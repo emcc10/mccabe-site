@@ -20,7 +20,7 @@ jobs:
           ftp-username: ${{ secrets.FTP_USERNAME }}
           ftp-password: ${{ secrets.FTP_PASSWORD }}
           local-dir: templates/266/
-          git-ftp-args: --remote-root /vspfiles/templates/266/
+          git-ftp-args: init --force --remote-root /vspfiles/templates/266
 
       - name: Deploy CSS
         uses: SamKirkland/FTP-Deploy-Action@v3.1.1
@@ -29,7 +29,7 @@ jobs:
           ftp-username: ${{ secrets.FTP_USERNAME }}
           ftp-password: ${{ secrets.FTP_PASSWORD }}
           local-dir: css/
-          git-ftp-args: --remote-root /vspfiles/css/
+          git-ftp-args: init --force --remote-root /vspfiles/css/
 
       - name: Deploy JS
         uses: SamKirkland/FTP-Deploy-Action@v3.1.1
@@ -38,4 +38,4 @@ jobs:
           ftp-username: ${{ secrets.FTP_USERNAME }}
           ftp-password: ${{ secrets.FTP_PASSWORD }}
           local-dir: js/
-          git-ftp-args: --remote-root /vspfiles/js/
+          git-ftp-args: init --force --remote-root /vspfiles/js/
