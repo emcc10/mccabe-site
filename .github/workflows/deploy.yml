@@ -10,8 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - name: Checkout repo (with retry)
+        run: |
+          for i in {1..5}; do
+            git clone https://github.com/emcc10/mccabe-site.git . && break
+            echo "Attempt $i failed. Retrying in 15 seconds..."
+            sleep 15
+          done
 
       - name: Deploy HTML templates (includes inline scripts)
         uses: appleboy/scp-action@v0.1.7
@@ -31,8 +36,6 @@ jobs:
           port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          # IMPORTANT: source should be a path in your repo, not an absolute server path
           source: "vspfiles/css/custom-safe.css"
           target: "/vspfiles/css/"
-          # remove leading "vspfiles/css" so the file lands directly in /vspfiles/css/
           strip_components: 2
