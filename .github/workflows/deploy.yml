@@ -13,22 +13,17 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Upload main HTML template
-        uses: wlixcc/SFTP-Deploy-Action@v1.2
-        with:
-          server: sftp.mccabestheaterandliving.com
-          port: 2222
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local_path: "template_266.html"
-          remote_path: "/vspfiles/template_266.html"
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Upload HTML template
+        run: |
+          sshpass -p "${{ secrets.FTP_PASSWORD }}" scp -P 2222 \
+          template_266.html \
+          ${{ secrets.FTP_USERNAME }}@sftp.mccabestheaterandliving.com:/vspfiles/template_266.html
 
       - name: Upload CSS
-        uses: wlixcc/SFTP-Deploy-Action@v1.2
-        with:
-          server: sftp.mccabestheaterandliving.com
-          port: 2222
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local_path: "css/custom-safe.css"
-          remote_path: "/vspfiles/css/custom-safe.css"
+        run: |
+          sshpass -p "${{ secrets.FTP_PASSWORD }}" scp -P 2222 \
+          css/custom-safe.css \
+          ${{ secrets.FTP_USERNAME }}@sftp.mccabestheaterandliving.com:/vspfiles/css/custom-safe.css
