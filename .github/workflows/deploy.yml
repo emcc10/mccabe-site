@@ -20,8 +20,8 @@ jobs:
           port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          source: "templates/266/*"
-          target: "/vspfiles/templates/266/"
+          source: "template_266.html*"
+          target: "/vspfiles/"
 
       - name: Deploy CSS
         uses: appleboy/scp-action@v0.1.7
@@ -30,7 +30,7 @@ jobs:
           port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          source: "css/*"
+          source: "/vspfiles/css/custom-safe.css"*"
           target: "/vspfiles/css/"
 
       - name: Deploy JS
@@ -40,5 +40,5 @@ jobs:
           port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          source: "js/*"
+          source: "template_266.html"
           target: "/vspfiles/js/"
