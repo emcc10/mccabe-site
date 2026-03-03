@@ -52,24 +52,17 @@
         white-space: normal !important;
     }
 
-    /* Prevent floating cart/home icons from overlaying the whole page */
+    /* Fix cart icon running off screen */
     .header-cart,
     .cart-link,
     .vCSS_img_cart,
     #cart-wrapper {
-        position: static !important;
-        z-index: auto !important;
-        top: auto !important;
-        right: auto !important;
-    }
-
-    /* Size the actual floating cart SVG icon (from the markup you provided) */
-    svg.mc-cart-float__icon {
-        width: 24px !important;
-        height: 24px !important;
-        max-width: 24px !important;
-        max-height: 24px !important;
-        display: inline-block !important;
+        position: absolute !important;
+        top: 12px !important;
+        right: 12px !important;
+        max-width: 40px !important;
+        height: auto !important;
+        z-index: 9999 !important;
     }
 }
 
