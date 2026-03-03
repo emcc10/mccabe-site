@@ -20,7 +20,7 @@ jobs:
         run: |
           sshpass -p "${{ secrets.FTP_PASSWORD }}" scp -P 2222 \
           template_266.html \
-          ${{ secrets.FTP_USERNAME }}@sftp.mccabestheaterandliving.com:/vspfiles/template_266.html
+          ${{ secrets.FTP_USERNAME }}@sftp.mccabestheaterandliving.com:/vspfiles/templates/266/template_266.html
 
       - name: Upload CSS
         run: |
