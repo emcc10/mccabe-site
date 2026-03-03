@@ -14,28 +14,28 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Deploy HTML templates
-        uses: SamKirkland/FTP-Deploy-Action@v3.1.1
+        uses: SamKirkland/FTP-Deploy-Action@4.3.4
         with:
-          ftp-server: ${{ secrets.FTP_SERVER }}
-          ftp-username: ${{ secrets.FTP_USERNAME }}
-          ftp-password: ${{ secrets.FTP_PASSWORD }}
+          server: sftp://sftp.mccabestheaterandliving.com:2222
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
           local-dir: templates/266/
-          git-ftp-args: init --force --remote-root /vspfiles/templates/266
+          server-dir: /vspfiles/templates/266/
 
       - name: Deploy CSS
-        uses: SamKirkland/FTP-Deploy-Action@v3.1.1
+        uses: SamKirkland/FTP-Deploy-Action@4.3.4
         with:
-          ftp-server: ${{ secrets.FTP_SERVER }}
-          ftp-username: ${{ secrets.FTP_USERNAME }}
-          ftp-password: ${{ secrets.FTP_PASSWORD }}
+          server: sftp://sftp.mccabestheaterandliving.com:2222
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
           local-dir: css/
-          git-ftp-args: init --force --remote-root /vspfiles/css/
+          server-dir: /vspfiles/css/
 
       - name: Deploy JS
-        uses: SamKirkland/FTP-Deploy-Action@v3.1.1
+        uses: SamKirkland/FTP-Deploy-Action@4.3.4
         with:
-          ftp-server: ${{ secrets.FTP_SERVER }}
-          ftp-username: ${{ secrets.FTP_USERNAME }}
-          ftp-password: ${{ secrets.FTP_PASSWORD }}
+          server: sftp://sftp.mccabestheaterandliving.com:2222
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
           local-dir: js/
-          git-ftp-args: init --force --remote-root /vspfiles/js/
+          server-dir: /vspfiles/js/
