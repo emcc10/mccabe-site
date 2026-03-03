@@ -1,4 +1,4 @@
-name: Deploy Volusion Theme (SFTP)
+name: Deploy Volusion Theme
 
 on:
   push:
@@ -10,32 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo (with retry)
-        run: |
-          for i in {1..5}; do
-            git clone https://github.com/emcc10/mccabe-site.git . && break
-            echo "Attempt $i failed. Retrying in 15 seconds..."
-            sleep 15
-          done
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: Deploy HTML templates (includes inline scripts)
+      - name: Upload main HTML template
         uses: appleboy/scp-action@v0.1.7
         with:
           host: sftp.mccabestheaterandliving.com
           port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          source: "template_266.html*"
+          source: "template_266.html"
           target: "/vspfiles/"
-          strip_components: 0
 
-      - name: Deploy CSS
+      - name: Upload CSS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: sftp.mccabestheaterandliving.com
           port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          source: "vspfiles/css/custom-safe.css"
+          source: "css/custom-safe.css"
           target: "/vspfiles/css/"
-          strip_components: 2
