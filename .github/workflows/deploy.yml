@@ -14,25 +14,21 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Upload main HTML template
-        uses: appleboy/scp-action@v0.1.7
+        uses: wlixcc/SFTP-Deploy-Action@v1.2
         with:
-          host: sftp.mccabestheaterandliving.com
+          server: sftp.mccabestheaterandliving.com
           port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          source: "template_266.html"
-          target: "/vspfiles"
-          overwrite: true
-          rm: false
+          local_path: "template_266.html"
+          remote_path: "/vspfiles/template_266.html"
 
       - name: Upload CSS
-        uses: appleboy/scp-action@v0.1.7
+        uses: wlixcc/SFTP-Deploy-Action@v1.2
         with:
-          host: sftp.mccabestheaterandliving.com
+          server: sftp.mccabestheaterandliving.com
           port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          source: "css/custom-safe.css"
-          target: "/vspfiles/css"
-          overwrite: true
-          rm: false
+          local_path: "css/custom-safe.css"
+          remote_path: "/vspfiles/css/custom-safe.css"
