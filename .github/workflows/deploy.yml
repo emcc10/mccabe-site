@@ -11,9 +11,9 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Deploy HTML templates
+      - name: Deploy HTML templates (includes inline scripts)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: sftp.mccabestheaterandliving.com
@@ -22,6 +22,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           source: "template_266.html*"
           target: "/vspfiles/"
+          strip_components: 0
 
       - name: Deploy CSS
         uses: appleboy/scp-action@v0.1.7
@@ -30,15 +31,8 @@ jobs:
           port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          source: "/vspfiles/css/custom-safe.css"
+          # IMPORTANT: source should be a path in your repo, not an absolute server path
+          source: "vspfiles/css/custom-safe.css"
           target: "/vspfiles/css/"
-
-      - name: Deploy JS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: sftp.mccabestheaterandliving.com
-          port: 2222
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          source: "template_266.html"
-          target: "/vspfiles/js/"
+          # remove leading "vspfiles/css" so the file lands directly in /vspfiles/css/
+          strip_components: 2
