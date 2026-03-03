@@ -39,3 +39,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: js/
           server-dir: /vspfiles/js/
+          
