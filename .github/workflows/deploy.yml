@@ -18,14 +18,14 @@ jobs:
 
       - name: Upload HTML template via SFTP
         run: |
-          sshpass -p "${{ secrets.FTP_PASSWORD }}" sftp -P 2222 \
+          sshpass -p "${{ secrets.FTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no -P 2222 \
           ${{ secrets.FTP_USERNAME }}@sftp.mccabestheaterandliving.com << 'EOF'
           put "template_266.html" "/vspfiles/templates/266/template_266.html"
           EOF
 
       - name: Upload CSS via SFTP
         run: |
-          sshpass -p "${{ secrets.FTP_PASSWORD }}" sftp -P 2222 \
+          sshpass -p "${{ secrets.FTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no -P 2222 \
           ${{ secrets.FTP_USERNAME }}@sftp.mccabestheaterandliving.com << 'EOF'
           put "vspfiles/css/custom-safe.css" "/vspfiles/css/custom-safe.css"
           EOF
