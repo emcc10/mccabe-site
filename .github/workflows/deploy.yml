@@ -14,31 +14,31 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Deploy HTML templates
-        uses: wlixcc/SFTP-Deploy-Action@v1.2
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server: sftp.mccabestheaterandliving.com
+          host: sftp.mccabestheaterandliving.com
           port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local_path: templates/266/
-          remote_path: /vspfiles/templates/266/
+          source: "templates/266/*"
+          target: "/vspfiles/templates/266/"
 
       - name: Deploy CSS
-        uses: wlixcc/SFTP-Deploy-Action@v1.2
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server: sftp.mccabestheaterandliving.com
+          host: sftp.mccabestheaterandliving.com
           port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local_path: css/
-          remote_path: /vspfiles/css/
+          source: "css/*"
+          target: "/vspfiles/css/"
 
       - name: Deploy JS
-        uses: wlixcc/SFTP-Deploy-Action@v1.2
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server: sftp.mccabestheaterandliving.com
+          host: sftp.mccabestheaterandliving.com
           port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local_path: js/
-          remote_path: /vspfiles/js/
+          source: "js/*"
+          target: "/vspfiles/js/"
