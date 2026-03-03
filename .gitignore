@@ -1,0 +1,23 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/*.code-workspace
+
+# Secrets / local config
+.vscode/sftp.json
+
+# Logs and temp artifacts
+logs/
+tmp_*/
+*.log
+*.tmp
+
+# Dependencies / build caches (if ever added)
+node_modules/
+dist/
+build/
+.cache/
+
+# Python cache (for utility scripts)
+__pycache__/
+*.pyc

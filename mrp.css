@@ -1,0 +1,261 @@
+/* ============================================================
+   GLOBAL HARDENING (Volusion / theme defense)
+   ============================================================ */
+
+#mrp-root,
+#mrp-root * {
+  box-sizing: border-box !important;
+}
+
+#mrp-root {
+  position: relative !important;
+  transform: none !important;
+  zoom: 1 !important;
+  filter: none !important;
+  isolation: isolate !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+
+/* Kill inherited transforms / flex nonsense */
+#mrp-root * {
+  transform-style: flat !important;
+}
+
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+
+#mrp-root .mrp-tools {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-bottom: 10px !important;
+}
+
+#mrp-root .mrp-btn {
+  appearance: none !important;
+  border: 1px solid rgba(0,0,0,0.18) !important;
+  border-radius: 10px !important;
+  padding: 8px 10px !important;
+  background: #ffffff !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  color: #000 !important;
+}
+
+#mrp-root .mrp-btn.danger {
+  border-color: rgba(180,0,0,0.45) !important;
+}
+
+/* ============================================================
+   ROOM (MOST IMPORTANT)
+   ============================================================ */
+
+#mrp-room {
+  position: relative !important;
+  display: block !important;
+  flex: none !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: hidden !important;
+
+  border: 1px solid rgba(0,0,0,0.16) !important;
+  border-radius: 16px !important;
+  background: #fafafa !important;
+
+  transform: none !important;
+  filter: none !important;
+}
+
+/* ============================================================
+   PIECES
+   ============================================================ */
+
+#mrp-root .mrp-piece {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+
+  display: block !important;
+  flex: none !important;
+
+  overflow: hidden !important;
+  background: transparent !important;
+
+  border: 1px solid rgba(0,0,0,0.14) !important;
+  border-radius: 12px !important;
+
+  user-select: none !important;
+  touch-action: none !important;
+  cursor: grab !important;
+
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06) !important;
+}
+
+#mrp-root .mrp-piece:active {
+  cursor: grabbing !important;
+}
+
+#mrp-root .mrp-piece.active {
+  outline: 2px solid rgba(0,0,0,0.55) !important;
+  outline-offset: 2px !important;
+}
+
+/* ============================================================
+   IMAGE INSIDE PIECE (NO DISTORTION, EVER)
+   ============================================================ */
+
+#mrp-root .mrp-piece img.mrp-piece-img {
+  position: absolute !important;
+  inset: 0 !important;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  object-fit: contain !important;
+  object-position: center center !important;
+
+  max-width: none !important;
+  max-height: none !important;
+
+  display: block !important;
+  pointer-events: none !important;
+
+  transform: none !important;
+  filter: none !important;
+}
+
+/* ============================================================
+   PIECE LABEL
+   ============================================================ */
+
+#mrp-root .mrp-piece-label {
+  position: absolute !important;
+  left: 6px !important;
+  top: 6px !important;
+
+  padding: 2px 6px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+
+  border-radius: 8px !important;
+  background: rgba(255,255,255,0.86) !important;
+
+  pointer-events: none !important;
+}
+
+/* ============================================================
+   TRAY
+   ============================================================ */
+
+#mrp-root #mrp-tray {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+#mrp-root .mrp-tray-item {
+  width: 100% !important;
+  display: flex !important;
+  gap: 10px !important;
+  align-items: center !important;
+
+  border: 1px solid rgba(0,0,0,0.12) !important;
+  border-radius: 14px !important;
+  padding: 10px !important;
+
+  background: #ffffff !important;
+  cursor: pointer !important;
+}
+
+#mrp-root .mrp-thumb {
+  width: 56px !important;
+  height: 56px !important;
+  flex: 0 0 56px !important;
+
+  border-radius: 12px !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
+  overflow: hidden !important;
+
+  display: grid !important;
+  place-items: center !important;
+}
+
+#mrp-root .mrp-thumb-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  max-width: none !important;
+  max-height: none !important;
+  display: block !important;
+  pointer-events: none !important;
+}
+
+#mrp-root .mrp-tray-meta {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+}
+
+#mrp-root .mrp-tray-name {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+#mrp-root .mrp-tray-dims {
+  font-size: 12px !important;
+  opacity: 0.75 !important;
+}
+
+#mrp-root .mrp-empty {
+  padding: 12px !important;
+  border: 1px dashed rgba(0,0,0,0.22) !important;
+  border-radius: 14px !important;
+  background: rgba(255,255,255,0.7) !important;
+}
+
+/* ============================================================
+   OVERLAY (YELLOW ALIGNMENT CIRCLES)
+   THIS IS WHY YOU WILL SEE THEM OR SOMETHING IS VERY WRONG
+   ============================================================ */
+
+#mrp-room .mrp-overlay {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+
+  pointer-events: none !important;
+  z-index: 2147483647 !important;
+}
+
+#mrp-room .mrp-connector-dot {
+  position: absolute !important;
+
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 999px !important;
+
+  background: #ffd400 !important;
+  border: 3px solid rgba(0,0,0,0.45) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.35) !important;
+
+  transform: translate(-50%, -50%) !important;
+  opacity: 1 !important;
+}
+
+/* ============================================================
+   SNAP TARGET HIGHLIGHT (OPTIONAL VISUAL AID)
+   ============================================================ */
+
+#mrp-root .mrp-piece.mrp-snap-target {
+  outline: 2px solid rgba(255,212,0,0.9) !important;
+  outline-offset: 2px !important;
+}

@@ -1,0 +1,89 @@
+/* ===============================
+   MRP ROOM
+   =============================== */
+
+#mrp-room {
+  position: relative;
+  overflow: visible;
+  background: #eee;
+}
+
+/* ===============================
+   SEATS
+   =============================== */
+
+.mrp-seat {
+  position: absolute;
+  width: 120px;
+  height: 100px;
+
+  background: #ccc; /* overridden by inline color for now */
+  border-radius: 6px;
+
+  cursor: grab;
+  user-select: none;
+
+  box-sizing: border-box;
+
+  /* prevents Volusion image/CSS weirdness */
+  display: block;
+}
+
+.mrp-seat:active {
+  cursor: grabbing;
+}
+
+/* ===============================
+   FUTURE IMAGE SUPPORT
+   =============================== */
+
+.mrp-seat img {
+  width: 100%;
+  height: 100%;
+  display: block;
+
+  object-fit: contain;
+
+  pointer-events: none;
+}
+
+/* ===============================
+   CONNECTORS (READY BUT SAFE)
+   =============================== */
+
+.mrp-connector {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+
+  background: #ffd400;
+  border: 2px solid #000;
+  border-radius: 50%;
+
+  pointer-events: none;
+  z-index: 2000;
+}
+
+/* left connector */
+.mrp-connector.left {
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* right connector */
+.mrp-connector.right {
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ===============================
+   DEBUG HELPERS (OPTIONAL)
+   =============================== */
+
+/*
+.mrp-seat {
+  outline: 1px dashed red;
+}
+*/

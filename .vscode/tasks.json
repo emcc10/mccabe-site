@@ -1,0 +1,172 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "echo-test",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Write-Output 'TASK_OK'"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "upload-template-css",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$ErrorActionPreference='Stop'; Import-Module Posh-SSH -Force; $cfg=Get-Content '.vscode/sftp.json' | ConvertFrom-Json; $secure=ConvertTo-SecureString $cfg.password -AsPlainText -Force; $cred=New-Object System.Management.Automation.PSCredential($cfg.username,$secure); $s=New-SFTPSession -ComputerName $cfg.host -Port $cfg.port -Credential $cred -AcceptKey; try { Set-SFTPItem -SessionId $s.SessionId -Path '.\\vspfiles\\templates\\266\\css\\template.css' -Destination '/vspfiles/templates/266/css/' -Force; Write-Output 'UPLOAD_OK'; } finally { if($s){ Remove-SFTPSession -SessionId $s.SessionId | Out-Null } }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "revalidate-custom-safe-cache",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$u='https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=100290'; 1..5 | ForEach-Object { try { Invoke-WebRequest -Uri $u -Headers @{ 'Cache-Control'='no-cache'; 'Pragma'='no-cache' } -UseBasicParsing | Out-Null; Write-Output \"HIT $_ OK\" } catch { Write-Output \"HIT $_ FAIL\" } };"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "revalidate-custom-safe-pragma",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$u='https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=100290'; 1..5 | ForEach-Object { Invoke-WebRequest -Uri $u -UseBasicParsing -Headers @{Pragma='no-cache'} | Out-Null; Write-Output 'HIT_OK' }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "check-css-cache-headers",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$urls=@('https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=100290','https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=20260302b'); foreach($u in $urls){ $r=Invoke-WebRequest -Uri $u -UseBasicParsing; Write-Output ('URL=' + $u); Write-Output ('CF=' + $r.Headers['CF-Cache-Status']); Write-Output ('LastModified=' + $r.Headers['Last-Modified']); Write-Output ('Len=' + $r.Content.Length); Write-Output '---'; }"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "check-v100290-marker",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$r=Invoke-WebRequest -Uri \"https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=100290\" -UseBasicParsing; Write-Output (\"CF=\" + $r.Headers[\"CF-Cache-Status\"]); Write-Output (\"Len=\" + $r.Content.Length); Write-Output (\"HasMarker=\" + [bool]($r.Content -match \"FINAL MOBILE OVERRIDE\"));"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "run-css-cache-check-script",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"scripts/check_css_cache.ps1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "list-remote-paths",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"scripts/list_remote_paths.ps1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "download-old-css",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"scripts/download_old_css.ps1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "upload-template-css-script",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"scripts/upload_template_css.ps1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "inspect-product-html",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"scripts/inspect_product_html.ps1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "inspect-product-html-fixed",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"scripts/inspect_product_html.ps1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "upload-template-css-script-2",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"scripts/upload_template_css.ps1"
+			],
+			"isBackground": false
+		}
+	]
+}

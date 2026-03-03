@@ -1,0 +1,122 @@
+/* ============================
+   HERO VIDEO (HOMEPAGE)
+   ============================ */
+
+.mc-hero-video{
+  width:100%;
+  height:min(80vh,900px);
+  min-height:520px;
+  background:#000;
+}
+
+.mc-hero-video-el{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.mc-hero-overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  color:#fff;
+  background:rgba(0,0,0,.25);
+  padding:20px;
+}
+
+.mc-hero-overlay h1{
+  font-family:"Playfair Display", serif;
+  font-size:clamp(32px,5vw,56px);
+  letter-spacing:.04em;
+  margin:0 0 12px;
+}
+
+.mc-hero-overlay p{
+  font-size:14px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  margin:0 0 26px;
+}
+
+.mc-hero-btn{
+  padding:12px 28px;
+  border:1px solid #fff;
+  color:#fff;
+  text-decoration:none;
+  font-size:13px;
+  letter-spacing:.12em;
+  transition:.25s ease;
+}
+
+.mc-hero-btn:hover{
+  background:#fff;
+  color:#000;
+}
+
+/* ============================
+   HEADER + MENU (NORMAL FLOW)
+   ============================ */
+
+/* Header stays in normal document flow */
+html.has-hero .header{
+  position:relative;
+  z-index:10;
+}
+
+/* Keep menu readable */
+html.has-hero ul.vnav.vnav--horizontal.vnav--level1{
+  background:#fff;
+}
+
+/* Menu text readable */
+html.has-hero ul.vnav.vnav--horizontal.vnav--level1 > li > a{
+  color:#111;
+}
+
+/* ============================
+   HERO SPACING
+   ============================ */
+
+/* Push hero BELOW the header */
+html.has-hero #slideshow-container{
+  margin-top:20px;
+}
+
+/* Mobile */
+@media (max-width:768px){
+  .mc-hero-video{
+    min-height:360px;
+  }
+}
+html.has-hero ul.vnav.vnav--horizontal.vnav--level1 {
+  background: transparent !important;
+}
+/* ===== FINAL FIX: HEADER ABOVE HERO ===== */
+
+/* Header is normal, not overlay */
+html.has-hero .header {
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* Remove the white bar background */
+html.has-hero .header__section--top {
+  background: transparent !important;
+}
+
+/* Menu text visible */
+html.has-hero .vnav__link {
+  color: #111 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+/* Push hero BELOW header height */
+html.has-hero #slideshow-container {
+  margin-top: 101px; /* matches measured header height */
+}

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+<head>
+      <link rel="stylesheet" src="v/vspfiles/index/styles.css " type="text/css">
+    </head>
+    <body>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* I do this for all my projects */
+}
+body {
+  font-family: Verdana, sans-serif;
+  margin: 25px
+}
+
+* {
+border-box;
+}
+
+.row > .column {
+  padding: 0px 0px;
+  MARGIN-LEFT: 2%;
+  MARGIN-RIGHT: -28%;
+margin-bottom: -15px;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+margin-bottom: -15px
+float:left;
+}
+
+.column {
+  float:left;
+  width: 36%;
+padding: 2px;
+  padding-top: 2px;
+  padding-right: 2px;
+  padding-bottom: 2px;
+  padding-left: 2px;
+}
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1050; /* Sit on top */
+padding-top: 41px;
+  width: 49%;
+  max-height: 100%;
+  overflow: clip;
+  margin-left: 26%;
+  top: 2%;
+  bottom: -39%;
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(43,43,43,0.9); /* Black w/ opacity */
+
+
+
+  }
+/* Modal Content */
+.modal-content {
+display: block;
+position: fixed;
+z-index: 1050;
+padding-top: 14px;
+  max-width: 34%;
+  max-height: 93%;
+  padding-right: 29%;
+overflow: clip;
+margin-left: 8%;
+font-size: 22px;
+  color: white;
+text-align: center;
+}
+
+/* The Close Button */
+.close {
+  color: #b7b7b7;
+  z-index: 2;
+  position: relative;
+  top: -5%;
+  right: 3%;
+  font-size: 59px;
+  font-weight: bold;
+float: right;
+}
+
+
+.close:hover,
+.close:focus {
+  color: #999;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.mySlides {
+  display: none;
+}
+
+.cursor {
+  cursor: pointer;
+}
+img {
+  margin-bottom: 20px;
+}
+
+.caption-container {
+display: contents;
+width: 100%;
+height: 50%;
+            bottom: 10px; /*if using padding in the caption, match here */
+            left: 0;
+            z-index: 2;
+            padding: 5px 0;
+            text-align: center;
+margin-top: 24%;
+            color: rgba(191, 191, 191, 0.9);
+font-family:Arial,Helvetica,sans-serif;
+font-size: 22px;
+margin-left: 10%;
+
+
+}
+.demo {
+  opacity: 0.6;
+}
+
+.active,
+.demo:hover {
+  opacity: 1;
+}
+
+img.hover-shadow {
+  transition: 0.3s;
+
+	}
+.hover-shadow:hover {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+</style>
+<body>
+
+<h2 style="text-align:left;font-size: 18px;margin-top: 2px;margin-bottom: 2px;">Leather Table</h2>
+ </div>
+ </div>
+<div class="row">
+  <div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia Alloy.jpg" title="Grade 1000 Valencia Alloy" style="width:26%" onclick="openModal();currentSlide(1)" class="hover-shadow cursor"> 
+  </div>
+  
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia BISCOTTI.jpg" title="Grade 1000 Valencia Biscotti"style="width:26%" onclick="openModal();currentSlide(2)" class="hover-shadow cursor">
+  </div>
+ 
+ <div class="column">
+    <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia cafe.jpg" title="Grade 1000 Valencia Cafe" style="width:26%" onclick="openModal();currentSlide(3)" class="hover-shadow cursor">
+  </div>
+  
+<div class="column">
+    <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia cherry.jpg" title="Grade 1000 Valencia Cherry" style="width:26%" onclick="openModal();currentSlide(4)" class="hover-shadow cursor">
+</div>
+
+  <div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia dune.jpg" title="Grade 1000 Valencia Dune" style="width:26%" onclick="openModal();currentSlide(5)" class="hover-shadow cursor">
+  </div>
+
+  <div class="column">
+    <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia ink.jpg" title="Grade 1000 Valencia Ink" style="width:26%" onclick="openModal();currentSlide(6)" class="hover-shadow cursor">
+  </div>
+  
+<div class="column">
+    <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia lace.jpg" title="Grade 1000 Valencia Lace" style="width:26%" onclick="openModal();currentSlide(7)" class="hover-shadow cursor">
+  </div>
+  
+<div class="column">
+    <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia pewter.jpg" title="Grade 1000 Valencia Pewter" style="width:26%" onclick="openModal();currentSlide(8)" class="hover-shadow cursor">
+
+</div>
+</div>
+<div class="row">
+
+<div class="column">
+    <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein basalt.jpg" title="Grade 2000 Rein Basalt" style="width:26%" onclick="openModal();currentSlide(9)" class="hover-shadow cursor">
+  </div>
+ 
+ <div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein bruin.jpg" title="Grade 2000 Rein Bruin" style="width:26%" onclick="openModal();currentSlide(10)" class="hover-shadow cursor">
+  </div>
+  
+<div class="column">
+    <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein caramel.jpg" title="Grade 2000 Rein Caramel"style="width:26%" onclick="openModal();currentSlide(11)" class="hover-shadow cursor">
+  </div>
+  
+<div class="column">
+    <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein eggshell.jpg" title="Grade 2000 Rein Egg Shell" style="width:26%" onclick="openModal();currentSlide(12)" class="hover-shadow cursor">
+  </div>
+  
+<div class="column">
+    <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein granite.jpg" title="Grade 2000 Rein Granite" style="width:26%" onclick="openModal();currentSlide(13)" class="hover-shadow cursor">
+</div>
+ 
+ <div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein gray.jpg" title="Grade 2000 Rein Grey" style="width:26%" onclick="openModal();currentSlide(14)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein parchment.jpg" title="Grade 2000 Rein Parchment" style="width:26%" onclick="openModal();currentSlide(15)" class="hover-shadow cursor">
+  </div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein toast.jpg" title="Grade 2000 Rein Toast" style="width:26%" onclick="openModal();currentSlide(16)" class="hover-shadow cursor">
+  </div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein twilight.jpg" title="Grade 2000 Rein Twilight" style="width:26%" onclick="openModal();currentSlide(17)" class="hover-shadow cursor">
+  
+</div>
+</div>
+<div class="row">
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali basil.jpg" title="Grade 2000 Bali Basil" style="width:26%" onclick="openModal();currentSlide(18)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali carob.jpg" title="Grade 2000 Bali Carob" style="width:26%" onclick="openModal();currentSlide(19)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali currant.jpg" title="Grade 2000 Bali Currant" style="width:26%" onclick="openModal();currentSlide(20)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali harvest.jpg" title="Grade 2000 Bali Harvest" style="width:26%" onclick="openModal();currentSlide(21)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali marble.jpg" title="Grade 2000 Bali Marble" style="width:26%" onclick="openModal();currentSlide(22)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali rainstorm.jpg" title="Grade 2000 Bali Rainstorm" style="width:26%" onclick="openModal();currentSlide(23)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali silk.jpg" title="Grade 2000 Bali Silk" style="width:26%" onclick="openModal();currentSlide(24)" class="hover-shadow cursor">
+  </div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali spider.jpg" title="Grade 2000 Bali Spider" style="width:26%" onclick="openModal();currentSlide(25)" class="hover-shadow cursor">
+
+  </div>
+</div>
+<div class="row">
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Evoque ardesia.jpg" title="Grade 3000 Evoque Ardesia" style="width:26%" onclick="openModal();currentSlide(26)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Evoque atlantic.jpg" title="Grade 3000 Evoque Atlantic" style="width:26%" onclick="openModal();currentSlide(27)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Evoque frost.jpg" title="Grade 3000 Evoque Frost" style="width:26%" onclick="openModal();currentSlide(28)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Evoque mist.jpg" title="Grade 3000 Evoque Mist" style="width:26%" onclick="openModal();currentSlide(29)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Evoque stone.jpg" title="Grade 3000 Evoque Stone" style="width:26%" onclick="openModal();currentSlide(30)" class="hover-shadow cursor">
+ 
+ </div>
+</div>
+<div class="row">
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/parlour blush.jpg" title="Grade 3000 Parlour Blush" style="width:26%" onclick="openModal();currentSlide(31)" class="hover-shadow cursor">
+  </div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/parlour desert.jpg" title="Grade 3000 Parlour Desert" style="width:26%" onclick="openModal();currentSlide(32)" class="hover-shadow cursor">
+  </div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/parlour rye.jpg" title="Grade 3000 Parlour Rye" style="width:26%" onclick="openModal();currentSlide(33)" class="hover-shadow cursor">
+  </div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/parlour texas.jpg" title="Grade 3000 Parlour Texas" style="width:26%" onclick="openModal();currentSlide(34)" class="hover-shadow cursor">
+  </div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/parlour thunder.jpg" title="Grade 3000 Parlour Thunder" style="width:26%" onclick="openModal();currentSlide(35)" class="hover-shadow cursor">
+  
+</div>
+</div>
+<div class="row">
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/solana africa.jpg" title="Grade 3000 Solana Africa" style="width:26%" onclick="openModal();currentSlide(36)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/solana cocoa.jpg" title="Grade 3000 Solana Cocoa" style="width:26%" onclick="openModal();currentSlide(37)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://images.palliser.com/products/51BE638C-28CF-499A-A9F9-694DA548F879/Solana-Dijon.jpg?width=200" title="Grade 3000 Solana Dijon" style="width:26%" onclick="openModal();currentSlide(38)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/solana mountain.jpg" title="Grade 3000 Solana Mountain" style="width:26%" onclick="openModal();currentSlide(39)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/solana phantom.jpg" title="Grade 3000 Solana Phantom" style="width:26%" onclick="openModal();currentSlide(40)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/solana trail.jpg" title="Grade 3000 Solana Trail" style="width:26%" 
+onclick="openModal();currentSlide(41)" class="hover-shadow cursor">
+</div>
+
+<div class="column">
+<img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/solana tusk.jpg" title="Grade 3000 Solana Tusk" style="width:26%" 
+onclick="openModal();currentSlide(42)" class="hover-shadow cursor">
+
+
+
+  </div>
+</div>
+<div id="myModal" class="modal">
+  <span class="close cursor" onclick="closeModal()">&times;</span>
+  <div class="modal-content">
+<div class="caption-container">
+ </div>
+    <div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia Alloy.jpg" style="width:100%"><span class="caption">Grade 1000 Valencia Alloy</span>
+    </div>
+
+    <div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia biscotti.jpg" style="width:100%"><span class="caption">Grade 1000 Valencia Biscotti</span>
+    </div>
+
+    <div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia cafe.jpg" style="width:100%"> <span class="caption">Grade 1000 Valencia Cafe</span>
+    </div>
+    
+    <div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia cherry.jpg" style="width:100%"><span class="caption">Grade 1000 Valencia Cherry</span>
+    </div>
+
+    <div class="mySlides">
+  <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia dune.jpg" style="width:100%"><span class="caption">Grade 1000 Valencia Dune</span>
+    </div>
+
+    <div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia ink.jpg" style="width:100%"><span class="caption">Grade 1000 Valencia Ink</span>
+    </div>
+
+    <div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia lace.jpg" style="width:100%"> <span class="caption">Grade 1000 Valencia Lace</span>
+    </div>
+    
+        <div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Valencia pewter.jpg" style="width:100%"><span class="caption">Grade 1000 Valencia Pewter</span>
+</div>
+
+ <div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein basalt.jpg" style="width:100%"><span class="caption">Grade 2000 Rein Basalt</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein bruin.jpg" style="width:100%"><span class="caption">Grade 2000 Rein Bruin</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein caramel.jpg" style="width:100%"><span class="caption">Grade 2000 Rein Caramel</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein eggshell.jpg" style="width:100%"><span class="caption">Grade 2000 Rein Egg Shell</span>
+</div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein gray.jpg" style="width:100%"><span class="caption">Grade 2000 Rein Gray</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein granite.jpg" style="width:100%"><span class="caption">Grade 2000 Rein Granite</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein parchment.jpg" style="width:100%"><span class="caption">Grade 2000 Rein Parchment</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein toast.jpg" style="width:100%"><span class="caption">Grade 2000 Rein Toast</span>
+</div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/rein twilight.jpg" style="width:100%"><span class="caption">Grade 2000 Rein Twilight</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali basil.jpg" style="width:100%"><span class="caption">Grade 2000 Bali Basil</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali carob.jpg" style="width:100%"><span class="caption">Grade 2000 Bali Carob</span>
+</div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali Currant.jpg" style="width:100%"><span class="caption">Grade 2000 Bali Currant</span>
+</div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali harvest.jpg" style="width:100%"><span class="caption">Grade 2000 Bali Harvest</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali marble.jpg" style="width:100%"><span class="caption">Grade 2000 Bali Marble</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali rainstorm.jpg" style="width:100%"><span class="caption">Grade 2000 Bali Rainstorm</span>
+</div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali silk.jpg" style="width:100%"><span class="caption">Grade 2000 Bali Silk</span>
+</div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/bali spider.jpg" style="width:100%"><span class="caption">Grade 2000 Bali Spider</span>
+</div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/evoque ardesia.jpg" style="width:100%"><span class="caption">Grade 3000 Evoque Ardesia</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/evoque atlantic.jpg" style="width:100%"><span class="caption"> Grade 3000 Evoque Atlantic</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/evoque frost.jpg" style="width:100%"><span class="caption"> Grade 3000 Evoque Frost</span>
+</div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/evoque mist.jpg" style="width:100%"><span class="caption"> Grade 3000 Evoque Mist</span>
+</div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/evoque stone.jpg" style="width:100%"><span class="caption"> Grade 3000 Evoque Stone</span>
+          </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/parlour blush.jpg" style="width:100%"><span class="caption">Grade 3000 Parlour Blush</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Parlour Desert.jpg" style="width:100%"><span class="caption"> Grade 3000 Parlour Desert</span>
+    </div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Parlour Rye.jpg" style="width:100%"><span class="caption"> Grade 3000 Parlour Rye</span>
+</div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Parlour Texas.jpg" style="width:100%"><span class="caption"> Grade 3000 Parlour Texas</span>
+</div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/Parlour Thunder.jpg" style="width:100%"><span class="caption"> Grade 3000 Parlour Thunder</span>
+</div>
+
+<div class="mySlides">
+            <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/solana Africa.jpg" style="width:100%"><span class="caption"> Grade 3000 Solana Africa</span>
+</div>
+
+<div class="mySlides">
+            <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/solana Cocoa.jpg" style="width:100%"><span class="caption"> Grade 3000 Solana Cocoa</span>
+</div>
+
+<div class="mySlides">
+            <img src="https://images.palliser.com/products/51BE638C-28CF-499A-A9F9-694DA548F879/Solana-Dijon.jpg?width=667" style="width:100%"><span class="caption"> Grade 3000 Solana Dijon</span>
+    </div>
+
+<div class="mySlides">
+     <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/solana Mountain.jpg" style="width:100%"><span class="caption"> Grade 3000 Solana Mountain</span>
+    </div>
+
+<div class="mySlides">
+           <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/solana phantom.jpg" style="width:100%"><span class="caption"> Grade 3000 Solana Phantom</span>
+</div>
+
+<div class="mySlides">
+          <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/solana trail.jpg" style="width:100%"><span class="caption"> Grade 3000 Solana Trail</span>
+</div>
+
+<div class="mySlides">
+      <img src="https://www.mccabestheaterandliving.com/v/vspfiles/swatches/solana tusk.jpg" style="width:100%"><span class="caption"> Grade 3000 Solana Tusk</span>
+
+    </div>
+    </div>
+    <div class="caption-container">
+      <p id="caption"></p>
+
+    </div>
+</div>
+
+<script>
+function openModal() {
+  document.getElementById("myModal").style.display = "block";
+}
+
+function closeModal() {
+  document.getElementById("myModal").style.display = "none";
+}
+
+var slideIndex = 1;
+showSlides(slideIndex);
+
+function plusSlides(n) {
+  showSlides(slideIndex += n);
+}
+
+function currentSlide(n) {
+  showSlides(slideIndex = n);
+}
+
+function showSlides(n) {
+  var i;
+  var slides = document.getElementsByClassName("mySlides");
+  var dots = document.getElementsByClassName("demo");
+  var captionText = document.getElementById("caption");
+  if (n > slides.length) {slideIndex = 1}
+  if (n < 1) {slideIndex = slides.length}
+  for (i = 0; i < slides.length; i++) {
+      slides[i].style.display = "none";
+  }
+  for (i = 0; i < dots.length; i++) {
+      dots[i].className = dots[i].className.replace(" active", "");
+  }
+  slides[slideIndex-1].style.display = "block";
+  dots[slideIndex-1].className += " active";
+  captionText.innerHTML = dots[slideIndex-1].alt;
+}
+</script>
+    
+</body>
+</html>

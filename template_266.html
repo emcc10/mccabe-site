@@ -1,0 +1,2815 @@
+<!DOCTYPE html>
+
+<!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><!--<![endif]-->
+<head>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <meta id="v65-layout-mode" data-cart="storedot" data-checkout="storedot" data-use-simplified-checkout="true">
+
+  <!-- LOGO UPLOAD TOOL *** SET HEIGHT & WIDTH *** -->
+  <meta id="v65-logo-dimensions" data-width="250" data-height="70">
+
+  <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
+  <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
+<link id="mc-custom-safe-css" rel="stylesheet" href="/v/vspfiles/css/custom-safe.css?v=20260302-final">
+  <style>
+  .mc-cart-float__icon,
+  .mc-home-float__icon { width: 20px; height: 20px; display: block; }
+  </style>
+<script>
+(function () {
+  var liveHref = '/v/vspfiles/css/custom-safe.css?v=20260302-final-' + Date.now();
+  var updatedAny = false;
+
+  document.querySelectorAll('link[rel="stylesheet"]').forEach(function (linkEl) {
+    var href = (linkEl.getAttribute('href') || '').toLowerCase();
+    if (href.indexOf('custom-safe.css') !== -1) {
+      linkEl.href = liveHref;
+      linkEl.setAttribute('data-mc-css-live', '1');
+      updatedAny = true;
+    }
+  });
+
+  if (!updatedAny) {
+    var fallback = document.createElement('link');
+    fallback.rel = 'stylesheet';
+    fallback.id = 'mc-custom-safe-css';
+    fallback.href = liveHref;
+    fallback.setAttribute('data-mc-css-live', '1');
+    document.head.appendChild(fallback);
+  }
+})();
+</script>
+<script>
+(function () {
+  function bindMobileAltThumbs() {
+    var thumbsRoot = document.getElementById('altviews');
+    if (!thumbsRoot) return;
+
+    thumbsRoot.querySelectorAll('a').forEach(function (link) {
+      if (link.getAttribute('data-mc-thumb-click') === '1') return;
+      link.setAttribute('data-mc-thumb-click', '1');
+
+      link.addEventListener('click', function (e) {
+        if (!window.matchMedia('(max-width: 991px)').matches) return;
+
+        e.preventDefault();
+
+        var thumbImg = link.querySelector('img');
+        var match = thumbImg && thumbImg.id ? thumbImg.id.match(/alternate_product_photo_(\d+)/i) : null;
+        var index = match ? parseInt(match[1], 10) : null;
+
+        if (index && typeof window.change_product_photo === 'function') {
+          window.change_product_photo(index);
+          return;
+        }
+
+        var mainImg =
+          document.querySelector('img#product_photo') ||
+          document.querySelector('#product_photo img') ||
+          document.querySelector('img#main-image');
+
+        if (!mainImg) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+
+        mainImg.setAttribute('src', href);
+        var zoomLink = document.getElementById('product_photo_zoom_url') || document.getElementById('product_photo_zoom_url2');
+        if (zoomLink) zoomLink.setAttribute('href', href);
+      }, true);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindMobileAltThumbs);
+  } else {
+    bindMobileAltThumbs();
+  }
+
+  window.addEventListener('load', bindMobileAltThumbs);
+  setTimeout(bindMobileAltThumbs, 600);
+  setTimeout(bindMobileAltThumbs, 1500);
+})();
+</script>
+<script>
+(function () {
+  function removeConfigurationDetails() {
+    var productRoot = document.getElementById('v65-product-parent') || document;
+    var rows = productRoot.querySelectorAll('#options_table tr, tr');
+
+    rows.forEach(function (row) {
+      var text = (row.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      var hasConfigText = text.indexOf('configuration details') !== -1;
+      var hasConfigField = !!row.querySelector('input[title*="Configuration Details" i], input[name*="Configuration Details" i], input[value*="Configuration Details" i], textarea[title*="Configuration Details" i], select[title*="Configuration Details" i]');
+      if (hasConfigText || hasConfigField) {
+        row.remove();
+      }
+    });
+
+    productRoot.querySelectorAll('label, span, div, p, li, td, th').forEach(function (node) {
+      var text = (node.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      if (text === 'configuration details' || text.indexOf('configuration details') === 0) {
+        var host = node.closest('tr, li, .product-option, .v65-product-option, .option-row, .option, .form-group') || node;
+        if (host && host.parentNode) {
+          host.remove();
+        }
+      }
+    });
+  }
+
+  function enforceMobileLayout() {
+    if (!window.matchMedia('(max-width: 991px)').matches) return;
+
+    var gutters = document.querySelectorAll('#content_area, .content_area-wrapper, #v65-product-parent, #v65-product-parent td, #v65-product-parent th, #options_table, #divDescription, #divQuestions, .TabbedPanelsContent, .TabbedPanelsContentGroup, .resp-tabs-container, .product_description');
+    gutters.forEach(function (el) {
+      el.style.paddingLeft = '16px';
+      el.style.paddingRight = '16px';
+      el.style.marginLeft = '0';
+      el.style.marginRight = '0';
+      el.style.maxWidth = '100%';
+      el.style.boxSizing = 'border-box';
+    });
+
+    var cart = document.querySelector('a.mc-cart-float, a.floating-mobile-cart, a[aria-label="Cart"]');
+    if (cart) {
+      cart.style.position = 'fixed';
+      cart.style.top = '10px';
+      cart.style.right = '12px';
+      cart.style.left = 'auto';
+      cart.style.width = '42px';
+      cart.style.height = '42px';
+      cart.style.maxWidth = '42px';
+      cart.style.maxHeight = '42px';
+      cart.style.margin = '0';
+      cart.style.transform = 'none';
+      cart.style.zIndex = '2147483647';
+      cart.style.overflow = 'hidden';
+    }
+  }
+
+  function runProductHardFixes() {
+    removeConfigurationDetails();
+    enforceMobileLayout();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runProductHardFixes);
+  } else {
+    runProductHardFixes();
+  }
+
+  window.addEventListener('load', runProductHardFixes);
+  setTimeout(runProductHardFixes, 100);
+  setTimeout(runProductHardFixes, 400);
+  setTimeout(runProductHardFixes, 900);
+  setTimeout(runProductHardFixes, 1800);
+
+  var observerRoot = document.getElementById('v65-product-parent') || document.body;
+  if (observerRoot && typeof MutationObserver !== 'undefined') {
+    var observer = new MutationObserver(function () {
+      runProductHardFixes();
+    });
+
+    observer.observe(observerRoot, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  window.setInterval(runProductHardFixes, 2000);
+})();
+</script>
+
+
+  <!-- DESIGN TOOLKIT -->
+  <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js"></script>
+
+
+
+</head>
+
+
+<!-- ========== Vibes - 266 ======================
+    DESIGNER: WA
+    DEVELOPER: CD
+    CODE DATE: 2017-05
+    VERSION: 3.0.21
+========================================= -->
+
+<body>
+<a class="mc-cart-float" href="/shoppingcart.asp" aria-label="Cart" rel="nofollow">
+  <svg class="mc-cart-float__icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6.2 6l.4 2h12.2c.5 0 .9.2 1.2.6.3.4.3.9.2 1.4l-1.2 5.2c-.2.7-.8 1.2-1.6 1.2H8.1c-.8 0-1.4-.5-1.6-1.2L4.3 4H2V2h3.1c.7 0 1.3.5 1.4 1.2L6.2 6zm1.3 9h9.8l1.1-5H6.6l.9 5z"></path>
+  </svg>
+</a>
+<a class="mc-home-float" href="/default.asp" aria-label="Home">
+  <svg class="mc-home-float__icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 3l9 8h-2v10a1 1 0 0 1-1 1h-5v-7H11v7H6a1 1 0 0 1-1-1V11H3l9-8z"></path>
+  </svg>
+</a>
+<div id="if_homepage">
+
+  <div id="slideshow-container" data-max-width="full">
+
+    <!-- HERO MENU -->
+    <div class="hero-menu">
+        <nav class="hero-nav">
+          <a href="/palliser-theater-seating-s/106.htm">Theater Seating</a>
+          <a href="/bean-bag-seating-s/103.htm">Bean Bags</a>
+          <a href="/sectionals-s/139.htm">Sofas & Sectionals</a>
+          <a href="/sofas-s/142.htm">Bedroom</a>
+          <a href="/aboutus.asp">About Us</a>
+          <a href="/Contact_Us_a/83.htm">Contact Us</a>
+</nav>
+      </div>
+
+    <!-- HERO VIDEO -->
+    <section class="mc-hero-video">
+      <video class="mc-hero-video-el" autoplay muted loop playsinline>
+        <source src="/v/vspfiles/images/palliser.mp4" type="video/mp4">
+      </video>
+
+      <div class="mc-hero-overlay">
+        <h1>CRAFTSMANSHIP MEETS COMFORT</h1>
+        <p>
+          CUSTOM FURNITURE, DESIGNED FOR LIVING<br>
+          Featuring Palliser Custom Seating
+        </p>
+        <a href="/palliser-theater-seating-s/100.htm" class="mc-hero-btn">
+          Shop Palliser Theater Seating
+        </a>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+  <span style="display:none;" id="svgIncludes"></span>
+
+  <noscript id="no-js-notice">
+    To take full advantage of this site, please enable your browser's JavaScript feature.
+    <a href="http://www.activatejavascript.org/" target="_blank" rel="nofollow">Learn how</a>
+  </noscript>
+
+  <article class="vol-container">
+    <section class="vol-inner">
+      <div class="page-wrap">
+
+        <nav class="menu push-menu hidden-sm hidden-md hidden-lg" data-menu-type="slide-top" menu-icon-type="chevron">
+          <div class="push-menu__close-btn close-menu hidden">
+            <svg class="icon"><use xlink:href="#svg-close"></use></svg>
+          </div>
+          <div id="push-nav__menu" class="push-menu__menu-wrapper">
+            <!-- content populated with js -->
+          </div>
+        </nav>
+
+
+        <header class="header" data-ui-block="header-1">
+          <div class="header__section">
+          
+
+  <!-- LOGO -->
+  <div class="col-xs-6 col-sm-8 col-md-9 col-lg-3">
+    <div class="microblock vol-logo" id="display_homepage_title"></div>
+  </div>
+
+
+                <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2 col-lg-push-7 microblock-group text-right no-pad-left-xs">
+                  <div class="search__wrapper microblock">
+                    <div id="toggle1" class="toggle search__toggle searchToggle " tabindex="0" role="button">
+                      <span class="sr-only">Toggle search bar</span>
+                      <svg class="icon toggle__icon toggle__icon--closed"><use xlink:href="#svg-search"></use></svg>
+                      <svg class="icon toggle__icon toggle__icon--open"><use xlink:href="#svg-close"></use></svg>
+                    </div>
+                  </div>
+</div>
+           
+
+             
+
+            <div class="header__section header__section--middle">
+              <div class="collapsing-search" id="collapsingSearch">
+                <form class="collapsing-search__form" action="/searchresults.asp" method="get" name="SearchBoxForm">
+                  <div class="container">
+                    <div class="row">
+                      <input class="collapsing-search__input" id="search" placeholder="Search..." type="text" name="Search" value="">
+                      <label class="collapsing-search__label searchToggle sr-only" for="search">
+                        <span class="collapsing-search__label__text">Search...</span>
+                      </label>
+                      <button type="submit" name="Submit" class="collapsing-search__submit">
+                        <p class="sr-only">Search Submit</p>
+                        <svg class="collapsing-search__icon collapsing-search__icon--submit"><use xlink:href="#svg-search"></use></svg>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="header__section--bottom text-center visible-xs">
+              <span class="microblock menu-toggle">
+                <a class="menu-toggle__link" href="javascript:void(0);" id="nav-toggle" data-menu-type="slide-top">
+                  <span class="menu-toggle__text push-menu--closed">SELECT A CATEGORY</span>
+                  <span class="menu-toggle__text push-menu--open">CLOSE MENU</span>
+                  <svg class="menu-toggle__icon"><use xlink:href="#svg-menu"></use></svg>
+                </a>
+              </span>
+            </div>
+
+          </div>
+<div class="hidden-xs col-xs-12 col-lg-7 col-lg-pull-2 no-pad-lg">
+  <div class="microblock main-menu">
+    <nav id="display_menu_1" class="menu" link-alignment="center"></nav>
+  </div>
+</div>
+<div class="microblock mc-header-cart">
+  <a class="mc-header-cart__link" href="/shoppingcart.asp"></a>
+</div>
+</div>
+</div>
+<script>
+(function () {
+  document.addEventListener('click', function (e) {
+    var x = e.target.closest('.push-menu__close-btn');
+    if (!x) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    document.documentElement.classList.remove('push-menu-open');
+    document.body.classList.remove('push-menu-open');
+  }, true);
+})();
+</script>
+        </header>
+
+    
+        <div class="container container--content">
+          <aside class="vol-list-grid text-right vol-hide hidden-xs">
+            <section class="vol-list-grid-toggle vol-grid" data-grid-type="grid">
+              <svg class="icon grid-toggle__icon"><use xlink:href="#svg-cat-toggle-grid"></use></svg>
+            </section>
+            <section class="vol-list-grid-toggle vol-list" data-grid-type="list">
+              <svg class="icon grid-toggle__icon"><use xlink:href="#svg-cat-toggle-list"></use></svg>
+            </section>
+          </aside>
+
+          <div class="row">
+            <div class="sidebar-wrapper col-md-3 hidden-xs hidden-sm" role="complementary">
+              <div class="sidebar left-nav" menu-type="smart-expand toggle-expand">
+                <div id="if_not_homepage"></div>
+
+                <div id="Menu2_Title" class="menu-title hidden">Menu Title 2</div>
+                <nav id="display_menu_2" class="menu"></nav>
+
+                <div id="Menu3_Title" class="menu-title hidden">Menu Title 3</div>
+                <nav id="display_menu_3" class="menu"></nav>
+
+                <div id="Menu4_Title" class="menu-title hidden">Menu Title 4</div>
+                <nav id="display_menu_4" class="menu"></nav>
+
+                <div id="Menu5_Title" class="menu-title hidden">Menu Title 5</div>
+                <nav id="display_menu_5" class="menu"></nav>
+
+                <div id="Menu6_Title" class="menu-title hidden">Menu Title 6</div>
+                <nav id="display_menu_6" class="menu"></nav>
+
+                <div id="Menu7_Title" class="menu-title hidden">Menu Title 7</div>
+                <nav id="display_menu_7" class="menu"></nav>
+
+                <div id="Menu8_Title" class="menu-title hidden">Menu Title 8</div>
+                <nav id="display_menu_8" class="menu"></nav>
+              </div>
+            </div>
+
+            <section class="content_area-wrapper col-xs-12 col-md-9" role="main">
+
+  <!-- REQUIRED: Volusion injects all page content here -->
+  <div id="content_area"></div>
+
+</section>
+          </div>
+        </div>
+
+        <footer class="footer" data-ui-block="footer-1">
+          <div class="footer__section pt--base">
+            <div class="container">
+              <div class="row">
+                <div class="flex-sm-and-up">
+                  <div class="footer__logo col-xs-12 col-sm-6 col-md-3 col-lg-2 text-center-xs"></div>
+
+                  <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 text-center-xs text-right-sm">
+                    <section class="microblock social" data-v-edit-region="Footer Social Media Links">
+                      <div class="microblock__body">
+                        <ul class="social__list list-unstyled">
+                          <li class="social__item">
+                            <a class="social__link facebook" href="//www.facebook.com/" target="_blank" title="Like Config_CompanyNameLegal on Facebook">
+                              <p class="sr-only">Like Config_CompanyNameLegal on Facebook</p>
+                              <i class="vol-theme-icon vol-theme-icon--facebook"></i>
+                            </a>
+                          </li>
+                          <li class="social__item">
+                            <a class="social__link twitter" href="//twitter.com/" target="_blank" title="Follow Config_CompanyNameLegal on Twitter">
+                              <p class="sr-only">Follow Config_CompanyNameLegal on Twitter</p>
+                              <i class="vol-theme-icon vol-theme-icon--twitter"></i>
+                            </a>
+                          </li>
+                          <li class="social__item">
+                            <a class="social__link instagram" href="//instagram.com/" target="_blank" title="Follow Config_CompanyNameLegal on Instagram">
+                              <p class="sr-only">Follow Config_CompanyNameLegal on Instagram</p>
+                              <i class="vol-theme-icon vol-theme-icon--instagram"></i>
+                            </a>
+                          </li>
+                          <li class="social__item">
+                            <a class="social__link pinterest" href="//www.pinterest.com/" target="_blank" title="Pin Config_CompanyNameLegal to Pinterest">
+                              <p class="sr-only">Pin Config_CompanyNameLegal to Pinterest</p>
+                              <i class="vol-theme-icon vol-theme-icon--pinterest"></i>
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div class="col-xs-12 text-center-sm-and-down text-right-md col-md-6 col-lg-4">
+                    <ul class="link-column list-unstyled clearfix" data-v-edit-region="Link Column 1">
+                      <li class="link-column__item"><a href="/aboutus.asp" title="About Config_CompanyNameLegal">ABOUT</a></li>
+                      <li class="link-column__item"><a href="/myaccount.asp" title="My Account" rel="nofollow">MY ACCOUNT</a></li>
+                      <li class="link-column__item"><a href="/Contact_Us_a/83.htm" title="Contact Config_CompanyNameLegal">CONTACT</a></li>
+                    </ul>
+                  </div>
+
+                  <div class="elist__wrapper col-xs-12 col-lg-4 text-center-xs text-center-md text-right-lg">
+                    <div class="col-sm-8 col-sm-offset-2 col-md-6col-md-offset-3 col-lg-12 col-lg-offset-0 no-pad">
+                      <section class="microblock elist">
+                        <div class="microblock__body">
+                          <h2 class="footer__title elist__title" data-v-edit-region="Elist Title">NEWSLETTER</h2>
+                          <form class="elist__form" name="MailingList" method="post" action="/mailinglist_subscribe.asp">
+                            <label for="elistEmailAddress" class="elist__label sr-only">Enter your email Address</label>
+                            <div class="input-group">
+                              <input class="elist__input form-control" id="elistEmailAddress" type="text" name="emailaddress" value="" placeholder="Email Address" />
+                              <span class="input-group-btn">
+                                <button class="elist__submit btn" type="submit" name="Submit">SUBMIT</button>
+                              </span>
+                            </div>
+                          </form>
+                        </div>
+                      </section>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer__section">
+            <div class="container">
+              <div class="row">
+                <div class="col-xs-12 col-md-6 text-center-xs">
+                  <section class="copyright microblock">
+                    <a href="/terms.asp" title="Terms">
+                      <span data-v-edit-region="Copyright">
+                        &copy; Copyright <span class="insertYear">2015</span>&nbsp;Config_CompanyNameLegal.
+                      </span>
+                    </a>
+                    <span class="copyright__line" data-v-edit-region="Built With">
+                      All Rights Reserved.
+                      <span id="if_homepage"><a href="http://www.volusion.com" target="_blank" rel="nofollow">Ecommerce Software by Volusion</a></span>
+                      <span id="if_not_homepage">Ecommerce Software by Volusion</span>
+                    </span>
+                  </section>
+                </div>
+
+                <div class="col-xs-12 col-md-6 text-center-xs text-right-sm-and-up">
+                  <div class="credit-cards microblock">
+                    <i class="vol-theme-icon vol-theme-icon--paypal"></i>
+                    <i class="vol-theme-icon vol-theme-icon--visa"></i>
+                    <i class="vol-theme-icon vol-theme-icon--discover"></i>
+                    <i class="vol-theme-icon vol-theme-icon--mastercard"></i>
+                    <i class="vol-theme-icon vol-theme-icon--amex"></i>
+                  </div>
+
+                  <section class="ssl microblock">
+                    <div class="microblock__body">
+                      <a id="ssl__link" href="javascript:void(0);" rel="nofollow">
+                        <p class="sr-only">View SSL Certificate</p>
+                        <svg class="icon"><use xlink:href="#svg-ssl-simple"></use></svg>
+                      </a>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+          </div>
+        </footer>
+
+      </div>
+    </section>
+  </article>
+
+  <!-- IE9 FIX - CATEGORY GRID LAYOUT -->
+  <!--[if IE 9]><script>"searchresults.asp"===PageName()&&!function(e){e(document).ready(function(){var r,t=0,n=0,i=new Array,h=0;e(".v-product").each(function(){if(r=e(this),h=r.position().top,n!=h){for(currentDiv=0;currentDiv<i.length;currentDiv++)i[currentDiv].height(t);i.length=0,n=h,t=r.height(),i.push(r)}else i.push(r),t=t<r.height()?r.height():t;for(currentDiv=0;currentDiv<i.length;currentDiv++)i[currentDiv].height(t)})})}($jQueryModern);</script><![endif]-->
+
+  <script src="v/vspfiles/templates/266/js/min/template.min.js"></script>
+
+
+<!-- Westmere / Palliser Leather Modal (theme-level) -->
+<style id="wm-leather-modal-css">
+  .wm-leather-summary{margin:10px 0 10px;font-size:14px}
+  .wm-leather-summary b{font-weight:600}
+
+  .wm-btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:10px 14px;border:1px solid #ddd;border-radius:10px;
+    background:#fff;cursor:pointer;font-size:14px
+  }
+  .wm-btn:hover{border-color:#bbb}
+
+  .wm-overlay{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.45);
+    display:none;align-items:center;justify-content:center;
+    z-index:99999;padding:18px;
+  }
+
+  .wm-modal{
+    width:min(1020px,92vw);max-height:86vh;background:#fff;border-radius:16px;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);
+    overflow:hidden;display:flex;flex-direction:column;
+  }
+
+  .wm-modal-header{
+    padding:16px 18px;border-bottom:1px solid #eee;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:12px
+  }
+  .wm-modal-title{font-size:18px;font-weight:600}
+  .wm-modal-sub{font-size:13px;color:#666;margin-top:4px}
+  .wm-close{background:none;border:0;font-size:22px;cursor:pointer;line-height:1}
+
+  .wm-tabs{
+    display:flex;gap:8px;padding:10px 18px;border-bottom:1px solid #eee;background:#fff
+  }
+  .wm-tab{
+    border:1px solid #ddd;background:#fff;border-radius:999px;
+    padding:8px 12px;font-size:13px;cursor:pointer
+  }
+  .wm-tab[data-active="1"]{border-color:#111}
+
+  .wm-modal-body{padding:14px 18px;overflow:auto}
+  .wm-tabpanel{display:none}
+  .wm-tabpanel[data-active="1"]{display:block}
+
+  /* Grade header row: bring link closer */
+  .wm-grade-row{
+    display:flex;align-items:center;justify-content:flex-start;
+    gap:10px;margin:14px 0 6px
+  }
+  .wm-grade-row:first-child{margin-top:0}
+  .wm-grade-title{font-size:14px;font-weight:700;margin:0;white-space:nowrap}
+  .wm-grade-infoBtn{
+    border:0;background:none;padding:0;margin:0;
+    font-size:13px;cursor:pointer;color:#111;text-decoration:underline;
+    line-height:1.1
+  }
+  .wm-grade-infoBtn:hover{opacity:.8}
+
+  .wm-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+    gap:12px;margin-bottom:8px
+  }
+  .wm-tile{
+    position:relative;border:1px solid #e5e5e5;border-radius:12px;
+    padding:10px;cursor:pointer;background:#fff;text-align:left
+  }
+  .wm-tile[data-selected="1"]{border-color:#111}
+
+  .wm-swatch{
+    width:100%;aspect-ratio:1/1;border-radius:10px;
+    border:1px solid #eee;background:#fafafa;overflow:hidden
+  }
+  .wm-swatch img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+  .wm-name{font-size:12px;margin-top:6px;line-height:1.2}
+
+  .wm-zoom{
+    position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:999px;
+    border:1px solid #ddd;background:rgba(255,255,255,.92);
+    cursor:pointer;font-size:16px;line-height:26px;text-align:center
+  }
+  .wm-zoom:hover{border-color:#999}
+
+  .wm-modal-footer{
+    padding:14px 18px;border-top:1px solid #eee;
+    display:flex;justify-content:space-between;align-items:center;gap:12px
+  }
+  .wm-apply{background:#111;color:#fff;border:0;border-radius:12px;padding:10px 14px;cursor:pointer}
+  .wm-cancel{font-size:14px;cursor:pointer;color:#555;margin-right:12px}
+
+  .wm-infoGradeHeader{font-size:14px;font-weight:700;margin:0 0 12px}
+  .wm-info-list{display:flex;flex-direction:column;gap:12px}
+  .wm-info-card{border:1px solid #eee;border-radius:14px;padding:12px}
+  .wm-info-card h4{margin:0 0 6px;font-size:14px}
+  .wm-info-card .wm-info-desc{font-size:13px;line-height:1.35;color:#222}
+  .wm-info-card .wm-info-meta{margin-top:10px;font-size:12px;color:#333}
+  .wm-info-card .wm-info-meta b{font-weight:700}
+  .wm-info-card .wm-info-flag{margin-top:10px;font-size:12px;color:#333}
+  .wm-info-card .wm-info-flag .d{color:#666;margin-top:4px}
+
+/* Preview overlay */
+  .wm-preview{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);
+    display:none;align-items:center;justify-content:center;z-index:100000;
+    padding:18px;
+  }
+  .wm-preview-card{
+    width:min(720px,92vw);background:#fff;border-radius:16px;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.35)
+  }
+  .wm-preview-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 14px;border-bottom:1px solid #eee;font-size:14px;font-weight:600
+  }
+  .wm-preview-close{border:0;background:none;font-size:22px;cursor:pointer;line-height:1}
+  .wm-preview-body{padding:14px}
+  .wm-preview-img{width:100%;height:auto;display:block;border-radius:12px;border:1px solid #eee}
+}
+
+/* Normal products get normal options */
+/* Desktop-only spacing (prevents mobile from being shoved sideways) */
+@media (min-width: 992px) {
+  #content_area {
+    display: block !important;
+    text-align: left !important;
+    margin-top: 40px !important;
+    margin-left: 72px !important;
+    margin-right: 91px !important;
+  }
+
+  #content_area > * {
+    max-width: none !important;
+  }
+}
+
+/* Mobile: no forced side margins */
+@media (max-width: 991px) {
+  #content_area {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+/* Hide the modal's built-in button + summary so only our inline UI shows */
+#wmOpen,
+.wm-leather-summary{
+  display:none !important;
+}
+
+</style>
+<style>
+html body.category .v-product-grid .v-product,
+html body.category .v-product-grid .v-product-grid-item,
+html body.category .v-product-grid > .v-product {
+  vertical-align: baseline !important;
+}
+</style>
+
+<script id="wm-leather-modal-js">
+(function(){
+  "use strict";
+  // 🚫 EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER
+  var productCodeInput = document.querySelector('input[name="ProductCode"]');
+  if (productCodeInput && /^BB-/i.test(productCodeInput.value)) {
+    return;
+  }
+
+
+  // If you accidentally paste this twice, only the first one runs.
+  if (window.__WM_LEATHER_MODAL_SCRIPT_LOADED__) return;
+  window.__WM_LEATHER_MODAL_SCRIPT_LOADED__ = true;
+
+  const WM_DEBUG = false;
+  const log = (...a) => { if (WM_DEBUG) console.log("[WM]", ...a); };
+
+  // IMPORTANT: do NOT block retries until we actually build UI
+  if (window.__WM_LEATHER_MODAL_BUILT__) return;
+
+  const GRADE_UPCHARGE = { "2000": 99, "3000": 149 };
+  function gradeHeaderText(g){
+    if (g === "Base") return "Grade 1000";
+    const amt = GRADE_UPCHARGE[String(g)];
+    return amt ? `Grade ${g} (+$${amt}/seat)` : `Grade ${g}`;
+  }
+
+  // Add your families here (DO NOT remove Bali unless you want to)
+  const LEATHER_INFO = {
+  "Rein": {
+    description:
+      "Rein's embossed finish feels like a natural leather grain, while providing durability and a two-toned, highly pigmented appearance.",
+    match: "Yes",
+    thickness: "0.9-1.1 mm",
+    finishType: "Pigmented",
+    corrected: "Lightly",
+    origin: "Italy",
+    flags: [
+      { k: "Soap & Water Cleanable", v: "Clean with a mild soap and water solution, and wipe with a damp clean cloth. Do not saturate the leather." },
+      { k: "Repels Liquid", v: "Water beads to be easily wiped away before penetrating the leather" },
+      { k: "Stain Resistant", v: "This leather resists stains from spills and dirt" },
+      { k: "Solid Color", v: "Colour is uniform through the hide and does not often have variation." },
+      { k: "Embossed", v: "A print applied in the finishing process, like a stamp, to create a unique look or hide imperfections." },
+      { k: "Certified Sustainability", v: "The manufacturer of this leather has passed a set of certifications that promote sustainable development and environmental management practices." }
+    ]
+  },
+
+  "Traverse": {
+    description:
+      "Available in a wide variety of colours, ranging from everyday neutrals to stylish statements, Traverse makes an impact. The perfect fusion of durability and luxury, Traverse is an ideal leather for everyday life, while maintaining a softness and luxe feel.",
+    match: "Yes",
+    thickness: "1.2-1.4 mm",
+    finishType: "Pigmented",
+    corrected: "Yes",
+    origin: "Brasil",
+    flags: [
+      { k: "Soap & Water Cleanable", v: "Clean with a mild soap and water solution, and wipe with a damp clean cloth. Do not saturate the leather." },
+      { k: "Repels Liquid", v: "Water beads to be easily wiped away before penetrating the leather" },
+      { k: "Stain Resistant", v: "This leather resists stains from spills and dirt" },
+      { k: "Solid Color", v: "Colour is uniform through the hide and does not often have variation." },
+      { k: "Embossed", v: "A print applied in the finishing process, like a stamp, to create a unique look or hide imperfections." },
+      { k: "Certified Sustainability", v: "The manufacturer of this leather has passed a set of certifications that promote sustainable development and environmental management practices." }
+    ]
+  },
+
+  "Solana": {
+    description:
+      "Solana is a semi-aniline leather with a subtle two-tone effect and a natural grain. Soft and silky to the touch, Solana features mineral tones inspired by the warmth of nature.",
+    match: "Yes",
+    thickness: "1.2-1.4 mm",
+    finishType: "Semi-Aniline",
+    corrected: "Yes",
+    origin: "Brasil",
+    flags: [
+      { k: "Soap & Water Cleanable", v: "Clean with a mild soap and water solution, and wipe with a damp clean cloth. Do not saturate the leather." },
+      { k: "Color Variation", v: "Semi-aniline and aniline leathers can have slight colour variation as pieces can be cut from different parts of the hide, or from different lots. This is not a material defect, but evidence that it is a natural product." },
+      { k: "Two-Tone", v: "Consistent colour variation throughout the hide." },
+      { k: "Develops Patina", v: "Leather will develop a soft sheen and colour variation over time, generally in areas that get the most use like seats or back cushions." },
+      { k: "Natural Markings", v: "Markings such as healed scars, fat wrinkles, cuts, or brand marks may occur in 100% top grain leather." },
+      { k: "Certified Sustainability", v: "The manufacturer of this leather has passed a set of certifications that promote sustainable development and environmental management practices." }
+    ]
+  },
+
+  "Evoque": {
+    description:
+      "Evoque offers solid, saturated colour with a soft embossed grain that ends depth and character to the leather. Evoque offers excellent durability, minimal colour variation and is fade and stain resistant.",
+    match: "Yes",
+    thickness: "1.3-1.5 mm",
+    finishType: "Pigmented",
+    corrected: "Lightly",
+    origin: "Italy",
+    flags: [
+      { k: "Soap & Water Cleanable", v: "Clean with a mild soap and water solution, and wipe with a damp clean cloth. Do not saturate the leather." },
+      { k: "Repels Liquid", v: "Water beads to be easily wiped away before penetrating the leather" },
+      { k: "Stain Resistant", v: "This leather resists stains from spills and dirt" },
+      { k: "Solid Color", v: "Colour is uniform through the hide and does not often have variation." },
+      { k: "Certified Sustainability", v: "The manufacturer of this leather has passed a set of certifications that promote sustainable development and environmental management practices." }
+    ]
+  }
+};
+
+
+  function esc(s){
+    return String(s ?? "")
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+  }
+
+  function stripPriceTail(s){
+    let x = String(s || "");
+    x = x
+      .replace(/\s*\(\s*\+\s*\$?\s*\d+(?:\.\d{2})?[^)]*\)\s*$/ig, "")
+      .replace(/\s*\+\s*\$?\s*\d+(?:\.\d{2})?\s*$/ig, "")
+      .replace(/\s+\[\s*Additional\s*\$?\s*\d+(?:\.\d{2})?\s*\]\s*$/ig, "")
+      .replace(/\s+additional\s+\$?\s*\d+(?:\.\d{2})?\s*$/ig, "");
+    return x.replace(/\s+/g, " ").trim();
+  }
+  function cleanText(s){ return stripPriceTail(s).replace(/\s+/g, " ").trim(); }
+
+  function slugify(s){
+    return String(s || "").toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  function splitFamilyColor(rest){
+    const r = cleanText(rest);
+    if (!r) return { family:"", color:"" };
+
+    if (!r.includes(" ") && r.includes("_")){
+      const idx = r.indexOf("_");
+      return { family: r.slice(0, idx), color: r.slice(idx+1).replace(/_/g," ") };
+    }
+    if (!r.includes(" ") && r.includes("-")){
+      const idx = r.indexOf("-");
+      return { family: r.slice(0, idx), color: r.slice(idx+1).replace(/-/g," ") };
+    }
+
+    const parts = r.split(" ").filter(Boolean);
+    return { family: parts.shift() || "", color: parts.join(" ").trim() };
+  }
+
+  function possibleSwatchPaths(family, color){
+    const f = cleanText(family);
+    const c = cleanText(color);
+
+    const baseNames = [];
+    if (f && c){
+      baseNames.push(`${f} ${c}`);
+      baseNames.push(`${f}_${c}`);
+      baseNames.push(`${f}-${c}`);
+      baseNames.push(`${slugify(f)}-${slugify(c)}`);
+      baseNames.push(`${slugify(f)}_${slugify(c)}`);
+    } else if (f) {
+      baseNames.push(f);
+      baseNames.push(slugify(f));
+    }
+
+    const baseDir = "/v/vspfiles/swatches/";
+    const exts = [".jpeg", ".jpg", ".png", ".webp", ".gif"];
+
+    const urls = [];
+    for (const n of baseNames.map(x=>x.trim()).filter(Boolean)){
+      for (const e of exts) urls.push(baseDir + encodeURIComponent(n + e));
+    }
+    return urls;
+  }
+
+
+  function isPlaceholderOption(opt){
+    const t = (opt.textContent || "").trim();
+    const v = String(opt.value || "").trim();
+    if (!t || !v) return true;
+    if (/choose|select|please select|--/i.test(t)) return true;
+    return false;
+  }
+
+  function parseGradeAndRest(raw){
+    const s = cleanText(raw);
+    const m = s.match(/Grade\s*([0-9,]+)\s*[-–:]?\s*(.*)$/i);
+    if (m) return { grade: String(m[1]).replace(/,/g,""), rest: (m[2] || "").trim() };
+    return { grade: "Base", rest: s };
+  }
+
+  function gradeSortKey(g){
+    if (g === "Base") return -1;
+    const n = Number(g);
+    return Number.isFinite(n) ? n : 999999;
+  }
+
+  function labelFor(o){
+    const gLabel = (o.grade === "Base") ? "Grade 1000" : `Grade ${o.grade}`;
+    return `${gLabel} ${o.family} ${o.color}`.replace(/\s+/g," ").trim();
+  }
+
+ function selectLooksLeatherish(sel){
+  const id = (sel.id || "").toLowerCase();
+  const nm = (sel.name || "").toLowerCase();
+  const hint = id + " " + nm;
+
+  let lbl = "";
+  if (sel.id){
+    const lab = document.querySelector(`label[for="${CSS.escape(sel.id)}"]`);
+    if (lab) lbl = (lab.textContent || "").toLowerCase();
+  }
+
+  const opts = Array.from(sel.options || []);
+  const sample = opts.slice(0, 120).map(o => (o.textContent||"").toLowerCase()).join(" ");
+  const hasGrade = /grade\s*[0-9,]+/.test(sample);
+  const hasKnown = /(traverse|solana|rein|evoque|leather|cover)/.test(sample);
+  const hinted = /(leather|cover|upholstery)/.test(hint) || /(leather|cover|upholstery)/.test(lbl);
+
+  return hinted || hasGrade || hasKnown;
+}
+
+
+  function hasRealOptions(sel){
+    const real = Array.from(sel.options || []).filter(o => !isPlaceholderOption(o));
+    return real.length >= 2;
+  }
+
+  function initIfReady(){
+    if (document.getElementById("wmOpen")) return true;
+
+    const allSelects = Array.from(document.querySelectorAll("select"));
+    const candidateSelects = allSelects.filter(selectLooksLeatherish).filter(hasRealOptions);
+
+    if (!candidateSelects.length) { log("No leather-ish selects yet."); return false; }
+
+    const all = [];
+    for (const sel of candidateSelects){
+      for (const opt of Array.from(sel.options || [])){
+        if (isPlaceholderOption(opt)) continue;
+        const raw = (opt.textContent || "").trim();
+        if (!raw) continue;
+
+        const pr = parseGradeAndRest(raw);
+        const fc = splitFamilyColor(pr.rest);
+        if (!fc.family && !fc.color) continue;
+
+        all.push({
+          selectEl: sel,
+          value: opt.value,
+          grade: pr.grade,
+          family: fc.family,
+          color: fc.color,
+          swatches: possibleSwatchPaths(fc.family, fc.color)
+        });
+      }
+    }
+    if (!all.length) { log("Selects found, but no options parsed."); return false; }
+
+    // Mark built ONLY now
+    window.__WM_LEATHER_MODAL_BUILT__ = true;
+
+    // Hide selects and insert UI
+    const anchorSelect = candidateSelects[0];
+
+
+  const ui = document.createElement("div");
+    ui.innerHTML = `
+      <div class="wm-leather-summary"><b>Leather:</b> <span id="wmSummary">Select leather</span></div>
+      <button class="wm-btn" id="wmOpen" type="button">Choose Leather & Color</button>
+    `;
+    anchorSelect.insertAdjacentElement("afterend", ui);
+
+    // Modal
+    const overlay = document.createElement("div");
+    overlay.className = "wm-overlay";
+    overlay.innerHTML = `
+      <div class="wm-modal" role="dialog" aria-modal="true">
+        <div class="wm-modal-header">
+          <div>
+            <div class="wm-modal-title">Select Your Leather</div>
+            <div class="wm-modal-sub">One leather applies to all seats</div>
+          </div>
+          <button class="wm-close" type="button" aria-label="Close">&times;</button>
+        </div>
+
+        <div class="wm-tabs">
+          <button type="button" class="wm-tab" id="wmTabBtnSwatches" data-active="1">Swatches</button>
+          <button type="button" class="wm-tab" id="wmTabBtnInfo" data-active="0">Leather Information</button>
+        </div>
+
+        <div class="wm-modal-body">
+          <div class="wm-tabpanel" id="wmTabSwatches" data-active="1"><div id="wmSections"></div></div>
+          <div class="wm-tabpanel" id="wmTabInfo" data-active="0">
+            <div class="wm-infoGradeHeader" id="wmInfoGradeHeader">Leather Information</div>
+            <div class="wm-info-list" id="wmInfoList"></div>
+          </div>
+        </div>
+
+        <div class="wm-modal-footer">
+          <div id="wmPicked">No selection</div>
+          <div>
+            <span class="wm-cancel">Cancel</span>
+            <button class="wm-apply" type="button">Apply</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Preview overlay
+    const preview = document.createElement("div");
+    preview.className = "wm-preview";
+    preview.innerHTML = `
+      <div class="wm-preview-card" role="dialog" aria-modal="true">
+        <div class="wm-preview-head">
+          <span id="wmPreviewTitle">Swatch</span>
+          <button class="wm-preview-close" type="button" aria-label="Close">&times;</button>
+        </div>
+        <div class="wm-preview-body">
+          <img id="wmPreviewImg" class="wm-preview-img" alt="Swatch preview" />
+        </div>
+      </div>
+    `;
+    document.body.appendChild(preview);
+
+    // Refs
+    const sectionsEl = document.getElementById("wmSections");
+    const summaryEl  = document.getElementById("wmSummary");
+    const pickedEl   = document.getElementById("wmPicked");
+    const previewImg = document.getElementById("wmPreviewImg");
+    const previewTit = document.getElementById("wmPreviewTitle");
+
+    const tabBtnSwatches = document.getElementById("wmTabBtnSwatches");
+    const tabBtnInfo     = document.getElementById("wmTabBtnInfo");
+    const tabSwatches    = document.getElementById("wmTabSwatches");
+    const tabInfo        = document.getElementById("wmTabInfo");
+
+    let picked = null;
+    let pickedTile = null;
+    let lastInfoGrade = null;
+
+    function setTab(which){
+      const sw = (which === "swatches");
+      tabBtnSwatches.dataset.active = sw ? "1" : "0";
+      tabBtnInfo.dataset.active     = sw ? "0" : "1";
+      tabSwatches.dataset.active    = sw ? "1" : "0";
+      tabInfo.dataset.active        = sw ? "0" : "1";
+
+      if (!sw){
+        if (!lastInfoGrade){
+          const grades = Array.from(new Set(all.map(o => o.grade))).sort((a,b)=>gradeSortKey(a)-gradeSortKey(b));
+          lastInfoGrade = grades[0] || "Base";
+        }
+        renderGradeInfo(lastInfoGrade);
+      }
+    }
+
+    tabBtnSwatches.onclick = (e)=>{ e.preventDefault(); setTab("swatches"); };
+    tabBtnInfo.onclick     = (e)=>{ e.preventDefault(); setTab("info"); };
+
+    // Initialize from current selects (first match wins)
+    for (const sel of candidateSelects){
+      const curVal = sel.value;
+      const curObj = all.find(x => x.selectEl === sel && x.value === curVal);
+      if (curObj){ picked = curObj; break; }
+    }
+    if (picked){
+      const lab = labelFor(picked);
+      summaryEl.textContent = lab;
+      pickedEl.textContent  = lab;
+    }
+
+    function openPreview(title, imgSrc){
+      if (!imgSrc) return;
+      previewTit.textContent = title || "Swatch";
+      previewImg.src = imgSrc;
+      preview.style.display = "flex";
+    }
+    preview.querySelector(".wm-preview-close").onclick = () => preview.style.display = "none";
+    preview.onclick = (e) => { if (e.target === preview) preview.style.display = "none"; };
+
+    function buildTile(o){
+      const tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = "wm-tile";
+      tile.dataset.selected = (picked && picked.selectEl === o.selectEl && picked.value === o.value) ? "1" : "0";
+
+      const sw = document.createElement("div");
+      sw.className = "wm-swatch";
+
+      const img = document.createElement("img");
+      sw.appendChild(img);
+
+      const zoom = document.createElement("button");
+      zoom.type = "button";
+      zoom.className = "wm-zoom";
+      zoom.textContent = "+";
+      zoom.title = "View larger";
+
+      const name = document.createElement("div");
+      name.className = "wm-name";
+      name.textContent = `${o.family} ${o.color}`.trim() || "(Unnamed)";
+
+      tile.appendChild(sw);
+      tile.appendChild(zoom);
+      tile.appendChild(name);
+
+      // Load swatch with fallbacks
+      let i = 0;
+      function tryNext(){
+        if (i >= o.swatches.length){
+          img.removeAttribute("src");
+          img.alt = "Swatch not found";
+          return;
+        }
+        const url = o.swatches[i++];
+        img.onerror = tryNext;
+        img.src = url;
+      }
+      tryNext();
+
+      // Select on tile click
+      tile.onclick = (e) => {
+        e.preventDefault();
+        if (pickedTile) pickedTile.dataset.selected = "0";
+        tile.dataset.selected = "1";
+        pickedTile = tile;
+
+        picked = o;
+        pickedEl.textContent = labelFor(o);
+      };
+
+      // ONLY + opens preview
+      zoom.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openPreview(`${o.family} ${o.color}`.trim(), img.currentSrc || img.src);
+      };
+
+      if (tile.dataset.selected === "1") pickedTile = tile;
+      return tile;
+    }
+
+    function familiesForGrade(g){
+      return Array.from(new Set(
+        all.filter(o => o.grade === g).map(o => (o.family || "").trim()).filter(Boolean)
+      )).sort((a,b)=>a.localeCompare(b, undefined, {sensitivity:"base"}));
+    }
+
+    function renderGradeInfo(g){
+      const hdr = document.getElementById("wmInfoGradeHeader");
+      const listEl = document.getElementById("wmInfoList");
+      if (!hdr || !listEl) return;
+
+      lastInfoGrade = g;
+
+      // Header like: "Grade 2000   Leather Information"
+      hdr.textContent = `${(g==="Base" ? "Grade 1000" : gradeHeaderText(g))}   Leather Information`;
+      listEl.innerHTML = "";
+
+      const fams = familiesForGrade(g);
+      if (!fams.length){
+        listEl.innerHTML = `<div class="wm-info-card">No info available for this grade yet.</div>`;
+        return;
+      }
+
+      fams.forEach(fam => {
+        const info = LEATHER_INFO[fam];
+        const card = document.createElement("div");
+        card.className = "wm-info-card";
+
+        if (!info){
+          card.innerHTML = `<h4>${esc(fam)}</h4><div class="wm-info-desc">Details coming soon.</div>`;
+          listEl.appendChild(card);
+          return;
+        }
+
+        card.innerHTML = `
+          <h4>${esc(fam)}</h4>
+          <div class="wm-info-desc">${esc(info.description || "")}</div>
+
+          <div class="wm-info-meta">
+            <div><b>Available With Match</b><br>${esc(info.match || "")}</div><br>
+            <div><b>Thickness</b><br>${esc(info.thickness || "")}</div><br>
+            <div><b>Finish Type</b><br>${esc(info.finishType || "")}</div><br>
+            <div><b>Corrected</b><br>${esc(info.corrected || "")}</div><br>
+            <div><b>Country of Origin</b><br>${esc(info.origin || "")}</div>
+          </div>
+
+          ${(info.flags || []).map(f => `
+            <div class="wm-info-flag">
+              <b>${esc(f.k)}</b>
+              <div class="d">${esc(f.v)}</div>
+            </div>
+          `).join("")}
+        `;
+        listEl.appendChild(card);
+      });
+    }
+
+    function renderAllGradesTogether(){
+      sectionsEl.innerHTML = "";
+
+      const grades = Array.from(new Set(all.map(o => o.grade)))
+        .sort((a,b) => gradeSortKey(a) - gradeSortKey(b));
+
+      const frag = document.createDocumentFragment();
+
+      grades.forEach(g => {
+        // Row: Grade ####  |  Leather Information
+        const row = document.createElement("div");
+        row.className = "wm-grade-row";
+
+        const title = document.createElement("div");
+        title.className = "wm-grade-title";
+        title.textContent = (g === "Base") ? "Grade 1000" : gradeHeaderText(g);
+
+        const infoBtn = document.createElement("button");
+        infoBtn.type = "button";
+        infoBtn.className = "wm-grade-infoBtn";
+        infoBtn.textContent = "Leather Information";
+        infoBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          lastInfoGrade = g;
+          setTab("info");
+          renderGradeInfo(g);
+        };
+
+        row.appendChild(title);
+        row.appendChild(infoBtn);
+        frag.appendChild(row);
+
+        // Grid
+        const grid = document.createElement("div");
+        grid.className = "wm-grid";
+
+        const list = all
+          .filter(o => o.grade === g)
+          .sort((a,b) => {
+            const af = (a.family || "").localeCompare(b.family || "", undefined, { sensitivity:"base" });
+            if (af) return af;
+            return (a.color || "").localeCompare(b.color || "", undefined, { sensitivity:"base" });
+          });
+
+        list.forEach(o => grid.appendChild(buildTile(o)));
+        frag.appendChild(grid);
+      });
+
+      sectionsEl.appendChild(frag);
+    }
+
+    // Open modal
+    document.getElementById("wmOpen").onclick = (e) => {
+      e.preventDefault();
+      overlay.style.display = "flex";
+      setTab("swatches");
+      renderAllGradesTogether();
+    };
+
+    // Close modal
+    overlay.querySelector(".wm-close").onclick = () => overlay.style.display = "none";
+    overlay.querySelector(".wm-cancel").onclick = () => overlay.style.display = "none";
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.style.display = "none"; };
+
+    // Apply selection
+    overlay.querySelector(".wm-apply").onclick = (e) => {
+      e.preventDefault();
+      if (!picked) return;
+      picked.selectEl.value = picked.value;
+      picked.selectEl.dispatchEvent(new Event("change", { bubbles:true }));
+      summaryEl.textContent = labelFor(picked);
+      overlay.style.display = "none";
+    };
+
+    log("Initialized. Options parsed:", all.length);
+    return true;
+  }
+
+  // Boot: wait for Volusion to inject options, and watch for late changes
+function boot(){
+  setTimeout(initIfReady, 600);
+}
+boot();
+
+
+})();
+</script>
+ <script>
+(function(){
+  if (window.__MC_INLINE_FINAL__) return;
+
+  // 🚫 EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER
+  var productCodeInput = document.querySelector('input[name="ProductCode"]');
+  if (productCodeInput && /^BB-/i.test(productCodeInput.value)) {
+    return;
+  }
+
+  window.__MC_INLINE_FINAL__ = true;
+
+
+  function mount(){
+    if (document.getElementById("mc-inline-config")) return;
+
+    const wmOpen = document.getElementById("wmOpen");       // hidden modal trigger (still exists)
+    const wmSummary = document.getElementById("wmSummary"); // modal summary text (still exists)
+    const area = document.getElementById("content_area");
+    if (!area || !wmOpen) return;
+
+    const panel = document.createElement("div");
+    panel.id = "mc-inline-config";
+    panel.style.margin = "14px 0 18px";
+
+    panel.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start">
+        <div  style="display:flex;gap:10px;align-items:center">
+          <button type="button" id="mcLeatherBtn"
+            style="padding:10px 14px;min-width:260px;text-align:center;border:1px solid #333;border-radius:10px;background:#fff;cursor:pointer">
+            Choose Leather
+          </button>
+          <div id="mcLeatherSummary"
+            style="min-width:260px;max-width:520px;padding:8px 10px;border:1px solid #ddd;border-radius:10px;background:#f7f7f7;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            ${(wmSummary && wmSummary.textContent) ? wmSummary.textContent : "No leather selected"}
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center">
+          <button type="button" id="mcPlannerBtn"
+            style="padding:10px 14px;min-width:260px;text-align:center;border:1px solid #333;border-radius:10px;background:#fff;cursor:pointer">
+            Room Planner
+          </button>
+          <div id="mcPlannerSummary"
+            style="min-width:260px;max-width:520px;padding:8px 10px;border:1px solid #ddd;border-radius:10px;background:#f7f7f7;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            No planner selections
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Place the panel right after the hidden wmOpen button's container (so it sits where your options live)
+    wmOpen.parentElement.insertAdjacentElement("afterend", panel);
+
+    // Button actions
+    document.getElementById("mcLeatherBtn").onclick = () => wmOpen.click();
+
+    document.getElementById("mcPlannerBtn").onclick = () => {
+      window.open("/v/vspfiles/room-planner.html","roomPlanner","width=1300,height=900");
+      document.getElementById("mcPlannerSummary").textContent = "Planner opened";
+    };
+
+    // Keep summary synced to modal selection changes
+    const mcSum = document.getElementById("mcLeatherSummary");
+    if (wmSummary && mcSum) {
+      const sync = () => { mcSum.textContent = wmSummary.textContent || "No leather selected"; };
+      sync();
+      new MutationObserver(sync).observe(wmSummary, { childList:true, subtree:true });
+    }
+  }
+function calculatePlannerPrice(counts, seatPrice){
+  let total = 0;
+  let singleSeatCount = 0;
+
+  Object.entries(counts).forEach(([id, qty]) => {
+    if (id === "4L") {
+      // Armless loveseat = 2 seats minus $750
+      total += qty * ((2 * seatPrice) - 750);
+    } else {
+      total += qty * seatPrice;
+      singleSeatCount += qty;
+    }
+  });
+
+  // Business rule: 4L requires at least two OTHER seats
+  if (counts["4L"] && singleSeatCount < 2) {
+    throw new Error("4L requires at least two additional seats.");
+  }
+
+  return total;
+}
+
+// === ROOM PLANNER RECEIVE ===
+window.addEventListener("message", function (event) {
+  if (event.origin !== location.origin) return;
+  if (!event.data || event.data.type !== "ROOM_PLANNER_APPLY") return;
+
+  const payload = event.data.payload;
+
+  // Update planner summary
+  const summary = document.getElementById("mcPlannerSummary");
+  if (summary && payload.options) {
+    const seatCount =
+      payload.options["4L"]
+        ? payload.options["4L"] * 2 +
+          Object.entries(payload.options)
+            .filter(([k]) => k !== "4L")
+            .reduce((t, [, v]) => t + v, 0)
+        : Object.values(payload.options).reduce((t, v) => t + v, 0);
+
+    summary.textContent = `${seatCount} seats configured`;
+  }
+
+  // Save selections
+  window.__ROOM_PLANNER_OPTIONS__ = payload.options;
+
+  // Pricing
+  try {
+    const totalPrice = calculatePlannerPrice(payload.options);
+    updateProductPrice(totalPrice);
+  } catch (err) {
+    alert(err.message);
+  }
+});
+
+// Mount inline UI after DOM + Volusion settle
+setTimeout(mount, 600);
+setTimeout(mount, 1400);
+
+})();
+</script>
+
+
+<!-- ========= HOMEPAGE-ONLY HERO + MENU CONTROL (CLEAN) ========= -->
+
+<script>
+(function () {
+  if (document.getElementById('slideshow-container')) {
+    document.body.classList.add('is-home');
+  }
+})();
+</script>
+
+<style>
+/* ===============================
+   HERO MENU (HOMEPAGE ONLY)
+   =============================== */
+
+.hero-nav {
+  display: flex;
+  gap: 22px;
+}
+
+.hero-nav a,
+.hero-cart {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0 8px;
+  position: relative;
+  z-index: 2;
+}
+
+body.is-home .hero-menu::before {
+  content: "";
+  position: absolute;
+  inset: -15px -800px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(0px);
+  border-radius: 10px;
+  opacity: 0;
+  transition: opacity 100ms ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+body.is-home .hero-menu:hover::before {
+  opacity: 1;
+}
+
+/* ===============================
+   HERO VIDEO (HOMEPAGE ONLY)
+   =============================== */
+body:not(.is-home) .mc-hero-video {
+  display: none !important;
+}
+
+/* ===============================
+   VOLUSION MENU LOGIC
+   =============================== */
+
+
+/* Show Volusion menu on non-home */
+body:not(.is-home) #display_menu_1,
+body:not(.is-home) header.header nav.menu {
+  display: block !important;
+}
+
+/* Anchor the WHOLE menu container in one fixed spot on all non-home pages */
+body:not(.is-home) #display_menu_1 {
+  position: absolute !important;
+  top: -4px !important;
+  left: 117% !important;
+  transform: translateX(-50%) !important;
+  z-index: 10000 !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Keep the UL itself centered but NOT absolutely positioned */
+body:not(.is-home) #display_menu_1 .main-menu .vnav--level1,
+body:not(.is-home) #display_menu_1 .main-menu .vnav--horizontal.vnav--level1 {
+  position: static !important;
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 22px !important;
+  padding: 12px 20px !important;
+  margin: 0px !important;
+}
+
+
+
+/* Typography match for non-home */
+body:not(.is-home) #display_menu_1 .vnav--level1 > li > a,
+body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li > a,
+body:not(.is-home) #display_menu_1 .vnav__link,
+body:not(.is-home) #display_menu_1 .vnav__label {
+  color: #111111 !important;
+  font-family: Inter, sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  padding: 0 8px !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+}
+
+/* Submenu typography on non-home */
+body:not(.is-home) #display_menu_1 .vnav--level2 a,
+body:not(.is-home) #display_menu_1 .vnav--level3 a,
+body:not(.is-home) #display_menu_1 .vnav__submenu a {
+  color: #111111 !important;
+  font-family: Inter, sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+}
+
+
+/* Mobile */
+@media (max-width: 991px) {
+  body.is-home .hero-menu {
+    display: none !important;
+  }
+}
+</style>
+<style>
+/* ===== PRODUCT PAGE FIXES ===== */
+body.mc-product-page #content_area h1,
+body.mc-product-page #content_area h2,
+body.mc-product-page #content_area h3,
+body.mc-product-page #content_area h4,
+body.mc-product-page #content_area .tab,
+body.mc-product-page #content_area .tab a,
+body.mc-product-page #content_area .resp-tab-item,
+body.mc-product-page #content_area .resp-tabs-list li {
+  font-style: normal !important;
+}
+
+/* option labels / "number of seats per row" */
+body.mc-product-page #content_area label,
+body.mc-product-page #content_area .productoptionname,
+body.mc-product-page #content_area td.productoptionname {
+  font-style: normal !important;
+  text-align: left !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* tabs inline on desktop */
+@media (min-width: 992px){
+  body.mc-product-page #content_area .resp-tabs-list,
+  body.mc-product-page #content_area ul.resp-tabs-list,
+  body.mc-product-page #content_area .ui-tabs-nav,
+  body.mc-product-page #content_area .TabbedPanelsTabGroup {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    padding: 0 !important;
+    margin: 0 0 12px 0 !important;
+  }
+
+  body.mc-product-page #content_area .resp-tabs-list li,
+  body.mc-product-page #content_area .ui-tabs-nav li,
+  body.mc-product-page #content_area .TabbedPanelsTab {
+    float: none !important;
+    width: auto !important;
+    display: inline-block !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+  }
+}
+
+
+/* thumbnails on LEFT (desktop) */
+@media (min-width: 992px){
+  body.mc-product-page #content_area #altviews,
+  body.mc-product-page #content_area .altviews,
+  body.mc-product-page #content_area [id*="altview"] {
+    float: left !important;
+    width: 86px !important;
+    margin: 0 14px 0 0 !important;
+  }
+
+  body.mc-product-page #content_area #altviews img,
+  body.mc-product-page #content_area .altviews img,
+  body.mc-product-page #content_area [id*="altview"] img {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 0 8px 0 !important;
+  }
+
+  body.mc-product-page #content_area #product_photo,
+  body.mc-product-page #content_area .vcss_img_wrap,
+  body.mc-product-page #content_area .main-image {
+    overflow: hidden !important;
+  }
+}
+
+@media (max-width: 991px){
+  body.mc-product-page #content_area .mc-pdp-media-td,
+  body.mc-product-page #content_area .mc-pdp-options-td {
+    display: block !important;
+    width: 100% !important;
+    float: none !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body.mc-product-page #content_area .mc-pdp-media-td {
+    text-align: center !important;
+    margin: 0 0 12px 0 !important;
+    padding: 0 !important;
+    clear: both !important;
+  }
+
+  body.mc-product-page #content_area #product_photo,
+  body.mc-product-page #content_area .vcss_img_wrap,
+  body.mc-product-page #content_area .vCSS_img_wrap,
+  body.mc-product-page #content_area .main-image,
+  body.mc-product-page #content_area #product_photo_td {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto 12px auto !important;
+    float: none !important;
+    clear: both !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+
+  body.mc-product-page #content_area #product_photo img,
+  body.mc-product-page #content_area .vcss_img_wrap img,
+  body.mc-product-page #content_area .vCSS_img_wrap img,
+  body.mc-product-page #content_area .main-image img,
+  body.mc-product-page #content_area img#main-image {
+    display: block !important;
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 auto !important;
+  }
+
+  nav.push-menu,
+  #push-nav__menu,
+  .push-menu__menu-wrapper {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  #push-nav__menu ul,
+  .push-menu__menu-wrapper ul,
+  .mc-mobile-vnav,
+  .mc-mobile-vnav__sub,
+  .mc-mobile-vnav__item,
+  .mc-mobile-vnav__row,
+  .mc-mobile-vnav__link {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .mc-mobile-vnav__link {
+    display: block !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    padding-right: 36px !important;
+  }
+}
+</style>
+<script>
+(function () {
+  function forceMenuTypography() {
+    var scope = document.querySelector('#display_menu_1');
+    if (!scope) return;
+
+    var isHome = document.body.classList.contains('is-home');
+
+    /* FORCE NON-HOME WIDTH ON THE ACTUAL UL */
+    if (!isHome) {
+  // DO NOT force layout here (CSS will handle layout)
+}
+   
+
+    var nodes = scope.querySelectorAll(
+      '.vnav--level1 > li > a, .vnav--horizontal.vnav--level1 > li > a, .vnav__link, .vnav__label'
+    );
+
+    nodes.forEach(function (el) {
+      el.style.setProperty('font-family', 'Inter, sans-serif', 'important');
+      el.style.setProperty('font-size', '15px', 'important');
+      el.style.setProperty('font-weight', '700', 'important');
+      el.style.setProperty('letter-spacing', '0.12em', 'important');
+      el.style.setProperty('text-transform', 'uppercase', 'important');
+      el.style.setProperty('line-height', '1.2', 'important');
+      el.style.setProperty('text-decoration', 'none', 'important');
+      el.style.setProperty('padding', '0 8px', 'important');
+    });
+  }
+
+  function run() {
+    forceMenuTypography();
+    setTimeout(forceMenuTypography, 150);
+    setTimeout(forceMenuTypography, 500);
+    setTimeout(forceMenuTypography, 1000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+
+  window.addEventListener('load', run);
+
+  var obs = new MutationObserver(function () { forceMenuTypography(); });
+  obs.observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+<script>
+(function () {
+  function killLegacyCategoryBar() {
+    var isCategory =
+      document.body.classList.contains('category') ||
+      document.documentElement.className.indexOf('category') !== -1 ||
+      location.pathname.indexOf('-s/') !== -1;
+
+    if (!isCategory) return;
+
+    // Remove the exact spacer table pattern you pasted
+    document.querySelectorAll('#content_area table.colors_backgroundlight[width="215"]').forEach(function (el) {
+      el.remove();
+    });
+
+    // Remove parent wrappers that only contain clear1x1 spacer gifs
+    document.querySelectorAll('#content_area table.colors_backgroundlight').forEach(function (tbl) {
+      var spacer = tbl.querySelector('img[src*="clear1x1.gif"][width="15"][height="15"]');
+      if (spacer) {
+        tbl.remove();
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', killLegacyCategoryBar);
+  } else {
+    killLegacyCategoryBar();
+  }
+
+  window.addEventListener('load', killLegacyCategoryBar);
+  setTimeout(killLegacyCategoryBar, 250);
+  setTimeout(killLegacyCategoryBar, 800);
+})();
+</script>
+<script>
+(function () {
+  function removeHomepageSecondMenu() {
+    // homepage only (you already use this class)
+    if (!document.body.classList.contains('is-home')) return;
+
+    // remove top-level category UL rows (the duplicated menu row)
+    document.querySelectorAll('#display_menu_1 ul.vnav--horizontal.vnav--level1, #display_menu_1 ul.vnav--level1').forEach(function (ul) {
+      ul.remove();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', removeHomepageSecondMenu);
+  } else {
+    removeHomepageSecondMenu();
+  }
+
+  window.addEventListener('load', removeHomepageSecondMenu);
+  setTimeout(removeHomepageSecondMenu, 300);
+})();
+</script>
+
+
+<script>
+(function () {
+  function syncHeroCartCount() {
+    var heroCount = document.getElementById('heroCartCount');
+    if (!heroCount) return;
+
+    var nativeCount = document.querySelector('.microblock.cart [data-v-observable="cart-count"], .microblock.cart .cart__count');
+    if (!nativeCount) return;
+
+    var update = function () {
+      var v = (nativeCount.textContent || '').replace(/[^\d]/g, '');
+      heroCount.textContent = v ? v : '0';
+    };
+
+    update();
+
+    var obs = new MutationObserver(update);
+    obs.observe(nativeCount, { childList: true, subtree: true, characterData: true });
+
+    setInterval(update, 1000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncHeroCartCount);
+  } else {
+    syncHeroCartCount();
+  }
+  window.addEventListener('load', syncHeroCartCount);
+})();
+</script>
+
+<script>
+(function () {
+  function applyBaseline() {
+    var nodes = document.querySelectorAll(
+      '.v-product-grid .v-product, .v-product-grid > .v-product, .v-product'
+    );
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].style.setProperty('vertical-align', 'baseline', 'important');
+    }
+  }
+
+  function run() {
+    if (!document.body.classList.contains('category')) return;
+    applyBaseline();
+
+    // Keep re-applying in case theme JS rewrites styles
+    if (!window.__vprodBaselineObserver) {
+      window.__vprodBaselineObserver = new MutationObserver(function () {
+        applyBaseline();
+      });
+      window.__vprodBaselineObserver.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class', 'style']
+      });
+    }
+
+    setTimeout(applyBaseline, 150);
+    setTimeout(applyBaseline, 600);
+    setTimeout(applyBaseline, 1200);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+  window.addEventListener('load', run);
+})();
+</script>
+
+
+
+<script>
+(function(){
+  function isMobile(){ return window.matchMedia('(max-width: 991px)').matches; }
+  function isHome(){ return document.body.classList.contains('is-home'); }
+  function qs(sel, root){ return (root||document).querySelector(sel); }
+  function qsa(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
+
+  function target(){
+    return qs('#push-nav__menu') || qs('.push-menu__menu-wrapper');
+  }
+
+  function buildFromVnav(ul){
+    var out = document.createElement('ul');
+    out.className = 'mc-mobile-vnav';
+
+    qsa(':scope > li', ul).forEach(function(li){
+      var a = qs(':scope > a', li);
+      if (!a) return;
+
+      var item = document.createElement('li');
+      item.className = 'mc-mobile-vnav__item';
+
+      var row = document.createElement('div');
+      row.className = 'mc-mobile-vnav__row';
+
+      var link = document.createElement('a');
+      link.className = 'mc-mobile-vnav__link';
+      link.href = a.getAttribute('href') || '#';
+      link.textContent = (a.textContent||'').trim();
+      row.appendChild(link);
+
+      var sub = qs(':scope > ul', li);
+      if (sub){
+        item.classList.add('mc-has-sub');
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mc-sub-toggle';
+        btn.setAttribute('aria-expanded','false');
+        btn.textContent = '▾';
+        row.appendChild(btn);
+
+        var subList = buildFromVnav(sub);
+        subList.classList.add('mc-mobile-vnav__sub');
+        item.appendChild(subList);
+      }
+
+      item.insertBefore(row, item.firstChild);
+      out.appendChild(item);
+    });
+
+    return out;
+  }
+
+  function buildFromHero(){
+    var out = document.createElement('ul');
+    out.className = 'mc-mobile-vnav';
+
+    qsa('#slideshow-container .hero-menu a').forEach(function(a){
+      var txt = (a.textContent||'').trim();
+      var href = a.getAttribute('href') || '';
+      if (!txt || !href) return;
+
+      var li = document.createElement('li');
+      li.className = 'mc-mobile-vnav__item';
+
+      var row = document.createElement('div');
+      row.className = 'mc-mobile-vnav__row';
+
+      var link = document.createElement('a');
+      link.className = 'mc-mobile-vnav__link';
+      link.href = href;
+      link.textContent = txt;
+
+      row.appendChild(link);
+      li.appendChild(row);
+      out.appendChild(li);
+    });
+
+    return out;
+  }
+
+  function ensureHomeItem(ul){
+    // HOME at top
+    var hasHome = qsa('a', ul).some(function(a){ return (a.textContent||'').trim().toUpperCase()==='HOME'; });
+    if (!hasHome){
+      var li = document.createElement('li');
+      li.className = 'mc-mobile-vnav__item';
+
+      var row = document.createElement('div');
+      row.className = 'mc-mobile-vnav__row';
+
+      var a = document.createElement('a');
+      a.className = 'mc-mobile-vnav__link';
+      a.href = '/default.asp';
+      a.textContent = 'HOME';
+
+      row.appendChild(a);
+      li.appendChild(row);
+      ul.insertBefore(li, ul.firstChild);
+    }
+  }
+
+  function ensureSingleCart(ul){
+    var carts = qsa('a', ul).filter(function(a){ return (a.textContent||'').trim().toUpperCase()==='MY CART'; });
+    if (carts.length === 0){
+      var li = document.createElement('li');
+      li.className = 'mc-mobile-vnav__item';
+
+      var row = document.createElement('div');
+      row.className = 'mc-mobile-vnav__row';
+
+      var a = document.createElement('a');
+      a.className = 'mc-mobile-vnav__link';
+      a.href = '/shoppingcart.asp';
+      a.textContent = 'MY CART';
+
+      row.appendChild(a);
+      li.appendChild(row);
+      ul.appendChild(li);
+    } else {
+      for (var i=1;i<carts.length;i++){
+        var n = carts[i].closest('li');
+        if (n) n.remove(); else carts[i].remove();
+      }
+    }
+  }
+
+  function renderMenu(){
+    if (!isMobile()) return;
+    var t = target();
+    if (!t) return;
+
+    // If already rendered, stop
+    if (qs('ul.mc-mobile-vnav', t)) return;
+
+    var ul;
+    if (isHome()){
+      ul = buildFromHero();
+    } else {
+      var src = qs('#display_menu_1 ul.vnav--level1');
+      if (!src) return;
+      ul = buildFromVnav(src);
+    }
+
+    t.innerHTML = '';
+    t.appendChild(ul);
+  }
+
+  // Toggle submenu open/close
+  document.addEventListener('click', function(e){
+    if (!isMobile()) return;
+
+    var btn = e.target.closest('button.mc-sub-toggle');
+    if (btn){
+      e.preventDefault();
+      var li = btn.closest('li.mc-has-sub');
+      if (!li) return;
+      var open = li.classList.toggle('mc-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      return;
+    }
+
+    if (e.target.closest('#nav-toggle, .menu-toggle, .menu-toggle__link, .menu-toggle__text')){
+      setTimeout(renderMenu, 0);
+      setTimeout(renderMenu, 200);
+      setTimeout(renderMenu, 800);
+    }
+  }, true);
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(renderMenu, 300);
+  });
+
+})();
+</script>
+<script>
+(function(){
+  function isMobile(){ return window.matchMedia('(max-width: 991px)').matches; }
+  function qs(sel){ return document.querySelector(sel); }
+
+  function forceCloseGlyph(){
+    var btn = qs('nav.push-menu .push-menu__close-btn');
+    if (!btn) return;
+
+    if (!btn.querySelector('.mc-close-x')) {
+      btn.innerHTML = '<span class="mc-close-x" aria-hidden="true">&#215;</span>';
+    }
+
+    btn.style.display = 'block';
+    btn.style.position = 'absolute';
+    btn.style.top = '10px';
+    btn.style.right = '12px';
+    btn.style.width = '32px';
+    btn.style.height = '32px';
+    btn.style.zIndex = '2147483647';
+    btn.style.background = 'transparent';
+    btn.style.border = '0';
+    btn.style.color = '#fff';
+    btn.style.cursor = 'pointer';
+    btn.style.textAlign = 'center';
+    btn.style.lineHeight = '32px';
+    btn.style.fontFamily = 'Arial, Helvetica, sans-serif';
+    btn.style.fontSize = '28px';
+    btn.style.fontWeight = '400';
+  }
+
+  function getPanel(){ return qs('nav.push-menu'); }
+
+  function isOpen(){
+    return document.body.classList.contains('push-menu-open') ||
+           document.documentElement.classList.contains('push-menu-open');
+  }
+
+  function setOpen(openNow){
+    forceCloseGlyph();
+
+    document.documentElement.classList.toggle('push-menu-open', openNow);
+    document.body.classList.toggle('push-menu-open', openNow);
+
+    var toggle = qs('.menu-toggle');
+    if (toggle){
+      toggle.classList.toggle('push-menu--open', openNow);
+      toggle.classList.toggle('push-menu--closed', !openNow);
+
+      var txt = toggle.querySelector('.menu-toggle__text');
+      if (txt){
+        txt.classList.toggle('push-menu--open', openNow);
+        txt.classList.toggle('push-menu--closed', !openNow);
+      }
+    }
+
+    var panel = getPanel();
+    if (panel){
+      /* force panel on top of video/page */
+      panel.style.position = 'fixed';
+      panel.style.left = '0';
+      panel.style.right = '0';
+      panel.style.width = '100%';
+      panel.style.zIndex = '999999';
+      panel.style.display = 'block';
+
+      if (openNow){
+        panel.style.top = '0';
+        panel.style.visibility = 'visible';
+        panel.style.opacity = '1';
+        panel.style.pointerEvents = 'auto';
+      } else {
+        panel.style.top = '-120vh';
+        panel.style.visibility = 'hidden';
+        panel.style.opacity = '0';
+        panel.style.pointerEvents = 'none';
+      }
+    }
+  }
+
+  function toggleMenu(){
+    setOpen(!isOpen());
+  }
+
+  function bootCloseGlyph(){
+    forceCloseGlyph();
+    setTimeout(forceCloseGlyph, 100);
+    setTimeout(forceCloseGlyph, 400);
+    setTimeout(forceCloseGlyph, 900);
+  }
+
+  document.addEventListener('click', function(e){
+    /* X close button */
+    if (e.target.closest('.push-menu__close-btn')){
+      e.preventDefault();
+      e.stopPropagation();
+      setOpen(false);
+      return;
+    }
+
+    /* SELECT A CATEGORY toggle */
+    if (e.target.closest('#nav-toggle, .menu-toggle, .menu-toggle__link, .menu-toggle__text')){
+      e.preventDefault();
+      e.stopPropagation();
+      toggleMenu();
+      return;
+    }
+
+    /* tap outside closes */
+    var panel = getPanel();
+    if (!panel) return;
+    if (!isOpen()) return;
+    if (panel.contains(e.target)) return;
+
+    setOpen(false);
+  }, true);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootCloseGlyph);
+  } else {
+    bootCloseGlyph();
+  }
+
+  window.addEventListener('load', bootCloseGlyph);
+
+  /* Start closed on mobile */
+  document.addEventListener('DOMContentLoaded', function(){
+    if (!isMobile()) return;
+    setOpen(false);
+  });
+
+  /* If resizing to desktop, force closed */
+  window.addEventListener('resize', function(){
+    if (!isMobile()) setOpen(false);
+  });
+})();
+</script>
+
+<script>
+(function () {
+  function hoistPushMenu() {
+    var panel = document.querySelector('nav.push-menu');
+    if (!panel) return;
+
+    if (panel.parentNode !== document.body) {
+      document.body.appendChild(panel);
+    }
+  }
+
+  function closePushMenu() {
+    document.documentElement.classList.remove('push-menu-open');
+    document.body.classList.remove('push-menu-open');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hoistPushMenu);
+  } else {
+    hoistPushMenu();
+  }
+
+  window.addEventListener('load', hoistPushMenu);
+  setTimeout(hoistPushMenu, 300);
+  setTimeout(hoistPushMenu, 1000);
+
+  document.addEventListener('click', function (e) {
+    var x = e.target.closest('.push-menu__close-btn');
+    if (!x) return;
+    e.preventDefault();
+    e.stopPropagation();
+    closePushMenu();
+  }, true);
+})();
+</script>
+<script>
+(function () {
+  function isMobile() {
+    return window.matchMedia('(max-width: 991px)').matches;
+  }
+
+  function stripSubmenus(scope) {
+    if (!scope) return;
+
+    /* remove all submenu toggle buttons/icons in MOBILE menu only */
+    scope.querySelectorAll(
+      '.vnav__icon, .vnav__arrow, .vnav__caret, .vnav__toggle, .vnav__expand, .mc-sub-toggle, .mc-mobile-vnav__toggle'
+    ).forEach(function (el) {
+      el.remove();
+    });
+
+    /* remove nested ULs in MOBILE menu only */
+    scope.querySelectorAll('li > ul').forEach(function (ul) {
+      ul.remove();
+    });
+
+    scope.querySelectorAll('li').forEach(function (li) {
+      li.classList.remove('mc-has-sub', 'has-sub', 'mc-open', 'is-open');
+    });
+  }
+
+  function run() {
+    if (!isMobile()) return;
+
+    stripSubmenus(document.querySelector('#push-nav__menu'));
+    stripSubmenus(document.querySelector('.push-menu__menu-wrapper'));
+
+    setTimeout(function () {
+      if (!isMobile()) return;
+      stripSubmenus(document.querySelector('#push-nav__menu'));
+      stripSubmenus(document.querySelector('.push-menu__menu-wrapper'));
+    }, 200);
+
+    setTimeout(function () {
+      if (!isMobile()) return;
+      stripSubmenus(document.querySelector('#push-nav__menu'));
+      stripSubmenus(document.querySelector('.push-menu__menu-wrapper'));
+    }, 800);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+
+  window.addEventListener('load', run);
+  window.addEventListener('resize', run);
+
+  if (!window.__mcStripSubmenusObserver) {
+    window.__mcStripSubmenusObserver = new MutationObserver(function () {
+      if (!isMobile()) return;
+      run();
+    });
+    window.__mcStripSubmenusObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  function removeCartFromDesktopNav(){
+    // Only on desktop
+    if (window.matchMedia('(max-width: 991px)').matches) return;
+
+    var scope = document.querySelector('#display_menu_1');
+    if (!scope) return;
+
+    scope.querySelectorAll('li, a').forEach(function(node){
+      var txt = (node.textContent || '').trim().toUpperCase();
+      if (txt === 'MY CART') {
+        var li = node.closest('li');
+        if (li && scope.contains(li)) li.remove();
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', removeCartFromDesktopNav);
+  window.addEventListener('load', removeCartFromDesktopNav);
+  setTimeout(removeCartFromDesktopNav, 300);
+  setTimeout(removeCartFromDesktopNav, 1000);
+})();
+</script>
+<script>
+(function () {
+  function q(sel, root){ return (root || document).querySelector(sel); }
+  function qa(sel, root){ return Array.from((root || document).querySelectorAll(sel)); }
+  function isMobile(){ return window.matchMedia('(max-width: 991px)').matches; }
+
+  function markProductPage() {
+    if (!document.querySelector('input[name="ProductCode"]')) return false;
+    document.body.classList.add('mc-product-page');
+    return true;
+  }
+
+  function forceNoItalics(scope){
+    qa(
+      'h1, h2, h3, h4, .productnamecolor, .productnamecolorLARGE, .colors_productname,' +
+      '.tab, .tab a, .resp-tab-item, .resp-tabs-list li, .TabbedPanelsTab, .ui-tabs-nav li,' +
+      'label, .productoptionname, td.productoptionname',
+      scope
+    ).forEach(function(el){
+      el.style.setProperty('font-style','normal','important');
+      el.style.setProperty('font-family','inherit','important');
+    });
+  }
+
+  function forceOptionLabel(scope){
+    qa('label, .productoptionname, td, div', scope).forEach(function(el){
+      var t = (el.textContent || '').trim().toLowerCase();
+      if (t.indexOf('number of seats per row') !== -1) {
+        el.style.setProperty('text-align','left','important');
+        el.style.setProperty('padding-left','10px','important');
+        el.style.setProperty('margin-left','0','important');
+        el.style.setProperty('display','block','important');
+        el.style.setProperty('width','auto','important');
+      }
+    });
+
+    qa('.productoptionname, td.productoptionname, label', scope).forEach(function(el){
+      el.style.setProperty('text-align','left','important');
+      el.style.setProperty('padding-left','10px','important');
+      el.style.setProperty('margin-left','0','important');
+      el.style.setProperty('font-style','normal','important');
+    });
+  }
+
+  function forceTabsInline(scope){
+    if (isMobile()) return;
+
+    qa('.resp-tabs-list, ul.resp-tabs-list, .ui-tabs-nav, .TabbedPanelsTabGroup', scope).forEach(function(tabWrap){
+      tabWrap.style.setProperty('display','flex','important');
+      tabWrap.style.setProperty('flex-wrap','nowrap','important');
+      tabWrap.style.setProperty('align-items','center','important');
+      tabWrap.style.setProperty('gap','8px','important');
+      tabWrap.style.setProperty('overflow-x','auto','important');
+      tabWrap.style.setProperty('white-space','nowrap','important');
+      tabWrap.style.setProperty('padding','0','important');
+      tabWrap.style.setProperty('margin','0 0 12px 0','important');
+
+      qa('li, .resp-tab-item, .TabbedPanelsTab', tabWrap).forEach(function(tab){
+        tab.style.setProperty('float','none','important');
+        tab.style.setProperty('display','inline-block','important');
+        tab.style.setProperty('width','auto','important');
+        tab.style.setProperty('white-space','nowrap','important');
+        tab.style.setProperty('margin','0','important');
+      });
+    });
+  }
+
+  function findMainMedia(scope) {
+    return (
+      q('#product_photo', scope) ||
+      q('img#product_photo', scope) ||
+      q('#product_photo_td', scope) ||
+      q('.vcss_img_wrap', scope) ||
+      q('.vCSS_img_wrap', scope) ||
+      q('.main-image', scope) ||
+      q('img#main-image', scope) ||
+      q('img[itemprop="image"]', scope)
+    );
+  }
+
+  function stackMediaAbovePricing(scope){
+    if (!isMobile()) return;
+
+    var media = findMainMedia(scope);
+    if (!media) return;
+
+    var mediaTd = media.closest('td');
+    var addBtn =
+      q('input[name="btnaddtocart"]', scope) ||
+      q('input[id*="btnaddtocart"]', scope) ||
+      qa('input[type="submit"], button', scope).find(function(el){
+        return /add to cart/i.test(el.value || el.textContent || '');
+      });
+
+    var pricingTd = addBtn ? addBtn.closest('td') : null;
+    if (!mediaTd || !pricingTd || mediaTd === pricingTd) return;
+
+    var row = mediaTd.parentNode;
+    if (!row || row !== pricingTd.parentNode) return;
+
+    row.insertBefore(mediaTd, pricingTd);
+
+    row.style.setProperty('display', 'block', 'important');
+    mediaTd.style.setProperty('display', 'block', 'important');
+    pricingTd.style.setProperty('display', 'block', 'important');
+    mediaTd.style.setProperty('width', '100%', 'important');
+    pricingTd.style.setProperty('width', '100%', 'important');
+    mediaTd.style.setProperty('float', 'none', 'important');
+    pricingTd.style.setProperty('float', 'none', 'important');
+  }
+
+  // --- Key fix: desktop wrapper exists? remove it on mobile ---
+  function unwrapDesktopMediaWrap(scope){
+    var wrap = q('.mc-prod-media-wrap', scope);
+    if (!wrap) return;
+
+    var parent = wrap.parentNode;
+    var mainImg = q('#product_photo', scope);
+    var thumbsEl = q('#altviews', scope);
+
+    // Put main image first, thumbs after (both outside wrapper)
+    if (mainImg) parent.insertBefore(mainImg, wrap);
+    if (thumbsEl) parent.insertBefore(thumbsEl, mainImg ? mainImg.nextSibling : wrap);
+
+    wrap.remove();
+
+    // Remove inline styles that were applied for desktop
+    if (thumbsEl) thumbsEl.removeAttribute('style');
+    if (mainImg) mainImg.removeAttribute('style');
+    if (thumbsEl) qa('a, img', thumbsEl).forEach(function (el) { el.removeAttribute('style'); });
+  }
+
+  function centerMainImageMobile(scope){
+    var media = findMainMedia(scope);
+    if (!media) return;
+
+    var img = (media.tagName === 'IMG')
+      ? media
+      : (q('img', media) || q('img#main-image', scope) || q('img#product_photo', scope));
+
+    media.style.setProperty('display', 'block', 'important');
+    media.style.setProperty('width', '100%', 'important');
+    media.style.setProperty('max-width', '100%', 'important');
+    media.style.setProperty('margin', '0 auto 12px auto', 'important');
+    media.style.setProperty('text-align', 'center', 'important');
+    media.style.setProperty('float', 'none', 'important');
+
+    if (!img) return;
+    img.style.setProperty('display', 'block', 'important');
+    img.style.setProperty('margin', '0 auto', 'important');
+    img.style.setProperty('width', 'auto', 'important');
+    img.style.setProperty('max-width', '100%', 'important');
+    img.style.setProperty('height', 'auto', 'important');
+  }
+
+  function wireAltThumbClicks(scope){
+    var thumbsRoot = q('#altviews', scope) || q('span#altviews', scope);
+    if (!thumbsRoot) return;
+
+    qa('a', thumbsRoot).forEach(function(link){
+      if (link.getAttribute('data-mc-thumb-bound') === '1') return;
+      link.setAttribute('data-mc-thumb-bound', '1');
+
+      link.addEventListener('click', function(e){
+        if (!isMobile()) return;
+
+        e.preventDefault();
+
+        var thumbImg = q('img', link);
+        var match = thumbImg && thumbImg.id ? thumbImg.id.match(/alternate_product_photo_(\d+)/i) : null;
+        var index = match ? parseInt(match[1], 10) : null;
+
+        if (index && typeof window.change_product_photo === 'function') {
+          window.change_product_photo(index);
+          return;
+        }
+
+        var main =
+          q('img#product_photo', scope) ||
+          q('#product_photo img', scope) ||
+          q('img#main-image', scope);
+
+        if (!main) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+
+        main.setAttribute('src', href);
+        var zoomLink = q('a#product_photo_zoom_url', scope) || q('a#product_photo_zoom_url2', scope);
+        if (zoomLink) zoomLink.setAttribute('href', href);
+      }, true);
+    });
+  }
+
+  function forceMediaLayout(scope){
+    wireAltThumbClicks(scope);
+
+    // MOBILE: always undo any desktop wrapper and stop
+    if (isMobile()) {
+      unwrapDesktopMediaWrap(scope);
+      stackMediaAbovePricing(scope);
+      centerMainImageMobile(scope);
+      return;
+    }
+
+    // DESKTOP: build wrapper thumbs-left layout
+    var main =
+      q('#product_photo', scope) ||
+      q('.vcss_img_wrap', scope) ||
+      q('.main-image', scope) ||
+      q('[id*="product_photo"]', scope);
+
+    var thumbs =
+      q('#altviews', scope) ||
+      q('.altviews', scope) ||
+      q('[id*="altview"]', scope);
+
+    if (!main) return;
+
+    // Make main image larger / natural size
+    qa('img', main).forEach(function(img){
+      img.style.setProperty('width','auto','important');
+      img.style.setProperty('max-width','100%','important');
+      img.style.setProperty('height','auto','important');
+      img.style.setProperty('object-fit','contain','important');
+      img.style.setProperty('display','block','important');
+      img.style.setProperty('margin','0 auto','important');
+    });
+
+    // If no thumbs found, still keep main image clean
+    if (!thumbs || thumbs === main) {
+      main.style.setProperty('overflow','visible','important');
+      return;
+    }
+
+    // Build one flex wrapper ONCE so thumbs sit left of main image
+    var existingWrap = q('.mc-prod-media-wrap', scope);
+    if (!existingWrap) {
+      var wrap = document.createElement('div');
+      wrap.className = 'mc-prod-media-wrap';
+      wrap.style.setProperty('display','flex','important');
+      wrap.style.setProperty('align-items','flex-start','important');
+      wrap.style.setProperty('gap','14px','important');
+      wrap.style.setProperty('width','100%','important');
+      wrap.style.setProperty('margin','0 0 12px 0','important');
+
+      // insert wrapper right before whichever appears first
+      var firstNode = (thumbs.compareDocumentPosition(main) & Node.DOCUMENT_POSITION_FOLLOWING) ? thumbs : main;
+      firstNode.parentNode.insertBefore(wrap, firstNode);
+
+      wrap.appendChild(thumbs);
+      wrap.appendChild(main);
+    }
+
+    // Force thumbs column
+    thumbs.style.setProperty('float','none','important');
+    thumbs.style.setProperty('width','86px','important');
+    thumbs.style.setProperty('min-width','86px','important');
+    thumbs.style.setProperty('margin','0','important');
+    thumbs.style.setProperty('padding','0','important');
+
+    qa('a, img', thumbs).forEach(function(el){
+      if (el.tagName === 'A') {
+        el.style.setProperty('display','block','important');
+        el.style.setProperty('margin','0 0 8px 0','important');
+      }
+      if (el.tagName === 'IMG') {
+        el.style.setProperty('display','block','important');
+        el.style.setProperty('width','100%','important');
+        el.style.setProperty('height','auto','important');
+        el.style.setProperty('margin','0','important');
+      }
+    });
+
+    // Main image area fills remaining width
+    main.style.setProperty('float','none','important');
+    main.style.setProperty('width','auto','important');
+    main.style.setProperty('flex','1 1 auto','important');
+    main.style.setProperty('overflow','visible','important');
+    main.style.setProperty('min-width','0','important');
+  }
+
+  function removeConfigurationDetails(scope){
+    var optionsTable = q('#options_table', scope) || q('table[id*="options_table"]', scope);
+    if (!optionsTable) return;
+
+    var rows = qa('tr', optionsTable);
+    rows.forEach(function(row){
+      var txt = (row.textContent || '').replace(/\s+/g, ' ').toLowerCase();
+      var hasConfigInput = !!q('input[title*="Configuration Details" i], input[name*="Configuration" i], input[value*="Configuration" i], textarea[title*="Configuration" i], select[title*="Configuration" i], input[title*="Details" i], input[name*="Details" i], input[value*="Details" i]', row);
+      var rowIdClass = ((row.id || '') + ' ' + (row.className || '')).toLowerCase();
+      var hasHeaderMarker = rowIdClass.indexOf('config') !== -1 || rowIdClass.indexOf('details') !== -1 || row.id === 'product_options_heading';
+
+      if (txt.indexOf('configuration details') !== -1 || hasConfigInput || hasHeaderMarker) {
+        var prev = row.previousElementSibling;
+        if (row.parentNode) row.parentNode.removeChild(row);
+
+        if (prev) {
+          var prevTxt = (prev.textContent || '').replace(/\s+/g, ' ').toLowerCase();
+          if (prevTxt.indexOf('configuration details') !== -1 || !!q('b, i, strong, em', prev)) {
+            if (prev.parentNode) prev.parentNode.removeChild(prev);
+          }
+        }
+      }
+    });
+
+    qa('#options_table tr, tr', scope).forEach(function(row){
+      var rowTxt = (row.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      if (rowTxt === 'configuration details' || rowTxt.indexOf('configuration details') === 0) {
+        if (row.parentNode) row.parentNode.removeChild(row);
+      }
+    });
+  }
+
+  function clampFloatingIcons(){
+    if (!isMobile()) return;
+
+    var cart =
+      q('a.mc-cart-float') ||
+      q('a.floating-mobile-cart') ||
+      q('a[aria-label="Cart"]') ||
+      q('a[href*="shoppingcart.asp"][class*="float"]');
+
+    if (cart) {
+      cart.style.setProperty('position', 'fixed', 'important');
+      cart.style.setProperty('top', '10px', 'important');
+      cart.style.setProperty('right', '18px', 'important');
+      cart.style.setProperty('left', 'auto', 'important');
+      cart.style.setProperty('transform', 'none', 'important');
+      cart.style.setProperty('margin', '0', 'important');
+      cart.style.setProperty('width', '42px', 'important');
+      cart.style.setProperty('height', '42px', 'important');
+      cart.style.setProperty('max-width', '42px', 'important');
+      cart.style.setProperty('overflow', 'hidden', 'important');
+      cart.style.setProperty('z-index', '2147483647', 'important');
+      cart.style.setProperty('box-sizing', 'border-box', 'important');
+    }
+
+    var home = q('a.mc-home-float') || q('a[aria-label="Home"][class*="float"]');
+    if (home) {
+      home.style.setProperty('position', 'fixed', 'important');
+      home.style.setProperty('top', '10px', 'important');
+      home.style.setProperty('left', '8px', 'important');
+      home.style.setProperty('right', 'auto', 'important');
+      home.style.setProperty('transform', 'none', 'important');
+      home.style.setProperty('margin', '0', 'important');
+      home.style.setProperty('width', '42px', 'important');
+      home.style.setProperty('height', '42px', 'important');
+      home.style.setProperty('z-index', '2147483647', 'important');
+    }
+  }
+
+  function enforceMobileGutters(scope){
+    if (!isMobile()) return;
+
+    var nodes = qa([
+      '.content_area-wrapper',
+      '#content_area',
+      '#v65-product-parent',
+      '#v65-product-parent td',
+      '#v65-product-parent th',
+      '#content_area .resp-tabs-container',
+      '#content_area .TabbedPanelsContentGroup',
+      '#content_area .tabcontent'
+    ].join(','), scope || document);
+
+    nodes.forEach(function(node){
+      node.style.setProperty('box-sizing', 'border-box', 'important');
+      node.style.setProperty('max-width', '100%', 'important');
+    });
+
+    qa('.content_area-wrapper, #content_area', scope || document).forEach(function(node){
+      node.style.setProperty('padding-left', '14px', 'important');
+      node.style.setProperty('padding-right', '14px', 'important');
+      node.style.setProperty('margin-left', '0', 'important');
+      node.style.setProperty('margin-right', '0', 'important');
+    });
+
+    qa('#v65-product-parent td, #v65-product-parent th, #content_area .tabcontent', scope || document).forEach(function(node){
+      node.style.setProperty('padding-left', '10px', 'important');
+      node.style.setProperty('padding-right', '10px', 'important');
+    });
+  }
+
+  function forceProductFixes() {
+    if (!markProductPage()) return;
+    var scope = document.querySelector('#content_area') || document.body;
+    forceNoItalics(scope);
+    forceOptionLabel(scope);
+    forceTabsInline(scope);
+    forceMediaLayout(scope);
+    removeConfigurationDetails(scope);
+    enforceMobileGutters(scope);
+    clampFloatingIcons();
+  }
+
+  function boot() {
+    forceProductFixes();
+
+    // keep hitting it because Volusion rewrites chunks late
+    var tries = 0;
+    var t = setInterval(function () {
+      tries++;
+      forceProductFixes();
+      if (tries > 40) clearInterval(t);
+    }, 250);
+
+    // Watch product area for re-renders
+    var target = document.querySelector('#content_area') || document.body;
+    if (target && !window.__mcProductFixObserver) {
+      window.__mcProductFixObserver = new MutationObserver(function(){
+        forceProductFixes();
+      });
+      window.__mcProductFixObserver.observe(target, { childList:true, subtree:true });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  window.addEventListener('resize', function(){
+    if (document.body.classList.contains('mc-product-page')) forceProductFixes();
+  });
+
+  window.addEventListener('orientationchange', function(){
+    if (document.body.classList.contains('mc-product-page')) forceProductFixes();
+  });
+})();
+</script>
+<script>
+(function(){
+  function qs(sel, root){ return (root||document).querySelector(sel); }
+  function qsa(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
+
+  function isPDP(){
+    return !!qs('input[name="ProductCode"]') && !!qs('#content_area');
+  }
+
+  function unwrapBadWrapper(){
+    var wrap = qs('.mc-pdp-cols');
+    if (!wrap) return;
+    // Move children back out (left then right) into wrapper's parent, then remove wrapper
+    var parent = wrap.parentNode;
+    var nodes = qsa('.mc-pdp-col--left > *, .mc-pdp-col--right > *', wrap);
+    nodes.forEach(function(n){ parent.insertBefore(n, wrap); });
+    wrap.remove();
+  }
+
+  function tagPdpCells(){
+    if (!isPDP()) return;
+
+    var area = qs('#content_area');
+
+    // Find the TD that contains the main image
+    var main =
+      qs('#product_photo', area) ||
+      qs('#product_photo_td', area) ||
+      qs('.vcss_img_wrap', area) ||
+      qs('.vCSS_img_wrap', area) ||
+      qs('.main-image', area) ||
+      qs('img#main-image', area);
+
+    var mediaTd = main ? main.closest('td') : null;
+
+    // Find TD that contains Add to Cart
+    var addBtn =
+      qs('input[name="btnaddtocart"]', area) ||
+      qs('input[id*="btnaddtocart"]', area) ||
+      qsa('input[type="submit"], button', area).find(function(el){
+        return /add to cart/i.test(el.value || el.textContent || '');
+      });
+
+    var optionsTd = addBtn ? addBtn.closest('td') : null;
+
+    // Fallback: TD containing first visible non-hidden select (NOT hidden leather select)
+    if (!optionsTd){
+      var sel = qsa('select', area).find(function(s){
+        if (s.classList.contains('mc-native-leather')) return false;
+        return s.offsetParent !== null;
+      });
+      optionsTd = sel ? sel.closest('td') : null;
+    }
+
+    // Apply classes
+    if (mediaTd) mediaTd.classList.add('mc-pdp-media-td');
+    if (optionsTd) optionsTd.classList.add('mc-pdp-options-td');
+  }
+
+  function run(){
+    unwrapBadWrapper();
+    tagPdpCells();
+    document.body.classList.add('mc-product-page');
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+
+  window.addEventListener('load', run);
+  setTimeout(run, 300);
+  setTimeout(run, 900);
+})();
+</script>
+
+
+
+</body>
+</html>
