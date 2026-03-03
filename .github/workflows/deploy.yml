@@ -25,5 +25,5 @@ jobs:
       - name: Upload CSS
         run: |
           sshpass -p "${{ secrets.FTP_PASSWORD }}" scp -P 2222 \
-          css/custom-safe.css \
+          vspfiles/css/custom-safe.css \
           ${{ secrets.FTP_USERNAME }}@sftp.mccabestheaterandliving.com:/vspfiles/css/custom-safe.css
