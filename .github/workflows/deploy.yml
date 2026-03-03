@@ -1,4 +1,4 @@
-name: Deploy Volusion Theme
+name: Deploy Volusion Theme (SFTP)
 
 on:
   push:
@@ -14,28 +14,31 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Deploy HTML templates
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        uses: wlixcc/SFTP-Deploy-Action@v1.2
         with:
-          server: sftp://sftp.mccabestheaterandliving.com:2222
+          server: sftp.mccabestheaterandliving.com
+          port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: templates/266/
-          server-dir: /vspfiles/templates/266/
+          local_path: templates/266/
+          remote_path: /vspfiles/templates/266/
 
       - name: Deploy CSS
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        uses: wlixcc/SFTP-Deploy-Action@v1.2
         with:
-          server: sftp://sftp.mccabestheaterandliving.com:2222
+          server: sftp.mccabestheaterandliving.com
+          port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: css/
-          server-dir: /vspfiles/css/
+          local_path: css/
+          remote_path: /vspfiles/css/
 
       - name: Deploy JS
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        uses: wlixcc/SFTP-Deploy-Action@v1.2
         with:
-          server: sftp://sftp.mccabestheaterandliving.com:2222
+          server: sftp.mccabestheaterandliving.com
+          port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: js/
-          server-dir: /vspfiles/js/
+          local_path: js/
+          remote_path: /vspfiles/js/
