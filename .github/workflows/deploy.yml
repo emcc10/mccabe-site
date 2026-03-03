@@ -23,7 +23,7 @@ jobs:
           server-dir: /vspfiles/templates/266/
 
       - name: Deploy CSS
-       uses: SamKirkland/FTP-Deploy-Action@v3.1.1
+        uses: SamKirkland/FTP-Deploy-Action@v3.1.1
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -39,4 +39,3 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: js/
           server-dir: /vspfiles/js/
-          
