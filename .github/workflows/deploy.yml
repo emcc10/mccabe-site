@@ -21,7 +21,9 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           source: "template_266.html"
-          target: "/vspfiles/"
+          target: "/vspfiles"
+          overwrite: true
+          rm: false
 
       - name: Upload CSS
         uses: appleboy/scp-action@v0.1.7
@@ -31,4 +33,6 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           source: "css/custom-safe.css"
-          target: "/vspfiles/css/"
+          target: "/vspfiles/css"
+          overwrite: true
+          rm: false
