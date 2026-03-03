@@ -30,7 +30,7 @@ jobs:
           port: 2222
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          source: "/vspfiles/css/custom-safe.css"*"
+          source: "/vspfiles/css/custom-safe.css"
           target: "/vspfiles/css/"
 
       - name: Deploy JS
