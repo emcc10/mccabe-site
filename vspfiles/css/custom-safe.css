@@ -252,8 +252,6 @@ body:not(.is-home) #display_menu_1 br {
   display: none !important;
 }
 
-}
-
 /* ================================
    NON-HOME DROPDOWNS: ENABLE SUBMENUS (DESKTOP)
 ================================ */
@@ -2366,7 +2364,7 @@ body.productdetails #options_table tr:has(td input[title="Configuration Details"
 body.mc-product-page #options_table tr:has(td input[title="Configuration Details"]),
 body.productdetails #options_table tr:has(+ tr:has(td input[title="Configuration Details"])),
 body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuration Details"])) {
-  display: none !important;
+
 }
 
 @media only screen and (max-width: 991px) {
