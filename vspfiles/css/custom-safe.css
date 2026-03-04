@@ -2615,10 +2615,8 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
       right: 6px !important;
       left: auto !important;
       bottom: auto !important;
-      width: 40px !important;
-      height: 40px !important;
-      max-width: 40px !important;
-      max-height: 40px !important;
+      width: 52px !important;
+      height: 46px !important;
       margin: 0 !important;
       padding: 0 !important;
       transform: none !important;
