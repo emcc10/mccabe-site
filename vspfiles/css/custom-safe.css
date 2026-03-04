@@ -2887,3 +2887,87 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
 #options_table td {
   visibility: visible !important;
 }
+/* =========================================================
+   FINAL: Center NON-HOME menu + keep float icons in-bounds
+   (2026-03-04)
+   Paste at VERY BOTTOM of custom-safe.css
+   ========================================================= */
+
+/* ---------- NON-HOME DESKTOP/TABLET: true centering, proportional spacing ---------- */
+@media (min-width: 992px) {
+  /* Undo the -80px hacks */
+  body:not(.is-home) #display_menu_1 .vnav--level1 > li,
+  body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li,
+  body:not(.is-home) #display_menu_1 ul.vnav--level1 {
+    margin-left: 0 !important;
+  }
+
+  /* Center the UL like the hero menu does (flex + gap) */
+  body:not(.is-home) #display_menu_1 > ul,
+  body:not(.is-home) #display_menu_1 > ul.vnav--level1,
+  body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1 {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+
+    gap: clamp(14px, 2.2vw, 22px) !important;
+    flex-wrap: nowrap !important; /* keep 1 row like hero menu */
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  /* Make sure LIs don’t introduce layout weirdness */
+  body:not(.is-home) #display_menu_1 > ul > li {
+    float: none !important;
+    clear: none !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Keep link sizing responsive (optional but helps scaling) */
+  body:not(.is-home) #display_menu_1 .vnav__link,
+  body:not(.is-home) #display_menu_1 .vnav__label,
+  body:not(.is-home) #display_menu_1 > ul > li > a {
+    font-size: clamp(13px, 0.95vw, 15px) !important;
+    letter-spacing: clamp(0.08em, 0.15vw, 0.12em) !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* ---------- FLOATING ICONS: never run off-screen, scale with viewport ---------- */
+:root {
+  --mc-float-w: clamp(44px, 4.2vw, 52px);
+  --mc-float-h: clamp(40px, 3.6vw, 46px);
+  --mc-float-pad: clamp(8px, 1.6vw, 16px);
+  --mc-top: max(12px, env(safe-area-inset-top));
+  --mc-left: max(var(--mc-float-pad), env(safe-area-inset-left));
+  --mc-right: max(var(--mc-float-pad), env(safe-area-inset-right));
+}
+
+.mc-home-float,
+.mc-cart-float {
+  width: var(--mc-float-w) !important;
+  height: var(--mc-float-h) !important;
+  top: var(--mc-top) !important;
+
+  margin-left: 0 !important;     /* overrides your 30px push */
+  transform: none !important;
+}
+
+.mc-home-float { left: var(--mc-left) !important; }
+.mc-cart-float { right: var(--mc-right) !important; left: auto !important; }
+
+.mc-home-float__icon,
+.mc-cart-float__icon {
+  width: clamp(16px, 1.6vw, 20px) !important;
+  height: clamp(16px, 1.6vw, 20px) !important;
+  margin: 0 !important;
+}
+
+/* Critical: prevent the mobile "left:-16px" from pushing it off-screen */
+@media (max-width: 991px) {
+  .mc-home-float { left: var(--mc-left) !important; }
+}
