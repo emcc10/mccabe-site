@@ -2381,8 +2381,8 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
   body.mc-product-page a.floating-mobile-cart {
     right: max(8px, env(safe-area-inset-right)) !important;
     left: auto !important;
-    width: 42px !important;
-    height: 42px !important;
+    width: 52px !important;
+    height: 46px !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
   }
