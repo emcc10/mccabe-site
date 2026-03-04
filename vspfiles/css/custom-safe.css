@@ -2849,3 +2849,28 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     visibility: hidden !important;
   }
 }
+
+/* === CART ICON MOBILE FIX: MATCH HOME ICON SIZE AND MARGINS (2026-03-04) === */
+@media only screen and (max-width: 991px) {
+  a.mc-cart-float,
+  a.floating-mobile-cart,
+  a[aria-label="Cart"] {
+    width: 52px !important;
+    height: 46px !important;
+    max-width: 52px !important;
+    max-height: 46px !important;
+    right: 14px !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  .mc-cart-float .mc-cart-float__icon,
+  .mc-cart-float__icon,
+  .mc-cart-float__icon path,
+  a[aria-label="Cart"] svg,
+  a.floating-mobile-cart svg {
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 !important;
+  }
+}
