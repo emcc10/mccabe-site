@@ -2103,7 +2103,7 @@ body.mc-product-page select.mc-native-leather {
     flex: 0 0 18px !important;
   }
     @media (max-width: 991px) {
-  body.mc-product-page a.mc-cart-float {
+  body.mc-product-page #v65-product-parent a.mc-cart-float {
     right: 37px !important;
   }
 }
@@ -2669,7 +2669,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     a[aria-label="Cart"] {
       position: fixed !important;
       top: 14px !important;
-      right: 37px !important;
+      right: 17px !important;
       left: auto !important;
       width: 52px !important;
       height: 46px !important;
