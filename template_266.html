@@ -1,21 +1,46 @@
-<style>
-  /* Updated styles for #display_menu_1 */
-  body:not(.is-home) #display_menu_1 {
-    min-width: 992px;
-    position: static !important;
-    left: auto !important;
-    top: auto !important;
-    transform: none !important;
-    width: 100% !important;
-    z-index: auto !important;
-  }
-  body:not(.is-home) .main-menu #display_menu_1 > ul.vnav--level1, 
-  body:not(.is-home) .main-menu #display_menu_1 > ul.vnav--horizontal.vnav--level1 {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 22px !important;
-    padding: 12px 20px !important;
-    margin: 0 !important;
-  }
-</style>
+<html>
+<head>
+  <!-- Other head elements -->
+</head>
+<body>
+  <header id="site-header">
+    <div class="header-inner">
+
+      <div class="header-left">
+        <div class="microblock vol-logo" id="display_homepage_title">
+          <span class="vol-logo vol-logo--graphic" itemscope itemtype="http://schema.org/FurnitureStore">
+            <meta itemprop="name" content="McCabe's Theater & Living">
+            <a class="vol-logo__link" href="https://www.mccabestheaterandliving.com/default.asp" title="McCabe's Theater & Living">
+              McCabe's Theater & Living
+            </a>
+          </span>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <nav id="display_menu_1" class="menu" link-alignment="center">
+          <ul class="vnav vnav--horizontal vnav--level1">
+            <!-- KEEP THE FULL MENU HTML EXACTLY AS-IS (do not alter injected menu placeholder if blank) -->
+          </ul>
+        </nav>
+      </div>
+
+      <div class="header-right">
+        <div class="search__wrapper microblock">
+          <div id="toggle1" class="toggle search__toggle searchToggle" tabindex="0" role="button">
+            <span class="sr-only">Toggle search bar</span>
+            <svg class="icon toggle__icon toggle__icon--closed"><use xlink:href="#svg-search"></use></svg>
+            <svg class="icon toggle__icon toggle__icon--open"><use xlink:href="#svg-close"></use></svg>
+          </div>
+        </div>
+
+        <div class="microblock mc-header-cart">
+          <a class="mc-header-cart__link" href="/shoppingcart.asp"></a>
+        </div>
+      </div>
+
+    </div>
+  </header>
+  <!-- Other content remains unchanged -->
+</body>
+</html>
