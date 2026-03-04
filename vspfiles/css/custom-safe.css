@@ -2087,8 +2087,8 @@ body.mc-product-page select.mc-native-leather {
   .mc-cart-float {
     right: 8px !important;
     left: auto !important;
-    width: 44px !important;
-    height: 44px !important;
+    width: 52px !important;
+    height: 46px !important;
     margin: 0 !important;
     transform: none !important;
     box-sizing: border-box !important;
@@ -2096,8 +2096,8 @@ body.mc-product-page select.mc-native-leather {
   }
 
   .mc-cart-float__icon {
-    width: 18px !important;
-    height: 18px !important;
+    width: 20px !important;
+    height: 20px !important;
     margin: 0 !important;
     flex: 0 0 18px !important;
   }
