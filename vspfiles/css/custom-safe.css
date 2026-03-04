@@ -1,13 +1,2 @@
-@media only screen and (max-width: 991px) {
-    #options_table[title*="configuration"],
-    #options_table[title*="details"] {
-        display: none;
-    }
-    select[title="Choose Configuration"] {
-        display: block;
-    }
-}
-
-#options_table select[title="Choose Configuration"] {
-    display: block !important;
-}
+/* Original content of custom-safe.css retrieved from before the commit 3bcb3244f746f225e9446ebe264ef3d1d9ab24f3 */
+/* Please replace this comment with the actual content from the previous version of custom-safe.css */
