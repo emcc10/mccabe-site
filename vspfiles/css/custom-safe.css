@@ -2713,7 +2713,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
   .TabbedPanelsContentGroup,
   .resp-tabs-container,
   .product_description {
-    padding-left: 16px !important;
+    padding-left: 2px !important;
     padding-right: 16px !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
