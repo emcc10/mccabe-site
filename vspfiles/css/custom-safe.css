@@ -2865,7 +2865,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     flex: none !important;    /* remove forced 18px width */
   }
 @media (max-width: 991px) {
-  body.mc-product-page a.mc-cart-float.mc-cart-float {
+  body.mc-product-page #v65-product-parent ~ a.mc-cart-float {
     right: 37px !important;
   }
 }
