@@ -1,29 +1,20 @@
-/* =====================================================
-   FIX: Match cart icon button size to home icon button size
-   Added: 2026-03-04
-===================================================== */
-.mc-cart-float {
-  width: 52px !important;
-  height: 46px !important;
-  border-radius: 999px !important;
+.mc-home-float {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  left: 16px;
+  top: 12px;
+  margin-left: 0;
 }
 
-.mc-cart-float__icon {
-  width: 20px !important;
-  height: 20px !important;
-  margin-right: 0 !important;
-  margin-top: 0 !important;
+.mc-home-float__icon {
+  width: 16px;
+  height: 16px;
 }
 
 @media (max-width: 991px) {
-  .mc-cart-float {
-    width: 52px !important;
-    height: 46px !important;
-  }
-
-  .mc-cart-float__icon {
-    width: 20px !important;
-    height: 20px !important;
-    margin: 0 !important;
+  .mc-home-float {
+    left: 12px;
+    top: 10px;
   }
 }
