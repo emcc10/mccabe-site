@@ -2971,3 +2971,25 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
 @media (max-width: 991px) {
   .mc-home-float { left: var(--mc-left) !important; }
 }
+  /* =====================================================
+   DESKTOP FIX: stop menu running off screen at ~1180px+
+   Paste at VERY BOTTOM of custom-safe.css
+   (2026-03-04)
+   ===================================================== */
+@media (min-width: 992px) {
+  /* Remove the -80px hacks that push the menu sideways */
+  body:not(.is-home) #display_menu_1 ul.vnav--level1,
+  body:not(.is-home) #display_menu_1 .vnav--level1 > li,
+  body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li {
+    margin-left: 0 !important;
+  }
+
+  /* Ensure the UL centers within its container */
+  body:not(.is-home) #display_menu_1 > ul,
+  body:not(.is-home) #display_menu_1 > ul.vnav--level1,
+  body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1 {
+    justify-content: center !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+}
