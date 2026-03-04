@@ -2102,7 +2102,7 @@ body.mc-product-page select.mc-native-leather {
     margin: 0 !important;
     flex: 0 0 18px !important;
   }
-  body.mc-product-page .mc-cart-float__icon {
+  body.mc-product-page .mc-cart-float {
   margin-right: 37px !important;
   }
 }
