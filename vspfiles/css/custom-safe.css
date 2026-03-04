@@ -2610,7 +2610,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     a.floating-mobile-cart,
     a[aria-label="Cart"] {
       position: fixed !important;
-      top: 10px !important;
+      top: 14px !important;
       right: 6px !important;
       left: auto !important;
       bottom: auto !important;
@@ -2738,7 +2738,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
   a.floating-mobile-cart,
   a[aria-label="Cart"] {
     position: fixed !important;
-    top: 10px !important;
+    top: 14px !important;
     right: 12px !important;
     left: auto !important;
     bottom: auto !important;
@@ -2825,7 +2825,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
   body a[aria-label="Cart"],
   body a.mc-header-cart__link,
   body a.floating-mobile-cart {
-    right: 18px !important;
+    right: 37px !important;
   }
 
   #product_options_heading,
