@@ -2556,8 +2556,6 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
       left: auto !important;
       margin: 0 !important;
       transform: translate3d(0, 0, 0) !important;
-      max-width: 44px !important;
-      max-height: 44px !important;
       overflow: hidden !important;
     }
   }
