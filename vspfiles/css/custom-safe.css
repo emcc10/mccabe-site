@@ -2866,4 +2866,15 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
   html.productdetails a.mc-cart-float {
     right: 37px !important;
   }
+/* Ensure "Choose Configuration" (Straight/Curved) dropdown is visible */
+#options_table select[title="Choose Configuration"] {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  left: auto !important;
+  pointer-events: auto !important;
+}
+#options_table select[title="Choose Configuration"] * {
+  visibility: visible !important;
 }
