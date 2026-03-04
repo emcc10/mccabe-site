@@ -2865,16 +2865,25 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
 @media (max-width: 991px) {
   html.productdetails a.mc-cart-float {
     right: 37px !important;
-  }
-/* Ensure "Choose Configuration" (Straight/Curved) dropdown is visible */
-#options_table select[title="Choose Configuration"] {
-  display: inline-block !important;
+
+}
+/* === PDP: FORCE Straight/Curved ("Choose Configuration") option to show === */
+#options_table select[title*="Choose Configuration" i],
+#options_table select[name*="Choose Configuration" i],
+#options_table select[id*="Choose Configuration" i],
+#options_table select[name*="configuration" i],
+#options_table select[id*="configuration" i] {
+  display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
   position: static !important;
   left: auto !important;
+  height: auto !important;
   pointer-events: auto !important;
 }
-#options_table select[title="Choose Configuration"] * {
+
+/* If any generic rule is hiding option rows, ensure the option row can display */
+#options_table tr,
+#options_table td {
   visibility: visible !important;
 }
