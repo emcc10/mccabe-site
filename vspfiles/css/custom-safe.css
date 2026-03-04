@@ -1,20 +1,46 @@
+/* =====================================================
+   FIX: Home icon match cart size + consistent margins
+   Updated: 2026-03-04
+===================================================== */
+
+/* Home (top left) */
 .mc-home-float {
-  width: 40px;
-  height: 40px;
-  position: absolute;
-  left: 16px;
-  top: 12px;
-  margin-left: 0;
+  position: fixed !important;
+  top: 14px !important;
+  left: 16px !important;
+  z-index: 2147483647 !important;
+  width: 52px !important;
+  height: 46px !important;
+  border-radius: 999px !important;
+  margin-left: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important;
+  text-decoration: none !important;
 }
 
 .mc-home-float__icon {
-  width: 16px;
-  height: 16px;
+  width: 20px !important;
+  height: 20px !important;
+  display: block !important;
+  fill: #111 !important;
+  margin: 0 !important;
 }
 
+/* Mobile: keep fully visible and consistent */
 @media (max-width: 991px) {
   .mc-home-float {
-    left: 12px;
-    top: 10px;
+    top: 14px !important;
+    left: 16px !important;
+    width: 52px !important;
+    height: 46px !important;
+  }
+
+  .mc-home-float__icon {
+    width: 20px !important;
+    height: 20px !important;
   }
 }
