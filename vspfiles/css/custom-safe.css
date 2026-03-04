@@ -2110,6 +2110,10 @@ body.mc-product-page select.mc-native-leather {
   body.mc-product-page a.mc-cart-float {
     right: 37px !important;
   }
+    @media (max-width: 991px) {
+  body.mc-product-page a.mc-cart-float {
+    right: 37px !important;
+  }
 }
 
 /* === MOBILE OVERFLOW KILL-SWITCH (2026-03-02c) === */
