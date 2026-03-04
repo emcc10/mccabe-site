@@ -2085,21 +2085,21 @@ body.mc-product-page select.mc-native-leather {
   }
 
   .mc-cart-float {
-    right: 8px !important;
+    right: 14px !important;
     left: auto !important;
-    width: 44px !important;
-    height: 44px !important;
+    width: 52px !important;
+    height: 46px !important;
     margin: 0 !important;
     transform: none !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   .mc-cart-float__icon {
-    width: 18px !important;
-    height: 18px !important;
+    width: 20px !important;
+    height: 20px !important;
     margin: 0 !important;
-    flex: 0 0 18px !important;
+    flex: 0 0 20px !important;
   }
 }
 
@@ -2611,19 +2611,19 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     a.floating-mobile-cart,
     a[aria-label="Cart"] {
       position: fixed !important;
-      top: 10px !important;
-      right: 6px !important;
+      top: 14px !important;
+      right: 14px !important;
       left: auto !important;
       bottom: auto !important;
-      width: 40px !important;
-      height: 40px !important;
-      max-width: 40px !important;
-      max-height: 40px !important;
+      width: 52px !important;
+      height: 46px !important;
+      max-width: 52px !important;
+      max-height: 46px !important;
       margin: 0 !important;
       padding: 0 !important;
       transform: none !important;
       z-index: 2147483647 !important;
-      overflow: hidden !important;
+      overflow: visible !important;
       pointer-events: auto !important;
     }
   }
@@ -2667,17 +2667,17 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     a.floating-mobile-cart,
     a[aria-label="Cart"] {
       position: fixed !important;
-      top: 10px !important;
-      right: 8px !important;
+      top: 14px !important;
+      right: 14px !important;
       left: auto !important;
-      width: 42px !important;
-      height: 42px !important;
-      max-width: 42px !important;
-      max-height: 42px !important;
+      width: 52px !important;
+      height: 46px !important;
+      max-width: 52px !important;
+      max-height: 46px !important;
       margin: 0 !important;
       transform: none !important;
       z-index: 2147483647 !important;
-      overflow: hidden !important;
+      overflow: visible !important;
     }
   }
 }
@@ -2721,6 +2721,12 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     word-break: break-word !important;
   }
 
+  #v65-product-parent td,
+  #v65-product-parent th {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+
   #options_table tr:has(input[title*="Configuration Details" i]),
   #options_table tr:has(input[name*="Configuration Details" i]),
   #options_table tr:has(input[value*="Configuration Details" i]),
@@ -2743,28 +2749,28 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
   a.floating-mobile-cart,
   a[aria-label="Cart"] {
     position: fixed !important;
-    top: 10px !important;
-    right: 12px !important;
+    top: 14px !important;
+    right: 14px !important;
     left: auto !important;
     bottom: auto !important;
-    width: 42px !important;
-    height: 42px !important;
-    max-width: 42px !important;
-    max-height: 42px !important;
+    width: 52px !important;
+    height: 46px !important;
+    max-width: 52px !important;
+    max-height: 46px !important;
     margin: 0 !important;
     padding: 0 !important;
     transform: none !important;
     z-index: 2147483647 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   .mc-cart-float .mc-cart-float__icon,
   a[aria-label="Cart"] svg,
   a.floating-mobile-cart svg {
-    width: 22px !important;
-    height: 22px !important;
+    width: 20px !important;
+    height: 20px !important;
     display: block !important;
-    margin: 10px auto !important;
+    margin: auto !important;
   }
 }
 
@@ -2832,7 +2838,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
   body a[aria-label="Cart"],
   body a.mc-header-cart__link,
   body a.floating-mobile-cart {
-    right: 18px !important;
+    right: 14px !important;
   }
 
   #product_options_heading,
@@ -2847,5 +2853,30 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
   #options_table tr:has(td:empty + td input[title*="details" i]) {
     display: none !important;
     visibility: hidden !important;
+  }
+}
+
+/* === CART ICON MOBILE FIX: MATCH HOME ICON SIZE AND MARGINS (2026-03-04) === */
+@media only screen and (max-width: 991px) {
+  a.mc-cart-float,
+  a.floating-mobile-cart,
+  a[aria-label="Cart"] {
+    width: 52px !important;
+    height: 46px !important;
+    max-width: 52px !important;
+    max-height: 46px !important;
+    right: 14px !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  .mc-cart-float .mc-cart-float__icon,
+  .mc-cart-float__icon,
+  .mc-cart-float__icon path,
+  a[aria-label="Cart"] svg,
+  a.floating-mobile-cart svg {
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 !important;
   }
 }
