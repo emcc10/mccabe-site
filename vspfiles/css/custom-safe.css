@@ -2825,7 +2825,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
   body a[aria-label="Cart"],
   body a.mc-header-cart__link,
   body a.floating-mobile-cart {
-    right: 37px !important;
+    right: 18px !important;
   }
 
   #product_options_heading,
