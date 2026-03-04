@@ -1,18 +1,512 @@
-/* =====================================================
-   FIX: Home icon match cart size + consistent margins
-   Updated: 2026-03-04
-===================================================== */
+/* RH-STYLE GLOBAL FONT */
+body,
+body * {
+  font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-weight: 300;
+  letter-spacing: 0.2px;
+}
 
-/* Home (top left) */
+/* ======================================
+   GLOBAL RESET
+====================================== */
+* {
+  box-sizing: border-box;
+}
+
+/* Prevent any element from creating side-swipe */
+html,
+body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* ======================================
+   HOMEPAGE HERO VIDEO (HOME ONLY)
+====================================== */
+#slideshow-container .mc-hero-video {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#slideshow-container .mc-hero-video-el {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+#slideshow-container .mc-hero-overlay {
+  position: relative;
+  z-index: 2;
+  color: #ffffff;
+  text-align: center;
+  padding-top: clamp(200px, 28vh, 340px);
+}
+
+/* Hero menu (your custom menu) */
+#slideshow-container .hero-menu {
+  position: absolute;
+  top: 18px !important;
+  left: 50% !important;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 12px 20px;
+}
+
+/* ===== HOMEPAGE HERO MENU: NO WRAP ===== */
+#slideshow-container .hero-menu,
+#slideshow-container .hero-menu * {
+  white-space: nowrap !important;
+}
+
+#slideshow-container .hero-menu a {
+  display: inline-block !important;
+}
+
+.hero-nav {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 22px;
+  white-space: nowrap !important;
+}
+
+/* Hide hero on NON-home pages */
+body:not(.is-home) #slideshow-container {
+  display: none !important;
+}
+
+/* Mobile: hero video + overlay proportional */
+@media (max-width: 991px) {
+  /* keep hero menu hidden on mobile */
+  #slideshow-container .hero-menu {
+    display: none !important;
+  }
+
+  /* hero container: not full-page */
+  #slideshow-container .mc-hero-video {
+    min-height: 0 !important;
+    height: 52vh !important; /* adjust 45�60vh */
+    background: #000 !important; /* letterbox for contain */
+    overflow: hidden !important;
+  }
+
+  /* video: fully visible, proportional (no crop) */
+  #slideshow-container .mc-hero-video-el {
+    object-fit: contain !important;
+    object-position: center center !important;
+  }
+
+  /* overlay: proportional spacing + type */
+  #slideshow-container .mc-hero-overlay {
+    padding-top: 18vh !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  #slideshow-container .mc-hero-overlay h1 {
+    font-size: clamp(22px, 5vw, 34px) !important;
+    line-height: 1.1 !important;
+    margin: 0 0 10px !important;
+  }
+
+  #slideshow-container .mc-hero-overlay p {
+    font-size: clamp(13px, 3.4vw, 16px) !important;
+    line-height: 1.35 !important;
+    margin: 0 0 14px !important;
+  }
+}
+
+/* ======================================
+   VOLUSION MENU (NON-HOME PAGES)
+====================================== */
+
+/* Hide native Volusion menu on homepage */
+body.is-home #display_menu_1 {
+  display: none !important;
+}
+
+/* Make sure it shows on non-home pages */
+body:not(.is-home) #display_menu_1,
+body:not(.is-home) header.header nav.menu,
+body:not(.is-home) header.header .main-menu {
+  display: block !important;
+  position: relative !important;
+  transform: none !important;
+}
+
+/* ===== NON-HOME MENU: MATCH HOMEPAGE HERO MENU EXACTLY (DESKTOP/TABLET) ===== */
+
+/* LI should not have fixed widths */
+body:not(.is-home) #display_menu_1 .vnav--level1 > li,
+body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li {
+  width: auto !important;
+  margin-left: -80px !important;
+  padding: 0 !important;
+}
+
+/* Links: keep each item on ONE line */
+#display_menu_1 .vnav--level1 > li > a,
+#display_menu_1 .vnav--horizontal.vnav--level1 > li > a,
+#display_menu_1 .vnav__link,
+#display_menu_1 .vnav__label {
+  font-family: Inter, sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  display: inline-block !important;
+  width: auto !important;
+  line-height: 1.2 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Non-home color */
+body:not(.is-home) #display_menu_1 .vnav--level1 > li > a,
+body:not(.is-home) #display_menu_1 .vnav__link,
+body:not(.is-home) #display_menu_1 .vnav__label {
+  color: #111111 !important;
+}
+
+/* ======================================
+   PRODUCT GRID: FIX IMAGE BOX HEIGHT
+====================================== */
+.v-product-grid .v-product__img {
+  display: block;
+  height: 300px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.v-product-grid .v-product__img img {
+  max-height: 300px;
+  width: auto;
+  max-width: 100%;
+  display: inline-block;
+}
+
+/* =========================================================
+   PRODUCT LISTINGS: ALIGN IMAGES TO THE TOP OF THE IMAGE BOX
+========================================================= */
+#content_area .v-product__img,
+#content_area_home .v-product__img,
+body.is-home .v-product__img {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+}
+
+#content_area .v-product__img img,
+#content_area_home .v-product__img img,
+body.is-home .v-product__img img {
+  margin-top: 0 !important;
+  object-position: top center !important;
+}
+
+/* If a parent header row is hidden, force it visible on non-home */
+body:not(.is-home) .header__section--top,
+body:not(.is-home) header.header {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* =====================================================
+   NON-HOME MENU: STOP STACKING (DESKTOP/TABLET)
+===================================================== */
+body:not(.is-home) #display_menu_1 > ul.vnav--level1,
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+body:not(.is-home) #display_menu_1 > ul {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+body:not(.is-home) #display_menu_1 > ul > li {
+  clear: none !important;
+  float: none !important;
+  display: inline-flex !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body:not(.is-home) #display_menu_1 > ul > li > a {
+  display: inline-block !important;
+  width: auto !important;
+  white-space: nowrap !important;
+}
+
+body:not(.is-home) #display_menu_1 br {
+  display: none !important;
+}
+
+}
+
+/* ================================
+   NON-HOME DROPDOWNS: ENABLE SUBMENUS (DESKTOP)
+================================ */
+body:not(.is-home) #display_menu_1,
+body:not(.is-home) #display_menu_1 ul,
+body:not(.is-home) #display_menu_1 ul.vnav--level1,
+body:not(.is-home) #display_menu_1 ul.vnav--horizontal.vnav--level1 {
+  overflow: visible !important;
+}
+
+body:not(.is-home) #display_menu_1 > ul > li,
+body:not(.is-home) #display_menu_1 .vnav--level1 > li {
+  position: relative !important;
+}
+
+body:not(.is-home) #display_menu_1 > ul > li > ul,
+body:not(.is-home) #display_menu_1 .vnav--level1 > li > ul {
+  display: none !important;
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  z-index: 99999 !important;
+  min-width: 220px !important;
+  background: #ffffff !important;
+  padding: 10px 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+body:not(.is-home) #display_menu_1 > ul > li:hover > ul,
+body:not(.is-home) #display_menu_1 .vnav--level1 > li:hover > ul {
+  display: block !important;
+}
+
+body:not(.is-home) #display_menu_1 > ul > li > ul a,
+body:not(.is-home) #display_menu_1 .vnav--level1 > li > ul a {
+  display: block !important;
+  padding: 10px 16px !important;
+  white-space: nowrap !important;
+  text-transform: none !important;
+  letter-spacing: 0.02em !important;
+  font-size: 14px !important;
+  color: #111 !important;
+  background: transparent !important;
+}
+
+/* =====================================================
+   PRODUCT CARDS: STOP "LOWEST PRICE" TEXT OVERLAYING IMAGES
+===================================================== */
+.v-product-grid .v-product,
+#content_area .v-product,
+#content_area_home .v-product {
+  position: relative !important;
+}
+
+.v-product-grid .v-product [class*="lowest"],
+.v-product-grid .v-product [class*="Lowest"],
+.v-product-grid .v-product [class*="promo"],
+.v-product-grid .v-product [class*="callout"],
+.v-product-grid .v-product [class*="badge"],
+#content_area .v-product [class*="lowest"],
+#content_area .v-product [class*="promo"],
+#content_area .v-product [class*="callout"],
+#content_area_home .v-product [class*="lowest"],
+#content_area_home .v-product [class*="promo"],
+#content_area_home .v-product [class*="callout"] {
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
+  display: block !important;
+  margin: 10px 0 0 !important;
+}
+
+.v-product-grid .v-product__img {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* =====================================================
+   DESKTOP: CART AS A NAV ITEM (STYLES ONLY)
+===================================================== */
+@media (min-width: 992px) {
+  #display_menu_1 .mc-vnav-cart > a.vnav__link {
+    font-family: Inter, sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    text-decoration: none !important;
+    line-height: 1.2 !important;
+    padding: 0px 8px !important; /* match your inline vnav link padding */
+    white-space: nowrap !important;
+    color: #111111 !important;
+  }
+}
+
+/* =====================================================
+   MOBILE ONLY: FIX PUSH MENU + CLICK BLOCKERS
+   (does not affect desktop)
+===================================================== */
+@media (max-width: 991px) {
+  /* Stop top info bar from stealing taps */
+  td > div[style*="text-align: center"] {
+    position: relative !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
+  }
+
+  td > div[style*="text-align: center"] a {
+    pointer-events: auto !important;
+  }
+
+  /* Ensure toggle is clickable */
+  .menu-toggle,
+  .menu-toggle *,
+  .menu-toggle__text,
+  .push-menu--closed,
+  .push-menu--open {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+
+  .menu-toggle {
+    position: relative !important;
+    z-index: 2147483647 !important;
+    margin-right: -36px;
+    margin-left: -171px;
+    margin-top: 20px;
+  }
+
+  /* Push menu panel */
+  .push-menu {
+    position: fixed !important;
+    top: 34px !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: #fff !important;
+    overflow-y: auto !important;
+    z-index: 2147483647 !important;
+  }
+
+  /* When open, force visibility */
+  html.push-menu-open .push-menu,
+  body.push-menu-open .push-menu {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* Transparent background + centered menu */
+  nav.push-menu {
+    background: #fff !important;
+    overflow-y: auto !important;
+    max-height: 60vh !important;
+    background: rgba(72, 72, 72, 0.85) !important; /* 0.80�0.98 */
+    margin-top: 11px !important;
+  }
+
+  #push-nav__menu,
+  .push-menu__menu-wrapper {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    padding: 12px 12px !important;
+    text-align: center !important;
+    background: transparent !important;
+    background: rgba(72, 72, 72, 0.85) !important; /* 0.80�0.98 */
+  }
+
+  #push-nav__menu ul,
+  .push-menu__menu-wrapper ul {
+    list-style: none !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: block !important;
+    width: auto !important;
+  }
+
+  #push-nav__menu li,
+  .push-menu__menu-wrapper li {
+    display: block !important;
+    width: auto !important;
+  }
+
+  #push-nav__menu a,
+  .push-menu__menu-wrapper a {
+    display: inline-block !important;
+    padding: 12px 10px !important;
+    white-space: normal !important;
+    text-decoration: none !important;
+  }
+
+  /* FORCE submenus collapsed everywhere on mobile (non-home + home) */
+  #push-nav__menu li.mc-has-sub > ul,
+  .push-menu__menu-wrapper li.mc-has-sub > ul {
+    display: none !important;
+    position: static !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    margin: 6px 0 10px !important;
+    padding: 0 !important;
+  }
+
+  /* Open only when toggled */
+  #push-nav__menu li.mc-has-sub.mc-open > ul,
+  .push-menu__menu-wrapper li.mc-has-sub.mc-open > ul {
+    display: block !important;
+  }
+
+  /* Toggle button */
+  #push-nav__menu button.mc-sub-toggle,
+  .push-menu__menu-wrapper button.mc-sub-toggle {
+    border: 0 !important;
+    background: transparent !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    padding: 8px 8px !important;
+    cursor: pointer !important;
+  }
+}
+
+@media (max-width: 991px) {
+  /* Move the slide-top menu panel below the header */
+  nav.push-menu {
+    top: -40px !important; /* adjust if needed (60�90) */
+    height: calc(100vh - 70px) !important;
+    max-height: calc(100vh - 70px) !important;
+  }
+
+  /* Ensure the overlay/menu content starts at the top of the panel */
+  #push-nav__menu,
+  .push-menu__menu-wrapper {
+    padding-top: 0 !important;
+  }
+}
+
+/* =====================================================
+   ALWAYS-ON HOME ICON (TOP LEFT, ALL PAGES)
+   Does not touch menus
+===================================================== */
 .mc-home-float {
   position: fixed !important;
-  top: 14px !important;
-  left: 16px !important;
+top: 14px !important;
+  left: 24px !important;
   z-index: 2147483647 !important;
   width: 52px !important;
   height: 46px !important;
   border-radius: 999px !important;
-  margin-left: 0 !important;
+  margin-left: 30px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -27,20 +521,2331 @@
   height: 20px !important;
   display: block !important;
   fill: #111 !important;
-  margin: 0 !important;
 }
 
-/* Mobile: keep fully visible and consistent */
+/* Optional: keep it out of the way of your mobile toggle */
 @media (max-width: 991px) {
   .mc-home-float {
     top: 14px !important;
-    left: 16px !important;
-    width: 52px !important;
-    height: 46px !important;
+    left: -16px !important;
+  }
+}
+
+@media (max-width: 991px) {
+  body.push-menu-open.menu-toggle__text.push-menu--closed {
+    display: none !important;
   }
 
-  .mc-home-float__icon {
+  body.push-menu-open.menu-toggle__text.push-menu--open {
+    display: inline !important;
+  }
+
+  body:not(.push-menu-open) .menu-toggle__text.push-menu--open {
+    display: none !important;
+  }
+
+  body:not(.push-menu-open) .menu-toggle__text.push-menu--closed {
+    display: inline !important;
+  }
+
+  /* ensure panel starts hidden until opened */
+  nav.push-menu {
+    display: none;
+  }
+}
+
+@media (max-width: 991px) {
+  /* CLOSED state: keep it hidden */
+  nav.push-menu {
+    display: none !important;
+  }
+
+  /* OPEN state: force the panel to actually show */
+  body.push-menu-open nav.push-menu {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: fixed !important;
+    top: 70px !important; /* adjust 60�90 if needed */
+    left: 0 !important;
+    right: 0 !important;
+    height: calc(100vh - 70px) !important;
+    max-height: calc(100vh - 70px) !important;
+    overflow-y: auto !important;
+    z-index: 2147483647 !important;
+    background: rgba(255, 255, 255, 0.92) !important; /* your transparency */
+  }
+
+  /* Make sure the wrapper inside is visible */
+  body.push-menu-open #push-nav__menu,
+  body.push-menu-open .push-menu__menu-wrapper {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    background: transparent !important;
+  }
+}
+
+@media (max-width: 991px) {
+  /* When open, force panel on-screen (kills slide-top offscreen transform) */
+  body.push-menu-open nav.push-menu {
+    top: -12px !important; /* keep this */
+    transform: none !important; /* critical */
+    -webkit-transform: none !important;
+    translate: none !important; /* newer shorthand */
+  }
+
+  /* Some themes animate inner wrappers instead */
+  body.push-menu-open nav.push-menu *,
+  body.push-menu-open #push-nav__menu,
+  body.push-menu-open.push-menu__menu-wrapper {
+    transform: none !important;
+    -webkit-transform: none !important;
+    translate: none !important;
+  }
+}
+
+@media (max-width: 991px) {
+  nav.push-menu {
+    background: rgba(0, 0, 0, 0.70) !important; /* darker overlay */
+  }
+
+  /* keep the menu text readable */
+  #push-nav__menu a,
+  .push-menu__menu-wrapper a {
+    color: #ffffff !important;
+  }
+
+  /* optional: make submenu links slightly softer */
+  #push-nav__menu ul ul a,
+  .push-menu__menu-wrapper ul ul a {
+    color: rgba(72, 72, 72, 0.85) !important;
+  }
+}
+
+@media (max-width: 991px) {
+  /* darker, still transparent */
+  body.push-menu-open nav.push-menu {
+    background: rgba(0, 0, 0, 0.78) !important; /* try 0.70�0.88 */
+  }
+
+  /* make menu text visible */
+  body.push-menu-open #push-nav__menu a,
+  body.push-menu-open .push-menu__menu-wrapper a {
+    color: #ffffff !important;
+  }
+
+  /* optional: submenus slightly softer */
+  body.push-menu-open #push-nav__menu ul ul a,
+  body.push-menu-open .push-menu__menu-wrapper ul ul a {
+    color: rgba(255, 255, 255, 0.86) !important;
+  }
+}
+
+/* =====================================================
+   ALWAYS-ON CART ICON (TOP RIGHT, ALL PAGES)
+   Does not touch menus
+===================================================== */
+.mc-cart-float {
+  position: fixed !important;
+  top: 14px !important;
+  right: 16px !important;
+  z-index: 2147483647 !important;
+  width: 52px !important;
+  height: 46px !important;
+  border-radius: 999px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important;
+  text-decoration: none !important;
+}
+
+.mc-cart-float__icon {
+  width: 20px !important;
+  height: 20px !important;
+  display: block !important;
+  fill: #111 !important;
+  margin-right: -3px;
+  margin-top: 2px;
+}
+
+/* Hide header/cart text links if you only want the icon */
+a.mc-header-cart__link,
+a.hero-cart-link {
+  display: none !important;
+}
+
+@media (max-width: 991px) {
+  /* 1) STOP the hero from being full-page on mobile */
+  #slideshow-container .mc-hero-video {
+    min-height: 0 !important; /* overrides your desktop min-height:100vh */
+    height: 42vh !important; /* adjust: 40�60vh */
+    overflow: hidden !important;
+  }
+
+  /* 2) Keep video proportional (no stretching), fill the hero box */
+  #slideshow-container .mc-hero-video-el {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* proportional crop, not distortion */
+    display: block !important;
+
+    /* IMPORTANT: don't let the video block taps/clicks */
+    pointer-events: none !important;
+  }
+
+  /* 3) Make sure the rest of the page can scroll/show products */
+  #slideshow-container {
+    position: relative !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* 4) Keep header/menu and floating buttons ABOVE the hero */
+  header.header {
+    position: relative !important;
+    z-index: 2147483000 !important;
+  }
+
+  .mc-home-float,
+  .mc-cart-float {
+    z-index: 2147483647 !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* 5) If your hero overlay text is covering too much, contain it */
+  #slideshow-container .mc-hero-overlay {
+    padding-top: 18vh !important; /* stops giant spacing on mobile */
+  }
+}
+
+@media (max-width: 991px) {
+  /* PUSH MENU = full-page overlay (over video + page) */
+  nav.push-menu {
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 999999 !important;
+
+    /* hidden by default */
+    display: block !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+
+    /* slide from top */
+    transform: translateY(-100%) !important;
+    transition: transform 0.22s ease, opacity 0.22s ease, visibility 0.22s ease !important;
+
+    /* darker transparent overlay */
+    background: rgba(0, 0, 0, 0.72) !important;
+    backdrop-filter: blur(2px) !important;
+  }
+
+  /* OPEN STATE (your JS already toggles push-menu-open on html/body) */
+  html.push-menu-open nav.push-menu,
+  body.push-menu-open nav.push-menu {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(0) !important;
+  }
+
+  /* menu content wrapper inside overlay */
+  nav.push-menu .push-menu__menu-wrapper,
+  #push-nav__menu {
+    position: absolute !important;
+    top: 56px !important; /* room for X button */
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 10px 16px 18px !important;
+    background: transparent !important;
+  }
+
+  /* ===== MOBILE MENU CLOSE BUTTON (transparent, no white box) ===== */
+  nav.push-menu .push-menu__close-btn,
+  nav.push-menu .push-menu__close-btn * {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Make sure the close button is visible and positioned */
+  nav.push-menu .push-menu__close-btn {
+    display: block !important; /* overrides .hidden */
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    z-index: 999999 !important;
+  }
+
+  /* Hide the Volusion SVG icon (this is usually the white box culprit) */
+  nav.push-menu .push-menu__close-btn .icon,
+  nav.push-menu .push-menu__close-btn svg {
+    display: none !important;
+  }
+
+  /* Draw a clean transparent X */
+  nav.push-menu .push-menu__close-btn::before {
+    content: "\00D7";
+    display: block;
+    width: 32px;
+    height: 32px;
+    line-height: 30px;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 400;
+    font-family: Arial, Helvetica, sans-serif !important;
+    color: #ffffff !important; /* change if you want */
+    background: transparent !important;
+  }
+
+  /* make mobile menu text readable */
+  nav.push-menu a,
+  nav.push-menu .vnav__link,
+  nav.push-menu .mc-mobile-vnav__link {
+    color: #fff !important;
+    font-family: Inter, sans-serif !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+  }
+
+  /* keep submenus dark/transparent too */
+  nav.push-menu ul,
+  nav.push-menu li,
+  nav.push-menu .vnav__submenu,
+  nav.push-menu .mc-mobile-vnav__sub {
+    background: transparent !important;
+  }
+}
+
+@media (max-width: 991px) {
+  /* Keep homepage hero visible but below overlay */
+  #slideshow-container,
+  #slideshow-container .mc-hero-video,
+  #slideshow-container .mc-hero-overlay,
+  #slideshow-container .hero-menu {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  /* FORCE mobile push menu overlay to top of everything */
+  body > nav.push-menu {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 2147483647 !important;
+
+    display: block !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+
+    transform: translateY(-100%) !important;
+    transition: transform 0.22s ease, opacity 0.22s ease, visibility 0.22s ease !important;
+
+    background: rgba(0, 0, 0, 0.78) !important;
+    backdrop-filter: blur(2px) !important;
+  }
+
+  html.push-menu-open body > nav.push-menu,
+  body.push-menu-open body > nav.push-menu,
+  html.push-menu-open nav.push-menu,
+  body.push-menu-open nav.push-menu {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(0) !important;
+  }
+
+  /* menu content area */
+  body > nav.push-menu .push-menu__menu-wrapper,
+  body > nav.push-menu #push-nav__menu {
+    position: absolute !important;
+    top: 52px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    overflow-y: auto !important;
+    padding: 10px 16px 18px !important;
+    background: transparent !important;
+    z-index: 2147483647 !important;
+  }
+
+  /* close X */
+  body > nav.push-menu .push-menu__close-btn {
+    display: block !important;
+    position: absolute !important;
+    top: 10px !important;
+    right: 12px !important;
+    z-index: 2147483647 !important;
+    color: #fff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    padding: 6px !important;
+    cursor: pointer !important;
+  }
+
+  body > nav.push-menu .push-menu__close-btn .icon {
     width: 20px !important;
     height: 20px !important;
+    fill: #fff !important;
+  }
+
+  /* mobile menu text */
+  body > nav.push-menu a,
+  body > nav.push-menu .vnav__link,
+  body > nav.push-menu .mc-mobile-vnav__link {
+    color: #fff !important;
+    background: transparent !important;
+  }
+
+  body > nav.push-menu ul,
+  body > nav.push-menu li {
+    background: transparent !important;
+  }
+}
+
+/* FORCE A REAL X (if the SVG is rendering as a block) */
+nav.push-menu .push-menu__close-btn .icon {
+  display: none !important;
+}
+
+nav.push-menu .push-menu__close-btn::before {
+  content: "\00D7";
+  display: block;
+  font-size: 24px;
+  line-height: 1;
+  font-family: Arial, Helvetica, sans-serif !important;
+  color: #ffffff !important; /* <-- CHANGE THIS COLOR */
+  font-weight: 400;
+}
+
+/* ===== MOBILE ONLY: hide submenu arrows + nested lists in push menu ===== */
+@media (max-width: 991px) {
+  /* Hide submenu arrow/caret/toggle UI in the mobile slide menu only */
+  nav.push-menu .vnav__icon,
+  nav.push-menu .vnav__arrow,
+  nav.push-menu .vnav__caret,
+  nav.push-menu .vnav__toggle,
+  nav.push-menu .vnav__expand,
+  #push-nav__menu .mc-sub-toggle,
+  #push-nav__menu .mc-mobile-vnav__toggle,
+  .push-menu__menu-wrapper .mc-sub-toggle,
+  .push-menu__menu-wrapper .mc-mobile-vnav__toggle {
+    display: none !important;
+  }
+
+  /* Hide pseudo arrows if theme draws them */
+  nav.push-menu .vnav__link::after,
+  nav.push-menu .vnav__label::after,
+  #push-nav__menu a::after,
+  .push-menu__menu-wrapper a::after {
+    content: none !important;
+    display: none !important;
+    border: 0 !important;
+  }
+
+  /* Hide all nested submenu ULs in mobile menu only */
+  nav.push-menu li > ul,
+  #push-nav__menu li > ul,
+  .push-menu__menu-wrapper li > ul,
+  nav.push-menu .vnav--level2,
+  nav.push-menu .vnav--level3,
+  nav.push-menu .vnav__submenu {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Remove extra right padding reserved for arrows */
+  nav.push-menu .vnav__link,
+  nav.push-menu .vnav__label,
+  #push-nav__menu a,
+  .push-menu__menu-wrapper a {
+    padding-right: 8px !important;
+  }
+}
+
+.vcb-snippet:not(.vcb-custom) > .row {
+  padding: 15px !important;
+  margin-left: 1px !important;
+}
+
+/* =====================================================
+   FIX NON-HOME DESKTOP MENU CENTERING � EXACT MATCH
+   Paste at VERY BOTTOM of custom-safe.css
+===================================================== */
+@media (min-width: 992px) {
+  body:not(.is-home) #display_menu_1 ul.vnav--level1 {
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 22px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    width: auto !important;
+    margin-left: -80px !important;
+  }
+}
+
+/* MOBILE ONLY - content area spacing/alignment */
+@media (max-width: 991px) {
+  /* outer content column */
+  .content_area-wrapper {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin: 0 !important;
+
+    text-align: left !important; /* change to center if you want */
+  }
+
+  /* actual page content injected by Volusion */
+  #content_area {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin: 0 !important;
+    text-align: left !important; /* change if needed */
+
+  }
+
+  /* optional: remove row gutter weirdness if content still looks shifted */
+  .container--content > .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-bottom: 18px !important;
+    margin-top: 0 !important;
+
+  }
+
+  .container--content > .row > [class*="col-"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+
+  }
+}
+
+/* MOBILE ONLY: center product titles + pull closer to image */
+@media (max-width: 991px) {
+  /* Image wrapper spacing */
+  body.category .v-product-grid .v-product .v-product__img,
+  body.category .v-product-grid .v-product .v-product__image,
+  body.category .v-product-grid .v-product .v-product__image-wrap,
+  body.category .v-product-grid .v-product .product_image,
+  body.category .v-product-grid .v-product .vcss_img {
+    margin-bottom: 4px !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Product title text */
+  body.category .v-product-grid .v-product .v-product__name,
+  body.category .v-product-grid .v-product .productnamecolor,
+  body.category .v-product-grid .v-product .productnamecolor a,
+  body.category .v-product-grid .v-product h2,
+  body.category .v-product-grid .v-product h3,
+  body.category .v-product-grid .v-product h4 {
+    text-align: center !important;
+    display: block !important;
+    margin-top: 4px !important;
+    margin-bottom: 8px !important;
+    line-height: 1.2 !important;
+    font-style: normal !important;
+  }
+}
+
+/* =========================================
+   PRODUCT PAGE FIXES (Volusion 266)
+========================================= */
+
+/* Remove italic styling on product headings/tabs */
+body.mc-product-page #content_area h1,
+body.mc-product-page #content_area h2,
+body.mc-product-page #content_area h3,
+body.mc-product-page #content_area h4,
+body.mc-product-page #content_area .productnamecolor,
+body.mc-product-page #content_area .productnamecolorLARGE,
+body.mc-product-page #content_area .colors_productname,
+body.mc-product-page #content_area .tab,
+body.mc-product-page #content_area .tab a,
+body.mc-product-page #content_area .resp-tab-item,
+body.mc-product-page #content_area .resp-tabs-list li {
+  font-style: normal !important;
+}
+
+/* "Number of seats per row" / option labels */
+body.mc-product-page #content_area .productoptionname,
+body.mc-product-page #content_area .vCSS_input_label,
+body.mc-product-page #content_area td.productoptionname,
+body.mc-product-page #content_area label {
+  margin-left: 10px !important;
+  padding-left: 0 !important;
+  text-align: left !important;
+  font-style: normal !important;
+}
+
+/* Tabs on one row (desktop) */
+@media (min-width: 992px) {
+  body.mc-product-page #content_area .resp-tabs-list,
+  body.mc-product-page #content_area ul.resp-tabs-list,
+  body.mc-product-page #content_area .TabbedPanelsTabGroup,
+  body.mc-product-page #content_area .ui-tabs-nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    margin: 0 0 12px 0 !important;
+    padding: 0 !important;
+  }
+
+  body.mc-product-page #content_area .resp-tabs-list li,
+  body.mc-product-page #content_area .TabbedPanelsTab,
+  body.mc-product-page #content_area .ui-tabs-nav li {
+    display: block !important;
+    float: none !important;
+    width: auto !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+  }
+}
+
+/* Main image larger / natural */
+body.mc-product-page #content_area #product_photo,
+body.mc-product-page #content_area #product_photo img,
+body.mc-product-page #content_area .vCSS_img_wrap img,
+body.mc-product-page #content_area .main-image img {
+  height: auto !important;
+  object-fit: contain !important;
+}
+
+/* DESKTOP NON-HOME: hide top-level submenu arrows, keep dropdowns */
+@media (min-width: 992px) {
+  body:not(.is-home) #display_menu_1 .vnav__icon,
+  body:not(.is-home) #display_menu_1 .vnav__arrow,
+  body:not(.is-home) #display_menu_1 .vnav__caret,
+  body:not(.is-home) #display_menu_1 .vnav__toggle,
+  body:not(.is-home) #display_menu_1 .vnav__expand {
+    display: none !important;
+  }
+
+  body:not(.is-home) #display_menu_1 .vnav__link,
+  body:not(.is-home) #display_menu_1 .vnav__label,
+  body:not(.is-home) #display_menu_1 > ul > li > a {
+    padding-right: 8px !important;
+    background-image: none !important;
+  }
+
+  body:not(.is-home) #display_menu_1 .vnav__link::after,
+  body:not(.is-home) #display_menu_1 .vnav__label::after,
+  body:not(.is-home) #display_menu_1 > ul > li > a::after {
+    content: none !important;
+    display: none !important;
+  }
+}
+
+body:not(.is-home) #display_menu_1 > ul.vnav--level1,
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+body:not(.is-home) #display_menu_1 > ul {
+  display: inline-flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 110px !important;
+  width: auto !important;
+
+  padding: 12px 20px !important;
+  position: static !important;
+  transform: none !important;
+  left: auto !important;
+  top: auto !important;
+}
+
+
+/* =====================================================
+   PDP: keep Volusion layout intact; hide ONLY tagged leather selects
+   Paste at VERY BOTTOM of custom-safe.css
+===================================================== */
+
+/* Only hide selects/labels we explicitly tag as leather */
+body.mc-has-leather #content_area select.mc-native-leather {
+  position: absolute !important;
+  left: -9999px !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+body.mc-has-leather #content_area label.mc-native-leather {
+  display: none !important;
+}
+
+/* Tabs inline on desktop */
+@media (min-width: 992px) {
+  body.mc-product-page #content_area .resp-tabs-list,
+  body.mc-product-page #content_area ul.resp-tabs-list,
+  body.mc-product-page #content_area .ui-tabs-nav,
+  body.mc-product-page #content_area .TabbedPanelsTabGroup {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+  }
+
+  body.mc-product-page #content_area .resp-tabs-list li,
+  body.mc-product-page #content_area .ui-tabs-nav li,
+  body.mc-product-page #content_area .TabbedPanelsTab {
+    float: none !important;
+    display: inline-flex !important;
+    width: auto !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* Desktop media wrap (created by JS below) */
+@media (min-width: 992px) {
+  body.mc-product-page .mc-pdp-media {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+    width: 100% !important;
+    margin: 0 0 12px 0 !important;
+  }
+
+  body.mc-product-page .mc-pdp-media .mc-pdp-thumbs {
+    width: 86px !important;
+    min-width: 86px !important;
+  }
+
+  body.mc-product-page .mc-pdp-media .mc-pdp-thumbs img {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 0 8px 0 !important;
+  }
+
+  body.mc-product-page .mc-pdp-media .mc-pdp-main {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+}
+
+/* Main product image ONLY (product_photo is the IMG) */
+#content_area img#product_photo.vCSS_img_product_photo,
+#content_area img#product_photo {
+
+
+  height: auto !important;
+  display: block !important;
+}
+
+/* Ensure main image can't collapse even when layout shifts (planner pages) */
+body.mc-product-page #content_area td.mc-pdp-media img#product_photo,
+body.mc-product-page #content_area td.mc-pdp-media-td img#product_photo {
+
+}
+
+/* Remove italics on PDP */
+body.mc-product-page #content_area h1,
+body.mc-product-page #content_area h2,
+body.mc-product-page #content_area h3,
+body.mc-product-page #content_area h4,
+body.mc-product-page #content_area .tab,
+body.mc-product-page #content_area .tab a,
+body.mc-product-page #content_area .resp-tab-item,
+body.mc-product-page #content_area .resp-tabs-list li,
+body.mc-product-page #content_area label,
+body.mc-product-page #content_area .productoptionname {
+  font-style: normal !important;
+}
+
+/* PDP: keep inline planner/leather panel in normal flow */
+body.mc-product-page #mc-inline-config {
+  position: static !important;
+  display: block !important;
+  width: 100% !important;
+  clear: both !important;
+}
+
+/* Hidden leather select stays hidden without affecting layout */
+body.mc-product-page select.mc-native-leather {
+  position: absolute !important;
+  left: -9999px !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* =========================================
+   PDP FIX: force media TD left, options TD right (desktop only)
+========================================= */
+@media (min-width: 992px) {
+  body.mc-product-page #content_area td.mc-pdp-media-td {
+    width: 100% !important;
+    vertical-align: top !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  body.mc-product-page #content_area td.mc-pdp-options-td {
+    width: 48% !important;
+    vertical-align: top !important;
+    position: relative !important;
+    z-index: 5 !important;
+    padding-left: 18px !important;
+  }
+
+  /* Stop �cut off on the left� */
+  body.mc-product-page #content_area td.mc-pdp-options-td * {
+    overflow: visible !important;
+  }
+
+  /* Ensure the Add to Cart stays clickable */
+  body.mc-product-page #content_area td.mc-pdp-options-td input[name="btnaddtocart"],
+  body.mc-product-page #content_area td.mc-pdp-options-td button[name="btnaddtocart"] {
+    position: relative !important;
+    z-index: 10 !important;
+  }
+
+    /* 2-column layout for tagged PDP row */
+    body.mc-product-page #content_area table.mc-pdp-table {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    /* MAIN PRODUCT IMAGE: image itself has id="product_photo" */
+    body.mc-product-page #content_area td.mc-pdp-media img#product_photo {
+      display: block !important;
+      width: 100% !important;
+      max-width: 700px !important;
+      height: auto !important;
+      object-fit: contain !important;
+      margin: 0 auto !important;
+      flex: none !important;
+    }
+
+    /* OPTIONS TABLE: keep it readable and responsive */
+    #options_table {
+      width: 100% !important;
+      max-width: 700px !important;
+      table-layout: fixed !important;
+    }
+
+    #options_table td {
+      white-space: normal !important;
+      vertical-align: top !important;
+    }
+
+    #options_table td[align="right"] {
+      text-align: left !important;
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+    }
+
+    /* PRICE / AVAILABILITY / ADD TO CART ALIGNMENT */
+    .v65-product-price,
+    .v65-product-availability,
+    .v65-product-addtocart {
+      margin-left: 20px !important;
+      text-align: left !important;
+    }
+
+    /* PRODUCT TITLE ALIGNMENT */
+    .vp-product-title {
+      margin-left: 20px !important;
+      text-align: left !important;
+    }
+
+    /* PRODUCT INFO TABS WIDTH / ALIGNMENT */
+    .v65-product-info-tabs,
+    .v65-product-info {
+      clear: both !important;
+      width: 100% !important;
+      max-width: 900px !important;
+      margin-left: 20px !important;
+    }
+
+    /* RELATED ITEMS: FORCE IMAGE FIRST */
+    .v65-product-related-item {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+    }
+
+    /* The image is inside an <a>, so target the <a> */
+    .v65-product-related-item a {
+      order: 1 !important;
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+    }
+
+    .v65-product-related-item a img {
+      width: auto !important;
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
+    /* Title + price come after the image */
+    .v65-product-related-item .v65-product-related-title,
+    .v65-product-related-item .v65-product-related-price {
+      order: 2 !important;
+      display: block !important;
+      text-align: center !important;
+      width: 100% !important;
+    }
+
+    /* Hide stray ":" above options price */
+    #options_table font.text.colors_text {
+      display: none !important;
+    }
+
+    /* 1) Remove the first base price line (the stray ":" + price) */
+    .product_productprice {
+      display: none !important;
+    }
+
+    /* 2) Stack "Price with Selected Options" above its price */
+    .option_pricing,
+    #priceWithOptions {
+      display: block !important;
+    }
+
+    /* 3) Put "Add to cart for our lowest price!" on its own line below */
+    #priceWithOptions ~ div {
+      display: block !important;
+      margin-top: 4px !important;
+    }
+
+    /* REMOVE ITALICS FROM OPTION HEADERS */
+    #options_table i,
+    #options_table font i {
+      font-style: normal !important;
+    }
+
+    /* SAFE FIX: REMOVE BREADCRUMB SPACING ONLY */
+    #v65-product-parent .vCSS_breadcrumb_td {
+      padding-top: 35px !important;
+      padding-bottom: 20px !important;
+      margin: 0 !important;
+      padding-left: 40px !important;
+    }
+
+    #v65-product-parent table.vCSS_breadcrumb {
+      margin: 0 !important;
+      padding: 0 !important;
+      border-spacing: 0 !important;
+    }
+
+    /* FIX THE BREADCRUMB TABLE SPACING ON CATEGORY + PRODUCT PAGES */
+    body:not(.is-home) table[width="100%"][cellpadding="5"] {
+      margin: 0 !important;
+      padding: 0 !important;
+      border-spacing: 0 !important;
+      border-collapse: collapse !important;
+    }
+
+    body:not(.is-home) table[width="100%"][cellpadding="5"] td {
+      padding: 0 !important;
+      margin: 0 !important;
+      line-height: 1 !important;
+    }
+
+    /* FORCE HEADER COLUMNS TO BEHAVE LIKE A ROW ON NON-HOMEPAGE PAGES */
+    body:not(.is-home) .header__section {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      flex-wrap: nowrap !important;
+      width: 100% !important;
+    }
+
+
+
+    /* =========================================
+       MOBILE PDP: stack columns + kill overflow
+    ========================================= */
+    @media (max-width: 767px) {
+      body.mc-product-page #content_area td.mc-pdp-media,
+      body.mc-product-page #content_area td.mc-pdp-options,
+      body.mc-product-page #content_area td.mc-pdp-media-td,
+      body.mc-product-page #content_area td.mc-pdp-options-td {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Main product image (your main image is img#product_photo) */
+        height: auto !important;
+        display: block !important;
+      }
+
+      /* Prevent any �sidebar boxes� from exceeding screen width */
+      body.mc-product-page #content_area .mc-leather-summary,
+      body.mc-product-page #content_area .mc-planner-summary,
+      body.mc-product-page #content_area .mc-planner-selections,
+      body.mc-product-page #content_area .mc-room-planner,
+      body.mc-product-page #content_area .mc-selection-box,
+      body.mc-product-page #content_area .mc-summary-box,
+      body.mc-product-page #content_area .mc-options-box,
+      body.mc-product-page #content_area .mc-pdp-options * {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Common culprit: long unbroken text or inline-blocks */
+      body.mc-product-page #content_area .mc-pdp-options {
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+      }
+
+      /* If those boxes are inline-block/floated, force block */
+      body.mc-product-page #content_area .mc-leather-summary,
+      body.mc-product-page #content_area .mc-planner-summary,
+      body.mc-product-page #content_area .mc-planner-selections {
+        float: none !important;
+        display: block !important;
+        width: 100% !important;
+      }
+    }
+
+    /* =========================================
+       RELATED ITEMS: image on top, text below
+    ========================================= */
+    #relateditems td,
+    .relateditems td {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+    }
+
+    /* Image */
+    #relateditems td img,
+    .relateditems td img {
+      order: 1 !important;
+      display: block !important;
+    }
+
+    /* Title (covers common Volusion classes) */
+    #relateditems .productname,
+    #relateditems .ProductName,
+    #relateditems .vCSS_relatedProductName,
+    .relateditems .productname,
+    .relateditems .ProductName,
+    .relateditems .vCSS_relatedProductName {
+      order: 2 !important;
+      text-align: center !important;
+    }
+
+    /* Price */
+    #relateditems .price,
+    #relateditems .ProductPrice,
+    .relateditems .price,
+    .relateditems .ProductPrice {
+      order: 3 !important;
+      text-align: center !important;
+    }
+
+    @media (max-width: 767px) {
+      body.mc-product-page #content_area table {
+        max-width: 100% !important;
+      }
+    }
+
+    /* MOBILE: prevent leather row from forcing horizontal overflow */
+    @media (max-width: 767px) {
+      /* wrap the row */
+      #mcLeatherBtn {
+        min-width: 0 !important;
+        width: 100% !important;
+      }
+
+      #mcLeatherSummary {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+
+        /* allow text to wrap instead of forcing a single line */
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+      }
+
+      /* target the specific flex row without needing an id */
+      #mcLeatherBtn,
+      #mcLeatherSummary {
+        box-sizing: border-box !important;
+      }
+
+      /* make their common parent wrap (works because both are direct siblings) */
+      #mcLeatherBtn {
+        /* no-op hook to keep specificity; parent handled below */
+      }
+
+      #mcLeatherBtn {
+        /* nothing */
+      }
+
+      /* parent wrapper: the button + summary container */
+      #mcLeatherBtn {
+        /* nothing */
+      }
+
+      #mcLeatherBtn {
+        /* nothing */
+      }
+
+      /* robust parent selection: the immediate parent div that contains both */
+      #mcLeatherBtn {
+        /* nothing */
+      }
+
+      #mcLeatherBtn {
+        /* nothing */
+      }
+
+      /* Use :has if available to hit the parent div cleanly */
+      div:has(> #mcLeatherBtn):has(> #mcLeatherSummary) {
+        flex-wrap: wrap !important;
+        width: 100% !important;
+      }
+    }
+
+    @media (max-width: 767px) {
+      #mcLeatherRow {
+        width: 100% !important;
+      }
+
+      #mcLeatherBtn,
+      #mcLeatherSummary {
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+
+      #mcLeatherSummary {
+        max-width: 100% !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+      }
+    }
+
+    /* =========================================================
+       PDP OPTIONS: stop off-page stretch + keep rows inline
+    ========================================================= */
+
+    /* 0) kill horizontal overflow caused by fixed-width children */
+    body.mc-product-page #content_area,
+    body.mc-product-page #content_area * {
+      box-sizing: border-box !important;
+    }
+
+    /* 1) your leather row: keep in one line on >=768 and allow shrink */
+    @media (min-width: 768px) {
+      #mcLeatherRow {
+        flex-wrap: nowrap !important; /* do NOT stack under selects */
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+
+      /* make BOTH children shrinkable (this is the key) */
+      #mcLeatherRow > * {
+        min-width: 0 !important;
+      }
+
+      /* override the inline min-width:260px */
+      #mcLeatherBtn {
+        min-width: 0 !important;
+        flex: 0 0 auto !important; /* button keeps its natural width */
+        max-width: 100% !important;
+      }
+
+      #mcLeatherSummary {
+        min-width: 0 !important; /* lets it shrink instead of pushing page */
+        flex: 1 1 auto !important;
+        max-width: 100% !important;
+        white-space: nowrap !important; /* stays one line */
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+    }
+
+    /* 2) mobile: stack cleanly */
+    @media (max-width: 767px) {
+      #mcLeatherRow {
+        flex-direction: column !important;
+        align-items: stretch !important;
+      }
+
+      #mcLeatherBtn,
+      #mcLeatherSummary {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+
+      #mcLeatherSummary {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+      }
+    }
+
+    /* 3) global guardrail: if ANY options box has a fixed min-width, neutralize it */
+    body.mc-product-page #content_area [id^="mc"][style*="min-width"],
+    body.mc-product-page #content_area [id^="mc"][style*="max-width"],
+    body.mc-product-page #content_area [id^="mc"][style*="white-space"] {
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    /* Prevent any product options UI from creating horizontal scroll */
+    body.mc-product-page #content_area,
+    body.mc-product-page .productdetails,
+    body.mc-product-page .mc-pdp-options {
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+    }
+
+    /* Tablet/desktop: keep rows side-by-side and shrinkable */
+    #mcLeatherRow,
+    #mcPlannerRow,
+    #mcPlannerRow2 {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    /* Allow flex children to shrink inside rows */
+    #mcLeatherRow > *,
+    #mcPlannerRow > *,
+    #mcPlannerRow2 > * {
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+    }
+
+    /* Mobile: stack cleanly */
+    @media (max-width: 767px) {
+      #mcLeatherRow,
+      #mcPlannerRow,
+      #mcPlannerRow2 {
+        flex-direction: column !important;
+        align-items: stretch !important;
+      }
+
+      #mcLeatherRow #mcLeatherBtn,
+      #mcLeatherRow #mcLeatherSummary {
+        width: 100% !important;
+      }
+
+      #mcLeatherRow #mcLeatherSummary {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+      }
+    }
+/* --- Mobile product image layout fix (Volusion): center main image at top --- */
+@media (max-width: 768px) {
+  /* Stack instead of side-by-side */
+  .mc-prod-media-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  /* Put the main image first */
+  .mc-prod-media-wrap #product_photo {
+    order: 1 !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 480px; /* adjust up/down if you want */
+    height: auto !important;
+    margin: 0 auto !important;
+    flex: none !important;
+  }
+
+  /* Put alternative views below (and make them horizontal thumbnails) */
+  .mc-prod-media-wrap #altviews {
+    order: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    float: none !important;
+    text-align: center;
+  }
+
+  /* Hide the "Alternative Views" text line if it wastes space */
+  .mc-prod-media-wrap #altviews {
+    font-size: 0; /* hides the text nodes like "Alternative Views" + <br> gaps */
+  }
+
+  /* But keep thumbnails visible */
+  .mc-prod-media-wrap #altviews a {
+    display: inline-block !important;
+    margin: 0 6px 8px !important;
+    font-size: 14px; /* restore font-size for child elements */
+    vertical-align: top;
+  }
+
+  .mc-prod-media-wrap #altviews img {
+    width: 64px !important;
+    height: auto !important;
+    display: block !important;
+  }
+}
+/* Mobile: stop Volusion pricebox tables from forcing horizontal overflow */
+@media (max-width: 991px) {
+  table.colors_pricebox,
+  table.colors_pricebox tbody,
+  table.colors_pricebox tr,
+  table.colors_pricebox td {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* In case the table has inline width/attributes, force it to shrink */
+  table.colors_pricebox {
+    table-layout: fixed !important;
+  }
+
+  /* Optional: prevent long strings from blowing out width */
+
+  /* === FINAL MOBILE OVERRIDE (2026-03-02) === */
+  @media (max-width: 991px) {
+    body.productdetails #content_area img#product_photo,
+    body.mc-product-page #content_area img#product_photo {
+      display: block !important;
+      width: 92vw !important;
+      max-width: 680px !important;
+      height: auto !important;
+      margin: 0 auto 12px auto !important;
+      float: none !important;
+      clear: both !important;
+    }
+
+    body.productdetails #content_area span#altviews,
+    body.mc-product-page #content_area span#altviews {
+      display: block !important;
+      width: 100% !important;
+      float: none !important;
+      margin: 8px auto 0 auto !important;
+      text-align: center !important;
+    }
+
+    body.productdetails #content_area [itemprop="offers"],
+    body.mc-product-page #content_area [itemprop="offers"] {
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 12px 0 0 0 !important;
+      clear: both !important;
+    }
+
+    body > nav.push-menu,
+    body > nav.push-menu .push-menu__menu-wrapper,
+    body > nav.push-menu #push-nav__menu,
+    nav.push-menu,
+    #push-nav__menu,
+    .push-menu__menu-wrapper {
+      left: 0 !important;
+      right: 0 !important;
+      width: 100vw !important;
+      max-width: 100vw !important;
+      box-sizing: border-box !important;
+      overflow-x: hidden !important;
+    }
+
+    body > nav.push-menu a,
+    body > nav.push-menu .vnav__link,
+    body > nav.push-menu .mc-mobile-vnav__link,
+    #push-nav__menu a,
+    .push-menu__menu-wrapper a {
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere !important;
+      word-break: break-word !important;
+      box-sizing: border-box !important;
+    }
+
+    html, body {
+      overflow-x: hidden !important;
+    }
+  }
+  table.colors_pricebox td {
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+}
+
+/* === FORCE MOBILE FIX (2026-03-02b) === */
+@media only screen and (max-width: 991px) {
+  #v65-product-parent [id*="product_photo"],
+  #v65-product-parent a[id*="product_photo"],
+  #v65-product-parent img[id*="product_photo"],
+  #content_area [id*="product_photo"],
+  #content_area a[id*="product_photo"],
+  #content_area img[id*="product_photo"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    transform: none !important;
+    clip: auto !important;
+    clip-path: none !important;
+    float: none !important;
+    clear: both !important;
+  }
+
+  #v65-product-parent img[id*="product_photo"],
+  #content_area img[id*="product_photo"] {
+    width: 94vw !important;
+    max-width: 780px !important;
+    min-width: 220px !important;
+    height: auto !important;
+    margin: 0 auto 12px auto !important;
+  }
+
+  #v65-product-parent [itemprop="offers"],
+  #content_area [itemprop="offers"],
+  #v65-product-parent #options_table,
+  #v65-product-parent .v65-productdetail-cartqty,
+  #content_area #options_table {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    float: none !important;
+    clear: both !important;
+  }
+
+  nav.push-menu,
+  nav.push-menu .push-menu__menu-wrapper,
+  nav.push-menu #push-nav__menu,
+  #push-nav__menu,
+  .push-menu__menu-wrapper {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    left: 0 !important;
+    right: 0 !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  nav.push-menu a,
+  nav.push-menu .vnav__link,
+  nav.push-menu .mc-mobile-vnav__link,
+  #push-nav__menu a,
+  .push-menu__menu-wrapper a {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    box-sizing: border-box !important;
+  }
+
+  html,
+  body {
+    overflow-x: hidden !important;
+  }
+
+  #content_area span#altviews,
+  #content_area #altviews {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 8px auto 0 auto !important;
+    text-align: center !important;
+    float: none !important;
+    clear: both !important;
+    font-size: 0 !important;
+  }
+
+  #content_area span#altviews a,
+  #content_area #altviews a {
+    display: inline-block !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 6px 8px 6px !important;
+    vertical-align: top !important;
+  }
+
+  #content_area span#altviews img[id^="alternate_product_photo_"],
+  #content_area #altviews img[id^="alternate_product_photo_"],
+  #content_area span#altviews .vCSS_img_alternate_product_photo,
+  #content_area #altviews .vCSS_img_alternate_product_photo {
+    display: block !important;
+    width: 64px !important;
+    max-width: 64px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    float: none !important;
+    clear: none !important;
+    object-fit: cover !important;
+  }
+
+  #v65-product-parent #options_table,
+  #content_area #options_table,
+  #v65-product-parent [itemprop="offers"],
+  #content_area [itemprop="offers"],
+  #v65-product-parent .v65-product-price,
+  #v65-product-parent .v65-product-availability,
+  #v65-product-parent .v65-product-addtocart,
+  #content_area .v65-product-price,
+  #content_area .v65-product-availability,
+  #content_area .v65-product-addtocart,
+  #v65-product-parent .product_productprice,
+  #v65-product-parent .option_pricing,
+  #v65-product-parent #priceWithOptions,
+  #v65-product-parent #priceWithOptions ~ div {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    float: none !important;
+    clear: both !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+  }
+
+  #v65-product-parent #options_table td,
+  #content_area #options_table td {
+    width: auto !important;
+    max-width: none !important;
+    display: table-cell !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    box-sizing: border-box !important;
+  }
+
+  #v65-product-parent #options_table,
+  #content_area #options_table {
+    table-layout: fixed !important;
+  }
+
+  #v65-product-parent #options_table td[align="right"],
+  #content_area #options_table td[align="right"] {
+    text-align: left !important;
+    white-space: normal !important;
+    padding-right: 0 !important;
+  }
+
+  #v65-product-parent #options_table select,
+  #content_area #options_table select {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  #v65-product-parent input[name="btnaddtocart"],
+  #v65-product-parent input[id*="btnaddtocart"],
+  #v65-product-parent button[name="btnaddtocart"],
+  #content_area input[name="btnaddtocart"],
+  #content_area input[id*="btnaddtocart"],
+  #content_area button[name="btnaddtocart"] {
+    display: inline-block !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 8px 0 0 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .mc-cart-float {
+    right: 8px !important;
+    left: auto !important;
+    width: 44px !important;
+    height: 44px !important;
+    margin: 0 !important;
+    transform: none !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .mc-cart-float__icon {
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+    flex: 0 0 18px !important;
+  }
+}
+
+/* === MOBILE OVERFLOW KILL-SWITCH (2026-03-02c) === */
+@media only screen and (max-width: 991px) {
+  html,
+  body,
+  #content_area,
+  #v65-product-parent {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  #v65-product-parent,
+  #v65-product-parent * {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+  }
+
+  #v65-product-parent table,
+  #v65-product-parent tbody,
+  #v65-product-parent tr,
+  #v65-product-parent td,
+  #v65-product-parent th {
+    max-width: 100% !important;
+  }
+
+  #v65-product-parent table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+  }
+
+  #v65-product-parent td,
+  #v65-product-parent th,
+  #v65-product-parent div,
+  #v65-product-parent span,
+  #v65-product-parent p,
+  #v65-product-parent a,
+  #v65-product-parent font,
+  #v65-product-parent label {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  #v65-product-parent select,
+  #v65-product-parent textarea,
+  #v65-product-parent input[type="text"],
+  #v65-product-parent input[type="number"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  #v65-product-parent input[name="btnaddtocart"],
+  #v65-product-parent input[id*="btnaddtocart"],
+  #v65-product-parent button[name="btnaddtocart"] {
+    width: auto !important;
+    max-width: 100% !important;
+    display: inline-block !important;
+  }
+}
+
+/* === FINAL PDP MOBILE LAYOUT (2026-03-02d) === */
+@media only screen and (max-width: 991px) {
+  body.productdetails #content_area img#product_photo,
+  body.mc-product-page #content_area img#product_photo,
+  body.productdetails #v65-product-parent img#product_photo,
+  body.mc-product-page #v65-product-parent img#product_photo {
+    display: block !important;
+    width: auto !important;
+    max-width: 92vw !important;
+    height: auto !important;
+    margin: 0 auto 12px auto !important;
+    float: none !important;
+    clear: both !important;
+  }
+
+  body.productdetails #content_area #altviews,
+  body.mc-product-page #content_area #altviews,
+  body.productdetails #v65-product-parent #altviews,
+  body.mc-product-page #v65-product-parent #altviews {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 8px auto 0 auto !important;
+    text-align: center !important;
+    float: none !important;
+    clear: both !important;
+    font-size: 0 !important;
+  }
+
+  body.productdetails #content_area #altviews a,
+  body.mc-product-page #content_area #altviews a,
+  body.productdetails #v65-product-parent #altviews a,
+  body.mc-product-page #v65-product-parent #altviews a {
+    display: inline-block !important;
+    margin: 0 6px 8px 6px !important;
+    vertical-align: top !important;
+  }
+
+  body.productdetails #content_area #altviews img[id^="alternate_product_photo_"],
+  body.mc-product-page #content_area #altviews img[id^="alternate_product_photo_"],
+  body.productdetails #v65-product-parent #altviews img[id^="alternate_product_photo_"],
+  body.mc-product-page #v65-product-parent #altviews img[id^="alternate_product_photo_"] {
+    display: block !important;
+    width: 64px !important;
+    max-width: 64px !important;
+    height: auto !important;
+    margin: 0 !important;
+    float: none !important;
+  }
+
+  body.productdetails #v65-product-parent [itemprop="offers"],
+  body.mc-product-page #v65-product-parent [itemprop="offers"],
+  body.productdetails #content_area [itemprop="offers"],
+  body.mc-product-page #content_area [itemprop="offers"],
+  body.productdetails #v65-product-parent .v65-product-price,
+  body.mc-product-page #v65-product-parent .v65-product-price,
+  body.productdetails #v65-product-parent .v65-product-availability,
+  body.mc-product-page #v65-product-parent .v65-product-availability,
+  body.productdetails #v65-product-parent .v65-product-addtocart,
+  body.mc-product-page #v65-product-parent .v65-product-addtocart,
+  body.productdetails #v65-product-parent #options_table,
+  body.mc-product-page #v65-product-parent #options_table,
+  body.productdetails #content_area #options_table,
+  body.mc-product-page #content_area #options_table {
+    text-align: left !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    float: none !important;
+    clear: both !important;
+  }
+
+  body.productdetails #v65-product-parent #options_table td,
+  body.mc-product-page #v65-product-parent #options_table td,
+  body.productdetails #content_area #options_table td,
+  body.mc-product-page #content_area #options_table td {
+    text-align: left !important;
+    white-space: normal !important;
+  }
+
+  body.productdetails #v65-product-parent #options_table,
+  body.mc-product-page #v65-product-parent #options_table,
+  body.productdetails #content_area #options_table,
+  body.mc-product-page #content_area #options_table {
+    width: 100% !important;
+    table-layout: auto !important;
+    border-collapse: collapse !important;
+  }
+
+  body.productdetails #v65-product-parent #options_table tr,
+  body.mc-product-page #v65-product-parent #options_table tr,
+  body.productdetails #content_area #options_table tr,
+  body.mc-product-page #content_area #options_table tr {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 10px 0 !important;
+  }
+
+  body.productdetails #v65-product-parent #options_table td,
+  body.mc-product-page #v65-product-parent #options_table td,
+  body.productdetails #content_area #options_table td,
+  body.mc-product-page #content_area #options_table td {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    text-align: left !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body.productdetails #v65-product-parent #options_table td:empty,
+  body.mc-product-page #v65-product-parent #options_table td:empty,
+  body.productdetails #content_area #options_table td:empty,
+  body.mc-product-page #content_area #options_table td:empty {
+    display: none !important;
+  }
+
+  body.productdetails #v65-product-parent #options_table select,
+  body.mc-product-page #v65-product-parent #options_table select,
+  body.productdetails #content_area #options_table select,
+  body.mc-product-page #content_area #options_table select {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+/* === FINAL MOBILE COLUMN STACK (2026-03-02e) === */
+@media only screen and (max-width: 991px) {
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td,
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    float: none !important;
+    clear: both !important;
+    text-align: left !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    vertical-align: top !important;
+  }
+
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child,
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child {
+    text-align: center !important;
+  }
+
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:last-child,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:last-child,
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child {
+    text-align: left !important;
+  }
+
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:last-child .colors_pricebox,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:last-child .colors_pricebox,
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child .colors_pricebox,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child .colors_pricebox {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+}
+
+/* === FINAL MOBILE GUTTERS (2026-03-02f) === */
+@media only screen and (max-width: 991px) {
+  body.productdetails .content_area-wrapper,
+  body.mc-product-page .content_area-wrapper,
+  body.productdetails #content_area,
+  body.mc-product-page #content_area {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails #v65-product-parent,
+  body.mc-product-page #v65-product-parent {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* === FINAL PDP CLEANUP (2026-03-02g) === */
+body.productdetails #options_table tr:has(td input[title="Configuration Details"]),
+body.mc-product-page #options_table tr:has(td input[title="Configuration Details"]),
+body.productdetails #options_table tr:has(+ tr:has(td input[title="Configuration Details"])),
+body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuration Details"])) {
+  display: none !important;
+}
+
+@media only screen and (max-width: 991px) {
+  body.productdetails #content_area input.vCSS_input_addtocart,
+  body.mc-product-page #content_area input.vCSS_input_addtocart,
+  body.productdetails #content_area input[name="btnaddtocart"],
+  body.mc-product-page #content_area input[name="btnaddtocart"] {
+    display: block !important;
+    width: 170px !important;
+    max-width: 68% !important;
+    height: auto !important;
+    margin: 10px auto 0 auto !important;
+    float: none !important;
+  }
+
+  body.productdetails a.floating-mobile-cart,
+  body.mc-product-page a.floating-mobile-cart {
+    right: max(8px, env(safe-area-inset-right)) !important;
+    left: auto !important;
+    width: 42px !important;
+    height: 42px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  body.productdetails a.floating-mobile-cart img,
+  body.mc-product-page a.floating-mobile-cart img {
+    width: 24px !important;
+    height: 24px !important;
+    margin: 0 !important;
+  }
+}
+
+/* === MOBILE MENU CLOSE GLYPH HARD-FIX (2026-03-02h) === */
+@media only screen and (max-width: 991px) {
+  nav.push-menu .push-menu__close-btn svg,
+  nav.push-menu .push-menu__close-btn .icon {
+    display: none !important;
+  }
+
+  nav.push-menu .push-menu__close-btn .mc-close-x {
+    display: block !important;
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    text-align: center !important;
+    color: #fff !important;
+    font-size: 28px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-weight: 400 !important;
+  }
+
+  nav.push-menu .push-menu__close-btn.close-menu,
+  body > nav.push-menu .push-menu__close-btn.close-menu {
+    display: block !important;
+    position: absolute !important;
+    top: 10px !important;
+    right: 12px !important;
+    width: 32px !important;
+    height: 32px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    z-index: 2147483647 !important;
+  }
+
+  nav.push-menu .push-menu__close-btn.close-menu::before,
+  body > nav.push-menu .push-menu__close-btn.close-menu::before {
+    content: "\00D7" !important;
+    display: block !important;
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    text-align: center !important;
+    color: #fff !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 28px !important;
+    font-weight: 400 !important;
+    background: transparent !important;
+  }
+}
+
+/* === FINAL MOBILE MARGINS + CART FIX (2026-03-02i) === */
+@media only screen and (max-width: 991px) {
+  html,
+  body {
+    overflow-x: hidden !important;
+  }
+
+  .page-wrap,
+  .container,
+  .container--content,
+  .content_area-wrapper,
+  #content_area,
+  #v65-product-parent {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .container,
+  .container--content,
+  .content_area-wrapper,
+  #content_area {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .container--content > .row,
+  #content_area .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .container--content > .row > [class*="col-"],
+  #content_area .row > [class*="col-"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  a.mc-cart-float {
+    position: fixed !important;
+    top: max(12px, env(safe-area-inset-top)) !important;
+    right: max(10px, env(safe-area-inset-right)) !important;
+    left: auto !important;
+    width: 44px !important;
+    height: 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transform: none !important;
+    z-index: 2147483647 !important;
+    pointer-events: auto !important;
+    text-decoration: none !important;
+  }
+
+  .mc-cart-float__icon,
+  .mc-cart-float__icon path {
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+    display: block !important;
+    fill: #111111 !important;
+  }
+
+  body.productdetails a.floating-mobile-cart,
+  body.mc-product-page a.floating-mobile-cart {
+    display: none !important;
+  }
+
+  /* === FINAL MOBILE MARGINS + CART FIX (2026-03-02j) === */
+  @media only screen and (max-width: 991px) {
+    .content_area-wrapper,
+    #content_area,
+    #v65-product-parent,
+    body.productdetails #content_area,
+    body.mc-product-page #content_area {
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      box-sizing: border-box !important;
+    }
+
+    body.productdetails #v65-product-parent > tbody > tr > td,
+    body.mc-product-page #v65-product-parent > tbody > tr > td,
+    body.productdetails #v65-product-parent > tr > td,
+    body.mc-product-page #v65-product-parent > tr > td,
+    #content_area .resp-tabs-container,
+    #content_area .TabbedPanelsContentGroup,
+    #content_area .tabcontent {
+      padding-left: 10px !important;
+      padding-right: 10px !important;
+      box-sizing: border-box !important;
+    }
+
+    a.mc-cart-float {
+      top: 12px !important;
+      right: 10px !important;
+      top: max(12px, env(safe-area-inset-top)) !important;
+      right: max(10px, env(safe-area-inset-right)) !important;
+      left: auto !important;
+      margin: 0 !important;
+      transform: translate3d(0, 0, 0) !important;
+      max-width: 44px !important;
+      max-height: 44px !important;
+      overflow: hidden !important;
+    }
+  }
+
+  /* === HARD MOBILE OVERRIDE (2026-03-02z) === */
+  @media only screen and (max-width: 991px) {
+    .vol-container,
+    .vol-inner,
+    .page-wrap,
+    .container,
+    .container--content,
+    .container--content > .row,
+    .container--content > .row > [class*="col-"] {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    #content_area,
+    .content_area-wrapper,
+    #v65-product-parent,
+    #v65-product-parent td,
+    #v65-product-parent th,
+    #options_table,
+    #content_area .TabbedPanelsContent,
+    #content_area .TabbedPanelsContentGroup,
+    #content_area .resp-tabs-container,
+    #content_area .product_description,
+    #content_area [itemprop="description"] {
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      overflow-wrap: anywhere !important;
+      word-break: break-word !important;
+    }
+
+    #options_table input[title*="Configuration Details" i],
+    #options_table input[value*="Configuration Details" i],
+    #options_table [title*="Configuration Details" i] {
+      display: none !important;
+      visibility: hidden !important;
+    }
+
+    a.mc-cart-float,
+    a.floating-mobile-cart,
+    a[aria-label="Cart"] {
+      position: fixed !important;
+      top: 10px !important;
+      right: 6px !important;
+      left: auto !important;
+      bottom: auto !important;
+      width: 40px !important;
+      height: 40px !important;
+      max-width: 40px !important;
+      max-height: 40px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      transform: none !important;
+      z-index: 2147483647 !important;
+      overflow: hidden !important;
+      pointer-events: auto !important;
+    }
+  }
+
+  /* === FINAL MOBILE EDGE LOCK (2026-03-02k) === */
+  @media only screen and (max-width: 991px) {
+    html,
+    body,
+    .vol-container,
+    .vol-inner,
+    .page-wrap,
+    .container,
+    .container--content,
+    .content_area-wrapper,
+    #content_area,
+    #v65-product-parent {
+      overflow-x: hidden !important;
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+    }
+
+    .content_area-wrapper,
+    #content_area,
+    #v65-product-parent,
+    #v65-product-parent td,
+    #v65-product-parent th,
+    #content_area .tabcontent,
+    #content_area .resp-tabs-container,
+    #content_area .TabbedPanelsContentGroup,
+    #content_area .product_description,
+    #content_area #divDescription,
+    #content_area #divQuestions {
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      box-sizing: border-box !important;
+    }
+
+    a.mc-cart-float,
+    a.floating-mobile-cart,
+    a[aria-label="Cart"] {
+      position: fixed !important;
+      top: 10px !important;
+      right: 8px !important;
+      left: auto !important;
+      width: 42px !important;
+      height: 42px !important;
+      max-width: 42px !important;
+      max-height: 42px !important;
+      margin: 0 !important;
+      transform: none !important;
+      z-index: 2147483647 !important;
+      overflow: hidden !important;
+    }
+  }
+}
+
+@media only screen and (max-width: 991px) {
+  html,
+  body,
+  #content_area,
+  .content_area-wrapper,
+  #v65-product-parent,
+  #v65-product-parent td,
+  #v65-product-parent th,
+  #options_table,
+  #divDescription,
+  #divQuestions,
+  .TabbedPanelsContent,
+  .TabbedPanelsContentGroup,
+  .resp-tabs-container,
+  .product_description {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+  }
+
+  #content_area,
+  .content_area-wrapper,
+  #v65-product-parent,
+  #v65-product-parent td,
+  #v65-product-parent th,
+  #options_table,
+  #divDescription,
+  #divQuestions,
+  .TabbedPanelsContent,
+  .TabbedPanelsContentGroup,
+  .resp-tabs-container,
+  .product_description {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  #options_table tr:has(input[title*="Configuration Details" i]),
+  #options_table tr:has(input[name*="Configuration Details" i]),
+  #options_table tr:has(input[value*="Configuration Details" i]),
+  #options_table tr:has(textarea[title*="Configuration Details" i]),
+  #options_table tr:has(select[title*="Configuration Details" i]) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  #options_table input[title*="Configuration Details" i],
+  #options_table input[name*="Configuration Details" i],
+  #options_table input[value*="Configuration Details" i],
+  #options_table textarea[title*="Configuration Details" i],
+  #options_table select[title*="Configuration Details" i] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  a.mc-cart-float,
+  a.floating-mobile-cart,
+  a[aria-label="Cart"] {
+    position: fixed !important;
+    top: 10px !important;
+    right: 12px !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: 42px !important;
+    height: 42px !important;
+    max-width: 42px !important;
+    max-height: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    z-index: 2147483647 !important;
+    overflow: hidden !important;
+  }
+
+  .mc-cart-float .mc-cart-float__icon,
+  a[aria-label="Cart"] svg,
+  a.floating-mobile-cart svg {
+    width: 22px !important;
+    height: 22px !important;
+    display: block !important;
+    margin: 10px auto !important;
+  }
+}
+
+@media only screen and (max-width: 991px) {
+  body #v65-product-parent,
+  body #v65-product-parent > table,
+  body #v65-product-parent > table > tbody > tr > td,
+  body #v65-product-parent #v65-productdetail-action-wrapper,
+  body #v65-product-parent .v65-productdetail-options,
+  body #v65-product-parent #options_table,
+  body #v65-product-parent #options_table > tbody,
+  body #v65-product-parent #options_table > tbody > tr,
+  body #v65-product-parent #options_table > tbody > tr > td,
+  body #content_area,
+  body .content_area-wrapper {
+    width: auto !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body #v65-product-parent,
+  body #v65-product-parent #v65-productdetail-action-wrapper,
+  body #v65-product-parent .v65-productdetail-options,
+  body #v65-product-parent #options_table,
+  body #content_area,
+  body .content_area-wrapper {
+    margin-left: 16px !important;
+    margin-right: 16px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body #v65-product-parent #options_table > tbody > tr > td,
+  body #v65-product-parent .TabbedPanelsContent,
+  body #v65-product-parent .resp-tabs-container,
+  body #v65-product-parent .product_description,
+  body #divDescription,
+  body #divQuestions {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  body #v65-product-parent #options_table input[title*="configuration" i],
+  body #v65-product-parent #options_table input[name*="configuration" i],
+  body #v65-product-parent #options_table input[value*="configuration" i],
+  body #v65-product-parent #options_table textarea[title*="configuration" i],
+  body #v65-product-parent #options_table select[title*="configuration" i],
+  body #v65-product-parent #options_table input[title*="details" i],
+  body #v65-product-parent #options_table input[name*="details" i],
+  body #v65-product-parent #options_table input[value*="details" i] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  body #v65-product-parent #options_table tr:has(input[title*="configuration" i]),
+  body #v65-product-parent #options_table tr:has(input[name*="configuration" i]),
+  body #v65-product-parent #options_table tr:has(input[value*="configuration" i]),
+  body #v65-product-parent #options_table tr:has(input[title*="details" i]),
+  body #v65-product-parent #options_table tr:has(input[name*="details" i]),
+  body #v65-product-parent #options_table tr:has(input[value*="details" i]) {
+    display: none !important;
+  }
+
+  body a.mc-cart-float,
+  body a[aria-label="Cart"],
+  body a.mc-header-cart__link,
+  body a.floating-mobile-cart {
+    right: 18px !important;
+  }
+
+  #product_options_heading,
+  #options_table #product_options_heading,
+  #options_table tr[id*="config" i],
+  #options_table tr[class*="config" i],
+  #options_table tr:has(td[id*="config" i]),
+  #options_table tr:has(td[class*="config" i]),
+  #options_table tr:has(td[title*="configuration" i]),
+  #options_table tr:has(td[title*="details" i]),
+  #options_table tr:has(td:empty + td input[title*="configuration" i]),
+  #options_table tr:has(td:empty + td input[title*="details" i]) {
+    display: none !important;
+    visibility: hidden !important;
   }
 }
