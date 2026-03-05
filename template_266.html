@@ -15,30 +15,7 @@
   <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
 <link id="mc-custom-safe-css" rel="stylesheet" href="/v/vspfiles/css/custom-safe.css?v=20260302-final">
  
-<script>
-(function () {
-  var liveHref = '/v/vspfiles/css/custom-safe.css?v=20260302-final-' + Date.now();
-  var updatedAny = false;
 
-  document.querySelectorAll('link[rel="stylesheet"]').forEach(function (linkEl) {
-    var href = (linkEl.getAttribute('href') || '').toLowerCase();
-    if (href.indexOf('custom-safe.css') !== -1) {
-      linkEl.href = liveHref;
-      linkEl.setAttribute('data-mc-css-live', '1');
-      updatedAny = true;
-    }
-  });
-
-  if (!updatedAny) {
-    var fallback = document.createElement('link');
-    fallback.rel = 'stylesheet';
-    fallback.id = 'mc-custom-safe-css';
-    fallback.href = liveHref;
-    fallback.setAttribute('data-mc-css-live', '1');
-    document.head.appendChild(fallback);
-  }
-})();
-</script>
 <script>
 (function () {
   function bindMobileAltThumbs() {
