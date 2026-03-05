@@ -2993,3 +2993,23 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     margin: 0 auto !important;
   }
 }
+@media (max-width: 1200px) {
+  #options_table tr select[name="SELECT___PALLISER-FLICKS-THEATER-CHAIR___2"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  #options_table tr select[name="SELECT___PALLISER-FLICKS-THEATER-CHAIR___2"] {
+    max-width: 100% !important;
+  }
+
+  #options_table tr select[name="SELECT___PALLISER-FLICKS-THEATER-CHAIR___2"] {
+    position: relative !important;
+  }
+
+  /* Ensure the parent <tr> stays visible */
+  #options_table tr:has(select[name="SELECT___PALLISER-FLICKS-THEATER-CHAIR___2"]) {
+    display: table-row !important;
+  }
+}
