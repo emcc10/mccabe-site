@@ -1,3 +1,9 @@
+/* Prevent cart icon flash */
+.mc-cart-float__icon {
+  width: 20px;
+  height: 20px;
+}
+
 /* RH-STYLE GLOBAL FONT */
 body,
 body * {
