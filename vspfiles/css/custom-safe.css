@@ -2862,10 +2862,10 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     margin: 0 !important;
     flex: none !important;    /* remove forced 18px width */
   }
-@media (max-width: 991px) {
+
   html.productdetails a.mc-cart-float {
     right: 37px !important;
-
+  }
 }
 /* === PDP: FORCE Straight/Curved ("Choose Configuration") option to show === */
 #options_table select[title*="Choose Configuration" i],
@@ -3062,6 +3062,63 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
   #options_table select {
     width: 100% !important;
     max-width: 100% !important;
+  }
+}
+
+/* ============================================================
+   FIX 1: Force "Straight or Curved" (Choose Configuration)
+   dropdown to remain visible at all screen sizes.
+   Targets ONLY the specific element:
+   <select title="Choose Configuration"> (the Straight/Curved picker)
+   Uses the same specificity as the hiding rules so that
+   last-in-source-order wins and the dropdown stays visible.
+   ============================================================ */
+
+/* Base rule – all screen sizes */
+body #v65-product-parent #options_table select[title*="Choose Configuration" i],
+body #v65-product-parent #options_table select[name*="Choose Configuration" i],
+body #v65-product-parent #options_table select[id*="Choose Configuration" i] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  left: auto !important;
+  height: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure the table-row containing the dropdown is also visible */
+body #v65-product-parent #options_table tr:has(select[title*="Choose Configuration" i]),
+body #v65-product-parent #options_table tr:has(select[name*="Choose Configuration" i]),
+body #v65-product-parent #options_table tr:has(select[id*="Choose Configuration" i]) {
+  display: table-row !important;
+  visibility: visible !important;
+}
+
+/* Mobile override – repeat inside the breakpoint to beat the specificity
+   of the existing mobile hide rules (max-width: 991px) */
+@media only screen and (max-width: 991px) {
+  body #v65-product-parent #options_table select[title*="Choose Configuration" i],
+  body #v65-product-parent #options_table select[name*="Choose Configuration" i],
+  body #v65-product-parent #options_table select[id*="Choose Configuration" i] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    left: auto !important;
+    height: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    pointer-events: auto !important;
+  }
+
+  body #v65-product-parent #options_table tr:has(select[title*="Choose Configuration" i]),
+  body #v65-product-parent #options_table tr:has(select[name*="Choose Configuration" i]),
+  body #v65-product-parent #options_table tr:has(select[id*="Choose Configuration" i]) {
+    display: table-row !important;
+    visibility: visible !important;
   }
 }
 
