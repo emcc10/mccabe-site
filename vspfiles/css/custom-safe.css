@@ -3064,4 +3064,46 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     max-width: 100% !important;
   }
 }
+/* ============================================================
+   FIX 1: Force "Straight or Curved" (Choose Configuration)
+   dropdown to remain visible at all screen sizes.
+   Targets ONLY <select id="ProductOptionField_N">
+   ============================================================ */
+#ProductOptionField_N {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  pointer-events: auto !important;
+  position: static !important;
+}
 
+
+/* ============================================================
+   FIX 2: Home icon size — match cart icon behavior.
+   Replaces fixed 20px size with responsive clamp().
+   Targets ONLY .mc-home-float__icon
+   ============================================================ */
+.mc-home-float__icon {
+  width: clamp(20px, 2vw, 28px) !important;
+  height: clamp(20px, 2vw, 28px) !important;
+  display: block !important;
+  fill: #111 !important;
+}
+
+
+/* ============================================================
+   FIX 3: Main menu shifting/disappearing around 1080px
+   Applies ONLY to non-home pages.
+   Replaces fixed 110px gap with responsive clamp().
+   Keeps menu centered until mobile breakpoint.
+   ============================================================ */
+body:not(.is-home) #display_menu_1 > ul.vnav--level1,
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+body:not(.is-home) #display_menu_1 > ul {
+  gap: clamp(20px, 6vw, 110px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
