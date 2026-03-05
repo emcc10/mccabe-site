@@ -1,8 +1,3 @@
-/* Prevent cart icon flash */
-.mc-cart-float__icon {
-  width: 20px;
-  height: 20px;
-}
 
 /* RH-STYLE GLOBAL FONT */
 body,
@@ -11,7 +6,23 @@ body * {
   font-weight: 300;
   letter-spacing: 0.2px;
 }
-
+/* Hide ALL Volusion default cart icons to stop flashing */
+header.header a[href*="shoppingcart"],
+header.header .vnav__cart,
+header.header .vnav-cart,
+header.header .vnav__link--cart,
+header.header .cart-link,
+header.header .carticon,
+header.header svg[aria-label="Cart"],
+header.header svg[class*="cart"],
+header.header [class*="cart"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
 /* ======================================
    GLOBAL RESET
 ====================================== */
