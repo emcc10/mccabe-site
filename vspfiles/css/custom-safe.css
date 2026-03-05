@@ -2994,22 +2994,52 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
   }
 }
 @media (max-width: 1200px) {
-  #options_table tr select[name="SELECT___PALLISER-FLICKS-THEATER-CHAIR___2"] {
+
+  /* Restore full table layout */
+  #options_table {
+    display: table !important;
+    width: 100% !important;
+    border-collapse: separate !important;
+  }
+
+  #options_table tbody {
+    display: table-row-group !important;
+  }
+
+  #options_table tr {
+    display: table-row !important;
+  }
+
+  #options_table td {
+    display: table-cell !important;
+    vertical-align: top !important;
+    float: none !important;
+    width: auto !important;
+  }
+
+  /* Keep ALL dropdowns visible */
+  #options_table select {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Keep ALL option group headers visible */
+  #options_table font.colors_productname,
+  #options_table .vCSS_img_line_group_features,
+  #options_table table {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
   }
 
-  #options_table tr select[name="SELECT___PALLISER-FLICKS-THEATER-CHAIR___2"] {
-    max-width: 100% !important;
-  }
-
-  #options_table tr select[name="SELECT___PALLISER-FLICKS-THEATER-CHAIR___2"] {
-    position: relative !important;
-  }
-
-  /* Ensure the parent <tr> stays visible */
-  #options_table tr:has(select[name="SELECT___PALLISER-FLICKS-THEATER-CHAIR___2"]) {
-    display: table-row !important;
+  /* Prevent Volusion mobile CSS from hiding option rows */
+  #options_table .v65-product-option,
+  #options_table tr,
+  #options_table td {
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
