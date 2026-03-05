@@ -3043,3 +3043,24 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     opacity: 1 !important;
   }
 }
+@media (max-width: 1200px) {
+
+  /* Nuclear: make sure the options table and everything inside it is visible */
+  #options_table,
+  #options_table * {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    float: none !important;
+  }
+
+  /* Basic layout so it doesn’t look totally broken */
+  #options_table {
+    width: 100% !important;
+  }
+
+  #options_table select {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
