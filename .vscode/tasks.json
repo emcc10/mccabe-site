@@ -2,6 +2,24 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "open-working-files",
+			"type": "shell",
+			"command": "code",
+			"args": [
+				"--reuse-window",
+				"${workspaceFolder}/template_266.html",
+				"${workspaceFolder}/vspfiles/css/custom-safe.css"
+			],
+			"runOptions": {
+				"runOn": "folderOpen"
+			},
+			"presentation": {
+				"reveal": "silent",
+				"panel": "shared"
+			},
+			"isBackground": false
+		},
+		{
 			"label": "echo-test",
 			"type": "shell",
 			"command": "powershell",
