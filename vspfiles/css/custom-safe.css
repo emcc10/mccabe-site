@@ -3124,3 +3124,50 @@ body:not(.is-home) #display_menu_1 > ul {
   justify-content: center !important;
   align-items: center !important;
 }
+/* FORCE ALL PRICES TO SHOW — overrides /a/c/content.css */
+.price,
+.product_price,
+.v65-productdetail-price,
+.v65-productlist-price,
+.v65-productdetail-price span,
+.v65-productlist-price span,
+.v65-productdetail-saleprice,
+.v65-productlist-saleprice {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  text-indent: 0 !important;
+  color: #111 !important;
+}
+  /* FIX CART ICON SIZE — overrides /a/c/vnav.css */
+.cart img,
+.header-cart img,
+.v65-cart img,
+.mc-cart-float__icon {
+  width: 24px !important;
+  height: 24px !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+}
+  /* FIX PRODUCT GRID LAYOUT — overrides /a/c/default.css */
+.v-product,
+.v-product-grid .v-product,
+#content_area .v-product,
+#content_area_home .v-product {
+  float: none !important;
+  width: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+  /* OVERRIDE LEGACY VNAV — prevents stacking and float issues */
+#display_menu_1 ul,
+#display_menu_1 li,
+#display_menu_1 a {
+  float: none !important;
+  width: auto !important;
+  display: inline-flex !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
