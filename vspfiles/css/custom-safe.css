@@ -3055,12 +3055,13 @@ html body a.mc-cart-float,
 html body .mc-cart-float,
 body a.mc-cart-float,
 body .mc-cart-float {
-  left: calc(100vw - 52px - max(20px, env(safe-area-inset-right))) !important;
+  left: calc(100vw - 52px - max(28px, env(safe-area-inset-right))) !important;
   right: auto !important;
   width: 52px !important;
   max-width: 52px !important;
   min-width: 40px !important;
   max-height: 48px !important;
-  margin-left: 16px !important; /* container margin: space between menu and cart */
+  margin-left: 16px !important;
+  margin-right: max(20px, env(safe-area-inset-right)) !important; /* container margin: space on right */
   box-sizing: border-box !important;
 }
