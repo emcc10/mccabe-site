@@ -1,5 +1,5 @@
 # SFTP deploy: uses secrets FTP_SERVER, FTP_USERNAME, FTP_PASSWORD (port 2222)
-# HTML at SFTP root: template_266.html. Assets under v/vspfiles/.
+# Template at v/template_266.html. Assets under v/vspfiles/.
 name: Deploy Volusion Theme
 
 on:
@@ -37,5 +37,5 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: "2222"
           uploads: |
-            template_266.html => ./
+            template_266.html => v/
             vspfiles/ => ${{ github.event.inputs.remote_path || 'v/vspfiles/' }}
