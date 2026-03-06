@@ -4,21 +4,22 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:   # Lets you run "Deploy Volusion Theme" manually from Actions tab
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    steps:      
+    steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: "Deploy via SFTP (vspfiles: templates, css, js)"
+      - name: Deploy via SFTP
         uses: Dylan700/sftp-upload-action@v1.2.3
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: "2222"
-          uploads: "vspfiles/ => vspfiles/"
+          uploads: |
+            vspfiles/ => vspfiles/
