@@ -55,6 +55,15 @@ body {
   z-index: 1;
 }
 
+/* Hide "open in separate window" / Picture-in-Picture on hero video */
+#slideshow-container .mc-hero-video-el::-webkit-media-controls-picture-in-picture-button,
+#slideshow-container .mc-hero-video-el::-webkit-media-controls-fullscreen-button {
+  display: none !important;
+}
+#slideshow-container .mc-hero-video-el {
+  overflow: hidden;
+}
+
 #slideshow-container .mc-hero-overlay {
   position: relative;
   z-index: 2;
