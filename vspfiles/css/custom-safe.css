@@ -275,9 +275,9 @@ body:not(.is-home) #display_menu_1 > ul {
   flex-direction: row !important;
   justify-content: center !important;
   align-items: center !important;
-  gap: 22px !important;
+  gap: 28px !important;
   margin: 0 !important;
-  padding: 0 12px !important;
+  padding: 0 16px !important;
   width: auto !important;
   max-width: 100% !important;
 }
@@ -289,7 +289,7 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li {
   display: flex !important;
   width: auto !important;
   flex: 0 0 auto !important;
-  margin: 0 !important;
+  margin: 0 4px !important;
   padding: 0 !important;
   position: relative !important;
 }
@@ -300,6 +300,7 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li > a {
   width: auto !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
+  padding: 0 6px !important;
 }
 
 body:not(.is-home) #display_menu_1 br {
@@ -1720,12 +1721,25 @@ body.mc-product-page select.mc-native-leather {
       }
     }
 
+    /* Choose Leather + Room Planner: same width */
+    .mc-config-btn,
+    #mcLeatherBtn,
+    #mcPlannerBtn {
+      width: 260px !important;
+      min-width: 260px !important;
+      max-width: 260px !important;
+      box-sizing: border-box !important;
+    }
+
     /* MOBILE: prevent leather row from forcing horizontal overflow */
     @media (max-width: 767px) {
       /* wrap the row */
-      #mcLeatherBtn {
+      #mcLeatherBtn,
+      #mcPlannerBtn,
+      .mc-config-btn {
         min-width: 0 !important;
         width: 100% !important;
+        max-width: 100% !important;
       }
 
       #mcLeatherSummary {
@@ -2204,12 +2218,12 @@ body.mc-product-page select.mc-native-leather {
     padding-right: 0 !important;
   }
 
-  #v65-product-parent #options_table select,
-  #content_area #options_table select {
+  #v65-product-parent #options_table select:not(.mc-native-leather),
+  #content_area #options_table select:not(.mc-native-leather) {
     display: block !important;
-    width: 100% !important;
+    width: auto !important;
+    min-width: 22ch !important;
     max-width: 100% !important;
-    min-width: 0 !important;
     box-sizing: border-box !important;
   }
 
@@ -2552,6 +2566,24 @@ body.mc-product-page select.mc-native-leather {
 #options_table td {
   visibility: visible !important;
 }
+
+/* === PDP: All option dropdowns same min size; width fits longest option === */
+body.mc-product-page #content_area #options_table select,
+body.mc-product-page #v65-product-parent #options_table select {
+  min-width: 22ch !important;
+  width: auto !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+/* Leather select hidden – selection shown in "Selected leather" box instead */
+body.mc-product-page #content_area select.mc-native-leather,
+body.mc-product-page #v65-product-parent select.mc-native-leather,
+select.mc-native-leather {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
 /* =========================================================
    FINAL: Center NON-HOME menu + keep float icons in-bounds
    (2026-03-04)
@@ -2567,19 +2599,22 @@ body.mc-product-page select.mc-native-leather {
     margin-left: 0 !important;
   }
 
-  /* Center the UL like the hero menu does (flex + gap) */
+  /* Center the UL like the hero menu does (flex + gap), no overlap */
   body:not(.is-home) #display_menu_1 > ul,
   body:not(.is-home) #display_menu_1 > ul.vnav--level1,
   body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1 {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-
-    gap: clamp(14px, 2.2vw, 22px) !important;
-    flex-wrap: nowrap !important; /* keep 1 row like hero menu */
+    gap: 28px !important;
+    flex-wrap: nowrap !important;
     width: 100% !important;
     margin: 0 auto !important;
-    padding: 0 !important;
+    padding: 0 16px !important;
+  }
+  body:not(.is-home) #display_menu_1 > ul > li {
+    margin: 0 2px !important;
+    flex-shrink: 0 !important;
   }
 
   /* Make sure LIs don’t introduce layout weirdness */
@@ -2964,41 +2999,45 @@ body:not(.is-home) #display_menu_1 > ul {
     padding-right: 0 !important;
   }
 
-  body #v65-product-parent #options_table input[title*="configuration" i],
-  body #v65-product-parent #options_table input[name*="configuration" i],
-  body #v65-product-parent #options_table input[value*="configuration" i],
-  body #v65-product-parent #options_table textarea[title*="configuration" i],
-  body #v65-product-parent #options_table select[title*="configuration" i],
-  body #v65-product-parent #options_table input[title*="details" i],
-  body #v65-product-parent #options_table input[name*="details" i],
-  body #v65-product-parent #options_table input[value*="details" i] {
+  /* Hide only "Configuration Details" (text field), NOT "Choose Configuration" (Straight/Curved) */
+  body #v65-product-parent #options_table input[title*="Configuration Details" i],
+  body #v65-product-parent #options_table input[name*="Configuration Details" i],
+  body #v65-product-parent #options_table input[value*="Configuration Details" i],
+  body #v65-product-parent #options_table textarea[title*="Configuration Details" i],
+  body #v65-product-parent #options_table select[title*="Configuration Details" i] {
     display: none !important;
     visibility: hidden !important;
   }
 
-  body #v65-product-parent #options_table tr:has(input[title*="configuration" i]),
-  body #v65-product-parent #options_table tr:has(input[name*="configuration" i]),
-  body #v65-product-parent #options_table tr:has(input[value*="configuration" i]),
-  body #v65-product-parent #options_table tr:has(input[title*="details" i]),
-  body #v65-product-parent #options_table tr:has(input[name*="details" i]),
-  body #v65-product-parent #options_table tr:has(input[value*="details" i]) {
+  body #v65-product-parent #options_table tr:has(input[title*="Configuration Details" i]),
+  body #v65-product-parent #options_table tr:has(input[name*="Configuration Details" i]),
+  body #v65-product-parent #options_table tr:has(textarea[title*="Configuration Details" i]),
+  body #v65-product-parent #options_table tr:has(select[title*="Configuration Details" i]) {
     display: none !important;
   }
 
-  /* Cart position: use unified block at top of file */
+  /* Keep Straight/Curved (Choose Configuration) row and dropdown visible */
+  #options_table tr:has(select[title*="Choose Configuration" i]),
+  #options_table tr:has(select[name*="Choose Configuration" i]),
+  #options_table tr:has(select[id*="Choose Configuration" i]) {
+    display: table-row !important;
+    visibility: visible !important;
+  }
+  #options_table tr:has(select[title*="Choose Configuration" i]) td,
+  #options_table tr:has(select[title*="Choose Configuration" i]) select {
+    display: table-cell !important;
+    visibility: visible !important;
+  }
+  #options_table select[title*="Choose Configuration" i],
+  #options_table select[name*="Choose Configuration" i] {
+    display: block !important;
+    visibility: visible !important;
+  }
 
-  #product_options_heading,
-  #options_table #product_options_heading,
-  #options_table tr[id*="config" i],
-  #options_table tr[class*="config" i],
-  #options_table tr:has(td[id*="config" i]),
-  #options_table tr:has(td[class*="config" i]),
-  #options_table tr:has(td[title*="configuration" i]),
-  #options_table tr:has(td[title*="details" i]),
-  #options_table tr:has(td:empty + td input[title*="configuration" i]),
-  #options_table tr:has(td:empty + td input[title*="details" i]) {
+  /* Hide only Configuration Details rows, not product_options_heading or Choose Configuration */
+  #options_table tr:has(td:empty + td input[title*="Configuration Details" i]),
+  #options_table tr:has(td:empty + td input[title*="Details" i]) {
     display: none !important;
-    visibility: hidden !important;
   }
 
   #options_table .vCSS_img_line_group_features {

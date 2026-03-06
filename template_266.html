@@ -972,13 +972,13 @@ html body.category .v-product-grid > .v-product {
     // Mark built ONLY now
     window.__WM_LEATHER_MODAL_BUILT__ = true;
 
-    // Hide selects and insert UI
+    // Hide native leather dropdown (selection shown in "Selected leather" box); insert UI
     const anchorSelect = candidateSelects[0];
-
+    anchorSelect.classList.add("mc-native-leather");
 
   const ui = document.createElement("div");
     ui.innerHTML = `
-      <div class="wm-leather-summary"><b>Leather:</b> <span id="wmSummary">Select leather</span></div>
+      <div class="wm-leather-summary"><b>Leather:</b> <span id="wmSummary">Selected leather</span></div>
       <button class="wm-btn" id="wmOpen" type="button">Choose Leather & Color</button>
     `;
     anchorSelect.insertAdjacentElement("afterend", ui);
@@ -1327,19 +1327,19 @@ boot();
     panel.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start">
         <div  style="display:flex;gap:10px;align-items:center">
-          <button type="button" id="mcLeatherBtn"
-            style="padding:10px 14px;min-width:260px;text-align:center;border:1px solid #333;border-radius:10px;background:#fff;cursor:pointer">
+          <button type="button" id="mcLeatherBtn" class="mc-config-btn"
+            style="padding:10px 14px;width:260px;min-width:260px;max-width:260px;text-align:center;border:1px solid #333;border-radius:10px;background:#fff;cursor:pointer">
             Choose Leather
           </button>
           <div id="mcLeatherSummary"
             style="min-width:260px;max-width:520px;padding:8px 10px;border:1px solid #ddd;border-radius:10px;background:#f7f7f7;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-            ${(wmSummary && wmSummary.textContent) ? wmSummary.textContent : "No leather selected"}
+            ${(wmSummary && wmSummary.textContent) ? wmSummary.textContent : "Selected leather"}
           </div>
         </div>
 
         <div style="display:flex;gap:10px;align-items:center">
-          <button type="button" id="mcPlannerBtn"
-            style="padding:10px 14px;min-width:260px;text-align:center;border:1px solid #333;border-radius:10px;background:#fff;cursor:pointer">
+          <button type="button" id="mcPlannerBtn" class="mc-config-btn"
+            style="padding:10px 14px;width:260px;min-width:260px;max-width:260px;text-align:center;border:1px solid #333;border-radius:10px;background:#fff;cursor:pointer">
             Room Planner
           </button>
           <div id="mcPlannerSummary"
@@ -1364,7 +1364,7 @@ boot();
     // Keep summary synced to modal selection changes
     const mcSum = document.getElementById("mcLeatherSummary");
     if (wmSummary && mcSum) {
-      const sync = () => { mcSum.textContent = wmSummary.textContent || "No leather selected"; };
+      const sync = () => { mcSum.textContent = wmSummary.textContent || "Selected leather"; };
       sync();
       new MutationObserver(sync).observe(wmSummary, { childList:true, subtree:true });
     }
@@ -2655,24 +2655,20 @@ body.mc-product-page #content_area td.productoptionname {
     var rows = qa('tr', optionsTable);
     rows.forEach(function(row){
       var txt = (row.textContent || '').replace(/\s+/g, ' ').toLowerCase();
-      var hasConfigInput = !!q('input[title*="Configuration Details" i], input[name*="Configuration" i], input[value*="Configuration" i], textarea[title*="Configuration" i], select[title*="Configuration" i], input[title*="Details" i], input[name*="Details" i], input[value*="Details" i]', row);
-      var rowIdClass = ((row.id || '') + ' ' + (row.className || '')).toLowerCase();
-      var hasHeaderMarker = rowIdClass.indexOf('config') !== -1 || rowIdClass.indexOf('details') !== -1 || row.id === 'product_options_heading';
+      /* Only remove "Configuration Details" rows, NOT "Choose Configuration" (Straight/Curved) */
+      var hasDetailsInput = !!q('input[title*="Configuration Details" i], textarea[title*="Configuration Details" i], select[title*="Configuration Details" i]', row);
+      var hasHeaderMarker = row.id === 'product_options_heading' && txt.indexOf('configuration details') !== -1;
 
-      if (txt.indexOf('configuration details') !== -1 || hasConfigInput || hasHeaderMarker) {
+      if (txt.indexOf('configuration details') !== -1 && (hasDetailsInput || hasHeaderMarker)) {
         var prev = row.previousElementSibling;
         if (row.parentNode) row.parentNode.removeChild(row);
-
-        if (prev) {
-          var prevTxt = (prev.textContent || '').replace(/\s+/g, ' ').toLowerCase();
-          if (prevTxt.indexOf('configuration details') !== -1 || !!q('b, i, strong, em', prev)) {
-            if (prev.parentNode) prev.parentNode.removeChild(prev);
-          }
+        if (prev && (prev.textContent || '').toLowerCase().indexOf('configuration details') !== -1) {
+          if (prev.parentNode) prev.parentNode.removeChild(prev);
         }
       }
     });
 
-    qa('#options_table tr, tr', scope).forEach(function(row){
+    qa('#options_table tr', scope).forEach(function(row){
       var rowTxt = (row.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
       if (rowTxt === 'configuration details' || rowTxt.indexOf('configuration details') === 0) {
         if (row.parentNode) row.parentNode.removeChild(row);
@@ -2717,6 +2713,26 @@ body.mc-product-page #content_area td.productoptionname {
     });
   }
 
+  function sizeSelectsToLongestOption(scope){
+    var root = scope || document;
+    var table = q('#options_table', root) || q('table[id*="options_table"]', root);
+    if (!table) return;
+    var selects = qa('select', table).filter(function(sel){ return !sel.classList.contains('mc-native-leather'); });
+    selects.forEach(function(sel){
+      var opts = qa('option', sel);
+      var longest = 0;
+      opts.forEach(function(opt){
+        var t = (opt.textContent || opt.innerText || '').trim();
+        if (t.length > longest) longest = t.length;
+      });
+      if (longest > 0) {
+        var ch = Math.min(Math.max(longest + 2, 22), 60);
+        sel.style.setProperty('width', ch + 'ch', 'important');
+        sel.style.setProperty('min-width', ch + 'ch', 'important');
+      }
+    });
+  }
+
   function forceProductFixes() {
     if (!markProductPage()) return;
     var scope = document.querySelector('#content_area') || document.body;
@@ -2725,6 +2741,7 @@ body.mc-product-page #content_area td.productoptionname {
     forceTabsInline(scope);
     forceMediaLayout(scope);
     removeConfigurationDetails(scope);
+    sizeSelectsToLongestOption(scope);
     enforceMobileGutters(scope);
     clampFloatingIcons();
   }
