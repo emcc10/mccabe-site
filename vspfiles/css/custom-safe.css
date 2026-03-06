@@ -254,30 +254,52 @@ body:not(.is-home) header.header {
 
 /* =====================================================
    NON-HOME MENU: STOP STACKING (DESKTOP/TABLET)
+   Single row, gap between items, no overlap
 ===================================================== */
+body:not(.is-home) #display_menu_1 {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
 body:not(.is-home) #display_menu_1 > ul.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul {
   display: flex !important;
   flex-wrap: nowrap !important;
+  flex-direction: row !important;
   justify-content: center !important;
   align-items: center !important;
+  gap: 22px !important;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  width: auto !important;
+  max-width: 100% !important;
 }
 
-body:not(.is-home) #display_menu_1 > ul > li {
+body:not(.is-home) #display_menu_1 > ul > li,
+body:not(.is-home) #display_menu_1 .vnav--level1 > li {
   clear: none !important;
   float: none !important;
-  display: inline-flex !important;
+  display: flex !important;
   width: auto !important;
   flex: 0 0 auto !important;
   margin: 0 !important;
   padding: 0 !important;
+  position: relative !important;
 }
 
-body:not(.is-home) #display_menu_1 > ul > li > a {
+body:not(.is-home) #display_menu_1 > ul > li > a,
+body:not(.is-home) #display_menu_1 .vnav--level1 > li > a {
   display: inline-block !important;
   width: auto !important;
   white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 body:not(.is-home) #display_menu_1 br {
@@ -654,6 +676,7 @@ a.mc-cart-float {
 a.mc-home-float {
   left: max(12px, env(safe-area-inset-left)) !important;
   right: auto !important;
+  margin-right: 16px !important; /* space between container and content to the right */
 }
 
 .mc-cart-float,
@@ -2599,7 +2622,10 @@ body.mc-product-page select.mc-native-leather {
   transform: none !important;
 }
 
-.mc-home-float { left: var(--mc-left) !important; }
+.mc-home-float {
+  left: var(--mc-left) !important;
+  margin-right: 16px !important; /* container margin: space to the right of home icon */
+}
 /* .mc-cart-float position set at end of file (left-based so it never runs off) */
 
 .mc-home-float__icon,
@@ -2996,5 +3022,6 @@ body .mc-cart-float {
   max-width: 52px !important;
   min-width: 40px !important;
   max-height: 48px !important;
+  margin-left: 16px !important; /* container margin: space between menu and cart */
   box-sizing: border-box !important;
 }

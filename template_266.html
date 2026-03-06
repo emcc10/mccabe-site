@@ -42,8 +42,10 @@ document.addEventListener("DOMContentLoaded", function () {
   <style>
   .mc-cart-float__icon,
   .mc-home-float__icon { width: 20px; height: 20px; display: block; }
-  /* Keep cart on-screen: position from left so it never clips */
+  /* Icon containers: margins so they don’t touch menu/content */
+  body a.mc-home-float, body .mc-home-float { margin-right: 16px !important; }
   body a.mc-cart-float, body .mc-cart-float {
+    margin-left: 16px !important;
     left: calc(100vw - 52px - max(20px, env(safe-area-inset-right))) !important;
     right: auto !important;
     width: 52px !important;
@@ -1510,7 +1512,14 @@ body:not(.is-home) #display_menu_1 {
   padding: 0 !important;
 }
 
-/* Center the nav list (match hero menu gap/padding) */
+/* Center the nav list, single row, no stacking (match hero menu gap) */
+body:not(.is-home) #display_menu_1 {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
 body:not(.is-home) #display_menu_1 .main-menu .vnav--level1,
 body:not(.is-home) #display_menu_1 .main-menu .vnav--horizontal.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul.vnav--level1,
@@ -1521,13 +1530,26 @@ body:not(.is-home) #display_menu_1 > ul {
   top: auto !important;
   left: auto !important;
   display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 22px !important;
   padding: 12px 20px !important;
   margin: 0 auto !important;
-  width: 100% !important;
+  width: auto !important;
   max-width: 100% !important;
+}
+body:not(.is-home) #display_menu_1 > ul > li,
+body:not(.is-home) #display_menu_1 .vnav--level1 > li {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+body:not(.is-home) #display_menu_1 > ul > li > a,
+body:not(.is-home) #display_menu_1 .vnav--level1 > li > a {
+  white-space: nowrap !important;
 }
 
 
