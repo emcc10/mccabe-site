@@ -42,11 +42,10 @@ jobs:
 
       - name: Show exact remote paths (for FileZilla comparison)
         run: |
-          VSP_PATH="${{ github.event.inputs.remote_path || 'v/vspfiles/' }}"
           echo "Remote paths are relative to your SFTP user's HOME directory."
           echo "Template will be uploaded to:  v/template_266.html"
-          echo "vspfiles will be uploaded to:  $VSP_PATH"
-          echo "So custom-safe.css lands at:   ${VSP_PATH}css/custom-safe.css"
+          echo "vspfiles will be uploaded to:  v/vspfiles/"
+          echo "So custom-safe.css lands at:   v/vspfiles/css/custom-safe.css"
           echo ""
           echo "In FileZilla: after login, you start in that HOME folder. Look for the folder 'v' (or 'vspfiles' if you used that path). The Modified time of custom-safe.css there should be NOW after this run."
 
@@ -59,7 +58,7 @@ jobs:
           port: "2222"
           uploads: |
             template_266.html => v/
-            vspfiles/ => ${{ github.event.inputs.remote_path || 'v/vspfiles/' }}
+            vspfiles/ => v/vspfiles/
 
       - name: Deploy summary
         run: |
