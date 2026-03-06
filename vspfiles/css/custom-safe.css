@@ -3104,3 +3104,47 @@ body:not(.is-home) #display_menu_1 > ul {
   justify-content: center !important;
   align-items: center !important;
 }
+@media (max-width: 1200px) {
+  #options_table {
+    display: table !important;
+    width: 100% !important;
+    border-collapse: separate !important;
+  }
+
+  #options_table tbody {
+    display: table-row-group !important;
+  }
+
+  #options_table tr {
+    display: table-row !important;
+  }
+
+  #options_table td {
+    display: table-cell !important;
+    vertical-align: top !important;
+    float: none !important;
+    width: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #options_table select {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  #options_table font.colors_productname {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  #options_table .vCSS_img_line_group_features {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
