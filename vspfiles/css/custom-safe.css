@@ -2552,56 +2552,6 @@ body.mc-product-page select.mc-native-leather {
     margin: 0 auto !important;
   }
 }
-@media (max-width: 1200px) {
-
-  /* Restore full table layout */
-  #options_table {
-    display: table !important;
-    width: 100% !important;
-    border-collapse: separate !important;
-  }
-
-  #options_table tbody {
-    display: table-row-group !important;
-  }
-
-  #options_table tr {
-    display: table-row !important;
-  }
-
-  #options_table td {
-    display: table-cell !important;
-    vertical-align: top !important;
-    float: none !important;
-    width: auto !important;
-  }
-
-  /* Keep ALL dropdowns visible */
-  #options_table select {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  /* Keep ALL option group headers visible */
-  #options_table font.colors_productname,
-  #options_table .vCSS_img_line_group_features,
-  #options_table table {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  /* Prevent Volusion mobile CSS from hiding option rows */
-  #options_table .v65-product-option,
-  #options_table tr,
-  #options_table td {
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-}
 
 
 /* ============================================================
@@ -2615,7 +2565,7 @@ body.mc-product-page select.mc-native-leather {
   display: block !important;
   fill: #111 !important;
 }
-
+}
 
 /* ============================================================
    FIX 3: Main menu shifting/disappearing around 1080px
@@ -2637,6 +2587,7 @@ body:not(.is-home) #display_menu_1 > ul {
     display: table !important;
     width: 100% !important;
     border-collapse: separate !important;
+    table-layout: auto !important;
   }
 
   #options_table tbody {
