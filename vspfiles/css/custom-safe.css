@@ -367,6 +367,100 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li > ul a {
 }
 
 /* =====================================================
+   BREAKPOINT 992px: MOBILE MENU vs DESKTOP MENU
+===================================================== */
+/* Below 992px: show "SELECT A CATEGORY" mobile menu toggle, hide desktop nav */
+@media (max-width: 991px) {
+  .header__section--bottom.visible-xs,
+  .header__section--bottom .menu-toggle,
+  .menu-toggle,
+  .menu-toggle__link {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  .menu-toggle {
+    display: inline-block !important;
+  }
+  /* Hide desktop main menu when mobile menu is active */
+  header .microblock.main-menu,
+  header #display_menu_1,
+  .hidden-xs.col-lg-7 .main-menu {
+    display: none !important;
+  }
+  header .hidden-xs.col-lg-7.no-pad-lg {
+    display: none !important;
+  }
+  /* Override Bootstrap: allow push menu panel to show when open below 992px */
+  nav.push-menu.hidden-sm.hidden-md.hidden-lg,
+  nav.menu.push-menu {
+    display: none !important;
+  }
+  body.push-menu-open nav.push-menu,
+  html.push-menu-open nav.push-menu {
+    display: block !important;
+  }
+}
+
+/* 992px and up: hide mobile toggle, show desktop nav */
+@media (min-width: 992px) {
+  .header__section--bottom.visible-xs {
+    display: none !important;
+  }
+  .menu-toggle,
+  .menu-toggle__link {
+    display: none !important;
+  }
+  header .microblock.main-menu,
+  header #display_menu_1 {
+    display: block !important;
+  }
+  body:not(.is-home) header #display_menu_1 {
+    display: block !important;
+  }
+}
+
+/* =====================================================
+   FIX MENU SHIFT AT 992px–1199px (product/category pages)
+   Bootstrap col-lg-* only applies at 1200px+, so at 1199px the
+   menu column loses width and can shift right. Lock layout here.
+===================================================== */
+@media (min-width: 992px) and (max-width: 1199px) {
+  body:not(.is-home) header.header > div {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  body:not(.is-home) header.header .header__section {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+  }
+  /* Menu column: take remaining space and center the nav */
+  body:not(.is-home) header.header .hidden-xs.col-lg-7.no-pad-lg,
+  body:not(.is-home) header.header div.hidden-xs.no-pad-lg {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: auto !important;
+  }
+  body:not(.is-home) header.header .microblock.main-menu {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  body:not(.is-home) header.header .microblock.mc-header-cart {
+    flex: 0 0 auto !important;
+  }
+}
+
+/* =====================================================
    MOBILE ONLY: FIX PUSH MENU + CLICK BLOCKERS
    (does not affect desktop)
 ===================================================== */
@@ -395,9 +489,9 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li > ul a {
   .menu-toggle {
     position: relative !important;
     z-index: 2147483647 !important;
-    margin-right: -36px;
-    margin-left: -171px;
-    margin-top: 20px;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
   }
 
   /* Push menu panel */
@@ -510,18 +604,25 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li > ul a {
 }
 
 /* =====================================================
-   ALWAYS-ON HOME ICON (TOP LEFT, ALL PAGES)
-   Does not touch menus
+   HOME + CART ICONS (SAME SIZE & POSITION ON ALL PAGES)
+   Proportional sizing; safe margins so they never run off
 ===================================================== */
-.mc-home-float {
+.mc-home-float,
+a.mc-home-float,
+.mc-cart-float,
+a.mc-cart-float {
   position: fixed !important;
-top: 14px !important;
-  left: 24px !important;
+  top: max(12px, env(safe-area-inset-top)) !important;
   z-index: 2147483647 !important;
-  width: 52px !important;
-  height: 46px !important;
+  width: clamp(40px, 10vw, 52px) !important;
+  height: clamp(40px, 10vw, 52px) !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 52px !important;
+  max-height: 52px !important;
   border-radius: 999px !important;
-  margin-left: 30px !important;
+  margin: 0 !important;
+  padding: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -529,21 +630,37 @@ top: 14px !important;
   border: 1px solid rgba(0, 0, 0, 0.12) !important;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important;
   text-decoration: none !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  transform: none !important;
 }
 
-.mc-home-float__icon {
-  width: 20px !important;
-  height: 20px !important;
+.mc-home-float,
+a.mc-home-float {
+  left: max(12px, env(safe-area-inset-left)) !important;
+  right: auto !important;
+}
+
+.mc-cart-float,
+a.mc-cart-float {
+  right: max(12px, env(safe-area-inset-right)) !important;
+  left: auto !important;
+}
+
+.mc-home-float__icon,
+.mc-cart-float__icon,
+.mc-home-float__icon path,
+.mc-cart-float__icon path {
+  width: clamp(16px, 4vw, 20px) !important;
+  height: clamp(16px, 4vw, 20px) !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  margin: 0 !important;
   display: block !important;
   fill: #111 !important;
-}
-
-/* Optional: keep it out of the way of your mobile toggle */
-@media (max-width: 991px) {
-  .mc-home-float {
-    top: 14px !important;
-    left: -16px !important;
-  }
+  flex: 0 0 auto !important;
 }
 
 @media (max-width: 991px) {
@@ -659,35 +776,7 @@ top: 14px !important;
   }
 }
 
-/* =====================================================
-   ALWAYS-ON CART ICON (TOP RIGHT, ALL PAGES)
-   Does not touch menus
-===================================================== */
-.mc-cart-float {
-  position: fixed !important;
-  top: 14px !important;
-  right: 16px !important;
-  z-index: 2147483647 !important;
-  width: 52px !important;
-  height: 46px !important;
-  border-radius: 999px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: rgba(255, 255, 255, 0.92) !important;
-  border: 1px solid rgba(0, 0, 0, 0.12) !important;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important;
-  text-decoration: none !important;
-}
-
-.mc-cart-float__icon {
-  width: 20px !important;
-  height: 20px !important;
-  display: block !important;
-  fill: #111 !important;
-  margin-right: -3px;
-  margin-top: 2px;
-}
+/* (Home + cart icon rules are in the unified block above) */
 
 /* Hide header/cart text links if you only want the icon */
 a.mc-header-cart__link,
@@ -2099,23 +2188,7 @@ body.mc-product-page select.mc-native-leather {
     box-sizing: border-box !important;
   }
 
-  .mc-cart-float {
-    right: 8px !important;
-    left: auto !important;
-    width: 44px !important;
-    height: 44px !important;
-    margin: 0 !important;
-    transform: none !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-  }
-
-  .mc-cart-float__icon {
-    width: 18px !important;
-    height: 18px !important;
-    margin: 0 !important;
-    flex: 0 0 18px !important;
-  }
+  /* Use unified icon sizing (same as base block above) – do not override size/position */
 }
 
 /* === MOBILE OVERFLOW KILL-SWITCH (2026-03-02c) === */
@@ -2504,33 +2577,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     padding-right: 0 !important;
   }
 
-  a.mc-cart-float {
-    position: fixed !important;
-    top: max(12px, env(safe-area-inset-top)) !important;
-    right: max(10px, env(safe-area-inset-right)) !important;
-    left: auto !important;
-    width: 44px !important;
-    height: 44px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border-radius: 999px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transform: none !important;
-    z-index: 2147483647 !important;
-    pointer-events: auto !important;
-    text-decoration: none !important;
-  }
-
-  .mc-cart-float__icon,
-  .mc-cart-float__icon path {
-    width: 18px !important;
-    height: 18px !important;
-    margin: 0 !important;
-    display: block !important;
-    fill: #111111 !important;
-  }
+  /* Home/cart use unified block at top of file */
 
   body.productdetails a.floating-mobile-cart,
   body.mc-product-page a.floating-mobile-cart {
@@ -2563,18 +2610,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
       box-sizing: border-box !important;
     }
 
-    a.mc-cart-float {
-      top: 12px !important;
-      right: 10px !important;
-      top: max(12px, env(safe-area-inset-top)) !important;
-      right: max(10px, env(safe-area-inset-right)) !important;
-      left: auto !important;
-      margin: 0 !important;
-      transform: translate3d(0, 0, 0) !important;
-      max-width: 44px !important;
-      max-height: 44px !important;
-      overflow: hidden !important;
-    }
+    /* a.mc-cart-float: use unified icon block at top of file */
   }
 
   /* === HARD MOBILE OVERRIDE (2026-03-02z) === */
@@ -2622,25 +2658,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
       visibility: hidden !important;
     }
 
-    a.mc-cart-float,
-    a.floating-mobile-cart,
-    a[aria-label="Cart"] {
-      position: fixed !important;
-      top: 10px !important;
-      right: 6px !important;
-      left: auto !important;
-      bottom: auto !important;
-      width: 40px !important;
-      height: 40px !important;
-      max-width: 40px !important;
-      max-height: 40px !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      transform: none !important;
-      z-index: 2147483647 !important;
-      overflow: hidden !important;
-      pointer-events: auto !important;
-    }
+    /* Cart/home icons: use unified block at top of file */
   }
 
   /* === FINAL MOBILE EDGE LOCK (2026-03-02k) === */
@@ -2678,22 +2696,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
       box-sizing: border-box !important;
     }
 
-    a.mc-cart-float,
-    a.floating-mobile-cart,
-    a[aria-label="Cart"] {
-      position: fixed !important;
-      top: 10px !important;
-      right: 8px !important;
-      left: auto !important;
-      width: 42px !important;
-      height: 42px !important;
-      max-width: 42px !important;
-      max-height: 42px !important;
-      margin: 0 !important;
-      transform: none !important;
-      z-index: 2147483647 !important;
-      overflow: hidden !important;
-    }
+    /* Cart/home icons: use unified block at top of file */
   }
 }
 
@@ -2754,33 +2757,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     visibility: hidden !important;
   }
 
-  a.mc-cart-float,
-  a.floating-mobile-cart,
-  a[aria-label="Cart"] {
-    position: fixed !important;
-    top: 10px !important;
-    right: 12px !important;
-    left: auto !important;
-    bottom: auto !important;
-    width: 42px !important;
-    height: 42px !important;
-    max-width: 42px !important;
-    max-height: 42px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    transform: none !important;
-    z-index: 2147483647 !important;
-    overflow: hidden !important;
-  }
-
-  .mc-cart-float .mc-cart-float__icon,
-  a[aria-label="Cart"] svg,
-  a.floating-mobile-cart svg {
-    width: 22px !important;
-    height: 22px !important;
-    display: block !important;
-    margin: 10px auto !important;
-  }
+  /* Cart/home icons: use unified block at top of file (same size/position on all pages) */
 }
 
 @media only screen and (max-width: 991px) {
@@ -2843,12 +2820,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     display: none !important;
   }
 
-  body a.mc-cart-float,
-  body a[aria-label="Cart"],
-  body a.mc-header-cart__link,
-  body a.floating-mobile-cart {
-    right: 18px !important;
-  }
+  /* Cart position: use unified block at top of file */
 
   #product_options_heading,
   #options_table #product_options_heading,
