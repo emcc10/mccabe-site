@@ -1,3 +1,4 @@
+
 /* RH-STYLE GLOBAL FONT */
 body,
 body * {
@@ -5,7 +6,23 @@ body * {
   font-weight: 300;
   letter-spacing: 0.2px;
 }
-
+/* Hide ALL Volusion default cart icons to stop flashing */
+header.header a[href*="shoppingcart"],
+header.header .vnav__cart,
+header.header .vnav-cart,
+header.header .vnav__link--cart,
+header.header .cart-link,
+header.header .carticon,
+header.header svg[aria-label="Cart"],
+header.header svg[class*="cart"],
+header.header [class*="cart"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
 /* ======================================
    GLOBAL RESET
 ====================================== */
@@ -92,7 +109,7 @@ body:not(.is-home) #slideshow-container {
   /* hero container: not full-page */
   #slideshow-container .mc-hero-video {
     min-height: 0 !important;
-    height: 52vh !important; /* adjust 45�60vh */
+    height: 52vh !important; /* adjust 45 60vh */
     background: #000 !important; /* letterbox for contain */
     overflow: hidden !important;
   }
@@ -409,7 +426,7 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li > ul a {
     background: #fff !important;
     overflow-y: auto !important;
     max-height: 60vh !important;
-    background: rgba(72, 72, 72, 0.85) !important; /* 0.80�0.98 */
+    background: rgba(72, 72, 72, 0.85) !important; /* 0.80 0.98 */
     margin-top: 11px !important;
   }
 
@@ -422,7 +439,7 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li > ul a {
     padding: 12px 12px !important;
     text-align: center !important;
     background: transparent !important;
-    background: rgba(72, 72, 72, 0.85) !important; /* 0.80�0.98 */
+    background: rgba(72, 72, 72, 0.85) !important; /* 0.80 0.98 */
   }
 
   #push-nav__menu ul,
@@ -480,7 +497,7 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li > ul a {
 @media (max-width: 991px) {
   /* Move the slide-top menu panel below the header */
   nav.push-menu {
-    top: -40px !important; /* adjust if needed (60�90) */
+    top: -40px !important; /* adjust if needed (60 90) */
     height: calc(100vh - 70px) !important;
     max-height: calc(100vh - 70px) !important;
   }
@@ -565,7 +582,7 @@ top: 14px !important;
     opacity: 1 !important;
     pointer-events: auto !important;
     position: fixed !important;
-    top: 70px !important; /* adjust 60�90 if needed */
+    top: 70px !important; /* adjust 60 90 if needed */
     left: 0 !important;
     right: 0 !important;
     height: calc(100vh - 70px) !important;
@@ -626,7 +643,7 @@ top: 14px !important;
 @media (max-width: 991px) {
   /* darker, still transparent */
   body.push-menu-open nav.push-menu {
-    background: rgba(0, 0, 0, 0.78) !important; /* try 0.70�0.88 */
+    background: rgba(0, 0, 0, 0.78) !important; /* try 0.70 0.88 */
   }
 
   /* make menu text visible */
@@ -682,7 +699,7 @@ a.hero-cart-link {
   /* 1) STOP the hero from being full-page on mobile */
   #slideshow-container .mc-hero-video {
     min-height: 0 !important; /* overrides your desktop min-height:100vh */
-    height: 42vh !important; /* adjust: 40�60vh */
+    height: 42vh !important; /* adjust: 40 60vh */
     overflow: hidden !important;
   }
 
@@ -995,7 +1012,7 @@ nav.push-menu .push-menu__close-btn::before {
 }
 
 /* =====================================================
-   FIX NON-HOME DESKTOP MENU CENTERING � EXACT MATCH
+   FIX NON-HOME DESKTOP MENU CENTERING   EXACT MATCH
    Paste at VERY BOTTOM of custom-safe.css
 ===================================================== */
 @media (min-width: 992px) {
@@ -1318,7 +1335,7 @@ body.mc-product-page select.mc-native-leather {
     padding-left: 18px !important;
   }
 
-  /* Stop �cut off on the left� */
+  /* Stop  cut off on the left  */
   body.mc-product-page #content_area td.mc-pdp-options-td * {
     overflow: visible !important;
   }
@@ -1504,7 +1521,7 @@ body.mc-product-page select.mc-native-leather {
         display: block !important;
       }
 
-      /* Prevent any �sidebar boxes� from exceeding screen width */
+      /* Prevent any  sidebar boxes  from exceeding screen width */
       body.mc-product-page #content_area .mc-leather-summary,
       body.mc-product-page #content_area .mc-planner-summary,
       body.mc-product-page #content_area .mc-planner-selections,
@@ -2992,4 +3009,118 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     width: 100% !important;
     margin: 0 auto !important;
   }
+}
+@media (max-width: 1200px) {
+
+  /* Restore full table layout */
+  #options_table {
+    display: table !important;
+    width: 100% !important;
+    border-collapse: separate !important;
+  }
+
+  #options_table tbody {
+    display: table-row-group !important;
+  }
+
+  #options_table tr {
+    display: table-row !important;
+  }
+
+  #options_table td {
+    display: table-cell !important;
+    vertical-align: top !important;
+    float: none !important;
+    width: auto !important;
+  }
+
+  /* Keep ALL dropdowns visible */
+  #options_table select {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Keep ALL option group headers visible */
+  #options_table font.colors_productname,
+  #options_table .vCSS_img_line_group_features,
+  #options_table table {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Prevent Volusion mobile CSS from hiding option rows */
+  #options_table .v65-product-option,
+  #options_table tr,
+  #options_table td {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+@media (max-width: 1200px) {
+
+  /* Nuclear: make sure the options table and everything inside it is visible */
+  #options_table,
+  #options_table * {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    float: none !important;
+  }
+
+  /* Basic layout so it doesn’t look totally broken */
+  #options_table {
+    width: 100% !important;
+  }
+
+  #options_table select {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+/* ============================================================
+   FIX 1: Force "Straight or Curved" (Choose Configuration)
+   dropdown to remain visible at all screen sizes.
+   Targets ONLY <select id="ProductOptionField_N">
+   ============================================================ */
+#ProductOptionField_N {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  pointer-events: auto !important;
+  position: static !important;
+}
+
+
+/* ============================================================
+   FIX 2: Home icon size — match cart icon behavior.
+   Replaces fixed 20px size with responsive clamp().
+   Targets ONLY .mc-home-float__icon
+   ============================================================ */
+.mc-home-float__icon {
+  width: clamp(20px, 2vw, 28px) !important;
+  height: clamp(20px, 2vw, 28px) !important;
+  display: block !important;
+  fill: #111 !important;
+}
+
+
+/* ============================================================
+   FIX 3: Main menu shifting/disappearing around 1080px
+   Applies ONLY to non-home pages.
+   Replaces fixed 110px gap with responsive clamp().
+   Keeps menu centered until mobile breakpoint.
+   ============================================================ */
+body:not(.is-home) #display_menu_1 > ul.vnav--level1,
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+body:not(.is-home) #display_menu_1 > ul {
+  gap: clamp(20px, 6vw, 110px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
