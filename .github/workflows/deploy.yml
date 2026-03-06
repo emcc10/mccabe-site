@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:   # Lets you run "Deploy Volusion Theme" manually from Actions tab
 
 jobs:
   deploy:
