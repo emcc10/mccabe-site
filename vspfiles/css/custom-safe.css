@@ -303,7 +303,7 @@ body:not(.is-home) #display_menu_1 {
   flex-direction: row !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 0 !important;
+  gap: 32px !important; /* space between uls if Volusion injects more than one */
   width: 100% !important;
   max-width: 100% !important;
 }
