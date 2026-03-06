@@ -19,7 +19,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: templates/266/
+          local-dir: vspfiles/templates/266/
           server-dir: /vspfiles/templates/266/
 
       - name: Deploy CSS
@@ -28,7 +28,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: css/
+          local-dir: vspfiles/css/
           server-dir: /vspfiles/css/
 
       - name: Deploy JS
@@ -37,5 +37,5 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: js/
-          server-dir: /vspfiles/js/
+          local-dir: vspfiles/templates/266/js/
+          server-dir: /vspfiles/templates/266/js/
