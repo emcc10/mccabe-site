@@ -14,20 +14,31 @@
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
 <link id="mc-custom-safe-css" rel="stylesheet" href="/v/vspfiles/css/custom-safe.css?v=20260302-final">
+ 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  if (window.v65 && typeof window.v65.init === "function") {
-    window.v65.init();
-  }
-  if (window.V65 && typeof window.V65.init === "function") {
-    window.V65.init();
-  }
-  if (window.Volusion && window.Volusion.ProductDetail && typeof window.Volusion.ProductDetail.init === "function") {
-    window.Volusion.ProductDetail.init();
-  }
-});
-</script>
+(function () {
+  var liveHref = '/v/vspfiles/css/custom-safe.css?v=20260302-final-' + Date.now();
+  var updatedAny = false;
 
+  document.querySelectorAll('link[rel="stylesheet"]').forEach(function (linkEl) {
+    var href = (linkEl.getAttribute('href') || '').toLowerCase();
+    if (href.indexOf('custom-safe.css') !== -1) {
+      linkEl.href = liveHref;
+      linkEl.setAttribute('data-mc-css-live', '1');
+      updatedAny = true;
+    }
+  });
+
+  if (!updatedAny) {
+    var fallback = document.createElement('link');
+    fallback.rel = 'stylesheet';
+    fallback.id = 'mc-custom-safe-css';
+    fallback.href = liveHref;
+    fallback.setAttribute('data-mc-css-live', '1');
+    document.head.appendChild(fallback);
+  }
+})();
+</script>
 <script>
 (function () {
   function bindMobileAltThumbs() {
@@ -119,7 +130,19 @@ document.addEventListener("DOMContentLoaded", function () {
       el.style.boxSizing = 'border-box';
     });
 
-    
+    var cart = document.querySelector('a.mc-cart-float, a.floating-mobile-cart, a[aria-label="Cart"]');
+    if (cart) {
+      cart.style.position = 'fixed';
+      cart.style.top = '10px';
+      cart.style.right = '12px';
+      cart.style.left = 'auto';
+      cart.style.width = '52px';
+      cart.style.height = '46px';
+      cart.style.margin = '0';
+      cart.style.transform = 'none';
+      cart.style.zIndex = '2147483647';
+      cart.style.overflow = 'hidden';
+    }
   }
 
   function runProductHardFixes() {
