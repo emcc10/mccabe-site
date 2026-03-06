@@ -1442,7 +1442,7 @@ body.mc-product-page select.mc-native-leather {
 
     /* 1) Remove the first base price line (the stray ":" + price) */
     .product_productprice {
-      display: none !important;
+      display: block !important;
     }
 
     /* 2) Stack "Price with Selected Options" above its price */
