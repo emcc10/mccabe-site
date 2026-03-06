@@ -22,40 +22,36 @@ jobs:
 
       - name: Verify deploy secrets
         run: |
-          if [ -z "$FTP_SERVER" ]; then echo "::error::FTP_SERVER secret is not set in GitHub. Add it in repo Settings → Secrets and variables → Actions."; exit 1; fi
+          if [ -z "$FTP_SERVER" ]; then echo "::error::FTP_SERVER secret is not set."; exit 1; fi
           if [ -z "$FTP_USERNAME" ]; then echo "::error::FTP_USERNAME secret is not set."; exit 1; fi
           if [ -z "$FTP_PASSWORD" ]; then echo "::error::FTP_PASSWORD secret is not set."; exit 1; fi
-          echo "Secrets are set. Deploying to $FTP_SERVER (port 2222)."
+          echo "Server: $FTP_SERVER"
+          echo "Username: $FTP_USERNAME"
+          echo "Port: 2222"
 
-      - name: Show what we're deploying
+      - name: Show source files
         run: |
-          echo "Template (to remote root /):"
+          echo "Template source:"
           ls -la template_266.html 2>/dev/null || true
-          echo "Contents of vspfiles/ (to /vspfiles/):"
-          find vspfiles -type f | head -40
+          echo "CSS source:"
           ls -la vspfiles/css/custom-safe.css 2>/dev/null || true
+          echo "Deploy test source:"
+          ls -la vspfiles/css/deploy-test.txt 2>/dev/null || true
+          echo "Top of custom-safe.css:"
+          head -20 vspfiles/css/custom-safe.css 2>/dev/null || true
 
-      - name: Show exact remote paths (for FileZilla comparison)
-        run: |
-          echo "Remote paths are relative to your SFTP root /."
-          echo "Template will be uploaded to:  /template_266.html"
-          echo "vspfiles will be uploaded to:  /vspfiles/"
-          echo "So custom-safe.css lands at:   /vspfiles/css/custom-safe.css"
-          echo ""
-          echo "In FileZilla: after login, open /vspfiles/css/custom-safe.css and check that Modified time is NOW after this run."
-
-      - name: Deploy via SFTP
-        uses: Dylan700/sftp-upload-action@v1.2.3
+      - name: Upload via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server: ${{ secrets.FTP_SERVER }}
+          host: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: "2222"
-          uploads: |
-            template_266.html => /
-            vspfiles/ => vspfiles/
+          port: 2222
+          source: "template_266.html,vspfiles/*"
+          target: "/"
 
       - name: Deploy summary
         run: |
-          echo "If the job succeeded, the files were written to the paths above."
-          echo "Check FileZilla at: /vspfiles/css/custom-safe.css"
+          echo "Expected remote template: /template_266.html"
+          echo "Expected remote CSS: /vspfiles/css/custom-safe.css"
+          echo "Expected remote test file: /vspfiles/css/deploy-test.txt"
