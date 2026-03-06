@@ -23,4 +23,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: "2222"
           uploads: |
-            vspfiles/ => vspfiles/
+            vspfiles/ => v/vspfiles/
