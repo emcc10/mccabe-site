@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Deploy to FTP (vspfiles: templates, css, js)
+      - name: "Deploy to FTP (vspfiles: templates, css, js)"
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           ftp-server: ${{ secrets.FTP_SERVER }}
