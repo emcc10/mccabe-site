@@ -14,11 +14,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: "Deploy to FTP (vspfiles: templates, css, js)"
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: "Deploy via SFTP (vspfiles: templates, css, js)"
+        uses: Dylan700/sftp-upload-action@v1.2.3
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: vspfiles/
-          server-dir: ./
+          port: "2222"
+          uploads: "vspfiles/ => vspfiles/"
