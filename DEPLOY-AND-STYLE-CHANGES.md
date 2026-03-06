@@ -9,9 +9,15 @@ This file documents the changes applied so you can commit them as a single updat
 - **Triggers:** Push to `main` and manual "Run workflow"
 - **Protocol:** SFTP (port 2222) via Dylan700/sftp-upload-action
 - **Secrets used:** `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`
-- **Upload:** Local `vspfiles/` → remote `vspfiles/`
+- **Upload:** Local `vspfiles/` → remote `v/vspfiles/` (path is relative to your SFTP login folder)
 
-Set `FTP_SERVER` in GitHub Secrets to your SFTP hostname (e.g. `sftp.mccabestheaterandliving.com`) or IP. No port or `sftp://` in the secret.
+Set `FTP_SERVER` in GitHub Secrets to your SFTP hostname or **IP** (hostname often fails from GitHub; IP is reliable). No port or `sftp://` in the secret.
+
+**If the action succeeds but the live site doesn’t update:**
+
+1. **Confirm where files land:** In FileZilla (or your SFTP client), connect and look at the top-level folders. Find where `custom-safe.css` actually lives (same path as the URL `/v/vspfiles/css/`). Check that file’s “Last modified” time after a deploy—if it’s not updated, the workflow is uploading to the wrong path.
+2. **Try a different path:** In GitHub → Actions → “Deploy Volusion Theme” → “Run workflow”. You can enter a different **Remote path for vspfiles** (e.g. `vspfiles/` if your SFTP home is already the `v` folder, or `./v/vspfiles/`). Then run and check the site again.
+3. **Cache:** Do a hard refresh (Ctrl+Shift+R) or open the site in a private window to rule out browser cache.
 
 ---
 

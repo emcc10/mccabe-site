@@ -1,4 +1,5 @@
 # SFTP deploy: uses secrets FTP_SERVER, FTP_USERNAME, FTP_PASSWORD (port 2222)
+# Site URLs use /v/vspfiles/ - remote path must match where the server serves that from.
 name: Deploy Volusion Theme
 
 on:
@@ -6,6 +7,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      remote_path:
+        description: "Remote path for vspfiles (e.g. v/vspfiles/ or vspfiles/)"
+        required: false
+        default: "v/vspfiles/"
 
 jobs:
   deploy:
@@ -15,6 +21,13 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Show what we're deploying
+        run: |
+          echo "Contents of vspfiles/ being uploaded:"
+          find vspfiles -type f | head -40
+          echo "---"
+          ls -la vspfiles/css/custom-safe.css 2>/dev/null || true
+
       - name: Deploy via SFTP
         uses: Dylan700/sftp-upload-action@v1.2.3
         with:
@@ -23,4 +36,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: "2222"
           uploads: |
-            vspfiles/ => v/vspfiles/
+            vspfiles/ => ${{ github.event.inputs.remote_path || 'v/vspfiles/' }}
