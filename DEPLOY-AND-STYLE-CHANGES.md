@@ -10,7 +10,7 @@ This file documents the changes applied so you can commit them as a single updat
 - **Protocol:** SFTP (port 2222) via Dylan700/sftp-upload-action
 - **Secrets used:** `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`
 - **Uploads:**  
-  - `template_266.html` → remote root (same location as `sftp://.../template_266.html`)  
+  - `template_266.html` (at repo root) → remote root = **sftp://erin@sftp.mccabestheaterandliving.com:2222/template_266.html**. Volusion has two locations for the template; this is the one we deploy to. Edit only this file in the repo.  
   - `vspfiles/` → remote `v/vspfiles/` (path relative to your SFTP login folder)
 
 Set `FTP_SERVER` in GitHub Secrets to your SFTP hostname or **IP** (hostname often fails from GitHub; IP is reliable). No port or `sftp://` in the secret.

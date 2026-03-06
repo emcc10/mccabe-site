@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Canonical template: deploys to sftp://.../template_266.html (SFTP root). Volusion may have two locations; edit this file for changes. -->
 
 <!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
 <!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><!--<![endif]-->
@@ -14,6 +15,31 @@
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
 <link id="mc-custom-safe-css" rel="stylesheet" href="/v/vspfiles/css/custom-safe.css?v=20260302-final">
+
+<script>
+window.showSlides = function(){};
+</script>
+<script>
+window.onerror = function (message, source, lineno, colno, error) {
+  if (String(message).includes("dots[(slideIndex - 1)]")) {
+    return true; // swallow the slideshow error
+  }
+};
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (window.v65 && typeof window.v65.init === "function") {
+    window.v65.init();
+  }
+  if (window.V65 && typeof window.V65.init === "function") {
+    window.V65.init();
+  }
+  if (window.Volusion && window.Volusion.ProductDetail && typeof window.Volusion.ProductDetail.init === "function") {
+    window.Volusion.ProductDetail.init();
+  }
+});
+</script>
   <style>
   .mc-cart-float__icon,
   .mc-home-float__icon { width: 20px; height: 20px; display: block; }
@@ -95,35 +121,13 @@
 })();
 </script>
 <script>
-(function () {
-  function removeConfigurationDetails() {
-    var productRoot = document.getElementById('v65-product-parent') || document;
-    var rows = productRoot.querySelectorAll('#options_table tr, tr');
-
-    rows.forEach(function (row) {
-      var text = (row.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
-      var hasConfigText = text.indexOf('configuration details') !== -1;
-      var hasConfigField = !!row.querySelector('input[title*="Configuration Details" i], input[name*="Configuration Details" i], input[value*="Configuration Details" i], textarea[title*="Configuration Details" i], select[title*="Configuration Details" i]');
-      if (hasConfigText || hasConfigField) {
-        row.remove();
-      }
-    });
-
-    productRoot.querySelectorAll('label, span, div, p, li, td, th').forEach(function (node) {
-      var text = (node.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
-      if (text === 'configuration details' || text.indexOf('configuration details') === 0) {
-        var host = node.closest('tr, li, .product-option, .v65-product-option, .option-row, .option, .form-group') || node;
-        if (host && host.parentNode) {
-          host.remove();
-        }
-      }
-    });
-  }
-
   function enforceMobileLayout() {
     if (!window.matchMedia('(max-width: 991px)').matches) return;
 
-    var gutters = document.querySelectorAll('#content_area, .content_area-wrapper, #v65-product-parent, #v65-product-parent td, #v65-product-parent th, #options_table, #divDescription, #divQuestions, .TabbedPanelsContent, .TabbedPanelsContentGroup, .resp-tabs-container, .product_description');
+    var gutters = document.querySelectorAll(
+      '#content_area, .content_area-wrapper, #v65-product-parent, #options_table, #divDescription, #divQuestions, .TabbedPanelsContent, .TabbedPanelsContentGroup, .resp-tabs-container, .product_description'
+    );
+
     gutters.forEach(function (el) {
       el.style.paddingLeft = '16px';
       el.style.paddingRight = '16px';
@@ -151,8 +155,7 @@
   }
 
   function runProductHardFixes() {
-    removeConfigurationDetails();
-    enforceMobileLayout();
+  enforceMobileLayout();
   }
 
   if (document.readyState === 'loading') {
@@ -162,24 +165,6 @@
   }
 
   window.addEventListener('load', runProductHardFixes);
-  setTimeout(runProductHardFixes, 100);
-  setTimeout(runProductHardFixes, 400);
-  setTimeout(runProductHardFixes, 900);
-  setTimeout(runProductHardFixes, 1800);
-
-  var observerRoot = document.getElementById('v65-product-parent') || document.body;
-  if (observerRoot && typeof MutationObserver !== 'undefined') {
-    var observer = new MutationObserver(function () {
-      runProductHardFixes();
-    });
-
-    observer.observe(observerRoot, {
-      childList: true,
-      subtree: true
-    });
-  }
-
-  window.setInterval(runProductHardFixes, 2000);
 })();
 </script>
 
@@ -227,12 +212,12 @@
       </div>
 
     <!-- HERO VIDEO -->
-    <section class="mc-hero-video">
-      <video class="mc-hero-video-el" autoplay muted loop playsinline>
-        <source src="/v/vspfiles/images/palliser.mp4" type="video/mp4">
-      </video>
+<section class="mc-hero-video">
+  <video class="mc-hero-video-el is-preloading" autoplay muted playsinline preload="auto">
+    <source src="/v/vspfiles/windsor_feature_2025.mov" type="video/mp4">
+  </video>
 
-      <div class="mc-hero-overlay">
+ <div class="mc-hero-overlay">
         <h1>CRAFTSMANSHIP MEETS COMFORT</h1>
         <p>
           CUSTOM FURNITURE, DESIGNED FOR LIVING<br>
@@ -243,6 +228,65 @@
         </a>
       </div>
     </section>
+
+<style>
+  .mc-hero-video-el.is-preloading {
+    opacity: 0;
+  }
+
+  .mc-hero-video-el.is-ready {
+    opacity: 1;
+    transition: opacity .25s ease;
+  }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var video = document.querySelector(".mc-hero-video-el");
+  if (!video) return;
+
+  var startTime = 4;
+  var hasStarted = false;
+
+  function revealVideo() {
+    video.classList.remove("is-preloading");
+    video.classList.add("is-ready");
+  }
+
+  function seekAndPlay() {
+    if (hasStarted) return;
+    hasStarted = true;
+
+    video.pause();
+
+    var onSeeked = function () {
+      video.removeEventListener("seeked", onSeeked);
+      revealVideo();
+
+      var playPromise = video.play();
+      if (playPromise && typeof playPromise.then === "function") {
+        playPromise.catch(function () {});
+      }
+    };
+
+    video.addEventListener("seeked", onSeeked);
+    video.currentTime = startTime;
+  }
+
+  if (video.readyState >= 1) {
+    seekAndPlay();
+  } else {
+    video.addEventListener("loadedmetadata", seekAndPlay, { once: true });
+  }
+
+  video.addEventListener("ended", function () {
+    video.currentTime = startTime;
+    video.play().catch(function () {});
+  });
+});
+</script>
+
+      
 
   </div>
 </div>
