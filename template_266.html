@@ -42,6 +42,13 @@ document.addEventListener("DOMContentLoaded", function () {
   <style>
   .mc-cart-float__icon,
   .mc-home-float__icon { width: 20px; height: 20px; display: block; }
+  /* Keep cart on-screen: position from left so it never clips */
+  body a.mc-cart-float, body .mc-cart-float {
+    left: calc(100vw - 52px - max(20px, env(safe-area-inset-right))) !important;
+    right: auto !important;
+    width: 52px !important;
+    max-width: 52px !important;
+  }
   </style>
 <script>
 (function () {

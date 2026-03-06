@@ -658,8 +658,8 @@ a.mc-home-float {
 
 .mc-cart-float,
 a.mc-cart-float {
-  right: max(16px, env(safe-area-inset-right)) !important;
-  left: auto !important;
+  /* Position from left at end of file so cart never runs off */
+  right: auto !important;
 }
 
 .mc-home-float__icon,
@@ -2600,7 +2600,7 @@ body.mc-product-page select.mc-native-leather {
 }
 
 .mc-home-float { left: var(--mc-left) !important; }
-.mc-cart-float { right: var(--mc-right) !important; left: auto !important; }
+/* .mc-cart-float position set at end of file (left-based so it never runs off) */
 
 .mc-home-float__icon,
 .mc-cart-float__icon {
@@ -2980,4 +2980,21 @@ body:not(.is-home) #display_menu_1 > ul {
     visibility: visible !important;
     opacity: 1 !important;
   }
+}
+
+/* ============================================================
+   CART ICON: force on-screen (no run-off) - position from left
+   so it never gets clipped by viewport/containing block
+   ============================================================ */
+html body a.mc-cart-float,
+html body .mc-cart-float,
+body a.mc-cart-float,
+body .mc-cart-float {
+  left: calc(100vw - 52px - max(20px, env(safe-area-inset-right))) !important;
+  right: auto !important;
+  width: 52px !important;
+  max-width: 52px !important;
+  min-width: 40px !important;
+  max-height: 48px !important;
+  box-sizing: border-box !important;
 }
