@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Deploy HTML templates
-        uses: SamKirkland/FTP-Deploy-Action@v3.1.1
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -24,7 +24,7 @@ jobs:
           server-dir: /vspfiles/templates/266/
 
       - name: Deploy CSS
-        uses: SamKirkland/FTP-Deploy-Action@v3.1.1
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -33,7 +33,7 @@ jobs:
           server-dir: /vspfiles/css/
 
       - name: Deploy JS
-        uses: SamKirkland/FTP-Deploy-Action@v3.1.1
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
