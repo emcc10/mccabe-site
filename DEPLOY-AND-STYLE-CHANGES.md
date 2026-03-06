@@ -9,7 +9,9 @@ This file documents the changes applied so you can commit them as a single updat
 - **Triggers:** Push to `main` and manual "Run workflow"
 - **Protocol:** SFTP (port 2222) via Dylan700/sftp-upload-action
 - **Secrets used:** `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`
-- **Upload:** Local `vspfiles/` → remote `v/vspfiles/` (path is relative to your SFTP login folder)
+- **Uploads:**  
+  - `template_266.html` → remote root (same location as `sftp://.../template_266.html`)  
+  - `vspfiles/` → remote `v/vspfiles/` (path relative to your SFTP login folder)
 
 Set `FTP_SERVER` in GitHub Secrets to your SFTP hostname or **IP** (hostname often fails from GitHub; IP is reliable). No port or `sftp://` in the secret.
 

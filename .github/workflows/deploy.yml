@@ -1,5 +1,5 @@
 # SFTP deploy: uses secrets FTP_SERVER, FTP_USERNAME, FTP_PASSWORD (port 2222)
-# Site URLs use /v/vspfiles/ - remote path must match where the server serves that from.
+# HTML at SFTP root: template_266.html. Assets under v/vspfiles/.
 name: Deploy Volusion Theme
 
 on:
@@ -23,9 +23,10 @@ jobs:
 
       - name: Show what we're deploying
         run: |
-          echo "Contents of vspfiles/ being uploaded:"
+          echo "Template (to remote root):"
+          ls -la template_266.html 2>/dev/null || true
+          echo "Contents of vspfiles/ (to v/vspfiles/):"
           find vspfiles -type f | head -40
-          echo "---"
           ls -la vspfiles/css/custom-safe.css 2>/dev/null || true
 
       - name: Deploy via SFTP
@@ -36,4 +37,5 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: "2222"
           uploads: |
+            template_266.html => ./
             vspfiles/ => ${{ github.event.inputs.remote_path || 'v/vspfiles/' }}
