@@ -1,5 +1,5 @@
 # SFTP deploy: uses secrets FTP_SERVER, FTP_USERNAME, FTP_PASSWORD (port 2222)
-# Template at v/template_266.html. Assets under v/vspfiles/.
+# Template at /template_266.html. Assets under /vspfiles/.
 name: Deploy Volusion Theme
 
 on:
@@ -7,11 +7,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      remote_path:
-        description: "Remote path for vspfiles (e.g. v/vspfiles/ or vspfiles/)"
-        required: false
-        default: "v/vspfiles/"
 
 jobs:
   deploy:
@@ -34,20 +29,20 @@ jobs:
 
       - name: Show what we're deploying
         run: |
-          echo "Template (to remote root):"
+          echo "Template (to remote root /):"
           ls -la template_266.html 2>/dev/null || true
-          echo "Contents of vspfiles/ (to wwwroot/v/vspfiles/):"
+          echo "Contents of vspfiles/ (to /vspfiles/):"
           find vspfiles -type f | head -40
           ls -la vspfiles/css/custom-safe.css 2>/dev/null || true
 
       - name: Show exact remote paths (for FileZilla comparison)
         run: |
-          echo "Remote paths are relative to your SFTP user's HOME directory."
-          echo "Template will be uploaded to:  wwwroot/v/template_266.html"
-          echo "vspfiles will be uploaded to:  wwwroot/v/vspfiles/"
-          echo "So custom-safe.css lands at:   wwwroot/v/vspfiles/css/custom-safe.css"
+          echo "Remote paths are relative to your SFTP root /."
+          echo "Template will be uploaded to:  /template_266.html"
+          echo "vspfiles will be uploaded to:  /vspfiles/"
+          echo "So custom-safe.css lands at:   /vspfiles/css/custom-safe.css"
           echo ""
-          echo "In FileZilla: after login, open wwwroot/v/vspfiles/css/custom-safe.css and check that Modified time is NOW after this run."
+          echo "In FileZilla: after login, open /vspfiles/css/custom-safe.css and check that Modified time is NOW after this run."
 
       - name: Deploy via SFTP
         uses: Dylan700/sftp-upload-action@v1.2.3
@@ -57,10 +52,10 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: "2222"
           uploads: |
-            template_266.html => wwwroot/v/
-            vspfiles/ => wwwroot/v/vspfiles/
+            template_266.html => /
+            vspfiles/ => vspfiles/
 
       - name: Deploy summary
         run: |
           echo "If the job succeeded, the files were written to the paths above."
-          echo "Check FileZilla at: wwwroot/v/vspfiles/css/custom-safe.css"
+          echo "Check FileZilla at: /vspfiles/css/custom-safe.css"
