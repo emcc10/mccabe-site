@@ -2273,43 +2273,6 @@ body.mc-product-page select.mc-native-leather {
     table-layout: auto !important;
     border-collapse: collapse !important;
   }
-
-  body.productdetails #v65-product-parent #options_table tr,
-  body.mc-product-page #v65-product-parent #options_table tr,
-  body.productdetails #content_area #options_table tr,
-  body.mc-product-page #content_area #options_table tr {
-    display: block !important;
-    width: 100% !important;
-    margin: 0 0 10px 0 !important;
-  }
-
-  body.productdetails #v65-product-parent #options_table td,
-  body.mc-product-page #v65-product-parent #options_table td,
-  body.productdetails #content_area #options_table td,
-  body.mc-product-page #content_area #options_table td {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    text-align: left !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  body.productdetails #v65-product-parent #options_table td:empty,
-  body.mc-product-page #v65-product-parent #options_table td:empty,
-  body.productdetails #content_area #options_table td:empty,
-  body.mc-product-page #content_area #options_table td:empty {
-    display: none !important;
-  }
-
-  body.productdetails #v65-product-parent #options_table select,
-  body.mc-product-page #v65-product-parent #options_table select,
-  body.productdetails #content_area #options_table select,
-  body.mc-product-page #content_area #options_table select {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-  }
 }
 
 /* === FINAL MOBILE COLUMN STACK (2026-03-02e) === */
