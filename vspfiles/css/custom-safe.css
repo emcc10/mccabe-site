@@ -63,7 +63,7 @@ body {
   padding-top: clamp(200px, 28vh, 340px);
 }
 
-/* Hero menu (your custom menu) */
+/* Hero menu: clear of home/cart icons, proportional to viewport */
 #slideshow-container .hero-menu {
   position: absolute;
   top: 18px !important;
@@ -72,8 +72,11 @@ body {
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 22px;
-  padding: 12px 20px;
+  justify-content: center;
+  gap: clamp(14px, 2.5vw, 22px);
+  padding: clamp(8px, 1.5vw, 12px) max(80px, 10vw) clamp(8px, 1.5vw, 12px) max(80px, 10vw); /* clear home (left) and cart (right) */
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 /* ===== HOMEPAGE HERO MENU: NO WRAP ===== */
@@ -84,19 +87,44 @@ body {
 
 #slideshow-container .hero-menu a {
   display: inline-block !important;
+  font-size: clamp(12px, 1.4vw, 15px) !important;
+  padding: 0 clamp(4px, 0.5vw, 8px) !important;
 }
 
 .hero-nav {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 22px;
+  gap: clamp(14px, 2.5vw, 22px);
   white-space: nowrap !important;
 }
 
 /* Hide hero on NON-home pages */
 body:not(.is-home) #slideshow-container {
   display: none !important;
+}
+
+/* Home: keep cart and home icons visible at all widths (no overflow clip) */
+body.is-home .mc-cart-float,
+body.is-home a.mc-cart-float,
+body.is-home .mc-home-float,
+body.is-home a.mc-home-float {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: flex !important;
+  pointer-events: auto !important;
+}
+
+/* On home, position cart from right so it stays visible when width is adjusted */
+body.is-home .mc-cart-float,
+body.is-home a.mc-cart-float {
+  left: auto !important;
+  right: max(28px, env(safe-area-inset-right)) !important;
+}
+
+/* Prevent hero container from clipping fixed icons (they're body children) */
+body.is-home #slideshow-container {
+  overflow: visible !important;
 }
 
 /* Mobile: hero video + overlay proportional */
@@ -3064,4 +3092,13 @@ body .mc-cart-float {
   margin-left: 16px !important;
   margin-right: max(20px, env(safe-area-inset-right)) !important; /* container margin: space on right */
   box-sizing: border-box !important;
+}
+
+/* Home page: position cart from right so it stays visible when width is adjusted */
+body.is-home html body a.mc-cart-float,
+body.is-home html body .mc-cart-float,
+body.is-home body a.mc-cart-float,
+body.is-home body .mc-cart-float {
+  left: auto !important;
+  right: max(28px, env(safe-area-inset-right)) !important;
 }

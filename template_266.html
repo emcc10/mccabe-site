@@ -1445,22 +1445,31 @@ setTimeout(mount, 1400);
 <style>
 /* ===============================
    HERO MENU (HOMEPAGE ONLY)
+   Clear of home/cart icons, proportional to viewport
    =============================== */
+
+#slideshow-container .hero-menu {
+  padding-left: max(80px, 10vw);
+  padding-right: max(80px, 10vw);
+  gap: clamp(14px, 2.5vw, 22px);
+  box-sizing: border-box;
+  max-width: 100%;
+}
 
 .hero-nav {
   display: flex;
-  gap: 22px;
+  gap: clamp(14px, 2.5vw, 22px);
 }
 
 .hero-nav a,
 .hero-cart {
   color: #fff;
-  font-size: 15px;
+  font-size: clamp(12px, 1.4vw, 15px);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   text-decoration: none;
-  padding: 0 8px;
+  padding: 0 clamp(4px, 0.5vw, 8px);
   position: relative;
   z-index: 2;
 }
