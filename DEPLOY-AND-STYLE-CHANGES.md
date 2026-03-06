@@ -23,6 +23,9 @@ Set `FTP_SERVER` in GitHub Secrets to your SFTP hostname or **IP** (hostname oft
 4. **Volusion template:** In Volusion admin, confirm the store uses the theme that points to **v/template_266.html** and CSS **/v/vspfiles/css/custom-safe.css**.
 5. **Cache:** Hard refresh (Ctrl+Shift+R) or private window. The template uses `?v=20260306` on the CSS so a hard refresh after deploy loads the new file.
 
+**If `/v/vspfiles/css/custom-safe.css` does not show "DEPLOYED 2026-03-06" at the top:**  
+The file the browser loads is not the one GitHub is uploading. In FileZilla, connect with the same host/user/port as in your secrets. After a deploy, find every `custom-safe.css` on the server. Check which folder has the file that was just updated (Modified = now). The web URL `/v/vspfiles/...` maps to some folder on the server—that folder might be your SFTP login folder, or a subfolder. If the updated file is in a different place (e.g. `vspfiles/css/` instead of `v/vspfiles/css/`), then when you "Run workflow" use **Remote path for vspfiles** = `vspfiles/` (so the workflow writes into the same path the site serves from).
+
 ---
 
 ## 2. Main menu same on all pages (`vspfiles/css/custom-safe.css`)
