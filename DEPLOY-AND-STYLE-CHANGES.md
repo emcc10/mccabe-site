@@ -17,9 +17,11 @@ Set `FTP_SERVER` in GitHub Secrets to your SFTP hostname or **IP** (hostname oft
 
 **If the action succeeds but the live site doesn’t update:**
 
-1. **Confirm where files land:** In FileZilla (or your SFTP client), connect and look at the top-level folders. Find where `custom-safe.css` actually lives (same path as the URL `/v/vspfiles/css/`). Check that file’s “Last modified” time after a deploy—if it’s not updated, the workflow is uploading to the wrong path.
-2. **Try a different path:** In GitHub → Actions → “Deploy Volusion Theme” → “Run workflow”. You can enter a different **Remote path for vspfiles** (e.g. `vspfiles/` if your SFTP home is already the `v` folder, or `./v/vspfiles/`). Then run and check the site again.
-3. **Cache:** Do a hard refresh (Ctrl+Shift+R) or open the site in a private window to rule out browser cache.
+1. **Confirm the workflow ran:** GitHub → **Actions** → latest "Deploy Volusion Theme" run. If it failed (red), read the log (e.g. add missing secrets under Settings → Secrets and variables → Actions).
+2. **Confirm where files land:** In FileZilla (or your SFTP client), connect and look at the top-level folders. Find where `custom-safe.css` actually lives (same path as the URL `/v/vspfiles/css/`). Check that file’s “Last modified” time after a deploy—if it’s not updated, the workflow is uploading to the wrong path.
+3. **Try a different path:** In GitHub → Actions → “Deploy Volusion Theme” → “Run workflow”. You can enter a different **Remote path for vspfiles** (e.g. `vspfiles/` if your SFTP home is already the `v` folder, or `./v/vspfiles/`). Then run and check the site again.
+4. **Volusion template:** In Volusion admin, confirm the store uses the theme that points to **v/template_266.html** and CSS **/v/vspfiles/css/custom-safe.css**.
+5. **Cache:** Hard refresh (Ctrl+Shift+R) or private window. The template uses `?v=20260306` on the CSS so a hard refresh after deploy loads the new file.
 
 ---
 
