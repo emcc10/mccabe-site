@@ -141,13 +141,28 @@ body:not(.is-home) header.header .main-menu {
   transform: none !important;
 }
 
+/* Non-home: same layout as hero – centered bar, same padding/margins */
+@media (min-width: 992px) {
+  body:not(.is-home) .microblock.main-menu {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  body:not(.is-home) .microblock.main-menu #display_menu_1 {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
 /* ===== NON-HOME MENU: MATCH HOMEPAGE HERO MENU EXACTLY (DESKTOP/TABLET) ===== */
 
-/* LI should not have fixed widths */
+/* LI: same as hero – no fixed widths, no extra margin (centering via flex on ul) */
 body:not(.is-home) #display_menu_1 .vnav--level1 > li,
 body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li {
   width: auto !important;
-  margin-left: -80px !important;
+  margin: 0 !important;
   padding: 0 !important;
 }
 
@@ -1005,11 +1020,10 @@ nav.push-menu .push-menu__close-btn::before {
     display: inline-flex !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 22px !important;
+    gap: 22px !important;  /* match hero menu */
     margin: 0 auto !important;
-    padding: 0 !important;
+    padding: 12px 20px !important;  /* match hero menu */
     width: auto !important;
-    margin-left: -80px !important;
   }
 }
 
@@ -1168,16 +1182,17 @@ body.mc-product-page #content_area .main-image img {
   }
 }
 
+/* Match homepage hero menu exactly: same gap, padding, layout */
 body:not(.is-home) #display_menu_1 > ul.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul {
   display: inline-flex !important;
   justify-content: center !important;
   align-items: center !important;
-  gap: 110px !important;
+  gap: 22px !important;  /* same as #slideshow-container .hero-menu */
   width: auto !important;
-
-  padding: 12px 20px !important;
+  margin: 0 auto !important;
+  padding: 12px 20px !important;  /* same as hero menu */
   position: static !important;
   transform: none !important;
   left: auto !important;
@@ -2590,7 +2605,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
     #content_area .resp-tabs-container,
     #content_area .product_description,
     #content_area [itemprop="description"] {
-      padding-left: 16px !important;
+      padding-left: 2px !important;
       padding-right: 16px !important;
       margin-left: 0 !important;
       margin-right: 0 !important;
@@ -2713,7 +2728,7 @@ body.mc-product-page #options_table tr:has(+ tr:has(td input[title="Configuratio
   .TabbedPanelsContentGroup,
   .resp-tabs-container,
   .product_description {
-    padding-left: 16px !important;
+    padding-left: 2px !important;
     padding-right: 16px !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
