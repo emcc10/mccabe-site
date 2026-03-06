@@ -1355,17 +1355,19 @@ body.mc-product-page #content_area .main-image img {
   }
 }
 
-/* Match homepage hero menu exactly: same gap, padding, layout */
+/* Match homepage hero menu: flex (not inline-flex) so ul doesn’t shrink and overlap items */
 body:not(.is-home) #display_menu_1 > ul.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul {
-  display: inline-flex !important;
+  display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  gap: 22px !important;  /* same as #slideshow-container .hero-menu */
+  gap: 32px !important;
+  flex-wrap: nowrap !important;
   width: auto !important;
+  min-width: min-content !important;
   margin: 0 auto !important;
-  padding: 12px 20px !important;  /* same as hero menu */
+  padding: 12px 20px !important;
   position: static !important;
   transform: none !important;
   left: auto !important;
@@ -3121,4 +3123,60 @@ body.is-home body a.mc-cart-float,
 body.is-home body .mc-cart-float {
   left: auto !important;
   right: max(28px, env(safe-area-inset-right)) !important;
+}
+
+/* =========================================================
+   CATEGORY / NON-HOME: force menu single row, no overlap
+   High specificity so theme/Volusion cannot override
+   ========================================================= */
+body:not(.is-home) header.header .microblock.main-menu {
+  padding-right: 80px !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  min-width: 0 !important; /* allow flex shrink in row */
+}
+body:not(.is-home) header.header #display_menu_1 {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 32px !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+/* Any top-level nav ul (direct child or nested) */
+body:not(.is-home) header.header #display_menu_1 ul.vnav--level1,
+body:not(.is-home) header.header #display_menu_1 ul.vnav--horizontal.vnav--level1,
+body:not(.is-home) header.header #display_menu_1 > ul {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 32px !important;
+  min-width: min-content !important; /* never shrink below content = no overlap */
+  margin: 0 !important;
+  padding: 0 20px !important;
+  position: static !important;
+  left: auto !important;
+  overflow: visible !important;
+}
+body:not(.is-home) header.header #display_menu_1 ul.vnav--level1 > li,
+body:not(.is-home) header.header #display_menu_1 ul.vnav--horizontal.vnav--level1 > li,
+body:not(.is-home) header.header #display_menu_1 > ul > li {
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  min-width: min-content !important;
+  margin: 0 8px !important;
+  padding: 0 !important;
+  position: relative !important;
+}
+body:not(.is-home) header.header #display_menu_1 ul.vnav--level1 > li > a,
+body:not(.is-home) header.header #display_menu_1 ul.vnav--horizontal.vnav--level1 > li > a,
+body:not(.is-home) header.header #display_menu_1 > ul > li > a,
+body:not(.is-home) header.header #display_menu_1 .vnav__link,
+body:not(.is-home) header.header #display_menu_1 .vnav__label {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  padding: 0 10px !important;
+  display: inline-block !important;
 }
