@@ -1505,21 +1505,24 @@ body:not(.is-home) header.header nav.menu {
   display: block !important;
 }
 
-/* Anchor the WHOLE menu container in one fixed spot on all non-home pages */
+/* Non-home: keep menu in flow so header flex can center it (no position: absolute / left: 117%) */
 body:not(.is-home) #display_menu_1 {
-  position: absolute !important;
-  top: -4px !important;
-  left: 117% !important;
-  transform: translateX(-50%) !important;
-  z-index: 10000 !important;
-  width: auto !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  z-index: 1 !important;
+  width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
 }
 
-/* Keep the UL itself centered but NOT absolutely positioned */
+/* Center the nav list (match hero menu gap/padding) */
 body:not(.is-home) #display_menu_1 .main-menu .vnav--level1,
-body:not(.is-home) #display_menu_1 .main-menu .vnav--horizontal.vnav--level1 {
+body:not(.is-home) #display_menu_1 .main-menu .vnav--horizontal.vnav--level1,
+body:not(.is-home) #display_menu_1 > ul.vnav--level1,
+body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+body:not(.is-home) #display_menu_1 > ul {
   position: static !important;
   transform: none !important;
   top: auto !important;
@@ -1529,7 +1532,9 @@ body:not(.is-home) #display_menu_1 .main-menu .vnav--horizontal.vnav--level1 {
   justify-content: center !important;
   gap: 22px !important;
   padding: 12px 20px !important;
-  margin: 0px !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 
