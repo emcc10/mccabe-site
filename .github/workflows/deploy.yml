@@ -16,10 +16,21 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
+      - name: Verify deploy secrets
+        run: |
+          if [ -z "$FTP_SERVER" ]; then echo "::error::FTP_SERVER secret is not set in GitHub. Add it in repo Settings → Secrets and variables → Actions."; exit 1; fi
+          if [ -z "$FTP_USERNAME" ]; then echo "::error::FTP_USERNAME secret is not set."; exit 1; fi
+          if [ -z "$FTP_PASSWORD" ]; then echo "::error::FTP_PASSWORD secret is not set."; exit 1; fi
+          echo "Secrets are set. Deploying to $FTP_SERVER (port 2222)."
 
       - name: Show what we're deploying
         run: |
@@ -39,3 +50,10 @@ jobs:
           uploads: |
             template_266.html => v/
             vspfiles/ => ${{ github.event.inputs.remote_path || 'v/vspfiles/' }}
+
+      - name: Deploy summary
+        run: |
+          echo "If the job succeeded, these paths should exist on the server:"
+          echo "  - v/template_266.html"
+          echo "  - v/vspfiles/css/custom-safe.css"
+          echo "In FileZilla, confirm those files exist and their 'Modified' time is just now."
