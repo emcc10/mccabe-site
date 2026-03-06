@@ -658,7 +658,7 @@ a.mc-home-float {
 
 .mc-cart-float,
 a.mc-cart-float {
-  right: max(12px, env(safe-area-inset-right)) !important;
+  right: max(16px, env(safe-area-inset-right)) !important;
   left: auto !important;
 }
 
@@ -2586,7 +2586,7 @@ body.mc-product-page select.mc-native-leather {
   --mc-float-pad: clamp(8px, 1.6vw, 16px);
   --mc-top: max(12px, env(safe-area-inset-top));
   --mc-left: max(var(--mc-float-pad), env(safe-area-inset-left));
-  --mc-right: max(var(--mc-float-pad), env(safe-area-inset-right));
+  --mc-right: max(16px, var(--mc-float-pad), env(safe-area-inset-right));
 }
 
 .mc-home-float,
