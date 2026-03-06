@@ -40,6 +40,16 @@ jobs:
           find vspfiles -type f | head -40
           ls -la vspfiles/css/custom-safe.css 2>/dev/null || true
 
+      - name: Show exact remote paths (for FileZilla comparison)
+        run: |
+          VSP_PATH="${{ github.event.inputs.remote_path || 'v/vspfiles/' }}"
+          echo "Remote paths are relative to your SFTP user's HOME directory."
+          echo "Template will be uploaded to:  v/template_266.html"
+          echo "vspfiles will be uploaded to:  $VSP_PATH"
+          echo "So custom-safe.css lands at:   ${VSP_PATH}css/custom-safe.css"
+          echo ""
+          echo "In FileZilla: after login, you start in that HOME folder. Look for the folder 'v' (or 'vspfiles' if you used that path). The Modified time of custom-safe.css there should be NOW after this run."
+
       - name: Deploy via SFTP
         uses: Dylan700/sftp-upload-action@v1.2.3
         with:
@@ -53,7 +63,5 @@ jobs:
 
       - name: Deploy summary
         run: |
-          echo "If the job succeeded, these paths should exist on the server:"
-          echo "  - v/template_266.html"
-          echo "  - v/vspfiles/css/custom-safe.css"
-          echo "In FileZilla, confirm those files exist and their 'Modified' time is just now."
+          echo "If the job succeeded, the files were written to the paths above (under your SFTP home)."
+          echo "If FileZilla still shows Modified = 11:51 a.m., you are either looking in a different folder than the workflow uses, or the SFTP home for this user is different from where the web server serves /v/ from."
