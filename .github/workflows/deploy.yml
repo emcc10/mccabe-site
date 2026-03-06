@@ -1,3 +1,4 @@
+# SFTP deploy: uses secrets FTP_SERVER, FTP_USERNAME, FTP_PASSWORD (port 2222)
 name: Deploy Volusion Theme
 
 on:
