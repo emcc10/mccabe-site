@@ -1,7 +1,9 @@
-name: Volusion Path Probe
+name: Deploy Volusion Theme
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -9,15 +11,32 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Upload probe files via SFTP
-        uses: Dylan700/sftp-upload-action@v1.2.3
+      - name: Deploy HTML templates
+        uses: SamKirkland/FTP-Deploy-Action@v4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: "2222"
-          uploads: |
-            probe-root.txt => /v/
-            probe-v.txt => /v/
+          local-dir: templates/266/
+          server-dir: /vspfiles/templates/266/
+
+      - name: Deploy CSS
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: css/
+          server-dir: /vspfiles/css/
+
+      - name: Deploy JS
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: js/
+          server-dir: /vspfiles/js/
+          
