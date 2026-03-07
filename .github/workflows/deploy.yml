@@ -76,7 +76,9 @@ jobs:
             "$(date -u '+%Y-%m-%d %H:%M:%S')" \
             "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
             "${GITHUB_SHA}" > deploy-marker.txt
+          cp deploy-marker.txt deploy-market.txt
           ls -la deploy-marker.txt
+          ls -la deploy-market.txt
 
       - name: Show resolved remote paths
         run: |
@@ -84,18 +86,17 @@ jobs:
           echo "Template destination: ${REMOTE_TEMPLATE_PATH}template_266.html"
           echo "custom-safe.css path: ${REMOTE_VSPFILES_PATH}css/custom-safe.css"
           echo "Marker path (css):    ${REMOTE_VSPFILES_PATH}css/deploy-marker.txt"
+          echo "Market path (css):    ${REMOTE_VSPFILES_PATH}css/deploy-market.txt"
 
-      - name: Deploy via SFTP
-        uses: Dylan700/sftp-upload-action@v1.2.3
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: "2222"
-          uploads: |
-            template_266.html => ${{ env.REMOTE_TEMPLATE_PATH }}
-            vspfiles/css/custom-safe.css => ${{ env.REMOTE_VSPFILES_PATH }}css/
-            deploy-marker.txt => ${{ env.REMOTE_VSPFILES_PATH }}css/
+      - name: Deploy via SFTP (explicit puts)
+        run: |
+          sshpass -p "$FTP_PASSWORD" sftp -o StrictHostKeyChecking=no -P 2222 "$FTP_USERNAME@$FTP_SERVER" <<EOF
+          put "template_266.html" "${REMOTE_TEMPLATE_PATH}template_266.html"
+          put "vspfiles/css/custom-safe.css" "${REMOTE_VSPFILES_PATH}css/custom-safe.css"
+          put "deploy-marker.txt" "${REMOTE_VSPFILES_PATH}css/deploy-marker.txt"
+          put "deploy-market.txt" "${REMOTE_VSPFILES_PATH}css/deploy-market.txt"
+          bye
+          EOF
 
       - name: Verify remote files via SFTP
         run: |
@@ -106,6 +107,7 @@ jobs:
           ls -la ${REMOTE_TEMPLATE_PATH}
           ls -la ${REMOTE_VSPFILES_PATH}css
           ls -la ${REMOTE_VSPFILES_PATH}css/deploy-marker.txt
+          ls -la ${REMOTE_VSPFILES_PATH}css/deploy-market.txt
           ls -la ${REMOTE_VSPFILES_PATH}css/custom-safe.css
           bye
           EOF
