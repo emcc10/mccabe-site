@@ -12,6 +12,10 @@ on:
         description: "Remote path for vspfiles (e.g. v/vspfiles/ or vspfiles/)"
         required: false
         default: "v/vspfiles/"
+      template_remote_path:
+        description: "Remote path for template_266.html (e.g. v/ or ./)"
+        required: false
+        default: "v/"
 
 jobs:
   deploy:
@@ -20,6 +24,15 @@ jobs:
       FTP_SERVER: ${{ secrets.FTP_SERVER }}
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      # Path resolution priority:
+      # 1) Manual workflow input (workflow_dispatch)
+      # 2) Repository variable DEPLOY_REMOTE_PATH
+      # 3) Fallback default
+      REMOTE_VSPFILES_PATH: ${{ github.event.inputs.remote_path || vars.DEPLOY_REMOTE_PATH || 'v/vspfiles/' }}
+      # 1) Manual workflow input (workflow_dispatch)
+      # 2) Repository variable TEMPLATE_REMOTE_PATH
+      # 3) Fallback default
+      REMOTE_TEMPLATE_PATH: ${{ github.event.inputs.template_remote_path || vars.TEMPLATE_REMOTE_PATH || 'v/' }}
 
     steps:
       - name: Checkout repo
@@ -36,16 +49,41 @@ jobs:
         run: |
           echo "Template (to remote root):"
           ls -la template_266.html 2>/dev/null || true
-          echo "Contents of vspfiles/ (to v/vspfiles/):"
+          echo "Contents of vspfiles/ (to ${REMOTE_VSPFILES_PATH}):"
           find vspfiles -type f | head -40
           ls -la vspfiles/css/custom-safe.css 2>/dev/null || true
+
+      - name: Normalize remote paths
+        run: |
+          normalize() {
+            p="$1"
+            p="${p#./}"
+            p="${p#/}"
+            if [ -z "$p" ]; then
+              p="./"
+            elif [ "${p%/}" = "$p" ]; then
+              p="${p}/"
+            fi
+            echo "$p"
+          }
+          echo "REMOTE_VSPFILES_PATH=$(normalize "$REMOTE_VSPFILES_PATH")" >> "$GITHUB_ENV"
+          echo "REMOTE_TEMPLATE_PATH=$(normalize "$REMOTE_TEMPLATE_PATH")" >> "$GITHUB_ENV"
+
+      - name: Create deploy marker
+        run: |
+          printf "Deployed UTC: %s\nGitHub run: %s\nCommit: %s\n" \
+            "$(date -u '+%Y-%m-%d %H:%M:%S')" \
+            "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
+            "${GITHUB_SHA}" > .deploy-marker.txt
+          ls -la .deploy-marker.txt
 
       - name: Show exact remote paths (for FileZilla comparison)
         run: |
           echo "Remote paths are relative to your SFTP user's HOME directory."
-          echo "Template will be uploaded to:  v/template_266.html"
-          echo "vspfiles will be uploaded to:  v/vspfiles/"
-          echo "So custom-safe.css lands at:   v/vspfiles/css/custom-safe.css"
+          echo "Template will be uploaded to:  ${REMOTE_TEMPLATE_PATH}template_266.html"
+          echo "vspfiles will be uploaded to:  ${REMOTE_VSPFILES_PATH}"
+          echo "So custom-safe.css lands at:   ${REMOTE_VSPFILES_PATH}css/custom-safe.css"
+          echo "Deploy marker lands at:        ${REMOTE_VSPFILES_PATH}.deploy-marker.txt"
           echo ""
           echo "In FileZilla: after login, you start in that HOME folder. Look for the folder 'v' (or 'vspfiles' if you used that path). The Modified time of custom-safe.css there should be NOW after this run."
 
@@ -57,10 +95,12 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: "2222"
           uploads: |
-            template_266.html => v/
-            vspfiles/ => v/vspfiles/
+            template_266.html => ${{ env.REMOTE_TEMPLATE_PATH }}
+            vspfiles/ => ${{ env.REMOTE_VSPFILES_PATH }}
+            .deploy-marker.txt => ${{ env.REMOTE_VSPFILES_PATH }}
 
       - name: Deploy summary
         run: |
           echo "If the job succeeded, the files were written to the paths above (under your SFTP home)."
-          echo "If FileZilla still shows Modified = 11:51 a.m., you are either looking in a different folder than the workflow uses, or the SFTP home for this user is different from where the web server serves /v/ from."
+          echo "If FileZilla still shows old times, open ${REMOTE_VSPFILES_PATH}.deploy-marker.txt and confirm its UTC timestamp and run URL."
+          echo "If the marker is not there, you are looking at a different folder than the workflow uses, or the SFTP home for this user is different from where the web server serves /v/ from."
