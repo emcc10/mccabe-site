@@ -36,6 +36,17 @@ jobs:
           echo "Deploy test source:"
           ls -la vspfiles/css/deploy-test.txt 2>/dev/null || true
 
+      - name: Show deploy target
+        run: |
+          echo "Server: $FTP_SERVER"
+          echo "Username: $FTP_USERNAME"
+          echo "Port: 2222"
+          pwd
+          ls -la
+          ls -la template_266.html || true
+          ls -la root-test.txt || true
+          ls -la vspfiles/css/deploy-test.txt || true
+
       - name: Deploy via SFTP
         uses: Dylan700/sftp-upload-action@v1.2.3
         with:
