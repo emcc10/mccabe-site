@@ -1,31 +1,16 @@
-name: Deploy Volusion Theme
+name: Root Deploy Test
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      FTP_SERVER: ${{ secrets.FTP_SERVER }}
-      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Show deploy target
-        run: |
-          echo "Server: $FTP_SERVER"
-          echo "Username: $FTP_USERNAME"
-          echo "Port: 2222"
-          ls -la root-test.txt || true
-
-      - name: Deploy root test via SFTP
+      - name: Upload root test
         uses: Dylan700/sftp-upload-action@v1.2.3
         with:
           server: ${{ secrets.FTP_SERVER }}
