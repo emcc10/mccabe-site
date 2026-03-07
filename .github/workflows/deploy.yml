@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-<<<<<<< HEAD
   workflow_dispatch:
     inputs:
       remote_path:
@@ -15,13 +14,10 @@ on:
         description: "Remote path for template_266.html (e.g. v/ or ./)"
         required: false
         default: "v/"
-=======
->>>>>>> 839f3cc7294125405184a2b4b28825686923602f
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-<<<<<<< HEAD
     env:
       FTP_SERVER: ${{ secrets.FTP_SERVER }}
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -31,31 +27,26 @@ jobs:
       # 2) Repository variable DEPLOY_REMOTE_PATH
       # 3) Fallback default
       REMOTE_VSPFILES_PATH: ${{ github.event.inputs.remote_path || vars.DEPLOY_REMOTE_PATH || 'v/vspfiles/' }}
+      # Path resolution priority:
       # 1) Manual workflow input (workflow_dispatch)
       # 2) Repository variable TEMPLATE_REMOTE_PATH
       # 3) Fallback default
       REMOTE_TEMPLATE_PATH: ${{ github.event.inputs.template_remote_path || vars.TEMPLATE_REMOTE_PATH || 'v/' }}
-=======
->>>>>>> 839f3cc7294125405184a2b4b28825686923602f
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install sshpass
-        run: sudo apt-get update && sudo apt-get install -y sshpass
-
-      - name: Upload HTML template via SFTP
+      - name: Verify deploy secrets
         run: |
-          sshpass -p "${{ secrets.FTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no -P 2222 \
-          ${{ secrets.FTP_USERNAME }}@sftp.mccabestheaterandliving.com << 'EOF'
-          put "template_266.html" "/vspfiles/templates/266/template_266.html"
-          EOF
+          if [ -z "$FTP_SERVER" ]; then echo "::error::FTP_SERVER secret is not set in GitHub. Add it in repo Settings > Secrets and variables > Actions."; exit 1; fi
+          if [ -z "$FTP_USERNAME" ]; then echo "::error::FTP_USERNAME secret is not set."; exit 1; fi
+          if [ -z "$FTP_PASSWORD" ]; then echo "::error::FTP_PASSWORD secret is not set."; exit 1; fi
+          echo "Secrets are set. Deploying to $FTP_SERVER (port 2222)."
 
-      - name: Upload CSS via SFTP
+      - name: Show what we are deploying
         run: |
-<<<<<<< HEAD
-          echo "Template (to remote root):"
+          echo "Template file:"
           ls -la template_266.html 2>/dev/null || true
           echo "Contents of vspfiles/ (to ${REMOTE_VSPFILES_PATH}):"
           find vspfiles -type f | head -40
@@ -85,15 +76,13 @@ jobs:
             "${GITHUB_SHA}" > .deploy-marker.txt
           ls -la .deploy-marker.txt
 
-      - name: Show exact remote paths (for FileZilla comparison)
+      - name: Show resolved remote paths
         run: |
           echo "Remote paths are relative to your SFTP user's HOME directory."
-          echo "Template will be uploaded to:  ${REMOTE_TEMPLATE_PATH}template_266.html"
-          echo "vspfiles will be uploaded to:  ${REMOTE_VSPFILES_PATH}"
-          echo "So custom-safe.css lands at:   ${REMOTE_VSPFILES_PATH}css/custom-safe.css"
-          echo "Deploy marker lands at:        ${REMOTE_VSPFILES_PATH}.deploy-marker.txt"
-          echo ""
-          echo "In FileZilla: after login, you start in that HOME folder. Look for the folder 'v' (or 'vspfiles' if you used that path). The Modified time of custom-safe.css there should be NOW after this run."
+          echo "Template destination: ${REMOTE_TEMPLATE_PATH}template_266.html"
+          echo "vspfiles destination: ${REMOTE_VSPFILES_PATH}"
+          echo "custom-safe.css path: ${REMOTE_VSPFILES_PATH}css/custom-safe.css"
+          echo "Marker path:          ${REMOTE_VSPFILES_PATH}.deploy-marker.txt"
 
       - name: Deploy via SFTP
         uses: Dylan700/sftp-upload-action@v1.2.3
@@ -109,12 +98,5 @@ jobs:
 
       - name: Deploy summary
         run: |
-          echo "If the job succeeded, the files were written to the paths above (under your SFTP home)."
-          echo "If FileZilla still shows old times, open ${REMOTE_VSPFILES_PATH}.deploy-marker.txt and confirm its UTC timestamp and run URL."
-          echo "If the marker is not there, you are looking at a different folder than the workflow uses, or the SFTP home for this user is different from where the web server serves /v/ from."
-=======
-          sshpass -p "${{ secrets.FTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no -P 2222 \
-          ${{ secrets.FTP_USERNAME }}@sftp.mccabestheaterandliving.com << 'EOF'
-          put "vspfiles/css/custom-safe.css" "/vspfiles/css/custom-safe.css"
-          EOF
->>>>>>> 839f3cc7294125405184a2b4b28825686923602f
+          echo "If this run succeeded, files were written to the paths above under SFTP home."
+          echo "If FileZilla still shows old times, open ${REMOTE_VSPFILES_PATH}.deploy-marker.txt and verify the timestamp."
