@@ -7,13 +7,13 @@ on:
   workflow_dispatch:
     inputs:
       remote_path:
-        description: "Remote path for vspfiles (e.g. vspfiles/)"
+        description: "Remote path for vspfiles (e.g. /vspfiles/)"
         required: false
-        default: "vspfiles/"
+        default: "/vspfiles/"
       template_remote_path:
-        description: "Remote path for template_266.html (e.g. vspfiles/templates/266/)"
+        description: "Remote path for template_266.html (e.g. /vspfiles/templates/266/)"
         required: false
-        default: "vspfiles/templates/266/"
+        default: "/vspfiles/templates/266/"
 
 jobs:
   deploy:
@@ -26,12 +26,12 @@ jobs:
       # 1) Manual workflow input (workflow_dispatch)
       # 2) Repository variable DEPLOY_REMOTE_PATH
       # 3) Fallback default
-      REMOTE_VSPFILES_PATH: ${{ github.event.inputs.remote_path || vars.DEPLOY_REMOTE_PATH || 'vspfiles/' }}
+      REMOTE_VSPFILES_PATH: ${{ github.event.inputs.remote_path || vars.DEPLOY_REMOTE_PATH || '/vspfiles/' }}
       # Path resolution priority:
       # 1) Manual workflow input (workflow_dispatch)
       # 2) Repository variable TEMPLATE_REMOTE_PATH
       # 3) Fallback default
-      REMOTE_TEMPLATE_PATH: ${{ github.event.inputs.template_remote_path || vars.TEMPLATE_REMOTE_PATH || 'vspfiles/templates/266/' }}
+      REMOTE_TEMPLATE_PATH: ${{ github.event.inputs.template_remote_path || vars.TEMPLATE_REMOTE_PATH || '/vspfiles/templates/266/' }}
 
     steps:
       - name: Checkout repo
@@ -60,7 +60,6 @@ jobs:
           normalize() {
             p="$1"
             p="${p#./}"
-            p="${p#/}"
             if [ -z "$p" ]; then
               p="./"
             elif [ "${p%/}" = "$p" ]; then
@@ -76,18 +75,14 @@ jobs:
           printf "Deployed UTC: %s\nGitHub run: %s\nCommit: %s\n" \
             "$(date -u '+%Y-%m-%d %H:%M:%S')" \
             "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
-            "${GITHUB_SHA}" > vspfiles/deploy-marker.txt
-          cp vspfiles/deploy-marker.txt vspfiles/css/deploy-marker.txt
-          ls -la vspfiles/deploy-marker.txt
-          ls -la vspfiles/css/deploy-marker.txt
+            "${GITHUB_SHA}" > deploy-marker.txt
+          ls -la deploy-marker.txt
 
       - name: Show resolved remote paths
         run: |
           echo "Remote paths are relative to your SFTP user's HOME directory."
           echo "Template destination: ${REMOTE_TEMPLATE_PATH}template_266.html"
-          echo "vspfiles destination: ${REMOTE_VSPFILES_PATH}"
           echo "custom-safe.css path: ${REMOTE_VSPFILES_PATH}css/custom-safe.css"
-          echo "Marker path:          ${REMOTE_VSPFILES_PATH}deploy-marker.txt"
           echo "Marker path (css):    ${REMOTE_VSPFILES_PATH}css/deploy-marker.txt"
 
       - name: Deploy via SFTP
@@ -99,7 +94,8 @@ jobs:
           port: "2222"
           uploads: |
             template_266.html => ${{ env.REMOTE_TEMPLATE_PATH }}
-            vspfiles/ => ${{ env.REMOTE_VSPFILES_PATH }}
+            vspfiles/css/custom-safe.css => ${{ env.REMOTE_VSPFILES_PATH }}css/
+            deploy-marker.txt => ${{ env.REMOTE_VSPFILES_PATH }}css/
 
       - name: Verify remote files via SFTP
         run: |
@@ -108,10 +104,9 @@ jobs:
           pwd
           ls -la
           ls -la ${REMOTE_TEMPLATE_PATH}
-          ls -la ${REMOTE_VSPFILES_PATH}
           ls -la ${REMOTE_VSPFILES_PATH}css
-          ls -la ${REMOTE_VSPFILES_PATH}deploy-marker.txt
           ls -la ${REMOTE_VSPFILES_PATH}css/deploy-marker.txt
+          ls -la ${REMOTE_VSPFILES_PATH}css/custom-safe.css
           bye
           EOF
           echo "Remote listing complete."
