@@ -19,5 +19,5 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: "2222"
           uploads: |
-            probe-root.txt => wwwroot/
-            probe-v.txt => wwwroot/v/
+            probe-root.txt => /v/
+            probe-v.txt => /v/
