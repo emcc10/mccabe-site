@@ -1,4 +1,4 @@
-# SFTP deploy: uses secrets FTP_SERVER, FTP_USERNAME, FTP_PASSWORD (port 2222)
+\# SFTP deploy: uses secrets FTP_SERVER, FTP_USERNAME, FTP_PASSWORD (port 2222)
 # Template at /template_266.html. Assets under /vspfiles/.
 name: Deploy Volusion Theme
 
@@ -31,6 +31,8 @@ jobs:
         run: |
           echo "Template source:"
           ls -la template_266.html 2>/dev/null || true
+          echo "Root test source:"
+          ls -la root-test.txt 2>/dev/null || true
           echo "CSS source:"
           ls -la vspfiles/css/custom-safe.css 2>/dev/null || true
           echo "Deploy test source:"
@@ -44,12 +46,13 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: "2222"
           uploads: |
-            template_266.html => /
-             root-test.txt => ./
+            template_266.html => ./
+            root-test.txt => ./
             vspfiles/ => vspfiles/
 
       - name: Deploy summary
         run: |
           echo "Expected remote template: /template_266.html"
+          echo "Expected remote root test file: /root-test.txt"
           echo "Expected remote CSS: /vspfiles/css/custom-safe.css"
           echo "Expected remote test file: /vspfiles/css/deploy-test.txt"
