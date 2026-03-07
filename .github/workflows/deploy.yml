@@ -73,8 +73,10 @@ jobs:
           printf "Deployed UTC: %s\nGitHub run: %s\nCommit: %s\n" \
             "$(date -u '+%Y-%m-%d %H:%M:%S')" \
             "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
-            "${GITHUB_SHA}" > deploy-marker.txt
-          ls -la deploy-marker.txt
+            "${GITHUB_SHA}" > vspfiles/deploy-marker.txt
+          cp vspfiles/deploy-marker.txt vspfiles/css/deploy-marker.txt
+          ls -la vspfiles/deploy-marker.txt
+          ls -la vspfiles/css/deploy-marker.txt
 
       - name: Show resolved remote paths
         run: |
@@ -83,6 +85,7 @@ jobs:
           echo "vspfiles destination: ${REMOTE_VSPFILES_PATH}"
           echo "custom-safe.css path: ${REMOTE_VSPFILES_PATH}css/custom-safe.css"
           echo "Marker path:          ${REMOTE_VSPFILES_PATH}deploy-marker.txt"
+          echo "Marker path (css):    ${REMOTE_VSPFILES_PATH}css/deploy-marker.txt"
 
       - name: Deploy via SFTP
         uses: Dylan700/sftp-upload-action@v1.2.3
@@ -94,9 +97,8 @@ jobs:
           uploads: |
             template_266.html => ${{ env.REMOTE_TEMPLATE_PATH }}
             vspfiles/ => ${{ env.REMOTE_VSPFILES_PATH }}
-            deploy-marker.txt => ${{ env.REMOTE_VSPFILES_PATH }}
 
       - name: Deploy summary
         run: |
           echo "If this run succeeded, files were written to the paths above under SFTP home."
-          echo "If FileZilla still shows old times, open ${REMOTE_VSPFILES_PATH}deploy-marker.txt and verify the timestamp."
+          echo "If FileZilla still shows old times, open ${REMOTE_VSPFILES_PATH}css/deploy-marker.txt and verify the timestamp."
