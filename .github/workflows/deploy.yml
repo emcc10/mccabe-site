@@ -1,5 +1,3 @@
-\# SFTP deploy: uses secrets FTP_SERVER, FTP_USERNAME, FTP_PASSWORD (port 2222)
-# Template at /template_266.html. Assets under /vspfiles/.
 name: Deploy Volusion Theme
 
 on:
