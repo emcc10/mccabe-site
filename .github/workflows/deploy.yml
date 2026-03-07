@@ -44,7 +44,8 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: "2222"
           uploads: |
-            template_266.html => ./
+            template_266.html => /
+             root-test.txt => ./
             vspfiles/ => vspfiles/
 
       - name: Deploy summary
