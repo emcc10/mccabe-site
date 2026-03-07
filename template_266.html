@@ -13,11 +13,17 @@
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
 <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
-<link id="mc-custom-safe-css" rel="stylesheet" href="/v/vspfiles/css/custom-safe.css">
+<link id="mc-custom-safe-css" rel="stylesheet" href="/vspfiles/css/custom-safe.css">
 <script>
 (function () {
   var el = document.getElementById('mc-custom-safe-css');
-  if (el) el.href = '/v/vspfiles/css/custom-safe.css?v=' + Date.now();
+  if (!el) return;
+  var bust = '?v=' + Date.now();
+  el.onerror = function () {
+    this.onerror = null;
+    this.href = '/v/vspfiles/css/custom-safe.css' + bust;
+  };
+  el.href = '/vspfiles/css/custom-safe.css' + bust;
 })();
 </script>
 <script>
