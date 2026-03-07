@@ -1,46 +1,17 @@
-name: Deploy Volusion Theme
+name: Volusion Path Probe
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      FTP_SERVER: ${{ secrets.FTP_SERVER }}
-      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Verify deploy secrets
-        run: |
-          if [ -z "$FTP_SERVER" ]; then echo "::error::FTP_SERVER secret is not set."; exit 1; fi
-          if [ -z "$FTP_USERNAME" ]; then echo "::error::FTP_USERNAME secret is not set."; exit 1; fi
-          if [ -z "$FTP_PASSWORD" ]; then echo "::error::FTP_PASSWORD secret is not set."; exit 1; fi
-          echo "Secrets are set. Deploying to $FTP_SERVER (port 2222)."
-
-      - name: Show what we're deploying
-        run: |
-          echo "Template source:"
-          ls -la template_266.html 2>/dev/null || true
-          echo "CSS source:"
-          ls -la vspfiles/css/custom-safe.css 2>/dev/null || true
-          echo "Deploy test source:"
-          ls -la vspfiles/css/deploy-test.txt 2>/dev/null || true
-
-      - name: Show exact remote paths
-        run: |
-          echo "Expected remote template: wwwroot/v/template_266.html"
-          echo "Expected remote CSS: wwwroot/v/vspfiles/css/custom-safe.css"
-          echo "Expected remote test file: wwwroot/v/vspfiles/css/deploy-test.txt"
-
-      - name: Deploy via SFTP
+      - name: Upload probe files via SFTP
         uses: Dylan700/sftp-upload-action@v1.2.3
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -48,12 +19,5 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: "2222"
           uploads: |
-            template_266.html => wwwroot/v/
-            vspfiles/ => wwwroot/v/vspfiles/
-
-      - name: Deploy summary
-        run: |
-          echo "If the job succeeded, check these files in FileZilla:"
-          echo "wwwroot/v/template_266.html"
-          echo "wwwroot/v/vspfiles/css/custom-safe.css"
-          echo "wwwroot/v/vspfiles/css/deploy-test.txt"
+            probe-root.txt => wwwroot/
+            probe-v.txt => wwwroot/v/
