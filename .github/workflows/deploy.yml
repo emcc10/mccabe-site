@@ -18,36 +18,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Verify deploy secrets
-        run: |
-          if [ -z "$FTP_SERVER" ]; then echo "::error::FTP_SERVER secret is not set."; exit 1; fi
-          if [ -z "$FTP_USERNAME" ]; then echo "::error::FTP_USERNAME secret is not set."; exit 1; fi
-          if [ -z "$FTP_PASSWORD" ]; then echo "::error::FTP_PASSWORD secret is not set."; exit 1; fi
-          echo "Secrets are set. Deploying to $FTP_SERVER (port 2222)."
-
-      - name: Show what we're deploying
-        run: |
-          echo "Template source:"
-          ls -la template_266.html 2>/dev/null || true
-          echo "Root test source:"
-          ls -la root-test.txt 2>/dev/null || true
-          echo "CSS source:"
-          ls -la vspfiles/css/custom-safe.css 2>/dev/null || true
-          echo "Deploy test source:"
-          ls -la vspfiles/css/deploy-test.txt 2>/dev/null || true
-
       - name: Show deploy target
         run: |
           echo "Server: $FTP_SERVER"
           echo "Username: $FTP_USERNAME"
           echo "Port: 2222"
-          pwd
-          ls -la
-          ls -la template_266.html || true
           ls -la root-test.txt || true
-          ls -la vspfiles/css/deploy-test.txt || true
 
-      - name: Deploy via SFTP
+      - name: Deploy root test via SFTP
         uses: Dylan700/sftp-upload-action@v1.2.3
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -55,13 +33,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: "2222"
           uploads: |
-            template_266.html => ./
             root-test.txt => ./
-            vspfiles/ => vspfiles/
-
-      - name: Deploy summary
-        run: |
-          echo "Expected remote template: /template_266.html"
-          echo "Expected remote root test file: /root-test.txt"
-          echo "Expected remote CSS: /vspfiles/css/custom-safe.css"
-          echo "Expected remote test file: /vspfiles/css/deploy-test.txt"
