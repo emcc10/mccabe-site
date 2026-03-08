@@ -45,6 +45,7 @@ jobs:
           echo "Secrets are set. Deploying to $FTP_SERVER (port 2222)."
 
       - name: Install sshpass (for remote listing)
+        timeout-minutes: 3
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
       - name: Show what we are deploying
@@ -89,8 +90,14 @@ jobs:
           echo "Market path (css):    ${REMOTE_VSPFILES_PATH}css/deploy-market.txt"
 
       - name: Deploy via SFTP (explicit puts)
+        timeout-minutes: 2
         run: |
-          sshpass -p "$FTP_PASSWORD" sftp -o StrictHostKeyChecking=no -P 2222 "$FTP_USERNAME@$FTP_SERVER" <<EOF
+          timeout 120s sshpass -p "$FTP_PASSWORD" sftp \
+          -o StrictHostKeyChecking=no \
+          -o ConnectTimeout=20 \
+          -o ServerAliveInterval=10 \
+          -o ServerAliveCountMax=3 \
+          -P 2222 "$FTP_USERNAME@$FTP_SERVER" <<EOF
           put "template_266.html" "${REMOTE_TEMPLATE_PATH}template_266.html"
           put "vspfiles/css/custom-safe.css" "${REMOTE_VSPFILES_PATH}css/custom-safe.css"
           put "deploy-marker.txt" "${REMOTE_VSPFILES_PATH}css/deploy-marker.txt"
@@ -99,9 +106,15 @@ jobs:
           EOF
 
       - name: Verify remote files via SFTP
+        timeout-minutes: 2
         run: |
           set +e
-          sshpass -p "$FTP_PASSWORD" sftp -o StrictHostKeyChecking=no -P 2222 "$FTP_USERNAME@$FTP_SERVER" <<EOF
+          timeout 120s sshpass -p "$FTP_PASSWORD" sftp \
+          -o StrictHostKeyChecking=no \
+          -o ConnectTimeout=20 \
+          -o ServerAliveInterval=10 \
+          -o ServerAliveCountMax=3 \
+          -P 2222 "$FTP_USERNAME@$FTP_SERVER" <<EOF
           pwd
           ls -la
           ls -la ${REMOTE_TEMPLATE_PATH}
