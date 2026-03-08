@@ -3229,3 +3229,54 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     padding: 0 !important;
   }
 }
+
+/* =========================================================
+   FINAL DESKTOP GRID FIX (2026-03-08)
+   Neutralize Bootstrap pull/push offsets in header row that
+   shift nav left on non-home desktop pages.
+   ========================================================= */
+@media (min-width: 1200px) {
+  body:not(.is-home) header.header .hidden-xs.col-xs-12.col-lg-7.col-lg-pull-2.no-pad-lg {
+    right: auto !important; /* cancel .col-lg-pull-2 offset */
+    left: auto !important;
+    position: relative !important;
+  }
+
+  body:not(.is-home) header.header .col-xs-6.col-sm-4.col-md-3.col-lg-2.col-lg-push-7.microblock-group {
+    left: auto !important; /* cancel .col-lg-push-7 offset */
+    right: auto !important;
+  }
+}
+
+/* =========================================================
+   FINAL CATEGORY/NON-HOME TOP NAV WRAPPER FIX (2026-03-08)
+   Center across full header width (not within a 7/12 grid col).
+   ========================================================= */
+@media (min-width: 992px) {
+  body:not(.is-home) header.header .hidden-xs.col-xs-12.col-lg-7.col-lg-pull-2.no-pad-lg {
+    float: none !important;
+    clear: both !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    right: auto !important;
+    left: auto !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    position: relative !important;
+  }
+
+  body:not(.is-home) header.header .hidden-xs.col-xs-12.col-lg-7.col-lg-pull-2.no-pad-lg .microblock.main-menu {
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  body:not(.is-home) header.header .hidden-xs.col-xs-12.col-lg-7.col-lg-pull-2.no-pad-lg #display_menu_1 {
+    width: 100% !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+  }
+}
