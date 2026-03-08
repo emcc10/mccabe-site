@@ -3236,7 +3236,7 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
    shift nav left on non-home desktop pages.
    ========================================================= */
 @media (min-width: 1200px) {
-  body:not(.is-home) header.header .hidden-xs.col-xs-12.col-lg-7.col-lg-pull-2.no-pad-lg {
+  body:not(.is-home) header.header .hidden-xs.col-xs-12.no-pad-lg {
     right: auto !important; /* cancel .col-lg-pull-2 offset */
     left: auto !important;
     position: relative !important;
@@ -3253,7 +3253,7 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
    Center across full header width (not within a 7/12 grid col).
    ========================================================= */
 @media (min-width: 992px) {
-  body:not(.is-home) header.header .hidden-xs.col-xs-12.col-lg-7.col-lg-pull-2.no-pad-lg {
+  body:not(.is-home) header.header .hidden-xs.col-xs-12.no-pad-lg {
     float: none !important;
     clear: both !important;
     width: 100% !important;
@@ -3265,7 +3265,7 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     position: relative !important;
   }
 
-  body:not(.is-home) header.header .hidden-xs.col-xs-12.col-lg-7.col-lg-pull-2.no-pad-lg .microblock.main-menu {
+  body:not(.is-home) header.header .hidden-xs.col-xs-12.no-pad-lg .microblock.main-menu {
     width: 100% !important;
     margin: 0 auto !important;
     padding: 0 !important;
@@ -3274,7 +3274,7 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     align-items: center !important;
   }
 
-  body:not(.is-home) header.header .hidden-xs.col-xs-12.col-lg-7.col-lg-pull-2.no-pad-lg #display_menu_1 {
+  body:not(.is-home) header.header .hidden-xs.col-xs-12.no-pad-lg #display_menu_1 {
     width: 100% !important;
     margin: 0 auto !important;
     text-align: center !important;
