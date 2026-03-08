@@ -3181,3 +3181,51 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
   padding: 0 10px !important;
   display: inline-block !important;
 }
+
+/* =========================================================
+   FINAL DESKTOP NON-HOME NAV CENTER FIX (2026-03-08)
+   Symmetric gutters keep menu visually centered between
+   floating home/cart icons.
+   ========================================================= */
+@media (min-width: 992px) {
+  body:not(.is-home) header.header .microblock.main-menu {
+    padding: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+  }
+
+  body:not(.is-home) header.header #display_menu_1 {
+    width: 100% !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  body:not(.is-home) header.header #display_menu_1 > ul,
+  body:not(.is-home) header.header #display_menu_1 > ul.vnav--level1,
+  body:not(.is-home) header.header #display_menu_1 > ul.vnav--horizontal.vnav--level1 {
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding-left: max(80px, 8vw) !important;
+    padding-right: max(80px, 8vw) !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: clamp(18px, 2.2vw, 30px) !important;
+  }
+
+  /* If a hidden cart li exists in nav, remove it from layout flow. */
+  body:not(.is-home) header.header #display_menu_1 li.mc-vnav-cart,
+  body:not(.is-home) header.header #display_menu_1 .mc-vnav-cart {
+    display: none !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
