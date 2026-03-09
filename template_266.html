@@ -971,6 +971,7 @@ html body.category .v-product-grid > .v-product {
         label: labelFor(o)
       };
     });
+    document.dispatchEvent(new CustomEvent("wmLeatherOptionsReady"));
 
     // Mark built ONLY now
     window.__WM_LEATHER_MODAL_BUILT__ = true;
@@ -1293,9 +1294,13 @@ html body.category .v-product-grid > .v-product {
     return true;
   }
 
-  // Boot: wait for Volusion to inject options, and watch for late changes
+  // Boot: wait for Volusion to inject options; keep retrying briefly.
 function boot(){
-  setTimeout(initIfReady, 600);
+  var tries = 0;
+  var timer = setInterval(function(){
+    tries++;
+    if (initIfReady() || tries > 40) clearInterval(timer);
+  }, 250);
 }
 boot();
 
@@ -1325,24 +1330,24 @@ boot();
 
     const panel = document.createElement("div");
     panel.id = "mc-inline-config";
-    panel.style.margin = "10px 0 16px";
+    panel.style.margin = "0 0 12px";
 
     panel.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:12px;align-items:stretch;max-width:540px;width:100%">
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:stretch;max-width:520px;width:100%">
         <div id="mcLeatherRow" style="display:flex;flex-direction:column;gap:6px;align-items:stretch;width:100%">
-          <div id="mcLeatherHeader" style="font-size:16px;font-weight:500;line-height:1.2;">
-            Select Leather:
+          <div id="mcLeatherHeader" style="font-size:12px;font-weight:400;line-height:1.2;letter-spacing:.08em;text-transform:uppercase;">
+            Select From Special Order Leathers
           </div>
-          <div id="mcLeatherPicker" style="display:flex;align-items:center;gap:8px;width:100%">
+          <div id="mcLeatherPicker" style="display:flex;align-items:center;gap:6px;width:100%">
             <div id="mcLeatherSwatchStrip" style="display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0;overflow:hidden"></div>
             <button type="button" id="mcLeatherBtn" class="mc-config-btn"
               aria-label="Open leather swatches"
-              style="padding:0;width:34px;min-width:34px;max-width:34px;height:34px;line-height:32px;text-align:center;border:1px solid #333;border-radius:999px;background:#fff;cursor:pointer;font-size:18px;font-weight:400">
+              style="padding:0;width:16px;min-width:16px;max-width:16px;height:16px;line-height:16px;text-align:center;border:0;border-radius:0;background:transparent;cursor:pointer;font-size:14px;font-weight:400;color:#222">
               &#8964;
             </button>
           </div>
           <div id="mcLeatherSummary"
-            style="padding:6px 2px 0;border:0;background:transparent;font-size:13px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#555">
+            style="padding:4px 2px 0;border:0;background:transparent;font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#666">
             ${(wmSummary && wmSummary.textContent) ? wmSummary.textContent : "Selected leather"}
           </div>
         </div>
@@ -1447,6 +1452,17 @@ boot();
     // Keep summary synced to modal selection changes
     renderLeatherPreviewStrip();
     setTimeout(renderLeatherPreviewStrip, 900);
+    (function keepTryingSwatches(){
+      var tries = 0;
+      var timer = setInterval(function(){
+        tries++;
+        renderLeatherPreviewStrip();
+        syncLeatherSummary();
+        if (tries > 20 || (mcLeatherStrip && mcLeatherStrip.querySelector(".mc-mini-swatch"))) {
+          clearInterval(timer);
+        }
+      }, 250);
+    })();
 
     if (wmSummary && mcSum) {
       syncLeatherSummary();
@@ -2514,7 +2530,7 @@ body.mc-product-page #content_area td.productoptionname {
       var normalized = raw.toLowerCase().replace(/:$/, '').trim();
       var hasField = !!q('select, input, textarea, button', el);
       if (!hasField && (normalized === 'choose cover' || normalized === 'choose leather')) {
-        el.textContent = 'Select Leather:';
+        el.textContent = 'Select From Special Order Leathers';
       }
     });
   }
@@ -2694,10 +2710,15 @@ body.mc-product-page #content_area td.productoptionname {
 
     if (!main) return;
 
-    // Make main image larger / natural size
-    qa('img', main).forEach(function(img){
-      img.style.setProperty('width','auto','important');
-      img.style.setProperty('max-width','100%','important');
+    // Make main image larger / natural size (works whether main is an IMG or wrapper)
+    var mainImgs = [];
+    if ((main.tagName || '').toUpperCase() === 'IMG') mainImgs = [main];
+    else mainImgs = qa('img', main);
+
+    mainImgs.forEach(function(img){
+      img.style.setProperty('width','100%','important');
+      img.style.setProperty('max-width','980px','important');
+      img.style.setProperty('min-width','0','important');
       img.style.setProperty('height','auto','important');
       img.style.setProperty('object-fit','contain','important');
       img.style.setProperty('display','block','important');
@@ -2717,7 +2738,7 @@ body.mc-product-page #content_area td.productoptionname {
       wrap.className = 'mc-prod-media-wrap';
       wrap.style.setProperty('display','flex','important');
       wrap.style.setProperty('align-items','flex-start','important');
-      wrap.style.setProperty('gap','14px','important');
+      wrap.style.setProperty('gap','8px','important');
       wrap.style.setProperty('width','100%','important');
       wrap.style.setProperty('margin','0 0 12px 0','important');
 
@@ -2731,8 +2752,8 @@ body.mc-product-page #content_area td.productoptionname {
 
     // Force thumbs column
     thumbs.style.setProperty('float','none','important');
-    thumbs.style.setProperty('width','86px','important');
-    thumbs.style.setProperty('min-width','86px','important');
+    thumbs.style.setProperty('width','72px','important');
+    thumbs.style.setProperty('min-width','72px','important');
     thumbs.style.setProperty('margin','0','important');
     thumbs.style.setProperty('padding','0','important');
 
@@ -2751,8 +2772,8 @@ body.mc-product-page #content_area td.productoptionname {
 
     // Main image area fills remaining width
     main.style.setProperty('float','none','important');
-    main.style.setProperty('width','auto','important');
-    main.style.setProperty('flex','1 1 auto','important');
+    main.style.setProperty('width','100%','important');
+    main.style.setProperty('flex','1 1 0','important');
     main.style.setProperty('overflow','visible','important');
     main.style.setProperty('min-width','0','important');
   }
@@ -2790,6 +2811,9 @@ body.mc-product-page #content_area td.productoptionname {
     if (!optionsTable) return;
 
     qa('tr', optionsTable).forEach(function(row){
+      var hasLeatherControl = !!q('select.mc-native-leather', row);
+      if (hasLeatherControl) row.classList.add('mc-leather-option-row');
+
       var hasConfigControl = !!q('select:not(.mc-native-leather), textarea, input[type="text"], input[type="number"]', row);
       if (hasConfigControl) row.classList.add('mc-option-row');
     });
