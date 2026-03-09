@@ -3575,3 +3575,161 @@ body.mc-product-page #mc-inline-config {
     padding-bottom: 2px !important;
   }
 }
+
+/* =========================================================
+   PDP DESKTOP LAYOUT LOCK (2026-03-09)
+   Final authority block to neutralize older conflicting rules.
+   ========================================================= */
+@media (min-width: 992px) {
+  body.productdetails #content_area,
+  body.mc-product-page #content_area {
+    max-width: 1460px !important;
+    margin: 24px auto 0 !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2),
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 18px !important;
+    width: 100% !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
+  body.mc-product-page #content_area td.mc-pdp-media-td {
+    flex: 0 0 60% !important;
+    width: 60% !important;
+    max-width: 60% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
+  body.mc-product-page #content_area td.mc-pdp-options-td {
+    flex: 1 1 40% !important;
+    width: 40% !important;
+    max-width: 40% !important;
+    min-width: 380px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails #content_area #product_photo,
+  body.mc-product-page #content_area #product_photo,
+  body.productdetails #v65-product-parent #product_photo,
+  body.mc-product-page #v65-product-parent #product_photo,
+  body.productdetails #content_area img#product_photo,
+  body.mc-product-page #content_area img#product_photo {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 auto !important;
+  }
+
+  body.productdetails #content_area #altviews,
+  body.mc-product-page #content_area #altviews {
+    width: 74px !important;
+    min-width: 74px !important;
+  }
+
+  body.productdetails #v65-product-parent #options_table,
+  body.mc-product-page #v65-product-parent #options_table,
+  body.productdetails #content_area #options_table,
+  body.mc-product-page #content_area #options_table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: auto !important;
+    margin: 0 !important;
+  }
+
+  body.productdetails #v65-product-parent #options_table tr.mc-option-row,
+  body.mc-product-page #v65-product-parent #options_table tr.mc-option-row,
+  body.productdetails #content_area #options_table tr.mc-option-row,
+  body.mc-product-page #content_area #options_table tr.mc-option-row,
+  body.productdetails #v65-product-parent #options_table tr:has(select:not(.mc-native-leather)),
+  body.mc-product-page #v65-product-parent #options_table tr:has(select:not(.mc-native-leather)),
+  body.productdetails #content_area #options_table tr:has(select:not(.mc-native-leather)),
+  body.mc-product-page #content_area #options_table tr:has(select:not(.mc-native-leather)) {
+    display: block !important;
+    margin-bottom: 6px !important;
+  }
+
+  body.productdetails #v65-product-parent #options_table td[align="right"],
+  body.mc-product-page #v65-product-parent #options_table td[align="right"],
+  body.productdetails #content_area #options_table td[align="right"],
+  body.mc-product-page #content_area #options_table td[align="right"],
+  body.productdetails #v65-product-parent #options_table .productoptionname,
+  body.mc-product-page #v65-product-parent #options_table .productoptionname,
+  body.productdetails #content_area #options_table .productoptionname,
+  body.mc-product-page #content_area #options_table .productoptionname,
+  body.productdetails #v65-product-parent #options_table label,
+  body.mc-product-page #v65-product-parent #options_table label,
+  body.productdetails #content_area #options_table label,
+  body.mc-product-page #content_area #options_table label {
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 1.25 !important;
+    letter-spacing: 0 !important;
+    margin: 0 0 2px 0 !important;
+    text-align: left !important;
+  }
+
+  body.productdetails #v65-product-parent #options_table select:not(.mc-native-leather),
+  body.mc-product-page #v65-product-parent #options_table select:not(.mc-native-leather),
+  body.productdetails #content_area #options_table select:not(.mc-native-leather),
+  body.mc-product-page #content_area #options_table select:not(.mc-native-leather) {
+    width: 100% !important;
+    max-width: 420px !important;
+    margin: 0 !important;
+  }
+}
+
+/* RH-like leather strip cleanup */
+body.mc-product-page #mc-inline-config {
+  width: 100% !important;
+  max-width: 460px !important;
+  margin: 4px 0 10px !important;
+}
+
+body.mc-product-page #mcLeatherSummary {
+  display: none !important;
+}
+
+body.mc-product-page #mcLeatherHeader {
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .08em !important;
+  color: #555 !important;
+}
+
+body.mc-product-page #mcLeatherSwatchStrip {
+  max-width: 266px !important;
+  height: 26px !important;
+  border: 1px solid #d6d6d6 !important;
+  background: #fff !important;
+}
+
+body.mc-product-page .mc-mini-swatch {
+  width: 33px !important;
+  min-width: 33px !important;
+  height: 24px !important;
+}
+
+body.mc-product-page #mcLeatherBtn {
+  width: 14px !important;
+  min-width: 14px !important;
+  height: 14px !important;
+  line-height: 14px !important;
+  font-size: 13px !important;
+}

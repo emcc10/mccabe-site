@@ -1326,6 +1326,7 @@ boot();
     const wmOpen = document.getElementById("wmOpen");       // hidden modal trigger (still exists)
     const wmSummary = document.getElementById("wmSummary"); // modal summary text (still exists)
     const area = document.getElementById("content_area");
+    const optionsTable = document.querySelector("#options_table, table[id*='options_table']");
     if (!area || !wmOpen) return;
 
     const panel = document.createElement("div");
@@ -1365,8 +1366,9 @@ boot();
       </div>
     `;
 
-    // Place the panel right after the hidden wmOpen button's container (so it sits where your options live)
-    wmOpen.parentElement.insertAdjacentElement("afterend", panel);
+    // Place panel directly after options table when possible (stable placement).
+    if (optionsTable) optionsTable.insertAdjacentElement("afterend", panel);
+    else wmOpen.parentElement.insertAdjacentElement("afterend", panel);
 
     const mcLeatherBtn = document.getElementById("mcLeatherBtn");
     const mcLeatherStrip = document.getElementById("mcLeatherSwatchStrip");
@@ -1379,6 +1381,7 @@ boot();
         if (idx >= urls.length){
           img.removeAttribute("src");
           img.classList.add("mc-mini-swatch--empty");
+          img.style.background = "linear-gradient(90deg,#dadada 0%,#bdbdbd 22%,#d9d9d9 46%,#b3b3b3 68%,#dfdfdf 100%)";
           return;
         }
         var url = urls[idx++];
@@ -1441,6 +1444,17 @@ boot();
       });
     }
 
+    function hideLegacyLeatherRows(){
+      if (!optionsTable) return;
+      Array.from(optionsTable.querySelectorAll("tr")).forEach(function(row){
+        var txt = (row.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+        var hasNativeLeather = !!row.querySelector("select.mc-native-leather");
+        if (hasNativeLeather || txt === "choose cover" || txt === "choose leather" || txt.indexOf("choose cover") === 0) {
+          row.style.setProperty("display", "none", "important");
+        }
+      });
+    }
+
     // Button actions
     if (mcLeatherBtn) mcLeatherBtn.onclick = () => wmOpen.click();
 
@@ -1463,12 +1477,22 @@ boot();
         }
       }, 250);
     })();
+    hideLegacyLeatherRows();
+    setTimeout(hideLegacyLeatherRows, 400);
+    setTimeout(hideLegacyLeatherRows, 1200);
 
     if (wmSummary && mcSum) {
       syncLeatherSummary();
       new MutationObserver(syncLeatherSummary).observe(wmSummary, { childList:true, subtree:true });
     } else {
       syncLeatherSummary();
+    }
+
+    if (optionsTable && !window.__mcLeatherRowObserver) {
+      window.__mcLeatherRowObserver = new MutationObserver(function(){
+        hideLegacyLeatherRows();
+      });
+      window.__mcLeatherRowObserver.observe(optionsTable, { childList: true, subtree: true });
     }
 
     document.addEventListener("wmLeatherOptionsReady", function(){
