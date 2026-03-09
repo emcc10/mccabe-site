@@ -3289,8 +3289,8 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
 @media (min-width: 992px) {
   body.productdetails #content_area,
   body.mc-product-page #content_area {
-    margin-left: 24px !important;
-    margin-right: 24px !important;
+    margin-left: 12px !important;
+    margin-right: 12px !important;
   }
 
   body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child,
@@ -3298,8 +3298,8 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
   body.mc-product-page #content_area td.mc-pdp-media-td {
-    width: 68% !important;
-    max-width: 68% !important;
+    width: 71% !important;
+    max-width: 71% !important;
     min-width: 0 !important;
     float: none !important;
     vertical-align: top !important;
@@ -3312,9 +3312,9 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
   body.mc-product-page #content_area td.mc-pdp-options-td {
-    width: 32% !important;
-    max-width: 32% !important;
-    min-width: 250px !important;
+    width: 29% !important;
+    max-width: 29% !important;
+    min-width: 240px !important;
     float: none !important;
     vertical-align: top !important;
     box-sizing: border-box !important;
@@ -3327,7 +3327,7 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
   body.productdetails #v65-product-parent img#product_photo,
   body.mc-product-page #v65-product-parent img#product_photo {
     display: block !important;
-    width: min(100%, 1040px) !important;
+    width: min(100%, 1200px) !important;
     max-width: 100% !important;
     min-width: 0 !important;
     height: auto !important;
@@ -3371,6 +3371,7 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     text-align: left !important;
     padding: 0 !important;
     white-space: normal !important;
+    margin-bottom: 1px !important;
   }
 
   body.productdetails #v65-product-parent #options_table tr.mc-option-row > td:not([align="right"]),
@@ -3401,6 +3402,7 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     max-width: 430px !important;
     min-width: 0 !important;
     margin: 0 !important;
+    margin-bottom: 4px !important;
     box-sizing: border-box !important;
   }
 
@@ -3448,6 +3450,22 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     max-width: 100% !important;
     padding: 0 !important;
   }
+
+  /* Strong fallback if tagged classes miss: use direct PDP row split */
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2),
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) {
+    display: table-row !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child {
+    width: 71% !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child {
+    width: 29% !important;
+  }
 }
 
 /* =========================================================
@@ -3456,20 +3474,20 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
    ========================================================= */
 body.mc-product-page #mcLeatherRow {
   width: 100% !important;
-  max-width: 500px !important;
+  max-width: 460px !important;
   gap: 3px !important;
-  border-top: 1px solid #d9d9d9 !important;
-  padding-top: 8px !important;
+  border-top: 0 !important;
+  padding-top: 2px !important;
 }
 
 body.mc-product-page #mcLeatherHeader {
-  font-size: 11px !important;
+  font-size: 13px !important;
   font-weight: 400 !important;
-  line-height: 1.25 !important;
-  letter-spacing: .08em !important;
-  text-transform: uppercase !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
   margin: 0 !important;
-  color: #555 !important;
+  color: #222 !important;
 }
 
 body.mc-product-page #mcLeatherPicker {
@@ -3486,16 +3504,16 @@ body.mc-product-page #mcLeatherSwatchStrip {
   flex: 1 1 auto !important;
   min-width: 0 !important;
   overflow: hidden !important;
-  max-width: 252px !important;
-  height: 24px !important;
+  max-width: 260px !important;
+  height: 26px !important;
   border: 1px solid #d7d7d7 !important;
   background: #fff !important;
 }
 
 body.mc-product-page .mc-mini-swatch {
-  width: 31px !important;
-  height: 22px !important;
-  min-width: 31px !important;
+  width: 32px !important;
+  height: 24px !important;
+  min-width: 32px !important;
   border: 0 !important;
   border-right: 1px solid #e6e6e6 !important;
   border-radius: 0 !important;
@@ -3521,25 +3539,25 @@ body.mc-product-page .mc-mini-swatch:last-child {
 }
 
 body.mc-product-page #mcLeatherBtn {
-  width: 14px !important;
-  height: 14px !important;
-  min-width: 14px !important;
-  max-width: 14px !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  max-width: 18px !important;
   border-radius: 0 !important;
   border: 0 !important;
   background: transparent !important;
   padding: 0 !important;
-  line-height: 14px !important;
-  font-size: 13px !important;
+  line-height: 18px !important;
+  font-size: 15px !important;
   font-weight: 400 !important;
-  color: #666 !important;
+  color: #444 !important;
 }
 
 body.mc-product-page #mcLeatherSummary {
   padding-top: 1px !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
   line-height: 1.3 !important;
-  color: #7a7a7a !important;
+  color: #666 !important;
 }
 
 body.mc-product-page #mc-inline-config {

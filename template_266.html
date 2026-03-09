@@ -673,9 +673,9 @@ document.addEventListener("DOMContentLoaded", function () {
   #content_area {
     display: block !important;
     text-align: left !important;
-    margin-top: 40px !important;
-    margin-left: 72px !important;
-    margin-right: 91px !important;
+    margin-top: 28px !important;
+    margin-left: 18px !important;
+    margin-right: 18px !important;
   }
 
   #content_area > * {
@@ -1335,14 +1335,14 @@ boot();
     panel.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;align-items:stretch;max-width:520px;width:100%">
         <div id="mcLeatherRow" style="display:flex;flex-direction:column;gap:6px;align-items:stretch;width:100%">
-          <div id="mcLeatherHeader" style="font-size:12px;font-weight:400;line-height:1.2;letter-spacing:.08em;text-transform:uppercase;">
-            Select From Special Order Leathers
+          <div id="mcLeatherHeader" style="font-size:13px;font-weight:400;line-height:1.2;letter-spacing:0;text-transform:none;">
+            Select Leather:
           </div>
           <div id="mcLeatherPicker" style="display:flex;align-items:center;gap:6px;width:100%">
             <div id="mcLeatherSwatchStrip" style="display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0;overflow:hidden"></div>
             <button type="button" id="mcLeatherBtn" class="mc-config-btn"
               aria-label="Open leather swatches"
-              style="padding:0;width:16px;min-width:16px;max-width:16px;height:16px;line-height:16px;text-align:center;border:0;border-radius:0;background:transparent;cursor:pointer;font-size:14px;font-weight:400;color:#222">
+              style="padding:0;width:18px;min-width:18px;max-width:18px;height:18px;line-height:18px;text-align:center;border:0;border-radius:0;background:transparent;cursor:pointer;font-size:15px;font-weight:400;color:#444">
               &#8964;
             </button>
           </div>
@@ -1470,6 +1470,11 @@ boot();
     } else {
       syncLeatherSummary();
     }
+
+    document.addEventListener("wmLeatherOptionsReady", function(){
+      renderLeatherPreviewStrip();
+      syncLeatherSummary();
+    });
   }
 function calculatePlannerPrice(counts, seatPrice){
   let total = 0;
@@ -2530,7 +2535,7 @@ body.mc-product-page #content_area td.productoptionname {
       var normalized = raw.toLowerCase().replace(/:$/, '').trim();
       var hasField = !!q('select, input, textarea, button', el);
       if (!hasField && (normalized === 'choose cover' || normalized === 'choose leather')) {
-        el.textContent = 'Select From Special Order Leathers';
+        el.textContent = 'Select Leather:';
       }
     });
   }
