@@ -960,6 +960,18 @@ html body.category .v-product-grid > .v-product {
     }
     if (!all.length) { log("Selects found, but no options parsed."); return false; }
 
+    // Expose parsed leather options so inline UI can render preview swatches.
+    window.__WM_LEATHER_OPTIONS__ = all.map(function(o){
+      return {
+        family: o.family,
+        color: o.color,
+        grade: o.grade,
+        value: o.value,
+        swatches: Array.isArray(o.swatches) ? o.swatches.slice(0) : [],
+        label: labelFor(o)
+      };
+    });
+
     // Mark built ONLY now
     window.__WM_LEATHER_MODAL_BUILT__ = true;
 
@@ -1313,22 +1325,29 @@ boot();
 
     const panel = document.createElement("div");
     panel.id = "mc-inline-config";
-    panel.style.margin = "14px 0 18px";
+    panel.style.margin = "10px 0 16px";
 
     panel.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start">
-        <div  style="display:flex;gap:10px;align-items:center">
-          <button type="button" id="mcLeatherBtn" class="mc-config-btn"
-            style="padding:10px 14px;width:260px;min-width:260px;max-width:260px;text-align:center;border:1px solid #333;border-radius:10px;background:#fff;cursor:pointer">
-            Choose Leather
-          </button>
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:stretch;max-width:540px;width:100%">
+        <div id="mcLeatherRow" style="display:flex;flex-direction:column;gap:6px;align-items:stretch;width:100%">
+          <div id="mcLeatherHeader" style="font-size:16px;font-weight:500;line-height:1.2;">
+            Select Leather:
+          </div>
+          <div id="mcLeatherPicker" style="display:flex;align-items:center;gap:8px;width:100%">
+            <div id="mcLeatherSwatchStrip" style="display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0;overflow:hidden"></div>
+            <button type="button" id="mcLeatherBtn" class="mc-config-btn"
+              aria-label="Open leather swatches"
+              style="padding:0;width:34px;min-width:34px;max-width:34px;height:34px;line-height:32px;text-align:center;border:1px solid #333;border-radius:999px;background:#fff;cursor:pointer;font-size:18px;font-weight:400">
+              &#8964;
+            </button>
+          </div>
           <div id="mcLeatherSummary"
-            style="min-width:260px;max-width:520px;padding:8px 10px;border:1px solid #ddd;border-radius:10px;background:#f7f7f7;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            style="padding:6px 2px 0;border:0;background:transparent;font-size:13px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#555">
             ${(wmSummary && wmSummary.textContent) ? wmSummary.textContent : "Selected leather"}
           </div>
         </div>
 
-        <div style="display:flex;gap:10px;align-items:center">
+        <div id="mcPlannerRow" style="display:flex;gap:10px;align-items:center">
           <button type="button" id="mcPlannerBtn" class="mc-config-btn"
             style="padding:10px 14px;width:260px;min-width:260px;max-width:260px;text-align:center;border:1px solid #333;border-radius:10px;background:#fff;cursor:pointer">
             Room Planner
@@ -1344,8 +1363,81 @@ boot();
     // Place the panel right after the hidden wmOpen button's container (so it sits where your options live)
     wmOpen.parentElement.insertAdjacentElement("afterend", panel);
 
+    const mcLeatherBtn = document.getElementById("mcLeatherBtn");
+    const mcLeatherStrip = document.getElementById("mcLeatherSwatchStrip");
+    const mcSum = document.getElementById("mcLeatherSummary");
+
+    function loadMiniSwatch(img, swatches){
+      var urls = Array.isArray(swatches) ? swatches.slice(0) : [];
+      var idx = 0;
+      function tryNext(){
+        if (idx >= urls.length){
+          img.removeAttribute("src");
+          img.classList.add("mc-mini-swatch--empty");
+          return;
+        }
+        var url = urls[idx++];
+        img.onerror = tryNext;
+        img.src = url;
+      }
+      tryNext();
+    }
+
+    function renderLeatherPreviewStrip(){
+      if (!mcLeatherStrip) return;
+
+      var source = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
+      if (!source.length){
+        mcLeatherStrip.innerHTML = '<span style="font-size:12px;color:#777">Loading swatches...</span>';
+        return;
+      }
+
+      var unique = [];
+      var seen = {};
+      source.forEach(function(o){
+        var key = ((o.family || "") + "|" + (o.color || "")).toLowerCase();
+        if (!key || seen[key]) return;
+        seen[key] = true;
+        unique.push(o);
+      });
+
+      mcLeatherStrip.innerHTML = "";
+      unique.slice(0, 8).forEach(function(o){
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "mc-mini-swatch";
+        var friendly = ((o.family || "") + " " + (o.color || "")).trim();
+        btn.title = friendly || "Leather swatch";
+        btn.dataset.lookup = friendly.toLowerCase();
+
+        var img = document.createElement("img");
+        img.alt = friendly || "Leather swatch";
+        btn.appendChild(img);
+        loadMiniSwatch(img, o.swatches);
+
+        btn.onclick = function(e){
+          e.preventDefault();
+          wmOpen.click();
+        };
+
+        mcLeatherStrip.appendChild(btn);
+      });
+    }
+
+    function syncLeatherSummary(){
+      if (!mcSum) return;
+      mcSum.textContent = (wmSummary && wmSummary.textContent) ? wmSummary.textContent : "Selected leather";
+
+      var activeText = (mcSum.textContent || "").toLowerCase();
+      Array.from((mcLeatherStrip || document).querySelectorAll(".mc-mini-swatch")).forEach(function(btn){
+        var key = btn.dataset.lookup || "";
+        var isActive = !!key && activeText.indexOf(key) !== -1;
+        btn.dataset.selected = isActive ? "1" : "0";
+      });
+    }
+
     // Button actions
-    document.getElementById("mcLeatherBtn").onclick = () => wmOpen.click();
+    if (mcLeatherBtn) mcLeatherBtn.onclick = () => wmOpen.click();
 
     document.getElementById("mcPlannerBtn").onclick = () => {
       window.open("/v/vspfiles/room-planner.html","roomPlanner","width=1300,height=900");
@@ -1353,11 +1445,14 @@ boot();
     };
 
     // Keep summary synced to modal selection changes
-    const mcSum = document.getElementById("mcLeatherSummary");
+    renderLeatherPreviewStrip();
+    setTimeout(renderLeatherPreviewStrip, 900);
+
     if (wmSummary && mcSum) {
-      const sync = () => { mcSum.textContent = wmSummary.textContent || "Selected leather"; };
-      sync();
-      new MutationObserver(sync).observe(wmSummary, { childList:true, subtree:true });
+      syncLeatherSummary();
+      new MutationObserver(syncLeatherSummary).observe(wmSummary, { childList:true, subtree:true });
+    } else {
+      syncLeatherSummary();
     }
   }
 function calculatePlannerPrice(counts, seatPrice){
@@ -2407,22 +2502,20 @@ body.mc-product-page #content_area td.productoptionname {
   }
 
   function forceOptionLabel(scope){
-    qa('label, .productoptionname, td, div', scope).forEach(function(el){
-      var t = (el.textContent || '').trim().toLowerCase();
-      if (t.indexOf('number of seats per row') !== -1) {
-        el.style.setProperty('text-align','left','important');
-        el.style.setProperty('padding-left','10px','important');
-        el.style.setProperty('margin-left','0','important');
-        el.style.setProperty('display','block','important');
-        el.style.setProperty('width','auto','important');
-      }
-    });
-
-    qa('.productoptionname, td.productoptionname, label', scope).forEach(function(el){
+    qa('.productoptionname, td.productoptionname, label, #options_table td[align="right"]', scope).forEach(function(el){
       el.style.setProperty('text-align','left','important');
-      el.style.setProperty('padding-left','10px','important');
+      el.style.setProperty('padding-left','0','important');
       el.style.setProperty('margin-left','0','important');
+      el.style.setProperty('display','block','important');
+      el.style.setProperty('width','auto','important');
       el.style.setProperty('font-style','normal','important');
+
+      var raw = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      var normalized = raw.toLowerCase().replace(/:$/, '').trim();
+      var hasField = !!q('select, input, textarea, button', el);
+      if (!hasField && (normalized === 'choose cover' || normalized === 'choose leather')) {
+        el.textContent = 'Select Leather:';
+      }
     });
   }
 
