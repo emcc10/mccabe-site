@@ -2692,6 +2692,16 @@ body.mc-product-page #content_area td.productoptionname {
     });
   }
 
+  function tagOptionRows(scope){
+    var optionsTable = q('#options_table', scope) || q('table[id*="options_table"]', scope);
+    if (!optionsTable) return;
+
+    qa('tr', optionsTable).forEach(function(row){
+      var hasConfigControl = !!q('select:not(.mc-native-leather), textarea, input[type="text"], input[type="number"]', row);
+      if (hasConfigControl) row.classList.add('mc-option-row');
+    });
+  }
+
   function clampFloatingIcons(){
     /* Cart/home position and size come from custom-safe.css (safe-area, no run-off) */
     if (!isMobile()) return;
@@ -2757,6 +2767,7 @@ body.mc-product-page #content_area td.productoptionname {
     forceTabsInline(scope);
     forceMediaLayout(scope);
     removeConfigurationDetails(scope);
+    tagOptionRows(scope);
     sizeSelectsToLongestOption(scope);
     enforceMobileGutters(scope);
     clampFloatingIcons();
@@ -2869,6 +2880,63 @@ body.mc-product-page #content_area td.productoptionname {
   window.addEventListener('load', run);
   setTimeout(run, 300);
   setTimeout(run, 900);
+})();
+</script>
+<script>
+(function(){
+  function qsa(sel, root){ return Array.from((root || document).querySelectorAll(sel)); }
+
+  function cleanPriceNode(node){
+    if (!node) return;
+    var walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null);
+    var textNodes = [];
+    while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+    textNodes.forEach(function(t){
+      var before = t.nodeValue || '';
+      var after = before
+        .replace(/^\s*:\s*(?=\$)/, '')
+        .replace(/^\s*:\s*(?=\d)/, '')
+        .replace(/^\s*:\s*$/, '');
+      if (after !== before) t.nodeValue = after;
+    });
+  }
+
+  function stripLeadingPriceColons(root){
+    var selectors = [
+      '.v65-product-price',
+      '.product_productprice',
+      '#priceWithOptions',
+      '.option_pricing',
+      '.v65-product-related-price',
+      '.price',
+      '[itemprop=\"offers\"]'
+    ];
+    qsa(selectors.join(','), root || document).forEach(cleanPriceNode);
+  }
+
+  function boot(){
+    stripLeadingPriceColons(document);
+    setTimeout(function(){ stripLeadingPriceColons(document); }, 500);
+    setTimeout(function(){ stripLeadingPriceColons(document); }, 1500);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', function(){ stripLeadingPriceColons(document); });
+
+  if (!window.__mcPriceColonObserver) {
+    var scheduled = false;
+    window.__mcPriceColonObserver = new MutationObserver(function(){
+      if (scheduled) return;
+      scheduled = true;
+      setTimeout(function(){
+        scheduled = false;
+        stripLeadingPriceColons(document);
+      }, 120);
+    });
+    window.__mcPriceColonObserver.observe(document.body, { childList: true, subtree: true });
+  }
 })();
 </script>
 
