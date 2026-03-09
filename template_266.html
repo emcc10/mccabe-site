@@ -1336,16 +1336,18 @@ boot();
     panel.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;align-items:stretch;max-width:520px;width:100%">
         <div id="mcLeatherRow" style="display:flex;flex-direction:column;gap:6px;align-items:stretch;width:100%">
-          <div id="mcLeatherHeader" style="font-size:13px;font-weight:400;line-height:1.2;letter-spacing:0;text-transform:none;">
-            Select Leather:
-          </div>
-          <div id="mcLeatherPicker" style="display:flex;align-items:center;gap:6px;width:100%">
-            <div id="mcLeatherSwatchStrip" style="display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0;overflow:hidden"></div>
+          <div id="mcLeatherHeaderRow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%">
+            <div id="mcLeatherHeader" style="font-size:13px;font-weight:400;line-height:1.2;letter-spacing:0;text-transform:none;">
+              SELECT FROM 65 SPECIAL ORDER LEATHERS
+            </div>
             <button type="button" id="mcLeatherBtn" class="mc-config-btn"
               aria-label="Open leather swatches"
               style="padding:0;width:18px;min-width:18px;max-width:18px;height:18px;line-height:18px;text-align:center;border:0;border-radius:0;background:transparent;cursor:pointer;font-size:15px;font-weight:400;color:#444">
-              &#8964;
+              &#8250;
             </button>
+          </div>
+          <div id="mcLeatherPicker" style="display:flex;align-items:center;gap:6px;width:100%">
+            <div id="mcLeatherSwatchStrip" style="display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0;overflow:hidden"></div>
           </div>
           <div id="mcLeatherSummary"
             style="padding:4px 2px 0;border:0;background:transparent;font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#666">
@@ -2559,7 +2561,7 @@ body.mc-product-page #content_area td.productoptionname {
       var normalized = raw.toLowerCase().replace(/:$/, '').trim();
       var hasField = !!q('select, input, textarea, button', el);
       if (!hasField && (normalized === 'choose cover' || normalized === 'choose leather')) {
-        el.textContent = 'Select Leather:';
+        el.textContent = 'SELECT FROM 65 SPECIAL ORDER LEATHERS';
       }
     });
   }
