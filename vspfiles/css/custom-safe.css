@@ -3798,3 +3798,230 @@ body.mc-product-page #mcLeatherSummary {
     overflow-x: auto !important;
   }
 }
+
+/* =========================================================
+   FINAL PDP + LEATHER FIX (2026-03-09)
+   Prevent right overflow, remove legacy cover row,
+   and keep only the custom "SELECT A LEATHER" section.
+   ========================================================= */
+body.mc-product-page #mc-inline-config {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+body.mc-product-page #mcLeatherRow {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  border-top: 1px solid #d8d8d8 !important;
+  padding-top: 10px !important;
+  gap: 8px !important;
+}
+
+body.mc-product-page #mcLeatherHeader {
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .06em !important;
+  color: #686868 !important;
+}
+
+body.mc-product-page #mcLeatherHeaderRow {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+body.mc-product-page #mcLeatherPicker {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+body.mc-product-page #mcLeatherSwatchStrip {
+  width: 100% !important;
+  max-width: 360px !important;
+  min-width: 0 !important;
+  height: 42px !important;
+  overflow: hidden !important;
+  gap: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+body.mc-product-page .mc-mini-swatch {
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 42px !important;
+  border: 0 !important;
+  border-right: 1px solid #ececec !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+}
+
+body.mc-product-page .mc-mini-swatch img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+body.mc-product-page .mc-mini-swatch:last-child {
+  border-right: 0 !important;
+}
+
+body.mc-product-page #mcLeatherBtn {
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
+  font-size: 18px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #555 !important;
+}
+
+body.mc-product-page #mcLeatherSummary {
+  display: none !important;
+}
+
+body.mc-product-page #mcPlannerRow {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+body.mc-product-page #mcPlannerBtn {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: auto !important;
+  flex: 0 1 240px !important;
+  box-sizing: border-box !important;
+}
+
+body.mc-product-page #mcPlannerSummary {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  flex: 1 1 auto !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 992px) {
+  body.productdetails #content_area,
+  body.mc-product-page #content_area {
+    width: 100% !important;
+    max-width: min(1380px, calc(100vw - 28px)) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    overflow-x: clip !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2),
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
+  body.mc-product-page #content_area td.mc-pdp-media-td {
+    flex: 0 1 calc(62% - 8px) !important;
+    width: calc(62% - 8px) !important;
+    max-width: calc(62% - 8px) !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
+  body.mc-product-page #content_area td.mc-pdp-options-td {
+    flex: 1 1 calc(38% - 8px) !important;
+    width: calc(38% - 8px) !important;
+    max-width: calc(38% - 8px) !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  body.productdetails #v65-product-parent #options_table,
+  body.mc-product-page #v65-product-parent #options_table,
+  body.productdetails #content_area #options_table,
+  body.mc-product-page #content_area #options_table {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    table-layout: auto !important;
+  }
+
+  body.productdetails #v65-product-parent #options_table select:not(.mc-native-leather),
+  body.mc-product-page #v65-product-parent #options_table select:not(.mc-native-leather),
+  body.productdetails #content_area #options_table select:not(.mc-native-leather),
+  body.mc-product-page #content_area #options_table select:not(.mc-native-leather) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+/* Hide native leather/cover option rows so only custom section remains */
+body.productdetails #v65-product-parent #options_table tr:has(select.mc-native-leather),
+body.mc-product-page #v65-product-parent #options_table tr:has(select.mc-native-leather),
+body.productdetails #content_area #options_table tr:has(select.mc-native-leather),
+body.mc-product-page #content_area #options_table tr:has(select.mc-native-leather),
+body.productdetails #v65-product-parent #options_table tr:has(select[name*="cover" i]),
+body.mc-product-page #v65-product-parent #options_table tr:has(select[name*="cover" i]),
+body.productdetails #content_area #options_table tr:has(select[name*="cover" i]),
+body.mc-product-page #content_area #options_table tr:has(select[name*="cover" i]),
+body.productdetails #v65-product-parent #options_table tr:has(select[id*="cover" i]),
+body.mc-product-page #v65-product-parent #options_table tr:has(select[id*="cover" i]),
+body.productdetails #content_area #options_table tr:has(select[id*="cover" i]),
+body.mc-product-page #content_area #options_table tr:has(select[id*="cover" i]),
+body.productdetails #v65-product-parent #options_table tr:has(select[name*="leather" i]),
+body.mc-product-page #v65-product-parent #options_table tr:has(select[name*="leather" i]),
+body.productdetails #content_area #options_table tr:has(select[name*="leather" i]),
+body.mc-product-page #content_area #options_table tr:has(select[name*="leather" i]),
+body.productdetails #v65-product-parent #options_table tr:has(select[id*="leather" i]),
+body.mc-product-page #v65-product-parent #options_table tr:has(select[id*="leather" i]),
+body.productdetails #content_area #options_table tr:has(select[id*="leather" i]),
+body.mc-product-page #content_area #options_table tr:has(select[id*="leather" i]) {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  body.mc-product-page #mcLeatherHeader {
+    font-size: 12px !important;
+  }
+
+  body.mc-product-page #mcLeatherSwatchStrip {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  body.mc-product-page #mcPlannerRow {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  body.mc-product-page #mcPlannerBtn,
+  body.mc-product-page #mcPlannerSummary {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 auto !important;
+  }
+}

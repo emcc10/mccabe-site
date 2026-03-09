@@ -1338,7 +1338,7 @@ boot();
         <div id="mcLeatherRow" style="display:flex;flex-direction:column;gap:6px;align-items:stretch;width:100%">
           <div id="mcLeatherHeaderRow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%">
             <div id="mcLeatherHeader" style="font-size:13px;font-weight:400;line-height:1.2;letter-spacing:0;text-transform:none;">
-              SELECT FROM 65 SPECIAL ORDER LEATHERS
+              SELECT A LEATHER
             </div>
             <button type="button" id="mcLeatherBtn" class="mc-config-btn"
               aria-label="Open leather swatches"
@@ -1355,13 +1355,13 @@ boot();
           </div>
         </div>
 
-        <div id="mcPlannerRow" style="display:flex;gap:10px;align-items:center">
+        <div id="mcPlannerRow" style="display:flex;gap:10px;align-items:center;width:100%;min-width:0">
           <button type="button" id="mcPlannerBtn" class="mc-config-btn"
-            style="padding:10px 14px;width:260px;min-width:260px;max-width:260px;text-align:center;border:1px solid #333;border-radius:10px;background:#fff;cursor:pointer">
+            style="padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:10px;background:#fff;cursor:pointer">
             Room Planner
           </button>
           <div id="mcPlannerSummary"
-            style="min-width:260px;max-width:520px;padding:8px 10px;border:1px solid #ddd;border-radius:10px;background:#f7f7f7;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            style="min-width:0;max-width:100%;flex:1 1 auto;padding:8px 10px;border:1px solid #ddd;border-radius:10px;background:#f7f7f7;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
             No planner selections
           </div>
         </div>
@@ -1376,14 +1376,96 @@ boot();
     const mcLeatherStrip = document.getElementById("mcLeatherSwatchStrip");
     const mcSum = document.getElementById("mcLeatherSummary");
 
-    function loadMiniSwatch(img, swatches){
+    function normalizeLeatherText(raw){
+      var x = String(raw || "");
+      x = x.replace(/\s*\(\s*\+\s*\$?\s*\d+(?:\.\d{2})?[^)]*\)\s*$/ig, "");
+      x = x.replace(/\s*\+\s*\$?\s*\d+(?:\.\d{2})?\s*$/ig, "");
+      x = x.replace(/^grade\s*[0-9,]+\s*[-–:]?\s*/i, "");
+      return x.replace(/\s+/g, " ").trim();
+    }
+
+    function splitLeatherFamilyColor(text){
+      var cleaned = normalizeLeatherText(text);
+      if (!cleaned) return { family: "", color: "" };
+      var parts = cleaned.split(" ").filter(Boolean);
+      var family = parts.shift() || "";
+      return { family: family, color: parts.join(" ").trim() };
+    }
+
+    function slugifyMini(text){
+      return String(text || "")
+        .toLowerCase()
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+    }
+
+    function miniSwatchCandidates(family, color){
+      var f = String(family || "").trim();
+      var c = String(color || "").trim();
+      if (!f) return [];
+
+      var names = [];
+      if (f && c) {
+        names.push(f + " " + c);
+        names.push(f.toLowerCase() + " " + c.toLowerCase());
+        names.push(f + "_" + c);
+        names.push(f + "-" + c);
+        names.push(slugifyMini(f) + "-" + slugifyMini(c));
+        names.push(slugifyMini(f) + "_" + slugifyMini(c));
+      } else {
+        names.push(f);
+        names.push(f.toLowerCase());
+        names.push(slugifyMini(f));
+      }
+
+      var out = [];
+      var exts = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+      names.forEach(function(n){
+        exts.forEach(function(ext){
+          out.push(encodeURI("/v/vspfiles/swatches/" + (n + ext)));
+        });
+      });
+      return out;
+    }
+
+    function fallbackLeatherOptionsFromSelect(){
+      var table = optionsTable || document.querySelector("#options_table, table[id*='options_table']");
+      var native =
+        document.querySelector("select.mc-native-leather") ||
+        (table ? table.querySelector("select[name*='cover' i], select[id*='cover' i], select[name*='leather' i], select[id*='leather' i], select") : null);
+      if (!native) return [];
+
+      var rows = [];
+      Array.from(native.options || []).forEach(function(opt){
+        var txt = (opt.textContent || "").replace(/\s+/g, " ").trim();
+        var val = String(opt.value || "").trim();
+        if (!txt || !val) return;
+        if (/choose|select|please select|--/i.test(txt)) return;
+        var fc = splitLeatherFamilyColor(txt);
+        if (!fc.family && !fc.color) return;
+        rows.push({
+          family: fc.family,
+          color: fc.color,
+          value: val,
+          swatches: miniSwatchCandidates(fc.family, fc.color)
+        });
+      });
+      return rows;
+    }
+
+    function loadMiniSwatch(img, swatches, swatchBtn){
       var urls = Array.isArray(swatches) ? swatches.slice(0) : [];
       var idx = 0;
       function tryNext(){
         if (idx >= urls.length){
           img.removeAttribute("src");
           img.classList.add("mc-mini-swatch--empty");
-          img.style.background = "linear-gradient(90deg,#dadada 0%,#bdbdbd 22%,#d9d9d9 46%,#b3b3b3 68%,#dfdfdf 100%)";
+          img.style.display = "none";
+          if (swatchBtn) {
+            swatchBtn.style.background = "linear-gradient(90deg,#ded8cd 0%,#c9bba0 30%,#9e8b6f 58%,#7f7362 100%)";
+          }
           return;
         }
         var url = urls[idx++];
@@ -1397,8 +1479,9 @@ boot();
       if (!mcLeatherStrip) return;
 
       var source = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
+      if (!source.length) source = fallbackLeatherOptionsFromSelect();
       if (!source.length){
-        mcLeatherStrip.innerHTML = '<span style="font-size:12px;color:#777">Loading swatches...</span>';
+        mcLeatherStrip.innerHTML = '<span style="font-size:12px;color:#777">Swatches unavailable</span>';
         return;
       }
 
@@ -1422,8 +1505,9 @@ boot();
 
         var img = document.createElement("img");
         img.alt = friendly || "Leather swatch";
+        img.loading = "lazy";
         btn.appendChild(img);
-        loadMiniSwatch(img, o.swatches);
+        loadMiniSwatch(img, o.swatches, btn);
 
         btn.onclick = function(e){
           e.preventDefault();
@@ -1447,13 +1531,22 @@ boot();
     }
 
     function hideLegacyLeatherRows(){
-      if (!optionsTable) return;
-      Array.from(optionsTable.querySelectorAll("tr")).forEach(function(row){
-        var txt = (row.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
-        var hasNativeLeather = !!row.querySelector("select.mc-native-leather");
-        if (hasNativeLeather || txt === "choose cover" || txt === "choose leather" || txt.indexOf("choose cover") === 0) {
-          row.style.setProperty("display", "none", "important");
-        }
+      var tables = Array.from(document.querySelectorAll("#options_table, table[id*='options_table']"));
+      if (!tables.length) return;
+
+      tables.forEach(function(tbl){
+        Array.from(tbl.querySelectorAll("tr")).forEach(function(row){
+          var txt = (row.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+          var labelCell = row.querySelector("td[align='right'], .productoptionname, label");
+          var labelTxt = ((labelCell && labelCell.textContent) || "").replace(/\s+/g, " ").trim().toLowerCase();
+          var hasSelect = !!row.querySelector("select");
+          var hasNativeLeather = !!row.querySelector("select.mc-native-leather");
+          var hasLeatherNamedSelect = !!row.querySelector("select[name*='cover' i], select[id*='cover' i], select[name*='leather' i], select[id*='leather' i]");
+          var looksLeatherLabel = /choose cover|choose leather|select leather|select a leather/.test(txt) || /choose cover|choose leather|select leather|select a leather/.test(labelTxt);
+          if (hasNativeLeather || hasLeatherNamedSelect || (hasSelect && looksLeatherLabel) || txt === "choose cover" || txt === "choose leather") {
+            row.style.setProperty("display", "none", "important");
+          }
+        });
       });
     }
 
@@ -2561,7 +2654,7 @@ body.mc-product-page #content_area td.productoptionname {
       var normalized = raw.toLowerCase().replace(/:$/, '').trim();
       var hasField = !!q('select, input, textarea, button', el);
       if (!hasField && (normalized === 'choose cover' || normalized === 'choose leather')) {
-        el.textContent = 'SELECT FROM 65 SPECIAL ORDER LEATHERS';
+        el.textContent = 'SELECT A LEATHER';
       }
     });
   }
