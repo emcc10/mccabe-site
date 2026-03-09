@@ -2752,9 +2752,11 @@ body.mc-product-page #content_area td.productoptionname {
         if (t.length > longest) longest = t.length;
       });
       if (longest > 0) {
-        var ch = Math.min(Math.max(longest + 2, 22), 60);
-        sel.style.setProperty('width', ch + 'ch', 'important');
-        sel.style.setProperty('min-width', ch + 'ch', 'important');
+        var ch = Math.min(Math.max(longest + 2, 24), 42);
+        sel.style.setProperty('width', '100%', 'important');
+        sel.style.setProperty('max-width', ch + 'ch', 'important');
+        sel.style.setProperty('min-width', '0', 'important');
+        sel.style.setProperty('box-sizing', 'border-box', 'important');
       }
     });
   }
