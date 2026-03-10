@@ -2927,22 +2927,10 @@ body.mc-product-page #content_area td.productoptionname {
     var rows = qa('tr', optionsTable);
     rows.forEach(function(row){
       var txt = (row.textContent || '').replace(/\s+/g, ' ').toLowerCase();
-      /* Only remove "Configuration Details" rows, NOT "Choose Configuration" (Straight/Curved) */
-      var hasDetailsInput = !!q('input[title*="Configuration Details" i], textarea[title*="Configuration Details" i], select[title*="Configuration Details" i]', row);
-      var hasHeaderMarker = row.id === 'product_options_heading' && txt.indexOf('configuration details') !== -1;
 
-      if (txt.indexOf('configuration details') !== -1 && (hasDetailsInput || hasHeaderMarker)) {
-        var prev = row.previousElementSibling;
-        if (row.parentNode) row.parentNode.removeChild(row);
-        if (prev && (prev.textContent || '').toLowerCase().indexOf('configuration details') !== -1) {
-          if (prev.parentNode) prev.parentNode.removeChild(prev);
-        }
-      }
-    });
-
-    qa('#options_table tr', scope).forEach(function(row){
-      var rowTxt = (row.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
-      if (rowTxt === 'configuration details' || rowTxt.indexOf('configuration details') === 0) {
+      // Any row that is the "Configuration Details" header or comment block
+      if (txt.indexOf('configuration details') !== -1 ||
+          txt.indexOf("please note how you'd like your seats arranged") !== -1) {
         if (row.parentNode) row.parentNode.removeChild(row);
       }
     });

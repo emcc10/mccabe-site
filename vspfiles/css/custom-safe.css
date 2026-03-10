@@ -4143,21 +4143,29 @@ body.mc-product-page #content_area h1 {
   margin: 0 0 14px 0 !important;
 }
 
-body.mc-product-page #content_area .colors_price,
-body.mc-product-page #content_area .product_list_price,
-body.mc-product-page #content_area .product_sale_price {
-  font-size: 22px !important;
-  font-weight: 500 !important;
+body.mc-product-page #content_area .product_sale_price,
+body.mc-product-page #content_area .product_sale_price b,
+body.mc-product-page #content_area .product_sale_price span {
+  font-size: 26px !important;
+  font-weight: 600 !important;
   margin: 0 0 18px 0 !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Hide smaller base price; only show Price with Selected Options */
+body.mc-product-page #content_area .colors_price,
+body.mc-product-page #content_area .product_list_price {
+  display: none !important;
 }
 
 body.mc-product-page #content_area .productoptionname,
 body.mc-product-page #content_area td.productoptionname,
 body.mc-product-page #content_area label {
-  font-size: 13px !important;
-  letter-spacing: 0.06em !important;
+  font-size: 14px !important;
+  letter-spacing: 0.08em !important;
   text-transform: uppercase !important;
-  margin: 14px 0 4px 0 !important;
+  margin: 18px 0 6px 0 !important;
+  text-align: left !important;
 }
 
 body.mc-product-page #content_area,
@@ -4165,4 +4173,68 @@ body.mc-product-page #content_area p,
 body.mc-product-page #content_area li {
   font-size: 14px !important;
   line-height: 1.6 !important;
+}
+
+/* RH-style dropdowns */
+body.mc-product-page #content_area select {
+  width: 100% !important;
+  max-width: 360px !important;
+  padding: 10px 14px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  background-color: #fff !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  appearance: none !important;
+  -moz-appearance: none !important;
+  -webkit-appearance: none !important;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #555 50%),
+    linear-gradient(135deg, #555 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) 50%,
+    calc(100% - 11px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  box-sizing: border-box !important;
+  margin-bottom: 14px !important;
+}
+
+/* Narrower gap between image and options */
+@media (min-width: 992px) {
+  body.mc-product-page #content_area .mc-pdp-media-td {
+    width: 56% !important;
+    padding-right: 24px !important;
+  }
+  body.mc-product-page #content_area .mc-pdp-options-td {
+    width: 44% !important;
+    padding-left: 16px !important;
+  }
+}
+
+/* RH-style Add to Cart button */
+body.mc-product-page #content_area input[name="btnaddtocart"],
+body.mc-product-page #content_area input[id*="btnaddtocart"],
+body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i] {
+  display: inline-block !important;
+  min-width: 220px !important;
+  padding: 12px 26px !important;
+  margin-top: 18px !important;
+  border-radius: 4px !important;
+  border: 1px solid #111 !important;
+  background-color: #111 !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+}
+
+body.mc-product-page #content_area input[name="btnaddtocart"]:hover,
+body.mc-product-page #content_area input[id*="btnaddtocart"]:hover {
+  background-color: #333 !important;
+  border-color: #333 !important;
 }
