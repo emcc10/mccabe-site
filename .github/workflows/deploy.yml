@@ -5,7 +5,7 @@ on:
     branches:
       - main
   workflow_dispatch:
-  inputs:
+    inputs:
     remote_path:
       description: "Remote path for vspfiles (e.g. /v/vspfiles/)"
       required: false
