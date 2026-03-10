@@ -2905,9 +2905,11 @@ body.mc-product-page #content_area td.productoptionname {
     rows.forEach(function(row){
       var txt = (row.textContent || '').replace(/\s+/g, ' ').toLowerCase();
 
-      // Any row that is the "Configuration Details" header or comment block
+      // Any row that is the "Configuration Details" header, "please note..." text, or comment box
+      var isCommentRow = !!row.querySelector('textarea');
       if (txt.indexOf('configuration details') !== -1 ||
-          txt.indexOf("please note how you'd like your seats arranged") !== -1) {
+          txt.indexOf("please note how you'd like your seats arranged") !== -1 ||
+          isCommentRow) {
         if (row.parentNode) row.parentNode.removeChild(row);
       }
     });

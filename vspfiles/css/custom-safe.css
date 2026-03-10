@@ -473,14 +473,19 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li > ul a {
   header .hidden-xs.col-lg-7.no-pad-lg {
     display: none !important;
   }
-  /* Override Bootstrap: allow push menu panel to show when open below 992px */
+  /* Push menu panel hidden by default below 992px (Bootstrap .hidden-* classes) */
   nav.push-menu.hidden-sm.hidden-md.hidden-lg,
   nav.menu.push-menu {
     display: none !important;
   }
+  /* When open: override .hidden-* so panel is visible (higher specificity) */
   body.push-menu-open nav.push-menu,
-  html.push-menu-open nav.push-menu {
+  html.push-menu-open nav.push-menu,
+  body.push-menu-open nav.push-menu.hidden-sm.hidden-md.hidden-lg,
+  html.push-menu-open nav.push-menu.hidden-sm.hidden-md.hidden-lg {
     display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
   }
 }
 
