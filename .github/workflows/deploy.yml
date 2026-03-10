@@ -1,50 +1,31 @@
-name: Deploy Volusion Theme
+name: Deploy Volusion Template
 
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      remote_path:
-        description: "Remote path for vspfiles (e.g. /v/vspfiles/)"
-        required: false
-        default: "/v/vspfiles/"
-      template_remote_path:
-        description: "Remote path for template_266.html (e.g. /v/)"
-        required: false
-        default: "/v/"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     env:
       FTP_SERVER: ${{ secrets.FTP_SERVER }}
       FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-      REMOTE_PATH: ${{ github.event.inputs.remote_path || '/v/vspfiles/' }}
-      TEMPLATE_REMOTE_PATH: ${{ github.event.inputs.template_remote_path || '/v/' }}
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Upload VSPFiles
+      - name: Deploy template_266.html
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ env.FTP_SERVER }}
           username: ${{ env.FTP_USERNAME }}
           password: ${{ env.FTP_PASSWORD }}
-          local-dir: ./v/vspfiles/
-          server-dir: ${{ env.REMOTE_PATH }}
-
-      - name: Upload template_266.html
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ env.FTP_SERVER }}
-          username: ${{ env.FTP_USERNAME }}
-          password: ${{ env.FTP_PASSWORD }}
-          local-dir: ./v/
-          server-dir: ${{ env.TEMPLATE_REMOTE_PATH }}
+          local-dir: ./
+          server-dir: /v/
           include: |
             template_266.html
