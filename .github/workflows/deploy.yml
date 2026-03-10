@@ -19,6 +19,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Debug files
+        run: |
+          pwd
+          ls -la
+          echo "---- deploy-template ----"
+          ls -la deploy-template || true
+          echo "---- find template_266.html ----"
+          find . -name "template_266.html"
+
       - name: Deploy template_266.html
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
