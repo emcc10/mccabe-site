@@ -4025,3 +4025,144 @@ body.mc-product-page #content_area #options_table tr:has(select[id*="leather" i]
     flex: 0 0 auto !important;
   }
 }
+
+/* =========================================================
+   PDP LAYOUT: RH-style centered grid, big imagery, clean spacing
+   Target: product detail pages (mc-product-page)
+   ========================================================= */
+
+/* 1) Center the whole PDP content, RH-style width */
+@media (min-width: 992px) {
+  body.mc-product-page #content_area {
+    max-width: 1280px !important;
+    margin: 60px auto 80px !important;
+    padding: 0 40px !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* 2) Two-column grid: media left, options right on desktop */
+@media (min-width: 992px) {
+  body.mc-product-page #content_area #options_table {
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  body.mc-product-page #content_area .mc-pdp-media-td,
+  body.mc-product-page #content_area .mc-pdp-options-td {
+    vertical-align: top !important;
+    padding: 0 30px 0 0 !important;
+  }
+
+  body.mc-product-page #content_area .mc-pdp-media-td {
+    width: 58% !important;
+    padding-right: 40px !important;
+    border: 0 !important;
+  }
+
+  body.mc-product-page #content_area .mc-pdp-options-td {
+    width: 42% !important;
+    padding-right: 0 !important;
+    border: 0 !important;
+  }
+}
+
+/* Stack media + options full-width on mobile */
+@media (max-width: 991px) {
+  body.mc-product-page #content_area .mc-pdp-media-td,
+  body.mc-product-page #content_area .mc-pdp-options-td {
+    display: block !important;
+    width: 100% !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* 3) Larger hero image and thumbnail strip */
+@media (min-width: 992px) {
+  body.mc-product-page #content_area #product_photo,
+  body.mc-product-page #content_area .vcss_img_wrap,
+  body.mc-product-page #content_area .vCSS_img_wrap,
+  body.mc-product-page #content_area .main-image {
+    max-width: 100% !important;
+    height: auto !important;
+    text-align: center !important;
+    margin: 0 0 20px 0 !important;
+  }
+
+  body.mc-product-page #content_area #product_photo img,
+  body.mc-product-page #content_area .vcss_img_wrap img,
+  body.mc-product-page #content_area .vCSS_img_wrap img,
+  body.mc-product-page #content_area .main-image img,
+  body.mc-product-page #content_area img#main-image {
+    display: block !important;
+    max-width: 100% !important;
+    max-height: 640px !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 auto !important;
+    object-fit: contain !important;
+  }
+
+  body.mc-product-page #content_area #altviews,
+  body.mc-product-page #content_area .altviews,
+  body.mc-product-page #content_area [id*="altview"] {
+    float: none !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+  }
+
+  body.mc-product-page #content_area #altviews a,
+  body.mc-product-page #content_area .altviews a,
+  body.mc-product-page #content_area [id*="altview"] a {
+    display: inline-block !important;
+    width: 80px !important;
+    height: 80px !important;
+    margin: 0 6px 6px 6px !important;
+  }
+
+  body.mc-product-page #content_area #altviews img,
+  body.mc-product-page #content_area .altviews img,
+  body.mc-product-page #content_area [id*="altview"] img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+}
+
+/* 4) Typography & spacing hierarchy (name, price, labels, body copy) */
+body.mc-product-page #content_area h1.productnamecolorLARGE,
+body.mc-product-page #content_area h1.productnamecolor,
+body.mc-product-page #content_area h1 {
+  font-size: 30px !important;
+  line-height: 1.2 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  margin: 0 0 14px 0 !important;
+}
+
+body.mc-product-page #content_area .colors_price,
+body.mc-product-page #content_area .product_list_price,
+body.mc-product-page #content_area .product_sale_price {
+  font-size: 22px !important;
+  font-weight: 500 !important;
+  margin: 0 0 18px 0 !important;
+}
+
+body.mc-product-page #content_area .productoptionname,
+body.mc-product-page #content_area td.productoptionname,
+body.mc-product-page #content_area label {
+  font-size: 13px !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  margin: 14px 0 4px 0 !important;
+}
+
+body.mc-product-page #content_area,
+body.mc-product-page #content_area p,
+body.mc-product-page #content_area li {
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
