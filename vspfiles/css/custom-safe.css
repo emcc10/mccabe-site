@@ -1931,11 +1931,15 @@ body.mc-product-page select.mc-native-leather {
     }
 
     /* Prevent any product options UI from creating horizontal scroll */
-    body.mc-product-page #content_area,
     body.mc-product-page .productdetails,
     body.mc-product-page .mc-pdp-options {
       max-width: 100% !important;
       overflow-x: hidden !important;
+    }
+    /* Allow Add to Cart button to show full label (no clip); keep content_area width-contained */
+    body.mc-product-page #content_area {
+      max-width: 100% !important;
+      overflow-x: visible !important;
     }
 
     /* Tablet/desktop: keep rows side-by-side and shrinkable */
@@ -4212,12 +4216,14 @@ body.mc-product-page #content_area select {
   }
 }
 
-/* RH-style Add to Cart button */
+/* RH-style Add to Cart button – full label visible, never clipped */
 body.mc-product-page #content_area input[name="btnaddtocart"],
 body.mc-product-page #content_area input[id*="btnaddtocart"],
 body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i] {
   display: inline-block !important;
-  min-width: 220px !important;
+  width: max-content !important;
+  min-width: 240px !important;
+  max-width: 100% !important;
   padding: 12px 26px !important;
   margin-top: 18px !important;
   border-radius: 4px !important;
@@ -4231,6 +4237,14 @@ body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i] 
   text-align: center !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+}
+
+/* Don’t clip the Add to Cart button in the options column */
+body.mc-product-page #content_area td.mc-pdp-options-td,
+body.mc-product-page #content_area .mc-pdp-options-td {
+  overflow: visible !important;
 }
 
 body.mc-product-page #content_area input[name="btnaddtocart"]:hover,
