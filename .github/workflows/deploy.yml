@@ -10,33 +10,16 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    env:
-      FTP_SERVER: ${{ secrets.FTP_SERVER }}
-      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Debug files
-        run: |
-          pwd
-          ls -la
-          echo "---- deploy-template ----"
-          ls -la deploy-template || true
-          echo "---- find template_266.html ----"
-          find . -name "template_266.html"
-
-      - name: Deploy template_266.html
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Upload template_266.html via SFTP
+        uses: Dylan700/sftp-upload-action@latest
         with:
-          server: ${{ env.FTP_SERVER }}
-          username: ${{ env.FTP_USERNAME }}
-          password: ${{ env.FTP_PASSWORD }}
-          protocol: ftps
-          security: loose
-          timeout: 120000
-          log-level: verbose
-          local-dir: ./deploy-template/
-          server-dir: /v/
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 22
+          uploads: |
+            ./deploy-template/template_266.html => /v/template_266.html
