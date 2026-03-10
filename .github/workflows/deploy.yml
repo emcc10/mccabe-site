@@ -11,9 +11,9 @@ on:
         required: false
         default: "/vspfiles/"
       template_remote_path:
-        description: "Remote path for template_266.html (e.g. /)"
+        description: "Remote path for template_266.html (e.g. /v/ so the file is /v/template_266.html)"
         required: false
-        default: "/"
+        default: "/v/"
 
 jobs:
   deploy:
@@ -31,7 +31,7 @@ jobs:
       # 1) Manual workflow input (workflow_dispatch)
       # 2) Repository variable TEMPLATE_REMOTE_PATH
       # 3) Fallback default
-      REMOTE_TEMPLATE_PATH: ${{ github.event.inputs.template_remote_path || vars.TEMPLATE_REMOTE_PATH || '/' }}
+      REMOTE_TEMPLATE_PATH: ${{ github.event.inputs.template_remote_path || vars.TEMPLATE_REMOTE_PATH || '/v/' }}
 
     steps:
       - name: Checkout repo
