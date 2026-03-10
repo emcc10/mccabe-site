@@ -25,7 +25,7 @@ jobs:
           server: ${{ env.FTP_SERVER }}
           username: ${{ env.FTP_USERNAME }}
           password: ${{ env.FTP_PASSWORD }}
-          local-dir: ./
+          protocol: ftp
+          timeout: 60000
+          local-dir: ./deploy-template/
           server-dir: /v/
-          include: |
-            template_266.html
