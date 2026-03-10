@@ -26,12 +26,17 @@ jobs:
           [ -n "$FTP_USERNAME" ] || (echo "::error::FTP_USERNAME missing" && exit 1)
           [ -n "$FTP_PASSWORD" ] || (echo "::error::FTP_PASSWORD missing" && exit 1)
           [ -n "$SFTP_PORT" ] || (echo "::error::SFTP_PORT missing" && exit 1)
+          echo "Server: $FTP_SERVER"
+          echo "User: $FTP_USERNAME"
+          echo "Port: $SFTP_PORT"
 
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
       - name: Show local file
         run: |
+          pwd
+          ls -la
           ls -la deploy-template
           ls -la deploy-template/template_266.html
 
@@ -44,12 +49,24 @@ jobs:
           EOF
           cat sftp-batch.txt
 
+      - name: Test SFTP connection only
+        run: |
+          sshpass -p "$FTP_PASSWORD" sftp -vvv \
+            -o StrictHostKeyChecking=no \
+            -o PreferredAuthentications=keyboard-interactive,password \
+            -o PubkeyAuthentication=no \
+            -P "$SFTP_PORT" \
+            "$FTP_USERNAME@$FTP_SERVER" <<EOF
+          pwd
+          ls
+          bye
+          EOF
+
       - name: Upload template via SFTP batch mode
         run: |
-          sshpass -p "$FTP_PASSWORD" sftp \
-            -vvv \
+          sshpass -p "$FTP_PASSWORD" sftp -vvv \
             -o StrictHostKeyChecking=no \
-            -o PreferredAuthentications=password \
+            -o PreferredAuthentications=keyboard-interactive,password \
             -o PubkeyAuthentication=no \
             -P "$SFTP_PORT" \
             -b sftp-batch.txt \
