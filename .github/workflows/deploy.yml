@@ -5,47 +5,29 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      remote_path:
-        description: "Remote path for vspfiles (e.g. /vspfiles/)"
-        required: false
-        default: "/vspfiles/"
-      template_remote_path:
-        description: "Remote path for template_266.html (e.g. /vspfiles/templates/266/)"
-        required: false
-        default: "/vspfiles/templates/266/"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    env:
-      FTP_SERVER: ${{ secrets.FTP_SERVER }}
-      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-      # Path resolution priority:
-      # 1) Manual workflow input (workflow_dispatch)
-      # 2) Repository variable DEPLOY_REMOTE_PATH
-      # 3) Fallback default
-      REMOTE_VSPFILES_PATH: ${{ github.event.inputs.remote_path || vars.DEPLOY_REMOTE_PATH || '/vspfiles/' }}
-      # Path resolution priority:
-      # 1) Manual workflow input (workflow_dispatch)
-      # 2) Repository variable TEMPLATE_REMOTE_PATH
-      # 3) Fallback default
-      REMOTE_TEMPLATE_PATH: ${{ github.event.inputs.template_remote_path || vars.TEMPLATE_REMOTE_PATH || '/vspfiles/templates/266/' }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy template_266.html
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Verify deploy secrets
+        run: |
+          if [ -z "${{ secrets.FTP_SERVER }}" ]; then echo "::error::FTP_SERVER secret is not set."; exit 1; fi
+          if [ -z "${{ secrets.FTP_USERNAME }}" ]; then echo "::error::FTP_USERNAME secret is not set."; exit 1; fi
+          if [ -z "${{ secrets.FTP_PASSWORD }}" ]; then echo "::error::FTP_PASSWORD secret is not set."; exit 1; fi
+          echo "Secrets are set. Deploying via SFTP on port 2222."
+
+      - name: Deploy template + vspfiles via SFTP
+        uses: Dylan700/sftp-upload-action@v1.2.3
         with:
-          server: ${{ env.FTP_SERVER }}
-          username: ${{ env.FTP_USERNAME }}
-          password: ${{ env.FTP_PASSWORD }}
-          local-dir: ./
-          server-dir: /v/
-          exclude: |
-            **
-            !template_266.html
+          server:   ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: "2222"
+          uploads: |
+            template_266.html => v/
+            vspfiles/         => v/vspfiles/
