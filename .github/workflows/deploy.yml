@@ -1,16 +1,60 @@
-name: Deploy Volusion Theme
+name: Deploy Volusion Template
 
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      remote_path:
-        description: "Remote path for vspfiles (e.g. /vspfiles/)"
-        required: false
-        default: "/vspfiles/"
-      template_remote_path:
-        description: "Remote path for template_266.html (e.g. /vspfiles/templates/266/)"
-        required: false
-        default: "/vspfiles/templates/266/"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      SFTP_PORT: ${{ secrets.SFTP_PORT }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Verify deploy secrets
+        run: |
+          if [ -z "$FTP_SERVER" ]; then echo "::error::FTP_SERVER secret is not set."; exit 1; fi
+          if [ -z "$FTP_USERNAME" ]; then echo "::error::FTP_USERNAME secret is not set."; exit 1; fi
+          if [ -z "$FTP_PASSWORD" ]; then echo "::error::FTP_PASSWORD secret is not set."; exit 1; fi
+          if [ -z "$SFTP_PORT" ]; then echo "::error::SFTP_PORT secret is not set."; exit 1; fi
+          echo "Secrets are set."
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Show local file
+        run: |
+          pwd
+          ls -la
+          ls -la deploy-template/template_266.html
+
+      - name: Upload template_266.html via SFTP
+        run: |
+          sshpass -p "$FTP_PASSWORD" sftp \
+            -o StrictHostKeyChecking=no \
+            -o ConnectTimeout=20 \
+            -P "$SFTP_PORT" \
+            "$FTP_USERNAME@$FTP_SERVER" <<EOF
+          put "deploy-template/template_266.html" "/v/template_266.html"
+          bye
+          EOF
+
+      - name: Verify remote file exists
+        run: |
+          sshpass -p "$FTP_PASSWORD" sftp \
+            -o StrictHostKeyChecking=no \
+            -o ConnectTimeout=20 \
+            -P "$SFTP_PORT" \
+            "$FTP_USERNAME@$FTP_SERVER" <<EOF
+          ls -l /v/template_266.html
+          bye
+          EOF
