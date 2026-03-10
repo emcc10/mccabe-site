@@ -38,7 +38,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy template_266.html
+            - name: Deploy template_266.html
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ env.FTP_SERVER }}
@@ -46,5 +46,6 @@ jobs:
           password: ${{ env.FTP_PASSWORD }}
           local-dir: ./
           server-dir: /v/
-          include: |
-            template_266.html
+          exclude: |
+            **
+            !template_266.html
