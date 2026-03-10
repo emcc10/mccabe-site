@@ -10,24 +10,22 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Verify deploy secrets
-        run: |
-          if [ -z "${{ secrets.FTP_SERVER }}" ]; then echo "::error::FTP_SERVER secret is not set."; exit 1; fi
-          if [ -z "${{ secrets.FTP_USERNAME }}" ]; then echo "::error::FTP_USERNAME secret is not set."; exit 1; fi
-          if [ -z "${{ secrets.FTP_PASSWORD }}" ]; then echo "::error::FTP_PASSWORD secret is not set."; exit 1; fi
-          echo "Secrets are set. Deploying via SFTP on port 2222."
-
-      - name: Deploy template + vspfiles via SFTP
-        uses: Dylan700/sftp-upload-action@v1.2.3
+      - name: Deploy template_266.html
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server:   ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: "2222"
-          uploads: |
-            template_266.html => v/
-            vspfiles/         => v/vspfiles/
+          server: ${{ env.FTP_SERVER }}
+          username: ${{ env.FTP_USERNAME }}
+          password: ${{ env.FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: /v/
+          include: |
+            template_266.html
