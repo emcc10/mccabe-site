@@ -464,11 +464,14 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li > ul a {
   .menu-toggle {
     display: inline-block !important;
   }
-  /* Hide desktop main menu when mobile menu is active */
+  /* Hide desktop main menu and its wrapper so only SELECT A CATEGORY shows */
   header .microblock.main-menu,
   header #display_menu_1,
-  .hidden-xs.col-lg-7 .main-menu {
+  header .hidden-xs.col-lg-7 .main-menu,
+  header div.hidden-xs.no-pad-lg,
+  header .hidden-xs.col-xs-12.no-pad-lg {
     display: none !important;
+    visibility: hidden !important;
   }
   header .hidden-xs.col-lg-7.no-pad-lg {
     display: none !important;
@@ -999,7 +1002,7 @@ a.hero-cart-link {
     display: none !important;
   }
 
-  /* Draw a clean transparent X */
+  /* Draw a clean transparent X (only when JS has not injected .mc-close-x) */
   nav.push-menu .push-menu__close-btn::before {
     content: "\00D7";
     display: block;
@@ -1010,8 +1013,13 @@ a.hero-cart-link {
     font-size: 26px;
     font-weight: 400;
     font-family: Arial, Helvetica, sans-serif !important;
-    color: #ffffff !important; /* change if you want */
+    color: #ffffff !important;
     background: transparent !important;
+  }
+  /* Single X only: hide ::before when JS injects .mc-close-x to avoid two X's */
+  nav.push-menu .push-menu__close-btn:has(.mc-close-x)::before {
+    content: none !important;
+    display: none !important;
   }
 
   /* make mobile menu text readable */
@@ -2587,6 +2595,12 @@ body.mc-product-page select.mc-native-leather {
     z-index: 2147483647 !important;
   }
 
+  /* One X only: when .mc-close-x exists, don't draw a second via ::before */
+  nav.push-menu .push-menu__close-btn.close-menu:has(.mc-close-x)::before,
+  body > nav.push-menu .push-menu__close-btn.close-menu:has(.mc-close-x)::before {
+    content: none !important;
+    display: none !important;
+  }
   nav.push-menu .push-menu__close-btn.close-menu::before,
   body > nav.push-menu .push-menu__close-btn.close-menu::before {
     content: "\00D7" !important;
@@ -2875,6 +2889,20 @@ body:not(.is-home) #display_menu_1 > ul {
 
   /* === HARD MOBILE OVERRIDE (2026-03-02z) === */
   @media only screen and (max-width: 991px) {
+    /* Safe horizontal margins so nothing stretches off screen */
+    body,
+    .vol-container,
+    .vol-inner,
+    .page-wrap {
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+      box-sizing: border-box !important;
+    }
+    header.header {
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+      max-width: 100% !important;
+    }
     .vol-container,
     .vol-inner,
     .page-wrap,
@@ -2884,10 +2912,13 @@ body:not(.is-home) #display_menu_1 > ul {
     .container--content > .row > [class*="col-"] {
       margin-left: 0 !important;
       margin-right: 0 !important;
-      padding-left: 0 !important;
-      padding-right: 0 !important;
       max-width: 100% !important;
       box-sizing: border-box !important;
+    }
+    .container,
+    .container--content {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
     }
 
     #content_area,
@@ -2901,8 +2932,8 @@ body:not(.is-home) #display_menu_1 > ul {
     #content_area .resp-tabs-container,
     #content_area .product_description,
     #content_area [itemprop="description"] {
-      padding-left: 2px !important;
-      padding-right: 16px !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
       margin-left: 0 !important;
       margin-right: 0 !important;
       max-width: 100% !important;
@@ -4167,14 +4198,34 @@ body.mc-product-page #content_area .product_list_price {
   display: none !important;
 }
 
+/* Option headers: match Select a leather (line above + same typography) */
 body.mc-product-page #content_area .productoptionname,
 body.mc-product-page #content_area td.productoptionname,
-body.mc-product-page #content_area label {
+body.mc-product-page #content_area label,
+body.mc-product-page #content_area .mc-option-accordion__label {
   font-size: 14px !important;
-  letter-spacing: 0.08em !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: .06em !important;
   text-transform: uppercase !important;
-  margin: 18px 0 6px 0 !important;
+  color: #686868 !important;
+  margin: 0 0 6px 0 !important;
+  padding-top: 18px !important;
+  border-top: 1px solid #e5e5e5 !important;
   text-align: left !important;
+}
+/* Accordion block: line above header, same look as leather section */
+body.mc-product-page #content_area .mc-option-accordion {
+  border-top: 1px solid #e5e5e5 !important;
+  margin-top: 16px !important;
+  padding-top: 0 !important;
+}
+body.mc-product-page #content_area .mc-option-accordion:first-child {
+  margin-top: 0 !important;
+}
+body.mc-product-page #content_area .mc-option-accordion__label {
+  padding-top: 0 !important;
+  border-top: none !important;
 }
 
 body.mc-product-page #content_area,
@@ -4184,8 +4235,96 @@ body.mc-product-page #content_area li {
   line-height: 1.6 !important;
 }
 
-/* RH-style dropdowns */
-body.mc-product-page #content_area select {
+/* Hide native select when wrapped in accordion (stays in DOM for form submit) */
+body.mc-product-page #content_area select.mc-option-accordion-native,
+body.mc-product-page #v65-product-parent select.mc-option-accordion-native {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0,0,0,0) !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Accordion header row: label + ">" like Select a leather */
+body.mc-product-page #content_area .mc-option-accordion__header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin: 0 0 6px 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+body.mc-product-page #content_area .mc-option-accordion__toggle {
+  flex: 0 0 auto !important;
+  width: 20px !important;
+  height: 20px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #555 !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  font-weight: 400 !important;
+  transition: transform 0.2s ease !important;
+}
+body.mc-product-page #content_area .mc-option-accordion:has(.mc-option-accordion__panel--open) .mc-option-accordion__toggle {
+  transform: rotate(90deg) !important;
+}
+/* Selected value: always visible directly under header */
+body.mc-product-page #content_area .mc-option-accordion__selected {
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  color: #333 !important;
+  margin: 0 0 8px 0 !important;
+  padding: 0 !important;
+  min-height: 1.4em !important;
+}
+/* Panel: expands vertically when ">" clicked, not a long dropdown box */
+body.mc-product-page #content_area .mc-option-accordion__panel {
+  max-height: 0 !important;
+  overflow: hidden !important;
+  transition: max-height 0.2s ease-out !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+body.mc-product-page #content_area .mc-option-accordion__panel.mc-option-accordion__panel--open {
+  max-height: 400px !important;
+  overflow-y: auto !important;
+}
+body.mc-product-page #content_area .mc-option-accordion__choice {
+  display: block !important;
+  width: 100% !important;
+  max-width: 360px !important;
+  padding: 10px 14px !important;
+  margin: 0 0 4px 0 !important;
+  text-align: left !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 4px !important;
+  background: #fff !important;
+  color: #333 !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+}
+body.mc-product-page #content_area .mc-option-accordion__choice:hover {
+  border-color: #ccc !important;
+  background: #f9f9f9 !important;
+}
+
+/* RH-style dropdowns (only when not accordion) */
+body.mc-product-page #content_area select:not(.mc-option-accordion-native) {
   width: 100% !important;
   max-width: 360px !important;
   padding: 10px 14px !important;
@@ -4247,6 +4386,23 @@ body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i] 
 }
 
 /* Don’t clip the Add to Cart button in the options column */
+/* Single Add to Cart: no second container/color – wrapper matches button */
+body.mc-product-page #content_area .v65-product-addtocart,
+body.mc-product-page #v65-product-parent .v65-product-addtocart {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+body.mc-product-page #content_area .v65-product-addtocart input[name="btnaddtocart"],
+body.mc-product-page #content_area .v65-product-addtocart input[id*="btnaddtocart"],
+body.mc-product-page #content_area .v65-product-addtocart button[name="btnaddtocart"] {
+  background-color: #111 !important;
+  border: 1px solid #111 !important;
+  color: #fff !important;
+}
+
 body.mc-product-page #content_area td.mc-pdp-options-td,
 body.mc-product-page #content_area .mc-pdp-options-td {
   overflow: visible !important;

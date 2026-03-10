@@ -2971,6 +2971,7 @@ body.mc-product-page #content_area td.productoptionname {
     if (!table) return;
     var selects = qa('select', table).filter(function(sel){ return !sel.classList.contains('mc-native-leather'); });
     selects.forEach(function(sel){
+      if (sel.closest('.mc-option-accordion')) return;
       var opts = qa('option', sel);
       var longest = 0;
       opts.forEach(function(opt){
@@ -2987,6 +2988,72 @@ body.mc-product-page #content_area td.productoptionname {
     });
   }
 
+  function wrapSelectsAsAccordions(scope){
+    var root = scope || document;
+    var table = q('#options_table', root) || q('table[id*="options_table"]', root);
+    if (!table) return;
+    var rows = qa('tr', table);
+    rows.forEach(function(tr){
+      var sel = q('select:not(.mc-native-leather)', tr);
+      if (!sel || tr.querySelector('.mc-option-accordion')) return;
+      var labelTd = tr.querySelector('td:first-child');
+      var valueTd = tr.querySelector('td:last-child');
+      if (!valueTd || !labelTd) return;
+      var labelText = (labelTd.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!labelText) labelText = 'Option';
+      labelText = labelText.toUpperCase();
+      var options = [];
+      qa('option', sel).forEach(function(opt){
+        var t = (opt.textContent || '').replace(/\s+/g, ' ').trim();
+        var v = (opt.value || '').trim();
+        if (!v && !t) return;
+        options.push({ text: t, value: v, selected: opt.selected });
+      });
+      if (options.length === 0) return;
+      var curVal = sel.value;
+      var selectedOpt = options.filter(function(o){ return o.value === curVal; })[0] || options.filter(function(o){ return o.selected; })[0] || options[0];
+      var wrap = document.createElement('div');
+      wrap.className = 'mc-option-accordion';
+      wrap.innerHTML =
+        '<div class="mc-option-accordion__header">' +
+          '<span class="mc-option-accordion__label">' + escapeHtml(labelText) + '</span>' +
+          '<button type="button" class="mc-option-accordion__toggle" aria-expanded="false" aria-label="Open options">&#8250;</button>' +
+        '</div>' +
+        '<div class="mc-option-accordion__selected">' + escapeHtml(selectedOpt.text) + '</div>' +
+        '<div class="mc-option-accordion__panel" role="region" aria-hidden="true"></div>';
+      var selectedEl = wrap.querySelector('.mc-option-accordion__selected');
+      var panelEl = wrap.querySelector('.mc-option-accordion__panel');
+      var toggleBtn = wrap.querySelector('.mc-option-accordion__toggle');
+      options.forEach(function(o){
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mc-option-accordion__choice';
+        btn.textContent = o.text;
+        btn.dataset.value = o.value;
+        btn.addEventListener('click', function(){
+          sel.value = o.value;
+          selectedEl.textContent = o.text;
+          toggleBtn.setAttribute('aria-expanded', 'false');
+          panelEl.setAttribute('aria-hidden', 'true');
+          panelEl.classList.remove('mc-option-accordion__panel--open');
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        panelEl.appendChild(btn);
+      });
+      toggleBtn.addEventListener('click', function(){
+        var open = panelEl.classList.toggle('mc-option-accordion__panel--open');
+        toggleBtn.setAttribute('aria-expanded', open);
+        panelEl.setAttribute('aria-hidden', !open);
+      });
+      sel.classList.add('mc-option-accordion-native');
+      valueTd.appendChild(wrap);
+      valueTd.appendChild(sel);
+      labelTd.style.setProperty('display', 'none', 'important');
+      tr.classList.add('mc-accordion-row');
+    });
+  }
+  function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
   function forceProductFixes() {
     if (!markProductPage()) return;
     var scope = document.querySelector('#content_area') || document.body;
@@ -2996,6 +3063,7 @@ body.mc-product-page #content_area td.productoptionname {
     forceMediaLayout(scope);
     removeConfigurationDetails(scope);
     tagOptionRows(scope);
+    wrapSelectsAsAccordions(scope);
     sizeSelectsToLongestOption(scope);
     enforceMobileGutters(scope);
     clampFloatingIcons();
