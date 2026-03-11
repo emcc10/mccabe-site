@@ -2988,14 +2988,26 @@ body.mc-product-page #content_area td.productoptionname {
     });
   }
 
+  function rowHasLeatherSelect(tr){
+    var sel = tr.querySelector('select.mc-native-leather');
+    if (sel) return true;
+    var selects = tr.querySelectorAll('select');
+    for (var i = 0; i < selects.length; i++) {
+      var n = (selects[i].name || '').toLowerCase();
+      var id = (selects[i].id || '').toLowerCase();
+      if (n.indexOf('cover') !== -1 || n.indexOf('leather') !== -1 || id.indexOf('cover') !== -1 || id.indexOf('leather') !== -1) return true;
+    }
+    return false;
+  }
   function wrapSelectsAsAccordions(scope){
+    try {
     var root = scope || document;
     var table = q('#options_table', root) || q('table[id*="options_table"]', root);
     if (!table) return;
     var rows = qa('tr', table);
     var numberSeatsCount = 0;
     rows.forEach(function(tr){
-      if (tr.querySelector('select.mc-native-leather') || tr.querySelector('select[name*="cover" i], select[name*="leather" i], select[id*="cover" i], select[id*="leather" i]')) return;
+      if (rowHasLeatherSelect(tr)) return;
       var labelTd = tr.querySelector('td:first-child');
       var labelTxt = (labelTd && labelTd.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
       if (/number of seats|seats per row/.test(labelTxt)) {
@@ -3070,19 +3082,7 @@ body.mc-product-page #content_area td.productoptionname {
       labelTd.style.setProperty('display', 'none', 'important');
       tr.classList.add('mc-accordion-row');
     });
-    var plannerRow = document.getElementById('mcPlannerRow');
-    if (plannerRow && plannerRow.closest('#mc-inline-config')) {
-      qa('.mc-option-accordion__label', root).forEach(function(lbl){
-        var txt = (lbl.textContent || '').toUpperCase();
-        if (!/NUMBER OF SEATS|SEATS PER ROW/.test(txt)) return;
-        var acc = lbl.closest('.mc-option-accordion');
-        var panel = acc && acc.querySelector('.mc-option-accordion__panel');
-        if (panel && plannerRow.parentNode) {
-          panel.insertBefore(plannerRow, panel.firstChild);
-          plannerRow.style.setProperty('margin-bottom', '12px', 'important');
-        }
-      });
-    }
+    } catch (e) { if (typeof console !== 'undefined' && console.warn) console.warn('wrapSelectsAsAccordions:', e); }
   }
   function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
