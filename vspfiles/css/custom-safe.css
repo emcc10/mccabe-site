@@ -3921,18 +3921,17 @@ body.mc-product-page #mcLeatherBtn {
   color: #555 !important;
 }
 
-/* Leather selected: show directly under "Select a leather" header */
+/* Leather selected: next to "Select a leather:" header, blank until a selection is made */
 body.mc-product-page #mcLeatherSummary {
-  display: block !important;
+  display: inline !important;
   font-size: 14px !important;
   line-height: 1.4 !important;
   color: #333 !important;
-  margin: 0 0 8px 0 !important;
-  padding: 0 !important;
-  min-height: 1.4em !important;
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
+  margin: 0 !important;
+  padding: 0 0 0 4px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 body.mc-product-page #mcPlannerRow {

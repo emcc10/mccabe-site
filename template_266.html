@@ -1331,9 +1331,10 @@ boot();
     panel.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;align-items:stretch;max-width:520px;width:100%">
         <div id="mcLeatherRow" style="display:flex;flex-direction:column;gap:6px;align-items:stretch;width:100%">
-          <div id="mcLeatherHeaderRow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%">
-            <div id="mcLeatherHeader" style="font-size:13px;font-weight:400;line-height:1.2;letter-spacing:0;text-transform:none;">
-              SELECT A LEATHER
+          <div id="mcLeatherHeaderRow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 auto">
+              <span id="mcLeatherHeader" style="font-size:13px;font-weight:400;line-height:1.2;letter-spacing:0;text-transform:none;">SELECT A LEATHER:</span>
+              <span id="mcLeatherSummary" style="padding:0;border:0;background:transparent;font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#333;min-width:0"></span>
             </div>
             <button type="button" id="mcLeatherBtn" class="mc-config-btn"
               aria-label="Open leather swatches"
@@ -1343,10 +1344,6 @@ boot();
           </div>
           <div id="mcLeatherPicker" style="display:flex;align-items:center;gap:6px;width:100%">
             <div id="mcLeatherSwatchStrip" style="display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0;overflow:hidden"></div>
-          </div>
-          <div id="mcLeatherSummary"
-            style="padding:4px 2px 0;border:0;background:transparent;font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#666">
-            ${(wmSummary && wmSummary.textContent) ? wmSummary.textContent : "Selected leather"}
           </div>
         </div>
 
@@ -1515,7 +1512,9 @@ boot();
 
     function syncLeatherSummary(){
       if (!mcSum) return;
-      mcSum.textContent = (wmSummary && wmSummary.textContent) ? wmSummary.textContent : "Selected leather";
+      var txt = (wmSummary && wmSummary.textContent) ? String(wmSummary.textContent).trim() : "";
+      if (!txt || /^selected leather$|^choose|^select\s|^please\s/i.test(txt)) txt = "";
+      mcSum.textContent = txt;
 
       var activeText = (mcSum.textContent || "").toLowerCase();
       Array.from((mcLeatherStrip || document).querySelectorAll(".mc-mini-swatch")).forEach(function(btn){
@@ -2649,7 +2648,7 @@ body.mc-product-page #content_area td.productoptionname {
       var normalized = raw.toLowerCase().replace(/:$/, '').trim();
       var hasField = !!q('select, input, textarea, button', el);
       if (!hasField && (normalized === 'choose cover' || normalized === 'choose leather')) {
-        el.textContent = 'SELECT A LEATHER';
+        el.textContent = 'SELECT A LEATHER:';
       }
     });
   }
@@ -3005,19 +3004,6 @@ body.mc-product-page #content_area td.productoptionname {
     var table = q('#options_table', root) || q('table[id*="options_table"]', root);
     if (!table) return;
     var rows = qa('tr', table);
-    var numberSeatsCount = 0;
-    rows.forEach(function(tr){
-      if (rowHasLeatherSelect(tr)) return;
-      var labelTd = tr.querySelector('td:first-child');
-      var labelTxt = (labelTd && labelTd.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
-      if (/number of seats|seats per row/.test(labelTxt)) {
-        numberSeatsCount++;
-        if (numberSeatsCount === 1) {
-          tr.style.setProperty('display', 'none', 'important');
-          return;
-        }
-      }
-    });
     rows.forEach(function(tr){
       var sel = q('select:not(.mc-native-leather)', tr);
       if (!sel || tr.querySelector('.mc-option-accordion')) return;
@@ -3028,9 +3014,14 @@ body.mc-product-page #content_area td.productoptionname {
       if (!labelText) {
         var selName = (sel.name || '').toLowerCase();
         var selId = (sel.id || '').toLowerCase();
-        var optText = (sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].text || '').toLowerCase();
-        if (/straight|curved|configuration/.test(selName + ' ' + selId + ' ' + optText)) labelText = 'Straight or Curved';
-        else labelText = 'Option';
+        var hasStraightCurved = /straight|curved|configuration/.test(selName + ' ' + selId);
+        if (!hasStraightCurved && sel.options) {
+          for (var oi = 0; oi < sel.options.length; oi++) {
+            var ot = (sel.options[oi].textContent || '').toLowerCase();
+            if (/straight|curved|configuration/.test(ot)) { hasStraightCurved = true; break; }
+          }
+        }
+        labelText = hasStraightCurved ? 'Straight or Curved' : 'Option';
       }
       labelText = labelText.toUpperCase();
       var options = [];
@@ -3082,6 +3073,21 @@ body.mc-product-page #content_area td.productoptionname {
       labelTd.style.setProperty('display', 'none', 'important');
       tr.classList.add('mc-accordion-row');
     });
+    try {
+      var plannerRow = document.getElementById('mcPlannerRow');
+      if (plannerRow && plannerRow.closest('#mc-inline-config')) {
+        qa('.mc-option-accordion__label', root).forEach(function(lbl){
+          var txt = (lbl.textContent || '').toUpperCase();
+          if (!/NUMBER OF SEATS|SEATS PER ROW/.test(txt)) return;
+          var acc = lbl.closest('.mc-option-accordion');
+          var panel = acc && acc.querySelector('.mc-option-accordion__panel');
+          if (panel && plannerRow.parentNode) {
+            panel.insertBefore(plannerRow, panel.firstChild);
+            plannerRow.style.setProperty('margin-bottom', '12px', 'important');
+          }
+        });
+      }
+    } catch (e2) { if (typeof console !== 'undefined' && console.warn) console.warn('Room Planner move:', e2); }
     } catch (e) { if (typeof console !== 'undefined' && console.warn) console.warn('wrapSelectsAsAccordions:', e); }
   }
   function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
