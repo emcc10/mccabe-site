@@ -2993,6 +2993,19 @@ body.mc-product-page #content_area td.productoptionname {
     var table = q('#options_table', root) || q('table[id*="options_table"]', root);
     if (!table) return;
     var rows = qa('tr', table);
+    var numberSeatsCount = 0;
+    rows.forEach(function(tr){
+      if (tr.querySelector('select.mc-native-leather') || tr.querySelector('select[name*="cover" i], select[name*="leather" i], select[id*="cover" i], select[id*="leather" i]')) return;
+      var labelTd = tr.querySelector('td:first-child');
+      var labelTxt = (labelTd && labelTd.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      if (/number of seats|seats per row/.test(labelTxt)) {
+        numberSeatsCount++;
+        if (numberSeatsCount === 1) {
+          tr.style.setProperty('display', 'none', 'important');
+          return;
+        }
+      }
+    });
     rows.forEach(function(tr){
       var sel = q('select:not(.mc-native-leather)', tr);
       if (!sel || tr.querySelector('.mc-option-accordion')) return;
@@ -3000,7 +3013,13 @@ body.mc-product-page #content_area td.productoptionname {
       var valueTd = tr.querySelector('td:last-child');
       if (!valueTd || !labelTd) return;
       var labelText = (labelTd.textContent || '').replace(/\s+/g, ' ').trim();
-      if (!labelText) labelText = 'Option';
+      if (!labelText) {
+        var selName = (sel.name || '').toLowerCase();
+        var selId = (sel.id || '').toLowerCase();
+        var optText = (sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].text || '').toLowerCase();
+        if (/straight|curved|configuration/.test(selName + ' ' + selId + ' ' + optText)) labelText = 'Straight or Curved';
+        else labelText = 'Option';
+      }
       labelText = labelText.toUpperCase();
       var options = [];
       qa('option', sel).forEach(function(opt){
@@ -3051,6 +3070,19 @@ body.mc-product-page #content_area td.productoptionname {
       labelTd.style.setProperty('display', 'none', 'important');
       tr.classList.add('mc-accordion-row');
     });
+    var plannerRow = document.getElementById('mcPlannerRow');
+    if (plannerRow && plannerRow.closest('#mc-inline-config')) {
+      qa('.mc-option-accordion__label', root).forEach(function(lbl){
+        var txt = (lbl.textContent || '').toUpperCase();
+        if (!/NUMBER OF SEATS|SEATS PER ROW/.test(txt)) return;
+        var acc = lbl.closest('.mc-option-accordion');
+        var panel = acc && acc.querySelector('.mc-option-accordion__panel');
+        if (panel && plannerRow.parentNode) {
+          panel.insertBefore(plannerRow, panel.firstChild);
+          plannerRow.style.setProperty('margin-bottom', '12px', 'important');
+        }
+      });
+    }
   }
   function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 

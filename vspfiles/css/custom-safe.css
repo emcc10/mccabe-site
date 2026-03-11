@@ -3823,10 +3823,6 @@ body.mc-product-page #mcLeatherBtn {
   justify-content: center !important;
 }
 
-body.mc-product-page #mcLeatherSummary {
-  display: none !important;
-}
-
 @media (max-width: 767px) {
   body.mc-product-page #mcLeatherHeader {
     font-size: 15px !important;
@@ -3925,8 +3921,18 @@ body.mc-product-page #mcLeatherBtn {
   color: #555 !important;
 }
 
+/* Leather selected: show directly under "Select a leather" header */
 body.mc-product-page #mcLeatherSummary {
-  display: none !important;
+  display: block !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  color: #333 !important;
+  margin: 0 0 8px 0 !important;
+  padding: 0 !important;
+  min-height: 1.4em !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
 }
 
 body.mc-product-page #mcPlannerRow {
@@ -4183,19 +4189,22 @@ body.mc-product-page #content_area h1 {
   margin: 0 0 14px 0 !important;
 }
 
+
+/* Hide price above "Price with selected options" – only show the price under it */
+body.mc-product-page #content_area .colors_price,
+body.mc-product-page #content_area .product_list_price,
+body.mc-product-page #content_area .product_productprice,
+body.mc-product-page #v65-product-parent .product_productprice {
+  display: none !important;
+}
+/* Price under "Price with selected options" – larger font */
 body.mc-product-page #content_area .product_sale_price,
 body.mc-product-page #content_area .product_sale_price b,
 body.mc-product-page #content_area .product_sale_price span {
-  font-size: 26px !important;
+  font-size: 32px !important;
   font-weight: 600 !important;
   margin: 0 0 18px 0 !important;
   letter-spacing: 0.05em !important;
-}
-
-/* Hide smaller base price; only show Price with Selected Options */
-body.mc-product-page #content_area .colors_price,
-body.mc-product-page #content_area .product_list_price {
-  display: none !important;
 }
 
 /* Option headers: match Select a leather (line above + same typography) */
@@ -4302,25 +4311,30 @@ body.mc-product-page #content_area .mc-option-accordion__panel.mc-option-accordi
   max-height: 400px !important;
   overflow-y: auto !important;
 }
+/* Accordion choices: no outline, RH text style */
 body.mc-product-page #content_area .mc-option-accordion__choice {
   display: block !important;
   width: 100% !important;
   max-width: 360px !important;
-  padding: 10px 14px !important;
-  margin: 0 0 4px 0 !important;
+  padding: 10px 0 !important;
+  margin: 0 0 2px 0 !important;
   text-align: left !important;
   font-size: 14px !important;
+  font-weight: 400 !important;
   line-height: 1.4 !important;
-  border: 1px solid #e5e5e5 !important;
-  border-radius: 4px !important;
-  background: #fff !important;
+  letter-spacing: .03em !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
   color: #333 !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 body.mc-product-page #content_area .mc-option-accordion__choice:hover {
-  border-color: #ccc !important;
-  background: #f9f9f9 !important;
+  color: #111 !important;
+  background: transparent !important;
 }
 
 /* RH-style dropdowns (only when not accordion) */
@@ -4360,29 +4374,31 @@ body.mc-product-page #content_area select:not(.mc-option-accordion-native) {
   }
 }
 
-/* RH-style Add to Cart button – full label visible, never clipped */
+/* Add to Cart – RH button style: black, white text, clean typography */
 body.mc-product-page #content_area input[name="btnaddtocart"],
 body.mc-product-page #content_area input[id*="btnaddtocart"],
-body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i] {
+body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i],
+body.mc-product-page #content_area button[name="btnaddtocart"] {
   display: inline-block !important;
   width: max-content !important;
   min-width: 240px !important;
   max-width: 100% !important;
-  padding: 12px 26px !important;
+  padding: 14px 28px !important;
   margin-top: 18px !important;
-  border-radius: 4px !important;
+  border-radius: 0 !important;
   border: 1px solid #111 !important;
   background-color: #111 !important;
   color: #fff !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.12em !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.15em !important;
   text-transform: uppercase !important;
   text-align: center !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
   overflow: visible !important;
   white-space: nowrap !important;
+  font-family: inherit !important;
 }
 
 /* Don’t clip the Add to Cart button in the options column */
@@ -4409,7 +4425,8 @@ body.mc-product-page #content_area .mc-pdp-options-td {
 }
 
 body.mc-product-page #content_area input[name="btnaddtocart"]:hover,
-body.mc-product-page #content_area input[id*="btnaddtocart"]:hover {
+body.mc-product-page #content_area input[id*="btnaddtocart"]:hover,
+body.mc-product-page #content_area button[name="btnaddtocart"]:hover {
   background-color: #333 !important;
   border-color: #333 !important;
 }
