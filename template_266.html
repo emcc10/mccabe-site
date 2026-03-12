@@ -3276,9 +3276,8 @@ body.mc-product-page #content_area td.productoptionname {
           var txt = (lbl.textContent || '').toUpperCase();
           if (!/NUMBER OF SEATS|SEATS PER ROW/.test(txt)) return;
           var acc = lbl.closest('.mc-option-accordion');
-          var panel = acc && acc.querySelector('.mc-option-accordion__panel');
-          if (panel && plannerRow.parentNode) {
-            panel.insertBefore(plannerRow, panel.firstChild);
+          if (acc && plannerRow.parentNode) {
+            acc.parentNode.insertBefore(plannerRow, acc);
             plannerRow.style.setProperty('margin-bottom', '12px', 'important');
           }
         });
