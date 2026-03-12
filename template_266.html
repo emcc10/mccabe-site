@@ -1589,21 +1589,36 @@ boot();
       syncLeatherSummary();
     });
   }
+function getPlannerSeatPrice(){
+  var el = document.querySelector("#priceWithOptions, .v65-product-price, .product_productprice, [itemprop=\"price\"]");
+  if (!el) return 0;
+  var text = (el.textContent || el.innerText || "").replace(/[^0-9.]/g, "");
+  var n = parseFloat(text, 10);
+  return isNaN(n) ? 0 : n;
+}
+
+function updateProductPrice(totalPrice){
+  var el = document.querySelector("#priceWithOptions, .v65-product-price, .product_productprice");
+  if (el && totalPrice > 0) {
+    var formatted = "$" + Number(totalPrice).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    el.textContent = formatted;
+  }
+}
+
 function calculatePlannerPrice(counts, seatPrice){
+  if (seatPrice == null || seatPrice <= 0) seatPrice = getPlannerSeatPrice();
   let total = 0;
   let singleSeatCount = 0;
 
   Object.entries(counts).forEach(([id, qty]) => {
     if (id === "4L") {
-      // Armless loveseat = 2 seats minus $750
-      total += qty * ((2 * seatPrice) - 750);
+      total += qty * ((2 * seatPrice) - 500);
     } else {
       total += qty * seatPrice;
       singleSeatCount += qty;
     }
   });
 
-  // Business rule: 4L requires at least two OTHER seats
   if (counts["4L"] && singleSeatCount < 2) {
     throw new Error("4L requires at least two additional seats.");
   }
@@ -1635,9 +1650,10 @@ window.addEventListener("message", function (event) {
   // Save selections
   window.__ROOM_PLANNER_OPTIONS__ = payload.options;
 
-  // Pricing
+  // Pricing: unit price from product options × piece counts (4L = 2 seats, −$500 per 4L)
   try {
-    const totalPrice = calculatePlannerPrice(payload.options);
+    const seatPrice = getPlannerSeatPrice();
+    const totalPrice = calculatePlannerPrice(payload.options, seatPrice);
     updateProductPrice(totalPrice);
   } catch (err) {
     alert(err.message);

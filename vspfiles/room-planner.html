@@ -264,6 +264,14 @@ function calculateSeatCount(){
   return seats;
 }
 
+function getNon4LCount(){
+  let n = 0;
+  document.querySelectorAll(".seat").forEach(seat => {
+    if (seat.dataset.pieceId !== "4L") n++;
+  });
+  return n;
+}
+
 function makeDraggable(el){
   el.addEventListener("mousedown", e=>{
     setActive(el);
@@ -283,6 +291,13 @@ function makeDraggable(el){
 }
 
 function addSeat(piece){
+  if (piece.id === "4L") {
+    var non4L = getNon4LCount();
+    if (non4L < 2) {
+      alert("A 4L Armless Loveseat can only be added when at least two other pieces (e.g. 1L, 2L, 3L) are already in the room.");
+      return;
+    }
+  }
   const seat = document.createElement("div");
   seat.className = "seat";
 seat.dataset.rot = "0";
@@ -372,9 +387,15 @@ function serializeLayout(){
 }
 
 document.getElementById("saveLayout").onclick = () => {
+  const counts = getCounts();
+  const layout = serializeLayout();
+  const seatCount = calculateSeatCount();
   const payload = {
-    counts: getCounts(),
+    options: counts,
+    counts: counts,
     room: { width: roomW.value, depth: roomD.value },
+    layout: layout,
+    seatCount: seatCount,
     ts: Date.now()
   };
 
@@ -387,7 +408,20 @@ document.getElementById("saveLayout").onclick = () => {
     );
   }
 
-  alert("Layout saved");
+  var blob = new Blob([JSON.stringify({
+    room: payload.room,
+    layout: layout,
+    pieces: counts,
+    seatCount: seatCount,
+    savedAt: new Date().toISOString()
+  }, null, 2)], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "room-layout-" + new Date().toISOString().slice(0,19).replace(/[-:]/g,"").replace("T","-") + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+
+  alert("Layout saved and file downloaded.");
 };
 
 function buildPlannerOptions(){
