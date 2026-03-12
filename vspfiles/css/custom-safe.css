@@ -4411,16 +4411,6 @@ body.mc-product-page #v65-product-parent .v65-product-addtocart {
   border: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  text-align: center !important;
-}
-/* Center: full width so flex centering works */
-body.mc-product-page #content_area td.mc-pdp-options-td .v65-product-addtocart,
-body.mc-product-page #content_area .mc-pdp-options-td .v65-product-addtocart {
-  width: 100% !important;
-  margin-left: 0 !important;
 }
 body.mc-product-page #content_area .v65-product-addtocart input[name="btnaddtocart"],
 body.mc-product-page #content_area .v65-product-addtocart input[id*="btnaddtocart"],

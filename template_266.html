@@ -65,58 +65,6 @@ document.addEventListener("DOMContentLoaded", function () {
   </style>
 
 <script>
-(function () {
-  function bindMobileAltThumbs() {
-    var thumbsRoot = document.getElementById('altviews');
-    if (!thumbsRoot) return;
-
-    thumbsRoot.querySelectorAll('a').forEach(function (link) {
-      if (link.getAttribute('data-mc-thumb-click') === '1') return;
-      link.setAttribute('data-mc-thumb-click', '1');
-
-      link.addEventListener('click', function (e) {
-        if (!window.matchMedia('(max-width: 991px)').matches) return;
-
-        e.preventDefault();
-
-        var thumbImg = link.querySelector('img');
-        var match = thumbImg && thumbImg.id ? thumbImg.id.match(/alternate_product_photo_(\d+)/i) : null;
-        var index = match ? parseInt(match[1], 10) : null;
-
-        if (index && typeof window.change_product_photo === 'function') {
-          window.change_product_photo(index);
-          return;
-        }
-
-        var mainImg =
-          document.querySelector('img#product_photo') ||
-          document.querySelector('#product_photo img') ||
-          document.querySelector('img#main-image');
-
-        if (!mainImg) return;
-
-        var href = link.getAttribute('href');
-        if (!href) return;
-
-        mainImg.setAttribute('src', href);
-        var zoomLink = document.getElementById('product_photo_zoom_url') || document.getElementById('product_photo_zoom_url2');
-        if (zoomLink) zoomLink.setAttribute('href', href);
-      }, true);
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bindMobileAltThumbs);
-  } else {
-    bindMobileAltThumbs();
-  }
-
-  window.addEventListener('load', bindMobileAltThumbs);
-  setTimeout(bindMobileAltThumbs, 600);
-  setTimeout(bindMobileAltThumbs, 1500);
-})();
-</script>
-<script>
   function enforceMobileLayout() {
     if (!window.matchMedia('(max-width: 991px)').matches) return;
 
