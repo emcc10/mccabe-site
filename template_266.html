@@ -3004,6 +3004,19 @@ body.mc-product-page #content_area td.productoptionname {
     var table = q('#options_table', root) || q('table[id*="options_table"]', root);
     if (!table) return;
     var rows = qa('tr', table);
+    var numberSeatsCount = 0;
+    rows.forEach(function(tr){
+      if (rowHasLeatherSelect(tr)) return;
+      var labelTd = tr.querySelector('td:first-child');
+      var labelTxt = (labelTd && labelTd.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      if (/number of seats|seats per row/.test(labelTxt)) {
+        numberSeatsCount++;
+        if (numberSeatsCount === 1) {
+          tr.style.setProperty('display', 'none', 'important');
+          return;
+        }
+      }
+    });
     rows.forEach(function(tr){
       var sel = q('select:not(.mc-native-leather)', tr);
       if (!sel || tr.querySelector('.mc-option-accordion')) return;
