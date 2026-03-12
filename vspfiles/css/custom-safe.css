@@ -4520,7 +4520,19 @@ body.mc-product-page #content_area #options_table td,
 body.mc-product-page #v65-product-parent #options_table tr,
 body.mc-product-page #v65-product-parent #options_table td,
 body.mc-product-page #content_area [itemprop="offers"],
-body.mc-product-page #v65-product-parent [itemprop="offers"] {
+body.mc-product-page #v65-product-parent [itemprop="offers"],
+body.mc-product-page #content_area form[action*="cart"],
+body.mc-product-page #v65-product-parent form[action*="cart"],
+body.mc-product-page #content_area table:has(input[name="btnaddtocart"]),
+body.mc-product-page #v65-product-parent table:has(input[name="btnaddtocart"]),
+body.mc-product-page #content_area tbody:has(input[name="btnaddtocart"]),
+body.mc-product-page #v65-product-parent tbody:has(input[name="btnaddtocart"]),
+body.mc-product-page #content_area tr:has(input[name="btnaddtocart"]),
+body.mc-product-page #v65-product-parent tr:has(input[name="btnaddtocart"]),
+body.mc-product-page #content_area tr:has(.v65-product-addtocart),
+body.mc-product-page #v65-product-parent tr:has(.v65-product-addtocart),
+body.mc-product-page #content_area td:has(input[name="btnaddtocart"]),
+body.mc-product-page #v65-product-parent td:has(input[name="btnaddtocart"]) {
   background: transparent !important;
   background-color: transparent !important;
   box-shadow: none !important;
