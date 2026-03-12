@@ -1333,13 +1333,17 @@ boot();
           </div>
         </div>
 
-        <div id="mcPlannerRow" style="display:flex;gap:10px;align-items:center;width:100%;min-width:0">
+        <div id="mcPlannerRow" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;width:100%;min-width:0">
           <button type="button" id="mcPlannerBtn" class="mc-config-btn"
             style="padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:10px;background:#fff;cursor:pointer">
             Room Planner
           </button>
+          <button type="button" id="mcApplyPlannerBtn" class="mc-config-btn"
+            style="padding:10px 14px;min-width:0;width:auto;text-align:center;border:1px solid #333;border-radius:10px;background:#f0f0f0;cursor:pointer">
+            Apply configuration
+          </button>
           <div id="mcPlannerSummary"
-            style="min-width:0;max-width:100%;flex:1 1 auto;padding:8px 10px;border:1px solid #ddd;border-radius:10px;background:#f7f7f7;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            style="min-width:0;max-width:100%;flex:1 1 auto;min-width:120px;padding:8px 10px;border:1px solid #ddd;border-radius:10px;background:#f7f7f7;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
             No planner selections
           </div>
         </div>
@@ -1538,6 +1542,42 @@ boot();
       document.getElementById("mcPlannerSummary").textContent = "Planner opened";
     };
 
+    var applyPlannerBtn = document.getElementById("mcApplyPlannerBtn");
+    if (applyPlannerBtn) {
+      applyPlannerBtn.onclick = function () {
+        var opts = window.__ROOM_PLANNER_OPTIONS__;
+        if (!opts || typeof opts !== 'object' || Object.keys(opts).length === 0) {
+          alert("Use Room Planner first to configure your layout, then click Save. After that you can apply the configuration here.");
+          return;
+        }
+        var seatCount = opts["4L"]
+          ? opts["4L"] * 2 + Object.keys(opts).filter(function(k){ return k !== "4L"; }).reduce(function(t, k){ return t + (opts[k] || 0); }, 0)
+          : Object.keys(opts).reduce(function(t, k){ return t + (opts[k] || 0); }, 0);
+        var root = document.querySelector("#content_area") || document.body;
+        var labels = root.querySelectorAll ? root.querySelectorAll(".mc-option-accordion__label, td.productoptionname, label, #options_table td") : [];
+        for (var i = 0; i < labels.length; i++) {
+          var txt = (labels[i].textContent || "").toUpperCase();
+          if (!/NUMBER OF SEATS|SEATS PER ROW|SEAT/.test(txt)) continue;
+          var acc = labels[i].closest ? labels[i].closest(".mc-option-accordion") : null;
+          var panel = acc ? acc.querySelector(".mc-option-accordion__panel") : null;
+          var sel = panel ? panel.querySelector("select") : (labels[i].closest ? (labels[i].closest("tr") ? labels[i].closest("tr").querySelector("select") : null) : null);
+          if (!sel || !sel.options) continue;
+          var targetVal = String(seatCount);
+          for (var j = 0; j < sel.options.length; j++) {
+            if (sel.options[j].value === targetVal) { sel.value = targetVal; break; }
+            if (parseInt(sel.options[j].value, 10) === seatCount) { sel.value = sel.options[j].value; break; }
+          }
+        }
+        var sumEl = document.getElementById("mcPlannerSummary");
+        if (sumEl) sumEl.textContent = seatCount + " seats configured";
+        try {
+          var sp = getPlannerSeatPrice();
+          var totalPrice = calculatePlannerPrice(opts, sp);
+          updateProductPrice(totalPrice);
+        } catch (e) { if (e && e.message) alert(e.message); }
+      };
+    }
+
     // Keep summary synced to modal selection changes
     renderLeatherPreviewStrip();
     setTimeout(renderLeatherPreviewStrip, 900);
@@ -1593,6 +1633,7 @@ function updateProductPrice(totalPrice){
 
 function calculatePlannerPrice(counts, seatPrice){
   if (seatPrice == null || seatPrice <= 0) seatPrice = getPlannerSeatPrice();
+  if (!counts || typeof counts !== 'object') counts = {};
   let total = 0;
   let singleSeatCount = 0;
 
@@ -1617,32 +1658,27 @@ window.addEventListener("message", function (event) {
   if (event.origin !== location.origin) return;
   if (!event.data || event.data.type !== "ROOM_PLANNER_APPLY") return;
 
-  const payload = event.data.payload;
+  var payload = event.data.payload;
+  if (!payload || typeof payload !== 'object') return;
+  var opts = payload.options && typeof payload.options === 'object' ? payload.options : {};
 
   // Update planner summary
-  const summary = document.getElementById("mcPlannerSummary");
-  if (summary && payload.options) {
-    const seatCount =
-      payload.options["4L"]
-        ? payload.options["4L"] * 2 +
-          Object.entries(payload.options)
-            .filter(([k]) => k !== "4L")
-            .reduce((t, [, v]) => t + v, 0)
-        : Object.values(payload.options).reduce((t, v) => t + v, 0);
-
-    summary.textContent = `${seatCount} seats configured`;
+  var summary = document.getElementById("mcPlannerSummary");
+  if (summary) {
+    var seatCount = opts["4L"]
+      ? opts["4L"] * 2 + Object.keys(opts).filter(function(k){ return k !== "4L"; }).reduce(function(t, k){ return t + (opts[k] || 0); }, 0)
+      : Object.keys(opts).reduce(function(t, k){ return t + (opts[k] || 0); }, 0);
+    summary.textContent = seatCount ? seatCount + " seats configured" : "No planner selections";
   }
 
-  // Save selections
-  window.__ROOM_PLANNER_OPTIONS__ = payload.options;
+  window.__ROOM_PLANNER_OPTIONS__ = opts;
 
-  // Pricing: unit price from product options × piece counts (4L = 2 seats, −$500 per 4L)
   try {
-    const seatPrice = getPlannerSeatPrice();
-    const totalPrice = calculatePlannerPrice(payload.options, seatPrice);
+    var seatPrice = getPlannerSeatPrice();
+    var totalPrice = calculatePlannerPrice(opts, seatPrice);
     updateProductPrice(totalPrice);
   } catch (err) {
-    alert(err.message);
+    if (err && err.message) alert(err.message);
   }
 });
 

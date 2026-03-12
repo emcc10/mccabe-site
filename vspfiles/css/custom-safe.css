@@ -44,10 +44,32 @@ body {
 /* ======================================
    HOMEPAGE HERO VIDEO (HOME ONLY)
 ====================================== */
+/* Full-bleed: no white space on sides of slideshow */
+#if_homepage,
+body.is-home #if_homepage {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-left: calc(-50vw + 50%) !important;
+  margin-right: calc(-50vw + 50%) !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+body.is-home #slideshow-container {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-left: calc(-50vw + 50%) !important;
+  margin-right: calc(-50vw + 50%) !important;
+  left: 0 !important;
+  right: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
 #slideshow-container .mc-hero-video {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 #slideshow-container .mc-hero-video-el {
@@ -4478,7 +4500,9 @@ body.mc-product-page #content_area button[name="btnaddtocart"] {
 /* Don’t clip the Add to Cart button in the options column */
 /* Single Add to Cart: no second container/color – wrapper matches button */
 body.mc-product-page #content_area .v65-product-addtocart,
-body.mc-product-page #v65-product-parent .v65-product-addtocart {
+body.mc-product-page #v65-product-parent .v65-product-addtocart,
+body.mc-product-page #content_area .v65-product-addtocart div,
+body.mc-product-page #v65-product-parent .v65-product-addtocart div {
   background: transparent !important;
   background-color: transparent !important;
   border: 0 !important;
@@ -4488,7 +4512,15 @@ body.mc-product-page #v65-product-parent .v65-product-addtocart {
 }
 body.mc-product-page #content_area td.mc-pdp-options-td,
 body.mc-product-page #content_area .mc-pdp-options-td,
-body.mc-product-page #v65-product-parent td.mc-pdp-options-td {
+body.mc-product-page #v65-product-parent td.mc-pdp-options-td,
+body.mc-product-page #content_area #options_table,
+body.mc-product-page #v65-product-parent #options_table,
+body.mc-product-page #content_area #options_table tr,
+body.mc-product-page #content_area #options_table td,
+body.mc-product-page #v65-product-parent #options_table tr,
+body.mc-product-page #v65-product-parent #options_table td,
+body.mc-product-page #content_area [itemprop="offers"],
+body.mc-product-page #v65-product-parent [itemprop="offers"] {
   background: transparent !important;
   background-color: transparent !important;
   box-shadow: none !important;
