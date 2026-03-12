@@ -2647,8 +2647,17 @@ body.mc-product-page #content_area td.productoptionname {
       var raw = (el.textContent || '').replace(/\s+/g, ' ').trim();
       var normalized = raw.toLowerCase().replace(/:$/, '').trim();
       var hasField = !!q('select, input, textarea, button', el);
-      if (!hasField && (normalized === 'choose cover' || normalized === 'choose leather')) {
-        el.textContent = 'SELECT A LEATHER:';
+      if (!hasField) {
+        if (normalized === 'choose cover' || normalized === 'choose leather') {
+          el.textContent = 'SELECT A LEATHER:';
+        }
+        // Hide legacy duplicate labels that sit above the RH-style accordions
+        if (/^straight or curved\??$/.test(normalized)) {
+          el.style.setProperty('display', 'none', 'important');
+        }
+        if (/(number of seats|number of chairs|seats per row)/.test(normalized)) {
+          el.style.setProperty('display', 'none', 'important');
+        }
       }
     });
   }
