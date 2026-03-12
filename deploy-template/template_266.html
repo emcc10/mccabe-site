@@ -2650,12 +2650,24 @@ body.mc-product-page #content_area td.productoptionname {
       if (!hasField && (normalized === 'choose cover' || normalized === 'choose leather')) {
         el.textContent = 'SELECT A LEATHER:';
       }
-      // Hide legacy duplicate labels that sit above the RH-style accordions
-      if (/^straight or curved\??$/.test(normalized)) {
+      // Hide duplicate legacy labels that sit above the RH-style accordions when they are pure text
+      if (!hasField && /^straight or curved\??$/.test(normalized)) {
         el.style.setProperty('display', 'none', 'important');
       }
-      if (!hasField && (/(number of seats|number of chairs|seats per row)/.test(normalized))) {
+      if (!hasField && /(number of seats|number of chairs|seats per row)/.test(normalized)) {
         el.style.setProperty('display', 'none', 'important');
+      }
+    });
+  }
+
+  function hideLegacyOptionQuestions(scope){
+    var root = scope || document;
+    var nodes = qa('#content_area *', root);
+    nodes.forEach(function(el){
+      var txt = (el.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      if (!txt) return;
+      if (txt === 'straight or curved?' || txt === 'straight or curved ?') {
+        el.style.setProperty('display','none','important');
       }
     });
   }
@@ -3104,6 +3116,7 @@ body.mc-product-page #content_area td.productoptionname {
     var scope = document.querySelector('#content_area') || document.body;
     forceNoItalics(scope);
     forceOptionLabel(scope);
+    hideLegacyOptionQuestions(scope);
     forceTabsInline(scope);
     forceMediaLayout(scope);
     removeConfigurationDetails(scope);
