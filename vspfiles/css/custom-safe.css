@@ -1707,8 +1707,10 @@ body.mc-product-page select.mc-native-leather {
       }
 
       /* Main product image (your main image is img#product_photo) */
+      body.mc-product-page #content_area img#product_photo {
         height: auto !important;
         display: block !important;
+        max-width: 100% !important;
       }
 
       /* Prevent any  sidebar boxes  from exceeding screen width */
@@ -4428,4 +4430,79 @@ body.mc-product-page #content_area input[id*="btnaddtocart"]:hover,
 body.mc-product-page #content_area button[name="btnaddtocart"]:hover {
   background-color: #333 !important;
   border-color: #333 !important;
+}
+
+/* =========================================================
+   PDP OPTIONS: PROPORTIONAL ALIGNMENT (2026-03-12)
+   Keeps option headers + panels aligned and responsive.
+   ========================================================= */
+body.mc-product-page #content_area td.mc-pdp-options-td,
+body.mc-product-page #content_area .mc-pdp-options-td {
+  text-align: left !important;
+}
+
+/* Options column behaves like a responsive stack */
+body.mc-product-page #content_area td.mc-pdp-options-td,
+body.mc-product-page #content_area .mc-pdp-options-td,
+body.mc-product-page #content_area td.mc-pdp-options-td > *,
+body.mc-product-page #content_area .mc-pdp-options-td > * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Make the RH-style option blocks fill the available width */
+body.mc-product-page #content_area .mc-option-accordion,
+body.mc-product-page #content_area #mcLeatherRow,
+body.mc-product-page #content_area #mc-inline-config,
+body.mc-product-page #content_area #mcPlannerRow {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Keep header text + chevron aligned on one line */
+body.mc-product-page #content_area .mc-option-accordion__header,
+body.mc-product-page #content_area #mcLeatherHeaderRow {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Choices should scale with the column (no fixed 360px) */
+body.mc-product-page #content_area .mc-option-accordion__choice {
+  max-width: 100% !important;
+}
+
+/* Panel expands within the same aligned column */
+body.mc-product-page #content_area .mc-option-accordion__panel {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Desktop: constrain options stack to a tasteful RH-like measure */
+@media (min-width: 992px) {
+  body.mc-product-page #content_area td.mc-pdp-options-td,
+  body.mc-product-page #content_area .mc-pdp-options-td {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+  }
+
+  body.mc-product-page #content_area .mc-option-accordion,
+  body.mc-product-page #content_area #mcLeatherRow,
+  body.mc-product-page #content_area #mc-inline-config,
+  body.mc-product-page #content_area #mcPlannerRow {
+    max-width: 520px !important; /* matches your “wide table” look, but still responsive */
+  }
+}
+
+/* Mobile: full-bleed within gutters */
+@media (max-width: 991px) {
+  body.mc-product-page #content_area .mc-option-accordion,
+  body.mc-product-page #content_area #mcLeatherRow,
+  body.mc-product-page #content_area #mc-inline-config,
+  body.mc-product-page #content_area #mcPlannerRow {
+    max-width: 100% !important;
+  }
 }
