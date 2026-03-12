@@ -4532,7 +4532,48 @@ body.mc-product-page #v65-product-parent tr:has(input[name="btnaddtocart"]),
 body.mc-product-page #content_area tr:has(.v65-product-addtocart),
 body.mc-product-page #v65-product-parent tr:has(.v65-product-addtocart),
 body.mc-product-page #content_area td:has(input[name="btnaddtocart"]),
-body.mc-product-page #v65-product-parent td:has(input[name="btnaddtocart"]) {
+body.mc-product-page #v65-product-parent td:has(input[name="btnaddtocart"]),
+body.mc-product-page #content_area td:has(.v65-product-addtocart),
+body.mc-product-page #v65-product-parent td:has(.v65-product-addtocart),
+body.mc-product-page #content_area div:has(.v65-product-addtocart),
+body.mc-product-page #v65-product-parent div:has(.v65-product-addtocart),
+body.mc-product-page #content_area div:has(input[name="btnaddtocart"]),
+body.mc-product-page #v65-product-parent div:has(input[name="btnaddtocart"]) {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+/* Same transparent wrappers for Volusion body class (productdetails) */
+body.productdetails #content_area [itemprop="offers"],
+body.productdetails #v65-product-parent [itemprop="offers"],
+body.productdetails #content_area .v65-product-addtocart,
+body.productdetails #v65-product-parent .v65-product-addtocart,
+body.productdetails #content_area .v65-product-addtocart div,
+body.productdetails #v65-product-parent .v65-product-addtocart div,
+body.productdetails #content_area form[action*="cart"],
+body.productdetails #v65-product-parent form[action*="cart"],
+body.productdetails #content_area #options_table,
+body.productdetails #v65-product-parent #options_table,
+body.productdetails #content_area #options_table tr,
+body.productdetails #content_area #options_table td,
+body.productdetails #v65-product-parent #options_table tr,
+body.productdetails #v65-product-parent #options_table td,
+body.productdetails #content_area table:has(input[name="btnaddtocart"]),
+body.productdetails #v65-product-parent table:has(input[name="btnaddtocart"]),
+body.productdetails #content_area tbody:has(input[name="btnaddtocart"]),
+body.productdetails #v65-product-parent tbody:has(input[name="btnaddtocart"]),
+body.productdetails #content_area tr:has(input[name="btnaddtocart"]),
+body.productdetails #v65-product-parent tr:has(input[name="btnaddtocart"]),
+body.productdetails #content_area tr:has(.v65-product-addtocart),
+body.productdetails #v65-product-parent tr:has(.v65-product-addtocart),
+body.productdetails #content_area td:has(input[name="btnaddtocart"]),
+body.productdetails #v65-product-parent td:has(input[name="btnaddtocart"]),
+body.productdetails #content_area td:has(.v65-product-addtocart),
+body.productdetails #v65-product-parent td:has(.v65-product-addtocart),
+body.productdetails #content_area div:has(.v65-product-addtocart),
+body.productdetails #v65-product-parent div:has(.v65-product-addtocart),
+body.productdetails #content_area div:has(input[name="btnaddtocart"]),
+body.productdetails #v65-product-parent div:has(input[name="btnaddtocart"]) {
   background: transparent !important;
   background-color: transparent !important;
   box-shadow: none !important;
