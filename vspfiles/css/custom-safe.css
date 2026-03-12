@@ -4584,7 +4584,7 @@ body.mc-product-page #content_area .mc-option-accordion__panel {
   }
 }
 
-/* Mobile: full-bleed within gutters */
+/* Mobile: full-bleed within gutters; options visible and proportionate */
 @media (max-width: 991px) {
   body.mc-product-page #content_area .mc-option-accordion,
   body.mc-product-page #content_area #mcLeatherRow,
@@ -4592,4 +4592,39 @@ body.mc-product-page #content_area .mc-option-accordion__panel {
   body.mc-product-page #content_area #mcPlannerRow {
     max-width: 100% !important;
   }
+  body.mc-product-page #content_area #options_table,
+  body.productdetails #content_area #options_table,
+  body.mc-product-page #v65-product-parent #options_table,
+  body.productdetails #v65-product-parent #options_table {
+    display: table !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+  }
+  body.mc-product-page #content_area #options_table td,
+  body.productdetails #content_area #options_table td,
+  body.mc-product-page #v65-product-parent #options_table td,
+  body.productdetails #v65-product-parent #options_table td {
+    min-width: 0 !important;
+    max-width: 50% !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    box-sizing: border-box !important;
+  }
+  body.mc-product-page #content_area #options_table select,
+  body.productdetails #content_area #options_table select,
+  body.mc-product-page #v65-product-parent #options_table select,
+  body.productdetails #v65-product-parent #options_table select {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* Site-wide: no element may run off the right edge */
+#content_area > *,
+#v65-product-parent > *,
+.content_area-wrapper > * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
