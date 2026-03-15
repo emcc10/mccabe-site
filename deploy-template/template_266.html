@@ -1995,10 +1995,15 @@ window.initRoomPlanner = function (opts) {
   function makeDraggable(el) {
     el.addEventListener("mousedown", function (e) {
       setActive(el);
-      var sx = e.clientX, sy = e.clientY, ox = el.offsetLeft, oy = el.offsetTop;
+      var parent = el.offsetParent;
+      if (!parent) return;
+      var pr = parent.getBoundingClientRect();
+      var offsetX = e.clientX - (pr.left + el.offsetLeft);
+      var offsetY = e.clientY - (pr.top + el.offsetTop);
       function move(ev) {
-        el.style.left = (ox + ev.clientX - sx) + "px";
-        el.style.top = (oy + ev.clientY - sy) + "px";
+        var pr2 = parent.getBoundingClientRect();
+        el.style.left = (ev.clientX - pr2.left - offsetX) + "px";
+        el.style.top = (ev.clientY - pr2.top - offsetY) + "px";
       }
       function up() {
         document.removeEventListener("mousemove", move);
@@ -2284,9 +2289,16 @@ window.initRoomPlanner = function (opts) {
   }
   function rotateSeat(delta) {
     if (!activeSeat) return;
-    var rot = (parseFloat(activeSeat.dataset.rot || "0") + delta) % 360;
-    activeSeat.dataset.rot = rot;
-    activeSeat.style.transform = "rotate(" + rot + "deg)";
+    var seat = activeSeat;
+    var w = seat.offsetWidth, h = seat.offsetHeight;
+    var centerX = seat.offsetLeft + w / 2;
+    var centerY = seat.offsetTop + h / 2;
+    var rot = (parseFloat(seat.dataset.rot || "0") + delta) % 360;
+    seat.dataset.rot = rot;
+    seat.style.transformOrigin = "50% 50%";
+    seat.style.transform = "rotate(" + rot + "deg)";
+    seat.style.left = (centerX - w / 2) + "px";
+    seat.style.top = (centerY - h / 2) + "px";
   }
   document.getElementById("rotateL").onclick = function () { rotateSeat(-5); };
   document.getElementById("rotateR").onclick = function () { rotateSeat(5); };
