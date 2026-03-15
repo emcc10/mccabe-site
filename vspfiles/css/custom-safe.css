@@ -1,8 +1,7 @@
-/* Your stored CSS (manual updates) — revised with recently requested edits */
 /* TEST DEPLOY 3:55PM */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
-/* Recent edits: mobile product page — alt images thumbnail-only (64px), content contained (no overflow/push right) */
+/* 2026-03-12: Your CSS used as-is; only fixes: (1) duplicate price above "Price with selected options" hidden, (2) mobile PDP alt images sit next to each other beneath main image (64px thumbs), streamlined/organized */
 /* RH-STYLE GLOBAL FONT */
 body,
 body * {
@@ -1656,9 +1655,9 @@ body.mc-product-page select.mc-native-leather {
       display: none !important;
     }
 
-    /* 1) Remove the first base price line (the stray ":" + price) */
+    /* 1) Remove the first base price line (the stray ":" + price) – hide so only "Price with selected options" + price shows */
     .product_productprice {
-      display: block !important;
+      display: none !important;
     }
 
     /* 2) Stack "Price with Selected Options" above its price */
@@ -4795,4 +4794,74 @@ body.mc-product-page #v65-product-parent #options_table,
 body.productdetails #v65-product-parent #options_table {
   max-width: 100% !important;
   box-sizing: border-box !important;
+}
+
+/* =========================================================
+   MOBILE PDP: alt images next to each other beneath main image (2026-03-12)
+   Streamlined, clean; all elements proportionate; no full-size alt images
+========================================================= */
+@media (max-width: 991px) {
+  body.mc-product-page #content_area img#product_photo,
+  body.productdetails #content_area img#product_photo,
+  body.mc-product-page #v65-product-parent img#product_photo,
+  body.productdetails #v65-product-parent img#product_photo {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 auto 12px auto !important;
+    float: none !important;
+    clear: both !important;
+  }
+
+  body.mc-product-page #content_area #altviews,
+  body.productdetails #content_area #altviews,
+  body.mc-product-page #content_area span#altviews,
+  body.productdetails #content_area span#altviews,
+  body.mc-product-page #v65-product-parent #altviews,
+  body.productdetails #v65-product-parent #altviews {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 8px 0 0 0 !important;
+    text-align: center !important;
+    float: none !important;
+    clear: both !important;
+    font-size: 0 !important;
+  }
+
+  body.mc-product-page #content_area #altviews a,
+  body.productdetails #content_area #altviews a,
+  body.mc-product-page #v65-product-parent #altviews a,
+  body.productdetails #v65-product-parent #altviews a {
+    display: inline-block !important;
+    margin: 0 6px 8px 6px !important;
+    vertical-align: top !important;
+  }
+
+  body.mc-product-page #content_area #altviews img,
+  body.productdetails #content_area #altviews img,
+  body.mc-product-page #content_area #altviews img[id^="alternate_product_photo_"],
+  body.productdetails #content_area #altviews img[id^="alternate_product_photo_"],
+  body.mc-product-page #v65-product-parent #altviews img,
+  body.productdetails #v65-product-parent #altviews img {
+    width: 64px !important;
+    max-width: 64px !important;
+    height: 64px !important;
+    max-height: 64px !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+}
+
+/* Reinforce: hide duplicate price above "Price with selected options" (all viewports) */
+body.mc-product-page #content_area .product_productprice,
+body.mc-product-page #v65-product-parent .product_productprice,
+body.productdetails #content_area .product_productprice,
+body.productdetails #v65-product-parent .product_productprice,
+body.mc-product-page #content_area .product_list_price,
+body.mc-product-page #v65-product-parent .product_list_price,
+body.productdetails #content_area .product_list_price,
+body.productdetails #v65-product-parent .product_list_price {
+  display: none !important;
 }

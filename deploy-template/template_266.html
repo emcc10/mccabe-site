@@ -369,7 +369,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <style>
         #roomPlannerApp { font-family: Helvetica, Arial, sans-serif; background:#fff; }
         #roomPlannerApp #shell { display:flex; flex-direction:row; gap:12px; flex:1; min-height:0; }
-        #roomPlannerApp #planner-left { width:200px; flex-shrink:0; display:flex; flex-direction:column; gap:10px; overflow-y:auto; }
+        #roomPlannerApp #planner-left { width:200px; flex-shrink:0; display:flex; flex-direction:column; gap:10px; overflow-y:auto; padding-top:40px; }
         #roomPlannerApp .room-dims-row { display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; }
         #roomPlannerApp .room-dims-row label { font-size:11px; color:#555; margin:0 2px 0 0; }
         #roomPlannerApp .room-dims-row input[type="number"] { width:36px; padding:4px 2px; font-size:12px; margin:0; }
@@ -381,14 +381,15 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp #measuringToolBtn:hover { background:#eee; }
         #roomPlannerApp #measuringToolBtn svg { width:18px; height:18px; flex-shrink:0; }
         #roomPlannerApp .common-configs-title { font-size:13px; font-weight:600; margin:10px 0 6px 0; }
-        #roomPlannerApp .common-config { width:100%; height:52px; border:1px solid #ddd; border-radius:6px; cursor:pointer; margin-bottom:0; overflow:hidden; background:#fafafa; display:flex; align-items:center; justify-content:center; padding:0; position:relative; border-top:1px solid #eee; }
+        #roomPlannerApp .common-config { width:100%; height:60px; border:1px solid #ddd; border-radius:6px; cursor:pointer; margin-bottom:0; overflow:hidden; background:#fafafa; display:flex; align-items:center; justify-content:center; padding:0; position:relative; border-top:1px solid #eee; }
         #roomPlannerApp .common-config:first-of-type { border-top:1px solid #ddd; }
         #roomPlannerApp .common-config:hover { border-color:#888; background:#f0f0f0; }
         #roomPlannerApp .common-config-thumb { position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
-        #roomPlannerApp .common-config-thumb img { position:absolute; max-width:24px; max-height:24px; object-fit:contain; }
-        #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:8px; }
+        #roomPlannerApp .common-config-thumb img { position:absolute; max-width:112px; max-height:58px; object-fit:contain; }
+        #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:8px; padding-top:40px; }
+        #roomPlannerApp #tray-row { display:flex; align-items:center; gap:8px; width:100%; max-width:900px; flex-shrink:0; }
         #roomPlannerApp .room-dims-below-tray { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; width:100%; max-width:900px; flex-shrink:0; }
-        #roomPlannerApp #tray { display:flex; align-items:center; gap:8px; width:100%; max-width:900px; flex-shrink:0; }
+        #roomPlannerApp #tray { display:flex; align-items:center; gap:8px; flex:1; min-width:0; }
         #roomPlannerApp .tray-nav { width:32px; height:32px; border:1px solid #ddd; border-radius:50%; background:#f6f6f6; cursor:pointer; flex-shrink:0; font-size:16px; line-height:1; padding:0; }
         #roomPlannerApp .tray-nav:hover { background:#eee; }
         #roomPlannerApp #tray-items { display:flex; gap:8px; overflow-x:auto; scroll-behavior:smooth; flex:1; min-width:0; padding:4px 0; }
@@ -402,7 +403,8 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp .room-dim { position:absolute; font-size:12px; font-weight:600; background:#fff; padding:3px 6px; color:#333; z-index:8; border:1px solid #ccc; border-radius:4px; }
         #roomPlannerApp #dim-top { top:4px; left:50%; transform:translateX(-50%); }
         #roomPlannerApp #dim-left { left:4px; top:50%; transform:translateY(-50%) rotate(-90deg); }
-        #roomPlannerApp .seat { position:absolute; cursor:grab; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+        #roomPlannerApp .seat { position:absolute; cursor:grab; overflow:hidden; display:flex; align-items:center; justify-content:center; margin:0; box-sizing:border-box; }
+        #roomPlannerApp .config-group .seat { margin:0; }
         #roomPlannerApp .seat:active { cursor:grabbing; }
         #roomPlannerApp .seat.active { outline:2px dashed #3b82f6; }
         #roomPlannerApp #room .seat img { position:absolute; inset:0; width:100%; height:100%; object-fit:fill; display:block; pointer-events:none; }
@@ -433,12 +435,14 @@ document.addEventListener("DOMContentLoaded", function () {
       <div id="page">
         <div id="shell">
           <div id="planner-left">
-            <button type="button" id="measuringToolBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="9" width="20" height="6" rx="0.5"/><line x1="4" y1="9" x2="4" y2="11"/><line x1="7" y1="9" x2="7" y2="12"/><line x1="10" y1="9" x2="10" y2="11"/><line x1="13" y1="9" x2="13" y2="12"/><line x1="16" y1="9" x2="16" y2="11"/><line x1="19" y1="9" x2="19" y2="12"/><line x1="22" y1="9" x2="22" y2="11"/></svg> Measuring tool</button>
             <div class="common-configs-title">Common configurations</div>
             <div id="common-configs"></div>
           </div>
           <div id="planner-center">
-            <div id="tray"><button class="tray-nav" id="navL" type="button" aria-label="Scroll left">&lt;</button><div id="tray-items"></div><button class="tray-nav" id="navR" type="button" aria-label="Scroll right">&gt;</button></div>
+            <div id="tray-row">
+              <button type="button" id="measuringToolBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="9" width="20" height="6" rx="0.5"/><line x1="4" y1="9" x2="4" y2="11"/><line x1="7" y1="9" x2="7" y2="12"/><line x1="10" y1="9" x2="10" y2="11"/><line x1="13" y1="9" x2="13" y2="12"/><line x1="16" y1="9" x2="16" y2="11"/><line x1="19" y1="9" x2="19" y2="12"/><line x1="22" y1="9" x2="22" y2="11"/></svg> Measuring tool</button>
+              <div id="tray"><button class="tray-nav" id="navL" type="button" aria-label="Scroll left">&lt;</button><div id="tray-items"></div><button class="tray-nav" id="navR" type="button" aria-label="Scroll right">&gt;</button></div>
+            </div>
             <div class="room-dims-below-tray">
               <div class="room-dims-row">
                 <label>W</label><input type="number" id="roomW_ft" value="16" min="0" max="50" placeholder="ft" /><input type="number" id="roomW_in" value="0" min="0" max="11" placeholder="in" />
@@ -2154,7 +2158,7 @@ window.initRoomPlanner = function (opts) {
     group.dataset.isConfigGroup = "1";
     var minX = 1e9, minY = 1e9, maxX = 0, maxY = 0;
     var nPieces = cfg.pieces.length;
-    var curvedArc = (cfg.layout === "curved" && nPieces > 1) ? (nPieces - 1) * 10 : 0;
+    var curvedArc = (cfg.layout === "curved" && nPieces > 1) ? (nPieces - 1) * 12 : 0;
     cfg.pieces.forEach(function (id, i) {
       var piece = pieceMap[id];
       if (!piece) return;
@@ -2173,6 +2177,14 @@ window.initRoomPlanner = function (opts) {
       seat.style.top = startY + "px";
       seat.style.position = "absolute";
       seat.style.transform = "rotate(" + rot + "deg)";
+      var rad = rot * Math.PI / 180;
+      var extentX = seatW;
+      var extentY = seatH;
+      if (cfg.layout === "curved" && nPieces > 1) {
+        seat.style.transformOrigin = "0 50%";
+        extentX = seatW * Math.abs(Math.cos(rad)) + seatH * Math.abs(Math.sin(rad));
+        extentY = seatW * Math.abs(Math.sin(rad)) + seatH * Math.abs(Math.cos(rad));
+      }
       var img = document.createElement("img");
       img.src = piece.img;
       img.draggable = false;
@@ -2186,13 +2198,9 @@ window.initRoomPlanner = function (opts) {
       group.appendChild(seat);
       minX = Math.min(minX, startX);
       minY = Math.min(minY, startY);
-      maxX = Math.max(maxX, startX + seatW);
-      maxY = Math.max(maxY, startY + seatH);
-      if (cfg.layout === "curved" && nPieces > 1) {
-        var arcY = (cfg.pieces.length - 1) * 6;
-        startY += Math.abs(Math.sin((i / Math.max(1, cfg.pieces.length - 1)) * Math.PI * 0.5)) * arcY * PX_PER_INCH;
-      }
-      startX += seatW + rowGap;
+      maxX = Math.max(maxX, startX + extentX);
+      maxY = Math.max(maxY, startY + extentY);
+      startX += extentX + rowGap;
     });
     group.style.left = minX + "px";
     group.style.top = minY + "px";
@@ -2239,14 +2247,15 @@ window.initRoomPlanner = function (opts) {
   }
   var commonContainer = document.getElementById("common-configs");
   if (commonContainer) {
+    var trayImgH = 72;
+    var thumbScale = 0.8 * (trayImgH / (SEAT_DEPTH_IN * PX_PER_INCH));
     COMMON_CONFIGS.forEach(function (cfg) {
       var div = document.createElement("div");
       div.className = "common-config";
       div.title = "Click to add to planner";
       var thumb = document.createElement("div");
       thumb.className = "common-config-thumb";
-      var scale = 0.12;
-      var thumbCenterY = 26;
+      var thumbCenterY = 30;
       var tx = 0;
       cfg.pieces.forEach(function (id) {
         var p = pieceMap[id];
@@ -2254,13 +2263,13 @@ window.initRoomPlanner = function (opts) {
         var im = document.createElement("img");
         im.src = p.img;
         im.alt = "";
-        var tw = p.widthIn * scale, th = (p.depthIn != null ? p.depthIn : SEAT_DEPTH_IN) * scale;
+        var tw = p.widthIn * thumbScale, th = (p.depthIn != null ? p.depthIn : SEAT_DEPTH_IN) * thumbScale;
         im.style.width = tw + "px";
         im.style.height = th + "px";
         im.style.left = (50 + tx - tw / 2) + "px";
         im.style.top = (thumbCenterY - th / 2) + "px";
         thumb.appendChild(im);
-        tx += tw + 2;
+        tx += tw;
       });
       div.appendChild(thumb);
       div.onclick = function () { addCommonConfig(cfg); };
