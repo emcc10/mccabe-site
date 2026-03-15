@@ -367,41 +367,80 @@ document.addEventListener("DOMContentLoaded", function () {
   <template id="roomPlannerEmbed">
     <div id="roomPlannerApp">
       <style>
-        #roomPlannerApp body { margin:0; font-family: Helvetica, Arial, sans-serif; background:#fff; }
-        #roomPlannerApp #page { min-height:100vh; display:flex; justify-content:center; }
-        #roomPlannerApp #shell { width:1200px; padding-bottom:40px; }
-        #roomPlannerApp #room-inputs { display:flex; gap:12px; margin:12px 0 12px 0; align-items:center; }
-        #roomPlannerApp #room-inputs input { width:60px; }
-        #roomPlannerApp #tray { display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:14px; position:relative; width:100%; }
-        #roomPlannerApp .tray-nav { width:36px; height:36px; border:1px solid #ddd; border-radius:18px; background:#f6f6f6; cursor:pointer; z-index:2; flex:0 0 auto; }
-        #roomPlannerApp #tray-items { display:flex; gap:8px; max-width:900px; overflow-x:auto; scroll-behavior:smooth; flex:0 0 auto; justify-content:center; }
-        #roomPlannerApp .tray-item { width:150px; flex:0 0 150px; text-align:center; font-size:11px; cursor:pointer; }
-        #roomPlannerApp .tray-item img { width:130px; max-height:80px; object-fit:contain; display:block; margin:0 auto; pointer-events:none; }
-        #roomPlannerApp #room-wrapper { display:flex; justify-content:center; margin-bottom:14px; width:100%; }
-        #roomPlannerApp #room { position:relative; border:3px solid #ccc; background:#fff; min-width:300px; min-height:200px; }
-        #roomPlannerApp #room::before { content:""; position:absolute; inset:0; background-image: linear-gradient(to right, rgba(0,0,0,.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,.15) 1px, transparent 1px); background-size: var(--grid-size) var(--grid-size); pointer-events:none; }
-        #roomPlannerApp .room-dim { position:absolute; font-size:14px; font-weight:600; background:#fff; padding:4px 8px; color:#333; z-index:8; border:1px solid #ccc; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,.1); }
-        #roomPlannerApp #dim-top { top:6px; left:50%; transform:translateX(-50%); }
-        #roomPlannerApp #dim-left { left:6px; top:50%; transform:translateY(-50%) rotate(-90deg); }
-        #roomPlannerApp #room-measurement { margin-bottom:8px; font-size:13px; color:#555; text-align:center; }
-        #roomPlannerApp .seat { position:absolute; cursor:grab; overflow:hidden; }
+        #roomPlannerApp { font-family: Helvetica, Arial, sans-serif; background:#fff; }
+        #roomPlannerApp #shell { display:flex; flex-direction:row; gap:12px; flex:1; min-height:0; }
+        #roomPlannerApp #planner-left { width:200px; flex-shrink:0; display:flex; flex-direction:column; gap:14px; overflow-y:auto; }
+        #roomPlannerApp #planner-left label { font-size:12px; color:#555; display:block; margin-bottom:4px; }
+        #roomPlannerApp #planner-left input[type="number"] { width:70px; padding:6px 8px; margin-bottom:8px; }
+        #roomPlannerApp #planner-left #room-measurement { font-size:13px; color:#333; margin:4px 0; }
+        #roomPlannerApp #measuringToolBtn { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; cursor:pointer; border:1px solid #ccc; background:#f7f7f7; border-radius:6px; font-size:13px; }
+        #roomPlannerApp #measuringToolBtn:hover { background:#eee; }
+        #roomPlannerApp #measuringToolBtn svg { width:20px; height:20px; flex-shrink:0; }
+        #roomPlannerApp .common-configs-title { font-size:13px; font-weight:600; margin:12px 0 8px 0; }
+        #roomPlannerApp .common-config { width:100%; aspect-ratio:1.8; max-height:70px; border:1px solid #ddd; border-radius:6px; cursor:pointer; margin-bottom:6px; overflow:hidden; background:#fafafa; display:flex; align-items:center; justify-content:center; font-size:10px; color:#666; text-align:center; padding:4px; }
+        #roomPlannerApp .common-config:hover { border-color:#888; background:#f0f0f0; }
+        #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:8px; }
+        #roomPlannerApp #tray { display:flex; align-items:center; gap:8px; width:100%; max-width:900px; flex-shrink:0; }
+        #roomPlannerApp .tray-nav { width:32px; height:32px; border:1px solid #ddd; border-radius:50%; background:#f6f6f6; cursor:pointer; flex-shrink:0; font-size:16px; line-height:1; padding:0; }
+        #roomPlannerApp .tray-nav:hover { background:#eee; }
+        #roomPlannerApp #tray-items { display:flex; gap:8px; overflow-x:auto; scroll-behavior:smooth; flex:1; min-width:0; padding:4px 0; }
+        #roomPlannerApp #tray-items::-webkit-scrollbar { height:6px; }
+        #roomPlannerApp .tray-item { flex:0 0 140px; width:140px; text-align:center; font-size:11px; cursor:pointer; border:2px solid transparent; border-radius:8px; padding:6px; box-sizing:border-box; }
+        #roomPlannerApp .tray-item:hover { border-color:#ccc; background:#fafafa; }
+        #roomPlannerApp .tray-item img { width:100%; height:auto; max-height:72px; object-fit:contain; display:block; margin:0 auto; pointer-events:none; }
+        #roomPlannerApp #room-wrapper { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; width:100%; }
+        #roomPlannerApp #room { position:relative; border:3px solid #ccc; background:#fff; min-width:280px; min-height:180px; flex-shrink:0; }
+        #roomPlannerApp #room::before { content:""; position:absolute; inset:0; background-image: linear-gradient(to right, rgba(0,0,0,.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,.12) 1px, transparent 1px); background-size: var(--grid-size) var(--grid-size); pointer-events:none; }
+        #roomPlannerApp .room-dim { position:absolute; font-size:12px; font-weight:600; background:#fff; padding:3px 6px; color:#333; z-index:8; border:1px solid #ccc; border-radius:4px; }
+        #roomPlannerApp #dim-top { top:4px; left:50%; transform:translateX(-50%); }
+        #roomPlannerApp #dim-left { left:4px; top:50%; transform:translateY(-50%) rotate(-90deg); }
+        #roomPlannerApp .seat { position:absolute; cursor:grab; overflow:hidden; display:flex; align-items:center; justify-content:center; }
         #roomPlannerApp .seat:active { cursor:grabbing; }
         #roomPlannerApp .seat.active { outline:2px dashed #3b82f6; }
-        #roomPlannerApp #room .seat img { position:absolute; inset:0; width:100%; height:100%; object-fit:fill; display:block; }
-        #roomPlannerApp #toolbar { display:flex; justify-content:center; flex-wrap:wrap; gap:16px; margin-top:14px; }
-        #roomPlannerApp #toolbar #addConfigBtn { flex-shrink:0; }
-        #roomPlannerApp button { padding:8px 16px; border:1px solid #ccc; background:#f7f7f7; cursor:pointer; }
+        #roomPlannerApp #room .seat img { position:absolute; inset:0; width:100%; height:100%; object-fit:fill; display:block; pointer-events:none; }
+        #roomPlannerApp .seat .seat-name { position:relative; z-index:2; font-size:12px; color:rgba(100,100,100,.85); pointer-events:none; text-align:center; text-shadow:0 0 2px #fff, 0 1px 2px #fff; }
+        #roomPlannerApp #toolbar { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:6px; padding-top:6px; flex-shrink:0; }
+        #roomPlannerApp #toolbar button, #roomPlannerApp #planner-left button { padding:6px 12px; border:1px solid #ccc; background:#f7f7f7; cursor:pointer; font-size:12px; border-radius:4px; }
+        #roomPlannerApp #toolbar button:hover, #roomPlannerApp #planner-left button:hover { background:#eee; }
+        #roomPlannerApp #planner-right { width:220px; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; border-left:1px solid #eee; padding-left:12px; }
+        #roomPlannerApp #planner-style-name { font-size:14px; font-weight:600; margin-bottom:10px; }
+        #roomPlannerApp #planner-piece-list { font-size:12px; color:#555; }
+        #roomPlannerApp #planner-piece-list .piece-row { margin-bottom:6px; display:flex; justify-content:space-between; gap:8px; }
+        #roomPlannerApp #planner-piece-list .piece-name { flex:1; min-width:0; }
+        #roomPlannerApp #planner-piece-list .piece-dims { color:#777; flex-shrink:0; }
+        #roomPlannerApp #measure-line { position:absolute; left:0; right:0; bottom:8px; height:28px; pointer-events:none; z-index:9; display:none; }
+        #roomPlannerApp #measure-line.show { display:block; pointer-events:auto; }
+        #roomPlannerApp #measure-line svg { width:100%; height:100%; display:block; }
+        #roomPlannerApp #measure-line line { stroke:#2196F3; stroke-width:2; }
+        #roomPlannerApp #measure-line .measure-handle { fill:#2196F3; cursor:grab; }
+        #roomPlannerApp #measure-line .measure-handle:active { cursor:grabbing; }
+        #roomPlannerApp #measure-line .measure-label { font-size:12px; fill:#333; font-weight:600; }
       </style>
       <div id="page">
         <div id="shell">
-          <div id="room-inputs">Width (ft): <input id="roomW" value="16"> Depth (ft): <input id="roomD" value="12"> <button id="applyRoom">Apply</button></div>
-          <div id="room-measurement">Room: 16&prime; &times; 12&prime;</div>
-          <div id="tray"><button class="tray-nav" id="navL">&lt;</button><div id="tray-items"></div><button class="tray-nav" id="navR">&gt;</button></div>
-          <div id="room-wrapper"><div id="room"><div id="dim-top" class="room-dim"></div><div id="dim-left" class="room-dim"></div></div></div>
-          <div id="toolbar"><button id="rotateL">Rotate ⟲</button><button id="rotateR">Rotate ⟳</button><button id="deleteBtn">Delete</button><button id="saveLayout">Save Layout</button><button id="addConfigBtn">Add configuration</button></div>
-          <div class="mc-planner-save-email">
-            <input type="email" id="mcPlannerEmail" placeholder="Your email" />
-            <button type="button" id="mcPlannerEmailBtn">Save layout &amp; email me PDF</button>
+          <div id="planner-left">
+            <label>Width (ft)</label>
+            <input type="number" id="roomW" value="16" min="8" max="50" />
+            <label>Length (ft)</label>
+            <input type="number" id="roomD" value="12" min="6" max="40" />
+            <button id="applyRoom">Apply</button>
+            <div id="room-measurement">Room: 16&prime; &times; 12&prime;</div>
+            <button type="button" id="measuringToolBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 6h3l2-2 2 2 2-2 2 2 2-2 2 2h3M5 6v14M9 6v14M13 6v14M17 6v14M19 6v14"/></svg> Measuring tool</button>
+            <div class="common-configs-title">Common configurations</div>
+            <div id="common-configs"></div>
+          </div>
+          <div id="planner-center">
+            <div id="tray"><button class="tray-nav" id="navL" type="button" aria-label="Scroll left">&lt;</button><div id="tray-items"></div><button class="tray-nav" id="navR" type="button" aria-label="Scroll right">&gt;</button></div>
+            <div id="room-wrapper">
+              <div id="room"><div id="dim-top" class="room-dim"></div><div id="dim-left" class="room-dim"></div>
+                <div id="measure-line"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 24"><line id="measure-line-seg" x1="40" y1="12" x2="360" y2="12"/><circle id="measure-handle-l" class="measure-handle" cx="40" cy="12" r="10"/><circle id="measure-handle-r" class="measure-handle" cx="360" cy="12" r="10"/><text id="measure-label" class="measure-label" x="200" y="4" text-anchor="middle">0 in</text></svg></div>
+              </div>
+            </div>
+            <div id="toolbar"><button id="rotateL">Rotate ⟲</button><button id="rotateR">Rotate ⟳</button><button id="deleteBtn">Delete</button><button id="saveLayout">Save Layout</button><button id="addConfigBtn">Add configuration</button></div>
+          </div>
+          <div id="planner-right">
+            <div id="planner-style-name"></div>
+            <div id="planner-piece-list"></div>
           </div>
         </div>
       </div>
@@ -687,16 +726,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
 .mc-planner-overlay{ position:fixed;inset:0;background:rgba(0,0,0,.5); display:none;align-items:center;justify-content:center; z-index:99999;padding:12px;box-sizing:border-box; }
 .mc-planner-overlay.mc-planner-open{ display:flex !important; }
-.mc-planner-modal{ width:min(1200px,96vw);max-height:98vh;min-height:88vh;background:#fff;border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;display:flex;flex-direction:column; position:relative; }
+.mc-planner-modal{ width:min(1400px,98vw);max-height:98vh;min-height:95vh;height:98vh;background:#fff;border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;display:flex;flex-direction:column; position:relative; }
 .mc-planner-close{ position:absolute;top:10px;right:10px;width:36px;height:36px;border:0;background:rgba(0,0,0,.06); border-radius:50%;font-size:22px;line-height:1;cursor:pointer;z-index:10;color:#333; }
 .mc-planner-close:hover{ background:rgba(0,0,0,.12); }
-#mcPlannerModalBody{ flex:1; overflow:auto; padding:12px 16px; min-height:0; display:flex; flex-direction:column; align-items:stretch; }
-#mcPlannerModalBody #roomPlannerApp{ flex:1; display:flex; flex-direction:column; min-height:0; }
-#mcPlannerModalBody #roomPlannerApp #page{ min-height:0; flex:1; display:flex; flex-direction:column; }
-#mcPlannerModalBody #roomPlannerApp #shell{ width:100%; max-width:1200px; margin:0 auto; flex:1; display:flex; flex-direction:column; align-items:center; padding-bottom:20px; }
-.mc-planner-save-email{ margin-top:12px; padding-top:12px; border-top:1px solid #eee; display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
-.mc-planner-save-email input[type="email"]{ padding:8px 12px; border:1px solid #ccc; border-radius:6px; width:220px; max-width:100%; }
-.mc-planner-save-email button{ padding:8px 14px; border:1px solid #111; background:#111; color:#fff; border-radius:6px; cursor:pointer; font-size:13px; }
+#mcPlannerModalBody{ flex:1; overflow:hidden; padding:8px; min-height:0; display:flex; flex-direction:column; }
+#mcPlannerModalBody #roomPlannerApp{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+#mcPlannerModalBody #roomPlannerApp #page{ flex:1; min-height:0; display:flex; overflow:hidden; }
+#mcPlannerModalBody #roomPlannerApp #shell{ flex:1; min-height:0; display:flex; flex-direction:row; align-items:stretch; gap:12px; padding:8px; overflow:hidden; }
+.mc-planner-save-modal{ position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:100; display:flex; align-items:center; justify-content:center; }
+.mc-planner-save-modal .mc-planner-save-dialog{ background:#fff; padding:20px; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,.3); min-width:280px; }
+.mc-planner-save-modal h3{ margin:0 0 14px 0; font-size:16px; }
+.mc-planner-save-modal .mc-save-options{ display:flex; flex-direction:column; gap:10px; }
+.mc-planner-save-modal .mc-save-options button{ padding:10px 16px; cursor:pointer; border:1px solid #ccc; background:#f5f5f5; border-radius:6px; text-align:left; }
+.mc-planner-save-modal .mc-save-options button:hover{ background:#eee; }
+.mc-planner-save-modal .mc-email-row{ margin-top:12px; display:none; }
+.mc-planner-save-modal .mc-email-row input{ width:100%; padding:8px 12px; margin-bottom:8px; box-sizing:border-box; }
+.mc-planner-save-modal .mc-email-row.show{ display:block; }
 
 </style>
 <style>
@@ -1819,7 +1864,19 @@ window.initRoomPlanner = function (opts) {
   roomW.value = "16";
   roomD.value = "12";
   applyRoom();
-  document.getElementById("applyRoom").onclick = applyRoom;
+  var applyRoomBtn = document.getElementById("applyRoom");
+  if (applyRoomBtn) applyRoomBtn.onclick = applyRoom;
+  var styleNameEl = document.getElementById("planner-style-name");
+  var pieceListEl = document.getElementById("planner-piece-list");
+  if (styleNameEl) {
+    var productName = (document.querySelector("h1.productnamecolor, .productnamecolor, #content_area h1, .v65-product-parent .productnamecolor") || {}).textContent || document.title || "Product style";
+    styleNameEl.textContent = (productName || "Product style").trim().slice(0, 80);
+  }
+  if (pieceListEl) {
+    pieceListEl.innerHTML = PIECES.map(function (p) {
+      return "<div class=\"piece-row\"><span class=\"piece-name\">" + (p.name || p.id) + "</span><span class=\"piece-dims\">" + p.widthIn + "&Prime; &times; " + SEAT_DEPTH_IN + "&Prime;</span></div>";
+    }).join("");
+  }
   function makeDraggable(el) {
     el.addEventListener("mousedown", function (e) {
       setActive(el);
@@ -1860,6 +1917,10 @@ window.initRoomPlanner = function (opts) {
     img.draggable = false;
     img.onload = function () { seat._norm = piece.norm || { scale: 1, x: 0, y: 0 }; applySeatTransform(seat); };
     seat.appendChild(img);
+    var nameSpan = document.createElement("span");
+    nameSpan.className = "seat-name";
+    nameSpan.textContent = piece.name;
+    seat.appendChild(nameSpan);
     room.appendChild(seat);
     makeDraggable(seat);
     setActive(seat);
@@ -1867,14 +1928,110 @@ window.initRoomPlanner = function (opts) {
   PIECES.forEach(function (p) {
     var item = document.createElement("div");
     item.className = "tray-item";
-    item.innerHTML = "<img src=\"" + p.img + "\"><div>" + p.name + "</div>";
+    var imgH = 72;
+    item.innerHTML = "<img src=\"" + p.img + "\" style=\"max-height:" + imgH + "px;width:auto;object-fit:contain;\"><div>" + p.name + "</div>";
     item.onclick = function () { addSeat(p); };
     trayItemsel.appendChild(item);
   });
   var tray = document.getElementById("tray-items");
-  if (tray) {
-    document.getElementById("navL").onclick = function () { tray.scrollBy({ left: -300, behavior: "smooth" }); };
-    document.getElementById("navR").onclick = function () { tray.scrollBy({ left: 300, behavior: "smooth" }); };
+  var navL = document.getElementById("navL");
+  var navR = document.getElementById("navR");
+  if (tray && navL && navR) {
+    navL.onclick = function () { tray.scrollBy({ left: -(140 + 8), behavior: "smooth" }); };
+    navR.onclick = function () { tray.scrollBy({ left: 140 + 8, behavior: "smooth" }); };
+  }
+  var measureLineEl = document.getElementById("measure-line");
+  var measureBtn = document.getElementById("measuringToolBtn");
+  if (measureLineEl && measureBtn) {
+    var mlSvg = measureLineEl.querySelector("svg");
+    var mlSeg = document.getElementById("measure-line-seg");
+    var mlLabel = document.getElementById("measure-label");
+    var mlHL = document.getElementById("measure-handle-l");
+    var mlHR = document.getElementById("measure-handle-r");
+    function updateMeasureViewBox() {
+      if (!mlSvg || !room) return;
+      var rw = room.offsetWidth || 400;
+      mlSvg.setAttribute("viewBox", "0 0 " + rw + " 24");
+      if (mlSeg) { mlSeg.setAttribute("x1", 30); mlSeg.setAttribute("x2", rw - 30); }
+      if (mlHL) { mlHL.setAttribute("cx", 30); }
+      if (mlHR) { mlHR.setAttribute("cx", rw - 30); }
+      if (mlLabel) { mlLabel.setAttribute("x", rw / 2); mlLabel.textContent = Math.round((rw - 60) / PX_PER_INCH) + " in"; }
+    }
+    measureBtn.onclick = function () {
+      var on = measureLineEl.classList.toggle("show");
+      if (on) {
+        updateMeasureViewBox();
+        function move(ev) {
+          if (!dragging) return;
+          var r = room.getBoundingClientRect();
+          var x = ev.clientX - r.left;
+          x = Math.max(10, Math.min(room.offsetWidth - 10, x));
+          if (dragging === "l") {
+            var x2 = parseInt(mlSeg.getAttribute("x2"), 10);
+            if (x >= x2 - 20) return;
+            mlSeg.setAttribute("x1", x);
+            mlHL.setAttribute("cx", x);
+            mlLabel.setAttribute("x", (x + x2) / 2);
+            mlLabel.textContent = Math.round((x2 - x) / PX_PER_INCH) + " in";
+          } else {
+            var x1 = parseInt(mlSeg.getAttribute("x1"), 10);
+            if (x <= x1 + 20) return;
+            mlSeg.setAttribute("x2", x);
+            mlHR.setAttribute("cx", x);
+            mlLabel.setAttribute("x", (x1 + x) / 2);
+            mlLabel.textContent = Math.round((x - x1) / PX_PER_INCH) + " in";
+          }
+        }
+        function up() { dragging = null; document.removeEventListener("mousemove", move); document.removeEventListener("mouseup", up); }
+        var dragging = null;
+        mlHL.onmousedown = function (e) { e.preventDefault(); dragging = "l"; document.addEventListener("mousemove", move); document.addEventListener("mouseup", up); };
+        mlHR.onmousedown = function (e) { e.preventDefault(); dragging = "r"; document.addEventListener("mousemove", move); document.addEventListener("mouseup", up); };
+      }
+    };
+  }
+  var COMMON_CONFIGS = [
+    { name: "Straight row of 3", pieces: ["1L", "1L", "1L"], layout: "straight" },
+    { name: "Curved row of 3", pieces: ["1L", "1L", "1L"], layout: "curved" },
+    { name: "Straight row of 4", pieces: ["1L", "1L", "1L", "1L"], layout: "straight" },
+    { name: "Curved row of 4", pieces: ["1L", "1L", "1L", "1L"], layout: "curved" },
+    { name: "Straight row of 4 with armless loveseat", pieces: ["2L", "4L", "4L", "3L"], layout: "straight" },
+    { name: "Curved row of 4 with armless loveseat", pieces: ["2L", "4L", "4L", "3L"], layout: "curved" }
+  ];
+  var pieceMap = {};
+  PIECES.forEach(function (p) { pieceMap[p.id] = p; });
+  function addCommonConfig(cfg) {
+    document.querySelectorAll("#roomPlannerApp .seat").forEach(function (s) { s.remove(); });
+    activeSeat = null;
+    var startX = 30, startY = 30;
+    var rowGap = 8;
+    cfg.pieces.forEach(function (id, i) {
+      var piece = pieceMap[id];
+      if (!piece) return;
+      addSeat(piece, true);
+      var seat = room.querySelector(".seat:last-of-type");
+      if (!seat) return;
+      var w = piece.widthIn * PX_PER_INCH;
+      var y = startY;
+      var x = startX;
+      if (cfg.layout === "curved") {
+        var arc = (cfg.pieces.length - 1) * 12;
+        y = startY + Math.abs(Math.sin((i / Math.max(1, cfg.pieces.length - 1)) * Math.PI * 0.5)) * arc * PX_PER_INCH;
+      }
+      seat.style.left = x + "px";
+      seat.style.top = y + "px";
+      startX += w + rowGap;
+    });
+  }
+  var commonContainer = document.getElementById("common-configs");
+  if (commonContainer) {
+    COMMON_CONFIGS.forEach(function (cfg) {
+      var div = document.createElement("div");
+      div.className = "common-config";
+      div.title = "Click to add to planner";
+      div.textContent = cfg.name;
+      div.onclick = function () { addCommonConfig(cfg); };
+      commonContainer.appendChild(div);
+    });
   }
   function rotateSeat(delta) {
     if (!activeSeat) return;
@@ -1898,16 +2055,38 @@ window.initRoomPlanner = function (opts) {
     var seatCount = calculateSeatCount();
     var payload = { options: counts, counts: counts, room: { width: roomW.value, depth: roomD.value }, layout: layout, seatCount: seatCount, ts: Date.now() };
     try { localStorage.setItem("roomPlannerData", JSON.stringify(payload)); } catch (e) {}
-    if (window.opener && window.opener.postMessage) {
-      window.opener.postMessage({ type: "ROOM_PLANNER_APPLY", payload: payload }, location.origin);
-    }
-    var blob = new Blob([JSON.stringify({ room: payload.room, layout: layout, pieces: counts, seatCount: seatCount, savedAt: new Date().toISOString() }, null, 2)], { type: "application/json" });
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "room-layout-" + new Date().toISOString().slice(0, 19).replace(/[-:]/g, "").replace("T", "-") + ".json";
-    a.click();
-    URL.revokeObjectURL(a.href);
-    alert("Layout saved and file downloaded.");
+    var modal = document.createElement("div");
+    modal.className = "mc-planner-save-modal";
+    modal.innerHTML = "<div class=\"mc-planner-save-dialog\"><h3>Save layout</h3><div class=\"mc-save-options\"><button type=\"button\" data-action=\"computer\">Save to computer</button><button type=\"button\" data-action=\"email\">Send to email</button></div><div class=\"mc-email-row\"><input type=\"email\" placeholder=\"Your email\" id=\"mcPlannerEmailInput\"/><button type=\"button\" id=\"mcPlannerEmailSend\">Send PDF to email</button></div></div>";
+    document.body.appendChild(modal);
+    var emailRow = modal.querySelector(".mc-email-row");
+    var emailInput = modal.querySelector("#mcPlannerEmailInput");
+    var emailSendBtn = modal.querySelector("#mcPlannerEmailSend");
+    modal.querySelector("[data-action=\"computer\"]").onclick = function () {
+      modal.remove();
+      var blob = new Blob([JSON.stringify({ room: payload.room, layout: layout, pieces: counts, seatCount: seatCount, savedAt: new Date().toISOString() }, null, 2)], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "room-layout-" + new Date().toISOString().slice(0, 19).replace(/[-:]/g, "").replace("T", "-") + ".json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+      alert("Layout saved and file downloaded.");
+    };
+    modal.querySelector("[data-action=\"email\"]").onclick = function () {
+      emailRow.classList.add("show");
+    };
+    emailSendBtn.onclick = function () {
+      var email = (emailInput && emailInput.value || "").trim();
+      if (!email) { alert("Please enter your email address."); return; }
+      var endpoint = (typeof window.MC_PLANNER_EMAIL_ENDPOINT !== "undefined" && window.MC_PLANNER_EMAIL_ENDPOINT) ? window.MC_PLANNER_EMAIL_ENDPOINT : "/v/vspfiles/planner-email.php";
+      emailSendBtn.disabled = true;
+      emailSendBtn.textContent = "Sending…";
+      fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email, options: counts, layout: layout, room: payload.room, seatCount: seatCount, ts: Date.now() }) })
+        .then(function (r) { if (r.ok) { alert("Layout saved. A PDF will be sent to " + email + "."); modal.remove(); } else { throw new Error("Request failed"); } })
+        .catch(function () { alert("Could not send. Save your layout to your computer and contact us for your PDF."); })
+        .then(function () { emailSendBtn.disabled = false; emailSendBtn.textContent = "Send PDF to email"; });
+    };
+    modal.onclick = function (e) { if (e.target === modal) modal.remove(); };
   };
   var toolbarEl = document.getElementById("toolbar");
   var addConfigBtn = document.getElementById("addConfigBtn");
@@ -1962,27 +2141,6 @@ window.initRoomPlanner = function (opts) {
     } catch (e) {}
   }
   restoreLayoutFromStorage();
-
-  var emailBtn = document.getElementById("mcPlannerEmailBtn");
-  var emailInput = document.getElementById("mcPlannerEmail");
-  if (emailBtn && emailInput) {
-    emailBtn.onclick = function () {
-      var email = (emailInput.value || "").trim();
-      if (!email) { alert("Please enter your email address."); return; }
-      var counts = getCounts();
-      var layout = serializeLayout();
-      var seatCount = calculateSeatCount();
-      var payload = { email: email, options: counts, layout: layout, room: { width: roomW.value, depth: roomD.value }, seatCount: seatCount, ts: Date.now() };
-      try { localStorage.setItem("roomPlannerData", JSON.stringify(payload)); } catch (e) {}
-      var endpoint = (typeof window.MC_PLANNER_EMAIL_ENDPOINT !== "undefined" && window.MC_PLANNER_EMAIL_ENDPOINT) ? window.MC_PLANNER_EMAIL_ENDPOINT : "/v/vspfiles/planner-email.php";
-      emailBtn.disabled = true;
-      emailBtn.textContent = "Sending…";
-      fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-        .then(function (r) { if (r.ok) alert("Layout saved. A PDF will be sent to " + email + "."); else throw new Error("Request failed"); })
-        .catch(function () { alert("Could not send. Save your layout with the Save Layout button and contact us for your PDF."); })
-        .then(function () { emailBtn.disabled = false; emailBtn.textContent = "Save layout & email me PDF"; });
-    };
-  }
 };
 </script>
 
