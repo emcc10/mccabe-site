@@ -134,9 +134,11 @@ min-width: 300px;
   #toolbar{
     display:flex;
     justify-content:center;
+    flex-wrap:wrap;
     gap:16px;
     margin-top:14px;
   }
+  #toolbar #addConfigBtn{ flex-shrink:0; }
   button{
     padding:8px 16px;
     border:1px solid #ccc;

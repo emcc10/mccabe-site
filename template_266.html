@@ -387,7 +387,8 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp .seat:active { cursor:grabbing; }
         #roomPlannerApp .seat.active { outline:2px dashed #3b82f6; }
         #roomPlannerApp #room .seat img { position:absolute; inset:0; width:100%; height:100%; object-fit:fill; display:block; }
-        #roomPlannerApp #toolbar { display:flex; justify-content:center; gap:16px; margin-top:14px; }
+        #roomPlannerApp #toolbar { display:flex; justify-content:center; flex-wrap:wrap; gap:16px; margin-top:14px; }
+        #roomPlannerApp #toolbar #addConfigBtn { flex-shrink:0; }
         #roomPlannerApp button { padding:8px 16px; border:1px solid #ccc; background:#f7f7f7; cursor:pointer; }
       </style>
       <div id="page">
@@ -1856,7 +1857,14 @@ window.initRoomPlanner = function () {
     URL.revokeObjectURL(a.href);
     alert("Layout saved and file downloaded.");
   };
+  var toolbarEl = document.getElementById("toolbar");
   var addConfigBtn = document.getElementById("addConfigBtn");
+  if (!addConfigBtn && toolbarEl) {
+    addConfigBtn = document.createElement("button");
+    addConfigBtn.id = "addConfigBtn";
+    addConfigBtn.textContent = "Add configuration";
+    toolbarEl.appendChild(addConfigBtn);
+  }
   if (addConfigBtn) {
     addConfigBtn.onclick = function () {
       var counts = getCounts();
