@@ -381,11 +381,11 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp #measuringToolBtn:hover { background:#eee; }
         #roomPlannerApp #measuringToolBtn svg { width:18px; height:18px; flex-shrink:0; }
         #roomPlannerApp .common-configs-title { font-size:13px; font-weight:600; margin:10px 0 6px 0; }
-        #roomPlannerApp .common-config { width:100%; height:80px; border:1px solid #ddd; border-radius:6px; cursor:pointer; margin-bottom:0; overflow:hidden; background:#fafafa; display:flex; align-items:center; justify-content:center; padding:0; position:relative; border-top:1px solid #eee; }
+        #roomPlannerApp .common-config { width:100%; height:52px; border:1px solid #ddd; border-radius:6px; cursor:pointer; margin-bottom:0; overflow:hidden; background:#fafafa; display:flex; align-items:center; justify-content:center; padding:0; position:relative; border-top:1px solid #eee; }
         #roomPlannerApp .common-config:first-of-type { border-top:1px solid #ddd; }
         #roomPlannerApp .common-config:hover { border-color:#888; background:#f0f0f0; }
         #roomPlannerApp .common-config-thumb { position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
-        #roomPlannerApp .common-config-thumb img { position:absolute; max-width:48px; max-height:48px; object-fit:contain; }
+        #roomPlannerApp .common-config-thumb img { position:absolute; max-width:24px; max-height:24px; object-fit:contain; }
         #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:8px; }
         #roomPlannerApp .room-dims-below-tray { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; width:100%; max-width:900px; flex-shrink:0; }
         #roomPlannerApp #tray { display:flex; align-items:center; gap:8px; width:100%; max-width:900px; flex-shrink:0; }
@@ -425,8 +425,9 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp #measure-line .measure-handle { fill:#2196F3; cursor:grab; pointer-events:auto; }
         #roomPlannerApp #measure-line .measure-handle.measure-handle-rect { stroke:#1565C0; stroke-width:1; }
         #roomPlannerApp #measure-line .measure-handle:active { cursor:grabbing; }
-        #roomPlannerApp #planner-detach-row { margin-top:4px; text-align:left; min-height:28px; }
-        #roomPlannerApp #detachConfigBtn { font-size:11px; padding:4px 8px; }
+        #roomPlannerApp .config-group { position:relative; }
+        #roomPlannerApp .config-group .config-group-detach { position:absolute; top:4px; right:4px; z-index:20; font-size:10px; padding:3px 6px; border:1px solid #999; background:#fff; cursor:pointer; border-radius:4px; }
+        #roomPlannerApp .config-group .config-group-detach:hover { background:#f0f0f0; }
         #roomPlannerApp #measure-label-box { position:absolute; pointer-events:none; background:#fff; border:1px solid #2196F3; border-radius:4px; padding:3px 8px; font-size:12px; font-weight:600; color:#333; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,.2); z-index:10; transform:translate(-50%, -100%); min-width:3em; text-align:center; }
         #roomPlannerApp #planner-right { align-self:flex-start; margin-top:44px; }
       </style>
@@ -452,8 +453,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div id="measure-line"><svg id="measure-svg" xmlns="http://www.w3.org/2000/svg"><line id="measure-line-seg" x1="50" y1="50" x2="200" y2="150"/><rect id="measure-handle-l" class="measure-handle measure-handle-rect" x="38" y="38" width="24" height="24" rx="2"/><rect id="measure-handle-r" class="measure-handle measure-handle-rect" x="188" y="138" width="24" height="24" rx="2"/></svg><div id="measure-label-box">0 in</div></div>
               </div>
             </div>
-            <div id="planner-detach-row"><button type="button" id="detachConfigBtn" style="display:none;">Detach</button></div>
-            <div id="toolbar"><button id="rotateL">Rotate ⟲</button><button id="rotateR">Rotate ⟳</button><button id="deleteBtn">Delete</button><button id="saveLayout">Save Layout</button><button id="addConfigBtn">Add configuration</button></div>
+            <div id="toolbar"><button id="clearLayoutBtn">Clear layout</button><button id="rotateL">Rotate ⟲</button><button id="rotateR">Rotate ⟳</button><button id="deleteBtn">Delete</button><button id="saveLayout">Save Layout</button><button id="addConfigBtn">Add configuration</button></div>
           </div>
           <div id="planner-right">
             <div id="planner-style-name"></div>
@@ -2000,17 +2000,17 @@ window.initRoomPlanner = function (opts) {
     return seats;
   }
   var activeSeat = null;
-  /* Paragon 41417 dimensions: https://images.palliser.com/specsheet/en/41417%20paragon.pdf (Width x Depth x Height) */
+  /* Paragon 41417: https://images.palliser.com/specsheet/en/41417%20paragon.pdf — Width x Depth x Height (in) */
   var PIECES = [
-    { id: "1L", name: "1L Recliner", widthIn: 39, depthIn: 40, lengthIn: 39, img: "/v/vspfiles/MRP/1L.png", norm: { scale: 1, x: 0, y: 0 } },
-    { id: "2L", name: "2L LHF Recliner", widthIn: 30.5, depthIn: 40, lengthIn: 30.5, img: "/v/vspfiles/MRP/2L.png", norm: { scale: 1, x: 0, y: 0 } },
-    { id: "3L", name: "3L RHF Recliner", widthIn: 30.5, depthIn: 40, lengthIn: 30.5, img: "/v/vspfiles/MRP/3L.png", norm: { scale: 1.12, x: 0, y: 0 } },
-    { id: "4L", name: "4L Armless Loveseat", widthIn: 46, depthIn: 40, lengthIn: 46, img: "/v/vspfiles/MRP/4L.png", norm: { scale: 1.03, x: 0, y: 0 } },
-    { id: "5L", name: "5L RHF Wedge, LHF Straight", widthIn: 46, depthIn: 40, lengthIn: 46, img: "/v/vspfiles/MRP/5L.png" },
-    { id: "6L", name: "6L LHF Wedge, RHF Straight", widthIn: 46, depthIn: 40, lengthIn: 46, img: "/v/vspfiles/MRP/6L.png" },
-    { id: "7L", name: "7L RHF Wedge", widthIn: 38.5, depthIn: 40, lengthIn: 38.5, img: "/v/vspfiles/MRP/7L.png" },
-    { id: "8L", name: "8L Armless Recliner", widthIn: 23, depthIn: 40, lengthIn: 23, img: "/v/vspfiles/MRP/8L.png", norm: { scale: 1.03, x: 0, y: 0 } },
-    { id: "9L", name: "9L LHF Wedge", widthIn: 38.5, depthIn: 40, lengthIn: 38.5, img: "/v/vspfiles/MRP/9L.png" }
+    { id: "1L", name: "1L Recliner", widthIn: 39, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/1L.png", norm: { scale: 1, x: 0, y: 0 } },
+    { id: "2L", name: "2L LHF Recliner", widthIn: 30.5, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/2L.png", norm: { scale: 1, x: 0, y: 0 } },
+    { id: "3L", name: "3L RHF Recliner", widthIn: 30.5, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/3L.png", norm: { scale: 1.12, x: 0, y: 0 } },
+    { id: "4L", name: "4L Armless Loveseat", widthIn: 46, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/4L.png", norm: { scale: 1.03, x: 0, y: 0 } },
+    { id: "5L", name: "5L RHF Wedge, LHF Straight", widthIn: 46, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/5L.png" },
+    { id: "6L", name: "6L LHF Wedge, RHF Straight", widthIn: 46, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/6L.png" },
+    { id: "7L", name: "7L RHF Wedge", widthIn: 38.5, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/7L.png" },
+    { id: "8L", name: "8L Armless Recliner", widthIn: 23, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/8L.png", norm: { scale: 1.03, x: 0, y: 0 } },
+    { id: "9L", name: "9L LHF Wedge", widthIn: 38.5, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/9L.png" }
   ];
   function setActive(seat) {
     document.querySelectorAll("#roomPlannerApp .seat").forEach(function (s) { s.classList.remove("active"); });
@@ -2044,9 +2044,10 @@ window.initRoomPlanner = function (opts) {
   }
   if (pieceListEl) {
     pieceListEl.innerHTML = PIECES.map(function (p) {
+      var w = p.widthIn != null ? p.widthIn : 0;
       var d = p.depthIn != null ? p.depthIn : SEAT_DEPTH_IN;
-      var l = p.lengthIn != null ? p.lengthIn : p.widthIn;
-      return "<div class=\"piece-row\"><span class=\"piece-name\">" + (p.name || p.id) + "</span><span class=\"piece-dims\">" + l + "&Prime; &times; " + p.widthIn + "&Prime; &times; " + d + "&Prime;</span></div>";
+      var h = p.heightIn != null ? p.heightIn : 43;
+      return "<div class=\"piece-row\"><span class=\"piece-name\">" + (p.name || p.id) + "</span><span class=\"piece-dims\">" + w + "&Prime; &times; " + d + "&Prime; &times; " + h + "&Prime;</span></div>";
     }).join("");
   }
   function makeDraggable(el) {
@@ -2091,7 +2092,7 @@ window.initRoomPlanner = function (opts) {
     seat.appendChild(img);
     var nameSpan = document.createElement("span");
     nameSpan.className = "seat-name";
-    nameSpan.textContent = piece.name;
+    nameSpan.textContent = piece.id;
     seat.appendChild(nameSpan);
     room.appendChild(seat);
     makeDraggable(seat);
@@ -2217,7 +2218,7 @@ window.initRoomPlanner = function (opts) {
     document.querySelectorAll("#roomPlannerApp .config-group").forEach(function (g) { g.remove(); });
     document.querySelectorAll("#roomPlannerApp .seat").forEach(function (s) { if (!s.closest(".config-group")) s.remove(); });
     activeSeat = null;
-    var startX = 30, startY = 30, rowGap = 8;
+    var startX = 30, startY = 30, rowGap = 0;
     var group = document.createElement("div");
     group.className = "config-group";
     group.style.position = "absolute";
@@ -2225,12 +2226,19 @@ window.initRoomPlanner = function (opts) {
     group.style.top = "0";
     group.dataset.isConfigGroup = "1";
     var minX = 1e9, minY = 1e9, maxX = 0, maxY = 0;
+    var nPieces = cfg.pieces.length;
+    /* Curved: wedge pieces fan so diagonal arm aligns with straight edge of neighbor (e.g. 5L-4L-6L) */
+    var curvedArc = (cfg.layout === "curved" && nPieces > 1) ? (nPieces - 1) * 10 : 0;
     cfg.pieces.forEach(function (id, i) {
       var piece = pieceMap[id];
       if (!piece) return;
       var seat = document.createElement("div");
       seat.className = "seat";
-      seat.dataset.rot = "0";
+      var rot = 0;
+      if (cfg.layout === "curved" && nPieces > 1) {
+        rot = (i / (nPieces - 1)) * curvedArc * 2 - curvedArc;
+      }
+      seat.dataset.rot = String(rot);
       seat.dataset.pieceId = piece.id;
       var seatW = piece.widthIn * PX_PER_INCH, seatH = (piece.depthIn != null ? piece.depthIn : SEAT_DEPTH_IN) * PX_PER_INCH;
       seat.style.width = seatW + "px";
@@ -2238,6 +2246,7 @@ window.initRoomPlanner = function (opts) {
       seat.style.left = startX + "px";
       seat.style.top = startY + "px";
       seat.style.position = "absolute";
+      seat.style.transform = "rotate(" + rot + "deg)";
       var img = document.createElement("img");
       img.src = piece.img;
       img.draggable = false;
@@ -2246,16 +2255,16 @@ window.initRoomPlanner = function (opts) {
       seat.appendChild(img);
       var nameSpan = document.createElement("span");
       nameSpan.className = "seat-name";
-      nameSpan.textContent = piece.name;
+      nameSpan.textContent = piece.id;
       seat.appendChild(nameSpan);
       group.appendChild(seat);
       minX = Math.min(minX, startX);
       minY = Math.min(minY, startY);
       maxX = Math.max(maxX, startX + seatW);
       maxY = Math.max(maxY, startY + seatH);
-      if (cfg.layout === "curved") {
-        var arc = (cfg.pieces.length - 1) * 8;
-        startY += Math.abs(Math.sin((i / Math.max(1, cfg.pieces.length - 1)) * Math.PI * 0.5)) * arc * PX_PER_INCH;
+      if (cfg.layout === "curved" && nPieces > 1) {
+        var arcY = (cfg.pieces.length - 1) * 6;
+        startY += Math.abs(Math.sin((i / Math.max(1, cfg.pieces.length - 1)) * Math.PI * 0.5)) * arcY * PX_PER_INCH;
       }
       startX += seatW + rowGap;
     });
@@ -2267,14 +2276,18 @@ window.initRoomPlanner = function (opts) {
       seat.style.left = (parseFloat(seat.style.left) - minX) + "px";
       seat.style.top = (parseFloat(seat.style.top) - minY) + "px";
     });
+    var detachBtn = document.createElement("button");
+    detachBtn.type = "button";
+    detachBtn.className = "config-group-detach";
+    detachBtn.textContent = "Detach";
+    detachBtn.onclick = function (e) { e.stopPropagation(); detachConfigGroup(group); };
+    group.appendChild(detachBtn);
     room.appendChild(group);
     makeConfigGroupDraggable(group);
-    var detachBtn = document.getElementById("detachConfigBtn");
-    if (detachBtn) { detachBtn.style.display = "block"; detachBtn.onclick = detachConfigGroup; }
   }
   function makeConfigGroupDraggable(group) {
     group.addEventListener("mousedown", function (e) {
-      if (e.target.closest(".measure-handle") || e.target.closest("#measure-line")) return;
+      if (e.target.closest(".measure-handle") || e.target.closest("#measure-line") || e.target.closest(".config-group-detach")) return;
       setActive(null);
       var sx = e.clientX, sy = e.clientY, ox = group.offsetLeft, oy = group.offsetTop;
       function move(ev) {
@@ -2286,8 +2299,8 @@ window.initRoomPlanner = function (opts) {
       document.addEventListener("mouseup", up);
     });
   }
-  function detachConfigGroup() {
-    var group = room.querySelector(".config-group");
+  function detachConfigGroup(groupEl) {
+    var group = groupEl && groupEl.nodeType === 1 ? groupEl : room.querySelector(".config-group");
     if (!group) return;
     var gLeft = group.offsetLeft, gTop = group.offsetTop;
     group.querySelectorAll(".seat").forEach(function (seat) {
@@ -2297,8 +2310,6 @@ window.initRoomPlanner = function (opts) {
       makeDraggable(seat);
     });
     group.remove();
-    var detachBtn = document.getElementById("detachConfigBtn");
-    if (detachBtn) detachBtn.style.display = "none";
   }
   var commonContainer = document.getElementById("common-configs");
   if (commonContainer) {
@@ -2308,8 +2319,8 @@ window.initRoomPlanner = function (opts) {
       div.title = "Click to add to planner";
       var thumb = document.createElement("div");
       thumb.className = "common-config-thumb";
-      var scale = 0.2;
-      var thumbCenterY = 40;
+      var scale = 0.12;
+      var thumbCenterY = 26;
       var tx = 0;
       cfg.pieces.forEach(function (id) {
         var p = pieceMap[id];
@@ -2323,12 +2334,20 @@ window.initRoomPlanner = function (opts) {
         im.style.left = (50 + tx - tw / 2) + "px";
         im.style.top = (thumbCenterY - th / 2) + "px";
         thumb.appendChild(im);
-        tx += tw + 4;
+        tx += tw + 2;
       });
       div.appendChild(thumb);
       div.onclick = function () { addCommonConfig(cfg); };
       commonContainer.appendChild(div);
     });
+  }
+  var clearLayoutBtn = document.getElementById("clearLayoutBtn");
+  if (clearLayoutBtn) {
+    clearLayoutBtn.onclick = function () {
+      document.querySelectorAll("#roomPlannerApp .config-group").forEach(function (g) { g.remove(); });
+      document.querySelectorAll("#roomPlannerApp .seat").forEach(function (s) { s.remove(); });
+      activeSeat = null;
+    };
   }
   function serializeLayout() {
     var list = [];
@@ -2424,8 +2443,6 @@ window.initRoomPlanner = function (opts) {
       PIECES.forEach(function (p) { pieceMap[p.id] = p; });
       document.querySelectorAll("#roomPlannerApp .config-group").forEach(function (g) { g.remove(); });
       document.querySelectorAll("#roomPlannerApp .seat").forEach(function (seat) { seat.remove(); });
-      var detachBtn = document.getElementById("detachConfigBtn");
-      if (detachBtn) detachBtn.style.display = "none";
       if (data.room && (data.room.widthFt != null || data.room.widthTotalIn != null)) {
         if (roomW_ft && data.room.widthFt != null) roomW_ft.value = data.room.widthFt;
         if (roomW_in && data.room.widthIn != null) roomW_in.value = data.room.widthIn;
