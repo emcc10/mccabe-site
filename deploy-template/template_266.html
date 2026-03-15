@@ -370,20 +370,24 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp { font-family: Helvetica, Arial, sans-serif; background:#fff; }
         #roomPlannerApp #shell { display:flex; flex-direction:row; gap:12px; flex:1; min-height:0; }
         #roomPlannerApp #planner-left { width:200px; flex-shrink:0; display:flex; flex-direction:column; gap:10px; overflow-y:auto; }
-        #roomPlannerApp #planner-left .room-dims-row { display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; }
-        #roomPlannerApp #planner-left .room-dims-row label { font-size:11px; color:#555; margin:0 2px 0 0; }
-        #roomPlannerApp #planner-left .room-dims-row input[type="number"] { width:36px; padding:4px 2px; font-size:12px; margin:0; }
-        #roomPlannerApp #planner-left #room-measurement { font-size:12px; color:#333; margin:2px 0; }
-        #roomPlannerApp #planner-left #applyRoom { margin-top:2px; padding:5px 10px; font-size:12px; }
+        #roomPlannerApp .room-dims-row { display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; }
+        #roomPlannerApp .room-dims-row label { font-size:11px; color:#555; margin:0 2px 0 0; }
+        #roomPlannerApp .room-dims-row input[type="number"] { width:36px; padding:4px 2px; font-size:12px; margin:0; }
+        #roomPlannerApp input[type="number"]::-webkit-inner-spin-button, #roomPlannerApp input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+        #roomPlannerApp input[type="number"] { -moz-appearance:textfield; }
+        #roomPlannerApp #room-measurement { font-size:12px; color:#333; margin:0 6px 0 0; }
+        #roomPlannerApp #applyRoom { padding:5px 10px; font-size:12px; }
         #roomPlannerApp #measuringToolBtn { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; cursor:pointer; border:1px solid #ccc; background:#f7f7f7; border-radius:6px; font-size:12px; }
         #roomPlannerApp #measuringToolBtn:hover { background:#eee; }
         #roomPlannerApp #measuringToolBtn svg { width:18px; height:18px; flex-shrink:0; }
         #roomPlannerApp .common-configs-title { font-size:13px; font-weight:600; margin:10px 0 6px 0; }
-        #roomPlannerApp .common-config { width:100%; height:52px; border:1px solid #ddd; border-radius:6px; cursor:pointer; margin-bottom:6px; overflow:hidden; background:#fafafa; display:flex; align-items:center; justify-content:center; padding:0; position:relative; }
+        #roomPlannerApp .common-config { width:100%; height:80px; border:1px solid #ddd; border-radius:6px; cursor:pointer; margin-bottom:0; overflow:hidden; background:#fafafa; display:flex; align-items:center; justify-content:center; padding:0; position:relative; border-top:1px solid #eee; }
+        #roomPlannerApp .common-config:first-of-type { border-top:1px solid #ddd; }
         #roomPlannerApp .common-config:hover { border-color:#888; background:#f0f0f0; }
         #roomPlannerApp .common-config-thumb { position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
-        #roomPlannerApp .common-config-thumb img { position:absolute; max-width:24px; max-height:20px; object-fit:contain; }
+        #roomPlannerApp .common-config-thumb img { position:absolute; max-width:48px; max-height:48px; object-fit:contain; }
         #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:8px; }
+        #roomPlannerApp .room-dims-below-tray { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; width:100%; max-width:900px; flex-shrink:0; }
         #roomPlannerApp #tray { display:flex; align-items:center; gap:8px; width:100%; max-width:900px; flex-shrink:0; }
         #roomPlannerApp .tray-nav { width:32px; height:32px; border:1px solid #ddd; border-radius:50%; background:#f6f6f6; cursor:pointer; flex-shrink:0; font-size:16px; line-height:1; padding:0; }
         #roomPlannerApp .tray-nav:hover { background:#eee; }
@@ -405,7 +409,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp .seat .seat-name { position:relative; z-index:2; font-size:12px; color:rgba(100,100,100,.85); pointer-events:none; text-align:center; text-shadow:0 0 2px #fff, 0 1px 2px #fff; }
         #roomPlannerApp .config-group { cursor:grab; }
         #roomPlannerApp .config-group:active { cursor:grabbing; }
-        #roomPlannerApp #toolbar { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:6px; padding-top:6px; flex-shrink:0; }
+        #roomPlannerApp #toolbar { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:2px; padding-top:6px; flex-shrink:0; }
         #roomPlannerApp #toolbar button, #roomPlannerApp #planner-left button { padding:6px 12px; border:1px solid #ccc; background:#f7f7f7; cursor:pointer; font-size:12px; border-radius:4px; }
         #roomPlannerApp #toolbar button:hover, #roomPlannerApp #planner-left button:hover { background:#eee; }
         #roomPlannerApp #planner-right { width:220px; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; border-left:1px solid #eee; padding-left:12px; align-self:flex-start; margin-top:44px; }
@@ -419,6 +423,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp #measure-line svg { position:absolute; left:0; top:0; width:100%; height:100%; display:block; pointer-events:none; }
         #roomPlannerApp #measure-line line { stroke:#2196F3; stroke-width:2; }
         #roomPlannerApp #measure-line .measure-handle { fill:#2196F3; cursor:grab; pointer-events:auto; }
+        #roomPlannerApp #measure-line .measure-handle.measure-handle-rect { stroke:#1565C0; stroke-width:1; }
         #roomPlannerApp #measure-line .measure-handle:active { cursor:grabbing; }
         #roomPlannerApp #measure-label-box { position:absolute; pointer-events:none; background:#fff; border:1px solid #2196F3; border-radius:4px; padding:3px 8px; font-size:12px; font-weight:600; color:#333; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,.2); z-index:10; transform:translate(-50%, -100%); min-width:3em; text-align:center; }
         #roomPlannerApp #planner-detach-row { margin-top:4px; text-align:left; min-height:28px; }
@@ -427,21 +432,23 @@ document.addEventListener("DOMContentLoaded", function () {
       <div id="page">
         <div id="shell">
           <div id="planner-left">
-            <div class="room-dims-row">
-              <label>W</label><input type="number" id="roomW_ft" value="16" min="0" max="50" placeholder="ft" /><input type="number" id="roomW_in" value="0" min="0" max="11" placeholder="in" />
-              <label>L</label><input type="number" id="roomD_ft" value="12" min="0" max="40" placeholder="ft" /><input type="number" id="roomD_in" value="0" min="0" max="11" placeholder="in" />
-            </div>
-            <button id="applyRoom">Apply</button>
-            <div id="room-measurement">Room: 16&prime; &times; 12&prime;</div>
             <button type="button" id="measuringToolBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="9" width="20" height="6" rx="0.5"/><line x1="4" y1="9" x2="4" y2="11"/><line x1="7" y1="9" x2="7" y2="12"/><line x1="10" y1="9" x2="10" y2="11"/><line x1="13" y1="9" x2="13" y2="12"/><line x1="16" y1="9" x2="16" y2="11"/><line x1="19" y1="9" x2="19" y2="12"/><line x1="22" y1="9" x2="22" y2="11"/></svg> Measuring tool</button>
             <div class="common-configs-title">Common configurations</div>
             <div id="common-configs"></div>
           </div>
           <div id="planner-center">
             <div id="tray"><button class="tray-nav" id="navL" type="button" aria-label="Scroll left">&lt;</button><div id="tray-items"></div><button class="tray-nav" id="navR" type="button" aria-label="Scroll right">&gt;</button></div>
+            <div class="room-dims-below-tray">
+              <div class="room-dims-row">
+                <label>W</label><input type="number" id="roomW_ft" value="16" min="0" max="50" placeholder="ft" /><input type="number" id="roomW_in" value="0" min="0" max="11" placeholder="in" />
+                <label>L</label><input type="number" id="roomD_ft" value="12" min="0" max="40" placeholder="ft" /><input type="number" id="roomD_in" value="0" min="0" max="11" placeholder="in" />
+              </div>
+              <button id="applyRoom">Apply</button>
+              <div id="room-measurement">Room: 16&prime; &times; 12&prime;</div>
+            </div>
             <div id="room-wrapper">
               <div id="room"><div id="dim-top" class="room-dim"></div><div id="dim-left" class="room-dim"></div>
-                <div id="measure-line"><svg id="measure-svg" xmlns="http://www.w3.org/2000/svg"><line id="measure-line-seg" x1="50" y1="50" x2="200" y2="150"/><circle id="measure-handle-l" class="measure-handle" cx="50" cy="50" r="12"/><circle id="measure-handle-r" class="measure-handle" cx="200" cy="150" r="12"/></svg><div id="measure-label-box">0 in</div></div>
+                <div id="measure-line"><svg id="measure-svg" xmlns="http://www.w3.org/2000/svg"><line id="measure-line-seg" x1="50" y1="50" x2="200" y2="150"/><rect id="measure-handle-l" class="measure-handle measure-handle-rect" x="38" y="38" width="24" height="24" rx="2"/><rect id="measure-handle-r" class="measure-handle measure-handle-rect" x="188" y="138" width="24" height="24" rx="2"/></svg><div id="measure-label-box">0 in</div></div>
               </div>
             </div>
             <div id="planner-detach-row"><button type="button" id="detachConfigBtn" style="display:none;">Detach</button></div>
@@ -2049,6 +2056,28 @@ window.initRoomPlanner = function (opts) {
     var mlLabelBox = document.getElementById("measure-label-box");
     var mlHL = document.getElementById("measure-handle-l");
     var mlHR = document.getElementById("measure-handle-r");
+    function getHandleCenter(el) {
+      if (!el) return { x: 0, y: 0 };
+      var tag = (el.tagName || "").toLowerCase();
+      if (tag === "rect") {
+        var xx = parseFloat(el.getAttribute("x")) || 0, w = parseFloat(el.getAttribute("width")) || 24;
+        var yy = parseFloat(el.getAttribute("y")) || 0, h = parseFloat(el.getAttribute("height")) || 24;
+        return { x: xx + w / 2, y: yy + h / 2 };
+      }
+      return { x: parseFloat(el.getAttribute("cx")) || 0, y: parseFloat(el.getAttribute("cy")) || 0 };
+    }
+    function setHandleCenter(el, cx, cy) {
+      if (!el) return;
+      var tag = (el.tagName || "").toLowerCase();
+      if (tag === "rect") {
+        var w = parseFloat(el.getAttribute("width")) || 24, h = parseFloat(el.getAttribute("height")) || 24;
+        el.setAttribute("x", cx - w / 2);
+        el.setAttribute("y", cy - h / 2);
+      } else {
+        el.setAttribute("cx", cx);
+        el.setAttribute("cy", cy);
+      }
+    }
     function updateMeasureViewBox() {
       if (!mlSvg || !room) return;
       var rw = room.offsetWidth || 400, rh = room.offsetHeight || 300;
@@ -2056,18 +2085,16 @@ window.initRoomPlanner = function (opts) {
     }
     function measureLength() {
       if (!mlSeg || !mlHL || !mlHR) return 0;
-      var x1 = parseFloat(mlHL.getAttribute("cx")), y1 = parseFloat(mlHL.getAttribute("cy"));
-      var x2 = parseFloat(mlHR.getAttribute("cx")), y2 = parseFloat(mlHR.getAttribute("cy"));
-      return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+      var p1 = getHandleCenter(mlHL), p2 = getHandleCenter(mlHR);
+      return Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
     }
     function updateMeasureLabel() {
       var px = measureLength();
       var inVal = Math.round(px / PX_PER_INCH);
       if (mlLabelBox) {
         mlLabelBox.textContent = inVal >= 12 ? (Math.floor(inVal / 12) + " ft " + (inVal % 12) + " in") : (inVal + " in");
-        var x1 = parseFloat(mlHL.getAttribute("cx")), y1 = parseFloat(mlHL.getAttribute("cy"));
-        var x2 = parseFloat(mlHR.getAttribute("cx")), y2 = parseFloat(mlHR.getAttribute("cy"));
-        var mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+        var p1 = getHandleCenter(mlHL), p2 = getHandleCenter(mlHR);
+        var mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
         mlLabelBox.style.left = mx + "px";
         mlLabelBox.style.top = (my - 6) + "px";
       }
@@ -2079,7 +2106,7 @@ window.initRoomPlanner = function (opts) {
         var rw = room.offsetWidth || 400, rh = room.offsetHeight || 300;
         var x1 = 50, y1 = 50, x2 = Math.min(200, rw - 50), y2 = Math.min(150, rh - 50);
         mlSeg.setAttribute("x1", x1); mlSeg.setAttribute("y1", y1); mlSeg.setAttribute("x2", x2); mlSeg.setAttribute("y2", y2);
-        mlHL.setAttribute("cx", x1); mlHL.setAttribute("cy", y1); mlHR.setAttribute("cx", x2); mlHR.setAttribute("cy", y2);
+        setHandleCenter(mlHL, x1, y1); setHandleCenter(mlHR, x2, y2);
         setTimeout(updateMeasureLabel, 0);
         var dragging = null;
         function move(ev) {
@@ -2090,10 +2117,10 @@ window.initRoomPlanner = function (opts) {
           y = Math.max(12, Math.min(room.offsetHeight - 12, y));
           if (dragging === "l") {
             mlSeg.setAttribute("x1", x); mlSeg.setAttribute("y1", y);
-            mlHL.setAttribute("cx", x); mlHL.setAttribute("cy", y);
+            setHandleCenter(mlHL, x, y);
           } else {
             mlSeg.setAttribute("x2", x); mlSeg.setAttribute("y2", y);
-            mlHR.setAttribute("cx", x); mlHR.setAttribute("cy", y);
+            setHandleCenter(mlHR, x, y);
           }
           updateMeasureLabel();
         }
@@ -2208,7 +2235,8 @@ window.initRoomPlanner = function (opts) {
       div.title = "Click to add to planner";
       var thumb = document.createElement("div");
       thumb.className = "common-config-thumb";
-      var scale = 0.15;
+      var scale = 0.2;
+      var thumbCenterY = 40;
       var tx = 0;
       cfg.pieces.forEach(function (id) {
         var p = pieceMap[id];
@@ -2220,7 +2248,7 @@ window.initRoomPlanner = function (opts) {
         im.style.width = tw + "px";
         im.style.height = th + "px";
         im.style.left = (50 + tx - tw / 2) + "px";
-        im.style.top = (26 - th / 2) + "px";
+        im.style.top = (thumbCenterY - th / 2) + "px";
         thumb.appendChild(im);
         tx += tw + 4;
       });
@@ -2665,6 +2693,17 @@ body.mc-product-page #content_area td.productoptionname {
     max-width: 100% !important;
     height: auto !important;
     margin: 0 auto !important;
+  }
+
+  /* Mobile: force alt/thumbnail images to stay small */
+  body.mc-product-page #content_area #altviews img,
+  body.mc-product-page #content_area .altviews img,
+  body.mc-product-page #content_area [id*="altview"] img {
+    width: 64px !important;
+    max-width: 64px !important;
+    height: auto !important;
+    max-height: 64px !important;
+    object-fit: contain !important;
   }
 
   nav.push-menu,

@@ -2374,19 +2374,34 @@ body.mc-product-page select.mc-native-leather {
 /* === MOBILE OVERFLOW KILL-SWITCH (2026-03-02c) === */
 @media only screen and (max-width: 991px) {
   html,
-  body,
-  #content_area,
-  #v65-product-parent {
+  body {
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
     box-sizing: border-box !important;
   }
 
-  #v65-product-parent,
-  #v65-product-parent * {
-    box-sizing: border-box !important;
+  #content_area,
+  #v65-product-parent {
     max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Constrain tables and main blocks; avoid universal * so buttons/inputs don't break */
+  #v65-product-parent table,
+  #v65-product-parent tbody,
+  #v65-product-parent tr,
+  #v65-product-parent td,
+  #v65-product-parent th,
+  #v65-product-parent div,
+  #v65-product-parent span,
+  #content_area table,
+  #content_area tbody,
+  #content_area tr,
+  #content_area td,
+  #content_area th {
+    box-sizing: border-box !important;
   }
 
   #v65-product-parent table,
@@ -2520,6 +2535,79 @@ body.mc-product-page select.mc-native-leather {
     width: 100% !important;
     table-layout: auto !important;
     border-collapse: collapse !important;
+  }
+}
+
+/* === MOBILE: alt images thumbnail only + keep content on screen === */
+@media only screen and (max-width: 991px) {
+  /* Force ALL alternate/thumbnail images to stay small (Volusion may use different ids/classes) */
+  #content_area #altviews img,
+  #content_area span#altviews img,
+  #content_area .altviews img,
+  #content_area [id*="altview"] img,
+  #v65-product-parent #altviews img,
+  #v65-product-parent span#altviews img,
+  #v65-product-parent .altviews img,
+  #v65-product-parent [id*="altview"] img,
+  body.productdetails #content_area #altviews img,
+  body.mc-product-page #content_area #altviews img,
+  body.productdetails #content_area .altviews img,
+  body.mc-product-page #content_area .altviews img,
+  body.productdetails #v65-product-parent #altviews img,
+  body.mc-product-page #v65-product-parent #altviews img {
+    width: 64px !important;
+    max-width: 64px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    max-height: 64px !important;
+    object-fit: contain !important;
+    display: block !important;
+    margin: 0 auto !important;
+    float: none !important;
+  }
+
+  /* Keep product page content within viewport (no push right, no overflow) */
+  body.productdetails .content_area-wrapper,
+  body.mc-product-page .content_area-wrapper {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails #content_area,
+  body.mc-product-page #content_area {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails #v65-product-parent,
+  body.mc-product-page #v65-product-parent {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails #content_area table,
+  body.mc-product-page #content_area table,
+  body.productdetails #v65-product-parent table,
+  body.mc-product-page #v65-product-parent table {
+    max-width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  body.productdetails #content_area td,
+  body.productdetails #content_area th,
+  body.mc-product-page #content_area td,
+  body.mc-product-page #content_area th,
+  body.productdetails #v65-product-parent td,
+  body.productdetails #v65-product-parent th,
+  body.mc-product-page #v65-product-parent td,
+  body.mc-product-page #v65-product-parent th {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 }
 
