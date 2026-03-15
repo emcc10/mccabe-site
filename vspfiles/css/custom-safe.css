@@ -1560,6 +1560,8 @@ body.mc-product-page select.mc-native-leather {
   body.mc-product-page #content_area td.mc-pdp-options-td button[name="btnaddtocart"] {
     position: relative !important;
     z-index: 10 !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
     /* 2-column layout for tagged PDP row */
@@ -1664,6 +1666,7 @@ body.mc-product-page select.mc-native-leather {
     .option_pricing,
     #priceWithOptions {
       display: block !important;
+      font-size: 18px !important;
     }
 
     /* 3) Put "Add to cart for our lowest price!" on its own line below */
@@ -1676,6 +1679,10 @@ body.mc-product-page select.mc-native-leather {
     #options_table i,
     #options_table font i {
       font-style: normal !important;
+    }
+
+    font.text:nth-child(3) {
+      font-size: 14px !important;
     }
 
     /* SAFE FIX: REMOVE BREADCRUMB SPACING ONLY */
@@ -2367,6 +2374,8 @@ body.mc-product-page select.mc-native-leather {
     max-width: none !important;
     margin: 8px 0 0 0 !important;
     box-sizing: border-box !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   /* Use unified icon sizing (same as base block above) – do not override size/position */
@@ -2688,6 +2697,8 @@ body.mc-product-page select.mc-native-leather {
     height: auto !important;
     margin: 10px auto 0 auto !important;
     float: none !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   body.productdetails a.floating-mobile-cart,
