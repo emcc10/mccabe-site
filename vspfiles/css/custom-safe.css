@@ -1,7 +1,7 @@
 /* TEST DEPLOY 3:55PM */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
-/* 2026-03-12: Your CSS used as-is; only fixes: (1) duplicate price above "Price with selected options" hidden, (2) mobile PDP alt images sit next to each other beneath main image (64px thumbs), streamlined/organized */
+/* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
 /* RH-STYLE GLOBAL FONT */
 body,
 body * {
@@ -1655,9 +1655,9 @@ body.mc-product-page select.mc-native-leather {
       display: none !important;
     }
 
-    /* 1) Remove the first base price line (the stray ":" + price) – hide so only "Price with selected options" + price shows */
+    /* 1) Remove the first base price line (the stray ":" + price) */
     .product_productprice {
-      display: none !important;
+      display: block !important;
     }
 
     /* 2) Stack "Price with Selected Options" above its price */
