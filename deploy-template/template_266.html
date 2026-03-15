@@ -397,6 +397,10 @@ document.addEventListener("DOMContentLoaded", function () {
           <div id="tray"><button class="tray-nav" id="navL">&lt;</button><div id="tray-items"></div><button class="tray-nav" id="navR">&gt;</button></div>
           <div id="room-wrapper"><div id="room"><div id="dim-top" class="room-dim"></div><div id="dim-left" class="room-dim"></div></div></div>
           <div id="toolbar"><button id="rotateL">Rotate ⟲</button><button id="rotateR">Rotate ⟳</button><button id="deleteBtn">Delete</button><button id="saveLayout">Save Layout</button><button id="addConfigBtn">Add configuration</button></div>
+          <div class="mc-planner-save-email">
+            <input type="email" id="mcPlannerEmail" placeholder="Your email" />
+            <button type="button" id="mcPlannerEmailBtn">Save layout &amp; email me PDF</button>
+          </div>
         </div>
       </div>
     </div>
@@ -678,6 +682,18 @@ document.addEventListener("DOMContentLoaded", function () {
 .wm-leather-summary{
   display:none !important;
 }
+
+.mc-planner-overlay{ position:fixed;inset:0;background:rgba(0,0,0,.5); display:none;align-items:center;justify-content:center; z-index:99999;padding:12px;box-sizing:border-box; }
+.mc-planner-overlay.mc-planner-open{ display:flex !important; }
+.mc-planner-modal{ width:min(1200px,96vw);max-height:92vh;background:#fff;border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;display:flex;flex-direction:column; position:relative; }
+.mc-planner-close{ position:absolute;top:10px;right:10px;width:36px;height:36px;border:0;background:rgba(0,0,0,.06); border-radius:50%;font-size:22px;line-height:1;cursor:pointer;z-index:10;color:#333; }
+.mc-planner-close:hover{ background:rgba(0,0,0,.12); }
+#mcPlannerModalBody{ flex:1; overflow:auto; padding:16px; min-height:0; }
+#mcPlannerModalBody #roomPlannerApp #page{ min-height:0; }
+#mcPlannerModalBody #roomPlannerApp #shell{ width:100%; max-width:1200px; margin:0 auto; }
+.mc-planner-save-email{ margin-top:12px; padding-top:12px; border-top:1px solid #eee; display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+.mc-planner-save-email input[type="email"]{ padding:8px 12px; border:1px solid #ccc; border-radius:6px; width:220px; max-width:100%; }
+.mc-planner-save-email button{ padding:8px 14px; border:1px solid #111; background:#111; color:#fff; border-radius:6px; cursor:pointer; font-size:13px; }
 
 </style>
 <style>
@@ -1344,12 +1360,36 @@ boot();
             No planner selections
           </div>
         </div>
+        <div id="mcConfigurationBlock" style="margin-top:14px;padding-top:14px;border-top:1px solid #e5e5e5;display:none">
+          <div style="font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#686868;margin-bottom:8px">Configuration</div>
+          <div id="mcConfigurationPieces" style="font-size:13px;line-height:1.5;color:#333"></div>
+        </div>
       </div>
     `;
 
     // Place panel directly after options table when possible (stable placement).
     if (optionsTable) optionsTable.insertAdjacentElement("afterend", panel);
     else wmOpen.parentElement.insertAdjacentElement("afterend", panel);
+
+    var plannerOverlay = document.getElementById("mcPlannerOverlay");
+    if (!plannerOverlay) {
+      plannerOverlay = document.createElement("div");
+      plannerOverlay.id = "mcPlannerOverlay";
+      plannerOverlay.className = "mc-planner-overlay";
+      plannerOverlay.innerHTML = '<div class="mc-planner-modal"><button type="button" class="mc-planner-close" aria-label="Close">&#215;</button><div id="mcPlannerModalBody"></div></div>';
+      document.body.appendChild(plannerOverlay);
+      plannerOverlay.querySelector(".mc-planner-close").onclick = function () { plannerOverlay.classList.remove("mc-planner-open"); };
+      plannerOverlay.addEventListener("click", function (e) { if (e.target === plannerOverlay) plannerOverlay.classList.remove("mc-planner-open"); });
+    }
+    function openPlannerOverlay() {
+      var t = document.getElementById("roomPlannerEmbed");
+      var body = document.getElementById("mcPlannerModalBody");
+      if (!t || !body || !t.content) return;
+      body.innerHTML = "";
+      body.appendChild(t.content.cloneNode(true));
+      if (typeof window.initRoomPlanner === "function") window.initRoomPlanner({ onApply: function (payload) { if (typeof window.applyPlannerToPage === "function") window.applyPlannerToPage(payload); plannerOverlay.classList.remove("mc-planner-open"); } });
+      plannerOverlay.classList.add("mc-planner-open");
+    }
 
     const mcLeatherBtn = document.getElementById("mcLeatherBtn");
     const mcLeatherStrip = document.getElementById("mcLeatherSwatchStrip");
@@ -1534,17 +1574,11 @@ boot();
     // Button actions
     if (mcLeatherBtn) mcLeatherBtn.onclick = () => wmOpen.click();
 
-    document.getElementById("mcPlannerBtn").onclick = function () {
-      var url = window.location.href.split("#")[0] + "#room-planner";
-      window.open(url, "roomPlanner", "width=1300,height=900");
-    };
+    document.getElementById("mcPlannerBtn").onclick = openPlannerOverlay;
 
     var summaryBox = document.getElementById("mcPlannerSummary");
     if (summaryBox) {
-      summaryBox.onclick = function () {
-        var url = window.location.href.split("#")[0] + "#room-planner";
-        window.open(url, "roomPlanner", "width=1300,height=900");
-      };
+      summaryBox.onclick = openPlannerOverlay;
       summaryBox.onkeydown = function (e) {
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); summaryBox.click(); }
       };
@@ -1625,76 +1659,64 @@ function calculatePlannerPrice(counts, seatPrice){
   return total;
 }
 
-// === ROOM PLANNER RECEIVE ===
-window.addEventListener("message", function (event) {
-  if (event.origin !== location.origin) return;
-  if (!event.data || event.data.type !== "ROOM_PLANNER_APPLY") return;
+var PIECE_NAMES = { "1L":"1L Recliner","2L":"2L LHF Recliner","3L":"3L RHF Recliner","4L":"4L Armless Loveseat","5L":"5L RHF Wedge, LHF Straight","6L":"6L LHF Wedge, RHF Straight","7L":"7L RHF Wedge","8L":"8L Armless Recliner","9L":"9L LHF Wedge" };
+var PIECE_DESCRIPTIONS = { "1L":"Single recliner.","2L":"Left-hand facing recliner.","3L":"Right-hand facing recliner.","4L":"Armless loveseat, seats two.","5L":"RHF wedge with LHF straight.","6L":"LHF wedge with RHF straight.","7L":"Right-hand facing wedge.","8L":"Armless recliner.","9L":"Left-hand facing wedge." };
 
-  var payload = event.data.payload;
-  if (!payload || typeof payload !== 'object') return;
-  var opts = payload.options && typeof payload.options === 'object' ? payload.options : {};
+window.applyPlannerToPage = function (payload) {
+  if (!payload || typeof payload !== "object") return;
+  var opts = payload.options && typeof payload.options === "object" ? payload.options : {};
   var layout = payload.layout && Array.isArray(payload.layout) ? payload.layout : [];
-
   window.__ROOM_PLANNER_OPTIONS__ = opts;
   window.__ROOM_PLANNER_LAYOUT__ = layout;
-
   var summary = document.getElementById("mcPlannerSummary");
   if (summary) {
-    var pieceList = "";
-    if (layout.length) {
-      pieceList = layout.map(function(s){ return s.id || s; }).join(", ");
-    } else if (Object.keys(opts).length) {
-      var parts = [];
-      Object.keys(opts).forEach(function(k){ for (var i = 0; i < (opts[k] || 0); i++) parts.push(k); });
-      pieceList = parts.join(", ");
-    }
+    var pieceList = layout.length ? layout.map(function(s){ return s.id || s; }).join(", ") : "";
+    if (!pieceList && Object.keys(opts).length) { var parts = []; Object.keys(opts).forEach(function(k){ for (var i = 0; i < (opts[k] || 0); i++) parts.push(k); }); pieceList = parts.join(", "); }
     summary.textContent = pieceList || "No planner selections";
   }
-
+  var configBlock = document.getElementById("mcConfigurationBlock");
+  var configPieces = document.getElementById("mcConfigurationPieces");
+  if (configBlock && configPieces && (layout.length || Object.keys(opts).length)) {
+    var list = [];
+    if (layout.length) layout.forEach(function(s){ var id = s.id || s; list.push({ id: id, name: PIECE_NAMES[id] || id, desc: PIECE_DESCRIPTIONS[id] || "" }); });
+    else Object.keys(opts).forEach(function(k){ for (var i = 0; i < (opts[k] || 0); i++) list.push({ id: k, name: PIECE_NAMES[k] || k, desc: PIECE_DESCRIPTIONS[k] || "" }); });
+    configPieces.innerHTML = list.map(function(p){ return "<div style=\"margin-bottom:6px\"><strong>" + (p.name || p.id) + "</strong>" + (p.desc ? " &mdash; " + p.desc : "") + "</div>"; }).join("");
+    configBlock.style.display = "block";
+  } else if (configBlock && configPieces) { configBlock.style.display = "none"; configPieces.innerHTML = ""; }
   var seatCount = (payload.seatCount != null && payload.seatCount !== "") ? Number(payload.seatCount) : NaN;
-  if (isNaN(seatCount) || seatCount < 0) {
-    seatCount = opts["4L"]
-      ? opts["4L"] * 2 + Object.keys(opts).filter(function(k){ return k !== "4L"; }).reduce(function(t, k){ return t + (opts[k] || 0); }, 0)
-      : Object.keys(opts).reduce(function(t, k){ return t + (opts[k] || 0); }, 0);
-  }
+  if (isNaN(seatCount) || seatCount < 0) seatCount = opts["4L"] ? opts["4L"] * 2 + Object.keys(opts).filter(function(k){ return k !== "4L"; }).reduce(function(t, k){ return t + (opts[k] || 0); }, 0) : Object.keys(opts).reduce(function(t, k){ return t + (opts[k] || 0); }, 0);
   var root = document.querySelector("#content_area") || document.body;
   var targetVal = String(seatCount);
   var labels = root.querySelectorAll ? root.querySelectorAll(".mc-option-accordion__label, td.productoptionname, label") : [];
   for (var i = 0; i < labels.length; i++) {
     var txt = (labels[i].textContent || "").toUpperCase();
-    if (!/NUMBER OF SEATS|SEATS PER ROW|SEAT/.test(txt)) continue;
+    if (!/NUMBER OF SEATS|SEATS PER ROW|NUMBER OF SEATS PER ROW|SEAT/.test(txt)) continue;
     var acc = labels[i].closest ? labels[i].closest(".mc-option-accordion") : null;
     var panel = acc ? acc.querySelector(".mc-option-accordion__panel") : null;
-    var sel = panel ? panel.querySelector("select") : (labels[i].closest ? (labels[i].closest("tr") ? labels[i].closest("tr").querySelector("select") : null) : null);
+    var sel = panel ? panel.querySelector("select") : (labels[i].closest && labels[i].closest("tr") ? labels[i].closest("tr").querySelector("select") : null);
     if (!sel || !sel.options) continue;
-    for (var j = 0; j < sel.options.length; j++) {
-      if (sel.options[j].value === targetVal) { sel.value = targetVal; break; }
-      if (parseInt(sel.options[j].value, 10) === seatCount) { sel.value = sel.options[j].value; break; }
-    }
+    for (var j = 0; j < sel.options.length; j++) { if (sel.options[j].value === targetVal) { sel.value = targetVal; break; } if (parseInt(sel.options[j].value, 10) === seatCount) { sel.value = sel.options[j].value; break; } }
   }
   var tables = root.querySelectorAll ? root.querySelectorAll("#options_table, table[id*=\"options_table\"]") : [];
   for (var t = 0; t < tables.length; t++) {
     var rows = tables[t].querySelectorAll("tr");
     for (var r = 0; r < rows.length; r++) {
       var labelCell = rows[r].querySelector("td[align=\"right\"], .productoptionname, label");
-      if (!labelCell || !/NUMBER OF SEATS|SEATS PER ROW|SEAT/i.test(labelCell.textContent || "")) continue;
+      if (!labelCell || !/NUMBER OF SEATS|SEATS PER ROW|NUMBER OF SEATS PER ROW|SEAT/i.test(labelCell.textContent || "")) continue;
       var select = rows[r].querySelector("select");
       if (!select || !select.options) continue;
-      for (var j = 0; j < select.options.length; j++) {
-        if (select.options[j].value === targetVal) { select.value = targetVal; break; }
-        if (parseInt(select.options[j].value, 10) === seatCount) { select.value = select.options[j].value; break; }
-      }
+      for (var j = 0; j < select.options.length; j++) { if (select.options[j].value === targetVal) { select.value = targetVal; break; } if (parseInt(select.options[j].value, 10) === seatCount) { select.value = select.options[j].value; break; } }
       break;
     }
   }
+  try { var seatPrice = getPlannerSeatPrice(); var totalPrice = calculatePlannerPrice(opts, seatPrice); updateProductPrice(totalPrice); } catch (err) { if (err && err.message) alert(err.message); }
+};
 
-  try {
-    var seatPrice = getPlannerSeatPrice();
-    var totalPrice = calculatePlannerPrice(opts, seatPrice);
-    updateProductPrice(totalPrice);
-  } catch (err) {
-    if (err && err.message) alert(err.message);
-  }
+window.addEventListener("message", function (event) {
+  if (event.origin !== location.origin || !event.data || event.data.type !== "ROOM_PLANNER_APPLY") return;
+  var payload = event.data.payload;
+  if (!payload || typeof payload !== "object") return;
+  if (typeof window.applyPlannerToPage === "function") window.applyPlannerToPage(payload);
 });
 
 // Mount inline UI after DOM + Volusion settle
@@ -1731,7 +1753,8 @@ setTimeout(mount, 1400);
 })();
 </script>
 <script>
-window.initRoomPlanner = function () {
+window.initRoomPlanner = function (opts) {
+  opts = opts || {};
   var PX_PER_INCH = 4, SEAT_DEPTH_IN = 39;
   var room = document.getElementById("room");
   var roomW = document.getElementById("roomW");
@@ -1899,7 +1922,9 @@ window.initRoomPlanner = function () {
       }
       var payload = { options: counts, counts: counts, room: { width: roomW.value, depth: roomD.value }, layout: layout, seatCount: seatCount, ts: Date.now() };
       try { localStorage.setItem("roomPlannerData", JSON.stringify(payload)); } catch (e) {}
-      if (window.opener && window.opener.postMessage) {
+      if (opts.onApply && typeof opts.onApply === "function") {
+        opts.onApply(payload);
+      } else if (window.opener && window.opener.postMessage) {
         window.opener.postMessage({ type: "ROOM_PLANNER_APPLY", payload: payload }, location.origin);
         alert("Configuration sent to product page. Number of seats and price will update there.");
       } else {
@@ -1931,6 +1956,27 @@ window.initRoomPlanner = function () {
     } catch (e) {}
   }
   restoreLayoutFromStorage();
+
+  var emailBtn = document.getElementById("mcPlannerEmailBtn");
+  var emailInput = document.getElementById("mcPlannerEmail");
+  if (emailBtn && emailInput) {
+    emailBtn.onclick = function () {
+      var email = (emailInput.value || "").trim();
+      if (!email) { alert("Please enter your email address."); return; }
+      var counts = getCounts();
+      var layout = serializeLayout();
+      var seatCount = calculateSeatCount();
+      var payload = { email: email, options: counts, layout: layout, room: { width: roomW.value, depth: roomD.value }, seatCount: seatCount, ts: Date.now() };
+      try { localStorage.setItem("roomPlannerData", JSON.stringify(payload)); } catch (e) {}
+      var endpoint = (typeof window.MC_PLANNER_EMAIL_ENDPOINT !== "undefined" && window.MC_PLANNER_EMAIL_ENDPOINT) ? window.MC_PLANNER_EMAIL_ENDPOINT : "/v/vspfiles/planner-email.php";
+      emailBtn.disabled = true;
+      emailBtn.textContent = "Sending…";
+      fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+        .then(function (r) { if (r.ok) alert("Layout saved. A PDF will be sent to " + email + "."); else throw new Error("Request failed"); })
+        .catch(function () { alert("Could not send. Save your layout with the Save Layout button and contact us for your PDF."); })
+        .then(function () { emailBtn.disabled = false; emailBtn.textContent = "Save layout & email me PDF"; });
+    };
+  }
 };
 </script>
 
@@ -3322,7 +3368,7 @@ body.mc-product-page #content_area td.productoptionname {
             if (/straight|curved|configuration/.test(ot)) { hasStraightCurved = true; break; }
           }
         }
-        labelText = hasStraightCurved ? 'Straight or Curved' : 'Option';
+        labelText = hasStraightCurved ? 'Configuration' : 'Option';
       }
       labelText = labelText.toUpperCase();
       var options = [];
@@ -3379,7 +3425,7 @@ body.mc-product-page #content_area td.productoptionname {
       if (plannerRow && plannerRow.closest('#mc-inline-config')) {
         qa('.mc-option-accordion__label', root).forEach(function(lbl){
           var txt = (lbl.textContent || '').toUpperCase();
-          if (!/NUMBER OF SEATS|SEATS PER ROW/.test(txt)) return;
+          if (!/NUMBER OF SEATS|SEATS PER ROW|NUMBER OF SEATS PER ROW|SEAT/.test(txt)) return;
           var acc = lbl.closest('.mc-option-accordion');
           if (acc && plannerRow.parentNode) {
             acc.parentNode.insertBefore(plannerRow, acc);
