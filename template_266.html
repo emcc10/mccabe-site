@@ -1535,13 +1535,15 @@ boot();
     if (mcLeatherBtn) mcLeatherBtn.onclick = () => wmOpen.click();
 
     document.getElementById("mcPlannerBtn").onclick = function () {
-      window.open("/v/vspfiles/room-planner.html", "roomPlanner", "width=1300,height=900");
+      var url = window.location.href.split("#")[0] + "#room-planner";
+      window.open(url, "roomPlanner", "width=1300,height=900");
     };
 
     var summaryBox = document.getElementById("mcPlannerSummary");
     if (summaryBox) {
       summaryBox.onclick = function () {
-        window.open("/v/vspfiles/room-planner.html", "roomPlanner", "width=1300,height=900");
+        var url = window.location.href.split("#")[0] + "#room-planner";
+        window.open(url, "roomPlanner", "width=1300,height=900");
       };
       summaryBox.onkeydown = function (e) {
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); summaryBox.click(); }
@@ -1702,11 +1704,14 @@ setTimeout(mount, 1400);
 })();
 </script>
 
-<!-- Room planner: run when this page is the room planner (code lives in template) -->
+<!-- Room planner: run when this page is the room planner (code lives in template_266 only) -->
 <script>
 (function () {
   function isRoomPlannerPage() {
-    return (typeof window.location !== "undefined" && (window.location.pathname || "").indexOf("room-planner") !== -1);
+    if (typeof window.location === "undefined") return false;
+    var path = window.location.pathname || "";
+    var hash = window.location.hash || "";
+    return path.indexOf("room-planner") !== -1 || hash.indexOf("room-planner") !== -1;
   }
   function injectRoomPlanner() {
     var t = document.getElementById("roomPlannerEmbed");
