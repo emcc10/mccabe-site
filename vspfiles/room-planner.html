@@ -425,30 +425,42 @@ document.getElementById("saveLayout").onclick = () => {
   alert("Layout saved and file downloaded.");
 };
 
-document.getElementById("addConfigBtn").onclick = function(){
-  const counts = getCounts();
-  const layout = serializeLayout();
-  const seatCount = calculateSeatCount();
-  if (Object.keys(counts).length === 0) {
-    alert("Add at least one piece to the room before adding configuration.");
-    return;
+var addConfigBtn = document.getElementById("addConfigBtn");
+if (!addConfigBtn) {
+  var toolbarEl = document.getElementById("toolbar");
+  if (toolbarEl) {
+    addConfigBtn = document.createElement("button");
+    addConfigBtn.id = "addConfigBtn";
+    addConfigBtn.textContent = "Add configuration";
+    toolbarEl.appendChild(addConfigBtn);
   }
-  const payload = {
-    options: counts,
-    counts: counts,
-    room: { width: roomW.value, depth: roomD.value },
-    layout: layout,
-    seatCount: seatCount,
-    ts: Date.now()
+}
+if (addConfigBtn) {
+  addConfigBtn.onclick = function(){
+    const counts = getCounts();
+    const layout = serializeLayout();
+    const seatCount = calculateSeatCount();
+    if (Object.keys(counts).length === 0) {
+      alert("Add at least one piece to the room before adding configuration.");
+      return;
+    }
+    const payload = {
+      options: counts,
+      counts: counts,
+      room: { width: roomW.value, depth: roomD.value },
+      layout: layout,
+      seatCount: seatCount,
+      ts: Date.now()
+    };
+    localStorage.setItem("roomPlannerData", JSON.stringify(payload));
+    if (window.opener && window.opener.postMessage) {
+      window.opener.postMessage({ type: "ROOM_PLANNER_APPLY", payload: payload }, location.origin);
+      alert("Configuration sent to product page. Number of seats and price will update there.");
+    } else {
+      alert("Open the planner from the product page to add configuration there.");
+    }
   };
-  localStorage.setItem("roomPlannerData", JSON.stringify(payload));
-  if (window.opener && window.opener.postMessage) {
-    window.opener.postMessage({ type: "ROOM_PLANNER_APPLY", payload: payload }, location.origin);
-    alert("Configuration sent to product page. Number of seats and price will update there.");
-  } else {
-    alert("Open the planner from the product page to add configuration there.");
-  }
-};
+}
 
 function restoreLayoutFromStorage(){
   try {

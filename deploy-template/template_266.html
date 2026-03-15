@@ -1536,8 +1536,6 @@ boot();
 
     document.getElementById("mcPlannerBtn").onclick = function () {
       window.open("/v/vspfiles/room-planner.html", "roomPlanner", "width=1300,height=900");
-      var sumEl = document.getElementById("mcPlannerSummary");
-      if (sumEl) sumEl.textContent = "Planner opened";
     };
 
     var summaryBox = document.getElementById("mcPlannerSummary");
@@ -1640,8 +1638,10 @@ window.addEventListener("message", function (event) {
 
   var summary = document.getElementById("mcPlannerSummary");
   if (summary) {
-    var pieceList = layout.length ? layout.map(function(s){ return s.id; }).join(", ") : "";
-    if (!pieceList && Object.keys(opts).length) {
+    var pieceList = "";
+    if (layout.length) {
+      pieceList = layout.map(function(s){ return s.id || s; }).join(", ");
+    } else if (Object.keys(opts).length) {
       var parts = [];
       Object.keys(opts).forEach(function(k){ for (var i = 0; i < (opts[k] || 0); i++) parts.push(k); });
       pieceList = parts.join(", ");
@@ -1649,10 +1649,14 @@ window.addEventListener("message", function (event) {
     summary.textContent = pieceList || "No planner selections";
   }
 
-  var seatCount = opts["4L"]
-    ? opts["4L"] * 2 + Object.keys(opts).filter(function(k){ return k !== "4L"; }).reduce(function(t, k){ return t + (opts[k] || 0); }, 0)
-    : Object.keys(opts).reduce(function(t, k){ return t + (opts[k] || 0); }, 0);
+  var seatCount = (payload.seatCount != null && payload.seatCount !== "") ? Number(payload.seatCount) : NaN;
+  if (isNaN(seatCount) || seatCount < 0) {
+    seatCount = opts["4L"]
+      ? opts["4L"] * 2 + Object.keys(opts).filter(function(k){ return k !== "4L"; }).reduce(function(t, k){ return t + (opts[k] || 0); }, 0)
+      : Object.keys(opts).reduce(function(t, k){ return t + (opts[k] || 0); }, 0);
+  }
   var root = document.querySelector("#content_area") || document.body;
+  var targetVal = String(seatCount);
   var labels = root.querySelectorAll ? root.querySelectorAll(".mc-option-accordion__label, td.productoptionname, label") : [];
   for (var i = 0; i < labels.length; i++) {
     var txt = (labels[i].textContent || "").toUpperCase();
@@ -1661,10 +1665,24 @@ window.addEventListener("message", function (event) {
     var panel = acc ? acc.querySelector(".mc-option-accordion__panel") : null;
     var sel = panel ? panel.querySelector("select") : (labels[i].closest ? (labels[i].closest("tr") ? labels[i].closest("tr").querySelector("select") : null) : null);
     if (!sel || !sel.options) continue;
-    var targetVal = String(seatCount);
     for (var j = 0; j < sel.options.length; j++) {
       if (sel.options[j].value === targetVal) { sel.value = targetVal; break; }
       if (parseInt(sel.options[j].value, 10) === seatCount) { sel.value = sel.options[j].value; break; }
+    }
+  }
+  var tables = root.querySelectorAll ? root.querySelectorAll("#options_table, table[id*=\"options_table\"]") : [];
+  for (var t = 0; t < tables.length; t++) {
+    var rows = tables[t].querySelectorAll("tr");
+    for (var r = 0; r < rows.length; r++) {
+      var labelCell = rows[r].querySelector("td[align=\"right\"], .productoptionname, label");
+      if (!labelCell || !/NUMBER OF SEATS|SEATS PER ROW|SEAT/i.test(labelCell.textContent || "")) continue;
+      var select = rows[r].querySelector("select");
+      if (!select || !select.options) continue;
+      for (var j = 0; j < select.options.length; j++) {
+        if (select.options[j].value === targetVal) { select.value = targetVal; break; }
+        if (parseInt(select.options[j].value, 10) === seatCount) { select.value = select.options[j].value; break; }
+      }
+      break;
     }
   }
 
@@ -1898,7 +1916,7 @@ window.initRoomPlanner = function () {
         var piece = pieceMap[item.id];
         if (!piece) return;
         addSeat(piece, true);
-        var seat = room.querySelector("#roomPlannerApp .seat:last-of-type") || room.querySelector(".seat:last-of-type");
+        var seat = room.querySelector(".seat:last-of-type");
         if (seat) {
           seat.style.left = (item.x != null ? item.x : 40) + "px";
           seat.style.top = (item.y != null ? item.y : 40) + "px";
