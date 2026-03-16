@@ -383,7 +383,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp #measuringToolBtn svg { width:18px; height:18px; flex-shrink:0; }
         #roomPlannerApp .common-configs-title { display:none; }
         #roomPlannerApp #common-configs { display:none; }
-        /* Common config thumbnails: 80% of tray piece size, row layout */
+        /* Common config thumbnails: 80% of tray piece size (tray img max-height 72px → 58px), row layout */
         #roomPlannerApp .common-config { width:100%; height:64px; border:1px solid #ddd; border-radius:6px; cursor:pointer; margin-bottom:0; overflow:hidden; background:#fafafa; display:flex; align-items:center; justify-content:center; padding:0; position:relative; border-top:1px solid #eee; }
         #roomPlannerApp .common-config:first-of-type { border-top:1px solid #ddd; }
         #roomPlannerApp .common-config:hover { border-color:#888; background:#f0f0f0; }
@@ -392,7 +392,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:0; padding-top:0; overflow:hidden; }
         #roomPlannerApp #tray-row { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; max-width:900px; flex-shrink:0; margin-bottom:8px; }
         #roomPlannerApp #tray { display:flex; align-items:center; gap:8px; flex:1; min-width:0; }
-        #roomPlannerApp .tray-nav { width:32px; height:32px; border:1px solid #ddd; border-radius:50%; background:#f6f6f6; cursor:pointer; flex-shrink:0; font-size:16px; line-height:1; padding:0; }
+        #roomPlannerApp .tray-nav { width:32px; height:32px; border:1px solid #ddd; border-radius:18px; background:#f6f6f6; cursor:pointer; flex-shrink:0; font-size:16px; line-height:1; padding:0; }
         #roomPlannerApp .tray-nav:hover { background:#eee; }
         #roomPlannerApp #tray-items { display:flex; gap:8px; overflow-x:auto; scroll-behavior:smooth; flex:1; min-width:0; padding:4px 0; }
         #roomPlannerApp #tray-items::-webkit-scrollbar { height:6px; }
@@ -417,7 +417,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp #toolbar { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:6px; padding-top:0; flex-shrink:0; visibility:visible; }
         #roomPlannerApp #toolbar button, #roomPlannerApp #planner-left button { padding:6px 12px; border:1px solid #ccc; background:#f7f7f7; cursor:pointer; font-size:12px; border-radius:4px; }
         #roomPlannerApp #toolbar button:hover, #roomPlannerApp #planner-left button:hover { background:#eee; }
-        #roomPlannerApp #planner-right { width:150px; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; border-left:1px solid #eee; padding-left:10px; align-self:flex-start; margin-top:0; }
+        #roomPlannerApp #planner-right { width:150px; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; border-left:1px solid #eee; padding-left:10px; }
         #roomPlannerApp #planner-style-name { font-size:14px; font-weight:600; margin-bottom:10px; }
         #roomPlannerApp #planner-piece-list { font-size:12px; color:#555; }
         #roomPlannerApp #planner-piece-list .piece-row { margin-bottom:6px; display:flex; justify-content:space-between; gap:8px; }
@@ -429,10 +429,11 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp #measure-line line { stroke:#2196F3; stroke-width:2; }
         #roomPlannerApp #measure-line .measure-handle { stroke:#1565C0; stroke-width:4; stroke-linecap:round; cursor:grab; pointer-events:auto; }
         #roomPlannerApp #measure-line .measure-handle:active { cursor:grabbing; }
-        #roomPlannerApp #measure-label-box { position:absolute; pointer-events:none; background:#fff; border:1px solid #2196F3; border-radius:4px; padding:3px 8px; font-size:12px; font-weight:600; color:#333; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,.2); z-index:10; transform:translate(-50%, -100%); min-width:3em; text-align:center; }
         #roomPlannerApp .config-group { position:relative; }
         #roomPlannerApp .config-group .config-group-detach { position:absolute; top:4px; right:4px; z-index:20; font-size:10px; padding:3px 6px; border:1px solid #999; background:#fff; cursor:pointer; border-radius:4px; }
         #roomPlannerApp .config-group .config-group-detach:hover { background:#f0f0f0; }
+        #roomPlannerApp #measure-label-box { position:absolute; pointer-events:none; background:#fff; border:1px solid #2196F3; border-radius:4px; padding:3px 8px; font-size:12px; font-weight:600; color:#333; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,.2); z-index:10; transform:translate(-50%, -100%); min-width:3em; text-align:center; }
+        #roomPlannerApp #planner-right { align-self:flex-start; margin-top:0; padding-top:0; }
       </style>
       <div id="page">
         <div id="shell">
@@ -746,10 +747,22 @@ document.addEventListener("DOMContentLoaded", function () {
   display:none !important;
 }
 
-.mc-planner-overlay{ position:fixed;inset:0;background:rgba(0,0,0,.5); display:none;align-items:center;justify-content:center; z-index:99999;padding:12px;box-sizing:border-box; }
+/* Room planner overlay: transition like leather modal, no webpage chrome */
+.mc-planner-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  display:none;align-items:center;justify-content:center;
+  z-index:99999;padding:12px;box-sizing:border-box;
+}
 .mc-planner-overlay.mc-planner-open{ display:flex !important; }
-.mc-planner-modal{ width:min(1400px,98vw);max-height:98vh;min-height:95vh;height:98vh;background:#fff;border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;display:flex;flex-direction:column; position:relative; }
-.mc-planner-close{ position:absolute;top:10px;right:10px;width:36px;height:36px;border:0;background:rgba(0,0,0,.06); border-radius:50%;font-size:22px;line-height:1;cursor:pointer;z-index:10;color:#333; }
+.mc-planner-modal{
+  width:min(1400px,98vw);max-height:98vh;min-height:95vh;height:98vh;background:#fff;border-radius:12px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;display:flex;flex-direction:column;
+  position:relative;
+}
+.mc-planner-close{
+  position:absolute;top:10px;right:10px;width:36px;height:36px;border:0;background:rgba(0,0,0,.06);
+  border-radius:50%;font-size:22px;line-height:1;cursor:pointer;z-index:10;color:#333;
+}
 .mc-planner-close:hover{ background:rgba(0,0,0,.12); }
 #mcPlannerModalBody{ flex:1; overflow:hidden; padding:8px; min-height:0; display:flex; flex-direction:column; }
 #mcPlannerModalBody #roomPlannerApp{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
@@ -1442,16 +1455,24 @@ boot();
     panel.style.margin = "0 0 12px";
 
     panel.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:10px;align-items:stretch;max-width:520px;width:100%">
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;max-width:520px;width:100%">
+        <div id="mcPlannerRow" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;width:100%;min-width:0">
+          <button type="button" id="mcPlannerBtn" class="mc-config-btn"
+            style="padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:0;background:#fff;cursor:pointer">
+            <span>Room Planner</span>
+            <span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+          </button>
+        </div>
+
         <div id="mcLeatherRow" style="display:flex;flex-direction:column;gap:6px;align-items:stretch;width:100%">
           <div id="mcLeatherHeaderRow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;flex-wrap:nowrap">
             <div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 auto">
-              <span id="mcLeatherHeader" style="font-size:13px;font-weight:400;line-height:1.2;letter-spacing:0;text-transform:none;">SELECT A LEATHER:</span>
+              <span id="mcLeatherHeader" style="font-size:14px;font-weight:400;line-height:1.2;letter-spacing:.06em;text-transform:uppercase;color:#686868">SELECT A LEATHER:</span>
               <span id="mcLeatherSummary" style="padding:0;border:0;background:transparent;font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#333;min-width:0"></span>
             </div>
             <button type="button" id="mcLeatherBtn" class="mc-config-btn"
               aria-label="Open leather swatches"
-              style="padding:0;width:18px;min-width:18px;max-width:18px;height:18px;line-height:18px;text-align:center;border:0;border-radius:0;background:transparent;cursor:pointer;font-size:15px;font-weight:400;color:#444">
+              style="padding:0;width:20px;min-width:20px;max-width:20px;height:20px;line-height:20px;text-align:center;border:0;border-radius:0;background:transparent;cursor:pointer;font-size:20px;font-weight:400;color:#686868">
               &#8250;
             </button>
           </div>
@@ -1460,33 +1481,19 @@ boot();
           </div>
         </div>
 
-        <div id="mcPlannerRow" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;width:100%;min-width:0">
-          <button type="button" id="mcPlannerBtn" class="mc-config-btn"
-            style="padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:0;background:#fff;cursor:pointer">
-            <span>Room Planner</span>
-            <span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" title="Planner book"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h6"/></svg></span>
-            <span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" title="Ruler"><rect x="2" y="8" width="20" height="8" rx="0.5"/><path d="M4 8v8"/><path d="M8 8v8"/><path d="M12 8v8"/><path d="M16 8v8"/><path d="M20 8v8"/><path d="M2 10h20"/><path d="M2 14h20"/></svg></span>
-          </button>
-          <div id="mcPlannerSummary" role="button" tabindex="0" title="Click to reopen saved configuration"
-            style="min-width:0;max-width:100%;flex:1 1 auto;min-width:120px;padding:8px 10px;border:1px solid #ddd;border-radius:10px;background:#f7f7f7;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer">
-            No planner selections
-          </div>
-        </div>
-        <div id="mcConfigurationBlock" style="margin-top:14px;padding-top:14px;border-top:1px solid #e5e5e5;display:none">
-          <div style="font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#686868;margin-bottom:8px">Configuration</div>
-          <div id="mcConfigurationPieces" style="font-size:13px;line-height:1.5;color:#333"></div>
+        <div id="mcConfigurationBlock" style="width:100%">
+          <div style="font-size:14px;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:#686868;margin-bottom:4px">CONFIGURATION</div>
+          <div id="mcConfigurationCaption" style="font-size:13px;line-height:1.5;color:#999;font-style:italic">Please use the room planner to choose configuration.</div>
+          <div id="mcConfigurationPieces" style="font-size:13px;line-height:1.5;color:#333;display:none"></div>
         </div>
       </div>
     `;
 
-    // Place panel directly after options table when possible (stable placement).
-    if (optionsTable) optionsTable.insertAdjacentElement("afterend", panel);
-    else wmOpen.parentElement.insertAdjacentElement("afterend", panel);
     if (optionsTable) {
-      var plannerTopRow = panel.querySelector("#mcPlannerRow");
-      if (plannerTopRow && optionsTable.parentNode) {
-        optionsTable.parentNode.insertBefore(plannerTopRow, optionsTable);
-      }
+      optionsTable.style.setProperty("display", "none", "important");
+      optionsTable.insertAdjacentElement("afterend", panel);
+    } else {
+      wmOpen.parentElement.insertAdjacentElement("afterend", panel);
     }
 
     var plannerOverlay = document.getElementById("mcPlannerOverlay");
@@ -1496,17 +1503,33 @@ boot();
       plannerOverlay.className = "mc-planner-overlay";
       plannerOverlay.innerHTML = '<div class="mc-planner-modal"><button type="button" class="mc-planner-close" aria-label="Close">&#215;</button><div id="mcPlannerModalBody"></div></div>';
       document.body.appendChild(plannerOverlay);
-      plannerOverlay.querySelector(".mc-planner-close").onclick = function () { plannerOverlay.classList.remove("mc-planner-open"); };
-      plannerOverlay.addEventListener("click", function (e) { if (e.target === plannerOverlay) plannerOverlay.classList.remove("mc-planner-open"); });
+      var modalEl = plannerOverlay.querySelector(".mc-planner-modal");
+      plannerOverlay.querySelector(".mc-planner-close").onclick = function () {
+        plannerOverlay.classList.remove("mc-planner-open");
+      };
+      plannerOverlay.addEventListener("click", function (e) {
+        if (e.target === plannerOverlay) plannerOverlay.classList.remove("mc-planner-open");
+      });
     }
+
     function openPlannerOverlay() {
       var t = document.getElementById("roomPlannerEmbed");
       var body = document.getElementById("mcPlannerModalBody");
       if (!t || !body || !t.content) return;
       body.innerHTML = "";
       body.appendChild(t.content.cloneNode(true));
-      if (typeof window.initRoomPlanner === "function") window.initRoomPlanner({ onApply: function (payload) { if (typeof window.applyPlannerToPage === "function") window.applyPlannerToPage(payload); plannerOverlay.classList.remove("mc-planner-open"); } });
+      if (typeof window.initRoomPlanner === "function") {
+        window.initRoomPlanner({
+          onApply: function (payload) {
+            if (typeof window.applyPlannerToPage === "function") window.applyPlannerToPage(payload);
+            plannerOverlay.classList.remove("mc-planner-open");
+          }
+        });
+      }
       plannerOverlay.classList.add("mc-planner-open");
+    }
+    function closePlannerOverlay() {
+      plannerOverlay.classList.remove("mc-planner-open");
     }
 
     const mcLeatherBtn = document.getElementById("mcLeatherBtn");
@@ -1732,12 +1755,10 @@ boot();
 
     document.getElementById("mcPlannerBtn").onclick = openPlannerOverlay;
 
-    var summaryBox = document.getElementById("mcPlannerSummary");
-    if (summaryBox) {
-      summaryBox.onclick = openPlannerOverlay;
-      summaryBox.onkeydown = function (e) {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); summaryBox.click(); }
-      };
+    var configBlock = document.getElementById("mcConfigurationBlock");
+    if (configBlock) {
+      configBlock.style.cursor = "pointer";
+      configBlock.onclick = openPlannerOverlay;
     }
 
     // Keep summary synced to modal selection changes
@@ -1823,24 +1844,47 @@ window.applyPlannerToPage = function (payload) {
   var layout = payload.layout && Array.isArray(payload.layout) ? payload.layout : [];
   window.__ROOM_PLANNER_OPTIONS__ = opts;
   window.__ROOM_PLANNER_LAYOUT__ = layout;
+
   var summary = document.getElementById("mcPlannerSummary");
   if (summary) {
-    var pieceList = layout.length ? layout.map(function(s){ return s.id || s; }).join(", ") : "";
-    if (!pieceList && Object.keys(opts).length) { var parts = []; Object.keys(opts).forEach(function(k){ for (var i = 0; i < (opts[k] || 0); i++) parts.push(k); }); pieceList = parts.join(", "); }
+    var pieceList = "";
+    if (layout.length) {
+      pieceList = layout.map(function(s){ return s.id || s; }).join(", ");
+    } else if (Object.keys(opts).length) {
+      var parts = [];
+      Object.keys(opts).forEach(function(k){ for (var i = 0; i < (opts[k] || 0); i++) parts.push(k); });
+      pieceList = parts.join(", ");
+    }
     summary.textContent = pieceList || "No planner selections";
     summary.classList.toggle("mc-has-selections", !!(pieceList && pieceList.trim()));
   }
-  var configBlock = document.getElementById("mcConfigurationBlock");
+
+  var configCaption = document.getElementById("mcConfigurationCaption");
   var configPieces = document.getElementById("mcConfigurationPieces");
-  if (configBlock && configPieces && (layout.length || Object.keys(opts).length)) {
-    var list = [];
-    if (layout.length) layout.forEach(function(s){ var id = s.id || s; list.push({ id: id, name: PIECE_NAMES[id] || id, desc: PIECE_DESCRIPTIONS[id] || "" }); });
-    else Object.keys(opts).forEach(function(k){ for (var i = 0; i < (opts[k] || 0); i++) list.push({ id: k, name: PIECE_NAMES[k] || k, desc: PIECE_DESCRIPTIONS[k] || "" }); });
-    configPieces.innerHTML = list.map(function(p){ return "<div style=\"margin-bottom:6px\"><strong>" + (p.name || p.id) + "</strong>" + (p.desc ? " &mdash; " + p.desc : "") + "</div>"; }).join("");
-    configBlock.style.display = "block";
-  } else if (configBlock && configPieces) { configBlock.style.display = "none"; configPieces.innerHTML = ""; }
+  if (configCaption && configPieces) {
+    if (layout.length || Object.keys(opts).length) {
+      var list = [];
+      if (layout.length) {
+        layout.forEach(function(s){ var id = s.id || s; list.push({ id: id, name: PIECE_NAMES[id] || id, desc: PIECE_DESCRIPTIONS[id] || "" }); });
+      } else {
+        Object.keys(opts).forEach(function(k){ for (var i = 0; i < (opts[k] || 0); i++) list.push({ id: k, name: PIECE_NAMES[k] || k, desc: PIECE_DESCRIPTIONS[k] || "" }); });
+      }
+      configPieces.innerHTML = list.map(function(p){ return "<div style=\"margin-bottom:6px\"><strong>" + (p.name || p.id) + "</strong>" + (p.desc ? " &mdash; " + p.desc : "") + "</div>"; }).join("");
+      configCaption.style.display = "none";
+      configPieces.style.display = "block";
+    } else {
+      configCaption.style.display = "block";
+      configPieces.style.display = "none";
+      configPieces.innerHTML = "";
+    }
+  }
+
   var seatCount = (payload.seatCount != null && payload.seatCount !== "") ? Number(payload.seatCount) : NaN;
-  if (isNaN(seatCount) || seatCount < 0) seatCount = opts["4L"] ? opts["4L"] * 2 + Object.keys(opts).filter(function(k){ return k !== "4L"; }).reduce(function(t, k){ return t + (opts[k] || 0); }, 0) : Object.keys(opts).reduce(function(t, k){ return t + (opts[k] || 0); }, 0);
+  if (isNaN(seatCount) || seatCount < 0) {
+    seatCount = opts["4L"]
+      ? opts["4L"] * 2 + Object.keys(opts).filter(function(k){ return k !== "4L"; }).reduce(function(t, k){ return t + (opts[k] || 0); }, 0)
+      : Object.keys(opts).reduce(function(t, k){ return t + (opts[k] || 0); }, 0);
+  }
   var root = document.querySelector("#content_area") || document.body;
   var targetVal = String(seatCount);
   var labels = root.querySelectorAll ? root.querySelectorAll(".mc-option-accordion__label, td.productoptionname, label") : [];
@@ -1849,9 +1893,12 @@ window.applyPlannerToPage = function (payload) {
     if (!/NUMBER OF SEATS|SEATS PER ROW|NUMBER OF SEATS PER ROW|SEAT/.test(txt)) continue;
     var acc = labels[i].closest ? labels[i].closest(".mc-option-accordion") : null;
     var panel = acc ? acc.querySelector(".mc-option-accordion__panel") : null;
-    var sel = panel ? panel.querySelector("select") : (labels[i].closest && labels[i].closest("tr") ? labels[i].closest("tr").querySelector("select") : null);
+    var sel = panel ? panel.querySelector("select") : (labels[i].closest ? (labels[i].closest("tr") ? labels[i].closest("tr").querySelector("select") : null) : null);
     if (!sel || !sel.options) continue;
-    for (var j = 0; j < sel.options.length; j++) { if (sel.options[j].value === targetVal) { sel.value = targetVal; break; } if (parseInt(sel.options[j].value, 10) === seatCount) { sel.value = sel.options[j].value; break; } }
+    for (var j = 0; j < sel.options.length; j++) {
+      if (sel.options[j].value === targetVal) { sel.value = targetVal; break; }
+      if (parseInt(sel.options[j].value, 10) === seatCount) { sel.value = sel.options[j].value; break; }
+    }
     if (sel && sel.value) try { sel.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) {}
   }
   var tables = root.querySelectorAll ? root.querySelectorAll("#options_table, table[id*=\"options_table\"]") : [];
@@ -1862,16 +1909,27 @@ window.applyPlannerToPage = function (payload) {
       if (!labelCell || !/NUMBER OF SEATS|SEATS PER ROW|NUMBER OF SEATS PER ROW|SEAT/i.test(labelCell.textContent || "")) continue;
       var select = rows[r].querySelector("select");
       if (!select || !select.options) continue;
-      for (var j = 0; j < select.options.length; j++) { if (select.options[j].value === targetVal) { select.value = targetVal; break; } if (parseInt(select.options[j].value, 10) === seatCount) { select.value = select.options[j].value; break; } }
+      for (var j = 0; j < select.options.length; j++) {
+        if (select.options[j].value === targetVal) { select.value = targetVal; break; }
+        if (parseInt(select.options[j].value, 10) === seatCount) { select.value = select.options[j].value; break; }
+      }
       if (select && select.value) try { select.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) {}
       break;
     }
   }
-  try { var seatPrice = getPlannerSeatPrice(); var totalPrice = calculatePlannerPrice(opts, seatPrice); updateProductPrice(totalPrice); } catch (err) { if (err && err.message) alert(err.message); }
+
+  try {
+    var seatPrice = getPlannerSeatPrice();
+    var totalPrice = calculatePlannerPrice(opts, seatPrice);
+    updateProductPrice(totalPrice);
+  } catch (err) {
+    if (err && err.message) alert(err.message);
+  }
 };
 
 window.addEventListener("message", function (event) {
-  if (event.origin !== location.origin || !event.data || event.data.type !== "ROOM_PLANNER_APPLY") return;
+  if (event.origin !== location.origin) return;
+  if (!event.data || event.data.type !== "ROOM_PLANNER_APPLY") return;
   var payload = event.data.payload;
   if (!payload || typeof payload !== "object") return;
   if (typeof window.applyPlannerToPage === "function") window.applyPlannerToPage(payload);
@@ -2097,6 +2155,22 @@ window.initRoomPlanner = function (opts) {
     navL.onclick = function () { tray.scrollBy({ left: -(140 + 8), behavior: "smooth" }); };
     navR.onclick = function () { tray.scrollBy({ left: 140 + 8, behavior: "smooth" }); };
   }
+  function rotateSeat(delta) {
+    if (!activeSeat) return;
+    var seat = activeSeat;
+    var w = seat.offsetWidth, h = seat.offsetHeight;
+    var centerX = seat.offsetLeft + w / 2;
+    var centerY = seat.offsetTop + h / 2;
+    var rot = (parseFloat(seat.dataset.rot || "0") + delta) % 360;
+    seat.dataset.rot = rot;
+    seat.style.transformOrigin = "50% 50%";
+    seat.style.transform = "rotate(" + rot + "deg)";
+    seat.style.left = (centerX - w / 2) + "px";
+    seat.style.top = (centerY - h / 2) + "px";
+  }
+  document.getElementById("rotateL").onclick = function () { rotateSeat(-5); };
+  document.getElementById("rotateR").onclick = function () { rotateSeat(5); };
+  document.getElementById("deleteBtn").onclick = function () { if (activeSeat) { activeSeat.remove(); activeSeat = null; } };
   var measureLineEl = document.getElementById("measure-line");
   var measureBtn = document.getElementById("measuringToolBtn");
   if (measureLineEl && measureBtn) {
@@ -2249,6 +2323,7 @@ window.initRoomPlanner = function (opts) {
     group.dataset.isConfigGroup = "1";
     var minX = 1e9, minY = 1e9, maxX = 0, maxY = 0;
     var nPieces = cfg.pieces.length;
+    /* Curved: wedge pieces fan so diagonal aligns with straight edge of neighbor (5L-4L-6L); no vertical offset so pieces butt */
     var curvedArc = (cfg.layout === "curved" && nPieces > 1) ? (nPieces - 1) * 12 : 0;
     cfg.pieces.forEach(function (id, i) {
       var piece = pieceMap[id];
@@ -2379,22 +2454,6 @@ window.initRoomPlanner = function (opts) {
       activeSeat = null;
     };
   }
-  function rotateSeat(delta) {
-    if (!activeSeat) return;
-    var seat = activeSeat;
-    var w = seat.offsetWidth, h = seat.offsetHeight;
-    var centerX = seat.offsetLeft + w / 2;
-    var centerY = seat.offsetTop + h / 2;
-    var rot = (parseFloat(seat.dataset.rot || "0") + delta) % 360;
-    seat.dataset.rot = rot;
-    seat.style.transformOrigin = "50% 50%";
-    seat.style.transform = "rotate(" + rot + "deg)";
-    seat.style.left = (centerX - w / 2) + "px";
-    seat.style.top = (centerY - h / 2) + "px";
-  }
-  document.getElementById("rotateL").onclick = function () { rotateSeat(-5); };
-  document.getElementById("rotateR").onclick = function () { rotateSeat(5); };
-  document.getElementById("deleteBtn").onclick = function () { if (activeSeat) { activeSeat.remove(); activeSeat = null; } };
   function serializeLayout() {
     var list = [];
     document.querySelectorAll("#roomPlannerApp .seat").forEach(function (seat) {
@@ -3170,10 +3229,10 @@ body.mc-product-page #content_area #mcLeatherSwatchStrip img {
   color: #111 !important;
 }
 
-/* options: match desktop look on mobile (table layout, same structure) */
+/* Hide all options tables - options handled by custom UI */
 body.mc-product-page #content_area #options_table,
 body.mc-product-page #content_area table[id*="options_table"] {
-  width: 100% !important;
+  display: none !important;
 }
 body.mc-product-page #content_area .wm-swatch {
   border: 1px solid #ddd !important;
@@ -3238,9 +3297,32 @@ body.mc-product-page #content_area .wm-swatch img {
   body.mc-product-page #content_area .main-image {
     overflow: hidden !important;
   }
+
+  body.mc-product-page #content_area #product_photo img,
+  body.mc-product-page #content_area .vcss_img_wrap img,
+  body.mc-product-page #content_area .main-image img,
+  body.mc-product-page #content_area img#main-image {
+    min-width: 500px !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  body.mc-product-page #content_area #options_table,
+  body.mc-product-page #content_area table[id*="options_table"] {
+    display: none !important;
+  }
+
+  body.mc-product-page #content_area #v65-product-parent td,
+  body.mc-product-page #content_area .product_sale_price,
+  body.mc-product-page #content_area .v65-product-price,
+  body.mc-product-page #content_area #priceWithOptions,
+  body.mc-product-page #content_area .product_productname,
+  body.mc-product-page #content_area .option_pricing {
+    text-align: left !important;
+  }
 }
 
-/* Stack media above options from 962px down */
+/* Stack media above options from 962px down (so 962px = stacked + desktop-style options) */
 @media (max-width: 991px){
   body.mc-product-page #content_area .mc-pdp-media-td,
   body.mc-product-page #content_area .mc-pdp-options-td {
@@ -3259,17 +3341,6 @@ body.mc-product-page #content_area .wm-swatch img {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-  }
-
-  body.mc-product-page #content_area .mc-pdp-media-td,
-  body.mc-product-page #content_area [id*="product_photo_td"],
-  body.mc-product-page #content_area td:has(#product_photo),
-  body.mc-product-page #content_area td:has(.vcss_img_wrap),
-  body.mc-product-page #content_area td:has(.main-image) {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    width: 100% !important;
   }
 
   body.mc-product-page #content_area #product_photo,
@@ -3300,7 +3371,18 @@ body.mc-product-page #content_area .wm-swatch img {
     margin: 0 auto !important;
   }
 
-  /* Alt images: same width as main image area, centered; 4 per row; heavier padding between thumbnails */
+  /* Mobile: main image centered first, then alt images – up to 4 per row, single centered column */
+  body.mc-product-page #content_area .mc-pdp-media-td,
+  body.mc-product-page #content_area [id*="product_photo_td"],
+  body.mc-product-page #content_area td:has(#product_photo),
+  body.mc-product-page #content_area td:has(.vcss_img_wrap),
+  body.mc-product-page #content_area td:has(.main-image) {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+  /* Alt images: centered under main, 4 per row with wrap */
   body.mc-product-page #content_area #altviews,
   body.mc-product-page #content_area .altviews,
   body.mc-product-page #content_area span#altviews {
@@ -3309,10 +3391,10 @@ body.mc-product-page #content_area .wm-swatch img {
     flex-wrap: wrap !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 14px !important;
+    gap: 10px !important;
     margin: 12px auto 16px auto !important;
     padding: 0 !important;
-    width: 100% !important;
+    width: 286px !important;
     max-width: 100% !important;
     float: none !important;
     clear: both !important;
@@ -4169,7 +4251,7 @@ body.mc-product-page #content_area .wm-swatch img {
     if (!img) return;
     img.style.setProperty('display', 'block', 'important');
     img.style.setProperty('margin', '0 auto', 'important');
-    img.style.setProperty('width', 'auto', 'important');
+    img.style.setProperty('width', '100%', 'important');
     img.style.setProperty('max-width', '100%', 'important');
     img.style.setProperty('height', 'auto', 'important');
   }
@@ -4177,26 +4259,26 @@ body.mc-product-page #content_area .wm-swatch img {
   function syncAltviewsToMainImage(scope){
     if (!isMobile()) return;
     var thumbs = q('#altviews', scope) || q('span#altviews', scope) || q('.altviews', scope);
-    var mainWrap = q('#product_photo', scope) || q('.vcss_img_wrap', scope) || q('.vCSS_img_wrap', scope) || q('.main-image', scope);
-    var mainImg = q('img#product_photo', scope) || q('#product_photo img', scope) || q('img#main-image', scope) || (mainWrap ? q('img', mainWrap) : null);
-    if (!thumbs || !mainImg) return;
-    var w = Math.max(0, Math.floor(mainImg.getBoundingClientRect().width || 0));
-    if (!w) return;
+    if (!thumbs) return;
     var parent = thumbs.parentElement;
     if (parent) {
-      parent.style.setProperty('display', 'block', 'important');
+      parent.style.setProperty('display', 'flex', 'important');
+      parent.style.setProperty('flex-direction', 'column', 'important');
+      parent.style.setProperty('align-items', 'center', 'important');
       parent.style.setProperty('width', '100%', 'important');
-      parent.style.setProperty('text-align', 'center', 'important');
     }
-    thumbs.style.setProperty('width', w + 'px', 'important');
-    thumbs.style.setProperty('max-width', w + 'px', 'important');
+    thumbs.style.setProperty('display', 'flex', 'important');
+    thumbs.style.setProperty('flex-wrap', 'wrap', 'important');
+    thumbs.style.setProperty('justify-content', 'center', 'important');
+    thumbs.style.setProperty('gap', '10px', 'important');
+    thumbs.style.setProperty('width', '286px', 'important');
+    thumbs.style.setProperty('max-width', '100%', 'important');
     thumbs.style.setProperty('margin-left', 'auto', 'important');
     thumbs.style.setProperty('margin-right', 'auto', 'important');
     thumbs.style.setProperty('float', 'none', 'important');
     thumbs.style.setProperty('left', 'auto', 'important');
     thumbs.style.setProperty('right', 'auto', 'important');
     thumbs.style.setProperty('transform', 'none', 'important');
-    thumbs.style.setProperty('justify-content', 'center', 'important');
   }
 
   function wireAltThumbClicks(scope){
@@ -4208,18 +4290,8 @@ body.mc-product-page #content_area .wm-swatch img {
       link.setAttribute('data-mc-thumb-bound', '1');
 
       link.addEventListener('click', function(e){
-        if (!isMobile()) return;
-
         e.preventDefault();
-
-        var thumbImg = q('img', link);
-        var match = thumbImg && thumbImg.id ? thumbImg.id.match(/alternate_product_photo_(\d+)/i) : null;
-        var index = match ? parseInt(match[1], 10) : null;
-
-        if (index && typeof window.change_product_photo === 'function') {
-          window.change_product_photo(index);
-          return;
-        }
+        e.stopPropagation();
 
         var main =
           q('img#product_photo', scope) ||
@@ -4228,7 +4300,12 @@ body.mc-product-page #content_area .wm-swatch img {
 
         if (!main) return;
 
+        var thumbImg = q('img', link);
         var href = link.getAttribute('href');
+        if (!href && thumbImg) {
+          href = thumbImg.getAttribute('src') || '';
+          href = href.replace(/-\d+T\./, '-1T.').replace(/\/thumbnails\//, '/');
+        }
         if (!href) return;
 
         main.setAttribute('src', href);
@@ -4272,7 +4349,7 @@ body.mc-product-page #content_area .wm-swatch img {
     mainImgs.forEach(function(img){
       img.style.setProperty('width','100%','important');
       img.style.setProperty('max-width','980px','important');
-      img.style.setProperty('min-width','0','important');
+      img.style.setProperty('min-width','500px','important');
       img.style.setProperty('height','auto','important');
       img.style.setProperty('object-fit','contain','important');
       img.style.setProperty('display','block','important');
@@ -4611,22 +4688,64 @@ body.mc-product-page #content_area .wm-swatch img {
     }
   }
 
+  function hideOptionsTable(scope){
+    var root = scope || document;
+    var tables = qa('#options_table, table[id*="options_table"]', root);
+    tables.forEach(function(t){ t.style.setProperty('display','none','important'); });
+  }
+
+  function rearrangePriceCaption(scope){
+    var root = scope || document;
+    if (root.querySelector('.mc-price-caption-moved')) return;
+    var allTds = qa('td, div, span, p, b, font', root);
+    var lowestEl = null;
+    var priceLabel = null;
+    for (var i = 0; i < allTds.length; i++){
+      var txt = (allTds[i].textContent || '').trim().toLowerCase();
+      if (!lowestEl && /add to cart for our lowest price/i.test(txt) && allTds[i].children.length < 3) lowestEl = allTds[i];
+      if (!priceLabel && /price with selected options/i.test(txt) && allTds[i].children.length < 3) priceLabel = allTds[i];
+    }
+    if (lowestEl && priceLabel) {
+      var priceParent = priceLabel.parentNode;
+      if (priceParent) {
+        priceParent.insertBefore(lowestEl, priceLabel.nextSibling);
+        lowestEl.classList.add('mc-price-caption-moved');
+        lowestEl.style.setProperty('font-size','12px','important');
+        lowestEl.style.setProperty('color','#999','important');
+        lowestEl.style.setProperty('margin-top','2px','important');
+        lowestEl.style.setProperty('display','block','important');
+      }
+    }
+  }
+
+  function leftAlignPricingBlock(scope){
+    var root = scope || document;
+    var sels = [
+      '#v65-product-parent td',
+      '.product_sale_price', '.v65-product-price', '#priceWithOptions',
+      '.product_productname', '.product_description',
+      '.option_pricing', '.product_list_price'
+    ];
+    qa(sels.join(','), root).forEach(function(el){
+      el.style.setProperty('text-align','left','important');
+    });
+  }
+
   function forceProductFixes() {
     if (!markProductPage()) return;
     var scope = document.querySelector('#content_area') || document.body;
     forceNoItalics(scope);
-    forceOptionLabel(scope);
     hideLegacyOptionQuestions(scope);
     forceTabsInline(scope);
     forceMediaLayout(scope);
     removeConfigurationDetails(scope);
-    tagOptionRows(scope);
-    wrapSelectsAsAccordions(scope);
-    sizeSelectsToLongestOption(scope);
+    hideOptionsTable(scope);
     enforceMobileGutters(scope);
     clampFloatingIcons();
     clearAddToCartWrapperBackground(scope);
     injectAddToCartIcon(scope);
+    rearrangePriceCaption(scope);
+    leftAlignPricingBlock(scope);
   }
 
   function boot() {
