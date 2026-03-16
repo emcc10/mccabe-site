@@ -2916,6 +2916,10 @@ body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart
   border-radius: 0 !important;
   background: transparent !important;
   background-color: transparent !important;
+  background-image: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  box-shadow: none !important;
   color: inherit !important;
   font-size: inherit !important;
   font-weight: inherit !important;
@@ -3970,13 +3974,7 @@ body.mc-product-page #content_area .wm-swatch img {
       if (!hasField && (normalized === 'choose cover' || normalized === 'choose leather')) {
         el.textContent = 'SELECT A LEATHER:';
       }
-      // Hide duplicate legacy labels that sit above the RH-style accordions when they are pure text
-      if (!hasField && /^straight or curved\??$/.test(normalized)) {
-        el.style.setProperty('display', 'none', 'important');
-      }
-      if (!hasField && /(number of seats|number of chairs|seats per row)/.test(normalized)) {
-        el.style.setProperty('display', 'none', 'important');
-      }
+      // keep labels visible so desktop option headers always render
     });
   }
 
@@ -4103,6 +4101,20 @@ body.mc-product-page #content_area .wm-swatch img {
     img.style.setProperty('height', 'auto', 'important');
   }
 
+  function syncAltviewsToMainImage(scope){
+    if (!isMobile()) return;
+    var thumbs = q('#altviews', scope) || q('span#altviews', scope) || q('.altviews', scope);
+    var mainWrap = q('#product_photo', scope) || q('.vcss_img_wrap', scope) || q('.vCSS_img_wrap', scope) || q('.main-image', scope);
+    var mainImg = q('img#product_photo', scope) || q('#product_photo img', scope) || q('img#main-image', scope) || (mainWrap ? q('img', mainWrap) : null);
+    if (!thumbs || !mainImg) return;
+    var w = Math.max(0, Math.floor(mainImg.getBoundingClientRect().width || 0));
+    if (!w) return;
+    thumbs.style.setProperty('max-width', w + 'px', 'important');
+    thumbs.style.setProperty('margin-left', 'auto', 'important');
+    thumbs.style.setProperty('margin-right', 'auto', 'important');
+    thumbs.style.setProperty('justify-content', 'center', 'important');
+  }
+
   function wireAltThumbClicks(scope){
     var thumbsRoot = q('#altviews', scope) || q('span#altviews', scope);
     if (!thumbsRoot) return;
@@ -4150,6 +4162,7 @@ body.mc-product-page #content_area .wm-swatch img {
       unwrapDesktopMediaWrap(scope);
       stackMediaAbovePricing(scope);
       centerMainImageMobile(scope);
+      syncAltviewsToMainImage(scope);
       return;
     }
 
@@ -4438,6 +4451,8 @@ body.mc-product-page #content_area .wm-swatch img {
       el.style.setProperty('background', 'transparent', 'important');
       el.style.setProperty('background-color', 'transparent', 'important');
       el.style.setProperty('box-shadow', 'none', 'important');
+      el.style.setProperty('border', '0', 'important');
+      el.style.setProperty('padding', '0', 'important');
       el = el.parentElement;
     }
     var atcWrap = btn.closest('.mc-atc-button-wrap');
@@ -4449,6 +4464,12 @@ body.mc-product-page #content_area .wm-swatch img {
     }
     btn.style.setProperty('background', 'transparent', 'important');
     btn.style.setProperty('background-color', 'transparent', 'important');
+    btn.style.setProperty('background-image', 'none', 'important');
+    btn.style.setProperty('-webkit-appearance', 'none', 'important');
+    btn.style.setProperty('appearance', 'none', 'important');
+    btn.style.setProperty('box-shadow', 'none', 'important');
+    btn.style.setProperty('padding', '0', 'important');
+    btn.style.setProperty('margin', '0', 'important');
     btn.style.setProperty('border', 'none', 'important');
     btn.style.setProperty('color', 'inherit', 'important');
   }
@@ -4458,8 +4479,31 @@ body.mc-product-page #content_area .wm-swatch img {
     var root = scope || document;
     var btn = root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
     if (!btn) return;
+    if (btn.tagName === 'INPUT' && (btn.type || '').toLowerCase() === 'image') {
+      try { btn.type = 'submit'; } catch (e) {}
+      btn.removeAttribute('src');
+      if (!btn.value) btn.value = 'ADD TO CART';
+    }
     var existingWrap = btn.closest('.mc-atc-button-wrap');
-    if (existingWrap) return;
+    if (existingWrap) {
+      var hasIcon = !!existingWrap.querySelector('.mc-cart-icon-wrapper');
+      if (!hasIcon) {
+        var iconWrapExisting = document.createElement('span');
+        iconWrapExisting.innerHTML = cartIconSvg;
+        iconWrapExisting.classList.add('mc-cart-icon-wrapper');
+        existingWrap.appendChild(iconWrapExisting);
+      }
+      existingWrap.style.setProperty('display', 'inline-flex', 'important');
+      existingWrap.style.setProperty('align-items', 'center', 'important');
+      existingWrap.style.setProperty('gap', '8px', 'important');
+      var parentExisting = existingWrap.parentNode;
+      if (parentExisting && parentExisting.children) {
+        Array.prototype.slice.call(parentExisting.children).forEach(function(child){
+          if (child !== existingWrap && child.classList && child.classList.contains('mc-cart-icon-wrapper')) child.remove();
+        });
+      }
+      return;
+    }
     var oldWrap = btn.closest('.mc-atc-wrap');
     if (oldWrap) {
       while (oldWrap.firstChild) oldWrap.parentNode.insertBefore(oldWrap.firstChild, oldWrap);
@@ -4475,7 +4519,15 @@ body.mc-product-page #content_area .wm-swatch img {
     iconWrap.innerHTML = cartIconSvg;
     iconWrap.classList.add('mc-cart-icon-wrapper');
     wrapper.appendChild(iconWrap);
+    wrapper.style.setProperty('display', 'inline-flex', 'important');
+    wrapper.style.setProperty('align-items', 'center', 'important');
+    wrapper.style.setProperty('gap', '8px', 'important');
     parent.classList.add('mc-atc-row');
+    if (parent && parent.children) {
+      Array.prototype.slice.call(parent.children).forEach(function(child){
+        if (child !== wrapper && child.classList && child.classList.contains('mc-cart-icon-wrapper')) child.remove();
+      });
+    }
   }
 
   function forceProductFixes() {
