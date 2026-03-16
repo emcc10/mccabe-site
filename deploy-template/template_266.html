@@ -385,7 +385,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp #shell { display:flex; flex-direction:row; gap:16px; flex:1; min-height:0; align-items:flex-start; }
 
         /* Left panel: compact room dims + measuring tool */
-        #roomPlannerApp #planner-left { width:120px; flex-shrink:0; display:flex; flex-direction:column; gap:10px; padding-top:4px; }
+        #roomPlannerApp #planner-left { width:150px; flex-shrink:0; display:flex; flex-direction:column; gap:10px; padding-top:4px; }
         #roomPlannerApp .room-dims-block { display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
         #roomPlannerApp .room-dims-row { display:flex; flex-wrap:nowrap; align-items:baseline; gap:4px; }
         #roomPlannerApp .room-dims-row label { font-size:12px; font-weight:600; color:#333; margin:0; }
@@ -405,8 +405,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         /* Center: grid + toolbar */
         #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:0; padding-top:0; overflow:visible; }
-        #roomPlannerApp #room-wrapper { flex:0 0 auto; min-height:0; display:flex; align-items:flex-start; justify-content:center; width:100%; overflow:auto; max-width:100%; }
-        #roomPlannerApp #room { position:relative; border:1px solid #bbb; background:#fff; min-width:280px; min-height:180px; flex-shrink:0; }
+        #roomPlannerApp #room-wrapper { flex:0 0 auto; min-height:0; display:flex; align-items:flex-start; justify-content:center; width:100%; }
+        #roomPlannerApp #room { position:relative; border:2px solid #999; background:#fff; min-width:280px; min-height:180px; flex-shrink:0; box-sizing:content-box; }
         #roomPlannerApp .room-grid-layer { position:absolute; inset:0; z-index:0; background-image: linear-gradient(to right, rgba(0,0,0,.10) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,.10) 1px, transparent 1px); background-size: var(--grid-size) var(--grid-size); pointer-events:none; }
         #roomPlannerApp .room-dim { position:absolute; font-size:12px; font-weight:600; background:#fff; padding:3px 7px; color:#333; z-index:15; border:1px solid #ccc; border-radius:3px; box-shadow:0 1px 2px rgba(0,0,0,.06); }
         #roomPlannerApp #dim-top { top:4px; left:50%; transform:translateX(-50%); }
@@ -2047,17 +2047,6 @@ window.initRoomPlanner = function (opts) {
     dimLeft.textContent = (dFt ? dFt + " ft " : "") + (dIn ? dIn + " in" : (dFt ? "" : "0 in"));
     var measEl = document.getElementById("room-measurement");
     if (measEl) measEl.innerHTML = "Room: " + (wFt ? wFt + "&prime;" : "") + (wIn ? " " + wIn + "&Prime;" : "") + " &times; " + (dFt ? dFt + "&prime;" : "") + (dIn ? " " + dIn + "&Prime;" : "");
-    var modal = document.querySelector(".mc-planner-modal");
-    if (modal) {
-      var leftW = 120, rightW = 240, gaps = 56;
-      var needed = wPx + leftW + rightW + gaps;
-      var maxVw = Math.floor(window.innerWidth * 0.98);
-      modal.style.width = Math.min(Math.max(needed, 900), maxVw) + "px";
-      var maxVh = Math.floor(window.innerHeight * 0.98);
-      var trayH = 120, toolbarH = 60, chrome = 60;
-      var neededH = hPx + trayH + toolbarH + chrome;
-      modal.style.height = Math.min(Math.max(neededH, Math.floor(window.innerHeight * 0.8)), maxVh) + "px";
-    }
   }
   if (roomW_ft) roomW_ft.value = "16";
   if (roomW_in) roomW_in.value = "0";
