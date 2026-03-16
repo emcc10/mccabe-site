@@ -402,17 +402,19 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp #room-wrapper { flex:1; min-height:0; display:flex; align-items:flex-start; justify-content:center; width:100%; }
         #roomPlannerApp #room { position:relative; border:3px solid #ccc; background:#fff; min-width:280px; min-height:180px; flex-shrink:0; }
         #roomPlannerApp .room-grid-layer { position:absolute; inset:0; z-index:0; background-image: linear-gradient(to right, rgba(0,0,0,.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,.12) 1px, transparent 1px); background-size: var(--grid-size) var(--grid-size); pointer-events:none; }
-        #roomPlannerApp .room-dim { display:none; }
-        #roomPlannerApp .seat { position:absolute; cursor:grab; overflow:hidden; display:flex; align-items:center; justify-content:center; margin:0; box-sizing:border-box; z-index:5; transform-origin:50% 50%; }
+        #roomPlannerApp .room-dim { position:absolute; font-size:12px; font-weight:600; background:#fff; padding:4px 8px; color:#333; z-index:15; border:1px solid #ccc; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+        #roomPlannerApp #dim-top { top:6px; left:50%; transform:translateX(-50%); }
+        #roomPlannerApp #dim-left { left:6px; top:50%; transform:translateY(-50%) rotate(-90deg); }
+        #roomPlannerApp .seat { position:absolute; cursor:grab; overflow:hidden; margin:0; box-sizing:border-box; z-index:5; transform-origin:50% 50%; }
         #roomPlannerApp .config-group .seat { margin:0; }
         #roomPlannerApp .config-group { z-index:5; }
         #roomPlannerApp .seat:active { cursor:grabbing; }
         #roomPlannerApp .seat.active { outline:2px dashed #3b82f6; }
-        #roomPlannerApp #room .seat img { position:absolute; inset:0; width:100% !important; height:100% !important; max-width:none !important; max-height:none !important; object-fit:fill !important; object-position:center center; display:block; pointer-events:none; }
-        #roomPlannerApp .seat .seat-name { position:relative; z-index:2; font-size:12px; color:rgba(100,100,100,.85); pointer-events:none; text-align:center; text-shadow:0 0 2px #fff, 0 1px 2px #fff; }
+        #roomPlannerApp #room .seat img { position:absolute !important; left:0 !important; top:0 !important; width:100% !important; height:100% !important; max-width:none !important; max-height:none !important; min-width:100% !important; min-height:100% !important; object-fit:fill !important; object-position:center center; display:block; pointer-events:none; }
+        #roomPlannerApp .seat .seat-name { position:absolute; bottom:2px; left:0; right:0; z-index:2; font-size:10px; color:rgba(100,100,100,.85); pointer-events:none; text-align:center; text-shadow:0 0 2px #fff, 0 1px 2px #fff; }
         #roomPlannerApp .config-group { cursor:grab; }
         #roomPlannerApp .config-group:active { cursor:grabbing; }
-        #roomPlannerApp #toolbar { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:4px; padding-top:4px; flex-shrink:0; visibility:visible; }
+        #roomPlannerApp #toolbar { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:2px; padding-top:2px; flex-shrink:0; visibility:visible; }
         #roomPlannerApp #toolbar button, #roomPlannerApp #planner-left button { padding:6px 12px; border:1px solid #ccc; background:#f7f7f7; cursor:pointer; font-size:12px; border-radius:4px; }
         #roomPlannerApp #toolbar button:hover, #roomPlannerApp #planner-left button:hover { background:#eee; }
         #roomPlannerApp #planner-right { width:220px; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; border-left:1px solid #eee; padding-left:12px; align-self:flex-start; margin-top:96px; }
@@ -425,7 +427,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp #measure-line.show { display:block; pointer-events:auto; }
         #roomPlannerApp #measure-line svg { position:absolute; left:0; top:0; width:100%; height:100%; display:block; pointer-events:none; }
         #roomPlannerApp #measure-line line { stroke:#2196F3; stroke-width:2; }
-        #roomPlannerApp #measure-line .measure-handle { stroke:#2196F3; stroke-width:3; cursor:grab; pointer-events:auto; }
+        #roomPlannerApp #measure-line .measure-handle { fill:#2196F3; stroke:#1565C0; stroke-width:1; cursor:grab; pointer-events:auto; }
         #roomPlannerApp #measure-line .measure-handle:active { cursor:grabbing; }
         #roomPlannerApp #measure-label-box { position:absolute; pointer-events:none; background:#fff; border:1px solid #2196F3; border-radius:4px; padding:3px 8px; font-size:12px; font-weight:600; color:#333; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,.2); z-index:10; transform:translate(-50%, -100%); min-width:3em; text-align:center; }
         #roomPlannerApp .config-group { position:relative; }
@@ -453,7 +455,7 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
             <div id="room-wrapper">
               <div id="room"><div class="room-grid-layer" aria-hidden="true"></div><div id="dim-top" class="room-dim"></div><div id="dim-left" class="room-dim"></div>
-                <div id="measure-line"><svg id="measure-svg" xmlns="http://www.w3.org/2000/svg"><line id="measure-line-seg" x1="50" y1="50" x2="200" y2="150"/><line id="measure-handle-l" class="measure-handle" x1="46.67" y1="45" x2="53.33" y2="55"/><line id="measure-handle-r" class="measure-handle" x1="196.67" y1="155" x2="203.33" y2="145"/></svg><div id="measure-label-box">0 in</div></div>
+                <div id="measure-line"><svg id="measure-svg" xmlns="http://www.w3.org/2000/svg"><line id="measure-line-seg" x1="50" y1="50" x2="200" y2="150"/><rect id="measure-handle-l" class="measure-handle" x="38" y="38" width="24" height="24" rx="2"/><rect id="measure-handle-r" class="measure-handle" x="188" y="138" width="24" height="24" rx="2"/></svg><div id="measure-label-box">0 in</div></div>
               </div>
             </div>
             <div id="toolbar"><button id="clearLayoutBtn">Clear layout</button><button id="rotateL">Rotate ⟲</button><button id="rotateR">Rotate ⟳</button><button id="deleteBtn">Delete</button><button id="saveLayout">Save Layout</button><button id="addConfigBtn">Add configuration</button></div>
@@ -1992,27 +1994,33 @@ window.initRoomPlanner = function (opts) {
   }
   function makeDraggable(el) {
     el.addEventListener("mousedown", function (e) {
+      if (e.button !== 0) return;
       e.preventDefault();
       e.stopPropagation();
       setActive(el);
-      var parent = el.offsetParent;
-      if (!parent) return;
+      var parent = el.parentElement;
+      if (!parent || parent !== room) return;
       var pr = parent.getBoundingClientRect();
-      var offsetX = e.clientX - (pr.left + el.offsetLeft);
-      var offsetY = e.clientY - (pr.top + el.offsetTop);
+      var elRect = el.getBoundingClientRect();
+      var offsetX = e.clientX - elRect.left;
+      var offsetY = e.clientY - elRect.top;
       function move(ev) {
         ev.preventDefault();
+        ev.stopPropagation();
         var pr2 = parent.getBoundingClientRect();
-        el.style.left = (ev.clientX - pr2.left - offsetX) + "px";
-        el.style.top = (ev.clientY - pr2.top - offsetY) + "px";
+        var newLeft = ev.clientX - pr2.left - offsetX;
+        var newTop = ev.clientY - pr2.top - offsetY;
+        el.style.left = Math.round(newLeft) + "px";
+        el.style.top = Math.round(newTop) + "px";
       }
-      function up() {
-        document.removeEventListener("mousemove", move);
-        document.removeEventListener("mouseup", up);
+      function up(ev) {
+        ev.preventDefault();
+        document.removeEventListener("mousemove", move, true);
+        document.removeEventListener("mouseup", up, true);
       }
-      document.addEventListener("mousemove", move);
-      document.addEventListener("mouseup", up);
-    });
+      document.addEventListener("mousemove", move, true);
+      document.addEventListener("mouseup", up, true);
+    }, true);
   }
   function applySeatTransform(seat) {
     var img = seat.querySelector("img");
@@ -2148,28 +2156,29 @@ window.initRoomPlanner = function (opts) {
         var rw = room.offsetWidth || 400, rh = room.offsetHeight || 300;
         var x1 = 50, y1 = 50, x2 = Math.min(200, rw - 50), y2 = Math.min(150, rh - 50);
         mlSeg.setAttribute("x1", x1); mlSeg.setAttribute("y1", y1); mlSeg.setAttribute("x2", x2); mlSeg.setAttribute("y2", y2);
-        setHandleCenter(mlHL, x1, y1, mlHR); setHandleCenter(mlHR, x2, y2, mlHL);
+        setHandleCenter(mlHL, x1, y1); setHandleCenter(mlHR, x2, y2);
         setTimeout(updateMeasureLabel, 0);
         var dragging = null;
         function move(ev) {
           if (!dragging) return;
           ev.preventDefault();
+          ev.stopPropagation();
           var r = room.getBoundingClientRect();
           var x = ev.clientX - r.left, y = ev.clientY - r.top;
           x = Math.max(12, Math.min(room.offsetWidth - 12, x));
           y = Math.max(12, Math.min(room.offsetHeight - 12, y));
           if (dragging === "l") {
             mlSeg.setAttribute("x1", x); mlSeg.setAttribute("y1", y);
-            setHandleCenter(mlHL, x, y, mlHR);
+            setHandleCenter(mlHL, x, y);
           } else {
             mlSeg.setAttribute("x2", x); mlSeg.setAttribute("y2", y);
-            setHandleCenter(mlHR, x, y, mlHL);
+            setHandleCenter(mlHR, x, y);
           }
           updateMeasureLabel();
         }
-        function up(ev) { ev.preventDefault(); dragging = null; document.removeEventListener("mousemove", move); document.removeEventListener("mouseup", up); }
-        mlHL.onmousedown = function (e) { e.preventDefault(); e.stopPropagation(); dragging = "l"; document.addEventListener("mousemove", move); document.addEventListener("mouseup", up); };
-        mlHR.onmousedown = function (e) { e.preventDefault(); e.stopPropagation(); dragging = "r"; document.addEventListener("mousemove", move); document.addEventListener("mouseup", up); };
+        function up(ev) { ev.preventDefault(); dragging = null; document.removeEventListener("mousemove", move, true); document.removeEventListener("mouseup", up, true); }
+        mlHL.addEventListener("mousedown", function (e) { e.preventDefault(); e.stopPropagation(); dragging = "l"; document.addEventListener("mousemove", move, true); document.addEventListener("mouseup", up, true); }, true);
+        mlHR.addEventListener("mousedown", function (e) { e.preventDefault(); e.stopPropagation(); dragging = "r"; document.addEventListener("mousemove", move, true); document.addEventListener("mouseup", up, true); }, true);
       }
     };
   }
@@ -2260,16 +2269,25 @@ window.initRoomPlanner = function (opts) {
   function makeConfigGroupDraggable(group) {
     group.addEventListener("mousedown", function (e) {
       if (e.target.closest(".measure-handle") || e.target.closest("#measure-line") || e.target.closest(".config-group-detach")) return;
+      if (e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
       setActive(null);
       var sx = e.clientX, sy = e.clientY, ox = group.offsetLeft, oy = group.offsetTop;
       function move(ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
         group.style.left = (ox + ev.clientX - sx) + "px";
         group.style.top = (oy + ev.clientY - sy) + "px";
       }
-      function up() { document.removeEventListener("mousemove", move); document.removeEventListener("mouseup", up); }
-      document.addEventListener("mousemove", move);
-      document.addEventListener("mouseup", up);
-    });
+      function up(ev) {
+        ev.preventDefault();
+        document.removeEventListener("mousemove", move, true);
+        document.removeEventListener("mouseup", up, true);
+      }
+      document.addEventListener("mousemove", move, true);
+      document.addEventListener("mouseup", up, true);
+    }, true);
   }
   function detachConfigGroup(groupEl) {
     var group = groupEl && groupEl.nodeType === 1 ? groupEl : room.querySelector(".config-group");
@@ -2663,32 +2681,15 @@ body.mc-product-page #content_area td.productoptionname {
   padding-left: 0 !important;
 }
 
-/* options table: cleaner look for configuration / dropdowns */
+/* options: match desktop look on mobile (table layout, same structure) */
 body.mc-product-page #content_area #options_table,
 body.mc-product-page #content_area table[id*="options_table"] {
-  border-collapse: collapse !important;
   width: 100% !important;
 }
-body.mc-product-page #content_area #options_table td,
-body.mc-product-page #content_area table[id*="options_table"] td {
-  padding: 10px 12px !important;
-  vertical-align: middle !important;
-  border-bottom: 1px solid #eee !important;
-}
-body.mc-product-page #content_area #options_table select,
-body.mc-product-page #content_area table[id*="options_table"] select {
-  padding: 8px 12px !important;
-  border: 1px solid #ccc !important;
-  border-radius: 6px !important;
-  background: #fff !important;
-  font-size: 14px !important;
-  min-width: 120px !important;
-}
 body.mc-product-page #content_area .wm-swatch {
-  border: 2px solid #ddd !important;
-  border-radius: 8px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 6px !important;
   overflow: hidden !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,.08) !important;
 }
 body.mc-product-page #content_area .wm-swatch img {
   width: 100% !important;
@@ -2765,6 +2766,9 @@ body.mc-product-page #content_area .wm-swatch img {
     margin: 0 0 12px 0 !important;
     padding: 0 !important;
     clear: both !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
   }
 
   body.mc-product-page #content_area #product_photo,
@@ -2780,6 +2784,7 @@ body.mc-product-page #content_area .wm-swatch img {
     clear: both !important;
     text-align: center !important;
     box-sizing: border-box !important;
+    order: 1 !important;
   }
 
   body.mc-product-page #content_area #product_photo img,
@@ -2794,19 +2799,21 @@ body.mc-product-page #content_area .wm-swatch img {
     margin: 0 auto !important;
   }
 
-  /* Mobile: alt images in a row beneath main image */
+  /* Mobile: main image centered first, then alt images in a horizontal row beneath */
   body.mc-product-page #content_area #altviews,
   body.mc-product-page #content_area .altviews,
   body.mc-product-page #content_area [id*="altview"] {
     display: flex !important;
+    flex-direction: row !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
     gap: 8px !important;
-    margin: 0 auto 16px auto !important;
+    margin: 12px auto 16px auto !important;
     padding: 0 !important;
     width: 100% !important;
     float: none !important;
     clear: both !important;
+    order: 2 !important;
   }
   body.mc-product-page #content_area #altviews img,
   body.mc-product-page #content_area .altviews img,
