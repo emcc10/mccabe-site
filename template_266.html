@@ -389,7 +389,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp .common-config:hover { border-color:#888; background:#f0f0f0; }
         #roomPlannerApp .common-config-thumb { display:flex; flex-direction:row; align-items:center; justify-content:center; gap:3px; width:100%; height:100%; padding:0 6px; box-sizing:border-box; }
         #roomPlannerApp .common-config-thumb img { width:auto; height:100%; max-height:58px; max-width:80px; object-fit:contain; display:block; flex-shrink:0; }
-        #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:0; padding-top:8px; overflow-y:auto; }
+        #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:0; padding-top:8px; overflow:hidden; }
         #roomPlannerApp #tray-row { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; max-width:900px; flex-shrink:0; margin-bottom:6px; }
         #roomPlannerApp #tray { display:flex; align-items:center; gap:8px; flex:1; min-width:0; }
         #roomPlannerApp .tray-nav { width:32px; height:32px; border:1px solid #ddd; border-radius:18px; background:#f6f6f6; cursor:pointer; flex-shrink:0; font-size:16px; line-height:1; padding:0; }
@@ -405,12 +405,12 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp .room-dim { position:absolute; font-size:12px; font-weight:600; background:#fff; padding:4px 8px; color:#333; z-index:15; border:1px solid #ccc; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
         #roomPlannerApp #dim-top { top:6px; left:50%; transform:translateX(-50%); }
         #roomPlannerApp #dim-left { left:6px; top:50%; transform:translateY(-50%) rotate(-90deg); }
-        #roomPlannerApp .seat { position:absolute; cursor:grab; overflow:hidden; margin:0; box-sizing:border-box; z-index:5; transform-origin:50% 50%; }
+        #roomPlannerApp .seat { position:absolute; cursor:grab; overflow:hidden; margin:0; box-sizing:border-box; z-index:5; transform-origin:50% 50%; touch-action:none; }
         #roomPlannerApp .config-group .seat { margin:0; }
         #roomPlannerApp .config-group { z-index:5; }
         #roomPlannerApp .seat:active { cursor:grabbing; }
         #roomPlannerApp .seat.active { outline:2px dashed #3b82f6; }
-        #roomPlannerApp #room .seat img { position:absolute !important; left:0 !important; top:0 !important; width:100% !important; height:100% !important; max-width:none !important; max-height:none !important; min-width:100% !important; min-height:100% !important; object-fit:fill !important; object-position:center center; display:block; pointer-events:none; }
+        #roomPlannerApp #room .seat img { position:absolute !important; left:0 !important; top:0 !important; right:0 !important; bottom:0 !important; width:100% !important; height:100% !important; max-width:none !important; max-height:none !important; min-width:100% !important; min-height:100% !important; object-fit:fill !important; object-position:center center; display:block !important; pointer-events:none; }
         #roomPlannerApp .seat .seat-name { position:absolute; bottom:2px; left:0; right:0; z-index:2; font-size:10px; color:rgba(100,100,100,.85); pointer-events:none; text-align:center; text-shadow:0 0 2px #fff, 0 1px 2px #fff; }
         #roomPlannerApp .config-group { cursor:grab; }
         #roomPlannerApp .config-group:active { cursor:grabbing; }
@@ -2057,34 +2057,41 @@ window.initRoomPlanner = function (opts) {
     }).join("");
   }
   function makeDraggable(el) {
-    el.addEventListener("mousedown", function (e) {
-      if (e.button !== 0) return;
+    function startDrag(e) {
+      if (e.type === "mousedown" && e.button !== 0) return;
       e.preventDefault();
       e.stopPropagation();
       setActive(el);
       var parent = el.parentElement;
       if (!parent || parent !== room) return;
+      var clientX = e.clientX != null ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      var clientY = e.clientY != null ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
       var pr = parent.getBoundingClientRect();
       var elRect = el.getBoundingClientRect();
-      var offsetX = e.clientX - elRect.left;
-      var offsetY = e.clientY - elRect.top;
+      var offsetX = clientX - elRect.left;
+      var offsetY = clientY - elRect.top;
       function move(ev) {
         ev.preventDefault();
-        ev.stopPropagation();
+        var cx = ev.clientX != null ? ev.clientX : (ev.touches && ev.touches[0] ? ev.touches[0].clientX : 0);
+        var cy = ev.clientY != null ? ev.clientY : (ev.touches && ev.touches[0] ? ev.touches[0].clientY : 0);
         var pr2 = parent.getBoundingClientRect();
-        var newLeft = ev.clientX - pr2.left - offsetX;
-        var newTop = ev.clientY - pr2.top - offsetY;
-        el.style.left = Math.round(newLeft) + "px";
-        el.style.top = Math.round(newTop) + "px";
+        el.style.left = Math.round(cx - pr2.left - offsetX) + "px";
+        el.style.top = Math.round(cy - pr2.top - offsetY) + "px";
       }
       function up(ev) {
         ev.preventDefault();
-        document.removeEventListener("mousemove", move);
-        document.removeEventListener("mouseup", up);
+        document.removeEventListener("mousemove", move, true);
+        document.removeEventListener("mouseup", up, true);
+        document.removeEventListener("touchmove", move, true);
+        document.removeEventListener("touchend", up, true);
       }
       document.addEventListener("mousemove", move, true);
       document.addEventListener("mouseup", up, true);
-    }, true);
+      document.addEventListener("touchmove", move, { passive: false, capture: true });
+      document.addEventListener("touchend", up, true);
+    }
+    el.addEventListener("mousedown", startDrag, true);
+    el.addEventListener("touchstart", startDrag, { passive: false, capture: true });
   }
   function applySeatTransform(seat) {
     var img = seat.querySelector("img");
@@ -2746,6 +2753,115 @@ body.mc-product-page #content_area td.productoptionname {
   padding-left: 0 !important;
 }
 
+/* Prevent options running off at ~1205px */
+@media (max-width: 1205px) {
+  body.mc-product-page #content_area,
+  body.mc-product-page #content_area .product-details,
+  body.mc-product-page #content_area table[cellpadding] {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  body.mc-product-page #content_area #options_table,
+  body.mc-product-page #content_area table[id*="options_table"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+  }
+  body.mc-product-page #content_area .mc-pdp-options-td {
+    max-width: 100% !important;
+  }
+}
+
+/* At 962px and up: desktop-style options (native select + label), accordion UI hidden */
+@media (min-width: 962px) {
+  body.mc-product-page #content_area .mc-accordion-row td:first-child,
+  body.mc-product-page #content_area .mc-option-accordion + td:first-child {
+    display: table-cell !important;
+  }
+  body.mc-product-page #content_area .mc-option-accordion .mc-option-accordion__header,
+  body.mc-product-page #content_area .mc-option-accordion .mc-option-accordion__selected,
+  body.mc-product-page #content_area .mc-option-accordion .mc-option-accordion__panel {
+    display: none !important;
+  }
+  body.mc-product-page #content_area .mc-option-accordion .mc-option-accordion-native,
+  body.mc-product-page #content_area .mc-option-accordion select {
+    display: block !important;
+    visibility: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* At 961px and below: accordion only; panel closed by default; selected = one-line, not grey box */
+@media (max-width: 961px) {
+  body.mc-product-page #content_area .mc-option-accordion .mc-option-accordion-native,
+  body.mc-product-page #content_area .mc-option-accordion select {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    clip: rect(0,0,0,0) !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  body.mc-product-page #content_area .mc-option-accordion__header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    padding: 10px 0 !important;
+    border-bottom: 1px solid #eee !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+  }
+  body.mc-product-page #content_area .mc-option-accordion__toggle {
+    flex-shrink: 0 !important;
+    margin-left: 8px !important;
+    font-size: 1.2em !important;
+    border: 0 !important;
+    background: none !important;
+    cursor: pointer !important;
+    padding: 4px !important;
+  }
+  body.mc-product-page #content_area .mc-option-accordion__selected {
+    display: block !important;
+    padding: 4px 0 0 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    font-weight: normal !important;
+    font-size: 13px !important;
+    color: #333 !important;
+  }
+  body.mc-product-page #content_area .mc-option-accordion__panel {
+    display: none !important;
+    padding: 8px 0 12px 0 !important;
+    border: none !important;
+    background: transparent !important;
+  }
+  body.mc-product-page #content_area .mc-option-accordion__panel.mc-option-accordion__panel--open {
+    display: block !important;
+  }
+  body.mc-product-page #content_area .mc-option-accordion__choice {
+    display: block !important;
+    width: 100% !important;
+    text-align: left !important;
+    padding: 8px 12px !important;
+    margin: 0 0 4px 0 !important;
+    border: 1px solid #ddd !important;
+    border-radius: 6px !important;
+    background: #fff !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+  }
+  body.mc-product-page #content_area .mc-option-accordion__choice:hover {
+    background: #f5f5f5 !important;
+    border-color: #999 !important;
+  }
+}
+
 /* options: match desktop look on mobile (table layout, same structure) */
 body.mc-product-page #content_area #options_table,
 body.mc-product-page #content_area table[id*="options_table"] {
@@ -2816,6 +2932,7 @@ body.mc-product-page #content_area .wm-swatch img {
   }
 }
 
+/* Stack media above options from 962px down (so 962px = stacked + desktop-style options) */
 @media (max-width: 991px){
   body.mc-product-page #content_area .mc-pdp-media-td,
   body.mc-product-page #content_area .mc-pdp-options-td {
@@ -2865,13 +2982,25 @@ body.mc-product-page #content_area .wm-swatch img {
   }
 
   /* Mobile: main image centered first, then alt images in a horizontal row beneath */
+  body.mc-product-page #content_area .mc-pdp-media-td,
+  body.mc-product-page #content_area [id*="product_photo_td"],
+  body.mc-product-page #content_area td:has(#product_photo),
+  body.mc-product-page #content_area td:has(.vcss_img_wrap),
+  body.mc-product-page #content_area td:has(.main-image) {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
   body.mc-product-page #content_area #altviews,
   body.mc-product-page #content_area .altviews,
+  body.mc-product-page #content_area span#altviews,
   body.mc-product-page #content_area [id*="altview"] {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
+    align-items: center !important;
     gap: 8px !important;
     margin: 12px auto 16px auto !important;
     padding: 0 !important;
@@ -2879,6 +3008,15 @@ body.mc-product-page #content_area .wm-swatch img {
     float: none !important;
     clear: both !important;
     order: 2 !important;
+  }
+  body.mc-product-page #content_area #altviews a,
+  body.mc-product-page #content_area .altviews a,
+  body.mc-product-page #content_area #altviews > div,
+  body.mc-product-page #content_area .altviews > div,
+  body.mc-product-page #content_area [id*="altview"] a,
+  body.mc-product-page #content_area [id*="altview"] > div {
+    display: inline-block !important;
+    flex-shrink: 0 !important;
   }
   body.mc-product-page #content_area #altviews img,
   body.mc-product-page #content_area .altviews img,
