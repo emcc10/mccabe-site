@@ -2053,6 +2053,10 @@ window.initRoomPlanner = function (opts) {
       var needed = wPx + leftW + rightW + gaps;
       var maxVw = Math.floor(window.innerWidth * 0.98);
       modal.style.width = Math.min(Math.max(needed, 900), maxVw) + "px";
+      var maxVh = Math.floor(window.innerHeight * 0.98);
+      var trayH = 120, toolbarH = 60, chrome = 60;
+      var neededH = hPx + trayH + toolbarH + chrome;
+      modal.style.height = Math.min(Math.max(neededH, Math.floor(window.innerHeight * 0.8)), maxVh) + "px";
     }
   }
   if (roomW_ft) roomW_ft.value = "16";
@@ -2285,8 +2289,32 @@ window.initRoomPlanner = function (opts) {
         mlLabelBox.style.top = (my - 6) + "px";
       }
     }
+    var mlDragging = null;
+    function mlMove(ev) {
+      if (!mlDragging) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      var r = room.getBoundingClientRect();
+      var x = ev.clientX - r.left, y = ev.clientY - r.top;
+      x = Math.max(12, Math.min(room.offsetWidth - 12, x));
+      y = Math.max(12, Math.min(room.offsetHeight - 12, y));
+      if (mlDragging === "l") {
+        mlSeg.setAttribute("x1", x); mlSeg.setAttribute("y1", y);
+      } else {
+        mlSeg.setAttribute("x2", x); mlSeg.setAttribute("y2", y);
+      }
+      updateMeasureTicks();
+      updateMeasureLabel();
+    }
+    function mlUp(ev) { ev.preventDefault(); mlDragging = null; document.removeEventListener("mousemove", mlMove, true); document.removeEventListener("mouseup", mlUp, true); }
+    mlHL.addEventListener("mousedown", function (e) { e.preventDefault(); e.stopPropagation(); mlDragging = "l"; document.addEventListener("mousemove", mlMove, true); document.addEventListener("mouseup", mlUp, true); }, true);
+    mlHR.addEventListener("mousedown", function (e) { e.preventDefault(); e.stopPropagation(); mlDragging = "r"; document.addEventListener("mousemove", mlMove, true); document.addEventListener("mouseup", mlUp, true); }, true);
+    measureLineEl.style.pointerEvents = "none";
+    if (mlSvg) mlSvg.style.pointerEvents = "none";
+    if (mlLabelBox) mlLabelBox.style.pointerEvents = "none";
     measureBtn.onclick = function () {
       var on = measureLineEl.classList.toggle("show");
+      measureLineEl.style.pointerEvents = "none";
       if (on) {
         updateMeasureViewBox();
         var rw = room.offsetWidth || 400, rh = room.offsetHeight || 300;
@@ -2294,26 +2322,6 @@ window.initRoomPlanner = function (opts) {
         mlSeg.setAttribute("x1", x1); mlSeg.setAttribute("y1", y1); mlSeg.setAttribute("x2", x2); mlSeg.setAttribute("y2", y2);
         updateMeasureTicks();
         setTimeout(updateMeasureLabel, 0);
-        var dragging = null;
-        function move(ev) {
-          if (!dragging) return;
-          ev.preventDefault();
-          ev.stopPropagation();
-          var r = room.getBoundingClientRect();
-          var x = ev.clientX - r.left, y = ev.clientY - r.top;
-          x = Math.max(12, Math.min(room.offsetWidth - 12, x));
-          y = Math.max(12, Math.min(room.offsetHeight - 12, y));
-          if (dragging === "l") {
-            mlSeg.setAttribute("x1", x); mlSeg.setAttribute("y1", y);
-          } else {
-            mlSeg.setAttribute("x2", x); mlSeg.setAttribute("y2", y);
-          }
-          updateMeasureTicks();
-          updateMeasureLabel();
-        }
-        function up(ev) { ev.preventDefault(); dragging = null; document.removeEventListener("mousemove", move, true); document.removeEventListener("mouseup", up, true); }
-        mlHL.addEventListener("mousedown", function (e) { e.preventDefault(); e.stopPropagation(); dragging = "l"; document.addEventListener("mousemove", move, true); document.addEventListener("mouseup", up, true); }, true);
-        mlHR.addEventListener("mousedown", function (e) { e.preventDefault(); e.stopPropagation(); dragging = "r"; document.addEventListener("mousemove", move, true); document.addEventListener("mouseup", up, true); }, true);
       }
     };
   }
