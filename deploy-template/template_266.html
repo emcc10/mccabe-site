@@ -369,7 +369,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <style>
         #roomPlannerApp { font-family: Helvetica, Arial, sans-serif; background:#fff; isolation:isolate; }
         #roomPlannerApp #shell { display:flex; flex-direction:row; gap:12px; flex:1; min-height:0; }
-        #roomPlannerApp #planner-left { width:200px; flex-shrink:0; display:flex; flex-direction:column; gap:10px; overflow-y:auto; padding-top:100px; }
+        #roomPlannerApp #planner-left { width:200px; flex-shrink:0; display:flex; flex-direction:column; gap:10px; overflow-y:auto; padding-top:0; }
         #roomPlannerApp .room-dims-row { display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 6px; }
         #roomPlannerApp .room-dims-row label { font-size:11px; color:#555; margin:0 2px 0 0; }
         #roomPlannerApp .room-dims-row input[type="number"] { width:28px; padding:2px 0; font-size:12px; margin:0; border:none; border-bottom:1px solid #333; background:transparent; border-radius:0; text-align:center; -moz-appearance:textfield; }
@@ -417,7 +417,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp #toolbar { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:2px; padding-top:2px; flex-shrink:0; visibility:visible; }
         #roomPlannerApp #toolbar button, #roomPlannerApp #planner-left button { padding:6px 12px; border:1px solid #ccc; background:#f7f7f7; cursor:pointer; font-size:12px; border-radius:4px; }
         #roomPlannerApp #toolbar button:hover, #roomPlannerApp #planner-left button:hover { background:#eee; }
-        #roomPlannerApp #planner-right { width:220px; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; border-left:1px solid #eee; padding-left:12px; align-self:flex-start; margin-top:96px; }
+        #roomPlannerApp #planner-right { width:220px; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; border-left:1px solid #eee; padding-left:12px; align-self:flex-start; margin-top:0; }
         #roomPlannerApp #planner-style-name { font-size:14px; font-weight:600; margin-bottom:10px; }
         #roomPlannerApp #planner-piece-list { font-size:12px; color:#555; }
         #roomPlannerApp #planner-piece-list .piece-row { margin-bottom:6px; display:flex; justify-content:space-between; gap:8px; }
@@ -1444,7 +1444,7 @@ boot();
     panel.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:10px;align-items:stretch;max-width:520px;width:100%">
         <div id="mcLeatherRow" style="display:flex;flex-direction:column;gap:6px;align-items:stretch;width:100%">
-          <div id="mcLeatherHeaderRow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;flex-wrap:wrap">
+          <div id="mcLeatherHeaderRow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;flex-wrap:nowrap">
             <div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 auto">
               <span id="mcLeatherHeader" style="font-size:13px;font-weight:400;line-height:1.2;letter-spacing:0;text-transform:none;">SELECT A LEATHER:</span>
               <span id="mcLeatherSummary" style="padding:0;border:0;background:transparent;font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#333;min-width:0"></span>
@@ -1482,6 +1482,12 @@ boot();
     // Place panel directly after options table when possible (stable placement).
     if (optionsTable) optionsTable.insertAdjacentElement("afterend", panel);
     else wmOpen.parentElement.insertAdjacentElement("afterend", panel);
+    if (optionsTable) {
+      var plannerTopRow = panel.querySelector("#mcPlannerRow");
+      if (plannerTopRow && optionsTable.parentNode) {
+        optionsTable.parentNode.insertBefore(plannerTopRow, optionsTable);
+      }
+    }
 
     var plannerOverlay = document.getElementById("mcPlannerOverlay");
     if (!plannerOverlay) {
@@ -2046,7 +2052,7 @@ window.initRoomPlanner = function (opts) {
     img.style.height = "100%";
     img.style.maxWidth = "none";
     img.style.maxHeight = "none";
-    img.style.objectFit = "cover";
+    img.style.objectFit = "fill";
     img.style.objectPosition = "center center";
   }
   function addSeat(piece, skip4LCheck) {
@@ -2728,29 +2734,32 @@ body.mc-product-page #content_area .mc-option-accordion__header {
   }
 }
 
-/* At 962px and up: desktop-style options – show option headers (labels) and native select, hide accordion UI */
+/* At 962px and up: keep accordion UI visible with aligned ">" (same behavior desktop/mobile) */
 @media (min-width: 962px) {
   body.mc-product-page #content_area #options_table .mc-accordion-row td:first-child,
   body.mc-product-page #content_area table[id*="options_table"] .mc-accordion-row td:first-child {
-    display: table-cell !important;
-    visibility: visible !important;
-  }
-  body.mc-product-page #content_area .mc-accordion-row td:first-child .productoptionname,
-  body.mc-product-page #content_area .mc-accordion-row td:first-child label {
-    display: inline !important;
-    visibility: visible !important;
+    display: none !important;
+    visibility: hidden !important;
   }
   body.mc-product-page #content_area .mc-option-accordion .mc-option-accordion__header,
   body.mc-product-page #content_area .mc-option-accordion .mc-option-accordion__selected,
   body.mc-product-page #content_area .mc-option-accordion .mc-option-accordion__panel {
-    display: none !important;
+    display: block !important;
   }
   body.mc-product-page #content_area .mc-option-accordion .mc-option-accordion-native,
   body.mc-product-page #content_area .mc-option-accordion select {
-    display: block !important;
-    visibility: visible !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    clip: rect(0,0,0,0) !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  body.mc-product-page #content_area .mc-option-accordion__header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
   }
 }
 
@@ -3011,6 +3020,18 @@ body.mc-product-page #content_area #mcLeatherBtn {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+body.mc-product-page #content_area #mcLeatherHeaderRow {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  flex-wrap: nowrap !important;
+  min-height: 20px !important;
+}
+body.mc-product-page #content_area .mc-option-accordion__header {
+  min-height: 20px !important;
+  align-items: center !important;
 }
 body.mc-product-page #content_area #mcLeatherBtn:hover,
 body.mc-product-page #content_area #mcLeatherBtn:focus {
@@ -4120,9 +4141,20 @@ body.mc-product-page #content_area .wm-swatch img {
     if (!thumbs || !mainImg) return;
     var w = Math.max(0, Math.floor(mainImg.getBoundingClientRect().width || 0));
     if (!w) return;
+    var parent = thumbs.parentElement;
+    if (parent) {
+      parent.style.setProperty('display', 'block', 'important');
+      parent.style.setProperty('width', '100%', 'important');
+      parent.style.setProperty('text-align', 'center', 'important');
+    }
+    thumbs.style.setProperty('width', w + 'px', 'important');
     thumbs.style.setProperty('max-width', w + 'px', 'important');
     thumbs.style.setProperty('margin-left', 'auto', 'important');
     thumbs.style.setProperty('margin-right', 'auto', 'important');
+    thumbs.style.setProperty('float', 'none', 'important');
+    thumbs.style.setProperty('left', 'auto', 'important');
+    thumbs.style.setProperty('right', 'auto', 'important');
+    thumbs.style.setProperty('transform', 'none', 'important');
     thumbs.style.setProperty('justify-content', 'center', 'important');
   }
 
