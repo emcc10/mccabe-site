@@ -365,19 +365,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
   <!-- Room planner: embedded in template; shown when URL contains room-planner -->
   <template id="roomPlannerEmbed">
-    <div id="roomPlannerApp">
+    <div id="roomPlannerApp" style="position:relative;z-index:1;">
       <style>
-        #roomPlannerApp { font-family: Helvetica, Arial, sans-serif; background:#fff; }
+        #roomPlannerApp { font-family: Helvetica, Arial, sans-serif; background:#fff; isolation:isolate; }
         #roomPlannerApp #shell { display:flex; flex-direction:row; gap:12px; flex:1; min-height:0; }
-        #roomPlannerApp #planner-left { width:200px; flex-shrink:0; display:flex; flex-direction:column; gap:10px; overflow-y:auto; padding-top:96px; }
-        #roomPlannerApp .room-dims-row { display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; }
+        #roomPlannerApp #planner-left { width:200px; flex-shrink:0; display:flex; flex-direction:column; gap:10px; overflow-y:auto; padding-top:100px; }
+        #roomPlannerApp .room-dims-row { display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 6px; }
         #roomPlannerApp .room-dims-row label { font-size:11px; color:#555; margin:0 2px 0 0; }
-        #roomPlannerApp .room-dims-row input[type="number"] { width:36px; padding:4px 2px; font-size:12px; margin:0; }
-        #roomPlannerApp input[type="number"]::-webkit-inner-spin-button, #roomPlannerApp input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+        #roomPlannerApp .room-dims-row input[type="number"] { width:28px; padding:2px 0; font-size:12px; margin:0; border:none; border-bottom:1px solid #333; background:transparent; border-radius:0; text-align:center; -moz-appearance:textfield; }
+        #roomPlannerApp .room-dims-row input[type="number"]::-webkit-inner-spin-button, #roomPlannerApp .room-dims-row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
         #roomPlannerApp input[type="number"] { -moz-appearance:textfield; }
         #roomPlannerApp #room-measurement { font-size:12px; color:#333; margin:4px 0 0 0; }
-        #roomPlannerApp .room-dims-block { display:flex; flex-direction:column; gap:6px; }
-        #roomPlannerApp #applyRoom { padding:5px 10px; font-size:12px; align-self:flex-start; }
+        #roomPlannerApp .room-dims-block { display:flex; flex-direction:column; gap:6px; align-items:center; }
+        #roomPlannerApp #applyRoom { padding:5px 10px; font-size:12px; align-self:center; }
         #roomPlannerApp #measuringToolBtn { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; cursor:pointer; border:1px solid #ccc; background:#f7f7f7; border-radius:6px; font-size:12px; width:100%; justify-content:center; box-sizing:border-box; }
         #roomPlannerApp #measuringToolBtn:hover { background:#eee; }
         #roomPlannerApp #measuringToolBtn svg { width:18px; height:18px; flex-shrink:0; }
@@ -389,7 +389,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp .common-config:hover { border-color:#888; background:#f0f0f0; }
         #roomPlannerApp .common-config-thumb { display:flex; flex-direction:row; align-items:center; justify-content:center; gap:3px; width:100%; height:100%; padding:0 6px; box-sizing:border-box; }
         #roomPlannerApp .common-config-thumb img { width:auto; height:100%; max-height:58px; max-width:80px; object-fit:contain; display:block; flex-shrink:0; }
-        #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:0; padding-top:8px; }
+        #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:0; padding-top:8px; overflow-y:auto; }
         #roomPlannerApp #tray-row { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; max-width:900px; flex-shrink:0; margin-bottom:6px; }
         #roomPlannerApp #tray { display:flex; align-items:center; gap:8px; flex:1; min-width:0; }
         #roomPlannerApp .tray-nav { width:32px; height:32px; border:1px solid #ddd; border-radius:18px; background:#f6f6f6; cursor:pointer; flex-shrink:0; font-size:16px; line-height:1; padding:0; }
@@ -412,7 +412,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp .seat .seat-name { position:relative; z-index:2; font-size:12px; color:rgba(100,100,100,.85); pointer-events:none; text-align:center; text-shadow:0 0 2px #fff, 0 1px 2px #fff; }
         #roomPlannerApp .config-group { cursor:grab; }
         #roomPlannerApp .config-group:active { cursor:grabbing; }
-        #roomPlannerApp #toolbar { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:0; padding-top:2px; flex-shrink:0; }
+        #roomPlannerApp #toolbar { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:4px; padding-top:4px; flex-shrink:0; visibility:visible; }
         #roomPlannerApp #toolbar button, #roomPlannerApp #planner-left button { padding:6px 12px; border:1px solid #ccc; background:#f7f7f7; cursor:pointer; font-size:12px; border-radius:4px; }
         #roomPlannerApp #toolbar button:hover, #roomPlannerApp #planner-left button:hover { background:#eee; }
         #roomPlannerApp #planner-right { width:220px; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; border-left:1px solid #eee; padding-left:12px; }
@@ -425,8 +425,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp #measure-line.show { display:block; pointer-events:auto; }
         #roomPlannerApp #measure-line svg { position:absolute; left:0; top:0; width:100%; height:100%; display:block; pointer-events:none; }
         #roomPlannerApp #measure-line line { stroke:#2196F3; stroke-width:2; }
-        #roomPlannerApp #measure-line .measure-handle { fill:#2196F3; cursor:grab; pointer-events:auto; }
-        #roomPlannerApp #measure-line .measure-handle.measure-handle-rect { stroke:#1565C0; stroke-width:1; }
+        #roomPlannerApp #measure-line .measure-handle { stroke:#2196F3; stroke-width:3; cursor:grab; pointer-events:auto; }
         #roomPlannerApp #measure-line .measure-handle:active { cursor:grabbing; }
         #roomPlannerApp .config-group { position:relative; }
         #roomPlannerApp .config-group .config-group-detach { position:absolute; top:4px; right:4px; z-index:20; font-size:10px; padding:3px 6px; border:1px solid #999; background:#fff; cursor:pointer; border-radius:4px; }
@@ -455,7 +454,7 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
             <div id="room-wrapper">
               <div id="room"><div class="room-grid-layer" aria-hidden="true"></div><div id="dim-top" class="room-dim"></div><div id="dim-left" class="room-dim"></div>
-                <div id="measure-line"><svg id="measure-svg" xmlns="http://www.w3.org/2000/svg"><line id="measure-line-seg" x1="50" y1="50" x2="200" y2="150"/><rect id="measure-handle-l" class="measure-handle measure-handle-rect" x="38" y="38" width="24" height="24" rx="2"/><rect id="measure-handle-r" class="measure-handle measure-handle-rect" x="188" y="138" width="24" height="24" rx="2"/></svg><div id="measure-label-box">0 in</div></div>
+                <div id="measure-line"><svg id="measure-svg" xmlns="http://www.w3.org/2000/svg"><line id="measure-line-seg" x1="50" y1="50" x2="200" y2="150"/><line id="measure-handle-l" class="measure-handle" x1="46.67" y1="45" x2="53.33" y2="55"/><line id="measure-handle-r" class="measure-handle" x1="196.67" y1="155" x2="203.33" y2="145"/></svg><div id="measure-label-box">0 in</div></div>
               </div>
             </div>
             <div id="toolbar"><button id="clearLayoutBtn">Clear layout</button><button id="rotateL">Rotate ⟲</button><button id="rotateR">Rotate ⟳</button><button id="deleteBtn">Delete</button><button id="saveLayout">Save Layout</button><button id="addConfigBtn">Add configuration</button></div>
@@ -2057,6 +2056,8 @@ window.initRoomPlanner = function (opts) {
   }
   function makeDraggable(el) {
     el.addEventListener("mousedown", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
       setActive(el);
       var parent = el.offsetParent;
       if (!parent) return;
@@ -2064,6 +2065,7 @@ window.initRoomPlanner = function (opts) {
       var offsetX = e.clientX - (pr.left + el.offsetLeft);
       var offsetY = e.clientY - (pr.top + el.offsetTop);
       function move(ev) {
+        ev.preventDefault();
         var pr2 = parent.getBoundingClientRect();
         el.style.left = (ev.clientX - pr2.left - offsetX) + "px";
         el.style.top = (ev.clientY - pr2.top - offsetY) + "px";
@@ -2162,15 +2164,37 @@ window.initRoomPlanner = function (opts) {
         var yy = parseFloat(el.getAttribute("y")) || 0, h = parseFloat(el.getAttribute("height")) || 24;
         return { x: xx + w / 2, y: yy + h / 2 };
       }
+      if (tag === "line") {
+        var x1 = parseFloat(el.getAttribute("x1")) || 0, x2 = parseFloat(el.getAttribute("x2")) || 0;
+        var y1 = parseFloat(el.getAttribute("y1")) || 0, y2 = parseFloat(el.getAttribute("y2")) || 0;
+        return { x: (x1 + x2) / 2, y: (y1 + y2) / 2 };
+      }
       return { x: parseFloat(el.getAttribute("cx")) || 0, y: parseFloat(el.getAttribute("cy")) || 0 };
     }
-    function setHandleCenter(el, cx, cy) {
+    function setHandleCenter(el, cx, cy, otherHandle) {
       if (!el) return;
       var tag = (el.tagName || "").toLowerCase();
       if (tag === "rect") {
         var w = parseFloat(el.getAttribute("width")) || 24, h = parseFloat(el.getAttribute("height")) || 24;
         el.setAttribute("x", cx - w / 2);
         el.setAttribute("y", cy - h / 2);
+      } else if (tag === "line" && otherHandle) {
+        var other = getHandleCenter(otherHandle);
+        var dx = other.x - cx, dy = other.y - cy;
+        var len = Math.sqrt(dx * dx + dy * dy) || 1;
+        var perpX = (-dy / len) * 6, perpY = (dx / len) * 6;
+        el.setAttribute("x1", cx - perpX);
+        el.setAttribute("y1", cy - perpY);
+        el.setAttribute("x2", cx + perpX);
+        el.setAttribute("y2", cy + perpY);
+      } else if (tag === "line") {
+        var x1 = parseFloat(el.getAttribute("x1")) || 0, x2 = parseFloat(el.getAttribute("x2")) || 0;
+        var y1 = parseFloat(el.getAttribute("y1")) || 0, y2 = parseFloat(el.getAttribute("y2")) || 0;
+        var hx = (x2 - x1) / 2, hy = (y2 - y1) / 2;
+        el.setAttribute("x1", cx - hx);
+        el.setAttribute("y1", cy - hy);
+        el.setAttribute("x2", cx + hx);
+        el.setAttribute("y2", cy + hy);
       } else {
         el.setAttribute("cx", cx);
         el.setAttribute("cy", cy);
@@ -2204,27 +2228,28 @@ window.initRoomPlanner = function (opts) {
         var rw = room.offsetWidth || 400, rh = room.offsetHeight || 300;
         var x1 = 50, y1 = 50, x2 = Math.min(200, rw - 50), y2 = Math.min(150, rh - 50);
         mlSeg.setAttribute("x1", x1); mlSeg.setAttribute("y1", y1); mlSeg.setAttribute("x2", x2); mlSeg.setAttribute("y2", y2);
-        setHandleCenter(mlHL, x1, y1); setHandleCenter(mlHR, x2, y2);
+        setHandleCenter(mlHL, x1, y1, mlHR); setHandleCenter(mlHR, x2, y2, mlHL);
         setTimeout(updateMeasureLabel, 0);
         var dragging = null;
         function move(ev) {
           if (!dragging) return;
+          ev.preventDefault();
           var r = room.getBoundingClientRect();
           var x = ev.clientX - r.left, y = ev.clientY - r.top;
           x = Math.max(12, Math.min(room.offsetWidth - 12, x));
           y = Math.max(12, Math.min(room.offsetHeight - 12, y));
           if (dragging === "l") {
             mlSeg.setAttribute("x1", x); mlSeg.setAttribute("y1", y);
-            setHandleCenter(mlHL, x, y);
+            setHandleCenter(mlHL, x, y, mlHR);
           } else {
             mlSeg.setAttribute("x2", x); mlSeg.setAttribute("y2", y);
-            setHandleCenter(mlHR, x, y);
+            setHandleCenter(mlHR, x, y, mlHL);
           }
           updateMeasureLabel();
         }
-        function up() { dragging = null; document.removeEventListener("mousemove", move); document.removeEventListener("mouseup", up); }
-        mlHL.onmousedown = function (e) { e.preventDefault(); dragging = "l"; document.addEventListener("mousemove", move); document.addEventListener("mouseup", up); };
-        mlHR.onmousedown = function (e) { e.preventDefault(); dragging = "r"; document.addEventListener("mousemove", move); document.addEventListener("mouseup", up); };
+        function up(ev) { ev.preventDefault(); dragging = null; document.removeEventListener("mousemove", move); document.removeEventListener("mouseup", up); }
+        mlHL.onmousedown = function (e) { e.preventDefault(); e.stopPropagation(); dragging = "l"; document.addEventListener("mousemove", move); document.addEventListener("mouseup", up); };
+        mlHR.onmousedown = function (e) { e.preventDefault(); e.stopPropagation(); dragging = "r"; document.addEventListener("mousemove", move); document.addEventListener("mouseup", up); };
       }
     };
   }
@@ -2703,6 +2728,40 @@ body.mc-product-page #content_area td.productoptionname {
   padding-left: 0 !important;
 }
 
+/* options table: cleaner look for configuration / dropdowns */
+body.mc-product-page #content_area #options_table,
+body.mc-product-page #content_area table[id*="options_table"] {
+  border-collapse: collapse !important;
+  width: 100% !important;
+}
+body.mc-product-page #content_area #options_table td,
+body.mc-product-page #content_area table[id*="options_table"] td {
+  padding: 10px 12px !important;
+  vertical-align: middle !important;
+  border-bottom: 1px solid #eee !important;
+}
+body.mc-product-page #content_area #options_table select,
+body.mc-product-page #content_area table[id*="options_table"] select {
+  padding: 8px 12px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  font-size: 14px !important;
+  min-width: 120px !important;
+}
+body.mc-product-page #content_area .wm-swatch {
+  border: 2px solid #ddd !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08) !important;
+}
+body.mc-product-page #content_area .wm-swatch img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
 /* tabs inline on desktop */
 @media (min-width: 992px){
   body.mc-product-page #content_area .resp-tabs-list,
@@ -2800,7 +2859,20 @@ body.mc-product-page #content_area td.productoptionname {
     margin: 0 auto !important;
   }
 
-  /* Mobile: force alt/thumbnail images to stay small */
+  /* Mobile: alt images in a row beneath main image */
+  body.mc-product-page #content_area #altviews,
+  body.mc-product-page #content_area .altviews,
+  body.mc-product-page #content_area [id*="altview"] {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    margin: 0 auto 16px auto !important;
+    padding: 0 !important;
+    width: 100% !important;
+    float: none !important;
+    clear: both !important;
+  }
   body.mc-product-page #content_area #altviews img,
   body.mc-product-page #content_area .altviews img,
   body.mc-product-page #content_area [id*="altview"] img {
@@ -2809,6 +2881,7 @@ body.mc-product-page #content_area td.productoptionname {
     height: auto !important;
     max-height: 64px !important;
     object-fit: contain !important;
+    display: block !important;
   }
 
   nav.push-menu,
