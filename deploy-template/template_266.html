@@ -1820,6 +1820,7 @@ window.applyPlannerToPage = function (payload) {
     var pieceList = layout.length ? layout.map(function(s){ return s.id || s; }).join(", ") : "";
     if (!pieceList && Object.keys(opts).length) { var parts = []; Object.keys(opts).forEach(function(k){ for (var i = 0; i < (opts[k] || 0); i++) parts.push(k); }); pieceList = parts.join(", "); }
     summary.textContent = pieceList || "No planner selections";
+    summary.classList.toggle("mc-has-selections", !!(pieceList && pieceList.trim()));
   }
   var configBlock = document.getElementById("mcConfigurationBlock");
   var configPieces = document.getElementById("mcConfigurationPieces");
@@ -2727,8 +2728,10 @@ body.mc-product-page #content_area td.productoptionname {
   }
 }
 
-/* At 961px and below: accordion only; panel closed by default; selected = one-line, not grey box */
+/* At 961px and below: accordion only; panel closed by default; hide all Volusion dropdowns – only > opens options */
 @media (max-width: 961px) {
+  body.mc-product-page #content_area #options_table select,
+  body.mc-product-page #content_area table[id*="options_table"] select,
   body.mc-product-page #content_area .mc-option-accordion .mc-option-accordion-native,
   body.mc-product-page #content_area .mc-option-accordion select {
     position: absolute !important;
@@ -2747,9 +2750,19 @@ body.mc-product-page #content_area td.productoptionname {
     cursor: pointer !important;
     padding: 10px 0 !important;
     border-bottom: 1px solid #eee !important;
-    font-weight: 600 !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.06em !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
+    color: #686868 !important;
+    line-height: 1.2 !important;
+  }
+  body.mc-product-page #content_area .mc-option-accordion__label {
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: #686868 !important;
   }
   body.mc-product-page #content_area .mc-option-accordion__toggle {
     flex-shrink: 0 !important;
@@ -2795,6 +2808,69 @@ body.mc-product-page #content_area td.productoptionname {
     background: #f5f5f5 !important;
     border-color: #999 !important;
   }
+}
+
+/* Hide "No planner selections" box; show summary only when there are selections */
+body.mc-product-page #content_area #mcPlannerSummary {
+  display: none !important;
+}
+body.mc-product-page #content_area #mcPlannerSummary.mc-has-selections {
+  display: flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+/* RH-style buttons: Room Planner, Add to Cart, and room planner modal toolbar */
+body.mc-product-page #content_area .mc-config-btn,
+body.mc-product-page #content_area #mcPlannerBtn,
+body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i],
+body.mc-product-page #content_area input[name="btnaddtocart"],
+body.mc-product-page #content_area button[name="btnaddtocart"] {
+  display: inline-block !important;
+  min-width: 200px !important;
+  max-width: 100% !important;
+  padding: 14px 28px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #111 !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  font-family: inherit !important;
+}
+body.mc-product-page #content_area .mc-config-btn:hover,
+body.mc-product-page #content_area #mcPlannerBtn:hover,
+body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i]:hover,
+body.mc-product-page #content_area input[name="btnaddtocart"]:hover,
+body.mc-product-page #content_area button[name="btnaddtocart"]:hover {
+  background: #333 !important;
+  color: #fff !important;
+}
+#roomPlannerApp #toolbar button,
+#roomPlannerApp #planner-left button,
+#roomPlannerApp #applyRoom {
+  padding: 14px 28px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #111 !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+}
+#roomPlannerApp #toolbar button:hover,
+#roomPlannerApp #planner-left button:hover,
+#roomPlannerApp #applyRoom:hover {
+  background: #333 !important;
+  color: #fff !important;
 }
 
 /* options: match desktop look on mobile (table layout, same structure) */
@@ -2927,7 +3003,7 @@ body.mc-product-page #content_area .wm-swatch img {
     margin: 0 auto !important;
   }
 
-  /* Mobile: main image centered first, then alt images in a horizontal row beneath */
+  /* Mobile: main image centered first, then alt images – up to 4 per row, single centered column */
   body.mc-product-page #content_area #altviews,
   body.mc-product-page #content_area .altviews,
   body.mc-product-page #content_area span#altviews,
@@ -2940,10 +3016,12 @@ body.mc-product-page #content_area .wm-swatch img {
     gap: 8px !important;
     margin: 12px auto 16px auto !important;
     padding: 0 !important;
+    max-width: 320px !important;
     width: 100% !important;
     float: none !important;
     clear: both !important;
     order: 2 !important;
+    box-sizing: border-box !important;
   }
   body.mc-product-page #content_area #altviews a,
   body.mc-product-page #content_area .altviews a,
@@ -2963,6 +3041,14 @@ body.mc-product-page #content_area .wm-swatch img {
     max-height: 64px !important;
     object-fit: contain !important;
     display: block !important;
+  }
+
+  /* Hide duplicate/second price on mobile */
+  body.mc-product-page #content_area .product_productprice,
+  body.mc-product-page #content_area .product_list_price,
+  body.mc-product-page #v65-product-parent .product_productprice,
+  body.mc-product-page #v65-product-parent .product_list_price {
+    display: none !important;
   }
 
   nav.push-menu,
