@@ -2746,7 +2746,7 @@ body.mc-product-page #content_area .resp-tabs-list li {
   font-style: normal !important;
 }
 
-/* option labels – uniform weight and color (RH style) for every option header */
+/* option labels – EXACT same font for every option header (NUMBER OF SEATS, CONFIGURATION, SELECT A LEATHER) */
 body.mc-product-page #content_area #options_table label,
 body.mc-product-page #content_area #options_table .productoptionname,
 body.mc-product-page #content_area #options_table td.productoptionname,
@@ -2758,10 +2758,14 @@ body.mc-product-page #content_area .mc-option-accordion__label,
 body.mc-product-page #content_area .mc-option-accordion__header {
   font-style: normal !important;
   font-weight: 400 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
   color: #686868 !important;
   text-align: left !important;
   margin-left: 0 !important;
   padding-left: 0 !important;
+  line-height: 1.2 !important;
 }
 
 /* Prevent options running off at ~1205px */
@@ -2809,8 +2813,12 @@ body.mc-product-page #content_area .mc-option-accordion__header {
   }
 }
 
-/* At 961px and below: accordion only; panel closed by default; hide all Volusion dropdowns – only > opens options */
+/* At 961px and below: accordion only; hide table label cell (label is in accordion header); panel closed by default */
 @media (max-width: 961px) {
+  body.mc-product-page #content_area #options_table .mc-accordion-row td:first-child,
+  body.mc-product-page #content_area table[id*="options_table"] .mc-accordion-row td:first-child {
+    display: none !important;
+  }
   body.mc-product-page #content_area #options_table select,
   body.mc-product-page #content_area table[id*="options_table"] select,
   body.mc-product-page #content_area .mc-option-accordion .mc-option-accordion-native,
@@ -2855,12 +2863,17 @@ body.mc-product-page #content_area .mc-option-accordion__header {
     background: none !important;
     background-color: transparent !important;
     padding: 0 !important;
-    font-size: 1.2em !important;
-    line-height: 1 !important;
+    min-width: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 20px !important;
+    line-height: 20px !important;
     color: #686868 !important;
     outline: none !important;
     box-shadow: none !important;
-    min-width: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
   body.mc-product-page #content_area .mc-option-accordion__toggle:hover,
   body.mc-product-page #content_area .mc-option-accordion__toggle:focus {
@@ -2917,23 +2930,22 @@ body.mc-product-page #content_area #mcPlannerSummary.mc-has-selections {
   flex: 1 1 auto !important;
 }
 
-/* Add to Cart row: button + cart icon on same line, no wrapper box */
+/* Add to Cart: same look as Room Planner – one white button with cart icon inside */
 body.mc-product-page #content_area .mc-atc-row {
   display: flex !important;
   align-items: center !important;
   flex-wrap: nowrap !important;
-  gap: 8px !important;
+  gap: 0 !important;
   background: transparent !important;
   border: none !important;
   padding: 0 !important;
 }
-body.mc-product-page #content_area .mc-atc-row input[type="submit"],
-body.mc-product-page #content_area .mc-atc-row button[name="btnaddtocart"],
-body.mc-product-page #content_area input[name="btnaddtocart"],
-body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i] {
-  display: inline-block !important;
-  flex: 0 0 auto !important;
-  width: auto !important;
+/* Wrapper = visual button (matches #mcPlannerBtn exactly) */
+body.mc-product-page #content_area .mc-atc-button-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
   min-width: 200px !important;
   max-width: 100% !important;
   padding: 14px 28px !important;
@@ -2951,15 +2963,34 @@ body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i] 
   box-sizing: border-box !important;
   font-family: inherit !important;
 }
-body.mc-product-page #content_area .mc-atc-row input[type="submit"]:hover,
-body.mc-product-page #content_area input[name="btnaddtocart"]:hover,
-body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i]:hover {
+body.mc-product-page #content_area .mc-atc-button-wrap:hover {
   background: #f5f5f5 !important;
+  background-color: #f5f5f5 !important;
   color: #111 !important;
   border-color: #333 !important;
 }
-body.mc-product-page #content_area .mc-atc-row .mc-cart-icon-wrapper,
-body.mc-product-page #content_area .mc-atc-row .mc-cart-icon {
+/* Input inside wrapper: no box, same font so it aligns with icon */
+body.mc-product-page #content_area .mc-atc-button-wrap input[type="submit"],
+body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart"] {
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  letter-spacing: inherit !important;
+  text-transform: inherit !important;
+  cursor: pointer !important;
+  font-family: inherit !important;
+}
+body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
+body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon {
   flex-shrink: 0 !important;
   display: inline-block !important;
   vertical-align: middle !important;
@@ -3015,7 +3046,7 @@ body.mc-product-page #content_area #mcPlannerBtn:hover {
   border-color: #333 !important;
 }
 
-/* Select a Leather ">" button – no box, same as accordion toggle */
+/* Select a Leather ">" button – 20px, vertically aligned, no box (matches accordion toggle) */
 body.mc-product-page #content_area #mcLeatherBtn {
   -webkit-appearance: none !important;
   appearance: none !important;
@@ -3025,13 +3056,16 @@ body.mc-product-page #content_area #mcLeatherBtn {
   box-shadow: none !important;
   outline: none !important;
   padding: 0 !important;
-  min-width: 18px !important;
-  width: 18px !important;
-  height: 18px !important;
+  min-width: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
   color: #686868 !important;
-  font-size: 15px !important;
-  line-height: 18px !important;
+  font-size: 20px !important;
+  line-height: 20px !important;
   cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 body.mc-product-page #content_area #mcLeatherBtn:hover,
 body.mc-product-page #content_area #mcLeatherBtn:focus {
@@ -3042,7 +3076,7 @@ body.mc-product-page #content_area #mcLeatherBtn:focus {
   outline: none !important;
 }
 
-/* Accordion ">" toggle – no box/border at any viewport */
+/* Accordion ">" toggle – 20px, vertically aligned, no box */
 body.mc-product-page #content_area .mc-option-accordion__toggle {
   -webkit-appearance: none !important;
   appearance: none !important;
@@ -3052,8 +3086,15 @@ body.mc-product-page #content_area .mc-option-accordion__toggle {
   box-shadow: none !important;
   outline: none !important;
   padding: 0 !important;
-  min-width: 0 !important;
+  min-width: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  font-size: 20px !important;
+  line-height: 20px !important;
   color: #686868 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 body.mc-product-page #content_area .mc-option-accordion__toggle:hover,
 body.mc-product-page #content_area .mc-option-accordion__toggle:focus {
@@ -3252,7 +3293,7 @@ body.mc-product-page #content_area .wm-swatch img {
     align-items: center !important;
     width: 100% !important;
   }
-  /* Alt images: exactly 4 per row then wrap; centered under main image on mobile */
+  /* Alt images: same width as main image area, centered; 4 per row; heavier padding between thumbnails */
   body.mc-product-page #content_area #altviews,
   body.mc-product-page #content_area .altviews,
   body.mc-product-page #content_area span#altviews {
@@ -3261,11 +3302,11 @@ body.mc-product-page #content_area .wm-swatch img {
     flex-wrap: wrap !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 8px !important;
+    gap: 14px !important;
     margin: 12px auto 16px auto !important;
     padding: 0 !important;
-    max-width: 296px !important;
     width: 100% !important;
+    max-width: 100% !important;
     float: none !important;
     clear: both !important;
     order: 2 !important;
@@ -4433,7 +4474,6 @@ body.mc-product-page #content_area .wm-swatch img {
       sel.classList.add('mc-option-accordion-native');
       valueTd.appendChild(wrap);
       valueTd.appendChild(sel);
-      labelTd.style.setProperty('display', 'none', 'important');
       tr.classList.add('mc-accordion-row');
     });
     try {
@@ -4465,10 +4505,17 @@ body.mc-product-page #content_area .wm-swatch img {
       el.style.setProperty('box-shadow', 'none', 'important');
       el = el.parentElement;
     }
-    btn.style.setProperty('background', '#fff', 'important');
-    btn.style.setProperty('background-color', '#fff', 'important');
-    btn.style.setProperty('color', '#111', 'important');
-    btn.style.setProperty('border', '1px solid #333', 'important');
+    var atcWrap = btn.closest('.mc-atc-button-wrap');
+    if (atcWrap) {
+      atcWrap.style.setProperty('background', '#fff', 'important');
+      atcWrap.style.setProperty('background-color', '#fff', 'important');
+      atcWrap.style.setProperty('color', '#111', 'important');
+      atcWrap.style.setProperty('border', '1px solid #333', 'important');
+    }
+    btn.style.setProperty('background', 'transparent', 'important');
+    btn.style.setProperty('background-color', 'transparent', 'important');
+    btn.style.setProperty('border', 'none', 'important');
+    btn.style.setProperty('color', 'inherit', 'important');
   }
 
   var cartIconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -4476,24 +4523,24 @@ body.mc-product-page #content_area .wm-swatch img {
     var root = scope || document;
     var btn = root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
     if (!btn) return;
-    var wrap = btn.closest('.mc-atc-wrap');
-    if (wrap) {
-      while (wrap.firstChild) wrap.parentNode.insertBefore(wrap.firstChild, wrap);
-      wrap.remove();
+    var existingWrap = btn.closest('.mc-atc-button-wrap');
+    if (existingWrap) return;
+    var oldWrap = btn.closest('.mc-atc-wrap');
+    if (oldWrap) {
+      while (oldWrap.firstChild) oldWrap.parentNode.insertBefore(oldWrap.firstChild, oldWrap);
+      oldWrap.remove();
     }
     var parent = btn.parentNode;
     if (!parent) return;
-    var next = btn.nextElementSibling;
-    if (next && next.classList && (next.classList.contains('mc-cart-icon-wrapper') || next.querySelector && next.querySelector('.mc-cart-icon'))) {
-      parent.classList.add('mc-atc-row');
-      return;
-    }
-    parent.classList.add('mc-atc-row');
+    var wrapper = document.createElement('div');
+    wrapper.className = 'mc-atc-button-wrap';
+    parent.insertBefore(wrapper, btn);
+    wrapper.appendChild(btn);
     var iconWrap = document.createElement('span');
     iconWrap.innerHTML = cartIconSvg;
     iconWrap.classList.add('mc-cart-icon-wrapper');
-    if (btn.nextSibling) parent.insertBefore(iconWrap, btn.nextSibling);
-    else parent.appendChild(iconWrap);
+    wrapper.appendChild(iconWrap);
+    parent.classList.add('mc-atc-row');
   }
 
   function forceProductFixes() {
