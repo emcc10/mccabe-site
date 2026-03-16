@@ -399,7 +399,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp .tray-item { flex:0 0 140px; width:140px; text-align:center; font-size:11px; cursor:pointer; border:2px solid transparent; border-radius:8px; padding:6px; box-sizing:border-box; }
         #roomPlannerApp .tray-item:hover { border-color:#ccc; background:#fafafa; }
         #roomPlannerApp .tray-item img { width:100%; height:auto; max-height:72px; object-fit:contain; display:block; margin:0 auto; pointer-events:none; }
-        #roomPlannerApp #room-wrapper { flex:1; min-height:0; display:flex; align-items:flex-start; justify-content:center; width:100%; }
+        #roomPlannerApp #room-wrapper { flex:0 0 auto; min-height:0; display:flex; align-items:flex-start; justify-content:center; width:100%; margin-bottom:8px; }
         #roomPlannerApp #room { position:relative; border:3px solid #ccc; background:#fff; min-width:280px; min-height:180px; flex-shrink:0; }
         #roomPlannerApp .room-grid-layer { position:absolute; inset:0; z-index:0; background-image: linear-gradient(to right, rgba(0,0,0,.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,.12) 1px, transparent 1px); background-size: var(--grid-size) var(--grid-size); pointer-events:none; }
         #roomPlannerApp .room-dim { position:absolute; font-size:12px; font-weight:600; background:#fff; padding:4px 8px; color:#333; z-index:15; border:1px solid #ccc; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
@@ -2099,13 +2099,18 @@ window.initRoomPlanner = function (opts) {
   function applySeatTransform(seat) {
     var img = seat.querySelector("img");
     if (!img) return;
-    /* Force every piece to fill the seat box (same dimensions = same box size) */
-    img.style.transform = "none";
+    /* Force every piece to fill the seat box; use piece normalization offsets when provided */
+    var norm = seat._norm || { scale: 1, x: 0, y: 0 };
+    var scale = Math.max(1, Number(norm.scale || 1));
+    var offsetX = Number(norm.x || 0);
+    var offsetY = Number(norm.y || 0);
+    img.style.transformOrigin = "50% 50%";
+    img.style.transform = "translate(" + offsetX + "%," + offsetY + "%) scale(" + scale + ")";
     img.style.width = "100%";
     img.style.height = "100%";
     img.style.maxWidth = "none";
     img.style.maxHeight = "none";
-    img.style.objectFit = "fill";
+    img.style.objectFit = "cover";
     img.style.objectPosition = "center center";
   }
   function addSeat(piece, skip4LCheck) {
@@ -2754,6 +2759,7 @@ body.mc-product-page #content_area #options_table td:first-child,
 body.mc-product-page #content_area table[id*="options_table"] label,
 body.mc-product-page #content_area table[id*="options_table"] .productoptionname,
 body.mc-product-page #content_area table[id*="options_table"] td:first-child,
+body.mc-product-page #content_area #mcLeatherHeader,
 body.mc-product-page #content_area .mc-option-accordion__label,
 body.mc-product-page #content_area .mc-option-accordion__header {
   font-style: normal !important;
@@ -4025,7 +4031,12 @@ body.mc-product-page #content_area .wm-swatch img {
   }
 
   function forceOptionLabel(scope){
-    qa('.productoptionname, td.productoptionname, label, #options_table td[align="right"]', scope).forEach(function(el){
+    qa(
+      '#options_table .productoptionname, #options_table td.productoptionname, #options_table td[align="right"], #options_table label,' +
+      'table[id*="options_table"] .productoptionname, table[id*="options_table"] td.productoptionname, table[id*="options_table"] td[align="right"], table[id*="options_table"] label,' +
+      '#mcLeatherHeader',
+      scope
+    ).forEach(function(el){
       el.style.setProperty('text-align','left','important');
       el.style.setProperty('padding-left','0','important');
       el.style.setProperty('margin-left','0','important');
@@ -4418,13 +4429,21 @@ body.mc-product-page #content_area .wm-swatch img {
   function wrapSelectsAsAccordions(scope){
     try {
     var root = scope || document;
-    var table = q('#options_table', root) || q('table[id*="options_table"]', root);
-    if (!table) return;
+    var tables = qa('#options_table, table[id*="options_table"]', root);
+    if (!tables.length) return;
+    tables.forEach(function(table){
     var rows = qa('tr', table);
     rows.forEach(function(tr){
-      var sel = q('select:not(.mc-native-leather)', tr);
-      if (!sel || tr.querySelector('.mc-option-accordion')) return;
       var labelTd = tr.querySelector('td:first-child');
+      if (tr.querySelector('.mc-option-accordion')) {
+        if (labelTd) {
+          if (window.matchMedia('(max-width: 961px)').matches) labelTd.style.setProperty('display', 'none', 'important');
+          else labelTd.style.removeProperty('display');
+        }
+        return;
+      }
+      var sel = q('select:not(.mc-native-leather)', tr);
+      if (!sel) return;
       var valueTd = tr.querySelector('td:last-child');
       if (!valueTd || !labelTd) return;
       var labelText = (labelTd.textContent || '').replace(/\s+/g, ' ').trim();
@@ -4488,21 +4507,10 @@ body.mc-product-page #content_area .wm-swatch img {
       valueTd.appendChild(wrap);
       valueTd.appendChild(sel);
       tr.classList.add('mc-accordion-row');
+      if (window.matchMedia('(max-width: 961px)').matches) labelTd.style.setProperty('display', 'none', 'important');
+      else labelTd.style.removeProperty('display');
     });
-    try {
-      var plannerRow = document.getElementById('mcPlannerRow');
-      if (plannerRow && plannerRow.closest('#mc-inline-config')) {
-        qa('.mc-option-accordion__label', root).forEach(function(lbl){
-          var txt = (lbl.textContent || '').toUpperCase();
-          if (!/NUMBER OF SEATS|SEATS PER ROW/.test(txt)) return;
-          var acc = lbl.closest('.mc-option-accordion');
-          if (acc && plannerRow.parentNode) {
-            acc.parentNode.insertBefore(plannerRow, acc);
-            plannerRow.style.setProperty('margin-bottom', '12px', 'important');
-          }
-        });
-      }
-    } catch (e2) { if (typeof console !== 'undefined' && console.warn) console.warn('Room Planner move:', e2); }
+    });
     } catch (e) { if (typeof console !== 'undefined' && console.warn) console.warn('wrapSelectsAsAccordions:', e); }
   }
   function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
