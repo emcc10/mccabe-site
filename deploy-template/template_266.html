@@ -2154,6 +2154,24 @@ window.initRoomPlanner = function (opts) {
       var rw = room.offsetWidth || 400, rh = room.offsetHeight || 300;
       mlSvg.setAttribute("viewBox", "0 0 " + rw + " " + rh);
     }
+    function updateMeasureTicks() {
+      if (!mlSeg || !mlHL || !mlHR) return;
+      var x1 = parseFloat(mlSeg.getAttribute("x1")) || 0;
+      var y1 = parseFloat(mlSeg.getAttribute("y1")) || 0;
+      var x2 = parseFloat(mlSeg.getAttribute("x2")) || 0;
+      var y2 = parseFloat(mlSeg.getAttribute("y2")) || 0;
+      var dx = x2 - x1, dy = y2 - y1;
+      var len = Math.sqrt(dx * dx + dy * dy) || 1;
+      var perpX = (-dy / len) * 6, perpY = (dx / len) * 6;
+      mlHL.setAttribute("x1", x1 - perpX);
+      mlHL.setAttribute("y1", y1 - perpY);
+      mlHL.setAttribute("x2", x1 + perpX);
+      mlHL.setAttribute("y2", y1 + perpY);
+      mlHR.setAttribute("x1", x2 - perpX);
+      mlHR.setAttribute("y1", y2 - perpY);
+      mlHR.setAttribute("x2", x2 + perpX);
+      mlHR.setAttribute("y2", y2 + perpY);
+    }
     function measureLength() {
       if (!mlSeg) return 0;
       var x1 = parseFloat(mlSeg.getAttribute("x1")) || 0;
@@ -2183,7 +2201,7 @@ window.initRoomPlanner = function (opts) {
         var rw = room.offsetWidth || 400, rh = room.offsetHeight || 300;
         var x1 = 50, y1 = 50, x2 = Math.min(200, rw - 50), y2 = Math.min(150, rh - 50);
         mlSeg.setAttribute("x1", x1); mlSeg.setAttribute("y1", y1); mlSeg.setAttribute("x2", x2); mlSeg.setAttribute("y2", y2);
-        setHandleCenter(mlHL, x1, y1); setHandleCenter(mlHR, x2, y2);
+        updateMeasureTicks();
         setTimeout(updateMeasureLabel, 0);
         var dragging = null;
         function move(ev) {
@@ -2196,11 +2214,10 @@ window.initRoomPlanner = function (opts) {
           y = Math.max(12, Math.min(room.offsetHeight - 12, y));
           if (dragging === "l") {
             mlSeg.setAttribute("x1", x); mlSeg.setAttribute("y1", y);
-            setHandleCenter(mlHL, x, y);
           } else {
             mlSeg.setAttribute("x2", x); mlSeg.setAttribute("y2", y);
-            setHandleCenter(mlHR, x, y);
           }
+          updateMeasureTicks();
           updateMeasureLabel();
         }
         function up(ev) { ev.preventDefault(); dragging = null; document.removeEventListener("mousemove", move, true); document.removeEventListener("mouseup", up, true); }
@@ -2834,6 +2851,8 @@ body.mc-product-page #content_area .mc-option-accordion__header {
     margin-top: 0 !important;
     vertical-align: middle !important;
     font-family: Arial, sans-serif !important;
+    position: relative !important;
+    top: -1px !important;
   }
   body.mc-product-page #content_area .mc-option-accordion__toggle:hover,
   body.mc-product-page #content_area .mc-option-accordion__toggle:focus {
@@ -3034,6 +3053,8 @@ body.mc-product-page #content_area #mcLeatherBtn {
   margin-top: 0 !important;
   vertical-align: middle !important;
   font-family: Arial, sans-serif !important;
+  position: relative !important;
+  top: -1px !important;
 }
 body.mc-product-page #content_area #mcLeatherHeaderRow {
   display: flex !important;
@@ -3079,6 +3100,8 @@ body.mc-product-page #content_area .mc-option-accordion__toggle {
   margin-top: 0 !important;
   vertical-align: middle !important;
   font-family: Arial, sans-serif !important;
+  position: relative !important;
+  top: -1px !important;
 }
 body.mc-product-page #content_area .mc-option-accordion__toggle:hover,
 body.mc-product-page #content_area .mc-option-accordion__toggle:focus {
