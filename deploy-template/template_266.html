@@ -404,8 +404,8 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp .common-config { display:none; }
 
         /* Center: grid + toolbar */
-        #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:0; padding-top:0; overflow:visible; }
-        #roomPlannerApp #room-wrapper { flex:0 0 auto; min-height:0; display:flex; align-items:flex-start; justify-content:center; width:100%; }
+        #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:0; padding-top:0; overflow:hidden; }
+        #roomPlannerApp #room-wrapper { flex:1 1 auto; min-height:0; display:flex; align-items:flex-start; justify-content:center; width:100%; overflow:auto; }
         #roomPlannerApp #room { position:relative; border:1px solid #bbb; background:#fff; min-width:280px; min-height:180px; flex-shrink:0; }
         #roomPlannerApp .room-grid-layer { position:absolute; inset:0; z-index:0; background-image: linear-gradient(to right, rgba(0,0,0,.10) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,.10) 1px, transparent 1px); background-size: var(--grid-size) var(--grid-size); pointer-events:none; }
         #roomPlannerApp .room-dim { position:absolute; font-size:12px; font-weight:600; background:#fff; padding:3px 7px; color:#333; z-index:15; border:1px solid #ccc; border-radius:3px; box-shadow:0 1px 2px rgba(0,0,0,.06); }
@@ -437,7 +437,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         /* Measurement tool */
         #roomPlannerApp #measure-line { position:absolute; inset:0; pointer-events:none; z-index:9; display:none; }
-        #roomPlannerApp #measure-line.show { display:block; pointer-events:auto; }
+        #roomPlannerApp #measure-line.show { display:block; pointer-events:none; }
         #roomPlannerApp #measure-line svg { position:absolute; left:0; top:0; width:100%; height:100%; display:block; pointer-events:none; }
         #roomPlannerApp #measure-line line { stroke:#2196F3; stroke-width:2; }
         #roomPlannerApp #measure-line .measure-handle { stroke:#1565C0; stroke-width:4; stroke-linecap:round; cursor:grab; pointer-events:auto; }
@@ -777,7 +777,7 @@ document.addEventListener("DOMContentLoaded", function () {
 #mcPlannerModalBody #roomPlannerApp{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
 #mcPlannerModalBody #roomPlannerApp #page{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
 #mcPlannerModalBody #roomPlannerApp #tray-row{ flex-shrink:0; margin-bottom:12px; }
-#mcPlannerModalBody #roomPlannerApp #shell{ flex:1; min-height:0; display:flex; flex-direction:row; align-items:flex-start; gap:16px; padding:0 8px; overflow:hidden; }
+#mcPlannerModalBody #roomPlannerApp #shell{ flex:1; min-height:0; display:flex; flex-direction:row; align-items:flex-start; gap:16px; padding:0 8px; overflow:auto; }
 .mc-planner-save-modal{ position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:100; display:flex; align-items:center; justify-content:center; }
 .mc-planner-save-modal .mc-planner-save-dialog{ background:#fff; padding:20px; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,.3); min-width:280px; }
 .mc-planner-save-modal h3{ margin:0 0 14px 0; font-size:16px; }
@@ -2047,6 +2047,13 @@ window.initRoomPlanner = function (opts) {
     dimLeft.textContent = (dFt ? dFt + " ft " : "") + (dIn ? dIn + " in" : (dFt ? "" : "0 in"));
     var measEl = document.getElementById("room-measurement");
     if (measEl) measEl.innerHTML = "Room: " + (wFt ? wFt + "&prime;" : "") + (wIn ? " " + wIn + "&Prime;" : "") + " &times; " + (dFt ? dFt + "&prime;" : "") + (dIn ? " " + dIn + "&Prime;" : "");
+    var modal = document.querySelector(".mc-planner-modal");
+    if (modal) {
+      var leftW = 120, rightW = 240, gaps = 56;
+      var needed = wPx + leftW + rightW + gaps;
+      var maxVw = Math.floor(window.innerWidth * 0.98);
+      modal.style.width = Math.min(Math.max(needed, 900), maxVw) + "px";
+    }
   }
   if (roomW_ft) roomW_ft.value = "16";
   if (roomW_in) roomW_in.value = "0";
