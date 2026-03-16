@@ -368,74 +368,86 @@ document.addEventListener("DOMContentLoaded", function () {
     <div id="roomPlannerApp" style="position:relative;z-index:1;">
       <style>
         #roomPlannerApp { font-family: Helvetica, Arial, sans-serif; background:#fff; isolation:isolate; }
-        #roomPlannerApp #shell { display:flex; flex-direction:row; gap:10px; flex:1; min-height:0; }
-        #roomPlannerApp #planner-left { width:130px; flex-shrink:0; display:flex; flex-direction:column; gap:8px; overflow-y:auto; padding-top:0; }
-        #roomPlannerApp .room-dims-row { display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 6px; }
-        #roomPlannerApp .room-dims-row label { font-size:11px; color:#555; margin:0 2px 0 0; }
-        #roomPlannerApp .room-dims-row input[type="number"] { width:28px; padding:2px 0; font-size:12px; margin:0; border:none; border-bottom:1px solid #333; background:transparent; border-radius:0; text-align:center; -moz-appearance:textfield; }
-        #roomPlannerApp .room-dims-row input[type="number"]::-webkit-inner-spin-button, #roomPlannerApp .room-dims-row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+        #roomPlannerApp #page { display:flex; flex-direction:column; height:100%; }
+
+        /* Tray: full width across top, above the 3-column shell */
+        #roomPlannerApp #tray-row { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; flex-shrink:0; margin-bottom:12px; padding:0 40px; box-sizing:border-box; }
+        #roomPlannerApp #tray { display:flex; align-items:center; gap:8px; flex:1; min-width:0; }
+        #roomPlannerApp .tray-nav { width:32px; height:32px; border:1px solid #ddd; border-radius:50%; background:#f6f6f6; cursor:pointer; flex-shrink:0; font-size:16px; line-height:1; padding:0; display:flex; align-items:center; justify-content:center; }
+        #roomPlannerApp .tray-nav:hover { background:#eee; }
+        #roomPlannerApp #tray-items { display:flex; gap:12px; overflow-x:auto; scroll-behavior:smooth; flex:1; min-width:0; padding:4px 0; justify-content:center; }
+        #roomPlannerApp #tray-items::-webkit-scrollbar { height:6px; }
+        #roomPlannerApp .tray-item { flex:0 0 120px; width:120px; text-align:center; font-size:11px; cursor:pointer; border:2px solid transparent; border-radius:6px; padding:4px; box-sizing:border-box; }
+        #roomPlannerApp .tray-item:hover { border-color:#ccc; background:#fafafa; }
+        #roomPlannerApp .tray-item img { width:100%; height:auto; max-height:64px; object-fit:contain; display:block; margin:0 auto; pointer-events:none; }
+
+        /* 3-column shell: left controls | center grid+toolbar | right piece list */
+        #roomPlannerApp #shell { display:flex; flex-direction:row; gap:16px; flex:1; min-height:0; align-items:flex-start; }
+
+        /* Left panel: compact room dims + measuring tool */
+        #roomPlannerApp #planner-left { width:120px; flex-shrink:0; display:flex; flex-direction:column; gap:10px; padding-top:4px; }
+        #roomPlannerApp .room-dims-block { display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
+        #roomPlannerApp .room-dims-row { display:flex; flex-wrap:nowrap; align-items:baseline; gap:4px; }
+        #roomPlannerApp .room-dims-row label { font-size:12px; font-weight:600; color:#333; margin:0; }
+        #roomPlannerApp .room-dims-row input[type="number"] { width:24px; padding:2px 0; font-size:12px; margin:0; border:none; border-bottom:1px solid #333; background:transparent; border-radius:0; text-align:center; -moz-appearance:textfield; }
+        #roomPlannerApp .room-dims-row input[type="number"]::-webkit-inner-spin-button,
+        #roomPlannerApp .room-dims-row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
         #roomPlannerApp input[type="number"] { -moz-appearance:textfield; }
-        #roomPlannerApp #room-measurement { font-size:12px; color:#333; margin:4px 0 0 0; }
-        #roomPlannerApp .room-dims-block { display:flex; flex-direction:column; gap:6px; align-items:center; }
-        #roomPlannerApp #applyRoom { padding:5px 10px; font-size:11px; align-self:center; border:1px solid #333; border-radius:0; background:#fff; text-transform:uppercase; letter-spacing:.04em; }
-        #roomPlannerApp #measuringToolBtn { display:inline-flex; align-items:center; gap:6px; padding:8px 10px; cursor:pointer; border:1px solid #333; background:#fff; border-radius:0; font-size:11px; width:100%; justify-content:center; box-sizing:border-box; text-transform:uppercase; letter-spacing:.04em; }
+        #roomPlannerApp #applyRoom { padding:6px 16px; font-size:11px; border:1px solid #333; border-radius:0; background:#fff; text-transform:uppercase; letter-spacing:.05em; cursor:pointer; align-self:flex-start; }
+        #roomPlannerApp #applyRoom:hover { background:#f5f5f5; }
+        #roomPlannerApp #room-measurement { font-size:12px; color:#333; margin:0; }
+        #roomPlannerApp #measuringToolBtn { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; cursor:pointer; border:1px solid #333; background:#fff; border-radius:0; font-size:11px; width:100%; justify-content:center; box-sizing:border-box; text-transform:uppercase; letter-spacing:.05em; white-space:nowrap; }
         #roomPlannerApp #measuringToolBtn:hover { background:#f5f5f5; }
-        #roomPlannerApp #measuringToolBtn svg { width:18px; height:18px; flex-shrink:0; }
+        #roomPlannerApp #measuringToolBtn svg { width:16px; height:16px; flex-shrink:0; }
         #roomPlannerApp .common-configs-title { display:none; }
         #roomPlannerApp #common-configs { display:none; }
-        /* Common config thumbnails: 80% of tray piece size (tray img max-height 72px → 58px), row layout */
-        #roomPlannerApp .common-config { width:100%; height:64px; border:1px solid #ddd; border-radius:6px; cursor:pointer; margin-bottom:0; overflow:hidden; background:#fafafa; display:flex; align-items:center; justify-content:center; padding:0; position:relative; border-top:1px solid #eee; }
-        #roomPlannerApp .common-config:first-of-type { border-top:1px solid #ddd; }
-        #roomPlannerApp .common-config:hover { border-color:#888; background:#f0f0f0; }
-        #roomPlannerApp .common-config-thumb { display:flex; flex-direction:row; align-items:center; justify-content:center; gap:3px; width:100%; height:100%; padding:0 6px; box-sizing:border-box; }
-        #roomPlannerApp .common-config-thumb img { width:auto; height:100%; max-height:58px; max-width:80px; object-fit:contain; display:block; flex-shrink:0; }
-        #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:0; padding-top:0; overflow:hidden; }
-        #roomPlannerApp #tray-row { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; max-width:900px; flex-shrink:0; margin-bottom:8px; }
-        #roomPlannerApp #tray { display:flex; align-items:center; gap:8px; flex:1; min-width:0; }
-        #roomPlannerApp .tray-nav { width:32px; height:32px; border:1px solid #ddd; border-radius:18px; background:#f6f6f6; cursor:pointer; flex-shrink:0; font-size:16px; line-height:1; padding:0; }
-        #roomPlannerApp .tray-nav:hover { background:#eee; }
-        #roomPlannerApp #tray-items { display:flex; gap:8px; overflow-x:auto; scroll-behavior:smooth; flex:1; min-width:0; padding:4px 0; }
-        #roomPlannerApp #tray-items::-webkit-scrollbar { height:6px; }
-        #roomPlannerApp .tray-item { flex:0 0 140px; width:140px; text-align:center; font-size:11px; cursor:pointer; border:2px solid transparent; border-radius:8px; padding:6px; box-sizing:border-box; }
-        #roomPlannerApp .tray-item:hover { border-color:#ccc; background:#fafafa; }
-        #roomPlannerApp .tray-item img { width:100%; height:auto; max-height:72px; object-fit:contain; display:block; margin:0 auto; pointer-events:none; }
-        #roomPlannerApp #room-wrapper { flex:0 0 auto; min-height:0; display:flex; align-items:flex-start; justify-content:center; width:100%; margin-bottom:8px; }
-        #roomPlannerApp #room { position:relative; border:1px solid #bcbcbc; background:#fff; min-width:280px; min-height:180px; flex-shrink:0; }
-        #roomPlannerApp .room-grid-layer { position:absolute; inset:0; z-index:0; background-image: linear-gradient(to right, rgba(0,0,0,.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,.12) 1px, transparent 1px); background-size: var(--grid-size) var(--grid-size); pointer-events:none; }
-        #roomPlannerApp .room-dim { position:absolute; font-size:12px; font-weight:600; background:#fff; padding:4px 8px; color:#333; z-index:15; border:1px solid #ccc; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
-        #roomPlannerApp #dim-top { top:6px; left:50%; transform:translateX(-50%); }
-        #roomPlannerApp #dim-left { left:6px; top:50%; transform:translateY(-50%) rotate(-90deg); }
+        #roomPlannerApp .common-config { display:none; }
+
+        /* Center: grid + toolbar */
+        #roomPlannerApp #planner-center { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:0; padding-top:0; overflow:visible; }
+        #roomPlannerApp #room-wrapper { flex:0 0 auto; min-height:0; display:flex; align-items:flex-start; justify-content:center; width:100%; }
+        #roomPlannerApp #room { position:relative; border:1px solid #bbb; background:#fff; min-width:280px; min-height:180px; flex-shrink:0; }
+        #roomPlannerApp .room-grid-layer { position:absolute; inset:0; z-index:0; background-image: linear-gradient(to right, rgba(0,0,0,.10) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,.10) 1px, transparent 1px); background-size: var(--grid-size) var(--grid-size); pointer-events:none; }
+        #roomPlannerApp .room-dim { position:absolute; font-size:12px; font-weight:600; background:#fff; padding:3px 7px; color:#333; z-index:15; border:1px solid #ccc; border-radius:3px; box-shadow:0 1px 2px rgba(0,0,0,.06); }
+        #roomPlannerApp #dim-top { top:4px; left:50%; transform:translateX(-50%); }
+        #roomPlannerApp #dim-left { left:4px; top:50%; transform:translateY(-50%) rotate(-90deg); }
         #roomPlannerApp .seat { position:absolute; cursor:grab; overflow:hidden; margin:0; box-sizing:border-box; z-index:5; transform-origin:50% 50%; touch-action:none; }
         #roomPlannerApp .config-group .seat { margin:0; }
-        #roomPlannerApp .config-group { z-index:5; }
+        #roomPlannerApp .config-group { z-index:5; position:relative; cursor:grab; }
         #roomPlannerApp .seat:active { cursor:grabbing; }
+        #roomPlannerApp .config-group:active { cursor:grabbing; }
         #roomPlannerApp .seat.active { outline:2px dashed #3b82f6; }
         #roomPlannerApp #room .seat img { position:absolute !important; left:0 !important; top:0 !important; right:0 !important; bottom:0 !important; width:100% !important; height:100% !important; max-width:none !important; max-height:none !important; min-width:100% !important; min-height:100% !important; object-fit:fill !important; object-position:center center; display:block !important; pointer-events:none; }
         #roomPlannerApp .seat .seat-name { position:absolute; bottom:2px; left:0; right:0; z-index:2; font-size:10px; color:rgba(100,100,100,.85); pointer-events:none; text-align:center; text-shadow:0 0 2px #fff, 0 1px 2px #fff; }
-        #roomPlannerApp .config-group { cursor:grab; }
-        #roomPlannerApp .config-group:active { cursor:grabbing; }
-        #roomPlannerApp #toolbar { display:flex; justify-content:center; flex-wrap:nowrap; gap:8px; margin-top:8px; padding-top:0; flex-shrink:0; visibility:visible; }
-        #roomPlannerApp #toolbar button, #roomPlannerApp #planner-left button { padding:8px 14px; border:1px solid #333; background:#fff; cursor:pointer; font-size:11px; border-radius:0; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
-        #roomPlannerApp #toolbar button:hover, #roomPlannerApp #planner-left button:hover { background:#f5f5f5; }
-        #roomPlannerApp #planner-right { width:220px; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; border-left:1px solid #eee; padding-left:12px; }
-        #roomPlannerApp #planner-style-name { font-size:14px; font-weight:600; margin-bottom:10px; }
-        #roomPlannerApp #planner-piece-list { font-size:11px; color:#555; }
-        #roomPlannerApp #planner-piece-list .piece-row { margin-bottom:4px; display:flex; justify-content:space-between; gap:6px; white-space:nowrap; }
-        #roomPlannerApp #planner-piece-list .piece-name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; }
-        #roomPlannerApp #planner-piece-list .piece-dims { color:#777; flex-shrink:0; white-space:nowrap; }
+        #roomPlannerApp .config-group .config-group-detach { position:absolute; top:4px; right:4px; z-index:20; font-size:10px; padding:3px 6px; border:1px solid #999; background:#fff; cursor:pointer; border-radius:4px; }
+        #roomPlannerApp .config-group .config-group-detach:hover { background:#f0f0f0; }
+
+        /* Toolbar: all 6 buttons on one row, directly under grid */
+        #roomPlannerApp #toolbar { display:flex; justify-content:center; flex-wrap:nowrap; gap:10px; margin-top:16px; flex-shrink:0; }
+        #roomPlannerApp #toolbar button { padding:8px 16px; border:1px solid #333; background:#fff; cursor:pointer; font-size:11px; border-radius:0; text-transform:uppercase; letter-spacing:.05em; white-space:nowrap; color:#111; font-weight:400; }
+        #roomPlannerApp #toolbar button:hover { background:#f5f5f5; }
+
+        /* Right panel: piece list with single-line rows */
+        #roomPlannerApp #planner-right { width:240px; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; border-left:1px solid #eee; padding-left:14px; align-self:flex-start; padding-top:0; margin-top:0; }
+        #roomPlannerApp #planner-style-name { font-size:14px; font-weight:700; margin-bottom:12px; line-height:1.3; }
+        #roomPlannerApp #planner-piece-list { font-size:12px; color:#333; }
+        #roomPlannerApp #planner-piece-list .piece-row { margin-bottom:6px; display:flex; justify-content:space-between; gap:10px; line-height:1.4; }
+        #roomPlannerApp #planner-piece-list .piece-name { flex:1; min-width:0; }
+        #roomPlannerApp #planner-piece-list .piece-dims { color:#555; flex-shrink:0; white-space:nowrap; }
+
+        /* Measurement tool */
         #roomPlannerApp #measure-line { position:absolute; inset:0; pointer-events:none; z-index:9; display:none; }
         #roomPlannerApp #measure-line.show { display:block; pointer-events:auto; }
         #roomPlannerApp #measure-line svg { position:absolute; left:0; top:0; width:100%; height:100%; display:block; pointer-events:none; }
         #roomPlannerApp #measure-line line { stroke:#2196F3; stroke-width:2; }
         #roomPlannerApp #measure-line .measure-handle { stroke:#1565C0; stroke-width:4; stroke-linecap:round; cursor:grab; pointer-events:auto; }
         #roomPlannerApp #measure-line .measure-handle:active { cursor:grabbing; }
-        #roomPlannerApp .config-group { position:relative; }
-        #roomPlannerApp .config-group .config-group-detach { position:absolute; top:4px; right:4px; z-index:20; font-size:10px; padding:3px 6px; border:1px solid #999; background:#fff; cursor:pointer; border-radius:4px; }
-        #roomPlannerApp .config-group .config-group-detach:hover { background:#f0f0f0; }
         #roomPlannerApp #measure-label-box { position:absolute; pointer-events:none; background:#fff; border:1px solid #2196F3; border-radius:4px; padding:3px 8px; font-size:12px; font-weight:600; color:#333; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,.2); z-index:10; transform:translate(-50%, -100%); min-width:3em; text-align:center; }
-        #roomPlannerApp #planner-right { align-self:flex-start; margin-top:0; padding-top:0; width:220px; }
       </style>
       <div id="page">
+        <div id="tray-row">
+          <div id="tray"><button class="tray-nav" id="navL" type="button" aria-label="Scroll left">&lt;</button><div id="tray-items"></div><button class="tray-nav" id="navR" type="button" aria-label="Scroll right">&gt;</button></div>
+        </div>
         <div id="shell">
           <div id="planner-left">
             <div class="room-dims-block">
@@ -451,9 +463,6 @@ document.addEventListener("DOMContentLoaded", function () {
             <div id="common-configs"></div>
           </div>
           <div id="planner-center">
-            <div id="tray-row">
-              <div id="tray"><button class="tray-nav" id="navL" type="button" aria-label="Scroll left">&lt;</button><div id="tray-items"></div><button class="tray-nav" id="navR" type="button" aria-label="Scroll right">&gt;</button></div>
-            </div>
             <div id="room-wrapper">
               <div id="room"><div class="room-grid-layer" aria-hidden="true"></div><div id="dim-top" class="room-dim"></div><div id="dim-left" class="room-dim"></div>
                 <div id="measure-line"><svg id="measure-svg" xmlns="http://www.w3.org/2000/svg"><line id="measure-line-seg" x1="50" y1="50" x2="200" y2="150"/><line id="measure-handle-l" class="measure-handle" x1="44" y1="50" x2="56" y2="50"/><line id="measure-handle-r" class="measure-handle" x1="194" y1="150" x2="206" y2="150"/></svg><div id="measure-label-box">0 in</div></div>
@@ -3210,14 +3219,14 @@ body.mc-product-page #content_area #mcLeatherSwatchStrip img {
 }
 #roomPlannerApp #toolbar button,
 #roomPlannerApp #applyRoom {
-  padding: 8px 14px !important;
+  padding: 8px 16px !important;
   border: 1px solid #333 !important;
   border-radius: 0 !important;
   background: #fff !important;
   color: #111 !important;
   font-size: 11px !important;
   font-weight: 400 !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
   cursor: pointer !important;
   white-space: nowrap !important;
