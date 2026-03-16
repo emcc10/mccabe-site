@@ -2767,11 +2767,7 @@ body.mc-product-page #content_area td.productoptionname {
   body.mc-product-page #content_area .mc-option-accordion__toggle {
     flex-shrink: 0 !important;
     margin-left: 8px !important;
-    font-size: 1.2em !important;
-    border: 0 !important;
-    background: none !important;
     cursor: pointer !important;
-    padding: 4px !important;
   }
   body.mc-product-page #content_area .mc-option-accordion__selected {
     display: block !important;
@@ -2821,7 +2817,24 @@ body.mc-product-page #content_area #mcPlannerSummary.mc-has-selections {
   flex: 1 1 auto !important;
 }
 
-/* RH-style buttons: Room Planner, Add to Cart, and room planner modal toolbar */
+/* No separate container around Add to Cart – wrapper/cell/row must be transparent */
+body.mc-product-page #content_area .v65-product-addtocart,
+body.mc-product-page #content_area .v65-product-addtocart div,
+body.mc-product-page #v65-product-parent .v65-product-addtocart,
+body.mc-product-page #v65-product-parent .v65-product-addtocart div,
+body.mc-product-page #content_area td:has(input[name="btnaddtocart"]),
+body.mc-product-page #content_area tr:has(input[name="btnaddtocart"]),
+body.mc-product-page #content_area div:has(input[name="btnaddtocart"]),
+body.mc-product-page #content_area [itemprop="offers"],
+body.mc-product-page #v65-product-parent td:has(input[name="btnaddtocart"]),
+body.mc-product-page #v65-product-parent tr:has(input[name="btnaddtocart"]) {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* RH-style buttons: Room Planner and Add to Cart only (not accordion toggle) */
 body.mc-product-page #content_area .mc-config-btn,
 body.mc-product-page #content_area #mcPlannerBtn,
 body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i],
@@ -2851,6 +2864,30 @@ body.mc-product-page #content_area input[name="btnaddtocart"]:hover,
 body.mc-product-page #content_area button[name="btnaddtocart"]:hover {
   background: #333 !important;
   color: #fff !important;
+}
+
+/* Accordion toggle ">" – no black box, match header style */
+body.mc-product-page #content_area .mc-option-accordion__toggle {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #686868 !important;
+  padding: 4px 6px !important;
+  min-width: 0 !important;
+  font-size: 1.2em !important;
+  line-height: 1 !important;
+}
+
+/* Mini leather swatches – no grey boxes */
+body.mc-product-page #content_area #mcLeatherSwatchStrip .wm-swatch,
+body.mc-product-page #content_area #mcLeatherSwatchStrip > * {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+body.mc-product-page #content_area #mcLeatherSwatchStrip .wm-swatch img {
+  border-radius: 50% !important;
 }
 #roomPlannerApp #toolbar button,
 #roomPlannerApp #planner-left button,
@@ -3003,11 +3040,10 @@ body.mc-product-page #content_area .wm-swatch img {
     margin: 0 auto !important;
   }
 
-  /* Mobile: main image centered first, then alt images – up to 4 per row, single centered column */
+  /* Alt images: 4 per row, up to 2 rows; single centered column */
   body.mc-product-page #content_area #altviews,
   body.mc-product-page #content_area .altviews,
-  body.mc-product-page #content_area span#altviews,
-  body.mc-product-page #content_area [id*="altview"] {
+  body.mc-product-page #content_area span#altviews {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
@@ -3016,7 +3052,7 @@ body.mc-product-page #content_area .wm-swatch img {
     gap: 8px !important;
     margin: 12px auto 16px auto !important;
     padding: 0 !important;
-    max-width: 320px !important;
+    max-width: 296px !important;
     width: 100% !important;
     float: none !important;
     clear: both !important;
@@ -3027,14 +3063,16 @@ body.mc-product-page #content_area .wm-swatch img {
   body.mc-product-page #content_area .altviews a,
   body.mc-product-page #content_area #altviews > div,
   body.mc-product-page #content_area .altviews > div,
-  body.mc-product-page #content_area [id*="altview"] a,
-  body.mc-product-page #content_area [id*="altview"] > div {
-    display: inline-block !important;
-    flex-shrink: 0 !important;
+  body.mc-product-page #content_area span#altviews a,
+  body.mc-product-page #content_area span#altviews > div {
+    display: block !important;
+    flex: 0 0 64px !important;
+    width: 64px !important;
+    max-width: 64px !important;
   }
   body.mc-product-page #content_area #altviews img,
   body.mc-product-page #content_area .altviews img,
-  body.mc-product-page #content_area [id*="altview"] img {
+  body.mc-product-page #content_area span#altviews img {
     width: 64px !important;
     max-width: 64px !important;
     height: auto !important;
