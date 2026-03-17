@@ -4512,53 +4512,50 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (!isMobile()) return;
     var thumbs = q('#altviews', scope) || q('span#altviews', scope) || q('.altviews', scope);
     if (!thumbs) return;
-    var parent = thumbs.parentElement;
-    if (parent) {
-      parent.style.setProperty('display', 'flex', 'important');
-      parent.style.setProperty('flex-direction', 'column', 'important');
-      parent.style.setProperty('align-items', 'center', 'important');
-      parent.style.setProperty('width', '100%', 'important');
-      parent.style.setProperty('padding', '0', 'important');
-    }
-    thumbs.style.setProperty('display', 'flex', 'important');
-    thumbs.style.setProperty('flex-direction', 'row', 'important');
-    thumbs.style.setProperty('flex-wrap', 'wrap', 'important');
-    thumbs.style.setProperty('justify-content', 'center', 'important');
-    thumbs.style.setProperty('align-items', 'center', 'important');
-    thumbs.style.setProperty('gap', '10px', 'important');
-    thumbs.style.setProperty('width', '296px', 'important');
-    thumbs.style.setProperty('max-width', '100%', 'important');
-    thumbs.style.setProperty('margin', '12px auto 16px auto', 'important');
-    thumbs.style.setProperty('padding', '5px', 'important');
-    thumbs.style.setProperty('float', 'none', 'important');
-    thumbs.style.setProperty('clear', 'both', 'important');
-    thumbs.style.setProperty('left', 'auto', 'important');
-    thumbs.style.setProperty('right', 'auto', 'important');
-    thumbs.style.setProperty('position', 'static', 'important');
-    thumbs.style.setProperty('transform', 'none', 'important');
-    thumbs.style.setProperty('box-sizing', 'border-box', 'important');
-    qa('a', thumbs).forEach(function(el){
+    var el = thumbs.parentElement;
+    var depth = 0;
+    while (el && depth < 6) {
       el.style.setProperty('display', 'block', 'important');
-      el.style.setProperty('flex', '0 0 64px', 'important');
-      el.style.setProperty('width', '64px', 'important');
-      el.style.setProperty('max-width', '64px', 'important');
+      el.style.setProperty('width', '100%', 'important');
+      el.style.setProperty('float', 'none', 'important');
+      el.style.setProperty('text-align', 'center', 'important');
+      el.style.setProperty('padding-left', '0', 'important');
+      el.style.setProperty('padding-right', '0', 'important');
+      if (el.id === 'content_area' || el.tagName === 'BODY') break;
+      el = el.parentElement;
+      depth++;
+    }
+    thumbs.style.cssText = [
+      'display:flex!important',
+      'flex-direction:row!important',
+      'flex-wrap:wrap!important',
+      'justify-content:center!important',
+      'align-items:center!important',
+      'gap:10px!important',
+      'width:296px!important',
+      'max-width:100%!important',
+      'margin:12px auto 16px auto!important',
+      'padding:5px!important',
+      'float:none!important',
+      'clear:both!important',
+      'position:static!important',
+      'left:auto!important',
+      'right:auto!important',
+      'transform:none!important',
+      'box-sizing:border-box!important',
+      'text-align:center!important'
+    ].join(';');
+    qa('a', thumbs).forEach(function(a){
+      a.style.cssText = 'display:block!important;flex:0 0 64px!important;width:64px!important;max-width:64px!important;float:none!important;margin:0!important;padding:0!important';
     });
     for (var ci = 0; ci < thumbs.children.length; ci++) {
       var ch = thumbs.children[ci];
       if (ch.tagName === 'DIV') {
-        ch.style.setProperty('display', 'block', 'important');
-        ch.style.setProperty('flex', '0 0 64px', 'important');
-        ch.style.setProperty('width', '64px', 'important');
-        ch.style.setProperty('max-width', '64px', 'important');
+        ch.style.cssText = 'display:block!important;flex:0 0 64px!important;width:64px!important;max-width:64px!important;float:none!important;margin:0!important;padding:0!important';
       }
     }
-    qa('img', thumbs).forEach(function(el){
-      el.style.setProperty('width', '100%', 'important');
-      el.style.setProperty('max-width', '64px', 'important');
-      el.style.setProperty('height', 'auto', 'important');
-      el.style.setProperty('max-height', '64px', 'important');
-      el.style.setProperty('object-fit', 'contain', 'important');
-      el.style.setProperty('display', 'block', 'important');
+    qa('img', thumbs).forEach(function(img){
+      img.style.cssText = 'width:100%!important;max-width:64px!important;height:auto!important;max-height:64px!important;object-fit:contain!important;display:block!important;float:none!important;margin:0!important';
     });
   }
 
