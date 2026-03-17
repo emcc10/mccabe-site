@@ -1949,6 +1949,77 @@ function calculatePlannerPrice(counts, seatPrice){
   return total;
 }
 
+function hasInvalid4LConfiguration(counts){
+  if (!counts || typeof counts !== "object") return false;
+  var fourLCount = Number(counts["4L"] || 0);
+  if (!fourLCount) return false;
+  var non4LCount = Object.keys(counts).reduce(function(total, key){
+    if (key === "4L") return total;
+    return total + Number(counts[key] || 0);
+  }, 0);
+  return non4LCount < 2;
+}
+
+function summarizePlannerConfiguration(payload){
+  var opts = payload && payload.options && typeof payload.options === "object" ? payload.options : (window.__ROOM_PLANNER_OPTIONS__ || {});
+  var layout = payload && Array.isArray(payload.layout) ? payload.layout : (window.__ROOM_PLANNER_LAYOUT__ || []);
+  var room = payload && payload.room ? payload.room : null;
+  var seatCount = payload && payload.seatCount != null ? Number(payload.seatCount) : NaN;
+  var pieces = [];
+
+  if (layout.length) {
+    pieces = layout.map(function(item){ return item && item.id ? item.id : item; }).filter(Boolean);
+  } else {
+    Object.keys(opts).forEach(function(key){
+      for (var i = 0; i < Number(opts[key] || 0); i++) pieces.push(key);
+    });
+  }
+
+  if (isNaN(seatCount) || seatCount < 0) {
+    seatCount = pieces.reduce(function(total, id){ return total + (id === "4L" ? 2 : 1); }, 0);
+  }
+
+  var parts = [];
+  if (pieces.length) parts.push("Planner: " + pieces.join(", "));
+  if (!isNaN(seatCount) && seatCount > 0) parts.push("Seats: " + seatCount);
+  if (room && room.widthTotalIn != null && room.depthTotalIn != null) {
+    parts.push("Room: " + room.widthTotalIn + "x" + room.depthTotalIn + " in");
+  }
+
+  return parts.join(" | ").slice(0, 200);
+}
+
+function syncPlannerConfigurationToCart(payload){
+  var summary = summarizePlannerConfiguration(payload);
+  if (!summary) return;
+  window.__mcPlannerCartCopy = summary;
+
+  var root = document.querySelector("#content_area") || document.body;
+  var addToCartBtn = root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
+  var form = addToCartBtn && addToCartBtn.form ? addToCartBtn.form : root.querySelector('form[action*="ProductDetails.asp"]');
+  if (!form) return;
+
+  var existingField =
+    form.querySelector('input[title="Configuration Details"], textarea[title="Configuration Details"]') ||
+    form.querySelector('input[name^="TEXTBOX___"], textarea[name^="TEXTBOX___"]');
+
+  if (existingField && existingField.name) {
+    window.__mcPlannerCartFieldName = existingField.name;
+  }
+
+  if (!window.__mcPlannerCartFieldName) return;
+
+  var targetField = form.querySelector('input[name="' + window.__mcPlannerCartFieldName + '"], textarea[name="' + window.__mcPlannerCartFieldName + '"]');
+  if (!targetField) {
+    targetField = document.createElement("input");
+    targetField.type = "hidden";
+    targetField.name = window.__mcPlannerCartFieldName;
+    form.appendChild(targetField);
+  }
+
+  targetField.value = summary;
+}
+
 var PIECE_NAMES = { "1L":"1L Recliner","2L":"2L LHF Recliner","3L":"3L RHF Recliner","4L":"4L Armless Loveseat","5L":"5L RHF Wedge, LHF Straight","6L":"6L LHF Wedge, RHF Straight","7L":"7L RHF Wedge","8L":"8L Armless Recliner","9L":"9L LHF Wedge" };
 var PIECE_DESCRIPTIONS = { "1L":"Single recliner.","2L":"Left-hand facing recliner.","3L":"Right-hand facing recliner.","4L":"Armless loveseat, seats two.","5L":"RHF wedge with LHF straight.","6L":"LHF wedge with RHF straight.","7L":"Right-hand facing wedge.","8L":"Armless recliner.","9L":"Left-hand facing wedge." };
 
@@ -2039,6 +2110,13 @@ window.applyPlannerToPage = function (payload) {
   } else {
     configOpts = opts;
   }
+
+  syncPlannerConfigurationToCart({
+    options: opts,
+    layout: layout,
+    room: payload.room || null,
+    seatCount: seatCount
+  });
 
   var seatPrice = getPlannerBaseSeatPriceForCalc();
   console.log("[McCabe Planner] seatPrice read:", seatPrice, "counts:", JSON.stringify(configOpts));
@@ -2150,6 +2228,20 @@ window.initRoomPlanner = function (opts) {
       if (seat.dataset.pieceId !== "4L") n++;
     });
     return n;
+  }
+  function removeInvalid4LPieces(showAlert) {
+    if (getNon4LCount() >= 2) return false;
+    var removed = false;
+    document.querySelectorAll("#roomPlannerApp .seat").forEach(function (seat) {
+      if (seat.dataset.pieceId !== "4L") return;
+      if (activeSeat === seat) activeSeat = null;
+      seat.remove();
+      removed = true;
+    });
+    if (removed && showAlert) {
+      alert("A 4L Armless Loveseat can only be used when at least two other pieces are in the room. The 4L piece has been removed.");
+    }
+    return removed;
   }
   function calculateSeatCount() {
     var seats = 0;
@@ -2330,7 +2422,13 @@ window.initRoomPlanner = function (opts) {
   }
   document.getElementById("rotateL").onclick = function () { rotateSeat(-5); };
   document.getElementById("rotateR").onclick = function () { rotateSeat(5); };
-  document.getElementById("deleteBtn").onclick = function () { if (activeSeat) { activeSeat.remove(); activeSeat = null; } };
+  document.getElementById("deleteBtn").onclick = function () {
+    if (activeSeat) {
+      activeSeat.remove();
+      activeSeat = null;
+      removeInvalid4LPieces(true);
+    }
+  };
   var measureLineEl = document.getElementById("measure-line");
   var measureBtn = document.getElementById("measuringToolBtn");
   if (measureLineEl && measureBtn) {
@@ -2690,6 +2788,11 @@ window.initRoomPlanner = function (opts) {
         alert("Add at least one piece to the room before adding configuration.");
         return;
       }
+      if (hasInvalid4LConfiguration(counts)) {
+        alert("A 4L Armless Loveseat can only be added when at least two other pieces are already in the room.");
+        removeInvalid4LPieces(false);
+        return;
+      }
       var prodCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "unknown";
       var payload = { productCode: prodCode, options: counts, counts: counts, room: getRoomPayload(), layout: layout, seatCount: seatCount, ts: Date.now() };
       try { localStorage.setItem("roomPlannerData_" + prodCode, JSON.stringify(payload)); } catch (e) {}
@@ -2711,6 +2814,10 @@ window.initRoomPlanner = function (opts) {
       var data = JSON.parse(raw);
       var layout = data.layout;
       if (!layout || !Array.isArray(layout) || layout.length === 0) return;
+      if (hasInvalid4LConfiguration(data.options || data.counts || {})) {
+        localStorage.removeItem("roomPlannerData_" + prodCode);
+        return;
+      }
       var pieceMap = {};
       PIECES.forEach(function (p) { pieceMap[p.id] = p; });
       document.querySelectorAll("#roomPlannerApp .config-group").forEach(function (g) { g.remove(); });
@@ -4955,9 +5062,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var rows = qa('tr', optionsTable);
     rows.forEach(function(row){
       var txt = (row.textContent || '').replace(/\s+/g, ' ').toLowerCase();
+      var configField = row.querySelector('input[title="Configuration Details"], textarea[title="Configuration Details"], input[name^="TEXTBOX___"], textarea[name^="TEXTBOX___"]');
+      if (configField && configField.name) window.__mcPlannerCartFieldName = configField.name;
 
       // Any row that is the "Configuration Details" header, "please note..." text, or comment box
-      var isCommentRow = !!row.querySelector('textarea');
+      var isCommentRow = !!row.querySelector('textarea, input[title="Configuration Details"], textarea[title="Configuration Details"], input[name^="TEXTBOX___"], textarea[name^="TEXTBOX___"]');
       if (txt.indexOf('configuration details') !== -1 ||
           txt.indexOf("please note how you'd like your seats arranged") !== -1 ||
           isCommentRow) {
@@ -5176,6 +5285,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var root = scope || document;
     var btn = root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
     if (!btn) return;
+    if (!window.__mcPlannerCartSubmitBound && btn.form) {
+      window.__mcPlannerCartSubmitBound = true;
+      btn.form.addEventListener('submit', function(){
+        syncPlannerConfigurationToCart();
+      });
+    }
     if (btn.tagName === 'INPUT' && (btn.type || '').toLowerCase() === 'image') {
       try { btn.type = 'submit'; } catch (e) {}
       btn.removeAttribute('src');
