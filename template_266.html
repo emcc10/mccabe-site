@@ -3357,8 +3357,25 @@ body.mc-product-page #content_area .wm-swatch img {
     margin: 0 !important;
   }
 
+  .productdetails table:has(td[class*="vCSS_tab"]) {
+    display: block !important;
+    margin-bottom: -12px !important;
+    margin-top: 5px !important;
+    margin-left: -16px !important;
+  }
+  .productdetails tbody:has(td[class*="vCSS_tab"]) {
+    display: block !important;
+  }
+  .productdetails tr:has(> td[class*="vCSS_tab"]) {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    height: auto !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+  }
   .productdetails td[class*="vCSS_tab"] {
-    display: inline-block !important;
+    display: inline-flex !important;
+    align-items: center !important;
     float: none !important;
     width: auto !important;
     height: auto !important;
@@ -3366,9 +3383,7 @@ body.mc-product-page #content_area .wm-swatch img {
     white-space: nowrap !important;
     overflow: visible !important;
     padding: 8px 16px !important;
-    margin-bottom: -12px;
-    margin-top: 5px;
-    margin-left: -16px;
+    margin: 0 !important;
   }
   .productdetails td[class*="vCSS_tab"] span,
   .productdetails td[class*="vCSS_tab"] a,
@@ -3379,15 +3394,6 @@ body.mc-product-page #content_area .wm-swatch img {
     height: auto !important;
     display: inline !important;
     max-width: none !important;
-  }
-  .productdetails tr:has(> td[class*="vCSS_tab"]) {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    height: auto !important;
-  }
-  .productdetails table:has(td[class*="vCSS_tab"]),
-  .productdetails tbody:has(td[class*="vCSS_tab"]) {
-    display: block !important;
   }
 }
 
@@ -4388,7 +4394,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
     var fixedParents = [];
     qa('td[class*="vCSS_tab"]', scope).forEach(function(td){
-      td.style.setProperty('display','inline-block','important');
+      td.style.setProperty('display','inline-flex','important');
+      td.style.setProperty('align-items','center','important');
       td.style.setProperty('float','none','important');
       td.style.setProperty('width','auto','important');
       td.style.setProperty('height','auto','important');
@@ -4396,9 +4403,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       td.style.setProperty('white-space','nowrap','important');
       td.style.setProperty('overflow','visible','important');
       td.style.setProperty('padding','8px 16px','important');
-      td.style.setProperty('margin-bottom','-12px','important');
-      td.style.setProperty('margin-top','5px','important');
-      td.style.setProperty('margin-left','-16px','important');
+      td.style.setProperty('margin','0','important');
       qa('span, a, div', td).forEach(function(inner){
         inner.style.setProperty('white-space','nowrap','important');
         inner.style.setProperty('overflow','visible','important');
@@ -4412,6 +4417,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         fixedParents.push(tr);
         tr.style.setProperty('display','flex','important');
         tr.style.setProperty('flex-wrap','nowrap','important');
+        tr.style.setProperty('align-items','stretch','important');
         tr.style.setProperty('gap','0','important');
         tr.style.setProperty('height','auto','important');
         var tbody = tr.parentElement;
@@ -4420,6 +4426,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
           var tbl = tbody.parentElement;
           if (tbl && tbl.tagName === 'TABLE') {
             tbl.style.setProperty('display','block','important');
+            tbl.style.setProperty('margin-bottom','-12px','important');
+            tbl.style.setProperty('margin-top','5px','important');
+            tbl.style.setProperty('margin-left','-16px','important');
           }
         }
       }
