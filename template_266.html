@@ -4260,6 +4260,24 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         tab.style.setProperty('margin','0','important');
       });
     });
+
+    qa('td[class*="vCSS_tab"]', scope).forEach(function(td){
+      td.style.setProperty('display','inline-block','important');
+      td.style.setProperty('float','none','important');
+      td.style.setProperty('width','auto','important');
+      td.style.setProperty('vertical-align','bottom','important');
+    });
+    qa('tr:has(> td[class*="vCSS_tab"])', scope).forEach(function(tr){
+      tr.style.setProperty('display','flex','important');
+      tr.style.setProperty('flex-wrap','nowrap','important');
+      tr.style.setProperty('gap','0','important');
+    });
+    qa('table:has(td[class*="vCSS_tab"])', scope).forEach(function(tbl){
+      tbl.style.setProperty('display','block','important');
+    });
+    qa('tbody:has(> tr > td[class*="vCSS_tab"])', scope).forEach(function(tb){
+      tb.style.setProperty('display','block','important');
+    });
   }
 
   function findMainMedia(scope) {
