@@ -3367,6 +3367,16 @@ body.mc-product-page #content_area .wm-swatch img {
     overflow: visible !important;
     padding: 8px 16px !important;
   }
+  .productdetails td[class*="vCSS_tab"] span,
+  .productdetails td[class*="vCSS_tab"] a,
+  .productdetails td[class*="vCSS_tab"] div {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    width: auto !important;
+    height: auto !important;
+    display: inline !important;
+    max-width: none !important;
+  }
   .productdetails tr:has(> td[class*="vCSS_tab"]) {
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -3499,6 +3509,14 @@ body.mc-product-page #content_area .wm-swatch img {
     flex-direction: column !important;
     align-items: center !important;
     width: 100% !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  body.mc-product-page #content_area .mc-pdp-options-td,
+  body.mc-product-page #content_area td:has(.colors_pricebox),
+  body.mc-product-page #content_area td:has(#priceWithOptions) {
+    padding-top: 8px !important;
+    margin-top: 0 !important;
   }
   /* Alt images: centered under main, 4 per row with wrap */
   body.mc-product-page #content_area #altviews,
@@ -4375,6 +4393,14 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       td.style.setProperty('white-space','nowrap','important');
       td.style.setProperty('overflow','visible','important');
       td.style.setProperty('padding','8px 16px','important');
+      qa('span, a, div', td).forEach(function(inner){
+        inner.style.setProperty('white-space','nowrap','important');
+        inner.style.setProperty('overflow','visible','important');
+        inner.style.setProperty('width','auto','important');
+        inner.style.setProperty('height','auto','important');
+        inner.style.setProperty('display','inline','important');
+        inner.style.setProperty('max-width','none','important');
+      });
       var tr = td.parentElement;
       if (tr && tr.tagName === 'TR' && fixedParents.indexOf(tr) === -1) {
         fixedParents.push(tr);
@@ -4492,19 +4518,39 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       parent.style.setProperty('flex-direction', 'column', 'important');
       parent.style.setProperty('align-items', 'center', 'important');
       parent.style.setProperty('width', '100%', 'important');
+      parent.style.setProperty('padding', '0', 'important');
     }
     thumbs.style.setProperty('display', 'flex', 'important');
+    thumbs.style.setProperty('flex-direction', 'row', 'important');
     thumbs.style.setProperty('flex-wrap', 'wrap', 'important');
     thumbs.style.setProperty('justify-content', 'center', 'important');
+    thumbs.style.setProperty('align-items', 'center', 'important');
     thumbs.style.setProperty('gap', '10px', 'important');
     thumbs.style.setProperty('width', '296px', 'important');
     thumbs.style.setProperty('max-width', '100%', 'important');
-    thumbs.style.setProperty('margin-left', 'auto', 'important');
-    thumbs.style.setProperty('margin-right', 'auto', 'important');
+    thumbs.style.setProperty('margin', '12px auto 16px auto', 'important');
+    thumbs.style.setProperty('padding', '5px', 'important');
     thumbs.style.setProperty('float', 'none', 'important');
+    thumbs.style.setProperty('clear', 'both', 'important');
     thumbs.style.setProperty('left', 'auto', 'important');
     thumbs.style.setProperty('right', 'auto', 'important');
+    thumbs.style.setProperty('position', 'static', 'important');
     thumbs.style.setProperty('transform', 'none', 'important');
+    thumbs.style.setProperty('box-sizing', 'border-box', 'important');
+    qa('a, > div', thumbs).forEach(function(el){
+      el.style.setProperty('display', 'block', 'important');
+      el.style.setProperty('flex', '0 0 64px', 'important');
+      el.style.setProperty('width', '64px', 'important');
+      el.style.setProperty('max-width', '64px', 'important');
+    });
+    qa('img', thumbs).forEach(function(el){
+      el.style.setProperty('width', '100%', 'important');
+      el.style.setProperty('max-width', '64px', 'important');
+      el.style.setProperty('height', 'auto', 'important');
+      el.style.setProperty('max-height', '64px', 'important');
+      el.style.setProperty('object-fit', 'contain', 'important');
+      el.style.setProperty('display', 'block', 'important');
+    });
   }
 
   function wireAltThumbClicks(scope){
