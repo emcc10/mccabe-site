@@ -2117,6 +2117,16 @@ window.initRoomPlanner = function (opts) {
     dimLeft.textContent = (dFt ? dFt + " ft " : "") + (dIn ? dIn + " in" : (dFt ? "" : "0 in"));
     var measEl = document.getElementById("room-measurement");
     if (measEl) measEl.innerHTML = "Room: " + (wFt ? wFt + "&prime;" : "") + (wIn ? " " + wIn + "&Prime;" : "") + " &times; " + (dFt ? dFt + "&prime;" : "") + (dIn ? " " + dIn + "&Prime;" : "");
+
+    var modalEl = document.querySelector(".mc-planner-modal");
+    if (modalEl) {
+      var panelLeft = 150, panelRight = 240, gaps = 32, shellPad = 16, bodyPad = 16, buffer = 24;
+      var needed = wPx + panelLeft + panelRight + gaps + shellPad + bodyPad + buffer;
+      var baseW = 1400;
+      var maxVw = window.innerWidth * 0.98;
+      var finalW = Math.min(Math.max(needed, baseW), maxVw);
+      modalEl.style.width = finalW + "px";
+    }
   }
   if (roomW_ft) roomW_ft.value = "16";
   if (roomW_in) roomW_in.value = "0";
