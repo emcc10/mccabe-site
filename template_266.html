@@ -1466,14 +1466,6 @@ boot();
 
     panel.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;max-width:520px;width:100%">
-        <div id="mcPlannerRow" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;width:100%;min-width:0">
-          <button type="button" id="mcPlannerBtn" class="mc-config-btn"
-            style="padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:0;background:#fff;cursor:pointer">
-            <span>Room Planner</span>
-            <span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-          </button>
-        </div>
-
         <div id="mcLeatherRow" style="display:flex;flex-direction:column;gap:6px;align-items:stretch;width:100%">
           <div id="mcLeatherHeaderRow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;flex-wrap:nowrap">
             <div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 auto">
@@ -1489,6 +1481,14 @@ boot();
           <div id="mcLeatherPicker" style="display:flex;align-items:center;gap:6px;width:100%">
             <div id="mcLeatherSwatchStrip" style="display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0;overflow:hidden"></div>
           </div>
+        </div>
+
+        <div id="mcPlannerRow" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;width:100%;min-width:0">
+          <button type="button" id="mcPlannerBtn" class="mc-config-btn"
+            style="padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:0;background:#fff;cursor:pointer">
+            <span>Room Planner</span>
+            <span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+          </button>
         </div>
 
         <div id="mcConfigurationBlock" style="width:100%">
@@ -3083,7 +3083,7 @@ body.mc-product-page #content_area #mcPlannerBtn {
   justify-content: center !important;
   gap: 12px !important;
   min-width: 200px !important;
-  max-width: 47% !important;
+  max-width: 50% !important;
   padding: 14px 28px !important;
   border: 1px solid #d0d0d0 !important;
   border-radius: 30px !important;
