@@ -792,8 +792,78 @@ document.addEventListener("DOMContentLoaded", function () {
 <style>
 html body.category .v-product-grid .v-product,
 html body.category .v-product-grid .v-product-grid-item,
-html body.category .v-product-grid > .v-product {
+html body.category .v-product-grid > .v-product,
+html body.productdetails .v-product-grid .v-product,
+html body.productdetails .v-product-grid .v-product-grid-item,
+html body.productdetails .v-product-grid > .v-product {
   vertical-align: baseline !important;
+}
+
+.productdetails .v-product-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 20px !important;
+  justify-content: flex-start !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.productdetails .v-product-grid .v-product {
+  flex: 0 0 calc(25% - 15px) !important;
+  max-width: calc(25% - 15px) !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.productdetails .v-product-grid .v-product .v-product__img {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  height: 300px;
+  overflow: hidden;
+}
+
+.productdetails .v-product-grid .v-product .v-product__img img {
+  max-height: 300px;
+  width: auto;
+  max-width: 100%;
+  object-position: top center !important;
+  margin-top: 0 !important;
+}
+
+.productdetails .v-product-grid .v-product .v-product__name,
+.productdetails .v-product-grid .v-product .productnamecolor,
+.productdetails .v-product-grid .v-product .productnamecolor a {
+  text-align: left !important;
+  display: block !important;
+  margin-top: 8px !important;
+}
+
+@media (max-width: 991px) {
+  .productdetails .v-product-grid .v-product {
+    flex: 0 0 calc(50% - 10px) !important;
+    max-width: calc(50% - 10px) !important;
+  }
+  .productdetails .v-product-grid .v-product .v-product__img {
+    height: 200px;
+    margin-bottom: 4px !important;
+    padding-bottom: 0 !important;
+  }
+  .productdetails .v-product-grid .v-product .v-product__img img {
+    max-height: 200px;
+  }
+  .productdetails .v-product-grid .v-product .v-product__name,
+  .productdetails .v-product-grid .v-product .productnamecolor,
+  .productdetails .v-product-grid .v-product .productnamecolor a,
+  .productdetails .v-product-grid .v-product h2,
+  .productdetails .v-product-grid .v-product h3,
+  .productdetails .v-product-grid .v-product h4 {
+    text-align: center !important;
+    display: block !important;
+    margin-top: 4px !important;
+  }
 }
 </style>
 
@@ -1466,14 +1536,6 @@ boot();
 
     panel.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;max-width:520px;width:100%">
-        <div id="mcPlannerRow" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;width:100%;min-width:0">
-          <button type="button" id="mcPlannerBtn" class="mc-config-btn"
-            style="padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:0;background:#fff;cursor:pointer">
-            <span>Room Planner</span>
-            <span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-          </button>
-        </div>
-
         <div id="mcLeatherRow" style="display:flex;flex-direction:column;gap:6px;align-items:stretch;width:100%">
           <div id="mcLeatherHeaderRow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;flex-wrap:nowrap">
             <div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 auto">
@@ -1489,6 +1551,14 @@ boot();
           <div id="mcLeatherPicker" style="display:flex;align-items:center;gap:6px;width:100%">
             <div id="mcLeatherSwatchStrip" style="display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0;overflow:hidden"></div>
           </div>
+        </div>
+
+        <div id="mcPlannerRow" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;width:100%;min-width:0">
+          <button type="button" id="mcPlannerBtn" class="mc-config-btn"
+            style="padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:0;background:#fff;cursor:pointer">
+            <span>Room Planner</span>
+            <span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+          </button>
         </div>
 
         <div id="mcConfigurationBlock" style="width:100%">
@@ -1526,15 +1596,19 @@ boot();
       var t = document.getElementById("roomPlannerEmbed");
       var body = document.getElementById("mcPlannerModalBody");
       if (!t || !body || !t.content) return;
-      body.innerHTML = "";
-      body.appendChild(t.content.cloneNode(true));
-      if (typeof window.initRoomPlanner === "function") {
-        window.initRoomPlanner({
-          onApply: function (payload) {
-            if (typeof window.applyPlannerToPage === "function") window.applyPlannerToPage(payload);
-            plannerOverlay.classList.remove("mc-planner-open");
-          }
-        });
+      var curCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "";
+      if (!body.dataset.plannerProduct || body.dataset.plannerProduct !== curCode) {
+        body.innerHTML = "";
+        body.appendChild(t.content.cloneNode(true));
+        if (typeof window.initRoomPlanner === "function") {
+          window.initRoomPlanner({
+            onApply: function (payload) {
+              if (typeof window.applyPlannerToPage === "function") window.applyPlannerToPage(payload);
+              plannerOverlay.classList.remove("mc-planner-open");
+            }
+          });
+        }
+        body.dataset.plannerProduct = curCode;
       }
       plannerOverlay.classList.add("mc-planner-open");
     }
@@ -1809,10 +1883,14 @@ boot();
     });
   }
 function getPlannerSeatPrice(){
-  var el = document.querySelector("#priceWithOptions, .v65-product-price, .product_productprice, [itemprop=\"price\"]");
-  if (!el) return 0;
-  var text = (el.textContent || el.innerText || "").replace(/[^0-9.]/g, "");
-  var n = parseFloat(text, 10);
+  var el = document.getElementById("priceWithOptions");
+  if (!el) el = document.querySelector(".v65-product-price, .product_productprice, .option_pricing, [itemprop=\"price\"]");
+  if (!el) { console.warn("[McCabe Planner] No price element found"); return 0; }
+  var text = el.textContent || el.innerText || "";
+  var match = text.match(/\$[\d,]+\.?\d*/);
+  var raw = match ? match[0].replace(/[$,]/g, "") : text.replace(/[^0-9.]/g, "");
+  var n = parseFloat(raw);
+  console.log("[McCabe Planner] getPlannerSeatPrice:", n, "from text:", text.trim().substring(0, 80));
   return isNaN(n) ? 0 : n;
 }
 
@@ -1826,17 +1904,19 @@ function updateProductPrice(totalPrice){
 function calculatePlannerPrice(counts, seatPrice){
   if (seatPrice == null || seatPrice <= 0) seatPrice = getPlannerSeatPrice();
   if (!counts || typeof counts !== 'object') counts = {};
-  let total = 0;
-  let singleSeatCount = 0;
-
-  Object.entries(counts).forEach(([id, qty]) => {
+  var total = 0;
+  var singleSeatCount = 0;
+  var keys = Object.keys(counts);
+  for (var i = 0; i < keys.length; i++) {
+    var id = keys[i];
+    var qty = counts[id] || 0;
     if (id === "4L") {
       total += qty * ((2 * seatPrice) - 500);
     } else {
       total += qty * seatPrice;
       singleSeatCount += qty;
     }
-  });
+  }
 
   if (counts["4L"] && singleSeatCount < 2) {
     throw new Error("4L requires at least two additional seats.");
@@ -1928,11 +2008,30 @@ window.applyPlannerToPage = function (payload) {
     }
   }
 
+  var configOpts = {};
+  var configPiecesEl = document.getElementById("mcConfigurationPieces");
+  if (configPiecesEl && configPiecesEl.style.display !== "none" && configPiecesEl.innerHTML.trim()) {
+    configOpts = opts;
+  } else {
+    configOpts = opts;
+  }
+
+  var seatPrice = getPlannerSeatPrice();
+  console.log("[McCabe Planner] seatPrice read:", seatPrice, "counts:", JSON.stringify(configOpts));
+  if (seatPrice <= 0) {
+    console.warn("[McCabe Planner] Could not read seat price from page");
+  }
   try {
-    var seatPrice = getPlannerSeatPrice();
-    var totalPrice = calculatePlannerPrice(opts, seatPrice);
+    var totalPrice = calculatePlannerPrice(configOpts, seatPrice);
+    console.log("[McCabe Planner] calculated totalPrice:", totalPrice);
     updateProductPrice(totalPrice);
+    window.__mcPlannerPrice = totalPrice;
+    window.__mcPlannerCounts = configOpts;
+    setTimeout(function(){ updateProductPrice(totalPrice); }, 600);
+    setTimeout(function(){ updateProductPrice(totalPrice); }, 1500);
+    setTimeout(function(){ updateProductPrice(totalPrice); }, 3000);
   } catch (err) {
+    console.error("[McCabe Planner] pricing error:", err);
     if (err && err.message) alert(err.message);
   }
 };
@@ -1948,6 +2047,23 @@ window.addEventListener("message", function (event) {
 // Mount inline UI after DOM + Volusion settle
 setTimeout(mount, 600);
 setTimeout(mount, 1400);
+
+function restoreConfigOnPageLoad() {
+  try {
+    var prodCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "";
+    if (!prodCode) return;
+    var raw = localStorage.getItem("roomPlannerData_" + prodCode);
+    if (!raw) return;
+    var data = JSON.parse(raw);
+    if (!data || typeof data !== "object") return;
+    if (typeof window.applyPlannerToPage === "function") {
+      console.log("[McCabe Planner] Restoring saved configuration for", prodCode);
+      window.applyPlannerToPage(data);
+    }
+  } catch (e) { console.warn("[McCabe Planner] restore error:", e); }
+}
+setTimeout(restoreConfigOnPageLoad, 1600);
+setTimeout(restoreConfigOnPageLoad, 2800);
 
 })();
 </script>
@@ -2047,6 +2163,16 @@ window.initRoomPlanner = function (opts) {
     dimLeft.textContent = (dFt ? dFt + " ft " : "") + (dIn ? dIn + " in" : (dFt ? "" : "0 in"));
     var measEl = document.getElementById("room-measurement");
     if (measEl) measEl.innerHTML = "Room: " + (wFt ? wFt + "&prime;" : "") + (wIn ? " " + wIn + "&Prime;" : "") + " &times; " + (dFt ? dFt + "&prime;" : "") + (dIn ? " " + dIn + "&Prime;" : "");
+
+    var modalEl = document.querySelector(".mc-planner-modal");
+    if (modalEl) {
+      var panelLeft = 150, panelRight = 240, gaps = 32, shellPad = 16, bodyPad = 16, buffer = 24;
+      var needed = wPx + panelLeft + panelRight + gaps + shellPad + bodyPad + buffer;
+      var baseW = 1400;
+      var maxVw = window.innerWidth * 0.98;
+      var finalW = Math.min(Math.max(needed, baseW), maxVw);
+      modalEl.style.width = finalW + "px";
+    }
   }
   if (roomW_ft) roomW_ft.value = "16";
   if (roomW_in) roomW_in.value = "0";
@@ -2535,12 +2661,14 @@ window.initRoomPlanner = function (opts) {
       var counts = getCounts();
       var layout = serializeLayout();
       var seatCount = calculateSeatCount();
+      console.log("[McCabe Planner] Add configuration clicked. counts:", JSON.stringify(counts), "seatCount:", seatCount, "layout length:", layout.length);
       if (Object.keys(counts).length === 0) {
         alert("Add at least one piece to the room before adding configuration.");
         return;
       }
-      var payload = { options: counts, counts: counts, room: getRoomPayload(), layout: layout, seatCount: seatCount, ts: Date.now() };
-      try { localStorage.setItem("roomPlannerData", JSON.stringify(payload)); } catch (e) {}
+      var prodCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "unknown";
+      var payload = { productCode: prodCode, options: counts, counts: counts, room: getRoomPayload(), layout: layout, seatCount: seatCount, ts: Date.now() };
+      try { localStorage.setItem("roomPlannerData_" + prodCode, JSON.stringify(payload)); } catch (e) {}
       if (opts.onApply && typeof opts.onApply === "function") {
         opts.onApply(payload);
       } else if (window.opener && window.opener.postMessage) {
@@ -2553,7 +2681,8 @@ window.initRoomPlanner = function (opts) {
   }
   function restoreLayoutFromStorage() {
     try {
-      var raw = localStorage.getItem("roomPlannerData");
+      var prodCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "unknown";
+      var raw = localStorage.getItem("roomPlannerData_" + prodCode);
       if (!raw) return;
       var data = JSON.parse(raw);
       var layout = data.layout;
@@ -2586,7 +2715,7 @@ window.initRoomPlanner = function (opts) {
       });
     } catch (e) {}
   }
-  /* Do not restore from storage: planner starts cleared on every page load (refresh or new product) */
+  restoreLayoutFromStorage();
 };
 </script>
 
@@ -3083,7 +3212,7 @@ body.mc-product-page #content_area #mcPlannerBtn {
   justify-content: center !important;
   gap: 12px !important;
   min-width: 200px !important;
-  max-width: 47% !important;
+  max-width: 50% !important;
   padding: 14px 28px !important;
   border: 1px solid #d0d0d0 !important;
   border-radius: 30px !important;
@@ -3286,6 +3415,48 @@ body.mc-product-page #content_area .wm-swatch img {
     white-space: nowrap !important;
     margin: 0 !important;
   }
+
+  .productdetails table:has(td[class*="vCSS_tab"]) {
+    display: block !important;
+    margin-bottom: -12px !important;
+    margin-top: 5px !important;
+    margin-left: -16px !important;
+  }
+  .productdetails tbody:has(td[class*="vCSS_tab"]) {
+    display: block !important;
+  }
+  .productdetails tr:has(> td[class*="vCSS_tab"]) {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    height: auto !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+  }
+  .productdetails td[class*="vCSS_tab"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    float: none !important;
+    width: auto !important;
+    height: auto !important;
+    vertical-align: bottom !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    padding: 12px 28px !important;
+    margin: 0 16px 0 0 !important;
+  }
+  .productdetails td[class*="vCSS_tab"]:last-child {
+    margin-right: 0 !important;
+  }
+  .productdetails td[class*="vCSS_tab"] span,
+  .productdetails td[class*="vCSS_tab"] a,
+  .productdetails td[class*="vCSS_tab"] div {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    width: auto !important;
+    height: auto !important;
+    display: inline !important;
+    max-width: none !important;
+  }
 }
 
 
@@ -3409,20 +3580,34 @@ body.mc-product-page #content_area .wm-swatch img {
     flex-direction: column !important;
     align-items: center !important;
     width: 100% !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
   }
-  /* Alt images: centered under main, 4 per row with wrap */
+  body.mc-product-page #content_area .mc-pdp-options-td,
+  body.mc-product-page #content_area td:has(.colors_pricebox),
+  body.mc-product-page #content_area td:has(#priceWithOptions) {
+    padding-top: 8px !important;
+    margin-top: 0 !important;
+  }
+  /* Alt images: centered under main, 4 per row – multiple selectors so rules apply */
   body.mc-product-page #content_area #altviews,
   body.mc-product-page #content_area .altviews,
-  body.mc-product-page #content_area span#altviews {
+  body.mc-product-page #content_area span#altviews,
+  .productdetails #content_area #altviews,
+  .productdetails #content_area .altviews,
+  #content_area #altviews,
+  #content_area .altviews,
+  #content_area [id*="altview"] {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
     align-items: center !important;
     gap: 10px !important;
-    margin: 12px auto 16px auto !important;
-    padding: 5px !important;
-    max-width: 100% !important;
+    margin: 8px auto !important;
+    padding: 0 !important;
+    width: 286px !important;
+    max-width: 286px !important;
     float: none !important;
     clear: both !important;
     order: 2 !important;
@@ -3433,21 +3618,43 @@ body.mc-product-page #content_area .wm-swatch img {
   body.mc-product-page #content_area #altviews > div,
   body.mc-product-page #content_area .altviews > div,
   body.mc-product-page #content_area span#altviews a,
-  body.mc-product-page #content_area span#altviews > div {
+  body.mc-product-page #content_area span#altviews > div,
+  .productdetails #content_area #altviews a,
+  .productdetails #content_area .altviews a,
+  #content_area #altviews a,
+  #content_area .altviews a,
+  #content_area [id*="altview"] a,
+  #content_area #altviews > div,
+  #content_area .altviews > div {
     display: block !important;
-    flex: 0 0 95px !important;
-    width: 95px !important;
-    max-width: 95px !important;
+    flex: 0 0 64px !important;
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
   }
   body.mc-product-page #content_area #altviews img,
   body.mc-product-page #content_area .altviews img,
-  body.mc-product-page #content_area span#altviews img {
-    width: 84% !important;
-    max-width: 95px !important;
-    height: 94% !important;
-    max-height: 101px !important;
+  body.mc-product-page #content_area span#altviews img,
+  .productdetails #content_area #altviews img,
+  #content_area #altviews img,
+  #content_area .altviews img,
+  #content_area [id*="altview"] img {
+    width: 100% !important;
+    max-width: 64px !important;
+    height: auto !important;
+    max-height: 64px !important;
     object-fit: contain !important;
     display: block !important;
+  }
+  /* Wrapper for centering alt thumbnails – applied by JS */
+  #content_area .mc-altviews-outer {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 8px 0 !important;
+    padding: 0 !important;
+    order: 2 !important;
   }
 
   /* Hide duplicate/second price on mobile */
@@ -3488,6 +3695,42 @@ body.mc-product-page #content_area .wm-swatch img {
     word-break: break-word !important;
     padding-right: 36px !important;
   }
+
+  .productdetails table:has(td[class*="vCSS_tab"]) {
+    display: block !important;
+  }
+  .productdetails tbody:has(td[class*="vCSS_tab"]) {
+    display: block !important;
+  }
+  .productdetails tr:has(> td[class*="vCSS_tab"]) {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    height: auto !important;
+    align-items: stretch !important;
+  }
+  .productdetails td[class*="vCSS_tab"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    float: none !important;
+    width: auto !important;
+    height: auto !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    padding: 6px 12px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .productdetails td[class*="vCSS_tab"] a,
+  .productdetails td[class*="vCSS_tab"] span,
+  .productdetails td[class*="vCSS_tab"] div {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    width: auto !important;
+    height: auto !important;
+    display: inline !important;
+    max-width: none !important;
+  }
 }
 
 body, body * {
@@ -3510,10 +3753,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 }
 
 
-.productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody,
-.productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr,
-.productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr > td[align="center"] {
-  margin-right: -55px;
+@media (min-width: 992px) {
+  .productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody,
+  .productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr,
+  .productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr > td[align="center"] {
+    margin-right: -55px;
+  }
 }
 
 .productdetails form .colors_descriptionbox td,
@@ -3536,8 +3781,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   font-weight: 300;
 }
 
-.productdetails #product_photo_zoom_url {
-  margin-bottom: -97px;
+@media (min-width: 992px) {
+  .productdetails #product_photo_zoom_url {
+    margin-bottom: -97px;
+  }
 }
 
 .mc-price-caption-moved {
@@ -4232,7 +4479,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 
   function forceTabsInline(scope){
-    if (isMobile()) return;
+    var mobile = isMobile();
+    var tabPad = mobile ? '6px 12px' : '12px 28px';
 
     qa('.resp-tabs-list, ul.resp-tabs-list, .ui-tabs-nav, .TabbedPanelsTabGroup', scope).forEach(function(tabWrap){
       tabWrap.style.setProperty('display','flex','important');
@@ -4251,6 +4499,50 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         tab.style.setProperty('white-space','nowrap','important');
         tab.style.setProperty('margin','0','important');
       });
+    });
+
+    var fixedParents = [];
+    qa('td[class*="vCSS_tab"]', scope).forEach(function(td){
+      td.style.setProperty('display','inline-flex','important');
+      td.style.setProperty('align-items','center','important');
+      td.style.setProperty('float','none','important');
+      td.style.setProperty('width','auto','important');
+      td.style.setProperty('height','auto','important');
+      td.style.setProperty('vertical-align','bottom','important');
+      td.style.setProperty('white-space','nowrap','important');
+      td.style.setProperty('overflow','visible','important');
+      td.style.setProperty('padding', tabPad, 'important');
+      td.style.setProperty('margin', mobile ? '0' : '0 16px 0 0', 'important');
+      qa('span, a, div', td).forEach(function(inner){
+        inner.style.setProperty('white-space','nowrap','important');
+        inner.style.setProperty('overflow','visible','important');
+        inner.style.setProperty('width','auto','important');
+        inner.style.setProperty('height','auto','important');
+        inner.style.setProperty('display','inline','important');
+        inner.style.setProperty('max-width','none','important');
+      });
+      var tr = td.parentElement;
+      if (tr && tr.tagName === 'TR' && fixedParents.indexOf(tr) === -1) {
+        fixedParents.push(tr);
+        tr.style.setProperty('display','flex','important');
+        tr.style.setProperty('flex-wrap','nowrap','important');
+        tr.style.setProperty('align-items','stretch','important');
+        tr.style.setProperty('gap','0','important');
+        tr.style.setProperty('height','auto','important');
+        var tbody = tr.parentElement;
+        if (tbody && tbody.tagName === 'TBODY') {
+          tbody.style.setProperty('display','block','important');
+          var tbl = tbody.parentElement;
+          if (tbl && tbl.tagName === 'TABLE') {
+            tbl.style.setProperty('display','block','important');
+            if (!mobile) {
+              tbl.style.setProperty('margin-bottom','-12px','important');
+              tbl.style.setProperty('margin-top','5px','important');
+              tbl.style.setProperty('margin-left','-16px','important');
+            }
+          }
+        }
+      }
     });
   }
 
@@ -4344,27 +4636,34 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function syncAltviewsToMainImage(scope){
     if (!isMobile()) return;
-    var thumbs = q('#altviews', scope) || q('span#altviews', scope) || q('.altviews', scope);
+    var thumbs = q('#altviews', scope) || q('span#altviews', scope) || q('.altviews', scope) || q('[id*="altview"]', scope);
     if (!thumbs) return;
-    var parent = thumbs.parentElement;
-    if (parent) {
-      parent.style.setProperty('display', 'flex', 'important');
-      parent.style.setProperty('flex-direction', 'column', 'important');
-      parent.style.setProperty('align-items', 'center', 'important');
-      parent.style.setProperty('width', '100%', 'important');
+
+    var parent = thumbs.parentNode;
+    if (parent && parent.className && parent.className.indexOf('mc-altviews-outer') !== -1) {
+      parent.style.cssText = 'display:flex!important;justify-content:center!important;align-items:center!important;width:100%!important;margin:8px 0!important;padding:0!important;order:2!important;';
+    } else if (parent && parent !== document.body) {
+      var outer = document.createElement('div');
+      outer.className = 'mc-altviews-outer';
+      outer.style.cssText = 'display:flex!important;justify-content:center!important;align-items:center!important;width:100%!important;margin:8px 0!important;padding:0!important;order:2!important;';
+      parent.insertBefore(outer, thumbs);
+      outer.appendChild(thumbs);
     }
-    thumbs.style.setProperty('display', 'flex', 'important');
-    thumbs.style.setProperty('flex-wrap', 'wrap', 'important');
-    thumbs.style.setProperty('justify-content', 'center', 'important');
-    thumbs.style.setProperty('gap', '10px', 'important');
-    thumbs.style.setProperty('width', '286px', 'important');
-    thumbs.style.setProperty('max-width', '100%', 'important');
-    thumbs.style.setProperty('margin-left', 'auto', 'important');
-    thumbs.style.setProperty('margin-right', 'auto', 'important');
-    thumbs.style.setProperty('float', 'none', 'important');
-    thumbs.style.setProperty('left', 'auto', 'important');
-    thumbs.style.setProperty('right', 'auto', 'important');
-    thumbs.style.setProperty('transform', 'none', 'important');
+
+    thumbs.style.cssText = 'display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;justify-content:center!important;align-items:center!important;gap:10px!important;width:286px!important;max-width:286px!important;margin:0!important;padding:0!important;float:none!important;clear:both!important;position:static!important;left:auto!important;right:auto!important;transform:none!important;box-sizing:border-box!important;text-align:center!important;';
+
+    var allLinks = thumbs.querySelectorAll('a');
+    for (var i = 0; i < allLinks.length; i++) {
+      allLinks[i].style.cssText = 'display:block!important;flex:0 0 64px!important;width:64px!important;min-width:64px!important;max-width:64px!important;float:none!important;margin:0!important;padding:0!important;';
+    }
+    var kids = thumbs.children;
+    for (var k = 0; k < kids.length; k++) {
+      if (kids[k].tagName === 'DIV') kids[k].style.cssText = 'display:block!important;flex:0 0 64px!important;width:64px!important;min-width:64px!important;max-width:64px!important;margin:0!important;padding:0!important;';
+    }
+    var allImgs = thumbs.querySelectorAll('img');
+    for (var j = 0; j < allImgs.length; j++) {
+      allImgs[j].style.cssText = 'width:100%!important;max-width:64px!important;height:auto!important;max-height:64px!important;object-fit:contain!important;display:block!important;float:none!important;margin:0 auto!important;';
+    }
   }
 
   function wireAltThumbClicks(scope){
