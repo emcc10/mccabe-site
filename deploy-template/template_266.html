@@ -3425,6 +3425,7 @@ body.mc-product-page #content_area .wm-swatch img {
     max-width: 100% !important;
     float: none !important;
     clear: both !important;
+    order: 2 !important;
     box-sizing: border-box !important;
   }
   body.mc-product-page #content_area #altviews a,
@@ -3498,17 +3499,16 @@ body, body * {
   font-size: 28px !important;
 }
 
-.vCSS_img_mfg_logo {
-  margin-left: 236px;
+@media (min-width: 992px) {
+  .vCSS_img_mfg_logo {
+    margin-left: 236px;
+  }
 }
 
 table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) {
   text-align: left !important;
 }
 
-.productdetails td[class*="vCSS_tab"] {
-  display: inline-block;
-}
 
 .productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody,
 .productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr,
