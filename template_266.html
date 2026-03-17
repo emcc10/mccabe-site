@@ -3366,6 +3366,9 @@ body.mc-product-page #content_area .wm-swatch img {
     white-space: nowrap !important;
     overflow: visible !important;
     padding: 8px 16px !important;
+    margin-bottom: -12px;
+    margin-top: 5px;
+    margin-left: -16px;
   }
   .productdetails td[class*="vCSS_tab"] span,
   .productdetails td[class*="vCSS_tab"] a,
@@ -3528,9 +3531,9 @@ body.mc-product-page #content_area .wm-swatch img {
     justify-content: center !important;
     align-items: center !important;
     gap: 10px !important;
-    margin: 12px auto 16px auto !important;
-    padding: 5px !important;
-    width: 296px !important;
+    margin: 8px 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
     max-width: 100% !important;
     float: none !important;
     clear: both !important;
@@ -4393,6 +4396,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       td.style.setProperty('white-space','nowrap','important');
       td.style.setProperty('overflow','visible','important');
       td.style.setProperty('padding','8px 16px','important');
+      td.style.setProperty('margin-bottom','-12px','important');
+      td.style.setProperty('margin-top','5px','important');
+      td.style.setProperty('margin-left','-16px','important');
       qa('span, a, div', td).forEach(function(inner){
         inner.style.setProperty('white-space','nowrap','important');
         inner.style.setProperty('overflow','visible','important');
@@ -4512,51 +4518,32 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (!isMobile()) return;
     var thumbs = q('#altviews', scope) || q('span#altviews', scope) || q('.altviews', scope);
     if (!thumbs) return;
-    var el = thumbs.parentElement;
-    var depth = 0;
-    while (el && depth < 6) {
-      el.style.setProperty('display', 'block', 'important');
-      el.style.setProperty('width', '100%', 'important');
-      el.style.setProperty('float', 'none', 'important');
-      el.style.setProperty('text-align', 'center', 'important');
-      el.style.setProperty('padding-left', '0', 'important');
-      el.style.setProperty('padding-right', '0', 'important');
-      if (el.id === 'content_area' || el.tagName === 'BODY') break;
-      el = el.parentElement;
-      depth++;
+
+    thumbs.setAttribute('style',
+      'display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;' +
+      'justify-content:center!important;align-items:center!important;gap:10px!important;' +
+      'width:100%!important;max-width:100%!important;' +
+      'margin:8px 0!important;padding:0!important;' +
+      'float:none!important;clear:both!important;position:static!important;' +
+      'left:auto!important;right:auto!important;transform:none!important;' +
+      'box-sizing:border-box!important;text-align:center!important'
+    );
+
+    var allLinks = thumbs.querySelectorAll('a');
+    for (var i = 0; i < allLinks.length; i++) {
+      allLinks[i].setAttribute('style',
+        'display:block!important;flex:0 0 64px!important;width:64px!important;' +
+        'max-width:64px!important;float:none!important;margin:0!important;padding:0!important'
+      );
     }
-    thumbs.style.cssText = [
-      'display:flex!important',
-      'flex-direction:row!important',
-      'flex-wrap:wrap!important',
-      'justify-content:center!important',
-      'align-items:center!important',
-      'gap:10px!important',
-      'width:296px!important',
-      'max-width:100%!important',
-      'margin:12px auto 16px auto!important',
-      'padding:5px!important',
-      'float:none!important',
-      'clear:both!important',
-      'position:static!important',
-      'left:auto!important',
-      'right:auto!important',
-      'transform:none!important',
-      'box-sizing:border-box!important',
-      'text-align:center!important'
-    ].join(';');
-    qa('a', thumbs).forEach(function(a){
-      a.style.cssText = 'display:block!important;flex:0 0 64px!important;width:64px!important;max-width:64px!important;float:none!important;margin:0!important;padding:0!important';
-    });
-    for (var ci = 0; ci < thumbs.children.length; ci++) {
-      var ch = thumbs.children[ci];
-      if (ch.tagName === 'DIV') {
-        ch.style.cssText = 'display:block!important;flex:0 0 64px!important;width:64px!important;max-width:64px!important;float:none!important;margin:0!important;padding:0!important';
-      }
+    var allImgs = thumbs.querySelectorAll('img');
+    for (var j = 0; j < allImgs.length; j++) {
+      allImgs[j].setAttribute('style',
+        'width:100%!important;max-width:64px!important;height:auto!important;' +
+        'max-height:64px!important;object-fit:contain!important;display:block!important;' +
+        'float:none!important;margin:0 auto!important'
+      );
     }
-    qa('img', thumbs).forEach(function(img){
-      img.style.cssText = 'width:100%!important;max-width:64px!important;height:auto!important;max-height:64px!important;object-fit:contain!important;display:block!important;float:none!important;margin:0!important';
-    });
   }
 
   function wireAltThumbClicks(scope){
