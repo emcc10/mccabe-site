@@ -3441,8 +3441,11 @@ body.mc-product-page #content_area .wm-swatch img {
     vertical-align: bottom !important;
     white-space: nowrap !important;
     overflow: visible !important;
-    padding: 10px 24px !important;
-    margin: 0 !important;
+    padding: 12px 28px !important;
+    margin: 0 16px 0 0 !important;
+  }
+  .productdetails td[class*="vCSS_tab"]:last-child {
+    margin-right: 0 !important;
   }
   .productdetails td[class*="vCSS_tab"] span,
   .productdetails td[class*="vCSS_tab"] a,
@@ -3586,10 +3589,15 @@ body.mc-product-page #content_area .wm-swatch img {
     padding-top: 8px !important;
     margin-top: 0 !important;
   }
-  /* Alt images: centered under main, 4 per row with wrap */
+  /* Alt images: centered under main, 4 per row – multiple selectors so rules apply */
   body.mc-product-page #content_area #altviews,
   body.mc-product-page #content_area .altviews,
-  body.mc-product-page #content_area span#altviews {
+  body.mc-product-page #content_area span#altviews,
+  .productdetails #content_area #altviews,
+  .productdetails #content_area .altviews,
+  #content_area #altviews,
+  #content_area .altviews,
+  #content_area [id*="altview"] {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
@@ -3610,21 +3618,43 @@ body.mc-product-page #content_area .wm-swatch img {
   body.mc-product-page #content_area #altviews > div,
   body.mc-product-page #content_area .altviews > div,
   body.mc-product-page #content_area span#altviews a,
-  body.mc-product-page #content_area span#altviews > div {
+  body.mc-product-page #content_area span#altviews > div,
+  .productdetails #content_area #altviews a,
+  .productdetails #content_area .altviews a,
+  #content_area #altviews a,
+  #content_area .altviews a,
+  #content_area [id*="altview"] a,
+  #content_area #altviews > div,
+  #content_area .altviews > div {
     display: block !important;
     flex: 0 0 64px !important;
     width: 64px !important;
+    min-width: 64px !important;
     max-width: 64px !important;
   }
   body.mc-product-page #content_area #altviews img,
   body.mc-product-page #content_area .altviews img,
-  body.mc-product-page #content_area span#altviews img {
+  body.mc-product-page #content_area span#altviews img,
+  .productdetails #content_area #altviews img,
+  #content_area #altviews img,
+  #content_area .altviews img,
+  #content_area [id*="altview"] img {
     width: 100% !important;
     max-width: 64px !important;
     height: auto !important;
     max-height: 64px !important;
     object-fit: contain !important;
     display: block !important;
+  }
+  /* Wrapper for centering alt thumbnails – applied by JS */
+  #content_area .mc-altviews-outer {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 8px 0 !important;
+    padding: 0 !important;
+    order: 2 !important;
   }
 
   /* Hide duplicate/second price on mobile */
@@ -4450,7 +4480,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function forceTabsInline(scope){
     var mobile = isMobile();
-    var tabPad = mobile ? '6px 12px' : '10px 24px';
+    var tabPad = mobile ? '6px 12px' : '12px 28px';
 
     qa('.resp-tabs-list, ul.resp-tabs-list, .ui-tabs-nav, .TabbedPanelsTabGroup', scope).forEach(function(tabWrap){
       tabWrap.style.setProperty('display','flex','important');
@@ -4482,7 +4512,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       td.style.setProperty('white-space','nowrap','important');
       td.style.setProperty('overflow','visible','important');
       td.style.setProperty('padding', tabPad, 'important');
-      td.style.setProperty('margin','0','important');
+      td.style.setProperty('margin', mobile ? '0' : '0 16px 0 0', 'important');
       qa('span, a, div', td).forEach(function(inner){
         inner.style.setProperty('white-space','nowrap','important');
         inner.style.setProperty('overflow','visible','important');
@@ -4606,33 +4636,33 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function syncAltviewsToMainImage(scope){
     if (!isMobile()) return;
-    var thumbs = q('#altviews', scope) || q('span#altviews', scope) || q('.altviews', scope);
+    var thumbs = q('#altviews', scope) || q('span#altviews', scope) || q('.altviews', scope) || q('[id*="altview"]', scope);
     if (!thumbs) return;
 
-    thumbs.setAttribute('style',
-      'display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;' +
-      'justify-content:center!important;align-items:center!important;gap:10px!important;' +
-      'width:286px!important;max-width:286px!important;' +
-      'margin:8px auto!important;padding:0!important;' +
-      'float:none!important;clear:both!important;position:static!important;' +
-      'left:auto!important;right:auto!important;transform:none!important;' +
-      'box-sizing:border-box!important;text-align:center!important'
-    );
+    var parent = thumbs.parentNode;
+    if (parent && parent.className && parent.className.indexOf('mc-altviews-outer') !== -1) {
+      parent.style.cssText = 'display:flex!important;justify-content:center!important;align-items:center!important;width:100%!important;margin:8px 0!important;padding:0!important;order:2!important;';
+    } else if (parent && parent !== document.body) {
+      var outer = document.createElement('div');
+      outer.className = 'mc-altviews-outer';
+      outer.style.cssText = 'display:flex!important;justify-content:center!important;align-items:center!important;width:100%!important;margin:8px 0!important;padding:0!important;order:2!important;';
+      parent.insertBefore(outer, thumbs);
+      outer.appendChild(thumbs);
+    }
+
+    thumbs.style.cssText = 'display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;justify-content:center!important;align-items:center!important;gap:10px!important;width:286px!important;max-width:286px!important;margin:0!important;padding:0!important;float:none!important;clear:both!important;position:static!important;left:auto!important;right:auto!important;transform:none!important;box-sizing:border-box!important;text-align:center!important;';
 
     var allLinks = thumbs.querySelectorAll('a');
     for (var i = 0; i < allLinks.length; i++) {
-      allLinks[i].setAttribute('style',
-        'display:block!important;flex:0 0 64px!important;width:64px!important;' +
-        'max-width:64px!important;float:none!important;margin:0!important;padding:0!important'
-      );
+      allLinks[i].style.cssText = 'display:block!important;flex:0 0 64px!important;width:64px!important;min-width:64px!important;max-width:64px!important;float:none!important;margin:0!important;padding:0!important;';
+    }
+    var kids = thumbs.children;
+    for (var k = 0; k < kids.length; k++) {
+      if (kids[k].tagName === 'DIV') kids[k].style.cssText = 'display:block!important;flex:0 0 64px!important;width:64px!important;min-width:64px!important;max-width:64px!important;margin:0!important;padding:0!important;';
     }
     var allImgs = thumbs.querySelectorAll('img');
     for (var j = 0; j < allImgs.length; j++) {
-      allImgs[j].setAttribute('style',
-        'width:100%!important;max-width:64px!important;height:auto!important;' +
-        'max-height:64px!important;object-fit:contain!important;display:block!important;' +
-        'float:none!important;margin:0 auto!important'
-      );
+      allImgs[j].style.cssText = 'width:100%!important;max-width:64px!important;height:auto!important;max-height:64px!important;object-fit:contain!important;display:block!important;float:none!important;margin:0 auto!important;';
     }
   }
 
