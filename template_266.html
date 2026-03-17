@@ -792,8 +792,78 @@ document.addEventListener("DOMContentLoaded", function () {
 <style>
 html body.category .v-product-grid .v-product,
 html body.category .v-product-grid .v-product-grid-item,
-html body.category .v-product-grid > .v-product {
+html body.category .v-product-grid > .v-product,
+html body.productdetails .v-product-grid .v-product,
+html body.productdetails .v-product-grid .v-product-grid-item,
+html body.productdetails .v-product-grid > .v-product {
   vertical-align: baseline !important;
+}
+
+.productdetails .v-product-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 20px !important;
+  justify-content: flex-start !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.productdetails .v-product-grid .v-product {
+  flex: 0 0 calc(25% - 15px) !important;
+  max-width: calc(25% - 15px) !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.productdetails .v-product-grid .v-product .v-product__img {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  height: 300px;
+  overflow: hidden;
+}
+
+.productdetails .v-product-grid .v-product .v-product__img img {
+  max-height: 300px;
+  width: auto;
+  max-width: 100%;
+  object-position: top center !important;
+  margin-top: 0 !important;
+}
+
+.productdetails .v-product-grid .v-product .v-product__name,
+.productdetails .v-product-grid .v-product .productnamecolor,
+.productdetails .v-product-grid .v-product .productnamecolor a {
+  text-align: left !important;
+  display: block !important;
+  margin-top: 8px !important;
+}
+
+@media (max-width: 991px) {
+  .productdetails .v-product-grid .v-product {
+    flex: 0 0 calc(50% - 10px) !important;
+    max-width: calc(50% - 10px) !important;
+  }
+  .productdetails .v-product-grid .v-product .v-product__img {
+    height: 200px;
+    margin-bottom: 4px !important;
+    padding-bottom: 0 !important;
+  }
+  .productdetails .v-product-grid .v-product .v-product__img img {
+    max-height: 200px;
+  }
+  .productdetails .v-product-grid .v-product .v-product__name,
+  .productdetails .v-product-grid .v-product .productnamecolor,
+  .productdetails .v-product-grid .v-product .productnamecolor a,
+  .productdetails .v-product-grid .v-product h2,
+  .productdetails .v-product-grid .v-product h3,
+  .productdetails .v-product-grid .v-product h4 {
+    text-align: center !important;
+    display: block !important;
+    margin-top: 4px !important;
+  }
 }
 </style>
 
@@ -3291,7 +3361,20 @@ body.mc-product-page #content_area .wm-swatch img {
     display: inline-block !important;
     float: none !important;
     width: auto !important;
+    height: auto !important;
     vertical-align: bottom !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    padding: 8px 16px !important;
+  }
+  .productdetails tr:has(> td[class*="vCSS_tab"]) {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    height: auto !important;
+  }
+  .productdetails table:has(td[class*="vCSS_tab"]),
+  .productdetails tbody:has(td[class*="vCSS_tab"]) {
+    display: block !important;
   }
 }
 
@@ -3429,7 +3512,7 @@ body.mc-product-page #content_area .wm-swatch img {
     gap: 10px !important;
     margin: 12px auto 16px auto !important;
     padding: 5px !important;
-    width: 286px !important;
+    width: 296px !important;
     max-width: 100% !important;
     float: none !important;
     clear: both !important;
@@ -3496,6 +3579,23 @@ body.mc-product-page #content_area .wm-swatch img {
     word-break: break-word !important;
     padding-right: 36px !important;
   }
+
+  .productdetails td[class*="vCSS_tab"] {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    box-sizing: border-box !important;
+  }
+  .productdetails td[class*="vCSS_tab"] a,
+  .productdetails td[class*="vCSS_tab"] span {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    height: auto !important;
+    display: block !important;
+  }
 }
 
 body, body * {
@@ -3518,10 +3618,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 }
 
 
-.productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody,
-.productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr,
-.productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr > td[align="center"] {
-  margin-right: -55px;
+@media (min-width: 992px) {
+  .productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody,
+  .productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr,
+  .productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr > td[align="center"] {
+    margin-right: -55px;
+  }
 }
 
 .productdetails form .colors_descriptionbox td,
@@ -3544,8 +3646,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   font-weight: 300;
 }
 
-.productdetails #product_photo_zoom_url {
-  margin-bottom: -97px;
+@media (min-width: 992px) {
+  .productdetails #product_photo_zoom_url {
+    margin-bottom: -97px;
+  }
 }
 
 .mc-price-caption-moved {
@@ -4261,22 +4365,32 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       });
     });
 
+    var fixedParents = [];
     qa('td[class*="vCSS_tab"]', scope).forEach(function(td){
       td.style.setProperty('display','inline-block','important');
       td.style.setProperty('float','none','important');
       td.style.setProperty('width','auto','important');
+      td.style.setProperty('height','auto','important');
       td.style.setProperty('vertical-align','bottom','important');
-    });
-    qa('tr:has(> td[class*="vCSS_tab"])', scope).forEach(function(tr){
-      tr.style.setProperty('display','flex','important');
-      tr.style.setProperty('flex-wrap','nowrap','important');
-      tr.style.setProperty('gap','0','important');
-    });
-    qa('table:has(td[class*="vCSS_tab"])', scope).forEach(function(tbl){
-      tbl.style.setProperty('display','block','important');
-    });
-    qa('tbody:has(> tr > td[class*="vCSS_tab"])', scope).forEach(function(tb){
-      tb.style.setProperty('display','block','important');
+      td.style.setProperty('white-space','nowrap','important');
+      td.style.setProperty('overflow','visible','important');
+      td.style.setProperty('padding','8px 16px','important');
+      var tr = td.parentElement;
+      if (tr && tr.tagName === 'TR' && fixedParents.indexOf(tr) === -1) {
+        fixedParents.push(tr);
+        tr.style.setProperty('display','flex','important');
+        tr.style.setProperty('flex-wrap','nowrap','important');
+        tr.style.setProperty('gap','0','important');
+        tr.style.setProperty('height','auto','important');
+        var tbody = tr.parentElement;
+        if (tbody && tbody.tagName === 'TBODY') {
+          tbody.style.setProperty('display','block','important');
+          var tbl = tbody.parentElement;
+          if (tbl && tbl.tagName === 'TABLE') {
+            tbl.style.setProperty('display','block','important');
+          }
+        }
+      }
     });
   }
 
@@ -4383,7 +4497,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     thumbs.style.setProperty('flex-wrap', 'wrap', 'important');
     thumbs.style.setProperty('justify-content', 'center', 'important');
     thumbs.style.setProperty('gap', '10px', 'important');
-    thumbs.style.setProperty('width', '286px', 'important');
+    thumbs.style.setProperty('width', '296px', 'important');
     thumbs.style.setProperty('max-width', '100%', 'important');
     thumbs.style.setProperty('margin-left', 'auto', 'important');
     thumbs.style.setProperty('margin-right', 'auto', 'important');
