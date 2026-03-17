@@ -1919,7 +1919,6 @@ function calculatePlannerPrice(counts, seatPrice){
   if (seatPrice == null || seatPrice <= 0) seatPrice = getPlannerSeatPrice();
   if (!counts || typeof counts !== 'object') counts = {};
   var total = 0;
-  var singleSeatCount = 0;
   var keys = Object.keys(counts);
   for (var i = 0; i < keys.length; i++) {
     var id = keys[i];
@@ -1928,26 +1927,10 @@ function calculatePlannerPrice(counts, seatPrice){
       total += qty * ((2 * seatPrice) - 500);
     } else {
       total += qty * seatPrice;
-      singleSeatCount += qty;
     }
   }
 
-  if (counts["4L"] && singleSeatCount < 2) {
-    throw new Error("4L requires at least two additional seats.");
-  }
-
   return total;
-}
-
-function hasInvalid4LConfiguration(counts){
-  if (!counts || typeof counts !== "object") return false;
-  var fourLCount = Number(counts["4L"] || 0);
-  if (!fourLCount) return false;
-  var non4LCount = Object.keys(counts).reduce(function(total, key){
-    if (key === "4L") return total;
-    return total + Number(counts[key] || 0);
-  }, 0);
-  return non4LCount < 2;
 }
 
 function summarizePlannerConfiguration(payload){
@@ -2219,20 +2202,6 @@ window.initRoomPlanner = function (opts) {
     });
     return n;
   }
-  function removeInvalid4LPieces(showAlert) {
-    if (getNon4LCount() >= 2) return false;
-    var removed = false;
-    document.querySelectorAll("#roomPlannerApp .seat").forEach(function (seat) {
-      if (seat.dataset.pieceId !== "4L") return;
-      if (activeSeat === seat) activeSeat = null;
-      seat.remove();
-      removed = true;
-    });
-    if (removed && showAlert) {
-      alert("A 4L Armless Loveseat can only be used when at least two other pieces are in the room. The 4L piece has been removed.");
-    }
-    return removed;
-  }
   function calculateSeatCount() {
     var seats = 0;
     document.querySelectorAll("#roomPlannerApp .seat").forEach(function (seat) {
@@ -2356,10 +2325,6 @@ window.initRoomPlanner = function (opts) {
     img.style.objectPosition = "center center";
   }
   function addSeat(piece, skip4LCheck) {
-    if (!skip4LCheck && piece.id === "4L" && getNon4LCount() < 2) {
-      alert("A 4L Armless Loveseat can only be added when at least two other pieces (e.g. 1L, 2L, 3L) are already in the room.");
-      return;
-    }
     var seat = document.createElement("div");
     seat.className = "seat";
     seat.dataset.rot = "0";
@@ -2412,13 +2377,7 @@ window.initRoomPlanner = function (opts) {
   }
   document.getElementById("rotateL").onclick = function () { rotateSeat(-5); };
   document.getElementById("rotateR").onclick = function () { rotateSeat(5); };
-  document.getElementById("deleteBtn").onclick = function () {
-    if (activeSeat) {
-      activeSeat.remove();
-      activeSeat = null;
-      removeInvalid4LPieces(true);
-    }
-  };
+  document.getElementById("deleteBtn").onclick = function () { if (activeSeat) { activeSeat.remove(); activeSeat = null; } };
   var measureLineEl = document.getElementById("measure-line");
   var measureBtn = document.getElementById("measuringToolBtn");
   if (measureLineEl && measureBtn) {
@@ -2778,11 +2737,6 @@ window.initRoomPlanner = function (opts) {
         alert("Add at least one piece to the room before adding configuration.");
         return;
       }
-      if (hasInvalid4LConfiguration(counts)) {
-        alert("A 4L Armless Loveseat can only be added when at least two other pieces are already in the room.");
-        removeInvalid4LPieces(false);
-        return;
-      }
       var prodCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "unknown";
       var payload = { productCode: prodCode, options: counts, counts: counts, room: getRoomPayload(), layout: layout, seatCount: seatCount, ts: Date.now() };
       try { localStorage.setItem("roomPlannerData_" + prodCode, JSON.stringify(payload)); } catch (e) {}
@@ -2804,10 +2758,6 @@ window.initRoomPlanner = function (opts) {
       var data = JSON.parse(raw);
       var layout = data.layout;
       if (!layout || !Array.isArray(layout) || layout.length === 0) return;
-      if (hasInvalid4LConfiguration(data.options || data.counts || {})) {
-        localStorage.removeItem("roomPlannerData_" + prodCode);
-        return;
-      }
       var pieceMap = {};
       PIECES.forEach(function (p) { pieceMap[p.id] = p; });
       document.querySelectorAll("#roomPlannerApp .config-group").forEach(function (g) { g.remove(); });
@@ -3558,7 +3508,7 @@ body.mc-product-page #content_area .wm-swatch img {
     align-items: center !important;
     float: none !important;
     width: auto !important;
-    height: 40px !important;
+    height: 52px !important;
     vertical-align: bottom !important;
     white-space: nowrap !important;
     overflow: visible !important;
@@ -3587,6 +3537,15 @@ body.mc-product-page #content_area .wm-swatch img {
     margin-bottom: 5px;
   }
 
+  .productdetails td[class*="vCSS_tab"] > span,
+  .productdetails td[class*="vCSS_tab"] > a,
+  .productdetails td[class*="vCSS_tab"] > div {
+    min-height: 52px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    margin-bottom: 0 !important;
+  }
+
   /* Tab row: flex layout (works with or without :has()) */
   #content_area tr.mc-tabs-row,
   .productdetails tr.mc-tabs-row {
@@ -3603,7 +3562,7 @@ body.mc-product-page #content_area .wm-swatch img {
     align-items: center !important;
     float: none !important;
     width: auto !important;
-    height: 40px !important;
+    height: 52px !important;
     white-space: nowrap !important;
     overflow: visible !important;
     padding: 12px 28px !important;
@@ -3784,15 +3743,12 @@ body.mc-product-page #content_area .wm-swatch img {
   #content_area #altviews,
   #content_area .altviews,
   #content_area [id*="altview"] {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
+    display: ruby block !important;
+    flex-flow: wrap !important;
     justify-content: center !important;
     align-items: center !important;
     gap: 10px !important;
-    margin: 8px auto !important;
-    margin-left: -50px !important;
-    margin-bottom: -100px !important;
+    margin: 8px auto -100px -50px !important;
     padding: 0 !important;
     width: 286px !important;
     max-width: 300px !important;
@@ -3867,6 +3823,10 @@ body.mc-product-page #content_area .wm-swatch img {
   }
 
   /* Hide duplicate/second price on mobile */
+  body.mc-product-page #content_area .colors_productprice,
+  body.mc-product-page #v65-product-parent .colors_productprice,
+  body.mc-product-page #content_area .pricecolor.colors_productprice,
+  body.mc-product-page #v65-product-parent .pricecolor.colors_productprice,
   body.mc-product-page #content_area .product_productprice,
   body.mc-product-page #content_area .product_list_price,
   body.mc-product-page #v65-product-parent .product_productprice,
@@ -4889,7 +4849,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       outer.appendChild(thumbs);
     }
 
-    thumbs.style.cssText = 'display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;justify-content:center!important;align-items:center!important;gap:10px!important;width:286px!important;max-width:300px!important;margin:8px auto -100px auto!important;margin-left:-50px!important;padding:0!important;float:none!important;clear:both!important;position:static!important;left:auto!important;right:auto!important;transform:none!important;box-sizing:border-box!important;text-align:center!important;';
+    thumbs.style.cssText = 'display:ruby block!important;flex-flow:wrap!important;justify-content:center!important;align-items:center!important;gap:10px!important;width:286px!important;max-width:300px!important;margin:8px auto -100px -50px!important;padding:0!important;float:none!important;clear:both!important;position:static!important;left:auto!important;right:auto!important;transform:none!important;box-sizing:border-box!important;text-align:center!important;';
 
     var allLinks = thumbs.querySelectorAll('a');
     for (var i = 0; i < allLinks.length; i++) {
