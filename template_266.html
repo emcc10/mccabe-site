@@ -4537,12 +4537,21 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     thumbs.style.setProperty('position', 'static', 'important');
     thumbs.style.setProperty('transform', 'none', 'important');
     thumbs.style.setProperty('box-sizing', 'border-box', 'important');
-    qa('a, > div', thumbs).forEach(function(el){
+    qa('a', thumbs).forEach(function(el){
       el.style.setProperty('display', 'block', 'important');
       el.style.setProperty('flex', '0 0 64px', 'important');
       el.style.setProperty('width', '64px', 'important');
       el.style.setProperty('max-width', '64px', 'important');
     });
+    for (var ci = 0; ci < thumbs.children.length; ci++) {
+      var ch = thumbs.children[ci];
+      if (ch.tagName === 'DIV') {
+        ch.style.setProperty('display', 'block', 'important');
+        ch.style.setProperty('flex', '0 0 64px', 'important');
+        ch.style.setProperty('width', '64px', 'important');
+        ch.style.setProperty('max-width', '64px', 'important');
+      }
+    }
     qa('img', thumbs).forEach(function(el){
       el.style.setProperty('width', '100%', 'important');
       el.style.setProperty('max-width', '64px', 'important');
