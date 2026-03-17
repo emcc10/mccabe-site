@@ -3569,8 +3569,8 @@ body.mc-product-page #content_area .wm-swatch img {
 
   body.mc-product-page #content_area .mc-pdp-media-td {
     text-align: center !important;
-    margin: 0 0 12px 0 !important;
-    padding: 0 !important;
+    margin: 0 0 4px 0 !important;
+    padding: 0 0 0 0 !important;
     clear: both !important;
     display: flex !important;
     flex-direction: column !important;
@@ -3621,8 +3621,14 @@ body.mc-product-page #content_area .wm-swatch img {
   body.mc-product-page #content_area .mc-pdp-options-td,
   body.mc-product-page #content_area td:has(.colors_pricebox),
   body.mc-product-page #content_area td:has(#priceWithOptions) {
-    padding-top: 8px !important;
+    padding-top: 4px !important;
     margin-top: 0 !important;
+  }
+  /* Collapse large gaps: any row that contains both media and price */
+  body.mc-product-page #content_area table[cellpadding] tr,
+  #content_area #v65-product-parent tr,
+  .productdetails #v65-product-parent tbody tr {
+    min-height: 0 !important;
   }
   /* Alt images: centered under main, 4 per row – multiple selectors so rules apply */
   body.mc-product-page #content_area #altviews,
@@ -3687,9 +3693,30 @@ body.mc-product-page #content_area .wm-swatch img {
     justify-content: center !important;
     align-items: center !important;
     width: 100% !important;
-    margin: 8px 0 !important;
+    margin: 4px 0 !important;
     padding: 0 !important;
     order: 2 !important;
+  }
+  /* Force any cell containing altviews to full width and center its content */
+  #content_area td:has(#altviews),
+  #content_area td:has(.altviews),
+  #content_area td:has([id*="altview"]) {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    text-align: center !important;
+  }
+  /* Tighter gap: options/price block */
+  #content_area .mc-pdp-options-td,
+  #content_area td:has(.colors_pricebox),
+  #content_area td:has(#priceWithOptions) {
+    padding-top: 4px !important;
+    margin-top: 0 !important;
+  }
+  #content_area .mc-pdp-media-td,
+  #content_area [id*="product_photo_td"] {
+    margin-bottom: 4px !important;
+    padding-bottom: 0 !important;
   }
 
   /* Hide duplicate/second price on mobile */
@@ -4624,6 +4651,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     pricingTd.style.setProperty('width', '100%', 'important');
     mediaTd.style.setProperty('float', 'none', 'important');
     pricingTd.style.setProperty('float', 'none', 'important');
+    mediaTd.style.setProperty('margin-bottom', '4px', 'important');
+    mediaTd.style.setProperty('padding-bottom', '0', 'important');
+    pricingTd.style.setProperty('padding-top', '4px', 'important');
+    pricingTd.style.setProperty('margin-top', '0', 'important');
   }
 
   // --- Key fix: desktop wrapper exists? remove it on mobile ---
@@ -4675,18 +4706,31 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var thumbs = q('#altviews', scope) || q('span#altviews', scope) || q('.altviews', scope) || q('[id*="altview"]', scope);
     if (!thumbs) return;
 
+    var contentArea = scope && scope.id === 'content_area' ? scope : (q('#content_area') || document.body);
+    var node = thumbs.parentNode;
+    while (node && node !== contentArea && node !== document.body) {
+      node.style.setProperty('width', '100%', 'important');
+      node.style.setProperty('max-width', '100%', 'important');
+      if (node.tagName === 'TR') node.style.setProperty('display', 'block', 'important');
+      if (node.tagName === 'TD' || node.tagName === 'TH') {
+        node.style.setProperty('display', 'block', 'important');
+        node.style.setProperty('text-align', 'center', 'important');
+      }
+      node = node.parentNode;
+    }
+
     var parent = thumbs.parentNode;
     if (parent && parent.className && parent.className.indexOf('mc-altviews-outer') !== -1) {
-      parent.style.cssText = 'display:flex!important;justify-content:center!important;align-items:center!important;width:100%!important;margin:8px 0!important;padding:0!important;order:2!important;';
+      parent.style.cssText = 'display:flex!important;justify-content:center!important;align-items:center!important;width:100%!important;margin:4px 0!important;padding:0!important;order:2!important;';
     } else if (parent && parent !== document.body) {
       var outer = document.createElement('div');
       outer.className = 'mc-altviews-outer';
-      outer.style.cssText = 'display:flex!important;justify-content:center!important;align-items:center!important;width:100%!important;margin:8px 0!important;padding:0!important;order:2!important;';
+      outer.style.cssText = 'display:flex!important;justify-content:center!important;align-items:center!important;width:100%!important;margin:4px 0!important;padding:0!important;order:2!important;';
       parent.insertBefore(outer, thumbs);
       outer.appendChild(thumbs);
     }
 
-    thumbs.style.cssText = 'display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;justify-content:center!important;align-items:center!important;gap:10px!important;width:286px!important;max-width:286px!important;margin:0!important;padding:0!important;float:none!important;clear:both!important;position:static!important;left:auto!important;right:auto!important;transform:none!important;box-sizing:border-box!important;text-align:center!important;';
+    thumbs.style.cssText = 'display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;justify-content:center!important;align-items:center!important;gap:10px!important;width:286px!important;max-width:286px!important;margin:0 auto!important;padding:0!important;float:none!important;clear:both!important;position:static!important;left:auto!important;right:auto!important;transform:none!important;box-sizing:border-box!important;text-align:center!important;';
 
     var allLinks = thumbs.querySelectorAll('a');
     for (var i = 0; i < allLinks.length; i++) {
