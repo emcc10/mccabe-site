@@ -1596,15 +1596,19 @@ boot();
       var t = document.getElementById("roomPlannerEmbed");
       var body = document.getElementById("mcPlannerModalBody");
       if (!t || !body || !t.content) return;
-      body.innerHTML = "";
-      body.appendChild(t.content.cloneNode(true));
-      if (typeof window.initRoomPlanner === "function") {
-        window.initRoomPlanner({
-          onApply: function (payload) {
-            if (typeof window.applyPlannerToPage === "function") window.applyPlannerToPage(payload);
-            plannerOverlay.classList.remove("mc-planner-open");
-          }
-        });
+      var curCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "";
+      if (!body.dataset.plannerProduct || body.dataset.plannerProduct !== curCode) {
+        body.innerHTML = "";
+        body.appendChild(t.content.cloneNode(true));
+        if (typeof window.initRoomPlanner === "function") {
+          window.initRoomPlanner({
+            onApply: function (payload) {
+              if (typeof window.applyPlannerToPage === "function") window.applyPlannerToPage(payload);
+              plannerOverlay.classList.remove("mc-planner-open");
+            }
+          });
+        }
+        body.dataset.plannerProduct = curCode;
       }
       plannerOverlay.classList.add("mc-planner-open");
     }
@@ -2004,16 +2008,25 @@ window.applyPlannerToPage = function (payload) {
     }
   }
 
+  var configOpts = {};
+  var configPiecesEl = document.getElementById("mcConfigurationPieces");
+  if (configPiecesEl && configPiecesEl.style.display !== "none" && configPiecesEl.innerHTML.trim()) {
+    configOpts = opts;
+  } else {
+    configOpts = opts;
+  }
+
   var seatPrice = getPlannerSeatPrice();
-  console.log("[McCabe Planner] seatPrice read:", seatPrice, "counts:", JSON.stringify(opts));
+  console.log("[McCabe Planner] seatPrice read:", seatPrice, "counts:", JSON.stringify(configOpts));
   if (seatPrice <= 0) {
     console.warn("[McCabe Planner] Could not read seat price from page");
   }
   try {
-    var totalPrice = calculatePlannerPrice(opts, seatPrice);
+    var totalPrice = calculatePlannerPrice(configOpts, seatPrice);
     console.log("[McCabe Planner] calculated totalPrice:", totalPrice);
     updateProductPrice(totalPrice);
     window.__mcPlannerPrice = totalPrice;
+    window.__mcPlannerCounts = configOpts;
     setTimeout(function(){ updateProductPrice(totalPrice); }, 600);
     setTimeout(function(){ updateProductPrice(totalPrice); }, 1500);
     setTimeout(function(){ updateProductPrice(totalPrice); }, 3000);
@@ -2034,6 +2047,23 @@ window.addEventListener("message", function (event) {
 // Mount inline UI after DOM + Volusion settle
 setTimeout(mount, 600);
 setTimeout(mount, 1400);
+
+function restoreConfigOnPageLoad() {
+  try {
+    var prodCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "";
+    if (!prodCode) return;
+    var raw = localStorage.getItem("roomPlannerData_" + prodCode);
+    if (!raw) return;
+    var data = JSON.parse(raw);
+    if (!data || typeof data !== "object") return;
+    if (typeof window.applyPlannerToPage === "function") {
+      console.log("[McCabe Planner] Restoring saved configuration for", prodCode);
+      window.applyPlannerToPage(data);
+    }
+  } catch (e) { console.warn("[McCabe Planner] restore error:", e); }
+}
+setTimeout(restoreConfigOnPageLoad, 1600);
+setTimeout(restoreConfigOnPageLoad, 2800);
 
 })();
 </script>
@@ -2636,8 +2666,9 @@ window.initRoomPlanner = function (opts) {
         alert("Add at least one piece to the room before adding configuration.");
         return;
       }
-      var payload = { options: counts, counts: counts, room: getRoomPayload(), layout: layout, seatCount: seatCount, ts: Date.now() };
-      try { localStorage.setItem("roomPlannerData", JSON.stringify(payload)); } catch (e) {}
+      var prodCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "unknown";
+      var payload = { productCode: prodCode, options: counts, counts: counts, room: getRoomPayload(), layout: layout, seatCount: seatCount, ts: Date.now() };
+      try { localStorage.setItem("roomPlannerData_" + prodCode, JSON.stringify(payload)); } catch (e) {}
       if (opts.onApply && typeof opts.onApply === "function") {
         opts.onApply(payload);
       } else if (window.opener && window.opener.postMessage) {
@@ -2650,7 +2681,8 @@ window.initRoomPlanner = function (opts) {
   }
   function restoreLayoutFromStorage() {
     try {
-      var raw = localStorage.getItem("roomPlannerData");
+      var prodCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "unknown";
+      var raw = localStorage.getItem("roomPlannerData_" + prodCode);
       if (!raw) return;
       var data = JSON.parse(raw);
       var layout = data.layout;
@@ -2683,7 +2715,7 @@ window.initRoomPlanner = function (opts) {
       });
     } catch (e) {}
   }
-  /* Do not restore from storage: planner starts cleared on every page load (refresh or new product) */
+  restoreLayoutFromStorage();
 };
 </script>
 
