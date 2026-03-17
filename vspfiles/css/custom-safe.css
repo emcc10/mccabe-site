@@ -4570,6 +4570,12 @@ body.mc-product-page #content_area select:not(.mc-option-accordion-native) {
   }
 }
 
+@media (min-width: 992px) {
+  .mc-tabs-row {
+    margin-bottom: 18px;
+  }
+}
+
 /* Add to Cart – RH button style: black, white text, clean typography */
 body.mc-product-page #content_area input[name="btnaddtocart"],
 body.mc-product-page #content_area input[id*="btnaddtocart"],
