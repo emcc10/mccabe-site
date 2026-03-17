@@ -3457,6 +3457,41 @@ body.mc-product-page #content_area .wm-swatch img {
     display: inline !important;
     max-width: none !important;
   }
+
+  /* Tab row: flex layout (works with or without :has()) */
+  #content_area tr.mc-tabs-row,
+  .productdetails tr.mc-tabs-row {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+  }
+
+  /* Same tab styles without body/productdetails so they always apply when present */
+  #content_area td[class*="vCSS_tab"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    float: none !important;
+    width: auto !important;
+    height: auto !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    padding: 12px 28px !important;
+    margin: 0 16px 0 0 !important;
+    vertical-align: bottom !important;
+  }
+  #content_area td[class*="vCSS_tab"]:last-child {
+    margin-right: 0 !important;
+  }
+  #content_area td[class*="vCSS_tab"] span,
+  #content_area td[class*="vCSS_tab"] a,
+  #content_area td[class*="vCSS_tab"] div {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    width: auto !important;
+    max-width: none !important;
+    display: inline !important;
+  }
 }
 
 
@@ -4524,6 +4559,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       var tr = td.parentElement;
       if (tr && tr.tagName === 'TR' && fixedParents.indexOf(tr) === -1) {
         fixedParents.push(tr);
+        tr.classList.add('mc-tabs-row');
         tr.style.setProperty('display','flex','important');
         tr.style.setProperty('flex-wrap','nowrap','important');
         tr.style.setProperty('align-items','stretch','important');
