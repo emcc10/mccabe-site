@@ -3392,7 +3392,7 @@ body.mc-product-page #content_area .wm-swatch img {
     vertical-align: bottom !important;
     white-space: nowrap !important;
     overflow: visible !important;
-    padding: 8px 16px !important;
+    padding: 10px 24px !important;
     margin: 0 !important;
   }
   .productdetails td[class*="vCSS_tab"] span,
@@ -3547,10 +3547,10 @@ body.mc-product-page #content_area .wm-swatch img {
     justify-content: center !important;
     align-items: center !important;
     gap: 10px !important;
-    margin: 8px 0 !important;
+    margin: 8px auto !important;
     padding: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    width: 286px !important;
+    max-width: 286px !important;
     float: none !important;
     clear: both !important;
     order: 2 !important;
@@ -3617,21 +3617,40 @@ body.mc-product-page #content_area .wm-swatch img {
     padding-right: 36px !important;
   }
 
-  .productdetails td[class*="vCSS_tab"] {
+  .productdetails table:has(td[class*="vCSS_tab"]) {
     display: block !important;
-    width: 100% !important;
+  }
+  .productdetails tbody:has(td[class*="vCSS_tab"]) {
+    display: block !important;
+  }
+  .productdetails tr:has(> td[class*="vCSS_tab"]) {
+    display: flex !important;
+    flex-wrap: nowrap !important;
     height: auto !important;
+    align-items: stretch !important;
+  }
+  .productdetails td[class*="vCSS_tab"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    float: none !important;
+    width: auto !important;
+    height: auto !important;
+    white-space: nowrap !important;
     overflow: visible !important;
-    white-space: normal !important;
+    padding: 6px 12px !important;
+    margin: 0 !important;
     box-sizing: border-box !important;
   }
   .productdetails td[class*="vCSS_tab"] a,
-  .productdetails td[class*="vCSS_tab"] span {
-    white-space: normal !important;
+  .productdetails td[class*="vCSS_tab"] span,
+  .productdetails td[class*="vCSS_tab"] div {
+    white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: unset !important;
+    width: auto !important;
     height: auto !important;
-    display: block !important;
+    display: inline !important;
+    max-width: none !important;
   }
 }
 
@@ -4381,7 +4400,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 
   function forceTabsInline(scope){
-    if (isMobile()) return;
+    var mobile = isMobile();
+    var tabPad = mobile ? '6px 12px' : '10px 24px';
 
     qa('.resp-tabs-list, ul.resp-tabs-list, .ui-tabs-nav, .TabbedPanelsTabGroup', scope).forEach(function(tabWrap){
       tabWrap.style.setProperty('display','flex','important');
@@ -4412,7 +4432,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       td.style.setProperty('vertical-align','bottom','important');
       td.style.setProperty('white-space','nowrap','important');
       td.style.setProperty('overflow','visible','important');
-      td.style.setProperty('padding','8px 16px','important');
+      td.style.setProperty('padding', tabPad, 'important');
       td.style.setProperty('margin','0','important');
       qa('span, a, div', td).forEach(function(inner){
         inner.style.setProperty('white-space','nowrap','important');
@@ -4436,9 +4456,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
           var tbl = tbody.parentElement;
           if (tbl && tbl.tagName === 'TABLE') {
             tbl.style.setProperty('display','block','important');
-            tbl.style.setProperty('margin-bottom','-12px','important');
-            tbl.style.setProperty('margin-top','5px','important');
-            tbl.style.setProperty('margin-left','-16px','important');
+            if (!mobile) {
+              tbl.style.setProperty('margin-bottom','-12px','important');
+              tbl.style.setProperty('margin-top','5px','important');
+              tbl.style.setProperty('margin-left','-16px','important');
+            }
           }
         }
       }
@@ -4541,8 +4563,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     thumbs.setAttribute('style',
       'display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;' +
       'justify-content:center!important;align-items:center!important;gap:10px!important;' +
-      'width:100%!important;max-width:100%!important;' +
-      'margin:8px 0!important;padding:0!important;' +
+      'width:286px!important;max-width:286px!important;' +
+      'margin:8px auto!important;padding:0!important;' +
       'float:none!important;clear:both!important;position:static!important;' +
       'left:auto!important;right:auto!important;transform:none!important;' +
       'box-sizing:border-box!important;text-align:center!important'
