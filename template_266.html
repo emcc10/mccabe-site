@@ -1879,10 +1879,14 @@ boot();
     });
   }
 function getPlannerSeatPrice(){
-  var el = document.querySelector("#priceWithOptions, .v65-product-price, .product_productprice, [itemprop=\"price\"]");
-  if (!el) return 0;
-  var text = (el.textContent || el.innerText || "").replace(/[^0-9.]/g, "");
-  var n = parseFloat(text, 10);
+  var el = document.getElementById("priceWithOptions");
+  if (!el) el = document.querySelector(".v65-product-price, .product_productprice, .option_pricing, [itemprop=\"price\"]");
+  if (!el) { console.warn("[McCabe Planner] No price element found"); return 0; }
+  var text = el.textContent || el.innerText || "";
+  var match = text.match(/\$[\d,]+\.?\d*/);
+  var raw = match ? match[0].replace(/[$,]/g, "") : text.replace(/[^0-9.]/g, "");
+  var n = parseFloat(raw);
+  console.log("[McCabe Planner] getPlannerSeatPrice:", n, "from text:", text.trim().substring(0, 80));
   return isNaN(n) ? 0 : n;
 }
 
@@ -1896,17 +1900,19 @@ function updateProductPrice(totalPrice){
 function calculatePlannerPrice(counts, seatPrice){
   if (seatPrice == null || seatPrice <= 0) seatPrice = getPlannerSeatPrice();
   if (!counts || typeof counts !== 'object') counts = {};
-  let total = 0;
-  let singleSeatCount = 0;
-
-  Object.entries(counts).forEach(([id, qty]) => {
+  var total = 0;
+  var singleSeatCount = 0;
+  var keys = Object.keys(counts);
+  for (var i = 0; i < keys.length; i++) {
+    var id = keys[i];
+    var qty = counts[id] || 0;
     if (id === "4L") {
       total += qty * ((2 * seatPrice) - 500);
     } else {
       total += qty * seatPrice;
       singleSeatCount += qty;
     }
-  });
+  }
 
   if (counts["4L"] && singleSeatCount < 2) {
     throw new Error("4L requires at least two additional seats.");
@@ -1998,11 +2004,21 @@ window.applyPlannerToPage = function (payload) {
     }
   }
 
+  var seatPrice = getPlannerSeatPrice();
+  console.log("[McCabe Planner] seatPrice read:", seatPrice, "counts:", JSON.stringify(opts));
+  if (seatPrice <= 0) {
+    console.warn("[McCabe Planner] Could not read seat price from page");
+  }
   try {
-    var seatPrice = getPlannerSeatPrice();
     var totalPrice = calculatePlannerPrice(opts, seatPrice);
+    console.log("[McCabe Planner] calculated totalPrice:", totalPrice);
     updateProductPrice(totalPrice);
+    window.__mcPlannerPrice = totalPrice;
+    setTimeout(function(){ updateProductPrice(totalPrice); }, 600);
+    setTimeout(function(){ updateProductPrice(totalPrice); }, 1500);
+    setTimeout(function(){ updateProductPrice(totalPrice); }, 3000);
   } catch (err) {
+    console.error("[McCabe Planner] pricing error:", err);
     if (err && err.message) alert(err.message);
   }
 };
@@ -2615,6 +2631,7 @@ window.initRoomPlanner = function (opts) {
       var counts = getCounts();
       var layout = serializeLayout();
       var seatCount = calculateSeatCount();
+      console.log("[McCabe Planner] Add configuration clicked. counts:", JSON.stringify(counts), "seatCount:", seatCount, "layout length:", layout.length);
       if (Object.keys(counts).length === 0) {
         alert("Add at least one piece to the room before adding configuration.");
         return;
