@@ -65,6 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
   </style>
 
 <script>
+(function () {
   function enforceMobileLayout() {
     if (!window.matchMedia('(max-width: 991px)').matches) return;
 
@@ -403,10 +404,10 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp .room-dims-block { display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
         #roomPlannerApp .room-dims-row { display:flex; flex-wrap:nowrap; align-items:baseline; gap:4px; }
         #roomPlannerApp .room-dims-row label { font-size:12px; font-weight:600; color:#333; margin:0; }
-        #roomPlannerApp .room-dims-row input[type="number"] { width:24px; padding:2px 0; font-size:12px; margin:0; border:none; border-bottom:1px solid #333; background:transparent; border-radius:0; text-align:center; -moz-appearance:textfield; }
+        #roomPlannerApp .room-dims-row input[type="number"] { width:24px; padding:2px 0; font-size:12px; margin:0; border:none; border-bottom:1px solid #333; background:transparent; border-radius:0; text-align:center; -moz-appearance:textfield; appearance:textfield; }
         #roomPlannerApp .room-dims-row input[type="number"]::-webkit-inner-spin-button,
-        #roomPlannerApp .room-dims-row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
-        #roomPlannerApp input[type="number"] { -moz-appearance:textfield; }
+        #roomPlannerApp .room-dims-row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance:none; appearance:none; margin:0; }
+        #roomPlannerApp input[type="number"] { -moz-appearance:textfield; appearance:textfield; }
         #roomPlannerApp #applyRoom { padding:6px 16px; font-size:11px; border:1px solid #333; border-radius:0; background:#fff; text-transform:uppercase; letter-spacing:.05em; cursor:pointer; align-self:flex-start; }
         #roomPlannerApp #applyRoom:hover { background:#f5f5f5; }
         #roomPlannerApp #room-measurement { font-size:12px; color:#333; margin:0; }
@@ -738,7 +739,6 @@ document.addEventListener("DOMContentLoaded", function () {
   .wm-preview-close{border:0;background:none;font-size:22px;cursor:pointer;line-height:1}
   .wm-preview-body{padding:14px}
   .wm-preview-img{width:100%;height:auto;display:block;border-radius:12px;border:1px solid #eee}
-}
 
 /* Normal products get normal options */
 /* Desktop-only spacing (prevents mobile from being shoved sideways) */
@@ -1904,19 +1904,29 @@ function getPlannerSeatPrice(){
   var match = text.match(/\$[\d,]+\.?\d*/);
   var raw = match ? match[0].replace(/[$,]/g, "") : text.replace(/[^0-9.]/g, "");
   var n = parseFloat(raw);
+  if (!isNaN(n) && n > 0 && (window.__mcPlannerPrice == null || window.__mcPlannerPrice === undefined)) {
+    window.__mcPlannerBaseSeatPrice = n;
+  }
   console.log("[McCabe Planner] getPlannerSeatPrice:", n, "from text:", text.trim().substring(0, 80));
   return isNaN(n) ? 0 : n;
+}
+function getPlannerBaseSeatPriceForCalc(){
+  if (window.__mcPlannerBaseSeatPrice != null && window.__mcPlannerBaseSeatPrice > 0) {
+    return window.__mcPlannerBaseSeatPrice;
+  }
+  return getPlannerSeatPrice();
 }
 
 function updateProductPrice(totalPrice){
   if (totalPrice == null || isNaN(totalPrice) || totalPrice < 0) return;
   var formatted = "$" + Number(totalPrice).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  var targets = document.querySelectorAll("#priceWithOptions, .v65-product-price, .product_productprice, .product_sale_price, #content_area .product_sale_price b, #v65-product-parent .product_sale_price b");
+  var root = document.querySelector("#v65-product-parent, #content_area") || document.body;
+  var targets = root.querySelectorAll("#priceWithOptions, .v65-product-price, .product_productprice, .product_sale_price, .product_sale_price b, .option_pricing");
   for (var i = 0; i < targets.length; i++) { targets[i].textContent = formatted; }
 }
 
 function calculatePlannerPrice(counts, seatPrice){
-  if (seatPrice == null || seatPrice <= 0) seatPrice = getPlannerSeatPrice();
+  if (seatPrice == null || seatPrice <= 0) seatPrice = getPlannerBaseSeatPriceForCalc();
   if (!counts || typeof counts !== 'object') counts = {};
   var total = 0;
   var singleSeatCount = 0;
@@ -2030,7 +2040,7 @@ window.applyPlannerToPage = function (payload) {
     configOpts = opts;
   }
 
-  var seatPrice = getPlannerSeatPrice();
+  var seatPrice = getPlannerBaseSeatPriceForCalc();
   console.log("[McCabe Planner] seatPrice read:", seatPrice, "counts:", JSON.stringify(configOpts));
   if (seatPrice <= 0) {
     console.warn("[McCabe Planner] Could not read seat price from page");
