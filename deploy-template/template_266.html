@@ -5652,15 +5652,18 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     return pages.reduce(function(chain, pn){
       return chain.then(function(acc){
         return pdf.getPage(pn).then(function(pg){ return pg.getTextContent(); }).then(function(tc){
-          var lines = [], lastY = null, line = '';
+          var yGroups = {};
           tc.items.forEach(function(it){
             var y = Math.round(it.transform[5]);
-            if (lastY !== null && Math.abs(y - lastY) > 3){ lines.push(line); line = ''; }
-            else if (line) line += ' ';
-            line += it.str;
-            lastY = y;
+            if (!yGroups[y]) yGroups[y] = [];
+            yGroups[y].push({x: it.transform[4], str: it.str});
           });
-          if (line) lines.push(line);
+          var yKeys = Object.keys(yGroups).sort(function(a,b){ return parseFloat(b) - parseFloat(a); });
+          var lines = [];
+          yKeys.forEach(function(yk){
+            var items = yGroups[yk].sort(function(a,b){ return a.x - b.x; });
+            lines.push(items.map(function(it){ return it.str; }).join(' '));
+          });
           acc.push(lines.join('\n'));
           return acc;
         });
@@ -5670,14 +5673,43 @@ body.productdetails .v-product-grid .v-product .v-product__price {
 
   function parsePieceDims(text){
     var dims = {};
-    var flat = text.replace(/\r?\n/g, ' ');
-    var re = /(\d)[ERL]\s[\s\S]{1,150}?(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/gi;
-    var m;
-    while ((m = re.exec(flat)) !== null){
-      var w = parseFloat(m[2]), d = parseFloat(m[3]), h = parseFloat(m[4]);
-      var pid = m[1] + 'L';
-      if (w >= 15 && w <= 70 && d >= 30 && d <= 60 && h >= 30 && h <= 55 && !dims[pid]){
-        dims[pid] = {w:w, d:d, h:h};
+    var lines = text.split('\n');
+    var inSide = false, inFront = false;
+    var sideData = {}, frontData = {};
+    for (var li = 0; li < lines.length; li++){
+      var line = lines[li].trim();
+      if (/^Side\b/i.test(line)){ inSide = true; inFront = false; continue; }
+      if (/^Front\b/i.test(line)){ inFront = true; inSide = false; continue; }
+      var rm = line.match(/\d+-(\d)[ERL]\b/);
+      if (!rm) continue;
+      var pid = rm[1] + 'L';
+      var afterId = line.substring(rm.index + rm[0].length);
+      var numMatches = afterId.match(/\d+\.?\d*/g);
+      if (!numMatches) continue;
+      var nums = numMatches.map(parseFloat).filter(function(n){ return !isNaN(n); });
+      if (inSide && nums.length >= 2 && !sideData[pid]){
+        sideData[pid] = { d: nums[0], h: nums[1] };
+      } else if (inFront && nums.length >= 1 && !frontData[pid]){
+        frontData[pid] = { w: nums[0] };
+      }
+    }
+    for (var k in frontData){
+      if (sideData[k]) dims[k] = { w: frontData[k].w, d: sideData[k].d, h: sideData[k].h };
+    }
+    if (Object.keys(dims).length === 0){
+      var pieceIds = [], seenIds = {}, m2;
+      var pidRe = /(\d)[ERL]\s+(?:LHF|RHF|Armless|Recliner|Wedge|Power)/gi;
+      while ((m2 = pidRe.exec(text)) !== null){
+        if (!seenIds[m2[1]]){ pieceIds.push(m2[1]); seenIds[m2[1]] = true; }
+      }
+      var dimsList = [];
+      var dimRe = /(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*["\u2033]/g;
+      while ((m2 = dimRe.exec(text)) !== null){
+        var w = parseFloat(m2[1]);
+        if (w >= 15 && w <= 70) dimsList.push({ w:w, d:parseFloat(m2[2]), h:parseFloat(m2[3]) });
+      }
+      for (var j = 0; j < pieceIds.length && j < dimsList.length; j++){
+        dims[pieceIds[j]+'L'] = dimsList[j];
       }
     }
     return dims;
@@ -5727,7 +5759,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     if (_fetchedDims){ applyDims(_fetchedDims); setupDimObserver(_fetchedDims); return; }
     var info = detectStyle();
     if (!info) return;
-    var cacheKey = 'mc_dims_' + info.style;
+    var cacheKey = 'mc_dims_v2_' + info.style;
     try {
       var cached = sessionStorage.getItem(cacheKey);
       if (cached){
@@ -5737,27 +5769,89 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       }
     } catch(e){}
     var pdfUrl = 'https://images.palliser.com/specsheet/en/' + info.model + '%20' + info.style + '.pdf';
+    function fetchAB(url){ return fetch(url).then(function(r){ if (!r.ok) throw new Error('HTTP '+r.status); return r.arrayBuffer(); }); }
+    var proxy1 = 'https://corsproxy.io/?'+encodeURIComponent(pdfUrl);
+    var proxy2 = 'https://api.allorigins.win/raw?url='+encodeURIComponent(pdfUrl);
     loadPdfJs().then(function(lib){
-      return lib.getDocument({url:pdfUrl}).promise.catch(function(){
-        return lib.getDocument({url:'https://corsproxy.io/?'+encodeURIComponent(pdfUrl)}).promise;
+      return fetchAB(pdfUrl).catch(function(){
+        console.log('[MC Planner] Direct PDF fetch failed, trying proxy 1');
+        return fetchAB(proxy1);
+      }).catch(function(){
+        console.log('[MC Planner] Proxy 1 failed, trying proxy 2');
+        return fetchAB(proxy2);
+      }).then(function(data){
+        return lib.getDocument({data: new Uint8Array(data)}).promise;
       });
     }).then(function(pdf){
       return pdfToText(pdf);
     }).then(function(text){
+      console.log('[MC Planner] PDF text extracted, length:', text.length);
       var dims = parsePieceDims(text);
+      console.log('[MC Planner] Parsed dims:', JSON.stringify(dims));
       if (Object.keys(dims).length){
         _fetchedDims = dims;
         try { sessionStorage.setItem(cacheKey, JSON.stringify(dims)); } catch(e){}
         applyDims(dims); setupDimObserver(dims);
+      } else {
+        console.warn('[MC Planner] No dimensions parsed from PDF');
       }
     }).catch(function(err){
-      if (typeof console !== 'undefined') console.warn('[MC Planner] Spec-sheet fetch failed:', err);
+      console.warn('[MC Planner] Spec-sheet fetch failed:', err);
     });
+  }
+
+  /* ---- PATCH 4: Sync planner seat count to Volusion "Number of Seats" dropdown for correct cart pricing ---- */
+  function syncSeatCountToVolusion(seatCount){
+    if (!seatCount || seatCount < 1) return;
+    var table = document.querySelector('#options_table, table[id*="options_table"]');
+    if (!table) return;
+    var rows = table.querySelectorAll('tr');
+    for (var ri = 0; ri < rows.length; ri++){
+      var labelCell = rows[ri].querySelector('td:first-child');
+      var labelText = ((labelCell && labelCell.textContent) || '').toLowerCase();
+      if (labelText.indexOf('seat') === -1) continue;
+      if (/leather|cover|configuration|straight|curved/i.test(labelText)) continue;
+      var sel = rows[ri].querySelector('select');
+      if (!sel) continue;
+      var bestOpt = null, bestDiff = 999;
+      for (var oi = 0; oi < sel.options.length; oi++){
+        var optNum = parseInt((sel.options[oi].text || '').replace(/[^0-9]/g, ''));
+        if (isNaN(optNum)) continue;
+        var diff = Math.abs(optNum - seatCount);
+        if (diff < bestDiff){ bestDiff = diff; bestOpt = sel.options[oi]; }
+      }
+      if (bestOpt && sel.value !== bestOpt.value){
+        sel.value = bestOpt.value;
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        console.log('[MC Planner] Synced seat count', seatCount, 'to dropdown:', bestOpt.text);
+      }
+      break;
+    }
+  }
+
+  var _applyWrapped = false;
+  function wrapApplyPlannerToPage(){
+    if (_applyWrapped || typeof window.applyPlannerToPage !== 'function') return;
+    _applyWrapped = true;
+    var _origApply = window.applyPlannerToPage;
+    window.applyPlannerToPage = function(payload){
+      _origApply.call(window, payload);
+      var opts = (payload && payload.options) || {};
+      var layout = (payload && Array.isArray(payload.layout)) ? payload.layout : [];
+      var sc = 0;
+      if (layout.length){
+        layout.forEach(function(s){ sc += ((s.id || s) === '4L') ? 2 : 1; });
+      } else {
+        Object.keys(opts).forEach(function(k){ sc += (k === '4L') ? ((opts[k]||0)*2) : (opts[k]||0); });
+      }
+      if (sc > 0) syncSeatCountToVolusion(sc);
+    };
   }
 
   function runPatches(){
     patchProductTabs();
     patchRelatedItemImages();
+    wrapApplyPlannerToPage();
     fetchPlannerDimensions();
   }
 
