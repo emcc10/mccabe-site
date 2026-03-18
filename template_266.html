@@ -5960,20 +5960,47 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     var wIn = (room.widthTotalIn != null) ? room.widthTotalIn : 192;
     var dIn = (room.depthTotalIn != null) ? room.depthTotalIn : 144;
     var roomWpx = wIn * PX_PER_INCH, roomHpx = dIn * PX_PER_INCH;
-    var scale = Math.min((canvas.width - 40) / roomWpx, (canvas.height - 40) / roomHpx, 1) || 0.5;
+    var pad = 56;
+    var scale = Math.min((canvas.width - pad) / roomWpx, (canvas.height - pad) / roomHpx) || 0.5;
+    var roomW = roomWpx * scale, roomH = roomHpx * scale;
+    var ox = (canvas.width - roomW) / 2, oy = (canvas.height - roomH) / 2;
     var ctx = canvas.getContext("2d");
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    var roomW = roomWpx * scale, roomH = roomHpx * scale;
-    var ox = (canvas.width - roomW) / 2, oy = (canvas.height - roomH) / 2;
     ctx.strokeStyle = "#999";
     ctx.lineWidth = 2;
     ctx.strokeRect(ox, oy, roomW, roomH);
-    ctx.fillStyle = "rgba(0,0,0,.06)";
-    var gridPx = 12 * PX_PER_INCH * scale;
-    for (var gx = ox; gx < ox + roomW; gx += gridPx) { ctx.beginPath(); ctx.moveTo(gx, oy); ctx.lineTo(gx, oy + roomH); ctx.stroke(); }
-    for (var gy = oy; gy < oy + roomH; gy += gridPx) { ctx.beginPath(); ctx.moveTo(ox, gy); ctx.lineTo(ox + roomW, gy); ctx.stroke(); }
-    ctx.strokeStyle = "#999";
+    var gridSize = 12 * PX_PER_INCH * scale;
+    ctx.strokeStyle = "rgba(0,0,0,0.10)";
+    ctx.lineWidth = 1;
+    for (var gx = ox; gx < ox + roomW + 0.5; gx += gridSize) { ctx.beginPath(); ctx.moveTo(gx, oy); ctx.lineTo(gx, oy + roomH); ctx.stroke(); }
+    for (var gy = oy; gy < oy + roomH + 0.5; gy += gridSize) { ctx.beginPath(); ctx.moveTo(ox, gy); ctx.lineTo(ox + roomW, gy); ctx.stroke(); }
+    var wFt = Math.floor(wIn / 12), wInRem = wIn % 12, dFt = Math.floor(dIn / 12), dInRem = dIn % 12;
+    var dimTopText = (wFt ? wFt + " ft " : "") + (wInRem ? wInRem + " in" : (wFt ? "" : "0 in"));
+    var dimLeftText = (dFt ? dFt + " ft " : "") + (dInRem ? dInRem + " in" : (dFt ? "" : "0 in"));
+    ctx.font = "600 12px Helvetica, Arial, sans-serif";
+    ctx.fillStyle = "#333";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    var dimH = 22, dimPad = 6;
+    ctx.fillStyle = "#fff";
+    ctx.strokeStyle = "#ccc";
+    ctx.lineWidth = 1;
+    var topW = ctx.measureText(dimTopText).width + dimPad * 2;
+    ctx.fillRect(ox + roomW / 2 - topW / 2, oy - dimH - 4, topW, dimH);
+    ctx.strokeRect(ox + roomW / 2 - topW / 2, oy - dimH - 4, topW, dimH);
+    ctx.fillStyle = "#333";
+    ctx.fillText(dimTopText, ox + roomW / 2, oy - dimH / 2 - 4);
+    ctx.save();
+    ctx.translate(ox - dimH / 2 - 4, oy + roomH / 2);
+    ctx.rotate(-Math.PI / 2);
+    var leftW = ctx.measureText(dimLeftText).width + dimPad * 2;
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(-leftW / 2, -dimH / 2, leftW, dimH);
+    ctx.strokeRect(-leftW / 2, -dimH / 2, leftW, dimH);
+    ctx.fillStyle = "#333";
+    ctx.fillText(dimLeftText, 0, 0);
+    ctx.restore();
     layout.forEach(function(item){
       var x = (item.x != null ? item.x : 40) * scale + ox;
       var y = (item.y != null ? item.y : 40) * scale + oy;
@@ -5983,15 +6010,16 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       ctx.translate(x + w/2, y + h/2);
       ctx.rotate(((item.rot != null ? item.rot : 0) * Math.PI) / 180);
       ctx.translate(-(x + w/2), -(y + h/2));
-      ctx.fillStyle = "#e8e8e8";
-      ctx.strokeStyle = "#333";
+      ctx.fillStyle = "#fff";
+      ctx.strokeStyle = "#999";
       ctx.lineWidth = 1;
       ctx.fillRect(x, y, w, h);
       ctx.strokeRect(x, y, w, h);
-      ctx.fillStyle = "#333";
-      ctx.font = "11px sans-serif";
+      ctx.fillStyle = "rgba(100,100,100,0.85)";
+      ctx.font = "10px Helvetica, Arial, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(item.id || "", x + w/2, y + h/2 + 4);
+      ctx.textBaseline = "bottom";
+      ctx.fillText(item.id || "", x + w/2, y + h - 2);
       ctx.restore();
     });
   }
@@ -6006,9 +6034,10 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     title.style.cssText = "font-size:16px;font-weight:600;margin-bottom:12px;";
     title.textContent = "Room configuration";
     var canvas = document.createElement("canvas");
-    canvas.width = 520;
-    canvas.height = 380;
-    canvas.style.cssText = "display:block;max-width:100%;height:auto;border:1px solid #ddd;";
+    var cw = 640, ch = 420;
+    canvas.width = cw;
+    canvas.height = ch;
+    canvas.style.cssText = "display:block;max-width:100%;height:auto;border:2px solid #999;background:#fff;";
     var closeBtn = document.createElement("button");
     closeBtn.type = "button";
     closeBtn.textContent = "Close";
@@ -6077,19 +6106,11 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     }
     content.querySelectorAll("td.mc-cart-remove-x").forEach(function(td){ td.remove(); });
     content.querySelectorAll("tr.mc-remove-x-done").forEach(function(tr){ tr.classList.remove("mc-remove-x-done"); });
-    var boundary = null;
-    var walk = content.getElementsByTagName("*");
-    for (var b = 0; b < walk.length; b++) {
-      var txt = (walk[b].textContent || "").trim();
-      if (txt.indexOf("Calculate Shipping") !== -1 || (txt.indexOf("Zip") !== -1 && txt.indexOf("Postal") !== -1) || txt.indexOf("Tax:") !== -1 || /Total:\s*\$/.test(txt)) {
-        boundary = walk[b];
-        break;
-      }
-    }
     var tables = content.querySelectorAll("table");
     for (var t = 0; t < tables.length; t++) {
       var tbl = tables[t];
-      if (boundary && !(tbl.compareDocumentPosition(boundary) & 4)) continue;
+      var tblText = (tbl.textContent || "").toLowerCase();
+      if (tblText.indexOf("calculate shipping") !== -1 || tblText.indexOf("related products") !== -1) continue;
       if (!tbl.querySelector("img")) continue;
       var rows = tbl.querySelectorAll("tbody tr, tr");
       var lineItemRows = 0;
