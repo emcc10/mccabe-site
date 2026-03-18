@@ -6218,6 +6218,15 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         link.className = "mc-view-config-link";
         link.textContent = "View configuration";
         link.style.cssText = "margin-left:6px;font-size:12px;text-decoration:underline;cursor:pointer;";
+        link.addEventListener("click", function(ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          var idx = parseInt(this.getAttribute("data-mc-config-idx"), 10);
+          if (isNaN(idx)) idx = 0;
+          var list = window.__mcCartConfigList;
+          if (list && list[idx]) showConfigModal(list[idx]);
+          else if (list && list[0]) showConfigModal(list[0]);
+        }, false);
         sp.parentNode.replaceChild(link, sp);
       });
     }
@@ -6382,20 +6391,20 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     if (xTd || xBtn) {
       e.preventDefault();
       e.stopPropagation();
-      var row = mcClosest(xTd || xBtn, "tr");
+      var row = mcClosest(xTd || xBtn, "tr.v65-cart-details-row") || mcClosest(xTd || xBtn, "tr");
       if (!row) return;
-      var rl = row.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]') || (function(){
+      var rl = row.querySelector('a.v65-cart-item-remove-link, a[href*="remove="], a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]') || (function(){
         var links = row.querySelectorAll("a[href]");
         for (var i = 0; i < links.length; i++) {
           var lt = (links[i].textContent || "").toLowerCase();
           var lh = (links[i].getAttribute("href") || "").toLowerCase();
-          if (lt.indexOf("remove") !== -1 || lt.indexOf("delete") !== -1 || lh.indexOf("remove") !== -1 || lh.indexOf("delete") !== -1) return links[i];
+          if (lh.indexOf("remove") !== -1 || lt.indexOf("remove") !== -1 || lh.indexOf("delete") !== -1 || lt.indexOf("delete") !== -1) return links[i];
         }
         return null;
       })();
       var ri = row.querySelector('input[value*="Remove"], input[value*="Delete"], input[type="image"][alt*="emove"], input[type="submit"][value*="emove"]');
       if (rl) {
-        var href = (rl.getAttribute("href") || "").trim();
+        var href = (rl.href || rl.getAttribute("href") || "").trim();
         if (href && href.indexOf("javascript:") !== 0 && href !== "#") {
           window.location.href = href;
           return;
