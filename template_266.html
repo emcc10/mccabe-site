@@ -6078,13 +6078,6 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     for (var t = 0; t < tables.length; t++) {
       var cartTable = tables[t];
       var rows = cartTable.querySelectorAll("tbody tr, tr");
-      var dataRowsWithPrice = 0;
-      for (var r = 0; r < rows.length; r++) {
-        if (rows[r].querySelector("th")) continue;
-        if (rows[r].querySelectorAll("td").length < 4) continue;
-        if ((rows[r].textContent || "").indexOf("$") !== -1) dataRowsWithPrice++;
-      }
-      if (dataRowsWithPrice < 1) continue;
       rows.forEach(function(tr){
         if (tr.classList.contains("mc-remove-x-done")) return;
         if (tr.querySelector("th")) return;
@@ -6092,6 +6085,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         if (cells.length < 4) return;
         var removeLink = tr.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]');
         var removeInput = tr.querySelector('input[value*="Remove"], input[value*="Delete"], input[type="image"][alt*="emove"], input[type="submit"][value*="emove"]');
+        if (!removeLink && !removeInput) return;
         var lastTd = cells[cells.length - 1];
         if (!lastTd) return;
         var totalCell = lastTd;
