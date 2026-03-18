@@ -1945,22 +1945,10 @@ function ensurePriceWithOptionsLabel(scope){
   priceNode.parentNode.insertBefore(label, priceNode);
 }
 
-function calculatePlannerPrice(counts, seatPrice){
+function calculatePlannerPrice(seatCount, seatPrice){
   if (seatPrice == null || seatPrice <= 0) seatPrice = getPlannerBaseSeatPriceForCalc();
-  if (!counts || typeof counts !== 'object') counts = {};
-  var total = 0;
-  var keys = Object.keys(counts);
-  for (var i = 0; i < keys.length; i++) {
-    var id = keys[i];
-    var qty = counts[id] || 0;
-    if (id === "4L") {
-      total += qty * ((2 * seatPrice) - 500);
-    } else {
-      total += qty * seatPrice;
-    }
-  }
-
-  return total;
+  if (!seatCount || seatCount < 1) return 0;
+  return seatCount * seatPrice;
 }
 
 function summarizePlannerConfiguration(payload){
@@ -2104,23 +2092,16 @@ window.applyPlannerToPage = function (payload) {
   window.__mcPlannerCounts = configOpts;
   window.__mcPlannerSeatCount = seatCount;
 
-  /* Let Volusion handle pricing: the wrapper calls syncSeatCountToVolusion()
-     which sets the "Number of Seats" dropdown and fires a change event.
-     Volusion then recalculates #priceWithOptions server-side,
-     keeping product page and cart prices in sync. */
-
-  function readVolusionPrice() {
-    var el = document.getElementById("priceWithOptions");
-    if (!el) el = document.querySelector(".v65-product-price, .product_productprice, [itemprop=\"price\"]");
-    if (!el) return;
-    var m = (el.textContent || "").match(/\$[\d,]+\.?\d*/);
-    if (m) {
-      var p = parseFloat(m[0].replace(/[$,]/g, ""));
-      if (!isNaN(p) && p > 0) window.__mcPlannerPrice = p;
-    }
+  var seatPrice = getPlannerBaseSeatPriceForCalc();
+  console.log("[McCabe Planner] seatPrice:", seatPrice, "seatCount:", seatCount);
+  if (seatPrice > 0 && seatCount > 0) {
+    var totalPrice = calculatePlannerPrice(seatCount, seatPrice);
+    console.log("[McCabe Planner] totalPrice (seats × price):", totalPrice);
+    updateProductPrice(totalPrice);
+    window.__mcPlannerPrice = totalPrice;
+    setTimeout(function(){ updateProductPrice(totalPrice); }, 600);
+    setTimeout(function(){ updateProductPrice(totalPrice); }, 1500);
   }
-  setTimeout(readVolusionPrice, 1000);
-  setTimeout(readVolusionPrice, 2500);
 };
 
 window.addEventListener("message", function (event) {
@@ -5889,9 +5870,12 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         var diff = Math.abs(optNum - seatCount);
         if (diff < bestDiff){ bestDiff = diff; bestOpt = sel.options[oi]; }
       }
-      if (bestOpt && sel.value !== bestOpt.value){
+      if (bestOpt){
         sel.value = bestOpt.value;
         sel.dispatchEvent(new Event('change', { bubbles: true }));
+        try { sel.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
+        try { if (window.jQuery) window.jQuery(sel).trigger('change'); } catch(e){}
+        try { if (window.$ && window.$ !== window.jQuery) window.$(sel).trigger('change'); } catch(e){}
         console.log('[MC Planner] Synced seat count', seatCount, 'to dropdown:', bestOpt.text);
       }
       break;
