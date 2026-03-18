@@ -5941,7 +5941,8 @@ body.productdetails .v-product-grid .v-product .v-product__price {
   function isCartPage(){
     var p = (window.location.pathname || "").toLowerCase();
     var h = (window.location.href || "").toLowerCase();
-    return p.indexOf("shoppingcart") !== -1 || h.indexOf("shoppingcart") !== -1;
+    var title = (document.title || "").toLowerCase();
+    return p.indexOf("shoppingcart") !== -1 || p.indexOf("/cart") !== -1 || h.indexOf("shoppingcart") !== -1 || h.indexOf("/cart") !== -1 || title.indexOf("your cart") !== -1 || title.indexOf("shopping cart") !== -1;
   }
   function extractLayoutFromText(text){
     if (typeof text !== "string") return null;
@@ -6025,24 +6026,19 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     var content = document.getElementById("content_area") || document.body;
     if (!content || !content.querySelectorAll) return;
     var configDataList = [];
-    var candidates = content.querySelectorAll("td, div, span, li, p, label");
-    for (var i = 0; i < candidates.length; i++) {
-      var el = candidates[i];
-      if (el.classList.contains("mc-config-view-done")) continue;
+    function processElement(el) {
+      if (el.id === "content_area" || el.classList.contains("mc-config-view-done")) return;
       var html = el.innerHTML || "";
-      if (html.indexOf("[MC_LAYOUT]") === -1) continue;
+      if (html.indexOf("[MC_LAYOUT]") === -1) return;
       var descendants = el.querySelectorAll("*");
-      var hasInChild = false;
       for (var d = 0; d < descendants.length; d++) {
-        if ((descendants[d].innerHTML || "").indexOf("[MC_LAYOUT]") !== -1) { hasInChild = true; break; }
+        if ((descendants[d].innerHTML || "").indexOf("[MC_LAYOUT]") !== -1) return;
       }
-      if (hasInChild) continue;
-      if (el.id === "content_area") continue;
       var match = html.match(/\[MC_LAYOUT\]([\s\S]*?)\[\/MC_LAYOUT\]/);
-      if (!match) continue;
+      if (!match) return;
       var data = null;
-      try { data = JSON.parse(match[1]); } catch (e) { continue; }
-      if (!data) continue;
+      try { data = JSON.parse(match[1]); } catch (e) { return; }
+      if (!data) return;
       el.classList.add("mc-config-view-done");
       var idx = configDataList.length;
       configDataList.push(data);
@@ -6060,27 +6056,40 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         sp.parentNode.replaceChild(link, sp);
       });
     }
-    var tables = content.querySelectorAll("table");
-    var cartTable = null;
-    for (var t = 0; t < tables.length; t++) {
-      var tbl = tables[t];
-      if (tbl.id && tbl.id.toLowerCase().indexOf("cart") !== -1) { cartTable = tbl; break; }
-      if (tbl.className && typeof tbl.className === "string" && tbl.className.toLowerCase().indexOf("cart") !== -1) { cartTable = tbl; break; }
-      var rows = tbl.querySelectorAll("tbody tr, tr");
-      var dataRowCount = 0;
-      for (var r = 0; r < rows.length; r++) {
-        if (rows[r].querySelector("td") && !rows[r].querySelector("th") && rows[r].querySelectorAll("td").length >= 3) dataRowCount++;
+    var tagList = "td, div, span, li, p, label, font, a";
+    var candidates = content.querySelectorAll(tagList);
+    for (var i = 0; i < candidates.length; i++) processElement(candidates[i]);
+    if ((content.textContent || "").indexOf("[MC_LAYOUT]") !== -1) {
+      var walker = document.createTreeWalker(content, NodeFilter.SHOW_ELEMENT, null, false);
+      var node;
+      while ((node = walker.nextNode())) {
+        if (node.id === "content_area") continue;
+        if (node.classList && node.classList.contains("mc-config-view-done")) continue;
+        if ((node.innerHTML || "").indexOf("[MC_LAYOUT]") === -1) continue;
+        var kids = node.querySelectorAll("*");
+        var childHas = false;
+        for (var k = 0; k < kids.length; k++) {
+          if ((kids[k].innerHTML || "").indexOf("[MC_LAYOUT]") !== -1) { childHas = true; break; }
+        }
+        if (!childHas) processElement(node);
       }
-      if (dataRowCount >= 2 && (!cartTable || (tbl.querySelectorAll("td").length > (cartTable && cartTable.querySelectorAll("td").length || 0)))) cartTable = tbl;
     }
-    if (!cartTable) cartTable = content.querySelector("form table");
-    if (cartTable) {
+    var tables = content.querySelectorAll("table");
+    for (var t = 0; t < tables.length; t++) {
+      var cartTable = tables[t];
       var rows = cartTable.querySelectorAll("tbody tr, tr");
+      var dataRowsWithPrice = 0;
+      for (var r = 0; r < rows.length; r++) {
+        if (rows[r].querySelector("th")) continue;
+        if (rows[r].querySelectorAll("td").length < 4) continue;
+        if ((rows[r].textContent || "").indexOf("$") !== -1) dataRowsWithPrice++;
+      }
+      if (dataRowsWithPrice < 1) continue;
       rows.forEach(function(tr){
         if (tr.classList.contains("mc-remove-x-done")) return;
         if (tr.querySelector("th")) return;
         var cells = tr.querySelectorAll("td");
-        if (cells.length < 3) return;
+        if (cells.length < 4) return;
         var removeLink = tr.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]');
         var removeInput = tr.querySelector('input[value*="Remove"], input[value*="Delete"], input[type="image"][alt*="emove"], input[type="submit"][value*="emove"]');
         var lastTd = cells[cells.length - 1];
@@ -6116,9 +6125,27 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       });
     }
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", runCartEnhancements);
-  else runCartEnhancements();
-  window.addEventListener("load", runCartEnhancements);
+  function runWhenCartReady() {
+    if (!isCartPage()) return;
+    runCartEnhancements();
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", runWhenCartReady);
+  } else {
+    runWhenCartReady();
+  }
+  window.addEventListener("load", runWhenCartReady);
+  setTimeout(runWhenCartReady, 500);
+  setTimeout(runWhenCartReady, 1500);
+  setTimeout(runWhenCartReady, 3000);
+  setTimeout(runWhenCartReady, 5000);
+  var contentArea = document.getElementById("content_area");
+  if (contentArea && typeof MutationObserver !== "undefined") {
+    var cartObserver = new MutationObserver(function() {
+      setTimeout(runWhenCartReady, 100);
+    });
+    cartObserver.observe(contentArea, { childList: true, subtree: true });
+  }
 })();
 </script>
 
