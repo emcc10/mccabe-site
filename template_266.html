@@ -1945,10 +1945,21 @@ function ensurePriceWithOptionsLabel(scope){
   priceNode.parentNode.insertBefore(label, priceNode);
 }
 
-function calculatePlannerPrice(seatCount, seatPrice){
+function calculatePlannerPrice(counts, seatPrice){
   if (seatPrice == null || seatPrice <= 0) seatPrice = getPlannerBaseSeatPriceForCalc();
-  if (!seatCount || seatCount < 1) return 0;
-  return seatCount * seatPrice;
+  if (!counts || typeof counts !== 'object') return 0;
+  var total = 0;
+  var keys = Object.keys(counts);
+  for (var i = 0; i < keys.length; i++) {
+    var id = keys[i];
+    var qty = counts[id] || 0;
+    if (id === "4L") {
+      total += qty * ((2 * seatPrice) - 500);
+    } else {
+      total += qty * seatPrice;
+    }
+  }
+  return total;
 }
 
 function summarizePlannerConfiguration(payload){
@@ -2093,14 +2104,15 @@ window.applyPlannerToPage = function (payload) {
   window.__mcPlannerSeatCount = seatCount;
 
   var seatPrice = getPlannerBaseSeatPriceForCalc();
-  console.log("[McCabe Planner] seatPrice:", seatPrice, "seatCount:", seatCount);
-  if (seatPrice > 0 && seatCount > 0) {
-    var totalPrice = calculatePlannerPrice(seatCount, seatPrice);
-    console.log("[McCabe Planner] totalPrice (seats × price):", totalPrice);
+  console.log("[McCabe Planner] seatPrice:", seatPrice, "seatCount:", seatCount, "counts:", JSON.stringify(configOpts));
+  if (seatPrice > 0) {
+    var totalPrice = calculatePlannerPrice(configOpts, seatPrice);
+    console.log("[McCabe Planner] totalPrice:", totalPrice);
     updateProductPrice(totalPrice);
     window.__mcPlannerPrice = totalPrice;
     setTimeout(function(){ updateProductPrice(totalPrice); }, 600);
     setTimeout(function(){ updateProductPrice(totalPrice); }, 1500);
+    setTimeout(function(){ updateProductPrice(totalPrice); }, 3000);
   }
 };
 
