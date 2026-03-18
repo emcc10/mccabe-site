@@ -6256,7 +6256,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         if (!childHas) processElement(node);
       }
     }
-    window.__mcCartConfigList = configDataList;
+    if (configDataList.length) window.__mcCartConfigList = configDataList;
     content.querySelectorAll("td.mc-cart-remove-x").forEach(function(td){ td.remove(); });
     content.querySelectorAll("tr.mc-remove-x-done").forEach(function(tr){ tr.classList.remove("mc-remove-x-done"); });
     var tables = content.querySelectorAll("table");
@@ -6347,9 +6347,14 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       break;
     }
   }
+  var cartEnhancementsDone = false;
   function runWhenCartReady() {
     if (!isCartPage()) return;
+    if (cartEnhancementsDone) return;
     runCartEnhancements();
+    if (document.querySelector("td.mc-cart-remove-x") || document.querySelector("a.mc-view-config-link")) {
+      cartEnhancementsDone = true;
+    }
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", runWhenCartReady);
@@ -6361,68 +6366,6 @@ body.productdetails .v-product-grid .v-product .v-product__price {
   setTimeout(runWhenCartReady, 1500);
   setTimeout(runWhenCartReady, 3000);
   setTimeout(runWhenCartReady, 5000);
-  var contentArea = document.getElementById("content_area");
-  if (contentArea && typeof MutationObserver !== "undefined") {
-    var cartObserver = new MutationObserver(function() {
-      setTimeout(runWhenCartReady, 100);
-    });
-    cartObserver.observe(contentArea, { childList: true, subtree: true });
-  }
-  document.addEventListener("click", function cartClickDelegation(e) {
-    var target = e.target;
-    var el = target && target.nodeType === 1 ? target : (target && target.parentElement);
-    if (!el) return;
-    var link = mcClosest(el, "a[data-mc-config-idx].mc-view-config-link");
-    if (!link) {
-      var anyA = mcClosest(el, "a");
-      if (anyA && (anyA.textContent || "").trim().indexOf("View configuration") !== -1) link = anyA;
-    }
-    if (link) {
-      e.preventDefault();
-      e.stopPropagation();
-      var idx = parseInt(link.getAttribute("data-mc-config-idx"), 10);
-      if (isNaN(idx)) idx = 0;
-      var list = window.__mcCartConfigList;
-      if (list && list[idx]) {
-        try { showConfigModal(list[idx]); } catch (err) { console.error("View configuration error", err); }
-      } else if (list && list.length) {
-        try { showConfigModal(list[0]); } catch (err) { console.error("View configuration error", err); }
-      }
-      return;
-    }
-    var xTd = mcClosest(el, "td.mc-cart-remove-x");
-    var xBtn = mcClosest(el, "button[aria-label=\"Remove\"]");
-    if (xTd || xBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      var row = mcClosest(xTd || xBtn, "tr.v65-cart-details-row") || mcClosest(xTd || xBtn, "tr");
-      if (!row) return;
-      var rl = row.querySelector('a.v65-cart-item-remove-link, a[href*="remove="], a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]') || (function(){
-        var links = row.querySelectorAll("a[href]");
-        for (var i = 0; i < links.length; i++) {
-          var lt = (links[i].textContent || "").toLowerCase();
-          var lh = (links[i].getAttribute("href") || "").toLowerCase();
-          if (lh.indexOf("remove") !== -1 || lt.indexOf("remove") !== -1 || lh.indexOf("delete") !== -1 || lt.indexOf("delete") !== -1) return links[i];
-        }
-        return null;
-      })();
-      var ri = row.querySelector('input[value*="Remove"], input[value*="Delete"], input[type="image"][alt*="emove"], input[type="submit"][value*="emove"]');
-      if (rl) {
-        var href = (rl.href || rl.getAttribute("href") || "").trim();
-        if (href && href.indexOf("javascript:") !== 0 && href !== "#") {
-          window.location.href = href;
-          return;
-        }
-        try { rl.click(); } catch (err) {}
-      }
-      if (ri) { try { ri.click(); } catch (err) {} }
-      var form = mcClosest(row, "form");
-      if (form) {
-        var inp = row.querySelector('input[name*="Remove"], input[value*="Remove"], input[name*="Delete"], input[value*="Delete"]');
-        if (inp) inp.click();
-      }
-    }
-  }, true);
 })();
 </script>
 
