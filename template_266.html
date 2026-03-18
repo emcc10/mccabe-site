@@ -2734,7 +2734,7 @@ window.initRoomPlanner = function (opts) {
       var group = seat.closest(".config-group");
       var x = seat.offsetLeft, y = seat.offsetTop;
       if (group) { x += group.offsetLeft; y += group.offsetTop; }
-      list.push({ id: seat.dataset.pieceId, x: x, y: y, rot: parseFloat(seat.dataset.rot || "0"), w: seat.offsetWidth });
+      list.push({ id: seat.dataset.pieceId, x: x, y: y, rot: parseFloat(seat.dataset.rot || "0"), w: seat.offsetWidth, h: seat.offsetHeight });
     });
     return list;
   }
@@ -5954,30 +5954,31 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     } catch (e) { return null; }
   }
   function drawLayoutInCanvas(canvas, data){
-    var PX = 4;
+    var PX_PER_INCH = 4;
     var room = (data && data.r) ? data.r : { widthTotalIn: 192, depthTotalIn: 144 };
     var layout = (data && data.l) ? data.l : [];
     var wIn = (room.widthTotalIn != null) ? room.widthTotalIn : 192;
     var dIn = (room.depthTotalIn != null) ? room.depthTotalIn : 144;
-    var scale = Math.min((canvas.width - 40) / (wIn * PX), (canvas.height - 40) / (dIn * PX), 1) || 0.5;
+    var roomWpx = wIn * PX_PER_INCH, roomHpx = dIn * PX_PER_INCH;
+    var scale = Math.min((canvas.width - 40) / roomWpx, (canvas.height - 40) / roomHpx, 1) || 0.5;
     var ctx = canvas.getContext("2d");
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    var roomW = wIn * PX * scale, roomH = dIn * PX * scale;
+    var roomW = roomWpx * scale, roomH = roomHpx * scale;
     var ox = (canvas.width - roomW) / 2, oy = (canvas.height - roomH) / 2;
     ctx.strokeStyle = "#999";
     ctx.lineWidth = 2;
     ctx.strokeRect(ox, oy, roomW, roomH);
     ctx.fillStyle = "rgba(0,0,0,.06)";
-    var grid = 12 * PX * scale;
-    for (var gx = ox; gx < ox + roomW; gx += grid) { ctx.beginPath(); ctx.moveTo(gx, oy); ctx.lineTo(gx, oy + roomH); ctx.stroke(); }
-    for (var gy = oy; gy < oy + roomH; gy += grid) { ctx.beginPath(); ctx.moveTo(ox, gy); ctx.lineTo(ox + roomW, gy); ctx.stroke(); }
+    var gridPx = 12 * PX_PER_INCH * scale;
+    for (var gx = ox; gx < ox + roomW; gx += gridPx) { ctx.beginPath(); ctx.moveTo(gx, oy); ctx.lineTo(gx, oy + roomH); ctx.stroke(); }
+    for (var gy = oy; gy < oy + roomH; gy += gridPx) { ctx.beginPath(); ctx.moveTo(ox, gy); ctx.lineTo(ox + roomW, gy); ctx.stroke(); }
     ctx.strokeStyle = "#999";
     layout.forEach(function(item){
       var x = (item.x != null ? item.x : 40) * scale + ox;
       var y = (item.y != null ? item.y : 40) * scale + oy;
       var w = (item.w != null ? item.w : 160) * scale;
-      var h = Math.min(w * 0.6, roomH * 0.4);
+      var h = (item.h != null ? item.h : 96) * scale;
       ctx.save();
       ctx.translate(x + w/2, y + h/2);
       ctx.rotate(((item.rot != null ? item.rot : 0) * Math.PI) / 180);
@@ -6076,9 +6077,19 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     }
     content.querySelectorAll("td.mc-cart-remove-x").forEach(function(td){ td.remove(); });
     content.querySelectorAll("tr.mc-remove-x-done").forEach(function(tr){ tr.classList.remove("mc-remove-x-done"); });
+    var boundary = null;
+    var walk = content.getElementsByTagName("*");
+    for (var b = 0; b < walk.length; b++) {
+      var txt = (walk[b].textContent || "").trim();
+      if (txt.indexOf("Calculate Shipping") !== -1 || (txt.indexOf("Zip") !== -1 && txt.indexOf("Postal") !== -1) || txt.indexOf("Tax:") !== -1 || /Total:\s*\$/.test(txt)) {
+        boundary = walk[b];
+        break;
+      }
+    }
     var tables = content.querySelectorAll("table");
     for (var t = 0; t < tables.length; t++) {
       var tbl = tables[t];
+      if (boundary && !(tbl.compareDocumentPosition(boundary) & 4)) continue;
       if (!tbl.querySelector("img")) continue;
       var rows = tbl.querySelectorAll("tbody tr, tr");
       var lineItemRows = 0;
