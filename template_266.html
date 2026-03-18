@@ -5625,35 +5625,83 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     });
   }
 
-  /* ---- PATCH 3: Room planner dimension overrides ---- */
-  var DIMS = {
-    VIVID:    { '1L':{w:38,d:43,h:44},'2L':{w:30,d:43,h:44},'3L':{w:30,d:43,h:44},'4L':{w:46,d:43,h:44},'5L':{w:46,d:43,h:44},'6L':{w:46,d:43,h:44},'7L':{w:38,d:43,h:44},'8L':{w:23,d:43,h:44},'9L':{w:38,d:43,h:44} },
-    ACE:      { '1L':{w:38,d:40,h:43},'2L':{w:30,d:40,h:43},'3L':{w:30,d:40,h:43},'4L':{w:46,d:40,h:43},'5L':{w:46,d:40,h:43},'6L':{w:46,d:40,h:43},'7L':{w:38,d:40,h:43},'8L':{w:23,d:40,h:43},'9L':{w:38,d:40,h:43} },
-    PARAGON:  { '1L':{w:39,d:40,h:43},'2L':{w:30,d:40,h:43},'3L':{w:30,d:40,h:43},'4L':{w:46,d:40,h:43},'5L':{w:46,d:40,h:43},'6L':{w:46,d:40,h:43},'7L':{w:38,d:40,h:43},'8L':{w:23,d:40,h:43},'9L':{w:38,d:40,h:43} },
-    CATALINA: { '1L':{w:39,d:42,h:43},'2L':{w:31,d:42,h:43},'3L':{w:31,d:42,h:43},'4L':{w:46,d:42,h:43},'5L':{w:46,d:42,h:43},'6L':{w:46,d:42,h:43},'7L':{w:39,d:42,h:43},'8L':{w:23,d:42,h:43},'9L':{w:39,d:42,h:43} },
-    VERTEX:   { '1L':{w:38,d:40,h:43},'2L':{w:30,d:40,h:43},'3L':{w:30,d:40,h:43},'4L':{w:46,d:40,h:43},'5L':{w:46,d:40,h:43},'6L':{w:46,d:40,h:43},'7L':{w:38,d:40,h:43},'8L':{w:23,d:40,h:43},'9L':{w:38,d:40,h:43} },
-    BECKETT:  { '1L':{w:39,d:40,h:43},'2L':{w:30,d:40,h:43},'3L':{w:30,d:40,h:43},'4L':{w:46,d:40,h:43},'5L':{w:46,d:40,h:43},'6L':{w:46,d:40,h:43},'7L':{w:38,d:40,h:43},'8L':{w:23,d:40,h:43},'9L':{w:38,d:40,h:43} },
-    AUDIO:    { '1L':{w:38,d:39,h:42},'2L':{w:33,d:39,h:42},'3L':{w:33,d:39,h:42},'4L':{w:51,d:39,h:42},'5L':{w:44,d:39,h:42},'6L':{w:44,d:39,h:42},'7L':{w:37,d:39,h:42},'8L':{w:25,d:39,h:42},'9L':{w:37,d:39,h:42} }
+  /* ---- PATCH 3: Fetch planner dims from Palliser spec-sheet PDFs ---- */
+  var PALLISER_MODELS = {
+    flicks:'41416', audio:'41422', vivid:'41095', ace:'41472',
+    paragon:'41417', catalina:'41471', vertex:'41470', beckett:'41473'
   };
   var PX = 4;
+  var _fetchedDims = null;
 
-  function getOverrideDims(){
-    var pc = String(((document.querySelector('input[name="ProductCode"]')||{}).value||'')).toUpperCase();
-    if (pc.indexOf('FLICKS') !== -1) return null;
-    for (var key in DIMS){ if (pc.indexOf(key) !== -1) return DIMS[key]; }
+  function detectStyle(){
+    var name = (document.querySelector('h1.productnamecolor, .productnamecolor, #content_area h1')||{}).textContent||'';
+    var pc = String(((document.querySelector('input[name="ProductCode"]')||{}).value||'')).toLowerCase();
+    var hay = (name+' '+pc).toLowerCase();
+    for (var s in PALLISER_MODELS){
+      if (hay.indexOf(s) !== -1) return {style:s, model:PALLISER_MODELS[s]};
+    }
     return null;
   }
 
-  function patchPlannerDimensions(){
-    var dims = getOverrideDims();
-    if (!dims) return;
-    var rows = document.querySelectorAll('#roomPlannerApp .piece-row');
-    rows.forEach(function(row){
-      var nameEl = row.querySelector('.piece-name');
-      var dimEl  = row.querySelector('.piece-dims');
-      if (!nameEl || !dimEl) return;
-      var pid = (nameEl.textContent||'').trim().split(' ')[0];
-      if (dims[pid]) dimEl.innerHTML = dims[pid].w+'\u2033 \u00d7 '+dims[pid].d+'\u2033 \u00d7 '+dims[pid].h+'\u2033';
+  function loadPdfJs(){
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    return new Promise(function(ok,fail){
+      var s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload = function(){
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        ok(pdfjsLib);
+      };
+      s.onerror = fail;
+      document.head.appendChild(s);
+    });
+  }
+
+  function pdfToText(pdf){
+    var pages = [];
+    for (var p = 1; p <= pdf.numPages; p++) pages.push(p);
+    return pages.reduce(function(chain, pn){
+      return chain.then(function(acc){
+        return pdf.getPage(pn).then(function(pg){ return pg.getTextContent(); }).then(function(tc){
+          var lines = [], lastY = null, line = '';
+          tc.items.forEach(function(it){
+            var y = Math.round(it.transform[5]);
+            if (lastY !== null && Math.abs(y - lastY) > 3){ lines.push(line); line = ''; }
+            else if (line) line += ' ';
+            line += it.str;
+            lastY = y;
+          });
+          if (line) lines.push(line);
+          acc.push(lines.join('\n'));
+          return acc;
+        });
+      });
+    }, Promise.resolve([])).then(function(all){ return all.join('\n'); });
+  }
+
+  function parsePieceDims(text){
+    var dims = {};
+    var flat = text.replace(/\r?\n/g, ' ');
+    var re = /(\d)[ERL]\s[\s\S]{1,150}?(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/gi;
+    var m;
+    while ((m = re.exec(flat)) !== null){
+      var w = parseFloat(m[2]), d = parseFloat(m[3]), h = parseFloat(m[4]);
+      var pid = m[1] + 'L';
+      if (w >= 15 && w <= 70 && d >= 30 && d <= 60 && h >= 30 && h <= 55 && !dims[pid]){
+        dims[pid] = {w:w, d:d, h:h};
+      }
+    }
+    return dims;
+  }
+
+  function applyDims(dims){
+    if (!dims || !Object.keys(dims).length) return;
+    document.querySelectorAll('#roomPlannerApp .piece-row').forEach(function(row){
+      var ne = row.querySelector('.piece-name'), de = row.querySelector('.piece-dims');
+      if (!ne || !de) return;
+      var pid = (ne.textContent||'').trim().split(' ')[0];
+      if (dims[pid]) de.innerHTML = dims[pid].w+'\u2033 \u00d7 '+dims[pid].d+'\u2033 \u00d7 '+dims[pid].h+'\u2033';
     });
     document.querySelectorAll('#roomPlannerApp .seat').forEach(function(seat){
       var pid = seat.dataset.pieceId;
@@ -5664,14 +5712,12 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     });
   }
 
-  var _plannerObsSet = false;
-  function setupPlannerObserver(){
-    if (_plannerObsSet) return;
+  var _dimObsSet = false;
+  function setupDimObserver(dims){
+    if (_dimObsSet || !dims) return;
     var app = document.getElementById('roomPlannerApp');
     if (!app) return;
-    var dims = getOverrideDims();
-    if (!dims) return;
-    _plannerObsSet = true;
+    _dimObsSet = true;
     new MutationObserver(function(muts){
       muts.forEach(function(m){
         for (var i=0;i<m.addedNodes.length;i++){
@@ -5685,14 +5731,46 @@ body.productdetails .v-product-grid .v-product .v-product__price {
           }
         }
       });
+      applyDims(dims);
     }).observe(app, {childList:true, subtree:true});
+  }
+
+  function fetchPlannerDimensions(){
+    if (_fetchedDims){ applyDims(_fetchedDims); setupDimObserver(_fetchedDims); return; }
+    var info = detectStyle();
+    if (!info) return;
+    var cacheKey = 'mc_dims_' + info.style;
+    try {
+      var cached = sessionStorage.getItem(cacheKey);
+      if (cached){
+        _fetchedDims = JSON.parse(cached);
+        applyDims(_fetchedDims); setupDimObserver(_fetchedDims);
+        return;
+      }
+    } catch(e){}
+    var pdfUrl = 'https://images.palliser.com/specsheet/en/' + info.model + '%20' + info.style + '.pdf';
+    loadPdfJs().then(function(lib){
+      return lib.getDocument({url:pdfUrl}).promise.catch(function(){
+        return lib.getDocument({url:'https://corsproxy.io/?'+encodeURIComponent(pdfUrl)}).promise;
+      });
+    }).then(function(pdf){
+      return pdfToText(pdf);
+    }).then(function(text){
+      var dims = parsePieceDims(text);
+      if (Object.keys(dims).length){
+        _fetchedDims = dims;
+        try { sessionStorage.setItem(cacheKey, JSON.stringify(dims)); } catch(e){}
+        applyDims(dims); setupDimObserver(dims);
+      }
+    }).catch(function(err){
+      if (typeof console !== 'undefined') console.warn('[MC Planner] Spec-sheet fetch failed:', err);
+    });
   }
 
   function runPatches(){
     patchProductTabs();
     patchRelatedItemImages();
-    patchPlannerDimensions();
-    setupPlannerObserver();
+    fetchPlannerDimensions();
   }
 
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', runPatches);
