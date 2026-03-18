@@ -6074,10 +6074,23 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         if (!childHas) processElement(node);
       }
     }
+    content.querySelectorAll("td.mc-cart-remove-x").forEach(function(td){ td.remove(); });
+    content.querySelectorAll("tr.mc-remove-x-done").forEach(function(tr){ tr.classList.remove("mc-remove-x-done"); });
     var tables = content.querySelectorAll("table");
     for (var t = 0; t < tables.length; t++) {
-      var cartTable = tables[t];
-      var rows = cartTable.querySelectorAll("tbody tr, tr");
+      var tbl = tables[t];
+      if (!tbl.querySelector("img")) continue;
+      var rows = tbl.querySelectorAll("tbody tr, tr");
+      var lineItemRows = 0;
+      for (var r = 0; r < rows.length; r++) {
+        var row = rows[r];
+        if (row.querySelector("th")) continue;
+        if (row.querySelectorAll("td").length < 4) continue;
+        var rl = row.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]');
+        var ri = row.querySelector('input[value*="Remove"], input[value*="Delete"], input[type="image"][alt*="emove"], input[type="submit"][value*="emove"]');
+        if (rl || ri) lineItemRows++;
+      }
+      if (lineItemRows === 0) continue;
       rows.forEach(function(tr){
         if (tr.classList.contains("mc-remove-x-done")) return;
         if (tr.querySelector("th")) return;
@@ -6086,12 +6099,13 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         var removeLink = tr.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]');
         var removeInput = tr.querySelector('input[value*="Remove"], input[value*="Delete"], input[type="image"][alt*="emove"], input[type="submit"][value*="emove"]');
         if (!removeLink && !removeInput) return;
+        if (!tr.querySelector("img")) return;
         var lastTd = cells[cells.length - 1];
         if (!lastTd) return;
         var totalCell = lastTd;
         for (var c = 0; c < cells.length; c++) {
-          var t = (cells[c].textContent || "").trim();
-          if (/^\$[\d.,]+$/.test(t) || (/\d+\.?\d*/.test(t) && t.length < 15)) totalCell = cells[c];
+          var ct = (cells[c].textContent || "").trim();
+          if (/^\$[\d.,]+$/.test(ct) || (/\d+\.?\d*/.test(ct) && ct.length < 15)) totalCell = cells[c];
         }
         tr.classList.add("mc-remove-x-done");
         var xWrap = document.createElement("td");
@@ -6117,6 +6131,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         xWrap.appendChild(xBtn);
         totalCell.parentNode.insertBefore(xWrap, totalCell.nextSibling);
       });
+      break;
     }
   }
   function runWhenCartReady() {
