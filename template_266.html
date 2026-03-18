@@ -3650,6 +3650,7 @@ body.mc-product-page #content_area .wm-swatch img {
   body.mc-product-page #content_area .vcss_img_wrap,
   body.mc-product-page #content_area .main-image {
     overflow: hidden !important;
+    min-width: 600px !important;
   }
 
   body.mc-product-page #content_area #product_photo img,
@@ -5229,7 +5230,35 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
   function clearAddToCartWrapperBackground(scope) {
-    return;
+    var btn = (scope || document).querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
+    if (!btn) return;
+    var el = btn.parentElement;
+    var stop = document.querySelector('#content_area') || document.querySelector('#v65-product-parent') || document.body;
+    while (el && el !== stop) {
+      el.style.setProperty('background', 'transparent', 'important');
+      el.style.setProperty('background-color', 'transparent', 'important');
+      el.style.setProperty('box-shadow', 'none', 'important');
+      el.style.setProperty('border', '0', 'important');
+      el.style.setProperty('padding', '0', 'important');
+      el = el.parentElement;
+    }
+    var atcWrap = btn.closest('.mc-atc-button-wrap');
+    if (atcWrap) {
+      atcWrap.style.setProperty('background', '#fff', 'important');
+      atcWrap.style.setProperty('background-color', '#fff', 'important');
+      atcWrap.style.setProperty('color', '#111', 'important');
+      atcWrap.style.setProperty('border', '1px solid #333', 'important');
+    }
+    btn.style.setProperty('background', 'transparent', 'important');
+    btn.style.setProperty('background-color', 'transparent', 'important');
+    btn.style.setProperty('background-image', 'none', 'important');
+    btn.style.setProperty('-webkit-appearance', 'none', 'important');
+    btn.style.setProperty('appearance', 'none', 'important');
+    btn.style.setProperty('box-shadow', 'none', 'important');
+    btn.style.setProperty('padding', '0', 'important');
+    btn.style.setProperty('margin', '0', 'important');
+    btn.style.setProperty('border', 'none', 'important');
+    btn.style.setProperty('color', 'inherit', 'important');
   }
 
   var cartIconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -5243,32 +5272,55 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         syncPlannerConfigurationToCart();
       });
     }
+    if (btn.tagName === 'INPUT' && (btn.type || '').toLowerCase() === 'image') {
+      try { btn.type = 'submit'; } catch (e) {}
+      btn.removeAttribute('src');
+      if (!btn.value) btn.value = 'ADD TO CART';
+    }
     var existingWrap = btn.closest('.mc-atc-button-wrap');
     if (existingWrap) {
-      var existingParent = existingWrap.parentNode;
-      if (existingParent) {
-        existingParent.insertBefore(btn, existingWrap);
-        existingWrap.remove();
+      var hasIcon = !!existingWrap.querySelector('.mc-cart-icon-wrapper');
+      if (!hasIcon) {
+        var iconWrapExisting = document.createElement('span');
+        iconWrapExisting.innerHTML = cartIconSvg;
+        iconWrapExisting.classList.add('mc-cart-icon-wrapper');
+        existingWrap.appendChild(iconWrapExisting);
       }
-    }
-    var iconWrappers = root.querySelectorAll('.mc-cart-icon-wrapper');
-    for (var iw = 0; iw < iconWrappers.length; iw++) {
-      iconWrappers[iw].remove();
-    }
-    if (btn.classList && btn.classList.contains('mc-cart-icon')) {
-      btn.classList.remove('mc-cart-icon');
-    }
-    btn.removeAttribute('style');
-    var parentRow = btn.parentNode;
-    if (parentRow && parentRow.classList) {
-      parentRow.classList.remove('mc-atc-row');
+      existingWrap.style.setProperty('display', 'inline-flex', 'important');
+      existingWrap.style.setProperty('align-items', 'center', 'important');
+      existingWrap.style.setProperty('gap', '8px', 'important');
+      var parentExisting = existingWrap.parentNode;
+      if (parentExisting && parentExisting.children) {
+        Array.prototype.slice.call(parentExisting.children).forEach(function(child){
+          if (child !== existingWrap && child.classList && child.classList.contains('mc-cart-icon-wrapper')) child.remove();
+        });
+      }
+      return;
     }
     var oldWrap = btn.closest('.mc-atc-wrap');
     if (oldWrap) {
       while (oldWrap.firstChild) oldWrap.parentNode.insertBefore(oldWrap.firstChild, oldWrap);
       oldWrap.remove();
     }
-    return;
+    var parent = btn.parentNode;
+    if (!parent) return;
+    var wrapper = document.createElement('div');
+    wrapper.className = 'mc-atc-button-wrap';
+    parent.insertBefore(wrapper, btn);
+    wrapper.appendChild(btn);
+    var iconWrap = document.createElement('span');
+    iconWrap.innerHTML = cartIconSvg;
+    iconWrap.classList.add('mc-cart-icon-wrapper');
+    wrapper.appendChild(iconWrap);
+    wrapper.style.setProperty('display', 'inline-flex', 'important');
+    wrapper.style.setProperty('align-items', 'center', 'important');
+    wrapper.style.setProperty('gap', '8px', 'important');
+    parent.classList.add('mc-atc-row');
+    if (parent && parent.children) {
+      Array.prototype.slice.call(parent.children).forEach(function(child){
+        if (child !== wrapper && child.classList && child.classList.contains('mc-cart-icon-wrapper')) child.remove();
+      });
+    }
   }
 
   function hideOptionsTable(scope){
