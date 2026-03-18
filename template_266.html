@@ -6024,40 +6024,65 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     if (!isCartPage()) return;
     var content = document.getElementById("content_area") || document.body;
     if (!content || !content.querySelectorAll) return;
-    var candidates = content.querySelectorAll("td, div, span, li");
+    var configDataList = [];
+    var candidates = content.querySelectorAll("td, div, span, li, p, label");
     for (var i = 0; i < candidates.length; i++) {
       var el = candidates[i];
       if (el.classList.contains("mc-config-view-done")) continue;
-      var text = el.textContent || "";
-      if (text.indexOf("[MC_LAYOUT]") === -1) continue;
+      var html = el.innerHTML || "";
+      if (html.indexOf("[MC_LAYOUT]") === -1) continue;
       var descendants = el.querySelectorAll("*");
       var hasInChild = false;
       for (var d = 0; d < descendants.length; d++) {
-        if ((descendants[d].textContent || "").indexOf("[MC_LAYOUT]") !== -1) { hasInChild = true; break; }
+        if ((descendants[d].innerHTML || "").indexOf("[MC_LAYOUT]") !== -1) { hasInChild = true; break; }
       }
       if (hasInChild) continue;
-      if (el.id === "content_area" || text.length > 2000) continue;
-      var data = extractLayoutFromText(text);
+      if (el.id === "content_area") continue;
+      var match = html.match(/\[MC_LAYOUT\]([\s\S]*?)\[\/MC_LAYOUT\]/);
+      if (!match) continue;
+      var data = null;
+      try { data = JSON.parse(match[1]); } catch (e) { continue; }
       if (!data) continue;
       el.classList.add("mc-config-view-done");
-      var visible = text.replace(/\s*\[MC_LAYOUT\][\s\S]*?\[\/MC_LAYOUT\]\s*/g, "").trim();
-      var link = document.createElement("a");
-      link.href = "javascript:void(0)";
-      link.textContent = "View configuration";
-      link.style.cssText = "margin-left:8px;font-size:12px;text-decoration:underline;cursor:pointer;";
-      link.onclick = (function(d){ return function(e){ e.preventDefault(); showConfigModal(d); }; })(data);
-      el.textContent = "";
-      if (visible) el.appendChild(document.createTextNode(visible));
-      el.appendChild(link);
+      var idx = configDataList.length;
+      configDataList.push(data);
+      var newHtml = html.replace(/\s*\[MC_LAYOUT\][\s\S]*?\[\/MC_LAYOUT\]\s*/g, " <span data-mc-config-idx=\"" + idx + "\"></span>");
+      el.innerHTML = newHtml;
+      el.querySelectorAll("[data-mc-config-idx]").forEach(function(sp) {
+        var iid = parseInt(sp.getAttribute("data-mc-config-idx"), 10);
+        var d = configDataList[iid];
+        if (!d) return;
+        var link = document.createElement("a");
+        link.href = "javascript:void(0)";
+        link.textContent = "View configuration";
+        link.style.cssText = "margin-left:6px;font-size:12px;text-decoration:underline;cursor:pointer;";
+        link.onclick = (function(dat){ return function(e){ e.preventDefault(); showConfigModal(dat); }; })(d);
+        sp.parentNode.replaceChild(link, sp);
+      });
     }
-    var cartTable = content.querySelector("table[id*='cart'], table[class*='cart'], form table");
+    var tables = content.querySelectorAll("table");
+    var cartTable = null;
+    for (var t = 0; t < tables.length; t++) {
+      var tbl = tables[t];
+      if (tbl.id && tbl.id.toLowerCase().indexOf("cart") !== -1) { cartTable = tbl; break; }
+      if (tbl.className && typeof tbl.className === "string" && tbl.className.toLowerCase().indexOf("cart") !== -1) { cartTable = tbl; break; }
+      var rows = tbl.querySelectorAll("tbody tr, tr");
+      var dataRowCount = 0;
+      for (var r = 0; r < rows.length; r++) {
+        if (rows[r].querySelector("td") && !rows[r].querySelector("th") && rows[r].querySelectorAll("td").length >= 3) dataRowCount++;
+      }
+      if (dataRowCount >= 2 && (!cartTable || (tbl.querySelectorAll("td").length > (cartTable && cartTable.querySelectorAll("td").length || 0)))) cartTable = tbl;
+    }
+    if (!cartTable) cartTable = content.querySelector("form table");
     if (cartTable) {
       var rows = cartTable.querySelectorAll("tbody tr, tr");
       rows.forEach(function(tr){
         if (tr.classList.contains("mc-remove-x-done")) return;
+        if (tr.querySelector("th")) return;
+        var cells = tr.querySelectorAll("td");
+        if (cells.length < 3) return;
         var removeLink = tr.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]');
         var removeInput = tr.querySelector('input[value*="Remove"], input[value*="Delete"], input[type="image"][alt*="emove"], input[type="submit"][value*="emove"]');
-        var cells = tr.querySelectorAll("td");
         var lastTd = cells[cells.length - 1];
         if (!lastTd) return;
         var totalCell = lastTd;
@@ -6074,16 +6099,18 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         xBtn.setAttribute("aria-label", "Remove");
         xBtn.textContent = "\u00D7";
         xBtn.style.cssText = "width:28px;height:28px;padding:0;border:1px solid #999;background:#fff;cursor:pointer;font-size:20px;line-height:1;border-radius:4px;color:#333;";
-        xBtn.onclick = function(){
-          if (removeLink && removeLink.href && removeLink.href.indexOf("javascript") !== 0) { window.location.href = removeLink.href; return; }
-          if (removeLink) { removeLink.click(); return; }
-          if (removeInput) { removeInput.click(); return; }
-          var form = tr.closest("form");
-          if (form) {
-            var inp = form.querySelector('input[name*="Remove"], input[value*="Remove"], input[name*="Delete"], input[value*="Delete"]');
-            if (inp) inp.click();
-          }
-        };
+        xBtn.onclick = (function(rl, ri, row){
+          return function(){
+            if (rl && rl.href && rl.href.indexOf("javascript") !== 0) { window.location.href = rl.href; return; }
+            if (rl) { rl.click(); return; }
+            if (ri) { ri.click(); return; }
+            var form = row.closest("form");
+            if (form) {
+              var inp = form.querySelector('input[name*="Remove"], input[value*="Remove"], input[name*="Delete"], input[value*="Delete"]');
+              if (inp) inp.click();
+            }
+          };
+        })(removeLink, removeInput, tr);
         xWrap.appendChild(xBtn);
         totalCell.parentNode.insertBefore(xWrap, totalCell.nextSibling);
       });
