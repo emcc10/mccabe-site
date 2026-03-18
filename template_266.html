@@ -5942,7 +5942,19 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     var p = (window.location.pathname || "").toLowerCase();
     var h = (window.location.href || "").toLowerCase();
     var title = (document.title || "").toLowerCase();
-    return p.indexOf("shoppingcart") !== -1 || p.indexOf("/cart") !== -1 || h.indexOf("shoppingcart") !== -1 || h.indexOf("/cart") !== -1 || title.indexOf("your cart") !== -1 || title.indexOf("shopping cart") !== -1;
+    return p.indexOf("shoppingcart") !== -1 || p.indexOf("cart") !== -1 || p.indexOf("basket") !== -1 || h.indexOf("shoppingcart") !== -1 || h.indexOf("cart") !== -1 || h.indexOf("basket") !== -1 || title.indexOf("cart") !== -1 || title.indexOf("basket") !== -1;
+  }
+  function mcClosest(el, sel) {
+    if (!el || !sel) return null;
+    if (el.nodeType !== 1) el = el.parentElement;
+    if (!el) return null;
+    if (el.closest) return el.closest(sel);
+    while (el && el.nodeType === 1) {
+      try { if (el.matches && el.matches(sel)) return el; } catch (e) {}
+      try { if (el.webkitMatchesSelector && el.webkitMatchesSelector(sel)) return el; } catch (e) {}
+      el = el.parentElement;
+    }
+    return null;
   }
   function extractLayoutFromText(text){
     if (typeof text !== "string") return null;
@@ -6344,25 +6356,33 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     cartObserver.observe(contentArea, { childList: true, subtree: true });
   }
   document.addEventListener("click", function cartClickDelegation(e) {
-    if (!isCartPage()) return;
     var target = e.target;
-    var link = target.closest ? target.closest("a[data-mc-config-idx].mc-view-config-link") : null;
+    var el = target && target.nodeType === 1 ? target : (target && target.parentElement);
+    if (!el) return;
+    var link = mcClosest(el, "a[data-mc-config-idx].mc-view-config-link");
+    if (!link) {
+      var anyA = mcClosest(el, "a");
+      if (anyA && (anyA.textContent || "").trim().indexOf("View configuration") !== -1) link = anyA;
+    }
     if (link) {
       e.preventDefault();
       e.stopPropagation();
       var idx = parseInt(link.getAttribute("data-mc-config-idx"), 10);
+      if (isNaN(idx)) idx = 0;
       var list = window.__mcCartConfigList;
       if (list && list[idx]) {
         try { showConfigModal(list[idx]); } catch (err) { console.error("View configuration error", err); }
+      } else if (list && list.length) {
+        try { showConfigModal(list[0]); } catch (err) { console.error("View configuration error", err); }
       }
       return;
     }
-    var xTd = target.closest ? target.closest("td.mc-cart-remove-x") : null;
-    var xBtn = target.closest ? target.closest("button[aria-label=\"Remove\"]") : null;
+    var xTd = mcClosest(el, "td.mc-cart-remove-x");
+    var xBtn = mcClosest(el, "button[aria-label=\"Remove\"]");
     if (xTd || xBtn) {
       e.preventDefault();
       e.stopPropagation();
-      var row = (xTd || xBtn).closest("tr");
+      var row = mcClosest(xTd || xBtn, "tr");
       if (!row) return;
       var rl = row.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]') || (function(){
         var links = row.querySelectorAll("a[href]");
@@ -6383,7 +6403,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         try { rl.click(); } catch (err) {}
       }
       if (ri) { try { ri.click(); } catch (err) {} }
-      var form = row.closest("form");
+      var form = mcClosest(row, "form");
       if (form) {
         var inp = row.querySelector('input[name*="Remove"], input[value*="Remove"], input[name*="Delete"], input[value*="Delete"]');
         if (inp) inp.click();
