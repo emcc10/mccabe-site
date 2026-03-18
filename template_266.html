@@ -2717,7 +2717,9 @@ window.initRoomPlanner = function (opts) {
     var emailRow = modal.querySelector(".mc-email-row");
     var emailInput = modal.querySelector("#mcPlannerEmailInput");
     var emailSendBtn = modal.querySelector("#mcPlannerEmailSend");
-    modal.querySelector("[data-action=\"computer\"]").onclick = function () {
+    var computerBtn = modal.querySelector("[data-action=\"computer\"]");
+    var emailBtn = modal.querySelector("[data-action=\"email\"]");
+    if (computerBtn) computerBtn.onclick = function () {
       modal.remove();
       var blob = new Blob([JSON.stringify({ room: payload.room, layout: layout, pieces: counts, seatCount: seatCount, savedAt: new Date().toISOString() }, null, 2)], { type: "application/json" });
       var a = document.createElement("a");
@@ -2727,10 +2729,10 @@ window.initRoomPlanner = function (opts) {
       URL.revokeObjectURL(a.href);
       alert("Layout saved and file downloaded.");
     };
-    modal.querySelector("[data-action=\"email\"]").onclick = function () {
-      emailRow.classList.add("show");
+    if (emailBtn) emailBtn.onclick = function () {
+      if (emailRow) emailRow.classList.add("show");
     };
-    emailSendBtn.onclick = function () {
+    if (emailSendBtn) emailSendBtn.onclick = function () {
       var email = (emailInput && emailInput.value || "").trim();
       if (!email) { alert("Please enter your email address."); return; }
       var endpoint = (typeof window.MC_PLANNER_EMAIL_ENDPOINT !== "undefined" && window.MC_PLANNER_EMAIL_ENDPOINT) ? window.MC_PLANNER_EMAIL_ENDPOINT : "/v/vspfiles/planner-email.php";
