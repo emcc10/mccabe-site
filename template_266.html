@@ -6023,6 +6023,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       ctx.restore();
     });
   }
+  var MC_PIECE_IMG_BASE = "/v/vspfiles/MRP/";
   function showConfigModal(data){
     var overlay = document.createElement("div");
     overlay.className = "mc-cart-config-overlay";
@@ -6033,23 +6034,64 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     var title = document.createElement("div");
     title.style.cssText = "font-size:16px;font-weight:600;margin-bottom:12px;";
     title.textContent = "Room configuration";
-    var canvas = document.createElement("canvas");
-    var cw = 640, ch = 420;
-    canvas.width = cw;
-    canvas.height = ch;
-    canvas.style.cssText = "display:block;max-width:100%;height:auto;border:2px solid #999;background:#fff;";
+    var PX_PER_INCH = 4;
+    var room = (data && data.r) ? data.r : { widthTotalIn: 192, depthTotalIn: 144 };
+    var layout = (data && data.l) ? data.l : [];
+    var wIn = (room.widthTotalIn != null) ? room.widthTotalIn : 192;
+    var dIn = (room.depthTotalIn != null) ? room.depthTotalIn : 144;
+    var roomWpx = wIn * PX_PER_INCH, roomHpx = dIn * PX_PER_INCH;
+    var gridSize = 12 * PX_PER_INCH;
+    var viewW = 600, viewH = 420;
+    var scale = Math.min(viewW / roomWpx, viewH / roomHpx, 1);
+    var wrap = document.createElement("div");
+    wrap.style.cssText = "width:" + viewW + "px;height:" + viewH + "px;display:flex;align-items:center;justify-content:center;overflow:hidden;";
+    var roomEl = document.createElement("div");
+    roomEl.style.cssText = "position:relative;width:" + roomWpx + "px;height:" + roomHpx + "px;border:2px solid #999;background:#fff;box-sizing:border-box;transform:scale(" + scale + ");transform-origin:center center;";
+    var gridLayer = document.createElement("div");
+    gridLayer.style.cssText = "position:absolute;inset:0;z-index:0;background-image:linear-gradient(to right, rgba(0,0,0,.10) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,.10) 1px, transparent 1px);background-size:" + gridSize + "px " + gridSize + "px;pointer-events:none;";
+    roomEl.appendChild(gridLayer);
+    var wFt = Math.floor(wIn / 12), wInRem = wIn % 12, dFt = Math.floor(dIn / 12), dInRem = dIn % 12;
+    var dimTopText = (wFt ? wFt + " ft " : "") + (wInRem ? wInRem + " in" : (wFt ? "" : "0 in"));
+    var dimLeftText = (dFt ? dFt + " ft " : "") + (dInRem ? dInRem + " in" : (dFt ? "" : "0 in"));
+    var dimTop = document.createElement("div");
+    dimTop.style.cssText = "position:absolute;top:4px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:600;background:#fff;padding:3px 7px;color:#333;z-index:15;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,.06);white-space:nowrap;";
+    dimTop.textContent = dimTopText;
+    roomEl.appendChild(dimTop);
+    var dimLeft = document.createElement("div");
+    dimLeft.style.cssText = "position:absolute;left:4px;top:50%;transform:translateY(-50%) rotate(-90deg);font-size:12px;font-weight:600;background:#fff;padding:3px 7px;color:#333;z-index:15;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,.06);white-space:nowrap;";
+    dimLeft.textContent = dimLeftText;
+    roomEl.appendChild(dimLeft);
+    layout.forEach(function(item){
+      var w = (item.w != null ? item.w : 160);
+      var h = (item.h != null ? item.h : 96);
+      var x = (item.x != null ? item.x : 40);
+      var y = (item.y != null ? item.y : 40);
+      var rot = (item.rot != null ? item.rot : 0);
+      var seat = document.createElement("div");
+      seat.style.cssText = "position:absolute;left:" + x + "px;top:" + y + "px;width:" + w + "px;height:" + h + "px;transform:rotate(" + rot + "deg);transform-origin:50% 50%;overflow:hidden;z-index:5;box-sizing:border-box;";
+      var img = document.createElement("img");
+      img.src = (item.img && item.img.indexOf("/") !== -1) ? item.img : (MC_PIECE_IMG_BASE + (item.id || "1L") + ".png");
+      img.alt = "";
+      img.style.cssText = "position:absolute;left:0;top:0;width:100%;height:100%;object-fit:fill;object-position:center center;display:block;pointer-events:none;";
+      seat.appendChild(img);
+      var nameSpan = document.createElement("span");
+      nameSpan.style.cssText = "position:absolute;bottom:2px;left:0;right:0;z-index:2;font-size:10px;color:rgba(100,100,100,.85);pointer-events:none;text-align:center;text-shadow:0 0 2px #fff, 0 1px 2px #fff;";
+      nameSpan.textContent = item.id || "";
+      seat.appendChild(nameSpan);
+      roomEl.appendChild(seat);
+    });
+    wrap.appendChild(roomEl);
+    dialog.appendChild(title);
+    dialog.appendChild(wrap);
     var closeBtn = document.createElement("button");
     closeBtn.type = "button";
     closeBtn.textContent = "Close";
     closeBtn.style.cssText = "margin-top:14px;padding:8px 16px;cursor:pointer;border:1px solid #333;background:#fff;border-radius:0;";
     closeBtn.onclick = function(){ overlay.remove(); };
     overlay.onclick = function(e){ if (e.target === overlay) overlay.remove(); };
-    dialog.appendChild(title);
-    dialog.appendChild(canvas);
     dialog.appendChild(closeBtn);
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
-    drawLayoutInCanvas(canvas, data);
   }
   function runCartEnhancements(){
     if (!isCartPage()) return;
@@ -6110,7 +6152,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     for (var t = 0; t < tables.length; t++) {
       var tbl = tables[t];
       var tblText = (tbl.textContent || "").toLowerCase();
-      if (tblText.indexOf("calculate shipping") !== -1 || tblText.indexOf("related products") !== -1) continue;
+      if (tblText.indexOf("related products") !== -1) continue;
       if (!tbl.querySelector("img")) continue;
       var rows = tbl.querySelectorAll("tbody tr, tr");
       var lineItemRows = 0;
@@ -6118,9 +6160,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         var row = rows[r];
         if (row.querySelector("th")) continue;
         if (row.querySelectorAll("td").length < 4) continue;
-        var rl = row.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]');
-        var ri = row.querySelector('input[value*="Remove"], input[value*="Delete"], input[type="image"][alt*="emove"], input[type="submit"][value*="emove"]');
-        if (rl || ri) lineItemRows++;
+        if (row.querySelector("img")) lineItemRows++;
       }
       if (lineItemRows === 0) continue;
       rows.forEach(function(tr){
@@ -6128,10 +6168,17 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         if (tr.querySelector("th")) return;
         var cells = tr.querySelectorAll("td");
         if (cells.length < 4) return;
-        var removeLink = tr.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]');
-        var removeInput = tr.querySelector('input[value*="Remove"], input[value*="Delete"], input[type="image"][alt*="emove"], input[type="submit"][value*="emove"]');
-        if (!removeLink && !removeInput) return;
         if (!tr.querySelector("img")) return;
+        var removeLink = tr.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]') || (function(){
+          var links = tr.querySelectorAll("a[href]");
+          for (var i = 0; i < links.length; i++) {
+            var lt = (links[i].textContent || "").toLowerCase();
+            var lh = (links[i].getAttribute("href") || "").toLowerCase();
+            if (lt.indexOf("remove") !== -1 || lt.indexOf("delete") !== -1 || lh.indexOf("remove") !== -1 || lh.indexOf("delete") !== -1) return links[i];
+          }
+          return null;
+        })();
+        var removeInput = tr.querySelector('input[value*="Remove"], input[value*="Delete"], input[type="image"][alt*="emove"], input[type="submit"][value*="emove"]');
         var lastTd = cells[cells.length - 1];
         if (!lastTd) return;
         var totalCell = lastTd;
