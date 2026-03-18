@@ -6185,6 +6185,13 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     document.body.appendChild(overlay);
     drawConfigModalWithImages(canvas, data);
   }
+  window.__mcCartShowConfig = function(idx) {
+    idx = parseInt(idx, 10);
+    if (isNaN(idx)) idx = 0;
+    var list = window.__mcCartConfigList || [];
+    if (list[idx]) return showConfigModal(list[idx]);
+    if (list.length) return showConfigModal(list[0]);
+  };
   function runCartEnhancements(){
     if (!isCartPage()) return;
     var content = document.getElementById("content_area") || document.body;
@@ -6216,6 +6223,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         link.href = "#";
         link.setAttribute("data-mc-config-idx", String(iid));
         link.className = "mc-view-config-link";
+        link.setAttribute("onclick", "window.__mcCartShowConfig(this.getAttribute('data-mc-config-idx')); return false;");
         link.textContent = "View configuration";
         link.style.cssText = "margin-left:6px;font-size:12px;text-decoration:underline;cursor:pointer;";
         link.addEventListener("click", function(ev) {
@@ -6301,43 +6309,39 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         var xWrap = document.createElement("td");
         xWrap.className = "mc-cart-remove-x";
         xWrap.style.cssText = "vertical-align:middle;padding-left:8px;white-space:nowrap;";
-        var xBtn = document.createElement("button");
-        xBtn.type = "button";
-        xBtn.setAttribute("aria-label", "Remove");
-        xBtn.textContent = "\u00D7";
-        xBtn.style.cssText = "width:28px;height:28px;padding:0;border:1px solid #999;background:#fff;cursor:pointer;font-size:20px;line-height:1;border-radius:4px;color:#333;";
-        xBtn.onclick = (function(rl, ri, row){
-          return function(e){
-            e.preventDefault();
-            e.stopPropagation();
-            var target = null;
-            if (rl) {
-              var href = (rl.getAttribute("href") || "").trim();
-              if (href && href.indexOf("javascript:") !== 0 && href !== "#") {
-                window.location.href = href;
-                return;
+        var removeHref = removeLink ? ((removeLink.href || removeLink.getAttribute("href") || "").trim()) : "";
+        if (removeHref && removeHref !== "#" && removeHref.indexOf("javascript:") !== 0) {
+          var xLink = document.createElement("a");
+          xLink.href = removeHref;
+          xLink.setAttribute("aria-label", "Remove");
+          xLink.textContent = "\u00D7";
+          xLink.style.cssText = "display:inline-block;width:28px;height:28px;padding:0;border:1px solid #999;background:#fff;cursor:pointer;font-size:20px;line-height:26px;border-radius:4px;color:#333;text-align:center;text-decoration:none;";
+          xWrap.appendChild(xLink);
+        } else {
+          var xBtn = document.createElement("button");
+          xBtn.type = "button";
+          xBtn.setAttribute("aria-label", "Remove");
+          xBtn.textContent = "\u00D7";
+          xBtn.style.cssText = "width:28px;height:28px;padding:0;border:1px solid #999;background:#fff;cursor:pointer;font-size:20px;line-height:1;border-radius:4px;color:#333;";
+          xBtn.onclick = (function(rl, ri, row){
+            return function(e){
+              e.preventDefault();
+              e.stopPropagation();
+              if (rl) {
+                try { rl.click(); return; } catch (err) {}
               }
-              target = rl;
-            } else if (ri) target = ri;
-            if (target) {
-              try {
-                target.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
-              } catch (err) {}
-              try {
-                if (target.click) target.click();
-              } catch (err2) {}
-              if (rl && rl.href && rl.href.indexOf("javascript:") === 0) return;
-            }
-            var form = row.closest("form");
-            if (form) {
-              var inp = row.querySelector('input[name*="Remove"], input[value*="Remove"], input[name*="Delete"], input[value*="Delete"]');
-              if (inp) { inp.click(); return; }
-              inp = form.querySelector('input[name*="Remove"], input[value*="Remove"]');
-              if (inp) { inp.click(); return; }
-            }
-          };
-        })(removeLink, removeInput, tr);
-        xWrap.appendChild(xBtn);
+              if (ri) {
+                try { ri.click(); return; } catch (err2) {}
+              }
+              var form = mcClosest(row, "form");
+              if (form) {
+                var inp = row.querySelector('input[name*="Remove"], input[value*="Remove"], input[name*="Delete"], input[value*="Delete"]');
+                if (inp) inp.click();
+              }
+            };
+          })(removeLink, removeInput, tr);
+          xWrap.appendChild(xBtn);
+        }
         totalCell.parentNode.insertBefore(xWrap, totalCell.nextSibling);
       }
       break;
