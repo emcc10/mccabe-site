@@ -1921,8 +1921,28 @@ function updateProductPrice(totalPrice){
   if (totalPrice == null || isNaN(totalPrice) || totalPrice < 0) return;
   var formatted = "$" + Number(totalPrice).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   var root = document.querySelector("#v65-product-parent, #content_area") || document.body;
-  var targets = root.querySelectorAll("#priceWithOptions, .v65-product-price, .product_productprice, .product_sale_price, .product_sale_price b, .option_pricing");
+  var targets = root.querySelectorAll("#priceWithOptions, .v65-product-price, .product_productprice, .product_sale_price, .product_sale_price b");
   for (var i = 0; i < targets.length; i++) { targets[i].textContent = formatted; }
+}
+
+function ensurePriceWithOptionsLabel(scope){
+  var root = scope || document;
+  var priceNode = root.querySelector('#priceWithOptions');
+  if (!priceNode) return;
+
+  var prev = priceNode.previousElementSibling;
+  if (prev && /price with selected options/i.test(prev.textContent || '')) return;
+
+  var label = root.querySelector('.option_pricing');
+  if (label && /price with selected options/i.test(label.textContent || '')) {
+    priceNode.parentNode.insertBefore(label, priceNode);
+    return;
+  }
+
+  label = document.createElement('span');
+  label.className = 'text colors_text option_pricing';
+  label.textContent = 'Price with Selected Options: ';
+  priceNode.parentNode.insertBefore(label, priceNode);
 }
 
 function calculatePlannerPrice(counts, seatPrice){
@@ -3527,11 +3547,11 @@ body.mc-product-page #content_area .wm-swatch img {
     align-items: center !important;
     float: none !important;
     width: auto !important;
-    height: 52px !important;
+    height: 60px !important;
     vertical-align: bottom !important;
     white-space: nowrap !important;
     overflow: visible !important;
-    padding: 12px 28px !important;
+    padding: 16px 30px !important;
     margin: 0 16px 0 0 !important;
   }
   .productdetails td[class*="vCSS_tab"]:last-child {
@@ -3554,17 +3574,19 @@ body.mc-product-page #content_area .wm-swatch img {
   .productdetails td#Header_ProductDetail_TechSpecs.vCSS_tab_unselected span#Header_ProductDetail_TechSpecs_span,
   .productdetails td#Header_ProductDetail_ExtInfo.vCSS_tab_unselected span#Header_ProductDetail_ExtInfo_span {
     margin-bottom: 0 !important;
-    min-height: 52px !important;
+    min-height: 60px !important;
     display: inline-flex !important;
     align-items: center !important;
+    line-height: 1.2 !important;
   }
   .productdetails td[class*="vCSS_tab"] > span,
   .productdetails td[class*="vCSS_tab"] > a,
   .productdetails td[class*="vCSS_tab"] > div {
-    min-height: 52px !important;
+    min-height: 60px !important;
     display: inline-flex !important;
     align-items: center !important;
     margin-bottom: 0 !important;
+    line-height: 1.2 !important;
   }
 
   /* Tab row: flex layout (works with or without :has()) */
@@ -3574,7 +3596,7 @@ body.mc-product-page #content_area .wm-swatch img {
     flex-wrap: nowrap !important;
     align-items: stretch !important;
     gap: 0 !important;
-    margin-bottom: 18px !important;
+    margin-bottom: 8px !important;
   }
 
   /* Same tab styles without body/productdetails so they always apply when present */
@@ -3583,10 +3605,10 @@ body.mc-product-page #content_area .wm-swatch img {
     align-items: center !important;
     float: none !important;
     width: auto !important;
-    height: 52px !important;
+    height: 60px !important;
     white-space: nowrap !important;
     overflow: visible !important;
-    padding: 12px 28px !important;
+    padding: 16px 30px !important;
     margin: 0 16px 0 0 !important;
     vertical-align: bottom !important;
   }
@@ -5363,6 +5385,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     clearAddToCartWrapperBackground(scope);
     injectAddToCartIcon(scope);
     rearrangePriceCaption(scope);
+    ensurePriceWithOptionsLabel(scope);
     leftAlignPricingBlock(scope);
   }
 
