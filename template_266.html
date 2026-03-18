@@ -6144,6 +6144,9 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     });
   }
   function showConfigModal(data){
+    try {
+      if (!data || !data.r) data = { r: { widthTotalIn: 192, depthTotalIn: 144 }, l: (data && data.l) ? data.l : [] };
+    } catch (e) {}
     var overlay = document.createElement("div");
     overlay.className = "mc-cart-config-overlay";
     overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;";
@@ -6157,6 +6160,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     canvas.width = 640;
     canvas.height = 440;
     canvas.style.cssText = "display:block;max-width:100%;height:auto;border:2px solid #999;background:#fff;";
+    var closeBtn = document.createElement("button");
     closeBtn.type = "button";
     closeBtn.textContent = "Close";
     closeBtn.style.cssText = "margin-top:14px;padding:8px 16px;cursor:pointer;border:1px solid #333;background:#fff;border-radius:0;";
@@ -6197,10 +6201,11 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         var d = configDataList[iid];
         if (!d) return;
         var link = document.createElement("a");
-        link.href = "javascript:void(0)";
+        link.href = "#";
+        link.setAttribute("data-mc-config-idx", String(iid));
+        link.className = "mc-view-config-link";
         link.textContent = "View configuration";
         link.style.cssText = "margin-left:6px;font-size:12px;text-decoration:underline;cursor:pointer;";
-        link.onclick = (function(dat){ return function(e){ e.preventDefault(); showConfigModal(dat); }; })(d);
         sp.parentNode.replaceChild(link, sp);
       });
     }
@@ -6222,6 +6227,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         if (!childHas) processElement(node);
       }
     }
+    window.__mcCartConfigList = configDataList;
     content.querySelectorAll("td.mc-cart-remove-x").forEach(function(td){ td.remove(); });
     content.querySelectorAll("tr.mc-remove-x-done").forEach(function(tr){ tr.classList.remove("mc-remove-x-done"); });
     var tables = content.querySelectorAll("table");
@@ -6337,6 +6343,53 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     });
     cartObserver.observe(contentArea, { childList: true, subtree: true });
   }
+  document.addEventListener("click", function cartClickDelegation(e) {
+    if (!isCartPage()) return;
+    var target = e.target;
+    var link = target.closest ? target.closest("a[data-mc-config-idx].mc-view-config-link") : null;
+    if (link) {
+      e.preventDefault();
+      e.stopPropagation();
+      var idx = parseInt(link.getAttribute("data-mc-config-idx"), 10);
+      var list = window.__mcCartConfigList;
+      if (list && list[idx]) {
+        try { showConfigModal(list[idx]); } catch (err) { console.error("View configuration error", err); }
+      }
+      return;
+    }
+    var xTd = target.closest ? target.closest("td.mc-cart-remove-x") : null;
+    var xBtn = target.closest ? target.closest("button[aria-label=\"Remove\"]") : null;
+    if (xTd || xBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      var row = (xTd || xBtn).closest("tr");
+      if (!row) return;
+      var rl = row.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]') || (function(){
+        var links = row.querySelectorAll("a[href]");
+        for (var i = 0; i < links.length; i++) {
+          var lt = (links[i].textContent || "").toLowerCase();
+          var lh = (links[i].getAttribute("href") || "").toLowerCase();
+          if (lt.indexOf("remove") !== -1 || lt.indexOf("delete") !== -1 || lh.indexOf("remove") !== -1 || lh.indexOf("delete") !== -1) return links[i];
+        }
+        return null;
+      })();
+      var ri = row.querySelector('input[value*="Remove"], input[value*="Delete"], input[type="image"][alt*="emove"], input[type="submit"][value*="emove"]');
+      if (rl) {
+        var href = (rl.getAttribute("href") || "").trim();
+        if (href && href.indexOf("javascript:") !== 0 && href !== "#") {
+          window.location.href = href;
+          return;
+        }
+        try { rl.click(); } catch (err) {}
+      }
+      if (ri) { try { ri.click(); } catch (err) {} }
+      var form = row.closest("form");
+      if (form) {
+        var inp = row.querySelector('input[name*="Remove"], input[value*="Remove"], input[name*="Delete"], input[value*="Delete"]');
+        if (inp) inp.click();
+      }
+    }
+  }, true);
 })();
 </script>
 
