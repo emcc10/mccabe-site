@@ -2169,16 +2169,19 @@ setTimeout(restoreConfigOnPageLoad, 2800);
 </script>
 <script>
 window.initRoomPlanner = function (opts) {
+  try {
   opts = opts || {};
   var PX_PER_INCH = 4, SEAT_DEPTH_IN = 40;
-  var room = document.getElementById("room");
-  var roomW_ft = document.getElementById("roomW_ft");
-  var roomW_in = document.getElementById("roomW_in");
-  var roomD_ft = document.getElementById("roomD_ft");
-  var roomD_in = document.getElementById("roomD_in");
-  var dimTop = document.getElementById("dim-top");
-  var dimLeft = document.getElementById("dim-left");
-  var trayItemsel = document.getElementById("tray-items");
+  var app = document.getElementById("roomPlannerApp");
+  if (!app) return;
+  var room = app.querySelector("#room");
+  var roomW_ft = app.querySelector("#roomW_ft");
+  var roomW_in = app.querySelector("#roomW_in");
+  var roomD_ft = app.querySelector("#roomD_ft");
+  var roomD_in = app.querySelector("#roomD_in");
+  var dimTop = app.querySelector("#dim-top");
+  var dimLeft = app.querySelector("#dim-left");
+  var trayItemsel = app.querySelector("#tray-items");
   if (!room || !trayItemsel) return;
   function getRoomTotalInches(wFt, wIn, dFt, dIn) {
     var w = (parseFloat(wFt) || 0) * 12 + (parseFloat(wIn) || 0);
@@ -2187,7 +2190,7 @@ window.initRoomPlanner = function (opts) {
   }
   function getCounts() {
     var counts = {};
-    document.querySelectorAll("#roomPlannerApp .seat").forEach(function (seat) {
+    app.querySelectorAll(".seat").forEach(function (seat) {
       var id = seat.dataset.pieceId || "UNKNOWN";
       counts[id] = (counts[id] || 0) + 1;
     });
@@ -2195,14 +2198,14 @@ window.initRoomPlanner = function (opts) {
   }
   function getNon4LCount() {
     var n = 0;
-    document.querySelectorAll("#roomPlannerApp .seat").forEach(function (seat) {
+    app.querySelectorAll(".seat").forEach(function (seat) {
       if (seat.dataset.pieceId !== "4L") n++;
     });
     return n;
   }
   function calculateSeatCount() {
     var seats = 0;
-    document.querySelectorAll("#roomPlannerApp .seat").forEach(function (seat) {
+    app.querySelectorAll(".seat").forEach(function (seat) {
       seats += seat.dataset.pieceId === "4L" ? 2 : 1;
     });
     return seats;
@@ -2237,7 +2240,7 @@ window.initRoomPlanner = function (opts) {
   }
   var PIECES = getPlannerPiecesForProduct();
   function setActive(seat) {
-    document.querySelectorAll("#roomPlannerApp .seat").forEach(function (s) { s.classList.remove("active"); });
+    app.querySelectorAll(".seat").forEach(function (s) { s.classList.remove("active"); });
     activeSeat = seat;
     if (seat) seat.classList.add("active");
   }
@@ -2252,7 +2255,7 @@ window.initRoomPlanner = function (opts) {
     var dimLeftText = (dFt ? dFt + " ft " : "") + (dIn ? dIn + " in" : (dFt ? "" : "0 in"));
     if (dimTop) dimTop.textContent = dimTopText;
     if (dimLeft) dimLeft.textContent = dimLeftText;
-    var measEl = document.getElementById("room-measurement");
+    var measEl = app.querySelector("#room-measurement");
     if (measEl) measEl.innerHTML = "Room: " + (wFt ? wFt + "&prime;" : "") + (wIn ? " " + wIn + "&Prime;" : "") + " &times; " + (dFt ? dFt + "&prime;" : "") + (dIn ? " " + dIn + "&Prime;" : "");
 
     var modalEl = document.querySelector(".mc-planner-modal");
@@ -2270,10 +2273,10 @@ window.initRoomPlanner = function (opts) {
   if (roomD_ft) roomD_ft.value = "12";
   if (roomD_in) roomD_in.value = "0";
   applyRoom();
-  var applyRoomBtn = document.getElementById("applyRoom");
+  var applyRoomBtn = app.querySelector("#applyRoom");
   if (applyRoomBtn) applyRoomBtn.onclick = applyRoom;
-  var styleNameEl = document.getElementById("planner-style-name");
-  var pieceListEl = document.getElementById("planner-piece-list");
+  var styleNameEl = app.querySelector("#planner-style-name");
+  var pieceListEl = app.querySelector("#planner-piece-list");
   if (styleNameEl) {
     var productName = (document.querySelector("h1.productnamecolor, .productnamecolor, #content_area h1, .v65-product-parent .productnamecolor") || {}).textContent || document.title || "Product style";
     styleNameEl.textContent = (productName || "Product style").trim().slice(0, 80);
@@ -2371,9 +2374,9 @@ window.initRoomPlanner = function (opts) {
     item.onclick = function () { addSeat(p); };
     trayItemsel.appendChild(item);
   });
-  var tray = document.getElementById("tray-items");
-  var navL = document.getElementById("navL");
-  var navR = document.getElementById("navR");
+  var tray = trayItemsel;
+  var navL = app.querySelector("#navL");
+  var navR = app.querySelector("#navR");
   if (tray && navL && navR) {
     navL.onclick = function () { tray.scrollBy({ left: -(140 + 8), behavior: "smooth" }); };
     navR.onclick = function () { tray.scrollBy({ left: 140 + 8, behavior: "smooth" }); };
@@ -2391,20 +2394,20 @@ window.initRoomPlanner = function (opts) {
     seat.style.left = (centerX - w / 2) + "px";
     seat.style.top = (centerY - h / 2) + "px";
   }
-  var rotateL = document.getElementById("rotateL");
-  var rotateR = document.getElementById("rotateR");
-  var deleteBtn = document.getElementById("deleteBtn");
+  var rotateL = app.querySelector("#rotateL");
+  var rotateR = app.querySelector("#rotateR");
+  var deleteBtn = app.querySelector("#deleteBtn");
   if (rotateL) rotateL.onclick = function () { rotateSeat(-5); };
   if (rotateR) rotateR.onclick = function () { rotateSeat(5); };
   if (deleteBtn) deleteBtn.onclick = function () { if (activeSeat) { activeSeat.remove(); activeSeat = null; } };
-  var measureLineEl = document.getElementById("measure-line");
-  var measureBtn = document.getElementById("measuringToolBtn");
-  var mlSeg = document.getElementById("measure-line-seg");
-  var mlHL = document.getElementById("measure-handle-l");
-  var mlHR = document.getElementById("measure-handle-r");
+  var measureLineEl = app.querySelector("#measure-line");
+  var measureBtn = app.querySelector("#measuringToolBtn");
+  var mlSeg = app.querySelector("#measure-line-seg");
+  var mlHL = app.querySelector("#measure-handle-l");
+  var mlHR = app.querySelector("#measure-handle-r");
   if (measureLineEl && measureBtn && mlSeg && mlHL && mlHR) {
-    var mlSvg = document.getElementById("measure-svg");
-    var mlLabelBox = document.getElementById("measure-label-box");
+    var mlSvg = app.querySelector("#measure-svg");
+    var mlLabelBox = app.querySelector("#measure-label-box");
     function getHandleCenter(el) {
       if (!el) return { x: 0, y: 0 };
       var tag = (el.tagName || "").toLowerCase();
@@ -2542,8 +2545,8 @@ window.initRoomPlanner = function (opts) {
   var pieceMap = {};
   PIECES.forEach(function (p) { pieceMap[p.id] = p; });
   function addCommonConfig(cfg) {
-    document.querySelectorAll("#roomPlannerApp .config-group").forEach(function (g) { g.remove(); });
-    document.querySelectorAll("#roomPlannerApp .seat").forEach(function (s) { if (!s.closest(".config-group")) s.remove(); });
+    app.querySelectorAll(".config-group").forEach(function (g) { g.remove(); });
+    app.querySelectorAll(".seat").forEach(function (s) { if (!s.closest(".config-group")) s.remove(); });
     activeSeat = null;
     var startX = 30, startY = 30, rowGap = 0;
     var group = document.createElement("div");
@@ -2651,7 +2654,7 @@ window.initRoomPlanner = function (opts) {
     });
     group.remove();
   }
-  var commonContainer = document.getElementById("common-configs");
+  var commonContainer = app.querySelector("#common-configs");
   if (commonContainer) {
     var trayImgH = 72;
     var thumbScale = 0.8 * (trayImgH / (SEAT_DEPTH_IN * PX_PER_INCH));
@@ -2677,17 +2680,17 @@ window.initRoomPlanner = function (opts) {
       commonContainer.appendChild(div);
     });
   }
-  var clearLayoutBtn = document.getElementById("clearLayoutBtn");
+  var clearLayoutBtn = app.querySelector("#clearLayoutBtn");
   if (clearLayoutBtn) {
     clearLayoutBtn.onclick = function () {
-      document.querySelectorAll("#roomPlannerApp .config-group").forEach(function (g) { g.remove(); });
-      document.querySelectorAll("#roomPlannerApp .seat").forEach(function (s) { s.remove(); });
+      app.querySelectorAll(".config-group").forEach(function (g) { g.remove(); });
+      app.querySelectorAll(".seat").forEach(function (s) { s.remove(); });
       activeSeat = null;
     };
   }
   function serializeLayout() {
     var list = [];
-    document.querySelectorAll("#roomPlannerApp .seat").forEach(function (seat) {
+    app.querySelectorAll(".seat").forEach(function (seat) {
       var group = seat.closest(".config-group");
       var x = seat.offsetLeft, y = seat.offsetTop;
       if (group) { x += group.offsetLeft; y += group.offsetTop; }
@@ -2699,7 +2702,7 @@ window.initRoomPlanner = function (opts) {
     var tot = getRoomTotalInches(roomW_ft && roomW_ft.value, roomW_in && roomW_in.value, roomD_ft && roomD_ft.value, roomD_in && roomD_in.value);
     return { widthFt: roomW_ft && roomW_ft.value, widthIn: roomW_in && roomW_in.value, depthFt: roomD_ft && roomD_ft.value, depthIn: roomD_in && roomD_in.value, widthTotalIn: tot.widthIn, depthTotalIn: tot.depthIn };
   }
-  var saveLayoutBtn = document.getElementById("saveLayout");
+  var saveLayoutBtn = app.querySelector("#saveLayout");
   if (saveLayoutBtn) saveLayoutBtn.onclick = function () {
     var counts = getCounts();
     var layout = serializeLayout();
@@ -2740,8 +2743,8 @@ window.initRoomPlanner = function (opts) {
     };
     modal.onclick = function (e) { if (e.target === modal) modal.remove(); };
   };
-  var toolbarEl = document.getElementById("toolbar");
-  var addConfigBtn = document.getElementById("addConfigBtn");
+  var toolbarEl = app.querySelector("#toolbar");
+  var addConfigBtn = app.querySelector("#addConfigBtn");
   if (!addConfigBtn && toolbarEl) {
     addConfigBtn = document.createElement("button");
     addConfigBtn.id = "addConfigBtn";
@@ -2781,8 +2784,8 @@ window.initRoomPlanner = function (opts) {
       if (!layout || !Array.isArray(layout) || layout.length === 0) return;
       var pieceMap = {};
       PIECES.forEach(function (p) { pieceMap[p.id] = p; });
-      document.querySelectorAll("#roomPlannerApp .config-group").forEach(function (g) { g.remove(); });
-      document.querySelectorAll("#roomPlannerApp .seat").forEach(function (seat) { seat.remove(); });
+      app.querySelectorAll(".config-group").forEach(function (g) { g.remove(); });
+      app.querySelectorAll(".seat").forEach(function (seat) { seat.remove(); });
       if (data.room && (data.room.widthFt != null || data.room.widthTotalIn != null)) {
         if (roomW_ft && data.room.widthFt != null) roomW_ft.value = data.room.widthFt;
         if (roomW_in && data.room.widthIn != null) roomW_in.value = data.room.widthIn;
@@ -2808,6 +2811,7 @@ window.initRoomPlanner = function (opts) {
     } catch (e) {}
   }
   restoreLayoutFromStorage();
+  } catch (e) { console.error("[Room Planner] init error:", e); }
 };
 </script>
 
