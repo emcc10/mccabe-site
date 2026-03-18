@@ -1992,6 +1992,9 @@ function summarizePlannerConfiguration(payload){
   return parts.join(" | ").slice(0, 200);
 }
 
+var MC_LAYOUT_START = "[MC_LAYOUT]";
+var MC_LAYOUT_END = "[/MC_LAYOUT]";
+
 function syncPlannerConfigurationToCart(payload){
   var summary = summarizePlannerConfiguration(payload);
   if (!summary) return;
@@ -2020,7 +2023,16 @@ function syncPlannerConfigurationToCart(payload){
     form.appendChild(targetField);
   }
 
-  targetField.value = summary;
+  var layout = payload && Array.isArray(payload.layout) ? payload.layout : [];
+  var room = payload && payload.room ? payload.room : null;
+  var value = summary;
+  if (layout.length && room && (room.widthTotalIn != null || room.depthTotalIn != null)) {
+    try {
+      var blob = { l: layout, r: room };
+      value = summary + "\n" + MC_LAYOUT_START + JSON.stringify(blob) + MC_LAYOUT_END;
+    } catch (e) {}
+  }
+  targetField.value = value;
 }
 
 var PIECE_NAMES = { "1L":"1L Recliner","2L":"2L LHF Recliner","3L":"3L RHF Recliner","4L":"4L Armless Loveseat","5L":"5L RHF Wedge, LHF Straight","6L":"6L LHF Wedge, RHF Straight","7L":"7L RHF Wedge","8L":"8L Armless Recliner","9L":"9L LHF Wedge" };
@@ -2137,6 +2149,15 @@ function restoreConfigOnPageLoad() {
 }
 setTimeout(restoreConfigOnPageLoad, 1600);
 setTimeout(restoreConfigOnPageLoad, 2800);
+
+function clearPlannerWhenLeavingProductPage() {
+  try {
+    var prodCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "";
+    if (prodCode) localStorage.removeItem("roomPlannerData_" + prodCode);
+  } catch (e) {}
+}
+window.addEventListener("pagehide", clearPlannerWhenLeavingProductPage);
+window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
 
 })();
 </script>
@@ -3015,7 +3036,7 @@ body.mc-product-page #content_area .resp-tabs-list li {
   font-style: normal !important;
 }
 
-/* option labels – EXACT same font for every option header (NUMBER OF SEATS, CONFIGURATION, SELECT A LEATHER) */
+/* option labels – EXACT same font for every option header (NUMBER OF SEATS, CONFIGURATION, SELECT A LEATHER) + padding */
 body.mc-product-page #content_area #options_table label,
 body.mc-product-page #content_area #options_table .productoptionname,
 body.mc-product-page #content_area #options_table td.productoptionname,
@@ -3034,8 +3055,15 @@ body.mc-product-page #content_area .mc-option-accordion__header {
   color: #686868 !important;
   text-align: left !important;
   margin-left: 0 !important;
-  padding-left: 0 !important;
+  padding: 10px 14px 10px 0 !important;
   line-height: 1.2 !important;
+}
+/* Product tabs – more padding so labels are not too short */
+body.mc-product-page #content_area .tab,
+body.mc-product-page #content_area .tab a,
+body.mc-product-page #content_area .resp-tab-item,
+body.mc-product-page #content_area .resp-tabs-list li {
+  padding: 12px 18px !important;
 }
 
 /* Prevent options running off at ~1205px */
@@ -5885,6 +5913,158 @@ body.productdetails .v-product-grid .v-product .v-product__price {
   window.addEventListener('load', runPatches);
   var _pi = setInterval(runPatches, 500);
   setTimeout(function(){ clearInterval(_pi); }, 15000);
+})();
+</script>
+
+<!-- Cart page: configuration image modal + remove X per line -->
+<script>
+(function(){
+  function isCartPage(){
+    var p = (window.location.pathname || "").toLowerCase();
+    var h = (window.location.href || "").toLowerCase();
+    return p.indexOf("shoppingcart") !== -1 || h.indexOf("shoppingcart") !== -1;
+  }
+  function extractLayoutFromText(text){
+    if (typeof text !== "string") return null;
+    var start = text.indexOf("[MC_LAYOUT]");
+    var end = text.indexOf("[/MC_LAYOUT]");
+    if (start === -1 || end === -1 || end <= start) return null;
+    try {
+      return JSON.parse(text.slice(start + "[MC_LAYOUT]".length, end));
+    } catch (e) { return null; }
+  }
+  function drawLayoutInCanvas(canvas, data){
+    var PX = 4;
+    var room = (data && data.r) ? data.r : { widthTotalIn: 192, depthTotalIn: 144 };
+    var layout = (data && data.l) ? data.l : [];
+    var wIn = (room.widthTotalIn != null) ? room.widthTotalIn : 192;
+    var dIn = (room.depthTotalIn != null) ? room.depthTotalIn : 144;
+    var scale = Math.min((canvas.width - 40) / (wIn * PX), (canvas.height - 40) / (dIn * PX), 1) || 0.5;
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    var roomW = wIn * PX * scale, roomH = dIn * PX * scale;
+    var ox = (canvas.width - roomW) / 2, oy = (canvas.height - roomH) / 2;
+    ctx.strokeStyle = "#999";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(ox, oy, roomW, roomH);
+    ctx.fillStyle = "rgba(0,0,0,.06)";
+    var grid = 12 * PX * scale;
+    for (var gx = ox; gx < ox + roomW; gx += grid) { ctx.beginPath(); ctx.moveTo(gx, oy); ctx.lineTo(gx, oy + roomH); ctx.stroke(); }
+    for (var gy = oy; gy < oy + roomH; gy += grid) { ctx.beginPath(); ctx.moveTo(ox, gy); ctx.lineTo(ox + roomW, gy); ctx.stroke(); }
+    ctx.strokeStyle = "#999";
+    layout.forEach(function(item){
+      var x = (item.x != null ? item.x : 40) * scale + ox;
+      var y = (item.y != null ? item.y : 40) * scale + oy;
+      var w = (item.w != null ? item.w : 160) * scale;
+      var h = Math.min(w * 0.6, roomH * 0.4);
+      ctx.save();
+      ctx.translate(x + w/2, y + h/2);
+      ctx.rotate(((item.rot != null ? item.rot : 0) * Math.PI) / 180);
+      ctx.translate(-(x + w/2), -(y + h/2));
+      ctx.fillStyle = "#e8e8e8";
+      ctx.strokeStyle = "#333";
+      ctx.lineWidth = 1;
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+      ctx.fillStyle = "#333";
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(item.id || "", x + w/2, y + h/2 + 4);
+      ctx.restore();
+    });
+  }
+  function showConfigModal(data){
+    var overlay = document.createElement("div");
+    overlay.className = "mc-cart-config-overlay";
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;";
+    var dialog = document.createElement("div");
+    dialog.className = "mc-cart-config-dialog";
+    dialog.style.cssText = "background:#fff;border-radius:12px;padding:20px;max-width:95vw;max-height:90vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.3);";
+    var title = document.createElement("div");
+    title.style.cssText = "font-size:16px;font-weight:600;margin-bottom:12px;";
+    title.textContent = "Room configuration";
+    var canvas = document.createElement("canvas");
+    canvas.width = 520;
+    canvas.height = 380;
+    canvas.style.cssText = "display:block;max-width:100%;height:auto;border:1px solid #ddd;";
+    var closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.textContent = "Close";
+    closeBtn.style.cssText = "margin-top:14px;padding:8px 16px;cursor:pointer;border:1px solid #333;background:#fff;border-radius:0;";
+    closeBtn.onclick = function(){ overlay.remove(); };
+    overlay.onclick = function(e){ if (e.target === overlay) overlay.remove(); };
+    dialog.appendChild(title);
+    dialog.appendChild(canvas);
+    dialog.appendChild(closeBtn);
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+    drawLayoutInCanvas(canvas, data);
+  }
+  function runCartEnhancements(){
+    if (!isCartPage()) return;
+    var content = document.getElementById("content_area") || document.body;
+    var candidates = content.querySelectorAll ? content.querySelectorAll("td, div, span, li") : [];
+    for (var i = 0; i < candidates.length; i++) {
+      var el = candidates[i];
+      if (el.classList.contains("mc-config-view-done")) continue;
+      var text = el.textContent || "";
+      if (text.indexOf("[MC_LAYOUT]") === -1) continue;
+      var data = extractLayoutFromText(text);
+      if (!data) continue;
+      el.classList.add("mc-config-view-done");
+      var visible = text.replace(/\s*\[MC_LAYOUT\][\s\S]*?\[\/MC_LAYOUT\]\s*/g, "").trim();
+      var link = document.createElement("a");
+      link.href = "javascript:void(0)";
+      link.textContent = "View configuration";
+      link.style.cssText = "margin-left:8px;font-size:12px;text-decoration:underline;cursor:pointer;";
+      link.onclick = (function(d){ return function(e){ e.preventDefault(); showConfigModal(d); }; })(data);
+      el.textContent = "";
+      if (visible) el.appendChild(document.createTextNode(visible));
+      el.appendChild(link);
+    }
+    var cartTable = content.querySelector("table[id*='cart'], table[class*='cart'], form table");
+    if (cartTable) {
+      var rows = cartTable.querySelectorAll("tbody tr, tr");
+      rows.forEach(function(tr){
+        if (tr.classList.contains("mc-remove-x-done")) return;
+        var removeLink = tr.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]');
+        var removeInput = tr.querySelector('input[value*="Remove"], input[value*="Delete"], input[type="image"][alt*="emove"], input[type="submit"][value*="emove"]');
+        var cells = tr.querySelectorAll("td");
+        var lastTd = cells[cells.length - 1];
+        if (!lastTd) return;
+        var totalCell = lastTd;
+        for (var c = 0; c < cells.length; c++) {
+          var t = (cells[c].textContent || "").trim();
+          if (/^\$[\d.,]+$/.test(t) || (/\d+\.?\d*/.test(t) && t.length < 15)) totalCell = cells[c];
+        }
+        tr.classList.add("mc-remove-x-done");
+        var xWrap = document.createElement("td");
+        xWrap.className = "mc-cart-remove-x";
+        xWrap.style.cssText = "vertical-align:middle;padding-left:8px;white-space:nowrap;";
+        var xBtn = document.createElement("button");
+        xBtn.type = "button";
+        xBtn.setAttribute("aria-label", "Remove");
+        xBtn.textContent = "\u00D7";
+        xBtn.style.cssText = "width:28px;height:28px;padding:0;border:1px solid #999;background:#fff;cursor:pointer;font-size:20px;line-height:1;border-radius:4px;color:#333;";
+        xBtn.onclick = function(){
+          if (removeLink && removeLink.href && removeLink.href.indexOf("javascript") !== 0) { window.location.href = removeLink.href; return; }
+          if (removeLink) { removeLink.click(); return; }
+          if (removeInput) { removeInput.click(); return; }
+          var form = tr.closest("form");
+          if (form) {
+            var inp = form.querySelector('input[name*="Remove"], input[value*="Remove"], input[name*="Delete"], input[value*="Delete"]');
+            if (inp) inp.click();
+          }
+        };
+        xWrap.appendChild(xBtn);
+        totalCell.parentNode.insertBefore(xWrap, totalCell.nextSibling);
+      });
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", runCartEnhancements);
+  else runCartEnhancements();
+  window.addEventListener("load", runCartEnhancements);
 })();
 </script>
 
