@@ -2245,9 +2245,7 @@ window.initRoomPlanner = function (opts) {
       { id: "9L", name: "9L LHF Wedge", widthIn: 38.5, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/9L.png" }
     ];
     var productCode = String(((document.querySelector('input[name="ProductCode"]') || {}).value || "")).toUpperCase();
-    if (productCode.indexOf("FLICKS") === -1) return defaultPieces;
-
-    return [
+    var stylePieces = [
       { id: "1L", name: "1L Recliner", widthIn: 39, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/1L.png", norm: { scale: 1, x: 0, y: 0 } },
       { id: "2L", name: "2L LHF Recliner", widthIn: 33, depthIn: 39, heightIn: 42, img: "/v/vspfiles/MRP/2L.png", norm: { scale: 1, x: 0, y: 0 } },
       { id: "3L", name: "3L RHF Recliner", widthIn: 33, depthIn: 39, heightIn: 42, img: "/v/vspfiles/MRP/3L.png", norm: { scale: 1.12, x: 0, y: 0 } },
@@ -2258,8 +2256,28 @@ window.initRoomPlanner = function (opts) {
       { id: "8L", name: "8L Armless Recliner", widthIn: 25, depthIn: 39, heightIn: 42, img: "/v/vspfiles/MRP/8L.png", norm: { scale: 1.03, x: 0, y: 0 } },
       { id: "9L", name: "9L LHF Wedge", widthIn: 37, depthIn: 39, heightIn: 42, img: "/v/vspfiles/MRP/9L.png" }
     ];
+    var palliserAudioPieces = [
+      { id: "1L", name: "1L Recliner", widthIn: 34, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/1L.png", norm: { scale: 1, x: 0, y: 0 } },
+      { id: "2L", name: "2L LHF Recliner", widthIn: 28, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/2L.png", norm: { scale: 1, x: 0, y: 0 } },
+      { id: "3L", name: "3L RHF Recliner", widthIn: 28, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/3L.png", norm: { scale: 1.12, x: 0, y: 0 } },
+      { id: "4L", name: "4L Armless Loveseat", widthIn: 46, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/4L.png", norm: { scale: 1.03, x: 0, y: 0 } },
+      { id: "5L", name: "5L RHF Wedge, LHF Straight", widthIn: 40, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/5L.png" },
+      { id: "6L", name: "6L LHF Wedge, RHF Straight", widthIn: 40, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/6L.png" },
+      { id: "7L", name: "7L RHF Wedge", widthIn: 34, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/7L.png" },
+      { id: "8L", name: "8L Armless Recliner", widthIn: 23, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/8L.png", norm: { scale: 1.03, x: 0, y: 0 } },
+      { id: "9L", name: "9L LHF Wedge", widthIn: 34, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/9L.png" }
+    ];
+    if (productCode.indexOf("FLICKS") !== -1) return stylePieces;
+    if (productCode.indexOf("PALLISER") !== -1 || productCode.indexOf("AUDIO") !== -1) return palliserAudioPieces;
+    return defaultPieces;
   }
   var PIECES = getPlannerPiecesForProduct();
+  function getDefaultRoomForProduct() {
+    var productCode = String(((document.querySelector('input[name="ProductCode"]') || {}).value || "")).toUpperCase();
+    if (productCode.indexOf("PALLISER") !== -1 || productCode.indexOf("AUDIO") !== -1) return { widthFt: 14, widthIn: 0, depthFt: 11, depthIn: 0 };
+    if (productCode.indexOf("FLICKS") !== -1) return { widthFt: 14, widthIn: 0, depthFt: 11, depthIn: 0 };
+    return { widthFt: 16, widthIn: 0, depthFt: 12, depthIn: 0 };
+  }
   function setActive(seat) {
     app.querySelectorAll(".seat").forEach(function (s) { s.classList.remove("active"); });
     activeSeat = seat;
@@ -2289,10 +2307,11 @@ window.initRoomPlanner = function (opts) {
       modalEl.style.width = finalW + "px";
     }
   }
-  if (roomW_ft) roomW_ft.value = "16";
-  if (roomW_in) roomW_in.value = "0";
-  if (roomD_ft) roomD_ft.value = "12";
-  if (roomD_in) roomD_in.value = "0";
+  var defaultRoom = getDefaultRoomForProduct();
+  if (roomW_ft) roomW_ft.value = String(defaultRoom.widthFt != null ? defaultRoom.widthFt : 16);
+  if (roomW_in) roomW_in.value = String(defaultRoom.widthIn != null ? defaultRoom.widthIn : 0);
+  if (roomD_ft) roomD_ft.value = String(defaultRoom.depthFt != null ? defaultRoom.depthFt : 12);
+  if (roomD_in) roomD_in.value = String(defaultRoom.depthIn != null ? defaultRoom.depthIn : 0);
   applyRoom();
   var applyRoomBtn = app.querySelector("#applyRoom");
   if (applyRoomBtn) applyRoomBtn.onclick = applyRoom;
@@ -6004,12 +6023,20 @@ body.productdetails .v-product-grid .v-product .v-product__price {
   function runCartEnhancements(){
     if (!isCartPage()) return;
     var content = document.getElementById("content_area") || document.body;
-    var candidates = content.querySelectorAll ? content.querySelectorAll("td, div, span, li") : [];
+    if (!content || !content.querySelectorAll) return;
+    var candidates = content.querySelectorAll("td, div, span, li");
     for (var i = 0; i < candidates.length; i++) {
       var el = candidates[i];
       if (el.classList.contains("mc-config-view-done")) continue;
       var text = el.textContent || "";
       if (text.indexOf("[MC_LAYOUT]") === -1) continue;
+      var descendants = el.querySelectorAll("*");
+      var hasInChild = false;
+      for (var d = 0; d < descendants.length; d++) {
+        if ((descendants[d].textContent || "").indexOf("[MC_LAYOUT]") !== -1) { hasInChild = true; break; }
+      }
+      if (hasInChild) continue;
+      if (el.id === "content_area" || text.length > 2000) continue;
       var data = extractLayoutFromText(text);
       if (!data) continue;
       el.classList.add("mc-config-view-done");
