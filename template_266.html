@@ -2232,50 +2232,45 @@ window.initRoomPlanner = function (opts) {
     return seats;
   }
   var activeSeat = null;
+  var STYLE_DIMS = {
+    audio:    { "1L":{w:34,d:42,h:43},"2L":{w:28,d:42,h:43},"3L":{w:28,d:42,h:43},"4L":{w:46,d:42,h:43},"5L":{w:40,d:42,h:43},"6L":{w:40,d:42,h:43},"7L":{w:34,d:42,h:43},"8L":{w:23,d:42,h:43},"9L":{w:34,d:42,h:43} },
+    beckett:  { "1L":{w:38,d:41,h:43},"2L":{w:30,d:41,h:43},"3L":{w:30,d:41,h:43},"4L":{w:46,d:41,h:43},"5L":{w:46,d:41,h:43},"6L":{w:46,d:41,h:43},"7L":{w:38,d:41,h:43},"8L":{w:23,d:41,h:43},"9L":{w:38,d:41,h:43} },
+    flicks:   { "1L":{w:39,d:42,h:43},"2L":{w:33,d:39,h:42},"3L":{w:33,d:39,h:42},"4L":{w:51,d:39,h:42},"5L":{w:44,d:39,h:42},"6L":{w:44,d:39,h:42},"7L":{w:37,d:39,h:42},"8L":{w:25,d:39,h:42},"9L":{w:37,d:39,h:42} },
+    paragon:  { "1L":{w:39,d:42,h:43},"2L":{w:33,d:42,h:43},"3L":{w:33,d:42,h:43},"4L":{w:51,d:42,h:43},"5L":{w:44,d:42,h:43},"6L":{w:44,d:42,h:43},"7L":{w:37,d:42,h:43},"8L":{w:25,d:42,h:43},"9L":{w:37,d:42,h:43} },
+    ace:      { "1L":{w:38,d:41,h:43},"2L":{w:30,d:41,h:43},"3L":{w:30,d:41,h:43},"4L":{w:46,d:41,h:43},"5L":{w:46,d:41,h:43},"6L":{w:46,d:41,h:43},"7L":{w:38,d:41,h:43},"8L":{w:23,d:41,h:43},"9L":{w:38,d:41,h:43} },
+    catalina: { "1L":{w:38,d:42,h:43},"2L":{w:30,d:42,h:43},"3L":{w:30,d:42,h:43},"4L":{w:46,d:42,h:43},"5L":{w:46,d:42,h:43},"6L":{w:46,d:42,h:43},"7L":{w:38,d:42,h:43},"8L":{w:23,d:42,h:43},"9L":{w:38,d:42,h:43} },
+    vertex:   { "1L":{w:38,d:41,h:43},"2L":{w:30,d:41,h:43},"3L":{w:30,d:41,h:43},"4L":{w:46,d:41,h:43},"5L":{w:46,d:41,h:43},"6L":{w:46,d:41,h:43},"7L":{w:38,d:41,h:43},"8L":{w:23,d:41,h:43},"9L":{w:38,d:41,h:43} },
+    vivid:    { "1L":{w:38,d:40,h:43},"2L":{w:30,d:40,h:43},"3L":{w:30,d:40,h:43},"4L":{w:46,d:40,h:43},"5L":{w:46,d:40,h:43},"6L":{w:46,d:40,h:43},"7L":{w:38,d:40,h:43},"8L":{w:23,d:40,h:43},"9L":{w:38,d:40,h:43} }
+  };
+  var PIECE_NAMES_MAP = { "1L":"1L Recliner","2L":"2L LHF Recliner","3L":"3L RHF Recliner","4L":"4L Armless Loveseat","5L":"5L RHF Wedge, LHF Straight","6L":"6L LHF Wedge, RHF Straight","7L":"7L RHF Wedge","8L":"8L Armless Recliner","9L":"9L LHF Wedge" };
+  var PIECE_NORMS = { "1L":{scale:1,x:0,y:0},"2L":{scale:1,x:0,y:0},"3L":{scale:1.12,x:0,y:0},"4L":{scale:1.03,x:0,y:0},"8L":{scale:1.03,x:0,y:0} };
+  function detectStyleName() {
+    var name = (document.querySelector('h1.productnamecolor, .productnamecolor, #content_area h1') || {}).textContent || '';
+    var pc = String(((document.querySelector('input[name="ProductCode"]') || {}).value || '')).toLowerCase();
+    var hay = (name + ' ' + pc).toLowerCase();
+    var styles = Object.keys(STYLE_DIMS);
+    for (var i = 0; i < styles.length; i++) {
+      if (hay.indexOf(styles[i]) !== -1) return styles[i];
+    }
+    return null;
+  }
   function getPlannerPiecesForProduct() {
-    var defaultPieces = [
-      { id: "1L", name: "1L Recliner", widthIn: 39, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/1L.png", norm: { scale: 1, x: 0, y: 0 } },
-      { id: "2L", name: "2L LHF Recliner", widthIn: 30.5, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/2L.png", norm: { scale: 1, x: 0, y: 0 } },
-      { id: "3L", name: "3L RHF Recliner", widthIn: 30.5, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/3L.png", norm: { scale: 1.12, x: 0, y: 0 } },
-      { id: "4L", name: "4L Armless Loveseat", widthIn: 46, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/4L.png", norm: { scale: 1.03, x: 0, y: 0 } },
-      { id: "5L", name: "5L RHF Wedge, LHF Straight", widthIn: 46, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/5L.png" },
-      { id: "6L", name: "6L LHF Wedge, RHF Straight", widthIn: 46, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/6L.png" },
-      { id: "7L", name: "7L RHF Wedge", widthIn: 38.5, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/7L.png" },
-      { id: "8L", name: "8L Armless Recliner", widthIn: 23, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/8L.png", norm: { scale: 1.03, x: 0, y: 0 } },
-      { id: "9L", name: "9L LHF Wedge", widthIn: 38.5, depthIn: 40, heightIn: 43, img: "/v/vspfiles/MRP/9L.png" }
-    ];
-    var productCode = String(((document.querySelector('input[name="ProductCode"]') || {}).value || "")).toUpperCase();
-    var stylePieces = [
-      { id: "1L", name: "1L Recliner", widthIn: 39, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/1L.png", norm: { scale: 1, x: 0, y: 0 } },
-      { id: "2L", name: "2L LHF Recliner", widthIn: 33, depthIn: 39, heightIn: 42, img: "/v/vspfiles/MRP/2L.png", norm: { scale: 1, x: 0, y: 0 } },
-      { id: "3L", name: "3L RHF Recliner", widthIn: 33, depthIn: 39, heightIn: 42, img: "/v/vspfiles/MRP/3L.png", norm: { scale: 1.12, x: 0, y: 0 } },
-      { id: "4L", name: "4L Armless Loveseat", widthIn: 51, depthIn: 39, heightIn: 42, img: "/v/vspfiles/MRP/4L.png", norm: { scale: 1.03, x: 0, y: 0 } },
-      { id: "5L", name: "5L RHF Wedge, LHF Straight", widthIn: 44, depthIn: 39, heightIn: 42, img: "/v/vspfiles/MRP/5L.png" },
-      { id: "6L", name: "6L LHF Wedge, RHF Straight", widthIn: 44, depthIn: 39, heightIn: 42, img: "/v/vspfiles/MRP/6L.png" },
-      { id: "7L", name: "7L RHF Wedge", widthIn: 37, depthIn: 39, heightIn: 42, img: "/v/vspfiles/MRP/7L.png" },
-      { id: "8L", name: "8L Armless Recliner", widthIn: 25, depthIn: 39, heightIn: 42, img: "/v/vspfiles/MRP/8L.png", norm: { scale: 1.03, x: 0, y: 0 } },
-      { id: "9L", name: "9L LHF Wedge", widthIn: 37, depthIn: 39, heightIn: 42, img: "/v/vspfiles/MRP/9L.png" }
-    ];
-    var palliserAudioPieces = [
-      { id: "1L", name: "1L Recliner", widthIn: 34, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/1L.png", norm: { scale: 1, x: 0, y: 0 } },
-      { id: "2L", name: "2L LHF Recliner", widthIn: 28, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/2L.png", norm: { scale: 1, x: 0, y: 0 } },
-      { id: "3L", name: "3L RHF Recliner", widthIn: 28, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/3L.png", norm: { scale: 1.12, x: 0, y: 0 } },
-      { id: "4L", name: "4L Armless Loveseat", widthIn: 46, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/4L.png", norm: { scale: 1.03, x: 0, y: 0 } },
-      { id: "5L", name: "5L RHF Wedge, LHF Straight", widthIn: 40, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/5L.png" },
-      { id: "6L", name: "6L LHF Wedge, RHF Straight", widthIn: 40, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/6L.png" },
-      { id: "7L", name: "7L RHF Wedge", widthIn: 34, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/7L.png" },
-      { id: "8L", name: "8L Armless Recliner", widthIn: 23, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/8L.png", norm: { scale: 1.03, x: 0, y: 0 } },
-      { id: "9L", name: "9L LHF Wedge", widthIn: 34, depthIn: 42, heightIn: 43, img: "/v/vspfiles/MRP/9L.png" }
-    ];
-    if (productCode.indexOf("FLICKS") !== -1) return stylePieces;
-    if (productCode.indexOf("PALLISER") !== -1 || productCode.indexOf("AUDIO") !== -1) return palliserAudioPieces;
-    return defaultPieces;
+    var styleName = detectStyleName();
+    var dims = styleName && STYLE_DIMS[styleName] ? STYLE_DIMS[styleName] : null;
+    var defaultDims = { "1L":{w:39,d:40,h:43},"2L":{w:30.5,d:40,h:43},"3L":{w:30.5,d:40,h:43},"4L":{w:46,d:40,h:43},"5L":{w:46,d:40,h:43},"6L":{w:46,d:40,h:43},"7L":{w:38.5,d:40,h:43},"8L":{w:23,d:40,h:43},"9L":{w:38.5,d:40,h:43} };
+    var src = dims || defaultDims;
+    var ids = ["1L","2L","3L","4L","5L","6L","7L","8L","9L"];
+    return ids.map(function(id) {
+      var d = src[id] || defaultDims[id];
+      var p = { id: id, name: PIECE_NAMES_MAP[id] || id, widthIn: d.w, depthIn: d.d, heightIn: d.h, img: "/v/vspfiles/MRP/" + id + ".png" };
+      if (PIECE_NORMS[id]) p.norm = PIECE_NORMS[id];
+      return p;
+    });
   }
   var PIECES = getPlannerPiecesForProduct();
   function getDefaultRoomForProduct() {
-    var productCode = String(((document.querySelector('input[name="ProductCode"]') || {}).value || "")).toUpperCase();
-    if (productCode.indexOf("PALLISER") !== -1 || productCode.indexOf("AUDIO") !== -1) return { widthFt: 14, widthIn: 0, depthFt: 11, depthIn: 0 };
-    if (productCode.indexOf("FLICKS") !== -1) return { widthFt: 14, widthIn: 0, depthFt: 11, depthIn: 0 };
+    var styleName = detectStyleName();
+    if (styleName) return { widthFt: 14, widthIn: 0, depthFt: 11, depthIn: 0 };
     return { widthFt: 16, widthIn: 0, depthFt: 12, depthIn: 0 };
   }
   function setActive(seat) {
