@@ -1584,7 +1584,12 @@ boot();
     `;
 
     if (optionsTable) {
-      optionsTable.style.setProperty("display", "none", "important");
+      optionsTable.style.setProperty("position", "absolute", "important");
+      optionsTable.style.setProperty("left", "-9999px", "important");
+      optionsTable.style.setProperty("opacity", "0", "important");
+      optionsTable.style.setProperty("pointer-events", "none", "important");
+      optionsTable.style.setProperty("height", "0", "important");
+      optionsTable.style.setProperty("overflow", "hidden", "important");
       optionsTable.insertAdjacentElement("afterend", panel);
     } else {
       wmOpen.parentElement.insertAdjacentElement("afterend", panel);
@@ -3518,10 +3523,15 @@ body.mc-product-page #content_area #mcLeatherSwatchStrip img {
   color: #111 !important;
 }
 
-/* Hide all options tables - options handled by custom UI */
+/* Hide all options tables visually - but keep functional for Volusion form submission */
 body.mc-product-page #content_area #options_table,
 body.mc-product-page #content_area table[id*="options_table"] {
-  display: none !important;
+  position: absolute !important;
+  left: -9999px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
 }
 body.mc-product-page #content_area .wm-swatch {
   border: 1px solid #ddd !important;
@@ -3698,7 +3708,12 @@ body.mc-product-page #content_area .wm-swatch img {
 
   body.mc-product-page #content_area #options_table,
   body.mc-product-page #content_area table[id*="options_table"] {
-    display: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
   }
 
   body.mc-product-page #content_area #v65-product-parent td,
@@ -5360,7 +5375,14 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function hideOptionsTable(scope){
     var root = scope || document;
     var tables = qa('#options_table, table[id*="options_table"]', root);
-    tables.forEach(function(t){ t.style.setProperty('display','none','important'); });
+    tables.forEach(function(t){
+      t.style.setProperty('position','absolute','important');
+      t.style.setProperty('left','-9999px','important');
+      t.style.setProperty('opacity','0','important');
+      t.style.setProperty('pointer-events','none','important');
+      t.style.setProperty('height','0','important');
+      t.style.setProperty('overflow','hidden','important');
+    });
   }
 
   function rearrangePriceCaption(scope){
@@ -5911,11 +5933,26 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     };
   }
 
+  var _formIntercepted = false;
+  function interceptAddToCartForm(){
+    if (_formIntercepted) return;
+    var root = document.querySelector('#content_area') || document.body;
+    var btn = root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
+    var form = btn && btn.form ? btn.form : root.querySelector('form[action*="ProductDetails.asp"]');
+    if (!form) return;
+    _formIntercepted = true;
+    form.addEventListener('submit', function(){
+      var sc = window.__mcPlannerSeatCount;
+      if (sc && sc > 0) syncSeatCountToVolusion(sc);
+    });
+  }
+
   function runPatches(){
     patchProductTabs();
     patchRelatedItemImages();
     wrapApplyPlannerToPage();
     fetchPlannerDimensions();
+    interceptAddToCartForm();
   }
 
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', runPatches);
