@@ -2248,8 +2248,10 @@ window.initRoomPlanner = function (opts) {
     room.style.height = hPx + "px";
     room.style.setProperty("--grid-size", (12 * PX_PER_INCH) + "px");
     var wFt = Math.floor(tot.widthIn / 12), wIn = tot.widthIn % 12, dFt = Math.floor(tot.depthIn / 12), dIn = tot.depthIn % 12;
-    dimTop.textContent = (wFt ? wFt + " ft " : "") + (wIn ? wIn + " in" : (wFt ? "" : "0 in"));
-    dimLeft.textContent = (dFt ? dFt + " ft " : "") + (dIn ? dIn + " in" : (dFt ? "" : "0 in"));
+    var dimTopText = (wFt ? wFt + " ft " : "") + (wIn ? wIn + " in" : (wFt ? "" : "0 in"));
+    var dimLeftText = (dFt ? dFt + " ft " : "") + (dIn ? dIn + " in" : (dFt ? "" : "0 in"));
+    if (dimTop) dimTop.textContent = dimTopText;
+    if (dimLeft) dimLeft.textContent = dimLeftText;
     var measEl = document.getElementById("room-measurement");
     if (measEl) measEl.innerHTML = "Room: " + (wFt ? wFt + "&prime;" : "") + (wIn ? " " + wIn + "&Prime;" : "") + " &times; " + (dFt ? dFt + "&prime;" : "") + (dIn ? " " + dIn + "&Prime;" : "");
 
@@ -2389,17 +2391,20 @@ window.initRoomPlanner = function (opts) {
     seat.style.left = (centerX - w / 2) + "px";
     seat.style.top = (centerY - h / 2) + "px";
   }
-  document.getElementById("rotateL").onclick = function () { rotateSeat(-5); };
-  document.getElementById("rotateR").onclick = function () { rotateSeat(5); };
-  document.getElementById("deleteBtn").onclick = function () { if (activeSeat) { activeSeat.remove(); activeSeat = null; } };
+  var rotateL = document.getElementById("rotateL");
+  var rotateR = document.getElementById("rotateR");
+  var deleteBtn = document.getElementById("deleteBtn");
+  if (rotateL) rotateL.onclick = function () { rotateSeat(-5); };
+  if (rotateR) rotateR.onclick = function () { rotateSeat(5); };
+  if (deleteBtn) deleteBtn.onclick = function () { if (activeSeat) { activeSeat.remove(); activeSeat = null; } };
   var measureLineEl = document.getElementById("measure-line");
   var measureBtn = document.getElementById("measuringToolBtn");
-  if (measureLineEl && measureBtn) {
+  var mlSeg = document.getElementById("measure-line-seg");
+  var mlHL = document.getElementById("measure-handle-l");
+  var mlHR = document.getElementById("measure-handle-r");
+  if (measureLineEl && measureBtn && mlSeg && mlHL && mlHR) {
     var mlSvg = document.getElementById("measure-svg");
-    var mlSeg = document.getElementById("measure-line-seg");
     var mlLabelBox = document.getElementById("measure-label-box");
-    var mlHL = document.getElementById("measure-handle-l");
-    var mlHR = document.getElementById("measure-handle-r");
     function getHandleCenter(el) {
       if (!el) return { x: 0, y: 0 };
       var tag = (el.tagName || "").toLowerCase();
@@ -2476,6 +2481,7 @@ window.initRoomPlanner = function (opts) {
       return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
     function updateMeasureLabel() {
+      if (!mlSeg) return;
       var px = measureLength();
       var inVal = Math.round(px / PX_PER_INCH);
       if (mlLabelBox) {
@@ -2693,7 +2699,8 @@ window.initRoomPlanner = function (opts) {
     var tot = getRoomTotalInches(roomW_ft && roomW_ft.value, roomW_in && roomW_in.value, roomD_ft && roomD_ft.value, roomD_in && roomD_in.value);
     return { widthFt: roomW_ft && roomW_ft.value, widthIn: roomW_in && roomW_in.value, depthFt: roomD_ft && roomD_ft.value, depthIn: roomD_in && roomD_in.value, widthTotalIn: tot.widthIn, depthTotalIn: tot.depthIn };
   }
-  document.getElementById("saveLayout").onclick = function () {
+  var saveLayoutBtn = document.getElementById("saveLayout");
+  if (saveLayoutBtn) saveLayoutBtn.onclick = function () {
     var counts = getCounts();
     var layout = serializeLayout();
     var seatCount = calculateSeatCount();
