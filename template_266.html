@@ -5468,6 +5468,23 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     });
   }
 
+  function ensurePriceWithOptionsLabel(scope){
+    var root = scope || document;
+    var priceNode = root.querySelector('#priceWithOptions');
+    if (!priceNode) return;
+    var prev = priceNode.previousElementSibling;
+    if (prev && /price with selected options/i.test(prev.textContent || '')) return;
+    var label = root.querySelector('.option_pricing');
+    if (label && /price with selected options/i.test(label.textContent || '')) {
+      priceNode.parentNode.insertBefore(label, priceNode);
+      return;
+    }
+    label = document.createElement('span');
+    label.className = 'text colors_text option_pricing';
+    label.textContent = 'Price with Selected Options: ';
+    priceNode.parentNode.insertBefore(label, priceNode);
+  }
+
   function forceProductFixes() {
     if (!markProductPage()) return;
     var scope = document.querySelector('#content_area') || document.body;
@@ -5927,7 +5944,10 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     var form =
       (root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]') || {}).form ||
       root.querySelector('form[action*="ProductDetails.asp"]');
-    if (form) form.querySelectorAll('input[data-mc-seat-override]').forEach(function(el){ el.remove(); });
+    if (form) {
+      form.querySelectorAll('input[data-mc-seat-override]').forEach(function(el){ el.remove(); });
+      form.querySelectorAll('select[data-mc-disabled-by-planner]').forEach(function(s){ s.disabled = false; s.removeAttribute('data-mc-disabled-by-planner'); });
+    }
   }
 
   function setSeatDropdownTo(seatCount){
@@ -5995,15 +6015,13 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     if (!seatInfo || !seatInfo.name) return;
     setSeatDropdownTo(seatCount);
     form.querySelectorAll('input[data-mc-seat-override]').forEach(function(el){ el.remove(); });
-    /* Update any in-form fields with the same option name so Volusion
-       cannot read a stale/default value from another control first. */
-    form.querySelectorAll('input[name="' + seatInfo.name + '"], select[name="' + seatInfo.name + '"], textarea[name="' + seatInfo.name + '"]').forEach(function(el){
-      if (el.tagName === 'SELECT') el.value = seatInfo.value;
-      else {
-        el.value = seatInfo.value;
-        try { el.setAttribute('value', seatInfo.value); } catch(e){}
-      }
-    });
+    form.querySelectorAll('select[data-mc-disabled-by-planner]').forEach(function(s){ s.disabled = false; s.removeAttribute('data-mc-disabled-by-planner'); });
+    /* Disable the original select so only our hidden input is submitted.
+       Volusion may read the select first; disabled fields are excluded from form submission. */
+    if (seatInfo.select && seatInfo.select.form === form) {
+      seatInfo.select.disabled = true;
+      seatInfo.select.setAttribute('data-mc-disabled-by-planner', '1');
+    }
     var hid = document.createElement('input');
     hid.type = 'hidden';
     hid.name = seatInfo.name;

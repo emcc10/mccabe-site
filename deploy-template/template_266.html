@@ -5340,6 +5340,23 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     });
   }
 
+  function ensurePriceWithOptionsLabel(scope){
+    var root = scope || document;
+    var priceNode = root.querySelector('#priceWithOptions');
+    if (!priceNode) return;
+    var prev = priceNode.previousElementSibling;
+    if (prev && /price with selected options/i.test(prev.textContent || '')) return;
+    var label = root.querySelector('.option_pricing');
+    if (label && /price with selected options/i.test(label.textContent || '')) {
+      priceNode.parentNode.insertBefore(label, priceNode);
+      return;
+    }
+    label = document.createElement('span');
+    label.className = 'text colors_text option_pricing';
+    label.textContent = 'Price with Selected Options: ';
+    priceNode.parentNode.insertBefore(label, priceNode);
+  }
+
   function forceProductFixes() {
     if (!markProductPage()) return;
     var scope = document.querySelector('#content_area') || document.body;
