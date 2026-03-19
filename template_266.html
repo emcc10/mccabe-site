@@ -5990,30 +5990,47 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     };
   }
 
-  /* Re-sync dropdown and restore planner price on form submit so Volusion can't reset it */
+  /* Re-sync dropdown right before add-to-cart so Volusion submits the planner value */
   var _formIntercepted = false;
   function interceptAddToCartForm(){
     if (_formIntercepted) return;
     var root = document.querySelector('#content_area') || document.body;
     var btn = root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
-    var form = btn && btn.form ? btn.form : root.querySelector('form[action*="ProductDetails.asp"]');
-    if (!form) return;
+    if (!btn) return;
+    var form = btn.form || root.querySelector('form[action*="ProductDetails.asp"]');
     _formIntercepted = true;
 
     function syncBeforeSubmit(){
       var sc = window.__mcPlannerSeatCount;
       if (!sc || sc < 1) return;
-      syncSeatCountToVolusion(sc);
       var sel = findSeatSelect();
-      if (sel) console.log('[MC Planner] At submit: dropdown name=' + sel.name + ' value=' + sel.value);
+      var valBefore = sel ? sel.value : '?';
+      syncSeatCountToVolusion(sc);
+      var valAfter = sel ? sel.value : '?';
+      console.log('[MC Planner] At submit: before=' + valBefore + ' after=' + valAfter + (sel ? ' name=' + sel.name : ''));
     }
 
-    form.addEventListener('submit', syncBeforeSubmit, true);
-    form.addEventListener('click', function(ev){
+    if (form) {
+      form.addEventListener('submit', syncBeforeSubmit, true);
+    }
+
+    /* Catch clicks on the button, icon, or wrapper */
+    document.addEventListener('click', function(ev){
       var t = ev.target;
-      if (t && (t.name === 'btnaddtocart' || (t.id && t.id.indexOf('btnaddtocart') !== -1))){
-        syncBeforeSubmit();
-      }
+      if (!t) return;
+      var isAtc = (t.name === 'btnaddtocart') ||
+                  (t.id && t.id.indexOf('btnaddtocart') !== -1) ||
+                  !!(t.closest && t.closest('.mc-atc-button-wrap, input[name="btnaddtocart"], button[name="btnaddtocart"]'));
+      if (isAtc) syncBeforeSubmit();
+    }, true);
+
+    document.addEventListener('mousedown', function(ev){
+      var t = ev.target;
+      if (!t) return;
+      var isAtc = (t.name === 'btnaddtocart') ||
+                  (t.id && t.id.indexOf('btnaddtocart') !== -1) ||
+                  !!(t.closest && t.closest('.mc-atc-button-wrap, input[name="btnaddtocart"], button[name="btnaddtocart"]'));
+      if (isAtc) syncBeforeSubmit();
     }, true);
   }
 
