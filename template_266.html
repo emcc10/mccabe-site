@@ -5944,10 +5944,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     var form =
       (root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]') || {}).form ||
       root.querySelector('form[action*="ProductDetails.asp"]');
-    if (form) {
-      form.querySelectorAll('input[data-mc-seat-override]').forEach(function(el){ el.remove(); });
-      form.querySelectorAll('select[data-mc-disabled-by-planner]').forEach(function(s){ s.disabled = false; s.removeAttribute('data-mc-disabled-by-planner'); });
-    }
+    if (form) form.querySelectorAll('input[data-mc-seat-override]').forEach(function(el){ el.remove(); });
   }
 
   function setSeatDropdownTo(seatCount){
@@ -6015,13 +6012,14 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     if (!seatInfo || !seatInfo.name) return;
     setSeatDropdownTo(seatCount);
     form.querySelectorAll('input[data-mc-seat-override]').forEach(function(el){ el.remove(); });
-    form.querySelectorAll('select[data-mc-disabled-by-planner]').forEach(function(s){ s.disabled = false; s.removeAttribute('data-mc-disabled-by-planner'); });
-    /* Disable the original select so only our hidden input is submitted.
-       Volusion may read the select first; disabled fields are excluded from form submission. */
-    if (seatInfo.select && seatInfo.select.form === form) {
-      seatInfo.select.disabled = true;
-      seatInfo.select.setAttribute('data-mc-disabled-by-planner', '1');
-    }
+    /* Keep select and any in-form fields in sync so Volusion's price display stays correct. */
+    form.querySelectorAll('input[name="' + seatInfo.name + '"], select[name="' + seatInfo.name + '"], textarea[name="' + seatInfo.name + '"]').forEach(function(el){
+      if (el.tagName === 'SELECT') el.value = seatInfo.value;
+      else {
+        el.value = seatInfo.value;
+        try { el.setAttribute('value', seatInfo.value); } catch(e){}
+      }
+    });
     var hid = document.createElement('input');
     hid.type = 'hidden';
     hid.name = seatInfo.name;
@@ -6107,12 +6105,25 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     }, true);
   }
 
+  function reapplyPlannerConfigAfterDomChange(){
+    if (!window.__mcPlannerConfigApplied || !window.__mcPlannerSeatCount || window.__mcPlannerSeatCount < 1) return;
+    if (!document.querySelector('input[name="ProductCode"]')) return;
+    var sc = window.__mcPlannerSeatCount;
+    setSeatDropdownTo(sc);
+    injectSeatOptionIntoForm(sc);
+    setFormQuantityToOne();
+    if (typeof window.updateProductPrice === 'function' && window.__mcPlannerPrice != null) {
+      window.updateProductPrice(window.__mcPlannerPrice);
+    }
+  }
+
   function runPatches(){
     patchProductTabs();
     patchRelatedItemImages();
     wrapApplyPlannerToPage();
     fetchPlannerDimensions();
     interceptAddToCartForm();
+    reapplyPlannerConfigAfterDomChange();
   }
 
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', runPatches);
@@ -6120,6 +6131,17 @@ body.productdetails .v-product-grid .v-product .v-product__price {
   window.addEventListener('load', runPatches);
   var _patchDelays = [500, 1500, 3500, 8000];
   _patchDelays.forEach(function(ms, i){ setTimeout(runPatches, ms); });
+
+  var _reapplyTimer;
+  var contentArea = document.querySelector('#content_area');
+  if (contentArea && !window.__mcPlannerContentObserver) {
+    window.__mcPlannerContentObserver = new MutationObserver(function(){
+      if (!document.body.classList.contains('mc-product-page')) return;
+      clearTimeout(_reapplyTimer);
+      _reapplyTimer = setTimeout(reapplyPlannerConfigAfterDomChange, 300);
+    });
+    window.__mcPlannerContentObserver.observe(contentArea, { childList: true, subtree: true });
+  }
 })();
 </script>
 
