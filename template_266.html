@@ -5610,18 +5610,29 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (!priceNode) return;
     var priceBox = priceNode.closest('.colors_pricebox') || root.querySelector('.colors_pricebox') || priceNode.parentNode;
     if (!priceBox) return;
+    function isLegacyLowestPriceNode(node){
+      if (!node) return false;
+      var txt = (node.textContent || '').trim().toLowerCase();
+      if (!/add to cart for our lowest price/i.test(txt)) return false;
+      if (node.querySelector && (node.querySelector('#priceWithOptions') || node.querySelector('#priceWithOptionsNoTax') || node.querySelector('.option_pricing'))) return false;
+      return true;
+    }
+
+    var directLegacyCaption = priceBox.querySelector('#priceWithOptionsNoTax + div');
+    if (!isLegacyLowestPriceNode(directLegacyCaption)) directLegacyCaption = null;
+    var fallbackLegacyCaption = priceBox.querySelector('#priceWithOptions + div');
+    if (!isLegacyLowestPriceNode(fallbackLegacyCaption)) fallbackLegacyCaption = null;
 
     var caption =
       priceBox.querySelector('.mc-member-price-caption') ||
-      priceBox.querySelector('#priceWithOptionsNoTax + div') ||
-      priceBox.querySelector('#priceWithOptions + div') ||
+      directLegacyCaption ||
+      fallbackLegacyCaption ||
       priceBox.querySelector('.mc-price-caption-moved');
 
     if (!caption) {
       var legacyNodes = qa('td, div, span, p, b, font, a', priceBox);
       for (var li = 0; li < legacyNodes.length; li++) {
-        var legacyTxt = (legacyNodes[li].textContent || '').trim().toLowerCase();
-        if (/add to cart for our lowest price/i.test(legacyTxt) && legacyNodes[li].children.length < 3) {
+        if (isLegacyLowestPriceNode(legacyNodes[li]) && legacyNodes[li].children.length < 3) {
           caption = legacyNodes[li];
           break;
         }
@@ -5643,15 +5654,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     caption.style.setProperty('display','block','important');
     caption.style.removeProperty('visibility');
     caption.style.removeProperty('opacity');
-
-    var strayNodes = qa('td, div, span, p, b, font, a', priceBox);
-    strayNodes.forEach(function(node){
-      if (node === caption || (caption.contains && caption.contains(node))) return;
-      var txt = (node.textContent || '').trim().toLowerCase();
-      if (/add to cart for our lowest price/i.test(txt)) {
-        node.style.setProperty('display', 'none', 'important');
-      }
-    });
+    if (directLegacyCaption && directLegacyCaption !== caption) directLegacyCaption.style.setProperty('display', 'none', 'important');
+    if (fallbackLegacyCaption && fallbackLegacyCaption !== caption) fallbackLegacyCaption.style.setProperty('display', 'none', 'important');
 
     var state = window.__mcMemberPricing || {};
     if (state.unlocked && state.memberSeatPrice > 0) {
