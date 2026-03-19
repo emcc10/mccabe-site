@@ -5995,12 +5995,21 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     if (!seatInfo || !seatInfo.name) return;
     setSeatDropdownTo(seatCount);
     form.querySelectorAll('input[data-mc-seat-override]').forEach(function(el){ el.remove(); });
+    /* Update any in-form fields with the same option name so Volusion
+       cannot read a stale/default value from another control first. */
+    form.querySelectorAll('input[name="' + seatInfo.name + '"], select[name="' + seatInfo.name + '"], textarea[name="' + seatInfo.name + '"]').forEach(function(el){
+      if (el.tagName === 'SELECT') el.value = seatInfo.value;
+      else {
+        el.value = seatInfo.value;
+        try { el.setAttribute('value', seatInfo.value); } catch(e){}
+      }
+    });
     var hid = document.createElement('input');
     hid.type = 'hidden';
     hid.name = seatInfo.name;
     hid.value = seatInfo.value;
     hid.setAttribute('data-mc-seat-override', '1');
-    form.appendChild(hid);
+    form.insertBefore(hid, form.firstChild);
     console.log('[MC Planner] Seat option injected: name=' + seatInfo.name + ' value=' + seatInfo.value + ' (for ' + seatCount + ' seats)');
   }
 
