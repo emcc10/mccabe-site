@@ -5607,15 +5607,29 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function renderMemberPricingCaption(scope){
     var root = scope || document;
     var priceNode = root.querySelector('#priceWithOptions');
-    if (!priceNode || !priceNode.parentNode) return;
+    if (!priceNode) return;
+    var priceBox = priceNode.closest('.colors_pricebox') || root.querySelector('.colors_pricebox') || priceNode.parentNode;
+    if (!priceBox) return;
 
     var caption =
       root.querySelector('.mc-member-price-caption') ||
       root.querySelector('.mc-price-caption-moved');
 
     if (!caption) {
+      var legacyNodes = qa('td, div, span, p, b, font, a', priceBox);
+      for (var li = 0; li < legacyNodes.length; li++) {
+        var legacyTxt = (legacyNodes[li].textContent || '').trim().toLowerCase();
+        if (/add to cart for our lowest price/i.test(legacyTxt) && legacyNodes[li].children.length < 3) {
+          caption = legacyNodes[li];
+          break;
+        }
+      }
+    }
+
+    if (!caption) {
       caption = document.createElement('div');
-      priceNode.parentNode.insertBefore(caption, priceNode.nextSibling);
+      var anchor = priceBox.querySelector('#priceWithOptionsNoTax') || priceNode.parentNode || priceNode;
+      if (anchor.parentNode) anchor.parentNode.insertBefore(caption, anchor.nextSibling);
     }
 
     caption.classList.add('mc-price-caption-moved', 'mc-member-price-caption');
@@ -5625,6 +5639,17 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     caption.style.setProperty('text-align','left','important');
     caption.style.setProperty('margin-left','-10px');
     caption.style.setProperty('display','block','important');
+    caption.style.removeProperty('visibility');
+    caption.style.removeProperty('opacity');
+
+    var strayNodes = qa('td, div, span, p, b, font, a', priceBox);
+    strayNodes.forEach(function(node){
+      if (node === caption || (caption.contains && caption.contains(node))) return;
+      var txt = (node.textContent || '').trim().toLowerCase();
+      if (/add to cart for our lowest price/i.test(txt) && node.children.length < 3) {
+        node.style.setProperty('display', 'none', 'important');
+      }
+    });
 
     var state = window.__mcMemberPricing || {};
     if (state.unlocked && state.memberSeatPrice > 0) {
