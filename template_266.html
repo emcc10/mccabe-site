@@ -6016,14 +6016,27 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       var valBefore = sel ? sel.value : '?';
       syncSeatCountToVolusion(sc);
       var valAfter = sel ? sel.value : '?';
-      var pc = (document.querySelector('input[name="ProductCode"]') || {}).value || '';
-      var qtyName = pc ? ('QTY.' + pc) : '';
-      if (form && qtyName && form[qtyName]) {
-        form[qtyName].value = '1';
-        try { form[qtyName].setAttribute('value', '1'); } catch (e) {}
+      var qtyTouched = [];
+      if (form) {
+        var qtyInputs = form.querySelectorAll('input[name], input[id]');
+        for (var qi = 0; qi < qtyInputs.length; qi++) {
+          var q = qtyInputs[qi];
+          var n = q.name || '';
+          var id = q.id || '';
+          var isQty =
+            /^QTY\./i.test(n) ||
+            /^QtyToAdd$/i.test(n) ||
+            /^Qty$/i.test(n) ||
+            /^Quantity$/i.test(n) ||
+            /^ProdQuantity$/i.test(n) ||
+            /qty|quantity/i.test(id);
+          if (!isQty) continue;
+          q.value = '1';
+          try { q.setAttribute('value', '1'); } catch (e) {}
+          qtyTouched.push((n || '(no-name)') + '=' + q.value);
+        }
       }
-      var qtyVal = (form && qtyName && form[qtyName]) ? form[qtyName].value : 'n/a';
-      console.log('[MC Planner] At submit: before=' + valBefore + ' after=' + valAfter + (sel ? ' name=' + sel.name : '') + ' qty(' + qtyName + ')=' + qtyVal);
+      console.log('[MC Planner] At submit: before=' + valBefore + ' after=' + valAfter + (sel ? ' name=' + sel.name : '') + ' qtyFields=[' + (qtyTouched.join(', ') || 'none') + ']');
     }
 
     if (form) {
