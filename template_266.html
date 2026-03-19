@@ -5612,8 +5612,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (!priceBox) return;
 
     var caption =
-      root.querySelector('.mc-member-price-caption') ||
-      root.querySelector('.mc-price-caption-moved');
+      priceBox.querySelector('.mc-member-price-caption') ||
+      priceBox.querySelector('#priceWithOptionsNoTax + div') ||
+      priceBox.querySelector('#priceWithOptions + div') ||
+      priceBox.querySelector('.mc-price-caption-moved');
 
     if (!caption) {
       var legacyNodes = qa('td, div, span, p, b, font, a', priceBox);
@@ -5646,7 +5648,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     strayNodes.forEach(function(node){
       if (node === caption || (caption.contains && caption.contains(node))) return;
       var txt = (node.textContent || '').trim().toLowerCase();
-      if (/add to cart for our lowest price/i.test(txt) && node.children.length < 3) {
+      if (/add to cart for our lowest price/i.test(txt)) {
         node.style.setProperty('display', 'none', 'important');
       }
     });
