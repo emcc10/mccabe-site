@@ -5992,6 +5992,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     hid.value = seatInfo.value;
     hid.setAttribute('data-mc-seat-override', '1');
     form.appendChild(hid);
+    console.log('[MC Planner] Seat option injected: name=' + seatInfo.name + ' value=' + seatInfo.value + ' (for ' + seatCount + ' seats)');
   }
 
   function setFormQuantityToOne(){
@@ -6051,6 +6052,12 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         injectSeatOptionIntoForm(sc);
         setFormQuantityToOne();
       }
+      var fd = new FormData(form);
+      var parts = [];
+      fd.forEach(function(v, k){ parts.push(k + '=' + v); });
+      console.log('[MC Planner] Form submit data (key fields):', parts.filter(function(p){
+        return /seat|qty|Qty|Quantity|Select|Option|Price|ProductCode/i.test(p);
+      }).join(', '));
     }, true);
     form.addEventListener('click', function(ev){
       var t = ev.target;
