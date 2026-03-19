@@ -5999,67 +5999,103 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     };
   }
 
-  /* Re-sync dropdown right before add-to-cart so Volusion submits the planner value */
+  /* Force a native submit path for planner adds (bypasses Volusion soft_add quantity logic). */
   var _formIntercepted = false;
+  var _nativeCartSubmitting = false;
   function interceptAddToCartForm(){
     if (_formIntercepted) return;
     var root = document.querySelector('#content_area') || document.body;
     var btn = root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
     if (!btn) return;
     var form = btn.form || root.querySelector('form[action*="ProductDetails.asp"]');
+    if (!form) return;
     _formIntercepted = true;
 
-    function syncBeforeSubmit(){
+    function applyPlannerFieldsForSubmit() {
       var sc = window.__mcPlannerSeatCount;
-      if (!sc || sc < 1) return;
+      if (!sc || sc < 1) return false;
       var sel = findSeatSelect();
       var valBefore = sel ? sel.value : '?';
       syncSeatCountToVolusion(sc);
       var valAfter = sel ? sel.value : '?';
+
       var qtyTouched = [];
-      if (form) {
-        var qtyInputs = form.querySelectorAll('input[name], input[id]');
-        for (var qi = 0; qi < qtyInputs.length; qi++) {
-          var q = qtyInputs[qi];
-          var n = q.name || '';
-          var id = q.id || '';
-          var isQty =
-            /^QTY\./i.test(n) ||
-            /^QtyToAdd$/i.test(n) ||
-            /^Qty$/i.test(n) ||
-            /^Quantity$/i.test(n) ||
-            /^ProdQuantity$/i.test(n) ||
-            /qty|quantity/i.test(id);
-          if (!isQty) continue;
-          q.value = '1';
-          try { q.setAttribute('value', '1'); } catch (e) {}
-          qtyTouched.push((n || '(no-name)') + '=' + q.value);
-        }
+      var qtyInputs = form.querySelectorAll('input[name], input[id]');
+      for (var qi = 0; qi < qtyInputs.length; qi++) {
+        var q = qtyInputs[qi];
+        var n = q.name || '';
+        var id = q.id || '';
+        var isQty =
+          /^QTY\./i.test(n) ||
+          /^QtyToAdd$/i.test(n) ||
+          /^Qty$/i.test(n) ||
+          /^Quantity$/i.test(n) ||
+          /^ProdQuantity$/i.test(n) ||
+          /qty|quantity/i.test(id);
+        if (!isQty) continue;
+        q.value = '1';
+        try { q.setAttribute('value', '1'); } catch (e) {}
+        qtyTouched.push((n || '(no-name)') + '=1');
       }
-      console.log('[MC Planner] At submit: before=' + valBefore + ' after=' + valAfter + (sel ? ' name=' + sel.name : '') + ' qtyFields=[' + (qtyTouched.join(', ') || 'none') + ']');
+
+      if (!qtyTouched.length) {
+        var qtyHidden = form.querySelector('input[data-mc-qty-fallback]');
+        if (!qtyHidden) {
+          qtyHidden = document.createElement('input');
+          qtyHidden.type = 'hidden';
+          qtyHidden.name = 'QtyToAdd';
+          qtyHidden.setAttribute('data-mc-qty-fallback', '1');
+          form.appendChild(qtyHidden);
+        }
+        qtyHidden.value = '1';
+        qtyTouched.push('QtyToAdd=1');
+      }
+
+      var submitHidden = form.querySelector('input[data-mc-submit-fallback]');
+      if (!submitHidden) {
+        submitHidden = document.createElement('input');
+        submitHidden.type = 'hidden';
+        submitHidden.name = 'btnaddtocart';
+        submitHidden.value = 'btnaddtocart';
+        submitHidden.setAttribute('data-mc-submit-fallback', '1');
+        form.appendChild(submitHidden);
+      }
+
+      console.log('[MC Planner] Native submit prep: before=' + valBefore + ' after=' + valAfter + (sel ? ' name=' + sel.name : '') + ' qtyFields=[' + qtyTouched.join(', ') + ']');
+      return true;
     }
 
-    if (form) {
-      form.addEventListener('submit', syncBeforeSubmit, true);
+    function submitNativeIfPlanner() {
+      if (_nativeCartSubmitting) return;
+      if (!applyPlannerFieldsForSubmit()) return;
+      _nativeCartSubmitting = true;
+      try {
+        HTMLFormElement.prototype.submit.call(form);
+      } finally {
+        setTimeout(function(){ _nativeCartSubmitting = false; }, 1500);
+      }
     }
 
-    /* Catch clicks on the button, icon, or wrapper */
+    form.addEventListener('submit', function(ev){
+      if (!window.__mcPlannerSeatCount || window.__mcPlannerSeatCount < 1) return;
+      ev.preventDefault();
+      if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+      ev.stopPropagation();
+      submitNativeIfPlanner();
+    }, true);
+
     document.addEventListener('click', function(ev){
       var t = ev.target;
       if (!t) return;
       var isAtc = (t.name === 'btnaddtocart') ||
                   (t.id && t.id.indexOf('btnaddtocart') !== -1) ||
                   !!(t.closest && t.closest('.mc-atc-button-wrap, input[name="btnaddtocart"], button[name="btnaddtocart"]'));
-      if (isAtc) syncBeforeSubmit();
-    }, true);
-
-    document.addEventListener('mousedown', function(ev){
-      var t = ev.target;
-      if (!t) return;
-      var isAtc = (t.name === 'btnaddtocart') ||
-                  (t.id && t.id.indexOf('btnaddtocart') !== -1) ||
-                  !!(t.closest && t.closest('.mc-atc-button-wrap, input[name="btnaddtocart"], button[name="btnaddtocart"]'));
-      if (isAtc) syncBeforeSubmit();
+      if (!isAtc) return;
+      if (!window.__mcPlannerSeatCount || window.__mcPlannerSeatCount < 1) return;
+      ev.preventDefault();
+      if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+      ev.stopPropagation();
+      submitNativeIfPlanner();
     }, true);
   }
 
