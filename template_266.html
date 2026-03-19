@@ -6016,7 +6016,14 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       var valBefore = sel ? sel.value : '?';
       syncSeatCountToVolusion(sc);
       var valAfter = sel ? sel.value : '?';
-      console.log('[MC Planner] At submit: before=' + valBefore + ' after=' + valAfter + (sel ? ' name=' + sel.name : ''));
+      var pc = (document.querySelector('input[name="ProductCode"]') || {}).value || '';
+      var qtyName = pc ? ('QTY.' + pc) : '';
+      if (form && qtyName && form[qtyName]) {
+        form[qtyName].value = '1';
+        try { form[qtyName].setAttribute('value', '1'); } catch (e) {}
+      }
+      var qtyVal = (form && qtyName && form[qtyName]) ? form[qtyName].value : 'n/a';
+      console.log('[MC Planner] At submit: before=' + valBefore + ' after=' + valAfter + (sel ? ' name=' + sel.name : '') + ' qty(' + qtyName + ')=' + qtyVal);
     }
 
     if (form) {
