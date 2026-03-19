@@ -1913,16 +1913,58 @@ function getPlannerSeatPrice(){
   return isNaN(n) ? 0 : n;
 }
 function getPlannerBaseSeatPriceForCalc(){
-  return getPlannerSeatPrice();
+  if (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) {
+    return window.__mcPerSeatPrice;
+  }
+  var p = getPlannerSeatPrice();
+  if (p > 0) window.__mcPerSeatPrice = p;
+  return p;
 }
-
 function updateProductPrice(totalPrice){
   if (totalPrice == null || isNaN(totalPrice) || totalPrice < 0) return;
+  window.__mcPriceWrittenAt = Date.now();
   var formatted = "$" + Number(totalPrice).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   var root = document.querySelector("#v65-product-parent, #content_area") || document.body;
   var targets = root.querySelectorAll("#priceWithOptions, .v65-product-price, .product_productprice, .product_sale_price, .product_sale_price b");
   for (var i = 0; i < targets.length; i++) { targets[i].textContent = formatted; }
 }
+(function(){
+  function readVolusionPerSeatPrice(){
+    var el = document.getElementById("priceWithOptions");
+    if (!el) el = document.querySelector(".v65-product-price, .product_productprice, [itemprop=\"price\"]");
+    if (!el) return 0;
+    var m = (el.textContent || "").match(/\$[\d,]+\.?\d*/);
+    if (!m) return 0;
+    return parseFloat(m[0].replace(/[$,]/g, "")) || 0;
+  }
+
+  function onOptionChange(e){
+    if (!e.target || e.target.tagName !== 'SELECT') return;
+    var row = e.target.closest ? e.target.closest('tr') : null;
+    if (row) {
+      var lbl = ((row.querySelector('td:first-child') || {}).textContent || '').toLowerCase();
+      if (lbl.indexOf('seat') !== -1 && lbl.indexOf('leather') === -1) return;
+    }
+    setTimeout(function(){
+      if (window.__mcPriceWrittenAt && (Date.now() - window.__mcPriceWrittenAt) < 2000) return;
+      var p = readVolusionPerSeatPrice();
+      if (p > 0) {
+        window.__mcPerSeatPrice = p;
+        console.log("[McCabe Planner] Per-seat price updated by option change:", p);
+      }
+    }, 600);
+  }
+
+  function watchOptionChanges(){
+    var table = document.querySelector('#options_table, table[id*="options_table"]');
+    if (!table || table.__mcWatched) return;
+    table.__mcWatched = true;
+    table.addEventListener('change', onOptionChange);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watchOptionChanges);
+  else watchOptionChanges();
+  window.addEventListener('load', watchOptionChanges);
+})();
 
 function ensurePriceWithOptionsLabel(scope){
   var root = scope || document;
@@ -2038,6 +2080,12 @@ var PIECE_DESCRIPTIONS = { "1L":"Single recliner.","2L":"Left-hand facing reclin
 
 window.applyPlannerToPage = function (payload) {
   if (!payload || typeof payload !== "object") return;
+
+  if (window.__mcPerSeatPrice == null || window.__mcPerSeatPrice <= 0) {
+    var freshSeatPrice = getPlannerSeatPrice();
+    if (freshSeatPrice > 0) window.__mcPerSeatPrice = freshSeatPrice;
+  }
+
   var opts = payload.options && typeof payload.options === "object" ? payload.options : {};
   var layout = payload.layout && Array.isArray(payload.layout) ? payload.layout : [];
   window.__ROOM_PLANNER_OPTIONS__ = opts;
