@@ -5495,13 +5495,21 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       if (tries > 40) clearInterval(t);
     }, 250);
 
-    // Watch product area for re-renders
+    // Watch product area for re-renders (debounced + re-entrancy guard to avoid freeze)
     var target = document.querySelector('#content_area') || document.body;
     if (target && !window.__mcProductFixObserver) {
+      var fixInProgress = false;
+      var fixTimer = null;
       window.__mcProductFixObserver = new MutationObserver(function(){
-        forceProductFixes();
+        if (fixInProgress) return;
+        if (fixTimer) clearTimeout(fixTimer);
+        fixTimer = setTimeout(function(){
+          fixTimer = null;
+          fixInProgress = true;
+          try { forceProductFixes(); } finally { fixInProgress = false; }
+        }, 300);
       });
-      window.__mcProductFixObserver.observe(target, { childList:true, subtree:true });
+      window.__mcProductFixObserver.observe(target, { childList:true, subtree:true, attributes:false });
     }
   }
 
@@ -6023,8 +6031,8 @@ body.productdetails .v-product-grid .v-product .v-product__price {
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', runPatches);
   else runPatches();
   window.addEventListener('load', runPatches);
-  var _pi = setInterval(runPatches, 500);
-  setTimeout(function(){ clearInterval(_pi); }, 15000);
+  var _patchDelays = [500, 1500, 3500, 8000];
+  _patchDelays.forEach(function(ms, i){ setTimeout(runPatches, ms); });
 })();
 </script>
 
