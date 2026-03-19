@@ -5964,8 +5964,17 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       var diff = Math.abs(optNum - seatCount);
       if (diff < bestDiff){ bestDiff = diff; bestOpt = sel.options[oi]; }
     }
-    if (bestOpt && sel.value !== bestOpt.value){
+    if (bestOpt){
+      for (var si = 0; si < sel.options.length; si++) {
+        sel.options[si].selected = false;
+        sel.options[si].removeAttribute('selected');
+      }
+      bestOpt.selected = true;
+      bestOpt.setAttribute('selected', 'selected');
+      sel.selectedIndex = bestOpt.index;
       sel.value = bestOpt.value;
+      try { if (window.jQuery) window.jQuery(sel).val(bestOpt.value); } catch (e) {}
+      sel.dispatchEvent(new Event('input', { bubbles: true }));
       sel.dispatchEvent(new Event('change', { bubbles: true }));
       console.log('[MC Planner] Synced seat count', seatCount, 'to dropdown value:', bestOpt.value, 'text:', bestOpt.text);
     }
