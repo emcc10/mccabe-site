@@ -6036,16 +6036,23 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       root.querySelector('form[action*="ProductDetails.asp"]');
     if (!form) return;
     var productCode = (root.querySelector('input[name="ProductCode"]') || {}).value || '';
-    var namesToTry = ['QtyToAdd', 'qty', 'Quantity', 'QTY.' + productCode, 'ProdQuantity', 'Qty'];
-    for (var i = 0; i < namesToTry.length; i++){
-      var qtyInput = form.querySelector('input[name="' + namesToTry[i] + '"]');
-      if (qtyInput){ qtyInput.value = '1'; qtyInput.setAttribute('value', '1'); return; }
+    var pcUpper = productCode ? productCode.toUpperCase() : '';
+    var namesToTry = ['QtyToAdd', 'qty', 'Quantity', 'ProdQuantity', 'Qty'];
+    if (productCode) namesToTry.push('QTY.' + productCode);
+    if (pcUpper && pcUpper !== productCode) namesToTry.push('QTY.' + pcUpper);
+    var found = false;
+    namesToTry.forEach(function(n){
+      form.querySelectorAll('input[name="' + n + '"]').forEach(function(q){
+        q.value = '1'; q.setAttribute('value', '1'); found = true;
+      });
+    });
+    if (!found) {
+      var qtyInput = document.createElement('input');
+      qtyInput.type = 'hidden';
+      qtyInput.name = 'QtyToAdd';
+      qtyInput.value = '1';
+      form.appendChild(qtyInput);
     }
-    var qtyInput = document.createElement('input');
-    qtyInput.type = 'hidden';
-    qtyInput.name = 'QtyToAdd';
-    qtyInput.value = '1';
-    form.appendChild(qtyInput);
   }
 
   var _applyWrapped = false;
@@ -6086,22 +6093,33 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         setSeatDropdownTo(sc);
         injectSeatOptionIntoForm(sc);
         setFormQuantityToOne();
+        try {
+          var fd = new FormData(form);
+          var parts = [];
+          fd.forEach(function(v, k){ if (/seat|qty|Qty|Quantity|Select|Option|ProductCode/i.test(k)) parts.push(k + '=' + v); });
+          console.log('[MC Planner] Form submit:', parts.join(', '));
+        } catch(e){}
       } else {
         clearSeatOverrideFromForm();
       }
     }, true);
+    function onAddToCartAction(){
+      if (window.__mcPlannerConfigApplied && window.__mcPlannerSeatCount > 0){
+        var sc = window.__mcPlannerSeatCount;
+        setSeatDropdownTo(sc);
+        injectSeatOptionIntoForm(sc);
+        setFormQuantityToOne();
+      } else {
+        clearSeatOverrideFromForm();
+      }
+    }
+    form.addEventListener('mousedown', function(ev){
+      var t = ev.target;
+      if (t && (t.name === 'btnaddtocart' || (t.id && t.id.indexOf('btnaddtocart') !== -1))) onAddToCartAction();
+    }, true);
     form.addEventListener('click', function(ev){
       var t = ev.target;
-      if (t && (t.name === 'btnaddtocart' || (t.id && t.id.indexOf('btnaddtocart') !== -1))){
-        if (window.__mcPlannerConfigApplied && window.__mcPlannerSeatCount > 0){
-          var sc = window.__mcPlannerSeatCount;
-          setSeatDropdownTo(sc);
-          injectSeatOptionIntoForm(sc);
-          setFormQuantityToOne();
-        } else {
-          clearSeatOverrideFromForm();
-        }
-      }
+      if (t && (t.name === 'btnaddtocart' || (t.id && t.id.indexOf('btnaddtocart') !== -1))) onAddToCartAction();
     }, true);
   }
 
@@ -6112,9 +6130,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     setSeatDropdownTo(sc);
     injectSeatOptionIntoForm(sc);
     setFormQuantityToOne();
-    if (typeof window.updateProductPrice === 'function' && window.__mcPlannerPrice != null) {
-      window.updateProductPrice(window.__mcPlannerPrice);
-    }
+    /* Let Volusion update price from select; avoid calling updateProductPrice here to prevent flicker. */
   }
 
   function runPatches(){
@@ -6131,17 +6147,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
   window.addEventListener('load', runPatches);
   var _patchDelays = [500, 1500, 3500, 8000];
   _patchDelays.forEach(function(ms, i){ setTimeout(runPatches, ms); });
-
-  var _reapplyTimer;
-  var contentArea = document.querySelector('#content_area');
-  if (contentArea && !window.__mcPlannerContentObserver) {
-    window.__mcPlannerContentObserver = new MutationObserver(function(){
-      if (!document.body.classList.contains('mc-product-page')) return;
-      clearTimeout(_reapplyTimer);
-      _reapplyTimer = setTimeout(reapplyPlannerConfigAfterDomChange, 300);
-    });
-    window.__mcPlannerContentObserver.observe(contentArea, { childList: true, subtree: true });
-  }
+  /* No MutationObserver - it caused price flicker by fighting Volusion's updates. */
 })();
 </script>
 
