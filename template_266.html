@@ -5937,10 +5937,9 @@ body.productdetails .v-product-grid .v-product .v-product__price {
   }
 
   /* ---- PATCH 4: Sync planner seat count to Volusion "Number of Seats" dropdown for correct cart pricing ---- */
-  function syncSeatCountToVolusion(seatCount){
-    if (!seatCount || seatCount < 1) return;
+  function findSeatSelect(){
     var table = document.querySelector('#options_table, table[id*="options_table"]');
-    if (!table) return;
+    if (!table) return null;
     var rows = table.querySelectorAll('tr');
     for (var ri = 0; ri < rows.length; ri++){
       var labelCell = rows[ri].querySelector('td:first-child');
@@ -5948,20 +5947,27 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       if (labelText.indexOf('seat') === -1) continue;
       if (/leather|cover|configuration|straight|curved/i.test(labelText)) continue;
       var sel = rows[ri].querySelector('select');
-      if (!sel) continue;
-      var bestOpt = null, bestDiff = 999;
-      for (var oi = 0; oi < sel.options.length; oi++){
-        var optNum = parseInt((sel.options[oi].text || '').replace(/[^0-9]/g, ''));
-        if (isNaN(optNum)) continue;
-        var diff = Math.abs(optNum - seatCount);
-        if (diff < bestDiff){ bestDiff = diff; bestOpt = sel.options[oi]; }
-      }
-      if (bestOpt && sel.value !== bestOpt.value){
-        sel.value = bestOpt.value;
-        sel.dispatchEvent(new Event('change', { bubbles: true }));
-        console.log('[MC Planner] Synced seat count', seatCount, 'to dropdown:', bestOpt.text);
-      }
+      if (sel) return sel;
       break;
+    }
+    return null;
+  }
+
+  function syncSeatCountToVolusion(seatCount){
+    if (!seatCount || seatCount < 1) return;
+    var sel = findSeatSelect();
+    if (!sel) return;
+    var bestOpt = null, bestDiff = 999;
+    for (var oi = 0; oi < sel.options.length; oi++){
+      var optNum = parseInt((sel.options[oi].text || '').replace(/[^0-9]/g, ''));
+      if (isNaN(optNum)) continue;
+      var diff = Math.abs(optNum - seatCount);
+      if (diff < bestDiff){ bestDiff = diff; bestOpt = sel.options[oi]; }
+    }
+    if (bestOpt && sel.value !== bestOpt.value){
+      sel.value = bestOpt.value;
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+      console.log('[MC Planner] Synced seat count', seatCount, 'to dropdown value:', bestOpt.value, 'text:', bestOpt.text);
     }
   }
 
@@ -5984,11 +5990,39 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     };
   }
 
+  /* Re-sync dropdown and restore planner price on form submit so Volusion can't reset it */
+  var _formIntercepted = false;
+  function interceptAddToCartForm(){
+    if (_formIntercepted) return;
+    var root = document.querySelector('#content_area') || document.body;
+    var btn = root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
+    var form = btn && btn.form ? btn.form : root.querySelector('form[action*="ProductDetails.asp"]');
+    if (!form) return;
+    _formIntercepted = true;
+
+    function syncBeforeSubmit(){
+      var sc = window.__mcPlannerSeatCount;
+      if (!sc || sc < 1) return;
+      syncSeatCountToVolusion(sc);
+      var sel = findSeatSelect();
+      if (sel) console.log('[MC Planner] At submit: dropdown name=' + sel.name + ' value=' + sel.value);
+    }
+
+    form.addEventListener('submit', syncBeforeSubmit, true);
+    form.addEventListener('click', function(ev){
+      var t = ev.target;
+      if (t && (t.name === 'btnaddtocart' || (t.id && t.id.indexOf('btnaddtocart') !== -1))){
+        syncBeforeSubmit();
+      }
+    }, true);
+  }
+
   function runPatches(){
     patchProductTabs();
     patchRelatedItemImages();
     wrapApplyPlannerToPage();
     fetchPlannerDimensions();
+    interceptAddToCartForm();
   }
 
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', runPatches);
