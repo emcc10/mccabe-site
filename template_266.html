@@ -5944,7 +5944,10 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     var form =
       (root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]') || {}).form ||
       root.querySelector('form[action*="ProductDetails.asp"]');
-    if (form) form.querySelectorAll('input[data-mc-seat-override]').forEach(function(el){ el.remove(); });
+    if (form) {
+      form.querySelectorAll('input[data-mc-seat-override]').forEach(function(el){ el.remove(); });
+      form.querySelectorAll('input[data-mc-qty-override]').forEach(function(el){ el.remove(); });
+    }
   }
 
   function setSeatDropdownTo(seatCount){
@@ -6037,21 +6040,31 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     if (!form) return;
     var productCode = (root.querySelector('input[name="ProductCode"]') || {}).value || '';
     var pcUpper = productCode ? productCode.toUpperCase() : '';
-    var namesToTry = ['QtyToAdd', 'qty', 'Quantity', 'ProdQuantity', 'Qty'];
-    if (productCode) namesToTry.push('QTY.' + productCode);
-    if (pcUpper && pcUpper !== productCode) namesToTry.push('QTY.' + pcUpper);
-    var found = false;
-    namesToTry.forEach(function(n){
-      form.querySelectorAll('input[name="' + n + '"]').forEach(function(q){
-        q.value = '1'; q.setAttribute('value', '1'); found = true;
-      });
+    var qtyNames = ['QtyToAdd', 'qty', 'Quantity', 'ProdQuantity', 'Qty'];
+    if (productCode) qtyNames.push('QTY.' + productCode);
+    if (pcUpper && pcUpper !== productCode) qtyNames.push('QTY.' + pcUpper);
+    form.querySelectorAll('input[data-mc-qty-override]').forEach(function(q){ q.remove(); });
+    /* Remove existing quantity inputs to avoid duplicate values (e.g. 1+1=2 in cart). */
+    qtyNames.forEach(function(n){
+      form.querySelectorAll('input[name="' + n + '"]').forEach(function(q){ q.remove(); });
     });
-    if (!found) {
-      var qtyInput = document.createElement('input');
-      qtyInput.type = 'hidden';
-      qtyInput.name = 'QtyToAdd';
-      qtyInput.value = '1';
-      form.appendChild(qtyInput);
+    form.querySelectorAll('select[name*="Qty"], select[name*="Quantity"], select[id*="qty"], select[id*="Quantity"]').forEach(function(s){
+      var opt1 = s.querySelector('option[value="1"]') || s.querySelector('option[value=\'1\']');
+      if (opt1) { s.value = '1'; s.dispatchEvent(new Event('change', { bubbles: true })); }
+    });
+    var hid = document.createElement('input');
+    hid.type = 'hidden';
+    hid.name = 'QtyToAdd';
+    hid.value = '1';
+    hid.setAttribute('data-mc-qty-override', '1');
+    form.appendChild(hid);
+    if (productCode) {
+      var hid2 = document.createElement('input');
+      hid2.type = 'hidden';
+      hid2.name = 'QTY.' + productCode;
+      hid2.value = '1';
+      hid2.setAttribute('data-mc-qty-override', '1');
+      form.appendChild(hid2);
     }
   }
 
