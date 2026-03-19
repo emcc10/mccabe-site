@@ -5430,7 +5430,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function rearrangePriceCaption(scope){
     var root = scope || document;
     if (root.querySelector('.mc-price-caption-moved')) return;
-    var allTds = qa('td, div, span, p, b, font', root);
+    var parent = root.querySelector('#v65-product-parent') || root.querySelector('#content_area') || root;
+    var allTds = qa('td, div, span, p, b, font', parent);
+    if (allTds.length > 500) allTds = allTds.slice(0, 500);
     var lowestEl = null;
     var priceLabel = null;
     for (var i = 0; i < allTds.length; i++){
@@ -5486,31 +5488,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function boot() {
     forceProductFixes();
-
-    // keep hitting it because Volusion rewrites chunks late
     var tries = 0;
     var t = setInterval(function () {
       tries++;
       forceProductFixes();
-      if (tries > 40) clearInterval(t);
-    }, 250);
-
-    // Watch product area for re-renders (debounced + re-entrancy guard to avoid freeze)
-    var target = document.querySelector('#content_area') || document.body;
-    if (target && !window.__mcProductFixObserver) {
-      var fixInProgress = false;
-      var fixTimer = null;
-      window.__mcProductFixObserver = new MutationObserver(function(){
-        if (fixInProgress) return;
-        if (fixTimer) clearTimeout(fixTimer);
-        fixTimer = setTimeout(function(){
-          fixTimer = null;
-          fixInProgress = true;
-          try { forceProductFixes(); } finally { fixInProgress = false; }
-        }, 300);
-      });
-      window.__mcProductFixObserver.observe(target, { childList:true, subtree:true, attributes:false });
-    }
+      if (tries >= 6) clearInterval(t);
+    }, 600);
   }
 
   if (document.readyState === 'loading') {
@@ -5519,12 +5502,15 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     boot();
   }
 
+  var _resizeTimer;
   window.addEventListener('resize', function(){
-    if (document.body.classList.contains('mc-product-page')) forceProductFixes();
+    if (!document.body.classList.contains('mc-product-page')) return;
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(forceProductFixes, 400);
   });
 
   window.addEventListener('orientationchange', function(){
-    if (document.body.classList.contains('mc-product-page')) forceProductFixes();
+    if (document.body.classList.contains('mc-product-page')) setTimeout(forceProductFixes, 400);
   });
 })();
 </script>
@@ -5645,16 +5631,16 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   window.addEventListener('load', function(){ stripLeadingPriceColons(document); });
 
   if (!window.__mcPriceColonObserver) {
-    var scheduled = false;
+    var lastRun = 0;
+    var minInterval = 2500;
     window.__mcPriceColonObserver = new MutationObserver(function(){
-      if (scheduled) return;
-      scheduled = true;
-      setTimeout(function(){
-        scheduled = false;
-        stripLeadingPriceColons(document);
-      }, 120);
+      var now = Date.now();
+      if (now - lastRun < minInterval) return;
+      lastRun = now;
+      setTimeout(function(){ stripLeadingPriceColons(document); }, 200);
     });
-    window.__mcPriceColonObserver.observe(document.body, { childList: true, subtree: true });
+    var contentArea = document.querySelector('#content_area');
+    window.__mcPriceColonObserver.observe(contentArea || document.body, { childList: true, subtree: true });
   }
 })();
 </script>
