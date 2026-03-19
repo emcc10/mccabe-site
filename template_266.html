@@ -5919,7 +5919,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     });
   }
 
-  /* ---- PATCH 4: Cart total = Volusion option price for (seat count). Set dropdown to seat count, qty=1. ---- */
+  /* ---- PATCH 4: Cart total = option price for seat count. Sync dropdown and inject seat option into form so it submits. ---- */
 
   function setSeatDropdownTo(seatCount){
     if (!seatCount || seatCount < 1) return;
@@ -5940,13 +5940,58 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         var diff = Math.abs(optNum - seatCount);
         if (diff < bestDiff){ bestDiff = diff; bestOpt = sel.options[oi]; }
       }
-      if (bestOpt && sel.value !== bestOpt.value){
+      if (bestOpt){
         sel.value = bestOpt.value;
         sel.dispatchEvent(new Event('change', { bubbles: true }));
         try { if (window.jQuery) window.jQuery(sel).trigger('change'); } catch(e){}
+        return { name: sel.name, value: bestOpt.value };
       }
       break;
     }
+    return null;
+  }
+
+  function getSeatSelectAndOption(seatCount){
+    if (!seatCount || seatCount < 1) return null;
+    var table = document.querySelector('#options_table, table[id*="options_table"]');
+    if (!table) return null;
+    var rows = table.querySelectorAll('tr');
+    for (var ri = 0; ri < rows.length; ri++){
+      var labelCell = rows[ri].querySelector('td:first-child');
+      var labelText = ((labelCell && labelCell.textContent) || '').toLowerCase();
+      if (labelText.indexOf('seat') === -1) continue;
+      if (/leather|cover|configuration|straight|curved/i.test(labelText)) continue;
+      var sel = rows[ri].querySelector('select');
+      if (!sel) continue;
+      var bestOpt = null, bestDiff = 999;
+      for (var oi = 0; oi < sel.options.length; oi++){
+        var optNum = parseInt((sel.options[oi].text || '').replace(/[^0-9]/g, ''));
+        if (isNaN(optNum)) continue;
+        var diff = Math.abs(optNum - seatCount);
+        if (diff < bestDiff){ bestDiff = diff; bestOpt = sel.options[oi]; }
+      }
+      if (bestOpt) return { select: sel, name: sel.name, value: bestOpt.value };
+      break;
+    }
+    return null;
+  }
+
+  function injectSeatOptionIntoForm(seatCount){
+    var root = document.querySelector('#content_area') || document.body;
+    var form =
+      (root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]') || {}).form ||
+      root.querySelector('form[action*="ProductDetails.asp"]');
+    if (!form) return;
+    var seatInfo = getSeatSelectAndOption(seatCount);
+    if (!seatInfo || !seatInfo.name) return;
+    setSeatDropdownTo(seatCount);
+    form.querySelectorAll('input[data-mc-seat-override]').forEach(function(el){ el.remove(); });
+    var hid = document.createElement('input');
+    hid.type = 'hidden';
+    hid.name = seatInfo.name;
+    hid.value = seatInfo.value;
+    hid.setAttribute('data-mc-seat-override', '1');
+    form.appendChild(hid);
   }
 
   function setFormQuantityToOne(){
@@ -5985,6 +6030,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       }
       if (sc > 0){
         setSeatDropdownTo(sc);
+        injectSeatOptionIntoForm(sc);
         setFormQuantityToOne();
       }
     };
@@ -6002,9 +6048,21 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       var sc = window.__mcPlannerSeatCount;
       if (sc && sc > 0){
         setSeatDropdownTo(sc);
+        injectSeatOptionIntoForm(sc);
         setFormQuantityToOne();
       }
-    });
+    }, true);
+    form.addEventListener('click', function(ev){
+      var t = ev.target;
+      if (t && (t.name === 'btnaddtocart' || (t.id && t.id.indexOf('btnaddtocart') !== -1))){
+        var sc = window.__mcPlannerSeatCount;
+        if (sc && sc > 0){
+          setSeatDropdownTo(sc);
+          injectSeatOptionIntoForm(sc);
+          setFormQuantityToOne();
+        }
+      }
+    }, true);
   }
 
   function runPatches(){
