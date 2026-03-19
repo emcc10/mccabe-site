@@ -5919,7 +5919,16 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     });
   }
 
-  /* ---- PATCH 4: Cart total = option price for seat count. Sync dropdown and inject seat option into form so it submits. ---- */
+  /* ---- PATCH 4: Cart total = option price for seat count. Only override when user has applied a planner config. ---- */
+  window.__mcPlannerConfigApplied = false;
+
+  function clearSeatOverrideFromForm(){
+    var root = document.querySelector('#content_area') || document.body;
+    var form =
+      (root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]') || {}).form ||
+      root.querySelector('form[action*="ProductDetails.asp"]');
+    if (form) form.querySelectorAll('input[data-mc-seat-override]').forEach(function(el){ el.remove(); });
+  }
 
   function setSeatDropdownTo(seatCount){
     if (!seatCount || seatCount < 1) return;
@@ -6030,6 +6039,7 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         Object.keys(opts).forEach(function(k){ sc += (k === '4L') ? ((opts[k]||0)*2) : (opts[k]||0); });
       }
       if (sc > 0){
+        window.__mcPlannerConfigApplied = true;
         setSeatDropdownTo(sc);
         injectSeatOptionIntoForm(sc);
         setFormQuantityToOne();
@@ -6046,27 +6056,25 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     if (!form) return;
     _formIntercepted = true;
     form.addEventListener('submit', function(){
-      var sc = window.__mcPlannerSeatCount;
-      if (sc && sc > 0){
+      if (window.__mcPlannerConfigApplied && window.__mcPlannerSeatCount > 0){
+        var sc = window.__mcPlannerSeatCount;
         setSeatDropdownTo(sc);
         injectSeatOptionIntoForm(sc);
         setFormQuantityToOne();
+      } else {
+        clearSeatOverrideFromForm();
       }
-      var fd = new FormData(form);
-      var parts = [];
-      fd.forEach(function(v, k){ parts.push(k + '=' + v); });
-      console.log('[MC Planner] Form submit data (key fields):', parts.filter(function(p){
-        return /seat|qty|Qty|Quantity|Select|Option|Price|ProductCode/i.test(p);
-      }).join(', '));
     }, true);
     form.addEventListener('click', function(ev){
       var t = ev.target;
       if (t && (t.name === 'btnaddtocart' || (t.id && t.id.indexOf('btnaddtocart') !== -1))){
-        var sc = window.__mcPlannerSeatCount;
-        if (sc && sc > 0){
+        if (window.__mcPlannerConfigApplied && window.__mcPlannerSeatCount > 0){
+          var sc = window.__mcPlannerSeatCount;
           setSeatDropdownTo(sc);
           injectSeatOptionIntoForm(sc);
           setFormQuantityToOne();
+        } else {
+          clearSeatOverrideFromForm();
         }
       }
     }, true);
