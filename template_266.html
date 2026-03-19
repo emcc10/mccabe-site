@@ -5577,23 +5577,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     });
   }
 
-  function rearrangePriceCaption(scope){
-    var root = scope || document;
-    var parent = root.querySelector('#v65-product-parent') || root.querySelector('#content_area') || root;
-    var allTds = qa('td, div, span, p, b, font', parent);
-    if (allTds.length > 500) allTds = allTds.slice(0, 500);
-    var lowestEl = null;
-    var priceLabel = null;
-    for (var i = 0; i < allTds.length; i++){
-      var txt = (allTds[i].textContent || '').trim().toLowerCase();
-      if (!lowestEl && /add to cart for our lowest price/i.test(txt) && allTds[i].children.length < 3) lowestEl = allTds[i];
-      if (!priceLabel && /price with selected options/i.test(txt) && allTds[i].children.length < 3) priceLabel = allTds[i];
-    }
-    if (lowestEl && !lowestEl.classList.contains('mc-price-caption-moved')) {
-      lowestEl.classList.add('mc-price-caption-moved');
-      lowestEl.style.setProperty('display','none','important');
-    }
-  }
+  function rearrangePriceCaption(scope){ /* handled by renderMemberPricingCaption */ }
 
   function renderMemberPricingCaption(scope){
     var root = scope || document;
@@ -5619,18 +5603,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       legacyDiv.classList.add('mc-price-caption-moved');
     }
 
-    // Also hide any other "Add to cart for lowest price" nodes anywhere in root (belt-and-suspenders)
-    var allNodes = qa('div, td, span, p', root);
-    for (var ai = 0; ai < allNodes.length; ai++) {
-      var n = allNodes[ai];
-      if (n === legacyDiv || n.classList.contains('mc-member-price-caption')) continue;
-      var ntxt = (n.textContent || '').toLowerCase();
-      if (/add to cart for our lowest price/i.test(ntxt) && n.children.length < 3 && !n.querySelector('#priceWithOptions') && !n.querySelector('#priceWithOptionsNoTax')) {
-        n.style.setProperty('display', 'none', 'important');
-        n.classList.add('mc-price-caption-moved');
-      }
-    }
-
     // Find or create the member caption, inserted right after anchorEl (or after legacyDiv if found)
     var caption = root.querySelector('.mc-member-price-caption');
     if (!caption) {
@@ -5648,6 +5620,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     caption.style.setProperty('display','block','important');
     caption.style.removeProperty('visibility');
     caption.style.removeProperty('opacity');
+
+    var returnTo = encodeURIComponent((window.location.pathname || '/') + (window.location.search || ''));
+    var loginUrl = '/login.asp?ReturnTo=' + returnTo;
+    var createUrl = '/AccountSettings.asp?AddNewCustomer=Y&ReturnTo=' + returnTo;
 
     var state = window.__mcMemberPricing || {};
     if (state.unlocked && state.memberSeatPrice > 0) {
@@ -5668,9 +5644,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     caption.innerHTML =
       '<span class="mc-member-price-caption__label">Exclusive pricing for members</span>' +
       '<span class="mc-member-price-caption__actions">' +
-        '<a class="mc-member-price-caption__cta" href="' + getMemberLoginUrl() + '">Log in</a>' +
+        '<a class="mc-member-price-caption__cta" href="' + loginUrl + '">Log in</a>' +
         '<span class="mc-member-price-caption__sep">or</span>' +
-        '<a class="mc-member-price-caption__cta" href="' + getMemberCreateAccountUrl() + '">Create account</a>' +
+        '<a class="mc-member-price-caption__cta" href="' + createUrl + '">Create account</a>' +
       '</span>';
     caption.setAttribute('data-mc-member-state', 'locked');
   }
