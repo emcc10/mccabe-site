@@ -1912,7 +1912,145 @@ function getPlannerSeatPrice(){
   console.log("[McCabe Planner] getPlannerSeatPrice:", n, "from text:", text.trim().substring(0, 80));
   return isNaN(n) ? 0 : n;
 }
+function parseMcCurrency(text){
+  var src = text == null ? "" : String(text);
+  var m = src.match(/\$[\d,]+(?:\.\d+)?/);
+  if (!m) {
+    var raw = src.replace(/[^0-9.]/g, "");
+    var parsed = parseFloat(raw);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+  return parseFloat(m[0].replace(/[$,]/g, "")) || 0;
+}
+function formatMcCurrency(value){
+  return "$" + Number(value || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+function getDisplayedPublicSeatPrice(){
+  var candidates = [
+    document.querySelector('#v65-product-parent [itemprop="price"]'),
+    document.querySelector('#v65-product-parent .product_productprice'),
+    document.querySelector('#priceWithOptionsNoTax'),
+    document.querySelector('#priceWithOptions')
+  ];
+  for (var i = 0; i < candidates.length; i++) {
+    var el = candidates[i];
+    if (!el) continue;
+    var content = el.getAttribute && (el.getAttribute('content') || el.getAttribute('value'));
+    var n = parseMcCurrency(content || el.textContent || "");
+    if (n > 0) return n;
+  }
+  return getPlannerSeatPrice();
+}
+window.__mcMemberPricing = window.__mcMemberPricing || {
+  checked: false,
+  unlocked: false,
+  memberSeatPrice: 0,
+  publicSeatPrice: 0,
+  delta: null,
+  promise: null
+};
+function extractMemberSeatPriceFromHtml(html, publicSeatPrice){
+  if (!html) return 0;
+  var parser = new DOMParser();
+  var doc = parser.parseFromString(html, "text/html");
+  var priceBox =
+    doc.querySelector('#v65-product-parent .colors_pricebox') ||
+    doc.querySelector('#v65-product-parent') ||
+    doc.querySelector('#content_area') ||
+    doc.body;
+  if (!priceBox) return 0;
+  var matches = (priceBox.textContent || "").match(/\$[\d,]+(?:\.\d+)?/g) || [];
+  var seen = {};
+  var publicPrice = Number(publicSeatPrice || 0);
+  var memberPrice = 0;
+  for (var i = 0; i < matches.length; i++) {
+    var price = parseMcCurrency(matches[i]);
+    if (!(price > 0)) continue;
+    var key = String(price);
+    if (seen[key]) continue;
+    seen[key] = true;
+    if (publicPrice > 0 && price < publicPrice) {
+      if (!memberPrice || price < memberPrice) memberPrice = price;
+    }
+  }
+  return memberPrice;
+}
+function getMemberLoginUrl(){
+  var returnTo = encodeURIComponent((window.location.pathname || "/") + (window.location.search || ""));
+  return "/login.asp?ReturnTo=" + returnTo;
+}
+function getMemberCreateAccountUrl(){
+  var returnTo = encodeURIComponent((window.location.pathname || "/") + (window.location.search || ""));
+  return "/AccountSettings.asp?AddNewCustomer=Y&ReturnTo=" + returnTo;
+}
+function refreshPlannerPriceForMemberState(){
+  if (!window.__mcPlannerConfigApplied || !window.__mcPlannerCounts) return;
+  var totalPrice = calculatePlannerPrice(window.__mcPlannerCounts, getPlannerBaseSeatPriceForCalc());
+  if (!(totalPrice > 0)) return;
+  updateProductPrice(totalPrice);
+  window.__mcPlannerPrice = totalPrice;
+}
+function detectMemberPricingState(){
+  if (window.__mcMemberPricing.promise) return window.__mcMemberPricing.promise;
+  window.__mcMemberPricing.promise = fetch("/myaccount.asp", {
+    credentials: "same-origin",
+    cache: "no-store"
+  }).then(function(resp){
+    return resp.text();
+  }).then(function(accountHtml){
+    var state = window.__mcMemberPricing;
+    state.checked = true;
+    state.unlocked = /welcome to your account/i.test(accountHtml) && !/name=["']loginform["']/i.test(accountHtml);
+    state.publicSeatPrice = getDisplayedPublicSeatPrice();
+    if (!state.unlocked) return state;
+    var url = new URL(window.location.href);
+    url.searchParams.delete("CartID");
+    return fetch(url.pathname + url.search, {
+      credentials: "same-origin",
+      cache: "no-store"
+    }).then(function(resp){
+      return resp.text();
+    }).then(function(productHtml){
+      var memberSeatPrice = extractMemberSeatPriceFromHtml(productHtml, state.publicSeatPrice);
+      if (memberSeatPrice > 0) {
+        state.memberSeatPrice = memberSeatPrice;
+        if (state.publicSeatPrice > memberSeatPrice) {
+          state.delta = state.publicSeatPrice - memberSeatPrice;
+        }
+      }
+      return state;
+    }, function(){
+      return state;
+    });
+  }).catch(function(){
+    var state = window.__mcMemberPricing;
+    state.checked = true;
+    state.unlocked = false;
+    return state;
+  }).then(function(state){
+    try {
+      window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: state }));
+    } catch (e) {}
+    refreshPlannerPriceForMemberState();
+    return state;
+  });
+  return window.__mcMemberPricing.promise;
+}
+function getMemberPlannerSeatPriceForCalc(){
+  var state = window.__mcMemberPricing;
+  if (!state || !state.unlocked) return 0;
+  if (state.delta != null) {
+    var publicSeatPrice = 0;
+    if (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) publicSeatPrice = window.__mcPerSeatPrice;
+    else publicSeatPrice = state.publicSeatPrice || getDisplayedPublicSeatPrice();
+    var adjusted = publicSeatPrice - state.delta;
+    if (adjusted > 0) return adjusted;
+  }
+  return state.memberSeatPrice || 0;
+}
 function getPlannerBaseSeatPriceForCalc(){
+  var memberPrice = getMemberPlannerSeatPriceForCalc();
+  if (memberPrice > 0) return memberPrice;
   if (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) {
     return window.__mcPerSeatPrice;
   }
@@ -5441,7 +5579,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function rearrangePriceCaption(scope){
     var root = scope || document;
-    if (root.querySelector('.mc-price-caption-moved')) return;
     var parent = root.querySelector('#v65-product-parent') || root.querySelector('#content_area') || root;
     var allTds = qa('td, div, span, p, b, font', parent);
     if (allTds.length > 500) allTds = allTds.slice(0, 500);
@@ -5452,7 +5589,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       if (!lowestEl && /add to cart for our lowest price/i.test(txt) && allTds[i].children.length < 3) lowestEl = allTds[i];
       if (!priceLabel && /price with selected options/i.test(txt) && allTds[i].children.length < 3) priceLabel = allTds[i];
     }
-    if (lowestEl && priceLabel) {
+    if (lowestEl && priceLabel && !lowestEl.classList.contains('mc-price-caption-moved')) {
       var priceParent = priceLabel.parentNode;
       if (priceParent) {
         priceParent.insertBefore(lowestEl, priceLabel.nextSibling);
@@ -5465,6 +5602,54 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         lowestEl.style.setProperty('display','block','important');
       }
     }
+  }
+
+  function renderMemberPricingCaption(scope){
+    var root = scope || document;
+    var priceNode = root.querySelector('#priceWithOptions');
+    if (!priceNode || !priceNode.parentNode) return;
+
+    var caption =
+      root.querySelector('.mc-member-price-caption') ||
+      root.querySelector('.mc-price-caption-moved');
+
+    if (!caption) {
+      caption = document.createElement('div');
+      priceNode.parentNode.insertBefore(caption, priceNode.nextSibling);
+    }
+
+    caption.classList.add('mc-price-caption-moved', 'mc-member-price-caption');
+    caption.style.setProperty('font-size','14px','important');
+    caption.style.setProperty('color','rgb(69, 69, 69)','important');
+    caption.style.setProperty('margin-top','50px','important');
+    caption.style.setProperty('text-align','left','important');
+    caption.style.setProperty('margin-left','-10px');
+    caption.style.setProperty('display','block','important');
+
+    var state = window.__mcMemberPricing || {};
+    if (state.unlocked && state.memberSeatPrice > 0) {
+      caption.innerHTML =
+        '<span class="mc-member-price-caption__label">Exclusive pricing for members:</span> ' +
+        '<span class="mc-member-price-caption__value">' + formatMcCurrency(state.memberSeatPrice) + '</span>';
+      caption.setAttribute('data-mc-member-state', 'unlocked');
+      return;
+    }
+
+    if (state.unlocked) {
+      caption.innerHTML =
+        '<span class="mc-member-price-caption__label">Exclusive pricing for members</span>';
+      caption.setAttribute('data-mc-member-state', 'unlocked-no-price');
+      return;
+    }
+
+    caption.innerHTML =
+      '<span class="mc-member-price-caption__label">Exclusive pricing for members</span>' +
+      '<span class="mc-member-price-caption__actions">' +
+        '<a class="mc-member-price-caption__cta" href="' + getMemberLoginUrl() + '">Log in</a>' +
+        '<span class="mc-member-price-caption__sep">or</span>' +
+        '<a class="mc-member-price-caption__cta" href="' + getMemberCreateAccountUrl() + '">Create account</a>' +
+      '</span>';
+    caption.setAttribute('data-mc-member-state', 'locked');
   }
 
   function leftAlignPricingBlock(scope){
@@ -5511,6 +5696,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     clearAddToCartWrapperBackground(scope);
     injectAddToCartIcon(scope);
     rearrangePriceCaption(scope);
+    renderMemberPricingCaption(scope);
     ensurePriceWithOptionsLabel(scope);
     leftAlignPricingBlock(scope);
   }
@@ -5541,6 +5727,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   window.addEventListener('orientationchange', function(){
     if (document.body.classList.contains('mc-product-page')) setTimeout(forceProductFixes, 400);
   });
+
+  window.addEventListener('mcMemberPricingReady', function(){
+    forceProductFixes();
+  });
+  detectMemberPricingState();
 })();
 </script>
 <script>

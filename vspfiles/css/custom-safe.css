@@ -1675,6 +1675,39 @@ body.mc-product-page select.mc-native-leather {
       margin-top: 4px !important;
     }
 
+    .mc-member-price-caption {
+      display: block !important;
+      margin-top: 10px !important;
+      line-height: 1.5 !important;
+    }
+
+    .mc-member-price-caption__label {
+      font-weight: 600 !important;
+      letter-spacing: 0.02em !important;
+    }
+
+    .mc-member-price-caption__actions {
+      display: inline-flex !important;
+      gap: 8px !important;
+      align-items: center !important;
+      margin-left: 8px !important;
+      flex-wrap: wrap !important;
+    }
+
+    .mc-member-price-caption__cta {
+      text-decoration: underline !important;
+      color: inherit !important;
+    }
+
+    .mc-member-price-caption__sep {
+      opacity: 0.8 !important;
+    }
+
+    .mc-member-price-caption__value {
+      font-weight: 600 !important;
+      margin-left: 6px !important;
+    }
+
     /* REMOVE ITALICS FROM OPTION HEADERS */
     #options_table i,
     #options_table font i {
