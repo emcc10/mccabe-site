@@ -5589,18 +5589,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       if (!lowestEl && /add to cart for our lowest price/i.test(txt) && allTds[i].children.length < 3) lowestEl = allTds[i];
       if (!priceLabel && /price with selected options/i.test(txt) && allTds[i].children.length < 3) priceLabel = allTds[i];
     }
-    if (lowestEl && priceLabel && !lowestEl.classList.contains('mc-price-caption-moved')) {
-      var priceParent = priceLabel.parentNode;
-      if (priceParent) {
-        priceParent.insertBefore(lowestEl, priceLabel.nextSibling);
-        lowestEl.classList.add('mc-price-caption-moved');
-        lowestEl.style.setProperty('font-size','14px','important');
-        lowestEl.style.setProperty('color','rgb(69, 69, 69)','important');
-        lowestEl.style.setProperty('margin-top','50px','important');
-        lowestEl.style.setProperty('text-align','left','important');
-        lowestEl.style.setProperty('margin-left','-10px');
-        lowestEl.style.setProperty('display','block','important');
-      }
+    if (lowestEl && !lowestEl.classList.contains('mc-price-caption-moved')) {
+      lowestEl.classList.add('mc-price-caption-moved');
+      lowestEl.style.setProperty('display','none','important');
     }
   }
 

@@ -1675,8 +1675,7 @@ body.mc-product-page select.mc-native-leather {
       margin-top: 4px !important;
     }
 
-    body.mc-product-page #content_area #priceWithOptionsNoTax + div,
-    body.mc-product-page #v65-product-parent #priceWithOptionsNoTax + div {
+    #priceWithOptionsNoTax + div:not(.mc-member-price-caption) {
       display: none !important;
     }
 
