@@ -5597,37 +5597,46 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function renderMemberPricingCaption(scope){
     var root = scope || document;
-    var priceNode = root.querySelector('#priceWithOptions');
-    if (!priceNode) return;
-    var priceBox = priceNode.closest('.colors_pricebox') || root.querySelector('.colors_pricebox') || priceNode.parentNode;
-    if (!priceBox) return;
-    function isLegacyLowestPriceNode(node){
-      if (!node) return false;
-      var txt = (node.textContent || '').trim().toLowerCase();
-      if (!/add to cart for our lowest price/i.test(txt)) return false;
-      if (node.querySelector && (node.querySelector('#priceWithOptions') || node.querySelector('#priceWithOptionsNoTax') || node.querySelector('.option_pricing'))) return false;
-      return true;
+    // Anchor to #priceWithOptionsNoTax; fall back to #priceWithOptions parent
+    var anchorEl = root.querySelector('#priceWithOptionsNoTax') || root.querySelector('#priceWithOptions');
+    if (!anchorEl) return;
+
+    // Walk immediate element siblings after anchorEl to find and hide the legacy "Add to cart" div
+    var legacyDiv = null;
+    var sib = anchorEl.nextSibling;
+    while (sib) {
+      if (sib.nodeType === 1) {
+        var sibTxt = (sib.textContent || '').toLowerCase();
+        if (/add to cart for our lowest price/i.test(sibTxt) && !sib.querySelector('#priceWithOptions') && !sib.querySelector('#priceWithOptionsNoTax')) {
+          legacyDiv = sib;
+        }
+        break; // only inspect the first element sibling
+      }
+      sib = sib.nextSibling;
+    }
+    if (legacyDiv) {
+      legacyDiv.style.setProperty('display', 'none', 'important');
+      legacyDiv.classList.add('mc-price-caption-moved');
     }
 
-    var directLegacyCaption = priceBox.querySelector('#priceWithOptionsNoTax + div');
-    if (!isLegacyLowestPriceNode(directLegacyCaption)) directLegacyCaption = null;
-    var fallbackLegacyCaption = null;
-    var legacyNodes = qa('td, div, span, p, b, font, a', priceBox);
-    for (var li = 0; li < legacyNodes.length; li++) {
-      if (legacyNodes[li] === directLegacyCaption) continue;
-      if (isLegacyLowestPriceNode(legacyNodes[li]) && legacyNodes[li].children.length < 3) {
-        fallbackLegacyCaption = legacyNodes[li];
-        break;
+    // Also hide any other "Add to cart for lowest price" nodes anywhere in root (belt-and-suspenders)
+    var allNodes = qa('div, td, span, p', root);
+    for (var ai = 0; ai < allNodes.length; ai++) {
+      var n = allNodes[ai];
+      if (n === legacyDiv || n.classList.contains('mc-member-price-caption')) continue;
+      var ntxt = (n.textContent || '').toLowerCase();
+      if (/add to cart for our lowest price/i.test(ntxt) && n.children.length < 3 && !n.querySelector('#priceWithOptions') && !n.querySelector('#priceWithOptionsNoTax')) {
+        n.style.setProperty('display', 'none', 'important');
+        n.classList.add('mc-price-caption-moved');
       }
     }
 
-    var caption = priceBox.querySelector('.mc-member-price-caption');
+    // Find or create the member caption, inserted right after anchorEl (or after legacyDiv if found)
+    var caption = root.querySelector('.mc-member-price-caption');
     if (!caption) {
       caption = document.createElement('div');
-      var insertAfter = directLegacyCaption || fallbackLegacyCaption || priceBox.querySelector('#priceWithOptionsNoTax') || priceNode;
-      if (insertAfter.parentNode) {
-        insertAfter.parentNode.insertBefore(caption, insertAfter.nextSibling);
-      }
+      var insertAfter = legacyDiv || anchorEl;
+      insertAfter.parentNode.insertBefore(caption, insertAfter.nextSibling);
     }
 
     caption.className = 'mc-member-price-caption';
@@ -5639,12 +5648,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     caption.style.setProperty('display','block','important');
     caption.style.removeProperty('visibility');
     caption.style.removeProperty('opacity');
-    if (directLegacyCaption) directLegacyCaption.style.setProperty('display', 'none', 'important');
-    if (fallbackLegacyCaption) fallbackLegacyCaption.style.setProperty('display', 'none', 'important');
-    var movedCaption = priceBox.querySelector('.mc-price-caption-moved');
-    if (movedCaption && movedCaption !== caption && isLegacyLowestPriceNode(movedCaption)) {
-      movedCaption.style.setProperty('display', 'none', 'important');
-    }
 
     var state = window.__mcMemberPricing || {};
     if (state.unlocked && state.memberSeatPrice > 0) {
