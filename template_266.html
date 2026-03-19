@@ -5620,42 +5620,40 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
     var directLegacyCaption = priceBox.querySelector('#priceWithOptionsNoTax + div');
     if (!isLegacyLowestPriceNode(directLegacyCaption)) directLegacyCaption = null;
-    var fallbackLegacyCaption = priceBox.querySelector('#priceWithOptions + div');
-    if (!isLegacyLowestPriceNode(fallbackLegacyCaption)) fallbackLegacyCaption = null;
-
-    var caption =
-      priceBox.querySelector('.mc-member-price-caption') ||
-      directLegacyCaption ||
-      fallbackLegacyCaption ||
-      priceBox.querySelector('.mc-price-caption-moved');
-
-    if (!caption) {
-      var legacyNodes = qa('td, div, span, p, b, font, a', priceBox);
-      for (var li = 0; li < legacyNodes.length; li++) {
-        if (isLegacyLowestPriceNode(legacyNodes[li]) && legacyNodes[li].children.length < 3) {
-          caption = legacyNodes[li];
-          break;
-        }
+    var fallbackLegacyCaption = null;
+    var legacyNodes = qa('td, div, span, p, b, font, a', priceBox);
+    for (var li = 0; li < legacyNodes.length; li++) {
+      if (legacyNodes[li] === directLegacyCaption) continue;
+      if (isLegacyLowestPriceNode(legacyNodes[li]) && legacyNodes[li].children.length < 3) {
+        fallbackLegacyCaption = legacyNodes[li];
+        break;
       }
     }
 
+    var caption = priceBox.querySelector('.mc-member-price-caption');
     if (!caption) {
       caption = document.createElement('div');
-      var anchor = priceBox.querySelector('#priceWithOptionsNoTax') || priceNode.parentNode || priceNode;
-      if (anchor.parentNode) anchor.parentNode.insertBefore(caption, anchor.nextSibling);
+      var insertAfter = directLegacyCaption || fallbackLegacyCaption || priceBox.querySelector('#priceWithOptionsNoTax') || priceNode;
+      if (insertAfter.parentNode) {
+        insertAfter.parentNode.insertBefore(caption, insertAfter.nextSibling);
+      }
     }
 
-    caption.classList.add('mc-price-caption-moved', 'mc-member-price-caption');
+    caption.className = 'mc-member-price-caption';
     caption.style.setProperty('font-size','14px','important');
     caption.style.setProperty('color','rgb(69, 69, 69)','important');
-    caption.style.setProperty('margin-top','50px','important');
+    caption.style.setProperty('margin-top','10px','important');
     caption.style.setProperty('text-align','left','important');
-    caption.style.setProperty('margin-left','-10px');
+    caption.style.setProperty('margin-left','0','important');
     caption.style.setProperty('display','block','important');
     caption.style.removeProperty('visibility');
     caption.style.removeProperty('opacity');
-    if (directLegacyCaption && directLegacyCaption !== caption) directLegacyCaption.style.setProperty('display', 'none', 'important');
-    if (fallbackLegacyCaption && fallbackLegacyCaption !== caption) fallbackLegacyCaption.style.setProperty('display', 'none', 'important');
+    if (directLegacyCaption) directLegacyCaption.style.setProperty('display', 'none', 'important');
+    if (fallbackLegacyCaption) fallbackLegacyCaption.style.setProperty('display', 'none', 'important');
+    var movedCaption = priceBox.querySelector('.mc-price-caption-moved');
+    if (movedCaption && movedCaption !== caption && isLegacyLowestPriceNode(movedCaption)) {
+      movedCaption.style.setProperty('display', 'none', 'important');
+    }
 
     var state = window.__mcMemberPricing || {};
     if (state.unlocked && state.memberSeatPrice > 0) {
