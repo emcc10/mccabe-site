@@ -1909,16 +1909,10 @@ function getPlannerSeatPrice(){
   var match = text.match(/\$[\d,]+\.?\d*/);
   var raw = match ? match[0].replace(/[$,]/g, "") : text.replace(/[^0-9.]/g, "");
   var n = parseFloat(raw);
-  if (!isNaN(n) && n > 0 && (window.__mcPlannerPrice == null || window.__mcPlannerPrice === undefined)) {
-    window.__mcPlannerBaseSeatPrice = n;
-  }
   console.log("[McCabe Planner] getPlannerSeatPrice:", n, "from text:", text.trim().substring(0, 80));
   return isNaN(n) ? 0 : n;
 }
 function getPlannerBaseSeatPriceForCalc(){
-  if (window.__mcPlannerBaseSeatPrice != null && window.__mcPlannerBaseSeatPrice > 0) {
-    return window.__mcPlannerBaseSeatPrice;
-  }
   return getPlannerSeatPrice();
 }
 
@@ -5884,9 +5878,9 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     });
   }
 
-  /* ---- PATCH 4: Sync planner seat count to Volusion "Number of Seats" dropdown for correct cart pricing ---- */
-  function syncSeatCountToVolusion(seatCount){
-    if (!seatCount || seatCount < 1) return;
+  /* ---- PATCH 4: Sync planner config to Volusion form for correct cart pricing ---- */
+
+  function resetSeatDropdownToOne(){
     var table = document.querySelector('#options_table, table[id*="options_table"]');
     if (!table) return;
     var rows = table.querySelectorAll('tr');
@@ -5897,21 +5891,38 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       if (/leather|cover|configuration|straight|curved/i.test(labelText)) continue;
       var sel = rows[ri].querySelector('select');
       if (!sel) continue;
-      var bestOpt = null, bestDiff = 999;
       for (var oi = 0; oi < sel.options.length; oi++){
         var optNum = parseInt((sel.options[oi].text || '').replace(/[^0-9]/g, ''));
-        if (isNaN(optNum)) continue;
-        var diff = Math.abs(optNum - seatCount);
-        if (diff < bestDiff){ bestDiff = diff; bestOpt = sel.options[oi]; }
-      }
-      if (bestOpt && sel.value !== bestOpt.value){
-        sel.value = bestOpt.value;
-        sel.dispatchEvent(new Event('change', { bubbles: true }));
-        try { if (window.jQuery) window.jQuery(sel).trigger('change'); } catch(e){}
-        console.log('[MC Planner] Synced seat count', seatCount, 'to dropdown:', bestOpt.text);
+        if (optNum === 1){
+          if (sel.value !== sel.options[oi].value){
+            sel.value = sel.options[oi].value;
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            try { if (window.jQuery) window.jQuery(sel).trigger('change'); } catch(e){}
+          }
+          break;
+        }
       }
       break;
     }
+  }
+
+  function syncQuantityToVolusion(seatCount){
+    if (!seatCount || seatCount < 1) return;
+    var root = document.querySelector('#content_area') || document.body;
+    var form =
+      (root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]') || {}).form ||
+      root.querySelector('form[action*="ProductDetails.asp"]');
+    if (!form) return;
+
+    var qtyInput = form.querySelector('input[name="QtyToAdd"], input[name="qty"], input[name="Quantity"]');
+    if (!qtyInput){
+      qtyInput = document.createElement('input');
+      qtyInput.type = 'hidden';
+      qtyInput.name = 'QtyToAdd';
+      form.appendChild(qtyInput);
+    }
+    qtyInput.value = seatCount;
+    console.log('[MC Planner] Set cart quantity to', seatCount);
   }
 
   var _applyWrapped = false;
@@ -5929,7 +5940,10 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       } else {
         Object.keys(opts).forEach(function(k){ sc += (k === '4L') ? ((opts[k]||0)*2) : (opts[k]||0); });
       }
-      if (sc > 0) syncSeatCountToVolusion(sc);
+      if (sc > 0){
+        resetSeatDropdownToOne();
+        syncQuantityToVolusion(sc);
+      }
     };
   }
 
@@ -5943,7 +5957,10 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     _formIntercepted = true;
     form.addEventListener('submit', function(){
       var sc = window.__mcPlannerSeatCount;
-      if (sc && sc > 0) syncSeatCountToVolusion(sc);
+      if (sc && sc > 0){
+        resetSeatDropdownToOne();
+        syncQuantityToVolusion(sc);
+      }
     });
   }
 
