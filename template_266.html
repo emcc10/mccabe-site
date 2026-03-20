@@ -1922,6 +1922,9 @@ function parseMcCurrency(text){
   }
   return parseFloat(m[0].replace(/[$,]/g, "")) || 0;
 }
+if (typeof window !== "undefined") {
+  window.parseMcCurrency = parseMcCurrency;
+}
 function formatMcCurrency(value){
   return "$" + Number(value || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
@@ -5216,6 +5219,18 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function q(sel, root){ return (root || document).querySelector(sel); }
   function qa(sel, root){ return Array.from((root || document).querySelectorAll(sel)); }
   function isMobile(){ return window.matchMedia('(max-width: 991px)').matches; }
+  /** Same logic as global parseMcCurrency; IIFE cannot rely on another script block’s scope on Volusion. */
+  function mcParseCurrency(text){
+    if (typeof window.parseMcCurrency === 'function') return window.parseMcCurrency(text);
+    var src = text == null ? '' : String(text);
+    var m = src.match(/\$[\d,]+(?:\.\d+)?/);
+    if (!m) {
+      var raw = src.replace(/[^0-9.]/g, '');
+      var parsed = parseFloat(raw);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    return parseFloat(m[0].replace(/[$,]/g, '')) || 0;
+  }
 
   function markProductPage() {
     if (!document.querySelector('input[name="ProductCode"]')) return false;
@@ -5983,7 +5998,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         root.querySelector('#priceWithOptionsNoTax');
       var mapAmt = 0;
       if (mapEl) {
-        mapAmt = parseMcCurrency(
+        mapAmt = mcParseCurrency(
           (mapEl.getAttribute && (mapEl.getAttribute('content') || mapEl.getAttribute('value'))) ||
             mapEl.textContent ||
             ''
