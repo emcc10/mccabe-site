@@ -7431,6 +7431,37 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         moneyNodes[mn].textContent = tx.replace(/\$[\d,]+(?:\.\d+)?/, mcFmtMoney(adj));
       }
     }
+    // Hard fallback: if no row-level application happened, apply pending discount to summary totals.
+    if (mcTotal4LDiscount <= 0 && mcPending4LDiscount > 0) {
+      var appliedAny = false;
+      var summaryNodes = content.querySelectorAll("td, span, div, strong, b, font");
+      for (var sn = 0; sn < summaryNodes.length; sn++) {
+        var node = summaryNodes[sn];
+        var lineTxt = ((node.parentElement && node.parentElement.textContent) || node.textContent || "").toLowerCase();
+        if (!/subtotal|total|order total|grand total/.test(lineTxt)) continue;
+        var curr = (node.textContent || "").match(/\$[\d,]+(?:\.\d+)?/);
+        if (!curr) continue;
+        var baseVal = parseFloat(curr[0].replace(/[$,]/g, ""));
+        if (!(baseVal > 0)) continue;
+        var newVal = Math.max(0, baseVal - mcPending4LDiscount);
+        node.textContent = (node.textContent || "").replace(/\$[\d,]+(?:\.\d+)?/, mcFmtMoney(newVal));
+        appliedAny = true;
+      }
+      if (appliedAny) {
+        mcTotal4LDiscount = mcPending4LDiscount;
+        mcClearPending4L();
+      }
+    }
+    // Show an explicit discount line so users can verify it.
+    if (mcTotal4LDiscount > 0 && !content.querySelector(".mc-4l-discount-note")) {
+      var note = document.createElement("div");
+      note.className = "mc-4l-discount-note";
+      note.style.cssText = "margin:10px 0;padding:8px 10px;border:1px solid #ddd;background:#fafafa;font-size:13px;";
+      note.innerHTML = "<strong>4L Discount Applied:</strong> -" + mcFmtMoney(mcTotal4LDiscount).replace("$", "$");
+      var anchor = content.querySelector("table") || content.firstElementChild || content;
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(note, anchor);
+      else content.appendChild(note);
+    }
   }
   var cartEnhancementsDone = false;
   function runWhenCartReady() {
