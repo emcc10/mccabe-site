@@ -5940,8 +5940,14 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function rearrangePriceCaption(scope){ /* handled by renderMemberPricingCaption */ }
 
-  /** Volusion PDP markup varies; search scope then full document so we never skip the caption. */
-  function findMemberCaptionAnchorEl(root) {
+  function ensureMemberCaptionMounted(caption) {
+    if (!caption || caption.parentNode) return;
+    var vp = document.getElementById('v65-product-parent') || document.querySelector('#v65-product-parent');
+    if (vp) vp.appendChild(caption);
+  }
+
+  /** Always search document — #v65-product-parent may not be inside #content_area. */
+  function findMemberCaptionAnchorEl() {
     var el;
     var selectors = [
       '#priceWithOptionsNoTax',
@@ -5957,17 +5963,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     ];
     var i;
     for (i = 0; i < selectors.length; i++) {
-      el = root.querySelector(selectors[i]);
-      if (el) return el;
-    }
-    for (i = 0; i < selectors.length; i++) {
       el = document.querySelector(selectors[i]);
       if (el) return el;
     }
     return (
-      root.querySelector('#v65-product-parent .productnamecolorLARGE, #v65-product-parent .productnamecolor') ||
       document.querySelector('#v65-product-parent .productnamecolorLARGE, #v65-product-parent .productnamecolor') ||
-      root.querySelector('#v65-product-parent') ||
+      document.getElementById('v65-product-parent') ||
       document.querySelector('#v65-product-parent') ||
       null
     );
@@ -5975,7 +5976,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function renderMemberPricingCaption(scope){
     var root = scope || document;
-    var anchorEl = findMemberCaptionAnchorEl(root);
+    var anchorEl = findMemberCaptionAnchorEl();
     /* Do not append into empty #content_area — Volusion replaces innerHTML and would delete the caption. */
     var fallbackHost =
       document.querySelector('#v65-product-parent .colors_pricebox') ||
@@ -6082,6 +6083,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         '<span class="mc-member-price-caption__option-label">Exclusive pricing for members!</span>' +
         '<span class="mc-member-price-caption__price-value">' + fmt(seatPrice) + '</span>';
       caption.setAttribute('data-mc-member-state', 'unlocked');
+      ensureMemberCaptionMounted(caption);
       return;
     }
 
@@ -6089,6 +6091,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       caption.innerHTML =
         '<span class="mc-member-price-caption__option-label">Exclusive pricing for members!</span>';
       caption.setAttribute('data-mc-member-state', 'unlocked-no-price');
+      ensureMemberCaptionMounted(caption);
       return;
     }
 
@@ -6100,6 +6103,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         '<a class="mc-member-price-caption__cta" href="' + createUrl + '">Create account</a>' +
       '</div>';
     caption.setAttribute('data-mc-member-state', 'locked');
+    ensureMemberCaptionMounted(caption);
   }
 
   function leftAlignPricingBlock(scope){
@@ -6135,20 +6139,30 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function forceProductFixes() {
     if (!markProductPage()) return;
     var scope = document.querySelector('#content_area') || document.body;
-    forceNoItalics(scope);
-    hideLegacyOptionQuestions(scope);
-    forceTabsInline(scope);
-    forceMediaLayout(scope);
-    removeConfigurationDetails(scope);
-    hideOptionsTable(scope);
-    enforceMobileGutters(scope);
-    clampFloatingIcons();
-    clearAddToCartWrapperBackground(scope);
-    injectAddToCartIcon(scope);
+    try {
+      forceNoItalics(scope);
+      hideLegacyOptionQuestions(scope);
+      forceTabsInline(scope);
+      forceMediaLayout(scope);
+      removeConfigurationDetails(scope);
+      hideOptionsTable(scope);
+      enforceMobileGutters(scope);
+      clampFloatingIcons();
+      clearAddToCartWrapperBackground(scope);
+      injectAddToCartIcon(scope);
+    } catch (e) {
+      if (typeof console !== 'undefined' && console.warn) console.warn('[McCabe] forceProductFixes (before caption)', e);
+    }
     rearrangePriceCaption(scope);
-    renderMemberPricingCaption(scope);
-    ensurePriceWithOptionsLabel(scope);
-    leftAlignPricingBlock(scope);
+    try {
+      renderMemberPricingCaption(document);
+    } catch (e2) {
+      if (typeof console !== 'undefined' && console.warn) console.warn('[McCabe] renderMemberPricingCaption', e2);
+    }
+    try {
+      ensurePriceWithOptionsLabel(scope);
+      leftAlignPricingBlock(scope);
+    } catch (e3) {}
   }
 
   function boot() {
@@ -6185,6 +6199,27 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     try {
       mo.observe(ca, { childList: true, subtree: true });
     } catch (e) {}
+  })();
+
+  /* #v65-product-parent may be injected outside #content_area; catch when it appears anywhere. */
+  (function observeBodyForPdp(){
+    if (!document.body || document.body.__mcPdpBodyObserver) return;
+    document.body.__mcPdpBodyObserver = true;
+    var deb2;
+    var mo2 = new MutationObserver(function(){
+      clearTimeout(deb2);
+      deb2 = setTimeout(function(){
+        if (!document.getElementById('v65-product-parent')) return;
+        var cap = document.querySelector('.mc-member-price-caption');
+        if (cap && (cap.textContent || '').replace(/\s/g, '').length > 0) return;
+        try {
+          if (markProductPage()) renderMemberPricingCaption(document);
+        } catch (e) {}
+      }, 200);
+    });
+    try {
+      mo2.observe(document.body, { childList: true, subtree: true });
+    } catch (e2) {}
   })();
 
   var _resizeTimer;
