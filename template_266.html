@@ -2120,12 +2120,38 @@ function extractVolusionAddToCartPriceFromHtml(html) {
   }
   var fromScript = scrapeVolusionPriceCandidatesBelowMap(html, mainAmt);
   if (fromScript > 0) return fromScript;
-  var scr = html.match(/(?:OurPrice|SellingPrice|CartPrice|SoftAddPrice|ProductPrice)\s*[=:]\s*["']?(\d+\.?\d*)/i);
+  var scr = html.match(/(?:OurPrice|SellingPrice|CartPrice|SoftAddPrice|ProductPrice|HowToGetSalePrice)\s*[=:]\s*["']?(\d+\.?\d*)/i);
   if (scr) {
     var sv = parseFloat(scr[1]);
     if (sv > 50 && sv < 5000000 && (!mainAmt || sv < mainAmt - 0.01)) return sv;
   }
   return 0;
+}
+/**
+ * Volusion PDP often exposes the real selling price as window.HowToGetSalePrice (number, string, or function).
+ */
+function tryReadHowToGetSalePrice(mainAmt) {
+  try {
+    var w = typeof window !== "undefined" ? window : null;
+    if (!w || typeof w.HowToGetSalePrice === "undefined") return 0;
+    var raw = w.HowToGetSalePrice;
+    if (typeof raw === "function") {
+      raw = raw();
+    }
+    var p = 0;
+    if (typeof raw === "number" && isFinite(raw)) {
+      p = raw;
+    } else if (typeof raw === "string") {
+      p = parseMcCurrency(raw);
+    } else if (raw != null) {
+      p = parseMcCurrency(String(raw));
+    }
+    if (!(p > 50 && p < 5000000)) return 0;
+    if (mainAmt > 0 && p >= mainAmt - 0.01) return 0;
+    return p;
+  } catch (e) {
+    return 0;
+  }
 }
 function getVolusionAddToCartSeatPrice(root) {
   if (typeof window.__MC_MEMBER_SEAT_PRICE === "number" && window.__MC_MEMBER_SEAT_PRICE > 0) {
@@ -2144,12 +2170,16 @@ function getVolusionAddToCartSeatPrice(root) {
     var mapG = parseMcCurrency(
       (elG && (elG.getAttribute("content") || elG.textContent)) || ""
     );
+    var hts0 = tryReadHowToGetSalePrice(mapG);
+    if (hts0 > 0) return hts0;
     return scrapeVolusionPriceCandidatesBelowMap(document.documentElement.innerHTML || "", mapG);
   }
   var mainEl = box.querySelector("#priceWithOptions") || box.querySelector('[itemprop="price"]');
   var mainAmt = parseMcCurrency(
     (mainEl && (mainEl.getAttribute("content") || mainEl.getAttribute("value") || mainEl.textContent)) || ""
   );
+  var hts = tryReadHowToGetSalePrice(mainAmt);
+  if (hts > 0) return hts;
   var sale = box.querySelector(".product_sale_price, .product_sale_price b, font.product_sale_price, span.product_sale_price");
   if (sale) {
     var p = parseMcCurrency(sale.textContent || "");
@@ -2277,6 +2307,7 @@ window.detectMemberPricingState = detectMemberPricingState;
 window.formatMcCurrency = formatMcCurrency;
 window.getMcDisplayedSeatPrice = getDisplayedPublicSeatPrice;
 window.getVolusionAddToCartSeatPrice = getVolusionAddToCartSeatPrice;
+window.tryReadHowToGetSalePrice = tryReadHowToGetSalePrice;
 function getMemberPlannerSeatPriceForCalc(){
   var state = window.__mcMemberPricing;
   if (!state || !state.unlocked) return 0;
