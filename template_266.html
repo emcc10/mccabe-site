@@ -2094,11 +2094,11 @@ function extractVolusionAddToCartPriceFromHtml(html) {
     var sp = parseMcCurrency(sale.textContent || "");
     if (sp > 0 && mainAmt > 0 && sp < mainAmt - 0.01) return sp;
   }
-  var hid = parent.querySelectorAll('input[type="hidden"]');
+  var hid = parent.querySelectorAll('input, select, textarea');
   for (var hi = 0; hi < hid.length; hi++) {
     var nm = ((hid[hi].name || "") + " " + (hid[hi].id || "")).toLowerCase();
     if (!/price|cost|sell|our|cart|amount|base|map|actual|hidden/.test(nm)) continue;
-    var hv0 = parseMcCurrency(hid[hi].value || "");
+    var hv0 = parseMcCurrency(hid[hi].value || hid[hi].getAttribute("value") || hid[hi].textContent || "");
     if (hv0 > 50 && hv0 < 5000000 && (!mainAmt || hv0 < mainAmt - 0.01)) return hv0;
   }
   var matches = (box.textContent || "").match(/\$[\d,]+(?:\.\d+)?/g) || [];
@@ -2258,11 +2258,11 @@ function getVolusionAddToCartSeatPrice(root) {
     var p = parseMcCurrency(sale.textContent || "");
     if (p > 0 && mainAmt > 0 && p < mainAmt - 0.01) return p;
   }
-  var hid2 = parent.querySelectorAll('input[type="hidden"]');
+  var hid2 = parent.querySelectorAll('input, select, textarea');
   for (var hj = 0; hj < hid2.length; hj++) {
     var nm2 = ((hid2[hj].name || "") + " " + (hid2[hj].id || "")).toLowerCase();
     if (!/price|cost|sell|our|cart|amount|base|map|actual|hidden/.test(nm2)) continue;
-    var hv2 = parseMcCurrency(hid2[hj].value || "");
+    var hv2 = parseMcCurrency(hid2[hj].value || hid2[hj].getAttribute("value") || hid2[hj].textContent || "");
     if (hv2 > 50 && hv2 < 5000000 && (!mainAmt || hv2 < mainAmt - 0.01)) return hv2;
   }
   var matches = (box.textContent || "").match(/\$[\d,]+(?:\.\d+)?/g) || [];
@@ -7219,9 +7219,28 @@ function mcParsePriceLoose(v) {
 function mcReadSeatOverride() {
   var p = 0;
   if (typeof window.__MC_MEMBER_SEAT_PRICE === 'number') p = window.__MC_MEMBER_SEAT_PRICE;
+  if (!(p > 0) && window.saleprice != null) p = mcParsePriceLoose(window.saleprice);
+  if (!(p > 0) && window.SalePrice != null) p = mcParsePriceLoose(window.SalePrice);
+  if (!(p > 0) && window.sellingprice != null) p = mcParsePriceLoose(window.sellingprice);
+  if (!(p > 0) && window.SellingPrice != null) p = mcParsePriceLoose(window.SellingPrice);
   if (!(p > 0)) {
     var meta = document.querySelector('meta[name="mc-member-seat-price"], meta[name="mc-member-price"]');
     if (meta) p = mcParsePriceLoose(meta.getAttribute('content') || '');
+  }
+  if (!(p > 0)) {
+    var saleFields = document.querySelectorAll(
+      'input[name*="saleprice" i], input[id*="saleprice" i], ' +
+      'input[name*="sellingprice" i], input[id*="sellingprice" i], ' +
+      'input[name*="actualprice" i], input[id*="actualprice" i], ' +
+      'select[name*="saleprice" i], select[id*="saleprice" i], ' +
+      'textarea[name*="saleprice" i], textarea[id*="saleprice" i]'
+    );
+    for (var sf = 0; sf < saleFields.length; sf++) {
+      var fld = saleFields[sf];
+      var val = (fld.value || fld.getAttribute('value') || fld.textContent || '').trim();
+      p = mcParsePriceLoose(val);
+      if (p > 0) break;
+    }
   }
   if (!(p > 0)) {
     var hid = document.querySelectorAll('input[type="hidden"]');
