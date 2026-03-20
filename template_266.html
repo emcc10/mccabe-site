@@ -7165,5 +7165,158 @@ body.productdetails .v-product-grid .v-product .v-product__price {
 })();
 </script>
 
+<!-- STANDALONE: member caption — does not depend on other PDP scripts; keeps working if another block errors. -->
+<script>
+(function () {
+  window.__mcMemberPricing = window.__mcMemberPricing || {
+    checked: false,
+    unlocked: false,
+    memberSeatPrice: 0,
+    publicSeatPrice: 0,
+    delta: null,
+    promise: null
+  };
+  function fmt(n) {
+    return (
+      '$' +
+      Number(n || 0)
+        .toFixed(2)
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    );
+  }
+  function mount() {
+    try {
+      if (!document.querySelector('#v65-product-parent')) return;
+      var oldCaps = document.querySelectorAll('.mc-member-price-caption');
+      var ci;
+      for (ci = 0; ci < oldCaps.length; ci++) {
+        if (oldCaps[ci].id !== 'mc-member-price-caption-root') {
+          try {
+            oldCaps[ci].parentNode && oldCaps[ci].parentNode.removeChild(oldCaps[ci]);
+          } catch (rm) {}
+        }
+      }
+      var host =
+        document.querySelector('#v65-product-parent .colors_pricebox') ||
+        document.querySelector('#v65-product-parent');
+      if (!host) return;
+      var el = document.getElementById('mc-member-price-caption-root');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'mc-member-price-caption-root';
+        el.className = 'mc-member-price-caption';
+        var after =
+          document.querySelector('#priceWithOptions') ||
+          document.querySelector('#priceWithOptionsNoTax') ||
+          document.querySelector('#v65-product-parent [itemprop="price"]');
+        if (after && after.parentNode) {
+          after.parentNode.insertBefore(el, after.nextSibling);
+        } else {
+          host.appendChild(el);
+        }
+      }
+      var st = window.__mcMemberPricing || {};
+      var rt = encodeURIComponent((location.pathname || '/') + (location.search || ''));
+      var loginUrl = '/login.asp?ReturnTo=' + rt;
+      var createUrl = '/AccountSettings.asp?AddNewCustomer=Y&ReturnTo=' + rt;
+      var seat = Number(st.memberSeatPrice) || 0;
+      if (st.unlocked && seat <= 0 && typeof window.getVolusionAddToCartSeatPrice === 'function') {
+        try {
+          seat = Number(window.getVolusionAddToCartSeatPrice(document)) || 0;
+        } catch (e0) {}
+      }
+      if (st.unlocked && seat <= 0 && typeof window.tryReadHowToGetSalePrice === 'function') {
+        try {
+          var mapEl = document.querySelector(
+            '#priceWithOptions, [itemprop="price"], #priceWithOptionsNoTax'
+          );
+          var mapAmt = 0;
+          if (mapEl) {
+            var raw =
+              (mapEl.getAttribute &&
+                (mapEl.getAttribute('content') || mapEl.getAttribute('value'))) ||
+              mapEl.textContent ||
+              '';
+            mapAmt = parseFloat(String(raw).replace(/[^0-9.]/g, '')) || 0;
+          }
+          seat = Number(window.tryReadHowToGetSalePrice(mapAmt, true)) || 0;
+        } catch (e1) {}
+      }
+      el.style.cssText =
+        'display:block !important;visibility:visible !important;opacity:1 !important;' +
+        'margin-top:16px !important;margin-bottom:16px !important;min-height:1em !important;';
+      if (st.unlocked && seat > 0) {
+        el.innerHTML =
+          '<span class="mc-member-price-caption__option-label">Exclusive pricing for members!</span>' +
+          '<span class="mc-member-price-caption__price-value">' +
+          fmt(seat) +
+          '</span>';
+        el.setAttribute('data-mc-member-state', 'unlocked');
+      } else if (st.unlocked) {
+        el.innerHTML =
+          '<span class="mc-member-price-caption__option-label">Exclusive pricing for members!</span>';
+        el.setAttribute('data-mc-member-state', 'unlocked-no-price');
+      } else {
+        el.innerHTML =
+          '<div class="mc-member-price-caption__headline">Exclusive pricing for members!</div>' +
+          '<div class="mc-member-price-caption__actions">' +
+          '<a class="mc-member-price-caption__cta" href="' +
+          loginUrl +
+          '">Log in</a>' +
+          '<span class="mc-member-price-caption__sep"> or </span>' +
+          '<a class="mc-member-price-caption__cta" href="' +
+          createUrl +
+          '">Create account</a>' +
+          '</div>';
+        el.setAttribute('data-mc-member-state', 'locked');
+      }
+    } catch (err) {
+      if (typeof console !== 'undefined' && console.warn) {
+        console.warn('[McCabe] mcMountMemberCaptionStandalone', err);
+      }
+    }
+  }
+  window.mcMountMemberCaptionStandalone = mount;
+  function kick() {
+    mount();
+  }
+  function startDetect() {
+    if (typeof window.detectMemberPricingState !== 'function') return;
+    try {
+      window.detectMemberPricingState();
+    } catch (e2) {}
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      kick();
+      startDetect();
+    });
+  } else {
+    kick();
+    startDetect();
+  }
+  window.addEventListener('load', function () {
+    kick();
+    startDetect();
+  });
+  var ticks = 0;
+  var iv = setInterval(function () {
+    kick();
+    if (++ticks > 150) clearInterval(iv);
+  }, 400);
+  document.addEventListener('mcMemberPricingReady', kick);
+  if (document.body) {
+    try {
+      var deb;
+      var mo = new MutationObserver(function () {
+        clearTimeout(deb);
+        deb = setTimeout(kick, 40);
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+    } catch (e3) {}
+  }
+})();
+</script>
+
 </body>
 </html>
