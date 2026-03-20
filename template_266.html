@@ -5633,7 +5633,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var state = window.__mcMemberPricing || {};
     if (state.unlocked && state.memberSeatPrice > 0) {
       caption.innerHTML =
-        '<span class="mc-member-price-caption__option-label">Exclusive pricing for members</span>' +
+        '<span class="mc-member-price-caption__option-label">Exclusive pricing for members!</span>' +
         '<span class="mc-member-price-caption__price-value">' + formatMcCurrency(state.memberSeatPrice) + '</span>';
       caption.setAttribute('data-mc-member-state', 'unlocked');
       return;
@@ -5641,16 +5641,16 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
     if (state.unlocked) {
       caption.innerHTML =
-        '<span class="mc-member-price-caption__option-label">Exclusive pricing for members</span>';
+        '<span class="mc-member-price-caption__option-label">Exclusive pricing for members!</span>';
       caption.setAttribute('data-mc-member-state', 'unlocked-no-price');
       return;
     }
 
     caption.innerHTML =
-      '<div class="mc-member-price-caption__headline">Exclusive pricing for members</div>' +
+      '<div class="mc-member-price-caption__headline">Exclusive pricing for members!</div>' +
       '<div class="mc-member-price-caption__actions">' +
         '<a class="mc-member-price-caption__cta" href="' + loginUrl + '">Log in</a>' +
-        '<span class="mc-member-price-caption__sep"> or </span>' +
+        '<span class="mc-member-price-caption__sep">or</span>' +
         '<a class="mc-member-price-caption__cta" href="' + createUrl + '">Create account</a>' +
       '</div>';
     caption.setAttribute('data-mc-member-state', 'locked');

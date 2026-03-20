@@ -1721,6 +1721,8 @@ body.mc-product-page select.mc-native-leather {
     .mc-member-price-caption__sep {
       opacity: 0.8 !important;
       letter-spacing: 0.08em !important;
+      display: inline-block !important;
+      padding: 0 0.85em !important;
     }
 
     /* Unlocked: mirror main price block — label above, price below (same sizes as .option_pricing / #priceWithOptions) */
