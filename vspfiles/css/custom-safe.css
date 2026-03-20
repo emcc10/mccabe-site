@@ -1671,7 +1671,7 @@ body.mc-product-page select.mc-native-leather {
     }
     #priceWithOptions {
       display: block !important;
-      font-size: 16px !important;
+      font-size: 24px !important;
       text-transform: capitalize;
       font-weight: 400;
     }
@@ -1688,40 +1688,63 @@ body.mc-product-page select.mc-native-leather {
 
     .mc-member-price-caption {
       display: block !important;
-      font-size: 19px !important;
       color: rgb(69, 69, 69) !important;
-      text-transform: uppercase;
       margin-top: 20px !important;
       margin-bottom: 23px;
       line-height: 1.5 !important;
+      text-align: center !important;
     }
 
-    .mc-member-price-caption__label {
+    /* Locked: headline + login row (centered; links hidden when signed in via JS) */
+    .mc-member-price-caption__headline {
+      display: block !important;
+      font-size: 16px !important;
       font-weight: 300 !important;
       letter-spacing: 0.1em !important;
+      text-transform: uppercase;
+      text-align: center !important;
     }
 
     .mc-member-price-caption__actions {
-      display: inline-block;
-      gap: 7px !important;
-      align-items: left !important;
-      margin-left: 1px !important;
-      font-size: 11px !important;
-      flex-wrap: wrap !important;
+      display: block !important;
+      font-size: 12px !important;
+      text-align: center !important;
+      margin-top: 10px !important;
     }
 
     .mc-member-price-caption__cta {
       text-decoration: underline !important;
       color: inherit !important;
+      letter-spacing: 0.15em !important;
     }
 
     .mc-member-price-caption__sep {
       opacity: 0.8 !important;
+      letter-spacing: 0.08em !important;
     }
 
-    .mc-member-price-caption__value {
-      font-weight: 600 !important;
-      margin-left: 6px !important;
+    /* Unlocked: mirror main price block — label above, price below (same sizes as .option_pricing / #priceWithOptions) */
+    .mc-member-price-caption[data-mc-member-state="unlocked"],
+    .mc-member-price-caption[data-mc-member-state="unlocked-no-price"] {
+      text-align: left !important;
+    }
+
+    .mc-member-price-caption__option-label {
+      display: block !important;
+      font-size: 16px !important;
+      font-weight: 300 !important;
+      letter-spacing: 0.1em !important;
+      text-transform: uppercase;
+      color: rgb(69, 69, 69) !important;
+    }
+
+    .mc-member-price-caption__price-value {
+      display: block !important;
+      font-size: 24px !important;
+      font-weight: 400 !important;
+      text-transform: capitalize;
+      color: rgb(69, 69, 69) !important;
+      margin-top: 4px !important;
     }
 
     /* REMOVE ITALICS FROM OPTION HEADERS */
