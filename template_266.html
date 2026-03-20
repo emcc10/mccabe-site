@@ -6775,7 +6775,6 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       if (pc) localStorage.setItem("mc_member_seat_" + pc, String(price));
       var slug = mcSeatSlug(name);
       if (slug) localStorage.setItem("mc_member_seat_name_" + slug, String(price));
-      localStorage.setItem("mc_member_seat_last", String(price));
     } catch (_) {}
   }
   function mcGuessProductCodeFromRow(tr, removeHref){
@@ -6814,7 +6813,8 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     var best = 0;
     for (var i = 0; i < prices.length; i++) {
       var n = mcParseSeatMoney(prices[i]);
-      if (n > 0 && (!best || n < best)) best = n;
+      // Prefer larger row price to avoid accessory add-ons like $79.
+      if (n > 0 && (!best || n > best)) best = n;
     }
     return best;
   }
@@ -7370,8 +7370,7 @@ function mcCachedSeatForProduct(pc) {
       p = mcParsePriceLoose(localStorage.getItem('mc_member_seat_name_' + slug) || '');
       if (p > 0) return p;
     }
-    p = mcParsePriceLoose(localStorage.getItem('mc_member_seat_last') || '');
-    return p > 0 ? p : 0;
+    return 0;
   } catch (_) {
     return 0;
   }
@@ -7382,7 +7381,6 @@ function mcSetCachedSeatForProduct(pc, p, name) {
     if (pc) localStorage.setItem('mc_member_seat_' + pc, String(p));
     var slug = mcSeatSlug(name || mcProductName());
     if (slug) localStorage.setItem('mc_member_seat_name_' + slug, String(p));
-    localStorage.setItem('mc_member_seat_last', String(p));
   } catch (_) {}
 }
 function mcExtractSeatFromCartHtml(cartHtml, pc, productName, publicSeat) {
@@ -7396,15 +7394,18 @@ function mcExtractSeatFromCartHtml(cartHtml, pc, productName, publicSeat) {
   function pickBestPriceFromText(chunk) {
     if (!chunk) return 0;
     var prices = chunk.match(/\$[\d,]+(?:\.\d+)?/g) || [];
-    var bestBelow = 0;
+    var bestNear = 0;
+    var bestAboveFloor = 0;
     var bestAny = 0;
+    var floor = pub > 0 ? Math.max(50, pub * 0.2) : 50;
     for (var i = 0; i < prices.length; i++) {
       var n = mcParsePriceLoose(prices[i]);
       if (!(n > 0)) continue;
-      if (!bestAny || n < bestAny) bestAny = n;
-      if (pub > 0 && n < pub - 0.01 && (!bestBelow || n < bestBelow)) bestBelow = n;
+      if (!bestAny || n > bestAny) bestAny = n;
+      if (n >= floor && (!bestAboveFloor || n > bestAboveFloor)) bestAboveFloor = n;
+      if (pub > 0 && n >= floor && n <= pub * 1.05 && (!bestNear || n > bestNear)) bestNear = n;
     }
-    return bestBelow || bestAny || 0;
+    return bestNear || bestAboveFloor || bestAny || 0;
   }
 
   // 1) Try row-by-row match by product code or product name.
