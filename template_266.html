@@ -7119,11 +7119,32 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     var configDataList = [];
     var mcTotal4LDiscount = 0;
     function mcFmtMoney(v){ return "$" + Number(v || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+    function mcGuessQtyFromRow(tr){
+      var qEl = tr.querySelector('input[name*="qty" i], input[name*="quantity" i], select[name*="qty" i], select[name*="quantity" i]');
+      if (qEl) {
+        var qv = parseFloat((qEl.value || qEl.getAttribute("value") || "").replace(/[^0-9.]/g, ""));
+        if (qv > 0) return qv;
+      }
+      return 1;
+    }
+    function mcCount4LInRow(tr){
+      var txt = ((tr && tr.textContent) || "").toLowerCase();
+      var matches = txt.match(/\b4l\b/g);
+      var count = matches ? matches.length : 0;
+      if (!count && /armless\s+loveseat/.test(txt)) count = 1;
+      return count;
+    }
     function mcApplyRow4LDiscount(tr){
       var txt = tr.innerHTML || "";
       var m = txt.match(/\[MC_4L_DISCOUNT\](\d+(?:\.\d+)?)\[\/MC_4L_DISCOUNT\]/i);
-      if (!m) return;
-      var discount = parseFloat(m[1]);
+      var discount = 0;
+      if (m) {
+        discount = parseFloat(m[1]);
+      } else {
+        var cnt = mcCount4LInRow(tr);
+        var qty = mcGuessQtyFromRow(tr);
+        discount = cnt > 0 ? (cnt * 500 * qty) : 0;
+      }
       if (!(discount > 0)) return;
       var cells = tr.querySelectorAll("td");
       var bestCell = null, bestVal = 0;
@@ -7135,9 +7156,14 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         if (n > bestVal) { bestVal = n; bestCell = cells[i]; }
       }
       if (!bestCell || !(bestVal > 0)) return;
-      var newVal = Math.max(0, bestVal - discount);
+      if (!bestCell.dataset.mcOrigPrice) bestCell.dataset.mcOrigPrice = String(bestVal);
+      var base = parseFloat(bestCell.dataset.mcOrigPrice || "0");
+      if (!(base > 0)) base = bestVal;
+      var applied = Math.min(discount, base);
+      var newVal = Math.max(0, base - applied);
       bestCell.textContent = mcFmtMoney(newVal);
-      mcTotal4LDiscount += discount;
+      tr.dataset.mc4lApplied = String(applied);
+      mcTotal4LDiscount += applied;
     }
     function processElement(el) {
       if (el.id === "content_area" || el.classList.contains("mc-config-view-done")) return;
@@ -7305,7 +7331,8 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         if (!/total|subtotal|grand total|order total/.test(line)) continue;
         var mm2 = tx.match(/\$[\d,]+(?:\.\d+)?/);
         if (!mm2) continue;
-        var n2 = parseFloat(mm2[0].replace(/[$,]/g, ""));
+        if (!moneyNodes[mn].dataset.mcOrigMoney) moneyNodes[mn].dataset.mcOrigMoney = mm2[0];
+        var n2 = parseFloat((moneyNodes[mn].dataset.mcOrigMoney || mm2[0]).replace(/[$,]/g, ""));
         if (!(n2 > 0)) continue;
         var adj = Math.max(0, n2 - mcTotal4LDiscount);
         moneyNodes[mn].textContent = tx.replace(/\$[\d,]+(?:\.\d+)?/, mcFmtMoney(adj));
