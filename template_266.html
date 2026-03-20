@@ -2039,30 +2039,65 @@ function extractDisplayedSeatPriceFromHtml(html) {
 }
 /**
  * Volusion "add to cart" / actual selling price — NOT the MAP line in #priceWithOptions.
- * Uses .product_sale_price, hidden price inputs, smallest $ in .colors_pricebox, or script vars.
+ * Prefers prices strictly below MAP; scrapes scripts; optional meta / window override.
  */
+function scrapeVolusionPriceCandidatesBelowMap(html, mainAmt) {
+  if (!html) return 0;
+  var candidates = [];
+  var r =
+    /(?:ActualPrice|HiddenPrice|LowPrice|YourPrice|SellingPrice|SoftAddPrice|CartPrice|AddToCartPrice|BasePrice|ProductPrice|VolusionPrice)\s*[=:]\s*['"]?(\d+\.?\d*)/gi;
+  var m;
+  var v;
+  while ((m = r.exec(html)) !== null) {
+    v = parseFloat(m[1]);
+    if (v > 50 && v < 5000000) candidates.push(v);
+  }
+  r = /["'](?:price|saleprice|amount|ourprice)["']\s*:\s*(\d+\.?\d*)/gi;
+  while ((m = r.exec(html)) !== null) {
+    v = parseFloat(m[1]);
+    if (v > 50 && v < 5000000) candidates.push(v);
+  }
+  if (!mainAmt || mainAmt <= 0) {
+    return 0;
+  }
+  var below = candidates.filter(function(c) {
+    return c < mainAmt - 0.01;
+  });
+  return below.length ? Math.min.apply(null, below) : 0;
+}
 function extractVolusionAddToCartPriceFromHtml(html) {
   if (!html) return 0;
   var doc = new DOMParser().parseFromString(html, "text/html");
+  var meta = doc.querySelector('meta[name="mc-member-seat-price"], meta[name="mc-member-price"]');
+  if (meta && meta.getAttribute("content")) {
+    var mp = parseMcCurrency(meta.getAttribute("content"));
+    if (mp > 0) return mp;
+  }
   var parent = doc.querySelector("#v65-product-parent") || doc.body;
   var box = parent.querySelector(".colors_pricebox");
-  if (!box) return 0;
-  var sale = box.querySelector(".product_sale_price, .product_sale_price b, font.product_sale_price, span.product_sale_price");
-  if (sale) {
-    var sp = parseMcCurrency(sale.textContent || "");
-    if (sp > 0) return sp;
-  }
-  var hid = parent.querySelectorAll('input[type="hidden"]');
-  for (var hi = 0; hi < hid.length; hi++) {
-    var nm = ((hid[hi].name || "") + " " + (hid[hi].id || "")).toLowerCase();
-    if (!/price|cost|sell|our|cart|amount/.test(nm)) continue;
-    var hv0 = parseMcCurrency(hid[hi].value || "");
-    if (hv0 > 0 && hv0 < 5000000) return hv0;
+  if (!box) {
+    var elAny = doc.querySelector("#priceWithOptions") || doc.querySelector('[itemprop="price"]');
+    var mapGuess = parseMcCurrency(
+      (elAny && (elAny.getAttribute("content") || elAny.textContent)) || ""
+    );
+    return scrapeVolusionPriceCandidatesBelowMap(html, mapGuess);
   }
   var mainEl = box.querySelector("#priceWithOptions") || box.querySelector('[itemprop="price"]');
   var mainAmt = parseMcCurrency(
     (mainEl && (mainEl.getAttribute("content") || mainEl.getAttribute("value") || mainEl.textContent)) || ""
   );
+  var sale = box.querySelector(".product_sale_price, .product_sale_price b, font.product_sale_price, span.product_sale_price");
+  if (sale) {
+    var sp = parseMcCurrency(sale.textContent || "");
+    if (sp > 0 && mainAmt > 0 && sp < mainAmt - 0.01) return sp;
+  }
+  var hid = parent.querySelectorAll('input[type="hidden"]');
+  for (var hi = 0; hi < hid.length; hi++) {
+    var nm = ((hid[hi].name || "") + " " + (hid[hi].id || "")).toLowerCase();
+    if (!/price|cost|sell|our|cart|amount|base|map|actual|hidden/.test(nm)) continue;
+    var hv0 = parseMcCurrency(hid[hi].value || "");
+    if (hv0 > 50 && hv0 < 5000000 && (!mainAmt || hv0 < mainAmt - 0.01)) return hv0;
+  }
   var matches = (box.textContent || "").match(/\$[\d,]+(?:\.\d+)?/g) || [];
   var nums = [];
   var seen = {};
@@ -2076,40 +2111,57 @@ function extractVolusionAddToCartPriceFromHtml(html) {
   nums.sort(function(a, b) {
     return a - b;
   });
-  if (nums.length >= 2) {
+  if (nums.length >= 2 && mainAmt > 0) {
+    var smallest = nums[0];
+    if (smallest < mainAmt - 0.01) return smallest;
+  }
+  if (nums.length === 1 && mainAmt > 0 && nums[0] < mainAmt - 0.01) {
     return nums[0];
   }
-  if (nums.length === 1 && mainAmt > 0 && nums[0] < mainAmt) {
-    return nums[0];
-  }
+  var fromScript = scrapeVolusionPriceCandidatesBelowMap(html, mainAmt);
+  if (fromScript > 0) return fromScript;
   var scr = html.match(/(?:OurPrice|SellingPrice|CartPrice|SoftAddPrice|ProductPrice)\s*[=:]\s*["']?(\d+\.?\d*)/i);
   if (scr) {
     var sv = parseFloat(scr[1]);
-    if (sv > 0 && sv < 5000000 && (!mainAmt || sv < mainAmt)) return sv;
+    if (sv > 50 && sv < 5000000 && (!mainAmt || sv < mainAmt - 0.01)) return sv;
   }
   return 0;
 }
 function getVolusionAddToCartSeatPrice(root) {
+  if (typeof window.__MC_MEMBER_SEAT_PRICE === "number" && window.__MC_MEMBER_SEAT_PRICE > 0) {
+    return window.__MC_MEMBER_SEAT_PRICE;
+  }
   root = root || document;
+  var metaLive = document.querySelector('meta[name="mc-member-seat-price"], meta[name="mc-member-price"]');
+  if (metaLive && metaLive.getAttribute("content")) {
+    var mp2 = parseMcCurrency(metaLive.getAttribute("content"));
+    if (mp2 > 0) return mp2;
+  }
   var parent = root.querySelector("#v65-product-parent") || root;
   var box = parent.querySelector(".colors_pricebox");
-  if (!box) return 0;
-  var sale = box.querySelector(".product_sale_price, .product_sale_price b, font.product_sale_price, span.product_sale_price");
-  if (sale) {
-    var p = parseMcCurrency(sale.textContent || "");
-    if (p > 0) return p;
-  }
-  var hid2 = parent.querySelectorAll('input[type="hidden"]');
-  for (var hj = 0; hj < hid2.length; hj++) {
-    var nm2 = ((hid2[hj].name || "") + " " + (hid2[hj].id || "")).toLowerCase();
-    if (!/price|cost|sell|our|cart|amount/.test(nm2)) continue;
-    var hv2 = parseMcCurrency(hid2[hj].value || "");
-    if (hv2 > 0 && hv2 < 5000000) return hv2;
+  if (!box) {
+    var elG = document.querySelector("#priceWithOptions") || document.querySelector('[itemprop="price"]');
+    var mapG = parseMcCurrency(
+      (elG && (elG.getAttribute("content") || elG.textContent)) || ""
+    );
+    return scrapeVolusionPriceCandidatesBelowMap(document.documentElement.innerHTML || "", mapG);
   }
   var mainEl = box.querySelector("#priceWithOptions") || box.querySelector('[itemprop="price"]');
   var mainAmt = parseMcCurrency(
     (mainEl && (mainEl.getAttribute("content") || mainEl.getAttribute("value") || mainEl.textContent)) || ""
   );
+  var sale = box.querySelector(".product_sale_price, .product_sale_price b, font.product_sale_price, span.product_sale_price");
+  if (sale) {
+    var p = parseMcCurrency(sale.textContent || "");
+    if (p > 0 && mainAmt > 0 && p < mainAmt - 0.01) return p;
+  }
+  var hid2 = parent.querySelectorAll('input[type="hidden"]');
+  for (var hj = 0; hj < hid2.length; hj++) {
+    var nm2 = ((hid2[hj].name || "") + " " + (hid2[hj].id || "")).toLowerCase();
+    if (!/price|cost|sell|our|cart|amount|base|map|actual|hidden/.test(nm2)) continue;
+    var hv2 = parseMcCurrency(hid2[hj].value || "");
+    if (hv2 > 50 && hv2 < 5000000 && (!mainAmt || hv2 < mainAmt - 0.01)) return hv2;
+  }
   var matches = (box.textContent || "").match(/\$[\d,]+(?:\.\d+)?/g) || [];
   var nums = [];
   var seen = {};
@@ -2123,13 +2175,18 @@ function getVolusionAddToCartSeatPrice(root) {
   nums.sort(function(a, b) {
     return a - b;
   });
-  if (nums.length >= 2) {
+  if (nums.length >= 2 && mainAmt > 0) {
+    var sm = nums[0];
+    if (sm < mainAmt - 0.01) return sm;
+  }
+  if (nums.length === 1 && mainAmt > 0 && nums[0] < mainAmt - 0.01) {
     return nums[0];
   }
-  if (nums.length === 1 && mainAmt > 0 && nums[0] < mainAmt) {
-    return nums[0];
-  }
-  return 0;
+  var htmlChunk = (parent && parent.innerHTML) ? parent.innerHTML : "";
+  var fromScr = scrapeVolusionPriceCandidatesBelowMap(htmlChunk, mainAmt);
+  if (fromScr > 0) return fromScr;
+  fromScr = scrapeVolusionPriceCandidatesBelowMap(document.documentElement.innerHTML || "", mainAmt);
+  return fromScr > 0 ? fromScr : 0;
 }
 function detectMemberPricingState(){
   if (window.__mcMemberPricing.promise) return window.__mcMemberPricing.promise;
