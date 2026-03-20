@@ -6762,6 +6762,62 @@ body.productdetails .v-product-grid .v-product .v-product__price {
 <!-- Cart page: configuration image modal + remove X per line -->
 <script>
 (function(){
+  function mcSeatSlug(s){
+    return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+  function mcParseSeatMoney(s){
+    var n = parseFloat(String(s || "").replace(/[^0-9.]/g, ""));
+    return isNaN(n) ? 0 : n;
+  }
+  function mcCacheSeatPrice(pc, name, price){
+    if (!(price > 0)) return;
+    try {
+      if (pc) localStorage.setItem("mc_member_seat_" + pc, String(price));
+      var slug = mcSeatSlug(name);
+      if (slug) localStorage.setItem("mc_member_seat_name_" + slug, String(price));
+      localStorage.setItem("mc_member_seat_last", String(price));
+    } catch (_) {}
+  }
+  function mcGuessProductCodeFromRow(tr, removeHref){
+    var v = "";
+    var inp = tr.querySelector('input[name*="ProductCode" i], input[id*="ProductCode" i], input[name*="pcode" i], input[id*="pcode" i]');
+    if (inp) v = (inp.value || inp.getAttribute("value") || "").trim();
+    if (!v) {
+      var rowText = (tr.textContent || "");
+      var m = rowText.match(/\b([A-Z0-9][A-Z0-9\-]{3,})\b/);
+      if (m) v = m[1];
+    }
+    if (!v && removeHref) {
+      var m2 = removeHref.match(/(?:ProductCode|Product_Code|productcode|pcode)=([^&]+)/i);
+      if (m2) {
+        try { v = decodeURIComponent(m2[1]); } catch (e) { v = m2[1]; }
+      }
+    }
+    return String(v || "").trim();
+  }
+  function mcGuessProductNameFromRow(tr){
+    var el = tr.querySelector('a[href*="-p/"], a[href*="/p/"], a[href*="product"], .productnamecolor, .productnamecolorLARGE');
+    if (el) return (el.textContent || "").replace(/\s+/g, " ").trim();
+    var tds = tr.querySelectorAll("td");
+    for (var i = 0; i < tds.length; i++) {
+      var t = (tds[i].textContent || "").replace(/\s+/g, " ").trim();
+      if (!t) continue;
+      if (/\$[\d,]/.test(t)) continue;
+      if (/remove|delete|qty|quantity|total|price|each/i.test(t)) continue;
+      if (t.length < 4) continue;
+      return t;
+    }
+    return "";
+  }
+  function mcExtractRowSeatPrice(tr){
+    var prices = ((tr.textContent || "").match(/\$[\d,]+(?:\.\d+)?/g) || []);
+    var best = 0;
+    for (var i = 0; i < prices.length; i++) {
+      var n = mcParseSeatMoney(prices[i]);
+      if (n > 0 && (!best || n < best)) best = n;
+    }
+    return best;
+  }
   function isCartPage(){
     var p = (window.location.pathname || "").toLowerCase();
     var h = (window.location.href || "").toLowerCase();
@@ -7166,6 +7222,13 @@ body.productdetails .v-product-grid .v-product .v-product__price {
           })(removeLink, removeInput, tr);
           xWrap.appendChild(xBtn);
         }
+        // Cache per-seat member price from cart row for PDP caption fallback.
+        try {
+          var seatRow = mcExtractRowSeatPrice(tr);
+          var pcRow = mcGuessProductCodeFromRow(tr, removeHref);
+          var nmRow = mcGuessProductNameFromRow(tr);
+          if (seatRow > 0) mcCacheSeatPrice(pcRow, nmRow, seatRow);
+        } catch (cacheErr) {}
         totalCell.parentNode.insertBefore(xWrap, totalCell.nextSibling);
       }
       break;
@@ -7278,6 +7341,9 @@ function mcProductCode() {
   var inp = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
   return ((inp && inp.value) || '').trim();
 }
+function mcSeatSlug(s) {
+  return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
 function mcProductName() {
   var el =
     document.querySelector('#v65-product-parent h1, #v65-product-parent .productnamecolor, #v65-product-parent .productnamecolorLARGE') ||
@@ -7291,18 +7357,33 @@ function mcDisplayedPublicSeat() {
   return mcParsePriceLoose(raw);
 }
 function mcCachedSeatForProduct(pc) {
-  if (!pc) return 0;
   try {
-    var v = localStorage.getItem('mc_member_seat_' + pc);
-    var p = mcParsePriceLoose(v || '');
+    var p = 0;
+    if (pc) {
+      var v = localStorage.getItem('mc_member_seat_' + pc);
+      p = mcParsePriceLoose(v || '');
+      if (p > 0) return p;
+    }
+    var n = mcProductName();
+    var slug = mcSeatSlug(n);
+    if (slug) {
+      p = mcParsePriceLoose(localStorage.getItem('mc_member_seat_name_' + slug) || '');
+      if (p > 0) return p;
+    }
+    p = mcParsePriceLoose(localStorage.getItem('mc_member_seat_last') || '');
     return p > 0 ? p : 0;
   } catch (_) {
     return 0;
   }
 }
-function mcSetCachedSeatForProduct(pc, p) {
-  if (!pc || !(p > 0)) return;
-  try { localStorage.setItem('mc_member_seat_' + pc, String(p)); } catch (_) {}
+function mcSetCachedSeatForProduct(pc, p, name) {
+  if (!(p > 0)) return;
+  try {
+    if (pc) localStorage.setItem('mc_member_seat_' + pc, String(p));
+    var slug = mcSeatSlug(name || mcProductName());
+    if (slug) localStorage.setItem('mc_member_seat_name_' + slug, String(p));
+    localStorage.setItem('mc_member_seat_last', String(p));
+  } catch (_) {}
 }
 function mcExtractSeatFromCartHtml(cartHtml, pc, productName, publicSeat) {
   if (!cartHtml) return 0;
@@ -7374,7 +7455,7 @@ function mcTryHydrateSeatFromCart() {
       var p = mcExtractSeatFromCartHtml(html, pc, pn, pub);
       if (p > 0) {
         window.__mcMemberPricing.memberSeatPrice = p;
-        if (pc) mcSetCachedSeatForProduct(pc, p);
+        mcSetCachedSeatForProduct(pc, p, pn);
         try { mcKickMemberCaptionStandalone(); } catch (_) {}
       }
     })
