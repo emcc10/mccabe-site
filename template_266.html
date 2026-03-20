@@ -2594,9 +2594,16 @@ function syncPlannerConfigurationToCart(payload){
     if (fourLDiscount > 0) {
       if (pcCache) localStorage.setItem("mc_4l_discount_" + pcCache, String(fourLDiscount));
       if (slugCache) localStorage.setItem("mc_4l_discount_name_" + slugCache, String(fourLDiscount));
+      localStorage.setItem("mc_4l_discount_pending", JSON.stringify({
+        amount: fourLDiscount,
+        pc: pcCache || "",
+        name: nmCache || "",
+        ts: Date.now()
+      }));
     } else {
       if (pcCache) localStorage.removeItem("mc_4l_discount_" + pcCache);
       if (slugCache) localStorage.removeItem("mc_4l_discount_name_" + slugCache);
+      localStorage.removeItem("mc_4l_discount_pending");
     }
   } catch (_) {}
   if (fourLDiscount > 0) {
@@ -7150,6 +7157,9 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     if (!content || !content.querySelectorAll) return;
     var configDataList = [];
     var mcTotal4LDiscount = 0;
+    var mcPending4LDiscount = 0;
+    var mcPending4LPayload = null;
+    var mcFallbackRow = null;
     function mcFmtMoney(v){ return "$" + Number(v || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
     function mcGuessQtyFromRow(tr){
       var qEl = tr.querySelector('input[name*="qty" i], input[name*="quantity" i], select[name*="qty" i], select[name*="quantity" i]');
@@ -7199,6 +7209,26 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       mcTotal4LDiscount += applied;
       return applied;
     }
+    function mcReadPending4L(){
+      try {
+        var raw = localStorage.getItem("mc_4l_discount_pending");
+        if (!raw) return null;
+        var obj = JSON.parse(raw);
+        if (!obj || !(obj.amount > 0)) return null;
+        if (obj.ts && (Date.now() - Number(obj.ts)) > 1000 * 60 * 60 * 6) {
+          localStorage.removeItem("mc_4l_discount_pending");
+          return null;
+        }
+        return obj;
+      } catch (_) {
+        return null;
+      }
+    }
+    function mcClearPending4L(){
+      try { localStorage.removeItem("mc_4l_discount_pending"); } catch (_) {}
+    }
+    mcPending4LPayload = mcReadPending4L();
+    mcPending4LDiscount = mcPending4LPayload && mcPending4LPayload.amount ? Number(mcPending4LPayload.amount) : 0;
     function processElement(el) {
       if (el.id === "content_area" || el.classList.contains("mc-config-view-done")) return;
       var html = el.innerHTML || "";
@@ -7320,6 +7350,12 @@ body.productdetails .v-product-grid .v-product .v-product__price {
           var ct = (cells[c].textContent || "").trim();
           if (/^\$[\d.,]+$/.test(ct) || (/\d+\.?\d*/.test(ct) && ct.length < 15)) totalCell = cells[c];
         }
+        var rowVal = 0;
+        var mmRow = ((totalCell && totalCell.textContent) || "").match(/\$[\d,]+(?:\.\d+)?/);
+        if (mmRow) rowVal = parseFloat(mmRow[0].replace(/[$,]/g, "")) || 0;
+        if (!mcFallbackRow || rowVal > mcFallbackRow.val) {
+          mcFallbackRow = { tr: tr, totalCell: totalCell, val: rowVal };
+        }
         tr.classList.add("mc-remove-x-done");
         var xWrap = document.createElement("td");
         xWrap.className = "mc-cart-remove-x";
@@ -7364,6 +7400,18 @@ body.productdetails .v-product-grid .v-product .v-product__price {
           if (seatRow > 0) mcCacheSeatPrice(pcRow, nmRow, seatRow);
         } catch (cacheErr) {}
         totalCell.parentNode.insertBefore(xWrap, totalCell.nextSibling);
+      }
+      if (mcTotal4LDiscount <= 0 && mcPending4LDiscount > 0 && mcFallbackRow && mcFallbackRow.totalCell) {
+        var tc = mcFallbackRow.totalCell;
+        var baseTxt = (tc.textContent || "").match(/\$[\d,]+(?:\.\d+)?/);
+        var base = baseTxt ? parseFloat(baseTxt[0].replace(/[$,]/g, "")) : 0;
+        if (!(base > 0) && mcFallbackRow.val > 0) base = mcFallbackRow.val;
+        if (base > 0) {
+          var appliedPending = Math.min(base, mcPending4LDiscount);
+          tc.textContent = (tc.textContent || "").replace(/\$[\d,]+(?:\.\d+)?/, mcFmtMoney(base - appliedPending));
+          mcTotal4LDiscount += appliedPending;
+          mcClearPending4L();
+        }
       }
       break;
     }
