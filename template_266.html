@@ -7186,9 +7186,35 @@ function mcFmtMcCaption(n) {
 function mcCaptionReturn(o) {
   try {
     window.MC_CAPTION_LAST = o;
-    if (typeof console !== 'undefined' && console.info) console.info('[McCabe] member caption', o);
+    if (window.MC_CAPTION_DEBUG && typeof console !== 'undefined' && console.info) {
+      console.info('[McCabe] member caption', o);
+    }
   } catch (_) {}
   return o;
+}
+function mcIsVisible(el) {
+  if (!el) return false;
+  if (el.nodeType !== 1) return false;
+  if (el.closest('[style*="display:none"], [style*="display: none"]')) return false;
+  var cs = window.getComputedStyle ? window.getComputedStyle(el) : null;
+  if (!cs) return true;
+  if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return false;
+  return true;
+}
+function mcPickVisible(selectors) {
+  var i, j, list, el;
+  for (i = 0; i < selectors.length; i++) {
+    list = document.querySelectorAll(selectors[i]);
+    for (j = 0; j < list.length; j++) {
+      el = list[j];
+      if (mcIsVisible(el)) return el;
+    }
+  }
+  for (i = 0; i < selectors.length; i++) {
+    el = document.querySelector(selectors[i]);
+    if (el) return el;
+  }
+  return null;
 }
 function mcMountMemberCaptionStandalone() {
   try {
@@ -7204,9 +7230,12 @@ function mcMountMemberCaptionStandalone() {
         } catch (rm) {}
       }
     }
-    var host =
-      document.querySelector('#v65-product-parent .colors_pricebox') ||
-      document.querySelector('#v65-product-parent');
+    var host = mcPickVisible([
+      '#v65-product-parent .colors_pricebox',
+      '#v65-product-parent .v65-product-price',
+      '#v65-product-parent .product_productprice',
+      '#v65-product-parent'
+    ]);
     if (!host) {
       return mcCaptionReturn({ ok: false, reason: 'no host container' });
     }
@@ -7215,10 +7244,13 @@ function mcMountMemberCaptionStandalone() {
       el = document.createElement('div');
       el.id = 'mc-member-price-caption-root';
       el.className = 'mc-member-price-caption';
-      var after =
-        document.querySelector('#priceWithOptions') ||
-        document.querySelector('#priceWithOptionsNoTax') ||
-        document.querySelector('#v65-product-parent [itemprop="price"]');
+      var after = mcPickVisible([
+        '#priceWithOptions',
+        '#priceWithOptionsNoTax',
+        '#v65-product-parent [itemprop="price"]',
+        '#v65-product-parent .v65-product-price',
+        '#v65-product-parent .product_productprice'
+      ]);
       if (after && after.parentNode) {
         after.parentNode.insertBefore(el, after.nextSibling);
       } else {
@@ -7251,7 +7283,8 @@ function mcMountMemberCaptionStandalone() {
     }
     el.style.cssText =
       'display:block !important;visibility:visible !important;opacity:1 !important;' +
-      'margin-top:16px !important;margin-bottom:16px !important;min-height:1em !important;';
+      'margin-top:16px !important;margin-bottom:16px !important;min-height:1em !important;' +
+      'font-size:16px !important;color:#454545 !important;line-height:1.4 !important;';
     var uiState = 'locked';
     if (st.unlocked && seat > 0) {
       el.innerHTML =
@@ -7280,7 +7313,7 @@ function mcMountMemberCaptionStandalone() {
         '</div>';
       el.setAttribute('data-mc-member-state', 'locked');
     }
-    return mcCaptionReturn({ ok: true, reason: 'mounted', ui: uiState, unlocked: !!st.unlocked });
+    return mcCaptionReturn({ ok: true, reason: 'mounted', ui: uiState, unlocked: !!st.unlocked, seat: seat });
   } catch (err) {
     if (typeof console !== 'undefined' && console.warn) {
       console.warn('[McCabe] mcMountMemberCaptionStandalone', err);
@@ -7313,8 +7346,12 @@ window.addEventListener('load', function () {
 });
 var mcCaptionTicks = 0;
 var mcCaptionIv = setInterval(function () {
-  mcKickMemberCaptionStandalone();
-  if (++mcCaptionTicks > 150) clearInterval(mcCaptionIv);
+  var r = mcKickMemberCaptionStandalone();
+  if (r && r.ok && document.getElementById('mc-member-price-caption-root')) {
+    if (++mcCaptionTicks > 12) clearInterval(mcCaptionIv);
+    return;
+  }
+  if (++mcCaptionTicks > 120) clearInterval(mcCaptionIv);
 }, 400);
 document.addEventListener('mcMemberPricingReady', mcKickMemberCaptionStandalone);
 if (document.body) {
@@ -7322,7 +7359,12 @@ if (document.body) {
     var mcDeb;
     var mcMo = new MutationObserver(function () {
       clearTimeout(mcDeb);
-      mcDeb = setTimeout(mcKickMemberCaptionStandalone, 40);
+      mcDeb = setTimeout(function () {
+        var el = document.getElementById('mc-member-price-caption-root');
+        if (!el || !(el.textContent || '').replace(/\s/g, '').length) {
+          mcKickMemberCaptionStandalone();
+        }
+      }, 120);
     });
     mcMo.observe(document.body, { childList: true, subtree: true });
   } catch (e3) {}
@@ -7330,7 +7372,7 @@ if (document.body) {
 try {
   if (typeof console !== 'undefined' && console.info) {
     console.info(
-      '[McCabe] Ready. In the console run: mcMountMemberCaptionStandalone()  — it returns {ok,reason}. Last result is also in window.MC_CAPTION_LAST'
+      '[McCabe] Ready. Run mcMountMemberCaptionStandalone(); latest state: window.MC_CAPTION_LAST'
     );
   }
 } catch (_) {}
