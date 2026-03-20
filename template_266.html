@@ -2000,7 +2000,7 @@ function volusionMyAccountHtmlIndicatesLoggedIn(html) {
   if (/>\s*sign\s*out\s*</i.test(h)) return true;
   if (/>\s*log\s*out\s*</i.test(h)) return true;
   if (/welcome to your account/i.test(h)) return true;
-  if (/order history|account settings|edit (your )?profile/i.test(lc) && /returning customer/i.test(lc) === false) return true;
+  if (/order history|account settings|edit (your )?profile/i.test(lc) && !/returning customer/i.test(lc)) return true;
   if (/<input[^>]+type\s*=\s*["']password["']/i.test(h) && /returning customer|login password|sign in to continue/i.test(lc) && !/logout|log\s*out/i.test(lc)) return false;
   return false;
 }
@@ -2012,11 +2012,30 @@ function extractDisplayedSeatPriceFromHtml(html) {
   var el =
     doc.querySelector("#priceWithOptions") ||
     doc.querySelector('[itemprop="price"]') ||
-    doc.querySelector("#priceWithOptionsNoTax");
-  if (!el) return 0;
-  var content = el.getAttribute && (el.getAttribute("content") || el.getAttribute("value"));
-  var n = parseMcCurrency(content || el.textContent || "");
-  return n > 0 ? n : 0;
+    doc.querySelector("#priceWithOptionsNoTax") ||
+    doc.querySelector(".colors_pricebox font#priceWithOptions") ||
+    doc.querySelector(".colors_pricebox #priceWithOptions");
+  if (el) {
+    var content = el.getAttribute && (el.getAttribute("content") || el.getAttribute("value"));
+    var n = parseMcCurrency(content || el.textContent || "");
+    if (n > 0) return n;
+  }
+  var m = html.match(/itemprop=["']price["'][^>]*\bcontent=["']([\d.]+)/i);
+  if (m) {
+    var p = parseFloat(m[1]);
+    if (p > 0) return p;
+  }
+  m = html.match(/id=["']priceWithOptionsNoTax["'][^>]*\bvalue=["']([^"']+)/i);
+  if (m) {
+    var v = parseMcCurrency(m[1]);
+    if (v > 0) return v;
+  }
+  m = html.match(/id=["']priceWithOptions["'][^>]*>([\s\S]*?)<\/font>/i);
+  if (m) {
+    var inner = parseMcCurrency(m[1]);
+    if (inner > 0) return inner;
+  }
+  return 0;
 }
 function detectMemberPricingState(){
   if (window.__mcMemberPricing.promise) return window.__mcMemberPricing.promise;
@@ -2024,12 +2043,20 @@ function detectMemberPricingState(){
     credentials: "same-origin",
     cache: "no-store"
   }).then(function(resp){
-    return resp.text();
-  }).then(function(accountHtml){
+    return resp.text().then(function(accountHtml){
+      return { accountHtml: accountHtml, respUrl: (resp && resp.url) ? String(resp.url) : "" };
+    });
+  }).then(function(packet){
+    var accountHtml = packet.accountHtml;
+    var respUrl = (packet.respUrl || "").toLowerCase();
     var state = window.__mcMemberPricing;
     state.checked = true;
-    state.unlocked = volusionMyAccountHtmlIndicatesLoggedIn(accountHtml);
     state.publicSeatPrice = getDisplayedPublicSeatPrice();
+    if (respUrl.indexOf("login.asp") !== -1) {
+      state.unlocked = false;
+      return state;
+    }
+    state.unlocked = volusionMyAccountHtmlIndicatesLoggedIn(accountHtml);
     if (!state.unlocked) {
       return state;
     }
@@ -2051,6 +2078,12 @@ function detectMemberPricingState(){
           state.delta = state.publicSeatPrice - memberSeatPrice;
         }
       }
+      if (state.unlocked && !(state.memberSeatPrice > 0)) {
+        var live = getDisplayedPublicSeatPrice();
+        if (live > 0) {
+          state.memberSeatPrice = live;
+        }
+      }
       return state;
     }, function(){
       return state;
@@ -2068,11 +2101,24 @@ function detectMemberPricingState(){
     return state;
   }).then(function(state){
     window.__mcMemberPricing.promise = null;
+    if (state && state.unlocked && !(state.memberSeatPrice > 0)) {
+      setTimeout(function(){
+        var live = getDisplayedPublicSeatPrice();
+        if (live > 0) {
+          window.__mcMemberPricing.memberSeatPrice = live;
+          try {
+            window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing }));
+          } catch (e2) {}
+        }
+      }, 2500);
+    }
     return state;
   });
   return window.__mcMemberPricing.promise;
 }
 window.detectMemberPricingState = detectMemberPricingState;
+window.formatMcCurrency = formatMcCurrency;
+window.getMcDisplayedSeatPrice = getDisplayedPublicSeatPrice;
 function getMemberPlannerSeatPriceForCalc(){
   var state = window.__mcMemberPricing;
   if (!state || !state.unlocked) return 0;
@@ -5669,10 +5715,20 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var createUrl = '/AccountSettings.asp?AddNewCustomer=Y&ReturnTo=' + returnTo;
 
     var state = window.__mcMemberPricing || {};
-    if (state.unlocked && state.memberSeatPrice > 0) {
+    var fmt = typeof window.formatMcCurrency === 'function' ? window.formatMcCurrency : function(v){
+      return '$' + Number(v || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    };
+    var seatPrice = state.memberSeatPrice;
+    if (state.unlocked && !(seatPrice > 0) && typeof window.getMcDisplayedSeatPrice === 'function') {
+      seatPrice = window.getMcDisplayedSeatPrice();
+      if (seatPrice > 0) {
+        window.__mcMemberPricing.memberSeatPrice = seatPrice;
+      }
+    }
+    if (state.unlocked && seatPrice > 0) {
       caption.innerHTML =
         '<span class="mc-member-price-caption__option-label">Exclusive pricing for members!</span>' +
-        '<span class="mc-member-price-caption__price-value">' + formatMcCurrency(state.memberSeatPrice) + '</span>';
+        '<span class="mc-member-price-caption__price-value">' + fmt(seatPrice) + '</span>';
       caption.setAttribute('data-mc-member-state', 'unlocked');
       return;
     }
