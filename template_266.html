@@ -2037,6 +2037,100 @@ function extractDisplayedSeatPriceFromHtml(html) {
   }
   return 0;
 }
+/**
+ * Volusion "add to cart" / actual selling price — NOT the MAP line in #priceWithOptions.
+ * Uses .product_sale_price, hidden price inputs, smallest $ in .colors_pricebox, or script vars.
+ */
+function extractVolusionAddToCartPriceFromHtml(html) {
+  if (!html) return 0;
+  var doc = new DOMParser().parseFromString(html, "text/html");
+  var parent = doc.querySelector("#v65-product-parent") || doc.body;
+  var box = parent.querySelector(".colors_pricebox");
+  if (!box) return 0;
+  var sale = box.querySelector(".product_sale_price, .product_sale_price b, font.product_sale_price, span.product_sale_price");
+  if (sale) {
+    var sp = parseMcCurrency(sale.textContent || "");
+    if (sp > 0) return sp;
+  }
+  var hid = parent.querySelectorAll('input[type="hidden"]');
+  for (var hi = 0; hi < hid.length; hi++) {
+    var nm = ((hid[hi].name || "") + " " + (hid[hi].id || "")).toLowerCase();
+    if (!/price|cost|sell|our|cart|amount/.test(nm)) continue;
+    var hv0 = parseMcCurrency(hid[hi].value || "");
+    if (hv0 > 0 && hv0 < 5000000) return hv0;
+  }
+  var mainEl = box.querySelector("#priceWithOptions") || box.querySelector('[itemprop="price"]');
+  var mainAmt = parseMcCurrency(
+    (mainEl && (mainEl.getAttribute("content") || mainEl.getAttribute("value") || mainEl.textContent)) || ""
+  );
+  var matches = (box.textContent || "").match(/\$[\d,]+(?:\.\d+)?/g) || [];
+  var nums = [];
+  var seen = {};
+  for (var i = 0; i < matches.length; i++) {
+    var pr = parseMcCurrency(matches[i]);
+    if (pr > 0 && !seen[pr]) {
+      seen[pr] = true;
+      nums.push(pr);
+    }
+  }
+  nums.sort(function(a, b) {
+    return a - b;
+  });
+  if (nums.length >= 2) {
+    return nums[0];
+  }
+  if (nums.length === 1 && mainAmt > 0 && nums[0] < mainAmt) {
+    return nums[0];
+  }
+  var scr = html.match(/(?:OurPrice|SellingPrice|CartPrice|SoftAddPrice|ProductPrice)\s*[=:]\s*["']?(\d+\.?\d*)/i);
+  if (scr) {
+    var sv = parseFloat(scr[1]);
+    if (sv > 0 && sv < 5000000 && (!mainAmt || sv < mainAmt)) return sv;
+  }
+  return 0;
+}
+function getVolusionAddToCartSeatPrice(root) {
+  root = root || document;
+  var parent = root.querySelector("#v65-product-parent") || root;
+  var box = parent.querySelector(".colors_pricebox");
+  if (!box) return 0;
+  var sale = box.querySelector(".product_sale_price, .product_sale_price b, font.product_sale_price, span.product_sale_price");
+  if (sale) {
+    var p = parseMcCurrency(sale.textContent || "");
+    if (p > 0) return p;
+  }
+  var hid2 = parent.querySelectorAll('input[type="hidden"]');
+  for (var hj = 0; hj < hid2.length; hj++) {
+    var nm2 = ((hid2[hj].name || "") + " " + (hid2[hj].id || "")).toLowerCase();
+    if (!/price|cost|sell|our|cart|amount/.test(nm2)) continue;
+    var hv2 = parseMcCurrency(hid2[hj].value || "");
+    if (hv2 > 0 && hv2 < 5000000) return hv2;
+  }
+  var mainEl = box.querySelector("#priceWithOptions") || box.querySelector('[itemprop="price"]');
+  var mainAmt = parseMcCurrency(
+    (mainEl && (mainEl.getAttribute("content") || mainEl.getAttribute("value") || mainEl.textContent)) || ""
+  );
+  var matches = (box.textContent || "").match(/\$[\d,]+(?:\.\d+)?/g) || [];
+  var nums = [];
+  var seen = {};
+  for (var j = 0; j < matches.length; j++) {
+    var pr2 = parseMcCurrency(matches[j]);
+    if (pr2 > 0 && !seen[pr2]) {
+      seen[pr2] = true;
+      nums.push(pr2);
+    }
+  }
+  nums.sort(function(a, b) {
+    return a - b;
+  });
+  if (nums.length >= 2) {
+    return nums[0];
+  }
+  if (nums.length === 1 && mainAmt > 0 && nums[0] < mainAmt) {
+    return nums[0];
+  }
+  return 0;
+}
 function detectMemberPricingState(){
   if (window.__mcMemberPricing.promise) return window.__mcMemberPricing.promise;
   window.__mcMemberPricing.promise = fetch("/myaccount.asp", {
@@ -2068,9 +2162,15 @@ function detectMemberPricingState(){
     }).then(function(resp){
       return resp.text();
     }).then(function(productHtml){
-      var memberSeatPrice = extractMemberSeatPriceFromHtml(productHtml, state.publicSeatPrice);
+      var memberSeatPrice = extractVolusionAddToCartPriceFromHtml(productHtml);
       if (!(memberSeatPrice > 0)) {
-        memberSeatPrice = extractDisplayedSeatPriceFromHtml(productHtml);
+        memberSeatPrice = extractMemberSeatPriceFromHtml(productHtml, state.publicSeatPrice);
+      }
+      if (!(memberSeatPrice > 0)) {
+        var dispOnly = extractDisplayedSeatPriceFromHtml(productHtml);
+        if (dispOnly > 0 && state.publicSeatPrice > 0 && dispOnly < state.publicSeatPrice) {
+          memberSeatPrice = dispOnly;
+        }
       }
       if (memberSeatPrice > 0) {
         state.memberSeatPrice = memberSeatPrice;
@@ -2079,7 +2179,7 @@ function detectMemberPricingState(){
         }
       }
       if (state.unlocked && !(state.memberSeatPrice > 0)) {
-        var live = getDisplayedPublicSeatPrice();
+        var live = getVolusionAddToCartSeatPrice(document);
         if (live > 0) {
           state.memberSeatPrice = live;
         }
@@ -2103,9 +2203,9 @@ function detectMemberPricingState(){
     window.__mcMemberPricing.promise = null;
     if (state && state.unlocked && !(state.memberSeatPrice > 0)) {
       setTimeout(function(){
-        var live = getDisplayedPublicSeatPrice();
-        if (live > 0) {
-          window.__mcMemberPricing.memberSeatPrice = live;
+        var live2 = getVolusionAddToCartSeatPrice(document);
+        if (live2 > 0) {
+          window.__mcMemberPricing.memberSeatPrice = live2;
           try {
             window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing }));
           } catch (e2) {}
@@ -2119,6 +2219,7 @@ function detectMemberPricingState(){
 window.detectMemberPricingState = detectMemberPricingState;
 window.formatMcCurrency = formatMcCurrency;
 window.getMcDisplayedSeatPrice = getDisplayedPublicSeatPrice;
+window.getVolusionAddToCartSeatPrice = getVolusionAddToCartSeatPrice;
 function getMemberPlannerSeatPriceForCalc(){
   var state = window.__mcMemberPricing;
   if (!state || !state.unlocked) return 0;
@@ -5719,8 +5820,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       return '$' + Number(v || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     };
     var seatPrice = state.memberSeatPrice;
-    if (state.unlocked && !(seatPrice > 0) && typeof window.getMcDisplayedSeatPrice === 'function') {
-      seatPrice = window.getMcDisplayedSeatPrice();
+    if (state.unlocked && !(seatPrice > 0) && typeof window.getVolusionAddToCartSeatPrice === 'function') {
+      seatPrice = window.getVolusionAddToCartSeatPrice(document);
       if (seatPrice > 0) {
         window.__mcMemberPricing.memberSeatPrice = seatPrice;
       }
