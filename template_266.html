@@ -5233,7 +5233,13 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 
   function markProductPage() {
-    if (!document.querySelector('input[name="ProductCode"]')) return false;
+    /* Volusion injects #content_area asynchronously; don’t rely only on ProductCode timing. */
+    var hasMarker =
+      document.querySelector('input[name="ProductCode"]') ||
+      document.querySelector('input[name="productcode"]') ||
+      document.querySelector('#v65-product-parent') ||
+      document.querySelector('.colors_pricebox');
+    if (!hasMarker) return false;
     document.body.classList.add('mc-product-page');
     return true;
   }
@@ -5970,6 +5976,14 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function renderMemberPricingCaption(scope){
     var root = scope || document;
     var anchorEl = findMemberCaptionAnchorEl(root);
+    /* Do not append into empty #content_area — Volusion replaces innerHTML and would delete the caption. */
+    var fallbackHost =
+      document.querySelector('#v65-product-parent .colors_pricebox') ||
+      document.querySelector('#v65-product-parent') ||
+      null;
+    if (!anchorEl) {
+      anchorEl = fallbackHost;
+    }
     if (!anchorEl) return;
 
     // Walk immediate element siblings after anchorEl to find and hide the legacy "Add to cart" div
@@ -5990,16 +6004,23 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       legacyDiv.classList.add('mc-price-caption-moved');
     }
 
-    // Find or create the member caption, inserted right after anchorEl (or after legacyDiv if found)
-    var caption = root.querySelector('.mc-member-price-caption');
+    // Single caption in the document; move it if Volusion re-injected the price block.
+    var caption = document.querySelector('.mc-member-price-caption');
     if (!caption) {
       caption = document.createElement('div');
-      var insertAfter = legacyDiv || anchorEl;
+    }
+    var insertAfter = legacyDiv || anchorEl;
+    try {
       if (insertAfter && insertAfter.parentNode) {
         insertAfter.parentNode.insertBefore(caption, insertAfter.nextSibling);
-      } else {
-        (anchorEl.parentNode || document.querySelector('#v65-product-parent') || document.body).appendChild(caption);
+      } else if (fallbackHost) {
+        fallbackHost.appendChild(caption);
       }
+    } catch (insertErr) {
+      try {
+        var fh2 = document.querySelector('#v65-product-parent .colors_pricebox') || document.querySelector('#v65-product-parent');
+        if (fh2) fh2.appendChild(caption);
+      } catch (e3) {}
     }
 
     caption.className = 'mc-member-price-caption';
@@ -6136,8 +6157,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var t = setInterval(function () {
       tries++;
       forceProductFixes();
-      if (tries >= 6) clearInterval(t);
-    }, 600);
+      if (tries >= 25) clearInterval(t);
+    }, 400);
   }
 
   if (document.readyState === 'loading') {
@@ -6145,6 +6166,26 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   } else {
     boot();
   }
+  window.addEventListener('load', function(){
+    setTimeout(forceProductFixes, 0);
+    setTimeout(forceProductFixes, 800);
+  });
+
+  (function observeContentAreaForPdp(){
+    var ca = document.getElementById('content_area');
+    if (!ca || ca.__mcPdpObserver) return;
+    ca.__mcPdpObserver = true;
+    var deb;
+    var mo = new MutationObserver(function(){
+      clearTimeout(deb);
+      deb = setTimeout(function(){
+        if (markProductPage()) forceProductFixes();
+      }, 50);
+    });
+    try {
+      mo.observe(ca, { childList: true, subtree: true });
+    } catch (e) {}
+  })();
 
   var _resizeTimer;
   window.addEventListener('resize', function(){
