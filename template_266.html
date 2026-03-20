@@ -7192,10 +7192,17 @@ function mcCaptionReturn(o) {
 function mcIsVisible(el) {
   if (!el) return false;
   if (el.nodeType !== 1) return false;
-  if (el.closest('[style*="display:none"], [style*="display: none"]')) return false;
-  var cs = window.getComputedStyle ? window.getComputedStyle(el) : null;
-  if (!cs) return true;
-  if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return false;
+  var cur = el;
+  while (cur && cur.nodeType === 1) {
+    var cs = window.getComputedStyle ? window.getComputedStyle(cur) : null;
+    if (cs) {
+      if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return false;
+    }
+    cur = cur.parentElement;
+  }
+  if (!el.getClientRects || el.getClientRects().length === 0) return false;
+  var rect = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+  if (rect && rect.width === 0 && rect.height === 0) return false;
   return true;
 }
 function mcPickVisible(selectors) {
@@ -7233,9 +7240,8 @@ function mcMountMemberCaptionStandalone() {
       '#v65-product-parent .product_productprice',
       '#v65-product-parent'
     ]);
-    if (!host) {
-      return mcCaptionReturn({ ok: false, reason: 'no host container' });
-    }
+    if (!host) host = document.querySelector('#v65-product-parent');
+    if (!host) host = document.body;
     var el = document.getElementById('mc-member-price-caption-root');
     if (!el) {
       el = document.createElement('div');
@@ -7252,6 +7258,20 @@ function mcMountMemberCaptionStandalone() {
         after.parentNode.insertBefore(el, after.nextSibling);
       } else {
         host.appendChild(el);
+      }
+    }
+    // Ensure caption is attached to a visible container.
+    if (!mcIsVisible(el.parentElement)) {
+      var visibleParent = mcPickVisible([
+        '#v65-product-parent .v65-product-price',
+        '#v65-product-parent .product_productprice',
+        '#v65-product-parent .colors_pricebox',
+        '#v65-product-parent'
+      ]);
+      if (visibleParent && visibleParent.parentNode) {
+        visibleParent.parentNode.insertBefore(el, visibleParent.nextSibling);
+      } else if (document.body && el.parentNode !== document.body) {
+        document.body.appendChild(el);
       }
     }
     var st = window.__mcMemberPricing || {};
@@ -7282,6 +7302,12 @@ function mcMountMemberCaptionStandalone() {
       'display:block !important;visibility:visible !important;opacity:1 !important;' +
       'margin-top:16px !important;margin-bottom:16px !important;min-height:1em !important;' +
       'font-size:16px !important;color:#454545 !important;line-height:1.4 !important;';
+    if (el.parentNode === document.body) {
+      el.style.cssText +=
+        'position:fixed !important;left:16px !important;right:16px !important;bottom:16px !important;' +
+        'z-index:2147483000 !important;background:#fff !important;padding:10px 12px !important;' +
+        'border:1px solid #ddd !important;box-shadow:0 2px 12px rgba(0,0,0,.12) !important;';
+    }
     var uiState = 'locked';
     if (st.unlocked && seat > 0) {
       el.innerHTML =
@@ -7310,7 +7336,7 @@ function mcMountMemberCaptionStandalone() {
         '</div>';
       el.setAttribute('data-mc-member-state', 'locked');
     }
-    return mcCaptionReturn({ ok: true, reason: 'mounted', ui: uiState, unlocked: !!st.unlocked, seat: seat });
+    return mcCaptionReturn({ ok: true, reason: 'mounted', ui: uiState, unlocked: !!st.unlocked, seat: seat, parentTag: (el.parentElement && el.parentElement.tagName) || '' });
   } catch (err) {
     if (typeof console !== 'undefined' && console.warn) {
       console.warn('[McCabe] mcMountMemberCaptionStandalone', err);
