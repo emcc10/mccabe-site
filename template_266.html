@@ -7183,10 +7183,17 @@ function mcFmtMcCaption(n) {
       .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
   );
 }
+function mcCaptionReturn(o) {
+  try {
+    window.MC_CAPTION_LAST = o;
+    if (typeof console !== 'undefined' && console.info) console.info('[McCabe] member caption', o);
+  } catch (_) {}
+  return o;
+}
 function mcMountMemberCaptionStandalone() {
   try {
     if (!document.querySelector('#v65-product-parent')) {
-      return { ok: false, reason: 'no #v65-product-parent yet' };
+      return mcCaptionReturn({ ok: false, reason: 'no #v65-product-parent yet' });
     }
     var oldCaps = document.querySelectorAll('.mc-member-price-caption');
     var ci;
@@ -7201,7 +7208,7 @@ function mcMountMemberCaptionStandalone() {
       document.querySelector('#v65-product-parent .colors_pricebox') ||
       document.querySelector('#v65-product-parent');
     if (!host) {
-      return { ok: false, reason: 'no host container' };
+      return mcCaptionReturn({ ok: false, reason: 'no host container' });
     }
     var el = document.getElementById('mc-member-price-caption-root');
     if (!el) {
@@ -7273,17 +7280,17 @@ function mcMountMemberCaptionStandalone() {
         '</div>';
       el.setAttribute('data-mc-member-state', 'locked');
     }
-    return { ok: true, reason: 'mounted', ui: uiState, unlocked: !!st.unlocked };
+    return mcCaptionReturn({ ok: true, reason: 'mounted', ui: uiState, unlocked: !!st.unlocked });
   } catch (err) {
     if (typeof console !== 'undefined' && console.warn) {
       console.warn('[McCabe] mcMountMemberCaptionStandalone', err);
     }
-    return { ok: false, reason: String(err && err.message ? err.message : err) };
+    return mcCaptionReturn({ ok: false, reason: String(err && err.message ? err.message : err) });
   }
 }
 window.mcMountMemberCaptionStandalone = mcMountMemberCaptionStandalone;
 function mcKickMemberCaptionStandalone() {
-  mcMountMemberCaptionStandalone();
+  return mcMountMemberCaptionStandalone();
 }
 function mcStartDetectMemberPricing() {
   if (typeof window.detectMemberPricingState !== 'function') return;
@@ -7320,6 +7327,13 @@ if (document.body) {
     mcMo.observe(document.body, { childList: true, subtree: true });
   } catch (e3) {}
 }
+try {
+  if (typeof console !== 'undefined' && console.info) {
+    console.info(
+      '[McCabe] Ready. In the console run: mcMountMemberCaptionStandalone()  — it returns {ok,reason}. Last result is also in window.MC_CAPTION_LAST'
+    );
+  }
+} catch (_) {}
 </script>
 
 </body>
