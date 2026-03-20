@@ -2125,16 +2125,21 @@ function extractVolusionAddToCartPriceFromHtml(html) {
     var sv = parseFloat(scr[1]);
     if (sv > 50 && sv < 5000000 && (!mainAmt || sv < mainAmt - 0.01)) return sv;
   }
+  var htsInline = extractHowToGetSalePriceFromScripts(html, mainAmt, true);
+  if (htsInline > 0) return htsInline;
   return 0;
 }
 /**
  * Volusion PDP often exposes the real selling price as window.HowToGetSalePrice (number, string, or function).
+ * If allowEqual is true, accept p even when it matches MAP (still needed for caption when Volusion only exposes one price).
  */
-function tryReadHowToGetSalePrice(mainAmt) {
+function tryReadHowToGetSalePrice(mainAmt, allowEqual) {
   try {
     var w = typeof window !== "undefined" ? window : null;
-    if (!w || typeof w.HowToGetSalePrice === "undefined") return 0;
+    if (!w) return 0;
     var raw = w.HowToGetSalePrice;
+    if (typeof raw === "undefined" && w.howToGetSalePrice != null) raw = w.howToGetSalePrice;
+    if (typeof raw === "undefined") return 0;
     if (typeof raw === "function") {
       raw = raw();
     }
@@ -2147,11 +2152,37 @@ function tryReadHowToGetSalePrice(mainAmt) {
       p = parseMcCurrency(String(raw));
     }
     if (!(p > 50 && p < 5000000)) return 0;
-    if (mainAmt > 0 && p >= mainAmt - 0.01) return 0;
+    if (!allowEqual && mainAmt > 0 && p >= mainAmt - 0.01) return 0;
     return p;
   } catch (e) {
     return 0;
   }
+}
+/**
+ * HowToGetSalePrice may live only in inline scripts (not on window). Parse full HTML / script text.
+ */
+function extractHowToGetSalePriceFromScripts(html, mainAmt, allowEqual) {
+  if (!html || typeof html !== "string") return 0;
+  var patterns = [
+    /HowToGetSalePrice\s*=\s*['"]?([\d,]+\.?\d*)/gi,
+    /HowToGetSalePrice\s*=\s*['"]([\d,]+\.?\d*)['"]/gi,
+    /HowToGetSalePrice\s*:\s*['"]?([\d,]+\.?\d*)/gi,
+    /\[\s*['"]HowToGetSalePrice['"]\s*\]\s*=\s*['"]?([\d,]+\.?\d*)/gi,
+    /HowToGetSalePrice\s*=\s*function\s*\([^)]*\)\s*\{[^}]*?return\s+['"]?\$?([\d,]+\.?\d*)/gi
+  ];
+  var best = 0;
+  var pi;
+  for (pi = 0; pi < patterns.length; pi++) {
+    var r = patterns[pi];
+    var m;
+    while ((m = r.exec(html)) !== null) {
+      var p = parseMcCurrency(m[1]);
+      if (!(p > 50 && p < 5000000)) continue;
+      if (!allowEqual && mainAmt > 0 && p >= mainAmt - 0.01) continue;
+      if (!best || p < best) best = p;
+    }
+  }
+  return best;
 }
 function getVolusionAddToCartSeatPrice(root) {
   if (typeof window.__MC_MEMBER_SEAT_PRICE === "number" && window.__MC_MEMBER_SEAT_PRICE > 0) {
@@ -2172,7 +2203,12 @@ function getVolusionAddToCartSeatPrice(root) {
     );
     var hts0 = tryReadHowToGetSalePrice(mapG);
     if (hts0 > 0) return hts0;
-    return scrapeVolusionPriceCandidatesBelowMap(document.documentElement.innerHTML || "", mapG);
+    var fromScr0 = scrapeVolusionPriceCandidatesBelowMap(document.documentElement.innerHTML || "", mapG);
+    if (fromScr0 > 0) return fromScr0;
+    var scrInline0 = extractHowToGetSalePriceFromScripts(document.documentElement.innerHTML || "", mapG, true);
+    if (scrInline0 > 0) return scrInline0;
+    var htsEq0 = tryReadHowToGetSalePrice(mapG, true);
+    return htsEq0 > 0 ? htsEq0 : 0;
   }
   var mainEl = box.querySelector("#priceWithOptions") || box.querySelector('[itemprop="price"]');
   var mainAmt = parseMcCurrency(
@@ -2216,7 +2252,11 @@ function getVolusionAddToCartSeatPrice(root) {
   var fromScr = scrapeVolusionPriceCandidatesBelowMap(htmlChunk, mainAmt);
   if (fromScr > 0) return fromScr;
   fromScr = scrapeVolusionPriceCandidatesBelowMap(document.documentElement.innerHTML || "", mainAmt);
-  return fromScr > 0 ? fromScr : 0;
+  if (fromScr > 0) return fromScr;
+  var scrInline = extractHowToGetSalePriceFromScripts(document.documentElement.innerHTML || "", mainAmt, true);
+  if (scrInline > 0) return scrInline;
+  var htsEq = tryReadHowToGetSalePrice(mainAmt, true);
+  return htsEq > 0 ? htsEq : 0;
 }
 function detectMemberPricingState(){
   if (window.__mcMemberPricing.promise) return window.__mcMemberPricing.promise;
@@ -2289,15 +2329,26 @@ function detectMemberPricingState(){
   }).then(function(state){
     window.__mcMemberPricing.promise = null;
     if (state && state.unlocked && !(state.memberSeatPrice > 0)) {
-      setTimeout(function(){
+      var pollStart = Date.now();
+      var pollMs = 22000;
+      var pollIv = setInterval(function(){
+        if (window.__mcMemberPricing.memberSeatPrice > 0) {
+          clearInterval(pollIv);
+          return;
+        }
+        if (Date.now() - pollStart > pollMs) {
+          clearInterval(pollIv);
+          return;
+        }
         var live2 = getVolusionAddToCartSeatPrice(document);
         if (live2 > 0) {
           window.__mcMemberPricing.memberSeatPrice = live2;
+          clearInterval(pollIv);
           try {
             window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing }));
           } catch (e2) {}
         }
-      }, 2500);
+      }, 450);
     }
     return state;
   });
@@ -2308,6 +2359,7 @@ window.formatMcCurrency = formatMcCurrency;
 window.getMcDisplayedSeatPrice = getDisplayedPublicSeatPrice;
 window.getVolusionAddToCartSeatPrice = getVolusionAddToCartSeatPrice;
 window.tryReadHowToGetSalePrice = tryReadHowToGetSalePrice;
+window.extractHowToGetSalePriceFromScripts = extractHowToGetSalePriceFromScripts;
 function getMemberPlannerSeatPriceForCalc(){
   var state = window.__mcMemberPricing;
   if (!state || !state.unlocked) return 0;
@@ -5864,8 +5916,13 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function renderMemberPricingCaption(scope){
     var root = scope || document;
-    // Anchor to #priceWithOptionsNoTax; fall back to #priceWithOptions parent
-    var anchorEl = root.querySelector('#priceWithOptionsNoTax') || root.querySelector('#priceWithOptions');
+    // Anchor to visible MAP / option price (Volusion ids vary by theme)
+    var anchorEl =
+      root.querySelector('#priceWithOptionsNoTax') ||
+      root.querySelector('#priceWithOptions') ||
+      root.querySelector('#v65-product-parent .colors_pricebox [itemprop="price"]') ||
+      root.querySelector('#v65-product-parent .colors_pricebox font#priceWithOptions') ||
+      root.querySelector('#v65-product-parent .v65-product-price');
     if (!anchorEl) return;
 
     // Walk immediate element siblings after anchorEl to find and hide the legacy "Add to cart" div
@@ -5911,6 +5968,31 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (state.unlocked && !(seatPrice > 0) && typeof window.getVolusionAddToCartSeatPrice === 'function') {
       seatPrice = window.getVolusionAddToCartSeatPrice(document);
       if (seatPrice > 0) {
+        window.__mcMemberPricing.memberSeatPrice = seatPrice;
+      }
+    }
+    if (state.unlocked && !(seatPrice > 0) && typeof window.tryReadHowToGetSalePrice === 'function') {
+      var mapEl =
+        root.querySelector('#priceWithOptions') ||
+        root.querySelector('[itemprop="price"]') ||
+        root.querySelector('#priceWithOptionsNoTax');
+      var mapAmt = 0;
+      if (mapEl) {
+        mapAmt = parseMcCurrency(
+          (mapEl.getAttribute && (mapEl.getAttribute('content') || mapEl.getAttribute('value'))) ||
+            mapEl.textContent ||
+            ''
+        );
+      }
+      seatPrice = window.tryReadHowToGetSalePrice(mapAmt, true);
+      if (!(seatPrice > 0) && typeof window.extractHowToGetSalePriceFromScripts === 'function') {
+        seatPrice = window.extractHowToGetSalePriceFromScripts(
+          document.documentElement.innerHTML || '',
+          mapAmt,
+          true
+        );
+      }
+      if (seatPrice > 0 && window.__mcMemberPricing) {
         window.__mcMemberPricing.memberSeatPrice = seatPrice;
       }
     }
