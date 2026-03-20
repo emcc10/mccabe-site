@@ -7309,21 +7309,24 @@ function mcMountMemberCaptionStandalone() {
         'border:1px solid #ddd !important;box-shadow:0 2px 12px rgba(0,0,0,.12) !important;';
     }
     var uiState = 'locked';
+    var html = '';
     if (st.unlocked && seat > 0) {
-      el.innerHTML =
+      html =
         '<span class="mc-member-price-caption__option-label">Exclusive pricing for members!</span>' +
         '<span class="mc-member-price-caption__price-value">' +
         mcFmtMcCaption(seat) +
         '</span>';
+      el.innerHTML = html;
       el.setAttribute('data-mc-member-state', 'unlocked');
       uiState = 'unlocked';
     } else if (st.unlocked) {
-      el.innerHTML =
+      html =
         '<span class="mc-member-price-caption__option-label">Exclusive pricing for members!</span>';
+      el.innerHTML = html;
       el.setAttribute('data-mc-member-state', 'unlocked-no-price');
       uiState = 'unlocked-no-price';
     } else {
-      el.innerHTML =
+      html =
         '<div class="mc-member-price-caption__headline">Exclusive pricing for members!</div>' +
         '<div class="mc-member-price-caption__actions">' +
         '<a class="mc-member-price-caption__cta" href="' +
@@ -7334,9 +7337,31 @@ function mcMountMemberCaptionStandalone() {
         createUrl +
         '">Create account</a>' +
         '</div>';
+      el.innerHTML = html;
       el.setAttribute('data-mc-member-state', 'locked');
     }
-    return mcCaptionReturn({ ok: true, reason: 'mounted', ui: uiState, unlocked: !!st.unlocked, seat: seat, parentTag: (el.parentElement && el.parentElement.tagName) || '' });
+    // Fail-safe: if theme/layout still hides the normal node, render a fixed visible panel.
+    var visible = mcIsVisible(el);
+    var portal = document.getElementById('mc-member-caption-portal-fixed');
+    if (!visible) {
+      if (!portal) {
+        portal = document.createElement('div');
+        portal.id = 'mc-member-caption-portal-fixed';
+        document.body.appendChild(portal);
+      }
+      portal.innerHTML = html;
+      portal.setAttribute('data-mc-member-state', uiState);
+      portal.style.cssText =
+        'position:fixed !important;left:12px !important;right:12px !important;bottom:12px !important;' +
+        'z-index:2147483646 !important;background:#fff !important;border:1px solid #ddd !important;' +
+        'box-shadow:0 4px 16px rgba(0,0,0,.18) !important;padding:10px 12px !important;' +
+        'display:block !important;visibility:visible !important;opacity:1 !important;' +
+        'font-size:16px !important;color:#454545 !important;line-height:1.4 !important;';
+      visible = true;
+    } else if (portal) {
+      portal.parentNode.removeChild(portal);
+    }
+    return mcCaptionReturn({ ok: true, reason: 'mounted', ui: uiState, unlocked: !!st.unlocked, seat: seat, visible: visible, parentTag: (el.parentElement && el.parentElement.tagName) || '' });
   } catch (err) {
     if (typeof console !== 'undefined' && console.warn) {
       console.warn('[McCabe] mcMountMemberCaptionStandalone', err);
