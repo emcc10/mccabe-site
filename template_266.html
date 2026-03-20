@@ -2140,13 +2140,36 @@ function tryReadHowToGetSalePrice(mainAmt, allowEqual) {
   try {
     var w = typeof window !== "undefined" ? window : null;
     if (!w) return 0;
-    var raw = w.HowToGetSalePrice;
-    if (typeof raw === "undefined" && w.howToGetSalePrice != null) raw = w.howToGetSalePrice;
-    if (typeof raw === "undefined") return 0;
-    if (typeof raw === "function") {
-      raw = raw();
-      if (!(raw != null && String(raw).length)) {
-        try { raw = w.HowToGetSalePrice("saleprice"); } catch (e0) {}
+    var fn = w.HowToGetSalePrice;
+    if (typeof fn === "undefined" && w.howToGetSalePrice != null) fn = w.howToGetSalePrice;
+    var raw = fn;
+    if (typeof fn === "function") {
+      var pc = "";
+      try {
+        pc = ((document.querySelector('input[name="ProductCode"], input[name="productcode"]') || {}).value || "").trim();
+      } catch (pcErr) {}
+      var calls = [
+        [],
+        ["saleprice"],
+        ["SalePrice"],
+        [pc],
+        [pc, "saleprice"],
+        [pc, "SalePrice"],
+        [pc, "sellingprice"]
+      ];
+      var ci;
+      raw = null;
+      for (ci = 0; ci < calls.length; ci++) {
+        try {
+          raw = fn.apply(w, calls[ci]);
+        } catch (callErr) {
+          raw = null;
+        }
+        var pv = parseMcCurrency(raw == null ? "" : String(raw));
+        if (pv > 0) {
+          raw = pv;
+          break;
+        }
       }
     }
     var p = 0;
@@ -7213,6 +7236,22 @@ function mcReadSeatOverride() {
     var html = document.documentElement ? document.documentElement.innerHTML : '';
     var m = html.match(/(?:HowToGetSalePrice|SalePrice|ActualPrice|SellingPrice|OurPrice|CartPrice|AddToCartPrice)\s*[=:]\s*['"]?\$?([\d,]+(?:\.\d+)?)/i);
     if (m) p = mcParsePriceLoose(m[1]);
+  }
+  if (!(p > 0)) {
+    try {
+      var keys = Object.keys(window || {});
+      var best = 0;
+      for (var k = 0; k < keys.length; k++) {
+        var key = keys[k];
+        if (!/saleprice|sellingprice|actualprice|ourprice|cartprice/i.test(key)) continue;
+        var val = window[key];
+        var pp = 0;
+        if (typeof val === 'number') pp = val;
+        else if (typeof val === 'string') pp = mcParsePriceLoose(val);
+        if (pp > 0 && (!best || pp < best)) best = pp;
+      }
+      if (best > 0) p = best;
+    } catch (e4) {}
   }
   return p > 0 ? p : 0;
 }
