@@ -5934,15 +5934,42 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function rearrangePriceCaption(scope){ /* handled by renderMemberPricingCaption */ }
 
+  /** Volusion PDP markup varies; search scope then full document so we never skip the caption. */
+  function findMemberCaptionAnchorEl(root) {
+    var el;
+    var selectors = [
+      '#priceWithOptionsNoTax',
+      '#priceWithOptions',
+      'font#priceWithOptions',
+      '#v65-product-parent .colors_pricebox [itemprop="price"]',
+      '#v65-product-parent .colors_pricebox font#priceWithOptions',
+      '#v65-product-parent .v65-product-price',
+      '#v65-product-parent .product_productprice',
+      '.colors_pricebox [itemprop="price"]',
+      '.colors_pricebox #priceWithOptions',
+      '.colors_pricebox'
+    ];
+    var i;
+    for (i = 0; i < selectors.length; i++) {
+      el = root.querySelector(selectors[i]);
+      if (el) return el;
+    }
+    for (i = 0; i < selectors.length; i++) {
+      el = document.querySelector(selectors[i]);
+      if (el) return el;
+    }
+    return (
+      root.querySelector('#v65-product-parent .productnamecolorLARGE, #v65-product-parent .productnamecolor') ||
+      document.querySelector('#v65-product-parent .productnamecolorLARGE, #v65-product-parent .productnamecolor') ||
+      root.querySelector('#v65-product-parent') ||
+      document.querySelector('#v65-product-parent') ||
+      null
+    );
+  }
+
   function renderMemberPricingCaption(scope){
     var root = scope || document;
-    // Anchor to visible MAP / option price (Volusion ids vary by theme)
-    var anchorEl =
-      root.querySelector('#priceWithOptionsNoTax') ||
-      root.querySelector('#priceWithOptions') ||
-      root.querySelector('#v65-product-parent .colors_pricebox [itemprop="price"]') ||
-      root.querySelector('#v65-product-parent .colors_pricebox font#priceWithOptions') ||
-      root.querySelector('#v65-product-parent .v65-product-price');
+    var anchorEl = findMemberCaptionAnchorEl(root);
     if (!anchorEl) return;
 
     // Walk immediate element siblings after anchorEl to find and hide the legacy "Add to cart" div
@@ -5968,7 +5995,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (!caption) {
       caption = document.createElement('div');
       var insertAfter = legacyDiv || anchorEl;
-      insertAfter.parentNode.insertBefore(caption, insertAfter.nextSibling);
+      if (insertAfter && insertAfter.parentNode) {
+        insertAfter.parentNode.insertBefore(caption, insertAfter.nextSibling);
+      } else {
+        (anchorEl.parentNode || document.querySelector('#v65-product-parent') || document.body).appendChild(caption);
+      }
     }
 
     caption.className = 'mc-member-price-caption';
@@ -5985,37 +6016,46 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       return '$' + Number(v || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     };
     var seatPrice = state.memberSeatPrice;
-    if (state.unlocked && !(seatPrice > 0) && typeof window.getVolusionAddToCartSeatPrice === 'function') {
-      seatPrice = window.getVolusionAddToCartSeatPrice(document);
-      if (seatPrice > 0) {
-        window.__mcMemberPricing.memberSeatPrice = seatPrice;
+
+    try {
+      if (state.unlocked && !(seatPrice > 0) && typeof window.getVolusionAddToCartSeatPrice === 'function') {
+        seatPrice = window.getVolusionAddToCartSeatPrice(document);
+        if (seatPrice > 0 && window.__mcMemberPricing) {
+          window.__mcMemberPricing.memberSeatPrice = seatPrice;
+        }
       }
+      if (state.unlocked && !(seatPrice > 0) && typeof window.tryReadHowToGetSalePrice === 'function') {
+        var mapEl =
+          root.querySelector('#priceWithOptions') ||
+          root.querySelector('[itemprop="price"]') ||
+          root.querySelector('#priceWithOptionsNoTax') ||
+          document.querySelector('#priceWithOptions, [itemprop="price"], #priceWithOptionsNoTax');
+        var mapAmt = 0;
+        if (mapEl) {
+          mapAmt = mcParseCurrency(
+            (mapEl.getAttribute && (mapEl.getAttribute('content') || mapEl.getAttribute('value'))) ||
+              mapEl.textContent ||
+              ''
+          );
+        }
+        seatPrice = window.tryReadHowToGetSalePrice(mapAmt, true);
+        if (!(seatPrice > 0) && typeof window.extractHowToGetSalePriceFromScripts === 'function') {
+          seatPrice = window.extractHowToGetSalePriceFromScripts(
+            document.documentElement.innerHTML || '',
+            mapAmt,
+            true
+          );
+        }
+        if (seatPrice > 0 && window.__mcMemberPricing) {
+          window.__mcMemberPricing.memberSeatPrice = seatPrice;
+        }
+      }
+    } catch (err) {
+      try {
+        console.warn('[McCabe] member caption price resolution', err);
+      } catch (e2) {}
     }
-    if (state.unlocked && !(seatPrice > 0) && typeof window.tryReadHowToGetSalePrice === 'function') {
-      var mapEl =
-        root.querySelector('#priceWithOptions') ||
-        root.querySelector('[itemprop="price"]') ||
-        root.querySelector('#priceWithOptionsNoTax');
-      var mapAmt = 0;
-      if (mapEl) {
-        mapAmt = mcParseCurrency(
-          (mapEl.getAttribute && (mapEl.getAttribute('content') || mapEl.getAttribute('value'))) ||
-            mapEl.textContent ||
-            ''
-        );
-      }
-      seatPrice = window.tryReadHowToGetSalePrice(mapAmt, true);
-      if (!(seatPrice > 0) && typeof window.extractHowToGetSalePriceFromScripts === 'function') {
-        seatPrice = window.extractHowToGetSalePriceFromScripts(
-          document.documentElement.innerHTML || '',
-          mapAmt,
-          true
-        );
-      }
-      if (seatPrice > 0 && window.__mcMemberPricing) {
-        window.__mcMemberPricing.memberSeatPrice = seatPrice;
-      }
-    }
+
     if (state.unlocked && seatPrice > 0) {
       caption.innerHTML =
         '<span class="mc-member-price-caption__option-label">Exclusive pricing for members!</span>' +
