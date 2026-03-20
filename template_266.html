@@ -2509,6 +2509,22 @@ function calculatePlannerPrice(counts, seatPrice){
   }
   return total;
 }
+function cachePlannerCartTarget(retailTotal, memberTotal){
+  try {
+    var pc = ((document.querySelector('input[name="ProductCode"], input[name="productcode"]') || {}).value || "").trim();
+    if (!pc) return;
+    var name = ((document.querySelector('h1.productnamecolor, .productnamecolor, .productnamecolorLARGE') || {}).textContent || "").trim();
+    var payload = {
+      pc: pc,
+      name: name,
+      retailTotal: Number(retailTotal) || 0,
+      memberTotal: Number(memberTotal) || 0,
+      ts: Date.now()
+    };
+    localStorage.setItem("mc_cart_target_" + pc, JSON.stringify(payload));
+    localStorage.setItem("mc_cart_target_last", JSON.stringify(payload));
+  } catch (_) {}
+}
 
 function summarizePlannerConfiguration(payload){
   var opts = payload && payload.options && typeof payload.options === "object" ? payload.options : (window.__ROOM_PLANNER_OPTIONS__ || {});
@@ -2707,9 +2723,11 @@ window.applyPlannerToPage = function (payload) {
   window.__mcPlannerSeatCount = hasPlannerConfig ? seatCount : 0;
 
   var publicSeatPrice = (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) ? window.__mcPerSeatPrice : getDisplayedPublicSeatPrice();
+  var retailTotalComputed = 0;
   console.log("[McCabe Planner] publicSeatPrice:", publicSeatPrice, "seatCount:", seatCount, "counts:", JSON.stringify(configOpts));
   if (publicSeatPrice > 0) {
     var totalPrice = calculatePlannerPrice(configOpts, publicSeatPrice);
+    retailTotalComputed = totalPrice;
     console.log("[McCabe Planner] retail totalPrice:", totalPrice);
     updateProductPrice(totalPrice);
     window.__mcPlannerPrice = totalPrice;
@@ -2721,6 +2739,7 @@ window.applyPlannerToPage = function (payload) {
   if (window.__mcMemberPricing) {
     var memberTotal = calculatePlannerPrice(configOpts, memberSeat);
     window.__mcMemberPricing.memberPlannerTotal = memberTotal > 0 ? memberTotal : 0;
+    cachePlannerCartTarget(retailTotalComputed, window.__mcMemberPricing.memberPlannerTotal || 0);
     try { window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing })); } catch (e) {}
   }
 };
@@ -6836,6 +6855,42 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       if (slug) localStorage.setItem("mc_member_seat_name_" + slug, String(price));
     } catch (_) {}
   }
+  function mcCartLooksLoggedIn(){
+    var h = document.documentElement ? document.documentElement.innerHTML : "";
+    var lc = h.toLowerCase();
+    if (/href\s*=\s*["'][^"']*logout[^"']*["']/i.test(h)) return true;
+    if (/href\s*=\s*["'][^"']*logoff[^"']*["']/i.test(h)) return true;
+    if (/>\s*sign\s*out\s*</i.test(h) || />\s*log\s*out\s*</i.test(h)) return true;
+    if (/welcome to your account|order history|account settings/i.test(lc) && !/returning customer|login password|sign in/i.test(lc)) return true;
+    return false;
+  }
+  function mcReadCartTarget(){
+    try {
+      var raw = localStorage.getItem("mc_cart_target_last");
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      if (!obj || !obj.ts) return null;
+      if ((Date.now() - Number(obj.ts)) > 1000 * 60 * 60 * 6) return null;
+      return obj;
+    } catch (_) {
+      return null;
+    }
+  }
+  function mcApplyCartTargetPrice(row, targetTotal){
+    if (!(targetTotal > 0)) return 0;
+    var cells = row.querySelectorAll("td");
+    var bestCell = null, bestVal = 0;
+    for (var i = 0; i < cells.length; i++) {
+      var tx = (cells[i].textContent || "").trim();
+      var mm = tx.match(/\$[\d,]+(?:\.\d+)?/);
+      if (!mm) continue;
+      var n = mcParseSeatMoney(mm[0]);
+      if (n > bestVal) { bestVal = n; bestCell = cells[i]; }
+    }
+    if (!bestCell || !(bestVal > 0)) return 0;
+    bestCell.textContent = (bestCell.textContent || "").replace(/\$[\d,]+(?:\.\d+)?/, mcFmtMoney(targetTotal));
+    return targetTotal - bestVal;
+  }
   function mcGetCached4LDiscount(pc, name){
     try {
       var p = 0;
@@ -7157,6 +7212,10 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     if (!content || !content.querySelectorAll) return;
     var configDataList = [];
     var mcTotal4LDiscount = 0;
+    var mcCartDelta = 0;
+    var mcCartTarget = mcReadCartTarget();
+    var mcCartTargetApplied = false;
+    var mcIsMember = mcCartLooksLoggedIn();
     var mcPending4LDiscount = 0;
     var mcPending4LPayload = null;
     var mcFallbackRow = null;
@@ -7319,6 +7378,22 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         if (rowText.indexOf("calculate shipping") !== -1 || rowText.indexOf("zip") !== -1 || rowText.indexOf("postal") !== -1 || rowText.indexOf("select stat") !== -1 || rowText.indexOf("residential") !== -1 || rowText.indexOf("business") !== -1) break;
         if (rowText.indexOf("tax:") !== -1 || /total:\s*\$/.test(rowText)) break;
         if (!tr.querySelector("img")) continue;
+        if (!mcCartTargetApplied && mcCartTarget) {
+          var desired = mcIsMember ? Number(mcCartTarget.memberTotal || 0) : Number(mcCartTarget.retailTotal || 0);
+          if (desired > 0) {
+            var hit = false;
+            var pc = String(mcCartTarget.pc || "").toLowerCase();
+            var nm = String(mcCartTarget.name || "").toLowerCase();
+            if (pc && rowText.indexOf(pc) !== -1) hit = true;
+            else if (nm && nm.length > 5 && rowText.indexOf(nm) !== -1) hit = true;
+            else if (!pc && !nm) hit = true;
+            if (hit) {
+              var d = mcApplyCartTargetPrice(tr, desired);
+              if (d !== 0) mcCartDelta += d;
+              mcCartTargetApplied = true;
+            }
+          }
+        }
         var pcRowGuess = "";
         var nmRowGuess = "";
         var rowCached4LDiscount = 0;
@@ -7429,6 +7504,21 @@ body.productdetails .v-product-grid .v-product .v-product__price {
         if (!(n2 > 0)) continue;
         var adj = Math.max(0, n2 - mcTotal4LDiscount);
         moneyNodes[mn].textContent = tx.replace(/\$[\d,]+(?:\.\d+)?/, mcFmtMoney(adj));
+      }
+    }
+    if (mcCartDelta !== 0) {
+      var sumNodes = content.querySelectorAll("td, span, strong, b, font");
+      for (var sni = 0; sni < sumNodes.length; sni++) {
+        var ntx = (sumNodes[sni].textContent || "").trim();
+        if (!/\$[\d,]/.test(ntx)) continue;
+        var line = ((sumNodes[sni].parentElement && sumNodes[sni].parentElement.textContent) || "").toLowerCase();
+        if (!/subtotal|total|order total|grand total/.test(line)) continue;
+        var msum = ntx.match(/\$[\d,]+(?:\.\d+)?/);
+        if (!msum) continue;
+        var nsum = mcParseSeatMoney(msum[0]);
+        if (!(nsum > 0)) continue;
+        var fixed = Math.max(0, nsum + mcCartDelta);
+        sumNodes[sni].textContent = ntx.replace(/\$[\d,]+(?:\.\d+)?/, mcFmtMoney(fixed));
       }
     }
     // Hard fallback: if no row-level application happened, apply pending discount to summary totals.
