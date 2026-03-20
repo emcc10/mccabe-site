@@ -1990,6 +1990,34 @@ function refreshPlannerPriceForMemberState(){
   updateProductPrice(totalPrice);
   window.__mcPlannerPrice = totalPrice;
 }
+/** Volusion myaccount HTML: logged in if logout/sign-out present or welcome dashboard; not if login-only page. */
+function volusionMyAccountHtmlIndicatesLoggedIn(html) {
+  if (!html || html.length < 80) return false;
+  var h = html;
+  var lc = h.toLowerCase();
+  if (/href\s*=\s*["'][^"']*logout[^"']*["']/i.test(h)) return true;
+  if (/href\s*=\s*["'][^"']*logoff[^"']*["']/i.test(h)) return true;
+  if (/>\s*sign\s*out\s*</i.test(h)) return true;
+  if (/>\s*log\s*out\s*</i.test(h)) return true;
+  if (/welcome to your account/i.test(h)) return true;
+  if (/order history|account settings|edit (your )?profile/i.test(lc) && /returning customer/i.test(lc) === false) return true;
+  if (/<input[^>]+type\s*=\s*["']password["']/i.test(h) && /returning customer|login password|sign in to continue/i.test(lc) && !/logout|log\s*out/i.test(lc)) return false;
+  return false;
+}
+/** Parse primary PDP price from fetched product HTML (logged-in price may equal public — no "lower" dollar in DOM). */
+function extractDisplayedSeatPriceFromHtml(html) {
+  if (!html) return 0;
+  var parser = new DOMParser();
+  var doc = parser.parseFromString(html, "text/html");
+  var el =
+    doc.querySelector("#priceWithOptions") ||
+    doc.querySelector('[itemprop="price"]') ||
+    doc.querySelector("#priceWithOptionsNoTax");
+  if (!el) return 0;
+  var content = el.getAttribute && (el.getAttribute("content") || el.getAttribute("value"));
+  var n = parseMcCurrency(content || el.textContent || "");
+  return n > 0 ? n : 0;
+}
 function detectMemberPricingState(){
   if (window.__mcMemberPricing.promise) return window.__mcMemberPricing.promise;
   window.__mcMemberPricing.promise = fetch("/myaccount.asp", {
@@ -2000,9 +2028,11 @@ function detectMemberPricingState(){
   }).then(function(accountHtml){
     var state = window.__mcMemberPricing;
     state.checked = true;
-    state.unlocked = /welcome to your account/i.test(accountHtml) && !/name=["']loginform["']/i.test(accountHtml);
+    state.unlocked = volusionMyAccountHtmlIndicatesLoggedIn(accountHtml);
     state.publicSeatPrice = getDisplayedPublicSeatPrice();
-    if (!state.unlocked) return state;
+    if (!state.unlocked) {
+      return state;
+    }
     var url = new URL(window.location.href);
     url.searchParams.delete("CartID");
     return fetch(url.pathname + url.search, {
@@ -2012,6 +2042,9 @@ function detectMemberPricingState(){
       return resp.text();
     }).then(function(productHtml){
       var memberSeatPrice = extractMemberSeatPriceFromHtml(productHtml, state.publicSeatPrice);
+      if (!(memberSeatPrice > 0)) {
+        memberSeatPrice = extractDisplayedSeatPriceFromHtml(productHtml);
+      }
       if (memberSeatPrice > 0) {
         state.memberSeatPrice = memberSeatPrice;
         if (state.publicSeatPrice > memberSeatPrice) {
@@ -2033,9 +2066,13 @@ function detectMemberPricingState(){
     } catch (e) {}
     refreshPlannerPriceForMemberState();
     return state;
+  }).then(function(state){
+    window.__mcMemberPricing.promise = null;
+    return state;
   });
   return window.__mcMemberPricing.promise;
 }
+window.detectMemberPricingState = detectMemberPricingState;
 function getMemberPlannerSeatPriceForCalc(){
   var state = window.__mcMemberPricing;
   if (!state || !state.unlocked) return 0;
@@ -5736,7 +5773,15 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   window.addEventListener('mcMemberPricingReady', function(){
     forceProductFixes();
   });
-  detectMemberPricingState();
+  if (typeof window.detectMemberPricingState === 'function') {
+    window.detectMemberPricingState();
+  }
+  window.addEventListener('pageshow', function(ev){
+    if (!ev.persisted || !document.body.classList.contains('mc-product-page')) return;
+    if (typeof window.detectMemberPricingState !== 'function') return;
+    window.__mcMemberPricing.promise = null;
+    window.detectMemberPricingState();
+  });
 })();
 </script>
 <script>
