@@ -7186,9 +7186,6 @@ function mcFmtMcCaption(n) {
 function mcCaptionReturn(o) {
   try {
     window.MC_CAPTION_LAST = o;
-    if (window.MC_CAPTION_DEBUG && typeof console !== 'undefined' && console.info) {
-      console.info('[McCabe] member caption', o);
-    }
   } catch (_) {}
   return o;
 }
@@ -7348,10 +7345,10 @@ var mcCaptionTicks = 0;
 var mcCaptionIv = setInterval(function () {
   var r = mcKickMemberCaptionStandalone();
   if (r && r.ok && document.getElementById('mc-member-price-caption-root')) {
-    if (++mcCaptionTicks > 12) clearInterval(mcCaptionIv);
+    clearInterval(mcCaptionIv);
     return;
   }
-  if (++mcCaptionTicks > 120) clearInterval(mcCaptionIv);
+  if (++mcCaptionTicks > 25) clearInterval(mcCaptionIv);
 }, 400);
 document.addEventListener('mcMemberPricingReady', mcKickMemberCaptionStandalone);
 if (document.body) {
@@ -7372,7 +7369,7 @@ if (document.body) {
 try {
   if (typeof console !== 'undefined' && console.info) {
     console.info(
-      '[McCabe] Ready. Run mcMountMemberCaptionStandalone(); latest state: window.MC_CAPTION_LAST'
+      '[McCabe] Caption ready. Run mcMountMemberCaptionStandalone(); state: window.MC_CAPTION_LAST'
     );
   }
 } catch (_) {}
