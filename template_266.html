@@ -2158,6 +2158,9 @@ function tryReadHowToGetSalePrice(mainAmt, allowEqual) {
     return 0;
   }
 }
+if (typeof window !== "undefined") {
+  window.tryReadHowToGetSalePrice = tryReadHowToGetSalePrice;
+}
 /**
  * HowToGetSalePrice may live only in inline scripts (not on window). Parse full HTML / script text.
  */
@@ -2183,6 +2186,9 @@ function extractHowToGetSalePriceFromScripts(html, mainAmt, allowEqual) {
     }
   }
   return best;
+}
+if (typeof window !== "undefined") {
+  window.extractHowToGetSalePriceFromScripts = extractHowToGetSalePriceFromScripts;
 }
 function getVolusionAddToCartSeatPrice(root) {
   if (typeof window.__MC_MEMBER_SEAT_PRICE === "number" && window.__MC_MEMBER_SEAT_PRICE > 0) {
@@ -2358,8 +2364,7 @@ window.detectMemberPricingState = detectMemberPricingState;
 window.formatMcCurrency = formatMcCurrency;
 window.getMcDisplayedSeatPrice = getDisplayedPublicSeatPrice;
 window.getVolusionAddToCartSeatPrice = getVolusionAddToCartSeatPrice;
-window.tryReadHowToGetSalePrice = tryReadHowToGetSalePrice;
-window.extractHowToGetSalePriceFromScripts = extractHowToGetSalePriceFromScripts;
+/* tryReadHowToGetSalePrice + extractHowToGetSalePriceFromScripts: assigned on window right after define (above) */
 function getMemberPlannerSeatPriceForCalc(){
   var state = window.__mcMemberPricing;
   if (!state || !state.unlocked) return 0;
