@@ -7278,6 +7278,18 @@ function mcProductCode() {
   var inp = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
   return ((inp && inp.value) || '').trim();
 }
+function mcProductName() {
+  var el =
+    document.querySelector('#v65-product-parent h1, #v65-product-parent .productnamecolor, #v65-product-parent .productnamecolorLARGE') ||
+    document.querySelector('h1.productnamecolor, .productnamecolor, .productnamecolorLARGE');
+  return ((el && el.textContent) || '').replace(/\s+/g, ' ').trim();
+}
+function mcDisplayedPublicSeat() {
+  var el = document.querySelector('#priceWithOptions, #priceWithOptionsNoTax, #v65-product-parent [itemprop="price"], #v65-product-parent .v65-product-price');
+  if (!el) return 0;
+  var raw = (el.getAttribute && (el.getAttribute('content') || el.getAttribute('value'))) || el.textContent || '';
+  return mcParsePriceLoose(raw);
+}
 function mcCachedSeatForProduct(pc) {
   if (!pc) return 0;
   try {
@@ -7292,40 +7304,77 @@ function mcSetCachedSeatForProduct(pc, p) {
   if (!pc || !(p > 0)) return;
   try { localStorage.setItem('mc_member_seat_' + pc, String(p)); } catch (_) {}
 }
-function mcExtractSeatFromCartHtml(cartHtml, pc) {
+function mcExtractSeatFromCartHtml(cartHtml, pc, productName, publicSeat) {
   if (!cartHtml) return 0;
   var doc = new DOMParser().parseFromString(cartHtml, 'text/html');
   var txt = (doc.body && doc.body.textContent) ? doc.body.textContent : cartHtml;
   var code = String(pc || '').trim().toLowerCase();
+  var nameLc = String(productName || '').trim().toLowerCase();
+  var pub = Number(publicSeat) || 0;
+
+  function pickBestPriceFromText(chunk) {
+    if (!chunk) return 0;
+    var prices = chunk.match(/\$[\d,]+(?:\.\d+)?/g) || [];
+    var bestBelow = 0;
+    var bestAny = 0;
+    for (var i = 0; i < prices.length; i++) {
+      var n = mcParsePriceLoose(prices[i]);
+      if (!(n > 0)) continue;
+      if (!bestAny || n < bestAny) bestAny = n;
+      if (pub > 0 && n < pub - 0.01 && (!bestBelow || n < bestBelow)) bestBelow = n;
+    }
+    return bestBelow || bestAny || 0;
+  }
+
+  // 1) Try row-by-row match by product code or product name.
+  var rows = doc.querySelectorAll('tr');
+  for (var r = 0; r < rows.length; r++) {
+    var rt = (rows[r].textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    if (!rt) continue;
+    var codeHit = code && rt.indexOf(code) !== -1;
+    var nameHit = nameLc && rt.indexOf(nameLc) !== -1;
+    if (!codeHit && !nameHit) continue;
+    var rowPick = pickBestPriceFromText(rows[r].textContent || '');
+    if (rowPick > 0) return rowPick;
+  }
+
+  // 2) Fallback: near product code in full text.
   if (code) {
     var idx = txt.toLowerCase().indexOf(code);
     if (idx >= 0) {
       var near = txt.slice(Math.max(0, idx - 1000), Math.min(txt.length, idx + 3000));
-      var prices = near.match(/\$[\d,]+(?:\.\d+)?/g) || [];
-      var best = 0;
-      for (var i = 0; i < prices.length; i++) {
-        var n = mcParsePriceLoose(prices[i]);
-        if (n > 0 && (!best || n < best)) best = n;
-      }
+      var best = pickBestPriceFromText(near);
       if (best > 0) return best;
     }
   }
-  return 0;
+  // 3) Fallback: near product name in full text.
+  if (nameLc) {
+    var idx2 = txt.toLowerCase().indexOf(nameLc);
+    if (idx2 >= 0) {
+      var near2 = txt.slice(Math.max(0, idx2 - 1200), Math.min(txt.length, idx2 + 3200));
+      var best2 = pickBestPriceFromText(near2);
+      if (best2 > 0) return best2;
+    }
+  }
+  // 4) Last resort: if cart has one obvious price cluster, pick best from whole cart text.
+  return pickBestPriceFromText(txt);
 }
 function mcTryHydrateSeatFromCart() {
   if (window.__mcCartSeatProbeRunning) return;
   var st = window.__mcMemberPricing || {};
   if (!st.unlocked || st.memberSeatPrice > 0) return;
   var pc = mcProductCode();
-  if (!pc) return;
+  var pn = mcProductName();
+  if (!pc && !pn) return;
+  var pub = mcDisplayedPublicSeat();
   window.__mcCartSeatProbeRunning = true;
   fetch('/shoppingcart.asp', { credentials: 'same-origin', cache: 'no-store' })
     .then(function (r) { return r.text(); })
     .then(function (html) {
-      var p = mcExtractSeatFromCartHtml(html, pc);
+      var p = mcExtractSeatFromCartHtml(html, pc, pn, pub);
       if (p > 0) {
         window.__mcMemberPricing.memberSeatPrice = p;
-        mcSetCachedSeatForProduct(pc, p);
+        if (pc) mcSetCachedSeatForProduct(pc, p);
         try { mcKickMemberCaptionStandalone(); } catch (_) {}
       }
     })
