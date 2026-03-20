@@ -2048,7 +2048,7 @@ function scrapeVolusionPriceCandidatesBelowMap(html, mainAmt) {
   if (!html) return 0;
   var candidates = [];
   var r =
-    /(?:ActualPrice|HiddenPrice|LowPrice|YourPrice|SellingPrice|SoftAddPrice|CartPrice|AddToCartPrice|BasePrice|ProductPrice|VolusionPrice)\s*[=:]\s*['"]?(\d+\.?\d*)/gi;
+    /(?:ActualPrice|HiddenPrice|LowPrice|YourPrice|SellingPrice|SalePrice|SoftAddPrice|CartPrice|AddToCartPrice|BasePrice|ProductPrice|VolusionPrice)\s*[=:]\s*['"]?(\d+\.?\d*)/gi;
   var m;
   var v;
   while ((m = r.exec(html)) !== null) {
@@ -2123,7 +2123,7 @@ function extractVolusionAddToCartPriceFromHtml(html) {
   }
   var fromScript = scrapeVolusionPriceCandidatesBelowMap(html, mainAmt);
   if (fromScript > 0) return fromScript;
-  var scr = html.match(/(?:OurPrice|SellingPrice|CartPrice|SoftAddPrice|ProductPrice|HowToGetSalePrice)\s*[=:]\s*["']?(\d+\.?\d*)/i);
+  var scr = html.match(/(?:OurPrice|SellingPrice|SalePrice|CartPrice|SoftAddPrice|ProductPrice|HowToGetSalePrice)\s*[=:]\s*["']?(\d+\.?\d*)/i);
   if (scr) {
     var sv = parseFloat(scr[1]);
     if (sv > 50 && sv < 5000000 && (!mainAmt || sv < mainAmt - 0.01)) return sv;
@@ -2145,6 +2145,9 @@ function tryReadHowToGetSalePrice(mainAmt, allowEqual) {
     if (typeof raw === "undefined") return 0;
     if (typeof raw === "function") {
       raw = raw();
+      if (!(raw != null && String(raw).length)) {
+        try { raw = w.HowToGetSalePrice("saleprice"); } catch (e0) {}
+      }
     }
     var p = 0;
     if (typeof raw === "number" && isFinite(raw)) {
@@ -2174,7 +2177,8 @@ function extractHowToGetSalePriceFromScripts(html, mainAmt, allowEqual) {
     /HowToGetSalePrice\s*=\s*['"]([\d,]+\.?\d*)['"]/gi,
     /HowToGetSalePrice\s*:\s*['"]?([\d,]+\.?\d*)/gi,
     /\[\s*['"]HowToGetSalePrice['"]\s*\]\s*=\s*['"]?([\d,]+\.?\d*)/gi,
-    /HowToGetSalePrice\s*=\s*function\s*\([^)]*\)\s*\{[^}]*?return\s+['"]?\$?([\d,]+\.?\d*)/gi
+    /HowToGetSalePrice\s*=\s*function\s*\([^)]*\)\s*\{[^}]*?return\s+['"]?\$?([\d,]+\.?\d*)/gi,
+    /(?:^|[^\w])(SalePrice|saleprice|SellingPrice)\s*[=:]\s*['"]?\$?([\d,]+(?:\.\d+)?)/gi
   ];
   var best = 0;
   var pi;
@@ -2182,7 +2186,8 @@ function extractHowToGetSalePriceFromScripts(html, mainAmt, allowEqual) {
     var r = patterns[pi];
     var m;
     while ((m = r.exec(html)) !== null) {
-      var p = parseMcCurrency(m[1]);
+      var grab = m[2] != null ? m[2] : m[1];
+      var p = parseMcCurrency(grab);
       if (!(p > 50 && p < 5000000)) continue;
       if (!allowEqual && mainAmt > 0 && p >= mainAmt - 0.01) continue;
       if (!best || p < best) best = p;
@@ -7183,6 +7188,34 @@ function mcFmtMcCaption(n) {
       .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
   );
 }
+function mcParsePriceLoose(v) {
+  var s = v == null ? '' : String(v);
+  var n = parseFloat(s.replace(/[^0-9.]/g, ''));
+  return isNaN(n) ? 0 : n;
+}
+function mcReadSeatOverride() {
+  var p = 0;
+  if (typeof window.__MC_MEMBER_SEAT_PRICE === 'number') p = window.__MC_MEMBER_SEAT_PRICE;
+  if (!(p > 0)) {
+    var meta = document.querySelector('meta[name="mc-member-seat-price"], meta[name="mc-member-price"]');
+    if (meta) p = mcParsePriceLoose(meta.getAttribute('content') || '');
+  }
+  if (!(p > 0)) {
+    var hid = document.querySelectorAll('input[type="hidden"]');
+    for (var i = 0; i < hid.length; i++) {
+      var nm = ((hid[i].name || '') + ' ' + (hid[i].id || '')).toLowerCase();
+      if (!/howtogetsaleprice|saleprice|actualprice|sellingprice|ourprice|cartprice|addtocartprice|hiddenprice/.test(nm)) continue;
+      p = mcParsePriceLoose(hid[i].value || '');
+      if (p > 0) break;
+    }
+  }
+  if (!(p > 0)) {
+    var html = document.documentElement ? document.documentElement.innerHTML : '';
+    var m = html.match(/(?:HowToGetSalePrice|SalePrice|ActualPrice|SellingPrice|OurPrice|CartPrice|AddToCartPrice)\s*[=:]\s*['"]?\$?([\d,]+(?:\.\d+)?)/i);
+    if (m) p = mcParsePriceLoose(m[1]);
+  }
+  return p > 0 ? p : 0;
+}
 function mcCaptionReturn(o) {
   try {
     window.MC_CAPTION_LAST = o;
@@ -7241,7 +7274,9 @@ function mcMountMemberCaptionStandalone() {
       '#v65-product-parent'
     ]);
     if (!host) host = document.querySelector('#v65-product-parent');
-    if (!host) host = document.body;
+    if (!host) {
+      return mcCaptionReturn({ ok: false, reason: 'no host container' });
+    }
     var el = document.getElementById('mc-member-price-caption-root');
     if (!el) {
       el = document.createElement('div');
@@ -7270,8 +7305,6 @@ function mcMountMemberCaptionStandalone() {
       ]);
       if (visibleParent && visibleParent.parentNode) {
         visibleParent.parentNode.insertBefore(el, visibleParent.nextSibling);
-      } else if (document.body && el.parentNode !== document.body) {
-        document.body.appendChild(el);
       }
     }
     var st = window.__mcMemberPricing || {};
@@ -7279,6 +7312,10 @@ function mcMountMemberCaptionStandalone() {
     var loginUrl = '/login.asp?ReturnTo=' + rt;
     var createUrl = '/AccountSettings.asp?AddNewCustomer=Y&ReturnTo=' + rt;
     var seat = Number(st.memberSeatPrice) || 0;
+    if (!(seat > 0)) {
+      seat = mcReadSeatOverride();
+      if (seat > 0 && window.__mcMemberPricing) window.__mcMemberPricing.memberSeatPrice = seat;
+    }
     if (st.unlocked && seat <= 0 && typeof window.getVolusionAddToCartSeatPrice === 'function') {
       try {
         seat = Number(window.getVolusionAddToCartSeatPrice(document)) || 0;
@@ -7302,12 +7339,6 @@ function mcMountMemberCaptionStandalone() {
       'display:block !important;visibility:visible !important;opacity:1 !important;' +
       'margin-top:16px !important;margin-bottom:16px !important;min-height:1em !important;' +
       'font-size:16px !important;color:#454545 !important;line-height:1.4 !important;';
-    if (el.parentNode === document.body) {
-      el.style.cssText +=
-        'position:fixed !important;left:16px !important;right:16px !important;bottom:16px !important;' +
-        'z-index:2147483000 !important;background:#fff !important;padding:10px 12px !important;' +
-        'border:1px solid #ddd !important;box-shadow:0 2px 12px rgba(0,0,0,.12) !important;';
-    }
     var uiState = 'locked';
     var html = '';
     if (st.unlocked && seat > 0) {
@@ -7340,27 +7371,9 @@ function mcMountMemberCaptionStandalone() {
       el.innerHTML = html;
       el.setAttribute('data-mc-member-state', 'locked');
     }
-    // Fail-safe: if theme/layout still hides the normal node, render a fixed visible panel.
     var visible = mcIsVisible(el);
     var portal = document.getElementById('mc-member-caption-portal-fixed');
-    if (!visible) {
-      if (!portal) {
-        portal = document.createElement('div');
-        portal.id = 'mc-member-caption-portal-fixed';
-        document.body.appendChild(portal);
-      }
-      portal.innerHTML = html;
-      portal.setAttribute('data-mc-member-state', uiState);
-      portal.style.cssText =
-        'position:fixed !important;left:12px !important;right:12px !important;bottom:12px !important;' +
-        'z-index:2147483646 !important;background:#fff !important;border:1px solid #ddd !important;' +
-        'box-shadow:0 4px 16px rgba(0,0,0,.18) !important;padding:10px 12px !important;' +
-        'display:block !important;visibility:visible !important;opacity:1 !important;' +
-        'font-size:16px !important;color:#454545 !important;line-height:1.4 !important;';
-      visible = true;
-    } else if (portal) {
-      portal.parentNode.removeChild(portal);
-    }
+    if (portal && portal.parentNode) portal.parentNode.removeChild(portal);
     return mcCaptionReturn({ ok: true, reason: 'mounted', ui: uiState, unlocked: !!st.unlocked, seat: seat, visible: visible, parentTag: (el.parentElement && el.parentElement.tagName) || '' });
   } catch (err) {
     if (typeof console !== 'undefined' && console.warn) {
