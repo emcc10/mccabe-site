@@ -7356,19 +7356,28 @@ function mcDisplayedPublicSeat() {
   var raw = (el.getAttribute && (el.getAttribute('content') || el.getAttribute('value'))) || el.textContent || '';
   return mcParsePriceLoose(raw);
 }
+function mcLooksLikeSeatPrice(p, pub) {
+  if (!(p > 0)) return false;
+  if (p < 200) return false; // ignore accessories like tray tables
+  if (pub > 0 && p < pub * 0.2) return false;
+  return true;
+}
 function mcCachedSeatForProduct(pc) {
   try {
+    var pub = mcDisplayedPublicSeat();
     var p = 0;
     if (pc) {
       var v = localStorage.getItem('mc_member_seat_' + pc);
       p = mcParsePriceLoose(v || '');
-      if (p > 0) return p;
+      if (mcLooksLikeSeatPrice(p, pub)) return p;
+      if (p > 0) localStorage.removeItem('mc_member_seat_' + pc);
     }
     var n = mcProductName();
     var slug = mcSeatSlug(n);
     if (slug) {
       p = mcParsePriceLoose(localStorage.getItem('mc_member_seat_name_' + slug) || '');
-      if (p > 0) return p;
+      if (mcLooksLikeSeatPrice(p, pub)) return p;
+      if (p > 0) localStorage.removeItem('mc_member_seat_name_' + slug);
     }
     return 0;
   } catch (_) {
@@ -7376,7 +7385,8 @@ function mcCachedSeatForProduct(pc) {
   }
 }
 function mcSetCachedSeatForProduct(pc, p, name) {
-  if (!(p > 0)) return;
+  var pub = mcDisplayedPublicSeat();
+  if (!mcLooksLikeSeatPrice(p, pub)) return;
   try {
     if (pc) localStorage.setItem('mc_member_seat_' + pc, String(p));
     var slug = mcSeatSlug(name || mcProductName());
@@ -7401,6 +7411,7 @@ function mcExtractSeatFromCartHtml(cartHtml, pc, productName, publicSeat) {
     for (var i = 0; i < prices.length; i++) {
       var n = mcParsePriceLoose(prices[i]);
       if (!(n > 0)) continue;
+      if (!mcLooksLikeSeatPrice(n, pub)) continue;
       if (!bestAny || n > bestAny) bestAny = n;
       if (n >= floor && (!bestAboveFloor || n > bestAboveFloor)) bestAboveFloor = n;
       if (pub > 0 && n >= floor && n <= pub * 1.05 && (!bestNear || n > bestNear)) bestNear = n;
@@ -7413,6 +7424,7 @@ function mcExtractSeatFromCartHtml(cartHtml, pc, productName, publicSeat) {
   for (var r = 0; r < rows.length; r++) {
     var rt = (rows[r].textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
     if (!rt) continue;
+    if (/tray|table|accessor|accessory|add-on|addon|warranty|protection|shipping|delivery/.test(rt)) continue;
     var codeHit = code && rt.indexOf(code) !== -1;
     var nameHit = nameLc && rt.indexOf(nameLc) !== -1;
     if (!codeHit && !nameHit) continue;
