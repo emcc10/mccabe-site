@@ -25,25 +25,13 @@ jobs:
           [ -n "$FTP_USERNAME" ] || (echo "::error::FTP_USERNAME missing" && exit 1)
           [ -n "$FTP_PASSWORD" ] || (echo "::error::FTP_PASSWORD missing" && exit 1)
 
-      - name: Install lftp
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y lftp
-
-      - name: Show local file
-        run: |
-          pwd
-          ls -la
-          ls -la deploy-template
-          ls -la deploy-template/template_266.html
-
-      - name: Upload via FTP
-        run: |
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" $FTP_SERVER <<EOF
-          set ftp:ssl-allow no
-          set net:timeout 20
-          set net:max-retries 1
-          set cmd:fail-exit yes
-          put deploy-template/template_266.html -o /v/vspfiles/template_266.html
-          bye
-          EOF
+      - name: FTP Deploy
+          uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+          with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: deploy-template/
+          server-dir: /v/vspfiles/
