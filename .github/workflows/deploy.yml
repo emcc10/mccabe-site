@@ -1,4 +1,4 @@
-name: Deploy Volusion Template
+name: Deploy to Volusion
 
 on:
   push:
@@ -10,28 +10,16 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    env:
-      FTP_SERVER: ${{ secrets.FTP_SERVER }}
-      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify secrets
-        run: |
-          [ -n "$FTP_SERVER" ] || (echo "::error::FTP_SERVER missing" && exit 1)
-          [ -n "$FTP_USERNAME" ] || (echo "::error::FTP_USERNAME missing" && exit 1)
-          [ -n "$FTP_PASSWORD" ] || (echo "::error::FTP_PASSWORD missing" && exit 1)
-
-      - name: FTP Deploy
-          uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-          with:
-          server: ${{ secrets.FTP_SERVER }}
+      - name: Upload via SFTP
+        uses: wangyucode/sftp-upload-action@v3
+        with:
+          host: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: 21
-          local-dir: deploy-template/
-          server-dir: /v/vspfiles/
+          port: ${{ secrets.SFTP_PORT }}
+          localDir: 'deploy-template'
+          remoteDir: '/v/vspfiles'
