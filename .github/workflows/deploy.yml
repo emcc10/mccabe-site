@@ -39,11 +39,11 @@ jobs:
 
       - name: Upload via FTP
         run: |
-      lftp -u "$FTP_USERNAME","$FTP_PASSWORD" $FTP_SERVER <<EOF
-      set ftp:ssl-allow no
-      set net:timeout 20
-      set net:max-retries 1
-      set cmd:fail-exit yes
-      put deploy-template/template_266.html -o /v/vspfiles/template_266.html
-      bye
-      EOF
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" $FTP_SERVER <<EOF
+          set ftp:ssl-allow no
+          set net:timeout 20
+          set net:max-retries 1
+          set cmd:fail-exit yes
+          put deploy-template/template_266.html -o /v/vspfiles/template_266.html
+          bye
+          EOF
