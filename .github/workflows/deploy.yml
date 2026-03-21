@@ -39,13 +39,13 @@ jobs:
           ls -la deploy-template
           ls -la deploy-template/template_266.html
 
-      - name: Upload template_266.html via SFTP
+      - name: Upload via FTP
         run: |
-          lftp -d -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":"$SFTP_PORT" <<EOF
-          set sftp:auto-confirm yes
-          set net:timeout 20
-          set net:max-retries 1
-          set cmd:fail-exit yes
-          put deploy-template/template_266.html -o /v/template_266.html
-          bye
-          EOF
+      lftp -u "$FTP_USERNAME","$FTP_PASSWORD" $FTP_SERVER <<EOF
+      set ftp:ssl-allow no
+      set net:timeout 20
+      set net:max-retries 1
+      set cmd:fail-exit yes
+      put deploy-template/template_266.html -o /v/vspfiles/template_266.html
+      bye
+      EOF
