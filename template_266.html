@@ -1536,6 +1536,18 @@ boot();
 
   window.__MC_INLINE_FINAL__ = true;
 
+  /** Set to false to show the room planner again on Sofas & Sectionals */
+  var MC_HIDE_PLANNER_SECTIONALS = true;
+
+  function isSofasSectionalsContext() {
+    try {
+      if (/sectionals-s\/139/i.test(location.pathname || "")) return true;
+      var cat = document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
+      if (cat && String(cat.value || "").trim() === "139") return true;
+      if (document.querySelector('a[href*="/sectionals-s/139"]')) return true;
+    } catch (e) {}
+    return false;
+  }
 
   function mount(){
     if (document.getElementById("mc-inline-config")) return;
@@ -1858,12 +1870,29 @@ boot();
     // Button actions
     if (mcLeatherBtn) mcLeatherBtn.onclick = () => wmOpen.click();
 
-    document.getElementById("mcPlannerBtn").onclick = openPlannerOverlay;
+    var hidePlannerSs =
+      MC_HIDE_PLANNER_SECTIONALS && isSofasSectionalsContext();
+    var mcPlannerBtnEl = document.getElementById("mcPlannerBtn");
+
+    if (!hidePlannerSs && mcPlannerBtnEl) {
+      mcPlannerBtnEl.onclick = openPlannerOverlay;
+    } else if (hidePlannerSs) {
+      var plannerRow = document.getElementById("mcPlannerRow");
+      if (plannerRow) plannerRow.style.setProperty("display", "none", "important");
+      var capHide = document.getElementById("mcConfigurationCaption");
+      if (capHide) {
+        capHide.textContent = "Choose configuration using the options below.";
+      }
+    }
 
     var configBlock = document.getElementById("mcConfigurationBlock");
     if (configBlock) {
-      configBlock.style.cursor = "pointer";
-      configBlock.onclick = openPlannerOverlay;
+      if (!hidePlannerSs) {
+        configBlock.style.cursor = "pointer";
+        configBlock.onclick = openPlannerOverlay;
+      } else {
+        configBlock.style.cursor = "default";
+      }
     }
 
     // Keep summary synced to modal selection changes
