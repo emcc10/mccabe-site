@@ -14,19 +14,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Verify local file
+        run: |
+          echo "===== LOCAL FILE TOP ====="
+          head -20 template_266.html
+          ls -l template_266.html
+
       - name: Deploy template via SFTP
         run: |
           sudo apt-get update
           sudo apt-get install -y sshpass
 
           sshpass -p "${{ secrets.FTP_PASSWORD }}" \
-          sftp -vvv \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            -P "${{ secrets.FTP_PORT }}" \
-            "${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_HOST }}" <<'EOF'
+          sftp -o StrictHostKeyChecking=no \
+               -o UserKnownHostsFile=/dev/null \
+               -P "${{ secrets.FTP_PORT }}" \
+               "${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_HOST }}" <<'EOF'
           cd /v
           put template_266.html template_266.html
-          ls -l template_266.html
           bye
           EOF
