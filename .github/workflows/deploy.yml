@@ -14,35 +14,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Verify local file
+      - name: Test SFTP connection only
         run: |
-          set -euxo pipefail
-          echo "===== LOCAL FILE TOP ====="
-          head -20 template_266.html
-          ls -l template_266.html
-
-      - name: Deploy via raw SFTP
-        run: |
-          set -euxo pipefail
           sudo apt-get update
           sudo apt-get install -y sshpass
 
-          cat > sftp_batch.txt <<'EOF'
+          sshpass -p "${{ secrets.FTP_PASSWORD }}" \
+          sftp -vvv \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -P "${{ secrets.FTP_PORT }}" \
+            "${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_HOST }}" <<'EOF'
           pwd
-          ls -l /v
+          ls
           cd /v
           pwd
-          ls -l
-          put template_266.html template_266.html
-          ls -l template_266.html
+          ls
           bye
           EOF
-
-          echo "===== SFTP BATCH ====="
-          cat sftp_batch.txt
-
-          sshpass -p "${{ secrets.FTP_PASSWORD }}" \
-            sftp -v -o StrictHostKeyChecking=no \
-            -P "${{ secrets.FTP_PORT }}" \
-            -b sftp_batch.txt \
-            "${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_HOST }}"
