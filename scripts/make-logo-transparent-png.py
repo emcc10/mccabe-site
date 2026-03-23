@@ -1,8 +1,8 @@
 """
 Convert a flat white-background logo PNG to transparent PNG with soft edges.
 
-Uses a smooth alpha ramp (not hard threshold) + light blur on the alpha channel
-to reduce jagged edges on the video background.
+Uses 2x supersampling + distance-from-white alpha + light alpha blur so edges
+look smooth on dark video (reduces jaggies and light halos).
 
 Usage (from repo root):
   py -3 scripts/make-logo-transparent-png.py path/to/your-logo.png
@@ -18,6 +18,11 @@ import sys
 
 try:
     from PIL import Image, ImageFilter
+
+    try:
+        _LANCZOS = Image.Resampling.LANCZOS
+    except AttributeError:
+        _LANCZOS = Image.LANCZOS
 except ImportError:
     print("Install Pillow: py -3 -m pip install Pillow", file=sys.stderr)
     sys.exit(1)
@@ -25,20 +30,20 @@ except ImportError:
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(REPO, "vspfiles", "images", "mccabe-logo.png")
 
-# max(R,G,B) at or above this → fully transparent (background)
-HI = 252
-# max(R,G,B) at or below this → fully opaque (logo + dark edge pixels)
-LO = 188
+# Pixels with distance-from-white d >= RAMP_FULL are fully opaque (logo body).
+# Pixels with d in (0, RAMP_FULL) fade out (anti-alias / paper edge). Wider = softer edge.
+RAMP_FULL = 56
 
 
 def smooth_alpha(r: int, g: int, b: int) -> int:
+    """More transparent as max(R,G,B) approaches 255 (white background)."""
     m = max(r, g, b)
-    if m >= HI:
-        return 0
-    if m <= LO:
+    d = 255 - m
+    if d >= RAMP_FULL:
         return 255
-    # Linear blend across the anti-alias band
-    return int(round(255 * (HI - m) / (HI - LO)))
+    if d <= 0:
+        return 0
+    return int(round(255 * d / RAMP_FULL))
 
 
 def main() -> None:
@@ -52,21 +57,31 @@ def main() -> None:
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     img = Image.open(src).convert("RGBA")
-    w, h = img.size
-    px = img.load()
+    w0, h0 = img.size
+
+    # Process at 2x so anti-alias survives downscale
+    scale = 2
+    w, h = w0 * scale, h0 * scale
+    big = img.resize((w, h), _LANCZOS)
+    px = big.load()
     for y in range(h):
         for x in range(w):
             r, g, b, _ = px[x, y]
             a = smooth_alpha(r, g, b)
             px[x, y] = (r, g, b, a)
 
-    # Soften alpha edges slightly (reduces stair-stepping on dark video)
-    r, g, b, a = img.split()
-    a = a.filter(ImageFilter.GaussianBlur(radius=0.45))
-    img = Image.merge("RGBA", (r, g, b, a))
+    r, g, b, a = big.split()
+    # Blur at 2x resolution (radius in high-res pixels)
+    a = a.filter(ImageFilter.GaussianBlur(radius=0.85))
+    big = Image.merge("RGBA", (r, g, b, a))
 
-    img.save(OUT, "PNG", optimize=True)
-    print(f"Wrote {OUT} ({w}x{h})")
+    out = big.resize((w0, h0), _LANCZOS)
+    r, g, b, a = out.split()
+    a = a.filter(ImageFilter.GaussianBlur(radius=0.35))
+    out = Image.merge("RGBA", (r, g, b, a))
+
+    out.save(OUT, "PNG", optimize=True)
+    print(f"Wrote {OUT} ({w0}x{h0})")
 
 
 if __name__ == "__main__":
