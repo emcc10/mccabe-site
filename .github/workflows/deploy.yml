@@ -1,4 +1,4 @@
-name: Deploy Volusion Template
+name: Deploy to Volusion
 
 on:
   push:
@@ -10,42 +10,16 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    env:
-      FTP_SERVER: ${{ secrets.FTP_SERVER }}
-      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-      SFTP_PORT: ${{ secrets.SFTP_PORT }}
-
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify secrets
-        run: |
-          [ -n "$FTP_SERVER" ] || (echo "::error::FTP_SERVER missing" && exit 1)
-          [ -n "$FTP_USERNAME" ] || (echo "::error::FTP_USERNAME missing" && exit 1)
-          [ -n "$FTP_PASSWORD" ] || (echo "::error::FTP_PASSWORD missing" && exit 1)
-          [ -n "$SFTP_PORT" ] || (echo "::error::SFTP_PORT missing" && exit 1)
-
-      - name: Install lftp
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y lftp
-
-      - name: Show local file
-        run: |
-          pwd
-          ls -la
-          ls -la deploy-template
-          ls -la deploy-template/template_266.html
-
-      - name: Upload template_266.html via SFTP
-        run: |
-          lftp -d -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":"$SFTP_PORT" <<EOF
-          set sftp:auto-confirm yes
-          set net:timeout 20
-          set net:max-retries 1
-          set cmd:fail-exit yes
-          put deploy-template/template_266.html -o /v/template_266.html
-          bye
-          EOF
+      - name: Upload via SFTP
+        uses: wangyucode/sftp-upload-action@v3
+        with:
+          host: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.SFTP_PORT }}
+          localDir: 'deploy-template'
+          remoteDir: '/v/vspfiles'
