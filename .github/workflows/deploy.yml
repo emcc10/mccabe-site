@@ -14,26 +14,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Show repo file
+      - name: Verify file
         run: |
           echo "==== REPO FILE ===="
           head -20 template_266.html
 
-      - name: Stage template for deploy
-        run: |
-          rm -rf deploy-template
-          mkdir -p deploy-template
-          cp -f template_266.html deploy-template/template_266.html
-          echo "==== STAGED FILE ===="
-          head -20 deploy-template/template_266.html
-
-      - name: Upload via SFTP
-        uses: wangyucode/sftp-upload-action@v3
+      - name: Upload template
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT }}
-          localDir: 'deploy-template'
-          remoteDir: '/v/'
-          forceUpload: true
+          source: "template_266.html"
+          target: "/v/"
+          overwrite: true
