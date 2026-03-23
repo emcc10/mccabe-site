@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Stage template for deploy
         run: |
@@ -22,9 +22,9 @@ jobs:
       - name: Upload via SFTP
         uses: wangyucode/sftp-upload-action@v3
         with:
-          host: ${{ secrets.FTP_SERVER }}
+          host: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: ${{ secrets.SFTP_PORT }}
+          port: ${{ secrets.FTP_PORT }}
           localDir: 'deploy-template'
-          remoteDir: '/v/vspfiles'
+          remoteDir: '/'
