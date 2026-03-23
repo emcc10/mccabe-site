@@ -155,7 +155,10 @@ document.addEventListener("DOMContentLoaded", function () {
       </div>
 
     <!-- HERO VIDEO -->
-<section class="mc-hero-video">
+<section class="mc-hero-video video-hero">
+  <div class="hero-logo-wrap">
+    <img src="/v/vspfiles/images/mtllogo.png" alt="MTL McCabe's Theater & Living" class="hero-logo-img">
+  </div>
   <video class="mc-hero-video-el is-preloading" autoplay muted playsinline preload="auto" disablePictureInPicture disableRemotePlayback controlsList="nofullscreen nodownload noremoteplayback">
     <source src="/v/vspfiles/windsor_feature_2025.mov" type="video/mp4">
   </video>
@@ -7486,6 +7489,15 @@ body.productdetails .v-product-grid .v-product .v-product__price {
           tc.textContent = (tc.textContent || "").replace(/\$[\d,]+(?:\.\d+)?/, mcFmtMoney(base - appliedPending));
           mcTotal4LDiscount += appliedPending;
           mcClearPending4L();
+        }
+      }
+      // Deterministic fallback: if cart target wasn't matched by code/name, force-apply to primary row.
+      if (!mcCartTargetApplied && mcCartTarget && mcFallbackRow && mcFallbackRow.tr) {
+        var desiredFallback = mcIsMember ? Number(mcCartTarget.memberTotal || 0) : Number(mcCartTarget.retailTotal || 0);
+        if (desiredFallback > 0) {
+          var d2 = mcApplyCartTargetPrice(mcFallbackRow.tr, desiredFallback);
+          if (d2 !== 0) mcCartDelta += d2;
+          mcCartTargetApplied = true;
         }
       }
       break;

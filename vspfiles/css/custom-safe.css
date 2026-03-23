@@ -4956,3 +4956,51 @@ body.productdetails #content_area .product_list_price,
 body.productdetails #v65-product-parent .product_list_price {
   display: none !important;
 }
+
+/* make sure hero container allows overlay */
+.home-hero,
+.hero,
+.video-hero {
+  position: relative;
+}
+
+/* logo overlay */
+.hero-logo-wrap {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  width: min(92vw, 1100px);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* logo styling */
+.hero-logo-img {
+  display: block;
+  width: min(80vw, 950px);
+  max-width: 950px;
+  height: auto;
+  opacity: 0.92;
+}
+
+/* keep header above logo if needed */
+#header,
+.header,
+.nav-wrap {
+  position: relative;
+  z-index: 40;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  .hero-logo-wrap {
+    top: 16px;
+  }
+
+  .hero-logo-img {
+    width: 88vw;
+  }
+}
