@@ -4957,17 +4957,17 @@ body.productdetails #v65-product-parent .product_list_price {
   display: none !important;
 }
 
-/* make sure hero container allows overlay */
-.home-hero,
-.hero,
-.video-hero {
-  position: relative;
+/* === HERO LOGO OVERLAY === */
+
+/* ensure hero container can position children */
+#slideshow-container {
+  position: relative !important;
 }
 
-/* logo overlay */
+/* overlay wrapper */
 .hero-logo-wrap {
   position: absolute;
-  top: 28px;
+  top: 22px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 30;
@@ -4977,30 +4977,24 @@ body.productdetails #v65-product-parent .product_list_price {
   pointer-events: none;
 }
 
-/* logo styling */
+/* logo */
 .hero-logo-img {
   display: block;
-  width: min(80vw, 950px);
-  max-width: 950px;
+  width: min(78vw, 980px);
+  max-width: 980px;
   height: auto;
-  opacity: 0.92;
+  opacity: 0.96;
 }
 
-/* keep header above logo if needed */
-#header,
-.header,
-.nav-wrap {
-  position: relative;
-  z-index: 40;
-}
-
-/* responsive */
+/* mobile adjustments */
 @media (max-width: 768px) {
   .hero-logo-wrap {
-    top: 16px;
+    top: 14px;
+    width: 94vw;
   }
 
   .hero-logo-img {
     width: 88vw;
+    max-width: none;
   }
 }
