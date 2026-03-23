@@ -14,18 +14,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Verify file
+      - name: Verify template file
         run: |
           echo "==== REPO FILE ===="
           head -20 template_266.html
 
-      - name: Upload template
-        uses: appleboy/scp-action@v0.1.7
+      - name: Prepare deploy folder
+        run: |
+          rm -rf deploy
+          mkdir deploy
+          cp template_266.html deploy/template_266.html
+          echo "==== DEPLOY FILE ===="
+          head -20 deploy/template_266.html
+
+      - name: Deploy to Volusion via SFTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          host: ${{ secrets.FTP_HOST }}
+          server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT }}
-          source: "template_266.html"
-          target: "/v/"
-          overwrite: true
+          protocol: sftp
+          local-dir: ./deploy/
+          server-dir: /v/
