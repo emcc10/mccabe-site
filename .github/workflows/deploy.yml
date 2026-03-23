@@ -27,4 +27,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT }}
           localDir: 'deploy-template'
-          remoteDir: '/'
+          remoteDir: '/v/'
