@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'template_266.html'
   workflow_dispatch:
 
 jobs:
@@ -14,11 +16,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Verify local file
+      - name: Show commit and branch
         run: |
-          echo "===== LOCAL FILE TOP ====="
-          head -20 template_266.html
-          ls -l template_266.html
+          echo "BRANCH: $GITHUB_REF"
+          echo "SHA: $GITHUB_SHA"
+          git branch --show-current || true
+          git log -1 --oneline
+
+      - name: Show repo file top
+        run: |
+          echo "===== REPO template_266.html ====="
+          ls -l
+          head -40 template_266.html
+          grep -n "RAW SFTP" template_266.html || true
 
       - name: Deploy template via SFTP
         run: |
