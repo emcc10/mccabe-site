@@ -1,5 +1,8 @@
 """
-Convert a flat white-background logo PNG to transparent PNG.
+Convert a flat white-background logo PNG to transparent PNG with soft edges.
+
+Uses a smooth alpha ramp (not hard threshold) + light blur on the alpha channel
+to reduce jagged edges on the video background.
 
 Usage (from repo root):
   py -3 scripts/make-logo-transparent-png.py path/to/your-logo.png
@@ -14,7 +17,7 @@ import os
 import sys
 
 try:
-    from PIL import Image
+    from PIL import Image, ImageFilter
 except ImportError:
     print("Install Pillow: py -3 -m pip install Pillow", file=sys.stderr)
     sys.exit(1)
@@ -22,8 +25,20 @@ except ImportError:
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(REPO, "vspfiles", "images", "mccabe-logo.png")
 
-# Pixels at or above this (per channel) are treated as background
-THRESHOLD = 238
+# max(R,G,B) at or above this → fully transparent (background)
+HI = 252
+# max(R,G,B) at or below this → fully opaque (logo + dark edge pixels)
+LO = 188
+
+
+def smooth_alpha(r: int, g: int, b: int) -> int:
+    m = max(r, g, b)
+    if m >= HI:
+        return 0
+    if m <= LO:
+        return 255
+    # Linear blend across the anti-alias band
+    return int(round(255 * (HI - m) / (HI - LO)))
 
 
 def main() -> None:
@@ -37,13 +52,19 @@ def main() -> None:
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     img = Image.open(src).convert("RGBA")
-    px = img.load()
     w, h = img.size
+    px = img.load()
     for y in range(h):
         for x in range(w):
-            r, g, b, a = px[x, y]
-            if r >= THRESHOLD and g >= THRESHOLD and b >= THRESHOLD:
-                px[x, y] = (r, g, b, 0)
+            r, g, b, _ = px[x, y]
+            a = smooth_alpha(r, g, b)
+            px[x, y] = (r, g, b, a)
+
+    # Soften alpha edges slightly (reduces stair-stepping on dark video)
+    r, g, b, a = img.split()
+    a = a.filter(ImageFilter.GaussianBlur(radius=0.45))
+    img = Image.merge("RGBA", (r, g, b, a))
+
     img.save(OUT, "PNG", optimize=True)
     print(f"Wrote {OUT} ({w}x{h})")
 
