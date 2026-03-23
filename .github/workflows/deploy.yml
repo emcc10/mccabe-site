@@ -14,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Test SFTP connection only
+      - name: Deploy template via SFTP
         run: |
           sudo apt-get update
           sudo apt-get install -y sshpass
@@ -25,10 +25,8 @@ jobs:
             -o UserKnownHostsFile=/dev/null \
             -P "${{ secrets.FTP_PORT }}" \
             "${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_HOST }}" <<'EOF'
-          pwd
-          ls
           cd /v
-          pwd
-          ls
+          put template_266.html template_266.html
+          ls -l template_266.html
           bye
           EOF
