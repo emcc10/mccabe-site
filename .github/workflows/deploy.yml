@@ -14,26 +14,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Verify template file
+      - name: Deploy via SFTP (no extra tools)
         run: |
-          echo "==== REPO FILE ===="
-          head -20 template_266.html
+          sudo apt-get update
+          sudo apt-get install -y sshpass
 
-      - name: Prepare deploy folder
-        run: |
-          rm -rf deploy
-          mkdir deploy
-          cp template_266.html deploy/template_266.html
-          echo "==== DEPLOY FILE ===="
-          head -20 deploy/template_266.html
-
-      - name: Deploy to Volusion via SFTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: ${{ secrets.FTP_PORT }}
-          protocol: sftp
-          local-dir: ./deploy/
-          server-dir: /v/
+          sshpass -p "${{ secrets.FTP_PASSWORD }}" sftp -o StrictHostKeyChecking=no -P ${{ secrets.FTP_PORT }} ${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_HOST }} <<EOF
+          put template_266.html /v/template_266.html
+          bye
+          EOF
