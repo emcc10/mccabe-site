@@ -2172,6 +2172,9 @@ function extractVolusionAddToCartPriceFromHtml(html) {
   if (htsInline > 0) return htsInline;
   return 0;
 }
+if (typeof window !== "undefined") {
+  window.extractVolusionAddToCartPriceFromHtml = extractVolusionAddToCartPriceFromHtml;
+}
 /**
  * Volusion PDP often exposes the real selling price as window.HowToGetSalePrice (number, string, or function).
  * If allowEqual is true, accept p even when it matches MAP (still needed for caption when Volusion only exposes one price).
@@ -6233,10 +6236,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
     caption.innerHTML =
       '<div class="mc-member-price-caption__headline">Member price:</div>' +
-      '<div class="mc-member-price-caption__sub">Log in to see members pricing</div>' +
+      '<div class="mc-member-price-caption__sub">' +
+        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see members pricing' +
+      '</div>' +
       '<div class="mc-member-price-caption__actions">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a>' +
-        '<span class="mc-member-price-caption__sep">·</span>' +
         '<a class="mc-member-price-caption__cta" href="' + createUrl + '" target="_blank" rel="noopener">Sign up</a>' +
       '</div>';
     caption.setAttribute('data-mc-member-state', 'locked');
@@ -7995,10 +7998,10 @@ function mcMountMemberCaptionStandalone() {
     } else {
       html =
         '<div class="mc-member-price-caption__headline">Member price:</div>' +
-        '<div class="mc-member-price-caption__sub">Log in to see members pricing</div>' +
+        '<div class="mc-member-price-caption__sub">' +
+        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see members pricing' +
+        '</div>' +
         '<div class="mc-member-price-caption__actions">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a>' +
-        '<span class="mc-member-price-caption__sep">·</span>' +
         '<a class="mc-member-price-caption__cta" href="' +
         createUrl +
         '" target="_blank" rel="noopener">Sign up</a>' +
@@ -8078,7 +8081,7 @@ try {
 .mc-member-grid-price__regular{font-size:14px;color:#333;margin-bottom:6px}
 .mc-member-grid-price__label{font-size:13px;font-weight:600;letter-spacing:.02em;text-transform:none;color:#333}
 .mc-member-grid-price__hint{font-size:12px;margin-top:4px;color:#555}
-.mc-member-grid-price__login{margin-top:6px;font-size:12px;display:inline-block;text-decoration:underline;color:#333;letter-spacing:.04em;cursor:pointer;background:none;border:0;padding:0}
+.mc-member-grid-price__hint .mc-member-grid-price__login{margin:0;font-size:inherit;display:inline;text-decoration:underline;color:#333;letter-spacing:.04em;cursor:pointer;background:none;border:0;padding:0}
 .mc-login-modal{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
 .mc-login-modal.mc-login-modal--open{display:flex}
 .mc-login-modal__backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45);cursor:pointer}
@@ -8425,6 +8428,170 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
     return m ? m[0] : '';
   }
 
+  function mcFmtCategoryPrice(n) {
+    if (typeof window.formatMcCurrency === 'function') return window.formatMcCurrency(n);
+    return '$' + Number(n || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function mcFindProductHref(card) {
+    var a =
+      card.querySelector('a[href*="ProductCode="]') ||
+      card.querySelector('a[href*="productcode="]') ||
+      card.querySelector('.v-product__name a, .productnamecolor a, a.v-product__link');
+    if (a && a.getAttribute('href') && !/^javascript:/i.test(a.getAttribute('href') || '')) return a.href;
+    var a2 = card.querySelector(
+      'a[href*="/p/"], a[href*="product.asp"], a[href*="ProductDetail"], a[href*="productdetails"], a[href*="p.asp"]'
+    );
+    if (a2 && a2.href) return a2.href;
+    return '';
+  }
+
+  function mcProductCodeFromHref(href) {
+    try {
+      var u = new URL(href, window.location.origin);
+      var c = u.searchParams.get('ProductCode') || u.searchParams.get('productcode');
+      return c ? String(c).trim() : '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function mcCacheKeyForCategoryHref(href) {
+    var code = mcProductCodeFromHref(href);
+    if (code) return 'pc:' + code;
+    try {
+      var u = new URL(href, window.location.origin);
+      return 'path:' + u.pathname + u.search;
+    } catch (e2) {
+      return 'href:' + href;
+    }
+  }
+
+  /** Same extraction as PDP: Volusion HowToGet / scripts / pricebox (from fetched product HTML). */
+  function mcExtractHowToGetFromPdpHtml(html) {
+    if (!html) return 0;
+    var fn = window.extractVolusionAddToCartPriceFromHtml;
+    if (typeof fn === 'function') {
+      var v = fn(html);
+      if (v > 0) return v;
+    }
+    var mapAmt = 0;
+    try {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var mapEl = doc.querySelector('#priceWithOptions, [itemprop="price"], #priceWithOptionsNoTax');
+      if (mapEl && window.parseMcCurrency) {
+        mapAmt = window.parseMcCurrency(
+          (mapEl.getAttribute && (mapEl.getAttribute('content') || mapEl.getAttribute('value'))) ||
+            mapEl.textContent ||
+            ''
+        );
+      }
+    } catch (e1) {}
+    var fn2 = window.extractHowToGetSalePriceFromScripts;
+    if (typeof fn2 === 'function') {
+      var v2 = fn2(html, mapAmt, true);
+      if (v2 > 0) return v2;
+    }
+    return 0;
+  }
+
+  function mcEnsureAmountInMemberBlock(block, amountText) {
+    if (!block || !amountText) return;
+    var amt = block.querySelector('.mc-member-grid-price__amount');
+    if (!amt) {
+      amt = document.createElement('div');
+      amt.className = 'mc-member-grid-price__amount';
+      var label = block.querySelector('.mc-member-grid-price__label');
+      var hint = block.querySelector('.mc-member-grid-price__hint');
+      if (hint) {
+        block.insertBefore(amt, hint);
+      } else if (label) {
+        if (label.nextSibling) block.insertBefore(amt, label.nextSibling);
+        else block.appendChild(amt);
+      } else {
+        block.appendChild(amt);
+      }
+    }
+    amt.textContent = amountText;
+  }
+
+  function mcApplyHowToGetToAllCardsWithKey(cards, key, amt) {
+    if (!(amt > 0)) return;
+    var txt = mcFmtCategoryPrice(amt);
+    var j;
+    for (j = 0; j < cards.length; j++) {
+      var c = cards[j];
+      var h = mcFindProductHref(c);
+      if (!h) continue;
+      if (mcCacheKeyForCategoryHref(h) !== key) continue;
+      var b = c.querySelector('.mc-member-grid-price');
+      if (b) mcEnsureAmountInMemberBlock(b, txt);
+    }
+  }
+
+  function mcHydrateCategoryHowToGetPrices() {
+    var cards = mcCollectGridProductCards();
+    if (!cards.length) return;
+    var cache = (window.__mcCategoryHowToGetCache = window.__mcCategoryHowToGetCache || {});
+    var inflight = (window.__mcCategoryHowToGetInflight = window.__mcCategoryHowToGetInflight || {});
+    var queue = [];
+    var seenQ = {};
+    var ci;
+    for (ci = 0; ci < cards.length; ci++) {
+      var card = cards[ci];
+      var href = mcFindProductHref(card);
+      if (!href) continue;
+      var key = mcCacheKeyForCategoryHref(href);
+      if (cache[key] > 0) {
+        mcApplyHowToGetToAllCardsWithKey(cards, key, cache[key]);
+        continue;
+      }
+      if (cache[key] === 0) continue;
+      if (seenQ[key]) continue;
+      if (inflight[key]) continue;
+      seenQ[key] = true;
+      queue.push({ href: href, key: key });
+    }
+    if (!queue.length) return;
+
+    var maxConcurrent = 4;
+    var running = 0;
+    var qi = 0;
+
+    function pump() {
+      while (running < maxConcurrent && qi < queue.length) {
+        var item = queue[qi++];
+        var keyImmediate = item.key;
+        if (cache[keyImmediate] > 0 || cache[keyImmediate] === 0) continue;
+        if (inflight[keyImmediate]) continue;
+        inflight[keyImmediate] = true;
+        running++;
+        (function (href, key, cardsSnap) {
+          fetch(href, { credentials: 'same-origin', cache: 'no-store' })
+            .then(function (r) {
+              return r.text();
+            })
+            .then(function (html) {
+              return mcExtractHowToGetFromPdpHtml(html);
+            })
+            .then(function (amt) {
+              cache[key] = amt > 0 ? amt : 0;
+              if (amt > 0) mcApplyHowToGetToAllCardsWithKey(cardsSnap, key, amt);
+            })
+            .catch(function () {
+              cache[key] = 0;
+            })
+            .finally(function () {
+              delete inflight[key];
+              running--;
+              pump();
+            });
+        })(item.href, item.key, cards);
+      }
+    }
+    pump();
+  }
+
   function mcPaintCategoryGridMemberPricing() {
     var products = mcCollectGridProductCards();
     if (!products.length) return;
@@ -8495,14 +8662,14 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
       } else {
         var hint = document.createElement('div');
         hint.className = 'mc-member-grid-price__hint';
-        hint.textContent = 'Log in to see members pricing';
+        var loginA = document.createElement('a');
+        loginA.href = '#';
+        loginA.className = 'mc-member-grid-price__login';
+        loginA.setAttribute('data-mc-open-login', '');
+        loginA.textContent = 'Log in';
+        hint.appendChild(loginA);
+        hint.appendChild(document.createTextNode(' to see members pricing'));
         block.appendChild(hint);
-        var loginLnk = document.createElement('a');
-        loginLnk.href = '#';
-        loginLnk.className = 'mc-member-grid-price__login';
-        loginLnk.setAttribute('data-mc-open-login', '');
-        loginLnk.textContent = 'Log in';
-        block.appendChild(loginLnk);
       }
 
       if (mcSwapMapElementsForBlock(card, block)) {
@@ -8536,6 +8703,9 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
       } catch (eVis) {}
       card.setAttribute('data-mc-member-grid', nextState);
     }
+    try {
+      mcHydrateCategoryHowToGetPrices();
+    } catch (eHyd) {}
   }
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
 
