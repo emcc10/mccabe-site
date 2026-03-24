@@ -5109,16 +5109,7 @@ body.productdetails #v65-product-parent .product_list_price {
   margin-top: 4px;
 }
 
-/* Category / home product cards: members price block */
-body.category .v-product__price,
-body.is-home .v-product__price,
-#content_area .v-product__price,
-#content_area_home .v-product__price {
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: block !important;
-}
-
+/* Category / home: member price block only (do not change grid / card layout) */
 .mc-member-grid-price {
   text-align: left;
   margin-top: 4px;
@@ -5159,40 +5150,4 @@ body.is-home .v-product__price,
 
 .mc-member-grid-price__login:hover {
   background: #f5f5f5;
-}
-
-/* Align product titles horizontally within each row */
-body.category .v-product-grid,
-body.is-home #content_area_home .v-product-grid,
-#content_area .v-product-grid {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  align-items: stretch !important;
-}
-
-body.category .v-product-grid .v-product,
-body.is-home #content_area_home .v-product-grid .v-product,
-#content_area .v-product-grid .v-product {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  height: 100% !important;
-  box-sizing: border-box !important;
-}
-
-body.category .v-product-grid .v-product .v-product__name,
-body.category .v-product-grid .v-product .productnamecolor,
-body.category .v-product-grid .v-product .productnamecolor a,
-body.is-home #content_area_home .v-product-grid .v-product .v-product__name,
-body.is-home #content_area_home .v-product-grid .v-product .productnamecolor,
-#content_area .v-product-grid .v-product .v-product__name,
-#content_area .v-product-grid .v-product .productnamecolor,
-#content_area .v-product-grid .v-product .productnamecolor a {
-  flex: 1 1 auto !important;
-  min-height: 2.65em !important;
-  line-height: 1.25 !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2 !important;
-  -webkit-box-orient: vertical !important;
-  overflow: hidden !important;
 }

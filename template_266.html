@@ -8163,12 +8163,34 @@ try {
     return false;
   }
 
-  function mcFindCardPriceEl(card) {
-    var el =
+  /**
+   * Volusion often puts MAP / "Add to cart for our lowest price" in a promo link or callout,
+   * not in .v-product__price — find the smallest matching node first, then fall back to price.
+   */
+  function mcFindCardPricingMount(card) {
+    var nodes = card.querySelectorAll('a, span, div, p, font, td, strong, em');
+    var best = null;
+    var bestLen = Infinity;
+    var i;
+    var el;
+    var t;
+    for (i = 0; i < nodes.length; i++) {
+      el = nodes[i];
+      if (el.closest && el.closest('.mc-member-grid-price')) continue;
+      t = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!/add to cart for our lowest price|lowest price/i.test(t)) continue;
+      if (t.length > 160) continue;
+      if (t.length < bestLen) {
+        bestLen = t.length;
+        best = el;
+      }
+    }
+    if (best) return best;
+    return (
       card.querySelector('.v-product__price') ||
       card.querySelector('.product_price') ||
-      card.querySelector('[itemprop="price"]');
-    return el;
+      card.querySelector('[itemprop="price"]')
+    );
   }
 
   function mcExtractDollarFromText(txt) {
@@ -8185,13 +8207,26 @@ try {
     var i;
     for (i = 0; i < products.length; i++) {
       var card = products[i];
-      var priceEl = mcFindCardPriceEl(card);
-      if (!priceEl) continue;
       var prevState = card.getAttribute('data-mc-member-grid');
       var nextState = unlocked ? 'unlocked' : 'locked';
-      if (prevState === nextState && priceEl.querySelector('.mc-member-grid-price')) continue;
+      var existingBlock = card.querySelector('.mc-member-grid-price');
+      if (existingBlock && prevState === nextState) continue;
 
-      var raw = (priceEl.textContent || '').replace(/\s+/g, ' ').trim();
+      var priceEl;
+      if (existingBlock && existingBlock.parentNode) {
+        priceEl = existingBlock.parentNode;
+      } else {
+        priceEl = mcFindCardPricingMount(card);
+      }
+      if (!priceEl) continue;
+
+      var parseHost = card.cloneNode(true);
+      var strip = parseHost.querySelectorAll('.mc-member-grid-price');
+      var sj;
+      for (sj = 0; sj < strip.length; sj++) {
+        if (strip[sj].parentNode) strip[sj].parentNode.removeChild(strip[sj]);
+      }
+      var raw = (parseHost.textContent || '').replace(/\s+/g, ' ').trim();
       var dollar = mcExtractDollarFromText(raw);
       var hideMap =
         /lowest price|add to cart|see price|call|members?\s*only|map/i.test(raw) && !dollar;
@@ -8232,9 +8267,10 @@ try {
 
       priceEl.innerHTML = '';
       priceEl.appendChild(block);
-      priceEl.style.setProperty('visibility', 'visible', 'important');
-      priceEl.style.setProperty('opacity', '1', 'important');
-      priceEl.style.setProperty('display', 'block', 'important');
+      try {
+        priceEl.style.setProperty('visibility', 'visible', 'important');
+        priceEl.style.setProperty('opacity', '1', 'important');
+      } catch (eVis) {}
       card.setAttribute('data-mc-member-grid', nextState);
     }
   }
