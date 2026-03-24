@@ -1588,15 +1588,23 @@ body.mc-product-page select.mc-native-leather {
    PDP FIX: force media TD left, options TD right (desktop only)
 ========================================= */
 @media (min-width: 992px) {
-  body.mc-product-page #content_area td.mc-pdp-media-td {
-    width: 100% !important;
+  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-media-td,
+  body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-media-td {
+    flex: 1 1 52% !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 58% !important;
     vertical-align: top !important;
     position: relative !important;
     z-index: 1 !important;
   }
 
-  body.mc-product-page #content_area td.mc-pdp-options-td {
-    width: 48% !important;
+  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td,
+  body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td {
+    flex: 1 1 48% !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 48% !important;
     vertical-align: top !important;
     position: relative !important;
     z-index: 5 !important;
@@ -5413,7 +5421,7 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
 }
 
 /* =========================================================
-   PDP: product image block above title/options (desktop + mobile)
+   PDP: main row — image left, options right (desktop); stacked on mobile
    (tagged row: tr.mc-pdp-main-row from template_266.html)
    ========================================================= */
 @media (min-width: 992px) {
@@ -5422,9 +5430,9 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
   body.mc-product-page #v65-product-parent > tr.mc-pdp-main-row,
   body.productdetails #v65-product-parent > tr.mc-pdp-main-row {
     display: flex !important;
-    flex-direction: column !important;
+    flex-direction: row !important;
     flex-wrap: nowrap !important;
-    align-items: stretch !important;
+    align-items: flex-start !important;
     gap: 24px !important;
     width: 100% !important;
     min-width: 0 !important;
@@ -5434,10 +5442,7 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
   body.productdetails tr.mc-pdp-main-row > td,
   body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-media-td,
   body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td {
-    width: 100% !important;
-    max-width: 100% !important;
-    flex: 0 0 auto !important;
-    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
 
   body.mc-product-page tr.mc-pdp-main-row td.mc-pdp-media-td,
@@ -5448,8 +5453,6 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
   body.mc-product-page tr.mc-pdp-main-row td.mc-pdp-options-td,
   body.productdetails tr.mc-pdp-main-row td.mc-pdp-options-td {
     order: 2 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
   }
 }
 
@@ -5601,10 +5604,8 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
 }
 
 /* =========================================================
-   PDP: force image block ABOVE options (fixes overlap)
-   Earlier rules set tr:nth-of-type(2) to side-by-side flex + % widths;
-   large min-width on #product_photo then bled into the options column.
-   This block must load last and applies to all PDP layouts.
+   PDP: main product row — side-by-side on desktop (overlap fix: min-width: 0)
+   Applies to standard Volusion row 2 and tagged mc-pdp-main-row.
    ========================================================= */
 @media (min-width: 992px) {
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2),
@@ -5614,9 +5615,9 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
   body.mc-product-page #v65-product-parent > tbody > tr.mc-pdp-main-row,
   body.productdetails #v65-product-parent > tbody > tr.mc-pdp-main-row {
     display: flex !important;
-    flex-direction: column !important;
+    flex-direction: row !important;
     flex-wrap: nowrap !important;
-    align-items: stretch !important;
+    align-items: flex-start !important;
     gap: 28px !important;
     width: 100% !important;
     min-width: 0 !important;
@@ -5628,14 +5629,17 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
   body.productdetails #v65-product-parent > tr:nth-of-type(2) > td,
   body.mc-product-page tr.mc-pdp-main-row > td,
   body.productdetails tr.mc-pdp-main-row > td {
-    flex: 0 0 auto !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    flex: 1 1 0 !important;
+    width: auto !important;
+    max-width: none !important;
     min-width: 0 !important;
+    box-sizing: border-box !important;
   }
 
   body.mc-product-page #content_area td.mc-pdp-media-td,
   body.productdetails #content_area td.mc-pdp-media-td {
+    flex: 1 1 52% !important;
+    max-width: 58% !important;
     order: 1 !important;
     overflow: hidden !important;
     position: relative !important;
@@ -5644,6 +5648,8 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
 
   body.mc-product-page #content_area td.mc-pdp-options-td,
   body.productdetails #content_area td.mc-pdp-options-td {
+    flex: 1 1 48% !important;
+    max-width: 48% !important;
     order: 2 !important;
     position: relative !important;
     z-index: 2 !important;
