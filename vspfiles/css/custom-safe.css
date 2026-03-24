@@ -5440,3 +5440,53 @@ body.is-home #content_area_home .v-product .mc-member-grid-price,
   width: 100%;
   text-align: left !important;
 }
+
+/* mcLayoutHomeFeaturedFlex() — real DOM parent of featured products (tables / nested divs) */
+.mc-home-featured-flex {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1.25rem !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.mc-home-featured-flex > .mc-home-featured-flex__slot {
+  flex: 1 1 calc(25% - 1rem) !important;
+  max-width: calc(25% - 1rem) !important;
+  min-width: 200px !important;
+  box-sizing: border-box !important;
+}
+
+.mc-home-featured-flex > *:not(.mc-home-featured-flex__slot) {
+  flex: 0 0 100% !important;
+  max-width: 100% !important;
+}
+
+tbody.mc-home-featured-flex > tr.mc-home-featured-flex__slot {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+tr.mc-home-featured-flex {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 991px) {
+  .mc-home-featured-flex > .mc-home-featured-flex__slot {
+    flex: 1 1 calc(50% - 0.75rem) !important;
+    max-width: calc(50% - 0.75rem) !important;
+    min-width: 160px !important;
+  }
+}
+
+@media (max-width: 575px) {
+  .mc-home-featured-flex > .mc-home-featured-flex__slot {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+  }
+}
