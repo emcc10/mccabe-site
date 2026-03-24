@@ -5187,12 +5187,29 @@ body.category .v-product-grid .v-product h3,
 body.category .v-product-grid .v-product h4 {
   order: 2;
   flex: 0 1 auto;
-  min-height: 2.5em;
   line-height: 1.25;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  text-align: center;
+  min-height: 4.5em;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+body.category .v-product-grid .v-product .productnamecolor a,
+body.category .v-product-grid .v-product .v-product__name a {
+  width: 100%;
 }
 
 body.category .v-product-grid .v-product .v-product__price,
 body.category .v-product-grid .v-product .product_price,
 body.category .v-product-grid .v-product .mc-member-grid-price {
   order: 3;
+  min-height: 5.5em;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
 }
