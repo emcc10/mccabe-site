@@ -9117,63 +9117,21 @@ try {
 </script>
 
 <style id="mc-final-home-pdp-overrides">
-/* Final overrides load last to beat fallback styles */
+/* Product page final lock */
 @media (min-width: 992px){
-  body.is-home #slideshow-container .mc-hero-video{
-    min-height:100vh!important;
-    height:100vh!important;
+  body.productdetails #content_area img#product_photo,
+  body.mc-product-page #content_area img#product_photo,
+  body.productdetails #v65-product-parent img#product_photo,
+  body.mc-product-page #v65-product-parent img#product_photo{
+    width:600px!important;
+    max-width:600px!important;
+    height:auto!important;
+    min-width:0!important;
+    margin:0 auto!important;
+    display:block!important;
   }
 }
 
-body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list),
-body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list){
-  display:grid!important;
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  gap:24px!important;
-  width:100%!important;
-  margin:0!important;
-  padding:0!important;
-  list-style:none!important;
-}
-body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list) > li,
-body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list) > li,
-body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list) > .v-product,
-body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list) > .v-product{
-  width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;float:none!important;
-}
-body.is-home #content_area_home .v-product-grid .v-product,
-body.is-home #content_area_home ul.v-product-grid .v-product{
-  display:flex!important;flex-direction:column!important;align-items:stretch!important;min-width:0!important;
-}
-body.is-home #content_area_home .v-product-grid .v-product .v-product__img,
-body.is-home #content_area_home .v-product-grid .v-product .v-product__image,
-body.is-home #content_area_home .v-product-grid .v-product .product_image{
-  height:280px!important;min-height:280px!important;display:flex!important;align-items:center!important;justify-content:center!important;
-}
-body.is-home #content_area_home .v-product-grid .v-product .v-product__img img,
-body.is-home #content_area_home .v-product-grid .v-product .v-product__image img,
-body.is-home #content_area_home .v-product-grid .v-product .product_image img{
-  width:min(100%,280px)!important;max-width:280px!important;height:auto!important;max-height:280px!important;object-fit:contain!important;margin:0 auto!important;
-}
-body.is-home #content_area_home .v-product-grid .v-product .v-product__name,
-body.is-home #content_area_home .v-product-grid .v-product .productnamecolor,
-body.is-home #content_area_home .v-product-grid .v-product .v-product__name a,
-body.is-home #content_area_home .v-product-grid .v-product .productnamecolor a,
-body.is-home #content_area_home .v-product-grid .v-product .v-product__price,
-body.is-home #content_area_home .v-product-grid .v-product .product_price,
-body.is-home #content_area_home .v-product-grid .v-product .mc-member-grid-price{
-  display:block!important;width:100%!important;min-width:0!important;white-space:normal!important;word-break:normal!important;overflow-wrap:normal!important;text-align:left!important;
-}
-@media (max-width: 991px){
-  body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list),
-  body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list){grid-template-columns:repeat(2,minmax(0,1fr))!important}
-}
-@media (max-width: 575px){
-  body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list),
-  body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list){grid-template-columns:minmax(0,1fr)!important}
-}
-
-/* PDP related carousel hard lock */
 body.productdetails .mc-related-carousel__viewport,
 body.mc-product-page .mc-related-carousel__viewport{
   overflow-x:scroll!important;overflow-y:hidden!important;scrollbar-gutter:stable both-edges;
@@ -9211,6 +9169,89 @@ body.mc-product-page .mc-related-carousel__viewport .v-product .mc-member-grid-p
 body.mc-product-page .mc-related-carousel__viewport .v65-product-related-title,
 body.mc-product-page .mc-related-carousel__viewport .v65-product-related-price{order:2!important;width:100%!important;text-align:center!important}
 </style>
+
+<script>
+(function(){
+  function q(sel, root){ return (root || document).querySelector(sel); }
+  function qa(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  function isPdp(){
+    var b = document.body;
+    return !!b && (b.classList.contains('productdetails') || b.classList.contains('mc-product-page'));
+  }
+  function reorderCard(card){
+    if (!card) return;
+    var imgBlock = q('.v-product__img, .v-product__image, .product_image, a:has(img)', card);
+    if (imgBlock && card.firstElementChild !== imgBlock) {
+      card.insertBefore(imgBlock, card.firstElementChild);
+    }
+  }
+  function addShell(target){
+    if (!target || target.getAttribute('data-mc-related-carousel') === '1') return;
+    var parent = target.parentNode;
+    if (!parent) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'mc-related-carousel v-product-grid';
+    var viewport = document.createElement('div');
+    viewport.className = 'mc-related-carousel__viewport mc-related-carousel__track';
+    var prev = document.createElement('button');
+    prev.type = 'button';
+    prev.className = 'mc-related-carousel__nav mc-related-carousel__nav--prev';
+    prev.setAttribute('aria-label','Previous related products');
+    prev.innerHTML = '<span aria-hidden="true">&lsaquo;</span>';
+    var next = document.createElement('button');
+    next.type = 'button';
+    next.className = 'mc-related-carousel__nav mc-related-carousel__nav--next';
+    next.setAttribute('aria-label','Next related products');
+    next.innerHTML = '<span aria-hidden="true">&rsaquo;</span>';
+    parent.insertBefore(wrap, target);
+    wrap.appendChild(prev);
+    wrap.appendChild(viewport);
+    wrap.appendChild(next);
+    viewport.appendChild(target);
+    target.setAttribute('data-mc-related-carousel','1');
+
+    if (target.tagName === 'TABLE') {
+      var row = q('tbody tr:has(img), tr:has(img)', target);
+      if (row) row.classList.add('mc-related-carousel__row');
+    } else {
+      target.classList.add('mc-related-carousel__list');
+      qa('.v-product, .v65-product-related-item', target).forEach(reorderCard);
+    }
+
+    function step(){ return Math.max(1, Math.floor(viewport.clientWidth)); }
+    function sync(){
+      var max = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+      var left = viewport.scrollLeft;
+      prev.disabled = max <= 2 || left <= 2;
+      next.disabled = max <= 2 || left >= max - 2;
+    }
+    prev.addEventListener('click', function(){ viewport.scrollBy({ left: -step(), behavior: 'smooth' }); });
+    next.addEventListener('click', function(){ viewport.scrollBy({ left: step(), behavior: 'smooth' }); });
+    viewport.addEventListener('scroll', sync);
+    window.addEventListener('resize', sync);
+    setTimeout(sync, 60); setTimeout(sync, 350); setTimeout(sync, 1200);
+  }
+  function boot(){
+    if (!isPdp()) return;
+    var root = q('#content_area') || document;
+    var candidates = qa('table#relateditems, table.relateditems, table[id*="related" i], ul.v-product-grid, div.v-product-grid', root);
+    var v65 = q('#v65-product-parent');
+    candidates.forEach(function(el){
+      if (el.closest('#content_area_home')) return;
+      if (el.classList.contains('mc-related-carousel__list')) return;
+      if (v65 && !(v65.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)) return;
+      var hasCards = !!q('img, .v-product, .v65-product-related-item', el);
+      if (!hasCards) return;
+      addShell(el);
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', boot);
+  setTimeout(boot, 400);
+  setTimeout(boot, 1500);
+})();
+</script>
 
 </body>
 </html>
