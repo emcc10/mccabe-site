@@ -79,6 +79,7 @@ body.is-home #slideshow-container {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center bottom;
   z-index: 1;
 }
 
@@ -86,9 +87,6 @@ body.is-home #slideshow-container {
 #slideshow-container .mc-hero-video-el::-webkit-media-controls-picture-in-picture-button,
 #slideshow-container .mc-hero-video-el::-webkit-media-controls-fullscreen-button {
   display: none !important;
-}
-#slideshow-container .mc-hero-video-el {
-  overflow: hidden;
 }
 
 #slideshow-container .mc-hero-overlay {
@@ -178,10 +176,10 @@ body.is-home #slideshow-container {
     overflow: hidden !important;
   }
 
-  /* video: fully visible, proportional (no crop) */
+  /* video: fully visible; anchor to bottom so the lower frame is not cropped */
   #slideshow-container .mc-hero-video-el {
     object-fit: contain !important;
-    object-position: center center !important;
+    object-position: center bottom !important;
   }
 
   /* overlay: proportional spacing + type */
@@ -196,11 +194,18 @@ body.is-home #slideshow-container {
   }
 
   #slideshow-container .mc-hero-overlay .hero-logo-img {
-    max-height: clamp(44px, 11vw, 72px) !important;
-    width: auto !important;
-    max-width: min(96vw, 720px) !important;
+    display: block !important;
+    width: 80% !important;
     height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
     object-fit: contain !important;
+    opacity: 0.5 !important;
+    filter: brightness(0.5) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
 
   #slideshow-container .mc-hero-overlay p {
@@ -918,15 +923,16 @@ a.hero-cart-link {
   /* 1) STOP the hero from being full-page on mobile */
   #slideshow-container .mc-hero-video {
     min-height: 0 !important; /* overrides your desktop min-height:100vh */
-    height: 42vh !important; /* adjust: 40 60vh */
+    height: 52vh !important; /* align with block above; letterbox with contain */
     overflow: hidden !important;
   }
 
-  /* 2) Keep video proportional (no stretching), fill the hero box */
+  /* 2) Full frame visible; bottom-aligned so the lower portion is not cropped off */
   #slideshow-container .mc-hero-video-el {
     width: 100% !important;
     height: 100% !important;
-    object-fit: cover !important; /* proportional crop, not distortion */
+    object-fit: contain !important;
+    object-position: center bottom !important;
     display: block !important;
 
     /* IMPORTANT: don't let the video block taps/clicks */
@@ -5029,7 +5035,8 @@ body.productdetails #v65-product-parent .product_list_price {
   display: flex;
   justify-content: center;
   margin: 0 auto 0;
-  max-width: min(96vw, 980px);
+  width: 100%;
+  max-width: none;
 }
 
 #slideshow-container .mc-hero-overlay .hero-logo-wrap + p {
@@ -5038,13 +5045,18 @@ body.productdetails #v65-product-parent .product_list_price {
 
 #slideshow-container .mc-hero-overlay .hero-logo-img {
   display: block;
-  width: auto;
-  max-width: min(96vw, 980px);
-  max-height: clamp(56px, 9vw, 104px);
+  width: 80%;
   height: auto;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+  margin-left: auto;
+  margin-right: auto;
   object-fit: contain;
   object-position: center center;
-  opacity: 1;
+  opacity: 0.5;
+  filter: brightness(0.5);
 }
 
 /* === Members pricing: caption subline + modal + category grid === */
@@ -5805,7 +5817,7 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
 
   body.is-home #slideshow-container .mc-hero-video-el {
     object-fit: cover !important;
-    object-position: center center !important;
+    object-position: center bottom !important;
   }
 }
 
