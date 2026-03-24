@@ -6476,15 +6476,67 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     // Apply classes
     if (mediaTd) mediaTd.classList.add('mc-pdp-media-td');
     if (optionsTd) optionsTd.classList.add('mc-pdp-options-td');
-    var mainRow = (mediaTd && mediaTd.parentElement) || (optionsTd && optionsTd.parentElement);
-    if (mainRow && mainRow.tagName === 'TR') {
-      mainRow.classList.add('mc-pdp-main-row');
+    var mediaTr = mediaTd && mediaTd.parentElement;
+    var optionsTr = optionsTd && optionsTd.parentElement;
+    if (mediaTr && mediaTr.tagName === 'TR' && optionsTr && optionsTr.tagName === 'TR') {
+      if (mediaTr === optionsTr) {
+        mediaTr.classList.add('mc-pdp-main-row');
+      } else {
+        mediaTr.classList.add('mc-pdp-media-split-tr');
+        optionsTr.classList.add('mc-pdp-options-split-tr');
+      }
+    } else {
+      var mainRow = (mediaTd && mediaTd.parentElement) || (optionsTd && optionsTd.parentElement);
+      if (mainRow && mainRow.tagName === 'TR') mainRow.classList.add('mc-pdp-main-row');
     }
+  }
+
+  /**
+   * Volusion often puts the gallery and price/options in two sibling <tr> rows.
+   * Flex on a single tr cannot place those side-by-side; merge into one flex row via tbody.
+   */
+  function splitPdpRowsIfNeeded(){
+    if (!isPDP()) return;
+    var area = qs('#content_area');
+    if (!area) return;
+    var mediaTd = qs('td.mc-pdp-media-td', area);
+    var optionsTd = qs('td.mc-pdp-options-td', area);
+    if (!mediaTd || !optionsTd || mediaTd === optionsTd) return;
+
+    var mediaTr = mediaTd.parentElement;
+    var optionsTr = optionsTd.parentElement;
+    if (!mediaTr || !optionsTr || mediaTr.tagName !== 'TR' || optionsTr.tagName !== 'TR') return;
+    if (mediaTr === optionsTr) return;
+
+    var tb = mediaTr.parentElement;
+    if (!tb || tb.tagName !== 'TBODY' || tb !== optionsTr.parentElement) return;
+    if (tb.getAttribute('data-mc-pdp-split') === '1') return;
+
+    var rows = Array.prototype.filter.call(tb.children, function(el){ return el.tagName === 'TR'; });
+    if (rows.indexOf(mediaTr) === -1 || rows.indexOf(optionsTr) === -1) return;
+
+    if (rows.length === 2) {
+      tb.classList.add('mc-pdp-split-rows');
+      tb.setAttribute('data-mc-pdp-split', '1');
+      return;
+    }
+
+    var table = tb.parentElement;
+    if (!table || table.tagName !== 'TABLE') return;
+
+    var newTb = document.createElement('tbody');
+    newTb.className = 'mc-pdp-split-rows';
+    newTb.setAttribute('data-mc-pdp-split', '1');
+    var ref = mediaTr.compareDocumentPosition(optionsTr) & Node.DOCUMENT_POSITION_FOLLOWING ? mediaTr : optionsTr;
+    table.insertBefore(newTb, ref);
+    newTb.appendChild(mediaTr);
+    newTb.appendChild(optionsTr);
   }
 
   function run(){
     unwrapBadWrapper();
     tagPdpCells();
+    splitPdpRowsIfNeeded();
     document.body.classList.add('mc-product-page');
   }
 
@@ -6494,6 +6546,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   window.addEventListener('load', run);
   setTimeout(run, 300);
   setTimeout(run, 900);
+  setTimeout(function(){ tagPdpCells(); splitPdpRowsIfNeeded(); }, 1600);
 })();
 </script>
 <script>

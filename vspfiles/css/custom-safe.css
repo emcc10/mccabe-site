@@ -5494,6 +5494,36 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
   width: 100% !important;
 }
 
+.mc-related-carousel__viewport ul.mc-related-carousel__list {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  gap: 12px;
+  width: max-content !important;
+  min-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+  box-sizing: border-box !important;
+}
+
+.mc-related-carousel__viewport ul.mc-related-carousel__list > li {
+  flex: 0 0 calc((100cqi - 24px) / 3) !important;
+  min-width: calc((100cqi - 24px) / 3) !important;
+  max-width: calc((100cqi - 24px) / 3) !important;
+  scroll-snap-align: start;
+  box-sizing: border-box !important;
+}
+
+@supports not (container-type: inline-size) {
+  .mc-related-carousel__viewport ul.mc-related-carousel__list > li {
+    flex: 0 0 calc((100vw - 140px) / 3) !important;
+    min-width: calc((100vw - 140px) / 3) !important;
+    max-width: calc((100vw - 140px) / 3) !important;
+  }
+}
+
 .mc-related-carousel__viewport .mc-related-carousel__row {
   display: flex !important;
   flex-direction: row !important;
@@ -5568,14 +5598,16 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
     padding: 0 44px;
   }
 
-  .mc-related-carousel__viewport .mc-related-carousel__row td {
+  .mc-related-carousel__viewport .mc-related-carousel__row td,
+  .mc-related-carousel__viewport ul.mc-related-carousel__list > li {
     flex: 0 0 calc((100cqi - 12px) / 2) !important;
     min-width: calc((100cqi - 12px) / 2) !important;
     max-width: calc((100cqi - 12px) / 2) !important;
   }
 
   @supports not (container-type: inline-size) {
-    .mc-related-carousel__viewport .mc-related-carousel__row td {
+    .mc-related-carousel__viewport .mc-related-carousel__row td,
+    .mc-related-carousel__viewport ul.mc-related-carousel__list > li {
       flex: 0 0 calc((100vw - 120px) / 2) !important;
       min-width: calc((100vw - 120px) / 2) !important;
       max-width: calc((100vw - 120px) / 2) !important;
@@ -5588,14 +5620,16 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
     padding: 0 40px;
   }
 
-  .mc-related-carousel__viewport .mc-related-carousel__row td {
+  .mc-related-carousel__viewport .mc-related-carousel__row td,
+  .mc-related-carousel__viewport ul.mc-related-carousel__list > li {
     flex: 0 0 88cqi !important;
     min-width: 88cqi !important;
     max-width: 88cqi !important;
   }
 
   @supports not (container-type: inline-size) {
-    .mc-related-carousel__viewport .mc-related-carousel__row td {
+    .mc-related-carousel__viewport .mc-related-carousel__row td,
+    .mc-related-carousel__viewport ul.mc-related-carousel__list > li {
       flex: 0 0 88vw !important;
       min-width: 88vw !important;
       max-width: 88vw !important;
@@ -5671,6 +5705,63 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
     width: 100% !important;
     height: auto !important;
     box-sizing: border-box !important;
+  }
+}
+
+/* =========================================================
+   PDP: gallery + options in SEPARATE <tr> rows (Volusion inner table)
+   JS adds tbody.mc-pdp-split-rows; tr { display:contents } joins cells in one flex row.
+   Must load after other PDP rules.
+   ========================================================= */
+@media (min-width: 992px) {
+  body.mc-product-page #v65-product-parent tbody.mc-pdp-split-rows,
+  body.productdetails #v65-product-parent tbody.mc-pdp-split-rows {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    gap: 28px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.mc-product-page #v65-product-parent tbody.mc-pdp-split-rows > tr,
+  body.productdetails #v65-product-parent tbody.mc-pdp-split-rows > tr {
+    display: contents !important;
+  }
+
+  body.mc-product-page #v65-product-parent tbody.mc-pdp-split-rows td.mc-pdp-media-td,
+  body.productdetails #v65-product-parent tbody.mc-pdp-split-rows td.mc-pdp-media-td {
+    flex: 1 1 52% !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 58% !important;
+    box-sizing: border-box !important;
+    vertical-align: top !important;
+  }
+
+  body.mc-product-page #v65-product-parent tbody.mc-pdp-split-rows td.mc-pdp-options-td,
+  body.productdetails #v65-product-parent tbody.mc-pdp-split-rows td.mc-pdp-options-td {
+    flex: 1 1 48% !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 48% !important;
+    box-sizing: border-box !important;
+    vertical-align: top !important;
+    padding-left: 12px !important;
+  }
+}
+
+@media (max-width: 991px) {
+  body.mc-product-page #v65-product-parent tbody.mc-pdp-split-rows,
+  body.productdetails #v65-product-parent tbody.mc-pdp-split-rows {
+    display: table-row-group !important;
+  }
+
+  body.mc-product-page #v65-product-parent tbody.mc-pdp-split-rows > tr,
+  body.productdetails #v65-product-parent tbody.mc-pdp-split-rows > tr {
+    display: table-row !important;
   }
 }
 
