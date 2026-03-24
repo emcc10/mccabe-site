@@ -9118,6 +9118,47 @@ try {
 
 <style id="mc-final-home-pdp-overrides">
 /* Product page final lock */
+body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list),
+body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list),
+body.is-home #content_area .v-product-grid:not(.mc-related-carousel__list),
+body.is-home #content_area ul.v-product-grid:not(.mc-related-carousel__list){
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:24px!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  list-style:none!important;
+  overflow-x:visible!important;
+  white-space:normal!important;
+}
+body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list) > li,
+body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list) > li,
+body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list) > .v-product,
+body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list) > .v-product,
+body.is-home #content_area .v-product-grid:not(.mc-related-carousel__list) > li,
+body.is-home #content_area ul.v-product-grid:not(.mc-related-carousel__list) > li,
+body.is-home #content_area .v-product-grid:not(.mc-related-carousel__list) > .v-product,
+body.is-home #content_area ul.v-product-grid:not(.mc-related-carousel__list) > .v-product{
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:0!important;
+  float:none!important;
+}
+@media (max-width: 991px){
+  body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list),
+  body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list),
+  body.is-home #content_area .v-product-grid:not(.mc-related-carousel__list),
+  body.is-home #content_area ul.v-product-grid:not(.mc-related-carousel__list){grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media (max-width: 575px){
+  body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list),
+  body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list),
+  body.is-home #content_area .v-product-grid:not(.mc-related-carousel__list),
+  body.is-home #content_area ul.v-product-grid:not(.mc-related-carousel__list){grid-template-columns:minmax(0,1fr)!important}
+}
+
 @media (min-width: 992px){
   body.productdetails #content_area img#product_photo,
   body.mc-product-page #content_area img#product_photo,
@@ -9190,6 +9231,30 @@ body.mc-product-page .mc-related-carousel__viewport .v65-product-related-price{o
   function isPdp(){
     var b = document.body;
     return !!b && (b.classList.contains('productdetails') || b.classList.contains('mc-product-page'));
+  }
+  function enforcePdpMainImage(){
+    if (!isPdp()) return;
+    var desktop = (window.innerWidth || 0) >= 992;
+    var imgs = qa('#content_area img#product_photo, #v65-product-parent img#product_photo');
+    imgs.forEach(function(img){
+      if (desktop) {
+        img.style.setProperty('width', '600px', 'important');
+        img.style.setProperty('max-width', '600px', 'important');
+        img.style.setProperty('height', 'auto', 'important');
+        img.style.setProperty('display', 'block', 'important');
+        img.style.setProperty('margin', '0 auto', 'important');
+      } else {
+        img.style.setProperty('width', '100%', 'important');
+        img.style.setProperty('max-width', '100%', 'important');
+        img.style.setProperty('height', 'auto', 'important');
+      }
+    });
+    var wraps = qa('#content_area #product_photo, #content_area #product_photo_td, #v65-product-parent #product_photo, #v65-product-parent #product_photo_td');
+    wraps.forEach(function(w){
+      w.style.setProperty('max-width', desktop ? '600px' : '100%', 'important');
+      w.style.setProperty('width', desktop ? '600px' : '100%', 'important');
+      w.style.setProperty('margin', '0 auto', 'important');
+    });
   }
   function reorderCard(card){
     if (!card) return;
@@ -9332,6 +9397,7 @@ body.mc-product-page .mc-related-carousel__viewport .v65-product-related-price{o
   }
   function boot(){
     if (!isPdp()) return;
+    enforcePdpMainImage();
     var root = q('#content_area') || document;
     var candidates = qa('table#relateditems, table.relateditems, table[id*="related" i], ul.v-product-grid, div.v-product-grid', root);
     var v65 = q('#v65-product-parent');
@@ -9351,12 +9417,15 @@ body.mc-product-page .mc-related-carousel__viewport .v65-product-related-price{o
       }
       addShell(target);
     });
+    enforcePdpMainImage();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
   window.addEventListener('load', boot);
+  window.addEventListener('resize', enforcePdpMainImage);
   setTimeout(boot, 400);
   setTimeout(boot, 1500);
+  setTimeout(enforcePdpMainImage, 2500);
 })();
 </script>
 

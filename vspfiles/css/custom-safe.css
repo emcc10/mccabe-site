@@ -5800,11 +5800,11 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
   body.is-home #slideshow-container .mc-hero-video {
     min-height: 100vh !important;
     height: 100vh !important;
-    background: #000 !important;
+    background: transparent !important;
   }
 
   body.is-home #slideshow-container .mc-hero-video-el {
-    object-fit: contain !important;
+    object-fit: cover !important;
     object-position: center center !important;
   }
 }
