@@ -809,6 +809,12 @@ document.addEventListener("DOMContentLoaded", function () {
 html body.category .v-product-grid .v-product,
 html body.category .v-product-grid .v-product-grid-item,
 html body.category .v-product-grid > .v-product,
+html body.is-home .v-product-grid .v-product,
+html body.is-home .v-product-grid .v-product-grid-item,
+html body.is-home .v-product-grid > .v-product,
+html #content_area_home .v-product-grid .v-product,
+html #content_area_home .v-product-grid .v-product-grid-item,
+html #content_area_home .v-product-grid > .v-product,
 html body.productdetails .v-product-grid .v-product,
 html body.productdetails .v-product-grid .v-product-grid-item,
 html body.productdetails .v-product-grid > .v-product {
@@ -8093,12 +8099,18 @@ try {
 .mc-login-modal__frame{width:100%;min-height:320px;border:1px solid #ddd;border-radius:4px;background:#fafafa}
 .mc-login-modal__signup{margin:12px 0 0;font-size:13px;text-align:center}
 .mc-login-modal__signup-note{display:block;font-size:11px;opacity:.75;margin-top:4px}
-/* Category grid: image then title then price; constrain images (template fallback) */
+/* Category + home featured grid: fixed image slot (centered), title row baseline, left prices */
 body.category .v-product-grid .v-product{display:flex;flex-direction:column;align-items:stretch;box-sizing:border-box;min-width:0}
-body.category .v-product-grid .v-product .v-product__img,body.category .v-product-grid .v-product .v-product__image,body.category .v-product-grid .v-product .product_image{order:1;flex:0 0 auto;width:100%;text-align:center;margin-bottom:0!important;padding-bottom:0!important}
-body.category .v-product-grid .v-product .v-product__img img,body.category .v-product-grid .v-product .v-product__image img,body.category .v-product-grid .v-product .product_image img{width:100%;max-width:100%;height:auto;max-height:280px;object-fit:contain}
+body.category .v-product-grid .v-product .v-product__img,body.category .v-product-grid .v-product .v-product__image,body.category .v-product-grid .v-product .product_image{order:1;flex:0 0 auto;width:100%;min-height:280px;height:280px;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center;margin-bottom:0!important;padding-bottom:0!important;box-sizing:border-box}
+body.category .v-product-grid .v-product .v-product__img img,body.category .v-product-grid .v-product .v-product__image img,body.category .v-product-grid .v-product .product_image img{width:auto;max-width:100%;height:auto;max-height:280px;object-fit:contain;margin:0!important}
 body.category .v-product-grid .v-product .v-product__name,body.category .v-product-grid .v-product .productnamecolor,body.category .v-product-grid .v-product h2,body.category .v-product-grid .v-product h3,body.category .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;align-items:flex-end;justify-content:flex-start;text-align:left;min-height:4.5em;box-sizing:border-box;width:100%;margin-top:2px!important}
 body.category .v-product-grid .v-product .v-product__price,body.category .v-product-grid .v-product .product_price,body.category .v-product-grid .v-product .mc-member-grid-price{order:3;min-height:5.5em;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;width:100%;text-align:left!important}
+body.is-home .v-product-grid .v-product,#content_area_home .v-product-grid .v-product{display:flex;flex-direction:column;align-items:stretch;box-sizing:border-box;min-width:0;text-align:left!important}
+body.is-home .v-product-grid .v-product .v-product__img,body.is-home .v-product-grid .v-product .v-product__image,body.is-home .v-product-grid .v-product .product_image,#content_area_home .v-product-grid .v-product .v-product__img,#content_area_home .v-product-grid .v-product .v-product__image,#content_area_home .v-product-grid .v-product .product_image{order:1;flex:0 0 auto;width:100%;min-height:280px;height:280px;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center;margin-bottom:0!important;padding-bottom:0!important;box-sizing:border-box}
+body.is-home .v-product-grid .v-product .v-product__img img,body.is-home .v-product-grid .v-product .v-product__image img,body.is-home .v-product-grid .v-product .product_image img,#content_area_home .v-product-grid .v-product .v-product__img img,#content_area_home .v-product-grid .v-product .v-product__image img,#content_area_home .v-product-grid .v-product .product_image img{width:auto;max-width:100%;height:auto;max-height:280px;object-fit:contain;margin:0!important}
+body.is-home .v-product-grid .v-product .v-product__name,body.is-home .v-product-grid .v-product .productnamecolor,body.is-home .v-product-grid .v-product h2,body.is-home .v-product-grid .v-product h3,body.is-home .v-product-grid .v-product h4,#content_area_home .v-product-grid .v-product .v-product__name,#content_area_home .v-product-grid .v-product .productnamecolor,#content_area_home .v-product-grid .v-product h2,#content_area_home .v-product-grid .v-product h3,#content_area_home .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;align-items:flex-end;justify-content:flex-start;text-align:left!important;min-height:4.5em;box-sizing:border-box;width:100%;margin-top:2px!important}
+body.is-home .v-product-grid .v-product .productnamecolor a,body.is-home .v-product-grid .v-product .v-product__name a,#content_area_home .v-product-grid .v-product .productnamecolor a,#content_area_home .v-product-grid .v-product .v-product__name a{width:100%;text-align:left!important}
+body.is-home .v-product-grid .v-product .v-product__price,body.is-home .v-product-grid .v-product .product_price,body.is-home .v-product-grid .v-product .mc-member-grid-price,#content_area_home .v-product-grid .v-product .v-product__price,#content_area_home .v-product-grid .v-product .product_price,#content_area_home .v-product-grid .v-product .mc-member-grid-price{order:3;min-height:5.5em;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;width:100%;text-align:left!important}
 </style>
 <div id="mc-login-modal" class="mc-login-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mc-login-modal-title">
   <div class="mc-login-modal__backdrop" data-mc-close-login tabindex="-1"></div>
