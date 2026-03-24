@@ -8073,7 +8073,22 @@ try {
   }
 } catch (_) {}
 </script>
-
+<style id="mc-member-grid-inline-fallback">
+/* Fallback if vspfiles/css/custom-safe.css is not deployed — keeps MAP swap + modal usable */
+.mc-member-grid-price__label{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#333}
+.mc-member-grid-price__hint{font-size:12px;margin-top:4px;color:#555}
+.mc-member-grid-price__login{margin-top:8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border:1px solid #333;background:#fff;cursor:pointer;border-radius:2px}
+.mc-login-modal{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
+.mc-login-modal.mc-login-modal--open{display:flex}
+.mc-login-modal__backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45);cursor:pointer}
+.mc-login-modal__panel{position:relative;z-index:1;width:min(440px,100%);max-height:min(90vh,720px);background:#fff;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:20px;display:flex;flex-direction:column;overflow:hidden}
+.mc-login-modal__close{position:absolute;top:8px;right:10px;border:none;background:transparent;font-size:28px;line-height:1;cursor:pointer;color:#333}
+.mc-login-modal__title{margin:0 0 8px;font-size:18px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.mc-login-modal__hint{margin:0 0 12px;font-size:13px;line-height:1.45;color:#454545}
+.mc-login-modal__frame{width:100%;min-height:320px;border:1px solid #ddd;border-radius:4px;background:#fafafa}
+.mc-login-modal__signup{margin:12px 0 0;font-size:13px;text-align:center}
+.mc-login-modal__signup-note{display:block;font-size:11px;opacity:.75;margin-top:4px}
+</style>
 <div id="mc-login-modal" class="mc-login-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mc-login-modal-title">
   <div class="mc-login-modal__backdrop" data-mc-close-login tabindex="-1"></div>
   <div class="mc-login-modal__panel" role="document">
@@ -8153,14 +8168,59 @@ try {
     }
   });
 
-  function mcIsCategoryOrHomeGrid() {
+  function mcIsLikelyListingPage() {
     var b = document.body;
     if (!b) return false;
     if (b.classList.contains('category')) return true;
     if (b.classList.contains('is-home')) return true;
     var p = (location.pathname || '').toLowerCase();
     if (p === '/' || p === '/default.asp' || p.indexOf('default.asp') !== -1) return true;
+    if (p.indexOf('searchresults') !== -1) return true;
+    if (p.indexOf('sitemap') !== -1) return false;
     return false;
+  }
+
+  /** Product cards: Volusion sometimes renders outside #content_area (e.g. home widgets). */
+  function mcCollectGridProductCards() {
+    var sel =
+      '#content_area .v-product, #content_area_home .v-product, ' +
+      '.content_area-wrapper .v-product, [role="main"] .v-product, ' +
+      '.container--content .v-product';
+    var raw = document.querySelectorAll(sel);
+    var i;
+    var el;
+    var out = [];
+    var seen = {};
+    function pushCard(node) {
+      if (!node || seen[node]) return;
+      if (node.closest && (node.closest('#footer') || node.closest('footer'))) return;
+      seen[node] = true;
+      out.push(node);
+    }
+    for (i = 0; i < raw.length; i++) pushCard(raw[i]);
+    if (out.length) return out;
+    if (mcIsLikelyListingPage()) {
+      raw = document.querySelectorAll('.v-product-grid .v-product, li.v-product');
+      for (i = 0; i < raw.length; i++) pushCard(raw[i]);
+    }
+    if (out.length) return out;
+    raw = document.querySelectorAll('.v-product-grid .v-product');
+    for (i = 0; i < raw.length; i++) pushCard(raw[i]);
+    return out;
+  }
+
+  function mcFindMapTextMount(card) {
+    try {
+      var walk = document.createTreeWalker(card, NodeFilter.SHOW_TEXT, null, false);
+      var n;
+      while ((n = walk.nextNode())) {
+        var v = n.nodeValue || '';
+        if (!/our lowest price|lowest price|add to cart for/i.test(v)) continue;
+        var p = n.parentNode;
+        if (p && p.nodeType === 1 && (!p.closest || !p.closest('.mc-member-grid-price'))) return p;
+      }
+    } catch (eW) {}
+    return null;
   }
 
   /**
@@ -8168,24 +8228,27 @@ try {
    * not in .v-product__price — find the smallest matching node first, then fall back to price.
    */
   function mcFindCardPricingMount(card) {
-    var nodes = card.querySelectorAll('a, span, div, p, font, td, strong, em');
+    var nodes = card.querySelectorAll('a, span, div, p, font, td, strong, em, li, b, i, u, label, small');
     var best = null;
     var bestLen = Infinity;
     var i;
     var el;
     var t;
+    var MAP_RE = /add to cart for our lowest price|our lowest price|lowest price|add to cart for/i;
     for (i = 0; i < nodes.length; i++) {
       el = nodes[i];
       if (el.closest && el.closest('.mc-member-grid-price')) continue;
       t = (el.textContent || '').replace(/\s+/g, ' ').trim();
-      if (!/add to cart for our lowest price|lowest price/i.test(t)) continue;
-      if (t.length > 160) continue;
+      if (!MAP_RE.test(t)) continue;
+      if (t.length > 200) continue;
       if (t.length < bestLen) {
         bestLen = t.length;
         best = el;
       }
     }
     if (best) return best;
+    var byText = mcFindMapTextMount(card);
+    if (byText) return byText;
     return (
       card.querySelector('.v-product__price') ||
       card.querySelector('.product_price') ||
@@ -8200,10 +8263,10 @@ try {
   }
 
   function mcPaintCategoryGridMemberPricing() {
-    if (!mcIsCategoryOrHomeGrid()) return;
+    var products = mcCollectGridProductCards();
+    if (!products.length) return;
     var st = window.__mcMemberPricing || {};
     var unlocked = !!st.unlocked;
-    var products = document.querySelectorAll('#content_area .v-product, #content_area_home .v-product');
     var i;
     for (i = 0; i < products.length; i++) {
       var card = products[i];
@@ -8277,17 +8340,33 @@ try {
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
 
   function mcBootCategoryGrid() {
-    if (!mcIsCategoryOrHomeGrid()) return;
     var run = function () {
-      if (typeof window.detectMemberPricingState === 'function') {
-        window.detectMemberPricingState().then(function () {
+      try {
+        if (typeof window.detectMemberPricingState === 'function') {
+          window
+            .detectMemberPricingState()
+            .then(function () {
+              mcPaintCategoryGridMemberPricing();
+            })
+            .catch(function () {
+              mcPaintCategoryGridMemberPricing();
+            });
+        } else {
           mcPaintCategoryGridMemberPricing();
-        });
-      } else {
-        mcPaintCategoryGridMemberPricing();
+        }
+      } catch (eRun) {
+        try {
+          mcPaintCategoryGridMemberPricing();
+        } catch (e2) {}
       }
     };
     run();
+    var tick = 0;
+    var tickIv = setInterval(function () {
+      tick++;
+      mcPaintCategoryGridMemberPricing();
+      if (tick >= 40) clearInterval(tickIv);
+    }, 350);
     if (!window.__mcCategoryGridReadyBound) {
       window.__mcCategoryGridReadyBound = true;
       window.addEventListener('mcMemberPricingReady', function () {
@@ -8310,6 +8389,19 @@ try {
     }
     obs(ca);
     obs(ch);
+    if (!window.__mcGridBodyPaintObserver) {
+      window.__mcGridBodyPaintObserver = true;
+      var debBody;
+      try {
+        var moBody = new MutationObserver(function () {
+          clearTimeout(debBody);
+          debBody = setTimeout(function () {
+            mcPaintCategoryGridMemberPricing();
+          }, 200);
+        });
+        moBody.observe(document.body, { childList: true, subtree: true });
+      } catch (eB) {}
+    }
   }
 
   if (document.readyState === 'loading') {
