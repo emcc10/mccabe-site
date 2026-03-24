@@ -5718,8 +5718,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     else mainImgs = qa('img', main);
 
     mainImgs.forEach(function(img){
-      img.style.setProperty('width','100%','important');
-      img.style.setProperty('max-width','100%','important');
+      img.style.setProperty('width','min(600px, 100%)','important');
+      img.style.setProperty('max-width','600px','important');
       img.style.setProperty('min-width','0','important');
       img.style.setProperty('height','auto','important');
       img.style.setProperty('object-fit','contain','important');
@@ -6749,7 +6749,8 @@ body.productdetails .v-product-grid .v-product .v-product__price {
   }
 
   /**
-   * Volusion PDP often uses ul.v-product-grid (not table#relateditems). Find first grid outside main product parent.
+   * Volusion PDP often uses ul.v-product-grid (not table#relateditems).
+   * Prefer grids that are likely related products.
    */
   function mcFindRelatedListGrid() {
     if (document.body.classList.contains('is-home')) return null;
@@ -6758,23 +6759,40 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     var uls = ca.querySelectorAll('ul.v-product-grid');
     var i;
     var el;
+    function score(node) {
+      var s = 0;
+      var text = ((node.textContent || '') + ' ' + (((node.parentElement || {}).textContent) || '')).toLowerCase();
+      if (/related\s+products?|you\s+may\s+also|recommended/.test(text)) s += 5;
+      if (node.closest('#v65-product-parent')) s += 3;
+      if (node.querySelector('img')) s += 2;
+      var count = node.querySelectorAll(':scope > li, :scope > .v-product, :scope > div.v-product').length;
+      if (count >= 2) s += 2;
+      if (count >= 3) s += 1;
+      return s;
+    }
+    var best = null;
+    var bestScore = -1;
     for (i = 0; i < uls.length; i++) {
       el = uls[i];
-      if (el.closest('#v65-product-parent')) continue;
       if (el.closest('#content_area_home')) continue;
       var lis = el.querySelectorAll(':scope > li');
-      if (lis.length >= 1) return el;
+      if (lis.length >= 1) {
+        var s1 = score(el);
+        if (s1 > bestScore) { best = el; bestScore = s1; }
+      }
     }
     var divs = ca.querySelectorAll('div.v-product-grid');
     for (i = 0; i < divs.length; i++) {
       el = divs[i];
-      if (el.closest('#v65-product-parent')) continue;
       if (el.closest('#content_area_home')) continue;
       if (el.querySelector(':scope > ul.v-product-grid')) continue;
       var prods = el.querySelectorAll(':scope > .v-product, :scope > div.v-product');
-      if (prods.length >= 2) return el;
+      if (prods.length >= 2) {
+        var s2 = score(el);
+        if (s2 > bestScore) { best = el; bestScore = s2; }
+      }
     }
-    return null;
+    return best;
   }
 
   /* ---- Related products: horizontal scroll + arrows (table OR ul.v-product-grid) ---- */
