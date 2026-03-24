@@ -809,13 +809,6 @@ document.addEventListener("DOMContentLoaded", function () {
 html body.category .v-product-grid .v-product,
 html body.category .v-product-grid .v-product-grid-item,
 html body.category .v-product-grid > .v-product,
-html body.is-home .v-product-grid .v-product,
-html body.is-home .v-product-grid .v-product-grid-item,
-html body.is-home .v-product-grid > .v-product,
-html #content_area_home .v-product-grid .v-product,
-html #content_area_home .v-product-grid .v-product-grid-item,
-html #content_area_home .v-product-grid > .v-product,
-html #content_area_home .v-product,
 html body.productdetails .v-product-grid .v-product,
 html body.productdetails .v-product-grid .v-product-grid-item,
 html body.productdetails .v-product-grid > .v-product {
@@ -4365,17 +4358,14 @@ body.mc-product-page #content_area .wm-swatch img {
   body.mc-product-page #content_area .vcss_img_wrap,
   body.mc-product-page #content_area .main-image {
     overflow: hidden !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
+    min-width: 600px !important;
   }
 
   body.mc-product-page #content_area #product_photo img,
   body.mc-product-page #content_area .vcss_img_wrap img,
   body.mc-product-page #content_area .main-image img,
   body.mc-product-page #content_area img#main-image {
-    min-width: 0 !important;
-    max-width: 100% !important;
+    min-width: 600px !important;
     width: 100% !important;
     height: auto !important;
   }
@@ -5718,9 +5708,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     else mainImgs = qa('img', main);
 
     mainImgs.forEach(function(img){
-      img.style.setProperty('width','min(600px, 100%)','important');
-      img.style.setProperty('max-width','600px','important');
-      img.style.setProperty('min-width','0','important');
+      img.style.setProperty('width','100%','important');
+      img.style.setProperty('max-width','980px','important');
+      img.style.setProperty('min-width','600px','important');
       img.style.setProperty('height','auto','important');
       img.style.setProperty('object-fit','contain','important');
       img.style.setProperty('display','block','important');
@@ -5772,13 +5762,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       }
     });
 
-    // Main image area fills remaining width (no min-width — it overlapped the options column)
+    // Main image area fills remaining width
     main.style.setProperty('float','none','important');
     main.style.setProperty('width','100%','important');
     main.style.setProperty('flex','1 1 0','important');
     main.style.setProperty('overflow','visible','important');
-    main.style.setProperty('min-width','0','important');
-    main.style.setProperty('max-width','100%','important');
+    main.style.setProperty('min-width','600px','important');
   }
 
   function removeConfigurationDetails(scope){
@@ -6089,23 +6078,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (vp) vp.appendChild(caption);
   }
 
-  /**
-   * Volusion often wraps price text in <a href="...">. Nested <a> for "Log in" is invalid HTML
-   * and browsers ignore or break the inner link — hoist caption after the wrapping anchor.
-   */
-  function mcHoistMemberCaptionOutOfAnchor(caption) {
-    try {
-      if (!caption || !caption.parentNode) return;
-      var a = caption.closest && caption.closest('a[href]');
-      if (!a || !a.parentNode) return;
-      if (!a.contains(caption)) return;
-      a.parentNode.insertBefore(caption, a.nextSibling);
-    } catch (e) {}
-  }
-  try {
-    window.mcHoistMemberCaptionOutOfAnchor = mcHoistMemberCaptionOutOfAnchor;
-  } catch (eW) {}
-
   /** Always search document — #v65-product-parent may not be inside #content_area. */
   function findMemberCaptionAnchorEl() {
     var el;
@@ -6251,7 +6223,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         '<span class="mc-member-price-caption__price-value">' + fmt(memberDisplayPrice) + '</span>';
       caption.setAttribute('data-mc-member-state', 'unlocked');
       ensureMemberCaptionMounted(caption);
-      mcHoistMemberCaptionOutOfAnchor(caption);
       return;
     }
 
@@ -6260,7 +6231,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         '<span class="mc-member-price-caption__option-label">Member price:</span>';
       caption.setAttribute('data-mc-member-state', 'unlocked-no-price');
       ensureMemberCaptionMounted(caption);
-      mcHoistMemberCaptionOutOfAnchor(caption);
       return;
     }
 
@@ -6274,7 +6244,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       '</div>';
     caption.setAttribute('data-mc-member-state', 'locked');
     ensureMemberCaptionMounted(caption);
-    mcHoistMemberCaptionOutOfAnchor(caption);
   }
 
   function leftAlignPricingBlock(scope){
@@ -6476,67 +6445,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     // Apply classes
     if (mediaTd) mediaTd.classList.add('mc-pdp-media-td');
     if (optionsTd) optionsTd.classList.add('mc-pdp-options-td');
-    var mediaTr = mediaTd && mediaTd.parentElement;
-    var optionsTr = optionsTd && optionsTd.parentElement;
-    if (mediaTr && mediaTr.tagName === 'TR' && optionsTr && optionsTr.tagName === 'TR') {
-      if (mediaTr === optionsTr) {
-        mediaTr.classList.add('mc-pdp-main-row');
-      } else {
-        mediaTr.classList.add('mc-pdp-media-split-tr');
-        optionsTr.classList.add('mc-pdp-options-split-tr');
-      }
-    } else {
-      var mainRow = (mediaTd && mediaTd.parentElement) || (optionsTd && optionsTd.parentElement);
-      if (mainRow && mainRow.tagName === 'TR') mainRow.classList.add('mc-pdp-main-row');
-    }
-  }
-
-  /**
-   * Volusion often puts the gallery and price/options in two sibling <tr> rows.
-   * Flex on a single tr cannot place those side-by-side; merge into one flex row via tbody.
-   */
-  function splitPdpRowsIfNeeded(){
-    if (!isPDP()) return;
-    var area = qs('#content_area');
-    if (!area) return;
-    var mediaTd = qs('td.mc-pdp-media-td', area);
-    var optionsTd = qs('td.mc-pdp-options-td', area);
-    if (!mediaTd || !optionsTd || mediaTd === optionsTd) return;
-
-    var mediaTr = mediaTd.parentElement;
-    var optionsTr = optionsTd.parentElement;
-    if (!mediaTr || !optionsTr || mediaTr.tagName !== 'TR' || optionsTr.tagName !== 'TR') return;
-    if (mediaTr === optionsTr) return;
-
-    var tb = mediaTr.parentElement;
-    if (!tb || tb.tagName !== 'TBODY' || tb !== optionsTr.parentElement) return;
-    if (tb.getAttribute('data-mc-pdp-split') === '1') return;
-
-    var rows = Array.prototype.filter.call(tb.children, function(el){ return el.tagName === 'TR'; });
-    if (rows.indexOf(mediaTr) === -1 || rows.indexOf(optionsTr) === -1) return;
-
-    if (rows.length === 2) {
-      tb.classList.add('mc-pdp-split-rows');
-      tb.setAttribute('data-mc-pdp-split', '1');
-      return;
-    }
-
-    var table = tb.parentElement;
-    if (!table || table.tagName !== 'TABLE') return;
-
-    var newTb = document.createElement('tbody');
-    newTb.className = 'mc-pdp-split-rows';
-    newTb.setAttribute('data-mc-pdp-split', '1');
-    var ref = mediaTr.compareDocumentPosition(optionsTr) & Node.DOCUMENT_POSITION_FOLLOWING ? mediaTr : optionsTr;
-    table.insertBefore(newTb, ref);
-    newTb.appendChild(mediaTr);
-    newTb.appendChild(optionsTr);
   }
 
   function run(){
     unwrapBadWrapper();
     tagPdpCells();
-    splitPdpRowsIfNeeded();
     document.body.classList.add('mc-product-page');
   }
 
@@ -6546,7 +6459,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   window.addEventListener('load', run);
   setTimeout(run, 300);
   setTimeout(run, 900);
-  setTimeout(function(){ tagPdpCells(); splitPdpRowsIfNeeded(); }, 1600);
 })();
 </script>
 <script>
@@ -6695,178 +6607,6 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       }
     });
   }
-
-  function mcBuildRelatedCarouselShell() {
-    var wrap = document.createElement('div');
-    wrap.className = 'mc-related-carousel v-product-grid';
-    var viewport = document.createElement('div');
-    viewport.className = 'mc-related-carousel__viewport mc-related-carousel__track';
-    var prev = document.createElement('button');
-    prev.type = 'button';
-    prev.className = 'mc-related-carousel__nav mc-related-carousel__nav--prev';
-    prev.setAttribute('aria-label', 'Previous related products');
-    prev.innerHTML = '<span aria-hidden="true">&lsaquo;</span>';
-    var next = document.createElement('button');
-    next.type = 'button';
-    next.className = 'mc-related-carousel__nav mc-related-carousel__nav--next';
-    next.setAttribute('aria-label', 'Next related products');
-    next.innerHTML = '<span aria-hidden="true">&rsaquo;</span>';
-    wrap.appendChild(prev);
-    wrap.appendChild(viewport);
-    wrap.appendChild(next);
-    return { wrap: wrap, viewport: viewport, prev: prev, next: next };
-  }
-
-  function mcWireRelatedCarouselScroll(viewport, prev, next) {
-    var scrollEl = viewport;
-    function stepSize() {
-      return Math.max(1, Math.floor(scrollEl.clientWidth));
-    }
-    function syncNav() {
-      var maxScroll = Math.max(0, scrollEl.scrollWidth - scrollEl.clientWidth);
-      var left = scrollEl.scrollLeft;
-      var prevDisabled = maxScroll <= 2 || left <= 2;
-      var nextDisabled = maxScroll <= 2 || left >= maxScroll - 2;
-      prev.disabled = prevDisabled;
-      next.disabled = nextDisabled;
-      prev.setAttribute('aria-disabled', prevDisabled ? 'true' : 'false');
-      next.setAttribute('aria-disabled', nextDisabled ? 'true' : 'false');
-      prev.classList.toggle('is-disabled', prevDisabled);
-      next.classList.toggle('is-disabled', nextDisabled);
-    }
-    prev.addEventListener('click', function () {
-      scrollEl.scrollBy({ left: -stepSize(), behavior: 'smooth' });
-    });
-    next.addEventListener('click', function () {
-      scrollEl.scrollBy({ left: stepSize(), behavior: 'smooth' });
-    });
-    scrollEl.addEventListener('scroll', syncNav);
-    window.addEventListener('resize', syncNav);
-    window.addEventListener('load', syncNav);
-    setTimeout(syncNav, 50);
-    setTimeout(syncNav, 300);
-    setTimeout(syncNav, 1200);
-  }
-
-  /**
-   * Volusion PDP often uses ul.v-product-grid (not table#relateditems).
-   * Prefer grids that are likely related products.
-   */
-  function mcFindRelatedListGrid() {
-    if (document.body.classList.contains('is-home')) return null;
-    var ca = document.querySelector('#content_area');
-    if (!ca) return null;
-    var uls = ca.querySelectorAll('ul.v-product-grid');
-    var i;
-    var el;
-    function score(node) {
-      var s = 0;
-      var text = ((node.textContent || '') + ' ' + (((node.parentElement || {}).textContent) || '')).toLowerCase();
-      if (/related\s+products?|you\s+may\s+also|recommended/.test(text)) s += 5;
-      if (node.closest('#v65-product-parent')) s += 3;
-      if (node.querySelector('img')) s += 2;
-      var count = node.querySelectorAll(':scope > li, :scope > .v-product, :scope > div.v-product').length;
-      if (count >= 2) s += 2;
-      if (count >= 3) s += 1;
-      return s;
-    }
-    var best = null;
-    var bestScore = -1;
-    for (i = 0; i < uls.length; i++) {
-      el = uls[i];
-      if (el.closest('#content_area_home')) continue;
-      var lis = el.querySelectorAll(':scope > li');
-      if (lis.length >= 1) {
-        var s1 = score(el);
-        if (s1 > bestScore) { best = el; bestScore = s1; }
-      }
-    }
-    var divs = ca.querySelectorAll('div.v-product-grid');
-    for (i = 0; i < divs.length; i++) {
-      el = divs[i];
-      if (el.closest('#content_area_home')) continue;
-      if (el.querySelector(':scope > ul.v-product-grid')) continue;
-      var prods = el.querySelectorAll(':scope > .v-product, :scope > div.v-product');
-      if (prods.length >= 2) {
-        var s2 = score(el);
-        if (s2 > bestScore) { best = el; bestScore = s2; }
-      }
-    }
-    return best;
-  }
-
-  /* ---- Related products: horizontal scroll + arrows (table OR ul.v-product-grid) ---- */
-  function mcInitRelatedProductsCarousel(){
-    if (document.body.classList.contains('is-home')) return;
-    if (!document.body.classList.contains('productdetails') &&
-        !document.body.classList.contains('mc-product-page')) return;
-
-    var table =
-      document.getElementById('relateditems') ||
-      document.querySelector('#content_area table.relateditems') ||
-      document.querySelector('table[id*="RelatedItems" i]') ||
-      document.querySelector('table[id*="relateditem" i]');
-
-    if (table && table.getAttribute('data-mc-related-carousel') !== '1') {
-      var trs = table.querySelectorAll('tbody tr, thead + tr, tr');
-      var dataRow = null;
-      var ri;
-      for (ri = 0; ri < trs.length; ri++) {
-        var tds = trs[ri].querySelectorAll('td');
-        if (tds.length === 1 && /related\s+products?/i.test((trs[ri].textContent || '').trim())) continue;
-        if (tds.length >= 1 && trs[ri].querySelector('img, .v-product, .v65-product-related-item')) {
-          dataRow = trs[ri];
-          break;
-        }
-      }
-      if (dataRow) {
-        var cells = dataRow.querySelectorAll('td');
-        if (cells.length >= 1) {
-          table.setAttribute('data-mc-related-carousel', '1');
-          dataRow.classList.add('mc-related-carousel__row');
-          var shell = mcBuildRelatedCarouselShell();
-          var parent = table.parentNode;
-          if (parent) {
-            parent.insertBefore(shell.wrap, table);
-            shell.viewport.appendChild(table);
-            mcWireRelatedCarouselScroll(shell.viewport, shell.prev, shell.next);
-          }
-        }
-      }
-    }
-
-    var listGrid = mcFindRelatedListGrid();
-    if (listGrid && listGrid.getAttribute('data-mc-related-carousel') !== '1') {
-      listGrid.setAttribute('data-mc-related-carousel', '1');
-      listGrid.classList.add('mc-related-carousel__list');
-      var shell2 = mcBuildRelatedCarouselShell();
-      var p2 = listGrid.parentNode;
-      if (p2) {
-        p2.insertBefore(shell2.wrap, listGrid);
-        shell2.viewport.appendChild(listGrid);
-        mcWireRelatedCarouselScroll(shell2.viewport, shell2.prev, shell2.next);
-      }
-    }
-  }
-  window.mcInitRelatedProductsCarousel = mcInitRelatedProductsCarousel;
-
-  (function mcRelatedCarouselObserve(){
-    if (window.__mcRelatedCarouselObs) return;
-    window.__mcRelatedCarouselObs = true;
-    var ca = document.querySelector('#content_area');
-    if (!ca) return;
-    var t;
-    var mo = new MutationObserver(function () {
-      if (document.body.classList.contains('is-home')) return;
-      clearTimeout(t);
-      t = setTimeout(function () {
-        try { mcInitRelatedProductsCarousel(); } catch (e) {}
-      }, 250);
-    });
-    try {
-      mo.observe(ca, { childList: true, subtree: true });
-    } catch (e2) {}
-  })();
 
   /* ---- PATCH 3: Fetch planner dims from Palliser spec-sheet PDFs ---- */
   var PALLISER_MODELS = {
@@ -7120,7 +6860,6 @@ body.productdetails .v-product-grid .v-product .v-product__price {
   function runPatches(){
     patchProductTabs();
     patchRelatedItemImages();
-    mcInitRelatedProductsCarousel();
     wrapApplyPlannerToPage();
     fetchPlannerDimensions();
   }
@@ -8270,9 +8009,6 @@ function mcMountMemberCaptionStandalone() {
       el.innerHTML = html;
       el.setAttribute('data-mc-member-state', 'locked');
     }
-    if (typeof window.mcHoistMemberCaptionOutOfAnchor === 'function') {
-      window.mcHoistMemberCaptionOutOfAnchor(el);
-    }
     var visible = mcIsVisible(el);
     var portal = document.getElementById('mc-member-caption-portal-fixed');
     if (portal && portal.parentNode) portal.parentNode.removeChild(portal);
@@ -8357,6 +8093,12 @@ try {
 .mc-login-modal__frame{width:100%;min-height:320px;border:1px solid #ddd;border-radius:4px;background:#fafafa}
 .mc-login-modal__signup{margin:12px 0 0;font-size:13px;text-align:center}
 .mc-login-modal__signup-note{display:block;font-size:11px;opacity:.75;margin-top:4px}
+/* Category grid: image then title then price; constrain images (template fallback) */
+body.category .v-product-grid .v-product{display:flex;flex-direction:column;align-items:stretch;box-sizing:border-box;min-width:0}
+body.category .v-product-grid .v-product .v-product__img,body.category .v-product-grid .v-product .v-product__image,body.category .v-product-grid .v-product .product_image{order:1;flex:0 0 auto;width:100%;text-align:center;margin-bottom:0!important;padding-bottom:0!important}
+body.category .v-product-grid .v-product .v-product__img img,body.category .v-product-grid .v-product .v-product__image img,body.category .v-product-grid .v-product .product_image img{width:100%;max-width:100%;height:auto;max-height:280px;object-fit:contain}
+body.category .v-product-grid .v-product .v-product__name,body.category .v-product-grid .v-product .productnamecolor,body.category .v-product-grid .v-product h2,body.category .v-product-grid .v-product h3,body.category .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;align-items:flex-end;justify-content:flex-start;text-align:left;min-height:4.5em;box-sizing:border-box;width:100%;margin-top:2px!important}
+body.category .v-product-grid .v-product .v-product__price,body.category .v-product-grid .v-product .product_price,body.category .v-product-grid .v-product .mc-member-grid-price{order:3;min-height:5.5em;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;width:100%;text-align:left!important}
 </style>
 <div id="mc-login-modal" class="mc-login-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mc-login-modal-title">
   <div class="mc-login-modal__backdrop" data-mc-close-login tabindex="-1"></div>
@@ -8411,9 +8153,6 @@ try {
           if (typeof window.mcPaintCategoryGridMemberPricing === 'function') window.mcPaintCategoryGridMemberPricing();
         } catch (e5) {}
         try {
-          if (typeof window.mcLayoutHomeFeaturedFlex === 'function') window.mcLayoutHomeFeaturedFlex();
-        } catch (e5b) {}
-        try {
           if (typeof window.mcKickMemberCaptionStandalone === 'function') window.mcKickMemberCaptionStandalone();
         } catch (e6) {}
       });
@@ -8422,24 +8161,17 @@ try {
   window.mcOpenLoginModal = mcOpenLoginModal;
   window.mcCloseLoginModal = mcCloseLoginModal;
 
-  document.addEventListener(
-    'click',
-    function (ev) {
-      var raw = ev.target;
-      var t = raw && raw.nodeType === 1 ? raw : raw && raw.parentElement;
-      if (!t || typeof t.closest !== 'function') return;
-      if (t.closest('[data-mc-open-login]')) {
-        ev.preventDefault();
-        mcOpenLoginModal();
-        return;
-      }
-      if (t.closest('[data-mc-close-login]')) {
-        ev.preventDefault();
-        mcCloseLoginModal();
-      }
-    },
-    true
-  );
+  document.addEventListener('click', function (ev) {
+    var t = ev.target;
+    if (t && t.closest && t.closest('[data-mc-open-login]')) {
+      ev.preventDefault();
+      mcOpenLoginModal();
+    }
+    if (t && t.closest && t.closest('[data-mc-close-login]')) {
+      ev.preventDefault();
+      mcCloseLoginModal();
+    }
+  });
   document.addEventListener('keydown', function (ev) {
     if (ev.key === 'Escape') {
       var m = document.getElementById('mc-login-modal');
@@ -8642,6 +8374,53 @@ try {
       return true;
     }
     return false;
+  }
+
+  function mcFindMapTextMount(card) {
+    try {
+      var walk = document.createTreeWalker(card, NodeFilter.SHOW_TEXT, null, false);
+      var n;
+      while ((n = walk.nextNode())) {
+        var v = n.nodeValue || '';
+        if (!MC_MAP_LINK_RE.test(v)) continue;
+        var p = n.parentNode;
+        if (p && p.nodeType === 1 && (!p.closest || !p.closest('.mc-member-grid-price'))) return p;
+      }
+    } catch (eW) {}
+    return null;
+  }
+
+  /**
+   * Volusion often puts MAP / "Add to cart for our lowest price" in a promo link or callout,
+   * not in .v-product__price — find the smallest matching node first, then fall back to price.
+   */
+  function mcFindCardPricingMount(card) {
+    var nodes = card.querySelectorAll('a, span, div, p, font, td, strong, em, li, b, i, u, label, small');
+    var best = null;
+    var bestLen = Infinity;
+    var i;
+    var el;
+    var t;
+    var MAP_RE = MC_MAP_LINK_RE;
+    for (i = 0; i < nodes.length; i++) {
+      el = nodes[i];
+      if (el.closest && el.closest('.mc-member-grid-price')) continue;
+      t = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!MAP_RE.test(t)) continue;
+      if (t.length > 200) continue;
+      if (t.length < bestLen) {
+        bestLen = t.length;
+        best = el;
+      }
+    }
+    if (best) return best;
+    var byText = mcFindMapTextMount(card);
+    if (byText) return byText;
+    return (
+      card.querySelector('.v-product__price') ||
+      card.querySelector('.product_price') ||
+      card.querySelector('[itemprop="price"]')
+    );
   }
 
   function mcExtractDollarFromText(txt) {
@@ -8914,19 +8693,6 @@ try {
     pump();
   }
 
-  /** Strip legacy classes from older template versions (JS flex on table markup broke the page). */
-  function mcLayoutHomeFeaturedFlex() {
-    try {
-      var legacy = document.querySelectorAll('.mc-home-featured-flex, .mc-home-featured-flex__slot');
-      var li;
-      for (li = 0; li < legacy.length; li++) {
-        legacy[li].classList.remove('mc-home-featured-flex');
-        legacy[li].classList.remove('mc-home-featured-flex__slot');
-      }
-    } catch (eClr) {}
-  }
-  window.mcLayoutHomeFeaturedFlex = mcLayoutHomeFeaturedFlex;
-
   function mcPaintCategoryGridMemberPricing() {
     var products = mcCollectGridProductCards();
     if (!products.length) return;
@@ -8947,6 +8713,12 @@ try {
       }
 
       var regPrice = mcExtractRegularPriceFromCard(card);
+      var priceElPre = mcFindCardPricingMount(card);
+      var priceBox =
+        priceElPre && priceElPre.closest && priceElPre.closest('.v-product__price');
+      var gatherHost = priceBox || priceElPre;
+      var keptPre = gatherHost ? mcGatherPriceLikeNodes(gatherHost) : [];
+      var installTarget = priceBox || priceElPre;
 
       var parseHost = card.cloneNode(true);
       var strip = parseHost.querySelectorAll('.mc-member-grid-price');
@@ -8963,13 +8735,6 @@ try {
       var block = document.createElement('div');
       block.className = 'mc-member-grid-price';
       block.setAttribute('data-mc-member-grid', nextState);
-
-      if (!unlocked && regPrice) {
-        var regRow = document.createElement('div');
-        regRow.className = 'mc-member-grid-price__regular';
-        regRow.textContent = 'Regular price ' + regPrice;
-        block.appendChild(regRow);
-      }
 
       var label = document.createElement('div');
       label.className = 'mc-member-grid-price__label';
@@ -9010,35 +8775,31 @@ try {
         continue;
       }
 
-      var priceEl =
-        card.querySelector('.v-product__price') ||
-        card.querySelector('.product_price') ||
-        card.querySelector('[itemprop="price"]');
-
-      if (priceEl) {
-        mcInstallInPriceContainer(priceEl, block);
-        try {
-          priceEl.style.setProperty('visibility', 'visible', 'important');
-          priceEl.style.setProperty('opacity', '1', 'important');
-        } catch (eVis) {}
-        card.setAttribute('data-mc-member-grid', nextState);
+      var priceEl;
+      var exNode = card.querySelector('.mc-member-grid-price');
+      if (exNode && exNode.parentNode) {
+        priceEl = exNode.parentNode;
+      } else {
+        priceEl = installTarget;
+      }
+      if (!priceEl) {
+        if (mcCardStillShowsMapPhrase(card)) {
+          card.appendChild(block);
+          card.setAttribute('data-mc-member-grid', nextState);
+        }
         continue;
       }
 
-      /* Direct child of .v-product + flex order — image(1) title(2) pricing(3); nested insert broke order */
-      card.appendChild(block);
+      mcInstallInPriceContainer(priceEl, block);
       try {
-        block.style.setProperty('visibility', 'visible', 'important');
-        block.style.setProperty('opacity', '1', 'important');
-      } catch (eVisB) {}
+        priceEl.style.setProperty('visibility', 'visible', 'important');
+        priceEl.style.setProperty('opacity', '1', 'important');
+      } catch (eVis) {}
       card.setAttribute('data-mc-member-grid', nextState);
     }
     try {
       mcHydrateCategoryHowToGetPrices();
     } catch (eHyd) {}
-    try {
-      mcLayoutHomeFeaturedFlex();
-    } catch (eLay) {}
   }
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
 
@@ -9113,343 +8874,6 @@ try {
     mcBootCategoryGrid();
   }
   window.addEventListener('load', mcBootCategoryGrid);
-})();
-</script>
-
-<style id="mc-final-home-pdp-overrides">
-/* Product page final lock */
-body.is-home .mc-related-carousel__nav{display:none!important}
-body.is-home .mc-related-carousel__viewport{overflow-x:visible!important}
-body.is-home .mc-related-carousel__row,
-body.is-home .mc-related-carousel__list{
-  width:100%!important;
-  min-width:0!important;
-  max-width:100%!important;
-  display:grid!important;
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  gap:24px!important;
-}
-body.is-home .mc-related-carousel__row > td,
-body.is-home .mc-related-carousel__list > li,
-body.is-home .mc-related-carousel__list > .v-product{
-  flex:none!important;
-  width:auto!important;
-  min-width:0!important;
-  max-width:none!important;
-}
-@media (max-width: 991px){
-  body.is-home .mc-related-carousel__row,
-  body.is-home .mc-related-carousel__list{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-}
-@media (max-width: 575px){
-  body.is-home .mc-related-carousel__row,
-  body.is-home .mc-related-carousel__list{grid-template-columns:minmax(0,1fr)!important}
-}
-
-@media (min-width: 992px){
-  body.productdetails #content_area img#product_photo,
-  body.mc-product-page #content_area img#product_photo,
-  body.productdetails #v65-product-parent img#product_photo,
-  body.mc-product-page #v65-product-parent img#product_photo{
-    width:600px!important;
-    max-width:600px!important;
-    height:auto!important;
-    min-width:0!important;
-    margin:0 auto!important;
-    display:block!important;
-  }
-}
-
-body.productdetails .mc-related-carousel__viewport,
-body.mc-product-page .mc-related-carousel__viewport{
-  overflow-x:scroll!important;overflow-y:hidden!important;scrollbar-gutter:stable both-edges;
-}
-body.productdetails .mc-related-carousel__viewport .mc-related-carousel__list,
-body.mc-product-page .mc-related-carousel__viewport .mc-related-carousel__list{
-  display:flex!important;flex-wrap:nowrap!important;gap:12px!important;width:max-content!important;min-width:100%!important;
-}
-body.productdetails .mc-related-carousel__viewport .mc-related-carousel__list > li,
-body.productdetails .mc-related-carousel__viewport .mc-related-carousel__list > .v-product,
-body.productdetails .mc-related-carousel__viewport .mc-related-carousel__row td,
-body.mc-product-page .mc-related-carousel__viewport .mc-related-carousel__list > li,
-body.mc-product-page .mc-related-carousel__viewport .mc-related-carousel__list > .v-product,
-body.mc-product-page .mc-related-carousel__viewport .mc-related-carousel__row td{
-  flex:0 0 calc((100cqi - 24px)/3)!important;min-width:calc((100cqi - 24px)/3)!important;max-width:calc((100cqi - 24px)/3)!important;display:flex!important;flex-direction:column!important;align-items:center!important;text-align:center!important;
-}
-body.productdetails .mc-related-carousel__viewport .v-product .v-product__img,
-body.productdetails .mc-related-carousel__viewport .v-product .product_image,
-body.productdetails .mc-related-carousel__viewport .v65-product-related-item > a:has(img),
-body.mc-product-page .mc-related-carousel__viewport .v-product .v-product__img,
-body.mc-product-page .mc-related-carousel__viewport .v-product .product_image,
-body.mc-product-page .mc-related-carousel__viewport .v65-product-related-item > a:has(img){order:1!important;width:100%!important;margin:0 0 10px!important}
-body.productdetails .mc-related-carousel__viewport .v-product .v-product__name,
-body.productdetails .mc-related-carousel__viewport .v-product .productnamecolor,
-body.productdetails .mc-related-carousel__viewport .v-product .v-product__price,
-body.productdetails .mc-related-carousel__viewport .v-product .product_price,
-body.productdetails .mc-related-carousel__viewport .v-product .mc-member-grid-price,
-body.productdetails .mc-related-carousel__viewport .v65-product-related-title,
-body.productdetails .mc-related-carousel__viewport .v65-product-related-price,
-body.mc-product-page .mc-related-carousel__viewport .v-product .v-product__name,
-body.mc-product-page .mc-related-carousel__viewport .v-product .productnamecolor,
-body.mc-product-page .mc-related-carousel__viewport .v-product .v-product__price,
-body.mc-product-page .mc-related-carousel__viewport .v-product .product_price,
-body.mc-product-page .mc-related-carousel__viewport .v-product .mc-member-grid-price,
-body.mc-product-page .mc-related-carousel__viewport .v65-product-related-title,
-body.mc-product-page .mc-related-carousel__viewport .v65-product-related-price{
-  order:2!important;
-  width:100%!important;
-  max-width:none!important;
-  text-align:center!important;
-  white-space:normal!important;
-  word-break:normal!important;
-  overflow-wrap:normal!important;
-  font-size:14px!important;
-  line-height:1.35!important;
-}
-</style>
-
-<script>
-(function(){
-  function q(sel, root){ return (root || document).querySelector(sel); }
-  function qa(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
-  function normHref(href){
-    if (!href) return '';
-    try {
-      var u = new URL(href, location.origin);
-      u.hash = '';
-      return u.href;
-    } catch (e) {
-      return String(href).split('#')[0];
-    }
-  }
-  function cleanText(s){
-    return String(s || '').replace(/\s+/g, ' ').trim();
-  }
-  function isPdp(){
-    var b = document.body;
-    return !!b && (b.classList.contains('productdetails') || b.classList.contains('mc-product-page'));
-  }
-  function enforcePdpMainImage(){
-    if (!isPdp()) return;
-    var desktop = (window.innerWidth || 0) >= 992;
-    var imgs = qa([
-      '#content_area img#product_photo',
-      '#v65-product-parent img#product_photo',
-      '#content_area #product_photo img',
-      '#v65-product-parent #product_photo img',
-      '#content_area #product_photo_zoom_url img',
-      '#v65-product-parent #product_photo_zoom_url img',
-      '#content_area .vcss_img_wrap img',
-      '#content_area .vCSS_img_wrap img',
-      '#content_area .main-image img',
-      '#v65-product-parent .vcss_img_wrap img',
-      '#v65-product-parent .vCSS_img_wrap img',
-      '#v65-product-parent .main-image img'
-    ].join(', '));
-    imgs.forEach(function(img){
-      if (desktop) {
-        img.style.setProperty('width', '600px', 'important');
-        img.style.setProperty('max-width', '600px', 'important');
-        img.style.setProperty('height', 'auto', 'important');
-        img.style.setProperty('display', 'block', 'important');
-        img.style.setProperty('margin', '0 auto', 'important');
-      } else {
-        img.style.setProperty('width', '100%', 'important');
-        img.style.setProperty('max-width', '100%', 'important');
-        img.style.setProperty('height', 'auto', 'important');
-      }
-    });
-    var wraps = qa([
-      '#content_area #product_photo',
-      '#content_area #product_photo_td',
-      '#v65-product-parent #product_photo',
-      '#v65-product-parent #product_photo_td',
-      '#content_area .vcss_img_wrap',
-      '#content_area .vCSS_img_wrap',
-      '#content_area .main-image',
-      '#v65-product-parent .vcss_img_wrap',
-      '#v65-product-parent .vCSS_img_wrap',
-      '#v65-product-parent .main-image',
-      '#content_area #product_photo_zoom_url',
-      '#v65-product-parent #product_photo_zoom_url'
-    ].join(', '));
-    wraps.forEach(function(w){
-      w.style.setProperty('max-width', desktop ? '600px' : '100%', 'important');
-      w.style.setProperty('width', desktop ? '600px' : '100%', 'important');
-      w.style.setProperty('margin', '0 auto', 'important');
-      w.style.setProperty('display', 'block', 'important');
-    });
-  }
-  function reorderCard(card){
-    if (!card) return;
-    var imgBlock = q('.v-product__img, .v-product__image, .product_image, a:has(img)', card);
-    if (imgBlock && card.firstElementChild !== imgBlock) {
-      card.insertBefore(imgBlock, card.firstElementChild);
-    }
-  }
-  function normalizeRelatedTable(table){
-    if (!table || table.tagName !== 'TABLE') return table;
-    var anchors = qa('a[href]', table);
-    if (!anchors.length) return table;
-
-    var map = Object.create(null);
-    var order = [];
-    function ensure(key, href){
-      if (!map[key]){
-        map[key] = { href: href || '', title: '', imgSrc: '', imgAlt: '', mapText: '', idx: order.length };
-        order.push(key);
-      }
-      return map[key];
-    }
-
-    anchors.forEach(function(a){
-      var href = normHref(a.getAttribute('href') || a.href || '');
-      if (!href || /^javascript:/i.test(href) || href === '#') return;
-      var item = ensure(href, href);
-      var img = q('img', a);
-      if (img && !item.imgSrc){
-        item.imgSrc = img.currentSrc || img.getAttribute('src') || '';
-        item.imgAlt = cleanText(img.getAttribute('alt') || '');
-      }
-      var txt = cleanText(a.textContent || '');
-      if (!txt) return;
-      if (/add to cart|lowest price|see price|in cart|click for price|call for price/i.test(txt)) {
-        if (!item.mapText) item.mapText = txt;
-        return;
-      }
-      if (!item.title) item.title = txt;
-    });
-
-    var imgs = qa('img', table);
-    imgs.forEach(function(img){
-      var a = img.closest('a[href]');
-      if (!a) return;
-      var href = normHref(a.getAttribute('href') || a.href || '');
-      if (!href) return;
-      var item = ensure(href, href);
-      if (!item.imgSrc) item.imgSrc = img.currentSrc || img.getAttribute('src') || '';
-      if (!item.imgAlt) item.imgAlt = cleanText(img.getAttribute('alt') || '');
-    });
-
-    var items = order.map(function(k){ return map[k]; }).filter(function(it){
-      return !!(it.title || it.imgSrc);
-    });
-    if (items.length < 2) return table;
-
-    var ul = document.createElement('ul');
-    ul.className = 'mc-related-carousel__list v-product-grid';
-    items.forEach(function(it){
-      var li = document.createElement('li');
-      li.className = 'v-product v65-product-related-item';
-
-      var imgHref = document.createElement('a');
-      imgHref.href = it.href || '#';
-      imgHref.className = 'v-product__img';
-      if (it.imgSrc){
-        var image = document.createElement('img');
-        image.src = it.imgSrc;
-        image.alt = it.imgAlt || it.title || '';
-        imgHref.appendChild(image);
-      }
-      li.appendChild(imgHref);
-
-      if (it.title){
-        var title = document.createElement('div');
-        title.className = 'v-product__name v65-product-related-title productnamecolor';
-        var tLink = document.createElement('a');
-        tLink.href = it.href || '#';
-        tLink.textContent = it.title;
-        title.appendChild(tLink);
-        li.appendChild(title);
-      }
-
-      if (it.mapText){
-        var price = document.createElement('div');
-        price.className = 'v-product__price v65-product-related-price';
-        price.textContent = it.mapText;
-        li.appendChild(price);
-      }
-      ul.appendChild(li);
-    });
-    return ul;
-  }
-  function addShell(target){
-    if (!target || target.getAttribute('data-mc-related-carousel') === '1') return;
-    var parent = target.parentNode;
-    if (!parent) return;
-    var wrap = document.createElement('div');
-    wrap.className = 'mc-related-carousel v-product-grid';
-    var viewport = document.createElement('div');
-    viewport.className = 'mc-related-carousel__viewport mc-related-carousel__track';
-    var prev = document.createElement('button');
-    prev.type = 'button';
-    prev.className = 'mc-related-carousel__nav mc-related-carousel__nav--prev';
-    prev.setAttribute('aria-label','Previous related products');
-    prev.innerHTML = '<span aria-hidden="true">&lsaquo;</span>';
-    var next = document.createElement('button');
-    next.type = 'button';
-    next.className = 'mc-related-carousel__nav mc-related-carousel__nav--next';
-    next.setAttribute('aria-label','Next related products');
-    next.innerHTML = '<span aria-hidden="true">&rsaquo;</span>';
-    parent.insertBefore(wrap, target);
-    wrap.appendChild(prev);
-    wrap.appendChild(viewport);
-    wrap.appendChild(next);
-    viewport.appendChild(target);
-    target.setAttribute('data-mc-related-carousel','1');
-
-    if (target.tagName === 'TABLE') {
-      var row = q('tbody tr:has(img), tr:has(img)', target);
-      if (row) row.classList.add('mc-related-carousel__row');
-    } else {
-      target.classList.add('mc-related-carousel__list');
-      qa('.v-product, .v65-product-related-item', target).forEach(reorderCard);
-    }
-
-    function step(){ return Math.max(1, Math.floor(viewport.clientWidth)); }
-    function sync(){
-      var max = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
-      var left = viewport.scrollLeft;
-      prev.disabled = max <= 2 || left <= 2;
-      next.disabled = max <= 2 || left >= max - 2;
-    }
-    prev.addEventListener('click', function(){ viewport.scrollBy({ left: -step(), behavior: 'smooth' }); });
-    next.addEventListener('click', function(){ viewport.scrollBy({ left: step(), behavior: 'smooth' }); });
-    viewport.addEventListener('scroll', sync);
-    window.addEventListener('resize', sync);
-    setTimeout(sync, 60); setTimeout(sync, 350); setTimeout(sync, 1200);
-  }
-  function boot(){
-    if (!isPdp()) return;
-    enforcePdpMainImage();
-    var root = q('#content_area') || document;
-    var candidates = qa('table#relateditems, table.relateditems, table[id*="related" i], ul.v-product-grid, div.v-product-grid', root);
-    var v65 = q('#v65-product-parent');
-    candidates.forEach(function(el){
-      if (el.closest('#content_area_home')) return;
-      if (el.classList.contains('mc-related-carousel__list')) return;
-      if (v65 && !(v65.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)) return;
-      var hasCards = !!q('img, .v-product, .v65-product-related-item', el);
-      if (!hasCards) return;
-      var target = el;
-      if (el.tagName === 'TABLE') {
-        target = normalizeRelatedTable(el);
-        if (target !== el && el.parentNode) {
-          el.parentNode.insertBefore(target, el);
-          el.parentNode.removeChild(el);
-        }
-      }
-      addShell(target);
-    });
-    enforcePdpMainImage();
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-  else boot();
-  window.addEventListener('load', boot);
-  window.addEventListener('resize', enforcePdpMainImage);
-  setTimeout(boot, 400);
-  setTimeout(boot, 1500);
-  setTimeout(enforcePdpMainImage, 2500);
 })();
 </script>
 
