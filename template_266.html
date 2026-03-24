@@ -8078,7 +8078,8 @@ try {
 </script>
 <style id="mc-member-grid-inline-fallback">
 /* Fallback if vspfiles/css/custom-safe.css is not deployed — keeps MAP swap + modal usable */
-.mc-member-grid-price__regular{font-size:14px;color:#333;margin-bottom:6px}
+.mc-member-grid-price__regular{font-size:15px;color:#333;margin-bottom:6px}
+.mc-member-grid-price__amount{font-size:15px;margin-top:2px;color:#111}
 .mc-member-grid-price__label{font-size:13px;font-weight:600;letter-spacing:.02em;text-transform:none;color:#333}
 .mc-member-grid-price__hint{font-size:12px;margin-top:4px;color:#555}
 .mc-member-grid-price__hint .mc-member-grid-price__login{margin:0;font-size:inherit;display:inline;text-decoration:underline;color:#333;letter-spacing:.04em;cursor:pointer;background:none;border:0;padding:0}
@@ -8467,9 +8468,109 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
     }
   }
 
-  /** Same extraction as PDP: Volusion HowToGet / scripts / pricebox (from fetched product HTML). */
+  /** Volusion `SalePrice` / saleprice field and visible sale row (from fetched PDP HTML). */
+  function mcExtractSalePriceFromPdpHtml(html) {
+    if (!html) return 0;
+    var pc = window.parseMcCurrency;
+    if (typeof pc !== 'function') return 0;
+    try {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var parent = doc.querySelector('#v65-product-parent') || doc.body;
+      var box = parent.querySelector('.colors_pricebox');
+      var searchRoot = box || parent;
+      var inputs = searchRoot.querySelectorAll('input, select, textarea');
+      var ii;
+      for (ii = 0; ii < inputs.length; ii++) {
+        var inp = inputs[ii];
+        var nm = ((inp.name || '') + ' ' + (inp.id || '')).toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (nm.indexOf('saleprice') === -1) continue;
+        var val = pc(inp.value || inp.getAttribute('value') || '');
+        if (val > 0) return val;
+      }
+      if (box) {
+        var saleEl = box.querySelector(
+          '.product_sale_price, .product_sale_price b, font.product_sale_price, span.product_sale_price'
+        );
+        if (saleEl) {
+          var sp = pc(saleEl.textContent || '');
+          if (sp > 0) return sp;
+        }
+      }
+    } catch (eSale) {}
+    var patterns = [
+      /\bSalePrice\s*[=:]\s*['"]?\$?([\d,]+(?:\.\d+)?)/gi,
+      /\bwindow\.SalePrice\s*=\s*['"]?([\d,]+(?:\.\d+)?)/gi,
+      /["']SalePrice["']\s*:\s*["']?([\d,]+(?:\.\d+)?)/gi
+    ];
+    var pi;
+    for (pi = 0; pi < patterns.length; pi++) {
+      var r = patterns[pi];
+      var m;
+      r.lastIndex = 0;
+      while ((m = r.exec(html)) !== null) {
+        var p = pc(m[1]);
+        if (p > 0 && p < 50000000) return p;
+      }
+    }
+    return 0;
+  }
+
+  /** List / MSRP / main visible price on PDP when there is no SalePrice. */
+  function mcExtractRetailPriceFromPdpHtml(html) {
+    if (!html) return 0;
+    var pc = window.parseMcCurrency;
+    if (typeof pc !== 'function') return 0;
+    try {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var parent = doc.querySelector('#v65-product-parent') || doc.body;
+      var box = parent.querySelector('.colors_pricebox');
+      var searchRoot = box || parent;
+      var listEl = searchRoot.querySelector(
+        '.product_list_price, .product_list_price b, font.product_list_price, span.product_list_price, [class*="product_list_price"], .listprice'
+      );
+      if (listEl) {
+        var lp = pc(listEl.textContent || '');
+        if (lp > 0) return lp;
+      }
+      var inputs = searchRoot.querySelectorAll('input, select, textarea');
+      var ii;
+      for (ii = 0; ii < inputs.length; ii++) {
+        var inp = inputs[ii];
+        var nm = ((inp.name || '') + ' ' + (inp.id || '')).toLowerCase();
+        if (nm.indexOf('saleprice') !== -1) continue;
+        if (
+          nm.indexOf('listprice') === -1 &&
+          nm.indexOf('list_price') === -1 &&
+          nm.indexOf('productprice') === -1 &&
+          nm.indexOf('retail') === -1 &&
+          nm.indexOf('msrp') === -1
+        )
+          continue;
+        var val = pc(inp.value || inp.getAttribute('value') || '');
+        if (val > 0) return val;
+      }
+      var mainEl =
+        searchRoot.querySelector('#priceWithOptions, #priceWithOptionsNoTax') ||
+        searchRoot.querySelector('[itemprop="price"]');
+      if (mainEl) {
+        var ma = pc(
+          (mainEl.getAttribute && (mainEl.getAttribute('content') || mainEl.getAttribute('value'))) ||
+            mainEl.textContent ||
+            ''
+        );
+        if (ma > 0) return ma;
+      }
+    } catch (eRetail) {}
+    return 0;
+  }
+
+  /** Member grid PDP fetch: SalePrice first, else retail; then legacy HowToGet / MAP scrapers. */
   function mcExtractHowToGetFromPdpHtml(html) {
     if (!html) return 0;
+    var sale = mcExtractSalePriceFromPdpHtml(html);
+    if (sale > 0) return sale;
+    var retail = mcExtractRetailPriceFromPdpHtml(html);
+    if (retail > 0) return retail;
     var fn = window.extractVolusionAddToCartPriceFromHtml;
     if (typeof fn === 'function') {
       var v = fn(html);
@@ -8634,13 +8735,6 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
       var block = document.createElement('div');
       block.className = 'mc-member-grid-price';
       block.setAttribute('data-mc-member-grid', nextState);
-
-      if (regPrice && keptPre.length === 0) {
-        var regDiv = document.createElement('div');
-        regDiv.className = 'mc-member-grid-price__regular';
-        regDiv.textContent = 'Regular price ' + regPrice;
-        block.appendChild(regDiv);
-      }
 
       var label = document.createElement('div');
       label.className = 'mc-member-grid-price__label';
