@@ -8088,6 +8088,12 @@ try {
 .mc-login-modal__frame{width:100%;min-height:320px;border:1px solid #ddd;border-radius:4px;background:#fafafa}
 .mc-login-modal__signup{margin:12px 0 0;font-size:13px;text-align:center}
 .mc-login-modal__signup-note{display:block;font-size:11px;opacity:.75;margin-top:4px}
+/* Category grid: image then title then price; constrain images (template fallback) */
+body.category .v-product-grid .v-product{display:flex;flex-direction:column;align-items:stretch;box-sizing:border-box;min-width:0}
+body.category .v-product-grid .v-product .v-product__img,body.category .v-product-grid .v-product .v-product__image,body.category .v-product-grid .v-product .product_image{order:1;flex:0 0 auto;width:100%;text-align:center}
+body.category .v-product-grid .v-product .v-product__img img,body.category .v-product-grid .v-product .v-product__image img,body.category .v-product-grid .v-product .product_image img{width:100%;max-width:100%;height:auto;max-height:280px;object-fit:contain}
+body.category .v-product-grid .v-product .v-product__name,body.category .v-product-grid .v-product .productnamecolor,body.category .v-product-grid .v-product h2,body.category .v-product-grid .v-product h3,body.category .v-product-grid .v-product h4{order:2;flex:0 1 auto;min-height:2.5em;line-height:1.25}
+body.category .v-product-grid .v-product .v-product__price,body.category .v-product-grid .v-product .product_price,body.category .v-product-grid .v-product .mc-member-grid-price{order:3}
 </style>
 <div id="mc-login-modal" class="mc-login-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mc-login-modal-title">
   <div class="mc-login-modal__backdrop" data-mc-close-login tabindex="-1"></div>
@@ -8209,6 +8215,55 @@ try {
     return out;
   }
 
+  function mcCardStillShowsMapPhrase(card) {
+    var t = (card.textContent || '').replace(/\s+/g, ' ');
+    return /add\s+to\s+cart\s+for\s+our\s+lowest\s+price|our\s+lowest\s+price/i.test(t);
+  }
+
+  function mcSwapMapElementsForBlock(card, block) {
+    var MAP_RE = /add to cart for our lowest price|our lowest price|lowest price|add to cart for/i;
+    var k;
+    var as = card.querySelectorAll('a');
+    for (k = 0; k < as.length; k++) {
+      var a = as[k];
+      if (a.closest && a.closest('.mc-member-grid-price')) continue;
+      var ta = (a.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!MAP_RE.test(ta) || ta.length > 140) continue;
+      a.parentNode.replaceChild(block, a);
+      return true;
+    }
+    var fonts = card.querySelectorAll('font');
+    for (k = 0; k < fonts.length; k++) {
+      var f = fonts[k];
+      if (f.closest && f.closest('.mc-member-grid-price')) continue;
+      var tf = (f.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!MAP_RE.test(tf) || tf.length > 140) continue;
+      f.parentNode.replaceChild(block, f);
+      return true;
+    }
+    var spans = card.querySelectorAll('span');
+    for (k = 0; k < spans.length; k++) {
+      var sp = spans[k];
+      if (sp.closest && sp.closest('.mc-member-grid-price')) continue;
+      if (sp.children && sp.children.length) continue;
+      var ts = (sp.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!MAP_RE.test(ts) || ts.length > 140) continue;
+      sp.parentNode.replaceChild(block, sp);
+      return true;
+    }
+    var bs = card.querySelectorAll('b, strong, p');
+    for (k = 0; k < bs.length; k++) {
+      var bx = bs[k];
+      if (bx.closest && bx.closest('.mc-member-grid-price')) continue;
+      if (bx.children && bx.children.length) continue;
+      var tb = (bx.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!MAP_RE.test(tb) || tb.length > 140) continue;
+      bx.parentNode.replaceChild(block, bx);
+      return true;
+    }
+    return false;
+  }
+
   function mcFindMapTextMount(card) {
     try {
       var walk = document.createTreeWalker(card, NodeFilter.SHOW_TEXT, null, false);
@@ -8273,15 +8328,13 @@ try {
       var prevState = card.getAttribute('data-mc-member-grid');
       var nextState = unlocked ? 'unlocked' : 'locked';
       var existingBlock = card.querySelector('.mc-member-grid-price');
-      if (existingBlock && prevState === nextState) continue;
-
-      var priceEl;
-      if (existingBlock && existingBlock.parentNode) {
-        priceEl = existingBlock.parentNode;
-      } else {
-        priceEl = mcFindCardPricingMount(card);
+      if (existingBlock && prevState === nextState && !mcCardStillShowsMapPhrase(card)) continue;
+      if (existingBlock && mcCardStillShowsMapPhrase(card)) {
+        try {
+          existingBlock.parentNode.removeChild(existingBlock);
+        } catch (eRm) {}
+        existingBlock = null;
       }
-      if (!priceEl) continue;
 
       var parseHost = card.cloneNode(true);
       var strip = parseHost.querySelectorAll('.mc-member-grid-price');
@@ -8326,6 +8379,30 @@ try {
         btn.setAttribute('data-mc-open-login', '');
         btn.textContent = 'Log in';
         block.appendChild(btn);
+      }
+
+      if (mcSwapMapElementsForBlock(card, block)) {
+        try {
+          block.style.setProperty('visibility', 'visible', 'important');
+          block.style.setProperty('opacity', '1', 'important');
+        } catch (eVis1) {}
+        card.setAttribute('data-mc-member-grid', nextState);
+        continue;
+      }
+
+      var priceEl;
+      var exNode = card.querySelector('.mc-member-grid-price');
+      if (exNode && exNode.parentNode) {
+        priceEl = exNode.parentNode;
+      } else {
+        priceEl = mcFindCardPricingMount(card);
+      }
+      if (!priceEl) {
+        if (mcCardStillShowsMapPhrase(card)) {
+          card.appendChild(block);
+          card.setAttribute('data-mc-member-grid', nextState);
+        }
+        continue;
       }
 
       priceEl.innerHTML = '';
