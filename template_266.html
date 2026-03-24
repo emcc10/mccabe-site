@@ -9118,45 +9118,32 @@ try {
 
 <style id="mc-final-home-pdp-overrides">
 /* Product page final lock */
-body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list),
-body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list),
-body.is-home #content_area .v-product-grid:not(.mc-related-carousel__list),
-body.is-home #content_area ul.v-product-grid:not(.mc-related-carousel__list){
-  display:grid!important;
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  gap:24px!important;
-  width:100%!important;
-  margin:0!important;
-  padding:0!important;
-  list-style:none!important;
-  overflow-x:visible!important;
-  white-space:normal!important;
-}
-body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list) > li,
-body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list) > li,
-body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list) > .v-product,
-body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list) > .v-product,
-body.is-home #content_area .v-product-grid:not(.mc-related-carousel__list) > li,
-body.is-home #content_area ul.v-product-grid:not(.mc-related-carousel__list) > li,
-body.is-home #content_area .v-product-grid:not(.mc-related-carousel__list) > .v-product,
-body.is-home #content_area ul.v-product-grid:not(.mc-related-carousel__list) > .v-product{
+body.is-home .mc-related-carousel__nav{display:none!important}
+body.is-home .mc-related-carousel__viewport{overflow-x:visible!important}
+body.is-home .mc-related-carousel__row,
+body.is-home .mc-related-carousel__list{
   width:100%!important;
   min-width:0!important;
   max-width:100%!important;
-  margin:0!important;
-  float:none!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:24px!important;
+}
+body.is-home .mc-related-carousel__row > td,
+body.is-home .mc-related-carousel__list > li,
+body.is-home .mc-related-carousel__list > .v-product{
+  flex:none!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
 }
 @media (max-width: 991px){
-  body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list),
-  body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list),
-  body.is-home #content_area .v-product-grid:not(.mc-related-carousel__list),
-  body.is-home #content_area ul.v-product-grid:not(.mc-related-carousel__list){grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body.is-home .mc-related-carousel__row,
+  body.is-home .mc-related-carousel__list{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
 @media (max-width: 575px){
-  body.is-home #content_area_home .v-product-grid:not(.mc-related-carousel__list),
-  body.is-home #content_area_home ul.v-product-grid:not(.mc-related-carousel__list),
-  body.is-home #content_area .v-product-grid:not(.mc-related-carousel__list),
-  body.is-home #content_area ul.v-product-grid:not(.mc-related-carousel__list){grid-template-columns:minmax(0,1fr)!important}
+  body.is-home .mc-related-carousel__row,
+  body.is-home .mc-related-carousel__list{grid-template-columns:minmax(0,1fr)!important}
 }
 
 @media (min-width: 992px){
@@ -9208,7 +9195,17 @@ body.mc-product-page .mc-related-carousel__viewport .v-product .v-product__price
 body.mc-product-page .mc-related-carousel__viewport .v-product .product_price,
 body.mc-product-page .mc-related-carousel__viewport .v-product .mc-member-grid-price,
 body.mc-product-page .mc-related-carousel__viewport .v65-product-related-title,
-body.mc-product-page .mc-related-carousel__viewport .v65-product-related-price{order:2!important;width:100%!important;text-align:center!important}
+body.mc-product-page .mc-related-carousel__viewport .v65-product-related-price{
+  order:2!important;
+  width:100%!important;
+  max-width:none!important;
+  text-align:center!important;
+  white-space:normal!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+  font-size:14px!important;
+  line-height:1.35!important;
+}
 </style>
 
 <script>
@@ -9235,7 +9232,20 @@ body.mc-product-page .mc-related-carousel__viewport .v65-product-related-price{o
   function enforcePdpMainImage(){
     if (!isPdp()) return;
     var desktop = (window.innerWidth || 0) >= 992;
-    var imgs = qa('#content_area img#product_photo, #v65-product-parent img#product_photo');
+    var imgs = qa([
+      '#content_area img#product_photo',
+      '#v65-product-parent img#product_photo',
+      '#content_area #product_photo img',
+      '#v65-product-parent #product_photo img',
+      '#content_area #product_photo_zoom_url img',
+      '#v65-product-parent #product_photo_zoom_url img',
+      '#content_area .vcss_img_wrap img',
+      '#content_area .vCSS_img_wrap img',
+      '#content_area .main-image img',
+      '#v65-product-parent .vcss_img_wrap img',
+      '#v65-product-parent .vCSS_img_wrap img',
+      '#v65-product-parent .main-image img'
+    ].join(', '));
     imgs.forEach(function(img){
       if (desktop) {
         img.style.setProperty('width', '600px', 'important');
@@ -9249,11 +9259,25 @@ body.mc-product-page .mc-related-carousel__viewport .v65-product-related-price{o
         img.style.setProperty('height', 'auto', 'important');
       }
     });
-    var wraps = qa('#content_area #product_photo, #content_area #product_photo_td, #v65-product-parent #product_photo, #v65-product-parent #product_photo_td');
+    var wraps = qa([
+      '#content_area #product_photo',
+      '#content_area #product_photo_td',
+      '#v65-product-parent #product_photo',
+      '#v65-product-parent #product_photo_td',
+      '#content_area .vcss_img_wrap',
+      '#content_area .vCSS_img_wrap',
+      '#content_area .main-image',
+      '#v65-product-parent .vcss_img_wrap',
+      '#v65-product-parent .vCSS_img_wrap',
+      '#v65-product-parent .main-image',
+      '#content_area #product_photo_zoom_url',
+      '#v65-product-parent #product_photo_zoom_url'
+    ].join(', '));
     wraps.forEach(function(w){
       w.style.setProperty('max-width', desktop ? '600px' : '100%', 'important');
       w.style.setProperty('width', desktop ? '600px' : '100%', 'important');
       w.style.setProperty('margin', '0 auto', 'important');
+      w.style.setProperty('display', 'block', 'important');
     });
   }
   function reorderCard(card){
