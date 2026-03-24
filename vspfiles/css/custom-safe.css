@@ -301,13 +301,9 @@ body:not(.is-home) #display_menu_1 .vnav__label {
   display: inline-block;
 }
 
-/* Homepage: do not cap featured images at 300px — home block below sets slot + img */
+/* Homepage: lift global 300px cap — slot height set in #content_area_home block (do not use height:auto !important; it overrides that block) */
 body.is-home #content_area_home .v-product-grid .v-product__img,
-body.is-home #content_area_home .v-product .v-product__img,
-body.is-home #content_area .v-product-grid .v-product__img,
-body.is-home #content_area .v-product .v-product__img {
-  height: auto !important;
-  min-height: 360px !important;
+body.is-home #content_area_home .v-product .v-product__img {
   overflow: visible !important;
 }
 
@@ -5271,11 +5267,9 @@ body.category .v-product-grid .v-product .mc-member-grid-price {
   text-align: left !important;
 }
 
-/* Home featured: CSS Grid on .v-product-grid only — do NOT restyle <table> (breaks Volusion layout) */
+/* Home featured: CSS Grid on .v-product-grid in home column only (not entire #content_area — avoids breaking other grids) */
 body.is-home #content_area_home .v-product-grid,
-body.is-home #content_area_home ul.v-product-grid,
-body.is-home #content_area .v-product-grid,
-body.is-home #content_area ul.v-product-grid {
+body.is-home #content_area_home ul.v-product-grid {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 1.25rem !important;
@@ -5291,18 +5285,14 @@ body.is-home #content_area ul.v-product-grid {
 
 @media (max-width: 991px) {
   body.is-home #content_area_home .v-product-grid,
-  body.is-home #content_area_home ul.v-product-grid,
-  body.is-home #content_area .v-product-grid,
-  body.is-home #content_area ul.v-product-grid {
+  body.is-home #content_area_home ul.v-product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
 
 @media (max-width: 575px) {
   body.is-home #content_area_home .v-product-grid,
-  body.is-home #content_area_home ul.v-product-grid,
-  body.is-home #content_area .v-product-grid,
-  body.is-home #content_area ul.v-product-grid {
+  body.is-home #content_area_home ul.v-product-grid {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
@@ -5332,8 +5322,8 @@ body.is-home #content_area_home .v-product .product_image,
   order: 1 !important;
   flex: 0 0 auto !important;
   width: 100%;
-  min-height: 360px;
-  height: 360px;
+  min-height: 280px;
+  height: 280px;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -5352,10 +5342,10 @@ body.is-home #content_area_home .v-product .product_image img,
 #content_area_home .v-product .v-product__img img,
 #content_area_home .v-product .v-product__image img,
 #content_area_home .v-product .product_image img {
-  width: 100% !important;
+  width: auto !important;
   max-width: 100% !important;
   height: auto !important;
-  max-height: 360px !important;
+  max-height: 280px !important;
   object-fit: contain !important;
   object-position: center center !important;
   margin: 0 !important;

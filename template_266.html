@@ -6643,41 +6643,11 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     });
   }
 
-  /* ---- Related products: one row of 3, horizontal scroll + prev/next ---- */
-  function mcInitRelatedProductsCarousel(){
-    if (!document.body.classList.contains('productdetails') &&
-        !document.body.classList.contains('mc-product-page')) return;
-
-    var table =
-      document.getElementById('relateditems') ||
-      document.querySelector('#content_area table.relateditems') ||
-      document.querySelector('table[id*="RelatedItems" i]') ||
-      document.querySelector('table[id*="relateditem" i]');
-
-    if (!table || table.getAttribute('data-mc-related-carousel') === '1') return;
-
-    var trs = table.querySelectorAll('tbody tr, thead + tr, tr');
-    var dataRow = null;
-    var ri;
-    for (ri = 0; ri < trs.length; ri++) {
-      var tds = trs[ri].querySelectorAll('td');
-      if (tds.length === 1 && /related\s+products?/i.test((trs[ri].textContent || '').trim())) continue;
-      if (tds.length >= 2 && trs[ri].querySelector('img, .v-product, .v65-product-related-item')) {
-        dataRow = trs[ri];
-        break;
-      }
-    }
-    if (!dataRow) return;
-    var cells = dataRow.querySelectorAll('td');
-    if (cells.length < 2) return;
-
-    table.setAttribute('data-mc-related-carousel', '1');
-    dataRow.classList.add('mc-related-carousel__row');
-
+  function mcBuildRelatedCarouselShell() {
     var wrap = document.createElement('div');
-    wrap.className = 'mc-related-carousel';
+    wrap.className = 'mc-related-carousel v-product-grid';
     var viewport = document.createElement('div');
-    viewport.className = 'mc-related-carousel__viewport';
+    viewport.className = 'mc-related-carousel__viewport mc-related-carousel__track';
     var prev = document.createElement('button');
     prev.type = 'button';
     prev.className = 'mc-related-carousel__nav mc-related-carousel__nav--prev';
@@ -6688,28 +6658,22 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     next.className = 'mc-related-carousel__nav mc-related-carousel__nav--next';
     next.setAttribute('aria-label', 'Next related products');
     next.innerHTML = '<span aria-hidden="true">&rsaquo;</span>';
-
-    var parent = table.parentNode;
-    if (!parent) return;
-    parent.insertBefore(wrap, table);
-    viewport.appendChild(table);
     wrap.appendChild(prev);
     wrap.appendChild(viewport);
     wrap.appendChild(next);
+    return { wrap: wrap, viewport: viewport, prev: prev, next: next };
+  }
 
-    viewport.classList.add('mc-related-carousel__track');
+  function mcWireRelatedCarouselScroll(viewport, prev, next) {
     var scrollEl = viewport;
-
     function stepSize() {
-      /* One viewport width = next group (3-up desktop, fewer on narrow screens via CSS) */
       return Math.max(1, Math.floor(scrollEl.clientWidth));
     }
-
     function syncNav() {
       var maxScroll = Math.max(0, scrollEl.scrollWidth - scrollEl.clientWidth);
       var left = scrollEl.scrollLeft;
-      var prevDisabled = left <= 2;
-      var nextDisabled = left >= maxScroll - 2;
+      var prevDisabled = maxScroll <= 2 || left <= 2;
+      var nextDisabled = maxScroll <= 2 || left >= maxScroll - 2;
       prev.disabled = prevDisabled;
       next.disabled = nextDisabled;
       prev.setAttribute('aria-disabled', prevDisabled ? 'true' : 'false');
@@ -6717,7 +6681,6 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       prev.classList.toggle('is-disabled', prevDisabled);
       next.classList.toggle('is-disabled', nextDisabled);
     }
-
     prev.addEventListener('click', function () {
       scrollEl.scrollBy({ left: -stepSize(), behavior: 'smooth' });
     });
@@ -6725,14 +6688,114 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       scrollEl.scrollBy({ left: stepSize(), behavior: 'smooth' });
     });
     scrollEl.addEventListener('scroll', syncNav);
-    window.addEventListener('resize', function () {
-      syncNav();
-    });
+    window.addEventListener('resize', syncNav);
     window.addEventListener('load', syncNav);
-    setTimeout(syncNav, 100);
-    setTimeout(syncNav, 800);
+    setTimeout(syncNav, 50);
+    setTimeout(syncNav, 300);
+    setTimeout(syncNav, 1200);
+  }
+
+  /**
+   * Volusion PDP often uses ul.v-product-grid (not table#relateditems). Find first grid outside main product parent.
+   */
+  function mcFindRelatedListGrid() {
+    if (document.body.classList.contains('is-home')) return null;
+    var ca = document.querySelector('#content_area');
+    if (!ca) return null;
+    var uls = ca.querySelectorAll('ul.v-product-grid');
+    var i;
+    var el;
+    for (i = 0; i < uls.length; i++) {
+      el = uls[i];
+      if (el.closest('#v65-product-parent')) continue;
+      if (el.closest('#content_area_home')) continue;
+      var lis = el.querySelectorAll(':scope > li');
+      if (lis.length >= 1) return el;
+    }
+    var divs = ca.querySelectorAll('div.v-product-grid');
+    for (i = 0; i < divs.length; i++) {
+      el = divs[i];
+      if (el.closest('#v65-product-parent')) continue;
+      if (el.closest('#content_area_home')) continue;
+      if (el.querySelector(':scope > ul.v-product-grid')) continue;
+      var prods = el.querySelectorAll(':scope > .v-product, :scope > div.v-product');
+      if (prods.length >= 2) return el;
+    }
+    return null;
+  }
+
+  /* ---- Related products: horizontal scroll + arrows (table OR ul.v-product-grid) ---- */
+  function mcInitRelatedProductsCarousel(){
+    if (document.body.classList.contains('is-home')) return;
+    if (!document.body.classList.contains('productdetails') &&
+        !document.body.classList.contains('mc-product-page')) return;
+
+    var table =
+      document.getElementById('relateditems') ||
+      document.querySelector('#content_area table.relateditems') ||
+      document.querySelector('table[id*="RelatedItems" i]') ||
+      document.querySelector('table[id*="relateditem" i]');
+
+    if (table && table.getAttribute('data-mc-related-carousel') !== '1') {
+      var trs = table.querySelectorAll('tbody tr, thead + tr, tr');
+      var dataRow = null;
+      var ri;
+      for (ri = 0; ri < trs.length; ri++) {
+        var tds = trs[ri].querySelectorAll('td');
+        if (tds.length === 1 && /related\s+products?/i.test((trs[ri].textContent || '').trim())) continue;
+        if (tds.length >= 1 && trs[ri].querySelector('img, .v-product, .v65-product-related-item')) {
+          dataRow = trs[ri];
+          break;
+        }
+      }
+      if (dataRow) {
+        var cells = dataRow.querySelectorAll('td');
+        if (cells.length >= 1) {
+          table.setAttribute('data-mc-related-carousel', '1');
+          dataRow.classList.add('mc-related-carousel__row');
+          var shell = mcBuildRelatedCarouselShell();
+          var parent = table.parentNode;
+          if (parent) {
+            parent.insertBefore(shell.wrap, table);
+            shell.viewport.appendChild(table);
+            mcWireRelatedCarouselScroll(shell.viewport, shell.prev, shell.next);
+          }
+        }
+      }
+    }
+
+    var listGrid = mcFindRelatedListGrid();
+    if (listGrid && listGrid.getAttribute('data-mc-related-carousel') !== '1') {
+      listGrid.setAttribute('data-mc-related-carousel', '1');
+      listGrid.classList.add('mc-related-carousel__list');
+      var shell2 = mcBuildRelatedCarouselShell();
+      var p2 = listGrid.parentNode;
+      if (p2) {
+        p2.insertBefore(shell2.wrap, listGrid);
+        shell2.viewport.appendChild(listGrid);
+        mcWireRelatedCarouselScroll(shell2.viewport, shell2.prev, shell2.next);
+      }
+    }
   }
   window.mcInitRelatedProductsCarousel = mcInitRelatedProductsCarousel;
+
+  (function mcRelatedCarouselObserve(){
+    if (window.__mcRelatedCarouselObs) return;
+    window.__mcRelatedCarouselObs = true;
+    var ca = document.querySelector('#content_area');
+    if (!ca) return;
+    var t;
+    var mo = new MutationObserver(function () {
+      if (document.body.classList.contains('is-home')) return;
+      clearTimeout(t);
+      t = setTimeout(function () {
+        try { mcInitRelatedProductsCarousel(); } catch (e) {}
+      }, 250);
+    });
+    try {
+      mo.observe(ca, { childList: true, subtree: true });
+    } catch (e2) {}
+  })();
 
   /* ---- PATCH 3: Fetch planner dims from Palliser spec-sheet PDFs ---- */
   var PALLISER_MODELS = {
@@ -8229,12 +8292,12 @@ body.category .v-product-grid .v-product .v-product__img,body.category .v-produc
 body.category .v-product-grid .v-product .v-product__img img,body.category .v-product-grid .v-product .v-product__image img,body.category .v-product-grid .v-product .product_image img{width:auto;max-width:100%;height:auto;max-height:280px;object-fit:contain;margin:0!important}
 body.category .v-product-grid .v-product .v-product__name,body.category .v-product-grid .v-product .productnamecolor,body.category .v-product-grid .v-product h2,body.category .v-product-grid .v-product h3,body.category .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;align-items:flex-end;justify-content:flex-start;text-align:left;min-height:4.5em;box-sizing:border-box;width:100%;margin-top:2px!important}
 body.category .v-product-grid .v-product .v-product__price,body.category .v-product-grid .v-product .product_price,body.category .v-product-grid .v-product .mc-member-grid-price{order:3;min-height:5.5em;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;width:100%;text-align:left!important}
-body.is-home #content_area_home .v-product-grid,body.is-home #content_area_home ul.v-product-grid,body.is-home #content_area .v-product-grid,body.is-home #content_area ul.v-product-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:1.25rem!important;align-items:start!important;justify-items:stretch!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;list-style:none!important;padding-left:0!important;margin:0!important}
-@media (max-width:991px){body.is-home #content_area_home .v-product-grid,body.is-home #content_area_home ul.v-product-grid,body.is-home #content_area .v-product-grid,body.is-home #content_area ul.v-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media (max-width:575px){body.is-home #content_area_home .v-product-grid,body.is-home #content_area_home ul.v-product-grid,body.is-home #content_area .v-product-grid,body.is-home #content_area ul.v-product-grid{grid-template-columns:minmax(0,1fr)!important}}
+body.is-home #content_area_home .v-product-grid,body.is-home #content_area_home ul.v-product-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:1.25rem!important;align-items:start!important;justify-items:stretch!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;list-style:none!important;padding-left:0!important;margin:0!important}
+@media (max-width:991px){body.is-home #content_area_home .v-product-grid,body.is-home #content_area_home ul.v-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media (max-width:575px){body.is-home #content_area_home .v-product-grid,body.is-home #content_area_home ul.v-product-grid{grid-template-columns:minmax(0,1fr)!important}}
 body.is-home .v-product-grid .v-product,body.is-home #content_area_home .v-product,#content_area_home .v-product-grid .v-product,#content_area_home .v-product{display:flex!important;flex-direction:column!important;align-items:stretch!important;box-sizing:border-box!important;min-width:0!important;text-align:left!important}
-body.is-home .v-product-grid .v-product .v-product__img,body.is-home .v-product-grid .v-product .v-product__image,body.is-home .v-product-grid .v-product .product_image,body.is-home #content_area_home .v-product .v-product__img,body.is-home #content_area_home .v-product .v-product__image,body.is-home #content_area_home .v-product .product_image,#content_area_home .v-product .v-product__img,#content_area_home .v-product .v-product__image,#content_area_home .v-product .product_image{order:1!important;flex:0 0 auto!important;width:100%;min-height:360px;height:360px;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center;margin-bottom:0!important;padding-bottom:0!important;box-sizing:border-box}
-body.is-home .v-product-grid .v-product .v-product__img img,body.is-home .v-product-grid .v-product .v-product__image img,body.is-home .v-product-grid .v-product .product_image img,body.is-home #content_area_home .v-product .v-product__img img,body.is-home #content_area_home .v-product .v-product__image img,body.is-home #content_area_home .v-product .product_image img,#content_area_home .v-product .v-product__img img,#content_area_home .v-product .v-product__image img,#content_area_home .v-product .product_image img{width:100%!important;max-width:100%!important;height:auto!important;max-height:360px!important;object-fit:contain!important;object-position:center center!important;margin:0!important}
+body.is-home .v-product-grid .v-product .v-product__img,body.is-home .v-product-grid .v-product .v-product__image,body.is-home .v-product-grid .v-product .product_image,body.is-home #content_area_home .v-product .v-product__img,body.is-home #content_area_home .v-product .v-product__image,body.is-home #content_area_home .v-product .product_image,#content_area_home .v-product .v-product__img,#content_area_home .v-product .v-product__image,#content_area_home .v-product .product_image{order:1!important;flex:0 0 auto!important;width:100%;min-height:280px;height:280px;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center;margin-bottom:0!important;padding-bottom:0!important;box-sizing:border-box}
+body.is-home .v-product-grid .v-product .v-product__img img,body.is-home .v-product-grid .v-product .v-product__image img,body.is-home .v-product-grid .v-product .product_image img,body.is-home #content_area_home .v-product .v-product__img img,body.is-home #content_area_home .v-product .v-product__image img,body.is-home #content_area_home .v-product .product_image img,#content_area_home .v-product .v-product__img img,#content_area_home .v-product .v-product__image img,#content_area_home .v-product .product_image img{width:auto!important;max-width:100%!important;height:auto!important;max-height:280px!important;object-fit:contain!important;object-position:center center!important;margin:0!important}
 body.is-home .v-product-grid .v-product .v-product__name,body.is-home .v-product-grid .v-product .productnamecolor,body.is-home .v-product-grid .v-product h2,body.is-home .v-product-grid .v-product h3,body.is-home .v-product-grid .v-product h4,body.is-home #content_area_home .v-product .v-product__name,body.is-home #content_area_home .v-product .productnamecolor,body.is-home #content_area_home .v-product h2,body.is-home #content_area_home .v-product h3,body.is-home #content_area_home .v-product h4,#content_area_home .v-product .v-product__name,#content_area_home .v-product .productnamecolor,#content_area_home .v-product h2,#content_area_home .v-product h3,#content_area_home .v-product h4{order:2!important;flex:0 1 auto!important;line-height:1.25;display:flex;align-items:flex-end;justify-content:flex-start;text-align:left!important;min-height:4.5em;box-sizing:border-box;width:100%;margin-top:2px!important}
 body.is-home .v-product-grid .v-product .productnamecolor a,body.is-home .v-product-grid .v-product .v-product__name a,body.is-home #content_area_home .v-product .productnamecolor a,body.is-home #content_area_home .v-product .v-product__name a,#content_area_home .v-product .productnamecolor a,#content_area_home .v-product .v-product__name a{width:100%;text-align:left!important}
 body.is-home .v-product-grid .v-product .v-product__price,body.is-home .v-product-grid .v-product .product_price,body.is-home .v-product-grid .v-product .mc-member-grid-price,body.is-home #content_area_home .v-product .v-product__price,body.is-home #content_area_home .v-product .product_price,body.is-home #content_area_home .v-product .mc-member-grid-price,#content_area_home .v-product .v-product__price,#content_area_home .v-product .product_price,#content_area_home .v-product .mc-member-grid-price,body.is-home #content_area_home .v-product>.mc-member-grid-price,#content_area_home .v-product>.mc-member-grid-price{order:3!important;min-height:5.5em;box-sizing:border-box;display:flex!important;flex-direction:column!important;justify-content:flex-start!important;width:100%;text-align:left!important}
