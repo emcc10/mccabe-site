@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
  <div class="mc-hero-overlay">
         <div class="hero-logo-wrap">
-          <img src="/v/vspfiles/images/mccabe-logo.png" alt="McCabe's Theater & Living" class="hero-logo-img">
+          <img src="/v/vspfiles/images/mccabe-logo.svg" alt="McCabe's Theater & Living" class="hero-logo-img">
         </div>
         <p>
           CUSTOM FURNITURE, DESIGNED FOR LIVING<br>
@@ -6216,7 +6216,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     }
     if (state.unlocked && memberDisplayPrice > 0) {
       caption.innerHTML =
-        '<span class="mc-member-price-caption__option-label">Members price</span>' +
+        '<span class="mc-member-price-caption__option-label">Member price:</span>' +
         '<span class="mc-member-price-caption__price-value">' + fmt(memberDisplayPrice) + '</span>';
       caption.setAttribute('data-mc-member-state', 'unlocked');
       ensureMemberCaptionMounted(caption);
@@ -6225,17 +6225,17 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
     if (state.unlocked) {
       caption.innerHTML =
-        '<span class="mc-member-price-caption__option-label">Members price</span>';
+        '<span class="mc-member-price-caption__option-label">Member price:</span>';
       caption.setAttribute('data-mc-member-state', 'unlocked-no-price');
       ensureMemberCaptionMounted(caption);
       return;
     }
 
     caption.innerHTML =
-      '<div class="mc-member-price-caption__headline">Members price</div>' +
+      '<div class="mc-member-price-caption__headline">Member price:</div>' +
       '<div class="mc-member-price-caption__sub">Log in to see members pricing</div>' +
       '<div class="mc-member-price-caption__actions">' +
-        '<button type="button" class="mc-member-price-caption__cta mc-member-price-caption__cta--btn" data-mc-open-login>Log in</button>' +
+        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a>' +
         '<span class="mc-member-price-caption__sep">·</span>' +
         '<a class="mc-member-price-caption__cta" href="' + createUrl + '" target="_blank" rel="noopener">Sign up</a>' +
       '</div>';
@@ -7979,7 +7979,7 @@ function mcMountMemberCaptionStandalone() {
     var html = '';
     if (st.unlocked && memberDisplayPrice > 0) {
       html =
-        '<span class="mc-member-price-caption__option-label">Members price</span>' +
+        '<span class="mc-member-price-caption__option-label">Member price:</span>' +
         '<span class="mc-member-price-caption__price-value">' +
         mcFmtMcCaption(memberDisplayPrice) +
         '</span>';
@@ -7988,16 +7988,16 @@ function mcMountMemberCaptionStandalone() {
       uiState = 'unlocked';
     } else if (st.unlocked) {
       html =
-        '<span class="mc-member-price-caption__option-label">Members price</span>';
+        '<span class="mc-member-price-caption__option-label">Member price:</span>';
       el.innerHTML = html;
       el.setAttribute('data-mc-member-state', 'unlocked-no-price');
       uiState = 'unlocked-no-price';
     } else {
       html =
-        '<div class="mc-member-price-caption__headline">Members price</div>' +
+        '<div class="mc-member-price-caption__headline">Member price:</div>' +
         '<div class="mc-member-price-caption__sub">Log in to see members pricing</div>' +
         '<div class="mc-member-price-caption__actions">' +
-        '<button type="button" class="mc-member-price-caption__cta mc-member-price-caption__cta--btn" data-mc-open-login>Log in</button>' +
+        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a>' +
         '<span class="mc-member-price-caption__sep">·</span>' +
         '<a class="mc-member-price-caption__cta" href="' +
         createUrl +
@@ -8076,9 +8076,9 @@ try {
 <style id="mc-member-grid-inline-fallback">
 /* Fallback if vspfiles/css/custom-safe.css is not deployed — keeps MAP swap + modal usable */
 .mc-member-grid-price__regular{font-size:14px;color:#333;margin-bottom:6px}
-.mc-member-grid-price__label{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#333}
+.mc-member-grid-price__label{font-size:13px;font-weight:600;letter-spacing:.02em;text-transform:none;color:#333}
 .mc-member-grid-price__hint{font-size:12px;margin-top:4px;color:#555}
-.mc-member-grid-price__login{margin-top:8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border:1px solid #333;background:#fff;cursor:pointer;border-radius:2px}
+.mc-member-grid-price__login{margin-top:6px;font-size:12px;display:inline-block;text-decoration:underline;color:#333;letter-spacing:.04em;cursor:pointer;background:none;border:0;padding:0}
 .mc-login-modal{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
 .mc-login-modal.mc-login-modal--open{display:flex}
 .mc-login-modal__backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45);cursor:pointer}
@@ -8091,10 +8091,10 @@ try {
 .mc-login-modal__signup-note{display:block;font-size:11px;opacity:.75;margin-top:4px}
 /* Category grid: image then title then price; constrain images (template fallback) */
 body.category .v-product-grid .v-product{display:flex;flex-direction:column;align-items:stretch;box-sizing:border-box;min-width:0}
-body.category .v-product-grid .v-product .v-product__img,body.category .v-product-grid .v-product .v-product__image,body.category .v-product-grid .v-product .product_image{order:1;flex:0 0 auto;width:100%;text-align:center}
+body.category .v-product-grid .v-product .v-product__img,body.category .v-product-grid .v-product .v-product__image,body.category .v-product-grid .v-product .product_image{order:1;flex:0 0 auto;width:100%;text-align:center;margin-bottom:0!important;padding-bottom:0!important}
 body.category .v-product-grid .v-product .v-product__img img,body.category .v-product-grid .v-product .v-product__image img,body.category .v-product-grid .v-product .product_image img{width:100%;max-width:100%;height:auto;max-height:280px;object-fit:contain}
-body.category .v-product-grid .v-product .v-product__name,body.category .v-product-grid .v-product .productnamecolor,body.category .v-product-grid .v-product h2,body.category .v-product-grid .v-product h3,body.category .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;align-items:flex-end;justify-content:center;text-align:center;min-height:4.5em;box-sizing:border-box;width:100%}
-body.category .v-product-grid .v-product .v-product__price,body.category .v-product-grid .v-product .product_price,body.category .v-product-grid .v-product .mc-member-grid-price{order:3;min-height:5.5em;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;width:100%}
+body.category .v-product-grid .v-product .v-product__name,body.category .v-product-grid .v-product .productnamecolor,body.category .v-product-grid .v-product h2,body.category .v-product-grid .v-product h3,body.category .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;align-items:flex-end;justify-content:flex-start;text-align:left;min-height:4.5em;box-sizing:border-box;width:100%;margin-top:2px!important}
+body.category .v-product-grid .v-product .v-product__price,body.category .v-product-grid .v-product .product_price,body.category .v-product-grid .v-product .mc-member-grid-price{order:3;min-height:5.5em;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;width:100%;text-align:left!important}
 </style>
 <div id="mc-login-modal" class="mc-login-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mc-login-modal-title">
   <div class="mc-login-modal__backdrop" data-mc-close-login tabindex="-1"></div>
@@ -8477,7 +8477,7 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
 
       var label = document.createElement('div');
       label.className = 'mc-member-grid-price__label';
-      label.textContent = 'Members price';
+      label.textContent = 'Member price:';
       block.appendChild(label);
 
       if (unlocked) {
@@ -8497,12 +8497,12 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
         hint.className = 'mc-member-grid-price__hint';
         hint.textContent = 'Log in to see members pricing';
         block.appendChild(hint);
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'mc-member-grid-price__login';
-        btn.setAttribute('data-mc-open-login', '');
-        btn.textContent = 'Log in';
-        block.appendChild(btn);
+        var loginLnk = document.createElement('a');
+        loginLnk.href = '#';
+        loginLnk.className = 'mc-member-grid-price__login';
+        loginLnk.setAttribute('data-mc-open-login', '');
+        loginLnk.textContent = 'Log in';
+        block.appendChild(loginLnk);
       }
 
       if (mcSwapMapElementsForBlock(card, block)) {
