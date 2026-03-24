@@ -4365,14 +4365,17 @@ body.mc-product-page #content_area .wm-swatch img {
   body.mc-product-page #content_area .vcss_img_wrap,
   body.mc-product-page #content_area .main-image {
     overflow: hidden !important;
-    min-width: 600px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   body.mc-product-page #content_area #product_photo img,
   body.mc-product-page #content_area .vcss_img_wrap img,
   body.mc-product-page #content_area .main-image img,
   body.mc-product-page #content_area img#main-image {
-    min-width: 600px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
     width: 100% !important;
     height: auto !important;
   }
@@ -5716,8 +5719,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
     mainImgs.forEach(function(img){
       img.style.setProperty('width','100%','important');
-      img.style.setProperty('max-width','980px','important');
-      img.style.setProperty('min-width','600px','important');
+      img.style.setProperty('max-width','100%','important');
+      img.style.setProperty('min-width','0','important');
       img.style.setProperty('height','auto','important');
       img.style.setProperty('object-fit','contain','important');
       img.style.setProperty('display','block','important');
@@ -5769,12 +5772,13 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       }
     });
 
-    // Main image area fills remaining width
+    // Main image area fills remaining width (no min-width — it overlapped the options column)
     main.style.setProperty('float','none','important');
     main.style.setProperty('width','100%','important');
     main.style.setProperty('flex','1 1 0','important');
     main.style.setProperty('overflow','visible','important');
-    main.style.setProperty('min-width','600px','important');
+    main.style.setProperty('min-width','0','important');
+    main.style.setProperty('max-width','100%','important');
   }
 
   function removeConfigurationDetails(scope){
