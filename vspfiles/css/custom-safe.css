@@ -5115,6 +5115,12 @@ body.productdetails #v65-product-parent .product_list_price {
   margin-top: 4px;
 }
 
+.mc-member-grid-price__regular {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 6px;
+}
+
 .mc-member-grid-price__label {
   font-size: 12px;
   font-weight: 600;
