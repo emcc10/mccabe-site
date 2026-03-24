@@ -8216,13 +8216,109 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
     return out;
   }
 
+  /* MAP / teaser captions — match Volusion variants (case-insensitive) */
+  var MC_MAP_LINK_RE =
+    /add\s+to\s+cart\s+for\s+our\s+lowest\s+price|add\s+to\s+cart\s+for\s+the\s+lowest|our\s+lowest\s+price|add\s+to\s+cart\s+for\s+lowest|see\s+price\s+in\s+cart|click\s+for\s+price|call\s+for\s+price|call\s+for\s+pricing|add\s+to\s+cart\s+to\s+see/i;
+
   function mcCardStillShowsMapPhrase(card) {
     var t = (card.textContent || '').replace(/\s+/g, ' ');
-    return /add\s+to\s+cart\s+for\s+our\s+lowest\s+price|our\s+lowest\s+price/i.test(t);
+    return MC_MAP_LINK_RE.test(t);
+  }
+
+  function mcCloneCardSansMember(card) {
+    try {
+      var c = card.cloneNode(true);
+      var rm = c.querySelectorAll('.mc-member-grid-price');
+      var r;
+      for (r = 0; r < rm.length; r++) {
+        if (rm[r].parentNode) rm[r].parentNode.removeChild(rm[r]);
+      }
+      return c;
+    } catch (eC) {
+      return card;
+    }
+  }
+
+  function mcFormatMoneyShort(n) {
+    var v = Number(n);
+    if (!(v > 0)) return '';
+    if (typeof window.formatMcCurrency === 'function') return window.formatMcCurrency(v);
+    return '$' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  /** List / MSRP / visible dollar on the card (Volusion often leaves this next to MAP). */
+  function mcExtractRegularPriceFromCard(card) {
+    var host = mcCloneCardSansMember(card);
+    var el = host.querySelector('[itemprop="price"]');
+    if (el) {
+      var attr = el.getAttribute && el.getAttribute('content');
+      if (attr) {
+        var num = parseFloat(String(attr).replace(/[^0-9.]/g, ''));
+        if (num > 0) return mcFormatMoneyShort(num);
+      }
+      var d0 = mcExtractDollarFromText(el.textContent || '');
+      if (d0 && !MC_MAP_LINK_RE.test(el.textContent || '')) return d0;
+    }
+    var sels =
+      '.product_list_price, .listprice, [class*="list_price"], [class*="ListPrice"], .v65-product-price, .price_color, .formattedprice, span.price, .v-product__price .price';
+    var si;
+    for (si = 0; si < sels.split(', ').length; si++) {
+      var sel = sels.split(', ')[si];
+      var nodes = host.querySelectorAll(sel);
+      var nj;
+      for (nj = 0; nj < nodes.length; nj++) {
+        var tx = nodes[nj].textContent || '';
+        if (MC_MAP_LINK_RE.test(tx)) continue;
+        if (/lowest|add to cart for/i.test(tx)) continue;
+        var dol = mcExtractDollarFromText(tx);
+        if (dol) return dol;
+      }
+    }
+    var full = (host.textContent || '').replace(/\s+/g, ' ');
+    var parts = full.split(MC_MAP_LINK_RE);
+    if (parts[0]) {
+      var d1 = mcExtractDollarFromText(parts[0]);
+      if (d1) return d1;
+    }
+    var all = full.match(/\$[\d,]+(?:\.\d{2})?/g);
+    if (all && all.length === 1) return all[0];
+    if (all && all.length > 1) {
+      var pi;
+      for (pi = 0; pi < all.length; pi++) {
+        if (!MC_MAP_LINK_RE.test(all[pi])) return all[pi];
+      }
+      return all[0];
+    }
+    return '';
+  }
+
+  function mcGatherPriceLikeNodes(priceEl) {
+    var out = [];
+    if (!priceEl) return out;
+    var nodes = priceEl.querySelectorAll('span, div, del, s, b, strong, em');
+    var k;
+    for (k = 0; k < nodes.length; k++) {
+      var node = nodes[k];
+      if (node.closest && node.closest('.mc-member-grid-price')) continue;
+      var t = (node.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!/\$[\d,]+(?:\.\d{2})?/.test(t)) continue;
+      if (t.length > 90) continue;
+      if (MC_MAP_LINK_RE.test(t) || /lowest|add to cart for our lowest/i.test(t)) continue;
+      out.push(node.cloneNode(true));
+    }
+    return out;
+  }
+
+  function mcInstallInPriceContainer(priceEl, block) {
+    var kept = mcGatherPriceLikeNodes(priceEl);
+    var i;
+    priceEl.innerHTML = '';
+    for (i = 0; i < kept.length; i++) priceEl.appendChild(kept[i]);
+    priceEl.appendChild(block);
   }
 
   function mcSwapMapElementsForBlock(card, block) {
-    var MAP_RE = /add to cart for our lowest price|our lowest price|lowest price|add to cart for/i;
+    var MAP_RE = MC_MAP_LINK_RE;
     var k;
     var as = card.querySelectorAll('a');
     for (k = 0; k < as.length; k++) {
@@ -8262,6 +8358,16 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
       bx.parentNode.replaceChild(block, bx);
       return true;
     }
+    var tds = card.querySelectorAll('td');
+    for (k = 0; k < tds.length; k++) {
+      var td = tds[k];
+      if (td.closest && td.closest('.mc-member-grid-price')) continue;
+      var tt = (td.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!MAP_RE.test(tt) || tt.length > 130) continue;
+      if (td.querySelector && td.querySelector('img')) continue;
+      td.parentNode.replaceChild(block, td);
+      return true;
+    }
     return false;
   }
 
@@ -8271,7 +8377,7 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
       var n;
       while ((n = walk.nextNode())) {
         var v = n.nodeValue || '';
-        if (!/our lowest price|lowest price|add to cart for/i.test(v)) continue;
+        if (!MC_MAP_LINK_RE.test(v)) continue;
         var p = n.parentNode;
         if (p && p.nodeType === 1 && (!p.closest || !p.closest('.mc-member-grid-price'))) return p;
       }
@@ -8290,7 +8396,7 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
     var i;
     var el;
     var t;
-    var MAP_RE = /add to cart for our lowest price|our lowest price|lowest price|add to cart for/i;
+    var MAP_RE = MC_MAP_LINK_RE;
     for (i = 0; i < nodes.length; i++) {
       el = nodes[i];
       if (el.closest && el.closest('.mc-member-grid-price')) continue;
@@ -8337,6 +8443,14 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
         existingBlock = null;
       }
 
+      var regPrice = mcExtractRegularPriceFromCard(card);
+      var priceElPre = mcFindCardPricingMount(card);
+      var priceBox =
+        priceElPre && priceElPre.closest && priceElPre.closest('.v-product__price');
+      var gatherHost = priceBox || priceElPre;
+      var keptPre = gatherHost ? mcGatherPriceLikeNodes(gatherHost) : [];
+      var installTarget = priceBox || priceElPre;
+
       var parseHost = card.cloneNode(true);
       var strip = parseHost.querySelectorAll('.mc-member-grid-price');
       var sj;
@@ -8347,10 +8461,18 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
       var dollar = mcExtractDollarFromText(raw);
       var hideMap =
         /lowest price|add to cart|see price|call|members?\s*only|map/i.test(raw) && !dollar;
+      var showMemberAmt = dollar || regPrice;
 
       var block = document.createElement('div');
       block.className = 'mc-member-grid-price';
       block.setAttribute('data-mc-member-grid', nextState);
+
+      if (regPrice && keptPre.length === 0) {
+        var regDiv = document.createElement('div');
+        regDiv.className = 'mc-member-grid-price__regular';
+        regDiv.textContent = 'Regular price ' + regPrice;
+        block.appendChild(regDiv);
+      }
 
       var label = document.createElement('div');
       label.className = 'mc-member-grid-price__label';
@@ -8358,10 +8480,10 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
       block.appendChild(label);
 
       if (unlocked) {
-        if (dollar) {
+        if (showMemberAmt) {
           var amt = document.createElement('div');
           amt.className = 'mc-member-grid-price__amount';
-          amt.textContent = dollar;
+          amt.textContent = showMemberAmt;
           block.appendChild(amt);
         } else if (!hideMap && raw && raw.indexOf('$') !== -1) {
           var rest = document.createElement('div');
@@ -8396,7 +8518,7 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
       if (exNode && exNode.parentNode) {
         priceEl = exNode.parentNode;
       } else {
-        priceEl = mcFindCardPricingMount(card);
+        priceEl = installTarget;
       }
       if (!priceEl) {
         if (mcCardStillShowsMapPhrase(card)) {
@@ -8406,8 +8528,7 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
         continue;
       }
 
-      priceEl.innerHTML = '';
-      priceEl.appendChild(block);
+      mcInstallInPriceContainer(priceEl, block);
       try {
         priceEl.style.setProperty('visibility', 'visible', 'important');
         priceEl.style.setProperty('opacity', '1', 'important');
