@@ -1299,11 +1299,6 @@ nav.push-menu .push-menu__close-btn::before {
   body.is-home #content_area_home .v-product .v-product__image-wrap,
   body.is-home #content_area_home .v-product .product_image,
   body.is-home #content_area_home .v-product .vcss_img,
-  body.is-home #content_area .v-product .v-product__img,
-  body.is-home #content_area .v-product .v-product__image,
-  body.is-home #content_area .v-product .v-product__image-wrap,
-  body.is-home #content_area .v-product .product_image,
-  body.is-home #content_area .v-product .vcss_img,
   #content_area_home .v-product-grid .v-product .v-product__img,
   #content_area_home .v-product-grid .v-product .v-product__image,
   #content_area_home .v-product-grid .v-product .v-product__image-wrap,
@@ -1336,12 +1331,6 @@ nav.push-menu .push-menu__close-btn::before {
   body.is-home #content_area_home .v-product h2,
   body.is-home #content_area_home .v-product h3,
   body.is-home #content_area_home .v-product h4,
-  body.is-home #content_area .v-product .v-product__name,
-  body.is-home #content_area .v-product .productnamecolor,
-  body.is-home #content_area .v-product .productnamecolor a,
-  body.is-home #content_area .v-product h2,
-  body.is-home #content_area .v-product h3,
-  body.is-home #content_area .v-product h4,
   #content_area_home .v-product-grid .v-product .v-product__name,
   #content_area_home .v-product-grid .v-product .productnamecolor,
   #content_area_home .v-product-grid .v-product .productnamecolor a,
@@ -5273,90 +5262,43 @@ body.category .v-product-grid .v-product .mc-member-grid-price {
   text-align: left !important;
 }
 
-/* Home featured: Volusion often omits .v-product-grid or stacks products in a table — force a wrapping row */
+/* Home featured: CSS Grid on .v-product-grid only — do NOT restyle <table> (breaks Volusion layout) */
 body.is-home #content_area_home .v-product-grid,
 body.is-home #content_area_home ul.v-product-grid,
 body.is-home #content_area .v-product-grid,
 body.is-home #content_area ul.v-product-grid {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  justify-content: flex-start !important;
-  align-items: stretch !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 1.25rem !important;
   width: 100% !important;
+  max-width: 100% !important;
   box-sizing: border-box !important;
   list-style: none !important;
   padding-left: 0 !important;
   margin: 0 !important;
 }
 
-body.is-home #content_area_home ul.v-product-grid > li.v-product,
-body.is-home #content_area ul.v-product-grid > li.v-product {
-  flex: 1 1 calc(33.333% - 0.85rem) !important;
-  max-width: calc(33.333% - 0.85rem) !important;
-  min-width: 200px !important;
-  box-sizing: border-box !important;
-}
-
-body.is-home #content_area_home table:has(td .v-product),
-body.is-home #content_area table:has(td .v-product) {
-  display: block !important;
-  width: 100% !important;
-}
-
-body.is-home #content_area_home table:has(td .v-product) tbody,
-body.is-home #content_area table:has(td .v-product) tbody {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 1.25rem !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-body.is-home #content_area_home table:has(td .v-product) tr,
-body.is-home #content_area table:has(td .v-product) tr {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  flex: 1 1 calc(33.333% - 0.85rem) !important;
-  max-width: calc(33.333% - 0.85rem) !important;
-  min-width: 200px !important;
-  box-sizing: border-box !important;
-}
-
-body.is-home #content_area_home table:has(td .v-product) td,
-body.is-home #content_area table:has(td .v-product) td {
-  display: block !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  text-align: left !important;
-  vertical-align: top !important;
-}
-
 @media (max-width: 991px) {
-  body.is-home #content_area_home ul.v-product-grid > li.v-product,
-  body.is-home #content_area ul.v-product-grid > li.v-product,
-  body.is-home #content_area_home table:has(td .v-product) tr,
-  body.is-home #content_area table:has(td .v-product) tr {
-    flex: 1 1 calc(50% - 0.75rem) !important;
-    max-width: calc(50% - 0.75rem) !important;
-    min-width: 160px !important;
+  body.is-home #content_area_home .v-product-grid,
+  body.is-home #content_area_home ul.v-product-grid,
+  body.is-home #content_area .v-product-grid,
+  body.is-home #content_area ul.v-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
 
 @media (max-width: 575px) {
-  body.is-home #content_area_home ul.v-product-grid > li.v-product,
-  body.is-home #content_area ul.v-product-grid > li.v-product,
-  body.is-home #content_area_home table:has(td .v-product) tr,
-  body.is-home #content_area table:has(td .v-product) tr {
-    flex: 1 1 100% !important;
-    max-width: 100% !important;
+  body.is-home #content_area_home .v-product-grid,
+  body.is-home #content_area_home ul.v-product-grid,
+  body.is-home #content_area .v-product-grid,
+  body.is-home #content_area ul.v-product-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 }
 
-/* Home featured: image → title → regular + member (flex order); 3-column target */
+/* Home featured cards: image → title → price (scoped to home column only — not entire #content_area) */
 body.is-home .v-product-grid .v-product,
 body.is-home #content_area_home .v-product,
-body.is-home #content_area .v-product,
 #content_area_home .v-product-grid .v-product,
 #content_area_home .v-product {
   display: flex !important;
@@ -5373,9 +5315,6 @@ body.is-home .v-product-grid .v-product .product_image,
 body.is-home #content_area_home .v-product .v-product__img,
 body.is-home #content_area_home .v-product .v-product__image,
 body.is-home #content_area_home .v-product .product_image,
-body.is-home #content_area .v-product .v-product__img,
-body.is-home #content_area .v-product .v-product__image,
-body.is-home #content_area .v-product .product_image,
 #content_area_home .v-product .v-product__img,
 #content_area_home .v-product .v-product__image,
 #content_area_home .v-product .product_image {
@@ -5399,9 +5338,6 @@ body.is-home .v-product-grid .v-product .product_image img,
 body.is-home #content_area_home .v-product .v-product__img img,
 body.is-home #content_area_home .v-product .v-product__image img,
 body.is-home #content_area_home .v-product .product_image img,
-body.is-home #content_area .v-product .v-product__img img,
-body.is-home #content_area .v-product .v-product__image img,
-body.is-home #content_area .v-product .product_image img,
 #content_area_home .v-product .v-product__img img,
 #content_area_home .v-product .v-product__image img,
 #content_area_home .v-product .product_image img {
@@ -5423,11 +5359,6 @@ body.is-home #content_area_home .v-product .productnamecolor,
 body.is-home #content_area_home .v-product h2,
 body.is-home #content_area_home .v-product h3,
 body.is-home #content_area_home .v-product h4,
-body.is-home #content_area .v-product .v-product__name,
-body.is-home #content_area .v-product .productnamecolor,
-body.is-home #content_area .v-product h2,
-body.is-home #content_area .v-product h3,
-body.is-home #content_area .v-product h4,
 #content_area_home .v-product .v-product__name,
 #content_area_home .v-product .productnamecolor,
 #content_area_home .v-product h2,
@@ -5464,14 +5395,10 @@ body.is-home .v-product-grid .v-product .mc-member-grid-price,
 body.is-home #content_area_home .v-product .v-product__price,
 body.is-home #content_area_home .v-product .product_price,
 body.is-home #content_area_home .v-product .mc-member-grid-price,
-body.is-home #content_area .v-product .v-product__price,
-body.is-home #content_area .v-product .product_price,
-body.is-home #content_area .v-product .mc-member-grid-price,
 #content_area_home .v-product .v-product__price,
 #content_area_home .v-product .product_price,
 #content_area_home .v-product .mc-member-grid-price,
 body.is-home #content_area_home .v-product > .mc-member-grid-price,
-body.is-home #content_area .v-product > .mc-member-grid-price,
 #content_area_home .v-product > .mc-member-grid-price {
   order: 3 !important;
   min-height: 5.5em;
@@ -5483,55 +5410,3 @@ body.is-home #content_area .v-product > .mc-member-grid-price,
   text-align: left !important;
 }
 
-/* mcLayoutHomeFeaturedFlex() — real DOM parent of featured products (tables / nested divs) */
-.mc-home-featured-flex {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 1.25rem !important;
-  justify-content: flex-start !important;
-  align-items: stretch !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.mc-home-featured-flex > .mc-home-featured-flex__slot {
-  flex: 1 1 calc(33.333% - 0.85rem) !important;
-  max-width: calc(33.333% - 0.85rem) !important;
-  min-width: 200px !important;
-  box-sizing: border-box !important;
-}
-
-.mc-home-featured-flex > *:not(.mc-home-featured-flex__slot) {
-  flex: 0 0 100% !important;
-  max-width: 100% !important;
-}
-
-tbody.mc-home-featured-flex > tr.mc-home-featured-flex__slot {
-  display: block !important;
-  flex: 1 1 calc(33.333% - 0.85rem) !important;
-  max-width: calc(33.333% - 0.85rem) !important;
-  min-width: 200px !important;
-  width: auto !important;
-  box-sizing: border-box !important;
-}
-
-tr.mc-home-featured-flex {
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-@media (max-width: 991px) {
-  .mc-home-featured-flex > .mc-home-featured-flex__slot {
-    flex: 1 1 calc(50% - 0.75rem) !important;
-    max-width: calc(50% - 0.75rem) !important;
-    min-width: 160px !important;
-  }
-}
-
-@media (max-width: 575px) {
-  .mc-home-featured-flex > .mc-home-featured-flex__slot {
-    flex: 1 1 100% !important;
-    max-width: 100% !important;
-  }
-}
