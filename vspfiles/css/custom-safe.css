@@ -301,20 +301,29 @@ body:not(.is-home) #display_menu_1 .vnav__label {
   display: inline-block;
 }
 
+/* Homepage: do not cap featured images at 300px — home block below sets slot + img */
+body.is-home #content_area_home .v-product-grid .v-product__img,
+body.is-home #content_area_home .v-product .v-product__img,
+body.is-home #content_area .v-product-grid .v-product__img,
+body.is-home #content_area .v-product .v-product__img {
+  height: auto !important;
+  min-height: 360px !important;
+  overflow: visible !important;
+}
+
 /* =========================================================
    PRODUCT LISTINGS: ALIGN IMAGES TO THE TOP OF THE IMAGE BOX
+   (Homepage featured uses centered, larger images — see home block below)
 ========================================================= */
-#content_area .v-product__img,
-#content_area_home .v-product__img,
-body.is-home .v-product__img {
+body:not(.is-home) #content_area .v-product__img,
+body:not(.is-home) #content_area_home .v-product__img {
   display: flex !important;
   align-items: flex-start !important;
   justify-content: center !important;
 }
 
-#content_area .v-product__img img,
-#content_area_home .v-product__img img,
-body.is-home .v-product__img img {
+body:not(.is-home) #content_area .v-product__img img,
+body:not(.is-home) #content_area_home .v-product__img img {
   margin-top: 0 !important;
   object-position: top center !important;
 }
@@ -5270,6 +5279,8 @@ body.is-home #content_area ul.v-product-grid {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 1.25rem !important;
+  align-items: start !important;
+  justify-items: stretch !important;
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
@@ -5321,8 +5332,8 @@ body.is-home #content_area_home .v-product .product_image,
   order: 1 !important;
   flex: 0 0 auto !important;
   width: 100%;
-  min-height: 280px;
-  height: 280px;
+  min-height: 360px;
+  height: 360px;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -5341,11 +5352,12 @@ body.is-home #content_area_home .v-product .product_image img,
 #content_area_home .v-product .v-product__img img,
 #content_area_home .v-product .v-product__image img,
 #content_area_home .v-product .product_image img {
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  max-height: 280px;
-  object-fit: contain;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 360px !important;
+  object-fit: contain !important;
+  object-position: center center !important;
   margin: 0 !important;
 }
 
@@ -5408,5 +5420,193 @@ body.is-home #content_area_home .v-product > .mc-member-grid-price,
   justify-content: flex-start !important;
   width: 100%;
   text-align: left !important;
+}
+
+/* =========================================================
+   PDP: product image block above title/options (desktop + mobile)
+   (tagged row: tr.mc-pdp-main-row from template_266.html)
+   ========================================================= */
+@media (min-width: 992px) {
+  body.mc-product-page #v65-product-parent > tbody > tr.mc-pdp-main-row,
+  body.productdetails #v65-product-parent > tbody > tr.mc-pdp-main-row,
+  body.mc-product-page #v65-product-parent > tr.mc-pdp-main-row,
+  body.productdetails #v65-product-parent > tr.mc-pdp-main-row {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    gap: 24px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.mc-product-page tr.mc-pdp-main-row > td,
+  body.productdetails tr.mc-pdp-main-row > td,
+  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-media-td,
+  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+  }
+
+  body.mc-product-page tr.mc-pdp-main-row td.mc-pdp-media-td,
+  body.productdetails tr.mc-pdp-main-row td.mc-pdp-media-td {
+    order: 1 !important;
+  }
+
+  body.mc-product-page tr.mc-pdp-main-row td.mc-pdp-options-td,
+  body.productdetails tr.mc-pdp-main-row td.mc-pdp-options-td {
+    order: 2 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* =========================================================
+   PDP: related products — 3 across, horizontal scroll + arrows
+   ========================================================= */
+.mc-related-carousel {
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  margin: 28px auto 0;
+  padding: 0 48px;
+  box-sizing: border-box;
+}
+
+.mc-related-carousel__viewport,
+.mc-related-carousel__viewport.mc-related-carousel__track {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  width: 100%;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  container-type: inline-size;
+  container-name: mc-related;
+}
+
+.mc-related-carousel__viewport table {
+  display: block !important;
+  width: max-content !important;
+  min-width: 100% !important;
+  margin: 0 !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+.mc-related-carousel__viewport tbody {
+  display: block !important;
+  width: 100% !important;
+}
+
+.mc-related-carousel__viewport .mc-related-carousel__row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  gap: 12px;
+  width: max-content !important;
+  min-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Exactly 3 slots visible; each cell = 1/3 of carousel viewport (not full track) */
+.mc-related-carousel__viewport .mc-related-carousel__row td {
+  flex: 0 0 calc((100cqi - 24px) / 3) !important;
+  min-width: calc((100cqi - 24px) / 3) !important;
+  max-width: calc((100cqi - 24px) / 3) !important;
+  scroll-snap-align: start;
+  box-sizing: border-box !important;
+  vertical-align: top !important;
+}
+
+@supports not (container-type: inline-size) {
+  .mc-related-carousel__viewport .mc-related-carousel__row td {
+    flex: 0 0 calc((100vw - 140px) / 3) !important;
+    min-width: calc((100vw - 140px) / 3) !important;
+    max-width: calc((100vw - 140px) / 3) !important;
+  }
+}
+
+.mc-related-carousel__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  color: #222;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.mc-related-carousel__nav:hover:not(:disabled) {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.mc-related-carousel__nav.is-disabled,
+.mc-related-carousel__nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.mc-related-carousel__nav--prev {
+  left: 4px;
+}
+
+.mc-related-carousel__nav--next {
+  right: 4px;
+}
+
+@media (max-width: 991px) {
+  .mc-related-carousel {
+    padding: 0 44px;
+  }
+
+  .mc-related-carousel__viewport .mc-related-carousel__row td {
+    flex: 0 0 calc((100cqi - 12px) / 2) !important;
+    min-width: calc((100cqi - 12px) / 2) !important;
+    max-width: calc((100cqi - 12px) / 2) !important;
+  }
+
+  @supports not (container-type: inline-size) {
+    .mc-related-carousel__viewport .mc-related-carousel__row td {
+      flex: 0 0 calc((100vw - 120px) / 2) !important;
+      min-width: calc((100vw - 120px) / 2) !important;
+      max-width: calc((100vw - 120px) / 2) !important;
+    }
+  }
+}
+
+@media (max-width: 575px) {
+  .mc-related-carousel {
+    padding: 0 40px;
+  }
+
+  .mc-related-carousel__viewport .mc-related-carousel__row td {
+    flex: 0 0 88cqi !important;
+    min-width: 88cqi !important;
+    max-width: 88cqi !important;
+  }
+
+  @supports not (container-type: inline-size) {
+    .mc-related-carousel__viewport .mc-related-carousel__row td {
+      flex: 0 0 88vw !important;
+      min-width: 88vw !important;
+      max-width: 88vw !important;
+    }
+  }
 }
 
