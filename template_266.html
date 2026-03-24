@@ -8490,16 +8490,7 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
       bx.parentNode.replaceChild(block, bx);
       return true;
     }
-    var tds = card.querySelectorAll('td');
-    for (k = 0; k < tds.length; k++) {
-      var td = tds[k];
-      if (td.closest && td.closest('.mc-member-grid-price')) continue;
-      var tt = (td.textContent || '').replace(/\s+/g, ' ').trim();
-      if (!MAP_RE.test(tt) || tt.length > 130) continue;
-      if (td.querySelector && td.querySelector('img')) continue;
-      td.parentNode.replaceChild(block, td);
-      return true;
-    }
+    /* Never replace <td>/<th>: a <div> cannot replace a table cell without destroying the row/column grid. */
     return false;
   }
 

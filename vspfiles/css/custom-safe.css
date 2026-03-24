@@ -286,6 +286,51 @@ body:not(.is-home) #display_menu_1 .vnav__label {
   display: inline-block;
 }
 
+/* Home featured products: stable columns if markup is table-based or floated (member-pricing must not swap out <td>). */
+@media (min-width: 992px) {
+  body.is-home #content_area_home ul.v-product-grid,
+  body.is-home #content_area_home .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 24px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    list-style: none !important;
+    padding-left: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.is-home #content_area_home ul.v-product-grid > li,
+  body.is-home #content_area_home .v-product-grid > .v-product {
+    float: none !important;
+    clear: none !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (max-width: 991px) {
+  body.is-home #content_area_home ul.v-product-grid,
+  body.is-home #content_area_home .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    width: 100% !important;
+    list-style: none !important;
+    padding-left: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.is-home #content_area_home ul.v-product-grid > li,
+  body.is-home #content_area_home .v-product-grid > .v-product {
+    float: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+}
+
 /* =========================================================
    PRODUCT LISTINGS: ALIGN IMAGES TO THE TOP OF THE IMAGE BOX
 ========================================================= */
