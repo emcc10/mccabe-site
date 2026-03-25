@@ -5522,7 +5522,7 @@ body.category .v-product-grid .v-product .mc-member-grid-price {
     flex: 1 1 52% !important;
     max-width: 58% !important;
     order: 1 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     position: relative !important;
     z-index: 1 !important;
   }

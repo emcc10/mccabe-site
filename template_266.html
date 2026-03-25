@@ -4354,20 +4354,25 @@ body.mc-product-page #content_area .wm-swatch img {
     margin: 0 0 8px 0 !important;
   }
 
+  /* Do not force a min-width on the main image: media column is ~52–58% wide + overflow hidden would clip wide photos. */
   body.mc-product-page #content_area #product_photo,
   body.mc-product-page #content_area .vcss_img_wrap,
   body.mc-product-page #content_area .main-image {
-    overflow: hidden !important;
-    min-width: 600px !important;
+    overflow: visible !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   body.mc-product-page #content_area #product_photo img,
   body.mc-product-page #content_area .vcss_img_wrap img,
   body.mc-product-page #content_area .main-image img,
   body.mc-product-page #content_area img#main-image {
-    min-width: 600px !important;
-    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: auto !important;
     height: auto !important;
+    object-fit: contain !important;
   }
 
   body.mc-product-page #content_area #options_table,
