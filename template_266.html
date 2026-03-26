@@ -8058,6 +8058,7 @@ document.addEventListener('mcMemberPricingReady', mcKickMemberCaptionStandalone)
 if (document.body) {
   try {
     var mcDeb;
+    var mcCaptionMoRoot = document.getElementById('content_area') || document.body;
     var mcMo = new MutationObserver(function () {
       clearTimeout(mcDeb);
       mcDeb = setTimeout(function () {
@@ -8067,7 +8068,7 @@ if (document.body) {
         }
       }, 120);
     });
-    mcMo.observe(document.body, { childList: true, subtree: true });
+    mcMo.observe(mcCaptionMoRoot, { childList: true, subtree: true });
   } catch (e3) {}
 }
 try {
@@ -8981,19 +8982,8 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
     }
     obs(ca);
     obs(ch);
-    if (!window.__mcGridBodyPaintObserver) {
-      window.__mcGridBodyPaintObserver = true;
-      var debBody;
-      try {
-        var moBody = new MutationObserver(function () {
-          clearTimeout(debBody);
-          debBody = setTimeout(function () {
-            mcPaintCategoryGridMemberPricing();
-          }, 200);
-        });
-        moBody.observe(document.body, { childList: true, subtree: true });
-      } catch (eB) {}
-    }
+    /* Do not observe document.body: bot-check / challenge pages mutate the DOM constantly;
+       re-running grid paint here can interfere with verification on mobile. #content_area / #content_area_home are enough. */
   }
 
   if (document.readyState === 'loading') {
