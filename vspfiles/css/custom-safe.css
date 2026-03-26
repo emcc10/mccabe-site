@@ -5362,7 +5362,7 @@ body.category .v-product-grid .v-product .mc-member-grid-price {
   body.category .v-product-grid .v-product h4 {
     min-height: 0 !important;
     align-items: flex-start !important;
-    margin-top: 2px !important;
+    margin-top: 6px !important;
     margin-bottom: 0 !important;
     padding-top: 0 !important;
   }
@@ -5819,3 +5819,26 @@ body.category .v-product-grid .v-product .mc-member-grid-price {
   text-align: center !important;
 }
 
+/* Category listing: strip dead space between image and title (all viewports; late in file) */
+html body.category .v-product-grid .v-product .v-product__img,
+html body.category .v-product-grid .v-product .v-product__image,
+html body.category .v-product-grid .v-product .product_image,
+html body.category ul.v-product-grid > li.v-product .v-product__img {
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+html body.category .v-product-grid .v-product .v-product__name,
+html body.category .v-product-grid .v-product .productnamecolor,
+html body.category .v-product-grid .v-product h2,
+html body.category .v-product-grid .v-product h3,
+html body.category .v-product-grid .v-product h4 {
+  min-height: 0 !important;
+  align-items: flex-start !important;
+}
+
+html body.category .v-product-grid .v-product .v-product__price,
+html body.category .v-product-grid .v-product .product_price,
+html body.category .v-product-grid .v-product .mc-member-grid-price {
+  min-height: 0 !important;
+}
