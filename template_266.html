@@ -4400,7 +4400,9 @@ body.mc-product-page #content_area .wm-swatch img {
   html body.mc-product-page #content_area #v65-product-parent [itemprop="offers"],
   html body.productdetails #content_area [itemprop="offers"],
   html body.mc-product-page #content_area [itemprop="offers"] {
-    margin-left: -17px;
+    margin-left: 0 !important;
+    margin-top: 12px !important;
+    clear: both !important;
   }
   body.mc-product-page #content_area .mc-pdp-media-td,
   body.mc-product-page #content_area .mc-pdp-options-td {
@@ -4483,15 +4485,15 @@ body.mc-product-page #content_area .wm-swatch img {
   #content_area #altviews,
   #content_area .altviews,
   #content_area [id*="altview"] {
-    display: ruby block !important;
-    flex-flow: wrap !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
     justify-content: center !important;
-    align-items: center !important;
+    align-items: flex-start !important;
     gap: 10px !important;
-    margin: 8px auto 20px auto !important;
+    margin: 8px auto 36px auto !important;
     padding: 0 !important;
-    width: 286px !important;
-    max-width: 300px !important;
+    width: 100% !important;
+    max-width: 100% !important;
     float: none !important;
     clear: both !important;
     order: 2 !important;
@@ -8113,7 +8115,7 @@ body.category .v-product-grid .v-product .v-product__img,body.category .v-produc
 body.category .v-product-grid .v-product .v-product__img img,body.category .v-product-grid .v-product .v-product__image img,body.category .v-product-grid .v-product .product_image img{width:100%;max-width:100%;height:auto;max-height:280px;object-fit:contain}
 body.category .v-product-grid .v-product .v-product__name,body.category .v-product-grid .v-product .productnamecolor,body.category .v-product-grid .v-product h2,body.category .v-product-grid .v-product h3,body.category .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;align-items:flex-end;justify-content:flex-start;text-align:left;min-height:4.5em;box-sizing:border-box;width:100%;margin-top:2px!important}
 body.category .v-product-grid .v-product .v-product__price,body.category .v-product-grid .v-product .product_price,body.category .v-product-grid .v-product .mc-member-grid-price{order:3;min-height:5.5em;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;width:100%;text-align:left!important}
-@media (max-width:991px){body.category .v-product-grid .v-product .v-product__img,body.category .v-product-grid .v-product .v-product__image,body.category .v-product-grid .v-product .product_image{min-height:0!important;height:auto!important;max-height:220px!important}body.category .v-product-grid .v-product .v-product__img img,body.category .v-product-grid .v-product .v-product__image img,body.category .v-product-grid .v-product .product_image img{max-height:220px!important}body.category .v-product-grid .v-product .v-product__name,body.category .v-product-grid .v-product .productnamecolor,body.category .v-product-grid .v-product h2,body.category .v-product-grid .v-product h3,body.category .v-product-grid .v-product h4{min-height:0!important;align-items:flex-start!important;margin-top:6px!important;margin-bottom:4px!important}}
+@media (max-width:991px){body.category .v-product-grid .v-product .v-product__img,body.category .v-product-grid .v-product .v-product__image,body.category .v-product-grid .v-product .product_image,body.category ul.v-product-grid>li.v-product .v-product__img{min-height:0!important;height:auto!important;max-height:200px!important;margin-bottom:0!important;padding-bottom:0!important}body.category .v-product-grid .v-product .v-product__img img,body.category .v-product-grid .v-product .v-product__image img,body.category .v-product-grid .v-product .product_image img,body.category ul.v-product-grid>li.v-product .v-product__img img{max-height:200px!important}body.category .v-product-grid .v-product .v-product__name,body.category .v-product-grid .v-product .productnamecolor,body.category .v-product-grid .v-product h2,body.category .v-product-grid .v-product h3,body.category .v-product-grid .v-product h4{min-height:0!important;align-items:flex-start!important;margin-top:2px!important;margin-bottom:0!important;padding-top:0!important}body.category .v-product-grid .v-product{gap:0!important;row-gap:0!important}}
 </style>
 <div id="mc-login-modal" class="mc-login-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mc-login-modal-title">
   <div class="mc-login-modal__backdrop" data-mc-close-login tabindex="-1"></div>
@@ -8994,6 +8996,121 @@ body.category .v-product-grid .v-product .v-product__price,body.category .v-prod
   window.addEventListener('load', mcBootCategoryGrid);
 })();
 </script>
+
+<!-- Last mobile layout overrides (must stay before </body> so they win over head CSS + earlier inline blocks) -->
+<style id="mc-final-mobile-layout-fixes">
+@media (max-width: 991px) {
+  /* 1) Homepage hero logo — smaller on phones/tablets; desktop unchanged (this query is mobile-only) */
+  body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
+  #if_homepage #slideshow-container .mc-hero-overlay .hero-logo-img {
+    width: 34% !important;
+    max-width: min(200px, 78vw) !important;
+    height: auto !important;
+  }
+  body.is-home #slideshow-container .mc-hero-overlay .hero-logo-wrap,
+  #if_homepage #slideshow-container .mc-hero-overlay .hero-logo-wrap {
+    max-width: 90vw !important;
+  }
+
+  /* 2) Category grid — tighten space between product image and title */
+  html body.category .v-product-grid .v-product .v-product__img,
+  html body.category .v-product-grid .v-product .v-product__image,
+  html body.category .v-product-grid .v-product .product_image,
+  html body.category ul.v-product-grid > li.v-product .v-product__img {
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: 200px !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  html body.category .v-product-grid .v-product .v-product__img img,
+  html body.category .v-product-grid .v-product .v-product__image img,
+  html body.category .v-product-grid .v-product .product_image img,
+  html body.category ul.v-product-grid > li.v-product .v-product__img img {
+    max-height: 200px !important;
+  }
+  html body.category .v-product-grid .v-product .v-product__name,
+  html body.category .v-product-grid .v-product .productnamecolor,
+  html body.category .v-product-grid .v-product h2,
+  html body.category .v-product-grid .v-product h3,
+  html body.category .v-product-grid .v-product h4 {
+    min-height: 0 !important;
+    margin-top: 2px !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    align-items: flex-start !important;
+  }
+  html body.category .v-product-grid .v-product {
+    gap: 0 !important;
+    row-gap: 0 !important;
+  }
+
+  /* 3) PDP — stop price / “price with options” overlapping alt thumbnails */
+  html body.productdetails #content_area #v65-product-parent [itemprop="offers"],
+  html body.mc-product-page #content_area #v65-product-parent [itemprop="offers"],
+  html body.productdetails #content_area [itemprop="offers"],
+  html body.mc-product-page #content_area [itemprop="offers"] {
+    margin-left: 0 !important;
+    margin-top: 16px !important;
+    clear: both !important;
+  }
+
+  html body.mc-product-page #content_area #altviews,
+  html body.productdetails #content_area #altviews,
+  html body.mc-product-page #content_area span#altviews,
+  html body.productdetails #content_area span#altviews,
+  html body.mc-product-page #v65-product-parent #altviews,
+  html body.productdetails #v65-product-parent #altviews,
+  html body.mc-product-page #v65-product-parent span#altviews,
+  html body.productdetails #v65-product-parent span#altviews {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    margin: 8px 0 40px 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    float: none !important;
+    clear: both !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-product-page #content_area .mc-pdp-options-td,
+  html body.productdetails #content_area .mc-pdp-options-td,
+  html body.mc-product-page #content_area td:has(.colors_pricebox),
+  html body.productdetails #content_area td:has(.colors_pricebox),
+  html body.mc-product-page #content_area td:has(#priceWithOptions),
+  html body.productdetails #content_area td:has(#priceWithOptions) {
+    padding-top: 24px !important;
+    margin-top: 16px !important;
+    clear: both !important;
+  }
+
+  html body.mc-product-page #content_area table.colors_pricebox,
+  html body.productdetails #content_area table.colors_pricebox,
+  html body.mc-product-page #v65-product-parent table.colors_pricebox,
+  html body.productdetails #v65-product-parent table.colors_pricebox {
+    margin-top: 12px !important;
+    clear: both !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  html body.mc-product-page #content_area .option_pricing,
+  html body.productdetails #content_area .option_pricing,
+  html body.mc-product-page #v65-product-parent .option_pricing,
+  html body.productdetails #v65-product-parent .option_pricing,
+  html body.mc-product-page #content_area #priceWithOptions,
+  html body.productdetails #content_area #priceWithOptions,
+  html body.mc-product-page #v65-product-parent #priceWithOptions,
+  html body.productdetails #v65-product-parent #priceWithOptions {
+    margin-top: 18px !important;
+    clear: both !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+}
+</style>
 
 </body>
 </html>
