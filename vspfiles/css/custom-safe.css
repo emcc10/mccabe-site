@@ -4983,6 +4983,22 @@ body.productdetails #v65-product-parent #options_table {
     object-fit: cover !important;
     display: block !important;
   }
+
+  body.mc-product-page #content_area .option_pricing,
+  body.productdetails #content_area .option_pricing,
+  body.mc-product-page #v65-product-parent .option_pricing,
+  body.productdetails #v65-product-parent .option_pricing,
+  body.mc-product-page #content_area #priceWithOptions,
+  body.productdetails #content_area #priceWithOptions,
+  body.mc-product-page #v65-product-parent #priceWithOptions,
+  body.productdetails #v65-product-parent #priceWithOptions,
+  body.mc-product-page #content_area #priceWithOptions ~ div,
+  body.productdetails #content_area #priceWithOptions ~ div,
+  body.mc-product-page #v65-product-parent #priceWithOptions ~ div,
+  body.productdetails #v65-product-parent #priceWithOptions ~ div {
+    margin-top: 14px !important;
+    clear: both !important;
+  }
 }
 
 /* Reinforce: hide duplicate price above "Price with selected options" (all viewports) */
@@ -5024,6 +5040,12 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   object-position: center center;
   opacity: 0.5;
   filter: brightness(0.5);
+}
+
+@media (max-width: 991px) {
+  body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
+    width: 52% !important;
+  }
 }
 
 /* === Members pricing: caption subline + modal + category grid === */
@@ -5252,6 +5274,33 @@ body.category .v-product-grid .v-product .mc-member-grid-price {
   justify-content: flex-start;
   width: 100%;
   text-align: left !important;
+}
+
+@media (max-width: 991px) {
+  body.category .v-product-grid .v-product .v-product__img,
+  body.category .v-product-grid .v-product .v-product__image,
+  body.category .v-product-grid .v-product .product_image {
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: 220px !important;
+  }
+
+  body.category .v-product-grid .v-product .v-product__img img,
+  body.category .v-product-grid .v-product .v-product__image img,
+  body.category .v-product-grid .v-product .product_image img {
+    max-height: 220px !important;
+  }
+
+  body.category .v-product-grid .v-product .v-product__name,
+  body.category .v-product-grid .v-product .productnamecolor,
+  body.category .v-product-grid .v-product h2,
+  body.category .v-product-grid .v-product h3,
+  body.category .v-product-grid .v-product h4 {
+    min-height: 0 !important;
+    align-items: flex-start !important;
+    margin-top: 6px !important;
+    margin-bottom: 4px !important;
+  }
 }
 
 /* =========================================================
