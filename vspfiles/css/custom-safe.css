@@ -5097,14 +5097,14 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 @media (max-width: 991px) {
   body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
   #if_homepage #slideshow-container .mc-hero-overlay .hero-logo-img {
-    width: 34% !important;
-    max-width: min(200px, 78vw) !important;
+    width: 68% !important;
+    max-width: min(400px, 92vw) !important;
     height: auto !important;
   }
 
   body.is-home #slideshow-container .mc-hero-overlay .hero-logo-wrap,
   #if_homepage #slideshow-container .mc-hero-overlay .hero-logo-wrap {
-    max-width: 90vw !important;
+    max-width: 96vw !important;
   }
 }
 
@@ -5278,8 +5278,8 @@ body.category .v-product-grid .v-product .product_image {
   order: 1;
   flex: 0 0 auto;
   width: 100%;
-  min-height: 280px;
-  height: 280px;
+  min-height: 0;
+  height: auto;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -5309,13 +5309,13 @@ body.category .v-product-grid .v-product h4 {
   flex: 0 1 auto;
   line-height: 1.25;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: flex-start;
   text-align: left;
-  min-height: 4.5em;
+  min-height: 0;
   box-sizing: border-box;
   width: 100%;
-  margin-top: 2px !important;
+  margin-top: 8px !important;
 }
 
 body.category .v-product-grid .v-product .productnamecolor a,
@@ -5327,7 +5327,7 @@ body.category .v-product-grid .v-product .v-product__price,
 body.category .v-product-grid .v-product .product_price,
 body.category .v-product-grid .v-product .mc-member-grid-price {
   order: 3;
-  min-height: 5.5em;
+  min-height: 0;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
