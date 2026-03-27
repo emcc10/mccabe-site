@@ -1312,21 +1312,21 @@ nav.push-menu .push-menu__close-btn::before {
 
 /* MOBILE: category — title centered, price left, tight under image */
 @media (max-width: 991px) {
-  body.category .v-product-grid .v-product .v-product__img,
-  body.category .v-product-grid .v-product .v-product__image,
-  body.category .v-product-grid .v-product .v-product__image-wrap,
-  body.category .v-product-grid .v-product .product_image,
-  body.category .v-product-grid .v-product .vcss_img {
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
+  :is(html.category, body.category) .v-product-grid .v-product .product_image,
+  :is(html.category, body.category) .v-product-grid .v-product .vcss_img {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
   }
 
-  body.category .v-product-grid .v-product .v-product__name,
-  body.category .v-product-grid .v-product .productnamecolor,
-  body.category .v-product-grid .v-product .productnamecolor a,
-  body.category .v-product-grid .v-product h2,
-  body.category .v-product-grid .v-product h3,
-  body.category .v-product-grid .v-product h4 {
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__name,
+  :is(html.category, body.category) .v-product-grid .v-product .productnamecolor,
+  :is(html.category, body.category) .v-product-grid .v-product .productnamecolor a,
+  :is(html.category, body.category) .v-product-grid .v-product h2,
+  :is(html.category, body.category) .v-product-grid .v-product h3,
+  :is(html.category, body.category) .v-product-grid .v-product h4 {
     text-align: center !important;
     display: block !important;
     margin-top: 2px !important;
@@ -1335,9 +1335,9 @@ nav.push-menu .push-menu__close-btn::before {
     font-style: normal !important;
   }
 
-  body.category .v-product-grid .v-product .v-product__price,
-  body.category .v-product-grid .v-product .product_price,
-  body.category .v-product-grid .v-product .mc-member-grid-price {
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__price,
+  :is(html.category, body.category) .v-product-grid .v-product .product_price,
+  :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price {
     text-align: left !important;
   }
 }
@@ -5313,7 +5313,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 }
 
 /* Category listing: same visual order on every card (image → title → price) + full-width images */
-body.category .v-product-grid .v-product {
+:is(html.category, body.category) .v-product-grid .v-product {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -5321,11 +5321,11 @@ body.category .v-product-grid .v-product {
   min-width: 0;
 }
 
-body.category .v-product-grid .v-product .v-product__img,
-body.category .v-product-grid .v-product .v-product__image,
-body.category .v-product-grid .v-product .v-product__image-wrap,
-body.category .v-product-grid .v-product .product_image,
-body.category .v-product-grid .v-product .vcss_img {
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
+:is(html.category, body.category) .v-product-grid .v-product .product_image,
+:is(html.category, body.category) .v-product-grid .v-product .vcss_img {
   order: 1;
   flex: 0 0 auto;
   width: 100%;
@@ -5340,11 +5340,11 @@ body.category .v-product-grid .v-product .vcss_img {
   box-sizing: border-box;
 }
 
-body.category .v-product-grid .v-product .v-product__img a,
-body.category .v-product-grid .v-product .v-product__image a,
-body.category .v-product-grid .v-product .v-product__image-wrap a,
-body.category .v-product-grid .v-product .product_image a,
-body.category .v-product-grid .v-product .vcss_img a {
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img a,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image a,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap a,
+:is(html.category, body.category) .v-product-grid .v-product .product_image a,
+:is(html.category, body.category) .v-product-grid .v-product .vcss_img a {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
@@ -5352,11 +5352,11 @@ body.category .v-product-grid .v-product .vcss_img a {
   padding: 0 !important;
 }
 
-body.category .v-product-grid .v-product .v-product__img img,
-body.category .v-product-grid .v-product .v-product__image img,
-body.category .v-product-grid .v-product .v-product__image-wrap img,
-body.category .v-product-grid .v-product .product_image img,
-body.category .v-product-grid .v-product .vcss_img img {
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,
+:is(html.category, body.category) .v-product-grid .v-product .product_image img,
+:is(html.category, body.category) .v-product-grid .v-product .vcss_img img {
   width: 100% !important;
   height: 100% !important;
   max-width: none !important;
@@ -5367,11 +5367,11 @@ body.category .v-product-grid .v-product .vcss_img img {
   margin: 0 !important;
 }
 
-body.category .v-product-grid .v-product .v-product__name,
-body.category .v-product-grid .v-product .productnamecolor,
-body.category .v-product-grid .v-product h2,
-body.category .v-product-grid .v-product h3,
-body.category .v-product-grid .v-product h4 {
+:is(html.category, body.category) .v-product-grid .v-product .v-product__name,
+:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,
+:is(html.category, body.category) .v-product-grid .v-product h2,
+:is(html.category, body.category) .v-product-grid .v-product h3,
+:is(html.category, body.category) .v-product-grid .v-product h4 {
   order: 2;
   flex: 0 1 auto;
   line-height: 1.25;
@@ -5385,23 +5385,23 @@ body.category .v-product-grid .v-product h4 {
   margin-top: 4px !important;
 }
 
-body.category .v-product-grid .v-product .productnamecolor a,
-body.category .v-product-grid .v-product .v-product__name a {
+:is(html.category, body.category) .v-product-grid .v-product .productnamecolor a,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__name a {
   width: 100%;
   text-align: center !important;
 }
 
 /* When Volusion nests image-wrap inside img cell, fill the tile (avoid double 280px stack) */
-body.category .v-product-grid .v-product .v-product__img .v-product__image-wrap,
-body.category .v-product-grid .v-product .v-product__image .v-product__image-wrap {
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img .v-product__image-wrap,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image .v-product__image-wrap {
   height: 100% !important;
   min-height: 0 !important;
   max-height: none !important;
 }
 
-body.category .v-product-grid .v-product .v-product__price,
-body.category .v-product-grid .v-product .product_price,
-body.category .v-product-grid .v-product .mc-member-grid-price {
+:is(html.category, body.category) .v-product-grid .v-product .v-product__price,
+:is(html.category, body.category) .v-product-grid .v-product .product_price,
+:is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price {
   order: 3;
   min-height: 0;
   box-sizing: border-box;
@@ -5414,12 +5414,12 @@ body.category .v-product-grid .v-product .mc-member-grid-price {
 }
 
 @media (max-width: 991px) {
-  body.category .v-product-grid .v-product .v-product__img,
-  body.category .v-product-grid .v-product .v-product__image,
-  body.category .v-product-grid .v-product .v-product__image-wrap,
-  body.category .v-product-grid .v-product .product_image,
-  body.category .v-product-grid .v-product .vcss_img,
-  body.category ul.v-product-grid > li.v-product .v-product__img {
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
+  :is(html.category, body.category) .v-product-grid .v-product .product_image,
+  :is(html.category, body.category) .v-product-grid .v-product .vcss_img,
+  :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img {
     height: 220px !important;
     min-height: 220px !important;
     max-height: 220px !important;
@@ -5428,12 +5428,12 @@ body.category .v-product-grid .v-product .mc-member-grid-price {
     padding-bottom: 0 !important;
   }
 
-  body.category .v-product-grid .v-product .v-product__img img,
-  body.category .v-product-grid .v-product .v-product__image img,
-  body.category .v-product-grid .v-product .v-product__image-wrap img,
-  body.category .v-product-grid .v-product .product_image img,
-  body.category .v-product-grid .v-product .vcss_img img,
-  body.category ul.v-product-grid > li.v-product .v-product__img img {
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__image img,
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,
+  :is(html.category, body.category) .v-product-grid .v-product .product_image img,
+  :is(html.category, body.category) .v-product-grid .v-product .vcss_img img,
+  :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img {
     width: 100% !important;
     height: 100% !important;
     max-height: none !important;
@@ -5441,11 +5441,11 @@ body.category .v-product-grid .v-product .mc-member-grid-price {
     object-position: center center !important;
   }
 
-  body.category .v-product-grid .v-product .v-product__name,
-  body.category .v-product-grid .v-product .productnamecolor,
-  body.category .v-product-grid .v-product h2,
-  body.category .v-product-grid .v-product h3,
-  body.category .v-product-grid .v-product h4 {
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__name,
+  :is(html.category, body.category) .v-product-grid .v-product .productnamecolor,
+  :is(html.category, body.category) .v-product-grid .v-product h2,
+  :is(html.category, body.category) .v-product-grid .v-product h3,
+  :is(html.category, body.category) .v-product-grid .v-product h4 {
     min-height: 0 !important;
     align-items: center !important;
     justify-content: center !important;
@@ -5455,27 +5455,27 @@ body.category .v-product-grid .v-product .mc-member-grid-price {
     padding-top: 0 !important;
   }
 
-  body.category .v-product-grid .v-product {
+  :is(html.category, body.category) .v-product-grid .v-product {
     gap: 0 !important;
     row-gap: 0 !important;
   }
 }
 
 /* Category: subcategory nav (sidebar + in-content vnav) — left, RH-style caps */
-body.category .sidebar-wrapper .sidebar,
-body.category .sidebar-wrapper [id^="display_menu_"] {
+:is(html.category, body.category) .sidebar-wrapper .sidebar,
+:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] {
   text-align: left !important;
 }
 
-body.category .sidebar-wrapper [id^="display_menu_"] ul,
-body.category .sidebar-wrapper [id^="display_menu_"] li {
+:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] ul,
+:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] li {
   text-align: left !important;
 }
 
-body.category .sidebar-wrapper [id^="display_menu_"] a,
-body.category .sidebar-wrapper [id^="display_menu_"] .vnav__link,
-body.category .sidebar-wrapper [id^="display_menu_"] .vnav__label,
-body.category .sidebar-wrapper .menu a {
+:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] a,
+:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] .vnav__link,
+:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] .vnav__label,
+:is(html.category, body.category) .sidebar-wrapper .menu a {
   font-weight: 400 !important;
   letter-spacing: 0.08em !important;
   text-transform: uppercase !important;
@@ -5483,15 +5483,15 @@ body.category .sidebar-wrapper .menu a {
   color: #1a1a1a !important;
 }
 
-body.category #content_area .vnav--level2,
-body.category #content_area .vnav--level3,
-body.category #content_area .vnav--level2 > li,
-body.category #content_area .vnav--level3 > li {
+:is(html.category, body.category) #content_area .vnav--level2,
+:is(html.category, body.category) #content_area .vnav--level3,
+:is(html.category, body.category) #content_area .vnav--level2 > li,
+:is(html.category, body.category) #content_area .vnav--level3 > li {
   text-align: left !important;
 }
 
-body.category #content_area .vnav--level2 a,
-body.category #content_area .vnav--level3 a {
+:is(html.category, body.category) #content_area .vnav--level2 a,
+:is(html.category, body.category) #content_area .vnav--level3 a {
   font-weight: 400 !important;
   letter-spacing: 0.06em !important;
   text-transform: uppercase !important;
@@ -5945,12 +5945,12 @@ body.category #content_area .vnav--level3 a {
 }
 
 /* Category listing: uniform image tile + cover (late in file; wins over older blocks) */
-html body.category .v-product-grid .v-product .v-product__img,
-html body.category .v-product-grid .v-product .v-product__image,
-html body.category .v-product-grid .v-product .v-product__image-wrap,
-html body.category .v-product-grid .v-product .product_image,
-html body.category .v-product-grid .v-product .vcss_img,
-html body.category ul.v-product-grid > li.v-product .v-product__img {
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
+:is(html.category, body.category) .v-product-grid .v-product .product_image,
+:is(html.category, body.category) .v-product-grid .v-product .vcss_img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img {
   height: 280px !important;
   min-height: 280px !important;
   max-height: 280px !important;
@@ -5962,11 +5962,11 @@ html body.category ul.v-product-grid > li.v-product .v-product__img {
   position: relative !important;
 }
 
-html body.category .v-product-grid .v-product .v-product__img a,
-html body.category .v-product-grid .v-product .v-product__image a,
-html body.category .v-product-grid .v-product .v-product__image-wrap a,
-html body.category .v-product-grid .v-product .product_image a,
-html body.category .v-product-grid .v-product .vcss_img a {
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img a,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image a,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap a,
+:is(html.category, body.category) .v-product-grid .v-product .product_image a,
+:is(html.category, body.category) .v-product-grid .v-product .vcss_img a {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
@@ -5974,12 +5974,12 @@ html body.category .v-product-grid .v-product .vcss_img a {
   padding: 0 !important;
 }
 
-html body.category .v-product-grid .v-product .v-product__img img,
-html body.category .v-product-grid .v-product .v-product__image img,
-html body.category .v-product-grid .v-product .v-product__image-wrap img,
-html body.category .v-product-grid .v-product .product_image img,
-html body.category .v-product-grid .v-product .vcss_img img,
-html body.category ul.v-product-grid > li.v-product .v-product__img img {
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,
+:is(html.category, body.category) .v-product-grid .v-product .product_image img,
+:is(html.category, body.category) .v-product-grid .v-product .vcss_img img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img {
   width: 100% !important;
   height: 100% !important;
   max-width: none !important;
@@ -5990,31 +5990,31 @@ html body.category ul.v-product-grid > li.v-product .v-product__img img {
   margin: 0 !important;
 }
 
-html body.category .v-product-grid .v-product .v-product__img .v-product__image-wrap,
-html body.category .v-product-grid .v-product .v-product__image .v-product__image-wrap {
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img .v-product__image-wrap,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__image .v-product__image-wrap {
   height: 100% !important;
   min-height: 0 !important;
   max-height: none !important;
 }
 
 @media (max-width: 991px) {
-  html body.category .v-product-grid .v-product .v-product__img,
-  html body.category .v-product-grid .v-product .v-product__image,
-  html body.category .v-product-grid .v-product .v-product__image-wrap,
-  html body.category .v-product-grid .v-product .product_image,
-  html body.category .v-product-grid .v-product .vcss_img,
-  html body.category ul.v-product-grid > li.v-product .v-product__img {
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
+  :is(html.category, body.category) .v-product-grid .v-product .product_image,
+  :is(html.category, body.category) .v-product-grid .v-product .vcss_img,
+  :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img {
     height: 220px !important;
     min-height: 220px !important;
     max-height: 220px !important;
   }
 }
 
-html body.category .v-product-grid .v-product .v-product__name,
-html body.category .v-product-grid .v-product .productnamecolor,
-html body.category .v-product-grid .v-product h2,
-html body.category .v-product-grid .v-product h3,
-html body.category .v-product-grid .v-product h4 {
+:is(html.category, body.category) .v-product-grid .v-product .v-product__name,
+:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,
+:is(html.category, body.category) .v-product-grid .v-product h2,
+:is(html.category, body.category) .v-product-grid .v-product h3,
+:is(html.category, body.category) .v-product-grid .v-product h4 {
   min-height: 0 !important;
   align-items: center !important;
   justify-content: center !important;
@@ -6022,9 +6022,9 @@ html body.category .v-product-grid .v-product h4 {
   margin-top: 4px !important;
 }
 
-html body.category .v-product-grid .v-product .v-product__price,
-html body.category .v-product-grid .v-product .product_price,
-html body.category .v-product-grid .v-product .mc-member-grid-price {
+:is(html.category, body.category) .v-product-grid .v-product .v-product__price,
+:is(html.category, body.category) .v-product-grid .v-product .product_price,
+:is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price {
   min-height: 0 !important;
   text-align: left !important;
   align-items: flex-start !important;
