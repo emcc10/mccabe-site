@@ -21,10 +21,9 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          # Port 21 is the Volusion standard
-          port: 21 
-          # Matches your file in the repo
-          local-dir: ./ 
-          # Ensure this matches your actual theme folder name
-          server-dir: /vspfiles/templates/template_266/ 
-
+          port: 22
+          # Add these three lines to fix the timeout:
+          passive: true
+          timeout: 90000 
+          local-dir: ./
+          server-dir: /vspfiles/templates/template_266/
