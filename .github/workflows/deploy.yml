@@ -31,8 +31,9 @@ jobs:
                -o UserKnownHostsFile=/dev/null \
                -P 2222 \
                "${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_HOST }}" <<'EOF'
-          # Use the physical path that maps to your /v/ alias
-          cd /vspfiles/templates/template_266
+          # Navigate to the physical wwwroot / v folder
+          cd /wwwroot/v
           put deploy-template_266.html template_266.html
           bye
           EOF
+
