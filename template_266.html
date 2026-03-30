@@ -3,7 +3,7 @@
 <!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
 <!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><!--<![endif]-->
 <head>
-<!-- MC_DEPLOY_VERIFY_20260330b: live site should match after deploy + publish; search page source -->
+<!-- MC_DEPLOY_VERIFY_20260330c: CSS href /v/custom-safe.css (same folder as template); search page source -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -14,7 +14,7 @@
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
 <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
-<link id="mc-custom-safe-css" rel="stylesheet" href="/v/vspfiles/css/custom-safe.css">
+<link id="mc-custom-safe-css" rel="stylesheet" href="/v/custom-safe.css">
 <script>
 (function () {
   var el = document.getElementById('mc-custom-safe-css');
@@ -22,9 +22,9 @@
   var bust = '?v=' + Date.now();
   el.onerror = function () {
     this.onerror = null;
-    this.href = '/vspfiles/css/custom-safe.css' + bust;
+    this.href = '/v/vspfiles/css/custom-safe.css' + bust;
   };
-  el.href = '/v/vspfiles/css/custom-safe.css' + bust;
+  el.href = '/v/custom-safe.css' + bust;
 })();
 </script>
 <script>

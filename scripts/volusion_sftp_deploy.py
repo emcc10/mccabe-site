@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Paramiko-based SFTP deploy fallback when OpenSSH + sshpass cannot authenticate
-(Volusion and similar appliances often behave better with Paramiko's negotiation).
+Paramiko SFTP deploy fallback. Uses absolute remote paths for template + CSS.
 
-Always uses absolute remote paths for template + CSS so CSS cannot land beside the
-template if a chdir into vspfiles/css fails.
+Default: custom-safe.css in the same remote folder as template_266.html (e.g. /v/).
+Optional SFTP_CSS_SUBDIR=vspfiles/css for legacy layout.
+Optional SFTP_CSS_REMOTE_FILE= full path override.
 """
 from __future__ import annotations
 
@@ -19,13 +19,18 @@ def _roots() -> list[str]:
     return ["/v", "/", "__HOME__", "/mccabestheaterandliving.com/v", "v"]
 
 
-def _css_segments() -> list[str]:
-    rel = os.environ.get("SFTP_CSS_SUBDIR", "vspfiles/css").strip("/")
+def _css_subdir_segments() -> list[str]:
+    rel = os.environ.get("SFTP_CSS_SUBDIR", "").strip().strip("/")
+    if not rel:
+        return []
     return [s for s in rel.split("/") if s]
 
 
-def _css_remote_suffix() -> str:
-    return "/".join([*_css_segments(), "custom-safe.css"])
+def _css_relative_under_template_root() -> str:
+    segs = _css_subdir_segments()
+    if not segs:
+        return "custom-safe.css"
+    return "/".join(segs + ["custom-safe.css"])
 
 
 def _goto_root(sftp, root: str) -> None:
@@ -39,83 +44,33 @@ def _goto_root(sftp, root: str) -> None:
             sftp.chdir(seg)
 
 
-def _remote_paths(root: str) -> tuple[str | None, str | None]:
-    """Return (template_remote, css_remote) or (None, None) to use chdir+relative puts."""
+def _remote_pair(root: str) -> tuple[str | None, str | None]:
+    """(template_abs, css_abs) or (None, None) for __HOME__ relative mode."""
     if root == "__HOME__":
         return None, None
     override = os.environ.get("SFTP_CSS_REMOTE_FILE", "").strip()
-    css_suffix = _css_remote_suffix()
-    r = root.rstrip("/")
-    if r in ("", "/"):
-        t_rem = "/template_266.html"
-        c_rem = override or f"/{css_suffix}"
-    else:
-        base = r if r.startswith("/") else r
-        t_rem = f"{base}/template_266.html" if not base.startswith("/") else f"{base}/template_266.html"
-        if not base.startswith("/"):
-            t_rem = f"{base}/template_266.html"
-            c_rem = override or f"{base}/{css_suffix}"
-        else:
-            t_rem = f"{base}/template_266.html"
-            c_rem = override or f"{base}/{css_suffix}"
-    # Normalize duplicate slashes (except after colon)
-    def squash(p: str) -> str:
-        out = []
-        for part in p.split("/"):
-            if part == "" and out == []:
-                out.append("")
-            elif part != "":
-                out.append(part)
-        return "/" + "/".join(out[1:]) if p.startswith("/") else "/".join(out)
-
-    if t_rem.startswith("/"):
-        t_rem = "/" + "/".join(x for x in t_rem.split("/") if x)
-        c_rem = "/" + "/".join(x for x in c_rem.split("/") if x) if c_rem.startswith("/") else c_rem
-    else:
-        t_rem = "/".join(x for x in t_rem.split("/") if x)
-        c_rem = "/".join(x for x in c_rem.split("/") if x) if not override else c_rem
-    return t_rem, c_rem
-
-
-def _remote_paths_v2(root: str) -> tuple[str | None, str | None]:
-    """Clearer construction of absolute remote paths."""
-    if root == "__HOME__":
-        return None, None
-    override = os.environ.get("SFTP_CSS_REMOTE_FILE", "").strip()
-    css_rel = _css_remote_suffix()
-
-    if override:
-        css_rem: str | None = override
-    else:
-        css_rem = None
-
+    css_rel = _css_relative_under_template_root()
     r = root.strip()
     if r in ("/", ""):
         t_rem = "/template_266.html"
-        if css_rem is None:
-            css_rem = f"/{css_rel}"
-        return t_rem, css_rem
-
+        c_rem = override or ("/" + css_rel)
+        return t_rem, c_rem
     if r.startswith("/"):
         base = r.rstrip("/")
         t_rem = f"{base}/template_266.html"
-        if css_rem is None:
-            css_rem = f"{base}/{css_rel}"
-        return t_rem, css_rem
-
-    # relative root e.g. "v"
+        c_rem = override or f"{base}/{css_rel}"
+        return t_rem, c_rem
     t_rem = f"{r}/template_266.html"
-    if css_rem is None:
-        css_rem = f"{r}/{css_rel}"
-    return t_rem, css_rem
+    c_rem = override or f"{r}/{css_rel}"
+    return t_rem, c_rem
 
 
 def _try_upload(sftp, root: str) -> None:
-    t_rem, c_rem = _remote_paths_v2(root)
+    t_rem, c_rem = _remote_pair(root)
     if t_rem is None:
         _goto_root(sftp, root)
         sftp.put("template_266.html", "template_266.html")
-        for seg in _css_segments():
+        for seg in _css_subdir_segments():
             sftp.chdir(seg)
         sftp.put("vspfiles/css/custom-safe.css", "custom-safe.css")
         return
@@ -132,7 +87,7 @@ def main() -> int:
     user = os.environ["SFTP_USER"]
     password = os.environ["SFTP_PASS"]
 
-    import paramiko  # noqa: PLC0415 — after pip install in workflow
+    import paramiko  # noqa: PLC0415
 
     transport = paramiko.Transport((host, port))
     try:
@@ -143,7 +98,7 @@ def main() -> int:
 
     try:
         for root in _roots():
-            t_rem, c_rem = _remote_paths_v2(root)
+            t_rem, c_rem = _remote_pair(root)
             print(f"PARAMIKO_TRY root={root!r} template={t_rem!r} css={c_rem!r}", flush=True)
             sftp = paramiko.SFTPClient.from_transport(transport)
             try:
