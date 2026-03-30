@@ -76,9 +76,7 @@ jobs:
           fi
           echo "::endgroup::"
 
-          # Use -o User= so host is never parsed as part of the name (harmless when username has no @).
-          # Many FTP/SFTP appliances use keyboard-interactive; try it before plain password.
-          # Retry with weaker KEX/ciphers if the first handshake fails (common on older Volusion nodes).
+          # Use -o User=; disable agent/keys so sshpass is not confused by offered keys.
           run_sftp_once() {
             local batch="$1"
             shift
@@ -87,8 +85,9 @@ jobs:
               -o ConnectTimeout=30 \
               -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
+              -o IdentityAgent=none \
+              -o IdentitiesOnly=yes \
               -o "User=${SFTP_USER}" \
-              -o PreferredAuthentications=keyboard-interactive,password \
               -o PubkeyAuthentication=no \
               "$@" \
               -P "${SFTP_PORT}" \
@@ -97,16 +96,24 @@ jobs:
 
           run_sftp_batch() {
             local batch="$1"
-            if run_sftp_once "$batch" -o HostKeyAlgorithms=+ssh-rsa; then
-              return 0
-            fi
-            echo "::warning::SFTP retry with older SSH algorithms (KEX/ciphers)…"
-            if run_sftp_once "$batch" \
-              -o HostKeyAlgorithms=+ssh-rsa,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521 \
-              -o KexAlgorithms=+diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1 \
-              -o Ciphers=+aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,aes256-cbc,3des-cbc; then
-              return 0
-            fi
+            local auth
+            for auth in "password" "keyboard-interactive,password" "password,keyboard-interactive" "keyboard-interactive"; do
+              echo "::group::OpenSSH SFTP PreferredAuthentications=${auth} (modern keys)"
+              if run_sftp_once "$batch" -o "PreferredAuthentications=${auth}" -o HostKeyAlgorithms=+ssh-rsa; then
+                echo "::endgroup::"
+                return 0
+              fi
+              echo "::endgroup::"
+              echo "::group::OpenSSH SFTP PreferredAuthentications=${auth} (legacy KEX/ciphers)"
+              if run_sftp_once "$batch" -o "PreferredAuthentications=${auth}" \
+                -o HostKeyAlgorithms=+ssh-rsa,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521 \
+                -o KexAlgorithms=+diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1 \
+                -o Ciphers=+aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,aes256-cbc,3des-cbc; then
+                echo "::endgroup::"
+                return 0
+              fi
+              echo "::endgroup::"
+            done
             return 1
           }
 
@@ -116,7 +123,34 @@ jobs:
           if ! run_sftp_batch "$diag"; then
             rm -f "$diag"
             echo "::endgroup::"
-            echo "::error::SFTP login failed. TCP probe: $([ "${TCP_OK}" = 1 ] && echo OK || echo FAILED). If TCP=FAILED: Volusion/firewall may block GitHub IPs (FileZilla from home can still work). If TCP=OK: compare secrets to FileZilla (no spaces); open the log above and search for Permission denied, Unable to negotiate, or Connection reset."
+            echo "::warning::OpenSSH+sshpass could not log in. Trying Paramiko (different SSH stack; same secrets)."
+            python3 -m pip install -q paramiko --break-system-packages
+            if python3 scripts/volusion_sftp_deploy.py --probe-only 2>/dev/null; then
+              true
+            elif python3 -c "
+            import os, sys
+            os.chdir(os.environ.get('GITHUB_WORKSPACE','.'))
+            import paramiko
+            t = paramiko.Transport((os.environ['SFTP_HOST'], int(os.environ.get('SFTP_PORT','2222'))))
+            t.connect(username=os.environ['SFTP_USER'], password=os.environ['SFTP_PASS'])
+            s = paramiko.SFTPClient.from_transport(t)
+            s.chdir('.')
+            s.close()
+            t.close()
+            print('PARAMIKO_LOGIN_OK')
+            " 2>/tmp/paramiko_probe.err; then
+              echo "::notice::Paramiko authenticated. Uploading with scripts/volusion_sftp_deploy.py …"
+              if python3 scripts/volusion_sftp_deploy.py; then
+                echo "::notice::Deploy finished via Paramiko. Confirm live site with MC_DEPLOY_VERIFY."
+                exit 0
+              fi
+            fi
+            if [ -f /tmp/paramiko_probe.err ]; then
+              echo "::group::Paramiko probe stderr"
+              tail -n 40 /tmp/paramiko_probe.err || true
+              echo "::endgroup::"
+            fi
+            echo "::error::SFTP login failed (OpenSSH + Paramiko). TCP probe: $([ "${TCP_OK}" = 1 ] && echo OK || echo FAILED). If TCP=OK: confirm FTP_USERNAME/FTP_PASSWORD secrets match FileZilla; ask Volusion if automation from cloud IPs must be allowlisted. Search logs for Permission denied / Unable to negotiate / Authentication failed."
             exit 1
           fi
           rm -f "$diag"
