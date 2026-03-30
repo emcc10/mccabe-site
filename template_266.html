@@ -8859,6 +8859,69 @@ try {
     pump();
   }
 
+  /**
+   * Volusion often outputs sale / MAP / member nodes before the image. Flex `order` usually fixes it;
+   * when the card root is a column flex container, moving DOM after the title guarantees image → title → price.
+   */
+  function mcReorderCategoryListingNodes(card) {
+    if (!card || !card.querySelector) return;
+    var isCat =
+      (document.documentElement.classList &&
+        document.documentElement.classList.contains('category')) ||
+      (document.body.classList && document.body.classList.contains('category'));
+    if (!isCat) return;
+    var imgCell = card.querySelector('.v-product__img, .product_image');
+    var title =
+      card.querySelector('.v-product__name') ||
+      card.querySelector('.productnamecolor') ||
+      card.querySelector('h2') ||
+      card.querySelector('h3');
+    if (!title || !title.parentNode) return;
+    var titlePar = title.parentNode;
+
+    function moveAfterTitle(node) {
+      if (!node || node.parentNode !== card || !titlePar) return;
+      if (title.nextSibling === node) return;
+      var scan = title.nextSibling;
+      while (scan) {
+        if (scan === node) return;
+        scan = scan.nextSibling;
+      }
+      try {
+        titlePar.insertBefore(node, title.nextSibling);
+      } catch (eMove) {}
+    }
+
+    var k;
+    var chTop = card.children;
+    for (k = 0; k < chTop.length; k++) {
+      if (chTop[k].classList && chTop[k].classList.contains('mc-member-grid-price')) {
+        moveAfterTitle(chTop[k]);
+        break;
+      }
+    }
+
+    var kids = card.children;
+    var j;
+    for (j = 0; j < kids.length; j++) {
+      var el = kids[j];
+      if (imgCell && (el === imgCell || (el.contains && el.contains(imgCell)))) continue;
+      if (el === title || (el.contains && el.contains(title))) continue;
+      var tx = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      if (/^sale\s+price/i.test(tx) || /^list\s+price/i.test(tx)) {
+        moveAfterTitle(el);
+        continue;
+      }
+      var cls = (el.className && String(el.className)) || '';
+      if (
+        /product_sale_price|product_list_price|sale_price|list_price/i.test(cls) ||
+        (el.tagName === 'FONT' && /sale|list/i.test(cls) && /\$/i.test(tx))
+      ) {
+        moveAfterTitle(el);
+      }
+    }
+  }
+
   function mcPaintCategoryGridMemberPricing() {
     var products = mcCollectGridProductCards();
     if (!products.length) return;
@@ -8938,6 +9001,9 @@ try {
           block.style.setProperty('opacity', '1', 'important');
         } catch (eVis1) {}
         card.setAttribute('data-mc-member-grid', nextState);
+        try {
+          mcReorderCategoryListingNodes(card);
+        } catch (eOrdSwap) {}
         continue;
       }
 
@@ -8962,6 +9028,14 @@ try {
         priceEl.style.setProperty('opacity', '1', 'important');
       } catch (eVis) {}
       card.setAttribute('data-mc-member-grid', nextState);
+      try {
+        mcReorderCategoryListingNodes(card);
+      } catch (eOrdPaint) {}
+    }
+    for (i = 0; i < products.length; i++) {
+      try {
+        mcReorderCategoryListingNodes(products[i]);
+      } catch (eOrdAll) {}
     }
     try {
       mcHydrateCategoryHowToGetPrices();

@@ -271,15 +271,16 @@ body:not(.is-home) #display_menu_1 .vnav__label {
 
 /* ======================================
    PRODUCT GRID: FIX IMAGE BOX HEIGHT
+   (scoped off category pages — those use fixed tiles + object-fit: cover)
 ====================================== */
-.v-product-grid .v-product__img {
+html:not(.category) body:not(.category) .v-product-grid .v-product__img {
   display: block;
   height: 300px;
   text-align: center;
   overflow: hidden;
 }
 
-.v-product-grid .v-product__img img {
+html:not(.category) body:not(.category) .v-product-grid .v-product__img img {
   max-height: 300px;
   width: auto;
   max-width: 100%;
@@ -333,16 +334,17 @@ body:not(.is-home) #display_menu_1 .vnav__label {
 
 /* =========================================================
    PRODUCT LISTINGS: ALIGN IMAGES TO THE TOP OF THE IMAGE BOX
+   (not on category — category uses uniform center-crop tiles)
 ========================================================= */
-body:not(.is-home) #content_area .v-product__img,
-body:not(.is-home) #content_area_home .v-product__img {
+html:not(.category) body:not(.is-home) #content_area .v-product__img,
+html:not(.category) body:not(.is-home) #content_area_home .v-product__img {
   display: flex !important;
   align-items: flex-start !important;
   justify-content: center !important;
 }
 
-body:not(.is-home) #content_area .v-product__img img,
-body:not(.is-home) #content_area_home .v-product__img img {
+html:not(.category) body:not(.is-home) #content_area .v-product__img img,
+html:not(.category) body:not(.is-home) #content_area_home .v-product__img img {
   margin-top: 0 !important;
   object-position: top center !important;
 }
@@ -351,7 +353,13 @@ body:not(.is-home) #content_area_home .v-product__img img {
 :is(html.category, body.category) #content_area .v-product__img img,
 :is(html.category, body.category) #content_area .v-product-grid .v-product__img img,
 :is(html.category, body.category) #content_area ul.v-product-grid .v-product__img img {
+  object-fit: cover !important;
   object-position: center center !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  display: block !important;
 }
 
 /* If a parent header row is hidden, force it visible on non-home */
@@ -5379,10 +5387,12 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   height: 100% !important;
   max-width: none !important;
   max-height: none !important;
-  object-fit: cover;
-  object-position: center center;
+  object-fit: cover !important;
+  object-position: center center !important;
   display: block !important;
   margin: 0 !important;
+  flex-shrink: 0 !important;
+  vertical-align: top !important;
 }
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__name,
@@ -5396,7 +5406,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 :is(html.category, body.category) ul.v-product-grid > li.v-product h3,
 :is(html.category, body.category) ul.v-product-grid > li.v-product h4 {
   order: 2;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   line-height: 1.25;
   display: flex;
   align-items: center;
@@ -5427,13 +5437,11 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__price,
 :is(html.category, body.category) .v-product-grid .v-product .product_price,
-:is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__price,
-:is(html.category, body.category) ul.v-product-grid > li.v-product .product_price,
-:is(html.category, body.category) ul.v-product-grid > li.v-product .mc-member-grid-price {
+:is(html.category, body.category) ul.v-product-grid > li.v-product .product_price {
   order: 3;
   flex: 0 0 auto;
-  margin-top: auto !important;
+  margin-top: 6px !important;
   min-height: 0;
   box-sizing: border-box;
   display: flex;
@@ -5442,6 +5450,38 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   align-items: flex-start;
   width: 100%;
   text-align: left !important;
+}
+
+:is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
+:is(html.category, body.category) ul.v-product-grid > li.v-product .mc-member-grid-price {
+  order: 10 !important;
+  flex: 0 0 auto;
+  margin-top: 4px !important;
+  min-height: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left !important;
+}
+
+/* Volusion often injects sale / list / meta price before the image (DOM order). Default flex order:0
+   would paint above the image (order:1). Pull these below the title. */
+:is(html.category, body.category) .v-product .product_sale_price,
+:is(html.category, body.category) .v-product .product_list_price,
+:is(html.category, body.category) .v-product [class*="product_sale_price"],
+:is(html.category, body.category) .v-product [class*="product_list_price"],
+:is(html.category, body.category) .v-product [class*="sale_price"],
+:is(html.category, body.category) .v-product [itemprop="price"],
+:is(html.category, body.category) ul.v-product-grid > li.v-product > font.product_sale_price,
+:is(html.category, body.category) ul.v-product-grid > li.v-product > font.product_list_price {
+  order: 8 !important;
+  align-self: stretch !important;
+  text-align: left !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 @media (max-width: 991px) {
@@ -5482,7 +5522,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   :is(html.category, body.category) ul.v-product-grid > li.v-product h2,
   :is(html.category, body.category) ul.v-product-grid > li.v-product h3,
   :is(html.category, body.category) ul.v-product-grid > li.v-product h4 {
-    flex: 1 1 auto !important;
+    flex: 0 1 auto !important;
     min-height: 2.75em !important;
     align-items: center !important;
     justify-content: flex-start !important;
@@ -5494,11 +5534,15 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 
   :is(html.category, body.category) .v-product-grid .v-product .v-product__price,
   :is(html.category, body.category) .v-product-grid .v-product .product_price,
-  :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__price,
-  :is(html.category, body.category) ul.v-product-grid > li.v-product .product_price,
+  :is(html.category, body.category) ul.v-product-grid > li.v-product .product_price {
+    margin-top: 6px !important;
+  }
+
+  :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .mc-member-grid-price {
-    margin-top: auto !important;
+    margin-top: 4px !important;
+    order: 10 !important;
   }
 
   :is(html.category, body.category) .v-product-grid .v-product,
@@ -6039,6 +6083,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   object-position: center center !important;
   display: block !important;
   margin: 0 !important;
+  flex-shrink: 0 !important;
 }
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img .v-product__image-wrap,
@@ -6072,7 +6117,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 :is(html.category, body.category) ul.v-product-grid > li.v-product h2,
 :is(html.category, body.category) ul.v-product-grid > li.v-product h3,
 :is(html.category, body.category) ul.v-product-grid > li.v-product h4 {
-  flex: 1 1 auto !important;
+  flex: 0 1 auto !important;
   min-height: 2.75em !important;
   align-items: center !important;
   justify-content: flex-start !important;
@@ -6082,12 +6127,10 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__price,
 :is(html.category, body.category) .v-product-grid .v-product .product_price,
-:is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__price,
-:is(html.category, body.category) ul.v-product-grid > li.v-product .product_price,
-:is(html.category, body.category) ul.v-product-grid > li.v-product .mc-member-grid-price {
+:is(html.category, body.category) ul.v-product-grid > li.v-product .product_price {
   flex: 0 0 auto !important;
-  margin-top: auto !important;
+  margin-top: 6px !important;
   min-height: 0 !important;
   text-align: left !important;
   align-items: flex-start !important;
@@ -6095,17 +6138,26 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   flex-direction: column !important;
 }
 
-/* Category: force 3 products per row (desktop); 2 on tablet; 1 on narrow phones.
-   Covers parent categories that Volusion leaves in “list” / single-column layout. */
+:is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
+:is(html.category, body.category) ul.v-product-grid > li.v-product .mc-member-grid-price {
+  flex: 0 0 auto !important;
+  margin-top: 4px !important;
+  order: 10 !important;
+  min-height: 0 !important;
+  text-align: left !important;
+  align-items: flex-start !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Category: 3 / 2 / 1 columns — CSS Grid avoids flex-basis clipping + uneven row widths */
 @media (min-width: 992px) {
   :is(html.category, body.category) #content_area ul.v-product-grid,
   :is(html.category, body.category) #content_area .v-product-grid,
   html.vol-list.category #content_area ul.v-product-grid,
   html.vol-list.category #content_area .v-product-grid {
-    display: flex !important;
-    flex-flow: row wrap !important;
-    align-items: stretch !important;
-    justify-content: flex-start !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 20px !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -6114,6 +6166,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
     list-style: none !important;
     clear: both !important;
     float: none !important;
+    align-items: stretch !important;
   }
 
   :is(html.category, body.category) #content_area ul.v-product-grid > li,
@@ -6124,14 +6177,14 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   html.vol-list.category #content_area ul.v-product-grid > li.v-product,
   html.vol-list.category #content_area .v-product-grid > .v-product,
   html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
-    flex: 0 0 calc((100% - 40px) / 3) !important;
-    width: calc((100% - 40px) / 3) !important;
-    max-width: calc((100% - 40px) / 3) !important;
+    width: 100% !important;
+    max-width: none !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
     float: none !important;
     clear: none !important;
     display: flex !important;
+    flex-direction: column !important;
     list-style: none !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
@@ -6143,10 +6196,8 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   :is(html.category, body.category) #content_area .v-product-grid,
   html.vol-list.category #content_area ul.v-product-grid,
   html.vol-list.category #content_area .v-product-grid {
-    display: flex !important;
-    flex-flow: row wrap !important;
-    align-items: stretch !important;
-    justify-content: flex-start !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 16px !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -6155,6 +6206,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
     list-style: none !important;
     clear: both !important;
     float: none !important;
+    align-items: stretch !important;
   }
 
   :is(html.category, body.category) #content_area ul.v-product-grid > li,
@@ -6165,14 +6217,14 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   html.vol-list.category #content_area ul.v-product-grid > li.v-product,
   html.vol-list.category #content_area .v-product-grid > .v-product,
   html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
-    flex: 0 0 calc((100% - 16px) / 2) !important;
-    width: calc((100% - 16px) / 2) !important;
-    max-width: calc((100% - 16px) / 2) !important;
+    width: 100% !important;
+    max-width: none !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
     float: none !important;
     clear: none !important;
     display: flex !important;
+    flex-direction: column !important;
     list-style: none !important;
   }
 }
@@ -6182,8 +6234,8 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   :is(html.category, body.category) #content_area .v-product-grid,
   html.vol-list.category #content_area ul.v-product-grid,
   html.vol-list.category #content_area .v-product-grid {
-    display: flex !important;
-    flex-flow: row wrap !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 12px !important;
     width: 100% !important;
     margin: 0 !important;
@@ -6199,10 +6251,10 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   html.vol-list.category #content_area ul.v-product-grid > li,
   html.vol-list.category #content_area ul.v-product-grid > li.v-product,
   html.vol-list.category #content_area .v-product-grid > .v-product {
-    flex: 0 0 100% !important;
     width: 100% !important;
-    max-width: 100% !important;
+    max-width: none !important;
     float: none !important;
     display: flex !important;
+    flex-direction: column !important;
   }
 }
