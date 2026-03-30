@@ -5,15 +5,11 @@ name: Deploy to Volusion
 # Optional repo variable VERIFY_SITE_URL (e.g. https://www.example.com) overrides the default store URL used for verification.
 # Optional repo variable SKIP_LIVE_VERIFY=true skips the HTTP check (only if Volusion serves a template path we cannot hit via SFTP).
 
+# Runs on every push to main (no paths: filter). Previously, only commits touching template/CSS/deploy script started the workflow—other pushes looked like “deploy never ran.”
 on:
   push:
     branches:
       - main
-    paths:
-      - 'template_266.html'
-      - 'vspfiles/css/custom-safe.css'
-      - '.github/workflows/deploy.yml'
-      - 'scripts/volusion_sftp_deploy.py'
   workflow_dispatch:
 
 env:
