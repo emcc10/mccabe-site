@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'template_266.html'
   workflow_dispatch:
 
 jobs:
@@ -12,9 +14,8 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
-<<<<<<< HEAD
       - name: Upload template via SFTP (port 2222)
         env:
           SECRET_SFTP_HOST: ${{ secrets.SFTP_HOST }}
@@ -45,19 +46,3 @@ jobs:
           put template_266.html template_266.html
           bye
           EOSFTP
-=======
-      - name: Stage template for deploy
-        run: |
-          mkdir -p deploy-template
-          cp template_266.html deploy-template/template_266.html
-
-      - name: Upload via SFTP
-        uses: wangyucode/sftp-upload-action@v3
-        with:
-          host: ${{ secrets.SFTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: ${{ secrets.FTP_PORT }}
-          localDir: 'deploy-template'
-          remoteDir: '/v'
->>>>>>> efde708c77f0c437ff63256a5235cecdfe7f3648
