@@ -62,28 +62,48 @@ jobs:
           echo "Local template: $(wc -c < template_266.html | tr -d ' ') bytes; css: $(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes"
           echo "Remote CSS subdir (under template root): ${CSS_REL}"
 
+          TCP_OK=0
           echo "::group::Network: can this runner reach ${SFTP_HOST}:${SFTP_PORT}?"
           if timeout 15 bash -c "cat < /dev/null > /dev/tcp/${SFTP_HOST}/${SFTP_PORT}" 2>/dev/null; then
+            TCP_OK=1
             echo "TCP probe: port is open (connection accepted)."
           else
             echo "::warning::TCP probe failed (timeout or connection refused). Volusion or a firewall may block GitHub Actions IPs; FileZilla from home can still work."
           fi
           echo "::endgroup::"
 
-          # Legacy appliances (common on hosted FTP) still use ssh-rsa host keys; Ubuntu/OpenSSH 9+ disables them by default.
-          # -4 avoids broken IPv6 routes; password-only avoids hanging on SSH keys.
-          run_sftp_batch() {
+          # Use -o User= so host is never parsed as part of the name (harmless when username has no @).
+          # Many FTP/SFTP appliances use keyboard-interactive; try it before plain password.
+          # Retry with weaker KEX/ciphers if the first handshake fails (common on older Volusion nodes).
+          run_sftp_once() {
             local batch="$1"
+            shift
             sshpass -e sftp -4 -v -b "$batch" \
               -oBatchMode=no \
               -o ConnectTimeout=30 \
               -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
-              -o PreferredAuthentications=password \
+              -o "User=${SFTP_USER}" \
+              -o PreferredAuthentications=keyboard-interactive,password \
               -o PubkeyAuthentication=no \
-              -o HostKeyAlgorithms=+ssh-rsa \
+              "$@" \
               -P "${SFTP_PORT}" \
-              "${SFTP_USER}@${SFTP_HOST}"
+              "${SFTP_HOST}"
+          }
+
+          run_sftp_batch() {
+            local batch="$1"
+            if run_sftp_once "$batch" -o HostKeyAlgorithms=+ssh-rsa; then
+              return 0
+            fi
+            echo "::warning::SFTP retry with older SSH algorithms (KEX/ciphers)…"
+            if run_sftp_once "$batch" \
+              -o HostKeyAlgorithms=+ssh-rsa,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521 \
+              -o KexAlgorithms=+diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1 \
+              -o Ciphers=+aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,aes256-cbc,3des-cbc; then
+              return 0
+            fi
+            return 1
           }
 
           echo "::group::SFTP login check (pwd, ls)"
@@ -92,7 +112,7 @@ jobs:
           if ! run_sftp_batch "$diag"; then
             rm -f "$diag"
             echo "::endgroup::"
-            echo "::error::SFTP login failed after TCP probe. If TCP was OK: verify user/password secrets match FileZilla exactly (no extra spaces). If TCP failed: Volusion may need to allow GitHub/Azure egress IPs, or use a self-hosted Actions runner / manual upload."
+            echo "::error::SFTP login failed. TCP probe: $([ "${TCP_OK}" = 1 ] && echo OK || echo FAILED). If TCP=FAILED: Volusion/firewall may block GitHub IPs (FileZilla from home can still work). If TCP=OK: compare secrets to FileZilla (no spaces); open the log above and search for Permission denied, Unable to negotiate, or Connection reset."
             exit 1
           fi
           rm -f "$diag"
