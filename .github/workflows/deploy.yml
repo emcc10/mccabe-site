@@ -1,5 +1,8 @@
 name: Deploy to Volusion
 
+# Match scripts/upload_template_css.ps1: template → remote / , CSS → /vspfiles/css/
+# (SFTP "root" is usually the same folder the storefront exposes as /v/ on the web.)
+
 on:
   push:
     branches:
@@ -8,6 +11,9 @@ on:
       - 'template_266.html'
       - 'vspfiles/css/custom-safe.css'
   workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   deploy:
@@ -23,8 +29,7 @@ jobs:
           SECRET_FTP_HOST: ${{ secrets.FTP_HOST }}
           SFTP_USER: ${{ secrets.FTP_USERNAME }}
           SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          # Optional: full remote path to the folder that contains template_266.html (see FileZilla).
-          # Examples: /mccabestheaterandliving.com/v  or  /v
+          # Optional: remote folder that already contains template_266.html (cd here, then vspfiles/css for CSS).
           SFTP_ROOT_V: ${{ secrets.SFTP_ROOT_V }}
         run: |
           set -euo pipefail
@@ -41,8 +46,9 @@ jobs:
           sudo apt-get install -y -qq sshpass
 
           echo "Deploying to ${SFTP_HOST}:2222"
-          echo "  template_266.html → <root>/template_266.html ($(wc -c < template_266.html | tr -d ' ') bytes)"
-          echo "  vspfiles/css/custom-safe.css → <root>/vspfiles/css/custom-safe.css ($(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes)"
+          echo "  template_266.html → remote / (see upload_template_css.ps1)"
+          echo "  custom-safe.css → remote /vspfiles/css/"
+          echo "  Local sizes: template $(wc -c < template_266.html | tr -d ' ') bytes; css $(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes"
 
           run_sftp_batch() {
             local batch="$1"
@@ -54,24 +60,22 @@ jobs:
               "$SFTP_USER@$SFTP_HOST"
           }
 
-          try_remote_v_root() {
-            local root="$1"
+          echo "::group::SFTP after login: pwd + ls -la"
+          diag="$(mktemp)"
+          printf '%s\n' 'pwd' 'ls -la' 'bye' > "$diag"
+          run_sftp_batch "$diag" || true
+          rm -f "$diag"
+          echo "::endgroup::"
+
+          try_batch() {
+            local title="$1"
+            shift
             local batch
             batch="$(mktemp)"
-            # -b batch: abort on first failed command (heredoc does not)
-            {
-              echo "cd $root"
-              echo "put template_266.html template_266.html"
-              echo "ls -l template_266.html"
-              echo "cd vspfiles/css"
-              echo "put vspfiles/css/custom-safe.css custom-safe.css"
-              echo "ls -l custom-safe.css"
-              echo "bye"
-            } > "$batch"
-            echo "::group::SFTP try: cd $root"
+            printf '%s\n' "$@" > "$batch"
+            echo "::group::Try: $title"
             if run_sftp_batch "$batch"; then
               echo "::endgroup::"
-              echo "::notice::Upload OK under remote folder: $root"
               rm -f "$batch"
               return 0
             fi
@@ -80,16 +84,52 @@ jobs:
             return 1
           }
 
+          try_under_v_root() {
+            local root="$1"
+            try_batch "cd $root then template + vspfiles/css" \
+              "cd $root" \
+              "put template_266.html template_266.html" \
+              "ls -l template_266.html" \
+              "cd vspfiles/css" \
+              "put vspfiles/css/custom-safe.css custom-safe.css" \
+              "ls -l custom-safe.css" \
+              "bye"
+          }
+
+          ok=0
           if [ -n "${SFTP_ROOT_V:-}" ]; then
-            try_remote_v_root "$SFTP_ROOT_V"
+            if try_under_v_root "$SFTP_ROOT_V"; then ok=1; fi
           else
-            ok=0
-            for root in "/mccabestheaterandliving.com/v" "/v" "v"; do
-              if try_remote_v_root "$root"; then ok=1; break; fi
-            done
+            # Same paths as scripts/upload_template_css.ps1 (Posh-SSH -Destination '/' and '/vspfiles/css/')
+            if try_batch "cd / → template_266.html + /vspfiles/css/custom-safe.css" \
+              "cd /" \
+              "put template_266.html template_266.html" \
+              "ls -l template_266.html" \
+              "cd /vspfiles/css" \
+              "put vspfiles/css/custom-safe.css custom-safe.css" \
+              "ls -l custom-safe.css" \
+              "bye"; then ok=1; fi
+
             if [ "$ok" -ne 1 ]; then
-              echo "::error::SFTP could not upload using /mccabestheaterandliving.com/v, /v, or v (relative)."
-              echo "::error::In FileZilla, open the folder that contains template_266.html, note the remote path, and add GitHub secret SFTP_ROOT_V with that full path (e.g. /yourstore.com/v)."
-              exit 1
+              if try_batch "login cwd → template + vspfiles/css (relative)" \
+                "put template_266.html template_266.html" \
+                "ls -l template_266.html" \
+                "cd vspfiles/css" \
+                "put vspfiles/css/custom-safe.css custom-safe.css" \
+                "ls -l custom-safe.css" \
+                "bye"; then ok=1; fi
+            fi
+
+            if [ "$ok" -ne 1 ]; then
+              for root in "/mccabestheaterandliving.com/v" "/v" "v"; do
+                if try_under_v_root "$root"; then ok=1; break; fi
+              done
             fi
           fi
+
+          if [ "$ok" -ne 1 ]; then
+            echo "::error::All SFTP path attempts failed."
+            echo "::error::Compare the 'pwd + ls -la' group above with FileZilla. Set secret SFTP_ROOT_V to the remote path of the folder that contains template_266.html (then we use …/vspfiles/css for CSS)."
+            exit 1
+          fi
+          echo "::notice::Upload finished. Confirm on the live site with your MC_DEPLOY_VERIFY token."
