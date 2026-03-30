@@ -36,7 +36,12 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq sshpass
 
+          echo "Deploying template_266.html to ${SFTP_HOST}:2222 → remote /vspfiles/templates/template_266/template_266.html"
+          BYTES="$(wc -c < template_266.html | tr -d ' ')"
+          echo "Local file size: ${BYTES} bytes"
+
           sshpass -p "$SFTP_PASS" sftp \
+            -v \
             -oBatchMode=no \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
@@ -46,3 +51,5 @@ jobs:
           put template_266.html template_266.html
           bye
           EOSFTP
+
+          echo "::notice::SFTP put completed. In Volusion admin, confirm Design → Edit HTML still points at template 266 and publish if required."
