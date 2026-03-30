@@ -124,33 +124,24 @@ jobs:
             rm -f "$diag"
             echo "::endgroup::"
             echo "::warning::OpenSSH+sshpass could not log in. Trying Paramiko (different SSH stack; same secrets)."
-            python3 -m pip install -q paramiko --break-system-packages
-            if python3 scripts/volusion_sftp_deploy.py --probe-only 2>/dev/null; then
-              true
-            elif python3 -c "
-            import os, sys
-            os.chdir(os.environ.get('GITHUB_WORKSPACE','.'))
-            import paramiko
-            t = paramiko.Transport((os.environ['SFTP_HOST'], int(os.environ.get('SFTP_PORT','2222'))))
-            t.connect(username=os.environ['SFTP_USER'], password=os.environ['SFTP_PASS'])
-            s = paramiko.SFTPClient.from_transport(t)
-            s.chdir('.')
-            s.close()
-            t.close()
-            print('PARAMIKO_LOGIN_OK')
-            " 2>/tmp/paramiko_probe.err; then
-              echo "::notice::Paramiko authenticated. Uploading with scripts/volusion_sftp_deploy.py …"
-              if python3 scripts/volusion_sftp_deploy.py; then
-                echo "::notice::Deploy finished via Paramiko. Confirm live site with MC_DEPLOY_VERIFY."
-                exit 0
-              fi
+            if ! python3 -m pip install -q paramiko --break-system-packages; then
+              echo "::error::pip install paramiko failed on the runner."
+              exit 1
             fi
-            if [ -f /tmp/paramiko_probe.err ]; then
-              echo "::group::Paramiko probe stderr"
-              tail -n 40 /tmp/paramiko_probe.err || true
-              echo "::endgroup::"
+            export SFTP_HOST SFTP_PORT
+            set +e
+            python3 scripts/volusion_sftp_deploy.py
+            pm_rc=$?
+            set -e
+            if [ "$pm_rc" -eq 0 ]; then
+              echo "::notice::Deploy finished via Paramiko. Confirm live site with MC_DEPLOY_VERIFY."
+              exit 0
             fi
-            echo "::error::SFTP login failed (OpenSSH + Paramiko). TCP probe: $([ "${TCP_OK}" = 1 ] && echo OK || echo FAILED). If TCP=OK: confirm FTP_USERNAME/FTP_PASSWORD secrets match FileZilla; ask Volusion if automation from cloud IPs must be allowlisted. Search logs for Permission denied / Unable to negotiate / Authentication failed."
+            if [ "$pm_rc" -eq 1 ]; then
+              echo "::error::Paramiko connected but no remote path worked. Set SFTP_ROOT_V (Volusion often uses /v) or SFTP_CSS_SUBDIR."
+            else
+              echo "::error::Paramiko could not connect or authenticate. TCP probe: $([ "${TCP_OK}" = 1 ] && echo OK || echo FAILED). Match FTP_USERNAME/FTP_PASSWORD to FileZilla; ask Volusion if SFTP from cloud IPs is restricted."
+            fi
             exit 1
           fi
           rm -f "$diag"
