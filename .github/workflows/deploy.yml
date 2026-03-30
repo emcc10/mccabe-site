@@ -23,6 +23,9 @@ jobs:
           SECRET_FTP_HOST: ${{ secrets.FTP_HOST }}
           SFTP_USER: ${{ secrets.FTP_USERNAME }}
           SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          # Optional: full remote path to the folder that contains template_266.html (see FileZilla).
+          # Examples: /mccabestheaterandliving.com/v  or  /v
+          SFTP_ROOT_V: ${{ secrets.SFTP_ROOT_V }}
         run: |
           set -euo pipefail
           SFTP_HOST="${SECRET_SFTP_HOST:-}"
@@ -38,21 +41,55 @@ jobs:
           sudo apt-get install -y -qq sshpass
 
           echo "Deploying to ${SFTP_HOST}:2222"
-          echo "  - /v/template_266.html ($(wc -c < template_266.html | tr -d ' ') bytes) — same file as Design → v / template_266.html"
-          echo "  - /v/vspfiles/css/custom-safe.css ($(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes)"
+          echo "  template_266.html → <root>/template_266.html ($(wc -c < template_266.html | tr -d ' ') bytes)"
+          echo "  vspfiles/css/custom-safe.css → <root>/vspfiles/css/custom-safe.css ($(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes)"
 
-          sshpass -p "$SFTP_PASS" sftp \
-            -v \
-            -oBatchMode=no \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            -P 2222 \
-            "$SFTP_USER@$SFTP_HOST" << 'EOSFTP'
-          cd /v
-          put template_266.html template_266.html
-          cd /v/vspfiles/css
-          put vspfiles/css/custom-safe.css custom-safe.css
-          bye
-          EOSFTP
+          run_sftp_batch() {
+            local batch="$1"
+            sshpass -p "$SFTP_PASS" sftp -b "$batch" \
+              -oBatchMode=no \
+              -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -P 2222 \
+              "$SFTP_USER@$SFTP_HOST"
+          }
 
-          echo "::notice::SFTP upload finished (v/template_266.html + v/vspfiles/css/custom-safe.css). Not the same path as vspfiles/templates/266/ (theme assets)."
+          try_remote_v_root() {
+            local root="$1"
+            local batch
+            batch="$(mktemp)"
+            # -b batch: abort on first failed command (heredoc does not)
+            {
+              echo "cd $root"
+              echo "put template_266.html template_266.html"
+              echo "ls -l template_266.html"
+              echo "cd vspfiles/css"
+              echo "put vspfiles/css/custom-safe.css custom-safe.css"
+              echo "ls -l custom-safe.css"
+              echo "bye"
+            } > "$batch"
+            echo "::group::SFTP try: cd $root"
+            if run_sftp_batch "$batch"; then
+              echo "::endgroup::"
+              echo "::notice::Upload OK under remote folder: $root"
+              rm -f "$batch"
+              return 0
+            fi
+            echo "::endgroup::"
+            rm -f "$batch"
+            return 1
+          }
+
+          if [ -n "${SFTP_ROOT_V:-}" ]; then
+            try_remote_v_root "$SFTP_ROOT_V"
+          else
+            ok=0
+            for root in "/mccabestheaterandliving.com/v" "/v" "v"; do
+              if try_remote_v_root "$root"; then ok=1; break; fi
+            done
+            if [ "$ok" -ne 1 ]; then
+              echo "::error::SFTP could not upload using /mccabestheaterandliving.com/v, /v, or v (relative)."
+              echo "::error::In FileZilla, open the folder that contains template_266.html, note the remote path, and add GitHub secret SFTP_ROOT_V with that full path (e.g. /yourstore.com/v)."
+              exit 1
+            fi
+          fi
