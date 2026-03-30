@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'template_266.html'
   workflow_dispatch:
 
 jobs:
@@ -14,27 +12,19 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Build deploy copy with forced marker
+      - name: Stage template for deploy
         run: |
-          cp template_266.html deploy-template_266.html
-          printf '<!-- FORCED-RUNNER-MARKER -->\n<div style="position:fixed;top:0;left:0;z-index:999999;background:red;color:#fff;padding:12px 16px;">FORCED RUNNER MARKER</div>\n' | cat - deploy-template_266.html > temp && mv temp deploy-template_266.html
+          mkdir -p deploy-template
+          cp template_266.html deploy-template/template_266.html
 
-      - name: Upload via SFTP on Port 2222
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y sshpass
-
-          sshpass -p "${{ secrets.FTP_PASSWORD }}" \
-          sftp -o StrictHostKeyChecking=no \
-               -o UserKnownHostsFile=/dev/null \
-               -P 2222 \
-               "${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_HOST }}" <<'EOF'
-          # Target the physical directory for your active template
-          cd /vspfiles/templates/template_266
-          put deploy-template_266.html template_266.html
-          bye
-          EOF
-
-
+      - name: Upload via SFTP
+        uses: wangyucode/sftp-upload-action@v3
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          localDir: 'deploy-template'
+          remoteDir: '/v'
