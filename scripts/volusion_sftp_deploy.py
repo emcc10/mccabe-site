@@ -4,7 +4,7 @@ Paramiko SFTP deploy fallback.
 
 Template + CSS use different remote paths (Volusion):
   template → /template_266.html first (SFTP root), then fallbacks under /v/, etc.
-  CSS      → /vspfiles/css/custom-safe.css
+  CSS      → /vspfiles/css/custom-safe.css and /v/vspfiles/css/custom-safe.css (File Editor: wwwroot/v/vspfiles/css/).
 
 Override with SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE (full paths).
 """
@@ -30,17 +30,26 @@ def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
     secret_t = os.environ.get("SFTP_TEMPLATE_REMOTE", "").strip()
     domain_t = "/mccabestheaterandliving.com/v/template_266.html"
     domain_c = "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css"
+    domain_c_under_v = "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css"
+    v_wwwroot_css = "/v/vspfiles/css/custom-safe.css"
 
     raw: list[tuple[str, str]] = []
     if secret_t:
         raw.append((secret_t, c_remote))
+        raw.append((secret_t, v_wwwroot_css))
     raw.extend(
         [
             ("/template_266.html", c_remote),
+            ("/template_266.html", v_wwwroot_css),
             ("/v/template_266.html", c_remote),
+            ("/v/template_266.html", v_wwwroot_css),
             (domain_t, domain_c),
+            (domain_t, domain_c_under_v),
             ("template_266.html", "vspfiles/css/custom-safe.css"),
+            ("template_266.html", "v/vspfiles/css/custom-safe.css"),
             ("v/template_266.html", c_remote),
+            ("v/template_266.html", v_wwwroot_css),
+            ("v/template_266.html", "v/vspfiles/css/custom-safe.css"),
         ]
     )
 
@@ -77,7 +86,10 @@ def _mirror_template_to_canonical_paths(sftp) -> None:
 def _mirror_css_to_canonical_paths(sftp) -> None:
     for rel in (
         "/vspfiles/css/custom-safe.css",
+        "/v/vspfiles/css/custom-safe.css",
+        "v/vspfiles/css/custom-safe.css",
         "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css",
+        "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css",
     ):
         try:
             sftp.put("vspfiles/css/custom-safe.css", rel, confirm=False)

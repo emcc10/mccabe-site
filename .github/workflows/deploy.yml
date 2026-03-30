@@ -1,6 +1,6 @@
 name: Deploy to Volusion
 
-# Volusion: template at /template_266.html (SFTP root); css at /vspfiles/css/custom-safe.css. Optional secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE.
+# Volusion: template at /template_266.html (SFTP root). CSS: also under wwwroot v/ — /v/vspfiles/css/custom-safe.css (Volusion File Editor path), not only /vspfiles/css/custom-safe.css. Optional secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE.
 # If SFTP_TEMPLATE_REMOTE points at a path SFTP accepts but Volusion does not serve, the job used to go green while the storefront stayed stale—see mirror + verify steps below.
 # Optional repo variable VERIFY_SITE_URL (e.g. https://www.example.com) overrides the default store URL used for verification.
 # Optional repo variable SKIP_LIVE_VERIFY=true skips the HTTP check (only if Volusion serves a template path we cannot hit via SFTP).
@@ -207,7 +207,7 @@ jobs:
 
           if [ "$ok" -ne 1 ]; then
             echo "::error::All SFTP upload attempts failed (see -v output for paths/permissions)."
-            echo "::error::Match FileZilla: template is usually /template_266.html; css /vspfiles/css/custom-safe.css. Set secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE if yours differ."
+            echo "::error::Match FileZilla / Volusion File Editor: template often /template_266.html or /v/template_266.html; css must match live file (e.g. /v/vspfiles/css/custom-safe.css under wwwroot v/). Set secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE if yours differ."
             exit 1
           fi
 
@@ -215,6 +215,18 @@ jobs:
           try_put_template_only "mirror → /template_266.html" "/template_266.html"
           try_put_template_only "mirror → /v/template_266.html" "/v/template_266.html"
           try_put_template_only "mirror → domain /v/" "/mccabestheaterandliving.com/v/template_266.html"
+          echo "::endgroup::"
+
+          try_put_css_only() {
+            local title="$1" cpath="$2"
+            try_batch "${title}" \
+              "put vspfiles/css/custom-safe.css ${cpath}" \
+              "bye" || true
+          }
+
+          echo "::group::Best-effort: mirror CSS to wwwroot v/vspfiles/css (Volusion File Editor: v/vspfiles/css/custom-safe.css)"
+          try_put_css_only "css → /v/vspfiles/css/custom-safe.css" "/v/vspfiles/css/custom-safe.css"
+          try_put_css_only "css → v/vspfiles/css/custom-safe.css" "v/vspfiles/css/custom-safe.css"
           echo "::endgroup::"
 
           echo "::notice::Upload finished. Next step checks that the live homepage matches mc-deploy-verify in this commit."
