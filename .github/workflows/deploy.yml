@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'template_266.html'
+      - 'vspfiles/css/custom-safe.css'
   workflow_dispatch:
 
 jobs:
@@ -16,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload template via SFTP (port 2222)
+      - name: Upload template and CSS via SFTP (port 2222)
         env:
           SECRET_SFTP_HOST: ${{ secrets.SFTP_HOST }}
           SECRET_FTP_HOST: ${{ secrets.FTP_HOST }}
@@ -36,9 +37,9 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq sshpass
 
-          echo "Deploying template_266.html to ${SFTP_HOST}:2222 → remote /vspfiles/templates/template_266/template_266.html"
-          BYTES="$(wc -c < template_266.html | tr -d ' ')"
-          echo "Local file size: ${BYTES} bytes"
+          echo "Deploying to ${SFTP_HOST}:2222"
+          echo "  - /v/template_266.html ($(wc -c < template_266.html | tr -d ' ') bytes) — same file as Design → v / template_266.html"
+          echo "  - /v/vspfiles/css/custom-safe.css ($(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes)"
 
           sshpass -p "$SFTP_PASS" sftp \
             -v \
@@ -47,9 +48,11 @@ jobs:
             -o UserKnownHostsFile=/dev/null \
             -P 2222 \
             "$SFTP_USER@$SFTP_HOST" << 'EOSFTP'
-          cd /vspfiles/templates/template_266
+          cd /v
           put template_266.html template_266.html
+          cd /v/vspfiles/css
+          put vspfiles/css/custom-safe.css custom-safe.css
           bye
           EOSFTP
 
-          echo "::notice::SFTP put completed. In Volusion admin, confirm Design → Edit HTML still points at template 266 and publish if required."
+          echo "::notice::SFTP upload finished (v/template_266.html + v/vspfiles/css/custom-safe.css). Not the same path as vspfiles/templates/266/ (theme assets)."
