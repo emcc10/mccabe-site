@@ -21,16 +21,37 @@ def _css_remote() -> str:
     return "/vspfiles/css/custom-safe.css"
 
 
-def _template_candidates() -> list[str]:
-    one = os.environ.get("SFTP_TEMPLATE_REMOTE", "").strip()
-    if one:
-        return [one]
-    return [
-        "/template_266.html",
-        "/v/template_266.html",
-        "/mccabestheaterandliving.com/v/template_266.html",
-        "v/template_266.html",
-    ]
+def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
+    """Every (template_path, css_path) we try — same order as deploy.yml (secret first, then fallbacks).
+
+    When SFTP_TEMPLATE_REMOTE is set, older Paramiko behavior stopped after the first successful put;
+    that path is often writable but not the file Volusion serves, so we always attempt the full list.
+    """
+    secret_t = os.environ.get("SFTP_TEMPLATE_REMOTE", "").strip()
+    domain_t = "/mccabestheaterandliving.com/v/template_266.html"
+    domain_c = "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css"
+
+    raw: list[tuple[str, str]] = []
+    if secret_t:
+        raw.append((secret_t, c_remote))
+    raw.extend(
+        [
+            ("/template_266.html", c_remote),
+            ("/v/template_266.html", c_remote),
+            (domain_t, domain_c),
+            ("template_266.html", "vspfiles/css/custom-safe.css"),
+            ("v/template_266.html", c_remote),
+        ]
+    )
+
+    seen: set[tuple[str, str]] = set()
+    out: list[tuple[str, str]] = []
+    for t_path, c_path in raw:
+        key = (t_path, c_path)
+        if key not in seen:
+            seen.add(key)
+            out.append(key)
+    return out
 
 
 def _try_pair(sftp, t_path: str, c_path: str) -> None:
@@ -39,7 +60,7 @@ def _try_pair(sftp, t_path: str, c_path: str) -> None:
 
 
 def _mirror_template_to_canonical_paths(sftp) -> None:
-    """SFTP_TEMPLATE_REMOTE may point at a writable but non-live path; mirror to usual Volusion locations."""
+    """Extra template writes — logged so Action logs show whether Volusion paths are writable."""
     for rel in (
         "/template_266.html",
         "/v/template_266.html",
@@ -47,9 +68,21 @@ def _mirror_template_to_canonical_paths(sftp) -> None:
     ):
         try:
             sftp.put("template_266.html", rel)
-            print(f"PARAMIKO_MIRROR_OK {rel}", flush=True)
+            print(f"::notice::PARAMIKO_MIRROR_OK template → {rel}", flush=True)
         except Exception as exc:  # noqa: BLE001
-            print(f"PARAMIKO_MIRROR_SKIP {rel}: {exc}", flush=True)
+            print(f"::warning::PARAMIKO_MIRROR_SKIP template {rel}: {exc}", flush=True)
+
+
+def _mirror_css_to_canonical_paths(sftp) -> None:
+    for rel in (
+        "/vspfiles/css/custom-safe.css",
+        "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css",
+    ):
+        try:
+            sftp.put("vspfiles/css/custom-safe.css", rel)
+            print(f"::notice::PARAMIKO_MIRROR_OK css → {rel}", flush=True)
+        except Exception as exc:  # noqa: BLE001
+            print(f"::warning::PARAMIKO_MIRROR_SKIP css {rel}: {exc}", flush=True)
 
 
 def _try_home_relative(sftp) -> bool:
@@ -83,22 +116,25 @@ def main() -> int:
     try:
         sftp = paramiko.SFTPClient.from_transport(transport)
         try:
-            for t_path in _template_candidates():
-                c_path = c_remote
-                if t_path.startswith("/mccabestheaterandliving.com/") and c_remote == "/vspfiles/css/custom-safe.css":
-                    c_path = "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css"
+            any_ok = False
+            for t_path, c_path in _template_css_pairs(c_remote):
                 print(f"PARAMIKO_TRY template={t_path!r} css={c_path!r}", flush=True)
                 try:
                     _try_pair(sftp, t_path, c_path)
                 except Exception as exc:  # noqa: BLE001
-                    print(f"PARAMIKO_TRY_FAIL: {exc}", file=sys.stderr)
+                    print(f"PARAMIKO_TRY_FAIL template={t_path!r}: {exc}", file=sys.stderr)
                 else:
-                    print("PARAMIKO_OK", flush=True)
-                    _mirror_template_to_canonical_paths(sftp)
-                    return 0
+                    any_ok = True
+                    print(f"PARAMIKO_OK_PAIR template={t_path!r}", flush=True)
+            if any_ok:
+                _mirror_template_to_canonical_paths(sftp)
+                _mirror_css_to_canonical_paths(sftp)
+                print("PARAMIKO_OK (one or more path pairs succeeded)", flush=True)
+                return 0
             if _try_home_relative(sftp):
                 print("PARAMIKO_OK (login-relative template + vspfiles/css/)", flush=True)
                 _mirror_template_to_canonical_paths(sftp)
+                _mirror_css_to_canonical_paths(sftp)
                 return 0
             return 1
         finally:

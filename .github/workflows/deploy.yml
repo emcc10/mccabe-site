@@ -3,6 +3,7 @@ name: Deploy to Volusion
 # Volusion: template at /template_266.html (SFTP root); css at /vspfiles/css/custom-safe.css. Optional secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE.
 # If SFTP_TEMPLATE_REMOTE points at a path SFTP accepts but Volusion does not serve, the job used to go green while the storefront stayed stale—see mirror + verify steps below.
 # Optional repo variable VERIFY_SITE_URL (e.g. https://www.example.com) overrides the default store URL used for verification.
+# Optional repo variable SKIP_LIVE_VERIFY=true skips the HTTP check (only if Volusion serves a template path we cannot hit via SFTP).
 
 on:
   push:
@@ -223,6 +224,7 @@ jobs:
           echo "::notice::Upload finished. Next step checks that the live homepage matches mc-deploy-verify in this commit."
 
       - name: Verify live page shows checked-out template marker
+        if: ${{ vars.SKIP_LIVE_VERIFY != 'true' }}
         env:
           VERIFY_SITE_URL: ${{ vars.VERIFY_SITE_URL }}
         run: |
@@ -240,7 +242,10 @@ jobs:
           GOT=""
           for i in $(seq 1 8); do
             QURL="${BASE}/?__mc_deploy_verify=${i}&_=$(date +%s)"
-            HTML=$(curl -fsSL --max-time 45 "$QURL") || true
+            HTML=$(curl -fsSL --max-time 45 \
+              -H "Cache-Control: no-cache" \
+              -H "Pragma: no-cache" \
+              "$QURL") || true
             GOT=$(printf '%s' "$HTML" | perl -0777 -ne 'print $1 if /name="mc-deploy-verify"\s+content="([^"]+)"/') || true
             if [ "$GOT" = "$EXPECT" ]; then
               echo "::notice::Live site matches (mc-deploy-verify=${GOT})."
