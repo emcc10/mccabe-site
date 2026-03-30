@@ -1,6 +1,6 @@
 name: Deploy to Volusion
 
-# Volusion: template under /v/; custom-safe.css at /v/vspfiles/css/ (matches live URL). Override with secret SFTP_CSS_SUBDIR if needed.
+# Volusion: template at /template_266.html (SFTP root); css at /vspfiles/css/custom-safe.css. Optional secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE.
 
 on:
   push:
@@ -31,12 +31,12 @@ jobs:
           SECRET_SFTP_PORT: ${{ secrets.SFTP_PORT }}
           SFTP_USER: ${{ secrets.FTP_USERNAME }}
           SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          SFTP_ROOT_V: ${{ secrets.SFTP_ROOT_V }}
-          SFTP_CSS_SUBDIR: ${{ secrets.SFTP_CSS_SUBDIR }}
+          SFTP_TEMPLATE_REMOTE: ${{ secrets.SFTP_TEMPLATE_REMOTE }}
+          SFTP_CSS_REMOTE_FILE: ${{ secrets.SFTP_CSS_REMOTE_FILE }}
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}"
-          echo "::notice::deploy marker 20260331 — CSS default: /v/vspfiles/css/custom-safe.css"
+          echo "::notice::deploy marker 20260401 — template /template_266.html + css /vspfiles/css/custom-safe.css"
 
           SFTP_HOST="${SECRET_SFTP_HOST:-}"
           if [ -z "$SFTP_HOST" ]; then
@@ -59,11 +59,14 @@ jobs:
           sudo apt-get install -y -qq sshpass python3-pip
 
           export SSHPASS="${SFTP_PASS}"
-          CSS_REL="${SFTP_CSS_SUBDIR:-vspfiles/css}"
+          TEMPLATE_REMOTE="${SFTP_TEMPLATE_REMOTE:-}"
+          CSS_REMOTE="${SFTP_CSS_REMOTE_FILE:-/vspfiles/css/custom-safe.css}"
+          export SFTP_CSS_REMOTE_FILE="${CSS_REMOTE}"
+          export SFTP_TEMPLATE_REMOTE="${TEMPLATE_REMOTE}"
 
           echo "Deploying sftp://${SFTP_HOST}:${SFTP_PORT} as ${SFTP_USER}"
           echo "Local template: $(wc -c < template_266.html | tr -d ' ') bytes; css: $(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes"
-          echo "Remote CSS path: <template-root>/${CSS_REL}/custom-safe.css (set SFTP_CSS_SUBDIR empty for flat /v/custom-safe.css only if your store uses that)"
+          echo "Remote: template → ${TEMPLATE_REMOTE:-/template_266.html (then fallbacks)}; css → ${CSS_REMOTE}"
 
           TCP_OK=0
           echo "::group::Network: can this runner reach ${SFTP_HOST}:${SFTP_PORT}?"
@@ -137,7 +140,7 @@ jobs:
               exit 0
             fi
             if [ "$pm_rc" -eq 1 ]; then
-              echo "::error::Paramiko connected but no remote path worked. Set SFTP_ROOT_V (often /v). Default CSS path uses vspfiles/css under that root."
+              echo "::error::Paramiko connected but no path pair worked. Set SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE to match FileZilla."
             else
               echo "::error::Paramiko could not connect or authenticate. TCP probe: $([ "${TCP_OK}" = 1 ] && echo OK || echo FAILED). Match FTP_USERNAME/FTP_PASSWORD to FileZilla; ask Volusion if SFTP from cloud IPs is restricted."
             fi
@@ -165,76 +168,40 @@ jobs:
             return 1
           }
 
-          try_under_root() {
-            local root="$1"
-            root="${root%/}"
-            if [ -n "${CSS_REL}" ]; then
-              try_batch "cd ${root} → template + ${CSS_REL}/custom-safe.css" \
-                "cd ${root}" \
-                "put template_266.html template_266.html" \
-                "cd ${CSS_REL}" \
-                "put vspfiles/css/custom-safe.css custom-safe.css" \
-                "bye"
-            else
-              local t_rem c_rem
-              t_rem="${root}/template_266.html"
-              c_rem="${root}/custom-safe.css"
-              t_rem=$(echo "$t_rem" | sed 's#//#/#g')
-              c_rem=$(echo "$c_rem" | sed 's#//#/#g')
-              try_batch "absolute ${t_rem} + ${c_rem}" \
-                "put template_266.html ${t_rem}" \
-                "put vspfiles/css/custom-safe.css ${c_rem}" \
-                "bye"
-            fi
+          try_put_pair() {
+            local title="$1" tpath="$2" cpath="$3"
+            try_batch "${title}" \
+              "put template_266.html ${tpath}" \
+              "put vspfiles/css/custom-safe.css ${cpath}" \
+              "bye"
           }
 
           ok=0
-          if [ -n "${SFTP_ROOT_V:-}" ]; then
-            if try_under_root "${SFTP_ROOT_V}"; then ok=1; fi
-          else
-            if try_under_root "/v"; then ok=1; fi
-
-            if [ "$ok" -ne 1 ]; then
-              if [ -n "${CSS_REL}" ]; then
-                if try_batch "cd / → template + /${CSS_REL}" \
-                  "cd /" \
-                  "put template_266.html template_266.html" \
-                  "cd /${CSS_REL}" \
-                  "put vspfiles/css/custom-safe.css custom-safe.css" \
-                  "bye"; then ok=1; fi
-              else
-                if try_batch "absolute /template_266.html + /custom-safe.css" \
-                  "put template_266.html /template_266.html" \
-                  "put vspfiles/css/custom-safe.css /custom-safe.css" \
-                  "bye"; then ok=1; fi
-              fi
-            fi
-
-            if [ "$ok" -ne 1 ]; then
-              if [ -n "${CSS_REL}" ]; then
-                if try_batch "login cwd → template + ${CSS_REL}" \
-                  "put template_266.html template_266.html" \
-                  "cd ${CSS_REL}" \
-                  "put vspfiles/css/custom-safe.css custom-safe.css" \
-                  "bye"; then ok=1; fi
-              else
-                if try_batch "login cwd → template + custom-safe.css (same folder)" \
-                  "put template_266.html template_266.html" \
-                  "put vspfiles/css/custom-safe.css custom-safe.css" \
-                  "bye"; then ok=1; fi
-              fi
-            fi
-
-            if [ "$ok" -ne 1 ]; then
-              for root in "/mccabestheaterandliving.com/v" "v"; do
-                if try_under_root "$root"; then ok=1; break; fi
-              done
-            fi
+          if [ -n "${TEMPLATE_REMOTE}" ]; then
+            if try_put_pair "SFTP_TEMPLATE_REMOTE secret + css" "${TEMPLATE_REMOTE}" "${CSS_REMOTE}"; then ok=1; fi
+          fi
+          if [ "$ok" -ne 1 ]; then
+            if try_put_pair "canonical template at SFTP root" "/template_266.html" "${CSS_REMOTE}"; then ok=1; fi
+          fi
+          if [ "$ok" -ne 1 ]; then
+            if try_put_pair "template under /v" "/v/template_266.html" "${CSS_REMOTE}"; then ok=1; fi
+          fi
+          if [ "$ok" -ne 1 ]; then
+            if try_put_pair "domain-prefixed paths" "/mccabestheaterandliving.com/v/template_266.html" "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css"; then ok=1; fi
+          fi
+          if [ "$ok" -ne 1 ]; then
+            if try_batch "login cwd (relative vspfiles/css)" \
+              "put template_266.html template_266.html" \
+              "put vspfiles/css/custom-safe.css vspfiles/css/custom-safe.css" \
+              "bye"; then ok=1; fi
+          fi
+          if [ "$ok" -ne 1 ]; then
+            if try_put_pair "relative v/" "v/template_266.html" "${CSS_REMOTE}"; then ok=1; fi
           fi
 
           if [ "$ok" -ne 1 ]; then
             echo "::error::All SFTP upload attempts failed (see -v output for paths/permissions)."
-            echo "::error::Set SFTP_ROOT_V to FileZilla path for the folder with template_266.html. Default CSS subdir is vspfiles/css; set SFTP_CSS_SUBDIR to . or override paths if your layout differs."
+            echo "::error::Match FileZilla: template is usually /template_266.html; css /vspfiles/css/custom-safe.css. Set secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE if yours differ."
             exit 1
           fi
           echo "::notice::Upload finished. Confirm on the live site with your MC_DEPLOY_VERIFY token."

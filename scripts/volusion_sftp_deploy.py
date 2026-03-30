@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-Paramiko SFTP deploy fallback. Uses absolute remote paths for template + CSS.
+Paramiko SFTP deploy fallback.
 
-Default: custom-safe.css at <root>/vspfiles/css/ (matches live /v/vspfiles/css/custom-safe.css).
-Override SFTP_CSS_SUBDIR (e.g. empty for same-folder) or SFTP_CSS_REMOTE_FILE if needed.
+Template + CSS use different remote paths (Volusion):
+  template → /template_266.html first (SFTP root), then fallbacks under /v/, etc.
+  CSS      → /vspfiles/css/custom-safe.css
+
+Override with SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE (full paths).
 """
 from __future__ import annotations
 
@@ -11,70 +14,37 @@ import os
 import sys
 
 
-def _roots() -> list[str]:
-    override = os.environ.get("SFTP_ROOT_V", "").strip()
-    if override:
-        return [override]
-    return ["/v", "/", "__HOME__", "/mccabestheaterandliving.com/v", "v"]
+def _css_remote() -> str:
+    p = os.environ.get("SFTP_CSS_REMOTE_FILE", "").strip()
+    if p:
+        return p
+    return "/vspfiles/css/custom-safe.css"
 
 
-def _css_subdir_segments() -> list[str]:
-    rel = os.environ.get("SFTP_CSS_SUBDIR", "vspfiles/css").strip().strip("/")
-    if not rel:
-        return []
-    return [s for s in rel.split("/") if s]
+def _template_candidates() -> list[str]:
+    one = os.environ.get("SFTP_TEMPLATE_REMOTE", "").strip()
+    if one:
+        return [one]
+    return [
+        "/template_266.html",
+        "/v/template_266.html",
+        "/mccabestheaterandliving.com/v/template_266.html",
+        "v/template_266.html",
+    ]
 
 
-def _css_relative_under_template_root() -> str:
-    segs = _css_subdir_segments()
-    if not segs:
-        return "custom-safe.css"
-    return "/".join(segs + ["custom-safe.css"])
+def _try_pair(sftp, t_path: str, c_path: str) -> None:
+    sftp.put("template_266.html", t_path)
+    sftp.put("vspfiles/css/custom-safe.css", c_path)
 
 
-def _goto_root(sftp, root: str) -> None:
-    if root == "__HOME__":
-        return
-    sftp.chdir("/")
-    if root in ("", "/", "."):
-        return
-    for seg in root.strip("/").split("/"):
-        if seg:
-            sftp.chdir(seg)
-
-
-def _remote_pair(root: str) -> tuple[str | None, str | None]:
-    """(template_abs, css_abs) or (None, None) for __HOME__ relative mode."""
-    if root == "__HOME__":
-        return None, None
-    override = os.environ.get("SFTP_CSS_REMOTE_FILE", "").strip()
-    css_rel = _css_relative_under_template_root()
-    r = root.strip()
-    if r in ("/", ""):
-        t_rem = "/template_266.html"
-        c_rem = override or ("/" + css_rel)
-        return t_rem, c_rem
-    if r.startswith("/"):
-        base = r.rstrip("/")
-        t_rem = f"{base}/template_266.html"
-        c_rem = override or f"{base}/{css_rel}"
-        return t_rem, c_rem
-    t_rem = f"{r}/template_266.html"
-    c_rem = override or f"{r}/{css_rel}"
-    return t_rem, c_rem
-
-
-def _try_upload(sftp, root: str) -> None:
-    t_rem, c_rem = _remote_pair(root)
-    if t_rem is None:
-        _goto_root(sftp, root)
+def _try_home_relative(sftp) -> bool:
+    try:
         sftp.put("template_266.html", "template_266.html")
-        for seg in _css_subdir_segments():
-            sftp.chdir(seg)
-        sftp.put("vspfiles/css/custom-safe.css", "custom-safe.css")
-        return
-    sftp.put("template_266.html", t_rem)
-    sftp.put("vspfiles/css/custom-safe.css", c_rem)
+        sftp.put("vspfiles/css/custom-safe.css", "vspfiles/css/custom-safe.css")
+        return True
+    except Exception:  # noqa: BLE001
+        return False
 
 
 def main() -> int:
@@ -86,6 +56,7 @@ def main() -> int:
     user = os.environ["SFTP_USER"]
     password = os.environ["SFTP_PASS"]
 
+    c_remote = _css_remote()
     import paramiko  # noqa: PLC0415
 
     transport = paramiko.Transport((host, port))
@@ -96,24 +67,29 @@ def main() -> int:
         return 2
 
     try:
-        for root in _roots():
-            t_rem, c_rem = _remote_pair(root)
-            print(f"PARAMIKO_TRY root={root!r} template={t_rem!r} css={c_rem!r}", flush=True)
-            sftp = paramiko.SFTPClient.from_transport(transport)
-            try:
-                _try_upload(sftp, root)
-            except Exception as exc:  # noqa: BLE001
-                print(f"PARAMIKO_TRY_FAIL root={root!r}: {exc}", file=sys.stderr)
-            else:
-                print(f"PARAMIKO_OK root={root!r}", flush=True)
-                sftp.close()
-                return 0
-            finally:
+        sftp = paramiko.SFTPClient.from_transport(transport)
+        try:
+            for t_path in _template_candidates():
+                c_path = c_remote
+                if t_path.startswith("/mccabestheaterandliving.com/") and c_remote == "/vspfiles/css/custom-safe.css":
+                    c_path = "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css"
+                print(f"PARAMIKO_TRY template={t_path!r} css={c_path!r}", flush=True)
                 try:
-                    sftp.close()
-                except Exception:
-                    pass
-        return 1
+                    _try_pair(sftp, t_path, c_path)
+                except Exception as exc:  # noqa: BLE001
+                    print(f"PARAMIKO_TRY_FAIL: {exc}", file=sys.stderr)
+                else:
+                    print("PARAMIKO_OK", flush=True)
+                    return 0
+            if _try_home_relative(sftp):
+                print("PARAMIKO_OK (login-relative template + vspfiles/css/)", flush=True)
+                return 0
+            return 1
+        finally:
+            try:
+                sftp.close()
+            except Exception:
+                pass
     finally:
         transport.close()
 
