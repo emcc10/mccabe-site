@@ -24,12 +24,15 @@ def _expect_from_local(ws: str) -> str:
 
 def _template_paths_to_try() -> list[str]:
     secret = os.environ.get("SFTP_TEMPLATE_REMOTE", "").strip()
+    if secret and not secret.startswith("/"):
+        secret = "/" + secret
+    if secret == "/v/v/template_266.html":
+        secret = "/v/template_266.html"
     raw = [
         secret,
         "/template_266.html",
         "/v/template_266.html",
         "/mccabestheaterandliving.com/v/template_266.html",
-        "v/template_266.html",
         "template_266.html",
     ]
     seen: set[str] = set()

@@ -28,6 +28,10 @@ def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
     that path is often writable but not the file Volusion serves, so we always attempt the full list.
     """
     secret_t = os.environ.get("SFTP_TEMPLATE_REMOTE", "").strip()
+    if secret_t and not secret_t.startswith("/"):
+        secret_t = "/" + secret_t
+    if secret_t == "/v/v/template_266.html":
+        secret_t = "/v/template_266.html"
     domain_t = "/mccabestheaterandliving.com/v/template_266.html"
     domain_c = "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css"
     domain_c_under_v = "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css"
@@ -47,9 +51,6 @@ def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
             (domain_t, domain_c_under_v),
             ("template_266.html", "vspfiles/css/custom-safe.css"),
             ("template_266.html", "v/vspfiles/css/custom-safe.css"),
-            ("v/template_266.html", c_remote),
-            ("v/template_266.html", v_wwwroot_css),
-            ("v/template_266.html", "v/vspfiles/css/custom-safe.css"),
         ]
     )
 

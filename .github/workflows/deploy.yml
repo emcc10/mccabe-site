@@ -58,6 +58,14 @@ jobs:
 
           export SSHPASS="${SFTP_PASS}"
           TEMPLATE_REMOTE="${SFTP_TEMPLATE_REMOTE:-}"
+          if [ -n "${TEMPLATE_REMOTE}" ]; then
+            if [ "${TEMPLATE_REMOTE#/}" = "${TEMPLATE_REMOTE}" ]; then
+              TEMPLATE_REMOTE="/${TEMPLATE_REMOTE}"
+            fi
+            if [ "${TEMPLATE_REMOTE}" = "/v/v/template_266.html" ]; then
+              TEMPLATE_REMOTE="/v/template_266.html"
+            fi
+          fi
           CSS_REMOTE="${SFTP_CSS_REMOTE_FILE:-/vspfiles/css/custom-safe.css}"
           export SFTP_CSS_REMOTE_FILE="${CSS_REMOTE}"
           export SFTP_TEMPLATE_REMOTE="${TEMPLATE_REMOTE}"
@@ -199,9 +207,6 @@ jobs:
               "put template_266.html template_266.html" \
               "put vspfiles/css/custom-safe.css vspfiles/css/custom-safe.css" \
               "bye"; then ok=1; fi
-          fi
-          if [ "$ok" -ne 1 ]; then
-            if try_put_pair "relative v/" "v/template_266.html" "${CSS_REMOTE}"; then ok=1; fi
           fi
 
           if [ "$ok" -ne 1 ]; then
