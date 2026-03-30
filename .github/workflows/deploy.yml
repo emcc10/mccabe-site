@@ -22,14 +22,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload template and CSS via SFTP (port 2222)
+      - name: Upload template and CSS via SFTP
         env:
           SECRET_SFTP_HOST: ${{ secrets.SFTP_HOST }}
           SECRET_FTP_HOST: ${{ secrets.FTP_HOST }}
+          SECRET_SFTP_PORT: ${{ secrets.SFTP_PORT }}
           SFTP_USER: ${{ secrets.FTP_USERNAME }}
           SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
           SFTP_ROOT_V: ${{ secrets.SFTP_ROOT_V }}
-          # Optional: if CSS lives elsewhere (rare). Default: <template-root>/vspfiles/css
           SFTP_CSS_SUBDIR: ${{ secrets.SFTP_CSS_SUBDIR }}
         run: |
           set -euo pipefail
@@ -39,8 +39,10 @@ jobs:
           if [ -z "$SFTP_HOST" ]; then
             SFTP_HOST="${SECRET_FTP_HOST:-}"
           fi
+          SFTP_PORT="${SECRET_SFTP_PORT:-2222}"
+
           if [ -z "${SFTP_HOST:-}" ] || [ -z "${SFTP_USER:-}" ] || [ -z "${SFTP_PASS:-}" ]; then
-            echo "::error::Missing secrets. Set SFTP_HOST (or FTP_HOST), FTP_USERNAME, and FTP_PASSWORD."
+            echo "::error::Missing secrets. Set SFTP_HOST (or FTP_HOST), FTP_USERNAME, and FTP_PASSWORD. Optional: SFTP_PORT (default 2222)."
             exit 1
           fi
 
@@ -53,24 +55,34 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq sshpass
 
-          # sshpass -p breaks passwords containing $ ! ` etc.; -e reads SSHPASS safely
           export SSHPASS="${SFTP_PASS}"
-
           CSS_REL="${SFTP_CSS_SUBDIR:-vspfiles/css}"
 
-          echo "Deploying to ${SFTP_HOST}:2222 as ${SFTP_USER}"
-          echo "Local: $(pwd)/template_266.html ($(wc -c < template_266.html | tr -d ' ') bytes)"
-          echo "Local: $(pwd)/vspfiles/css/custom-safe.css ($(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes)"
+          echo "Deploying sftp://${SFTP_HOST}:${SFTP_PORT} as ${SFTP_USER}"
+          echo "Local template: $(wc -c < template_266.html | tr -d ' ') bytes; css: $(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes"
           echo "Remote CSS subdir (under template root): ${CSS_REL}"
 
+          echo "::group::Network: can this runner reach ${SFTP_HOST}:${SFTP_PORT}?"
+          if timeout 15 bash -c "cat < /dev/null > /dev/tcp/${SFTP_HOST}/${SFTP_PORT}" 2>/dev/null; then
+            echo "TCP probe: port is open (connection accepted)."
+          else
+            echo "::warning::TCP probe failed (timeout or connection refused). Volusion or a firewall may block GitHub Actions IPs; FileZilla from home can still work."
+          fi
+          echo "::endgroup::"
+
+          # Legacy appliances (common on hosted FTP) still use ssh-rsa host keys; Ubuntu/OpenSSH 9+ disables them by default.
+          # -4 avoids broken IPv6 routes; password-only avoids hanging on SSH keys.
           run_sftp_batch() {
             local batch="$1"
-            # -v surfaces "real path" and errors in the Actions log
-            sshpass -e sftp -v -b "$batch" \
+            sshpass -e sftp -4 -v -b "$batch" \
               -oBatchMode=no \
+              -o ConnectTimeout=30 \
               -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
-              -P 2222 \
+              -o PreferredAuthentications=password \
+              -o PubkeyAuthentication=no \
+              -o HostKeyAlgorithms=+ssh-rsa \
+              -P "${SFTP_PORT}" \
               "${SFTP_USER}@${SFTP_HOST}"
           }
 
@@ -80,7 +92,7 @@ jobs:
           if ! run_sftp_batch "$diag"; then
             rm -f "$diag"
             echo "::endgroup::"
-            echo "::error::SFTP could not connect or authenticate. Re-check SFTP_HOST/FTP_HOST, port 2222, FTP_USERNAME, FTP_PASSWORD (same as FileZilla). Passwords with special characters must be stored exactly in the secret."
+            echo "::error::SFTP login failed after TCP probe. If TCP was OK: verify user/password secrets match FileZilla exactly (no extra spaces). If TCP failed: Volusion may need to allow GitHub/Azure egress IPs, or use a self-hosted Actions runner / manual upload."
             exit 1
           fi
           rm -f "$diag"
@@ -119,7 +131,6 @@ jobs:
           if [ -n "${SFTP_ROOT_V:-}" ]; then
             if try_under_root "${SFTP_ROOT_V}"; then ok=1; fi
           else
-            # No post-put ls: some servers error on ls -l and abort after a successful put
             if try_batch "cd / → template + /${CSS_REL}" \
               "cd /" \
               "put template_266.html template_266.html" \
@@ -143,8 +154,8 @@ jobs:
           fi
 
           if [ "$ok" -ne 1 ]; then
-            echo "::error::All SFTP upload attempts failed (see -v lines above for 'No such file' / permission)."
-            echo "::error::In FileZilla, note Remote site path when you open the folder that contains template_266.html. Add secret SFTP_ROOT_V with that path (e.g. /yourstore.com/v). If CSS is not under …/vspfiles/css, set SFTP_CSS_SUBDIR (e.g. vspfiles/css)."
+            echo "::error::All SFTP upload attempts failed (see -v output for paths/permissions)."
+            echo "::error::Set SFTP_ROOT_V to FileZilla remote path of the folder containing template_266.html. Optional: SFTP_CSS_SUBDIR if css is not under …/vspfiles/css."
             exit 1
           fi
           echo "::notice::Upload finished. Confirm on the live site with your MC_DEPLOY_VERIFY token."
