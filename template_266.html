@@ -3,6 +3,25 @@
 <!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
 <!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><!--<![endif]-->
 <head>
+<script>
+(function () {
+  function markCategoryListing() {
+    try {
+      var p = (location.pathname || '').toLowerCase();
+      var h = document.documentElement;
+      if (/-s\//.test(p) || (h.classList && h.classList.contains('vol-list'))) {
+        h.classList.add('category');
+        if (document.body) {
+          document.body.classList.add('category');
+        }
+      }
+    } catch (e) {}
+  }
+  markCategoryListing();
+  document.addEventListener('DOMContentLoaded', markCategoryListing);
+  setTimeout(markCategoryListing, 0);
+})();
+</script>
 <!-- MC_DEPLOY_VERIFY_20260402: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
 <meta name="mc-deploy-verify" content="20260402">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">

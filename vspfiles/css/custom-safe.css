@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260327b — after deploy, Volusion File Editor at wwwroot/v/vspfiles/css/custom-safe.css should match this line */
+/* MC_DEPLOY_VERIFY_20260327d — category grid: vol-list + col flex min-width; content_area + product grid minmax */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6256,5 +6256,72 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
     float: none !important;
     display: flex !important;
     flex-direction: column !important;
+  }
+}
+
+/* =========================================================
+   CATEGORY / VOL-LIST: second column collapse (Bootstrap col + flex)
+   Without min-width:0 on the main column, CSS grid children can
+   shrink to a sliver. Also match html.vol-list when Volusion omits -s/.
+   ========================================================= */
+@media (min-width: 992px) {
+  :is(html.category, body.category) .content_area-wrapper,
+  html.vol-list .content_area-wrapper {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: 1 1 0% !important;
+  }
+
+  :is(html.category, body.category) #content_area,
+  html.vol-list #content_area {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  :is(html.category, body.category) #content_area ul.v-product-grid,
+  :is(html.category, body.category) #content_area .v-product-grid,
+  html.vol-list #content_area ul.v-product-grid,
+  html.vol-list #content_area .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  :is(html.category, body.category) #content_area ul.v-product-grid > li,
+  :is(html.category, body.category) #content_area .v-product-grid > .v-product,
+  html.vol-list #content_area ul.v-product-grid > li,
+  html.vol-list #content_area .v-product-grid > .v-product {
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+    overflow: hidden !important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+  :is(html.category, body.category) .content_area-wrapper,
+  html.vol-list .content_area-wrapper {
+    min-width: 0 !important;
+    flex: 1 1 0% !important;
+  }
+
+  :is(html.category, body.category) #content_area ul.v-product-grid,
+  :is(html.category, body.category) #content_area .v-product-grid,
+  html.vol-list #content_area ul.v-product-grid,
+  html.vol-list #content_area .v-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    min-width: 0 !important;
+  }
+
+  :is(html.category, body.category) #content_area ul.v-product-grid > li,
+  :is(html.category, body.category) #content_area .v-product-grid > .v-product,
+  html.vol-list #content_area ul.v-product-grid > li,
+  html.vol-list #content_area .v-product-grid > .v-product {
+    min-width: 0 !important;
+    overflow: hidden !important;
   }
 }
