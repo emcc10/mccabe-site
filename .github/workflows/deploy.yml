@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'template_266.html'
-      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 jobs:
@@ -15,17 +14,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Build deploy copy with forced marker
         run: |
           cp template_266.html deploy-template_266.html
           printf '<!-- FORCED-RUNNER-MARKER -->\n<div style="position:fixed;top:0;left:0;z-index:999999;background:red;color:#fff;padding:12px 16px;">FORCED RUNNER MARKER</div>\n' | cat - deploy-template_266.html > temp && mv temp deploy-template_266.html
-          echo "===== TOP OF DEPLOY FILE ====="
-          head -20 deploy-template_266.html
-          grep -n "FORCED RUNNER MARKER" deploy-template_266.html
 
-      - name: Upload exact deploy file via SFTP
+      - name: Upload via SFTP on Port 2222
         run: |
           sudo apt-get update
           sudo apt-get install -y sshpass
@@ -33,9 +29,12 @@ jobs:
           sshpass -p "${{ secrets.FTP_PASSWORD }}" \
           sftp -o StrictHostKeyChecking=no \
                -o UserKnownHostsFile=/dev/null \
-               -P "${{ secrets.FTP_PORT }}" \
+               -P 2222 \
                "${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_HOST }}" <<'EOF'
-          cd /v
+          # Target the physical directory for your active template
+          cd /vspfiles/templates/template_266
           put deploy-template_266.html template_266.html
           bye
           EOF
+
+
