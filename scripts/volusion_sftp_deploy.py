@@ -38,6 +38,20 @@ def _try_pair(sftp, t_path: str, c_path: str) -> None:
     sftp.put("vspfiles/css/custom-safe.css", c_path)
 
 
+def _mirror_template_to_canonical_paths(sftp) -> None:
+    """SFTP_TEMPLATE_REMOTE may point at a writable but non-live path; mirror to usual Volusion locations."""
+    for rel in (
+        "/template_266.html",
+        "/v/template_266.html",
+        "/mccabestheaterandliving.com/v/template_266.html",
+    ):
+        try:
+            sftp.put("template_266.html", rel)
+            print(f"PARAMIKO_MIRROR_OK {rel}", flush=True)
+        except Exception as exc:  # noqa: BLE001
+            print(f"PARAMIKO_MIRROR_SKIP {rel}: {exc}", flush=True)
+
+
 def _try_home_relative(sftp) -> bool:
     try:
         sftp.put("template_266.html", "template_266.html")
@@ -80,9 +94,11 @@ def main() -> int:
                     print(f"PARAMIKO_TRY_FAIL: {exc}", file=sys.stderr)
                 else:
                     print("PARAMIKO_OK", flush=True)
+                    _mirror_template_to_canonical_paths(sftp)
                     return 0
             if _try_home_relative(sftp):
                 print("PARAMIKO_OK (login-relative template + vspfiles/css/)", flush=True)
+                _mirror_template_to_canonical_paths(sftp)
                 return 0
             return 1
         finally:

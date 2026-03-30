@@ -1,6 +1,8 @@
 name: Deploy to Volusion
 
 # Volusion: template at /template_266.html (SFTP root); css at /vspfiles/css/custom-safe.css. Optional secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE.
+# If SFTP_TEMPLATE_REMOTE points at a path SFTP accepts but Volusion does not serve, the job used to go green while the storefront stayed stale—see mirror + verify steps below.
+# Optional repo variable VERIFY_SITE_URL (e.g. https://www.example.com) overrides the default store URL used for verification.
 
 on:
   push:
@@ -176,6 +178,13 @@ jobs:
               "bye"
           }
 
+          try_put_template_only() {
+            local title="$1" tpath="$2"
+            try_batch "${title}" \
+              "put template_266.html ${tpath}" \
+              "bye" || true
+          }
+
           ok=0
           if [ -n "${TEMPLATE_REMOTE}" ]; then
             if try_put_pair "SFTP_TEMPLATE_REMOTE secret + css" "${TEMPLATE_REMOTE}" "${CSS_REMOTE}"; then ok=1; fi
@@ -204,4 +213,41 @@ jobs:
             echo "::error::Match FileZilla: template is usually /template_266.html; css /vspfiles/css/custom-safe.css. Set secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE if yours differ."
             exit 1
           fi
-          echo "::notice::Upload finished. Confirm on the live site with your MC_DEPLOY_VERIFY token."
+
+          echo "::group::Best-effort: mirror template to canonical Volusion paths (covers wrong SFTP_TEMPLATE_REMOTE)"
+          try_put_template_only "mirror → /template_266.html" "/template_266.html"
+          try_put_template_only "mirror → /v/template_266.html" "/v/template_266.html"
+          try_put_template_only "mirror → domain /v/" "/mccabestheaterandliving.com/v/template_266.html"
+          echo "::endgroup::"
+
+          echo "::notice::Upload finished. Next step checks that the live homepage matches mc-deploy-verify in this commit."
+
+      - name: Verify live page shows checked-out template marker
+        env:
+          VERIFY_SITE_URL: ${{ vars.VERIFY_SITE_URL }}
+        run: |
+          set -euo pipefail
+          cd "${GITHUB_WORKSPACE}"
+          DEFAULT_URL="https://www.mccabestheaterandliving.com"
+          BASE="${VERIFY_SITE_URL:-$DEFAULT_URL}"
+          BASE="${BASE%/}"
+          EXPECT=$(perl -0777 -ne 'print $1 if /name="mc-deploy-verify"\s+content="([^"]+)"/' template_266.html)
+          if [ -z "${EXPECT}" ]; then
+            echo "::notice::No mc-deploy-verify in template; skipping live check."
+            exit 0
+          fi
+          echo "Expecting live mc-deploy-verify content: ${EXPECT}"
+          GOT=""
+          for i in $(seq 1 8); do
+            QURL="${BASE}/?__mc_deploy_verify=${i}&_=$(date +%s)"
+            HTML=$(curl -fsSL --max-time 45 "$QURL") || true
+            GOT=$(printf '%s' "$HTML" | perl -0777 -ne 'print $1 if /name="mc-deploy-verify"\s+content="([^"]+)"/') || true
+            if [ "$GOT" = "$EXPECT" ]; then
+              echo "::notice::Live site matches (mc-deploy-verify=${GOT})."
+              exit 0
+            fi
+            echo "Attempt ${i}: live mc-deploy-verify='${GOT:-<missing>}'"
+            sleep 15
+          done
+          echo "::error::Live homepage still shows mc-deploy-verify='${GOT:-<missing>}', expected '${EXPECT}'. SFTP accepted an upload that Volusion is not serving: remove or fix GitHub secret SFTP_TEMPLATE_REMOTE to match the template path in FileZilla, or confirm Design → Active template in Volusion."
+          exit 1
