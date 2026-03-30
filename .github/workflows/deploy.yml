@@ -1,6 +1,7 @@
 name: Deploy to Volusion
 
-# Matches scripts/upload_template_css.ps1: template → remote / , CSS → /vspfiles/css/
+# Volusion (typical): SFTP host + port 2222 in secrets; store file root is /v → template_266.html and /v/vspfiles/css/.
+# Fallbacks: / (chroot), login cwd, domain-prefixed /…/v (see try order below).
 
 on:
   push:
@@ -9,6 +10,7 @@ on:
     paths:
       - 'template_266.html'
       - 'vspfiles/css/custom-safe.css'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 env:
@@ -34,6 +36,7 @@ jobs:
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}"
+          echo "::notice::deploy.yml marker 20260328a — if you do not see this line, GitHub is running an old workflow (push latest main)."
 
           SFTP_HOST="${SECRET_SFTP_HOST:-}"
           if [ -z "$SFTP_HOST" ]; then
@@ -151,12 +154,17 @@ jobs:
           if [ -n "${SFTP_ROOT_V:-}" ]; then
             if try_under_root "${SFTP_ROOT_V}"; then ok=1; fi
           else
-            if try_batch "cd / → template + /${CSS_REL}" \
-              "cd /" \
-              "put template_266.html template_266.html" \
-              "cd /${CSS_REL}" \
-              "put vspfiles/css/custom-safe.css custom-safe.css" \
-              "bye"; then ok=1; fi
+            # Volusion: official store SFTP root is often /v (template here, css under vspfiles/css).
+            if try_under_root "/v"; then ok=1; fi
+
+            if [ "$ok" -ne 1 ]; then
+              if try_batch "cd / → template + /${CSS_REL} (chroot may map / to store root)" \
+                "cd /" \
+                "put template_266.html template_266.html" \
+                "cd /${CSS_REL}" \
+                "put vspfiles/css/custom-safe.css custom-safe.css" \
+                "bye"; then ok=1; fi
+            fi
 
             if [ "$ok" -ne 1 ]; then
               if try_batch "login cwd → template + relative ${CSS_REL}" \
@@ -167,7 +175,7 @@ jobs:
             fi
 
             if [ "$ok" -ne 1 ]; then
-              for root in "/mccabestheaterandliving.com/v" "/v" "v"; do
+              for root in "/mccabestheaterandliving.com/v" "v"; do
                 if try_under_root "$root"; then ok=1; break; fi
               done
             fi
