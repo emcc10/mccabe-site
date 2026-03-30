@@ -67,7 +67,8 @@ def _mirror_template_to_canonical_paths(sftp) -> None:
         "/mccabestheaterandliving.com/v/template_266.html",
     ):
         try:
-            sftp.put("template_266.html", rel)
+            # confirm=False: Volusion SFTP sometimes fails post-put size check (e.g. 196608 vs real size) on long paths.
+            sftp.put("template_266.html", rel, confirm=False)
             print(f"::notice::PARAMIKO_MIRROR_OK template → {rel}", flush=True)
         except Exception as exc:  # noqa: BLE001
             print(f"::warning::PARAMIKO_MIRROR_SKIP template {rel}: {exc}", flush=True)
@@ -79,7 +80,7 @@ def _mirror_css_to_canonical_paths(sftp) -> None:
         "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css",
     ):
         try:
-            sftp.put("vspfiles/css/custom-safe.css", rel)
+            sftp.put("vspfiles/css/custom-safe.css", rel, confirm=False)
             print(f"::notice::PARAMIKO_MIRROR_OK css → {rel}", flush=True)
         except Exception as exc:  # noqa: BLE001
             print(f"::warning::PARAMIKO_MIRROR_SKIP css {rel}: {exc}", flush=True)
