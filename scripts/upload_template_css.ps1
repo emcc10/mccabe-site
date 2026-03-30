@@ -8,7 +8,7 @@ $s = New-SFTPSession -ComputerName $cfg.host -Port $cfg.port -Credential $cred -
 try {
   Set-SFTPItem -SessionId $s.SessionId -Path '.\template_266.html' -Destination '/' -Force
   Set-SFTPItem -SessionId $s.SessionId -Path '.\vspfiles\templates\266\css\template.css' -Destination '/vspfiles/templates/266/css/' -Force
-  Set-SFTPItem -SessionId $s.SessionId -Path '.\vspfiles\css\custom-safe.css' -Destination '/' -Force
+  Set-SFTPItem -SessionId $s.SessionId -Path '.\vspfiles\css\custom-safe.css' -Destination '/vspfiles/css/' -Force
   Set-SFTPItem -SessionId $s.SessionId -Path '.\vspfiles\templates\266\js\min\template.min.js' -Destination '/vspfiles/templates/266/js/min/' -Force
   Set-SFTPItem -SessionId $s.SessionId -Path '.\vspfiles\templates\266\js\min\design-toolkit.min.js' -Destination '/vspfiles/templates/266/js/min/' -Force
   Write-Output 'UPLOAD_OK'

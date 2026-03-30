@@ -2,9 +2,8 @@
 """
 Paramiko SFTP deploy fallback. Uses absolute remote paths for template + CSS.
 
-Default: custom-safe.css in the same remote folder as template_266.html (e.g. /v/).
-Optional SFTP_CSS_SUBDIR=vspfiles/css for legacy layout.
-Optional SFTP_CSS_REMOTE_FILE= full path override.
+Default: custom-safe.css at <root>/vspfiles/css/ (matches live /v/vspfiles/css/custom-safe.css).
+Override SFTP_CSS_SUBDIR (e.g. empty for same-folder) or SFTP_CSS_REMOTE_FILE if needed.
 """
 from __future__ import annotations
 
@@ -20,7 +19,7 @@ def _roots() -> list[str]:
 
 
 def _css_subdir_segments() -> list[str]:
-    rel = os.environ.get("SFTP_CSS_SUBDIR", "").strip().strip("/")
+    rel = os.environ.get("SFTP_CSS_SUBDIR", "vspfiles/css").strip().strip("/")
     if not rel:
         return []
     return [s for s in rel.split("/") if s]

@@ -1,7 +1,6 @@
 name: Deploy to Volusion
 
-# Volusion: template + custom-safe.css in same remote folder (e.g. /v/). Local CSS stays repo path vspfiles/css/custom-safe.css.
-# Optional secret SFTP_CSS_SUBDIR=vspfiles/css if your store still uses that subfolder.
+# Volusion: template under /v/; custom-safe.css at /v/vspfiles/css/ (matches live URL). Override with secret SFTP_CSS_SUBDIR if needed.
 
 on:
   push:
@@ -37,7 +36,7 @@ jobs:
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}"
-          echo "::notice::deploy marker 20260330c — CSS default: same folder as template (/v/custom-safe.css)."
+          echo "::notice::deploy marker 20260331 — CSS default: /v/vspfiles/css/custom-safe.css"
 
           SFTP_HOST="${SECRET_SFTP_HOST:-}"
           if [ -z "$SFTP_HOST" ]; then
@@ -60,15 +59,11 @@ jobs:
           sudo apt-get install -y -qq sshpass python3-pip
 
           export SSHPASS="${SFTP_PASS}"
-          CSS_REL="${SFTP_CSS_SUBDIR:-}"
+          CSS_REL="${SFTP_CSS_SUBDIR:-vspfiles/css}"
 
           echo "Deploying sftp://${SFTP_HOST}:${SFTP_PORT} as ${SFTP_USER}"
           echo "Local template: $(wc -c < template_266.html | tr -d ' ') bytes; css: $(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes"
-          if [ -n "${CSS_REL}" ]; then
-            echo "Remote CSS path: <template-root>/${CSS_REL}/custom-safe.css (legacy subdir)"
-          else
-            echo "Remote CSS path: <template-root>/custom-safe.css (same folder as template)"
-          fi
+          echo "Remote CSS path: <template-root>/${CSS_REL}/custom-safe.css (set SFTP_CSS_SUBDIR empty for flat /v/custom-safe.css only if your store uses that)"
 
           TCP_OK=0
           echo "::group::Network: can this runner reach ${SFTP_HOST}:${SFTP_PORT}?"
@@ -142,7 +137,7 @@ jobs:
               exit 0
             fi
             if [ "$pm_rc" -eq 1 ]; then
-              echo "::error::Paramiko connected but no remote path worked. Set SFTP_ROOT_V (often /v). Optional SFTP_CSS_SUBDIR=vspfiles/css if CSS is not beside the template."
+              echo "::error::Paramiko connected but no remote path worked. Set SFTP_ROOT_V (often /v). Default CSS path uses vspfiles/css under that root."
             else
               echo "::error::Paramiko could not connect or authenticate. TCP probe: $([ "${TCP_OK}" = 1 ] && echo OK || echo FAILED). Match FTP_USERNAME/FTP_PASSWORD to FileZilla; ask Volusion if SFTP from cloud IPs is restricted."
             fi
@@ -239,7 +234,7 @@ jobs:
 
           if [ "$ok" -ne 1 ]; then
             echo "::error::All SFTP upload attempts failed (see -v output for paths/permissions)."
-            echo "::error::Set SFTP_ROOT_V to FileZilla path for the folder with template_266.html. Set SFTP_CSS_SUBDIR=vspfiles/css only if CSS is not beside the template."
+            echo "::error::Set SFTP_ROOT_V to FileZilla path for the folder with template_266.html. Default CSS subdir is vspfiles/css; set SFTP_CSS_SUBDIR to . or override paths if your layout differs."
             exit 1
           fi
           echo "::notice::Upload finished. Confirm on the live site with your MC_DEPLOY_VERIFY token."
