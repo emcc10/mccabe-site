@@ -4886,7 +4886,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 
   function run() {
-    if (!document.body.classList.contains('category')) return;
+    if (
+      !document.documentElement.classList.contains('category') &&
+      !document.body.classList.contains('category')
+    ) {
+      return;
+    }
     applyBaseline();
 
     // Keep re-applying in case theme JS rewrites styles
@@ -8328,7 +8333,9 @@ try {
 
   function mcIsLikelyListingPage() {
     var b = document.body;
+    var h = document.documentElement;
     if (!b) return false;
+    if (h && h.classList.contains('category')) return true;
     if (b.classList.contains('category')) return true;
     if (b.classList.contains('is-home')) return true;
     var p = (location.pathname || '').toLowerCase();
