@@ -9,10 +9,23 @@
     try {
       var p = (location.pathname || '').toLowerCase();
       var h = document.documentElement;
-      if (/-s\//.test(p) || (h.classList && h.classList.contains('vol-list'))) {
+      var b = document.body;
+      var pathMatch = /-s\//.test(p) || (h.classList && h.classList.contains('vol-list'));
+      var gridMatch = false;
+      if (b && !b.classList.contains('productdetails')) {
+        var isSearch = /\/search|searchresults/i.test(p);
+        var isCart = /shoppingcart|onepagecheckout|checkout|orderconfirm/i.test(p);
+        if (!isSearch && !isCart) {
+          var grid = document.querySelector('#content_area ul.v-product-grid');
+          if (grid && grid.querySelector('li')) {
+            gridMatch = true;
+          }
+        }
+      }
+      if (pathMatch || gridMatch) {
         h.classList.add('category');
-        if (document.body) {
-          document.body.classList.add('category');
+        if (b) {
+          b.classList.add('category');
         }
       }
     } catch (e) {}
@@ -22,8 +35,8 @@
   setTimeout(markCategoryListing, 0);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260402: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
-<meta name="mc-deploy-verify" content="20260402">
+<!-- MC_DEPLOY_VERIFY_20260403: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
+<meta name="mc-deploy-verify" content="20260403">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 

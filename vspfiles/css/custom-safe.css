@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260327d — category grid: vol-list + col flex min-width; content_area + product grid minmax */
+/* MC_DEPLOY_VERIFY_20260327e — category grid: also body:not(.productdetails) #content_area (no html.category required) */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6298,7 +6298,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
     min-width: 0 !important;
     max-width: none !important;
     width: auto !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 }
 
@@ -6322,6 +6322,73 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   html.vol-list #content_area ul.v-product-grid > li,
   html.vol-list #content_area .v-product-grid > .v-product {
     min-width: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
+  }
+}
+
+/* =========================================================
+   CATEGORY LISTING (nuclear): do not rely on html.category / vol-list
+   Live HTML may omit those classes; Volusion still uses float/% widths on <li>.
+   Scope: not homepage, not PDP (body.productdetails).
+   ========================================================= */
+@media (min-width: 992px) {
+  body:not(.is-home):not(.productdetails) .content_area-wrapper {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: 1 1 0% !important;
+  }
+
+  body:not(.is-home):not(.productdetails) #content_area {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body:not(.is-home):not(.productdetails) #content_area ul.v-product-grid,
+  body:not(.is-home):not(.productdetails) #content_area .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    float: none !important;
+    clear: both !important;
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  body:not(.is-home):not(.productdetails) #content_area ul.v-product-grid > li,
+  body:not(.is-home):not(.productdetails) #content_area .v-product-grid > .v-product {
+    float: none !important;
+    clear: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    overflow: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+  body:not(.is-home):not(.productdetails) #content_area ul.v-product-grid,
+  body:not(.is-home):not(.productdetails) #content_area .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    float: none !important;
+    clear: both !important;
+  }
+
+  body:not(.is-home):not(.productdetails) #content_area ul.v-product-grid > li,
+  body:not(.is-home):not(.productdetails) #content_area .v-product-grid > .v-product {
+    float: none !important;
+    min-width: 0 !important;
+    overflow: visible !important;
   }
 }
