@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260327e — category grid: also body:not(.productdetails) #content_area (no html.category required) */
+/* MC_DEPLOY_VERIFY_20260327f — remove is-home guard; category pages can still carry is-home */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6332,20 +6332,20 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
    Scope: not homepage, not PDP (body.productdetails).
    ========================================================= */
 @media (min-width: 992px) {
-  body:not(.is-home):not(.productdetails) .content_area-wrapper {
+  body:not(.productdetails) .content_area-wrapper {
     min-width: 0 !important;
     max-width: 100% !important;
     flex: 1 1 0% !important;
   }
 
-  body:not(.is-home):not(.productdetails) #content_area {
+  body:not(.productdetails) #content_area {
     min-width: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
   }
 
-  body:not(.is-home):not(.productdetails) #content_area ul.v-product-grid,
-  body:not(.is-home):not(.productdetails) #content_area .v-product-grid {
+  body:not(.productdetails) #content_area ul.v-product-grid,
+  body:not(.productdetails) #content_area .v-product-grid {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 20px !important;
@@ -6360,8 +6360,8 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
     margin-right: 0 !important;
   }
 
-  body:not(.is-home):not(.productdetails) #content_area ul.v-product-grid > li,
-  body:not(.is-home):not(.productdetails) #content_area .v-product-grid > .v-product {
+  body:not(.productdetails) #content_area ul.v-product-grid > li,
+  body:not(.productdetails) #content_area .v-product-grid > .v-product {
     float: none !important;
     clear: none !important;
     width: auto !important;
@@ -6374,8 +6374,8 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 }
 
 @media (min-width: 576px) and (max-width: 991px) {
-  body:not(.is-home):not(.productdetails) #content_area ul.v-product-grid,
-  body:not(.is-home):not(.productdetails) #content_area .v-product-grid {
+  body:not(.productdetails) #content_area ul.v-product-grid,
+  body:not(.productdetails) #content_area .v-product-grid {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 16px !important;
@@ -6385,8 +6385,8 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
     clear: both !important;
   }
 
-  body:not(.is-home):not(.productdetails) #content_area ul.v-product-grid > li,
-  body:not(.is-home):not(.productdetails) #content_area .v-product-grid > .v-product {
+  body:not(.productdetails) #content_area ul.v-product-grid > li,
+  body:not(.productdetails) #content_area .v-product-grid > .v-product {
     float: none !important;
     min-width: 0 !important;
     overflow: visible !important;
