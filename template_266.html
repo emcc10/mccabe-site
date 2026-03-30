@@ -30,95 +30,13 @@
       }
     } catch (e) {}
   }
-  function mcShouldForceListingGrid() {
-    try {
-      var b = document.body;
-      var p = (location.pathname || '').toLowerCase();
-      if (!b) return false;
-      if (b.classList.contains('productdetails') || b.classList.contains('is-home')) return false;
-      if (/\/search|searchresults|shoppingcart|onepagecheckout|checkout|orderconfirm/i.test(p)) return false;
-      return !!document.querySelector('#content_area ul.v-product-grid');
-    } catch (e) {
-      return false;
-    }
-  }
-  function mcForceListingGrid() {
-    try {
-      if (!mcShouldForceListingGrid()) return;
-      var grid = document.querySelector('#content_area ul.v-product-grid');
-      if (!grid) return;
-      var kids = grid.children || [];
-      var items = [];
-      var i;
-      for (i = 0; i < kids.length; i++) {
-        var node = kids[i];
-        if (!node || node.nodeType !== 1) continue;
-        if ((node.tagName || '').toLowerCase() === 'li' || (node.classList && node.classList.contains('v-product'))) {
-          items.push(node);
-        }
-      }
-      if (!items.length) return;
-      var cols = 1;
-      if (window.matchMedia && window.matchMedia('(min-width: 992px)').matches) cols = 3;
-      else if (window.matchMedia && window.matchMedia('(min-width: 576px)').matches) cols = 2;
-      grid.style.setProperty('display', 'grid', 'important');
-      grid.style.setProperty('grid-template-columns', 'repeat(' + cols + ', minmax(0, 1fr))', 'important');
-      grid.style.setProperty('gap', cols === 1 ? '12px' : '20px', 'important');
-      grid.style.setProperty('width', '100%', 'important');
-      grid.style.setProperty('max-width', '100%', 'important');
-      grid.style.setProperty('min-width', '0', 'important');
-      grid.style.setProperty('float', 'none', 'important');
-      grid.style.setProperty('clear', 'both', 'important');
-      grid.style.setProperty('margin', '0', 'important');
-      grid.style.setProperty('padding', '0', 'important');
-      for (i = 0; i < items.length; i++) {
-        var li = items[i];
-        li.style.setProperty('float', 'none', 'important');
-        li.style.setProperty('clear', 'none', 'important');
-        li.style.setProperty('width', 'auto', 'important');
-        li.style.setProperty('max-width', 'none', 'important');
-        li.style.setProperty('min-width', '0', 'important');
-        li.style.setProperty('display', 'flex', 'important');
-        li.style.setProperty('flex-direction', 'column', 'important');
-        li.style.setProperty('overflow', 'visible', 'important');
-      }
-    } catch (e) {}
-  }
-  function mcQueueForceListingGrid() {
-    setTimeout(mcForceListingGrid, 0);
-    setTimeout(mcForceListingGrid, 300);
-    setTimeout(mcForceListingGrid, 1200);
-  }
   markCategoryListing();
-  document.addEventListener('DOMContentLoaded', function () {
-    markCategoryListing();
-    mcQueueForceListingGrid();
-    if (window.MutationObserver) {
-      try {
-        var host = document.getElementById('content_area') || document.body;
-        if (host) {
-          var mo = new MutationObserver(function () {
-            mcForceListingGrid();
-          });
-          mo.observe(host, { childList: true, subtree: true, attributes: true });
-          setTimeout(function () {
-            try { mo.disconnect(); } catch (e) {}
-          }, 6000);
-        }
-      } catch (e) {}
-    }
-  });
-  window.addEventListener('load', mcQueueForceListingGrid);
-  window.addEventListener('resize', function () {
-    clearTimeout(window.__mcGridResizeT);
-    window.__mcGridResizeT = setTimeout(mcForceListingGrid, 120);
-  });
+  document.addEventListener('DOMContentLoaded', markCategoryListing);
   setTimeout(markCategoryListing, 0);
-  setTimeout(mcForceListingGrid, 0);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260404: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
-<meta name="mc-deploy-verify" content="20260404">
+<!-- MC_DEPLOY_VERIFY_20260405: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
+<meta name="mc-deploy-verify" content="20260405">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
