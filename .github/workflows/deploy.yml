@@ -16,25 +16,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build deploy copy with forced marker
+      - name: Upload template via SFTP (port 2222)
+        env:
+          SECRET_SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SECRET_FTP_HOST: ${{ secrets.FTP_HOST }}
+          SFTP_USER: ${{ secrets.FTP_USERNAME }}
+          SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
         run: |
-          cp template_266.html deploy-template_266.html
-          printf '<!-- FORCED-RUNNER-MARKER -->\n<div style="position:fixed;top:0;left:0;z-index:999999;background:red;color:#fff;padding:12px 16px;">FORCED RUNNER MARKER</div>\n' | cat - deploy-template_266.html > temp && mv temp deploy-template_266.html
+          set -euo pipefail
+          SFTP_HOST="${SECRET_SFTP_HOST:-}"
+          if [ -z "$SFTP_HOST" ]; then
+            SFTP_HOST="${SECRET_FTP_HOST:-}"
+          fi
+          if [ -z "${SFTP_HOST:-}" ] || [ -z "${SFTP_USER:-}" ] || [ -z "${SFTP_PASS:-}" ]; then
+            echo "::error::Missing secrets. Set SFTP_HOST (or FTP_HOST), FTP_USERNAME, and FTP_PASSWORD."
+            exit 1
+          fi
 
-      - name: Upload via SFTP on Port 2222
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y sshpass
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq sshpass
 
-          sshpass -p "${{ secrets.FTP_PASSWORD }}" \
-          sftp -o StrictHostKeyChecking=no \
-               -o UserKnownHostsFile=/dev/null \
-               -P 2222 \
-               "${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_HOST }}" <<'EOF'
-          # Target the physical directory for your active template
+          sshpass -p "$SFTP_PASS" sftp \
+            -oBatchMode=no \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -P 2222 \
+            "$SFTP_USER@$SFTP_HOST" << 'EOSFTP'
           cd /vspfiles/templates/template_266
-          put deploy-template_266.html template_266.html
+          put template_266.html template_266.html
           bye
-          EOF
-
-
+          EOSFTP
