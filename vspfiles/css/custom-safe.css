@@ -6150,8 +6150,9 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   flex-direction: column !important;
 }
 
-/* Category: 3 / 2 / 1 columns — CSS Grid avoids flex-basis clipping + uneven row widths */
+/* Category: 3 / 2 / 1 — grid containers only; card flex/width lives in one block below (no duplicate @media nesting) */
 @media (min-width: 992px) {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
   :is(html.category, body.category) #content_area ul.v-product-grid,
   :is(html.category, body.category) #content_area .v-product-grid,
   html.vol-list.category #content_area ul.v-product-grid,
@@ -6167,33 +6168,12 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
     clear: both !important;
     float: none !important;
     align-items: stretch !important;
-  }
-
-  :is(html.category, body.category) #content_area ul.v-product-grid > li,
-  :is(html.category, body.category) #content_area ul.v-product-grid > li.v-product,
-  :is(html.category, body.category) #content_area .v-product-grid > .v-product,
-  :is(html.category, body.category) #content_area .v-product-grid > .v-product-grid-item,
-  html.vol-list.category #content_area ul.v-product-grid > li,
-  html.vol-list.category #content_area ul.v-product-grid > li.v-product,
-  html.vol-list.category #content_area .v-product-grid > .v-product,
-  html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
-    /* 100% of grid cell — NOT width:auto (Volusion 33.33% must be overridden; % is vs cell in grid) */
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
-    box-sizing: border-box !important;
-    float: none !important;
-    clear: none !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    list-style: none !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+    min-width: 0 !important;
   }
 }
 
 @media (min-width: 576px) and (max-width: 991px) {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
   :is(html.category, body.category) #content_area ul.v-product-grid,
   :is(html.category, body.category) #content_area .v-product-grid,
   html.vol-list.category #content_area ul.v-product-grid,
@@ -6209,30 +6189,12 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
     clear: both !important;
     float: none !important;
     align-items: stretch !important;
-  }
-
-  :is(html.category, body.category) #content_area ul.v-product-grid > li,
-  :is(html.category, body.category) #content_area ul.v-product-grid > li.v-product,
-  :is(html.category, body.category) #content_area .v-product-grid > .v-product,
-  :is(html.category, body.category) #content_area .v-product-grid > .v-product-grid-item,
-  html.vol-list.category #content_area ul.v-product-grid > li,
-  html.vol-list.category #content_area ul.v-product-grid > li.v-product,
-  html.vol-list.category #content_area .v-product-grid > .v-product,
-  html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
-    box-sizing: border-box !important;
-    float: none !important;
-    clear: none !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    list-style: none !important;
+    min-width: 0 !important;
   }
 }
 
 @media (max-width: 575px) {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
   :is(html.category, body.category) #content_area ul.v-product-grid,
   :is(html.category, body.category) #content_area .v-product-grid,
   html.vol-list.category #content_area ul.v-product-grid,
@@ -6247,73 +6209,19 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
     float: none !important;
     clear: both !important;
   }
-
-  :is(html.category, body.category) #content_area ul.v-product-grid > li,
-  :is(html.category, body.category) #content_area ul.v-product-grid > li.v-product,
-  :is(html.category, body.category) #content_area .v-product-grid > .v-product,
-  html.vol-list.category #content_area ul.v-product-grid > li,
-  html.vol-list.category #content_area ul.v-product-grid > li.v-product,
-  html.vol-list.category #content_area .v-product-grid > .v-product {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
-    float: none !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-  }
 }
 
-/* =========================================================
-   Category product cards — single source of truth.
-   Live markup: #content_area table.v65-productDisplay .v-product-grid > div.v-product
-   Volusion injects an inline <style> with display:inline-block + width:33.33%
-   on .v-product-grid .v-product. We must override that with higher specificity.
-   ========================================================= */
-
-/* --- Grid container --- */
-@media (min-width: 992px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
-  :is(html.category, body.category) #content_area .v-product-grid {
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 20px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    float: none !important;
-    clear: both !important;
-  }
-}
-
-@media (min-width: 576px) and (max-width: 991px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
-  :is(html.category, body.category) #content_area .v-product-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 16px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-  }
-}
-
-@media (max-width: 575px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
-  :is(html.category, body.category) #content_area .v-product-grid {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 12px !important;
-  }
-}
-
-/* --- Card (override Volusion: 33.33% is for inline-block row; grid items must fill cell = 100%) --- */
+/* --- Category cards — single block (grid cells: flex + 100% width; vol-list + grid-item kept for markup variants) --- */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product,
 :is(html.category, body.category) #content_area .v-product-grid > div.v-product,
 :is(html.category, body.category) #content_area ul.v-product-grid > li.v-product,
-:is(html.category, body.category) #content_area .v-product-grid > .v-product {
+:is(html.category, body.category) #content_area .v-product-grid > .v-product,
+:is(html.category, body.category) #content_area .v-product-grid > .v-product-grid-item,
+html.vol-list.category #content_area ul.v-product-grid > li,
+html.vol-list.category #content_area ul.v-product-grid > li.v-product,
+html.vol-list.category #content_area .v-product-grid > .v-product,
+html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
