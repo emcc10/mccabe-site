@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260327i — final override: 2-col category cards, full-width image/title */
+/* MC_DEPLOY_VERIFY_20260327k — desktop hard lock: 3-up cards with capped image size */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6533,4 +6533,61 @@ body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid
   max-height: none !important;
   object-fit: contain !important;
   margin: 0 auto 10px !important;
+}
+
+/* Ultimate lock: target real card nodes only (div.v-product) */
+@media (min-width: 992px) {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    gap: 0 !important;
+  }
+
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product {
+    flex: 0 0 33.333333% !important;
+    width: 33.333333% !important;
+    max-width: 33.333333% !important;
+    min-width: 33.333333% !important;
+    box-sizing: border-box !important;
+    padding: 10px !important;
+    margin: 0 !important;
+    float: none !important;
+    clear: none !important;
+    overflow: visible !important;
+  }
+
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img {
+    display: block !important;
+    width: 100% !important;
+    max-width: 240px !important;
+    margin: 0 auto 10px !important;
+    overflow: hidden !important;
+  }
+
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img img {
+    display: block !important;
+    width: 100% !important;
+    max-width: 240px !important;
+    height: auto !important;
+    margin: 0 auto !important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product {
+    flex: 0 0 50% !important;
+    width: 50% !important;
+    max-width: 50% !important;
+    min-width: 50% !important;
+  }
+}
+
+@media (max-width: 575px) {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+  }
 }
