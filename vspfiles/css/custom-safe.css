@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260330a — fix conflicting width:100% on grid children that collapsed 3-col to 2-col */
+/* MC_DEPLOY_VERIFY_20260330b — add fallback selectors so grid rules work with or without table.v65-productDisplay */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6265,7 +6265,8 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 
 /* --- Grid container --- */
 @media (min-width: 992px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
+  :is(html.category, body.category) #content_area .v-product-grid {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 20px !important;
@@ -6280,7 +6281,8 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 }
 
 @media (min-width: 576px) and (max-width: 991px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
+  :is(html.category, body.category) #content_area .v-product-grid {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 16px !important;
@@ -6290,7 +6292,8 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 }
 
 @media (max-width: 575px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
+  :is(html.category, body.category) #content_area .v-product-grid {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) !important;
     gap: 12px !important;
@@ -6298,7 +6301,9 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 }
 
 /* --- Card (override Volusion's inline-block + width:33.33%) --- */
-body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product {
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product,
+:is(html.category, body.category) #content_area .v-product-grid > div.v-product,
+:is(html.category, body.category) #content_area .v-product-grid > .v-product {
   display: block !important;
   float: none !important;
   width: auto !important;
@@ -6314,7 +6319,8 @@ body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid
 }
 
 /* --- Image link: fixed height, centered, same size every card --- */
-body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img {
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img,
+:is(html.category, body.category) #content_area .v-product-grid > .v-product .v-product__img {
   display: block !important;
   width: 100% !important;
   max-width: none !important;
@@ -6326,7 +6332,8 @@ body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid
   text-align: center !important;
 }
 
-body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img img {
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img img,
+:is(html.category, body.category) #content_area .v-product-grid > .v-product .v-product__img img {
   display: block !important;
   width: auto !important;
   max-width: 100% !important;
@@ -6339,7 +6346,9 @@ body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid
 
 /* --- Title --- */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__title,
-body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .productnamecolor {
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .productnamecolor,
+:is(html.category, body.category) #content_area .v-product-grid > .v-product .v-product__title,
+:is(html.category, body.category) #content_area .v-product-grid > .v-product .productnamecolor {
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
