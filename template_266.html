@@ -12,13 +12,22 @@
       var b = document.body;
       var pathMatch = /-s\//.test(p) || (h.classList && h.classList.contains('vol-list'));
       var gridMatch = false;
+      var isHomePath = p === '/' || /\/default\.asp/i.test(p) || /^\/index\.htm/i.test(p);
       if (b && !b.classList.contains('productdetails')) {
         var isSearch = /\/search|searchresults/i.test(p);
         var isCart = /shoppingcart|onepagecheckout|checkout|orderconfirm/i.test(p);
-        if (!isSearch && !isCart) {
-          var grid = document.querySelector('#content_area ul.v-product-grid');
-          if (grid && grid.querySelector('li')) {
+        if (!isSearch && !isCart && !isHomePath) {
+          var ulGrid = document.querySelector('#content_area ul.v-product-grid');
+          if (ulGrid && ulGrid.querySelector('li')) {
             gridMatch = true;
+          } else {
+            var divGrid = document.querySelector('#content_area .v-product-grid');
+            if (
+              divGrid &&
+              (divGrid.querySelector('.v-product') || divGrid.querySelector('li.v-product'))
+            ) {
+              gridMatch = true;
+            }
           }
         }
       }
@@ -36,7 +45,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260405: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
-<meta name="mc-deploy-verify" content="20260330">
+<meta name="mc-deploy-verify" content="20260331">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -4921,32 +4930,71 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
 <script>
 (function () {
-  function fixCategoryGrid() {
-    var isCat =
-      document.documentElement.classList.contains('category') ||
-      (document.body && document.body.classList.contains('category'));
-    if (!isCat) return;
-
-    var grid = document.querySelector(
-      '#content_area table.v65-productDisplay .v-product-grid,' +
-      '#content_area .v-product-grid'
-    );
-    if (grid) {
-      grid.style.removeProperty('display');
-      grid.style.removeProperty('width');
-      grid.style.removeProperty('float');
+  function mcCategoryGridCols() {
+    var mq1 = window.matchMedia('(max-width: 575px)');
+    var mq2 = window.matchMedia('(min-width: 576px) and (max-width: 991px)');
+    if (mq1.matches) {
+      return { cols: 'minmax(0, 1fr)', gap: '12px' };
     }
+    if (mq2.matches) {
+      return { cols: 'repeat(2, minmax(0, 1fr))', gap: '16px' };
+    }
+    return { cols: 'repeat(3, minmax(0, 1fr))', gap: '20px' };
+  }
 
-    var cards = document.querySelectorAll(
-      '.v-product-grid .v-product, .v-product-grid > .v-product'
-    );
-    for (var i = 0; i < cards.length; i++) {
-      var s = cards[i].style;
-      s.removeProperty('display');
-      s.removeProperty('width');
-      s.removeProperty('max-width');
-      s.removeProperty('float');
-      s.setProperty('vertical-align', 'baseline', 'important');
+  function fixCategoryGrid() {
+    var b = document.body;
+    if (!b || b.classList.contains('productdetails')) return;
+
+    var p = (location.pathname || '').toLowerCase();
+    var isHomePath = p === '/' || /\/default\.asp/i.test(p) || /^\/index\.htm/i.test(p);
+    if (b.classList.contains('is-home') && isHomePath) return;
+
+    var grids = document.querySelectorAll('#content_area .v-product-grid');
+    if (!grids.length) return;
+
+    var hasListing = false;
+    var gi;
+    for (gi = 0; gi < grids.length; gi++) {
+      if (grids[gi].querySelector('.v-product, li.v-product')) {
+        hasListing = true;
+        break;
+      }
+    }
+    if (!hasListing) return;
+
+    document.documentElement.classList.add('category');
+    b.classList.add('category');
+
+    var spec = mcCategoryGridCols();
+    for (gi = 0; gi < grids.length; gi++) {
+      var grid = grids[gi];
+      if (grid.closest && grid.closest('#footer')) continue;
+
+      grid.style.setProperty('display', 'grid', 'important');
+      grid.style.setProperty('grid-template-columns', spec.cols, 'important');
+      grid.style.setProperty('gap', spec.gap, 'important');
+      grid.style.setProperty('width', '100%', 'important');
+      grid.style.setProperty('max-width', '100%', 'important');
+      grid.style.setProperty('min-width', '0', 'important');
+      grid.style.setProperty('float', 'none', 'important');
+      grid.style.setProperty('clear', 'both', 'important');
+
+      var ch = grid.children;
+      var ci;
+      for (ci = 0; ci < ch.length; ci++) {
+        var card = ch[ci];
+        if (!card.classList || !card.classList.contains('v-product')) continue;
+        var s = card.style;
+        s.setProperty('display', 'flex', 'important');
+        s.setProperty('flex-direction', 'column', 'important');
+        s.setProperty('align-items', 'stretch', 'important');
+        s.setProperty('box-sizing', 'border-box', 'important');
+        s.setProperty('width', '100%', 'important');
+        s.setProperty('max-width', 'none', 'important');
+        s.setProperty('min-width', '0', 'important');
+        s.setProperty('float', 'none', 'important');
+      }
     }
   }
 
@@ -4957,7 +5005,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       var debounce;
       window.__mcGridObserver = new MutationObserver(function () {
         clearTimeout(debounce);
-        debounce = setTimeout(fixCategoryGrid, 16);
+        debounce = setTimeout(fixCategoryGrid, 32);
       });
       window.__mcGridObserver.observe(document.documentElement, {
         childList: true,
@@ -4967,10 +5015,18 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       });
     }
 
-    setTimeout(fixCategoryGrid, 100);
-    setTimeout(fixCategoryGrid, 400);
-    setTimeout(fixCategoryGrid, 1000);
-    setTimeout(fixCategoryGrid, 2500);
+    if (!window.__mcGridResizeBound) {
+      window.__mcGridResizeBound = true;
+      window.addEventListener('resize', function () {
+        fixCategoryGrid();
+      });
+    }
+
+    setTimeout(fixCategoryGrid, 50);
+    setTimeout(fixCategoryGrid, 200);
+    setTimeout(fixCategoryGrid, 600);
+    setTimeout(fixCategoryGrid, 1500);
+    setTimeout(fixCategoryGrid, 3000);
   }
 
   if (document.readyState === 'loading') {
