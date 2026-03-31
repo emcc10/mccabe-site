@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260330b — add fallback selectors so grid rules work with or without table.v65-productDisplay */
+/* MC_DEPLOY_VERIFY_20260331 — category thumbnails: img width 100% in #content_area grid */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6335,13 +6335,13 @@ body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img img,
 :is(html.category, body.category) #content_area .v-product-grid > .v-product .v-product__img img {
   display: block !important;
-  width: auto !important;
-  max-width: 100% !important;
+  width: 100% !important;
+  max-width: none !important;
   height: 100% !important;
-  max-height: 280px !important;
-  object-fit: contain !important;
+  max-height: none !important;
+  object-fit: cover !important;
   object-position: center center !important;
-  margin: 0 auto !important;
+  margin: 0 !important;
 }
 
 /* --- Title --- */
