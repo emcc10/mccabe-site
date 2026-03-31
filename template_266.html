@@ -45,7 +45,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260405: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
-<meta name="mc-deploy-verify" content="20260402">
+<meta name="mc-deploy-verify" content="20260403">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -4946,17 +4946,26 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var ca = document.getElementById('content_area');
     if (!ca) return [];
 
-    var g =
-      document.querySelector('#content_area table.v65-productDisplay .v-product-grid') ||
-      document.querySelector('#content_area .v65-productDisplay .v-product-grid');
-    if (g) return [g];
+    var out = [];
+    var seen = new WeakSet();
+    function pushUnique(node) {
+      if (!node || seen.has(node)) return;
+      if (node.closest && node.closest('#footer')) return;
+      seen.add(node);
+      out.push(node);
+    }
+
+    /* Volusion often emits MULTIPLE .v-product-grid nodes (e.g. one per table row). querySelector returned only the first — other rows were never fixed (missing products + stray card). */
+    var multi = ca.querySelectorAll(
+      'table.v65-productDisplay .v-product-grid, .v65-productDisplay .v-product-grid'
+    );
+    var i;
+    for (i = 0; i < multi.length; i++) pushUnique(multi[i]);
+    if (out.length) return out;
 
     var all = ca.querySelectorAll('.v-product-grid');
-    if (!all.length) return [];
-
     var best = null;
     var bestN = 0;
-    var i;
     for (i = 0; i < all.length; i++) {
       if (all[i].closest && all[i].closest('#footer')) continue;
       var n = all[i].querySelectorAll('.v-product').length;
@@ -4972,10 +4981,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var b = document.body;
     if (!b || b.classList.contains('productdetails')) return;
 
-    var p = (location.pathname || '').toLowerCase();
-    var isHomePath = p === '/' || /\/default\.asp/i.test(p) || /^\/index\.htm/i.test(p);
-    if (b.classList.contains('is-home') && isHomePath) return;
-
     var grids = mcFindListingGrids();
     if (!grids.length) return;
 
@@ -4988,6 +4993,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       var grid = grids[gi];
       var gs = grid.style;
       gs.setProperty('display', 'grid', 'important');
+      gs.setProperty('grid-auto-flow', 'row', 'important');
       gs.setProperty('grid-template-columns', spec.cols, 'important');
       gs.setProperty('gap', spec.gap, 'important');
       gs.setProperty('width', '100%', 'important');
@@ -5009,6 +5015,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         if (!isCard) continue;
 
         var s = card.style;
+        s.removeProperty('grid-column');
+        s.removeProperty('grid-row');
+        s.removeProperty('grid-area');
         s.removeProperty('width');
         s.removeProperty('max-width');
         s.removeProperty('display');
