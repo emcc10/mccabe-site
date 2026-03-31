@@ -45,7 +45,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260405: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
-<meta name="mc-deploy-verify" content="20260415">
+<meta name="mc-deploy-verify" content="20260416">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -115,6 +115,47 @@ document.addEventListener("DOMContentLoaded", function () {
     right: auto !important;
     width: 52px !important;
     max-width: 52px !important;
+  }
+  </style>
+  <!-- Category grid: in-template fallback so layout works even if /v/vspfiles/css/custom-safe.css is stale or blocked -->
+  <style id="mc-category-grid-critical">
+  @media (min-width: 992px) {
+    body:not(.productdetails) #content_area .v-product-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 20px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      float: none !important;
+      clear: both !important;
+    }
+  }
+  @media (min-width: 576px) and (max-width: 991px) {
+    body:not(.productdetails) #content_area .v-product-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 16px !important;
+      width: 100% !important;
+    }
+  }
+  @media (max-width: 575px) {
+    body:not(.productdetails) #content_area .v-product-grid {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) !important;
+      gap: 12px !important;
+    }
+  }
+  body:not(.productdetails) #content_area .v-product-grid > .v-product,
+  body:not(.productdetails) #content_area ul.v-product-grid > li.v-product {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+    float: none !important;
   }
   </style>
 
@@ -4942,39 +4983,32 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return { cols: 'repeat(3, minmax(0, 1fr))', gap: '20px' };
   }
 
+  function mcGridIsListingCandidate(grid) {
+    if (!grid) return false;
+    if (grid.closest && grid.closest('#footer')) return false;
+    if (grid.closest && grid.closest('.sidebar-wrapper')) return false;
+    if (grid.closest && grid.closest('.sidebar')) return false;
+    if (!grid.querySelector || !grid.querySelector('.v-product, li.v-product, li')) return false;
+    return true;
+  }
+
   function mcFindListingGrids() {
     var ca = document.getElementById('content_area');
     if (!ca) return [];
 
+    /* Fix EVERY listing grid in main content — not only the first / v65 match. Volusion splits rows or omits v65 wrapper; a single-grid fallback hid most products. */
+    var all = ca.querySelectorAll('.v-product-grid');
     var out = [];
     var seen = new WeakSet();
-    function pushUnique(node) {
-      if (!node || seen.has(node)) return;
-      if (node.closest && node.closest('#footer')) return;
-      seen.add(node);
-      out.push(node);
-    }
-
-    /* Volusion often emits MULTIPLE .v-product-grid nodes (e.g. one per table row). querySelector returned only the first — other rows were never fixed (missing products + stray card). */
-    var multi = ca.querySelectorAll(
-      'table.v65-productDisplay .v-product-grid, .v65-productDisplay .v-product-grid'
-    );
     var i;
-    for (i = 0; i < multi.length; i++) pushUnique(multi[i]);
-    if (out.length) return out;
-
-    var all = ca.querySelectorAll('.v-product-grid');
-    var best = null;
-    var bestN = 0;
     for (i = 0; i < all.length; i++) {
-      if (all[i].closest && all[i].closest('#footer')) continue;
-      var n = all[i].querySelectorAll('.v-product').length;
-      if (n > bestN) {
-        bestN = n;
-        best = all[i];
-      }
+      var g = all[i];
+      if (!mcGridIsListingCandidate(g)) continue;
+      if (seen.has(g)) continue;
+      seen.add(g);
+      out.push(g);
     }
-    return best && bestN > 0 ? [best] : [];
+    return out;
   }
 
   function fixCategoryGrid() {
@@ -5063,6 +5097,20 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     setTimeout(fixCategoryGrid, 600);
     setTimeout(fixCategoryGrid, 1500);
     setTimeout(fixCategoryGrid, 3000);
+    setTimeout(fixCategoryGrid, 5000);
+    setTimeout(fixCategoryGrid, 8000);
+
+    if (!window.__mcGridPoll) {
+      window.__mcGridPoll = setInterval(function () {
+        fixCategoryGrid();
+      }, 1500);
+      setTimeout(function () {
+        if (window.__mcGridPoll) {
+          clearInterval(window.__mcGridPoll);
+          window.__mcGridPoll = null;
+        }
+      }, 24000);
+    }
   }
 
   if (document.readyState === 'loading') {
