@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260327k — desktop hard lock: 3-up cards with capped image size */
+/* MC_DEPLOY_VERIFY_20260327l — single category-card rule set; removed conflicting overrides */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6260,334 +6260,77 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 }
 
 /* =========================================================
-   CATEGORY / VOL-LIST: second column collapse (Bootstrap col + flex)
-   Without min-width:0 on the main column, CSS grid children can
-   shrink to a sliver. Also match html.vol-list when Volusion omits -s/.
+   MC_DEPLOY_VERIFY_20260327l
+   Category product cards — single source of truth.
+   Live markup: #content_area table.v65-productDisplay .v-product-grid > div.v-product
    ========================================================= */
 @media (min-width: 992px) {
-  :is(html.category, body.category) .content_area-wrapper,
-  html.vol-list .content_area-wrapper {
-    min-width: 0 !important;
-    max-width: 100% !important;
-    flex: 1 1 0% !important;
-  }
-
-  :is(html.category, body.category) #content_area,
-  html.vol-list #content_area {
-    min-width: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  :is(html.category, body.category) #content_area ul.v-product-grid,
-  :is(html.category, body.category) #content_area .v-product-grid,
-  html.vol-list #content_area ul.v-product-grid,
-  html.vol-list #content_area .v-product-grid {
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 20px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-  }
-
-  :is(html.category, body.category) #content_area ul.v-product-grid > li,
-  :is(html.category, body.category) #content_area .v-product-grid > .v-product,
-  html.vol-list #content_area ul.v-product-grid > li,
-  html.vol-list #content_area .v-product-grid > .v-product {
-    min-width: 0 !important;
-    max-width: none !important;
-    width: auto !important;
-    overflow: visible !important;
-  }
-}
-
-@media (min-width: 576px) and (max-width: 991px) {
-  :is(html.category, body.category) .content_area-wrapper,
-  html.vol-list .content_area-wrapper {
-    min-width: 0 !important;
-    flex: 1 1 0% !important;
-  }
-
-  :is(html.category, body.category) #content_area ul.v-product-grid,
-  :is(html.category, body.category) #content_area .v-product-grid,
-  html.vol-list #content_area ul.v-product-grid,
-  html.vol-list #content_area .v-product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    min-width: 0 !important;
-  }
-
-  :is(html.category, body.category) #content_area ul.v-product-grid > li,
-  :is(html.category, body.category) #content_area .v-product-grid > .v-product,
-  html.vol-list #content_area ul.v-product-grid > li,
-  html.vol-list #content_area .v-product-grid > .v-product {
-    min-width: 0 !important;
-    overflow: visible !important;
-  }
-}
-
-/* =========================================================
-   CATEGORY LISTING (nuclear): do not rely on html.category / vol-list
-   Live HTML may omit those classes; Volusion still uses float/% widths on <li>.
-   Scope: not homepage, not PDP (body.productdetails).
-   ========================================================= */
-@media (min-width: 992px) {
-  body:not(.productdetails) .content_area-wrapper {
-    min-width: 0 !important;
-    max-width: 100% !important;
-    flex: 1 1 0% !important;
-  }
-
-  body:not(.productdetails) #content_area {
-    min-width: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  body:not(.productdetails) #content_area ul.v-product-grid,
-  body:not(.productdetails) #content_area .v-product-grid {
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 20px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    float: none !important;
-    clear: both !important;
-    list-style: none !important;
-    padding-left: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  body:not(.productdetails) #content_area ul.v-product-grid > li,
-  body:not(.productdetails) #content_area .v-product-grid > .v-product {
-    float: none !important;
-    clear: none !important;
-    width: auto !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    overflow: visible !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-}
-
-@media (min-width: 576px) and (max-width: 991px) {
-  body:not(.productdetails) #content_area ul.v-product-grid,
-  body:not(.productdetails) #content_area .v-product-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 16px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    float: none !important;
-    clear: both !important;
-  }
-
-  body:not(.productdetails) #content_area ul.v-product-grid > li,
-  body:not(.productdetails) #content_area .v-product-grid > .v-product {
-    float: none !important;
-    min-width: 0 !important;
-    overflow: visible !important;
-  }
-}
-
-/* =========================================================
-   Volusion category card width fix (actual live markup)
-   Targets: table.v65-productDisplay > .v-product-grid > .v-product
-   ========================================================= */
-@media (min-width: 992px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    gap: 0 !important;
-    font-size: 0 !important;
-    float: none !important;
-    clear: both !important;
-  }
-
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > .v-product {
-    display: block !important;
-    float: none !important;
-    width: 33.333333% !important;
-    max-width: 33.333333% !important;
-    min-width: 33.333333% !important;
-    margin: 0 !important;
-    padding: 15px 10px !important;
-    box-sizing: border-box !important;
-    vertical-align: top !important;
-    overflow: visible !important;
-    font-size: 16px !important;
-  }
-
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > .v-product .v-product__img,
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > .v-product .v-product__title {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-  }
-}
-
-@media (min-width: 576px) and (max-width: 991px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > .v-product {
-    width: 50% !important;
-    max-width: 50% !important;
-    min-width: 50% !important;
-  }
-}
-
-/* Last-resort override: some categories render mixed direct-child wrappers.
-   Force equal columns for all direct children, not only .v-product. */
-@media (min-width: 992px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 0 !important;
-    align-items: start !important;
-  }
-
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > * {
-    display: block !important;
-    float: none !important;
-    width: auto !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    box-sizing: border-box !important;
-    padding: 15px 10px !important;
-    margin: 0 !important;
-    overflow: visible !important;
-  }
-}
-
-@media (min-width: 576px) and (max-width: 991px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 0 !important;
-    align-items: start !important;
-  }
-}
-
-/* =========================================================
-   FINAL CATEGORY OVERRIDE (wins all previous grid experiments)
-   Live markup: #content_area table.v65-productDisplay .v-product-grid > .v-product
-   ========================================================= */
-@media (min-width: 992px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 14px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    list-style: none !important;
-    float: none !important;
-    clear: both !important;
-    font-size: initial !important;
-  }
-
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > .v-product,
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > * {
-    display: block !important;
-    float: none !important;
-    width: auto !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    padding: 10px !important;
-    box-sizing: border-box !important;
-    overflow: visible !important;
-  }
-}
-
-@media (min-width: 576px) and (max-width: 991px) {
   body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 12px !important;
-  }
-}
-
-body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product__img,
-body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product__title,
-body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .productnamecolor {
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-}
-
-body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product__img img {
-  display: block !important;
-  width: 100% !important;
-  height: auto !important;
-  max-width: 100% !important;
-  max-height: none !important;
-  object-fit: contain !important;
-  margin: 0 auto 10px !important;
-}
-
-/* Ultimate lock: target real card nodes only (div.v-product) */
-@media (min-width: 992px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: flex-start !important;
-    gap: 0 !important;
-  }
-
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product {
-    flex: 0 0 33.333333% !important;
-    width: 33.333333% !important;
-    max-width: 33.333333% !important;
-    min-width: 33.333333% !important;
-    box-sizing: border-box !important;
-    padding: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     margin: 0 !important;
+    padding: 0 !important;
     float: none !important;
-    clear: none !important;
-    overflow: visible !important;
-  }
-
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img {
-    display: block !important;
-    width: 100% !important;
-    max-width: 240px !important;
-    margin: 0 auto 10px !important;
-    overflow: hidden !important;
-  }
-
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img img {
-    display: block !important;
-    width: 100% !important;
-    max-width: 240px !important;
-    height: auto !important;
-    margin: 0 auto !important;
+    clear: both !important;
   }
 }
 
 @media (min-width: 576px) and (max-width: 991px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product {
-    flex: 0 0 50% !important;
-    width: 50% !important;
-    max-width: 50% !important;
-    min-width: 50% !important;
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
   }
 }
 
 @media (max-width: 575px) {
-  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product {
-    flex: 0 0 100% !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
   }
+}
+
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product {
+  display: block !important;
+  float: none !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 10px !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img {
+  display: block !important;
+  width: 100% !important;
+  max-width: 220px !important;
+  margin: 0 auto 10px !important;
+  overflow: visible !important;
+}
+
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img img {
+  display: block !important;
+  width: 100% !important;
+  max-width: 220px !important;
+  height: auto !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  margin: 0 auto !important;
+}
+
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__title,
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .productnamecolor {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
 }
