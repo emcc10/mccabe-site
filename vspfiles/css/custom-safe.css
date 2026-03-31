@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260327l — single category-card rule set; removed conflicting overrides */
+/* MC_DEPLOY_VERIFY_20260327m — 3-col category grid, equal images, no max-width cap */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6260,15 +6260,18 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 }
 
 /* =========================================================
-   MC_DEPLOY_VERIFY_20260327l
    Category product cards — single source of truth.
    Live markup: #content_area table.v65-productDisplay .v-product-grid > div.v-product
+   Volusion injects an inline <style> with display:inline-block + width:33.33%
+   on .v-product-grid .v-product. We must override that with higher specificity.
    ========================================================= */
+
+/* --- Grid container --- */
 @media (min-width: 992px) {
   body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
     display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 12px !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 20px !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
@@ -6283,7 +6286,9 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 10px !important;
+    gap: 16px !important;
+    width: 100% !important;
+    min-width: 0 !important;
   }
 }
 
@@ -6291,10 +6296,11 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) !important;
-    gap: 10px !important;
+    gap: 12px !important;
   }
 }
 
+/* --- Card (override Volusion's inline-block + width:33.33%) --- */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product {
   display: block !important;
   float: none !important;
@@ -6302,29 +6308,39 @@ body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid
   max-width: none !important;
   min-width: 0 !important;
   margin: 0 !important;
-  padding: 10px !important;
+  margin-left: 0 !important;
+  padding: 15px 5px !important;
   box-sizing: border-box !important;
   overflow: visible !important;
+  vertical-align: top !important;
+  text-align: center !important;
 }
 
+/* --- Image link: fixed height, centered, same size every card --- */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img {
   display: block !important;
   width: 100% !important;
-  max-width: 220px !important;
+  max-width: none !important;
+  height: 280px !important;
+  min-height: 280px !important;
+  max-height: 280px !important;
   margin: 0 auto 10px !important;
-  overflow: visible !important;
+  overflow: hidden !important;
+  text-align: center !important;
 }
 
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img img {
   display: block !important;
-  width: 100% !important;
-  max-width: 220px !important;
-  height: auto !important;
-  max-height: none !important;
+  width: auto !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  max-height: 280px !important;
   object-fit: contain !important;
+  object-position: center center !important;
   margin: 0 auto !important;
 }
 
+/* --- Title --- */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__title,
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .productnamecolor {
   display: block !important;
@@ -6333,4 +6349,6 @@ body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid
   white-space: normal !important;
   overflow-wrap: break-word !important;
   word-break: normal !important;
+  text-align: center !important;
+  margin-top: 6px !important;
 }
