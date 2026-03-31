@@ -45,7 +45,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260405: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
-<meta name="mc-deploy-verify" content="20260331">
+<meta name="mc-deploy-verify" content="20260401">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -4942,6 +4942,32 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return { cols: 'repeat(3, minmax(0, 1fr))', gap: '20px' };
   }
 
+  function mcFindListingGrids() {
+    var ca = document.getElementById('content_area');
+    if (!ca) return [];
+
+    var g =
+      document.querySelector('#content_area table.v65-productDisplay .v-product-grid') ||
+      document.querySelector('#content_area .v65-productDisplay .v-product-grid');
+    if (g) return [g];
+
+    var all = ca.querySelectorAll('.v-product-grid');
+    if (!all.length) return [];
+
+    var best = null;
+    var bestN = 0;
+    var i;
+    for (i = 0; i < all.length; i++) {
+      if (all[i].closest && all[i].closest('#footer')) continue;
+      var n = all[i].querySelectorAll('.v-product').length;
+      if (n > bestN) {
+        bestN = n;
+        best = all[i];
+      }
+    }
+    return best && bestN > 0 ? [best] : [];
+  }
+
   function fixCategoryGrid() {
     var b = document.body;
     if (!b || b.classList.contains('productdetails')) return;
@@ -4950,48 +4976,48 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var isHomePath = p === '/' || /\/default\.asp/i.test(p) || /^\/index\.htm/i.test(p);
     if (b.classList.contains('is-home') && isHomePath) return;
 
-    var grids = document.querySelectorAll('#content_area .v-product-grid');
+    var grids = mcFindListingGrids();
     if (!grids.length) return;
-
-    var hasListing = false;
-    var gi;
-    for (gi = 0; gi < grids.length; gi++) {
-      if (grids[gi].querySelector('.v-product, li.v-product')) {
-        hasListing = true;
-        break;
-      }
-    }
-    if (!hasListing) return;
 
     document.documentElement.classList.add('category');
     b.classList.add('category');
 
     var spec = mcCategoryGridCols();
+    var gi;
     for (gi = 0; gi < grids.length; gi++) {
       var grid = grids[gi];
-      if (grid.closest && grid.closest('#footer')) continue;
-
-      grid.style.setProperty('display', 'grid', 'important');
-      grid.style.setProperty('grid-template-columns', spec.cols, 'important');
-      grid.style.setProperty('gap', spec.gap, 'important');
-      grid.style.setProperty('width', '100%', 'important');
-      grid.style.setProperty('max-width', '100%', 'important');
-      grid.style.setProperty('min-width', '0', 'important');
-      grid.style.setProperty('float', 'none', 'important');
-      grid.style.setProperty('clear', 'both', 'important');
+      var gs = grid.style;
+      gs.setProperty('display', 'grid', 'important');
+      gs.setProperty('grid-template-columns', spec.cols, 'important');
+      gs.setProperty('gap', spec.gap, 'important');
+      gs.setProperty('width', '100%', 'important');
+      gs.setProperty('max-width', '100%', 'important');
+      gs.setProperty('min-width', '0', 'important');
+      gs.setProperty('float', 'none', 'important');
+      gs.setProperty('clear', 'both', 'important');
 
       var ch = grid.children;
       var ci;
       for (ci = 0; ci < ch.length; ci++) {
         var card = ch[ci];
-        if (!card.classList || !card.classList.contains('v-product')) continue;
+        if (!card.classList) continue;
+        var isUlLi = grid.tagName === 'UL' && card.tagName === 'LI';
+        var isCard =
+          card.classList.contains('v-product') ||
+          card.classList.contains('v-product-grid-item') ||
+          isUlLi;
+        if (!isCard) continue;
+
         var s = card.style;
+        s.removeProperty('width');
+        s.removeProperty('max-width');
+        s.removeProperty('display');
         s.setProperty('display', 'flex', 'important');
         s.setProperty('flex-direction', 'column', 'important');
         s.setProperty('align-items', 'stretch', 'important');
         s.setProperty('box-sizing', 'border-box', 'important');
         s.setProperty('width', '100%', 'important');
-        s.setProperty('max-width', 'none', 'important');
+        s.setProperty('max-width', '100%', 'important');
         s.setProperty('min-width', '0', 'important');
         s.setProperty('float', 'none', 'important');
       }
@@ -5003,11 +5029,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
     if (!window.__mcGridObserver) {
       var debounce;
+      var obsRoot = document.getElementById('content_area') || document.documentElement;
       window.__mcGridObserver = new MutationObserver(function () {
         clearTimeout(debounce);
-        debounce = setTimeout(fixCategoryGrid, 32);
+        debounce = setTimeout(fixCategoryGrid, 48);
       });
-      window.__mcGridObserver.observe(document.documentElement, {
+      window.__mcGridObserver.observe(obsRoot, {
         childList: true,
         subtree: true,
         attributes: true,
