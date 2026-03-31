@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260327h — hard reset: equal-width product-grid children */
+/* MC_DEPLOY_VERIFY_20260327i — final override: 2-col category cards, full-width image/title */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6472,4 +6472,65 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
     gap: 0 !important;
     align-items: start !important;
   }
+}
+
+/* =========================================================
+   FINAL CATEGORY OVERRIDE (wins all previous grid experiments)
+   Live markup: #content_area table.v65-productDisplay .v-product-grid > .v-product
+   ========================================================= */
+@media (min-width: 992px) {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    float: none !important;
+    clear: both !important;
+    font-size: initial !important;
+  }
+
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > .v-product,
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > * {
+    display: block !important;
+    float: none !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product__img,
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product__title,
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .productnamecolor {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product__img img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  margin: 0 auto 10px !important;
 }
