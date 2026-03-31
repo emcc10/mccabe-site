@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260327m — 3-col category grid, equal images, no max-width cap */
+/* MC_DEPLOY_VERIFY_20260330a — fix conflicting width:100% on grid children that collapsed 3-col to 2-col */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6177,14 +6177,13 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   html.vol-list.category #content_area ul.v-product-grid > li.v-product,
   html.vol-list.category #content_area .v-product-grid > .v-product,
   html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
-    width: 100% !important;
+    width: auto !important;
     max-width: none !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
     float: none !important;
     clear: none !important;
-    display: flex !important;
-    flex-direction: column !important;
+    display: block !important;
     list-style: none !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
@@ -6217,14 +6216,13 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   html.vol-list.category #content_area ul.v-product-grid > li.v-product,
   html.vol-list.category #content_area .v-product-grid > .v-product,
   html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
-    width: 100% !important;
+    width: auto !important;
     max-width: none !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
     float: none !important;
     clear: none !important;
-    display: flex !important;
-    flex-direction: column !important;
+    display: block !important;
     list-style: none !important;
   }
 }
@@ -6251,11 +6249,10 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   html.vol-list.category #content_area ul.v-product-grid > li,
   html.vol-list.category #content_area ul.v-product-grid > li.v-product,
   html.vol-list.category #content_area .v-product-grid > .v-product {
-    width: 100% !important;
+    width: auto !important;
     max-width: none !important;
     float: none !important;
-    display: flex !important;
-    flex-direction: column !important;
+    display: block !important;
   }
 }
 
