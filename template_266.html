@@ -45,7 +45,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260405: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
-<meta name="mc-deploy-verify" content="20260416">
+<meta name="mc-deploy-verify" content="20260417">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -5013,8 +5013,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function fixCategoryGrid() {
     var b = document.body;
-    if (!b || b.classList.contains('productdetails')) return;
-
+    if (!b) return;
+    /* Do not skip when body has productdetails — Volusion sometimes sets it wrongly; rely on presence of a listing grid */
     var grids = mcFindListingGrids();
     if (!grids.length) return;
 
@@ -5119,6 +5119,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     run();
   }
   window.addEventListener('load', run);
+  window.mcFixCategoryGrid = fixCategoryGrid;
 })();
 </script>
 
@@ -9220,6 +9221,12 @@ try {
     try {
       mcHydrateCategoryHowToGetPrices();
     } catch (eHyd) {}
+    /* Member pricing moves nodes; re-apply grid after every paint so layout stays fixed */
+    try {
+      if (typeof window.mcFixCategoryGrid === 'function') {
+        window.mcFixCategoryGrid();
+      }
+    } catch (eMcG) {}
   }
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
 
@@ -9488,6 +9495,45 @@ try {
   align-items: flex-start !important;
   display: flex !important;
   flex-direction: column !important;
+}
+</style>
+<!-- Last in document: wins over v/vspfiles/templates/266/css/template.css for category grid -->
+<style id="mc-category-grid-tail">
+@media (min-width: 992px) {
+  body:not(.productdetails) #content_area .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    float: none !important;
+    clear: both !important;
+  }
+}
+@media (min-width: 576px) and (max-width: 991px) {
+  body:not(.productdetails) #content_area .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+}
+@media (max-width: 575px) {
+  body:not(.productdetails) #content_area .v-product-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+}
+body:not(.productdetails) #content_area .v-product-grid > .v-product,
+body:not(.productdetails) #content_area ul.v-product-grid > li.v-product {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 100% !important;
+  box-sizing: border-box !important;
+  float: none !important;
 }
 </style>
 
