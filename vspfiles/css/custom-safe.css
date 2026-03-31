@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260403 — JS fixes every .v-product-grid under v65-productDisplay (not only first row) */
+/* MC_DEPLOY_VERIFY_20260415 — bump to confirm SFTP/CSS path; if live ≠ this, deploy or active template is wrong */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
