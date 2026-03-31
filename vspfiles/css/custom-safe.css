@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260327g — force equal card widths for v65-productDisplay product grids */
+/* MC_DEPLOY_VERIFY_20260327h — hard reset: equal-width product-grid children */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6439,5 +6439,37 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
     width: 50% !important;
     max-width: 50% !important;
     min-width: 50% !important;
+  }
+}
+
+/* Last-resort override: some categories render mixed direct-child wrappers.
+   Force equal columns for all direct children, not only .v-product. */
+@media (min-width: 992px) {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0 !important;
+    align-items: start !important;
+  }
+
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > * {
+    display: block !important;
+    float: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    padding: 15px 10px !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0 !important;
+    align-items: start !important;
   }
 }
