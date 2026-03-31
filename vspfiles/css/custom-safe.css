@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260327f — remove is-home guard; category pages can still carry is-home */
+/* MC_DEPLOY_VERIFY_20260327g — force equal card widths for v65-productDisplay product grids */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6390,5 +6390,54 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
     float: none !important;
     min-width: 0 !important;
     overflow: visible !important;
+  }
+}
+
+/* =========================================================
+   Volusion category card width fix (actual live markup)
+   Targets: table.v65-productDisplay > .v-product-grid > .v-product
+   ========================================================= */
+@media (min-width: 992px) {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    font-size: 0 !important;
+    float: none !important;
+    clear: both !important;
+  }
+
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > .v-product {
+    display: block !important;
+    float: none !important;
+    width: 33.333333% !important;
+    max-width: 33.333333% !important;
+    min-width: 33.333333% !important;
+    margin: 0 !important;
+    padding: 15px 10px !important;
+    box-sizing: border-box !important;
+    vertical-align: top !important;
+    overflow: visible !important;
+    font-size: 16px !important;
+  }
+
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > .v-product .v-product__img,
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > .v-product .v-product__title {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > .v-product {
+    width: 50% !important;
+    max-width: 50% !important;
+    min-width: 50% !important;
   }
 }
