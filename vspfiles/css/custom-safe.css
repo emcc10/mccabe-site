@@ -96,6 +96,15 @@ body.is-home #slideshow-container {
   padding-top: clamp(200px, 28vh, 340px);
 }
 
+#slideshow-container .mc-hero-overlay .mc-hero-tagline {
+  display: block;
+  font-size: 36px !important;
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #b8b7b7 !important;
+}
+
 /* Hero menu: clear of home/cart icons, proportional to viewport */
 #slideshow-container .hero-menu {
   position: absolute;
@@ -1324,7 +1333,7 @@ nav.push-menu .push-menu__close-btn::before {
   }
 }
 
-/* MOBILE: category — title centered, price left, tight under image */
+/* MOBILE: category — title + member stack left (matches desktop RH-style grid) */
 @media (max-width: 991px) {
   :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
   :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
@@ -1341,11 +1350,11 @@ nav.push-menu .push-menu__close-btn::before {
   :is(html.category, body.category) .v-product-grid .v-product h2,
   :is(html.category, body.category) .v-product-grid .v-product h3,
   :is(html.category, body.category) .v-product-grid .v-product h4 {
-    text-align: center !important;
+    text-align: left !important;
     display: block !important;
     margin-top: 2px !important;
     margin-bottom: 4px !important;
-    line-height: 1.2 !important;
+    line-height: 1.35 !important;
     font-style: normal !important;
   }
 
@@ -5276,7 +5285,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   }
 }
 
-/* Category / home: member price block only (do not change grid / card layout) */
+/* Member pricing block (listings + modals): base; grid typography refined below */
 .mc-member-grid-price {
   text-align: left;
   margin-top: 4px;
@@ -5320,6 +5329,60 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   background: none;
   border: 0;
   padding: 0;
+}
+
+/* Home + category grids: RH-style member line (caps label, quiet secondary, left stack) */
+body.is-home:not(.productdetails) #content_area_home .v-product-grid .mc-member-grid-price,
+body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-price,
+:is(html.category, body.category) #content_area .v-product-grid .mc-member-grid-price,
+:is(html.category, body.category) #content_area ul.v-product-grid .mc-member-grid-price {
+  width: 100% !important;
+  text-align: left !important;
+  align-items: flex-start !important;
+  margin-top: 6px !important;
+}
+
+body.is-home:not(.productdetails) #content_area_home .v-product-grid .mc-member-grid-price__label,
+body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-price__label,
+:is(html.category, body.category) #content_area .v-product-grid .mc-member-grid-price__label,
+:is(html.category, body.category) #content_area ul.v-product-grid .mc-member-grid-price__label {
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: #6e6e6e !important;
+}
+
+body.is-home:not(.productdetails) #content_area_home .v-product-grid .mc-member-grid-price__amount,
+body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-price__amount,
+:is(html.category, body.category) #content_area .v-product-grid .mc-member-grid-price__amount,
+:is(html.category, body.category) #content_area ul.v-product-grid .mc-member-grid-price__amount {
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em !important;
+  color: #1a1a1a !important;
+  margin-top: 4px !important;
+}
+
+body.is-home:not(.productdetails) #content_area_home .v-product-grid .mc-member-grid-price__hint,
+body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-price__hint,
+:is(html.category, body.category) #content_area .v-product-grid .mc-member-grid-price__hint,
+:is(html.category, body.category) #content_area ul.v-product-grid .mc-member-grid-price__hint {
+  font-size: 12px !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.03em !important;
+  color: #5a5a5a !important;
+  margin-top: 6px !important;
+  line-height: 1.45 !important;
+}
+
+body.is-home:not(.productdetails) #content_area_home .v-product-grid .mc-member-grid-price__hint a.mc-member-grid-price__login,
+body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-price__hint a.mc-member-grid-price__login,
+:is(html.category, body.category) #content_area .v-product-grid .mc-member-grid-price__hint a.mc-member-grid-price__login,
+:is(html.category, body.category) #content_area ul.v-product-grid .mc-member-grid-price__hint a.mc-member-grid-price__login {
+  letter-spacing: 0.06em !important;
+  text-underline-offset: 3px !important;
+  color: #1a1a1a !important;
 }
 
 .mc-member-grid-price__hint a.mc-member-grid-price__login:hover {
@@ -5417,17 +5480,20 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 :is(html.category, body.category) ul.v-product-grid > li.v-product h2,
 :is(html.category, body.category) ul.v-product-grid > li.v-product h3,
 :is(html.category, body.category) ul.v-product-grid > li.v-product h4 {
-  order: 3;
+  order: 2;
   flex: 0 1 auto;
-  line-height: 1.25;
+  line-height: 1.35;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
-  text-align: center;
+  text-align: left;
   min-height: 2.25em;
   box-sizing: border-box;
   width: 100%;
-  margin-top: 6px !important;
+  margin-top: 8px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em !important;
+  color: #1a1a1a !important;
 }
 
 :is(html.category, body.category) .v-product-grid .v-product .productnamecolor a,
@@ -5435,7 +5501,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 :is(html.category, body.category) ul.v-product-grid > li.v-product .productnamecolor a,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__name a {
   width: 100%;
-  text-align: center !important;
+  text-align: left !important;
 }
 
 /* When Volusion nests image-wrap inside img cell, fill the tile (avoid double 280px stack) */
@@ -5455,9 +5521,9 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 :is(html.category, body.category) .v-product-grid .v-product .product_price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .product_price {
-  order: 2;
+  order: 4;
   flex: 0 0 auto;
-  margin-top: 2px !important;
+  margin-top: 4px !important;
   min-height: 0;
   box-sizing: border-box;
   display: flex;
@@ -5470,9 +5536,9 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 
 :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .mc-member-grid-price {
-  order: 2 !important;
+  order: 3 !important;
   flex: 0 0 auto;
-  margin-top: 2px !important;
+  margin-top: 6px !important;
   min-height: 0;
   box-sizing: border-box;
   display: flex;
@@ -5493,12 +5559,12 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 :is(html.category, body.category) .v-product [itemprop="price"],
 :is(html.category, body.category) ul.v-product-grid > li.v-product > font.product_sale_price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product > font.product_list_price {
-  order: 2 !important;
+  order: 5 !important;
   align-self: stretch !important;
   text-align: left !important;
   width: 100% !important;
   box-sizing: border-box !important;
-  margin-top: 2px !important;
+  margin-top: 4px !important;
 }
 
 @media (max-width: 991px) {
@@ -5546,13 +5612,13 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   :is(html.category, body.category) ul.v-product-grid > li.v-product h2,
   :is(html.category, body.category) ul.v-product-grid > li.v-product h3,
   :is(html.category, body.category) ul.v-product-grid > li.v-product h4 {
-    order: 3 !important;
+    order: 2 !important;
     flex: 0 1 auto !important;
     min-height: 2.25em !important;
-    align-items: center !important;
+    align-items: flex-start !important;
     justify-content: flex-start !important;
-    text-align: center !important;
-    margin-top: 6px !important;
+    text-align: left !important;
+    margin-top: 8px !important;
     margin-bottom: 0 !important;
     padding-top: 0 !important;
   }
@@ -5561,14 +5627,14 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   :is(html.category, body.category) .v-product-grid .v-product .product_price,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__price,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .product_price {
-    order: 2 !important;
-    margin-top: 2px !important;
+    order: 4 !important;
+    margin-top: 4px !important;
   }
 
   :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .mc-member-grid-price {
-    margin-top: 2px !important;
-    order: 2 !important;
+    margin-top: 6px !important;
+    order: 3 !important;
   }
 
   :is(html.category, body.category) .v-product-grid .v-product,
@@ -6157,22 +6223,22 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 :is(html.category, body.category) ul.v-product-grid > li.v-product h2,
 :is(html.category, body.category) ul.v-product-grid > li.v-product h3,
 :is(html.category, body.category) ul.v-product-grid > li.v-product h4 {
-  order: 3 !important;
+  order: 2 !important;
   flex: 0 1 auto !important;
   min-height: 2.25em !important;
-  align-items: center !important;
+  align-items: flex-start !important;
   justify-content: flex-start !important;
-  text-align: center !important;
-  margin-top: 6px !important;
+  text-align: left !important;
+  margin-top: 8px !important;
 }
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__price,
 :is(html.category, body.category) .v-product-grid .v-product .product_price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .product_price {
-  order: 2 !important;
+  order: 4 !important;
   flex: 0 0 auto !important;
-  margin-top: 2px !important;
+  margin-top: 4px !important;
   min-height: 0 !important;
   text-align: left !important;
   align-items: flex-start !important;
@@ -6183,8 +6249,8 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .mc-member-grid-price {
   flex: 0 0 auto !important;
-  margin-top: 2px !important;
-  order: 2 !important;
+  margin-top: 6px !important;
+  order: 3 !important;
   min-height: 0 !important;
   text-align: left !important;
   align-items: flex-start !important;
@@ -6344,8 +6410,8 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   white-space: normal !important;
   overflow-wrap: break-word !important;
   word-break: normal !important;
-  text-align: center !important;
-  margin-top: 6px !important;
+  text-align: left !important;
+  margin-top: 8px !important;
 }
 .v-product-grid {
   display: flex !important;
@@ -6513,7 +6579,7 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-produc
   margin: 0 !important;
 }
 
-/* Title band — fixed min-height so rows line up; price starts on same baseline below */
+/* Title band — left stack (RH-style); member block sits directly under title on home + category */
 body.is-home:not(.productdetails) #content_area_home .v-product__name,
 body.is-home:not(.productdetails) #content_area_home .productnamecolor,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid h2,
@@ -6529,17 +6595,20 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .productn
   flex: 0 0 auto !important;
   display: flex !important;
   flex-direction: column !important;
-  align-items: center !important;
+  align-items: flex-start !important;
   justify-content: flex-start !important;
-  text-align: center !important;
+  text-align: left !important;
   width: 100% !important;
-  min-height: 4.5em !important;
-  line-height: 1.3 !important;
-  margin: 6px 0 0 0 !important;
+  min-height: 2.75em !important;
+  line-height: 1.35 !important;
+  margin: 8px 0 0 0 !important;
   box-sizing: border-box !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em !important;
+  color: #1a1a1a !important;
 }
 
-/* Category PLP: title below price block (price hugging image) */
+/* Category PLP: same title stack as home (#content_area overrides) */
 :is(html.category, body.category) #content_area .v-product__name,
 :is(html.category, body.category) #content_area .productnamecolor,
 :is(html.category, body.category) #content_area .v-product-grid h2,
@@ -6547,18 +6616,21 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .productn
 :is(html.category, body.category) #content_area .v-product-grid h4,
 :is(html.category, body.category) #content_area ul.v-product-grid > li .v-product__name,
 :is(html.category, body.category) #content_area ul.v-product-grid > li .productnamecolor {
-  order: 3 !important;
+  order: 2 !important;
   flex: 0 0 auto !important;
   display: flex !important;
   flex-direction: column !important;
-  align-items: center !important;
+  align-items: flex-start !important;
   justify-content: flex-start !important;
-  text-align: center !important;
+  text-align: left !important;
   width: 100% !important;
   min-height: 2.25em !important;
-  line-height: 1.3 !important;
-  margin: 6px 0 0 0 !important;
+  line-height: 1.35 !important;
+  margin: 8px 0 0 0 !important;
   box-sizing: border-box !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em !important;
+  color: #1a1a1a !important;
 }
 
 body.is-home:not(.productdetails) #content_area_home .productnamecolor a,
@@ -6568,30 +6640,30 @@ body.is-home:not(.productdetails) #content_area .v-product__name a,
 :is(html.category, body.category) #content_area .productnamecolor a,
 :is(html.category, body.category) #content_area .v-product__name a {
   width: 100% !important;
-  text-align: center !important;
+  text-align: left !important;
 }
 
-/* Home: prices under title. Category: prices under image, left. */
+/* Retail / list price after member block */
 body.is-home:not(.productdetails) #content_area_home .v-product__price,
 body.is-home:not(.productdetails) #content_area_home .product_price,
 body.is-home:not(.productdetails) #content_area .v-product__price,
 body.is-home:not(.productdetails) #content_area .product_price {
-  order: 3 !important;
+  order: 4 !important;
   flex: 0 0 auto !important;
   width: 100% !important;
   margin-top: 4px !important;
-  text-align: center !important;
+  text-align: left !important;
   display: flex !important;
   flex-direction: column !important;
-  align-items: center !important;
+  align-items: flex-start !important;
 }
 
 :is(html.category, body.category) #content_area .v-product__price,
 :is(html.category, body.category) #content_area .product_price {
-  order: 2 !important;
+  order: 4 !important;
   flex: 0 0 auto !important;
   width: 100% !important;
-  margin-top: 2px !important;
+  margin-top: 4px !important;
   text-align: left !important;
   display: flex !important;
   flex-direction: column !important;
@@ -6604,9 +6676,9 @@ body.is-home:not(.productdetails) #content_area .v-product .product_sale_price,
 body.is-home:not(.productdetails) #content_area .v-product .product_list_price,
 body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li > font.product_sale_price,
 body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li > font.product_list_price {
-  order: 4 !important;
+  order: 5 !important;
   align-self: stretch !important;
-  text-align: center !important;
+  text-align: left !important;
   width: 100% !important;
   margin-top: 4px !important;
 }
@@ -6618,28 +6690,28 @@ body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li > fo
 :is(html.category, body.category) #content_area .v-product [itemprop="price"],
 :is(html.category, body.category) #content_area ul.v-product-grid > li > font.product_sale_price,
 :is(html.category, body.category) #content_area ul.v-product-grid > li > font.product_list_price {
-  order: 2 !important;
+  order: 5 !important;
   align-self: stretch !important;
   text-align: left !important;
   width: 100% !important;
-  margin-top: 2px !important;
+  margin-top: 4px !important;
 }
 
 body.is-home:not(.productdetails) #content_area_home .mc-member-grid-price,
 body.is-home:not(.productdetails) #content_area .mc-member-grid-price {
-  order: 5 !important;
+  order: 3 !important;
   flex: 0 0 auto !important;
   width: 100% !important;
   margin-top: 6px !important;
-  text-align: center !important;
-  align-items: center !important;
+  text-align: left !important;
+  align-items: flex-start !important;
 }
 
 :is(html.category, body.category) #content_area .mc-member-grid-price {
-  order: 2 !important;
+  order: 3 !important;
   flex: 0 0 auto !important;
   width: 100% !important;
-  margin-top: 2px !important;
+  margin-top: 6px !important;
   text-align: left !important;
   align-items: flex-start !important;
 }
