@@ -68,7 +68,7 @@ html body #mc-hero-copy-subline {
   }
 }
 
-/* Member pricing: centered under product title (home + category) */
+/* Member pricing: left-aligned under product title (home + category) */
 body.is-home #content_area .v-product-grid .mc-member-grid-price,
 body.is-home #content_area_home .v-product-grid .mc-member-grid-price,
 body.is-home #content_area ul.v-product-grid .mc-member-grid-price,
@@ -79,8 +79,8 @@ html.category #content_area .v-product-grid .mc-member-grid-price,
 html.category #content_area ul.v-product-grid .mc-member-grid-price {
   display: flex !important;
   flex-direction: column !important;
-  align-items: center !important;
-  text-align: center !important;
+  align-items: flex-start !important;
+  text-align: left !important;
   width: 100% !important;
 }
 
@@ -88,7 +88,7 @@ body.is-home #content_area .mc-member-grid-price__label,
 body.is-home #content_area_home .mc-member-grid-price__label,
 body.category #content_area .mc-member-grid-price__label,
 html.category #content_area .mc-member-grid-price__label {
-  text-align: center !important;
+  text-align: left !important;
   width: 100% !important;
 }
 
@@ -96,7 +96,7 @@ body.is-home #content_area .mc-member-grid-price__amount,
 body.is-home #content_area_home .mc-member-grid-price__amount,
 body.category #content_area .mc-member-grid-price__amount,
 html.category #content_area .mc-member-grid-price__amount {
-  text-align: center !important;
+  text-align: left !important;
   width: 100% !important;
 }
 
@@ -104,6 +104,6 @@ body.is-home #content_area .mc-member-grid-price__hint,
 body.is-home #content_area_home .mc-member-grid-price__hint,
 body.category #content_area .mc-member-grid-price__hint,
 html.category #content_area .mc-member-grid-price__hint {
-  text-align: center !important;
+  text-align: left !important;
   width: 100% !important;
 }
