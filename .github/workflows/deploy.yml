@@ -10,18 +10,9 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      skip_live_verify:
-        description: "Skip SFTP download verify (use if upload works but verify fails on path mismatch)"
-        type: boolean
-        default: false
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
-concurrency:
-  group: deploy-volusion-main
-  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -30,12 +21,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Show local deploy marker (expected on SFTP after upload)
-        run: |
-          set -euo pipefail
-          grep -n 'mc-deploy-verify' template_266.html || true
-          grep -n 'MC_DEPLOY_VERIFY' vspfiles/css/custom-safe.css | head -n 3 || true
 
       - name: Upload template and CSS via SFTP
         env:
@@ -49,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}"
-          echo "::notice::After deploy: View Source should contain mc-deploy-verify from template_266.html; CSS first line MC_DEPLOY_VERIFY_*"
+          echo "::notice::deploy marker 20260416 — View Source mc-deploy-verify content=20260416; CSS MC_DEPLOY_VERIFY_20260416"
 
           SFTP_HOST="${SECRET_SFTP_HOST:-}"
           if [ -z "$SFTP_HOST" ]; then
@@ -251,7 +236,7 @@ jobs:
           echo "::notice::Upload finished. Next step downloads template via SFTP and checks mc-deploy-verify (HTTP is not used; storefront HTML cache can lag)."
 
       - name: Verify remote template via SFTP (mc-deploy-verify)
-        if: ${{ vars.SKIP_LIVE_VERIFY != 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_live_verify != 'true') }}
+        if: ${{ vars.SKIP_LIVE_VERIFY != 'true' }}
         env:
           SECRET_SFTP_HOST: ${{ secrets.SFTP_HOST }}
           SECRET_FTP_HOST: ${{ secrets.FTP_HOST }}
