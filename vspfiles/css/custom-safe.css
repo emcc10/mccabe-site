@@ -43,6 +43,156 @@ body {
 }
 
 /* ======================================
+   HEADER SEARCH (fallback — Volusion / CDN theme CSS often missing)
+====================================== */
+header.header .header__section--middle {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  position: relative !important;
+  z-index: 5 !important;
+  box-sizing: border-box !important;
+}
+
+header.header .collapsing-search,
+header.header #collapsingSearch {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 6 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 10px 16px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+header.header .collapsing-search__form .container {
+  width: 100% !important;
+  max-width: min(720px, 100%) !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+}
+
+header.header .collapsing-search__form .row {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+
+header.header .collapsing-search__input,
+header.header #search {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: auto !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: 42px !important;
+  padding: 0 14px !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  border-radius: 2px !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  color: #111 !important;
+  background: #fff !important;
+  box-sizing: border-box !important;
+}
+
+header.header .collapsing-search__submit {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 42px !important;
+  padding: 0 !important;
+  border: 1px solid #111 !important;
+  background: #111 !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+}
+
+header.header .collapsing-search__submit svg,
+header.header .collapsing-search__icon {
+  width: 18px !important;
+  height: 18px !important;
+  fill: currentColor !important;
+}
+
+header.header .search__wrapper,
+header.header .search__wrapper.microblock {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+}
+
+header.header #toggle1.search__toggle,
+header.header #toggle1 {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  cursor: pointer !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  border-radius: 2px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-sizing: border-box !important;
+}
+
+header.header #toggle1 .toggle__icon {
+  width: 20px !important;
+  height: 20px !important;
+  display: block !important;
+}
+
+/* When theme expects “open” class, mirror Volusion behavior */
+header.header #toggle1 .toggle__icon--open {
+  display: none !important;
+}
+
+header.header #toggle1 .toggle__icon--closed {
+  display: block !important;
+}
+
+html.mc-search-open header.header #toggle1 .toggle__icon--closed,
+body.mc-search-open header.header #toggle1 .toggle__icon--closed {
+  display: none !important;
+}
+
+html.mc-search-open header.header #toggle1 .toggle__icon--open,
+body.mc-search-open header.header #toggle1 .toggle__icon--open {
+  display: block !important;
+}
+
+@media (min-width: 992px) {
+  body.is-home header.header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 2147483000 !important;
+    background: #fff !important;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06) !important;
+  }
+}
+
+/* ======================================
    HOMEPAGE HERO VIDEO (HOME ONLY)
 ====================================== */
 /* Full-bleed: no white space on sides of slideshow */
@@ -109,6 +259,11 @@ body.is-home #slideshow-container #mc-hero-copy-tagline,
   -webkit-text-fill-color: #d8d6d3 !important;
   text-transform: none !important;
   text-align: center !important;
+  white-space: nowrap !important;
+  max-width: min(96vw, 920px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
 }
 
 #mc-hero-copy-subline,
@@ -136,7 +291,7 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   align-items: center;
   justify-content: center;
   gap: clamp(14px, 2.5vw, 22px);
-  padding: clamp(8px, 1.5vw, 12px) max(80px, 10vw) clamp(8px, 1.5vw, 12px) max(80px, 10vw); /* clear home (left) and cart (right) */
+  padding: clamp(8px, 1.5vw, 12px) max(56px, 7.5vw) clamp(8px, 1.5vw, 12px) max(56px, 7.5vw); /* clear tighter float icons */
   box-sizing: border-box;
   max-width: 100%;
 }
@@ -181,7 +336,7 @@ body.is-home a.mc-home-float {
 body.is-home .mc-cart-float,
 body.is-home a.mc-cart-float {
   left: auto !important;
-  right: max(28px, env(safe-area-inset-right)) !important;
+  right: max(10px, env(safe-area-inset-right)) !important;
 }
 
 /* Prevent hero container from clipping fixed icons (they're body children) */
@@ -220,13 +375,14 @@ body.is-home #slideshow-container {
   /* Do not use bare `p` here — !important beats inline styles and blocked the 36px tagline */
   #mc-hero-copy-tagline,
   #slideshow-container #mc-hero-copy-tagline {
-    font-size: clamp(22px, 5.2vw, 36px) !important;
+    font-size: clamp(11px, 2.85vw, 36px) !important;
     line-height: 1.2 !important;
-    letter-spacing: 0.12em !important;
+    letter-spacing: clamp(0.05em, 0.09vw, 0.12em) !important;
     color: #d8d6d3 !important;
     -webkit-text-fill-color: #d8d6d3 !important;
     text-transform: none !important;
     margin: 0.35em auto 0.5em !important;
+    white-space: nowrap !important;
   }
 
   #mc-hero-copy-subline,
@@ -825,7 +981,7 @@ a.mc-home-float,
 .mc-cart-float,
 a.mc-cart-float {
   position: fixed !important;
-  top: max(12px, env(safe-area-inset-top)) !important;
+  top: max(10px, env(safe-area-inset-top)) !important;
   z-index: 2147483647 !important;
   width: clamp(40px, 10vw, 52px) !important;
   height: clamp(40px, 10vw, 52px) !important;
@@ -850,9 +1006,9 @@ a.mc-cart-float {
 
 .mc-home-float,
 a.mc-home-float {
-  left: max(12px, env(safe-area-inset-left)) !important;
+  left: max(10px, env(safe-area-inset-left)) !important;
   right: auto !important;
-  margin-right: 16px !important; /* space between container and content to the right */
+  margin-right: 0 !important;
 }
 
 .mc-cart-float,
@@ -3086,10 +3242,10 @@ select.mc-native-leather {
 :root {
   --mc-float-w: clamp(44px, 4.2vw, 52px);
   --mc-float-h: clamp(40px, 3.6vw, 46px);
-  --mc-float-pad: clamp(8px, 1.6vw, 16px);
-  --mc-top: max(12px, env(safe-area-inset-top));
+  --mc-float-pad: clamp(6px, 1.15vw, 12px);
+  --mc-top: max(10px, env(safe-area-inset-top));
   --mc-left: max(var(--mc-float-pad), env(safe-area-inset-left));
-  --mc-right: max(16px, var(--mc-float-pad), env(safe-area-inset-right));
+  --mc-right: max(10px, var(--mc-float-pad), env(safe-area-inset-right));
 }
 
 .mc-home-float,
@@ -3104,7 +3260,7 @@ select.mc-native-leather {
 
 .mc-home-float {
   left: var(--mc-left) !important;
-  margin-right: 16px !important; /* container margin: space to the right of home icon */
+  margin-right: 0 !important;
 }
 /* .mc-cart-float position set at end of file (left-based so it never runs off) */
 
@@ -3521,14 +3677,14 @@ html body a.mc-cart-float,
 html body .mc-cart-float,
 body a.mc-cart-float,
 body .mc-cart-float {
-  left: calc(100vw - 52px - max(28px, env(safe-area-inset-right))) !important;
+  left: calc(100vw - 52px - max(10px, env(safe-area-inset-right))) !important;
   right: auto !important;
   width: 52px !important;
   max-width: 52px !important;
   min-width: 40px !important;
   max-height: 48px !important;
-  margin-left: 16px !important;
-  margin-right: max(20px, env(safe-area-inset-right)) !important; /* container margin: space on right */
+  margin-left: 0 !important;
+  margin-right: max(10px, env(safe-area-inset-right)) !important;
   box-sizing: border-box !important;
 }
 
@@ -3538,7 +3694,7 @@ body.is-home html body .mc-cart-float,
 body.is-home body a.mc-cart-float,
 body.is-home body .mc-cart-float {
   left: auto !important;
-  right: max(28px, env(safe-area-inset-right)) !important;
+  right: max(10px, env(safe-area-inset-right)) !important;
 }
 
 /* =========================================================

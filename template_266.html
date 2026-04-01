@@ -55,7 +55,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260402g" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260402h" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -149,11 +149,11 @@ document.addEventListener("DOMContentLoaded", function () {
   <style>
   .mc-cart-float__icon,
   .mc-home-float__icon { width: 20px; height: 20px; display: block; }
-  /* Icon containers: margins so they don’t touch menu/content */
-  body a.mc-home-float, body .mc-home-float { margin-right: 16px !important; }
+  /* Tighter inset; still clear of safe areas and hero menu */
+  body a.mc-home-float, body .mc-home-float { margin-right: 0 !important; }
   body a.mc-cart-float, body .mc-cart-float {
-    margin-left: 16px !important;
-    left: calc(100vw - 52px - max(28px, env(safe-area-inset-right))) !important;
+    margin-left: 0 !important;
+    left: calc(100vw - 52px - max(10px, env(safe-area-inset-right))) !important;
     right: auto !important;
     width: 52px !important;
     max-width: 52px !important;
@@ -173,6 +173,11 @@ document.addEventListener("DOMContentLoaded", function () {
       margin: 0.35em auto 0.5em !important;
       padding: 0 !important;
       font-family: inherit !important;
+      white-space: nowrap !important;
+      max-width: min(96vw, 920px) !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      box-sizing: border-box !important;
     }
     #mc-hero-copy-subline {
       display: none !important;
@@ -186,7 +191,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     @media (max-width: 991px) {
       #mc-hero-copy-tagline {
-        font-size: clamp(22px, 5.2vw, 36px) !important;
+        font-size: clamp(11px, 2.85vw, 36px) !important;
+        letter-spacing: clamp(0.05em, 0.09vw, 0.12em) !important;
       }
     }
   </style>
@@ -211,6 +217,7 @@ document.addEventListener("DOMContentLoaded", function () {
     el.style.setProperty('text-transform', 'none', 'important');
     el.style.setProperty('margin-top', '0.35em', 'important');
     el.style.setProperty('margin-bottom', '0.5em', 'important');
+    el.style.setProperty('white-space', 'nowrap', 'important');
   }
   function mcHeroEnsureCopy() {
     var sc = document.getElementById('slideshow-container');
@@ -234,7 +241,8 @@ document.addEventListener("DOMContentLoaded", function () {
     t.style.setProperty('-webkit-text-fill-color', '#d8d6d3', 'important');
     try {
       if (window.matchMedia && window.matchMedia('(max-width: 991px)').matches) {
-        t.style.setProperty('font-size', 'clamp(22px, 5.2vw, 36px)', 'important');
+        t.style.setProperty('font-size', 'clamp(11px, 2.85vw, 36px)', 'important');
+        t.style.setProperty('letter-spacing', 'clamp(0.05em, 0.09vw, 0.12em)', 'important');
       }
     } catch (eM) {}
   }
@@ -595,6 +603,33 @@ document.addEventListener("DOMContentLoaded", function () {
 })();
 </script>
         </header>
+<script>
+(function () {
+  function bindSearchToggle() {
+    var toggle = document.getElementById('toggle1');
+    if (!toggle || toggle.getAttribute('data-mc-search-bound') === '1') return;
+    toggle.setAttribute('data-mc-search-bound', '1');
+    var root = document.documentElement;
+    var bod = document.body;
+    function flip() {
+      root.classList.toggle('mc-search-open');
+      if (bod) bod.classList.toggle('mc-search-open');
+    }
+    toggle.addEventListener('click', function (e) {
+      e.preventDefault();
+      flip();
+    });
+    toggle.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        flip();
+      }
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindSearchToggle);
+  else bindSearchToggle();
+})();
+</script>
 
     
         <div class="container container--content">
