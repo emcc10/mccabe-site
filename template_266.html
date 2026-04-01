@@ -3879,29 +3879,51 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li > a,
 body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li > a,
 body:not(.is-home) #display_menu_1 .vnav__link,
 body:not(.is-home) #display_menu_1 .vnav__label {
-  color: #111111 !important;
+  color: #2a2a2a !important;
   font-family: Inter, sans-serif !important;
   font-size: 15px !important;
-  font-weight: 700 !important;
+  font-weight: 500 !important;
   letter-spacing: 0.12em !important;
   text-transform: uppercase !important;
   text-decoration: none !important;
   padding: 0 8px !important;
   white-space: nowrap !important;
   line-height: 1.2 !important;
+  transition: color 0.15s ease !important;
 }
 
-/* Submenu typography on non-home */
+body:not(.is-home) #display_menu_1 .vnav--level1 > li > a:hover,
+body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li > a:hover,
+body:not(.is-home) #display_menu_1 .vnav__link:hover,
+body:not(.is-home) #display_menu_1 .vnav__label:hover {
+  color: #0a0a0a !important;
+}
+
+/* Submenu typography on non-home — left-aligned, lighter than top level */
+body:not(.is-home) #display_menu_1 .vnav--level2,
+body:not(.is-home) #display_menu_1 .vnav--level3,
+body:not(.is-home) #display_menu_1 .vnav__submenu {
+  text-align: left !important;
+}
+
 body:not(.is-home) #display_menu_1 .vnav--level2 a,
 body:not(.is-home) #display_menu_1 .vnav--level3 a,
 body:not(.is-home) #display_menu_1 .vnav__submenu a {
-  color: #111111 !important;
+  color: #2a2a2a !important;
   font-family: Inter, sans-serif !important;
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.12em !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.08em !important;
   text-transform: uppercase !important;
   text-decoration: none !important;
+  text-align: left !important;
+  transition: color 0.15s ease !important;
+}
+
+body:not(.is-home) #display_menu_1 .vnav--level2 a:hover,
+body:not(.is-home) #display_menu_1 .vnav--level3 a:hover,
+body:not(.is-home) #display_menu_1 .vnav__submenu a:hover {
+  color: #0a0a0a !important;
 }
 
 
@@ -4981,19 +5003,30 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 }
    
 
-    var nodes = scope.querySelectorAll(
+    var topNodes = scope.querySelectorAll(
       '.vnav--level1 > li > a, .vnav--horizontal.vnav--level1 > li > a, .vnav__link, .vnav__label'
     );
-
-    nodes.forEach(function (el) {
+    topNodes.forEach(function (el) {
+      if (el.closest && el.closest('.vnav--level2, .vnav--level3, .vnav__submenu')) return;
       el.style.setProperty('font-family', 'Inter, sans-serif', 'important');
       el.style.setProperty('font-size', '15px', 'important');
-      el.style.setProperty('font-weight', '700', 'important');
+      el.style.setProperty('font-weight', '500', 'important');
       el.style.setProperty('letter-spacing', '0.12em', 'important');
       el.style.setProperty('text-transform', 'uppercase', 'important');
       el.style.setProperty('line-height', '1.2', 'important');
       el.style.setProperty('text-decoration', 'none', 'important');
       el.style.setProperty('padding', '0 8px', 'important');
+    });
+
+    scope.querySelectorAll('.vnav--level2 a, .vnav--level3 a, .vnav__submenu a').forEach(function (el) {
+      el.style.setProperty('font-family', 'Inter, sans-serif', 'important');
+      el.style.setProperty('font-size', '14px', 'important');
+      el.style.setProperty('font-weight', '400', 'important');
+      el.style.setProperty('letter-spacing', '0.08em', 'important');
+      el.style.setProperty('text-transform', 'uppercase', 'important');
+      el.style.setProperty('text-align', 'left', 'important');
+      el.style.setProperty('line-height', '1.2', 'important');
+      el.style.setProperty('text-decoration', 'none', 'important');
     });
   }
 
@@ -5054,6 +5087,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 <script>
 (function () {
   var PAGER_ID = 'mc-category-pager';
+  /* Volusion often uses 12 or 24 per page; if grid is full, offer synthetic ?PageNum=2 when DOM hides pager */
+  var MC_PAGE_SIZE_HINT = 10;
 
   function isCategoryListing() {
     if (document.body.classList.contains('productdetails')) return false;
@@ -5064,31 +5099,88 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return false;
   }
 
+  /** Case-insensitive page from query (Volusion links sometimes differ in casing). */
+  function pageFromSearch(search) {
+    if (!search || search === '?') return 1;
+    var q = search.charAt(0) === '?' ? search.slice(1) : search;
+    var pairs = q.split('&');
+    for (var i = 0; i < pairs.length; i++) {
+      var eq = pairs[i].indexOf('=');
+      if (eq < 0) continue;
+      var k = decodeURIComponent(pairs[i].slice(0, eq)).toLowerCase();
+      var v = parseInt(decodeURIComponent(pairs[i].slice(eq + 1)), 10);
+      if (isNaN(v) || v < 1) continue;
+      if (k === 'pagenum' || k === 'page' || k === 'pagenumber') return v;
+    }
+    return 1;
+  }
+
   function currentPageNum() {
-    var sp = new URLSearchParams(location.search || '');
-    var raw =
-      sp.get('PageNum') ||
-      sp.get('page') ||
-      sp.get('pagenumber') ||
-      sp.get('Page') ||
-      '';
-    var n = parseInt(raw, 10);
-    return raw === '' || isNaN(n) ? 1 : n;
+    return pageFromSearch(location.search || '');
+  }
+
+  function pageFromHref(href) {
+    try {
+      return pageFromSearch(new URL(href, location.href).search || '');
+    } catch (e) {
+      return 1;
+    }
   }
 
   function outsideProductGrid(a) {
-    return !a.closest || !a.closest('.v-product-grid, ul.v-product-grid, li.v-product');
+    if (!a.closest) return true;
+    if (a.closest('#mc-category-pager')) return false;
+    if (a.closest('.v-product-grid, ul.v-product-grid, li.v-product, .v-product__details')) return false;
+    return true;
   }
 
-  function findNextPrevFromDom(ca) {
+  function sameCategoryPath(href) {
+    try {
+      return new URL(href, location.href).pathname === location.pathname;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /** Prefer PageNum if any link on the page uses it; else page= */
+  function detectPagingKey() {
+    var probe = document.querySelector('a[href*="PageNum="], a[href*="pagenum="]');
+    if (probe && probe.href) return 'PageNum';
+    probe = document.querySelector('a[href*="page="]');
+    if (probe && probe.href && /[?&]page=\d/i.test(probe.href)) return 'page';
+    return 'PageNum';
+  }
+
+  function buildUrlForPage(page) {
+    var u = new URL(location.href);
+    var key = detectPagingKey();
+    ['PageNum', 'pagenum', 'page', 'pagenumber', 'Page'].forEach(function (k) {
+      try {
+        u.searchParams.delete(k);
+      } catch (e) {}
+    });
+    if (page > 1) u.searchParams.set(key, String(page));
+    return u.href;
+  }
+
+  function productCardCount(ca) {
+    if (!ca) return 0;
+    return ca.querySelectorAll(
+      'ul.v-product-grid > li.v-product, .v-product-grid > .v-product, .v-product-grid > .v-product-grid-item, table.v65-productDisplay li.v-product'
+    ).length;
+  }
+
+  function findNextPrevFromDom(root) {
     var nextHref = null;
     var prevHref = null;
-    var nextRel = ca.querySelector('a[rel="next"][href]');
-    var prevRel = ca.querySelector('a[rel="prev"][href]');
+    if (!root) return { next: null, prev: null };
+
+    var nextRel = root.querySelector('a[rel="next"][href]');
+    var prevRel = root.querySelector('a[rel="prev"][href]');
     if (nextRel && nextRel.href && outsideProductGrid(nextRel)) nextHref = nextRel.href;
     if (prevRel && prevRel.href && outsideProductGrid(prevRel)) prevHref = prevRel.href;
 
-    ca.querySelectorAll('a[href]').forEach(function (a) {
+    root.querySelectorAll('a[href]').forEach(function (a) {
       if (!outsideProductGrid(a)) return;
       if (!a.href || /^javascript:/i.test(a.href)) return;
       var t = (a.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -5101,7 +5193,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       }
     });
 
-    var pag = ca.querySelector('ul.pagination');
+    var pag = root.querySelector('ul.pagination');
     if (pag) {
       var items = pag.querySelectorAll('li');
       if (items.length >= 2) {
@@ -5123,45 +5215,72 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return { next: nextHref, prev: prevHref };
   }
 
-  function inferFromPageParams(ca) {
-    var curr = currentPageNum();
+  function inferFromPageParams(root, curr) {
     var nextHref = null;
     var prevHref = null;
     var nextPage = Infinity;
     var prevPage = 0;
-    ca.querySelectorAll('a[href]').forEach(function (a) {
+    if (!root) return { next: null, prev: null };
+
+    root.querySelectorAll('a[href]').forEach(function (a) {
+      if (!outsideProductGrid(a)) return;
+      if (!a.href || /^javascript:/i.test(a.href)) return;
+      if (!sameCategoryPath(a.href)) return;
+      var lo = a.href.toLowerCase();
+      if (lo.indexOf('pagenum') < 0 && lo.indexOf('page=') < 0 && lo.indexOf('pagenumber') < 0) return;
+      var p = pageFromHref(a.href);
+      if (p < 1) return;
+      if (p > curr && p < nextPage) {
+        nextPage = p;
+        nextHref = a.href;
+      }
+      if (p < curr && p > prevPage) {
+        prevPage = p;
+        prevHref = a.href;
+      }
+    });
+    return { next: nextHref, prev: prevHref };
+  }
+
+  function maxPageSeenOnPage(root, currPath) {
+    var maxP = 1;
+    if (!root) return 1;
+    root.querySelectorAll('a[href]').forEach(function (a) {
       if (!outsideProductGrid(a)) return;
       if (!a.href || /^javascript:/i.test(a.href)) return;
       try {
         var u = new URL(a.href, location.href);
-        var lo = u.search.toLowerCase();
-        if (lo.indexOf('pagenum') < 0 && lo.indexOf('page=') < 0 && lo.indexOf('pagenumber') < 0) return;
-        var p = parseInt(
-          u.searchParams.get('PageNum') || u.searchParams.get('page') || u.searchParams.get('pagenumber') || '0',
-          10
-        );
-        if (!p) return;
-        if (p > curr && p < nextPage) {
-          nextPage = p;
-          nextHref = a.href;
-        }
-        if (p < curr && p > prevPage) {
-          prevPage = p;
-          prevHref = a.href;
-        }
+        if (u.pathname !== currPath) return;
+        var p = pageFromHref(a.href);
+        if (p > maxP) maxP = p;
       } catch (e) {}
     });
-    return { next: nextHref, prev: prevHref };
+    return maxP;
   }
 
   function mountPoint() {
     var ca = document.getElementById('content_area');
     if (!ca) return null;
     var table = ca.querySelector('table.v65-productDisplay');
-    if (table && table.parentNode) return { el: table, parent: table.parentNode };
     var grid = ca.querySelector('ul.v-product-grid') || ca.querySelector('.v-product-grid');
-    if (grid && grid.parentNode) return { el: grid, parent: grid.parentNode };
-    return null;
+    var anchor = table || grid;
+    if (anchor) {
+      var outer = anchor.closest('table.v65-productDisplay') || anchor.closest('table') || anchor;
+      return { anchor: outer, parent: outer.parentNode || ca };
+    }
+    var last = ca.lastElementChild;
+    if (last && last.id !== PAGER_ID) return { anchor: last, parent: ca };
+    return { anchor: null, parent: ca };
+  }
+
+  function insertPagerBar(m, wrap) {
+    if (!m || !m.parent) return;
+    if (m.anchor) {
+      if (m.anchor.nextSibling) m.parent.insertBefore(wrap, m.anchor.nextSibling);
+      else m.parent.appendChild(wrap);
+    } else {
+      m.parent.appendChild(wrap);
+    }
   }
 
   function renderPager() {
@@ -5173,14 +5292,39 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (existing) existing.remove();
 
     var m = mountPoint();
-    if (!m) return;
+    if (!m || !m.parent) return;
+
+    var curr = currentPageNum();
+    if (
+      curr <= 1 &&
+      !ca.querySelector('ul.v-product-grid, .v-product-grid, table.v65-productDisplay') &&
+      productCardCount(ca) < 1
+    ) {
+      return;
+    }
+
+    var body = document.body;
+    var path = location.pathname;
 
     var d1 = findNextPrevFromDom(ca);
-    var d2 = inferFromPageParams(ca);
-    var nextHref = d1.next || d2.next;
-    var prevHref = d1.prev || d2.prev;
+    var d1b = findNextPrevFromDom(body);
+    var d2 = inferFromPageParams(ca, curr);
+    var d2b = inferFromPageParams(body, curr);
 
-    if (currentPageNum() <= 1) prevHref = null;
+    var nextHref = d1.next || d1b.next || d2.next || d2b.next;
+    var prevHref = d1.prev || d1b.prev || d2.prev || d2b.prev;
+
+    if (curr <= 1) prevHref = null;
+    else if (!prevHref) prevHref = buildUrlForPage(curr - 1);
+
+    if (!nextHref) {
+      var maxP = maxPageSeenOnPage(body, path);
+      if (curr < maxP) nextHref = buildUrlForPage(curr + 1);
+      else if (curr === 1 && maxP > 1) nextHref = buildUrlForPage(2);
+      else if (curr === 1 && productCardCount(ca) >= MC_PAGE_SIZE_HINT) nextHref = buildUrlForPage(2);
+    }
+
+    if (nextHref && pageFromHref(nextHref) <= curr) nextHref = null;
 
     if (!nextHref && !prevHref) return;
 
@@ -5206,8 +5350,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
     if (!wrap.querySelector('a')) return;
 
-    if (m.el.nextSibling) m.parent.insertBefore(wrap, m.el.nextSibling);
-    else m.parent.appendChild(wrap);
+    insertPagerBar(m, wrap);
   }
 
   function boot() {
@@ -5220,6 +5363,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     renderPager();
     setTimeout(renderPager, 400);
     setTimeout(renderPager, 1200);
+    setTimeout(renderPager, 2500);
   });
 
   var ca0 = document.getElementById('content_area');
