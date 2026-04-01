@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260402homefix3 — sync markers; fixCategoryGrid skips is-home + category context only */
+/* MC_DEPLOY_VERIFY_20260417 — grid re-run after member pricing + tail <style> before </body> */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -271,23 +271,66 @@ body:not(.is-home) #display_menu_1 .vnav__label {
 
 /* ======================================
    PRODUCT GRID: FIX IMAGE BOX HEIGHT
-   (category + home use fixed tiles below; this is other non-category pages only)
+   (scoped off category pages — those use fixed tiles + object-fit: cover)
 ====================================== */
-html:not(.category) body:not(.category):not(.is-home) .v-product-grid .v-product__img {
+html:not(.category) body:not(.category) .v-product-grid .v-product__img {
   display: block;
   height: 300px;
   text-align: center;
   overflow: hidden;
 }
 
-html:not(.category) body:not(.category):not(.is-home) .v-product-grid .v-product__img img {
+html:not(.category) body:not(.category) .v-product-grid .v-product__img img {
   max-height: 300px;
   width: auto;
   max-width: 100%;
   display: inline-block;
 }
 
-/* Home featured products: keep native Volusion layout (recent home grid overrides caused hidden/scattered cards). */
+/* Home featured products: stable columns if markup is table-based or floated (member-pricing must not swap out <td>). */
+@media (min-width: 992px) {
+  body.is-home #content_area_home ul.v-product-grid,
+  body.is-home #content_area_home .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 24px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    list-style: none !important;
+    padding-left: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.is-home #content_area_home ul.v-product-grid > li,
+  body.is-home #content_area_home .v-product-grid > .v-product {
+    float: none !important;
+    clear: none !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (max-width: 991px) {
+  body.is-home #content_area_home ul.v-product-grid,
+  body.is-home #content_area_home .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    width: 100% !important;
+    list-style: none !important;
+    padding-left: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.is-home #content_area_home ul.v-product-grid > li,
+  body.is-home #content_area_home .v-product-grid > .v-product {
+    float: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+}
 
 /* =========================================================
    PRODUCT LISTINGS: ALIGN IMAGES TO THE TOP OF THE IMAGE BOX
@@ -1310,8 +1353,7 @@ nav.push-menu .push-menu__close-btn::before {
   :is(html.category, body.category) .v-product-grid .v-product .v-product__price,
   :is(html.category, body.category) .v-product-grid .v-product .product_price,
   :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price {
-    text-align: center !important;
-    align-items: center !important;
+    text-align: left !important;
   }
 }
 
@@ -5235,16 +5277,10 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   }
 }
 
-/* Member price block: listings are centered in template tail; default left elsewhere */
+/* Category / home: member price block only (do not change grid / card layout) */
 .mc-member-grid-price {
   text-align: left;
   margin-top: 4px;
-}
-
-.v-product-grid .mc-member-grid-price,
-#content_area .v-product .mc-member-grid-price,
-#content_area_home .v-product .mc-member-grid-price {
-  text-align: center;
 }
 
 .mc-member-grid-price__regular {
@@ -5373,11 +5409,10 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   flex: 0 1 auto;
   line-height: 1.25;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-align: center;
-  min-height: 3.5em;
+  min-height: 2.75em;
   box-sizing: border-box;
   width: 100%;
   margin-top: 4px !important;
@@ -5412,9 +5447,9 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
-  text-align: center !important;
+  text-align: left !important;
 }
 
 :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
@@ -5427,9 +5462,9 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
-  text-align: center !important;
+  text-align: left !important;
 }
 
 /* Volusion often injects sale / list / meta price before the image (DOM order). Default flex order:0
@@ -5444,7 +5479,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 :is(html.category, body.category) ul.v-product-grid > li.v-product > font.product_list_price {
   order: 8 !important;
   align-self: stretch !important;
-  text-align: center !important;
+  text-align: left !important;
   width: 100% !important;
   box-sizing: border-box !important;
 }
@@ -5488,10 +5523,9 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   :is(html.category, body.category) ul.v-product-grid > li.v-product h3,
   :is(html.category, body.category) ul.v-product-grid > li.v-product h4 {
     flex: 0 1 auto !important;
-    min-height: 3.5em !important;
+    min-height: 2.75em !important;
     align-items: center !important;
-    justify-content: center !important;
-    flex-direction: column !important;
+    justify-content: flex-start !important;
     text-align: center !important;
     margin-top: 3px !important;
     margin-bottom: 0 !important;
@@ -5503,16 +5537,12 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__price,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .product_price {
     margin-top: 6px !important;
-    text-align: center !important;
-    align-items: center !important;
   }
 
   :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .mc-member-grid-price {
     margin-top: 4px !important;
     order: 10 !important;
-    text-align: center !important;
-    align-items: center !important;
   }
 
   :is(html.category, body.category) .v-product-grid .v-product,
@@ -6087,13 +6117,10 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 :is(html.category, body.category) ul.v-product-grid > li.v-product h2,
 :is(html.category, body.category) ul.v-product-grid > li.v-product h3,
 :is(html.category, body.category) ul.v-product-grid > li.v-product h4 {
-  display: flex !important;
   flex: 0 1 auto !important;
-  line-height: 1.25 !important;
-  min-height: 3.5em !important;
+  min-height: 2.75em !important;
   align-items: center !important;
-  justify-content: center !important;
-  flex-direction: column !important;
+  justify-content: flex-start !important;
   text-align: center !important;
   margin-top: 4px !important;
 }
@@ -6105,8 +6132,8 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   flex: 0 0 auto !important;
   margin-top: 6px !important;
   min-height: 0 !important;
-  text-align: center !important;
-  align-items: center !important;
+  text-align: left !important;
+  align-items: flex-start !important;
   display: flex !important;
   flex-direction: column !important;
 }
@@ -6117,8 +6144,8 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   margin-top: 4px !important;
   order: 10 !important;
   min-height: 0 !important;
-  text-align: center !important;
-  align-items: center !important;
+  text-align: left !important;
+  align-items: flex-start !important;
   display: flex !important;
   flex-direction: column !important;
 }
@@ -6241,7 +6268,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   margin: 0 !important;
 }
 
-/* --- Title typography (flex/display from template #mc-category-grid-tail) --- */
+/* --- Title --- */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__title,
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .productnamecolor,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product .v-product__title,
@@ -6250,6 +6277,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 :is(html.category, body.category) #content_area .v-product-grid > .v-product .productnamecolor,
 :is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__title,
 :is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .productnamecolor {
+  display: block !important;
   width: 100% !important;
   max-width: 100% !important;
   white-space: normal !important;
@@ -6257,4 +6285,20 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   word-break: normal !important;
   text-align: center !important;
   margin-top: 6px !important;
+}
+.v-product-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  gap: 40px 36px !important;
+}
+
+.v-product-grid .v-product {
+  width: calc(33.333% - 24px) !important;
+  vertical-align: top !important;
+}
+
+.mc-member-grid-price,
+.mc-member-price-caption {
+  display: block !important;
 }
