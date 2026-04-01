@@ -6668,10 +6668,10 @@ body.is-home:not(.productdetails) #content_area .product_price {
   flex: 0 0 auto !important;
   width: 100% !important;
   margin-top: 4px !important;
-  text-align: left !important;
+  text-align: center !important;
   display: flex !important;
   flex-direction: column !important;
-  align-items: flex-start !important;
+  align-items: center !important;
 }
 
 :is(html.category, body.category) #content_area .v-product__price,
@@ -6680,10 +6680,10 @@ body.is-home:not(.productdetails) #content_area .product_price {
   flex: 0 0 auto !important;
   width: 100% !important;
   margin-top: 4px !important;
-  text-align: left !important;
+  text-align: center !important;
   display: flex !important;
   flex-direction: column !important;
-  align-items: flex-start !important;
+  align-items: center !important;
 }
 
 body.is-home:not(.productdetails) #content_area_home .v-product .product_sale_price,
@@ -6694,7 +6694,7 @@ body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li > fo
 body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li > font.product_list_price {
   order: 5 !important;
   align-self: stretch !important;
-  text-align: left !important;
+  text-align: center !important;
   width: 100% !important;
   margin-top: 4px !important;
 }
@@ -6708,7 +6708,7 @@ body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li > fo
 :is(html.category, body.category) #content_area ul.v-product-grid > li > font.product_list_price {
   order: 5 !important;
   align-self: stretch !important;
-  text-align: left !important;
+  text-align: center !important;
   width: 100% !important;
   margin-top: 4px !important;
 }
@@ -6718,18 +6718,18 @@ body.is-home:not(.productdetails) #content_area .mc-member-grid-price {
   order: 3 !important;
   flex: 0 0 auto !important;
   width: 100% !important;
-  margin-top: 6px !important;
-  text-align: left !important;
-  align-items: flex-start !important;
+  margin-top: 2px !important;
+  text-align: center !important;
+  align-items: center !important;
 }
 
 :is(html.category, body.category) #content_area .mc-member-grid-price {
   order: 3 !important;
   flex: 0 0 auto !important;
   width: 100% !important;
-  margin-top: 6px !important;
-  text-align: left !important;
-  align-items: flex-start !important;
+  margin-top: 2px !important;
+  text-align: center !important;
+  align-items: center !important;
 }
 
 @media (max-width: 991px) {
