@@ -1159,13 +1159,27 @@ a.hero-cart-link {
 }
 
 @media (max-width: 991px) {
-  /* Keep homepage hero visible but below overlay */
+  /* Hero: video behind, overlay + copy ABOVE (was z-index:1 on both → text hidden under video) */
   #slideshow-container,
-  #slideshow-container .mc-hero-video,
-  #slideshow-container .mc-hero-overlay,
-  #slideshow-container .hero-menu {
+  #slideshow-container .mc-hero-video {
     position: relative !important;
     z-index: 1 !important;
+  }
+  #slideshow-container .mc-hero-video-el {
+    z-index: 1 !important;
+  }
+  #slideshow-container .mc-hero-overlay {
+    position: relative !important;
+    z-index: 5 !important;
+    pointer-events: none !important;
+  }
+  #slideshow-container .mc-hero-overlay .hero-menu,
+  #slideshow-container .mc-hero-overlay a {
+    pointer-events: auto !important;
+  }
+  #slideshow-container .hero-menu {
+    position: absolute !important;
+    z-index: 10 !important;
   }
 
   /* FORCE mobile push menu overlay to top of everything */

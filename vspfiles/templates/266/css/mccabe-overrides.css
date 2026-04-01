@@ -1,0 +1,112 @@
+/* McCabe fixes — load after template.css (linked from template_266.html).
+   Ensures hero copy + listing member block even if custom-safe.css fails to load. */
+
+/* Mobile: overlay must stack ABOVE video (both were z-index:1 → text invisible) */
+@media (max-width: 991px) {
+  #slideshow-container .mc-hero-video-el {
+    z-index: 1 !important;
+  }
+  #slideshow-container .mc-hero-overlay {
+    position: relative !important;
+    z-index: 5 !important;
+    pointer-events: none !important;
+  }
+  #slideshow-container .mc-hero-overlay a,
+  #slideshow-container .mc-hero-overlay button {
+    pointer-events: auto !important;
+  }
+}
+
+/* Hero headline — maximum specificity */
+html body #slideshow-container #mc-hero-copy-tagline,
+html body #mc-hero-copy-tagline {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 6 !important;
+  font-size: 36px !important;
+  line-height: 1.2 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em !important;
+  color: #b8b7b7 !important;
+  -webkit-text-fill-color: #b8b7b7 !important;
+  text-transform: none !important;
+  text-align: center !important;
+  margin: 0.35em auto 0.2em !important;
+  width: 100% !important;
+  max-width: min(96vw, 920px) !important;
+  box-sizing: border-box !important;
+}
+
+html body #slideshow-container #mc-hero-copy-subline,
+html body #mc-hero-copy-subline {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 0.95 !important;
+  position: relative !important;
+  z-index: 6 !important;
+  font-size: 15px !important;
+  line-height: 1.4 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.1em !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  margin: 0 auto 14px !important;
+  width: 100% !important;
+  max-width: min(96vw, 920px) !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 991px) {
+  html body #slideshow-container #mc-hero-copy-tagline,
+  html body #mc-hero-copy-tagline {
+    font-size: clamp(22px, 5.2vw, 36px) !important;
+  }
+  html body #slideshow-container #mc-hero-copy-subline,
+  html body #mc-hero-copy-subline {
+    font-size: clamp(11px, 2.6vw, 15px) !important;
+  }
+}
+
+/* Member pricing: centered under product title (home + category) */
+body.is-home #content_area .v-product-grid .mc-member-grid-price,
+body.is-home #content_area_home .v-product-grid .mc-member-grid-price,
+body.is-home #content_area ul.v-product-grid .mc-member-grid-price,
+body.is-home #content_area_home ul.v-product-grid .mc-member-grid-price,
+body.category #content_area .v-product-grid .mc-member-grid-price,
+body.category #content_area ul.v-product-grid .mc-member-grid-price,
+html.category #content_area .v-product-grid .mc-member-grid-price,
+html.category #content_area ul.v-product-grid .mc-member-grid-price {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  width: 100% !important;
+}
+
+body.is-home #content_area .mc-member-grid-price__label,
+body.is-home #content_area_home .mc-member-grid-price__label,
+body.category #content_area .mc-member-grid-price__label,
+html.category #content_area .mc-member-grid-price__label {
+  text-align: center !important;
+  width: 100% !important;
+}
+
+body.is-home #content_area .mc-member-grid-price__amount,
+body.is-home #content_area_home .mc-member-grid-price__amount,
+body.category #content_area .mc-member-grid-price__amount,
+html.category #content_area .mc-member-grid-price__amount {
+  text-align: center !important;
+  width: 100% !important;
+}
+
+body.is-home #content_area .mc-member-grid-price__hint,
+body.is-home #content_area_home .mc-member-grid-price__hint,
+body.category #content_area .mc-member-grid-price__hint,
+html.category #content_area .mc-member-grid-price__hint {
+  text-align: center !important;
+  width: 100% !important;
+}

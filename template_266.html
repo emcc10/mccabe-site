@@ -55,6 +55,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260402" rel="stylesheet">
 <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
 <script>
 (function () {
@@ -211,6 +212,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (s.textContent.replace(/\s+/g, ' ').trim().indexOf('Palliser') === -1) s.textContent = SUB;
     paint(t, true);
     paint(s, false);
+    ov.style.setProperty('z-index', '5', 'important');
+    ov.style.setProperty('position', 'relative', 'important');
+    t.style.setProperty('-webkit-text-fill-color', '#b8b7b7', 'important');
+    s.style.setProperty('-webkit-text-fill-color', '#ffffff', 'important');
     try {
       if (window.matchMedia && window.matchMedia('(max-width: 991px)').matches) {
         t.style.setProperty('font-size', 'clamp(22px, 5.2vw, 36px)', 'important');
