@@ -1,6 +1,57 @@
 /* McCabe fixes — load after template.css (linked from template_266.html).
    Ensures hero copy + listing member block even if custom-safe.css fails to load. */
 
+/* Category: bottom pager + compact subcats (duplicated if custom-safe absent) */
+.mc-category-pager {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  margin: 28px auto 16px !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
+}
+.mc-category-pager__btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 7.5rem !important;
+  padding: 10px 20px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  color: #1a1a1a !important;
+  background: #fff !important;
+  border: 1px solid #1a1a1a !important;
+  border-radius: 2px !important;
+}
+.mc-category-pager__btn:hover {
+  background: #1a1a1a !important;
+  color: #fff !important;
+}
+body.category #content_area nav.menu ul.vnav--level2,
+body.category #content_area .menu ul.vnav--level2,
+html.category #content_area nav.menu ul.vnav--level2,
+html.category #content_area .menu ul.vnav--level2 {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, max-content)) !important;
+  column-gap: 1.5rem !important;
+  row-gap: 0.2rem !important;
+  justify-content: start !important;
+  width: auto !important;
+  max-width: min(100%, 36rem) !important;
+  margin: 0.25em 0 0.65em 0 !important;
+}
+body.category #content_area .vnav--level2 > li,
+html.category #content_area .vnav--level2 > li {
+  margin: 0 !important;
+  padding: 0 0.5rem 0.2em 0 !important;
+  line-height: 1.28 !important;
+}
+
 /* Mobile: overlay must stack ABOVE video (both were z-index:1 → text invisible) */
 @media (max-width: 991px) {
   #slideshow-container .mc-hero-video-el {

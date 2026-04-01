@@ -55,7 +55,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260402e" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260402f" rel="stylesheet">
 <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
 <script>
 (function () {
@@ -5049,6 +5049,188 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   window.addEventListener('load', killLegacyCategoryBar);
   setTimeout(killLegacyCategoryBar, 250);
   setTimeout(killLegacyCategoryBar, 800);
+})();
+</script>
+<script>
+(function () {
+  var PAGER_ID = 'mc-category-pager';
+
+  function isCategoryListing() {
+    if (document.body.classList.contains('productdetails')) return false;
+    if (document.documentElement.classList.contains('category')) return true;
+    if (document.body.classList.contains('category')) return true;
+    if (/\bvol-list\b/i.test(document.documentElement.className)) return true;
+    if (/-s\//.test(location.pathname)) return true;
+    return false;
+  }
+
+  function currentPageNum() {
+    var sp = new URLSearchParams(location.search || '');
+    var raw =
+      sp.get('PageNum') ||
+      sp.get('page') ||
+      sp.get('pagenumber') ||
+      sp.get('Page') ||
+      '';
+    var n = parseInt(raw, 10);
+    return raw === '' || isNaN(n) ? 1 : n;
+  }
+
+  function outsideProductGrid(a) {
+    return !a.closest || !a.closest('.v-product-grid, ul.v-product-grid, li.v-product');
+  }
+
+  function findNextPrevFromDom(ca) {
+    var nextHref = null;
+    var prevHref = null;
+    var nextRel = ca.querySelector('a[rel="next"][href]');
+    var prevRel = ca.querySelector('a[rel="prev"][href]');
+    if (nextRel && nextRel.href && outsideProductGrid(nextRel)) nextHref = nextRel.href;
+    if (prevRel && prevRel.href && outsideProductGrid(prevRel)) prevHref = prevRel.href;
+
+    ca.querySelectorAll('a[href]').forEach(function (a) {
+      if (!outsideProductGrid(a)) return;
+      if (!a.href || /^javascript:/i.test(a.href)) return;
+      var t = (a.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      var ti = (a.getAttribute('title') || '').toLowerCase();
+      if (!nextHref && (t === 'next' || t === '>' || t === '»' || /next\s+page/i.test(t) || ti.indexOf('next') >= 0)) {
+        nextHref = a.href;
+      }
+      if (!prevHref && (t === 'previous' || t === 'prev' || t === '<' || t === '«' || ti.indexOf('prev') >= 0)) {
+        prevHref = a.href;
+      }
+    });
+
+    var pag = ca.querySelector('ul.pagination');
+    if (pag) {
+      var items = pag.querySelectorAll('li');
+      if (items.length >= 2) {
+        var firstLi = items[0];
+        var lastLi = items[items.length - 1];
+        var firstA = firstLi.querySelector('a[href]');
+        var lastA = lastLi.querySelector('a[href]');
+        if (firstA && !firstLi.classList.contains('disabled') && !firstLi.classList.contains('active')) {
+          var ft = (firstA.textContent || '').toLowerCase();
+          if (ft.indexOf('prev') >= 0 || ft === '‹' || ft === '«' || ft === '<') prevHref = firstA.href;
+        }
+        if (lastA && !lastLi.classList.contains('disabled')) {
+          var lt = (lastA.textContent || '').toLowerCase();
+          if (lt.indexOf('next') >= 0 || lt === '›' || lt === '»' || lt === '>') nextHref = lastA.href;
+        }
+      }
+    }
+
+    return { next: nextHref, prev: prevHref };
+  }
+
+  function inferFromPageParams(ca) {
+    var curr = currentPageNum();
+    var nextHref = null;
+    var prevHref = null;
+    var nextPage = Infinity;
+    var prevPage = 0;
+    ca.querySelectorAll('a[href]').forEach(function (a) {
+      if (!outsideProductGrid(a)) return;
+      if (!a.href || /^javascript:/i.test(a.href)) return;
+      try {
+        var u = new URL(a.href, location.href);
+        var lo = u.search.toLowerCase();
+        if (lo.indexOf('pagenum') < 0 && lo.indexOf('page=') < 0 && lo.indexOf('pagenumber') < 0) return;
+        var p = parseInt(
+          u.searchParams.get('PageNum') || u.searchParams.get('page') || u.searchParams.get('pagenumber') || '0',
+          10
+        );
+        if (!p) return;
+        if (p > curr && p < nextPage) {
+          nextPage = p;
+          nextHref = a.href;
+        }
+        if (p < curr && p > prevPage) {
+          prevPage = p;
+          prevHref = a.href;
+        }
+      } catch (e) {}
+    });
+    return { next: nextHref, prev: prevHref };
+  }
+
+  function mountPoint() {
+    var ca = document.getElementById('content_area');
+    if (!ca) return null;
+    var table = ca.querySelector('table.v65-productDisplay');
+    if (table && table.parentNode) return { el: table, parent: table.parentNode };
+    var grid = ca.querySelector('ul.v-product-grid') || ca.querySelector('.v-product-grid');
+    if (grid && grid.parentNode) return { el: grid, parent: grid.parentNode };
+    return null;
+  }
+
+  function renderPager() {
+    if (!isCategoryListing()) return;
+    var ca = document.getElementById('content_area');
+    if (!ca) return;
+
+    var existing = document.getElementById(PAGER_ID);
+    if (existing) existing.remove();
+
+    var m = mountPoint();
+    if (!m) return;
+
+    var d1 = findNextPrevFromDom(ca);
+    var d2 = inferFromPageParams(ca);
+    var nextHref = d1.next || d2.next;
+    var prevHref = d1.prev || d2.prev;
+
+    if (currentPageNum() <= 1) prevHref = null;
+
+    if (!nextHref && !prevHref) return;
+
+    var wrap = document.createElement('nav');
+    wrap.id = PAGER_ID;
+    wrap.className = 'mc-category-pager';
+    wrap.setAttribute('aria-label', 'Category pages');
+
+    if (prevHref) {
+      var pa = document.createElement('a');
+      pa.className = 'mc-category-pager__btn mc-category-pager__btn--prev';
+      pa.href = prevHref;
+      pa.textContent = 'Previous';
+      wrap.appendChild(pa);
+    }
+    if (nextHref) {
+      var na = document.createElement('a');
+      na.className = 'mc-category-pager__btn mc-category-pager__btn--next';
+      na.href = nextHref;
+      na.textContent = 'Next';
+      wrap.appendChild(na);
+    }
+
+    if (!wrap.querySelector('a')) return;
+
+    if (m.el.nextSibling) m.parent.insertBefore(wrap, m.el.nextSibling);
+    else m.parent.appendChild(wrap);
+  }
+
+  function boot() {
+    renderPager();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', function () {
+    renderPager();
+    setTimeout(renderPager, 400);
+    setTimeout(renderPager, 1200);
+  });
+
+  var ca0 = document.getElementById('content_area');
+  if (ca0 && typeof MutationObserver !== 'undefined') {
+    var t = null;
+    var obs = new MutationObserver(function () {
+      clearTimeout(t);
+      t = setTimeout(renderPager, 100);
+    });
+    obs.observe(ca0, { childList: true, subtree: true });
+  }
 })();
 </script>
 <script>

@@ -5753,6 +5753,86 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   font-size: 11px !important;
 }
 
+/* Category PLP: compact subcategory link cluster (tighter columns + vertical rhythm) */
+:is(html.category, body.category) #content_area nav.menu ul.vnav--level2,
+:is(html.category, body.category) #content_area nav.menu ul.vnav--level3,
+:is(html.category, body.category) #content_area .menu ul.vnav--level2,
+:is(html.category, body.category) #content_area .menu ul.vnav--level3,
+html.vol-list.category #content_area nav.menu ul.vnav--level2,
+html.vol-list.category #content_area nav.menu ul.vnav--level3,
+html.vol-list.category #content_area .menu ul.vnav--level2,
+html.vol-list.category #content_area .menu ul.vnav--level3 {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, max-content)) !important;
+  column-gap: 1.5rem !important;
+  row-gap: 0.2rem !important;
+  justify-content: start !important;
+  align-content: start !important;
+  width: auto !important;
+  max-width: min(100%, 36rem) !important;
+  margin: 0.25em 0 0.65em 0 !important;
+  padding: 0 !important;
+  list-style-position: outside !important;
+}
+
+:is(html.category, body.category) #content_area .vnav--level2 > li,
+:is(html.category, body.category) #content_area .vnav--level3 > li,
+html.vol-list.category #content_area .vnav--level2 > li,
+html.vol-list.category #content_area .vnav--level3 > li {
+  margin: 0 !important;
+  padding: 0 0.5rem 0.2em 0 !important;
+  line-height: 1.28 !important;
+}
+
+:is(html.category, body.category) #content_area table.vCSS_breadcrumb,
+html.vol-list.category #content_area table.vCSS_breadcrumb {
+  margin-bottom: 0.15em !important;
+}
+
+:is(html.category, body.category) #content_area table.vCSS_breadcrumb td,
+html.vol-list.category #content_area table.vCSS_breadcrumb td {
+  padding-top: 0.15em !important;
+  padding-bottom: 0.35em !important;
+  line-height: 1.35 !important;
+}
+
+/* Bottom category pagination (injected by template script; mirrors Volusion URLs) */
+.mc-category-pager {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  margin: 28px auto 16px !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
+}
+
+.mc-category-pager__btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 7.5rem !important;
+  padding: 10px 20px !important;
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  color: #1a1a1a !important;
+  background: #fff !important;
+  border: 1px solid #1a1a1a !important;
+  border-radius: 2px !important;
+  box-sizing: border-box !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+.mc-category-pager__btn:hover {
+  background: #1a1a1a !important;
+  color: #fff !important;
+}
+
 /* =========================================================
    PDP: main row — image left, options right (desktop); stacked on mobile
    (tagged row: tr.mc-pdp-main-row from template_266.html)
