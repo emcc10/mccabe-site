@@ -81,48 +81,76 @@ def _fallback_paths() -> list[str]:
     return out
 
 
-def _http_marker(expect: str) -> tuple[bool, str, str]:
+def _browser_like_headers(url: str) -> dict[str, str]:
+    """Many storefronts return 403 to non-browser User-Agents (WAF / bot rules)."""
+    try:
+        from urllib.parse import urlparse
+
+        origin = f"{urlparse(url).scheme}://{urlparse(url).netloc}/"
+    except Exception:
+        origin = "https://www.mccabestheaterandliving.com/"
+    return {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/131.0.0.0 Safari/537.36"
+        ),
+        "Accept": (
+            "text/html,application/xhtml+xml,application/xml;q=0.9,"
+            "image/avif,image/webp,*/*;q=0.8"
+        ),
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+        "Referer": origin,
+    }
+
+
+def _http_marker(expect: str) -> tuple[bool, str, str, str | None]:
     """
-    Return (ok, got_or_err, url_used).
-    ok True iff body contains mc-deploy-verify with expect.
+    Return (ok, detail, url_used, failure_kind).
+
+    failure_kind: None (success), 'skipped', 'http' (could not fetch/parse page),
+    'mismatch' (fetched but wrong marker).
     """
     if os.environ.get("SKIP_HTTP_TEMPLATE_VERIFY", "").strip().lower() in (
         "1",
         "true",
         "yes",
     ):
-        return True, "skipped", ""
+        return True, "skipped", "", "skipped"
 
     default_url = "https://www.mccabestheaterandliving.com/v/template_266.html"
     url = (os.environ.get("VERIFY_HTTP_TEMPLATE_URL") or "").strip() or default_url
     if not url:
-        return True, "no_url", ""
+        return True, "no_url", "", None
 
     sep = "&" if "?" in url else "?"
     full = f"{url}{sep}_mcv={int(time.time())}"
     ctx = ssl.create_default_context()
     req = urllib.request.Request(
         full,
-        headers={
-            "User-Agent": "McCabeDeployVerify/1",
-            "Cache-Control": "no-cache",
-            "Pragma": "no-cache",
-        },
+        headers=_browser_like_headers(url),
         method="GET",
     )
     try:
         with urllib.request.urlopen(req, timeout=60, context=ctx) as resp:
             raw = resp.read().decode("utf-8", errors="replace")
     except urllib.error.HTTPError as exc:
-        return False, f"HTTP_{exc.code}", url
+        return (
+            False,
+            f"HTTP {exc.code} (live URL blocked or denied this request)",
+            url,
+            "http",
+        )
     except Exception as exc:  # noqa: BLE001
-        return False, str(exc), url
+        return False, str(exc), url, "http"
 
     m = re.search(r'name="mc-deploy-verify"\s+content="([^"]+)"', raw)
     got = m.group(1) if m else ""
     if got == expect:
-        return True, got, url
-    return False, got or "(no meta tag)", url
+        return True, got, url, None
+    return False, got or "(no meta tag)", url, "mismatch"
 
 
 def main() -> int:
@@ -219,16 +247,26 @@ def main() -> int:
         )
         return 1
 
-    http_ok, http_detail, http_url = _http_marker(expect)
+    http_ok, http_detail, http_url, http_fail_kind = _http_marker(expect)
     if not http_ok:
-        print(
-            "::error::Live template URL does not match Git yet. "
-            f"URL={http_url!r} saw mc-deploy-verify={http_detail!r}, expected {expect!r}. "
-            "SFTP updated a file, but the public /v/template_266.html (or cache) is still old. "
-            "Set VERIFY_HTTP_TEMPLATE_URL if your live URL differs. "
-            "Or set SKIP_HTTP_TEMPLATE_VERIFY=true only as a temporary bypass.",
-            file=sys.stderr,
-        )
+        if http_fail_kind == "http":
+            print(
+                "::error::Could not verify live template over HTTP. "
+                f"{http_detail}. URL={http_url!r}. "
+                "SFTP may still be correct; your host may block datacenter IPs. "
+                "Try VERIFY_HTTP_TEMPLATE_URL to the exact storefront URL, or "
+                "SKIP_HTTP_TEMPLATE_VERIFY=true only as a temporary bypass.",
+                file=sys.stderr,
+            )
+        else:
+            print(
+                "::error::Live template URL does not match Git yet. "
+                f"URL={http_url!r} saw mc-deploy-verify={http_detail!r}, expected {expect!r}. "
+                "SFTP updated a file, but the public page (or cache) is still old. "
+                "Set VERIFY_HTTP_TEMPLATE_URL if your live URL differs. "
+                "Or set SKIP_HTTP_TEMPLATE_VERIFY=true only as a temporary bypass.",
+                file=sys.stderr,
+            )
         return 1
 
     if http_detail != "skipped":
