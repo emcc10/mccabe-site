@@ -45,7 +45,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260405: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
-<meta name="mc-deploy-verify" content="20260402homefix">
+<meta name="mc-deploy-verify" content="20260402homefix2">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -5015,12 +5015,18 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function fixCategoryGrid() {
     var b = document.body;
     if (!b) return;
+    if (b.classList.contains('is-home')) return;
+    var h = document.documentElement;
+    var p = (location.pathname || '').toLowerCase();
+    var isCategoryContext =
+      (h && h.classList && h.classList.contains('category')) ||
+      b.classList.contains('category') ||
+      /-s\//.test(p) ||
+      /searchresults/i.test(p);
+    if (!isCategoryContext) return;
     /* Do not skip when body has productdetails — Volusion sometimes sets it wrongly; rely on presence of a listing grid */
     var grids = mcFindListingGrids();
     if (!grids.length) return;
-
-    document.documentElement.classList.add('category');
-    b.classList.add('category');
 
     var spec = mcCategoryGridCols();
     var gi;
