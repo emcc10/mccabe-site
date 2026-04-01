@@ -612,8 +612,17 @@ document.addEventListener("DOMContentLoaded", function () {
     var root = document.documentElement;
     var bod = document.body;
     function flip() {
+      var wasOpen = root.classList.contains('mc-search-open');
       root.classList.toggle('mc-search-open');
       if (bod) bod.classList.toggle('mc-search-open');
+      var inp = document.getElementById('search');
+      if (!wasOpen && inp) {
+        window.setTimeout(function () {
+          inp.focus();
+        }, 0);
+      } else if (wasOpen && inp) {
+        inp.blur();
+      }
     }
     toggle.addEventListener('click', function (e) {
       e.preventDefault();
