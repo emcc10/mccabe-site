@@ -55,7 +55,48 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260402f" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260402g" rel="stylesheet">
+  <style id="mc-category-pager-critical">
+    /* Category Next/Prev: must work even when custom-safe.css does not load */
+    #mc-category-pager.mc-category-pager {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 12px !important;
+      margin: 28px auto 20px !important;
+      padding: 12px !important;
+      clear: both !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      position: relative !important;
+      z-index: 2 !important;
+    }
+    #mc-category-pager .mc-category-pager__btn {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-width: 7.5rem !important;
+      padding: 10px 20px !important;
+      font: 600 12px/1.2 Inter, system-ui, -apple-system, sans-serif !important;
+      letter-spacing: 0.1em !important;
+      text-transform: uppercase !important;
+      text-decoration: none !important;
+      color: #1a1a1a !important;
+      background: #fff !important;
+      border: 1px solid #1a1a1a !important;
+      border-radius: 2px !important;
+      box-sizing: border-box !important;
+      cursor: pointer !important;
+    }
+    #mc-category-pager .mc-category-pager__btn:hover {
+      background: #1a1a1a !important;
+      color: #fff !important;
+    }
+  </style>
 <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
 <script>
 (function () {
@@ -5087,8 +5128,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 <script>
 (function () {
   var PAGER_ID = 'mc-category-pager';
-  /* Volusion often uses 12 or 24 per page; if grid is full, offer synthetic ?PageNum=2 when DOM hides pager */
-  var MC_PAGE_SIZE_HINT = 10;
+  /* Offer page 2 when at least this many listing signals (cards, product links, or thumbs) */
+  var MC_PAGE_SIZE_HINT = 4;
 
   function isCategoryListing() {
     if (document.body.classList.contains('productdetails')) return false;
@@ -5096,7 +5137,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (document.body.classList.contains('category')) return true;
     if (/\bvol-list\b/i.test(document.documentElement.className)) return true;
     if (/-s\//.test(location.pathname)) return true;
+    if (/categoryid=/i.test(location.search || '')) return true;
     return false;
+  }
+
+  function isCategoryPath() {
+    return /-s\//.test(location.pathname) || /categoryid=/i.test(location.search || '');
   }
 
   /** Case-insensitive page from query (Volusion links sometimes differ in casing). */
@@ -5166,8 +5212,19 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function productCardCount(ca) {
     if (!ca) return 0;
     return ca.querySelectorAll(
-      'ul.v-product-grid > li.v-product, .v-product-grid > .v-product, .v-product-grid > .v-product-grid-item, table.v65-productDisplay li.v-product'
+      'ul.v-product-grid > li.v-product, .v-product-grid > .v-product, .v-product-grid > .v-product-grid-item, table.v65-productDisplay li.v-product, .v-product'
     ).length;
+  }
+
+  /** Any signal that this is a product listing (Volusion markup varies). */
+  function listingStrength(ca) {
+    var n = productCardCount(ca);
+    if (n) return n;
+    if (!ca) return 0;
+    n = ca.querySelectorAll('a[href*="ProductCode="], a[href*="productcode="], a[href*="-p/"]').length;
+    if (n) return Math.min(n, 48);
+    n = ca.querySelectorAll('.v-product__img img, .product_image img, .v-product__image img, table img[src*="vspfiles"]').length;
+    return n;
   }
 
   function findNextPrevFromDom(root) {
@@ -5258,99 +5315,75 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return maxP;
   }
 
-  function mountPoint() {
-    var ca = document.getElementById('content_area');
-    if (!ca) return null;
-    var table = ca.querySelector('table.v65-productDisplay');
-    var grid = ca.querySelector('ul.v-product-grid') || ca.querySelector('.v-product-grid');
-    var anchor = table || grid;
-    if (anchor) {
-      var outer = anchor.closest('table.v65-productDisplay') || anchor.closest('table') || anchor;
-      return { anchor: outer, parent: outer.parentNode || ca };
-    }
-    var last = ca.lastElementChild;
-    if (last && last.id !== PAGER_ID) return { anchor: last, parent: ca };
-    return { anchor: null, parent: ca };
-  }
-
-  function insertPagerBar(m, wrap) {
-    if (!m || !m.parent) return;
-    if (m.anchor) {
-      if (m.anchor.nextSibling) m.parent.insertBefore(wrap, m.anchor.nextSibling);
-      else m.parent.appendChild(wrap);
-    } else {
-      m.parent.appendChild(wrap);
-    }
-  }
-
   function renderPager() {
-    if (!isCategoryListing()) return;
-    var ca = document.getElementById('content_area');
-    if (!ca) return;
+    try {
+      if (!isCategoryListing()) return;
+      var ca = document.getElementById('content_area');
+      if (!ca) return;
 
-    var existing = document.getElementById(PAGER_ID);
-    if (existing) existing.remove();
+      var existing = document.getElementById(PAGER_ID);
+      if (existing) existing.remove();
 
-    var m = mountPoint();
-    if (!m || !m.parent) return;
+      var curr = currentPageNum();
+      var body = document.body;
+      var path = location.pathname;
+      var onCat = isCategoryPath();
 
-    var curr = currentPageNum();
-    if (
-      curr <= 1 &&
-      !ca.querySelector('ul.v-product-grid, .v-product-grid, table.v65-productDisplay') &&
-      productCardCount(ca) < 1
-    ) {
-      return;
-    }
+      var d1 = findNextPrevFromDom(ca);
+      var d1b = findNextPrevFromDom(body);
+      var d2 = inferFromPageParams(ca, curr);
+      var d2b = inferFromPageParams(body, curr);
 
-    var body = document.body;
-    var path = location.pathname;
+      var nextHref = d1.next || d1b.next || d2.next || d2b.next;
+      var prevHref = d1.prev || d1b.prev || d2.prev || d2b.prev;
 
-    var d1 = findNextPrevFromDom(ca);
-    var d1b = findNextPrevFromDom(body);
-    var d2 = inferFromPageParams(ca, curr);
-    var d2b = inferFromPageParams(body, curr);
+      if (curr <= 1) prevHref = null;
+      else prevHref = prevHref || buildUrlForPage(curr - 1);
 
-    var nextHref = d1.next || d1b.next || d2.next || d2b.next;
-    var prevHref = d1.prev || d1b.prev || d2.prev || d2b.prev;
-
-    if (curr <= 1) prevHref = null;
-    else if (!prevHref) prevHref = buildUrlForPage(curr - 1);
-
-    if (!nextHref) {
       var maxP = maxPageSeenOnPage(body, path);
-      if (curr < maxP) nextHref = buildUrlForPage(curr + 1);
-      else if (curr === 1 && maxP > 1) nextHref = buildUrlForPage(2);
-      else if (curr === 1 && productCardCount(ca) >= MC_PAGE_SIZE_HINT) nextHref = buildUrlForPage(2);
-    }
+      var strength = listingStrength(ca);
 
-    if (nextHref && pageFromHref(nextHref) <= curr) nextHref = null;
+      if (!nextHref) {
+        if (curr < maxP) nextHref = buildUrlForPage(curr + 1);
+        else if (curr === 1 && maxP > 1) nextHref = buildUrlForPage(2);
+        else if (curr === 1 && strength >= MC_PAGE_SIZE_HINT) nextHref = buildUrlForPage(2);
+      }
 
-    if (!nextHref && !prevHref) return;
+      /* Middle pages: synthetic next only when we inferred a higher page from DOM links */
+      if (!nextHref && onCat && curr > 1 && curr < maxP) nextHref = buildUrlForPage(curr + 1);
 
-    var wrap = document.createElement('nav');
-    wrap.id = PAGER_ID;
-    wrap.className = 'mc-category-pager';
-    wrap.setAttribute('aria-label', 'Category pages');
+      /* First page: even a few listing signals ⇒ allow Next (MutationObserver will re-run when grid fills) */
+      if (!nextHref && onCat && curr === 1 && strength >= 3) nextHref = buildUrlForPage(2);
 
-    if (prevHref) {
-      var pa = document.createElement('a');
-      pa.className = 'mc-category-pager__btn mc-category-pager__btn--prev';
-      pa.href = prevHref;
-      pa.textContent = 'Previous';
-      wrap.appendChild(pa);
-    }
-    if (nextHref) {
-      var na = document.createElement('a');
-      na.className = 'mc-category-pager__btn mc-category-pager__btn--next';
-      na.href = nextHref;
-      na.textContent = 'Next';
-      wrap.appendChild(na);
-    }
+      if (nextHref && pageFromHref(nextHref) <= curr) nextHref = null;
 
-    if (!wrap.querySelector('a')) return;
+      if (!nextHref && !prevHref) return;
 
-    insertPagerBar(m, wrap);
+      var wrap = document.createElement('nav');
+      wrap.id = PAGER_ID;
+      wrap.className = 'mc-category-pager';
+      wrap.setAttribute('aria-label', 'Category pages');
+
+      if (prevHref) {
+        var pa = document.createElement('a');
+        pa.className = 'mc-category-pager__btn mc-category-pager__btn--prev';
+        pa.href = prevHref;
+        pa.textContent = 'Previous';
+        wrap.appendChild(pa);
+      }
+      if (nextHref) {
+        var na = document.createElement('a');
+        na.className = 'mc-category-pager__btn mc-category-pager__btn--next';
+        na.href = nextHref;
+        na.textContent = 'Next';
+        wrap.appendChild(na);
+      }
+
+      if (!wrap.querySelector('a')) return;
+
+      /* Bottom of main column — reliable vs nested tables */
+      ca.appendChild(wrap);
+    } catch (err) {}
   }
 
   function boot() {
@@ -5361,9 +5394,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   else boot();
   window.addEventListener('load', function () {
     renderPager();
-    setTimeout(renderPager, 400);
-    setTimeout(renderPager, 1200);
-    setTimeout(renderPager, 2500);
+    setTimeout(renderPager, 250);
+    setTimeout(renderPager, 800);
+    setTimeout(renderPager, 2000);
+    setTimeout(renderPager, 4000);
   });
 
   var ca0 = document.getElementById('content_area');
@@ -5371,7 +5405,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var t = null;
     var obs = new MutationObserver(function () {
       clearTimeout(t);
-      t = setTimeout(renderPager, 100);
+      t = setTimeout(renderPager, 80);
     });
     obs.observe(ca0, { childList: true, subtree: true });
   }
