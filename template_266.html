@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
-<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><!--<![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260402b"><!--<![endif]-->
 <head>
 <script>
 (function () {
@@ -368,6 +368,7 @@ document.addEventListener("DOMContentLoaded", function () {
 ========================================= -->
 
 <body>
+<!-- MC_TEMPLATE: search-below-nav-js-retries-20260402b — if missing in View Source, Volusion is not using this file -->
 <!-- Do not override window.location.reload: CAPTCHA / bot checks (Cloudflare, etc.) call reload to finish; blocking it causes verify loops. -->
 <a class="mc-cart-float" href="/shoppingcart.asp" aria-label="Cart" rel="nofollow">
   <svg class="mc-cart-float__icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
@@ -607,22 +608,44 @@ document.addEventListener("DOMContentLoaded", function () {
         </header>
 <script>
 (function () {
+  function mcFindMainMenuRow() {
+    var h = document.querySelector('header.header');
+    if (!h) return null;
+    var el =
+      h.querySelector('.hidden-xs.col-xs-12.no-pad-lg') ||
+      h.querySelector('.hidden-xs.col-xs-12') ||
+      h.querySelector('#display_menu_1') ||
+      h.querySelector('nav#display_menu_1');
+    if (!el) return null;
+    if (el.id === 'display_menu_1') {
+      return el.closest('.col-xs-12') || el.closest('[class*="col-"]') || el.parentElement;
+    }
+    return el;
+  }
+
   function mcMountSearchLayout() {
     var mid = document.querySelector('header.header .header__section--middle');
-    if (!mid || mid.getAttribute('data-mc-search-mount')) return;
-    var overlay = document.getElementById('mcHeroSearchOverlay');
-    var menuRow = document.querySelector('header.header .hidden-xs.col-xs-12.no-pad-lg');
+    if (!mid) return;
 
-    if (document.body.classList.contains('is-home') && overlay) {
-      var inner = document.createElement('div');
-      inner.className = 'mc-hero-search-inner';
-      inner.appendChild(mid);
-      overlay.appendChild(inner);
-      mid.setAttribute('data-mc-search-mount', 'hero');
-      overlay.classList.add('mc-hero-search-overlay--mounted');
-    } else if (menuRow && menuRow.parentNode) {
-      /* Template already places search after desktop nav; only reorder if needed (e.g. cached DOM) */
-      if (mid.previousElementSibling !== menuRow) {
+    var overlay = document.getElementById('mcHeroSearchOverlay');
+    var isHome = document.body.classList.contains('is-home');
+    var menuRow = mcFindMainMenuRow();
+
+    if (isHome && overlay) {
+      if (mid.getAttribute('data-mc-search-mount') !== 'hero') {
+        var inner = document.createElement('div');
+        inner.className = 'mc-hero-search-inner';
+        inner.appendChild(mid);
+        overlay.appendChild(inner);
+        mid.setAttribute('data-mc-search-mount', 'hero');
+        overlay.classList.add('mc-hero-search-overlay--mounted');
+      }
+      return;
+    }
+
+    /* Category / interior: strip must be the next sibling after the desktop menu row */
+    if (menuRow && menuRow.parentNode) {
+      if (menuRow.nextSibling !== mid) {
         menuRow.parentNode.insertBefore(mid, menuRow.nextSibling);
       }
       mid.setAttribute('data-mc-search-mount', 'below-nav');
@@ -663,6 +686,10 @@ document.addEventListener("DOMContentLoaded", function () {
   function boot() {
     mcMountSearchLayout();
     bindSearchToggle();
+    /* Volusion often injects #display_menu_1 after first paint — retry */
+    [0, 120, 400, 1000, 2500, 6000].forEach(function (ms) {
+      setTimeout(mcMountSearchLayout, ms);
+    });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
