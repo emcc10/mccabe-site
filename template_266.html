@@ -262,6 +262,18 @@ document.addEventListener("DOMContentLoaded", function () {
     opacity: 1;
     transition: opacity .25s ease;
   }
+
+  /* Hero tagline: wins over .mc-hero-overlay p / load-order from custom-safe-hero.css */
+  #if_homepage #slideshow-container .mc-hero-overlay .mc-hero-tagline,
+  body.is-home #slideshow-container .mc-hero-overlay .mc-hero-tagline {
+    display: block !important;
+    font-size: 36px !important;
+    line-height: 1.2 !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.02em !important;
+    color: #b8b7b7 !important;
+    text-transform: none !important;
+  }
 </style>
 
 <script>
@@ -6449,7 +6461,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     caption.innerHTML =
       '<div class="mc-member-price-caption__headline">Member price:</div>' +
       '<div class="mc-member-price-caption__sub">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see members pricing' +
+        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see member pricing' +
       '</div>' +
       '<div class="mc-member-price-caption__actions">' +
         '<a href="#" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
@@ -8209,7 +8221,7 @@ function mcMountMemberCaptionStandalone() {
       html =
         '<div class="mc-member-price-caption__headline">Member price:</div>' +
         '<div class="mc-member-price-caption__sub">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see members pricing' +
+        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see member pricing' +
         '</div>' +
         '<div class="mc-member-price-caption__actions">' +
         '<a href="#" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
@@ -8338,7 +8350,7 @@ try {
       <button type="button" class="mc-login-modal__tab" data-mc-login-tab="signup" role="tab" aria-selected="false">Sign up</button>
     </div>
     <div id="mc-login-modal-panel-login" class="mc-login-modal__panel-body is-active">
-      <p class="mc-login-modal__hint">Enter your email and password to see members pricing on this page.</p>
+      <p class="mc-login-modal__hint">Enter your email and password to see member pricing on this page.</p>
       <iframe class="mc-login-modal__frame" id="mc-login-modal-frame" title="Log in to your account" src="about:blank"></iframe>
       <p class="mc-login-modal__signup">New here? <a href="#" id="mc-login-modal-switch-signup">Create an account</a></p>
     </div>
@@ -9169,7 +9181,7 @@ try {
         loginA.setAttribute('data-mc-open-login', '');
         loginA.textContent = 'Log in';
         hint.appendChild(loginA);
-        hint.appendChild(document.createTextNode(' to see members pricing'));
+        hint.appendChild(document.createTextNode(' to see member pricing'));
         block.appendChild(hint);
       }
 
