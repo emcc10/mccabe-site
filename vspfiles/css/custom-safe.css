@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260401 — home + category listing: aligned titles, uniform image tiles, price under title */
+/* MC_DEPLOY_VERIFY_20260402 — listing layout: removed template CSS conflicts; see template #mc-category-grid-tail */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -5437,10 +5437,16 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   }
 }
 
-/* Category / home: member price block only (do not change grid / card layout) */
+/* Member price block: listings are centered in template tail; default left elsewhere */
 .mc-member-grid-price {
   text-align: left;
   margin-top: 4px;
+}
+
+.v-product-grid .mc-member-grid-price,
+#content_area .v-product .mc-member-grid-price,
+#content_area_home .v-product .mc-member-grid-price {
+  text-align: center;
 }
 
 .mc-member-grid-price__regular {
@@ -6437,7 +6443,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   margin: 0 !important;
 }
 
-/* --- Title --- */
+/* --- Title typography (flex/display from template #mc-category-grid-tail) --- */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__title,
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .productnamecolor,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product .v-product__title,
@@ -6446,7 +6452,6 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 :is(html.category, body.category) #content_area .v-product-grid > .v-product .productnamecolor,
 :is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__title,
 :is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .productnamecolor {
-  display: block !important;
   width: 100% !important;
   max-width: 100% !important;
   white-space: normal !important;

@@ -45,7 +45,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260405: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
-<meta name="mc-deploy-verify" content="20260401b">
+<meta name="mc-deploy-verify" content="20260402">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -119,8 +119,10 @@ document.addEventListener("DOMContentLoaded", function () {
   </style>
   <!-- Category grid: in-template fallback so layout works even if /v/vspfiles/css/custom-safe.css is stale or blocked -->
   <style id="mc-category-grid-critical">
+  /* First-paint grid: category + home featured (full rules in #mc-category-grid-tail). */
   @media (min-width: 992px) {
-    body:not(.productdetails) #content_area .v-product-grid {
+    body:not(.productdetails) #content_area .v-product-grid,
+    body.is-home:not(.productdetails) #content_area_home .v-product-grid {
       display: grid !important;
       grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
       gap: 20px !important;
@@ -132,7 +134,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
   @media (min-width: 576px) and (max-width: 991px) {
-    body:not(.productdetails) #content_area .v-product-grid {
+    body:not(.productdetails) #content_area .v-product-grid,
+    body.is-home:not(.productdetails) #content_area_home .v-product-grid {
       display: grid !important;
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
       gap: 16px !important;
@@ -140,14 +143,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
   @media (max-width: 575px) {
-    body:not(.productdetails) #content_area .v-product-grid {
+    body:not(.productdetails) #content_area .v-product-grid,
+    body.is-home:not(.productdetails) #content_area_home .v-product-grid {
       display: grid !important;
       grid-template-columns: minmax(0, 1fr) !important;
       gap: 12px !important;
     }
   }
   body:not(.productdetails) #content_area .v-product-grid > .v-product,
-  body:not(.productdetails) #content_area ul.v-product-grid > li.v-product {
+  body:not(.productdetails) #content_area ul.v-product-grid > li.v-product,
+  body.is-home:not(.productdetails) #content_area_home .v-product-grid > .v-product,
+  body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li.v-product {
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
@@ -8316,26 +8322,12 @@ try {
 .mc-login-modal__switch a{color:#333;text-decoration:underline;cursor:pointer}
 .mc-login-modal__signup{margin:12px 0 0;font-size:13px;text-align:center}
 .mc-login-modal__signup-note{display:block;font-size:11px;opacity:.75;margin-top:4px}
-/* Category grid: image then title then price; constrain images (template fallback) */
-:is(html.category, body.category) .v-product-grid .v-product{display:flex;flex-direction:column;align-items:stretch;box-sizing:border-box;min-width:100%!important}
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,:is(html.category, body.category) .v-product-grid .v-product .product_image,:is(html.category, body.category) .v-product-grid .v-product .vcss_img{order:1;flex:0 0 auto;width:100%;height:280px;min-height:280px;max-height:280px;overflow:hidden;text-align:center;margin:0!important;padding:0!important;display:block!important;position:relative}
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img a,:is(html.category, body.category) .v-product-grid .v-product .v-product__image a,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap a,:is(html.category, body.category) .v-product-grid .v-product .product_image a,:is(html.category, body.category) .v-product-grid .v-product .vcss_img a{display:block!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important}
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,:is(html.category, body.category) .v-product-grid .v-product .product_image img,:is(html.category, body.category) .v-product-grid .v-product .vcss_img img{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover;object-position:center center;display:block!important;margin:0!important}
-:is(html.category, body.category) .v-product-grid .v-product .v-product__name,:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,:is(html.category, body.category) .v-product-grid .v-product h2,:is(html.category, body.category) .v-product-grid .v-product h3,:is(html.category, body.category) .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:3.5em!important;box-sizing:border-box;width:100%;margin-top:4px!important}
-:is(html.category, body.category) .v-product-grid .v-product .productnamecolor a,:is(html.category, body.category) .v-product-grid .v-product .v-product__name a{width:100%;text-align:center!important}
-:is(html.category, body.category) .v-product-grid .v-product .v-product__price,:is(html.category, body.category) .v-product-grid .v-product .product_price,:is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price{order:3;min-height:0!important;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;width:100%;text-align:center!important}
+/* Listing card layout lives in #mc-category-grid-critical (head) + #mc-category-grid-tail (end). Avoid duplicating grid rules here — caused conflicts with late styles. */
 :is(html.category, body.category) .sidebar-wrapper .sidebar,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"]{text-align:left!important}
 :is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] ul,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] li{text-align:left!important}
 :is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] a,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] .vnav__link,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] .vnav__label,:is(html.category, body.category) .sidebar-wrapper .menu a{font-weight:400!important;letter-spacing:.08em!important;text-transform:uppercase!important;font-size:11px!important;color:#1a1a1a!important}
 :is(html.category, body.category) #content_area .vnav--level2,:is(html.category, body.category) #content_area .vnav--level3,:is(html.category, body.category) #content_area .vnav--level2>li,:is(html.category, body.category) #content_area .vnav--level3>li{text-align:left!important}
 :is(html.category, body.category) #content_area .vnav--level2 a,:is(html.category, body.category) #content_area .vnav--level3 a{font-weight:400!important;letter-spacing:.06em!important;text-transform:uppercase!important;font-size:11px!important}
-@media (max-width:991px){:is(html.category, body.category) .v-product-grid .v-product .v-product__img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,:is(html.category, body.category) .v-product-grid .v-product .product_image,:is(html.category, body.category) .v-product-grid .v-product .vcss_img,:is(html.category, body.category) ul.v-product-grid>li.v-product .v-product__img{height:220px!important;min-height:220px!important;max-height:220px!important;overflow:hidden!important;margin:0!important;padding:0!important}:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,:is(html.category, body.category) .v-product-grid .v-product .product_image img,:is(html.category, body.category) .v-product-grid .v-product .vcss_img img,:is(html.category, body.category) ul.v-product-grid>li.v-product .v-product__img img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important}:is(html.category, body.category) .v-product-grid .v-product .v-product__name,:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,:is(html.category, body.category) .v-product-grid .v-product h2,:is(html.category, body.category) .v-product-grid .v-product h3,:is(html.category, body.category) .v-product-grid .v-product h4{display:flex!important;min-height:3.5em!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;margin-top:3px!important;margin-bottom:0!important;padding-top:0!important}:is(html.category, body.category) .v-product-grid .v-product{gap:0!important;row-gap:0!important}}
-body.is-home #content_area_home .v-product-grid .v-product,body.is-home #content_area_home ul.v-product-grid>li.v-product{display:flex;flex-direction:column;align-items:stretch;box-sizing:border-box;min-width:100%!important}
-body.is-home #content_area_home .v-product-grid .v-product .v-product__img,body.is-home #content_area_home ul.v-product-grid>li.v-product .v-product__img{order:1;height:280px;min-height:280px;max-height:280px;width:100%;overflow:hidden;display:block!important;position:relative;margin:0!important;padding:0!important;box-sizing:border-box}
-body.is-home #content_area_home .v-product-grid .v-product .v-product__img img,body.is-home #content_area_home ul.v-product-grid>li.v-product .v-product__img img{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover;object-position:center center;display:block!important;margin:0!important}
-body.is-home #content_area_home .v-product-grid .v-product .v-product__name,body.is-home #content_area_home .v-product-grid .v-product .productnamecolor,body.is-home #content_area_home .v-product-grid .v-product h2,body.is-home #content_area_home .v-product-grid .v-product h3,body.is-home #content_area_home .v-product-grid .v-product h4{order:2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center!important;min-height:3.5em!important;line-height:1.25;margin-top:4px!important;box-sizing:border-box;width:100%}
-body.is-home #content_area_home .v-product-grid .v-product .v-product__price,body.is-home #content_area_home .v-product-grid .v-product .product_price,body.is-home #content_area_home .v-product-grid .v-product .mc-member-grid-price,body.is-home #content_area_home ul.v-product-grid>li.v-product .v-product__price,body.is-home #content_area_home ul.v-product-grid>li.v-product .product_price{order:3;display:flex;flex-direction:column;align-items:center;text-align:center!important;margin-top:6px!important;width:100%;box-sizing:border-box}
-@media (max-width:991px){body.is-home #content_area_home .v-product-grid .v-product .v-product__img,body.is-home #content_area_home ul.v-product-grid>li.v-product .v-product__img{height:220px!important;min-height:220px!important;max-height:220px!important}}
 </style>
 <div id="mc-login-modal" class="mc-login-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mc-login-modal-title">
   <div class="mc-login-modal__backdrop" data-mc-close-login tabindex="-1"></div>
@@ -9052,36 +9044,42 @@ body.is-home #content_area_home .v-product-grid .v-product .v-product__price,bod
    */
   function mcReorderCategoryListingNodes(card) {
     if (!card || !card.querySelector) return;
-    var isCat =
-      (document.documentElement.classList &&
-        document.documentElement.classList.contains('category')) ||
-      (document.body.classList && document.body.classList.contains('category'));
-    var isHome = document.body && document.body.classList && document.body.classList.contains('is-home');
-    if (!isCat && !isHome) return;
+    if (typeof mcIsLikelyListingPage === 'function' && !mcIsLikelyListingPage()) return;
     var imgCell = card.querySelector('.v-product__img, .product_image');
     var title =
       card.querySelector('.v-product__name') ||
       card.querySelector('.productnamecolor') ||
+      card.querySelector('.v-product__title') ||
       card.querySelector('h2') ||
       card.querySelector('h3');
-    if (!title || !title.parentNode) return;
-    var titlePar = title.parentNode;
+    if (!title) return;
 
-    function moveAfterTitle(node) {
-      if (!node || !titlePar) return;
-      if (title.nextSibling === node) return;
-      var scan = title.nextSibling;
-      while (scan) {
-        if (scan === node) return;
-        scan = scan.nextSibling;
-      }
+    function topSection(node) {
+      if (!node) return null;
+      var el = node;
+      while (el && el.parentNode && el.parentNode !== card) el = el.parentNode;
+      return el && el.parentNode === card ? el : null;
+    }
+
+    var titleSec = topSection(title);
+    if (!titleSec) return;
+
+    function moveAfterTitleBlock(node) {
+      if (!node || node === titleSec) return;
+      if (title.contains && title.contains(node)) return;
+      if (imgCell && (node === imgCell || (node.contains && node.contains(imgCell)))) return;
+      var sec = topSection(node);
+      if (!sec || sec === titleSec) return;
+      if (sec.contains && sec.contains(titleSec)) return;
+      if (titleSec.contains && titleSec.contains(sec)) return;
+      if (titleSec.nextSibling === sec) return;
       try {
-        titlePar.insertBefore(node, title.nextSibling);
+        card.insertBefore(sec, titleSec.nextSibling);
       } catch (eMove) {}
     }
 
     var topBlock = card.querySelector('.mc-member-grid-price');
-    if (topBlock) moveAfterTitle(topBlock);
+    if (topBlock) moveAfterTitleBlock(topBlock);
 
     var kids = card.children;
     var j;
@@ -9089,9 +9087,10 @@ body.is-home #content_area_home .v-product-grid .v-product .v-product__price,bod
       var el = kids[j];
       if (imgCell && (el === imgCell || (el.contains && el.contains(imgCell)))) continue;
       if (el === title || (el.contains && el.contains(title))) continue;
+      if (el === titleSec) continue;
       var tx = (el.textContent || '').replace(/\s+/g, ' ').trim();
       if (/^sale\s+price/i.test(tx) || /^list\s+price/i.test(tx)) {
-        moveAfterTitle(el);
+        moveAfterTitleBlock(el);
         continue;
       }
       var cls = (el.className && String(el.className)) || '';
@@ -9099,7 +9098,7 @@ body.is-home #content_area_home .v-product-grid .v-product .v-product__price,bod
         /product_sale_price|product_list_price|sale_price|list_price/i.test(cls) ||
         (el.tagName === 'FONT' && /sale|list/i.test(cls) && /\$/i.test(tx))
       ) {
-        moveAfterTitle(el);
+        moveAfterTitleBlock(el);
       }
     }
 
@@ -9110,7 +9109,7 @@ body.is-home #content_area_home .v-product-grid .v-product .v-product__price,bod
       var node = nestedPricing[j];
       if (!node || node === title || (node.contains && node.contains(title))) continue;
       if (imgCell && (node === imgCell || (node.contains && node.contains(imgCell)))) continue;
-      moveAfterTitle(node);
+      moveAfterTitleBlock(node);
     }
   }
 
@@ -9348,7 +9347,7 @@ body.is-home #content_area_home .v-product-grid .v-product .v-product__price,bod
   :is(html.category, body.category) .v-product-grid .v-product h2,
   :is(html.category, body.category) .v-product-grid .v-product h3,
   :is(html.category, body.category) .v-product-grid .v-product h4 {
-    min-height: 0 !important;
+    min-height: 3.5em !important;
     margin-top: 3px !important;
     margin-bottom: 0 !important;
     padding-top: 0 !important;
@@ -9427,86 +9426,7 @@ body.is-home #content_area_home .v-product-grid .v-product .v-product__price,bod
   }
 }
 
-/* Category cards (all viewports): uniform image tile + cover (same frame height per row) */
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
-:is(html.category, body.category) .v-product-grid .v-product .product_image,
-:is(html.category, body.category) .v-product-grid .v-product .vcss_img,
-:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img {
-  height: 280px !important;
-  min-height: 280px !important;
-  max-height: 280px !important;
-  width: 100% !important;
-  overflow: hidden !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  display: block !important;
-  position: relative !important;
-}
-
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img a,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image a,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap a,
-:is(html.category, body.category) .v-product-grid .v-product .product_image a,
-:is(html.category, body.category) .v-product-grid .v-product .vcss_img a {
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,
-:is(html.category, body.category) .v-product-grid .v-product .product_image img,
-:is(html.category, body.category) .v-product-grid .v-product .vcss_img img,
-:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: none !important;
-  max-height: none !important;
-  object-fit: cover !important;
-  object-position: center center !important;
-  display: block !important;
-  margin: 0 !important;
-}
-
-@media (max-width: 991px) {
-  :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
-  :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
-  :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
-  :is(html.category, body.category) .v-product-grid .v-product .product_image,
-  :is(html.category, body.category) .v-product-grid .v-product .vcss_img,
-  :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img {
-    height: 220px !important;
-    min-height: 220px !important;
-    max-height: 220px !important;
-  }
-}
-
-:is(html.category, body.category) .v-product-grid .v-product .v-product__name,
-:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,
-:is(html.category, body.category) .v-product-grid .v-product h2,
-:is(html.category, body.category) .v-product-grid .v-product h3,
-:is(html.category, body.category) .v-product-grid .v-product h4 {
-  min-height: 0 !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  margin-top: 4px !important;
-}
-
-:is(html.category, body.category) .v-product-grid .v-product .v-product__price,
-:is(html.category, body.category) .v-product-grid .v-product .product_price,
-:is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price {
-  min-height: 0 !important;
-  text-align: left !important;
-  align-items: flex-start !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
+/* Listing card image/title/price: see #mc-category-grid-tail (last stylesheet; do not duplicate here — was resetting title min-height and left-aligning prices). */
 </style>
 <!-- Last in document: wins over v/vspfiles/templates/266/css/template.css for category grid -->
 <style id="mc-category-grid-tail">
