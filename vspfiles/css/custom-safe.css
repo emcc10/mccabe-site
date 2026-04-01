@@ -429,20 +429,44 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   line-height: 0 !important;
 }
 
-/* Hero menu: clear of home/cart icons, proportional to viewport */
+/* Hero top: one column = main menu, then search — over video, not below the hero block */
+#slideshow-container .mc-hero-top-cluster {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: max(10px, env(safe-area-inset-top)) !important;
+  z-index: 25 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 max(28px, 4vw) !important;
+  box-sizing: border-box !important;
+  pointer-events: none !important;
+}
+
+#slideshow-container .mc-hero-top-cluster > * {
+  pointer-events: auto !important;
+}
+
+/* Hero menu: centered row inside cluster (no separate absolute top — avoids search above menu) */
+#slideshow-container .mc-hero-top-cluster .hero-menu,
 #slideshow-container .hero-menu {
-  position: absolute;
-  top: 18px !important;
-  left: 50% !important;
-  transform: translateX(-50%);
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  z-index: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   gap: clamp(14px, 2.5vw, 22px);
-  padding: clamp(8px, 1.5vw, 12px) max(40px, 5vw) clamp(8px, 1.5vw, 12px) max(40px, 5vw); /* inset matches tighter float icons */
-  box-sizing: border-box;
-  max-width: 100%;
+  padding: clamp(6px, 1.2vw, 10px) max(28px, 4vw) !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 /* ===== HOMEPAGE HERO MENU: NO WRAP ===== */
@@ -465,34 +489,23 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   white-space: nowrap !important;
 }
 
-/* Search row: absolutely positioned under hero menu, above video */
-#slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
-  position: absolute !important;
-  left: 0 !important;
-  right: 0 !important;
+/* Search: second row in .mc-hero-top-cluster (DOM order under .hero-menu) */
+#slideshow-container .mc-hero-top-cluster #mcHeroSearchOverlay.mc-hero-search-overlay {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
   width: 100% !important;
-  z-index: 16 !important;
+  z-index: 2 !important;
   display: flex !important;
   justify-content: center !important;
   align-items: flex-start !important;
-  padding: 0 max(32px, 4.2vw) !important;
+  padding: 0 !important;
   box-sizing: border-box !important;
   pointer-events: none !important;
 }
 
-@media (min-width: 992px) {
-  #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
-    top: calc(18px + 2.65rem + 8px) !important;
-  }
-}
-
-@media (max-width: 991px) {
-  #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
-    top: max(50px, calc(env(safe-area-inset-top, 0px) + 44px)) !important;
-  }
-}
-
-#slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay > * {
+#slideshow-container .mc-hero-top-cluster #mcHeroSearchOverlay.mc-hero-search-overlay > * {
   pointer-events: auto !important;
 }
 
@@ -545,7 +558,7 @@ body.is-home a.mc-home-float {
 body.is-home .mc-cart-float,
 body.is-home a.mc-cart-float {
   left: auto !important;
-  right: max(4px, env(safe-area-inset-right)) !important;
+  right: max(2px, env(safe-area-inset-right)) !important;
 }
 
 /* Prevent hero container from clipping fixed icons (they're body children) */
@@ -555,6 +568,11 @@ body.is-home #slideshow-container {
 
 /* Mobile: hero video + overlay proportional */
 @media (max-width: 991px) {
+  #slideshow-container .mc-hero-top-cluster {
+    gap: 0 !important;
+    top: max(8px, env(safe-area-inset-top)) !important;
+  }
+
   /* keep hero menu hidden on mobile */
   #slideshow-container .hero-menu {
     display: none !important;
@@ -1546,9 +1564,10 @@ a.hero-cart-link {
   #slideshow-container .mc-hero-overlay a {
     pointer-events: auto !important;
   }
-  #slideshow-container .hero-menu {
-    position: absolute !important;
-    z-index: 10 !important;
+  /* .hero-menu is display:none here; avoid resetting position on .mc-hero-top-cluster layout */
+  #slideshow-container .mc-hero-top-cluster .hero-menu {
+    position: relative !important;
+    z-index: auto !important;
   }
 
   /* FORCE mobile push menu overlay to top of everything */
@@ -3886,14 +3905,14 @@ html body a.mc-cart-float,
 html body .mc-cart-float,
 body a.mc-cart-float,
 body .mc-cart-float {
-  left: calc(100vw - 52px - max(4px, env(safe-area-inset-right))) !important;
+  left: calc(100vw - 52px - max(2px, env(safe-area-inset-right))) !important;
   right: auto !important;
   width: 52px !important;
   max-width: 52px !important;
   min-width: 40px !important;
   max-height: 48px !important;
   margin-left: 0 !important;
-  margin-right: max(4px, env(safe-area-inset-right)) !important;
+  margin-right: max(2px, env(safe-area-inset-right)) !important;
   box-sizing: border-box !important;
 }
 
@@ -3903,7 +3922,7 @@ body.is-home html body .mc-cart-float,
 body.is-home body a.mc-cart-float,
 body.is-home body .mc-cart-float {
   left: auto !important;
-  right: max(4px, env(safe-area-inset-right)) !important;
+  right: max(2px, env(safe-area-inset-right)) !important;
 }
 
 /* =========================================================
