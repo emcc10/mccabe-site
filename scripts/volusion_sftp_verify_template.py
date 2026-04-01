@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-After deploy, download remote template_266.html via SFTP and confirm it contains the same
-mc-deploy-verify marker as the local checkout.
+After deploy: confirm mc-deploy-verify matches Git.
 
-Volusion serves the theme at https://store.com/v/template_266.html — that maps to SFTP
-/v/template_266.html, NOT necessarily the same file as /template_266.html at account root.
-We must verify /v/ first when that file exists, or a green check can lie.
+1) SFTP: reject stale /v/ copies when those files exist.
+2) HTTP: public template URL must show the same marker (cache-busted). This catches
+   the case where SFTP only updated /template_266.html but the browser still reads /v/.
 """
 from __future__ import annotations
 
@@ -13,11 +12,17 @@ import os
 import re
 import sys
 import tempfile
+import time
+import urllib.error
+import urllib.request
+import ssl
 
-# Paths that match the live browser URL …/v/template_266.html (wwwroot v/)
+# SFTP paths that might be the live theme (browser …/v/template_266.html)
 _CANONICAL_V_PATHS: tuple[str, ...] = (
     "/v/template_266.html",
     "/mccabestheaterandliving.com/v/template_266.html",
+    "/v/v/template_266.html",
+    "v/template_266.html",
 )
 
 
@@ -39,7 +44,6 @@ def _normalize_secret_template_path() -> str:
 
 
 def _download_marker(sftp, remote: str) -> str | None:
-    """Return marker string, or None if file missing/unreadable."""
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".html")
     tmp.close()
     local = tmp.name
@@ -77,13 +81,57 @@ def _fallback_paths() -> list[str]:
     return out
 
 
+def _http_marker(expect: str) -> tuple[bool, str, str]:
+    """
+    Return (ok, got_or_err, url_used).
+    ok True iff body contains mc-deploy-verify with expect.
+    """
+    if os.environ.get("SKIP_HTTP_TEMPLATE_VERIFY", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    ):
+        return True, "skipped", ""
+
+    default_url = "https://www.mccabestheaterandliving.com/v/template_266.html"
+    url = (os.environ.get("VERIFY_HTTP_TEMPLATE_URL") or "").strip() or default_url
+    if not url:
+        return True, "no_url", ""
+
+    sep = "&" if "?" in url else "?"
+    full = f"{url}{sep}_mcv={int(time.time())}"
+    ctx = ssl.create_default_context()
+    req = urllib.request.Request(
+        full,
+        headers={
+            "User-Agent": "McCabeDeployVerify/1",
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+        },
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60, context=ctx) as resp:
+            raw = resp.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as exc:
+        return False, f"HTTP_{exc.code}", url
+    except Exception as exc:  # noqa: BLE001
+        return False, str(exc), url
+
+    m = re.search(r'name="mc-deploy-verify"\s+content="([^"]+)"', raw)
+    got = m.group(1) if m else ""
+    if got == expect:
+        return True, got, url
+    return False, got or "(no meta tag)", url
+
+
 def main() -> int:
     ws = os.environ.get("GITHUB_WORKSPACE", ".")
     os.chdir(ws)
 
     expect = _expect_from_local(ws)
     if not expect:
-        print("::notice::No mc-deploy-verify in template; skipping remote SFTP verify.")
+        print("::notice::No mc-deploy-verify in template; skipping remote verify.")
         return 0
 
     host = (
@@ -108,51 +156,53 @@ def main() -> int:
         print(f"::error::SFTP verify connect failed: {exc}", file=sys.stderr)
         return 1
 
+    sftp_any_match: str | None = None
+
     try:
         sftp = paramiko.SFTPClient.from_transport(transport)
         try:
             for remote in _CANONICAL_V_PATHS:
                 got = _download_marker(sftp, remote)
                 if got is None:
-                    print(f"::notice::No file at {remote!r} (skipped).", flush=True)
+                    print(f"::notice::SFTP no file at {remote!r} (skipped).", flush=True)
                     continue
                 if got == expect:
                     print(
-                        f"::notice::Remote template matches checkout (mc-deploy-verify={expect}) "
-                        f"via SFTP path {remote!r} (live /v/ path).",
+                        f"::notice::SFTP /v/ path OK: {remote!r} mc-deploy-verify={expect}",
                         flush=True,
                     )
-                    return 0
+                    sftp_any_match = remote
+                    break
                 print(
-                    "::error::Live theme path "
-                    f"{remote!r} has mc-deploy-verify={got!r}, expected {expect!r}. "
-                    "SFTP root /template_266.html may be updated but the store reads "
-                    "/v/template_266.html — fix deploy paths or SFTP_TEMPLATE_REMOTE.",
+                    "::error::SFTP live-path file "
+                    f"{remote!r} has mc-deploy-verify={got!r}, expected {expect!r}.",
                     file=sys.stderr,
                 )
                 return 1
 
-            print(
-                "::warning::No template at /v/... paths; falling back to SFTP root paths "
-                "(confirm FileZilla: live theme file may differ).",
-                flush=True,
-            )
-            for remote in _fallback_paths():
-                got = _download_marker(sftp, remote)
-                if got is None:
-                    print(f"::warning::SFTP get skip {remote!r}", flush=True)
-                    continue
-                if got == expect:
-                    print(
-                        f"::notice::Remote template matches checkout (mc-deploy-verify={expect}) "
-                        f"via SFTP path {remote!r} (fallback; /v/ path not found).",
-                        flush=True,
-                    )
-                    return 0
+            if sftp_any_match is None:
                 print(
-                    f"::warning::Path {remote!r} has mc-deploy-verify={got!r}, expected {expect!r}.",
+                    "::warning::Could not read any /v/... template via SFTP; "
+                    "trying SFTP root fallbacks (HTTP check will still run).",
                     flush=True,
                 )
+                for remote in _fallback_paths():
+                    got = _download_marker(sftp, remote)
+                    if got is None:
+                        print(f"::warning::SFTP get skip {remote!r}", flush=True)
+                        continue
+                    if got == expect:
+                        print(
+                            f"::notice::SFTP fallback OK: {remote!r} mc-deploy-verify={expect}",
+                            flush=True,
+                        )
+                        sftp_any_match = remote
+                        break
+                    print(
+                        f"::warning::SFTP {remote!r} has mc-deploy-verify={got!r}, "
+                        f"expected {expect!r}.",
+                        flush=True,
+                    )
         finally:
             try:
                 sftp.close()
@@ -161,12 +211,32 @@ def main() -> int:
     finally:
         transport.close()
 
-    print(
-        "::error::Could not confirm remote template: no SFTP path returned mc-deploy-verify "
-        f"matching {expect!r}. Upload may have failed or paths differ.",
-        file=sys.stderr,
-    )
-    return 1
+    if sftp_any_match is None:
+        print(
+            "::error::SFTP: no path returned mc-deploy-verify matching "
+            f"{expect!r}. Upload likely failed.",
+            file=sys.stderr,
+        )
+        return 1
+
+    http_ok, http_detail, http_url = _http_marker(expect)
+    if not http_ok:
+        print(
+            "::error::Live template URL does not match Git yet. "
+            f"URL={http_url!r} saw mc-deploy-verify={http_detail!r}, expected {expect!r}. "
+            "SFTP updated a file, but the public /v/template_266.html (or cache) is still old. "
+            "Set VERIFY_HTTP_TEMPLATE_URL if your live URL differs. "
+            "Or set SKIP_HTTP_TEMPLATE_VERIFY=true only as a temporary bypass.",
+            file=sys.stderr,
+        )
+        return 1
+
+    if http_detail != "skipped":
+        print(
+            f"::notice::HTTP template OK: {http_url!r} mc-deploy-verify={expect}",
+            flush=True,
+        )
+    return 0
 
 
 if __name__ == "__main__":

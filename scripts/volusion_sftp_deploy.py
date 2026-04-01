@@ -45,6 +45,8 @@ def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
         [
             ("/v/template_266.html", c_remote),
             ("/v/template_266.html", v_wwwroot_css),
+            ("/v/v/template_266.html", c_remote),
+            ("/v/v/template_266.html", v_wwwroot_css),
             ("/template_266.html", c_remote),
             ("/template_266.html", v_wwwroot_css),
             (domain_t, domain_c),
@@ -74,6 +76,7 @@ def _mirror_template_to_canonical_paths(sftp) -> None:
     for rel in (
         "/v/template_266.html",
         "/mccabestheaterandliving.com/v/template_266.html",
+        "/v/v/template_266.html",
         "/template_266.html",
     ):
         try:

@@ -24,6 +24,8 @@ def _paths() -> list[str]:
         secret,
         "/v/template_266.html",
         "/mccabestheaterandliving.com/v/template_266.html",
+        "/v/v/template_266.html",
+        "v/template_266.html",
         "/template_266.html",
         "template_266.html",
     ):
