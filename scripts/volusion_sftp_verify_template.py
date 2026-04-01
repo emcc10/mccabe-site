@@ -106,24 +106,25 @@ def _browser_like_headers(url: str) -> dict[str, str]:
     }
 
 
-def _http_marker(expect: str) -> tuple[bool, str, str, str | None]:
+def _http_marker(expect: str) -> tuple[bool, str, str, str | None, int | None]:
     """
-    Return (ok, detail, url_used, failure_kind).
+    Return (ok, detail, url_used, failure_kind, http_status).
 
     failure_kind: None (success), 'skipped', 'http' (could not fetch/parse page),
     'mismatch' (fetched but wrong marker).
+    http_status: status code on HTTPError, else None.
     """
     if os.environ.get("SKIP_HTTP_TEMPLATE_VERIFY", "").strip().lower() in (
         "1",
         "true",
         "yes",
     ):
-        return True, "skipped", "", "skipped"
+        return True, "skipped", "", "skipped", None
 
     default_url = "https://www.mccabestheaterandliving.com/v/template_266.html"
     url = (os.environ.get("VERIFY_HTTP_TEMPLATE_URL") or "").strip() or default_url
     if not url:
-        return True, "no_url", "", None
+        return True, "no_url", "", None, None
 
     sep = "&" if "?" in url else "?"
     full = f"{url}{sep}_mcv={int(time.time())}"
@@ -142,15 +143,16 @@ def _http_marker(expect: str) -> tuple[bool, str, str, str | None]:
             f"HTTP {exc.code} (live URL blocked or denied this request)",
             url,
             "http",
+            exc.code,
         )
     except Exception as exc:  # noqa: BLE001
-        return False, str(exc), url, "http"
+        return False, str(exc), url, "http", None
 
     m = re.search(r'name="mc-deploy-verify"\s+content="([^"]+)"', raw)
     got = m.group(1) if m else ""
     if got == expect:
-        return True, got, url, None
-    return False, got or "(no meta tag)", url, "mismatch"
+        return True, got, url, None, None
+    return False, got or "(no meta tag)", url, "mismatch", None
 
 
 def main() -> int:
@@ -247,8 +249,25 @@ def main() -> int:
         )
         return 1
 
-    http_ok, http_detail, http_url, http_fail_kind = _http_marker(expect)
+    http_ok, http_detail, http_url, http_fail_kind, http_status = _http_marker(expect)
     if not http_ok:
+        blocked = http_status in (401, 403, 429)
+        if (
+            http_fail_kind == "http"
+            and blocked
+            and sftp_any_match in _CANONICAL_V_PATHS
+            and os.environ.get("REQUIRE_HTTP_TEMPLATE_VERIFY", "").strip().lower()
+            not in ("1", "true", "yes")
+        ):
+            print(
+                "::warning::HTTP template check skipped: "
+                f"{http_detail} URL={http_url!r}. "
+                "SFTP already matched this file on a /v/ path; live URL may block "
+                "CI (WAF). Set REQUIRE_HTTP_TEMPLATE_VERIFY=true to fail the job if "
+                "HTTP cannot reach the template.",
+                flush=True,
+            )
+            return 0
         if http_fail_kind == "http":
             print(
                 "::error::Could not verify live template over HTTP. "
