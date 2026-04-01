@@ -6378,6 +6378,7 @@ html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
   overflow: visible !important;
   vertical-align: top !important;
   text-align: center !important;
+  background: #ffffff !important;
 }
 
 /* Sale / list price nodes default to flex order 0 — push behind image (order 1) on category cards */
