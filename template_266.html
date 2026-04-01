@@ -551,7 +551,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
              
 
-            <div class="header__section header__section--middle">
+            <div class="header__section--bottom text-center visible-xs">
+              <span class="microblock menu-toggle">
+                <a class="menu-toggle__link" href="javascript:void(0);" id="nav-toggle" data-menu-type="slide-top">
+                  <span class="menu-toggle__text push-menu--closed">SELECT A CATEGORY</span>
+                  <span class="menu-toggle__text push-menu--open">CLOSE MENU</span>
+                  <svg class="menu-toggle__icon"><use xlink:href="#svg-menu"></use></svg>
+                </a>
+              </span>
+            </div>
+
+          </div>
+<div class="hidden-xs col-xs-12 no-pad-lg">
+  <div class="microblock main-menu">
+    <nav id="display_menu_1" class="menu" link-alignment="center"></nav>
+  </div>
+</div>
+            <div class="header__section header__section--middle mc-header-search-below-nav">
               <div class="collapsing-search" id="collapsingSearch">
                 <form class="collapsing-search__form" action="/searchresults.asp" method="get" name="SearchBoxForm">
                   <div class="container">
@@ -569,23 +585,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 </form>
               </div>
             </div>
-
-            <div class="header__section--bottom text-center visible-xs">
-              <span class="microblock menu-toggle">
-                <a class="menu-toggle__link" href="javascript:void(0);" id="nav-toggle" data-menu-type="slide-top">
-                  <span class="menu-toggle__text push-menu--closed">SELECT A CATEGORY</span>
-                  <span class="menu-toggle__text push-menu--open">CLOSE MENU</span>
-                  <svg class="menu-toggle__icon"><use xlink:href="#svg-menu"></use></svg>
-                </a>
-              </span>
-            </div>
-
-          </div>
-<div class="hidden-xs col-xs-12 no-pad-lg">
-  <div class="microblock main-menu">
-    <nav id="display_menu_1" class="menu" link-alignment="center"></nav>
-  </div>
-</div>
 <div class="microblock mc-header-cart">
   <a class="mc-header-cart__link" href="/shoppingcart.asp"></a>
 </div>
@@ -622,7 +621,10 @@ document.addEventListener("DOMContentLoaded", function () {
       mid.setAttribute('data-mc-search-mount', 'hero');
       overlay.classList.add('mc-hero-search-overlay--mounted');
     } else if (menuRow && menuRow.parentNode) {
-      menuRow.parentNode.insertBefore(mid, menuRow.nextSibling);
+      /* Template already places search after desktop nav; only reorder if needed (e.g. cached DOM) */
+      if (mid.previousElementSibling !== menuRow) {
+        menuRow.parentNode.insertBefore(mid, menuRow.nextSibling);
+      }
       mid.setAttribute('data-mc-search-mount', 'below-nav');
     }
   }

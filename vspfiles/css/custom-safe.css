@@ -58,8 +58,9 @@ header.header .header__section--middle,
   overflow: visible !important;
 }
 
-/* Interior pages: search strip sits below main menu in normal flow (no overlap) */
-body:not(.is-home) header.header .header__section--middle {
+/* Interior pages: search lives after #display_menu_1 row in HTML — full width under nav */
+body:not(.is-home) header.header > .header__section--middle,
+body:not(.is-home) header.header .mc-header-search-below-nav {
   position: relative !important;
   top: auto !important;
   left: auto !important;
@@ -67,9 +68,11 @@ body:not(.is-home) header.header .header__section--middle {
   z-index: 1 !important;
   width: 100% !important;
   max-width: 100% !important;
+  flex: 0 0 100% !important;
   float: none !important;
   clear: both !important;
   margin: 0 !important;
+  display: block !important;
 }
 
 header.header .collapsing-search,
