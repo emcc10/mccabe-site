@@ -34,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}"
-          echo "::notice::deploy marker 20260416 — View Source mc-deploy-verify content=20260416; CSS MC_DEPLOY_VERIFY_20260416"
+          echo "::notice::deploy marker 20260418git — View Source mc-deploy-verify content=20260418git; CSS MC_DEPLOY_VERIFY_20260418git"
 
           SFTP_HOST="${SECRET_SFTP_HOST:-}"
           if [ -z "$SFTP_HOST" ]; then
@@ -234,7 +234,7 @@ jobs:
           try_put_css_only "css → v/vspfiles/css/custom-safe.css" "v/vspfiles/css/custom-safe.css"
           echo "::endgroup::"
 
-          echo "::notice::Upload finished. Next step downloads template via SFTP and checks mc-deploy-verify (HTTP is not used; storefront HTML cache can lag)."
+          echo "::notice::Upload finished. Next step re-downloads template via SFTP and may check the public template URL (HTTP); storefront cache can still lag what you see in a browser."
 
       # CSS often lands on /v/vspfiles/css/ while the live theme reads /v/template_266.html.
       # Bash mirror uses || true and can hide template failures; force absolute paths with Paramiko.
