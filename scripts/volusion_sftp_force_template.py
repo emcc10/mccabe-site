@@ -19,11 +19,12 @@ def _paths() -> list[str]:
         secret = "/v/template_266.html"
     out: list[str] = []
     seen: set[str] = set()
+    # /v/ first — same file as browser …/v/template_266.html (not SFTP root /template_266.html).
     for p in (
         secret,
         "/v/template_266.html",
-        "/template_266.html",
         "/mccabestheaterandliving.com/v/template_266.html",
+        "/template_266.html",
         "template_266.html",
     ):
         if p and p not in seen:

@@ -194,10 +194,10 @@ jobs:
             if try_put_pair "SFTP_TEMPLATE_REMOTE secret + css" "${TEMPLATE_REMOTE}" "${CSS_REMOTE}"; then ok=1; fi
           fi
           if [ "$ok" -ne 1 ]; then
-            if try_put_pair "canonical template at SFTP root" "/template_266.html" "${CSS_REMOTE}"; then ok=1; fi
+            if try_put_pair "template under /v (live theme URL)" "/v/template_266.html" "${CSS_REMOTE}"; then ok=1; fi
           fi
           if [ "$ok" -ne 1 ]; then
-            if try_put_pair "template under /v" "/v/template_266.html" "${CSS_REMOTE}"; then ok=1; fi
+            if try_put_pair "canonical template at SFTP root" "/template_266.html" "${CSS_REMOTE}"; then ok=1; fi
           fi
           if [ "$ok" -ne 1 ]; then
             if try_put_pair "domain-prefixed paths" "/mccabestheaterandliving.com/v/template_266.html" "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css"; then ok=1; fi
@@ -216,9 +216,9 @@ jobs:
           fi
 
           echo "::group::Best-effort: mirror template to canonical Volusion paths (covers wrong SFTP_TEMPLATE_REMOTE)"
-          try_put_template_only "mirror → /template_266.html" "/template_266.html"
           try_put_template_only "mirror → /v/template_266.html" "/v/template_266.html"
           try_put_template_only "mirror → domain /v/" "/mccabestheaterandliving.com/v/template_266.html"
+          try_put_template_only "mirror → /template_266.html" "/template_266.html"
           echo "::endgroup::"
 
           try_put_css_only() {

@@ -3,8 +3,9 @@
 After deploy, download remote template_266.html via SFTP and confirm it contains the same
 mc-deploy-verify marker as the local checkout.
 
-Use this instead of HTTP checks: Volusion often serves stale cached HTML while the uploaded
-file on SFTP is already correct.
+Volusion serves the theme at https://store.com/v/template_266.html — that maps to SFTP
+/v/template_266.html, NOT necessarily the same file as /template_266.html at account root.
+We must verify /v/ first when that file exists, or a green check can lie.
 """
 from __future__ import annotations
 
@@ -12,6 +13,12 @@ import os
 import re
 import sys
 import tempfile
+
+# Paths that match the live browser URL …/v/template_266.html (wwwroot v/)
+_CANONICAL_V_PATHS: tuple[str, ...] = (
+    "/v/template_266.html",
+    "/mccabestheaterandliving.com/v/template_266.html",
+)
 
 
 def _expect_from_local(ws: str) -> str:
@@ -22,20 +29,46 @@ def _expect_from_local(ws: str) -> str:
     return m.group(1) if m else ""
 
 
-def _template_paths_to_try() -> list[str]:
+def _normalize_secret_template_path() -> str:
     secret = os.environ.get("SFTP_TEMPLATE_REMOTE", "").strip()
     if secret and not secret.startswith("/"):
         secret = "/" + secret
     if secret == "/v/v/template_266.html":
         secret = "/v/template_266.html"
-    raw = [
-        secret,
-        "/template_266.html",
-        "/v/template_266.html",
-        "/mccabestheaterandliving.com/v/template_266.html",
-        "template_266.html",
-    ]
-    seen: set[str] = set()
+    return secret
+
+
+def _download_marker(sftp, remote: str) -> str | None:
+    """Return marker string, or None if file missing/unreadable."""
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".html")
+    tmp.close()
+    local = tmp.name
+    try:
+        sftp.get(remote, local)
+    except Exception:  # noqa: BLE001
+        try:
+            os.unlink(local)
+        except OSError:
+            pass
+        return None
+    try:
+        with open(local, encoding="utf-8", errors="replace") as f:
+            m = re.search(
+                r'name="mc-deploy-verify"\s+content="([^"]+)"',
+                f.read(),
+            )
+        return m.group(1) if m else ""
+    finally:
+        try:
+            os.unlink(local)
+        except OSError:
+            pass
+
+
+def _fallback_paths() -> list[str]:
+    secret = _normalize_secret_template_path()
+    raw = [secret, "/template_266.html", "template_266.html"]
+    seen: set[str] = set(_CANONICAL_V_PATHS)
     out: list[str] = []
     for p in raw:
         if p and p not in seen:
@@ -78,36 +111,41 @@ def main() -> int:
     try:
         sftp = paramiko.SFTPClient.from_transport(transport)
         try:
-            for remote in _template_paths_to_try():
-                tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".html")
-                tmp.close()
-                local = tmp.name
-                try:
-                    sftp.get(remote, local)
-                except Exception as exc:  # noqa: BLE001
-                    print(f"::warning::SFTP get skip {remote!r}: {exc}", flush=True)
-                    try:
-                        os.unlink(local)
-                    except OSError:
-                        pass
+            for remote in _CANONICAL_V_PATHS:
+                got = _download_marker(sftp, remote)
+                if got is None:
+                    print(f"::notice::No file at {remote!r} (skipped).", flush=True)
                     continue
-                try:
-                    with open(local, encoding="utf-8", errors="replace") as f:
-                        got_m = re.search(
-                            r'name="mc-deploy-verify"\s+content="([^"]+)"',
-                            f.read(),
-                        )
-                    got = got_m.group(1) if got_m else ""
-                finally:
-                    try:
-                        os.unlink(local)
-                    except OSError:
-                        pass
-
                 if got == expect:
                     print(
                         f"::notice::Remote template matches checkout (mc-deploy-verify={expect}) "
-                        f"via SFTP path {remote!r}.",
+                        f"via SFTP path {remote!r} (live /v/ path).",
+                        flush=True,
+                    )
+                    return 0
+                print(
+                    "::error::Live theme path "
+                    f"{remote!r} has mc-deploy-verify={got!r}, expected {expect!r}. "
+                    "SFTP root /template_266.html may be updated but the store reads "
+                    "/v/template_266.html — fix deploy paths or SFTP_TEMPLATE_REMOTE.",
+                    file=sys.stderr,
+                )
+                return 1
+
+            print(
+                "::warning::No template at /v/... paths; falling back to SFTP root paths "
+                "(confirm FileZilla: live theme file may differ).",
+                flush=True,
+            )
+            for remote in _fallback_paths():
+                got = _download_marker(sftp, remote)
+                if got is None:
+                    print(f"::warning::SFTP get skip {remote!r}", flush=True)
+                    continue
+                if got == expect:
+                    print(
+                        f"::notice::Remote template matches checkout (mc-deploy-verify={expect}) "
+                        f"via SFTP path {remote!r} (fallback; /v/ path not found).",
                         flush=True,
                     )
                     return 0
@@ -125,7 +163,7 @@ def main() -> int:
 
     print(
         "::error::Could not confirm remote template: no SFTP path returned mc-deploy-verify "
-        f"matching {expect!r}. Upload may have failed or paths differ from volusion_sftp_deploy.py.",
+        f"matching {expect!r}. Upload may have failed or paths differ.",
         file=sys.stderr,
     )
     return 1

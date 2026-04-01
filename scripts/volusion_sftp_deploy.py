@@ -43,10 +43,10 @@ def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
         raw.append((secret_t, v_wwwroot_css))
     raw.extend(
         [
-            ("/template_266.html", c_remote),
-            ("/template_266.html", v_wwwroot_css),
             ("/v/template_266.html", c_remote),
             ("/v/template_266.html", v_wwwroot_css),
+            ("/template_266.html", c_remote),
+            ("/template_266.html", v_wwwroot_css),
             (domain_t, domain_c),
             (domain_t, domain_c_under_v),
             ("template_266.html", "vspfiles/css/custom-safe.css"),
@@ -72,9 +72,9 @@ def _try_pair(sftp, t_path: str, c_path: str) -> None:
 def _mirror_template_to_canonical_paths(sftp) -> None:
     """Extra template writes — logged so Action logs show whether Volusion paths are writable."""
     for rel in (
-        "/template_266.html",
         "/v/template_266.html",
         "/mccabestheaterandliving.com/v/template_266.html",
+        "/template_266.html",
     ):
         try:
             # confirm=False: Volusion SFTP sometimes fails post-put size check (e.g. 196608 vs real size) on long paths.
