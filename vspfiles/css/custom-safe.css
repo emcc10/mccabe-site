@@ -5176,11 +5176,8 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
   margin-right: auto;
   object-fit: contain;
   object-position: center center;
-  opacity: 0.94;
-  /* Taupe tone + clearer edges vs old brightness(0.5) */
-  filter: contrast(1.14) brightness(0.97) sepia(0.42) saturate(0.38) hue-rotate(8deg);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+  opacity: 0.5;
+  filter: brightness(0.5);
 }
 
 @media (max-width: 991px) {

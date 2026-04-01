@@ -17,15 +17,6 @@
   }
 }
 
-/* Hero logo: taupe tint, higher contrast (matches custom-safe hero scope) */
-body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
-#if_homepage #slideshow-container .mc-hero-overlay .hero-logo-img {
-  opacity: 0.94 !important;
-  filter: contrast(1.14) brightness(0.97) sepia(0.42) saturate(0.38) hue-rotate(8deg) !important;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-
 /* Hero headline — maximum specificity */
 html body #slideshow-container #mc-hero-copy-tagline,
 html body #mc-hero-copy-tagline {
