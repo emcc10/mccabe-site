@@ -55,7 +55,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260402" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260402c" rel="stylesheet">
 <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
 <script>
 (function () {
@@ -125,42 +125,34 @@ document.addEventListener("DOMContentLoaded", function () {
       font-size: 36px !important;
       line-height: 1.2 !important;
       font-weight: 400 !important;
-      letter-spacing: 0.02em !important;
-      color: #b8b7b7 !important;
+      letter-spacing: 0.12em !important;
+      color: #d8d6d3 !important;
       text-transform: none !important;
       text-align: center !important;
-      margin: 0.35em auto 0.2em !important;
+      margin: 0.35em auto 0.5em !important;
       padding: 0 !important;
       font-family: inherit !important;
     }
     #mc-hero-copy-subline {
-      display: block !important;
-      font-size: 15px !important;
-      line-height: 1.4 !important;
-      font-weight: 400 !important;
-      letter-spacing: 0.1em !important;
-      color: #ffffff !important;
-      text-transform: uppercase !important;
-      opacity: 0.95 !important;
-      text-align: center !important;
-      margin: 0 auto 14px !important;
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      margin: 0 !important;
       padding: 0 !important;
-      font-family: inherit !important;
+      overflow: hidden !important;
+      font-size: 0 !important;
+      line-height: 0 !important;
     }
     @media (max-width: 991px) {
       #mc-hero-copy-tagline {
         font-size: clamp(22px, 5.2vw, 36px) !important;
-      }
-      #mc-hero-copy-subline {
-        font-size: clamp(11px, 2.6vw, 15px) !important;
       }
     }
   </style>
   <script id="mc-hero-copy-head-force">
 (function () {
   var TAG = 'CUSTOM FURNITURE, DESIGNED FOR LIVING';
-  var SUB = 'Featuring Palliser Custom Seating';
-  function paint(el, isTag) {
+  function paintTagline(el) {
     if (!el) return;
     el.style.cssText = '';
     el.style.setProperty('display', 'block', 'important');
@@ -170,24 +162,14 @@ document.addEventListener("DOMContentLoaded", function () {
     el.style.setProperty('margin-left', 'auto', 'important');
     el.style.setProperty('margin-right', 'auto', 'important');
     el.style.setProperty('box-sizing', 'border-box', 'important');
-    if (isTag) {
-      el.style.setProperty('font-size', '36px', 'important');
-      el.style.setProperty('line-height', '1.2', 'important');
-      el.style.setProperty('font-weight', '400', 'important');
-      el.style.setProperty('letter-spacing', '0.02em', 'important');
-      el.style.setProperty('color', '#b8b7b7', 'important');
-      el.style.setProperty('text-transform', 'none', 'important');
-      el.style.setProperty('margin-top', '0.35em', 'important');
-      el.style.setProperty('margin-bottom', '0.2em', 'important');
-    } else {
-      el.style.setProperty('font-size', '15px', 'important');
-      el.style.setProperty('line-height', '1.4', 'important');
-      el.style.setProperty('letter-spacing', '0.1em', 'important');
-      el.style.setProperty('color', '#ffffff', 'important');
-      el.style.setProperty('text-transform', 'uppercase', 'important');
-      el.style.setProperty('opacity', '0.95', 'important');
-      el.style.setProperty('margin', '0 auto 14px', 'important');
-    }
+    el.style.setProperty('font-size', '36px', 'important');
+    el.style.setProperty('line-height', '1.2', 'important');
+    el.style.setProperty('font-weight', '400', 'important');
+    el.style.setProperty('letter-spacing', '0.12em', 'important');
+    el.style.setProperty('color', '#d8d6d3', 'important');
+    el.style.setProperty('text-transform', 'none', 'important');
+    el.style.setProperty('margin-top', '0.35em', 'important');
+    el.style.setProperty('margin-bottom', '0.5em', 'important');
   }
   function mcHeroEnsureCopy() {
     var sc = document.getElementById('slideshow-container');
@@ -197,29 +179,21 @@ document.addEventListener("DOMContentLoaded", function () {
     var wrap = ov.querySelector('.hero-logo-wrap');
     var t = sc.querySelector('#mc-hero-copy-tagline');
     var s = sc.querySelector('#mc-hero-copy-subline');
+    if (s && s.parentNode) s.parentNode.removeChild(s);
     if (!t) {
       t = document.createElement('div');
       t.id = 'mc-hero-copy-tagline';
       if (wrap) wrap.insertAdjacentElement('afterend', t);
       else ov.insertBefore(t, ov.firstChild);
     }
-    if (!s) {
-      s = document.createElement('div');
-      s.id = 'mc-hero-copy-subline';
-      t.insertAdjacentElement('afterend', s);
-    }
     if (t.textContent.replace(/\s+/g, ' ').trim().indexOf('CUSTOM FURNITURE') === -1) t.textContent = TAG;
-    if (s.textContent.replace(/\s+/g, ' ').trim().indexOf('Palliser') === -1) s.textContent = SUB;
-    paint(t, true);
-    paint(s, false);
+    paintTagline(t);
     ov.style.setProperty('z-index', '5', 'important');
     ov.style.setProperty('position', 'relative', 'important');
-    t.style.setProperty('-webkit-text-fill-color', '#b8b7b7', 'important');
-    s.style.setProperty('-webkit-text-fill-color', '#ffffff', 'important');
+    t.style.setProperty('-webkit-text-fill-color', '#d8d6d3', 'important');
     try {
       if (window.matchMedia && window.matchMedia('(max-width: 991px)').matches) {
         t.style.setProperty('font-size', 'clamp(22px, 5.2vw, 36px)', 'important');
-        s.style.setProperty('font-size', 'clamp(11px, 2.6vw, 15px)', 'important');
       }
     } catch (eM) {}
   }
@@ -382,8 +356,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <div class="hero-logo-wrap">
           <img src="/v/vspfiles/images/mccabe-logo.png" alt="McCabe's Theater & Living" class="hero-logo-img">
         </div>
-        <div id="mc-hero-copy-tagline" style="font-size:36px !important;color:#b8b7b7 !important;text-transform:none !important;text-align:center !important;display:block !important;">CUSTOM FURNITURE, DESIGNED FOR LIVING</div>
-        <div id="mc-hero-copy-subline" style="font-size:15px !important;color:#ffffff !important;text-transform:uppercase !important;text-align:center !important;display:block !important;letter-spacing:0.1em !important;">Featuring Palliser Custom Seating</div>
+        <div id="mc-hero-copy-tagline" style="font-size:36px !important;color:#d8d6d3 !important;letter-spacing:0.12em !important;text-transform:none !important;text-align:center !important;display:block !important;">CUSTOM FURNITURE, DESIGNED FOR LIVING</div>
       <script>
         (function () {
           if (typeof window.mcHeroEnsureCopy === 'function') window.mcHeroEnsureCopy();
@@ -410,25 +383,24 @@ document.addEventListener("DOMContentLoaded", function () {
     font-size: 36px !important;
     line-height: 1.2 !important;
     font-weight: 400 !important;
-    letter-spacing: 0.02em !important;
-    color: #b8b7b7 !important;
+    letter-spacing: 0.12em !important;
+    color: #d8d6d3 !important;
+    -webkit-text-fill-color: #d8d6d3 !important;
     text-transform: none !important;
     text-align: center !important;
-    margin: 0.35em auto 0.2em !important;
+    margin: 0.35em auto 0.5em !important;
   }
   #mc-hero-copy-subline,
   #if_homepage #slideshow-container #mc-hero-copy-subline,
   #slideshow-container #mc-hero-copy-subline {
-    display: block !important;
-    font-size: 15px !important;
-    line-height: 1.4 !important;
-    font-weight: 400 !important;
-    letter-spacing: 0.1em !important;
-    color: #ffffff !important;
-    text-transform: uppercase !important;
-    opacity: 0.95 !important;
-    text-align: center !important;
-    margin: 0 auto 14px !important;
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
   }
 </style>
 

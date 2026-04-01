@@ -120,19 +120,23 @@ body:not(.is-home) #slideshow-container {
   #slideshow-container #mc-hero-copy-tagline {
     font-size: clamp(22px, 5.2vw, 36px) !important;
     line-height: 1.2 !important;
-    color: #b8b7b7 !important;
+    letter-spacing: 0.12em !important;
+    color: #d8d6d3 !important;
+    -webkit-text-fill-color: #d8d6d3 !important;
     text-transform: none !important;
-    margin: 0.35em auto 0.2em !important;
+    margin: 0.35em auto 0.5em !important;
   }
 
   #mc-hero-copy-subline,
   #slideshow-container #mc-hero-copy-subline {
-    font-size: clamp(11px, 2.6vw, 15px) !important;
-    line-height: 1.4 !important;
-    letter-spacing: 0.1em !important;
-    color: #ffffff !important;
-    text-transform: uppercase !important;
-    margin: 0 auto 12px !important;
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
   }
 }
 

@@ -17,6 +17,15 @@
   }
 }
 
+/* Hero logo: taupe tint, higher contrast (matches custom-safe hero scope) */
+body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
+#if_homepage #slideshow-container .mc-hero-overlay .hero-logo-img {
+  opacity: 0.94 !important;
+  filter: contrast(1.14) brightness(0.97) sepia(0.42) saturate(0.38) hue-rotate(8deg) !important;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
 /* Hero headline — maximum specificity */
 html body #slideshow-container #mc-hero-copy-tagline,
 html body #mc-hero-copy-tagline {
@@ -28,12 +37,12 @@ html body #mc-hero-copy-tagline {
   font-size: 36px !important;
   line-height: 1.2 !important;
   font-weight: 400 !important;
-  letter-spacing: 0.02em !important;
-  color: #b8b7b7 !important;
-  -webkit-text-fill-color: #b8b7b7 !important;
+  letter-spacing: 0.12em !important;
+  color: #d8d6d3 !important;
+  -webkit-text-fill-color: #d8d6d3 !important;
   text-transform: none !important;
   text-align: center !important;
-  margin: 0.35em auto 0.2em !important;
+  margin: 0.35em auto 0.5em !important;
   width: 100% !important;
   max-width: min(96vw, 920px) !important;
   box-sizing: border-box !important;
@@ -41,33 +50,21 @@ html body #mc-hero-copy-tagline {
 
 html body #slideshow-container #mc-hero-copy-subline,
 html body #mc-hero-copy-subline {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 0.95 !important;
-  position: relative !important;
-  z-index: 6 !important;
-  font-size: 15px !important;
-  line-height: 1.4 !important;
-  font-weight: 400 !important;
-  letter-spacing: 0.1em !important;
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  text-transform: uppercase !important;
-  text-align: center !important;
-  margin: 0 auto 14px !important;
-  width: 100% !important;
-  max-width: min(96vw, 920px) !important;
-  box-sizing: border-box !important;
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  opacity: 0 !important;
 }
 
 @media (max-width: 991px) {
   html body #slideshow-container #mc-hero-copy-tagline,
   html body #mc-hero-copy-tagline {
     font-size: clamp(22px, 5.2vw, 36px) !important;
-  }
-  html body #slideshow-container #mc-hero-copy-subline,
-  html body #mc-hero-copy-subline {
-    font-size: clamp(11px, 2.6vw, 15px) !important;
   }
 }
 
