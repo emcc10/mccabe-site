@@ -36,20 +36,23 @@
   margin:0 0 12px;
 }
 
-.mc-hero-overlay p{
-  font-size:14px;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  margin:0 0 26px;
-}
-
-.mc-hero-overlay .mc-hero-tagline{
+.mc-hero-overlay p.mc-hero-line--tagline{
   font-size:36px !important;
   line-height:1.2 !important;
   letter-spacing:.02em !important;
   color:#b8b7b7 !important;
   text-transform:none !important;
-  margin:0 !important;
+  margin:0.35em auto 0.2em !important;
+}
+
+.mc-hero-overlay p.mc-hero-line--sub{
+  font-size:15px !important;
+  line-height:1.4 !important;
+  letter-spacing:.1em !important;
+  color:#fff !important;
+  text-transform:uppercase !important;
+  margin:0 auto 14px !important;
+  opacity:.95;
 }
 
 .mc-hero-btn{

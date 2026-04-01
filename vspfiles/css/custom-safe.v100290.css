@@ -116,10 +116,21 @@ body:not(.is-home) #slideshow-container {
     margin: 0 0 10px !important;
   }
 
-  #slideshow-container .mc-hero-overlay p {
-    font-size: clamp(13px, 3.4vw, 16px) !important;
-    line-height: 1.35 !important;
-    margin: 0 0 14px !important;
+  #slideshow-container .mc-hero-overlay .mc-hero-line--tagline {
+    font-size: clamp(22px, 5.2vw, 36px) !important;
+    line-height: 1.2 !important;
+    color: #b8b7b7 !important;
+    text-transform: none !important;
+    margin: 0.35em auto 0.2em !important;
+  }
+
+  #slideshow-container .mc-hero-overlay .mc-hero-line--sub {
+    font-size: clamp(11px, 2.6vw, 15px) !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0.1em !important;
+    color: #ffffff !important;
+    text-transform: uppercase !important;
+    margin: 0 auto 12px !important;
   }
 }
 

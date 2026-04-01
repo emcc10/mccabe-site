@@ -262,10 +262,8 @@ document.addEventListener("DOMContentLoaded", function () {
         <div class="hero-logo-wrap">
           <img src="/v/vspfiles/images/mccabe-logo.png" alt="McCabe's Theater & Living" class="hero-logo-img">
         </div>
-        <p>
-          <span class="mc-hero-tagline" style="font-size:36px;color:#b8b7b7;">CUSTOM FURNITURE, DESIGNED FOR LIVING</span><br>
-          Featuring Palliser Custom Seating
-        </p>
+        <p class="mc-hero-line mc-hero-line--tagline" style="margin:0.35em auto 0.2em;font-size:36px;line-height:1.2;font-weight:400;letter-spacing:0.02em;color:#b8b7b7;text-transform:none;">CUSTOM FURNITURE, DESIGNED FOR LIVING</p>
+        <p class="mc-hero-line mc-hero-line--sub" style="margin:0 auto 14px;font-size:15px;line-height:1.4;font-weight:400;letter-spacing:0.1em;color:#ffffff;text-transform:uppercase;opacity:0.95;">Featuring Palliser Custom Seating</p>
       </div>
     </section>
 
@@ -279,9 +277,10 @@ document.addEventListener("DOMContentLoaded", function () {
     transition: opacity .25s ease;
   }
 
-  /* Hero tagline: wins over .mc-hero-overlay p / load-order from custom-safe-hero.css */
-  #if_homepage #slideshow-container .mc-hero-overlay .mc-hero-tagline,
-  body.is-home #slideshow-container .mc-hero-overlay .mc-hero-tagline {
+  /* Hero lines: beat .mc-hero-overlay p (hero.css) + mobile p { clamp } in custom-safe.css */
+  #if_homepage #slideshow-container .mc-hero-overlay .mc-hero-line--tagline,
+  body.is-home #slideshow-container .mc-hero-overlay .mc-hero-line--tagline,
+  #slideshow-container .mc-hero-overlay .mc-hero-line--tagline {
     display: block !important;
     font-size: 36px !important;
     line-height: 1.2 !important;
@@ -289,6 +288,21 @@ document.addEventListener("DOMContentLoaded", function () {
     letter-spacing: 0.02em !important;
     color: #b8b7b7 !important;
     text-transform: none !important;
+    margin-top: 0.35em !important;
+    margin-bottom: 0.2em !important;
+  }
+  #if_homepage #slideshow-container .mc-hero-overlay .mc-hero-line--sub,
+  body.is-home #slideshow-container .mc-hero-overlay .mc-hero-line--sub,
+  #slideshow-container .mc-hero-overlay .mc-hero-line--sub {
+    display: block !important;
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.1em !important;
+    color: #ffffff !important;
+    text-transform: uppercase !important;
+    opacity: 0.95 !important;
+    margin: 0 auto 14px !important;
   }
 </style>
 
