@@ -271,7 +271,7 @@ body:not(.is-home) #display_menu_1 .vnav__label {
 
 /* ======================================
    PRODUCT GRID: FIX IMAGE BOX HEIGHT
-   (scoped off category pages — those use fixed tiles + object-fit: cover)
+   (scoped off category pages — category PLP uses fixed tiles + object-fit: contain)
 ====================================== */
 html:not(.category) body:not(.category) .v-product-grid .v-product__img {
   display: block;
@@ -349,11 +349,10 @@ html:not(.category) body:not(.is-home) #content_area_home .v-product__img img {
   object-position: top center !important;
 }
 
-/* Category grids: center-crop thumbs (overrides rule above on listing pages) */
-:is(html.category, body.category) #content_area .v-product__img img,
+/* Category grids: letterboxed thumbs (same fit for every card; neutral tile behind image) */
 :is(html.category, body.category) #content_area .v-product-grid .v-product__img img,
 :is(html.category, body.category) #content_area ul.v-product-grid .v-product__img img {
-  object-fit: cover !important;
+  object-fit: contain !important;
   object-position: center center !important;
   width: 100% !important;
   height: 100% !important;
@@ -5338,6 +5337,12 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   height: 100%;
 }
 
+/* Flex default order is 0 — lower than our image (1), so sale/member nodes sat above the image. */
+:is(html.category, body.category) .v-product-grid .v-product > *,
+:is(html.category, body.category) ul.v-product-grid > li.v-product > * {
+  order: 5;
+}
+
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
 :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
 :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
@@ -5354,11 +5359,14 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   min-height: 280px;
   max-height: 280px;
   overflow: hidden;
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   position: relative;
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box;
+  background: #ececec !important;
 }
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img a,
@@ -5369,7 +5377,9 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img a,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__image a,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image a {
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   width: 100% !important;
   height: 100% !important;
   margin: 0 !important;
@@ -5387,7 +5397,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   height: 100% !important;
   max-width: none !important;
   max-height: none !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
   object-position: center center !important;
   display: block !important;
   margin: 0 !important;
@@ -5490,13 +5500,18 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
   :is(html.category, body.category) .v-product-grid .v-product .product_image,
   :is(html.category, body.category) .v-product-grid .v-product .vcss_img,
-  :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img {
+  :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img,
+  :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image {
     height: 220px !important;
     min-height: 220px !important;
     max-height: 220px !important;
     overflow: hidden !important;
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #ececec !important;
   }
 
   :is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
@@ -5504,11 +5519,12 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,
   :is(html.category, body.category) .v-product-grid .v-product .product_image img,
   :is(html.category, body.category) .v-product-grid .v-product .vcss_img img,
-  :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img {
+  :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img,
+  :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image img {
     width: 100% !important;
     height: 100% !important;
     max-height: none !important;
-    object-fit: cover !important;
+    object-fit: contain !important;
     object-position: center center !important;
   }
 
@@ -6035,13 +6051,14 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   text-align: center !important;
 }
 
-/* Category listing: uniform image tile + cover (late in file; wins over older blocks) */
+/* Category listing: uniform image tile + contain (late in file; wins over older blocks) */
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
 :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
 :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
 :is(html.category, body.category) .v-product-grid .v-product .product_image,
 :is(html.category, body.category) .v-product-grid .v-product .vcss_img,
-:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img {
+:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product .product_image {
   height: 280px !important;
   min-height: 280px !important;
   max-height: 280px !important;
@@ -6049,8 +6066,12 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   overflow: hidden !important;
   margin: 0 !important;
   padding: 0 !important;
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   position: relative !important;
+  background: #ececec !important;
+  box-sizing: border-box !important;
 }
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img a,
@@ -6061,7 +6082,9 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img a,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__image a,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image a {
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   width: 100% !important;
   height: 100% !important;
   margin: 0 !important;
@@ -6079,7 +6102,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img {
   height: 100% !important;
   max-width: none !important;
   max-height: none !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
   object-position: center center !important;
   display: block !important;
   margin: 0 !important;
@@ -6238,12 +6261,28 @@ html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
   text-align: center !important;
 }
 
+/* Sale / list price nodes default to flex order 0 — push behind image (order 1) on category cards */
+:is(html.category, body.category) #content_area .v-product-grid > div.v-product > *,
+:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product > *,
+:is(html.category, body.category) #content_area ul.v-product-grid > li > *,
+html.vol-list.category #content_area ul.v-product-grid > li > * {
+  order: 5;
+}
+
+body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product > *,
+body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product > * {
+  order: 5;
+}
+
 /* --- Image link: fixed height, centered, same size every card --- */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product .v-product__img,
 :is(html.category, body.category) #content_area .v-product-grid > .v-product .v-product__img,
 :is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__img {
-  display: block !important;
+  order: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   width: 100% !important;
   max-width: none !important;
   height: 280px !important;
@@ -6252,6 +6291,8 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   margin: 0 auto 10px !important;
   overflow: hidden !important;
   text-align: center !important;
+  background: #ececec !important;
+  box-sizing: border-box !important;
 }
 
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product .v-product__img img,
@@ -6263,7 +6304,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   max-width: none !important;
   height: 100% !important;
   max-height: none !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
   object-position: center center !important;
   margin: 0 !important;
 }
@@ -6346,7 +6387,7 @@ html.vol-list.category #content_area .v-product-grid > .v-product {
   height: 100%;
 }
 
-/* Image tile — same fixed height home + category */
+/* Image tile — same fixed height home + category (category: letterbox; home: crop) */
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__img,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__image,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__image-wrap,
@@ -6356,7 +6397,23 @@ body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li .v-p
 body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li .v-product__image,
 body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li .product_image,
 body.is-home:not(.productdetails) #content_area .v-product-grid .v-product__img,
-body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-product__img,
+body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-product__img {
+  order: 1 !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  height: 280px !important;
+  min-height: 280px !important;
+  max-height: 280px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
 :is(html.category, body.category) #content_area .v-product-grid .v-product__img,
 :is(html.category, body.category) #content_area .v-product-grid .v-product__image,
 :is(html.category, body.category) #content_area .v-product-grid .v-product__image-wrap,
@@ -6373,20 +6430,34 @@ html.vol-list.category #content_area ul.v-product-grid > li .v-product__img {
   min-height: 280px !important;
   max-height: 280px !important;
   overflow: hidden !important;
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   position: relative !important;
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box !important;
+  background: #ececec !important;
 }
 
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__img a,
 body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li .v-product__img a,
 body.is-home:not(.productdetails) #content_area .v-product-grid .v-product__img a,
-body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-product__img a,
+body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-product__img a {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 :is(html.category, body.category) #content_area .v-product-grid .v-product__img a,
 :is(html.category, body.category) #content_area ul.v-product-grid > li .v-product__img a {
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   width: 100% !important;
   height: 100% !important;
   margin: 0 !important;
@@ -6396,14 +6467,24 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-produc
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__img img,
 body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li .v-product__img img,
 body.is-home:not(.productdetails) #content_area .v-product-grid .v-product__img img,
-body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-product__img img,
+body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-product__img img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+  margin: 0 !important;
+}
+
 :is(html.category, body.category) #content_area .v-product-grid .v-product__img img,
 :is(html.category, body.category) #content_area ul.v-product-grid > li .v-product__img img {
   width: 100% !important;
   height: 100% !important;
   max-width: none !important;
   max-height: none !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
   object-position: center center !important;
   display: block !important;
   margin: 0 !important;
