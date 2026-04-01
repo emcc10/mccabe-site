@@ -36,16 +36,17 @@
   margin:0 0 12px;
 }
 
-.mc-hero-overlay p.mc-hero-line--tagline{
+#mc-hero-copy-tagline{
   font-size:36px !important;
   line-height:1.2 !important;
   letter-spacing:.02em !important;
   color:#b8b7b7 !important;
   text-transform:none !important;
   margin:0.35em auto 0.2em !important;
+  text-align:center !important;
 }
 
-.mc-hero-overlay p.mc-hero-line--sub{
+#mc-hero-copy-subline{
   font-size:15px !important;
   line-height:1.4 !important;
   letter-spacing:.1em !important;
@@ -53,6 +54,7 @@
   text-transform:uppercase !important;
   margin:0 auto 14px !important;
   opacity:.95;
+  text-align:center !important;
 }
 
 .mc-hero-btn{

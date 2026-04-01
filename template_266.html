@@ -117,6 +117,44 @@ document.addEventListener("DOMContentLoaded", function () {
     max-width: 52px !important;
   }
   </style>
+  <!-- Hero headline: IDs + head CSS + sync script — Volusion often strips p/class/style; this must win -->
+  <style id="mc-hero-copy-critical">
+    #mc-hero-copy-tagline {
+      display: block !important;
+      font-size: 36px !important;
+      line-height: 1.2 !important;
+      font-weight: 400 !important;
+      letter-spacing: 0.02em !important;
+      color: #b8b7b7 !important;
+      text-transform: none !important;
+      text-align: center !important;
+      margin: 0.35em auto 0.2em !important;
+      padding: 0 !important;
+      font-family: inherit !important;
+    }
+    #mc-hero-copy-subline {
+      display: block !important;
+      font-size: 15px !important;
+      line-height: 1.4 !important;
+      font-weight: 400 !important;
+      letter-spacing: 0.1em !important;
+      color: #ffffff !important;
+      text-transform: uppercase !important;
+      opacity: 0.95 !important;
+      text-align: center !important;
+      margin: 0 auto 14px !important;
+      padding: 0 !important;
+      font-family: inherit !important;
+    }
+    @media (max-width: 991px) {
+      #mc-hero-copy-tagline {
+        font-size: clamp(22px, 5.2vw, 36px) !important;
+      }
+      #mc-hero-copy-subline {
+        font-size: clamp(11px, 2.6vw, 15px) !important;
+      }
+    }
+  </style>
   <!-- Category grid: in-template fallback so layout works even if /v/vspfiles/css/custom-safe.css is stale or blocked -->
   <style id="mc-category-grid-critical">
   @media (min-width: 992px) {
@@ -262,9 +300,57 @@ document.addEventListener("DOMContentLoaded", function () {
         <div class="hero-logo-wrap">
           <img src="/v/vspfiles/images/mccabe-logo.png" alt="McCabe's Theater & Living" class="hero-logo-img">
         </div>
-        <p class="mc-hero-line mc-hero-line--tagline" style="margin:0.35em auto 0.2em;font-size:36px;line-height:1.2;font-weight:400;letter-spacing:0.02em;color:#b8b7b7;text-transform:none;">CUSTOM FURNITURE, DESIGNED FOR LIVING</p>
-        <p class="mc-hero-line mc-hero-line--sub" style="margin:0 auto 14px;font-size:15px;line-height:1.4;font-weight:400;letter-spacing:0.1em;color:#ffffff;text-transform:uppercase;opacity:0.95;">Featuring Palliser Custom Seating</p>
-      </div>
+        <div id="mc-hero-copy-tagline">CUSTOM FURNITURE, DESIGNED FOR LIVING</div>
+        <div id="mc-hero-copy-subline">Featuring Palliser Custom Seating</div>
+      <script>
+        (function () {
+          function mcLockHeroCopy() {
+            var t = document.getElementById('mc-hero-copy-tagline');
+            var s = document.getElementById('mc-hero-copy-subline');
+            if (t) {
+              t.style.setProperty('display', 'block', 'important');
+              t.style.setProperty('font-size', '36px', 'important');
+              t.style.setProperty('line-height', '1.2', 'important');
+              t.style.setProperty('font-weight', '400', 'important');
+              t.style.setProperty('letter-spacing', '0.02em', 'important');
+              t.style.setProperty('color', '#b8b7b7', 'important');
+              t.style.setProperty('text-transform', 'none', 'important');
+              t.style.setProperty('text-align', 'center', 'important');
+              t.style.setProperty('margin', '0.35em auto 0.2em', 'important');
+            }
+            if (s) {
+              s.style.setProperty('display', 'block', 'important');
+              s.style.setProperty('font-size', '15px', 'important');
+              s.style.setProperty('line-height', '1.4', 'important');
+              s.style.setProperty('letter-spacing', '0.1em', 'important');
+              s.style.setProperty('color', '#ffffff', 'important');
+              s.style.setProperty('text-transform', 'uppercase', 'important');
+              s.style.setProperty('opacity', '0.95', 'important');
+              s.style.setProperty('text-align', 'center', 'important');
+              s.style.setProperty('margin', '0 auto 14px', 'important');
+            }
+          }
+          mcLockHeroCopy();
+          document.addEventListener('DOMContentLoaded', mcLockHeroCopy);
+          window.addEventListener('load', mcLockHeroCopy);
+          setTimeout(mcLockHeroCopy, 50);
+          setTimeout(mcLockHeroCopy, 300);
+          setTimeout(mcLockHeroCopy, 1000);
+          requestAnimationFrame(function () {
+            requestAnimationFrame(mcLockHeroCopy);
+          });
+          try {
+            var ov = document.querySelector('.mc-hero-overlay');
+            if (ov && typeof MutationObserver !== 'undefined') {
+              var mo = new MutationObserver(function () {
+                mcLockHeroCopy();
+              });
+              mo.observe(ov, { childList: true, subtree: true, characterData: true });
+            }
+          } catch (eMo) {}
+        })();
+      </script>
+    </div>
     </section>
 
 <style>
@@ -277,10 +363,10 @@ document.addEventListener("DOMContentLoaded", function () {
     transition: opacity .25s ease;
   }
 
-  /* Hero lines: beat .mc-hero-overlay p (hero.css) + mobile p { clamp } in custom-safe.css */
-  #if_homepage #slideshow-container .mc-hero-overlay .mc-hero-line--tagline,
-  body.is-home #slideshow-container .mc-hero-overlay .mc-hero-line--tagline,
-  #slideshow-container .mc-hero-overlay .mc-hero-line--tagline {
+  /* Backup for hero copy (primary: #mc-hero-copy-* in head + JS setProperty) */
+  #mc-hero-copy-tagline,
+  #if_homepage #slideshow-container #mc-hero-copy-tagline,
+  #slideshow-container #mc-hero-copy-tagline {
     display: block !important;
     font-size: 36px !important;
     line-height: 1.2 !important;
@@ -288,12 +374,12 @@ document.addEventListener("DOMContentLoaded", function () {
     letter-spacing: 0.02em !important;
     color: #b8b7b7 !important;
     text-transform: none !important;
-    margin-top: 0.35em !important;
-    margin-bottom: 0.2em !important;
+    text-align: center !important;
+    margin: 0.35em auto 0.2em !important;
   }
-  #if_homepage #slideshow-container .mc-hero-overlay .mc-hero-line--sub,
-  body.is-home #slideshow-container .mc-hero-overlay .mc-hero-line--sub,
-  #slideshow-container .mc-hero-overlay .mc-hero-line--sub {
+  #mc-hero-copy-subline,
+  #if_homepage #slideshow-container #mc-hero-copy-subline,
+  #slideshow-container #mc-hero-copy-subline {
     display: block !important;
     font-size: 15px !important;
     line-height: 1.4 !important;
@@ -302,6 +388,7 @@ document.addEventListener("DOMContentLoaded", function () {
     color: #ffffff !important;
     text-transform: uppercase !important;
     opacity: 0.95 !important;
+    text-align: center !important;
     margin: 0 auto 14px !important;
   }
 </style>
@@ -705,7 +792,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     </a>
                     <span class="copyright__line" data-v-edit-region="Built With">
                       All Rights Reserved.
-                      <span id="if_homepage"><a href="http://www.volusion.com" target="_blank" rel="nofollow">Ecommerce Software by Volusion</a></span>
+                      <span class="mc-vol-powered"><a href="http://www.volusion.com" target="_blank" rel="nofollow">Ecommerce Software by Volusion</a></span>
                       <span id="if_not_homepage">Ecommerce Software by Volusion</span>
                     </span>
                   </section>
