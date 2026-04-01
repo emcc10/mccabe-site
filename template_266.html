@@ -9062,6 +9062,7 @@ try {
     }
 
     var titleSec = topSection(title);
+    if (!titleSec && imgCell) titleSec = topSection(imgCell);
     if (!titleSec) return;
 
     function moveAfterTitleBlock(node) {
