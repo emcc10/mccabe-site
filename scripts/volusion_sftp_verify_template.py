@@ -14,12 +14,16 @@ import sys
 import tempfile
 
 
-def _expect_from_local(ws: str) -> str:
-    path = os.path.join(ws, "template_266.html")
-    with open(path, encoding="utf-8", errors="replace") as f:
-        raw = f.read()
-    m = re.search(r'name="mc-deploy-verify"\s+content="([^"]+)"', raw)
-    return m.group(1) if m else ""
+def _extract_verify_marker(raw: str) -> str:
+    """Match meta tag regardless of attribute order or quote style."""
+    for pat in (
+        r'name=["\']mc-deploy-verify["\']\s+content=["\']([^"\']+)["\']',
+        r'content=["\']([^"\']+)["\'][^>]*name=["\']mc-deploy-verify["\']',
+    ):
+        m = re.search(pat, raw, flags=re.IGNORECASE)
+        if m:
+            return m.group(1).strip()
+    return ""
 
 
 def _template_paths_to_try() -> list[str]:
@@ -42,6 +46,13 @@ def _template_paths_to_try() -> list[str]:
             seen.add(p)
             out.append(p)
     return out
+
+
+def _expect_from_local(ws: str) -> str:
+    path = os.path.join(ws, "template_266.html")
+    with open(path, encoding="utf-8", errors="replace") as f:
+        raw = f.read()
+    return _extract_verify_marker(raw)
 
 
 def main() -> int:
@@ -93,11 +104,7 @@ def main() -> int:
                     continue
                 try:
                     with open(local, encoding="utf-8", errors="replace") as f:
-                        got_m = re.search(
-                            r'name="mc-deploy-verify"\s+content="([^"]+)"',
-                            f.read(),
-                        )
-                    got = got_m.group(1) if got_m else ""
+                        got = _extract_verify_marker(f.read())
                 finally:
                     try:
                         os.unlink(local)
