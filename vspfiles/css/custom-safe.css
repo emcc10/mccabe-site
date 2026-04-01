@@ -5339,6 +5339,8 @@ body.is-home:not(.productdetails) #content_area_home .v-product-grid .mc-member-
 body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-price,
 :is(html.category, body.category) #content_area .v-product-grid .mc-member-grid-price,
 :is(html.category, body.category) #content_area ul.v-product-grid .mc-member-grid-price {
+  display: flex !important;
+  flex-direction: column !important;
   width: 100% !important;
   text-align: center !important;
   align-items: center !important;
