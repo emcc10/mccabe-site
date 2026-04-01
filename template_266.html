@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
   body a.mc-home-float, body .mc-home-float { margin-right: 0 !important; }
   body a.mc-cart-float, body .mc-cart-float {
     margin-left: 0 !important;
-    left: calc(100vw - 52px - max(10px, env(safe-area-inset-right))) !important;
+    left: calc(100vw - 52px - max(4px, env(safe-area-inset-right))) !important;
     right: auto !important;
     width: 52px !important;
     max-width: 52px !important;
@@ -395,6 +395,9 @@ document.addEventListener("DOMContentLoaded", function () {
 </nav>
       </div>
 
+    <!-- Search mounts here on homepage (JS): overlay on video, directly under hero menu -->
+    <div class="mc-hero-search-overlay" id="mcHeroSearchOverlay" aria-label="Site search"></div>
+
     <!-- HERO VIDEO -->
 <section class="mc-hero-video">
   <video class="mc-hero-video-el is-preloading" autoplay muted playsinline preload="auto" disablePictureInPicture disableRemotePlayback controlsList="nofullscreen nodownload noremoteplayback">
@@ -605,6 +608,29 @@ document.addEventListener("DOMContentLoaded", function () {
         </header>
 <script>
 (function () {
+  function mcMountSearchLayout() {
+    var mid = document.querySelector('header.header .header__section--middle');
+    if (!mid || mid.getAttribute('data-mc-search-mount')) return;
+    var overlay = document.getElementById('mcHeroSearchOverlay');
+    var menuRow = document.querySelector('header.header .hidden-xs.col-xs-12.no-pad-lg');
+    var toggleWrap = document.querySelector('header.header .search__wrapper');
+    var toggleCol = toggleWrap ? toggleWrap.closest('.microblock-group') : null;
+
+    if (document.body.classList.contains('is-home') && overlay) {
+      var inner = document.createElement('div');
+      inner.className = 'mc-hero-search-inner';
+      if (toggleCol) inner.appendChild(toggleCol);
+      inner.appendChild(mid);
+      overlay.appendChild(inner);
+      mid.setAttribute('data-mc-search-mount', 'hero');
+      if (toggleCol) toggleCol.setAttribute('data-mc-search-mount', 'hero');
+      overlay.classList.add('mc-hero-search-overlay--mounted');
+    } else if (menuRow && menuRow.parentNode) {
+      menuRow.parentNode.insertBefore(mid, menuRow.nextSibling);
+      mid.setAttribute('data-mc-search-mount', 'below-nav');
+    }
+  }
+
   function bindSearchToggle() {
     var toggle = document.getElementById('toggle1');
     if (!toggle || toggle.getAttribute('data-mc-search-bound') === '1') return;
@@ -635,8 +661,13 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindSearchToggle);
-  else bindSearchToggle();
+
+  function boot() {
+    mcMountSearchLayout();
+    bindSearchToggle();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
 </script>
 
@@ -3829,8 +3860,8 @@ window.initRoomPlanner = function (opts) {
    =============================== */
 
 #slideshow-container .hero-menu {
-  padding-left: max(80px, 10vw);
-  padding-right: max(80px, 10vw);
+  padding-left: max(40px, 5vw);
+  padding-right: max(40px, 5vw);
   gap: clamp(14px, 2.5vw, 22px);
   box-sizing: border-box;
   max-width: 100%;

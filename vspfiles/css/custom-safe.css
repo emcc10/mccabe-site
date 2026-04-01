@@ -43,9 +43,10 @@ body {
 }
 
 /* ======================================
-   HEADER SEARCH — underline default, hover darkens, focus/open “pops out”
+   HEADER + HERO SEARCH — underline, hover, pop-out (strip may live in header or #mcHeroSearchOverlay)
 ====================================== */
-header.header .header__section--middle {
+header.header .header__section--middle,
+#mcHeroSearchOverlay .header__section--middle {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -58,7 +59,9 @@ header.header .header__section--middle {
 }
 
 header.header .collapsing-search,
-header.header #collapsingSearch {
+header.header #collapsingSearch,
+#mcHeroSearchOverlay .collapsing-search,
+#mcHeroSearchOverlay #collapsingSearch {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -83,14 +86,18 @@ header.header #collapsingSearch {
     padding 0.22s ease !important;
 }
 
-header.header .collapsing-search:hover {
+header.header .collapsing-search:hover,
+#mcHeroSearchOverlay .collapsing-search:hover {
   border-bottom-color: rgba(0, 0, 0, 0.55) !important;
 }
 
 /* Expanded: typed focus, or magnifier toggle opened */
 header.header .collapsing-search:focus-within,
 html.mc-search-open header.header .collapsing-search,
-body.mc-search-open header.header .collapsing-search {
+body.mc-search-open header.header .collapsing-search,
+#mcHeroSearchOverlay .collapsing-search:focus-within,
+html.mc-search-open #mcHeroSearchOverlay .collapsing-search,
+body.mc-search-open #mcHeroSearchOverlay .collapsing-search {
   background: #ffffff !important;
   border-bottom-color: #1a1a1a !important;
   border-bottom-width: 2px !important;
@@ -101,11 +108,14 @@ body.mc-search-open header.header .collapsing-search {
 }
 
 html.mc-search-open header.header,
-body.mc-search-open header.header {
+body.mc-search-open header.header,
+html.mc-search-open #mcHeroSearchOverlay,
+body.mc-search-open #mcHeroSearchOverlay {
   overflow: visible !important;
 }
 
-header.header .collapsing-search__form .container {
+header.header .collapsing-search__form .container,
+#mcHeroSearchOverlay .collapsing-search__form .container {
   width: 100% !important;
   max-width: min(280px, 92vw) !important;
   margin: 0 auto !important;
@@ -115,11 +125,15 @@ header.header .collapsing-search__form .container {
 
 header.header .collapsing-search:focus-within .collapsing-search__form .container,
 html.mc-search-open header.header .collapsing-search__form .container,
-body.mc-search-open header.header .collapsing-search__form .container {
+body.mc-search-open header.header .collapsing-search__form .container,
+#mcHeroSearchOverlay .collapsing-search:focus-within .collapsing-search__form .container,
+html.mc-search-open #mcHeroSearchOverlay .collapsing-search__form .container,
+body.mc-search-open #mcHeroSearchOverlay .collapsing-search__form .container {
   max-width: min(640px, 100%) !important;
 }
 
-header.header .collapsing-search__form .row {
+header.header .collapsing-search__form .row,
+#mcHeroSearchOverlay .collapsing-search__form .row {
   display: flex !important;
   flex-wrap: nowrap !important;
   align-items: center !important;
@@ -128,7 +142,9 @@ header.header .collapsing-search__form .row {
 }
 
 header.header .collapsing-search__input,
-header.header #search {
+header.header #search,
+#mcHeroSearchOverlay .collapsing-search__input,
+#mcHeroSearchOverlay #search {
   flex: 1 1 auto !important;
   min-width: 0 !important;
   width: auto !important;
@@ -151,11 +167,14 @@ header.header #search {
 }
 
 header.header .collapsing-search:hover .collapsing-search__input,
-header.header .collapsing-search:hover #search {
+header.header .collapsing-search:hover #search,
+#mcHeroSearchOverlay .collapsing-search:hover .collapsing-search__input,
+#mcHeroSearchOverlay .collapsing-search:hover #search {
   color: #000000 !important;
 }
 
-header.header .collapsing-search .collapsing-search__submit {
+header.header .collapsing-search .collapsing-search__submit,
+#mcHeroSearchOverlay .collapsing-search .collapsing-search__submit {
   flex: 0 0 0 !important;
   width: 0 !important;
   min-width: 0 !important;
@@ -180,7 +199,10 @@ header.header .collapsing-search .collapsing-search__submit {
 
 header.header .collapsing-search:focus-within .collapsing-search__submit,
 html.mc-search-open header.header .collapsing-search .collapsing-search__submit,
-body.mc-search-open header.header .collapsing-search .collapsing-search__submit {
+body.mc-search-open header.header .collapsing-search .collapsing-search__submit,
+#mcHeroSearchOverlay .collapsing-search:focus-within .collapsing-search__submit,
+html.mc-search-open #mcHeroSearchOverlay .collapsing-search .collapsing-search__submit,
+body.mc-search-open #mcHeroSearchOverlay .collapsing-search .collapsing-search__submit {
   flex: 0 0 40px !important;
   width: 40px !important;
   min-width: 40px !important;
@@ -195,19 +217,26 @@ body.mc-search-open header.header .collapsing-search .collapsing-search__submit 
 
 header.header .collapsing-search:focus-within .collapsing-search__submit:hover,
 html.mc-search-open header.header .collapsing-search .collapsing-search__submit:hover,
-body.mc-search-open header.header .collapsing-search .collapsing-search__submit:hover {
+body.mc-search-open header.header .collapsing-search .collapsing-search__submit:hover,
+#mcHeroSearchOverlay .collapsing-search:focus-within .collapsing-search__submit:hover,
+html.mc-search-open #mcHeroSearchOverlay .collapsing-search .collapsing-search__submit:hover,
+body.mc-search-open #mcHeroSearchOverlay .collapsing-search .collapsing-search__submit:hover {
   color: #000000 !important;
 }
 
 header.header .collapsing-search__submit svg,
-header.header .collapsing-search__icon {
+header.header .collapsing-search__icon,
+#mcHeroSearchOverlay .collapsing-search__submit svg,
+#mcHeroSearchOverlay .collapsing-search__icon {
   width: 20px !important;
   height: 20px !important;
   fill: currentColor !important;
 }
 
 header.header .search__wrapper,
-header.header .search__wrapper.microblock {
+header.header .search__wrapper.microblock,
+#mcHeroSearchOverlay .search__wrapper,
+#mcHeroSearchOverlay .search__wrapper.microblock {
   display: flex !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -217,7 +246,9 @@ header.header .search__wrapper.microblock {
 
 /* Magnifier: no box, hover darkens */
 header.header #toggle1.search__toggle,
-header.header #toggle1 {
+header.header #toggle1,
+#mcHeroSearchOverlay #toggle1.search__toggle,
+#mcHeroSearchOverlay #toggle1 {
   display: flex !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -235,7 +266,8 @@ header.header #toggle1 {
   transition: opacity 0.2s ease !important;
 }
 
-header.header #toggle1 .toggle__icon {
+header.header #toggle1 .toggle__icon,
+#mcHeroSearchOverlay #toggle1 .toggle__icon {
   width: 20px !important;
   height: 20px !important;
   display: block !important;
@@ -244,37 +276,68 @@ header.header #toggle1 .toggle__icon {
 }
 
 header.header #toggle1:hover .toggle__icon,
-header.header #toggle1:focus-visible .toggle__icon {
+header.header #toggle1:focus-visible .toggle__icon,
+#mcHeroSearchOverlay #toggle1:hover .toggle__icon,
+#mcHeroSearchOverlay #toggle1:focus-visible .toggle__icon {
   opacity: 0.95 !important;
 }
 
-header.header #toggle1 .toggle__icon--open {
+header.header #toggle1 .toggle__icon--open,
+#mcHeroSearchOverlay #toggle1 .toggle__icon--open {
   display: none !important;
 }
 
-header.header #toggle1 .toggle__icon--closed {
+header.header #toggle1 .toggle__icon--closed,
+#mcHeroSearchOverlay #toggle1 .toggle__icon--closed {
   display: block !important;
 }
 
 html.mc-search-open header.header #toggle1 .toggle__icon--closed,
-body.mc-search-open header.header #toggle1 .toggle__icon--closed {
+body.mc-search-open header.header #toggle1 .toggle__icon--closed,
+html.mc-search-open #mcHeroSearchOverlay #toggle1 .toggle__icon--closed,
+body.mc-search-open #mcHeroSearchOverlay #toggle1 .toggle__icon--closed {
   display: none !important;
 }
 
 html.mc-search-open header.header #toggle1 .toggle__icon--open,
-body.mc-search-open header.header #toggle1 .toggle__icon--open {
+body.mc-search-open header.header #toggle1 .toggle__icon--open,
+html.mc-search-open #mcHeroSearchOverlay #toggle1 .toggle__icon--open,
+body.mc-search-open #mcHeroSearchOverlay #toggle1 .toggle__icon--open {
   display: block !important;
   opacity: 0.85 !important;
 }
 
-@media (min-width: 992px) {
-  body.is-home header.header {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 2147483000 !important;
-    background: #fff !important;
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06) !important;
-  }
+/* Hero overlay on video: light underline + type until expanded (overrides dark header colors above) */
+html:not(.mc-search-open) #mcHeroSearchOverlay .collapsing-search:not(:focus-within) {
+  border-bottom-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+html:not(.mc-search-open) #mcHeroSearchOverlay .collapsing-search:not(:focus-within):hover {
+  border-bottom-color: rgba(255, 255, 255, 0.82) !important;
+}
+
+html:not(.mc-search-open) #mcHeroSearchOverlay .collapsing-search:not(:focus-within) .collapsing-search__input,
+html:not(.mc-search-open) #mcHeroSearchOverlay .collapsing-search:not(:focus-within) #search {
+  color: rgba(255, 255, 255, 0.94) !important;
+}
+
+html:not(.mc-search-open) #mcHeroSearchOverlay .collapsing-search:not(:focus-within):hover .collapsing-search__input,
+html:not(.mc-search-open) #mcHeroSearchOverlay .collapsing-search:not(:focus-within):hover #search {
+  color: #ffffff !important;
+}
+
+#mcHeroSearchOverlay #search::placeholder {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+html.mc-search-open #mcHeroSearchOverlay #search::placeholder,
+#mcHeroSearchOverlay .collapsing-search:focus-within #search::placeholder {
+  color: rgba(0, 0, 0, 0.38) !important;
+}
+
+#mcHeroSearchOverlay #toggle1 .toggle__icon {
+  opacity: 0.62 !important;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45)) !important;
 }
 
 /* ======================================
@@ -291,6 +354,7 @@ body.is-home #if_homepage {
   box-sizing: border-box !important;
 }
 body.is-home #slideshow-container {
+  position: relative !important;
   width: 100vw !important;
   max-width: 100vw !important;
   margin-left: calc(-50vw + 50%) !important;
@@ -376,7 +440,7 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   align-items: center;
   justify-content: center;
   gap: clamp(14px, 2.5vw, 22px);
-  padding: clamp(8px, 1.5vw, 12px) max(56px, 7.5vw) clamp(8px, 1.5vw, 12px) max(56px, 7.5vw); /* clear tighter float icons */
+  padding: clamp(8px, 1.5vw, 12px) max(40px, 5vw) clamp(8px, 1.5vw, 12px) max(40px, 5vw); /* inset matches tighter float icons */
   box-sizing: border-box;
   max-width: 100%;
 }
@@ -401,6 +465,66 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   white-space: nowrap !important;
 }
 
+/* Search row: absolutely positioned under hero menu, above video */
+#slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 16 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  padding: 0 max(32px, 4.2vw) !important;
+  box-sizing: border-box !important;
+  pointer-events: none !important;
+}
+
+@media (min-width: 992px) {
+  #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
+    top: calc(18px + 2.65rem + 8px) !important;
+  }
+}
+
+@media (max-width: 991px) {
+  #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
+    top: max(50px, calc(env(safe-area-inset-top, 0px) + 44px)) !important;
+  }
+}
+
+#slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay > * {
+  pointer-events: auto !important;
+}
+
+#slideshow-container .mc-hero-search-inner {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  width: min(680px, 94vw) !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#slideshow-container #mcHeroSearchOverlay .microblock-group {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: none !important;
+  float: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin: 0 !important;
+}
+
+#slideshow-container #mcHeroSearchOverlay .header__section--middle {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
 /* Hide hero on NON-home pages */
 body:not(.is-home) #slideshow-container {
   display: none !important;
@@ -421,7 +545,7 @@ body.is-home a.mc-home-float {
 body.is-home .mc-cart-float,
 body.is-home a.mc-cart-float {
   left: auto !important;
-  right: max(10px, env(safe-area-inset-right)) !important;
+  right: max(4px, env(safe-area-inset-right)) !important;
 }
 
 /* Prevent hero container from clipping fixed icons (they're body children) */
@@ -1066,7 +1190,7 @@ a.mc-home-float,
 .mc-cart-float,
 a.mc-cart-float {
   position: fixed !important;
-  top: max(10px, env(safe-area-inset-top)) !important;
+  top: max(6px, env(safe-area-inset-top)) !important;
   z-index: 2147483647 !important;
   width: clamp(40px, 10vw, 52px) !important;
   height: clamp(40px, 10vw, 52px) !important;
@@ -1091,7 +1215,7 @@ a.mc-cart-float {
 
 .mc-home-float,
 a.mc-home-float {
-  left: max(10px, env(safe-area-inset-left)) !important;
+  left: max(4px, env(safe-area-inset-left)) !important;
   right: auto !important;
   margin-right: 0 !important;
 }
@@ -3327,10 +3451,10 @@ select.mc-native-leather {
 :root {
   --mc-float-w: clamp(44px, 4.2vw, 52px);
   --mc-float-h: clamp(40px, 3.6vw, 46px);
-  --mc-float-pad: clamp(6px, 1.15vw, 12px);
-  --mc-top: max(10px, env(safe-area-inset-top));
+  --mc-float-pad: clamp(4px, 0.9vw, 10px);
+  --mc-top: max(6px, env(safe-area-inset-top));
   --mc-left: max(var(--mc-float-pad), env(safe-area-inset-left));
-  --mc-right: max(10px, var(--mc-float-pad), env(safe-area-inset-right));
+  --mc-right: max(4px, var(--mc-float-pad), env(safe-area-inset-right));
 }
 
 .mc-home-float,
@@ -3762,14 +3886,14 @@ html body a.mc-cart-float,
 html body .mc-cart-float,
 body a.mc-cart-float,
 body .mc-cart-float {
-  left: calc(100vw - 52px - max(10px, env(safe-area-inset-right))) !important;
+  left: calc(100vw - 52px - max(4px, env(safe-area-inset-right))) !important;
   right: auto !important;
   width: 52px !important;
   max-width: 52px !important;
   min-width: 40px !important;
   max-height: 48px !important;
   margin-left: 0 !important;
-  margin-right: max(10px, env(safe-area-inset-right)) !important;
+  margin-right: max(4px, env(safe-area-inset-right)) !important;
   box-sizing: border-box !important;
 }
 
@@ -3779,7 +3903,7 @@ body.is-home html body .mc-cart-float,
 body.is-home body a.mc-cart-float,
 body.is-home body .mc-cart-float {
   left: auto !important;
-  right: max(10px, env(safe-area-inset-right)) !important;
+  right: max(4px, env(safe-area-inset-right)) !important;
 }
 
 /* =========================================================
