@@ -235,6 +235,25 @@ jobs:
 
           echo "::notice::Upload finished. Next step downloads template via SFTP and checks mc-deploy-verify (HTTP is not used; storefront HTML cache can lag)."
 
+      # CSS often lands on /v/vspfiles/css/ while the live theme reads /v/template_266.html.
+      # Bash mirror uses || true and can hide template failures; force absolute paths with Paramiko.
+      - name: Force template to canonical Volusion paths
+        env:
+          SECRET_SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SECRET_FTP_HOST: ${{ secrets.FTP_HOST }}
+          SECRET_SFTP_PORT: ${{ secrets.SFTP_PORT }}
+          SFTP_USER: ${{ secrets.FTP_USERNAME }}
+          SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          SFTP_TEMPLATE_REMOTE: ${{ secrets.SFTP_TEMPLATE_REMOTE }}
+        run: |
+          set -euo pipefail
+          cd "${GITHUB_WORKSPACE}"
+          export SFTP_HOST="${SECRET_SFTP_HOST:-}"
+          if [ -z "${SFTP_HOST:-}" ]; then export SFTP_HOST="${SECRET_FTP_HOST:-}"; fi
+          export SFTP_PORT="${SECRET_SFTP_PORT:-2222}"
+          python3 -m pip install -q paramiko --break-system-packages
+          python3 scripts/volusion_sftp_force_template.py
+
       - name: Verify remote template via SFTP (mc-deploy-verify)
         if: ${{ vars.SKIP_LIVE_VERIFY != 'true' }}
         env:
