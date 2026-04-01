@@ -45,7 +45,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260405: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
-<meta name="mc-deploy-verify" content="20260402">
+<meta name="mc-deploy-verify" content="20260402d">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -9431,6 +9431,7 @@ try {
 </style>
 <!-- Last in document: wins over v/vspfiles/templates/266/css/template.css for category grid -->
 <style id="mc-category-grid-tail">
+/* Listing cards: desktop (≥992px) uses 3-column grid in #mc-category-grid-critical; image/title/price order applies ALL widths — only tile height shrinks to 220px below 992px in the @media at bottom. */
 /* Late override: home + category listing cards must render image -> title -> price */
 body.is-home #content_area_home .v-product-grid > .v-product,
 body.is-home #content_area_home ul.v-product-grid > li.v-product,
@@ -9539,6 +9540,61 @@ body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid
   align-items: center !important;
   display: flex !important;
   flex-direction: column !important;
+}
+
+/* Desktop: repeat order + grid so Volusion / .category rules at full width cannot win over base flex */
+@media (min-width: 992px) {
+  body:not(.productdetails) #content_area .v-product-grid,
+  body.is-home:not(.productdetails) #content_area_home .v-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+    width: 100% !important;
+    align-items: stretch !important;
+  }
+  body.is-home #content_area_home .v-product .v-product__img,
+  body.is-home #content_area_home .v-product .v-product__image,
+  body.is-home #content_area_home .v-product .v-product__image-wrap,
+  body.is-home #content_area_home .v-product .product_image,
+  body.is-home #content_area_home .v-product .vcss_img,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__img,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__image,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__image-wrap,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product .product_image,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product .vcss_img,
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product .v-product__img {
+    order: 1 !important;
+    height: 280px !important;
+    min-height: 280px !important;
+    max-height: 280px !important;
+  }
+  body.is-home #content_area_home .v-product .v-product__title,
+  body.is-home #content_area_home .v-product .v-product__name,
+  body.is-home #content_area_home .v-product .productnamecolor,
+  body.is-home #content_area_home .v-product h2,
+  body.is-home #content_area_home .v-product h3,
+  body.is-home #content_area_home .v-product h4,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__title,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__name,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product .productnamecolor,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product h2,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product h3,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product h4,
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product .v-product__title,
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product .productnamecolor {
+    order: 2 !important;
+  }
+  body.is-home #content_area_home .v-product .v-product__price,
+  body.is-home #content_area_home .v-product .product_price,
+  body.is-home #content_area_home .v-product .mc-member-grid-price,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__price,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product .product_price,
+  :is(html.category, body.category) #content_area .v-product-grid .v-product .mc-member-grid-price,
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product .v-product__price,
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product .product_price,
+  body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product .mc-member-grid-price {
+    order: 3 !important;
+  }
 }
 
 @media (max-width: 991px) {
