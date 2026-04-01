@@ -45,7 +45,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260405: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
-<meta name="mc-deploy-verify" content="20260401">
+<meta name="mc-deploy-verify" content="20260401b">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -9056,7 +9056,8 @@ body.is-home #content_area_home .v-product-grid .v-product .v-product__price,bod
       (document.documentElement.classList &&
         document.documentElement.classList.contains('category')) ||
       (document.body.classList && document.body.classList.contains('category'));
-    if (!isCat) return;
+    var isHome = document.body && document.body.classList && document.body.classList.contains('is-home');
+    if (!isCat && !isHome) return;
     var imgCell = card.querySelector('.v-product__img, .product_image');
     var title =
       card.querySelector('.v-product__name') ||
@@ -9067,7 +9068,7 @@ body.is-home #content_area_home .v-product-grid .v-product .v-product__price,bod
     var titlePar = title.parentNode;
 
     function moveAfterTitle(node) {
-      if (!node || node.parentNode !== card || !titlePar) return;
+      if (!node || !titlePar) return;
       if (title.nextSibling === node) return;
       var scan = title.nextSibling;
       while (scan) {
@@ -9079,14 +9080,8 @@ body.is-home #content_area_home .v-product-grid .v-product .v-product__price,bod
       } catch (eMove) {}
     }
 
-    var k;
-    var chTop = card.children;
-    for (k = 0; k < chTop.length; k++) {
-      if (chTop[k].classList && chTop[k].classList.contains('mc-member-grid-price')) {
-        moveAfterTitle(chTop[k]);
-        break;
-      }
-    }
+    var topBlock = card.querySelector('.mc-member-grid-price');
+    if (topBlock) moveAfterTitle(topBlock);
 
     var kids = card.children;
     var j;
@@ -9106,6 +9101,16 @@ body.is-home #content_area_home .v-product-grid .v-product .v-product__price,bod
       ) {
         moveAfterTitle(el);
       }
+    }
+
+    var nestedPricing = card.querySelectorAll(
+      '.v-product__price, .product_price, .mc-member-grid-price, [class*="sale_price"], [class*="list_price"], [itemprop="price"]'
+    );
+    for (j = 0; j < nestedPricing.length; j++) {
+      var node = nestedPricing[j];
+      if (!node || node === title || (node.contains && node.contains(title))) continue;
+      if (imgCell && (node === imgCell || (node.contains && node.contains(imgCell)))) continue;
+      moveAfterTitle(node);
     }
   }
 
