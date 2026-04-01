@@ -157,6 +157,22 @@ document.addEventListener("DOMContentLoaded", function () {
     box-sizing: border-box !important;
     float: none !important;
   }
+  /* Category PLP: white image tile (path /-s/ sets html.category before body paint) */
+  html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid,
+  html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid {
+    background-color: #ffffff !important;
+  }
+  html.category body:not(.productdetails):not(.is-home) #content_area .v-product__img,
+  html.category body:not(.productdetails):not(.is-home) #content_area .v-product__image,
+  html.category body:not(.productdetails):not(.is-home) #content_area .product_image,
+  html.category body:not(.productdetails):not(.is-home) #content_area .vcss_img,
+  html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li .v-product__img {
+    background-color: #ffffff !important;
+  }
+  html.category body:not(.productdetails):not(.is-home) #content_area .v-product__img a,
+  html.category body:not(.productdetails):not(.is-home) #content_area .product_image a {
+    background-color: #ffffff !important;
+  }
   </style>
 
 <script>
