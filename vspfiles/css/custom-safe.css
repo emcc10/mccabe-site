@@ -58,6 +58,20 @@ header.header .header__section--middle,
   overflow: visible !important;
 }
 
+/* Interior pages: search strip sits below main menu in normal flow (no overlap) */
+body:not(.is-home) header.header .header__section--middle {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  z-index: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  float: none !important;
+  clear: both !important;
+  margin: 0 !important;
+}
+
 header.header .collapsing-search,
 header.header #collapsingSearch,
 #mcHeroSearchOverlay .collapsing-search,
@@ -429,44 +443,20 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   line-height: 0 !important;
 }
 
-/* Hero top: one column = main menu, then search — over video, not below the hero block */
-#slideshow-container .mc-hero-top-cluster {
-  position: absolute !important;
-  left: 0 !important;
-  right: 0 !important;
-  top: max(10px, env(safe-area-inset-top)) !important;
-  z-index: 25 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  gap: 8px !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  padding: 0 max(28px, 4vw) !important;
-  box-sizing: border-box !important;
-  pointer-events: none !important;
-}
-
-#slideshow-container .mc-hero-top-cluster > * {
-  pointer-events: auto !important;
-}
-
-/* Hero menu: centered row inside cluster (no separate absolute top — avoids search above menu) */
-#slideshow-container .mc-hero-top-cluster .hero-menu,
+/* Hero menu: absolute over video (do not alter nav markup or link styling here) */
 #slideshow-container .hero-menu {
-  position: relative !important;
-  top: auto !important;
-  left: auto !important;
-  transform: none !important;
-  z-index: 1 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  position: absolute;
+  top: 18px !important;
+  left: 50% !important;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: clamp(14px, 2.5vw, 22px);
-  padding: clamp(6px, 1.2vw, 10px) max(28px, 4vw) !important;
-  box-sizing: border-box !important;
-  width: 100% !important;
-  max-width: 100% !important;
+  padding: clamp(8px, 1.5vw, 12px) max(56px, 7.5vw) clamp(8px, 1.5vw, 12px) max(56px, 7.5vw);
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 /* ===== HOMEPAGE HERO MENU: NO WRAP ===== */
@@ -489,33 +479,42 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   white-space: nowrap !important;
 }
 
-/* Search: second row in .mc-hero-top-cluster (DOM order under .hero-menu) */
-#slideshow-container .mc-hero-top-cluster #mcHeroSearchOverlay.mc-hero-search-overlay {
-  position: relative !important;
-  top: auto !important;
-  left: auto !important;
-  right: auto !important;
+/* Search overlay on home: same stacking context as hero menu, but top offset sits UNDER menu bar */
+#slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
   width: 100% !important;
-  z-index: 2 !important;
+  z-index: 12 !important;
   display: flex !important;
   justify-content: center !important;
   align-items: flex-start !important;
-  padding: 0 !important;
+  padding: 0 max(32px, 4.2vw) !important;
   box-sizing: border-box !important;
   pointer-events: none !important;
 }
 
-#slideshow-container .mc-hero-top-cluster #mcHeroSearchOverlay.mc-hero-search-overlay > * {
+@media (min-width: 992px) {
+  #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
+    top: calc(18px + 3.85rem + 18px) !important;
+  }
+}
+
+@media (max-width: 991px) {
+  #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
+    top: max(54px, calc(env(safe-area-inset-top, 0px) + 46px)) !important;
+  }
+}
+
+#slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay > * {
   pointer-events: auto !important;
 }
 
 #slideshow-container .mc-hero-search-inner {
   display: flex !important;
-  flex-direction: row !important;
-  align-items: flex-end !important;
-  justify-content: center !important;
-  flex-wrap: nowrap !important;
-  gap: 8px !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
   width: min(680px, 94vw) !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
@@ -558,7 +557,7 @@ body.is-home a.mc-home-float {
 body.is-home .mc-cart-float,
 body.is-home a.mc-cart-float {
   left: auto !important;
-  right: max(2px, env(safe-area-inset-right)) !important;
+  right: max(10px, env(safe-area-inset-right)) !important;
 }
 
 /* Prevent hero container from clipping fixed icons (they're body children) */
@@ -568,11 +567,6 @@ body.is-home #slideshow-container {
 
 /* Mobile: hero video + overlay proportional */
 @media (max-width: 991px) {
-  #slideshow-container .mc-hero-top-cluster {
-    gap: 0 !important;
-    top: max(8px, env(safe-area-inset-top)) !important;
-  }
-
   /* keep hero menu hidden on mobile */
   #slideshow-container .hero-menu {
     display: none !important;
@@ -1208,7 +1202,7 @@ a.mc-home-float,
 .mc-cart-float,
 a.mc-cart-float {
   position: fixed !important;
-  top: max(6px, env(safe-area-inset-top)) !important;
+  top: max(12px, env(safe-area-inset-top)) !important;
   z-index: 2147483647 !important;
   width: clamp(40px, 10vw, 52px) !important;
   height: clamp(40px, 10vw, 52px) !important;
@@ -1233,9 +1227,9 @@ a.mc-cart-float {
 
 .mc-home-float,
 a.mc-home-float {
-  left: max(4px, env(safe-area-inset-left)) !important;
+  left: max(12px, env(safe-area-inset-left)) !important;
   right: auto !important;
-  margin-right: 0 !important;
+  margin-right: 16px !important;
 }
 
 .mc-cart-float,
@@ -1564,10 +1558,9 @@ a.hero-cart-link {
   #slideshow-container .mc-hero-overlay a {
     pointer-events: auto !important;
   }
-  /* .hero-menu is display:none here; avoid resetting position on .mc-hero-top-cluster layout */
-  #slideshow-container .mc-hero-top-cluster .hero-menu {
-    position: relative !important;
-    z-index: auto !important;
+  #slideshow-container .hero-menu {
+    position: absolute !important;
+    z-index: 10 !important;
   }
 
   /* FORCE mobile push menu overlay to top of everything */
@@ -3470,10 +3463,10 @@ select.mc-native-leather {
 :root {
   --mc-float-w: clamp(44px, 4.2vw, 52px);
   --mc-float-h: clamp(40px, 3.6vw, 46px);
-  --mc-float-pad: clamp(4px, 0.9vw, 10px);
-  --mc-top: max(6px, env(safe-area-inset-top));
+  --mc-float-pad: clamp(8px, 1.6vw, 16px);
+  --mc-top: max(12px, env(safe-area-inset-top));
   --mc-left: max(var(--mc-float-pad), env(safe-area-inset-left));
-  --mc-right: max(4px, var(--mc-float-pad), env(safe-area-inset-right));
+  --mc-right: max(16px, var(--mc-float-pad), env(safe-area-inset-right));
 }
 
 .mc-home-float,
@@ -3488,7 +3481,7 @@ select.mc-native-leather {
 
 .mc-home-float {
   left: var(--mc-left) !important;
-  margin-right: 0 !important;
+  margin-right: 16px !important;
 }
 /* .mc-cart-float position set at end of file (left-based so it never runs off) */
 
@@ -3905,14 +3898,14 @@ html body a.mc-cart-float,
 html body .mc-cart-float,
 body a.mc-cart-float,
 body .mc-cart-float {
-  left: calc(100vw - 52px - max(2px, env(safe-area-inset-right))) !important;
+  left: calc(100vw - 52px - max(28px, env(safe-area-inset-right))) !important;
   right: auto !important;
   width: 52px !important;
   max-width: 52px !important;
   min-width: 40px !important;
   max-height: 48px !important;
-  margin-left: 0 !important;
-  margin-right: max(2px, env(safe-area-inset-right)) !important;
+  margin-left: 16px !important;
+  margin-right: max(20px, env(safe-area-inset-right)) !important;
   box-sizing: border-box !important;
 }
 
@@ -3922,7 +3915,7 @@ body.is-home html body .mc-cart-float,
 body.is-home body a.mc-cart-float,
 body.is-home body .mc-cart-float {
   left: auto !important;
-  right: max(2px, env(safe-area-inset-right)) !important;
+  right: max(28px, env(safe-area-inset-right)) !important;
 }
 
 /* =========================================================
