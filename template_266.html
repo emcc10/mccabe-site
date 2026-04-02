@@ -124,6 +124,7 @@
       width: 100% !important;
       max-width: 100% !important;
     }
+    body:not(.is-home) header.header > .mc-header-desktop-bar,
     body:not(.is-home) header.header > .hidden-xs.col-xs-12,
     body:not(.is-home) header.header > .col-xs-12.hidden-xs {
       order: 2 !important;
@@ -138,7 +139,7 @@
       width: 100% !important;
       max-width: 100% !important;
       flex: 0 0 auto !important;
-      margin-top: 10px !important;
+      margin-top: 0 !important;
     }
     body:not(.is-home) header.header > .mc-header-cart {
       order: 30 !important;
@@ -665,31 +666,33 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
 
           </div>
-<div class="hidden-xs col-xs-12 no-pad-lg">
-  <div class="microblock main-menu">
+<div class="col-xs-12 no-pad-lg mc-header-desktop-bar">
+  <div class="microblock main-menu hidden-xs">
     <nav id="display_menu_1" class="menu" link-alignment="center"></nav>
   </div>
-</div>
-            <div class="header__section header__section--middle mc-header-search-below-nav">
-              <div class="collapsing-search" id="collapsingSearch">
-                <form class="collapsing-search__form" action="/searchresults.asp" method="get" name="SearchBoxForm">
-                  <div class="container">
-                    <div class="row">
-                      <input class="collapsing-search__input" id="search" placeholder="Search..." type="text" name="Search" value="">
-                      <label class="collapsing-search__label searchToggle sr-only" for="search">
-                        <span class="collapsing-search__label__text">Search...</span>
-                      </label>
-                      <button type="submit" name="Submit" class="collapsing-search__submit">
-                        <p class="sr-only">Search Submit</p>
-                        <svg class="collapsing-search__icon collapsing-search__icon--submit"><use xlink:href="#svg-search"></use></svg>
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
+  <div class="mc-header-search-cart-wrap">
+    <div class="header__section header__section--middle mc-header-search-below-nav">
+      <div class="collapsing-search" id="collapsingSearch">
+        <form class="collapsing-search__form" action="/searchresults.asp" method="get" name="SearchBoxForm">
+          <div class="container">
+            <div class="row">
+              <input class="collapsing-search__input" id="search" placeholder="Search..." type="text" name="Search" value="">
+              <label class="collapsing-search__label searchToggle sr-only" for="search">
+                <span class="collapsing-search__label__text">Search...</span>
+              </label>
+              <button type="submit" name="Submit" class="collapsing-search__submit">
+                <p class="sr-only">Search Submit</p>
+                <svg class="collapsing-search__icon collapsing-search__icon--submit"><use xlink:href="#svg-search"></use></svg>
+              </button>
             </div>
-<div class="microblock mc-header-cart">
-  <a class="mc-header-cart__link" href="/shoppingcart.asp"></a>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="microblock mc-header-cart hidden-xs">
+      <a class="mc-header-cart__link" href="/shoppingcart.asp"></a>
+    </div>
+  </div>
 </div>
         </header>
 <script>
@@ -749,17 +752,36 @@ document.addEventListener("DOMContentLoaded", function () {
     /* Interior: pull search back from hero overlay if URL is not homepage */
     if (mid.getAttribute('data-mc-search-mount') === 'hero' && menuRow && menuRow.parentNode) {
       try {
-        menuRow.parentNode.insertBefore(mid, menuRow.nextSibling);
+        mcPlaceInteriorSearchInBar(menuRow, mid);
       } catch (ePull) {}
       mid.setAttribute('data-mc-search-mount', 'below-nav');
     }
 
-    /* Strip must be the next sibling after the desktop menu row */
+    /* Interior: search + cart sit inside .mc-header-desktop-bar after main menu (beside Contact Us → cart) */
     if (menuRow && menuRow.parentNode) {
-      if (menuRow.nextSibling !== mid) {
-        menuRow.parentNode.insertBefore(mid, menuRow.nextSibling);
-      }
+      mcPlaceInteriorSearchInBar(menuRow, mid);
       mid.setAttribute('data-mc-search-mount', 'below-nav');
+    }
+  }
+
+  function mcPlaceInteriorSearchInBar(menuRow, mid) {
+    if (!menuRow || !mid) return;
+    var wrap = document.querySelector('header.header .mc-header-search-cart-wrap');
+    var cart = document.querySelector('header.header .mc-header-cart');
+    var mm = menuRow.querySelector('.microblock.main-menu');
+    if (!wrap) return;
+    if (mid.parentNode !== wrap) {
+      wrap.insertBefore(mid, wrap.firstChild);
+    }
+    if (cart && cart.parentNode !== wrap) {
+      wrap.appendChild(cart);
+    }
+    if (wrap.parentNode !== menuRow) {
+      if (mm) {
+        menuRow.insertBefore(wrap, mm.nextSibling);
+      } else {
+        menuRow.appendChild(wrap);
+      }
     }
   }
 

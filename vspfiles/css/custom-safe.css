@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260402h — bean bag: show cover/size rows; stack PDP; related image-first; description clip */
+/* MC_DEPLOY_VERIFY_20260401j — nav row: menu | search→cart line; hero-matching gutters; tighter logo row */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -58,7 +58,7 @@ header.header .header__section--middle,
   overflow: visible !important;
 }
 
-/* Interior pages: search lives after #display_menu_1 row in HTML — full width under nav */
+/* Interior: search lives in .mc-header-desktop-bar (beside nav → cart); full width on mobile */
 body:not(.is-home) header.header > .header__section--middle,
 body:not(.is-home) header.header .mc-header-search-below-nav {
   position: relative !important;
@@ -68,7 +68,8 @@ body:not(.is-home) header.header .mc-header-search-below-nav {
   z-index: 1 !important;
   width: 100% !important;
   max-width: 100% !important;
-  flex: 0 0 100% !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
   float: none !important;
   clear: both !important;
   margin: 0 !important;
@@ -646,6 +647,11 @@ body.is-home #slideshow-container {
   }
 }
 
+/* Homepage: hero supplies nav + search; hide duplicate desktop strip */
+body.is-home .mc-header-desktop-bar {
+  display: none !important;
+}
+
 /* ======================================
    VOLUSION MENU (NON-HOME PAGES)
 ====================================== */
@@ -664,22 +670,95 @@ body:not(.is-home) header.header .main-menu {
   transform: none !important;
 }
 
-/* Non-home: same layout as hero – centered bar, same padding/margins */
+/* Non-home: one row — hero-menu gutters (#slideshow-container .hero-menu); search line stops at cart */
 @media (min-width: 992px) {
-  body:not(.is-home) .microblock.main-menu {
+  body:not(.is-home) header.header > .header__section {
+    padding-top: 10px !important;
+    padding-bottom: 4px !important;
+  }
+
+  body:not(.is-home) header.header > .mc-header-desktop-bar {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: clamp(14px, 2.5vw, 22px) !important;
+    padding: clamp(8px, 1.5vw, 12px) max(56px, 7.5vw) !important;
+    box-sizing: border-box !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .microblock.main-menu {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     padding: 0 !important;
     margin: 0 !important;
-  }
-  body:not(.is-home) .microblock.main-menu {
-    padding-right: 80px !important;
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
   }
-  body:not(.is-home) .microblock.main-menu #display_menu_1 {
+
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: clamp(10px, 1.5vw, 18px) !important;
+    flex: 1 1 auto !important;
+    min-width: 140px !important;
+    max-width: min(380px, 42vw) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.22) !important;
+    padding: 8px 0 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-below-nav {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search {
+    border-bottom: none !important;
+    padding: 8px 0 4px !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-cart {
+    flex: 0 0 auto !important;
+    align-self: center !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .microblock.main-menu #display_menu_1 {
     padding: 0 !important;
     margin: 0 !important;
+  }
+
+  /* Focus / open: underline the wrap (search → cart), not full header width */
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search:focus-within,
+  html.mc-search-open body:not(.is-home) .mc-header-desktop-bar .collapsing-search,
+  body.mc-search-open body:not(.is-home) .mc-header-desktop-bar .collapsing-search {
+    transform: none !important;
+    padding: 8px 0 4px !important;
+    box-shadow: none !important;
+    border-bottom: none !important;
+    background: #ffffff !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap:focus-within,
+  html.mc-search-open body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap,
+  body.mc-search-open body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap {
+    border-bottom-color: #1a1a1a !important;
+    border-bottom-width: 2px !important;
+    padding: 8px 0 8px !important;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.06) !important;
   }
 }
 
@@ -829,6 +908,7 @@ body:not(.is-home) header.header > .header__section {
   max-width: 100% !important;
 }
 
+body:not(.is-home) header.header > .mc-header-desktop-bar,
 body:not(.is-home) header.header > .hidden-xs.col-xs-12,
 body:not(.is-home) header.header > .col-xs-12.hidden-xs {
   order: 2 !important;
@@ -848,6 +928,7 @@ body:not(.is-home) header.header > .mc-header-cart {
 }
 
 /* Interior: keep nav row above search; kill lift that overlaps category links */
+body:not(.is-home) header.header > .mc-header-desktop-bar,
 body:not(.is-home) header.header > .hidden-xs.col-xs-12,
 body:not(.is-home) header.header > .col-xs-12.hidden-xs {
   position: relative !important;
@@ -856,7 +937,7 @@ body:not(.is-home) header.header > .col-xs-12.hidden-xs {
 
 body:not(.is-home) header.header > .header__section--middle,
 body:not(.is-home) header.header > .mc-header-search-below-nav {
-  margin-top: 10px !important;
+  margin-top: 0 !important;
 }
 
 body:not(.is-home) html.mc-search-open header.header .collapsing-search,
@@ -4076,46 +4157,45 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
 }
 
 /* =========================================================
-   FINAL DESKTOP NON-HOME NAV CENTER FIX (2026-03-08)
-   Symmetric gutters keep menu visually centered between
-   floating home/cart icons.
+   FINAL DESKTOP NON-HOME NAV (2026-04)
+   Gutters come from .mc-header-desktop-bar (matches hero-menu).
    ========================================================= */
 @media (min-width: 992px) {
-  body:not(.is-home) header.header .microblock.main-menu {
+  body:not(.is-home) header.header .mc-header-desktop-bar .microblock.main-menu {
     padding: 0 !important;
-    width: 100% !important;
+    width: auto !important;
+    max-width: none !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     box-sizing: border-box !important;
   }
 
-  body:not(.is-home) header.header #display_menu_1 {
-    width: 100% !important;
+  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 {
+    width: auto !important;
     margin: 0 auto !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
   }
 
-  body:not(.is-home) header.header #display_menu_1 > ul,
-  body:not(.is-home) header.header #display_menu_1 > ul.vnav--level1,
-  body:not(.is-home) header.header #display_menu_1 > ul.vnav--horizontal.vnav--level1 {
-    width: 100% !important;
+  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 > ul,
+  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--level1,
+  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--horizontal.vnav--level1 {
+    width: auto !important;
     margin: 0 auto !important;
-    padding-left: max(80px, 8vw) !important;
-    padding-right: max(80px, 8vw) !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
     box-sizing: border-box !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     flex-wrap: nowrap !important;
-    gap: clamp(18px, 2.2vw, 30px) !important;
+    gap: clamp(14px, 2.5vw, 22px) !important;
   }
 
-  /* If a hidden cart li exists in nav, remove it from layout flow. */
-  body:not(.is-home) header.header #display_menu_1 li.mc-vnav-cart,
-  body:not(.is-home) header.header #display_menu_1 .mc-vnav-cart {
+  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 li.mc-vnav-cart,
+  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 .mc-vnav-cart {
     display: none !important;
     width: 0 !important;
     margin: 0 !important;
@@ -4129,7 +4209,8 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
    shift nav left on non-home desktop pages.
    ========================================================= */
 @media (min-width: 1200px) {
-  body:not(.is-home) header.header .hidden-xs.col-xs-12.no-pad-lg {
+  body:not(.is-home) header.header .hidden-xs.col-xs-12.no-pad-lg,
+  body:not(.is-home) header.header .mc-header-desktop-bar {
     right: auto !important; /* cancel .col-lg-pull-2 offset */
     left: auto !important;
     position: relative !important;
@@ -4155,6 +4236,17 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     left: auto !important;
     margin: 0 auto !important;
     padding: 0 !important;
+    position: relative !important;
+  }
+
+  body:not(.is-home) header.header .mc-header-desktop-bar {
+    float: none !important;
+    clear: both !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    right: auto !important;
+    left: auto !important;
+    margin: 0 auto !important;
     position: relative !important;
   }
 
@@ -4990,9 +5082,7 @@ body.productdetails #content_area .v-product-grid .v-product .mc-member-grid-pri
 }
 
 body.productdetails #content_area #relateditems td,
-body.mc-product-page #content_area #relateditems td,
-body.productdetails #content_area table[id*="related"] td,
-body.mc-product-page #content_area table[id*="related"] td {
+body.mc-product-page #content_area #relateditems td {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
