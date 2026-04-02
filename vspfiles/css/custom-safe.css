@@ -215,7 +215,7 @@ header.header #search,
   padding: 4px 0 6px !important;
   border: none !important;
   border-radius: 0 !important;
-  border-bottom: 1px solid transparent !important;
+  border-bottom: 0px solid transparent !important;
   font-size: 15px !important;
   font-weight: 400 !important;
   color: #1a1a1a !important;
