@@ -1063,6 +1063,7 @@ body:not(.is-home) header.header {
   flex-wrap: nowrap !important;
   align-items: stretch !important;
   visibility: visible !important;
+  margin-top: -45px;
 }
 
 /* Interior: logo row first, main menu (#display_menu_1) second, search strip last — beats theme float/order */
