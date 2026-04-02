@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
-<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260401p"><!--<![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260401q"><!--<![endif]-->
 <head>
 <script>
 (function () {
@@ -174,7 +174,7 @@
       padding: 0 !important;
       pointer-events: none !important;
     }
-    /* MC_HEADER_CRITICAL_20260401p — interior: nav centered like hero; search docked right in bar */
+    /* MC_HEADER_CRITICAL_20260401q — interior: flex bar (no clip); hero search top-right */
     header.header .header__section--middle,
     header.header .mc-header-search-below-nav,
     #mcHeroSearchOverlay .header__section--middle {
@@ -219,16 +219,14 @@
         flex-wrap: nowrap !important;
         align-items: center !important;
         justify-content: center !important;
-        position: relative !important;
-        gap: 0 !important;
+        gap: clamp(14px, 2.5vw, 22px) !important;
         width: 100% !important;
         max-width: 100% !important;
         padding: clamp(8px, 1.5vw, 12px) max(56px, 7.5vw) !important;
         box-sizing: border-box !important;
-        min-height: 48px !important;
       }
       body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
-        flex: 1 1 auto !important;
+        flex: 0 1 auto !important;
         min-width: 0 !important;
         max-width: none !important;
         display: flex !important;
@@ -243,14 +241,13 @@
         flex-wrap: nowrap !important;
         align-items: center !important;
         gap: clamp(8px, 1.2vw, 16px) !important;
-        position: absolute !important;
-        right: max(56px, 7.5vw) !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        flex: 0 0 auto !important;
-        width: min(360px, 34vw) !important;
+        flex: 0 1 auto !important;
+        position: relative !important;
+        right: auto !important;
+        top: auto !important;
+        transform: none !important;
         min-width: 120px !important;
-        max-width: min(360px, 34vw) !important;
+        max-width: min(360px, 40vw) !important;
         border-bottom: 1px solid rgba(0, 0, 0, 0.28) !important;
         padding: 4px 0 8px !important;
         box-sizing: border-box !important;
@@ -576,7 +573,7 @@ document.addEventListener("DOMContentLoaded", function () {
   } catch (e) {}
 })();
 </script>
-<!-- MC_TEMPLATE: header-critical-bar-20260401p -->
+<!-- MC_TEMPLATE: header-critical-bar-20260401q -->
 <!-- Do not override window.location.reload: CAPTCHA / bot checks (Cloudflare, etc.) call reload to finish; blocking it causes verify loops. -->
 <a class="mc-cart-float" href="/shoppingcart.asp" aria-label="Cart" rel="nofollow">
   <svg class="mc-cart-float__icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
@@ -781,7 +778,7 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
 
           </div>
-<div class="col-xs-12 no-pad-lg mc-header-desktop-bar" data-mc-header-bar="20260401p">
+<div class="col-xs-12 no-pad-lg mc-header-desktop-bar" data-mc-header-bar="20260401q">
   <div class="microblock main-menu hidden-xs">
     <nav id="display_menu_1" class="menu" link-alignment="center"></nav>
   </div>
@@ -846,20 +843,33 @@ document.addEventListener("DOMContentLoaded", function () {
     );
   }
 
+  /**
+   * Search block may live in .mc-header-desktop-bar (source HTML) or in #mcHeroSearchOverlay after
+   * a homepage mount. If we only query the bar, interior pages return null while the node is still
+   * inside hidden #if_homepage — mcMountSearchLayout would exit early and never pull it back.
+   */
   function mcFindHeaderSearchMid() {
     var h = document.querySelector('header.header');
     if (!h) return null;
     var bar = h.querySelector('.mc-header-desktop-bar');
     if (bar) {
-      var m =
+      var inBar =
         bar.querySelector('.mc-header-search-below-nav.header__section--middle') ||
         bar.querySelector('.mc-header-search-below-nav .header__section--middle') ||
         bar.querySelector('.mc-header-search-below-nav');
-      if (m) return m;
+      if (inBar) return inBar;
+    }
+    var ov = document.getElementById('mcHeroSearchOverlay');
+    if (ov) {
+      var inHero =
+        ov.querySelector('.mc-header-search-below-nav') ||
+        ov.querySelector('.header__section--middle') ||
+        ov.querySelector('.mc-hero-search-inner .header__section--middle');
+      if (inHero) return inHero;
     }
     return (
-      h.querySelector('header.header .mc-header-search-below-nav') ||
-      h.querySelector('header.header .header__section--middle')
+      h.querySelector('.mc-header-search-below-nav') ||
+      h.querySelector('.header__section--middle')
     );
   }
 
@@ -10332,21 +10342,6 @@ try {
     return /\bsale\s+price\b/i.test((card.textContent || '').replace(/\s+/g, ' '));
   }
 
-  function mcStripSaleNodesFromCardRoot(card) {
-    if (!card || !card.querySelectorAll) return;
-    var nodes = card.querySelectorAll(
-      'font.product_sale_price, .product_sale_price, [class*="product_sale_price"]'
-    );
-    var si;
-    for (si = 0; si < nodes.length; si++) {
-      var n = nodes[si];
-      if (!n || (n.closest && n.closest('.mc-member-grid-price'))) continue;
-      try {
-        if (n.parentNode) n.parentNode.removeChild(n);
-      } catch (eR) {}
-    }
-  }
-
   function mcBuildLockedMemberLoginBlock() {
     var block = document.createElement('div');
     block.className = 'mc-member-grid-price';
@@ -10594,9 +10589,6 @@ try {
       }
 
       if (!unlocked) {
-        try {
-          mcStripSaleNodesFromCardRoot(card);
-        } catch (eStrip) {}
         if (existingBlock && existingBlock.parentNode) {
           try {
             existingBlock.parentNode.removeChild(existingBlock);
