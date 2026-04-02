@@ -11,16 +11,13 @@ name: Deploy to Volusion
       - main
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Upload template and CSS via SFTP
         env:
@@ -72,7 +69,7 @@ jobs:
 
           echo "Deploying sftp://${SFTP_HOST}:${SFTP_PORT} as ${SFTP_USER}"
           echo "Local template: $(wc -c < template_266.html | tr -d ' ') bytes; css: $(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes"
-          echo "Remote: template Ã¢â€ â€™ ${TEMPLATE_REMOTE:-/template_266.html (then fallbacks)}; css Ã¢â€ â€™ ${CSS_REMOTE}"
+          echo "Remote: template ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ ${TEMPLATE_REMOTE:-/template_266.html (then fallbacks)}; css ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ ${CSS_REMOTE}"
 
           TCP_OK=0
           echo "::group::Network: can this runner reach ${SFTP_HOST}:${SFTP_PORT}?"
@@ -216,10 +213,10 @@ jobs:
           fi
 
           echo "::group::Best-effort: mirror template to canonical Volusion paths (covers wrong SFTP_TEMPLATE_REMOTE)"
-          try_put_template_only "mirror Ã¢â€ â€™ /v/template_266.html" "/v/template_266.html"
-          try_put_template_only "mirror Ã¢â€ â€™ /v/v/template_266.html" "/v/v/template_266.html"
-          try_put_template_only "mirror Ã¢â€ â€™ domain /v/" "/mccabestheaterandliving.com/v/template_266.html"
-          try_put_template_only "mirror Ã¢â€ â€™ /template_266.html" "/template_266.html"
+          try_put_template_only "mirror ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ /v/template_266.html" "/v/template_266.html"
+          try_put_template_only "mirror ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ /v/v/template_266.html" "/v/v/template_266.html"
+          try_put_template_only "mirror ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ domain /v/" "/mccabestheaterandliving.com/v/template_266.html"
+          try_put_template_only "mirror ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ /template_266.html" "/template_266.html"
           echo "::endgroup::"
 
           try_put_css_only() {
@@ -230,8 +227,8 @@ jobs:
           }
 
           echo "::group::Best-effort: mirror CSS to wwwroot v/vspfiles/css (Volusion File Editor: v/vspfiles/css/custom-safe.css)"
-          try_put_css_only "css Ã¢â€ â€™ /v/vspfiles/css/custom-safe.css" "/v/vspfiles/css/custom-safe.css"
-          try_put_css_only "css Ã¢â€ â€™ v/vspfiles/css/custom-safe.css" "v/vspfiles/css/custom-safe.css"
+          try_put_css_only "css ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ /v/vspfiles/css/custom-safe.css" "/v/vspfiles/css/custom-safe.css"
+          try_put_css_only "css ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ v/vspfiles/css/custom-safe.css" "v/vspfiles/css/custom-safe.css"
           echo "::endgroup::"
 
           echo "::notice::Upload finished. Next step re-downloads template via SFTP and may check the public template URL (HTTP); storefront cache can still lag what you see in a browser."
@@ -264,6 +261,7 @@ jobs:
           SFTP_USER: ${{ secrets.FTP_USERNAME }}
           SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
           SFTP_TEMPLATE_REMOTE: ${{ secrets.SFTP_TEMPLATE_REMOTE }}
+          SFTP_CSS_REMOTE_FILE: ${{ secrets.SFTP_CSS_REMOTE_FILE }}
           # Optional repo var VERIFY_HTTP_TEMPLATE_URL if public template URL differs from default.
           VERIFY_HTTP_TEMPLATE_URL: ${{ vars.VERIFY_HTTP_TEMPLATE_URL }}
           # Optional SKIP_HTTP_TEMPLATE_VERIFY=true to bypass HTTP check (emergency only).
@@ -272,6 +270,8 @@ jobs:
           REQUIRE_HTTP_TEMPLATE_VERIFY: ${{ vars.REQUIRE_HTTP_TEMPLATE_VERIFY }}
           # Optional SKIP_CSS_SFTP_VERIFY=true to skip remote custom-safe.css needle check.
           SKIP_CSS_SFTP_VERIFY: ${{ vars.SKIP_CSS_SFTP_VERIFY }}
+          # Optional STRICT_V_WWWROOT_CSS_SFTP=true to fail if /v/vspfiles/ CSS is not readable via SFTP.
+          STRICT_V_WWWROOT_CSS_SFTP: ${{ vars.STRICT_V_WWWROOT_CSS_SFTP }}
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}"

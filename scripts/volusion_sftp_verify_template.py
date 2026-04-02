@@ -27,14 +27,45 @@ _CANONICAL_V_PATHS: tuple[str, ...] = (
     "v/template_266.html",
 )
 
-# Live storefront CSS is often under wwwroot /v/vspfiles/css/ (not the same as /vspfiles/…).
-_CSS_SFTP_PATHS: tuple[str, ...] = (
-    "/v/vspfiles/css/custom-safe.css",
-    "v/vspfiles/css/custom-safe.css",
-    "/vspfiles/css/custom-safe.css",
-    "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css",
-    "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css",
-)
+def _normalize_css_remote_secret() -> str:
+    raw = os.environ.get("SFTP_CSS_REMOTE_FILE", "").strip()
+    if not raw:
+        return ""
+    if not raw.startswith("/"):
+        return "/" + raw
+    return raw
+
+
+def _css_verify_path_groups() -> tuple[list[str], list[str]]:
+    """(v_wwwroot_paths, other_paths) — Volusion live CSS is usually under …/v/vspfiles/css/."""
+    secret = _normalize_css_remote_secret()
+    v_paths: list[str] = [
+        "/v/vspfiles/css/custom-safe.css",
+        "v/vspfiles/css/custom-safe.css",
+        "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css",
+    ]
+    other_paths: list[str] = [
+        "/vspfiles/css/custom-safe.css",
+        "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css",
+        "vspfiles/css/custom-safe.css",
+    ]
+    if secret:
+        if "v/vspfiles" in secret.replace("\\", "/"):
+            v_paths.insert(0, secret)
+        else:
+            other_paths.insert(0, secret)
+    seen: set[str] = set()
+    out_v: list[str] = []
+    for x in v_paths:
+        if x and x not in seen:
+            seen.add(x)
+            out_v.append(x)
+    out_o: list[str] = []
+    for x in other_paths:
+        if x and x not in seen:
+            seen.add(x)
+            out_o.append(x)
+    return out_v, out_o
 
 
 def _expect_from_local(ws: str) -> str:
@@ -202,39 +233,73 @@ def _verify_remote_css_via_sftp(sftp, ws: str, expect: str) -> int:
             )
             return 0
 
-    seen: set[str] = set()
-    reads: list[tuple[str, str]] = []
-    for remote in _CSS_SFTP_PATHS:
-        if remote in seen:
-            continue
-        seen.add(remote)
+    v_paths, other_paths = _css_verify_path_groups()
+
+    for remote in v_paths:
         body = _download_text_file(sftp, remote)
         if body is None:
             print(f"::notice::SFTP no CSS at {remote!r} (skipped).", flush=True)
             continue
-        reads.append((remote, body))
         if needle in body:
-            print(f"::notice::SFTP CSS OK: {remote!r} contains {needle!r}", flush=True)
+            print(f"::notice::SFTP CSS OK (v wwwroot): {remote!r} contains {needle!r}", flush=True)
             return 0
-
-    if not reads:
+        cm = re.search(r"MC_DEPLOY_VERIFY_[A-Za-z0-9]+", body)
+        saw = cm.group(0) if cm else "(no MC_DEPLOY_VERIFY in file)"
         print(
-            "::warning::Could not read custom-safe.css from any canonical SFTP path; "
-            "cannot confirm CSS reached the server. Check SFTP_CSS_REMOTE_FILE / Volusion paths.",
+            "::error::Remote CSS at "
+            f"{remote!r} is readable but does not contain {needle!r} (saw {saw!r}). "
+            "The live theme path /v/vspfiles/css/custom-safe.css looks stale.",
+            file=sys.stderr,
+        )
+        return 1
+
+    any_other = False
+    for remote in other_paths:
+        body = _download_text_file(sftp, remote)
+        if body is None:
+            print(f"::notice::SFTP no CSS at {remote!r} (skipped).", flush=True)
+            continue
+        any_other = True
+        if needle in body:
+            print(f"::notice::SFTP CSS OK (non-v path): {remote!r} contains {needle!r}", flush=True)
+            print(
+                "::warning::SFTP could not read any /v/vspfiles/css/custom-safe.css path, "
+                f"but {remote!r} has the deploy token. The storefront usually serves "
+                "…/v/vspfiles/css/custom-safe.css — open that URL with a cache-bust query "
+                "and confirm MC_DEPLOY_VERIFY matches Git. "
+                "Set repo var STRICT_V_WWWROOT_CSS_SFTP=true to fail the job until /v/vspfiles/… "
+                "is readable via SFTP and contains the token.",
+                flush=True,
+            )
+            strict = os.environ.get("STRICT_V_WWWROOT_CSS_SFTP", "").strip().lower() in (
+                "1",
+                "true",
+                "yes",
+            )
+            if strict:
+                print(
+                    "::error::STRICT_V_WWWROOT_CSS_SFTP set: need confirmed /v/vspfiles/… CSS via SFTP.",
+                    file=sys.stderr,
+                )
+                return 1
+            return 0
+        cm = re.search(r"MC_DEPLOY_VERIFY_[A-Za-z0-9]+", body)
+        saw = cm.group(0) if cm else "(no MC_DEPLOY_VERIFY in file)"
+        print(
+            "::error::Remote CSS at "
+            f"{remote!r} does not contain {needle!r} (saw {saw!r}). "
+            "Template on SFTP may match Git while a CSS path is stale.",
+            file=sys.stderr,
+        )
+        return 1
+
+    if not any_other:
+        print(
+            "::warning::Could not read custom-safe.css from any SFTP path; "
+            "cannot confirm CSS on the server. Check SFTP_CSS_REMOTE_FILE / Volusion paths.",
             flush=True,
         )
-        return 0
-
-    remote0, body0 = reads[0]
-    cm = re.search(r"MC_DEPLOY_VERIFY_[A-Za-z0-9]+", body0)
-    saw = cm.group(0) if cm else "(no MC_DEPLOY_VERIFY in file)"
-    print(
-        "::error::Remote CSS at "
-        f"{remote0!r} does not contain {needle!r} (saw {saw!r}). "
-        "Template on SFTP may match Git while the live theme still loads old CSS.",
-        file=sys.stderr,
-    )
-    return 1
+    return 0
 
 
 def main() -> int:
