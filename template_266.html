@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
-<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260401q"><!--<![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260402bbfix3"><!--<![endif]-->
 <head>
 <script>
 (function () {
@@ -6626,6 +6626,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var pcInp =
       document.querySelector('input[name="ProductCode"]') ||
       document.querySelector('input[name="productcode"]');
+    var code = pcInp && pcInp.value ? String(pcInp.value).trim() : '';
+    /* Bean bags (BB*): skip sofa/leather PDP transforms — Volusion layout stays default */
+    if (/^BB/i.test(code)) return false;
     var hasMarker =
       pcInp ||
       document.querySelector('#v65-product-parent') ||
@@ -6938,8 +6941,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function forceMediaLayout(scope){
     wireAltThumbClicks(scope);
-
-    if (isBeanBagProductPage() && !isMobile()) return;
 
     // MOBILE: always undo any desktop wrapper and stop
     if (isMobile()) {
@@ -7319,22 +7320,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     }
   }
 
-  function isBeanBagProductPage(){
-    try {
-      var pc = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
-      if (pc && /^BB/i.test(String(pc.value || '').trim())) return true;
-      var pathLow = (location.pathname || '').toLowerCase();
-      var searchLow = (location.search || '').toLowerCase();
-      if (pathLow.indexOf('bean-bag') !== -1 || pathLow.indexOf('beanbag') !== -1 || pathLow.indexOf('bean_bag') !== -1) return true;
-      if (pathLow.indexOf('/103.htm') !== -1 || searchLow.indexOf('categoryid=103') !== -1 || searchLow.indexOf('c=103') !== -1) return true;
-      var titleEl = document.querySelector('.productnamecolorLARGE, .productnamecolor, #v65-product-parent h1, h1.productnamecolor');
-      var titleTxt = titleEl ? String(titleEl.textContent || '') : '';
-      if (/bean\s*bag/i.test(titleTxt)) return true;
-      return false;
-    } catch (eBb) { return false; }
-  }
   function hideOptionsTable(scope){
-    if (isBeanBagProductPage()) return;
     var root = scope || document;
     var tables = qa('#options_table, table[id*="options_table"]', root);
     tables.forEach(function(t){
@@ -7442,6 +7428,21 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var fmt = typeof window.formatMcCurrency === 'function' ? window.formatMcCurrency : function(v){
       return '$' + Number(v || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     };
+
+    if (!state.unlocked) {
+      caption.innerHTML =
+        '<div class="mc-member-price-caption__headline">Member price:</div>' +
+        '<div class="mc-member-price-caption__sub">' +
+          '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see member pricing' +
+        '</div>' +
+        '<div class="mc-member-price-caption__actions">' +
+          '<a href="#" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
+        '</div>';
+      caption.setAttribute('data-mc-member-state', 'locked');
+      ensureMemberCaptionMounted(caption);
+      return;
+    }
+
     var seatPrice = state.memberSeatPrice;
     var memberDisplayPrice = seatPrice;
 
@@ -7507,17 +7508,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       ensureMemberCaptionMounted(caption);
       return;
     }
-
-    caption.innerHTML =
-      '<div class="mc-member-price-caption__headline">Member price:</div>' +
-      '<div class="mc-member-price-caption__sub">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see member pricing' +
-      '</div>' +
-      '<div class="mc-member-price-caption__actions">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
-      '</div>';
-    caption.setAttribute('data-mc-member-state', 'locked');
-    ensureMemberCaptionMounted(caption);
   }
 
   function leftAlignPricingBlock(scope){
@@ -7551,23 +7541,45 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 
   function forceProductFixes() {
-    if (!markProductPage()) return;
+    var pcInp =
+      document.querySelector('input[name="ProductCode"]') ||
+      document.querySelector('input[name="productcode"]');
+    var code = pcInp && pcInp.value ? String(pcInp.value).trim() : '';
+    var beanBag = /^BB/i.test(code);
+    var hasMarker =
+      pcInp ||
+      document.querySelector('#v65-product-parent') ||
+      document.querySelector('.colors_pricebox');
+    if (!hasMarker) return;
+
     var scope = document.querySelector('#content_area') || document.body;
-    try {
-      forceNoItalics(scope);
-      hideLegacyOptionQuestions(scope);
-      forceTabsInline(scope);
-      forceMediaLayout(scope);
-      removeConfigurationDetails(scope);
-      hideOptionsTable(scope);
-      enforceMobileGutters(scope);
-      clampFloatingIcons();
-      clearAddToCartWrapperBackground(scope);
-      injectAddToCartIcon(scope);
-    } catch (e) {
-      if (typeof console !== 'undefined' && console.warn) console.warn('[McCabe] forceProductFixes (before caption)', e);
+
+    if (beanBag) {
+      try { document.body.classList.remove('mc-product-page'); } catch (eBb0) {}
+      document.body.classList.add('mc-bean-bag-pdp');
+      try { document.body.classList.remove('is-home'); } catch (eBb1) {}
+    } else {
+      if (!markProductPage()) return;
     }
-    rearrangePriceCaption(scope);
+
+    if (!beanBag) {
+      try {
+        forceNoItalics(scope);
+        hideLegacyOptionQuestions(scope);
+        forceTabsInline(scope);
+        forceMediaLayout(scope);
+        removeConfigurationDetails(scope);
+        hideOptionsTable(scope);
+        enforceMobileGutters(scope);
+        clampFloatingIcons();
+        clearAddToCartWrapperBackground(scope);
+        injectAddToCartIcon(scope);
+      } catch (e) {
+        if (typeof console !== 'undefined' && console.warn) console.warn('[McCabe] forceProductFixes (before caption)', e);
+      }
+      rearrangePriceCaption(scope);
+    }
+
     try {
       renderMemberPricingCaption(document);
     } catch (e2) {
@@ -7607,7 +7619,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var mo = new MutationObserver(function(){
       clearTimeout(deb);
       deb = setTimeout(function(){
-        if (markProductPage()) forceProductFixes();
+        var _m = document.querySelector('input[name="ProductCode"], input[name="productcode"]') ||
+          document.getElementById('v65-product-parent');
+        if (_m) forceProductFixes();
       }, 50);
     });
     try {
@@ -7627,7 +7641,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         var cap = document.querySelector('.mc-member-price-caption');
         if (cap && (cap.textContent || '').replace(/\s/g, '').length > 0) return;
         try {
-          if (markProductPage()) renderMemberPricingCaption(document);
+          var _pc = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+          var _c = _pc && _pc.value ? String(_pc.value).trim() : '';
+          if (markProductPage() || /^BB/i.test(_c)) renderMemberPricingCaption(document);
         } catch (e) {}
       }, 200);
     });
@@ -7638,13 +7654,15 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   var _resizeTimer;
   window.addEventListener('resize', function(){
-    if (!document.body.classList.contains('mc-product-page')) return;
+    if (!document.body.classList.contains('mc-product-page') &&
+        !document.body.classList.contains('mc-bean-bag-pdp')) return;
     clearTimeout(_resizeTimer);
     _resizeTimer = setTimeout(forceProductFixes, 400);
   });
 
   window.addEventListener('orientationchange', function(){
-    if (document.body.classList.contains('mc-product-page')) setTimeout(forceProductFixes, 400);
+    if (document.body.classList.contains('mc-product-page') ||
+        document.body.classList.contains('mc-bean-bag-pdp')) setTimeout(forceProductFixes, 400);
   });
 
   window.addEventListener('mcMemberPricingReady', function(){
@@ -7655,7 +7673,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     window.detectMemberPricingState();
   }
   window.addEventListener('pageshow', function(ev){
-    if (!ev.persisted || !document.body.classList.contains('mc-product-page')) return;
+    if (!ev.persisted) return;
+    if (!document.body.classList.contains('mc-product-page') &&
+        !document.body.classList.contains('mc-bean-bag-pdp')) return;
     if (typeof window.detectMemberPricingState !== 'function') return;
     window.__mcMemberPricing.promise = null;
     window.detectMemberPricingState();
@@ -7668,7 +7688,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function qsa(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
 
   function isPDP(){
-    return !!qs('input[name="ProductCode"]') && !!qs('#content_area');
+    return !!(qs('input[name="ProductCode"]') || qs('input[name="productcode"]')) && !!qs('#content_area');
   }
 
   function unwrapBadWrapper(){
@@ -7722,10 +7742,22 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 
   function run(){
-    unwrapBadWrapper();
-    tagPdpCells();
-    document.body.classList.add('mc-product-page');
-    document.body.classList.remove('mc-bean-bag-pdp');
+    if (!isPDP()) return;
+    var pcInp =
+      qs('input[name="ProductCode"]') ||
+      qs('input[name="productcode"]');
+    var code = pcInp && pcInp.value ? String(pcInp.value).trim() : '';
+    var beanBag = /^BB/i.test(code);
+    if (!beanBag) {
+      unwrapBadWrapper();
+      tagPdpCells();
+      document.body.classList.add('mc-product-page');
+      document.body.classList.remove('mc-bean-bag-pdp');
+    } else {
+      document.body.classList.remove('mc-product-page');
+      document.body.classList.add('mc-bean-bag-pdp');
+      try { document.body.classList.remove('is-home'); } catch (eRun) {}
+    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
@@ -7865,7 +7897,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 <!-- PATCH: Restore product tabs · reorder related-item images · match planner dimensions -->
 <style>
 body.productdetails table:has(td[class*="vCSS_tab"]),
-body.mc-product-page table:has(td[class*="vCSS_tab"]) {
+body.mc-product-page table:has(td[class*="vCSS_tab"]),
+body.mc-bean-bag-pdp table:has(td[class*="vCSS_tab"]) {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -7874,17 +7907,20 @@ body.mc-product-page table:has(td[class*="vCSS_tab"]) {
   pointer-events: auto !important;
 }
 body.productdetails td[class*="vCSS_tab"],
-body.mc-product-page td[class*="vCSS_tab"] {
+body.mc-product-page td[class*="vCSS_tab"],
+body.mc-bean-bag-pdp td[class*="vCSS_tab"] {
   visibility: visible !important;
   opacity: 1 !important;
   padding: 15px !important;
 }
 body.productdetails tbody:has(td[class*="vCSS_tab"]),
-body.mc-product-page tbody:has(td[class*="vCSS_tab"]) {
+body.mc-product-page tbody:has(td[class*="vCSS_tab"]),
+body.mc-bean-bag-pdp tbody:has(td[class*="vCSS_tab"]) {
   display: block !important;
 }
 body.productdetails tr:has(> td[class*="vCSS_tab"]),
-body.mc-product-page tr:has(> td[class*="vCSS_tab"]) {
+body.mc-product-page tr:has(> td[class*="vCSS_tab"]),
+body.mc-bean-bag-pdp tr:has(> td[class*="vCSS_tab"]) {
   display: flex !important;
   visibility: visible !important;
 }
@@ -7978,7 +8014,8 @@ body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) f
   /* ---- PATCH 1: Force product tabs visible ---- */
   function patchProductTabs(){
     if (!document.body.classList.contains('productdetails') &&
-        !document.body.classList.contains('mc-product-page')) return;
+        !document.body.classList.contains('mc-product-page') &&
+        !document.body.classList.contains('mc-bean-bag-pdp')) return;
     var scope = document.querySelector('#content_area') || document.body;
     var tabTds = scope.querySelectorAll('td[class*="vCSS_tab"]');
     if (!tabTds.length) return;

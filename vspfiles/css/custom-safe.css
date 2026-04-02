@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260402bbfix2 — pair with template meta mc-deploy-verify=20260402bbfix2 */
+/* MC_DEPLOY_VERIFY_20260402bbfix3 — pair with template html data-mc-search-fix=20260402bbfix3 */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -2148,6 +2148,16 @@ nav.push-menu .push-menu__close-btn::before {
 /* =========================================
    PRODUCT PAGE FIXES (Volusion 266)
 ========================================= */
+
+/* Guests: hide Volusion sale row in main price box (retail/list stays visible; member caption shows sale when logged in) */
+body.productdetails:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox font.product_sale_price,
+body.productdetails:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox .product_sale_price,
+body.mc-product-page:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox font.product_sale_price,
+body.mc-product-page:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox .product_sale_price,
+body.mc-bean-bag-pdp:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox font.product_sale_price,
+body.mc-bean-bag-pdp:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox .product_sale_price {
+  display: none !important;
+}
 
 /* Remove italic styling on product headings/tabs */
 body.mc-product-page #content_area h1,
@@ -6509,7 +6519,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 :is(html.category, body.category) .v-product-grid .v-product .product_price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .product_price {
-  order: 5;
+  order: 4;
   flex: 0 0 auto;
   margin-top: 4px !important;
   min-height: 0;
@@ -6524,7 +6534,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 
 :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .mc-member-grid-price {
-  order: 4 !important;
+  order: 5 !important;
   flex: 0 0 auto;
   margin-top: 2px !important;
   min-height: 0;
@@ -6555,17 +6565,22 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   margin-top: 4px !important;
 }
 
-/* Sale / member rows: guests see regular only (JS strips sale); logged-in ordering below */
-:is(html.category, body.category) body.mc-member-logged-in #content_area .v-product .product_sale_price,
-:is(html.category, body.category) body.mc-member-logged-in #content_area .v-product [class*="product_sale_price"],
-:is(html.category, body.category) body.mc-member-logged-in #content_area ul.v-product-grid > li.v-product > font.product_sale_price {
-  order: 5 !important;
-}
-
+/* Sale / member rows: retail row (4) → member block (5) → sale/list siblings (6–7) when logged in */
 :is(html.category, body.category) body.mc-member-logged-in #content_area .v-product .v-product__price,
 :is(html.category, body.category) body.mc-member-logged-in #content_area .v-product .product_price,
 :is(html.category, body.category) body.mc-member-logged-in #content_area ul.v-product-grid > li.v-product .v-product__price,
 :is(html.category, body.category) body.mc-member-logged-in #content_area ul.v-product-grid > li.v-product .product_price {
+  order: 4 !important;
+}
+
+:is(html.category, body.category) body.mc-member-logged-in #content_area .v-product .mc-member-grid-price,
+:is(html.category, body.category) body.mc-member-logged-in #content_area ul.v-product-grid > li.v-product .mc-member-grid-price {
+  order: 5 !important;
+}
+
+:is(html.category, body.category) body.mc-member-logged-in #content_area .v-product .product_sale_price,
+:is(html.category, body.category) body.mc-member-logged-in #content_area .v-product [class*="product_sale_price"],
+:is(html.category, body.category) body.mc-member-logged-in #content_area ul.v-product-grid > li.v-product > font.product_sale_price {
   order: 6 !important;
 }
 
