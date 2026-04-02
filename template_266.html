@@ -58,8 +58,8 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260402searchline: MAP mount must not steal installTarget (homepage Volusion price HTML) -->
-<meta name="mc-deploy-verify" content="20260402searchline">
+<!-- MC_DEPLOY_VERIFY_20260402bbpdpfix: MAP mount must not steal installTarget (homepage Volusion price HTML) -->
+<meta name="mc-deploy-verify" content="20260402bbpdpfix">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -6632,6 +6632,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       document.querySelector('.colors_pricebox');
     if (!hasMarker) return false;
     document.body.classList.add('mc-product-page');
+    try { document.body.classList.remove('is-home'); } catch (eH) {}
     return true;
   }
 
@@ -6937,6 +6938,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function forceMediaLayout(scope){
     wireAltThumbClicks(scope);
+
+    if (isBeanBagProductPage() && !isMobile()) return;
 
     // MOBILE: always undo any desktop wrapper and stop
     if (isMobile()) {
@@ -7316,7 +7319,14 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     }
   }
 
+  function isBeanBagProductPage(){
+    try {
+      var pc = document.querySelector('input[name=""ProductCode""], input[name=""productcode""]');
+      return !!(pc && /^BB/i.test(String(pc.value || '').trim()));
+    } catch (eBb) { return false; }
+  }
   function hideOptionsTable(scope){
+    if (isBeanBagProductPage()) return;
     var root = scope || document;
     var tables = qa('#options_table, table[id*="options_table"]', root);
     tables.forEach(function(t){

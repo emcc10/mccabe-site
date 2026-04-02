@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260402searchline — pair with template meta mc-deploy-verify=20260402searchline */
+/* MC_DEPLOY_VERIFY_20260402bbpdpfix — pair with template meta mc-deploy-verify=20260402bbpdpfix */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -701,6 +701,34 @@ body.is-home #slideshow-container {
 /* Homepage: hero supplies nav + search; hide duplicate desktop strip */
 body.is-home .mc-header-desktop-bar {
   display: none !important;
+}
+
+/* PDP: keep desktop nav + search visible even if body.is-home is set incorrectly */
+body.productdetails .mc-header-desktop-bar,
+body.productdetails.is-home .mc-header-desktop-bar {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+body.productdetails #display_menu_1,
+body.productdetails.is-home #display_menu_1,
+body.productdetails header.header .main-menu,
+body.productdetails header.header nav.menu {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+body.productdetails header.header .mc-header-search-cart-wrap {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+body.productdetails header.header .mc-header-search-below-nav,
+body.productdetails header.header #collapsingSearch,
+body.productdetails header.header .collapsing-search {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* ======================================
