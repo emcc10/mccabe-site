@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260401n — header critical + desktop bar row; hero underline on input row */
+/* MC_DEPLOY_VERIFY_20260401o — related items flex order, member sale hide, pager top bar, bean subline */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -5127,37 +5127,101 @@ body.productdetails #content_area .v-product-grid .v-product .mc-member-grid-pri
 }
 
 body.productdetails #content_area #relateditems td,
-body.mc-product-page #content_area #relateditems td {
+body.mc-product-page #content_area #relateditems td,
+body.productdetails #content_area table.relateditems td,
+body.mc-product-page #content_area table.relateditems td {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
 }
 
-body.productdetails #content_area #relateditems td > a:has(img),
-body.mc-product-page #content_area #relateditems td > a:has(img),
-body.productdetails #content_area #relateditems td img,
-body.mc-product-page #content_area #relateditems td img {
+/* Wrapper .v-product inside related cell: reset child order so title is never stuck above image */
+body.productdetails #content_area #relateditems td .v-product,
+body.mc-product-page #content_area #relateditems td .v-product {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body.productdetails #content_area #relateditems td .v-product > *,
+body.mc-product-page #content_area #relateditems td .v-product > * {
+  order: 10 !important;
+}
+
+body.productdetails #content_area #relateditems td .v-product .v-product__img,
+body.productdetails #content_area #relateditems td .v-product .product_image,
+body.productdetails #content_area #relateditems td .v-product > a:has(img),
+body.mc-product-page #content_area #relateditems td .v-product .v-product__img,
+body.mc-product-page #content_area #relateditems td .v-product .product_image,
+body.mc-product-page #content_area #relateditems td .v-product > a:has(img) {
   order: 1 !important;
 }
 
-body.productdetails #content_area #relateditems td .v-product__name,
-body.productdetails #content_area #relateditems td .productnamecolor,
-body.productdetails #content_area #relateditems td .v65-product-related-title,
-body.mc-product-page #content_area #relateditems td .v-product__name,
-body.mc-product-page #content_area #relateditems td .productnamecolor,
-body.mc-product-page #content_area #relateditems td .v65-product-related-title {
+body.productdetails #content_area #relateditems td .v-product .v-product__name,
+body.productdetails #content_area #relateditems td .v-product .productnamecolor,
+body.productdetails #content_area #relateditems td .v-product .v65-product-related-title,
+body.mc-product-page #content_area #relateditems td .v-product .v-product__name,
+body.mc-product-page #content_area #relateditems td .v-product .productnamecolor,
+body.mc-product-page #content_area #relateditems td .v-product .v65-product-related-title {
   order: 2 !important;
 }
 
-body.productdetails #content_area #relateditems td .v-product__price,
-body.productdetails #content_area #relateditems td .product_price,
-body.productdetails #content_area #relateditems td .v65-product-related-price,
-body.productdetails #content_area #relateditems td font.product_sale_price,
-body.mc-product-page #content_area #relateditems td .v-product__price,
-body.mc-product-page #content_area #relateditems td .product_price,
-body.mc-product-page #content_area #relateditems td .v65-product-related-price,
-body.mc-product-page #content_area #relateditems td font.product_sale_price {
+body.productdetails #content_area #relateditems td .v-product .v-product__price,
+body.productdetails #content_area #relateditems td .v-product .product_price,
+body.productdetails #content_area #relateditems td .v-product .mc-member-grid-price,
+body.productdetails #content_area #relateditems td .v-product .v65-product-related-price,
+body.productdetails #content_area #relateditems td .v-product font.product_sale_price,
+body.mc-product-page #content_area #relateditems td .v-product .v-product__price,
+body.mc-product-page #content_area #relateditems td .v-product .product_price,
+body.mc-product-page #content_area #relateditems td .v-product .mc-member-grid-price,
+body.mc-product-page #content_area #relateditems td .v-product .v65-product-related-price,
+body.mc-product-page #content_area #relateditems td .v-product font.product_sale_price {
   order: 3 !important;
+}
+
+/* Flat table cells (no .v-product wrapper) */
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)),
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) > *,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) > * {
+  order: 10 !important;
+}
+
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) > a:has(img),
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) > a:has(img) {
+  order: 1 !important;
+}
+
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .v-product__name,
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .productnamecolor,
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .v65-product-related-title,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .v-product__name,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .productnamecolor,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .v65-product-related-title {
+  order: 2 !important;
+}
+
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .v-product__price,
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .v65-product-related-price,
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) font.product_sale_price,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .v-product__price,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .v65-product-related-price,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) font.product_sale_price {
+  order: 3 !important;
+}
+
+/* Logged-in + member block: hide redundant Volusion “Sale price” row in related items */
+body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-grid-price) font.product_sale_price,
+body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-grid-price) .product_sale_price,
+body.mc-member-logged-in #content_area #relateditems tr > td:not(:has(.v-product)):has(.mc-member-grid-price) font.product_sale_price {
+  display: none !important;
 }
 
 @media (max-width: 767px) {
@@ -6422,7 +6486,7 @@ body.is-home:not(.productdetails).mc-member-logged-in #content_area_home ul.v-pr
   flex: 0 0 auto !important;
   width: 100% !important;
   box-sizing: border-box !important;
-  margin: 2px 0 0 0 !important;
+  margin: 0 !important;
   padding: 0 !important;
   font-size: 12px !important;
   font-weight: 400 !important;
@@ -6634,7 +6698,7 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   color: #fff !important;
 }
 
-/* Next beside “Page N …” above the grid (injected #mc-category-pager-top) */
+/* Next beside “Page N …” above the grid (injected #mc-category-pager-top; re-parented before product grid in JS) */
 .mc-category-pager-page-row {
   display: flex !important;
   flex-direction: row !important;
@@ -6646,7 +6710,8 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   max-width: 100% !important;
   box-sizing: border-box !important;
   margin: 0 0 14px 0 !important;
-  padding: 0 max(12px, 2vw) !important;
+  padding: 0 !important;
+  clear: both !important;
 }
 
 .mc-category-pager-page-row .mc-category-pager__btn--next {
