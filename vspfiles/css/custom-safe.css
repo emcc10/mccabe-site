@@ -839,7 +839,7 @@ body:not(.is-home) header.header .collapsing-search {
     max-width: 45% !important;
     min-width: 0 !important;
     border-bottom: none !important;
-    border-right: 1px solid rgba(0, 0, 0, 0.22) !important;
+    border-right: none !important;
     padding-right: 10px !important;
     box-shadow: none !important;
   }
