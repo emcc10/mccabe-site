@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260402guestfix — pair with template meta mc-deploy-verify=20260402guestfix */
+/* MC_DEPLOY_VERIFY_20260402searchline — pair with template meta mc-deploy-verify=20260402searchline */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -810,6 +810,14 @@ body:not(.is-home) header.header .collapsing-search {
     width: 8.75rem !important;
     max-width: 45% !important;
     min-width: 0 !important;
+    border-bottom: none !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.22) !important;
+    padding-right: 10px !important;
+    box-shadow: none !important;
+  }
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search:not(:focus-within):hover .collapsing-search__form .row #search,
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search:not(:focus-within):hover .collapsing-search__form .row .collapsing-search__input {
+    border-right-color: rgba(0, 0, 0, 0.55) !important;
   }
 
   body:not(.is-home) .mc-header-desktop-bar .collapsing-search:not(:focus-within) .collapsing-search__form .row::after {
@@ -845,6 +853,8 @@ body:not(.is-home) header.header .collapsing-search {
     flex: 1 1 auto !important;
     width: auto !important;
     max-width: none !important;
+    border-right: none !important;
+    padding-right: 0 !important;
   }
 
   body:not(.is-home) .mc-header-desktop-bar .mc-header-cart {
@@ -870,8 +880,7 @@ body:not(.is-home) header.header .collapsing-search {
   body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap:focus-within,
   html.mc-search-open body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap,
   body.mc-search-open body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap {
-    border-bottom-color: #1a1a1a !important;
-    border-bottom-width: 2px !important;
+    border-bottom: 2px solid #1a1a1a !important;
     padding: 8px 0 8px !important;
     box-shadow: 0 18px 48px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.06) !important;
   }
