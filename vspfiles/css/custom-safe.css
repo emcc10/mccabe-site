@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260419sync — pair with template meta mc-deploy-verify=20260419sync */
+/* MC_DEPLOY_VERIFY_20260419fixall — pair with template meta mc-deploy-verify=20260419fixall */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6491,11 +6491,24 @@ body.is-home:not(.productdetails).mc-member-logged-in #content_area_home ul.v-pr
 
 /* Guests: hide Volusion sale rows on PLP (member login block + list/regular only) */
 :is(html.category, body.category) body:not(.mc-member-logged-in) #content_area .v-product font.product_sale_price,
+:is(html.category, body.category) body:not(.mc-member-logged-in) #content_area .v-product .product_sale_price,
+:is(html.category, body.category) body:not(.mc-member-logged-in) #content_area .v-product [class*="product_sale_price"],
 :is(html.category, body.category) body:not(.mc-member-logged-in)
   #content_area
   ul.v-product-grid
   > li.v-product
   > font.product_sale_price {
+  display: none !important;
+}
+
+/* Homepage grids: same guest sale hiding as category PLP */
+body.is-home:not(.productdetails):not(.mc-member-logged-in) #content_area_home .v-product font.product_sale_price,
+body.is-home:not(.productdetails):not(.mc-member-logged-in) #content_area_home .v-product .product_sale_price,
+body.is-home:not(.productdetails):not(.mc-member-logged-in) #content_area_home .v-product [class*="product_sale_price"],
+body.is-home:not(.productdetails):not(.mc-member-logged-in) #content_area_home ul.v-product-grid > li > font.product_sale_price,
+body.is-home:not(.productdetails):not(.mc-member-logged-in) #content_area .v-product font.product_sale_price,
+body.is-home:not(.productdetails):not(.mc-member-logged-in) #content_area .v-product .product_sale_price,
+body.is-home:not(.productdetails):not(.mc-member-logged-in) #content_area .v-product [class*="product_sale_price"] {
   display: none !important;
 }
 
@@ -6506,22 +6519,22 @@ body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
   display: none !important;
 }
 
-/* Bean bag category: subline centered under title */
+/* Bean bag category: subline tight under title, aligned with PLP title stack */
 :is(html.category, body.category) #content_area .mc-plp-bean-subline {
   order: 3 !important;
   flex: 0 0 auto !important;
   width: 100% !important;
   box-sizing: border-box !important;
-  margin: 0 !important;
+  margin: 2px 0 0 0 !important;
   padding: 0 !important;
   font-size: 12px !important;
   font-weight: 400 !important;
   letter-spacing: 0.06em !important;
   text-transform: none !important;
   color: #555 !important;
-  text-align: center !important;
-  line-height: 1.35 !important;
-  align-self: center !important;
+  text-align: left !important;
+  line-height: 1.2 !important;
+  align-self: flex-start !important;
 }
 
 @media (max-width: 991px) {

@@ -58,8 +58,8 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260419sync: bump this + meta content whenever you need to prove a template deploy (same string forever hides stale uploads). -->
-<meta name="mc-deploy-verify" content="20260419sync">
+<!-- MC_DEPLOY_VERIFY_20260419fixall: MAP→member row, guest sale strip, PLP alignment -->
+<meta name="mc-deploy-verify" content="20260419fixall">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -10342,6 +10342,88 @@ try {
     return /\bsale\s+price\b/i.test((card.textContent || '').replace(/\s+/g, ' '));
   }
 
+  /** MAP callout may live in a div/span whose textContent still matches (split text nodes break mcFindMapTextMount). */
+  function mcFindSmallestMapElement(card) {
+    if (!card || !card.querySelectorAll) return null;
+    var nodes = card.querySelectorAll('a, span, div, p, font, strong, em, b, i, u, label, small');
+    var best = null;
+    var bestLen = Infinity;
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      var el = nodes[i];
+      if (el.closest && el.closest('.mc-member-grid-price')) continue;
+      if (el.querySelector && el.querySelector('img')) continue;
+      if (el.querySelector && el.querySelector('table')) continue;
+      var t = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!MC_MAP_LINK_RE.test(t) || t.length > 200) continue;
+      if (t.length >= bestLen) continue;
+      bestLen = t.length;
+      best = el;
+    }
+    return best;
+  }
+
+  function mcRemoveGuestSaleElements(card) {
+    if (!card || !card.querySelectorAll) return;
+    if (document.body.classList.contains('mc-member-logged-in')) return;
+    var rmSel =
+      'font.product_sale_price, .product_sale_price, [class*="product_sale_price"], span.product_sale_price, [class*="formatted_sale"], [class*="FormattedSale"]';
+    var nodes = card.querySelectorAll(rmSel);
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      if (n.closest && n.closest('.mc-member-grid-price')) continue;
+      try {
+        if (n.parentNode) n.parentNode.removeChild(n);
+      } catch (eRs) {}
+    }
+    var labels = card.querySelectorAll('font, span, b, strong, div');
+    for (i = 0; i < labels.length; i++) {
+      var el = labels[i];
+      if (el.closest && el.closest('.mc-member-grid-price')) continue;
+      if (el.querySelector && el.children && el.children.length > 4) continue;
+      var tx = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!/^sale\s*price/i.test(tx) && !/\bsale\s*price\s*:/i.test(tx)) continue;
+      if (tx.length > 100) continue;
+      try {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      } catch (eR2) {}
+    }
+  }
+
+  function mcReplaceMapCalloutWithBlock(card, block) {
+    if (!card || !block) return false;
+    if (mcSwapMapElementsForBlock(card, block)) return true;
+    var mapEl = mcFindSmallestMapElement(card);
+    if (mapEl && mapEl.parentNode) {
+      var tag = mapEl.tagName ? mapEl.tagName.toUpperCase() : '';
+      if (tag !== 'TD' && tag !== 'TH') {
+        var mte = (mapEl.textContent || '').replace(/\s+/g, ' ').trim();
+        if (MC_MAP_LINK_RE.test(mte) && mte.length <= 200) {
+          try {
+            mapEl.parentNode.replaceChild(block, mapEl);
+            return true;
+          } catch (eRepSm) {}
+        }
+      }
+    }
+    var mapMount = mcFindMapTextMount(card);
+    if (
+      !mapMount ||
+      !mapMount.parentNode ||
+      (mapMount.closest && mapMount.closest('.mc-member-grid-price'))
+    ) {
+      return false;
+    }
+    var mt = (mapMount.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!MC_MAP_LINK_RE.test(mt) || mt.length > 200) return false;
+    try {
+      mapMount.parentNode.replaceChild(block, mapMount);
+      return true;
+    } catch (eRep) {}
+    return false;
+  }
+
   function mcBuildLockedMemberLoginBlock() {
     var block = document.createElement('div');
     block.className = 'mc-member-grid-price';
@@ -10407,7 +10489,7 @@ try {
     var tag = priceEl.tagName ? priceEl.tagName.toUpperCase() : '';
     if (tag === 'TD' || tag === 'TH') {
       var saleNodes = priceEl.querySelectorAll(
-        'font.product_sale_price, .product_sale_price, [class*="product_sale_price"]'
+        'font.product_sale_price, .product_sale_price, [class*="product_sale_price"], [class*="formatted_sale"], [class*="FormattedSale"]'
       );
       var si;
       for (si = 0; si < saleNodes.length; si++) {
@@ -10594,14 +10676,74 @@ try {
             existingBlock.parentNode.removeChild(existingBlock);
           } catch (eRmGuest) {}
         }
+        try {
+          mcRemoveGuestSaleElements(card);
+        } catch (eRmGsPre) {}
+        if (mcCardStillShowsMapPhrase(card)) {
+          var gMapBlock = mcBuildLockedMemberLoginBlock();
+          if (mcReplaceMapCalloutWithBlock(card, gMapBlock)) {
+            try {
+              mcRemoveGuestSaleElements(card);
+            } catch (eRmG) {}
+            if (installTarget) mcInstallGuestPriceOnly(installTarget, card);
+            if (!card.querySelector('.mc-member-grid-price')) {
+              mcAppendGuestMemberLoginBlock(card, installTarget);
+            }
+            card.setAttribute('data-mc-member-grid', 'locked');
+            try {
+              mcReorderCategoryListingNodes(card);
+              mcEnsureMemberBlockCardLevel(card);
+            } catch (eGuestMap) {}
+            continue;
+          }
+        }
+        try {
+          mcRemoveGuestSaleElements(card);
+        } catch (eRmGs) {}
         if (installTarget) mcInstallGuestPriceOnly(installTarget, card);
-        mcAppendGuestMemberLoginBlock(card, installTarget);
+        if (!card.querySelector('.mc-member-grid-price')) {
+          mcAppendGuestMemberLoginBlock(card, installTarget);
+        }
         card.setAttribute('data-mc-member-grid', 'locked');
         try {
           mcReorderCategoryListingNodes(card);
           mcEnsureMemberBlockCardLevel(card);
         } catch (eGuestOrd) {}
         continue;
+      }
+
+      /* Logged-in + MAP teaser only (no Volusion sale row): swap teaser for member row + price when we have it */
+      if (unlocked && !hasSale && mcCardStillShowsMapPhrase(card)) {
+        if (existingBlock && existingBlock.parentNode) {
+          try {
+            existingBlock.parentNode.removeChild(existingBlock);
+          } catch (eRmMap0) {}
+          existingBlock = null;
+        }
+        var mapMember = document.createElement('div');
+        mapMember.className = 'mc-member-grid-price';
+        mapMember.setAttribute('data-mc-member-grid', 'unlocked');
+        var mapLbl = document.createElement('div');
+        mapLbl.className = 'mc-member-grid-price__label';
+        mapLbl.textContent = 'Member price:';
+        mapMember.appendChild(mapLbl);
+        var mapAmtStr = regPrice || mcExtractDollarFromText((card.textContent || '').replace(/\s+/g, ' '));
+        if (mapAmtStr) {
+          var mapAmtEl = document.createElement('div');
+          mapAmtEl.className = 'mc-member-grid-price__amount';
+          mapAmtEl.textContent = mapAmtStr;
+          mapMember.appendChild(mapAmtEl);
+        }
+        if (mcReplaceMapCalloutWithBlock(card, mapMember)) {
+          if (installTarget) mcInstallLoggedInPriceNoMemberBlock(installTarget);
+          card.setAttribute('data-mc-member-grid', 'unlocked');
+          try {
+            mcReorderCategoryListingNodes(card);
+            mcEnsureMemberBlockCardLevel(card);
+            mcReorderSaleAfterMember(card);
+          } catch (eMapL) {}
+          continue;
+        }
       }
 
       if (!hasSale) {
