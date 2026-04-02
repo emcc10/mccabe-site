@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
-<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260402bbfix3"><!--<![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260402bbfix4"><!--<![endif]-->
 <head>
 <script>
 (function () {
@@ -58,8 +58,8 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260402bbfix2: MAP mount must not steal installTarget (homepage Volusion price HTML) -->
-<meta name="mc-deploy-verify" content="20260402bbfix2">
+<!-- MC_DEPLOY_VERIFY_20260402bbfix4: bean bag PDP guards + deploy pair -->
+<meta name="mc-deploy-verify" content="20260402bbfix4">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -1600,11 +1600,16 @@ html body.productdetails .v-product-grid > .v-product {
 <script id="wm-leather-modal-js">
 (function(){
   "use strict";
-  // 🚫 EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER (codes start with BB)
-  var productCodeInput = document.querySelector('input[name="ProductCode"]');
-  if (productCodeInput && /^BB/i.test(String(productCodeInput.value || '').trim())) {
-    return;
+  // EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER (BB*; URL fallback if ProductCode not in DOM yet)
+  function mcSkipLeatherPlannerForBeanBag() {
+    try {
+      var pcInp = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      if (pcInp && /^BB/i.test(String(pcInp.value || '').trim())) return true;
+      if (/\/product-p\/bb[-_]/i.test(String(location.pathname || ''))) return true;
+    } catch (eSk) {}
+    return false;
   }
+  if (mcSkipLeatherPlannerForBeanBag()) return;
 
 
   // If you accidentally paste this twice, only the first one runs.
@@ -2242,11 +2247,16 @@ boot();
 (function(){
   if (window.__MC_INLINE_FINAL__) return;
 
-  // 🚫 EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER (codes start with BB)
-  var productCodeInput = document.querySelector('input[name="ProductCode"]');
-  if (productCodeInput && /^BB/i.test(String(productCodeInput.value || '').trim())) {
-    return;
+  // EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER (BB*; URL fallback if ProductCode not in DOM yet)
+  function mcSkipLeatherPlannerForBeanBagInline() {
+    try {
+      var pcInp = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      if (pcInp && /^BB/i.test(String(pcInp.value || '').trim())) return true;
+      if (/\/product-p\/bb[-_]/i.test(String(location.pathname || ''))) return true;
+    } catch (eSk2) {}
+    return false;
   }
+  if (mcSkipLeatherPlannerForBeanBagInline()) return;
 
   window.__MC_INLINE_FINAL__ = true;
 
