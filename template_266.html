@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
-<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260402c"><!--<![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260402d"><!--<![endif]-->
 <head>
 <script>
 (function () {
@@ -95,6 +95,58 @@
     #mc-category-pager .mc-category-pager__btn:hover {
       background: #1a1a1a !important;
       color: #fff !important;
+    }
+  </style>
+  <style id="mc-header-search-critical">
+    /* Interior: full-width search under nav even when custom-safe.css is old or fails */
+    @media (min-width: 992px) {
+      body:not(.is-home) header.header {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        align-items: stretch !important;
+      }
+      body:not(.is-home) header.header > .header__section {
+        order: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      body:not(.is-home) header.header > .hidden-xs.col-xs-12,
+      body:not(.is-home) header.header > .col-xs-12.hidden-xs {
+        order: 2 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      body:not(.is-home) header.header > .header__section--middle,
+      body:not(.is-home) header.header > .mc-header-search-below-nav {
+        order: 20 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 auto !important;
+      }
+      body:not(.is-home) header.header > .mc-header-cart {
+        order: 30 !important;
+      }
+    }
+    header.header .header__section--middle,
+    header.header .mc-header-search-below-nav,
+    #mcHeroSearchOverlay .header__section--middle {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    header.header .collapsing-search,
+    #mcHeroSearchOverlay .collapsing-search {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      position: relative !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
     }
   </style>
 <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
@@ -368,7 +420,7 @@ document.addEventListener("DOMContentLoaded", function () {
 ========================================= -->
 
 <body>
-<!-- MC_TEMPLATE: hero-z35-search-z22-if_homepage-is-home-20260402c -->
+<!-- MC_TEMPLATE: hero-z35-search-z22-if_homepage-is-home-20260402d -->
 <!-- Do not override window.location.reload: CAPTCHA / bot checks (Cloudflare, etc.) call reload to finish; blocking it causes verify loops. -->
 <a class="mc-cart-float" href="/shoppingcart.asp" aria-label="Cart" rel="nofollow">
   <svg class="mc-cart-float__icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
@@ -2782,6 +2834,10 @@ function detectMemberPricingState(){
     return state;
   }).then(function(state){
     try {
+      if (state && state.unlocked) document.body.classList.add('mc-member-logged-in');
+      else document.body.classList.remove('mc-member-logged-in');
+    } catch (eCls) {}
+    try {
       window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: state }));
     } catch (e) {}
     refreshPlannerPriceForMemberState();
@@ -3928,6 +3984,14 @@ window.initRoomPlanner = function (opts) {
   padding: 0 clamp(4px, 0.5vw, 8px);
   position: relative;
   z-index: 2;
+  transition: background 0.15s ease, color 0.15s ease;
+  border-radius: 4px;
+}
+
+.hero-nav a:hover,
+.hero-nav a:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
 }
 
 body.is-home .hero-menu::before {
@@ -4056,8 +4120,13 @@ body:not(.is-home) #display_menu_1 .vnav__label {
 body:not(.is-home) #display_menu_1 .vnav--level1 > li > a:hover,
 body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li > a:hover,
 body:not(.is-home) #display_menu_1 .vnav__link:hover,
-body:not(.is-home) #display_menu_1 .vnav__label:hover {
+body:not(.is-home) #display_menu_1 .vnav__label:hover,
+body:not(.is-home) #display_menu_1 .vnav--level1 > li > a:focus-visible,
+body:not(.is-home) #display_menu_1 .vnav__link:focus-visible,
+body:not(.is-home) #display_menu_1 .vnav__label:focus-visible {
   color: #0a0a0a !important;
+  background: rgba(0, 0, 0, 0.08) !important;
+  border-radius: 4px !important;
 }
 
 /* Submenu typography on non-home — left-aligned, lighter than top level */
@@ -4083,8 +4152,12 @@ body:not(.is-home) #display_menu_1 .vnav__submenu a {
 
 body:not(.is-home) #display_menu_1 .vnav--level2 a:hover,
 body:not(.is-home) #display_menu_1 .vnav--level3 a:hover,
-body:not(.is-home) #display_menu_1 .vnav__submenu a:hover {
+body:not(.is-home) #display_menu_1 .vnav__submenu a:hover,
+body:not(.is-home) #display_menu_1 .vnav--level2 a:focus-visible,
+body:not(.is-home) #display_menu_1 .vnav--level3 a:focus-visible,
+body:not(.is-home) #display_menu_1 .vnav__submenu a:focus-visible {
   color: #0a0a0a !important;
+  background: rgba(0, 0, 0, 0.07) !important;
 }
 
 
@@ -8941,6 +9014,7 @@ try {
 :is(html.category, body.category) .v-product-grid .v-product .v-product__name,:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,:is(html.category, body.category) .v-product-grid .v-product h2,:is(html.category, body.category) .v-product-grid .v-product h3,:is(html.category, body.category) .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;align-items:flex-start;justify-content:flex-start;text-align:left;min-height:0!important;box-sizing:border-box;width:100%;margin-top:4px!important}
 :is(html.category, body.category) .v-product-grid .v-product .productnamecolor a,:is(html.category, body.category) .v-product-grid .v-product .v-product__name a{width:100%;text-align:left!important}
 :is(html.category, body.category) .v-product-grid .v-product .v-product__price,:is(html.category, body.category) .v-product-grid .v-product .product_price,:is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price{order:3;min-height:0!important;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;width:100%;text-align:left!important}
+:is(html.category, body.category) #content_area .mc-plp-bean-subline{order:2;width:100%;box-sizing:border-box;margin:2px 0 0;font-size:12px;letter-spacing:.06em;color:#555;text-align:left;line-height:1.35}
 :is(html.category, body.category) .sidebar-wrapper .sidebar,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"]{text-align:left!important}
 :is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] ul,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] li{text-align:left!important}
 :is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] a,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] .vnav__link,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] .vnav__label,:is(html.category, body.category) .sidebar-wrapper .menu a{font-weight:400!important;letter-spacing:.08em!important;text-transform:uppercase!important;font-size:11px!important;color:#1a1a1a!important}
@@ -9273,7 +9347,20 @@ try {
   function mcGatherPriceLikeNodes(priceEl) {
     var out = [];
     if (!priceEl) return out;
-    var nodes = priceEl.querySelectorAll('span, div, del, s, b, strong, em');
+    var selfText = (priceEl.textContent || '').replace(/\s+/g, ' ').trim();
+    if (
+      priceEl.nodeType === 1 &&
+      (!priceEl.children || priceEl.children.length === 0) &&
+      /\$[\d,]+(?:\.\d{2})?/.test(selfText) &&
+      !MC_MAP_LINK_RE.test(selfText) &&
+      !/lowest|add to cart for our lowest/i.test(selfText)
+    ) {
+      if (!priceEl.closest || !priceEl.closest('.mc-member-grid-price')) {
+        out.push(priceEl.cloneNode(true));
+      }
+      return out;
+    }
+    var nodes = priceEl.querySelectorAll('span, div, del, s, b, strong, em, font, i, u, p, small');
     var k;
     for (k = 0; k < nodes.length; k++) {
       var node = nodes[k];
@@ -9590,7 +9677,12 @@ try {
       if (!h) continue;
       if (mcCacheKeyForCategoryHref(h) !== key) continue;
       var b = c.querySelector('.mc-member-grid-price');
-      if (b) mcEnsureAmountInMemberBlock(b, txt);
+      if (b) {
+        mcEnsureAmountInMemberBlock(b, txt);
+        try {
+          mcReorderSaleAfterMember(c);
+        } catch (eRs) {}
+      }
     }
   }
 
@@ -9661,6 +9753,70 @@ try {
    * Volusion often outputs sale / MAP / member nodes before the image. Flex `order` usually fixes it;
    * when the card root is a column flex container, moving DOM after the title guarantees image → title → price.
    */
+  function mcEnsureMemberBlockCardLevel(card) {
+    var block = card.querySelector('.mc-member-grid-price');
+    if (!block || !block.parentNode || block.parentNode === card) return;
+    var title =
+      card.querySelector('.v-product__name') ||
+      card.querySelector('.productnamecolor') ||
+      card.querySelector('h2') ||
+      card.querySelector('h3');
+    if (!title || !title.parentNode) return;
+    var insertAfter = title;
+    var ns = title.nextSibling;
+    if (ns && ns.nodeType === 1 && ns.classList && ns.classList.contains('mc-plp-bean-subline')) {
+      insertAfter = ns;
+    }
+    if (block.previousSibling === insertAfter) return;
+    var ref = insertAfter.nextSibling;
+    try {
+      if (ref === block) return;
+      card.insertBefore(block, ref);
+    } catch (eIns) {
+      try {
+        card.appendChild(block);
+      } catch (e2) {}
+    }
+  }
+
+  function mcReorderSaleAfterMember(card) {
+    if (!document.body.classList.contains('mc-member-logged-in')) return;
+    var mem = card.querySelector('.mc-member-grid-price');
+    if (!mem || !mem.parentNode) return;
+    var sale = card.querySelector(
+      '.product_sale_price, font.product_sale_price, span.product_sale_price, [class*="product_sale_price"]'
+    );
+    if (!sale || (sale.closest && sale.closest('.mc-member-grid-price'))) return;
+    if (mem.nextSibling === sale) return;
+    try {
+      mem.parentNode.insertBefore(sale, mem.nextSibling);
+    } catch (eSale) {}
+  }
+
+  function mcInjectBeanBagPlpSubline() {
+    var path = (location.pathname || '').toLowerCase();
+    if (path.indexOf('bean-bag') === -1) return;
+    var cards = mcCollectGridProductCards();
+    var ci;
+    for (ci = 0; ci < cards.length; ci++) {
+      var card = cards[ci];
+      if (!card.querySelector || card.querySelector('.mc-plp-bean-subline')) continue;
+      var title =
+        card.querySelector('.v-product__name') ||
+        card.querySelector('.productnamecolor') ||
+        card.querySelector('h2') ||
+        card.querySelector('h3');
+      if (!title || !title.parentNode) continue;
+      var sub = document.createElement('div');
+      sub.className = 'mc-plp-bean-subline';
+      sub.setAttribute('aria-hidden', 'true');
+      sub.textContent = 'More sizes and colors';
+      try {
+        title.parentNode.insertBefore(sub, title.nextSibling);
+      } catch (eSub) {}
+    }
+  }
+
   function mcReorderCategoryListingNodes(card) {
     if (!card || !card.querySelector) return;
     var isCat =
@@ -9725,6 +9881,13 @@ try {
     if (!products.length) return;
     var st = window.__mcMemberPricing || {};
     var unlocked = !!st.unlocked;
+    try {
+      if (unlocked) document.body.classList.add('mc-member-logged-in');
+      else document.body.classList.remove('mc-member-logged-in');
+    } catch (eCls2) {}
+    try {
+      mcInjectBeanBagPlpSubline();
+    } catch (eBean0) {}
     var i;
     for (i = 0; i < products.length; i++) {
       var card = products[i];
@@ -9746,6 +9909,14 @@ try {
       var gatherHost = priceBox || priceElPre;
       var keptPre = gatherHost ? mcGatherPriceLikeNodes(gatherHost) : [];
       var installTarget = priceBox || priceElPre;
+      if (!installTarget) {
+        installTarget =
+          card.querySelector('.v-product__price') ||
+          card.querySelector('.product_price') ||
+          card.querySelector('font.product_sale_price') ||
+          card.querySelector('.product_sale_price') ||
+          card.querySelector('[itemprop="price"]');
+      }
 
       var parseHost = card.cloneNode(true);
       var strip = parseHost.querySelectorAll('.mc-member-grid-price');
@@ -9802,6 +9973,11 @@ try {
         try {
           mcReorderCategoryListingNodes(card);
         } catch (eOrdSwap) {}
+        try {
+          mcEnsureMemberBlockCardLevel(card);
+          mcReorderCategoryListingNodes(card);
+          mcReorderSaleAfterMember(card);
+        } catch (ePost1) {}
         continue;
       }
 
@@ -9816,6 +9992,12 @@ try {
         if (mcCardStillShowsMapPhrase(card)) {
           card.appendChild(block);
           card.setAttribute('data-mc-member-grid', nextState);
+          try {
+            mcReorderCategoryListingNodes(card);
+            mcEnsureMemberBlockCardLevel(card);
+            mcReorderCategoryListingNodes(card);
+            mcReorderSaleAfterMember(card);
+          } catch (ePost3) {}
         }
         continue;
       }
@@ -9829,6 +10011,11 @@ try {
       try {
         mcReorderCategoryListingNodes(card);
       } catch (eOrdPaint) {}
+      try {
+        mcEnsureMemberBlockCardLevel(card);
+        mcReorderCategoryListingNodes(card);
+        mcReorderSaleAfterMember(card);
+      } catch (ePost2) {}
     }
     for (i = 0; i < products.length; i++) {
       try {
