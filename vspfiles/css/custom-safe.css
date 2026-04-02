@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260401k — bean PLP subline center; member/sale logged-in only; pager next top-right */
+/* MC_DEPLOY_VERIFY_20260401n — header critical + desktop bar row; hero underline on input row */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -77,9 +77,7 @@ body:not(.is-home) header.header .mc-header-search-below-nav {
 }
 
 header.header .collapsing-search,
-header.header #collapsingSearch,
-#mcHeroSearchOverlay .collapsing-search,
-#mcHeroSearchOverlay #collapsingSearch {
+header.header #collapsingSearch {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -104,18 +102,44 @@ header.header #collapsingSearch,
     padding 0.22s ease !important;
 }
 
-header.header .collapsing-search:hover,
-#mcHeroSearchOverlay .collapsing-search:hover {
+/* Hero: line is on .collapsing-search__form .row (template critical); no dark strip on wrapper */
+#mcHeroSearchOverlay .collapsing-search,
+#mcHeroSearchOverlay #collapsingSearch {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 6 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  overflow: visible !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: none !important;
+  border-radius: 0 !important;
+  padding: 4px 12px 10px !important;
+  transition:
+    background 0.22s ease,
+    box-shadow 0.28s ease,
+    transform 0.28s ease,
+    padding 0.22s ease !important;
+}
+
+header.header .collapsing-search:hover {
   border-bottom-color: rgba(0, 0, 0, 0.55) !important;
 }
 
-/* Expanded: typed focus, or magnifier toggle opened */
+#mcHeroSearchOverlay .collapsing-search:hover .collapsing-search__form .row {
+  border-bottom-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Expanded: header strip (hero lives in #mcHeroSearchOverlay, not under header.header) */
 header.header .collapsing-search:focus-within,
 html.mc-search-open header.header .collapsing-search,
-body.mc-search-open header.header .collapsing-search,
-#mcHeroSearchOverlay .collapsing-search:focus-within,
-html.mc-search-open #mcHeroSearchOverlay .collapsing-search,
-body.mc-search-open #mcHeroSearchOverlay .collapsing-search {
+body.mc-search-open header.header .collapsing-search {
   background: #ffffff !important;
   border-bottom-color: #1a1a1a !important;
   border-bottom-width: 2px !important;
@@ -123,6 +147,24 @@ body.mc-search-open #mcHeroSearchOverlay .collapsing-search {
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.06) !important;
   transform: translateY(-3px) !important;
   z-index: 100 !important;
+}
+
+#mcHeroSearchOverlay .collapsing-search:focus-within,
+html.mc-search-open #mcHeroSearchOverlay .collapsing-search,
+body.mc-search-open #mcHeroSearchOverlay .collapsing-search {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-bottom: none !important;
+  padding: 10px 14px 12px !important;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(-2px) !important;
+  z-index: 100 !important;
+}
+
+#mcHeroSearchOverlay .collapsing-search:focus-within .collapsing-search__form .row,
+html.mc-search-open #mcHeroSearchOverlay .collapsing-search__form .row,
+body.mc-search-open #mcHeroSearchOverlay .collapsing-search__form .row {
+  border-bottom: 2px solid #1a1a1a !important;
+  padding-bottom: 8px !important;
 }
 
 html.mc-search-open header.header,
@@ -185,10 +227,13 @@ header.header #search,
 }
 
 header.header .collapsing-search:hover .collapsing-search__input,
-header.header .collapsing-search:hover #search,
-#mcHeroSearchOverlay .collapsing-search:hover .collapsing-search__input,
-#mcHeroSearchOverlay .collapsing-search:hover #search {
+header.header .collapsing-search:hover #search {
   color: #000000 !important;
+}
+
+#mcHeroSearchOverlay .collapsing-search:hover:not(:focus-within) .collapsing-search__input,
+#mcHeroSearchOverlay .collapsing-search:hover:not(:focus-within) #search {
+  color: #ffffff !important;
 }
 
 header.header .collapsing-search .collapsing-search__submit,
@@ -325,12 +370,12 @@ body.mc-search-open #mcHeroSearchOverlay #toggle1 .toggle__icon--open {
   opacity: 0.85 !important;
 }
 
-/* Hero overlay on video: light underline + type until expanded (overrides dark header colors above) */
-html:not(.mc-search-open) #mcHeroSearchOverlay .collapsing-search:not(:focus-within) {
-  border-bottom-color: rgba(255, 255, 255, 0.45) !important;
+/* Hero: underline on the input row (outer .collapsing-search has no border — see template critical) */
+html:not(.mc-search-open) #mcHeroSearchOverlay .collapsing-search:not(:focus-within) .collapsing-search__form .row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45) !important;
 }
 
-html:not(.mc-search-open) #mcHeroSearchOverlay .collapsing-search:not(:focus-within):hover {
+html:not(.mc-search-open) #mcHeroSearchOverlay .collapsing-search:not(:focus-within):hover .collapsing-search__form .row {
   border-bottom-color: rgba(255, 255, 255, 0.82) !important;
 }
 
