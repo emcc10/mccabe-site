@@ -58,8 +58,8 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260402bbpdpfix: MAP mount must not steal installTarget (homepage Volusion price HTML) -->
-<meta name="mc-deploy-verify" content="20260402bbpdpfix">
+<!-- MC_DEPLOY_VERIFY_20260402bbfix2: MAP mount must not steal installTarget (homepage Volusion price HTML) -->
+<meta name="mc-deploy-verify" content="20260402bbfix2">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -7321,8 +7321,16 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function isBeanBagProductPage(){
     try {
-      var pc = document.querySelector('input[name=""ProductCode""], input[name=""productcode""]');
-      return !!(pc && /^BB/i.test(String(pc.value || '').trim()));
+      var pc = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      if (pc && /^BB/i.test(String(pc.value || '').trim())) return true;
+      var pathLow = (location.pathname || '').toLowerCase();
+      var searchLow = (location.search || '').toLowerCase();
+      if (pathLow.indexOf('bean-bag') !== -1 || pathLow.indexOf('beanbag') !== -1 || pathLow.indexOf('bean_bag') !== -1) return true;
+      if (pathLow.indexOf('/103.htm') !== -1 || searchLow.indexOf('categoryid=103') !== -1 || searchLow.indexOf('c=103') !== -1) return true;
+      var titleEl = document.querySelector('.productnamecolorLARGE, .productnamecolor, #v65-product-parent h1, h1.productnamecolor');
+      var titleTxt = titleEl ? String(titleEl.textContent || '') : '';
+      if (/bean\s*bag/i.test(titleTxt)) return true;
+      return false;
     } catch (eBb) { return false; }
   }
   function hideOptionsTable(scope){
