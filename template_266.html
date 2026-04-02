@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
-<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260402b"><!--<![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260402c"><!--<![endif]-->
 <head>
 <script>
 (function () {
@@ -368,7 +368,7 @@ document.addEventListener("DOMContentLoaded", function () {
 ========================================= -->
 
 <body>
-<!-- MC_TEMPLATE: search-below-nav-js-retries-20260402b — if missing in View Source, Volusion is not using this file -->
+<!-- MC_TEMPLATE: hero-z35-search-z22-if_homepage-is-home-20260402c -->
 <!-- Do not override window.location.reload: CAPTCHA / bot checks (Cloudflare, etc.) call reload to finish; blocking it causes verify loops. -->
 <a class="mc-cart-float" href="/shoppingcart.asp" aria-label="Cart" rel="nofollow">
   <svg class="mc-cart-float__icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
@@ -381,6 +381,13 @@ document.addEventListener("DOMContentLoaded", function () {
   </svg>
 </a>
 <div id="if_homepage">
+<script>
+(function () {
+  try {
+    document.body.classList.add('is-home');
+  } catch (e) {}
+})();
+</script>
 
   <div id="slideshow-container" data-max-width="full">
 
@@ -396,7 +403,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </nav>
       </div>
 
-    <!-- Search: separate overlay, positioned UNDER hero menu via CSS top (homepage only; JS moves strip here) -->
+    <!-- Search: sibling between hero menu and video — z-index below .hero-menu, above video (see custom-safe.css) -->
     <div class="mc-hero-search-overlay" id="mcHeroSearchOverlay" aria-label="Site search"></div>
 
     <!-- HERO VIDEO -->
@@ -611,16 +618,19 @@ document.addEventListener("DOMContentLoaded", function () {
   function mcFindMainMenuRow() {
     var h = document.querySelector('header.header');
     if (!h) return null;
-    var el =
+    var anchor = h.querySelector('.microblock.main-menu') || h.querySelector('#display_menu_1');
+    if (anchor) {
+      var row = anchor.closest('.col-xs-12');
+      if (row) return row;
+      row = anchor.closest('[class*="col-xs"]');
+      if (row) return row;
+      return anchor.parentElement;
+    }
+    return (
       h.querySelector('.hidden-xs.col-xs-12.no-pad-lg') ||
       h.querySelector('.hidden-xs.col-xs-12') ||
-      h.querySelector('#display_menu_1') ||
-      h.querySelector('nav#display_menu_1');
-    if (!el) return null;
-    if (el.id === 'display_menu_1') {
-      return el.closest('.col-xs-12') || el.closest('[class*="col-"]') || el.parentElement;
-    }
-    return el;
+      null
+    );
   }
 
   function mcMountSearchLayout() {
@@ -693,6 +703,16 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
+
+  var hdr = document.querySelector('header.header');
+  if (hdr && typeof MutationObserver !== 'undefined') {
+    var moT;
+    var mo = new MutationObserver(function () {
+      clearTimeout(moT);
+      moT = setTimeout(mcMountSearchLayout, 60);
+    });
+    mo.observe(hdr, { childList: true, subtree: true });
+  }
 })();
 </script>
 

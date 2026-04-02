@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260402_SEARCH — search mount retries + html data-mc-search-fix=20260402b */
+/* MC_DEPLOY_VERIFY_20260402c — hero menu z35 search z22; header flex order interior; if_homepage sets is-home */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -383,6 +383,7 @@ body.is-home #slideshow-container {
 }
 #slideshow-container .mc-hero-video {
   position: relative;
+  z-index: 1 !important;
   min-height: 100vh;
   overflow: hidden;
   width: 100% !important;
@@ -446,13 +447,13 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   line-height: 0 !important;
 }
 
-/* Hero menu: absolute over video (do not alter nav markup or link styling here) */
+/* Hero menu: above search + video layers (search z-index lower so it never covers nav links) */
 #slideshow-container .hero-menu {
   position: absolute;
   top: 18px !important;
   left: 50% !important;
   transform: translateX(-50%);
-  z-index: 10;
+  z-index: 35 !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -482,13 +483,13 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   white-space: nowrap !important;
 }
 
-/* Search overlay on home: same stacking context as hero menu, but top offset sits UNDER menu bar */
+/* Search: between .hero-menu and .mc-hero-video — above video (z-index 1), below menu (z-index 35) */
 #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
   position: absolute !important;
   left: 0 !important;
   right: 0 !important;
   width: 100% !important;
-  z-index: 12 !important;
+  z-index: 22 !important;
   display: flex !important;
   justify-content: center !important;
   align-items: flex-start !important;
@@ -499,7 +500,7 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
 
 @media (min-width: 992px) {
   #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
-    top: calc(18px + 3.85rem + 18px) !important;
+    top: calc(18px + 3.5rem + 14px) !important;
   }
 }
 
@@ -791,8 +792,36 @@ html:not(.category) body:not(.is-home) #content_area_home .v-product__img img {
 /* If a parent header row is hidden, force it visible on non-home */
 body:not(.is-home) .header__section--top,
 body:not(.is-home) header.header {
-  display: block !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
   visibility: visible !important;
+}
+
+/* Interior: logo row first, main menu (#display_menu_1) second, search strip last — beats theme float/order */
+body:not(.is-home) header.header > .header__section {
+  order: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body:not(.is-home) header.header > .hidden-xs.col-xs-12,
+body:not(.is-home) header.header > .col-xs-12.hidden-xs {
+  order: 2 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body:not(.is-home) header.header > .header__section--middle,
+body:not(.is-home) header.header > .mc-header-search-below-nav {
+  order: 20 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body:not(.is-home) header.header > .mc-header-cart {
+  order: 30 !important;
 }
 
 /* =====================================================
