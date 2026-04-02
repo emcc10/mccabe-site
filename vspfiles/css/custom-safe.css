@@ -5218,9 +5218,10 @@ body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) f
 }
 
 /* Logged-in + member block: hide redundant Volusion “Sale price” row in related items */
+body.mc-member-logged-in #content_area #relateditems td:has(.mc-member-grid-price) font.product_sale_price,
+body.mc-member-logged-in #content_area #relateditems td:has(.mc-member-grid-price) .product_sale_price,
 body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-grid-price) font.product_sale_price,
-body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-grid-price) .product_sale_price,
-body.mc-member-logged-in #content_area #relateditems tr > td:not(:has(.v-product)):has(.mc-member-grid-price) font.product_sale_price {
+body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-grid-price) .product_sale_price {
   display: none !important;
 }
 
@@ -6717,6 +6718,11 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
 .mc-category-pager-page-row .mc-category-pager__btn--next {
   flex: 0 0 auto !important;
   margin-left: auto !important;
+}
+
+:is(html.category, body.category) #mc-category-pager-top.mc-category-pager-page-row {
+  padding-left: max(12px, 2vw) !important;
+  padding-right: max(12px, 2vw) !important;
 }
 
 /* =========================================================

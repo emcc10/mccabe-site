@@ -9682,7 +9682,7 @@ try {
   /** List / MSRP / visible dollar on the card (Volusion often leaves this next to MAP). */
   function mcExtractRegularPriceFromCard(card) {
     var host = mcCloneCardSansMember(card);
-    var directBox = host.querySelector('.v-product__price, .product_price');
+    var directBox = host.querySelector('.v-product__price, .product_price, .v65-product-related-price');
     if (directBox) {
       var dtxt = (directBox.textContent || '').replace(/\s+/g, ' ');
       if (/\$[\d,]+/.test(dtxt) && !MC_MAP_LINK_RE.test(dtxt)) {
