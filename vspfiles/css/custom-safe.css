@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260401o — related items flex order, member sale hide, pager top bar, bean subline */
+/* MC_DEPLOY_VERIFY_20260401p — header nav center + search dock; guests: no sale + login block; PDP guest sale hide */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -715,7 +715,7 @@ body:not(.is-home) header.header .main-menu {
   transform: none !important;
 }
 
-/* Non-home: one row — hero-menu gutters (#slideshow-container .hero-menu); search line stops at cart */
+/* Non-home: nav centered like hero (#slideshow-container .hero-menu); search+cart docked right inside bar */
 @media (min-width: 992px) {
   body:not(.is-home) header.header > .header__section {
     padding-top: 10px !important;
@@ -728,13 +728,15 @@ body:not(.is-home) header.header .main-menu {
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: clamp(14px, 2.5vw, 22px) !important;
+    position: relative !important;
+    gap: 0 !important;
     padding: clamp(8px, 1.5vw, 12px) max(56px, 7.5vw) !important;
     box-sizing: border-box !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
+    min-height: 48px !important;
   }
 
   body:not(.is-home) .mc-header-desktop-bar .microblock.main-menu {
@@ -743,7 +745,7 @@ body:not(.is-home) header.header .main-menu {
     align-items: center !important;
     padding: 0 !important;
     margin: 0 !important;
-    flex: 0 1 auto !important;
+    flex: 1 1 auto !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
   }
@@ -754,12 +756,18 @@ body:not(.is-home) header.header .main-menu {
     flex-wrap: nowrap !important;
     align-items: center !important;
     gap: clamp(10px, 1.5vw, 18px) !important;
-    flex: 1 1 auto !important;
+    position: absolute !important;
+    right: max(56px, 7.5vw) !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    flex: 0 0 auto !important;
+    width: min(360px, 34vw) !important;
     min-width: 140px !important;
-    max-width: min(380px, 42vw) !important;
+    max-width: min(360px, 34vw) !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.22) !important;
     padding: 8px 0 6px !important;
     box-sizing: border-box !important;
+    margin: 0 !important;
   }
 
   body:not(.is-home) .mc-header-desktop-bar .mc-header-search-below-nav {
@@ -797,6 +805,20 @@ body:not(.is-home) header.header .main-menu {
     background: #ffffff !important;
   }
 
+  /* Duplicate search toggle in logo row — real field lives in .mc-header-desktop-bar */
+  body:not(.is-home) header.header .header__section .microblock-group .search__wrapper,
+  body:not(.is-home) header.header .header__section .search__toggle#toggle1 {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
   body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap:focus-within,
   html.mc-search-open body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap,
   body.mc-search-open body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap {
@@ -804,6 +826,24 @@ body:not(.is-home) header.header .main-menu {
     border-bottom-width: 2px !important;
     padding: 8px 0 8px !important;
     box-shadow: 0 18px 48px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+  }
+}
+
+@media (max-width: 991px) {
+  body:not(.is-home) header.header > .mc-header-desktop-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap {
+    position: relative !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 }
 
@@ -6471,13 +6511,24 @@ body.is-home:not(.productdetails).mc-member-logged-in #content_area_home ul.v-pr
   order: 6 !important;
 }
 
-/* Guests: hide Volusion sale rows on PLP (regular-only is rebuilt in JS) */
+/* Guests: hide Volusion sale rows on PLP (member login block + list/regular only) */
 :is(html.category, body.category) body:not(.mc-member-logged-in) #content_area .v-product font.product_sale_price,
 :is(html.category, body.category) body:not(.mc-member-logged-in)
   #content_area
   ul.v-product-grid
   > li.v-product
-  > font.product_sale_price {
+  > font.product_sale_price,
+body:not(.mc-member-logged-in) #content_area .v-product [class*="product_sale_price"],
+body:not(.mc-member-logged-in) #content_area_home .v-product [class*="product_sale_price"],
+body:not(.mc-member-logged-in) #content_area .v-product span.product_sale_price,
+body:not(.mc-member-logged-in) #content_area_home .v-product span.product_sale_price {
+  display: none !important;
+}
+
+/* PDP: guests never see “Sale price” row — caption prompts login */
+body:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox font.product_sale_price,
+body:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox .product_sale_price,
+body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
   display: none !important;
 }
 
