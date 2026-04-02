@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260402e — PLP sale only when logged in; bean bag subline; price gather font/leaf fix */
+/* MC_DEPLOY_VERIFY_20260402f — PLP: no guest sale hide; bean URL + price preserve + repaint missing amounts */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -833,6 +833,25 @@ body:not(.is-home) header.header > .mc-header-search-below-nav {
 
 body:not(.is-home) header.header > .mc-header-cart {
   order: 30 !important;
+}
+
+/* Interior: keep nav row above search; kill lift that overlaps category links */
+body:not(.is-home) header.header > .hidden-xs.col-xs-12,
+body:not(.is-home) header.header > .col-xs-12.hidden-xs {
+  position: relative !important;
+  z-index: 3 !important;
+}
+
+body:not(.is-home) header.header > .header__section--middle,
+body:not(.is-home) header.header > .mc-header-search-below-nav {
+  margin-top: 10px !important;
+}
+
+body:not(.is-home) html.mc-search-open header.header .collapsing-search,
+body:not(.is-home) body.mc-search-open header.header .collapsing-search,
+body:not(.is-home) html.mc-search-open header.header #collapsingSearch,
+body:not(.is-home) body.mc-search-open header.header #collapsingSearch {
+  transform: none !important;
 }
 
 /* =====================================================
@@ -6080,16 +6099,8 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   margin-top: 4px !important;
 }
 
-/* PLP / home grids: hide Volusion sale row until member login; when logged in, sale stacks under member block */
-:is(html.category, body.category) body:not(.mc-member-logged-in) #content_area .v-product .product_sale_price,
-:is(html.category, body.category) body:not(.mc-member-logged-in) #content_area .v-product [class*="product_sale_price"],
-:is(html.category, body.category) body:not(.mc-member-logged-in) #content_area ul.v-product-grid > li.v-product > font.product_sale_price,
-body.is-home:not(.productdetails):not(.mc-member-logged-in) #content_area_home .v-product .product_sale_price,
-body.is-home:not(.productdetails):not(.mc-member-logged-in) #content_area_home .v-product [class*="product_sale_price"],
-body.is-home:not(.productdetails):not(.mc-member-logged-in) #content_area_home ul.v-product-grid > li > font.product_sale_price {
-  display: none !important;
-}
-
+/* PLP / home: do NOT hide sale for guests — many listings only expose sale in that row (hiding it blanked prices).
+   Logged-in members: stack sale under member block via order below. */
 :is(html.category, body.category) body.mc-member-logged-in #content_area .v-product .product_sale_price,
 :is(html.category, body.category) body.mc-member-logged-in #content_area .v-product [class*="product_sale_price"],
 :is(html.category, body.category) body.mc-member-logged-in #content_area ul.v-product-grid > li.v-product > font.product_sale_price {
