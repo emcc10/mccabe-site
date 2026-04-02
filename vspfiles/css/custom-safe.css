@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260403layout1 — pair with template html data-mc-search-fix=20260403layout1 */
+/* MC_DEPLOY_VERIFY_20260403layout2 - pair with template html data-mc-search-fix=20260403layout2 */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -43,7 +43,7 @@ body {
 }
 
 /* ======================================
-   HEADER + HERO SEARCH — underline, hover, pop-out (strip may live in header or #mcHeroSearchOverlay)
+   HEADER + HERO SEARCH â€” underline, hover, pop-out (strip may live in header or #mcHeroSearchOverlay)
 ====================================== */
 header.header .header__section--middle,
 #mcHeroSearchOverlay .header__section--middle {
@@ -58,7 +58,7 @@ header.header .header__section--middle,
   overflow: visible !important;
 }
 
-/* Interior: search lives in .mc-header-desktop-bar (beside nav → cart); full width on mobile */
+/* Interior: search lives in .mc-header-desktop-bar (beside nav â†’ cart); full width on mobile */
 body:not(.is-home) header.header > .header__section--middle,
 body:not(.is-home) header.header .mc-header-search-below-nav {
   position: relative !important;
@@ -102,7 +102,7 @@ header.header #collapsingSearch {
     padding 0.22s ease !important;
 }
 
-/* Interior desktop: one underline only — strip is on .mc-header-search-cart-wrap (template), not inner search */
+/* Interior desktop: one underline only â€” strip is on .mc-header-search-cart-wrap (template), not inner search */
 @media (min-width: 992px) {
   body:not(.is-home) .mc-header-search-cart-wrap .collapsing-search,
   body:not(.is-home) .mc-header-search-cart-wrap #collapsingSearch {
@@ -393,7 +393,7 @@ body.mc-search-open #mcHeroSearchOverlay #toggle1 .toggle__icon--open {
   opacity: 0.85 !important;
 }
 
-/* Hero: underline on the input row (outer .collapsing-search has no border — see template critical) */
+/* Hero: underline on the input row (outer .collapsing-search has no border â€” see template critical) */
 html:not(.mc-search-open) #mcHeroSearchOverlay .collapsing-search:not(:focus-within) .collapsing-search__form .row {
   border-bottom: 1px solid rgba(255, 255, 255, 0.45) !important;
 }
@@ -695,7 +695,7 @@ body.is-home #slideshow-container {
     padding-right: 16px !important;
   }
 
-  /* Do not use bare `p` here — !important beats inline styles and blocked the 36px tagline */
+  /* Do not use bare `p` here â€” !important beats inline styles and blocked the 36px tagline */
   #mc-hero-copy-tagline,
   #slideshow-container #mc-hero-copy-tagline {
     font-size: clamp(11px, 2.85vw, 36px) !important;
@@ -786,7 +786,7 @@ body:not(.is-home) header.header .collapsing-search {
   pointer-events: auto !important;
 }
 
-/* Non-home: one flex row — nav + search (no absolute; avoids clip + keeps search in document flow) */
+/* Non-home: one flex row â€” nav + search (no absolute; avoids clip + keeps search in document flow) */
 @media (min-width: 992px) {
   body:not(.is-home) header.header > .header__section {
     padding-top: 18px !important;
@@ -951,7 +951,7 @@ body:not(.is-home) header.header .collapsing-search {
 
 /* ===== NON-HOME MENU: MATCH HOMEPAGE HERO MENU EXACTLY (DESKTOP/TABLET) ===== */
 
-/* LI: same as hero – no fixed widths, no extra margin (centering via flex on ul) */
+/* LI: same as hero â€“ no fixed widths, no extra margin (centering via flex on ul) */
 body:not(.is-home) #display_menu_1 .vnav--level1 > li,
 body:not(.is-home) #display_menu_1 .vnav--horizontal.vnav--level1 > li {
   width: auto !important;
@@ -988,7 +988,7 @@ body:not(.is-home) #display_menu_1 .vnav__label {
 
 /* ======================================
    PRODUCT GRID: FIX IMAGE BOX HEIGHT
-   (scoped off category pages — category PLP uses fixed tiles + object-fit: contain)
+   (scoped off category pages â€” category PLP uses fixed tiles + object-fit: contain)
 ====================================== */
 html:not(.category) body:not(.category) .v-product-grid .v-product__img {
   display: block;
@@ -1051,7 +1051,7 @@ html:not(.category) body:not(.category) .v-product-grid .v-product__img img {
 
 /* =========================================================
    PRODUCT LISTINGS: ALIGN IMAGES TO THE TOP OF THE IMAGE BOX
-   (not on category — category uses uniform center-crop tiles)
+   (not on category â€” category uses uniform center-crop tiles)
 ========================================================= */
 html:not(.category) body:not(.is-home) #content_area .v-product__img,
 html:not(.category) body:not(.is-home) #content_area_home .v-product__img {
@@ -1066,7 +1066,7 @@ html:not(.category) body:not(.is-home) #content_area_home .v-product__img img {
   object-position: top center !important;
 }
 
-/* Category grids: letterbox without upscaling (100%×100% on img blurs small thumbs) */
+/* Category grids: letterbox without upscaling (100%Ã—100% on img blurs small thumbs) */
 :is(html.category, body.category) #content_area .v-product-grid .v-product__img img,
 :is(html.category, body.category) #content_area ul.v-product-grid .v-product__img img {
   object-fit: contain !important;
@@ -1089,7 +1089,7 @@ body:not(.is-home) header.header {
   margin-top: -45px;
 }
 
-/* Interior: logo row first, main menu (#display_menu_1) second, search strip last — beats theme float/order */
+/* Interior: logo row first, main menu (#display_menu_1) second, search strip last â€” beats theme float/order */
 body:not(.is-home) header.header > .header__section {
   order: 1 !important;
   width: 100% !important;
@@ -1378,7 +1378,7 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li:focus-within > a {
 }
 
 /* =====================================================
-   FIX MENU SHIFT AT 992px–1199px (product/category pages)
+   FIX MENU SHIFT AT 992pxâ€“1199px (product/category pages)
    Bootstrap col-lg-* only applies at 1200px+, so at 1199px the
    menu column loses width and can shift right. Lock layout here.
 ===================================================== */
@@ -1910,7 +1910,7 @@ a.hero-cart-link {
 }
 
 @media (max-width: 991px) {
-  /* Hero: video behind, overlay + copy ABOVE (was z-index:1 on both → text hidden under video) */
+  /* Hero: video behind, overlay + copy ABOVE (was z-index:1 on both â†’ text hidden under video) */
   #slideshow-container,
   #slideshow-container .mc-hero-video {
     position: relative !important;
@@ -2132,7 +2132,7 @@ nav.push-menu .push-menu__close-btn::before {
   }
 }
 
-/* MOBILE: category — title centered; member + list price left */
+/* MOBILE: category â€” title centered; member + list price left */
 @media (max-width: 991px) {
   :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
   :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
@@ -2288,7 +2288,7 @@ body.mc-product-page #content_area .main-image img {
   }
 }
 
-/* Match homepage hero menu: flex (not inline-flex) so ul doesn’t shrink and overlap items */
+/* Match homepage hero menu: flex (not inline-flex) so ul doesnâ€™t shrink and overlap items */
 body:not(.is-home) #display_menu_1 > ul.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul.vnav--horizontal.vnav--level1,
 body:not(.is-home) #display_menu_1 > ul {
@@ -2626,7 +2626,7 @@ body.mc-product-page select.mc-native-leather {
       padding: 0 0.85em !important;
     }
 
-    /* Unlocked: mirror main price block — label above, price below (same sizes as .option_pricing / #priceWithOptions) */
+    /* Unlocked: mirror main price block â€” label above, price below (same sizes as .option_pricing / #priceWithOptions) */
     .mc-member-price-caption[data-mc-member-state="unlocked"],
     .mc-member-price-caption[data-mc-member-state="unlocked-no-price"] {
       text-align: left !important;
@@ -3354,7 +3354,7 @@ body.mc-product-page select.mc-native-leather {
     box-shadow: none !important;
   }
 
-  /* Use unified icon sizing (same as base block above) – do not override size/position */
+  /* Use unified icon sizing (same as base block above) â€“ do not override size/position */
 }
 
 /* === MOBILE OVERFLOW KILL-SWITCH (2026-03-02c) === */
@@ -3793,7 +3793,7 @@ body.mc-product-page #v65-product-parent #options_table select {
   max-width: 100% !important;
   box-sizing: border-box !important;
 }
-/* Leather select hidden – selection shown in "Selected leather" box instead */
+/* Leather select hidden â€“ selection shown in "Selected leather" box instead */
 body.mc-product-page #content_area select.mc-native-leather,
 body.mc-product-page #v65-product-parent select.mc-native-leather,
 select.mc-native-leather {
@@ -3838,7 +3838,7 @@ select.mc-native-leather {
     flex-shrink: 0 !important;
   }
 
-  /* Make sure LIs don’t introduce layout weirdness */
+  /* Make sure LIs donâ€™t introduce layout weirdness */
   body:not(.is-home) #display_menu_1 > ul > li {
     float: none !important;
     clear: none !important;
@@ -3920,7 +3920,7 @@ select.mc-native-leather {
 
 
 /* ============================================================
-   FIX 2: Home icon size — match cart icon behavior.
+   FIX 2: Home icon size â€” match cart icon behavior.
    Replaces fixed 20px size with responsive clamp().
    Targets ONLY .mc-home-float__icon
    ============================================================ */
@@ -5210,7 +5210,7 @@ body.mc-product-page #content_area #options_table tr:has(select[id*="leather" i]
   display: none !important;
 }
 
-/* Bean bag PDPs (body.mc-bean-bag-pdp): Volusion option names often include "cover" — global hide above removed size/fabric rows */
+/* Bean bag PDPs (body.mc-bean-bag-pdp): Volusion option names often include "cover" â€” global hide above removed size/fabric rows */
 body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select[name*="cover" i]),
 body.mc-bean-bag-pdp.mc-product-page #v65-product-parent #options_table tr:has(select[name*="cover" i]),
 body.mc-bean-bag-pdp.productdetails #content_area #options_table tr:has(select[name*="cover" i]),
@@ -5389,7 +5389,7 @@ body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) f
   order: 3 !important;
 }
 
-/* Logged-in + member block: hide redundant Volusion “Sale price” row in related items */
+/* Logged-in + member block: hide redundant Volusion â€œSale priceâ€ row in related items */
 body.mc-member-logged-in #content_area #relateditems td:has(.mc-member-grid-price) font.product_sale_price,
 body.mc-member-logged-in #content_area #relateditems td:has(.mc-member-grid-price) .product_sale_price,
 body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-grid-price) font.product_sale_price,
@@ -5573,14 +5573,14 @@ body.mc-product-page #content_area h1 {
 }
 
 
-/* Hide price above "Price with selected options" – only show the price under it */
+/* Hide price above "Price with selected options" â€“ only show the price under it */
 body.mc-product-page #content_area .colors_price,
 body.mc-product-page #content_area .product_list_price,
 body.mc-product-page #content_area .product_productprice,
 body.mc-product-page #v65-product-parent .product_productprice {
   display: none !important;
 }
-/* Price under "Price with selected options" – larger font */
+/* Price under "Price with selected options" â€“ larger font */
 body.mc-product-page #content_area .product_sale_price,
 body.mc-product-page #content_area .product_sale_price b,
 body.mc-product-page #content_area .product_sale_price span {
@@ -5763,7 +5763,7 @@ body.mc-product-page #content_area select:not(.mc-option-accordion-native) {
   }
 }
 
-/* Add to Cart – RH button style: black, white text, clean typography */
+/* Add to Cart â€“ RH button style: black, white text, clean typography */
 body.mc-product-page #content_area input[name="btnaddtocart"],
 body.mc-product-page #content_area input[id*="btnaddtocart"],
 body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i],
@@ -5788,8 +5788,8 @@ body.mc-product-page #content_area button[name="btnaddtocart"] {
   font-family: inherit !important;
 }
 
-/* Don’t clip the Add to Cart button in the options column */
-/* Single Add to Cart: no second container/color – wrapper matches button */
+/* Donâ€™t clip the Add to Cart button in the options column */
+/* Single Add to Cart: no second container/color â€“ wrapper matches button */
 body.mc-product-page #content_area .v65-product-addtocart,
 body.mc-product-page #v65-product-parent .v65-product-addtocart,
 body.mc-product-page #content_area .v65-product-addtocart div,
@@ -5950,7 +5950,7 @@ body.mc-product-page #content_area .mc-option-accordion__panel {
   body.mc-product-page #content_area #mcLeatherRow,
   body.mc-product-page #content_area #mc-inline-config,
   body.mc-product-page #content_area #mcPlannerRow {
-    max-width: 520px !important; /* matches your “wide table” look, but still responsive */
+    max-width: 520px !important; /* matches your â€œwide tableâ€ look, but still responsive */
   }
 }
 
@@ -6273,7 +6273,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
   margin-top: 4px;
 }
 
-/* Mobile: full login modal visible — scroll inside panel, safe areas, shorter iframe floor */
+/* Mobile: full login modal visible â€” scroll inside panel, safe areas, shorter iframe floor */
 @media (max-width: 991px) {
   .mc-login-modal.mc-login-modal--open {
     align-items: flex-start !important;
@@ -6428,7 +6428,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   color: #111;
 }
 
-/* Category listing: same visual order on every card (image → title → price) + full-width images */
+/* Category listing: same visual order on every card (image â†’ title â†’ price) + full-width images */
 :is(html.category, body.category) .v-product-grid .v-product,
 :is(html.category, body.category) ul.v-product-grid > li.v-product {
   display: flex;
@@ -6439,7 +6439,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   height: 100%;
 }
 
-/* Flex default order is 0 — lower than our image (1), so sale/member nodes sat above the image. */
+/* Flex default order is 0 â€” lower than our image (1), so sale/member nodes sat above the image. */
 :is(html.category, body.category) .v-product-grid .v-product > *,
 :is(html.category, body.category) ul.v-product-grid > li.v-product > * {
   order: 5;
@@ -6607,7 +6607,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   margin-top: 4px !important;
 }
 
-/* Sale / member rows: retail row (4) → member block (5) → sale/list siblings (6–7) when logged in */
+/* Sale / member rows: retail row (4) â†’ member block (5) â†’ sale/list siblings (6â€“7) when logged in */
 :is(html.category, body.category) body.mc-member-logged-in #content_area .v-product .v-product__price,
 :is(html.category, body.category) body.mc-member-logged-in #content_area .v-product .product_price,
 :is(html.category, body.category) body.mc-member-logged-in #content_area ul.v-product-grid > li.v-product .v-product__price,
@@ -6695,7 +6695,7 @@ body.is-home:not(.productdetails):not(.mc-member-logged-in) #content_area .v-pro
   display: none !important;
 }
 
-/* PDP: guests never see “Sale price” row — caption prompts login */
+/* PDP: guests never see â€œSale priceâ€ row â€” caption prompts login */
 body:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox font.product_sale_price,
 body:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox .product_sale_price,
 body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
@@ -6803,7 +6803,7 @@ body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
   }
 }
 
-/* Category: subcategory nav (sidebar + in-content vnav) — left, RH-style caps */
+/* Category: subcategory nav (sidebar + in-content vnav) â€” left, RH-style caps */
 :is(html.category, body.category) .sidebar-wrapper .sidebar,
 :is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] {
   text-align: left !important;
@@ -6920,7 +6920,7 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   color: #fff !important;
 }
 
-/* Next beside “Page N …” above the grid (injected #mc-category-pager-top; re-parented before product grid in JS) */
+/* Next beside â€œPage N â€¦â€ above the grid (injected #mc-category-pager-top; re-parented before product grid in JS) */
 .mc-category-pager-page-row {
   display: flex !important;
   flex-direction: row !important;
@@ -6947,7 +6947,7 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
 }
 
 /* =========================================================
-   PDP: main row — image left, options right (desktop); stacked on mobile
+   PDP: main row â€” image left, options right (desktop); stacked on mobile
    (tagged row: tr.mc-pdp-main-row from template_266.html)
    ========================================================= */
 @media (min-width: 992px) {
@@ -6983,7 +6983,7 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
 }
 
 /* =========================================================
-   PDP: related products — 3 across, horizontal scroll + arrows
+   PDP: related products â€” 3 across, horizontal scroll + arrows
    ========================================================= */
 .mc-related-carousel {
   position: relative;
@@ -7177,7 +7177,7 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
 }
 
 /* =========================================================
-   PDP: main product row — side-by-side on desktop (overlap fix: min-width: 0)
+   PDP: main product row â€” side-by-side on desktop (overlap fix: min-width: 0)
    Applies to standard Volusion row 2 and tagged mc-pdp-main-row.
    ========================================================= */
 @media (min-width: 992px) {
@@ -7537,7 +7537,7 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   flex-direction: column !important;
 }
 
-/* Category: 3 / 2 / 1 — grid containers only; card flex/width lives in one block below (no duplicate @media nesting) */
+/* Category: 3 / 2 / 1 â€” grid containers only; card flex/width lives in one block below (no duplicate @media nesting) */
 @media (min-width: 992px) {
   body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid,
   :is(html.category, body.category) #content_area ul.v-product-grid,
@@ -7598,7 +7598,7 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   }
 }
 
-/* --- Category cards — single block (grid cells: flex + 100% width; vol-list + grid-item kept for markup variants) --- */
+/* --- Category cards â€” single block (grid cells: flex + 100% width; vol-list + grid-item kept for markup variants) --- */
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid > div.v-product,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product,
 :is(html.category, body.category) #content_area .v-product-grid > div.v-product,
@@ -7626,7 +7626,7 @@ html.vol-list.category #content_area .v-product-grid > .v-product-grid-item {
   background: #ffffff !important;
 }
 
-/* Sale / list price nodes default to flex order 0 — push behind image (order 1) on category cards */
+/* Sale / list price nodes default to flex order 0 â€” push behind image (order 1) on category cards */
 :is(html.category, body.category) #content_area .v-product-grid > div.v-product > *,
 :is(html.category, body.category) #content_area ul.v-product-grid > li.v-product > *,
 :is(html.category, body.category) #content_area ul.v-product-grid > li > *,
@@ -7755,7 +7755,7 @@ html.vol-list.category #content_area .v-product-grid > .v-product {
   height: 100%;
 }
 
-/* Image tile — same fixed height home + category (category: letterbox; home: crop) */
+/* Image tile â€” same fixed height home + category (category: letterbox; home: crop) */
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__img,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__image,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product__image-wrap,
@@ -7861,7 +7861,7 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-produc
   margin: 0 !important;
 }
 
-/* Title band — left-aligned with member pricing below */
+/* Title band â€” left-aligned with member pricing below */
 body.is-home:not(.productdetails) #content_area_home .v-product__name,
 body.is-home:not(.productdetails) #content_area_home .productnamecolor,
 body.is-home:not(.productdetails) #content_area_home .v-product-grid h2,
@@ -8095,5 +8095,20 @@ body:not(.mc-member-logged-in) #content_area #relateditems [class*="product_sale
 body:not(.mc-member-logged-in) #content_area table.relateditems font.product_sale_price,
 body:not(.mc-member-logged-in) #content_area table.relateditems .product_sale_price,
 body:not(.mc-member-logged-in) #content_area table.relateditems [class*="product_sale_price"] {
+  display: none !important;
+}
+
+/* ===== BEAN BAG PRODUCT PAGE HARD STOP ===== */
+body.beanbag-product #roomPlannerApp,
+body.beanbag-product .room-planner-wrap,
+body.beanbag-product .room-planner-trigger,
+body.beanbag-product .planner-summary,
+body.beanbag-product .planner-toolbar,
+body.beanbag-product .planner-controls,
+body.beanbag-product .wm-selection-summary,
+body.beanbag-product .wmOpen,
+body.beanbag-product .wm-inline-trigger,
+body.beanbag-product .wm-leather-modal,
+body.beanbag-product .wm-modal {
   display: none !important;
 }

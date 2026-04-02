@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
-<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260403layout1"><!--<![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260403layout2"><!--<![endif]-->
 <head>
 <script>
 (function () {
@@ -46,7 +46,7 @@
 </script>
 <script>
 (function () {
-  /* True homepage URL only — #if_homepage / slideshow often exist in raw HTML on every Volusion page. */
+  /* True homepage URL only â€” #if_homepage / slideshow often exist in raw HTML on every Volusion page. */
   window.mcPathIsHomepage = function mcPathIsHomepage() {
     try {
       var p = (location.pathname || '').replace(/\\/g, '/').toLowerCase();
@@ -58,8 +58,8 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260403layout1: PLP order + retail label + search line -->
-<meta name="mc-deploy-verify" content="20260403layout1">
+<!-- MC_DEPLOY_VERIFY_20260403layout2: beanbag wm-leather hard stop + deploy pair -->
+<meta name="mc-deploy-verify" content="20260403layout2">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -69,7 +69,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260403layout1" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260403layout2" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -163,7 +163,7 @@
     body:not(.is-home) body.mc-search-open header.header .collapsing-search {
       transform: none !important;
     }
-    /* Raw template often includes #if_homepage on every page — hide when URL is not homepage */
+    /* Raw template often includes #if_homepage on every page â€” hide when URL is not homepage */
     body:not(.is-home) #if_homepage {
       display: none !important;
       visibility: hidden !important;
@@ -174,7 +174,7 @@
       padding: 0 !important;
       pointer-events: none !important;
     }
-    /* MC_HEADER_CRITICAL_20260401q — interior: flex bar (no clip); hero search top-right */
+    /* MC_HEADER_CRITICAL_20260401q â€” interior: flex bar (no clip); hero search top-right */
     header.header .header__section--middle,
     header.header .mc-header-search-below-nav,
     #mcHeroSearchOverlay .header__section--middle {
@@ -211,7 +211,7 @@
       border-bottom-color: rgba(255, 255, 255, 0.92) !important;
       border-bottom-width: 2px !important;
     }
-    /* Interior desktop (≥992px): one row — nav | search→cart; overrides width:100% above */
+    /* Interior desktop (â‰¥992px): one row â€” nav | searchâ†’cart; overrides width:100% above */
     @media (min-width: 992px) {
       body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] {
         display: flex !important;
@@ -354,7 +354,7 @@ document.addEventListener("DOMContentLoaded", function () {
     max-width: 52px !important;
   }
   </style>
-  <!-- Hero headline: IDs + head CSS + sync script — Volusion often strips p/class/style; this must win -->
+  <!-- Hero headline: IDs + head CSS + sync script â€” Volusion often strips p/class/style; this must win -->
   <style id="mc-hero-copy-critical">
     #mc-hero-copy-tagline {
       display: block !important;
@@ -611,7 +611,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </nav>
       </div>
 
-    <!-- Search: sibling between hero menu and video — z-index below .hero-menu, above video (see custom-safe.css) -->
+    <!-- Search: sibling between hero menu and video â€” z-index below .hero-menu, above video (see custom-safe.css) -->
     <div class="mc-hero-search-overlay" id="mcHeroSearchOverlay" aria-label="Site search"></div>
 
     <!-- HERO VIDEO -->
@@ -846,7 +846,7 @@ document.addEventListener("DOMContentLoaded", function () {
   /**
    * Search block may live in .mc-header-desktop-bar (source HTML) or in #mcHeroSearchOverlay after
    * a homepage mount. If we only query the bar, interior pages return null while the node is still
-   * inside hidden #if_homepage — mcMountSearchLayout would exit early and never pull it back.
+   * inside hidden #if_homepage â€” mcMountSearchLayout would exit early and never pull it back.
    */
   function mcFindHeaderSearchMid() {
     var h = document.querySelector('header.header');
@@ -920,7 +920,7 @@ document.addEventListener("DOMContentLoaded", function () {
       mid.setAttribute('data-mc-search-mount', 'below-nav');
     }
 
-    /* Interior: search + cart sit inside .mc-header-desktop-bar after main menu (beside Contact Us → cart) */
+    /* Interior: search + cart sit inside .mc-header-desktop-bar after main menu (beside Contact Us â†’ cart) */
     var placeRow = menuRow;
     if (!placeRow && hHdr) {
       placeRow = hHdr.querySelector('.mc-header-desktop-bar') || hHdr;
@@ -1012,7 +1012,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (eSync) {}
     mcMountSearchLayout();
     bindSearchToggle();
-    /* Volusion often injects #display_menu_1 after first paint — retry */
+    /* Volusion often injects #display_menu_1 after first paint â€” retry */
     [0, 120, 400, 1000, 2500, 6000].forEach(function (ms) {
       setTimeout(mcMountSearchLayout, ms);
     });
@@ -1181,7 +1181,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div id="measure-line"><svg id="measure-svg" xmlns="http://www.w3.org/2000/svg"><line id="measure-line-seg" x1="50" y1="50" x2="200" y2="150"/><line id="measure-handle-l" class="measure-handle" x1="44" y1="50" x2="56" y2="50"/><line id="measure-handle-r" class="measure-handle" x1="194" y1="150" x2="206" y2="150"/></svg><div id="measure-label-box">0 in</div></div>
               </div>
             </div>
-            <div id="toolbar"><button id="clearLayoutBtn">Clear layout</button><button id="rotateL">Rotate ⟲</button><button id="rotateR">Rotate ⟳</button><button id="deleteBtn">Delete</button><button id="saveLayout">Save Layout</button><button id="addConfigBtn">Add configuration</button></div>
+            <div id="toolbar"><button id="clearLayoutBtn">Clear layout</button><button id="rotateL">Rotate âŸ²</button><button id="rotateR">Rotate âŸ³</button><button id="deleteBtn">Delete</button><button id="saveLayout">Save Layout</button><button id="addConfigBtn">Add configuration</button></div>
           </div>
           <div id="planner-right">
             <div id="planner-style-name"></div>
@@ -1600,16 +1600,38 @@ html body.productdetails .v-product-grid > .v-product {
 <script id="wm-leather-modal-js">
 (function(){
   "use strict";
-  // EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER (BB*; URL fallback if ProductCode not in DOM yet)
-  function mcSkipLeatherPlannerForBeanBag() {
-    try {
-      var pcInp = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
-      if (pcInp && /^BB/i.test(String(pcInp.value || '').trim())) return true;
-      if (/\/product-p\/bb[-_]/i.test(String(location.pathname || ''))) return true;
-    } catch (eSk) {}
-    return false;
+
+  var PATH = (location.pathname || "").toLowerCase();
+  var IS_BEANBAG = /\/product-p\/bb-/.test(PATH);
+
+  if (IS_BEANBAG) {
+    document.addEventListener('DOMContentLoaded', function () {
+      if (document.body) document.body.classList.add('beanbag-product');
+
+      ['roomPlannerApp'].forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) el.remove();
+      });
+
+      [
+        '.room-planner-wrap',
+        '.room-planner-trigger',
+        '.planner-summary',
+        '.planner-toolbar',
+        '.planner-controls',
+        '.wm-selection-summary',
+        '.wmOpen',
+        '.wm-inline-trigger',
+        '.wm-leather-modal',
+        '.wm-modal'
+      ].forEach(function(sel){
+        document.querySelectorAll(sel).forEach(function(el){
+          el.remove();
+        });
+      });
+    });
+    return;
   }
-  if (mcSkipLeatherPlannerForBeanBag()) return;
 
 
   // If you accidentally paste this twice, only the first one runs.
@@ -1821,7 +1843,7 @@ html body.productdetails .v-product-grid > .v-product {
 
   function parseGradeAndRest(raw){
     const s = cleanText(raw);
-    const m = s.match(/Grade\s*([0-9,]+)\s*[-–:]?\s*(.*)$/i);
+    const m = s.match(/Grade\s*([0-9,]+)\s*[-â€“:]?\s*(.*)$/i);
     if (m) return { grade: String(m[1]).replace(/,/g,""), rest: (m[2] || "").trim() };
     return { grade: "Base", rest: s };
   }
@@ -2381,7 +2403,7 @@ boot();
       var x = String(raw || "");
       x = x.replace(/\s*\(\s*\+\s*\$?\s*\d+(?:\.\d{2})?[^)]*\)\s*$/ig, "");
       x = x.replace(/\s*\+\s*\$?\s*\d+(?:\.\d{2})?\s*$/ig, "");
-      x = x.replace(/^grade\s*[0-9,]+\s*[-–:]?\s*/i, "");
+      x = x.replace(/^grade\s*[0-9,]+\s*[-â€“:]?\s*/i, "");
       return x.replace(/\s+/g, " ").trim();
     }
 
@@ -2771,7 +2793,7 @@ function volusionMyAccountHtmlIndicatesLoggedIn(html) {
   if (/<input[^>]+type\s*=\s*["']password["']/i.test(h) && /returning customer|login password|sign in to continue/i.test(lc) && !/logout|log\s*out/i.test(lc)) return false;
   return false;
 }
-/** Parse primary PDP price from fetched product HTML (logged-in price may equal public — no "lower" dollar in DOM). */
+/** Parse primary PDP price from fetched product HTML (logged-in price may equal public â€” no "lower" dollar in DOM). */
 function extractDisplayedSeatPriceFromHtml(html) {
   if (!html) return 0;
   var parser = new DOMParser();
@@ -2805,7 +2827,7 @@ function extractDisplayedSeatPriceFromHtml(html) {
   return 0;
 }
 /**
- * Volusion "add to cart" / actual selling price — NOT the MAP line in #priceWithOptions.
+ * Volusion "add to cart" / actual selling price â€” NOT the MAP line in #priceWithOptions.
  * Prefers prices strictly below MAP; scrapes scripts; optional meta / window override.
  */
 function scrapeVolusionPriceCandidatesBelowMap(html, mainAmt) {
@@ -4156,7 +4178,7 @@ window.initRoomPlanner = function (opts) {
       if (!email) { alert("Please enter your email address."); return; }
       var endpoint = (typeof window.MC_PLANNER_EMAIL_ENDPOINT !== "undefined" && window.MC_PLANNER_EMAIL_ENDPOINT) ? window.MC_PLANNER_EMAIL_ENDPOINT : "/v/vspfiles/planner-email.php";
       emailSendBtn.disabled = true;
-      emailSendBtn.textContent = "Sending…";
+      emailSendBtn.textContent = "Sendingâ€¦";
       fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email, options: counts, layout: layout, room: payload.room, seatCount: seatCount, ts: Date.now() }) })
         .then(function (r) { if (r.ok) { alert("Layout saved. A PDF will be sent to " + email + "."); modal.remove(); } else { throw new Error("Request failed"); } })
         .catch(function () { alert("Could not send. Save your layout to your computer and contact us for your PDF."); })
@@ -4424,7 +4446,7 @@ body:not(.is-home) #display_menu_1 .vnav__label:focus-visible {
   border-radius: 4px !important;
 }
 
-/* Submenu typography on non-home — left-aligned, lighter than top level */
+/* Submenu typography on non-home â€” left-aligned, lighter than top level */
 body:not(.is-home) #display_menu_1 .vnav--level2,
 body:not(.is-home) #display_menu_1 .vnav--level3,
 body:not(.is-home) #display_menu_1 .vnav__submenu {
@@ -4476,7 +4498,7 @@ body.mc-product-page #content_area .resp-tabs-list li {
   font-style: normal !important;
 }
 
-/* option labels – EXACT same font for every option header (NUMBER OF SEATS, CONFIGURATION, SELECT A LEATHER) + padding */
+/* option labels â€“ EXACT same font for every option header (NUMBER OF SEATS, CONFIGURATION, SELECT A LEATHER) + padding */
 body.mc-product-page #content_area #options_table label,
 body.mc-product-page #content_area #options_table .productoptionname,
 body.mc-product-page #content_area #options_table td.productoptionname,
@@ -4498,7 +4520,7 @@ body.mc-product-page #content_area .mc-option-accordion__header {
   padding: 10px 14px 10px 0 !important;
   line-height: 1.2 !important;
 }
-/* Product tabs – more padding so labels are not too short */
+/* Product tabs â€“ more padding so labels are not too short */
 body.mc-product-page #content_area .tab,
 body.mc-product-page #content_area .tab a,
 body.mc-product-page #content_area .resp-tab-item,
@@ -4691,7 +4713,7 @@ body.mc-product-page #content_area #mcPlannerSummary.mc-has-selections {
   flex: 1 1 auto !important;
 }
 
-/* Add to Cart: same look as Room Planner – one white button with cart icon inside */
+/* Add to Cart: same look as Room Planner â€“ one white button with cart icon inside */
 body.mc-product-page #content_area .mc-atc-row {
   display: flex !important;
   align-items: center !important;
@@ -4763,7 +4785,7 @@ body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon {
   vertical-align: middle !important;
 }
 
-/* No separate container – every wrapper of Add to Cart transparent */
+/* No separate container â€“ every wrapper of Add to Cart transparent */
 body.mc-product-page #content_area .v65-product-addtocart,
 body.mc-product-page #content_area .v65-product-addtocart div,
 body.mc-product-page #v65-product-parent .v65-product-addtocart,
@@ -4814,7 +4836,7 @@ body.mc-product-page #content_area #mcPlannerBtn:hover {
   border-color: #333 !important;
 }
 
-/* Select a Leather ">" button – 20px, vertically aligned, no box (matches accordion toggle) */
+/* Select a Leather ">" button â€“ 20px, vertically aligned, no box (matches accordion toggle) */
 body.mc-product-page #content_area #mcLeatherBtn {
   -webkit-appearance: none !important;
   appearance: none !important;
@@ -4862,7 +4884,7 @@ body.mc-product-page #content_area #mcLeatherBtn:focus {
   outline: none !important;
 }
 
-/* Accordion ">" toggle – 20px, vertically aligned, no box */
+/* Accordion ">" toggle â€“ 20px, vertically aligned, no box */
 body.mc-product-page #content_area .mc-option-accordion__toggle {
   -webkit-appearance: none !important;
   appearance: none !important;
@@ -4896,7 +4918,7 @@ body.mc-product-page #content_area .mc-option-accordion__toggle:focus {
   outline: none !important;
 }
 
-/* Mini leather swatches – no grey boxes, strictly uniform size */
+/* Mini leather swatches â€“ no grey boxes, strictly uniform size */
 body.mc-product-page #content_area #mcLeatherSwatchStrip {
   display: flex !important;
   align-items: center !important;
@@ -5124,7 +5146,7 @@ body.mc-product-page #content_area .wm-swatch img {
     margin: 0 0 8px 0 !important;
   }
 
-  /* Do not force a min-width on the main image: media column is ~52–58% wide + overflow hidden would clip wide photos. */
+  /* Do not force a min-width on the main image: media column is ~52â€“58% wide + overflow hidden would clip wide photos. */
   body.mc-product-page #content_area #product_photo,
   body.mc-product-page #content_area .vcss_img_wrap,
   body.mc-product-page #content_area .main-image {
@@ -5234,7 +5256,7 @@ body.mc-product-page #content_area .wm-swatch img {
     margin: 0 auto !important;
   }
 
-  /* Mobile: main image centered first, then alt images – up to 4 per row, single centered column */
+  /* Mobile: main image centered first, then alt images â€“ up to 4 per row, single centered column */
   body.mc-product-page #content_area .mc-pdp-media-td,
   body.mc-product-page #content_area [id*="product_photo_td"],
   body.mc-product-page #content_area td:has(#product_photo),
@@ -5259,7 +5281,7 @@ body.mc-product-page #content_area .wm-swatch img {
   .productdetails #v65-product-parent tbody tr {
     min-height: 0 !important;
   }
-  /* Alt images: centered under main, 4 per row – multiple selectors so rules apply */
+  /* Alt images: centered under main, 4 per row â€“ multiple selectors so rules apply */
   body.mc-product-page #content_area #altviews,
   body.mc-product-page #content_area .altviews,
   body.mc-product-page #content_area span#altviews,
@@ -5315,7 +5337,7 @@ body.mc-product-page #content_area .wm-swatch img {
     object-fit: contain !important;
     display: block !important;
   }
-  /* Wrapper for centering alt thumbnails – applied by JS */
+  /* Wrapper for centering alt thumbnails â€“ applied by JS */
   #content_area .mc-altviews-outer {
     display: flex !important;
     justify-content: center !important;
@@ -5334,7 +5356,7 @@ body.mc-product-page #content_area .wm-swatch img {
     max-width: 100% !important;
     text-align: center !important;
   }
-  /* Tighter gap: options/price block — clear below alt thumbnails (no overlap) */
+  /* Tighter gap: options/price block â€” clear below alt thumbnails (no overlap) */
   #content_area .mc-pdp-options-td,
   #content_area td:has(.colors_pricebox),
   #content_area td:has(#priceWithOptions) {
@@ -5730,10 +5752,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       if (!a.href || /^javascript:/i.test(a.href)) return;
       var t = (a.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
       var ti = (a.getAttribute('title') || '').toLowerCase();
-      if (!nextHref && (t === 'next' || t === '>' || t === '»' || /next\s+page/i.test(t) || ti.indexOf('next') >= 0)) {
+      if (!nextHref && (t === 'next' || t === '>' || t === 'Â»' || /next\s+page/i.test(t) || ti.indexOf('next') >= 0)) {
         nextHref = a.href;
       }
-      if (!prevHref && (t === 'previous' || t === 'prev' || t === '<' || t === '«' || ti.indexOf('prev') >= 0)) {
+      if (!prevHref && (t === 'previous' || t === 'prev' || t === '<' || t === 'Â«' || ti.indexOf('prev') >= 0)) {
         prevHref = a.href;
       }
     });
@@ -5748,11 +5770,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         var lastA = lastLi.querySelector('a[href]');
         if (firstA && !firstLi.classList.contains('disabled') && !firstLi.classList.contains('active')) {
           var ft = (firstA.textContent || '').toLowerCase();
-          if (ft.indexOf('prev') >= 0 || ft === '‹' || ft === '«' || ft === '<') prevHref = firstA.href;
+          if (ft.indexOf('prev') >= 0 || ft === 'â€¹' || ft === 'Â«' || ft === '<') prevHref = firstA.href;
         }
         if (lastA && !lastLi.classList.contains('disabled')) {
           var lt = (lastA.textContent || '').toLowerCase();
-          if (lt.indexOf('next') >= 0 || lt === '›' || lt === '»' || lt === '>') nextHref = lastA.href;
+          if (lt.indexOf('next') >= 0 || lt === 'â€º' || lt === 'Â»' || lt === '>') nextHref = lastA.href;
         }
       }
     }
@@ -5818,7 +5840,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       if (
         /\bpage\s+\d+/i.test(t) ||
         /\bpage\s+\d+\s+of\s+\d+/i.test(t) ||
-        /\bshowing\s+\d+\s*[-–]\s*\d+/i.test(t) ||
+        /\bshowing\s+\d+\s*[-â€“]\s*\d+/i.test(t) ||
         /^page\s*:/i.test(t)
       ) {
         return el;
@@ -5864,7 +5886,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       /* Middle pages: synthetic next only when we inferred a higher page from DOM links */
       if (!nextHref && onCat && curr > 1 && curr < maxP) nextHref = buildUrlForPage(curr + 1);
 
-      /* First page: even a few listing signals ⇒ allow Next (MutationObserver will re-run when grid fills) */
+      /* First page: even a few listing signals â‡’ allow Next (MutationObserver will re-run when grid fills) */
       if (!nextHref && onCat && curr === 1 && strength >= 3) nextHref = buildUrlForPage(2);
 
       if (nextHref && pageFromHref(nextHref) <= curr) nextHref = null;
@@ -5931,7 +5953,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
       if (!wrap.querySelector('a') && !document.getElementById('mc-category-pager-top')) return;
 
-      /* Bottom of main column — reliable vs nested tables */
+      /* Bottom of main column â€” reliable vs nested tables */
       if (wrap.querySelector('a')) {
         ca.appendChild(wrap);
       }
@@ -6045,7 +6067,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var ca = document.getElementById('content_area');
     if (!ca) return [];
 
-    /* Fix EVERY listing grid in main content — not only the first / v65 match. Volusion splits rows or omits v65 wrapper; a single-grid fallback hid most products. */
+    /* Fix EVERY listing grid in main content â€” not only the first / v65 match. Volusion splits rows or omits v65 wrapper; a single-grid fallback hid most products. */
     var all = ca.querySelectorAll('.v-product-grid');
     var out = [];
     var seen = new WeakSet();
@@ -6063,7 +6085,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function fixCategoryGrid() {
     var b = document.body;
     if (!b) return;
-    /* Do not skip when body has productdetails — Volusion sometimes sets it wrongly; rely on presence of a listing grid */
+    /* Do not skip when body has productdetails â€” Volusion sometimes sets it wrongly; rely on presence of a listing grid */
     var grids = mcFindListingGrids();
     if (!grids.length) return;
 
@@ -6213,7 +6235,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         btn.type = 'button';
         btn.className = 'mc-sub-toggle';
         btn.setAttribute('aria-expanded','false');
-        btn.textContent = '▾';
+        btn.textContent = 'â–¾';
         row.appendChild(btn);
 
         var subList = buildFromVnav(sub);
@@ -6618,7 +6640,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function q(sel, root){ return (root || document).querySelector(sel); }
   function qa(sel, root){ return Array.from((root || document).querySelectorAll(sel)); }
   function isMobile(){ return window.matchMedia('(max-width: 991px)').matches; }
-  /** Same logic as global parseMcCurrency; IIFE cannot rely on another script block’s scope on Volusion. */
+  /** Same logic as global parseMcCurrency; IIFE cannot rely on another script blockâ€™s scope on Volusion. */
   function mcParseCurrency(text){
     if (typeof window.parseMcCurrency === 'function') return window.parseMcCurrency(text);
     var src = text == null ? '' : String(text);
@@ -6632,12 +6654,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 
   function markProductPage() {
-    /* Volusion injects #content_area asynchronously; don’t rely only on ProductCode timing. */
+    /* Volusion injects #content_area asynchronously; donâ€™t rely only on ProductCode timing. */
     var pcInp =
       document.querySelector('input[name="ProductCode"]') ||
       document.querySelector('input[name="productcode"]');
     var code = pcInp && pcInp.value ? String(pcInp.value).trim() : '';
-    /* Bean bags (BB*): skip sofa/leather PDP transforms — Volusion layout stays default */
+    /* Bean bags (BB*): skip sofa/leather PDP transforms â€” Volusion layout stays default */
     if (/^BB/i.test(code)) return false;
     var hasMarker =
       pcInp ||
@@ -7351,7 +7373,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (vp) vp.appendChild(caption);
   }
 
-  /** Always search document — #v65-product-parent may not be inside #content_area. */
+  /** Always search document â€” #v65-product-parent may not be inside #content_area. */
   function findMemberCaptionAnchorEl() {
     var el;
     var selectors = [
@@ -7382,7 +7404,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function renderMemberPricingCaption(scope){
     var root = scope || document;
     var anchorEl = findMemberCaptionAnchorEl();
-    /* Do not append into empty #content_area — Volusion replaces innerHTML and would delete the caption. */
+    /* Do not append into empty #content_area â€” Volusion replaces innerHTML and would delete the caption. */
     var fallbackHost =
       document.querySelector('#v65-product-parent .colors_pricebox') ||
       document.querySelector('#v65-product-parent') ||
@@ -7944,7 +7966,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 })();
 </script>
 
-<!-- PATCH: Restore product tabs · reorder related-item images · match planner dimensions -->
+<!-- PATCH: Restore product tabs Â· reorder related-item images Â· match planner dimensions -->
 <style>
 body.productdetails table:has(td[class*="vCSS_tab"]),
 body.mc-product-page table:has(td[class*="vCSS_tab"]),
@@ -9141,7 +9163,7 @@ body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) f
 })();
 </script>
 
-<!-- STANDALONE: member caption — no IIFE; always on window; returns { ok, reason } not undefined. -->
+<!-- STANDALONE: member caption â€” no IIFE; always on window; returns { ok, reason } not undefined. -->
 <script>
 window.__mcMemberPricing = window.__mcMemberPricing || {
   checked: false,
@@ -9596,7 +9618,7 @@ try {
 } catch (_) {}
 </script>
 <style id="mc-member-grid-inline-fallback">
-/* Fallback if vspfiles/css/custom-safe.css is not deployed — keeps MAP swap + modal usable */
+/* Fallback if vspfiles/css/custom-safe.css is not deployed â€” keeps MAP swap + modal usable */
 .mc-member-grid-price__regular{font-size:15px;color:#333;margin-bottom:6px}
 .mc-member-grid-price__amount{font-size:15px;margin-top:2px;color:#111}
 .mc-member-grid-price__label{font-size:13px;font-weight:600;letter-spacing:.02em;text-transform:none;color:#333}
@@ -9873,7 +9895,7 @@ try {
     var i;
     var el;
     var out = [];
-    /* Plain objects cannot key DOM nodes — all divs become "[object HTMLDivElement]" and only the first card was kept. */
+    /* Plain objects cannot key DOM nodes â€” all divs become "[object HTMLDivElement]" and only the first card was kept. */
     var seen = new WeakSet();
     function pushCard(node) {
       if (!node || seen.has(node)) return;
@@ -9882,7 +9904,7 @@ try {
       out.push(node);
     }
     for (i = 0; i < raw.length; i++) pushCard(raw[i]);
-    /* Related items: handled separately (image → title → price). Do not run PLP member-grid paint on these cells. */
+    /* Related items: handled separately (image â†’ title â†’ price). Do not run PLP member-grid paint on these cells. */
     if (out.length) return out;
     if (mcIsLikelyListingPage()) {
       raw = document.querySelectorAll('.v-product-grid .v-product, li.v-product');
@@ -9894,7 +9916,7 @@ try {
     return out;
   }
 
-  /* MAP / teaser captions — match Volusion variants (case-insensitive) */
+  /* MAP / teaser captions â€” match Volusion variants (case-insensitive) */
   var MC_MAP_LINK_RE =
     /add\s+to\s+cart\s+for\s+our\s+lowest\s+price|add\s+to\s+cart\s+for\s+the\s+lowest|our\s+lowest\s+price|add\s+to\s+cart\s+for\s+lowest|see\s+price\s+in\s+cart|click\s+for\s+price|call\s+for\s+price|call\s+for\s+pricing|add\s+to\s+cart\s+to\s+see/i;
 
@@ -10116,7 +10138,7 @@ try {
 
   /**
    * Volusion often puts MAP / "Add to cart for our lowest price" in a promo link or callout,
-   * not in .v-product__price — find the smallest matching node first, then fall back to price.
+   * not in .v-product__price â€” find the smallest matching node first, then fall back to price.
    */
   function mcFindCardPricingMount(card) {
     var MAP_RE = MC_MAP_LINK_RE;
@@ -10153,7 +10175,7 @@ try {
     );
   }
 
-  /** Where to run mcInstallGuestPriceOnly / logged-in price restore — must stay in DOM after MAP anchor is replaced. */
+  /** Where to run mcInstallGuestPriceOnly / logged-in price restore â€” must stay in DOM after MAP anchor is replaced. */
   function mcFindCardPriceContainerMount(card) {
     if (!card || !card.querySelectorAll) return null;
     var candidates = [
@@ -10489,7 +10511,7 @@ try {
 
   /**
    * Volusion often outputs sale / MAP / member nodes before the image. Flex `order` usually fixes it;
-   * when the card root is a column flex container, moving DOM after the title guarantees image → title → price.
+   * when the card root is a column flex container, moving DOM after the title guarantees image â†’ title â†’ price.
    */
   function mcEnsureMemberBlockCardLevel(card) {
     var block = card.querySelector('.mc-member-grid-price');
@@ -11211,7 +11233,7 @@ try {
 
 <style id="mc-final-mobile-layout-fixes">
 @media (max-width: 991px) {
-  /* 1) Homepage hero logo — smaller on phones/tablets; desktop unchanged (this query is mobile-only) */
+  /* 1) Homepage hero logo â€” smaller on phones/tablets; desktop unchanged (this query is mobile-only) */
   body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
   #if_homepage #slideshow-container .mc-hero-overlay .hero-logo-img {
     width: 68% !important;
@@ -11223,7 +11245,7 @@ try {
     max-width: 96vw !important;
   }
 
-  /* 2) Category grid — uniform image tile (match desktop cover rules at smaller height) */
+  /* 2) Category grid â€” uniform image tile (match desktop cover rules at smaller height) */
   :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
   :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
   :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
@@ -11266,7 +11288,7 @@ try {
     row-gap: 0 !important;
   }
 
-  /* 3) PDP — stop price / “price with options” overlapping alt thumbnails */
+  /* 3) PDP â€” stop price / â€œprice with optionsâ€ overlapping alt thumbnails */
   html body.productdetails #content_area #v65-product-parent [itemprop="offers"],
   html body.mc-product-page #content_area #v65-product-parent [itemprop="offers"],
   html body.productdetails #content_area [itemprop="offers"],
@@ -11476,3 +11498,6 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e598c4c0cafe88f',t:'MTc3NTA2Njk5OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
+
+
+
