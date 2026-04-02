@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260402f — PLP: no guest sale hide; bean URL + price preserve + repaint missing amounts */
+/* MC_DEPLOY_VERIFY_20260402g — is-home from URL only (fixes interior search + :not(.is-home) CSS) */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -360,6 +360,18 @@ html.mc-search-open #mcHeroSearchOverlay #search::placeholder,
 /* ======================================
    HOMEPAGE HERO VIDEO (HOME ONLY)
 ====================================== */
+/* Volusion often ships #if_homepage in HTML on all pages; URL sync removes is-home on interior */
+body:not(.is-home) #if_homepage {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+}
+
 /* Full-bleed: no white space on sides of slideshow */
 #if_homepage,
 body.is-home #if_homepage {

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
-<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260402d"><!--<![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260402g"><!--<![endif]-->
 <head>
 <script>
 (function () {
@@ -42,6 +42,20 @@
   markCategoryListing();
   document.addEventListener('DOMContentLoaded', markCategoryListing);
   setTimeout(markCategoryListing, 0);
+})();
+</script>
+<script>
+(function () {
+  /* True homepage URL only — #if_homepage / slideshow often exist in raw HTML on every Volusion page. */
+  window.mcPathIsHomepage = function mcPathIsHomepage() {
+    try {
+      var p = (location.pathname || '').replace(/\\/g, '/').toLowerCase();
+      if (p === '/' || p === '/index.htm' || p === '/index.html') return true;
+      if (/\/default\.asp$/i.test(p)) return true;
+      if (/\/index\.asp$/i.test(p)) return true;
+    } catch (e) {}
+    return false;
+  };
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260418git: Volusion File Editor path is wwwroot/v/vspfiles/css/custom-safe.css; deploy writes that path and /vspfiles/css/custom-safe.css. Browser URL /v/vspfiles/css/custom-safe.css. -->
@@ -132,6 +146,17 @@
     body:not(.is-home) html.mc-search-open header.header .collapsing-search,
     body:not(.is-home) body.mc-search-open header.header .collapsing-search {
       transform: none !important;
+    }
+    /* Raw template often includes #if_homepage on every page — hide when URL is not homepage */
+    body:not(.is-home) #if_homepage {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      pointer-events: none !important;
     }
     header.header .header__section--middle,
     header.header .mc-header-search-below-nav,
@@ -425,7 +450,17 @@ document.addEventListener("DOMContentLoaded", function () {
 ========================================= -->
 
 <body>
-<!-- MC_TEMPLATE: hero-z35-search-z22-if_homepage-is-home-20260402d -->
+<script>
+(function () {
+  try {
+    if (typeof window.mcPathIsHomepage === 'function') {
+      if (window.mcPathIsHomepage()) document.body.classList.add('is-home');
+      else document.body.classList.remove('is-home');
+    }
+  } catch (e) {}
+})();
+</script>
+<!-- MC_TEMPLATE: url-home-only-is-home-20260402g -->
 <!-- Do not override window.location.reload: CAPTCHA / bot checks (Cloudflare, etc.) call reload to finish; blocking it causes verify loops. -->
 <a class="mc-cart-float" href="/shoppingcart.asp" aria-label="Cart" rel="nofollow">
   <svg class="mc-cart-float__icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
@@ -441,7 +476,10 @@ document.addEventListener("DOMContentLoaded", function () {
 <script>
 (function () {
   try {
-    document.body.classList.add('is-home');
+    if (typeof window.mcPathIsHomepage === 'function') {
+      if (window.mcPathIsHomepage()) document.body.classList.add('is-home');
+      else document.body.classList.remove('is-home');
+    }
   } catch (e) {}
 })();
 </script>
@@ -692,8 +730,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var mid = document.querySelector('header.header .header__section--middle');
     if (!mid) return;
 
-    var overlay = document.getElementById('mcHeroSearchOverlay');
-    var isHome = document.body.classList.contains('is-home');
+    var isHome = typeof window.mcPathIsHomepage === 'function' && window.mcPathIsHomepage();
+    var overlay = isHome ? document.getElementById('mcHeroSearchOverlay') : null;
     var menuRow = mcFindMainMenuRow();
 
     if (isHome && overlay) {
@@ -708,7 +746,15 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    /* Category / interior: strip must be the next sibling after the desktop menu row */
+    /* Interior: pull search back from hero overlay if URL is not homepage */
+    if (mid.getAttribute('data-mc-search-mount') === 'hero' && menuRow && menuRow.parentNode) {
+      try {
+        menuRow.parentNode.insertBefore(mid, menuRow.nextSibling);
+      } catch (ePull) {}
+      mid.setAttribute('data-mc-search-mount', 'below-nav');
+    }
+
+    /* Strip must be the next sibling after the desktop menu row */
     if (menuRow && menuRow.parentNode) {
       if (menuRow.nextSibling !== mid) {
         menuRow.parentNode.insertBefore(mid, menuRow.nextSibling);
@@ -749,6 +795,12 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function boot() {
+    try {
+      if (typeof window.mcPathIsHomepage === 'function') {
+        if (window.mcPathIsHomepage()) document.body.classList.add('is-home');
+        else document.body.classList.remove('is-home');
+      }
+    } catch (eSync) {}
     mcMountSearchLayout();
     bindSearchToggle();
     /* Volusion often injects #display_menu_1 after first paint — retry */
@@ -3951,9 +4003,12 @@ window.initRoomPlanner = function (opts) {
 
 <script>
 (function () {
-  if (document.getElementById('slideshow-container')) {
-    document.body.classList.add('is-home');
-  }
+  try {
+    if (typeof window.mcPathIsHomepage === 'function') {
+      if (window.mcPathIsHomepage()) document.body.classList.add('is-home');
+      else document.body.classList.remove('is-home');
+    }
+  } catch (e) {}
 })();
 </script>
 
