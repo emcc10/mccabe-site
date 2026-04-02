@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260401j — nav row: menu | search→cart line; hero-matching gutters; tighter logo row */
+/* MC_DEPLOY_VERIFY_20260401k — bean PLP subline center; member/sale logged-in only; pager next top-right */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6279,7 +6279,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 :is(html.category, body.category) .v-product-grid .v-product .product_price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .product_price {
-  order: 4;
+  order: 5;
   flex: 0 0 auto;
   margin-top: 4px !important;
   min-height: 0;
@@ -6294,7 +6294,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 
 :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .mc-member-grid-price {
-  order: 3 !important;
+  order: 4 !important;
   flex: 0 0 auto;
   margin-top: 2px !important;
   min-height: 0;
@@ -6317,7 +6317,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 :is(html.category, body.category) .v-product [itemprop="price"],
 :is(html.category, body.category) ul.v-product-grid > li.v-product > font.product_sale_price,
 :is(html.category, body.category) ul.v-product-grid > li.v-product > font.product_list_price {
-  order: 5 !important;
+  order: 6 !important;
   align-self: stretch !important;
   text-align: left !important;
   width: 100% !important;
@@ -6325,25 +6325,24 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   margin-top: 4px !important;
 }
 
-/* PLP / home: do NOT hide sale for guests — many listings only expose sale in that row (hiding it blanked prices).
-   Logged-in members: stack sale under member block via order below. */
+/* Sale / member rows: guests see regular only (JS strips sale); logged-in ordering below */
 :is(html.category, body.category) body.mc-member-logged-in #content_area .v-product .product_sale_price,
 :is(html.category, body.category) body.mc-member-logged-in #content_area .v-product [class*="product_sale_price"],
 :is(html.category, body.category) body.mc-member-logged-in #content_area ul.v-product-grid > li.v-product > font.product_sale_price {
-  order: 4 !important;
+  order: 5 !important;
 }
 
 :is(html.category, body.category) body.mc-member-logged-in #content_area .v-product .v-product__price,
 :is(html.category, body.category) body.mc-member-logged-in #content_area .v-product .product_price,
 :is(html.category, body.category) body.mc-member-logged-in #content_area ul.v-product-grid > li.v-product .v-product__price,
 :is(html.category, body.category) body.mc-member-logged-in #content_area ul.v-product-grid > li.v-product .product_price {
-  order: 5 !important;
+  order: 6 !important;
 }
 
 :is(html.category, body.category) body.mc-member-logged-in #content_area .v-product .product_list_price,
 :is(html.category, body.category) body.mc-member-logged-in #content_area .v-product [class*="product_list_price"],
 :is(html.category, body.category) body.mc-member-logged-in #content_area ul.v-product-grid > li.v-product > font.product_list_price {
-  order: 6 !important;
+  order: 7 !important;
 }
 
 body.is-home:not(.productdetails).mc-member-logged-in #content_area_home .v-product .product_sale_price,
@@ -6362,9 +6361,19 @@ body.is-home:not(.productdetails).mc-member-logged-in #content_area_home ul.v-pr
   order: 6 !important;
 }
 
-/* Bean bag category: line under each product title */
+/* Guests: hide Volusion sale rows on PLP (regular-only is rebuilt in JS) */
+:is(html.category, body.category) body:not(.mc-member-logged-in) #content_area .v-product font.product_sale_price,
+:is(html.category, body.category) body:not(.mc-member-logged-in)
+  #content_area
+  ul.v-product-grid
+  > li.v-product
+  > font.product_sale_price {
+  display: none !important;
+}
+
+/* Bean bag category: subline centered under title */
 :is(html.category, body.category) #content_area .mc-plp-bean-subline {
-  order: 2 !important;
+  order: 3 !important;
   flex: 0 0 auto !important;
   width: 100% !important;
   box-sizing: border-box !important;
@@ -6375,8 +6384,9 @@ body.is-home:not(.productdetails).mc-member-logged-in #content_area_home ul.v-pr
   letter-spacing: 0.06em !important;
   text-transform: none !important;
   color: #555 !important;
-  text-align: left !important;
+  text-align: center !important;
   line-height: 1.35 !important;
+  align-self: center !important;
 }
 
 @media (max-width: 991px) {
@@ -6577,6 +6587,26 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
 .mc-category-pager__btn:hover {
   background: #1a1a1a !important;
   color: #fff !important;
+}
+
+/* Next beside “Page N …” above the grid (injected #mc-category-pager-top) */
+.mc-category-pager-page-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 0 14px 0 !important;
+  padding: 0 max(12px, 2vw) !important;
+}
+
+.mc-category-pager-page-row .mc-category-pager__btn--next {
+  flex: 0 0 auto !important;
+  margin-left: auto !important;
 }
 
 /* =========================================================
