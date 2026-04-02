@@ -778,7 +778,8 @@ body:not(.is-home) header.header .collapsing-search {
     flex: 0 1 auto !important;
     min-width: 140px !important;
     max-width: min(380px, 42vw) !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.22) !important;
+    /* Default: no full-width rule under the word; line sits in the row rail to the right (see ::after) */
+    border-bottom: none !important;
     padding: 8px 0 6px !important;
     box-sizing: border-box !important;
     margin: 0 !important;
@@ -796,6 +797,54 @@ body:not(.is-home) header.header .collapsing-search {
     padding: 8px 0 4px !important;
     margin: 0 !important;
     box-shadow: none !important;
+  }
+
+  /* Collapsed: placeholder stays narrow; underline continues horizontally to the right of the text */
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search:not(:focus-within) .collapsing-search__form .row {
+    align-items: flex-end !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search:not(:focus-within) .collapsing-search__form .row #search,
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search:not(:focus-within) .collapsing-search__form .row .collapsing-search__input {
+    flex: 0 1 auto !important;
+    width: 8.75rem !important;
+    max-width: 45% !important;
+    min-width: 0 !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search:not(:focus-within) .collapsing-search__form .row::after {
+    content: "" !important;
+    flex: 1 1 auto !important;
+    min-width: 12px !important;
+    height: 0 !important;
+    align-self: flex-end !important;
+    margin-bottom: 10px !important;
+    margin-left: 6px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.22) !important;
+  }
+
+  body:not(.is-home)
+    .mc-header-desktop-bar
+    .collapsing-search:not(:focus-within):hover
+    .collapsing-search__form
+    .row::after {
+    border-bottom-color: rgba(0, 0, 0, 0.55) !important;
+  }
+
+  html.mc-search-open body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row::after,
+  body.mc-search-open body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row::after {
+    display: none !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search:focus-within .collapsing-search__form .row #search,
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search:focus-within .collapsing-search__form .row .collapsing-search__input,
+  html.mc-search-open body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row #search,
+  html.mc-search-open body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row .collapsing-search__input,
+  body.mc-search-open body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row #search,
+  body.mc-search-open body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row .collapsing-search__input {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
   }
 
   body:not(.is-home) .mc-header-desktop-bar .mc-header-cart {
