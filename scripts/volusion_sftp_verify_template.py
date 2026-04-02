@@ -3,7 +3,9 @@
 After deploy: confirm mc-deploy-verify matches Git.
 
 1) SFTP: reject stale /v/ copies when those files exist.
-2) HTTP: public template URL must show the same marker (cache-busted). This catches
+2) SFTP: optional check that remote custom-safe.css contains MC_DEPLOY_VERIFY_<token>
+   (layout often breaks when template updates but CSS path is stale).
+3) HTTP: public template URL must show the same marker (cache-busted). This catches
    the case where SFTP only updated /template_266.html but the browser still reads /v/.
 """
 from __future__ import annotations
@@ -25,6 +27,15 @@ _CANONICAL_V_PATHS: tuple[str, ...] = (
     "v/template_266.html",
 )
 
+# Live storefront CSS is often under wwwroot /v/vspfiles/css/ (not the same as /vspfiles/…).
+_CSS_SFTP_PATHS: tuple[str, ...] = (
+    "/v/vspfiles/css/custom-safe.css",
+    "v/vspfiles/css/custom-safe.css",
+    "/vspfiles/css/custom-safe.css",
+    "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css",
+    "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css",
+)
+
 
 def _expect_from_local(ws: str) -> str:
     path = os.path.join(ws, "template_266.html")
@@ -41,6 +52,28 @@ def _normalize_secret_template_path() -> str:
     if secret == "/v/v/template_266.html":
         secret = "/v/template_266.html"
     return secret
+
+
+def _download_text_file(sftp, remote: str) -> str | None:
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".bin")
+    tmp.close()
+    local = tmp.name
+    try:
+        sftp.get(remote, local)
+    except Exception:  # noqa: BLE001
+        try:
+            os.unlink(local)
+        except OSError:
+            pass
+        return None
+    try:
+        with open(local, encoding="utf-8", errors="replace") as f:
+            return f.read()
+    finally:
+        try:
+            os.unlink(local)
+        except OSError:
+            pass
 
 
 def _download_marker(sftp, remote: str) -> str | None:
@@ -107,13 +140,6 @@ def _browser_like_headers(url: str) -> dict[str, str]:
 
 
 def _http_marker(expect: str) -> tuple[bool, str, str, str | None, int | None]:
-    """
-    Return (ok, detail, url_used, failure_kind, http_status).
-
-    failure_kind: None (success), 'skipped', 'http' (could not fetch/parse page),
-    'mismatch' (fetched but wrong marker).
-    http_status: status code on HTTPError, else None.
-    """
     if os.environ.get("SKIP_HTTP_TEMPLATE_VERIFY", "").strip().lower() in (
         "1",
         "true",
@@ -155,6 +181,62 @@ def _http_marker(expect: str) -> tuple[bool, str, str, str | None, int | None]:
     return False, got or "(no meta tag)", url, "mismatch", None
 
 
+def _verify_remote_css_via_sftp(sftp, ws: str, expect: str) -> int:
+    if os.environ.get("SKIP_CSS_SFTP_VERIFY", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    ):
+        print("::notice::SKIP_CSS_SFTP_VERIFY set; skipping remote CSS check.", flush=True)
+        return 0
+
+    needle = f"MC_DEPLOY_VERIFY_{expect}"
+    local_css = os.path.join(ws, "vspfiles", "css", "custom-safe.css")
+    if not os.path.isfile(local_css):
+        return 0
+    with open(local_css, encoding="utf-8", errors="replace") as f:
+        if needle not in f.read():
+            print(
+                "::notice::Local custom-safe.css has no matching verify token; skip remote CSS check.",
+                flush=True,
+            )
+            return 0
+
+    seen: set[str] = set()
+    reads: list[tuple[str, str]] = []
+    for remote in _CSS_SFTP_PATHS:
+        if remote in seen:
+            continue
+        seen.add(remote)
+        body = _download_text_file(sftp, remote)
+        if body is None:
+            print(f"::notice::SFTP no CSS at {remote!r} (skipped).", flush=True)
+            continue
+        reads.append((remote, body))
+        if needle in body:
+            print(f"::notice::SFTP CSS OK: {remote!r} contains {needle!r}", flush=True)
+            return 0
+
+    if not reads:
+        print(
+            "::warning::Could not read custom-safe.css from any canonical SFTP path; "
+            "cannot confirm CSS reached the server. Check SFTP_CSS_REMOTE_FILE / Volusion paths.",
+            flush=True,
+        )
+        return 0
+
+    remote0, body0 = reads[0]
+    cm = re.search(r"MC_DEPLOY_VERIFY_[A-Za-z0-9]+", body0)
+    saw = cm.group(0) if cm else "(no MC_DEPLOY_VERIFY in file)"
+    print(
+        "::error::Remote CSS at "
+        f"{remote0!r} does not contain {needle!r} (saw {saw!r}). "
+        "Template on SFTP may match Git while the live theme still loads old CSS.",
+        file=sys.stderr,
+    )
+    return 1
+
+
 def main() -> int:
     ws = os.environ.get("GITHUB_WORKSPACE", ".")
     os.chdir(ws)
@@ -163,6 +245,12 @@ def main() -> int:
     if not expect:
         print("::notice::No mc-deploy-verify in template; skipping remote verify.")
         return 0
+
+    print(
+        "::notice::Deploy verify: expect template "
+        f'mc-deploy-verify content={expect!r}; expect CSS substring MC_DEPLOY_VERIFY_{expect}',
+        flush=True,
+    )
 
     host = (
         os.environ.get("SFTP_HOST", "").strip()
@@ -233,6 +321,11 @@ def main() -> int:
                         f"expected {expect!r}.",
                         flush=True,
                     )
+
+            if sftp_any_match is not None:
+                css_rc = _verify_remote_css_via_sftp(sftp, ws, expect)
+                if css_rc != 0:
+                    return css_rc
         finally:
             try:
                 sftp.close()
@@ -264,7 +357,9 @@ def main() -> int:
                 f"{http_detail} URL={http_url!r}. "
                 "SFTP already matched this file on a /v/ path; live URL may block "
                 "CI (WAF). Set REQUIRE_HTTP_TEMPLATE_VERIFY=true to fail the job if "
-                "HTTP cannot reach the template.",
+                "HTTP cannot reach the template. "
+                "Browsers can still show cached HTML/CSS — open the template URL with "
+                "a cache-busting query (e.g. ?_mcv=<unix time>) or hard refresh.",
                 flush=True,
             )
             return 0

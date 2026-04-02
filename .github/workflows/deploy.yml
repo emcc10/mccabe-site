@@ -72,7 +72,7 @@ jobs:
 
           echo "Deploying sftp://${SFTP_HOST}:${SFTP_PORT} as ${SFTP_USER}"
           echo "Local template: $(wc -c < template_266.html | tr -d ' ') bytes; css: $(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes"
-          echo "Remote: template â†’ ${TEMPLATE_REMOTE:-/template_266.html (then fallbacks)}; css â†’ ${CSS_REMOTE}"
+          echo "Remote: template Ã¢â€ â€™ ${TEMPLATE_REMOTE:-/template_266.html (then fallbacks)}; css Ã¢â€ â€™ ${CSS_REMOTE}"
 
           TCP_OK=0
           echo "::group::Network: can this runner reach ${SFTP_HOST}:${SFTP_PORT}?"
@@ -216,10 +216,10 @@ jobs:
           fi
 
           echo "::group::Best-effort: mirror template to canonical Volusion paths (covers wrong SFTP_TEMPLATE_REMOTE)"
-          try_put_template_only "mirror â†’ /v/template_266.html" "/v/template_266.html"
-          try_put_template_only "mirror â†’ /v/v/template_266.html" "/v/v/template_266.html"
-          try_put_template_only "mirror â†’ domain /v/" "/mccabestheaterandliving.com/v/template_266.html"
-          try_put_template_only "mirror â†’ /template_266.html" "/template_266.html"
+          try_put_template_only "mirror Ã¢â€ â€™ /v/template_266.html" "/v/template_266.html"
+          try_put_template_only "mirror Ã¢â€ â€™ /v/v/template_266.html" "/v/v/template_266.html"
+          try_put_template_only "mirror Ã¢â€ â€™ domain /v/" "/mccabestheaterandliving.com/v/template_266.html"
+          try_put_template_only "mirror Ã¢â€ â€™ /template_266.html" "/template_266.html"
           echo "::endgroup::"
 
           try_put_css_only() {
@@ -230,8 +230,8 @@ jobs:
           }
 
           echo "::group::Best-effort: mirror CSS to wwwroot v/vspfiles/css (Volusion File Editor: v/vspfiles/css/custom-safe.css)"
-          try_put_css_only "css â†’ /v/vspfiles/css/custom-safe.css" "/v/vspfiles/css/custom-safe.css"
-          try_put_css_only "css â†’ v/vspfiles/css/custom-safe.css" "v/vspfiles/css/custom-safe.css"
+          try_put_css_only "css Ã¢â€ â€™ /v/vspfiles/css/custom-safe.css" "/v/vspfiles/css/custom-safe.css"
+          try_put_css_only "css Ã¢â€ â€™ v/vspfiles/css/custom-safe.css" "v/vspfiles/css/custom-safe.css"
           echo "::endgroup::"
 
           echo "::notice::Upload finished. Next step re-downloads template via SFTP and may check the public template URL (HTTP); storefront cache can still lag what you see in a browser."
@@ -270,6 +270,8 @@ jobs:
           SKIP_HTTP_TEMPLATE_VERIFY: ${{ vars.SKIP_HTTP_TEMPLATE_VERIFY }}
           # If true, HTTP check must succeed (no WAF bypass when SFTP /v/ matched).
           REQUIRE_HTTP_TEMPLATE_VERIFY: ${{ vars.REQUIRE_HTTP_TEMPLATE_VERIFY }}
+          # Optional SKIP_CSS_SFTP_VERIFY=true to skip remote custom-safe.css needle check.
+          SKIP_CSS_SFTP_VERIFY: ${{ vars.SKIP_CSS_SFTP_VERIFY }}
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}"
