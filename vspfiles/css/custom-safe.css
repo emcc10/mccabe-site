@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260419pricebox — pair with template meta mc-deploy-verify=20260419pricebox */
+/* MC_DEPLOY_VERIFY_20260419fullux — pair with template meta mc-deploy-verify=20260419fullux */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -569,7 +569,8 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
 
 @media (min-width: 992px) {
   #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
-    top: 18px !important;
+    top: 56px !important;
+    z-index: 40 !important;
   }
 }
 
@@ -723,7 +724,7 @@ body:not(.is-home) header.header .main-menu {
 /* Non-home: one flex row — nav + search (no absolute; avoids clip + keeps search in document flow) */
 @media (min-width: 992px) {
   body:not(.is-home) header.header > .header__section {
-    padding-top: 6px !important;
+    padding-top: 18px !important;
     padding-bottom: 2px !important;
   }
 
@@ -7904,4 +7905,13 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   height: auto !important;
   max-width: 100% !important;
   max-height: 100% !important;
+}
+/* PDP related items: guests never see sale row (retail / list only) */
+body:not(.mc-member-logged-in) #content_area #relateditems font.product_sale_price,
+body:not(.mc-member-logged-in) #content_area #relateditems .product_sale_price,
+body:not(.mc-member-logged-in) #content_area #relateditems [class*="product_sale_price"],
+body:not(.mc-member-logged-in) #content_area table.relateditems font.product_sale_price,
+body:not(.mc-member-logged-in) #content_area table.relateditems .product_sale_price,
+body:not(.mc-member-logged-in) #content_area table.relateditems [class*="product_sale_price"] {
+  display: none !important;
 }

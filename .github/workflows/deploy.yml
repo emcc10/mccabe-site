@@ -34,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}"
-          echo "::notice::deploy marker 20260419pricebox — View Source mc-deploy-verify content=20260419pricebox; CSS first line MC_DEPLOY_VERIFY_20260419pricebox"
+          echo "::notice::deploy marker 20260419fullux — View Source mc-deploy-verify content=20260419fullux; CSS first line MC_DEPLOY_VERIFY_20260419fullux"
 
           SFTP_HOST="${SECRET_SFTP_HOST:-}"
           if [ -z "$SFTP_HOST" ]; then
