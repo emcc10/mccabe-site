@@ -102,24 +102,6 @@ def _mirror_css_to_canonical_paths(sftp) -> None:
             print(f"::warning::PARAMIKO_MIRROR_SKIP css {rel}: {exc}", flush=True)
 
 
-def _mirror_mccabe_overrides_to_canonical_paths(sftp) -> None:
-    """Live template links v/vspfiles/templates/266/css/mccabe-overrides.css (custom-safe may not load)."""
-    local = "vspfiles/templates/266/css/mccabe-overrides.css"
-    if not os.path.isfile(local):
-        print("::notice::PARAMIKO_SKIP mccabe-overrides (local file missing)", flush=True)
-        return
-    for rel in (
-        "/v/vspfiles/templates/266/css/mccabe-overrides.css",
-        "v/vspfiles/templates/266/css/mccabe-overrides.css",
-        "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css",
-    ):
-        try:
-            sftp.put(local, rel, confirm=False)
-            print(f"::notice::PARAMIKO_MIRROR_OK mccabe-overrides → {rel}", flush=True)
-        except Exception as exc:  # noqa: BLE001
-            print(f"::warning::PARAMIKO_MIRROR_SKIP mccabe-overrides {rel}: {exc}", flush=True)
-
-
 def _try_home_relative(sftp) -> bool:
     try:
         sftp.put("template_266.html", "template_266.html")
@@ -164,14 +146,12 @@ def main() -> int:
             if any_ok:
                 _mirror_template_to_canonical_paths(sftp)
                 _mirror_css_to_canonical_paths(sftp)
-                _mirror_mccabe_overrides_to_canonical_paths(sftp)
                 print("PARAMIKO_OK (one or more path pairs succeeded)", flush=True)
                 return 0
             if _try_home_relative(sftp):
                 print("PARAMIKO_OK (login-relative template + vspfiles/css/)", flush=True)
                 _mirror_template_to_canonical_paths(sftp)
                 _mirror_css_to_canonical_paths(sftp)
-                _mirror_mccabe_overrides_to_canonical_paths(sftp)
                 return 0
             return 1
         finally:

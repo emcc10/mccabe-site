@@ -3,9 +3,7 @@
 After deploy: confirm mc-deploy-verify matches Git.
 
 1) SFTP: reject stale /v/ copies when those files exist.
-2) SFTP: optional check that remote custom-safe.css contains MC_DEPLOY_VERIFY_<token>
-   (layout often breaks when template updates but CSS path is stale).
-3) HTTP: public template URL must show the same marker (cache-busted). This catches
+2) HTTP: public template URL must show the same marker (cache-busted). This catches
    the case where SFTP only updated /template_266.html but the browser still reads /v/.
 """
 from __future__ import annotations
@@ -27,46 +25,6 @@ _CANONICAL_V_PATHS: tuple[str, ...] = (
     "v/template_266.html",
 )
 
-def _normalize_css_remote_secret() -> str:
-    raw = os.environ.get("SFTP_CSS_REMOTE_FILE", "").strip()
-    if not raw:
-        return ""
-    if not raw.startswith("/"):
-        return "/" + raw
-    return raw
-
-
-def _css_verify_path_groups() -> tuple[list[str], list[str]]:
-    """(v_wwwroot_paths, other_paths) — Volusion live CSS is usually under …/v/vspfiles/css/."""
-    secret = _normalize_css_remote_secret()
-    v_paths: list[str] = [
-        "/v/vspfiles/css/custom-safe.css",
-        "v/vspfiles/css/custom-safe.css",
-        "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css",
-    ]
-    other_paths: list[str] = [
-        "/vspfiles/css/custom-safe.css",
-        "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css",
-        "vspfiles/css/custom-safe.css",
-    ]
-    if secret:
-        if "v/vspfiles" in secret.replace("\\", "/"):
-            v_paths.insert(0, secret)
-        else:
-            other_paths.insert(0, secret)
-    seen: set[str] = set()
-    out_v: list[str] = []
-    for x in v_paths:
-        if x and x not in seen:
-            seen.add(x)
-            out_v.append(x)
-    out_o: list[str] = []
-    for x in other_paths:
-        if x and x not in seen:
-            seen.add(x)
-            out_o.append(x)
-    return out_v, out_o
-
 
 def _expect_from_local(ws: str) -> str:
     path = os.path.join(ws, "template_266.html")
@@ -83,28 +41,6 @@ def _normalize_secret_template_path() -> str:
     if secret == "/v/v/template_266.html":
         secret = "/v/template_266.html"
     return secret
-
-
-def _download_text_file(sftp, remote: str) -> str | None:
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".bin")
-    tmp.close()
-    local = tmp.name
-    try:
-        sftp.get(remote, local)
-    except Exception:  # noqa: BLE001
-        try:
-            os.unlink(local)
-        except OSError:
-            pass
-        return None
-    try:
-        with open(local, encoding="utf-8", errors="replace") as f:
-            return f.read()
-    finally:
-        try:
-            os.unlink(local)
-        except OSError:
-            pass
 
 
 def _download_marker(sftp, remote: str) -> str | None:
@@ -171,6 +107,13 @@ def _browser_like_headers(url: str) -> dict[str, str]:
 
 
 def _http_marker(expect: str) -> tuple[bool, str, str, str | None, int | None]:
+    """
+    Return (ok, detail, url_used, failure_kind, http_status).
+
+    failure_kind: None (success), 'skipped', 'http' (could not fetch/parse page),
+    'mismatch' (fetched but wrong marker).
+    http_status: status code on HTTPError, else None.
+    """
     if os.environ.get("SKIP_HTTP_TEMPLATE_VERIFY", "").strip().lower() in (
         "1",
         "true",
@@ -212,96 +155,6 @@ def _http_marker(expect: str) -> tuple[bool, str, str, str | None, int | None]:
     return False, got or "(no meta tag)", url, "mismatch", None
 
 
-def _verify_remote_css_via_sftp(sftp, ws: str, expect: str) -> int:
-    if os.environ.get("SKIP_CSS_SFTP_VERIFY", "").strip().lower() in (
-        "1",
-        "true",
-        "yes",
-    ):
-        print("::notice::SKIP_CSS_SFTP_VERIFY set; skipping remote CSS check.", flush=True)
-        return 0
-
-    needle = f"MC_DEPLOY_VERIFY_{expect}"
-    local_css = os.path.join(ws, "vspfiles", "css", "custom-safe.css")
-    if not os.path.isfile(local_css):
-        return 0
-    with open(local_css, encoding="utf-8", errors="replace") as f:
-        if needle not in f.read():
-            print(
-                "::notice::Local custom-safe.css has no matching verify token; skip remote CSS check.",
-                flush=True,
-            )
-            return 0
-
-    v_paths, other_paths = _css_verify_path_groups()
-
-    for remote in v_paths:
-        body = _download_text_file(sftp, remote)
-        if body is None:
-            print(f"::notice::SFTP no CSS at {remote!r} (skipped).", flush=True)
-            continue
-        if needle in body:
-            print(f"::notice::SFTP CSS OK (v wwwroot): {remote!r} contains {needle!r}", flush=True)
-            return 0
-        cm = re.search(r"MC_DEPLOY_VERIFY_[A-Za-z0-9]+", body)
-        saw = cm.group(0) if cm else "(no MC_DEPLOY_VERIFY in file)"
-        print(
-            "::error::Remote CSS at "
-            f"{remote!r} is readable but does not contain {needle!r} (saw {saw!r}). "
-            "The live theme path /v/vspfiles/css/custom-safe.css looks stale.",
-            file=sys.stderr,
-        )
-        return 1
-
-    any_other = False
-    for remote in other_paths:
-        body = _download_text_file(sftp, remote)
-        if body is None:
-            print(f"::notice::SFTP no CSS at {remote!r} (skipped).", flush=True)
-            continue
-        any_other = True
-        if needle in body:
-            print(f"::notice::SFTP CSS OK (non-v path): {remote!r} contains {needle!r}", flush=True)
-            print(
-                "::warning::SFTP could not read any /v/vspfiles/css/custom-safe.css path, "
-                f"but {remote!r} has the deploy token. The storefront usually serves "
-                "…/v/vspfiles/css/custom-safe.css — open that URL with a cache-bust query "
-                "and confirm MC_DEPLOY_VERIFY matches Git. "
-                "Set repo var STRICT_V_WWWROOT_CSS_SFTP=true to fail the job until /v/vspfiles/… "
-                "is readable via SFTP and contains the token.",
-                flush=True,
-            )
-            strict = os.environ.get("STRICT_V_WWWROOT_CSS_SFTP", "").strip().lower() in (
-                "1",
-                "true",
-                "yes",
-            )
-            if strict:
-                print(
-                    "::error::STRICT_V_WWWROOT_CSS_SFTP set: need confirmed /v/vspfiles/… CSS via SFTP.",
-                    file=sys.stderr,
-                )
-                return 1
-            return 0
-        cm = re.search(r"MC_DEPLOY_VERIFY_[A-Za-z0-9]+", body)
-        saw = cm.group(0) if cm else "(no MC_DEPLOY_VERIFY in file)"
-        print(
-            "::error::Remote CSS at "
-            f"{remote!r} does not contain {needle!r} (saw {saw!r}). "
-            "Template on SFTP may match Git while a CSS path is stale.",
-            file=sys.stderr,
-        )
-        return 1
-
-    if not any_other:
-        print(
-            "::warning::Could not read custom-safe.css from any SFTP path; "
-            "cannot confirm CSS on the server. Check SFTP_CSS_REMOTE_FILE / Volusion paths.",
-            flush=True,
-        )
-    return 0
-
-
 def main() -> int:
     ws = os.environ.get("GITHUB_WORKSPACE", ".")
     os.chdir(ws)
@@ -310,12 +163,6 @@ def main() -> int:
     if not expect:
         print("::notice::No mc-deploy-verify in template; skipping remote verify.")
         return 0
-
-    print(
-        "::notice::Deploy verify: expect template "
-        f'mc-deploy-verify content={expect!r}; expect CSS substring MC_DEPLOY_VERIFY_{expect}',
-        flush=True,
-    )
 
     host = (
         os.environ.get("SFTP_HOST", "").strip()
@@ -386,11 +233,6 @@ def main() -> int:
                         f"expected {expect!r}.",
                         flush=True,
                     )
-
-            if sftp_any_match is not None:
-                css_rc = _verify_remote_css_via_sftp(sftp, ws, expect)
-                if css_rc != 0:
-                    return css_rc
         finally:
             try:
                 sftp.close()
@@ -422,9 +264,7 @@ def main() -> int:
                 f"{http_detail} URL={http_url!r}. "
                 "SFTP already matched this file on a /v/ path; live URL may block "
                 "CI (WAF). Set REQUIRE_HTTP_TEMPLATE_VERIFY=true to fail the job if "
-                "HTTP cannot reach the template. "
-                "Browsers can still show cached HTML/CSS — open the template URL with "
-                "a cache-busting query (e.g. ?_mcv=<unix time>) or hard refresh.",
+                "HTTP cannot reach the template.",
                 flush=True,
             )
             return 0

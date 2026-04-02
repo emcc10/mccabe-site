@@ -34,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}"
-          echo "::notice::deploy marker 20260419sync — View Source mc-deploy-verify content=20260419sync; CSS first line MC_DEPLOY_VERIFY_20260419sync"
+          echo "::notice::deploy marker 20260419fullux — View Source mc-deploy-verify content=20260419fullux; CSS first line MC_DEPLOY_VERIFY_20260419fullux"
 
           SFTP_HOST="${SECRET_SFTP_HOST:-}"
           if [ -z "$SFTP_HOST" ]; then
@@ -233,19 +233,6 @@ jobs:
           try_put_css_only "css → /v/vspfiles/css/custom-safe.css" "/v/vspfiles/css/custom-safe.css"
           try_put_css_only "css → v/vspfiles/css/custom-safe.css" "v/vspfiles/css/custom-safe.css"
           echo "::endgroup::"
-          try_put_overrides_only() {
-            local title="$1" opath="$2"
-            try_batch "${title}" \
-              "put vspfiles/templates/266/css/mccabe-overrides.css ${opath}" \
-              "bye" || true
-          }
-
-          echo "::group::Best-effort: mccabe-overrides.css (path live template loads)"
-          try_put_overrides_only "overrides -> /v/vspfiles/templates/266/css" "/v/vspfiles/templates/266/css/mccabe-overrides.css"
-          try_put_overrides_only "overrides -> v/vspfiles/templates/266/css" "v/vspfiles/templates/266/css/mccabe-overrides.css"
-          try_put_overrides_only "overrides -> domain" "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css"
-          echo "::endgroup::"
-
 
           echo "::notice::Upload finished. Next step re-downloads template via SFTP and may check the public template URL (HTTP); storefront cache can still lag what you see in a browser."
 
