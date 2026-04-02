@@ -5710,16 +5710,24 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function findCategoryPageTextRow(ca) {
     if (!ca) return null;
-    var candidates = ca.querySelectorAll('td, div, span, p, td b');
+    var candidates = ca.querySelectorAll('td, div, span, p, td b, font, strong');
     var i;
     var el;
     for (i = 0; i < candidates.length; i++) {
       el = candidates[i];
       if (el.closest && el.closest('.v-product-grid')) continue;
       if (el.closest && el.closest('#mc-category-pager')) continue;
+      if (el.closest && el.closest('#relateditems')) continue;
       var t = (el.textContent || '').replace(/\s+/g, ' ').trim();
-      if (t.length > 140) continue;
-      if (/\bpage\s+\d+/i.test(t) || /\bpage\s+\d+\s+of\s+\d+/i.test(t)) return el;
+      if (t.length > 160) continue;
+      if (
+        /\bpage\s+\d+/i.test(t) ||
+        /\bpage\s+\d+\s+of\s+\d+/i.test(t) ||
+        /\bshowing\s+\d+\s*[-–]\s*\d+/i.test(t) ||
+        /^page\s*:/i.test(t)
+      ) {
+        return el;
+      }
     }
     return null;
   }
@@ -5808,10 +5816,20 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         var topBar = document.createElement('div');
         topBar.id = 'mc-category-pager-top';
         topBar.className = 'mc-category-pager-page-row';
-        var par = pageTxt.parentNode;
-        par.insertBefore(topBar, pageTxt);
+        try {
+          pageTxt.parentNode.removeChild(pageTxt);
+        } catch (eRmPt) {}
         topBar.appendChild(pageTxt);
         topBar.appendChild(nextForTop);
+        var gridAnchor =
+          ca.querySelector('.v-product-grid') ||
+          ca.querySelector('ul.v-product-grid') ||
+          ca.querySelector('table.v-product-grid');
+        if (gridAnchor && gridAnchor.parentNode) {
+          gridAnchor.parentNode.insertBefore(topBar, gridAnchor);
+        } else {
+          ca.insertBefore(topBar, ca.firstChild);
+        }
       } else if (nextForTop) {
         wrap.appendChild(nextForTop);
       }
@@ -7715,6 +7733,75 @@ body.productdetails .v-product-grid .v-product .v-product__name {
 body.productdetails .v-product-grid .v-product .v-product__price {
   order: 2 !important;
 }
+/* Related products (#relateditems): neutralize default order:0 so title never sits above image */
+body.productdetails #content_area #relateditems td .v-product,
+body.mc-product-page #content_area #relateditems td .v-product {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+body.productdetails #content_area #relateditems td .v-product > *,
+body.mc-product-page #content_area #relateditems td .v-product > * {
+  order: 10 !important;
+}
+body.productdetails #content_area #relateditems td .v-product .v-product__img,
+body.productdetails #content_area #relateditems td .v-product .product_image,
+body.productdetails #content_area #relateditems td .v-product > a:has(img),
+body.mc-product-page #content_area #relateditems td .v-product .v-product__img,
+body.mc-product-page #content_area #relateditems td .v-product .product_image,
+body.mc-product-page #content_area #relateditems td .v-product > a:has(img) {
+  order: 1 !important;
+}
+body.productdetails #content_area #relateditems td .v-product .v-product__name,
+body.productdetails #content_area #relateditems td .v-product .productnamecolor,
+body.productdetails #content_area #relateditems td .v-product .v65-product-related-title,
+body.mc-product-page #content_area #relateditems td .v-product .v-product__name,
+body.mc-product-page #content_area #relateditems td .v-product .productnamecolor,
+body.mc-product-page #content_area #relateditems td .v-product .v65-product-related-title {
+  order: 2 !important;
+}
+body.productdetails #content_area #relateditems td .v-product .v-product__price,
+body.productdetails #content_area #relateditems td .v-product .product_price,
+body.productdetails #content_area #relateditems td .v-product .mc-member-grid-price,
+body.productdetails #content_area #relateditems td .v-product .v65-product-related-price,
+body.productdetails #content_area #relateditems td .v-product font.product_sale_price,
+body.mc-product-page #content_area #relateditems td .v-product .v-product__price,
+body.mc-product-page #content_area #relateditems td .v-product .product_price,
+body.mc-product-page #content_area #relateditems td .v-product .mc-member-grid-price,
+body.mc-product-page #content_area #relateditems td .v-product .v65-product-related-price,
+body.mc-product-page #content_area #relateditems td .v-product font.product_sale_price {
+  order: 3 !important;
+}
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)),
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) > *,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) > * {
+  order: 10 !important;
+}
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) > a:has(img),
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) > a:has(img) {
+  order: 1 !important;
+}
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .v-product__name,
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .productnamecolor,
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .v65-product-related-title,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .v-product__name,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .productnamecolor,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .v65-product-related-title {
+  order: 2 !important;
+}
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .v-product__price,
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .v65-product-related-price,
+body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) font.product_sale_price,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .v-product__price,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .v65-product-related-price,
+body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) font.product_sale_price {
+  order: 3 !important;
+}
 </style>
 <script>
 (function(){
@@ -7744,10 +7831,13 @@ body.productdetails .v-product-grid .v-product .v-product__price {
     });
   }
 
-  /* ---- PATCH 2: Related-item images above text ---- */
+  /* ---- PATCH 2: Related-item images above title/price (Volusion order varies) ---- */
   function patchRelatedItemImages(){
     var prods = document.querySelectorAll(
-      '.productdetails .v-product-grid .v-product, body.productdetails .v-product'
+      '.productdetails .v-product-grid .v-product, ' +
+        'body.productdetails .v-product, ' +
+        '#content_area #relateditems td .v-product, ' +
+        '#content_area #relateditems .v-product'
     );
     prods.forEach(function(prod){
       var img = prod.querySelector('.v-product__img');
@@ -7759,6 +7849,26 @@ body.productdetails .v-product-grid .v-product .v-product__price {
       }
       if (img && img.parentNode === prod && prod.firstElementChild !== img){
         prod.insertBefore(img, prod.firstElementChild);
+      }
+    });
+    /* Table cells without .v-product wrapper: move image link before other direct children */
+    var tds = document.querySelectorAll(
+      '#content_area #relateditems tr > td, #content_area table.relateditems tr > td'
+    );
+    tds.forEach(function(td){
+      if (!td || td.querySelector('table')) return;
+      if (td.querySelector('.v-product')) return;
+      var imgHost = null;
+      var links = td.querySelectorAll(':scope > a');
+      var j;
+      for (j = 0; j < links.length; j++){
+        if (links[j].querySelector('img')){ imgHost = links[j]; break; }
+      }
+      if (!imgHost && td.querySelector(':scope > img')) {
+        imgHost = td.querySelector(':scope > img');
+      }
+      if (imgHost && td.firstElementChild && imgHost !== td.firstElementChild){
+        td.insertBefore(imgHost, td.firstElementChild);
       }
     });
   }
@@ -9508,6 +9618,26 @@ try {
       out.push(node);
     }
     for (i = 0; i < raw.length; i++) pushCard(raw[i]);
+    var relTds = document.querySelectorAll(
+      '#content_area #relateditems tr > td, #content_area table.relateditems tr > td'
+    );
+    for (i = 0; i < relTds.length; i++) {
+      var rtd = relTds[i];
+      if (!rtd || (rtd.closest && rtd.closest('#footer'))) continue;
+      if (rtd.querySelector && rtd.querySelector('table')) continue;
+      var cspan = parseInt(rtd.getAttribute('colspan') || '1', 10);
+      if (cspan > 1) continue;
+      if (rtd.querySelector && rtd.querySelector('.v-product')) continue;
+      if (
+        !rtd.querySelector('img') &&
+        !rtd.querySelector(
+          'a[href*="ProductCode"], a[href*="productcode"], a[href*="/p/"], a[href*="product.asp"]'
+        )
+      ) {
+        continue;
+      }
+      pushCard(rtd);
+    }
     if (out.length) return out;
     if (mcIsLikelyListingPage()) {
       raw = document.querySelectorAll('.v-product-grid .v-product, li.v-product');
@@ -9745,7 +9875,7 @@ try {
    */
   function mcFindCardPricingMount(card) {
     var MAP_RE = MC_MAP_LINK_RE;
-    var quick = card.querySelector('.v-product__price, .product_price');
+    var quick = card.querySelector('.v-product__price, .product_price, .v65-product-related-price');
     if (quick) {
       var tq = (quick.textContent || '').replace(/\s+/g, ' ').trim();
       if (/\$[\d,]+/.test(tq) && !MAP_RE.test(tq)) return quick;
@@ -9773,6 +9903,7 @@ try {
     return (
       card.querySelector('.v-product__price') ||
       card.querySelector('.product_price') ||
+      card.querySelector('.v65-product-related-price') ||
       card.querySelector('[itemprop="price"]')
     );
   }
@@ -9798,6 +9929,15 @@ try {
       'a[href*="/p/"], a[href*="product.asp"], a[href*="ProductDetail"], a[href*="productdetails"], a[href*="p.asp"]'
     );
     if (a2 && a2.href) return a2.href;
+    var imgL = card.querySelector('a[href] img');
+    if (imgL && imgL.parentElement && imgL.parentElement.tagName === 'A') {
+      var ah = imgL.parentElement.getAttribute('href') || '';
+      if (ah && !/^javascript:/i.test(ah)) {
+        try {
+          return new URL(ah, window.location.origin).href;
+        } catch (eImgH) {}
+      }
+    }
     return '';
   }
 
@@ -10062,6 +10202,7 @@ try {
     var title =
       card.querySelector('.v-product__name') ||
       card.querySelector('.productnamecolor') ||
+      card.querySelector('.v65-product-related-title') ||
       card.querySelector('h2') ||
       card.querySelector('h3');
     if (!title || !title.parentNode) return;
@@ -10116,6 +10257,7 @@ try {
     var ci;
     for (ci = 0; ci < cards.length; ci++) {
       var card = cards[ci];
+      if (card.closest && card.closest('#relateditems, table.relateditems')) continue;
       if (!card.querySelector || card.querySelector('.mc-plp-bean-subline')) continue;
       var title =
         card.querySelector('.v-product__name') ||
