@@ -58,8 +58,8 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260419fullux: MAP mount must not steal installTarget (homepage Volusion price HTML) -->
-<meta name="mc-deploy-verify" content="20260419fullux">
+<!-- MC_DEPLOY_VERIFY_20260402guestfix: MAP mount must not steal installTarget (homepage Volusion price HTML) -->
+<meta name="mc-deploy-verify" content="20260402guestfix">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -867,6 +867,13 @@ document.addEventListener("DOMContentLoaded", function () {
         ov.querySelector('.mc-hero-search-inner .header__section--middle');
       if (inHero) return inHero;
     }
+    var fromSearch = h.querySelector('#search');
+    if (fromSearch) {
+      var wrap =
+        fromSearch.closest('.mc-header-search-below-nav') ||
+        fromSearch.closest('.header__section--middle');
+      if (wrap && h.contains(wrap)) return wrap;
+    }
     return (
       h.querySelector('.mc-header-search-below-nav') ||
       h.querySelector('.header__section--middle')
@@ -874,7 +881,19 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function mcMountSearchLayout() {
+    var hHdr = document.querySelector('header.header');
     var mid = mcFindHeaderSearchMid();
+    if (!mid && hHdr) {
+      var gSearch = document.getElementById('search');
+      if (gSearch && gSearch.closest && hHdr.contains(gSearch)) {
+        var w =
+          gSearch.closest('.mc-header-search-below-nav') ||
+          gSearch.closest('.header__section--middle') ||
+          gSearch.closest('.collapsing-search') ||
+          gSearch.parentElement;
+        if (w && hHdr.contains(w)) mid = w;
+      }
+    }
     if (!mid) return;
 
     var isHome = typeof window.mcPathIsHomepage === 'function' && window.mcPathIsHomepage();
@@ -902,27 +921,39 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     /* Interior: search + cart sit inside .mc-header-desktop-bar after main menu (beside Contact Us → cart) */
-    if (menuRow && menuRow.parentNode) {
-      mcPlaceInteriorSearchInBar(menuRow, mid);
+    var placeRow = menuRow;
+    if (!placeRow && hHdr) {
+      placeRow = hHdr.querySelector('.mc-header-desktop-bar') || hHdr;
+    }
+    if (placeRow && placeRow.parentNode) {
+      mcPlaceInteriorSearchInBar(placeRow, mid);
       mid.setAttribute('data-mc-search-mount', 'below-nav');
     }
   }
 
   function mcPlaceInteriorSearchInBar(menuRow, mid) {
-    var bar = document.querySelector('header.header .mc-header-desktop-bar');
+    var hRoot = document.querySelector('header.header');
+    var bar = hRoot && hRoot.querySelector('.mc-header-desktop-bar');
     if (!menuRow) menuRow = bar;
     if (!menuRow || !mid) return;
-    var wrap = document.querySelector('header.header .mc-header-search-cart-wrap');
-    var cart = document.querySelector('header.header .mc-header-cart');
+    var wrap = hRoot && hRoot.querySelector('.mc-header-search-cart-wrap');
+    var cart = hRoot && hRoot.querySelector('.mc-header-cart');
     var mm = menuRow.querySelector('.microblock.main-menu');
     if (!mm && bar) mm = bar.querySelector('.microblock.main-menu');
-    if (!wrap && bar) {
+    var anchorForWrap = bar || menuRow || hRoot;
+    if (!wrap && anchorForWrap) {
       wrap = document.createElement('div');
       wrap.className = 'mc-header-search-cart-wrap';
-      if (mm) {
-        bar.insertBefore(wrap, mm.nextSibling);
+      if (mm && mm.parentNode === anchorForWrap) {
+        anchorForWrap.insertBefore(wrap, mm.nextSibling);
+      } else if (mm && anchorForWrap.contains && anchorForWrap.contains(mm)) {
+        try {
+          mm.parentNode.insertBefore(wrap, mm.nextSibling);
+        } catch (eW1) {
+          anchorForWrap.appendChild(wrap);
+        }
       } else {
-        bar.appendChild(wrap);
+        anchorForWrap.appendChild(wrap);
       }
     }
     if (!wrap) return;
@@ -6595,8 +6626,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var pcInp =
       document.querySelector('input[name="ProductCode"]') ||
       document.querySelector('input[name="productcode"]');
-    var code = pcInp && pcInp.value ? String(pcInp.value).trim() : '';
-    if (/^BB/i.test(code)) return false;
     var hasMarker =
       pcInp ||
       document.querySelector('#v65-product-parent') ||
@@ -7677,15 +7706,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function run(){
     unwrapBadWrapper();
     tagPdpCells();
-    var pc = qs('input[name="ProductCode"]');
-    var code = (pc && pc.value) ? String(pc.value).trim() : '';
-    if (/^BB/i.test(code)) {
-      document.body.classList.remove('mc-product-page');
-      document.body.classList.add('mc-bean-bag-pdp');
-    } else {
-      document.body.classList.add('mc-product-page');
-      document.body.classList.remove('mc-bean-bag-pdp');
-    }
+    document.body.classList.add('mc-product-page');
+    document.body.classList.remove('mc-bean-bag-pdp');
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
@@ -10253,6 +10275,9 @@ try {
 
   function mcEnsureAmountInMemberBlock(block, amountText) {
     if (!block || !amountText) return;
+    if (block.getAttribute('data-mc-member-grid') === 'locked' || block.getAttribute('data-mc-guest-login') === '1') {
+      return;
+    }
     var amt = block.querySelector('.mc-member-grid-price__amount');
     if (!amt) {
       amt = document.createElement('div');
@@ -10273,6 +10298,8 @@ try {
 
   function mcApplyHowToGetToAllCardsWithKey(cards, key, amt) {
     if (!(amt > 0)) return;
+    var stHg = window.__mcMemberPricing || {};
+    if (!stHg.unlocked) return;
     var txt = mcFmtCategoryPrice(amt);
     var j;
     for (j = 0; j < cards.length; j++) {
@@ -10291,6 +10318,8 @@ try {
   }
 
   function mcHydrateCategoryHowToGetPrices() {
+    var stHyd = window.__mcMemberPricing || {};
+    if (!stHyd.unlocked) return;
     var cards = mcCollectGridProductCards();
     if (!cards.length) return;
     var cache = (window.__mcCategoryHowToGetCache = window.__mcCategoryHowToGetCache || {});
