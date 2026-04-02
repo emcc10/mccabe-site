@@ -1,10 +1,10 @@
-name: Deploy to Volusion
+﻿name: Deploy to Volusion
 
-# Volusion: template at /template_266.html (SFTP root). CSS: also under wwwroot v/ — /v/vspfiles/css/custom-safe.css (Volusion File Editor path), not only /vspfiles/css/custom-safe.css. Optional secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE.
+# Volusion: template at /template_266.html (SFTP root). CSS: also under wwwroot v/ â€” /v/vspfiles/css/custom-safe.css (Volusion File Editor path), not only /vspfiles/css/custom-safe.css. Optional secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE.
 # Post-deploy verification downloads template_266.html via SFTP and checks mc-deploy-verify (authoritative). HTTP homepage can stay cached while SFTP already has the new file.
 # Optional repo variable SKIP_LIVE_VERIFY=true skips that SFTP download check.
 
-# Runs on every push to main (no paths: filter). Previously, only commits touching template/CSS/deploy script started the workflow—other pushes looked like “deploy never ran.”
+# Runs on every push to main (no paths: filter). Previously, only commits touching template/CSS/deploy script started the workflowâ€”other pushes looked like â€œdeploy never ran.â€
 on:
   push:
     branches:
@@ -34,7 +34,9 @@ jobs:
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}"
-          echo "::notice::deploy marker 20260419fullux — View Source mc-deploy-verify content=20260419fullux; CSS first line MC_DEPLOY_VERIFY_20260419fullux"
+          EXPECT_META="$(python3 -c "import re, pathlib; t=pathlib.Path('template_266.html').read_text(encoding='utf-8', errors='ignore'); m=re.search(r'name=\"mc-deploy-verify\"\s+content=\"([^\"]+)\"', t); print(m.group(1) if m else 'UNKNOWN')")"
+          EXPECT_CSS="$(python3 -c "import re, pathlib; t=pathlib.Path('vspfiles/css/custom-safe.css').read_text(encoding='utf-8', errors='ignore'); m=re.search(r'MC_DEPLOY_VERIFY_([A-Za-z0-9]+)', t); print(m.group(1) if m else 'UNKNOWN')")"
+          echo "::notice::Deploy from Git: mc-deploy-verify=${EXPECT_META}; custom-safe header MC_DEPLOY_VERIFY_${EXPECT_CSS} — confirm both on live after run"
 
           SFTP_HOST="${SECRET_SFTP_HOST:-}"
           if [ -z "$SFTP_HOST" ]; then
@@ -72,7 +74,7 @@ jobs:
 
           echo "Deploying sftp://${SFTP_HOST}:${SFTP_PORT} as ${SFTP_USER}"
           echo "Local template: $(wc -c < template_266.html | tr -d ' ') bytes; css: $(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes"
-          echo "Remote: template → ${TEMPLATE_REMOTE:-/template_266.html (then fallbacks)}; css → ${CSS_REMOTE}"
+          echo "Remote: template â†’ ${TEMPLATE_REMOTE:-/template_266.html (then fallbacks)}; css â†’ ${CSS_REMOTE}"
 
           TCP_OK=0
           echo "::group::Network: can this runner reach ${SFTP_HOST}:${SFTP_PORT}?"
@@ -216,10 +218,10 @@ jobs:
           fi
 
           echo "::group::Best-effort: mirror template to canonical Volusion paths (covers wrong SFTP_TEMPLATE_REMOTE)"
-          try_put_template_only "mirror → /v/template_266.html" "/v/template_266.html"
-          try_put_template_only "mirror → /v/v/template_266.html" "/v/v/template_266.html"
-          try_put_template_only "mirror → domain /v/" "/mccabestheaterandliving.com/v/template_266.html"
-          try_put_template_only "mirror → /template_266.html" "/template_266.html"
+          try_put_template_only "mirror â†’ /v/template_266.html" "/v/template_266.html"
+          try_put_template_only "mirror â†’ /v/v/template_266.html" "/v/v/template_266.html"
+          try_put_template_only "mirror â†’ domain /v/" "/mccabestheaterandliving.com/v/template_266.html"
+          try_put_template_only "mirror â†’ /template_266.html" "/template_266.html"
           echo "::endgroup::"
 
           try_put_css_only() {
@@ -230,8 +232,8 @@ jobs:
           }
 
           echo "::group::Best-effort: mirror CSS to wwwroot v/vspfiles/css (Volusion File Editor: v/vspfiles/css/custom-safe.css)"
-          try_put_css_only "css → /v/vspfiles/css/custom-safe.css" "/v/vspfiles/css/custom-safe.css"
-          try_put_css_only "css → v/vspfiles/css/custom-safe.css" "v/vspfiles/css/custom-safe.css"
+          try_put_css_only "css â†’ /v/vspfiles/css/custom-safe.css" "/v/vspfiles/css/custom-safe.css"
+          try_put_css_only "css â†’ v/vspfiles/css/custom-safe.css" "v/vspfiles/css/custom-safe.css"
           echo "::endgroup::"
 
           echo "::notice::Upload finished. Next step re-downloads template via SFTP and may check the public template URL (HTTP); storefront cache can still lag what you see in a browser."
