@@ -1,11 +1,11 @@
-﻿name: Deploy to Volusion
+name: Deploy to Volusion
 
-# Volusion: template at /template_266.html (SFTP root). CSS: also under wwwroot v/ â€” /v/vspfiles/css/custom-safe.css (Volusion File Editor path), not only /vspfiles/css/custom-safe.css. Optional secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE.
+# Volusion: template /template_266.html or /v/template_266.html. CSS: /vspfiles/css/custom-safe.css and /v/vspfiles/css/custom-safe.css. Optional secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE.
 # Post-deploy verification downloads template_266.html via SFTP and checks mc-deploy-verify (authoritative). HTTP homepage can stay cached while SFTP already has the new file.
 # Optional repo variable SKIP_LIVE_VERIFY=true skips that SFTP download check.
 
-# Runs on every push to main (no paths: filter). Previously, only commits touching template/CSS/deploy script started the workflowâ€”other pushes looked like â€œdeploy never ran.â€
-on:
+# Runs on every push to main (workflow_dispatch also).
+"on":
   push:
     branches:
       - main
@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Upload template and CSS via SFTP
         env:
@@ -34,9 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           cd "${GITHUB_WORKSPACE}"
-          EXPECT_META="$(python3 -c "import re, pathlib; t=pathlib.Path('template_266.html').read_text(encoding='utf-8', errors='ignore'); m=re.search(r'name=\"mc-deploy-verify\"\s+content=\"([^\"]+)\"', t); print(m.group(1) if m else 'UNKNOWN')")"
-          EXPECT_CSS="$(python3 -c "import re, pathlib; t=pathlib.Path('vspfiles/css/custom-safe.css').read_text(encoding='utf-8', errors='ignore'); m=re.search(r'MC_DEPLOY_VERIFY_([A-Za-z0-9]+)', t); print(m.group(1) if m else 'UNKNOWN')")"
-          echo "::notice::Deploy from Git: mc-deploy-verify=${EXPECT_META}; custom-safe header MC_DEPLOY_VERIFY_${EXPECT_CSS} — confirm both on live after run"
+          echo "::notice::SFTP deploy starting (verify mc-deploy-verify meta matches Git after run)"
 
           SFTP_HOST="${SECRET_SFTP_HOST:-}"
           if [ -z "$SFTP_HOST" ]; then

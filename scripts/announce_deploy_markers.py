@@ -1,5 +1,5 @@
-﻿#!/usr/bin/env python3
-"""Print GitHub Actions ::notice with mc-deploy-verify + CSS header token (no drift vs hardcoded strings)."""
+#!/usr/bin/env python3
+"""Print GitHub Actions ::notice with deploy tokens from repo files (avoids broken bash quoting)."""
 from __future__ import annotations
 
 import pathlib
@@ -20,7 +20,7 @@ def main() -> int:
 
     print(
         f"::notice::Deploy from Git: mc-deploy-verify={meta}; "
-        f"custom-safe.css MC_DEPLOY_VERIFY_{css_tok} — confirm both on live after run",
+        f"custom-safe.css MC_DEPLOY_VERIFY_{css_tok} — confirm on live after SFTP",
         flush=True,
     )
     return 0
