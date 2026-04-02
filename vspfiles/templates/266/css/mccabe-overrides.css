@@ -151,3 +151,18 @@ html.category #content_area .mc-member-grid-price__hint {
   text-align: left !important;
   width: 100% !important;
 }
+
+/* ===== BEAN BAG PRODUCT PAGE HARD STOP ===== */
+body.beanbag-product #roomPlannerApp,
+body.beanbag-product .room-planner-wrap,
+body.beanbag-product .room-planner-trigger,
+body.beanbag-product .planner-summary,
+body.beanbag-product .planner-toolbar,
+body.beanbag-product .planner-controls,
+body.beanbag-product .wm-selection-summary,
+body.beanbag-product .wmOpen,
+body.beanbag-product .wm-inline-trigger,
+body.beanbag-product .wm-leather-modal,
+body.beanbag-product .wm-modal {
+  display: none !important;
+}

@@ -8097,18 +8097,3 @@ body:not(.mc-member-logged-in) #content_area table.relateditems .product_sale_pr
 body:not(.mc-member-logged-in) #content_area table.relateditems [class*="product_sale_price"] {
   display: none !important;
 }
-
-/* ===== BEAN BAG PRODUCT PAGE HARD STOP ===== */
-body.beanbag-product #roomPlannerApp,
-body.beanbag-product .room-planner-wrap,
-body.beanbag-product .room-planner-trigger,
-body.beanbag-product .planner-summary,
-body.beanbag-product .planner-toolbar,
-body.beanbag-product .planner-controls,
-body.beanbag-product .wm-selection-summary,
-body.beanbag-product .wmOpen,
-body.beanbag-product .wm-inline-trigger,
-body.beanbag-product .wm-leather-modal,
-body.beanbag-product .wm-modal {
-  display: none !important;
-}
