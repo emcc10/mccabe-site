@@ -58,8 +58,8 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260419fixall: MAP→member row, guest sale strip, PLP alignment -->
-<meta name="mc-deploy-verify" content="20260419fixall">
+<!-- MC_DEPLOY_VERIFY_20260419pricebox: MAP mount must not steal installTarget (homepage Volusion price HTML) -->
+<meta name="mc-deploy-verify" content="20260419pricebox">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -9953,6 +9953,34 @@ try {
     );
   }
 
+  /** Where to run mcInstallGuestPriceOnly / logged-in price restore — must stay in DOM after MAP anchor is replaced. */
+  function mcFindCardPriceContainerMount(card) {
+    if (!card || !card.querySelectorAll) return null;
+    var candidates = [
+      '.v-product__price',
+      '.product_price',
+      '.v65-product-related-price',
+      '.product_productprice',
+      'font.colors_productprice',
+      'font.pricecolor.colors_productprice',
+      'font.pricecolor',
+      '[itemprop="price"]'
+    ];
+    var ci;
+    for (ci = 0; ci < candidates.length; ci++) {
+      var nodes = card.querySelectorAll(candidates[ci]);
+      var j;
+      for (j = 0; j < nodes.length; j++) {
+        var el = nodes[j];
+        if (el.closest && el.closest('.mc-member-grid-price')) continue;
+        var tx = (el.textContent || '').replace(/\s+/g, ' ').trim();
+        if (!/\$[\d,]+/.test(tx)) continue;
+        return el;
+      }
+    }
+    return null;
+  }
+
   function mcExtractDollarFromText(txt) {
     if (!txt) return '';
     var m = String(txt).match(/\$[\d,]+(?:\.\d{2})?/);
@@ -10644,7 +10672,7 @@ try {
         priceElPre && priceElPre.closest && priceElPre.closest('.v-product__price');
       var gatherHost = priceBox || priceElPre;
       var keptPre = gatherHost ? mcGatherPriceLikeNodes(gatherHost) : [];
-      var installTarget = priceBox || priceElPre;
+      var installTarget = priceBox || mcFindCardPriceContainerMount(card) || priceElPre;
       if (!installTarget) {
         installTarget =
           card.querySelector('.v-product__price') ||
