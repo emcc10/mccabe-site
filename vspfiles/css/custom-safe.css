@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260402bbfix4 — pair with template html data-mc-search-fix=20260402bbfix4 */
+/* MC_DEPLOY_VERIFY_20260403layout1 — pair with template html data-mc-search-fix=20260403layout1 */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -100,6 +100,29 @@ header.header #collapsingSearch {
     box-shadow 0.28s ease,
     transform 0.28s ease,
     padding 0.22s ease !important;
+}
+
+/* Interior desktop: one underline only — strip is on .mc-header-search-cart-wrap (template), not inner search */
+@media (min-width: 992px) {
+  body:not(.is-home) .mc-header-search-cart-wrap .collapsing-search,
+  body:not(.is-home) .mc-header-search-cart-wrap #collapsingSearch {
+    border-bottom: none !important;
+    box-shadow: none !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+  }
+  body:not(.is-home) header.header .mc-header-desktop-bar[data-mc-header-bar] {
+    padding-top: clamp(4px, 1.1vw, 8px) !important;
+    align-items: center !important;
+  }
+}
+
+@media (max-width: 991px) {
+  body:not(.is-home) header.header .collapsing-search,
+  body:not(.is-home) header.header #collapsingSearch {
+    padding-top: 6px !important;
+    padding-bottom: 10px !important;
+  }
 }
 
 /* Hero: line is on .collapsing-search__form .row (template critical); no dark strip on wrapper */
@@ -2157,6 +2180,25 @@ body.mc-product-page:not(.mc-member-logged-in) #v65-product-parent .colors_price
 body.mc-bean-bag-pdp:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox font.product_sale_price,
 body.mc-bean-bag-pdp:not(.mc-member-logged-in) #v65-product-parent .colors_pricebox .product_sale_price {
   display: none !important;
+}
+
+/* PDP: explicit retail row above options price; bean bag subline under title */
+#v65-product-parent .mc-pdp-retail-label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: #444 !important;
+  margin: 0 0 2px !important;
+  line-height: 1.3 !important;
+}
+body.mc-bean-bag-pdp #v65-product-parent .mc-bean-bag-pdp-subline {
+  margin: 4px 0 10px !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+  letter-spacing: 0.06em !important;
+  color: #555 !important;
+  line-height: 1.35 !important;
 }
 
 /* Remove italic styling on product headings/tabs */
@@ -6588,6 +6630,30 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 :is(html.category, body.category) body.mc-member-logged-in #content_area .v-product [class*="product_list_price"],
 :is(html.category, body.category) body.mc-member-logged-in #content_area ul.v-product-grid > li.v-product > font.product_list_price {
   order: 7 !important;
+}
+
+
+/* Category PLP: "Retail price" above the main price column (member row follows in DOM order + flex order) */
+:is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__price::before,
+:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__price::before,
+:is(html.category, body.category) #content_area .v-product-grid .v-product .product_price::before,
+:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .product_price::before {
+  content: "Retail price";
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #444;
+  margin: 0 0 2px;
+  line-height: 1.3;
+}
+
+#content_area #relateditems .v-product__price::before,
+#content_area #relateditems .product_price::before,
+#content_area table.relateditems .v-product__price::before,
+#content_area table.relateditems .product_price::before {
+  content: none !important;
 }
 
 body.is-home:not(.productdetails).mc-member-logged-in #content_area_home .v-product .product_sale_price,

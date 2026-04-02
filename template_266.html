@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
-<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260402bbfix4"><!--<![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260403layout1"><!--<![endif]-->
 <head>
 <script>
 (function () {
@@ -58,8 +58,8 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260402bbfix4: bean bag PDP guards + deploy pair -->
-<meta name="mc-deploy-verify" content="20260402bbfix4">
+<!-- MC_DEPLOY_VERIFY_20260403layout1: PLP order + retail label + search line -->
+<meta name="mc-deploy-verify" content="20260403layout1">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -7550,6 +7550,42 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     priceNode.parentNode.insertBefore(label, priceNode);
   }
 
+  function ensurePdpRetailPriceLabel() {
+    var box = document.querySelector('#v65-product-parent .colors_pricebox');
+    if (!box || box.querySelector('.mc-pdp-retail-label')) return;
+    var anchor =
+      box.querySelector('#priceWithOptions') ||
+      box.querySelector('#priceWithOptionsNoTax') ||
+      box.querySelector('[itemprop="price"]') ||
+      box.querySelector('.v65-product-price') ||
+      box.querySelector('.product_productprice');
+    if (!anchor || !anchor.parentNode) return;
+    var lab = document.createElement('div');
+    lab.className = 'mc-pdp-retail-label';
+    lab.textContent = 'Retail price';
+    try {
+      anchor.parentNode.insertBefore(lab, anchor);
+    } catch (eR) {}
+  }
+
+  function injectBeanBagPdpSubline() {
+    try {
+      if (!document.body.classList.contains('mc-bean-bag-pdp')) return;
+      if (document.querySelector('.mc-bean-bag-pdp-subline')) return;
+      var title =
+        document.querySelector('#v65-product-parent h1.productnamecolorLARGE') ||
+        document.querySelector('#v65-product-parent .productnamecolorLARGE') ||
+        document.querySelector('#v65-product-parent .colors_productname') ||
+        document.querySelector('#v65-product-parent .productnamecolor') ||
+        document.querySelector('#v65-product-parent h1');
+      if (!title || !title.parentNode) return;
+      var sub = document.createElement('p');
+      sub.className = 'mc-bean-bag-pdp-subline';
+      sub.textContent = 'More sizes and colors';
+      title.parentNode.insertBefore(sub, title.nextSibling);
+    } catch (eSubPdp) {}
+  }
+
   function forceProductFixes() {
     var pcInp =
       document.querySelector('input[name="ProductCode"]') ||
@@ -7568,6 +7604,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       try { document.body.classList.remove('mc-product-page'); } catch (eBb0) {}
       document.body.classList.add('mc-bean-bag-pdp');
       try { document.body.classList.remove('is-home'); } catch (eBb1) {}
+      try {
+        injectBeanBagPdpSubline();
+      } catch (eBeanSub) {}
     } else {
       if (!markProductPage()) return;
     }
@@ -7597,6 +7636,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     }
     try {
       ensurePriceWithOptionsLabel(scope);
+      ensurePdpRetailPriceLabel();
       leftAlignPricingBlock(scope);
     } catch (e3) {}
   }
@@ -9590,9 +9630,9 @@ try {
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,:is(html.category, body.category) .v-product-grid .v-product .product_image img,:is(html.category, body.category) .v-product-grid .v-product .vcss_img img{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover;object-position:center center;display:block!important;margin:0!important}
 :is(html.category, body.category) .v-product-grid .v-product .v-product__name,:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,:is(html.category, body.category) .v-product-grid .v-product h2,:is(html.category, body.category) .v-product-grid .v-product h3,:is(html.category, body.category) .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;align-items:flex-start;justify-content:flex-start;text-align:left;min-height:0!important;box-sizing:border-box;width:100%;margin-top:4px!important}
 :is(html.category, body.category) .v-product-grid .v-product .productnamecolor a,:is(html.category, body.category) .v-product-grid .v-product .v-product__name a{width:100%;text-align:left!important}
-:is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price{order:4;min-height:0!important;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;width:100%;text-align:left!important}
-:is(html.category, body.category) .v-product-grid .v-product .v-product__price,:is(html.category, body.category) .v-product-grid .v-product .product_price{order:5;min-height:0!important;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;width:100%;text-align:left!important}
-:is(html.category, body.category) #content_area .mc-plp-bean-subline{order:3;width:100%;box-sizing:border-box;margin:2px 0 0;font-size:12px;letter-spacing:.06em;color:#555;text-align:center;line-height:1.35;align-self:center}
+:is(html.category, body.category) .v-product-grid .v-product .v-product__price,:is(html.category, body.category) .v-product-grid .v-product .product_price{order:4;min-height:0!important;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;width:100%;text-align:left!important}
+:is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price{order:5;min-height:0!important;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;width:100%;text-align:left!important}
+:is(html.category, body.category) #content_area .mc-plp-bean-subline,:is(html.category, body.category) #content_area ul.v-product-grid>li.v-product .mc-plp-bean-subline{order:3;width:100%;box-sizing:border-box;margin:2px 0 0;font-size:12px;letter-spacing:.06em;color:#555;text-align:left!important;line-height:1.35;align-self:stretch}
 :is(html.category, body.category) .sidebar-wrapper .sidebar,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"]{text-align:left!important}
 :is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] ul,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] li{text-align:left!important}
 :is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] a,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] .vnav__link,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] .vnav__label,:is(html.category, body.category) .sidebar-wrapper .menu a{font-weight:400!important;letter-spacing:.08em!important;text-transform:uppercase!important;font-size:11px!important;color:#1a1a1a!important}
@@ -10512,20 +10552,32 @@ try {
     var ci;
     for (ci = 0; ci < cards.length; ci++) {
       var card = cards[ci];
+      if (!card || typeof card.querySelector !== 'function') continue;
       if (card.closest && card.closest('#relateditems, table.relateditems')) continue;
-      if (!card.querySelector || card.querySelector('.mc-plp-bean-subline')) continue;
+      if (card.querySelector('.mc-plp-bean-subline')) continue;
       var title =
         card.querySelector('.v-product__name') ||
         card.querySelector('.productnamecolor') ||
         card.querySelector('h2') ||
         card.querySelector('h3');
-      if (!title || !title.parentNode) continue;
+      if (!title) continue;
       var sub = document.createElement('div');
       sub.className = 'mc-plp-bean-subline';
       sub.setAttribute('aria-hidden', 'true');
       sub.textContent = 'More sizes and colors';
+      var titleHost =
+        card.querySelector('.v-product__name') ||
+        card.querySelector('.productnamecolor') ||
+        title;
+      while (titleHost && titleHost.parentNode && titleHost.parentNode !== card) {
+        titleHost = titleHost.parentNode;
+      }
       try {
-        title.parentNode.insertBefore(sub, title.nextSibling);
+        if (titleHost && titleHost.parentNode === card) {
+          card.insertBefore(sub, titleHost.nextSibling);
+        } else if (title.parentNode) {
+          title.parentNode.insertBefore(sub, title.nextSibling);
+        }
       } catch (eSub) {}
     }
   }
