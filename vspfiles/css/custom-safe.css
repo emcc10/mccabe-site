@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260402g — is-home from URL only (fixes interior search + :not(.is-home) CSS) */
+/* MC_DEPLOY_VERIFY_20260402h — bean bag: show cover/size rows; stack PDP; related image-first; description clip */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -4899,6 +4899,130 @@ body.mc-product-page #v65-product-parent #options_table tr:has(select[id*="leath
 body.productdetails #content_area #options_table tr:has(select[id*="leather" i]),
 body.mc-product-page #content_area #options_table tr:has(select[id*="leather" i]) {
   display: none !important;
+}
+
+/* Bean bag PDPs (body.mc-bean-bag-pdp): Volusion option names often include "cover" — global hide above removed size/fabric rows */
+body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select[name*="cover" i]),
+body.mc-bean-bag-pdp.mc-product-page #v65-product-parent #options_table tr:has(select[name*="cover" i]),
+body.mc-bean-bag-pdp.productdetails #content_area #options_table tr:has(select[name*="cover" i]),
+body.mc-bean-bag-pdp.mc-product-page #content_area #options_table tr:has(select[name*="cover" i]),
+body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select[id*="cover" i]),
+body.mc-bean-bag-pdp.mc-product-page #v65-product-parent #options_table tr:has(select[id*="cover" i]),
+body.mc-bean-bag-pdp.productdetails #content_area #options_table tr:has(select[id*="cover" i]),
+body.mc-bean-bag-pdp.mc-product-page #content_area #options_table tr:has(select[id*="cover" i]) {
+  display: table-row !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select[name*="cover" i]) select,
+body.mc-bean-bag-pdp #content_area #options_table tr:has(select[name*="cover" i]) select,
+body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select[id*="cover" i]) select,
+body.mc-bean-bag-pdp #content_area #options_table tr:has(select[id*="cover" i]) select {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Bean bags: main image row first, title/price/options full width below (not clipped) */
+@media (min-width: 992px) {
+  body.mc-bean-bag-pdp #v65-product-parent > tbody > tr:nth-of-type(2),
+  body.mc-bean-bag-pdp.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+  }
+
+  body.mc-bean-bag-pdp #v65-product-parent > tbody > tr:nth-of-type(2) > td,
+  body.mc-bean-bag-pdp #content_area td.mc-pdp-media-td,
+  body.mc-bean-bag-pdp #content_area td.mc-pdp-options-td {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body.mc-bean-bag-pdp #content_area td.mc-pdp-options-td,
+  body.mc-bean-bag-pdp #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child {
+    overflow: visible !important;
+    overflow-x: visible !important;
+    padding-top: 24px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* Description / tabs: stop top border being clipped */
+body.mc-bean-bag-pdp #content_area .product_description,
+body.mc-bean-bag-pdp #content_area #divDescription,
+body.mc-bean-bag-pdp #content_area .TabbedPanelsContent,
+body.mc-bean-bag-pdp #content_area .TabbedPanelsContentGroup,
+body.mc-bean-bag-pdp #content_area .resp-tabs-container,
+body.mc-bean-bag-pdp #content_area [itemprop="description"] {
+  overflow: visible !important;
+  overflow-x: visible !important;
+  margin-top: 8px !important;
+}
+
+/* PDP related grid: image first when not inside mc-related-carousel (Volusion v-product-grid) */
+body.productdetails #content_area .v-product-grid .v-product .v-product__img,
+body.productdetails #content_area .v-product-grid .v-product .product_image,
+body.productdetails #content_area .v-product-grid .v-product .v-product__image,
+body.productdetails #content_area .v-product-grid .v-product > a:has(img) {
+  order: 1 !important;
+}
+
+body.productdetails #content_area .v-product-grid .v-product .v-product__name,
+body.productdetails #content_area .v-product-grid .v-product .productnamecolor,
+body.productdetails #content_area .v-product-grid .v-product h2,
+body.productdetails #content_area .v-product-grid .v-product h3 {
+  order: 2 !important;
+}
+
+body.productdetails #content_area .v-product-grid .v-product .v-product__price,
+body.productdetails #content_area .v-product-grid .v-product .product_price,
+body.productdetails #content_area .v-product-grid .v-product .product_sale_price,
+body.productdetails #content_area .v-product-grid .v-product .mc-member-grid-price {
+  order: 3 !important;
+}
+
+body.productdetails #content_area #relateditems td,
+body.mc-product-page #content_area #relateditems td,
+body.productdetails #content_area table[id*="related"] td,
+body.mc-product-page #content_area table[id*="related"] td {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+body.productdetails #content_area #relateditems td > a:has(img),
+body.mc-product-page #content_area #relateditems td > a:has(img),
+body.productdetails #content_area #relateditems td img,
+body.mc-product-page #content_area #relateditems td img {
+  order: 1 !important;
+}
+
+body.productdetails #content_area #relateditems td .v-product__name,
+body.productdetails #content_area #relateditems td .productnamecolor,
+body.productdetails #content_area #relateditems td .v65-product-related-title,
+body.mc-product-page #content_area #relateditems td .v-product__name,
+body.mc-product-page #content_area #relateditems td .productnamecolor,
+body.mc-product-page #content_area #relateditems td .v65-product-related-title {
+  order: 2 !important;
+}
+
+body.productdetails #content_area #relateditems td .v-product__price,
+body.productdetails #content_area #relateditems td .product_price,
+body.productdetails #content_area #relateditems td .v65-product-related-price,
+body.productdetails #content_area #relateditems td font.product_sale_price,
+body.mc-product-page #content_area #relateditems td .v-product__price,
+body.mc-product-page #content_area #relateditems td .product_price,
+body.mc-product-page #content_area #relateditems td .v65-product-related-price,
+body.mc-product-page #content_area #relateditems td font.product_sale_price {
+  order: 3 !important;
 }
 
 @media (max-width: 767px) {

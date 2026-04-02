@@ -1320,7 +1320,11 @@ html body.productdetails .v-product-grid > .v-product {
   flex-direction: column !important;
 }
 
-.productdetails .v-product-grid .v-product .v-product__img {
+.productdetails .v-product-grid .v-product .v-product__img,
+.productdetails .v-product-grid .v-product .product_image,
+.productdetails .v-product-grid .v-product .v-product__image,
+.productdetails .v-product-grid .v-product > a:has(img) {
+  order: 1 !important;
   display: flex !important;
   align-items: flex-start !important;
   justify-content: center !important;
@@ -1338,10 +1342,24 @@ html body.productdetails .v-product-grid > .v-product {
 
 .productdetails .v-product-grid .v-product .v-product__name,
 .productdetails .v-product-grid .v-product .productnamecolor,
-.productdetails .v-product-grid .v-product .productnamecolor a {
+.productdetails .v-product-grid .v-product .productnamecolor a,
+.productdetails .v-product-grid .v-product h2,
+.productdetails .v-product-grid .v-product h3 {
+  order: 2 !important;
   text-align: left !important;
   display: block !important;
   margin-top: 8px !important;
+}
+
+.productdetails .v-product-grid .v-product .v-product__price,
+.productdetails .v-product-grid .v-product .product_price,
+.productdetails .v-product-grid .v-product .product_sale_price,
+.productdetails .v-product-grid .v-product .mc-member-grid-price,
+.productdetails .v-product-grid .v-product font.product_sale_price {
+  order: 3 !important;
+  text-align: left !important;
+  display: block !important;
+  margin-top: 4px !important;
 }
 
 @media (max-width: 991px) {
@@ -1373,9 +1391,9 @@ html body.productdetails .v-product-grid > .v-product {
 <script id="wm-leather-modal-js">
 (function(){
   "use strict";
-  // 🚫 EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER
+  // 🚫 EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER (codes start with BB)
   var productCodeInput = document.querySelector('input[name="ProductCode"]');
-  if (productCodeInput && /^BB-/i.test(productCodeInput.value)) {
+  if (productCodeInput && /^BB/i.test(String(productCodeInput.value || '').trim())) {
     return;
   }
 
@@ -2015,9 +2033,9 @@ boot();
 (function(){
   if (window.__MC_INLINE_FINAL__) return;
 
-  // 🚫 EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER
+  // 🚫 EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER (codes start with BB)
   var productCodeInput = document.querySelector('input[name="ProductCode"]');
-  if (productCodeInput && /^BB-/i.test(productCodeInput.value)) {
+  if (productCodeInput && /^BB/i.test(String(productCodeInput.value || '').trim())) {
     return;
   }
 
@@ -7414,6 +7432,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     unwrapBadWrapper();
     tagPdpCells();
     document.body.classList.add('mc-product-page');
+    var pc = qs('input[name="ProductCode"]');
+    var code = (pc && pc.value) ? String(pc.value).trim() : '';
+    if (/^BB/i.test(code)) document.body.classList.add('mc-bean-bag-pdp');
+    else document.body.classList.remove('mc-bean-bag-pdp');
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
