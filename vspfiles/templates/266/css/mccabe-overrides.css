@@ -6,13 +6,11 @@
   display: flex !important;
   flex-wrap: wrap !important;
   align-items: center !important;
-  justify-content: flex-end !important;
+  justify-content: center !important;
   gap: 12px !important;
-  margin: 10px 0 14px !important;
-  padding: 0 max(12px, 2vw) !important;
+  margin: 28px auto 16px !important;
+  padding: 0 12px !important;
   box-sizing: border-box !important;
-  width: 100% !important;
-  max-width: 100% !important;
 }
 .mc-category-pager__btn {
   display: inline-flex !important;
@@ -75,7 +73,7 @@ html body #slideshow-container #mc-hero-copy-tagline,
 html body #mc-hero-copy-tagline {
   display: block !important;
   visibility: visible !important;
-  opacity: 0.5 !important;
+  opacity: 1 !important;
   position: relative !important;
   z-index: 6 !important;
   font-size: 36px !important;
@@ -86,7 +84,7 @@ html body #mc-hero-copy-tagline {
   -webkit-text-fill-color: #d8d6d3 !important;
   text-transform: none !important;
   text-align: center !important;
-  margin: 0.06em auto 0.5em !important;
+  margin: 0.35em auto 0.5em !important;
   width: 100% !important;
   max-width: min(96vw, 920px) !important;
   box-sizing: border-box !important;
