@@ -192,3 +192,34 @@ html.category #content_area .mc-member-grid-price__hint {
   visibility: visible !important;
   pointer-events: none;
 }
+/* ===== PRODUCT MAIN IMAGE: keep visible ===== */
+#v65-product-parent #product_photo,
+#v65-product-parent .product_photo,
+#v65-product-parent #product_image,
+#v65-product-parent .main-image-wrapper {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative;
+  min-height: 300px;
+}
+
+#v65-product-parent #product_photo img,
+#v65-product-parent .product_photo img,
+#v65-product-parent #product_image img {
+  display: block !important;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#v65-product-parent #altviews,
+#v65-product-parent .v65-productdetail-thumbnav {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  position: static !important;
+}
