@@ -1,3 +1,4 @@
+html { outline: 6px solid red !important; }
 /* McCabe fixes — load after template.css (linked from template_266.html).
    Ensures hero copy + listing member block even if custom-safe.css fails to load. */
 
