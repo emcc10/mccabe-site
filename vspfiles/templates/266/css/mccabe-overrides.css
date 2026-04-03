@@ -230,4 +230,70 @@ body.mc-product-page #v65-product-parent #product_photo_td {
     min-width: 0 !important;
     max-width: 980px !important;
   }
+/* ===== CLEAN CATEGORY PAGINATION DISPLAY ONLY ===== */
+body.category #content_area .v65-pagepagination,
+html.category #content_area .v65-pagepagination {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  clear: both !important;
+  margin: 20px 0 28px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body.category #content_area .v65-pagepagination a,
+html.category #content_area .v65-pagepagination a {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 40px !important;
+  padding: 0 14px !important;
+  text-decoration: none !important;
+}
+
+/* ===== PDP: main image is the IMG itself ===== */
+body.mc-product-page #content_area img#product_photo,
+body.productdetails #content_area img#product_photo {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 0 auto !important;
+}
+
+/* Bean bag desktop: keep the native table layout clean */
+@media (min-width: 992px) {
+  body.mc-product-page #content_area td.mc-pdp-media-td,
+  body.productdetails #content_area td.mc-pdp-media-td {
+    vertical-align: top !important;
+  }
+
+  body.mc-product-page #content_area td.mc-pdp-media-td #altviews,
+  body.mc-product-page #content_area td.mc-pdp-media-td span#altviews,
+  body.mc-product-page #content_area td.mc-pdp-media-td .altviews,
+  body.productdetails #content_area td.mc-pdp-media-td #altviews,
+  body.productdetails #content_area td.mc-pdp-media-td span#altviews,
+  body.productdetails #content_area td.mc-pdp-media-td .altviews {
+    float: left !important;
+    width: 86px !important;
+    max-width: 86px !important;
+    margin: 0 12px 0 0 !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  body.mc-product-page #content_area td.mc-pdp-media-td img#product_photo,
+  body.productdetails #content_area td.mc-pdp-media-td img#product_photo {
+    display: block !important;
+    float: none !important;
+    clear: none !important;
+    max-width: min(700px, 100%) !important;
+    margin: 0 !important;
+  }
 }
