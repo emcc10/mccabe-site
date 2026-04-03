@@ -11618,5 +11618,15 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
+  <script>
+document.addEventListener('click', function(e) {
+  var a = e.target.closest('.v65-pagepagination a');
+  if (!a) return;
+  var href = a.getAttribute('href');
+  if (href && href !== '#' && href.indexOf('javascript:') !== 0) {
+    window.location.href = href;
+  }
+}, true);
+</script>
 </body>
 </html>
