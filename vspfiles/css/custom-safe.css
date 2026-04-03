@@ -5271,34 +5271,7 @@ body.mc-bean-bag-pdp #content_area #options_table tr:has(select[id*="cover" i]) 
   position: static !important;
   width: 100% !important;
   max-width: 100% !important;
-}
 
-/* Bean bags: main image row first, title/price/options full width below (not clipped) */
-@media (min-width: 992px) {
-  body.mc-bean-bag-pdp #v65-product-parent > tbody > tr:nth-of-type(2),
-  body.mc-bean-bag-pdp.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) {
-    display: flex !important;
-    flex-direction: column !important;
-    flex-wrap: nowrap !important;
-    align-items: stretch !important;
-  }
-
-  body.mc-bean-bag-pdp #v65-product-parent > tbody > tr:nth-of-type(2) > td,
-  body.mc-bean-bag-pdp #content_area td.mc-pdp-media-td,
-  body.mc-bean-bag-pdp #content_area td.mc-pdp-options-td {
-    flex: 0 0 auto !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  body.mc-bean-bag-pdp #content_area td.mc-pdp-options-td,
-  body.mc-bean-bag-pdp #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child {
-    overflow: visible !important;
-    overflow-x: visible !important;
-    padding-top: 24px !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
 }
 
 /* Description / tabs: stop top border being clipped */
