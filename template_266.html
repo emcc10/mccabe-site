@@ -11619,5 +11619,38 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+  var content = document.querySelector('#content_area');
+  if (!content) return;
+
+  var pagers = content.querySelectorAll('.v65-pagepagination');
+  if (pagers.length && !content.querySelector('.mc-top-pagination')) {
+    var topClone = pagers[0].cloneNode(true);
+    topClone.className += ' mc-top-pagination';
+    content.insertBefore(topClone, content.firstChild);
+  }
+
+  var mainImg =
+    document.querySelector('#content_area img#product_photo') ||
+    document.querySelector('#v65-product-parent img#product_photo');
+
+  var firstAlt =
+    document.querySelector('#content_area #altviews img') ||
+    document.querySelector('#content_area span#altviews img') ||
+    document.querySelector('#v65-product-parent #altviews img');
+
+  if (mainImg) {
+    var src = mainImg.getAttribute('src') || '';
+    if ((!src || /noimage|default/i.test(src)) && firstAlt) {
+      var altSrc = firstAlt.getAttribute('src');
+      if (altSrc) {
+        mainImg.setAttribute('src', altSrc);
+        mainImg.removeAttribute('srcset');
+      }
+    }
+  }
+});
+</script>
 </body>
 </html>
