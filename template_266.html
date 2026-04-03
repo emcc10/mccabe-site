@@ -11584,41 +11584,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e598c4c0cafe88f',t:'MTc3NTA2Njk5OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 
   
-  
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  var content = document.querySelector('#content_area');
-  if (!content) return;
 
-  /* Top pagination clone only. No click hijacking. */
-  var pagers = content.querySelectorAll('.v65-pagepagination');
-  if (pagers.length && !content.querySelector('.mc-top-pagination')) {
-    var topClone = pagers[0].cloneNode(true);
-    topClone.className += ' mc-top-pagination';
-    content.insertBefore(topClone, content.firstChild);
-  }
-
-  /* PDP fallback: product_photo is the image itself */
-  var mainImg =
-    document.querySelector('#content_area img#product_photo') ||
-    document.querySelector('#v65-product-parent img#product_photo');
-
-  var firstAlt =
-    document.querySelector('#content_area #altviews img') ||
-    document.querySelector('#v65-product-parent #altviews img');
-
-  if (mainImg) {
-    var src = mainImg.getAttribute('src') || '';
-    if ((!src || /noimage|default/i.test(src)) && firstAlt) {
-      var altSrc = firstAlt.getAttribute('src');
-      if (altSrc) {
-        mainImg.setAttribute('src', altSrc);
-        mainImg.removeAttribute('srcset');
-      }
-    }
-  }
-});
-</script>
   <script>
 document.addEventListener('DOMContentLoaded', function () {
   var content = document.querySelector('#content_area');
