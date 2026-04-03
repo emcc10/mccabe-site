@@ -478,7 +478,7 @@ body.is-home #slideshow-container #mc-hero-copy-tagline,
   display: block !important;
   font-size: 36px !important;
   line-height: 1.2 !important;
-  font-weight: 400 !important;
+  font-weight: 300 !important;
   letter-spacing: 0.12em !important;
   color: #d8d6d3 !important;
   -webkit-text-fill-color: #d8d6d3 !important;
@@ -489,6 +489,7 @@ body.is-home #slideshow-container #mc-hero-copy-tagline,
   margin-left: auto !important;
   margin-right: auto !important;
   box-sizing: border-box !important;
+  margin-top: -215px !important;
 }
 
 #mc-hero-copy-subline,
