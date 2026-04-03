@@ -805,9 +805,9 @@ document.addEventListener("DOMContentLoaded", function () {
         <form class="collapsing-search__form" action="/searchresults.asp" method="get" name="SearchBoxForm">
           <div class="container">
             <div class="row">
-              <input class="collapsing-search__input" id="search" placeholder="Search..." type="text" name="Search" value="">
+              <input class="collapsing-search__input" id="search" placeholder="Search" type="text" name="Search" value="">
               <label class="collapsing-search__label searchToggle sr-only" for="search">
-                <span class="collapsing-search__label__text">Search...</span>
+                <span class="collapsing-search__label__text">Search</span>
               </label>
               <button type="submit" name="Submit" class="collapsing-search__submit">
                 <p class="sr-only">Search Submit</p>
@@ -1625,21 +1625,23 @@ html body.productdetails .v-product-grid > .v-product {
 
 
   // If you accidentally paste this twice, only the first one runs.
-  if (window.__WM_LEATHER_MODAL_SCRIPT_LOADED__) return;
-  window.__WM_LEATHER_MODAL_SCRIPT_LOADED__ = true;
+if (window.__WM_LEATHER_MODAL_SCRIPT_LOADED__) return;
+window.__WM_LEATHER_MODAL_SCRIPT_LOADED__ = true;
 
-  const WM_DEBUG = false;
-  const log = (...a) => { if (WM_DEBUG) console.log("[WM]", ...a); };
+var WM_DEBUG = false;
+function log() {
+  if (WM_DEBUG) console.log.apply(console, ["[WM]"].concat([].slice.call(arguments)));
+}
 
-  // IMPORTANT: do NOT block retries until we actually build UI
-  if (window.__WM_LEATHER_MODAL_BUILT__) return;
+// IMPORTANT: do NOT block retries until we actually build UI
+if (window.__WM_LEATHER_MODAL_BUILT__) return;
 
-  const GRADE_UPCHARGE = { "2000": 99, "3000": 149 };
-  function gradeHeaderText(g){
-    if (g === "Base") return "Grade 1000";
-    const amt = GRADE_UPCHARGE[String(g)];
-    return amt ? `Grade ${g} (+$${amt}/seat)` : `Grade ${g}`;
-  }
+var GRADE_UPCHARGE = { "2000": 99, "3000": 149 };
+function gradeHeaderText(g) {
+  if (g === "Base") return "Grade 1000";
+  var amt = GRADE_UPCHARGE[String(g)];
+  return amt ? "Grade " + g + " (+$" + amt + "/seat)" : "Grade " + g;
+}
 
   // Add your families here (DO NOT remove Bali unless you want to)
   const LEATHER_INFO = {
