@@ -6090,7 +6090,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
 #if_homepage #slideshow-container .mc-hero-overlay .hero-logo-img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   min-width: 0;
   min-height: 0;
   max-width: none;
@@ -6101,7 +6101,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
   object-position: center center;
   opacity: 0.4;
   filter: brightness(150%);
-  margin-top: -150px;
+  margin-top: -200px;
 }
 
 @media (max-width: 991px) {
