@@ -151,3 +151,83 @@ html.category #content_area .mc-member-grid-price__hint {
   text-align: left !important;
   width: 100% !important;
 }
+/* ===== CATEGORY PAGINATION: clean placement only, no click hijacking ===== */
+body.category #content_area .v65-pagepagination,
+html.category #content_area .v65-pagepagination {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  clear: both !important;
+  margin: 20px 0 28px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+body.category #content_area .mc-top-pagination {
+  margin-top: 0 !important;
+  margin-bottom: 18px !important;
+}
+
+body.category #content_area .v65-pagepagination a,
+html.category #content_area .v65-pagepagination a {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 40px !important;
+  padding: 0 14px !important;
+  text-decoration: none !important;
+}
+
+/* ===== PDP MAIN IMAGE: target actual Volusion image, not fake wrapper ===== */
+body.productdetails #content_area img#product_photo,
+body.mc-product-page #content_area img#product_photo,
+body.productdetails #v65-product-parent img#product_photo,
+body.mc-product-page #v65-product-parent img#product_photo {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 0 auto !important;
+  float: none !important;
+  clear: both !important;
+}
+
+body.productdetails #content_area #product_photo_td,
+body.mc-product-page #content_area #product_photo_td,
+body.productdetails #v65-product-parent #product_photo_td,
+body.mc-product-page #v65-product-parent #product_photo_td {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Bean bag desktop: keep alt views beside image only if template JS builds it */
+@media (min-width: 992px) {
+  body.productdetails #content_area .mc-prod-media-wrap,
+  body.mc-product-page #content_area .mc-prod-media-wrap {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  body.productdetails #content_area .mc-prod-media-wrap #altviews,
+  body.mc-product-page #content_area .mc-prod-media-wrap #altviews {
+    flex: 0 0 72px !important;
+    width: 72px !important;
+    min-width: 72px !important;
+    margin: 0 !important;
+  }
+
+  body.productdetails #content_area .mc-prod-media-wrap img#product_photo,
+  body.mc-product-page #content_area .mc-prod-media-wrap img#product_photo {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: 980px !important;
+  }
+}
