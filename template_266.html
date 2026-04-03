@@ -7040,6 +7040,39 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     });
   }
 
+  function desktopMainMediaTarget(scope) {
+    var cand =
+      q('#product_photo', scope) ||
+      q('img#product_photo', scope) ||
+      q('.vcss_img_wrap', scope) ||
+      q('.vCSS_img_wrap', scope) ||
+      q('.main-image', scope) ||
+      q('img#main-image', scope) ||
+      q('img[itemprop="image"]', scope);
+    if (cand) return cand;
+
+    var td = q('#product_photo_td', scope);
+    if (!td) return null;
+
+    var inner =
+      q('#product_photo', td) ||
+      q('.vCSS_img_wrap', td) ||
+      q('.vcss_img_wrap', td) ||
+      q('.main-image', td) ||
+      q('img#main-image', td) ||
+      q('a#product_photo_zoom_url', td) ||
+      q('a#product_photo_zoom_url2', td);
+    if (inner) return inner;
+
+    var imgs = qa('img', td);
+    var ii;
+    for (ii = 0; ii < imgs.length; ii++) {
+      var im = imgs[ii];
+      if (im.closest && im.closest('#altviews, .altviews, [id*="altview"]')) continue;
+      return im;
+    }
+    return null;
+  }
   function forceMediaLayout(scope){
     wireAltThumbClicks(scope);
 
@@ -7052,12 +7085,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       return;
     }
 
-    // DESKTOP: build wrapper thumbs-left layout
-    var main =
-      q('#product_photo', scope) ||
-      q('.vcss_img_wrap', scope) ||
-      q('.main-image', scope) ||
-      q('[id*="product_photo"]', scope);
+    // DESKTOP: build wrapper thumbs-left layout (never reparent <td>)
+    var main = desktopMainMediaTarget(scope);
 
     var thumbs =
       q('#altviews', scope) ||
