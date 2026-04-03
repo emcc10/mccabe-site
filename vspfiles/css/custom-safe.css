@@ -6100,7 +6100,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
   object-position: center center;
   opacity: 0.4;
   filter: brightness(150%);
-  margin-top: -375px;
+  margin-top: -305px;
 }
 
 @media (max-width: 991px) {
