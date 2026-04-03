@@ -11628,5 +11628,32 @@ document.addEventListener('click', function(e) {
   }
 }, true);
 </script>
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+  var mainImg =
+    document.querySelector('#v65-product-parent #product_photo img') ||
+    document.querySelector('#v65-product-parent .product_photo img') ||
+    document.querySelector('#v65-product-parent #product_image img');
+
+  var altImgs = document.querySelectorAll('#v65-product-parent #altviews img, #v65-product-parent .v65-productdetail-thumbnav img');
+
+  if (!mainImg && altImgs.length) return;
+
+  /* if main image exists but src is blank/bad, use first alt image */
+  if (mainImg) {
+    var src = mainImg.getAttribute('src') || '';
+    if (!src || /noimage|default/i.test(src)) {
+      var firstAlt = altImgs[0];
+      if (firstAlt) {
+        var altSrc = firstAlt.getAttribute('src');
+        if (altSrc) {
+          mainImg.setAttribute('src', altSrc);
+          mainImg.setAttribute('srcset', '');
+        }
+      }
+    }
+  }
+});
+</script>
 </body>
 </html>
