@@ -6813,13 +6813,30 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   display: flex !important;
   flex-wrap: wrap !important;
   align-items: center !important;
-  justify-content: center !important;
+  justify-content: space-between !important;
   gap: 12px !important;
   margin: 28px auto 16px !important;
   padding: 0 12px !important;
   box-sizing: border-box !important;
 }
 
+
+.mc-category-pager__page-of {
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em !important;
+  color: #1a1a1a !important;
+  margin-right: auto !important;
+}
+
+.mc-category-pager .mc-category-pager__btn--next {
+  margin-left: auto !important;
+}
+
+.mc-category-pager .mc-category-pager__btn--prev {
+  margin-right: auto !important;
+}
 .mc-category-pager__btn {
   display: inline-flex !important;
   align-items: center !important;
