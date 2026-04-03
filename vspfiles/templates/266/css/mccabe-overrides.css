@@ -265,6 +265,8 @@ body.productdetails #content_area img#product_photo {
   max-width: 100% !important;
   height: auto !important;
   margin: 0 auto !important;
+  float: none !important;
+  clear: both !important;
 }
 
 /* Bean bag desktop: keep the native table layout clean */
