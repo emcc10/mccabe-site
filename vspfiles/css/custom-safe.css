@@ -6631,10 +6631,10 @@ body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
   padding: 0 !important;
   font-size: 12px !important;
   font-weight: 400 !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.1em !important;
   text-transform: none !important;
   color: #555 !important;
-  text-align: left !important;
+  text-align: center !important;
   line-height: 1.2 !important;
   align-self: flex-start !important;
 }
@@ -6691,10 +6691,12 @@ body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
     justify-content: flex-start !important;
     text-align: left !important;
     font-size: 16px !important;
-    letter-spacing: 0.02em !important;
-    margin-top: 6px !important;
+    letter-spacing: 0.05em !important;
+    margin-top: -2px !important;
     margin-bottom: 0 !important;
     padding-top: 0 !important;
+    font-weight: 300 !important;
+    text-transform: uppercase;
   }
 
   :is(html.category, body.category) .v-product-grid .v-product .v-product__price,
@@ -6709,10 +6711,11 @@ body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
 
   :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .mc-member-grid-price {
-    margin-top: 2px !important;
+    margin-top: 11px !important;
     order: 3 !important;
     align-items: flex-start !important;
     text-align: left !important;
+    margin-left: 25px;
   }
 
   :is(html.category, body.category) .v-product-grid .v-product,
