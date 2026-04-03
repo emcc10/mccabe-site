@@ -5619,6 +5619,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 <script>
 (function () {
   var PAGER_ID = 'mc-category-pager';
+  var lastPagerSig = null;
   function isCategoryListing() {
     if (document.body.classList.contains('productdetails')) return false;
     if (document.documentElement.classList.contains('category')) return true;
@@ -5677,10 +5678,16 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     }
   }
 
-  /** Prefer PageNum if any link on the page uses it; else page= */
+  /** Match Volusion paging param on this URL or in category links. */
   function detectPagingKey() {
+    if (/(^|[?&])PageNum=/i.test(location.search || '')) return 'PageNum';
+    if (/(^|[?&])pagenum=/i.test(location.search || '')) return 'pagenum';
+    if (/(^|[?&])pagenumber=/i.test(location.search || '')) return 'pagenumber';
+    if (/(^|[?&])page=\d/i.test(location.search || '')) return 'page';
     var probe = document.querySelector('a[href*="PageNum="], a[href*="pagenum="]');
     if (probe && probe.href) return 'PageNum';
+    probe = document.querySelector('a[href*="pagenumber="]');
+    if (probe && probe.href) return 'pagenumber';
     probe = document.querySelector('a[href*="page="]');
     if (probe && probe.href && /[?&]page=\d/i.test(probe.href)) return 'page';
     return 'PageNum';
@@ -5841,9 +5848,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       var ca = document.getElementById('content_area');
       if (!ca) return;
 
-      var existing = document.getElementById(PAGER_ID);
-      if (existing) existing.remove();
-
       var curr = currentPageNum();
       var body = document.body;
       var path = location.pathname;
@@ -5876,6 +5880,29 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       if (totalP < curr) totalP = curr;
 
       var showTop = totalP > 1 || curr > 1 || hasNext;
+      var labelText = totalP > 1 ? 'Page ' + curr + ' of ' + totalP : 'Page ' + curr;
+      var locKey = path + '|' + (location.search || '');
+      var sig =
+        locKey +
+        '|' +
+        curr +
+        '|' +
+        totalP +
+        '|' +
+        (nextHref || '') +
+        '|' +
+        (prevHref || '') +
+        '|' +
+        (showTop ? '1' : '0') +
+        '|' +
+        (showTop ? labelText : '');
+
+      if (lastPagerSig === sig) {
+        return;
+      }
+
+      var existing = document.getElementById(PAGER_ID);
+      if (existing) existing.remove();
 
       if (!hasNext && !prevHref && !showTop) {
         var otOnly = document.getElementById('mc-category-pager-top');
@@ -5884,6 +5911,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
             otOnly.parentNode.removeChild(otOnly);
           } catch (eOt) {}
         }
+        lastPagerSig = sig;
         return;
       }
 
@@ -5927,7 +5955,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         var label = document.createElement('span');
         label.className = 'mc-category-pager__page-of';
         label.setAttribute('aria-live', 'polite');
-        label.textContent = totalP > 1 ? 'Page ' + curr + ' of ' + totalP : 'Page ' + curr;
+        label.textContent = labelText;
         topBar.appendChild(label);
         if (hasNext) {
           var topNext = document.createElement('a');
@@ -5947,14 +5975,18 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         }
       }
 
-      if (!wrap.querySelector('a') && !document.getElementById('mc-category-pager-top')) return;
+      if (!wrap.querySelector('a') && !document.getElementById('mc-category-pager-top')) {
+        lastPagerSig = sig;
+        return;
+      }
 
       if (wrap.querySelector('a')) {
         ca.appendChild(wrap);
       }
+
+      lastPagerSig = sig;
     } catch (err) {}
   }
-
 
   function boot() {
     renderPager();
@@ -5973,9 +6005,36 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   var ca0 = document.getElementById('content_area');
   if (ca0 && typeof MutationObserver !== 'undefined') {
     var t = null;
-    var obs = new MutationObserver(function () {
+    function isPagerOwned(el) {
+      if (!el || el.nodeType !== 1) return false;
+      if (el.id === PAGER_ID || el.id === 'mc-category-pager-top') return true;
+      var p = el.parentElement;
+      while (p) {
+        if (p.id === PAGER_ID || p.id === 'mc-category-pager-top') return true;
+        p = p.parentElement;
+      }
+      return false;
+    }
+    function shouldIgnoreMutations(records) {
+      var i;
+      var j;
+      for (i = 0; i < records.length; i++) {
+        var r = records[i];
+        for (j = 0; j < r.addedNodes.length; j++) {
+          var n = r.addedNodes[j];
+          if (n.nodeType === 1 && !isPagerOwned(n)) return false;
+        }
+        for (j = 0; j < r.removedNodes.length; j++) {
+          var n2 = r.removedNodes[j];
+          if (n2.nodeType === 1 && !isPagerOwned(n2)) return false;
+        }
+      }
+      return true;
+    }
+    var obs = new MutationObserver(function (mutations) {
+      if (shouldIgnoreMutations(mutations)) return;
       clearTimeout(t);
-      t = setTimeout(renderPager, 80);
+      t = setTimeout(renderPager, 400);
     });
     obs.observe(ca0, { childList: true, subtree: true });
   }
