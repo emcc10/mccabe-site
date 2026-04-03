@@ -5620,6 +5620,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 (function () {
   var PAGER_ID = 'mc-category-pager';
   var lastPagerSig = null;
+  var pagerObsCooldownUntil = 0;
   function isCategoryListing() {
     if (document.body.classList.contains('productdetails')) return false;
     if (document.documentElement.classList.contains('category')) return true;
@@ -5659,6 +5660,19 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       return pageFromSearch(new URL(href, location.href).search || '');
     } catch (e) {
       return 1;
+    }
+  }
+
+  /** Normalize href for stable pager signatures (avoids rebuilds on trivial URL string drift). */
+  function pagerHrefKey(href) {
+    if (!href) return '';
+    try {
+      var u = new URL(href, location.href);
+      var path = u.pathname;
+      if (path.length > 1 && path.charAt(path.length - 1) === '/') path = path.slice(0, -1);
+      return path + u.search;
+    } catch (eHk) {
+      return href;
     }
   }
 
@@ -5800,6 +5814,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var el;
     for (i = 0; i < candidates.length; i++) {
       el = candidates[i];
+      if (el.getAttribute && el.getAttribute('data-mc-pager-hidden') === '1') continue;
       if (el.closest && el.closest('.v-product-grid')) continue;
       if (el.closest && el.closest('#mc-category-pager')) continue;
       if (el.closest && el.closest('#mc-category-pager-top')) continue;
@@ -5889,9 +5904,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         '|' +
         totalP +
         '|' +
-        (nextHref || '') +
+        pagerHrefKey(nextHref) +
         '|' +
-        (prevHref || '') +
+        pagerHrefKey(prevHref) +
         '|' +
         (showTop ? '1' : '0') +
         '|' +
@@ -5900,6 +5915,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       if (lastPagerSig === sig) {
         return;
       }
+
+      pagerObsCooldownUntil = Date.now() + 700;
 
       var existing = document.getElementById(PAGER_ID);
       if (existing) existing.remove();
@@ -5949,7 +5966,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         var pageTxt = findCategoryPageTextRow(ca);
         if (pageTxt && pageTxt.parentNode) {
           try {
-            pageTxt.parentNode.removeChild(pageTxt);
+            pageTxt.setAttribute('data-mc-pager-hidden', '1');
+            pageTxt.style.setProperty('display', 'none', 'important');
           } catch (eRmPt) {}
         }
         var label = document.createElement('span');
@@ -5996,10 +6014,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   else boot();
   window.addEventListener('load', function () {
     renderPager();
-    setTimeout(renderPager, 250);
-    setTimeout(renderPager, 800);
-    setTimeout(renderPager, 2000);
-    setTimeout(renderPager, 4000);
+    setTimeout(renderPager, 350);
+    setTimeout(renderPager, 1100);
   });
 
   var ca0 = document.getElementById('content_area');
@@ -6032,6 +6048,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       return true;
     }
     var obs = new MutationObserver(function (mutations) {
+      if (Date.now() < pagerObsCooldownUntil) return;
       if (shouldIgnoreMutations(mutations)) return;
       clearTimeout(t);
       t = setTimeout(renderPager, 400);
