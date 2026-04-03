@@ -90,6 +90,7 @@
       z-index: 2 !important;
     }
     #mc-category-pager .mc-category-pager__btn {
+      transition: none !important;
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -134,6 +135,9 @@
     }
     #mc-category-pager .mc-category-pager__btn--prev {
       margin-right: auto !important;
+    }
+    #mc-category-pager-top .mc-category-pager__btn {
+      transition: none !important;
     }
     #mc-category-pager-top .mc-category-pager__btn--next {
       margin-left: auto !important;
@@ -5775,8 +5779,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       if (!outsideProductGrid(a)) return;
       if (!a.href || /^javascript:/i.test(a.href)) return;
       if (!sameCategoryPath(a.href)) return;
-      var lo = a.href.toLowerCase();
-      if (lo.indexOf('pagenum') < 0 && lo.indexOf('page=') < 0 && lo.indexOf('pagenumber') < 0) return;
+      var lo = a.href;
+      if (!/[?&](?:pagenum|pagenumber|page)=/i.test(lo) && !/[?&]PageNum=/i.test(lo)) return;
       var p = pageFromHref(a.href);
       if (p < 1) return;
       if (p > curr && p < nextPage) {
@@ -5857,6 +5861,43 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return Math.max(curr, 1);
   }
 
+  function tryUpdateCategoryPagerInPlace(ca, sig, prevHref, nextHref, hasNext, showTop, labelText) {
+    var nav = document.getElementById(PAGER_ID);
+    var topEl = document.getElementById('mc-category-pager-top');
+    if (!nav && !topEl) return false;
+
+    var prevNeeded = !!prevHref;
+    var nextNeeded = !!nextHref;
+
+    if (nav) {
+      var np = nav.querySelector('.mc-category-pager__btn--prev');
+      var nn = nav.querySelector('.mc-category-pager__btn--next');
+      if (!!np !== prevNeeded || !!nn !== nextNeeded) return false;
+      if (np) np.setAttribute('href', prevHref);
+      if (nn) nn.setAttribute('href', nextHref);
+    } else if (prevNeeded || nextNeeded) {
+      return false;
+    }
+
+    if (showTop) {
+      if (!topEl) return false;
+      var lbl = topEl.querySelector('.mc-category-pager__page-of');
+      var tn = topEl.querySelector('.mc-category-pager__btn--next');
+      if (lbl) lbl.textContent = labelText;
+      if (nextNeeded) {
+        if (!tn) return false;
+        tn.setAttribute('href', nextHref);
+      } else if (tn) {
+        return false;
+      }
+    } else if (topEl) {
+      return false;
+    }
+
+    lastPagerSig = sig;
+    return true;
+  }
+
   function renderPager() {
     try {
       if (!isCategoryListing()) return;
@@ -5916,7 +5957,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         return;
       }
 
-      pagerObsCooldownUntil = Date.now() + 700;
+      if (tryUpdateCategoryPagerInPlace(ca, sig, prevHref, nextHref, hasNext, showTop, labelText)) {
+        return;
+      }
+
+      pagerObsCooldownUntil = Date.now() + 1600;
 
       var existing = document.getElementById(PAGER_ID);
       if (existing) existing.remove();
@@ -6051,7 +6096,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       if (Date.now() < pagerObsCooldownUntil) return;
       if (shouldIgnoreMutations(mutations)) return;
       clearTimeout(t);
-      t = setTimeout(renderPager, 400);
+      t = setTimeout(renderPager, 1000);
     });
     obs.observe(ca0, { childList: true, subtree: true });
   }
@@ -6908,22 +6953,36 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   // --- Key fix: desktop wrapper exists? remove it on mobile ---
   function unwrapDesktopMediaWrap(scope){
     var wrap = q('.mc-prod-media-wrap', scope);
-    if (!wrap) return;
+    if (!wrap || !wrap.parentNode) return;
 
     var parent = wrap.parentNode;
-    var mainImg = q('#product_photo', scope);
-    var thumbsEl = q('#altviews', scope);
+    var thumbsEl =
+      q('#altviews', wrap) ||
+      q('#altviews', scope) ||
+      q('.altviews', wrap) ||
+      q('.altviews', scope);
 
-    // Put main image first, thumbs after (both outside wrapper)
-    if (mainImg) parent.insertBefore(mainImg, wrap);
-    if (thumbsEl) parent.insertBefore(thumbsEl, mainImg ? mainImg.nextSibling : wrap);
-
+    var kids = Array.prototype.slice.call(wrap.childNodes);
+    var ki;
+    for (ki = 0; ki < kids.length; ki++) {
+      parent.insertBefore(kids[ki], wrap);
+    }
     wrap.remove();
 
-    // Remove inline styles that were applied for desktop
-    if (thumbsEl) thumbsEl.removeAttribute('style');
-    if (mainImg) mainImg.removeAttribute('style');
-    if (thumbsEl) qa('a, img', thumbsEl).forEach(function (el) { el.removeAttribute('style'); });
+    if (thumbsEl) {
+      thumbsEl.removeAttribute('style');
+      qa('a, img', thumbsEl).forEach(function (el) { el.removeAttribute('style'); });
+    }
+
+    var mainEl =
+      (typeof desktopMainMediaTarget === 'function' && desktopMainMediaTarget(scope)) ||
+      q('#product_photo', scope) ||
+      q('.vCSS_img_wrap', scope) ||
+      q('.vcss_img_wrap', scope);
+    if (mainEl) {
+      mainEl.removeAttribute('style');
+      qa('img', mainEl).forEach(function (im) { im.removeAttribute('style'); });
+    }
   }
 
   function centerMainImageMobile(scope){
@@ -7040,41 +7099,57 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     });
   }
 
+  function isInsideAltThumbs(el) {
+    return !!(el && el.closest && el.closest('#altviews, .altviews, [id*="altview"]'));
+  }
+
   function desktopMainMediaTarget(scope) {
+    function pick(sel, root) {
+      var n = q(sel, root || scope);
+      return n && !isInsideAltThumbs(n) ? n : null;
+    }
+
     var cand =
-      q('#product_photo', scope) ||
-      q('img#product_photo', scope) ||
-      q('.vcss_img_wrap', scope) ||
-      q('.vCSS_img_wrap', scope) ||
-      q('.main-image', scope) ||
-      q('img#main-image', scope) ||
-      q('img[itemprop="image"]', scope);
+      pick('#product_photo') ||
+      pick('img#product_photo') ||
+      pick('.vcss_img_wrap') ||
+      pick('.vCSS_img_wrap') ||
+      pick('.main-image') ||
+      pick('img#main-image') ||
+      pick('img[itemprop="image"]');
     if (cand) return cand;
 
     var td = q('#product_photo_td', scope);
     if (!td) return null;
 
     var inner =
-      q('#product_photo', td) ||
-      q('.vCSS_img_wrap', td) ||
-      q('.vcss_img_wrap', td) ||
-      q('.main-image', td) ||
-      q('img#main-image', td) ||
-      q('a#product_photo_zoom_url', td) ||
-      q('a#product_photo_zoom_url2', td);
+      pick('#product_photo', td) ||
+      pick('.vCSS_img_wrap', td) ||
+      pick('.vcss_img_wrap', td) ||
+      pick('.main-image', td) ||
+      pick('img#main-image', td) ||
+      pick('a#product_photo_zoom_url', td) ||
+      pick('a#product_photo_zoom_url2', td);
     if (inner) return inner;
 
     var imgs = qa('img', td);
     var ii;
     for (ii = 0; ii < imgs.length; ii++) {
       var im = imgs[ii];
-      if (im.closest && im.closest('#altviews, .altviews, [id*="altview"]')) continue;
+      if (isInsideAltThumbs(im)) continue;
       return im;
     }
     return null;
   }
   function forceMediaLayout(scope){
     wireAltThumbClicks(scope);
+
+    /* Bean bag PDP: flex reparenting breaks Volusion table markup; template CSS floats alt views. */
+    if (isBeanBagProductPage() && !isMobile()) {
+      var wBb = q('.mc-prod-media-wrap', scope);
+      if (wBb) unwrapDesktopMediaWrap(scope);
+      return;
+    }
 
     // MOBILE: always undo any desktop wrapper and stop
     if (isMobile()) {
