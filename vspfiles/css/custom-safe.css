@@ -6088,7 +6088,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-wrap + #mc-hero-co
 body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
 #if_homepage #slideshow-container .mc-hero-overlay .hero-logo-img {
   display: block;
-  width: 80%;
+  width: 90%;
   height: auto;
   min-width: 0;
   min-height: 0;
@@ -6098,8 +6098,9 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
   margin-right: auto;
   object-fit: contain;
   object-position: center center;
-  opacity: 0.5;
-  filter: brightness(0.5);
+  opacity: 0.4;
+  filter: brightness(150%);
+  margin-top: -375px;
 }
 
 @media (max-width: 991px) {
