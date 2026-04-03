@@ -151,3 +151,44 @@ html.category #content_area .mc-member-grid-price__hint {
   text-align: left !important;
   width: 100% !important;
 }
+/* ===== CATEGORY PAGINATION: show clearly and stop layout glitches ===== */
+.v65-categorySubPage .v65-pagepagination,
+.v65-category-subcategory .v65-pagepagination,
+#content_area .v65-pagepagination {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  clear: both;
+  margin: 20px 0 28px;
+  position: relative;
+  z-index: 20;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.v65-categorySubPage .v65-pagepagination a,
+.v65-category-subcategory .v65-pagepagination a,
+#content_area .v65-pagepagination a {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 14px;
+  text-decoration: none;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+}
+
+.v65-categorySubPage .v65-pagepagination img,
+.v65-category-subcategory .v65-pagepagination img,
+#content_area .v65-pagepagination img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none;
+}
