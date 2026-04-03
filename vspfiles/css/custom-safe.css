@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY_20260402bbfix2 — pair with template meta mc-deploy-verify=20260402bbfix2 */
+/* MC_DEPLOY_VERIFY_20260402bbfix2TEST — pair with template meta mc-deploy-verify=20260402bbfix2 */
 /* DEPLOYED 2026-03-06 - GitHub deploy is working if you see this line at /v/vspfiles/css/custom-safe.css */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
 /* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
@@ -6637,6 +6637,7 @@ body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
   text-align: center !important;
   line-height: 1.2 !important;
   align-self: flex-start !important;
+  margin-top: -6px !important;
 }
 
 @media (max-width: 991px) {
@@ -7615,7 +7616,9 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   text-align: center !important;
   font-size: 16px !important;
   letter-spacing: 0.02em !important;
-  margin-top: 6px !important;
+  margin-top: 9px !important;
+  text-transform: uppercase;
+  font-weight: 300 !important;
 }
 .v-product-grid {
   display: flex !important;
