@@ -7026,8 +7026,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function forceMediaLayout(scope){
     wireAltThumbClicks(scope);
 
-    if (isBeanBagProductPage() && !isMobile()) return;
-
     // MOBILE: always undo any desktop wrapper and stop
     if (isMobile()) {
       unwrapDesktopMediaWrap(scope);
