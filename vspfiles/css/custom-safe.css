@@ -5242,7 +5242,7 @@ body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-g
   }
 
   body.mc-product-page #content_area .mc-pdp-media-td {
-    width: 58% !important;
+    width: 80% !important;
     padding-right: 40px !important;
     border: 0 !important;
   }
