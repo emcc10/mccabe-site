@@ -275,7 +275,7 @@ body.mc-product-page #v65-product-parent #product_photo_td {
     overflow: visible !important;
     width: auto !important;
     max-width: min(700px, 100%) !important;
-    min-width: 0 !important;
+    min-width: 700px !important;
     margin: 0 !important;
   }
 
