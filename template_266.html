@@ -58,7 +58,7 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260402bbfix2TEST: MAP mount must not steal installTarget (homepage Volusion price HTML) -->
+<!-- MC_DEPLOY_VERIFY_20260402bbfix2IMAGEFIX: MAP mount must not steal installTarget (homepage Volusion price HTML) -->
 <meta name="mc-deploy-verify" content="20260402bbfix2">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -7148,10 +7148,21 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
     /* Bean bag PDP: flex reparenting breaks Volusion table markup; template CSS floats alt views. */
     if (isBeanBagProductPage() && !isMobile()) {
-      var wBb = q('.mc-prod-media-wrap', scope);
-      if (wBb) unwrapDesktopMediaWrap(scope);
-      return;
+  var wBb = q('.mc-prod-media-wrap', scope);
+  if (wBb) unwrapDesktopMediaWrap(scope);
+
+  var mainBb = desktopMainMediaTarget(scope);
+  if (mainBb) {
+    if ((mainBb.tagName || '').toUpperCase() === 'IMG') {
+      mainBb.style.setProperty('display','block','important');
+      mainBb.style.setProperty('visibility','visible','important');
+      mainBb.style.setProperty('opacity','1','important');
+      mainBb.style.setProperty('max-width','700px','important');
+      mainBb.style.setProperty('height','auto','important');
     }
+  }
+  return;
+}
 
     // MOBILE: always undo any desktop wrapper and stop
     if (isMobile()) {
