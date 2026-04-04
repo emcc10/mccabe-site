@@ -5243,9 +5243,11 @@ body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-g
   }
 
   body.mc-product-page #content_area .mc-pdp-media-td {
-    width: 80% !important;
+    width: 70% !important;
     padding-right: 40px !important;
     border: 0 !important;
+    padding-left: 5px !important;
+    margin-left: 75px !important;
   }
 
   body.mc-product-page #content_area .mc-pdp-options-td {
