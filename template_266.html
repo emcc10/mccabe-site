@@ -7151,16 +7151,36 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   var wBb = q('.mc-prod-media-wrap', scope);
   if (wBb) unwrapDesktopMediaWrap(scope);
 
-  var mainBb = desktopMainMediaTarget(scope);
-  if (mainBb) {
-    if ((mainBb.tagName || '').toUpperCase() === 'IMG') {
-      mainBb.style.setProperty('display','block','important');
-      mainBb.style.setProperty('visibility','visible','important');
-      mainBb.style.setProperty('opacity','1','important');
-      mainBb.style.setProperty('max-width','700px','important');
-      mainBb.style.setProperty('height','auto','important');
-    }
-  }
+  var mainBb =
+    desktopMainMediaTarget(scope) ||
+    q('img#product_photo', scope) ||
+    q('#product_photo', scope) ||
+    q('.vcss_img_wrap', scope) ||
+    q('.vCSS_img_wrap', scope) ||
+    q('.main-image', scope);
+
+  if (!mainBb) return;
+
+  var mainImgs = [];
+  if ((mainBb.tagName || '').toUpperCase() === 'IMG') mainImgs = [mainBb];
+  else mainImgs = qa('img', mainBb);
+
+  mainBb.style.setProperty('display', 'block', 'important');
+  mainBb.style.setProperty('visibility', 'visible', 'important');
+  mainBb.style.setProperty('opacity', '1', 'important');
+  mainBb.style.setProperty('overflow', 'visible', 'important');
+
+  mainImgs.forEach(function(img){
+    img.style.setProperty('display', 'block', 'important');
+    img.style.setProperty('visibility', 'visible', 'important');
+    img.style.setProperty('opacity', '1', 'important');
+    img.style.setProperty('width', '100%', 'important');
+    img.style.setProperty('max-width', '700px', 'important');
+    img.style.setProperty('height', 'auto', 'important');
+    img.style.setProperty('object-fit', 'contain', 'important');
+    img.style.setProperty('margin', '0', 'important');
+  });
+
   return;
 }
 
