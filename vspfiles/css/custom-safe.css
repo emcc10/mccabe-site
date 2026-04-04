@@ -6945,7 +6945,7 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   body.mc-product-page #content_area td.mc-pdp-media-td,
   body.productdetails #content_area td.mc-pdp-media-td {
     flex: 1 1 52% !important;
-    max-width: 58% !important;
+    max-width: 70% !important;
     order: 1 !important;
     overflow: visible !important;
     position: relative !important;
