@@ -4435,7 +4435,7 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
   body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child,
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
-  body.mc-product-page #content_area td.mc-pdp-media-td {
+  body.mc-product-page .mc-pdp-media-td {
     width: 71% !important;
     max-width: 71% !important;
     min-width: 0 !important;
@@ -4449,7 +4449,7 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
   body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:last-child,
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
-  body.mc-product-page #content_area td.mc-pdp-options-td {
+  body.mc-product-page .mc-pdp-options-td {
     width: 29% !important;
     max-width: 29% !important;
     min-width: 240px !important;
@@ -4965,7 +4965,7 @@ body.mc-product-page #mcPlannerSummary {
 
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
-  body.mc-product-page #content_area td.mc-pdp-media-td {
+  body.mc-product-page .mc-pdp-media-td {
     flex: 0 1 calc(62% - 8px) !important;
     width: calc(62% - 8px) !important;
     max-width: calc(62% - 8px) !important;
@@ -4976,7 +4976,7 @@ body.mc-product-page #mcPlannerSummary {
 
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
-  body.mc-product-page #content_area td.mc-pdp-options-td {
+  body.mc-product-page .mc-pdp-options-td {
     flex: 1 1 calc(38% - 8px) !important;
     width: calc(38% - 8px) !important;
     max-width: calc(38% - 8px) !important;
@@ -5332,7 +5332,7 @@ body.mc-product-page #content_area .product_sale_price span {
 
 /* Option headers: match Select a leather (line above + same typography) */
 body.mc-product-page #content_area .productoptionname,
-body.mc-product-page #content_area td.productoptionname,
+body.mc-product-page .productoptionname,
 body.mc-product-page #content_area label,
 body.mc-product-page #content_area .mc-option-accordion__label {
   font-size: 14px !important;
@@ -7951,7 +7951,7 @@ body.mc-product-page #content_area #product_photo_td .altviews {
     width: auto !important;
     max-width: min(700px, 100%) !important;
     min-width: 0 !important;
-    margin: 0 !important;
+    margin: 0 0 0 82px !important;
   }
 
   body.productdetails #content_area #product_photo_td .vCSS_img_wrap img,
