@@ -218,12 +218,18 @@ body.mc-product-page #v65-product-parent #product_photo_td {
   opacity: 1 !important;
 }
 
-/* Desktop PDP: alt thumbs left; main beside (.vCSS_img_wrap is Volusion default) */
+/* Desktop PDP: flex row — thumbs first (order 1), main >= 600px (order 2); floats break when DOM order differs */
 @media (min-width: 992px) {
   body.productdetails #content_area td.mc-pdp-media-td,
   body.mc-product-page #content_area td.mc-pdp-media-td,
   body.productdetails #content_area #product_photo_td,
   body.mc-product-page #content_area #product_photo_td {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 14px !important;
     vertical-align: top !important;
     overflow: visible !important;
   }
@@ -240,12 +246,16 @@ body.mc-product-page #v65-product-parent #product_photo_td {
   body.mc-product-page #content_area #product_photo_td #altviews,
   body.mc-product-page #content_area #product_photo_td span#altviews,
   body.mc-product-page #content_area #product_photo_td .altviews {
-    float: left !important;
-    width: 86px !important;
-    max-width: 86px !important;
-    margin: 0 12px 0 0 !important;
+    float: none !important;
+    order: 1 !important;
+    flex: 0 0 72px !important;
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+    margin: 0 !important;
     padding: 0 !important;
     display: block !important;
+    align-self: flex-start !important;
   }
 
   body.productdetails #content_area td.mc-pdp-media-td img#product_photo,
@@ -255,7 +265,11 @@ body.mc-product-page #v65-product-parent #product_photo_td {
     display: block !important;
     float: none !important;
     clear: none !important;
-    max-width: min(700px, 100%) !important;
+    order: 2 !important;
+    flex: 1 1 auto !important;
+    min-width: min(600px, 100%) !important;
+    max-width: 100% !important;
+    width: auto !important;
     margin: 0 !important;
   }
 
@@ -273,9 +287,11 @@ body.mc-product-page #v65-product-parent #product_photo_td {
     float: none !important;
     clear: none !important;
     overflow: visible !important;
+    order: 2 !important;
+    flex: 1 1 auto !important;
     width: auto !important;
-    max-width: min(700px, 100%) !important;
-    min-width: 700px !important;
+    max-width: 100% !important;
+    min-width: min(600px, 100%) !important;
     margin: 0 !important;
   }
 }

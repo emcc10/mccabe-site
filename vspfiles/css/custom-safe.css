@@ -6974,9 +6974,9 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   body.productdetails #v65-product-parent img#product_photo,
   body.mc-product-page #content_area #v65-product-parent img#product_photo,
   body.productdetails #content_area #v65-product-parent img#product_photo {
-    min-width: 700px !important;
-    max-width: 800px !important;
-    width: min(700px, 100%) !important;
+    min-width: min(600px, 100%) !important;
+    max-width: 100% !important;
+    width: auto !important;
     height: auto !important;
     box-sizing: border-box !important;
   }
