@@ -7921,9 +7921,8 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     float: none !important;
     clear: none !important;
     overflow: visible !important;
-    width: auto !important;
-    max-width: min(700px, 100%) !important;
-    min-width: 0 !important;
+    
+    min-width: 700px !important;
     margin: 0 0 0 82px !important;
   }
 
