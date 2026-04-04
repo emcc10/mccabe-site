@@ -7930,11 +7930,16 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 
   function run(){
-    unwrapBadWrapper();
-    tagPdpCells();
-    document.body.classList.add('mc-product-page');
+  unwrapBadWrapper();
+  tagPdpCells();
+  document.body.classList.add('mc-product-page');
+
+  if (isBeanBagProductPage()) {
+    document.body.classList.add('mc-bean-bag-pdp');
+  } else {
     document.body.classList.remove('mc-bean-bag-pdp');
   }
+}
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
   else run();
