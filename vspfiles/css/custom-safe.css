@@ -7823,15 +7823,6 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   max-width: 100% !important;
   max-height: 100% !important;
 }
-/* PDP related items: guests never see sale row (retail / list only) */
-body:not(.mc-member-logged-in) #content_area #relateditems font.product_sale_price,
-body:not(.mc-member-logged-in) #content_area #relateditems .product_sale_price,
-body:not(.mc-member-logged-in) #content_area #relateditems [class*="product_sale_price"],
-body:not(.mc-member-logged-in) #content_area table.relateditems font.product_sale_price,
-body:not(.mc-member-logged-in) #content_area table.relateditems .product_sale_price,
-body:not(.mc-member-logged-in) #content_area table.relateditems [class*="product_sale_price"] {
-  display: none !important;
-}
 @media (min-width: 992px) {
   body.productdetails #content_area td.mc-pdp-media-td,
   body.mc-product-page #content_area td.mc-pdp-media-td,
@@ -7913,25 +7904,7 @@ body:not(.mc-member-logged-in) #content_area table.relateditems [class*="product
     clear: none !important;
     max-width: min(700px, 100%) !important;
     height: auto !important;
-    body.productdetails #content_area td.mc-pdp-media-td #altviews,
-body.productdetails #content_area td.mc-pdp-media-td span#altviews,
-body.productdetails #content_area td.mc-pdp-media-td .altviews,
-body.mc-product-page #content_area td.mc-pdp-media-td #altviews,
-body.mc-product-page #content_area td.mc-pdp-media-td span#altviews,
-body.mc-product-page #content_area td.mc-pdp-media-td .altviews,
-body.productdetails #content_area #product_photo_td #altviews,
-body.productdetails #content_area #product_photo_td span#altviews,
-body.productdetails #content_area #product_photo_td .altviews,
-body.mc-product-page #content_area #product_photo_td #altviews,
-body.mc-product-page #content_area #product_photo_td span#altviews,
-body.mc-product-page #content_area #product_photo_td .altviews {
-  float: left !important;
-  width: 72px !important;
-  max-width: 72px !important;
-  margin: 0 10px 0 0 !important;
-  padding: 0 !important;
-  display: block !important;
-}
+    margin: 0 !important;
   }
 
   body.productdetails #content_area #product_photo_td .vCSS_img_wrap,
