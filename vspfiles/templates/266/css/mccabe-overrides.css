@@ -209,11 +209,11 @@ body.mc-product-page #v65-product-parent img#product_photo {
   }
 }
 
+/* Never force display:block on <td id="product_photo_td"> — it breaks table layout and can hide the hero image. */
 body.productdetails #content_area #product_photo_td,
 body.mc-product-page #content_area #product_photo_td,
 body.productdetails #v65-product-parent #product_photo_td,
 body.mc-product-page #v65-product-parent #product_photo_td {
-  display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
