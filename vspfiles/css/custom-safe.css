@@ -2411,7 +2411,7 @@ body.mc-product-page select.mc-native-leather {
     body.productdetails #content_area td.mc-pdp-media-td img#product_photo {
       display: block !important;
       width: 100% !important;
-      max-width: 700px !important;
+      min-width: 70% !important;
       height: auto !important;
       object-fit: contain !important;
       margin: 0 !important;
