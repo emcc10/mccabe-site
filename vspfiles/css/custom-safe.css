@@ -6970,6 +6970,20 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
     box-sizing: border-box !important;
   }
 
+  /* JS wraps thumbs+hero in .mc-prod-media-wrap; min-width:0 + flex td collapses the wrap and hides the hero */
+  body.mc-product-page #v65-product-parent #product_photo_td .mc-prod-media-wrap,
+  body.productdetails #v65-product-parent #product_photo_td .mc-prod-media-wrap,
+  body.mc-product-page #content_area #product_photo_td .mc-prod-media-wrap,
+  body.productdetails #content_area #product_photo_td .mc-prod-media-wrap,
+  body.mc-product-page #content_area td.mc-pdp-media-td .mc-prod-media-wrap,
+  body.productdetails #content_area td.mc-pdp-media-td .mc-prod-media-wrap {
+    min-width: min(600px, 100%) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+    box-sizing: border-box !important;
+  }
+
   body.mc-product-page #v65-product-parent img#product_photo,
   body.productdetails #v65-product-parent img#product_photo,
   body.mc-product-page #content_area #v65-product-parent img#product_photo,
