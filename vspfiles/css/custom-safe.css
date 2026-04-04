@@ -5488,7 +5488,7 @@ body.mc-product-page #content_area select:not(.mc-option-accordion-native) {
 /* Narrower gap between image and options */
 @media (min-width: 992px) {
   body.mc-product-page #content_area .mc-pdp-media-td {
-    width: 56% !important;
+    width: 80% !important;
     padding-right: 24px !important;
   }
   body.mc-product-page #content_area .mc-pdp-options-td {
