@@ -7878,16 +7878,25 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 }
 
-  /* BEAN BAG FIX: Override mccabe-overrides.css margin */
-body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2 {
-  margin-left: 0 !important;
-  margin-right: auto !important;
+/* BEAN BAG IMAGE ALIGNMENT - FORCE FIX */
+body.mc-bean-bag-pdp img#product_photo {
+  margin: 0 !important;
+  display: block !important;
+  margin-left: 0 !important !important;
 }
 
-body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) #altviews,
-body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) span#altviews,
-body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) .altviews {
-  margin-top: 0 !important;
+body.mc-bean-bag-pdp a#product_photo_zoom_url,
+body.mc-bean-bag-pdp a#product_photo_zoom_url2 {
+  margin: 0 !important;
   margin-left: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+  width: fit-content !important;
+}
+
+body.mc-bean-bag-pdp td#product_photo_td,
+body.mc-bean-bag-pdp td.mc-pdp-media-td {
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
 }
