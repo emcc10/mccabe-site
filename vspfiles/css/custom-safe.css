@@ -7900,3 +7900,10 @@ html body.mc-product-page.mc-bean-bag-pdp #content_area img#product_photo {
   width: 100% !important;
   max-width: 600px !important;
 }
+/* BEAN BAG: FIX THE TD CONTAINER MARGIN */
+body.mc-bean-bag-pdp td.mc-pdp-media-td {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
