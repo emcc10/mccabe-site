@@ -6804,6 +6804,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (!hasMarker) return false;
     document.body.classList.add('mc-product-page');
     try { document.body.classList.remove('is-home'); } catch (eH) {}
+    try {
+      if (typeof isBeanBagProductPage === 'function' && isBeanBagProductPage()) {
+        document.body.classList.add('mc-bean-bag-pdp');
+      }
+    } catch (eBbCls) {}
     return true;
   }
 
@@ -6995,16 +7000,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       thumbsEl.removeAttribute('style');
       qa('a, img', thumbsEl).forEach(function (el) { el.removeAttribute('style'); });
     }
-
-    var mainEl =
-      (typeof desktopMainMediaTarget === 'function' && desktopMainMediaTarget(scope)) ||
-      q('#product_photo', scope) ||
-      q('.vCSS_img_wrap', scope) ||
-      q('.vcss_img_wrap', scope);
-    if (mainEl) {
-      mainEl.removeAttribute('style');
-      qa('img', mainEl).forEach(function (im) { im.removeAttribute('style'); });
-    }
   }
 
   function centerMainImageMobile(scope){
@@ -7168,7 +7163,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     wireAltThumbClicks(scope);
 
     /* Bean bag PDP: flex reparenting breaks Volusion table markup; template CSS floats alt views. */
-    if (isBeanBagProductPage() && !isMobile()) {
+    var pcBbGate = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+    var bbDesktop = !isMobile() && ((document.body && document.body.classList.contains('mc-bean-bag-pdp')) || isBeanBagProductPage() || (pcBbGate && /^BB/i.test(String(pcBbGate.value || '').trim())));
+    if (bbDesktop) {
   var wBb = q('.mc-prod-media-wrap', scope);
   if (wBb) unwrapDesktopMediaWrap(scope);
 
@@ -7255,6 +7252,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     // Build one flex wrapper ONCE so thumbs sit left of main image
     var existingWrap = q('.mc-prod-media-wrap', scope);
     if (!existingWrap) {
+      var pcWrapGate = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      if (!pcWrapGate) return;
       var wrap = document.createElement('div');
       wrap.className = 'mc-prod-media-wrap';
       wrap.style.setProperty('display','flex','important');
