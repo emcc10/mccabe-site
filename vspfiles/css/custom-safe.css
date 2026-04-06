@@ -7958,3 +7958,14 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     margin: 0 !important;
   }
 }
+/* BEAN BAG: Fix image positioning */
+body.mc-bean-bag-pdp a#product_photo_zoom_url,
+body.mc-bean-bag-pdp a#product_photo_zoom_url2 {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+body.mc-bean-bag-pdp td.mc-pdp-media-td {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
