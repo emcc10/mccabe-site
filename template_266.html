@@ -58,8 +58,8 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260402: inline PDP authoritative + mccabe ?v=20260402 -->
-<meta name="mc-deploy-verify" content="20260402pdp-inline">
+<!-- MC_DEPLOY_VERIFY_20260401: PDP flex thumbs+hero; mccabe-overrides ?v=202604003e -->
+<meta name="mc-deploy-verify" content="20260401pdp-css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -69,7 +69,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260402" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=202604003g" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -1865,7 +1865,7 @@ function gradeHeaderText(g) {
   const opts = Array.from(sel.options || []);
   const sample = opts.slice(0, 120).map(o => (o.textContent||"").toLowerCase()).join(" ");
   const hasGrade = /grade\s*[0-9,]+/.test(sample);
-  const hasKnown = /(traverse|solana|rein|evoque|\bleather\b)/.test(sample);
+  const hasKnown = /(traverse|solana|rein|evoque|leather|cover)/.test(sample);
   const hinted = /(leather|cover|upholstery)/.test(hint) || /(leather|cover|upholstery)/.test(lbl);
 
   return hinted || hasGrade || hasKnown;
@@ -1879,18 +1879,6 @@ function gradeHeaderText(g) {
 
   function initIfReady(){
     if (document.getElementById("wmOpen")) return true;
-    /* Bean bag PDPs: never attach WM leather UI or mc-native-leather — option text often contains
-       "cover"/fabric words that false-positive selectLooksLeatherish and hides the whole size row. */
-    try {
-      var pcWmBb = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
-      if (pcWmBb && /^BB/i.test(String(pcWmBb.value || '').trim())) return false;
-      var pathWm = (location.pathname || '').toLowerCase();
-      var searchWm = (location.search || '').toLowerCase();
-      if (pathWm.indexOf('bean-bag') !== -1 || pathWm.indexOf('beanbag') !== -1 || pathWm.indexOf('bean_bag') !== -1) return false;
-      if (pathWm.indexOf('/103.htm') !== -1 || searchWm.indexOf('categoryid=103') !== -1 || searchWm.indexOf('c=103') !== -1) return false;
-      var titleWm = document.querySelector('.productnamecolorLARGE, .productnamecolor, #v65-product-parent h1, h1.productnamecolor');
-      if (titleWm && /bean\s*bag/i.test(String(titleWm.textContent || ''))) return false;
-    } catch (eWmBb) {}
 
     const allSelects = Array.from(document.querySelectorAll("select"));
     const candidateSelects = allSelects.filter(selectLooksLeatherish).filter(hasRealOptions);
@@ -5126,10 +5114,10 @@ body.mc-product-page #content_area .wm-swatch img {
 }
 
 
-/* thumbnails on LEFT (desktop): flex row — thumbs top-aligned beside hero; min-width 0 hero (no overflow into options) (matches mccabe-overrides + custom-safe) */
+/* thumbnails on LEFT (desktop): flex row — thumbs top-aligned beside hero; min 600px hero (matches mccabe-overrides + custom-safe) */
 @media (min-width: 992px){
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #product_photo_td,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
@@ -5138,21 +5126,23 @@ body.mc-product-page #content_area .wm-swatch img {
     gap: 14px !important;
   }
 
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #altviews,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .altviews,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) [id*="altview"] {
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) [id*="altview"] {
     float: none !important;
     order: 1 !important;
     flex: 0 0 86px !important;
     width: 86px !important;
     min-width: 86px !important;
     max-width: 86px !important;
+    margin: 0 !important;
     align-self: flex-start !important;
+    margin-top: -520px !important;
   }
 
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #altviews img,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .altviews img,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) [id*="altview"] img {
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) [id*="altview"] img {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -5160,23 +5150,23 @@ body.mc-product-page #content_area .wm-swatch img {
     margin: 0 0 8px 0 !important;
   }
 
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #product_photo,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .vcss_img_wrap,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .vCSS_img_wrap,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .main-image {
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .vcss_img_wrap,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .vCSS_img_wrap,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .main-image {
     overflow: visible !important;
     order: 2 !important;
     flex: 1 1 auto !important;
-    min-width: 0 !important;
+    min-width: min(600px, 100%) !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
 
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #product_photo img,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .vcss_img_wrap img,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .vCSS_img_wrap img,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .main-image img,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) img#main-image {
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .vcss_img_wrap img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .vCSS_img_wrap img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .main-image img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) img#main-image {
     min-width: 0 !important;
     max-width: 100% !important;
     width: auto !important;
@@ -5184,8 +5174,8 @@ body.mc-product-page #content_area .wm-swatch img {
     object-fit: contain !important;
   }
 
-  body:is(.mc-product-page, .productdetails) #content_area #options_table,
-  body:is(.mc-product-page, .productdetails) #content_area table[id*="options_table"] {
+  body.mc-product-page #content_area #options_table,
+  body.mc-product-page #content_area table[id*="options_table"] {
     position: absolute !important;
     left: -9999px !important;
     opacity: 0 !important;
@@ -5195,12 +5185,12 @@ body.mc-product-page #content_area .wm-swatch img {
   }
 
   body.mc-product-page #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td),
-  body:is(.mc-product-page, .productdetails) #content_area #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td),
-  body:is(.mc-product-page, .productdetails) #content_area .product_sale_price,
-  body:is(.mc-product-page, .productdetails) #content_area .v65-product-price,
-  body:is(.mc-product-page, .productdetails) #content_area #priceWithOptions,
-  body:is(.mc-product-page, .productdetails) #content_area .product_productname,
-  body:is(.mc-product-page, .productdetails) #content_area .option_pricing {
+  body.mc-product-page #content_area #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td),
+  body.mc-product-page #content_area .product_sale_price,
+  body.mc-product-page #content_area .v65-product-price,
+  body.mc-product-page #content_area #priceWithOptions,
+  body.mc-product-page #content_area .product_productname,
+  body.mc-product-page #content_area .option_pricing {
     text-align: left !important;
     display: block !important;
   }
@@ -5210,10 +5200,10 @@ body.mc-product-page #content_area .wm-swatch img {
   body.mc-product-page #mcPlannerRow {
     gap: 13px !important;
   }
-  body:is(.mc-product-page, .productdetails) #content_area .mc-option-accordion,
-  body:is(.mc-product-page, .productdetails) #content_area #mcLeatherRow,
-  body:is(.mc-product-page, .productdetails) #content_area #mc-inline-config,
-  body:is(.mc-product-page, .productdetails) #content_area #mcPlannerRow {
+  body.mc-product-page #content_area .mc-option-accordion,
+  body.mc-product-page #content_area #mcLeatherRow,
+  body.mc-product-page #content_area #mc-inline-config,
+  body.mc-product-page #content_area #mcPlannerRow {
     max-width: 509px !important;
   }
 }
@@ -7129,54 +7119,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 
   function isInsideAltThumbs(el) {
-    return !!(el && el.closest && el.closest('#altviews, span#altviews, .altviews'));
-  }
-
-  /** Volusion sometimes nests the main hero (zoom link or #product_photo) inside #altviews — thumbnails CSS then shrinks it. */
-  function ensureProductHeroOutsideAltviews(scope) {
-    try {
-      var td = q('#product_photo_td', scope) || document.getElementById('product_photo_td');
-      if (!td) return;
-      var thumbs = q('#altviews', td) || q('span#altviews', td) || q('.altviews', td);
-      if (!thumbs || !thumbs.parentNode) return;
-      var hero =
-        q('a#product_photo_zoom_url', td) ||
-        q('a#product_photo_zoom_url2', td) ||
-        null;
-      if (!hero) {
-        var im = q('img#product_photo', td);
-        if (im && thumbs.contains(im)) hero = im;
-      }
-      if (!hero || !thumbs.contains(hero)) return;
-      var p = thumbs.parentNode;
-      if (thumbs.nextSibling) p.insertBefore(hero, thumbs.nextSibling);
-      else p.appendChild(hero);
-    } catch (eMc) {}
-  }
-
-  function ensureAltviewsBeforeMainHero(scope) {
-    try {
-      if (isMobile()) return;
-      var td = q('#product_photo_td', scope) || document.getElementById('product_photo_td');
-      if (!td) return;
-      var thumbs = q('#altviews', td) || q('span#altviews', td) || q('.altviews', td);
-      if (!thumbs || !td.contains(thumbs)) return;
-      var hero =
-        q('a#product_photo_zoom_url', td) ||
-        q('a#product_photo_zoom_url2', td) ||
-        q('img#product_photo', td);
-      if (!hero || thumbs.contains(hero) || isInsideAltThumbs(hero)) return;
-      function topUnder(root, el) {
-        var n = el;
-        while (n && n.parentNode && n.parentNode !== root) n = n.parentNode;
-        return n;
-      }
-      var th = topUnder(td, thumbs);
-      var he = topUnder(td, hero);
-      if (!th || !he || th === he) return;
-      var after = he.compareDocumentPosition(th) & Node.DOCUMENT_POSITION_FOLLOWING;
-      if (after) td.insertBefore(th, he);
-    } catch (eOrd) {}
+  return !!(el && el.closest && el.closest('#altviews, span#altviews, .altviews'));
+}
   }
 
   function desktopMainMediaTarget(scope) {
@@ -7220,8 +7164,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
   function forceMediaLayout(scope){
     wireAltThumbClicks(scope);
-    ensureProductHeroOutsideAltviews(scope);
-    ensureAltviewsBeforeMainHero(scope);
 
     /* Bean bag PDP: flex reparenting breaks Volusion table markup; template CSS floats alt views. */
     var pcBbGate = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
@@ -7261,10 +7203,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     img.style.setProperty('display', 'block', 'important');
     img.style.setProperty('visibility', 'visible', 'important');
     img.style.setProperty('opacity', '1', 'important');
-    /* Bean bags: avoid width:100% when parent column is narrow (hero rendered thumb-sized). */
-    img.style.setProperty('width', 'auto', 'important');
-    img.style.setProperty('min-width', 'min(520px, 94vw)', 'important');
-    img.style.setProperty('max-width', 'min(920px, 100%)', 'important');
+    img.style.setProperty('width', '100%', 'important');
+    img.style.setProperty('max-width', '700px', 'important');
     img.style.setProperty('height', 'auto', 'important');
     img.style.setProperty('object-fit', 'contain', 'important');
     img.style.setProperty('margin', '0', 'important');
@@ -7301,7 +7241,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     mainImgs.forEach(function(img){
       img.style.setProperty('width','100%','important');
       img.style.setProperty('max-width','980px','important');
-      img.style.setProperty('min-width','0','important');
+      img.style.setProperty('min-width','600px','important');
       img.style.setProperty('height','auto','important');
       img.style.setProperty('object-fit','contain','important');
       img.style.setProperty('display','block','important');
@@ -7335,10 +7275,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       wrap.appendChild(main);
     }
 
-    // Force thumbs column (margins from CSS; avoid inline margin — it overrides margin-top)
+    // Force thumbs column
     thumbs.style.setProperty('float','none','important');
     thumbs.style.setProperty('width','72px','important');
     thumbs.style.setProperty('min-width','72px','important');
+    thumbs.style.setProperty('margin','0','important');
     thumbs.style.setProperty('padding','0','important');
 
     qa('a, img', thumbs).forEach(function(el){
@@ -7359,7 +7300,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     main.style.setProperty('width','100%','important');
     main.style.setProperty('flex','1 1 0','important');
     main.style.setProperty('overflow','visible','important');
-    main.style.setProperty('min-width','0','important');
+    main.style.setProperty('min-width','600px','important');
   }
 
   function removeConfigurationDetails(scope){
@@ -11749,94 +11690,5 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
-<!-- MC_PDP_MEDIA_FIX_20260402: Search View Source for this string; if absent, live store is not serving this template. -->
-<style id="mc-pdp-desktop-authoritative">
-@media (min-width: 992px) {
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #product_photo_td,
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    gap: 12px !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    margin-left: 0 !important;
-    padding-left: 0 !important;
-  }
-
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #altviews,
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) span#altviews,
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .altviews {
-    float: none !important;
-    clear: none !important;
-    order: 1 !important;
-    flex: 0 0 80px !important;
-    width: 80px !important;
-    min-width: 80px !important;
-    max-width: 80px !important;
-    margin: 0 !important;
-    align-self: flex-start !important;
-    display: block !important;
-  }
-
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #altviews a,
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) span#altviews a,
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .altviews a {
-    display: block !important;
-    width: 72px !important;
-    max-width: 72px !important;
-    margin: 0 0 8px 0 !important;
-  }
-
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #altviews img,
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) span#altviews img,
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .altviews img {
-    display: block !important;
-    width: 72px !important;
-    max-width: 72px !important;
-    height: auto !important;
-    max-height: 72px !important;
-    margin: 0 !important;
-    object-fit: contain !important;
-  }
-
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2,
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #product_photo,
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .vcss_img_wrap,
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .vCSS_img_wrap,
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .main-image {
-    order: 2 !important;
-    flex: 1 1 0% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    margin-left: 0 !important;
-    float: none !important;
-    clear: none !important;
-    box-sizing: border-box !important;
-  }
-
-  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .mc-prod-media-wrap {
-    order: 2 !important;
-    flex: 1 1 0% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: flex-start !important;
-    gap: 10px !important;
-    margin: 0 !important;
-  }
-
-  html body:is(.mc-product-page, .productdetails) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child {
-    min-width: 0 !important;
-    overflow-x: hidden !important;
-  }
-}
-</style>
 </body>
 </html>

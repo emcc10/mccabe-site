@@ -1,11 +1,10 @@
 name: Deploy to Volusion
 
 # Volusion: template at /template_266.html (SFTP root). CSS: also under wwwroot v/ — /v/vspfiles/css/custom-safe.css (Volusion File Editor path), not only /vspfiles/css/custom-safe.css. Optional secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE.
-# Also uploads vspfiles/templates/266/css/mccabe-overrides.css (linked from template; not under css/ — may not appear in Volusion admin file tree).
 # Post-deploy verification downloads template_266.html via SFTP and checks mc-deploy-verify (authoritative). HTTP homepage can stay cached while SFTP already has the new file.
 # Optional repo variable SKIP_LIVE_VERIFY=true skips that SFTP download check.
 
-# Runs on every push to main (no paths: filter). Previously, only commits touching template/CSS/deploy script started the workflow—other pushes looked like "deploy never ran."
+# Runs on every push to main (no paths: filter). Previously, only commits touching template/CSS/deploy script started the workflow—other pushes looked like “deploy never ran.”
 on:
   push:
     branches:
@@ -51,10 +50,6 @@ jobs:
           if [ ! -f template_266.html ] || [ ! -f vspfiles/css/custom-safe.css ]; then
             echo "::error::Expected files missing after checkout (template_266.html or vspfiles/css/custom-safe.css)."
             ls -la
-            exit 1
-          fi
-          if [ ! -f vspfiles/templates/266/css/mccabe-overrides.css ]; then
-            echo "::error::Missing vspfiles/templates/266/css/mccabe-overrides.css (template links it after template.css)."
             exit 1
           fi
 
@@ -179,26 +174,11 @@ jobs:
             return 1
           }
 
-          # Remote path for mccabe-overrides.css must match template: v/vspfiles/templates/266/css/mccabe-overrides.css
-          mccabe_remote_for_css() {
-            case "$1" in
-              /v/vspfiles/css/custom-safe.css|v/vspfiles/css/custom-safe.css) echo "/v/vspfiles/templates/266/css/mccabe-overrides.css" ;;
-              /vspfiles/css/custom-safe.css) echo "/vspfiles/templates/266/css/mccabe-overrides.css" ;;
-              /mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css) echo "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css" ;;
-              /mccabestheaterandliving.com/vspfiles/css/custom-safe.css) echo "/mccabestheaterandliving.com/vspfiles/templates/266/css/mccabe-overrides.css" ;;
-              vspfiles/css/custom-safe.css) echo "vspfiles/templates/266/css/mccabe-overrides.css" ;;
-              *) echo "/v/vspfiles/templates/266/css/mccabe-overrides.css" ;;
-            esac
-          }
-
           try_put_pair() {
             local title="$1" tpath="$2" cpath="$3"
-            local mpath
-            mpath="$(mccabe_remote_for_css "${cpath}")"
             try_batch "${title}" \
               "put template_266.html ${tpath}" \
               "put vspfiles/css/custom-safe.css ${cpath}" \
-              "put vspfiles/templates/266/css/mccabe-overrides.css ${mpath}" \
               "bye"
           }
 
@@ -226,7 +206,6 @@ jobs:
             if try_batch "login cwd (relative vspfiles/css)" \
               "put template_266.html template_266.html" \
               "put vspfiles/css/custom-safe.css vspfiles/css/custom-safe.css" \
-              "put vspfiles/templates/266/css/mccabe-overrides.css vspfiles/templates/266/css/mccabe-overrides.css" \
               "bye"; then ok=1; fi
           fi
 
@@ -253,19 +232,6 @@ jobs:
           echo "::group::Best-effort: mirror CSS to wwwroot v/vspfiles/css (Volusion File Editor: v/vspfiles/css/custom-safe.css)"
           try_put_css_only "css → /v/vspfiles/css/custom-safe.css" "/v/vspfiles/css/custom-safe.css"
           try_put_css_only "css → v/vspfiles/css/custom-safe.css" "v/vspfiles/css/custom-safe.css"
-          echo "::endgroup::"
-
-          try_put_mccabe_only() {
-            local title="$1" mpath="$2"
-            try_batch "${title}" \
-              "put vspfiles/templates/266/css/mccabe-overrides.css ${mpath}" \
-              "bye" || true
-          }
-          echo "::group::Best-effort: mccabe-overrides.css (under templates/266/css/ — often not listed in Volusion admin)"
-          try_put_mccabe_only "mccabe-overrides → /v/vspfiles/templates/266/css/" "/v/vspfiles/templates/266/css/mccabe-overrides.css"
-          try_put_mccabe_only "mccabe-overrides → v/vspfiles/templates/266/css/" "v/vspfiles/templates/266/css/mccabe-overrides.css"
-          try_put_mccabe_only "mccabe-overrides → /vspfiles/templates/266/css/" "/vspfiles/templates/266/css/mccabe-overrides.css"
-          try_put_mccabe_only "mccabe-overrides → domain" "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css"
           echo "::endgroup::"
 
           echo "::notice::Upload finished. Next step re-downloads template via SFTP and may check the public template URL (HTTP); storefront cache can still lag what you see in a browser."

@@ -5058,41 +5058,6 @@ body.mc-bean-bag-pdp #content_area #options_table tr:has(select[id*="cover" i]) 
 
 }
 
-
-/* Bean bag: undo global hide for leather/cover substring + native-leather rows (size/fabric options must show) */
-body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select.mc-native-leather),
-body.mc-bean-bag-pdp.mc-product-page #v65-product-parent #options_table tr:has(select.mc-native-leather),
-body.mc-bean-bag-pdp.productdetails #content_area #options_table tr:has(select.mc-native-leather),
-body.mc-bean-bag-pdp.mc-product-page #content_area #options_table tr:has(select.mc-native-leather),
-body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select[name*="leather" i]),
-body.mc-bean-bag-pdp.mc-product-page #v65-product-parent #options_table tr:has(select[name*="leather" i]),
-body.mc-bean-bag-pdp.productdetails #content_area #options_table tr:has(select[name*="leather" i]),
-body.mc-bean-bag-pdp.mc-product-page #content_area #options_table tr:has(select[name*="leather" i]),
-body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select[id*="leather" i]),
-body.mc-bean-bag-pdp.mc-product-page #v65-product-parent #options_table tr:has(select[id*="leather" i]),
-body.mc-bean-bag-pdp.productdetails #content_area #options_table tr:has(select[id*="leather" i]),
-body.mc-bean-bag-pdp.mc-product-page #content_area #options_table tr:has(select[id*="leather" i]) {
-  display: table-row !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select.mc-native-leather) select.mc-native-leather,
-body.mc-bean-bag-pdp #content_area #options_table tr:has(select.mc-native-leather) select.mc-native-leather {
-  position: static !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  height: auto !important;
-  padding: 10px 14px !important;
-  margin: 0 0 14px 0 !important;
-  overflow: visible !important;
-  clip: auto !important;
-  clip-path: none !important;
-  border: 1px solid #ccc !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
 /* Description / tabs: stop top border being clipped */
 body.mc-bean-bag-pdp #content_area .product_description,
 body.mc-bean-bag-pdp #content_area #divDescription,
@@ -5282,7 +5247,7 @@ body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-g
     padding-right: 40px !important;
     border: 0 !important;
     padding-left: 5px !important;
-    margin-left: 0 !important;
+    margin-left: 75px !important;
   }
 
   body.mc-product-page #content_area .mc-pdp-options-td {
@@ -5312,7 +5277,8 @@ body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-g
     width: 100% !important;
     max-width: 100% !important;
     text-align: center !important;
-    margin: 12px auto 16px auto !important;
+    margin: 8px auto 0 auto !important;
+    margin-top: -570px !important;
   }
   body.mc-product-page #content_area #altviews a,
   body.mc-product-page #content_area .altviews a,
@@ -7875,97 +7841,4 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   max-width: 100% !important;
   max-height: 100% !important;
 }
-/* =========================================================
-   PDP desktop — final layout lock (loads after template inline)
-   Prevents hero + alt column from shifting over options; flex row in photo TD.
-   ========================================================= */
-@media (min-width: 992px) {
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #product_photo_td,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    gap: 12px !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    margin-left: 0 !important;
-  }
-
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #altviews,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) span#altviews,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .altviews {
-    float: none !important;
-    clear: none !important;
-    order: 1 !important;
-    flex: 0 0 80px !important;
-    width: 80px !important;
-    min-width: 80px !important;
-    max-width: 80px !important;
-    margin: 0 !important;
-    align-self: flex-start !important;
-    display: block !important;
-  }
-
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #altviews a,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) span#altviews a,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .altviews a {
-    display: block !important;
-    width: 72px !important;
-    max-width: 72px !important;
-    margin: 0 0 8px 0 !important;
-  }
-
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #altviews img,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) span#altviews img,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .altviews img {
-    display: block !important;
-    width: 72px !important;
-    max-width: 72px !important;
-    height: auto !important;
-    max-height: 72px !important;
-    margin: 0 !important;
-    object-fit: contain !important;
-  }
-
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #product_photo,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .vcss_img_wrap,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .vCSS_img_wrap,
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .main-image {
-    order: 2 !important;
-    flex: 1 1 0% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    float: none !important;
-    clear: none !important;
-    box-sizing: border-box !important;
-  }
-
-  body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .mc-prod-media-wrap {
-    order: 2 !important;
-    flex: 1 1 0% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: flex-start !important;
-    gap: 10px !important;
-    margin: 0 !important;
-  }
-}
-/* BEAN BAG: Fix image positioning */
-body.mc-bean-bag-pdp a#product_photo_zoom_url,
-body.mc-bean-bag-pdp a#product_photo_zoom_url2 {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-body.mc-bean-bag-pdp td.mc-pdp-media-td {
-  margin-left: 0 !important;
-  padding-left: 0 !important;
 }

@@ -211,7 +211,7 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
   visibility: visible !important;
   opacity: 1 !important;
 }
-
+}
 @media (min-width: 992px) {
   body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
   body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
@@ -219,38 +219,24 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     visibility: visible !important;
     opacity: 1 !important;
     width: auto !important;
-    max-width: min(700px, 100%) !important;
+    max-width: 700px !important;
     height: auto !important;
     margin: 0 !important;
     float: none !important;
     clear: none !important;
   }
 
-<<<<<<< HEAD
   body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2,
-  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2 {
+  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     overflow: visible !important;
     width: auto !important;
-    max-width: min(700px, 100%) !important;
-    margin: 0 !important;
+    max-width: 700px !important;
+    margin: 0 0 0 82px !important;
     float: none !important;
     clear: none !important;
-=======
-  @media (min-width: 992px) {
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
-    position: relative !important;
-    overflow: visible !important;
-    vertical-align: top !important;
-    min-height: 520px !important;
->>>>>>> 9cd25b7d8b15a0510444f4707fdbebae565b9e8b
   }
 
   body.productdetails :is(#content_area, #v65-product-parent) #altviews,
@@ -259,17 +245,13 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
   body.mc-product-page :is(#content_area, #v65-product-parent) #altviews,
   body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews,
   body.mc-product-page :is(#content_area, #v65-product-parent) .altviews {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
+    float: left !important;
     width: 72px !important;
     max-width: 72px !important;
-    margin: 0 !important;
+    margin: 0 10px 0 0 !important;
     padding: 0 !important;
     display: block !important;
     clear: none !important;
-    float: none !important;
-    z-index: 2 !important;
   }
 
   body.productdetails :is(#content_area, #v65-product-parent) #altviews a,
@@ -299,61 +281,5 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     max-height: 72px !important;
     margin: 0 !important;
     object-fit: contain !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    overflow: visible !important;
-    width: calc(100% - 82px) !important;
-    max-width: 620px !important;
-    margin: 0 0 0 82px !important;
-    float: none !important;
-    clear: none !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
-  body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    width: 100% !important;
-    max-width: 620px !important;
-    height: auto !important;
-    margin: 0 !important;
-    float: none !important;
-    clear: none !important;
-  }
-
-  /* Bean bag: keep alt column on-screen (large negative margin pulled thumbs off the viewport) */
-  body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) td.mc-pdp-media-td #altviews,
-  body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) td.mc-pdp-media-td span#altviews,
-  body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .altviews,
-  body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) #product_photo_td #altviews,
-  body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) #product_photo_td span#altviews,
-  body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) #product_photo_td .altviews {
-    margin-top: 0 !important;
-  }
-  /* Bean bag: hero stays large (width:100% on a collapsed parent rendered thumb-sized beside logo) */
-  body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) img#product_photo {
-    width: auto !important;
-    min-width: min(520px, 94vw) !important;
-    max-width: min(920px, 100%) !important;
-    height: auto !important;
-  }
-
-  body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-  body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2 {
-    display: block !important;
-    width: fit-content !important;
-    max-width: min(920px, 100%) !important;
-    margin-left: 0px !important;
-    margin-right: auto !important;
-  }
-  /* Bean bag PDP: Cordaroys mfg logo - margin-left 100px (overrides e.g. 236px) */
-  body.mc-bean-bag-pdp .vCSS_img_mfg_logo {
-    margin-left: 100px !important;
   }
 }

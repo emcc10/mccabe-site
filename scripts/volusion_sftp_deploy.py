@@ -3,9 +3,8 @@
 Paramiko SFTP deploy fallback.
 
 Template + CSS use different remote paths (Volusion):
-  template -> /template_266.html first (SFTP root), then fallbacks under /v/, etc.
-  CSS      -> /vspfiles/css/custom-safe.css and /v/vspfiles/css/custom-safe.css (File Editor: wwwroot/v/vspfiles/css/).
-  mccabe-overrides -> alongside under vspfiles/templates/266/css/ (linked from template_266.html).
+  template → /template_266.html first (SFTP root), then fallbacks under /v/, etc.
+  CSS      → /vspfiles/css/custom-safe.css and /v/vspfiles/css/custom-safe.css (File Editor: wwwroot/v/vspfiles/css/).
 
 Override with SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE (full paths).
 """
@@ -13,8 +12,6 @@ from __future__ import annotations
 
 import os
 import sys
-
-LOCAL_MCCABE = "vspfiles/templates/266/css/mccabe-overrides.css"
 
 
 def _css_remote() -> str:
@@ -24,21 +21,12 @@ def _css_remote() -> str:
     return "/vspfiles/css/custom-safe.css"
 
 
-def _mccabe_remote_for_css(c_path: str) -> str:
-    if c_path in ("/v/vspfiles/css/custom-safe.css", "v/vspfiles/css/custom-safe.css"):
-        return "/v/vspfiles/templates/266/css/mccabe-overrides.css"
-    if c_path == "/vspfiles/css/custom-safe.css":
-        return "/vspfiles/templates/266/css/mccabe-overrides.css"
-    if c_path == "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css":
-        return "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css"
-    if c_path == "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css":
-        return "/mccabestheaterandliving.com/vspfiles/templates/266/css/mccabe-overrides.css"
-    if c_path == "vspfiles/css/custom-safe.css":
-        return "vspfiles/templates/266/css/mccabe-overrides.css"
-    return "/v/vspfiles/templates/266/css/mccabe-overrides.css"
-
-
 def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
+    """Every (template_path, css_path) we try — same order as deploy.yml (secret first, then fallbacks).
+
+    When SFTP_TEMPLATE_REMOTE is set, older Paramiko behavior stopped after the first successful put;
+    that path is often writable but not the file Volusion serves, so we always attempt the full list.
+    """
     secret_t = os.environ.get("SFTP_TEMPLATE_REMOTE", "").strip()
     if secret_t and not secret_t.startswith("/"):
         secret_t = "/" + secret_t
@@ -81,11 +69,10 @@ def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
 def _try_pair(sftp, t_path: str, c_path: str) -> None:
     sftp.put("template_266.html", t_path)
     sftp.put("vspfiles/css/custom-safe.css", c_path)
-    m_path = _mccabe_remote_for_css(c_path)
-    sftp.put(LOCAL_MCCABE, m_path)
 
 
 def _mirror_template_to_canonical_paths(sftp) -> None:
+    """Extra template writes — logged so Action logs show whether Volusion paths are writable."""
     for rel in (
         "/v/template_266.html",
         "/mccabestheaterandliving.com/v/template_266.html",
@@ -93,9 +80,10 @@ def _mirror_template_to_canonical_paths(sftp) -> None:
         "/template_266.html",
     ):
         try:
+            # confirm=False: Volusion SFTP sometimes fails post-put size check (e.g. 196608 vs real size) on long paths.
             sftp.put("template_266.html", rel, confirm=False)
-            print(f"::notice::PARAMIKO_MIRROR_OK template -> {rel}", flush=True)
-        except Exception as exc:
+            print(f"::notice::PARAMIKO_MIRROR_OK template → {rel}", flush=True)
+        except Exception as exc:  # noqa: BLE001
             print(f"::warning::PARAMIKO_MIRROR_SKIP template {rel}: {exc}", flush=True)
 
 
@@ -109,32 +97,17 @@ def _mirror_css_to_canonical_paths(sftp) -> None:
     ):
         try:
             sftp.put("vspfiles/css/custom-safe.css", rel, confirm=False)
-            print(f"::notice::PARAMIKO_MIRROR_OK css -> {rel}", flush=True)
-        except Exception as exc:
+            print(f"::notice::PARAMIKO_MIRROR_OK css → {rel}", flush=True)
+        except Exception as exc:  # noqa: BLE001
             print(f"::warning::PARAMIKO_MIRROR_SKIP css {rel}: {exc}", flush=True)
-
-
-def _mirror_mccabe_to_canonical_paths(sftp) -> None:
-    for rel in (
-        "/v/vspfiles/templates/266/css/mccabe-overrides.css",
-        "v/vspfiles/templates/266/css/mccabe-overrides.css",
-        "/vspfiles/templates/266/css/mccabe-overrides.css",
-        "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css",
-    ):
-        try:
-            sftp.put(LOCAL_MCCABE, rel, confirm=False)
-            print(f"::notice::PARAMIKO_MIRROR_OK mccabe-overrides -> {rel}", flush=True)
-        except Exception as exc:
-            print(f"::warning::PARAMIKO_MIRROR_SKIP mccabe-overrides {rel}: {exc}", flush=True)
 
 
 def _try_home_relative(sftp) -> bool:
     try:
         sftp.put("template_266.html", "template_266.html")
         sftp.put("vspfiles/css/custom-safe.css", "vspfiles/css/custom-safe.css")
-        sftp.put(LOCAL_MCCABE, "vspfiles/templates/266/css/mccabe-overrides.css")
         return True
-    except Exception:
+    except Exception:  # noqa: BLE001
         return False
 
 
@@ -142,22 +115,18 @@ def main() -> int:
     ws = os.environ.get("GITHUB_WORKSPACE", ".")
     os.chdir(ws)
 
-    if not os.path.isfile(LOCAL_MCCABE):
-        print(f"PARAMIKO_FAIL missing {LOCAL_MCCABE}", file=sys.stderr)
-        return 1
-
     host = os.environ["SFTP_HOST"]
     port = int(os.environ.get("SFTP_PORT", "2222"))
     user = os.environ["SFTP_USER"]
     password = os.environ["SFTP_PASS"]
 
     c_remote = _css_remote()
-    import paramiko
+    import paramiko  # noqa: PLC0415
 
     transport = paramiko.Transport((host, port))
     try:
         transport.connect(username=user, password=password)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         print(f"PARAMIKO_CONNECT_FAIL: {exc}", file=sys.stderr)
         return 2
 
@@ -169,7 +138,7 @@ def main() -> int:
                 print(f"PARAMIKO_TRY template={t_path!r} css={c_path!r}", flush=True)
                 try:
                     _try_pair(sftp, t_path, c_path)
-                except Exception as exc:
+                except Exception as exc:  # noqa: BLE001
                     print(f"PARAMIKO_TRY_FAIL template={t_path!r}: {exc}", file=sys.stderr)
                 else:
                     any_ok = True
@@ -177,14 +146,12 @@ def main() -> int:
             if any_ok:
                 _mirror_template_to_canonical_paths(sftp)
                 _mirror_css_to_canonical_paths(sftp)
-                _mirror_mccabe_to_canonical_paths(sftp)
                 print("PARAMIKO_OK (one or more path pairs succeeded)", flush=True)
                 return 0
             if _try_home_relative(sftp):
                 print("PARAMIKO_OK (login-relative template + vspfiles/css/)", flush=True)
                 _mirror_template_to_canonical_paths(sftp)
                 _mirror_css_to_canonical_paths(sftp)
-                _mirror_mccabe_to_canonical_paths(sftp)
                 return 0
             return 1
         finally:
