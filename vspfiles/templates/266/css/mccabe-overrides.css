@@ -282,8 +282,4 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     margin: 0 !important;
     object-fit: contain !important;
   }
-@media (min-width: 992px) {
-body.mc-product-page #content_area #altviews, body.mc-product-page #content_area .altviews, body.mc-product-page #content_area [id*="altview"] {
-margin-top: -520px !important;
-}
 }
