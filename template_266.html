@@ -5116,8 +5116,8 @@ body.mc-product-page #content_area .wm-swatch img {
 
 /* thumbnails on LEFT (desktop): flex row — thumbs top-aligned beside hero; min 600px hero (matches mccabe-overrides + custom-safe) */
 @media (min-width: 992px){
-  body.mc-product-page #content_area #product_photo_td,
-  body.mc-product-page #content_area td.mc-pdp-media-td {
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
@@ -5126,9 +5126,9 @@ body.mc-product-page #content_area .wm-swatch img {
     gap: 14px !important;
   }
 
-  body.mc-product-page #content_area #altviews,
-  body.mc-product-page #content_area .altviews,
-  body.mc-product-page #content_area [id*="altview"] {
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) [id*="altview"] {
     float: none !important;
     order: 1 !important;
     flex: 0 0 86px !important;
@@ -5139,9 +5139,9 @@ body.mc-product-page #content_area .wm-swatch img {
     align-self: flex-start !important;
   }
 
-  body.mc-product-page #content_area #altviews img,
-  body.mc-product-page #content_area .altviews img,
-  body.mc-product-page #content_area [id*="altview"] img {
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) [id*="altview"] img {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -5149,10 +5149,10 @@ body.mc-product-page #content_area .wm-swatch img {
     margin: 0 0 8px 0 !important;
   }
 
-  body.mc-product-page #content_area #product_photo,
-  body.mc-product-page #content_area .vcss_img_wrap,
-  body.mc-product-page #content_area .vCSS_img_wrap,
-  body.mc-product-page #content_area .main-image {
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .vcss_img_wrap,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .vCSS_img_wrap,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .main-image {
     overflow: visible !important;
     order: 2 !important;
     flex: 1 1 auto !important;
@@ -5161,11 +5161,11 @@ body.mc-product-page #content_area .wm-swatch img {
     box-sizing: border-box !important;
   }
 
-  body.mc-product-page #content_area #product_photo img,
-  body.mc-product-page #content_area .vcss_img_wrap img,
-  body.mc-product-page #content_area .vCSS_img_wrap img,
-  body.mc-product-page #content_area .main-image img,
-  body.mc-product-page #content_area img#main-image {
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .vcss_img_wrap img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .vCSS_img_wrap img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .main-image img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) img#main-image {
     min-width: 0 !important;
     max-width: 100% !important;
     width: auto !important;
@@ -5183,6 +5183,7 @@ body.mc-product-page #content_area .wm-swatch img {
     overflow: hidden !important;
   }
 
+  body.mc-product-page #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td),
   body.mc-product-page #content_area #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td),
   body.mc-product-page #content_area .product_sale_price,
   body.mc-product-page #content_area .v65-product-price,
@@ -7171,14 +7172,15 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   var mainBb =
     desktopMainMediaTarget(scope) ||
+    desktopMainMediaTarget(document.documentElement) ||
     q('img#product_photo', scope) ||
+    q('img#product_photo', document.getElementById('v65-product-parent')) ||
     q('#product_photo', scope) ||
     q('.vcss_img_wrap', scope) ||
     q('.vCSS_img_wrap', scope) ||
     q('.main-image', scope);
 
-  if (!mainBb) return;
-
+  if (mainBb) {
   var mainImgs = [];
   if ((mainBb.tagName || '').toUpperCase() === 'IMG') mainImgs = [mainBb];
   else mainImgs = qa('img', mainBb);
@@ -7207,6 +7209,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   });
 
   return;
+  }
 }
 
     // MOBILE: always undo any desktop wrapper and stop

@@ -2407,8 +2407,8 @@ body.mc-product-page select.mc-native-leather {
 
     /* MAIN PRODUCT IMAGE: image itself has id="product_photo" */
     body.mc-product-page #content_area td.mc-pdp-media img#product_photo,
-    body.mc-product-page #content_area td.mc-pdp-media-td img#product_photo,
-    body.productdetails #content_area td.mc-pdp-media-td img#product_photo {
+    body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td img#product_photo,
+    body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td img#product_photo {
       display: block !important;
       width: 100% !important;
       min-width: 70% !important;
@@ -6947,7 +6947,7 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   }
 
   body.mc-product-page #content_area td.mc-pdp-media-td,
-  body.productdetails #content_area td.mc-pdp-media-td {
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
     flex: 1 1 52% !important;
     max-width: 70% !important;
     order: 1 !important;
@@ -6975,10 +6975,10 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   /* JS wraps thumbs+hero in .mc-prod-media-wrap; min-width:0 + flex td collapses the wrap and hides the hero */
   body.mc-product-page #v65-product-parent #product_photo_td .mc-prod-media-wrap,
   body.productdetails #v65-product-parent #product_photo_td .mc-prod-media-wrap,
-  body.mc-product-page #content_area #product_photo_td .mc-prod-media-wrap,
-  body.productdetails #content_area #product_photo_td .mc-prod-media-wrap,
-  body.mc-product-page #content_area td.mc-pdp-media-td .mc-prod-media-wrap,
-  body.productdetails #content_area td.mc-pdp-media-td .mc-prod-media-wrap {
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td .mc-prod-media-wrap,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td .mc-prod-media-wrap,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .mc-prod-media-wrap,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .mc-prod-media-wrap {
     min-width: min(600px, 100%) !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -7843,10 +7843,10 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 @media (min-width: 992px) {
   /* Flex row: thumbs top-left beside main (DOM order independent); main >= 600px when space allows */
-  body.productdetails #content_area td.mc-pdp-media-td,
-  body.mc-product-page #content_area td.mc-pdp-media-td,
-  body.productdetails #content_area #product_photo_td,
-  body.mc-product-page #content_area #product_photo_td {
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
@@ -7857,18 +7857,18 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     overflow: visible !important;
   }
 
-  body.productdetails #content_area td.mc-pdp-media-td #altviews,
-  body.productdetails #content_area td.mc-pdp-media-td span#altviews,
-  body.productdetails #content_area td.mc-pdp-media-td .altviews,
-  body.mc-product-page #content_area td.mc-pdp-media-td #altviews,
-  body.mc-product-page #content_area td.mc-pdp-media-td span#altviews,
-  body.mc-product-page #content_area td.mc-pdp-media-td .altviews,
-  body.productdetails #content_area #product_photo_td #altviews,
-  body.productdetails #content_area #product_photo_td span#altviews,
-  body.productdetails #content_area #product_photo_td .altviews,
-  body.mc-product-page #content_area #product_photo_td #altviews,
-  body.mc-product-page #content_area #product_photo_td span#altviews,
-  body.mc-product-page #content_area #product_photo_td .altviews {
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td #altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td span#altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td span#altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td #altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td span#altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td .altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td span#altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td .altviews {
     float: none !important;
     order: 1 !important;
     flex: 0 0 72px !important;
@@ -7881,18 +7881,18 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     align-self: flex-start !important;
   }
 
-  body.productdetails #content_area td.mc-pdp-media-td #altviews a,
-  body.productdetails #content_area td.mc-pdp-media-td span#altviews a,
-  body.productdetails #content_area td.mc-pdp-media-td .altviews a,
-  body.mc-product-page #content_area td.mc-pdp-media-td #altviews a,
-  body.mc-product-page #content_area td.mc-pdp-media-td span#altviews a,
-  body.mc-product-page #content_area td.mc-pdp-media-td .altviews a,
-  body.productdetails #content_area #product_photo_td #altviews a,
-  body.productdetails #content_area #product_photo_td span#altviews a,
-  body.productdetails #content_area #product_photo_td .altviews a,
-  body.mc-product-page #content_area #product_photo_td #altviews a,
-  body.mc-product-page #content_area #product_photo_td span#altviews a,
-  body.mc-product-page #content_area #product_photo_td .altviews a {
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td #altviews a,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td span#altviews a,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td #altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td span#altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .altviews a,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td #altviews a,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td span#altviews a,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td .altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td #altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td span#altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td .altviews a {
     display: block !important;
     width: 72px !important;
     max-width: 72px !important;
@@ -7901,18 +7901,18 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     overflow: hidden !important;
   }
 
-  body.productdetails #content_area td.mc-pdp-media-td #altviews img,
-  body.productdetails #content_area td.mc-pdp-media-td span#altviews img,
-  body.productdetails #content_area td.mc-pdp-media-td .altviews img,
-  body.mc-product-page #content_area td.mc-pdp-media-td #altviews img,
-  body.mc-product-page #content_area td.mc-pdp-media-td span#altviews img,
-  body.mc-product-page #content_area td.mc-pdp-media-td .altviews img,
-  body.productdetails #content_area #product_photo_td #altviews img,
-  body.productdetails #content_area #product_photo_td span#altviews img,
-  body.productdetails #content_area #product_photo_td .altviews img,
-  body.mc-product-page #content_area #product_photo_td #altviews img,
-  body.mc-product-page #content_area #product_photo_td span#altviews img,
-  body.mc-product-page #content_area #product_photo_td .altviews img {
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td #altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td span#altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td #altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td span#altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td #altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td span#altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td .altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td #altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td span#altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td .altviews img {
     display: block !important;
     width: 72px !important;
     max-width: 72px !important;
@@ -7922,10 +7922,10 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     object-fit: contain !important;
   }
 
-  body.productdetails #content_area td.mc-pdp-media-td img#product_photo,
-  body.mc-product-page #content_area td.mc-pdp-media-td img#product_photo,
-  body.productdetails #content_area #product_photo_td img#product_photo,
-  body.mc-product-page #content_area #product_photo_td img#product_photo {
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td img#product_photo,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td img#product_photo,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td img#product_photo,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td img#product_photo {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -7940,14 +7940,14 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     margin: 0 !important;
   }
 
-  body.productdetails #content_area #product_photo_td .vCSS_img_wrap,
-  body.mc-product-page #content_area #product_photo_td .vCSS_img_wrap,
-  body.productdetails #content_area #product_photo_td .vcss_img_wrap,
-  body.mc-product-page #content_area #product_photo_td .vcss_img_wrap,
-  body.productdetails #content_area td.mc-pdp-media-td .vCSS_img_wrap,
-  body.mc-product-page #content_area td.mc-pdp-media-td .vCSS_img_wrap,
-  body.productdetails #content_area td.mc-pdp-media-td .vcss_img_wrap,
-  body.mc-product-page #content_area td.mc-pdp-media-td .vcss_img_wrap {
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td .vCSS_img_wrap,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td .vCSS_img_wrap,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td .vcss_img_wrap,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td .vcss_img_wrap,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .vCSS_img_wrap,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .vCSS_img_wrap,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .vcss_img_wrap,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .vcss_img_wrap {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -7961,14 +7961,14 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     margin: 0 !important;
   }
 
-  body.productdetails #content_area #product_photo_td .vCSS_img_wrap img,
-  body.mc-product-page #content_area #product_photo_td .vCSS_img_wrap img,
-  body.productdetails #content_area #product_photo_td .vcss_img_wrap img,
-  body.mc-product-page #content_area #product_photo_td .vcss_img_wrap img,
-  body.productdetails #content_area td.mc-pdp-media-td .vCSS_img_wrap img,
-  body.mc-product-page #content_area td.mc-pdp-media-td .vCSS_img_wrap img,
-  body.productdetails #content_area td.mc-pdp-media-td .vcss_img_wrap img,
-  body.mc-product-page #content_area td.mc-pdp-media-td .vcss_img_wrap img {
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td .vCSS_img_wrap img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td .vCSS_img_wrap img,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td .vcss_img_wrap img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td .vcss_img_wrap img,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .vCSS_img_wrap img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .vCSS_img_wrap img,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .vcss_img_wrap img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .vcss_img_wrap img {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
