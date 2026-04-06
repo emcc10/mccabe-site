@@ -295,3 +295,25 @@ body.mc-product-page #v65-product-parent #product_photo_td {
     margin: 0 !important;
   }
 }
+
+/* Bean bag PDP: keep main hero visible (scope/layout + Volusion quirks) */
+@media (min-width: 992px) {
+  body.mc-bean-bag-pdp #v65-product-parent #product_photo_td img#product_photo,
+  body.mc-bean-bag-pdp.mc-product-page #v65-product-parent #product_photo_td img#product_photo,
+  body.mc-bean-bag-pdp #v65-product-parent td.mc-pdp-media-td img#product_photo {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-width: min(920px, 100%) !important;
+    width: auto !important;
+    height: auto !important;
+  }
+  body.mc-bean-bag-pdp #v65-product-parent #product_photo_td .vCSS_img_wrap,
+  body.mc-bean-bag-pdp #v65-product-parent #product_photo_td .vcss_img_wrap,
+  body.mc-bean-bag-pdp #v65-product-parent td.mc-pdp-media-td .vCSS_img_wrap,
+  body.mc-bean-bag-pdp #v65-product-parent td.mc-pdp-media-td .vcss_img_wrap {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
