@@ -5147,7 +5147,6 @@ body.mc-product-page #content_area .wm-swatch img {
     max-width: 100% !important;
     height: auto !important;
     margin: 0 0 8px 0 !important;
-    margin-top: -520px !important;
   }
 
   body.mc-product-page #content_area #product_photo,
@@ -5184,7 +5183,7 @@ body.mc-product-page #content_area .wm-swatch img {
     overflow: hidden !important;
   }
 
-  body.mc-product-page #content_area #v65-product-parent td,
+  body.mc-product-page #content_area #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td),
   body.mc-product-page #content_area .product_sale_price,
   body.mc-product-page #content_area .v65-product-price,
   body.mc-product-page #content_area #priceWithOptions,
