@@ -326,6 +326,7 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     min-width: min(520px, 94vw) !important;
     max-width: min(920px, 100%) !important;
     height: auto !important;
+     margin-left: -400px !important;
   }
 
   body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
