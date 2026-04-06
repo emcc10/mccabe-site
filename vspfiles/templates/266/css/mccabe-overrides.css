@@ -252,6 +252,7 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     padding: 0 !important;
     display: block !important;
     clear: none !important;
+     margin-top: 540px !important;
   }
 
   body.productdetails :is(#content_area, #v65-product-parent) #altviews a,
