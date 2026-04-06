@@ -7311,11 +7311,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       wrap.appendChild(main);
     }
 
-    // Force thumbs column
+    // Force thumbs column (margins from CSS; avoid inline margin — it overrides margin-top)
     thumbs.style.setProperty('float','none','important');
     thumbs.style.setProperty('width','72px','important');
     thumbs.style.setProperty('min-width','72px','important');
-    thumbs.style.setProperty('margin','0','important');
     thumbs.style.setProperty('padding','0','important');
 
     qa('a, img', thumbs).forEach(function(el){
