@@ -7132,10 +7132,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     }
 
     var cand =
-      pick('#product_photo') ||
       pick('img#product_photo') ||
-      pick('.vcss_img_wrap') ||
       pick('.vCSS_img_wrap') ||
+      pick('.vcss_img_wrap') ||
+      pick('#product_photo') ||
       pick('.main-image') ||
       pick('img#main-image') ||
       pick('img[itemprop="image"]');
@@ -7145,9 +7145,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (!td) return null;
 
     var inner =
-      pick('#product_photo', td) ||
+      pick('img#product_photo', td) ||
       pick('.vCSS_img_wrap', td) ||
       pick('.vcss_img_wrap', td) ||
+      pick('#product_photo', td) ||
       pick('.main-image', td) ||
       pick('img#main-image', td) ||
       pick('a#product_photo_zoom_url', td) ||
@@ -7184,6 +7185,13 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   var mainImgs = [];
   if ((mainBb.tagName || '').toUpperCase() === 'IMG') mainImgs = [mainBb];
   else mainImgs = qa('img', mainBb);
+  if (!mainImgs.length) {
+    var tdBb = mainBb.closest && mainBb.closest('td');
+    var fi =
+      (tdBb && (tdBb.querySelector('img#product_photo') || tdBb.querySelector('img[itemprop="image"]'))) ||
+      (typeof q === 'function' && (q('img#product_photo', scope) || q('img#product_photo', document.getElementById('v65-product-parent'))));
+    if (fi && !isInsideAltThumbs(fi)) mainImgs = [fi];
+  }
 
   mainBb.style.setProperty('display', 'block', 'important');
   mainBb.style.setProperty('visibility', 'visible', 'important');
@@ -7812,11 +7820,13 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function forceProductFixes() {
     if (!markProductPage()) return;
     var scope = document.querySelector('#content_area') || document.body;
+    var vp = document.getElementById('v65-product-parent');
+    var mediaScope = vp && scope && !scope.contains(vp) ? vp : scope;
     try {
       forceNoItalics(scope);
       hideLegacyOptionQuestions(scope);
       forceTabsInline(scope);
-      forceMediaLayout(scope);
+      forceMediaLayout(mediaScope);
       removeConfigurationDetails(scope);
       hideOptionsTable(scope);
       enforceMobileGutters(scope);
