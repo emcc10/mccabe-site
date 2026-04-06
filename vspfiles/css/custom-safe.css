@@ -7877,30 +7877,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   max-height: 100% !important;
 }
 }
-
-/* BEAN BAG: REORDER TABLE COLUMNS - IMAGE LEFT, OPTIONS RIGHT */
-body.mc-bean-bag-pdp table#v65-product-parent {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  width: 100% !important;
-  gap: 20px !important;
-}
-
-body.mc-bean-bag-pdp table#v65-product-parent tbody {
-  display: contents !important;
-}
-
-body.mc-bean-bag-pdp table#v65-product-parent tr {
-  display: contents !important;
-}
-
+/* BEAN BAG: Fix left margin on media column */
 body.mc-bean-bag-pdp td.mc-pdp-media-td {
-  grid-column: 1 !important;
   margin-left: 0 !important;
-  padding: 0 !important;
-  width: 100% !important;
-}
-
-body.mc-bean-bag-pdp td:not(.mc-pdp-media-td) {
-  grid-column: 2 !important;
 }
