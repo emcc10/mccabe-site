@@ -326,8 +326,14 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     overflow: hidden !important;
   }
 
+  /* Keep sibling cells as table cells — display:block on td breaks the row and stacks/overlaps the flex media cell. */
   body.mc-product-page #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td),
-  body.mc-product-page #content_area #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td),
+  body.mc-product-page #content_area #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td) {
+    text-align: left !important;
+    display: table-cell !important;
+    vertical-align: top !important;
+  }
+
   body.mc-product-page #content_area .product_sale_price,
   body.mc-product-page #content_area .v65-product-price,
   body.mc-product-page #content_area #priceWithOptions,
