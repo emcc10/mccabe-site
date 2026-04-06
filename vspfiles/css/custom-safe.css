@@ -5058,6 +5058,41 @@ body.mc-bean-bag-pdp #content_area #options_table tr:has(select[id*="cover" i]) 
 
 }
 
+
+/* Bean bag: undo global hide for leather/cover substring + native-leather rows (size/fabric options must show) */
+body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select.mc-native-leather),
+body.mc-bean-bag-pdp.mc-product-page #v65-product-parent #options_table tr:has(select.mc-native-leather),
+body.mc-bean-bag-pdp.productdetails #content_area #options_table tr:has(select.mc-native-leather),
+body.mc-bean-bag-pdp.mc-product-page #content_area #options_table tr:has(select.mc-native-leather),
+body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select[name*="leather" i]),
+body.mc-bean-bag-pdp.mc-product-page #v65-product-parent #options_table tr:has(select[name*="leather" i]),
+body.mc-bean-bag-pdp.productdetails #content_area #options_table tr:has(select[name*="leather" i]),
+body.mc-bean-bag-pdp.mc-product-page #content_area #options_table tr:has(select[name*="leather" i]),
+body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select[id*="leather" i]),
+body.mc-bean-bag-pdp.mc-product-page #v65-product-parent #options_table tr:has(select[id*="leather" i]),
+body.mc-bean-bag-pdp.productdetails #content_area #options_table tr:has(select[id*="leather" i]),
+body.mc-bean-bag-pdp.mc-product-page #content_area #options_table tr:has(select[id*="leather" i]) {
+  display: table-row !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body.mc-bean-bag-pdp #v65-product-parent #options_table tr:has(select.mc-native-leather) select.mc-native-leather,
+body.mc-bean-bag-pdp #content_area #options_table tr:has(select.mc-native-leather) select.mc-native-leather {
+  position: static !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  padding: 10px 14px !important;
+  margin: 0 0 14px 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  border: 1px solid #ccc !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
 /* Description / tabs: stop top border being clipped */
 body.mc-bean-bag-pdp #content_area .product_description,
 body.mc-bean-bag-pdp #content_area #divDescription,
