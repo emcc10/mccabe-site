@@ -7131,8 +7131,29 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 
   function isInsideAltThumbs(el) {
-  return !!(el && el.closest && el.closest('#altviews, span#altviews, .altviews'));
-}
+    return !!(el && el.closest && el.closest('#altviews, span#altviews, .altviews'));
+  }
+
+  /** Volusion sometimes nests the main hero (zoom link or #product_photo) inside #altviews — thumbnails CSS then shrinks it. */
+  function ensureProductHeroOutsideAltviews(scope) {
+    try {
+      var td = q('#product_photo_td', scope) || document.getElementById('product_photo_td');
+      if (!td) return;
+      var thumbs = q('#altviews', td) || q('span#altviews', td) || q('.altviews', td);
+      if (!thumbs || !thumbs.parentNode) return;
+      var hero =
+        q('a#product_photo_zoom_url', td) ||
+        q('a#product_photo_zoom_url2', td) ||
+        null;
+      if (!hero) {
+        var im = q('img#product_photo', td);
+        if (im && thumbs.contains(im)) hero = im;
+      }
+      if (!hero || !thumbs.contains(hero)) return;
+      var p = thumbs.parentNode;
+      if (thumbs.nextSibling) p.insertBefore(hero, thumbs.nextSibling);
+      else p.appendChild(hero);
+    } catch (eMc) {}
   }
 
   function desktopMainMediaTarget(scope) {
@@ -7176,6 +7197,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
   function forceMediaLayout(scope){
     wireAltThumbClicks(scope);
+    ensureProductHeroOutsideAltviews(scope);
 
     /* Bean bag PDP: flex reparenting breaks Volusion table markup; template CSS floats alt views. */
     var pcBbGate = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
