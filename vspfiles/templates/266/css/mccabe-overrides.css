@@ -185,10 +185,8 @@ html.category #content_area .v65-pagepagination a {
 /* ===== PDP MAIN IMAGE =====
    Do NOT use clear:both on desktop: floated #altviews sits left; clear forces the
    hero image onto a new row (thumbs stack above the main image). */
-body.productdetails #content_area img#product_photo,
-body.mc-product-page #content_area img#product_photo,
-body.productdetails #v65-product-parent img#product_photo,
-body.mc-product-page #v65-product-parent img#product_photo {
+body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
+body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -201,19 +199,15 @@ body.mc-product-page #v65-product-parent img#product_photo {
 }
 
 @media (max-width: 991px) {
-  body.productdetails #content_area img#product_photo,
-  body.mc-product-page #content_area img#product_photo,
-  body.productdetails #v65-product-parent img#product_photo,
-  body.mc-product-page #v65-product-parent img#product_photo {
+  body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
+  body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
     clear: both !important;
   }
 }
 
 /* Never force display:block on <td id="product_photo_td"> — it breaks table layout and can hide the hero image. */
 body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td,
-body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td,
-body.productdetails #v65-product-parent #product_photo_td,
-body.mc-product-page #v65-product-parent #product_photo_td {
+body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
   visibility: visible !important;
   opacity: 1 !important;
 }
