@@ -219,7 +219,7 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     visibility: visible !important;
     opacity: 1 !important;
     width: auto !important;
-    max-width: 700px !important;
+    max-width: min(700px, 100%) !important;
     height: auto !important;
     margin: 0 !important;
     float: none !important;
@@ -227,14 +227,16 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
   }
 
   body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url {
+  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
+  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2,
+  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2 {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     overflow: visible !important;
     width: auto !important;
-    max-width: 700px !important;
-    margin: 0 0 0 82px !important;
+    max-width: min(700px, 100%) !important;
+    margin: 0 !important;
     float: none !important;
     clear: none !important;
   }
