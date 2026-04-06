@@ -211,7 +211,7 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
   visibility: visible !important;
   opacity: 1 !important;
 }
-}
+
 @media (min-width: 992px) {
   body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
   body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
@@ -283,16 +283,31 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     object-fit: contain !important;
   }
 
-  /* Bean bag: pull vertical alt-thumbnail column up (desktop flex uses margin:0 on #altviews) */
+  /* Bean bag: keep alt column on-screen (large negative margin pulled thumbs off the viewport) */
   body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) td.mc-pdp-media-td #altviews,
   body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) td.mc-pdp-media-td span#altviews,
   body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .altviews,
   body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) #product_photo_td #altviews,
   body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) #product_photo_td span#altviews,
   body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) #product_photo_td .altviews {
-    margin-top: -570px !important;
+    margin-top: 0 !important;
+  }
+  /* Bean bag: hero stays large (width:100% on a collapsed parent rendered thumb-sized beside logo) */
+  body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) img#product_photo {
+    width: auto !important;
+    min-width: min(520px, 94vw) !important;
+    max-width: min(920px, 100%) !important;
+    height: auto !important;
   }
 
+  body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
+  body.mc-bean-bag-pdp :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2 {
+    display: block !important;
+    width: fit-content !important;
+    max-width: min(920px, 100%) !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+  }
   /* Bean bag PDP: Cordaroys mfg logo - margin-left 100px (overrides e.g. 236px) */
   body.mc-bean-bag-pdp .vCSS_img_mfg_logo {
     margin-left: 100px !important;
