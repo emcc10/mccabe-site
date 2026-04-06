@@ -5137,6 +5137,7 @@ body.mc-product-page #content_area .wm-swatch img {
     max-width: 86px !important;
     margin: 0 !important;
     align-self: flex-start !important;
+    margin-top: -520px !important;
   }
 
   body.mc-product-page :is(#content_area, #v65-product-parent) #altviews img,
@@ -7086,7 +7087,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
         var main =
           q('img#product_photo', scope) ||
-          q('#product_photo img', scope) ||
+          q('#product_photo', scope) ||
           q('img#main-image', scope);
 
         if (!main) return;
