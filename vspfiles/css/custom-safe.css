@@ -7878,25 +7878,37 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 }
 
-/* BEAN BAG IMAGE ALIGNMENT - FORCE FIX */
+/* BEAN BAG: FORCE PROPER ALIGNMENT - OVERRIDE ALL */
 body.mc-bean-bag-pdp img#product_photo {
+  width: auto !important;
+  max-width: 500px !important;
   margin: 0 !important;
-  display: block !important;
-  margin-left: 0 !important !important;
+  margin-left: 0 !important;
+  float: left !important;
 }
 
 body.mc-bean-bag-pdp a#product_photo_zoom_url,
 body.mc-bean-bag-pdp a#product_photo_zoom_url2 {
+  display: block !important;
   margin: 0 !important;
   margin-left: 0 !important;
-  padding: 0 !important;
-  display: block !important;
-  width: fit-content !important;
+  width: auto !important;
+  max-width: 500px !important;
+  float: left !important;
 }
 
-body.mc-bean-bag-pdp td#product_photo_td,
-body.mc-bean-bag-pdp td.mc-pdp-media-td {
+body.mc-bean-bag-pdp #product_photo_td {
+  width: 500px !important;
+  max-width: 500px !important;
   margin: 0 !important;
   padding: 0 !important;
-  text-align: left !important;
+  float: left !important;
+}
+
+body.mc-bean-bag-pdp #altviews,
+body.mc-bean-bag-pdp span#altviews,
+body.mc-bean-bag-pdp .altviews {
+  float: left !important;
+  margin-left: 10px !important;
+  margin-top: 0 !important;
 }
