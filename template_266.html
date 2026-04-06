@@ -58,8 +58,8 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260401pdpfix: PDP flex thumbs+hero; mccabe-overrides ?v=202604003i -->
-<meta name="mc-deploy-verify" content="20260401pdp-css">
+<!-- MC_DEPLOY_VERIFY_20260402: inline PDP authoritative + mccabe ?v=20260402 -->
+<meta name="mc-deploy-verify" content="20260402pdp-inline">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -69,7 +69,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260401pdpfix" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260402" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -11749,5 +11749,94 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
+<!-- MC_PDP_MEDIA_FIX_20260402: Search View Source for this string; if absent, live store is not serving this template. -->
+<style id="mc-pdp-desktop-authoritative">
+@media (min-width: 992px) {
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #product_photo_td,
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #altviews,
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) span#altviews,
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .altviews {
+    float: none !important;
+    clear: none !important;
+    order: 1 !important;
+    flex: 0 0 80px !important;
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
+    margin: 0 !important;
+    align-self: flex-start !important;
+    display: block !important;
+  }
+
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #altviews a,
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) span#altviews a,
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .altviews a {
+    display: block !important;
+    width: 72px !important;
+    max-width: 72px !important;
+    margin: 0 0 8px 0 !important;
+  }
+
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #altviews img,
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) span#altviews img,
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .altviews img {
+    display: block !important;
+    width: 72px !important;
+    max-width: 72px !important;
+    height: auto !important;
+    max-height: 72px !important;
+    margin: 0 !important;
+    object-fit: contain !important;
+  }
+
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2,
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) #product_photo,
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .vcss_img_wrap,
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .vCSS_img_wrap,
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .main-image {
+    order: 2 !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    float: none !important;
+    clear: none !important;
+    box-sizing: border-box !important;
+  }
+
+  html body:is(.mc-product-page, .productdetails) :is(#content_area, #v65-product-parent) .mc-prod-media-wrap {
+    order: 2 !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    margin: 0 !important;
+  }
+
+  html body:is(.mc-product-page, .productdetails) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child {
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+  }
+}
+</style>
 </body>
 </html>
