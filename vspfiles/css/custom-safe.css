@@ -7842,3 +7842,95 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   max-height: 100% !important;
 }
 }
+/* ===== FINAL FORCE FIX: PDP desktop media alignment ===== */
+@media (min-width: 992px) {
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
+    position: relative !important;
+    display: block !important;
+    overflow: visible !important;
+    vertical-align: top !important;
+    min-height: 520px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) #altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) span#altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) .altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    float: none !important;
+    clear: none !important;
+    display: block !important;
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 2 !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) #altviews a,
+  body.productdetails :is(#content_area, #v65-product-parent) span#altviews a,
+  body.productdetails :is(#content_area, #v65-product-parent) .altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews a {
+    display: block !important;
+    width: 72px !important;
+    max-width: 72px !important;
+    margin: 0 0 8px 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) #altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) span#altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) .altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews img {
+    display: block !important;
+    width: 72px !important;
+    max-width: 72px !important;
+    height: auto !important;
+    max-height: 72px !important;
+    margin: 0 !important;
+    object-fit: contain !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
+  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2,
+  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
+  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2 {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+    float: none !important;
+    clear: none !important;
+    width: calc(100% - 88px) !important;
+    max-width: 560px !important;
+    margin: 0 0 0 88px !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
+  body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    float: none !important;
+    clear: none !important;
+    width: 100% !important;
+    max-width: 560px !important;
+    height: auto !important;
+    margin: 0 !important;
+  }
+}
