@@ -245,12 +245,9 @@ body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
     overflow: visible !important;
     float: none !important;
     clear: none !important;
-    margin: 0 0 0 76px !important;
-    width: 460px !important;
+    width: calc(100% - 76px) !important;
     max-width: 460px !important;
-    position: relative !important;
-    left: -120px !important;
-    box-sizing: border-box !important;
+    margin: 0 0 0 76px !important;
   }
 
   body.productdetails :is(#content_area, #v65-product-parent) #altviews,
