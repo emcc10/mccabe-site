@@ -7346,6 +7346,16 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return null;
   }
 
+  /** Volusion category listings use `...-s/{id}.htm` — authoritative vs. stray hidden CategoryID fields in the page. */
+  function mcListingCategoryIdFromPath() {
+    try {
+      var path = (location.pathname || '').toLowerCase();
+      var m = path.match(/-s\/(\d+)\.htm/i);
+      if (m) return String(m[1]);
+    } catch (eLc) {}
+    return null;
+  }
+
   function isBeanBagProductPage(){
     try {
       var pc = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
@@ -10496,20 +10506,41 @@ try {
   function mcPathLooksLikeBeanBagCategory() {
     try {
       var path = (location.pathname || '').toLowerCase();
+      var pathCat = typeof mcListingCategoryIdFromPath === 'function' ? mcListingCategoryIdFromPath() : null;
+
+      function beanBagUrlConflictsWithPath() {
+        return pathCat && pathCat !== '103';
+      }
+
       if (path.indexOf('bean-bag') !== -1 || path.indexOf('bean_bag') !== -1 || path.indexOf('beanbag') !== -1) {
+        if (beanBagUrlConflictsWithPath()) return false;
         return true;
       }
-      if (path.indexOf('bean') !== -1 && path.indexOf('bag') !== -1) return true;
-      if (path.indexOf('/103.htm') !== -1) return true;
+      if (path.indexOf('bean') !== -1 && path.indexOf('bag') !== -1) {
+        if (beanBagUrlConflictsWithPath()) return false;
+        return true;
+      }
+      if (path.indexOf('/103.htm') !== -1) {
+        if (beanBagUrlConflictsWithPath()) return false;
+        return true;
+      }
       var cid = mcGetQueryParamValue('categoryid') || mcGetQueryParamValue('category_id');
       var cParam = mcGetQueryParamValue('c');
-      if (cid === '103' || cParam === '103') return true;
+      if (cid === '103' || cParam === '103') {
+        if (beanBagUrlConflictsWithPath()) return false;
+        return true;
+      }
       var catInp =
         document.querySelector(
           '#content_area input[name="CategoryID"], #content_area input[name="categoryid"], #content_area input[name="Category_Id"]'
         ) ||
         document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
-      if (catInp && String(catInp.value || '').trim() === '103') return true;
+      var inpv = catInp && String(catInp.value || '').trim();
+      if (inpv === '103') {
+        /* A promo/widget can expose CategoryID=103 earlier in the DOM than the real listing (e.g. Stationary Loveseats -s/157.htm). */
+        if (beanBagUrlConflictsWithPath()) return false;
+        return true;
+      }
       return false;
     } catch (eBeanPath) {
       return false;
