@@ -7838,13 +7838,15 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
   body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2 {
     float: none !important;
-    display: block !important;
+    display: flow-root !important;
     visibility: visible !important;
     opacity: 1 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     width: auto !important;
-    max-width: none !important;
+    max-width: 100% !important;
+    min-width: min(100%, 280px) !important;
     margin: 0 !important;
+    margin-bottom: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
   }
@@ -7854,7 +7856,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    width: 100% !important;
+    width: auto !important;
     max-width: 100% !important;
     min-width: 0 !important;
     height: auto !important;

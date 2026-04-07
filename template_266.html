@@ -58,8 +58,8 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260407: fix stray merge markers in PDP script (was breaking all downstream JS); mccabe ?v=20260407pdp -->
-<meta name="mc-deploy-verify" content="20260407pdp-jsfix">
+<!-- MC_DEPLOY_VERIFY_20260407b: PDP hero — drop zoom -97px hack; zoom link flow-root + visible overflow; mccabe ?v=20260407b -->
+<meta name="mc-deploy-verify" content="20260407b-pdp-hero">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -69,7 +69,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260407pdp" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260407b" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -5432,12 +5432,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 .productdetails .productnamecolorLARGE.colors_productname {
   color: #575757;
   font-weight: 300;
-}
-
-@media (min-width: 992px) {
-  .productdetails #product_photo_zoom_url {
-    margin-bottom: -97px;
-  }
 }
 
 .mc-price-caption-moved {
