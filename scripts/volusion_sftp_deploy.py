@@ -5,6 +5,7 @@ Paramiko SFTP deploy fallback.
 Template + CSS use different remote paths (Volusion):
   template → /template_266.html first (SFTP root), then fallbacks under /v/, etc.
   CSS      → /vspfiles/css/custom-safe.css and /v/vspfiles/css/custom-safe.css (File Editor: wwwroot/v/vspfiles/css/).
+  mccabe   → parallel to CSS under .../templates/266/css/mccabe-overrides.css (linked from template).
 
 Override with SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE (full paths).
 """
@@ -19,6 +20,23 @@ def _css_remote() -> str:
     if p:
         return p
     return "/vspfiles/css/custom-safe.css"
+
+
+def _mccabe_remote_for_css(c_path: str) -> str:
+    """Keep theme override path parallel to custom-safe (v/ wwwroot vs /vspfiles)."""
+    mapping = {
+        "/v/vspfiles/css/custom-safe.css": "/v/vspfiles/templates/266/css/mccabe-overrides.css",
+        "v/vspfiles/css/custom-safe.css": "/v/vspfiles/templates/266/css/mccabe-overrides.css",
+        "/vspfiles/css/custom-safe.css": "/vspfiles/templates/266/css/mccabe-overrides.css",
+        "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css": (
+            "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css"
+        ),
+        "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css": (
+            "/mccabestheaterandliving.com/vspfiles/templates/266/css/mccabe-overrides.css"
+        ),
+        "vspfiles/css/custom-safe.css": "vspfiles/templates/266/css/mccabe-overrides.css",
+    }
+    return mapping.get(c_path, "/v/vspfiles/templates/266/css/mccabe-overrides.css")
 
 
 def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
@@ -67,8 +85,10 @@ def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
 
 
 def _try_pair(sftp, t_path: str, c_path: str) -> None:
+    m_path = _mccabe_remote_for_css(c_path)
     sftp.put("template_266.html", t_path)
     sftp.put("vspfiles/css/custom-safe.css", c_path)
+    sftp.put("vspfiles/templates/266/css/mccabe-overrides.css", m_path)
 
 
 def _mirror_template_to_canonical_paths(sftp) -> None:
@@ -102,10 +122,31 @@ def _mirror_css_to_canonical_paths(sftp) -> None:
             print(f"::warning::PARAMIKO_MIRROR_SKIP css {rel}: {exc}", flush=True)
 
 
+def _mirror_mccabe_to_canonical_paths(sftp) -> None:
+    local = "vspfiles/templates/266/css/mccabe-overrides.css"
+    for rel in (
+        "/v/vspfiles/templates/266/css/mccabe-overrides.css",
+        "v/vspfiles/templates/266/css/mccabe-overrides.css",
+        "/vspfiles/templates/266/css/mccabe-overrides.css",
+        "vspfiles/templates/266/css/mccabe-overrides.css",
+        "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css",
+        "/mccabestheaterandliving.com/vspfiles/templates/266/css/mccabe-overrides.css",
+    ):
+        try:
+            sftp.put(local, rel, confirm=False)
+            print(f"::notice::PARAMIKO_MIRROR_OK mccabe-overrides → {rel}", flush=True)
+        except Exception as exc:  # noqa: BLE001
+            print(f"::warning::PARAMIKO_MIRROR_SKIP mccabe {rel}: {exc}", flush=True)
+
+
 def _try_home_relative(sftp) -> bool:
     try:
         sftp.put("template_266.html", "template_266.html")
         sftp.put("vspfiles/css/custom-safe.css", "vspfiles/css/custom-safe.css")
+        sftp.put(
+            "vspfiles/templates/266/css/mccabe-overrides.css",
+            "vspfiles/templates/266/css/mccabe-overrides.css",
+        )
         return True
     except Exception:  # noqa: BLE001
         return False
@@ -146,12 +187,14 @@ def main() -> int:
             if any_ok:
                 _mirror_template_to_canonical_paths(sftp)
                 _mirror_css_to_canonical_paths(sftp)
+                _mirror_mccabe_to_canonical_paths(sftp)
                 print("PARAMIKO_OK (one or more path pairs succeeded)", flush=True)
                 return 0
             if _try_home_relative(sftp):
                 print("PARAMIKO_OK (login-relative template + vspfiles/css/)", flush=True)
                 _mirror_template_to_canonical_paths(sftp)
                 _mirror_css_to_canonical_paths(sftp)
+                _mirror_mccabe_to_canonical_paths(sftp)
                 return 0
             return 1
         finally:
