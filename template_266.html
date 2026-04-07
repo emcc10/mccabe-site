@@ -10422,6 +10422,7 @@ try {
    * when the card root is a column flex container, moving DOM after the title guarantees image → title → price.
    */
   function mcEnsureMemberBlockCardLevel(card) {
+    if (typeof mcPathLooksLikeBeanBagCategory === 'function' && mcPathLooksLikeBeanBagCategory()) return;
     var block = card.querySelector('.mc-member-grid-price');
     if (!block || !block.parentNode || block.parentNode === card) return;
     var title =
@@ -10449,6 +10450,7 @@ try {
   }
 
   function mcReorderSaleAfterMember(card) {
+    if (typeof mcPathLooksLikeBeanBagCategory === 'function' && mcPathLooksLikeBeanBagCategory()) return;
     if (!document.body.classList.contains('mc-member-logged-in')) return;
     var mem = card.querySelector('.mc-member-grid-price');
     if (!mem || !mem.parentNode) return;
@@ -10460,6 +10462,17 @@ try {
     try {
       mem.parentNode.insertBefore(sale, mem.nextSibling);
     } catch (eSale) {}
+  }
+
+  function mcRemoveMemberGridBlocks(card) {
+    if (!card || !card.querySelectorAll) return;
+    var blocks = card.querySelectorAll('.mc-member-grid-price');
+    var i;
+    for (i = 0; i < blocks.length; i++) {
+      try {
+        if (blocks[i] && blocks[i].parentNode) blocks[i].parentNode.removeChild(blocks[i]);
+      } catch (e) {}
+    }
   }
 
   function mcPathLooksLikeBeanBagCategory() {
@@ -10628,6 +10641,7 @@ try {
 
   function mcAppendGuestMemberLoginBlock(card, installTarget) {
     if (!card) return;
+    if (typeof mcPathLooksLikeBeanBagCategory === 'function' && mcPathLooksLikeBeanBagCategory()) return;
     var prev = card.querySelectorAll('.mc-member-grid-price');
     var pi;
     for (pi = 0; pi < prev.length; pi++) {
@@ -10784,12 +10798,28 @@ try {
       else document.body.classList.remove('mc-member-logged-in');
     } catch (eCls2) {}
     try {
+      if (mcPathLooksLikeBeanBagCategory()) {
+        document.body.classList.add('mc-beanbag-category');
+        if (document.documentElement) document.documentElement.classList.add('mc-beanbag-category');
+      } else {
+        document.body.classList.remove('mc-beanbag-category');
+        if (document.documentElement) document.documentElement.classList.remove('mc-beanbag-category');
+      }
+    } catch (eBeanCls) {}
+    try {
       mcInjectBeanBagPlpSubline();
     } catch (eBean0) {}
     var i;
     for (i = 0; i < products.length; i++) {
       var card = products[i];
       if (card.closest && card.closest('#relateditems, table.relateditems')) continue;
+      if (mcPathLooksLikeBeanBagCategory()) {
+        mcRemoveMemberGridBlocks(card);
+        try {
+          card.removeAttribute('data-mc-member-grid');
+        } catch (eBeanCard) {}
+        continue;
+      }
       var hasSale = mcCardHasSalePricing(card);
       var prevState = card.getAttribute('data-mc-member-grid');
       var nextState = unlocked ? 'unlocked' : 'locked';

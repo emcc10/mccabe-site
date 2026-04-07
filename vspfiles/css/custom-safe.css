@@ -8912,3 +8912,39 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     content: none !important;
   }
 }
+
+/* =========================================================
+   PDP — layout sync (992px+); matches live Volusion custom CSS (flat @media, no nesting)
+   ========================================================= */
+@media (min-width: 992px) {
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2 {
+    margin-left: 40px !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews {
+    top: 64px !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2) {
+    margin-left: 250px !important;
+  }
+}
+
+/* Bean bag category PLP: hide member-price blocks if any slip through (JS removes them first) */
+body.category.mc-beanbag-category .mc-member-grid-price,
+html.category body.mc-beanbag-category .mc-member-grid-price {
+  display: none !important;
+}
