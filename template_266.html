@@ -58,7 +58,7 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260401: deploy uploads mccabe-overrides; ?v=20260401deploy -->
+<!-- MC_DEPLOY_VERIFY_20260401: PDP desktop layout CSS+unwrap; mccabe ?v=202604012pdp -->
 <meta name="mc-deploy-verify" content="20260401pdp-css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -69,7 +69,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260401deploy" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=202604012pdp" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -7223,84 +7223,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       return;
     }
 
-    // DESKTOP: build wrapper thumbs-left layout (never reparent <td>)
-    var main = desktopMainMediaTarget(scope);
-
-    var thumbs =
-      q('#altviews', scope) ||
-      q('.altviews', scope) ||
-      q('[id*="altview"]', scope);
-
-    if (!main) return;
-
-    // Make main image larger / natural size (works whether main is an IMG or wrapper)
-    var mainImgs = [];
-    if ((main.tagName || '').toUpperCase() === 'IMG') mainImgs = [main];
-    else mainImgs = qa('img', main);
-
-    mainImgs.forEach(function(img){
-      img.style.setProperty('width','100%','important');
-      img.style.setProperty('max-width','980px','important');
-      img.style.setProperty('min-width','600px','important');
-      img.style.setProperty('height','auto','important');
-      img.style.setProperty('object-fit','contain','important');
-      img.style.setProperty('display','block','important');
-      img.style.setProperty('margin','0 auto','important');
-    });
-
-    // If no thumbs found, still keep main image clean
-    if (!thumbs || thumbs === main) {
-      main.style.setProperty('overflow','visible','important');
-      return;
-    }
-
-    // Build one flex wrapper ONCE so thumbs sit left of main image
-    var existingWrap = q('.mc-prod-media-wrap', scope);
-    if (!existingWrap) {
-      var pcWrapGate = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
-      if (!pcWrapGate) return;
-      var wrap = document.createElement('div');
-      wrap.className = 'mc-prod-media-wrap';
-      wrap.style.setProperty('display','flex','important');
-      wrap.style.setProperty('align-items','flex-start','important');
-      wrap.style.setProperty('gap','8px','important');
-      wrap.style.setProperty('width','100%','important');
-      wrap.style.setProperty('margin','0 0 12px 0','important');
-
-      // insert wrapper right before whichever appears first
-      var firstNode = (thumbs.compareDocumentPosition(main) & Node.DOCUMENT_POSITION_FOLLOWING) ? thumbs : main;
-      firstNode.parentNode.insertBefore(wrap, firstNode);
-
-      wrap.appendChild(thumbs);
-      wrap.appendChild(main);
-    }
-
-    // Force thumbs column
-    thumbs.style.setProperty('float','none','important');
-    thumbs.style.setProperty('width','72px','important');
-    thumbs.style.setProperty('min-width','72px','important');
-    thumbs.style.setProperty('margin','0','important');
-    thumbs.style.setProperty('padding','0','important');
-
-    qa('a, img', thumbs).forEach(function(el){
-      if (el.tagName === 'A') {
-        el.style.setProperty('display','block','important');
-        el.style.setProperty('margin','0 0 8px 0','important');
-      }
-      if (el.tagName === 'IMG') {
-        el.style.setProperty('display','block','important');
-        el.style.setProperty('width','100%','important');
-        el.style.setProperty('height','auto','important');
-        el.style.setProperty('margin','0','important');
-      }
-    });
-
-    // Main image area fills remaining width
-    main.style.setProperty('float','none','important');
-    main.style.setProperty('width','100%','important');
-    main.style.setProperty('flex','1 1 0','important');
-    main.style.setProperty('overflow','visible','important');
-    main.style.setProperty('min-width','600px','important');
+    // DESKTOP: mccabe-overrides.css positions thumbs (absolute) and media cell; unwrap legacy flex so CSS wins.
+    unwrapDesktopMediaWrap(scope);
   }
 
   function removeConfigurationDetails(scope){

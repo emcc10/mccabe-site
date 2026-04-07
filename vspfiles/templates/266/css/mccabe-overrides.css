@@ -205,38 +205,52 @@ body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
   }
 }
 
-/* Never force display:block on <td id="product_photo_td"> — it breaks table layout and can hide the hero image. */
-body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td,
-body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-}
+
+/* Desktop PDP (>=992px): in-browser verified layout -- absolute thumb column, block media cell, hero link offset.
+   display:block on #product_photo_td applies only at this breakpoint. */
 @media (min-width: 992px) {
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
+    position: relative !important;
+    display: block !important;
+    overflow: visible !important;
+    min-height: 520px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
   body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
   body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    width: auto !important;
-    max-width: 700px !important;
-    height: auto !important;
-    margin: 0 !important;
     float: none !important;
     clear: none !important;
+    width: 100% !important;
+    max-width: 460px !important;
+    height: auto !important;
+    margin: 0 !important;
+    object-fit: contain !important;
   }
 
   body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url {
+  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2,
+  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
+  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2 {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     overflow: visible !important;
-    width: auto !important;
-    max-width: 700px !important;
-    margin: 0 0 0 82px !important;
     float: none !important;
     clear: none !important;
+    margin: 0 0 0 76px !important;
+    width: 460px !important;
+    max-width: 460px !important;
+    position: relative !important;
+    left: -120px !important;
+    box-sizing: border-box !important;
   }
 
   body.productdetails :is(#content_area, #v65-product-parent) #altviews,
@@ -245,13 +259,17 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
   body.mc-product-page :is(#content_area, #v65-product-parent) #altviews,
   body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews,
   body.mc-product-page :is(#content_area, #v65-product-parent) .altviews {
-    float: left !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
     width: 72px !important;
     max-width: 72px !important;
-    margin: 0 10px 0 0 !important;
+    margin: 0 !important;
     padding: 0 !important;
     display: block !important;
+    float: none !important;
     clear: none !important;
+    z-index: 5 !important;
   }
 
   body.productdetails :is(#content_area, #v65-product-parent) #altviews a,
@@ -265,7 +283,6 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     max-width: 72px !important;
     margin: 0 0 8px 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
   }
 
   body.productdetails :is(#content_area, #v65-product-parent) #altviews img,
