@@ -7831,6 +7831,23 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     min-width: 0 !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
+    /* Default: align with cell edge (single-image PDPs have no #altviews — 250px was empty gutter). */
+    margin-left: 0 !important;
+  }
+
+  /* Thumbnail strip present: legacy offset aligns full-width rows with hero column */
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td:has(span#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td:has(span#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td:has(.altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td:has(.altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(span#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(span#altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(.altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(.altviews) > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2) {
     margin-left: 250px !important;
   }
 
@@ -7845,6 +7862,29 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    margin-left: 0 !important;
+  }
+
+  /* Hero in first <table> (e.g. manufacturer row + img#product_photo same table): still column 2 beside thumbs */
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td:has(#altviews) > table:first-of-type:has(img#product_photo),
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td:has(#altviews) > table:first-of-type:has(img#product_photo),
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td:has(span#altviews) > table:first-of-type:has(img#product_photo),
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td:has(span#altviews) > table:first-of-type:has(img#product_photo),
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td:has(.altviews) > table:first-of-type:has(img#product_photo),
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td:has(.altviews) > table:first-of-type:has(img#product_photo),
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(#altviews) > table:first-of-type:has(img#product_photo),
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(#altviews) > table:first-of-type:has(img#product_photo),
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(span#altviews) > table:first-of-type:has(img#product_photo),
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(span#altviews) > table:first-of-type:has(img#product_photo),
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(.altviews) > table:first-of-type:has(img#product_photo),
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(.altviews) > table:first-of-type:has(img#product_photo) {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
   }
 
   /* Single hero table + direct #altviews (only one <table> in cell): hero col2 row2 beside thumbs */
@@ -7853,13 +7893,16 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td:has(> #altviews) > table:only-of-type:has(img#product_photo),
   body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td:has(> span#altviews) > table:only-of-type:has(img#product_photo),
   body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(> #altviews) > table:only-of-type:has(img#product_photo),
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(> #altviews) > table:only-of-type:has(img#product_photo) {
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(> #altviews) > table:only-of-type:has(img#product_photo),
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(> span#altviews) > table:only-of-type:has(img#product_photo),
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(> span#altviews) > table:only-of-type:has(img#product_photo) {
     grid-column: 2 !important;
     grid-row: 2 !important;
     min-width: 0 !important;
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    margin-left: 0 !important;
   }
 
   body.productdetails :is(#content_area, #v65-product-parent) #altviews,
@@ -7925,6 +7968,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     max-width: 100% !important;
     width: 100% !important;
     margin: 0 !important;
+    margin-left: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
   }
@@ -8956,13 +9000,6 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
   body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews {
     top: 0 !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2) {
-    margin-left: 250px !important;
   }
 }
 
