@@ -205,4 +205,5 @@ body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
   }
 }
 
-/* Desktop PDP media layout: single source is vspfiles/css/custom-safe.css (final block). */
+/* Desktop PDP (>=992px): no rules here for #product_photo_td, zoom links, or #altviews —
+   removed legacy block (76px margin / 460px hero / absolute thumbs). Single source: custom-safe.css end. */
