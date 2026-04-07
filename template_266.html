@@ -3088,6 +3088,16 @@ function getVolusionAddToCartSeatPrice(root) {
   return htsEq > 0 ? htsEq : 0;
 }
 function detectMemberPricingState(){
+  if (document.body && document.body.classList.contains('mc-bean-bag-pdp')) {
+    document.querySelectorAll(
+      '.mc-member-price, .mc-member-pricing, .mc-member-price-row, .mc-member-login, .mc-member-grid-price, [class*="member-price"], [class*="memberpricing"]'
+    ).forEach(function(el){
+      try { el.remove(); } catch (e) {}
+    });
+    document.body.classList.remove('mc-member-pricing-on');
+    document.body.classList.add('mc-member-pricing-off');
+    return Promise.resolve(false);
+  }
   if (window.__mcMemberPricing.promise) return window.__mcMemberPricing.promise;
   window.__mcMemberPricing.promise = fetch("/myaccount.asp", {
     credentials: "same-origin",
@@ -7359,6 +7369,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   /** Path id, else `categoryid` / `c` query (e.g. category.asp?categoryid=157) — needed so stray DOM fields don’t imply the wrong category. */
   function mcListingCategoryIdFromVolusion() {
     var path = (location.pathname || '').toLowerCase();
+    if (/\/stationary-loveseats-s\/157\.html?/.test(path)) {
+      return '157';
+    }
     var fromPath =
       typeof mcListingCategoryIdFromPath === 'function' ? mcListingCategoryIdFromPath() : null;
     /* Some stores omit `-s/`; last `/157.htm` segment on a PLP is still the category id. Skip obvious non-PLP paths. */
@@ -7403,20 +7416,37 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     } catch (eEcat) {}
   }
 
-  function isBeanBagProductPage(){
+  function isBeanBagProductPage() {
     try {
-      var pc = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
-      if (pc && /^BB/i.test(String(pc.value || '').trim())) return true;
-      var pathLow = (location.pathname || '').toLowerCase();
-      if (pathLow.indexOf('bean-bag') !== -1 || pathLow.indexOf('beanbag') !== -1 || pathLow.indexOf('bean_bag') !== -1) return true;
-      var cid = mcGetQueryParamValue('categoryid') || mcGetQueryParamValue('category_id');
-      var cParam = mcGetQueryParamValue('c');
-      if (pathLow.indexOf('/103.htm') !== -1 || cid === '103' || cParam === '103') return true;
-      var titleEl = document.querySelector('.productnamecolorLARGE, .productnamecolor, #v65-product-parent h1, h1.productnamecolor');
-      var titleTxt = titleEl ? String(titleEl.textContent || '') : '';
-      if (/bean\s*bag/i.test(titleTxt)) return true;
+      var p = (location.pathname || '').toLowerCase();
+      var bodyText = (document.body ? document.body.textContent : '').toLowerCase();
+      var titleText = (document.title || '').toLowerCase();
+
+      if (
+        /\/bean-bag-seating-s\//.test(p) ||
+        /product-p\/bb-/.test(p) ||
+        /cordaroys/.test(bodyText) ||
+        /cordaroys/.test(titleText) ||
+        /bean bag/.test(bodyText) ||
+        /bean bag/.test(titleText) ||
+        /chinchilla/.test(bodyText) ||
+        /chinchilla/.test(titleText) ||
+        /nest/.test(bodyText) ||
+        /nest/.test(titleText) ||
+        /faux fur/.test(bodyText) ||
+        /faux fur/.test(titleText) ||
+        /chenille/.test(bodyText) ||
+        /chenille/.test(titleText) ||
+        /corduroy/.test(bodyText) ||
+        /corduroy/.test(titleText)
+      ) {
+        return true;
+      }
+
       return false;
-    } catch (eBb) { return false; }
+    } catch (e) {
+      return false;
+    }
   }
   function hideOptionsTable(scope){
     if (isBeanBagProductPage()) return;
@@ -7470,6 +7500,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function renderMemberPricingCaption(scope){
     var root = scope || document;
+    if (document.body && document.body.classList.contains('mc-bean-bag-pdp')) return;
     var anchorEl = findMemberCaptionAnchorEl();
     /* Do not append into empty #content_area — Volusion replaces innerHTML and would delete the caption. */
     var fallbackHost =
@@ -7837,6 +7868,73 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 </script>
 <script>
 (function () {
+  function mcNormalizeRelatedItemImages(root) {
+    try {
+      var scope = root || document;
+      var cards = scope.querySelectorAll(
+        '.mc-related-carousel__viewport .v-product, ' +
+        '.mc-related-carousel__viewport .v65-product-related-item, ' +
+        '#related-products .v-product, ' +
+        '#related-products .v65-product-related-item, ' +
+        '.v65-product-related .v-product, ' +
+        '.v65-product-related-item'
+      );
+
+      cards.forEach(function(card){
+        var img =
+          card.querySelector('img') ||
+          card.querySelector('.v-product__img img') ||
+          card.querySelector('.v-product__image img') ||
+          card.querySelector('.product_image img');
+
+        if (!img) return;
+
+        var src = img.getAttribute('src') || '';
+        var dataSrc = img.getAttribute('data-src') || '';
+        var dataOriginal = img.getAttribute('data-original') || '';
+        var dataLazy = img.getAttribute('data-lazy') || '';
+        var chosen = dataSrc || dataOriginal || dataLazy || src;
+
+        if (!chosen) return;
+
+        chosen = chosen
+          .replace(/^\s+|\s+$/g, '')
+          .replace(/^https?:\/\/[^/]+/i, '');
+
+        if (/\/no[-_]?image|image[_-]?not[_-]?available|\/comingsoon|\/blank\.(gif|png|jpg)/i.test(chosen)) {
+          var link = card.querySelector('a[href*="-p/"], a[href*="product-p/"]');
+          if (link) {
+            var href = link.getAttribute('href') || '';
+            var m = href.match(/(?:product-p\/|-p\/)([^.?/#]+)/i);
+            if (m && m[1]) {
+              var code = m[1].replace(/\.htm.*/i, '').toUpperCase();
+              chosen = '/v/vspfiles/photos/' + code + '-1.jpg';
+            }
+          }
+        }
+
+        img.loading = 'eager';
+        img.decoding = 'async';
+        img.removeAttribute('srcset');
+        img.removeAttribute('sizes');
+        img.setAttribute('src', chosen);
+
+        img.onerror = function(){
+          var current = img.getAttribute('src') || '';
+          if (/-1\.(jpg|jpeg|png|webp)$/i.test(current)) {
+            img.onerror = null;
+            img.src = current.replace(/-1\.(jpg|jpeg|png|webp)$/i, '-2T.jpg');
+            return;
+          }
+          if (/-2T\.(jpg|jpeg|png|webp)$/i.test(current)) {
+            img.onerror = null;
+            img.src = current.replace(/-2T\.(jpg|jpeg|png|webp)$/i, '-1.jpg');
+          }
+        };
+      });
+    } catch (e) {}
+  }
+
   function mcMoveRelatedImageFirst(root) {
     if (!root || !root.querySelectorAll) return;
     var cells = root.querySelectorAll('td');
@@ -7872,6 +7970,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var rel = document.querySelector('#content_area #relateditems, #content_area table.relateditems');
     if (!rel) return;
     mcMoveRelatedImageFirst(rel);
+    mcNormalizeRelatedItemImages(document);
   }
   function boot() {
     if (
@@ -7899,6 +7998,19 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     try {
       mo.observe(ca, { childList: true, subtree: true });
     } catch (eMo) {}
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    mcNormalizeRelatedItemImages(document);
+    setTimeout(function(){ mcNormalizeRelatedItemImages(document); }, 300);
+    setTimeout(function(){ mcNormalizeRelatedItemImages(document); }, 900);
+    window.addEventListener('load', function(){ mcNormalizeRelatedItemImages(document); });
+  });
+  if (document.readyState !== 'loading') {
+    mcNormalizeRelatedItemImages(document);
+    setTimeout(function(){ mcNormalizeRelatedItemImages(document); }, 300);
+    setTimeout(function(){ mcNormalizeRelatedItemImages(document); }, 900);
+    window.addEventListener('load', function(){ mcNormalizeRelatedItemImages(document); });
   }
 })();
 </script>
