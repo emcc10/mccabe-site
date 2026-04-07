@@ -199,11 +199,13 @@ header.header .collapsing-search__form .row,
   margin: 0 !important;
 }
 
-/* Non-home header search: one underline on the row only (wrapper has no border) */
-body:not(.is-home) header.header .collapsing-search__form .row {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.22) !important;
-  padding-bottom: 6px !important;
-  box-sizing: border-box !important;
+/* Non-home header search underline: mobile/tablet only — desktop rules live in last-win blocks (avoid double line with .container/.row) */
+@media (max-width: 991px) {
+  body:not(.is-home) header.header .collapsing-search__form .row {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.22) !important;
+    padding-bottom: 6px !important;
+    box-sizing: border-box !important;
+  }
 }
 
 header.header .collapsing-search__input,
@@ -8847,5 +8849,66 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     margin: 0 !important;
     height: 24px !important;
     line-height: 24px !important;
+  }
+
+  /* Strip theme borders from form shell so only .row shows one line (container + row was two lines) */
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-below-nav,
+  body:not(.is-home) .mc-header-desktop-bar .header__section--middle {
+    border: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form {
+    border: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .container {
+    border: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .collapsing-search__label,
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .collapsing-search__submit {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row::before,
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row::after {
+    display: none !important;
+    content: none !important;
+    border: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+}
+
+/* =========================================================
+   HERO SEARCH — single underline (form/container must not add a second line)
+   ========================================================= */
+@media (min-width: 992px) {
+  #mcHeroSearchOverlay .collapsing-search__form {
+    border: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+  }
+
+  #mcHeroSearchOverlay .collapsing-search__form .container {
+    border: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+  }
+
+  #mcHeroSearchOverlay .collapsing-search__form .row::before {
+    display: none !important;
+    content: none !important;
   }
 }
