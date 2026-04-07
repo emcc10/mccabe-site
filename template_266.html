@@ -58,7 +58,7 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260401: PDP flex thumbs+hero; mccabe-overrides ?v=202604003i -->
+<!-- MC_DEPLOY_VERIFY_20260401: PDP flex thumbs+hero; mccabe-overrides ?v=202604003j -->
 <meta name="mc-deploy-verify" content="20260401pdp-css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -69,7 +69,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=202604003i" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=202604003j" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -5440,11 +5440,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   font-weight: 300;
 }
 
-@media (min-width: 992px) {
-  .productdetails #product_photo_zoom_url {
-    margin-bottom: -97px;
-  }
-}
+/* Desktop PDP: negative margin removed — overlapped options; layout handled in mccabe-overrides.css */
 
 .mc-price-caption-moved {
   font-size: 14px !important;
@@ -7822,24 +7818,43 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function tagPdpCells(){
     if (!isPDP()) return;
 
-    var area = qs('#content_area');
+    var ca = qs('#content_area');
+    var vp = qs('#v65-product-parent');
+    /* #v65-product-parent is sometimes outside #content_area; search both so PDP layout CSS can match */
+    function qScope(sel){
+      return (ca && qs(sel, ca)) || (vp && qs(sel, vp)) || qs(sel, document);
+    }
+    function qaScope(sel){
+      var seen = {};
+      var out = [];
+      function addAll(root){
+        if (!root) return;
+        qsa(sel, root).forEach(function(n){
+          if (n && !seen[n]) { seen[n] = true; out.push(n); }
+        });
+      }
+      addAll(ca);
+      addAll(vp);
+      if (!out.length) addAll(document);
+      return out;
+    }
 
     // Find the TD that contains the main image
     var main =
-      qs('#product_photo', area) ||
-      qs('#product_photo_td', area) ||
-      qs('.vcss_img_wrap', area) ||
-      qs('.vCSS_img_wrap', area) ||
-      qs('.main-image', area) ||
-      qs('img#main-image', area);
+      qScope('#product_photo') ||
+      qScope('#product_photo_td') ||
+      qScope('.vcss_img_wrap') ||
+      qScope('.vCSS_img_wrap') ||
+      qScope('.main-image') ||
+      qScope('img#main-image');
 
     var mediaTd = main ? main.closest('td') : null;
 
     // Find TD that contains Add to Cart
     var addBtn =
-      qs('input[name="btnaddtocart"]', area) ||
-      qs('input[id*="btnaddtocart"]', area) ||
-      qsa('input[type="submit"], button', area).find(function(el){
+      qScope('input[name="btnaddtocart"]') ||
+      qScope('input[id*="btnaddtocart"]') ||
+      qaScope('input[type="submit"], button').find(function(el){
         return /add to cart/i.test(el.value || el.textContent || '');
       });
 
@@ -7847,7 +7862,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
     // Fallback: TD containing first visible non-hidden select (NOT hidden leather select)
     if (!optionsTd){
-      var sel = qsa('select', area).find(function(s){
+      var sel = qaScope('select').find(function(s){
         if (s.classList.contains('mc-native-leather')) return false;
         return s.offsetParent !== null;
       });
@@ -7858,7 +7873,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (mediaTd) mediaTd.classList.add('mc-pdp-media-td');
     if (optionsTd) optionsTd.classList.add('mc-pdp-options-td');
   }
-
   function run(){
   unwrapBadWrapper();
   tagPdpCells();
