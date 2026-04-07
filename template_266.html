@@ -7117,17 +7117,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       }, true);
     });
   }
-
-  function isInsideAltThumbs(el) {
+function isInsideAltThumbs(el) {
   return !!(el && el.closest && el.closest('#altviews, span#altviews, .altviews'));
 }
-  }
 
-  function desktopMainMediaTarget(scope) {
-    function pick(sel, root) {
-      var n = q(sel, root || scope);
-      return n && !isInsideAltThumbs(n) ? n : null;
-    }
+function desktopMainMediaTarget(scope) {
 
     var cand =
       pick('img#product_photo') ||
