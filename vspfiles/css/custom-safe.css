@@ -7829,6 +7829,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     min-width: 0 !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
+    margin-left: 250px !important;
   }
 
   /* Hero table beside thumbs — second+ tables */
@@ -8182,7 +8183,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
   body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews {
     position: absolute !important;
-    top: 0 !important;
+    top: 64px !important;
     left: 0 !important;
     width: 86px !important;
     max-width: 86px !important;
@@ -8226,7 +8227,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2,
   body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2 {
     display: block !important;
-    margin-left: 104px !important;
+    margin-left: 40px !important;
     position: relative !important;
     z-index: 1 !important;
   }
@@ -8363,7 +8364,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
   body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews {
     position: absolute !important;
-    top: 0 !important;
+    top: 64px !important;
     left: 0 !important;
     width: 86px !important;
     max-width: 86px !important;
@@ -8408,7 +8409,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2 {
     display: block !important;
     position: relative !important;
-    margin-left: 104px !important;
+    margin-left: 40px !important;
     left: 0 !important;
     z-index: 1 !important;
   }
