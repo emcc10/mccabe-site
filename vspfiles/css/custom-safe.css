@@ -8966,10 +8966,53 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 }
 
-/* Bean bag category PLP: hide member-price blocks if any slip through (JS removes them first).
-   Do not require body.category — some listing templates omit it while JS still sets mc-beanbag-category. */
-body.mc-beanbag-category .mc-member-grid-price,
-html.mc-beanbag-category .mc-member-grid-price {
+/* Category 103 PLP: no member pricing (list + sale only). html.mtl-cat103-no-member is set by template JS. */
+html.mtl-cat103-no-member .member-price,
+html.mtl-cat103-no-member .members-price,
+html.mtl-cat103-no-member .memberPricing,
+html.mtl-cat103-no-member .member-pricing,
+html.mtl-cat103-no-member .price-member,
+html.mtl-cat103-no-member .price_member,
+html.mtl-cat103-no-member .product-member-price,
+html.mtl-cat103-no-member .member-price-wrap,
+html.mtl-cat103-no-member .member-pricing-wrap,
+html.mtl-cat103-no-member .mtl-member-price,
+html.mtl-cat103-no-member .mtl-member-badge,
+html.mtl-cat103-no-member .mtl-member-savings,
+html.mtl-cat103-no-member .login-for-price,
+html.mtl-cat103-no-member .members-only-price,
+html.mtl-cat103-no-member .mc-member-grid-price,
+html.mtl-cat103-no-member .mc-member-grid-price__label,
+html.mtl-cat103-no-member .mc-member-grid-price__amount,
+html.mtl-cat103-no-member .mc-member-grid-price__hint,
+html.mtl-cat103-no-member .mc-member-grid-price__login {
+  display: none !important;
+}
+
+html.mtl-cat103-no-member .price,
+html.mtl-cat103-no-member .product_price,
+html.mtl-cat103-no-member .v65-productDisplay-price,
+html.mtl-cat103-no-member .price_sale,
+html.mtl-cat103-no-member .product_saleprice,
+html.mtl-cat103-no-member .saleprice,
+html.mtl-cat103-no-member .price-old,
+html.mtl-cat103-no-member .oldprice,
+html.mtl-cat103-no-member .product_retailprice,
+html.mtl-cat103-no-member .listprice,
+html.mtl-cat103-no-member .retailprice,
+html.mtl-cat103-no-member .v-product__price,
+html.mtl-cat103-no-member font.product_sale_price,
+html.mtl-cat103-no-member font.product_list_price {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Win over template mccabe-overrides.css member-grid flex rules on category 103 only */
+html.mtl-cat103-no-member body.category #content_area .v-product-grid .mc-member-grid-price,
+html.mtl-cat103-no-member body.category #content_area ul.v-product-grid .mc-member-grid-price,
+html.mtl-cat103-no-member html.category #content_area .v-product-grid .mc-member-grid-price,
+html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-member-grid-price {
   display: none !important;
 }
 
