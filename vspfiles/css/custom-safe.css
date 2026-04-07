@@ -6835,11 +6835,11 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
     flex: 1 1 0% !important;
     flex-grow: 1 !important;
     flex-shrink: 1 !important;
-    flex-basis: 52% !important;
-    max-width: 56% !important;
+    flex-basis: 55% !important;
+    max-width: 58% !important;
     min-width: 0 !important;
     order: 1 !important;
-    overflow-x: hidden !important;
+    overflow-x: visible !important;
     overflow-y: visible !important;
     position: relative !important;
     z-index: 1 !important;
@@ -6848,14 +6848,16 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   body.mc-product-page #content_area td.mc-pdp-options-td,
   body.productdetails #content_area td.mc-pdp-options-td {
     flex: 1 1 0% !important;
-    flex-basis: 44% !important;
-    max-width: 44% !important;
+    flex-basis: 42% !important;
+    max-width: 42% !important;
     min-width: 0 !important;
     order: 2 !important;
     position: relative !important;
     z-index: 2 !important;
-    overflow-x: hidden !important;
+    overflow-x: visible !important;
     overflow-y: visible !important;
+    padding-right: 16px !important;
+    box-sizing: border-box !important;
   }
 
   body.mc-product-page #v65-product-parent .mc-prod-media-wrap,
@@ -6918,27 +6920,28 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   body.mc-product-page #v65-product-parent tbody.mc-pdp-split-rows td.mc-pdp-media-td,
   body.productdetails #v65-product-parent tbody.mc-pdp-split-rows td.mc-pdp-media-td {
     flex: 1 1 0% !important;
-    flex-basis: 52% !important;
+    flex-basis: 55% !important;
     width: auto !important;
     min-width: 0 !important;
-    max-width: 56% !important;
+    max-width: 58% !important;
     box-sizing: border-box !important;
     vertical-align: top !important;
-    overflow-x: hidden !important;
+    overflow-x: visible !important;
     overflow-y: visible !important;
   }
 
   body.mc-product-page #v65-product-parent tbody.mc-pdp-split-rows td.mc-pdp-options-td,
   body.productdetails #v65-product-parent tbody.mc-pdp-split-rows td.mc-pdp-options-td {
     flex: 1 1 0% !important;
-    flex-basis: 44% !important;
+    flex-basis: 42% !important;
     width: auto !important;
     min-width: 0 !important;
-    max-width: 44% !important;
+    max-width: 42% !important;
     box-sizing: border-box !important;
     vertical-align: top !important;
     padding-left: 12px !important;
-    overflow-x: hidden !important;
+    padding-right: 16px !important;
+    overflow-x: visible !important;
     overflow-y: visible !important;
   }
 }
