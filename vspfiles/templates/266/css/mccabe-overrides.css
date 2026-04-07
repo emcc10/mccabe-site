@@ -409,6 +409,25 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     gap: 10px !important;
     margin: 0 !important;
   }
+
+  /* vZoom inner wrap: thumbs first, main image obeys column width (not flex:1 + 980px inlines) */
+  body.productdetails :is(#content_area, #v65-product-parent) .mc-prod-media-wrap #altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) .mc-prod-media-wrap span#altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .mc-prod-media-wrap #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .mc-prod-media-wrap span#altviews {
+    order: 1 !important;
+    flex: 0 0 76px !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) .mc-prod-media-wrap img#product_photo,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .mc-prod-media-wrap img#product_photo {
+    order: 2 !important;
+    flex: none !important;
+    width: auto !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+  }
 }
 
 body.mc-bean-bag-pdp:is(.productdetails, .mc-product-page) :is(#content_area, #v65-product-parent) #product_photo_td,
