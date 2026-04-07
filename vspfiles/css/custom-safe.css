@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY — FINAL FIX block: hide search label text + PDP altviews absolute in row-2 td (see file end) */
+/* MC_DEPLOY_VERIFY — FINAL FORCE FIX end: non-home dup search + PDP #altviews absolute (see file bottom) */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
 /* RH-STYLE GLOBAL FONT */
@@ -8221,5 +8221,81 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     margin-left: 104px !important;
     position: relative !important;
     z-index: 1 !important;
+  }
+}
+
+/* =========================================================
+   FINAL FORCE FIX — DESKTOP NON-HOME SEARCH + PDP ALT THUMBS
+   ========================================================= */
+
+/* A. NON-HOME DESKTOP: hide duplicate search UI and keep only one search rail */
+@media (min-width: 992px) {
+  /* Hide any search block that accidentally remains mounted outside the intended desktop bar */
+  body:not(.is-home) #mcHeroSearchOverlay,
+  body:not(.is-home) .mc-hero-search-overlay,
+  body:not(.is-home) .mc-hero-search-inner {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Keep only the search inside the desktop header bar */
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-below-nav,
+  body:not(.is-home) .mc-header-desktop-bar .header__section--middle,
+  body:not(.is-home) .mc-header-desktop-bar #collapsingSearch,
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* If any extra search wrapper appears before/above the real one, hide it */
+  body:not(.is-home) header.header > .header__section--middle,
+  body:not(.is-home) header.header > .mc-header-search-below-nav {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Keep label/input clean in the one real search bar */
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__label,
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__label__text {
+    position: static !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
+/* B. PDP DESKTOP: move alt thumbnails back up */
+@media (min-width: 992px) {
+  body.productdetails :is(#content_area, #v65-product-parent) #altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) span#altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) .altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
+    z-index: 5 !important;
+  }
+
+  /* Make sure the media cell is the positioning context */
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
+    position: relative !important;
+    overflow: visible !important;
   }
 }
