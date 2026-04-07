@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY — bottom: hide search toggles + PDP zoom left -140px; see FINAL FORCE FIX REMOVE EXTRA SEARCH LABEL */
+/* MC_DEPLOY_VERIFY — LAST-WIN: strip ::before Search labels; PDP zoom left:-180px; see file end */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
 /* RH-STYLE GLOBAL FONT */
@@ -8401,7 +8401,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     display: block !important;
     position: relative !important;
     margin-left: 104px !important;
-    left: -140px !important;
+    left: -180px !important;
     z-index: 1 !important;
   }
 
@@ -8414,5 +8414,59 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     width: auto !important;
     height: auto !important;
     margin: 0 !important;
+  }
+}
+
+/* =========================================================
+   LAST-WIN — uppercase SEARCH was from ::before, not .search__toggle
+   (see .mc-header-search-cart-wrap::before + .mc-hero-search-inner::before earlier in file)
+   ========================================================= */
+@media (min-width: 992px) {
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap::before {
+    content: none !important;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #slideshow-container .mc-hero-search-inner::before,
+  #mcHeroSearchOverlay .mc-hero-search-inner::before {
+    content: none !important;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Single-row search rail after pseudo label removed (override grid + ::before row) */
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 10px !important;
+    grid-template-columns: unset !important;
+    grid-template-rows: unset !important;
+    row-gap: 0 !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-below-nav {
+    grid-column: unset !important;
+    grid-row: unset !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-cart {
+    grid-column: unset !important;
+    grid-row: unset !important;
+    flex: 0 0 auto !important;
   }
 }
