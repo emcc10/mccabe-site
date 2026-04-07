@@ -7017,7 +7017,49 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       }, true);
     });
   }
+<<<<<<< HEAD
 
+=======
+function isInsideAltThumbs(el) {
+  return !!(el && el.closest && el.closest('#altviews, span#altviews, .altviews'));
+}
+
+function desktopMainMediaTarget(scope) {
+
+    var cand =
+      pick('img#product_photo') ||
+      pick('.vCSS_img_wrap') ||
+      pick('.vcss_img_wrap') ||
+      pick('#product_photo') ||
+      pick('.main-image') ||
+      pick('img#main-image') ||
+      pick('img[itemprop="image"]');
+    if (cand) return cand;
+
+    var td = q('#product_photo_td', scope) || document.getElementById('product_photo_td');
+    if (!td) return null;
+
+    var inner =
+      pick('img#product_photo', td) ||
+      pick('.vCSS_img_wrap', td) ||
+      pick('.vcss_img_wrap', td) ||
+      pick('#product_photo', td) ||
+      pick('.main-image', td) ||
+      pick('img#main-image', td) ||
+      pick('a#product_photo_zoom_url', td) ||
+      pick('a#product_photo_zoom_url2', td);
+    if (inner) return inner;
+
+    var imgs = qa('img', td);
+    var ii;
+    for (ii = 0; ii < imgs.length; ii++) {
+      var im = imgs[ii];
+      if (isInsideAltThumbs(im)) continue;
+      return im;
+    }
+    return null;
+  }
+>>>>>>> 82ddd114db815459ed9f8f7d3e8718a88761d4fe
   function forceMediaLayout(scope){
     wireAltThumbClicks(scope);
 
