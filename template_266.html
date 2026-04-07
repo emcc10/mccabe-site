@@ -7329,14 +7329,32 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     }
   }
 
+  /** Exact query param value — avoids indexOf('c=103') matching c=1030 / categoryid=1039. */
+  function mcGetQueryParamValue(name) {
+    var q = (location.search || '').replace(/^\?/, '');
+    if (!q) return null;
+    var want = String(name || '').toLowerCase();
+    var parts = q.split('&');
+    var i;
+    for (i = 0; i < parts.length; i++) {
+      var p = parts[i].split('=');
+      var k = decodeURIComponent((p[0] || '').replace(/\+/g, ' ')).toLowerCase();
+      if (k === want) {
+        return decodeURIComponent((p.slice(1).join('=') || '').replace(/\+/g, ' '));
+      }
+    }
+    return null;
+  }
+
   function isBeanBagProductPage(){
     try {
       var pc = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
       if (pc && /^BB/i.test(String(pc.value || '').trim())) return true;
       var pathLow = (location.pathname || '').toLowerCase();
-      var searchLow = (location.search || '').toLowerCase();
       if (pathLow.indexOf('bean-bag') !== -1 || pathLow.indexOf('beanbag') !== -1 || pathLow.indexOf('bean_bag') !== -1) return true;
-      if (pathLow.indexOf('/103.htm') !== -1 || searchLow.indexOf('categoryid=103') !== -1 || searchLow.indexOf('c=103') !== -1) return true;
+      var cid = mcGetQueryParamValue('categoryid') || mcGetQueryParamValue('category_id');
+      var cParam = mcGetQueryParamValue('c');
+      if (pathLow.indexOf('/103.htm') !== -1 || cid === '103' || cParam === '103') return true;
       var titleEl = document.querySelector('.productnamecolorLARGE, .productnamecolor, #v65-product-parent h1, h1.productnamecolor');
       var titleTxt = titleEl ? String(titleEl.textContent || '') : '';
       if (/bean\s*bag/i.test(titleTxt)) return true;
@@ -10475,23 +10493,6 @@ try {
     }
   }
 
-  /** Exact match only — indexOf('categoryid=103') falsely matches categoryid=1039; c=103 matches c=1030. */
-  function mcGetQueryParamValue(name) {
-    var q = (location.search || '').replace(/^\?/, '');
-    if (!q) return null;
-    var want = String(name || '').toLowerCase();
-    var parts = q.split('&');
-    var i;
-    for (i = 0; i < parts.length; i++) {
-      var p = parts[i].split('=');
-      var k = decodeURIComponent((p[0] || '').replace(/\+/g, ' ')).toLowerCase();
-      if (k === want) {
-        return decodeURIComponent((p.slice(1).join('=') || '').replace(/\+/g, ' '));
-      }
-    }
-    return null;
-  }
-
   function mcPathLooksLikeBeanBagCategory() {
     try {
       var path = (location.pathname || '').toLowerCase();
@@ -10500,11 +10501,7 @@ try {
       }
       if (path.indexOf('bean') !== -1 && path.indexOf('bag') !== -1) return true;
       if (path.indexOf('/103.htm') !== -1) return true;
-      var cid =
-        mcGetQueryParamValue('categoryid') ||
-        mcGetQueryParamValue('CategoryID') ||
-        mcGetQueryParamValue('category_id') ||
-        mcGetQueryParamValue('Category_Id');
+      var cid = mcGetQueryParamValue('categoryid') || mcGetQueryParamValue('category_id');
       var cParam = mcGetQueryParamValue('c');
       if (cid === '103' || cParam === '103') return true;
       var catInp =
