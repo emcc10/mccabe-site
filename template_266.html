@@ -58,7 +58,8 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260401: PDP flex thumbs+hero; mccabe-overrides ?v=202604003n"mc-deploy-verify" content="20260401pdp-css">
+<!-- MC_DEPLOY_VERIFY_20260401: PDP flex thumbs+hero; mccabe-overrides ?v=202604003e -->
+<meta name="mc-deploy-verify" content="20260401pdp-css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -68,7 +69,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=202604003n" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=202604003g" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -5113,6 +5114,100 @@ body.mc-product-page #content_area .wm-swatch img {
 }
 
 
+/* thumbnails on LEFT (desktop): flex row — thumbs top-aligned beside hero; min 600px hero (matches mccabe-overrides + custom-safe) */
+@media (min-width: 992px){
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 14px !important;
+  }
+
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) [id*="altview"] {
+    float: none !important;
+    order: 1 !important;
+    flex: 0 0 86px !important;
+    width: 86px !important;
+    min-width: 86px !important;
+    max-width: 86px !important;
+    margin: 0 !important;
+    align-self: flex-start !important;
+    margin-top: -520px !important;
+  }
+
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) [id*="altview"] img {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 0 8px 0 !important;
+  }
+
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .vcss_img_wrap,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .vCSS_img_wrap,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .main-image {
+    overflow: visible !important;
+    order: 2 !important;
+    flex: 1 1 auto !important;
+    min-width: min(600px, 100%) !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .vcss_img_wrap img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .vCSS_img_wrap img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .main-image img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) img#main-image {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+
+  body.mc-product-page #content_area #options_table,
+  body.mc-product-page #content_area table[id*="options_table"] {
+    position: absolute !important;
+    left: -9999px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body.mc-product-page #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td),
+  body.mc-product-page #content_area #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td),
+  body.mc-product-page #content_area .product_sale_price,
+  body.mc-product-page #content_area .v65-product-price,
+  body.mc-product-page #content_area #priceWithOptions,
+  body.mc-product-page #content_area .product_productname,
+  body.mc-product-page #content_area .option_pricing {
+    text-align: left !important;
+    display: block !important;
+  }
+  body.mc-product-page #mcPlannerBtn {
+    width: 200px;
+  }
+  body.mc-product-page #mcPlannerRow {
+    gap: 13px !important;
+  }
+  body.mc-product-page #content_area .mc-option-accordion,
+  body.mc-product-page #content_area #mcLeatherRow,
+  body.mc-product-page #content_area #mc-inline-config,
+  body.mc-product-page #content_area #mcPlannerRow {
+    max-width: 509px !important;
+  }
+}
+
 /* Stack media above options from 962px down (so 962px = stacked + desktop-style options) */
 @media (max-width: 991px){
   html body.productdetails #content_area #v65-product-parent [itemprop="offers"],
@@ -5439,7 +5534,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   font-weight: 300;
 }
 
-/* Desktop PDP: negative margin removed — overlapped options; layout handled in mccabe-overrides.css */
+@media (min-width: 992px) {
+  .productdetails #product_photo_zoom_url {
+    margin-bottom: -97px;
+  }
+}
 
 .mc-price-caption-moved {
   font-size: 14px !important;
@@ -6905,105 +7004,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     }
   }
 
-  function ensureDesktopProductMediaOrder(scope) {
-    if (isMobile()) return;
-    try {
-      var vp = document.getElementById('v65-product-parent');
-      var td =
-        q('#product_photo_td', scope) ||
-        (vp && q('#product_photo_td', vp)) ||
-        document.getElementById('product_photo_td');
-      if (!td) return;
-      var thumbs =
-        q('#altviews', td) || q('span#altviews', td) || q('.altviews', td);
-      var img = q('img#product_photo', td);
-      if (!thumbs || !img || (thumbs.contains && thumbs.contains(img))) return;
-
-      function thumbsAfterImg(container) {
-        if (!container || !container.contains(img) || !container.contains(thumbs)) return false;
-        return !!(img.compareDocumentPosition(thumbs) & Node.DOCUMENT_POSITION_FOLLOWING);
-      }
-
-      var innerWrap = img.closest && img.closest('.mc-prod-media-wrap');
-      if (innerWrap && td.contains(innerWrap) && thumbsAfterImg(innerWrap)) {
-        innerWrap.insertBefore(thumbs, img);
-        return;
-      }
-      var zoomA = img.closest && img.closest('a#product_photo_zoom_url, a#product_photo_zoom_url2');
-      if (zoomA && td.contains(zoomA) && thumbsAfterImg(zoomA)) {
-        zoomA.insertBefore(thumbs, img);
-        return;
-      }
-      if (zoomA && td.contains(thumbs) && !zoomA.contains(thumbs)) {
-        if (zoomA.compareDocumentPosition(thumbs) & Node.DOCUMENT_POSITION_FOLLOWING) {
-          td.insertBefore(thumbs, zoomA);
-        }
-      }
-    } catch (eOrd) {}
-  }
-
-  function stripVolusionPdpMediaInlines(scope) {
-    if (isMobile()) return;
-    try {
-      var vp = document.getElementById('v65-product-parent');
-      var ca = q('#content_area', document);
-      var roots = [];
-      if (scope && scope.querySelector) roots.push(scope);
-      if (ca) roots.push(ca);
-      if (vp) roots.push(vp);
-      var seen = {};
-      var ri;
-      for (ri = 0; ri < roots.length; ri++) {
-        var r = roots[ri];
-        if (!r || seen[r]) continue;
-        seen[r] = true;
-        var img = r.querySelector('img#product_photo');
-        if (img) img.removeAttribute('style');
-        var wraps = r.querySelectorAll('.mc-prod-media-wrap');
-        var wi;
-        for (wi = 0; wi < wraps.length; wi++) wraps[wi].removeAttribute('style');
-        var a1 = r.querySelector('a#product_photo_zoom_url');
-        var a2 = r.querySelector('a#product_photo_zoom_url2');
-        if (a1) a1.removeAttribute('style');
-        if (a2) a2.removeAttribute('style');
-      }
-    } catch (eStrip) {}
-  }
-
-  function ensureDesktopPdpTwoColumnRow() {
-    if (isMobile()) return;
-    try {
-      var vp = document.getElementById('v65-product-parent');
-      if (!vp) return;
-      var rows = vp.getElementsByTagName('tr');
-      var r, tr, idx, td, tag, mediaTd, optTd, btn, ph;
-      for (r = 0; r < rows.length; r++) {
-        tr = rows[r];
-        mediaTd = null;
-        optTd = null;
-        for (idx = 0; idx < tr.children.length; idx++) {
-          td = tr.children[idx];
-          tag = (td.tagName || '').toUpperCase();
-          if (tag !== 'TD' && tag !== 'TH') continue;
-          if (td.id === 'product_photo_td' || (td.classList && td.classList.contains('mc-pdp-media-td'))) mediaTd = td;
-          if (td.classList && td.classList.contains('mc-pdp-options-td')) optTd = td;
-        }
-        if (!optTd) {
-          btn = tr.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
-          if (btn) optTd = btn.closest('td');
-        }
-        if (!mediaTd) {
-          ph = tr.querySelector('img#product_photo');
-          if (ph) mediaTd = ph.closest('td');
-        }
-        if (!mediaTd || !optTd || mediaTd.parentNode !== tr || optTd.parentNode !== tr) continue;
-        if (optTd.compareDocumentPosition(mediaTd) & Node.DOCUMENT_POSITION_FOLLOWING) {
-          tr.insertBefore(mediaTd, optTd);
-        }
-        return;
-      }
-    } catch (eRow) {}
-  }
   function centerMainImageMobile(scope){
     var media = findMainMedia(scope);
     if (!media) return;
@@ -7119,47 +7119,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 
   function isInsideAltThumbs(el) {
-    return !!(el && el.closest && el.closest('#altviews, span#altviews, .altviews'));
+  return !!(el && el.closest && el.closest('#altviews, span#altviews, .altviews'));
+}
   }
 
-  function ensureProductHeroOutsideAltviews(scope) {
-    try {
-      var td = q('#product_photo_td', scope) || document.getElementById('product_photo_td');
-      if (!td) return;
-      var thumbs = q('#altviews', td) || q('span#altviews', td) || q('.altviews', td);
-      if (!thumbs || !thumbs.parentNode) return;
-      var hero = q('a#product_photo_zoom_url', td) || q('a#product_photo_zoom_url2', td) || null;
-      if (!hero) {
-        var im = q('img#product_photo', td);
-        if (im && thumbs.contains(im)) hero = im;
-      }
-      if (!hero || !thumbs.contains(hero)) return;
-      var p = thumbs.parentNode;
-      if (thumbs.nextSibling) p.insertBefore(hero, thumbs.nextSibling);
-      else p.appendChild(hero);
-    } catch (e0) {}
-  }
-
-  function ensureAltviewsBeforeMainHero(scope) {
-    try {
-      if (isMobile()) return;
-      var td = q('#product_photo_td', scope) || document.getElementById('product_photo_td');
-      if (!td) return;
-      var thumbs = q('#altviews', td) || q('span#altviews', td) || q('.altviews', td);
-      if (!thumbs) return;
-      var hero = q('a#product_photo_zoom_url', td) || q('a#product_photo_zoom_url2', td) || q('img#product_photo', td);
-      if (!hero || thumbs.contains(hero) || isInsideAltThumbs(hero)) return;
-      function topUnder(root, el) {
-        var n = el;
-        while (n && n.parentNode && n.parentNode !== root) n = n.parentNode;
-        return n;
-      }
-      var th = topUnder(td, thumbs);
-      var he = topUnder(td, hero);
-      if (!th || !he || th === he) return;
-      if (he.compareDocumentPosition(th) & Node.DOCUMENT_POSITION_FOLLOWING) td.insertBefore(th, he);
-    } catch (e1) {}
-  }
   function desktopMainMediaTarget(scope) {
     function pick(sel, root) {
       var n = q(sel, root || scope);
@@ -7201,8 +7164,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
   function forceMediaLayout(scope){
     wireAltThumbClicks(scope);
-    ensureProductHeroOutsideAltviews(scope);
-    ensureAltviewsBeforeMainHero(scope);
 
     /* Bean bag PDP: flex reparenting breaks Volusion table markup; template CSS floats alt views. */
     var pcBbGate = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
@@ -7242,7 +7203,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     img.style.setProperty('display', 'block', 'important');
     img.style.setProperty('visibility', 'visible', 'important');
     img.style.setProperty('opacity', '1', 'important');
-
+    img.style.setProperty('width', '100%', 'important');
+    img.style.setProperty('max-width', '700px', 'important');
+    img.style.setProperty('height', 'auto', 'important');
+    img.style.setProperty('object-fit', 'contain', 'important');
+    img.style.setProperty('margin', '0', 'important');
   });
 
   return;
@@ -7258,12 +7223,84 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       return;
     }
 
-    // Desktop: real table row (no tr flex); reorder media/options td if needed; unwrap/strip vZoom inlines.
-    ensureDesktopPdpTwoColumnRow();
-    ensureDesktopProductMediaOrder(scope);
-    unwrapDesktopMediaWrap(scope);
-    ensureDesktopProductMediaOrder(scope);
-    stripVolusionPdpMediaInlines(scope);
+    // DESKTOP: build wrapper thumbs-left layout (never reparent <td>)
+    var main = desktopMainMediaTarget(scope);
+
+    var thumbs =
+      q('#altviews', scope) ||
+      q('.altviews', scope) ||
+      q('[id*="altview"]', scope);
+
+    if (!main) return;
+
+    // Make main image larger / natural size (works whether main is an IMG or wrapper)
+    var mainImgs = [];
+    if ((main.tagName || '').toUpperCase() === 'IMG') mainImgs = [main];
+    else mainImgs = qa('img', main);
+
+    mainImgs.forEach(function(img){
+      img.style.setProperty('width','100%','important');
+      img.style.setProperty('max-width','980px','important');
+      img.style.setProperty('min-width','600px','important');
+      img.style.setProperty('height','auto','important');
+      img.style.setProperty('object-fit','contain','important');
+      img.style.setProperty('display','block','important');
+      img.style.setProperty('margin','0 auto','important');
+    });
+
+    // If no thumbs found, still keep main image clean
+    if (!thumbs || thumbs === main) {
+      main.style.setProperty('overflow','visible','important');
+      return;
+    }
+
+    // Build one flex wrapper ONCE so thumbs sit left of main image
+    var existingWrap = q('.mc-prod-media-wrap', scope);
+    if (!existingWrap) {
+      var pcWrapGate = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      if (!pcWrapGate) return;
+      var wrap = document.createElement('div');
+      wrap.className = 'mc-prod-media-wrap';
+      wrap.style.setProperty('display','flex','important');
+      wrap.style.setProperty('align-items','flex-start','important');
+      wrap.style.setProperty('gap','8px','important');
+      wrap.style.setProperty('width','100%','important');
+      wrap.style.setProperty('margin','0 0 12px 0','important');
+
+      // insert wrapper right before whichever appears first
+      var firstNode = (thumbs.compareDocumentPosition(main) & Node.DOCUMENT_POSITION_FOLLOWING) ? thumbs : main;
+      firstNode.parentNode.insertBefore(wrap, firstNode);
+
+      wrap.appendChild(thumbs);
+      wrap.appendChild(main);
+    }
+
+    // Force thumbs column
+    thumbs.style.setProperty('float','none','important');
+    thumbs.style.setProperty('width','72px','important');
+    thumbs.style.setProperty('min-width','72px','important');
+    thumbs.style.setProperty('margin','0','important');
+    thumbs.style.setProperty('padding','0','important');
+
+    qa('a, img', thumbs).forEach(function(el){
+      if (el.tagName === 'A') {
+        el.style.setProperty('display','block','important');
+        el.style.setProperty('margin','0 0 8px 0','important');
+      }
+      if (el.tagName === 'IMG') {
+        el.style.setProperty('display','block','important');
+        el.style.setProperty('width','100%','important');
+        el.style.setProperty('height','auto','important');
+        el.style.setProperty('margin','0','important');
+      }
+    });
+
+    // Main image area fills remaining width
+    main.style.setProperty('float','none','important');
+    main.style.setProperty('width','100%','important');
+    main.style.setProperty('flex','1 1 0','important');
+    main.style.setProperty('overflow','visible','important');
+    main.style.setProperty('min-width','600px','important');
   }
 
   function removeConfigurationDetails(scope){
@@ -7463,7 +7500,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var btn = (scope || document).querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
     if (!btn) return;
     var el = btn.parentElement;
-    var stop = btn.closest('#v65-product-parent') || document.querySelector('#content_area') || document.body;
+    var stop = document.querySelector('#content_area') || document.querySelector('#v65-product-parent') || document.body;
     while (el && el !== stop) {
       el.style.setProperty('background', 'transparent', 'important');
       el.style.setProperty('background-color', 'transparent', 'important');
@@ -7821,7 +7858,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var t = setInterval(function () {
       tries++;
       forceProductFixes();
-      if (tries >= 80) clearInterval(t);
+      if (tries >= 25) clearInterval(t);
     }, 400);
   }
 
@@ -7833,10 +7870,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   window.addEventListener('load', function(){
     setTimeout(forceProductFixes, 0);
     setTimeout(forceProductFixes, 800);
-    setTimeout(forceProductFixes, 1600);
-    setTimeout(forceProductFixes, 3200);
-    setTimeout(forceProductFixes, 6000);
-    setTimeout(forceProductFixes, 12000);
   });
 
   (function observeContentAreaForPdp(){
@@ -7853,43 +7886,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     try {
       mo.observe(ca, { childList: true, subtree: true });
     } catch (e) {}
-  })();
-  (function observeV65ProductParentForLayout(){
-    var debVp;
-    function schedulePdpFix(){
-      if (!document.body.classList.contains('mc-product-page') && !document.body.classList.contains('productdetails')) return;
-      clearTimeout(debVp);
-      debVp = setTimeout(function(){
-        if (markProductPage() && typeof window.mcFixPdpMediaLayoutOnly === 'function') window.mcFixPdpMediaLayoutOnly();
-      }, 100);
-    }
-    function attachToVp(vp){
-      if (!vp || vp.__mcPdpVpLayoutObserver) return;
-      vp.__mcPdpVpLayoutObserver = true;
-      try {
-        var moVp = new MutationObserver(schedulePdpFix);
-        moVp.observe(vp, {
-          childList: true,
-          subtree: true,
-          attributes: true,
-          attributeFilter: ['style', 'class']
-        });
-      } catch (eVp) {}
-    }
-    function tryAttachVp(){
-      attachToVp(document.getElementById('v65-product-parent'));
-    }
-    tryAttachVp();
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryAttachVp);
-    window.addEventListener('load', tryAttachVp);
-    setTimeout(tryAttachVp, 500);
-    setTimeout(tryAttachVp, 2000);
-    var attachPoll = 0;
-    var attachIv = setInterval(function(){
-      attachPoll++;
-      tryAttachVp();
-      if (attachPoll >= 60) clearInterval(attachIv);
-    }, 250);
   })();
 
   /* #v65-product-parent may be injected outside #content_area; catch when it appears anywhere. */
@@ -7927,16 +7923,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   window.addEventListener('mcMemberPricingReady', function(){
     forceProductFixes();
   });
-  window.mcFixPdpMediaLayoutOnly = function () {
-    if (!markProductPage() || isMobile()) return;
-    var scope = document.querySelector('#content_area') || document.body;
-    var vp = document.getElementById('v65-product-parent');
-    var mediaScope = vp && scope && !scope.contains(vp) ? vp : scope;
-    try {
-      ensureDesktopPdpTwoColumnRow();
-      forceMediaLayout(mediaScope);
-    } catch (eMc) {}
-  };
   window.forceProductFixes = forceProductFixes;
   if (typeof window.detectMemberPricingState === 'function') {
     window.detectMemberPricingState();
@@ -7971,43 +7957,24 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function tagPdpCells(){
     if (!isPDP()) return;
 
-    var ca = qs('#content_area');
-    var vp = qs('#v65-product-parent');
-    /* #v65-product-parent is sometimes outside #content_area; search both so PDP layout CSS can match */
-    function qScope(sel){
-      return (ca && qs(sel, ca)) || (vp && qs(sel, vp)) || qs(sel, document);
-    }
-    function qaScope(sel){
-      var seen = {};
-      var out = [];
-      function addAll(root){
-        if (!root) return;
-        qsa(sel, root).forEach(function(n){
-          if (n && !seen[n]) { seen[n] = true; out.push(n); }
-        });
-      }
-      addAll(ca);
-      addAll(vp);
-      if (!out.length) addAll(document);
-      return out;
-    }
+    var area = qs('#content_area');
 
     // Find the TD that contains the main image
     var main =
-      qScope('#product_photo') ||
-      qScope('#product_photo_td') ||
-      qScope('.vcss_img_wrap') ||
-      qScope('.vCSS_img_wrap') ||
-      qScope('.main-image') ||
-      qScope('img#main-image');
+      qs('#product_photo', area) ||
+      qs('#product_photo_td', area) ||
+      qs('.vcss_img_wrap', area) ||
+      qs('.vCSS_img_wrap', area) ||
+      qs('.main-image', area) ||
+      qs('img#main-image', area);
 
     var mediaTd = main ? main.closest('td') : null;
 
     // Find TD that contains Add to Cart
     var addBtn =
-      qScope('input[name="btnaddtocart"]') ||
-      qScope('input[id*="btnaddtocart"]') ||
-      qaScope('input[type="submit"], button').find(function(el){
+      qs('input[name="btnaddtocart"]', area) ||
+      qs('input[id*="btnaddtocart"]', area) ||
+      qsa('input[type="submit"], button', area).find(function(el){
         return /add to cart/i.test(el.value || el.textContent || '');
       });
 
@@ -8015,7 +7982,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
     // Fallback: TD containing first visible non-hidden select (NOT hidden leather select)
     if (!optionsTd){
-      var sel = qaScope('select').find(function(s){
+      var sel = qsa('select', area).find(function(s){
         if (s.classList.contains('mc-native-leather')) return false;
         return s.offsetParent !== null;
       });
@@ -8026,6 +7993,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (mediaTd) mediaTd.classList.add('mc-pdp-media-td');
     if (optionsTd) optionsTd.classList.add('mc-pdp-options-td');
   }
+
   function run(){
   unwrapBadWrapper();
   tagPdpCells();
