@@ -7982,14 +7982,109 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 }
 
-/* #altviews after hero: pull up. Use --mc-pdp-altviews-shift on html/body for a SKU (e.g. -624px). */
+/* #altviews is a *direct* child of #product_photo_td / media td: pull up (legacy Volusion).
+   When #altviews is nested *inside* the same td/table as the hero, do NOT use margin hacks — use nested flex block below. */
 @media (min-width: 992px) {
-  body.productdetails :is(#content_area, #v65-product-parent) #altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) span#altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) .altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews {
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > #altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > span#altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > #altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > span#altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > span#altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > span#altviews {
     margin-top: var(--mc-pdp-altviews-shift, clamp(-90vh, -42vh, 0px)) !important;
+  }
+}
+
+/* Nested #altviews (same td/table as hero): flex row — thumbs left, hero flexes; no independent margin-top. */
+@media (min-width: 992px) {
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td td:has(#altviews),
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td td:has(#altviews),
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td td:has(#altviews),
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td td:has(#altviews) {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td td:has(#altviews) #altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td td:has(#altviews) span#altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td td:has(#altviews) #altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td td:has(#altviews) span#altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td td:has(#altviews) #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td td:has(#altviews) span#altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td td:has(#altviews) #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td td:has(#altviews) span#altviews {
+    order: -1 !important;
+    flex: 0 0 72px !important;
+    width: 72px !important;
+    max-width: 72px !important;
+    margin-top: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    align-self: flex-start !important;
+    float: none !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td td:has(#altviews) a#product_photo_zoom_url,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td td:has(#altviews) a#product_photo_zoom_url2,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td td:has(#altviews) a#product_photo_zoom_url,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td td:has(#altviews) a#product_photo_zoom_url2,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td td:has(#altviews) a#product_photo_zoom_url,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td td:has(#altviews) a#product_photo_zoom_url2,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td td:has(#altviews) a#product_photo_zoom_url,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td td:has(#altviews) a#product_photo_zoom_url2 {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: auto !important;
+    order: 0 !important;
+  }
+
+  /* Same as above but #altviews + hero live inside a wrapper div inside td */
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):has(img#product_photo),
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):has(a#product_photo_zoom_url),
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):has(img#product_photo),
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):has(img#product_photo),
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):has(a#product_photo_zoom_url),
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):has(img#product_photo) {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) #altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) span#altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews) #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) span#altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews) #altviews {
+    order: -1 !important;
+    flex: 0 0 72px !important;
+    width: 72px !important;
+    max-width: 72px !important;
+    margin: 0 !important;
+    align-self: flex-start !important;
+    float: none !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) a#product_photo_zoom_url,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) a#product_photo_zoom_url2,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) a#product_photo_zoom_url,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) a#product_photo_zoom_url2 {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
   }
 }
