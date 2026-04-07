@@ -58,8 +58,8 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260408d: hide stray desktop search dup; PDP alt pull; custom-safe; mccabe ?v=20260408d -->
-<meta name="mc-deploy-verify" content="20260408d-search-pdp-alt">
+<!-- MC_DEPLOY_VERIFY_20260409a: inline hide dup search strip + custom-safe PDP; upload template + vspfiles/css/custom-safe.css; mccabe ?v=20260409a -->
+<meta name="mc-deploy-verify" content="20260409a-inline-css-upload-custom-safe">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -69,7 +69,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260408d" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260409a" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -306,6 +306,22 @@
       body.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
         border-bottom-color: #1a1a1a !important;
         border-bottom-width: 2px !important;
+      }
+      /* Duplicate strip: direct-child search blocks (order:20) are NOT the in-bar search — hide (inline = works if custom-safe.css never deployed) */
+      body:not(.is-home) header.header > .mc-header-search-below-nav,
+      body:not(.is-home) header.header > .header__section.header__section--middle,
+      body.productdetails header.header > .mc-header-search-below-nav,
+      body.productdetails header.header > .header__section.header__section--middle {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
+        border: 0 !important;
+        clip-path: inset(50%) !important;
       }
     }
   </style>
@@ -795,7 +811,7 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
 
           </div>
-<div class="col-xs-12 no-pad-lg mc-header-desktop-bar" data-mc-header-bar="20260401q">
+<div class="col-xs-12 no-pad-lg mc-header-desktop-bar" data-mc-header-bar="20260409a">
   <div class="microblock main-menu hidden-xs">
     <nav id="display_menu_1" class="menu" link-alignment="center"></nav>
   </div>
