@@ -7816,13 +7816,13 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       }, 50);
     });
     try {
-      mo.observe(ca, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
+      mo.observe(ca, { childList: true, subtree: true });
     } catch (e) {}
   })();
   (function observeV65ProductParentForLayout(){
     var debVp;
     function schedulePdpFix(){
-      if (!document.body.classList.contains(''mc-product-page'') && !document.body.classList.contains(''productdetails'')) return;
+      if (!document.body.classList.contains('mc-product-page') && !document.body.classList.contains('productdetails')) return;
       clearTimeout(debVp);
       debVp = setTimeout(function(){
         if (markProductPage()) forceProductFixes();
@@ -7837,16 +7837,16 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
           childList: true,
           subtree: true,
           attributes: true,
-          attributeFilter: [''style'', ''class'']
+          attributeFilter: ['style', 'class']
         });
       } catch (eVp) {}
     }
     function tryAttachVp(){
-      attachToVp(document.getElementById(''v65-product-parent''));
+      attachToVp(document.getElementById('v65-product-parent'));
     }
     tryAttachVp();
-    if (document.readyState === ''loading'') document.addEventListener(''DOMContentLoaded'', tryAttachVp);
-    window.addEventListener(''load'', tryAttachVp);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tryAttachVp);
+    window.addEventListener('load', tryAttachVp);
     setTimeout(tryAttachVp, 500);
     setTimeout(tryAttachVp, 2000);
     var attachPoll = 0;
@@ -8063,7 +8063,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       t = setTimeout(mcRunRelatedFix, 80);
     });
     try {
-      mo.observe(ca, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
+      mo.observe(ca, { childList: true, subtree: true });
     } catch (eMo) {}
   }
 })();
