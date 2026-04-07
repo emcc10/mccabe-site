@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY — LAST-WIN: strip ::before Search labels; PDP zoom left:-180px; see file end */
+/* MC_DEPLOY_VERIFY — LAST-WIN: strip ::before Search labels; PDP layout + single search underline; see file end */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
 /* RH-STYLE GLOBAL FONT */
@@ -92,9 +92,9 @@ header.header #collapsingSearch {
   border: none !important;
   border-radius: 0 !important;
   padding: 8px 20px 12px !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.22) !important;
+  /* Underline is only on .collapsing-search__form .row — a wrapper border stacked into a double line */
+  border-bottom: none !important;
   transition:
-    border-bottom-color 0.2s ease,
     background 0.22s ease,
     box-shadow 0.28s ease,
     transform 0.28s ease,
@@ -127,7 +127,7 @@ header.header #collapsingSearch {
     padding 0.22s ease !important;
 }
 
-header.header .collapsing-search:hover {
+body:not(.is-home) header.header .collapsing-search:hover .collapsing-search__form .row {
   border-bottom-color: rgba(0, 0, 0, 0.55) !important;
 }
 
@@ -140,8 +140,7 @@ header.header .collapsing-search:focus-within,
 html.mc-search-open header.header .collapsing-search,
 body.mc-search-open header.header .collapsing-search {
   background: #ffffff !important;
-  border-bottom-color: #1a1a1a !important;
-  border-bottom-width: 2px !important;
+  border-bottom: none !important;
   padding: 16px 20px 18px !important;
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.06) !important;
   transform: translateY(-3px) !important;
@@ -198,6 +197,13 @@ header.header .collapsing-search__form .row,
   align-items: center !important;
   gap: 0 !important;
   margin: 0 !important;
+}
+
+/* Non-home header search: one underline on the row only (wrapper has no border) */
+body:not(.is-home) header.header .collapsing-search__form .row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.22) !important;
+  padding-bottom: 6px !important;
+  box-sizing: border-box !important;
 }
 
 header.header .collapsing-search__input,
@@ -8391,7 +8397,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     object-fit: contain !important;
   }
 
-  /* Move main image LEFT so it no longer sits under the options */
+  /* Main image clears alt column (margin-left); do not negative-shift — it overlapped thumbs */
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
   body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2,
@@ -8403,7 +8409,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     display: block !important;
     position: relative !important;
     margin-left: 104px !important;
-    left: -180px !important;
+    left: 0 !important;
     z-index: 1 !important;
   }
 
@@ -8555,6 +8561,16 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     content: none !important;
   }
 
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .container {
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
   body:not(.is-home) .mc-header-desktop-bar .collapsing-search__input,
   body:not(.is-home) .mc-header-desktop-bar #search {
     border: 0 !important;
@@ -8616,6 +8632,16 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     content: none !important;
   }
 
+  #mcHeroSearchOverlay .collapsing-search__form .row::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  #mcHeroSearchOverlay .collapsing-search__form .container {
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
   #mcHeroSearchOverlay .collapsing-search__input,
   #mcHeroSearchOverlay #search {
     border: 0 !important;
@@ -8632,5 +8658,52 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 
   #mcHeroSearchOverlay #search::placeholder {
     color: rgba(255, 255, 255, 0.78) !important;
+  }
+}
+
+/* =========================================================
+   PDP WIDER LAYOUT — more room so main image clears thumbs + options
+   ========================================================= */
+@media (min-width: 992px) {
+  body.productdetails .vol-container,
+  body.productdetails .vol-inner,
+  body.productdetails .page-wrap,
+  body.mc-product-page .vol-container,
+  body.mc-product-page .vol-inner,
+  body.mc-product-page .page-wrap {
+    max-width: min(1580px, 98vw) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails .container--content,
+  body.mc-product-page .container--content,
+  body.productdetails .content_area-wrapper,
+  body.mc-product-page .content_area-wrapper {
+    max-width: min(1580px, 98vw) !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails #content_area,
+  body.mc-product-page #content_area {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    max-width: 100% !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child {
+    padding-right: 20px !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:last-child,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:last-child {
+    padding-left: 20px !important;
+    box-sizing: border-box !important;
   }
 }
