@@ -8185,7 +8185,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
   body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews {
     position: absolute !important;
-    top: 64px !important;
+    top: 0 !important;
     left: 0 !important;
     width: 86px !important;
     max-width: 86px !important;
@@ -8373,7 +8373,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
   body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews {
     position: absolute !important;
-    top: 64px !important;
+    top: 0 !important;
     left: 0 !important;
     width: 86px !important;
     max-width: 86px !important;
@@ -8955,7 +8955,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews,
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
   body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews {
-    top: 64px !important;
+    top: 0 !important;
   }
 
   body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2),
@@ -8973,22 +8973,38 @@ html.mc-beanbag-category .mc-member-grid-price {
   display: none !important;
 }
 
-/* LAST-WIN (992+): one "Search" string — input placeholder only (beats theme + earlier partial overrides). */
+/* Revert / last-win: duplicate "Search" (label + placeholder) — high specificity + strip row pseudo text */
 @media (min-width: 992px) {
-  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__label,
-  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__label__text,
-  #mcHeroSearchOverlay .collapsing-search__label,
-  #mcHeroSearchOverlay .collapsing-search__label__text {
+  html body:not(.is-home) header.header .mc-header-desktop-bar .collapsing-search__form .row::before,
+  html body:not(.is-home) header.header .mc-header-desktop-bar .collapsing-search__form .row::after {
+    content: none !important;
     display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
     width: 0 !important;
     height: 0 !important;
     overflow: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
+  }
+
+  html body:not(.is-home) header.header .mc-header-desktop-bar .collapsing-search__label,
+  html body:not(.is-home) header.header .mc-header-desktop-bar .collapsing-search__label__text,
+  html body #mcHeroSearchOverlay .collapsing-search__label,
+  html body #mcHeroSearchOverlay .collapsing-search__label__text {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-width: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
     position: absolute !important;
+    left: -9999px !important;
     clip-path: inset(50%) !important;
     pointer-events: none !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
   }
 }
