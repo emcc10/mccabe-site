@@ -8275,22 +8275,20 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     overflow: hidden !important;
   }
 
-  /* Visually hide the real <label> — placeholder carries "Search"; showing both was duplicate text.
-     (Do NOT override the earlier "hide label" rule — display:block here regressed duplicate Search.) */
+  /* Match earlier block: fully hide label text (visibility:visible + opacity:1 here caused duplicate "Search" to reappear). */
   body:not(.is-home) .mc-header-desktop-bar .collapsing-search__label,
   body:not(.is-home) .mc-header-desktop-bar .collapsing-search__label__text {
-    position: absolute !important;
-    width: 1px !important;
-    height: 1px !important;
-    padding: 0 !important;
-    margin: -1px !important;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
     overflow: hidden !important;
-    clip: rect(0, 0, 0, 0) !important;
-    white-space: nowrap !important;
-    border: 0 !important;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: absolute !important;
+    clip-path: inset(50%) !important;
+    pointer-events: none !important;
   }
 }
 
@@ -8921,18 +8919,20 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     content: none !important;
   }
 
-  /* One visible "Search" cue: placeholder only — keep <label> for a11y but clip (matches header bar fix). */
+  /* Placeholder-only cue on hero — hide label (same as header bar; clip still leaked duplicate text in some builds). */
   #mcHeroSearchOverlay .collapsing-search__label,
   #mcHeroSearchOverlay .collapsing-search__label__text {
-    position: absolute !important;
-    width: 1px !important;
-    height: 1px !important;
-    padding: 0 !important;
-    margin: -1px !important;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
     overflow: hidden !important;
-    clip: rect(0, 0, 0, 0) !important;
-    white-space: nowrap !important;
-    border: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: absolute !important;
+    clip-path: inset(50%) !important;
+    pointer-events: none !important;
   }
 }
 
@@ -8971,4 +8971,24 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 body.mc-beanbag-category .mc-member-grid-price,
 html.mc-beanbag-category .mc-member-grid-price {
   display: none !important;
+}
+
+/* LAST-WIN (992+): one "Search" string — input placeholder only (beats theme + earlier partial overrides). */
+@media (min-width: 992px) {
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__label,
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__label__text,
+  #mcHeroSearchOverlay .collapsing-search__label,
+  #mcHeroSearchOverlay .collapsing-search__label__text {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: absolute !important;
+    clip-path: inset(50%) !important;
+    pointer-events: none !important;
+  }
 }

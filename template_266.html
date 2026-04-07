@@ -10571,40 +10571,28 @@ try {
           ? window.mcListingCategoryIdFromVolusion()
           : null;
 
-      function beanBagUrlConflictsWithListing() {
-        return listingCat && listingCat !== '103';
+      /*
+       * If the URL resolves to a Volusion category id, only id 103 (bean bags) is the bean PLP.
+       * Fixes loveseat 157 and every other category where a stray hidden CategoryID=103 or fuzzy slug logic fired.
+       */
+      if (listingCat) {
+        return listingCat === '103';
       }
 
+      /* No id in URL — fall back to slug / query only (never trust hidden inputs alone). */
       if (path.indexOf('bean-bag') !== -1 || path.indexOf('bean_bag') !== -1 || path.indexOf('beanbag') !== -1) {
-        if (beanBagUrlConflictsWithListing()) return false;
         return true;
       }
       if (path.indexOf('bean') !== -1 && path.indexOf('bag') !== -1) {
-        if (beanBagUrlConflictsWithListing()) return false;
         return true;
       }
-      if (path.indexOf('/103.htm') !== -1) {
-        if (beanBagUrlConflictsWithListing()) return false;
+      if (path.indexOf('/103.htm') !== -1 || path.indexOf('/103.html') !== -1) {
         return true;
       }
       var cid = gq('categoryid') || gq('category_id');
       var cParam = gq('c');
       if (cid === '103' || cParam === '103') {
-        if (beanBagUrlConflictsWithListing()) return false;
         return true;
-      }
-      var catInp =
-        document.querySelector(
-          '#content_area input[name="CategoryID"], #content_area input[name="categoryid"], #content_area input[name="Category_Id"]'
-        ) ||
-        document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
-      var inpv = catInp && String(catInp.value || '').trim();
-      if (inpv === '103') {
-        /* A promo/widget can expose CategoryID=103 before the real listing input (e.g. cat 157). */
-        if (beanBagUrlConflictsWithListing()) return false;
-        /* If we could not resolve the URL to a category id, do NOT trust a lone hidden field — that was hiding member pricing on 157. */
-        if (listingCat === null || listingCat === '') return false;
-        return listingCat === '103';
       }
       return false;
     } catch (eBeanPath) {
