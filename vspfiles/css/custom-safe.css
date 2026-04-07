@@ -8662,30 +8662,53 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   PDP WIDER LAYOUT — more room so main image clears thumbs + options
+   MAIN SHELL — keep Volusion outer wrappers centered when max-width caps width
    ========================================================= */
 @media (min-width: 992px) {
-  body.productdetails .vol-container,
-  body.productdetails .vol-inner,
-  body.productdetails .page-wrap,
-  body.mc-product-page .vol-container,
-  body.mc-product-page .vol-inner,
-  body.mc-product-page .page-wrap {
+  article.vol-container,
+  .vol-container,
+  .vol-inner,
+  .page-wrap {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .container--content,
+  .content_area-wrapper {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+/* =========================================================
+   PDP WIDER LAYOUT — only on real product detail (has #v65-product-parent)
+   ========================================================= */
+@media (min-width: 992px) {
+  body.productdetails:has(#v65-product-parent) .vol-container,
+  body.productdetails:has(#v65-product-parent) .vol-inner,
+  body.productdetails:has(#v65-product-parent) .page-wrap,
+  body.mc-product-page:has(#v65-product-parent) .vol-container,
+  body.mc-product-page:has(#v65-product-parent) .vol-inner,
+  body.mc-product-page:has(#v65-product-parent) .page-wrap {
     max-width: min(1580px, 98vw) !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
 
-  body.productdetails .container--content,
-  body.mc-product-page .container--content,
-  body.productdetails .content_area-wrapper,
-  body.mc-product-page .content_area-wrapper {
+  body.productdetails:has(#v65-product-parent) .container--content,
+  body.mc-product-page:has(#v65-product-parent) .container--content,
+  body.productdetails:has(#v65-product-parent) .content_area-wrapper,
+  body.mc-product-page:has(#v65-product-parent) .content_area-wrapper {
     max-width: min(1580px, 98vw) !important;
     box-sizing: border-box !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
 
-  body.productdetails #content_area,
-  body.mc-product-page #content_area {
+  body.productdetails:has(#v65-product-parent) #content_area,
+  body.mc-product-page:has(#v65-product-parent) #content_area {
     margin-left: auto !important;
     margin-right: auto !important;
     max-width: 100% !important;
