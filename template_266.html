@@ -10475,21 +10475,43 @@ try {
     }
   }
 
+  /** Exact match only — indexOf('categoryid=103') falsely matches categoryid=1039; c=103 matches c=1030. */
+  function mcGetQueryParamValue(name) {
+    var q = (location.search || '').replace(/^\?/, '');
+    if (!q) return null;
+    var want = String(name || '').toLowerCase();
+    var parts = q.split('&');
+    var i;
+    for (i = 0; i < parts.length; i++) {
+      var p = parts[i].split('=');
+      var k = decodeURIComponent((p[0] || '').replace(/\+/g, ' ')).toLowerCase();
+      if (k === want) {
+        return decodeURIComponent((p.slice(1).join('=') || '').replace(/\+/g, ' '));
+      }
+    }
+    return null;
+  }
+
   function mcPathLooksLikeBeanBagCategory() {
     try {
       var path = (location.pathname || '').toLowerCase();
-      var q = (location.search || '').toLowerCase();
-      var href = (typeof location.href === 'string' ? location.href : '').toLowerCase();
       if (path.indexOf('bean-bag') !== -1 || path.indexOf('bean_bag') !== -1 || path.indexOf('beanbag') !== -1) {
         return true;
       }
       if (path.indexOf('bean') !== -1 && path.indexOf('bag') !== -1) return true;
       if (path.indexOf('/103.htm') !== -1) return true;
-      if (q.indexOf('categoryid=103') !== -1 || q.indexOf('c=103') !== -1 || q.indexOf('category_id=103') !== -1) {
-        return true;
-      }
-      if (href.indexOf('categoryid=103') !== -1 || href.indexOf('category_id=103') !== -1) return true;
-      var catInp = document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
+      var cid =
+        mcGetQueryParamValue('categoryid') ||
+        mcGetQueryParamValue('CategoryID') ||
+        mcGetQueryParamValue('category_id') ||
+        mcGetQueryParamValue('Category_Id');
+      var cParam = mcGetQueryParamValue('c');
+      if (cid === '103' || cParam === '103') return true;
+      var catInp =
+        document.querySelector(
+          '#content_area input[name="CategoryID"], #content_area input[name="categoryid"], #content_area input[name="Category_Id"]'
+        ) ||
+        document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
       if (catInp && String(catInp.value || '').trim() === '103') return true;
       return false;
     } catch (eBeanPath) {

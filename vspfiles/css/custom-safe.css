@@ -8275,10 +8275,19 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     overflow: hidden !important;
   }
 
-  /* Keep label/input clean in the one real search bar */
+  /* Visually hide the real <label> — placeholder carries "Search"; showing both was duplicate text.
+     (Do NOT override the earlier "hide label" rule — display:block here regressed duplicate Search.) */
   body:not(.is-home) .mc-header-desktop-bar .collapsing-search__label,
   body:not(.is-home) .mc-header-desktop-bar .collapsing-search__label__text {
-    position: static !important;
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -8910,6 +8919,20 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   #mcHeroSearchOverlay .collapsing-search__form .row::before {
     display: none !important;
     content: none !important;
+  }
+
+  /* One visible "Search" cue: placeholder only — keep <label> for a11y but clip (matches header bar fix). */
+  #mcHeroSearchOverlay .collapsing-search__label,
+  #mcHeroSearchOverlay .collapsing-search__label__text {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
   }
 }
 
