@@ -8943,8 +8943,9 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 }
 
-/* Bean bag category PLP: hide member-price blocks if any slip through (JS removes them first) */
-body.category.mc-beanbag-category .mc-member-grid-price,
-html.category body.mc-beanbag-category .mc-member-grid-price {
+/* Bean bag category PLP: hide member-price blocks if any slip through (JS removes them first).
+   Do not require body.category — some listing templates omit it while JS still sets mc-beanbag-category. */
+body.mc-beanbag-category .mc-member-grid-price,
+html.mc-beanbag-category .mc-member-grid-price {
   display: none !important;
 }

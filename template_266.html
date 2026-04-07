@@ -10476,17 +10476,25 @@ try {
   }
 
   function mcPathLooksLikeBeanBagCategory() {
-    var path = (location.pathname || '').toLowerCase();
-    var q = (location.search || '').toLowerCase();
-    if (path.indexOf('bean-bag') !== -1 || path.indexOf('bean_bag') !== -1 || path.indexOf('beanbag') !== -1) {
-      return true;
+    try {
+      var path = (location.pathname || '').toLowerCase();
+      var q = (location.search || '').toLowerCase();
+      var href = (typeof location.href === 'string' ? location.href : '').toLowerCase();
+      if (path.indexOf('bean-bag') !== -1 || path.indexOf('bean_bag') !== -1 || path.indexOf('beanbag') !== -1) {
+        return true;
+      }
+      if (path.indexOf('bean') !== -1 && path.indexOf('bag') !== -1) return true;
+      if (path.indexOf('/103.htm') !== -1) return true;
+      if (q.indexOf('categoryid=103') !== -1 || q.indexOf('c=103') !== -1 || q.indexOf('category_id=103') !== -1) {
+        return true;
+      }
+      if (href.indexOf('categoryid=103') !== -1 || href.indexOf('category_id=103') !== -1) return true;
+      var catInp = document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
+      if (catInp && String(catInp.value || '').trim() === '103') return true;
+      return false;
+    } catch (eBeanPath) {
+      return false;
     }
-    if (path.indexOf('bean') !== -1 && path.indexOf('bag') !== -1) return true;
-    if (path.indexOf('/103.htm') !== -1) return true;
-    if (q.indexOf('categoryid=103') !== -1 || q.indexOf('c=103') !== -1 || q.indexOf('category_id=103') !== -1) {
-      return true;
-    }
-    return false;
   }
 
   function mcInjectBeanBagPlpSubline() {
@@ -10789,16 +10797,9 @@ try {
   }
 
   function mcPaintCategoryGridMemberPricing() {
-    var products = mcCollectGridProductCards();
-    if (!products.length) return;
-    var st = window.__mcMemberPricing || {};
-    var unlocked = !!st.unlocked;
+    var beanCat = mcPathLooksLikeBeanBagCategory();
     try {
-      if (unlocked) document.body.classList.add('mc-member-logged-in');
-      else document.body.classList.remove('mc-member-logged-in');
-    } catch (eCls2) {}
-    try {
-      if (mcPathLooksLikeBeanBagCategory()) {
+      if (beanCat) {
         document.body.classList.add('mc-beanbag-category');
         if (document.documentElement) document.documentElement.classList.add('mc-beanbag-category');
       } else {
@@ -10809,11 +10810,33 @@ try {
     try {
       mcInjectBeanBagPlpSubline();
     } catch (eBean0) {}
+
+    var products = mcCollectGridProductCards();
+    if (beanCat && !products.length) {
+      try {
+        var stray = document.querySelectorAll(
+          '#content_area .mc-member-grid-price, #content_area_home .mc-member-grid-price, [role="main"] .mc-member-grid-price'
+        );
+        var si;
+        for (si = 0; si < stray.length; si++) {
+          var blk = stray[si];
+          if (blk && blk.parentNode) blk.parentNode.removeChild(blk);
+        }
+      } catch (eStrayBean) {}
+    }
+    if (!products.length) return;
+
+    var st = window.__mcMemberPricing || {};
+    var unlocked = !!st.unlocked;
+    try {
+      if (unlocked) document.body.classList.add('mc-member-logged-in');
+      else document.body.classList.remove('mc-member-logged-in');
+    } catch (eCls2) {}
     var i;
     for (i = 0; i < products.length; i++) {
       var card = products[i];
       if (card.closest && card.closest('#relateditems, table.relateditems')) continue;
-      if (mcPathLooksLikeBeanBagCategory()) {
+      if (beanCat) {
         mcRemoveMemberGridBlocks(card);
         try {
           card.removeAttribute('data-mc-member-grid');
