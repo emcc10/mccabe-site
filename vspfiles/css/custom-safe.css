@@ -8470,3 +8470,160 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     flex: 0 0 auto !important;
   }
 }
+
+/* =========================================================
+   FINAL SEARCH FIX — HERO ALIGNMENT + REMOVE EXTRA LABEL/LINE
+   ========================================================= */
+@media (min-width: 992px) {
+  /* ---------------------------------------------------------
+     1) Kill the extra standalone uppercase SEARCH text/toggle
+     --------------------------------------------------------- */
+  header.header #toggle1,
+  header.header #toggle1.search__toggle,
+  header.header .search__wrapper .toggle,
+  header.header .search__wrapper .searchToggle,
+  header.header .search__wrapper .search__toggle,
+  #mcHeroSearchOverlay #toggle1,
+  #mcHeroSearchOverlay #toggle1.search__toggle,
+  #mcHeroSearchOverlay .search__wrapper .toggle,
+  #mcHeroSearchOverlay .search__wrapper .searchToggle,
+  #mcHeroSearchOverlay .search__wrapper .search__toggle,
+  header.header .toggle__text,
+  header.header .search__toggle .toggle__text,
+  #mcHeroSearchOverlay .toggle__text,
+  #mcHeroSearchOverlay .search__toggle .toggle__text {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  header.header .search__wrapper,
+  #mcHeroSearchOverlay .search__wrapper {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    flex: 0 0 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* ---------------------------------------------------------
+     2) NON-HOME DESKTOP: keep one clean search line only
+     --------------------------------------------------------- */
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap {
+    border-bottom: none !important;
+    box-shadow: none !important;
+    padding-bottom: 0 !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search,
+  body:not(.is-home) .mc-header-desktop-bar #collapsingSearch {
+    border-bottom: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form,
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .container {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row {
+    display: flex !important;
+    align-items: flex-end !important;
+    margin: 0 !important;
+    padding: 0 0 6px 0 !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.28) !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__input,
+  body:not(.is-home) .mc-header-desktop-bar #search {
+    border: 0 !important;
+    border-bottom: 0 !important;
+    border-right: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 24px !important;
+    line-height: 24px !important;
+  }
+
+  /* ---------------------------------------------------------
+     3) HOMEPAGE HERO: move search up to align with main menu
+     --------------------------------------------------------- */
+  #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
+    top: 18px !important;
+    z-index: 40 !important;
+    align-items: flex-start !important;
+  }
+
+  #slideshow-container .mc-hero-search-inner {
+    width: min(320px, 34vw) !important;
+    max-width: min(320px, 34vw) !important;
+    margin-top: 0 !important;
+  }
+
+  #mcHeroSearchOverlay .collapsing-search,
+  #mcHeroSearchOverlay #collapsingSearch {
+    border-bottom: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #mcHeroSearchOverlay .collapsing-search__form,
+  #mcHeroSearchOverlay .collapsing-search__form .container {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #mcHeroSearchOverlay .collapsing-search__form .row {
+    display: flex !important;
+    align-items: flex-end !important;
+    margin: 0 !important;
+    padding: 0 0 6px 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.55) !important;
+  }
+
+  #mcHeroSearchOverlay .collapsing-search__form .row::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  #mcHeroSearchOverlay .collapsing-search__input,
+  #mcHeroSearchOverlay #search {
+    border: 0 !important;
+    border-bottom: 0 !important;
+    border-right: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 24px !important;
+    line-height: 24px !important;
+    color: #fff !important;
+  }
+
+  #mcHeroSearchOverlay #search::placeholder {
+    color: rgba(255, 255, 255, 0.78) !important;
+  }
+}
