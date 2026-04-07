@@ -2336,29 +2336,30 @@ body.mc-product-page select.mc-native-leather {
   body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-media-td,
   body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-media-td {
     flex: 1 1 0% !important;
-    flex-basis: 52% !important;
+    flex-basis: 55% !important;
     width: auto !important;
     min-width: 0 !important;
-    max-width: 56% !important;
+    max-width: 58% !important;
     vertical-align: top !important;
     position: relative !important;
     z-index: 1 !important;
-    overflow-x: hidden !important;
+    overflow-x: visible !important;
     overflow-y: visible !important;
   }
 
   body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td,
   body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td {
     flex: 1 1 0% !important;
-    flex-basis: 44% !important;
+    flex-basis: 42% !important;
     width: auto !important;
     min-width: 0 !important;
-    max-width: 44% !important;
+    max-width: 42% !important;
     vertical-align: top !important;
     position: relative !important;
     z-index: 5 !important;
     padding-left: 18px !important;
-    overflow-x: hidden !important;
+    padding-right: 16px !important;
+    overflow-x: visible !important;
     overflow-y: visible !important;
   }
 
@@ -7789,11 +7790,11 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     box-sizing: border-box !important;
   }
 
-  /* Hero table (contains main image) sits beside thumbs on row 2 */
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > table:has(img#product_photo),
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > table:has(img#product_photo),
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > table:has(img#product_photo),
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > table:has(img#product_photo) {
+  /* Hero table beside thumbs — skip :first-of-type when logo+hero share one table */
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > table:has(img#product_photo):not(:first-of-type),
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > table:has(img#product_photo):not(:first-of-type),
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > table:has(img#product_photo):not(:first-of-type),
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > table:has(img#product_photo):not(:first-of-type) {
     grid-column: 2 !important;
     grid-row: 2 !important;
     min-width: 0 !important;
