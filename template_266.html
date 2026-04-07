@@ -7356,6 +7356,44 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return null;
   }
 
+  /** Path id, else `categoryid` / `c` query (e.g. category.asp?categoryid=157) — needed so stray DOM fields don’t imply the wrong category. */
+  function mcListingCategoryIdFromVolusion() {
+    var fromPath =
+      typeof mcListingCategoryIdFromPath === 'function' ? mcListingCategoryIdFromPath() : null;
+    var cid = mcGetQueryParamValue('categoryid') || mcGetQueryParamValue('category_id');
+    var cParam = mcGetQueryParamValue('c');
+    var fromQuery = null;
+    if (cid && /^\d+$/.test(String(cid).trim())) fromQuery = String(cid).trim();
+    else if (cParam && /^\d+$/.test(String(cParam).trim())) fromQuery = String(cParam).trim();
+    if (fromPath && fromQuery && fromPath !== fromQuery) return fromPath;
+    return fromPath || fromQuery || null;
+  }
+
+  /** Ensures PLP member block reorder + category-scoped CSS apply (fixCategoryGrid may run after first paint). */
+  function mcEnsureCategoryListingClasses() {
+    try {
+      var b = document.body;
+      if (!b || b.classList.contains('productdetails')) return;
+      if (b.classList.contains('is-home')) return;
+      var id = mcListingCategoryIdFromVolusion();
+      var path = (location.pathname || '').toLowerCase();
+      var hasListParams = !!(
+        mcGetQueryParamValue('categoryid') ||
+        mcGetQueryParamValue('category_id') ||
+        mcGetQueryParamValue('c')
+      );
+      var looksListing =
+        !!id ||
+        /-s\/\d+\.htm/i.test(path) ||
+        (hasListParams && /category\.asp/i.test(path));
+      if (!looksListing) return;
+      var ca = document.getElementById('content_area');
+      if (!ca || !ca.querySelector('.v-product, .v-product-grid, li.v-product')) return;
+      document.documentElement.classList.add('category');
+      b.classList.add('category');
+    } catch (eEcat) {}
+  }
+
   function isBeanBagProductPage(){
     try {
       var pc = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
@@ -7700,6 +7738,13 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     window.__mcMemberPricing.promise = null;
     window.detectMemberPricingState();
   });
+
+  try {
+    window.mcGetQueryParamValue = mcGetQueryParamValue;
+    window.mcListingCategoryIdFromPath = mcListingCategoryIdFromPath;
+    window.mcListingCategoryIdFromVolusion = mcListingCategoryIdFromVolusion;
+    window.mcEnsureCategoryListingClasses = mcEnsureCategoryListingClasses;
+  } catch (eMcListingWin) {}
 })();
 </script>
 <script>
@@ -10505,29 +10550,38 @@ try {
 
   function mcPathLooksLikeBeanBagCategory() {
     try {
+      var gq =
+        typeof window.mcGetQueryParamValue === 'function'
+          ? window.mcGetQueryParamValue
+          : function () {
+              return null;
+            };
       var path = (location.pathname || '').toLowerCase();
-      var pathCat = typeof mcListingCategoryIdFromPath === 'function' ? mcListingCategoryIdFromPath() : null;
+      var listingCat =
+        typeof window.mcListingCategoryIdFromVolusion === 'function'
+          ? window.mcListingCategoryIdFromVolusion()
+          : null;
 
-      function beanBagUrlConflictsWithPath() {
-        return pathCat && pathCat !== '103';
+      function beanBagUrlConflictsWithListing() {
+        return listingCat && listingCat !== '103';
       }
 
       if (path.indexOf('bean-bag') !== -1 || path.indexOf('bean_bag') !== -1 || path.indexOf('beanbag') !== -1) {
-        if (beanBagUrlConflictsWithPath()) return false;
+        if (beanBagUrlConflictsWithListing()) return false;
         return true;
       }
       if (path.indexOf('bean') !== -1 && path.indexOf('bag') !== -1) {
-        if (beanBagUrlConflictsWithPath()) return false;
+        if (beanBagUrlConflictsWithListing()) return false;
         return true;
       }
       if (path.indexOf('/103.htm') !== -1) {
-        if (beanBagUrlConflictsWithPath()) return false;
+        if (beanBagUrlConflictsWithListing()) return false;
         return true;
       }
-      var cid = mcGetQueryParamValue('categoryid') || mcGetQueryParamValue('category_id');
-      var cParam = mcGetQueryParamValue('c');
+      var cid = gq('categoryid') || gq('category_id');
+      var cParam = gq('c');
       if (cid === '103' || cParam === '103') {
-        if (beanBagUrlConflictsWithPath()) return false;
+        if (beanBagUrlConflictsWithListing()) return false;
         return true;
       }
       var catInp =
@@ -10538,7 +10592,7 @@ try {
       var inpv = catInp && String(catInp.value || '').trim();
       if (inpv === '103') {
         /* A promo/widget can expose CategoryID=103 earlier in the DOM than the real listing (e.g. Stationary Loveseats -s/157.htm). */
-        if (beanBagUrlConflictsWithPath()) return false;
+        if (beanBagUrlConflictsWithListing()) return false;
         return true;
       }
       return false;
@@ -10847,6 +10901,9 @@ try {
   }
 
   function mcPaintCategoryGridMemberPricing() {
+    try {
+      if (typeof window.mcEnsureCategoryListingClasses === 'function') window.mcEnsureCategoryListingClasses();
+    } catch (eEnsCat) {}
     var beanCat = mcPathLooksLikeBeanBagCategory();
     try {
       if (beanCat) {
