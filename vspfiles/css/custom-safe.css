@@ -571,7 +571,8 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   /* Align with .hero-menu (top: 18px); keep search top-right in overlay */
   #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
     top: 18px !important;
-    z-index: 40 !important;
+    /* Below .hero-menu (35) so the overlay never stacks over nav links */
+    z-index: 22 !important;
     align-items: flex-start !important;
   }
 }
@@ -1087,7 +1088,8 @@ body:not(.is-home) header.header {
   flex-wrap: nowrap !important;
   align-items: stretch !important;
   visibility: visible !important;
-  margin-top: -45px;
+  /* Was -45px — pulled the nav row under the viewport top (menu looked clipped) */
+  margin-top: 0 !important;
 }
 
 /* Interior: logo row first, main menu (#display_menu_1) second, search strip last — beats theme float/order */
@@ -8569,9 +8571,14 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   /* ---------------------------------------------------------
      3) HOMEPAGE HERO: move search up to align with main menu
      --------------------------------------------------------- */
+  #slideshow-container .hero-menu {
+    z-index: 45 !important;
+  }
+
   #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
     top: 18px !important;
-    z-index: 40 !important;
+    /* Stay below .hero-menu so nav is never covered / clipped by overlay */
+    z-index: 22 !important;
     align-items: flex-start !important;
   }
 
