@@ -324,42 +324,8 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     margin-bottom: 0 !important;
   }
 
-  /* Volusion often outputs options column before photo in source order; flex row + order = gallery left, buy box right */
-  body.productdetails #v65-product-parent tr:has(> td.mc-pdp-media-td):has(> td.mc-pdp-options-td),
-  body.mc-product-page #v65-product-parent tr:has(> td.mc-pdp-media-td):has(> td.mc-pdp-options-td),
-  body.productdetails #v65-product-parent tr:has(> td#product_photo_td):has(> td.mc-pdp-options-td),
-  body.mc-product-page #v65-product-parent tr:has(> td#product_photo_td):has(> td.mc-pdp-options-td) {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    gap: 28px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
+  /* Desktop row layout: do NOT set display:flex on <tr> — it breaks the table and stacks rows (options under images). Column order is handled in template JS (ensureDesktopPdpTwoColumnRow). */
 
-  body.productdetails #v65-product-parent tr:has(> td.mc-pdp-media-td):has(> td.mc-pdp-options-td) > td.mc-pdp-media-td,
-  body.mc-product-page #v65-product-parent tr:has(> td.mc-pdp-media-td):has(> td.mc-pdp-options-td) > td.mc-pdp-media-td,
-  body.productdetails #v65-product-parent tr:has(> td#product_photo_td):has(> td.mc-pdp-options-td) > td#product_photo_td,
-  body.mc-product-page #v65-product-parent tr:has(> td#product_photo_td):has(> td.mc-pdp-options-td) > td#product_photo_td {
-    order: 1 !important;
-    flex: 1 1 52% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
-
-  body.productdetails #v65-product-parent tr:has(> td.mc-pdp-media-td):has(> td.mc-pdp-options-td) > td.mc-pdp-options-td,
-  body.mc-product-page #v65-product-parent tr:has(> td.mc-pdp-media-td):has(> td.mc-pdp-options-td) > td.mc-pdp-options-td,
-  body.productdetails #v65-product-parent tr:has(> td#product_photo_td):has(> td.mc-pdp-options-td) > td.mc-pdp-options-td,
-  body.mc-product-page #v65-product-parent tr:has(> td#product_photo_td):has(> td.mc-pdp-options-td) > td.mc-pdp-options-td {
-    order: 2 !important;
-    flex: 1 1 42% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    display: block !important;
-    vertical-align: top !important;
-  }
 
   body.mc-product-page #content_area #options_table,
   body.mc-product-page #content_area table[id*="options_table"] {
@@ -371,7 +337,7 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     overflow: hidden !important;
   }
 
-  /* Layout cells stay table-cell; media + options use flex row (see :has rules above), not forced table-cell */
+  /* Layout cells stay table-cell; media + options cells stay normal table-cells in a real <tr> (JS may reorder td); other cells: */
   body.productdetails #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td):not(.mc-pdp-options-td),
   body.mc-product-page #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td):not(.mc-pdp-options-td),
   body.productdetails #content_area #v65-product-parent td:not(#product_photo_td):not(.mc-pdp-media-td):not(.mc-pdp-options-td),
