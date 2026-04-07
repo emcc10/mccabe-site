@@ -58,8 +58,7 @@
   };
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260401: PDP flex thumbs+hero; mccabe-overrides ?v=202604003l -->
-<meta name="mc-deploy-verify" content="20260401pdp-css">
+<!-- MC_DEPLOY_VERIFY_20260401: PDP flex thumbs+hero; mccabe-overrides ?v=202604003m"mc-deploy-verify" content="20260401pdp-css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -69,7 +68,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=202604003l" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=202604003m" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -7787,7 +7786,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var t = setInterval(function () {
       tries++;
       forceProductFixes();
-      if (tries >= 25) clearInterval(t);
+      if (tries >= 80) clearInterval(t);
     }, 400);
   }
 
@@ -7799,6 +7798,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   window.addEventListener('load', function(){
     setTimeout(forceProductFixes, 0);
     setTimeout(forceProductFixes, 800);
+    setTimeout(forceProductFixes, 1600);
+    setTimeout(forceProductFixes, 3200);
+    setTimeout(forceProductFixes, 6000);
+    setTimeout(forceProductFixes, 12000);
   });
 
   (function observeContentAreaForPdp(){
@@ -7813,8 +7816,45 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       }, 50);
     });
     try {
-      mo.observe(ca, { childList: true, subtree: true });
+      mo.observe(ca, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
     } catch (e) {}
+  })();
+  (function observeV65ProductParentForLayout(){
+    var debVp;
+    function schedulePdpFix(){
+      if (!document.body.classList.contains(''mc-product-page'') && !document.body.classList.contains(''productdetails'')) return;
+      clearTimeout(debVp);
+      debVp = setTimeout(function(){
+        if (markProductPage()) forceProductFixes();
+      }, 100);
+    }
+    function attachToVp(vp){
+      if (!vp || vp.__mcPdpVpLayoutObserver) return;
+      vp.__mcPdpVpLayoutObserver = true;
+      try {
+        var moVp = new MutationObserver(schedulePdpFix);
+        moVp.observe(vp, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: [''style'', ''class'']
+        });
+      } catch (eVp) {}
+    }
+    function tryAttachVp(){
+      attachToVp(document.getElementById(''v65-product-parent''));
+    }
+    tryAttachVp();
+    if (document.readyState === ''loading'') document.addEventListener(''DOMContentLoaded'', tryAttachVp);
+    window.addEventListener(''load'', tryAttachVp);
+    setTimeout(tryAttachVp, 500);
+    setTimeout(tryAttachVp, 2000);
+    var attachPoll = 0;
+    var attachIv = setInterval(function(){
+      attachPoll++;
+      tryAttachVp();
+      if (attachPoll >= 60) clearInterval(attachIv);
+    }, 250);
   })();
 
   /* #v65-product-parent may be injected outside #content_area; catch when it appears anywhere. */
@@ -8023,7 +8063,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       t = setTimeout(mcRunRelatedFix, 80);
     });
     try {
-      mo.observe(ca, { childList: true, subtree: true });
+      mo.observe(ca, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
     } catch (eMo) {}
   }
 })();
