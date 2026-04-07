@@ -6902,14 +6902,14 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
     box-sizing: border-box !important;
   }
 
-  /* JS wraps thumbs+hero in .mc-prod-media-wrap; min-width:0 + flex td collapses the wrap and hides the hero */
+  /* Wrap can sit in a narrow flex td — never force a 600px min on the hero (clips / white box). */
   body.mc-product-page #v65-product-parent #product_photo_td .mc-prod-media-wrap,
   body.productdetails #v65-product-parent #product_photo_td .mc-prod-media-wrap,
   body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td .mc-prod-media-wrap,
   body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td .mc-prod-media-wrap,
   body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .mc-prod-media-wrap,
   body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td .mc-prod-media-wrap {
-    min-width: min(600px, 100%) !important;
+    min-width: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     flex: 1 1 auto !important;
@@ -6920,7 +6920,7 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
   body.productdetails #v65-product-parent img#product_photo,
   body.mc-product-page #content_area #v65-product-parent img#product_photo,
   body.productdetails #content_area #v65-product-parent img#product_photo {
-    min-width: min(600px, 100%) !important;
+    min-width: 0 !important;
     max-width: 100% !important;
     width: auto !important;
     height: auto !important;
@@ -7773,11 +7773,11 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 }
 
 /* =========================================================
-   McCabe PDP desktop media — SINGLE SOURCE (2026-04-06)
-   Volusion order is typically hero link first, #altviews after.
-   float:right on the zoom link + float:left on thumbs places thumbs on the
-   left and hero beside them; overflow:hidden on the cell forms a BFC.
-   No flex on #product_photo_td / .mc-pdp-media-td; no [id*="altview"].
+   McCabe PDP desktop media — SINGLE SOURCE (2026-04-07)
+   Keep <td> as table-cell (do not set display:grid/flex on the td — breaks tables).
+   Thumbs: float left. Hero link: block + overflow:hidden forms BFC beside the float
+   (no float:right / no fixed 600px min on the img — those caused white/empty heroes).
+   No [id*="altview"] selectors.
    ========================================================= */
 @media (min-width: 992px) {
   body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td,
@@ -7785,7 +7785,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
   body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
     vertical-align: top !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   body.productdetails :is(#content_area, #v65-product-parent) #altviews,
@@ -7837,13 +7837,13 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2,
   body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
   body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2 {
-    float: right !important;
+    float: none !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     overflow: hidden !important;
-    width: calc(100% - 84px) !important;
-    max-width: 100% !important;
+    width: auto !important;
+    max-width: none !important;
     margin: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
