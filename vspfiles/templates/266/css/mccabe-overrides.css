@@ -224,19 +224,7 @@ body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
     margin: 0 !important;
     float: none !important;
     clear: none !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    overflow: visible !important;
-    width: auto !important;
-    max-width: 700px !important;
-    margin: 0 0 0 82px !important;
-    float: none !important;
-    clear: none !important;
+  
   }
 
   body.productdetails :is(#content_area, #v65-product-parent) #altviews,
