@@ -1,4 +1,4 @@
-/* MC_DEPLOY_VERIFY — FINAL FORCE FIX end: non-home dup search + PDP #altviews absolute (see file bottom) */
+/* MC_DEPLOY_VERIFY — bottom: hide search toggles + PDP zoom left -140px; see FINAL FORCE FIX REMOVE EXTRA SEARCH LABEL */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
 /* RH-STYLE GLOBAL FONT */
@@ -8297,5 +8297,122 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
     position: relative !important;
     overflow: visible !important;
+  }
+}
+
+/* =========================================================
+   FINAL FORCE FIX — REMOVE EXTRA SEARCH LABEL + MOVE PDP IMAGE LEFT
+   ========================================================= */
+@media (min-width: 992px) {
+  /* 1) Remove the extra uppercase SEARCH label everywhere on desktop */
+  header.header .search__wrapper .search__toggle,
+  header.header .search__wrapper .searchToggle,
+  body:not(.is-home) header.header .search__wrapper .search__toggle,
+  body:not(.is-home) header.header .search__wrapper .searchToggle,
+  #mcHeroSearchOverlay .search__wrapper .search__toggle,
+  #mcHeroSearchOverlay .search__wrapper .searchToggle {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Keep the real search input visible */
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-below-nav,
+  body:not(.is-home) .mc-header-desktop-bar .header__section--middle,
+  body:not(.is-home) .mc-header-desktop-bar #collapsingSearch,
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search,
+  #mcHeroSearchOverlay .mc-header-search-below-nav,
+  #mcHeroSearchOverlay .header__section--middle,
+  #mcHeroSearchOverlay #collapsingSearch,
+  #mcHeroSearchOverlay .collapsing-search {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* 2) Real live PDP left media cell */
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child {
+    position: relative !important;
+    vertical-align: top !important;
+    overflow: visible !important;
+  }
+
+  /* Alt thumbs stay on the left and near the top */
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 86px !important;
+    max-width: 86px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    z-index: 5 !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews a,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews a,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews a,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews a {
+    display: block !important;
+    width: 86px !important;
+    max-width: 86px !important;
+    margin: 0 0 10px 0 !important;
+    padding: 0 !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews img,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews img,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews img,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews img {
+    display: block !important;
+    width: 86px !important;
+    max-width: 86px !important;
+    height: auto !important;
+    max-height: 86px !important;
+    margin: 0 !important;
+    object-fit: contain !important;
+  }
+
+  /* Move main image LEFT so it no longer sits under the options */
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo_zoom_url2 {
+    display: block !important;
+    position: relative !important;
+    margin-left: 104px !important;
+    left: -140px !important;
+    z-index: 1 !important;
+  }
+
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child #product_photo,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child #product_photo {
+    display: block !important;
+    max-width: 560px !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
   }
 }
