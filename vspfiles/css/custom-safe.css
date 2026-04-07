@@ -2298,35 +2298,6 @@ body.mc-has-leather #content_area label.mc-native-leather {
   }
 }
 
-/* Desktop media wrap (created by JS below) */
-@media (min-width: 992px) {
-  body.mc-product-page .mc-pdp-media {
-    display: flex !important;
-    align-items: flex-start !important;
-    gap: 14px !important;
-    width: 100% !important;
-    margin: 0 0 12px 0 !important;
-  }
-
-  body.mc-product-page .mc-pdp-media .mc-pdp-thumbs {
-    width: 86px !important;
-    min-width: 86px !important;
-  }
-
-  body.mc-product-page .mc-pdp-media .mc-pdp-thumbs img {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    margin: 0 0 8px 0 !important;
-  }
-
-  body.mc-product-page .mc-pdp-media .mc-pdp-main {
-    flex: 1 1 auto !important;
-    min-width: 240px !important;
-  }
-
-
-
 /* Remove italics on PDP */
 body.mc-product-page #content_area h1,
 body.mc-product-page #content_area h2,
@@ -2403,19 +2374,6 @@ body.mc-product-page select.mc-native-leather {
     body.mc-product-page #content_area table.mc-pdp-table {
       width: 100% !important;
       max-width: 100% !important;
-    }
-
-    /* MAIN PRODUCT IMAGE: image itself has id="product_photo" */
-    body.mc-product-page #content_area td.mc-pdp-media img#product_photo,
-    body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td img#product_photo,
-    body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td img#product_photo {
-      display: block !important;
-      width: 100% !important;
-      min-width: 70% !important;
-      height: auto !important;
-      object-fit: contain !important;
-      margin: 0 !important;
-      flex: none !important;
     }
 
     /* OPTIONS TABLE: keep it readable and responsive */
@@ -3474,11 +3432,9 @@ body.mc-product-page select.mc-native-leather {
   #content_area #altviews img,
   #content_area span#altviews img,
   #content_area .altviews img,
-  #content_area [id*="altview"] img,
   #v65-product-parent #altviews img,
   #v65-product-parent span#altviews img,
   #v65-product-parent .altviews img,
-  #v65-product-parent [id*="altview"] img,
   body.productdetails #content_area #altviews img,
   body.mc-product-page #content_area #altviews img,
   body.productdetails #content_area .altviews img,
@@ -4460,21 +4416,6 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     text-align: left !important;
   }
 
-  body.productdetails #content_area img#product_photo,
-  body.mc-product-page #content_area img#product_photo,
-  body.productdetails #v65-product-parent img#product_photo,
-  body.mc-product-page #v65-product-parent img#product_photo {
-    display: block !important;
-    width: min(100%, 1200px) !important;
-    max-width: 100% !important;
-    min-width: 700px !important;
-    height: auto !important;
-    margin: 0 auto !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    margin-left: 40px !important;
-  }
-
   body.productdetails #v65-product-parent #options_table,
   body.mc-product-page #v65-product-parent #options_table,
   body.productdetails #content_area #options_table,
@@ -5247,7 +5188,6 @@ body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-g
     padding-right: 40px !important;
     border: 0 !important;
     padding-left: 5px !important;
-    margin-left: 75px !important;
   }
 
   body.mc-product-page #content_area .mc-pdp-options-td {
@@ -5269,21 +5209,22 @@ body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-g
 
   /* Alt view thumbnails: keep small on mobile (no full-size) */
   body.mc-product-page #content_area #altviews,
+  body.mc-product-page #content_area span#altviews,
   body.mc-product-page #content_area .altviews,
-  body.mc-product-page #content_area [id*="altview"],
   body.productdetails #content_area #altviews,
+  body.productdetails #content_area span#altviews,
   body.productdetails #content_area .altviews {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
     text-align: center !important;
     margin: 8px auto 0 auto !important;
-    margin-top: -570px !important;
   }
   body.mc-product-page #content_area #altviews a,
+  body.mc-product-page #content_area span#altviews a,
   body.mc-product-page #content_area .altviews a,
-  body.mc-product-page #content_area [id*="altview"] a,
-  body.productdetails #content_area #altviews a {
+  body.productdetails #content_area #altviews a,
+  body.productdetails #content_area span#altviews a {
     display: inline-block !important;
     width: 64px !important;
     max-width: 64px !important;
@@ -5292,9 +5233,10 @@ body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-g
     overflow: hidden !important;
   }
   body.mc-product-page #content_area #altviews img,
+  body.mc-product-page #content_area span#altviews img,
   body.mc-product-page #content_area .altviews img,
-  body.mc-product-page #content_area [id*="altview"] img,
-  body.productdetails #content_area #altviews img {
+  body.productdetails #content_area #altviews img,
+  body.productdetails #content_area span#altviews img {
     width: 100% !important;
     height: 100% !important;
     max-width: 64px !important;
@@ -5487,18 +5429,6 @@ body.mc-product-page #content_area select:not(.mc-option-accordion-native) {
   background-repeat: no-repeat;
   box-sizing: border-box !important;
   margin-bottom: 14px !important;
-}
-
-/* Narrower gap between image and options */
-@media (min-width: 992px) {
-  body.mc-product-page #content_area .mc-pdp-media-td {
-    width: 80% !important;
-    padding-right: 24px !important;
-  }
-  body.mc-product-page #content_area .mc-pdp-options-td {
-    width: 44% !important;
-    padding-left: 16px !important;
-  }
 }
 
 @media (min-width: 992px) {
@@ -7841,184 +7771,96 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   max-width: 100% !important;
   max-height: 100% !important;
 }
-}
-/* ===== FINAL FORCE FIX: PDP desktop media alignment ===== */
+
+/* =========================================================
+   McCabe PDP desktop media — SINGLE SOURCE (2026-04-06)
+   Volusion order is typically hero link first, #altviews after.
+   float:right on the zoom link + float:left on thumbs places thumbs on the
+   left and hero beside them; overflow:hidden on the cell forms a BFC.
+   No flex on #product_photo_td / .mc-pdp-media-td; no [id*="altview"].
+   ========================================================= */
 @media (min-width: 992px) {
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
   body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
-    position: relative !important;
-    display: block !important;
-    overflow: visible !important;
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
     vertical-align: top !important;
-    min-height: 520px !important;
+    overflow: hidden !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) #altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) span#altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) .altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews {
+    float: left !important;
+    clear: none !important;
+    position: static !important;
+    width: 72px !important;
+    max-width: 72px !important;
+    margin: 0 12px 8px 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    text-align: left !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) #altviews a,
+  body.productdetails :is(#content_area, #v65-product-parent) span#altviews a,
+  body.productdetails :is(#content_area, #v65-product-parent) .altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews a {
+    display: block !important;
+    width: 72px !important;
+    max-width: 72px !important;
+    margin: 0 0 8px 0 !important;
+    padding: 0 !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) #altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) span#altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) .altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews img {
+    display: block !important;
+    width: 72px !important;
+    max-width: 72px !important;
+    height: auto !important;
+    max-height: 72px !important;
+    margin: 0 !important;
+    object-fit: contain !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
+  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2,
+  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
+  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2 {
+    float: right !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    overflow: hidden !important;
+    width: calc(100% - 84px) !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
+  body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     width: 100% !important;
     max-width: 100% !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) #altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) span#altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) .altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
     float: none !important;
     clear: none !important;
-    display: block !important;
-    width: 72px !important;
-    min-width: 72px !important;
-    max-width: 72px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    z-index: 2 !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) #altviews a,
-  body.productdetails :is(#content_area, #v65-product-parent) span#altviews a,
-  body.productdetails :is(#content_area, #v65-product-parent) .altviews a,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews a,
-  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews a,
-  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews a {
-    display: block !important;
-    width: 72px !important;
-    max-width: 72px !important;
-    margin: 0 0 8px 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) #altviews img,
-  body.productdetails :is(#content_area, #v65-product-parent) span#altviews img,
-  body.productdetails :is(#content_area, #v65-product-parent) .altviews img,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews img,
-  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews img,
-  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews img {
-    display: block !important;
-    width: 72px !important;
-    max-width: 72px !important;
-    height: auto !important;
-    max-height: 72px !important;
-    margin: 0 !important;
     object-fit: contain !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2,
-  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2 {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    overflow: visible !important;
-    float: none !important;
-    clear: none !important;
-    width: calc(100% - 88px) !important;
-    max-width: 560px !important;
-    margin: 0 0 0 88px !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
-  body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    float: none !important;
-    clear: none !important;
-    width: 100% !important;
-    max-width: 560px !important;
-    height: auto !important;
-    margin: 0 !important;
-  }
-}
-@media (min-width: 992px) {
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
-    position: relative !important;
-    display: block !important;
-    overflow: visible !important;
-    vertical-align: top !important;
-    min-height: 520px !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) #altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) span#altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) .altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    float: none !important;
-    clear: none !important;
-    display: block !important;
-    width: 72px !important;
-    max-width: 72px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    z-index: 2 !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) #altviews a,
-  body.productdetails :is(#content_area, #v65-product-parent) span#altviews a,
-  body.productdetails :is(#content_area, #v65-product-parent) .altviews a,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews a,
-  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews a,
-  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews a {
-    display: block !important;
-    width: 72px !important;
-    max-width: 72px !important;
-    margin: 0 0 8px 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) #altviews img,
-  body.productdetails :is(#content_area, #v65-product-parent) span#altviews img,
-  body.productdetails :is(#content_area, #v65-product-parent) .altviews img,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews img,
-  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews img,
-  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews img {
-    display: block !important;
-    width: 72px !important;
-    max-width: 72px !important;
-    height: auto !important;
-    max-height: 72px !important;
-    margin: 0 !important;
-    object-fit: contain !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2,
-  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
-  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url2 {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    overflow: visible !important;
-    float: none !important;
-    clear: none !important;
-    width: calc(100% - 76px) !important;
-    max-width: 460px !important;
-    margin: 0 0 0 76px !important;
-  }
-
-  body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
-  body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    float: none !important;
-    clear: none !important;
-    width: 100% !important;
-    max-width: 460px !important;
-    height: auto !important;
-    margin: 0 !important;
   }
 }
