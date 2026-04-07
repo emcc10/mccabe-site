@@ -7346,11 +7346,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return null;
   }
 
-  /** Volusion category listings use `...-s/{id}.htm` — authoritative vs. stray hidden CategoryID fields in the page. */
+  /** Volusion category listings use `...-s/{id}.htm` (or `.html`) — authoritative vs. stray hidden CategoryID fields in the page. */
   function mcListingCategoryIdFromPath() {
     try {
       var path = (location.pathname || '').toLowerCase();
-      var m = path.match(/-s\/(\d+)\.htm/i);
+      var m = path.match(/-s\/(\d+)\.html?/i);
       if (m) return String(m[1]);
     } catch (eLc) {}
     return null;
@@ -7358,8 +7358,17 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   /** Path id, else `categoryid` / `c` query (e.g. category.asp?categoryid=157) — needed so stray DOM fields don’t imply the wrong category. */
   function mcListingCategoryIdFromVolusion() {
+    var path = (location.pathname || '').toLowerCase();
     var fromPath =
       typeof mcListingCategoryIdFromPath === 'function' ? mcListingCategoryIdFromPath() : null;
+    /* Some stores omit `-s/`; last `/157.htm` segment on a PLP is still the category id. Skip obvious non-PLP paths. */
+    if (
+      !fromPath &&
+      !/productdetail|shoppingcart|myaccount|onepagecheckout|login\.asp|searchresult/i.test(path)
+    ) {
+      var tm = path.match(/\/(\d{2,6})\.html?(?:#|\?|$)/i);
+      if (tm) fromPath = String(tm[1]);
+    }
     var cid = mcGetQueryParamValue('categoryid') || mcGetQueryParamValue('category_id');
     var cParam = mcGetQueryParamValue('c');
     var fromQuery = null;
@@ -7384,7 +7393,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       );
       var looksListing =
         !!id ||
-        /-s\/\d+\.htm/i.test(path) ||
+        /-s\/\d+\.html?/i.test(path) ||
         (hasListParams && /category\.asp/i.test(path));
       if (!looksListing) return;
       var ca = document.getElementById('content_area');
@@ -10591,9 +10600,11 @@ try {
         document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
       var inpv = catInp && String(catInp.value || '').trim();
       if (inpv === '103') {
-        /* A promo/widget can expose CategoryID=103 earlier in the DOM than the real listing (e.g. Stationary Loveseats -s/157.htm). */
+        /* A promo/widget can expose CategoryID=103 before the real listing input (e.g. cat 157). */
         if (beanBagUrlConflictsWithListing()) return false;
-        return true;
+        /* If we could not resolve the URL to a category id, do NOT trust a lone hidden field — that was hiding member pricing on 157. */
+        if (listingCat === null || listingCat === '') return false;
+        return listingCat === '103';
       }
       return false;
     } catch (eBeanPath) {
