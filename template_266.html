@@ -11614,9 +11614,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 </script>
-  <script>
+<script>
 (function () {
-  function forcePdpMediaLeft() {
+  function forceBeanBagImageLeft() {
     if (window.innerWidth < 992) return;
     if (!document.body.classList.contains('productdetails') &&
         !document.body.classList.contains('mc-product-page')) return;
@@ -11636,12 +11636,12 @@ document.addEventListener('DOMContentLoaded', function () {
       document.querySelector('#product_photo_td') ||
       document.querySelector('td.mc-pdp-media-td');
 
-    if (mediaTd) {
-      mediaTd.style.setProperty('position', 'relative', 'important');
-      mediaTd.style.setProperty('display', 'block', 'important');
-      mediaTd.style.setProperty('overflow', 'visible', 'important');
-      mediaTd.style.setProperty('min-height', '520px', 'important');
-    }
+    if (!mainLink || !mainImg || !mediaTd) return;
+
+    mediaTd.style.setProperty('position', 'relative', 'important');
+    mediaTd.style.setProperty('display', 'block', 'important');
+    mediaTd.style.setProperty('overflow', 'visible', 'important');
+    mediaTd.style.setProperty('min-height', '520px', 'important');
 
     if (altViews) {
       altViews.style.setProperty('position', 'absolute', 'important');
@@ -11675,48 +11675,56 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    if (mainLink) {
-      mainLink.style.setProperty('display', 'block', 'important');
-      mainLink.style.setProperty('visibility', 'visible', 'important');
-      mainLink.style.setProperty('opacity', '1', 'important');
-      mainLink.style.setProperty('overflow', 'visible', 'important');
-      mainLink.style.setProperty('float', 'none', 'important');
-      mainLink.style.setProperty('clear', 'none', 'important');
-      mainLink.style.setProperty('margin', '0 0 0 76px', 'important');
-      mainLink.style.setProperty('width', '460px', 'important');
-      mainLink.style.setProperty('max-width', '460px', 'important');
-      mainLink.style.setProperty('position', 'relative', 'important');
-      mainLink.style.setProperty('left', '-320px', 'important');
-    }
+    mainLink.style.setProperty('display', 'block', 'important');
+    mainLink.style.setProperty('visibility', 'visible', 'important');
+    mainLink.style.setProperty('opacity', '1', 'important');
+    mainLink.style.setProperty('overflow', 'visible', 'important');
+    mainLink.style.setProperty('float', 'none', 'important');
+    mainLink.style.setProperty('clear', 'none', 'important');
+    mainLink.style.setProperty('position', 'relative', 'important');
+    mainLink.style.setProperty('left', '-120px', 'important');
+    mainLink.style.setProperty('margin', '0 0 0 76px', 'important');
+    mainLink.style.setProperty('width', '460px', 'important');
+    mainLink.style.setProperty('max-width', '460px', 'important');
 
-    if (mainImg) {
-      mainImg.style.setProperty('display', 'block', 'important');
-      mainImg.style.setProperty('visibility', 'visible', 'important');
-      mainImg.style.setProperty('opacity', '1', 'important');
-      mainImg.style.setProperty('float', 'none', 'important');
-      mainImg.style.setProperty('clear', 'none', 'important');
-      mainImg.style.setProperty('width', '100%', 'important');
-      mainImg.style.setProperty('max-width', '460px', 'important');
-      mainImg.style.setProperty('height', 'auto', 'important');
-      mainImg.style.setProperty('margin', '0', 'important');
-    }
+    mainImg.style.setProperty('display', 'block', 'important');
+    mainImg.style.setProperty('visibility', 'visible', 'important');
+    mainImg.style.setProperty('opacity', '1', 'important');
+    mainImg.style.setProperty('float', 'none', 'important');
+    mainImg.style.setProperty('clear', 'none', 'important');
+    mainImg.style.setProperty('width', '100%', 'important');
+    mainImg.style.setProperty('max-width', '460px', 'important');
+    mainImg.style.setProperty('height', 'auto', 'important');
+    mainImg.style.setProperty('margin', '0', 'important');
   }
 
-  function bootForcePdpMediaLeft() {
-    forcePdpMediaLeft();
-    setTimeout(forcePdpMediaLeft, 100);
-    setTimeout(forcePdpMediaLeft, 500);
-    setTimeout(forcePdpMediaLeft, 1200);
+  function bootForceBeanBagImageLeft() {
+    forceBeanBagImageLeft();
+    setTimeout(forceBeanBagImageLeft, 0);
+    setTimeout(forceBeanBagImageLeft, 150);
+    setTimeout(forceBeanBagImageLeft, 400);
+    setTimeout(forceBeanBagImageLeft, 900);
+    setTimeout(forceBeanBagImageLeft, 1600);
+    setTimeout(forceBeanBagImageLeft, 2600);
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootForcePdpMediaLeft);
+    document.addEventListener('DOMContentLoaded', bootForceBeanBagImageLeft);
   } else {
-    bootForcePdpMediaLeft();
+    bootForceBeanBagImageLeft();
   }
 
-  window.addEventListener('load', bootForcePdpMediaLeft);
-  window.addEventListener('resize', bootForcePdpMediaLeft);
+  window.addEventListener('load', bootForceBeanBagImageLeft);
+  window.addEventListener('resize', bootForceBeanBagImageLeft);
+
+  if (typeof MutationObserver !== 'undefined') {
+    var moTimer;
+    var mo = new MutationObserver(function () {
+      clearTimeout(moTimer);
+      moTimer = setTimeout(forceBeanBagImageLeft, 120);
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+  }
 })();
 </script>
 </body>
