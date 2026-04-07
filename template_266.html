@@ -14,9 +14,9 @@
       var gridMatch = false;
       var isHomePath = p === '/' || /\/default\.asp/i.test(p) || /^\/index\.htm/i.test(p);
       if (b && !b.classList.contains('productdetails')) {
-        var isSearch = /\/search|searchresults/i.test(p);
         var isCart = /shoppingcart|onepagecheckout|checkout|orderconfirm/i.test(p);
-        if (!isSearch && !isCart && !isHomePath) {
+        /* Include search results: same .v-product-grid markup as PLP — excluding it left tiles on the non-category image rules (inconsistent sizes). */
+        if (!isCart && !isHomePath) {
           var ulGrid = document.querySelector('#content_area ul.v-product-grid');
           if (ulGrid && ulGrid.querySelector('li')) {
             gridMatch = true;
