@@ -1,6 +1,6 @@
-/* MC_DEPLOY_VERIFY — pair with template meta mc-deploy-verify=20260401pdp-css */
-/* McCabe: hero menu match, 992px breakpoint, unified icons, menu shift fix */
-/* Your margins, borders, font edits, etc. are unchanged. Combined edits (mobile PDP alt row + hide duplicate price) appended at end only. */
+/* MC_DEPLOY_VERIFY — pair with template meta mc-deploy-verify=20260408d-search-pdp-alt (template_266.html) */
+/* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
+/* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
 /* RH-STYLE GLOBAL FONT */
 body,
 body * {
