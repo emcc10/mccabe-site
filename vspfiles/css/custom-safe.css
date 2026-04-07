@@ -2343,8 +2343,9 @@ body.mc-product-page select.mc-native-leather {
     vertical-align: top !important;
     position: relative !important;
     z-index: 1 !important;
-    overflow-x: visible !important;
+    overflow-x: clip !important;
     overflow-y: visible !important;
+    isolation: isolate !important;
   }
 
   body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td,
@@ -2361,6 +2362,7 @@ body.mc-product-page select.mc-native-leather {
     padding-right: 16px !important;
     overflow-x: visible !important;
     overflow-y: visible !important;
+    background: #fff !important;
   }
 
   /* Stop  cut off on the left  */
@@ -6840,10 +6842,11 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
     max-width: 58% !important;
     min-width: 0 !important;
     order: 1 !important;
-    overflow-x: visible !important;
+    overflow-x: clip !important;
     overflow-y: visible !important;
     position: relative !important;
     z-index: 1 !important;
+    isolation: isolate !important;
   }
 
   body.mc-product-page #content_area td.mc-pdp-options-td,
@@ -6854,11 +6857,12 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
     min-width: 0 !important;
     order: 2 !important;
     position: relative !important;
-    z-index: 2 !important;
+    z-index: 4 !important;
     overflow-x: visible !important;
     overflow-y: visible !important;
     padding-right: 16px !important;
     box-sizing: border-box !important;
+    background: #fff !important;
   }
 
   body.mc-product-page #v65-product-parent .mc-prod-media-wrap,
@@ -6927,8 +6931,9 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
     max-width: 58% !important;
     box-sizing: border-box !important;
     vertical-align: top !important;
-    overflow-x: visible !important;
+    overflow-x: clip !important;
     overflow-y: visible !important;
+    isolation: isolate !important;
   }
 
   body.mc-product-page #v65-product-parent tbody.mc-pdp-split-rows td.mc-pdp-options-td,
@@ -6944,6 +6949,9 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
     padding-right: 16px !important;
     overflow-x: visible !important;
     overflow-y: visible !important;
+    z-index: 4 !important;
+    position: relative !important;
+    background: #fff !important;
   }
 }
 
@@ -7769,14 +7777,15 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     display: grid !important;
     grid-template-columns: 72px minmax(0, 1fr) !important;
     column-gap: 12px !important;
-    row-gap: 12px !important;
+    row-gap: 6px !important;
     align-items: start !important;
     vertical-align: top !important;
-    overflow-x: visible !important;
+    overflow-x: clip !important;
     overflow-y: visible !important;
     max-width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
+    isolation: isolate !important;
   }
 
   /* Default: stack logo / intro blocks full width */
@@ -7790,11 +7799,26 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     box-sizing: border-box !important;
   }
 
-  /* Hero table beside thumbs — skip :first-of-type when logo+hero share one table */
+  /* Hero table beside thumbs — second+ tables */
   body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > table:has(img#product_photo):not(:first-of-type),
   body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > table:has(img#product_photo):not(:first-of-type),
   body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > table:has(img#product_photo):not(:first-of-type),
   body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > table:has(img#product_photo):not(:first-of-type) {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Single hero table + direct #altviews (only one <table> in cell): hero col2 row2 beside thumbs */
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td:has(> #altviews) > table:only-of-type:has(img#product_photo),
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td:has(> span#altviews) > table:only-of-type:has(img#product_photo),
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td:has(> #altviews) > table:only-of-type:has(img#product_photo),
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td:has(> span#altviews) > table:only-of-type:has(img#product_photo),
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(> #altviews) > table:only-of-type:has(img#product_photo),
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td:has(> #altviews) > table:only-of-type:has(img#product_photo) {
     grid-column: 2 !important;
     grid-row: 2 !important;
     min-width: 0 !important;
@@ -7859,12 +7883,12 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     grid-column: 2 !important;
     grid-row: 2 !important;
     min-width: 0 !important;
     max-width: 100% !important;
-    width: auto !important;
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
@@ -7875,7 +7899,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    width: auto !important;
+    width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     height: auto !important;
@@ -7883,6 +7907,15 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     float: none !important;
     clear: none !important;
     object-fit: contain !important;
+  }
+
+  /* Tables inside media cell cannot spill into the options column */
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td table,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td table,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td table,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td table {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* Manufacturer / brand row: keep logo readable, not full cell width */
@@ -7898,7 +7931,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 }
 
-/* Last-win: PDP row cells without .mc-pdp-* — match 58/42 split, no horizontal clip */
+/* Last-win: PDP row cells without .mc-pdp-* — match 58/42 split; clip media so hero cannot paint over options */
 @media (min-width: 992px) {
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
   body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
@@ -7909,9 +7942,10 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     width: auto !important;
     max-width: 58% !important;
     min-width: 0 !important;
-    overflow-x: visible !important;
+    overflow-x: clip !important;
     overflow-y: visible !important;
     box-sizing: border-box !important;
+    isolation: isolate !important;
   }
 
   body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
@@ -7927,5 +7961,35 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     overflow-y: visible !important;
     padding-right: 16px !important;
     box-sizing: border-box !important;
+    position: relative !important;
+    z-index: 4 !important;
+    background: #fff !important;
+  }
+}
+
+/* =========================================================
+   Volusion PDP: inner 100% table in row-2 center <td> (Firefox inspector fix)
+   Negative margin-right on nested tbody/tr/td pulls media so thumbs + hero align in column.
+   ========================================================= */
+@media (min-width: 992px) {
+  body.productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody,
+  body.productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr,
+  body.productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr > td[align="center"],
+  body.mc-product-page #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody,
+  body.mc-product-page #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr,
+  body.mc-product-page #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr > td[align="center"] {
+    margin-right: -20px !important;
+  }
+}
+
+/* #altviews after hero: pull up. Use --mc-pdp-altviews-shift on html/body for a SKU (e.g. -624px). */
+@media (min-width: 992px) {
+  body.productdetails :is(#content_area, #v65-product-parent) #altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) span#altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) .altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews {
+    margin-top: var(--mc-pdp-altviews-shift, clamp(-90vh, -42vh, 0px)) !important;
   }
 }
