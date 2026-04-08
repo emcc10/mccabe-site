@@ -616,10 +616,14 @@ document.addEventListener("DOMContentLoaded", function () {
       document.querySelector('input[name="ProductCode"]') ||
       document.querySelector('input[name="productcode"]');
     var pc = String((pcEl && pcEl.value) || '').trim();
+    var catEarly =
+      document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
+    var catEarlyV = catEarly && String(catEarly.value || '').trim();
     var isBean =
       /^BB/i.test(pc) ||
       /\/bean-bag-seating-s\//.test(p) ||
-      /product-p\/bb-/i.test(p);
+      /product-p\/bb-/i.test(p) ||
+      catEarlyV === '103';
     if (isBean) {
       b.classList.add('mc-bean-bag-pdp');
       return;
@@ -7460,6 +7464,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function isBeanBagProductPage() {
     try {
       var p = (location.pathname || '').toLowerCase();
+      var catInp = document.querySelector(
+        'input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]'
+      );
+      var catVal = catInp && String(catInp.value || '').trim();
+      if (catVal === '103') return true;
       /* Fuzzy copy checks must NOT use document.body — global nav includes e.g. "Nest Bean Bags" (/nest/), which false-flagged every PDP as a bean bag and killed member pricing. */
       var contentRoot =
         document.getElementById('content_area') ||
@@ -11109,6 +11118,25 @@ try {
   /** PLP member-grid: category ids that must never be treated as no-member listings (e.g. cat 103). */
   var MC_MEMBER_PRICING_GRID_CATEGORY_IDS = { 157: true };
 
+  /** Bean bag category (103) skips member grid paint; still show PLP hint under title. */
+  function mcEnsureBeanBagPlpSubline(card) {
+    if (!card || !card.querySelector) return;
+    if (!mcPathLooksLikeCategory103Listing()) return;
+    if (card.querySelector('.mc-plp-bean-subline')) return;
+    var title =
+      card.querySelector('.v-product__name') ||
+      card.querySelector('.productnamecolor') ||
+      card.querySelector('h2') ||
+      card.querySelector('h3');
+    if (!title || !title.parentNode) return;
+    var sub = document.createElement('div');
+    sub.className = 'mc-plp-bean-subline';
+    sub.textContent = 'More sizes and colors available on the product page.';
+    try {
+      title.parentNode.insertBefore(sub, title.nextSibling);
+    } catch (eBeanSub) {}
+  }
+
   function mcPaintCategoryGridMemberPricing() {
     try {
       if (typeof window.mcEnsureCategoryListingClasses === 'function') window.mcEnsureCategoryListingClasses();
@@ -11152,6 +11180,12 @@ try {
         try {
           card.removeAttribute('data-mc-member-grid');
         } catch (eCat103Card) {}
+        try {
+          if (!mcIsPdpCardOrRelated(card)) {
+            mcEnsureBeanBagPlpSubline(card);
+            mcReorderCategoryListingNodes(card);
+          }
+        } catch (eBeanPl) {}
         continue;
       }
       var hasSale = mcCardHasSalePricing(card);
@@ -11427,7 +11461,10 @@ try {
     }
     for (i = 0; i < products.length; i++) {
       try {
-        if (!mcIsPdpCardOrRelated(products[i])) mcReorderCategoryListingNodes(products[i]);
+        if (!mcIsPdpCardOrRelated(products[i])) {
+          if (cat103NoMember) mcEnsureBeanBagPlpSubline(products[i]);
+          mcReorderCategoryListingNodes(products[i]);
+        }
       } catch (eOrdAll) {}
     }
     try {
