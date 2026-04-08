@@ -9325,3 +9325,7 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
   animation: none !important;
   transform: none !important;
 }
+.collapsing-search__form > div:nth-child(1) {
+  margin-top: 5px !important;
+  margin-left: 130px !important;
+}
