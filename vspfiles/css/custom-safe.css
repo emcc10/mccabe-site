@@ -853,7 +853,7 @@ body:not(.is-home) header.header .collapsing-search {
     text-transform: uppercase !important;
     color: #111111 !important;
     line-height: 1.2 !important;
-    margin: 0 !important;
+    margin: 225px !important;
     padding: 0 !important;
   }
 
