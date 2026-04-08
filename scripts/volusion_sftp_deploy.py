@@ -6,6 +6,7 @@ Template + CSS use different remote paths (Volusion):
   template → /template_266.html first (SFTP root), then fallbacks under /v/, etc.
   CSS      → /vspfiles/css/custom-safe.css and /v/vspfiles/css/custom-safe.css (File Editor: wwwroot/v/vspfiles/css/).
   mccabe   → parallel to CSS under .../templates/266/css/mccabe-overrides.css (linked from template).
+  theme    → template.css + js/min/*.js under .../templates/266/ (same href/src as template).
 
 Override with SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE (full paths).
 """
@@ -37,6 +38,28 @@ def _mccabe_remote_for_css(c_path: str) -> str:
         "vspfiles/css/custom-safe.css": "vspfiles/templates/266/css/mccabe-overrides.css",
     }
     return mapping.get(c_path, "/v/vspfiles/templates/266/css/mccabe-overrides.css")
+
+
+def _template266_theme_tail_paths() -> list[str]:
+    """Paths under …/vspfiles/ linked from template_266.html (same tree as mccabe-overrides)."""
+    return [
+        "templates/266/css/template.css",
+        "templates/266/js/min/design-toolkit.min.js",
+        "templates/266/js/min/template.min.js",
+    ]
+
+
+def _theme_asset_remote(mccabe_path: str, tail: str) -> str:
+    """Derive remote path for template.css / JS from the mccabe-overrides.css path for this deploy pair."""
+    suffix = "mccabe-overrides.css"
+    name = tail.split("/")[-1]
+    if mccabe_path.endswith(suffix):
+        prefix = mccabe_path[: -len(suffix)]
+        if tail.startswith("templates/266/css/"):
+            return prefix + name
+        js_prefix = prefix.replace("/css/", "/js/min/", 1)
+        return js_prefix + name
+    return f"{mccabe_path.rstrip('/')}/{tail.removeprefix('templates/266/').lstrip('/')}"
 
 
 def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
@@ -89,6 +112,15 @@ def _try_pair(sftp, t_path: str, c_path: str) -> None:
     sftp.put("template_266.html", t_path)
     sftp.put("vspfiles/css/custom-safe.css", c_path)
     sftp.put("vspfiles/templates/266/css/mccabe-overrides.css", m_path)
+    for tail in _template266_theme_tail_paths():
+        local = f"vspfiles/{tail}"
+        if not os.path.isfile(local):
+            continue
+        remote = _theme_asset_remote(m_path, tail)
+        try:
+            sftp.put(local, remote)
+        except Exception as exc:  # noqa: BLE001
+            print(f"PARAMIKO_TRY_PAIR_THEME_SKIP {local!r}→{remote!r}: {exc}", flush=True)
 
 
 def _mirror_template_to_canonical_paths(sftp) -> None:
@@ -139,6 +171,29 @@ def _mirror_mccabe_to_canonical_paths(sftp) -> None:
             print(f"::warning::PARAMIKO_MIRROR_SKIP mccabe {rel}: {exc}", flush=True)
 
 
+def _mirror_template266_theme_assets(sftp) -> None:
+    bases = (
+        "/v/vspfiles/",
+        "v/vspfiles/",
+        "/vspfiles/",
+        "vspfiles/",
+        "/mccabestheaterandliving.com/v/vspfiles/",
+        "/mccabestheaterandliving.com/vspfiles/",
+    )
+    for tail in _template266_theme_tail_paths():
+        local = f"vspfiles/{tail}"
+        if not os.path.isfile(local):
+            print(f"::warning::PARAMIKO_MIRROR_SKIP missing local {local}", flush=True)
+            continue
+        for base in bases:
+            rel = base + tail
+            try:
+                sftp.put(local, rel, confirm=False)
+                print(f"::notice::PARAMIKO_MIRROR_OK template266 → {rel}", flush=True)
+            except Exception as exc:  # noqa: BLE001
+                print(f"::warning::PARAMIKO_MIRROR_SKIP template266 {rel}: {exc}", flush=True)
+
+
 def _try_home_relative(sftp) -> bool:
     try:
         sftp.put("template_266.html", "template_266.html")
@@ -147,6 +202,10 @@ def _try_home_relative(sftp) -> bool:
             "vspfiles/templates/266/css/mccabe-overrides.css",
             "vspfiles/templates/266/css/mccabe-overrides.css",
         )
+        for tail in _template266_theme_tail_paths():
+            local = f"vspfiles/{tail}"
+            if os.path.isfile(local):
+                sftp.put(local, tail)
         return True
     except Exception:  # noqa: BLE001
         return False
@@ -188,6 +247,7 @@ def main() -> int:
                 _mirror_template_to_canonical_paths(sftp)
                 _mirror_css_to_canonical_paths(sftp)
                 _mirror_mccabe_to_canonical_paths(sftp)
+                _mirror_template266_theme_assets(sftp)
                 print("PARAMIKO_OK (one or more path pairs succeeded)", flush=True)
                 return 0
             if _try_home_relative(sftp):
@@ -195,6 +255,7 @@ def main() -> int:
                 _mirror_template_to_canonical_paths(sftp)
                 _mirror_css_to_canonical_paths(sftp)
                 _mirror_mccabe_to_canonical_paths(sftp)
+                _mirror_template266_theme_assets(sftp)
                 return 0
             return 1
         finally:
