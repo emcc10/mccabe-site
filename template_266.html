@@ -10073,15 +10073,15 @@ try {
     var b = document.body;
     var h = document.documentElement;
     if (!b) return false;
+    if (/\/category-s\/157\.htm/i.test(location.pathname || '')) {
+      return true;
+    }
     if (h && h.classList.contains('category')) return true;
     if (b.classList.contains('category')) return true;
     if (b.classList.contains('is-home')) return true;
     var p = (location.pathname || '').toLowerCase();
     if (p === '/' || p === '/default.asp' || p.indexOf('default.asp') !== -1) return true;
     if (p.indexOf('searchresults') !== -1) return true;
-    if (/\/category-s\/157\.htm/i.test(location.pathname || '')) {
-      return true;
-    }
     if (/\/stationary-loveseats-s\/157\.htm/i.test(location.pathname || '')) {
       return true;
     }
