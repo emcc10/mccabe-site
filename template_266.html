@@ -10212,6 +10212,7 @@ try {
           node.closest('#related-products') ||
           node.closest('#relateditems') ||
           node.closest('table.relateditems') ||
+          node.closest('#related_products_content') ||
           node.closest('#v65-product-related') ||
           node.closest('.v65-product-related') ||
           node.closest('.v65-product-related-item') ||
@@ -10223,6 +10224,20 @@ try {
       seen.add(node);
       out.push(node);
     }
+
+    /* Stationary Loveseats PLP: prefer real grid cards (.v-product-grid-item) so sidebar/stray .v-product does not short-circuit collection. */
+    var path157 =
+      /\/category-s\/157\.html?/i.test(location.pathname || '') ||
+      /\/stationary-loveseats-s\/157\.html?/i.test(location.pathname || '');
+    if (path157) {
+      var raw157 = document.querySelectorAll(
+        '#content_area .v-product-grid .v-product, #content_area .v-product-grid .v-product-grid-item, #content_area .v-product-grid li.v-product'
+      );
+      for (i = 0; i < raw157.length; i++) pushCard(raw157[i]);
+      if (out.length) return out;
+    }
+
+    raw = document.querySelectorAll(sel);
     for (i = 0; i < raw.length; i++) pushCard(raw[i]);
     /* Related items: handled separately (image → title → price). Do not run PLP member-grid paint on these cells. */
     if (out.length) return out;
@@ -10899,6 +10914,7 @@ try {
 
   function mcRemoveMemberGridBlocks(card) {
     if (!card || !card.querySelectorAll) return;
+    if (mcIsRelatedItemsNode(card)) return;
     var blocks = card.querySelectorAll('.mc-member-grid-price');
     var i;
     for (i = 0; i < blocks.length; i++) {
@@ -11247,10 +11263,13 @@ try {
   }
 
   function mcMemberPricingGridCardEligible(card) {
+    var pagePath = location.pathname || '';
+    if (/\/category-s\/157\.html?/i.test(pagePath) || /\/stationary-loveseats-s\/157\.html?/i.test(pagePath)) return true;
     if (mcMemberPricingGridListingEligible()) return true;
     var h = mcFindProductHref(card);
+    if (/\/category-s\/157\.html?/i.test(h || '')) return true;
     var pid = mcMemberGridParsedCategoryFromHref(h);
-    if (pid === '157') return true;
+    if (pid === '157' || Number(pid) === 157) return true;
     if (pid && MC_MEMBER_PRICING_GRID_CATEGORY_IDS[pid]) return true;
     return false;
   }
@@ -11263,6 +11282,7 @@ try {
         node.closest('#related-products') ||
         node.closest('#relateditems') ||
         node.closest('table.relateditems') ||
+        node.closest('#related_products_content') ||
         node.closest('#v65-product-related') ||
         node.closest('.v65-product-related') ||
         node.closest('.v65-product-related-item') ||
@@ -11356,7 +11376,7 @@ try {
         }
         continue;
       }
-      if (card.closest && card.closest('#relateditems, table.relateditems')) {
+      if (card.closest && card.closest('#relateditems, table.relateditems, #related_products_content')) {
         if (typeof window !== 'undefined' && window.__MC_DEBUG_MEMBER_GRID) {
           console.log('[MC member pricing skipped card]', {
             href: cardHref,
@@ -11393,6 +11413,7 @@ try {
         /\$[\d,]+/.test((card.textContent || '').replace(/\s+/g, ' ')) &&
         (
           cardParsedCat === '157' ||
+          Number(cardParsedCat) === 157 ||
           /\/category-s\/157\.html?/i.test(location.pathname || '') ||
           /\/stationary-loveseats-s\/157\.html?/i.test(location.pathname || '') ||
           /\/category-s\/157\.html?/i.test(cardHref || '') ||

@@ -9165,16 +9165,6 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
   margin-left: 130px !important;
 }
 
-/* Bean bag PDP related-items stability only */
-#related-products .v65-product-related-item,
-.v65-product-related .v65-product-related-item,
-.mc-related-carousel .v65-product-related-item,
-.mc-related-carousel__viewport .v65-product-related-item {
-  transition: none !important;
-  animation: none !important;
-  transform: none !important;
-}
-
 /* Related Items — per-card only (table cells / single carousel item; no flex on multi-product wrappers) */
 body.productdetails #content_area #v65-product-related table.v65-productDisplay > tbody > tr > td,
 body.mc-product-page #content_area #v65-product-related table.v65-productDisplay > tbody > tr > td {
@@ -9291,4 +9281,14 @@ body.mc-product-page #content_area #v65-product-related table.v65-productDisplay
 [class*="lowest-price"],
 [class*="lowestprice"] {
   display: none !important;
+}
+
+/* Related Items stability only */
+#related-products .v65-product-related-item,
+.v65-product-related .v65-product-related-item,
+.mc-related-carousel .v65-product-related-item,
+.mc-related-carousel__viewport .v65-product-related-item {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
 }
