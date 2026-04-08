@@ -2183,6 +2183,27 @@ nav.push-menu .push-menu__close-btn::before {
    PRODUCT PAGE FIXES (Volusion 266)
 ========================================= */
 
+/* Match template_266: hide native #options_table until mc-product-page (early class mc-hide-native-options-until-mc). Bean bags keep native UI. */
+body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
+body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
+body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area #options_table,
+body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
+body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
+body.productdetails:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"] {
+  position: absolute !important;
+  left: -9999px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
 /* Remove italic styling on product headings/tabs */
 body.mc-product-page #content_area h1,
 body.mc-product-page #content_area h2,
