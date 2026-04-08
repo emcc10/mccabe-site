@@ -10414,13 +10414,23 @@ try {
   function mcInstallInPriceContainer(priceEl, block) {
     var tag = priceEl && priceEl.tagName ? priceEl.tagName.toUpperCase() : '';
     if (tag === 'TD' || tag === 'TH') {
-      if (!priceEl.querySelector('.mc-member-grid-price')) {
-        try {
-          priceEl.appendChild(block);
-        } catch (eTd) {}
-      }
+      try {
+        var olds = priceEl.querySelectorAll('.mc-member-grid-price');
+        var oi;
+        for (oi = 0; oi < olds.length; oi++) {
+          try {
+            if (olds[oi] !== block && olds[oi].parentNode) olds[oi].parentNode.removeChild(olds[oi]);
+          } catch (eRmOld) {}
+        }
+      } catch (ePr) {}
+      try {
+        if (!priceEl.contains(block)) priceEl.appendChild(block);
+      } catch (eTd) {}
       return;
     }
+    try {
+      if (block && block.parentNode) block.parentNode.removeChild(block);
+    } catch (eDetBl) {}
     var kept = mcGatherPriceLikeNodes(priceEl);
     if (!kept.length && priceEl) {
       var raw = (priceEl.textContent || '').replace(/\s+/g, ' ').trim();
@@ -10894,37 +10904,56 @@ try {
     pump();
   }
 
+  /** Keep at most one .mc-member-grid-price per listing card (idempotent repaints / nested install targets). */
+  function mcDedupeMemberGridBlocksInCard(card) {
+    if (!card || !card.querySelectorAll) return;
+    function rmDups(sel) {
+      var nodes = card.querySelectorAll(sel);
+      var ii;
+      for (ii = 1; ii < nodes.length; ii++) {
+        try {
+          if (nodes[ii] && nodes[ii].parentNode) nodes[ii].parentNode.removeChild(nodes[ii]);
+        } catch (eDed) {}
+      }
+    }
+    rmDups('.mc-member-grid-price');
+    rmDups('.mc-member-price');
+  }
+
   /**
    * Volusion often outputs sale / MAP / member nodes before the image. Flex `order` usually fixes it;
    * when the card root is a column flex container, moving DOM after the title guarantees image → title → price.
    */
   function mcEnsureMemberBlockCardLevel(card) {
-    if (mcIsRelatedItemsNode(card)) return;
-    if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) return;
+    if (!card || !card.querySelector) return null;
+    if (mcIsRelatedItemsNode(card)) return null;
+    if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) return null;
+    mcDedupeMemberGridBlocksInCard(card);
     var block = card.querySelector('.mc-member-grid-price');
-    if (!block || !block.parentNode || block.parentNode === card) return;
+    if (!block || !block.parentNode || block.parentNode === card) return block || null;
     var title =
       card.querySelector('.v-product__name') ||
       card.querySelector('.productnamecolor') ||
       card.querySelector('.v65-product-related-title') ||
       card.querySelector('h2') ||
       card.querySelector('h3');
-    if (!title || !title.parentNode) return;
+    if (!title || !title.parentNode) return block || null;
     var insertAfter = title;
     var ns = title.nextSibling;
     if (ns && ns.nodeType === 1 && ns.classList && ns.classList.contains('mc-plp-bean-subline')) {
       insertAfter = ns;
     }
-    if (block.previousSibling === insertAfter) return;
+    if (block.previousSibling === insertAfter) return block;
     var ref = insertAfter.nextSibling;
     try {
-      if (ref === block) return;
+      if (ref === block) return block;
       card.insertBefore(block, ref);
     } catch (eIns) {
       try {
         card.appendChild(block);
       } catch (e2) {}
     }
+    return block;
   }
 
   function mcReorderSaleAfterMember(card) {
@@ -10934,7 +10963,7 @@ try {
     var mem = card.querySelector('.mc-member-grid-price');
     if (!mem || !mem.parentNode) return;
     var sale = card.querySelector(
-      '.product_sale_price, font.product_sale_price, span.product_sale_price, [class*="product_sale_price"]'
+      '.product_sale_price, font.product_sale_price, span.product_sale_price, [class*="product_sale_price"], .product_saleprice, [class*="product_saleprice"]'
     );
     if (!sale || (sale.closest && sale.closest('.mc-member-grid-price'))) return;
     if (mem.nextSibling === sale) return;
@@ -11438,6 +11467,7 @@ try {
         } catch (eBeanPl) {}
         continue;
       }
+      mcDedupeMemberGridBlocksInCard(card);
       var hasSale = mcCardHasSalePricing(card);
       /* Category 157 (Stationary Loveseats): Volusion often omits font.product_sale_price; still paint member row when prices are visible. */
       if (
@@ -11569,8 +11599,14 @@ try {
           } catch (eRmMap0) {}
           existingBlock = null;
         }
-        var mapMember = document.createElement('div');
-        mapMember.className = 'mc-member-grid-price';
+        mcDedupeMemberGridBlocksInCard(card);
+        var mapMember = card.querySelector('.mc-member-grid-price');
+        if (!mapMember) {
+          mapMember = document.createElement('div');
+          mapMember.className = 'mc-member-grid-price';
+        } else {
+          while (mapMember.firstChild) mapMember.removeChild(mapMember.firstChild);
+        }
         mapMember.setAttribute('data-mc-member-grid', 'unlocked');
         var mapLbl = document.createElement('div');
         mapLbl.className = 'mc-member-grid-price__label';
@@ -11632,8 +11668,13 @@ try {
         ? volSale || regPrice || dollar
         : dollar || regPrice;
 
-      var block = document.createElement('div');
-      block.className = 'mc-member-grid-price';
+      var block = card.querySelector('.mc-member-grid-price');
+      if (!block) {
+        block = document.createElement('div');
+        block.className = 'mc-member-grid-price';
+      } else {
+        while (block.firstChild) block.removeChild(block.firstChild);
+      }
       block.setAttribute('data-mc-member-grid', nextState);
 
       var label = document.createElement('div');
@@ -11694,7 +11735,9 @@ try {
       }
       if (!priceEl) {
         if (mcCardStillShowsMapPhrase(card)) {
-          card.appendChild(block);
+          if (!card.contains(block)) {
+            card.appendChild(block);
+          }
           card.setAttribute('data-mc-member-grid', nextState);
           try {
             if (!mcIsPdpCardOrRelated(card)) {

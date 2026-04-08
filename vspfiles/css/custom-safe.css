@@ -9408,3 +9408,18 @@ body.mc-product-page #content_area #related_products_content .v-product .mc-memb
   margin-top: 0 !important;
   text-align: center !important;
 }
+
+/* Bean bag category (103) PLP — last-win: real sale/list price nodes stay visible on product cards (overrides any stray hides) */
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .product_saleprice,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid .product_saleprice,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid font.product_sale_price,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid font.product_sale_price,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .product_sale_price,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid .product_sale_price,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_saleprice,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.product_sale_price,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_sale_price {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
