@@ -6160,6 +6160,20 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (grid.closest && grid.closest('#footer')) return false;
     if (grid.closest && grid.closest('.sidebar-wrapper')) return false;
     if (grid.closest && grid.closest('.sidebar')) return false;
+    /* PDP Related Items often use .v-product-grid inside #content_area; mcFixCategoryGrid + observer caused repeat reflow/flash. */
+    if (
+      grid.closest &&
+      (grid.closest('#related-products') ||
+        grid.closest('#relateditems') ||
+        grid.closest('table.relateditems') ||
+        grid.closest('#v65-product-related') ||
+        grid.closest('.v65-product-related') ||
+        grid.closest('#related_products_content') ||
+        grid.closest('.mc-related-carousel') ||
+        grid.closest('.mc-related-carousel__viewport'))
+    ) {
+      return false;
+    }
     if (!grid.querySelector || !grid.querySelector('.v-product, li.v-product, li')) return false;
     return true;
   }
@@ -8003,6 +8017,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       );
 
       cards.forEach(function(card){
+        if (card.getAttribute && card.getAttribute('data-mc-related-img-norm') === '1') return;
         var img =
           card.querySelector('img') ||
           card.querySelector('.v-product__img img') ||
@@ -8011,6 +8026,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         if (!img) return;
         var link = card.querySelector('a[href*="-p/"], a[href*="product-p/"]');
         normalizeOne(img, link);
+        try {
+          card.setAttribute('data-mc-related-img-norm', '1');
+        } catch (eNorm) {}
       });
 
       scope.querySelectorAll('#v65-product-related td.v65-productPhoto').forEach(function(td){
@@ -8026,7 +8044,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       var root = document.querySelector('#content_area #v65-product-related, #content_area #related_products_content');
       if (!root) return;
       var table = root.querySelector('table.v65-productDisplay');
-      if (!table) return;
+      if (!table || (table.getAttribute && table.getAttribute('data-mc-related-rows-done') === '1')) return;
       var tbody = table.tBodies[0] || table;
       var rows = [];
       var ch = tbody.children;
@@ -8037,6 +8055,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       }
       if (rows.length < 3) return;
       tbody.insertBefore(rows[2], rows[0]);
+      try {
+        table.setAttribute('data-mc-related-rows-done', '1');
+      } catch (eAttr) {}
     } catch (eR) {}
   }
 
@@ -8048,6 +8069,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       var td = cells[i];
       var v = td.querySelector('.v-product');
       var box = v || td;
+      if (box.getAttribute && box.getAttribute('data-mc-related-layout-done') === '1') continue;
       var img = box.querySelector('a[href] > img, .v-product__img img, .product_image img, a img');
       if (!img) continue;
       var imgHost =
@@ -8068,6 +8090,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         if (titleEl && imgHost.nextSibling !== titleEl) {
           box.insertBefore(titleEl, imgHost.nextSibling);
         }
+        try {
+          box.setAttribute('data-mc-related-layout-done', '1');
+        } catch (eAttr2) {}
       } catch (eR) {}
     }
   }
@@ -10121,6 +10146,7 @@ try {
           node.closest('#related-products') ||
           node.closest('#relateditems') ||
           node.closest('table.relateditems') ||
+          node.closest('#v65-product-related') ||
           node.closest('.v65-product-related') ||
           node.closest('.v65-product-related-item') ||
           node.closest('.mc-related-carousel') ||
@@ -11171,6 +11197,7 @@ try {
         node.closest('#related-products') ||
         node.closest('#relateditems') ||
         node.closest('table.relateditems') ||
+        node.closest('#v65-product-related') ||
         node.closest('.v65-product-related') ||
         node.closest('.v65-product-related-item') ||
         node.closest('.mc-related-carousel') ||

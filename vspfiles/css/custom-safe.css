@@ -9316,6 +9316,11 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
   transform: none !important;
 }
 
+.collapsing-search__form > div:nth-child(1) {
+  margin-top: 5px !important;
+  margin-left: 130px !important;
+}
+
 /* Bean bag PDP related-items stability only */
 #related-products .v65-product-related-item,
 .v65-product-related .v65-product-related-item,
@@ -9324,8 +9329,4 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
   transition: none !important;
   animation: none !important;
   transform: none !important;
-}
-.collapsing-search__form > div:nth-child(1) {
-  margin-top: 5px !important;
-  margin-left: 130px !important;
 }
