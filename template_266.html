@@ -7572,22 +7572,26 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       var doc = scope && scope.nodeType ? scope : document;
       var hosts = [];
       var vp = doc.getElementById && doc.getElementById('v65-product-parent');
-      if (vp) hosts.push(vp);
+      if (vp) hosts.push({ root: vp, cartLinksOnly: true });
       var extra = doc.querySelectorAll(
         '#v65-product-related, #relateditems, #related-products, #content_area .v65-product-related'
       );
       var hi;
-      for (hi = 0; hi < extra.length; hi++) hosts.push(extra[hi]);
-      if (!hosts.length) hosts.push(doc);
+      for (hi = 0; hi < extra.length; hi++) hosts.push({ root: extra[hi], cartLinksOnly: false });
+      if (!hosts.length) hosts.push({ root: doc, cartLinksOnly: true });
       var LOW = /add to cart for our lowest price|our lowest price|lowest price!/i;
-      for (hi = 0; hi < hosts.length; hi++) {
-        var sub = hosts[hi];
-        if (!sub || !sub.querySelectorAll) continue;
-        var links = sub.querySelectorAll('a[href*="ShoppingCart"], a[href*="shoppingcart"]');
+      function stripLinksFrom(sub, cartLinksOnly) {
+        if (!sub || !sub.querySelectorAll) return;
+        var sel = cartLinksOnly
+          ? 'a[href*="ShoppingCart"], a[href*="shoppingcart"]'
+          : 'a';
+        var links = sub.querySelectorAll(sel);
         var i;
         for (i = links.length - 1; i >= 0; i--) {
           var a = links[i];
-          if (!LOW.test((a.textContent || '').replace(/\s+/g, ' '))) continue;
+          var linkTxt = (a.textContent || '').replace(/\s+/g, ' ');
+          if (!LOW.test(linkTxt)) continue;
+          if (!cartLinksOnly && linkTxt.length > 160) continue;
           try {
             a.classList.add('mc-lowest-price-cta');
           } catch (eCls) {}
@@ -7606,6 +7610,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
             }
           } catch (eRm) {}
         }
+      }
+      for (hi = 0; hi < hosts.length; hi++) {
+        stripLinksFrom(hosts[hi].root, hosts[hi].cartLinksOnly);
       }
     } catch (eAll) {}
   }
@@ -8303,74 +8310,74 @@ body.productdetails .v-product-grid .v-product .v-product__name {
 body.productdetails .v-product-grid .v-product .v-product__price {
   order: 2 !important;
 }
-/* Related products (#relateditems): neutralize default order:0 so title never sits above image */
-body.productdetails #content_area #relateditems td .v-product,
-body.mc-product-page #content_area #relateditems td .v-product {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
+/* Related products (#relateditems): per table cell only — keep row layout, stack content inside each cell */
+body.productdetails #content_area #relateditems table td,
+body.mc-product-page #content_area #relateditems table td {
+  vertical-align: top !important;
+  text-align: left !important;
 }
-body.productdetails #content_area #relateditems td .v-product > *,
-body.mc-product-page #content_area #relateditems td .v-product > * {
-  order: 10 !important;
+body.productdetails #content_area #relateditems table td .v-product,
+body.mc-product-page #content_area #relateditems table td .v-product {
+  vertical-align: top !important;
+  text-align: left !important;
 }
-body.productdetails #content_area #relateditems td .v-product .v-product__img,
-body.productdetails #content_area #relateditems td .v-product .product_image,
-body.productdetails #content_area #relateditems td .v-product > a:has(img),
-body.mc-product-page #content_area #relateditems td .v-product .v-product__img,
-body.mc-product-page #content_area #relateditems td .v-product .product_image,
-body.mc-product-page #content_area #relateditems td .v-product > a:has(img) {
-  order: 1 !important;
+body.productdetails #content_area #relateditems table td .v-product .v-product__img,
+body.productdetails #content_area #relateditems table td .v-product .product_image,
+body.productdetails #content_area #relateditems table td .v-product > a:first-of-type,
+body.productdetails #content_area #relateditems table td .v-product img,
+body.mc-product-page #content_area #relateditems table td .v-product .v-product__img,
+body.mc-product-page #content_area #relateditems table td .v-product .product_image,
+body.mc-product-page #content_area #relateditems table td .v-product > a:first-of-type,
+body.mc-product-page #content_area #relateditems table td .v-product img {
+  display: block !important;
+  margin: 0 0 10px 0 !important;
 }
-body.productdetails #content_area #relateditems td .v-product .v-product__name,
-body.productdetails #content_area #relateditems td .v-product .productnamecolor,
-body.productdetails #content_area #relateditems td .v-product .v65-product-related-title,
-body.mc-product-page #content_area #relateditems td .v-product .v-product__name,
-body.mc-product-page #content_area #relateditems td .v-product .productnamecolor,
-body.mc-product-page #content_area #relateditems td .v-product .v65-product-related-title {
-  order: 2 !important;
+body.productdetails #content_area #relateditems table td .v-product .v-product__name,
+body.productdetails #content_area #relateditems table td .v-product .productnamecolor,
+body.productdetails #content_area #relateditems table td .v-product .v65-product-related-title,
+body.productdetails #content_area #relateditems table td .v-product .v-product__price,
+body.productdetails #content_area #relateditems table td .v-product .product_price,
+body.productdetails #content_area #relateditems table td .v-product .mc-member-grid-price,
+body.productdetails #content_area #relateditems table td .v-product .v65-product-related-price,
+body.productdetails #content_area #relateditems table td .v-product .mc-member-price,
+body.mc-product-page #content_area #relateditems table td .v-product .v-product__name,
+body.mc-product-page #content_area #relateditems table td .v-product .productnamecolor,
+body.mc-product-page #content_area #relateditems table td .v-product .v65-product-related-title,
+body.mc-product-page #content_area #relateditems table td .v-product .v-product__price,
+body.mc-product-page #content_area #relateditems table td .v-product .product_price,
+body.mc-product-page #content_area #relateditems table td .v-product .mc-member-grid-price,
+body.mc-product-page #content_area #relateditems table td .v-product .v65-product-related-price,
+body.mc-product-page #content_area #relateditems table td .v-product .mc-member-price {
+  display: block !important;
+  float: none !important;
+  clear: both !important;
+  position: static !important;
+  margin-top: 0 !important;
 }
-body.productdetails #content_area #relateditems td .v-product .v-product__price,
-body.productdetails #content_area #relateditems td .v-product .product_price,
-body.productdetails #content_area #relateditems td .v-product .mc-member-grid-price,
-body.productdetails #content_area #relateditems td .v-product .v65-product-related-price,
-body.productdetails #content_area #relateditems td .v-product font.product_sale_price,
-body.mc-product-page #content_area #relateditems td .v-product .v-product__price,
-body.mc-product-page #content_area #relateditems td .v-product .product_price,
-body.mc-product-page #content_area #relateditems td .v-product .mc-member-grid-price,
-body.mc-product-page #content_area #relateditems td .v-product .v65-product-related-price,
-body.mc-product-page #content_area #relateditems td .v-product font.product_sale_price {
-  order: 3 !important;
+body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) > a:first-of-type,
+body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) > a:first-of-type {
+  display: block !important;
+  margin: 0 0 10px 0 !important;
 }
-body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)),
-body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-}
-body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) > *,
-body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) > * {
-  order: 10 !important;
-}
-body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) > a:has(img),
-body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) > a:has(img) {
-  order: 1 !important;
-}
-body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .v-product__name,
-body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .productnamecolor,
-body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .v65-product-related-title,
-body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .v-product__name,
-body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .productnamecolor,
-body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .v65-product-related-title {
-  order: 2 !important;
-}
-body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .v-product__price,
-body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) .v65-product-related-price,
-body.productdetails #content_area #relateditems tr > td:not(:has(.v-product)) font.product_sale_price,
-body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .v-product__price,
-body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) .v65-product-related-price,
-body.mc-product-page #content_area #relateditems tr > td:not(:has(.v-product)) font.product_sale_price {
-  order: 3 !important;
+body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .v-product__name,
+body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .productnamecolor,
+body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .v65-product-related-title,
+body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .v-product__price,
+body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .v65-product-related-price,
+body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .product_price,
+body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .mc-member-grid-price,
+body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .v-product__name,
+body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .productnamecolor,
+body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .v65-product-related-title,
+body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .v-product__price,
+body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .v65-product-related-price,
+body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .product_price,
+body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .mc-member-grid-price {
+  display: block !important;
+  float: none !important;
+  clear: both !important;
+  position: static !important;
+  margin-top: 0 !important;
 }
 </style>
 <script>
@@ -11380,6 +11387,21 @@ try {
         continue;
       }
       var hasSale = mcCardHasSalePricing(card);
+      /* Category 157 (Stationary Loveseats): Volusion often omits font.product_sale_price; still paint member row when prices are visible. */
+      if (
+        !hasSale &&
+        /\$[\d,]+/.test((card.textContent || '').replace(/\s+/g, ' ')) &&
+        (
+          cardParsedCat === '157' ||
+          /\/category-s\/157\.html?/i.test(location.pathname || '') ||
+          /\/stationary-loveseats-s\/157\.html?/i.test(location.pathname || '') ||
+          /\/category-s\/157\.html?/i.test(cardHref || '') ||
+          (typeof mcListingCategoryIdFromVolusion === 'function' &&
+            mcListingCategoryIdFromVolusion() === '157')
+        )
+      ) {
+        hasSale = true;
+      }
       var prevState = card.getAttribute('data-mc-member-grid');
       var nextState = unlocked ? 'unlocked' : 'locked';
       var existingBlock = card.querySelector('.mc-member-grid-price');
