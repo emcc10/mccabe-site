@@ -9352,3 +9352,58 @@ body.mc-product-page #content_area #related_products_content table.v65-productDi
   max-width: 100% !important;
   height: auto !important;
 }
+
+/* Related: same table, cells sometimes omit .v65-productDisplay-cell — target product row td only */
+body.productdetails #v65-product-related table.v65-productDisplay > tbody > tr > td,
+body.mc-product-page #v65-product-related table.v65-productDisplay > tbody > tr > td {
+  vertical-align: top !important;
+  text-align: center !important;
+}
+
+body.productdetails #v65-product-related table.v65-productDisplay > tbody > tr > td img,
+body.mc-product-page #v65-product-related table.v65-productDisplay > tbody > tr > td img {
+  display: block !important;
+  margin: 0 auto 10px auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+body.productdetails #content_area #related_products_content table.v65-productDisplay > tbody > tr > td,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay > tbody > tr > td {
+  vertical-align: top !important;
+  text-align: center !important;
+}
+
+body.productdetails #content_area #related_products_content table.v65-productDisplay > tbody > tr > td img,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay > tbody > tr > td img {
+  display: block !important;
+  margin: 0 auto 10px auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+#related-products table.v65-productDisplay > tbody > tr > td,
+.mc-related-carousel__viewport table.v65-productDisplay > tbody > tr > td {
+  vertical-align: top !important;
+  text-align: center !important;
+}
+
+#related-products table.v65-productDisplay > tbody > tr > td img,
+.mc-related-carousel__viewport table.v65-productDisplay > tbody > tr > td img {
+  display: block !important;
+  margin: 0 auto 10px auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Bean bag (103) PLP — per-list-item card column only; does not target ul.v-product-grid wrapper */
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item {
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}

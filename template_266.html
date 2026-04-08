@@ -37,6 +37,14 @@
           b.classList.add('category');
         }
       }
+      /* Loveseat PLP: hide raw list/sale/listing prices until member-pricing JS runs (avoids pre-JS flash). */
+      var cat157MemberPlp =
+        /\/category-s\/157\.html?/i.test(p) || /\/stationary-loveseats-s\/157\.html?/i.test(p);
+      if (cat157MemberPlp) {
+        h.classList.add('mc-cat157-plp-pricing-pending');
+      } else {
+        h.classList.remove('mc-cat157-plp-pricing-pending');
+      }
     } catch (e) {}
   }
   markCategoryListing();
@@ -58,6 +66,39 @@
   };
 })();
 </script>
+<style id="mc-cat157-plp-pending-critical">
+  /* Loads in head before body paint: suppress Volusion list/sale/listing price on cat 157 PLP until mcPaintCategoryGridMemberPricing clears mc-cat157-plp-pricing-pending */
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_productprice,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_saleprice,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.product_sale_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_sale_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.price_color,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .price_color,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .v-product__price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.product_list_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_list_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_productprice,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_saleprice,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product font.product_sale_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_sale_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .v-product__price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product font.product_list_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_list_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_productprice,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_saleprice,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product font.product_sale_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_sale_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product font.product_list_price,
+  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_list_price {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+</style>
 <!-- MC_DEPLOY_VERIFY_20260409a: inline hide dup search strip + custom-safe PDP; upload template + vspfiles/css/custom-safe.css; mccabe ?v=20260409a -->
 <meta name="mc-deploy-verify" content="20260409a-inline-css-upload-custom-safe">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -10920,6 +10961,7 @@ try {
       }
     }
     rmDups('.mc-member-grid-price');
+    rmDups('.mc-member-price');
   }
 
   /**
@@ -10930,9 +10972,23 @@ try {
     if (!card || !card.querySelector) return null;
     if (mcIsRelatedItemsNode(card)) return null;
     if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) return null;
-    mcDedupeMemberGridBlocksInCard(card);
+    var gDup = card.querySelectorAll('.mc-member-grid-price');
+    var gi;
+    for (gi = 1; gi < gDup.length; gi++) {
+      try {
+        gDup[gi].remove();
+      } catch (eGd) {}
+    }
+    var pDup = card.querySelectorAll('.mc-member-price');
+    var pi;
+    for (pi = 1; pi < pDup.length; pi++) {
+      try {
+        pDup[pi].remove();
+      } catch (ePd) {}
+    }
     var block = card.querySelector('.mc-member-grid-price');
-    if (!block || !block.parentNode || block.parentNode === card) return block || null;
+    if (!block) return null;
+    if (block.parentNode && block.parentNode === card) return block;
     var title =
       card.querySelector('.v-product__name') ||
       card.querySelector('.productnamecolor') ||
@@ -11376,68 +11432,69 @@ try {
   }
 
   function mcPaintCategoryGridMemberPricing() {
-    try {
-      if (typeof window.mcEnsureCategoryListingClasses === 'function') window.mcEnsureCategoryListingClasses();
-    } catch (eEnsCat) {}
-    var cat103NoMember = mcPathLooksLikeCategory103Listing();
-    try {
-      var _mcGridLid =
-        typeof mcListingCategoryIdFromVolusion === 'function' ? mcListingCategoryIdFromVolusion() : null;
-      if (_mcGridLid && MC_MEMBER_PRICING_GRID_CATEGORY_IDS[_mcGridLid]) {
-        cat103NoMember = false;
-      }
-    } catch (e157Grid) {}
-
-    var products = mcCollectGridProductCards();
-    var st157 = window.__mcMemberPricing || {};
-    var unlocked157 = !!st157.unlocked;
     var plpPathLow = (location.pathname || '').toLowerCase();
     var on157MemberGatedPlp =
       /\/category-s\/157\.html?/i.test(plpPathLow) || /\/stationary-loveseats-s\/157\.html?/i.test(plpPathLow);
     try {
-      if (on157MemberGatedPlp && !unlocked157) {
-        document.documentElement.classList.add('mc-cat157-plp-guest');
-      } else {
-        document.documentElement.classList.remove('mc-cat157-plp-guest');
-      }
-    } catch (e157Tok2) {}
-    if (cat103NoMember && !products.length) {
       try {
-        var stray = document.querySelectorAll(
-          '#content_area .mc-member-grid-price, #content_area_home .mc-member-grid-price, [role="main"] .mc-member-grid-price'
-        );
-        var si;
-        for (si = 0; si < stray.length; si++) {
-          var blk = stray[si];
-          if (blk && blk.parentNode) blk.parentNode.removeChild(blk);
-        }
-      } catch (eStrayBean) {}
-    }
-    if (!products.length) return;
-
-    if (typeof window !== 'undefined' && window.__MC_DEBUG_MEMBER_GRID) {
+        if (typeof window.mcEnsureCategoryListingClasses === 'function') window.mcEnsureCategoryListingClasses();
+      } catch (eEnsCat) {}
+      var cat103NoMember = mcPathLooksLikeCategory103Listing();
       try {
-        var _mcDbgLid =
+        var _mcGridLid =
           typeof mcListingCategoryIdFromVolusion === 'function' ? mcListingCategoryIdFromVolusion() : null;
-        console.log('[MC member pricing eligibility]', {
-          pathname: location.pathname,
-          parsedListingCategoryId: _mcDbgLid,
-          cat103NoMember: cat103NoMember,
-          listingEligible: mcMemberPricingGridListingEligible(),
-          productsLength: products.length
-        });
-      } catch (eDbgElig) {}
-    }
+        if (_mcGridLid && MC_MEMBER_PRICING_GRID_CATEGORY_IDS[_mcGridLid]) {
+          cat103NoMember = false;
+        }
+      } catch (e157Grid) {}
 
-    var st = window.__mcMemberPricing || {};
-    var unlocked = !!st.unlocked;
-    try {
-      if (unlocked) document.body.classList.add('mc-member-logged-in');
-      else document.body.classList.remove('mc-member-logged-in');
-    } catch (eCls2) {}
-    var i;
-    for (i = 0; i < products.length; i++) {
-      var card = products[i];
+      var products = mcCollectGridProductCards();
+      if (cat103NoMember && !products.length) {
+        try {
+          var stray = document.querySelectorAll(
+            '#content_area .mc-member-grid-price, #content_area_home .mc-member-grid-price, [role="main"] .mc-member-grid-price'
+          );
+          var si;
+          for (si = 0; si < stray.length; si++) {
+            var blk = stray[si];
+            if (blk && blk.parentNode) blk.parentNode.removeChild(blk);
+          }
+        } catch (eStrayBean) {}
+      }
+      if (!products.length) {
+        return;
+      }
+
+      if (typeof window !== 'undefined' && window.__MC_DEBUG_MEMBER_GRID) {
+        try {
+          var _mcDbgLid =
+            typeof mcListingCategoryIdFromVolusion === 'function' ? mcListingCategoryIdFromVolusion() : null;
+          console.log('[MC member pricing eligibility]', {
+            pathname: location.pathname,
+            parsedListingCategoryId: _mcDbgLid,
+            cat103NoMember: cat103NoMember,
+            listingEligible: mcMemberPricingGridListingEligible(),
+            productsLength: products.length
+          });
+        } catch (eDbgElig) {}
+      }
+
+      var st = window.__mcMemberPricing || {};
+      var unlocked = !!st.unlocked;
+      try {
+        if (unlocked) document.body.classList.add('mc-member-logged-in');
+        else document.body.classList.remove('mc-member-logged-in');
+      } catch (eCls2) {}
+      try {
+        if (on157MemberGatedPlp && !unlocked) {
+          document.documentElement.classList.add('mc-cat157-plp-guest');
+        } else {
+          document.documentElement.classList.remove('mc-cat157-plp-guest');
+        }
+      } catch (e157Tok2) {}
+      var i;
+      for (i = 0; i < products.length; i++) {
+        var card = products[i];
       var cardHref = mcFindProductHref(card);
       var cardParsedCat = mcMemberGridParsedCategoryFromHref(cardHref);
       var cat103Skip = cat103NoMember && !mcMemberPricingGridCardEligible(card);
@@ -11828,6 +11885,13 @@ try {
         window.mcFixCategoryGrid();
       }
     } catch (eMcG) {}
+    } finally {
+      try {
+        if (on157MemberGatedPlp) {
+          document.documentElement.classList.remove('mc-cat157-plp-pricing-pending');
+        }
+      } catch (e157Fn) {}
+    }
   }
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
 
