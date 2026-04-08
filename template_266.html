@@ -10231,9 +10231,28 @@ try {
       /\/stationary-loveseats-s\/157\.html?/i.test(location.pathname || '');
     if (path157) {
       var raw157 = document.querySelectorAll(
-        '#content_area .v-product-grid .v-product, #content_area .v-product-grid .v-product-grid-item, #content_area .v-product-grid li.v-product'
+        '#content_area .v-product-grid .v-product, ' +
+          '#content_area .v-product-grid .v-product-grid-item, ' +
+          '#content_area ul.v-product-grid > li.v-product, ' +
+          '#content_area ul.v-product-grid > li.v-product-grid-item, ' +
+          '#content_area .v-product-grid li.v-product'
       );
       for (i = 0; i < raw157.length; i++) pushCard(raw157[i]);
+      if (!out.length) {
+        var links157 = document.querySelectorAll('#content_area a[href*="/product-p/"]');
+        var j157;
+        for (j157 = 0; j157 < links157.length; j157++) {
+          var a157 = links157[j157];
+          if (a157.closest && (a157.closest('#footer') || a157.closest('footer'))) continue;
+          var wrap157 =
+            (a157.closest && a157.closest('.v-product-grid-item')) ||
+            (a157.closest && a157.closest('ul.v-product-grid > li')) ||
+            (a157.closest && a157.closest('.v-product')) ||
+            (a157.closest && a157.closest('li.v-product')) ||
+            (a157.closest && a157.closest('table.v65-productDisplay td'));
+          if (wrap157) pushCard(wrap157);
+        }
+      }
       if (out.length) return out;
     }
 
@@ -11257,17 +11276,18 @@ try {
     try {
       lid = typeof mcListingCategoryIdFromVolusion === 'function' ? mcListingCategoryIdFromVolusion() : null;
     } catch (eLidEl) {}
-    if (lid === '157') return true;
+    if (lid === '157' || Number(lid) === 157) return true;
     if (lid && MC_MEMBER_PRICING_GRID_CATEGORY_IDS[lid]) return true;
     return false;
   }
 
   function mcMemberPricingGridCardEligible(card) {
     var pagePath = location.pathname || '';
-    if (/\/category-s\/157\.html?/i.test(pagePath) || /\/stationary-loveseats-s\/157\.html?/i.test(pagePath)) return true;
+    if (/\/category-s\/157\.htm/i.test(pagePath) || /\/category-s\/157\.html?/i.test(pagePath)) return true;
+    if (/\/stationary-loveseats-s\/157\.htm/i.test(pagePath) || /\/stationary-loveseats-s\/157\.html?/i.test(pagePath)) return true;
     if (mcMemberPricingGridListingEligible()) return true;
     var h = mcFindProductHref(card);
-    if (/\/category-s\/157\.html?/i.test(h || '')) return true;
+    if (/\/category-s\/157\.htm/i.test(h || '') || /\/category-s\/157\.html?/i.test(h || '')) return true;
     var pid = mcMemberGridParsedCategoryFromHref(h);
     if (pid === '157' || Number(pid) === 157) return true;
     if (pid && MC_MEMBER_PRICING_GRID_CATEGORY_IDS[pid]) return true;

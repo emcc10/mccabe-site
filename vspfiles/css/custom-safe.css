@@ -9165,7 +9165,92 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
   margin-left: 130px !important;
 }
 
-/* Related Items — per-card only (table cells / single carousel item; no flex on multi-product wrappers) */
+/* Never show lowest-price MAP promo CTA (member caption replaces in template) */
+.mc-lowest-price-cta,
+.lowest-price-cta,
+[class*="lowest-price"],
+[class*="lowestprice"] {
+  display: none !important;
+}
+
+/* Related Items stability only */
+#related-products .v65-product-related-item,
+.v65-product-related .v65-product-related-item,
+.mc-related-carousel .v65-product-related-item,
+.mc-related-carousel__viewport .v65-product-related-item {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Per-card: category PLP + related buckets (scoped wrappers only; flex column on each card, not the whole section) */
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  vertical-align: top !important;
+  text-align: left !important;
+}
+
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_image,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__img,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__image,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product > a:first-of-type,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product img,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item .product_image,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item .v-product__img,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item .v-product__image,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item > a:first-of-type,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item img,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_image,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .v-product__img,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product > a:first-of-type,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product img,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .product_image,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .v-product__img,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item > a:first-of-type,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item img {
+  display: block !important;
+  margin: 0 0 10px 0 !important;
+}
+
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v65-product-related-title,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .productnamecolor,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__name,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v65-product-related-price,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__price,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_price,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .mc-member-grid-price,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .mc-member-price,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product font.product_sale_price,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item .v-product__name,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item .productnamecolor,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item .v-product__price,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item .product_price,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item .mc-member-grid-price,
+html.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product-grid-item font.product_sale_price,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .v-product__name,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .productnamecolor,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .v-product__price,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_price,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .mc-member-grid-price,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product font.product_sale_price,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .v-product__name,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .productnamecolor,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .v-product__price,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .product_price,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .mc-member-grid-price,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item font.product_sale_price {
+  display: block !important;
+  float: none !important;
+  clear: both !important;
+  position: static !important;
+  margin-top: 0 !important;
+}
+
 body.productdetails #content_area #v65-product-related table.v65-productDisplay > tbody > tr > td,
 body.mc-product-page #content_area #v65-product-related table.v65-productDisplay > tbody > tr > td {
   vertical-align: top !important;
@@ -9174,6 +9259,9 @@ body.mc-product-page #content_area #v65-product-related table.v65-productDisplay
 
 body.productdetails #content_area #v65-product-related table.v65-productDisplay > tbody > tr > td .v-product,
 body.mc-product-page #content_area #v65-product-related table.v65-productDisplay > tbody > tr > td .v-product {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
   vertical-align: top !important;
   text-align: left !important;
 }
@@ -9213,11 +9301,60 @@ body.mc-product-page #content_area #v65-product-related table.v65-productDisplay
   margin-top: 0 !important;
 }
 
+body.productdetails #content_area #related_products_content .v-product,
+body.mc-product-page #content_area #related_products_content .v-product {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  vertical-align: top !important;
+  text-align: left !important;
+}
+
+body.productdetails #content_area #related_products_content .v-product .product_image,
+body.productdetails #content_area #related_products_content .v-product .v-product__img,
+body.productdetails #content_area #related_products_content .v-product .v-product__image,
+body.productdetails #content_area #related_products_content .v-product > a:first-of-type,
+body.productdetails #content_area #related_products_content .v-product img,
+body.mc-product-page #content_area #related_products_content .v-product .product_image,
+body.mc-product-page #content_area #related_products_content .v-product .v-product__img,
+body.mc-product-page #content_area #related_products_content .v-product .v-product__image,
+body.mc-product-page #content_area #related_products_content .v-product > a:first-of-type,
+body.mc-product-page #content_area #related_products_content .v-product img {
+  display: block !important;
+  margin: 0 0 10px 0 !important;
+}
+
+body.productdetails #content_area #related_products_content .v-product .v65-product-related-title,
+body.productdetails #content_area #related_products_content .v-product .productnamecolor,
+body.productdetails #content_area #related_products_content .v-product .v-product__name,
+body.productdetails #content_area #related_products_content .v-product .v65-product-related-price,
+body.productdetails #content_area #related_products_content .v-product .v-product__price,
+body.productdetails #content_area #related_products_content .v-product .product_price,
+body.productdetails #content_area #related_products_content .v-product .mc-member-grid-price,
+body.productdetails #content_area #related_products_content .v-product .mc-member-price,
+body.mc-product-page #content_area #related_products_content .v-product .v65-product-related-title,
+body.mc-product-page #content_area #related_products_content .v-product .productnamecolor,
+body.mc-product-page #content_area #related_products_content .v-product .v-product__name,
+body.mc-product-page #content_area #related_products_content .v-product .v65-product-related-price,
+body.mc-product-page #content_area #related_products_content .v-product .v-product__price,
+body.mc-product-page #content_area #related_products_content .v-product .product_price,
+body.mc-product-page #content_area #related_products_content .v-product .mc-member-grid-price,
+body.mc-product-page #content_area #related_products_content .v-product .mc-member-price {
+  display: block !important;
+  float: none !important;
+  clear: both !important;
+  position: static !important;
+  margin-top: 0 !important;
+}
+
 #related-products .v65-product-related-item,
 .mc-related-carousel__viewport .mc-related-carousel__row > td .v65-product-related-item,
 .mc-related-carousel__viewport .mc-related-carousel__list > li.v65-product-related-item,
 .mc-related-carousel__viewport .mc-related-carousel__row > td .v-product,
 .mc-related-carousel__viewport .mc-related-carousel__list > li.v-product {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
   vertical-align: top !important;
   text-align: left !important;
 }
@@ -9273,22 +9410,4 @@ body.mc-product-page #content_area #v65-product-related table.v65-productDisplay
   clear: both !important;
   position: static !important;
   margin-top: 0 !important;
-}
-
-/* Never show lowest-price MAP promo CTA (member caption replaces in template) */
-.mc-lowest-price-cta,
-.lowest-price-cta,
-[class*="lowest-price"],
-[class*="lowestprice"] {
-  display: none !important;
-}
-
-/* Related Items stability only */
-#related-products .v65-product-related-item,
-.v65-product-related .v65-product-related-item,
-.mc-related-carousel .v65-product-related-item,
-.mc-related-carousel__viewport .v65-product-related-item {
-  transition: none !important;
-  animation: none !important;
-  transform: none !important;
 }
