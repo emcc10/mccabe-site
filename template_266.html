@@ -43,11 +43,16 @@
         /(?:\?|&)cat=103(?:&|$)/i.test(qs103) ||
         /\/category-s\/103\.html?/i.test(p) ||
         /-s\/103\.html?/i.test(p);
+      var looksMemberGatedPlp =
+        /\/category-s\/157\.html?/i.test(p) ||
+        /\/stationary-loveseats-s\/157\.html?/i.test(p) ||
+        /-s\/157\.html?(?:\?|#|$)/i.test(p);
       var memberPlpFlashGuard =
         b &&
         !b.classList.contains('productdetails') &&
         !b.classList.contains('is-home') &&
         !looks103 &&
+        looksMemberGatedPlp &&
         (h.classList.contains('category') || b.classList.contains('category'));
       if (memberPlpFlashGuard) {
         h.classList.add('mc-member-plp-price-pending');
@@ -77,33 +82,41 @@
 })();
 </script>
 <style id="mc-cat157-plp-pending-critical">
-  /* Loads in head before body paint: suppress Volusion list/sale/listing price on cat 157 PLP until mcPaintCategoryGridMemberPricing clears mc-cat157-plp-pricing-pending */
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_productprice,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_saleprice,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.product_sale_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_sale_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.price_color,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .price_color,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .v-product__price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.product_list_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_list_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_productprice,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_saleprice,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product font.product_sale_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_sale_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .v-product__price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product font.product_list_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_list_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_productprice,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_saleprice,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product font.product_sale_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_sale_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product font.product_list_price,
-  html.mc-cat157-plp-pricing-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_list_price {
+  /* Head: suppress raw Volusion list/sale/list nodes until mcPaintCategoryGridMemberPricing clears html.mc-member-plp-price-pending */
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_saleprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.price_color,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .price_color,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .v-product__price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_saleprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product font.product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .v-product__price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product font.product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .product_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .product_saleprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item font.product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .product_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .v-product__price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item font.product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_saleprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product font.product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product font.product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_list_price {
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
@@ -10613,6 +10626,8 @@ try {
       '.product_price',
       '.v65-product-related-price',
       '.product_productprice',
+      '.product_saleprice',
+      '[class*="product_saleprice"]',
       'font.colors_productprice',
       'font.pricecolor.colors_productprice',
       'font.pricecolor',
@@ -10633,12 +10648,45 @@ try {
     return null;
   }
 
+  /** Narrow PLP price mount for visibility flash guard (image/title not hidden). */
+  function mcFindCardPriceWrapperForVisibility(card) {
+    if (!card || !card.querySelector) return null;
+    var w = mcFindCardPriceContainerMount(card) || mcFindCardPricingMount(card);
+    if (w) return w;
+    return (
+      card.querySelector('.v-product__price') ||
+      card.querySelector('.product_price') ||
+      card.querySelector('.product_productprice') ||
+      card.querySelector('.product_saleprice') ||
+      card.querySelector('font.product_sale_price') ||
+      card.querySelector('.v65-product-related-price') ||
+      null
+    );
+  }
+
+  function mcMarkCardPriceWrapperPending(card) {
+    var w = mcFindCardPriceWrapperForVisibility(card);
+    if (!w || !w.classList) return;
+    try {
+      w.classList.remove('mc-pricing-ready');
+      w.classList.add('mc-pricing-pending');
+    } catch (eMpp) {}
+  }
+
+  function mcMarkCardPriceWrapperReady(card) {
+    var w = mcFindCardPriceWrapperForVisibility(card);
+    if (!w || !w.classList) return;
+    try {
+      w.classList.remove('mc-pricing-pending');
+      w.classList.add('mc-pricing-ready');
+    } catch (eMpr) {}
+  }
 
   function mcExtractVolusionSalePriceFromCard(card) {
     if (!card) return '';
     var host = mcCloneCardSansMember(card);
     var saleEl = host.querySelector(
-      'font.product_sale_price, .product_sale_price, [class*="product_sale_price"], span.product_sale_price'
+      'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"], span.product_sale_price'
     );
     if (saleEl) {
       var sd = mcExtractDollarFromText(saleEl.textContent || '');
@@ -10982,20 +11030,7 @@ try {
     if (!card || !card.querySelector) return null;
     if (mcIsRelatedItemsNode(card)) return null;
     if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) return null;
-    var gDup = card.querySelectorAll('.mc-member-grid-price');
-    var gi;
-    for (gi = 1; gi < gDup.length; gi++) {
-      try {
-        gDup[gi].remove();
-      } catch (eGd) {}
-    }
-    var pDup = card.querySelectorAll('.mc-member-price');
-    var pi;
-    for (pi = 1; pi < pDup.length; pi++) {
-      try {
-        pDup[pi].remove();
-      } catch (ePd) {}
-    }
+    mcDedupeMemberGridBlocksInCard(card);
     var block = card.querySelector('.mc-member-grid-price');
     if (!block) return null;
     if (block.parentNode && block.parentNode === card) return block;
@@ -11367,7 +11402,7 @@ try {
       }
       var cls = (el.className && String(el.className)) || '';
       if (
-        /product_sale_price|product_list_price|sale_price|list_price/i.test(cls) ||
+        /product_sale_price|product_list_price|sale_price|list_price|product_saleprice|product_productprice/i.test(cls) ||
         (el.tagName === 'FONT' && /sale|list/i.test(cls) && /\$/i.test(tx))
       ) {
         moveAfterTitle(el);
@@ -11379,6 +11414,9 @@ try {
   var MC_MEMBER_PRICING_GRID_CATEGORY_IDS = { 157: true };
 
   function mcMemberPricingGridListingEligible() {
+    if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) {
+      return false;
+    }
     var pagePath = location.pathname || '';
     if (/\/category-s\/157\.html?/i.test(pagePath)) return true;
     if (/\/stationary-loveseats-s\/157\.html?/i.test(pagePath)) return true;
@@ -11393,13 +11431,22 @@ try {
 
   function mcMemberPricingGridCardEligible(card) {
     var pagePath = location.pathname || '';
-    if (/\/category-s\/157\.htm/i.test(pagePath) || /\/category-s\/157\.html?/i.test(pagePath)) return true;
-    if (/\/stationary-loveseats-s\/157\.htm/i.test(pagePath) || /\/stationary-loveseats-s\/157\.html?/i.test(pagePath)) return true;
-    if (mcMemberPricingGridListingEligible()) return true;
     var h = mcFindProductHref(card);
-    if (/\/category-s\/157\.htm/i.test(h || '') || /\/category-s\/157\.html?/i.test(h || '')) return true;
     var pid = mcMemberGridParsedCategoryFromHref(h);
-    if (pid === '157' || Number(pid) === 157) return true;
+    if (
+      pid === '157' ||
+      Number(pid) === 157 ||
+      /\/category-s\/157\.htm/i.test(pagePath) ||
+      /\/category-s\/157\.htm/i.test(h || '') ||
+      /\/category-s\/157\.html?/i.test(pagePath) ||
+      /\/category-s\/157\.html?/i.test(h || '')
+    ) {
+      return true;
+    }
+    if (/\/stationary-loveseats-s\/157\.htm/i.test(pagePath) || /\/stationary-loveseats-s\/157\.html?/i.test(pagePath))
+      return true;
+    if (mcMemberPricingGridListingEligible()) return true;
+    if (/\/stationary-loveseats-s\/157\.htm/i.test(h || '') || /\/stationary-loveseats-s\/157\.html?/i.test(h || '')) return true;
     if (pid && MC_MEMBER_PRICING_GRID_CATEGORY_IDS[pid]) return true;
     return false;
   }
@@ -11549,32 +11596,10 @@ try {
         } catch (eBeanPl) {}
         continue;
       }
-      if (typeof window !== 'undefined' && window.__MC_DEBUG_MEMBER_GRID) {
-        try {
-          var dbg157Path =
-            /\/category-s\/157\.htm/i.test(location.pathname || '') ||
-            /\/category-s\/157\.html?/i.test(location.pathname || '') ||
-            /\/stationary-loveseats-s\/157\.html?/i.test(location.pathname || '');
-          var dbg157 =
-            dbg157Path || cardParsedCat === '157' || Number(cardParsedCat) === 157;
-          if (dbg157) {
-            console.log('[MC157 card pricing]', {
-              pathname: location.pathname,
-              cardHref: cardHref || '',
-              parsedCategoryId: cardParsedCat,
-              eligible: mcMemberPricingGridCardEligible(card),
-              cat103Skip: cat103Skip,
-              hasMemberBlock: !!card.querySelector('.mc-member-grid-price, .mc-member-price'),
-              hasSalePrice: !!card.querySelector(
-                '.price_sale, .product_saleprice, .saleprice, font.product_sale_price, .product_sale_price'
-              ),
-              isLoggedInState: document.body.classList.contains('mc-member-pricing-on'),
-              mcMemberLoggedIn: document.body.classList.contains('mc-member-logged-in')
-            });
-          }
-        } catch (e157Dbg) {}
-      }
       mcDedupeMemberGridBlocksInCard(card);
+      try {
+        mcMarkCardPriceWrapperPending(card);
+      } catch (ePend) {}
       var hasSale = mcCardHasSalePricing(card);
       /* Category 157 (Stationary Loveseats): Volusion often omits font.product_sale_price; still paint member row when prices are visible. */
       if (
@@ -11583,8 +11608,10 @@ try {
         (
           cardParsedCat === '157' ||
           Number(cardParsedCat) === 157 ||
+          /\/category-s\/157\.htm/i.test(location.pathname || '') ||
           /\/category-s\/157\.html?/i.test(location.pathname || '') ||
           /\/stationary-loveseats-s\/157\.html?/i.test(location.pathname || '') ||
+          /\/category-s\/157\.htm/i.test(cardHref || '') ||
           /\/category-s\/157\.html?/i.test(cardHref || '') ||
           (typeof mcListingCategoryIdFromVolusion === 'function' &&
             mcListingCategoryIdFromVolusion() === '157')
@@ -11592,6 +11619,14 @@ try {
       ) {
         hasSale = true;
       }
+      var is157ListingCtx =
+        /\/category-s\/157\.htm/i.test(location.pathname || '') ||
+        /\/category-s\/157\.html?/i.test(location.pathname || '') ||
+        /\/stationary-loveseats-s\/157\.html?/i.test(location.pathname || '') ||
+        cardParsedCat === '157' ||
+        Number(cardParsedCat) === 157 ||
+        (typeof mcListingCategoryIdFromVolusion === 'function' &&
+          String(mcListingCategoryIdFromVolusion()) === '157');
       var prevState = card.getAttribute('data-mc-member-grid');
       var nextState = unlocked ? 'unlocked' : 'locked';
       var existingBlock = card.querySelector('.mc-member-grid-price');
@@ -11634,6 +11669,7 @@ try {
           card.querySelector('.v65-product-related-price') ||
           card.querySelector('font.product_sale_price') ||
           card.querySelector('.product_sale_price') ||
+          card.querySelector('.product_saleprice') ||
           card.querySelector('font.price_color') ||
           card.querySelector('.price_color') ||
           card.querySelector('[class*="formattedprice"]') ||
@@ -11744,20 +11780,24 @@ try {
       }
 
       if (!hasSale) {
-        if (existingBlock && existingBlock.parentNode) {
-          try {
-            existingBlock.parentNode.removeChild(existingBlock);
-          } catch (eRmNs2) {}
-        }
-        if (installTarget) mcInstallLoggedInPriceNoMemberBlock(installTarget);
-        card.setAttribute('data-mc-member-grid', 'unlocked');
-        try {
-          if (!mcIsPdpCardOrRelated(card)) {
-            mcReorderCategoryListingNodes(card);
-            mcEnsureMemberBlockCardLevel(card);
+        if (unlocked && is157ListingCtx) {
+          hasSale = true;
+        } else {
+          if (existingBlock && existingBlock.parentNode) {
+            try {
+              existingBlock.parentNode.removeChild(existingBlock);
+            } catch (eRmNs2) {}
           }
-        } catch (eNsOrd) {}
-        continue;
+          if (installTarget) mcInstallLoggedInPriceNoMemberBlock(installTarget);
+          card.setAttribute('data-mc-member-grid', 'unlocked');
+          try {
+            if (!mcIsPdpCardOrRelated(card)) {
+              mcReorderCategoryListingNodes(card);
+              mcEnsureMemberBlockCardLevel(card);
+            }
+          } catch (eNsOrd) {}
+          continue;
+        }
       }
 
       var parseHost = card.cloneNode(true);
@@ -11886,6 +11926,14 @@ try {
         }
       } catch (eOrdAll) {}
     }
+    for (i = 0; i < products.length; i++) {
+      try {
+        var cVis = products[i];
+        if (mcIsRelatedItemsNode(cVis)) continue;
+        if (cat103NoMember && !mcMemberPricingGridCardEligible(cVis)) continue;
+        mcMarkCardPriceWrapperReady(cVis);
+      } catch (eVisR) {}
+    }
     try {
       mcHydrateCategoryHowToGetPrices();
     } catch (eHyd) {}
@@ -11897,13 +11945,30 @@ try {
     } catch (eMcG) {}
     } finally {
       try {
-        if (on157MemberGatedPlp) {
-          document.documentElement.classList.remove('mc-cat157-plp-pricing-pending');
-        }
+        document.documentElement.classList.remove('mc-member-plp-price-pending');
+        document.documentElement.classList.remove('mc-cat157-plp-pricing-pending');
       } catch (e157Fn) {}
     }
   }
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
+
+  function mcMarkMemberPlpPricesPendingEarly() {
+    try {
+      if (!document.body || document.body.classList.contains('productdetails')) return;
+      if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing())
+        return;
+      if (!document.documentElement.classList.contains('category') && !document.body.classList.contains('category'))
+        return;
+      var earlyProds = mcCollectGridProductCards();
+      var ei;
+      for (ei = 0; ei < earlyProds.length; ei++) {
+        var ec = earlyProds[ei];
+        if (mcIsRelatedItemsNode(ec)) continue;
+        if (!mcMemberPricingGridCardEligible(ec)) continue;
+        mcMarkCardPriceWrapperPending(ec);
+      }
+    } catch (eEarlyM) {}
+  }
 
   function mcBootCategoryGrid() {
     var isPdp =
@@ -11914,6 +11979,9 @@ try {
       /\/product-p\//i.test(location.pathname || '');
 
     var run = function () {
+      try {
+        mcMarkMemberPlpPricesPendingEarly();
+      } catch (eRunEarly) {}
       try {
         if (typeof window.detectMemberPricingState === 'function') {
           window
