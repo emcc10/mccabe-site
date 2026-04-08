@@ -7406,6 +7406,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   /** Path id, else `categoryid` / `c` query (e.g. category.asp?categoryid=157) — needed so stray DOM fields don’t imply the wrong category. */
   function mcListingCategoryIdFromVolusion() {
+    if (/\/category-s\/157\.htm/i.test(location.pathname || '')) {
+      return '157';
+    }
     var path = (location.pathname || '').toLowerCase();
     if (/\/category-s\/157\.html?/.test(path) || /\/stationary-loveseats-s\/157\.html?/.test(path)) {
       return '157';
@@ -10076,10 +10079,10 @@ try {
     var p = (location.pathname || '').toLowerCase();
     if (p === '/' || p === '/default.asp' || p.indexOf('default.asp') !== -1) return true;
     if (p.indexOf('searchresults') !== -1) return true;
-    if (
-      /\/stationary-loveseats-s\/157\.htm/i.test(location.pathname || '') ||
-      /\/category-s\/157\.htm/i.test(location.pathname || '')
-    ) {
+    if (/\/category-s\/157\.htm/i.test(location.pathname || '')) {
+      return true;
+    }
+    if (/\/stationary-loveseats-s\/157\.htm/i.test(location.pathname || '')) {
       return true;
     }
     if (p.indexOf('sitemap') !== -1) return false;
@@ -10785,10 +10788,10 @@ try {
   /** Category 103 PLP only — skip McCabe member grid paint (list + sale only). Other categories unchanged. */
   function mcPathLooksLikeCategory103Listing() {
     try {
-      if (
-        /\/stationary-loveseats-s\/157\.htm/i.test(location.pathname || '') ||
-        /\/category-s\/157\.htm/i.test(location.pathname || '')
-      ) {
+      if (/\/category-s\/157\.htm/i.test(location.pathname || '')) {
+        return false;
+      }
+      if (/\/stationary-loveseats-s\/157\.htm/i.test(location.pathname || '')) {
         return false;
       }
       var gq =
@@ -11103,11 +11106,21 @@ try {
     }
   }
 
+  /** PLP member-grid: category ids that must never be treated as no-member listings (e.g. cat 103). */
+  var MC_MEMBER_PRICING_GRID_CATEGORY_IDS = { 157: true };
+
   function mcPaintCategoryGridMemberPricing() {
     try {
       if (typeof window.mcEnsureCategoryListingClasses === 'function') window.mcEnsureCategoryListingClasses();
     } catch (eEnsCat) {}
     var cat103NoMember = mcPathLooksLikeCategory103Listing();
+    try {
+      var _mcGridLid =
+        typeof mcListingCategoryIdFromVolusion === 'function' ? mcListingCategoryIdFromVolusion() : null;
+      if (_mcGridLid && MC_MEMBER_PRICING_GRID_CATEGORY_IDS[_mcGridLid]) {
+        cat103NoMember = false;
+      }
+    } catch (e157Grid) {}
 
     var products = mcCollectGridProductCards();
     if (cat103NoMember && !products.length) {
