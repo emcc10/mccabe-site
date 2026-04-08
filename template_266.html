@@ -10239,12 +10239,15 @@ try {
       for (gi = 0; gi < v65Grids.length; gi++) {
         var v65g = v65Grids[gi];
         if (v65g.closest && v65g.closest('#v65-product-related')) continue;
-        var nameAs = v65g.querySelectorAll('td a.colors_productname');
+        /* Volusion: title link is usually .productnamecolor; .colors_productname is not always present on loveseat PLP */
+        var nameAs = v65g.querySelectorAll('td a.productnamecolor');
+        if (!nameAs.length) {
+          nameAs = v65g.querySelectorAll('td a.colors_productname');
+        }
         var na;
         for (na = 0; na < nameAs.length; na++) {
           var aNm = nameAs[na];
           if (!aNm.classList || aNm.classList.contains('productnamecolorsmall')) continue;
-          if (!aNm.classList.contains('productnamecolor')) continue;
           var tdc = aNm.closest && aNm.closest('td');
           if (tdc) pushCard(tdc);
         }
@@ -10917,7 +10920,6 @@ try {
       }
     }
     rmDups('.mc-member-grid-price');
-    rmDups('.mc-member-price');
   }
 
   /**
@@ -11065,7 +11067,7 @@ try {
     if (!card || !card.querySelectorAll) return;
     if (document.body.classList.contains('mc-member-logged-in')) return;
     var rmSel =
-      'font.product_sale_price, .product_sale_price, [class*="product_sale_price"], span.product_sale_price, [class*="formatted_sale"], [class*="FormattedSale"]';
+      'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"], span.product_sale_price, [class*="formatted_sale"], [class*="FormattedSale"]';
     var nodes = card.querySelectorAll(rmSel);
     var i;
     for (i = 0; i < nodes.length; i++) {
@@ -11188,7 +11190,7 @@ try {
     var tag = priceEl.tagName ? priceEl.tagName.toUpperCase() : '';
     if (tag === 'TD' || tag === 'TH') {
       var saleNodes = priceEl.querySelectorAll(
-        'font.product_sale_price, .product_sale_price, [class*="product_sale_price"], [class*="formatted_sale"], [class*="FormattedSale"]'
+        'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"], [class*="formatted_sale"], [class*="FormattedSale"]'
       );
       var si;
       for (si = 0; si < saleNodes.length; si++) {
@@ -11207,7 +11209,7 @@ try {
       var n = kept[ki];
       var cls = (n.className && String(n.className)) || '';
       var txt = (n.textContent || '').replace(/\s+/g, ' ').trim();
-      if (/product_sale|sale_price/i.test(cls)) continue;
+      if (/product_sale|sale_price|product_saleprice|saleprice/i.test(cls)) continue;
       if (/^sale\s*price/i.test(txt)) continue;
       filtered.push(n);
     }
@@ -11264,7 +11266,8 @@ try {
     var titlePar = title.parentNode;
 
     function moveAfterTitle(node) {
-      if (!node || node.parentNode !== card || !titlePar) return;
+      if (!node || !titlePar || !card.contains(node)) return;
+      if (node === title || (title.contains && title.contains(node))) return;
       if (title.nextSibling === node) return;
       var scan = title.nextSibling;
       while (scan) {
@@ -11420,6 +11423,16 @@ try {
       if (unlocked) document.body.classList.add('mc-member-logged-in');
       else document.body.classList.remove('mc-member-logged-in');
     } catch (eCls2) {}
+    var plpPathLow = (location.pathname || '').toLowerCase();
+    var on157MemberGatedPlp =
+      /\/category-s\/157\.html?/i.test(plpPathLow) || /\/stationary-loveseats-s\/157\.html?/i.test(plpPathLow);
+    try {
+      if (on157MemberGatedPlp && !unlocked) {
+        document.documentElement.classList.add('mc-cat157-plp-guest');
+      } else {
+        document.documentElement.classList.remove('mc-cat157-plp-guest');
+      }
+    } catch (e157Tok) {}
     var i;
     for (i = 0; i < products.length; i++) {
       var card = products[i];
@@ -11466,6 +11479,31 @@ try {
           }
         } catch (eBeanPl) {}
         continue;
+      }
+      if (typeof window !== 'undefined' && window.__MC_DEBUG_MEMBER_GRID) {
+        try {
+          var dbg157Path =
+            /\/category-s\/157\.htm/i.test(location.pathname || '') ||
+            /\/category-s\/157\.html?/i.test(location.pathname || '') ||
+            /\/stationary-loveseats-s\/157\.html?/i.test(location.pathname || '');
+          var dbg157 =
+            dbg157Path || cardParsedCat === '157' || Number(cardParsedCat) === 157;
+          if (dbg157) {
+            console.log('[MC157 card pricing]', {
+              pathname: location.pathname,
+              cardHref: cardHref || '',
+              parsedCategoryId: cardParsedCat,
+              eligible: mcMemberPricingGridCardEligible(card),
+              cat103Skip: cat103Skip,
+              hasMemberBlock: !!card.querySelector('.mc-member-grid-price, .mc-member-price'),
+              hasSalePrice: !!card.querySelector(
+                '.price_sale, .product_saleprice, .saleprice, font.product_sale_price, .product_sale_price'
+              ),
+              isLoggedInState: document.body.classList.contains('mc-member-pricing-on'),
+              mcMemberLoggedIn: document.body.classList.contains('mc-member-logged-in')
+            });
+          }
+        } catch (e157Dbg) {}
       }
       mcDedupeMemberGridBlocksInCard(card);
       var hasSale = mcCardHasSalePricing(card);
