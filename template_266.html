@@ -37,14 +37,24 @@
           b.classList.add('category');
         }
       }
-      /* Loveseat PLP: hide raw list/sale/listing prices until member-pricing JS runs (avoids pre-JS flash). */
-      var cat157MemberPlp =
-        /\/category-s\/157\.html?/i.test(p) || /\/stationary-loveseats-s\/157\.html?/i.test(p);
-      if (cat157MemberPlp) {
-        h.classList.add('mc-cat157-plp-pricing-pending');
+      /* Member PLP (not bean 103): hide raw Volusion price nodes until grid paint runs — avoids flash on refresh */
+      var qs103 = (window.location.search || '').toLowerCase();
+      var looks103 =
+        /(?:\?|&)cat=103(?:&|$)/i.test(qs103) ||
+        /\/category-s\/103\.html?/i.test(p) ||
+        /-s\/103\.html?/i.test(p);
+      var memberPlpFlashGuard =
+        b &&
+        !b.classList.contains('productdetails') &&
+        !b.classList.contains('is-home') &&
+        !looks103 &&
+        (h.classList.contains('category') || b.classList.contains('category'));
+      if (memberPlpFlashGuard) {
+        h.classList.add('mc-member-plp-price-pending');
       } else {
-        h.classList.remove('mc-cat157-plp-pricing-pending');
+        h.classList.remove('mc-member-plp-price-pending');
       }
+      h.classList.remove('mc-cat157-plp-pricing-pending');
     } catch (e) {}
   }
   markCategoryListing();
