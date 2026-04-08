@@ -58,6 +58,15 @@ jobs:
             echo "::error::Missing vspfiles/templates/266/css/mccabe-overrides.css (template links it after template.css)."
             exit 1
           fi
+          for f in \
+            vspfiles/templates/266/css/template.css \
+            vspfiles/templates/266/js/min/design-toolkit.min.js \
+            vspfiles/templates/266/js/min/template.min.js; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Missing $f (linked from template_266.html)."
+              exit 1
+            fi
+          done
 
           sudo apt-get update -qq
           sudo apt-get install -y -qq sshpass python3-pip
@@ -194,12 +203,18 @@ jobs:
 
           try_put_pair() {
             local title="$1" tpath="$2" cpath="$3"
-            local mpath
+            local mpath tcss tjs
             mpath="$(mccabe_remote_for_css "${cpath}")"
+            tcss="${mpath%/*}/template.css"
+            tjs="${mpath/\/css\//\/js\/min\/}"
+            tjs="${tjs%mccabe-overrides.css}"
             try_batch "${title}" \
               "put template_266.html ${tpath}" \
               "put vspfiles/css/custom-safe.css ${cpath}" \
               "put vspfiles/templates/266/css/mccabe-overrides.css ${mpath}" \
+              "put vspfiles/templates/266/css/template.css ${tcss}" \
+              "put vspfiles/templates/266/js/min/design-toolkit.min.js ${tjs}design-toolkit.min.js" \
+              "put vspfiles/templates/266/js/min/template.min.js ${tjs}template.min.js" \
               "bye"
           }
 
@@ -228,6 +243,9 @@ jobs:
               "put template_266.html template_266.html" \
               "put vspfiles/css/custom-safe.css vspfiles/css/custom-safe.css" \
               "put vspfiles/templates/266/css/mccabe-overrides.css vspfiles/templates/266/css/mccabe-overrides.css" \
+              "put vspfiles/templates/266/css/template.css vspfiles/templates/266/css/template.css" \
+              "put vspfiles/templates/266/js/min/design-toolkit.min.js vspfiles/templates/266/js/min/design-toolkit.min.js" \
+              "put vspfiles/templates/266/js/min/template.min.js vspfiles/templates/266/js/min/template.min.js" \
               "bye"; then ok=1; fi
           fi
 
@@ -269,6 +287,33 @@ jobs:
           try_put_mccabe_only "mccabe-overrides → domain v/" "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css"
           try_put_mccabe_only "mccabe-overrides → domain legacy" "/mccabestheaterandliving.com/vspfiles/templates/266/css/mccabe-overrides.css"
           try_put_mccabe_only "mccabe-overrides → relative" "vspfiles/templates/266/css/mccabe-overrides.css"
+          echo "::endgroup::"
+
+          try_put_template_css_only() {
+            local title="$1" rpath="$2"
+            try_batch "${title}" \
+              "put vspfiles/templates/266/css/template.css ${rpath}" \
+              "bye" || true
+          }
+          try_put_template266_js_only() {
+            local title="$1" dir="$2"
+            try_batch "${title}" \
+              "put vspfiles/templates/266/js/min/design-toolkit.min.js ${dir}/design-toolkit.min.js" \
+              "put vspfiles/templates/266/js/min/template.min.js ${dir}/template.min.js" \
+              "bye" || true
+          }
+          echo "::group::Best-effort: template.css + template JS (template_266.html links v/vspfiles/templates/266/…)"
+          try_put_template_css_only "template.css → /v/vspfiles/templates/266/css/" "/v/vspfiles/templates/266/css/template.css"
+          try_put_template_css_only "template.css → v/vspfiles/templates/266/css/" "v/vspfiles/templates/266/css/template.css"
+          try_put_template_css_only "template.css → /vspfiles/templates/266/css/" "/vspfiles/templates/266/css/template.css"
+          try_put_template_css_only "template.css → domain v/" "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/template.css"
+          try_put_template_css_only "template.css → domain legacy" "/mccabestheaterandliving.com/vspfiles/templates/266/css/template.css"
+          try_put_template_css_only "template.css → relative" "vspfiles/templates/266/css/template.css"
+          try_put_template266_js_only "JS → /v/vspfiles/templates/266/js/min" "/v/vspfiles/templates/266/js/min"
+          try_put_template266_js_only "JS → v/vspfiles/templates/266/js/min" "v/vspfiles/templates/266/js/min"
+          try_put_template266_js_only "JS → /vspfiles/templates/266/js/min" "/vspfiles/templates/266/js/min"
+          try_put_template266_js_only "JS → domain v/" "/mccabestheaterandliving.com/v/vspfiles/templates/266/js/min"
+          try_put_template266_js_only "JS → domain legacy" "/mccabestheaterandliving.com/vspfiles/templates/266/js/min"
           echo "::endgroup::"
 
           echo "::notice::Upload finished. Next step re-downloads template via SFTP and may check the public template URL (HTTP); storefront cache can still lag what you see in a browser."
