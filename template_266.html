@@ -7368,9 +7368,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   /** Path id, else `categoryid` / `c` query (e.g. category.asp?categoryid=157) — needed so stray DOM fields don’t imply the wrong category. */
   function mcListingCategoryIdFromVolusion() {
-    if (/\/stationary-loveseats-s\/157\.htm/i.test(location.pathname || '')) {
-      return '157';
-    }
     var path = (location.pathname || '').toLowerCase();
     if (/\/category-s\/157\.html?/.test(path) || /\/stationary-loveseats-s\/157\.html?/.test(path)) {
       return '157';
