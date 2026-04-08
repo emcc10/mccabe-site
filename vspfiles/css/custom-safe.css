@@ -9281,3 +9281,13 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
   max-width: 100% !important;
   object-fit: contain !important;
 }
+
+/* PDP purchase-side stability only */
+#v65-product-parent .v65-productdetail-cartqty,
+#v65-product-parent #options_table,
+#v65-product-parent #add,
+#v65-product-parent #btn_addtocart {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}

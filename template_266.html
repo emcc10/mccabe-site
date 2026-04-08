@@ -7368,6 +7368,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   /** Path id, else `categoryid` / `c` query (e.g. category.asp?categoryid=157) — needed so stray DOM fields don’t imply the wrong category. */
   function mcListingCategoryIdFromVolusion() {
+    if (/\/stationary-loveseats-s\/157\.htm/i.test(location.pathname || '')) {
+      return '157';
+    }
     var path = (location.pathname || '').toLowerCase();
     if (/\/category-s\/157\.html?/.test(path) || /\/stationary-loveseats-s\/157\.html?/.test(path)) {
       return '157';
@@ -10027,6 +10030,9 @@ try {
     var p = (location.pathname || '').toLowerCase();
     if (p === '/' || p === '/default.asp' || p.indexOf('default.asp') !== -1) return true;
     if (p.indexOf('searchresults') !== -1) return true;
+    if (/\/stationary-loveseats-s\/157\.htm/i.test(location.pathname || '')) {
+      return true;
+    }
     if (p.indexOf('sitemap') !== -1) return false;
     return false;
   }
@@ -10043,17 +10049,20 @@ try {
     var out = [];
     /* Plain objects cannot key DOM nodes — all divs become "[object HTMLDivElement]" and only the first card was kept. */
     var seen = new WeakSet();
-    if (
-      document.body.classList.contains('productdetails') ||
-      document.body.classList.contains('mc-product-page') ||
-      document.getElementById('v65-product-parent') ||
-      /\/product-p\//i.test(location.pathname || '')
-    ) {
-      return [];
-    }
     function pushCard(node) {
       if (!node || seen.has(node)) return;
       if (node.closest && (node.closest('#footer') || node.closest('footer'))) return;
+      if (
+        node.closest &&
+        (
+          node.closest('#related-products') ||
+          node.closest('#relateditems') ||
+          node.closest('table.relateditems') ||
+          node.closest('.v65-product-related') ||
+          node.closest('.v65-product-related-item') ||
+          node.closest('.mc-related-carousel')
+        )
+      ) return;
       seen.add(node);
       out.push(node);
     }
@@ -10724,6 +10733,9 @@ try {
   /** Category 103 PLP only — skip McCabe member grid paint (list + sale only). Other categories unchanged. */
   function mcPathLooksLikeCategory103Listing() {
     try {
+      if (/\/stationary-loveseats-s\/157\.htm/i.test(location.pathname || '')) {
+        return false;
+      }
       var gq =
         typeof window.mcGetQueryParamValue === 'function'
           ? window.mcGetQueryParamValue
@@ -11363,15 +11375,13 @@ try {
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
 
   function mcBootCategoryGrid() {
-    if (
+    var isPdp =
+      !!document.getElementById('v65-product-parent') ||
+      !!document.getElementById('options_table') ||
       document.body.classList.contains('productdetails') ||
       document.body.classList.contains('mc-product-page') ||
-      document.getElementById('v65-product-parent') ||
-      document.getElementById('options_table') ||
-      /\/product-p\//i.test(location.pathname || '')
-    ) {
-      return;
-    }
+      /\/product-p\//i.test(location.pathname || '');
+
     var run = function () {
       try {
         if (typeof window.detectMemberPricingState === 'function') {
@@ -11392,22 +11402,32 @@ try {
         } catch (e2) {}
       }
     };
+
     run();
+
+    /* On PDPs, do ONE pass only. The repeated repaint loop is what makes purchase/options areas jump. */
+    if (isPdp) {
+      return;
+    }
+
     var tick = 0;
     var tickIv = setInterval(function () {
       tick++;
       mcPaintCategoryGridMemberPricing();
       if (tick >= 40) clearInterval(tickIv);
     }, 350);
+
     if (!window.__mcCategoryGridReadyBound) {
       window.__mcCategoryGridReadyBound = true;
       window.addEventListener('mcMemberPricingReady', function () {
         mcPaintCategoryGridMemberPricing();
       });
     }
+
     var ca = document.getElementById('content_area');
     var ch = document.getElementById('content_area_home');
     var deb;
+
     function obs(root) {
       if (!root || root.__mcGridMo) return;
       root.__mcGridMo = true;
@@ -11419,10 +11439,9 @@ try {
         mo.observe(root, { childList: true, subtree: true });
       } catch (e) {}
     }
+
     obs(ca);
     obs(ch);
-    /* Do not observe document.body: bot-check / challenge pages mutate the DOM constantly;
-       re-running grid paint here can interfere with verification on mobile. #content_area / #content_area_home are enough. */
   }
 
   if (document.readyState === 'loading') {
