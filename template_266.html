@@ -10225,7 +10225,34 @@ try {
       out.push(node);
     }
 
-    /* Stationary Loveseats PLP: prefer real grid cards (.v-product-grid-item) so sidebar/stray .v-product does not short-circuit collection. */
+    /*
+     * Volusion category PLP (e.g. /category-s/157.htm): nested table.v65-productDisplay — image row + separate title/price row.
+     * There is NO .v-product wrapper; member-grid paint must target each title <td> (a.productnamecolor, not productnamecolorsmall).
+     */
+    var onCategoryPlp =
+      (document.documentElement.classList.contains('category') || document.body.classList.contains('category')) &&
+      !document.body.classList.contains('productdetails') &&
+      !document.body.classList.contains('mc-product-page');
+    if (onCategoryPlp) {
+      var v65Grids = document.querySelectorAll('#content_area table.v65-productDisplay table.v65-productDisplay');
+      var gi;
+      for (gi = 0; gi < v65Grids.length; gi++) {
+        var v65g = v65Grids[gi];
+        if (v65g.closest && v65g.closest('#v65-product-related')) continue;
+        var nameAs = v65g.querySelectorAll('td a.colors_productname');
+        var na;
+        for (na = 0; na < nameAs.length; na++) {
+          var aNm = nameAs[na];
+          if (!aNm.classList || aNm.classList.contains('productnamecolorsmall')) continue;
+          if (!aNm.classList.contains('productnamecolor')) continue;
+          var tdc = aNm.closest && aNm.closest('td');
+          if (tdc) pushCard(tdc);
+        }
+      }
+      if (out.length) return out;
+    }
+
+    /* Stationary Loveseats PLP: ul/div .v-product-grid when present (sidebar .v-product must not short-circuit first). */
     var path157 =
       /\/category-s\/157\.html?/i.test(location.pathname || '') ||
       /\/stationary-loveseats-s\/157\.html?/i.test(location.pathname || '');
@@ -10238,21 +10265,6 @@ try {
           '#content_area .v-product-grid li.v-product'
       );
       for (i = 0; i < raw157.length; i++) pushCard(raw157[i]);
-      if (!out.length) {
-        var links157 = document.querySelectorAll('#content_area a[href*="/product-p/"]');
-        var j157;
-        for (j157 = 0; j157 < links157.length; j157++) {
-          var a157 = links157[j157];
-          if (a157.closest && (a157.closest('#footer') || a157.closest('footer'))) continue;
-          var wrap157 =
-            (a157.closest && a157.closest('.v-product-grid-item')) ||
-            (a157.closest && a157.closest('ul.v-product-grid > li')) ||
-            (a157.closest && a157.closest('.v-product')) ||
-            (a157.closest && a157.closest('li.v-product')) ||
-            (a157.closest && a157.closest('table.v65-productDisplay td'));
-          if (wrap157) pushCard(wrap157);
-        }
-      }
       if (out.length) return out;
     }
 
@@ -10980,7 +10992,7 @@ try {
   function mcCardHasSalePricing(card) {
     if (!card) return false;
     var saleEl = card.querySelector(
-      'font.product_sale_price, .product_sale_price, [class*="product_sale_price"]'
+      'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"]'
     );
     if (!saleEl) return false;
     var saleTxt = (saleEl.textContent || '').replace(/\s+/g, ' ').trim();
