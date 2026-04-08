@@ -6976,7 +6976,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       outer.appendChild(thumbs);
     }
 
-    thumbs.style.cssText = 'display:ruby block!important;flex-flow:wrap!important;justify-content:center!important;align-items:center!important;gap:10px!important;width:286px!important;max-width:300px!important;margin:8px auto -100px -50px!important;padding:0!important;float:none!important;clear:both!important;position:static!important;left:auto!important;right:auto!important;transform:none!important;box-sizing:border-box!important;text-align:center!important;';
+    /* No negative margins: they yank price/options under the hero and flash/jump when this runs (observer + interval). */
+    thumbs.style.cssText = 'display:flex!important;flex-wrap:wrap!important;justify-content:center!important;align-items:center!important;gap:10px!important;width:100%!important;max-width:100%!important;margin:8px auto 12px auto!important;padding:0!important;float:none!important;clear:both!important;position:static!important;left:auto!important;right:auto!important;transform:none!important;box-sizing:border-box!important;text-align:center!important;';
 
     var allLinks = thumbs.querySelectorAll('a');
     for (var i = 0; i < allLinks.length; i++) {
