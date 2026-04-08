@@ -5476,6 +5476,7 @@ body.mc-product-page #content_area select:not(.mc-option-accordion-native) {
   background-repeat: no-repeat;
   box-sizing: border-box !important;
   margin-bottom: 14px !important;
+  display: none !important;
 }
 
 @media (min-width: 992px) {
