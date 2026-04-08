@@ -11389,6 +11389,18 @@ try {
     } catch (e157Grid) {}
 
     var products = mcCollectGridProductCards();
+    var st157 = window.__mcMemberPricing || {};
+    var unlocked157 = !!st157.unlocked;
+    var plpPathLow = (location.pathname || '').toLowerCase();
+    var on157MemberGatedPlp =
+      /\/category-s\/157\.html?/i.test(plpPathLow) || /\/stationary-loveseats-s\/157\.html?/i.test(plpPathLow);
+    try {
+      if (on157MemberGatedPlp && !unlocked157) {
+        document.documentElement.classList.add('mc-cat157-plp-guest');
+      } else {
+        document.documentElement.classList.remove('mc-cat157-plp-guest');
+      }
+    } catch (e157Tok2) {}
     if (cat103NoMember && !products.length) {
       try {
         var stray = document.querySelectorAll(
@@ -11423,16 +11435,6 @@ try {
       if (unlocked) document.body.classList.add('mc-member-logged-in');
       else document.body.classList.remove('mc-member-logged-in');
     } catch (eCls2) {}
-    var plpPathLow = (location.pathname || '').toLowerCase();
-    var on157MemberGatedPlp =
-      /\/category-s\/157\.html?/i.test(plpPathLow) || /\/stationary-loveseats-s\/157\.html?/i.test(plpPathLow);
-    try {
-      if (on157MemberGatedPlp && !unlocked) {
-        document.documentElement.classList.add('mc-cat157-plp-guest');
-      } else {
-        document.documentElement.classList.remove('mc-cat157-plp-guest');
-      }
-    } catch (e157Tok) {}
     var i;
     for (i = 0; i < products.length; i++) {
       var card = products[i];
