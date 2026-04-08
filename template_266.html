@@ -10123,7 +10123,8 @@ try {
           node.closest('table.relateditems') ||
           node.closest('.v65-product-related') ||
           node.closest('.v65-product-related-item') ||
-          node.closest('.mc-related-carousel')
+          node.closest('.mc-related-carousel') ||
+          node.closest('.mc-related-carousel__viewport')
         )
       ) return;
 
@@ -10478,6 +10479,25 @@ try {
     return '';
   }
 
+  /** Category id from a product or category URL (PLP card breadcrumbs, return links, etc.). */
+  function mcMemberGridParsedCategoryFromHref(href) {
+    if (!href) return null;
+    try {
+      var u = new URL(href, window.location.origin);
+      var path = (u.pathname || '').toLowerCase();
+      var mCat = path.match(/\/category-s\/(\d+)\.html?(?:[\?#]|$)/i);
+      if (mCat) return String(mCat[1]);
+      var mS = path.match(/-s\/(\d+)\.html?(?:[\?#]|$)/i);
+      if (mS) return String(mS[1]);
+      var idq =
+        u.searchParams.get('categoryid') ||
+        u.searchParams.get('category_id') ||
+        u.searchParams.get('c');
+      if (idq && /^\d+$/.test(String(idq).trim())) return String(idq).trim();
+    } catch (eHref) {}
+    return null;
+  }
+
   function mcProductCodeFromHref(href) {
     try {
       var u = new URL(href, window.location.origin);
@@ -10741,6 +10761,7 @@ try {
    * when the card root is a column flex container, moving DOM after the title guarantees image → title → price.
    */
   function mcEnsureMemberBlockCardLevel(card) {
+    if (mcIsRelatedItemsNode(card)) return;
     if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) return;
     var block = card.querySelector('.mc-member-grid-price');
     if (!block || !block.parentNode || block.parentNode === card) return;
@@ -10769,6 +10790,7 @@ try {
   }
 
   function mcReorderSaleAfterMember(card) {
+    if (mcIsRelatedItemsNode(card)) return;
     if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) return;
     if (!document.body.classList.contains('mc-member-logged-in')) return;
     var mem = card.querySelector('.mc-member-grid-price');
@@ -11058,6 +11080,7 @@ try {
 
   function mcReorderCategoryListingNodes(card) {
     if (!card || !card.querySelector) return;
+    if (mcIsRelatedItemsNode(card)) return;
     var isCat =
       (document.documentElement.classList &&
         document.documentElement.classList.contains('category')) ||
@@ -11118,6 +11141,44 @@ try {
   /** PLP member-grid: category ids that must never be treated as no-member listings (e.g. cat 103). */
   var MC_MEMBER_PRICING_GRID_CATEGORY_IDS = { 157: true };
 
+  function mcMemberPricingGridListingEligible() {
+    var pagePath = location.pathname || '';
+    if (/\/category-s\/157\.html?/i.test(pagePath)) return true;
+    if (/\/stationary-loveseats-s\/157\.html?/i.test(pagePath)) return true;
+    var lid = null;
+    try {
+      lid = typeof mcListingCategoryIdFromVolusion === 'function' ? mcListingCategoryIdFromVolusion() : null;
+    } catch (eLidEl) {}
+    if (lid === '157') return true;
+    if (lid && MC_MEMBER_PRICING_GRID_CATEGORY_IDS[lid]) return true;
+    return false;
+  }
+
+  function mcMemberPricingGridCardEligible(card) {
+    if (mcMemberPricingGridListingEligible()) return true;
+    var h = mcFindProductHref(card);
+    var pid = mcMemberGridParsedCategoryFromHref(h);
+    if (pid === '157') return true;
+    if (pid && MC_MEMBER_PRICING_GRID_CATEGORY_IDS[pid]) return true;
+    return false;
+  }
+
+  function mcIsRelatedItemsNode(node) {
+    if (!node) return false;
+    return !!(
+      node.closest &&
+      (
+        node.closest('#related-products') ||
+        node.closest('#relateditems') ||
+        node.closest('table.relateditems') ||
+        node.closest('.v65-product-related') ||
+        node.closest('.v65-product-related-item') ||
+        node.closest('.mc-related-carousel') ||
+        node.closest('.mc-related-carousel__viewport')
+      )
+    );
+  }
+
   /** Bean bag category (103) skips member grid paint; still show PLP hint under title. */
   function mcEnsureBeanBagPlpSubline(card) {
     if (!card || !card.querySelector) return;
@@ -11165,6 +11226,20 @@ try {
     }
     if (!products.length) return;
 
+    if (typeof window !== 'undefined' && window.__MC_DEBUG_MEMBER_GRID) {
+      try {
+        var _mcDbgLid =
+          typeof mcListingCategoryIdFromVolusion === 'function' ? mcListingCategoryIdFromVolusion() : null;
+        console.log('[MC member pricing eligibility]', {
+          pathname: location.pathname,
+          parsedListingCategoryId: _mcDbgLid,
+          cat103NoMember: cat103NoMember,
+          listingEligible: mcMemberPricingGridListingEligible(),
+          productsLength: products.length
+        });
+      } catch (eDbgElig) {}
+    }
+
     var st = window.__mcMemberPricing || {};
     var unlocked = !!st.unlocked;
     try {
@@ -11174,8 +11249,38 @@ try {
     var i;
     for (i = 0; i < products.length; i++) {
       var card = products[i];
-      if (card.closest && card.closest('#relateditems, table.relateditems')) continue;
-      if (cat103NoMember) {
+      var cardHref = mcFindProductHref(card);
+      var cardParsedCat = mcMemberGridParsedCategoryFromHref(cardHref);
+      var cat103Skip = cat103NoMember && !mcMemberPricingGridCardEligible(card);
+
+      if (mcIsRelatedItemsNode(card)) {
+        if (typeof window !== 'undefined' && window.__MC_DEBUG_MEMBER_GRID) {
+          console.log('[MC member pricing skipped card]', {
+            href: cardHref,
+            parsedCategoryId: cardParsedCat,
+            reason: 'related-items-node'
+          });
+        }
+        continue;
+      }
+      if (card.closest && card.closest('#relateditems, table.relateditems')) {
+        if (typeof window !== 'undefined' && window.__MC_DEBUG_MEMBER_GRID) {
+          console.log('[MC member pricing skipped card]', {
+            href: cardHref,
+            parsedCategoryId: cardParsedCat,
+            reason: 'legacy-relateditems-selector'
+          });
+        }
+        continue;
+      }
+      if (cat103Skip) {
+        if (typeof window !== 'undefined' && window.__MC_DEBUG_MEMBER_GRID) {
+          console.log('[MC member pricing skipped card]', {
+            href: cardHref,
+            parsedCategoryId: cardParsedCat,
+            reason: 'category-103-no-member-plp'
+          });
+        }
         mcRemoveMemberGridBlocks(card);
         try {
           card.removeAttribute('data-mc-member-grid');
@@ -11461,8 +11566,11 @@ try {
     }
     for (i = 0; i < products.length; i++) {
       try {
+        if (mcIsRelatedItemsNode(products[i])) continue;
         if (!mcIsPdpCardOrRelated(products[i])) {
-          if (cat103NoMember) mcEnsureBeanBagPlpSubline(products[i]);
+          if (cat103NoMember && !mcMemberPricingGridCardEligible(products[i])) {
+            mcEnsureBeanBagPlpSubline(products[i]);
+          }
           mcReorderCategoryListingNodes(products[i]);
         }
       } catch (eOrdAll) {}

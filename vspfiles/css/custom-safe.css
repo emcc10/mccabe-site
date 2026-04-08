@@ -9315,3 +9315,13 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
   animation: none !important;
   transform: none !important;
 }
+
+/* Bean bag PDP related-items stability only */
+#related-products .v65-product-related-item,
+.v65-product-related .v65-product-related-item,
+.mc-related-carousel .v65-product-related-item,
+.mc-related-carousel__viewport .v65-product-related-item {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+}
