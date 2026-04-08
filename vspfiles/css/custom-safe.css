@@ -800,6 +800,12 @@ body:not(.is-home) header.header .collapsing-search {
     padding-bottom: 2px !important;
   }
 
+  /* PDP: interior header strip uses body:not(.is-home) padding; homepage menu sits in hero overlay — tighten PDP top gap only */
+  body.productdetails header.header > .header__section,
+  body.mc-product-page header.header > .header__section {
+    padding-top: 2px !important;
+  }
+
   body:not(.is-home) header.header > .mc-header-desktop-bar {
     display: flex !important;
     flex-direction: row !important;
@@ -9292,6 +9298,66 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
   position: static !important;
 }
 
+/* Volusion #v65-product-related table (live PDP): flex per cell so image wrapper is above title/price/member */
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  vertical-align: top !important;
+}
+
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product > *,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product > * {
+  order: 10 !important;
+}
+
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product .v-product__img,
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product .v-product__image,
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product .product_image,
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product > a:has(img),
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product .v-product__img,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product .v-product__image,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product .product_image,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product > a:has(img) {
+  order: 1 !important;
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 10px 0 !important;
+}
+
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product .v-product__name,
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product .productnamecolor,
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product .v65-product-related-title,
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product .v-product__price,
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product .product_price,
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product .v65-product-related-price,
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product .mc-member-grid-price,
+body.productdetails #content_area #v65-product-related table.v65-productDisplay td .v-product font.product_sale_price,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product .v-product__name,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product .productnamecolor,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product .v65-product-related-title,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product .v-product__price,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product .product_price,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product .v65-product-related-price,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product .mc-member-grid-price,
+body.mc-product-page #content_area #v65-product-related table.v65-productDisplay td .v-product font.product_sale_price {
+  order: 2 !important;
+  display: block !important;
+  float: none !important;
+  clear: both !important;
+  position: static !important;
+}
+
 #related-products img,
 .v65-product-related img,
 .v65-product-related-products img,
@@ -9329,4 +9395,12 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
   transition: none !important;
   animation: none !important;
   transform: none !important;
+}
+
+/* Never show lowest-price MAP promo CTA (member caption replaces in template) */
+.mc-lowest-price-cta,
+.lowest-price-cta,
+[class*="lowest-price"],
+[class*="lowestprice"] {
+  display: none !important;
 }

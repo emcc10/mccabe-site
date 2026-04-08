@@ -7567,9 +7567,53 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     );
   }
 
+  function mcRemoveLowestPriceMapPromos(scope) {
+    try {
+      var doc = scope && scope.nodeType ? scope : document;
+      var hosts = [];
+      var vp = doc.getElementById && doc.getElementById('v65-product-parent');
+      if (vp) hosts.push(vp);
+      var extra = doc.querySelectorAll(
+        '#v65-product-related, #relateditems, #related-products, #content_area .v65-product-related'
+      );
+      var hi;
+      for (hi = 0; hi < extra.length; hi++) hosts.push(extra[hi]);
+      if (!hosts.length) hosts.push(doc);
+      var LOW = /add to cart for our lowest price|our lowest price|lowest price!/i;
+      for (hi = 0; hi < hosts.length; hi++) {
+        var sub = hosts[hi];
+        if (!sub || !sub.querySelectorAll) continue;
+        var links = sub.querySelectorAll('a[href*="ShoppingCart"], a[href*="shoppingcart"]');
+        var i;
+        for (i = links.length - 1; i >= 0; i--) {
+          var a = links[i];
+          if (!LOW.test((a.textContent || '').replace(/\s+/g, ' '))) continue;
+          try {
+            a.classList.add('mc-lowest-price-cta');
+          } catch (eCls) {}
+          var par = a.parentNode;
+          if (!par) continue;
+          try {
+            if (
+              par.parentNode &&
+              par.children &&
+              par.children.length === 1 &&
+              /^(div|p|font|span|td|li)$/i.test(par.tagName || '')
+            ) {
+              par.parentNode.removeChild(par);
+            } else {
+              par.removeChild(a);
+            }
+          } catch (eRm) {}
+        }
+      }
+    } catch (eAll) {}
+  }
+
   function renderMemberPricingCaption(scope){
     var root = scope || document;
     if (document.body && document.body.classList.contains('mc-bean-bag-pdp')) return;
+    mcRemoveLowestPriceMapPromos(root);
     var anchorEl = findMemberCaptionAnchorEl();
     /* Do not append into empty #content_area — Volusion replaces innerHTML and would delete the caption. */
     var fallbackHost =
@@ -7581,22 +7625,34 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     }
     if (!anchorEl) return;
 
-    // Walk immediate element siblings after anchorEl to find and hide the legacy "Add to cart" div
+    // Remove legacy MAP / "Add to cart for our lowest price" siblings after anchor (Volusion reinjects)
     var legacyDiv = null;
     var sib = anchorEl.nextSibling;
     while (sib) {
+      var nextSib = sib.nextSibling;
       if (sib.nodeType === 1) {
         var sibTxt = (sib.textContent || '').toLowerCase();
-        if (/add to cart for our lowest price/i.test(sibTxt) && !sib.querySelector('#priceWithOptions') && !sib.querySelector('#priceWithOptionsNoTax')) {
-          legacyDiv = sib;
+        if (
+          /add to cart for our lowest price/i.test(sibTxt) &&
+          !sib.querySelector('#priceWithOptions') &&
+          !sib.querySelector('#priceWithOptionsNoTax')
+        ) {
+          try {
+            sib.classList.add('mc-lowest-price-cta');
+            sib.parentNode.removeChild(sib);
+            legacyDiv = null;
+          } catch (eLeg) {
+            legacyDiv = sib;
+          }
         }
-        break; // only inspect the first element sibling
       }
-      sib = sib.nextSibling;
+      sib = nextSib;
     }
-    if (legacyDiv) {
-      legacyDiv.style.setProperty('display', 'none', 'important');
-      legacyDiv.classList.add('mc-price-caption-moved');
+    if (legacyDiv && legacyDiv.parentNode) {
+      try {
+        legacyDiv.parentNode.removeChild(legacyDiv);
+      } catch (eL2) {}
+      legacyDiv = null;
     }
 
     // Single caption in the document; move it if Volusion re-injected the price block.
@@ -7604,7 +7660,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (!caption) {
       caption = document.createElement('div');
     }
-    var insertAfter = legacyDiv || anchorEl;
+    var insertAfter = anchorEl;
     try {
       if (insertAfter && insertAfter.parentNode) {
         insertAfter.parentNode.insertBefore(caption, insertAfter.nextSibling);
@@ -7755,6 +7811,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       if (typeof console !== 'undefined' && console.warn) console.warn('[McCabe] forceProductFixes (before caption)', e);
     }
     rearrangePriceCaption(scope);
+    try {
+      mcRemoveLowestPriceMapPromos(document);
+    } catch (eRm0) {}
     try {
       renderMemberPricingCaption(document);
     } catch (e2) {
