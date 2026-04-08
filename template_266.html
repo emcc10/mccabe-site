@@ -7164,7 +7164,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     });
   }
 
-  function sizeSelectsToLongestOption(scope){
+  function electsToLongestOption(scope){
     var root = scope || document;
     var table = q('#options_table', root) || q('table[id*="options_table"]', root);
     if (!table) return;
@@ -7976,7 +7976,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         img.loading = 'eager';
         img.decoding = 'async';
         img.removeAttribute('srcset');
-        img.removeAttribute('sizes');
+        img.removeAttribute('');
         img.setAttribute('src', chosen);
 
         img.onerror = function(){
@@ -11192,7 +11192,7 @@ try {
     if (!title || !title.parentNode) return;
     var sub = document.createElement('div');
     sub.className = 'mc-plp-bean-subline';
-    sub.textContent = 'More sizes and colors available on the product page.';
+    sub.textContent = 'More sizes and colors available';
     try {
       title.parentNode.insertBefore(sub, title.nextSibling);
     } catch (eBeanSub) {}
