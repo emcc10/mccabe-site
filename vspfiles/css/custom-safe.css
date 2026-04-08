@@ -5004,6 +5004,23 @@ body.mc-bean-bag-pdp [class*="memberpricing"] {
   display: none !important;
 }
 
+/* Beat template inline accordion rules that clip #options_table selects (body.mc-product-page … .mc-option-accordion select). */
+body.mc-bean-bag-pdp.mc-product-page #content_area .mc-option-accordion select,
+body.mc-bean-bag-pdp.mc-product-page #content_area .mc-option-accordion .mc-option-accordion-native,
+body.mc-bean-bag-pdp.productdetails #content_area .mc-option-accordion select,
+body.mc-bean-bag-pdp.productdetails #content_area .mc-option-accordion .mc-option-accordion-native {
+  position: static !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  clip: auto !important;
+  clip-path: none !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
 /* Description / tabs: stop top border being clipped */
 body.mc-bean-bag-pdp #content_area .product_description,
 body.mc-bean-bag-pdp #content_area #divDescription,
@@ -9173,6 +9190,91 @@ html.mtl-cat103-no-member html.category #content_area ul.v-product-grid .mc-memb
 .mc-related-carousel__viewport img,
 #related-products img,
 .v65-product-related-item img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+}
+
+/* PDP RELATED ITEMS — hard override for actual PDP markup */
+#related-products,
+.v65-product-related,
+.v65-product-related-products,
+.related-products {
+  position: relative !important;
+}
+
+#related-products .v-product,
+#related-products .v65-product-related-item,
+.v65-product-related .v-product,
+.v65-product-related .v65-product-related-item,
+.v65-product-related-products .v-product,
+.v65-product-related-products .v65-product-related-item,
+.related-products .v-product,
+.related-products .v65-product-related-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+
+#related-products .v-product > a:first-of-type,
+#related-products .v65-product-related-item > a:first-of-type,
+.v65-product-related .v-product > a:first-of-type,
+.v65-product-related .v65-product-related-item > a:first-of-type,
+.v65-product-related-products .v-product > a:first-of-type,
+.v65-product-related-products .v65-product-related-item > a:first-of-type,
+.related-products .v-product > a:first-of-type,
+.related-products .v65-product-related-item > a:first-of-type,
+#related-products .v-product .v-product__img,
+#related-products .v-product .v-product__image,
+#related-products .v-product .product_image,
+#related-products .v65-product-related-item .v-product__img,
+#related-products .v65-product-related-item .v-product__image,
+#related-products .v65-product-related-item .product_image,
+.v65-product-related .v-product .v-product__img,
+.v65-product-related .v-product .v-product__image,
+.v65-product-related .v-product .product_image,
+.v65-product-related .v65-product-related-item .v-product__img,
+.v65-product-related .v65-product-related-item .v-product__image,
+.v65-product-related .v65-product-related-item .product_image {
+  order: 1 !important;
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 10px 0 !important;
+}
+
+#related-products .v-product .v-product__name,
+#related-products .v-product .productnamecolor,
+#related-products .v-product .v-product__price,
+#related-products .v-product .product_price,
+#related-products .v-product .mc-member-grid-price,
+#related-products .v65-product-related-item .v65-product-related-title,
+#related-products .v65-product-related-item .v65-product-related-price,
+#related-products .v65-product-related-item .mc-member-grid-price,
+.v65-product-related .v-product .v-product__name,
+.v65-product-related .v-product .productnamecolor,
+.v65-product-related .v-product .v-product__price,
+.v65-product-related .v-product .product_price,
+.v65-product-related .v-product .mc-member-grid-price,
+.v65-product-related .v65-product-related-item .v65-product-related-title,
+.v65-product-related .v65-product-related-item .v65-product-related-price,
+.v65-product-related .v65-product-related-item .mc-member-grid-price {
+  order: 2 !important;
+  display: block !important;
+  width: 100% !important;
+  text-align: left !important;
+  clear: both !important;
+  float: none !important;
+  position: static !important;
+}
+
+#related-products img,
+.v65-product-related img,
+.v65-product-related-products img,
+.related-products img {
   display: block !important;
   width: 100% !important;
   height: auto !important;
