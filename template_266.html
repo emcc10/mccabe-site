@@ -10076,7 +10076,10 @@ try {
     var p = (location.pathname || '').toLowerCase();
     if (p === '/' || p === '/default.asp' || p.indexOf('default.asp') !== -1) return true;
     if (p.indexOf('searchresults') !== -1) return true;
-    if (/\/stationary-loveseats-s\/157\.htm/i.test(location.pathname || '')) {
+    if (
+      /\/stationary-loveseats-s\/157\.htm/i.test(location.pathname || '') ||
+      /\/category-s\/157\.htm/i.test(location.pathname || '')
+    ) {
       return true;
     }
     if (p.indexOf('sitemap') !== -1) return false;
@@ -10098,9 +10101,11 @@ try {
     function pushCard(node) {
       if (!node || seen.has(node)) return;
       if (node.closest && (node.closest('#footer') || node.closest('footer'))) return;
+
       if (
         node.closest &&
         (
+          node.closest('#v65-product-parent') ||
           node.closest('#related-products') ||
           node.closest('#relateditems') ||
           node.closest('table.relateditems') ||
@@ -10109,6 +10114,7 @@ try {
           node.closest('.mc-related-carousel')
         )
       ) return;
+
       seen.add(node);
       out.push(node);
     }
@@ -10779,7 +10785,10 @@ try {
   /** Category 103 PLP only — skip McCabe member grid paint (list + sale only). Other categories unchanged. */
   function mcPathLooksLikeCategory103Listing() {
     try {
-      if (/\/stationary-loveseats-s\/157\.htm/i.test(location.pathname || '')) {
+      if (
+        /\/stationary-loveseats-s\/157\.htm/i.test(location.pathname || '') ||
+        /\/category-s\/157\.htm/i.test(location.pathname || '')
+      ) {
         return false;
       }
       var gq =
@@ -11451,7 +11460,7 @@ try {
 
     run();
 
-    /* On PDPs, do ONE pass only. The repeated repaint loop is what makes purchase/options areas jump. */
+    /* PDPs get one pass only. Repeated repaints make the purchase/options area jump. */
     if (isPdp) {
       return;
     }
