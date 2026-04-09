@@ -11451,22 +11451,43 @@ try {
     }
   }
 
-  /** PLP member-grid: category ids that must never be treated as no-member listings (e.g. cat 103). */
+  /** PLP member-grid: category ids that override bean-only PLP handling (e.g. 157 nested-table layout). */
   var MC_MEMBER_PRICING_GRID_CATEGORY_IDS = { 157: true };
 
   function mcMemberPricingGridListingEligible() {
     if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) {
       return false;
     }
-    var pagePath = location.pathname || '';
-    if (/\/category-s\/157\.html?/i.test(pagePath)) return true;
-    if (/\/stationary-loveseats-s\/157\.html?/i.test(pagePath)) return true;
-    var lid = null;
     try {
-      lid = typeof mcListingCategoryIdFromVolusion === 'function' ? mcListingCategoryIdFromVolusion() : null;
-    } catch (eLidEl) {}
-    if (lid === '157' || Number(lid) === 157) return true;
-    if (lid && MC_MEMBER_PRICING_GRID_CATEGORY_IDS[lid]) return true;
+      var b = document.body;
+      if (!b || b.classList.contains('productdetails') || b.classList.contains('is-home')) return false;
+
+      var pagePath = (location.pathname || '').toLowerCase();
+      var lid = null;
+      try {
+        lid = typeof mcListingCategoryIdFromVolusion === 'function' ? mcListingCategoryIdFromVolusion() : null;
+      } catch (eLidEl) {}
+
+      if (lid === '103' || Number(lid) === 103) return false;
+      /* Any resolved listing category (except 103): card hrefs are /product-p/... and rarely carry category id. */
+      if (lid && /^\d+$/.test(String(lid))) return true;
+
+      if (/-s\/\d+\.html?/i.test(pagePath)) return true;
+
+      var h = document.documentElement;
+      var onCat = (h && h.classList.contains('category')) || b.classList.contains('category');
+      if (onCat) {
+        var ca = document.getElementById('content_area');
+        if (
+          ca &&
+          (ca.querySelector('ul.v-product-grid li') ||
+            ca.querySelector('.v-product-grid .v-product') ||
+            ca.querySelector('table.v65-productDisplay table.v65-productDisplay td a.productnamecolor'))
+        ) {
+          return true;
+        }
+      }
+    } catch (eMpgle) {}
     return false;
   }
 
