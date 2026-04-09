@@ -119,6 +119,34 @@
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__price,
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product font.product_list_price,
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product .product_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product .product_saleprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product font.product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product .product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product .product_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product .v-product__price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product font.product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product .product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item .product_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item .product_saleprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item font.product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item .product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item .product_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item .v-product__price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item font.product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item .product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product font.colors_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product font.pricecolor,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item font.colors_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item font.pricecolor,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product font.colors_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product font.pricecolor,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product font.colors_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product font.pricecolor,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item font.colors_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item font.pricecolor,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.colors_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.pricecolor,
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .mc-member-grid-price,
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .mc-member-price,
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .member-price,
@@ -11568,6 +11596,18 @@ try {
     } catch (eBeanSub) {}
   }
 
+  var __mcMemberPlpPendingRevealToken = 0;
+
+  function mcPlpFlashMayRevealPrices() {
+    try {
+      return !(
+        document.documentElement && document.documentElement.classList.contains('mc-member-plp-price-pending')
+      );
+    } catch (ePlf) {
+      return true;
+    }
+  }
+
   function mcPaintCategoryGridMemberPricing() {
     var plpPathLow = (location.pathname || '').toLowerCase();
     var on157MemberGatedPlp =
@@ -11576,6 +11616,18 @@ try {
       try {
         if (typeof window.mcEnsureCategoryListingClasses === 'function') window.mcEnsureCategoryListingClasses();
       } catch (eEnsCat) {}
+      var hPl = document.documentElement;
+      var bPl = document.body;
+      var usePlpFlash =
+        hPl &&
+        bPl &&
+        !bPl.classList.contains('productdetails') &&
+        !bPl.classList.contains('is-home') &&
+        (hPl.classList.contains('category') || bPl.classList.contains('category')) &&
+        !(typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing());
+      if (usePlpFlash) {
+        hPl.classList.add('mc-member-plp-price-pending');
+      }
       var cat103NoMember = mcPathLooksLikeCategory103Listing();
       try {
         var _mcGridLid =
@@ -11950,8 +12002,10 @@ try {
 
       if (mcSwapMapElementsForBlock(card, block)) {
         try {
-          block.style.setProperty('visibility', 'visible', 'important');
-          block.style.setProperty('opacity', '1', 'important');
+          if (mcPlpFlashMayRevealPrices()) {
+            block.style.setProperty('visibility', 'visible', 'important');
+            block.style.setProperty('opacity', '1', 'important');
+          }
         } catch (eVis1) {}
         card.setAttribute('data-mc-member-grid', nextState);
         try {
@@ -11994,8 +12048,10 @@ try {
 
       mcInstallInPriceContainer(priceEl, block);
       try {
-        priceEl.style.setProperty('visibility', 'visible', 'important');
-        priceEl.style.setProperty('opacity', '1', 'important');
+        if (mcPlpFlashMayRevealPrices()) {
+          priceEl.style.setProperty('visibility', 'visible', 'important');
+          priceEl.style.setProperty('opacity', '1', 'important');
+        }
       } catch (eVis) {}
       card.setAttribute('data-mc-member-grid', nextState);
       try {
@@ -12039,9 +12095,23 @@ try {
     } catch (eMcG) {}
     } finally {
       try {
-        document.documentElement.classList.remove('mc-member-plp-price-pending');
-        document.documentElement.classList.remove('mc-cat157-plp-pricing-pending');
-      } catch (e157Fn) {}
+        var htmlPl = document.documentElement;
+        var revealTok = ++__mcMemberPlpPendingRevealToken;
+        var finishPlpFlash = function () {
+          if (revealTok !== __mcMemberPlpPendingRevealToken) return;
+          try {
+            htmlPl.classList.remove('mc-member-plp-price-pending');
+            htmlPl.classList.remove('mc-cat157-plp-pricing-pending');
+          } catch (e157Fn) {}
+        };
+        if (typeof window.requestAnimationFrame === 'function') {
+          window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(finishPlpFlash);
+          });
+        } else {
+          setTimeout(finishPlpFlash, 32);
+        }
+      } catch (eDeferPl) {}
     }
   }
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
