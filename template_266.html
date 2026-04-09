@@ -11616,18 +11616,8 @@ try {
       try {
         if (typeof window.mcEnsureCategoryListingClasses === 'function') window.mcEnsureCategoryListingClasses();
       } catch (eEnsCat) {}
-      var hPl = document.documentElement;
-      var bPl = document.body;
-      var usePlpFlash =
-        hPl &&
-        bPl &&
-        !bPl.classList.contains('productdetails') &&
-        !bPl.classList.contains('is-home') &&
-        (hPl.classList.contains('category') || bPl.classList.contains('category')) &&
-        !(typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing());
-      if (usePlpFlash) {
-        hPl.classList.add('mc-member-plp-price-pending');
-      }
+      /* Do not re-add mc-member-plp-price-pending here: mcPaint runs on a 350ms interval + observers.
+         Re-applying pending every pass hid all PLP prices repeatedly (visible → blank → visible flicker). */
       var cat103NoMember = mcPathLooksLikeCategory103Listing();
       try {
         var _mcGridLid =
