@@ -12156,83 +12156,85 @@ try {
   }
 
   function mcBootCategoryGrid() {
-    var isPdp =
-      !!document.getElementById('v65-product-parent') ||
-      !!document.getElementById('options_table') ||
-      document.body.classList.contains('productdetails') ||
-      document.body.classList.contains('mc-product-page') ||
-      /\/product-p\//i.test(location.pathname || '');
+  var isPdp =
+    !!document.getElementById('v65-product-parent') ||
+    !!document.getElementById('options_table') ||
+    document.body.classList.contains('productdetails') ||
+    document.body.classList.contains('mc-product-page') ||
+    /\/product-p\//i.test(location.pathname || '');
 
-    var run = function () {
-      try {
+  var ranInitialPending = false;
+
+  var run = function () {
+    try {
+      if (!ranInitialPending) {
+        ranInitialPending = true;
         mcMarkMemberPlpPricesPendingEarly();
-      } catch (eRunEarly) {}
-      try {
-        if (typeof window.detectMemberPricingState === 'function') {
-          window
-            .detectMemberPricingState()
-            .then(function () {
-              mcPaintCategoryGridMemberPricing();
-            })
-            .catch(function () {
-              mcPaintCategoryGridMemberPricing();
-            });
-        } else {
-          mcPaintCategoryGridMemberPricing();
-        }
-      } catch (eRun) {
-        try {
-          mcPaintCategoryGridMemberPricing();
-        } catch (e2) {}
       }
-    };
+    } catch (eRunEarly) {}
 
-    run();
-
-    /* PDPs get one pass only. Repeated repaints make the purchase/options area jump. */
-    if (isPdp) {
-      return;
-    }
-
-    var tick = 0;
-    var tickIv = setInterval(function () {
-      tick++;
-      mcPaintCategoryGridMemberPricing();
-      if (tick >= 40) {
-        clearInterval(tickIv);
-        try {
-          document.documentElement.classList.remove('mc-member-plp-price-pending');
-          document.documentElement.classList.remove('mc-cat157-plp-pricing-pending');
-        } catch (eIvRel) {}
-      }
-    }, 350);
-
-    if (!window.__mcCategoryGridReadyBound) {
-      window.__mcCategoryGridReadyBound = true;
-      window.addEventListener('mcMemberPricingReady', function () {
+    try {
+      if (typeof window.detectMemberPricingState === 'function') {
+        window
+          .detectMemberPricingState()
+          .then(function () {
+            mcPaintCategoryGridMemberPricing();
+          })
+          .catch(function () {
+            mcPaintCategoryGridMemberPricing();
+          });
+      } else {
         mcPaintCategoryGridMemberPricing();
-      });
-    }
-
-    var ca = document.getElementById('content_area');
-    var ch = document.getElementById('content_area_home');
-    var deb;
-
-    function obs(root) {
-      if (!root || root.__mcGridMo) return;
-      root.__mcGridMo = true;
+      }
+    } catch (eRun) {
       try {
-        var mo = new MutationObserver(function () {
-          clearTimeout(deb);
-          deb = setTimeout(run, 120);
-        });
-        mo.observe(root, { childList: true, subtree: true });
-      } catch (e) {}
+        mcPaintCategoryGridMemberPricing();
+      } catch (e2) {}
     }
+  };
 
-    obs(ca);
-    obs(ch);
+  run();
+
+  if (isPdp) {
+    return;
   }
+
+  if (!window.__mcCategoryGridReadyBound) {
+    window.__mcCategoryGridReadyBound = true;
+    window.addEventListener('mcMemberPricingReady', function () {
+      mcPaintCategoryGridMemberPricing();
+    });
+  }
+
+  setTimeout(function () {
+    try {
+      mcPaintCategoryGridMemberPricing();
+    } catch (e) {}
+  }, 200);
+
+  var ca = document.getElementById('content_area');
+  var ch = document.getElementById('content_area_home');
+  var deb;
+
+  function obs(root) {
+    if (!root || root.__mcGridMo) return;
+    root.__mcGridMo = true;
+    try {
+      var mo = new MutationObserver(function () {
+        clearTimeout(deb);
+        deb = setTimeout(function () {
+          try {
+            mcPaintCategoryGridMemberPricing();
+          } catch (e) {}
+        }, 120);
+      });
+      mo.observe(root, { childList: true, subtree: true });
+    } catch (e) {}
+  }
+
+  obs(ca);
+  obs(ch);
+}
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', mcBootCategoryGrid);
