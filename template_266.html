@@ -11866,7 +11866,7 @@ try {
             try {
               mcRemoveGuestSaleElements(card);
             } catch (eRmG) {}
-            if (installTarget && mcIsPdpCardOrRelated(card)) mcInstallGuestPriceOnly(installTarget, card);
+            if (installTarget) mcInstallGuestPriceOnly(installTarget, card);
             if (!card.querySelector('.mc-member-grid-price')) {
               mcAppendGuestMemberLoginBlock(card, installTarget);
             }
@@ -11883,7 +11883,7 @@ try {
         try {
           mcRemoveGuestSaleElements(card);
         } catch (eRmGs) {}
-        if (installTarget && mcIsPdpCardOrRelated(card)) mcInstallGuestPriceOnly(installTarget, card);
+        if (installTarget) mcInstallGuestPriceOnly(installTarget, card);
         if (!card.querySelector('.mc-member-grid-price')) {
           mcAppendGuestMemberLoginBlock(card, installTarget);
         }
