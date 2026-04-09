@@ -11998,7 +11998,7 @@ try {
   }
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
 
- function mcBootCategoryGrid() {
+function mcBootCategoryGrid() {
   var isPdp =
     !!document.getElementById('v65-product-parent') ||
     !!document.getElementById('options_table') ||
@@ -12007,6 +12007,10 @@ try {
     /\/product-p\//i.test(location.pathname || '');
 
   var run = function () {
+    try {
+      mcMarkMemberPlpPricesPendingEarly();
+    } catch (eRunEarly) {}
+
     try {
       if (typeof window.detectMemberPricingState === 'function') {
         window
@@ -12026,6 +12030,45 @@ try {
       } catch (e2) {}
     }
   };
+
+  run();
+
+  if (isPdp) {
+    return;
+  }
+
+  if (!window.__mcCategoryGridReadyBound) {
+    window.__mcCategoryGridReadyBound = true;
+    window.addEventListener('mcMemberPricingReady', function () {
+      mcPaintCategoryGridMemberPricing();
+    });
+  }
+
+  setTimeout(function () {
+    try {
+      mcPaintCategoryGridMemberPricing();
+    } catch (e) {}
+  }, 200);
+
+  var ca = document.getElementById('content_area');
+  var ch = document.getElementById('content_area_home');
+  var deb;
+
+  function obs(root) {
+    if (!root || root.__mcGridMo) return;
+    root.__mcGridMo = true;
+    try {
+      var mo = new MutationObserver(function () {
+        clearTimeout(deb);
+        deb = setTimeout(run, 120);
+      });
+      mo.observe(root, { childList: true, subtree: true });
+    } catch (e) {}
+  }
+
+  obs(ca);
+  obs(ch);
+}
 
   run();
 
