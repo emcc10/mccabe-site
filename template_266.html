@@ -43,62 +43,50 @@
       var q = (window.location.search || '').toLowerCase();
       var h = document.documentElement;
       var b = document.body;
-      var pathMatch = /-s\//.test(p) || (h.classList && h.classList.contains('vol-list'));
-      var gridMatch = false;
-      var isHomePath = p === '/' || /\/default\.asp/i.test(p) || /^\/index\.htm/i.test(p);
 
-      if (b && !b.classList.contains('productdetails')) {
-        var isCart = /shoppingcart|onepagecheckout|checkout|orderconfirm/i.test(p);
-        if (!isCart && !isHomePath) {
-          var ulGrid = document.querySelector('#content_area ul.v-product-grid');
-          if (ulGrid && ulGrid.querySelector('li')) {
-            gridMatch = true;
-          } else {
-            var divGrid = document.querySelector('#content_area .v-product-grid');
-            if (
-              divGrid &&
-              (divGrid.querySelector('.v-product') || divGrid.querySelector('li.v-product'))
-            ) {
-              gridMatch = true;
-            }
-          }
-        }
-      }
+      var isHomePath =
+        p === '/' ||
+        /\/default\.asp/i.test(p) ||
+        /^\/index\.htm/i.test(p) ||
+        /^\/index\.html/i.test(p);
 
-      if (pathMatch || gridMatch) {
-        h.classList.add('category');
-        if (b) b.classList.add('category');
-      }
+      var isCartPath = /shoppingcart|onepagecheckout|checkout|orderconfirm|myaccount/i.test(p);
+      var isProductPath = /\/product-p\//i.test(p) || /productdetail/i.test(p);
 
-      /* category detection */
       var looks103 =
         /(?:\?|&)cat=103(?:&|$)/i.test(q) ||
         /\/category-s\/103\.html?$/i.test(p) ||
         /\/[^\/]*-s\/103\.html?$/i.test(p) ||
         /-s\/103\.html?/i.test(p);
-      /* Volusion PLP path; hide raw prices on html until mcPaintCategoryGridMemberPricing (not only cat 157). */
-      var pathLooksCategoryPlp = /-s\/\d+\.html?/i.test(p);
-      var isCartPath = /shoppingcart|onepagecheckout|checkout|orderconfirm/i.test(p);
-      var memberPlpFlashGuard =
-        !looks103 &&
-        !isCartPath &&
-        !isHomePath &&
-        (pathLooksCategoryPlp || gridMatch || h.classList.contains('category') || (b && b.classList.contains('category'))) &&
-        (!b || (!b.classList.contains('productdetails') && !b.classList.contains('is-home')));
 
-      if (memberPlpFlashGuard) {
-        h.classList.add('mc-member-plp-price-pending');
-      } else {
-        h.classList.remove('mc-member-plp-price-pending');
+      var pathLooksCategoryPlp = /-s\/\d+\.html?/i.test(p);
+
+      var gridMatch = false;
+      if (!isCartPath && !isHomePath && !isProductPath) {
+        var ulGrid = document.querySelector('#content_area ul.v-product-grid');
+        var divGrid = document.querySelector('#content_area .v-product-grid');
+        gridMatch =
+          !!(ulGrid && ulGrid.querySelector('li')) ||
+          !!(divGrid && (divGrid.querySelector('.v-product') || divGrid.querySelector('li.v-product')));
       }
 
+      var isCategoryPage = !isCartPath && !isHomePath && !isProductPath && (pathLooksCategoryPlp || gridMatch);
+
+      h.classList.toggle('category', isCategoryPage);
+      if (b) b.classList.toggle('category', isCategoryPage);
+
+      var shouldHideDuringPaint = isCategoryPage && !looks103;
+
+      h.classList.toggle('mc-member-plp-price-pending', shouldHideDuringPaint);
       h.classList.remove('mc-cat157-plp-pricing-pending');
     } catch (e) {}
   }
 
   markCategoryListing();
   document.addEventListener('DOMContentLoaded', markCategoryListing);
+  window.addEventListener('load', markCategoryListing);
   setTimeout(markCategoryListing, 0);
+  setTimeout(markCategoryListing, 150);
 })();
 </script>
 <script>
