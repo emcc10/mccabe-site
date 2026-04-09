@@ -8074,7 +8074,12 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   function run(){
   unwrapBadWrapper();
   tagPdpCells();
-  document.body.classList.add('mc-product-page');
+  /* Only tag true PDPs: unconditional mc-product-page broke category-s/157.htm (nested v65 tables, no .v-product) — mcCollectGridProductCards skips table PLP collection when this class is set. */
+  if (isPDP()) {
+    document.body.classList.add('mc-product-page');
+  } else {
+    document.body.classList.remove('mc-product-page');
+  }
 
   if (isBeanBagProductPage()) {
     document.body.classList.add('mc-bean-bag-pdp');
