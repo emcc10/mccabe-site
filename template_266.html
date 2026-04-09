@@ -8,14 +8,15 @@
   function markCategoryListing() {
     try {
       var p = (location.pathname || '').toLowerCase();
+      var q = (window.location.search || '').toLowerCase();
       var h = document.documentElement;
       var b = document.body;
       var pathMatch = /-s\//.test(p) || (h.classList && h.classList.contains('vol-list'));
       var gridMatch = false;
       var isHomePath = p === '/' || /\/default\.asp/i.test(p) || /^\/index\.htm/i.test(p);
+
       if (b && !b.classList.contains('productdetails')) {
         var isCart = /shoppingcart|onepagecheckout|checkout|orderconfirm/i.test(p);
-        /* Include search results: same .v-product-grid markup as PLP — excluding it left tiles on the non-category image rules (inconsistent sizes). */
         if (!isCart && !isHomePath) {
           var ulGrid = document.querySelector('#content_area ul.v-product-grid');
           if (ulGrid && ulGrid.querySelector('li')) {
@@ -31,41 +32,45 @@
           }
         }
       }
+
       if (pathMatch || gridMatch) {
         h.classList.add('category');
-        if (b) {
-          b.classList.add('category');
-        }
+        if (b) b.classList.add('category');
       }
-      /* Member PLP (not bean 103): hide raw Volusion price nodes until grid paint runs — avoids flash on refresh */
-      var qs103 = (window.location.search || '').toLowerCase();
+
+      /* category detection */
       var looks103 =
-        /(?:\?|&)cat=103(?:&|$)/i.test(qs103) ||
-        /\/category-s\/103\.html?/i.test(p) ||
+        /(?:\?|&)cat=103(?:&|$)/i.test(q) ||
+        /\/category-s\/103\.html?$/i.test(p) ||
+        /\/[^\/]*-s\/103\.html?$/i.test(p) ||
         /-s\/103\.html?/i.test(p);
-      var qsHead = (window.location.search || '').toLowerCase();
-      var looksMemberGatedPlp =
+      var looks157 =
+        /(?:\?|&)cat=157(?:&|$)/i.test(q) ||
+        /(?:\?|&)categoryid=157(?:&|$)/i.test(q) ||
+        /(?:\?|&)category_id=157(?:&|$)/i.test(q) ||
         /\/category-s\/157\.html?/i.test(p) ||
         /\/stationary-loveseats-s\/157\.html?/i.test(p) ||
-        /-s\/157\.html?(?:\?|#|$)/i.test(p) ||
-        /(?:\?|&)categoryid=157(?:&|$)/i.test(qsHead) ||
-        /(?:\?|&)category_id=157(?:&|$)/i.test(qsHead) ||
-        /(?:\?|&)cat=157(?:&|$)/i.test(qsHead);
+        /\/loveseats-s\/157\.html?/i.test(p) ||
+        /\/[^\/]*-s\/157\.html?/i.test(p) ||
+        /-s\/157\.html?(?:\?|#|$)/i.test(p);
       var memberPlpFlashGuard =
         b &&
         !b.classList.contains('productdetails') &&
         !b.classList.contains('is-home') &&
         !looks103 &&
-        looksMemberGatedPlp &&
-        (h.classList.contains('category') || b.classList.contains('category'));
+        looks157 &&
+        (h.classList.contains('category') || (b && b.classList.contains('category')));
+
       if (memberPlpFlashGuard) {
         h.classList.add('mc-member-plp-price-pending');
       } else {
         h.classList.remove('mc-member-plp-price-pending');
       }
+
       h.classList.remove('mc-cat157-plp-pricing-pending');
     } catch (e) {}
   }
+
   markCategoryListing();
   document.addEventListener('DOMContentLoaded', markCategoryListing);
   setTimeout(markCategoryListing, 0);
