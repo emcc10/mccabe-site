@@ -44,22 +44,15 @@
         /\/category-s\/103\.html?$/i.test(p) ||
         /\/[^\/]*-s\/103\.html?$/i.test(p) ||
         /-s\/103\.html?/i.test(p);
-      var looks157 =
-        /(?:\?|&)cat=157(?:&|$)/i.test(q) ||
-        /(?:\?|&)categoryid=157(?:&|$)/i.test(q) ||
-        /(?:\?|&)category_id=157(?:&|$)/i.test(q) ||
-        /\/category-s\/157\.html?/i.test(p) ||
-        /\/stationary-loveseats-s\/157\.html?/i.test(p) ||
-        /\/loveseats-s\/157\.html?/i.test(p) ||
-        /\/[^\/]*-s\/157\.html?/i.test(p) ||
-        /-s\/157\.html?(?:\?|#|$)/i.test(p);
+      /* Volusion PLP path; hide raw prices on html until mcPaintCategoryGridMemberPricing (not only cat 157). */
+      var pathLooksCategoryPlp = /-s\/\d+\.html?/i.test(p);
+      var isCartPath = /shoppingcart|onepagecheckout|checkout|orderconfirm/i.test(p);
       var memberPlpFlashGuard =
-        b &&
-        !b.classList.contains('productdetails') &&
-        !b.classList.contains('is-home') &&
         !looks103 &&
-        looks157 &&
-        (h.classList.contains('category') || (b && b.classList.contains('category')));
+        !isCartPath &&
+        !isHomePath &&
+        (pathLooksCategoryPlp || gridMatch || h.classList.contains('category') || (b && b.classList.contains('category'))) &&
+        (!b || (!b.classList.contains('productdetails') && !b.classList.contains('is-home')));
 
       if (memberPlpFlashGuard) {
         h.classList.add('mc-member-plp-price-pending');
@@ -125,7 +118,23 @@
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_price,
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__price,
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product font.product_list_price,
-  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_list_price {
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product .product_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product .product_saleprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product font.product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product .product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product .product_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product .v-product__price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product font.product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product .product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item .product_productprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item .product_saleprice,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item font.product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item .product_sale_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item .product_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item .v-product__price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item font.product_list_price,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid li.v-product-grid-item .product_list_price {
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
