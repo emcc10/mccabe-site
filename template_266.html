@@ -11951,13 +11951,13 @@ try {
       } catch (eOrdAll) {}
     }
     for (i = 0; i < products.length; i++) {
-      try {
-        var cVis = products[i];
-        if (mcIsRelatedItemsNode(cVis)) continue;
-        if (cat103NoMember) continue;
-        mcMarkCardPriceWrapperReady(cVis);
-      } catch (eVisR) {}
-    }
+  try {
+    var cVis = products[i];
+    if (mcIsRelatedItemsNode(cVis)) continue;
+    if (cat103NoMember && !mcMemberPricingGridCardEligible(cVis)) continue;
+    mcMarkCardPriceWrapperReady(cVis);
+  } catch (eVisR) {}
+}
     try {
       mcHydrateCategoryHowToGetPrices();
     } catch (eHyd) {}
