@@ -7512,11 +7512,17 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       var tm = path.match(/\/(\d{2,6})\.html?(?:#|\?|$)/i);
       if (tm) fromPath = String(tm[1]);
     }
-    var cid = mcGetQueryParamValue('categoryid') || mcGetQueryParamValue('category_id');
-    var cParam = mcGetQueryParamValue('c');
-    var fromQuery = null;
-    if (cid && /^\d+$/.test(String(cid).trim())) fromQuery = String(cid).trim();
-    else if (cParam && /^\d+$/.test(String(cParam).trim())) fromQuery = String(cParam).trim();
+    var cid =
+  mcGetQueryParamValue('categoryid') ||
+  mcGetQueryParamValue('category_id');
+
+var cParam = mcGetQueryParamValue('c');
+var catParam = mcGetQueryParamValue('cat');
+
+var fromQuery = null;
+if (cid && /^\d+$/.test(String(cid).trim())) fromQuery = String(cid).trim();
+else if (cParam && /^\d+$/.test(String(cParam).trim())) fromQuery = String(cParam).trim();
+else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(catParam).trim();
     if (fromPath && fromQuery && fromPath !== fromQuery) return fromPath;
     return fromPath || fromQuery || null;
   }
