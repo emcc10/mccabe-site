@@ -116,15 +116,7 @@
 })();
 </script>
 <style id="mc-cat157-plp-pending-critical">
-  /* Head: suppress raw Volusion list/sale/list nodes until mcPaintCategoryGridMemberPricing clears html.mc-member-plp-price-pending */
-  /* Whole grid/table product area — catches stray price nodes and avoids one-frame partial compositing */
-  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid,
-  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid,
-  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
+  
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_productprice,
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_saleprice,
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.product_sale_price,
@@ -203,13 +195,7 @@
   }
 </style>
 <style id="mc-member-plp-price-restore">
-html:not(.mc-member-plp-price-pending) body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid,
-html:not(.mc-member-plp-price-pending) body:not(.productdetails):not(.is-home) #content_area .v-product-grid,
-html:not(.mc-member-plp-price-pending) body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay {
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-}
+
 html:not(.mc-member-plp-price-pending) body:not(.productdetails):not(.is-home) #content_area .mc-member-grid-price,
 html:not(.mc-member-plp-price-pending) body:not(.productdetails):not(.is-home) #content_area .mc-member-price,
 html:not(.mc-member-plp-price-pending) body:not(.productdetails):not(.is-home) #content_area .member-price,
