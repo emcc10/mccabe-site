@@ -43,10 +43,14 @@
         /(?:\?|&)cat=103(?:&|$)/i.test(qs103) ||
         /\/category-s\/103\.html?/i.test(p) ||
         /-s\/103\.html?/i.test(p);
+      var qsHead = (window.location.search || '').toLowerCase();
       var looksMemberGatedPlp =
         /\/category-s\/157\.html?/i.test(p) ||
         /\/stationary-loveseats-s\/157\.html?/i.test(p) ||
-        /-s\/157\.html?(?:\?|#|$)/i.test(p);
+        /-s\/157\.html?(?:\?|#|$)/i.test(p) ||
+        /(?:\?|&)categoryid=157(?:&|$)/i.test(qsHead) ||
+        /(?:\?|&)category_id=157(?:&|$)/i.test(qsHead) ||
+        /(?:\?|&)cat=157(?:&|$)/i.test(qsHead);
       var memberPlpFlashGuard =
         b &&
         !b.classList.contains('productdetails') &&
@@ -11506,7 +11510,11 @@ try {
       try {
         var _mcGridLid =
           typeof mcListingCategoryIdFromVolusion === 'function' ? mcListingCategoryIdFromVolusion() : null;
-        if (_mcGridLid && MC_MEMBER_PRICING_GRID_CATEGORY_IDS[_mcGridLid]) {
+        if (
+          _mcGridLid &&
+          MC_MEMBER_PRICING_GRID_CATEGORY_IDS[_mcGridLid] &&
+          !(typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing())
+        ) {
           cat103NoMember = false;
         }
       } catch (e157Grid) {}
@@ -11560,7 +11568,6 @@ try {
         var card = products[i];
       var cardHref = mcFindProductHref(card);
       var cardParsedCat = mcMemberGridParsedCategoryFromHref(cardHref);
-      var cat103Skip = cat103NoMember && !mcMemberPricingGridCardEligible(card);
 
       if (mcIsRelatedItemsNode(card)) {
         if (typeof window !== 'undefined' && window.__MC_DEBUG_MEMBER_GRID) {
@@ -11582,12 +11589,12 @@ try {
         }
         continue;
       }
-      if (cat103Skip) {
+      if (cat103NoMember) {
         if (typeof window !== 'undefined' && window.__MC_DEBUG_MEMBER_GRID) {
           console.log('[MC member pricing skipped card]', {
             href: cardHref,
             parsedCategoryId: cardParsedCat,
-            reason: 'category-103-no-member-plp'
+            reason: 'category-103-bean-plp'
           });
         }
         mcRemoveMemberGridBlocks(card);
@@ -11600,6 +11607,17 @@ try {
             mcReorderCategoryListingNodes(card);
           }
         } catch (eBeanPl) {}
+        try {
+          mcMarkCardPriceWrapperReady(card);
+        } catch (e103Vis) {}
+        continue;
+      }
+      var listingMember = mcMemberPricingGridListingEligible();
+      var cardEligible = mcMemberPricingGridCardEligible(card);
+      if (!listingMember && !cardEligible) {
+        try {
+          mcMarkCardPriceWrapperReady(card);
+        } catch (eGateVis) {}
         continue;
       }
       mcDedupeMemberGridBlocksInCard(card);
@@ -11936,7 +11954,7 @@ try {
       try {
         var cVis = products[i];
         if (mcIsRelatedItemsNode(cVis)) continue;
-        if (cat103NoMember && !mcMemberPricingGridCardEligible(cVis)) continue;
+        if (cat103NoMember) continue;
         mcMarkCardPriceWrapperReady(cVis);
       } catch (eVisR) {}
     }
@@ -11970,7 +11988,7 @@ try {
       for (ei = 0; ei < earlyProds.length; ei++) {
         var ec = earlyProds[ei];
         if (mcIsRelatedItemsNode(ec)) continue;
-        if (!mcMemberPricingGridCardEligible(ec)) continue;
+        if (!mcMemberPricingGridListingEligible() && !mcMemberPricingGridCardEligible(ec)) continue;
         mcMarkCardPriceWrapperPending(ec);
       }
     } catch (eEarlyM) {}
