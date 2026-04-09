@@ -112,15 +112,25 @@ html body #mc-hero-copy-subline {
   }
 }
 
-/* Member pricing: left-aligned under product title (home + category) */
+/* Member pricing: left-aligned under product title (home + category).
+   Defer category rules until html.mc-member-plp-price-pending is cleared — otherwise
+   display/flex + width interact with the template’s flash guard (opacity/visibility)
+   and can cause one-frame layout or visibility fights during first paint. */
 body.is-home #content_area .v-product-grid .mc-member-grid-price,
 body.is-home #content_area_home .v-product-grid .mc-member-grid-price,
 body.is-home #content_area ul.v-product-grid .mc-member-grid-price,
-body.is-home #content_area_home ul.v-product-grid .mc-member-grid-price,
-body.category #content_area .v-product-grid .mc-member-grid-price,
-body.category #content_area ul.v-product-grid .mc-member-grid-price,
-html.category #content_area .v-product-grid .mc-member-grid-price,
-html.category #content_area ul.v-product-grid .mc-member-grid-price {
+body.is-home #content_area_home ul.v-product-grid .mc-member-grid-price {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  text-align: left !important;
+  width: 100% !important;
+}
+
+html:not(.mc-member-plp-price-pending) body.category #content_area .v-product-grid .mc-member-grid-price,
+html:not(.mc-member-plp-price-pending) body.category #content_area ul.v-product-grid .mc-member-grid-price,
+html.category:not(.mc-member-plp-price-pending) #content_area .v-product-grid .mc-member-grid-price,
+html.category:not(.mc-member-plp-price-pending) #content_area ul.v-product-grid .mc-member-grid-price {
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
@@ -129,25 +139,37 @@ html.category #content_area ul.v-product-grid .mc-member-grid-price {
 }
 
 body.is-home #content_area .mc-member-grid-price__label,
-body.is-home #content_area_home .mc-member-grid-price__label,
-body.category #content_area .mc-member-grid-price__label,
-html.category #content_area .mc-member-grid-price__label {
+body.is-home #content_area_home .mc-member-grid-price__label {
+  text-align: left !important;
+  width: 100% !important;
+}
+
+html:not(.mc-member-plp-price-pending) body.category #content_area .mc-member-grid-price__label,
+html.category:not(.mc-member-plp-price-pending) #content_area .mc-member-grid-price__label {
   text-align: left !important;
   width: 100% !important;
 }
 
 body.is-home #content_area .mc-member-grid-price__amount,
-body.is-home #content_area_home .mc-member-grid-price__amount,
-body.category #content_area .mc-member-grid-price__amount,
-html.category #content_area .mc-member-grid-price__amount {
+body.is-home #content_area_home .mc-member-grid-price__amount {
+  text-align: left !important;
+  width: 100% !important;
+}
+
+html:not(.mc-member-plp-price-pending) body.category #content_area .mc-member-grid-price__amount,
+html.category:not(.mc-member-plp-price-pending) #content_area .mc-member-grid-price__amount {
   text-align: left !important;
   width: 100% !important;
 }
 
 body.is-home #content_area .mc-member-grid-price__hint,
-body.is-home #content_area_home .mc-member-grid-price__hint,
-body.category #content_area .mc-member-grid-price__hint,
-html.category #content_area .mc-member-grid-price__hint {
+body.is-home #content_area_home .mc-member-grid-price__hint {
+  text-align: left !important;
+  width: 100% !important;
+}
+
+html:not(.mc-member-plp-price-pending) body.category #content_area .mc-member-grid-price__hint,
+html.category:not(.mc-member-plp-price-pending) #content_area .mc-member-grid-price__hint {
   text-align: left !important;
   width: 100% !important;
 }
