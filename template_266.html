@@ -224,8 +224,8 @@ html:not(.mc-member-plp-price-pending) body:not(.productdetails):not(.is-home) #
   visibility: visible !important;
 }
 </style>
-<!-- MC_DEPLOY_VERIFY_20260409a: inline hide dup search strip + custom-safe PDP; upload template + vspfiles/css/custom-safe.css; mccabe ?v=20260409a -->
-<meta name="mc-deploy-verify" content="20260409a-inline-css-upload-custom-safe">
+<!-- MC_DEPLOY_VERIFY_20260409b: PLP flash guard only clears after cards collected (no early finally reveal) -->
+<meta name="mc-deploy-verify" content="20260409b-plp-flash-finally-fix">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -11668,6 +11668,9 @@ try {
         }
       } catch (e157Grid) {}
 
+      /* Only drop html.mc-member-plp-price-pending after we have cards to paint; otherwise finally
+         used to fire on products.length===0 and revealed raw Volusion prices before member paint (flicker). */
+      var scheduleMemberPlpReveal = false;
       var products = mcCollectGridProductCards();
       if (cat103NoMember && !products.length) {
         try {
@@ -11684,6 +11687,7 @@ try {
       if (!products.length) {
         return;
       }
+      scheduleMemberPlpReveal = true;
 
       if (typeof window !== 'undefined' && window.__MC_DEBUG_MEMBER_GRID) {
         try {
@@ -12116,31 +12120,33 @@ try {
       }
     } catch (eMcG) {}
     } finally {
-      try {
-        var htmlPl = document.documentElement;
-        var revealTok = ++__mcMemberPlpPendingRevealToken;
-        var finishPlpFlash = function () {
-          if (revealTok !== __mcMemberPlpPendingRevealToken) return;
-          try {
-            if (typeof window.mcFixCategoryGrid === 'function') {
-              window.mcFixCategoryGrid();
-            }
-          } catch (eMcGf) {}
-          try {
-            htmlPl.classList.remove('mc-member-plp-price-pending');
-            htmlPl.classList.remove('mc-cat157-plp-pricing-pending');
-          } catch (e157Fn) {}
-        };
-        if (typeof window.requestAnimationFrame === 'function') {
-          window.requestAnimationFrame(function () {
+      if (scheduleMemberPlpReveal) {
+        try {
+          var htmlPl = document.documentElement;
+          var revealTok = ++__mcMemberPlpPendingRevealToken;
+          var finishPlpFlash = function () {
+            if (revealTok !== __mcMemberPlpPendingRevealToken) return;
+            try {
+              if (typeof window.mcFixCategoryGrid === 'function') {
+                window.mcFixCategoryGrid();
+              }
+            } catch (eMcGf) {}
+            try {
+              htmlPl.classList.remove('mc-member-plp-price-pending');
+              htmlPl.classList.remove('mc-cat157-plp-pricing-pending');
+            } catch (e157Fn) {}
+          };
+          if (typeof window.requestAnimationFrame === 'function') {
             window.requestAnimationFrame(function () {
-              window.requestAnimationFrame(finishPlpFlash);
+              window.requestAnimationFrame(function () {
+                window.requestAnimationFrame(finishPlpFlash);
+              });
             });
-          });
-        } else {
-          setTimeout(finishPlpFlash, 48);
-        }
-      } catch (eDeferPl) {}
+          } else {
+            setTimeout(finishPlpFlash, 48);
+          }
+        } catch (eDeferPl) {}
+      }
     }
   }
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
@@ -12206,7 +12212,13 @@ try {
     var tickIv = setInterval(function () {
       tick++;
       mcPaintCategoryGridMemberPricing();
-      if (tick >= 40) clearInterval(tickIv);
+      if (tick >= 40) {
+        clearInterval(tickIv);
+        try {
+          document.documentElement.classList.remove('mc-member-plp-price-pending');
+          document.documentElement.classList.remove('mc-cat157-plp-pricing-pending');
+        } catch (eIvRel) {}
+      }
     }, 350);
 
     if (!window.__mcCategoryGridReadyBound) {
