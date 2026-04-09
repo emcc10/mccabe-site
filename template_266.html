@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
-<!--[if lte IE 9]><html class="no-js lt-ie10" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
-<!--[if gt IE 9]><!--><html class="no-js" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260401q"><!--<![endif]-->
+<!--[if lte IE 9]><html class="no-js lt-ie10 mc-member-plp-price-pending" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js mc-member-plp-price-pending" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260401q"><!--<![endif]-->
 <head>
 <script>
 (function () {
@@ -116,7 +116,15 @@
 })();
 </script>
 <style id="mc-cat157-plp-pending-critical">
-  
+  /* Head: suppress raw Volusion list/sale/list nodes until mcPaintCategoryGridMemberPricing clears html.mc-member-plp-price-pending */
+  /* Whole grid/table product area — catches stray price nodes and avoids one-frame partial compositing */
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area .v-product-grid,
+  html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_productprice,
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .product_saleprice,
   html.mc-member-plp-price-pending body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td font.product_sale_price,
@@ -195,7 +203,13 @@
   }
 </style>
 <style id="mc-member-plp-price-restore">
-
+html:not(.mc-member-plp-price-pending) body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid,
+html:not(.mc-member-plp-price-pending) body:not(.productdetails):not(.is-home) #content_area .v-product-grid,
+html:not(.mc-member-plp-price-pending) body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
 html:not(.mc-member-plp-price-pending) body:not(.productdetails):not(.is-home) #content_area .mc-member-grid-price,
 html:not(.mc-member-plp-price-pending) body:not(.productdetails):not(.is-home) #content_area .mc-member-price,
 html:not(.mc-member-plp-price-pending) body:not(.productdetails):not(.is-home) #content_area .member-price,
@@ -1345,7 +1359,7 @@ document.addEventListener("DOMContentLoaded", function () {
         #roomPlannerApp .seat:active { cursor:grabbing; }
         #roomPlannerApp .config-group:active { cursor:grabbing; }
         #roomPlannerApp .seat.active { outline:2px dashed #3b82f6; }
-        #roomPlannerApp #room .seat img { position:absolute !important; left:0 !important; top:0 !important; right:0 !important; bottom:0 !important; width:100% !important; height:100% !important; max-width:none !important; max-height:none !important; min-width:100% !important; min-height:100% !important; object-fit:fill !important; object-position: center; display:block !important; pointer-events:none; }
+        #roomPlannerApp #room .seat img { position:absolute !important; left:0 !important; top:0 !important; right:0 !important; bottom:0 !important; width:100% !important; height:100% !important; max-width:none !important; max-height:none !important; min-width:100% !important; min-height:100% !important; object-fit:fill !important; object-position:center center; display:block !important; pointer-events:none; }
         #roomPlannerApp .seat .seat-name { position:absolute; bottom:2px; left:0; right:0; z-index:2; font-size:10px; color:rgba(100,100,100,.85); pointer-events:none; text-align:center; text-shadow:0 0 2px #fff, 0 1px 2px #fff; }
         #roomPlannerApp .config-group .config-group-detach { position:absolute; top:4px; right:4px; z-index:20; font-size:10px; padding:3px 6px; border:1px solid #999; background:#fff; cursor:pointer; border-radius:4px; }
         #roomPlannerApp .config-group .config-group-detach:hover { background:#f0f0f0; }
@@ -10110,7 +10124,7 @@ try {
 :is(html.category, body.category) .v-product-grid .v-product{display:flex;flex-direction:column;align-items:stretch;box-sizing:border-box;min-width:100%!important}
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,:is(html.category, body.category) .v-product-grid .v-product .product_image,:is(html.category, body.category) .v-product-grid .v-product .vcss_img{order:1;flex:0 0 auto;width:100%;height:280px;min-height:280px;max-height:280px;overflow:hidden;text-align:center;margin:0!important;padding:0!important;display:block!important;position:relative}
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img a,:is(html.category, body.category) .v-product-grid .v-product .v-product__image a,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap a,:is(html.category, body.category) .v-product-grid .v-product .product_image a,:is(html.category, body.category) .v-product-grid .v-product .vcss_img a{display:block!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important}
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,:is(html.category, body.category) .v-product-grid .v-product .product_image img,:is(html.category, body.category) .v-product-grid .v-product .vcss_img img{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover;object-position:center center;display:block!important;}
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,:is(html.category, body.category) .v-product-grid .v-product .product_image img,:is(html.category, body.category) .v-product-grid .v-product .vcss_img img{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover;object-position:center center;display:block!important;margin:0!important}
 :is(html.category, body.category) .v-product-grid .v-product .v-product__name,:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,:is(html.category, body.category) .v-product-grid .v-product h2,:is(html.category, body.category) .v-product-grid .v-product h3,:is(html.category, body.category) .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;align-items:flex-start;justify-content:flex-start;text-align:left;min-height:0!important;box-sizing:border-box;width:100%;margin-top:4px!important}
 :is(html.category, body.category) .v-product-grid .v-product .productnamecolor a,:is(html.category, body.category) .v-product-grid .v-product .v-product__name a{width:100%;text-align:left!important}
 :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price{order:4;min-height:0!important;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;width:100%;text-align:left!important}
@@ -12194,19 +12208,22 @@ try {
       return;
     }
 
-    if (!window.__mcCategoryGridReadyBound) {
-  window.__mcCategoryGridReadyBound = true;
-  window.addEventListener('mcMemberPricingReady', function () {
-    mcPaintCategoryGridMemberPricing();
-  });
-}
+    var tick = 0;
+    var tickIv = setInterval(function () {
+      tick++;
+      mcPaintCategoryGridMemberPricing();
+      if (tick >= 40) {
+        clearInterval(tickIv);
+        try {
+          document.documentElement.classList.remove('mc-member-plp-price-pending');
+          document.documentElement.classList.remove('mc-cat157-plp-pricing-pending');
+        } catch (eIvRel) {}
+      }
+    }, 350);
 
-/* one short follow-up pass only, instead of repainting for 14 seconds */
-setTimeout(function () {
-  try {
-    mcPaintCategoryGridMemberPricing();
-  } catch (e) {}
-}, 200);
+    if (!window.__mcCategoryGridReadyBound) {
+      window.__mcCategoryGridReadyBound = true;
+      window.addEventListener('mcMemberPricingReady', function () {
         mcPaintCategoryGridMemberPricing();
       });
     }
