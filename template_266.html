@@ -11942,20 +11942,31 @@ try {
       }
 
       if (!hasSale) {
-  if (existingBlock && existingBlock.parentNode) {
-    try {
-      existingBlock.parentNode.removeChild(existingBlock);
-    } catch (eRmNs2) {}
-  }
-  if (installTarget) mcInstallLoggedInPriceNoMemberBlock(installTarget);
-  card.setAttribute('data-mc-member-grid', 'unlocked');
-  try {
-    if (!mcIsPdpCardOrRelated(card)) {
-      mcReorderCategoryListingNodes(card);
-      mcEnsureMemberBlockCardLevel(card);
+  if (
+    unlocked &&
+    (
+      is157ListingCtx ||
+      listingMember ||
+      cardEligible
+    )
+  ) {
+    hasSale = true;
+  } else {
+    if (existingBlock && existingBlock.parentNode) {
+      try {
+        existingBlock.parentNode.removeChild(existingBlock);
+      } catch (eRmNs2) {}
     }
-  } catch (eNsOrd) {}
-  continue;
+    if (installTarget) mcInstallLoggedInPriceNoMemberBlock(installTarget);
+    card.setAttribute('data-mc-member-grid', 'unlocked');
+    try {
+      if (!mcIsPdpCardOrRelated(card)) {
+        mcReorderCategoryListingNodes(card);
+        mcEnsureMemberBlockCardLevel(card);
+      }
+    } catch (eNsOrd) {}
+    continue;
+  }
 }
 }
 
