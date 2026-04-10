@@ -711,7 +711,7 @@ body.is-home #slideshow-container {
     color: #d8d6d3 !important;
     -webkit-text-fill-color: #d8d6d3 !important;
     text-transform: none !important;
-    margin: 0.35em auto 0.5em !important;
+    margin: 0.15em auto 0.3em !important;
     white-space: nowrap !important;
   }
 
