@@ -12120,7 +12120,7 @@ try {
       try {
         var cVis = products[i];
         if (mcIsRelatedItemsNode(cVis)) continue;
-        if (cat103NoMember) continue;
+        if (cat103NoMember && !mcMemberPricingGridCardEligible(cVis)) continue;
         mcMarkCardPriceWrapperReady(cVis);
       } catch (eVisR) {}
     }
@@ -12183,85 +12183,85 @@ try {
   }
 
   function mcBootCategoryGrid() {
-  var isPdp =
-    !!document.getElementById('v65-product-parent') ||
-    !!document.getElementById('options_table') ||
-    document.body.classList.contains('productdetails') ||
-    document.body.classList.contains('mc-product-page') ||
-    /\/product-p\//i.test(location.pathname || '');
+    var isPdp =
+      !!document.getElementById('v65-product-parent') ||
+      !!document.getElementById('options_table') ||
+      document.body.classList.contains('productdetails') ||
+      document.body.classList.contains('mc-product-page') ||
+      /\/product-p\//i.test(location.pathname || '');
 
-  var ranInitialPending = false;
+    var ranInitialPending = false;
 
-  var run = function () {
-    try {
-      if (!ranInitialPending) {
-        ranInitialPending = true;
-        mcMarkMemberPlpPricesPendingEarly();
+    var run = function () {
+      try {
+        if (!ranInitialPending) {
+          ranInitialPending = true;
+          mcMarkMemberPlpPricesPendingEarly();
+        }
+      } catch (eRunEarly) {}
+
+      try {
+        if (typeof window.detectMemberPricingState === 'function') {
+          window
+            .detectMemberPricingState()
+            .then(function () {
+              mcPaintCategoryGridMemberPricing();
+            })
+            .catch(function () {
+              mcPaintCategoryGridMemberPricing();
+            });
+        } else {
+          mcPaintCategoryGridMemberPricing();
+        }
+      } catch (eRun) {
+        try {
+          mcPaintCategoryGridMemberPricing();
+        } catch (e2) {}
       }
-    } catch (eRunEarly) {}
+    };
 
-    try {
-      if (typeof window.detectMemberPricingState === 'function') {
-        window
-          .detectMemberPricingState()
-          .then(function () {
-            mcPaintCategoryGridMemberPricing();
-          })
-          .catch(function () {
-            mcPaintCategoryGridMemberPricing();
-          });
-      } else {
+    run();
+
+    if (isPdp) {
+      return;
+    }
+
+    if (!window.__mcCategoryGridReadyBound) {
+      window.__mcCategoryGridReadyBound = true;
+      window.addEventListener('mcMemberPricingReady', function () {
         mcPaintCategoryGridMemberPricing();
-      }
-    } catch (eRun) {
+      });
+    }
+
+    setTimeout(function () {
       try {
         mcPaintCategoryGridMemberPricing();
-      } catch (e2) {}
+      } catch (e) {}
+    }, 200);
+
+    var ca = document.getElementById('content_area');
+    var ch = document.getElementById('content_area_home');
+    var deb;
+
+    function obs(root) {
+      if (!root || root.__mcGridMo) return;
+      root.__mcGridMo = true;
+      try {
+        var mo = new MutationObserver(function () {
+          clearTimeout(deb);
+          deb = setTimeout(function () {
+            try {
+              mcPaintCategoryGridMemberPricing();
+            } catch (e) {}
+          }, 120);
+        });
+        mo.observe(root, { childList: true, subtree: true });
+      } catch (e) {}
     }
-  };
 
-  run();
-
-  if (isPdp) {
-    return;
+    obs(ca);
+    obs(ch);
   }
-
-  if (!window.__mcCategoryGridReadyBound) {
-    window.__mcCategoryGridReadyBound = true;
-    window.addEventListener('mcMemberPricingReady', function () {
-      mcPaintCategoryGridMemberPricing();
-    });
-  }
-
-  setTimeout(function () {
-    try {
-      mcPaintCategoryGridMemberPricing();
-    } catch (e) {}
-  }, 200);
-
-  var ca = document.getElementById('content_area');
-  var ch = document.getElementById('content_area_home');
-  var deb;
-
-  function obs(root) {
-    if (!root || root.__mcGridMo) return;
-    root.__mcGridMo = true;
-    try {
-      var mo = new MutationObserver(function () {
-        clearTimeout(deb);
-        deb = setTimeout(function () {
-          try {
-            mcPaintCategoryGridMemberPricing();
-          } catch (e) {}
-        }, 120);
-      });
-      mo.observe(root, { childList: true, subtree: true });
-    } catch (e) {}
-  }
-
-  obs(ca);
-  obs(ch);
-}
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', mcBootCategoryGrid);
