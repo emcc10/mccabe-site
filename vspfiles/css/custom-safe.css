@@ -9507,6 +9507,23 @@ html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #cont
   text-align: center !important;
 }
 
+/* Bean bag 103 PLP: image tiles must stay display:flex (custom-safe centers img via flex). Do not set image box to display:block here — it overrides flex and images look off-center. */
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__img,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__image,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__image-wrap,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_image,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .vcss_img,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product-grid-item .v-product__img,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product-grid-item .product_image,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .v-product__img,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .product_image,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .v-product__img,
+html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item .product_image {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
 /* Member PLP — hide only the resolved price mount until mcMarkCardPriceWrapperReady (per card, under #content_area) */
 body.category:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li .mc-pricing-pending,
 body.category:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .mc-pricing-pending,

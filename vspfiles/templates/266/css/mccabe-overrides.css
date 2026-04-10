@@ -229,31 +229,3 @@ body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
 
 /* Desktop PDP (>=992px): no rules here for #product_photo_td, zoom links, or #altviews —
    removed legacy block (76px margin / 460px hero / absolute thumbs). Single source: custom-safe.css end. */
-
-/* Bean bag category (103) PLP — center product images (html.mtl-cat103-no-member from template JS) */
-html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid .v-product__img,
-html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid .v-product__image-wrap,
-html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid .product_image,
-html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .v-product__img,
-html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid > .v-product .product_image,
-html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay .v-product__img,
-html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay .product_image,
-html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay .vCSS_img_wrap {
-  display: block !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  float: none !important;
-  text-align: center !important;
-}
-
-html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid .v-product__img img,
-html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid .product_image img,
-html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area .v-product-grid .v-product img,
-html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay img {
-  display: block !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  float: none !important;
-  max-width: 100% !important;
-  height: auto !important;
-}
