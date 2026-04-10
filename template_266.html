@@ -11929,17 +11929,16 @@ try {
           mapMember.appendChild(mapAmtEl);
         }
         if (mcReplaceMapCalloutWithBlock(card, mapMember)) {
-          if (installTarget) mcInstallLoggedInPriceNoMemberBlock(installTarget);
-          card.setAttribute('data-mc-member-grid', 'unlocked');
-          try {
-            if (!mcIsPdpCardOrRelated(card)) {
-              mcReorderCategoryListingNodes(card);
-              mcEnsureMemberBlockCardLevel(card);
-              mcReorderSaleAfterMember(card);
-            }
-          } catch (eMapL) {}
-          continue;
-        }
+  card.setAttribute('data-mc-member-grid', 'unlocked');
+  try {
+    if (!mcIsPdpCardOrRelated(card)) {
+      mcReorderCategoryListingNodes(card);
+      mcEnsureMemberBlockCardLevel(card);
+      mcReorderSaleAfterMember(card);
+    }
+  } catch (eMapL) {}
+  continue;
+}
       }
 
       if (!hasSale) {
