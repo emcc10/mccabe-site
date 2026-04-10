@@ -11410,8 +11410,20 @@ try {
 
   function mcInstallGuestPriceOnly(priceEl, card) {
     if (!priceEl) return;
+    /* Member-gated PLP + guest: hide list/MSRP/public dollars in the Volusion price mount; login/member caption is separate. */
+    var hidePublicMemberPlpGuest =
+      typeof mcMemberPricingGridListingEligible === 'function' &&
+      mcMemberPricingGridListingEligible() &&
+      document.body &&
+      !document.body.classList.contains('mc-member-logged-in');
     var tag = priceEl.tagName ? priceEl.tagName.toUpperCase() : '';
     if (tag === 'TD' || tag === 'TH') {
+      if (hidePublicMemberPlpGuest) {
+        try {
+          priceEl.innerHTML = '';
+        } catch (eClrTd) {}
+        return;
+      }
       var saleNodes = priceEl.querySelectorAll(
         'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"], [class*="formatted_sale"], [class*="FormattedSale"]'
       );
@@ -11423,6 +11435,12 @@ try {
           if (sn.parentNode) sn.parentNode.removeChild(sn);
         } catch (eR) {}
       }
+      return;
+    }
+    if (hidePublicMemberPlpGuest) {
+      try {
+        priceEl.innerHTML = '';
+      } catch (eClr) {}
       return;
     }
     var kept = mcGatherPriceLikeNodes(priceEl);
