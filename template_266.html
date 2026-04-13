@@ -7843,6 +7843,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     caption.style.setProperty('display','block','important');
     caption.style.removeProperty('visibility');
     caption.style.removeProperty('opacity');
+    caption.style.setProperty('pointer-events','auto','important');
+    caption.style.setProperty('position','relative','important');
+    caption.style.setProperty('z-index','12','important');
 
     var state = window.__mcMemberPricing || {};
     var fmt = typeof window.formatMcCurrency === 'function' ? window.formatMcCurrency : function(v){
@@ -7923,6 +7926,22 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         '<a href="#" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
       '</div>';
     caption.setAttribute('data-mc-member-state', 'locked');
+    try {
+      var loginCta = caption.querySelector('[data-mc-open-login]');
+      if (loginCta) {
+        loginCta.onclick = function(ev) {
+          ev.preventDefault();
+          if (typeof window.mcOpenLoginModal === 'function') window.mcOpenLoginModal();
+        };
+      }
+      var signupCta = caption.querySelector('[data-mc-open-signup]');
+      if (signupCta) {
+        signupCta.onclick = function(ev) {
+          ev.preventDefault();
+          if (typeof window.mcOpenSignupModal === 'function') window.mcOpenSignupModal();
+        };
+      }
+    } catch (eCapBind) {}
     ensureMemberCaptionMounted(caption);
   }
 
@@ -10191,25 +10210,43 @@ function mcMountMemberCaptionStandalone() {
       return mcCaptionReturn({ ok: false, reason: 'no host container' });
     }
     var el = document.getElementById('mc-member-price-caption-root');
+    var addBtn = mcPickVisible([
+      '#v65-product-parent input[name="btnaddtocart"]',
+      '#v65-product-parent input[id*="btnaddtocart"]',
+      '#v65-product-parent button[name="btnaddtocart"]',
+      '#v65-product-parent button[id*="btnaddtocart"]',
+      '#v65-product-parent [itemprop="offers"] input[type="submit"]',
+      '#v65-product-parent [itemprop="offers"] button'
+    ]);
     if (!el) {
       el = document.createElement('div');
       el.id = 'mc-member-price-caption-root';
       el.className = 'mc-member-price-caption';
-      var after = mcPickVisible([
-        '#priceWithOptions',
-        '#priceWithOptionsNoTax',
-        '#v65-product-parent [itemprop="price"]',
-        '#v65-product-parent .v65-product-price',
-        '#v65-product-parent .product_productprice'
-      ]);
-      if (after && after.parentNode) {
-        after.parentNode.insertBefore(el, after.nextSibling);
+      if (addBtn && addBtn.parentNode) {
+        addBtn.parentNode.insertBefore(el, addBtn);
       } else {
-        host.appendChild(el);
+        var after = mcPickVisible([
+          '#priceWithOptions',
+          '#priceWithOptionsNoTax',
+          '#v65-product-parent [itemprop="price"]',
+          '#v65-product-parent .v65-product-price',
+          '#v65-product-parent .product_productprice'
+        ]);
+        if (after && after.parentNode) {
+          after.parentNode.insertBefore(el, after.nextSibling);
+        } else {
+          host.appendChild(el);
+        }
       }
     }
     // Ensure caption is attached to a visible container.
-    if (!mcIsVisible(el.parentElement)) {
+    if (
+      (addBtn && addBtn.parentNode && el.parentNode !== addBtn.parentNode) ||
+      !mcIsVisible(el.parentElement)
+    ) {
+      if (addBtn && addBtn.parentNode) {
+        addBtn.parentNode.insertBefore(el, addBtn);
+      } else {
       var visibleParent = mcPickVisible([
         '#v65-product-parent .v65-product-price',
         '#v65-product-parent .product_productprice',
@@ -10218,6 +10255,7 @@ function mcMountMemberCaptionStandalone() {
       ]);
       if (visibleParent && visibleParent.parentNode) {
         visibleParent.parentNode.insertBefore(el, visibleParent.nextSibling);
+      }
       }
     }
     var st = window.__mcMemberPricing || {};
@@ -10282,7 +10320,8 @@ function mcMountMemberCaptionStandalone() {
     el.style.cssText =
       'display:block !important;visibility:visible !important;opacity:1 !important;' +
       'margin-top:16px !important;margin-bottom:16px !important;min-height:1em !important;' +
-      'font-size:16px !important;color:#454545 !important;line-height:1.4 !important;';
+      'font-size:16px !important;color:#454545 !important;line-height:1.4 !important;' +
+      'pointer-events:auto !important;position:relative !important;z-index:12 !important;';
     if (st.unlocked && window.__mcPlannerConfigApplied && window.__mcPlannerCounts && seat > 0 && typeof calculatePlannerPrice === 'function') {
       var mpTotal = Number(st.memberPlannerTotal) || 0;
       if (!(mpTotal > 0)) mpTotal = calculatePlannerPrice(window.__mcPlannerCounts, seat);
@@ -10318,6 +10357,22 @@ function mcMountMemberCaptionStandalone() {
       el.setAttribute('data-mc-member-state', 'locked');
       uiState = 'locked';
     }
+    try {
+      var loginBtn = el.querySelector('[data-mc-open-login]');
+      if (loginBtn) {
+        loginBtn.onclick = function(ev) {
+          ev.preventDefault();
+          if (typeof window.mcOpenLoginModal === 'function') window.mcOpenLoginModal();
+        };
+      }
+      var signupBtn = el.querySelector('[data-mc-open-signup]');
+      if (signupBtn) {
+        signupBtn.onclick = function(ev) {
+          ev.preventDefault();
+          if (typeof window.mcOpenSignupModal === 'function') window.mcOpenSignupModal();
+        };
+      }
+    } catch (eBindCap) {}
     var visible = mcIsVisible(el);
     var portal = document.getElementById('mc-member-caption-portal-fixed');
     if (portal && portal.parentNode) portal.parentNode.removeChild(portal);
