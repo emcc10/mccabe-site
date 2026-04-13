@@ -8010,6 +8010,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       hideNativePdpSalePricing(scope);
       ensurePriceWithOptionsLabel(scope);
       leftAlignPricingBlock(scope);
+      if (typeof window.mcMountMemberCaptionStandalone === 'function') {
+        window.mcMountMemberCaptionStandalone();
+      }
     } catch (e3) {}
   }
 
@@ -8397,230 +8400,68 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function mcForceBuildRelatedGrid(maxVisible) {
     try {
-      var root = document.querySelector(
-        '#content_area #v65-product-related, #content_area #related_products_content, #content_area #relateditems, #content_area table.relateditems, #related-products'
-      );
+      var root = document.querySelector('#content_area #v65-product-related, #content_area #related_products_content');
       if (!root) return false;
-      var table = root.querySelector('table.v65-productDisplay') || (root.tagName === 'TABLE' ? root : null);
+      var table = root.querySelector('table.v65-productDisplay');
       if (!table) return false;
+
+      try {
+        mcReorderV65RelatedProductRows();
+      } catch (ePreRel) {}
+
       var tbody = table.tBodies[0] || table;
       var rows = [];
       var ch = tbody.children;
-      var i, r, c;
+      var i;
       for (i = 0; i < ch.length; i++) {
-        if (ch[i] && ch[i].tagName === 'TR') rows.push(ch[i]);
-      }
-      if (!rows.length) return false;
-
-      function cleanText(node) {
-        return ((node && node.textContent) || '').replace(/\s+/g, ' ').trim();
-      }
-
-      function findHref(node) {
-        if (!node || !node.querySelectorAll) return '';
-        var links = node.querySelectorAll('a[href]');
-        var i;
-        for (i = 0; i < links.length; i++) {
-          var href = links[i].getAttribute('href') || '';
-          if (/(?:product-p\/|-p\/)/i.test(href)) return href;
+        if (ch[i] && ch[i].tagName === 'TR' && ch[i].classList && ch[i].classList.contains('v65-productDisplay-row')) {
+          rows.push(ch[i]);
         }
-        return '';
+      }
+      if (rows.length < 3) return false;
+
+      var imageRow = rows[0];
+      var titleRow = rows[1];
+      var priceRow = rows[2];
+      var maxCols = Math.min(
+        maxVisible,
+        Math.max(
+          imageRow && imageRow.children ? imageRow.children.length : 0,
+          titleRow && titleRow.children ? titleRow.children.length : 0,
+          priceRow && priceRow.children ? priceRow.children.length : 0
+        )
+      );
+      if (!maxCols) return false;
+
+      function cellText(cell) {
+        return ((cell && cell.textContent) || '').replace(/\s+/g, ' ').trim();
       }
 
-      function findImg(node) {
-        if (!node || !node.querySelectorAll) return null;
-        var imgs = node.querySelectorAll('img');
-        var i;
-        for (i = 0; i < imgs.length; i++) {
-          var src =
-            imgs[i].getAttribute('src') ||
-            imgs[i].getAttribute('data-src') ||
-            imgs[i].getAttribute('data-original') ||
-            imgs[i].getAttribute('data-lazy') ||
-            '';
-          if (src) return imgs[i];
-        }
-        return null;
+      function hasUsefulCell(cell) {
+        if (!cell) return false;
+        if (cell.querySelector && cell.querySelector('img')) return true;
+        return cellText(cell).length > 0;
       }
 
-      function fallbackImgFromHref(href) {
-        if (!href) return '';
-        var m = String(href).match(/(?:product-p\/|-p\/)([^.?/#]+)/i);
-        if (!m || !m[1]) return '';
-        return '/v/vspfiles/photos/' + String(m[1]).replace(/\.htm.*/i, '').toUpperCase() + '-1.jpg';
-      }
-
-      function resolveImgSrc(img, href) {
-        var chosen = '';
-        if (img) {
-          chosen =
-            img.currentSrc ||
-            img.getAttribute('src') ||
-            img.getAttribute('data-src') ||
-            img.getAttribute('data-original') ||
-            img.getAttribute('data-lazy') ||
-            '';
-        }
-        chosen = String(chosen || '').replace(/^\s+|\s+$/g, '').replace(/^https?:\/\/[^/]+/i, '');
-        if (
-          !chosen ||
-          /\/no[-_]?image|image[_-]?not[_-]?available|\/comingsoon|\/blank\.(gif|png|jpg)/i.test(chosen) ||
-          /-0\.(png|jpg|jpeg|webp)(\?|$)/i.test(chosen)
-        ) {
-          chosen = fallbackImgFromHref(href);
-        }
-        return chosen;
-      }
-
-      function findTitle(cells) {
-        var i;
-        for (i = 0; i < cells.length; i++) {
-          var node = cells[i];
-          if (!node || !node.querySelector) continue;
-          var titleEl =
-            node.querySelector('.productnamecolor, .v65-product-related-title, .v-product__name') ||
-            node.querySelector('a[href*="-p/"], a[href*="product-p/"]');
-          var txt = cleanText(titleEl || node);
-          if (!txt) continue;
-          if (/\$[\d,]+/.test(txt)) continue;
-          if (/^sale\s*price\s*:?\s*$/i.test(txt)) continue;
-          return txt;
-        }
-        return '';
-      }
-
-      function findPriceInfo(cells) {
-        var out = { retail: '', member: '', fallback: '' };
-        var joined = '';
-        var i;
-        for (i = 0; i < cells.length; i++) {
-          joined += ' ' + cleanText(cells[i]);
-          var node = cells[i];
-          if (!node || !node.querySelectorAll) continue;
-          var priced = node.querySelectorAll(
-            '.product_list_price, .listprice, [class*="list_price"], [class*="ListPrice"], .product_productprice, .v65-product-price, .price_color, .formattedprice, span.price, .v-product__price .price,' +
-            '.product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"], .mc-member-grid-price, .mc-member-price'
+      function appendCellContents(target, cell, kind) {
+        if (!target || !cell) return;
+        var clone = cell.cloneNode(true);
+        if (kind === 'price' && document.body && !document.body.classList.contains('mc-member-logged-in') && !document.body.classList.contains('mc-bean-bag-pdp')) {
+          var saleNodes = clone.querySelectorAll(
+            'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"]'
           );
-          var j;
-          for (j = 0; j < priced.length; j++) {
-            var el = priced[j];
-            var tx = cleanText(el);
-            if (!tx) continue;
-            var cls = String(el.className || '');
-            var dol = mcExtractDollarFromText(tx);
-            if (!dol) continue;
-            if (
-              !out.retail &&
-              (/list|retail|msrp|regular|product_productprice|product_list_price|price_color|formattedprice/i.test(cls) ||
-                /(list|retail|msrp|regular)\s*price/i.test(tx))
-            ) {
-              out.retail = dol;
-            }
-            if (
-              !out.member &&
-              (/member|sale|product_sale_price|product_saleprice/i.test(cls) ||
-                /(?:member|sale)\s*price/i.test(tx))
-            ) {
-              out.member = dol;
-            }
+          var si;
+          for (si = 0; si < saleNodes.length; si++) {
+            try {
+              if (saleNodes[si].parentNode) saleNodes[si].parentNode.removeChild(saleNodes[si]);
+            } catch (eRmSale) {}
           }
+          var txt = cellText(clone);
+          if (/^sale\s*price\s*:?\s*$/i.test(txt)) clone.innerHTML = '';
+          if (/^sale\s*price\s*:?\s*\$[\d,]+(?:\.\d{2})?$/i.test(txt)) clone.innerHTML = '';
         }
-        joined = joined.replace(/\s+/g, ' ').trim();
-        var labeledRetail = joined.match(/(?:list|retail|msrp|regular)\s*price\s*:?\s*(\$[\d,]+(?:\.\d{2})?)/i);
-        if (!out.retail && labeledRetail && labeledRetail[1]) out.retail = labeledRetail[1];
-        var labeledMember = joined.match(/member\s*price\s*:?\s*(\$[\d,]+(?:\.\d{2})?)/i);
-        if (!out.member && labeledMember && labeledMember[1]) out.member = labeledMember[1];
-        var labeledSale = joined.match(/sale\s*price\s*:?\s*(\$[\d,]+(?:\.\d{2})?)/i);
-        if (!out.member && labeledSale && labeledSale[1]) out.member = labeledSale[1];
-        var all = joined.match(/\$[\d,]+(?:\.\d{2})?/g) || [];
-        if (!out.retail && all.length > 1) out.retail = all[0];
-        if (!out.member && all.length > 1) out.member = all[all.length - 1];
-        if (!out.fallback && all.length) out.fallback = all[0];
-        return out;
+        while (clone.firstChild) target.appendChild(clone.firstChild);
       }
-
-      function rowScore(row, kind) {
-        var txt = cleanText(row);
-        var imgCount = row.querySelectorAll ? row.querySelectorAll('img').length : 0;
-        var linkCount = row.querySelectorAll ? row.querySelectorAll('a[href*="-p/"], a[href*="product-p/"]').length : 0;
-        var dollarCount = (txt.match(/\$[\d,]+(?:\.\d{2})?/g) || []).length;
-        if (kind === 'image') return imgCount * 50 + linkCount * 3 - dollarCount * 25;
-        if (kind === 'price') return dollarCount * 50 + (/price/i.test(txt) ? 10 : 0) - imgCount * 25;
-        return linkCount * 10 + (txt ? 2 : 0) - dollarCount * 25 - imgCount * 25;
-      }
-
-      function bestRow(group, kind, used) {
-        var best = null;
-        var bestIdx = -1;
-        var bestScore = -9999;
-        var i;
-        for (i = 0; i < group.length; i++) {
-          if (used[i]) continue;
-          var score = rowScore(group[i], kind);
-          if (score > bestScore) {
-            bestScore = score;
-            best = group[i];
-            bestIdx = i;
-          }
-        }
-        if (bestIdx >= 0) used[bestIdx] = true;
-        return best;
-      }
-
-      var imgRows = [];
-      for (r = 0; r < rows.length; r++) {
-        if (rows[r].querySelector && rows[r].querySelector('img')) imgRows.push(r);
-      }
-      var groupSize = imgRows.length > 1 ? imgRows[1] - imgRows[0] : 3;
-      if (groupSize < 1) groupSize = 3;
-
-      var items = [];
-      var seen = {};
-      for (r = 0; r < rows.length; r += groupSize) {
-        var group = rows.slice(r, r + groupSize);
-        if (!group.length) continue;
-        var used = {};
-        var imageRow = bestRow(group, 'image', used);
-        var priceRow = bestRow(group, 'price', used);
-        var titleRow = bestRow(group, 'title', used);
-        var colCount = 0;
-        if (imageRow && imageRow.children.length > colCount) colCount = imageRow.children.length;
-        if (titleRow && titleRow.children.length > colCount) colCount = titleRow.children.length;
-        if (priceRow && priceRow.children.length > colCount) colCount = priceRow.children.length;
-        for (c = 0; c < colCount; c++) {
-          var cells = [];
-          if (imageRow && imageRow.children[c]) cells.push(imageRow.children[c]);
-          if (titleRow && titleRow.children[c]) cells.push(titleRow.children[c]);
-          if (priceRow && priceRow.children[c]) cells.push(priceRow.children[c]);
-          if (!cells.length) continue;
-          var href = '';
-          for (i = 0; i < cells.length && !href; i++) href = findHref(cells[i]);
-          var img = null;
-          for (i = 0; i < cells.length && !img; i++) img = findImg(cells[i]);
-          var imgSrc = resolveImgSrc(img, href);
-          var title = findTitle(cells);
-          var priceInfo = findPriceInfo(cells);
-          if (!title && img) title = (img.getAttribute('alt') || '').replace(/\s+/g, ' ').trim();
-          var key = href || title || imgSrc || ('row-' + r + '-col-' + c);
-          if (seen[key]) continue;
-          if (!title && !imgSrc) continue;
-          seen[key] = true;
-          items.push({
-            href: href,
-            title: title,
-            retailPrice: priceInfo.retail,
-            memberPrice: priceInfo.member,
-            fallbackPrice: priceInfo.fallback,
-            src: imgSrc,
-            alt: img ? (img.getAttribute('alt') || title || '') : (title || ''),
-            imgNode: img ? img.cloneNode(true) : null
-          });
-          if (items.length >= maxVisible) break;
-        }
-        if (items.length >= maxVisible) break;
-      }
-
-      if (!items.length) return false;
 
       var oldGrid = document.getElementById('mc-related-force-grid');
       if (oldGrid && oldGrid.parentNode) oldGrid.parentNode.removeChild(oldGrid);
@@ -8628,17 +8469,20 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       var grid = document.createElement('div');
       grid.id = 'mc-related-force-grid';
       grid.style.setProperty('display', 'grid', 'important');
-      grid.style.setProperty('grid-template-columns', 'repeat(' + Math.max(1, Math.min(maxVisible, items.length)) + ', minmax(0, 1fr))', 'important');
+      grid.style.setProperty('grid-template-columns', 'repeat(' + maxCols + ', minmax(0, 1fr))', 'important');
       grid.style.setProperty('gap', '24px 18px', 'important');
       grid.style.setProperty('align-items', 'start', 'important');
       grid.style.setProperty('justify-items', 'center', 'important');
       grid.style.setProperty('width', '100%', 'important');
       grid.style.setProperty('margin', '12px 0 0 0', 'important');
-      var isLoggedIn = !!(document.body && document.body.classList.contains('mc-member-logged-in'));
-      var isBeanBagPdp = !!(document.body && document.body.classList.contains('mc-bean-bag-pdp'));
 
-      for (i = 0; i < items.length && i < maxVisible; i++) {
-        var item = items[i];
+      var cardsBuilt = 0;
+      for (i = 0; i < maxCols; i++) {
+        var imgCell = imageRow.children[i];
+        var titleCell = titleRow.children[i];
+        var priceCell = priceRow.children[i];
+        if (!hasUsefulCell(imgCell) && !hasUsefulCell(titleCell) && !hasUsefulCell(priceCell)) continue;
+
         var card = document.createElement('div');
         card.style.setProperty('display', 'flex', 'important');
         card.style.setProperty('flex-direction', 'column', 'important');
@@ -8646,75 +8490,39 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         card.style.setProperty('justify-content', 'flex-start', 'important');
         card.style.setProperty('text-align', 'center', 'important');
         card.style.setProperty('min-width', '0', 'important');
+        card.style.setProperty('width', '100%', 'important');
 
-        var media = document.createElement(item.href ? 'a' : 'div');
-        if (item.href) media.setAttribute('href', item.href);
+        var media = document.createElement('div');
         media.style.setProperty('display', 'flex', 'important');
         media.style.setProperty('align-items', 'center', 'important');
         media.style.setProperty('justify-content', 'center', 'important');
         media.style.setProperty('width', '100%', 'important');
         media.style.setProperty('min-height', '160px', 'important');
         media.style.setProperty('margin', '0 0 12px 0', 'important');
-
-        if (item.src) {
-          var imgEl = item.imgNode ? item.imgNode.cloneNode(true) : document.createElement('img');
-          imgEl.setAttribute('src', item.src);
-          imgEl.setAttribute('alt', item.alt || item.title || '');
-          try { imgEl.removeAttribute('srcset'); } catch (eImgSet) {}
-          imgEl.loading = 'eager';
-          imgEl.decoding = 'async';
-          imgEl.onerror = function(){
-            var cur = this.getAttribute('src') || '';
-            if (/-1\.(jpg|jpeg|png|webp)$/i.test(cur)) {
-              this.onerror = null;
-              this.src = cur.replace(/-1\.(jpg|jpeg|png|webp)$/i, '-2T.jpg');
-            }
-          };
-          imgEl.style.setProperty('display', 'block', 'important');
-          imgEl.style.setProperty('margin', '0 auto', 'important');
-          imgEl.style.setProperty('max-width', '100%', 'important');
-          imgEl.style.setProperty('max-height', '160px', 'important');
-          imgEl.style.setProperty('width', 'auto', 'important');
-          imgEl.style.setProperty('height', 'auto', 'important');
-          media.appendChild(imgEl);
-        }
+        appendCellContents(media, imgCell, 'image');
         card.appendChild(media);
 
-        if (item.title) {
-          var titleEl = document.createElement(item.href ? 'a' : 'div');
-          if (item.href) titleEl.setAttribute('href', item.href);
-          titleEl.textContent = item.title;
-          titleEl.style.setProperty('display', 'block', 'important');
-          titleEl.style.setProperty('width', '100%', 'important');
-          titleEl.style.setProperty('margin', '0 auto 6px auto', 'important');
-          titleEl.style.setProperty('text-align', 'center', 'important');
-          titleEl.style.setProperty('line-height', '1.35', 'important');
-          card.appendChild(titleEl);
-        }
+        var title = document.createElement('div');
+        title.style.setProperty('display', 'block', 'important');
+        title.style.setProperty('width', '100%', 'important');
+        title.style.setProperty('margin', '0 auto 6px auto', 'important');
+        title.style.setProperty('text-align', 'center', 'important');
+        title.style.setProperty('line-height', '1.35', 'important');
+        appendCellContents(title, titleCell, 'title');
+        if (cellText(title)) card.appendChild(title);
 
-        var publicPrice = item.retailPrice || (isBeanBagPdp ? (item.memberPrice || item.fallbackPrice) : '');
-        if (publicPrice) {
-          var priceEl = document.createElement('div');
-          priceEl.textContent = publicPrice;
-          priceEl.style.setProperty('display', 'block', 'important');
-          priceEl.style.setProperty('width', '100%', 'important');
-          priceEl.style.setProperty('text-align', 'center', 'important');
-          card.appendChild(priceEl);
-        }
-
-        var memberCandidate = item.memberPrice || (!item.retailPrice ? item.fallbackPrice : '');
-        if (!isBeanBagPdp && isLoggedIn && memberCandidate && memberCandidate !== publicPrice) {
-          var memberEl = document.createElement('div');
-          memberEl.textContent = 'Member price: ' + memberCandidate;
-          memberEl.style.setProperty('display', 'block', 'important');
-          memberEl.style.setProperty('width', '100%', 'important');
-          memberEl.style.setProperty('text-align', 'center', 'important');
-          card.appendChild(memberEl);
-        }
+        var price = document.createElement('div');
+        price.style.setProperty('display', 'block', 'important');
+        price.style.setProperty('width', '100%', 'important');
+        price.style.setProperty('text-align', 'center', 'important');
+        appendCellContents(price, priceCell, 'price');
+        if (cellText(price)) card.appendChild(price);
 
         grid.appendChild(card);
+        cardsBuilt++;
       }
 
+      if (!cardsBuilt) return false;
       table.style.setProperty('display', 'none', 'important');
       if (table.nextSibling) table.parentNode.insertBefore(grid, table.nextSibling);
       else table.parentNode.appendChild(grid);
@@ -8726,6 +8534,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function mcRunRelatedFix() {
     mcNormalizeRelatedItemImages(document);
+    if (mcForceBuildRelatedGrid(4)) return;
     mcReorderV65RelatedProductRows();
     mcLimitRelatedProductCount(4);
     var relLegacy = document.querySelector('#content_area #relateditems, #content_area table.relateditems');
