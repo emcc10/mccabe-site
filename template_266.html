@@ -10624,6 +10624,38 @@ try {
 .mc-login-modal__switch a{color:#333;text-decoration:underline;cursor:pointer}
 .mc-login-modal__signup{margin:12px 0 0;font-size:13px;text-align:center}
 .mc-login-modal__signup-note{display:block;font-size:11px;opacity:.75;margin-top:4px}
+
+/* Global member-price typography parity across PDP/PLP/home */
+body .mc-member-grid-price__label,
+body .mc-member-price-caption__option-label {
+  display:block !important;
+  font-size:16px !important;
+  font-weight:300 !important;
+  letter-spacing:0.06em !important;
+  text-transform:none !important;
+  color:#454545 !important;
+  line-height:1.35 !important;
+}
+body .mc-member-grid-price__amount,
+body .mc-member-price-caption__price-value {
+  display:block !important;
+  font-size:24px !important;
+  font-weight:400 !important;
+  letter-spacing:0.02em !important;
+  text-transform:none !important;
+  color:#454545 !important;
+  line-height:1.2 !important;
+  margin-top:4px !important;
+}
+/* Do not show Volusion sale rows when member price is present. */
+body #content_area .v-product:has(.mc-member-grid-price) .product_sale_price,
+body #content_area .v-product:has(.mc-member-grid-price) font.product_sale_price,
+body #content_area .v-product:has(.mc-member-grid-price) .product_saleprice,
+body #content_area td:has(.mc-member-grid-price) .product_sale_price,
+body #content_area td:has(.mc-member-grid-price) font.product_sale_price,
+body #content_area td:has(.mc-member-grid-price) .product_saleprice {
+  display:none !important;
+}
 /* Category grid: image then title then price; constrain images (template fallback) */
 :is(html.category, body.category) .v-product-grid .v-product{display:flex;flex-direction:column;align-items:stretch;box-sizing:border-box;min-width:100%!important}
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,:is(html.category, body.category) .v-product-grid .v-product .product_image,:is(html.category, body.category) .v-product-grid .v-product .vcss_img{order:1;flex:0 0 auto;width:100%;height:280px;min-height:280px;max-height:280px;overflow:hidden;text-align:center;margin:0!important;padding:0!important;display:block!important;position:relative}
@@ -11392,8 +11424,16 @@ try {
     }
     return pickNarrowPriceNode();
   }
+  function mcCardUsesProductTileLayout(card) {
+    if (!card || !card.classList) return false;
+    return (
+      card.classList.contains('v-product') ||
+      card.classList.contains('v-product-grid-item')
+    );
+  }
 
   function mcMarkCardPriceWrapperPending(card) {
+    if (!mcCardUsesProductTileLayout(card)) return;
     var w = mcFindCardPriceWrapperForVisibility(card);
     if (!w || !w.classList) return;
     /* Avoid churn: repeated paints were removing mc-pricing-ready and re-adding pending on the same wrapper. */
@@ -11405,6 +11445,7 @@ try {
   }
 
   function mcMarkCardPriceWrapperReady(card) {
+    if (!mcCardUsesProductTileLayout(card)) return;
     var w = mcFindCardPriceWrapperForVisibility(card);
     if (!w || !w.classList) return;
     try {
@@ -11802,14 +11843,17 @@ try {
     if (!document.body.classList.contains('mc-member-logged-in')) return;
     var mem = card.querySelector('.mc-member-grid-price');
     if (!mem || !mem.parentNode) return;
-    var sale = card.querySelector(
+    var sales = card.querySelectorAll(
       '.product_sale_price, font.product_sale_price, span.product_sale_price, [class*="product_sale_price"], .product_saleprice, [class*="product_saleprice"]'
     );
-    if (!sale || (sale.closest && sale.closest('.mc-member-grid-price'))) return;
-    if (mem.nextSibling === sale) return;
-    try {
-      mem.parentNode.insertBefore(sale, mem.nextSibling);
-    } catch (eSale) {}
+    var si;
+    for (si = 0; si < sales.length; si++) {
+      var sale = sales[si];
+      if (!sale || (sale.closest && sale.closest('.mc-member-grid-price'))) continue;
+      try {
+        sale.style.setProperty('display', 'none', 'important');
+      } catch (eSale) {}
+    }
   }
 
   function mcRemoveMemberGridBlocks(card) {
