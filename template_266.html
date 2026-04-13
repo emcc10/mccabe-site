@@ -8336,32 +8336,63 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
   function mcLimitRelatedProductCount(maxVisible) {
     try {
-      var root = document.querySelector('#content_area #v65-product-related, #content_area #related_products_content');
+      var root = document.querySelector(
+        '#content_area #v65-product-related, #content_area #related_products_content, #content_area #relateditems, #content_area table.relateditems'
+      );
       if (!root) return;
-      var table = root.querySelector('table.v65-productDisplay');
+      var table = root.querySelector('table.v65-productDisplay') || (root.tagName === 'TABLE' ? root : null);
       if (!table) return;
+      if (table.getAttribute('data-mc-related-limit-done') === '1') return;
       var tbody = table.tBodies[0] || table;
       var rows = [];
       var ch = tbody.children;
-      for (var i = 0; i < ch.length; i++) {
+      var i, r, c;
+      for (i = 0; i < ch.length; i++) {
         if (ch[i] && ch[i].tagName === 'TR') rows.push(ch[i]);
       }
-      var groupSize = 3;
-      for (var g = 0; g < rows.length; g += groupSize) {
-        var isOverflow = (g >= groupSize);
-        for (var r = g; r < g + groupSize && r < rows.length; r++) {
-          if (isOverflow) {
-            rows[r].style.display = 'none';
-            continue;
-          }
+      if (!rows.length) return;
+
+      var maxTds = 0;
+      for (r = 0; r < rows.length; r++) {
+        var cnt = rows[r].children.length;
+        if (cnt > maxTds) maxTds = cnt;
+      }
+      if (maxTds <= 0) return;
+      var ppl = maxTds;
+
+      if (ppl > maxVisible) {
+        for (r = 0; r < rows.length; r++) {
           var cells = rows[r].children;
-          for (var c = 0; c < cells.length; c++) {
-            if (c >= maxVisible) {
-              cells[c].style.display = 'none';
+          for (c = 0; c < cells.length; c++) {
+            if (c >= maxVisible) cells[c].style.setProperty('display', 'none', 'important');
+          }
+        }
+      } else {
+        var imgRows = [];
+        for (r = 0; r < rows.length; r++) {
+          if (rows[r].querySelector('img')) imgRows.push(r);
+        }
+        var groupSize = imgRows.length > 1 ? (imgRows[1] - imgRows[0]) : (rows.length > 3 ? 3 : rows.length);
+        if (groupSize < 1) groupSize = 3;
+        var maxLines = Math.ceil(maxVisible / ppl);
+        var maxRows = groupSize * maxLines;
+        for (r = maxRows; r < rows.length; r++) {
+          rows[r].style.setProperty('display', 'none', 'important');
+        }
+        if (maxLines * ppl > maxVisible) {
+          var lastLineStart = (maxLines - 1) * groupSize;
+          var lastLineTds = maxVisible - (maxLines - 1) * ppl;
+          if (lastLineTds > 0 && lastLineTds < ppl) {
+            for (r = lastLineStart; r < lastLineStart + groupSize && r < rows.length; r++) {
+              var rc = rows[r].children;
+              for (c = 0; c < rc.length; c++) {
+                if (c >= lastLineTds) rc[c].style.setProperty('display', 'none', 'important');
+              }
             }
           }
         }
       }
+      table.setAttribute('data-mc-related-limit-done', '1');
     } catch (eLimit) {}
   }
 
