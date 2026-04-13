@@ -9563,6 +9563,56 @@ body.mc-product-page #content_area #related_products_content table.v65-productDi
   text-align: center !important;
 }
 
+/* PDP related titles: center the actual title/link element, not just the wrapper */
+body.productdetails #v65-product-related .productnamecolor,
+body.productdetails #v65-product-related .v65-product-related-title,
+body.productdetails #v65-product-related .v-product__name,
+body.mc-product-page #v65-product-related .productnamecolor,
+body.mc-product-page #v65-product-related .v65-product-related-title,
+body.mc-product-page #v65-product-related .v-product__name,
+body.productdetails #content_area #related_products_content .productnamecolor,
+body.productdetails #content_area #related_products_content .v65-product-related-title,
+body.productdetails #content_area #related_products_content .v-product__name,
+body.mc-product-page #content_area #related_products_content .productnamecolor,
+body.mc-product-page #content_area #related_products_content .v65-product-related-title,
+body.mc-product-page #content_area #related_products_content .v-product__name,
+body.productdetails #content_area #relateditems .productnamecolor,
+body.productdetails #content_area #relateditems .v65-product-related-title,
+body.productdetails #content_area #relateditems .v-product__name,
+body.mc-product-page #content_area #relateditems .productnamecolor,
+body.mc-product-page #content_area #relateditems .v65-product-related-title,
+body.mc-product-page #content_area #relateditems .v-product__name,
+.mc-related-carousel__viewport .productnamecolor,
+.mc-related-carousel__viewport .v65-product-related-title,
+.mc-related-carousel__viewport .v-product__name,
+body.productdetails #v65-product-related .productnamecolor a,
+body.productdetails #v65-product-related .v65-product-related-title a,
+body.productdetails #v65-product-related .v-product__name a,
+body.mc-product-page #v65-product-related .productnamecolor a,
+body.mc-product-page #v65-product-related .v65-product-related-title a,
+body.mc-product-page #v65-product-related .v-product__name a,
+body.productdetails #content_area #related_products_content .productnamecolor a,
+body.productdetails #content_area #related_products_content .v65-product-related-title a,
+body.productdetails #content_area #related_products_content .v-product__name a,
+body.mc-product-page #content_area #related_products_content .productnamecolor a,
+body.mc-product-page #content_area #related_products_content .v65-product-related-title a,
+body.mc-product-page #content_area #related_products_content .v-product__name a,
+body.productdetails #content_area #relateditems .productnamecolor a,
+body.productdetails #content_area #relateditems .v65-product-related-title a,
+body.productdetails #content_area #relateditems .v-product__name a,
+body.mc-product-page #content_area #relateditems .productnamecolor a,
+body.mc-product-page #content_area #relateditems .v65-product-related-title a,
+body.mc-product-page #content_area #relateditems .v-product__name a,
+.mc-related-carousel__viewport .productnamecolor a,
+.mc-related-carousel__viewport .v65-product-related-title a,
+.mc-related-carousel__viewport .v-product__name a {
+  display: block !important;
+  width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center !important;
+}
+
 /* Bean bag (103) PLP — per-list-item card column only; does not target ul.v-product-grid wrapper */
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product,
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item {
