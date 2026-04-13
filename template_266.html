@@ -7914,16 +7914,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       return;
     }
 
-    caption.innerHTML =
-      '<div class="mc-member-price-caption__headline">Member price:</div>' +
-      '<div class="mc-member-price-caption__sub">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see member pricing' +
-      '</div>' +
-      '<div class="mc-member-price-caption__actions">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
-      '</div>';
-    caption.setAttribute('data-mc-member-state', 'locked');
-    ensureMemberCaptionMounted(caption);
+    try {
+      if (caption.parentNode) caption.parentNode.removeChild(caption);
+    } catch (eCapRm) {}
   }
 
   function leftAlignPricingBlock(scope){
@@ -7937,6 +7930,28 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     qa(sels.join(','), root).forEach(function(el){
       el.style.setProperty('text-align','left','important');
     });
+  }
+
+  function hideNativePdpSalePricing(scope) {
+    if (!markProductPage()) return;
+    if (document.body && document.body.classList.contains('mc-bean-bag-pdp')) return;
+    var root =
+      (scope && scope.querySelector && scope.querySelector('#v65-product-parent')) ||
+      document.getElementById('v65-product-parent') ||
+      scope ||
+      document;
+    if (!root || !root.querySelectorAll) return;
+    var saleNodes = root.querySelectorAll(
+      'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"]'
+    );
+    var i;
+    for (i = 0; i < saleNodes.length; i++) {
+      var node = saleNodes[i];
+      if (node.closest && node.closest('.mc-member-price-caption')) continue;
+      try {
+        node.style.setProperty('display', 'none', 'important');
+      } catch (eSaleHide) {}
+    }
   }
 
   function ensurePriceWithOptionsLabel(scope){
@@ -7985,6 +8000,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       if (typeof console !== 'undefined' && console.warn) console.warn('[McCabe] renderMemberPricingCaption', e2);
     }
     try {
+      hideNativePdpSalePricing(scope);
       ensurePriceWithOptionsLabel(scope);
       leftAlignPricingBlock(scope);
     } catch (e3) {}
@@ -8420,6 +8436,35 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         return null;
       }
 
+      function fallbackImgFromHref(href) {
+        if (!href) return '';
+        var m = String(href).match(/(?:product-p\/|-p\/)([^.?/#]+)/i);
+        if (!m || !m[1]) return '';
+        return '/v/vspfiles/photos/' + String(m[1]).replace(/\.htm.*/i, '').toUpperCase() + '-1.jpg';
+      }
+
+      function resolveImgSrc(img, href) {
+        var chosen = '';
+        if (img) {
+          chosen =
+            img.currentSrc ||
+            img.getAttribute('src') ||
+            img.getAttribute('data-src') ||
+            img.getAttribute('data-original') ||
+            img.getAttribute('data-lazy') ||
+            '';
+        }
+        chosen = String(chosen || '').replace(/^\s+|\s+$/g, '').replace(/^https?:\/\/[^/]+/i, '');
+        if (
+          !chosen ||
+          /\/no[-_]?image|image[_-]?not[_-]?available|\/comingsoon|\/blank\.(gif|png|jpg)/i.test(chosen) ||
+          /-0\.(png|jpg|jpeg|webp)(\?|$)/i.test(chosen)
+        ) {
+          chosen = fallbackImgFromHref(href);
+        }
+        return chosen;
+      }
+
       function findTitle(cells) {
         var i;
         for (i = 0; i < cells.length; i++) {
@@ -8437,17 +8482,54 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         return '';
       }
 
-      function findPrice(cells) {
+      function findPriceInfo(cells) {
+        var out = { retail: '', member: '', fallback: '' };
+        var joined = '';
         var i;
         for (i = 0; i < cells.length; i++) {
-          var txt = cleanText(cells[i]);
-          if (!txt) continue;
-          var labeled = txt.match(/(?:member|sale)\s*price\s*:?\s*\$[\d,]+(?:\.\d{2})?/i);
-          if (labeled && labeled[0]) return labeled[0].replace(/\s+/g, ' ').trim();
-          var dollar = txt.match(/\$[\d,]+(?:\.\d{2})?/);
-          if (dollar && dollar[0]) return 'Sale Price: ' + dollar[0];
+          joined += ' ' + cleanText(cells[i]);
+          var node = cells[i];
+          if (!node || !node.querySelectorAll) continue;
+          var priced = node.querySelectorAll(
+            '.product_list_price, .listprice, [class*="list_price"], [class*="ListPrice"], .product_productprice, .v65-product-price, .price_color, .formattedprice, span.price, .v-product__price .price,' +
+            '.product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"], .mc-member-grid-price, .mc-member-price'
+          );
+          var j;
+          for (j = 0; j < priced.length; j++) {
+            var el = priced[j];
+            var tx = cleanText(el);
+            if (!tx) continue;
+            var cls = String(el.className || '');
+            var dol = mcExtractDollarFromText(tx);
+            if (!dol) continue;
+            if (
+              !out.retail &&
+              (/list|retail|msrp|regular|product_productprice|product_list_price|price_color|formattedprice/i.test(cls) ||
+                /(list|retail|msrp|regular)\s*price/i.test(tx))
+            ) {
+              out.retail = dol;
+            }
+            if (
+              !out.member &&
+              (/member|sale|product_sale_price|product_saleprice/i.test(cls) ||
+                /(?:member|sale)\s*price/i.test(tx))
+            ) {
+              out.member = dol;
+            }
+          }
         }
-        return '';
+        joined = joined.replace(/\s+/g, ' ').trim();
+        var labeledRetail = joined.match(/(?:list|retail|msrp|regular)\s*price\s*:?\s*(\$[\d,]+(?:\.\d{2})?)/i);
+        if (!out.retail && labeledRetail && labeledRetail[1]) out.retail = labeledRetail[1];
+        var labeledMember = joined.match(/member\s*price\s*:?\s*(\$[\d,]+(?:\.\d{2})?)/i);
+        if (!out.member && labeledMember && labeledMember[1]) out.member = labeledMember[1];
+        var labeledSale = joined.match(/sale\s*price\s*:?\s*(\$[\d,]+(?:\.\d{2})?)/i);
+        if (!out.member && labeledSale && labeledSale[1]) out.member = labeledSale[1];
+        var all = joined.match(/\$[\d,]+(?:\.\d{2})?/g) || [];
+        if (!out.retail && all.length > 1) out.retail = all[0];
+        if (!out.member && all.length > 1) out.member = all[all.length - 1];
+        if (!out.fallback && all.length) out.fallback = all[0];
+        return out;
       }
 
       function rowScore(row, kind) {
@@ -8508,21 +8590,23 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
           for (i = 0; i < cells.length && !href; i++) href = findHref(cells[i]);
           var img = null;
           for (i = 0; i < cells.length && !img; i++) img = findImg(cells[i]);
+          var imgSrc = resolveImgSrc(img, href);
           var title = findTitle(cells);
-          var price = findPrice(cells);
+          var priceInfo = findPriceInfo(cells);
           if (!title && img) title = (img.getAttribute('alt') || '').replace(/\s+/g, ' ').trim();
-          var key = href || title || (img && (img.getAttribute('src') || img.getAttribute('data-src'))) || ('row-' + r + '-col-' + c);
+          var key = href || title || imgSrc || ('row-' + r + '-col-' + c);
           if (seen[key]) continue;
-          if (!href && !title && !img) continue;
+          if (!href && !title && !imgSrc) continue;
           seen[key] = true;
           items.push({
             href: href,
             title: title,
-            price: price,
-            src: img
-              ? img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-original') || img.getAttribute('data-lazy') || ''
-              : '',
-            alt: img ? (img.getAttribute('alt') || title || '') : (title || '')
+            retailPrice: priceInfo.retail,
+            memberPrice: priceInfo.member,
+            fallbackPrice: priceInfo.fallback,
+            src: imgSrc,
+            alt: img ? (img.getAttribute('alt') || title || '') : (title || ''),
+            imgNode: img ? img.cloneNode(true) : null
           });
           if (items.length >= maxVisible) break;
         }
@@ -8542,6 +8626,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       grid.style.setProperty('align-items', 'start', 'important');
       grid.style.setProperty('width', '100%', 'important');
       grid.style.setProperty('margin', '12px 0 0 0', 'important');
+      var isLoggedIn = !!(document.body && document.body.classList.contains('mc-member-logged-in'));
+      var isBeanBagPdp = !!(document.body && document.body.classList.contains('mc-bean-bag-pdp'));
 
       for (i = 0; i < items.length && i < maxVisible; i++) {
         var item = items[i];
@@ -8563,9 +8649,19 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         media.style.setProperty('margin', '0 0 12px 0', 'important');
 
         if (item.src) {
-          var imgEl = document.createElement('img');
+          var imgEl = item.imgNode ? item.imgNode.cloneNode(true) : document.createElement('img');
           imgEl.setAttribute('src', item.src);
           imgEl.setAttribute('alt', item.alt || item.title || '');
+          try { imgEl.removeAttribute('srcset'); } catch (eImgSet) {}
+          imgEl.loading = 'eager';
+          imgEl.decoding = 'async';
+          imgEl.onerror = function(){
+            var cur = this.getAttribute('src') || '';
+            if (/-1\.(jpg|jpeg|png|webp)$/i.test(cur)) {
+              this.onerror = null;
+              this.src = cur.replace(/-1\.(jpg|jpeg|png|webp)$/i, '-2T.jpg');
+            }
+          };
           imgEl.style.setProperty('display', 'block', 'important');
           imgEl.style.setProperty('margin', '0 auto', 'important');
           imgEl.style.setProperty('max-width', '100%', 'important');
@@ -8588,13 +8684,23 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
           card.appendChild(titleEl);
         }
 
-        if (item.price) {
+        var publicPrice = item.retailPrice || (isBeanBagPdp ? (item.memberPrice || item.fallbackPrice) : '');
+        if (publicPrice) {
           var priceEl = document.createElement('div');
-          priceEl.textContent = item.price;
+          priceEl.textContent = publicPrice;
           priceEl.style.setProperty('display', 'block', 'important');
           priceEl.style.setProperty('width', '100%', 'important');
           priceEl.style.setProperty('text-align', 'center', 'important');
           card.appendChild(priceEl);
+        }
+
+        if (!isBeanBagPdp && isLoggedIn && item.memberPrice && item.memberPrice !== publicPrice) {
+          var memberEl = document.createElement('div');
+          memberEl.textContent = 'Member price: ' + item.memberPrice;
+          memberEl.style.setProperty('display', 'block', 'important');
+          memberEl.style.setProperty('width', '100%', 'important');
+          memberEl.style.setProperty('text-align', 'center', 'important');
+          card.appendChild(memberEl);
         }
 
         grid.appendChild(card);
