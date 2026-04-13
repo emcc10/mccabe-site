@@ -8382,6 +8382,32 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
             if (c >= maxVisible) cells[c].style.setProperty('display', 'none', 'important');
           }
         }
+      } else if (rows.length > 3) {
+        var groupSize = rows.length % 3 === 0 ? 3 : rows.length;
+        var imgRows = [];
+        for (r = 0; r < rows.length; r++) {
+          if (rows[r].querySelector && rows[r].querySelector('img')) imgRows.push(r);
+        }
+        if (imgRows.length > 1) {
+          var inferred = imgRows[1] - imgRows[0];
+          if (inferred > 0) groupSize = inferred;
+        }
+        if (groupSize < 1) groupSize = 3;
+        var maxGroups = Math.ceil(maxVisible / maxTds);
+        var visibleRows = maxGroups * groupSize;
+        for (r = visibleRows; r < rows.length; r++) {
+          rows[r].style.setProperty('display', 'none', 'important');
+        }
+        var lastGroupItems = maxVisible - (maxGroups - 1) * maxTds;
+        if (lastGroupItems > 0 && lastGroupItems < maxTds) {
+          var lastGroupStart = (maxGroups - 1) * groupSize;
+          for (r = lastGroupStart; r < lastGroupStart + groupSize && r < rows.length; r++) {
+            var groupCells = rows[r].children;
+            for (c = 0; c < groupCells.length; c++) {
+              if (c >= lastGroupItems) groupCells[c].style.setProperty('display', 'none', 'important');
+            }
+          }
+        }
       }
 
       table.setAttribute('data-mc-related-limit-done', '1');
@@ -8719,10 +8745,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function mcRunRelatedFix() {
     mcNormalizeRelatedItemImages(document);
-    mcReorderV65RelatedProductRows();
     mcLimitRelatedProductCount(4);
-    var relLegacy = document.querySelector('#content_area #relateditems, #content_area table.relateditems');
-    if (relLegacy) mcMoveRelatedImageFirst(relLegacy);
     mcNormalizeRelatedItemImages(document);
   }
   function boot() {
@@ -10437,6 +10460,16 @@ function mcMountMemberCaptionStandalone() {
         }
         seat = Number(window.tryReadHowToGetSalePrice(mapAmt, true)) || 0;
       } catch (e1) {}
+    }
+    if (st.unlocked && seat <= 0 && typeof mcExtractSalePriceFromPdpHtml === 'function') {
+      try {
+        seat = Number(mcExtractSalePriceFromPdpHtml(document.documentElement.innerHTML || '')) || 0;
+      } catch (eSaleHtml) {}
+    }
+    if (st.unlocked && seat <= 0 && typeof window.extractVolusionAddToCartPriceFromHtml === 'function') {
+      try {
+        seat = Number(window.extractVolusionAddToCartPriceFromHtml(document.documentElement.innerHTML || '')) || 0;
+      } catch (eCartHtml) {}
     }
     if (st.unlocked && seat <= 0) {
       try {
