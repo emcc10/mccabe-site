@@ -8359,11 +8359,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
   function mcLimitRelatedProductCount(maxVisible) {
     try {
-      var root = document.querySelector(
-        '#content_area #v65-product-related, #content_area #related_products_content, #content_area #relateditems, #content_area table.relateditems, #related-products'
-      );
+      var root = document.querySelector('#content_area #v65-product-related, #content_area #related_products_content');
       if (!root) return;
-      var table = root.querySelector('table.v65-productDisplay') || (root.tagName === 'TABLE' ? root : null);
+      var table = root.querySelector('table.v65-productDisplay');
       if (!table) return;
       if (table.getAttribute('data-mc-related-limit-done') === '1') return;
       var tbody = table.tBodies[0] || table;
@@ -8371,49 +8369,25 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       var ch = tbody.children;
       var i, r, c;
       for (i = 0; i < ch.length; i++) {
-        if (ch[i] && ch[i].tagName === 'TR') rows.push(ch[i]);
+        var row = ch[i];
+        if (
+          row &&
+          row.tagName === 'TR' &&
+          row.classList &&
+          row.classList.contains('v65-productDisplay-row')
+        ) rows.push(row);
       }
       if (!rows.length) return;
 
-      var maxTds = 0;
+      var groupSize = rows.length >= 3 ? 3 : rows.length;
       for (r = 0; r < rows.length; r++) {
-        var cnt = rows[r].children.length;
-        if (cnt > maxTds) maxTds = cnt;
-      }
-      if (maxTds <= 0) return;
-
-      if (maxTds > maxVisible) {
-        for (r = 0; r < rows.length; r++) {
-          var cells = rows[r].children;
-          for (c = 0; c < cells.length; c++) {
-            if (c >= maxVisible) cells[c].style.setProperty('display', 'none', 'important');
-          }
-        }
-      } else if (rows.length > 3) {
-        var groupSize = rows.length % 3 === 0 ? 3 : rows.length;
-        var imgRows = [];
-        for (r = 0; r < rows.length; r++) {
-          if (rows[r].querySelector && rows[r].querySelector('img')) imgRows.push(r);
-        }
-        if (imgRows.length > 1) {
-          var inferred = imgRows[1] - imgRows[0];
-          if (inferred > 0) groupSize = inferred;
-        }
-        if (groupSize < 1) groupSize = 3;
-        var maxGroups = Math.ceil(maxVisible / maxTds);
-        var visibleRows = maxGroups * groupSize;
-        for (r = visibleRows; r < rows.length; r++) {
+        if (r >= groupSize) {
           rows[r].style.setProperty('display', 'none', 'important');
+          continue;
         }
-        var lastGroupItems = maxVisible - (maxGroups - 1) * maxTds;
-        if (lastGroupItems > 0 && lastGroupItems < maxTds) {
-          var lastGroupStart = (maxGroups - 1) * groupSize;
-          for (r = lastGroupStart; r < lastGroupStart + groupSize && r < rows.length; r++) {
-            var groupCells = rows[r].children;
-            for (c = 0; c < groupCells.length; c++) {
-              if (c >= lastGroupItems) groupCells[c].style.setProperty('display', 'none', 'important');
-            }
-          }
+        var cells = rows[r].children;
+        for (c = 0; c < cells.length; c++) {
+          if (c >= maxVisible) cells[c].style.setProperty('display', 'none', 'important');
         }
       }
 
