@@ -10344,7 +10344,6 @@ function mcMountMemberCaptionStandalone() {
           addBtn.closest('td') ||
           addBtn.parentNode)) ||
       null;
-    var theaterPdp = mcIsTheaterSeatingPdp();
     var priceAnchor = mcPickVisible([
       '#priceWithOptions',
       '#priceWithOptionsNoTax',
@@ -10354,7 +10353,7 @@ function mcMountMemberCaptionStandalone() {
     ]);
     function placeCaptionNode(node) {
       if (!node) return false;
-      if (theaterPdp && priceAnchor && priceAnchor.parentNode) {
+      if (priceAnchor && priceAnchor.parentNode) {
         if (priceAnchor.nextSibling) priceAnchor.parentNode.insertBefore(node, priceAnchor.nextSibling);
         else priceAnchor.parentNode.appendChild(node);
         return true;
@@ -10386,11 +10385,10 @@ function mcMountMemberCaptionStandalone() {
     }
     // Ensure caption is attached to a visible container and stays directly above Add to Cart.
     if (
-      (theaterPdp &&
-        priceAnchor &&
+      (priceAnchor &&
         priceAnchor.parentNode &&
         (el.parentNode !== priceAnchor.parentNode || el.previousSibling !== priceAnchor)) ||
-      (!theaterPdp &&
+      (!priceAnchor &&
         addMount &&
         addMount.parentNode &&
         (el.parentNode !== addMount.parentNode || el.nextSibling !== addMount)) ||
@@ -10629,21 +10627,21 @@ try {
 body .mc-member-grid-price__label,
 body .mc-member-price-caption__option-label {
   display:block !important;
-  font-size:16px !important;
-  font-weight:300 !important;
-  letter-spacing:0.06em !important;
-  text-transform:none !important;
-  color:#454545 !important;
+  font-size:11px !important;
+  font-weight:500 !important;
+  letter-spacing:0.14em !important;
+  text-transform:uppercase !important;
+  color:#6a6a6a !important;
   line-height:1.35 !important;
 }
 body .mc-member-grid-price__amount,
 body .mc-member-price-caption__price-value {
   display:block !important;
-  font-size:24px !important;
+  font-size:16px !important;
   font-weight:400 !important;
   letter-spacing:0.02em !important;
   text-transform:none !important;
-  color:#454545 !important;
+  color:#1a1a1a !important;
   line-height:1.2 !important;
   margin-top:4px !important;
 }
@@ -12069,6 +12067,17 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
 
   function mcInstallGuestPriceOnly(priceEl, card) {
     if (!priceEl) return;
+    function isSafePriceMount(node) {
+      if (!node || !node.matches) return false;
+      if (
+        node.matches(
+          '.v-product__price, .product_price, .product_productprice, .product_saleprice, .v65-product-related-price, [itemprop="price"], font.pricecolor, font.colors_productprice, .price_color, [class*="formattedprice"]'
+        )
+      ) return true;
+      var tag = node.tagName ? node.tagName.toUpperCase() : '';
+      if (tag === 'TD' || tag === 'TH') return false;
+      return false;
+    }
     function isBroadCell(node) {
       if (!node || !node.querySelector) return false;
       var tagName = node.tagName ? node.tagName.toUpperCase() : '';
@@ -12105,6 +12114,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       }
       return;
     }
+    if (!isSafePriceMount(priceEl)) return;
     if (hidePublicMemberPlpGuest) {
       try {
         priceEl.innerHTML = '';
@@ -12137,6 +12147,12 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
 
   function mcInstallLoggedInPriceNoMemberBlock(priceEl) {
     if (!priceEl) return;
+    if (
+      !priceEl.matches ||
+      !priceEl.matches(
+        '.v-product__price, .product_price, .product_productprice, .product_saleprice, .v65-product-related-price, [itemprop="price"], font.pricecolor, font.colors_productprice, .price_color, [class*="formattedprice"]'
+      )
+    ) return;
     var tag = priceEl.tagName ? priceEl.tagName.toUpperCase() : '';
     if (tag === 'TD' || tag === 'TH') return;
     var kept = mcGatherPriceLikeNodes(priceEl);
