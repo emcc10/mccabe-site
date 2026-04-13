@@ -12069,6 +12069,14 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
 
   function mcInstallGuestPriceOnly(priceEl, card) {
     if (!priceEl) return;
+    function isBroadCell(node) {
+      if (!node || !node.querySelector) return false;
+      var tagName = node.tagName ? node.tagName.toUpperCase() : '';
+      if (tagName !== 'TD' && tagName !== 'TH') return false;
+      return !!node.querySelector(
+        'img, .v-product, .v-product__img, .v-product__name, .productnamecolor, a.productnamecolor, h2, h3'
+      );
+    }
     /* Member-gated PLP + guest: hide list/MSRP/public dollars in the Volusion price mount; login/member caption is separate. */
     var hidePublicMemberPlpGuest =
       typeof mcMemberPricingGridListingEligible === 'function' &&
@@ -12077,6 +12085,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       !document.body.classList.contains('mc-member-logged-in');
     var tag = priceEl.tagName ? priceEl.tagName.toUpperCase() : '';
     if (tag === 'TD' || tag === 'TH') {
+      if (isBroadCell(priceEl)) return;
       if (hidePublicMemberPlpGuest) {
         try {
           priceEl.innerHTML = '';
@@ -12539,18 +12548,6 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
           card.querySelector('.price_color') ||
           card.querySelector('[class*="formattedprice"]') ||
           card.querySelector('[itemprop="price"]');
-      }
-      if (!installTarget) {
-        var tds = card.querySelectorAll('td');
-        var tix;
-        for (tix = 0; tix < tds.length; tix++) {
-          var td = tds[tix];
-          var ttxt = (td.textContent || '').replace(/\s+/g, ' ');
-          if (!/\$[\d,]+/.test(ttxt)) continue;
-          if (td.closest && td.closest('.mc-member-grid-price')) continue;
-          installTarget = td;
-          break;
-        }
       }
 
       if (!unlocked) {
