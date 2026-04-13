@@ -8283,7 +8283,16 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         if (r && r.tagName === 'TR' && r.classList && r.classList.contains('v65-productDisplay-row')) rows.push(r);
       }
       if (rows.length < 3) return;
-      tbody.insertBefore(rows[2], rows[0]);
+      var frag = document.createDocumentFragment();
+      for (ri = 0; ri < rows.length; ri += 3) {
+        var rowA = rows[ri];
+        var rowB = rows[ri + 1];
+        var rowC = rows[ri + 2];
+        if (rowC) frag.appendChild(rowC);
+        if (rowA) frag.appendChild(rowA);
+        if (rowB) frag.appendChild(rowB);
+      }
+      tbody.appendChild(frag);
       try {
         table.setAttribute('data-mc-related-rows-done', '1');
       } catch (eAttr) {}
