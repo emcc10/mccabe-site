@@ -5731,13 +5731,27 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
     if (!isCategory) return;
 
+    function looksLikeProductTable(tbl) {
+      if (!tbl || !tbl.querySelector) return false;
+      if (tbl.querySelector('a[href*="-p/"], a[href*="product-p/"], a.productnamecolor, .v-product, .productnamecolor')) return true;
+      var imgs = tbl.querySelectorAll('img');
+      var i;
+      for (i = 0; i < imgs.length; i++) {
+        var src = (imgs[i].getAttribute('src') || '').toLowerCase();
+        if (src && src.indexOf('clear1x1') === -1) return true;
+      }
+      return false;
+    }
+
     // Remove the exact spacer table pattern you pasted
     document.querySelectorAll('#content_area table.colors_backgroundlight[width="215"]').forEach(function (el) {
+      if (looksLikeProductTable(el)) return;
       el.remove();
     });
 
     // Remove parent wrappers that only contain clear1x1 spacer gifs
     document.querySelectorAll('#content_area table.colors_backgroundlight').forEach(function (tbl) {
+      if (looksLikeProductTable(tbl)) return;
       var spacer = tbl.querySelector('img[src*="clear1x1.gif"][width="15"][height="15"]');
       if (spacer) {
         tbl.remove();
