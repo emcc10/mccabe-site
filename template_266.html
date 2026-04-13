@@ -12426,6 +12426,11 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
         }
         continue;
       }
+      if (!mcCardUsesProductTileLayout(card)) {
+        try { mcRemoveMemberGridBlocks(card); } catch (eLegacyBlk) {}
+        try { card.removeAttribute('data-mc-member-grid'); } catch (eLegacyAttr) {}
+        continue;
+      }
       if (cat103NoMember) {
         if (typeof window !== 'undefined' && window.__MC_DEBUG_MEMBER_GRID) {
           console.log('[MC member pricing skipped card]', {
