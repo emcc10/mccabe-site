@@ -5628,7 +5628,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   .productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody,
   .productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr,
   .productdetails #v65-product-parent > tbody > tr:first-child + tr > td[align="center"] > table[width="100%"] > tbody > tr > td[align="center"] {
-    margin-right: -55px;
+    margin-right: 0 !important;
   }
 }
 
@@ -8719,7 +8719,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function mcRunRelatedFix() {
     mcNormalizeRelatedItemImages(document);
-    if (mcForceBuildRelatedGrid(4)) return;
     mcReorderV65RelatedProductRows();
     mcLimitRelatedProductCount(4);
     var relLegacy = document.querySelector('#content_area #relateditems, #content_area table.relateditems');
@@ -10440,6 +10439,18 @@ function mcMountMemberCaptionStandalone() {
       } catch (e1) {}
     }
     if (st.unlocked && seat <= 0) {
+      try {
+        var liveSale = document.querySelector(
+          '#v65-product-parent .product_sale_price, #v65-product-parent font.product_sale_price, #v65-product-parent .product_saleprice'
+        );
+        var liveSaleAmt = mcParsePriceLoose((liveSale && liveSale.textContent) || '');
+        if (liveSaleAmt > 0) {
+          seat = liveSaleAmt;
+          if (window.__mcMemberPricing) window.__mcMemberPricing.memberSeatPrice = seat;
+        }
+      } catch (eLiveSale) {}
+    }
+    if (st.unlocked && seat <= 0) {
       mcTryHydrateSeatFromCart();
     }
     el.style.cssText =
@@ -10469,16 +10480,10 @@ function mcMountMemberCaptionStandalone() {
       el.setAttribute('data-mc-member-state', 'unlocked-no-price');
       uiState = 'unlocked-no-price';
     } else {
-      html =
-        '<div class="mc-member-price-caption__headline">Member price:</div>' +
-        '<div class="mc-member-price-caption__sub">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see member pricing' +
-        '</div>' +
-        '<div class="mc-member-price-caption__actions">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
-        '</div>';
-      el.innerHTML = html;
-      el.setAttribute('data-mc-member-state', 'locked');
+      el.innerHTML = '';
+      el.setAttribute('data-mc-member-state', 'locked-hidden');
+      el.style.setProperty('display', 'none', 'important');
+      return mcCaptionReturn({ ok: true, reason: 'hidden-locked', ui: 'locked-hidden', unlocked: false, seat: seat, visible: false });
     }
     var visible = mcIsVisible(el);
     var portal = document.getElementById('mc-member-caption-portal-fixed');
