@@ -7891,7 +7891,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     max-width: 100% !important;
     box-sizing: border-box !important;
     /* Default: align with cell edge (single-image PDPs have no #altviews — 250px was empty gutter). */
-    margin-left: 200px !important;
+    margin-left: 100px !important;
   }
 
   /* Thumbnail strip present: legacy offset aligns full-width rows with hero column */
