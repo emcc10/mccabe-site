@@ -8596,7 +8596,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
           if (!title && img) title = (img.getAttribute('alt') || '').replace(/\s+/g, ' ').trim();
           var key = href || title || imgSrc || ('row-' + r + '-col-' + c);
           if (seen[key]) continue;
-          if (!href && !title && !imgSrc) continue;
+          if (!title && !imgSrc) continue;
           seen[key] = true;
           items.push({
             href: href,
@@ -8621,9 +8621,10 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       var grid = document.createElement('div');
       grid.id = 'mc-related-force-grid';
       grid.style.setProperty('display', 'grid', 'important');
-      grid.style.setProperty('grid-template-columns', 'repeat(4, minmax(0, 1fr))', 'important');
+      grid.style.setProperty('grid-template-columns', 'repeat(' + Math.max(1, Math.min(maxVisible, items.length)) + ', minmax(0, 1fr))', 'important');
       grid.style.setProperty('gap', '24px 18px', 'important');
       grid.style.setProperty('align-items', 'start', 'important');
+      grid.style.setProperty('justify-items', 'center', 'important');
       grid.style.setProperty('width', '100%', 'important');
       grid.style.setProperty('margin', '12px 0 0 0', 'important');
       var isLoggedIn = !!(document.body && document.body.classList.contains('mc-member-logged-in'));
@@ -8694,9 +8695,10 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
           card.appendChild(priceEl);
         }
 
-        if (!isBeanBagPdp && isLoggedIn && item.memberPrice && item.memberPrice !== publicPrice) {
+        var memberCandidate = item.memberPrice || (!item.retailPrice ? item.fallbackPrice : '');
+        if (!isBeanBagPdp && isLoggedIn && memberCandidate && memberCandidate !== publicPrice) {
           var memberEl = document.createElement('div');
-          memberEl.textContent = 'Member price: ' + item.memberPrice;
+          memberEl.textContent = 'Member price: ' + memberCandidate;
           memberEl.style.setProperty('display', 'block', 'important');
           memberEl.style.setProperty('width', '100%', 'important');
           memberEl.style.setProperty('text-align', 'center', 'important');
