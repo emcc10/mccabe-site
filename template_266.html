@@ -8439,59 +8439,11 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       }
       if (rows.length < 3) return false;
 
-      var sourceRows = rows.slice(0, 3);
-
-      function rowImageScore(row) {
-        if (!row || !row.children) return 0;
-        var score = 0;
-        var ci;
-        for (ci = 0; ci < row.children.length; ci++) {
-          var cell = row.children[ci];
-          if (!cell || !cell.querySelector) continue;
-          if (cell.querySelector('img')) score += 4;
-          if (cell.querySelector('a[href] > img, .v65-productPhoto img, .v-product__img img, .product_image img')) score += 6;
-        }
-        return score;
+      var maxCols = 0;
+      for (i = 0; i < rows.length; i++) {
+        maxCols = Math.max(maxCols, rows[i] && rows[i].children ? rows[i].children.length : 0);
       }
-
-      function rowPriceScore(row) {
-        if (!row || !row.children) return 0;
-        var score = 0;
-        var ci;
-        for (ci = 0; ci < row.children.length; ci++) {
-          var cell = row.children[ci];
-          if (!cell) continue;
-          var txt = cellText(cell);
-          if (/\$[\d,]+(?:\.\d{2})?/.test(txt)) score += 5;
-          if (/member price|sale price|our price|list price/i.test(txt)) score += 4;
-          if (cell.querySelector && cell.querySelector('.product_price, .product_sale_price, .v65-product-related-price, .mc-member-grid-price')) score += 6;
-        }
-        return score;
-      }
-
-      var imageRow = sourceRows.slice().sort(function(a, b) {
-        return rowImageScore(b) - rowImageScore(a);
-      })[0];
-      var remainingRows = sourceRows.filter(function(row) { return row !== imageRow; });
-      var priceRow = remainingRows.slice().sort(function(a, b) {
-        return rowPriceScore(b) - rowPriceScore(a);
-      })[0];
-      var titleRow = remainingRows.filter(function(row) { return row !== priceRow; })[0];
-
-      if (!imageRow || !titleRow || !priceRow) {
-        imageRow = sourceRows[0];
-        titleRow = sourceRows[1];
-        priceRow = sourceRows[2];
-      }
-
-      var maxCols = Math.min(
-        maxVisible,
-        Math.max(
-          imageRow && imageRow.children ? imageRow.children.length : 0,
-          titleRow && titleRow.children ? titleRow.children.length : 0,
-          priceRow && priceRow.children ? priceRow.children.length : 0
-        )
-      );
+      maxCols = Math.min(maxVisible, maxCols);
       if (!maxCols) return false;
 
       function cellText(cell) {
@@ -8506,6 +8458,39 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
       function looksLikePriceText(txt) {
         return /\$[\d,]+(?:\.\d{2})?/.test(txt) || /member price|sale price|our price|list price/i.test(txt || '');
+      }
+
+      function cellImageScore(cell) {
+        if (!cell || !cell.querySelector) return 0;
+        var score = 0;
+        if (cell.querySelector('img')) score += 4;
+        if (cell.querySelector('a[href] > img, .v65-productPhoto img, .v-product__img img, .product_image img')) score += 8;
+        return score;
+      }
+
+      function cellPriceScore(cell) {
+        if (!cell) return 0;
+        var score = 0;
+        var txt = cellText(cell);
+        if (/\$[\d,]+(?:\.\d{2})?/.test(txt)) score += 5;
+        if (/member price|sale price|our price|list price/i.test(txt)) score += 4;
+        if (cell.querySelector && cell.querySelector('.product_price, .product_sale_price, .v65-product-related-price, .mc-member-grid-price')) score += 6;
+        return score;
+      }
+
+      function pickBestCell(cells, scorer) {
+        var best = null;
+        var bestScore = 0;
+        var ci;
+        for (ci = 0; ci < cells.length; ci++) {
+          var cell = cells[ci];
+          var score = scorer(cell);
+          if (score > bestScore) {
+            best = cell;
+            bestScore = score;
+          }
+        }
+        return best;
       }
 
       function appendCellContents(target, cell, kind) {
@@ -8599,10 +8584,22 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
       var cardsBuilt = 0;
       for (i = 0; i < maxCols; i++) {
-        var imgCell = imageRow && imageRow.children ? imageRow.children[i] : null;
-        var titleCell = titleRow && titleRow.children ? titleRow.children[i] : null;
-        var priceCell = priceRow && priceRow.children ? priceRow.children[i] : null;
-        if (!hasUsefulCell(imgCell) && !hasUsefulCell(titleCell) && !hasUsefulCell(priceCell)) continue;
+        var columnCells = [];
+        var ri2;
+        for (ri2 = 0; ri2 < rows.length; ri2++) {
+          if (rows[ri2] && rows[ri2].children && rows[ri2].children[i]) columnCells.push(rows[ri2].children[i]);
+        }
+        var imgCell = pickBestCell(columnCells, cellImageScore);
+        var priceCell = pickBestCell(columnCells, cellPriceScore);
+        var hasTitleCandidate = false;
+        var ci3;
+        for (ci3 = 0; ci3 < columnCells.length; ci3++) {
+          if (cellText(columnCells[ci3])) {
+            hasTitleCandidate = true;
+            break;
+          }
+        }
+        if (!hasUsefulCell(imgCell) && !hasTitleCandidate && !hasUsefulCell(priceCell)) continue;
 
         var card = document.createElement('div');
         card.style.setProperty('display', 'flex', 'important');
@@ -8629,7 +8626,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         title.style.setProperty('margin', '0 auto 6px auto', 'important');
         title.style.setProperty('text-align', 'center', 'important');
         title.style.setProperty('line-height', '1.35', 'important');
-        appendTitleContents(title, [titleCell, imgCell, priceCell]);
+        appendTitleContents(title, columnCells);
         if (cellText(title)) card.appendChild(title);
 
         var price = document.createElement('div');
@@ -10325,8 +10322,8 @@ function mcMountMemberCaptionStandalone() {
     ]);
     var addMount =
       (addBtn &&
-        (addBtn.closest('.mc-atc-button-wrap') ||
-          addBtn.closest('[itemprop="offers"]') ||
+        (addBtn.closest('[itemprop="offers"]') ||
+          addBtn.closest('.mc-atc-button-wrap') ||
           addBtn.closest('td') ||
           addBtn.parentNode)) ||
       null;
