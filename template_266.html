@@ -8424,10 +8424,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       var table = root.querySelector('table.v65-productDisplay');
       if (!table) return false;
 
-      try {
-        mcReorderV65RelatedProductRows();
-      } catch (ePreRel) {}
-
       var tbody = table.tBodies[0] || table;
       var rows = [];
       var ch = tbody.children;
@@ -8439,9 +8435,51 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       }
       if (rows.length < 3) return false;
 
-      var imageRow = rows[0];
-      var titleRow = rows[1];
-      var priceRow = rows[2];
+      var sourceRows = rows.slice(0, 3);
+
+      function rowImageScore(row) {
+        if (!row || !row.children) return 0;
+        var score = 0;
+        var ci;
+        for (ci = 0; ci < row.children.length; ci++) {
+          var cell = row.children[ci];
+          if (!cell || !cell.querySelector) continue;
+          if (cell.querySelector('img')) score += 4;
+          if (cell.querySelector('a[href] > img, .v65-productPhoto img, .v-product__img img, .product_image img')) score += 6;
+        }
+        return score;
+      }
+
+      function rowPriceScore(row) {
+        if (!row || !row.children) return 0;
+        var score = 0;
+        var ci;
+        for (ci = 0; ci < row.children.length; ci++) {
+          var cell = row.children[ci];
+          if (!cell) continue;
+          var txt = cellText(cell);
+          if (/\$[\d,]+(?:\.\d{2})?/.test(txt)) score += 5;
+          if (/member price|sale price|our price|list price/i.test(txt)) score += 4;
+          if (cell.querySelector && cell.querySelector('.product_price, .product_sale_price, .v65-product-related-price, .mc-member-grid-price')) score += 6;
+        }
+        return score;
+      }
+
+      var imageRow = sourceRows.slice().sort(function(a, b) {
+        return rowImageScore(b) - rowImageScore(a);
+      })[0];
+      var remainingRows = sourceRows.filter(function(row) { return row !== imageRow; });
+      var priceRow = remainingRows.slice().sort(function(a, b) {
+        return rowPriceScore(b) - rowPriceScore(a);
+      })[0];
+      var titleRow = remainingRows.filter(function(row) { return row !== priceRow; })[0];
+
+      if (!imageRow || !titleRow || !priceRow) {
+        imageRow = sourceRows[0];
+        titleRow = sourceRows[1];
+        priceRow = sourceRows[2];
+      }
+
       var maxCols = Math.min(
         maxVisible,
         Math.max(
@@ -8460,6 +8498,10 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         if (!cell) return false;
         if (cell.querySelector && cell.querySelector('img')) return true;
         return cellText(cell).length > 0;
+      }
+
+      function looksLikePriceText(txt) {
+        return /\$[\d,]+(?:\.\d{2})?/.test(txt) || /member price|sale price|our price|list price/i.test(txt || '');
       }
 
       function appendCellContents(target, cell, kind) {
@@ -8482,6 +8524,62 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         while (clone.firstChild) target.appendChild(clone.firstChild);
       }
 
+      function appendTitleContents(target, cells) {
+        if (!target || !cells || !cells.length) return false;
+        var titleSelectors =
+          '.v-product__name, .productnamecolor, .v65-product-related-title, .productname, .ProductName, .vCSS_relatedProductName';
+        var ci;
+        for (ci = 0; ci < cells.length; ci++) {
+          var cell = cells[ci];
+          if (!cell || !cell.querySelector) continue;
+          var titleNode = cell.querySelector(titleSelectors);
+          if (titleNode && cellText(titleNode)) {
+            target.appendChild(titleNode.cloneNode(true));
+            return true;
+          }
+        }
+        for (ci = 0; ci < cells.length; ci++) {
+          var linkCell = cells[ci];
+          if (!linkCell || !linkCell.querySelectorAll) continue;
+          var links = linkCell.querySelectorAll('a[href]');
+          var li;
+          for (li = 0; li < links.length; li++) {
+            var link = links[li];
+            var linkTxt = cellText(link);
+            if (!linkTxt || link.querySelector('img') || looksLikePriceText(linkTxt) || /review/i.test(linkTxt)) continue;
+            target.appendChild(link.cloneNode(true));
+            return true;
+          }
+        }
+        for (ci = 0; ci < cells.length; ci++) {
+          var imgCell2 = cells[ci];
+          if (!imgCell2 || !imgCell2.querySelector) continue;
+          var img = imgCell2.querySelector('img[alt]');
+          var alt = ((img && img.getAttribute && img.getAttribute('alt')) || '').replace(/\s+/g, ' ').trim();
+          if (!alt || looksLikePriceText(alt) || /^image$/i.test(alt)) continue;
+          var hrefEl =
+            imgCell2.querySelector('a[href]') ||
+            (cells[0] && cells[0].querySelector && cells[0].querySelector('a[href]'));
+          if (hrefEl) {
+            var fallbackLink = document.createElement('a');
+            fallbackLink.href = hrefEl.getAttribute('href') || hrefEl.href || '#';
+            fallbackLink.textContent = alt;
+            target.appendChild(fallbackLink);
+          } else {
+            target.textContent = alt;
+          }
+          return true;
+        }
+        for (ci = 0; ci < cells.length; ci++) {
+          var txtCell = cells[ci];
+          var txt = cellText(txtCell);
+          if (!txt || looksLikePriceText(txt) || /review/i.test(txt) || txt.length > 140) continue;
+          target.textContent = txt;
+          return true;
+        }
+        return false;
+      }
+
       var oldGrid = document.getElementById('mc-related-force-grid');
       if (oldGrid && oldGrid.parentNode) oldGrid.parentNode.removeChild(oldGrid);
 
@@ -8497,9 +8595,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
       var cardsBuilt = 0;
       for (i = 0; i < maxCols; i++) {
-        var imgCell = imageRow.children[i];
-        var titleCell = titleRow.children[i];
-        var priceCell = priceRow.children[i];
+        var imgCell = imageRow && imageRow.children ? imageRow.children[i] : null;
+        var titleCell = titleRow && titleRow.children ? titleRow.children[i] : null;
+        var priceCell = priceRow && priceRow.children ? priceRow.children[i] : null;
         if (!hasUsefulCell(imgCell) && !hasUsefulCell(titleCell) && !hasUsefulCell(priceCell)) continue;
 
         var card = document.createElement('div');
@@ -8527,7 +8625,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         title.style.setProperty('margin', '0 auto 6px auto', 'important');
         title.style.setProperty('text-align', 'center', 'important');
         title.style.setProperty('line-height', '1.35', 'important');
-        appendCellContents(title, titleCell, 'title');
+        appendTitleContents(title, [titleCell, imgCell, priceCell]);
         if (cellText(title)) card.appendChild(title);
 
         var price = document.createElement('div');
@@ -10246,9 +10344,11 @@ function mcMountMemberCaptionStandalone() {
         }
       }
     }
-    // Ensure caption is attached to a visible container.
+    // Ensure caption is attached to a visible container and stays directly above Add to Cart.
     if (
-      (addMount && addMount.parentNode && el.parentNode !== addMount.parentNode) ||
+      (addMount &&
+        addMount.parentNode &&
+        (el.parentNode !== addMount.parentNode || el.nextSibling !== addMount)) ||
       !mcIsVisible(el.parentElement)
     ) {
       if (addMount && addMount.parentNode) {
@@ -10326,9 +10426,10 @@ function mcMountMemberCaptionStandalone() {
     }
     el.style.cssText =
       'display:block !important;visibility:visible !important;opacity:1 !important;' +
+      'width:100% !important;max-width:340px !important;clear:both !important;float:none !important;' +
       'margin-top:16px !important;margin-bottom:16px !important;min-height:1em !important;' +
       'font-size:16px !important;color:#454545 !important;line-height:1.4 !important;' +
-      'pointer-events:auto !important;position:relative !important;z-index:12 !important;';
+      'pointer-events:auto !important;position:relative !important;z-index:12 !important;overflow:visible !important;';
     if (st.unlocked && window.__mcPlannerConfigApplied && window.__mcPlannerCounts && seat > 0 && typeof calculatePlannerPrice === 'function') {
       var mpTotal = Number(st.memberPlannerTotal) || 0;
       if (!(mpTotal > 0)) mpTotal = calculatePlannerPrice(window.__mcPlannerCounts, seat);
