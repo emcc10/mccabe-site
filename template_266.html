@@ -7914,9 +7914,16 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       return;
     }
 
-    try {
-      if (caption.parentNode) caption.parentNode.removeChild(caption);
-    } catch (eCapRm) {}
+    caption.innerHTML =
+      '<div class="mc-member-price-caption__headline">Member price:</div>' +
+      '<div class="mc-member-price-caption__sub">' +
+        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see member pricing' +
+      '</div>' +
+      '<div class="mc-member-price-caption__actions">' +
+        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
+      '</div>';
+    caption.setAttribute('data-mc-member-state', 'locked');
+    ensureMemberCaptionMounted(caption);
   }
 
   function leftAlignPricingBlock(scope){
@@ -8745,7 +8752,10 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function mcRunRelatedFix() {
     mcNormalizeRelatedItemImages(document);
+    mcReorderV65RelatedProductRows();
     mcLimitRelatedProductCount(4);
+    var relLegacy = document.querySelector('#content_area #relateditems, #content_area table.relateditems');
+    if (relLegacy) mcMoveRelatedImageFirst(relLegacy);
     mcNormalizeRelatedItemImages(document);
   }
   function boot() {
@@ -10513,10 +10523,17 @@ function mcMountMemberCaptionStandalone() {
       el.setAttribute('data-mc-member-state', 'unlocked-no-price');
       uiState = 'unlocked-no-price';
     } else {
-      el.innerHTML = '';
-      el.setAttribute('data-mc-member-state', 'locked-hidden');
-      el.style.setProperty('display', 'none', 'important');
-      return mcCaptionReturn({ ok: true, reason: 'hidden-locked', ui: 'locked-hidden', unlocked: false, seat: seat, visible: false });
+      html =
+        '<div class="mc-member-price-caption__headline">Member price:</div>' +
+        '<div class="mc-member-price-caption__sub">' +
+        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see member pricing' +
+        '</div>' +
+        '<div class="mc-member-price-caption__actions">' +
+        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
+        '</div>';
+      el.innerHTML = html;
+      el.setAttribute('data-mc-member-state', 'locked');
+      uiState = 'locked';
     }
     var visible = mcIsVisible(el);
     var portal = document.getElementById('mc-member-caption-portal-fixed');
