@@ -8334,8 +8334,40 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       } catch (eR) {}
     }
   }
+  function mcLimitRelatedProductCount(maxVisible) {
+    try {
+      var root = document.querySelector('#content_area #v65-product-related, #content_area #related_products_content');
+      if (!root) return;
+      var table = root.querySelector('table.v65-productDisplay');
+      if (!table) return;
+      var tbody = table.tBodies[0] || table;
+      var rows = [];
+      var ch = tbody.children;
+      for (var i = 0; i < ch.length; i++) {
+        if (ch[i] && ch[i].tagName === 'TR') rows.push(ch[i]);
+      }
+      var groupSize = 3;
+      for (var g = 0; g < rows.length; g += groupSize) {
+        var isOverflow = (g >= groupSize);
+        for (var r = g; r < g + groupSize && r < rows.length; r++) {
+          if (isOverflow) {
+            rows[r].style.display = 'none';
+            continue;
+          }
+          var cells = rows[r].children;
+          for (var c = 0; c < cells.length; c++) {
+            if (c >= maxVisible) {
+              cells[c].style.display = 'none';
+            }
+          }
+        }
+      }
+    } catch (eLimit) {}
+  }
+
   function mcRunRelatedFix() {
     mcReorderV65RelatedProductRows();
+    mcLimitRelatedProductCount(4);
     var relLegacy = document.querySelector('#content_area #relateditems, #content_area table.relateditems');
     if (relLegacy) mcMoveRelatedImageFirst(relLegacy);
     mcNormalizeRelatedItemImages(document);
