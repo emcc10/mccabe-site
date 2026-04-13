@@ -10706,8 +10706,29 @@ try {
       mcSetSignupFormAction();
     }
   }
-  function mcOpenLoginModal() {
+  function mcPrepareLoginModal() {
     var m = document.getElementById('mc-login-modal');
+    if (!m) return null;
+    try {
+      if (document.body && m.parentNode !== document.body) {
+        document.body.appendChild(m);
+      } else if (document.body) {
+        document.body.appendChild(m);
+      }
+    } catch (eMove) {}
+    try {
+      m.style.setProperty('position', 'fixed', 'important');
+      m.style.setProperty('inset', '0', 'important');
+      m.style.setProperty('display', 'flex', 'important');
+      m.style.setProperty('visibility', 'visible', 'important');
+      m.style.setProperty('opacity', '1', 'important');
+      m.style.setProperty('pointer-events', 'auto', 'important');
+      m.style.setProperty('z-index', '2147483647', 'important');
+    } catch (eStyle) {}
+    return m;
+  }
+  function mcOpenLoginModal() {
+    var m = mcPrepareLoginModal();
     if (!m) return;
     mcSetModalTab('login');
     m.classList.add('mc-login-modal--open');
@@ -10717,7 +10738,7 @@ try {
     } catch (e) {}
   }
   function mcOpenSignupModal() {
-    var m = document.getElementById('mc-login-modal');
+    var m = mcPrepareLoginModal();
     if (!m) return;
     mcSetModalTab('signup');
     m.classList.add('mc-login-modal--open');
@@ -10732,6 +10753,11 @@ try {
     m.classList.remove('mc-login-modal--open');
     m.setAttribute('aria-hidden', 'true');
     try {
+      m.style.removeProperty('display');
+      m.style.removeProperty('visibility');
+      m.style.removeProperty('opacity');
+      m.style.removeProperty('pointer-events');
+      m.style.removeProperty('z-index');
       document.body.style.overflow = '';
     } catch (e2) {}
     if (typeof window.detectMemberPricingState === 'function') {
