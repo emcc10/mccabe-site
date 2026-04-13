@@ -10287,6 +10287,23 @@ function mcPickVisible(selectors) {
   }
   return null;
 }
+function mcIsTheaterSeatingPdp() {
+  try {
+    var p = String((location && location.pathname) || '').toLowerCase();
+    if (/theater[-\s]*seating/.test(p) || /\/106\.htm/.test(p) || /-s\/106\.htm/.test(p)) return true;
+    var crumbs = document.querySelectorAll(
+      '#content_area a[href*="/106.htm"], #content_area a[href*="-s/106"], .breadcrumbs a, .breadcrumb a, .v65-productpath a'
+    );
+    var i;
+    for (i = 0; i < crumbs.length; i++) {
+      var a = crumbs[i];
+      var txt = ((a && a.textContent) || '').replace(/\s+/g, ' ').toLowerCase();
+      var href = ((a && a.getAttribute && a.getAttribute('href')) || '').toLowerCase();
+      if (/theater\s*seating/.test(txt) || /\/106\.htm/.test(href) || /-s\/106\.htm/.test(href)) return true;
+    }
+  } catch (eTheater) {}
+  return false;
+}
 function mcMountMemberCaptionStandalone() {
   try {
     if (!document.querySelector('#v65-product-parent')) {
@@ -10327,13 +10344,32 @@ function mcMountMemberCaptionStandalone() {
           addBtn.closest('td') ||
           addBtn.parentNode)) ||
       null;
+    var theaterPdp = mcIsTheaterSeatingPdp();
+    var priceAnchor = mcPickVisible([
+      '#priceWithOptions',
+      '#priceWithOptionsNoTax',
+      '#v65-product-parent [itemprop="price"]',
+      '#v65-product-parent .v65-product-price',
+      '#v65-product-parent .product_productprice'
+    ]);
+    function placeCaptionNode(node) {
+      if (!node) return false;
+      if (theaterPdp && priceAnchor && priceAnchor.parentNode) {
+        if (priceAnchor.nextSibling) priceAnchor.parentNode.insertBefore(node, priceAnchor.nextSibling);
+        else priceAnchor.parentNode.appendChild(node);
+        return true;
+      }
+      if (addMount && addMount.parentNode) {
+        addMount.parentNode.insertBefore(node, addMount);
+        return true;
+      }
+      return false;
+    }
     if (!el) {
       el = document.createElement('div');
       el.id = 'mc-member-price-caption-root';
       el.className = 'mc-member-price-caption';
-      if (addMount && addMount.parentNode) {
-        addMount.parentNode.insertBefore(el, addMount);
-      } else {
+      if (!placeCaptionNode(el)) {
         var after = mcPickVisible([
           '#priceWithOptions',
           '#priceWithOptionsNoTax',
@@ -10350,14 +10386,17 @@ function mcMountMemberCaptionStandalone() {
     }
     // Ensure caption is attached to a visible container and stays directly above Add to Cart.
     if (
-      (addMount &&
+      (theaterPdp &&
+        priceAnchor &&
+        priceAnchor.parentNode &&
+        (el.parentNode !== priceAnchor.parentNode || el.previousSibling !== priceAnchor)) ||
+      (!theaterPdp &&
+        addMount &&
         addMount.parentNode &&
         (el.parentNode !== addMount.parentNode || el.nextSibling !== addMount)) ||
       !mcIsVisible(el.parentElement)
     ) {
-      if (addMount && addMount.parentNode) {
-        addMount.parentNode.insertBefore(el, addMount);
-      } else {
+      if (!placeCaptionNode(el)) {
       var visibleParent = mcPickVisible([
         '#v65-product-parent .v65-product-price',
         '#v65-product-parent .product_productprice',
@@ -11326,17 +11365,32 @@ try {
   /** Narrow PLP price mount for visibility flash guard (image/title not hidden). */
   function mcFindCardPriceWrapperForVisibility(card) {
     if (!card || !card.querySelector) return null;
+    function pickNarrowPriceNode() {
+      return (
+        card.querySelector('.v-product__price') ||
+        card.querySelector('.product_price') ||
+        card.querySelector('.product_productprice') ||
+        card.querySelector('.product_saleprice') ||
+        card.querySelector('font.product_sale_price') ||
+        card.querySelector('.v65-product-related-price') ||
+        card.querySelector('[itemprop="price"]') ||
+        null
+      );
+    }
     var w = mcFindCardPriceContainerMount(card) || mcFindCardPricingMount(card);
-    if (w) return w;
-    return (
-      card.querySelector('.v-product__price') ||
-      card.querySelector('.product_price') ||
-      card.querySelector('.product_productprice') ||
-      card.querySelector('.product_saleprice') ||
-      card.querySelector('font.product_sale_price') ||
-      card.querySelector('.v65-product-related-price') ||
-      null
-    );
+    if (w) {
+      var tag = (w.tagName || '').toUpperCase();
+      var tooBroad =
+        w === card ||
+        tag === 'LI' ||
+        tag === 'UL' ||
+        tag === 'TR' ||
+        tag === 'TBODY' ||
+        tag === 'TABLE' ||
+        (w.querySelector && w.querySelector('img'));
+      if (!tooBroad) return w;
+    }
+    return pickNarrowPriceNode();
   }
 
   function mcMarkCardPriceWrapperPending(card) {
