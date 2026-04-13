@@ -7109,14 +7109,14 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
 .mc-related-carousel__viewport .v65-product-related-item .v65-product-related-price {
   order: 2 !important;
   width: 100% !important;
-  text-align: left !important;
+  text-align: center !important;
 }
 
 .mc-related-carousel__viewport .v-product .mc-member-grid-price {
   order: 2 !important;
   width: 100% !important;
-  text-align: left !important;
-  align-items: flex-start !important;
+  text-align: center !important;
+  align-items: center !important;
 }
 
 .mc-related-carousel__viewport .mc-related-carousel__row td,
@@ -7125,9 +7125,9 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
 .mc-related-carousel__viewport .mc-related-carousel__list > div.v-product {
   display: flex !important;
   flex-direction: column !important;
-  align-items: stretch !important;
+  align-items: center !important;
   justify-content: flex-start !important;
-  text-align: left !important;
+  text-align: center !important;
 }
 
 .mc-related-carousel__viewport .mc-related-carousel__row td a:has(img),
@@ -7150,14 +7150,14 @@ html.vol-list.category #content_area table.vCSS_breadcrumb td {
 .mc-related-carousel__viewport .mc-related-carousel__row td .v65-product-related-price {
   order: 2 !important;
   width: 100% !important;
-  text-align: left !important;
+  text-align: center !important;
 }
 
 .mc-related-carousel__viewport .mc-related-carousel__row td .mc-member-grid-price {
   order: 2 !important;
   width: 100% !important;
-  text-align: left !important;
-  align-items: flex-start !important;
+  text-align: center !important;
+  align-items: center !important;
 }
 
 /* Category listing: uniform image tile + contain (late in file; wins over older blocks) */
