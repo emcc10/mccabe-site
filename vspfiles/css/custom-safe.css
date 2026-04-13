@@ -2626,10 +2626,10 @@ body.mc-product-page select.mc-native-leather {
 
     /* SAFE FIX: REMOVE BREADCRUMB SPACING ONLY */
     #v65-product-parent .vCSS_breadcrumb_td {
-      padding-top: 35px !important;
-      padding-bottom: 20px !important;
+      padding-top: 5px !important;
+      padding-bottom: 30px !important;
       margin: 0 !important;
-      padding-left: 40px !important;
+      padding-left: 100px !important;
     }
 
     #v65-product-parent table.vCSS_breadcrumb {
@@ -2983,6 +2983,7 @@ body.mc-product-page select.mc-native-leather {
     height: auto !important;
     margin: 0 auto !important;
     flex: none !important;
+margin-left: 65px !important;
   }
 
   /* Put alternative views below (and make them horizontal thumbnails) */
@@ -7888,7 +7889,7 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2) {
     grid-column: 1 / -1 !important;
     min-width: 0 !important;
-    max-width: 100% !important;
+    max-width: 90% !important;
     box-sizing: border-box !important;
     /* Default: align with cell edge (single-image PDPs have no #altviews — 250px was empty gutter). */
     margin-left: 100px !important;
