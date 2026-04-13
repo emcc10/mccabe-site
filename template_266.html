@@ -10218,12 +10218,19 @@ function mcMountMemberCaptionStandalone() {
       '#v65-product-parent [itemprop="offers"] input[type="submit"]',
       '#v65-product-parent [itemprop="offers"] button'
     ]);
+    var addMount =
+      (addBtn &&
+        (addBtn.closest('.mc-atc-button-wrap') ||
+          addBtn.closest('[itemprop="offers"]') ||
+          addBtn.closest('td') ||
+          addBtn.parentNode)) ||
+      null;
     if (!el) {
       el = document.createElement('div');
       el.id = 'mc-member-price-caption-root';
       el.className = 'mc-member-price-caption';
-      if (addBtn && addBtn.parentNode) {
-        addBtn.parentNode.insertBefore(el, addBtn);
+      if (addMount && addMount.parentNode) {
+        addMount.parentNode.insertBefore(el, addMount);
       } else {
         var after = mcPickVisible([
           '#priceWithOptions',
@@ -10241,11 +10248,11 @@ function mcMountMemberCaptionStandalone() {
     }
     // Ensure caption is attached to a visible container.
     if (
-      (addBtn && addBtn.parentNode && el.parentNode !== addBtn.parentNode) ||
+      (addMount && addMount.parentNode && el.parentNode !== addMount.parentNode) ||
       !mcIsVisible(el.parentElement)
     ) {
-      if (addBtn && addBtn.parentNode) {
-        addBtn.parentNode.insertBefore(el, addBtn);
+      if (addMount && addMount.parentNode) {
+        addMount.parentNode.insertBefore(el, addMount);
       } else {
       var visibleParent = mcPickVisible([
         '#v65-product-parent .v65-product-price',
