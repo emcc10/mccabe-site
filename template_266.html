@@ -5730,6 +5730,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       location.pathname.indexOf('-s/') !== -1;
 
     if (!isCategory) return;
+    return;
 
     function looksLikeProductTable(tbl) {
       if (!tbl || !tbl.querySelector) return false;
@@ -6162,7 +6163,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         if (pageTxt && pageTxt.parentNode) {
           try {
             pageTxt.setAttribute('data-mc-pager-hidden', '1');
-            pageTxt.style.setProperty('display', 'none', 'important');
           } catch (eRmPt) {}
         }
         var label = document.createElement('span');
