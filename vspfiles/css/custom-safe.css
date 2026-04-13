@@ -9461,6 +9461,108 @@ body.mc-product-page #content_area #related_products_content table.v65-productDi
   text-align: center !important;
 }
 
+/* PDP related items: last-win sizing/stack for the v65 related path and carousel path */
+body.productdetails #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product,
+body.mc-product-page #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product,
+body.productdetails #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product,
+.mc-related-carousel__viewport .v65-product-related-item,
+.mc-related-carousel__viewport .mc-related-carousel__row td .v-product {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+
+body.productdetails #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .product_image,
+body.productdetails #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v-product__img,
+body.productdetails #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v-product__image,
+body.productdetails #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product > a:first-of-type,
+body.mc-product-page #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .product_image,
+body.mc-product-page #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v-product__img,
+body.mc-product-page #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v-product__image,
+body.mc-product-page #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product > a:first-of-type,
+body.productdetails #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .product_image,
+body.productdetails #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v-product__img,
+body.productdetails #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v-product__image,
+body.productdetails #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product > a:first-of-type,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .product_image,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v-product__img,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v-product__image,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product > a:first-of-type,
+.mc-related-carousel__viewport .v65-product-related-item > a:has(img),
+.mc-related-carousel__viewport .mc-related-carousel__row td .v-product > a:has(img),
+.mc-related-carousel__viewport .mc-related-carousel__row td .v-product .v-product__img,
+.mc-related-carousel__viewport .mc-related-carousel__row td .v-product .v-product__image,
+.mc-related-carousel__viewport .mc-related-carousel__row td .product_image {
+  order: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 180px !important;
+  margin: 0 0 12px 0 !important;
+  text-align: center !important;
+}
+
+body.productdetails #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product img,
+body.mc-product-page #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product img,
+body.productdetails #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product img,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product img,
+.mc-related-carousel__viewport .v65-product-related-item img,
+.mc-related-carousel__viewport .mc-related-carousel__row td .v-product img {
+  display: block !important;
+  width: auto !important;
+  max-width: 100% !important;
+  max-height: 160px !important;
+  height: auto !important;
+  margin: 0 auto !important;
+}
+
+body.productdetails #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .productnamecolor,
+body.productdetails #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v65-product-related-title,
+body.productdetails #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v-product__name,
+body.productdetails #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .product_price,
+body.productdetails #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v65-product-related-price,
+body.productdetails #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .mc-member-grid-price,
+body.productdetails #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .mc-member-price,
+body.mc-product-page #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .productnamecolor,
+body.mc-product-page #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v65-product-related-title,
+body.mc-product-page #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v-product__name,
+body.mc-product-page #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .product_price,
+body.mc-product-page #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v65-product-related-price,
+body.mc-product-page #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .mc-member-grid-price,
+body.mc-product-page #v65-product-related table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .mc-member-price,
+body.productdetails #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .productnamecolor,
+body.productdetails #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v65-product-related-title,
+body.productdetails #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v-product__name,
+body.productdetails #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .product_price,
+body.productdetails #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v65-product-related-price,
+body.productdetails #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .mc-member-grid-price,
+body.productdetails #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .mc-member-price,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .productnamecolor,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v65-product-related-title,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v-product__name,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .product_price,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .v65-product-related-price,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .mc-member-grid-price,
+body.mc-product-page #content_area #related_products_content table.v65-productDisplay tr.v65-productDisplay-row > td .v-product .mc-member-price,
+.mc-related-carousel__viewport .v65-product-related-item .v65-product-related-title,
+.mc-related-carousel__viewport .v65-product-related-item .v65-product-related-price,
+.mc-related-carousel__viewport .mc-related-carousel__row td .productnamecolor,
+.mc-related-carousel__viewport .mc-related-carousel__row td .v-product__name,
+.mc-related-carousel__viewport .mc-related-carousel__row td .v-product__price,
+.mc-related-carousel__viewport .mc-related-carousel__row td .product_price,
+.mc-related-carousel__viewport .mc-related-carousel__row td .v65-product-related-title,
+.mc-related-carousel__viewport .mc-related-carousel__row td .v65-product-related-price,
+.mc-related-carousel__viewport .mc-related-carousel__row td .mc-member-grid-price {
+  order: 2 !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+
 /* Bean bag (103) PLP — per-list-item card column only; does not target ul.v-product-grid wrapper */
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product,
 html.mtl-cat103-no-member.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product-grid-item {
