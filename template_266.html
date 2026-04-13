@@ -7931,14 +7931,18 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       if (loginCta) {
         loginCta.onclick = function(ev) {
           ev.preventDefault();
+          ev.stopPropagation();
           if (typeof window.mcOpenLoginModal === 'function') window.mcOpenLoginModal();
+          return false;
         };
       }
       var signupCta = caption.querySelector('[data-mc-open-signup]');
       if (signupCta) {
         signupCta.onclick = function(ev) {
           ev.preventDefault();
+          ev.stopPropagation();
           if (typeof window.mcOpenSignupModal === 'function') window.mcOpenSignupModal();
+          return false;
         };
       }
     } catch (eCapBind) {}
@@ -8643,6 +8647,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       table.style.setProperty('display', 'none', 'important');
       if (table.nextSibling) table.parentNode.insertBefore(grid, table.nextSibling);
       else table.parentNode.appendChild(grid);
+      try {
+        mcNormalizeRelatedItemImages(grid);
+      } catch (eNormGrid) {}
       return true;
     } catch (eForce) {
       return false;
@@ -10470,14 +10477,18 @@ function mcMountMemberCaptionStandalone() {
       if (loginBtn) {
         loginBtn.onclick = function(ev) {
           ev.preventDefault();
+          ev.stopPropagation();
           if (typeof window.mcOpenLoginModal === 'function') window.mcOpenLoginModal();
+          return false;
         };
       }
       var signupBtn = el.querySelector('[data-mc-open-signup]');
       if (signupBtn) {
         signupBtn.onclick = function(ev) {
           ev.preventDefault();
+          ev.stopPropagation();
           if (typeof window.mcOpenSignupModal === 'function') window.mcOpenSignupModal();
+          return false;
         };
       }
     } catch (eBindCap) {}
@@ -10751,11 +10762,15 @@ try {
     var t = ev.target;
     if (t && t.closest && t.closest('[data-mc-open-login]')) {
       ev.preventDefault();
+      ev.stopPropagation();
       mcOpenLoginModal();
+      return;
     }
     if (t && t.closest && t.closest('[data-mc-open-signup]')) {
       ev.preventDefault();
+      ev.stopPropagation();
       mcOpenSignupModal();
+      return;
     }
     if (t && t.closest && t.closest('[data-mc-close-login]')) {
       ev.preventDefault();
@@ -10774,7 +10789,7 @@ try {
       ev.preventDefault();
       mcSetModalTab('login');
     }
-  });
+  }, true);
 
   (function mcBindSignupForm() {
     var form = document.getElementById('mc-member-signup-form');
