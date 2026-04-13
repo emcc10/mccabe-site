@@ -10706,6 +10706,28 @@ try {
       mcSetSignupFormAction();
     }
   }
+  function mcOpenAuthWindow(mode) {
+    var isSignup = mode === 'signup';
+    var url = isSignup
+      ? '/AccountSettings.asp?AddNewCustomer=Y&ReturnTo=' + mcLoginReturnTo()
+      : '/login.asp?ReturnTo=' + mcLoginReturnTo();
+    try {
+      var w = window.open(
+        url,
+        isSignup ? 'mcSignupPopup' : 'mcLoginPopup',
+        'popup=yes,width=540,height=760,resizable=yes,scrollbars=yes'
+      );
+      if (w) {
+        try { w.focus(); } catch (eFocus) {}
+        return true;
+      }
+    } catch (eWin) {}
+    try {
+      window.location.href = url;
+      return true;
+    } catch (eNav) {}
+    return false;
+  }
   function mcPrepareLoginModal() {
     var m = document.getElementById('mc-login-modal');
     if (!m) return null;
@@ -10729,23 +10751,53 @@ try {
   }
   function mcOpenLoginModal() {
     var m = mcPrepareLoginModal();
-    if (!m) return;
+    if (!m) return mcOpenAuthWindow('login');
     mcSetModalTab('login');
     m.classList.add('mc-login-modal--open');
     m.setAttribute('aria-hidden', 'false');
     try {
       document.body.style.overflow = 'hidden';
     } catch (e) {}
+    try {
+      var cs = window.getComputedStyle ? window.getComputedStyle(m) : null;
+      var rect = m.getBoundingClientRect ? m.getBoundingClientRect() : null;
+      var visible = !!(
+        cs &&
+        cs.display !== 'none' &&
+        cs.visibility !== 'hidden' &&
+        cs.opacity !== '0' &&
+        rect &&
+        rect.width > 0 &&
+        rect.height > 0
+      );
+      if (!visible) return mcOpenAuthWindow('login');
+    } catch (eVis) {}
+    return true;
   }
   function mcOpenSignupModal() {
     var m = mcPrepareLoginModal();
-    if (!m) return;
+    if (!m) return mcOpenAuthWindow('signup');
     mcSetModalTab('signup');
     m.classList.add('mc-login-modal--open');
     m.setAttribute('aria-hidden', 'false');
     try {
       document.body.style.overflow = 'hidden';
     } catch (e2) {}
+    try {
+      var cs = window.getComputedStyle ? window.getComputedStyle(m) : null;
+      var rect = m.getBoundingClientRect ? m.getBoundingClientRect() : null;
+      var visible = !!(
+        cs &&
+        cs.display !== 'none' &&
+        cs.visibility !== 'hidden' &&
+        cs.opacity !== '0' &&
+        rect &&
+        rect.width > 0 &&
+        rect.height > 0
+      );
+      if (!visible) return mcOpenAuthWindow('signup');
+    } catch (eVis2) {}
+    return true;
   }
   function mcCloseLoginModal() {
     var m = document.getElementById('mc-login-modal');
