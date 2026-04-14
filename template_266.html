@@ -132,6 +132,77 @@
 </script>
 <script>
 (function () {
+  function mcIsCategoryUrlNow() {
+    var p = (location.pathname || '').toLowerCase();
+    var q = (location.search || '').toLowerCase();
+    return /-s\/\d+\.html?/i.test(p) || /(?:\?|&)categoryid=\d+/i.test(q);
+  }
+
+  function mcForceUnhideCategoryProducts() {
+    try {
+      if (!mcIsCategoryUrlNow()) return;
+      if (/\/product-p\//i.test(location.pathname || '')) return;
+      var area = document.getElementById('content_area');
+      if (!area) return;
+
+      document.documentElement.classList.remove('mc-member-plp-price-pending');
+      document.documentElement.classList.remove('mc-cat157-plp-pricing-pending');
+      document.body.classList.remove('productdetails');
+      document.body.classList.remove('mc-product-page');
+      document.body.classList.remove('mc-bean-bag-pdp');
+      document.documentElement.classList.add('category');
+      document.body.classList.add('category');
+
+      var links = area.querySelectorAll('a[href*="-p/"], a[href*="product-p/"]');
+      var i;
+      for (i = 0; i < links.length; i++) {
+        var n = links[i];
+        var depth = 0;
+        while (n && n !== area && depth < 12) {
+          if (n.style) {
+            n.style.removeProperty('display');
+            n.style.removeProperty('visibility');
+            n.style.removeProperty('opacity');
+            n.style.removeProperty('height');
+            n.style.removeProperty('max-height');
+            n.style.removeProperty('overflow');
+          }
+          if (n.classList) {
+            n.classList.remove('mc-pricing-pending');
+            n.classList.remove('hidden');
+            n.classList.remove('hide');
+            n.classList.remove('is-hidden');
+            n.classList.add('mc-pricing-ready');
+          }
+          n.hidden = false;
+          n = n.parentElement;
+          depth++;
+        }
+      }
+    } catch (e) {}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mcForceUnhideCategoryProducts);
+  } else {
+    mcForceUnhideCategoryProducts();
+  }
+  window.addEventListener('load', mcForceUnhideCategoryProducts);
+  setTimeout(mcForceUnhideCategoryProducts, 120);
+  setTimeout(mcForceUnhideCategoryProducts, 400);
+  setTimeout(mcForceUnhideCategoryProducts, 900);
+  setTimeout(mcForceUnhideCategoryProducts, 1600);
+  setTimeout(mcForceUnhideCategoryProducts, 2600);
+  var mcCatForceTicks = 0;
+  var mcCatForceIv = setInterval(function () {
+    mcForceUnhideCategoryProducts();
+    mcCatForceTicks++;
+    if (mcCatForceTicks >= 40) clearInterval(mcCatForceIv);
+  }, 300);
+})();
+</script>
+<script>
+(function () {
   function mcLooksCategoryPage() {
     var p = (location.pathname || '').toLowerCase();
     var q = (window.location.search || '').toLowerCase();
