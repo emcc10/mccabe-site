@@ -99,6 +99,18 @@
   markCategoryListing();
   document.addEventListener('DOMContentLoaded', markCategoryListing);
   setTimeout(markCategoryListing, 0);
+  setTimeout(function () {
+    try {
+      document.documentElement.classList.remove('mc-member-plp-price-pending');
+      document.documentElement.classList.remove('mc-cat157-plp-pricing-pending');
+    } catch (eUnpend) {}
+  }, 2200);
+  window.addEventListener('load', function () {
+    try {
+      document.documentElement.classList.remove('mc-member-plp-price-pending');
+      document.documentElement.classList.remove('mc-cat157-plp-pricing-pending');
+    } catch (eUnpend2) {}
+  });
 })();
 </script>
 <script>
@@ -11960,6 +11972,13 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   function mcRemoveGuestSaleElements(card) {
     if (!card || !card.querySelectorAll) return;
     if (document.body.classList.contains('mc-member-logged-in')) return;
+    function isNarrowPriceNode(node) {
+      if (!node || !node.tagName) return false;
+      var t = node.tagName.toUpperCase();
+      if (t !== 'SPAN' && t !== 'FONT' && t !== 'B' && t !== 'STRONG' && t !== 'EM' && t !== 'SMALL') return false;
+      if (node.querySelector && node.querySelector('img, table, tr, td, th, .v-product, .productnamecolor, a[href*="-p/"]')) return false;
+      return true;
+    }
     var rmSel =
       'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"], span.product_sale_price, [class*="formatted_sale"], [class*="FormattedSale"]';
     var nodes = card.querySelectorAll(rmSel);
@@ -11967,20 +11986,21 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     for (i = 0; i < nodes.length; i++) {
       var n = nodes[i];
       if (n.closest && n.closest('.mc-member-grid-price')) continue;
+      if (!isNarrowPriceNode(n)) continue;
       try {
-        if (n.parentNode) n.parentNode.removeChild(n);
+        n.style.setProperty('display', 'none', 'important');
       } catch (eRs) {}
     }
-    var labels = card.querySelectorAll('font, span, b, strong, div');
+    var labels = card.querySelectorAll('font, span, b, strong, em, small');
     for (i = 0; i < labels.length; i++) {
       var el = labels[i];
       if (el.closest && el.closest('.mc-member-grid-price')) continue;
-      if (el.querySelector && el.children && el.children.length > 4) continue;
+      if (!isNarrowPriceNode(el)) continue;
       var tx = (el.textContent || '').replace(/\s+/g, ' ').trim();
       if (!/^sale\s*price/i.test(tx) && !/\bsale\s*price\s*:/i.test(tx)) continue;
       if (tx.length > 100) continue;
       try {
-        if (el.parentNode) el.parentNode.removeChild(el);
+        el.style.setProperty('display', 'none', 'important');
       } catch (eR2) {}
     }
   }
@@ -12122,8 +12142,10 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       for (si = 0; si < saleNodes.length; si++) {
         var sn = saleNodes[si];
         if (sn.closest && sn.closest('.mc-member-grid-price')) continue;
+        var st = sn.tagName ? sn.tagName.toUpperCase() : '';
+        if (st === 'TD' || st === 'TH' || st === 'TR' || st === 'TABLE') continue;
         try {
-          if (sn.parentNode) sn.parentNode.removeChild(sn);
+          sn.style.setProperty('display', 'none', 'important');
         } catch (eR) {}
       }
       return;
