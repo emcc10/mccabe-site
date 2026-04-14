@@ -10217,10 +10217,14 @@ function mcMountMemberCaptionStandalone() {
       retailText = mcFmtMcCaption(memberDisplayPrice > 0 ? memberDisplayPrice : seat);
     }
     var memberText = memberDisplayPrice > 0 ? mcFmtMcCaption(memberDisplayPrice) : mcFmtMcCaption(seat);
+    var inferredUnlocked = !!(
+      st.unlocked ||
+      (memberText && retailText && memberText !== retailText)
+    );
     var pdpStack = document.querySelector('.mc-pdp-member-pricing');
     var uiState = 'locked';
     var html = '';
-    if (st.unlocked && memberDisplayPrice > 0) {
+    if (inferredUnlocked && memberDisplayPrice > 0) {
       var rendered1 = mcRenderPdpRetailAndMember(retailText, memberText);
       if (rendered1) {
         try {
@@ -10237,7 +10241,7 @@ function mcMountMemberCaptionStandalone() {
       }
       el.setAttribute('data-mc-member-state', 'unlocked');
       uiState = 'unlocked';
-    } else if (st.unlocked) {
+    } else if (inferredUnlocked) {
       var rendered2 = mcRenderPdpRetailAndMember(retailText, memberText || retailText);
       if (rendered2) {
         try {
@@ -11511,39 +11515,29 @@ body.mc-product-page #v65-product-parent select[name*="quantity" i] {
 
   function mcApplyHowToGetToAllCardsWithKey(cards, key, amt) {
     if (!(amt > 0)) return;
-    var stHg = window.__mcMemberPricing || {};
-    if (!stHg.unlocked) return;
     var txt = mcFmtCategoryPrice(amt);
+    var loginUrl = getMemberLoginUrl();
+    var unlocked = !!(
+      (document.body && document.body.classList && document.body.classList.contains('mc-member-logged-in')) ||
+      window.__mcIsLoggedIn
+    );
     var j;
     for (j = 0; j < cards.length; j++) {
       var c = cards[j];
       var h = mcFindProductHref(c);
       if (!h) continue;
       if (mcCacheKeyForCategoryHref(h) !== key) continue;
-      var b = c.querySelector('.mc-member-grid-price');
-      if (b) {
-        mcEnsureAmountInMemberBlock(b, txt);
-        try {
-          if (!mcIsPdpCardOrRelated(c)) {
-            var retailTxt = mcExtractRegularPriceFromCard(c);
-            var retailLine = mcEnsureRetailLineForCard(c, retailTxt);
-            var mount = mcEnsureCardPriceMount(c);
-            if (mount) {
-              if (retailLine && retailLine.parentNode !== mount) mount.insertBefore(retailLine, mount.firstChild || null);
-              if (b.parentNode !== mount) mount.appendChild(b);
-            }
-            mcKeepSingleMemberBlock(c);
-            mount && mount.setAttribute('data-mc-priced', '1');
-            c.setAttribute('data-mc-priced', '1');
-          }
-        } catch (eRs) {}
-      }
+      try {
+        if (mcIsPdpCardOrRelated(c)) continue;
+        var retailTxt = mcExtractRegularPriceFromCard(c) || mcExtractVolusionSalePriceFromCard(c) || '';
+        if (!retailTxt) continue;
+        if (unlocked || txt !== retailTxt) mcRenderCardRetailAndMember(c, retailTxt, txt);
+        else mcRenderCardRetailAndLogin(c, retailTxt, loginUrl);
+      } catch (eRs) {}
     }
   }
 
   function mcHydrateCategoryHowToGetPrices() {
-    var stHyd = window.__mcMemberPricing || {};
-    if (!stHyd.unlocked) return;
     var cards = mcCollectGridProductCards();
     if (!cards.length) return;
     var cache = (window.__mcCategoryHowToGetCache = window.__mcCategoryHowToGetCache || {});
@@ -12284,16 +12278,19 @@ body.mc-product-page #v65-product-parent select[name*="quantity" i] {
           var amt = Number(memberCache[key]) || 0;
           if (amt > 0) memberText = mcFmtCategoryPrice(amt);
         }
-        if (!memberText) {
+      if (!memberText) {
           var saleText = mcExtractVolusionSalePriceFromCard(card) || '';
           if (saleText && saleText !== retailText) memberText = saleText;
         }
-
-        if (!memberText) {
-          memberText = retailText;
+      if (!memberText) {
+        if (unlocked) memberText = retailText;
+        else {
+          mcRenderCardRetailAndLogin(card, retailText, loginUrl);
+          continue;
         }
-
-        mcRenderCardRetailAndMember(card, retailText, memberText);
+      }
+      if (unlocked || memberText !== retailText) mcRenderCardRetailAndMember(card, retailText, memberText);
+      else mcRenderCardRetailAndLogin(card, retailText, loginUrl);
       }
 
       try {
