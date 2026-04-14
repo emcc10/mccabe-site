@@ -51,6 +51,11 @@
         if (b && b.classList) b.classList.remove('category');
         return;
       }
+      if (b && b.classList) {
+        /* Guard against stale bfcache/login navigation state from PDPs. */
+        b.classList.remove('mc-product-page');
+        b.classList.remove('mc-bean-bag-pdp');
+      }
       var pathMatch = /-s\//.test(p) || (h.classList && h.classList.contains('vol-list'));
       var gridMatch = false;
       var isHomePath = p === '/' || /\/default\.asp/i.test(p) || /^\/index\.htm/i.test(p);
@@ -126,7 +131,10 @@
     var b = document.body;
     if (/\/product-p\//i.test(p)) return false;
     if (document.getElementById('v65-product-parent')) return false;
-    if (b && (b.classList.contains('productdetails') || b.classList.contains('mc-product-page'))) return false;
+    if (b && b.classList.contains('productdetails')) return false;
+    if (b && b.classList.contains('mc-product-page') && /-s\//.test(p)) {
+      b.classList.remove('mc-product-page');
+    }
     return /-s\//.test(p) || document.documentElement.classList.contains('category') || document.body.classList.contains('category');
   }
 
@@ -6462,7 +6470,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var b = document.body;
     if (!b) return;
     var p = (location.pathname || '').toLowerCase();
-    if (/\/product-p\//i.test(p) || document.getElementById('v65-product-parent') || b.classList.contains('mc-product-page')) return;
+    if (/\/product-p\//i.test(p) || document.getElementById('v65-product-parent')) return;
+    if (b.classList.contains('mc-product-page') && /-s\//.test(p)) {
+      b.classList.remove('mc-product-page');
+    }
     /* Do not skip when body has productdetails — Volusion sometimes sets it wrongly; rely on presence of a listing grid */
     var grids = mcFindListingGrids();
     if (!grids.length) return;
@@ -10421,12 +10432,16 @@ function mcIsTheaterSeatingPdp() {
 }
 function mcMountMemberCaptionStandalone() {
   try {
+    var isPdpPath = /\/product-p\//i.test(location.pathname || '');
     var productRoot =
       document.querySelector('#v65-product-parent') ||
       document.querySelector('#content_area table.v65-productDisplay') ||
       document.querySelector('#content_area .colors_pricebox') ||
       document.getElementById('content_area') ||
       null;
+    if (!productRoot && isPdpPath) {
+      productRoot = document.getElementById('content_area') || document.body || null;
+    }
     if (!productRoot) {
       return mcCaptionReturn({ ok: false, reason: 'no product root yet' });
     }
@@ -10436,9 +10451,23 @@ function mcMountMemberCaptionStandalone() {
       '#v65-product-parent .product_productprice',
       '#content_area .colors_pricebox',
       '#content_area table.v65-productDisplay',
+      '#content_area .product_sale_price',
+      '#content_area .product_saleprice',
+      '#content_area .product_price',
+      '#content_area [itemprop="offers"]',
       '#v65-product-parent'
     ]);
     if (!host) host = productRoot;
+    if (!host && isPdpPath) {
+      host =
+        document.querySelector('#content_area [itemprop="offers"]') ||
+        document.querySelector('#content_area .product_sale_price') ||
+        document.querySelector('#content_area .product_saleprice') ||
+        document.querySelector('#content_area .product_price') ||
+        document.querySelector('#content_area form[action*="shoppingcart"], #content_area form[action*="ShoppingCart"]') ||
+        document.getElementById('content_area') ||
+        document.body;
+    }
     if (!host) {
       return mcCaptionReturn({ ok: false, reason: 'no host container' });
     }
@@ -10463,7 +10492,11 @@ function mcMountMemberCaptionStandalone() {
       'input[name="btnaddtocart"]',
       'input[id*="btnaddtocart"]',
       'button[name="btnaddtocart"]',
-      'button[id*="btnaddtocart"]'
+      'button[id*="btnaddtocart"]',
+      '#content_area [itemprop="offers"] input[type="submit"]',
+      '#content_area [itemprop="offers"] button',
+      '#content_area form[action*="shoppingcart"] input[type="submit"]',
+      '#content_area form[action*="ShoppingCart"] input[type="submit"]'
     ]);
     var addMount =
       (addBtn &&
