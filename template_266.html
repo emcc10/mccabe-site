@@ -9951,7 +9951,7 @@ function mcRenderPdpRetailAndMember(retailText, memberText) {
     document.querySelector('#v65-product-parent .price') ||
     document.querySelector('#v65-product-parent');
 
-  if (!host || !host.parentNode) return;
+  if (!host || !host.parentNode) return false;
 
   var wrap = document.querySelector('.mc-pdp-member-pricing');
   if (!wrap) {
@@ -9965,6 +9965,7 @@ function mcRenderPdpRetailAndMember(retailText, memberText) {
     '<div class="mc-pdp-member-line">Member: ' + memberText + '</div>';
 
   mcSetStableHtml(wrap, html);
+  return true;
 }
 function mcMountMemberCaptionStandalone() {
   try {
@@ -10210,17 +10211,35 @@ function mcMountMemberCaptionStandalone() {
     var uiState = 'locked';
     var html = '';
     if (st.unlocked && memberDisplayPrice > 0) {
-      mcRenderPdpRetailAndMember(retailText, memberText);
-      try {
-        if (el && el.parentNode) el.parentNode.removeChild(el);
-      } catch (eRmLegacy1) {}
+      var rendered1 = mcRenderPdpRetailAndMember(retailText, memberText);
+      if (rendered1) {
+        try {
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        } catch (eRmLegacy1) {}
+      } else {
+        html =
+          '<span class="mc-member-price-caption__option-label">Member price:</span>' +
+          '<span class="mc-member-price-caption__price-value">' +
+          mcFmtMcCaption(memberDisplayPrice) +
+          '</span>';
+        mcSetStableHtml(el, html);
+        el.style.display = 'block';
+      }
       el.setAttribute('data-mc-member-state', 'unlocked');
       uiState = 'unlocked';
     } else if (st.unlocked) {
-      mcRenderPdpRetailAndMember(retailText, memberText);
-      try {
-        if (el && el.parentNode) el.parentNode.removeChild(el);
-      } catch (eRmLegacy2) {}
+      var rendered2 = mcRenderPdpRetailAndMember(retailText, memberText || retailText);
+      if (rendered2) {
+        try {
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        } catch (eRmLegacy2) {}
+      } else {
+        html =
+          '<span class="mc-member-price-caption__option-label">Member price:</span>' +
+          '<span class="mc-member-price-caption__price-value">' + (memberText || retailText) + '</span>';
+        mcSetStableHtml(el, html);
+        el.style.display = 'block';
+      }
       el.setAttribute('data-mc-member-state', 'unlocked-no-price');
       uiState = 'unlocked-no-price';
     } else {
@@ -12261,10 +12280,7 @@ body.mc-product-page #v65-product-parent select[name*="quantity" i] {
         }
 
         if (!memberText) {
-          mount.removeAttribute('data-mc-last-html');
-          mount.removeAttribute('data-mc-priced');
-          card.removeAttribute('data-mc-priced');
-          continue;
+          memberText = retailText;
         }
 
         mcRenderCardRetailAndMember(card, retailText, memberText);
