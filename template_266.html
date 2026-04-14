@@ -3080,8 +3080,18 @@ function mcResolveVolusionSession() {
     loggedIn = true;
   }
 
-  if (document.querySelector('form[action*="login.asp"] input[name="EmailAddress"]')) {
-    loggedIn = false;
+  var loginEmail = document.querySelector('form[action*="login.asp"] input[name="EmailAddress"]');
+  if (loginEmail) {
+    var inModal = !!(loginEmail.closest && loginEmail.closest('#mc-login-modal'));
+    var formEl = loginEmail.form || (loginEmail.closest ? loginEmail.closest('form') : null);
+    var visibleForm = !!(
+      formEl &&
+      formEl.offsetParent !== null &&
+      (!window.getComputedStyle || window.getComputedStyle(formEl).display !== 'none')
+    );
+    if (!inModal && visibleForm) {
+      loggedIn = false;
+    }
   }
 
   b.classList.toggle('mc-member-logged-in', loggedIn);
