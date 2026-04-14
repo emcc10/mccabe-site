@@ -8165,6 +8165,29 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       function appendCellContents(target, cell, kind) {
         if (!target || !cell) return;
         var clone = cell.cloneNode(true);
+        if (kind === 'image') {
+          var imgs = clone.querySelectorAll('img');
+          var ii;
+          for (ii = 0; ii < imgs.length; ii++) {
+            var img = imgs[ii];
+            var src =
+              img.getAttribute('src') ||
+              img.getAttribute('data-src') ||
+              img.getAttribute('data-original') ||
+              img.getAttribute('data-lazy-src') ||
+              img.getAttribute('data-img') ||
+              '';
+            if (!src) {
+              try {
+                src = img.currentSrc || '';
+              } catch (eCur) {}
+            }
+            if (src) {
+              img.setAttribute('src', src);
+              img.removeAttribute('srcset');
+            }
+          }
+        }
         if (kind === 'price' && document.body && !document.body.classList.contains('mc-member-logged-in') && !document.body.classList.contains('mc-bean-bag-pdp')) {
           var saleNodes = clone.querySelectorAll(
             'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"]'
@@ -9979,16 +10002,46 @@ function mcRenderPdpRetailAndMember(retailText, memberText) {
 
   if (!host) return;
 
+  function mcHideBelowAddToCartPricing() {
+    var atc =
+      document.querySelector('#v65-product-parent input[name="btnaddtocart"], #v65-product-parent input[id*="btnaddtocart"], #v65-product-parent button[name="btnaddtocart"], #v65-product-parent button[id*="btnaddtocart"]') ||
+      document.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"], button[id*="btnaddtocart"]');
+    if (!atc || !atc.closest) return;
+    var atcWrap = atc.closest('td, tr, form, div, table, [itemprop="offers"]');
+    if (!atcWrap || !atcWrap.parentNode) return;
+    var scope = atcWrap.parentNode;
+    var nodes = scope.querySelectorAll(
+      '.mc-member-price-caption, .mc-member-grid-price, .product_sale_price, .product_saleprice, font.product_sale_price, .v65-product-price, .product_price'
+    );
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      if (!n || n.closest('.mc-pdp-member-pricing')) continue;
+      if (atcWrap.contains(n)) continue;
+      try {
+        n.style.setProperty('display', 'none', 'important');
+      } catch (eHide) {}
+    }
+  }
+
   var wrap = document.querySelector('.mc-pdp-member-pricing');
   if (!wrap) {
     wrap = document.createElement('div');
     wrap.className = 'mc-pdp-member-pricing';
+  }
+  var financeAnchor =
+    document.querySelector('#v65-product-parent [src*="affirm" i], #v65-product-parent [src*="klarna" i], #v65-product-parent a[href*="affirm" i], #v65-product-parent a[href*="klarna" i]') ||
+    document.querySelector('[src*="affirm" i], [src*="klarna" i], a[href*="affirm" i], a[href*="klarna" i]');
+  if (financeAnchor && financeAnchor.parentNode && wrap.parentNode !== financeAnchor.parentNode) {
+    financeAnchor.parentNode.insertBefore(wrap, financeAnchor);
+  } else if (host.parentNode && wrap.parentNode !== host.parentNode) {
     host.parentNode.insertBefore(wrap, host.nextSibling);
   }
 
   wrap.innerHTML =
     '<div class="mc-pdp-retail-line">Retail: ' + retailText + '</div>' +
     '<div class="mc-pdp-member-line">Member: ' + memberText + '</div>';
+  mcHideBelowAddToCartPricing();
 }
 function mcMountMemberCaptionStandalone() {
   try {
@@ -10453,6 +10506,37 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
 .v-product h2,
 .v-product h3 {
   display: block !important;
+}
+
+/* PDP pricing stack + quantity sizing + RH-style typography */
+.mc-pdp-member-pricing,
+.mc-pdp-member-pricing .mc-pdp-retail-line,
+.mc-pdp-member-pricing .mc-pdp-member-line,
+body.productdetails #content_area #relateditems,
+body.productdetails #content_area #relateditems * ,
+body.mc-product-page #content_area #relateditems,
+body.mc-product-page #content_area #relateditems *,
+body.productdetails #content_area table.relateditems,
+body.productdetails #content_area table.relateditems *,
+body.mc-product-page #content_area table.relateditems,
+body.mc-product-page #content_area table.relateditems * {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  letter-spacing: 0.04em !important;
+}
+
+body.productdetails #v65-product-parent input[name*="qty" i],
+body.productdetails #v65-product-parent input[name*="quantity" i],
+body.productdetails #v65-product-parent select[name*="qty" i],
+body.productdetails #v65-product-parent select[name*="quantity" i],
+body.mc-product-page #v65-product-parent input[name*="qty" i],
+body.mc-product-page #v65-product-parent input[name*="quantity" i],
+body.mc-product-page #v65-product-parent select[name*="qty" i],
+body.mc-product-page #v65-product-parent select[name*="quantity" i] {
+  max-width: 56px !important;
+  width: 56px !important;
+  height: 30px !important;
+  padding: 2px 6px !important;
+  font-size: 12px !important;
 }
 </style>
 <div id="mc-login-modal" class="mc-login-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mc-login-modal-title">
