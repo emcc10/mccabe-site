@@ -7033,6 +7033,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     try {
       if (typeof isBeanBagProductPage === 'function' && isBeanBagProductPage()) {
         document.body.classList.add('mc-bean-bag-pdp');
+      } else {
+        document.body.classList.remove('mc-bean-bag-pdp');
       }
     } catch (eBbCls) {}
     return true;
@@ -7733,36 +7735,31 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   function isBeanBagProductPage() {
     try {
       var p = (location.pathname || '').toLowerCase();
+      var pcInp =
+        document.querySelector('input[name="ProductCode"]') ||
+        document.querySelector('input[name="productcode"]');
+      var pcVal = String((pcInp && pcInp.value) || '').trim();
       var catInp = document.querySelector(
         'input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]'
       );
       var catVal = catInp && String(catInp.value || '').trim();
       if (catVal === '103') return true;
-      /* Fuzzy copy checks must NOT use document.body — global nav includes e.g. "Nest Bean Bags" (/nest/), which false-flagged every PDP as a bean bag and killed member pricing. */
+      if (/^bb/i.test(pcVal)) return true;
+      if (/-s\/103\.html?(?:\?|#|$)/i.test(p)) return true;
       var contentRoot =
         document.getElementById('content_area') ||
         document.getElementById('v65-product-parent') ||
-        document.body;
+        null;
       var bodyText = (contentRoot ? contentRoot.textContent : '').toLowerCase();
       var titleText = (document.title || '').toLowerCase();
 
       if (
         /\/bean-bag-seating-s\//.test(p) ||
         /product-p\/bb-/.test(p) ||
-        /cordaroys/.test(bodyText) ||
-        /cordaroys/.test(titleText) ||
         /bean bag/.test(bodyText) ||
         /bean bag/.test(titleText) ||
-        /chinchilla/.test(bodyText) ||
-        /chinchilla/.test(titleText) ||
-        /nest/.test(bodyText) ||
-        /nest/.test(titleText) ||
-        /faux fur/.test(bodyText) ||
-        /faux fur/.test(titleText) ||
-        /chenille/.test(bodyText) ||
-        /chenille/.test(titleText) ||
-        /corduroy/.test(bodyText) ||
-        /corduroy/.test(titleText)
+        /cordaroys/.test(bodyText) ||
+        /cordaroys/.test(titleText)
       ) {
         return true;
       }
@@ -11000,7 +10997,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   window.mcOpenSignupModal = mcOpenSignupModal;
 
   document.addEventListener('click', function (ev) {
-    var t = ev.target;
+    var t = ev.target && ev.target.nodeType === 1 ? ev.target : (ev.target && ev.target.parentElement ? ev.target.parentElement : null);
     if (t && t.closest && t.closest('[data-mc-open-login]')) {
       ev.preventDefault();
       ev.stopPropagation();
@@ -12350,7 +12347,13 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     }
     try {
       var b = document.body;
-      if (!b || b.classList.contains('productdetails') || b.classList.contains('is-home')) return false;
+      if (!b || b.classList.contains('productdetails')) return false;
+      if (b.classList.contains('is-home')) {
+        var isTrueHome =
+          (typeof window.mcPathIsHomepage === 'function' && window.mcPathIsHomepage()) ||
+          /^\/(?:default\.asp|index\.htm|index\.html)?$/i.test(location.pathname || '/');
+        if (isTrueHome) return false;
+      }
 
       var pagePath = (location.pathname || '').toLowerCase();
       var lid = null;
@@ -12549,7 +12552,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
         }
         continue;
       }
-      if (!mcCardUsesProductTileLayout(card)) {
+      if (!mcCardUsesProductTileLayout(card) && !on157MemberGatedPlp) {
         try { mcRemoveMemberGridBlocks(card); } catch (eLegacyBlk) {}
         try { card.removeAttribute('data-mc-member-grid'); } catch (eLegacyAttr) {}
         continue;
