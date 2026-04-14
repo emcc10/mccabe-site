@@ -86,11 +86,9 @@
         (pathLooksCategoryPlp || gridMatch || h.classList.contains('category') || (b && b.classList.contains('category'))) &&
         (!b || (!b.classList.contains('productdetails') && !b.classList.contains('is-home')));
 
-      if (memberPlpFlashGuard) {
-        h.classList.add('mc-member-plp-price-pending');
-      } else {
-        h.classList.remove('mc-member-plp-price-pending');
-      }
+      /* Safety-first: do not re-apply global pending mask on category pages.
+         If this class sticks, legacy listings can appear blank after refresh. */
+      h.classList.remove('mc-member-plp-price-pending');
 
       h.classList.remove('mc-cat157-plp-pricing-pending');
     } catch (e) {}
@@ -111,6 +109,79 @@
       document.documentElement.classList.remove('mc-cat157-plp-pricing-pending');
     } catch (eUnpend2) {}
   });
+})();
+</script>
+<script>
+(function () {
+  function mcLooksCategoryPage() {
+    var p = (location.pathname || '').toLowerCase();
+    return /-s\//.test(p) || document.documentElement.classList.contains('category') || document.body.classList.contains('category');
+  }
+
+  function mcIsVisibleNode(el) {
+    if (!el || el.nodeType !== 1) return false;
+    var st = window.getComputedStyle ? window.getComputedStyle(el) : null;
+    if (!st) return true;
+    if (st.display === 'none' || st.visibility === 'hidden' || Number(st.opacity || '1') === 0) return false;
+    return true;
+  }
+
+  function mcEmergencyKeepCategoryProductsVisible() {
+    try {
+      if (!mcLooksCategoryPage()) return;
+      var area = document.getElementById('content_area');
+      if (!area) return;
+
+      document.documentElement.classList.remove('mc-member-plp-price-pending');
+      document.documentElement.classList.remove('mc-cat157-plp-pricing-pending');
+
+      var links = area.querySelectorAll('a[href*="-p/"], a[href*="product-p/"]');
+      if (!links.length) return;
+
+      var visibleCount = 0;
+      var i;
+      for (i = 0; i < links.length; i++) {
+        if (mcIsVisibleNode(links[i])) visibleCount++;
+      }
+      if (visibleCount > 0) return;
+
+      for (i = 0; i < links.length; i++) {
+        var a = links[i];
+        var n = a;
+        var depth = 0;
+        while (n && n !== area && depth < 8) {
+          if (n.style) {
+            n.style.removeProperty('display');
+            n.style.removeProperty('visibility');
+            n.style.removeProperty('opacity');
+            n.style.removeProperty('height');
+            n.style.removeProperty('max-height');
+            n.style.removeProperty('overflow');
+          }
+          if (n.classList) {
+            n.classList.remove('mc-pricing-pending');
+            n.classList.remove('hidden');
+            n.classList.remove('hide');
+            n.classList.remove('is-hidden');
+            n.classList.add('mc-pricing-ready');
+          }
+          n.hidden = false;
+          n = n.parentElement;
+          depth++;
+        }
+      }
+    } catch (e) {}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mcEmergencyKeepCategoryProductsVisible);
+  } else {
+    mcEmergencyKeepCategoryProductsVisible();
+  }
+  window.addEventListener('load', mcEmergencyKeepCategoryProductsVisible);
+  setTimeout(mcEmergencyKeepCategoryProductsVisible, 200);
+  setTimeout(mcEmergencyKeepCategoryProductsVisible, 800);
+  setTimeout(mcEmergencyKeepCategoryProductsVisible, 1800);
 })();
 </script>
 <script>
