@@ -2750,9 +2750,9 @@ function extractMemberSeatPriceFromHtml(html, publicSeatPrice){
   return memberPrice;
 }
 function getMemberLoginUrl(){
-  var returnTo = encodeURIComponent((window.location.pathname || "/") + (window.location.search || ""));
-  return "/login.asp?ReturnTo=" + returnTo;
+  return '/login.asp?ReturnTo=' + encodeURIComponent(location.pathname + location.search + location.hash);
 }
+window.getMemberLoginUrl = getMemberLoginUrl;
 function getMemberCreateAccountUrl(){
   var returnTo = encodeURIComponent((window.location.pathname || "/") + (window.location.search || ""));
   return "/AccountSettings.asp?AddNewCustomer=Y&ReturnTo=" + returnTo;
@@ -3063,88 +3063,32 @@ function getVolusionAddToCartSeatPrice(root) {
   var htsEq = tryReadHowToGetSalePrice(mainAmt, true);
   return htsEq > 0 ? htsEq : 0;
 }
-function mcSessionHasAuthoritativeLoggedInMarker(doc){
-  doc = doc || document;
-  if (!doc || !doc.querySelector) return false;
-  if (doc.querySelector('a[href*="logout.asp" i], a[href*="logoff.asp" i], a[href*="logout" i], a[href*="logoff" i]')) return true;
-  if (doc.querySelector('form[action*="logout.asp" i], form[action*="logoff.asp" i]')) return true;
-  if (doc.querySelector('[data-v-login-state="in"], [data-login-state="in"], [data-customer-logged-in="true"]')) return true;
-  return false;
-}
-function mcApplyResolvedSessionState(state){
-  var loggedIn = !!(state && state.unlocked);
+function mcResolveVolusionSession() {
+  var b = document.body;
+  if (!b) return false;
+
+  var loggedIn = false;
+
+  if (document.querySelector('a[href*="logout"], a[href*="LogOut"], a[href*="logoff"], a[href*="myaccount"]')) {
+    loggedIn = true;
+  }
+
+  if (document.querySelector('form[action*="login.asp"] input[name="EmailAddress"]')) {
+    loggedIn = false;
+  }
+
+  b.classList.toggle('mc-member-logged-in', loggedIn);
+  b.classList.toggle('mc-member-logged-out', !loggedIn);
+
   window.__mcIsLoggedIn = loggedIn;
   try {
-    if (document.body && document.body.classList) {
-      if (loggedIn) {
-        document.body.classList.add('mc-member-logged-in');
-        document.body.classList.remove('mc-member-logged-out');
-      } else {
-        document.body.classList.remove('mc-member-logged-in');
-        document.body.classList.add('mc-member-logged-out');
-      }
-    }
-  } catch (eBody) {}
-}
-function mcResolveVolusionSession() {
-  if (window.__mcResolveSessionPromise) return window.__mcResolveSessionPromise;
-  var state = window.__mcMemberPricing || {};
-  state.checked = true;
-  state.publicSeatPrice = getDisplayedPublicSeatPrice();
-  state.unlocked = mcSessionHasAuthoritativeLoggedInMarker(document);
-  if (!state.unlocked) {
-    state.memberSeatPrice = 0;
-    state.memberPlannerTotal = 0;
-    state.delta = null;
-  }
-  window.__mcResolveSessionPromise = Promise.resolve().then(function () {
-    if (!state.unlocked) return state;
-    var pageType = typeof window.mcPageType === 'function' ? window.mcPageType() : 'other';
-    if (pageType !== 'pdp') return state;
-    var url = new URL(window.location.href);
-    url.searchParams.delete("CartID");
-    return fetch(url.pathname + url.search, {
-      credentials: "same-origin",
-      cache: "no-store"
-    }).then(function(resp){
-      return resp.text();
-    }).then(function(productHtml){
-      var memberSeatPrice = extractVolusionAddToCartPriceFromHtml(productHtml);
-      if (!(memberSeatPrice > 0)) {
-        memberSeatPrice = extractMemberSeatPriceFromHtml(productHtml, state.publicSeatPrice);
-      }
-      if (!(memberSeatPrice > 0)) {
-        var dispOnly = extractDisplayedSeatPriceFromHtml(productHtml);
-        if (dispOnly > 0 && state.publicSeatPrice > 0 && dispOnly < state.publicSeatPrice) {
-          memberSeatPrice = dispOnly;
-        }
-      }
-      if (memberSeatPrice > 0) {
-        state.memberSeatPrice = memberSeatPrice;
-        state.delta = state.publicSeatPrice > memberSeatPrice ? (state.publicSeatPrice - memberSeatPrice) : null;
-      } else {
-        state.memberSeatPrice = 0;
-        state.delta = null;
-      }
-      return state;
-    }).catch(function(){
-      return state;
-    });
-  }).then(function(resolved){
-    window.__mcMemberPricing = resolved || state;
-    mcApplyResolvedSessionState(window.__mcMemberPricing);
-    try {
-      window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing }));
-    } catch (eEvt) {}
-    refreshPlannerPriceForMemberState();
-    return window.__mcMemberPricing;
-  }).finally(function(){
-    window.__mcResolveSessionPromise = null;
-  });
-  return window.__mcResolveSessionPromise;
+    window.__mcMemberPricing = window.__mcMemberPricing || {};
+    window.__mcMemberPricing.unlocked = loggedIn;
+    window.__mcMemberPricing.checked = true;
+  } catch (eState) {}
+  return loggedIn;
 }
 window.mcResolveVolusionSession = mcResolveVolusionSession;
-window.detectMemberPricingState = mcResolveVolusionSession;
 window.formatMcCurrency = formatMcCurrency;
 window.getMcDisplayedSeatPrice = getDisplayedPublicSeatPrice;
 window.getVolusionAddToCartSeatPrice = getVolusionAddToCartSeatPrice;
@@ -10640,19 +10584,18 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       m.style.removeProperty('z-index');
       document.body.style.overflow = '';
     } catch (e2) {}
-    if (typeof window.mcResolveVolusionSession === 'function') {
-      window.mcResolveVolusionSession().then(function () {
-        try {
-          if (typeof window.forceProductFixes === 'function') window.forceProductFixes();
-        } catch (e4) {}
-        try {
-          if (typeof window.mcPaintCategoryGridMemberPricing === 'function') window.mcPaintCategoryGridMemberPricing();
-        } catch (e5) {}
-        try {
-          if (typeof window.mcKickMemberCaptionStandalone === 'function') window.mcKickMemberCaptionStandalone();
-        } catch (e6) {}
-      });
-    }
+    try {
+      if (typeof window.mcResolveVolusionSession === 'function') window.mcResolveVolusionSession();
+    } catch (e3) {}
+    try {
+      if (typeof window.forceProductFixes === 'function') window.forceProductFixes();
+    } catch (e4) {}
+    try {
+      if (typeof window.mcPaintCategoryGridMemberPricing === 'function') window.mcPaintCategoryGridMemberPricing();
+    } catch (e5) {}
+    try {
+      if (typeof window.mcKickMemberCaptionStandalone === 'function') window.mcKickMemberCaptionStandalone();
+    } catch (e6) {}
   }
   window.mcOpenLoginModal = mcOpenLoginModal;
   window.mcCloseLoginModal = mcCloseLoginModal;
@@ -10660,7 +10603,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
 
   document.addEventListener('click', function (ev) {
     var t = ev.target && ev.target.nodeType === 1 ? ev.target : (ev.target && ev.target.parentElement ? ev.target.parentElement : null);
-    if (t && t.closest && t.closest('[data-mc-open-login]')) {
+    if (t && t.closest && t.closest('.mc-member-grid-price__login, [data-mc-open-login]')) {
       ev.preventDefault();
       ev.stopPropagation();
       window.location.href = getMemberLoginUrl();
@@ -12157,7 +12100,11 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       }
 
       var st = window.__mcMemberPricing || {};
-      var unlocked = !!st.unlocked;
+      var unlocked = !!(
+        (document.body && document.body.classList && document.body.classList.contains('mc-member-logged-in')) ||
+        window.__mcIsLoggedIn
+      );
+      st.unlocked = unlocked;
       try {
         if (on157MemberGatedPlp && !unlocked) {
           document.documentElement.classList.add('mc-cat157-plp-guest');
@@ -12591,60 +12538,44 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
 
   function mcBootCategoryGrid() {
+    if (window.__mcCategoryBootStarted) return;
+    window.__mcCategoryBootStarted = true;
     if (typeof window.mcPageType === 'function' && window.mcPageType() !== 'category') return;
 
-    var run = function () {
-      try {
-        if (typeof window.mcResolveVolusionSession === 'function') {
-          window
-            .mcResolveVolusionSession()
-            .then(function () {
-              mcPaintCategoryGridMemberPricing();
-            })
-            .catch(function () {
-              mcPaintCategoryGridMemberPricing();
-            });
-        } else {
-          mcPaintCategoryGridMemberPricing();
-        }
-      } catch (eRun) {
-        try {
-          mcPaintCategoryGridMemberPricing();
-        } catch (e2) {}
-      }
-    };
-
-    run();
-
-    if (!window.__mcCategoryGridReadyBound) {
-      window.__mcCategoryGridReadyBound = true;
-      window.addEventListener('mcMemberPricingReady', function () {
-        mcPaintCategoryGridMemberPricing();
-      });
+    function runPaint() {
+      try { mcResolveVolusionSession(); } catch (e1) {}
+      try { mcPaintCategoryGridMemberPricing(); } catch (e2) {}
     }
 
-    var ca = document.getElementById('content_area');
-    var deb;
-    if (!ca || window.__mcCategoryGridMo) return;
-    window.__mcCategoryGridMo = true;
-    try {
-      var mo = new MutationObserver(function () {
-        clearTimeout(deb);
-        deb = setTimeout(function () {
-          try {
-            mcPaintCategoryGridMemberPricing();
-          } catch (e) {}
-        }, 120);
-      });
-      mo.observe(ca, { childList: true, subtree: true });
-    } catch (e) {}
-  }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', runPaint);
+    } else {
+      runPaint();
+    }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mcBootCategoryGrid);
-  } else {
-    mcBootCategoryGrid();
+    window.addEventListener('load', runPaint);
+
+    if (window.__mcCategoryPriceObserver) {
+      try { window.__mcCategoryPriceObserver.disconnect(); } catch (e3) {}
+    }
+
+    var gridRoot =
+      document.querySelector('#content_area .v-product-grid') ||
+      document.querySelector('#content_area') ||
+      document.body;
+
+    var debounceTimer = null;
+    window.__mcCategoryPriceObserver = new MutationObserver(function () {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(runPaint, 120);
+    });
+
+    if (gridRoot) {
+      window.__mcCategoryPriceObserver.observe(gridRoot, { childList: true, subtree: true });
+    }
   }
+  window.mcBootCategoryGrid = mcBootCategoryGrid;
+  mcBootCategoryGrid();
   window.mcPathLooksLikeCategory103Listing = mcPathLooksLikeCategory103Listing;
 })();
 </script>
