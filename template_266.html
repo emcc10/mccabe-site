@@ -11503,6 +11503,14 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
             .then(function (amt) {
               cache[key] = amt > 0 ? amt : 0;
               if (amt > 0) mcApplyHowToGetToAllCardsWithKey(cardsSnap, key, amt);
+              clearTimeout(window.__mcHydrateGridRepaintTimer);
+              window.__mcHydrateGridRepaintTimer = setTimeout(function () {
+                try {
+                  if (typeof window.mcPaintCategoryGridMemberPricing === 'function') {
+                    window.mcPaintCategoryGridMemberPricing();
+                  }
+                } catch (eHydPaint) {}
+              }, 60);
             })
             .catch(function () {
               cache[key] = 0;
@@ -12151,10 +12159,6 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       var st = window.__mcMemberPricing || {};
       var unlocked = !!st.unlocked;
       try {
-        if (unlocked) document.body.classList.add('mc-member-logged-in');
-        else document.body.classList.remove('mc-member-logged-in');
-      } catch (eCls2) {}
-      try {
         if (on157MemberGatedPlp && !unlocked) {
           document.documentElement.classList.add('mc-cat157-plp-guest');
         } else {
@@ -12315,6 +12319,15 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
           card.querySelector('[class*="formattedprice"]') ||
           card.querySelector('[itemprop="price"]');
       }
+      var cachedMemberAmt = 0;
+      var memberCacheKey = null;
+      if (unlocked && cardHref) {
+        memberCacheKey = mcCacheKeyForCategoryHref(cardHref);
+        var memberCache = window.__mcCategoryHowToGetCache || {};
+        if (memberCache[memberCacheKey] > 0) {
+          cachedMemberAmt = Number(memberCache[memberCacheKey]) || 0;
+        }
+      }
 
       if (!unlocked) {
         if (existingBlock && existingBlock.parentNode) {
@@ -12363,7 +12376,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       }
 
       /* Logged-in + MAP teaser only (no Volusion sale row): swap teaser for member row + price when we have it */
-      if (unlocked && !hasSale && mcCardStillShowsMapPhrase(card)) {
+      if (unlocked && cachedMemberAmt > 0 && !hasSale && mcCardStillShowsMapPhrase(card)) {
         if (existingBlock && existingBlock.parentNode) {
           try {
             existingBlock.parentNode.removeChild(existingBlock);
@@ -12383,10 +12396,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
         mapLbl.className = 'mc-member-grid-price__label';
         mapLbl.textContent = 'Member price:';
         mapMember.appendChild(mapLbl);
-        var mapAmtStr =
-          mcExtractVolusionSalePriceFromCard(card) ||
-          regPrice ||
-          mcExtractDollarFromText((card.textContent || '').replace(/\s+/g, ' '));
+        var mapAmtStr = mcFmtCategoryPrice(cachedMemberAmt);
         if (mapAmtStr) {
           var mapAmtEl = document.createElement('div');
           mapAmtEl.className = 'mc-member-grid-price__amount';
@@ -12409,7 +12419,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       if (!hasSale) {
         if (
           unlocked &&
-          (is157ListingCtx || is139ListingCtx || listingMember || cardEligible)
+          cachedMemberAmt > 0
         ) {
           hasSale = true;
         } else {
@@ -12438,11 +12448,15 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       }
       var raw = (parseHost.textContent || '').replace(/\s+/g, ' ').trim();
       var dollar = mcExtractDollarFromText(raw);
+      var publicAmtNum = parseMcCurrency(mcExtractVolusionSalePriceFromCard(card) || regPrice || dollar || '');
+      if (cachedMemberAmt > 0 && publicAmtNum > 0 && Math.abs(cachedMemberAmt - publicAmtNum) < 0.01) {
+        cachedMemberAmt = 0;
+      }
       var hideMap =
         /lowest price|add to cart|see price|call|members?\s*only|map/i.test(raw) && !dollar;
       var volSale = mcExtractVolusionSalePriceFromCard(card);
       var showMemberAmt = unlocked
-        ? volSale || regPrice || dollar
+        ? (cachedMemberAmt > 0 ? mcFmtCategoryPrice(cachedMemberAmt) : '')
         : dollar || regPrice;
 
       var block = card.querySelector('.mc-member-grid-price');
