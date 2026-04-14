@@ -10288,21 +10288,16 @@ function mcMountMemberCaptionStandalone() {
     var html = '';
     if (st.unlocked && memberDisplayPrice > 0) {
       mcRenderPdpRetailAndMember(retailText, memberText);
-      html =
-        '<span class="mc-member-price-caption__option-label">Member price:</span>' +
-        '<span class="mc-member-price-caption__price-value">' +
-        mcFmtMcCaption(memberDisplayPrice) +
-        '</span>';
-      el.innerHTML = html;
-      el.style.display = 'none';
+      try {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      } catch (eRmLegacy1) {}
       el.setAttribute('data-mc-member-state', 'unlocked');
       uiState = 'unlocked';
     } else if (st.unlocked) {
       mcRenderPdpRetailAndMember(retailText, memberText);
-      html =
-        '<span class="mc-member-price-caption__option-label">Member price:</span>';
-      el.innerHTML = html;
-      el.style.display = 'none';
+      try {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      } catch (eRmLegacy2) {}
       el.setAttribute('data-mc-member-state', 'unlocked-no-price');
       uiState = 'unlocked-no-price';
     } else {
@@ -11712,6 +11707,42 @@ body.mc-product-page #v65-product-parent select[name*="quantity" i] {
       try {
         n.style.setProperty('display', 'none', 'important');
       } catch (eHideNative) {}
+    }
+  }
+
+  function mcCleanupCategoryMemberPriceStrays(scope) {
+    scope = scope || document;
+    var cards = scope.querySelectorAll('#content_area .v-product, #content_area li.v-product, #content_area td, #content_area .v65-productDisplay-cell');
+    var i;
+    for (i = 0; i < cards.length; i++) {
+      var card = cards[i];
+      if (!card || !card.querySelectorAll) continue;
+      var mount = card.querySelector('.mc-price-stack');
+      var blocks = card.querySelectorAll('.mc-member-grid-price');
+      if (!blocks.length) continue;
+      var j;
+      if (mount) {
+        for (j = 0; j < blocks.length; j++) {
+          var b = blocks[j];
+          if (b.parentNode !== mount) {
+            try {
+              if (b && b.parentNode) b.parentNode.removeChild(b);
+            } catch (eRmStray) {}
+          }
+        }
+        var inMount = mount.querySelectorAll('.mc-member-grid-price');
+        for (j = 1; j < inMount.length; j++) {
+          try {
+            if (inMount[j] && inMount[j].parentNode) inMount[j].parentNode.removeChild(inMount[j]);
+          } catch (eDupMount) {}
+        }
+      } else if (blocks.length > 1) {
+        for (j = 1; j < blocks.length; j++) {
+          try {
+            if (blocks[j] && blocks[j].parentNode) blocks[j].parentNode.removeChild(blocks[j]);
+          } catch (eDupNoMount) {}
+        }
+      }
     }
   }
 
