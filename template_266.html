@@ -43,6 +43,14 @@
       var q = (window.location.search || '').toLowerCase();
       var h = document.documentElement;
       var b = document.body;
+      var isPdpPath = /\/product-p\//i.test(p);
+      var hasPdpRoot = !!document.getElementById('v65-product-parent');
+      if (isPdpPath || hasPdpRoot || (b && b.classList && b.classList.contains('productdetails'))) {
+        h.classList.remove('category');
+        h.classList.remove('mc-member-plp-price-pending');
+        if (b && b.classList) b.classList.remove('category');
+        return;
+      }
       var pathMatch = /-s\//.test(p) || (h.classList && h.classList.contains('vol-list'));
       var gridMatch = false;
       var isHomePath = p === '/' || /\/default\.asp/i.test(p) || /^\/index\.htm/i.test(p);
@@ -115,6 +123,10 @@
 (function () {
   function mcLooksCategoryPage() {
     var p = (location.pathname || '').toLowerCase();
+    var b = document.body;
+    if (/\/product-p\//i.test(p)) return false;
+    if (document.getElementById('v65-product-parent')) return false;
+    if (b && (b.classList.contains('productdetails') || b.classList.contains('mc-product-page'))) return false;
     return /-s\//.test(p) || document.documentElement.classList.contains('category') || document.body.classList.contains('category');
   }
 
@@ -6449,6 +6461,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function fixCategoryGrid() {
     var b = document.body;
     if (!b) return;
+    var p = (location.pathname || '').toLowerCase();
+    if (/\/product-p\//i.test(p) || document.getElementById('v65-product-parent') || b.classList.contains('mc-product-page')) return;
     /* Do not skip when body has productdetails — Volusion sometimes sets it wrongly; rely on presence of a listing grid */
     var grids = mcFindListingGrids();
     if (!grids.length) return;
