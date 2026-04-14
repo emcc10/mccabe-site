@@ -9969,6 +9969,27 @@ function mcIsTheaterSeatingPdp() {
   } catch (eTheater) {}
   return false;
 }
+function mcRenderPdpRetailAndMember(retailText, memberText) {
+  var host =
+    document.querySelector('#priceWithOptions') ||
+    document.querySelector('#priceWithOptionsNoTax') ||
+    document.querySelector('#v65-product-parent .product_price') ||
+    document.querySelector('#v65-product-parent .price') ||
+    document.querySelector('#v65-product-parent');
+
+  if (!host) return;
+
+  var wrap = document.querySelector('.mc-pdp-member-pricing');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.className = 'mc-pdp-member-pricing';
+    host.parentNode.insertBefore(wrap, host.nextSibling);
+  }
+
+  wrap.innerHTML =
+    '<div class="mc-pdp-retail-line">Retail: ' + retailText + '</div>' +
+    '<div class="mc-pdp-member-line">Member: ' + memberText + '</div>';
+}
 function mcMountMemberCaptionStandalone() {
   try {
     var isPdpPath = /\/product-p\//i.test(location.pathname || '');
@@ -10194,24 +10215,49 @@ function mcMountMemberCaptionStandalone() {
       if (!(mpTotal > 0)) mpTotal = calculatePlannerPrice(window.__mcPlannerCounts, seat);
       if (mpTotal > 0) memberDisplayPrice = mpTotal;
     }
+    var retailText = '';
+    try {
+      var retailAmt = 0;
+      if (typeof mcExtractRetailPriceFromPdpHtml === 'function') {
+        retailAmt = Number(mcExtractRetailPriceFromPdpHtml(document.documentElement.innerHTML || '')) || 0;
+      }
+      if (!(retailAmt > 0) && typeof getDisplayedPublicSeatPrice === 'function') {
+        retailAmt = Number(getDisplayedPublicSeatPrice()) || 0;
+      }
+      if (retailAmt > 0) retailText = mcFmtMcCaption(retailAmt);
+    } catch (eRetailPdp) {}
+    if (!retailText) {
+      retailText = mcFmtMcCaption(memberDisplayPrice > 0 ? memberDisplayPrice : seat);
+    }
+    var memberText = memberDisplayPrice > 0 ? mcFmtMcCaption(memberDisplayPrice) : mcFmtMcCaption(seat);
+    var pdpStack = document.querySelector('.mc-pdp-member-pricing');
     var uiState = 'locked';
     var html = '';
     if (st.unlocked && memberDisplayPrice > 0) {
+      mcRenderPdpRetailAndMember(retailText, memberText);
       html =
         '<span class="mc-member-price-caption__option-label">Member price:</span>' +
         '<span class="mc-member-price-caption__price-value">' +
         mcFmtMcCaption(memberDisplayPrice) +
         '</span>';
       el.innerHTML = html;
+      el.style.display = 'none';
       el.setAttribute('data-mc-member-state', 'unlocked');
       uiState = 'unlocked';
     } else if (st.unlocked) {
+      mcRenderPdpRetailAndMember(retailText, memberText);
       html =
         '<span class="mc-member-price-caption__option-label">Member price:</span>';
       el.innerHTML = html;
+      el.style.display = 'none';
       el.setAttribute('data-mc-member-state', 'unlocked-no-price');
       uiState = 'unlocked-no-price';
     } else {
+      if (pdpStack && pdpStack.parentNode) {
+        try {
+          pdpStack.parentNode.removeChild(pdpStack);
+        } catch (eRmPdp) {}
+      }
       html =
         '<div class="mc-member-price-caption__headline">Member price:</div>' +
         '<div class="mc-member-price-caption__sub">' +
@@ -10221,6 +10267,7 @@ function mcMountMemberCaptionStandalone() {
         '<a href="' + getMemberCreateAccountUrl() + '" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
         '</div>';
       el.innerHTML = html;
+      el.style.display = 'block';
       el.setAttribute('data-mc-member-state', 'locked');
       uiState = 'locked';
     }
@@ -10373,6 +10420,40 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
 :is(html.category, body.category) #content_area .vnav--level2,:is(html.category, body.category) #content_area .vnav--level3,:is(html.category, body.category) #content_area .vnav--level2>li,:is(html.category, body.category) #content_area .vnav--level3>li{text-align:left!important}
 :is(html.category, body.category) #content_area .vnav--level2 a,:is(html.category, body.category) #content_area .vnav--level3 a{font-weight:400!important;letter-spacing:.06em!important;text-transform:uppercase!important;font-size:11px!important}
 @media (max-width:991px){:is(html.category, body.category) .v-product-grid .v-product .v-product__img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,:is(html.category, body.category) .v-product-grid .v-product .product_image,:is(html.category, body.category) .v-product-grid .v-product .vcss_img,:is(html.category, body.category) ul.v-product-grid>li.v-product .v-product__img{height:220px!important;min-height:220px!important;max-height:220px!important;overflow:hidden!important;margin:0!important;padding:0!important}:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,:is(html.category, body.category) .v-product-grid .v-product .product_image img,:is(html.category, body.category) .v-product-grid .v-product .vcss_img img,:is(html.category, body.category) ul.v-product-grid>li.v-product .v-product__img img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important}:is(html.category, body.category) .v-product-grid .v-product .v-product__name,:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,:is(html.category, body.category) .v-product-grid .v-product h2,:is(html.category, body.category) .v-product-grid .v-product h3,:is(html.category, body.category) .v-product-grid .v-product h4{min-height:0!important;align-items:flex-start!important;justify-content:flex-start!important;text-align:left!important;margin-top:3px!important;margin-bottom:0!important;padding-top:0!important}:is(html.category, body.category) .v-product-grid .v-product{gap:0!important;row-gap:0!important}}
+.mc-price-stack,
+.mc-retail-price,
+.mc-member-grid-price,
+.mc-pdp-member-pricing,
+.mc-pdp-retail-line,
+.mc-pdp-member-line {
+  display: block !important;
+  width: 100% !important;
+}
+
+.mc-price-stack {
+  margin-top: 8px !important;
+}
+
+.mc-retail-price,
+.mc-pdp-retail-line {
+  font: 400 13px/1.45 Inter, system-ui, sans-serif !important;
+  color: #444 !important;
+  margin: 0 0 2px 0 !important;
+}
+
+.mc-member-grid-price,
+.mc-pdp-member-line {
+  font: 600 13px/1.45 Inter, system-ui, sans-serif !important;
+  color: #111 !important;
+  margin: 0 !important;
+}
+
+.v-product__name,
+.productnamecolor,
+.v-product h2,
+.v-product h3 {
+  display: block !important;
+}
 </style>
 <div id="mc-login-modal" class="mc-login-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mc-login-modal-title">
   <div class="mc-login-modal__backdrop" data-mc-close-login tabindex="-1"></div>
@@ -11375,6 +11456,21 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     amt.textContent = amountText;
   }
 
+  function mcEnsureRetailLineForCard(card, retailText) {
+    if (!card || !retailText) return null;
+
+    var existing = card.querySelector('.mc-retail-price');
+    if (existing) {
+      existing.textContent = 'Retail: ' + retailText;
+      return existing;
+    }
+
+    var row = document.createElement('div');
+    row.className = 'mc-retail-price';
+    row.textContent = 'Retail: ' + retailText;
+    return row;
+  }
+
   function mcApplyHowToGetToAllCardsWithKey(cards, key, amt) {
     if (!(amt > 0)) return;
     var stHg = window.__mcMemberPricing || {};
@@ -11390,7 +11486,16 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       if (b) {
         mcEnsureAmountInMemberBlock(b, txt);
         try {
-          if (!mcIsPdpCardOrRelated(c)) mcReorderSaleAfterMember(c);
+          if (!mcIsPdpCardOrRelated(c)) {
+            var retailTxt = mcExtractRegularPriceFromCard(c);
+            var retailLine = mcEnsureRetailLineForCard(c, retailTxt);
+            var mount = mcEnsureCardPriceMount(c);
+            if (mount) {
+              if (retailLine && retailLine.parentNode !== mount) mount.insertBefore(retailLine, mount.firstChild || null);
+              if (b.parentNode !== mount) mount.appendChild(b);
+            }
+            mcReorderSaleAfterMember(c);
+          }
         } catch (eRs) {}
       }
     }
@@ -11495,35 +11600,38 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
    * Volusion often outputs sale / MAP / member nodes before the image. Flex `order` usually fixes it;
    * when the card root is a column flex container, moving DOM after the title guarantees image → title → price.
    */
+  function mcEnsureCardPriceMount(card) {
+    var title =
+      card.querySelector('.v-product__name') ||
+      card.querySelector('.productnamecolor') ||
+      card.querySelector('h2') ||
+      card.querySelector('h3');
+
+    if (!title || !title.parentNode) return null;
+
+    var mount = card.querySelector('.mc-price-stack');
+    if (mount) return mount;
+
+    mount = document.createElement('div');
+    mount.className = 'mc-price-stack';
+    title.insertAdjacentElement('afterend', mount);
+    return mount;
+  }
+
   function mcEnsureMemberBlockCardLevel(card) {
     if (!card || !card.querySelector) return null;
     if (mcIsRelatedItemsNode(card)) return null;
     if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) return null;
     mcDedupeMemberGridBlocksInCard(card);
+    var mount = mcEnsureCardPriceMount(card);
     var block = card.querySelector('.mc-member-grid-price');
     if (!block) return null;
-    if (block.parentNode && block.parentNode === card) return block;
-    var title =
-      card.querySelector('.v-product__name') ||
-      card.querySelector('.productnamecolor') ||
-      card.querySelector('.v65-product-related-title') ||
-      card.querySelector('h2') ||
-      card.querySelector('h3');
-    if (!title || !title.parentNode) return block || null;
-    var insertAfter = title;
-    var ns = title.nextSibling;
-    if (ns && ns.nodeType === 1 && ns.classList && ns.classList.contains('mc-plp-bean-subline')) {
-      insertAfter = ns;
-    }
-    if (block.previousSibling === insertAfter) return block;
-    var ref = insertAfter.nextSibling;
+    if (!mount) return block;
+    if (block.parentNode === mount) return block;
     try {
-      if (ref === block) return block;
-      card.insertBefore(block, ref);
+      mount.appendChild(block);
     } catch (eIns) {
-      try {
-        card.appendChild(block);
-      } catch (e2) {}
+      return block;
     }
     return block;
   }
@@ -11531,19 +11639,18 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   function mcReorderSaleAfterMember(card) {
     if (mcIsRelatedItemsNode(card)) return;
     if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) return;
-    if (!document.body.classList.contains('mc-member-logged-in')) return;
+
     var mem = card.querySelector('.mc-member-grid-price');
     if (!mem || !mem.parentNode) return;
-    var sales = card.querySelectorAll(
-      '.product_sale_price, font.product_sale_price, span.product_sale_price, [class*="product_sale_price"], .product_saleprice, [class*="product_saleprice"]'
+
+    var retail = card.querySelector(
+      '.mc-retail-price, .product_list_price, font.product_list_price, span.product_list_price, [class*="product_list_price"], .listprice, .product_productprice, .product_price, .v-product__price'
     );
-    var si;
-    for (si = 0; si < sales.length; si++) {
-      var sale = sales[si];
-      if (!sale || (sale.closest && sale.closest('.mc-member-grid-price'))) continue;
+
+    if (retail && retail !== mem && retail.parentNode === mem.parentNode) {
       try {
-        sale.style.setProperty('display', 'none', 'important');
-      } catch (eSale) {}
+        mem.parentNode.insertBefore(retail, mem);
+      } catch (e) {}
     }
   }
 
@@ -11712,7 +11819,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     block.setAttribute('data-mc-guest-login', '1');
     var label = document.createElement('div');
     label.className = 'mc-member-grid-price__label';
-    label.textContent = 'Member price:';
+    label.textContent = 'Member:';
     block.appendChild(label);
     var hint = document.createElement('div');
     hint.className = 'mc-member-grid-price__hint';
@@ -11891,6 +11998,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       card.querySelector('h2') ||
       card.querySelector('h3');
     if (!title || !title.parentNode) return;
+    if (card.querySelector('.mc-price-stack')) return;
     var titlePar = title.parentNode;
 
     function moveAfterTitle(node) {
@@ -12247,12 +12355,13 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       }
 
       var regPrice = mcExtractRegularPriceFromCard(card);
+      var priceMount = mcEnsureCardPriceMount(card);
       var priceElPre = mcFindCardPricingMount(card);
       var priceBox =
         priceElPre && priceElPre.closest && priceElPre.closest('.v-product__price');
       var gatherHost = priceBox || priceElPre;
       var keptPre = gatherHost ? mcGatherPriceLikeNodes(gatherHost) : [];
-      var installTarget = priceBox || mcFindCardPriceContainerMount(card) || priceElPre;
+      var installTarget = priceMount || priceBox || mcFindCardPriceContainerMount(card) || priceElPre;
       if (!installTarget) {
         installTarget =
           card.querySelector('.v-product__price') ||
@@ -12341,7 +12450,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
         mapMember.setAttribute('data-mc-member-grid', 'unlocked');
         var mapLbl = document.createElement('div');
         mapLbl.className = 'mc-member-grid-price__label';
-        mapLbl.textContent = 'Member price:';
+        mapLbl.textContent = 'Member:';
         mapMember.appendChild(mapLbl);
         var mapAmtStr = mcFmtCategoryPrice(cachedMemberAmt);
         if (mapAmtStr) {
@@ -12350,12 +12459,17 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
           mapAmtEl.textContent = mapAmtStr;
           mapMember.appendChild(mapAmtEl);
         }
-        if (mcReplaceMapCalloutWithBlock(card, mapMember)) {
+        if (!priceMount && mcReplaceMapCalloutWithBlock(card, mapMember)) {
           card.setAttribute('data-mc-member-grid', 'unlocked');
           try {
             if (!mcIsPdpCardOrRelated(card)) {
-              mcReorderCategoryListingNodes(card);
               mcEnsureMemberBlockCardLevel(card);
+              var retailMap = mcEnsureRetailLineForCard(card, regPrice || '');
+              var mountMap = mcEnsureCardPriceMount(card);
+              if (mountMap) {
+                if (retailMap && retailMap.parentNode !== mountMap) mountMap.insertBefore(retailMap, mountMap.firstChild || null);
+                if (mapMember.parentNode !== mountMap) mountMap.appendChild(mapMember);
+              }
               mcReorderSaleAfterMember(card);
             }
           } catch (eMapL) {}
@@ -12417,7 +12531,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
 
       var label = document.createElement('div');
       label.className = 'mc-member-grid-price__label';
-      label.textContent = 'Member price:';
+      label.textContent = 'Member:';
       block.appendChild(label);
 
       if (unlocked) {
@@ -12445,7 +12559,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
         block.appendChild(hint);
       }
 
-      if (mcSwapMapElementsForBlock(card, block)) {
+      if (!priceMount && mcSwapMapElementsForBlock(card, block)) {
         try {
           block.style.setProperty('visibility', 'visible', 'important');
           block.style.setProperty('opacity', '1', 'important');
@@ -12457,7 +12571,13 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
         try {
           if (!mcIsPdpCardOrRelated(card)) {
             mcEnsureMemberBlockCardLevel(card);
-            mcReorderCategoryListingNodes(card);
+            var retailSwap = mcEnsureRetailLineForCard(card, regPrice || dollar || '');
+            if (retailSwap) {
+              var mountSwap = mcEnsureCardPriceMount(card);
+              if (mountSwap && retailSwap.parentNode !== mountSwap) {
+                mountSwap.insertBefore(retailSwap, mountSwap.firstChild || null);
+              }
+            }
             mcReorderSaleAfterMember(card);
           }
         } catch (ePost1) {}
@@ -12501,7 +12621,12 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       try {
         if (!mcIsPdpCardOrRelated(card)) {
           mcEnsureMemberBlockCardLevel(card);
-          mcReorderCategoryListingNodes(card);
+          var retail = mcEnsureRetailLineForCard(card, regPrice || dollar || '');
+          var mount = mcEnsureCardPriceMount(card);
+          if (mount) {
+            if (retail && retail.parentNode !== mount) mount.insertBefore(retail, mount.firstChild || null);
+            if (block.parentNode !== mount) mount.appendChild(block);
+          }
           mcReorderSaleAfterMember(card);
         }
       } catch (ePost2) {}
