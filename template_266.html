@@ -2772,20 +2772,6 @@ function refreshPlannerPriceForMemberState(){
   }
   try { window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing })); } catch (e) {}
 }
-/** Volusion myaccount HTML: logged in if logout/sign-out present or welcome dashboard; not if login-only page. */
-function volusionMyAccountHtmlIndicatesLoggedIn(html) {
-  if (!html || html.length < 80) return false;
-  var h = html;
-  var lc = h.toLowerCase();
-  if (/href\s*=\s*["'][^"']*logout[^"']*["']/i.test(h)) return true;
-  if (/href\s*=\s*["'][^"']*logoff[^"']*["']/i.test(h)) return true;
-  if (/>\s*sign\s*out\s*</i.test(h)) return true;
-  if (/>\s*log\s*out\s*</i.test(h)) return true;
-  if (/welcome to your account/i.test(h)) return true;
-  if (/order history|account settings|edit (your )?profile/i.test(lc) && !/returning customer/i.test(lc)) return true;
-  if (/<input[^>]+type\s*=\s*["']password["']/i.test(h) && /returning customer|login password|sign in to continue/i.test(lc) && !/logout|log\s*out/i.test(lc)) return false;
-  return false;
-}
 /** Parse primary PDP price from fetched product HTML (logged-in price may equal public — no "lower" dollar in DOM). */
 function extractDisplayedSeatPriceFromHtml(html) {
   if (!html) return 0;
@@ -3077,39 +3063,44 @@ function getVolusionAddToCartSeatPrice(root) {
   var htsEq = tryReadHowToGetSalePrice(mainAmt, true);
   return htsEq > 0 ? htsEq : 0;
 }
-function detectMemberPricingState(){
-  if (document.body && document.body.classList.contains('mc-bean-bag-pdp')) {
-    document.querySelectorAll(
-      '.mc-member-price, .mc-member-pricing, .mc-member-price-row, .mc-member-login, .mc-member-grid-price, [class*="member-price"], [class*="memberpricing"]'
-    ).forEach(function(el){
-      try { el.remove(); } catch (e) {}
-    });
-    document.body.classList.remove('mc-member-pricing-on');
-    document.body.classList.add('mc-member-pricing-off');
-    return Promise.resolve(false);
+function mcSessionHasAuthoritativeLoggedInMarker(doc){
+  doc = doc || document;
+  if (!doc || !doc.querySelector) return false;
+  if (doc.querySelector('a[href*="logout.asp" i], a[href*="logoff.asp" i], a[href*="logout" i], a[href*="logoff" i]')) return true;
+  if (doc.querySelector('form[action*="logout.asp" i], form[action*="logoff.asp" i]')) return true;
+  if (doc.querySelector('[data-v-login-state="in"], [data-login-state="in"], [data-customer-logged-in="true"]')) return true;
+  return false;
+}
+function mcApplyResolvedSessionState(state){
+  var loggedIn = !!(state && state.unlocked);
+  window.__mcIsLoggedIn = loggedIn;
+  try {
+    if (document.body && document.body.classList) {
+      if (loggedIn) {
+        document.body.classList.add('mc-member-logged-in');
+        document.body.classList.remove('mc-member-logged-out');
+      } else {
+        document.body.classList.remove('mc-member-logged-in');
+        document.body.classList.add('mc-member-logged-out');
+      }
+    }
+  } catch (eBody) {}
+}
+function mcResolveVolusionSession() {
+  if (window.__mcResolveSessionPromise) return window.__mcResolveSessionPromise;
+  var state = window.__mcMemberPricing || {};
+  state.checked = true;
+  state.publicSeatPrice = getDisplayedPublicSeatPrice();
+  state.unlocked = mcSessionHasAuthoritativeLoggedInMarker(document);
+  if (!state.unlocked) {
+    state.memberSeatPrice = 0;
+    state.memberPlannerTotal = 0;
+    state.delta = null;
   }
-  if (window.__mcMemberPricing.promise) return window.__mcMemberPricing.promise;
-  window.__mcMemberPricing.promise = fetch("/myaccount.asp", {
-    credentials: "same-origin",
-    cache: "no-store"
-  }).then(function(resp){
-    return resp.text().then(function(accountHtml){
-      return { accountHtml: accountHtml, respUrl: (resp && resp.url) ? String(resp.url) : "" };
-    });
-  }).then(function(packet){
-    var accountHtml = packet.accountHtml;
-    var respUrl = (packet.respUrl || "").toLowerCase();
-    var state = window.__mcMemberPricing;
-    state.checked = true;
-    state.publicSeatPrice = getDisplayedPublicSeatPrice();
-    if (respUrl.indexOf("login.asp") !== -1) {
-      state.unlocked = false;
-      return state;
-    }
-    state.unlocked = volusionMyAccountHtmlIndicatesLoggedIn(accountHtml);
-    if (!state.unlocked) {
-      return state;
-    }
+  window.__mcResolveSessionPromise = Promise.resolve().then(function () {
+    if (!state.unlocked) return state;
+    var pageType = typeof window.mcPageType === 'function' ? window.mcPageType() : 'other';
+    if (pageType !== 'pdp') return state;
     var url = new URL(window.location.href);
     url.searchParams.delete("CartID");
     return fetch(url.pathname + url.search, {
@@ -3130,64 +3121,30 @@ function detectMemberPricingState(){
       }
       if (memberSeatPrice > 0) {
         state.memberSeatPrice = memberSeatPrice;
-        if (state.publicSeatPrice > memberSeatPrice) {
-          state.delta = state.publicSeatPrice - memberSeatPrice;
-        }
-      }
-      if (state.unlocked && !(state.memberSeatPrice > 0)) {
-        var live = getVolusionAddToCartSeatPrice(document);
-        if (live > 0) {
-          state.memberSeatPrice = live;
-        }
+        state.delta = state.publicSeatPrice > memberSeatPrice ? (state.publicSeatPrice - memberSeatPrice) : null;
+      } else {
+        state.memberSeatPrice = 0;
+        state.delta = null;
       }
       return state;
-    }, function(){
+    }).catch(function(){
       return state;
     });
-  }).catch(function(){
-    var state = window.__mcMemberPricing;
-    state.checked = true;
-    state.unlocked = false;
-    return state;
-  }).then(function(state){
+  }).then(function(resolved){
+    window.__mcMemberPricing = resolved || state;
+    mcApplyResolvedSessionState(window.__mcMemberPricing);
     try {
-      if (state && state.unlocked) document.body.classList.add('mc-member-logged-in');
-      else document.body.classList.remove('mc-member-logged-in');
-    } catch (eCls) {}
-    try {
-      window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: state }));
-    } catch (e) {}
+      window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing }));
+    } catch (eEvt) {}
     refreshPlannerPriceForMemberState();
-    return state;
-  }).then(function(state){
-    window.__mcMemberPricing.promise = null;
-    if (state && state.unlocked && !(state.memberSeatPrice > 0)) {
-      var pollStart = Date.now();
-      var pollMs = 22000;
-      var pollIv = setInterval(function(){
-        if (window.__mcMemberPricing.memberSeatPrice > 0) {
-          clearInterval(pollIv);
-          return;
-        }
-        if (Date.now() - pollStart > pollMs) {
-          clearInterval(pollIv);
-          return;
-        }
-        var live2 = getVolusionAddToCartSeatPrice(document);
-        if (live2 > 0) {
-          window.__mcMemberPricing.memberSeatPrice = live2;
-          clearInterval(pollIv);
-          try {
-            window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing }));
-          } catch (e2) {}
-        }
-      }, 450);
-    }
-    return state;
+    return window.__mcMemberPricing;
+  }).finally(function(){
+    window.__mcResolveSessionPromise = null;
   });
-  return window.__mcMemberPricing.promise;
+  return window.__mcResolveSessionPromise;
 }
-window.detectMemberPricingState = detectMemberPricingState;
+window.mcResolveVolusionSession = mcResolveVolusionSession;
+window.detectMemberPricingState = mcResolveVolusionSession;
 window.formatMcCurrency = formatMcCurrency;
 window.getMcDisplayedSeatPrice = getDisplayedPublicSeatPrice;
 window.getVolusionAddToCartSeatPrice = getVolusionAddToCartSeatPrice;
@@ -7725,32 +7682,12 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     caption.innerHTML =
       '<div class="mc-member-price-caption__headline">Member price:</div>' +
       '<div class="mc-member-price-caption__sub">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see member pricing' +
+        '<a href="' + getMemberLoginUrl() + '" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see member pricing' +
       '</div>' +
       '<div class="mc-member-price-caption__actions">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
+        '<a href="' + getMemberCreateAccountUrl() + '" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
       '</div>';
     caption.setAttribute('data-mc-member-state', 'locked');
-    try {
-      var loginCta = caption.querySelector('[data-mc-open-login]');
-      if (loginCta) {
-        loginCta.onclick = function(ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          if (typeof window.mcOpenLoginModal === 'function') window.mcOpenLoginModal();
-          return false;
-        };
-      }
-      var signupCta = caption.querySelector('[data-mc-open-signup]');
-      if (signupCta) {
-        signupCta.onclick = function(ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          if (typeof window.mcOpenSignupModal === 'function') window.mcOpenSignupModal();
-          return false;
-        };
-      }
-    } catch (eCapBind) {}
     ensureMemberCaptionMounted(caption);
   }
 
@@ -7927,14 +7864,13 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     forceProductFixes();
   });
   window.forceProductFixes = forceProductFixes;
-  if (typeof window.detectMemberPricingState === 'function') {
-    window.detectMemberPricingState();
+  if (typeof window.mcResolveVolusionSession === 'function') {
+    window.mcResolveVolusionSession();
   }
   window.addEventListener('pageshow', function(ev){
     if (!ev.persisted || !document.body.classList.contains('mc-product-page')) return;
-    if (typeof window.detectMemberPricingState !== 'function') return;
-    window.__mcMemberPricing.promise = null;
-    window.detectMemberPricingState();
+    if (typeof window.mcResolveVolusionSession !== 'function') return;
+    window.mcResolveVolusionSession();
   });
 
   try {
@@ -9091,12 +9027,8 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     } catch (_) {}
   }
   function mcCartLooksLoggedIn(){
-    var h = document.documentElement ? document.documentElement.innerHTML : "";
-    var lc = h.toLowerCase();
-    if (/href\s*=\s*["'][^"']*logout[^"']*["']/i.test(h)) return true;
-    if (/href\s*=\s*["'][^"']*logoff[^"']*["']/i.test(h)) return true;
-    if (/>\s*sign\s*out\s*</i.test(h) || />\s*log\s*out\s*</i.test(h)) return true;
-    if (/welcome to your account|order history|account settings/i.test(lc) && !/returning customer|login password|sign in/i.test(lc)) return true;
+    if (typeof window.__mcIsLoggedIn === "boolean") return window.__mcIsLoggedIn;
+    if (document.body && document.body.classList.contains("mc-member-logged-in")) return true;
     return false;
   }
   function mcReadCartTarget(){
@@ -10339,35 +10271,15 @@ function mcMountMemberCaptionStandalone() {
       html =
         '<div class="mc-member-price-caption__headline">Member price:</div>' +
         '<div class="mc-member-price-caption__sub">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see member pricing' +
+        '<a href="' + getMemberLoginUrl() + '" class="mc-member-price-caption__cta" data-mc-open-login>Log in</a> to see member pricing' +
         '</div>' +
         '<div class="mc-member-price-caption__actions">' +
-        '<a href="#" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
+        '<a href="' + getMemberCreateAccountUrl() + '" class="mc-member-price-caption__cta" data-mc-open-signup>Sign up</a>' +
         '</div>';
       el.innerHTML = html;
       el.setAttribute('data-mc-member-state', 'locked');
       uiState = 'locked';
     }
-    try {
-      var loginBtn = el.querySelector('[data-mc-open-login]');
-      if (loginBtn) {
-        loginBtn.onclick = function(ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          if (typeof window.mcOpenLoginModal === 'function') window.mcOpenLoginModal();
-          return false;
-        };
-      }
-      var signupBtn = el.querySelector('[data-mc-open-signup]');
-      if (signupBtn) {
-        signupBtn.onclick = function(ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          if (typeof window.mcOpenSignupModal === 'function') window.mcOpenSignupModal();
-          return false;
-        };
-      }
-    } catch (eBindCap) {}
     var visible = mcIsVisible(el);
     if (!visible) {
       try {
@@ -10397,37 +10309,25 @@ window.mcMountMemberCaptionStandalone = mcMountMemberCaptionStandalone;
 function mcKickMemberCaptionStandalone() {
   return mcMountMemberCaptionStandalone();
 }
-function mcStartDetectMemberPricing() {
-  if (typeof window.detectMemberPricingState !== 'function') return;
+function mcStartResolveVolusionSession() {
+  if (typeof window.mcResolveVolusionSession !== 'function') return;
   try {
-    window.detectMemberPricingState();
+    window.mcResolveVolusionSession();
   } catch (e2) {}
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', function () {
     mcKickMemberCaptionStandalone();
-    mcStartDetectMemberPricing();
+    mcStartResolveVolusionSession();
   });
 } else {
   mcKickMemberCaptionStandalone();
-  mcStartDetectMemberPricing();
+  mcStartResolveVolusionSession();
 }
 window.addEventListener('load', function () {
   mcKickMemberCaptionStandalone();
-  mcStartDetectMemberPricing();
+  mcStartResolveVolusionSession();
 });
-var mcCaptionTicks = 0;
-var mcCaptionIv = setInterval(function () {
-  var r = mcKickMemberCaptionStandalone();
-  var elNow = document.getElementById('mc-member-price-caption-root');
-  var hasText = !!(elNow && (elNow.textContent || '').replace(/\s/g, '').length);
-  var isVisibleNow = !!(elNow && mcIsVisible(elNow));
-  if (r && r.ok && elNow && hasText && isVisibleNow) {
-    clearInterval(mcCaptionIv);
-    return;
-  }
-  if (++mcCaptionTicks > 25) clearInterval(mcCaptionIv);
-}, 400);
 document.addEventListener('mcMemberPricingReady', mcKickMemberCaptionStandalone);
 if (document.body) {
   try {
@@ -10740,11 +10640,8 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       m.style.removeProperty('z-index');
       document.body.style.overflow = '';
     } catch (e2) {}
-    if (typeof window.detectMemberPricingState === 'function') {
-      try {
-        window.__mcMemberPricing.promise = null;
-      } catch (e3) {}
-      window.detectMemberPricingState().then(function () {
+    if (typeof window.mcResolveVolusionSession === 'function') {
+      window.mcResolveVolusionSession().then(function () {
         try {
           if (typeof window.forceProductFixes === 'function') window.forceProductFixes();
         } catch (e4) {}
@@ -10766,13 +10663,13 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     if (t && t.closest && t.closest('[data-mc-open-login]')) {
       ev.preventDefault();
       ev.stopPropagation();
-      mcOpenLoginModal();
+      window.location.href = getMemberLoginUrl();
       return;
     }
     if (t && t.closest && t.closest('[data-mc-open-signup]')) {
       ev.preventDefault();
       ev.stopPropagation();
-      mcOpenSignupModal();
+      window.location.href = getMemberCreateAccountUrl();
       return;
     }
     if (t && t.closest && t.closest('[data-mc-close-login]')) {
@@ -11869,7 +11766,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     var hint = document.createElement('div');
     hint.className = 'mc-member-grid-price__hint';
     var loginA = document.createElement('a');
-    loginA.href = '#';
+    loginA.href = getMemberLoginUrl();
     loginA.className = 'mc-member-grid-price__login';
     loginA.setAttribute('data-mc-open-login', '');
     loginA.textContent = 'Log in';
@@ -12578,7 +12475,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
         var hint = document.createElement('div');
         hint.className = 'mc-member-grid-price__hint';
         var loginA = document.createElement('a');
-        loginA.href = '#';
+        loginA.href = getMemberLoginUrl();
         loginA.className = 'mc-member-grid-price__login';
         loginA.setAttribute('data-mc-open-login', '');
         loginA.textContent = 'Log in';
@@ -12684,9 +12581,9 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
 
     var run = function () {
       try {
-        if (typeof window.detectMemberPricingState === 'function') {
+        if (typeof window.mcResolveVolusionSession === 'function') {
           window
-            .detectMemberPricingState()
+            .mcResolveVolusionSession()
             .then(function () {
               mcPaintCategoryGridMemberPricing();
             })
