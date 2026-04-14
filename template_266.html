@@ -7761,20 +7761,18 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       if (catVal === '103') return true;
       if (/^bb/i.test(pcVal)) return true;
       if (/-s\/103\.html?(?:\?|#|$)/i.test(p)) return true;
-      var contentRoot =
-        document.getElementById('content_area') ||
-        document.getElementById('v65-product-parent') ||
+      var productTitleNode =
+        document.querySelector('#v65-product-parent .productnamecolorLARGE') ||
+        document.querySelector('#v65-product-parent .productnamecolor') ||
+        document.querySelector('#v65-product-parent h1') ||
         null;
-      var bodyText = (contentRoot ? contentRoot.textContent : '').toLowerCase();
-      var titleText = (document.title || '').toLowerCase();
+      var productTitle = (productTitleNode && productTitleNode.textContent ? productTitleNode.textContent : '').toLowerCase();
 
       if (
         /\/bean-bag-seating-s\//.test(p) ||
         /product-p\/bb-/.test(p) ||
-        /bean bag/.test(bodyText) ||
-        /bean bag/.test(titleText) ||
-        /cordaroys/.test(bodyText) ||
-        /cordaroys/.test(titleText)
+        /bean bag/.test(productTitle) ||
+        /cordaroys/.test(productTitle)
       ) {
         return true;
       }
