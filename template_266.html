@@ -7926,6 +7926,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (!caption) {
       caption = document.createElement('div');
     }
+    caption.id = 'mc-member-price-caption-root';
+    caption.className = 'mc-member-price-caption';
     var insertAfter = anchorEl;
     try {
       if (insertAfter && insertAfter.parentNode) {
@@ -10407,36 +10409,49 @@ function mcIsTheaterSeatingPdp() {
 }
 function mcMountMemberCaptionStandalone() {
   try {
-    if (!document.querySelector('#v65-product-parent')) {
-      return mcCaptionReturn({ ok: false, reason: 'no #v65-product-parent yet' });
+    var productRoot =
+      document.querySelector('#v65-product-parent') ||
+      document.querySelector('#content_area table.v65-productDisplay') ||
+      document.querySelector('#content_area .colors_pricebox') ||
+      document.getElementById('content_area') ||
+      null;
+    if (!productRoot) {
+      return mcCaptionReturn({ ok: false, reason: 'no product root yet' });
     }
+    var host = mcPickVisible([
+      '#v65-product-parent .colors_pricebox',
+      '#v65-product-parent .v65-product-price',
+      '#v65-product-parent .product_productprice',
+      '#content_area .colors_pricebox',
+      '#content_area table.v65-productDisplay',
+      '#v65-product-parent'
+    ]);
+    if (!host) host = productRoot;
+    if (!host) {
+      return mcCaptionReturn({ ok: false, reason: 'no host container' });
+    }
+    var el = document.getElementById('mc-member-price-caption-root');
     var oldCaps = document.querySelectorAll('.mc-member-price-caption');
     var ci;
     for (ci = 0; ci < oldCaps.length; ci++) {
+      if (el && oldCaps[ci] === el) continue;
       if (oldCaps[ci].id !== 'mc-member-price-caption-root') {
         try {
           oldCaps[ci].parentNode && oldCaps[ci].parentNode.removeChild(oldCaps[ci]);
         } catch (rm) {}
       }
     }
-    var host = mcPickVisible([
-      '#v65-product-parent .colors_pricebox',
-      '#v65-product-parent .v65-product-price',
-      '#v65-product-parent .product_productprice',
-      '#v65-product-parent'
-    ]);
-    if (!host) host = document.querySelector('#v65-product-parent');
-    if (!host) {
-      return mcCaptionReturn({ ok: false, reason: 'no host container' });
-    }
-    var el = document.getElementById('mc-member-price-caption-root');
     var addBtn = mcPickVisible([
       '#v65-product-parent input[name="btnaddtocart"]',
       '#v65-product-parent input[id*="btnaddtocart"]',
       '#v65-product-parent button[name="btnaddtocart"]',
       '#v65-product-parent button[id*="btnaddtocart"]',
       '#v65-product-parent [itemprop="offers"] input[type="submit"]',
-      '#v65-product-parent [itemprop="offers"] button'
+      '#v65-product-parent [itemprop="offers"] button',
+      'input[name="btnaddtocart"]',
+      'input[id*="btnaddtocart"]',
+      'button[name="btnaddtocart"]',
+      'button[id*="btnaddtocart"]'
     ]);
     var addMount =
       (addBtn &&
