@@ -11494,6 +11494,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
               if (retailLine && retailLine.parentNode !== mount) mount.insertBefore(retailLine, mount.firstChild || null);
               if (b.parentNode !== mount) mount.appendChild(b);
             }
+            mcKeepSingleMemberBlock(c);
             mcReorderSaleAfterMember(c);
           }
         } catch (eRs) {}
@@ -11593,6 +11594,20 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
           if (roots[ri] && roots[ri].parentNode) roots[ri].parentNode.removeChild(roots[ri]);
         } catch (eDed) {}
       }
+    }
+  }
+
+  function mcKeepSingleMemberBlock(card) {
+    if (!card || !card.querySelectorAll) return;
+    var all = Array.prototype.slice.call(card.querySelectorAll('.mc-member-grid-price'));
+    if (all.length <= 1) return;
+    var keep = card.querySelector('.mc-price-stack .mc-member-grid-price') || all[0];
+    var i;
+    for (i = 0; i < all.length; i++) {
+      if (all[i] === keep) continue;
+      try {
+        if (all[i] && all[i].parentNode) all[i].parentNode.removeChild(all[i]);
+      } catch (eKeepOne) {}
     }
   }
 
@@ -12339,7 +12354,10 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
           } else {
             var amtChk = existingBlock.querySelector('.mc-member-grid-price__amount');
             var amtOk = amtChk && (amtChk.textContent || '').replace(/\s/g, '').length > 1;
-            if (amtOk) continue;
+            if (amtOk) {
+              mcKeepSingleMemberBlock(card);
+              continue;
+            }
             try {
               if (existingBlock.parentNode) existingBlock.parentNode.removeChild(existingBlock);
             } catch (eRm2) {}
@@ -12470,6 +12488,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
                 if (retailMap && retailMap.parentNode !== mountMap) mountMap.insertBefore(retailMap, mountMap.firstChild || null);
                 if (mapMember.parentNode !== mountMap) mountMap.appendChild(mapMember);
               }
+              mcKeepSingleMemberBlock(card);
               mcReorderSaleAfterMember(card);
             }
           } catch (eMapL) {}
@@ -12578,6 +12597,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
                 mountSwap.insertBefore(retailSwap, mountSwap.firstChild || null);
               }
             }
+            mcKeepSingleMemberBlock(card);
             mcReorderSaleAfterMember(card);
           }
         } catch (ePost1) {}
@@ -12627,6 +12647,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
             if (retail && retail.parentNode !== mount) mount.insertBefore(retail, mount.firstChild || null);
             if (block.parentNode !== mount) mount.appendChild(block);
           }
+          mcKeepSingleMemberBlock(card);
           mcReorderSaleAfterMember(card);
         }
       } catch (ePost2) {}
