@@ -10673,6 +10673,20 @@ function mcMountMemberCaptionStandalone() {
       }
     } catch (eBindCap) {}
     var visible = mcIsVisible(el);
+    if (!visible) {
+      try {
+        var safeRoot =
+          document.querySelector('#v65-product-parent .colors_pricebox') ||
+          document.querySelector('#v65-product-parent') ||
+          document.querySelector('#content_area .colors_pricebox') ||
+          document.querySelector('#content_area table.v65-productDisplay') ||
+          document.getElementById('content_area');
+        if (safeRoot) {
+          safeRoot.appendChild(el);
+          visible = mcIsVisible(el);
+        }
+      } catch (eVisFix) {}
+    }
     var portal = document.getElementById('mc-member-caption-portal-fixed');
     if (portal && portal.parentNode) portal.parentNode.removeChild(portal);
     return mcCaptionReturn({ ok: true, reason: 'mounted', ui: uiState, unlocked: !!st.unlocked, seat: seat, visible: visible, parentTag: (el.parentElement && el.parentElement.tagName) || '' });
@@ -10709,7 +10723,10 @@ window.addEventListener('load', function () {
 var mcCaptionTicks = 0;
 var mcCaptionIv = setInterval(function () {
   var r = mcKickMemberCaptionStandalone();
-  if (r && r.ok && document.getElementById('mc-member-price-caption-root')) {
+  var elNow = document.getElementById('mc-member-price-caption-root');
+  var hasText = !!(elNow && (elNow.textContent || '').replace(/\s/g, '').length);
+  var isVisibleNow = !!(elNow && mcIsVisible(elNow));
+  if (r && r.ok && elNow && hasText && isVisibleNow) {
     clearInterval(mcCaptionIv);
     return;
   }
