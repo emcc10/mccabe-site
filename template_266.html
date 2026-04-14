@@ -43,9 +43,15 @@
       var q = (window.location.search || '').toLowerCase();
       var h = document.documentElement;
       var b = document.body;
+      var isCategoryPath = /-s\/\d+\.html?/i.test(p) || /(?:\?|&)categoryid=\d+/i.test(q);
       var isPdpPath = /\/product-p\//i.test(p);
       var hasPdpRoot = !!document.getElementById('v65-product-parent');
-      if (isPdpPath || hasPdpRoot || (b && b.classList && b.classList.contains('productdetails'))) {
+      if (b && b.classList && isCategoryPath) {
+        b.classList.remove('productdetails');
+        b.classList.remove('mc-product-page');
+        b.classList.remove('mc-bean-bag-pdp');
+      }
+      if (isPdpPath || hasPdpRoot || (b && b.classList && b.classList.contains('productdetails') && !isCategoryPath)) {
         h.classList.remove('category');
         h.classList.remove('mc-member-plp-price-pending');
         if (b && b.classList) b.classList.remove('category');
@@ -128,10 +134,18 @@
 (function () {
   function mcLooksCategoryPage() {
     var p = (location.pathname || '').toLowerCase();
+    var q = (window.location.search || '').toLowerCase();
     var b = document.body;
+    var isCategoryPath = /-s\/\d+\.html?/i.test(p) || /(?:\?|&)categoryid=\d+/i.test(q);
+    if (isCategoryPath && b && b.classList) {
+      b.classList.remove('productdetails');
+      b.classList.remove('mc-product-page');
+      b.classList.remove('mc-bean-bag-pdp');
+    }
+    if (isCategoryPath) return true;
     if (/\/product-p\//i.test(p)) return false;
     if (document.getElementById('v65-product-parent')) return false;
-    if (b && b.classList.contains('productdetails')) return false;
+    if (b && b.classList.contains('productdetails') && !isCategoryPath) return false;
     if (b && b.classList.contains('mc-product-page') && /-s\//.test(p)) {
       b.classList.remove('mc-product-page');
     }
@@ -140,9 +154,13 @@
 
   function mcIsVisibleNode(el) {
     if (!el || el.nodeType !== 1) return false;
-    var st = window.getComputedStyle ? window.getComputedStyle(el) : null;
-    if (!st) return true;
-    if (st.display === 'none' || st.visibility === 'hidden' || Number(st.opacity || '1') === 0) return false;
+    var cur = el;
+    while (cur && cur.nodeType === 1) {
+      var st = window.getComputedStyle ? window.getComputedStyle(cur) : null;
+      if (st && (st.display === 'none' || st.visibility === 'hidden' || Number(st.opacity || '1') === 0)) return false;
+      cur = cur.parentElement;
+    }
+    if (el.getClientRects && el.getClientRects().length === 0) return false;
     return true;
   }
 
@@ -6470,7 +6488,14 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     var b = document.body;
     if (!b) return;
     var p = (location.pathname || '').toLowerCase();
-    if (/\/product-p\//i.test(p) || document.getElementById('v65-product-parent')) return;
+    var q = (window.location.search || '').toLowerCase();
+    var isCategoryPath = /-s\/\d+\.html?/i.test(p) || /(?:\?|&)categoryid=\d+/i.test(q);
+    if (isCategoryPath && b.classList) {
+      b.classList.remove('productdetails');
+      b.classList.remove('mc-product-page');
+      b.classList.remove('mc-bean-bag-pdp');
+    }
+    if (/\/product-p\//i.test(p) || document.getElementById('v65-product-parent') || (b.classList.contains('productdetails') && !isCategoryPath)) return;
     if (b.classList.contains('mc-product-page') && /-s\//.test(p)) {
       b.classList.remove('mc-product-page');
     }
