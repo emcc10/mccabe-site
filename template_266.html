@@ -2760,6 +2760,19 @@ function mcSetStableHtml(el, html) {
   el.setAttribute('data-mc-last-html', html);
   return true;
 }
+function mcCardPriceHtml(retailText, memberText, loginUrl, isLoggedIn) {
+  if (isLoggedIn && memberText) {
+    return (
+      '<div class="mc-retail-price">Retail: ' + retailText + '</div>' +
+      '<div class="mc-member-grid-price">Member: ' + memberText + '</div>'
+    );
+  }
+  return (
+    '<div class="mc-retail-price">Retail: ' + retailText + '</div>' +
+    '<div class="mc-member-grid-price mc-member-grid-price--locked">Member: <a href="' + loginUrl + '" class="mc-member-grid-price__login">Log in to see price</a></div>'
+  );
+}
+window.mcCardPriceHtml = mcCardPriceHtml;
 function getMemberCreateAccountUrl(){
   var returnTo = encodeURIComponent((window.location.pathname || "/") + (window.location.search || ""));
   return "/AccountSettings.asp?AddNewCustomer=Y&ReturnTo=" + returnTo;
@@ -8282,12 +8295,35 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         appendTitleContents(title, columnCells);
         if (cellText(title)) card.appendChild(title);
 
-        var price = document.createElement('div');
-        price.style.setProperty('display', 'block', 'important');
-        price.style.setProperty('width', '100%', 'important');
-        price.style.setProperty('text-align', 'center', 'important');
-        appendCellContents(price, priceCell, 'price');
-        if (cellText(price)) card.appendChild(price);
+        var relatedRetailText = '';
+        var relatedMemberText = '';
+        if (priceCell) {
+          var pcText = cellText(priceCell);
+          var dollars = pcText.match(/\$[\d,]+(?:\.\d{2})?/g);
+          if (dollars && dollars.length >= 2) {
+            relatedRetailText = dollars[0];
+            relatedMemberText = dollars[1];
+          } else if (dollars && dollars.length === 1) {
+            relatedRetailText = dollars[0];
+          }
+        }
+        var isLoggedIn = !!(document.body && document.body.classList.contains('mc-member-logged-in'));
+        var isBeanBagPdp = !!(document.body && document.body.classList.contains('mc-bean-bag-pdp'));
+        if (relatedRetailText && !isBeanBagPdp) {
+          var priceMount = document.createElement('div');
+          priceMount.className = 'mc-price-stack';
+          var loginUrl = (typeof getMemberLoginUrl === 'function') ? getMemberLoginUrl() : '/login.asp';
+          var priceHtml = mcCardPriceHtml(relatedRetailText, isLoggedIn ? (relatedMemberText || relatedRetailText) : null, loginUrl, isLoggedIn);
+          priceMount.innerHTML = priceHtml;
+          card.appendChild(priceMount);
+        } else {
+          var price = document.createElement('div');
+          price.style.setProperty('display', 'block', 'important');
+          price.style.setProperty('width', '100%', 'important');
+          price.style.setProperty('text-align', 'center', 'important');
+          appendCellContents(price, priceCell, 'price');
+          if (cellText(price)) card.appendChild(price);
+        }
 
         grid.appendChild(card);
         cardsBuilt++;
@@ -9954,20 +9990,21 @@ function mcIsTheaterSeatingPdp() {
   return false;
 }
 function mcRenderPdpRetailAndMember(retailText, memberText) {
-  var host =
+  var nativeBlock =
     document.querySelector('#priceWithOptions') ||
     document.querySelector('#priceWithOptionsNoTax') ||
     document.querySelector('#v65-product-parent .product_price') ||
-    document.querySelector('#v65-product-parent .price') ||
-    document.querySelector('#v65-product-parent');
+    document.querySelector('#v65-product-parent .price');
 
-  if (!host || !host.parentNode) return false;
+  if (!nativeBlock || !nativeBlock.parentNode) return false;
 
   var wrap = document.querySelector('.mc-pdp-member-pricing');
   if (!wrap) {
     wrap = document.createElement('div');
     wrap.className = 'mc-pdp-member-pricing';
-    host.parentNode.insertBefore(wrap, host.nextSibling);
+    nativeBlock.parentNode.insertBefore(wrap, nativeBlock);
+  } else if (wrap.nextSibling !== nativeBlock) {
+    nativeBlock.parentNode.insertBefore(wrap, nativeBlock);
   }
 
   var html =
@@ -9975,7 +10012,19 @@ function mcRenderPdpRetailAndMember(retailText, memberText) {
     '<div class="mc-pdp-member-line">Member: ' + memberText + '</div>';
 
   mcSetStableHtml(wrap, html);
+  mcHideDuplicatePdpMemberFragments();
   return true;
+}
+function mcHideDuplicatePdpMemberFragments() {
+  var root = document.querySelector('#v65-product-parent') || document;
+  var nodes = root.querySelectorAll(
+    '.mc-member-price:not(.mc-pdp-member-line), .member-price, .members-price, .mc-member-price-row, .mc-member-price-wrap'
+  );
+  var i;
+  for (i = 0; i < nodes.length; i++) {
+    if (nodes[i].closest && nodes[i].closest('.mc-pdp-member-pricing')) continue;
+    nodes[i].style.setProperty('display', 'none', 'important');
+  }
 }
 function mcMountMemberCaptionStandalone() {
   try {
@@ -10195,7 +10244,7 @@ function mcMountMemberCaptionStandalone() {
       'display:block !important;visibility:visible !important;opacity:1 !important;' +
       'width:100% !important;max-width:340px !important;clear:both !important;float:none !important;' +
       'margin-top:16px !important;margin-bottom:16px !important;min-height:1em !important;' +
-      'font-size:16px !important;color:#454545 !important;line-height:1.4 !important;' +
+      'font-family:Inter,system-ui,-apple-system,sans-serif !important;font-size:13px !important;color:#5b5b5b !important;line-height:1.45 !important;font-weight:400 !important;letter-spacing:0.06em !important;' +
       'pointer-events:auto !important;position:relative !important;z-index:12 !important;overflow:visible !important;';
     if (st.unlocked && window.__mcPlannerConfigApplied && window.__mcPlannerCounts && seat > 0 && typeof calculatePlannerPrice === 'function') {
       var mpTotal = Number(st.memberPlannerTotal) || 0;
@@ -10372,7 +10421,7 @@ body .mc-member-price-caption__price-value {
   line-height:1.2 !important;
   margin-top:4px !important;
 }
-/* Do not show Volusion sale rows when member price is present. */
+/* Hide Volusion sale rows when member price is present */
 body #content_area .v-product:has(.mc-member-grid-price) .product_sale_price,
 body #content_area .v-product:has(.mc-member-grid-price) font.product_sale_price,
 body #content_area .v-product:has(.mc-member-grid-price) .product_saleprice,
@@ -10381,22 +10430,24 @@ body #content_area td:has(.mc-member-grid-price) font.product_sale_price,
 body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   display:none !important;
 }
-/* Category grid: image then title then price; constrain images (template fallback) */
+/* Category grid: image then title then price; constrain images */
 :is(html.category, body.category) .v-product-grid .v-product{display:flex;flex-direction:column;align-items:stretch;box-sizing:border-box;min-width:100%!important}
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,:is(html.category, body.category) .v-product-grid .v-product .product_image,:is(html.category, body.category) .v-product-grid .v-product .vcss_img{order:1;flex:0 0 auto;width:100%;height:280px;min-height:280px;max-height:280px;overflow:hidden;text-align:center;margin:0!important;padding:0!important;display:block!important;position:relative}
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img a,:is(html.category, body.category) .v-product-grid .v-product .v-product__image a,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap a,:is(html.category, body.category) .v-product-grid .v-product .product_image a,:is(html.category, body.category) .v-product-grid .v-product .vcss_img a{display:block!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important}
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,:is(html.category, body.category) .v-product-grid .v-product .product_image img,:is(html.category, body.category) .v-product-grid .v-product .vcss_img img{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover;object-position:center center;display:block!important;margin:0!important}
-:is(html.category, body.category) .v-product-grid .v-product .v-product__name,:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,:is(html.category, body.category) .v-product-grid .v-product h2,:is(html.category, body.category) .v-product-grid .v-product h3,:is(html.category, body.category) .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;align-items:flex-start;justify-content:flex-start;text-align:left;min-height:0!important;box-sizing:border-box;width:100%;margin-top:4px!important}
-:is(html.category, body.category) .v-product-grid .v-product .productnamecolor a,:is(html.category, body.category) .v-product-grid .v-product .v-product__name a{width:100%;text-align:left!important}
-:is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price{order:4;min-height:0!important;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;width:100%;text-align:left!important}
-:is(html.category, body.category) .v-product-grid .v-product .v-product__price,:is(html.category, body.category) .v-product-grid .v-product .product_price{order:5;min-height:0!important;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;width:100%;text-align:left!important}
+:is(html.category, body.category) .v-product-grid .v-product .v-product__name,:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,:is(html.category, body.category) .v-product-grid .v-product h2,:is(html.category, body.category) .v-product-grid .v-product h3,:is(html.category, body.category) .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;align-items:flex-start;justify-content:flex-start;text-align:center;min-height:0!important;box-sizing:border-box;width:100%;margin-top:4px!important;justify-content:center!important}
+:is(html.category, body.category) .v-product-grid .v-product .productnamecolor a,:is(html.category, body.category) .v-product-grid .v-product .v-product__name a{width:100%;text-align:center!important}
+:is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price{order:4;min-height:0!important;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;width:100%;text-align:center!important}
+:is(html.category, body.category) .v-product-grid .v-product .v-product__price,:is(html.category, body.category) .v-product-grid .v-product .product_price{order:5;min-height:0!important;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;width:100%;text-align:center!important}
 :is(html.category, body.category) #content_area .mc-plp-bean-subline{order:3;width:100%;box-sizing:border-box;margin:2px 0 0;font-size:12px;letter-spacing:.06em;color:#555;text-align:center;line-height:1.35;align-self:center}
 :is(html.category, body.category) .sidebar-wrapper .sidebar,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"]{text-align:left!important}
 :is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] ul,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] li{text-align:left!important}
 :is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] a,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] .vnav__link,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] .vnav__label,:is(html.category, body.category) .sidebar-wrapper .menu a{font-weight:400!important;letter-spacing:.08em!important;text-transform:uppercase!important;font-size:11px!important;color:#1a1a1a!important}
 :is(html.category, body.category) #content_area .vnav--level2,:is(html.category, body.category) #content_area .vnav--level3,:is(html.category, body.category) #content_area .vnav--level2>li,:is(html.category, body.category) #content_area .vnav--level3>li{text-align:left!important}
 :is(html.category, body.category) #content_area .vnav--level2 a,:is(html.category, body.category) #content_area .vnav--level3 a{font-weight:400!important;letter-spacing:.06em!important;text-transform:uppercase!important;font-size:11px!important}
-@media (max-width:991px){:is(html.category, body.category) .v-product-grid .v-product .v-product__img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,:is(html.category, body.category) .v-product-grid .v-product .product_image,:is(html.category, body.category) .v-product-grid .v-product .vcss_img,:is(html.category, body.category) ul.v-product-grid>li.v-product .v-product__img{height:220px!important;min-height:220px!important;max-height:220px!important;overflow:hidden!important;margin:0!important;padding:0!important}:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,:is(html.category, body.category) .v-product-grid .v-product .product_image img,:is(html.category, body.category) .v-product-grid .v-product .vcss_img img,:is(html.category, body.category) ul.v-product-grid>li.v-product .v-product__img img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important}:is(html.category, body.category) .v-product-grid .v-product .v-product__name,:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,:is(html.category, body.category) .v-product-grid .v-product h2,:is(html.category, body.category) .v-product-grid .v-product h3,:is(html.category, body.category) .v-product-grid .v-product h4{min-height:0!important;align-items:flex-start!important;justify-content:flex-start!important;text-align:left!important;margin-top:3px!important;margin-bottom:0!important;padding-top:0!important}:is(html.category, body.category) .v-product-grid .v-product{gap:0!important;row-gap:0!important}}
+@media (max-width:991px){:is(html.category, body.category) .v-product-grid .v-product .v-product__img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,:is(html.category, body.category) .v-product-grid .v-product .product_image,:is(html.category, body.category) .v-product-grid .v-product .vcss_img,:is(html.category, body.category) ul.v-product-grid>li.v-product .v-product__img{height:220px!important;min-height:220px!important;max-height:220px!important;overflow:hidden!important;margin:0!important;padding:0!important}:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,:is(html.category, body.category) .v-product-grid .v-product .product_image img,:is(html.category, body.category) .v-product-grid .v-product .vcss_img img,:is(html.category, body.category) ul.v-product-grid>li.v-product .v-product__img img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important}:is(html.category, body.category) .v-product-grid .v-product .v-product__name,:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,:is(html.category, body.category) .v-product-grid .v-product h2,:is(html.category, body.category) .v-product-grid .v-product h3,:is(html.category, body.category) .v-product-grid .v-product h4{min-height:0!important;align-items:center!important;justify-content:center!important;text-align:center!important;margin-top:3px!important;margin-bottom:0!important;padding-top:0!important}:is(html.category, body.category) .v-product-grid .v-product{gap:0!important;row-gap:0!important}}
+
+/* ===== PRICE STACK + RH-STYLE TYPOGRAPHY ===== */
 .mc-price-stack,
 .mc-retail-price,
 .mc-member-grid-price,
@@ -10405,83 +10456,120 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
 .mc-pdp-member-line {
   display: block !important;
   width: 100% !important;
+  font-family: Inter, system-ui, -apple-system, sans-serif !important;
 }
-
-.mc-price-stack {
-  margin-top: 8px !important;
-}
-
-.mc-retail-price,
-.mc-pdp-retail-line {
-  font: 400 13px/1.45 Inter, system-ui, sans-serif !important;
-  color: #444 !important;
-  margin: 0 0 2px 0 !important;
-}
-
-.mc-member-grid-price,
-.mc-pdp-member-line {
-  font: 600 13px/1.45 Inter, system-ui, sans-serif !important;
-  color: #111 !important;
-  margin: 0 !important;
-}
-
-.v-product__name,
-.productnamecolor,
-.v-product h2,
-.v-product h3 {
-  display: block !important;
-}
-
 .mc-price-stack,
-.mc-retail-price,
-.mc-member-grid-price,
-.mc-pdp-member-pricing,
-.mc-pdp-retail-line,
-.mc-pdp-member-line {
-  display: block !important;
-  width: 100% !important;
-}
-
-.mc-price-stack {
-  margin-top: 8px !important;
-  min-height: 38px !important;
-}
-
-.mc-retail-price,
-.mc-pdp-retail-line {
-  font: 400 13px/1.45 Inter, system-ui, sans-serif !important;
-  color: #444 !important;
-  margin: 0 0 2px 0 !important;
-}
-
-.mc-member-grid-price,
-.mc-pdp-member-line {
-  font: 600 13px/1.45 Inter, system-ui, sans-serif !important;
-  color: #111 !important;
-  margin: 0 !important;
-}
-
 .mc-pdp-member-pricing {
   margin-top: 8px !important;
   min-height: 38px !important;
 }
+.mc-retail-price,
+.mc-pdp-retail-line {
+  color: #5b5b5b !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: none !important;
+  margin: 0 0 3px 0 !important;
+}
+.mc-member-grid-price,
+.mc-pdp-member-line {
+  color: #2f2f2f !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: none !important;
+  margin: 0 !important;
+}
 
-/* PDP pricing stack + quantity sizing + RH-style typography */
+/* ===== TITLE TYPOGRAPHY (RH-style) ===== */
+#content_area .v-product__name,
+#content_area .productnamecolor,
+#content_area .v-product h2,
+#content_area .v-product h3,
+#divRelatedProducts .v-product__name,
+#divRelatedProducts .productnamecolor,
+.related-products .v-product__name,
+.related-products .productnamecolor {
+  color: #3f3f3f !important;
+  font-family: Inter, system-ui, -apple-system, sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  display: block !important;
+}
+
+/* ===== IMAGE CENTERING (category + related) ===== */
+#content_area .v-product-grid > .v-product,
+#content_area ul.v-product-grid > li.v-product,
+#divRelatedProducts .v-product,
+#divRelatedProducts li,
+.related-products .v-product,
+.related-products li {
+  text-align: center !important;
+}
+#content_area .v-product__img,
+#content_area .v-product__image,
+#content_area .product_image,
+#content_area .vcss_img,
+#divRelatedProducts .v-product__img,
+#divRelatedProducts .v-product__image,
+#divRelatedProducts .product_image,
+.related-products .v-product__img,
+.related-products .v-product__image,
+.related-products .product_image {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 0 auto 14px auto !important;
+  float: none !important;
+  text-align: center !important;
+}
+#content_area .v-product__img img,
+#content_area .v-product__image img,
+#content_area .product_image img,
+#divRelatedProducts .v-product__img img,
+#divRelatedProducts .v-product__image img,
+#divRelatedProducts .product_image img,
+.related-products .v-product__img img,
+.related-products .v-product__image img,
+.related-products .product_image img {
+  display: block !important;
+  margin: 0 auto !important;
+  float: none !important;
+}
+
+/* ===== MENU STABILITY ===== */
+@media (min-width: 992px) {
+  header.header .mc-header-desktop-bar[data-mc-header-bar] {
+    min-height: 56px !important;
+    align-items: center !important;
+  }
+  header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+  header.header .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
+    align-self: center !important;
+  }
+}
+
+/* ===== PDP typography + quantity sizing ===== */
 .mc-pdp-member-pricing,
 .mc-pdp-member-pricing .mc-pdp-retail-line,
 .mc-pdp-member-pricing .mc-pdp-member-line,
 body.productdetails #content_area #relateditems,
-body.productdetails #content_area #relateditems * ,
+body.productdetails #content_area #relateditems *,
 body.mc-product-page #content_area #relateditems,
 body.mc-product-page #content_area #relateditems *,
 body.productdetails #content_area table.relateditems,
 body.productdetails #content_area table.relateditems *,
 body.mc-product-page #content_area table.relateditems,
 body.mc-product-page #content_area table.relateditems * {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-  letter-spacing: 0.04em !important;
+  font-family: Inter, system-ui, -apple-system, sans-serif !important;
+  letter-spacing: 0.06em !important;
 }
-
 body.productdetails #v65-product-parent input[name*="qty" i],
 body.productdetails #v65-product-parent input[name*="quantity" i],
 body.productdetails #v65-product-parent select[name*="qty" i],
@@ -10495,6 +10583,16 @@ body.mc-product-page #v65-product-parent select[name*="quantity" i] {
   height: 30px !important;
   padding: 2px 6px !important;
   font-size: 12px !important;
+}
+
+/* ===== RELATED ITEMS GRID (force-built) ===== */
+#mc-related-force-grid .mc-price-stack {
+  text-align: center !important;
+  margin: 6px auto 0 auto !important;
+}
+#mc-related-force-grid .mc-retail-price,
+#mc-related-force-grid .mc-member-grid-price {
+  text-align: center !important;
 }
 </style>
 <div id="mc-login-modal" class="mc-login-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mc-login-modal-title">
@@ -11529,10 +11627,10 @@ body.mc-product-page #v65-product-parent select[name*="quantity" i] {
       if (mcCacheKeyForCategoryHref(h) !== key) continue;
       try {
         if (mcIsPdpCardOrRelated(c)) continue;
+        if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) continue;
         var retailTxt = mcExtractRegularPriceFromCard(c) || mcExtractVolusionSalePriceFromCard(c) || '';
         if (!retailTxt) continue;
-        if (unlocked || txt !== retailTxt) mcRenderCardRetailAndMember(c, retailTxt, txt);
-        else mcRenderCardRetailAndLogin(c, retailTxt, loginUrl);
+        mcRenderUniformCardPricing(c, retailTxt, unlocked ? txt : null, loginUrl, unlocked);
       } catch (eRs) {}
     }
   }
@@ -11636,8 +11734,26 @@ body.mc-product-page #v65-product-parent select[name*="quantity" i] {
     }
   }
 
-  function mcHideNativeCategoryPriceNodes(card, mount) {
-    return;
+  function mcHideNativeCardPriceFragments(card) {
+    if (!card) return;
+    var nodes = card.querySelectorAll(
+      '.product_saleprice, .product_sale_price, font.product_sale_price, .product_price, .product_productprice, .v-product__price, .product_list_price, font.product_list_price, .pricecolor, .colors_productprice'
+    );
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      if (nodes[i].closest && nodes[i].closest('.mc-price-stack')) continue;
+      if (nodes[i].closest && nodes[i].closest('.mc-pdp-member-pricing')) continue;
+      nodes[i].style.setProperty('display', 'none', 'important');
+    }
+  }
+
+  function mcRenderUniformCardPricing(card, retailText, memberText, loginUrl, isLoggedIn) {
+    var mount = mcEnsureCardPriceMount(card);
+    if (!mount) return;
+    var html = mcCardPriceHtml(retailText, memberText, loginUrl, isLoggedIn);
+    mcSetStableHtml(mount, html);
+    mcHideNativeCardPriceFragments(card);
+    card.setAttribute('data-mc-priced', '1');
   }
 
   function mcCleanupCategoryMemberPriceStrays(scope) {
@@ -12212,31 +12328,11 @@ body.mc-product-page #v65-product-parent select[name*="quantity" i] {
   }
 
   function mcRenderCardRetailAndMember(card, retailText, memberText) {
-    var mount = mcEnsureCardPriceMount(card);
-    if (!mount) return;
-
-    var html =
-      '<div class="mc-retail-price">Retail: ' + retailText + '</div>' +
-      '<div class="mc-member-grid-price">Member: ' + memberText + '</div>';
-
-    if (mcSetStableHtml(mount, html)) {
-      mount.setAttribute('data-mc-priced', '1');
-    }
-    card.setAttribute('data-mc-priced', '1');
+    mcRenderUniformCardPricing(card, retailText, memberText, getMemberLoginUrl(), true);
   }
 
   function mcRenderCardRetailAndLogin(card, retailText, loginUrl) {
-    var mount = mcEnsureCardPriceMount(card);
-    if (!mount) return;
-
-    var html =
-      '<div class="mc-retail-price">Retail: ' + retailText + '</div>' +
-      '<div class="mc-member-grid-price mc-member-grid-price--locked">Member: <a href="' + loginUrl + '" class="mc-member-grid-price__login">Log in to see price</a></div>';
-
-    if (mcSetStableHtml(mount, html)) {
-      mount.setAttribute('data-mc-priced', '1');
-    }
-    card.setAttribute('data-mc-priced', '1');
+    mcRenderUniformCardPricing(card, retailText, null, loginUrl, false);
   }
 
   function mcPaintCategoryGridMemberPricing() {
@@ -12296,6 +12392,9 @@ body.mc-product-page #v65-product-parent select[name*="quantity" i] {
       try {
         mcHydrateCategoryHowToGetPrices();
       } catch (eHyd) {}
+      try {
+        mcCleanupCategoryMemberPriceStrays();
+      } catch (eClean) {}
     } catch (ePaint) {}
   }
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
