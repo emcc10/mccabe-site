@@ -10270,6 +10270,9 @@ function mcIsTheaterSeatingPdp() {
 }
 function mcMountMemberCaptionStandalone() {
   try {
+    if (document.querySelector('.mc-pdp-member-pricing, .mc-pdp-retail-member')) {
+      return mcCaptionReturn({ ok: true, reason: 'pdp pricing stack already rendered' });
+    }
     if (typeof window.mcPageType === 'function' && window.mcPageType() === 'pdp') {
       return mcCaptionReturn({ ok: true, reason: 'pdp retail/member via mcRenderRetailMemberOnPdp' });
     }
@@ -10278,9 +10281,6 @@ function mcMountMemberCaptionStandalone() {
       (document.body.classList.contains('productdetails') || document.body.classList.contains('mc-product-page'))
     ) {
       return mcCaptionReturn({ ok: true, reason: 'pdp retail/member via mcRenderRetailMemberOnPdp' });
-    }
-    if (document.querySelector('.mc-pdp-retail-member, .mc-pdp-member-pricing')) {
-      return mcCaptionReturn({ ok: true, reason: 'mc-pdp-retail-member already rendered' });
     }
     if (!document.querySelector('#v65-product-parent')) {
       return mcCaptionReturn({ ok: false, reason: 'no #v65-product-parent yet' });
@@ -10935,22 +10935,13 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
           if (typeof window.forceProductFixes === 'function') window.forceProductFixes();
         } catch (e4) {}
         try {
-          if (
-            typeof window.mcPageType === 'function' &&
-            window.mcPageType() === 'category' &&
-            typeof window.mcPaintCategoryGridMemberPricing === 'function'
-          ) {
+          if (typeof window.mcPaintCategoryGridMemberPricing === 'function') {
             window.mcPaintCategoryGridMemberPricing();
           }
         } catch (e5) {}
         try {
-          if (typeof window.mcPageType === 'function' && window.mcPageType() === 'pdp') {
-            if (typeof window.mcRenderRetailMemberOnPdp === 'function') {
-              window.mcRenderRetailMemberOnPdp();
-            }
-            if (typeof window.mcKickMemberCaptionStandalone === 'function') {
-              window.mcKickMemberCaptionStandalone();
-            }
+          if (typeof window.mcRenderRetailMemberOnPdp === 'function') {
+            window.mcRenderRetailMemberOnPdp();
           }
         } catch (e6) {}
       });
@@ -12217,7 +12208,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   function mcAppendGuestMemberLoginBlock(card, installTarget) {
     if (!card) return;
     if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) return;
-    var prev = card.querySelectorAll('.mc-member-grid-price');
+    var prev = card.querySelectorAll('.mc-member-grid-price[data-mc-guest-login]');
     var pi;
     for (pi = 0; pi < prev.length; pi++) {
       try {
@@ -12274,21 +12265,9 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
         'img, .v-product, .v-product__img, .v-product__name, .productnamecolor, a.productnamecolor, h2, h3'
       );
     }
-    /* Member-gated PLP + guest: hide list/MSRP/public dollars in the Volusion price mount; login/member caption is separate. */
-    var hidePublicMemberPlpGuest =
-      typeof mcMemberPricingGridListingEligible === 'function' &&
-      mcMemberPricingGridListingEligible() &&
-      document.body &&
-      !document.body.classList.contains('mc-member-logged-in');
     var tag = priceEl.tagName ? priceEl.tagName.toUpperCase() : '';
     if (tag === 'TD' || tag === 'TH') {
       if (isBroadCell(priceEl)) return;
-      if (hidePublicMemberPlpGuest) {
-        try {
-          priceEl.innerHTML = '';
-        } catch (eClrTd) {}
-        return;
-      }
       var saleNodes = priceEl.querySelectorAll(
         'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"], [class*="formatted_sale"], [class*="FormattedSale"]'
       );
@@ -12305,12 +12284,6 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       return;
     }
     if (!isSafePriceMount(priceEl)) return;
-    if (hidePublicMemberPlpGuest) {
-      try {
-        priceEl.innerHTML = '';
-      } catch (eClr) {}
-      return;
-    }
     var kept = mcGatherPriceLikeNodes(priceEl);
     var filtered = [];
     var ki;
@@ -12759,6 +12732,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   function mcHideDuplicatePdpMemberFragments() {
     var root = document.querySelector('#v65-product-parent');
     if (!root) return;
+    if (!document.querySelector('.mc-pdp-member-pricing, .mc-pdp-retail-member')) return;
     var nodes = root.querySelectorAll(
       '.mc-member-price, .member-price, .members-price, .mc-member-price-row, .mc-member-price-wrap, .mc-member-price-caption'
     );
@@ -12800,9 +12774,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       html += '<div class="mc-pdp-member-line">Member: ' + memberText + '</div>';
     } else {
       html +=
-        '<div class="mc-pdp-member-line mc-pdp-member-line--locked">Member: <a href="' +
-        loginUrl +
-        '" class="mc-member-grid-price__login">Log in to see price</a></div>';
+        '<div class="mc-pdp-member-line mc-pdp-member-line--locked">Member: <a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see member pricing</div>';
     }
 
     mcSetStableHtml(wrap, html);
@@ -12851,7 +12823,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     }
 
     var retailText = mcFmtMoney(retailAmt);
-    var memberText = mcFmtMoney(memberAmt);
+    var memberText = isLoggedIn ? mcFmtMoney(memberAmt) : '';
 
     if (!retailText) return;
 
