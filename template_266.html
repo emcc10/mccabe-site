@@ -10275,7 +10275,7 @@ function mcMountMemberCaptionStandalone() {
     ) {
       return mcCaptionReturn({ ok: true, reason: 'pdp retail/member via mcRenderRetailMemberOnPdp' });
     }
-    if (document.querySelector('.mc-pdp-retail-member')) {
+    if (document.querySelector('.mc-pdp-retail-member, .mc-pdp-member-pricing')) {
       return mcCaptionReturn({ ok: true, reason: 'mc-pdp-retail-member already rendered' });
     }
     if (!document.querySelector('#v65-product-parent')) {
@@ -10664,6 +10664,47 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
 }
 
 .mc-pdp-retail-member .mc-pdp-member-line {
+  color: #2f2f2f !important;
+  font-weight: 500 !important;
+}
+
+.mc-price-stack,
+.mc-retail-price,
+.mc-member-grid-price,
+.mc-pdp-member-pricing,
+.mc-pdp-retail-line,
+.mc-pdp-member-line {
+  display: block !important;
+  width: 100% !important;
+}
+
+.mc-member-grid-price__login,
+.mc-pdp-member-line--locked a {
+  text-decoration: underline !important;
+  color: inherit !important;
+}
+
+.mc-pdp-member-pricing {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 10px 0 !important;
+  font-family: Inter, system-ui, -apple-system, sans-serif !important;
+}
+
+.mc-pdp-member-pricing .mc-pdp-retail-line,
+.mc-pdp-member-pricing .mc-pdp-member-line {
+  display: block !important;
+  width: 100% !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: none !important;
+  color: #444 !important;
+  font-weight: 400 !important;
+  margin: 0 0 3px 0 !important;
+}
+
+.mc-pdp-member-pricing .mc-pdp-member-line {
   color: #2f2f2f !important;
   font-weight: 500 !important;
 }
@@ -11472,6 +11513,129 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   function mcFmtCategoryPrice(n) {
     if (typeof window.formatMcCurrency === 'function') return window.formatMcCurrency(n);
     return '$' + Number(n || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function mcFmtMoney(value) {
+    value = Number(value || 0);
+    if (!(value > 0)) return '';
+    return '$' + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function getMemberLoginUrl() {
+    return '/login.asp?ReturnTo=' + encodeURIComponent(location.pathname + location.search + location.hash);
+  }
+
+  function mcSetStableHtml(mount, html) {
+    if (!mount) return;
+    if (mount.getAttribute('data-mc-last-html') !== html) {
+      mount.innerHTML = html;
+      mount.setAttribute('data-mc-last-html', html);
+    }
+  }
+
+  function mcEnsureCardPriceMount(card) {
+    if (!card || !card.querySelector) return null;
+    var priceElPre = mcFindCardPricingMount(card);
+    var priceBox = priceElPre && priceElPre.closest && priceElPre.closest('.v-product__price');
+    var installTarget = priceBox || mcFindCardPriceContainerMount(card) || priceElPre;
+    if (!installTarget) {
+      installTarget =
+        card.querySelector('.v-product__price') ||
+        card.querySelector('.product_price') ||
+        card.querySelector('.v65-product-related-price') ||
+        card.querySelector('font.product_sale_price') ||
+        card.querySelector('.product_sale_price') ||
+        card.querySelector('.product_saleprice') ||
+        card.querySelector('font.price_color') ||
+        card.querySelector('.price_color') ||
+        card.querySelector('[class*="formattedprice"]') ||
+        card.querySelector('[itemprop="price"]');
+    }
+    if (!installTarget) return null;
+    var mount = installTarget.querySelector('.mc-price-stack');
+    if (!mount) {
+      mount = document.createElement('div');
+      mount.className = 'mc-price-stack';
+      try {
+        installTarget.insertBefore(mount, installTarget.firstChild);
+      } catch (eIns) {
+        try {
+          installTarget.appendChild(mount);
+        } catch (e2) {
+          return null;
+        }
+      }
+    }
+    return mount;
+  }
+
+  function mcHideNativeCardPriceFragments(card) {
+    if (!card || !card.querySelectorAll) return;
+    var mount = card.querySelector('.mc-price-stack');
+    if (!mount) return;
+    var inner = (mount.innerHTML || '').replace(/\s/g, '');
+    if (!inner) return;
+    var selectors = [
+      '.product_productprice',
+      '.product_saleprice',
+      'font.product_sale_price',
+      '.product_sale_price',
+      'font.product_list_price',
+      '.product_list_price',
+      '.price_color',
+      'font.colors_productprice',
+      'font.pricecolor'
+    ];
+    var si, nodes, j, n;
+    for (si = 0; si < selectors.length; si++) {
+      nodes = card.querySelectorAll(selectors[si]);
+      for (j = 0; j < nodes.length; j++) {
+        n = nodes[j];
+        if (!n || (n.closest && n.closest('.mc-price-stack'))) continue;
+        try {
+          n.style.setProperty('display', 'none', 'important');
+          n.style.setProperty('visibility', 'hidden', 'important');
+        } catch (eH) {}
+      }
+    }
+    var priceHosts = card.querySelectorAll('.v-product__price, .product_price');
+    var hi, host, ch, k, c;
+    for (hi = 0; hi < priceHosts.length; hi++) {
+      host = priceHosts[hi];
+      if (!host || (host.closest && host.closest('.mc-price-stack'))) continue;
+      ch = host.children;
+      for (k = 0; k < ch.length; k++) {
+        c = ch[k];
+        if (!c || !c.classList) continue;
+        if (c.classList.contains('mc-price-stack')) continue;
+        try {
+          c.style.setProperty('display', 'none', 'important');
+        } catch (eC) {}
+      }
+    }
+  }
+
+  function mcRenderUniformCardPricing(card, retailText, memberText, loginUrl, isLoggedIn) {
+    var mount = mcEnsureCardPriceMount(card);
+    if (!mount) return;
+
+    var html = '';
+
+    if (retailText) {
+      html += '<div class="mc-retail-price">Retail: ' + retailText + '</div>';
+    }
+
+    if (isLoggedIn && memberText) {
+      html += '<div class="mc-member-grid-price">Member: ' + memberText + '</div>';
+    } else {
+      html +=
+        '<div class="mc-member-grid-price mc-member-grid-price--locked">Member: <a href="' +
+        loginUrl +
+        '" class="mc-member-grid-price__login">Log in to see price</a></div>';
+    }
+
+    mcSetStableHtml(mount, html);
+    mcHideNativeCardPriceFragments(card);
   }
 
   function mcFindProductHref(card) {
@@ -12473,282 +12637,44 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
         } catch (e103Vis) {}
         continue;
       }
-      var listingMember = mcMemberPricingGridListingEligible();
-      var cardEligible = mcMemberPricingGridCardEligible(card);
-      if (!listingMember && !cardEligible) {
-        try {
-          mcMarkCardPriceWrapperReady(card);
-        } catch (eGateVis) {}
-        continue;
-      }
       mcDedupeMemberGridBlocksInCard(card);
+      var regStr = mcExtractRegularPriceFromCard(card);
+      var retailAmt = parseFloat(String(regStr || '').replace(/[^0-9.]/g, '')) || 0;
+      if (!(retailAmt > 0)) {
+        var cloneTxt = (mcCloneCardSansMember(card).textContent || '').replace(/\s+/g, ' ');
+        var fallD = mcExtractDollarFromText(cloneTxt);
+        retailAmt = parseFloat(String(fallD || '').replace(/[^0-9.]/g, '')) || 0;
+      }
+      var memberStr = unlocked ? mcExtractVolusionSalePriceFromCard(card) : '';
+      var memberAmt = parseFloat(String(memberStr || '').replace(/[^0-9.]/g, '')) || 0;
+      if (unlocked && !(memberAmt > 0)) {
+        memberAmt =
+          parseFloat(
+            String(mcExtractDollarFromText(mcExtractVolusionSalePriceFromCard(card) || '') || '').replace(
+              /[^0-9.]/g,
+              ''
+            )
+          ) || 0;
+      }
+      if (!(retailAmt > 0) && unlocked && memberAmt > 0) {
+        retailAmt = memberAmt;
+      }
+      var retailText = mcFmtMoney(retailAmt);
+      if (!retailText) {
+        var anyD = mcExtractDollarFromText(
+          (mcCloneCardSansMember(card).textContent || '').replace(/\s+/g, ' ')
+        );
+        if (anyD && !MC_MAP_LINK_RE.test(card.textContent || '')) {
+          retailText = anyD;
+        }
+      }
+      var memberText = unlocked && memberAmt > 0 ? mcFmtMoney(memberAmt) : '';
+
+      mcRenderUniformCardPricing(card, retailText, memberText, getMemberLoginUrl(), unlocked);
       try {
-        mcMarkCardPriceWrapperPending(card);
-      } catch (ePend) {}
-      var hasSale = mcCardHasSalePricing(card);
-      /* 157 / 139 PLPs: Volusion often omits font.product_sale_price; still paint member row when a dollar is visible. */
-      if (
-        !hasSale &&
-        /\$[\d,]+/.test((card.textContent || '').replace(/\s+/g, ' ')) &&
-        (
-          cardParsedCat === '157' ||
-          Number(cardParsedCat) === 157 ||
-          cardParsedCat === '139' ||
-          Number(cardParsedCat) === 139 ||
-          /\/category-s\/157\.htm/i.test(location.pathname || '') ||
-          /\/category-s\/157\.html?/i.test(location.pathname || '') ||
-          /\/stationary-loveseats-s\/157\.html?/i.test(location.pathname || '') ||
-          /\/sectionals-s\/139\.htm/i.test(location.pathname || '') ||
-          /\/sectionals-s\/139\.html?/i.test(location.pathname || '') ||
-          /\/category-s\/157\.htm/i.test(cardHref || '') ||
-          /\/category-s\/157\.html?/i.test(cardHref || '') ||
-          /\/sectionals-s\/139\.htm/i.test(cardHref || '') ||
-          /\/sectionals-s\/139\.html?/i.test(cardHref || '') ||
-          (typeof mcListingCategoryIdFromVolusion === 'function' &&
-            (mcListingCategoryIdFromVolusion() === '157' || mcListingCategoryIdFromVolusion() === '139'))
-        )
-      ) {
-        hasSale = true;
-      }
-      var is157ListingCtx =
-        /\/category-s\/157\.htm/i.test(location.pathname || '') ||
-        /\/category-s\/157\.html?/i.test(location.pathname || '') ||
-        /\/stationary-loveseats-s\/157\.html?/i.test(location.pathname || '') ||
-        cardParsedCat === '157' ||
-        Number(cardParsedCat) === 157 ||
-        (typeof mcListingCategoryIdFromVolusion === 'function' &&
-          String(mcListingCategoryIdFromVolusion()) === '157');
-      var is139ListingCtx =
-        /\/sectionals-s\/139\.htm/i.test(location.pathname || '') ||
-        /\/sectionals-s\/139\.html?/i.test(location.pathname || '') ||
-        cardParsedCat === '139' ||
-        Number(cardParsedCat) === 139 ||
-        (typeof mcListingCategoryIdFromVolusion === 'function' &&
-          String(mcListingCategoryIdFromVolusion()) === '139');
-      var prevState = card.getAttribute('data-mc-member-grid');
-      var nextState = unlocked ? 'unlocked' : 'locked';
-      var existingBlock = card.querySelector('.mc-member-grid-price');
-      if (existingBlock && prevState === nextState && !mcCardStillShowsMapPhrase(card)) {
-        if (unlocked) {
-          if (!hasSale) {
-            try {
-              if (existingBlock.parentNode) existingBlock.parentNode.removeChild(existingBlock);
-            } catch (eRmNs) {}
-            existingBlock = null;
-          } else {
-            var amtChk = existingBlock.querySelector('.mc-member-grid-price__amount');
-            var amtOk = amtChk && (amtChk.textContent || '').replace(/\s/g, '').length > 1;
-            if (amtOk) continue;
-            try {
-              if (existingBlock.parentNode) existingBlock.parentNode.removeChild(existingBlock);
-            } catch (eRm2) {}
-            existingBlock = null;
-          }
-        }
-      }
-      if (existingBlock && mcCardStillShowsMapPhrase(card)) {
-        try {
-          existingBlock.parentNode.removeChild(existingBlock);
-        } catch (eRm) {}
-        existingBlock = null;
-      }
-
-      var regPrice = mcExtractRegularPriceFromCard(card);
-      var priceElPre = mcFindCardPricingMount(card);
-      var priceBox =
-        priceElPre && priceElPre.closest && priceElPre.closest('.v-product__price');
-      var gatherHost = priceBox || priceElPre;
-      var keptPre = gatherHost ? mcGatherPriceLikeNodes(gatherHost) : [];
-      var installTarget = priceBox || mcFindCardPriceContainerMount(card) || priceElPre;
-      if (!installTarget) {
-        installTarget =
-          card.querySelector('.v-product__price') ||
-          card.querySelector('.product_price') ||
-          card.querySelector('.v65-product-related-price') ||
-          card.querySelector('font.product_sale_price') ||
-          card.querySelector('.product_sale_price') ||
-          card.querySelector('.product_saleprice') ||
-          card.querySelector('font.price_color') ||
-          card.querySelector('.price_color') ||
-          card.querySelector('[class*="formattedprice"]') ||
-          card.querySelector('[itemprop="price"]');
-      }
-
-      if (!unlocked) {
-        if (existingBlock && existingBlock.parentNode) {
-          try {
-            existingBlock.parentNode.removeChild(existingBlock);
-          } catch (eRmGuest) {}
-        }
-        try {
-          mcRemoveGuestSaleElements(card);
-        } catch (eRmGsPre) {}
-        if (mcCardStillShowsMapPhrase(card)) {
-          var gMapBlock = mcBuildLockedMemberLoginBlock();
-          if (mcReplaceMapCalloutWithBlock(card, gMapBlock)) {
-            try {
-              mcRemoveGuestSaleElements(card);
-            } catch (eRmG) {}
-            if (installTarget) mcInstallGuestPriceOnly(installTarget, card);
-            if (!card.querySelector('.mc-member-grid-price')) {
-              mcAppendGuestMemberLoginBlock(card, installTarget);
-            }
-            card.setAttribute('data-mc-member-grid', 'locked');
-            continue;
-          }
-        }
-        try {
-          mcRemoveGuestSaleElements(card);
-        } catch (eRmGs) {}
-        if (installTarget) mcInstallGuestPriceOnly(installTarget, card);
-        if (!card.querySelector('.mc-member-grid-price')) {
-          mcAppendGuestMemberLoginBlock(card, installTarget);
-        }
-        card.setAttribute('data-mc-member-grid', 'locked');
-        continue;
-      }
-
-      /* Logged-in + MAP teaser only (no Volusion sale row): swap teaser for member row + price when we have it */
-      if (unlocked && !hasSale && mcCardStillShowsMapPhrase(card)) {
-        if (existingBlock && existingBlock.parentNode) {
-          try {
-            existingBlock.parentNode.removeChild(existingBlock);
-          } catch (eRmMap0) {}
-          existingBlock = null;
-        }
-        mcDedupeMemberGridBlocksInCard(card);
-        var mapMember = card.querySelector('.mc-member-grid-price');
-        if (!mapMember) {
-          mapMember = document.createElement('div');
-          mapMember.className = 'mc-member-grid-price';
-        } else {
-          while (mapMember.firstChild) mapMember.removeChild(mapMember.firstChild);
-        }
-        mapMember.setAttribute('data-mc-member-grid', 'unlocked');
-        var mapLbl = document.createElement('div');
-        mapLbl.className = 'mc-member-grid-price__label';
-        mapLbl.textContent = 'Member price:';
-        mapMember.appendChild(mapLbl);
-        var mapAmtStr =
-          mcExtractVolusionSalePriceFromCard(card) ||
-          regPrice ||
-          mcExtractDollarFromText((card.textContent || '').replace(/\s+/g, ' '));
-        if (mapAmtStr) {
-          var mapAmtEl = document.createElement('div');
-          mapAmtEl.className = 'mc-member-grid-price__amount';
-          mapAmtEl.textContent = mapAmtStr;
-          mapMember.appendChild(mapAmtEl);
-        }
-        if (mcReplaceMapCalloutWithBlock(card, mapMember)) {
-          card.setAttribute('data-mc-member-grid', 'unlocked');
-          continue;
-        }
-      }
-
-      if (!hasSale) {
-        if (
-          unlocked &&
-          (is157ListingCtx || is139ListingCtx || listingMember || cardEligible)
-        ) {
-          hasSale = true;
-        } else {
-          if (existingBlock && existingBlock.parentNode) {
-            try {
-              existingBlock.parentNode.removeChild(existingBlock);
-            } catch (eRmNs2) {}
-          }
-          if (installTarget) mcInstallLoggedInPriceNoMemberBlock(installTarget);
-          card.setAttribute('data-mc-member-grid', 'unlocked');
-          continue;
-        }
-      }
-
-      var parseHost = card.cloneNode(true);
-      var strip = parseHost.querySelectorAll('.mc-member-grid-price');
-      var sj;
-      for (sj = 0; sj < strip.length; sj++) {
-        if (strip[sj].parentNode) strip[sj].parentNode.removeChild(strip[sj]);
-      }
-      var raw = (parseHost.textContent || '').replace(/\s+/g, ' ').trim();
-      var dollar = mcExtractDollarFromText(raw);
-      var hideMap =
-        /lowest price|add to cart|see price|call|members?\s*only|map/i.test(raw) && !dollar;
-      var volSale = mcExtractVolusionSalePriceFromCard(card);
-      var showMemberAmt = unlocked
-        ? volSale || regPrice || dollar
-        : dollar || regPrice;
-
-      var block = card.querySelector('.mc-member-grid-price');
-      if (!block) {
-        block = document.createElement('div');
-        block.className = 'mc-member-grid-price';
-      } else {
-        while (block.firstChild) block.removeChild(block.firstChild);
-      }
-      block.setAttribute('data-mc-member-grid', nextState);
-
-      var label = document.createElement('div');
-      label.className = 'mc-member-grid-price__label';
-      label.textContent = 'Member price:';
-      block.appendChild(label);
-
-      if (unlocked) {
-        if (showMemberAmt) {
-          var amt = document.createElement('div');
-          amt.className = 'mc-member-grid-price__amount';
-          amt.textContent = showMemberAmt;
-          block.appendChild(amt);
-        } else if (!hideMap && raw && raw.indexOf('$') !== -1) {
-          var rest = document.createElement('div');
-          rest.className = 'mc-member-grid-price__amount';
-          rest.textContent = raw.replace(/add to cart[^\n]*/gi, '').trim();
-          block.appendChild(rest);
-        }
-      } else {
-        var hint = document.createElement('div');
-        hint.className = 'mc-member-grid-price__hint';
-        var loginA = document.createElement('a');
-        loginA.href = '#';
-        loginA.className = 'mc-member-grid-price__login';
-        loginA.setAttribute('data-mc-open-login', '');
-        loginA.textContent = 'Log in';
-        hint.appendChild(loginA);
-        hint.appendChild(document.createTextNode(' to see member pricing'));
-        block.appendChild(hint);
-      }
-
-      if (mcSwapMapElementsForBlock(card, block)) {
-        try {
-          block.style.setProperty('visibility', 'visible', 'important');
-          block.style.setProperty('opacity', '1', 'important');
-        } catch (eVis1) {}
-        card.setAttribute('data-mc-member-grid', nextState);
-        continue;
-      }
-
-      var priceEl;
-      var exNode = card.querySelector('.mc-member-grid-price');
-      if (exNode && exNode.parentNode) {
-        priceEl = exNode.parentNode;
-      } else {
-        priceEl = installTarget;
-      }
-      if (!priceEl) {
-        if (mcCardStillShowsMapPhrase(card)) {
-          if (!card.contains(block)) {
-            card.appendChild(block);
-          }
-          card.setAttribute('data-mc-member-grid', nextState);
-        }
-        continue;
-      }
-
-      mcInstallInPriceContainer(priceEl, block);
-      try {
-        priceEl.style.setProperty('visibility', 'visible', 'important');
-        priceEl.style.setProperty('opacity', '1', 'important');
-      } catch (eVis) {}
-      card.setAttribute('data-mc-member-grid', nextState);
+        mcMarkCardPriceWrapperReady(card);
+      } catch (eRd) {}
+      card.setAttribute('data-mc-member-grid', unlocked ? 'unlocked' : 'locked');
     }
     for (i = 0; i < products.length; i++) {
       try {
@@ -12808,100 +12734,106 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   }
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
 
-  function mcHideOldPdpMemberFragmentsOnly() {
+  function mcHideDuplicatePdpMemberFragments() {
     var root = document.querySelector('#v65-product-parent');
     if (!root) return;
     var nodes = root.querySelectorAll(
       '.mc-member-price, .member-price, .members-price, .mc-member-price-row, .mc-member-price-wrap, .mc-member-price-caption'
     );
-    nodes.forEach(function (n) {
-      if (n.closest && n.closest('.mc-pdp-retail-member')) return;
-      n.style.setProperty('display', 'none', 'important');
-    });
-    root.querySelectorAll('.mc-pdp-member-pricing').forEach(function (el) {
-      el.style.setProperty('display', 'none', 'important');
-    });
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      if (!n) continue;
+      if (n.closest && n.closest('.mc-pdp-member-pricing')) continue;
+      try {
+        n.style.setProperty('display', 'none', 'important');
+      } catch (eH) {}
+    }
+  }
+
+  function mcRenderPdpRetailAndMember(retailText, memberText, loginUrl, isLoggedIn) {
+    var nativeBlock =
+      document.querySelector('#priceWithOptions') ||
+      document.querySelector('#priceWithOptionsNoTax') ||
+      document.querySelector('#v65-product-parent .product_price') ||
+      document.querySelector('#v65-product-parent .price');
+
+    if (!nativeBlock || !nativeBlock.parentNode) return false;
+
+    var wrap = document.querySelector('.mc-pdp-member-pricing');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.className = 'mc-pdp-member-pricing';
+      nativeBlock.parentNode.insertBefore(wrap, nativeBlock);
+    } else if (wrap.nextSibling !== nativeBlock) {
+      nativeBlock.parentNode.insertBefore(wrap, nativeBlock);
+    }
+
+    var html = '';
+    if (retailText) {
+      html += '<div class="mc-pdp-retail-line">Retail: ' + retailText + '</div>';
+    }
+
+    if (isLoggedIn && memberText) {
+      html += '<div class="mc-pdp-member-line">Member: ' + memberText + '</div>';
+    } else {
+      html +=
+        '<div class="mc-pdp-member-line mc-pdp-member-line--locked">Member: <a href="' +
+        loginUrl +
+        '" class="mc-member-grid-price__login">Log in to see price</a></div>';
+    }
+
+    mcSetStableHtml(wrap, html);
+    mcHideDuplicatePdpMemberFragments();
+    return true;
+  }
+
+  function mcHideOldPdpMemberFragmentsOnly() {
+    mcHideDuplicatePdpMemberFragments();
   }
 
   async function mcRenderRetailMemberOnPdp() {
     var root = document.querySelector('#v65-product-parent');
     if (!root) return;
 
-    var nativeBlock =
-      root.querySelector('#priceWithOptions') ||
-      root.querySelector('#priceWithOptionsNoTax') ||
-      root.querySelector('.product_price') ||
-      root.querySelector('.price');
-
-    if (!nativeBlock || !nativeBlock.parentNode) return;
-
-    var retail = 0;
-    var member = 0;
     var isLoggedIn = false;
-
     try {
-      if (typeof window.detectMemberPricingState === 'function') {
-        var state = await window.detectMemberPricingState();
-        isLoggedIn = !!(state && state.unlocked);
-      }
+      var st =
+        typeof window.detectMemberPricingState === 'function'
+          ? await window.detectMemberPricingState()
+          : typeof detectMemberPricingState === 'function'
+            ? await detectMemberPricingState()
+            : null;
+      isLoggedIn = !!(st && st.unlocked);
     } catch (e1) {}
 
+    var retailAmt = 0;
+    var memberAmt = 0;
+
     try {
-      retail = mcExtractRetailPriceFromPdpHtml(document.documentElement.outerHTML);
+      retailAmt = Number(mcExtractRetailPriceFromPdpHtml(document.documentElement.innerHTML || '')) || 0;
     } catch (e2) {}
 
     if (isLoggedIn) {
       try {
         var url = new URL(window.location.href);
         url.searchParams.delete('CartID');
-        var resp = await fetch(url.pathname + url.search, {
-          credentials: 'same-origin',
-          cache: 'no-store'
-        });
+        var resp = await fetch(url.pathname + url.search, { credentials: 'same-origin', cache: 'no-store' });
         var html = await resp.text();
 
-        member =
-          mcExtractSalePriceFromPdpHtml(html) ||
-          mcExtractHowToGetFromPdpHtml(html) ||
-          (typeof extractVolusionAddToCartPriceFromHtml === 'function'
-            ? extractVolusionAddToCartPriceFromHtml(html)
-            : 0) ||
-          0;
-
-        if (!retail) {
-          retail = mcExtractRetailPriceFromPdpHtml(html) || 0;
+        memberAmt = Number(mcExtractSalePriceFromPdpHtml(html)) || 0;
+        if (!(retailAmt > 0)) {
+          retailAmt = Number(mcExtractRetailPriceFromPdpHtml(html)) || 0;
         }
       } catch (e3) {}
     }
 
-    if (!(retail > 0)) return;
+    var retailText = mcFmtMoney(retailAmt);
+    var memberText = mcFmtMoney(memberAmt);
 
-    var retailText = '$' + retail.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    var memberText =
-      member > 0
-        ? '$' + member.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        : '';
+    if (!retailText) return;
 
-    var wrap = root.querySelector('.mc-pdp-retail-member');
-    if (!wrap) {
-      wrap = document.createElement('div');
-      wrap.className = 'mc-pdp-retail-member';
-      nativeBlock.parentNode.insertBefore(wrap, nativeBlock);
-    } else if (wrap.nextSibling !== nativeBlock) {
-      nativeBlock.parentNode.insertBefore(wrap, nativeBlock);
-    }
-
-    var htmlOut =
-      isLoggedIn && memberText
-        ? '<div class="mc-pdp-retail-line">Retail: ' + retailText + '</div>' +
-          '<div class="mc-pdp-member-line">Member: ' + memberText + '</div>'
-        : '<div class="mc-pdp-retail-line">Retail: ' + retailText + '</div>';
-
-    if (wrap.getAttribute('data-mc-last-html') !== htmlOut) {
-      wrap.innerHTML = htmlOut;
-      wrap.setAttribute('data-mc-last-html', htmlOut);
-    }
-    mcHideOldPdpMemberFragmentsOnly();
+    mcRenderPdpRetailAndMember(retailText, memberText, getMemberLoginUrl(), isLoggedIn);
   }
 
   function mcBootPdpRetailMemberOnly() {
@@ -12928,23 +12860,13 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   window.mcBootPdpRetailMemberOnly = mcBootPdpRetailMemberOnly;
   window.mcRenderRetailMemberOnPdp = mcRenderRetailMemberOnPdp;
   window.mcHideOldPdpMemberFragmentsOnly = mcHideOldPdpMemberFragmentsOnly;
+  window.mcHideDuplicatePdpMemberFragments = mcHideDuplicatePdpMemberFragments;
+  window.mcRenderPdpRetailAndMember = mcRenderPdpRetailAndMember;
+  window.getMemberLoginUrl = getMemberLoginUrl;
+  window.mcFmtMoney = mcFmtMoney;
 
   function mcMarkMemberPlpPricesPendingEarly() {
-    try {
-      if (!document.body || document.body.classList.contains('productdetails')) return;
-      if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing())
-        return;
-      if (!document.documentElement.classList.contains('category') && !document.body.classList.contains('category'))
-        return;
-      var earlyProds = mcCollectGridProductCards();
-      var ei;
-      for (ei = 0; ei < earlyProds.length; ei++) {
-        var ec = earlyProds[ei];
-        if (mcIsRelatedItemsNode(ec)) continue;
-        if (!mcMemberPricingGridListingEligible() && !mcMemberPricingGridCardEligible(ec)) continue;
-        mcMarkCardPriceWrapperPending(ec);
-      }
-    } catch (eEarlyM) {}
+    return;
   }
 
   function mcBootCategoryGrid() {
