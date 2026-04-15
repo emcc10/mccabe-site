@@ -10274,16 +10274,10 @@ function mcMountMemberCaptionStandalone() {
       return mcCaptionReturn({ ok: true, reason: 'pdp pricing stack already rendered' });
     }
     if (typeof window.mcPageType === 'function' && window.mcPageType() === 'pdp') {
-      return mcCaptionReturn({ ok: true, reason: 'pdp retail/member via mcRenderRetailMemberOnPdp' });
+      return mcCaptionReturn({ ok: true, reason: 'pdp handled elsewhere' });
     }
-    if (
-      document.body &&
-      (document.body.classList.contains('productdetails') || document.body.classList.contains('mc-product-page'))
-    ) {
-      return mcCaptionReturn({ ok: true, reason: 'pdp retail/member via mcRenderRetailMemberOnPdp' });
-    }
-    if (!document.querySelector('#v65-product-parent')) {
-      return mcCaptionReturn({ ok: false, reason: 'no #v65-product-parent yet' });
+    if (document.querySelector('#v65-product-parent')) {
+      return mcCaptionReturn({ ok: true, reason: 'pdp handled elsewhere' });
     }
     var oldCaps = document.querySelectorAll('.mc-member-price-caption');
     var ci;
@@ -10931,9 +10925,6 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     } catch (eRvs) {}
     if (typeof window.detectMemberPricingState === 'function') {
       window.detectMemberPricingState().then(function () {
-        try {
-          if (typeof window.forceProductFixes === 'function') window.forceProductFixes();
-        } catch (e4) {}
         try {
           if (typeof window.mcPaintCategoryGridMemberPricing === 'function') {
             window.mcPaintCategoryGridMemberPricing();
@@ -12863,92 +12854,52 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   }
 
   function mcBootCategoryGrid() {
-    var isPdp =
-      !!document.getElementById('v65-product-parent') ||
-      !!document.getElementById('options_table') ||
-      document.body.classList.contains('productdetails') ||
-      document.body.classList.contains('mc-product-page') ||
-      /\/product-p\//i.test(location.pathname || '');
+    if (typeof window.mcPageType === 'function' && window.mcPageType() !== 'category') return;
+    if (window.__mcCategoryGridBooted) return;
+    window.__mcCategoryGridBooted = true;
 
-    var ranInitialPending = false;
-
-    var run = function () {
+    function run() {
       try {
-        if (!ranInitialPending) {
-          ranInitialPending = true;
-          mcMarkMemberPlpPricesPendingEarly();
-        }
-      } catch (eRunEarly) {}
-
-      try {
-        if (typeof window.detectMemberPricingState === 'function') {
-          window
-            .detectMemberPricingState()
-            .then(function () {
-              mcPaintCategoryGridMemberPricing();
-            })
-            .catch(function () {
-              mcPaintCategoryGridMemberPricing();
-            });
-        } else {
-          mcPaintCategoryGridMemberPricing();
-        }
-      } catch (eRun) {
-        try {
-          mcPaintCategoryGridMemberPricing();
-        } catch (e2) {}
-      }
-    };
-
-    run();
-
-    if (isPdp) {
-      return;
-    }
-
-    if (!window.__mcCategoryGridReadyBound) {
-      window.__mcCategoryGridReadyBound = true;
-      window.addEventListener('mcMemberPricingReady', function () {
-        mcPaintCategoryGridMemberPricing();
-      });
-    }
-
-    setTimeout(function () {
+        if (typeof window.mcResolveVolusionSession === 'function') window.mcResolveVolusionSession();
+      } catch (e1) {}
       try {
         mcPaintCategoryGridMemberPricing();
-      } catch (e) {}
-    }, 200);
+      } catch (e2) {}
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', run, { once: true });
+    } else {
+      run();
+    }
+
+    window.addEventListener('load', run, { once: true });
 
     var ca = document.getElementById('content_area');
-    var ch = document.getElementById('content_area_home');
+    if (!ca) return;
+
     var deb;
-
-    function obs(root) {
-      if (!root || root.__mcGridMo) return;
-      root.__mcGridMo = true;
-      try {
-        var mo = new MutationObserver(function () {
-          clearTimeout(deb);
-          deb = setTimeout(function () {
-            try {
-              mcPaintCategoryGridMemberPricing();
-            } catch (e) {}
-          }, 120);
-        });
-        mo.observe(root, { childList: true, subtree: true });
-      } catch (e) {}
-    }
-
-    obs(ca);
-    obs(ch);
+    var mo = new MutationObserver(function (mutations) {
+      var shouldRun = false;
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].addedNodes && mutations[i].addedNodes.length) {
+          shouldRun = true;
+          break;
+        }
+      }
+      if (!shouldRun) return;
+      clearTimeout(deb);
+      deb = setTimeout(run, 120);
+    });
+    mo.observe(ca, { childList: true, subtree: true });
   }
+  window.mcBootCategoryGrid = mcBootCategoryGrid;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', mcBootCategoryGrid);
   } else {
     mcBootCategoryGrid();
   }
-  window.addEventListener('load', mcBootCategoryGrid);
   window.mcPathLooksLikeCategory103Listing = mcPathLooksLikeCategory103Listing;
   try {
     mcBootPdpRetailMemberOnly();
