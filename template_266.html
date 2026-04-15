@@ -7997,9 +7997,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       hideNativePdpSalePricing(scope);
       ensurePriceWithOptionsLabel(scope);
       leftAlignPricingBlock(scope);
-      if (typeof window.mcMountMemberCaptionStandalone === 'function') {
-        window.mcMountMemberCaptionStandalone();
-      }
     } catch (e3) {}
   }
 
@@ -10208,7 +10205,6 @@ function mcTryHydrateSeatFromCart() {
       if (p > 0) {
         window.__mcMemberPricing.memberSeatPrice = p;
         mcSetCachedSeatForProduct(pc, p, pn);
-        try { mcKickMemberCaptionStandalone(); } catch (_) {}
       }
     })
     .catch(function () {})
@@ -10270,13 +10266,13 @@ function mcIsTheaterSeatingPdp() {
 }
 function mcMountMemberCaptionStandalone() {
   try {
+    if (document.querySelector('#v65-product-parent')) {
+      return mcCaptionReturn({ ok: true, reason: 'pdp handled by mcRenderRetailMemberOnPdp' });
+    }
     if (document.querySelector('.mc-pdp-member-pricing, .mc-pdp-retail-member')) {
       return mcCaptionReturn({ ok: true, reason: 'pdp pricing stack already rendered' });
     }
     if (typeof window.mcPageType === 'function' && window.mcPageType() === 'pdp') {
-      return mcCaptionReturn({ ok: true, reason: 'pdp handled elsewhere' });
-    }
-    if (document.querySelector('#v65-product-parent')) {
       return mcCaptionReturn({ ok: true, reason: 'pdp handled elsewhere' });
     }
     var oldCaps = document.querySelectorAll('.mc-member-price-caption');
@@ -10519,43 +10515,14 @@ function mcStartDetectMemberPricing() {
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', function () {
-    mcKickMemberCaptionStandalone();
     mcStartDetectMemberPricing();
   });
 } else {
-  mcKickMemberCaptionStandalone();
   mcStartDetectMemberPricing();
 }
 window.addEventListener('load', function () {
-  mcKickMemberCaptionStandalone();
   mcStartDetectMemberPricing();
 });
-var mcCaptionTicks = 0;
-var mcCaptionIv = setInterval(function () {
-  var r = mcKickMemberCaptionStandalone();
-  if (r && r.ok && document.getElementById('mc-member-price-caption-root')) {
-    clearInterval(mcCaptionIv);
-    return;
-  }
-  if (++mcCaptionTicks > 25) clearInterval(mcCaptionIv);
-}, 400);
-document.addEventListener('mcMemberPricingReady', mcKickMemberCaptionStandalone);
-if (document.body) {
-  try {
-    var mcDeb;
-    var mcCaptionMoRoot = document.getElementById('content_area') || document.body;
-    var mcMo = new MutationObserver(function () {
-      clearTimeout(mcDeb);
-      mcDeb = setTimeout(function () {
-        var el = document.getElementById('mc-member-price-caption-root');
-        if (!el || !(el.textContent || '').replace(/\s/g, '').length) {
-          mcKickMemberCaptionStandalone();
-        }
-      }, 120);
-    });
-    mcMo.observe(mcCaptionMoRoot, { childList: true, subtree: true });
-  } catch (e3) {}
-}
 try {
   if (typeof console !== 'undefined' && console.info) {
     console.info(
@@ -12208,6 +12175,8 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     }
     var block = mcBuildLockedMemberLoginBlock();
     var mount =
+      card.querySelector('.v-product__price .mc-price-stack') ||
+      card.querySelector('.mc-price-stack') ||
       card.querySelector('.v-product__price') ||
       card.querySelector('.product_price') ||
       installTarget;
@@ -12661,6 +12630,11 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
         mcMarkCardPriceWrapperReady(card);
       } catch (eRd) {}
       card.setAttribute('data-mc-member-grid', unlocked ? 'unlocked' : 'locked');
+      try {
+        card.setAttribute('data-mc-priced', '1');
+        var stkPriced = card.querySelector('.mc-price-stack');
+        if (stkPriced) stkPriced.setAttribute('data-mc-priced', '1');
+      } catch (ePriced) {}
     }
     for (i = 0; i < products.length; i++) {
       try {
@@ -12854,44 +12828,59 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   }
 
   function mcBootCategoryGrid() {
+    if (window.__mcCategoryBootStarted) return;
+    window.__mcCategoryBootStarted = true;
     if (typeof window.mcPageType === 'function' && window.mcPageType() !== 'category') return;
-    if (window.__mcCategoryGridBooted) return;
-    window.__mcCategoryGridBooted = true;
 
-    function run() {
+    function runPaint(force) {
       try {
         if (typeof window.mcResolveVolusionSession === 'function') window.mcResolveVolusionSession();
       } catch (e1) {}
+      if (!force) {
+        var unpriced = document.querySelector(
+          '#content_area .v-product:not([data-mc-priced="1"]), #content_area li.v-product:not([data-mc-priced="1"]), #content_area .mc-price-stack:not([data-mc-priced="1"])'
+        );
+        if (!unpriced) return;
+      }
       try {
         mcPaintCategoryGridMemberPricing();
       } catch (e2) {}
     }
 
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', run, { once: true });
+      document.addEventListener('DOMContentLoaded', function () {
+        runPaint(true);
+      });
     } else {
-      run();
+      runPaint(true);
     }
 
-    window.addEventListener('load', run, { once: true });
-
-    var ca = document.getElementById('content_area');
-    if (!ca) return;
-
-    var deb;
-    var mo = new MutationObserver(function (mutations) {
-      var shouldRun = false;
-      for (var i = 0; i < mutations.length; i++) {
-        if (mutations[i].addedNodes && mutations[i].addedNodes.length) {
-          shouldRun = true;
-          break;
-        }
-      }
-      if (!shouldRun) return;
-      clearTimeout(deb);
-      deb = setTimeout(run, 120);
+    window.addEventListener('load', function () {
+      runPaint(true);
     });
-    mo.observe(ca, { childList: true, subtree: true });
+
+    if (window.__mcCategoryPriceObserver) {
+      try {
+        window.__mcCategoryPriceObserver.disconnect();
+      } catch (e3) {}
+    }
+
+    var gridRoot =
+      document.querySelector('#content_area .v-product-grid') ||
+      document.querySelector('#content_area') ||
+      document.body;
+
+    var debounceTimer = null;
+    window.__mcCategoryPriceObserver = new MutationObserver(function () {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () {
+        runPaint(false);
+      }, 120);
+    });
+
+    if (gridRoot) {
+      window.__mcCategoryPriceObserver.observe(gridRoot, { childList: true, subtree: true });
+    }
   }
   window.mcBootCategoryGrid = mcBootCategoryGrid;
 
