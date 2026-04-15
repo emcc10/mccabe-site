@@ -10504,9 +10504,6 @@ function mcMountMemberCaptionStandalone() {
   }
 }
 window.mcMountMemberCaptionStandalone = mcMountMemberCaptionStandalone;
-function mcKickMemberCaptionStandalone() {
-  return mcMountMemberCaptionStandalone();
-}
 function mcStartDetectMemberPricing() {
   if (typeof window.detectMemberPricingState !== 'function') return;
   try {
@@ -11375,7 +11372,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     );
   }
 
-  /** Where to run mcInstallGuestPriceOnly / logged-in price restore — must stay in DOM after MAP anchor is replaced. */
+  /** Logged-in price restore — must stay in DOM after MAP anchor is replaced. */
   function mcFindCardPriceContainerMount(card) {
     if (!card || !card.querySelectorAll) return null;
     var candidates = [
@@ -11927,62 +11924,6 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     }
   }
 
-  /**
-   * Volusion often outputs sale / MAP / member nodes before the image. Flex `order` usually fixes it;
-   * when the card root is a column flex container, moving DOM after the title guarantees image → title → price.
-   */
-  function mcEnsureMemberBlockCardLevel(card) {
-    if (!card || !card.querySelector) return null;
-    if (mcIsRelatedItemsNode(card)) return null;
-    if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) return null;
-    mcDedupeMemberGridBlocksInCard(card);
-    var block = card.querySelector('.mc-member-grid-price');
-    if (!block) return null;
-    if (block.parentNode && block.parentNode === card) return block;
-    var title =
-      card.querySelector('.v-product__name') ||
-      card.querySelector('.productnamecolor') ||
-      card.querySelector('.v65-product-related-title') ||
-      card.querySelector('h2') ||
-      card.querySelector('h3');
-    if (!title || !title.parentNode) return block || null;
-    var insertAfter = title;
-    var ns = title.nextSibling;
-    if (ns && ns.nodeType === 1 && ns.classList && ns.classList.contains('mc-plp-bean-subline')) {
-      insertAfter = ns;
-    }
-    if (block.previousSibling === insertAfter) return block;
-    var ref = insertAfter.nextSibling;
-    try {
-      if (ref === block) return block;
-      card.insertBefore(block, ref);
-    } catch (eIns) {
-      try {
-        card.appendChild(block);
-      } catch (e2) {}
-    }
-    return block;
-  }
-
-  function mcReorderSaleAfterMember(card) {
-    if (mcIsRelatedItemsNode(card)) return;
-    if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) return;
-    if (!document.body.classList.contains('mc-member-logged-in')) return;
-    var mem = card.querySelector('.mc-member-grid-price');
-    if (!mem || !mem.parentNode) return;
-    var sales = card.querySelectorAll(
-      '.product_sale_price, font.product_sale_price, span.product_sale_price, [class*="product_sale_price"], .product_saleprice, [class*="product_saleprice"]'
-    );
-    var si;
-    for (si = 0; si < sales.length; si++) {
-      var sale = sales[si];
-      if (!sale || (sale.closest && sale.closest('.mc-member-grid-price'))) continue;
-      try {
-        sale.style.setProperty('display', 'none', 'important');
-      } catch (eSale) {}
-    }
-  }
-
   function mcRemoveMemberGridBlocks(card) {
     if (!card || !card.querySelectorAll) return;
     if (mcIsRelatedItemsNode(card)) return;
@@ -12163,111 +12104,6 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     return block;
   }
 
-  function mcAppendGuestMemberLoginBlock(card, installTarget) {
-    if (!card) return;
-    if (typeof mcPathLooksLikeCategory103Listing === 'function' && mcPathLooksLikeCategory103Listing()) return;
-    var prev = card.querySelectorAll('.mc-member-grid-price[data-mc-guest-login]');
-    var pi;
-    for (pi = 0; pi < prev.length; pi++) {
-      try {
-        if (prev[pi].parentNode) prev[pi].parentNode.removeChild(prev[pi]);
-      } catch (eP) {}
-    }
-    var block = mcBuildLockedMemberLoginBlock();
-    var mount =
-      card.querySelector('.v-product__price .mc-price-stack') ||
-      card.querySelector('.mc-price-stack') ||
-      card.querySelector('.v-product__price') ||
-      card.querySelector('.product_price') ||
-      installTarget;
-    var tag = card.tagName ? card.tagName.toUpperCase() : '';
-    if (tag === 'TD' || tag === 'TH') {
-      if (mount && mount.parentNode === card) {
-        try {
-          card.insertBefore(block, mount.nextSibling);
-          return;
-        } catch (eTd) {}
-      }
-      try {
-        card.appendChild(block);
-      } catch (eTd2) {}
-      return;
-    }
-    if (mount && mount.parentNode) {
-      try {
-        mount.parentNode.insertBefore(block, mount.nextSibling);
-        return;
-      } catch (eM) {}
-    }
-    try {
-      card.appendChild(block);
-    } catch (eA) {}
-  }
-
-  function mcInstallGuestPriceOnly(priceEl, card) {
-    if (!priceEl) return;
-    function isSafePriceMount(node) {
-      if (!node || !node.matches) return false;
-      if (
-        node.matches(
-          '.v-product__price, .product_price, .product_productprice, .product_saleprice, .v65-product-related-price, [itemprop="price"], font.pricecolor, font.colors_productprice, .price_color, [class*="formattedprice"]'
-        )
-      ) return true;
-      var tag = node.tagName ? node.tagName.toUpperCase() : '';
-      if (tag === 'TD' || tag === 'TH') return false;
-      return false;
-    }
-    function isBroadCell(node) {
-      if (!node || !node.querySelector) return false;
-      var tagName = node.tagName ? node.tagName.toUpperCase() : '';
-      if (tagName !== 'TD' && tagName !== 'TH') return false;
-      return !!node.querySelector(
-        'img, .v-product, .v-product__img, .v-product__name, .productnamecolor, a.productnamecolor, h2, h3'
-      );
-    }
-    var tag = priceEl.tagName ? priceEl.tagName.toUpperCase() : '';
-    if (tag === 'TD' || tag === 'TH') {
-      if (isBroadCell(priceEl)) return;
-      var saleNodes = priceEl.querySelectorAll(
-        'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"], [class*="formatted_sale"], [class*="FormattedSale"]'
-      );
-      var si;
-      for (si = 0; si < saleNodes.length; si++) {
-        var sn = saleNodes[si];
-        if (sn.closest && sn.closest('.mc-member-grid-price')) continue;
-        var st = sn.tagName ? sn.tagName.toUpperCase() : '';
-        if (st === 'TD' || st === 'TH' || st === 'TR' || st === 'TABLE') continue;
-        try {
-          sn.style.setProperty('display', 'none', 'important');
-        } catch (eR) {}
-      }
-      return;
-    }
-    if (!isSafePriceMount(priceEl)) return;
-    var kept = mcGatherPriceLikeNodes(priceEl);
-    var filtered = [];
-    var ki;
-    for (ki = 0; ki < kept.length; ki++) {
-      var n = kept[ki];
-      var cls = (n.className && String(n.className)) || '';
-      var txt = (n.textContent || '').replace(/\s+/g, ' ').trim();
-      if (/product_sale|sale_price|product_saleprice|saleprice/i.test(cls)) continue;
-      if (/^sale\s*price/i.test(txt)) continue;
-      filtered.push(n);
-    }
-    if (!filtered.length && card) {
-      var reg = mcExtractRegularPriceFromCard(card);
-      if (reg) {
-        var sp = document.createElement('span');
-        sp.className = 'mc-preserved-plp-price';
-        sp.textContent = reg;
-        filtered.push(sp);
-      }
-    }
-    priceEl.innerHTML = '';
-    for (ki = 0; ki < filtered.length; ki++) priceEl.appendChild(filtered[ki]);
-  }
-
   function mcInstallLoggedInPriceNoMemberBlock(priceEl) {
     if (!priceEl) return;
     if (
@@ -12294,67 +12130,6 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       node.closest('.mc-related-carousel') ||
       /\/product-p\//i.test(location.pathname || '')
     );
-  }
-
-  function mcReorderCategoryListingNodes(card) {
-    if (!card || !card.querySelector) return;
-    if (mcIsRelatedItemsNode(card)) return;
-    var isCat =
-      (document.documentElement.classList &&
-        document.documentElement.classList.contains('category')) ||
-      (document.body.classList && document.body.classList.contains('category'));
-    if (!isCat) return;
-    var imgCell = card.querySelector('.v-product__img, .product_image');
-    var title =
-      card.querySelector('.v-product__name') ||
-      card.querySelector('.productnamecolor') ||
-      card.querySelector('h2') ||
-      card.querySelector('h3');
-    if (!title || !title.parentNode) return;
-    var titlePar = title.parentNode;
-
-    function moveAfterTitle(node) {
-      if (!node || !titlePar || !card.contains(node)) return;
-      if (node === title || (title.contains && title.contains(node))) return;
-      if (title.nextSibling === node) return;
-      var scan = title.nextSibling;
-      while (scan) {
-        if (scan === node) return;
-        scan = scan.nextSibling;
-      }
-      try {
-        titlePar.insertBefore(node, title.nextSibling);
-      } catch (eMove) {}
-    }
-
-    var k;
-    var chTop = card.children;
-    for (k = 0; k < chTop.length; k++) {
-      if (chTop[k].classList && chTop[k].classList.contains('mc-member-grid-price')) {
-        moveAfterTitle(chTop[k]);
-        break;
-      }
-    }
-
-    var kids = card.children;
-    var j;
-    for (j = 0; j < kids.length; j++) {
-      var el = kids[j];
-      if (imgCell && (el === imgCell || (el.contains && el.contains(imgCell)))) continue;
-      if (el === title || (el.contains && el.contains(title))) continue;
-      var tx = (el.textContent || '').replace(/\s+/g, ' ').trim();
-      if (/^sale\s+price/i.test(tx) || /^list\s+price/i.test(tx)) {
-        moveAfterTitle(el);
-        continue;
-      }
-      var cls = (el.className && String(el.className)) || '';
-      if (
-        /product_sale_price|product_list_price|sale_price|list_price|product_saleprice|product_productprice/i.test(cls) ||
-        (el.tagName === 'FONT' && /sale|list/i.test(cls) && /\$/i.test(tx))
-      ) {
-        moveAfterTitle(el);
-      }
-    }
   }
 
   /** PLP member-grid: category ids that override bean-only PLP handling (e.g. 157 nested-table layout). */
