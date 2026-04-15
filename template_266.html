@@ -2880,10 +2880,14 @@ function extractMemberSeatPriceFromHtml(html, publicSeatPrice){
   }
   return memberPrice;
 }
-function getMemberLoginUrl(){
-  var returnTo = encodeURIComponent((window.location.pathname || "/") + (window.location.search || ""));
-  return "/login.asp?ReturnTo=" + returnTo;
+function getMemberLoginUrl() {
+  return '/login.asp?ReturnTo=' + encodeURIComponent(location.pathname + location.search + location.hash);
 }
+function getMemberSignupUrl() {
+  return '/register.asp?ReturnTo=' + encodeURIComponent(location.pathname + location.search + location.hash);
+}
+window.getMemberLoginUrl = getMemberLoginUrl;
+window.getMemberSignupUrl = getMemberSignupUrl;
 function getMemberCreateAccountUrl(){
   var returnTo = encodeURIComponent((window.location.pathname || "/") + (window.location.search || ""));
   return "/AccountSettings.asp?AddNewCustomer=Y&ReturnTo=" + returnTo;
@@ -10708,6 +10712,77 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   color: #2f2f2f !important;
   font-weight: 500 !important;
 }
+
+.mc-member-auth-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+}
+.mc-member-auth-modal[aria-hidden="false"] {
+  display: block;
+}
+.mc-member-auth-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+}
+.mc-member-auth-modal__dialog {
+  position: relative;
+  width: min(92vw, 520px);
+  height: min(82vh, 720px);
+  margin: 5vh auto 0;
+  background: #fff;
+  box-shadow: 0 18px 60px rgba(0,0,0,.25);
+  display: flex;
+  flex-direction: column;
+}
+.mc-member-auth-modal__close {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  border: 0;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+}
+.mc-member-auth-modal__tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #ddd;
+}
+.mc-member-auth-tab {
+  flex: 1 1 50%;
+  border: 0;
+  background: #fff;
+  padding: 14px 12px;
+  font: 400 13px/1.2 Inter, system-ui, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #555;
+}
+.mc-member-auth-tab.is-active {
+  color: #222;
+  border-bottom: 2px solid #222;
+}
+.mc-member-auth-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.mc-member-auth-modal__frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+html.mc-member-auth-open,
+body.mc-member-auth-open {
+  overflow: hidden !important;
+}
 </style>
 <div id="mc-login-modal" class="mc-login-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mc-login-modal-title">
   <div class="mc-login-modal__backdrop" data-mc-close-login tabindex="-1"></div>
@@ -11519,10 +11594,6 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     value = Number(value || 0);
     if (!(value > 0)) return '';
     return '$' + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  function getMemberLoginUrl() {
-    return '/login.asp?ReturnTo=' + encodeURIComponent(location.pathname + location.search + location.hash);
   }
 
   function mcSetStableHtml(mount, html) {
@@ -12670,7 +12741,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       }
       var memberText = unlocked && memberAmt > 0 ? mcFmtMoney(memberAmt) : '';
 
-      mcRenderUniformCardPricing(card, retailText, memberText, getMemberLoginUrl(), unlocked);
+      mcRenderUniformCardPricing(card, retailText, memberText, window.getMemberLoginUrl(), unlocked);
       try {
         mcMarkCardPriceWrapperReady(card);
       } catch (eRd) {}
@@ -12833,7 +12904,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
 
     if (!retailText) return;
 
-    mcRenderPdpRetailAndMember(retailText, memberText, getMemberLoginUrl(), isLoggedIn);
+    mcRenderPdpRetailAndMember(retailText, memberText, window.getMemberLoginUrl(), isLoggedIn);
   }
 
   function mcBootPdpRetailMemberOnly() {
@@ -12862,7 +12933,6 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   window.mcHideOldPdpMemberFragmentsOnly = mcHideOldPdpMemberFragmentsOnly;
   window.mcHideDuplicatePdpMemberFragments = mcHideDuplicatePdpMemberFragments;
   window.mcRenderPdpRetailAndMember = mcRenderPdpRetailAndMember;
-  window.getMemberLoginUrl = getMemberLoginUrl;
   window.mcFmtMoney = mcFmtMoney;
 
   function mcMarkMemberPlpPricesPendingEarly() {
@@ -13052,6 +13122,166 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   });
 
   mo.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<script>
+(function () {
+  function mcEnsureAuthModal() {
+    if (document.getElementById('mcMemberAuthModal')) return;
+
+    var wrap = document.createElement('div');
+    wrap.innerHTML =
+      '<div id="mcMemberAuthModal" class="mc-member-auth-modal" aria-hidden="true">' +
+        '<div class="mc-member-auth-modal__backdrop" data-mc-auth-close></div>' +
+        '<div class="mc-member-auth-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="mcMemberAuthTitle">' +
+          '<button type="button" class="mc-member-auth-modal__close" data-mc-auth-close aria-label="Close">×</button>' +
+          '<div class="mc-member-auth-modal__tabs">' +
+            '<button type="button" class="mc-member-auth-tab is-active" data-mc-auth-tab="login">Log In</button>' +
+            '<button type="button" class="mc-member-auth-tab" data-mc-auth-tab="signup">Sign Up</button>' +
+          '</div>' +
+          '<div class="mc-member-auth-modal__body">' +
+            '<iframe id="mcMemberAuthFrame" class="mc-member-auth-modal__frame" src="" loading="lazy"></iframe>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(wrap.firstChild);
+  }
+
+  function mcOpenAuthModal(mode) {
+    mcEnsureAuthModal();
+
+    var modal = document.getElementById('mcMemberAuthModal');
+    var frame = document.getElementById('mcMemberAuthFrame');
+    if (!modal || !frame) return;
+
+    var tabs = modal.querySelectorAll('.mc-member-auth-tab');
+    var i;
+    for (i = 0; i < tabs.length; i++) {
+      tabs[i].classList.toggle('is-active', tabs[i].getAttribute('data-mc-auth-tab') === mode);
+    }
+
+    frame.src =
+      mode === 'signup' ? window.getMemberSignupUrl() : window.getMemberLoginUrl();
+    modal.setAttribute('aria-hidden', 'false');
+    document.documentElement.classList.add('mc-member-auth-open');
+    document.body.classList.add('mc-member-auth-open');
+
+    if (typeof window.mcBindAuthFrameWatcher === 'function') {
+      window.mcBindAuthFrameWatcher();
+    }
+  }
+
+  function mcCloseAuthModal() {
+    var modal = document.getElementById('mcMemberAuthModal');
+    var frame = document.getElementById('mcMemberAuthFrame');
+    if (!modal || !frame) return;
+    modal.setAttribute('aria-hidden', 'true');
+    frame.src = '';
+    document.documentElement.classList.remove('mc-member-auth-open');
+    document.body.classList.remove('mc-member-auth-open');
+  }
+
+  document.addEventListener('click', function (e) {
+    var loginLink = e.target.closest('.mc-member-grid-price__login, [data-mc-open-login]');
+    if (loginLink) {
+      e.preventDefault();
+      mcOpenAuthModal('login');
+      return;
+    }
+
+    var signupLink = e.target.closest('[data-mc-open-signup]');
+    if (signupLink) {
+      e.preventDefault();
+      mcOpenAuthModal('signup');
+      return;
+    }
+
+    var closeBtn = e.target.closest('[data-mc-auth-close]');
+    if (closeBtn) {
+      e.preventDefault();
+      mcCloseAuthModal();
+    }
+
+    var tab = e.target.closest('.mc-member-auth-tab');
+    if (tab) {
+      e.preventDefault();
+      mcOpenAuthModal(tab.getAttribute('data-mc-auth-tab') || 'login');
+    }
+  });
+
+  window.mcOpenAuthModal = mcOpenAuthModal;
+  window.mcCloseAuthModal = mcCloseAuthModal;
+})();
+
+(function () {
+  function mcRefreshMemberPricingOnCurrentPage() {
+    try {
+      if (typeof mcResolveVolusionSession === 'function') mcResolveVolusionSession();
+    } catch (e1) {}
+
+    try {
+      if (typeof mcPageType === 'function' && mcPageType() === 'category' && typeof mcPaintCategoryGridMemberPricing === 'function') {
+        mcPaintCategoryGridMemberPricing();
+      }
+    } catch (e2) {}
+
+    try {
+      if (typeof mcPageType === 'function' && mcPageType() === 'pdp' && typeof mcRenderRetailMemberOnPdp === 'function') {
+        mcRenderRetailMemberOnPdp();
+      }
+    } catch (e3) {}
+  }
+
+  function mcLooksLoggedInPath(path) {
+    path = String(path || '').toLowerCase();
+    return (
+      path.indexOf('/myaccount') > -1 ||
+      path.indexOf('/logout') > -1 ||
+      path.indexOf('/account') > -1 ||
+      path === location.pathname.toLowerCase()
+    );
+  }
+
+  function mcBindAuthFrameWatcher() {
+    var frame = document.getElementById('mcMemberAuthFrame');
+    if (!frame || frame.getAttribute('data-mc-auth-watch') === '1') return;
+    frame.setAttribute('data-mc-auth-watch', '1');
+
+    frame.addEventListener('load', function () {
+      var href = '';
+      var path = '';
+
+      try {
+        href = frame.contentWindow.location.href || '';
+        path = frame.contentWindow.location.pathname || '';
+      } catch (eCross) {
+        return;
+      }
+
+      if (!href) return;
+
+      var isLoginPage = /\/login\.asp/i.test(path);
+      var isRegisterPage = /\/register\.asp/i.test(path);
+
+      if (!isLoginPage && !isRegisterPage && mcLooksLoggedInPath(path)) {
+        if (typeof window.mcCloseAuthModal === 'function') {
+          window.mcCloseAuthModal();
+        }
+        setTimeout(function () {
+          mcRefreshMemberPricingOnCurrentPage();
+        }, 120);
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mcBindAuthFrameWatcher);
+  } else {
+    mcBindAuthFrameWatcher();
+  }
+
+  window.addEventListener('load', mcBindAuthFrameWatcher);
+  window.mcBindAuthFrameWatcher = mcBindAuthFrameWatcher;
 })();
 </script>
 
