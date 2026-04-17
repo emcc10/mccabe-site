@@ -10231,6 +10231,16 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   font-weight: 500 !important;
 }
 
+.mc-pdp-retail-label {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 4px 0 !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0.06em !important;
+  color: #444 !important;
+}
+
 body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
 body.productdetails:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
 body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
@@ -10260,29 +10270,21 @@ body.mc-product-page #content_area #priceWithOptionsNoTax {
   opacity: 1 !important;
 }
 
-body.productdetails #v65-product-parent .product_productprice,
-body.productdetails #v65-product-parent .product_list_price,
 body.productdetails #v65-product-parent .product_sale_price,
 body.productdetails #v65-product-parent .product_saleprice,
 body.productdetails #v65-product-parent font.product_sale_price,
-body.productdetails #content_area .product_productprice,
-body.productdetails #content_area .product_list_price,
 body.productdetails #content_area .product_sale_price,
 body.productdetails #content_area .product_saleprice,
 body.productdetails #content_area font.product_sale_price,
-body.mc-product-page #v65-product-parent .product_productprice,
-body.mc-product-page #v65-product-parent .product_list_price,
 body.mc-product-page #v65-product-parent .product_sale_price,
 body.mc-product-page #v65-product-parent .product_saleprice,
 body.mc-product-page #v65-product-parent font.product_sale_price,
-body.mc-product-page #content_area .product_productprice,
-body.mc-product-page #content_area .product_list_price,
 body.mc-product-page #content_area .product_sale_price,
 body.mc-product-page #content_area .product_saleprice,
 body.mc-product-page #content_area font.product_sale_price {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
 }
 </style>
 <div id="mc-login-modal" class="mc-login-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mc-login-modal-title">
@@ -10615,24 +10617,16 @@ body.mc-product-page #content_area font.product_sale_price {
               window.setTimeout(function () {
                 window.location.reload();
               }, 120);
-              return;
             }
           } catch (eAuth) {}
-          cleanup(
-            false,
-            mode === 'signup'
-              ? 'We could not confirm the new account. Please check your info and try again.'
-              : 'Login failed. Please check your email and password.',
-            'error'
-          );
         }, 0);
       }, 900);
       var timeoutId = window.setTimeout(function() {
         cleanup(
           false,
           mode === 'signup'
-            ? 'Could not create the account right now. Please try again.'
-            : 'Could not sign in right now. Please try again.',
+            ? 'We could not confirm the new account. Please check your info and try again.'
+            : 'Login failed. Please check your email and password.',
           'error'
         );
       }, 15000);
@@ -11335,6 +11329,17 @@ body.mc-product-page #content_area font.product_sale_price {
     html += '</div>';
 
     mcSetStableHtml(mount, html);
+    try {
+      var saleNodes = card.querySelectorAll(
+        'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"]'
+      );
+      var i;
+      for (i = 0; i < saleNodes.length; i++) {
+        if (saleNodes[i].closest && saleNodes[i].closest('.mc-price-stack')) continue;
+        saleNodes[i].style.setProperty('display', 'none', 'important');
+        saleNodes[i].style.setProperty('visibility', 'hidden', 'important');
+      }
+    } catch (eHideCardSale) {}
   }
 
   function mcFindProductHref(card) {
@@ -12184,20 +12189,30 @@ body.mc-product-page #content_area font.product_sale_price {
 
     if (!nativeBlock || !nativeBlock.parentNode) return false;
 
+    var retailLabel = document.querySelector('.mc-pdp-retail-label');
+    if (!retailLabel) {
+      retailLabel = document.createElement('div');
+      retailLabel.className = 'mc-pdp-retail-label';
+    }
+    retailLabel.textContent = 'Retail:';
+    try {
+      if (retailLabel.previousSibling !== nativeBlock.previousSibling || retailLabel.nextSibling !== nativeBlock) {
+        nativeBlock.parentNode.insertBefore(retailLabel, nativeBlock);
+      }
+    } catch (eRetailLbl) {}
+
     var wrap = document.querySelector('.mc-pdp-member-pricing');
     if (!wrap) {
       wrap = document.createElement('div');
       wrap.className = 'mc-pdp-member-pricing';
-      nativeBlock.parentNode.insertBefore(wrap, nativeBlock);
-    } else if (wrap.nextSibling !== nativeBlock) {
-      nativeBlock.parentNode.insertBefore(wrap, nativeBlock);
+      if (nativeBlock.nextSibling) nativeBlock.parentNode.insertBefore(wrap, nativeBlock.nextSibling);
+      else nativeBlock.parentNode.appendChild(wrap);
+    } else if (wrap.previousSibling !== nativeBlock) {
+      if (nativeBlock.nextSibling) nativeBlock.parentNode.insertBefore(wrap, nativeBlock.nextSibling);
+      else nativeBlock.parentNode.appendChild(wrap);
     }
 
     var html = '';
-    if (retailText) {
-      html += '<div class="mc-pdp-retail-line">Retail: ' + retailText + '</div>';
-    }
-
     if (isLoggedIn && memberText) {
       html += '<div class="mc-pdp-member-line">Member: ' + memberText + '</div>';
     } else {
@@ -12206,6 +12221,22 @@ body.mc-product-page #content_area font.product_sale_price {
     }
 
     mcSetStableHtml(wrap, html);
+    try {
+      nativeBlock.style.setProperty('display', 'block', 'important');
+      nativeBlock.style.setProperty('visibility', 'visible', 'important');
+      nativeBlock.style.setProperty('opacity', '1', 'important');
+    } catch (eNativePdp) {}
+    try {
+      var saleNodes = document.querySelectorAll(
+        '#v65-product-parent font.product_sale_price, #v65-product-parent .product_sale_price, #v65-product-parent .product_saleprice,' +
+        '#content_area font.product_sale_price, #content_area .product_sale_price, #content_area .product_saleprice'
+      );
+      var i;
+      for (i = 0; i < saleNodes.length; i++) {
+        saleNodes[i].style.setProperty('display', 'none', 'important');
+        saleNodes[i].style.setProperty('visibility', 'hidden', 'important');
+      }
+    } catch (eHidePdpSale) {}
     mcHideDuplicatePdpMemberFragments();
     return true;
   }
