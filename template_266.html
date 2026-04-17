@@ -8100,21 +8100,57 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }
   }
 
-  function ensurePriceWithOptionsLabel(scope){
-    var root = scope || document;
+  function mcIsTheaterSeatingPdp(root){
+    var scope = root || document;
     var theaterTitle = (
       (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
       document.title ||
       ""
     ).toLowerCase();
-    var isTheaterSeatPdp =
+    return (
       !!(document.body && document.body.classList.contains('mc-theater-seating-pdp')) ||
       !!document.querySelector('a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"]') ||
-      /theater seating|theatre seating|theater chair|theatre chair/.test(theaterTitle);
-    if (isTheaterSeatPdp) {
-      try {
-        document.body.classList.add('mc-theater-seating-pdp');
-      } catch (eTheaterFlag) {}
+      /theater seating|theatre seating|theater chair|theatre chair/.test(theaterTitle) ||
+      !!scope.querySelector('select[title*="Number of Seats"], select[title*="Choose Configuration"], select[title*="Choose Cover"]')
+    );
+  }
+  function hideTheaterSeatPdpNativePricing(scope){
+    var root = scope || document;
+    if (!mcIsTheaterSeatingPdp(root)) return;
+    try {
+      document.body.classList.add('mc-theater-seating-pdp');
+    } catch (eTheaterFlag) {}
+    try {
+      var nodes = root.querySelectorAll('.option_pricing, #priceWithOptions, #priceWithOptionsNoTax');
+      var i;
+      for (i = 0; i < nodes.length; i++) {
+        var node = nodes[i];
+        node.style.setProperty('display', 'none', 'important');
+        node.style.setProperty('visibility', 'hidden', 'important');
+        node.style.setProperty('opacity', '0', 'important');
+        if (node.id === 'priceWithOptions' && node.parentNode) {
+          node.parentNode.style.setProperty('display', 'none', 'important');
+        }
+      }
+    } catch (eHideTheaterPrice) {}
+    try {
+      var rows = root.querySelectorAll('#options_table tr, table[id*="options_table"] tr');
+      var ri;
+      for (ri = 0; ri < rows.length; ri++) {
+        var row = rows[ri];
+        var select = row.querySelector('select');
+        if (!select) continue;
+        var meta = (((row.textContent || '') + ' ' + (select.getAttribute('title') || '') + ' ' + (select.name || '')).toLowerCase()).replace(/\s+/g, ' ');
+        if (/number of seats|choose configuration/.test(meta)) {
+          row.style.setProperty('display', 'none', 'important');
+        }
+      }
+    } catch (eHideTheaterRows) {}
+  }
+  function ensurePriceWithOptionsLabel(scope){
+    var root = scope || document;
+    if (mcIsTheaterSeatingPdp(root)) {
+      hideTheaterSeatPdpNativePricing(root);
       return;
     }
     var priceNode = root.querySelector('#priceWithOptions');
@@ -8162,6 +8198,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }
     try {
       hideNativePdpSalePricing(scope);
+      hideTheaterSeatPdpNativePricing(scope);
       ensurePriceWithOptionsLabel(scope);
       leftAlignPricingBlock(scope);
     } catch (e3) {}
@@ -10721,6 +10758,20 @@ body.mc-product-page #content_area font.product_sale_price {
     } catch (e2) {}
     return false;
   }
+  function mcLoginResponseLooksFailed(html, respUrl) {
+    var h = String(html || '');
+    var lc = h.toLowerCase();
+    var url = String(respUrl || '').toLowerCase();
+    if (typeof window.volusionMyAccountHtmlIndicatesLoggedIn === 'function' && window.volusionMyAccountHtmlIndicatesLoggedIn(h)) {
+      return false;
+    }
+    if (/logout|log\s*out|sign\s*out|order history|account settings/i.test(h)) return false;
+    if (url.indexOf('/login.asp') !== -1) return true;
+    if (/returning customers?|if you've purchased from us before/i.test(lc) && /type\s*=\s*["']password["']/i.test(h)) {
+      return true;
+    }
+    return false;
+  }
 
   async function mcSubmitAuthForm(form, mode) {
     if (!form) return false;
@@ -10728,6 +10779,46 @@ body.mc-product-page #content_area font.product_sale_price {
     mcToggleAuthPending(form, true);
     mcSetAuthStatus(mode, mode === 'signup' ? 'Creating account...' : 'Signing in...', 'success');
     mcRememberRecentMemberAuth();
+    if (mode === 'login') {
+      try {
+        mcSetLoginFormAction();
+        var loginResp = await fetch(form.getAttribute('action') || '/login.asp?ReturnTo=' + mcLoginReturnTo(), {
+          method: 'POST',
+          credentials: 'same-origin',
+          cache: 'no-store',
+          redirect: 'follow',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+          },
+          body: mcAuthFormBody(form)
+        });
+        var loginHtml = await loginResp.text();
+        var confirmedHtml = await mcConfirmRecentMemberAuth(10, 900);
+        if (confirmedHtml) {
+          mcRememberRecentMemberAuth();
+          mcSetAuthStatus('login', 'Signed in. Refreshing...', 'success');
+          window.setTimeout(function () {
+            window.location.reload();
+          }, 120);
+          return true;
+        }
+        mcClearRecentMemberAuth();
+        mcSetAuthStatus(
+          'login',
+          mcLoginResponseLooksFailed(loginHtml, loginResp && loginResp.url)
+            ? 'Login failed. Please check your email and password.'
+            : 'We could not confirm the member session. Please try again.',
+          'error'
+        );
+        mcToggleAuthPending(form, false);
+        return false;
+      } catch (eLoginFetch) {
+        mcClearRecentMemberAuth();
+        mcSetAuthStatus('login', 'Could not sign in right now. Please try again.', 'error');
+        mcToggleAuthPending(form, false);
+        return false;
+      }
+    }
     return new Promise(function(resolve) {
       var frame = mcGetAuthFrame();
       var originalTarget = form.getAttribute('target') || '';
