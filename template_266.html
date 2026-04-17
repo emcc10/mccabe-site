@@ -12657,6 +12657,19 @@ body.mc-product-page #content_area font.product_sale_price {
             : null;
       isLoggedIn = !!(st && st.unlocked);
     } catch (e1) {}
+    try {
+      var liveAuth = await mcAuthSucceeded();
+      if (!liveAuth) {
+        isLoggedIn = false;
+        if (st) st.unlocked = false;
+        mcClearRecentMemberAuth();
+        if (document.body) document.body.classList.remove('mc-member-logged-in');
+      } else {
+        isLoggedIn = true;
+        if (st) st.unlocked = true;
+        if (document.body) document.body.classList.add('mc-member-logged-in');
+      }
+    } catch (e1b) {}
 
     var retailAmt = 0;
     var memberAmt = 0;
