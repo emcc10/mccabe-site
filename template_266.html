@@ -2972,15 +2972,20 @@ function refreshPlannerPriceForMemberState(){
 /** Volusion myaccount HTML: logged in if logout/sign-out present or welcome dashboard; not if login-only page. */
 function volusionMyAccountHtmlIndicatesLoggedIn(html) {
   if (!html || html.length < 80) return false;
-  var h = html;
+  var h = String(html)
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ');
   var lc = h.toLowerCase();
-  if (/href\s*=\s*["'][^"']*logout[^"']*["']/i.test(h)) return true;
-  if (/href\s*=\s*["'][^"']*logoff[^"']*["']/i.test(h)) return true;
+  if (/returning customer|if you've purchased from us before/i.test(lc) && /<input[^>]+type\s*=\s*["']password["']/i.test(h)) {
+    return false;
+  }
+  if (/href\s*=\s*["'][^"']*logout\.asp[^"']*["']/i.test(h)) return true;
+  if (/href\s*=\s*["'][^"']*logoff\.asp[^"']*["']/i.test(h)) return true;
   if (/>\s*sign\s*out\s*</i.test(h)) return true;
   if (/>\s*log\s*out\s*</i.test(h)) return true;
-  if (/welcome to your account/i.test(h)) return true;
+  if (/welcome to your account/i.test(lc)) return true;
   if (/order history|account settings|edit (your )?profile/i.test(lc) && !/returning customer/i.test(lc)) return true;
-  if (/<input[^>]+type\s*=\s*["']password["']/i.test(h) && /returning customer|login password|sign in to continue/i.test(lc) && !/logout|log\s*out/i.test(lc)) return false;
   return false;
 }
 function mcRememberRecentMemberAuth() {
@@ -3047,7 +3052,6 @@ function mcPopulateMemberSeatPriceFromHtml(state, productHtml) {
 function mcCurrentPageSuggestsLoggedIn(html, publicSeatPrice) {
   if (!html) return false;
   if (volusionMyAccountHtmlIndicatesLoggedIn(html)) return true;
-  if (/logout|log\s*out|sign\s*out|order history|account settings/i.test(String(html || ""))) return true;
   var memberPrice = extractVolusionAddToCartPriceFromHtml(html);
   if (!(memberPrice > 0)) {
     memberPrice = extractMemberSeatPriceFromHtml(html, publicSeatPrice);
@@ -9467,12 +9471,17 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     } catch (_) {}
   }
   function mcCartLooksLoggedIn(){
-    var h = document.documentElement ? document.documentElement.innerHTML : "";
+    var raw = document.documentElement ? document.documentElement.innerHTML : "";
+    var h = String(raw)
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<!--[\s\S]*?-->/g, ' ');
     var lc = h.toLowerCase();
-    if (/href\s*=\s*["'][^"']*logout[^"']*["']/i.test(h)) return true;
-    if (/href\s*=\s*["'][^"']*logoff[^"']*["']/i.test(h)) return true;
+    if (/<input[^>]+type\s*=\s*["']password["']/i.test(h) && /returning customer|login password|sign in/i.test(lc)) return false;
+    if (/href\s*=\s*["'][^"']*logout\.asp[^"']*["']/i.test(h)) return true;
+    if (/href\s*=\s*["'][^"']*logoff\.asp[^"']*["']/i.test(h)) return true;
     if (/>\s*sign\s*out\s*</i.test(h) || />\s*log\s*out\s*</i.test(h)) return true;
-    if (/welcome to your account|order history|account settings/i.test(lc) && !/returning customer|login password|sign in/i.test(lc)) return true;
+    if (/welcome to your account|order history|account settings/i.test(lc) && !/returning customer/i.test(lc)) return true;
     return false;
   }
   function mcReadCartTarget(){
@@ -10804,7 +10813,10 @@ body.mc-product-page #content_area font.product_sale_price {
       if (typeof window.volusionMyAccountHtmlIndicatesLoggedIn === 'function') {
         return !!window.volusionMyAccountHtmlIndicatesLoggedIn(html);
       }
-      return /logout|log\s*out|sign\s*out|order history|account settings/i.test(String(html || ''));
+      if (typeof volusionMyAccountHtmlIndicatesLoggedIn === 'function') {
+        return !!volusionMyAccountHtmlIndicatesLoggedIn(html);
+      }
+      return false;
     } catch (e2) {}
     return false;
   }
