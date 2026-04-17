@@ -10382,10 +10382,89 @@ body.mc-product-page #content_area font.product_sale_price {
     if (!frame) return;
     var src = '/login.asp?ReturnTo=' + mcLoginReturnTo() + '&mcModalLogin=1';
     try {
+      frame.__mcLoginSubmitSeen = false;
+      frame.__mcLoginSuccessChecks = 0;
       if (forceReload || frame.getAttribute('src') !== src) {
         frame.setAttribute('src', src);
       }
     } catch (eFrm) {}
+  }
+  function mcGetLoginFrameDocument(frame) {
+    if (!frame) return null;
+    try {
+      return frame.contentDocument || (frame.contentWindow ? frame.contentWindow.document : null) || null;
+    } catch (eDoc) {}
+    return null;
+  }
+  function mcStyleLoginFrame(doc) {
+    if (!doc || !doc.documentElement) return;
+    if (doc.getElementById('mc-login-modal-frame-style')) return;
+    try {
+      var style = doc.createElement('style');
+      style.id = 'mc-login-modal-frame-style';
+      style.textContent =
+        'html,body{margin:0!important;padding:0!important;background:#fff!important;}' +
+        'body{font-family:Arial,Helvetica,sans-serif!important;overflow-x:hidden!important;}' +
+        'section.content_area-wrapper,#content_area{width:auto!important;max-width:none!important;margin:0!important;padding:0!important;}' +
+        '#content_area>img:first-child{display:none!important;}' +
+        'form[name="loginform"]{display:block!important;margin:0!important;}' +
+        'form[name="loginform"]>table{width:100%!important;max-width:100%!important;border-collapse:collapse!important;}' +
+        'form[name="loginform"]>table>tbody>tr{display:block!important;}' +
+        'form[name="loginform"]>table>tbody>tr>td{display:block!important;width:100%!important;max-width:100%!important;padding:12px!important;box-sizing:border-box!important;}' +
+        'form[name="loginform"]>table>tbody>tr>td:nth-child(2){display:none!important;}' +
+        'input[name="email"],input[name="Password"]{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;padding:10px 12px!important;font-size:16px!important;line-height:1.3!important;box-sizing:border-box!important;}' +
+        '#btnSubmit,input[name="imageField2"]{max-width:160px!important;height:auto!important;}';
+      (doc.head || doc.documentElement).appendChild(style);
+    } catch (eStyleFrame) {}
+  }
+  function mcWireLoginFrameForm(frame, doc) {
+    if (!frame || !doc) return false;
+    var form = null;
+    try {
+      form = doc.querySelector("form[name='loginform'][action*='login.asp']");
+    } catch (eSel) {}
+    if (!form) return false;
+    mcStyleLoginFrame(doc);
+    if (form.getAttribute('data-mc-login-bound') === '1') return true;
+    try {
+      form.setAttribute('data-mc-login-bound', '1');
+      form.addEventListener('submit', function () {
+        try {
+          frame.__mcLoginSubmitSeen = true;
+          frame.__mcLoginSuccessChecks = 0;
+        } catch (eSubmitFlag) {}
+      });
+    } catch (eBindForm) {}
+    return true;
+  }
+  function mcFinalizeLoginFrameSuccess(frame) {
+    if (!frame) return;
+    try {
+      frame.__mcLoginSubmitSeen = false;
+      frame.__mcLoginSuccessChecks = 0;
+    } catch (eDone) {}
+    mcCloseLoginModal();
+    window.setTimeout(function () {
+      window.location.reload();
+    }, 120);
+  }
+  function mcCheckLoginFrameSuccess(frame) {
+    if (!frame) return;
+    if (!frame.__mcLoginSubmitSeen) return;
+    var doc = mcGetLoginFrameDocument(frame);
+    if (!doc) return;
+    if (mcWireLoginFrameForm(frame, doc)) {
+      return;
+    }
+    var tries = (frame.__mcLoginSuccessChecks || 0) + 1;
+    frame.__mcLoginSuccessChecks = tries;
+    window.setTimeout(async function () {
+      try {
+        if (await mcAuthSucceeded()) {
+          mcFinalizeLoginFrameSuccess(frame);
+        }
+      } catch (eAuthFrame) {}
+    }, tries < 3 ? 300 : 700);
   }
   function mcSetModalTab(mode) {
     var loginPanel = document.getElementById('mc-login-modal-panel-login');
@@ -10601,15 +10680,6 @@ body.mc-product-page #content_area font.product_sale_price {
   }
 
   async function mcAuthSucceeded() {
-    if (typeof window.detectMemberPricingState === 'function') {
-      try {
-        window.__mcMemberPricing.promise = null;
-      } catch (e0) {}
-      try {
-        var state = await window.detectMemberPricingState();
-        if (state && state.unlocked) return true;
-      } catch (e1) {}
-    }
     try {
       var resp = await fetch('/myaccount.asp?mcAuthCheck=' + Date.now(), {
         credentials: 'same-origin',
@@ -10762,18 +10832,14 @@ body.mc-product-page #content_area font.product_sale_price {
     var frame = document.getElementById('mc-login-modal-login-frame');
     if (!frame) return;
     frame.addEventListener('load', function () {
-      window.setTimeout(async function () {
+      window.setTimeout(function () {
         var modal = document.getElementById('mc-login-modal');
         if (!modal || !modal.classList.contains('mc-login-modal--open')) return;
-        try {
-          if (await mcAuthSucceeded()) {
-            mcCloseLoginModal();
-            window.setTimeout(function () {
-              window.location.reload();
-            }, 120);
-          }
-        } catch (eAuthFrame) {}
-      }, 400);
+        var doc = mcGetLoginFrameDocument(frame);
+        if (!doc) return;
+        if (mcWireLoginFrameForm(frame, doc)) return;
+        mcCheckLoginFrameSuccess(frame);
+      }, 120);
     });
   })();
   document.addEventListener('keydown', function (ev) {
