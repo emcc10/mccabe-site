@@ -10778,21 +10778,36 @@ body.mc-product-page #content_area font.product_sale_price {
     mcSetAuthStatus(mode, '', '');
     mcToggleAuthPending(form, true);
     mcSetAuthStatus(mode, mode === 'signup' ? 'Creating account...' : 'Signing in...', 'success');
-    mcRememberRecentMemberAuth();
     if (mode === 'login') {
+      var loginAbort = null;
+      var loginTimeoutId = null;
       try {
         mcSetLoginFormAction();
+        if (typeof AbortController !== 'undefined') {
+          loginAbort = new AbortController();
+          loginTimeoutId = window.setTimeout(function () {
+            try {
+              loginAbort.abort();
+            } catch (eAbort) {}
+          }, 12000);
+        }
         var loginResp = await fetch(form.getAttribute('action') || '/login.asp?ReturnTo=' + mcLoginReturnTo(), {
           method: 'POST',
           credentials: 'same-origin',
           cache: 'no-store',
           redirect: 'follow',
+          signal: loginAbort ? loginAbort.signal : undefined,
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
           },
           body: mcAuthFormBody(form)
         });
+        if (loginTimeoutId) {
+          window.clearTimeout(loginTimeoutId);
+          loginTimeoutId = null;
+        }
         var loginHtml = await loginResp.text();
+        mcRememberRecentMemberAuth();
         var confirmedHtml = await mcConfirmRecentMemberAuth(10, 900);
         if (confirmedHtml) {
           mcRememberRecentMemberAuth();
@@ -10813,12 +10828,23 @@ body.mc-product-page #content_area font.product_sale_price {
         mcToggleAuthPending(form, false);
         return false;
       } catch (eLoginFetch) {
+        if (loginTimeoutId) {
+          window.clearTimeout(loginTimeoutId);
+          loginTimeoutId = null;
+        }
         mcClearRecentMemberAuth();
-        mcSetAuthStatus('login', 'Could not sign in right now. Please try again.', 'error');
+        mcSetAuthStatus(
+          'login',
+          eLoginFetch && eLoginFetch.name === 'AbortError'
+            ? 'Login timed out. Please try again.'
+            : 'Could not sign in right now. Please try again.',
+          'error'
+        );
         mcToggleAuthPending(form, false);
         return false;
       }
     }
+    mcRememberRecentMemberAuth();
     return new Promise(function(resolve) {
       var frame = mcGetAuthFrame();
       var originalTarget = form.getAttribute('target') || '';
