@@ -10804,12 +10804,22 @@ body.mc-product-page #content_area font.product_sale_price {
   }
 
   async function mcAuthSucceeded() {
+    var ctrl = null;
+    var timer = null;
     try {
+      if (typeof AbortController !== 'undefined') {
+        ctrl = new AbortController();
+        timer = window.setTimeout(function () {
+          try { ctrl.abort(); } catch (eA) {}
+        }, 4500);
+      }
       var resp = await fetch('/myaccount.asp?mcAuthCheck=' + Date.now(), {
         credentials: 'same-origin',
-        cache: 'no-store'
+        cache: 'no-store',
+        signal: ctrl ? ctrl.signal : undefined
       });
       var html = await resp.text();
+      if (timer) { window.clearTimeout(timer); timer = null; }
       if (typeof window.volusionMyAccountHtmlIndicatesLoggedIn === 'function') {
         return !!window.volusionMyAccountHtmlIndicatesLoggedIn(html);
       }
@@ -10817,7 +10827,9 @@ body.mc-product-page #content_area font.product_sale_price {
         return !!volusionMyAccountHtmlIndicatesLoggedIn(html);
       }
       return false;
-    } catch (e2) {}
+    } catch (e2) {
+      if (timer) { try { window.clearTimeout(timer); } catch (eC) {} }
+    }
     return false;
   }
   async function mcWaitForAuthSuccess(maxMs, intervalMs) {
@@ -10833,15 +10845,22 @@ body.mc-product-page #content_area font.product_sale_price {
     return false;
   }
   function mcLoginResponseLooksFailed(html, respUrl) {
-    var h = String(html || '');
-    var lc = h.toLowerCase();
+    var raw = String(html || '');
+    var stripped = raw
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<!--[\s\S]*?-->/g, ' ');
+    var lc = stripped.toLowerCase();
     var url = String(respUrl || '').toLowerCase();
-    if (typeof window.volusionMyAccountHtmlIndicatesLoggedIn === 'function' && window.volusionMyAccountHtmlIndicatesLoggedIn(h)) {
+    if (/the email address or password[^<]*invalid|invalid (?:email|login|password)|login failed|not recognized|could not log you in/i.test(lc)) {
+      return true;
+    }
+    if (typeof window.volusionMyAccountHtmlIndicatesLoggedIn === 'function' && window.volusionMyAccountHtmlIndicatesLoggedIn(raw)) {
       return false;
     }
-    if (/logout|log\s*out|sign\s*out|order history|account settings/i.test(h)) return false;
+    if (/href\s*=\s*["'][^"']*logout\.asp[^"']*["']/i.test(stripped)) return false;
     if (url.indexOf('/login.asp') !== -1) return true;
-    if (/returning customers?|if you've purchased from us before/i.test(lc) && /type\s*=\s*["']password["']/i.test(h)) {
+    if (/returning customers?|if you've purchased from us before/i.test(lc)) {
       return true;
     }
     return false;
@@ -10855,76 +10874,62 @@ body.mc-product-page #content_area font.product_sale_price {
     if (mode === 'login') {
       var loginAbort = null;
       var loginTimeoutId = null;
-      var loginRequest = null;
+      var didNavigate = false;
       try {
         mcSetLoginFormAction();
         if (typeof AbortController !== 'undefined') {
           loginAbort = new AbortController();
           loginTimeoutId = window.setTimeout(function () {
-            try {
-              loginAbort.abort();
-            } catch (eAbort) {}
-          }, 12000);
+            try { loginAbort.abort(); } catch (eAbort) {}
+          }, 10000);
         }
-        loginRequest = fetch(form.getAttribute('action') || '/login.asp?ReturnTo=' + mcLoginReturnTo(), {
-          method: 'POST',
-          credentials: 'same-origin',
-          cache: 'no-store',
-          redirect: 'follow',
-          signal: loginAbort ? loginAbort.signal : undefined,
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-          },
-          body: mcAuthFormBody(form)
-        });
-        var confirmed = await mcWaitForAuthSuccess(15000, 700);
+        var loginResp = null;
+        var loginHtml = '';
+        try {
+          loginResp = await fetch(form.getAttribute('action') || '/login.asp?ReturnTo=' + mcLoginReturnTo(), {
+            method: 'POST',
+            credentials: 'same-origin',
+            cache: 'no-store',
+            redirect: 'follow',
+            signal: loginAbort ? loginAbort.signal : undefined,
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            },
+            body: mcAuthFormBody(form)
+          });
+          loginHtml = await loginResp.text();
+        } catch (eFetch) {
+          if (!(eFetch && eFetch.name === 'AbortError')) throw eFetch;
+        }
+        if (loginTimeoutId) { window.clearTimeout(loginTimeoutId); loginTimeoutId = null; }
+
+        var failed = loginResp
+          ? mcLoginResponseLooksFailed(loginHtml, loginResp && loginResp.url)
+          : false;
+        if (failed) {
+          mcClearRecentMemberAuth();
+          mcSetAuthStatus('login', 'Login failed. Please check your email and password.', 'error');
+          return false;
+        }
+
+        var confirmed = await mcWaitForAuthSuccess(8000, 500);
         if (confirmed) {
-          if (loginTimeoutId) {
-            window.clearTimeout(loginTimeoutId);
-            loginTimeoutId = null;
-          }
-          try {
-            if (loginAbort) loginAbort.abort();
-          } catch (eAbortDone) {}
           mcRememberRecentMemberAuth();
           mcSetAuthStatus('login', 'Signed in. Refreshing...', 'success');
+          didNavigate = true;
           mcCloseLoginModal();
-          window.setTimeout(function () {
-            window.location.reload();
-          }, 120);
+          window.setTimeout(function () { window.location.reload(); }, 120);
           return true;
         }
-        var loginResp = await loginRequest;
-        if (loginTimeoutId) {
-          window.clearTimeout(loginTimeoutId);
-          loginTimeoutId = null;
-        }
-        var loginHtml = await loginResp.text();
-        var confirmedHtml = await mcConfirmRecentMemberAuth(3, 700);
-        if (confirmedHtml) {
-          mcRememberRecentMemberAuth();
-          mcSetAuthStatus('login', 'Signed in. Refreshing...', 'success');
-          mcCloseLoginModal();
-          window.setTimeout(function () {
-            window.location.reload();
-          }, 120);
-          return true;
-        }
+
         mcClearRecentMemberAuth();
         mcSetAuthStatus(
           'login',
-          mcLoginResponseLooksFailed(loginHtml, loginResp && loginResp.url)
-            ? 'Login failed. Please check your email and password.'
-            : 'We could not confirm the member session. Please try again.',
+          'We could not confirm the member session. Please try again.',
           'error'
         );
-        mcToggleAuthPending(form, false);
         return false;
       } catch (eLoginFetch) {
-        if (loginTimeoutId) {
-          window.clearTimeout(loginTimeoutId);
-          loginTimeoutId = null;
-        }
         mcClearRecentMemberAuth();
         mcSetAuthStatus(
           'login',
@@ -10933,8 +10938,14 @@ body.mc-product-page #content_area font.product_sale_price {
             : 'Could not sign in right now. Please try again.',
           'error'
         );
-        mcToggleAuthPending(form, false);
         return false;
+      } finally {
+        if (loginTimeoutId) {
+          try { window.clearTimeout(loginTimeoutId); } catch (eCT) {}
+        }
+        if (!didNavigate) {
+          try { mcToggleAuthPending(form, false); } catch (eTP) {}
+        }
       }
     }
     mcRememberRecentMemberAuth();
