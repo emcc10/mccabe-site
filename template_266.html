@@ -10313,13 +10313,21 @@ body.mc-product-page #content_area font.product_sale_price {
     </div>
     <div id="mc-login-modal-panel-login" class="mc-login-modal__panel-body is-active">
       <p class="mc-login-modal__hint">Sign in below. When login succeeds, this page will refresh and show member pricing.</p>
-      <iframe
-        id="mc-login-modal-login-frame"
-        class="mc-login-modal__frame"
-        title="Member login"
-        loading="lazy"
-        src="about:blank"
-      ></iframe>
+      <div id="mc-login-modal-login-status" class="mc-login-modal__status" aria-live="polite"></div>
+      <form id="mc-member-login-form" class="mc-login-modal__form" method="post" action="/login.asp" autocomplete="on">
+        <input type="hidden" name="CustomerNewOld" value="old" />
+        <input type="hidden" name="imageField2.x" value="1" />
+        <input type="hidden" name="imageField2.y" value="1" />
+        <div class="mc-login-modal__field">
+          <label for="mc-login-email">Email (username)</label>
+          <input type="email" id="mc-login-email" name="email" required autocomplete="username" maxlength="75" />
+        </div>
+        <div class="mc-login-modal__field">
+          <label for="mc-login-password">Password</label>
+          <input type="password" id="mc-login-password" name="Password" required autocomplete="current-password" maxlength="80" />
+        </div>
+        <button type="submit" class="mc-login-modal__submit">Log in</button>
+      </form>
       <p class="mc-login-modal__signup-note">Need the full login page? <a href="/login.asp" target="_blank" rel="noopener">Open in a new tab</a></p>
       <p class="mc-login-modal__signup">New here? <a href="#" id="mc-login-modal-switch-signup">Create an account</a></p>
     </div>
@@ -10364,6 +10372,11 @@ body.mc-product-page #content_area font.product_sale_price {
       '/AccountSettings.asp?AddNewCustomer=Y&ReturnTo=' + mcLoginReturnTo()
     );
   }
+  function mcSetLoginFormAction() {
+    var form = document.getElementById('mc-member-login-form');
+    if (!form) return;
+    form.setAttribute('action', '/login.asp?ReturnTo=' + mcLoginReturnTo());
+  }
   function mcSplitDisplayName(full) {
     var s = String(full || '').trim().replace(/\s+/g, ' ');
     if (!s) return { first: '', last: 'Customer' };
@@ -10371,100 +10384,12 @@ body.mc-product-page #content_area font.product_sale_price {
     if (i === -1) return { first: s, last: 'Customer' };
     return { first: s.slice(0, i), last: s.slice(i + 1) };
   }
-  function mcSetLoginFrameSrc(forceReload) {
-    var frame = document.getElementById('mc-login-modal-login-frame');
-    if (!frame) return;
-    var src = '/login.asp?ReturnTo=' + mcLoginReturnTo() + '&mcModalLogin=1';
-    try {
-      frame.__mcLoginSubmitSeen = false;
-      frame.__mcLoginSuccessChecks = 0;
-      if (forceReload || frame.getAttribute('src') !== src) {
-        frame.setAttribute('src', src);
-      }
-    } catch (eFrm) {}
-  }
-  function mcGetLoginFrameDocument(frame) {
-    if (!frame) return null;
-    try {
-      return frame.contentDocument || (frame.contentWindow ? frame.contentWindow.document : null) || null;
-    } catch (eDoc) {}
-    return null;
-  }
-  function mcStyleLoginFrame(doc) {
-    if (!doc || !doc.documentElement) return;
-    if (doc.getElementById('mc-login-modal-frame-style')) return;
-    try {
-      var style = doc.createElement('style');
-      style.id = 'mc-login-modal-frame-style';
-      style.textContent =
-        'html,body{margin:0!important;padding:0!important;background:#fff!important;}' +
-        'body{font-family:Arial,Helvetica,sans-serif!important;overflow-x:hidden!important;}' +
-        'section.content_area-wrapper,#content_area{width:auto!important;max-width:none!important;margin:0!important;padding:0!important;}' +
-        '#content_area>img:first-child{display:none!important;}' +
-        'form[name="loginform"]{display:block!important;margin:0!important;}' +
-        'form[name="loginform"]>table{width:100%!important;max-width:100%!important;border-collapse:collapse!important;}' +
-        'form[name="loginform"]>table>tbody>tr{display:block!important;}' +
-        'form[name="loginform"]>table>tbody>tr>td{display:block!important;width:100%!important;max-width:100%!important;padding:12px!important;box-sizing:border-box!important;}' +
-        'form[name="loginform"]>table>tbody>tr>td:nth-child(2){display:none!important;}' +
-        'input[name="email"],input[name="Password"]{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;padding:10px 12px!important;font-size:16px!important;line-height:1.3!important;box-sizing:border-box!important;}' +
-        '#btnSubmit,input[name="imageField2"]{max-width:160px!important;height:auto!important;}';
-      (doc.head || doc.documentElement).appendChild(style);
-    } catch (eStyleFrame) {}
-  }
-  function mcWireLoginFrameForm(frame, doc) {
-    if (!frame || !doc) return false;
-    var form = null;
-    try {
-      form = doc.querySelector("form[name='loginform'][action*='login.asp']");
-    } catch (eSel) {}
-    if (!form) return false;
-    mcStyleLoginFrame(doc);
-    if (form.getAttribute('data-mc-login-bound') === '1') return true;
-    try {
-      form.setAttribute('data-mc-login-bound', '1');
-      form.addEventListener('submit', function () {
-        try {
-          frame.__mcLoginSubmitSeen = true;
-          frame.__mcLoginSuccessChecks = 0;
-        } catch (eSubmitFlag) {}
-      });
-    } catch (eBindForm) {}
-    return true;
-  }
-  function mcFinalizeLoginFrameSuccess(frame) {
-    if (!frame) return;
-    try {
-      frame.__mcLoginSubmitSeen = false;
-      frame.__mcLoginSuccessChecks = 0;
-    } catch (eDone) {}
-    mcCloseLoginModal();
-    window.setTimeout(function () {
-      window.location.reload();
-    }, 120);
-  }
-  function mcCheckLoginFrameSuccess(frame) {
-    if (!frame) return;
-    if (!frame.__mcLoginSubmitSeen) return;
-    var doc = mcGetLoginFrameDocument(frame);
-    if (!doc) return;
-    if (mcWireLoginFrameForm(frame, doc)) {
-      return;
-    }
-    var tries = (frame.__mcLoginSuccessChecks || 0) + 1;
-    frame.__mcLoginSuccessChecks = tries;
-    window.setTimeout(async function () {
-      try {
-        if (await mcAuthSucceeded()) {
-          mcFinalizeLoginFrameSuccess(frame);
-        }
-      } catch (eAuthFrame) {}
-    }, tries < 3 ? 300 : 700);
-  }
   function mcSetModalTab(mode) {
     var loginPanel = document.getElementById('mc-login-modal-panel-login');
     var signupPanel = document.getElementById('mc-login-modal-panel-signup');
     var tabs = document.querySelectorAll('[data-mc-login-tab]');
     var title = document.getElementById('mc-login-modal-title');
+    mcSetAuthStatus('login', '', '');
     mcSetAuthStatus('signup', '', '');
     var i;
     for (i = 0; i < tabs.length; i++) {
@@ -10483,7 +10408,10 @@ body.mc-product-page #content_area font.product_sale_price {
       title.textContent = mode === 'signup' ? 'Create account' : 'Member login';
     }
     if (mode === 'login') {
-      mcSetLoginFrameSrc(false);
+      mcSetLoginFormAction();
+      try {
+        mcToggleAuthPending(document.getElementById('mc-member-login-form'), false);
+      } catch (eLogReset) {}
     }
     if (mode === 'signup') {
       mcSetSignupFormAction();
@@ -10513,7 +10441,6 @@ body.mc-product-page #content_area font.product_sale_price {
   function mcOpenLoginModal() {
     var m = mcPrepareLoginModal();
     if (!m) return false;
-    mcSetLoginFrameSrc(true);
     mcSetModalTab('login');
     m.classList.add('mc-login-modal--open');
     m.setAttribute('aria-hidden', 'false');
@@ -10727,6 +10654,7 @@ body.mc-product-page #content_area font.product_sale_price {
           if (finished) return;
           try {
             if (await mcAuthSucceeded()) {
+              mcRememberRecentMemberAuth();
               mcSetAuthStatus(mode, mode === 'signup' ? 'Account created. Refreshing...' : 'Signed in. Refreshing...', 'success');
               cleanup(true, '', '');
               window.setTimeout(function () {
@@ -10744,10 +10672,11 @@ body.mc-product-page #content_area font.product_sale_price {
             : 'Login failed. Please check your email and password.',
           'error'
         );
-      }, 15000);
+      }, 25000);
       try {
         form.setAttribute('target', 'mc-member-auth-frame');
         if (mode === 'signup') mcSetSignupFormAction();
+        if (mode === 'login') mcSetLoginFormAction();
         HTMLFormElement.prototype.submit.call(form);
       } catch (err) {
         cleanup(
@@ -10801,6 +10730,13 @@ body.mc-product-page #content_area font.product_sale_price {
   });
 
   (function mcBindAuthForms() {
+    var loginForm = document.getElementById('mc-member-login-form');
+    if (loginForm) {
+      loginForm.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        mcSubmitAuthForm(loginForm, 'login');
+      });
+    }
     var form = document.getElementById('mc-member-signup-form');
     if (!form) return;
     form.addEventListener('submit', function (ev) {
@@ -10820,20 +10756,6 @@ body.mc-product-page #content_area font.product_sale_price {
       p2.value = pwEl.value;
       mcSetSignupFormAction();
       mcSubmitAuthForm(form, 'signup');
-    });
-  })();
-  (function mcBindLoginFrame() {
-    var frame = document.getElementById('mc-login-modal-login-frame');
-    if (!frame) return;
-    frame.addEventListener('load', function () {
-      window.setTimeout(function () {
-        var modal = document.getElementById('mc-login-modal');
-        if (!modal || !modal.classList.contains('mc-login-modal--open')) return;
-        var doc = mcGetLoginFrameDocument(frame);
-        if (!doc) return;
-        if (mcWireLoginFrameForm(frame, doc)) return;
-        mcCheckLoginFrameSuccess(frame);
-      }, 120);
     });
   })();
   document.addEventListener('keydown', function (ev) {
