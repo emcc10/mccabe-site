@@ -2921,6 +2921,62 @@ function volusionMyAccountHtmlIndicatesLoggedIn(html) {
   if (/<input[^>]+type\s*=\s*["']password["']/i.test(h) && /returning customer|login password|sign in to continue/i.test(lc) && !/logout|log\s*out/i.test(lc)) return false;
   return false;
 }
+function mcRememberRecentMemberAuth() {
+  try { sessionStorage.setItem("mc_recent_member_auth_ts", String(Date.now())); } catch (e) {}
+}
+function mcClearRecentMemberAuth() {
+  try { sessionStorage.removeItem("mc_recent_member_auth_ts"); } catch (e) {}
+}
+function mcHasRecentMemberAuth() {
+  try {
+    var ts = parseInt(sessionStorage.getItem("mc_recent_member_auth_ts") || "0", 10);
+    return !!(ts && (Date.now() - ts) < 10 * 60 * 1000);
+  } catch (e) {
+    return false;
+  }
+}
+function mcDelay(ms) {
+  return new Promise(function(resolve) {
+    setTimeout(resolve, ms);
+  });
+}
+function mcPopulateMemberSeatPriceFromHtml(state, productHtml) {
+  if (!state || !productHtml) return state;
+  var memberSeatPrice = extractVolusionAddToCartPriceFromHtml(productHtml);
+  if (!(memberSeatPrice > 0)) {
+    memberSeatPrice = extractMemberSeatPriceFromHtml(productHtml, state.publicSeatPrice);
+  }
+  if (!(memberSeatPrice > 0)) {
+    var dispOnly = extractDisplayedSeatPriceFromHtml(productHtml);
+    if (dispOnly > 0 && state.publicSeatPrice > 0 && dispOnly < state.publicSeatPrice) {
+      memberSeatPrice = dispOnly;
+    }
+  }
+  if (memberSeatPrice > 0) {
+    state.memberSeatPrice = memberSeatPrice;
+    if (state.publicSeatPrice > memberSeatPrice) {
+      state.delta = state.publicSeatPrice - memberSeatPrice;
+    }
+  }
+  if (state.unlocked && !(state.memberSeatPrice > 0)) {
+    var live = getVolusionAddToCartSeatPrice(document);
+    if (live > 0) {
+      state.memberSeatPrice = live;
+    }
+  }
+  return state;
+}
+function mcCurrentPageSuggestsLoggedIn(html, publicSeatPrice) {
+  if (!html) return false;
+  if (volusionMyAccountHtmlIndicatesLoggedIn(html)) return true;
+  if (/logout|log\s*out|sign\s*out|order history|account settings/i.test(String(html || ""))) return true;
+  var memberPrice = extractVolusionAddToCartPriceFromHtml(html);
+  if (!(memberPrice > 0)) {
+    memberPrice = extractMemberSeatPriceFromHtml(html, publicSeatPrice);
+  }
+  if (memberPrice > 0 && (!(publicSeatPrice > 0) || memberPrice <= publicSeatPrice)) return true;
+  return false;
+}
 /** Parse primary PDP price from fetched product HTML (logged-in price may equal public — no "lower" dollar in DOM). */
 function extractDisplayedSeatPriceFromHtml(html) {
   if (!html) return 0;
@@ -3235,46 +3291,57 @@ function detectMemberPricingState(){
     var accountHtml = packet.accountHtml;
     var respUrl = (packet.respUrl || "").toLowerCase();
     var state = window.__mcMemberPricing;
+    var recentAuth = mcHasRecentMemberAuth();
     state.checked = true;
     state.publicSeatPrice = getDisplayedPublicSeatPrice();
-    if (respUrl.indexOf("login.asp") !== -1) {
+    if (respUrl.indexOf("login.asp") !== -1 && !recentAuth) {
       state.unlocked = false;
       return state;
     }
     state.unlocked = volusionMyAccountHtmlIndicatesLoggedIn(accountHtml);
-    if (!state.unlocked) {
-      return state;
-    }
     var url = new URL(window.location.href);
     url.searchParams.delete("CartID");
-    return fetch(url.pathname + url.search, {
-      credentials: "same-origin",
-      cache: "no-store"
-    }).then(function(resp){
-      return resp.text();
-    }).then(function(productHtml){
-      var memberSeatPrice = extractVolusionAddToCartPriceFromHtml(productHtml);
-      if (!(memberSeatPrice > 0)) {
-        memberSeatPrice = extractMemberSeatPriceFromHtml(productHtml, state.publicSeatPrice);
-      }
-      if (!(memberSeatPrice > 0)) {
-        var dispOnly = extractDisplayedSeatPriceFromHtml(productHtml);
-        if (dispOnly > 0 && state.publicSeatPrice > 0 && dispOnly < state.publicSeatPrice) {
-          memberSeatPrice = dispOnly;
+    var fetchCurrentPage = function() {
+      var pageUrl = url.pathname + url.search + (url.search ? "&" : "?") + "mcAuthCheck=" + Date.now();
+      return fetch(pageUrl, {
+        credentials: "same-origin",
+        cache: "no-store"
+      }).then(function(resp){
+        return resp.text();
+      });
+    };
+    if (!state.unlocked) {
+      var retryMyAccount = recentAuth
+        ? mcDelay(900).then(function() {
+            return fetch("/myaccount.asp?mcAuthCheck=" + Date.now(), {
+              credentials: "same-origin",
+              cache: "no-store"
+            }).then(function(resp) {
+              return resp.text();
+            }, function() {
+              return "";
+            });
+          })
+        : Promise.resolve("");
+      return retryMyAccount.then(function(retryAccountHtml) {
+        if (retryAccountHtml && volusionMyAccountHtmlIndicatesLoggedIn(retryAccountHtml)) {
+          state.unlocked = true;
         }
-      }
-      if (memberSeatPrice > 0) {
-        state.memberSeatPrice = memberSeatPrice;
-        if (state.publicSeatPrice > memberSeatPrice) {
-          state.delta = state.publicSeatPrice - memberSeatPrice;
-        }
-      }
-      if (state.unlocked && !(state.memberSeatPrice > 0)) {
-        var live = getVolusionAddToCartSeatPrice(document);
-        if (live > 0) {
-          state.memberSeatPrice = live;
-        }
-      }
+        return fetchCurrentPage().then(function(productHtml){
+          if (!state.unlocked && mcCurrentPageSuggestsLoggedIn(productHtml, state.publicSeatPrice)) {
+            state.unlocked = true;
+          }
+          if (state.unlocked) {
+            mcPopulateMemberSeatPriceFromHtml(state, productHtml);
+          }
+          return state;
+        }, function(){
+          return state;
+        });
+      });
+    }
+    return fetchCurrentPage().then(function(productHtml){
+      mcPopulateMemberSeatPriceFromHtml(state, productHtml);
       return state;
     }, function(){
       return state;
@@ -3289,6 +3356,9 @@ function detectMemberPricingState(){
       if (state && state.unlocked) document.body.classList.add('mc-member-logged-in');
       else document.body.classList.remove('mc-member-logged-in');
     } catch (eCls) {}
+    try {
+      if (state && state.unlocked) mcClearRecentMemberAuth();
+    } catch (eAuthMark) {}
     try {
       window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: state }));
     } catch (e) {}
@@ -10436,6 +10506,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       if (!response.ok) {
         throw new Error('Request failed');
       }
+      mcRememberRecentMemberAuth();
       if (await mcAuthSucceeded()) {
         mcSetAuthStatus(mode, mode === 'signup' ? 'Account created. Refreshing...' : 'Signed in. Refreshing...', 'success');
         window.setTimeout(function () {
@@ -10458,6 +10529,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
           : 'Could not sign in right now. Please try again.',
         'error'
       );
+      mcClearRecentMemberAuth();
     } finally {
       mcToggleAuthPending(form, false);
     }
@@ -12030,9 +12102,10 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     var root = document.querySelector('#v65-product-parent');
     if (!root) return;
 
+    var st = null;
     var isLoggedIn = false;
     try {
-      var st =
+      st =
         typeof window.detectMemberPricingState === 'function'
           ? await window.detectMemberPricingState()
           : typeof detectMemberPricingState === 'function'
@@ -12047,6 +12120,14 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     try {
       retailAmt = Number(mcExtractRetailPriceFromPdpHtml(document.documentElement.innerHTML || '')) || 0;
     } catch (e2) {}
+    if (!(retailAmt > 0) && st && st.publicSeatPrice > 0) {
+      retailAmt = Number(st.publicSeatPrice) || 0;
+    }
+    if (!(retailAmt > 0)) {
+      try {
+        retailAmt = Number(getDisplayedPublicSeatPrice()) || 0;
+      } catch (e2b) {}
+    }
 
     if (isLoggedIn) {
       try {
@@ -12060,6 +12141,14 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
           retailAmt = Number(mcExtractRetailPriceFromPdpHtml(html)) || 0;
         }
       } catch (e3) {}
+      if (!(memberAmt > 0) && st && st.memberSeatPrice > 0) {
+        memberAmt = Number(st.memberSeatPrice) || 0;
+      }
+      if (!(memberAmt > 0)) {
+        try {
+          memberAmt = Number(getVolusionAddToCartSeatPrice(document)) || 0;
+        } catch (e3b) {}
+      }
     }
 
     var retailText = mcFmtMoney(retailAmt);
