@@ -12593,10 +12593,11 @@ body.mc-product-page #content_area font.product_sale_price {
       else nativeBlock.parentNode.appendChild(wrap);
     }
 
-    var effectiveMemberText = memberText || retailText;
     var html = '';
-    if (isLoggedIn) {
-      html += '<div class="mc-pdp-member-line">Member: ' + effectiveMemberText + '</div>';
+    if (isLoggedIn && memberText) {
+      html += '<div class="mc-pdp-member-line">Member: ' + memberText + '</div>';
+    } else if (isLoggedIn) {
+      html += '<div class="mc-pdp-member-line">Member pricing updates after session and option pricing load.</div>';
     } else {
       html +=
         '<div class="mc-pdp-member-line mc-pdp-member-line--locked">Member: <a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see member pricing</div>';
@@ -12890,6 +12891,7 @@ body.mc-product-page #content_area font.product_sale_price {
     });
 
     root.querySelectorAll('.price, .product_price, .v65-productDisplay-price, .v-product__price').forEach(function (el) {
+      if (el.closest && el.closest('.mc-pdp-member-pricing, .mc-member-grid-price')) return;
       var html = el.innerHTML || '';
       html = html.replace(/member price/gi, '');
       html = html.replace(/members price/gi, '');
