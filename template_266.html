@@ -2736,6 +2736,64 @@ boot();
         });
       });
     }
+    function isTheaterSeatingPdp(){
+      if (!document.getElementById("v65-product-parent")) return false;
+      if (!(document.body && (document.body.classList.contains("mc-product-page") || document.body.classList.contains("productdetails")))) {
+        return false;
+      }
+      if (
+        document.querySelector(
+          'a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"]'
+        )
+      ) {
+        return true;
+      }
+      var titleText = (
+        (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
+        document.title ||
+        ""
+      ).toLowerCase();
+      return /theater seating|theatre seating|theater chair|theatre chair/.test(titleText);
+    }
+    function hideTheaterSeatDropdownRows(){
+      if (!isTheaterSeatingPdp()) return;
+      try {
+        document.body.classList.add("mc-theater-seating-pdp");
+      } catch (eCls) {}
+      var tables = Array.from(document.querySelectorAll("#options_table, table[id*='options_table']"));
+      if (!tables.length) return;
+      tables.forEach(function(tbl){
+        var rows = Array.from(tbl.querySelectorAll("tr"));
+        var leatherIndex = -1;
+        var ri;
+        for (ri = 0; ri < rows.length; ri++) {
+          var row = rows[ri];
+          var txt = (row.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+          if (
+            row.querySelector("select.mc-native-leather") ||
+            row.querySelector("select[name*='cover' i], select[id*='cover' i], select[name*='leather' i], select[id*='leather' i]") ||
+            /choose cover|choose leather|select leather|select a leather/.test(txt)
+          ) {
+            leatherIndex = ri;
+            break;
+          }
+        }
+        if (leatherIndex < 0) return;
+        for (ri = 0; ri < leatherIndex; ri++) {
+          var preRow = rows[ri];
+          var select = preRow.querySelector("select");
+          if (!select) continue;
+          var labelText = (preRow.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+          var selectMeta = (
+            (select.getAttribute("title") || "") + " " + (select.name || "") + " " + (select.id || "")
+          ).toLowerCase();
+          if (/number of seats|choose configuration|configuration/.test(labelText + " " + selectMeta)) {
+            preRow.classList.add("mc-theater-hide-preleather");
+            preRow.style.setProperty("display", "none", "important");
+          }
+        }
+      });
+    }
 
     // Button actions
     if (mcLeatherBtn) mcLeatherBtn.onclick = () => wmOpen.click();
@@ -2780,8 +2838,11 @@ boot();
       }, 250);
     })();
     hideLegacyLeatherRows();
+    hideTheaterSeatDropdownRows();
     setTimeout(hideLegacyLeatherRows, 400);
     setTimeout(hideLegacyLeatherRows, 1200);
+    setTimeout(hideTheaterSeatDropdownRows, 400);
+    setTimeout(hideTheaterSeatDropdownRows, 1200);
 
     if (wmSummary && mcSum) {
       syncLeatherSummary();
@@ -2793,6 +2854,7 @@ boot();
     if (optionsTable && !window.__mcLeatherRowObserver) {
       window.__mcLeatherRowObserver = new MutationObserver(function(){
         hideLegacyLeatherRows();
+        hideTheaterSeatDropdownRows();
       });
       window.__mcLeatherRowObserver.observe(optionsTable, { childList: true, subtree: true });
     }
@@ -2934,6 +2996,22 @@ function mcHasRecentMemberAuth() {
   } catch (e) {
     return false;
   }
+}
+async function mcConfirmRecentMemberAuth(maxAttempts, delayMs) {
+  var attempts = Math.max(1, Number(maxAttempts) || 1);
+  var waitMs = Math.max(150, Number(delayMs) || 0);
+  for (var i = 0; i < attempts; i++) {
+    try {
+      var resp = await fetch("/myaccount.asp?mcAuthCheck=" + Date.now() + "_" + i, {
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+      var html = await resp.text();
+      if (html && volusionMyAccountHtmlIndicatesLoggedIn(html)) return html;
+    } catch (e) {}
+    if (i < attempts - 1) await mcDelay(waitMs);
+  }
+  return "";
 }
 function mcDelay(ms) {
   return new Promise(function(resolve) {
@@ -3311,16 +3389,7 @@ function detectMemberPricingState(){
         state.unlocked = false;
         return state;
       }
-      return mcDelay(900).then(function() {
-        return fetch("/myaccount.asp?mcAuthCheck=" + Date.now(), {
-          credentials: "same-origin",
-          cache: "no-store"
-        }).then(function(resp) {
-          return resp.text();
-        }, function() {
-          return "";
-        });
-      }).then(function(retryAccountHtml) {
+      return mcConfirmRecentMemberAuth(6, 900).then(function(retryAccountHtml) {
         state.unlocked = !!(retryAccountHtml && volusionMyAccountHtmlIndicatesLoggedIn(retryAccountHtml));
         if (!state.unlocked) {
           mcClearRecentMemberAuth();
@@ -3461,6 +3530,16 @@ function updateProductPrice(totalPrice){
 
 function ensurePriceWithOptionsLabel(scope){
   var root = scope || document;
+  var theaterTitle = (
+    (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
+    document.title ||
+    ""
+  ).toLowerCase();
+  var isTheaterSeatPdp =
+    !!(document.body && document.body.classList.contains('mc-theater-seating-pdp')) ||
+    !!document.querySelector('a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"]') ||
+    /theater seating|theatre seating|theater chair|theatre chair/.test(theaterTitle);
+  if (isTheaterSeatPdp) return;
   var priceNode = root.querySelector('#priceWithOptions');
   if (!priceNode) return;
 
