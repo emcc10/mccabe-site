@@ -3294,10 +3294,6 @@ function detectMemberPricingState(){
     var recentAuth = mcHasRecentMemberAuth();
     state.checked = true;
     state.publicSeatPrice = getDisplayedPublicSeatPrice();
-    if (respUrl.indexOf("login.asp") !== -1 && !recentAuth) {
-      state.unlocked = false;
-      return state;
-    }
     state.unlocked = volusionMyAccountHtmlIndicatesLoggedIn(accountHtml);
     var url = new URL(window.location.href);
     url.searchParams.delete("CartID");
@@ -3311,29 +3307,27 @@ function detectMemberPricingState(){
       });
     };
     if (!state.unlocked) {
-      var retryMyAccount = recentAuth
-        ? mcDelay(900).then(function() {
-            return fetch("/myaccount.asp?mcAuthCheck=" + Date.now(), {
-              credentials: "same-origin",
-              cache: "no-store"
-            }).then(function(resp) {
-              return resp.text();
-            }, function() {
-              return "";
-            });
-          })
-        : Promise.resolve("");
-      return retryMyAccount.then(function(retryAccountHtml) {
-        if (retryAccountHtml && volusionMyAccountHtmlIndicatesLoggedIn(retryAccountHtml)) {
-          state.unlocked = true;
+      if (!recentAuth) {
+        state.unlocked = false;
+        return state;
+      }
+      return mcDelay(900).then(function() {
+        return fetch("/myaccount.asp?mcAuthCheck=" + Date.now(), {
+          credentials: "same-origin",
+          cache: "no-store"
+        }).then(function(resp) {
+          return resp.text();
+        }, function() {
+          return "";
+        });
+      }).then(function(retryAccountHtml) {
+        state.unlocked = !!(retryAccountHtml && volusionMyAccountHtmlIndicatesLoggedIn(retryAccountHtml));
+        if (!state.unlocked) {
+          mcClearRecentMemberAuth();
+          return state;
         }
         return fetchCurrentPage().then(function(productHtml){
-          if (!state.unlocked && mcCurrentPageSuggestsLoggedIn(productHtml, state.publicSeatPrice)) {
-            state.unlocked = true;
-          }
-          if (state.unlocked) {
-            mcPopulateMemberSeatPriceFromHtml(state, productHtml);
-          }
+          mcPopulateMemberSeatPriceFromHtml(state, productHtml);
           return state;
         }, function(){
           return state;
