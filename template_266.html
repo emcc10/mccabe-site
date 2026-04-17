@@ -8019,7 +8019,10 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       var node = saleNodes[i];
       if (node.closest && node.closest('.mc-member-price-caption')) continue;
       try {
-        node.style.setProperty('display', 'none', 'important');
+        node.style.removeProperty('display');
+        node.style.removeProperty('visibility');
+        node.style.setProperty('display', 'block', 'important');
+        node.style.setProperty('visibility', 'visible', 'important');
       } catch (eSaleHide) {}
     }
   }
@@ -10256,6 +10259,31 @@ body.mc-product-page #content_area #priceWithOptionsNoTax {
   visibility: visible !important;
   opacity: 1 !important;
 }
+
+body.productdetails #v65-product-parent .product_productprice,
+body.productdetails #v65-product-parent .product_list_price,
+body.productdetails #v65-product-parent .product_sale_price,
+body.productdetails #v65-product-parent .product_saleprice,
+body.productdetails #v65-product-parent font.product_sale_price,
+body.productdetails #content_area .product_productprice,
+body.productdetails #content_area .product_list_price,
+body.productdetails #content_area .product_sale_price,
+body.productdetails #content_area .product_saleprice,
+body.productdetails #content_area font.product_sale_price,
+body.mc-product-page #v65-product-parent .product_productprice,
+body.mc-product-page #v65-product-parent .product_list_price,
+body.mc-product-page #v65-product-parent .product_sale_price,
+body.mc-product-page #v65-product-parent .product_saleprice,
+body.mc-product-page #v65-product-parent font.product_sale_price,
+body.mc-product-page #content_area .product_productprice,
+body.mc-product-page #content_area .product_list_price,
+body.mc-product-page #content_area .product_sale_price,
+body.mc-product-page #content_area .product_saleprice,
+body.mc-product-page #content_area font.product_sale_price {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
 </style>
 <div id="mc-login-modal" class="mc-login-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mc-login-modal-title">
   <div class="mc-login-modal__backdrop" data-mc-close-login tabindex="-1"></div>
@@ -10547,21 +10575,22 @@ body.mc-product-page #content_area #priceWithOptionsNoTax {
     if (!form) return false;
     mcSetAuthStatus(mode, '', '');
     mcToggleAuthPending(form, true);
+    mcSetAuthStatus(mode, mode === 'signup' ? 'Creating account...' : 'Signing in...', 'success');
     mcRememberRecentMemberAuth();
     return new Promise(function(resolve) {
-      var finished = false;
       var frame = mcGetAuthFrame();
       var originalTarget = form.getAttribute('target') || '';
       var originalAction = form.getAttribute('action') || '';
+      var finished = false;
       var cleanup = function(ok, message, kind) {
         if (finished) return;
         finished = true;
         try {
-          frame.removeEventListener('load', onLoad);
-        } catch (eRm) {}
-        try {
           clearTimeout(timeoutId);
         } catch (eTo) {}
+        try {
+          clearInterval(pollId);
+        } catch (ePoll) {}
         try {
           if (originalTarget) form.setAttribute('target', originalTarget);
           else form.removeAttribute('target');
@@ -10576,8 +10605,9 @@ body.mc-product-page #content_area #priceWithOptionsNoTax {
         }
         resolve(ok);
       };
-      var onLoad = function() {
+      var pollId = window.setInterval(function() {
         window.setTimeout(async function() {
+          if (finished) return;
           try {
             if (await mcAuthSucceeded()) {
               mcSetAuthStatus(mode, mode === 'signup' ? 'Account created. Refreshing...' : 'Signed in. Refreshing...', 'success');
@@ -10595,8 +10625,8 @@ body.mc-product-page #content_area #priceWithOptionsNoTax {
               : 'Login failed. Please check your email and password.',
             'error'
           );
-        }, 900);
-      };
+        }, 0);
+      }, 900);
       var timeoutId = window.setTimeout(function() {
         cleanup(
           false,
@@ -10607,7 +10637,6 @@ body.mc-product-page #content_area #priceWithOptionsNoTax {
         );
       }, 15000);
       try {
-        frame.addEventListener('load', onLoad);
         form.setAttribute('target', 'mc-member-auth-frame');
         if (mode === 'signup') mcSetSignupFormAction();
         HTMLFormElement.prototype.submit.call(form);
