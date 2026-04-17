@@ -8102,6 +8102,21 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function ensurePriceWithOptionsLabel(scope){
     var root = scope || document;
+    var theaterTitle = (
+      (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
+      document.title ||
+      ""
+    ).toLowerCase();
+    var isTheaterSeatPdp =
+      !!(document.body && document.body.classList.contains('mc-theater-seating-pdp')) ||
+      !!document.querySelector('a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"]') ||
+      /theater seating|theatre seating|theater chair|theatre chair/.test(theaterTitle);
+    if (isTheaterSeatPdp) {
+      try {
+        document.body.classList.add('mc-theater-seating-pdp');
+      } catch (eTheaterFlag) {}
+      return;
+    }
     var priceNode = root.querySelector('#priceWithOptions');
     if (!priceNode) return;
     var prev = priceNode.previousElementSibling;
@@ -10279,6 +10294,19 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   color: inherit !important;
 }
 
+body.mc-theater-seating-pdp #v65-product-parent .option_pricing,
+body.mc-theater-seating-pdp #content_area .option_pricing,
+body.mc-theater-seating-pdp #v65-product-parent #priceWithOptions,
+body.mc-theater-seating-pdp #content_area #priceWithOptions,
+body.mc-theater-seating-pdp #v65-product-parent #priceWithOptionsNoTax,
+body.mc-theater-seating-pdp #content_area #priceWithOptionsNoTax,
+body.mc-theater-seating-pdp #v65-product-parent tr.mc-theater-hide-preleather,
+body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
 .mc-pdp-member-pricing {
   display: block !important;
   width: 100% !important;
@@ -12304,6 +12332,32 @@ body.mc-product-page #content_area font.product_sale_price {
   }
 
   function mcRenderPdpRetailAndMember(retailText, memberText, loginUrl, isLoggedIn) {
+    var theaterTitle = (
+      (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
+      document.title ||
+      ""
+    ).toLowerCase();
+    var isTheaterSeatPdp =
+      !!(document.body && document.body.classList.contains('mc-theater-seating-pdp')) ||
+      !!document.querySelector('a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"]') ||
+      /theater seating|theatre seating|theater chair|theatre chair/.test(theaterTitle);
+    if (isTheaterSeatPdp) {
+      try {
+        document.body.classList.add('mc-theater-seating-pdp');
+      } catch (eTheaterCls) {}
+      try {
+        var selectedOptionPriceNodes = document.querySelectorAll(
+          '#v65-product-parent .option_pricing, #content_area .option_pricing,' +
+          '#v65-product-parent #priceWithOptions, #content_area #priceWithOptions,' +
+          '#v65-product-parent #priceWithOptionsNoTax, #content_area #priceWithOptionsNoTax'
+        );
+        var soi;
+        for (soi = 0; soi < selectedOptionPriceNodes.length; soi++) {
+          selectedOptionPriceNodes[soi].style.setProperty('display', 'none', 'important');
+          selectedOptionPriceNodes[soi].style.setProperty('visibility', 'hidden', 'important');
+        }
+      } catch (eHideSelectedOptions) {}
+    }
     var nativeBlock =
       document.querySelector('#v65-product-parent .product_list_price') ||
       document.querySelector('#content_area .product_list_price') ||
