@@ -10521,6 +10521,11 @@ body.mc-product-page #content_area font.product_sale_price {
     if (!form) return;
     form.setAttribute('action', '/login.asp?ReturnTo=' + mcLoginReturnTo());
   }
+  function mcGetLogoutUrl() {
+    var link = document.querySelector('a[href*="logout"], a[href*="logoff"]');
+    if (link && link.href) return link.href;
+    return '/logout.asp?ReturnTo=' + mcLoginReturnTo();
+  }
   function mcSplitDisplayName(full) {
     var s = String(full || '').trim().replace(/\s+/g, ' ');
     if (!s) return { first: '', last: 'Customer' };
@@ -10670,6 +10675,51 @@ body.mc-product-page #content_area font.product_sale_price {
   window.mcCloseLoginModal = mcCloseLoginModal;
   window.mcOpenSignupModal = mcOpenSignupModal;
 
+  var mcIdleLogoutTimer = null;
+  function mcClearIdleLogoutTimer() {
+    if (mcIdleLogoutTimer) {
+      window.clearTimeout(mcIdleLogoutTimer);
+      mcIdleLogoutTimer = null;
+    }
+  }
+  function mcRecordMemberActivity() {
+    try {
+      sessionStorage.setItem('mc_last_member_activity_ts', String(Date.now()));
+    } catch (eAct) {}
+  }
+  function mcScheduleIdleLogout() {
+    mcClearIdleLogoutTimer();
+    if (!(document.body && document.body.classList.contains('mc-member-logged-in'))) return;
+    mcIdleLogoutTimer = window.setTimeout(function () {
+      if (!(document.body && document.body.classList.contains('mc-member-logged-in'))) return;
+      window.location.href = mcGetLogoutUrl();
+    }, 60 * 60 * 1000);
+  }
+  function mcRefreshIdleLogout() {
+    if (document.body && document.body.classList.contains('mc-member-logged-in')) {
+      mcRecordMemberActivity();
+      mcScheduleIdleLogout();
+    } else {
+      mcClearIdleLogoutTimer();
+    }
+  }
+  (function mcBindIdleLogout() {
+    var lastRecorded = 0;
+    ['mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(function (evtName) {
+      window.addEventListener(evtName, function () {
+        if (!(document.body && document.body.classList.contains('mc-member-logged-in'))) return;
+        var now = Date.now();
+        if (now - lastRecorded < 15000) return;
+        lastRecorded = now;
+        mcRefreshIdleLogout();
+      }, { passive: true });
+    });
+    window.addEventListener('mcMemberPricingReady', function () {
+      mcRefreshIdleLogout();
+    });
+    window.setTimeout(mcRefreshIdleLogout, 0);
+  })();
+
   function mcSetAuthStatus(mode, message, kind) {
     var id = mode === 'signup' ? 'mc-login-modal-signup-status' : 'mc-login-modal-login-status';
     var box = document.getElementById(id);
@@ -10758,6 +10808,18 @@ body.mc-product-page #content_area font.product_sale_price {
     } catch (e2) {}
     return false;
   }
+  async function mcWaitForAuthSuccess(maxMs, intervalMs) {
+    var timeoutMs = Math.max(1000, Number(maxMs) || 0);
+    var stepMs = Math.max(200, Number(intervalMs) || 0);
+    var started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      try {
+        if (await mcAuthSucceeded()) return true;
+      } catch (eAuthPoll) {}
+      await mcDelay(stepMs);
+    }
+    return false;
+  }
   function mcLoginResponseLooksFailed(html, respUrl) {
     var h = String(html || '');
     var lc = h.toLowerCase();
@@ -10781,6 +10843,7 @@ body.mc-product-page #content_area font.product_sale_price {
     if (mode === 'login') {
       var loginAbort = null;
       var loginTimeoutId = null;
+      var loginRequest = null;
       try {
         mcSetLoginFormAction();
         if (typeof AbortController !== 'undefined') {
@@ -10791,7 +10854,7 @@ body.mc-product-page #content_area font.product_sale_price {
             } catch (eAbort) {}
           }, 12000);
         }
-        var loginResp = await fetch(form.getAttribute('action') || '/login.asp?ReturnTo=' + mcLoginReturnTo(), {
+        loginRequest = fetch(form.getAttribute('action') || '/login.asp?ReturnTo=' + mcLoginReturnTo(), {
           method: 'POST',
           credentials: 'same-origin',
           cache: 'no-store',
@@ -10802,16 +10865,34 @@ body.mc-product-page #content_area font.product_sale_price {
           },
           body: mcAuthFormBody(form)
         });
+        var confirmed = await mcWaitForAuthSuccess(15000, 700);
+        if (confirmed) {
+          if (loginTimeoutId) {
+            window.clearTimeout(loginTimeoutId);
+            loginTimeoutId = null;
+          }
+          try {
+            if (loginAbort) loginAbort.abort();
+          } catch (eAbortDone) {}
+          mcRememberRecentMemberAuth();
+          mcSetAuthStatus('login', 'Signed in. Refreshing...', 'success');
+          mcCloseLoginModal();
+          window.setTimeout(function () {
+            window.location.reload();
+          }, 120);
+          return true;
+        }
+        var loginResp = await loginRequest;
         if (loginTimeoutId) {
           window.clearTimeout(loginTimeoutId);
           loginTimeoutId = null;
         }
         var loginHtml = await loginResp.text();
-        mcRememberRecentMemberAuth();
-        var confirmedHtml = await mcConfirmRecentMemberAuth(10, 900);
+        var confirmedHtml = await mcConfirmRecentMemberAuth(3, 700);
         if (confirmedHtml) {
           mcRememberRecentMemberAuth();
           mcSetAuthStatus('login', 'Signed in. Refreshing...', 'success');
+          mcCloseLoginModal();
           window.setTimeout(function () {
             window.location.reload();
           }, 120);
@@ -12512,9 +12593,10 @@ body.mc-product-page #content_area font.product_sale_price {
       else nativeBlock.parentNode.appendChild(wrap);
     }
 
+    var effectiveMemberText = memberText || retailText;
     var html = '';
-    if (isLoggedIn && memberText) {
-      html += '<div class="mc-pdp-member-line">Member: ' + memberText + '</div>';
+    if (isLoggedIn) {
+      html += '<div class="mc-pdp-member-line">Member: ' + effectiveMemberText + '</div>';
     } else {
       html +=
         '<div class="mc-pdp-member-line mc-pdp-member-line--locked">Member: <a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see member pricing</div>';
@@ -12610,6 +12692,24 @@ body.mc-product-page #content_area font.product_sale_price {
           memberAmt = Number(getVolusionAddToCartSeatPrice(document)) || 0;
         } catch (e3b) {}
       }
+      if (!(memberAmt > 0)) {
+        try {
+          var selectedPriceNode =
+            document.querySelector('#priceWithOptions') ||
+            document.querySelector('#priceWithOptionsNoTax') ||
+            document.querySelector('#content_area .product_saleprice, #content_area .product_sale_price') ||
+            document.querySelector('#v65-product-parent .product_saleprice, #v65-product-parent .product_sale_price');
+          if (selectedPriceNode && typeof window.parseMcCurrency === 'function') {
+            memberAmt = Number(
+              window.parseMcCurrency(
+                (selectedPriceNode.getAttribute && (selectedPriceNode.getAttribute('value') || selectedPriceNode.getAttribute('content'))) ||
+                selectedPriceNode.textContent ||
+                ''
+              )
+            ) || 0;
+          }
+        } catch (e3c) {}
+      }
     }
 
     var retailText = mcFmtMoney(retailAmt);
@@ -12640,6 +12740,7 @@ body.mc-product-page #content_area font.product_sale_price {
     }
 
     window.addEventListener('load', run, { once: true });
+    window.addEventListener('mcMemberPricingReady', run);
   }
   window.mcBootPdpRetailMemberOnly = mcBootPdpRetailMemberOnly;
   window.mcRenderRetailMemberOnPdp = mcRenderRetailMemberOnPdp;
