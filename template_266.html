@@ -10163,6 +10163,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     </div>
     <div id="mc-login-modal-panel-login" class="mc-login-modal__panel-body is-active">
       <p class="mc-login-modal__hint">Sign in with the email and password for your account.</p>
+      <div id="mc-login-modal-login-status" class="mc-login-modal__status" aria-live="polite"></div>
       <form id="mc-member-login-form" class="mc-login-modal__form" method="post" action="/login.asp" autocomplete="on">
         <input type="hidden" name="CustomerNewOld" value="old" />
         <div class="mc-login-modal__field">
@@ -10180,6 +10181,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     </div>
     <div id="mc-login-modal-panel-signup" class="mc-login-modal__panel-body">
       <p class="mc-login-modal__hint">Create your account with your name, email, and password.</p>
+      <div id="mc-login-modal-signup-status" class="mc-login-modal__status" aria-live="polite"></div>
       <form id="mc-member-signup-form" class="mc-login-modal__form" method="post" action="/AccountSettings.asp" autocomplete="on">
         <input type="hidden" name="AddNewCustomer" value="Y" />
         <input type="hidden" name="FirstName" id="mc-signup-firstname" value="" />
@@ -10230,6 +10232,8 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     var signupPanel = document.getElementById('mc-login-modal-panel-signup');
     var tabs = document.querySelectorAll('[data-mc-login-tab]');
     var title = document.getElementById('mc-login-modal-title');
+    mcSetAuthStatus('login', '', '');
+    mcSetAuthStatus('signup', '', '');
     var i;
     for (i = 0; i < tabs.length; i++) {
       var tab = tabs[i];
@@ -10256,28 +10260,6 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       mcSetSignupFormAction();
     }
   }
-  function mcOpenAuthWindow(mode) {
-    var isSignup = mode === 'signup';
-    var url = isSignup
-      ? '/AccountSettings.asp?AddNewCustomer=Y&ReturnTo=' + mcLoginReturnTo()
-      : '/login.asp?ReturnTo=' + mcLoginReturnTo();
-    try {
-      var w = window.open(
-        url,
-        isSignup ? 'mcSignupPopup' : 'mcLoginPopup',
-        'popup=yes,width=540,height=760,resizable=yes,scrollbars=yes'
-      );
-      if (w) {
-        try { w.focus(); } catch (eFocus) {}
-        return true;
-      }
-    } catch (eWin) {}
-    try {
-      window.location.href = url;
-      return true;
-    } catch (eNav) {}
-    return false;
-  }
   function mcPrepareLoginModal() {
     var m = document.getElementById('mc-login-modal');
     if (!m) return null;
@@ -10301,7 +10283,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   }
   function mcOpenLoginModal() {
     var m = mcPrepareLoginModal();
-    if (!m) return mcOpenAuthWindow('login');
+    if (!m) return false;
     mcSetModalTab('login');
     m.classList.add('mc-login-modal--open');
     m.setAttribute('aria-hidden', 'false');
@@ -10320,13 +10302,13 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
         rect.width > 0 &&
         rect.height > 0
       );
-      if (!visible) return mcOpenAuthWindow('login');
+      if (!visible) return false;
     } catch (eVis) {}
     return true;
   }
   function mcOpenSignupModal() {
     var m = mcPrepareLoginModal();
-    if (!m) return mcOpenAuthWindow('signup');
+    if (!m) return false;
     mcSetModalTab('signup');
     m.classList.add('mc-login-modal--open');
     m.setAttribute('aria-hidden', 'false');
@@ -10345,7 +10327,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
         rect.width > 0 &&
         rect.height > 0
       );
-      if (!visible) return mcOpenAuthWindow('signup');
+      if (!visible) return false;
     } catch (eVis2) {}
     return true;
   }
@@ -10387,6 +10369,101 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
   window.mcCloseLoginModal = mcCloseLoginModal;
   window.mcOpenSignupModal = mcOpenSignupModal;
 
+  function mcSetAuthStatus(mode, message, kind) {
+    var id = mode === 'signup' ? 'mc-login-modal-signup-status' : 'mc-login-modal-login-status';
+    var box = document.getElementById(id);
+    if (!box) return;
+    box.className = 'mc-login-modal__status' + (kind ? ' is-' + kind : '');
+    box.textContent = message || '';
+  }
+
+  function mcToggleAuthPending(form, pending) {
+    if (!form || !form.querySelectorAll) return;
+    var controls = form.querySelectorAll('input, button');
+    var i;
+    for (i = 0; i < controls.length; i++) {
+      if (pending) controls[i].setAttribute('disabled', 'disabled');
+      else controls[i].removeAttribute('disabled');
+    }
+  }
+
+  function mcAuthFormBody(form) {
+    var fd = new FormData(form);
+    var params = new URLSearchParams();
+    fd.forEach(function (value, key) {
+      params.append(key, value == null ? '' : String(value));
+    });
+    return params.toString();
+  }
+
+  async function mcAuthSucceeded() {
+    if (typeof window.detectMemberPricingState === 'function') {
+      try {
+        window.__mcMemberPricing.promise = null;
+      } catch (e0) {}
+      try {
+        var state = await window.detectMemberPricingState();
+        if (state && state.unlocked) return true;
+      } catch (e1) {}
+    }
+    try {
+      var resp = await fetch('/myaccount.asp', { credentials: 'same-origin', cache: 'no-store' });
+      var html = await resp.text();
+      if (typeof window.volusionMyAccountHtmlIndicatesLoggedIn === 'function') {
+        return !!window.volusionMyAccountHtmlIndicatesLoggedIn(html);
+      }
+      return /logout|log\s*out|sign\s*out|order history|account settings/i.test(String(html || ''));
+    } catch (e2) {}
+    return false;
+  }
+
+  async function mcSubmitAuthForm(form, mode) {
+    if (!form) return false;
+    mcSetAuthStatus(mode, '', '');
+    mcToggleAuthPending(form, true);
+    try {
+      var action = form.getAttribute('action') || (mode === 'signup' ? '/AccountSettings.asp' : '/login.asp');
+      var response = await fetch(action, {
+        method: 'POST',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        body: mcAuthFormBody(form)
+      });
+      if (!response.ok) {
+        throw new Error('Request failed');
+      }
+      if (await mcAuthSucceeded()) {
+        mcSetAuthStatus(mode, mode === 'signup' ? 'Account created. Refreshing...' : 'Signed in. Refreshing...', 'success');
+        window.setTimeout(function () {
+          window.location.reload();
+        }, 120);
+        return true;
+      }
+      mcSetAuthStatus(
+        mode,
+        mode === 'signup'
+          ? 'We could not confirm the new account. Please check your info and try again.'
+          : 'Login failed. Please check your email and password.',
+        'error'
+      );
+    } catch (err) {
+      mcSetAuthStatus(
+        mode,
+        mode === 'signup'
+          ? 'Could not create the account right now. Please try again.'
+          : 'Could not sign in right now. Please try again.',
+        'error'
+      );
+    } finally {
+      mcToggleAuthPending(form, false);
+    }
+    return false;
+  }
+
   document.addEventListener('click', function (e) {
     var loginLink = e.target.closest('.mc-member-grid-price__login, [data-mc-open-login]');
     if (loginLink) {
@@ -10426,10 +10503,18 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     }
   });
 
-  (function mcBindSignupForm() {
+  (function mcBindAuthForms() {
+    var loginForm = document.getElementById('mc-member-login-form');
+    if (loginForm) {
+      loginForm.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        mcSubmitAuthForm(loginForm, 'login');
+      });
+    }
     var form = document.getElementById('mc-member-signup-form');
     if (!form) return;
     form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
       var nameEl = document.getElementById('mc-signup-display-name');
       var emailEl = document.getElementById('mc-signup-email');
       var pwEl = document.getElementById('mc-signup-password');
@@ -10444,6 +10529,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
       e2.value = emailEl.value;
       p2.value = pwEl.value;
       mcSetSignupFormAction();
+      mcSubmitAuthForm(form, 'signup');
     });
   })();
   document.addEventListener('keydown', function (ev) {
@@ -11001,12 +11087,36 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
         card.querySelector('[itemprop="price"]');
     }
     if (!installTarget) return null;
-    var mount = installTarget.querySelector('.mc-price-stack');
+    var mount = null;
+    var child = installTarget.firstElementChild;
+    while (child) {
+      if (child.classList && child.classList.contains('mc-price-stack')) {
+        mount = child;
+        break;
+      }
+      child = child.nextElementSibling;
+    }
+    if (
+      !mount &&
+      installTarget.nextElementSibling &&
+      installTarget.nextElementSibling.classList &&
+      installTarget.nextElementSibling.classList.contains('mc-price-stack')
+    ) {
+      mount = installTarget.nextElementSibling;
+    }
     if (!mount) {
       mount = document.createElement('div');
       mount.className = 'mc-price-stack';
       try {
-        installTarget.insertBefore(mount, installTarget.firstChild);
+        var tag = (installTarget.tagName || '').toUpperCase();
+        if ((tag === 'TD' || tag === 'TH') && installTarget.appendChild) {
+          installTarget.appendChild(mount);
+        } else if (installTarget.parentNode) {
+          if (installTarget.nextSibling) installTarget.parentNode.insertBefore(mount, installTarget.nextSibling);
+          else installTarget.parentNode.appendChild(mount);
+        } else if (installTarget.appendChild) {
+          installTarget.appendChild(mount);
+        }
       } catch (eIns) {
         try {
           installTarget.appendChild(mount);
@@ -11018,73 +11128,25 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     return mount;
   }
 
-  function mcHideNativeCardPriceFragments(card) {
-    if (!card || !card.querySelectorAll) return;
-    var mount = card.querySelector('.mc-price-stack');
-    if (!mount) return;
-    var inner = (mount.innerHTML || '').replace(/\s/g, '');
-    if (!inner) return;
-    var selectors = [
-      '.product_productprice',
-      '.product_saleprice',
-      'font.product_sale_price',
-      '.product_sale_price',
-      'font.product_list_price',
-      '.product_list_price',
-      '.price_color',
-      'font.colors_productprice',
-      'font.pricecolor'
-    ];
-    var si, nodes, j, n;
-    for (si = 0; si < selectors.length; si++) {
-      nodes = card.querySelectorAll(selectors[si]);
-      for (j = 0; j < nodes.length; j++) {
-        n = nodes[j];
-        if (!n || (n.closest && n.closest('.mc-price-stack'))) continue;
-        try {
-          n.style.setProperty('display', 'none', 'important');
-          n.style.setProperty('visibility', 'hidden', 'important');
-        } catch (eH) {}
-      }
-    }
-    var priceHosts = card.querySelectorAll('.v-product__price, .product_price');
-    var hi, host, ch, k, c;
-    for (hi = 0; hi < priceHosts.length; hi++) {
-      host = priceHosts[hi];
-      if (!host || (host.closest && host.closest('.mc-price-stack'))) continue;
-      ch = host.children;
-      for (k = 0; k < ch.length; k++) {
-        c = ch[k];
-        if (!c || !c.classList) continue;
-        if (c.classList.contains('mc-price-stack')) continue;
-        try {
-          c.style.setProperty('display', 'none', 'important');
-        } catch (eC) {}
-      }
-    }
-  }
-
   function mcRenderUniformCardPricing(card, retailText, memberText, loginUrl, isLoggedIn) {
     var mount = mcEnsureCardPriceMount(card);
     if (!mount) return;
 
-    var html = '';
-
-    if (retailText) {
-      html += '<div class="mc-retail-price">Retail: ' + retailText + '</div>';
-    }
-
+    var html = '<div class="mc-member-grid-price' + (isLoggedIn && memberText ? '' : ' mc-member-grid-price--locked') + '">';
     if (isLoggedIn && memberText) {
-      html += '<div class="mc-member-grid-price">Member: ' + memberText + '</div>';
+      html +=
+        '<div class="mc-member-grid-price__label">Member price:</div>' +
+        '<div class="mc-member-grid-price__amount">' + memberText + '</div>';
     } else {
       html +=
-        '<div class="mc-member-grid-price mc-member-grid-price--locked">Member: <a href="' +
+        '<div class="mc-member-grid-price__label">Member price:</div>' +
+        '<div class="mc-member-grid-price__hint"><a href="' +
         loginUrl +
-        '" class="mc-member-grid-price__login">Log in to see price</a></div>';
+        '" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see member pricing</div>';
     }
+    html += '</div>';
 
     mcSetStableHtml(mount, html);
-    mcHideNativeCardPriceFragments(card);
   }
 
   function mcFindProductHref(card) {
@@ -11563,44 +11625,6 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
     return false;
   }
 
-  function mcBuildLockedMemberLoginBlock() {
-    var block = document.createElement('div');
-    block.className = 'mc-member-grid-price';
-    block.setAttribute('data-mc-member-grid', 'locked');
-    block.setAttribute('data-mc-guest-login', '1');
-    var label = document.createElement('div');
-    label.className = 'mc-member-grid-price__label';
-    label.textContent = 'Member price:';
-    block.appendChild(label);
-    var hint = document.createElement('div');
-    hint.className = 'mc-member-grid-price__hint';
-    var loginA = document.createElement('a');
-    loginA.href = '#';
-    loginA.className = 'mc-member-grid-price__login';
-    loginA.setAttribute('data-mc-open-login', '');
-    loginA.textContent = 'Log in';
-    hint.appendChild(loginA);
-    hint.appendChild(document.createTextNode(' to see member pricing'));
-    block.appendChild(hint);
-    return block;
-  }
-
-  function mcInstallLoggedInPriceNoMemberBlock(priceEl) {
-    if (!priceEl) return;
-    if (
-      !priceEl.matches ||
-      !priceEl.matches(
-        '.v-product__price, .product_price, .product_productprice, .product_saleprice, .v65-product-related-price, [itemprop="price"], font.pricecolor, font.colors_productprice, .price_color, [class*="formattedprice"]'
-      )
-    ) return;
-    var tag = priceEl.tagName ? priceEl.tagName.toUpperCase() : '';
-    if (tag === 'TD' || tag === 'TH') return;
-    var kept = mcGatherPriceLikeNodes(priceEl);
-    priceEl.innerHTML = '';
-    var ki;
-    for (ki = 0; ki < kept.length; ki++) priceEl.appendChild(kept[ki]);
-  }
-
   function mcIsPdpCardOrRelated(node) {
     if (!node) return false;
     return !!(
@@ -11819,11 +11843,6 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
             reason: 'legacy-relateditems-selector'
           });
         }
-        continue;
-      }
-      if (!mcCardUsesProductTileLayout(card)) {
-        try { mcRemoveMemberGridBlocks(card); } catch (eLegacyBlk) {}
-        try { card.removeAttribute('data-mc-member-grid'); } catch (eLegacyAttr) {}
         continue;
       }
       if (cat103NoMember) {

@@ -229,3 +229,76 @@ body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
 
 /* Desktop PDP (>=992px): no rules here for #product_photo_td, zoom links, or #altviews —
    removed legacy block (76px margin / 460px hero / absolute thumbs). Single source: custom-safe.css end. */
+
+/* Active PLP member pricing stack: keep public price visible, add member row beneath it. */
+body.is-home #content_area .mc-price-stack,
+body.is-home #content_area_home .mc-price-stack,
+html.category #content_area .mc-price-stack,
+body.category #content_area .mc-price-stack {
+  display: block !important;
+  width: 100% !important;
+  margin-top: 6px !important;
+}
+
+body.is-home #content_area .mc-member-grid-price,
+body.is-home #content_area_home .mc-member-grid-price,
+html.category #content_area .mc-member-grid-price,
+body.category #content_area .mc-member-grid-price {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+  width: 100% !important;
+  text-align: left !important;
+}
+
+body.is-home #content_area .mc-member-grid-price__label,
+body.is-home #content_area_home .mc-member-grid-price__label,
+html.category #content_area .mc-member-grid-price__label,
+body.category #content_area .mc-member-grid-price__label {
+  display: block !important;
+  width: 100% !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: #6a6a6a !important;
+}
+
+body.is-home #content_area .mc-member-grid-price__amount,
+body.is-home #content_area_home .mc-member-grid-price__amount,
+html.category #content_area .mc-member-grid-price__amount,
+body.category #content_area .mc-member-grid-price__amount {
+  display: block !important;
+  width: 100% !important;
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+  color: #1a1a1a !important;
+}
+
+body.is-home #content_area .mc-member-grid-price__hint,
+body.is-home #content_area_home .mc-member-grid-price__hint,
+html.category #content_area .mc-member-grid-price__hint,
+body.category #content_area .mc-member-grid-price__hint {
+  display: block !important;
+  width: 100% !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  color: #555 !important;
+}
+
+.mc-login-modal__status {
+  min-height: 1.35em;
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #555;
+}
+
+.mc-login-modal__status.is-error {
+  color: #9b1c1c;
+}
+
+.mc-login-modal__status.is-success {
+  color: #22663a;
+}

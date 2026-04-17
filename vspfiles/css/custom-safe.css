@@ -9814,3 +9814,126 @@ html:not(.mc-member-plp-price-pending) body.category:not(.productdetails):not(.i
 html:not(.mc-member-plp-price-pending) body.category:not(.productdetails):not(.is-home) #content_area table.v65-productDisplay table.v65-productDisplay > tbody > tr > td .mc-pricing-ready {
   visibility: visible !important;
 }
+
+/* Final pricing/layout authority: keep category public prices visible and style the new member supplement. */
+body.category:not(.productdetails):not(.is-home) #content_area .mc-pricing-pending,
+body.category:not(.productdetails):not(.is-home) #content_area .mc-pricing-ready {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body.category:not(.productdetails):not(.is-home) #content_area .mc-price-stack {
+  display: block !important;
+  width: 100% !important;
+  margin-top: 6px !important;
+}
+
+body.category:not(.productdetails):not(.is-home) #content_area .mc-member-grid-price {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+  width: 100% !important;
+  text-align: left !important;
+}
+
+body.category:not(.productdetails):not(.is-home) #content_area .mc-member-grid-price__label {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: #6a6a6a !important;
+}
+
+body.category:not(.productdetails):not(.is-home) #content_area .mc-member-grid-price__amount {
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+  color: #1a1a1a !important;
+}
+
+body.category:not(.productdetails):not(.is-home) #content_area .mc-member-grid-price__hint {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  color: #555 !important;
+}
+
+/* Final PDP member pricing block: one stack above the live Volusion price, no legacy caption spacing. */
+body.productdetails #v65-product-parent .mc-pdp-member-pricing,
+body.mc-product-page #v65-product-parent .mc-pdp-member-pricing {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 10px 0 !important;
+  text-align: left !important;
+}
+
+body.productdetails #v65-product-parent .mc-pdp-retail-line,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-line,
+body.productdetails #v65-product-parent .mc-pdp-member-line,
+body.mc-product-page #v65-product-parent .mc-pdp-member-line {
+  display: block !important;
+  margin: 0 0 4px 0 !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0.06em !important;
+  color: #444 !important;
+}
+
+body.productdetails #v65-product-parent .mc-pdp-member-line,
+body.mc-product-page #v65-product-parent .mc-pdp-member-line {
+  color: #2f2f2f !important;
+  font-weight: 500 !important;
+}
+
+body.productdetails #v65-product-parent .mc-pdp-member-pricing + #priceWithOptions,
+body.mc-product-page #v65-product-parent .mc-pdp-member-pricing + #priceWithOptions,
+body.productdetails #v65-product-parent .mc-pdp-member-pricing + #priceWithOptionsNoTax,
+body.mc-product-page #v65-product-parent .mc-pdp-member-pricing + #priceWithOptionsNoTax {
+  margin-top: 0 !important;
+}
+
+body.productdetails #v65-product-parent .mc-member-price-caption,
+body.mc-product-page #v65-product-parent .mc-member-price-caption {
+  display: none !important;
+}
+
+/* Final 992–1199 desktop header clamp: keep product/category menu centered and prevent right drift. */
+@media (min-width: 992px) and (max-width: 1199px) {
+  body:not(.is-home) header.header > .mc-header-desktop-bar {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 18px !important;
+    padding: 10px 24px !important;
+  }
+
+  body:not(.is-home) header.header .mc-header-desktop-bar .microblock.main-menu {
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+
+  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 {
+    width: auto !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 > ul,
+  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--level1,
+  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--horizontal.vnav--level1 {
+    width: auto !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 16px !important;
+    justify-content: center !important;
+  }
+
+  body:not(.is-home) header.header .mc-header-desktop-bar .mc-header-search-cart-wrap {
+    width: min(320px, 32vw) !important;
+    max-width: min(320px, 32vw) !important;
+    min-width: 220px !important;
+  }
+}
