@@ -10534,13 +10534,42 @@ body.mc-product-page #content_area font.product_sale_price {
   }
 
   function mcToggleAuthPending(form, pending) {
-    if (!form || !form.querySelectorAll) return;
-    var controls = form.querySelectorAll('input, button');
-    var i;
-    for (i = 0; i < controls.length; i++) {
-      if (pending) controls[i].setAttribute('disabled', 'disabled');
-      else controls[i].removeAttribute('disabled');
-    }
+    if (!form) return;
+    try {
+      if (pending) {
+        form.setAttribute('data-mc-auth-pending', '1');
+        form.setAttribute('aria-busy', 'true');
+      } else {
+        form.removeAttribute('data-mc-auth-pending');
+        form.removeAttribute('aria-busy');
+      }
+    } catch (eState) {}
+    var submitBtn = form.querySelector('button[type="submit"], input[type="submit"], input[type="image"]');
+    if (!submitBtn) return;
+    try {
+      if (!submitBtn.getAttribute('data-mc-label-default')) {
+        var baseLabel =
+          submitBtn.tagName === 'INPUT'
+            ? (submitBtn.getAttribute('value') || submitBtn.getAttribute('alt') || '')
+            : (submitBtn.textContent || '');
+        submitBtn.setAttribute('data-mc-label-default', baseLabel);
+      }
+      var defaultLabel = submitBtn.getAttribute('data-mc-label-default') || '';
+      var pendingLabel = form.id === 'mc-member-signup-form' ? 'Creating account...' : 'Signing in...';
+      if (submitBtn.tagName === 'INPUT') {
+        if (pending) {
+          submitBtn.setAttribute('value', pendingLabel);
+          submitBtn.setAttribute('alt', pendingLabel);
+        } else {
+          if (defaultLabel) {
+            submitBtn.setAttribute('value', defaultLabel);
+            submitBtn.setAttribute('alt', defaultLabel);
+          }
+        }
+      } else {
+        submitBtn.textContent = pending ? pendingLabel : defaultLabel;
+      }
+    } catch (eLabel) {}
   }
 
   function mcAuthFormBody(form) {
