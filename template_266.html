@@ -10318,20 +10318,14 @@ body.mc-product-page #content_area font.product_sale_price {
       <button type="button" class="mc-login-modal__tab" data-mc-login-tab="signup" role="tab" aria-selected="false">Sign up</button>
     </div>
     <div id="mc-login-modal-panel-login" class="mc-login-modal__panel-body is-active">
-      <p class="mc-login-modal__hint">Sign in with the email and password for your account.</p>
-      <div id="mc-login-modal-login-status" class="mc-login-modal__status" aria-live="polite"></div>
-      <form id="mc-member-login-form" class="mc-login-modal__form" method="post" action="/login.asp" autocomplete="on">
-        <input type="hidden" name="CustomerNewOld" value="old" />
-        <div class="mc-login-modal__field">
-          <label for="mc-login-email">Email (username)</label>
-          <input type="email" id="mc-login-email" name="email" required autocomplete="username" maxlength="75" />
-        </div>
-        <div class="mc-login-modal__field">
-          <label for="mc-login-password">Password</label>
-          <input type="password" id="mc-login-password" name="Password" required autocomplete="current-password" maxlength="80" />
-        </div>
-        <button type="submit" class="mc-login-modal__submit">Log in</button>
-      </form>
+      <p class="mc-login-modal__hint">Sign in below. When login succeeds, this page will refresh and show member pricing.</p>
+      <iframe
+        id="mc-login-modal-login-frame"
+        class="mc-login-modal__frame"
+        title="Member login"
+        loading="lazy"
+        src="about:blank"
+      ></iframe>
       <p class="mc-login-modal__signup-note">Need the full login page? <a href="/login.asp" target="_blank" rel="noopener">Open in a new tab</a></p>
       <p class="mc-login-modal__signup">New here? <a href="#" id="mc-login-modal-switch-signup">Create an account</a></p>
     </div>
@@ -10383,12 +10377,21 @@ body.mc-product-page #content_area font.product_sale_price {
     if (i === -1) return { first: s, last: 'Customer' };
     return { first: s.slice(0, i), last: s.slice(i + 1) };
   }
+  function mcSetLoginFrameSrc(forceReload) {
+    var frame = document.getElementById('mc-login-modal-login-frame');
+    if (!frame) return;
+    var src = '/login.asp?ReturnTo=' + mcLoginReturnTo() + '&mcModalLogin=1';
+    try {
+      if (forceReload || frame.getAttribute('src') !== src) {
+        frame.setAttribute('src', src);
+      }
+    } catch (eFrm) {}
+  }
   function mcSetModalTab(mode) {
     var loginPanel = document.getElementById('mc-login-modal-panel-login');
     var signupPanel = document.getElementById('mc-login-modal-panel-signup');
     var tabs = document.querySelectorAll('[data-mc-login-tab]');
     var title = document.getElementById('mc-login-modal-title');
-    mcSetAuthStatus('login', '', '');
     mcSetAuthStatus('signup', '', '');
     var i;
     for (i = 0; i < tabs.length; i++) {
@@ -10407,10 +10410,7 @@ body.mc-product-page #content_area font.product_sale_price {
       title.textContent = mode === 'signup' ? 'Create account' : 'Member login';
     }
     if (mode === 'login') {
-      var lf = document.getElementById('mc-member-login-form');
-      if (lf) {
-        lf.setAttribute('action', '/login.asp?ReturnTo=' + mcLoginReturnTo());
-      }
+      mcSetLoginFrameSrc(false);
     }
     if (mode === 'signup') {
       mcSetSignupFormAction();
@@ -10440,6 +10440,7 @@ body.mc-product-page #content_area font.product_sale_price {
   function mcOpenLoginModal() {
     var m = mcPrepareLoginModal();
     if (!m) return false;
+    mcSetLoginFrameSrc(true);
     mcSetModalTab('login');
     m.classList.add('mc-login-modal--open');
     m.setAttribute('aria-hidden', 'false');
@@ -10736,13 +10737,6 @@ body.mc-product-page #content_area font.product_sale_price {
   });
 
   (function mcBindAuthForms() {
-    var loginForm = document.getElementById('mc-member-login-form');
-    if (loginForm) {
-      loginForm.addEventListener('submit', function (ev) {
-        ev.preventDefault();
-        mcSubmitAuthForm(loginForm, 'login');
-      });
-    }
     var form = document.getElementById('mc-member-signup-form');
     if (!form) return;
     form.addEventListener('submit', function (ev) {
@@ -10762,6 +10756,24 @@ body.mc-product-page #content_area font.product_sale_price {
       p2.value = pwEl.value;
       mcSetSignupFormAction();
       mcSubmitAuthForm(form, 'signup');
+    });
+  })();
+  (function mcBindLoginFrame() {
+    var frame = document.getElementById('mc-login-modal-login-frame');
+    if (!frame) return;
+    frame.addEventListener('load', function () {
+      window.setTimeout(async function () {
+        var modal = document.getElementById('mc-login-modal');
+        if (!modal || !modal.classList.contains('mc-login-modal--open')) return;
+        try {
+          if (await mcAuthSucceeded()) {
+            mcCloseLoginModal();
+            window.setTimeout(function () {
+              window.location.reload();
+            }, 120);
+          }
+        } catch (eAuthFrame) {}
+      }, 400);
     });
   })();
   document.addEventListener('keydown', function (ev) {
