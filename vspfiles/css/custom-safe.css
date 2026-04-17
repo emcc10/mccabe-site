@@ -9937,3 +9937,33 @@ body.mc-product-page #v65-product-parent .mc-member-price-caption {
     min-width: 220px !important;
   }
 }
+
+/* Final PDP safety: never hide the native Volusion price/options table. */
+body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
+body.productdetails:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
+body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
+body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"] {
+  position: static !important;
+  left: auto !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+body.productdetails #v65-product-parent #priceWithOptions,
+body.productdetails #v65-product-parent #priceWithOptionsNoTax,
+body.productdetails #content_area #priceWithOptions,
+body.productdetails #content_area #priceWithOptionsNoTax,
+body.mc-product-page #v65-product-parent #priceWithOptions,
+body.mc-product-page #v65-product-parent #priceWithOptionsNoTax,
+body.mc-product-page #content_area #priceWithOptions,
+body.mc-product-page #content_area #priceWithOptionsNoTax {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
