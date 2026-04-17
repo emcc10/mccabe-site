@@ -9968,6 +9968,27 @@ body.mc-product-page #content_area #priceWithOptionsNoTax {
   opacity: 1 !important;
 }
 
+body.productdetails #v65-product-parent .product_list_price,
+body.productdetails #content_area .product_list_price,
+body.productdetails #v65-product-parent .product_productprice,
+body.productdetails #content_area .product_productprice,
+body.productdetails #v65-product-parent .v65-product-price,
+body.productdetails #content_area .v65-product-price,
+body.productdetails #v65-product-parent .product_price,
+body.productdetails #content_area .product_price,
+body.mc-product-page #v65-product-parent .product_list_price,
+body.mc-product-page #content_area .product_list_price,
+body.mc-product-page #v65-product-parent .product_productprice,
+body.mc-product-page #content_area .product_productprice,
+body.mc-product-page #v65-product-parent .v65-product-price,
+body.mc-product-page #content_area .v65-product-price,
+body.mc-product-page #v65-product-parent .product_price,
+body.mc-product-page #content_area .product_price {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
 body.productdetails #v65-product-parent .product_sale_price,
 body.productdetails #v65-product-parent .product_saleprice,
 body.productdetails #v65-product-parent font.product_sale_price,

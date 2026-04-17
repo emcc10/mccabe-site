@@ -10270,6 +10270,27 @@ body.mc-product-page #content_area #priceWithOptionsNoTax {
   opacity: 1 !important;
 }
 
+body.productdetails #v65-product-parent .product_list_price,
+body.productdetails #content_area .product_list_price,
+body.productdetails #v65-product-parent .product_productprice,
+body.productdetails #content_area .product_productprice,
+body.productdetails #v65-product-parent .v65-product-price,
+body.productdetails #content_area .v65-product-price,
+body.productdetails #v65-product-parent .product_price,
+body.productdetails #content_area .product_price,
+body.mc-product-page #v65-product-parent .product_list_price,
+body.mc-product-page #content_area .product_list_price,
+body.mc-product-page #v65-product-parent .product_productprice,
+body.mc-product-page #content_area .product_productprice,
+body.mc-product-page #v65-product-parent .v65-product-price,
+body.mc-product-page #content_area .v65-product-price,
+body.mc-product-page #v65-product-parent .product_price,
+body.mc-product-page #content_area .product_price {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
 body.productdetails #v65-product-parent .product_sale_price,
 body.productdetails #v65-product-parent .product_saleprice,
 body.productdetails #v65-product-parent font.product_sale_price,
@@ -12182,10 +12203,16 @@ body.mc-product-page #content_area font.product_sale_price {
 
   function mcRenderPdpRetailAndMember(retailText, memberText, loginUrl, isLoggedIn) {
     var nativeBlock =
-      document.querySelector('#priceWithOptions') ||
-      document.querySelector('#priceWithOptionsNoTax') ||
+      document.querySelector('#v65-product-parent .product_list_price') ||
+      document.querySelector('#content_area .product_list_price') ||
+      document.querySelector('#v65-product-parent .product_productprice') ||
+      document.querySelector('#content_area .product_productprice') ||
+      document.querySelector('#v65-product-parent .v65-product-price') ||
+      document.querySelector('#content_area .v65-product-price') ||
       document.querySelector('#v65-product-parent .product_price') ||
-      document.querySelector('#v65-product-parent .price');
+      document.querySelector('#v65-product-parent .price') ||
+      document.querySelector('#priceWithOptionsNoTax') ||
+      document.querySelector('#priceWithOptions');
 
     if (!nativeBlock || !nativeBlock.parentNode) return false;
 
@@ -12226,6 +12253,20 @@ body.mc-product-page #content_area font.product_sale_price {
       nativeBlock.style.setProperty('visibility', 'visible', 'important');
       nativeBlock.style.setProperty('opacity', '1', 'important');
     } catch (eNativePdp) {}
+    try {
+      var retailNodes = document.querySelectorAll(
+        '#v65-product-parent .product_list_price, #content_area .product_list_price,' +
+        '#v65-product-parent .product_productprice, #content_area .product_productprice,' +
+        '#v65-product-parent .v65-product-price, #content_area .v65-product-price,' +
+        '#v65-product-parent .product_price, #content_area .product_price'
+      );
+      var ri;
+      for (ri = 0; ri < retailNodes.length; ri++) {
+        retailNodes[ri].style.setProperty('display', 'block', 'important');
+        retailNodes[ri].style.setProperty('visibility', 'visible', 'important');
+        retailNodes[ri].style.setProperty('opacity', '1', 'important');
+      }
+    } catch (eShowRetailNodes) {}
     try {
       var saleNodes = document.querySelectorAll(
         '#v65-product-parent font.product_sale_price, #v65-product-parent .product_sale_price, #v65-product-parent .product_saleprice,' +
