@@ -12616,7 +12616,7 @@ async function mcSubmitAuthForm(form, mode) {
     if (isLoggedIn && memberText) {
       html += '<div class="mc-pdp-member-line">Member: ' + memberText + '</div>';
     } else if (isLoggedIn) {
-      html += '<div class="mc-pdp-member-line">Member pricing updates after session and option pricing load.</div>';
+      /* No member amount yet; omit a loading caption so async paint does not flash placeholder text. */
     } else {
       html +=
         '<div class="mc-pdp-member-line mc-pdp-member-line--locked">Member: <a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see member pricing</div>';
@@ -12708,13 +12708,47 @@ async function mcSubmitAuthForm(form, mode) {
       } catch (eR1) {}
       return amt;
     }
+    function mcPdpSyncMemberAmountFromDom() {
+      var amt = 0;
+      try {
+        amt = Number(mcExtractSalePriceFromPdpHtml(document.documentElement.innerHTML || '')) || 0;
+      } catch (eM0) {}
+      if (amt > 0) return amt;
+      try {
+        amt = Number(getVolusionAddToCartSeatPrice(document)) || 0;
+      } catch (eM1) {}
+      if (amt > 0) return amt;
+      if (typeof window.parseMcCurrency !== 'function') return 0;
+      try {
+        var saleNode =
+          document.querySelector('#priceWithOptions') ||
+          document.querySelector('#priceWithOptionsNoTax') ||
+          document.querySelector('#content_area .product_saleprice, #content_area .product_sale_price') ||
+          document.querySelector('#v65-product-parent .product_saleprice, #v65-product-parent .product_sale_price');
+        if (saleNode) {
+          amt =
+            Number(
+              window.parseMcCurrency(
+                (saleNode.getAttribute && (saleNode.getAttribute('value') || saleNode.getAttribute('content'))) ||
+                  saleNode.textContent ||
+                  ''
+              )
+            ) || 0;
+        }
+      } catch (eM2) {}
+      return amt;
+    }
     var retailAmtSync = mcPdpSyncRetailAmountFromDom();
     var retailTextSync = mcFmtMoney(retailAmtSync);
     if (retailTextSync) {
       try {
         var loginUrlEarly =
           typeof window.getMemberLoginUrl === 'function' ? window.getMemberLoginUrl() : '#';
-        mcRenderPdpRetailAndMember(retailTextSync, '', loginUrlEarly, mcPdpSyncLoggedInGuess());
+        var guessLoggedInEarly = mcPdpSyncLoggedInGuess();
+        var memberAmtEarly = guessLoggedInEarly ? mcPdpSyncMemberAmountFromDom() : 0;
+        var memberTextEarly =
+          guessLoggedInEarly && memberAmtEarly > 0 ? mcFmtMoney(memberAmtEarly) : '';
+        mcRenderPdpRetailAndMember(retailTextSync, memberTextEarly, loginUrlEarly, guessLoggedInEarly);
       } catch (eEarlyPdp) {}
     }
 
