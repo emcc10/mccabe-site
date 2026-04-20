@@ -802,12 +802,6 @@ body:not(.is-home) header.header .collapsing-search {
     padding-bottom: 2px !important;
   }
 
-  /* PDP: interior header strip uses body:not(.is-home) padding; homepage menu sits in hero overlay — tighten PDP top gap only */
-  body.productdetails header.header > .header__section,
-  body.mc-product-page header.header > .header__section {
-    padding-top: 2px !important;
-  }
-
   body:not(.is-home) header.header > .mc-header-desktop-bar {
     display: flex !important;
     flex-direction: row !important;
@@ -1589,7 +1583,9 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li:focus-within > a {
 .mc-home-float,
 a.mc-home-float,
 .mc-cart-float,
-a.mc-cart-float {
+a.mc-cart-float,
+.mc-account-float,
+a.mc-account-float {
   position: fixed !important;
   top: max(12px, env(safe-area-inset-top)) !important;
   z-index: 2147483647 !important;
@@ -1622,15 +1618,19 @@ a.mc-home-float {
 }
 
 .mc-cart-float,
-a.mc-cart-float {
+a.mc-cart-float,
+.mc-account-float,
+a.mc-account-float {
   /* Position from left at end of file so cart never runs off */
   right: auto !important;
 }
 
 .mc-home-float__icon,
 .mc-cart-float__icon,
+.mc-account-float__icon,
 .mc-home-float__icon path,
-.mc-cart-float__icon path {
+.mc-cart-float__icon path,
+.mc-account-float__icon path {
   width: clamp(16px, 4vw, 20px) !important;
   height: clamp(16px, 4vw, 20px) !important;
   min-width: 16px !important;
@@ -4255,8 +4255,7 @@ body:not(.is-home) #display_menu_1 > ul {
 }
 
 /* ============================================================
-   CART ICON: force on-screen (no run-off) - position from left
-   so it never gets clipped by viewport/containing block
+   CART + MY ACCOUNT FLOATS: base (mobile keeps original cart inset)
    ============================================================ */
 html body a.mc-cart-float,
 html body .mc-cart-float,
@@ -4273,6 +4272,11 @@ body .mc-cart-float {
   box-sizing: border-box !important;
 }
 
+.mc-account-float,
+a.mc-account-float {
+  display: none !important;
+}
+
 /* Home page: position cart from right so it stays visible when width is adjusted */
 body.is-home html body a.mc-cart-float,
 body.is-home html body .mc-cart-float,
@@ -4280,6 +4284,52 @@ body.is-home body a.mc-cart-float,
 body.is-home body .mc-cart-float {
   left: auto !important;
   right: max(28px, env(safe-area-inset-right)) !important;
+}
+
+@media (min-width: 992px) {
+  html body a.mc-account-float,
+  html body .mc-account-float,
+  body a.mc-account-float,
+  body .mc-account-float {
+    display: flex !important;
+    left: calc(100vw - 52px - 12px - 52px - max(52px, env(safe-area-inset-right))) !important;
+    right: auto !important;
+    width: 52px !important;
+    max-width: 52px !important;
+    min-width: 40px !important;
+    max-height: 48px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body a.mc-cart-float,
+  html body .mc-cart-float,
+  body a.mc-cart-float,
+  body .mc-cart-float {
+    left: calc(100vw - 52px - max(52px, env(safe-area-inset-right))) !important;
+  }
+
+  body.is-home html body a.mc-cart-float,
+  body.is-home html body .mc-cart-float,
+  body.is-home body a.mc-cart-float,
+  body.is-home body .mc-cart-float {
+    left: auto !important;
+    right: max(52px, env(safe-area-inset-right)) !important;
+  }
+
+  body.is-home html body a.mc-account-float,
+  body.is-home html body .mc-account-float,
+  body.is-home body a.mc-account-float,
+  body.is-home body .mc-account-float {
+    display: flex !important;
+    left: auto !important;
+    right: calc(52px + 12px + max(52px, env(safe-area-inset-right))) !important;
+  }
+
+  .mc-home-float,
+  a.mc-home-float {
+    left: max(22px, calc(env(safe-area-inset-left) + 20px)) !important;
+  }
 }
 
 /* =========================================================
@@ -10224,4 +10274,148 @@ body.mc-product-page #content_area font.product_sale_price {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
+}
+
+/* ============================================================
+   RH-STYLE TYPOGRAPHY (prices + labels + PDP product copy)
+   ============================================================ */
+body .mc-member-grid-price__label,
+body .mc-member-price-caption__option-label {
+  font-weight: 400 !important;
+  letter-spacing: 0.22em !important;
+  text-transform: uppercase !important;
+  color: #8b8b8b !important;
+}
+
+body .mc-member-grid-price__amount,
+body .mc-member-price-caption__price-value {
+  font-weight: 400 !important;
+  letter-spacing: 0.04em !important;
+  color: #2a2a2a !important;
+}
+
+body.productdetails #v65-product-parent .mc-pdp-retail-row,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
+body.productdetails #v65-product-parent .mc-pdp-member-pricing,
+body.productdetails #v65-product-parent .mc-pdp-member-line,
+body.mc-product-page #v65-product-parent .mc-pdp-member-pricing,
+body.mc-product-page #v65-product-parent .mc-pdp-member-line {
+  letter-spacing: 0.06em !important;
+  color: #3d3d3d !important;
+}
+
+body.productdetails #v65-product-parent .mc-pdp-member-line,
+body.mc-product-page #v65-product-parent .mc-pdp-member-line {
+  color: #222 !important;
+}
+
+@media (min-width: 992px) {
+  body.productdetails #v65-product-parent .v65-product-info,
+  body.productdetails #v65-product-parent .v65-product-info-tabs,
+  body.productdetails #v65-product-parent .product_longdescription,
+  body.productdetails #v65-product-parent #ProductDetail_TechSpecs,
+  body.productdetails #v65-product-parent .colors_descriptionbox,
+  body.mc-product-page #v65-product-parent .v65-product-info,
+  body.mc-product-page #v65-product-parent .v65-product-info-tabs,
+  body.mc-product-page #v65-product-parent .product_longdescription,
+  body.mc-product-page #v65-product-parent #ProductDetail_TechSpecs,
+  body.mc-product-page #v65-product-parent .colors_descriptionbox {
+    font-family: Inter, system-ui, -apple-system, sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.65 !important;
+    color: #4a4a4a !important;
+  }
+
+  body.productdetails #v65-product-parent .v65-product-info-tabs a,
+  body.productdetails #v65-product-parent .vCSS_tabbed_nav a,
+  body.mc-product-page #v65-product-parent .v65-product-info-tabs a,
+  body.mc-product-page #v65-product-parent .vCSS_tabbed_nav a {
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.2em !important;
+    text-transform: uppercase !important;
+    color: #6f6f6f !important;
+  }
+
+  /* Interior: stable menu bar height + search nudged right (away from About Us) */
+  body:not(.is-home) header.header > .mc-header-desktop-bar {
+    min-height: 52px !important;
+    align-items: center !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap {
+    margin-left: clamp(12px, 2.2vw, 36px) !important;
+  }
+
+  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row {
+    margin-left: clamp(8px, 1.5vw, 24px) !important;
+  }
+
+  body.productdetails #v65-product-parent #v65-productdetail-action-wrapper,
+  body.mc-product-page #v65-product-parent #v65-productdetail-action-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px 20px !important;
+    width: 100% !important;
+    max-width: 520px !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+  }
+
+  /* Quantity + Add to cart: compact qty, aligned with button column */
+  body.productdetails #v65-product-parent [itemprop="offers"],
+  body.mc-product-page #v65-product-parent [itemprop="offers"] {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px 18px !important;
+    width: 100% !important;
+    max-width: 520px !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    text-align: right !important;
+  }
+
+  body.productdetails #v65-product-parent .v65-productdetail-cartqty,
+  body.mc-product-page #v65-product-parent .v65-productdetail-cartqty {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+  }
+
+  body.productdetails #v65-product-parent .v65-productdetail-cartqty input[type="text"],
+  body.productdetails #v65-product-parent .v65-productdetail-cartqty input[type="number"],
+  body.mc-product-page #v65-product-parent .v65-productdetail-cartqty input[type="text"],
+  body.mc-product-page #v65-product-parent .v65-productdetail-cartqty input[type="number"] {
+    width: 3.25rem !important;
+    min-width: 0 !important;
+    max-width: 4.5rem !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 4px 8px !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    border: 1px solid #c9c9c9 !important;
+    border-radius: 2px !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+  }
+
+  body.productdetails #v65-product-parent .v65-product-addtocart,
+  body.mc-product-page #v65-product-parent .v65-product-addtocart {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    text-align: right !important;
+  }
 }
