@@ -12665,6 +12665,59 @@ async function mcSubmitAuthForm(form, mode) {
     var root = document.querySelector('#v65-product-parent');
     if (!root) return;
 
+    /* Paint retail label + member row from the live DOM before any await so the first paint
+       is not a bare Volusion price followed by labels after async session/fetch work. */
+    function mcPdpSyncLoggedInGuess() {
+      try {
+        if (document.body && document.body.classList.contains('mc-member-logged-in')) return true;
+      } catch (eG1) {}
+      try {
+        if (sessionStorage.getItem('mc_recent_member_auth')) return true;
+      } catch (eG2) {}
+      return false;
+    }
+    function mcPdpSyncRetailAmountFromDom() {
+      var amt = 0;
+      try {
+        amt = Number(mcExtractRetailPriceFromPdpHtml(document.documentElement.innerHTML || '')) || 0;
+      } catch (eR0) {}
+      if (amt > 0) return amt;
+      if (typeof window.parseMcCurrency !== 'function') return 0;
+      try {
+        var nb =
+          document.querySelector('#v65-product-parent .product_list_price') ||
+          document.querySelector('#content_area .product_list_price') ||
+          document.querySelector('#v65-product-parent .product_productprice') ||
+          document.querySelector('#content_area .product_productprice') ||
+          document.querySelector('#v65-product-parent .v65-product-price') ||
+          document.querySelector('#content_area .v65-product-price') ||
+          document.querySelector('#v65-product-parent .product_price') ||
+          document.querySelector('#v65-product-parent .price') ||
+          document.querySelector('#priceWithOptionsNoTax') ||
+          document.querySelector('#priceWithOptions');
+        if (nb) {
+          amt =
+            Number(
+              window.parseMcCurrency(
+                (nb.getAttribute && (nb.getAttribute('content') || nb.getAttribute('value'))) ||
+                  nb.textContent ||
+                  ''
+              )
+            ) || 0;
+        }
+      } catch (eR1) {}
+      return amt;
+    }
+    var retailAmtSync = mcPdpSyncRetailAmountFromDom();
+    var retailTextSync = mcFmtMoney(retailAmtSync);
+    if (retailTextSync) {
+      try {
+        var loginUrlEarly =
+          typeof window.getMemberLoginUrl === 'function' ? window.getMemberLoginUrl() : '#';
+        mcRenderPdpRetailAndMember(retailTextSync, '', loginUrlEarly, mcPdpSyncLoggedInGuess());
+      } catch (eEarlyPdp) {}
+    }
+
  var st = null;
 var isLoggedIn = false;
 try {
