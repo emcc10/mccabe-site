@@ -10542,39 +10542,38 @@ body.mc-product-page #content_area font.product_sale_price {
     if (i === -1) return { first: s, last: 'Customer' };
     return { first: s.slice(0, i), last: s.slice(i + 1) };
   }
-  function mcSetModalTab(mode) {
-    var loginPanel = document.getElementById('mc-login-modal-panel-login');
-    var signupPanel = document.getElementById('mc-login-modal-panel-signup');
-    var tabs = document.querySelectorAll('[data-mc-login-tab]');
-    var title = document.getElementById('mc-login-modal-title');
-    mcSetAuthStatus('login', '', '');
-    mcSetAuthStatus('signup', '', '');
-    var i;
-    for (i = 0; i < tabs.length; i++) {
-      var tab = tabs[i];
-      var isSel = tab.getAttribute('data-mc-login-tab') === mode;
-      tab.classList.toggle('is-active', isSel);
-      tab.setAttribute('aria-selected', isSel ? 'true' : 'false');
-    }
-    if (loginPanel) {
-      loginPanel.classList.toggle('is-active', mode === 'login');
-    }
-    if (signupPanel) {
-      signupPanel.classList.toggle('is-active', mode === 'signup');
-    }
-    if (title) {
-      title.textContent = mode === 'signup' ? 'Create account' : 'Member login';
-    }
-    if (mode === 'login') {
-      mcSetLoginFormAction();
-      try {
-        mcToggleAuthPending(document.getElementById('mc-member-login-form'), false);
-      } catch (eLogReset) {}
-    }
-    if (mode === 'signup') {
-      mcSetSignupFormAction();
-    }
+ function mcSetModalTab(mode) {
+  var loginPanel = document.getElementById('mc-login-modal-panel-login');
+  var signupPanel = document.getElementById('mc-login-modal-panel-signup');
+  var tabs = document.querySelectorAll('[data-mc-login-tab]');
+  var title = document.getElementById('mc-login-modal-title');
+
+  mcSetAuthStatus('login', '', '');
+  mcSetAuthStatus('signup', '', '');
+
+  var i;
+  for (i = 0; i < tabs.length; i++) {
+    var tab = tabs[i];
+    var isSel = tab.getAttribute('data-mc-login-tab') === mode;
+    tab.classList.toggle('is-active', isSel);
+    tab.setAttribute('aria-selected', isSel ? 'true' : 'false');
   }
+
+  if (loginPanel) loginPanel.classList.toggle('is-active', mode === 'login');
+  if (signupPanel) signupPanel.classList.toggle('is-active', mode === 'signup');
+  if (title) title.textContent = mode === 'signup' ? 'Create account' : 'Member login';
+
+  if (mode === 'login') {
+    mcSetLoginFormAction();
+    try {
+      mcToggleAuthPending(document.getElementById('mc-member-login-form'), false);
+    } catch (eLogReset) {}
+  }
+
+  if (mode === 'signup') {
+    mcSetSignupFormAction();
+  }
+}
   function mcPrepareLoginModal() {
     var m = document.getElementById('mc-login-modal');
     if (!m) return null;
@@ -10866,167 +10865,144 @@ body.mc-product-page #content_area font.product_sale_price {
     return false;
   }
 
-  async function mcSubmitAuthForm(form, mode) {
-    if (!form) return false;
-    mcSetAuthStatus(mode, '', '');
-    mcToggleAuthPending(form, true);
-    mcSetAuthStatus(mode, mode === 'signup' ? 'Creating account...' : 'Signing in...', 'success');
-    if (mode === 'login') {
-      var loginAbort = null;
-      var loginTimeoutId = null;
-      var didNavigate = false;
-      try {
-        mcSetLoginFormAction();
-        if (typeof AbortController !== 'undefined') {
-          loginAbort = new AbortController();
-          loginTimeoutId = window.setTimeout(function () {
-            try { loginAbort.abort(); } catch (eAbort) {}
-          }, 10000);
-        }
-        var loginResp = null;
-        var loginHtml = '';
-        try {
-          loginResp = await fetch(form.getAttribute('action') || '/login.asp?ReturnTo=' + mcLoginReturnTo(), {
-            method: 'POST',
-            credentials: 'same-origin',
-            cache: 'no-store',
-            redirect: 'follow',
-            signal: loginAbort ? loginAbort.signal : undefined,
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-            },
-            body: mcAuthFormBody(form)
-          });
-          loginHtml = await loginResp.text();
-        } catch (eFetch) {
-          if (!(eFetch && eFetch.name === 'AbortError')) throw eFetch;
-        }
-        if (loginTimeoutId) { window.clearTimeout(loginTimeoutId); loginTimeoutId = null; }
+async function mcSubmitAuthForm(form, mode) {
+  if (!form) return false;
+  mcSetAuthStatus(mode, '', '');
+  mcToggleAuthPending(form, true);
+  mcSetAuthStatus(mode, mode === 'signup' ? 'Creating account.' : 'Signing in.', 'success');
 
-        var failed = loginResp
-          ? mcLoginResponseLooksFailed(loginHtml, loginResp && loginResp.url)
-          : false;
-        if (failed) {
-          mcClearRecentMemberAuth();
-          mcSetAuthStatus('login', 'Login failed. Please check your email and password.', 'error');
-          return false;
-        }
+  if (mode === 'login') {
+    try {
+      mcSetLoginFormAction();
 
-        var confirmed = await mcWaitForAuthSuccess(8000, 500);
-        if (confirmed) {
-          mcRememberRecentMemberAuth();
-          mcSetAuthStatus('login', 'Signed in. Refreshing...', 'success');
-          didNavigate = true;
-          mcCloseLoginModal();
-          window.setTimeout(function () { window.location.reload(); }, 120);
-          return true;
-        }
-
-        mcClearRecentMemberAuth();
-        mcSetAuthStatus(
-          'login',
-          'We could not confirm the member session. Please try again.',
-          'error'
-        );
-        return false;
-      } catch (eLoginFetch) {
-        mcClearRecentMemberAuth();
-        mcSetAuthStatus(
-          'login',
-          eLoginFetch && eLoginFetch.name === 'AbortError'
-            ? 'Login timed out. Please try again.'
-            : 'Could not sign in right now. Please try again.',
-          'error'
-        );
-        return false;
-      } finally {
-        if (loginTimeoutId) {
-          try { window.clearTimeout(loginTimeoutId); } catch (eCT) {}
-        }
-        if (!didNavigate) {
-          try { mcToggleAuthPending(form, false); } catch (eTP) {}
-        }
+      var emailEl = document.getElementById('mc-login-email');
+      if (emailEl && !form.querySelector('input[name="EmailAddress"]')) {
+        emailEl.setAttribute('name', 'EmailAddress');
       }
-    }
-    mcRememberRecentMemberAuth();
-    return new Promise(function(resolve) {
-      var frame = mcGetAuthFrame();
+
+      var passwordEl = document.getElementById('mc-login-password');
+      if (passwordEl && !form.querySelector('input[name="Password"]')) {
+        passwordEl.setAttribute('name', 'Password');
+      }
+
+      mcSetAuthStatus('login', 'Signing in.', 'success');
+
       var originalTarget = form.getAttribute('target') || '';
-      var originalAction = form.getAttribute('action') || '';
-      var finished = false;
-      var cleanup = function(ok, message, kind) {
-        if (finished) return;
-        finished = true;
-        try {
-          clearTimeout(timeoutId);
-        } catch (eTo) {}
-        try {
-          clearInterval(pollId);
-        } catch (ePoll) {}
-        try {
-          if (originalTarget) form.setAttribute('target', originalTarget);
-          else form.removeAttribute('target');
-        } catch (eT) {}
-        try {
-          if (originalAction) form.setAttribute('action', originalAction);
-        } catch (eA) {}
-        if (!ok) {
-          mcClearRecentMemberAuth();
-          mcSetAuthStatus(mode, message, kind || 'error');
-          mcToggleAuthPending(form, false);
-        }
-        resolve(ok);
-      };
-      var pollId = window.setInterval(function() {
-        window.setTimeout(async function() {
-          if (finished) return;
-          try {
-            if (await mcAuthSucceeded()) {
-              mcRememberRecentMemberAuth();
-              mcSetAuthStatus(mode, mode === 'signup' ? 'Account created. Refreshing...' : 'Signed in. Refreshing...', 'success');
-              cleanup(true, '', '');
-              window.setTimeout(function () {
-                window.location.reload();
-              }, 120);
-            }
-          } catch (eAuth) {}
-        }, 0);
-      }, 900);
-      var timeoutId = window.setTimeout(function() {
-        cleanup(
-          false,
-          mode === 'signup'
-            ? 'We could not confirm the new account. Please check your info and try again.'
-            : 'Login failed. Please check your email and password.',
-          'error'
-        );
-      }, 25000);
-      try {
-        form.setAttribute('target', 'mc-member-auth-frame');
-        if (mode === 'signup') mcSetSignupFormAction();
-        if (mode === 'login') mcSetLoginFormAction();
-        HTMLFormElement.prototype.submit.call(form);
-      } catch (err) {
-        cleanup(
-          false,
-          mode === 'signup'
-            ? 'Could not create the account right now. Please try again.'
-            : 'Could not sign in right now. Please try again.',
-          'error'
-        );
+      form.setAttribute('target', 'mc-member-auth-frame');
+      mcGetAuthFrame();
+
+      HTMLFormElement.prototype.submit.call(form);
+
+      var confirmed = await mcWaitForAuthSuccess(12000, 500);
+      if (confirmed) {
+        mcRememberRecentMemberAuth();
+        mcSetAuthStatus('login', 'Signed in. Refreshing...', 'success');
+        mcCloseLoginModal();
+        window.setTimeout(function () {
+          window.location.reload();
+        }, 150);
+        return true;
       }
-    });
+
+      if (originalTarget) form.setAttribute('target', originalTarget);
+      else form.removeAttribute('target');
+
+      mcClearRecentMemberAuth();
+      mcSetAuthStatus('login', 'We could not confirm the member session. Please try again.', 'error');
+      mcToggleAuthPending(form, false);
+      return false;
+    } catch (eLogin) {
+      mcClearRecentMemberAuth();
+      mcSetAuthStatus('login', 'Could not sign in right now. Please try again.', 'error');
+      mcToggleAuthPending(form, false);
+      return false;
+    }
   }
+
+  return new Promise(function(resolve) {
+    var originalTarget = form.getAttribute('target') || '';
+    var originalAction = form.getAttribute('action') || '';
+    var finished = false;
+
+    var cleanup = function(ok, message, kind) {
+      if (finished) return;
+      finished = true;
+
+      try { clearTimeout(timeoutId); } catch (e1) {}
+      try { clearInterval(pollId); } catch (e2) {}
+
+      try {
+        if (originalTarget) form.setAttribute('target', originalTarget);
+        else form.removeAttribute('target');
+      } catch (e3) {}
+
+      try {
+        if (originalAction) form.setAttribute('action', originalAction);
+      } catch (e4) {}
+
+      if (!ok) {
+        mcClearRecentMemberAuth();
+        mcSetAuthStatus(mode, message, kind || 'error');
+        mcToggleAuthPending(form, false);
+      }
+
+      resolve(ok);
+    };
+
+    var pollId = window.setInterval(function() {
+      window.setTimeout(async function() {
+        if (finished) return;
+        try {
+          if (await mcAuthSucceeded()) {
+            mcRememberRecentMemberAuth();
+            mcSetAuthStatus(
+              mode,
+              mode === 'signup' ? 'Account created. Refreshing...' : 'Signed in. Refreshing...',
+              'success'
+            );
+            cleanup(true, '', '');
+            window.setTimeout(function () {
+              window.location.reload();
+            }, 120);
+          }
+        } catch (eAuth) {}
+      }, 0);
+    }, 900);
+
+    var timeoutId = window.setTimeout(function() {
+      cleanup(
+        false,
+        mode === 'signup'
+          ? 'We could not confirm the new account. Please check your info and try again.'
+          : 'Login failed. Please check your email and password.',
+        'error'
+      );
+    }, 25000);
+
+    try {
+      form.setAttribute('target', 'mc-member-auth-frame');
+      if (mode === 'signup') mcSetSignupFormAction();
+      if (mode === 'login') mcSetLoginFormAction();
+      HTMLFormElement.prototype.submit.call(form);
+    } catch (err) {
+      cleanup(
+        false,
+        mode === 'signup'
+          ? 'Could not create the account right now. Please try again.'
+          : 'Could not sign in right now. Please try again.',
+        'error'
+      );
+    }
+  });
+}
 
   document.addEventListener('click', function (e) {
     var loginLink = e.target.closest('.mc-member-grid-price__login, [data-mc-open-login]');
-    if (loginLink) {
-      e.preventDefault();
-      if (typeof window.mcOpenLoginModal === 'function') {
-        window.mcOpenLoginModal();
-      }
-      return;
-    }
+  if (loginLink) {
+  e.preventDefault();
+  window.location.href = '/login.asp?ReturnTo=' + encodeURIComponent((location.pathname || '/') + (location.search || ''));
+  return;
+}
 
     var signupLink = e.target.closest('[data-mc-open-signup]');
     if (signupLink) {
@@ -11059,12 +11035,32 @@ body.mc-product-page #content_area font.product_sale_price {
 
   (function mcBindAuthForms() {
     var loginForm = document.getElementById('mc-member-login-form');
-    if (loginForm) {
-      loginForm.addEventListener('submit', function (ev) {
-        ev.preventDefault();
-        mcSubmitAuthForm(loginForm, 'login');
-      });
+  if (loginForm) {
+  loginForm.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+
+    try {
+      mcSetAuthStatus('login', '', '');
+      mcToggleAuthPending(loginForm, true);
+      mcSetAuthStatus('login', 'Signing in...', 'success');
+
+      mcSetLoginFormAction();
+
+      var emailEl = document.getElementById('mc-login-email');
+      if (emailEl) emailEl.setAttribute('name', 'EmailAddress');
+
+      var passwordEl = document.getElementById('mc-login-password');
+      if (passwordEl) passwordEl.setAttribute('name', 'Password');
+
+      loginForm.removeAttribute('target');
+      HTMLFormElement.prototype.submit.call(loginForm);
+    } catch (eLoginSubmit) {
+      mcClearRecentMemberAuth();
+      mcSetAuthStatus('login', 'Could not sign in right now. Please try again.', 'error');
+      mcToggleAuthPending(loginForm, false);
     }
+  });
+}
     var form = document.getElementById('mc-member-signup-form');
     if (!form) return;
     form.addEventListener('submit', function (ev) {
@@ -12669,31 +12665,50 @@ body.mc-product-page #content_area font.product_sale_price {
     var root = document.querySelector('#v65-product-parent');
     if (!root) return;
 
-    var st = null;
-    var isLoggedIn = false;
-    try {
-      st =
-        typeof window.detectMemberPricingState === 'function'
-          ? await window.detectMemberPricingState()
-          : typeof detectMemberPricingState === 'function'
-            ? await detectMemberPricingState()
-            : null;
-      isLoggedIn = !!(st && st.unlocked);
-    } catch (e1) {}
-    try {
-      var liveAuth = await mcAuthSucceeded();
-      if (!liveAuth) {
-        isLoggedIn = false;
-        if (st) st.unlocked = false;
-        mcClearRecentMemberAuth();
-        if (document.body) document.body.classList.remove('mc-member-logged-in');
-      } else {
-        isLoggedIn = true;
-        if (st) st.unlocked = true;
-        if (document.body) document.body.classList.add('mc-member-logged-in');
-      }
-    } catch (e1b) {}
+ var st = null;
+var isLoggedIn = false;
+try {
+  st =
+    typeof window.detectMemberPricingState === 'function'
+      ? await window.detectMemberPricingState()
+      : typeof detectMemberPricingState === 'function'
+        ? await detectMemberPricingState()
+        : null;
+  isLoggedIn = !!(st && st.unlocked);
+} catch (e1) {}
 
+try {
+  if (!isLoggedIn && document.body && document.body.classList.contains('mc-member-logged-in')) {
+    isLoggedIn = true;
+  }
+} catch (eBody) {}
+
+try {
+  if (!isLoggedIn) {
+    var recentAuth = sessionStorage.getItem('mc_recent_member_auth');
+    if (recentAuth) isLoggedIn = true;
+  }
+} catch (eSess) {}
+
+try {
+  var liveAuth = await mcAuthSucceeded();
+  if (liveAuth) {
+    isLoggedIn = true;
+  }
+} catch (e1b) {}
+
+if (st) {
+  st.unlocked = isLoggedIn;
+}
+
+if (document.body) {
+  if (isLoggedIn) document.body.classList.add('mc-member-logged-in');
+  else document.body.classList.remove('mc-member-logged-in');
+}
+
+if (!isLoggedIn) {
+  mcClearRecentMemberAuth();
+}
     var retailAmt = 0;
     var memberAmt = 0;
 
@@ -12811,16 +12826,20 @@ body.mc-product-page #content_area font.product_sale_price {
     }
 
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function () {
-        runPaint(true);
-      });
-    } else {
-      runPaint(true);
-    }
+  document.addEventListener('DOMContentLoaded', function () {
+    runPaint(true);
+  });
+} else {
+  runPaint(true);
+}
 
-    window.addEventListener('load', function () {
-      runPaint(true);
-    });
+window.addEventListener('load', function () {
+  runPaint(true);
+});
+
+window.addEventListener('mcMemberPricingReady', function () {
+  runPaint(true);
+});
 
     if (window.__mcCategoryPriceObserver) {
       try {
