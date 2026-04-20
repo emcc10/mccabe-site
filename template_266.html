@@ -6067,6 +6067,53 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return { next: nextHref, prev: prevHref };
   }
 
+  /** Volusion `.v65-pagepagination` / `ul.pagination` (not filtered by product-grid rules). */
+  function findNextPrevFromVolusionPagination(root) {
+    var nextHref = null;
+    var prevHref = null;
+    if (!root) return { next: null, prev: null };
+    var scopes = root.querySelectorAll('.v65-pagepagination, ul.pagination');
+    var si;
+    for (si = 0; si < scopes.length; si++) {
+      var pag = scopes[si];
+      if (pag.closest && pag.closest('.v-product-grid, li.v-product, .v-product__details')) continue;
+
+      var nextRel = pag.querySelector('a[rel="next"][href]');
+      var prevRel = pag.querySelector('a[rel="prev"][href]');
+      if (nextRel && nextRel.href) nextHref = nextRel.href;
+      if (prevRel && prevRel.href) prevHref = prevRel.href;
+
+      var items = pag.querySelectorAll('li');
+      if (items.length >= 2) {
+        var firstLi = items[0];
+        var lastLi = items[items.length - 1];
+        var firstA = firstLi.querySelector('a[href]');
+        var lastA = lastLi.querySelector('a[href]');
+        if (!prevHref && firstA && !firstLi.classList.contains('disabled') && !firstLi.classList.contains('active')) {
+          var ft = (firstA.textContent || '').toLowerCase();
+          if (ft.indexOf('prev') >= 0 || ft === '‹' || ft === '«' || ft === '<') prevHref = firstA.href;
+        }
+        if (!nextHref && lastA && !lastLi.classList.contains('disabled')) {
+          var lt = (lastA.textContent || '').toLowerCase();
+          if (lt.indexOf('next') >= 0 || lt === '›' || lt === '»' || lt === '>') nextHref = lastA.href;
+        }
+      }
+
+      pag.querySelectorAll('a[href]').forEach(function (a) {
+        if (!a.href || /^javascript:/i.test(a.href)) return;
+        var t = (a.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+        var ti = (a.getAttribute('title') || '').toLowerCase();
+        if (!nextHref && (t === 'next' || t === '>' || t === '»' || /next\s+page/i.test(t) || ti.indexOf('next') >= 0)) {
+          nextHref = a.href;
+        }
+        if (!prevHref && (t === 'previous' || t === 'prev' || t === '<' || t === '«' || ti.indexOf('prev') >= 0)) {
+          prevHref = a.href;
+        }
+      });
+    }
+    return { next: nextHref, prev: prevHref };
+  }
+
   function inferFromPageParams(root, curr) {
     var nextHref = null;
     var prevHref = null;
@@ -6212,9 +6259,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       var d1b = findNextPrevFromDom(body);
       var d2 = inferFromPageParams(ca, curr);
       var d2b = inferFromPageParams(body, curr);
+      var dVol = findNextPrevFromVolusionPagination(ca);
+      var dVolBody = findNextPrevFromVolusionPagination(body);
 
-      var nextHref = d1.next || d1b.next || d2.next || d2b.next;
-      var prevHref = d1.prev || d1b.prev || d2.prev || d2b.prev;
+      var nextHref = d1.next || d1b.next || d2.next || d2b.next || dVol.next || dVolBody.next;
+      var prevHref = d1.prev || d1b.prev || d2.prev || d2b.prev || dVol.prev || dVolBody.prev;
 
       if (curr <= 1) prevHref = null;
       else prevHref = prevHref || buildUrlForPage(curr - 1);
