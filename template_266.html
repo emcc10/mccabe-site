@@ -10353,20 +10353,47 @@ body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
   opacity: 0 !important;
 }
 
+.mc-pdp-retail-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: baseline !important;
+  gap: 0.4em !important;
+  width: 100% !important;
+  margin: 60px 0 8px 0 !important;
+  font-family: Inter, system-ui, -apple-system, sans-serif !important;
+  font-size: 16px !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0.04em !important;
+  color: #444 !important;
+}
+
+.mc-pdp-retail-row .mc-pdp-retail-label {
+  display: inline !important;
+  width: auto !important;
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+  font-size: 16px !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0.04em !important;
+  color: #444 !important;
+}
+
 .mc-pdp-member-pricing {
   display: block !important;
   width: 100% !important;
   margin: 0 0 10px 0 !important;
   font-family: Inter, system-ui, -apple-system, sans-serif !important;
+  font-size: 16px !important;
 }
 
 .mc-pdp-member-pricing .mc-pdp-retail-line,
 .mc-pdp-member-pricing .mc-pdp-member-line {
   display: block !important;
   width: 100% !important;
-  font-size: 13px !important;
+  font-size: 16px !important;
   line-height: 1.45 !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.04em !important;
   text-transform: none !important;
   color: #444 !important;
   font-weight: 400 !important;
@@ -10382,9 +10409,9 @@ body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
   display: block !important;
   width: 100% !important;
   margin: 0 0 4px 0 !important;
-  font-size: 13px !important;
+  font-size: 16px !important;
   line-height: 1.45 !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.04em !important;
   color: #444 !important;
 }
 
@@ -10436,6 +10463,46 @@ body.mc-product-page #content_area .product_price {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+}
+
+body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
+body.productdetails #content_area .mc-pdp-retail-row .product_list_price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row font.product_list_price,
+body.productdetails #content_area .mc-pdp-retail-row font.product_list_price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .product_productprice,
+body.productdetails #content_area .mc-pdp-retail-row .product_productprice,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+body.productdetails #content_area .mc-pdp-retail-row .v65-product-price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .product_price,
+body.productdetails #content_area .mc-pdp-retail-row .product_price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .price,
+body.productdetails #content_area .mc-pdp-retail-row .price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row #priceWithOptions,
+body.productdetails #content_area .mc-pdp-retail-row #priceWithOptions,
+body.productdetails #v65-product-parent .mc-pdp-retail-row #priceWithOptionsNoTax,
+body.productdetails #content_area .mc-pdp-retail-row #priceWithOptionsNoTax,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_list_price,
+body.mc-product-page #content_area .mc-pdp-retail-row .product_list_price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row font.product_list_price,
+body.mc-product-page #content_area .mc-pdp-retail-row font.product_list_price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_productprice,
+body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+body.mc-product-page #content_area .mc-pdp-retail-row .v65-product-price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_price,
+body.mc-product-page #content_area .mc-pdp-retail-row .product_price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .price,
+body.mc-product-page #content_area .mc-pdp-retail-row .price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row #priceWithOptions,
+body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptions,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row #priceWithOptionsNoTax,
+body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
+  display: inline !important;
+  width: auto !important;
+  margin: 0 !important;
+  font-size: 16px !important;
+  line-height: 1.45 !important;
+  vertical-align: baseline !important;
 }
 
 body.productdetails #v65-product-parent .product_sale_price,
@@ -12601,15 +12668,29 @@ async function mcSubmitAuthForm(form, mode) {
       }
     } catch (eRetailLbl) {}
 
+    var retailRow = document.querySelector('.mc-pdp-retail-row');
+    if (!retailRow) {
+      retailRow = document.createElement('div');
+      retailRow.className = 'mc-pdp-retail-row';
+    }
+    try {
+      if (retailLabel.parentNode !== retailRow || nativeBlock.parentNode !== retailRow) {
+        var rowParent = nativeBlock.parentNode;
+        rowParent.insertBefore(retailRow, retailLabel);
+        retailRow.appendChild(retailLabel);
+        retailRow.appendChild(nativeBlock);
+      }
+    } catch (eRetailRow) {}
+
     var wrap = document.querySelector('.mc-pdp-member-pricing');
     if (!wrap) {
       wrap = document.createElement('div');
       wrap.className = 'mc-pdp-member-pricing';
-      if (nativeBlock.nextSibling) nativeBlock.parentNode.insertBefore(wrap, nativeBlock.nextSibling);
-      else nativeBlock.parentNode.appendChild(wrap);
-    } else if (wrap.previousSibling !== nativeBlock) {
-      if (nativeBlock.nextSibling) nativeBlock.parentNode.insertBefore(wrap, nativeBlock.nextSibling);
-      else nativeBlock.parentNode.appendChild(wrap);
+      if (retailRow.nextSibling) retailRow.parentNode.insertBefore(wrap, retailRow.nextSibling);
+      else retailRow.parentNode.appendChild(wrap);
+    } else if (wrap.previousSibling !== retailRow) {
+      if (retailRow.nextSibling) retailRow.parentNode.insertBefore(wrap, retailRow.nextSibling);
+      else retailRow.parentNode.appendChild(wrap);
     }
 
     var html = '';
@@ -12624,7 +12705,6 @@ async function mcSubmitAuthForm(form, mode) {
 
     mcSetStableHtml(wrap, html);
     try {
-      nativeBlock.style.setProperty('display', 'block', 'important');
       nativeBlock.style.setProperty('visibility', 'visible', 'important');
       nativeBlock.style.setProperty('opacity', '1', 'important');
     } catch (eNativePdp) {}
@@ -12637,9 +12717,11 @@ async function mcSubmitAuthForm(form, mode) {
       );
       var ri;
       for (ri = 0; ri < retailNodes.length; ri++) {
-        retailNodes[ri].style.setProperty('display', 'block', 'important');
-        retailNodes[ri].style.setProperty('visibility', 'visible', 'important');
-        retailNodes[ri].style.setProperty('opacity', '1', 'important');
+        var rNode = retailNodes[ri];
+        if (rNode && rNode.closest && rNode.closest('.mc-pdp-retail-row')) continue;
+        rNode.style.setProperty('display', 'block', 'important');
+        rNode.style.setProperty('visibility', 'visible', 'important');
+        rNode.style.setProperty('opacity', '1', 'important');
       }
     } catch (eShowRetailNodes) {}
     try {

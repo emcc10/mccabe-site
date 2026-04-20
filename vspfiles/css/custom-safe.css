@@ -9858,12 +9858,42 @@ body.category:not(.productdetails):not(.is-home) #content_area .mc-member-grid-p
 }
 
 /* Final PDP member pricing block: one stack above the live Volusion price, no legacy caption spacing. */
+body.productdetails #v65-product-parent .mc-pdp-retail-row,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: baseline !important;
+  gap: 0.4em !important;
+  width: 100% !important;
+  margin: 60px 0 8px 0 !important;
+  text-align: left !important;
+  font-family: Inter, system-ui, -apple-system, sans-serif !important;
+  font-size: 16px !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0.04em !important;
+  color: #444 !important;
+}
+
+body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label {
+  display: inline !important;
+  width: auto !important;
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+  font-size: 16px !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0.04em !important;
+  color: #444 !important;
+}
+
 body.productdetails #v65-product-parent .mc-pdp-member-pricing,
 body.mc-product-page #v65-product-parent .mc-pdp-member-pricing {
   display: block !important;
   width: 100% !important;
   margin: 0 0 10px 0 !important;
   text-align: left !important;
+  font-size: 16px !important;
 }
 
 body.productdetails #v65-product-parent .mc-pdp-retail-line,
@@ -9872,9 +9902,9 @@ body.productdetails #v65-product-parent .mc-pdp-member-line,
 body.mc-product-page #v65-product-parent .mc-pdp-member-line {
   display: block !important;
   margin: 0 0 4px 0 !important;
-  font-size: 13px !important;
+  font-size: 16px !important;
   line-height: 1.45 !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.04em !important;
   color: #444 !important;
 }
 
@@ -9987,6 +10017,46 @@ body.mc-product-page #content_area .product_price {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+}
+
+body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
+body.productdetails #content_area .mc-pdp-retail-row .product_list_price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row font.product_list_price,
+body.productdetails #content_area .mc-pdp-retail-row font.product_list_price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .product_productprice,
+body.productdetails #content_area .mc-pdp-retail-row .product_productprice,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+body.productdetails #content_area .mc-pdp-retail-row .v65-product-price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .product_price,
+body.productdetails #content_area .mc-pdp-retail-row .product_price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .price,
+body.productdetails #content_area .mc-pdp-retail-row .price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row #priceWithOptions,
+body.productdetails #content_area .mc-pdp-retail-row #priceWithOptions,
+body.productdetails #v65-product-parent .mc-pdp-retail-row #priceWithOptionsNoTax,
+body.productdetails #content_area .mc-pdp-retail-row #priceWithOptionsNoTax,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_list_price,
+body.mc-product-page #content_area .mc-pdp-retail-row .product_list_price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row font.product_list_price,
+body.mc-product-page #content_area .mc-pdp-retail-row font.product_list_price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_productprice,
+body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+body.mc-product-page #content_area .mc-pdp-retail-row .v65-product-price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_price,
+body.mc-product-page #content_area .mc-pdp-retail-row .product_price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .price,
+body.mc-product-page #content_area .mc-pdp-retail-row .price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row #priceWithOptions,
+body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptions,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row #priceWithOptionsNoTax,
+body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
+  display: inline !important;
+  width: auto !important;
+  margin: 0 !important;
+  font-size: 16px !important;
+  line-height: 1.45 !important;
+  vertical-align: baseline !important;
 }
 
 body.productdetails #v65-product-parent .product_sale_price,
