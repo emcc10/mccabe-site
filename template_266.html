@@ -249,17 +249,6 @@
     #mc-category-pager-sticky.mc-category-pager-sticky a {
       pointer-events: auto !important;
     }
-    #mc-category-pager-sticky .mc-category-pager-sticky__next {
-      opacity: 0 !important;
-      transform: translateY(12px) !important;
-      pointer-events: none !important;
-      transition: opacity 0.22s ease, transform 0.22s ease !important;
-    }
-    #mc-category-pager-sticky.mc-category-pager-sticky--at-bottom .mc-category-pager-sticky__next {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-      pointer-events: auto !important;
-    }
   </style>
   <style id="mc-header-search-critical">
     /* Interior: full-width search under nav even when custom-safe.css is old or fails */
@@ -5894,33 +5883,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   var STICKY_ID = 'mc-category-pager-sticky';
   var lastPagerSig = null;
   var pagerObsCooldownUntil = 0;
-  var stickyScrollBound = false;
-
-  function refreshCategoryStickyVisibility() {
-    var st = document.getElementById(STICKY_ID);
-    if (!st || !st.querySelector('.mc-category-pager-sticky__next')) {
-      if (st) st.classList.remove('mc-category-pager-sticky--at-bottom');
-      return;
-    }
-    var el = document.documentElement;
-    var body = document.body;
-    var scrollY = window.scrollY || window.pageYOffset || 0;
-    var vh = window.innerHeight || 0;
-    var sh = Math.max(el.scrollHeight, body.scrollHeight, el.offsetHeight, body.offsetHeight);
-    var distFromBottom = sh - (scrollY + vh);
-    st.classList.toggle('mc-category-pager-sticky--at-bottom', distFromBottom < 160);
-  }
-
-  function bindCategoryStickyScrollOnce() {
-    if (stickyScrollBound) return;
-    stickyScrollBound = true;
-    window.addEventListener('scroll', refreshCategoryStickyVisibility, { passive: true });
-    window.addEventListener('resize', refreshCategoryStickyVisibility, { passive: true });
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', refreshCategoryStickyVisibility, { passive: true });
-    }
-    refreshCategoryStickyVisibility();
-  }
 
   function updateCategoryStickyPager(prevHref, nextHref) {
     if (!isCategoryListing()) return;
@@ -5935,7 +5897,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       }
       return;
     }
-    bindCategoryStickyScrollOnce();
     var root = document.getElementById(STICKY_ID);
     if (!root) {
       root = document.createElement('div');
@@ -5944,7 +5905,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       root.setAttribute('aria-label', 'Category paging');
       document.body.appendChild(root);
     }
-    root.classList.remove('mc-category-pager-sticky--at-bottom');
     root.innerHTML = '';
     if (hasPrev) {
       var pa = document.createElement('a');
@@ -5961,7 +5921,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       na.textContent = '\u2192';
       root.appendChild(na);
     }
-    requestAnimationFrame(refreshCategoryStickyVisibility);
   }
 
   function isCategoryListing() {
@@ -10466,7 +10425,7 @@ body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
   width: 100% !important;
   margin: 60px 0 8px 0 !important;
   font-family: Inter, system-ui, -apple-system, sans-serif !important;
-  font-size: 16px !important;
+  font-size: 18px !important;
   line-height: 1.45 !important;
   letter-spacing: 0.04em !important;
   color: #444 !important;
@@ -10477,7 +10436,7 @@ body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
   width: auto !important;
   margin: 0 !important;
   flex: 0 0 auto !important;
-  font-size: 16px !important;
+  font-size: 18px !important;
   line-height: 1.45 !important;
   letter-spacing: 0.04em !important;
   color: #444 !important;
@@ -10488,14 +10447,14 @@ body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
   width: 100% !important;
   margin: 0 0 10px 0 !important;
   font-family: Inter, system-ui, -apple-system, sans-serif !important;
-  font-size: 16px !important;
+  font-size: 18px !important;
 }
 
 .mc-pdp-member-pricing .mc-pdp-retail-line,
 .mc-pdp-member-pricing .mc-pdp-member-line {
   display: block !important;
   width: 100% !important;
-  font-size: 16px !important;
+  font-size: 18px !important;
   line-height: 1.45 !important;
   letter-spacing: 0.04em !important;
   text-transform: none !important;
@@ -10513,7 +10472,7 @@ body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
   display: block !important;
   width: 100% !important;
   margin: 0 0 4px 0 !important;
-  font-size: 16px !important;
+  font-size: 18px !important;
   line-height: 1.45 !important;
   letter-spacing: 0.04em !important;
   color: #444 !important;
@@ -10604,7 +10563,7 @@ body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
   display: inline !important;
   width: auto !important;
   margin: 0 !important;
-  font-size: 16px !important;
+  font-size: 18px !important;
   line-height: 1.45 !important;
   vertical-align: baseline !important;
 }

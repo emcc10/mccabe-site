@@ -6624,16 +6624,39 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   padding-bottom: 6px !important;
 }
 
-:is(html.category, body.category):not(.productdetails) #content_area table:has(select:not(#options_table select)) td:not(:has(select)),
-html.vol-list.category:not(.productdetails) #content_area table:has(select:not(#options_table select)) td:not(:has(select)) {
+/* Reinforce PLP member-price type (avoid any stray table/cell rules shrinking card text). */
+:is(html.category, body.category) #content_area .v-product-grid .mc-member-grid-price__label,
+:is(html.category, body.category) #content_area ul.v-product-grid .mc-member-grid-price__label {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: #6a6a6a !important;
+}
+
+:is(html.category, body.category) #content_area .v-product-grid .mc-member-grid-price__amount,
+:is(html.category, body.category) #content_area ul.v-product-grid .mc-member-grid-price__amount {
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em !important;
+  color: #1a1a1a !important;
+}
+
+/* Category cards: “Retail” before list / regular price — same label style as member line */
+:is(html.category, body.category) #content_area .v-product .product_list_price::before,
+:is(html.category, body.category) #content_area ul.v-product-grid > li .product_list_price::before,
+:is(html.category, body.category) #content_area .v-product font.product_list_price::before,
+:is(html.category, body.category) #content_area ul.v-product-grid > li > font.product_list_price::before {
+  content: "Retail" !important;
+  display: inline !important;
+  margin-right: 0.35em !important;
   font-family: Inter, system-ui, -apple-system, sans-serif !important;
   font-size: 11px !important;
   font-weight: 500 !important;
   letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
   color: #6a6a6a !important;
-  vertical-align: middle !important;
-  padding-right: 10px !important;
+  vertical-align: baseline !important;
 }
 
 /* Bottom category pagination (injected by template script; mirrors Volusion URLs) */
@@ -6778,24 +6801,15 @@ html.vol-list.category:not(.productdetails) #content_area table:has(select:not(#
   background: #1a1a1a !important;
   border: 1px solid #1a1a1a !important;
   border-radius: 50% !important;
-  opacity: 0 !important;
-  transform: translateY(12px) !important;
-  pointer-events: none !important;
-  transition:
-    opacity 0.22s ease,
-    transform 0.22s ease !important;
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: auto !important;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15) !important;
 }
 
 #mc-category-pager-sticky .mc-category-pager-sticky__next:hover {
   background: #333 !important;
   border-color: #333 !important;
-}
-
-#mc-category-pager-sticky.mc-category-pager-sticky--at-bottom .mc-category-pager-sticky__next {
-  opacity: 1 !important;
-  transform: translateY(0) !important;
-  pointer-events: auto !important;
 }
 
 /* =========================================================
@@ -10005,7 +10019,7 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row {
   margin: 60px 0 8px 0 !important;
   text-align: left !important;
   font-family: Inter, system-ui, -apple-system, sans-serif !important;
-  font-size: 16px !important;
+  font-size: 18px !important;
   line-height: 1.45 !important;
   letter-spacing: 0.04em !important;
   color: #444 !important;
@@ -10017,7 +10031,7 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label
   width: auto !important;
   margin: 0 !important;
   flex: 0 0 auto !important;
-  font-size: 16px !important;
+  font-size: 18px !important;
   line-height: 1.45 !important;
   letter-spacing: 0.04em !important;
   color: #444 !important;
@@ -10029,7 +10043,7 @@ body.mc-product-page #v65-product-parent .mc-pdp-member-pricing {
   width: 100% !important;
   margin: 0 0 10px 0 !important;
   text-align: left !important;
-  font-size: 16px !important;
+  font-size: 18px !important;
 }
 
 body.productdetails #v65-product-parent .mc-pdp-retail-line,
@@ -10038,7 +10052,7 @@ body.productdetails #v65-product-parent .mc-pdp-member-line,
 body.mc-product-page #v65-product-parent .mc-pdp-member-line {
   display: block !important;
   margin: 0 0 4px 0 !important;
-  font-size: 16px !important;
+  font-size: 18px !important;
   line-height: 1.45 !important;
   letter-spacing: 0.04em !important;
   color: #444 !important;
@@ -10190,7 +10204,7 @@ body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
   display: inline !important;
   width: auto !important;
   margin: 0 !important;
-  font-size: 16px !important;
+  font-size: 18px !important;
   line-height: 1.45 !important;
   vertical-align: baseline !important;
 }
