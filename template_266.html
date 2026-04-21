@@ -5945,15 +5945,21 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return /-s\//.test(location.pathname) || /categoryid=/i.test(location.search || '');
   }
 
-  /** Case-insensitive page from query (Volusion links sometimes differ in casing). */
+  /** Page index from query string (regex first — Volusion uses PageNum= ; split-parse missed some encodings). */
   function pageFromSearch(search) {
     if (!search || search === '?') return 1;
-    var q = search.charAt(0) === '?' ? search.slice(1) : search;
-    var pairs = q.split('&');
+    var q = search.charAt(0) === '?' ? search : '?' + search;
+    var rm = q.match(/[?&](?:PageNum|pagenum|pagenumber|page)=(\d+)/i);
+    if (rm) {
+      var rv = parseInt(rm[1], 10);
+      if (!isNaN(rv) && rv >= 1) return rv;
+    }
+    var raw = search.charAt(0) === '?' ? search.slice(1) : search;
+    var pairs = raw.split('&');
     for (var i = 0; i < pairs.length; i++) {
       var eq = pairs[i].indexOf('=');
       if (eq < 0) continue;
-      var k = decodeURIComponent(pairs[i].slice(0, eq)).toLowerCase();
+      var k = decodeURIComponent(pairs[i].slice(0, eq)).toLowerCase().replace(/^\uFEFF/, '').trim();
       var v = parseInt(decodeURIComponent(pairs[i].slice(eq + 1)), 10);
       if (isNaN(v) || v < 1) continue;
       if (k === 'pagenum' || k === 'page' || k === 'pagenumber') return v;
@@ -5962,12 +5968,30 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 
   function currentPageNum() {
-    return pageFromSearch(location.search || '');
+    try {
+      return pageFromSearch(new URL(location.href).search || '');
+    } catch (eCurr) {
+      return pageFromSearch(location.search || '');
+    }
+  }
+
+  /** Volusion SEO path paging: ...-s/106-2.htm (optional). */
+  function pageFromPathname(pathname) {
+    if (!pathname) return 1;
+    var m = pathname.match(/-s\/\d+-(\d+)\.htm$/i);
+    if (m) {
+      var pv = parseInt(m[1], 10);
+      if (!isNaN(pv) && pv >= 1) return pv;
+    }
+    return 1;
   }
 
   function pageFromHref(href) {
     try {
-      return pageFromSearch(new URL(href, location.href).search || '');
+      var u = new URL(href, location.href);
+      var fromQ = pageFromSearch(u.search || '');
+      var fromPath = pageFromPathname(u.pathname || '');
+      return Math.max(fromQ, fromPath, 1);
     } catch (e) {
       return 1;
     }
@@ -6110,7 +6134,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
   function hrefHasPagingParam(href) {
     if (!href || typeof href !== 'string') return false;
-    return /[?&](?:pagenum|pagenumber|page|PageNum)=/i.test(href);
+    if (/[?&](?:pagenum|pagenumber|page|PageNum)=/i.test(href)) return true;
+    try {
+      var u = new URL(href, location.href);
+      if (/-s\/\d+-\d+\.htm$/i.test(u.pathname || '')) return true;
+    } catch (eHp) {}
+    return false;
   }
 
   function findNextPrevFromDom(root, currPage) {
@@ -6317,6 +6346,20 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return m ? parseInt(m[1], 10) : 0;
   }
 
+  /** "Showing 1 - 24 of 96" → at least ceil(96/24) pages (Volusion often omits "Page X of Y"). */
+  function minPagesFromShowingOfTotal(root) {
+    if (!root) return 1;
+    var blob = String(root.textContent || '').replace(/\s+/g, ' ');
+    var m = blob.match(/\b\d+\s*[-–]\s*\d+\s+of\s+(\d+)\b/i);
+    if (!m) return 1;
+    var total = parseInt(m[1], 10);
+    if (isNaN(total) || total < 2) return 1;
+    var m2 = blob.match(/\b(\d+)\s*[-–]\s*\d+\s+of\s+\d+/i);
+    var per = m2 ? parseInt(m2[1], 10) : 24;
+    if (isNaN(per) || per < 1) per = 24;
+    return Math.max(1, Math.ceil(total / per));
+  }
+
   function inferTotalPages(ca, curr, maxP, hasNext) {
     var pt = findCategoryPageTextRow(ca);
     if (pt) {
@@ -6334,6 +6377,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         if (n1 >= curr) return n1;
       }
     } catch (e0) {}
+    var minShow = Math.max(minPagesFromShowingOfTotal(ca), minPagesFromShowingOfTotal(document.body));
+    if (minShow > 1) return Math.max(minShow, maxP, curr);
     if (maxP >= curr && maxP > 1) return maxP;
     if (hasNext) return Math.max(curr + 1, maxP);
     return Math.max(curr, 1);
@@ -6376,10 +6421,42 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return true;
   }
 
+  function volusionPaginationSuggestsMorePages(root, currPage) {
+    if (!root) return false;
+    currPage = currPage > 0 ? currPage : 1;
+    var blocks = root.querySelectorAll(
+      '.v65-pagepagination, ul.pagination, [class*="pagepagination"], [class*="PagePagination"], nav.pagination'
+    );
+    var bi;
+    for (bi = 0; bi < blocks.length; bi++) {
+      var p = blocks[bi];
+      if (p.closest && p.closest('.v-product-grid, li.v-product, .v-product__details')) continue;
+      var saw = 0;
+      p.querySelectorAll('a[href]').forEach(function (a) {
+        if (!a.href || /^javascript:/i.test(a.href)) return;
+        var li = a.closest && a.closest('li');
+        if (li && li.classList && li.classList.contains('disabled')) return;
+        var t = (a.textContent || '').replace(/\s+/g, ' ').trim();
+        var ti = ((a.getAttribute && a.getAttribute('title')) || '').toLowerCase();
+        if (/^next\b|^›|^»|^>$/i.test(t) || /next\s+page/i.test(t) || ti.indexOf('next') >= 0) saw++;
+        if (/^\d+$/.test(t) && parseInt(t, 10) > currPage) saw++;
+        if (hrefHasPagingParam(a.href) && sameListingContext(a.href) && pageFromHref(a.href) > currPage) saw++;
+        var im = a.querySelector && a.querySelector('img[alt]');
+        if (im && /next/i.test(im.getAttribute('alt') || '')) saw++;
+      });
+      if (saw > 0) return true;
+    }
+    return false;
+  }
+
   function renderPager() {
     try {
       if (!isCategoryListing()) return;
-      var ca = document.getElementById('content_area');
+      var ca =
+        document.getElementById('content_area') ||
+        document.querySelector('.content_area-wrapper') ||
+        document.querySelector('[role="main"]') ||
+        document.body;
       if (!ca) return;
 
       var curr = currentPageNum();
@@ -6407,6 +6484,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
       var maxP = maxPageSeenOnPage(body);
       maxP = Math.max(maxP, maxPageFromVolusionPagination(ca), maxPageFromVolusionPagination(body));
+      maxP = Math.max(
+        maxP,
+        minPagesFromShowingOfTotal(ca),
+        minPagesFromShowingOfTotal(body)
+      );
 
       if (!nextHref) {
         if (curr < maxP) nextHref = buildUrlForPage(curr + 1);
@@ -6414,6 +6496,13 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       }
 
       if (!nextHref && onCat && curr > 1 && curr < maxP) nextHref = buildUrlForPage(curr + 1);
+
+      if (!nextHref && onCat && volusionPaginationSuggestsMorePages(ca, curr)) {
+        nextHref = buildUrlForPage(curr + 1);
+      }
+      if (!nextHref && onCat && volusionPaginationSuggestsMorePages(body, curr)) {
+        nextHref = buildUrlForPage(curr + 1);
+      }
 
       if (nextHref) {
         var pnNext = pageFromHref(nextHref);
@@ -6561,7 +6650,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     setTimeout(renderPager, 1100);
   });
 
-  var ca0 = document.getElementById('content_area');
+  var ca0 =
+    document.getElementById('content_area') ||
+    document.querySelector('.content_area-wrapper') ||
+    document.body;
   if (ca0 && typeof MutationObserver !== 'undefined') {
     var t = null;
     function isPagerOwned(el) {
