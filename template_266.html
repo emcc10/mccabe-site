@@ -167,7 +167,7 @@
       display: flex !important;
       flex-wrap: wrap !important;
       align-items: center !important;
-      justify-content: flex-end !important;
+      justify-content: space-between !important;
       gap: 12px !important;
       margin: 28px auto 20px !important;
       padding: 12px !important;
@@ -221,6 +221,9 @@
       color: #1a1a1a !important;
       text-transform: none !important;
     }
+    #mc-category-pager.mc-category-pager:not(:has(.mc-category-pager__btn--prev)) {
+      justify-content: flex-end !important;
+    }
     #mc-category-pager .mc-category-pager__btn--next {
       margin-left: 0 !important;
     }
@@ -241,13 +244,16 @@
       z-index: 1600 !important;
       display: flex !important;
       align-items: flex-end !important;
-      justify-content: flex-end !important;
+      justify-content: space-between !important;
       padding: 10px 14px calc(12px + env(safe-area-inset-bottom)) !important;
       pointer-events: none !important;
       box-sizing: border-box !important;
     }
     #mc-category-pager-sticky.mc-category-pager-sticky a {
       pointer-events: auto !important;
+    }
+    #mc-category-pager-sticky.mc-category-pager-sticky:not(:has(.mc-category-pager-sticky__prev)) {
+      justify-content: flex-end !important;
     }
     #mc-category-pager-sticky .mc-category-pager-sticky__prev {
       margin-right: 0 !important;
@@ -6149,8 +6155,24 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return 'PageNum';
   }
 
+  /** Use a real Volusion pagination link as the URL base so path + hidden query params match the store. */
+  function listingBaseUrlForPaging() {
+    var links = document.querySelectorAll(
+      '#content_area .v65-pagepagination a[href], #content_area ul.pagination a[href], .v65-pagepagination a[href], ul.pagination a[href]'
+    );
+    var i;
+    for (i = 0; i < links.length; i++) {
+      var href = links[i].href;
+      if (!href || /^javascript:/i.test(href)) continue;
+      if (!hrefHasPagingParam(href)) continue;
+      if (!sameListingContext(href)) continue;
+      return href;
+    }
+    return location.href;
+  }
+
   function buildUrlForPage(page) {
-    var u = new URL(location.href);
+    var u = new URL(listingBaseUrlForPaging(), location.href);
     var key = detectPagingKey();
     ['PageNum', 'pagenum', 'page', 'pagenumber', 'Page'].forEach(function (k) {
       try {
@@ -6165,7 +6187,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         for (fi = 0; fi < fallbacks.length; fi++) {
           if (fallbacks[fi] === key) continue;
           try {
-            var u2 = new URL(location.href);
+            var u2 = new URL(listingBaseUrlForPaging(), location.href);
             ['PageNum', 'pagenum', 'page', 'pagenumber', 'Page'].forEach(function (k2) {
               try {
                 u2.searchParams.delete(k2);

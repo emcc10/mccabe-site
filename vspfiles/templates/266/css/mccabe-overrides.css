@@ -6,11 +6,15 @@
   display: flex !important;
   flex-wrap: wrap !important;
   align-items: center !important;
-  justify-content: flex-end !important;
+  justify-content: space-between !important;
   gap: 12px !important;
   margin: 28px auto 16px !important;
   padding: 0 12px !important;
   box-sizing: border-box !important;
+}
+
+.mc-category-pager:not(:has(.mc-category-pager__btn--prev)) {
+  justify-content: flex-end !important;
 }
 .mc-category-pager__btn {
   display: inline-flex !important;
