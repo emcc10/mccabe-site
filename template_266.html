@@ -6280,7 +6280,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       if (!a.href || /^javascript:/i.test(a.href)) return;
       if (!sameListingContext(a.href)) return;
       var lo = a.href;
-      if (!/[?&](?:pagenum|pagenumber|page)=/i.test(lo) && !/[?&]PageNum=/i.test(lo)) return;
+      if (!hrefHasPagingParam(lo)) return;
       var p = pageFromHref(a.href);
       if (p < 1) return;
       if (p > curr && p < nextPage) {
