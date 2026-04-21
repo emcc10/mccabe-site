@@ -5895,48 +5895,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   var lastPagerSig = null;
   var pagerObsCooldownUntil = 0;
 
-  function destroyCategoryPagerUI() {
-    var nav = document.getElementById(PAGER_ID);
-    if (nav && nav.parentNode) {
-      try {
-        nav.parentNode.removeChild(nav);
-      } catch (eNav) {}
-    }
-    var topBar = document.getElementById('mc-category-pager-top');
-    if (topBar && topBar.parentNode) {
-      try {
-        topBar.parentNode.removeChild(topBar);
-      } catch (eTop) {}
-    }
-    updateCategoryStickyPager(null, null);
-    lastPagerSig = null;
-  }
-
-  /** Pager only when the listing has more than 30 products (total from “of N” or count on this page). */
-  function totalProductsFromShowingLine(root) {
-    if (!root) return 0;
-    var blob = String(root.textContent || '').replace(/\s+/g, ' ');
-    var m = blob.match(/\b\d+\s*[-–]\s*\d+\s+of\s+(\d+)\b/i);
-    return m ? parseInt(m[1], 10) : 0;
-  }
-
-  function listingProductCardsOnPage(root) {
-    if (!root) return 0;
-    try {
-      return root.querySelectorAll(
-        'ul.v-product-grid > li.v-product, ul.v-product-grid > li, .v-product-grid > .v-product'
-      ).length;
-    } catch (eCt) {
-      return 0;
-    }
-  }
-
-  function categoryPagerProductThresholdMet(root) {
-    var total = totalProductsFromShowingLine(root);
-    var onPage = listingProductCardsOnPage(root);
-    return total > 30 || onPage > 30;
-  }
-
   function updateCategoryStickyPager(prevHref, nextHref) {
     if (!isCategoryListing()) return;
     var hasPrev = !!prevHref;
@@ -6551,11 +6509,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         document.querySelector('[role="main"]') ||
         document.body;
       if (!ca) return;
-
-      if (!categoryPagerProductThresholdMet(ca)) {
-        destroyCategoryPagerUI();
-        return;
-      }
 
       var curr = currentPageNum();
       var body = document.body;
