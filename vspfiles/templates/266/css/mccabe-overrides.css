@@ -15,9 +15,6 @@
 .mc-category-pager .mc-category-pager__btn--prev {
   margin-right: auto !important;
 }
-.mc-category-pager .mc-category-pager__btn--next {
-  margin-left: 0 !important;
-}
 .mc-category-pager__btn {
   display: inline-flex !important;
   align-items: center !important;
