@@ -222,16 +222,16 @@
       text-transform: none !important;
     }
     #mc-category-pager .mc-category-pager__btn--next {
-      margin-left: auto !important;
+      margin-left: 0 !important;
     }
     #mc-category-pager .mc-category-pager__btn--prev {
-      margin-right: auto !important;
+      margin-right: 0 !important;
     }
     #mc-category-pager-top .mc-category-pager__btn {
       transition: none !important;
     }
     #mc-category-pager-top .mc-category-pager__btn--next {
-      margin-left: auto !important;
+      margin-left: 0 !important;
     }
     #mc-category-pager-sticky.mc-category-pager-sticky {
       position: fixed !important;
@@ -250,7 +250,10 @@
       pointer-events: auto !important;
     }
     #mc-category-pager-sticky .mc-category-pager-sticky__prev {
-      margin-right: auto !important;
+      margin-right: 0 !important;
+    }
+    #mc-category-pager-sticky .mc-category-pager-sticky__next {
+      margin-left: 0 !important;
     }
   </style>
   <style id="mc-header-search-critical">
@@ -5892,6 +5895,48 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   var lastPagerSig = null;
   var pagerObsCooldownUntil = 0;
 
+  function destroyCategoryPagerUI() {
+    var nav = document.getElementById(PAGER_ID);
+    if (nav && nav.parentNode) {
+      try {
+        nav.parentNode.removeChild(nav);
+      } catch (eNav) {}
+    }
+    var topBar = document.getElementById('mc-category-pager-top');
+    if (topBar && topBar.parentNode) {
+      try {
+        topBar.parentNode.removeChild(topBar);
+      } catch (eTop) {}
+    }
+    updateCategoryStickyPager(null, null);
+    lastPagerSig = null;
+  }
+
+  /** Pager only when the listing has more than 30 products (total from “of N” or count on this page). */
+  function totalProductsFromShowingLine(root) {
+    if (!root) return 0;
+    var blob = String(root.textContent || '').replace(/\s+/g, ' ');
+    var m = blob.match(/\b\d+\s*[-–]\s*\d+\s+of\s+(\d+)\b/i);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+
+  function listingProductCardsOnPage(root) {
+    if (!root) return 0;
+    try {
+      return root.querySelectorAll(
+        'ul.v-product-grid > li.v-product, ul.v-product-grid > li, .v-product-grid > .v-product'
+      ).length;
+    } catch (eCt) {
+      return 0;
+    }
+  }
+
+  function categoryPagerProductThresholdMet(root) {
+    var total = totalProductsFromShowingLine(root);
+    var onPage = listingProductCardsOnPage(root);
+    return total > 30 || onPage > 30;
+  }
+
   function updateCategoryStickyPager(prevHref, nextHref) {
     if (!isCategoryListing()) return;
     var hasPrev = !!prevHref;
@@ -6105,14 +6150,40 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return bestHref;
   }
 
+  /** Read which paging query key Volusion uses on real pagination links (avoids wrong `page=` vs `PageNum=`). */
+  function inferPagingKeyFromDom() {
+    var scopes = document.querySelectorAll(
+      '#content_area .v65-pagepagination, #content_area ul.pagination, .v65-pagepagination, ul.pagination'
+    );
+    var si;
+    for (si = 0; si < scopes.length; si++) {
+      var box = scopes[si];
+      if (box.closest && box.closest('.v-product-grid, li.v-product, .v-product__details')) continue;
+      var links = box.querySelectorAll('a[href]');
+      var li;
+      for (li = 0; li < links.length; li++) {
+        var h = links[li].href || '';
+        if (/[?&]PageNum=/i.test(h)) return 'PageNum';
+        if (/[?&]pagenum=/i.test(h)) return 'pagenum';
+        if (/[?&]pagenumber=/i.test(h)) return 'pagenumber';
+        if (/[?&]page=\d/i.test(h)) return 'page';
+      }
+    }
+    return null;
+  }
+
   /** Match Volusion paging param on this URL or in category links. */
   function detectPagingKey() {
+    var domKey = inferPagingKeyFromDom();
+    if (domKey) return domKey;
     if (/(^|[?&])PageNum=/i.test(location.search || '')) return 'PageNum';
     if (/(^|[?&])pagenum=/i.test(location.search || '')) return 'pagenum';
     if (/(^|[?&])pagenumber=/i.test(location.search || '')) return 'pagenumber';
     if (/(^|[?&])page=\d/i.test(location.search || '')) return 'page';
-    var probe = document.querySelector('a[href*="PageNum="], a[href*="pagenum="]');
+    var probe = document.querySelector('#content_area a[href*="PageNum="], a[href*="PageNum="]');
     if (probe && probe.href) return 'PageNum';
+    probe = document.querySelector('#content_area a[href*="pagenum="], a[href*="pagenum="]');
+    if (probe && probe.href) return 'pagenum';
     probe = document.querySelector('a[href*="pagenumber="]');
     if (probe && probe.href) return 'pagenumber';
     probe = document.querySelector('a[href*="page="]');
@@ -6128,7 +6199,29 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         u.searchParams.delete(k);
       } catch (e) {}
     });
-    if (page > 1) u.searchParams.set(key, String(page));
+    if (page > 1) {
+      u.searchParams.set(key, String(page));
+      if (pageFromHref(u.href) < page) {
+        var fallbacks = ['PageNum', 'pagenum', 'pagenumber', 'page'];
+        var fi;
+        for (fi = 0; fi < fallbacks.length; fi++) {
+          if (fallbacks[fi] === key) continue;
+          try {
+            var u2 = new URL(location.href);
+            ['PageNum', 'pagenum', 'page', 'pagenumber', 'Page'].forEach(function (k2) {
+              try {
+                u2.searchParams.delete(k2);
+              } catch (e2) {}
+            });
+            u2.searchParams.set(fallbacks[fi], String(page));
+            if (pageFromHref(u2.href) >= page) {
+              u.href = u2.href;
+              break;
+            }
+          } catch (eFb) {}
+        }
+      }
+    }
     return u.href;
   }
 
@@ -6459,6 +6552,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         document.body;
       if (!ca) return;
 
+      if (!categoryPagerProductThresholdMet(ca)) {
+        destroyCategoryPagerUI();
+        return;
+      }
+
       var curr = currentPageNum();
       var body = document.body;
       var path = location.pathname;
@@ -6504,6 +6602,13 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         nextHref = buildUrlForPage(curr + 1);
       }
 
+      if (nextHref) {
+        try {
+          if (new URL(nextHref, location.href).href === new URL(location.href).href) {
+            nextHref = null;
+          }
+        } catch (eSame) {}
+      }
       if (nextHref) {
         var pnNext = pageFromHref(nextHref);
         if (hrefHasPagingParam(nextHref) && pnNext > 0 && pnNext <= curr) nextHref = null;

@@ -12,9 +12,6 @@
   padding: 0 12px !important;
   box-sizing: border-box !important;
 }
-.mc-category-pager .mc-category-pager__btn--prev {
-  margin-right: auto !important;
-}
 .mc-category-pager__btn {
   display: inline-flex !important;
   align-items: center !important;
