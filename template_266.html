@@ -10482,64 +10482,93 @@ body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
 
 .mc-pdp-retail-row {
   display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  align-items: baseline !important;
-  gap: 0.4em !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
   width: 100% !important;
   margin: 60px 0 8px 0 !important;
   font-family: Inter, system-ui, -apple-system, sans-serif !important;
-  font-size: 18px !important;
-  line-height: 1.45 !important;
-  letter-spacing: 0.04em !important;
-  color: #444 !important;
+  font-size: inherit !important;
+  line-height: normal !important;
+  letter-spacing: normal !important;
+  color: inherit !important;
 }
 
 .mc-pdp-retail-row .mc-pdp-retail-label {
-  display: inline !important;
+  display: block !important;
   width: auto !important;
   margin: 0 !important;
   flex: 0 0 auto !important;
-  font-size: 18px !important;
-  line-height: 1.45 !important;
-  letter-spacing: 0.04em !important;
-  color: #444 !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: #6a6a6a !important;
 }
 
 .mc-pdp-member-pricing {
-  display: block !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
   width: 100% !important;
   margin: 0 0 10px 0 !important;
   font-family: Inter, system-ui, -apple-system, sans-serif !important;
-  font-size: 18px !important;
+  font-size: inherit !important;
 }
 
 .mc-pdp-member-pricing .mc-pdp-retail-line,
 .mc-pdp-member-pricing .mc-pdp-member-line {
-  display: block !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
   width: 100% !important;
-  font-size: 18px !important;
-  line-height: 1.45 !important;
-  letter-spacing: 0.04em !important;
+  margin: 0 0 4px 0 !important;
+  font-size: inherit !important;
+  line-height: normal !important;
+  letter-spacing: normal !important;
   text-transform: none !important;
-  color: #444 !important;
+  color: inherit !important;
   font-weight: 400 !important;
-  margin: 0 0 3px 0 !important;
+}
+
+.mc-pdp-member-pricing .mc-pdp-member-line__label,
+.mc-pdp-member-line__label {
+  display: block !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: #6a6a6a !important;
+}
+
+.mc-pdp-member-pricing .mc-pdp-member-line__amount,
+.mc-pdp-member-line__amount {
+  display: block !important;
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+  color: #1a1a1a !important;
+  font-weight: 400 !important;
 }
 
 .mc-pdp-member-pricing .mc-pdp-member-line {
-  color: #2f2f2f !important;
-  font-weight: 500 !important;
+  color: inherit !important;
+  font-weight: 400 !important;
 }
 
 .mc-pdp-retail-label {
   display: block !important;
-  width: 100% !important;
-  margin: 0 0 4px 0 !important;
-  font-size: 18px !important;
-  line-height: 1.45 !important;
-  letter-spacing: 0.04em !important;
-  color: #444 !important;
+  width: auto !important;
+  margin: 0 !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: #6a6a6a !important;
 }
 
 body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
@@ -10624,11 +10653,14 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row #priceWithOptions,
 body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptions,
 body.mc-product-page #v65-product-parent .mc-pdp-retail-row #priceWithOptionsNoTax,
 body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
-  display: inline !important;
+  display: block !important;
   width: auto !important;
   margin: 0 !important;
-  font-size: 18px !important;
-  line-height: 1.45 !important;
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+  color: #1a1a1a !important;
   vertical-align: baseline !important;
 }
 
@@ -12822,12 +12854,20 @@ async function mcSubmitAuthForm(form, mode) {
 
     var html = '';
     if (isLoggedIn && memberText) {
-      html += '<div class="mc-pdp-member-line">Member: ' + memberText + '</div>';
+      html +=
+        '<div class="mc-pdp-member-line">' +
+        '<span class="mc-pdp-member-line__label">Member:</span>' +
+        '<span class="mc-pdp-member-line__amount">' +
+        memberText +
+        '</span></div>';
     } else if (isLoggedIn) {
       /* No member amount yet; omit a loading caption so async paint does not flash placeholder text. */
     } else {
       html +=
-        '<div class="mc-pdp-member-line mc-pdp-member-line--locked">Member: <a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see member pricing</div>';
+        '<div class="mc-pdp-member-line mc-pdp-member-line--locked">' +
+        '<span class="mc-pdp-member-line__label">Member:</span>' +
+        '<span class="mc-pdp-member-line__amount"><a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see member pricing</span>' +
+        '</div>';
     }
 
     mcSetStableHtml(wrap, html);
