@@ -6768,14 +6768,19 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   justify-content: flex-end !important;
 }
 
+[data-mc-pager-hidden="1"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  border: 0 !important;
+}
 
 .mc-category-pager__page-of {
-  font-family: Inter, system-ui, sans-serif !important;
-  font-size: 16px !important;
-  font-weight: 400 !important;
-  letter-spacing: 0.02em !important;
-  color: #1a1a1a !important;
-  margin-right: auto !important;
+  display: none !important;
 }
 
 .mc-category-pager .mc-category-pager__btn--next {

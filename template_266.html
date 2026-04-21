@@ -214,12 +214,19 @@
       margin: 0 0 14px 0 !important;
       padding: 0 max(12px, 2vw) !important;
     }
-    #mc-category-pager-top .mc-category-pager__page-of {
-      margin-right: auto !important;
-      font: 400 16px/1.35 Inter, system-ui, -apple-system, sans-serif !important;
-      letter-spacing: 0.02em !important;
-      color: #1a1a1a !important;
-      text-transform: none !important;
+    /* Volusion “Page N of M” row hidden via data-mc-pager-hidden when custom pager is active */
+    [data-mc-pager-hidden="1"] {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      border: 0 !important;
+    }
+    .mc-category-pager__page-of {
+      display: none !important;
     }
     #mc-category-pager.mc-category-pager:not(:has(.mc-category-pager__btn--prev)) {
       justify-content: flex-end !important;
@@ -6457,43 +6464,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return Math.max(curr, 1);
   }
 
-  function tryUpdateCategoryPagerInPlace(ca, sig, prevHref, nextHref, hasNext, showTop, labelText) {
-    var nav = document.getElementById(PAGER_ID);
-    var topEl = document.getElementById('mc-category-pager-top');
-    if (!nav && !topEl) return false;
-
-    var prevNeeded = !!prevHref;
-    var nextNeeded = !!nextHref;
-
-    if (nav) {
-      var np = nav.querySelector('.mc-category-pager__btn--prev');
-      var nn = nav.querySelector('.mc-category-pager__btn--next');
-      if (!!np !== prevNeeded || !!nn !== nextNeeded) return false;
-      if (np) np.setAttribute('href', prevHref);
-      if (nn) nn.setAttribute('href', nextHref);
-    } else if (prevNeeded || nextNeeded) {
-      return false;
-    }
-
-    if (showTop) {
-      if (!topEl) return false;
-      var lbl = topEl.querySelector('.mc-category-pager__page-of');
-      var tn = topEl.querySelector('.mc-category-pager__btn--next');
-      if (lbl) lbl.textContent = labelText;
-      if (nextNeeded) {
-        if (!tn) return false;
-        tn.setAttribute('href', nextHref);
-      } else if (tn) {
-        return false;
-      }
-    } else if (topEl) {
-      return false;
-    }
-
-    lastPagerSig = sig;
-    return true;
-  }
-
   function volusionPaginationSuggestsMorePages(root, currPage) {
     if (!root) return false;
     currPage = currPage > 0 ? currPage : 1;
@@ -6522,6 +6492,71 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return false;
   }
 
+  /** Count PLP tiles on the current page; fallback from “Showing a–b of …” when the grid is nonstandard. */
+  function countCategoryProductsShownOnPage(root) {
+    if (!root) return 0;
+    var dom = 0;
+    try {
+      var sel = root.querySelectorAll(
+        'ul.v-product-grid > li.v-product, ul.v-product-grid > li.v-product-grid-item, .v-product-grid > li.v-product, .v-product-grid > .v-product, table.v-product-grid td.v65-productDisplay-cell'
+      );
+      dom = sel.length;
+    } catch (eCnt) {}
+    var fromTxt = 0;
+    try {
+      var blob = String(root.textContent || '').replace(/\s+/g, ' ');
+      var m = blob.match(/\b(\d+)\s*[-–]\s*(\d+)\s+of\s+\d+/i);
+      if (m) {
+        var lo = parseInt(m[1], 10);
+        var hi = parseInt(m[2], 10);
+        if (!isNaN(lo) && !isNaN(hi) && hi >= lo) fromTxt = hi - lo + 1;
+      }
+    } catch (eTxt) {}
+    return Math.max(dom, fromTxt);
+  }
+
+  function hideCategoryVolusionPageLabel(root) {
+    if (!root) return;
+    var pt = findCategoryPageTextRow(root);
+    if (pt) {
+      try {
+        pt.setAttribute('data-mc-pager-hidden', '1');
+      } catch (eH) {}
+    }
+  }
+
+  function revealMcPagerHiddenLabels(root) {
+    if (!root || !root.querySelectorAll) return;
+    try {
+      root.querySelectorAll('[data-mc-pager-hidden="1"]').forEach(function (el) {
+        el.removeAttribute('data-mc-pager-hidden');
+      });
+    } catch (eR) {}
+  }
+
+  function teardownCustomCategoryPager(ca) {
+    var existing = document.getElementById(PAGER_ID);
+    if (existing && existing.parentNode) {
+      try {
+        existing.parentNode.removeChild(existing);
+      } catch (e1) {}
+    }
+    var top = document.getElementById('mc-category-pager-top');
+    if (top && top.parentNode) {
+      try {
+        top.parentNode.removeChild(top);
+      } catch (e2) {}
+    }
+    var sticky = document.getElementById(STICKY_ID);
+    if (sticky && sticky.parentNode) {
+      try {
+        sticky.parentNode.removeChild(sticky);
+      } catch (e3) {}
+    }
+    revealMcPagerHiddenLabels(ca);
+    lastPagerSig = null;
+  }
+
   function renderPager() {
     try {
       if (!isCategoryListing()) return;
@@ -6531,6 +6566,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         document.querySelector('[role="main"]') ||
         document.body;
       if (!ca) return;
+
+      var shownOnPage = countCategoryProductsShownOnPage(ca);
+      if (shownOnPage <= 30) {
+        teardownCustomCategoryPager(ca);
+        return;
+      }
 
       var curr = currentPageNum();
       var body = document.body;
@@ -6598,29 +6639,21 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
       var hasNext = !!nextHref;
 
-      var showTop = totalP > 1 || curr > 1 || hasNext;
-      var labelText = totalP > 1 ? 'Page ' + curr + ' of ' + totalP : 'Page ' + curr;
+      hideCategoryVolusionPageLabel(ca);
+
       var locKey = path + '|' + (location.search || '');
       var sig =
         locKey +
         '|' +
         curr +
         '|' +
-        totalP +
+        shownOnPage +
         '|' +
         pagerHrefKey(nextHref) +
         '|' +
-        pagerHrefKey(prevHref) +
-        '|' +
-        (showTop ? '1' : '0') +
-        '|' +
-        (showTop ? labelText : '');
+        pagerHrefKey(prevHref);
 
       if (lastPagerSig === sig) {
-        return;
-      }
-
-      if (tryUpdateCategoryPagerInPlace(ca, sig, prevHref, nextHref, hasNext, showTop, labelText)) {
         updateCategoryStickyPager(prevHref, nextHref);
         return;
       }
@@ -6628,9 +6661,13 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       pagerObsCooldownUntil = Date.now() + 1600;
 
       var existing = document.getElementById(PAGER_ID);
-      if (existing) existing.remove();
+      if (existing && existing.parentNode) {
+        try {
+          existing.parentNode.removeChild(existing);
+        } catch (eRmNav) {}
+      }
 
-      if (!hasNext && !prevHref && !showTop) {
+      if (!hasNext && !prevHref) {
         var otOnly = document.getElementById('mc-category-pager-top');
         if (otOnly && otOnly.parentNode) {
           try {
@@ -6647,69 +6684,6 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         try {
           oldTop.parentNode.removeChild(oldTop);
         } catch (eOldTop) {}
-      }
-
-      var wrap = document.createElement('nav');
-      wrap.id = PAGER_ID;
-      wrap.className = 'mc-category-pager';
-      wrap.setAttribute('aria-label', 'Category pages');
-
-      if (prevHref) {
-        var pa = document.createElement('a');
-        pa.className = 'mc-category-pager__btn mc-category-pager__btn--prev';
-        pa.href = prevHref;
-        pa.textContent = 'Previous';
-        wrap.appendChild(pa);
-      }
-      if (hasNext) {
-        var na = document.createElement('a');
-        na.className = 'mc-category-pager__btn mc-category-pager__btn--next';
-        na.href = nextHref;
-        na.textContent = 'Next';
-        wrap.appendChild(na);
-      }
-
-      if (showTop) {
-        var topBar = document.createElement('div');
-        topBar.id = 'mc-category-pager-top';
-        topBar.className = 'mc-category-pager-page-row';
-        var pageTxt = findCategoryPageTextRow(ca);
-        if (pageTxt && pageTxt.parentNode) {
-          try {
-            pageTxt.setAttribute('data-mc-pager-hidden', '1');
-          } catch (eRmPt) {}
-        }
-        var label = document.createElement('span');
-        label.className = 'mc-category-pager__page-of';
-        label.setAttribute('aria-live', 'polite');
-        label.textContent = labelText;
-        topBar.appendChild(label);
-        if (hasNext) {
-          var topNext = document.createElement('a');
-          topNext.className = 'mc-category-pager__btn mc-category-pager__btn--next';
-          topNext.href = nextHref;
-          topNext.textContent = 'Next';
-          topBar.appendChild(topNext);
-        }
-        var gridAnchor =
-          ca.querySelector('.v-product-grid') ||
-          ca.querySelector('ul.v-product-grid') ||
-          ca.querySelector('table.v-product-grid');
-        if (gridAnchor && gridAnchor.parentNode) {
-          gridAnchor.parentNode.insertBefore(topBar, gridAnchor);
-        } else {
-          ca.insertBefore(topBar, ca.firstChild);
-        }
-      }
-
-      if (!wrap.querySelector('a') && !document.getElementById('mc-category-pager-top')) {
-        updateCategoryStickyPager(prevHref, nextHref);
-        lastPagerSig = sig;
-        return;
-      }
-
-      if (wrap.querySelector('a')) {
-        ca.appendChild(wrap);
       }
 
       updateCategoryStickyPager(prevHref, nextHref);
