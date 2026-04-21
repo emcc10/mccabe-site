@@ -6,11 +6,17 @@
   display: flex !important;
   flex-wrap: wrap !important;
   align-items: center !important;
-  justify-content: space-between !important;
+  justify-content: flex-end !important;
   gap: 12px !important;
   margin: 28px auto 16px !important;
   padding: 0 12px !important;
   box-sizing: border-box !important;
+}
+.mc-category-pager .mc-category-pager__btn--prev {
+  margin-right: auto !important;
+}
+.mc-category-pager .mc-category-pager__btn--next {
+  margin-left: 0 !important;
 }
 .mc-category-pager__btn {
   display: inline-flex !important;

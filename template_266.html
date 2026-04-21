@@ -167,7 +167,7 @@
       display: flex !important;
       flex-wrap: wrap !important;
       align-items: center !important;
-      justify-content: space-between !important;
+      justify-content: flex-end !important;
       gap: 12px !important;
       margin: 28px auto 20px !important;
       padding: 12px !important;
@@ -241,7 +241,7 @@
       z-index: 1600 !important;
       display: flex !important;
       align-items: flex-end !important;
-      justify-content: space-between !important;
+      justify-content: flex-end !important;
       padding: 10px 14px calc(12px + env(safe-area-inset-bottom)) !important;
       pointer-events: none !important;
       box-sizing: border-box !important;
@@ -6000,6 +6000,84 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     }
   }
 
+  /** Volusion: pretty URL `/Name-s/106.htm` vs classic `/category.asp?categoryid=106&PageNum=2` — same listing, different pathname. */
+  function listingMetaFromHref(href) {
+    var out = { cid: '', sid: '', path: '' };
+    try {
+      var u = new URL(href, location.href);
+      out.path = (u.pathname || '').replace(/\/+$/, '').toLowerCase();
+      var q = u.search || '';
+      if (q.charAt(0) === '?') q = q.slice(1);
+      var pairs = q.split('&');
+      var i;
+      for (i = 0; i < pairs.length; i++) {
+        var eq = pairs[i].indexOf('=');
+        if (eq < 0) continue;
+        var k = decodeURIComponent(pairs[i].slice(0, eq)).toLowerCase();
+        if (k === 'categoryid') {
+          out.cid = decodeURIComponent(pairs[i].slice(eq + 1));
+          break;
+        }
+      }
+      var sm = u.pathname.match(/-s\/(\d+)/i);
+      if (sm) out.sid = sm[1];
+      else {
+        var hm = u.pathname.match(/(\d+)\.htm$/i);
+        if (hm) out.sid = hm[1];
+      }
+    } catch (eMeta) {}
+    return out;
+  }
+
+  function sameListingContext(href) {
+    try {
+      var A = listingMetaFromHref(href);
+      var B = listingMetaFromHref(location.href);
+      if (A.cid && B.cid && A.cid === B.cid) return true;
+      if (A.sid && B.sid && A.sid === B.sid) return true;
+      if (A.cid && B.sid && A.cid === B.sid) return true;
+      if (A.sid && B.cid && A.sid === B.cid) return true;
+      return A.path && B.path && A.path === B.path;
+    } catch (eSl) {
+      return false;
+    }
+  }
+
+  /** Smallest page index > curr among pagination links for this listing (handles asp vs SEO URLs). */
+  function findSmallestNextPageHref(root, currPage) {
+    var bestP = Infinity;
+    var bestHref = null;
+    if (!root) return null;
+    currPage = currPage > 0 ? currPage : 1;
+    function consider(a) {
+      if (!a.href || /^javascript:/i.test(a.href)) return;
+      if (!hrefHasPagingParam(a.href)) return;
+      if (!sameListingContext(a.href)) return;
+      var p2 = pageFromHref(a.href);
+      if (p2 <= currPage || p2 >= bestP) return;
+      bestP = p2;
+      bestHref = a.href;
+    }
+    var scopes = root.querySelectorAll(
+      '.v65-pagepagination, ul.pagination, [class*="pagepagination"], [class*="PagePagination"], nav.pagination'
+    );
+    var si;
+    if (scopes.length) {
+      for (si = 0; si < scopes.length; si++) {
+        var pag = scopes[si];
+        if (pag.closest && pag.closest('.v-product-grid, li.v-product, .v-product__details')) continue;
+        pag.querySelectorAll('a[href]').forEach(consider);
+      }
+    } else {
+      root
+        .querySelectorAll(
+          '#content_area a[href*="PageNum="], #content_area a[href*="pagenum="], #content_area a[href*="pagenumber="]'
+        )
+        .forEach(consider);
+    }
+    return bestHref;
+  }
+
   /** Match Volusion paging param on this URL or in category links. */
   function detectPagingKey() {
     if (/(^|[?&])PageNum=/i.test(location.search || '')) return 'PageNum';
@@ -6150,12 +6228,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       pag.querySelectorAll('a[href]').forEach(function (a) {
         if (!a.href || /^javascript:/i.test(a.href)) return;
         if (!hrefHasPagingParam(a.href)) return;
-        try {
-          var u = new URL(a.href, location.href);
-          if (u.pathname !== location.pathname) return;
-        } catch (ePg) {
-          return;
-        }
+        if (!sameListingContext(a.href)) return;
         var p = pageFromHref(a.href);
         if (p > maxPg) maxPg = p;
       });
@@ -6173,7 +6246,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     root.querySelectorAll('a[href]').forEach(function (a) {
       if (!outsideProductGrid(a)) return;
       if (!a.href || /^javascript:/i.test(a.href)) return;
-      if (!sameCategoryPath(a.href)) return;
+      if (!sameListingContext(a.href)) return;
       var lo = a.href;
       if (!/[?&](?:pagenum|pagenumber|page)=/i.test(lo) && !/[?&]PageNum=/i.test(lo)) return;
       var p = pageFromHref(a.href);
@@ -6190,15 +6263,15 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return { next: nextHref, prev: prevHref };
   }
 
-  function maxPageSeenOnPage(root, currPath) {
+  function maxPageSeenOnPage(root) {
     var maxP = 1;
     if (!root) return 1;
     root.querySelectorAll('a[href]').forEach(function (a) {
       if (!outsideProductGrid(a)) return;
       if (!a.href || /^javascript:/i.test(a.href)) return;
+      if (!hrefHasPagingParam(a.href)) return;
+      if (!sameListingContext(a.href)) return;
       try {
-        var u = new URL(a.href, location.href);
-        if (u.pathname !== currPath) return;
         var p = pageFromHref(a.href);
         if (p > maxP) maxP = p;
       } catch (e) {}
@@ -6233,7 +6306,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
   function parseTotalPagesFromText(txt) {
     if (!txt) return 0;
-    var m = String(txt).replace(/\s+/g, ' ').match(/\bpage\s+\d+\s+of\s+(\d+)\b/i);
+    var s = String(txt).replace(/\s+/g, ' ');
+    var m =
+      s.match(/\bpage\s+\d+\s+of\s+(\d+)\b/i) ||
+      s.match(/\bpage\s*\d+\s*of\s*(\d+)\b/i) ||
+      s.match(/\bpage\s+\d+\s*\/\s*(\d+)\b/i);
     return m ? parseInt(m[1], 10) : 0;
   }
 
@@ -6245,7 +6322,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     }
     try {
       var blob = ca ? String(ca.textContent || '') : '';
-      var m = blob.match(/\bpage\s+\d+\s+of\s+(\d+)\b/i);
+      var m =
+        blob.match(/\bpage\s+\d+\s+of\s+(\d+)\b/i) ||
+        blob.match(/\bpage\s*\d+\s*of\s*(\d+)\b/i) ||
+        blob.match(/\bpage\s+\d+\s*\/\s*(\d+)\b/i);
       if (m) {
         var n1 = parseInt(m[1], 10);
         if (n1 >= curr) return n1;
@@ -6314,10 +6394,15 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       var nextHref = d1.next || d1b.next || d2.next || d2b.next || dVol.next || dVolBody.next;
       var prevHref = d1.prev || d1b.prev || d2.prev || d2b.prev || dVol.prev || dVolBody.prev;
 
+      if (!nextHref) {
+        var candNext = findSmallestNextPageHref(ca, curr) || findSmallestNextPageHref(body, curr);
+        if (candNext) nextHref = candNext;
+      }
+
       if (curr <= 1) prevHref = null;
       else prevHref = prevHref || buildUrlForPage(curr - 1);
 
-      var maxP = maxPageSeenOnPage(body, path);
+      var maxP = maxPageSeenOnPage(body);
       maxP = Math.max(maxP, maxPageFromVolusionPagination(ca), maxPageFromVolusionPagination(body));
 
       if (!nextHref) {

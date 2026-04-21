@@ -6757,7 +6757,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   display: flex !important;
   flex-wrap: wrap !important;
   align-items: center !important;
-  justify-content: space-between !important;
+  justify-content: flex-end !important;
   gap: 12px !important;
   margin: 28px auto 16px !important;
   padding: 0 12px !important;
@@ -6842,7 +6842,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   display: flex !important;
   flex-direction: row !important;
   align-items: flex-end !important;
-  justify-content: space-between !important;
+  justify-content: flex-end !important;
   gap: 16px !important;
   padding: 10px max(14px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)) !important;
   pointer-events: none !important;
