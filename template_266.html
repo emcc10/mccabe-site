@@ -6181,6 +6181,31 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return location.href;
   }
 
+  /** Volusion SEO: page 2+ often uses …-s/{id}-{n}.htm while page 1 is …-s/{id}.htm (query PageNum alone may not advance pageFromHref). */
+  function applySeoPathPageIfNeeded(u, page) {
+    if (!u || page < 2) return;
+    try {
+      var p = String(u.pathname || '').replace(/\/+$/, '');
+      var ext = /\.html$/i.test(p) ? '.html' : '.htm';
+      var m2 = p.match(/^(.*-s\/)(\d+)-(\d+)\.html?$/i);
+      if (m2) {
+        u.pathname = m2[1] + m2[2] + '-' + page + ext;
+      } else {
+        var m1 = p.match(/^(.*-s\/)(\d+)\.html?$/i);
+        if (m1) {
+          u.pathname = m1[1] + m1[2] + '-' + page + ext;
+        } else {
+          return;
+        }
+      }
+      ['PageNum', 'pagenum', 'page', 'pagenumber', 'Page'].forEach(function (k) {
+        try {
+          u.searchParams.delete(k);
+        } catch (eDel) {}
+      });
+    } catch (eSeo) {}
+  }
+
   function buildUrlForPage(page) {
     var u = new URL(listingBaseUrlForPaging(), location.href);
     var key = detectPagingKey();
@@ -6210,6 +6235,9 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
             }
           } catch (eFb) {}
         }
+      }
+      if (pageFromHref(u.href) < page) {
+        applySeoPathPageIfNeeded(u, page);
       }
     }
     return u.href;
@@ -6433,11 +6461,15 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function minPagesFromShowingOfTotal(root) {
     if (!root) return 1;
     var blob = String(root.textContent || '').replace(/\s+/g, ' ');
-    var m = blob.match(/\b\d+\s*[-–]\s*\d+\s+of\s+(\d+)\b/i);
+    var m =
+      blob.match(/\b\d+\s*[-–]\s*\d+\s+of\s+(\d+)\b/i) ||
+      blob.match(/\b(?:showing|displaying|viewing)\s*:?\s*\d+\s*[-–]\s*\d+\s+of\s+(\d+)\b/i);
     if (!m) return 1;
     var total = parseInt(m[1], 10);
     if (isNaN(total) || total < 2) return 1;
-    var m2 = blob.match(/\b(\d+)\s*[-–]\s*\d+\s+of\s+\d+/i);
+    var m2 =
+      blob.match(/\b(\d+)\s*[-–]\s*\d+\s+of\s+\d+/i) ||
+      blob.match(/\b(?:showing|displaying|viewing)\s*:?\s*(\d+)\s*[-–]\s*\d+\s+of\s+\d+/i);
     var per = m2 ? parseInt(m2[1], 10) : 24;
     if (isNaN(per) || per < 1) per = 24;
     return Math.max(1, Math.ceil(total / per));
@@ -6523,13 +6555,37 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (!root) return 0;
     try {
       var blob = String(root.textContent || '').replace(/\s+/g, ' ');
-      var m = blob.match(/\b\d+\s*[-–]\s*\d+\s+of\s+(\d+)\b/i);
+      var m =
+        blob.match(/\b\d+\s*[-–]\s*\d+\s+of\s+(\d+)\b/i) ||
+        blob.match(/\b(?:showing|displaying|viewing)\s*:?\s*\d+\s*[-–]\s*\d+\s+of\s+(\d+)\b/i);
       if (!m) return 0;
       var n = parseInt(m[1], 10);
       return isNaN(n) ? 0 : n;
     } catch (eTot) {
       return 0;
     }
+  }
+
+  /** Any paging link in the listing (ignores outsideProductGrid — some themes nest oddly). */
+  function scanBestNextHrefFromContentArea(root, currPage) {
+    if (!root) return null;
+    currPage = currPage > 0 ? currPage : 1;
+    var bestP = Infinity;
+    var bestHref = null;
+    try {
+      root.querySelectorAll('a[href]').forEach(function (a) {
+        if (!a.href || /^javascript:/i.test(a.href)) return;
+        if (a.closest && a.closest('li.v-product')) return;
+        if (/productdetails|shoppingcart|\.asp\?search=/i.test(a.href)) return;
+        if (!hrefHasPagingParam(a.href)) return;
+        if (!sameListingContext(a.href)) return;
+        var p = pageFromHref(a.href);
+        if (p <= currPage || p >= bestP) return;
+        bestP = p;
+        bestHref = a.href;
+      });
+    } catch (eSc) {}
+    return bestHref;
   }
 
   function hideCategoryVolusionPageLabel(root) {
@@ -6611,6 +6667,10 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         var candNext = findSmallestNextPageHref(ca, curr) || findSmallestNextPageHref(body, curr);
         if (candNext) nextHref = candNext;
       }
+      if (!nextHref) {
+        var scanNext = scanBestNextHrefFromContentArea(ca, curr) || scanBestNextHrefFromContentArea(body, curr);
+        if (scanNext) nextHref = scanNext;
+      }
 
       if (curr <= 1) prevHref = null;
       else prevHref = prevHref || buildUrlForPage(curr - 1);
@@ -6654,6 +6714,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       if (totalP < curr) totalP = curr;
       if (!nextHref && totalP > curr) {
         nextHref = buildUrlForPage(curr + 1);
+      }
+      if (!nextHref && onCat && categoryTotalN > 0 && shownOnPage > 0) {
+        var estPagesFromTotal = Math.ceil(categoryTotalN / shownOnPage);
+        if (estPagesFromTotal > curr) {
+          nextHref = buildUrlForPage(curr + 1);
+        }
       }
 
       var hasNext = !!nextHref;
