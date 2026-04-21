@@ -6027,10 +6027,16 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     return u.href;
   }
 
-  function findNextPrevFromDom(root) {
+  function hrefHasPagingParam(href) {
+    if (!href || typeof href !== 'string') return false;
+    return /[?&](?:pagenum|pagenumber|page|PageNum)=/i.test(href);
+  }
+
+  function findNextPrevFromDom(root, currPage) {
     var nextHref = null;
     var prevHref = null;
     if (!root) return { next: null, prev: null };
+    currPage = currPage > 0 ? currPage : 1;
 
     var nextRel = root.querySelector('a[rel="next"][href]');
     var prevRel = root.querySelector('a[rel="prev"][href]');
@@ -6060,11 +6066,15 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         var lastA = lastLi.querySelector('a[href]');
         if (firstA && !firstLi.classList.contains('disabled') && !firstLi.classList.contains('active')) {
           var ft = (firstA.textContent || '').toLowerCase();
+          var fp = pageFromHref(firstA.href);
           if (ft.indexOf('prev') >= 0 || ft === '‹' || ft === '«' || ft === '<') prevHref = firstA.href;
+          else if (hrefHasPagingParam(firstA.href) && fp > 0 && fp < currPage) prevHref = firstA.href;
         }
         if (lastA && !lastLi.classList.contains('disabled')) {
           var lt = (lastA.textContent || '').toLowerCase();
+          var lp = pageFromHref(lastA.href);
           if (lt.indexOf('next') >= 0 || lt === '›' || lt === '»' || lt === '>') nextHref = lastA.href;
+          else if (hrefHasPagingParam(lastA.href) && lp > currPage) nextHref = lastA.href;
         }
       }
     }
@@ -6073,10 +6083,11 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 
   /** Volusion `.v65-pagepagination` / `ul.pagination` (not filtered by product-grid rules). */
-  function findNextPrevFromVolusionPagination(root) {
+  function findNextPrevFromVolusionPagination(root, currPage) {
     var nextHref = null;
     var prevHref = null;
     if (!root) return { next: null, prev: null };
+    currPage = currPage > 0 ? currPage : 1;
     var scopes = root.querySelectorAll(
       '.v65-pagepagination, ul.pagination, [class*="pagepagination"], [class*="PagePagination"], nav.pagination'
     );
@@ -6098,11 +6109,15 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         var lastA = lastLi.querySelector('a[href]');
         if (!prevHref && firstA && !firstLi.classList.contains('disabled') && !firstLi.classList.contains('active')) {
           var ft = (firstA.textContent || '').toLowerCase();
+          var fp = pageFromHref(firstA.href);
           if (ft.indexOf('prev') >= 0 || ft === '‹' || ft === '«' || ft === '<') prevHref = firstA.href;
+          else if (hrefHasPagingParam(firstA.href) && fp > 0 && fp < currPage) prevHref = firstA.href;
         }
         if (!nextHref && lastA && !lastLi.classList.contains('disabled')) {
           var lt = (lastA.textContent || '').toLowerCase();
+          var lp = pageFromHref(lastA.href);
           if (lt.indexOf('next') >= 0 || lt === '›' || lt === '»' || lt === '>') nextHref = lastA.href;
+          else if (hrefHasPagingParam(lastA.href) && lp > currPage) nextHref = lastA.href;
         }
       }
 
@@ -6119,6 +6134,33 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       });
     }
     return { next: nextHref, prev: prevHref };
+  }
+
+  /** Largest page index linked from Volusion category pagination (boosts maxP when numeric links use ?PageNum=). */
+  function maxPageFromVolusionPagination(root) {
+    var maxPg = 1;
+    if (!root) return maxPg;
+    var scopes = root.querySelectorAll(
+      '.v65-pagepagination, ul.pagination, [class*="pagepagination"], [class*="PagePagination"], nav.pagination'
+    );
+    var si;
+    for (si = 0; si < scopes.length; si++) {
+      var pag = scopes[si];
+      if (pag.closest && pag.closest('.v-product-grid, li.v-product, .v-product__details')) continue;
+      pag.querySelectorAll('a[href]').forEach(function (a) {
+        if (!a.href || /^javascript:/i.test(a.href)) return;
+        if (!hrefHasPagingParam(a.href)) return;
+        try {
+          var u = new URL(a.href, location.href);
+          if (u.pathname !== location.pathname) return;
+        } catch (ePg) {
+          return;
+        }
+        var p = pageFromHref(a.href);
+        if (p > maxPg) maxPg = p;
+      });
+    }
+    return maxPg;
   }
 
   function inferFromPageParams(root, curr) {
@@ -6262,12 +6304,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       var path = location.pathname;
       var onCat = isCategoryPath();
 
-      var d1 = findNextPrevFromDom(ca);
-      var d1b = findNextPrevFromDom(body);
+      var d1 = findNextPrevFromDom(ca, curr);
+      var d1b = findNextPrevFromDom(body, curr);
       var d2 = inferFromPageParams(ca, curr);
       var d2b = inferFromPageParams(body, curr);
-      var dVol = findNextPrevFromVolusionPagination(ca);
-      var dVolBody = findNextPrevFromVolusionPagination(body);
+      var dVol = findNextPrevFromVolusionPagination(ca, curr);
+      var dVolBody = findNextPrevFromVolusionPagination(body, curr);
 
       var nextHref = d1.next || d1b.next || d2.next || d2b.next || dVol.next || dVolBody.next;
       var prevHref = d1.prev || d1b.prev || d2.prev || d2b.prev || dVol.prev || dVolBody.prev;
@@ -6276,6 +6318,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
       else prevHref = prevHref || buildUrlForPage(curr - 1);
 
       var maxP = maxPageSeenOnPage(body, path);
+      maxP = Math.max(maxP, maxPageFromVolusionPagination(ca), maxPageFromVolusionPagination(body));
 
       if (!nextHref) {
         if (curr < maxP) nextHref = buildUrlForPage(curr + 1);
@@ -6286,7 +6329,7 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
       if (nextHref) {
         var pnNext = pageFromHref(nextHref);
-        if (pnNext > 0 && pnNext <= curr) nextHref = null;
+        if (hrefHasPagingParam(nextHref) && pnNext > 0 && pnNext <= curr) nextHref = null;
       }
 
       var hasNextPrelim = !!nextHref;
