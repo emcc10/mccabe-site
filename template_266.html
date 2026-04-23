@@ -3003,10 +3003,8 @@ function refreshPlannerPriceForMemberState(){
   if (window.__mcMemberPricing) {
     window.__mcMemberPricing.memberPlannerTotal = memberTotal > 0 ? memberTotal : 0;
   }
-  var lineTotal = typeof getMcPlannerCartLineTotal === "function" ? getMcPlannerCartLineTotal() : 0;
-  if (!(lineTotal > 0) && publicSeat > 0) {
-    lineTotal = Number(calculatePlannerPrice(window.__mcPlannerCounts, publicSeat)) || 0;
-  }
+  var lineTotal = mcComputePlannerConfigurationTotal(window.__mcPlannerCounts);
+  window.__mcPlannerConfigurationTotal = lineTotal > 0 ? lineTotal : null;
   if (lineTotal > 0) {
     window.__mcPlannerPrice = lineTotal;
     var cpeR = document.getElementById("mcConfigurationPrice");
@@ -3638,30 +3636,34 @@ function calculatePlannerPrice(counts, seatPrice){
   return total;
 }
 /**
- * Line total Volusion must post for qty=1: full planner configuration total (member math when logged in),
- * never the top PDP block and never a bare per-seat member figure.
+ * Single formula for the planner "configuration total" (counts × seat), used for #mcConfigurationPrice and for POST.
+ * Does not read Volusion cart fields or __mcPlannerPrice — only counts + public/member per-seat used in planner math.
  */
-function getMcPlannerCartLineTotal(){
-  if (!window.__mcPlannerConfigApplied || !window.__mcPlannerCounts) return 0;
-  var st = window.__mcMemberPricing || {};
-  if (st.unlocked) {
-    var mt = Number(st.memberPlannerTotal) || 0;
-    if (mt > 0) return mt;
-    var ms = Number(st.memberSeatPrice) || 0;
-    if (ms > 0) {
-      var recalc = calculatePlannerPrice(window.__mcPlannerCounts, ms);
-      if (recalc > 0) return recalc;
+function mcComputePlannerConfigurationTotal(counts){
+  if (!counts || typeof counts !== "object") return 0;
+  var keys = Object.keys(counts);
+  var hasPiece = false;
+  var ki;
+  for (ki = 0; ki < keys.length; ki++) {
+    if (Number(counts[keys[ki]] || 0) > 0) {
+      hasPiece = true;
+      break;
     }
   }
+  if (!hasPiece) return 0;
   var publicSeat =
     window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0
       ? window.__mcPerSeatPrice
       : getDisplayedPublicSeatPrice();
-  if (!(publicSeat > 0)) return 0;
-  return Number(calculatePlannerPrice(window.__mcPlannerCounts, publicSeat)) || 0;
+  var retail = publicSeat > 0 ? Number(calculatePlannerPrice(counts, publicSeat)) || 0 : 0;
+  var st = window.__mcMemberPricing || {};
+  var memberSeat = typeof getMemberPlannerSeatPriceForCalc === "function" ? getMemberPlannerSeatPriceForCalc() : 0;
+  var memberCfg = memberSeat > 0 ? Number(calculatePlannerPrice(counts, memberSeat)) || 0 : 0;
+  if (st.unlocked && memberCfg > 0) return memberCfg;
+  return retail;
 }
 if (typeof window !== "undefined") {
-  window.getMcPlannerCartLineTotal = getMcPlannerCartLineTotal;
+  window.mcComputePlannerConfigurationTotal = mcComputePlannerConfigurationTotal;
 }
 function cachePlannerCartTarget(retailTotal, memberTotal){
   try {
@@ -3858,7 +3860,8 @@ function mcLogPlannerCartSubmitDebug(form, configuredTotal){
   console.log("[mcPlanDebug] base member (per-seat for planner):", memberSeat);
   console.log("[mcPlanDebug] configured retail total:", retailCfg);
   console.log("[mcPlanDebug] configured member total:", memberCfg);
-  console.log("[mcPlanDebug] cart line total (posted):", configuredTotal);
+  console.log("[mcPlanDebug] __mcPlannerConfigurationTotal (submit source):", window.__mcPlannerConfigurationTotal);
+  console.log("[mcPlanDebug] cart line total written into price fields:", configuredTotal);
   console.table(rows);
   if (payloadPreview) console.log("[mcPlanDebug] form body (application/x-www-form-urlencoded):", payloadPreview.slice(0, 8000));
 }
@@ -3868,7 +3871,10 @@ function mcLogPlannerCartSubmitDebug(form, configuredTotal){
  */
 window.mcForceTheaterPlannerAddToCartPayload = function (form) {
   if (!form || !window.__mcPlannerConfigApplied) return;
-  var pt = typeof getMcPlannerCartLineTotal === "function" ? getMcPlannerCartLineTotal() : Number(window.__mcPlannerPrice);
+  var pt = Number(window.__mcPlannerConfigurationTotal);
+  if (!(pt > 0) && typeof mcComputePlannerConfigurationTotal === "function") {
+    pt = Number(mcComputePlannerConfigurationTotal(window.__mcPlannerCounts || {})) || 0;
+  }
   if (!(pt > 0)) return;
   var qtySelectors =
     'input[name="Quantity"],input#Quantity,input[name="quantity"],input[id="quantity"],' +
@@ -4030,6 +4036,8 @@ window.__mcPlannerConfigApplied = false;
 window.__mcPlannerSeatCount = 0;
 window.__mcPlannerCounts = {};
 window.__mcPlannerPrice = null;
+/** Sole numeric source for Volusion hidden price fields at submit (planner configuration total). */
+window.__mcPlannerConfigurationTotal = null;
 window.applyPlannerToPage = function (payload) {
   if (!payload || typeof payload !== "object") return;
 
@@ -4128,9 +4136,9 @@ window.applyPlannerToPage = function (payload) {
     var memberTotal = calculatePlannerPrice(configOpts, memberSeat);
     window.__mcMemberPricing.memberPlannerTotal = memberTotal > 0 ? memberTotal : 0;
   }
-  var lineTotal = typeof getMcPlannerCartLineTotal === "function" ? getMcPlannerCartLineTotal() : 0;
-  if (!(lineTotal > 0) && retailTotalComputed > 0) lineTotal = retailTotalComputed;
-  window.__mcPlannerPrice = lineTotal > 0 ? lineTotal : null;
+  var lineTotal = hasPlannerConfig ? mcComputePlannerConfigurationTotal(configOpts) : 0;
+  window.__mcPlannerConfigurationTotal = lineTotal > 0 ? lineTotal : null;
+  window.__mcPlannerPrice = window.__mcPlannerConfigurationTotal;
   var cpe = document.getElementById("mcConfigurationPrice");
   if (cpe && hasPlannerConfig && lineTotal > 0) {
     cpe.textContent = "Configuration total: " + formatMcCurrency(lineTotal);
