@@ -10200,6 +10200,67 @@ body.mc-product-page #v65-product-parent .mc-member-price-caption {
   display: none !important;
 }
 
+/* Theater / WM panel: configuration summary — RH typography (Inter, caps label, clean body). */
+body.productdetails .mc-configuration-rh,
+body.mc-product-page .mc-configuration-rh,
+body.mc-theater-seating-pdp .mc-configuration-rh {
+  font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em !important;
+  color: #1a1a1a !important;
+}
+
+body.productdetails .mc-configuration-rh__heading,
+body.mc-product-page .mc-configuration-rh__heading,
+body.mc-theater-seating-pdp .mc-configuration-rh__heading {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: #6a6a6a !important;
+  margin-bottom: 6px !important;
+}
+
+body.productdetails .mc-configuration-rh__caption,
+body.mc-product-page .mc-configuration-rh__caption,
+body.mc-theater-seating-pdp .mc-configuration-rh__caption {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em !important;
+  color: #6a6a6a !important;
+}
+
+body.productdetails .mc-configuration-rh__pieces,
+body.mc-product-page .mc-configuration-rh__pieces,
+body.mc-theater-seating-pdp .mc-configuration-rh__pieces {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em !important;
+  color: #1a1a1a !important;
+}
+
+body.productdetails .mc-configuration-rh__pieces strong,
+body.mc-product-page .mc-configuration-rh__pieces strong,
+body.mc-theater-seating-pdp .mc-configuration-rh__pieces strong {
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+}
+
+body.productdetails .mc-configuration-rh__total,
+body.mc-product-page .mc-configuration-rh__total,
+body.mc-theater-seating-pdp .mc-configuration-rh__total {
+  margin-top: 12px !important;
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em !important;
+  color: #1a1a1a !important;
+}
+
 /* Final 992–1199 desktop header clamp: keep product/category menu centered and prevent right drift. */
 @media (min-width: 992px) and (max-width: 1199px) {
   body:not(.is-home) header.header > .mc-header-desktop-bar {

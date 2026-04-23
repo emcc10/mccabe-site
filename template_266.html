@@ -2499,11 +2499,11 @@ boot();
           </button>
         </div>
 
-        <div id="mcConfigurationBlock" style="width:100%">
-          <div style="font-size:14px;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:#686868;margin-bottom:4px">CONFIGURATION</div>
-          <div id="mcConfigurationCaption" style="font-size:13px;line-height:1.5;color:#999;font-style:italic">Please use the room planner to choose configuration.</div>
-          <div id="mcConfigurationPieces" style="font-size:13px;line-height:1.5;color:#333;display:none"></div>
-          <div id="mcConfigurationPrice" style="display:none;margin-top:10px;font-size:15px;font-weight:600;letter-spacing:.02em;color:#1a1a1a"></div>
+        <div id="mcConfigurationBlock" class="mc-configuration-rh" style="width:100%">
+          <div class="mc-configuration-rh__heading">CONFIGURATION</div>
+          <div id="mcConfigurationCaption" class="mc-configuration-rh__caption">Please use the room planner to choose configuration.</div>
+          <div id="mcConfigurationPieces" class="mc-configuration-rh__pieces" style="display:none"></div>
+          <div id="mcConfigurationPrice" class="mc-configuration-rh__total" style="display:none"></div>
         </div>
       </div>
     `;
@@ -3000,7 +3000,6 @@ function refreshPlannerPriceForMemberState(){
   var publicSeat = (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) ? window.__mcPerSeatPrice : getDisplayedPublicSeatPrice();
   var publicTotal = calculatePlannerPrice(window.__mcPlannerCounts, publicSeat);
   if (publicTotal > 0) {
-    updateProductPrice(publicTotal);
     window.__mcPlannerPrice = publicTotal;
     var cpeR = document.getElementById("mcConfigurationPrice");
     if (cpeR) {
@@ -3609,8 +3608,16 @@ function ensurePriceWithOptionsLabel(scope){
   priceNode.parentNode.insertBefore(label, priceNode);
 }
 
+/** Configuration totals use retail/public per-seat only — never member pricing unless a seatPrice is passed explicitly. */
 function calculatePlannerPrice(counts, seatPrice){
-  if (seatPrice == null || seatPrice <= 0) seatPrice = getPlannerBaseSeatPriceForCalc();
+  if (seatPrice == null || seatPrice <= 0) {
+    if (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) {
+      seatPrice = window.__mcPerSeatPrice;
+    } else {
+      seatPrice = getDisplayedPublicSeatPrice() || getPlannerSeatPrice();
+    }
+    if (!(seatPrice > 0)) return 0;
+  }
   if (!counts || typeof counts !== 'object') return 0;
   var total = 0;
   var keys = Object.keys(counts);
@@ -3850,7 +3857,7 @@ window.applyPlannerToPage = function (payload) {
     var totalPrice = calculatePlannerPrice(configOpts, publicSeatPrice);
     retailTotalComputed = totalPrice;
     console.log("[McCabe Planner] retail totalPrice:", totalPrice);
-    updateProductPrice(totalPrice);
+    /* Do not call updateProductPrice — #priceWithOptions / retail row must stay Volusion’s retail. */
     window.__mcPlannerPrice = totalPrice;
     var cpe = document.getElementById("mcConfigurationPrice");
     if (cpe && hasPlannerConfig && totalPrice > 0) {
@@ -3860,9 +3867,6 @@ window.applyPlannerToPage = function (payload) {
       cpe.style.display = "none";
       cpe.textContent = "";
     }
-    setTimeout(function(){ updateProductPrice(totalPrice); }, 600);
-    setTimeout(function(){ updateProductPrice(totalPrice); }, 1500);
-    setTimeout(function(){ updateProductPrice(totalPrice); }, 3000);
   }
   var memberSeat = getMemberPlannerSeatPriceForCalc();
   if (window.__mcMemberPricing) {
