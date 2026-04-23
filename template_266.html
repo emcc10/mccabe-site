@@ -14403,7 +14403,7 @@ document.addEventListener('DOMContentLoaded', function () {
       '</div>' +
       '<div class="vf-thumbs" style="display:flex;gap:10px;padding:14px 14px 16px;border-top:1px solid #e9e6e1;background:#fff;overflow-x:auto;overflow-y:hidden;"></div>';
 
-    wrappers[0].parentNode.insertBefore(flip, wrappers[0]);
+    (firstBlock.parentNode || wrappers[0].parentNode).insertBefore(flip, firstBlock);
 
     var stage = flip.querySelector('.vf-stage');
     var thumbs = flip.querySelector('.vf-thumbs');
@@ -14489,11 +14489,48 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     });
 
-    wrappers.forEach(function (node) {
-      if (node) node.style.display = 'none';
-    });
+    var hidden = new Set();
 
-    return true;
+items.forEach(function (item) {
+  var img = item.img;
+  if (!img) return;
+
+  var candidates = [
+    img.closest('.gallery'),
+    img.closest('li'),
+    img.closest('td'),
+    img.closest('p'),
+    img.closest('div'),
+    img.closest('a')
+  ].filter(Boolean);
+
+  var node = candidates[0] || img;
+
+  /* if this div only exists to hold the image, hide that whole block */
+  if (node && node.tagName === 'DIV') {
+    var text = (node.textContent || '').replace(/\s+/g, '').trim();
+    var imgCount = node.querySelectorAll ? node.querySelectorAll('img').length : 0;
+    if (imgCount === 1 && text === '') {
+      /* keep climbing while it's still just an image wrapper */
+      while (
+        node.parentElement &&
+        node.parentElement !== document.body &&
+        node.parentElement.children.length <= 3 &&
+        node.parentElement.querySelectorAll('img').length >= 1 &&
+        ((node.parentElement.textContent || '').replace(/\s+/g, '').trim() === '')
+      ) {
+        node = node.parentElement;
+      }
+    }
+  }
+
+  if (!hidden.has(node)) {
+    hidden.add(node);
+    node.style.display = 'none';
+  }
+});
+
+return true;
   }
 
   function boot() {
