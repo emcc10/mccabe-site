@@ -1270,7 +1270,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <!-- REQUIRED: Volusion injects all page content here -->
   <div id="content_area"></div>
 
-  <!-- Room planner: embedded in template; shown when URL contains room-planner -->
+  <!-- Room planner: canonical markup + behavior live in this template (#roomPlannerEmbed + window.initRoomPlanner below). vspfiles/room-planner.html is a legacy standalone page and is not the source of truth for PDP/cart integration. -->
   <template id="roomPlannerEmbed">
     <div id="roomPlannerApp" style="position:relative;z-index:1;">
       <style>
@@ -1380,6 +1380,7 @@ document.addEventListener("DOMContentLoaded", function () {
           <div id="planner-right">
             <div id="planner-style-name"></div>
             <div id="planner-piece-list"></div>
+            <div id="mcPlannerRunningTotal" style="display:none;font-size:13px;font-weight:700;margin-top:10px;color:#111" aria-live="polite"></div>
           </div>
         </div>
       </div>
@@ -2997,7 +2998,6 @@ function getMemberCreateAccountUrl(){
 }
 function refreshPlannerPriceForMemberState(){
   if (!window.__mcPlannerConfigApplied || !window.__mcPlannerCounts) return;
-  var publicSeat = (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) ? window.__mcPerSeatPrice : getDisplayedPublicSeatPrice();
   var memberSeat = getMemberPlannerSeatPriceForCalc();
   var memberTotal = calculatePlannerPrice(window.__mcPlannerCounts, memberSeat);
   if (window.__mcMemberPricing) {
@@ -3397,6 +3397,72 @@ function getVolusionAddToCartSeatPrice(root) {
   var htsEq = tryReadHowToGetSalePrice(mainAmt, true);
   return htsEq > 0 ? htsEq : 0;
 }
+function mcFindProductDetailsForm(root) {
+  root = root || document;
+  var btn = root.querySelector(
+    'input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]'
+  );
+  if (btn && btn.form) return btn.form;
+  return root.querySelector('form[action*="ProductDetails"], form[action*="shoppingcart"]') || null;
+}
+/** Volusion-maintained unit selling price on the add-to-cart form (option-aware), not the MAP header row. */
+function mcReadVolusionProductFormSellingUnit(form) {
+  if (!form) return 0;
+  var names = [
+    "SellingPrice",
+    "sellingprice",
+    "ActualPrice",
+    "actualprice",
+    "HiddenPrice",
+    "hiddenprice",
+    "SalePrice",
+    "saleprice",
+    "AddToCartPrice",
+    "addtocartprice"
+  ];
+  var ni;
+  for (ni = 0; ni < names.length; ni++) {
+    var inp = form.querySelector(
+      'input[type="hidden"][name="' +
+        names[ni] +
+        '"],input[name="' +
+        names[ni] +
+        '"]:not([type="checkbox"]):not([type="radio"])'
+    );
+    if (!inp) continue;
+    var v = parseMcCurrency(inp.value || inp.getAttribute("value") || "");
+    if (v > 50 && v < 50000000) return v;
+  }
+  return 0;
+}
+/**
+ * Per-seat unit used to multiply planner piece counts: form hidden prices first, then Volusion sale helpers.
+ * Intentionally does not use #priceWithOptions / getDisplayedPublicSeatPrice / getPlannerSeatPrice.
+ */
+function mcGetPlannerPerSeatUnitFromVolusion(root) {
+  root = root || document;
+  var form = mcFindProductDetailsForm(root);
+  var fromForm = mcReadVolusionProductFormSellingUnit(form);
+  if (fromForm > 0) return fromForm;
+  var fromVol = getVolusionAddToCartSeatPrice(root);
+  if (fromVol > 0) return fromVol;
+  var hts = tryReadHowToGetSalePrice(0, true);
+  if (hts > 0) return hts;
+  if (typeof window.__MC_MEMBER_SEAT_PRICE === "number" && window.__MC_MEMBER_SEAT_PRICE > 0) {
+    return window.__MC_MEMBER_SEAT_PRICE;
+  }
+  var metaLive = document.querySelector('meta[name="mc-member-seat-price"], meta[name="mc-member-price"]');
+  if (metaLive && metaLive.getAttribute("content")) {
+    var mp = parseMcCurrency(metaLive.getAttribute("content"));
+    if (mp > 0) return mp;
+  }
+  return 0;
+}
+if (typeof window !== "undefined") {
+  window.mcFindProductDetailsForm = mcFindProductDetailsForm;
+  window.mcReadVolusionProductFormSellingUnit = mcReadVolusionProductFormSellingUnit;
+  window.mcGetPlannerPerSeatUnitFromVolusion = mcGetPlannerPerSeatUnitFromVolusion;
+}
 function detectMemberPricingState(){
   if (document.body && document.body.classList.contains('mc-bean-bag-pdp')) {
     document.querySelectorAll(
@@ -3559,6 +3625,7 @@ function updateProductPrice(totalPrice){
       if (lbl.indexOf('seat') !== -1 && lbl.indexOf('leather') === -1) return;
     }
     setTimeout(function(){
+      if (window.__mcPlannerConfigApplied) return;
       if (window.__mcPriceWrittenAt && (Date.now() - window.__mcPriceWrittenAt) < 2000) return;
       var p = readVolusionPerSeatPrice();
       if (p > 0) {
@@ -3616,8 +3683,8 @@ function calculatePlannerPrice(counts, seatPrice){
   if (seatPrice == null || seatPrice <= 0) {
     if (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) {
       seatPrice = window.__mcPerSeatPrice;
-    } else {
-      seatPrice = getDisplayedPublicSeatPrice() || getPlannerSeatPrice();
+    } else if (typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
+      seatPrice = mcGetPlannerPerSeatUnitFromVolusion(document);
     }
     if (!(seatPrice > 0)) return 0;
   }
@@ -3636,8 +3703,7 @@ function calculatePlannerPrice(counts, seatPrice){
   return total;
 }
 /**
- * Single formula for the planner "configuration total" (counts × seat), used for #mcConfigurationPrice and for POST.
- * Does not read Volusion cart fields or __mcPlannerPrice — only counts + public/member per-seat used in planner math.
+ * Planner configuration line total: piece counts × Volusion form / sale per-seat (same moment as Apply in modal).
  */
 function mcComputePlannerConfigurationTotal(counts){
   if (!counts || typeof counts !== "object") return 0;
@@ -3651,19 +3717,13 @@ function mcComputePlannerConfigurationTotal(counts){
     }
   }
   if (!hasPiece) return 0;
-  var publicSeat =
-    window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0
-      ? window.__mcPerSeatPrice
-      : getDisplayedPublicSeatPrice();
-  var retail = publicSeat > 0 ? Number(calculatePlannerPrice(counts, publicSeat)) || 0 : 0;
-  var st = window.__mcMemberPricing || {};
-  var memberSeat = typeof getMemberPlannerSeatPriceForCalc === "function" ? getMemberPlannerSeatPriceForCalc() : 0;
-  var memberCfg = memberSeat > 0 ? Number(calculatePlannerPrice(counts, memberSeat)) || 0 : 0;
-  if (st.unlocked && memberCfg > 0) return memberCfg;
-  return retail;
+  var u = typeof mcGetPlannerPerSeatUnitFromVolusion === "function" ? mcGetPlannerPerSeatUnitFromVolusion(document) : 0;
+  if (!(u > 0)) return 0;
+  return Number(calculatePlannerPrice(counts, u)) || 0;
 }
 if (typeof window !== "undefined") {
   window.mcComputePlannerConfigurationTotal = mcComputePlannerConfigurationTotal;
+  window.calculatePlannerPrice = calculatePlannerPrice;
 }
 function cachePlannerCartTarget(retailTotal, memberTotal){
   try {
@@ -3821,8 +3881,27 @@ function mcPlannerSubmitDebugEnabled(){
     return false;
   }
 }
+function mcReadPlannerTotalFromConfigurationPriceEl(){
+  var el = document.getElementById("mcConfigurationPrice");
+  if (!el || !el.textContent) return 0;
+  var dm = el.textContent.match(/\$[\d,]+(?:\.\d{2})?/);
+  return dm ? parseMcCurrency(dm[0]) : 0;
+}
+function mcReadPlannerRunningTotalFromRoomPlannerApp(){
+  var el = document.querySelector(
+    "#mcPlannerModalBody #mcPlannerRunningTotal, #roomPlannerApp #mcPlannerRunningTotal"
+  );
+  if (!el || !el.textContent) return 0;
+  var dm = el.textContent.match(/\$[\d,]+(?:\.\d{2})?/);
+  return dm ? parseMcCurrency(dm[0]) : 0;
+}
 function mcLogPlannerCartSubmitDebug(form, configuredTotal){
   if (!mcPlannerSubmitDebugEnabled() || !form) return;
+  var plannerDisplayed = mcReadPlannerTotalFromConfigurationPriceEl();
+  var plannerModalTotal = mcReadPlannerRunningTotalFromRoomPlannerApp();
+  var last = window.__mcLastPlannerPayload || {};
+  var volUnit = typeof mcGetPlannerPerSeatUnitFromVolusion === "function" ? mcGetPlannerPerSeatUnitFromVolusion(document) : 0;
+  var formUnit = typeof mcReadVolusionProductFormSellingUnit === "function" ? mcReadVolusionProductFormSellingUnit(form) : 0;
   var publicSeat = (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) ? window.__mcPerSeatPrice : getDisplayedPublicSeatPrice();
   var memberSeat = typeof getMemberPlannerSeatPriceForCalc === "function" ? getMemberPlannerSeatPriceForCalc() : 0;
   var retailCfg =
@@ -3856,12 +3935,19 @@ function mcLogPlannerCartSubmitDebug(form, configuredTotal){
       payloadPreview = new URLSearchParams(new FormData(form)).toString();
     }
   } catch (e3) {}
-  console.log("[mcPlanDebug] base retail (per-seat display math):", publicSeat);
-  console.log("[mcPlanDebug] base member (per-seat for planner):", memberSeat);
-  console.log("[mcPlanDebug] configured retail total:", retailCfg);
-  console.log("[mcPlanDebug] configured member total:", memberCfg);
-  console.log("[mcPlanDebug] __mcPlannerConfigurationTotal (submit source):", window.__mcPlannerConfigurationTotal);
-  console.log("[mcPlanDebug] cart line total written into price fields:", configuredTotal);
+  console.log("[mcPlanDebug] lastApply payload.configurationTotal:", last.configurationTotal);
+  console.log("[mcPlanDebug] lastApply payload.mcPlannerPerSeatUnit:", last.mcPlannerPerSeatUnit);
+  console.log("[mcPlanDebug] #mcConfigurationPrice parsed (PDP configuration block):", plannerDisplayed);
+  console.log("[mcPlanDebug] #mcPlannerRunningTotal parsed (room planner panel):", plannerModalTotal);
+  console.log("[mcPlanDebug] mcReadVolusionProductFormSellingUnit(form):", formUnit);
+  console.log("[mcPlanDebug] mcGetPlannerPerSeatUnitFromVolusion (Volusion unit for math):", volUnit);
+  console.log("[mcPlanDebug] __mcPerSeatPrice (cached, may be stale):", window.__mcPerSeatPrice);
+  console.log("[mcPlanDebug] base retail from #priceWithOptions path (NOT submit source):", publicSeat);
+  console.log("[mcPlanDebug] base member seat (NOT submit source):", memberSeat);
+  console.log("[mcPlanDebug] retail×counts if using display path (NOT submit source):", retailCfg);
+  console.log("[mcPlanDebug] member×counts if using member path (NOT submit source):", memberCfg);
+  console.log("[mcPlanDebug] __mcPlannerConfigurationTotal (canonical before DOM fallback):", window.__mcPlannerConfigurationTotal);
+  console.log("[mcPlanDebug] final value written into Volusion price fields:", configuredTotal);
   console.table(rows);
   if (payloadPreview) console.log("[mcPlanDebug] form body (application/x-www-form-urlencoded):", payloadPreview.slice(0, 8000));
 }
@@ -3872,10 +3958,41 @@ function mcLogPlannerCartSubmitDebug(form, configuredTotal){
 window.mcForceTheaterPlannerAddToCartPayload = function (form) {
   if (!form || !window.__mcPlannerConfigApplied) return;
   var pt = Number(window.__mcPlannerConfigurationTotal);
+  if (!(pt > 0)) pt = mcReadPlannerTotalFromConfigurationPriceEl();
+  if (!(pt > 0)) pt = mcReadPlannerRunningTotalFromRoomPlannerApp();
   if (!(pt > 0) && typeof mcComputePlannerConfigurationTotal === "function") {
     pt = Number(mcComputePlannerConfigurationTotal(window.__mcPlannerCounts || {})) || 0;
   }
   if (!(pt > 0)) return;
+  var formUnitBefore =
+    typeof mcReadVolusionProductFormSellingUnit === "function"
+      ? mcReadVolusionProductFormSellingUnit(form)
+      : 0;
+  var perSeatBefore =
+    typeof mcGetPlannerPerSeatUnitFromVolusion === "function"
+      ? mcGetPlannerPerSeatUnitFromVolusion(document)
+      : 0;
+  try {
+    var qBefore = {};
+    form
+      .querySelectorAll(
+        'input[name="Quantity"],input#Quantity,input[name="quantity"],select[name="Quantity"],select[name="quantity"]'
+      )
+      .forEach(function (el) {
+        qBefore[el.name || el.id || "qty"] = el.value;
+      });
+    console.log("[McCabe planner ATC] (before overwriting Volusion price fields)", {
+      finalPostedLine: pt,
+      storedCanonical: window.__mcPlannerConfigurationTotal,
+      mcConfigurationPriceParsed: mcReadPlannerTotalFromConfigurationPriceEl(),
+      mcPlannerRunningTotalParsed: mcReadPlannerRunningTotalFromRoomPlannerApp(),
+      lastApplyConfigurationTotal: (window.__mcLastPlannerPayload || {}).configurationTotal,
+      lastApplyPerSeat: (window.__mcLastPlannerPayload || {}).mcPlannerPerSeatUnit,
+      volusionFormSellingUnitBeforeOverride: formUnitBefore,
+      volusionPerSeatResolvedBeforeOverride: perSeatBefore,
+      qtyBefore: qBefore
+    });
+  } catch (eAtcLog) {}
   var qtySelectors =
     'input[name="Quantity"],input#Quantity,input[name="quantity"],input[id="quantity"],' +
     'input[name^="QTY"],input[name^="qty"],select[name="Quantity"],select[name="quantity"]';
@@ -4042,8 +4159,8 @@ window.applyPlannerToPage = function (payload) {
   if (!payload || typeof payload !== "object") return;
 
   if (window.__mcPerSeatPrice == null || window.__mcPerSeatPrice <= 0) {
-    var freshSeatPrice = getPlannerSeatPrice();
-    if (freshSeatPrice > 0) window.__mcPerSeatPrice = freshSeatPrice;
+    var pu0 = typeof mcGetPlannerPerSeatUnitFromVolusion === "function" ? mcGetPlannerPerSeatUnitFromVolusion(document) : 0;
+    if (pu0 > 0) window.__mcPerSeatPrice = pu0;
   }
 
   var opts = payload.options && typeof payload.options === "object" ? payload.options : {};
@@ -4124,19 +4241,29 @@ window.applyPlannerToPage = function (payload) {
   window.__mcPlannerCounts = configOpts;
   window.__mcPlannerSeatCount = hasPlannerConfig ? seatCount : 0;
 
-  var publicSeatPrice = (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) ? window.__mcPerSeatPrice : getDisplayedPublicSeatPrice();
+  var fromPayload = payload && Number(payload.configurationTotal);
+  var payloadUnit = payload && Number(payload.mcPlannerPerSeatUnit);
+  if (payloadUnit > 0) window.__mcPerSeatPrice = payloadUnit;
+
+  var publicSeatPrice = (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) ? window.__mcPerSeatPrice : 0;
+  if (!(publicSeatPrice > 0) && typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
+    publicSeatPrice = mcGetPlannerPerSeatUnitFromVolusion(document);
+    if (publicSeatPrice > 0) window.__mcPerSeatPrice = publicSeatPrice;
+  }
   var retailTotalComputed = 0;
-  console.log("[McCabe Planner] publicSeatPrice:", publicSeatPrice, "seatCount:", seatCount, "counts:", JSON.stringify(configOpts));
+  console.log("[McCabe Planner] volusion unit (form/sale):", publicSeatPrice, "seatCount:", seatCount, "counts:", JSON.stringify(configOpts), "payload.configurationTotal:", fromPayload);
   if (publicSeatPrice > 0) {
     retailTotalComputed = calculatePlannerPrice(configOpts, publicSeatPrice);
-    console.log("[McCabe Planner] retail configuration total:", retailTotalComputed);
+    console.log("[McCabe Planner] counts×volusion unit total:", retailTotalComputed);
   }
   var memberSeat = getMemberPlannerSeatPriceForCalc();
   if (window.__mcMemberPricing) {
     var memberTotal = calculatePlannerPrice(configOpts, memberSeat);
     window.__mcMemberPricing.memberPlannerTotal = memberTotal > 0 ? memberTotal : 0;
   }
-  var lineTotal = hasPlannerConfig ? mcComputePlannerConfigurationTotal(configOpts) : 0;
+  var lineTotal = 0;
+  if (fromPayload > 0) lineTotal = fromPayload;
+  else if (hasPlannerConfig) lineTotal = mcComputePlannerConfigurationTotal(configOpts);
   window.__mcPlannerConfigurationTotal = lineTotal > 0 ? lineTotal : null;
   window.__mcPlannerPrice = window.__mcPlannerConfigurationTotal;
   var cpe = document.getElementById("mcConfigurationPrice");
@@ -4160,7 +4287,9 @@ window.applyPlannerToPage = function (payload) {
     options: configOpts,
     layout: layout,
     room: payload && payload.room ? payload.room : null,
-    seatCount: seatCount
+    seatCount: seatCount,
+    configurationTotal: window.__mcPlannerConfigurationTotal,
+    mcPlannerPerSeatUnit: payloadUnit > 0 ? payloadUnit : publicSeatPrice || null
   };
 };
 
@@ -4841,7 +4970,39 @@ window.initRoomPlanner = function (opts) {
         return;
       }
       var prodCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "unknown";
-      var payload = { productCode: prodCode, options: counts, counts: counts, room: getRoomPayload(), layout: layout, seatCount: seatCount, ts: Date.now() };
+      var unit =
+        typeof window.mcGetPlannerPerSeatUnitFromVolusion === "function"
+          ? window.mcGetPlannerPerSeatUnitFromVolusion(document)
+          : 0;
+      var configurationTotal =
+        unit > 0 && typeof window.calculatePlannerPrice === "function"
+          ? window.calculatePlannerPrice(counts, unit)
+          : 0;
+      var payload = {
+        productCode: prodCode,
+        options: counts,
+        counts: counts,
+        room: getRoomPayload(),
+        layout: layout,
+        seatCount: seatCount,
+        configurationTotal: configurationTotal,
+        mcPlannerPerSeatUnit: unit,
+        ts: Date.now()
+      };
+      var runTot = app.querySelector("#mcPlannerRunningTotal");
+      if (runTot) {
+        if (configurationTotal > 0) {
+          runTot.style.display = "block";
+          runTot.textContent =
+            "Configuration total: " +
+            (typeof window.formatMcCurrency === "function"
+              ? window.formatMcCurrency(configurationTotal)
+              : "$" + Number(configurationTotal).toFixed(2));
+        } else {
+          runTot.style.display = "none";
+          runTot.textContent = "";
+        }
+      }
       try { localStorage.setItem("roomPlannerData_" + prodCode, JSON.stringify(payload)); } catch (e) {}
       if (opts.onApply && typeof opts.onApply === "function") {
         opts.onApply(payload);
