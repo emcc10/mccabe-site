@@ -150,7 +150,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260417resync: force overwrite of corrupted live template (duplicate mcSubmitAuthForm) -->
-<meta name="mc-deploy-verify" content="20260420pdp-trace-planner-cart">
+<meta name="mc-deploy-verify" content="20260420atc-payload-trace-v2">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -3905,9 +3905,8 @@ window.addEventListener("message", function (event) {
 });
 
 /**
- * TEMP: PDP trace only — console logs after planner Apply and before ATC submit.
- * Does not read/write top MAP, does not change qty, prices, or posted fields.
- * Remove this IIFE after you capture logs and we patch the real offending field.
+ * TEMP: Trace submitted add-to-cart payload (FormData, urlencoded body, XHR/fetch POST).
+ * Does not read visible MAP labels; does not mutate prices, qty, or top block.
  */
 (function mcTraceVertexPdpPlannerCart(){
   if (window.__mcTraceVertexPdpPlannerCart) return;
@@ -3919,26 +3918,38 @@ window.addEventListener("message", function (event) {
     return /\bproductdetails\b/i.test(document.body.className || "");
   }
 
-  function readDomTotals(){
-    var cpe = document.getElementById("mcConfigurationPrice");
-    var pmv = document.getElementById("mcPlannerMemberPriceAboveAtcValue");
-    return {
-      mcConfigurationPriceText: cpe ? String(cpe.textContent || "").trim() : null,
-      mcConfigurationPriceDisplay: cpe ? String(window.getComputedStyle(cpe).display || "") : null,
-      mcPlannerMemberPriceBlockText: pmv ? String(pmv.textContent || "").trim() : null
-    };
+  var TAG = "[McCabe TRACE ATC PAYLOAD]";
+
+  function isRelevantAtcUrl(url){
+    if (!url) return false;
+    var s = String(url).toLowerCase();
+    return /productdetails|shoppingcart|softadd|addtocart|add_to_cart|onepagecheckout/i.test(s);
+  }
+
+  function formDataToObject(fd){
+    var posted = {};
+    fd.forEach(function(val, key){
+      var s = typeof val === "string" ? val : val && typeof val.name === "string" ? val.name : String(val);
+      if (Object.prototype.hasOwnProperty.call(posted, key)) {
+        if (!Array.isArray(posted[key])) posted[key] = [posted[key]];
+        posted[key].push(s);
+      } else {
+        posted[key] = s;
+      }
+    });
+    return posted;
   }
 
   function priceishField(name, id){
     var s = (String(name || "") + " " + String(id || "")).toLowerCase();
-    return /price|amount|cost|sell|map|cart|total|hidden|actual|soft|volusion|base|msrp|discount|qty|quantity/.test(s);
+    return /price|amount|cost|sell|map|cart|total|hidden|actual|soft|volusion|base|msrp|discount|qty|quantity|option/i.test(s);
   }
 
   function serializeAtcForm(form, note){
     var out = {
       traceNote: note || "",
       formAction: form.getAttribute("action"),
-      formMethod: (form.getAttribute("method") || "").toUpperCase()
+      formMethod: (form.getAttribute("method") || "GET").toUpperCase()
     };
     var rows = [];
     var i;
@@ -3956,24 +3967,21 @@ window.addEventListener("message", function (event) {
       });
     }
     out.everyInputSelectHiddenInForm = rows;
-    out.priceQtyRelatedSubset = rows.filter(function(r){
+    out.priceQtyOptionRelatedSubset = rows.filter(function(r){
       return r.type === "hidden" || priceishField(r.name, r.id);
     });
     try {
       var fd = new FormData(form);
-      var posted = {};
-      fd.forEach(function(val, key){
-        var s = typeof val === "string" ? val : val && typeof val.name === "string" ? val.name : String(val);
-        if (Object.prototype.hasOwnProperty.call(posted, key)) {
-          if (!Array.isArray(posted[key])) posted[key] = [posted[key]];
-          posted[key].push(s);
-        } else {
-          posted[key] = s;
-        }
-      });
-      out.exactFormDataEntriesForSubmit = posted;
+      out.exactFormDataEntriesForSubmit = formDataToObject(fd);
     } catch (eFd) {
       out.exactFormDataEntriesForSubmit = { error: String(eFd) };
+    }
+    try {
+      var enc = new URLSearchParams(new FormData(form)).toString();
+      out.urlEncodedBodyThatBrowserWouldPost = enc;
+      out.urlEncodedBodyLength = enc.length;
+    } catch (eEnc) {
+      out.urlEncodedBodyThatBrowserWouldPost = { error: String(eEnc) };
     }
     var qtyEl = form.querySelector(
       'input[name*="qty" i], input[name*="quantity" i], input[name="QTY"], input[name="qty"], select[name*="qty" i], select[name*="quantity" i]'
@@ -3986,15 +3994,15 @@ window.addEventListener("message", function (event) {
     return out;
   }
 
-  function traceBundle(which, extra){
-    var b = Object.assign({ which: which, ts: new Date().toISOString() }, readDomTotals(), extra || {});
-    console.log("[McCabe TRACE PDP]", b);
+  function tracePayload(which, extra){
+    var b = Object.assign({ which: which, ts: new Date().toISOString() }, extra || {});
+    console.log(TAG, b);
     try {
       if (b.everyInputSelectHiddenInForm) console.table(b.everyInputSelectHiddenInForm);
-    } catch (eT) {}
+    } catch (eT0) {}
     try {
-      if (b.priceQtyRelatedSubset) console.table(b.priceQtyRelatedSubset);
-    } catch (eT2) {}
+      if (b.priceQtyOptionRelatedSubset) console.table(b.priceQtyOptionRelatedSubset);
+    } catch (eT) {}
     return b;
   }
 
@@ -4006,14 +4014,16 @@ window.addEventListener("message", function (event) {
       if (!isVertexPdp()) return;
       try {
         var form = typeof window.mcFindProductDetailsForm === "function" ? window.mcFindProductDetailsForm() : null;
-        var extra = form ? serializeAtcForm(form, "form snapshot right after Apply") : { formFound: false };
-        traceBundle("AFTER_PLANNER_APPLY", Object.assign(extra, {
-          payloadConfigurationTotal: payload && payload.configurationTotal,
-          payloadMcPlannerPerSeatUnit: payload && payload.mcPlannerPerSeatUnit,
-          payloadSeatCount: payload && payload.seatCount
-        }));
+        var ser = form ? serializeAtcForm(form, "ATC form after Apply (fields that will post)") : { formFound: false };
+        var payloadCopy = null;
+        try {
+          payloadCopy = JSON.parse(JSON.stringify(payload || null));
+        } catch (eJ) {
+          payloadCopy = { parseError: true };
+        }
+        tracePayload("AFTER_PLANNER_APPLY_ATC_FORM_PAYLOAD", Object.assign(ser, { plannerApplyPayload: payloadCopy }));
       } catch (eA) {
-        console.warn("[McCabe TRACE PDP] AFTER_PLANNER_APPLY", eA);
+        console.warn(TAG, "AFTER_PLANNER_APPLY error", eA);
       }
     };
     window.applyPlannerToPage.__mcTraceWrapped = 1;
@@ -4033,13 +4043,99 @@ window.addEventListener("message", function (event) {
       var form = ev.target;
       if (!looksLikeProductAtcForm(form)) return;
       try {
-        traceBundle("IMMEDIATELY_BEFORE_ATC_SUBMIT", serializeAtcForm(form, "capture-phase submit"));
+        tracePayload("IMMEDIATELY_BEFORE_ATC_SUBMIT_CAPTURE", serializeAtcForm(form, "capture phase"));
       } catch (eS) {
-        console.warn("[McCabe TRACE PDP] BEFORE_SUBMIT", eS);
+        console.warn(TAG, "SUBMIT_CAPTURE", eS);
       }
     },
     true
   );
+
+  document.addEventListener(
+    "submit",
+    function(ev){
+      var form = ev.target;
+      if (!looksLikeProductAtcForm(form)) return;
+      try {
+        tracePayload("IMMEDIATELY_BEFORE_ATC_SUBMIT_BUBBLE", serializeAtcForm(form, "bubble phase"));
+      } catch (eB) {
+        console.warn(TAG, "SUBMIT_BUBBLE", eB);
+      }
+    },
+    false
+  );
+
+  try {
+    var origFormSubmit = HTMLFormElement.prototype.submit;
+    if (!origFormSubmit.__mcTraceWrapped) {
+      HTMLFormElement.prototype.submit = function(){
+        try {
+          if (looksLikeProductAtcForm(this)) {
+            tracePayload("HTMLFORM_PROTOTYPE_SUBMIT_PROGRAMMATIC", serializeAtcForm(this, "programmatic submit"));
+          }
+        } catch (ePs) {}
+        return origFormSubmit.apply(this, arguments);
+      };
+      HTMLFormElement.prototype.submit.__mcTraceWrapped = 1;
+    }
+  } catch (eProto) {}
+
+  try {
+    var xhrProto = XMLHttpRequest.prototype;
+    var oxopen = xhrProto.open;
+    var oxsend = xhrProto.send;
+    if (!oxsend.__mcTraceWrapped) {
+      xhrProto.open = function(method, url){
+        try {
+          this.__mcTraceXhrMethod = method;
+          this.__mcTraceXhrUrl = url;
+        } catch (eO) {}
+        return oxopen.apply(this, arguments);
+      };
+      xhrProto.send = function(body){
+        try {
+          var m = String(this.__mcTraceXhrMethod || "").toUpperCase();
+          var u = this.__mcTraceXhrUrl || "";
+          if (isVertexPdp() && m === "POST" && isRelevantAtcUrl(u)) {
+            tracePayload("XHR_POST_SEND", {
+              url: String(u),
+              bodyString: typeof body === "string" ? body : body != null ? "[non-string body type=" + typeof body + "]" : "",
+              bodyLength: typeof body === "string" ? body.length : null
+            });
+          }
+        } catch (eX) {}
+        return oxsend.apply(this, arguments);
+      };
+      xhrProto.send.__mcTraceWrapped = 1;
+    }
+  } catch (eXhr) {}
+
+  try {
+    var ofetch = window.fetch;
+    if (typeof ofetch === "function" && !ofetch.__mcTraceWrapped) {
+      window.fetch = function(input, init){
+        init = init || {};
+        var url = typeof input === "string" ? input : input && input.url ? input.url : "";
+        var method = (init.method || (input && input.method) || "GET").toUpperCase();
+        var body = init.body;
+        if (isVertexPdp() && method === "POST" && isRelevantAtcUrl(url)) {
+          try {
+            var detail = { url: String(url), method: method };
+            if (typeof body === "string") {
+              detail.bodyString = body;
+            } else if (body instanceof FormData) {
+              detail.exactFormDataEntriesForSubmit = formDataToObject(body);
+            } else if (body != null) {
+              detail.bodyType = typeof body;
+            }
+            tracePayload("FETCH_POST", detail);
+          } catch (eF) {}
+        }
+        return ofetch.apply(this, arguments);
+      };
+      window.fetch.__mcTraceWrapped = 1;
+    }
+  } catch (eFetch) {}
 
   wrapApplyPlanner();
 })();
