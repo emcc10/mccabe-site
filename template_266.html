@@ -150,7 +150,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260417resync: force overwrite of corrupted live template (duplicate mcSubmitAuthForm) -->
-<meta name="mc-deploy-verify" content="20260417resync-force-overwrite">
+<meta name="mc-deploy-verify" content="20260420planner-member-price-atc">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -2526,6 +2526,10 @@ boot();
           <div id="mcConfigurationCaption" class="mc-configuration-rh__caption">Please use the room planner to choose configuration.</div>
           <div id="mcConfigurationPieces" class="mc-configuration-rh__pieces" style="display:none"></div>
           <div id="mcConfigurationPrice" class="mc-configuration-rh__total" style="display:none"></div>
+          <div id="mcPlannerMemberPriceAboveAtc" class="mc-planner-member-price-above-atc" style="display:none" aria-live="polite">
+            <div class="mc-planner-member-price-above-atc__label">PLANNER MEMBER PRICE</div>
+            <div class="mc-planner-member-price-above-atc__value" id="mcPlannerMemberPriceAboveAtcValue"></div>
+          </div>
         </div>
       </div>
     `;
@@ -3711,23 +3715,67 @@ function mcParseConfiguredTotalFromMcConfigurationPriceEl(){
   return dm ? parseMcCurrency(dm[0]) : 0;
 }
 
+function mcPlannerAtcHostLikelyVisible(el){
+  if (!el || el.nodeType !== 1) return false;
+  var st = window.getComputedStyle(el);
+  if (st.display === "none" || st.visibility === "hidden" || Number(st.opacity) === 0) return false;
+  var r = el.getBoundingClientRect();
+  return r.width > 0 && r.height > 0;
+}
+
+/** Prefer the PDP add-to-cart inside #v65-product-parent that is visible and follows our inline config (avoids header/duplicate controls). */
+function mcFindPrimaryProductAddToCartHost(){
+  var root = document.getElementById("v65-product-parent") || document.getElementById("content_area") || document.body;
+  var panel = document.getElementById("mc-inline-config");
+  var nodes = root.querySelectorAll(
+    'input[name="btnaddtocart"], input[id*="btnaddtocart"], input[id*="BtnAddToCart"], button[name="btnaddtocart"]'
+  );
+  var i;
+  var el;
+  var after = Node.DOCUMENT_POSITION_FOLLOWING;
+  for (i = 0; i < nodes.length; i++) {
+    el = nodes[i];
+    if (!mcPlannerAtcHostLikelyVisible(el)) continue;
+    if (panel && (panel.compareDocumentPosition(el) & after) === 0) continue;
+    return el.closest(".mc-atc-button-wrap") || el;
+  }
+  for (i = nodes.length - 1; i >= 0; i--) {
+    el = nodes[i];
+    if (panel && (panel.compareDocumentPosition(el) & after) === 0) continue;
+    return el.closest(".mc-atc-button-wrap") || el;
+  }
+  return null;
+}
+
+function mcSyncPlannerMemberPriceBlockPosition(wrap){
+  if (!wrap || !wrap.parentNode) return;
+  var host = mcFindPrimaryProductAddToCartHost();
+  if (!host || !host.parentNode) return;
+  if (wrap === host || host.contains(wrap)) return;
+  try {
+    host.parentNode.insertBefore(wrap, host);
+  } catch (ePos) {}
+}
+
 function mcEnsurePlannerMemberPriceAboveAtc(){
-  var atc = document.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
-  if (!atc || !atc.parentNode) return;
   var wrap = document.getElementById("mcPlannerMemberPriceAboveAtc");
   if (!wrap) {
+    var host0 = mcFindPrimaryProductAddToCartHost();
+    if (!host0 || !host0.parentNode) return;
     wrap = document.createElement("div");
     wrap.id = "mcPlannerMemberPriceAboveAtc";
     wrap.className = "mc-planner-member-price-above-atc";
+    wrap.setAttribute("aria-live", "polite");
     wrap.innerHTML =
       '<div class="mc-planner-member-price-above-atc__label">PLANNER MEMBER PRICE</div>' +
       '<div class="mc-planner-member-price-above-atc__value" id="mcPlannerMemberPriceAboveAtcValue"></div>';
-    atc.parentNode.insertBefore(wrap, atc);
+    host0.parentNode.insertBefore(wrap, host0);
   }
   var v = mcParseConfiguredTotalFromMcConfigurationPriceEl();
   var valEl = document.getElementById("mcPlannerMemberPriceAboveAtcValue");
   if (!valEl) return;
   if (v > 0) {
+    mcSyncPlannerMemberPriceBlockPosition(wrap);
     wrap.style.display = "block";
     valEl.textContent = typeof formatMcCurrency === "function" ? formatMcCurrency(v) : "$" + Number(v).toFixed(2);
   } else {
