@@ -3884,6 +3884,7 @@ window.applyPlannerToPage = function (payload) {
     /* Do not call updateProductPrice — #priceWithOptions / retail row must stay Volusion’s retail. */
     window.__mcPlannerPrice = totalPrice;
     var cpe = document.getElementById("mcConfigurationPrice");
+    /* Reference amounts: 6696 vs 7196 — i.e. $66.96 configuration total vs $71.96 incorrect cart line. */
     if (cpe && hasPlannerConfig && totalPrice > 0) {
       cpe.textContent = "Configuration total: " + formatMcCurrency(totalPrice);
       cpe.style.display = "block";
