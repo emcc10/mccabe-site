@@ -149,8 +149,8 @@
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260417vertex-debug: remove vertex option-writer; add debug-only logger -->
-<meta name="mc-deploy-verify" content="20260417vertex-debug-logger-only">
+<!-- MC_DEPLOY_VERIFY_20260417vertex-map: deterministic planner->Volusion option writer (seats + CLC) -->
+<meta name="mc-deploy-verify" content="20260417vertex-map-deterministic">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -4019,6 +4019,170 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
     setTimeout(dump, 400);
     setTimeout(dump, 1200);
   });
+})();
+</script>
+
+<!--
+  Vertex theater: deterministic planner -> Volusion option writer.
+  Rules (sourced from calculatePlannerPrice in this template, line ~3658):
+    seats = non-4L pieces + 2 * 4L pieces   (capped at 6)
+    has4L = any 4L in layout
+    isCurved = any wedge piece in layout    (5L, 6L, 7L, 9L)
+  Mapping:
+    SELECT___PALLISER-VERTEX-THEATER-CHAIR___49 (seat count)
+      1->750, 2->744, 3->745, 4->746, 5->748, 6->749
+    SELECT___PALLISER-VERTEX-THEATER-CHAIR___2 (configuration)
+      has4L & isCurved  -> 761 (Chair, Loveseat, Chair - Curved)
+      has4L & !isCurved -> 760 (Chair, Loveseat, Chair - Straight)
+      !has4L & isCurved -> 116 (Curved)
+      !has4L & !isCurved-> 115 (Straight)
+    SELECT___PALLISER-VERTEX-THEATER-CHAIR___4 (leather): never touched.
+-->
+<script>
+(function mcVertexTheaterDeterministicWriter(){
+  if (window.__mcVertexTheaterDeterministicWriter) return;
+  window.__mcVertexTheaterDeterministicWriter = true;
+
+  var LOG = "[McCabe VERTEX MAP]";
+  var WEDGE_IDS = { "5L":1, "6L":1, "7L":1, "9L":1 };
+  var SEAT_COUNT_VALUES = { 1:"750", 2:"744", 3:"745", 4:"746", 5:"748", 6:"749" };
+
+  function isPdp(){
+    if (!document.body) return false;
+    var c = document.body.className || "";
+    if (document.body.classList.contains("productdetails") || document.body.classList.contains("mc-product-page")) return true;
+    return /\bproductdetails\b/i.test(c);
+  }
+
+  function getAtcForm(){
+    if (typeof window.mcFindProductDetailsForm === "function") {
+      var f = window.mcFindProductDetailsForm(document);
+      if (f) return f;
+    }
+    return document.querySelector('form[action*="addtocart" i], form#Form_ProductDetails, form[name="ProductDetails"], form.v65-productDisplay-addToCart, form[action*="ShoppingCart" i]');
+  }
+
+  function findSelectByNameSuffix(form, suffix){
+    if (!form) return null;
+    var sels = form.querySelectorAll('select');
+    var re = new RegExp('SELECT___PALLISER-VERTEX-THEATER-CHAIR___' + suffix + '$', 'i');
+    for (var i = 0; i < sels.length; i++) {
+      if (re.test(sels[i].name || "")) return sels[i];
+    }
+    return null;
+  }
+
+  function setSelectValue(sel, val){
+    if (!sel) return false;
+    var want = String(val);
+    if (String(sel.value) === want) return true;
+    var i;
+    for (i = 0; i < sel.options.length; i++) {
+      if (String(sel.options[i].value) === want) {
+        sel.selectedIndex = i;
+        try { sel.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) {}
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function summarizePayload(payload){
+    var layout = (payload && Array.isArray(payload.layout)) ? payload.layout : [];
+    var opts   = (payload && payload.options && typeof payload.options === "object") ? payload.options : {};
+    var counts = {};
+    if (layout.length) {
+      layout.forEach(function(s){
+        var id = String((s && s.id) || s || "").toUpperCase();
+        if (!id) return;
+        counts[id] = (counts[id] || 0) + 1;
+      });
+    } else {
+      Object.keys(opts).forEach(function(k){
+        var id = String(k).toUpperCase();
+        var n  = Number(opts[k] || 0);
+        if (n > 0) counts[id] = (counts[id] || 0) + n;
+      });
+    }
+    var ids = Object.keys(counts);
+    var fourL = counts["4L"] || 0;
+    var nonFourL = 0;
+    var hasWedge = false;
+    ids.forEach(function(id){
+      if (id === "4L") return;
+      nonFourL += counts[id];
+      if (WEDGE_IDS[id]) hasWedge = true;
+    });
+    var seats;
+    if (payload && payload.seatCount != null && Number(payload.seatCount) > 0) {
+      seats = Number(payload.seatCount);
+    } else {
+      seats = nonFourL + 2 * fourL;
+    }
+    if (seats < 1) seats = 1;
+    if (seats > 6) seats = 6;
+    return { seats: seats, has4L: fourL > 0, isCurved: hasWedge || !!(payload && payload.curved), counts: counts };
+  }
+
+  function writeSelects(payload, tag){
+    if (!isPdp()) return;
+    var form = getAtcForm();
+    if (!form) { console.log(LOG, tag, "no form"); return; }
+    var sel49 = findSelectByNameSuffix(form, "49");
+    var sel02 = findSelectByNameSuffix(form, "2");
+    if (!sel49 && !sel02) return;
+
+    var s = summarizePayload(payload || {});
+    var seatVal = SEAT_COUNT_VALUES[s.seats] || SEAT_COUNT_VALUES[1];
+    var cfgVal;
+    if (s.has4L) cfgVal = s.isCurved ? "761" : "760";
+    else         cfgVal = s.isCurved ? "116" : "115";
+
+    var ok49 = setSelectValue(sel49, seatVal);
+    var ok02 = setSelectValue(sel02, cfgVal);
+    console.log(LOG, tag, {
+      seats: s.seats,
+      has4L: s.has4L,
+      isCurved: s.isCurved,
+      seatOptionValue: seatVal,
+      configOptionValue: cfgVal,
+      wrote_seatCount: ok49,
+      wrote_config: ok02
+    });
+  }
+
+  var innerApply = window.applyPlannerToPage;
+  if (typeof innerApply === "function" && !innerApply.__mcDeterministicWrapped) {
+    window.applyPlannerToPage = function (payload) {
+      innerApply.apply(this, arguments);
+      try { writeSelects(payload, "after-apply"); } catch (e) { console.warn(LOG, "apply-wrap", e); }
+    };
+    window.applyPlannerToPage.__mcDeterministicWrapped = 1;
+  } else if (typeof innerApply !== "function") {
+    var waited = 0;
+    var iv = setInterval(function(){
+      waited += 200;
+      var fn = window.applyPlannerToPage;
+      if (typeof fn === "function" && !fn.__mcDeterministicWrapped) {
+        window.applyPlannerToPage = function (payload) {
+          fn.apply(this, arguments);
+          try { writeSelects(payload, "after-apply"); } catch (e) { console.warn(LOG, "apply-wrap", e); }
+        };
+        window.applyPlannerToPage.__mcDeterministicWrapped = 1;
+        clearInterval(iv);
+      } else if (waited > 8000) {
+        clearInterval(iv);
+      }
+    }, 200);
+  }
+
+  document.addEventListener("submit", function(ev){
+    var form = ev.target;
+    if (!form || form.tagName !== "FORM") return;
+    if (!form.querySelector('input[name="ProductCode"], input#ProductCode')) return;
+    try { writeSelects(window.__mcLastPlannerPayload || {}, "before-submit"); }
+    catch (e) { console.warn(LOG, "submit-wrap", e); }
+  }, true);
 })();
 </script>
 
