@@ -10535,6 +10535,16 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
       if (!(total > 0) || !root || !root.querySelectorAll) return;
       var wantPc = String((mcCartTarget || {}).pc || "").trim().toLowerCase();
       var tblf = cartTable;
+      if (!tblf || !tblf.querySelector) {
+        var fall = root.querySelectorAll("table");
+        for (var fi = 0; fi < fall.length; fi++) {
+          var ft = fall[fi];
+          if ((ft.textContent || "").toLowerCase().indexOf("related products") !== -1) continue;
+          if (!ft.querySelector("img")) continue;
+          tblf = ft;
+          break;
+        }
+      }
       if (!tblf || !tblf.querySelector) return;
       var rowsf = tblf.querySelectorAll("tbody tr, tr");
       var need = [];
@@ -10564,8 +10574,19 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
       }
     }
     function mcAlignSubtotalForSingleLinePlanner(root, total, cartTable){
-      if (!(total > 0) || !root || !root.querySelectorAll || !cartTable) return;
+      if (!(total > 0) || !root || !root.querySelectorAll) return;
       var tb = cartTable;
+      if (!tb || !tb.querySelector) {
+        var fall2 = root.querySelectorAll("table");
+        for (var gi = 0; gi < fall2.length; gi++) {
+          var g = fall2[gi];
+          if ((g.textContent || "").toLowerCase().indexOf("related products") !== -1) continue;
+          if (!g.querySelector("img")) continue;
+          tb = g;
+          break;
+        }
+      }
+      if (!tb || !tb.querySelector) return;
       var rows = tb.querySelectorAll("tbody tr, tr");
       var imgRows = 0;
       for (var r = 0; r < rows.length; r++) {
@@ -10984,7 +11005,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
       if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(note, anchor);
       else content.appendChild(note);
     }
-    if (mcPlannerLineTotal > 0 && mcSelectedCartTable) {
+    if (mcPlannerLineTotal > 0) {
       mcFinalEnforcePlannerLinePrice(content, mcPlannerLineTotal, mcSelectedCartTable);
       mcAlignSubtotalForSingleLinePlanner(content, mcPlannerLineTotal, mcSelectedCartTable);
     }
