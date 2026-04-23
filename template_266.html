@@ -3781,6 +3781,59 @@ function syncPlannerConfigurationToCart(payload){
   targetField.value = value;
 }
 
+/**
+ * Volusion PDP: before submit, force qty=1 and echo planner line total into any native
+ * hidden price fields Volusion already posts (no invented field names).
+ */
+window.mcForceTheaterPlannerAddToCartPayload = function (form) {
+  if (!form || !window.__mcPlannerConfigApplied) return;
+  var pt = Number(window.__mcPlannerPrice);
+  if (!(pt > 0)) return;
+  var qtySelectors =
+    'input[name="Quantity"],input#Quantity,input[name="quantity"],input[id="quantity"],' +
+    'input[name^="QTY"],input[name^="qty"],select[name="Quantity"],select[name="quantity"]';
+  form.querySelectorAll(qtySelectors).forEach(function (el) {
+    try {
+      if (String(el.tagName || "").toUpperCase() === "SELECT") {
+        var opts = el.options || [];
+        var pick = null;
+        for (var oi = 0; oi < opts.length; oi++) {
+          var o = opts[oi];
+          if (String(o.value) === "1" || /^1\b/.test(String(o.textContent || "").trim())) {
+            pick = o;
+            break;
+          }
+        }
+        if (!pick && opts[0]) pick = opts[0];
+        if (pick) {
+          el.value = pick.value;
+          el.selectedIndex = pick.index;
+        }
+      } else {
+        el.value = "1";
+      }
+    } catch (_) {}
+  });
+  var priceNames = [
+    "SellingPrice",
+    "ActualPrice",
+    "HiddenPrice",
+    "CartPrice",
+    "AddToCartPrice",
+    "ProductPrice",
+    "SoftAddPrice",
+    "OurPrice",
+    "SalePrice"
+  ];
+  for (var i = 0; i < priceNames.length; i++) {
+    var nm = priceNames[i];
+    var h = form.querySelector(
+      'input[type="hidden"][name="' + nm + '"],input[name="' + nm + '"]:not([type="checkbox"]):not([type="radio"])'
+    );
+    if (h && h.name) h.value = String(pt);
+  }
+};
+
 var PIECE_NAMES = { "1L":"1L Recliner","2L":"2L LHF Recliner","3L":"3L RHF Recliner","4L":"4L Armless Loveseat","5L":"5L RHF Wedge, LHF Straight","6L":"6L LHF Wedge, RHF Straight","7L":"7L RHF Wedge","8L":"8L Armless Recliner","9L":"9L LHF Wedge" };
 var PIECE_DESCRIPTIONS = { "1L":"Single recliner.","2L":"Left-hand facing recliner.","3L":"Right-hand facing recliner.","4L":"Armless loveseat, seats two.","5L":"RHF wedge with LHF straight.","6L":"LHF wedge with RHF straight.","7L":"Right-hand facing wedge.","8L":"Armless recliner.","9L":"Left-hand facing wedge." };
 
@@ -3884,7 +3937,6 @@ window.applyPlannerToPage = function (payload) {
     /* Do not call updateProductPrice — #priceWithOptions / retail row must stay Volusion’s retail. */
     window.__mcPlannerPrice = totalPrice;
     var cpe = document.getElementById("mcConfigurationPrice");
-    /* Reference amounts: 6696 vs 7196 — i.e. $66.96 configuration total vs $71.96 incorrect cart line. */
     if (cpe && hasPlannerConfig && totalPrice > 0) {
       cpe.textContent = "Configuration total: " + formatMcCurrency(totalPrice);
       cpe.style.display = "block";
@@ -3905,6 +3957,12 @@ window.applyPlannerToPage = function (payload) {
   if (window.__mcMemberPricing) {
     try { window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing })); } catch (e) {}
   }
+  window.__mcLastPlannerPayload = {
+    options: configOpts,
+    layout: layout,
+    room: payload && payload.room ? payload.room : null,
+    seatCount: seatCount
+  };
 };
 
 window.addEventListener("message", function (event) {
@@ -8163,9 +8221,22 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (!btn) return;
     if (!window.__mcPlannerCartSubmitBound && btn.form) {
       window.__mcPlannerCartSubmitBound = true;
-      btn.form.addEventListener('submit', function(){
-        syncPlannerConfigurationToCart();
-      });
+      btn.form.addEventListener(
+        'submit',
+        function () {
+          try {
+            if (window.__mcPlannerConfigApplied) {
+              syncPlannerConfigurationToCart(window.__mcLastPlannerPayload);
+              if (typeof window.mcForceTheaterPlannerAddToCartPayload === 'function') {
+                window.mcForceTheaterPlannerAddToCartPayload(btn.form);
+              }
+            } else {
+              syncPlannerConfigurationToCart();
+            }
+          } catch (eSub) {}
+        },
+        true
+      );
     }
     if (btn.tagName === 'INPUT' && (btn.type || '').toLowerCase() === 'image') {
       try { btn.type = 'submit'; } catch (e) {}
@@ -9985,6 +10056,31 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     }
   }
 
+  /** Keep Volusion seat *option* at smallest numeric tier so line price is not N× base seat. */
+  function syncSeatCountToVolusionMinimum(){
+    var sel = findSeatSelect();
+    if (!sel) return;
+    var bestOpt = null, bestNum = 1e9;
+    for (var oi = 0; oi < sel.options.length; oi++){
+      var optNum = parseInt((sel.options[oi].text || '').replace(/[^0-9]/g, ''), 10);
+      if (isNaN(optNum) || optNum < 1) continue;
+      if (optNum < bestNum) { bestNum = optNum; bestOpt = sel.options[oi]; }
+    }
+    if (!bestOpt) return;
+    for (var si = 0; si < sel.options.length; si++) {
+      sel.options[si].selected = false;
+      sel.options[si].removeAttribute('selected');
+    }
+    bestOpt.selected = true;
+    bestOpt.setAttribute('selected', 'selected');
+    sel.selectedIndex = bestOpt.index;
+    sel.value = bestOpt.value;
+    try { if (window.jQuery) window.jQuery(sel).val(bestOpt.value); } catch (e) {}
+    sel.dispatchEvent(new Event('input', { bubbles: true }));
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    console.log('[MC Planner] Seat option forced to minimum tier:', bestOpt.value, bestOpt.text);
+  }
+
   var _applyWrapped = false;
   function wrapApplyPlannerToPage(){
     if (_applyWrapped || typeof window.applyPlannerToPage !== 'function') return;
@@ -10000,7 +10096,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
       } else {
         Object.keys(opts).forEach(function(k){ sc += (k === '4L') ? ((opts[k]||0)*2) : (opts[k]||0); });
       }
-      if (sc > 0) syncSeatCountToVolusion(sc);
+      if (sc > 0) syncSeatCountToVolusionMinimum();
     };
   }
 
