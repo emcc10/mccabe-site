@@ -13937,40 +13937,472 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e598c4c0cafe88f',t:'MTc3NTA2Njk5OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 
-  
-
-  <script>
-document.addEventListener('DOMContentLoaded', function () {
-  var content = document.querySelector('#content_area');
-  if (!content) return;
-
-  var pagers = content.querySelectorAll('.v65-pagepagination');
-  if (pagers.length && !content.querySelector('.mc-top-pagination')) {
-    var topClone = pagers[0].cloneNode(true);
-    topClone.className += ' mc-top-pagination';
-    content.insertBefore(topClone, content.firstChild);
+  <style>
+  .rh-fixed-pager{
+    display:flex !important;
+    justify-content:center !important;
+    align-items:center !important;
+    gap:14px !important;
+    margin:36px 0 28px !important;
+    padding:0 20px !important;
+    clear:both !important;
+    width:100% !important;
+    position:relative !important;
+    z-index:99999 !important;
   }
 
-  var mainImg =
-    document.querySelector('#content_area img#product_photo') ||
-    document.querySelector('#v65-product-parent img#product_photo');
+  .rh-fixed-pager-btn{
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    min-width:150px !important;
+    padding:14px 22px !important;
+    border:1px solid #d8d2c8 !important;
+    background:#fff !important;
+    color:#1f1f1f !important;
+    text-decoration:none !important;
+    font-family:Inter, Arial, sans-serif !important;
+    font-size:11px !important;
+    font-weight:500 !important;
+    letter-spacing:.18em !important;
+    text-transform:uppercase !important;
+    line-height:1 !important;
+    box-sizing:border-box !important;
+    transition:all .22s ease !important;
+    cursor:pointer !important;
+    pointer-events:auto !important;
+    position:relative !important;
+    z-index:99999 !important;
+  }
 
-  var firstAlt =
-    document.querySelector('#content_area #altviews img') ||
-    document.querySelector('#content_area span#altviews img') ||
-    document.querySelector('#v65-product-parent #altviews img');
+  .rh-fixed-pager-btn:hover{
+    background:#1f1f1f !important;
+    color:#fff !important;
+    border-color:#1f1f1f !important;
+    text-decoration:none !important;
+  }
 
-  if (mainImg) {
-    var src = mainImg.getAttribute('src') || '';
-    if ((!src || /noimage|default/i.test(src)) && firstAlt) {
-      var altSrc = firstAlt.getAttribute('src');
-      if (altSrc) {
-        mainImg.setAttribute('src', altSrc);
-        mainImg.removeAttribute('srcset');
-      }
+  .rh-fixed-pager-btn.is-disabled{
+    opacity:.35 !important;
+    pointer-events:none !important;
+    cursor:default !important;
+  }
+
+  .rh-fixed-pager-divider{
+    width:28px !important;
+    height:1px !important;
+    background:#d8d2c8 !important;
+    flex:0 0 28px !important;
+  }
+
+  @media (max-width:767px){
+    .rh-fixed-pager{
+      gap:10px !important;
+      margin:26px 0 18px !important;
+      padding:0 14px !important;
+    }
+
+    .rh-fixed-pager-btn{
+      min-width:0 !important;
+      flex:1 1 0 !important;
+      padding:13px 14px !important;
+      font-size:10px !important;
+      letter-spacing:.16em !important;
+    }
+
+    .rh-fixed-pager-divider{
+      display:none !important;
     }
   }
-});
+</style>
+
+
+
+<script>
+(function(){
+  if (window.__RH_PAGER_FINAL__) return;
+  window.__RH_PAGER_FINAL__ = true;
+
+  function removeOldPagers(){
+    ['.rh-fixed-pager', '.rh-native-pager', '.rh-cat-nav-wrap'].forEach(function(sel){
+      document.querySelectorAll(sel).forEach(function(el){ el.remove(); });
+    });
+  }
+
+  function getCurrentPage(){
+    var text = document.body.innerText || '';
+    var m = text.match(/Page\s+(\d+)\s+of\s+(\d+)/i);
+    if (m) return parseInt(m[1], 10) || 1;
+
+    var q = location.href.match(/[?&]page=(\d+)/i);
+    return q ? parseInt(q[1], 10) : 1;
+  }
+
+  function getTotalPages(){
+    var text = document.body.innerText || '';
+    var m = text.match(/Page\s+\d+\s+of\s+(\d+)/i) || text.match(/Page\s+of\s+(\d+)/i);
+    return m ? parseInt(m[1], 10) : 1;
+  }
+
+  function getPagerForm(){
+    return document.forms[1] || null;
+  }
+
+  function getPageInput(form){
+    if (!form) return null;
+
+    var inputs = Array.prototype.slice.call(
+      form.querySelectorAll('input[type="text"], input[type="number"], input:not([type])')
+    );
+
+    inputs = inputs.filter(function(input){
+      var style = window.getComputedStyle(input);
+      return style.display !== 'none' &&
+             style.visibility !== 'hidden' &&
+             input.offsetWidth > 0 &&
+             input.offsetHeight > 0;
+    });
+
+    return inputs.length ? inputs[inputs.length - 1] : null;
+  }
+
+  function getNativeNext(form){
+    if (!form) return null;
+    return form.querySelector('input[type="image"][src*="btn_nextpage"]');
+  }
+
+  function getNativePrev(form){
+    if (!form) return null;
+    return form.querySelector('input[type="image"][src*="btn_prevpage"]');
+  }
+
+  function submitPage(page){
+    var form = getPagerForm();
+    var input = getPageInput(form);
+
+    if (!form || !input) return false;
+
+    input.value = String(page);
+    input.setAttribute('value', String(page));
+    input.dispatchEvent(new Event('input', { bubbles:true }));
+    input.dispatchEvent(new Event('change', { bubbles:true }));
+
+    form.submit();
+    return true;
+  }
+
+  function goNext(){
+    var form = getPagerForm();
+    var nativeNext = getNativeNext(form);
+
+    if (nativeNext && typeof nativeNext.click === 'function'){
+      nativeNext.click();
+      return true;
+    }
+
+    return submitPage(getCurrentPage() + 1);
+  }
+
+  function goPrev(){
+    var form = getPagerForm();
+    var nativePrev = getNativePrev(form);
+
+    if (nativePrev && typeof nativePrev.click === 'function'){
+      nativePrev.click();
+      return true;
+    }
+
+    return submitPage(getCurrentPage() - 1);
+  }
+
+  function insertPager(){
+    removeOldPagers();
+
+    if (!/\/category-s\/\d+\.htm/i.test(location.pathname)) return;
+
+    var currentPage = getCurrentPage();
+    var totalPages = getTotalPages();
+
+    if (totalPages <= 1) return;
+
+    var wrap = document.createElement('div');
+    wrap.className = 'rh-fixed-pager';
+    wrap.id = 'rh-fixed-pager';
+
+    var prev = document.createElement('a');
+    prev.className = 'rh-fixed-pager-btn';
+    prev.textContent = 'Previous';
+    prev.href = '#';
+
+    var divider = document.createElement('div');
+    divider.className = 'rh-fixed-pager-divider';
+
+    var next = document.createElement('a');
+    next.className = 'rh-fixed-pager-btn';
+    next.textContent = 'Next';
+    next.href = '#';
+
+    if (currentPage <= 1){
+      prev.classList.add('is-disabled');
+      prev.removeAttribute('href');
+    } else {
+      prev.addEventListener('click', function(e){
+        e.preventDefault();
+        goPrev();
+      });
+    }
+
+    if (currentPage >= totalPages){
+      next.classList.add('is-disabled');
+      next.removeAttribute('href');
+    } else {
+      next.addEventListener('click', function(e){
+        e.preventDefault();
+        goNext();
+      });
+    }
+
+    wrap.appendChild(prev);
+    wrap.appendChild(divider);
+    wrap.appendChild(next);
+
+    var target =
+      document.querySelector('.category-footer') ||
+      document.querySelector('#content_area') ||
+      document.body;
+
+    if (target === document.body || target.id === 'content_area'){
+      target.appendChild(wrap);
+    } else {
+      target.parentNode.insertBefore(wrap, target.nextSibling);
+    }
+  }
+
+  function run(){
+    insertPager();
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', run, { once:true });
+  } else {
+    run();
+  }
+
+  window.addEventListener('load', run, { once:true });
+})();
 </script>
+<script>
+(function () {
+  var PRODUCT_SLUG = '/palliser-vertex-media-seating-p/palliser-vertex-theater-chair.htm';
+  if (location.pathname.toLowerCase() !== PRODUCT_SLUG) return;
+
+  function ready(fn){
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn);
+    } else {
+      fn();
+    }
+  }
+
+  ready(function () {
+    var tries = 0;
+
+    function initFlipbook() {
+      tries++;
+
+      if (document.querySelector('.vertex-desc-flipbook-wrap')) return;
+
+      var allImgs = Array.from(document.querySelectorAll('#v65-product-parent img'));
+      var sourceImgs = allImgs.filter(function(img){
+        var src = (img.currentSrc || img.src || '').toLowerCase();
+        return src.indexOf('/vspfiles/photos/customers/vertex') !== -1;
+      });
+
+      if (sourceImgs.length < 2) {
+        if (tries < 20) setTimeout(initFlipbook, 400);
+        return;
+      }
+
+      var unique = [];
+      var seen = new Set();
+
+      sourceImgs.forEach(function(img){
+        var src = (img.currentSrc || img.src || '').trim();
+        if (!src || seen.has(src)) return;
+        seen.add(src);
+        unique.push({
+          full: src,
+          thumb: src,
+          alt: img.alt || 'Vertex image'
+        });
+      });
+
+      if (unique.length < 2) return;
+
+      var firstImg = sourceImgs[0];
+      if (!firstImg || !firstImg.parentNode) return;
+
+      document.body.classList.add('vertex-flipbook-ready');
+
+      var wrap = document.createElement('section');
+      wrap.className = 'vertex-flipbook-wrap vertex-desc-flipbook-wrap';
+      wrap.innerHTML =
+        '<div class="vertex-flipbook">' +
+          '<div class="vertex-flipbook-stage"></div>' +
+          '<div class="vertex-flipbook-ui">' +
+            '<div class="vertex-flipbook-count">Image <span class="vf-current">1</span> / <span class="vf-total">' + unique.length + '</span></div>' +
+            '<div class="vertex-flipbook-nav">' +
+              '<button type="button" class="vertex-flipbook-btn vf-prev" aria-label="Previous image">&#10094;</button>' +
+              '<button type="button" class="vertex-flipbook-btn vf-next" aria-label="Next image">&#10095;</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="vertex-flipbook-thumbs"></div>' +
+        '</div>';
+
+      firstImg.parentNode.insertBefore(wrap, firstImg);
+
+      var stage = wrap.querySelector('.vertex-flipbook-stage');
+      var thumbs = wrap.querySelector('.vertex-flipbook-thumbs');
+      var currentEl = wrap.querySelector('.vf-current');
+      var prevBtn = wrap.querySelector('.vf-prev');
+      var nextBtn = wrap.querySelector('.vf-next');
+
+      unique.forEach(function (item, i) {
+        var slide = document.createElement('div');
+        slide.className = 'vertex-flipbook-slide' + (i === 0 ? ' is-active' : '');
+
+        var img = document.createElement('img');
+        img.alt = item.alt;
+        img.loading = i === 0 ? 'eager' : 'lazy';
+        img.decoding = 'async';
+        img.src = item.full;
+
+        slide.appendChild(img);
+        stage.appendChild(slide);
+
+        var thumb = document.createElement('button');
+        thumb.type = 'button';
+        thumb.className = 'vertex-flipbook-thumb' + (i === 0 ? ' is-active' : '');
+        thumb.setAttribute('data-index', i);
+
+        var thumbImg = document.createElement('img');
+        thumbImg.src = item.thumb;
+        thumbImg.alt = '';
+        thumbImg.loading = 'lazy';
+
+        thumb.appendChild(thumbImg);
+        thumbs.appendChild(thumb);
+      });
+
+      var slides = Array.from(wrap.querySelectorAll('.vertex-flipbook-slide'));
+      var thumbButtons = Array.from(wrap.querySelectorAll('.vertex-flipbook-thumb'));
+      var index = 0;
+
+      function goTo(i) {
+        index = (i + slides.length) % slides.length;
+
+        slides.forEach(function(slide, n){
+          slide.classList.toggle('is-active', n === index);
+        });
+
+        thumbButtons.forEach(function(btn, n){
+          btn.classList.toggle('is-active', n === index);
+        });
+
+        currentEl.textContent = index + 1;
+      }
+
+      prevBtn.addEventListener('click', function(){ goTo(index - 1); });
+      nextBtn.addEventListener('click', function(){ goTo(index + 1); });
+
+      thumbButtons.forEach(function(btn){
+        btn.addEventListener('click', function(){
+          goTo(parseInt(btn.getAttribute('data-index'), 10));
+        });
+      });
+
+      sourceImgs.forEach(function(img){
+        img.classList.add('vertex-source-image');
+        var parentLink = img.closest('a');
+        if (parentLink) parentLink.classList.add('vertex-source-link');
+      });
+    }
+
+    initFlipbook();
+  });
+})();
+</script>
+
+<script>
+(function(){
+  if (window.__MC_FINANCE_STABILIZER__) return;
+  window.__MC_FINANCE_STABILIZER__ = true;
+
+  function getOffersWrap(){
+    return (
+      document.querySelector('#v65-product-parent [itemprop="offers"]') ||
+      document.querySelector('#v65-product-parent #v65-productdetail-action-wrapper')
+    );
+  }
+
+  function stabilizeFinanceHeight(){
+    var wrap = getOffersWrap();
+    if (!wrap) return;
+
+    var h = wrap.offsetHeight || 0;
+    if (!h) return;
+
+    var saved = parseInt(wrap.dataset.mcStableMinHeight || '0', 10);
+    if (h > saved){
+      wrap.dataset.mcStableMinHeight = String(h);
+      wrap.style.minHeight = h + 'px';
+    } else if (saved > 0){
+      wrap.style.minHeight = saved + 'px';
+    }
+  }
+
+  function run(){
+    stabilizeFinanceHeight();
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+
+  window.addEventListener('load', function(){
+    run();
+    setTimeout(run, 250);
+    setTimeout(run, 700);
+    setTimeout(run, 1400);
+    setTimeout(run, 2200);
+  });
+
+  var obs = new MutationObserver(function(){
+    stabilizeFinanceHeight();
+  });
+
+  function startObs(){
+    var wrap = getOffersWrap();
+    if (!wrap) return;
+    obs.observe(wrap, {
+      childList:true,
+      subtree:true,
+      characterData:true
+    });
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', startObs);
+  } else {
+    startObs();
+  }
+
+  window.addEventListener('load', startObs);
+})();
+</script>
+
+
 </body>
 </html>
