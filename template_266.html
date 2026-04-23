@@ -2503,6 +2503,7 @@ boot();
           <div style="font-size:14px;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:#686868;margin-bottom:4px">CONFIGURATION</div>
           <div id="mcConfigurationCaption" style="font-size:13px;line-height:1.5;color:#999;font-style:italic">Please use the room planner to choose configuration.</div>
           <div id="mcConfigurationPieces" style="font-size:13px;line-height:1.5;color:#333;display:none"></div>
+          <div id="mcConfigurationPrice" style="display:none;margin-top:10px;font-size:15px;font-weight:600;letter-spacing:.02em;color:#1a1a1a"></div>
         </div>
       </div>
     `;
@@ -3001,6 +3002,12 @@ function refreshPlannerPriceForMemberState(){
   if (publicTotal > 0) {
     updateProductPrice(publicTotal);
     window.__mcPlannerPrice = publicTotal;
+    var cpeR = document.getElementById("mcConfigurationPrice");
+    if (cpeR) {
+      cpeR.textContent = "Configuration total: " + formatMcCurrency(publicTotal);
+      cpeR.style.display = "block";
+    }
+    cachePlannerCartTarget(publicTotal, publicTotal);
   }
   var memberSeat = getMemberPlannerSeatPriceForCalc();
   var memberTotal = calculatePlannerPrice(window.__mcPlannerCounts, memberSeat);
@@ -3788,6 +3795,7 @@ window.applyPlannerToPage = function (payload) {
 
   var configCaption = document.getElementById("mcConfigurationCaption");
   var configPieces = document.getElementById("mcConfigurationPieces");
+  var configPriceEl = document.getElementById("mcConfigurationPrice");
   if (configCaption && configPieces) {
     if (layout.length || Object.keys(opts).length) {
       var list = [];
@@ -3803,6 +3811,10 @@ window.applyPlannerToPage = function (payload) {
       configCaption.style.display = "block";
       configPieces.style.display = "none";
       configPieces.innerHTML = "";
+      if (configPriceEl) {
+        configPriceEl.style.display = "none";
+        configPriceEl.textContent = "";
+      }
     }
   }
 
@@ -3840,6 +3852,14 @@ window.applyPlannerToPage = function (payload) {
     console.log("[McCabe Planner] retail totalPrice:", totalPrice);
     updateProductPrice(totalPrice);
     window.__mcPlannerPrice = totalPrice;
+    var cpe = document.getElementById("mcConfigurationPrice");
+    if (cpe && hasPlannerConfig && totalPrice > 0) {
+      cpe.textContent = "Configuration total: " + formatMcCurrency(totalPrice);
+      cpe.style.display = "block";
+    } else if (cpe && !hasPlannerConfig) {
+      cpe.style.display = "none";
+      cpe.textContent = "";
+    }
     setTimeout(function(){ updateProductPrice(totalPrice); }, 600);
     setTimeout(function(){ updateProductPrice(totalPrice); }, 1500);
     setTimeout(function(){ updateProductPrice(totalPrice); }, 3000);
@@ -3848,7 +3868,12 @@ window.applyPlannerToPage = function (payload) {
   if (window.__mcMemberPricing) {
     var memberTotal = calculatePlannerPrice(configOpts, memberSeat);
     window.__mcMemberPricing.memberPlannerTotal = memberTotal > 0 ? memberTotal : 0;
-    cachePlannerCartTarget(retailTotalComputed, window.__mcMemberPricing.memberPlannerTotal || 0);
+  }
+  /* Cart must use the planner configuration total (retail math), not member per-seat — keep both slots equal for mc_cart_target_*. */
+  if (retailTotalComputed > 0) {
+    cachePlannerCartTarget(retailTotalComputed, retailTotalComputed);
+  }
+  if (window.__mcMemberPricing) {
     try { window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing })); } catch (e) {}
   }
 };
@@ -10512,7 +10537,8 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
         if (rowText.indexOf("tax:") !== -1 || /total:\s*\$/.test(rowText)) break;
         if (!tr.querySelector("img")) continue;
         if (!mcCartTargetApplied && mcCartTarget) {
-          var desired = mcIsMember ? Number(mcCartTarget.memberTotal || 0) : Number(mcCartTarget.retailTotal || 0);
+          /* Theater planner: cart line must match configuration total (retailTotal), not memberTotal. */
+          var desired = Number(mcCartTarget.retailTotal || 0);
           if (desired > 0) {
             var hit = false;
             var pc = String(mcCartTarget.pc || "").toLowerCase();
@@ -10623,7 +10649,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
       }
       // Deterministic fallback: if cart target wasn't matched by code/name, force-apply to primary row.
       if (!mcCartTargetApplied && mcCartTarget && mcFallbackRow && mcFallbackRow.tr) {
-        var desiredFallback = mcIsMember ? Number(mcCartTarget.memberTotal || 0) : Number(mcCartTarget.retailTotal || 0);
+        var desiredFallback = Number(mcCartTarget.retailTotal || 0);
         if (desiredFallback > 0) {
           var d2 = mcApplyCartTargetPrice(mcFallbackRow.tr, desiredFallback);
           if (d2 !== 0) mcCartDelta += d2;
