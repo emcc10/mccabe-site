@@ -10432,6 +10432,8 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     var mcTotal4LDiscount = 0;
     var mcCartDelta = 0;
     var mcCartTarget = mcReadCartTarget() || mcReadSessionPlannerCartTarget("", true);
+    var mcPlannerLineTotal = mcCartTarget ? (Number(mcCartTarget.retailTotal) || 0) : 0;
+    var mcSuppressCart4L = mcPlannerLineTotal > 0;
     var mcCartTargetApplied = false;
     var mcIsMember = mcCartLooksLoggedIn();
     var mcPending4LDiscount = 0;
@@ -10553,8 +10555,10 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     function mcClearPending4L(){
       try { localStorage.removeItem("mc_4l_discount_pending"); } catch (_) {}
     }
-    mcPending4LPayload = mcReadPending4L();
-    mcPending4LDiscount = mcPending4LPayload && mcPending4LPayload.amount ? Number(mcPending4LPayload.amount) : 0;
+    if (!mcSuppressCart4L) {
+      mcPending4LPayload = mcReadPending4L();
+      mcPending4LDiscount = mcPending4LPayload && mcPending4LPayload.amount ? Number(mcPending4LPayload.amount) : 0;
+    }
     function processElement(el) {
       if (el.id === "content_area" || el.classList.contains("mc-config-view-done")) return;
       var html = el.innerHTML || "";
@@ -10700,9 +10704,12 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
           nmRowGuess = mcGuessProductNameFromRow(tr);
           rowCached4LDiscount = mcGetCached4LDiscount(pcRowGuess, nmRowGuess);
         } catch (eGuess) {}
-        var applied4L = mcApplyRow4LDiscount(tr, rowCached4LDiscount);
-        if (applied4L > 0 && rowCached4LDiscount > 0) {
-          mcClearCached4LDiscount(pcRowGuess, nmRowGuess);
+        var applied4L = 0;
+        if (!mcSuppressCart4L) {
+          applied4L = mcApplyRow4LDiscount(tr, rowCached4LDiscount);
+          if (applied4L > 0 && rowCached4LDiscount > 0) {
+            mcClearCached4LDiscount(pcRowGuess, nmRowGuess);
+          }
         }
         var removeInput = tr.querySelector('input[value*="Remove"], input[value*="Delete"], input[type="image"][alt*="emove"], input[type="submit"][value*="emove"]');
         if (!removeLink && !removeInput) continue;
@@ -10764,7 +10771,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
         } catch (cacheErr) {}
         totalCell.parentNode.insertBefore(xWrap, totalCell.nextSibling);
       }
-      if (mcTotal4LDiscount <= 0 && mcPending4LDiscount > 0 && mcFallbackRow && mcFallbackRow.totalCell) {
+      if (!mcSuppressCart4L && mcTotal4LDiscount <= 0 && mcPending4LDiscount > 0 && mcFallbackRow && mcFallbackRow.totalCell) {
         var frTr = mcFallbackRow.tr;
         if (!(frTr && frTr.dataset && frTr.dataset.mcPlannerCartTarget === "1")) {
           var tc = mcFallbackRow.totalCell;
@@ -10804,7 +10811,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
       }
       break;
     }
-    if (mcTotal4LDiscount > 0) {
+    if (!mcSuppressCart4L && mcTotal4LDiscount > 0) {
       var moneyNodes = content.querySelectorAll("td, span, strong, b, font");
       for (var mn = 0; mn < moneyNodes.length; mn++) {
         var tx = (moneyNodes[mn].textContent || "").trim();
@@ -10824,7 +10831,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
       mcApplyCartSummaryDelta(mcCartDelta);
     }
     // Hard fallback: if no row-level application happened, apply pending discount to summary totals.
-    if (mcTotal4LDiscount <= 0 && mcPending4LDiscount > 0) {
+    if (!mcSuppressCart4L && mcTotal4LDiscount <= 0 && mcPending4LDiscount > 0) {
       var appliedAny = false;
       var summaryNodes = content.querySelectorAll("td, span, div, strong, b, font");
       for (var sn = 0; sn < summaryNodes.length; sn++) {
@@ -10845,7 +10852,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
       }
     }
     // Show an explicit discount line so users can verify it.
-    if (mcTotal4LDiscount > 0 && !content.querySelector(".mc-4l-discount-note")) {
+    if (!mcSuppressCart4L && mcTotal4LDiscount > 0 && !content.querySelector(".mc-4l-discount-note")) {
       var note = document.createElement("div");
       note.className = "mc-4l-discount-note";
       note.style.cssText = "margin:10px 0;padding:8px 10px;border:1px solid #ddd;background:#fafafa;font-size:13px;";
