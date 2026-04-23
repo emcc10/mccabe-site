@@ -150,7 +150,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260417resync: force overwrite of corrupted live template (duplicate mcSubmitAuthForm) -->
-<meta name="mc-deploy-verify" content="20260420atc-payload-trace-v2">
+<meta name="mc-deploy-verify" content="20260420planner-native-option-sync">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -3905,239 +3905,257 @@ window.addEventListener("message", function (event) {
 });
 
 /**
- * TEMP: Trace submitted add-to-cart payload (FormData, urlencoded body, XHR/fetch POST).
- * Does not read visible MAP labels; does not mutate prices, qty, or top block.
+ * Planner → Volusion native OPTION selects (server prices from ProductCode + selects).
+ * Deletes prior role: payload/XHR/fetch trace. No hidden price overrides; no top MAP changes.
  */
-(function mcTraceVertexPdpPlannerCart(){
-  if (window.__mcTraceVertexPdpPlannerCart) return;
-  window.__mcTraceVertexPdpPlannerCart = true;
+(function mcPlannerVolusionNativeOptionSelects(){
+  if (window.__mcPlannerVolusionNativeOptionSelects) return;
+  window.__mcPlannerVolusionNativeOptionSelects = true;
 
-  function isVertexPdp(){
+  var LOG = "[McCabe PLANNER OPTIONS]";
+
+  function isPdp(){
     if (!document.body) return false;
     if (document.body.classList.contains("productdetails") || document.body.classList.contains("mc-product-page")) return true;
     return /\bproductdetails\b/i.test(document.body.className || "");
   }
 
-  var TAG = "[McCabe TRACE ATC PAYLOAD]";
-
-  function isRelevantAtcUrl(url){
-    if (!url) return false;
-    var s = String(url).toLowerCase();
-    return /productdetails|shoppingcart|softadd|addtocart|add_to_cart|onepagecheckout/i.test(s);
+  function getAtcForm(){
+    return typeof window.mcFindProductDetailsForm === "function" ? window.mcFindProductDetailsForm(document) : null;
   }
 
-  function formDataToObject(fd){
-    var posted = {};
-    fd.forEach(function(val, key){
-      var s = typeof val === "string" ? val : val && typeof val.name === "string" ? val.name : String(val);
-      if (Object.prototype.hasOwnProperty.call(posted, key)) {
-        if (!Array.isArray(posted[key])) posted[key] = [posted[key]];
-        posted[key].push(s);
-      } else {
-        posted[key] = s;
-      }
-    });
-    return posted;
+  function classifySelect(sel){
+    var row = sel.closest("tr");
+    var meta = (
+      (row ? row.textContent : "") + " " +
+      (sel.getAttribute("title") || "") + " " +
+      (sel.name || "") + " " +
+      (sel.id || "")
+    )
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+    if (/number of seats|# of seats|how many seats|quantity of seats|seat quantity|seats:/.test(meta)) return "seats";
+    if (/choose configuration|configuration|layout|arrangement|recliner layout|section layout/.test(meta)) return "configuration";
+    if (/choose cover|select cover|leather|fabric|grade|upholstery|swatch/.test(meta)) return "cover";
+    return "other";
   }
 
-  function priceishField(name, id){
-    var s = (String(name || "") + " " + String(id || "")).toLowerCase();
-    return /price|amount|cost|sell|map|cart|total|hidden|actual|soft|volusion|base|msrp|discount|qty|quantity|option/i.test(s);
-  }
-
-  function serializeAtcForm(form, note){
-    var out = {
-      traceNote: note || "",
-      formAction: form.getAttribute("action"),
-      formMethod: (form.getAttribute("method") || "GET").toUpperCase()
-    };
-    var rows = [];
+  function serializeSelect(sel){
+    var opts = [];
     var i;
-    var el;
-    for (i = 0; i < form.elements.length; i++) {
-      el = form.elements[i];
-      rows.push({
-        i: i,
-        tag: el.tagName,
-        type: (el.type || "").toLowerCase(),
-        name: el.name || "",
-        id: el.id || "",
-        disabled: !!el.disabled,
-        value: el.type === "password" ? "***" : String(el.value != null ? el.value : "")
+    for (i = 0; i < sel.options.length; i++) {
+      var o = sel.options[i];
+      opts.push({ index: i, value: o.value, text: String(o.text || "").trim() });
+    }
+    var cur = sel.options[sel.selectedIndex];
+    return {
+      role: classifySelect(sel),
+      name: sel.name || "",
+      id: sel.id || "",
+      title: sel.getAttribute("title") || "",
+      selectedIndex: sel.selectedIndex,
+      selectedValue: sel.value,
+      selectedText: cur ? String(cur.text || "").trim() : "",
+      optionCount: sel.options.length,
+      allOptions: opts
+    };
+  }
+
+  function mcLogVolusionPdpOptionSelects(tag, payload){
+    if (!isPdp()) return;
+    var form = getAtcForm();
+    if (!form) {
+      console.log(LOG, tag, { formFound: false });
+      return;
+    }
+    var selects = Array.prototype.slice.call(form.querySelectorAll("select"));
+    var rows = selects.map(serializeSelect);
+    var bundle = {
+      tag: tag,
+      ts: new Date().toISOString(),
+      selectCount: rows.length,
+      selects: rows,
+      payloadSeatCount: payload && payload.seatCount,
+      payloadLayoutLen: payload && payload.layout && payload.layout.length
+    };
+    console.log(LOG, bundle);
+    try {
+      console.table(
+        rows.map(function (r) {
+          return {
+            role: r.role,
+            name: r.name,
+            selectedValue: r.selectedValue,
+            selectedText: r.selectedText.slice(0, 140)
+          };
+        })
+      );
+    } catch (eT) {}
+    return bundle;
+  }
+
+  function plannerSeatCount(payload){
+    if (!payload || typeof payload !== "object") return 0;
+    var n = Number(payload.seatCount);
+    if (!isNaN(n) && n > 0) return n;
+    var opts = payload.options || payload.counts || {};
+    if (opts["4L"]) {
+      return (
+        opts["4L"] * 2 +
+        Object.keys(opts)
+          .filter(function (k) {
+            return k !== "4L";
+          })
+          .reduce(function (t, k) {
+            return t + (Number(opts[k]) || 0);
+          }, 0)
+      );
+    }
+    return Object.keys(opts).reduce(function (t, k) {
+      return t + (Number(opts[k]) || 0);
+    }, 0);
+  }
+
+  function normalizeOptText(s){
+    return String(s || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function scoreConfigurationOption(optionText, layout, opts, seatCount){
+    var t = normalizeOptText(optionText);
+    if (!t || /^choose|^select|^please/.test(t)) return -1;
+    var score = 0;
+    var ids = [];
+    if (layout && layout.length) {
+      layout.forEach(function (s) {
+        ids.push(String(s.id || s).toUpperCase());
+      });
+    } else if (opts && typeof opts === "object") {
+      Object.keys(opts).forEach(function (k) {
+        var c = Number(opts[k] || 0);
+        var ku = String(k).toUpperCase();
+        var j;
+        for (j = 0; j < c; j++) ids.push(ku);
       });
     }
-    out.everyInputSelectHiddenInForm = rows;
-    out.priceQtyOptionRelatedSubset = rows.filter(function(r){
-      return r.type === "hidden" || priceishField(r.name, r.id);
+    ids.forEach(function (id) {
+      if (id && t.indexOf(id.toLowerCase()) !== -1) score += 8;
     });
-    try {
-      var fd = new FormData(form);
-      out.exactFormDataEntriesForSubmit = formDataToObject(fd);
-    } catch (eFd) {
-      out.exactFormDataEntriesForSubmit = { error: String(eFd) };
+    if (seatCount > 0) {
+      var re = new RegExp("\\b" + seatCount + "\\b");
+      if (re.test(t)) score += 4;
     }
-    try {
-      var enc = new URLSearchParams(new FormData(form)).toString();
-      out.urlEncodedBodyThatBrowserWouldPost = enc;
-      out.urlEncodedBodyLength = enc.length;
-    } catch (eEnc) {
-      out.urlEncodedBodyThatBrowserWouldPost = { error: String(eEnc) };
-    }
-    var qtyEl = form.querySelector(
-      'input[name*="qty" i], input[name*="quantity" i], input[name="QTY"], input[name="qty"], select[name*="qty" i], select[name*="quantity" i]'
-    );
-    out.qtyInputName = qtyEl ? qtyEl.name : null;
-    out.qtyInputValue = qtyEl ? qtyEl.value : null;
-    if (typeof window.mcReadVolusionProductFormSellingUnit === "function") {
-      out.mcReadVolusionProductFormSellingUnit = window.mcReadVolusionProductFormSellingUnit(form);
-    }
-    return out;
+    var sorted = ids
+      .slice()
+      .sort()
+      .join(" ")
+      .replace(/\s+/g, "")
+      .toLowerCase();
+    var tCompact = t.replace(/\s/g, "");
+    if (sorted.length > 1 && tCompact.indexOf(sorted) !== -1) score += 25;
+    return score;
   }
 
-  function tracePayload(which, extra){
-    var b = Object.assign({ which: which, ts: new Date().toISOString() }, extra || {});
-    console.log(TAG, b);
-    try {
-      if (b.everyInputSelectHiddenInForm) console.table(b.everyInputSelectHiddenInForm);
-    } catch (eT0) {}
-    try {
-      if (b.priceQtyOptionRelatedSubset) console.table(b.priceQtyOptionRelatedSubset);
-    } catch (eT) {}
-    return b;
-  }
-
-  function wrapApplyPlanner(){
-    var inner = window.applyPlannerToPage;
-    if (typeof inner !== "function" || inner.__mcTraceWrapped) return;
-    window.applyPlannerToPage = function(payload){
-      inner.apply(this, arguments);
-      if (!isVertexPdp()) return;
-      try {
-        var form = typeof window.mcFindProductDetailsForm === "function" ? window.mcFindProductDetailsForm() : null;
-        var ser = form ? serializeAtcForm(form, "ATC form after Apply (fields that will post)") : { formFound: false };
-        var payloadCopy = null;
-        try {
-          payloadCopy = JSON.parse(JSON.stringify(payload || null));
-        } catch (eJ) {
-          payloadCopy = { parseError: true };
+  function mcSyncPlannerPayloadToVolusionOptionSelects(payload){
+    if (!isPdp() || !payload || typeof payload !== "object") return;
+    var form = getAtcForm();
+    if (!form) return;
+    var seatCount = plannerSeatCount(payload);
+    var layout = payload.layout && Array.isArray(payload.layout) ? payload.layout : [];
+    var opts = payload.options || payload.counts || {};
+    var selects = Array.prototype.slice.call(form.querySelectorAll("select"));
+    selects.forEach(function (sel) {
+      var role = classifySelect(sel);
+      if (role === "cover") return;
+      if (role === "seats" && seatCount > 0) {
+        var bestI = -1;
+        var bestRank = -1;
+        var i;
+        for (i = 0; i < sel.options.length; i++) {
+          var o = sel.options[i];
+          var textL = String(o.text || "").toLowerCase();
+          var v = String(o.value || "");
+          var rank = 0;
+          if (new RegExp("\\b" + seatCount + "\\b").test(textL)) rank += 100;
+          if (v === String(seatCount)) rank += 100;
+          if (textL.indexOf(String(seatCount)) !== -1) rank += 40;
+          if (rank > bestRank) {
+            bestRank = rank;
+            bestI = i;
+          }
         }
-        tracePayload("AFTER_PLANNER_APPLY_ATC_FORM_PAYLOAD", Object.assign(ser, { plannerApplyPayload: payloadCopy }));
-      } catch (eA) {
-        console.warn(TAG, "AFTER_PLANNER_APPLY error", eA);
+        if (bestI > 0 && bestRank > 0) {
+          sel.selectedIndex = bestI;
+          try {
+            sel.dispatchEvent(new Event("change", { bubbles: true }));
+          } catch (eC) {}
+        }
       }
-    };
-    window.applyPlannerToPage.__mcTraceWrapped = 1;
+      if (role === "configuration") {
+        var bestJ = -1;
+        var bestScore = -1;
+        var j;
+        for (j = 0; j < sel.options.length; j++) {
+          var oj = sel.options[j];
+          var sc = scoreConfigurationOption(oj.text || "", layout, opts, seatCount);
+          if (sc > bestScore) {
+            bestScore = sc;
+            bestJ = j;
+          }
+        }
+        if (bestJ > 0 && bestScore >= 5) {
+          sel.selectedIndex = bestJ;
+          try {
+            sel.dispatchEvent(new Event("change", { bubbles: true }));
+          } catch (eC2) {}
+        }
+      }
+    });
   }
 
   function looksLikeProductAtcForm(form){
-    if (!form || form.tagName !== "FORM" || !isVertexPdp()) return false;
+    if (!form || form.tagName !== "FORM" || !isPdp()) return false;
     if (!form.querySelector('input[name="ProductCode"], input#ProductCode')) return false;
     return !!form.querySelector(
       'input[name="btnaddtocart"], input[id*="btnaddtocart"], input[id*="BtnAddToCart"], button[name="btnaddtocart"]'
     );
   }
 
+  window.mcLogVolusionPdpOptionSelects = mcLogVolusionPdpOptionSelects;
+  window.mcSyncPlannerPayloadToVolusionOptionSelects = mcSyncPlannerPayloadToVolusionOptionSelects;
+
+  var innerApply = window.applyPlannerToPage;
+  if (typeof innerApply === "function" && !innerApply.__mcPlannerNativeSelectWrapped) {
+    window.applyPlannerToPage = function (payload) {
+      innerApply.apply(this, arguments);
+      try {
+        mcSyncPlannerPayloadToVolusionOptionSelects(payload);
+        mcLogVolusionPdpOptionSelects("after-planner-apply", payload);
+      } catch (eW) {
+        console.warn(LOG, "applyPlanner wrap", eW);
+      }
+    };
+    window.applyPlannerToPage.__mcPlannerNativeSelectWrapped = 1;
+  }
+
   document.addEventListener(
     "submit",
-    function(ev){
+    function (ev) {
       var form = ev.target;
       if (!looksLikeProductAtcForm(form)) return;
       try {
-        tracePayload("IMMEDIATELY_BEFORE_ATC_SUBMIT_CAPTURE", serializeAtcForm(form, "capture phase"));
+        var last = window.__mcLastPlannerPayload;
+        if (last) mcSyncPlannerPayloadToVolusionOptionSelects(last);
+        mcLogVolusionPdpOptionSelects("immediately-before-add-to-cart-submit", last || {});
       } catch (eS) {
-        console.warn(TAG, "SUBMIT_CAPTURE", eS);
+        console.warn(LOG, "submit", eS);
       }
     },
     true
   );
-
-  document.addEventListener(
-    "submit",
-    function(ev){
-      var form = ev.target;
-      if (!looksLikeProductAtcForm(form)) return;
-      try {
-        tracePayload("IMMEDIATELY_BEFORE_ATC_SUBMIT_BUBBLE", serializeAtcForm(form, "bubble phase"));
-      } catch (eB) {
-        console.warn(TAG, "SUBMIT_BUBBLE", eB);
-      }
-    },
-    false
-  );
-
-  try {
-    var origFormSubmit = HTMLFormElement.prototype.submit;
-    if (!origFormSubmit.__mcTraceWrapped) {
-      HTMLFormElement.prototype.submit = function(){
-        try {
-          if (looksLikeProductAtcForm(this)) {
-            tracePayload("HTMLFORM_PROTOTYPE_SUBMIT_PROGRAMMATIC", serializeAtcForm(this, "programmatic submit"));
-          }
-        } catch (ePs) {}
-        return origFormSubmit.apply(this, arguments);
-      };
-      HTMLFormElement.prototype.submit.__mcTraceWrapped = 1;
-    }
-  } catch (eProto) {}
-
-  try {
-    var xhrProto = XMLHttpRequest.prototype;
-    var oxopen = xhrProto.open;
-    var oxsend = xhrProto.send;
-    if (!oxsend.__mcTraceWrapped) {
-      xhrProto.open = function(method, url){
-        try {
-          this.__mcTraceXhrMethod = method;
-          this.__mcTraceXhrUrl = url;
-        } catch (eO) {}
-        return oxopen.apply(this, arguments);
-      };
-      xhrProto.send = function(body){
-        try {
-          var m = String(this.__mcTraceXhrMethod || "").toUpperCase();
-          var u = this.__mcTraceXhrUrl || "";
-          if (isVertexPdp() && m === "POST" && isRelevantAtcUrl(u)) {
-            tracePayload("XHR_POST_SEND", {
-              url: String(u),
-              bodyString: typeof body === "string" ? body : body != null ? "[non-string body type=" + typeof body + "]" : "",
-              bodyLength: typeof body === "string" ? body.length : null
-            });
-          }
-        } catch (eX) {}
-        return oxsend.apply(this, arguments);
-      };
-      xhrProto.send.__mcTraceWrapped = 1;
-    }
-  } catch (eXhr) {}
-
-  try {
-    var ofetch = window.fetch;
-    if (typeof ofetch === "function" && !ofetch.__mcTraceWrapped) {
-      window.fetch = function(input, init){
-        init = init || {};
-        var url = typeof input === "string" ? input : input && input.url ? input.url : "";
-        var method = (init.method || (input && input.method) || "GET").toUpperCase();
-        var body = init.body;
-        if (isVertexPdp() && method === "POST" && isRelevantAtcUrl(url)) {
-          try {
-            var detail = { url: String(url), method: method };
-            if (typeof body === "string") {
-              detail.bodyString = body;
-            } else if (body instanceof FormData) {
-              detail.exactFormDataEntriesForSubmit = formDataToObject(body);
-            } else if (body != null) {
-              detail.bodyType = typeof body;
-            }
-            tracePayload("FETCH_POST", detail);
-          } catch (eF) {}
-        }
-        return ofetch.apply(this, arguments);
-      };
-      window.fetch.__mcTraceWrapped = 1;
-    }
-  } catch (eFetch) {}
-
-  wrapApplyPlanner();
 })();
 
 // Mount inline UI after DOM + Volusion settle
