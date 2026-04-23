@@ -3637,17 +3637,28 @@ function cachePlannerCartTarget(retailTotal, memberTotal){
     var pc = ((document.querySelector('input[name="ProductCode"], input[name="productcode"]') || {}).value || "").trim();
     if (!pc) return;
     var name = ((document.querySelector('h1.productnamecolor, .productnamecolor, .productnamecolorLARGE') || {}).textContent || "").trim();
+    var numericRetail = Number(retailTotal) || 0;
+    try {
+      var cpeEl = document.getElementById("mcConfigurationPrice");
+      if (cpeEl && cpeEl.textContent) {
+        var dm = cpeEl.textContent.match(/\$[\d,]+(?:\.\d+)?/);
+        if (dm) {
+          var fromUi = parseFloat(dm[0].replace(/[$,]/g, ""));
+          if (fromUi > 0) numericRetail = fromUi;
+        }
+      }
+    } catch (_) {}
     var payload = {
       pc: pc,
       name: name,
-      retailTotal: Number(retailTotal) || 0,
+      retailTotal: numericRetail,
       memberTotal: Number(memberTotal) || 0,
       ts: Date.now()
     };
     localStorage.setItem("mc_cart_target_" + pc, JSON.stringify(payload));
     localStorage.setItem("mc_cart_target_last", JSON.stringify(payload));
     try {
-      sessionStorage.setItem("mc_planner_config_total", String(Number(retailTotal) || 0));
+      sessionStorage.setItem("mc_planner_config_total", String(numericRetail));
       sessionStorage.setItem("mc_planner_config_ts", String(Date.now()));
       sessionStorage.setItem("mc_planner_config_pc", pc);
     } catch (_) {}
@@ -10081,7 +10092,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     if (!(targetTotal > 0)) return 0;
     var cells = row.querySelectorAll("td");
     var nCells = cells.length;
-    var lastStart = Math.max(0, nCells - 4);
+    var lastStart = Math.max(0, nCells - 5);
     var candidates = [];
     for (var i = 0; i < nCells; i++) {
       var tx = (cells[i].textContent || "").trim();
@@ -10487,6 +10498,76 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
         }
       }
     }
+    function mcFinalEnforcePlannerLinePrice(root, total){
+      if (!(total > 0) || !root || !root.querySelectorAll) return;
+      var wantPc = String((mcCartTarget || {}).pc || "").trim().toLowerCase();
+      var tables = root.querySelectorAll("table");
+      for (var tf = 0; tf < tables.length; tf++) {
+        var tblf = tables[tf];
+        if ((tblf.textContent || "").toLowerCase().indexOf("related products") !== -1) continue;
+        if (!tblf.querySelector("img")) continue;
+        var rowsf = tblf.querySelectorAll("tbody tr, tr");
+        var need = [];
+        for (var rf = 0; rf < rowsf.length; rf++) {
+          var trf = rowsf[rf];
+          if (trf.querySelector("th")) continue;
+          if (trf.querySelectorAll("td").length < 4) continue;
+          if (!trf.querySelector("img")) continue;
+          var rtf = (trf.textContent || "").toLowerCase();
+          if (rtf.indexOf("tax:") !== -1 || /total:\s*\$/.test(rtf)) continue;
+          need.push(trf);
+        }
+        if (need.length === 1) {
+          mcApplyCartTargetPrice(need[0], total);
+        } else {
+          for (var nf = 0; nf < need.length; nf++) {
+            var trn = need[nf];
+            if (trn.dataset && trn.dataset.mcPlannerCartTarget === "1") {
+              mcApplyCartTargetPrice(trn, total);
+            } else if (wantPc) {
+              var rln = trn.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]');
+              var rhn = rln ? ((rln.href || rln.getAttribute("href") || "").trim()) : "";
+              var pcn = String(mcGuessProductCodeFromRow(trn, rhn) || "").toLowerCase();
+              if (pcn && pcn === wantPc) mcApplyCartTargetPrice(trn, total);
+            }
+          }
+        }
+        break;
+      }
+    }
+    function mcAlignSubtotalForSingleLinePlanner(root, total){
+      if (!(total > 0) || !root || !root.querySelectorAll) return;
+      var tables = root.querySelectorAll("table");
+      for (var ti = 0; ti < tables.length; ti++) {
+        var tb = tables[ti];
+        if ((tb.textContent || "").toLowerCase().indexOf("related products") !== -1) continue;
+        if (!tb.querySelector("img")) continue;
+        var rows = tb.querySelectorAll("tbody tr, tr");
+        var imgRows = 0;
+        for (var r = 0; r < rows.length; r++) {
+          if (rows[r].querySelector("th")) continue;
+          if (rows[r].querySelectorAll("td").length < 4) continue;
+          if (rows[r].querySelector("img")) imgRows++;
+        }
+        if (imgRows !== 1) return;
+        var trsAll = root.querySelectorAll("tr");
+        for (var si = 0; si < trsAll.length; si++) {
+          var trs = trsAll[si];
+          if (trs.querySelector("img")) continue;
+          var st = (trs.textContent || "").toLowerCase();
+          if (!/\bsubtotal\b/.test(st) && !/\bmerchandise total\b/.test(st)) continue;
+          if (/\bgrand total\b/.test(st) || /\border total\b/.test(st)) continue;
+          var tdc = trs.querySelectorAll("td, th");
+          for (var jk = tdc.length - 1; jk >= 0; jk--) {
+            var tx2 = (tdc[jk].textContent || "").trim();
+            if (!/\$[\d,]+/.test(tx2)) continue;
+            tdc[jk].textContent = tx2.replace(/\$[\d,]+(?:\.\d+)?/, mcFmtMoney(total));
+            return;
+          }
+        }
+        return;
+      }
+    }
     function mcGuessQtyFromRow(tr){
       var qEl = tr.querySelector('input[name*="qty" i], input[name*="quantity" i], select[name*="qty" i], select[name*="quantity" i]');
       if (qEl) {
@@ -10860,6 +10941,10 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
       var anchor = content.querySelector("table") || content.firstElementChild || content;
       if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(note, anchor);
       else content.appendChild(note);
+    }
+    if (mcPlannerLineTotal > 0) {
+      mcFinalEnforcePlannerLinePrice(content, mcPlannerLineTotal);
+      mcAlignSubtotalForSingleLinePlanner(content, mcPlannerLineTotal);
     }
   }
   function runWhenCartReady() {
