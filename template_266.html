@@ -14404,6 +14404,15 @@ document.addEventListener('DOMContentLoaded', function () {
       '<div class="vf-thumbs" style="display:flex;gap:10px;padding:14px 14px 16px;border-top:1px solid #e9e6e1;background:#fff;overflow-x:auto;overflow-y:hidden;"></div>';
 
     wrappers[0].parentNode.insertBefore(flip, wrappers[0]);
+    setTimeout(function () {
+  items.forEach(function (item) {
+    if (item.img) {
+      item.img.style.display = 'none';
+      var a = item.img.closest('a');
+      if (a && a.children.length === 1) a.style.display = 'none';
+    }
+  });
+}, 0);
 
     var stage = flip.querySelector('.vf-stage');
     var thumbs = flip.querySelector('.vf-thumbs');
