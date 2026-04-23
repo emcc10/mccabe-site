@@ -1695,6 +1695,27 @@ document.addEventListener("DOMContentLoaded", function () {
 .mc-planner-save-modal .mc-email-row input{ width:100%; padding:8px 12px; margin-bottom:8px; box-sizing:border-box; }
 .mc-planner-save-modal .mc-email-row.show{ display:block; }
 
+/* Above Add to Cart: mirrors #mcConfigurationPrice total only; do not use for native MAP row */
+.mc-planner-member-price-above-atc{
+  margin:12px 0 10px;
+  padding:10px 12px;
+  border:1px solid #ddd;
+  border-radius:6px;
+  background:#f9f9f9;
+  box-sizing:border-box;
+}
+.mc-planner-member-price-above-atc__label{
+  font-size:11px;
+  letter-spacing:.06em;
+  color:#555;
+  margin-bottom:4px;
+}
+.mc-planner-member-price-above-atc__value{
+  font-size:1.25rem;
+  font-weight:600;
+  line-height:1.2;
+}
+
 </style>
 <style>
 :is(html.category, body.category) .v-product-grid .v-product,
@@ -3004,16 +3025,14 @@ function refreshPlannerPriceForMemberState(){
     window.__mcMemberPricing.memberPlannerTotal = memberTotal > 0 ? memberTotal : 0;
   }
   var lineTotal = mcComputePlannerConfigurationTotal(window.__mcPlannerCounts);
-  window.__mcPlannerConfigurationTotal = lineTotal > 0 ? lineTotal : null;
   if (lineTotal > 0) {
-    window.__mcPlannerPrice = lineTotal;
     var cpeR = document.getElementById("mcConfigurationPrice");
     if (cpeR) {
       cpeR.textContent = "Configuration total: " + formatMcCurrency(lineTotal);
       cpeR.style.display = "block";
     }
-    cachePlannerCartTarget(lineTotal, lineTotal);
   }
+  if (typeof mcEnsurePlannerMemberPriceAboveAtc === "function") mcEnsurePlannerMemberPriceAboveAtc();
   try { window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing })); } catch (e) {}
 }
 /** Volusion myaccount HTML: logged in if logout/sign-out present or welcome dashboard; not if login-only page. */
@@ -3599,53 +3618,6 @@ function getPlannerBaseSeatPriceForCalc(){
   if (p > 0) window.__mcPerSeatPrice = p;
   return p;
 }
-function updateProductPrice(totalPrice){
-  if (totalPrice == null || isNaN(totalPrice) || totalPrice < 0) return;
-  window.__mcPriceWrittenAt = Date.now();
-  var formatted = "$" + Number(totalPrice).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  var root = document.querySelector("#v65-product-parent, #content_area") || document.body;
-  var targets = root.querySelectorAll("#priceWithOptions, .v65-product-price, .product_productprice, .product_sale_price, .product_sale_price b");
-  for (var i = 0; i < targets.length; i++) { targets[i].textContent = formatted; }
-}
-(function(){
-  function readVolusionPerSeatPrice(){
-    var el = document.getElementById("priceWithOptions");
-    if (!el) el = document.querySelector(".v65-product-price, .product_productprice, [itemprop=\"price\"]");
-    if (!el) return 0;
-    var m = (el.textContent || "").match(/\$[\d,]+\.?\d*/);
-    if (!m) return 0;
-    return parseFloat(m[0].replace(/[$,]/g, "")) || 0;
-  }
-
-  function onOptionChange(e){
-    if (!e.target || e.target.tagName !== 'SELECT') return;
-    var row = e.target.closest ? e.target.closest('tr') : null;
-    if (row) {
-      var lbl = ((row.querySelector('td:first-child') || {}).textContent || '').toLowerCase();
-      if (lbl.indexOf('seat') !== -1 && lbl.indexOf('leather') === -1) return;
-    }
-    setTimeout(function(){
-      if (window.__mcPlannerConfigApplied) return;
-      if (window.__mcPriceWrittenAt && (Date.now() - window.__mcPriceWrittenAt) < 2000) return;
-      var p = readVolusionPerSeatPrice();
-      if (p > 0) {
-        window.__mcPerSeatPrice = p;
-        console.log("[McCabe Planner] Per-seat price updated by option change:", p);
-      }
-    }, 600);
-  }
-
-  function watchOptionChanges(){
-    var table = document.querySelector('#options_table, table[id*="options_table"]');
-    if (!table || table.__mcWatched) return;
-    table.__mcWatched = true;
-    table.addEventListener('change', onOptionChange);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watchOptionChanges);
-  else watchOptionChanges();
-  window.addEventListener('load', watchOptionChanges);
-})();
-
 function ensurePriceWithOptionsLabel(scope){
   var root = scope || document;
   var theaterTitle = (
@@ -3725,436 +3697,45 @@ if (typeof window !== "undefined") {
   window.mcComputePlannerConfigurationTotal = mcComputePlannerConfigurationTotal;
   window.calculatePlannerPrice = calculatePlannerPrice;
 }
-function cachePlannerCartTarget(retailTotal, memberTotal){
-  try {
-    var pc = ((document.querySelector('input[name="ProductCode"], input[name="productcode"]') || {}).value || "").trim();
-    if (!pc) return;
-    var name = ((document.querySelector('h1.productnamecolor, .productnamecolor, .productnamecolorLARGE') || {}).textContent || "").trim();
-    var numericRetail = Number(retailTotal) || 0;
-    try {
-      var cpeEl = document.getElementById("mcConfigurationPrice");
-      if (cpeEl && cpeEl.textContent) {
-        var dm = cpeEl.textContent.match(/\$[\d,]+(?:\.\d+)?/);
-        if (dm) {
-          var fromUi = parseFloat(dm[0].replace(/[$,]/g, ""));
-          if (fromUi > 0) numericRetail = fromUi;
-        }
-      }
-    } catch (_) {}
-    var payload = {
-      pc: pc,
-      name: name,
-      retailTotal: numericRetail,
-      memberTotal: Number(memberTotal) || 0,
-      ts: Date.now()
-    };
-    localStorage.setItem("mc_cart_target_" + pc, JSON.stringify(payload));
-    localStorage.setItem("mc_cart_target_last", JSON.stringify(payload));
-    try {
-      sessionStorage.setItem("mc_planner_config_total", String(numericRetail));
-      sessionStorage.setItem("mc_planner_config_ts", String(Date.now()));
-      sessionStorage.setItem("mc_planner_config_pc", pc);
-    } catch (_) {}
-    try {
-      document.cookie =
-        "mc_planner_ct=" +
-        encodeURIComponent(String(numericRetail)) +
-        ";path=/;max-age=21600;SameSite=Lax";
-      document.cookie =
-        "mc_planner_pc=" + encodeURIComponent(pc) + ";path=/;max-age=21600;SameSite=Lax";
-    } catch (_) {}
-  } catch (_) {}
-}
 
-function summarizePlannerConfiguration(payload){
-  var opts = payload && payload.options && typeof payload.options === "object" ? payload.options : (window.__ROOM_PLANNER_OPTIONS__ || {});
-  var layout = payload && Array.isArray(payload.layout) ? payload.layout : (window.__ROOM_PLANNER_LAYOUT__ || []);
-  var room = payload && payload.room ? payload.room : null;
-  var seatCount = payload && payload.seatCount != null ? Number(payload.seatCount) : NaN;
-  var pieces = [];
+window.__mcPlannerConfigApplied = false;
+window.__mcPlannerSeatCount = 0;
+window.__mcPlannerCounts = {};
+var MC_PLANNER_PIECE_NAMES = { "1L":"1L Recliner","2L":"2L LHF Recliner","3L":"3L RHF Recliner","4L":"4L Armless Loveseat","5L":"5L RHF Wedge, LHF Straight","6L":"6L LHF Wedge, RHF Straight","7L":"7L RHF Wedge","8L":"8L Armless Recliner","9L":"9L LHF Wedge" };
+var MC_PLANNER_PIECE_DESCRIPTIONS = { "1L":"Single recliner.","2L":"Left-hand facing recliner.","3L":"Right-hand facing recliner.","4L":"Armless loveseat, seats two.","5L":"RHF wedge with LHF straight.","6L":"LHF wedge with RHF straight.","7L":"Right-hand facing wedge.","8L":"Armless recliner.","9L":"Left-hand facing wedge." };
 
-  if (layout.length) {
-    pieces = layout.map(function(item){ return item && item.id ? item.id : item; }).filter(Boolean);
-  } else {
-    Object.keys(opts).forEach(function(key){
-      for (var i = 0; i < Number(opts[key] || 0); i++) pieces.push(key);
-    });
-  }
-
-  if (isNaN(seatCount) || seatCount < 0) {
-    seatCount = pieces.reduce(function(total, id){ return total + (id === "4L" ? 2 : 1); }, 0);
-  }
-
-  var parts = [];
-  if (pieces.length) parts.push("Planner: " + pieces.join(", "));
-  if (!isNaN(seatCount) && seatCount > 0) parts.push("Seats: " + seatCount);
-  if (room && room.widthTotalIn != null && room.depthTotalIn != null) {
-    parts.push("Room: " + room.widthTotalIn + "x" + room.depthTotalIn + " in");
-  }
-
-  return parts.join(" | ").slice(0, 200);
-}
-function getPlanner4LCount(payload){
-  if (!payload || typeof payload !== "object") return 0;
-  var opts = payload.options && typeof payload.options === "object" ? payload.options : null;
-  if (opts && opts["4L"] != null) return Number(opts["4L"] || 0);
-  var layout = Array.isArray(payload.layout) ? payload.layout : [];
-  var count = 0;
-  for (var i = 0; i < layout.length; i++) {
-    var id = layout[i] && layout[i].id ? layout[i].id : layout[i];
-    if (id === "4L") count++;
-  }
-  return count;
-}
-
-var MC_LAYOUT_START = "[MC_LAYOUT]";
-var MC_LAYOUT_END = "[/MC_LAYOUT]";
-
-function syncPlannerConfigurationToCart(payload){
-  var summary = summarizePlannerConfiguration(payload);
-  if (!summary) return;
-  window.__mcPlannerCartCopy = summary;
-
-  var root = document.querySelector("#content_area") || document.body;
-  var addToCartBtn = root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
-  var form = addToCartBtn && addToCartBtn.form ? addToCartBtn.form : root.querySelector('form[action*="ProductDetails.asp"]');
-  if (!form) return;
-
-  var existingField =
-    form.querySelector('input[title="Configuration Details"], textarea[title="Configuration Details"]') ||
-    form.querySelector('input[name^="TEXTBOX___"], textarea[name^="TEXTBOX___"]');
-
-  if (existingField && existingField.name) {
-    window.__mcPlannerCartFieldName = existingField.name;
-  }
-
-  if (!window.__mcPlannerCartFieldName) return;
-
-  var targetField = form.querySelector('input[name="' + window.__mcPlannerCartFieldName + '"], textarea[name="' + window.__mcPlannerCartFieldName + '"]');
-  if (!targetField) {
-    targetField = document.createElement("input");
-    targetField.type = "hidden";
-    targetField.name = window.__mcPlannerCartFieldName;
-    form.appendChild(targetField);
-  }
-
-  var layout = payload && Array.isArray(payload.layout) ? payload.layout : [];
-  var room = payload && payload.room ? payload.room : null;
-  var value = summary;
-  var fourLCount = getPlanner4LCount(payload);
-  var fourLDiscount = fourLCount > 0 ? (fourLCount * 500) : 0;
-  try {
-    var pcCache = ((document.querySelector('input[name="ProductCode"], input[name="productcode"]') || {}).value || "").trim();
-    var nmCache = ((document.querySelector('h1.productnamecolor, .productnamecolor, .productnamecolorLARGE') || {}).textContent || "").trim();
-    var slugCache = String(nmCache || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-    if (fourLDiscount > 0) {
-      if (pcCache) localStorage.setItem("mc_4l_discount_" + pcCache, String(fourLDiscount));
-      if (slugCache) localStorage.setItem("mc_4l_discount_name_" + slugCache, String(fourLDiscount));
-      localStorage.setItem("mc_4l_discount_pending", JSON.stringify({
-        amount: fourLDiscount,
-        pc: pcCache || "",
-        name: nmCache || "",
-        ts: Date.now()
-      }));
-    } else {
-      if (pcCache) localStorage.removeItem("mc_4l_discount_" + pcCache);
-      if (slugCache) localStorage.removeItem("mc_4l_discount_name_" + slugCache);
-      localStorage.removeItem("mc_4l_discount_pending");
-    }
-  } catch (_) {}
-  if (fourLDiscount > 0) {
-    value += "\n[MC_4L_DISCOUNT]" + fourLDiscount + "[/MC_4L_DISCOUNT]";
-  }
-  if (layout.length && room && (room.widthTotalIn != null || room.depthTotalIn != null)) {
-    try {
-      var blob = { l: layout, r: room };
-      value = summary + "\n" + MC_LAYOUT_START + JSON.stringify(blob) + MC_LAYOUT_END;
-    } catch (e) {}
-  }
-  targetField.value = value;
-}
-
-function mcPlannerSubmitDebugEnabled(){
-  try {
-    return /(?:^|[?&])mcPlanDebug=1(?:&|$)/.test(location.search) || sessionStorage.getItem("mcPlanDebug") === "1";
-  } catch (e) {
-    return false;
-  }
-}
-function mcReadPlannerTotalFromConfigurationPriceEl(){
+function mcParseConfiguredTotalFromMcConfigurationPriceEl(){
   var el = document.getElementById("mcConfigurationPrice");
   if (!el || !el.textContent) return 0;
   var dm = el.textContent.match(/\$[\d,]+(?:\.\d{2})?/);
   return dm ? parseMcCurrency(dm[0]) : 0;
 }
-function mcReadPlannerRunningTotalFromRoomPlannerApp(){
-  var el = document.querySelector(
-    "#mcPlannerModalBody #mcPlannerRunningTotal, #roomPlannerApp #mcPlannerRunningTotal"
-  );
-  if (!el || !el.textContent) return 0;
-  var dm = el.textContent.match(/\$[\d,]+(?:\.\d{2})?/);
-  return dm ? parseMcCurrency(dm[0]) : 0;
+
+function mcEnsurePlannerMemberPriceAboveAtc(){
+  var atc = document.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
+  if (!atc || !atc.parentNode) return;
+  var wrap = document.getElementById("mcPlannerMemberPriceAboveAtc");
+  if (!wrap) {
+    wrap = document.createElement("div");
+    wrap.id = "mcPlannerMemberPriceAboveAtc";
+    wrap.className = "mc-planner-member-price-above-atc";
+    wrap.innerHTML =
+      '<div class="mc-planner-member-price-above-atc__label">PLANNER MEMBER PRICE</div>' +
+      '<div class="mc-planner-member-price-above-atc__value" id="mcPlannerMemberPriceAboveAtcValue"></div>';
+    atc.parentNode.insertBefore(wrap, atc);
+  }
+  var v = mcParseConfiguredTotalFromMcConfigurationPriceEl();
+  var valEl = document.getElementById("mcPlannerMemberPriceAboveAtcValue");
+  if (!valEl) return;
+  if (v > 0) {
+    wrap.style.display = "block";
+    valEl.textContent = typeof formatMcCurrency === "function" ? formatMcCurrency(v) : "$" + Number(v).toFixed(2);
+  } else {
+    wrap.style.display = "none";
+    valEl.textContent = "";
+  }
 }
-function mcLogPlannerCartSubmitDebug(form, configuredTotal){
-  if (!mcPlannerSubmitDebugEnabled() || !form) return;
-  var plannerDisplayed = mcReadPlannerTotalFromConfigurationPriceEl();
-  var plannerModalTotal = mcReadPlannerRunningTotalFromRoomPlannerApp();
-  var last = window.__mcLastPlannerPayload || {};
-  var volUnit = typeof mcGetPlannerPerSeatUnitFromVolusion === "function" ? mcGetPlannerPerSeatUnitFromVolusion(document) : 0;
-  var formUnit = typeof mcReadVolusionProductFormSellingUnit === "function" ? mcReadVolusionProductFormSellingUnit(form) : 0;
-  var publicSeat = (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) ? window.__mcPerSeatPrice : getDisplayedPublicSeatPrice();
-  var memberSeat = typeof getMemberPlannerSeatPriceForCalc === "function" ? getMemberPlannerSeatPriceForCalc() : 0;
-  var retailCfg =
-    publicSeat > 0 && window.__mcPlannerCounts
-      ? calculatePlannerPrice(window.__mcPlannerCounts, publicSeat)
-      : 0;
-  var memberCfg =
-    memberSeat > 0 && window.__mcPlannerCounts
-      ? calculatePlannerPrice(window.__mcPlannerCounts, memberSeat)
-      : 0;
-  var rows = [];
-  try {
-    var all = form.querySelectorAll("input, select, textarea");
-    var ai;
-    for (ai = 0; ai < all.length; ai++) {
-      var el = all[ai];
-      var nm = (el.name || "") + " " + (el.id || "");
-      if (!/price|amount|sell|our|cart|sale|cost|soft|total|hidden|actual|base|map|qty|quantity|^q\d|^qty/i.test(nm.toLowerCase())) continue;
-      rows.push({
-        tag: el.tagName,
-        type: el.type || "",
-        name: el.name || "",
-        id: el.id || "",
-        value: (el.value || "").slice(0, 120)
-      });
-    }
-  } catch (e2) {}
-  var payloadPreview = "";
-  try {
-    if (typeof URLSearchParams !== "undefined") {
-      payloadPreview = new URLSearchParams(new FormData(form)).toString();
-    }
-  } catch (e3) {}
-  console.log("[mcPlanDebug] lastApply payload.configurationTotal:", last.configurationTotal);
-  console.log("[mcPlanDebug] lastApply payload.mcPlannerPerSeatUnit:", last.mcPlannerPerSeatUnit);
-  console.log("[mcPlanDebug] #mcConfigurationPrice parsed (PDP configuration block):", plannerDisplayed);
-  console.log("[mcPlanDebug] #mcPlannerRunningTotal parsed (room planner panel):", plannerModalTotal);
-  console.log("[mcPlanDebug] mcReadVolusionProductFormSellingUnit(form):", formUnit);
-  console.log("[mcPlanDebug] mcGetPlannerPerSeatUnitFromVolusion (Volusion unit for math):", volUnit);
-  console.log("[mcPlanDebug] __mcPerSeatPrice (cached, may be stale):", window.__mcPerSeatPrice);
-  console.log("[mcPlanDebug] base retail from #priceWithOptions path (NOT submit source):", publicSeat);
-  console.log("[mcPlanDebug] base member seat (NOT submit source):", memberSeat);
-  console.log("[mcPlanDebug] retail×counts if using display path (NOT submit source):", retailCfg);
-  console.log("[mcPlanDebug] member×counts if using member path (NOT submit source):", memberCfg);
-  console.log("[mcPlanDebug] __mcPlannerConfigurationTotal (canonical before DOM fallback):", window.__mcPlannerConfigurationTotal);
-  console.log("[mcPlanDebug] final value written into Volusion price fields:", configuredTotal);
-  console.table(rows);
-  if (payloadPreview) console.log("[mcPlanDebug] form body (application/x-www-form-urlencoded):", payloadPreview.slice(0, 8000));
-}
-/**
- * Volusion PDP: force qty=1 and set native price fields to the planner configuration line total.
- * Runs from a window-level submit bubble listener so Volusion cannot overwrite these values afterward.
- */
-window.mcForceTheaterPlannerAddToCartPayload = function (form) {
-  if (!form || !window.__mcPlannerConfigApplied) return;
-  var pt = Number(window.__mcPlannerConfigurationTotal);
-  if (!(pt > 0)) pt = mcReadPlannerTotalFromConfigurationPriceEl();
-  if (!(pt > 0)) pt = mcReadPlannerRunningTotalFromRoomPlannerApp();
-  if (!(pt > 0) && typeof mcComputePlannerConfigurationTotal === "function") {
-    pt = Number(mcComputePlannerConfigurationTotal(window.__mcPlannerCounts || {})) || 0;
-  }
-  if (!(pt > 0)) return;
-  var formUnitBefore =
-    typeof mcReadVolusionProductFormSellingUnit === "function"
-      ? mcReadVolusionProductFormSellingUnit(form)
-      : 0;
-  var perSeatBefore =
-    typeof mcGetPlannerPerSeatUnitFromVolusion === "function"
-      ? mcGetPlannerPerSeatUnitFromVolusion(document)
-      : 0;
-  try {
-    var qBefore = {};
-    form
-      .querySelectorAll(
-        'input[name="Quantity"],input#Quantity,input[name="quantity"],select[name="Quantity"],select[name="quantity"]'
-      )
-      .forEach(function (el) {
-        qBefore[el.name || el.id || "qty"] = el.value;
-      });
-    console.log("[McCabe planner ATC] (before overwriting Volusion price fields)", {
-      finalPostedLine: pt,
-      storedCanonical: window.__mcPlannerConfigurationTotal,
-      mcConfigurationPriceParsed: mcReadPlannerTotalFromConfigurationPriceEl(),
-      mcPlannerRunningTotalParsed: mcReadPlannerRunningTotalFromRoomPlannerApp(),
-      lastApplyConfigurationTotal: (window.__mcLastPlannerPayload || {}).configurationTotal,
-      lastApplyPerSeat: (window.__mcLastPlannerPayload || {}).mcPlannerPerSeatUnit,
-      volusionFormSellingUnitBeforeOverride: formUnitBefore,
-      volusionPerSeatResolvedBeforeOverride: perSeatBefore,
-      qtyBefore: qBefore
-    });
-  } catch (eAtcLog) {}
-  var qtySelectors =
-    'input[name="Quantity"],input#Quantity,input[name="quantity"],input[id="quantity"],' +
-    'input[name^="QTY"],input[name^="qty"],select[name="Quantity"],select[name="quantity"]';
-  form.querySelectorAll(qtySelectors).forEach(function (el) {
-    try {
-      if (String(el.tagName || "").toUpperCase() === "SELECT") {
-        var opts = el.options || [];
-        var pick = null;
-        for (var oi = 0; oi < opts.length; oi++) {
-          var o = opts[oi];
-          if (String(o.value) === "1" || /^1\b/.test(String(o.textContent || "").trim())) {
-            pick = o;
-            break;
-          }
-        }
-        if (!pick && opts[0]) pick = opts[0];
-        if (pick) {
-          el.value = pick.value;
-          el.selectedIndex = pick.index;
-        }
-      } else {
-        el.value = "1";
-      }
-    } catch (_) {}
-  });
-  var priceNames = [
-    "SellingPrice",
-    "sellingprice",
-    "ActualPrice",
-    "actualprice",
-    "HiddenPrice",
-    "hiddenprice",
-    "CartPrice",
-    "cartprice",
-    "AddToCartPrice",
-    "addtocartprice",
-    "ProductPrice",
-    "productprice",
-    "SoftAddPrice",
-    "softaddprice",
-    "OurPrice",
-    "ourprice",
-    "SalePrice",
-    "saleprice",
-    "LowPrice",
-    "lowprice",
-    "YourPrice",
-    "yourprice",
-    "VolusionPrice",
-    "volusionprice"
-  ];
-  var seen = {};
-  var pi;
-  for (pi = 0; pi < priceNames.length; pi++) {
-    var nm = priceNames[pi];
-    var h = form.querySelector(
-      'input[type="hidden"][name="' + nm + '"],input[name="' + nm + '"]:not([type="checkbox"]):not([type="radio"])'
-    );
-    if (h && h.name) {
-      seen[h.name] = true;
-      try {
-        h.value = String(pt);
-      } catch (_) {}
-    }
-  }
-  try {
-    var hid = form.querySelectorAll('input[type="hidden"]');
-    var hi;
-    for (hi = 0; hi < hid.length; hi++) {
-      var inp = hid[hi];
-      var n = (inp.name || "").trim();
-      if (!n || seen[n]) continue;
-      var nl = n.toLowerCase();
-      if (!/price|amount|sale|sell|our|cart|soft|cost|actual|hidden|baseproduct|productcost|volusionprice|lowprice/.test(nl)) continue;
-      if (/optionchoice|optionitem|productcode|categoryid|category|coupon|gift|ship|tax|weight|email|password|return|token|recaptcha/i.test(nl)) continue;
-      seen[n] = true;
-      inp.value = String(pt);
-    }
-  } catch (_) {}
-  mcLogPlannerCartSubmitDebug(form, pt);
-};
-(function mcBindPlannerCartSubmitBubble(){
-  if (window.__mcPlannerCartSubmitBubbleBound) return;
-  window.__mcPlannerCartSubmitBubbleBound = true;
-  window.addEventListener(
-    "submit",
-    function (ev) {
-      var form = ev.target;
-      if (!form || String(form.tagName || "").toLowerCase() !== "form") return;
-      if (!window.__mcPlannerConfigApplied) return;
-      if (
-        !form.querySelector(
-          'input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]'
-        )
-      )
-        return;
-      if (!form.querySelector('input[name="ProductCode"], input[name="productcode"]')) return;
-      try {
-        if (typeof window.syncPlannerConfigurationToCart === "function") {
-          window.syncPlannerConfigurationToCart(window.__mcLastPlannerPayload);
-        }
-        if (typeof window.mcForceTheaterPlannerAddToCartPayload === "function") {
-          window.mcForceTheaterPlannerAddToCartPayload(form);
-        }
-      } catch (eMc) {}
-    },
-    false
-  );
-})();
 
-var PIECE_NAMES = { "1L":"1L Recliner","2L":"2L LHF Recliner","3L":"3L RHF Recliner","4L":"4L Armless Loveseat","5L":"5L RHF Wedge, LHF Straight","6L":"6L LHF Wedge, RHF Straight","7L":"7L RHF Wedge","8L":"8L Armless Recliner","9L":"9L LHF Wedge" };
-var PIECE_DESCRIPTIONS = { "1L":"Single recliner.","2L":"Left-hand facing recliner.","3L":"Right-hand facing recliner.","4L":"Armless loveseat, seats two.","5L":"RHF wedge with LHF straight.","6L":"LHF wedge with RHF straight.","7L":"Right-hand facing wedge.","8L":"Armless recliner.","9L":"Left-hand facing wedge." };
-
-/** Volusion "Number of Seats" option: force lowest tier so cart is not N× base; line total comes from hidden price fields. */
-window.mcSyncTheaterSeatOptionToMinimum = function () {
-  var table = document.querySelector('#options_table, table[id*="options_table"]');
-  if (!table) return;
-  var rows = table.querySelectorAll("tr");
-  var sel = null;
-  for (var ri = 0; ri < rows.length; ri++) {
-    var labelCell = rows[ri].querySelector("td:first-child");
-    var labelText = ((labelCell && labelCell.textContent) || "").toLowerCase();
-    if (labelText.indexOf("seat") === -1) continue;
-    if (/leather|cover|configuration|straight|curved/i.test(labelText)) continue;
-    sel = rows[ri].querySelector("select");
-    if (sel) break;
-  }
-  if (!sel) return;
-  var bestOpt = null;
-  var bestNum = 1e9;
-  for (var oi = 0; oi < sel.options.length; oi++) {
-    var optNum = parseInt((sel.options[oi].text || "").replace(/[^0-9]/g, ""), 10);
-    if (isNaN(optNum) || optNum < 1) continue;
-    if (optNum < bestNum) {
-      bestNum = optNum;
-      bestOpt = sel.options[oi];
-    }
-  }
-  if (!bestOpt) return;
-  for (var si = 0; si < sel.options.length; si++) {
-    sel.options[si].selected = false;
-    sel.options[si].removeAttribute("selected");
-  }
-  bestOpt.selected = true;
-  bestOpt.setAttribute("selected", "selected");
-  sel.selectedIndex = bestOpt.index;
-  sel.value = bestOpt.value;
-  try {
-    if (window.jQuery) window.jQuery(sel).val(bestOpt.value);
-  } catch (e) {}
-  try {
-    sel.dispatchEvent(new Event("input", { bubbles: true }));
-    sel.dispatchEvent(new Event("change", { bubbles: true }));
-  } catch (e2) {}
-};
-
-window.__mcPlannerConfigApplied = false;
-window.__mcPlannerSeatCount = 0;
-window.__mcPlannerCounts = {};
-window.__mcPlannerPrice = null;
-/** Sole numeric source for Volusion hidden price fields at submit (planner configuration total). */
-window.__mcPlannerConfigurationTotal = null;
 window.applyPlannerToPage = function (payload) {
   if (!payload || typeof payload !== "object") return;
 
@@ -4198,9 +3779,9 @@ window.applyPlannerToPage = function (payload) {
     if (layout.length || Object.keys(opts).length) {
       var list = [];
       if (layout.length) {
-        layout.forEach(function(s){ var id = s.id || s; list.push({ id: id, name: PIECE_NAMES[id] || id, desc: PIECE_DESCRIPTIONS[id] || "" }); });
+        layout.forEach(function(s){ var id = s.id || s; list.push({ id: id, name: MC_PLANNER_PIECE_NAMES[id] || id, desc: MC_PLANNER_PIECE_DESCRIPTIONS[id] || "" }); });
       } else {
-        Object.keys(opts).forEach(function(k){ for (var i = 0; i < (opts[k] || 0); i++) list.push({ id: k, name: PIECE_NAMES[k] || k, desc: PIECE_DESCRIPTIONS[k] || "" }); });
+        Object.keys(opts).forEach(function(k){ for (var i = 0; i < (opts[k] || 0); i++) list.push({ id: k, name: MC_PLANNER_PIECE_NAMES[k] || k, desc: MC_PLANNER_PIECE_DESCRIPTIONS[k] || "" }); });
       }
       configPieces.innerHTML = list.map(function(p){ return "<div style=\"margin-bottom:6px\"><strong>" + (p.name || p.id) + "</strong>" + (p.desc ? " &mdash; " + p.desc : "") + "</div>"; }).join("");
       configCaption.style.display = "none";
@@ -4223,21 +3804,7 @@ window.applyPlannerToPage = function (payload) {
       : Object.keys(opts).reduce(function(t, k){ return t + (opts[k] || 0); }, 0);
   }
 
-  var configOpts = {};
-  var configPiecesEl = document.getElementById("mcConfigurationPieces");
-  if (configPiecesEl && configPiecesEl.style.display !== "none" && configPiecesEl.innerHTML.trim()) {
-    configOpts = opts;
-  } else {
-    configOpts = opts;
-  }
-
-  syncPlannerConfigurationToCart({
-    options: opts,
-    layout: layout,
-    room: payload.room || null,
-    seatCount: seatCount
-  });
-
+  var configOpts = opts;
   window.__mcPlannerCounts = configOpts;
   window.__mcPlannerSeatCount = hasPlannerConfig ? seatCount : 0;
 
@@ -4250,22 +3817,14 @@ window.applyPlannerToPage = function (payload) {
     publicSeatPrice = mcGetPlannerPerSeatUnitFromVolusion(document);
     if (publicSeatPrice > 0) window.__mcPerSeatPrice = publicSeatPrice;
   }
-  var retailTotalComputed = 0;
-  console.log("[McCabe Planner] volusion unit (form/sale):", publicSeatPrice, "seatCount:", seatCount, "counts:", JSON.stringify(configOpts), "payload.configurationTotal:", fromPayload);
-  if (publicSeatPrice > 0) {
-    retailTotalComputed = calculatePlannerPrice(configOpts, publicSeatPrice);
-    console.log("[McCabe Planner] counts×volusion unit total:", retailTotalComputed);
-  }
+  var lineTotal = 0;
+  if (fromPayload > 0) lineTotal = fromPayload;
+  else if (hasPlannerConfig) lineTotal = mcComputePlannerConfigurationTotal(configOpts);
   var memberSeat = getMemberPlannerSeatPriceForCalc();
   if (window.__mcMemberPricing) {
     var memberTotal = calculatePlannerPrice(configOpts, memberSeat);
     window.__mcMemberPricing.memberPlannerTotal = memberTotal > 0 ? memberTotal : 0;
   }
-  var lineTotal = 0;
-  if (fromPayload > 0) lineTotal = fromPayload;
-  else if (hasPlannerConfig) lineTotal = mcComputePlannerConfigurationTotal(configOpts);
-  window.__mcPlannerConfigurationTotal = lineTotal > 0 ? lineTotal : null;
-  window.__mcPlannerPrice = window.__mcPlannerConfigurationTotal;
   var cpe = document.getElementById("mcConfigurationPrice");
   if (cpe && hasPlannerConfig && lineTotal > 0) {
     cpe.textContent = "Configuration total: " + formatMcCurrency(lineTotal);
@@ -4273,23 +3832,19 @@ window.applyPlannerToPage = function (payload) {
   } else if (cpe && !hasPlannerConfig) {
     cpe.style.display = "none";
     cpe.textContent = "";
+  } else if (cpe && hasPlannerConfig && !(lineTotal > 0)) {
+    cpe.style.display = "none";
+    cpe.textContent = "";
   }
-  if (lineTotal > 0) {
-    cachePlannerCartTarget(lineTotal, lineTotal);
-  }
+  mcEnsurePlannerMemberPriceAboveAtc();
   if (window.__mcMemberPricing) {
     try { window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing })); } catch (e) {}
-  }
-  if (hasPlannerConfig && typeof window.mcSyncTheaterSeatOptionToMinimum === "function") {
-    window.mcSyncTheaterSeatOptionToMinimum();
   }
   window.__mcLastPlannerPayload = {
     options: configOpts,
     layout: layout,
     room: payload && payload.room ? payload.room : null,
-    seatCount: seatCount,
-    configurationTotal: window.__mcPlannerConfigurationTotal,
-    mcPlannerPerSeatUnit: payloadUnit > 0 ? payloadUnit : publicSeatPrice || null
+    seatCount: seatCount
   };
 };
 
@@ -9103,19 +8658,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     try {
       document.body.classList.add('mc-theater-seating-pdp');
     } catch (eTheaterFlag) {}
-    try {
-      var nodes = root.querySelectorAll('.option_pricing, #priceWithOptions, #priceWithOptionsNoTax');
-      var i;
-      for (i = 0; i < nodes.length; i++) {
-        var node = nodes[i];
-        node.style.setProperty('display', 'none', 'important');
-        node.style.setProperty('visibility', 'hidden', 'important');
-        node.style.setProperty('opacity', '0', 'important');
-        if (node.id === 'priceWithOptions' && node.parentNode) {
-          node.parentNode.style.setProperty('display', 'none', 'important');
-        }
-      }
-    } catch (eHideTheaterPrice) {}
     try {
       var rows = root.querySelectorAll('#options_table tr, table[id*="options_table"] tr');
       var ri;
