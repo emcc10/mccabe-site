@@ -5908,6 +5908,15 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   var lastPagerSig = null;
   var pagerObsCooldownUntil = 0;
 
+  function isRoomPlannerActivePage() {
+    try {
+      var p = String(location.pathname || '');
+      var h = String(location.hash || '');
+      if (p.indexOf('room-planner') !== -1 || h.indexOf('room-planner') !== -1) return true;
+    } catch (eRp) {}
+    return false;
+  }
+
   function updateCategoryStickyPager(prevHref, nextHref) {
     if (!isCategoryListing()) return;
     var hasPrev = !!prevHref;
@@ -6633,6 +6642,17 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   function renderPager() {
     try {
       if (!isCategoryListing()) return;
+      if (isRoomPlannerActivePage()) {
+        try {
+          teardownCustomCategoryPager(
+            document.getElementById('content_area') ||
+              document.querySelector('.content_area-wrapper') ||
+              document.querySelector('[role="main"]') ||
+              document.body
+          );
+        } catch (ePlanner) {}
+        return;
+      }
       var ca =
         document.getElementById('content_area') ||
         document.querySelector('.content_area-wrapper') ||
@@ -6668,7 +6688,8 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
         if (candNext) nextHref = candNext;
       }
       if (!nextHref) {
-        var scanNext = scanBestNextHrefFromContentArea(ca, curr) || scanBestNextHrefFromContentArea(body, curr);
+        /* Do not scan document.body — tens of thousands of anchors + URL parsing freezes the tab; ca is enough. */
+        var scanNext = scanBestNextHrefFromContentArea(ca, curr);
         if (scanNext) nextHref = scanNext;
       }
 
@@ -6795,14 +6816,15 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     document.getElementById('content_area') ||
     document.querySelector('.content_area-wrapper') ||
     document.body;
-  if (ca0 && typeof MutationObserver !== 'undefined') {
+  if (ca0 && typeof MutationObserver !== 'undefined' && !isRoomPlannerActivePage()) {
     var t = null;
     function isPagerOwned(el) {
       if (!el || el.nodeType !== 1) return false;
-      if (el.id === PAGER_ID || el.id === 'mc-category-pager-top') return true;
-      var p = el.parentElement;
+      var p = el;
       while (p) {
-        if (p.id === PAGER_ID || p.id === 'mc-category-pager-top') return true;
+        var id = p.id;
+        if (id === PAGER_ID || id === 'mc-category-pager-top') return true;
+        if (id === 'roomPlannerApp' || id === 'mcPlannerModalBody') return true;
         p = p.parentElement;
       }
       return false;
