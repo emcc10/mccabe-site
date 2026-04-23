@@ -150,7 +150,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260417resync: force overwrite of corrupted live template (duplicate mcSubmitAuthForm) -->
-<meta name="mc-deploy-verify" content="20260420planner-member-price-atc">
+<meta name="mc-deploy-verify" content="20260420pdp-trace-planner-cart">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -3903,6 +3903,146 @@ window.addEventListener("message", function (event) {
   if (!payload || typeof payload !== "object") return;
   if (typeof window.applyPlannerToPage === "function") window.applyPlannerToPage(payload);
 });
+
+/**
+ * TEMP: PDP trace only — console logs after planner Apply and before ATC submit.
+ * Does not read/write top MAP, does not change qty, prices, or posted fields.
+ * Remove this IIFE after you capture logs and we patch the real offending field.
+ */
+(function mcTraceVertexPdpPlannerCart(){
+  if (window.__mcTraceVertexPdpPlannerCart) return;
+  window.__mcTraceVertexPdpPlannerCart = true;
+
+  function isVertexPdp(){
+    if (!document.body) return false;
+    if (document.body.classList.contains("productdetails") || document.body.classList.contains("mc-product-page")) return true;
+    return /\bproductdetails\b/i.test(document.body.className || "");
+  }
+
+  function readDomTotals(){
+    var cpe = document.getElementById("mcConfigurationPrice");
+    var pmv = document.getElementById("mcPlannerMemberPriceAboveAtcValue");
+    return {
+      mcConfigurationPriceText: cpe ? String(cpe.textContent || "").trim() : null,
+      mcConfigurationPriceDisplay: cpe ? String(window.getComputedStyle(cpe).display || "") : null,
+      mcPlannerMemberPriceBlockText: pmv ? String(pmv.textContent || "").trim() : null
+    };
+  }
+
+  function priceishField(name, id){
+    var s = (String(name || "") + " " + String(id || "")).toLowerCase();
+    return /price|amount|cost|sell|map|cart|total|hidden|actual|soft|volusion|base|msrp|discount|qty|quantity/.test(s);
+  }
+
+  function serializeAtcForm(form, note){
+    var out = {
+      traceNote: note || "",
+      formAction: form.getAttribute("action"),
+      formMethod: (form.getAttribute("method") || "").toUpperCase()
+    };
+    var rows = [];
+    var i;
+    var el;
+    for (i = 0; i < form.elements.length; i++) {
+      el = form.elements[i];
+      rows.push({
+        i: i,
+        tag: el.tagName,
+        type: (el.type || "").toLowerCase(),
+        name: el.name || "",
+        id: el.id || "",
+        disabled: !!el.disabled,
+        value: el.type === "password" ? "***" : String(el.value != null ? el.value : "")
+      });
+    }
+    out.everyInputSelectHiddenInForm = rows;
+    out.priceQtyRelatedSubset = rows.filter(function(r){
+      return r.type === "hidden" || priceishField(r.name, r.id);
+    });
+    try {
+      var fd = new FormData(form);
+      var posted = {};
+      fd.forEach(function(val, key){
+        var s = typeof val === "string" ? val : val && typeof val.name === "string" ? val.name : String(val);
+        if (Object.prototype.hasOwnProperty.call(posted, key)) {
+          if (!Array.isArray(posted[key])) posted[key] = [posted[key]];
+          posted[key].push(s);
+        } else {
+          posted[key] = s;
+        }
+      });
+      out.exactFormDataEntriesForSubmit = posted;
+    } catch (eFd) {
+      out.exactFormDataEntriesForSubmit = { error: String(eFd) };
+    }
+    var qtyEl = form.querySelector(
+      'input[name*="qty" i], input[name*="quantity" i], input[name="QTY"], input[name="qty"], select[name*="qty" i], select[name*="quantity" i]'
+    );
+    out.qtyInputName = qtyEl ? qtyEl.name : null;
+    out.qtyInputValue = qtyEl ? qtyEl.value : null;
+    if (typeof window.mcReadVolusionProductFormSellingUnit === "function") {
+      out.mcReadVolusionProductFormSellingUnit = window.mcReadVolusionProductFormSellingUnit(form);
+    }
+    return out;
+  }
+
+  function traceBundle(which, extra){
+    var b = Object.assign({ which: which, ts: new Date().toISOString() }, readDomTotals(), extra || {});
+    console.log("[McCabe TRACE PDP]", b);
+    try {
+      if (b.everyInputSelectHiddenInForm) console.table(b.everyInputSelectHiddenInForm);
+    } catch (eT) {}
+    try {
+      if (b.priceQtyRelatedSubset) console.table(b.priceQtyRelatedSubset);
+    } catch (eT2) {}
+    return b;
+  }
+
+  function wrapApplyPlanner(){
+    var inner = window.applyPlannerToPage;
+    if (typeof inner !== "function" || inner.__mcTraceWrapped) return;
+    window.applyPlannerToPage = function(payload){
+      inner.apply(this, arguments);
+      if (!isVertexPdp()) return;
+      try {
+        var form = typeof window.mcFindProductDetailsForm === "function" ? window.mcFindProductDetailsForm() : null;
+        var extra = form ? serializeAtcForm(form, "form snapshot right after Apply") : { formFound: false };
+        traceBundle("AFTER_PLANNER_APPLY", Object.assign(extra, {
+          payloadConfigurationTotal: payload && payload.configurationTotal,
+          payloadMcPlannerPerSeatUnit: payload && payload.mcPlannerPerSeatUnit,
+          payloadSeatCount: payload && payload.seatCount
+        }));
+      } catch (eA) {
+        console.warn("[McCabe TRACE PDP] AFTER_PLANNER_APPLY", eA);
+      }
+    };
+    window.applyPlannerToPage.__mcTraceWrapped = 1;
+  }
+
+  function looksLikeProductAtcForm(form){
+    if (!form || form.tagName !== "FORM" || !isVertexPdp()) return false;
+    if (!form.querySelector('input[name="ProductCode"], input#ProductCode')) return false;
+    return !!form.querySelector(
+      'input[name="btnaddtocart"], input[id*="btnaddtocart"], input[id*="BtnAddToCart"], button[name="btnaddtocart"]'
+    );
+  }
+
+  document.addEventListener(
+    "submit",
+    function(ev){
+      var form = ev.target;
+      if (!looksLikeProductAtcForm(form)) return;
+      try {
+        traceBundle("IMMEDIATELY_BEFORE_ATC_SUBMIT", serializeAtcForm(form, "capture-phase submit"));
+      } catch (eS) {
+        console.warn("[McCabe TRACE PDP] BEFORE_SUBMIT", eS);
+      }
+    },
+    true
+  );
+
+  wrapApplyPlanner();
+})();
 
 // Mount inline UI after DOM + Volusion settle
 setTimeout(mount, 600);
