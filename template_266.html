@@ -3662,6 +3662,14 @@ function cachePlannerCartTarget(retailTotal, memberTotal){
       sessionStorage.setItem("mc_planner_config_ts", String(Date.now()));
       sessionStorage.setItem("mc_planner_config_pc", pc);
     } catch (_) {}
+    try {
+      document.cookie =
+        "mc_planner_ct=" +
+        encodeURIComponent(String(numericRetail)) +
+        ";path=/;max-age=21600;SameSite=Lax";
+      document.cookie =
+        "mc_planner_pc=" + encodeURIComponent(pc) + ";path=/;max-age=21600;SameSite=Lax";
+    } catch (_) {}
   } catch (_) {}
 }
 
@@ -10045,6 +10053,21 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     if (/welcome to your account|order history|account settings/i.test(lc) && !/returning customer/i.test(lc)) return true;
     return false;
   }
+  function mcReadPlannerCookieTarget(){
+    try {
+      var c = document.cookie || "";
+      var m = c.match(/(?:^|;\s*)mc_planner_ct=([^;]+)/);
+      if (!m) return null;
+      var t = parseFloat(decodeURIComponent(m[1]));
+      if (!(t > 0)) return null;
+      var pc = "";
+      var m2 = c.match(/(?:^|;\s*)mc_planner_pc=([^;]+)/);
+      if (m2) pc = decodeURIComponent(m2[1]).trim();
+      return { retailTotal: t, memberTotal: t, ts: Date.now(), pc: pc, name: "" };
+    } catch (_) {
+      return null;
+    }
+  }
   function mcReadCartTarget(){
     try {
       var raw = localStorage.getItem("mc_cart_target_last");
@@ -10086,39 +10109,33 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     } catch (_) {}
     var sess = mcReadSessionPlannerCartTarget(pc, !!allowSessionAnyProduct);
     if (sess) return sess;
+    var ck = mcReadPlannerCookieTarget();
+    if (ck) {
+      if (!pc || !ck.pc || String(pc).toLowerCase() === String(ck.pc).toLowerCase() || allowSessionAnyProduct) return ck;
+    }
     return mcReadCartTarget();
   }
   function mcApplyCartTargetPrice(row, targetTotal){
     if (!(targetTotal > 0)) return 0;
     var cells = row.querySelectorAll("td");
     var nCells = cells.length;
-    var lastStart = Math.max(0, nCells - 5);
-    var candidates = [];
-    for (var i = 0; i < nCells; i++) {
-      var tx = (cells[i].textContent || "").trim();
+    var pickCell = null;
+    var pickVal = 0;
+    for (var i = nCells - 1; i >= 0; i--) {
+      var tx = cells[i].textContent || "";
       var mm = tx.match(/\$[\d,]+(?:\.\d+)?/);
       if (!mm) continue;
       var n = mcParseSeatMoney(mm[0]);
       if (!(n > 0)) continue;
-      candidates.push({ cell: cells[i], n: n, idx: i });
+      pickCell = cells[i];
+      pickVal = n;
+      break;
     }
-    if (!candidates.length) return 0;
-    var inTail = candidates.filter(function(c){ return c.idx >= lastStart; });
-    var pool = inTail.length ? inTail : candidates;
-    var maxN = 0;
-    for (var cj = 0; cj < pool.length; cj++) {
-      if (pool[cj].n > maxN) maxN = pool[cj].n;
-    }
-    var ties = pool.filter(function(x){ return x.n === maxN; });
-    var pick = ties[0];
-    for (var ti = 1; ti < ties.length; ti++) {
-      if (ties[ti].idx > pick.idx) pick = ties[ti];
-    }
-    var bestCell = pick.cell;
-    var bestVal = pick.n;
-    bestCell.textContent = (bestCell.textContent || "").replace(/\$[\d,]+(?:\.\d+)?/, mcFmtCartMoney(targetTotal));
+    if (!pickCell) return 0;
+    var newTxt = mcFmtCartMoney(targetTotal);
+    pickCell.textContent = (pickCell.textContent || "").replace(/\$[\d,]+(?:\.\d+)?/g, newTxt);
     try { row.dataset.mcPlannerCartTarget = "1"; } catch (ePc) {}
-    return targetTotal - bestVal;
+    return targetTotal - pickVal;
   }
   function mcGetCached4LDiscount(pc, name){
     try {
@@ -10185,7 +10202,22 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     var p = (window.location.pathname || "").toLowerCase();
     var h = (window.location.href || "").toLowerCase();
     var title = (document.title || "").toLowerCase();
-    return p.indexOf("shoppingcart") !== -1 || p.indexOf("cart") !== -1 || p.indexOf("basket") !== -1 || h.indexOf("shoppingcart") !== -1 || h.indexOf("cart") !== -1 || h.indexOf("basket") !== -1 || title.indexOf("cart") !== -1 || title.indexOf("basket") !== -1;
+    return (
+      p.indexOf("shoppingcart") !== -1 ||
+      p.indexOf("shopcart") !== -1 ||
+      p.indexOf("/cart") !== -1 ||
+      p.indexOf("basket") !== -1 ||
+      p.indexOf("orderform") !== -1 ||
+      h.indexOf("shoppingcart") !== -1 ||
+      h.indexOf("shopcart.asp") !== -1 ||
+      h.indexOf("basket.asp") !== -1 ||
+      h.indexOf("/cart") !== -1 ||
+      h.indexOf("basket") !== -1 ||
+      h.indexOf("shoppingcart.asp") !== -1 ||
+      title.indexOf("shopping cart") !== -1 ||
+      title.indexOf("cart") !== -1 ||
+      title.indexOf("basket") !== -1
+    );
   }
   function mcClosest(el, sel) {
     if (!el || !sel) return null;
@@ -10442,7 +10474,8 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     var configDataList = [];
     var mcTotal4LDiscount = 0;
     var mcCartDelta = 0;
-    var mcCartTarget = mcReadCartTarget() || mcReadSessionPlannerCartTarget("", true);
+    var mcCartTarget =
+      mcReadCartTarget() || mcReadSessionPlannerCartTarget("", true) || mcReadPlannerCookieTarget();
     var mcPlannerLineTotal = mcCartTarget ? (Number(mcCartTarget.retailTotal) || 0) : 0;
     var mcSuppressCart4L = mcPlannerLineTotal > 0;
     var mcCartTargetApplied = false;
@@ -10498,74 +10531,63 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
         }
       }
     }
-    function mcFinalEnforcePlannerLinePrice(root, total){
+    function mcFinalEnforcePlannerLinePrice(root, total, cartTable){
       if (!(total > 0) || !root || !root.querySelectorAll) return;
       var wantPc = String((mcCartTarget || {}).pc || "").trim().toLowerCase();
-      var tables = root.querySelectorAll("table");
-      for (var tf = 0; tf < tables.length; tf++) {
-        var tblf = tables[tf];
-        if ((tblf.textContent || "").toLowerCase().indexOf("related products") !== -1) continue;
-        if (!tblf.querySelector("img")) continue;
-        var rowsf = tblf.querySelectorAll("tbody tr, tr");
-        var need = [];
-        for (var rf = 0; rf < rowsf.length; rf++) {
-          var trf = rowsf[rf];
-          if (trf.querySelector("th")) continue;
-          if (trf.querySelectorAll("td").length < 4) continue;
-          if (!trf.querySelector("img")) continue;
-          var rtf = (trf.textContent || "").toLowerCase();
-          if (rtf.indexOf("tax:") !== -1 || /total:\s*\$/.test(rtf)) continue;
-          need.push(trf);
-        }
-        if (need.length === 1) {
-          mcApplyCartTargetPrice(need[0], total);
-        } else {
-          for (var nf = 0; nf < need.length; nf++) {
-            var trn = need[nf];
-            if (trn.dataset && trn.dataset.mcPlannerCartTarget === "1") {
-              mcApplyCartTargetPrice(trn, total);
-            } else if (wantPc) {
-              var rln = trn.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]');
-              var rhn = rln ? ((rln.href || rln.getAttribute("href") || "").trim()) : "";
-              var pcn = String(mcGuessProductCodeFromRow(trn, rhn) || "").toLowerCase();
-              if (pcn && pcn === wantPc) mcApplyCartTargetPrice(trn, total);
-            }
+      var tblf = cartTable;
+      if (!tblf || !tblf.querySelector) return;
+      var rowsf = tblf.querySelectorAll("tbody tr, tr");
+      var need = [];
+      for (var rf = 0; rf < rowsf.length; rf++) {
+        var trf = rowsf[rf];
+        if (trf.querySelector("th")) continue;
+        if (trf.querySelectorAll("td").length < 4) continue;
+        if (!trf.querySelector("img")) continue;
+        var rtf = (trf.textContent || "").toLowerCase();
+        if (rtf.indexOf("tax:") !== -1 || /total:\s*\$/.test(rtf)) continue;
+        need.push(trf);
+      }
+      if (need.length === 1) {
+        mcApplyCartTargetPrice(need[0], total);
+      } else {
+        for (var nf = 0; nf < need.length; nf++) {
+          var trn = need[nf];
+          if (trn.dataset && trn.dataset.mcPlannerCartTarget === "1") {
+            mcApplyCartTargetPrice(trn, total);
+          } else if (wantPc) {
+            var rln = trn.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]');
+            var rhn = rln ? ((rln.href || rln.getAttribute("href") || "").trim()) : "";
+            var pcn = String(mcGuessProductCodeFromRow(trn, rhn) || "").toLowerCase();
+            if (pcn && pcn === wantPc) mcApplyCartTargetPrice(trn, total);
           }
         }
-        break;
       }
     }
-    function mcAlignSubtotalForSingleLinePlanner(root, total){
-      if (!(total > 0) || !root || !root.querySelectorAll) return;
-      var tables = root.querySelectorAll("table");
-      for (var ti = 0; ti < tables.length; ti++) {
-        var tb = tables[ti];
-        if ((tb.textContent || "").toLowerCase().indexOf("related products") !== -1) continue;
-        if (!tb.querySelector("img")) continue;
-        var rows = tb.querySelectorAll("tbody tr, tr");
-        var imgRows = 0;
-        for (var r = 0; r < rows.length; r++) {
-          if (rows[r].querySelector("th")) continue;
-          if (rows[r].querySelectorAll("td").length < 4) continue;
-          if (rows[r].querySelector("img")) imgRows++;
+    function mcAlignSubtotalForSingleLinePlanner(root, total, cartTable){
+      if (!(total > 0) || !root || !root.querySelectorAll || !cartTable) return;
+      var tb = cartTable;
+      var rows = tb.querySelectorAll("tbody tr, tr");
+      var imgRows = 0;
+      for (var r = 0; r < rows.length; r++) {
+        if (rows[r].querySelector("th")) continue;
+        if (rows[r].querySelectorAll("td").length < 4) continue;
+        if (rows[r].querySelector("img")) imgRows++;
+      }
+      if (imgRows !== 1) return;
+      var trsAll = root.querySelectorAll("tr");
+      for (var si = 0; si < trsAll.length; si++) {
+        var trs = trsAll[si];
+        if (trs.querySelector("img")) continue;
+        var st = (trs.textContent || "").toLowerCase();
+        if (!/\bsubtotal\b/.test(st) && !/\bmerchandise total\b/.test(st)) continue;
+        if (/\bgrand total\b/.test(st) || /\border total\b/.test(st)) continue;
+        var tdc = trs.querySelectorAll("td, th");
+        for (var jk = tdc.length - 1; jk >= 0; jk--) {
+          var tx2 = (tdc[jk].textContent || "").trim();
+          if (!/\$[\d,]+/.test(tx2)) continue;
+          tdc[jk].textContent = tx2.replace(/\$[\d,]+(?:\.\d+)?/, mcFmtMoney(total));
+          return;
         }
-        if (imgRows !== 1) return;
-        var trsAll = root.querySelectorAll("tr");
-        for (var si = 0; si < trsAll.length; si++) {
-          var trs = trsAll[si];
-          if (trs.querySelector("img")) continue;
-          var st = (trs.textContent || "").toLowerCase();
-          if (!/\bsubtotal\b/.test(st) && !/\bmerchandise total\b/.test(st)) continue;
-          if (/\bgrand total\b/.test(st) || /\border total\b/.test(st)) continue;
-          var tdc = trs.querySelectorAll("td, th");
-          for (var jk = tdc.length - 1; jk >= 0; jk--) {
-            var tx2 = (tdc[jk].textContent || "").trim();
-            if (!/\$[\d,]+/.test(tx2)) continue;
-            tdc[jk].textContent = tx2.replace(/\$[\d,]+(?:\.\d+)?/, mcFmtMoney(total));
-            return;
-          }
-        }
-        return;
       }
     }
     function mcGuessQtyFromRow(tr){
@@ -10703,11 +10725,29 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     content.querySelectorAll("td.mc-cart-remove-x").forEach(function(td){ td.remove(); });
     content.querySelectorAll("tr.mc-remove-x-done").forEach(function(tr){ tr.classList.remove("mc-remove-x-done"); });
     var tables = content.querySelectorAll("table");
-    for (var t = 0; t < tables.length; t++) {
-      var tbl = tables[t];
+    var mcSelectedCartTable = null;
+    var bestTblScore = 0;
+    for (var tbI = 0; tbI < tables.length; tbI++) {
+      var tbc = tables[tbI];
+      var tbcText = (tbc.textContent || "").toLowerCase();
+      if (tbcText.indexOf("related products") !== -1) continue;
+      if (!tbc.querySelector("img")) continue;
+      var rowsScore = tbc.querySelectorAll("tbody tr, tr");
+      var score = 0;
+      for (var rc = 0; rc < rowsScore.length; rc++) {
+        var rw = rowsScore[rc];
+        if (rw.querySelector("th")) continue;
+        if (rw.querySelectorAll("td").length < 4) continue;
+        if (rw.querySelector("img")) score++;
+      }
+      if (score > bestTblScore) {
+        bestTblScore = score;
+        mcSelectedCartTable = tbc;
+      }
+    }
+    if (mcSelectedCartTable && bestTblScore > 0) {
+      var tbl = mcSelectedCartTable;
       var tblText = (tbl.textContent || "").toLowerCase();
-      if (tblText.indexOf("related products") !== -1) continue;
-      if (!tbl.querySelector("img")) continue;
       var rows = tbl.querySelectorAll("tbody tr, tr");
       var lineItemRows = 0;
       for (var r = 0; r < rows.length; r++) {
@@ -10716,7 +10756,9 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
         if (row.querySelectorAll("td").length < 4) continue;
         if (row.querySelector("img")) lineItemRows++;
       }
-      if (lineItemRows === 0) continue;
+      if (lineItemRows === 0) {
+        /* keep mcSelectedCartTable for final enforce */
+      } else {
       var loneLineTr = null;
       if (lineItemRows === 1) {
         for (var r0 = 0; r0 < rows.length; r0++) {
@@ -10890,7 +10932,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
           mcCartTargetApplied = true;
         }
       }
-      break;
+      }
     }
     if (!mcSuppressCart4L && mcTotal4LDiscount > 0) {
       var moneyNodes = content.querySelectorAll("td, span, strong, b, font");
@@ -10908,7 +10950,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
         moneyNodes[mn].textContent = tx.replace(/\$[\d,]+(?:\.\d+)?/, mcFmtMoney(adj));
       }
     }
-    if (mcCartDelta !== 0) {
+    if (!mcSuppressCart4L && mcCartDelta !== 0) {
       mcApplyCartSummaryDelta(mcCartDelta);
     }
     // Hard fallback: if no row-level application happened, apply pending discount to summary totals.
@@ -10942,9 +10984,9 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
       if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(note, anchor);
       else content.appendChild(note);
     }
-    if (mcPlannerLineTotal > 0) {
-      mcFinalEnforcePlannerLinePrice(content, mcPlannerLineTotal);
-      mcAlignSubtotalForSingleLinePlanner(content, mcPlannerLineTotal);
+    if (mcPlannerLineTotal > 0 && mcSelectedCartTable) {
+      mcFinalEnforcePlannerLinePrice(content, mcPlannerLineTotal, mcSelectedCartTable);
+      mcAlignSubtotalForSingleLinePlanner(content, mcPlannerLineTotal, mcSelectedCartTable);
     }
   }
   function runWhenCartReady() {
@@ -10961,6 +11003,23 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
   setTimeout(runWhenCartReady, 1500);
   setTimeout(runWhenCartReady, 3000);
   setTimeout(runWhenCartReady, 5000);
+  function mcInstallCartPriceObserver(){
+    if (!isCartPage() || typeof MutationObserver === "undefined") return;
+    var ca = document.getElementById("content_area");
+    if (!ca || ca.dataset.mcCartPriceObserver) return;
+    ca.dataset.mcCartPriceObserver = "1";
+    var deb = null;
+    var mo = new MutationObserver(function(){
+      if (!isCartPage()) return;
+      if (deb) clearTimeout(deb);
+      deb = setTimeout(function(){ runWhenCartReady(); }, 400);
+    });
+    try {
+      mo.observe(ca, { childList: true, subtree: true, characterData: true });
+    } catch (eMo) {}
+  }
+  setTimeout(mcInstallCartPriceObserver, 600);
+  setTimeout(mcInstallCartPriceObserver, 2800);
 })();
 </script>
 
