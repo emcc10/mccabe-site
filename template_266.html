@@ -150,7 +150,7 @@
 })();
 </script>
 <!-- MC_DEPLOY_VERIFY_20260417resync: force overwrite of corrupted live template (duplicate mcSubmitAuthForm) -->
-<meta name="mc-deploy-verify" content="20260420planner-native-option-sync">
+<meta name="mc-deploy-verify" content="20260420vertex-theater-option-map">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -3905,14 +3905,15 @@ window.addEventListener("message", function (event) {
 });
 
 /**
- * Planner → Volusion native OPTION selects (server prices from ProductCode + selects).
- * Deletes prior role: payload/XHR/fetch trace. No hidden price overrides; no top MAP changes.
+ * Palliser Vertex theater: Volusion prices from SELECT___PALLISER-VERTEX-THEATER-CHAIR___* only (no hidden price).
+ * Optional: window.MC_PALLISER_VERTEX_THEATER_OPTION_MAP[ mcVertexTheaterPlannerKey(payload) ] = { fullSelectName: "volusionValue", ... }
+ * No top MAP changes; no hidden price fields.
  */
 (function mcPlannerVolusionNativeOptionSelects(){
   if (window.__mcPlannerVolusionNativeOptionSelects) return;
   window.__mcPlannerVolusionNativeOptionSelects = true;
 
-  var LOG = "[McCabe PLANNER OPTIONS]";
+  var LOG = "[McCabe VERTEX THEATER]";
 
   function isPdp(){
     if (!document.body) return false;
@@ -3924,74 +3925,21 @@ window.addEventListener("message", function (event) {
     return typeof window.mcFindProductDetailsForm === "function" ? window.mcFindProductDetailsForm(document) : null;
   }
 
-  function classifySelect(sel){
-    var row = sel.closest("tr");
-    var meta = (
-      (row ? row.textContent : "") + " " +
-      (sel.getAttribute("title") || "") + " " +
-      (sel.name || "") + " " +
-      (sel.id || "")
-    )
-      .toLowerCase()
-      .replace(/\s+/g, " ");
-    if (/number of seats|# of seats|how many seats|quantity of seats|seat quantity|seats:/.test(meta)) return "seats";
-    if (/choose configuration|configuration|layout|arrangement|recliner layout|section layout/.test(meta)) return "configuration";
-    if (/choose cover|select cover|leather|fabric|grade|upholstery|swatch/.test(meta)) return "cover";
-    return "other";
+  function isVertexTheaterSelect(sel){
+    return /SELECT___PALLISER-VERTEX-THEATER-CHAIR___/i.test(sel.name || "");
   }
 
-  function serializeSelect(sel){
-    var opts = [];
-    var i;
-    for (i = 0; i < sel.options.length; i++) {
-      var o = sel.options[i];
-      opts.push({ index: i, value: o.value, text: String(o.text || "").trim() });
-    }
-    var cur = sel.options[sel.selectedIndex];
-    return {
-      role: classifySelect(sel),
-      name: sel.name || "",
-      id: sel.id || "",
-      title: sel.getAttribute("title") || "",
-      selectedIndex: sel.selectedIndex,
-      selectedValue: sel.value,
-      selectedText: cur ? String(cur.text || "").trim() : "",
-      optionCount: sel.options.length,
-      allOptions: opts
-    };
+  function nameSuffix(sel){
+    var m = String(sel.name || "").match(/___(\d+)\s*$/i);
+    return m ? m[1] : "";
   }
 
-  function mcLogVolusionPdpOptionSelects(tag, payload){
-    if (!isPdp()) return;
-    var form = getAtcForm();
-    if (!form) {
-      console.log(LOG, tag, { formFound: false });
-      return;
-    }
-    var selects = Array.prototype.slice.call(form.querySelectorAll("select"));
-    var rows = selects.map(serializeSelect);
-    var bundle = {
-      tag: tag,
-      ts: new Date().toISOString(),
-      selectCount: rows.length,
-      selects: rows,
-      payloadSeatCount: payload && payload.seatCount,
-      payloadLayoutLen: payload && payload.layout && payload.layout.length
-    };
-    console.log(LOG, bundle);
-    try {
-      console.table(
-        rows.map(function (r) {
-          return {
-            role: r.role,
-            name: r.name,
-            selectedValue: r.selectedValue,
-            selectedText: r.selectedText.slice(0, 140)
-          };
-        })
-      );
-    } catch (eT) {}
-    return bundle;
+  function vertexTheaterSelectsSorted(form){
+    var list = Array.prototype.slice.call(form.querySelectorAll("select")).filter(isVertexTheaterSelect);
+    list.sort(function (a, b) {
+      return Number(nameSuffix(a)) - Number(nameSuffix(b));
+    });
+    return list;
   }
 
   function plannerSeatCount(payload){
@@ -4016,6 +3964,32 @@ window.addEventListener("message", function (event) {
     }, 0);
   }
 
+  function plannerPieceListSorted(payload){
+    var layout = payload.layout && Array.isArray(payload.layout) ? payload.layout : [];
+    var opts = payload.options || payload.counts || {};
+    var ids = [];
+    if (layout.length) {
+      layout.forEach(function (s) {
+        ids.push(String(s.id || s).toUpperCase());
+      });
+    } else {
+      Object.keys(opts).forEach(function (k) {
+        var c = Number(opts[k] || 0);
+        var ku = String(k).toUpperCase();
+        var j;
+        for (j = 0; j < c; j++) ids.push(ku);
+      });
+    }
+    ids.sort();
+    return ids;
+  }
+
+  function mcVertexTheaterPlannerKey(payload){
+    var sc = plannerSeatCount(payload);
+    var ids = plannerPieceListSorted(payload);
+    return "SC" + sc + "_" + ids.join("-");
+  }
+
   function normalizeOptText(s){
     return String(s || "")
       .toLowerCase()
@@ -4024,17 +3998,105 @@ window.addEventListener("message", function (event) {
       .trim();
   }
 
-  function scoreConfigurationOption(optionText, layout, opts, seatCount){
-    var t = normalizeOptText(optionText);
-    if (!t || /^choose|^select|^please/.test(t)) return -1;
+  function serializeSelect(sel){
+    var opts = [];
+    var i;
+    for (i = 0; i < sel.options.length; i++) {
+      var o = sel.options[i];
+      opts.push({ index: i, value: String(o.value != null ? o.value : ""), text: String(o.text || "").trim() });
+    }
+    var cur = sel.options[sel.selectedIndex];
+    return {
+      vertexTheater: isVertexTheaterSelect(sel),
+      suffix: nameSuffix(sel),
+      name: sel.name || "",
+      id: sel.id || "",
+      title: sel.getAttribute("title") || "",
+      selectedIndex: sel.selectedIndex,
+      selectedValue: sel.value,
+      selectedText: cur ? String(cur.text || "").trim() : "",
+      optionCount: sel.options.length,
+      allOptions: opts
+    };
+  }
+
+  function mcLogVolusionPdpOptionSelects(tag, payload){
+    if (!isPdp()) return;
+    var form = getAtcForm();
+    if (!form) {
+      console.log(LOG, tag, { formFound: false });
+      return;
+    }
+    var selects = Array.prototype.slice.call(form.querySelectorAll("select"));
+    var rows = selects.map(serializeSelect);
+    var bundle = {
+      tag: tag,
+      plannerKey: payload ? mcVertexTheaterPlannerKey(payload) : null,
+      ts: new Date().toISOString(),
+      selectCount: rows.length,
+      selects: rows
+    };
+    console.log(LOG, bundle);
+    rows.forEach(function (r) {
+      if (!r.vertexTheater) return;
+      console.log(LOG, "full inventory " + r.name, r.allOptions);
+    });
+    try {
+      console.table(
+        rows.map(function (r) {
+          return {
+            vertex: r.vertexTheater ? "Y" : "",
+            suffix: r.suffix,
+            name: r.name.slice(-32),
+            selectedValue: r.selectedValue,
+            selectedText: r.selectedText.slice(0, 120),
+            nOpts: r.optionCount
+          };
+        })
+      );
+    } catch (eT) {}
+    return bundle;
+  }
+
+  function setSelectByVolusionValue(sel, valueStr){
+    var vWant = String(valueStr);
+    var i;
+    for (i = 0; i < sel.options.length; i++) {
+      if (String(sel.options[i].value) === vWant) {
+        sel.selectedIndex = i;
+        try {
+          sel.dispatchEvent(new Event("change", { bubbles: true }));
+        } catch (eC) {}
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function scoreVertexOptionRow(textRaw, valueRaw, payload, seatCount, layout, opts){
+    var text = String(textRaw || "");
+    var t = normalizeOptText(text);
+    var v = String(valueRaw != null ? valueRaw : "");
+    if (!v || v === "0") return -9999;
+    if (!t || /^choose|^select|^please/.test(t)) return -8000;
     var score = 0;
+    var mDigit = text.replace(/\s/g, "").match(/^(\d+)$/);
+    if (mDigit && seatCount > 0) {
+      var d = Number(mDigit[1]);
+      if (d === seatCount) score += 120;
+      else score -= 150;
+    }
+    if (seatCount > 0) {
+      if (new RegExp("\\b" + seatCount + "\\b").test(t)) score += 80;
+      if (new RegExp("\\b" + seatCount + "\\b").test(text.toLowerCase())) score += 40;
+    }
     var ids = [];
     if (layout && layout.length) {
       layout.forEach(function (s) {
         ids.push(String(s.id || s).toUpperCase());
       });
-    } else if (opts && typeof opts === "object") {
-      Object.keys(opts).forEach(function (k) {
+    } else {
+      Object.keys(opts || {}).forEach(function (k) {
         var c = Number(opts[k] || 0);
         var ku = String(k).toUpperCase();
         var j;
@@ -4042,21 +4104,64 @@ window.addEventListener("message", function (event) {
       });
     }
     ids.forEach(function (id) {
-      if (id && t.indexOf(id.toLowerCase()) !== -1) score += 8;
+      if (id && t.indexOf(id.toLowerCase()) !== -1) score += 25;
     });
-    if (seatCount > 0) {
-      var re = new RegExp("\\b" + seatCount + "\\b");
-      if (re.test(t)) score += 4;
+    var room = payload && payload.room;
+    if (room && room.widthTotalIn != null) {
+      var wi = Math.round(Number(room.widthTotalIn));
+      if (wi > 0 && (t.indexOf(String(wi)) !== -1 || t.indexOf(String(Math.floor(wi / 12))) !== -1)) score += 18;
     }
-    var sorted = ids
-      .slice()
+    if (room && room.depthTotalIn != null) {
+      var di = Math.round(Number(room.depthTotalIn));
+      if (di > 0 && t.indexOf(String(di)) !== -1) score += 18;
+    }
+    var uniq = {};
+    ids.forEach(function (x) {
+      uniq[x] = true;
+    });
+    var sortedSig = Object.keys(uniq)
       .sort()
-      .join(" ")
-      .replace(/\s+/g, "")
+      .join("")
       .toLowerCase();
-    var tCompact = t.replace(/\s/g, "");
-    if (sorted.length > 1 && tCompact.indexOf(sorted) !== -1) score += 25;
+    if (sortedSig.length > 1) {
+      var tCompact = t.replace(/\s/g, "");
+      if (tCompact.indexOf(sortedSig) !== -1) score += 40;
+    }
     return score;
+  }
+
+  function bestOptionIndexForVertexSelect(sel, payload, seatCount, layout, opts){
+    var bestI = -1;
+    var bestScore = -Infinity;
+    var j;
+    for (j = 0; j < sel.options.length; j++) {
+      var oj = sel.options[j];
+      var sc = scoreVertexOptionRow(oj.text, oj.value, payload, seatCount, layout, opts);
+      if (sc > bestScore) {
+        bestScore = sc;
+        bestI = j;
+      }
+    }
+    if (bestI >= 0 && bestScore > -5000) return bestI;
+    return -1;
+  }
+
+  function applyExplicitVertexMap(vertexSels, key, payload){
+    var table = window.MC_PALLISER_VERTEX_THEATER_OPTION_MAP;
+    if (!table || typeof table !== "object") return false;
+    var row = table[key];
+    if (!row || typeof row !== "object") return false;
+    var applied = false;
+    vertexSels.forEach(function (sel) {
+      var nm = sel.name;
+      var suf = "___" + nameSuffix(sel);
+      var val = row[nm] != null ? row[nm] : row[suf];
+      if (val != null && String(val) !== "" && setSelectByVolusionValue(sel, String(val))) applied = true;
+    });
+    if (applied) {
+      console.log(LOG, "applied MC_PALLISER_VERTEX_THEATER_OPTION_MAP", { key: key });
+    }
+    return applied;
   }
 
   function mcSyncPlannerPayloadToVolusionOptionSelects(payload){
@@ -4066,54 +4171,21 @@ window.addEventListener("message", function (event) {
     var seatCount = plannerSeatCount(payload);
     var layout = payload.layout && Array.isArray(payload.layout) ? payload.layout : [];
     var opts = payload.options || payload.counts || {};
-    var selects = Array.prototype.slice.call(form.querySelectorAll("select"));
-    selects.forEach(function (sel) {
-      var role = classifySelect(sel);
-      if (role === "cover") return;
-      if (role === "seats" && seatCount > 0) {
-        var bestI = -1;
-        var bestRank = -1;
-        var i;
-        for (i = 0; i < sel.options.length; i++) {
-          var o = sel.options[i];
-          var textL = String(o.text || "").toLowerCase();
-          var v = String(o.value || "");
-          var rank = 0;
-          if (new RegExp("\\b" + seatCount + "\\b").test(textL)) rank += 100;
-          if (v === String(seatCount)) rank += 100;
-          if (textL.indexOf(String(seatCount)) !== -1) rank += 40;
-          if (rank > bestRank) {
-            bestRank = rank;
-            bestI = i;
-          }
-        }
-        if (bestI > 0 && bestRank > 0) {
-          sel.selectedIndex = bestI;
-          try {
-            sel.dispatchEvent(new Event("change", { bubbles: true }));
-          } catch (eC) {}
-        }
+    var vertexSels = vertexTheaterSelectsSorted(form);
+    if (!vertexSels.length) return;
+    var key = mcVertexTheaterPlannerKey(payload);
+    if (applyExplicitVertexMap(vertexSels, key, payload)) return;
+    var k;
+    for (k = 0; k < vertexSels.length; k++) {
+      var sel = vertexSels[k];
+      var idx = bestOptionIndexForVertexSelect(sel, payload, seatCount, layout, opts);
+      if (idx > 0) {
+        sel.selectedIndex = idx;
+        try {
+          sel.dispatchEvent(new Event("change", { bubbles: true }));
+        } catch (eCh) {}
       }
-      if (role === "configuration") {
-        var bestJ = -1;
-        var bestScore = -1;
-        var j;
-        for (j = 0; j < sel.options.length; j++) {
-          var oj = sel.options[j];
-          var sc = scoreConfigurationOption(oj.text || "", layout, opts, seatCount);
-          if (sc > bestScore) {
-            bestScore = sc;
-            bestJ = j;
-          }
-        }
-        if (bestJ > 0 && bestScore >= 5) {
-          sel.selectedIndex = bestJ;
-          try {
-            sel.dispatchEvent(new Event("change", { bubbles: true }));
-          } catch (eC2) {}
-        }
-      }
-    });
+    }
   }
 
   function looksLikeProductAtcForm(form){
@@ -4126,6 +4198,7 @@ window.addEventListener("message", function (event) {
 
   window.mcLogVolusionPdpOptionSelects = mcLogVolusionPdpOptionSelects;
   window.mcSyncPlannerPayloadToVolusionOptionSelects = mcSyncPlannerPayloadToVolusionOptionSelects;
+  window.mcVertexTheaterPlannerKey = mcVertexTheaterPlannerKey;
 
   var innerApply = window.applyPlannerToPage;
   if (typeof innerApply === "function" && !innerApply.__mcPlannerNativeSelectWrapped) {
