@@ -149,8 +149,8 @@
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260417resync: force overwrite of corrupted live template (duplicate mcSubmitAuthForm) -->
-<meta name="mc-deploy-verify" content="20260420vertex-theater-option-map">
+<!-- MC_DEPLOY_VERIFY_20260417vertex-debug: remove vertex option-writer; add debug-only logger -->
+<meta name="mc-deploy-verify" content="20260417vertex-debug-logger-only">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -3904,332 +3904,8 @@ window.addEventListener("message", function (event) {
   if (typeof window.applyPlannerToPage === "function") window.applyPlannerToPage(payload);
 });
 
-/**
- * Palliser Vertex theater: Volusion prices from SELECT___PALLISER-VERTEX-THEATER-CHAIR___* only (no hidden price).
- * Optional: window.MC_PALLISER_VERTEX_THEATER_OPTION_MAP[ mcVertexTheaterPlannerKey(payload) ] = { fullSelectName: "volusionValue", ... }
- * No top MAP changes; no hidden price fields.
- */
-(function mcPlannerVolusionNativeOptionSelects(){
-  if (window.__mcPlannerVolusionNativeOptionSelects) return;
-  window.__mcPlannerVolusionNativeOptionSelects = true;
-
-  var LOG = "[McCabe VERTEX THEATER]";
-
-  function isPdp(){
-    if (!document.body) return false;
-    if (document.body.classList.contains("productdetails") || document.body.classList.contains("mc-product-page")) return true;
-    return /\bproductdetails\b/i.test(document.body.className || "");
-  }
-
-  function getAtcForm(){
-    return typeof window.mcFindProductDetailsForm === "function" ? window.mcFindProductDetailsForm(document) : null;
-  }
-
-  function isVertexTheaterSelect(sel){
-    return /SELECT___PALLISER-VERTEX-THEATER-CHAIR___/i.test(sel.name || "");
-  }
-
-  function nameSuffix(sel){
-    var m = String(sel.name || "").match(/___(\d+)\s*$/i);
-    return m ? m[1] : "";
-  }
-
-  function vertexTheaterSelectsSorted(form){
-    var list = Array.prototype.slice.call(form.querySelectorAll("select")).filter(isVertexTheaterSelect);
-    list.sort(function (a, b) {
-      return Number(nameSuffix(a)) - Number(nameSuffix(b));
-    });
-    return list;
-  }
-
-  function plannerSeatCount(payload){
-    if (!payload || typeof payload !== "object") return 0;
-    var n = Number(payload.seatCount);
-    if (!isNaN(n) && n > 0) return n;
-    var opts = payload.options || payload.counts || {};
-    if (opts["4L"]) {
-      return (
-        opts["4L"] * 2 +
-        Object.keys(opts)
-          .filter(function (k) {
-            return k !== "4L";
-          })
-          .reduce(function (t, k) {
-            return t + (Number(opts[k]) || 0);
-          }, 0)
-      );
-    }
-    return Object.keys(opts).reduce(function (t, k) {
-      return t + (Number(opts[k]) || 0);
-    }, 0);
-  }
-
-  function plannerPieceListSorted(payload){
-    var layout = payload.layout && Array.isArray(payload.layout) ? payload.layout : [];
-    var opts = payload.options || payload.counts || {};
-    var ids = [];
-    if (layout.length) {
-      layout.forEach(function (s) {
-        ids.push(String(s.id || s).toUpperCase());
-      });
-    } else {
-      Object.keys(opts).forEach(function (k) {
-        var c = Number(opts[k] || 0);
-        var ku = String(k).toUpperCase();
-        var j;
-        for (j = 0; j < c; j++) ids.push(ku);
-      });
-    }
-    ids.sort();
-    return ids;
-  }
-
-  function mcVertexTheaterPlannerKey(payload){
-    var sc = plannerSeatCount(payload);
-    var ids = plannerPieceListSorted(payload);
-    return "SC" + sc + "_" + ids.join("-");
-  }
-
-  function normalizeOptText(s){
-    return String(s || "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function serializeSelect(sel){
-    var opts = [];
-    var i;
-    for (i = 0; i < sel.options.length; i++) {
-      var o = sel.options[i];
-      opts.push({ index: i, value: String(o.value != null ? o.value : ""), text: String(o.text || "").trim() });
-    }
-    var cur = sel.options[sel.selectedIndex];
-    return {
-      vertexTheater: isVertexTheaterSelect(sel),
-      suffix: nameSuffix(sel),
-      name: sel.name || "",
-      id: sel.id || "",
-      title: sel.getAttribute("title") || "",
-      selectedIndex: sel.selectedIndex,
-      selectedValue: sel.value,
-      selectedText: cur ? String(cur.text || "").trim() : "",
-      optionCount: sel.options.length,
-      allOptions: opts
-    };
-  }
-
-  function mcLogVolusionPdpOptionSelects(tag, payload){
-    if (!isPdp()) return;
-    var form = getAtcForm();
-    if (!form) {
-      console.log(LOG, tag, { formFound: false });
-      return;
-    }
-    var selects = Array.prototype.slice.call(form.querySelectorAll("select"));
-    var rows = selects.map(serializeSelect);
-    var bundle = {
-      tag: tag,
-      plannerKey: payload ? mcVertexTheaterPlannerKey(payload) : null,
-      ts: new Date().toISOString(),
-      selectCount: rows.length,
-      selects: rows
-    };
-    console.log(LOG, bundle);
-    rows.forEach(function (r) {
-      if (!r.vertexTheater) return;
-      console.log(LOG, "full inventory " + r.name, r.allOptions);
-    });
-    try {
-      console.table(
-        rows.map(function (r) {
-          return {
-            vertex: r.vertexTheater ? "Y" : "",
-            suffix: r.suffix,
-            name: r.name.slice(-32),
-            selectedValue: r.selectedValue,
-            selectedText: r.selectedText.slice(0, 120),
-            nOpts: r.optionCount
-          };
-        })
-      );
-    } catch (eT) {}
-    return bundle;
-  }
-
-  function setSelectByVolusionValue(sel, valueStr){
-    var vWant = String(valueStr);
-    var i;
-    for (i = 0; i < sel.options.length; i++) {
-      if (String(sel.options[i].value) === vWant) {
-        sel.selectedIndex = i;
-        try {
-          sel.dispatchEvent(new Event("change", { bubbles: true }));
-        } catch (eC) {}
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function scoreVertexOptionRow(textRaw, valueRaw, payload, seatCount, layout, opts){
-    var text = String(textRaw || "");
-    var t = normalizeOptText(text);
-    var v = String(valueRaw != null ? valueRaw : "");
-    if (!v || v === "0") return -9999;
-    if (!t || /^choose|^select|^please/.test(t)) return -8000;
-    var score = 0;
-    var mDigit = text.replace(/\s/g, "").match(/^(\d+)$/);
-    if (mDigit && seatCount > 0) {
-      var d = Number(mDigit[1]);
-      if (d === seatCount) score += 120;
-      else score -= 150;
-    }
-    if (seatCount > 0) {
-      if (new RegExp("\\b" + seatCount + "\\b").test(t)) score += 80;
-      if (new RegExp("\\b" + seatCount + "\\b").test(text.toLowerCase())) score += 40;
-    }
-    var ids = [];
-    if (layout && layout.length) {
-      layout.forEach(function (s) {
-        ids.push(String(s.id || s).toUpperCase());
-      });
-    } else {
-      Object.keys(opts || {}).forEach(function (k) {
-        var c = Number(opts[k] || 0);
-        var ku = String(k).toUpperCase();
-        var j;
-        for (j = 0; j < c; j++) ids.push(ku);
-      });
-    }
-    ids.forEach(function (id) {
-      if (id && t.indexOf(id.toLowerCase()) !== -1) score += 25;
-    });
-    var room = payload && payload.room;
-    if (room && room.widthTotalIn != null) {
-      var wi = Math.round(Number(room.widthTotalIn));
-      if (wi > 0 && (t.indexOf(String(wi)) !== -1 || t.indexOf(String(Math.floor(wi / 12))) !== -1)) score += 18;
-    }
-    if (room && room.depthTotalIn != null) {
-      var di = Math.round(Number(room.depthTotalIn));
-      if (di > 0 && t.indexOf(String(di)) !== -1) score += 18;
-    }
-    var uniq = {};
-    ids.forEach(function (x) {
-      uniq[x] = true;
-    });
-    var sortedSig = Object.keys(uniq)
-      .sort()
-      .join("")
-      .toLowerCase();
-    if (sortedSig.length > 1) {
-      var tCompact = t.replace(/\s/g, "");
-      if (tCompact.indexOf(sortedSig) !== -1) score += 40;
-    }
-    return score;
-  }
-
-  function bestOptionIndexForVertexSelect(sel, payload, seatCount, layout, opts){
-    var bestI = -1;
-    var bestScore = -Infinity;
-    var j;
-    for (j = 0; j < sel.options.length; j++) {
-      var oj = sel.options[j];
-      var sc = scoreVertexOptionRow(oj.text, oj.value, payload, seatCount, layout, opts);
-      if (sc > bestScore) {
-        bestScore = sc;
-        bestI = j;
-      }
-    }
-    if (bestI >= 0 && bestScore > -5000) return bestI;
-    return -1;
-  }
-
-  function applyExplicitVertexMap(vertexSels, key, payload){
-    var table = window.MC_PALLISER_VERTEX_THEATER_OPTION_MAP;
-    if (!table || typeof table !== "object") return false;
-    var row = table[key];
-    if (!row || typeof row !== "object") return false;
-    var applied = false;
-    vertexSels.forEach(function (sel) {
-      var nm = sel.name;
-      var suf = "___" + nameSuffix(sel);
-      var val = row[nm] != null ? row[nm] : row[suf];
-      if (val != null && String(val) !== "" && setSelectByVolusionValue(sel, String(val))) applied = true;
-    });
-    if (applied) {
-      console.log(LOG, "applied MC_PALLISER_VERTEX_THEATER_OPTION_MAP", { key: key });
-    }
-    return applied;
-  }
-
-  function mcSyncPlannerPayloadToVolusionOptionSelects(payload){
-    if (!isPdp() || !payload || typeof payload !== "object") return;
-    var form = getAtcForm();
-    if (!form) return;
-    var seatCount = plannerSeatCount(payload);
-    var layout = payload.layout && Array.isArray(payload.layout) ? payload.layout : [];
-    var opts = payload.options || payload.counts || {};
-    var vertexSels = vertexTheaterSelectsSorted(form);
-    if (!vertexSels.length) return;
-    var key = mcVertexTheaterPlannerKey(payload);
-    if (applyExplicitVertexMap(vertexSels, key, payload)) return;
-    var k;
-    for (k = 0; k < vertexSels.length; k++) {
-      var sel = vertexSels[k];
-      var idx = bestOptionIndexForVertexSelect(sel, payload, seatCount, layout, opts);
-      if (idx > 0) {
-        sel.selectedIndex = idx;
-        try {
-          sel.dispatchEvent(new Event("change", { bubbles: true }));
-        } catch (eCh) {}
-      }
-    }
-  }
-
-  function looksLikeProductAtcForm(form){
-    if (!form || form.tagName !== "FORM" || !isPdp()) return false;
-    if (!form.querySelector('input[name="ProductCode"], input#ProductCode')) return false;
-    return !!form.querySelector(
-      'input[name="btnaddtocart"], input[id*="btnaddtocart"], input[id*="BtnAddToCart"], button[name="btnaddtocart"]'
-    );
-  }
-
-  window.mcLogVolusionPdpOptionSelects = mcLogVolusionPdpOptionSelects;
-  window.mcSyncPlannerPayloadToVolusionOptionSelects = mcSyncPlannerPayloadToVolusionOptionSelects;
-  window.mcVertexTheaterPlannerKey = mcVertexTheaterPlannerKey;
-
-  var innerApply = window.applyPlannerToPage;
-  if (typeof innerApply === "function" && !innerApply.__mcPlannerNativeSelectWrapped) {
-    window.applyPlannerToPage = function (payload) {
-      innerApply.apply(this, arguments);
-      try {
-        mcSyncPlannerPayloadToVolusionOptionSelects(payload);
-        mcLogVolusionPdpOptionSelects("after-planner-apply", payload);
-      } catch (eW) {
-        console.warn(LOG, "applyPlanner wrap", eW);
-      }
-    };
-    window.applyPlannerToPage.__mcPlannerNativeSelectWrapped = 1;
-  }
-
-  document.addEventListener(
-    "submit",
-    function (ev) {
-      var form = ev.target;
-      if (!looksLikeProductAtcForm(form)) return;
-      try {
-        var last = window.__mcLastPlannerPayload;
-        if (last) mcSyncPlannerPayloadToVolusionOptionSelects(last);
-        mcLogVolusionPdpOptionSelects("immediately-before-add-to-cart-submit", last || {});
-      } catch (eS) {
-        console.warn(LOG, "submit", eS);
-      }
-    },
-    true
-  );
-})();
+/* Vertex theater option-writer removed: heuristic scoring was picking wrong leather/option rows
+ * and triggering a false upcharge in the cart. Native Volusion selects now drive pricing again. */
 
 // Mount inline UI after DOM + Volusion settle
 setTimeout(mount, 600);
@@ -4260,6 +3936,89 @@ function clearPlannerWhenLeavingProductPage() {
 window.addEventListener("pagehide", clearPlannerWhenLeavingProductPage);
 window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
 
+})();
+</script>
+
+<!-- Vertex theater DEBUG-ONLY: logs selected option values on planner Apply and Add To Cart. No writes. -->
+<script>
+(function(){
+  if (window.__MC_VERTEX_DEBUG_ONLY__) return;
+  window.__MC_VERTEX_DEBUG_ONLY__ = true;
+
+  function cleanText(s){
+    return (s || '').replace(/\s+/g,' ').trim();
+  }
+
+  function dump(){
+    var root = document.querySelector('#v65-product-parent') || document.body;
+    var sels = Array.from(root.querySelectorAll('select')).map(function(el){
+      var opt = el.options[el.selectedIndex];
+      return {
+        name: el.name || '',
+        id: el.id || '',
+        selectedText: opt ? opt.text : '',
+        selectedValue: opt ? opt.value : '',
+        allOptions: Array.from(el.options).map(function(o){
+          return { text:o.text, value:o.value };
+        })
+      };
+    });
+
+    var tbody = Array.from(root.querySelectorAll('tbody')).find(function(tb){
+      var txt = cleanText(tb.innerText || tb.textContent);
+      return /retail:/i.test(txt) && /member:/i.test(txt);
+    });
+
+    var configNode = Array.from(root.querySelectorAll('*')).find(function(el){
+      return cleanText(el.innerText || el.textContent).toLowerCase() === 'configuration';
+    });
+
+    console.log('MC_VERTEX_DEBUG', {
+      selects: sels,
+      tbodyText: tbody ? cleanText(tbody.innerText || tbody.textContent) : null,
+      configurationBlock: configNode && configNode.nextElementSibling
+        ? cleanText(configNode.nextElementSibling.innerText || configNode.nextElementSibling.textContent)
+        : null
+    });
+  }
+
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if (!t) return;
+
+    if (
+      t.closest('.room-planner-trigger') ||
+      t.closest('.room-planner-btn') ||
+      t.closest('#wmOpenPlanner') ||
+      t.closest('[data-room-planner]') ||
+      /apply|planner|layout|save/i.test((t.innerText || t.textContent || '').trim())
+    ){
+      setTimeout(dump, 300);
+      setTimeout(dump, 900);
+      setTimeout(dump, 1800);
+    }
+
+    if (
+      t.closest('#btn_addtocart') ||
+      t.closest('input[value="Add To Cart"]') ||
+      t.closest('input[value="ADD TO CART"]') ||
+      t.closest('.v65-product-addtocart')
+    ){
+      dump();
+    }
+  }, true);
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', dump);
+  } else {
+    dump();
+  }
+
+  window.addEventListener('load', function(){
+    dump();
+    setTimeout(dump, 400);
+    setTimeout(dump, 1200);
+  });
 })();
 </script>
 
