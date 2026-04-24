@@ -58,15 +58,13 @@ jobs:
             echo "::error::Missing vspfiles/templates/266/css/mccabe-overrides.css (template links it after template.css)."
             exit 1
           fi
-          if [ ! -f vspfiles/templates/266/css/template.css ]; then
-            echo "::error::Missing vspfiles/templates/266/css/template.css (linked from template_266.html)."
-            exit 1
-          fi
           for f in \
+            vspfiles/templates/266/css/template.css \
             vspfiles/templates/266/js/min/design-toolkit.min.js \
             vspfiles/templates/266/js/min/template.min.js; do
             if [ ! -f "$f" ]; then
-              echo "::notice::Optional theme JS not in repo: $f — SFTP batch will skip those puts."
+              echo "::error::Missing $f (linked from template_266.html)."
+              exit 1
             fi
           done
 
@@ -205,36 +203,19 @@ jobs:
 
           try_put_pair() {
             local title="$1" tpath="$2" cpath="$3"
-            local mpath tcss tjs batch
+            local mpath tcss tjs
             mpath="$(mccabe_remote_for_css "${cpath}")"
             tcss="${mpath%/*}/template.css"
             tjs="${mpath/\/css\//\/js\/min\/}"
             tjs="${tjs%mccabe-overrides.css}"
-            batch="$(mktemp)"
-            {
-              printf '%s\n' "put template_266.html ${tpath}"
-              printf '%s\n' "put vspfiles/css/custom-safe.css ${cpath}"
-              printf '%s\n' "put vspfiles/templates/266/css/mccabe-overrides.css ${mpath}"
-              printf '%s\n' "put vspfiles/templates/266/css/template.css ${tcss}"
-              if [ -f vspfiles/templates/266/js/min/design-toolkit.min.js ]; then
-                printf '%s\n' "put vspfiles/templates/266/js/min/design-toolkit.min.js ${tjs}design-toolkit.min.js"
-              fi
-              if [ -f vspfiles/templates/266/js/min/template.min.js ]; then
-                printf '%s\n' "put vspfiles/templates/266/js/min/template.min.js ${tjs}template.min.js"
-              fi
-              printf '%s\n' "bye"
-            } > "$batch"
-            echo "::group::Try: $title"
-            echo "Batch commands:"
-            sed 's/^/  /' "$batch"
-            if run_sftp_batch "$batch"; then
-              echo "::endgroup::"
-              rm -f "$batch"
-              return 0
-            fi
-            echo "::endgroup::"
-            rm -f "$batch"
-            return 1
+            try_batch "${title}" \
+              "put template_266.html ${tpath}" \
+              "put vspfiles/css/custom-safe.css ${cpath}" \
+              "put vspfiles/templates/266/css/mccabe-overrides.css ${mpath}" \
+              "put vspfiles/templates/266/css/template.css ${tcss}" \
+              "put vspfiles/templates/266/js/min/design-toolkit.min.js ${tjs}design-toolkit.min.js" \
+              "put vspfiles/templates/266/js/min/template.min.js ${tjs}template.min.js" \
+              "bye"
           }
 
           try_put_template_only() {
@@ -258,26 +239,14 @@ jobs:
             if try_put_pair "domain-prefixed paths" "/mccabestheaterandliving.com/v/template_266.html" "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css"; then ok=1; fi
           fi
           if [ "$ok" -ne 1 ]; then
-            rel_batch="$(mktemp)"
-            {
-              printf '%s\n' "put template_266.html template_266.html"
-              printf '%s\n' "put vspfiles/css/custom-safe.css vspfiles/css/custom-safe.css"
-              printf '%s\n' "put vspfiles/templates/266/css/mccabe-overrides.css vspfiles/templates/266/css/mccabe-overrides.css"
-              printf '%s\n' "put vspfiles/templates/266/css/template.css vspfiles/templates/266/css/template.css"
-              if [ -f vspfiles/templates/266/js/min/design-toolkit.min.js ]; then
-                printf '%s\n' "put vspfiles/templates/266/js/min/design-toolkit.min.js vspfiles/templates/266/js/min/design-toolkit.min.js"
-              fi
-              if [ -f vspfiles/templates/266/js/min/template.min.js ]; then
-                printf '%s\n' "put vspfiles/templates/266/js/min/template.min.js vspfiles/templates/266/js/min/template.min.js"
-              fi
-              printf '%s\n' "bye"
-            } > "$rel_batch"
-            echo "::group::Try: login cwd (relative vspfiles/css)"
-            echo "Batch commands:"
-            sed 's/^/  /' "$rel_batch"
-            if run_sftp_batch "$rel_batch"; then ok=1; fi
-            rm -f "$rel_batch"
-            echo "::endgroup::"
+            if try_batch "login cwd (relative vspfiles/css)" \
+              "put template_266.html template_266.html" \
+              "put vspfiles/css/custom-safe.css vspfiles/css/custom-safe.css" \
+              "put vspfiles/templates/266/css/mccabe-overrides.css vspfiles/templates/266/css/mccabe-overrides.css" \
+              "put vspfiles/templates/266/css/template.css vspfiles/templates/266/css/template.css" \
+              "put vspfiles/templates/266/js/min/design-toolkit.min.js vspfiles/templates/266/js/min/design-toolkit.min.js" \
+              "put vspfiles/templates/266/js/min/template.min.js vspfiles/templates/266/js/min/template.min.js" \
+              "bye"; then ok=1; fi
           fi
 
           if [ "$ok" -ne 1 ]; then
@@ -328,27 +297,10 @@ jobs:
           }
           try_put_template266_js_only() {
             local title="$1" dir="$2"
-            local batch
-            batch="$(mktemp)"
-            {
-              if [ -f vspfiles/templates/266/js/min/design-toolkit.min.js ]; then
-                printf '%s\n' "put vspfiles/templates/266/js/min/design-toolkit.min.js ${dir}/design-toolkit.min.js"
-              fi
-              if [ -f vspfiles/templates/266/js/min/template.min.js ]; then
-                printf '%s\n' "put vspfiles/templates/266/js/min/template.min.js ${dir}/template.min.js"
-              fi
-              printf '%s\n' "bye"
-            } > "$batch"
-            if ! grep -q '^put ' "$batch"; then
-              rm -f "$batch"
-              return 0
-            fi
-            echo "::group::Try: $title"
-            echo "Batch commands:"
-            sed 's/^/  /' "$batch"
-            run_sftp_batch "$batch" || true
-            rm -f "$batch"
-            echo "::endgroup::"
+            try_batch "${title}" \
+              "put vspfiles/templates/266/js/min/design-toolkit.min.js ${dir}/design-toolkit.min.js" \
+              "put vspfiles/templates/266/js/min/template.min.js ${dir}/template.min.js" \
+              "bye" || true
           }
           echo "::group::Best-effort: template.css + template JS (template_266.html links v/vspfiles/templates/266/…)"
           try_put_template_css_only "template.css → /v/vspfiles/templates/266/css/" "/v/vspfiles/templates/266/css/template.css"
