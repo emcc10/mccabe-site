@@ -1239,6 +1239,118 @@ body:not(.is-home) header.header > .mc-header-search-below-nav {
   margin-top: 0 !important;
 }
 
+/* PDP: Volusion often leaves body.is-home; mirror non-home interior header stack so the main menu
+   sits in the same vertical position as category pages (logo row → nav bar → search). */
+body.productdetails .header__section--top,
+body.productdetails header.header,
+body.mc-product-page .header__section--top,
+body.mc-product-page header.header,
+html.mc-url-looks-like-pdp body.is-home .header__section--top,
+html.mc-url-looks-like-pdp body.is-home header.header {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  visibility: visible !important;
+  margin-top: 0 !important;
+}
+
+body.productdetails header.header > .header__section,
+body.mc-product-page header.header > .header__section,
+html.mc-url-looks-like-pdp body.is-home header.header > .header__section {
+  order: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body.productdetails header.header > .mc-header-desktop-bar,
+body.productdetails header.header > .hidden-xs.col-xs-12,
+body.productdetails header.header > .col-xs-12.hidden-xs,
+body.mc-product-page header.header > .mc-header-desktop-bar,
+body.mc-product-page header.header > .hidden-xs.col-xs-12,
+body.mc-product-page header.header > .col-xs-12.hidden-xs,
+html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-desktop-bar,
+html.mc-url-looks-like-pdp body.is-home header.header > .hidden-xs.col-xs-12,
+html.mc-url-looks-like-pdp body.is-home header.header > .col-xs-12.hidden-xs {
+  order: 2 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body.productdetails header.header > .header__section--middle,
+body.productdetails header.header > .mc-header-search-below-nav,
+body.mc-product-page header.header > .header__section--middle,
+body.mc-product-page header.header > .mc-header-search-below-nav,
+html.mc-url-looks-like-pdp body.is-home header.header > .header__section--middle,
+html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-search-below-nav {
+  order: 20 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body.productdetails header.header > .mc-header-cart,
+body.mc-product-page header.header > .mc-header-cart,
+html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-cart {
+  order: 30 !important;
+}
+
+body.productdetails header.header > .mc-header-desktop-bar,
+body.productdetails header.header > .hidden-xs.col-xs-12,
+body.productdetails header.header > .col-xs-12.hidden-xs,
+body.mc-product-page header.header > .mc-header-desktop-bar,
+body.mc-product-page header.header > .hidden-xs.col-xs-12,
+body.mc-product-page header.header > .col-xs-12.hidden-xs,
+html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-desktop-bar,
+html.mc-url-looks-like-pdp body.is-home header.header > .hidden-xs.col-xs-12,
+html.mc-url-looks-like-pdp body.is-home header.header > .col-xs-12.hidden-xs {
+  position: relative !important;
+  z-index: 3 !important;
+}
+
+body.productdetails header.header > .header__section--middle,
+body.productdetails header.header > .mc-header-search-below-nav,
+body.mc-product-page header.header > .header__section--middle,
+body.mc-product-page header.header > .mc-header-search-below-nav,
+html.mc-url-looks-like-pdp body.is-home header.header > .header__section--middle,
+html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-search-below-nav {
+  margin-top: 0 !important;
+}
+
+body.productdetails #display_menu_1,
+body.mc-product-page #display_menu_1,
+html.mc-url-looks-like-pdp body.is-home #display_menu_1 {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 32px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body.productdetails #display_menu_1 > ul.vnav--level1,
+body.productdetails #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+body.productdetails #display_menu_1 > ul,
+body.mc-product-page #display_menu_1 > ul.vnav--level1,
+body.mc-product-page #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+body.mc-product-page #display_menu_1 > ul,
+html.mc-url-looks-like-pdp body.is-home #display_menu_1 > ul.vnav--level1,
+html.mc-url-looks-like-pdp body.is-home #display_menu_1 > ul.vnav--horizontal.vnav--level1,
+html.mc-url-looks-like-pdp body.is-home #display_menu_1 > ul {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 32px !important;
+  margin: 0 !important;
+  padding: 0 20px 0 20px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
 body:not(.is-home) html.mc-search-open header.header .collapsing-search,
 body:not(.is-home) body.mc-search-open header.header .collapsing-search,
 body:not(.is-home) html.mc-search-open header.header #collapsingSearch,
@@ -2598,9 +2710,26 @@ body.mc-product-page select.mc-native-leather {
     background: #fff !important;
   }
 
-  /* Stop  cut off on the left  */
-  body.mc-product-page #content_area td.mc-pdp-options-td * {
-    overflow: visible !important;
+  /* Stop cut-off on the left — never use bare `td *` here: it sets overflow:visible on
+     #mcLeatherSwatchStrip and lets swatches paint over #mcPlannerRow. */
+  body.mc-product-page #content_area td.mc-pdp-options-td #mcLeatherSwatchStrip,
+  body.productdetails #content_area td.mc-pdp-options-td #mcLeatherSwatchStrip {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  body.mc-product-page #content_area td.mc-pdp-options-td #mcLeatherSwatchStrip .mc-mini-swatch,
+  body.productdetails #content_area td.mc-pdp-options-td #mcLeatherSwatchStrip .mc-mini-swatch {
+    flex-shrink: 0 !important;
+  }
+
+  body.mc-product-page #content_area td.mc-pdp-options-td #mcPlannerRow,
+  body.productdetails #content_area td.mc-pdp-options-td #mcPlannerRow {
+    margin-top: 12px !important;
+    flex-wrap: nowrap !important;
   }
 
   /* Ensure the Add to Cart stays clickable */
@@ -5026,12 +5155,14 @@ body.mc-product-page #mcLeatherPicker {
 
 body.mc-product-page #mcLeatherSwatchStrip {
   display: flex !important;
+  flex-wrap: nowrap !important;
   align-items: stretch !important;
   gap: 0 !important;
   width: 100% !important;
-  max-width: 320px !important;
+  max-width: min(100%, 520px) !important;
   height: 42px !important;
-  overflow: hidden !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
   border: 0 !important;
   background: transparent !important;
 }
@@ -5193,7 +5324,7 @@ body.mc-product-page #mcPlannerRow {
   max-width: 100% !important;
   display: flex !important;
   flex-direction: row !important;
-  flex-wrap: wrap !important;
+  flex-wrap: nowrap !important;
   align-items: stretch !important;
   justify-content: flex-start !important;
   gap: 10px !important;
@@ -5204,7 +5335,7 @@ body.mc-product-page #mcProductSummaryBtn {
   min-width: 0 !important;
   max-width: 100% !important;
   width: auto !important;
-  flex: 0 1 240px !important;
+  flex: 1 1 0 !important;
   box-sizing: border-box !important;
 }
 
@@ -5475,7 +5606,7 @@ body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-g
 
   body.mc-product-page #mcPlannerRow {
     flex-direction: row !important;
-    flex-wrap: wrap !important;
+    flex-wrap: nowrap !important;
     align-items: stretch !important;
     justify-content: flex-start !important;
   }
@@ -5483,10 +5614,10 @@ body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-g
   body.mc-product-page #mcPlannerBtn,
   body.mc-product-page #mcProductSummaryBtn,
   body.mc-product-page #mcPlannerSummary {
-    flex: 1 1 140px !important;
+    flex: 1 1 0 !important;
     min-width: 0 !important;
     width: auto !important;
-    max-width: calc(50% - 5px) !important;
+    max-width: none !important;
   }
 }
 
@@ -5499,7 +5630,8 @@ body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-g
 @media (min-width: 992px) {
   body.mc-product-page #content_area {
     max-width: 1280px !important;
-    margin: 60px auto 80px !important;
+    /* Match interior pages: large top margin pushed PDP chrome down vs category */
+    margin: 20px auto 80px !important;
     padding: 0 40px !important;
     box-sizing: border-box !important;
   }
