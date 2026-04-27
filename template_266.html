@@ -722,7 +722,7 @@ document.addEventListener("DOMContentLoaded", function () {
 ========================================= -->
 
 <body>
-  <!-- MCCABE GLOBAL TOP MENU - FIXED SITEWIDE POSITION -->
+  <!-- MCCABE GLOBAL TOP MENU - SINGLE CLEAN DESKTOP MENU -->
 <style id="mccabe-global-top-nav-css">
   #mccabe-global-top-nav {
     width: 100% !important;
@@ -761,6 +761,10 @@ document.addEventListener("DOMContentLoaded", function () {
     text-decoration: none !important;
   }
 
+  .mccabe-hide-old-top-menu {
+    display: none !important;
+  }
+
   @media (max-width: 767px) {
     #mccabe-global-top-nav {
       display: none !important;
@@ -769,63 +773,95 @@ document.addEventListener("DOMContentLoaded", function () {
 </style>
 
 <nav id="mccabe-global-top-nav" aria-label="Main category navigation">
-  <a href="/category-s/186.htm">Theater Seating</a>
-  <a href="/category-s/185.htm">Bean Bags</a>
-  <a href="/category-s/187.htm">Sofas &amp; Sectionals</a>
-  <a href="/category-s/188.htm">Bedroom</a>
+  <a href="/customtheaterseating-s/106.htm">Theater Seating</a>
+  <a href="/bean-bag-seating-s/103.htm">Bean Bags</a>
+  <a href="/category-s/139.htm">Sofas &amp; Sectionals</a>
+  <a href="/category-s/142.htm">Bedroom</a>
   <a href="/aboutus.asp">About Us</a>
   <a href="/Articles.asp?ID=83">Contact Us</a>
 </nav>
-  <script id="mccabe-safe-hide-duplicate-top-menu">
+
+<script id="mccabe-hide-old-top-menu-script">
 (function () {
-  function hideOnlyDuplicateTextMenu() {
+  function hideOldTopMenuOnly() {
     var newMenu = document.getElementById("mccabe-global-top-nav");
     if (!newMenu) return;
 
-    var candidates = Array.from(document.querySelectorAll("nav, ul, table, tbody, tr, div"));
+    var menuTexts = [
+      "THEATER SEATING",
+      "BEAN BAGS",
+      "SOFAS",
+      "BEDROOM",
+      "ABOUT",
+      "CONTACT"
+    ];
 
-    candidates.forEach(function (el) {
-      if (el === newMenu || newMenu.contains(el)) return;
+    var candidates = Array.from(document.querySelectorAll("body *")).filter(function (el) {
+      if (el === newMenu || newMenu.contains(el)) return false;
 
       var rect = el.getBoundingClientRect();
+      if (rect.top < 0 || rect.top > 180) return false;
+      if (rect.height <= 0 || rect.height > 70) return false;
+      if (rect.width < 400) return false;
+
+      if (el.querySelector("img")) return false;
+      if (el.querySelector("#slideshow-container")) return false;
+      if (el.querySelector("[id*='slideshow']")) return false;
+      if (el.querySelector("[class*='slideshow']")) return false;
+      if (el.querySelector("#roomPlannerApp")) return false;
+      if (el.querySelector("[id*='roomPlanner']")) return false;
+      if (el.querySelector("[class*='roomPlanner']")) return false;
+
       var txt = (el.innerText || "").toUpperCase().replace(/\s+/g, " ").trim();
+      if (!txt) return false;
 
-      var isOldMenu =
-        txt.includes("THEATER SEATING") &&
-        txt.includes("BEAN BAGS") &&
-        txt.includes("SOFAS") &&
-        txt.includes("BEDROOM") &&
-        txt.includes("ABOUT") &&
-        txt.includes("CONTACT");
+      var hitCount = menuTexts.filter(function (word) {
+        return txt.indexOf(word) !== -1;
+      }).length;
 
-      var isNearTop = rect.top >= 0 && rect.top < 180;
-      var isSmallMenuStrip = rect.height > 0 && rect.height < 80;
+      return hitCount >= 5;
+    });
 
-      var containsHero =
-        el.querySelector &&
+    candidates.sort(function (a, b) {
+      return a.getBoundingClientRect().height - b.getBoundingClientRect().height;
+    });
+
+    if (candidates[0]) {
+      candidates[0].classList.add("mccabe-hide-old-top-menu");
+    }
+
+    Array.from(document.querySelectorAll("a")).forEach(function (a) {
+      if (newMenu.contains(a)) return;
+
+      var txt = (a.innerText || "").toUpperCase().replace(/\s+/g, " ").trim();
+      var rect = a.getBoundingClientRect();
+
+      if (
+        rect.top >= 0 &&
+        rect.top < 180 &&
         (
-          el.querySelector("#slideshow-container") ||
-          el.querySelector(".slidesjs-container") ||
-          el.querySelector("[id*='slideshow']") ||
-          el.querySelector("[class*='slideshow']") ||
-          el.querySelector("img")
-        );
-
-      if (isOldMenu && isNearTop && isSmallMenuStrip && !containsHero) {
-        el.style.setProperty("display", "none", "important");
+          txt === "THEATER SEATING" ||
+          txt === "BEAN BAGS" ||
+          txt === "SOFAS & SECTIONALS" ||
+          txt === "BEDROOM" ||
+          txt === "ABOUT US" ||
+          txt === "CONTACT US"
+        )
+      ) {
+        a.style.setProperty("display", "none", "important");
       }
     });
   }
 
-  hideOnlyDuplicateTextMenu();
+  hideOldTopMenuOnly();
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", hideOnlyDuplicateTextMenu);
+    document.addEventListener("DOMContentLoaded", hideOldTopMenuOnly);
   }
 
-  window.addEventListener("load", hideOnlyDuplicateTextMenu);
-  setTimeout(hideOnlyDuplicateTextMenu, 300);
-  setTimeout(hideOnlyDuplicateTextMenu, 1000);
+  window.addEventListener("load", hideOldTopMenuOnly);
+  setTimeout(hideOldTopMenuOnly, 300);
+  setTimeout(hideOldTopMenuOnly, 1000);
 })();
 </script>
 <script>
