@@ -93,34 +93,26 @@ jobs:
 
           open -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222
 
+          echo "Uploading template..."
           put template_266.html -o /v/template_266.html
+
+          echo "Uploading CSS..."
           put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
 
-          bye
-          EOF
-
-          elif [ "$PORT_21_OPEN" = "true" ]; then
-            echo "Using FTP on port 21..."
-
-            lftp <<EOF
-          set ftp:ssl-allow no
-          set ssl:verify-certificate no
-          set net:timeout 90
-          set net:max-retries 2
-          set net:reconnect-interval-base 10
-          set xfer:clobber yes
-          set cmd:fail-exit yes
-
-          open -u "$FTP_USERNAME","$FTP_PASSWORD" ftp://"$FTP_SERVER":21
-
-          put template_266.html -o /v/template_266.html
-          put vspfiles/css/custom-safe.css -o /v/vspfiles/css/custom-safe.css
+          echo "Downloading remote files back for verification..."
+          get /v/template_266.html -o remote-template_266.html
+          get /vspfiles/css/custom-safe.css -o remote-custom-safe.css
 
           bye
           EOF
+
+            echo "Checking uploaded template marker..."
+            grep -n "GITHUB TEMPLATE DEPLOY TEST" remote-template_266.html || true
+
+            echo "Checking uploaded CSS marker..."
+            grep -n "GITHUB CSS DEPLOY TEST" remote-custom-safe.css || true
 
           else
-            echo "ERROR: GitHub cannot connect to this FTP_SERVER on port 2222 or port 21."
-            echo "Your FTP_SERVER secret is probably not the correct Volusion FTP host, or Volusion is blocking GitHub's runner."
+            echo "ERROR: Port 2222 is not open."
             exit 1
           fi
