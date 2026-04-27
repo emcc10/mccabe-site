@@ -110,11 +110,14 @@ jobs:
           bye
           EOF
 
-            echo "Checking uploaded template marker..."
-            grep -n "GITHUB TEMPLATE DEPLOY TEST" remote-template_266.html || true
+            echo "Checking uploaded template (MC_DEPLOY_VERIFY in View Source)..."
+            grep -n "MC_DEPLOY_VERIFY" remote-template_266.html || {
+              echo "WARNING: MC_DEPLOY_VERIFY not found in downloaded template — wrong path or upload failed"
+              exit 1
+            }
 
-            echo "Checking uploaded CSS marker..."
-            grep -n "GITHUB CSS DEPLOY TEST" remote-custom-safe.css || true
+            echo "Checking uploaded CSS (first 5 lines)..."
+            head -n 5 remote-custom-safe.css
 
           else
             echo "ERROR: Port 2222 is not open."
