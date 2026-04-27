@@ -132,8 +132,8 @@ jobs:
           EOF
 
           echo "Verify template marker..."
-          grep -n "MC_DEPLOY_VERIFY" remote-template_266.html || {
-            echo "ERROR: MC_DEPLOY_VERIFY not found in /v/template_266.html"
+          grep -q "MC_DEPLOY_VERIFY_20260428vspath" remote-template_266.html || {
+            echo "ERROR: MC_DEPLOY_VERIFY_20260428vspath not found in /v/template_266.html"
             exit 1
           }
 
