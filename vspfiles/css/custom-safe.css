@@ -2813,13 +2813,18 @@ body.mc-product-page select.mc-native-leather {
 
     /* MOBILE: prevent leather row from forcing horizontal overflow */
     @media (max-width: 767px) {
-      /* wrap the row */
       #mcLeatherBtn,
-      #mcPlannerBtn,
       .mc-config-btn {
         min-width: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
+      }
+      /* Room Planner + Product Summary stay adjacent; do not force full-row width */
+      #mcPlannerRow .mc-config-btn,
+      #mcPlannerRow2 .mc-config-btn {
+        width: auto !important;
+        max-width: calc(50% - 6px) !important;
+        flex: 1 1 140px !important;
       }
 
       #mcLeatherSummary {
@@ -2989,12 +2994,17 @@ body.mc-product-page select.mc-native-leather {
       box-sizing: border-box !important;
     }
 
-    /* Mobile: stack cleanly */
+    /* Mobile: stack leather header row; keep planner + product summary side by side */
     @media (max-width: 767px) {
-      #mcLeatherRow,
+      #mcLeatherRow {
+        flex-direction: column !important;
+        align-items: stretch !important;
+      }
+
       #mcPlannerRow,
       #mcPlannerRow2 {
-        flex-direction: column !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
         align-items: stretch !important;
       }
 
@@ -5010,7 +5020,10 @@ body.mc-product-page #mcPlannerRow {
   min-width: 0 !important;
   max-width: 100% !important;
   display: flex !important;
-  align-items: center !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
   gap: 10px !important;
 }
 
@@ -5289,16 +5302,19 @@ body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-g
   }
 
   body.mc-product-page #mcPlannerRow {
-    flex-direction: column !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
     align-items: stretch !important;
+    justify-content: flex-start !important;
   }
 
   body.mc-product-page #mcPlannerBtn,
   body.mc-product-page #mcProductSummaryBtn,
   body.mc-product-page #mcPlannerSummary {
-    width: 100% !important;
-    max-width: 100% !important;
-    flex: 0 0 auto !important;
+    flex: 1 1 140px !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: calc(50% - 5px) !important;
   }
 }
 

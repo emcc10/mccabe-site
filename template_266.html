@@ -2713,19 +2713,6 @@ boot();
 
   window.__MC_INLINE_FINAL__ = true;
 
-  /** Set to false to show the room planner again on Sofas & Sectionals */
-  var MC_HIDE_PLANNER_SECTIONALS = true;
-
-  function isSofasSectionalsContext() {
-    try {
-      if (/sectionals-s\/139/i.test(location.pathname || "")) return true;
-      var cat = document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
-      if (cat && String(cat.value || "").trim() === "139") return true;
-      if (document.querySelector('a[href*="/sectionals-s/139"]')) return true;
-    } catch (e) {}
-    return false;
-  }
-
   function mount(opts){
     opts = opts || {};
     if (document.getElementById("mc-inline-config")) return;
@@ -2775,7 +2762,7 @@ boot();
           </div>
         </div>
 
-        <div id="mcPlannerRow" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;width:100%;min-width:0">
+        <div id="mcPlannerRow" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:10px;align-items:stretch;justify-content:flex-start;width:100%;min-width:0">
           <button type="button" id="mcPlannerBtn" class="mc-config-btn"
             style="padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:0;background:#fff;cursor:pointer">
             <span>Room Planner</span>
@@ -3148,29 +3135,13 @@ boot();
     // Button actions
     if (mcLeatherBtn && wmOpen) mcLeatherBtn.onclick = () => wmOpen.click();
 
-    var hidePlannerSs =
-      MC_HIDE_PLANNER_SECTIONALS && isSofasSectionalsContext();
     var mcPlannerBtnEl = document.getElementById("mcPlannerBtn");
-
-    if (!hidePlannerSs && mcPlannerBtnEl) {
-      mcPlannerBtnEl.onclick = openPlannerOverlay;
-    } else if (hidePlannerSs) {
-      /* Hide only Room Planner — keep #mcPlannerRow visible so Product Summary stays on PDPs */
-      if (mcPlannerBtnEl) mcPlannerBtnEl.style.setProperty("display", "none", "important");
-      var capHide = document.getElementById("mcConfigurationCaption");
-      if (capHide) {
-        capHide.textContent = "Choose configuration using the options below.";
-      }
-    }
+    if (mcPlannerBtnEl) mcPlannerBtnEl.onclick = openPlannerOverlay;
 
     var configBlock = document.getElementById("mcConfigurationBlock");
     if (configBlock) {
-      if (!hidePlannerSs) {
-        configBlock.style.cursor = "pointer";
-        configBlock.onclick = openPlannerOverlay;
-      } else {
-        configBlock.style.cursor = "default";
-      }
+      configBlock.style.cursor = "pointer";
+      configBlock.onclick = openPlannerOverlay;
     }
 
     // Keep summary synced to modal selection changes
