@@ -94,16 +94,46 @@
 </script>
 <script>
 (function () {
-  /* True homepage URL only — #if_homepage / slideshow often exist in raw HTML on every Volusion page. */
+  /**
+   * True homepage URL — #if_homepage / hero exist in HTML on every Volusion page; body.is-home toggles visibility.
+   * Match store root and common Volusion entry paths (including subdirectory stores).
+   */
   window.mcPathIsHomepage = function mcPathIsHomepage() {
     try {
-      var p = (location.pathname || '').replace(/\\/g, '/').toLowerCase();
-      if (p === '/' || p === '/index.htm' || p === '/index.html') return true;
-      if (/\/default\.asp$/i.test(p)) return true;
-      if (/\/index\.asp$/i.test(p)) return true;
+      var raw = String(location.pathname || "").replace(/\\/g, "/");
+      var p = raw.toLowerCase();
+      p = p.replace(/\/+/g, "/");
+      while (p.length > 1 && p.charAt(p.length - 1) === "/") {
+        p = p.slice(0, -1);
+      }
+      if (p === "" || p === "/") return true;
+      if (/\/(default|index)\.asp$/i.test(p)) return true;
+      if (/\/(index|default)\.html?$/i.test(p)) return true;
+      if (/\/(welcome|home)\.asp$/i.test(p)) return true;
+      if (/\/(home|index)\.htm$/i.test(p)) return true;
     } catch (e) {}
     return false;
   };
+
+  window.mcSyncHomeBodyClass = function mcSyncHomeBodyClass() {
+    try {
+      if (!document.body) return;
+      if (typeof window.mcPathIsHomepage === "function" && window.mcPathIsHomepage()) {
+        document.body.classList.add("is-home");
+      } else {
+        document.body.classList.remove("is-home");
+      }
+    } catch (e2) {}
+  };
+
+  try {
+    window.addEventListener("popstate", function () {
+      window.mcSyncHomeBodyClass();
+    });
+    window.addEventListener("pageshow", function (ev) {
+      if (ev.persisted) window.mcSyncHomeBodyClass();
+    });
+  } catch (ePop) {}
 })();
 </script>
 <script>
@@ -726,9 +756,10 @@ document.addEventListener("DOMContentLoaded", function () {
 <script>
 (function () {
   try {
-    if (typeof window.mcPathIsHomepage === 'function') {
-      if (window.mcPathIsHomepage()) document.body.classList.add('is-home');
-      else document.body.classList.remove('is-home');
+    if (typeof window.mcSyncHomeBodyClass === "function") window.mcSyncHomeBodyClass();
+    else if (typeof window.mcPathIsHomepage === "function") {
+      if (window.mcPathIsHomepage()) document.body.classList.add("is-home");
+      else document.body.classList.remove("is-home");
     }
   } catch (e) {}
 })();
@@ -784,9 +815,10 @@ document.addEventListener("DOMContentLoaded", function () {
 <script>
 (function () {
   try {
-    if (typeof window.mcPathIsHomepage === 'function') {
-      if (window.mcPathIsHomepage()) document.body.classList.add('is-home');
-      else document.body.classList.remove('is-home');
+    if (typeof window.mcSyncHomeBodyClass === "function") window.mcSyncHomeBodyClass();
+    else if (typeof window.mcPathIsHomepage === "function") {
+      if (window.mcPathIsHomepage()) document.body.classList.add("is-home");
+      else document.body.classList.remove("is-home");
     }
   } catch (e) {}
 })();
@@ -812,7 +844,7 @@ document.addEventListener("DOMContentLoaded", function () {
     <!-- HERO VIDEO -->
 <section class="mc-hero-video">
   <video class="mc-hero-video-el is-preloading" autoplay muted playsinline preload="auto" disablePictureInPicture disableRemotePlayback controlsList="nofullscreen nodownload noremoteplayback">
-    <source src="/v/vspfiles/windsor_feature_2025.mov" type="video/mp4">
+    <source src="/v/vspfiles/windsor_feature_2025.mov" type="video/quicktime">
   </video>
 
  <div class="mc-hero-overlay">
@@ -1200,9 +1232,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function boot() {
     try {
-      if (typeof window.mcPathIsHomepage === 'function') {
-        if (window.mcPathIsHomepage()) document.body.classList.add('is-home');
-        else document.body.classList.remove('is-home');
+      if (typeof window.mcSyncHomeBodyClass === "function") window.mcSyncHomeBodyClass();
+      else if (typeof window.mcPathIsHomepage === "function") {
+        if (window.mcPathIsHomepage()) document.body.classList.add("is-home");
+        else document.body.classList.remove("is-home");
       }
     } catch (eSync) {}
     mcMountSearchLayout();
@@ -5443,9 +5476,10 @@ window.initRoomPlanner = function (opts) {
 <script>
 (function () {
   try {
-    if (typeof window.mcPathIsHomepage === 'function') {
-      if (window.mcPathIsHomepage()) document.body.classList.add('is-home');
-      else document.body.classList.remove('is-home');
+    if (typeof window.mcSyncHomeBodyClass === "function") window.mcSyncHomeBodyClass();
+    else if (typeof window.mcPathIsHomepage === "function") {
+      if (window.mcPathIsHomepage()) document.body.classList.add("is-home");
+      else document.body.classList.remove("is-home");
     }
   } catch (e) {}
 })();

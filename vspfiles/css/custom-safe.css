@@ -438,6 +438,8 @@ body.is-home #if_homepage {
   box-sizing: border-box !important;
 }
 body.is-home #slideshow-container {
+  display: block !important;
+  visibility: visible !important;
   position: relative !important;
   width: 100vw !important;
   max-width: 100vw !important;
@@ -730,9 +732,29 @@ body.is-home #slideshow-container {
   }
 }
 
-/* Homepage: hero supplies nav + search; hide duplicate desktop strip */
-body.is-home .mc-header-desktop-bar {
+/* Homepage: hero supplies nav + search; hide duplicate desktop strip (load-order / theme overrides) */
+body.is-home header.header > .mc-header-desktop-bar,
+body.is-home header.header .mc-header-desktop-bar[data-mc-header-bar],
+html body.is-home .mc-header-desktop-bar {
   display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  border: 0 !important;
+}
+
+body.is-home #if_homepage {
+  display: block !important;
+  visibility: visible !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
 }
 
 /* PDP: keep desktop nav + search visible even if body.is-home is set incorrectly */
