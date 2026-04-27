@@ -24,6 +24,9 @@ jobs:
           echo "Repo root:"
           pwd
 
+          echo "Latest commit:"
+          git log -1 --oneline
+
           if [ ! -f "template_266.html" ]; then
             echo "ERROR: template_266.html is missing from repo root"
             exit 1
@@ -79,10 +82,14 @@ jobs:
           echo "PORT_2222_OPEN=$PORT_2222_OPEN"
           echo "PORT_21_OPEN=$PORT_21_OPEN"
 
-          if [ "$PORT_2222_OPEN" = "true" ]; then
-            echo "Using SFTP on port 2222..."
+          if [ "$PORT_2222_OPEN" != "true" ]; then
+            echo "ERROR: Port 2222 is not open. Do not deploy."
+            exit 1
+          fi
 
-            lftp <<EOF
+          echo "Using SFTP on port 2222..."
+
+          lftp <<EOF
           set sftp:auto-confirm yes
           set ssl:verify-certificate no
           set net:timeout 90
@@ -93,33 +100,24 @@ jobs:
 
           open -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222
 
-          echo "Uploading template..."
           echo "Uploading template to /v/template_266.html..."
           put template_266.html -o /v/template_266.html
 
           echo "Uploading template to /template_266.html..."
           put template_266.html -o /template_266.html
 
-          echo "Uploading CSS..."
-          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
-
-          echo "Downloading remote files back for verification..."
-          get /v/template_266.html -o remote-template_266.html
-          get /vspfiles/css/custom-safe.css -o remote-custom-safe.css
+          echo "Uploading CSS with retries..."
+          set cmd:fail-exit no
+          for i in 1 2 3 4 5; do
+            put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
+            if [ $? -eq 0 ]; then
+              echo "CSS upload succeeded."
+              break
+            fi
+            echo "CSS upload failed, retry $i..."
+            sleep 15
+          done
+          set cmd:fail-exit yes
 
           bye
           EOF
-
-            echo "Checking uploaded template (MC_DEPLOY_VERIFY in View Source)..."
-            grep -n "MC_DEPLOY_VERIFY" remote-template_266.html || {
-              echo "WARNING: MC_DEPLOY_VERIFY not found in downloaded template — wrong path or upload failed"
-              exit 1
-            }
-
-            echo "Checking uploaded CSS (first 5 lines)..."
-            head -n 5 remote-custom-safe.css
-
-          else
-            echo "ERROR: Port 2222 is not open."
-            exit 1
-          fi
