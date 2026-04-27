@@ -3547,6 +3547,7 @@ margin-left: 65px !important;
 
   /* Use unified icon sizing (same as base block above) – do not override size/position */
 }
+}
 
 /* === MOBILE OVERFLOW KILL-SWITCH (2026-03-02c) === */
 @media only screen and (max-width: 991px) {
