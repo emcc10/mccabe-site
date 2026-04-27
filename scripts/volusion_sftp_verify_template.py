@@ -168,8 +168,14 @@ def main() -> int:
         os.environ.get("SFTP_HOST", "").strip()
         or os.environ.get("SECRET_SFTP_HOST", "").strip()
         or os.environ.get("SECRET_FTP_HOST", "").strip()
+        or os.environ.get("SECRET_FTP_SERVER", "").strip()
     )
-    port = int(os.environ.get("SFTP_PORT") or os.environ.get("SECRET_SFTP_PORT") or "2222")
+    port = int(
+        os.environ.get("SFTP_PORT")
+        or os.environ.get("SECRET_SFTP_PORT")
+        or os.environ.get("SECRET_FTP_PORT")
+        or "2222"
+    )
     user = os.environ.get("SFTP_USER", "")
     password = os.environ.get("SFTP_PASS", "")
 
