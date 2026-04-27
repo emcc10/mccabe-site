@@ -2837,10 +2837,11 @@ body.mc-product-page select.mc-native-leather {
       }
     }
 
-    /* Choose Leather + Room Planner: same width */
+    /* Choose Leather + Room Planner + Product Summary: same width */
     .mc-config-btn,
     #mcLeatherBtn,
-    #mcPlannerBtn {
+    #mcPlannerBtn,
+    #mcProductSummaryBtn {
       width: 260px !important;
       min-width: 260px !important;
       max-width: 260px !important;

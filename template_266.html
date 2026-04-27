@@ -2464,9 +2464,9 @@ boot();
 (function () {
   /**
    * Palliser spec sheets: https://images.palliser.com/specsheet/en/{MODEL}%20{STYLE}.pdf
-   * STYLE is uppercase (often one word). Keys are lowercase tokens matched in title / ProductCode slug.
+   * Product Summary link: first 5-digit run in ProductCode + first word of product name (uppercase).
+   * Map below is still used by room-planner PDF dimension lookup (PATCH 3), not for this URL.
    */
-  /* Known Palliser collection tokens → 5-digit model (extend as you verify on images.palliser.com). */
   var MC_PALLISER_SPEC_MODEL = {
     flicks: "41416",
     audio: "41422",
@@ -2483,139 +2483,48 @@ boot();
     leeds: "77328"
   };
 
-  function mcPalliserHaystack() {
-    var parts = [];
+  function mcPalliserFirstFiveDigitsFromProductCode() {
+    var pc = String(((document.querySelector('input[name="ProductCode"]') || {}).value || "")).trim();
+    if (!pc) return "";
+    var m = pc.match(/\d{5}/);
+    if (m) return m[0];
+    var digits = pc.replace(/\D/g, "");
+    return digits.length >= 5 ? digits.slice(0, 5) : "";
+  }
+
+  function mcPalliserProductNameText() {
     try {
-      var h1 =
+      var el =
         document.querySelector("h1 [itemprop='name'], h1.productnamecolor, .productnamecolor, #content_area h1, .vp-product-title") ||
         document.querySelector("h1");
-      if (h1 && h1.textContent) parts.push(h1.textContent);
-    } catch (eH) {}
-    try {
-      var pc = (document.querySelector('input[name="ProductCode"]') || {}).value;
-      if (pc) parts.push(pc);
-    } catch (ePc) {}
-    try {
-      if (document.title) parts.push(document.title);
-    } catch (eT) {}
-    try {
-      var m = document.querySelector('meta[name="description"]');
-      if (m && m.getAttribute("content")) parts.push(m.getAttribute("content"));
-    } catch (eM) {}
-    try {
-      var root = document.getElementById("v65-product-parent") || document.getElementById("content_area");
-      if (root) parts.push(root.innerText || root.textContent || "");
-    } catch (eR) {}
-    return parts.join(" ").replace(/\s+/g, " ").trim();
-  }
-
-  function mcPalliserReverseByModel() {
-    var rev = {};
-    var k;
-    for (k in MC_PALLISER_SPEC_MODEL) {
-      if (!Object.prototype.hasOwnProperty.call(MC_PALLISER_SPEC_MODEL, k)) continue;
-      rev[String(MC_PALLISER_SPEC_MODEL[k])] = k;
+      return String((el && el.textContent) || "").replace(/\s+/g, " ").trim();
+    } catch (eN) {
+      return "";
     }
-    return rev;
   }
 
-  function mcPalliserExtractFiveDigitModel(hay) {
-    var h = String(hay || "");
-    var m;
-    var re = /\b([3478]\d{4})\b/g;
-    var best = "";
-    while ((m = re.exec(h)) !== null) {
-      var n = m[1];
-      var y = parseInt(n, 10);
-      if (y >= 20150 && y <= 20350) continue;
-      if (!best) best = n;
-    }
-    if (best) return best;
-    m = h.match(/\bmodel\s*#?\s*([0-9]{5})\b/i);
-    return m ? m[1] : "";
-  }
-
-  function mcPalliserStyleKeyFromHaystack(hay) {
-    var low = String(hay || "").toLowerCase();
-    var keys = Object.keys(MC_PALLISER_SPEC_MODEL).sort(function (a, b) {
-      return b.length - a.length;
-    });
-    var i;
-    for (i = 0; i < keys.length; i++) {
-      if (low.indexOf(keys[i]) !== -1) return keys[i];
-    }
-    return "";
-  }
-
-  function mcPalliserStyleWordsFromTitle() {
-    var raw =
-      (
-        (
-          document.querySelector("h1 [itemprop='name'], h1.productnamecolor, .productnamecolor, #content_area h1, .vp-product-title") ||
-          document.querySelector("h1") ||
-          {}
-        ).textContent || ""
-      ).trim();
+  function mcPalliserFirstWordFromProductName() {
+    var raw = mcPalliserProductNameText();
     if (!raw) return "";
-    var s = raw.replace(/^palliser\s+/i, "").replace(/\s*[\u2013\u2014\-|]\s*.*$/i, "").trim();
-    var STOP =
-      /\b(furniture|home|theater|theatre|seating|living|sectional|sofa|loveseat|chair|recliner|media|power|manual|w\/|with|and|or)\b/gi;
-    s = s.replace(STOP, " ").replace(/\s+/g, " ").trim();
-    var words = s.split(" ").filter(function (w) {
-      return w.length > 2;
-    });
-    if (!words.length) return "";
-    return words
-      .slice(0, 4)
-      .join(" ")
-      .toUpperCase();
-  }
-
-  function mcPalliserStyleFromSlug() {
-    var pc = String(((document.querySelector('input[name="ProductCode"]') || {}).value || "")).toLowerCase();
-    if (!pc) return "";
-    var parts = pc.split(/[^a-z0-9]+/i).filter(Boolean);
-    var j;
-    for (j = 0; j < parts.length; j++) {
-      var tok = parts[j];
-      if (tok.length < 3 || tok === "palliser" || tok === "htm") continue;
-      if (MC_PALLISER_SPEC_MODEL[tok]) return tok;
+    raw = raw.replace(/^palliser\s+/i, "").trim();
+    var words = raw.split(/\s+/).filter(Boolean);
+    var i;
+    for (i = 0; i < words.length; i++) {
+      var w = words[i].replace(/[\u2013\u2014\-–—]/g, "").trim();
+      if (!w) continue;
+      var token = w.replace(/[^a-zA-Z0-9]/g, "");
+      if (!token || /^\d+$/.test(token)) continue;
+      return token.toUpperCase();
     }
     return "";
   }
 
   function mcBuildPalliserSpecSheetUrl() {
-    var hay = mcPalliserHaystack().toLowerCase();
-    if (hay.indexOf("palliser") === -1 && !mcPalliserStyleKeyFromHaystack(hay)) {
-      return "";
-    }
-    var rev = mcPalliserReverseByModel();
-    var model = mcPalliserExtractFiveDigitModel(hay);
-    var key = mcPalliserStyleKeyFromHaystack(hay) || mcPalliserStyleFromSlug();
-    var styleUpper = "";
-
-    if (key && MC_PALLISER_SPEC_MODEL[key]) {
-      if (!model) model = MC_PALLISER_SPEC_MODEL[key];
-      styleUpper = key.replace(/[\s_-]+/g, " ").trim().toUpperCase();
-    } else if (model && rev[model]) {
-      styleUpper = rev[model].replace(/[\s_-]+/g, " ").trim().toUpperCase();
-    } else if (model) {
-      styleUpper = mcPalliserStyleWordsFromTitle();
-      if (!styleUpper) return "";
-    } else if (key) {
-      model = MC_PALLISER_SPEC_MODEL[key];
-      styleUpper = key.toUpperCase();
-    } else {
-      key = mcPalliserStyleFromSlug();
-      if (key && MC_PALLISER_SPEC_MODEL[key]) {
-        model = MC_PALLISER_SPEC_MODEL[key];
-        styleUpper = key.toUpperCase();
-      }
-    }
-
-    if (!model || !styleUpper) return "";
+    var model = mcPalliserFirstFiveDigitsFromProductCode();
+    var style = mcPalliserFirstWordFromProductName();
+    if (!model || !style) return "";
     return (
-      "https://images.palliser.com/specsheet/en/" + encodeURIComponent(model + " " + styleUpper) + ".pdf"
+      "https://images.palliser.com/specsheet/en/" + encodeURIComponent(model + " " + style) + ".pdf"
     );
   }
 
@@ -2661,7 +2570,7 @@ boot();
     a.href = url;
     a.title = "Open Palliser product summary (PDF)";
     a.style.cssText =
-      "padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:0;background:#fff;cursor:pointer;text-decoration:none;color:inherit;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:8px;";
+      "padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:0;background:#fff;cursor:pointer;";
     a.innerHTML =
       '<span>Product Summary</span><span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>';
     wrap.appendChild(a);
@@ -2843,7 +2752,7 @@ boot();
             <span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
           </button>
           <a id="mcProductSummaryBtn" class="mc-config-btn" href="#" target="_blank" rel="noopener noreferrer"
-            style="padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:0;background:#fff;cursor:pointer;text-decoration:none;color:inherit;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:8px">
+            style="padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:0;background:#fff;cursor:pointer">
             <span>Product Summary</span>
             <span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
           </a>
@@ -6008,8 +5917,13 @@ body.mc-product-page #v65-product-parent table:has(input[name="btnaddtocart"]) {
   box-shadow: none !important;
 }
 
-/* Room Planner button only: white background, font style, border (not the leather ">" button) */
-body.mc-product-page #content_area #mcPlannerBtn {
+/* Room Planner + Product Summary: same pill button (not the leather ">" button) */
+body.mc-product-page #content_area #mcPlannerBtn,
+body.mc-product-page #content_area #mcProductSummaryBtn,
+body.productdetails #content_area #mcPlannerBtn,
+body.productdetails #content_area #mcProductSummaryBtn,
+body.mc-theater-seating-pdp #content_area #mcPlannerBtn,
+body.mc-theater-seating-pdp #content_area #mcProductSummaryBtn {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -6029,12 +5943,25 @@ body.mc-product-page #content_area #mcPlannerBtn {
   cursor: pointer !important;
   box-sizing: border-box !important;
   font-family: inherit !important;
-  height: 42px;
+  height: 42px !important;
+  text-decoration: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
-body.mc-product-page #content_area #mcPlannerBtn:hover {
+body.mc-product-page #content_area #mcPlannerBtn:hover,
+body.mc-product-page #content_area #mcProductSummaryBtn:hover,
+body.productdetails #content_area #mcPlannerBtn:hover,
+body.productdetails #content_area #mcProductSummaryBtn:hover,
+body.mc-theater-seating-pdp #content_area #mcPlannerBtn:hover,
+body.mc-theater-seating-pdp #content_area #mcProductSummaryBtn:hover {
   background: #f5f5f5 !important;
   color: #111 !important;
   border-color: #333 !important;
+}
+body.mc-product-page #content_area #mcProductSummaryBtn:visited,
+body.productdetails #content_area #mcProductSummaryBtn:visited,
+body.mc-theater-seating-pdp #content_area #mcProductSummaryBtn:visited {
+  color: #111 !important;
 }
 
 /* Select a Leather ">" button – 20px, vertically aligned, no box (matches accordion toggle) */
