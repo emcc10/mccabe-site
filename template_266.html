@@ -803,6 +803,47 @@
         border: 0 !important;
         clip-path: inset(50%) !important;
       }
+      /* PDP: keep nav + in-bar search on one baseline; space-between so search does not compress centered menu */
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar],
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar],
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] {
+        justify-content: space-between !important;
+        align-items: center !important;
+      }
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
+        align-items: center !important;
+        align-self: center !important;
+      }
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
+        align-self: center !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+      }
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        line-height: 1.15 !important;
+      }
+      body.productdetails header.header,
+      body.mc-product-page header.header {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 10060 !important;
+        background-color: #fff !important;
+      }
     }
   </style>
 <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
