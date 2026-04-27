@@ -2793,6 +2793,53 @@ boot();
     return false;
   }
 
+  /** Prefer product-scoped options table so we never grab the wrong table on the page. */
+  function mcFindPdpOptionsTableEl() {
+    return (
+      document.querySelector("#v65-product-parent #options_table, #v65-product-parent table[id*='options_table']") ||
+      document.querySelector("#options_table, table[id*='options_table']")
+    );
+  }
+
+  /** Right-hand options column (same heuristic as tagPdpCells) — correct home for planner / summary on sectionals. */
+  function mcFindPdpOptionsColumnCell() {
+    var optTd =
+      document.querySelector("#v65-product-parent .mc-pdp-options-td") ||
+      document.querySelector("#content_area .mc-pdp-options-td");
+    if (optTd) return optTd;
+    var area = document.getElementById("content_area");
+    if (!area) return null;
+    var addBtn =
+      area.querySelector('input[name="btnaddtocart"]') || area.querySelector('input[id*="btnaddtocart" i]');
+    var td = addBtn ? addBtn.closest("td") : null;
+    if (td) return td;
+    var sels = area.querySelectorAll("select");
+    var i;
+    var s;
+    for (i = 0; i < sels.length; i++) {
+      s = sels[i];
+      if (s.classList && s.classList.contains("mc-native-leather")) continue;
+      try {
+        if (s.offsetParent === null) continue;
+      } catch (eOff) {}
+      td = s.closest("td");
+      if (td) return td;
+    }
+    return null;
+  }
+
+  /** If inline config was mounted under the title (or wrong column), move it into the options TD. */
+  function mcRelocateMcInlineConfigToOptionsColumn() {
+    var panel = document.getElementById("mc-inline-config");
+    if (!panel || !panel.parentNode) return;
+    var optTd = mcFindPdpOptionsColumnCell();
+    if (!optTd) return;
+    if (optTd.contains(panel)) return;
+    try {
+      optTd.insertBefore(panel, optTd.firstChild);
+    } catch (eRel) {}
+  }
+
   function mount(opts){
     opts = opts || {};
     if (document.getElementById("mc-inline-config")) return;
@@ -2808,7 +2855,8 @@ boot();
 
     const wmOpen = document.getElementById("wmOpen");       // hidden modal trigger (created async by leather script)
     const wmSummary = document.getElementById("wmSummary"); // modal summary text (still exists)
-    const optionsTable = document.querySelector("#options_table, table[id*='options_table']");
+    const optionsTable = mcFindPdpOptionsTableEl();
+    var optionsColTd = mcFindPdpOptionsColumnCell();
     var hasProductCode = !!(
       document.querySelector('input[name="ProductCode"]') &&
       String((document.querySelector('input[name="ProductCode"]') || {}).value || "").trim()
@@ -2818,12 +2866,17 @@ boot();
     var allowOptionsWithoutWm =
       !!opts.forceWithoutWmOpen ||
       (mcIsTheaterSeatingPdpEarly() && !mcPdpMayReceiveWmOpenSoon());
+
+    var mountInsertMode = "";
     if (optionsTable) {
       if (!wmOpen && !allowOptionsWithoutWm) return;
+      mountInsertMode = "afterOptionsTable";
     } else if (wmOpen && wmOpen.parentElement) {
-      /* ok */
+      mountInsertMode = "afterWmOpen";
+    } else if (optionsColTd) {
+      mountInsertMode = "optionsColumn";
     } else if (hasProductCode && opts.allowTitleFallback) {
-      /* ok: insert below title */
+      mountInsertMode = "afterTitle";
     } else {
       return;
     }
@@ -2877,7 +2930,8 @@ boot();
       </div>
     `;
 
-    if (optionsTable) {
+    var panelAttached = false;
+    if (mountInsertMode === "afterOptionsTable" && optionsTable) {
       optionsTable.style.setProperty("position", "absolute", "important");
       optionsTable.style.setProperty("left", "-9999px", "important");
       optionsTable.style.setProperty("opacity", "0", "important");
@@ -2885,17 +2939,32 @@ boot();
       optionsTable.style.setProperty("height", "0", "important");
       optionsTable.style.setProperty("overflow", "hidden", "important");
       optionsTable.insertAdjacentElement("afterend", panel);
-    } else if (wmOpen && wmOpen.parentElement) {
+      panelAttached = true;
+    } else if (mountInsertMode === "afterWmOpen" && wmOpen && wmOpen.parentElement) {
       wmOpen.parentElement.insertAdjacentElement("afterend", panel);
-    } else {
+      panelAttached = true;
+    } else if (mountInsertMode === "optionsColumn" && optionsColTd) {
+      optionsColTd.insertBefore(panel, optionsColTd.firstChild);
+      panelAttached = true;
+    } else if (mountInsertMode === "afterTitle") {
       var titleEl =
         document.querySelector("#v65-product-parent h1[itemprop='name']") ||
         document.querySelector("#v65-product-parent h1") ||
         document.querySelector("#content_area h1.vp-product-title") ||
         document.querySelector("#content_area h1");
-      if (!titleEl || !titleEl.parentElement) return;
-      titleEl.insertAdjacentElement("afterend", panel);
+      if (titleEl && titleEl.parentElement) {
+        titleEl.insertAdjacentElement("afterend", panel);
+        panelAttached = true;
+      }
     }
+    if (!panelAttached) return;
+
+    try {
+      mcRelocateMcInlineConfigToOptionsColumn();
+      [100, 350, 800, 1600, 3200].forEach(function (ms) {
+        setTimeout(mcRelocateMcInlineConfigToOptionsColumn, ms);
+      });
+    } catch (eRelSched) {}
 
     if (!wmOpen) {
       try {
