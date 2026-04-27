@@ -291,8 +291,8 @@
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260428headerfix2: github->volusion deploy verification marker -->
-<meta name="mc-deploy-verify" content="20260428headerfix2">
+<!-- MC_DEPLOY_VERIFY_20260428titan-spec: github->volusion deploy verification marker -->
+<meta name="mc-deploy-verify" content="20260428titan-spec">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -2840,7 +2840,9 @@ boot();
     reece: "40109",
     apex: "44008",
     sanibel: "40111",
-    leeds: "77328"
+    leeds: "77328",
+    /* Titan: official PDF is https://images.palliser.com/specsheet/en/44004%20TITAN.pdf */
+    titan: "44004"
   };
 
   function mcPalliserHaystack() {
@@ -2883,12 +2885,16 @@ boot();
   function mcPalliserResolveModelAndStyle() {
     var model = "";
     var style = "";
+    var explicitModel = false;
     try {
       var modelEl = document.getElementById("mcPalliserModel");
       var styleEl = document.getElementById("mcPalliserStyle");
       if (modelEl) {
         var mv = String(modelEl.value || modelEl.textContent || "").trim();
-        if (/^\d{5}$/.test(mv)) model = mv;
+        if (/^\d{5}$/.test(mv)) {
+          model = mv;
+          explicitModel = true;
+        }
       }
       if (styleEl) {
         var sv = String(styleEl.value || styleEl.textContent || "").trim();
@@ -2901,7 +2907,9 @@ boot();
 
     var mapped = mcPalliserMapMatch();
     if (mapped && mapped.model) {
-      if (!model) model = mapped.model;
+      /* Collection name in title/path: Palliser PDFs use the collection model (e.g. 44004 TITAN).
+         Volusion ProductCode often starts with unrelated digits — override unless #mcPalliserModel is set. */
+      if (!explicitModel) model = mapped.model;
       if (!style) style = mapped.styleKey.toUpperCase();
     }
 
@@ -11073,7 +11081,8 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     paragon: "41417",
     catalina: "41471",
     vertex: "41470",
-    beckett: "41473"
+    beckett: "41473",
+    titan: "44004"
   };
   var PX = 4;
   var _fetchedDims = null;
