@@ -3193,6 +3193,29 @@ boot();
     return null;
   }
 
+  /**
+   * Volusion often renders [itemprop="offers"] (qty + add to cart) above our #mc-inline-config in the column.
+   * Move the inline block immediately before .v65-productdetail-cartqty so Room Planner / Product Summary stay above qty.
+   */
+  function mcReorderInlineConfigBeforeCartQty() {
+    var panel = document.getElementById("mc-inline-config");
+    if (!panel || !panel.parentNode) return;
+    var root = document.getElementById("v65-product-parent") || document.getElementById("content_area");
+    if (!root) return;
+    var qty =
+      root.querySelector('[itemprop="offers"] .v65-productdetail-cartqty') ||
+      root.querySelector(".v65-productdetail-cartqty");
+    if (!qty || !qty.parentNode) return;
+    if (qty.contains(panel) || panel.contains(qty)) return;
+    if (qty.previousElementSibling === panel) return;
+    try {
+      qty.parentNode.insertBefore(panel, qty);
+    } catch (eOrd) {}
+  }
+  try {
+    window.mcReorderInlineConfigBeforeCartQty = mcReorderInlineConfigBeforeCartQty;
+  } catch (eWOrd) {}
+
   /** If inline config was mounted under the title (or wrong column), move it into the options TD. */
   function mcRelocateMcInlineConfigToOptionsColumn() {
     var panel = document.getElementById("mc-inline-config");
@@ -3203,6 +3226,7 @@ boot();
     try {
       optTd.insertBefore(panel, optTd.firstChild);
     } catch (eRel) {}
+    mcReorderInlineConfigBeforeCartQty();
   }
 
   function mount(opts){
@@ -3333,8 +3357,12 @@ boot();
 
     try {
       mcRelocateMcInlineConfigToOptionsColumn();
+      mcReorderInlineConfigBeforeCartQty();
       [100, 250, 500, 900, 1600, 2400, 3600, 5200].forEach(function (ms) {
-        setTimeout(mcRelocateMcInlineConfigToOptionsColumn, ms);
+        setTimeout(function () {
+          mcRelocateMcInlineConfigToOptionsColumn();
+          mcReorderInlineConfigBeforeCartQty();
+        }, ms);
       });
     } catch (eRelSched) {}
 
@@ -4714,6 +4742,11 @@ window.applyPlannerToPage = function (payload) {
   };
   try { mcPersistPlannerCartTarget(window.__mcLastPlannerPayload, lineTotal); } catch (ePersistApply) {}
   try { mcSyncPlannerFormForSubmit(window.__mcLastPlannerPayload, lineTotal); } catch (eSyncApply) {}
+  try {
+    if (typeof window.mcReorderInlineConfigBeforeCartQty === "function") {
+      window.mcReorderInlineConfigBeforeCartQty();
+    }
+  } catch (eReApply) {}
 };
 
 function mcBuildPlannerConfigFieldText(payload) {
@@ -5162,6 +5195,11 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
     window.applyPlannerToPage = function (payload) {
       innerApply.apply(this, arguments);
       try { writeSelects(payload, "after-apply"); } catch (e) { console.warn(LOG, "apply-wrap", e); }
+      try {
+        if (typeof window.mcReorderInlineConfigBeforeCartQty === "function") {
+          window.mcReorderInlineConfigBeforeCartQty();
+        }
+      } catch (eOrdV) {}
     };
     window.applyPlannerToPage.__mcDeterministicWrapped = 1;
   } else if (typeof innerApply !== "function") {
@@ -5173,6 +5211,11 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
         window.applyPlannerToPage = function (payload) {
           fn.apply(this, arguments);
           try { writeSelects(payload, "after-apply"); } catch (e) { console.warn(LOG, "apply-wrap", e); }
+          try {
+            if (typeof window.mcReorderInlineConfigBeforeCartQty === "function") {
+              window.mcReorderInlineConfigBeforeCartQty();
+            }
+          } catch (eOrdV2) {}
         };
         window.applyPlannerToPage.__mcDeterministicWrapped = 1;
         clearInterval(iv);

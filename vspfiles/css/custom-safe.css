@@ -11304,7 +11304,7 @@ body.productdetails #v65-product-parent #v65-productdetail-action-wrapper,
 body.mc-product-page #v65-product-parent #v65-productdetail-action-wrapper,
 body.productdetails #v65-product-parent [itemprop="offers"],
 body.mc-product-page #v65-product-parent [itemprop="offers"]{
-  min-height:140px !important;
+  min-height: 0 !important;
 }
 
 /* prevent tiny animations / reflow flicker */
@@ -11361,5 +11361,87 @@ body.mc-product-page #v65-product-parent [class*="klarna"]{
 #mcPlannerMemberTotal.is-visible{
   display:block !important;
 }
+}
+
+/* PDP 2026-04-28: sticky header on product pages; planner/summary labels one line; offers column stacks with qty after prices */
+@media (min-width: 992px) {
+  body.productdetails header.header,
+  body.mc-product-page header.header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10050 !important;
+    background-color: #fff !important;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06) !important;
+  }
+}
+
+body.productdetails #v65-product-parent [itemprop="offers"],
+body.mc-product-page #v65-product-parent [itemprop="offers"],
+body.productdetails #content_area [itemprop="offers"],
+body.mc-product-page #content_area [itemprop="offers"] {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+}
+
+body.productdetails #v65-product-parent [itemprop="offers"] > .v65-productdetail-cartqty,
+body.mc-product-page #v65-product-parent [itemprop="offers"] > .v65-productdetail-cartqty,
+body.productdetails #content_area [itemprop="offers"] > .v65-productdetail-cartqty,
+body.mc-product-page #content_area [itemprop="offers"] > .v65-productdetail-cartqty {
+  order: 80 !important;
+}
+
+body.productdetails #v65-product-parent [itemprop="offers"] > .v65-product-addtocart,
+body.mc-product-page #v65-product-parent [itemprop="offers"] > .v65-product-addtocart,
+body.productdetails #content_area [itemprop="offers"] > .v65-product-addtocart,
+body.mc-product-page #content_area [itemprop="offers"] > .v65-product-addtocart {
+  order: 90 !important;
+}
+
+body.productdetails #v65-product-parent [itemprop="offers"] > #v65-productdetail-action-wrapper,
+body.mc-product-page #v65-product-parent [itemprop="offers"] > #v65-productdetail-action-wrapper,
+body.productdetails #content_area [itemprop="offers"] > #v65-productdetail-action-wrapper,
+body.mc-product-page #content_area [itemprop="offers"] > #v65-productdetail-action-wrapper {
+  order: 85 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+}
+
+body.productdetails #v65-product-parent [itemprop="offers"] > #mc-inline-config,
+body.mc-product-page #v65-product-parent [itemprop="offers"] > #mc-inline-config,
+body.productdetails #content_area [itemprop="offers"] > #mc-inline-config,
+body.mc-product-page #content_area [itemprop="offers"] > #mc-inline-config {
+  order: 40 !important;
+}
+
+body.productdetails #mcPlannerBtn,
+body.productdetails #mcProductSummaryBtn,
+body.mc-product-page #mcPlannerBtn,
+body.mc-product-page #mcProductSummaryBtn,
+body.mc-theater-seating-pdp #mcPlannerBtn,
+body.mc-theater-seating-pdp #mcProductSummaryBtn {
+  white-space: nowrap !important;
+  flex-wrap: nowrap !important;
+}
+
+body.productdetails #mcPlannerBtn > span:first-child,
+body.productdetails #mcProductSummaryBtn > span:first-child,
+body.mc-product-page #mcPlannerBtn > span:first-child,
+body.mc-product-page #mcProductSummaryBtn > span:first-child,
+body.mc-theater-seating-pdp #mcPlannerBtn > span:first-child,
+body.mc-theater-seating-pdp #mcProductSummaryBtn > span:first-child {
+  white-space: nowrap !important;
+}
+
+body.productdetails #mcPlannerBtn .mc-btn-icon,
+body.productdetails #mcProductSummaryBtn .mc-btn-icon,
+body.mc-product-page #mcPlannerBtn .mc-btn-icon,
+body.mc-product-page #mcProductSummaryBtn .mc-btn-icon,
+body.mc-theater-seating-pdp #mcPlannerBtn .mc-btn-icon,
+body.mc-theater-seating-pdp #mcProductSummaryBtn .mc-btn-icon {
+  flex-shrink: 0 !important;
 }
 
