@@ -14,17 +14,15 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install SFTP tools
+      - name: Install deploy tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y sshpass openssh-client
+          sudo apt-get install -y lftp netcat-openbsd
 
       - name: Verify local files exist
         run: |
           echo "Repo root:"
           pwd
-
-          echo "Checking required files..."
 
           if [ ! -f "template_266.html" ]; then
             echo "ERROR: template_266.html is missing from repo root"
@@ -52,28 +50,77 @@ jobs:
           echo "FTP_USERNAME is set"
           echo "FTP_PASSWORD is set"
 
-      - name: Create SFTP batch file
+      - name: Test Volusion connection ports
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
         run: |
-          cat > sftp-batch.txt <<'EOF'
-          put template_266.html /v/template_266.html
-          put vspfiles/css/custom-safe.css /v/vspfiles/css/custom-safe.css
-          bye
-          EOF
+          echo "Testing port 2222..."
+          if nc -vz -w 20 "$FTP_SERVER" 2222; then
+            echo "PORT_2222_OPEN=true" >> $GITHUB_ENV
+          else
+            echo "PORT_2222_OPEN=false" >> $GITHUB_ENV
+          fi
 
-          echo "Batch file created:"
-          cat sftp-batch.txt
+          echo "Testing port 21..."
+          if nc -vz -w 20 "$FTP_SERVER" 21; then
+            echo "PORT_21_OPEN=true" >> $GITHUB_ENV
+          else
+            echo "PORT_21_OPEN=false" >> $GITHUB_ENV
+          fi
 
       - name: Deploy files to Volusion
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          PORT_2222_OPEN: ${{ env.PORT_2222_OPEN }}
+          PORT_21_OPEN: ${{ env.PORT_21_OPEN }}
         run: |
-          sshpass -p "$FTP_PASSWORD" sftp \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            -o ServerAliveInterval=30 \
-            -o ServerAliveCountMax=4 \
-            -P 2222 \
-            -b sftp-batch.txt \
-            "$FTP_USERNAME@$FTP_SERVER"
+          echo "PORT_2222_OPEN=$PORT_2222_OPEN"
+          echo "PORT_21_OPEN=$PORT_21_OPEN"
+
+          if [ "$PORT_2222_OPEN" = "true" ]; then
+            echo "Using SFTP on port 2222..."
+
+            lftp <<EOF
+          set sftp:auto-confirm yes
+          set ssl:verify-certificate no
+          set net:timeout 90
+          set net:max-retries 2
+          set net:reconnect-interval-base 10
+          set xfer:clobber yes
+          set cmd:fail-exit yes
+
+          open -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222
+
+          put template_266.html -o /v/template_266.html
+          put vspfiles/css/custom-safe.css -o /v/vspfiles/css/custom-safe.css
+
+          bye
+          EOF
+
+          elif [ "$PORT_21_OPEN" = "true" ]; then
+            echo "Using FTP on port 21..."
+
+            lftp <<EOF
+          set ftp:ssl-allow no
+          set ssl:verify-certificate no
+          set net:timeout 90
+          set net:max-retries 2
+          set net:reconnect-interval-base 10
+          set xfer:clobber yes
+          set cmd:fail-exit yes
+
+          open -u "$FTP_USERNAME","$FTP_PASSWORD" ftp://"$FTP_SERVER":21
+
+          put template_266.html -o /v/template_266.html
+          put vspfiles/css/custom-safe.css -o /v/vspfiles/css/custom-safe.css
+
+          bye
+          EOF
+
+          else
+            echo "ERROR: GitHub cannot connect to this FTP_SERVER on port 2222 or port 21."
+            echo "Your FTP_SERVER secret is probably not the correct Volusion FTP host, or Volusion is blocking GitHub's runner."
+            exit 1
+          fi
