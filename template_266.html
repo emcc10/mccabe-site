@@ -2713,12 +2713,83 @@ boot();
 
   window.__MC_INLINE_FINAL__ = true;
 
+  /** True on Palliser / custom theater PDPs before mount finishes (body class may not exist yet). */
+  function mcIsTheaterSeatingPdpEarly() {
+    try {
+      if (!document.getElementById("v65-product-parent")) return false;
+      var path = String(location.pathname || "").toLowerCase();
+      var search = String(location.search || "").toLowerCase();
+      if (/-s\/106(\b|\.|-|\/)/.test(path) || /\bcategoryid=106\b/.test(search)) return true;
+      if (
+        /customtheaterseating|palliser-theater-seating|theater-seating|theatre-seating|vertex-theater/i.test(
+          path
+        )
+      )
+        return true;
+      if (
+        document.querySelector(
+          'a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"], a[href*="theater-seating"], a[href*="theatre-seating"]'
+        )
+      )
+        return true;
+      if (
+        document.querySelector(
+          'select[title*="Number of Seats" i], select[title*="Choose Configuration" i]'
+        )
+      )
+        return true;
+      var titleText = (
+        (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
+        document.title ||
+        ""
+      ).toLowerCase();
+      return /theater seating|theatre seating|theater chair|theatre chair|home theater|home theatre|palliser vertex/i.test(
+        titleText
+      );
+    } catch (eTh) {
+      return false;
+    }
+  }
+
+  /** Mirrors leather modal's select detection: if true, wait for #wmOpen instead of mounting without it. */
+  function mcPdpMayReceiveWmOpenSoon() {
+    try {
+      var sels = document.querySelectorAll(
+        "#options_table select, table[id*='options_table'] select, #v65-product-parent select"
+      );
+      var idx;
+      for (idx = 0; idx < sels.length; idx++) {
+        var sel = sels[idx];
+        var id = (sel.id || "").toLowerCase();
+        var nm = (sel.name || "").toLowerCase();
+        var hint = id + " " + nm;
+        var opts = sel.options || [];
+        var sample = "";
+        var j;
+        for (j = 0; j < Math.min(opts.length, 50); j++) {
+          sample += (opts[j].textContent || "").toLowerCase() + " ";
+        }
+        var hasGrade = /grade\s*[0-9,]+/.test(sample);
+        var hasKnown = /(traverse|solana|rein|evoque|leather|cover)/.test(sample);
+        var hinted = /(leather|cover|upholstery)/.test(hint);
+        if (hinted || hasGrade || hasKnown) return true;
+      }
+    } catch (eWm) {}
+    return false;
+  }
+
   function mount(opts){
     opts = opts || {};
     if (document.getElementById("mc-inline-config")) return;
 
     const area = document.getElementById("content_area");
     if (!area) return;
+
+    try {
+      if (mcIsTheaterSeatingPdpEarly() && document.body) {
+        document.body.classList.add("mc-theater-seating-pdp");
+      }
+    } catch (eThCls) {}
 
     const wmOpen = document.getElementById("wmOpen");       // hidden modal trigger (created async by leather script)
     const wmSummary = document.getElementById("wmSummary"); // modal summary text (still exists)
@@ -2728,9 +2799,12 @@ boot();
       String((document.querySelector('input[name="ProductCode"]') || {}).value || "").trim()
     );
 
-    /* With options table, wait for #wmOpen unless we already waited long enough (Volusion/leather script can be >2s). Without options table, use wmOpen parent or a late title-anchor fallback. */
+    /* With options table, normally wait for #wmOpen. Theater without leather-style selects mounts immediately; late force covers stuck PDPs. */
+    var allowOptionsWithoutWm =
+      !!opts.forceWithoutWmOpen ||
+      (mcIsTheaterSeatingPdpEarly() && !mcPdpMayReceiveWmOpenSoon());
     if (optionsTable) {
-      if (!wmOpen && !opts.forceWithoutWmOpen) return;
+      if (!wmOpen && !allowOptionsWithoutWm) return;
     } else if (wmOpen && wmOpen.parentElement) {
       /* ok */
     } else if (hasProductCode && opts.allowTitleFallback) {
@@ -4380,6 +4454,9 @@ try {
 ;[0, 250, 500, 800, 1200, 1800, 2600, 3800, 5500, 8000].forEach(function (ms) {
   setTimeout(mount, ms);
 });
+setTimeout(function () {
+  mount({ allowTitleFallback: true, forceWithoutWmOpen: true });
+}, 3500);
 setTimeout(function () {
   mount({ allowTitleFallback: true, forceWithoutWmOpen: true });
 }, 11000);

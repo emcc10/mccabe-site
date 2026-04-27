@@ -2383,6 +2383,42 @@ body.mc-product-page #mc-inline-config {
   clear: both !important;
 }
 
+/* Theater PDPs: same panel visibility (body may lack mc-product-page until other scripts run) */
+body.mc-theater-seating-pdp #mc-inline-config {
+  position: static !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  clear: both !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+body.mc-theater-seating-pdp #mcPlannerRow {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+body.mc-theater-seating-pdp #mcPlannerBtn,
+body.mc-theater-seating-pdp #mcProductSummaryBtn {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: auto !important;
+  flex: 1 1 140px !important;
+  box-sizing: border-box !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
 /* Hidden leather select stays hidden without affecting layout */
 body.mc-product-page select.mc-native-leather {
   position: absolute !important;
