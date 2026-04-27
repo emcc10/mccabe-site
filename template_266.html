@@ -760,22 +760,6 @@ document.addEventListener("DOMContentLoaded", function () {
     color: #777 !important;
     text-decoration: none !important;
   }
-/* Hide Volusion/original duplicate top category menu */
-body:has(#mccabe-global-top-nav) a[href*="category-s/186.htm"]:not(#mccabe-global-top-nav a) {
-  visibility: hidden !important;
-}
-
-body:has(#mccabe-global-top-nav) a[href*="category-s/186.htm"]:not(#mccabe-global-top-nav a)::after {
-  visibility: visible !important;
-}
-
-/* Hide any wrapper near the top that contains the old category menu */
-body:has(#mccabe-global-top-nav) div:has(> a[href*="category-s/186.htm"]):not(#mccabe-global-top-nav),
-body:has(#mccabe-global-top-nav) table:has(a[href*="category-s/186.htm"]),
-body:has(#mccabe-global-top-nav) ul:has(a[href*="category-s/186.htm"]),
-body:has(#mccabe-global-top-nav) nav:has(a[href*="category-s/186.htm"]):not(#mccabe-global-top-nav) {
-  display: none !important;
-}
 
   @media (max-width: 767px) {
     #mccabe-global-top-nav {
@@ -792,6 +776,58 @@ body:has(#mccabe-global-top-nav) nav:has(a[href*="category-s/186.htm"]):not(#mcc
   <a href="/aboutus.asp">About Us</a>
   <a href="/Articles.asp?ID=83">Contact Us</a>
 </nav>
+  <script id="mccabe-safe-hide-duplicate-top-menu">
+(function () {
+  function hideOnlyDuplicateTextMenu() {
+    var newMenu = document.getElementById("mccabe-global-top-nav");
+    if (!newMenu) return;
+
+    var candidates = Array.from(document.querySelectorAll("nav, ul, table, tbody, tr, div"));
+
+    candidates.forEach(function (el) {
+      if (el === newMenu || newMenu.contains(el)) return;
+
+      var rect = el.getBoundingClientRect();
+      var txt = (el.innerText || "").toUpperCase().replace(/\s+/g, " ").trim();
+
+      var isOldMenu =
+        txt.includes("THEATER SEATING") &&
+        txt.includes("BEAN BAGS") &&
+        txt.includes("SOFAS") &&
+        txt.includes("BEDROOM") &&
+        txt.includes("ABOUT") &&
+        txt.includes("CONTACT");
+
+      var isNearTop = rect.top >= 0 && rect.top < 180;
+      var isSmallMenuStrip = rect.height > 0 && rect.height < 80;
+
+      var containsHero =
+        el.querySelector &&
+        (
+          el.querySelector("#slideshow-container") ||
+          el.querySelector(".slidesjs-container") ||
+          el.querySelector("[id*='slideshow']") ||
+          el.querySelector("[class*='slideshow']") ||
+          el.querySelector("img")
+        );
+
+      if (isOldMenu && isNearTop && isSmallMenuStrip && !containsHero) {
+        el.style.setProperty("display", "none", "important");
+      }
+    });
+  }
+
+  hideOnlyDuplicateTextMenu();
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", hideOnlyDuplicateTextMenu);
+  }
+
+  window.addEventListener("load", hideOnlyDuplicateTextMenu);
+  setTimeout(hideOnlyDuplicateTextMenu, 300);
+  setTimeout(hideOnlyDuplicateTextMenu, 1000);
+})();
+</script>
 <script>
 (function () {
   try {
