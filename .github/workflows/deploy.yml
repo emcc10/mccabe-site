@@ -123,21 +123,21 @@ jobs:
 
           TPL_OK=
           for f in mc-remote-tpl-v.html mc-remote-tpl-root.html mc-remote-tpl-home.html mc-remote-tpl-vv.html; do
-            if [ -f "$f" ] && grep -q "MC_DEPLOY_VERIFY_20260428pydeploy" "$f" 2>/dev/null; then
+            if [ -f "$f" ] && grep -q "MC_DEPLOY_VERIFY_20260428headerfix2" "$f" 2>/dev/null; then
               echo "OK: template marker found in $f"
               TPL_OK=1
               break
             fi
           done
           if [ -z "$TPL_OK" ]; then
-            echo "ERROR: MC_DEPLOY_VERIFY_20260428pydeploy not found in any downloaded template copy."
+            echo "ERROR: MC_DEPLOY_VERIFY_20260428headerfix2 not found in any downloaded template copy."
             ls -la mc-remote-tpl-*.html 2>/dev/null || true
             exit 1
           fi
 
           CSS_OK=
           for f in mc-remote-css-vv.css mc-remote-css-vs.css mc-remote-css-rel.css mc-remote-css-vrel.css; do
-            if [ -f "$f" ] && grep -q "MC_CSS_DEPLOY_VERIFY_20260428pydeploy" "$f" 2>/dev/null; then
+            if [ -f "$f" ] && grep -q "MC_CSS_DEPLOY_VERIFY_20260428headerfix2" "$f" 2>/dev/null; then
               echo "OK: CSS marker found in $f"
               CSS_OK=1
               head -n 2 "$f"
@@ -145,7 +145,7 @@ jobs:
             fi
           done
           if [ -z "$CSS_OK" ]; then
-            echo "ERROR: MC_CSS_DEPLOY_VERIFY_20260428pydeploy not found in any downloaded custom-safe.css."
+            echo "ERROR: MC_CSS_DEPLOY_VERIFY_20260428headerfix2 not found in any downloaded custom-safe.css."
             ls -la mc-remote-css-*.css 2>/dev/null || true
             exit 1
           fi

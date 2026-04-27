@@ -1,4 +1,4 @@
-/* MC_CSS_DEPLOY_VERIFY_20260428pydeploy — uploaded by GitHub Actions with template; wins over inline header CSS */
+/* MC_CSS_DEPLOY_VERIFY_20260428headerfix2 — uploaded by GitHub Actions with template; wins over inline header CSS */
 /* MC_DEPLOY_VERIFY — LAST-WIN: strip ::before Search labels; PDP layout + single search underline; see file end */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
