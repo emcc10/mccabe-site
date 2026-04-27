@@ -10913,26 +10913,3 @@ body.mc-product-page #v65-product-parent [class*="klarna"]{
 #mcPlannerMemberTotal.is-visible{
   display:block !important;
 }
-/* =========================================================
-   FORCE TOP MENU VERTICAL ALIGNMENT SITEWIDE
-   ========================================================= */
-
-.mccabe-fixed-top-menu-wrap {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  top: 0 !important;
-  transform: none !important;
-  position: relative !important;
-  z-index: 9999 !important;
-}
-
-.mccabe-fixed-top-menu-wrap ul,
-.mccabe-fixed-top-menu-wrap nav,
-.mccabe-fixed-top-menu-wrap table,
-.mccabe-fixed-top-menu-wrap td,
-.mccabe-fixed-top-menu-wrap div {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  top: 0 !important;
-  transform: none !important;
-}
