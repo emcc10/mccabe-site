@@ -24,9 +24,6 @@ jobs:
           echo "Repo root:"
           pwd
 
-          echo "Repo files:"
-          find . -maxdepth 4 -type f | sort
-
           echo "Checking required files..."
 
           if [ ! -f "template_266.html" ]; then
@@ -51,9 +48,9 @@ jobs:
           test -n "$FTP_USERNAME" || (echo "ERROR: FTP_USERNAME is blank" && exit 1)
           test -n "$FTP_PASSWORD" || (echo "ERROR: FTP_PASSWORD is blank" && exit 1)
 
-          echo "FTP_SERVER length: ${#FTP_SERVER}"
-          echo "FTP_USERNAME length: ${#FTP_USERNAME}"
-          echo "FTP_PASSWORD length: ${#FTP_PASSWORD}"
+          echo "FTP_SERVER is set"
+          echo "FTP_USERNAME is set"
+          echo "FTP_PASSWORD is set"
 
       - name: Deploy files to Volusion
         env:
@@ -64,28 +61,21 @@ jobs:
           lftp <<EOF
           set sftp:auto-confirm yes
           set ssl:verify-certificate no
-          set net:timeout 45
-          set net:max-retries 3
-          set net:reconnect-interval-base 5
+          set net:timeout 90
+          set net:max-retries 2
+          set net:reconnect-interval-base 10
           set xfer:clobber yes
           set cmd:fail-exit yes
 
           open -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222
 
-          echo "Connected to Volusion"
-          pwd
-          ls
-
-          echo "Deploying template..."
+          echo "Uploading template_266.html..."
           put template_266.html -o /v/template_266.html
 
-          echo "Deploying custom CSS..."
-          mkdir -p /v/vspfiles/css
+          echo "Uploading custom-safe.css..."
           put vspfiles/css/custom-safe.css -o /v/vspfiles/css/custom-safe.css
 
-          echo "Verifying remote files..."
-          cls -l /v/template_266.html
-          cls -l /v/vspfiles/css/custom-safe.css
+          echo "Deploy completed."
 
           bye
           EOF
