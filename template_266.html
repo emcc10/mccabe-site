@@ -6,6 +6,23 @@
 <script>
 (function () {
   try {
+    var p = String(location.pathname || "").toLowerCase();
+    var s = String(location.search || "");
+    var looksPdp = false;
+    if (/\/product-p\//i.test(p) || /\/-p\//i.test(p)) looksPdp = true;
+    if (!looksPdp && /-p\/[^/]+\.html?$/i.test(p)) looksPdp = true;
+    if (!looksPdp && /\/productdetails\.asp/i.test(p)) looksPdp = true;
+    if (!looksPdp) {
+      var m = s.match(/(?:^|[?&])productcode=([^&]*)/i);
+      if (m && String(decodeURIComponent(String(m[1] || "").replace(/\+/g, " "))).trim()) looksPdp = true;
+    }
+    if (looksPdp) document.documentElement.classList.add("mc-url-looks-like-pdp");
+  } catch (eMcUrlPdp) {}
+})();
+</script>
+<script>
+(function () {
+  try {
     var h0 = document.documentElement;
     var p0 = (location.pathname || '').toLowerCase();
     var q0 = (window.location.search || '').toLowerCase();
@@ -101,8 +118,12 @@
   function mcPathLooksLikeProductOrInteriorUrl() {
     try {
       var p = String(location.pathname || "").toLowerCase();
+      var s = String(location.search || "");
       if (/\/product-p\//i.test(p) || /\/-p\//i.test(p)) return true;
       if (/-p\/[^/]+\.html?$/i.test(p)) return true;
+      if (/\/productdetails\.asp/i.test(p)) return true;
+      var m = s.match(/(?:^|[?&])productcode=([^&]*)/i);
+      if (m && String(decodeURIComponent(String(m[1] || "").replace(/\+/g, " "))).trim()) return true;
     } catch (eU) {}
     return false;
   }
@@ -122,6 +143,10 @@
       /* Never treat real PDP / product chrome as homepage (prevents hero + duplicate nav). */
       if (mcDomLooksLikeProductPage()) return false;
       if (mcPathLooksLikeProductOrInteriorUrl()) return false;
+      try {
+        if (document.documentElement && document.documentElement.classList.contains("mc-url-looks-like-pdp"))
+          return false;
+      } catch (eHtmlPdp) {}
 
       var raw = String(location.pathname || "").replace(/\\/g, "/");
       var p = raw.toLowerCase();
@@ -206,8 +231,8 @@
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260427deploytest: github->volusion deploy verification marker -->
-<meta name="mc-deploy-verify" content="20260427deploytest">
+<!-- MC_DEPLOY_VERIFY_20260428pdpurl: github->volusion deploy verification marker -->
+<meta name="mc-deploy-verify" content="20260428pdpurl">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -373,6 +398,21 @@
       margin: 0 !important;
       padding: 0 !important;
       pointer-events: none !important;
+    }
+    /* URL-only PDP hint (runs before body exists): beats body.is-home #if_homepage when path/query is a product page */
+    html.mc-url-looks-like-pdp #if_homepage,
+    html.mc-url-looks-like-pdp body #if_homepage,
+    html.mc-url-looks-like-pdp body.is-home #if_homepage {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      max-height: 0 !important;
+      overflow: hidden !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      pointer-events: none !important;
+      border: 0 !important;
     }
     /* MC_HEADER_CRITICAL_20260401q — interior: flex bar (no clip); hero search top-right */
     header.header .header__section--middle,
@@ -2763,12 +2803,14 @@ boot();
       document.querySelector("#content_area .mc-pdp-options-td");
     if (optTd) return optTd;
     var area = document.getElementById("content_area");
-    if (!area) return null;
+    var v65 = document.getElementById("v65-product-parent");
+    var scope = v65 || area;
+    if (!scope) return null;
     var addBtn =
-      area.querySelector('input[name="btnaddtocart"]') || area.querySelector('input[id*="btnaddtocart" i]');
+      scope.querySelector('input[name="btnaddtocart"]') || scope.querySelector('input[id*="btnaddtocart" i]');
     var td = addBtn ? addBtn.closest("td") : null;
     if (td) return td;
-    var sels = area.querySelectorAll("select");
+    var sels = scope.querySelectorAll("select");
     var i;
     var s;
     for (i = 0; i < sels.length; i++) {
@@ -2800,7 +2842,8 @@ boot();
     if (document.getElementById("mc-inline-config")) return;
 
     const area = document.getElementById("content_area");
-    if (!area) return;
+    const v65root = document.getElementById("v65-product-parent");
+    if (!area && !v65root) return;
 
     try {
       if (mcIsTheaterSeatingPdpEarly() && document.body) {
@@ -9759,7 +9802,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   function qsa(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
 
   function isPDP(){
-    return !!qs('input[name="ProductCode"]') && !!qs('#content_area');
+    return !!qs('input[name="ProductCode"]') && !!(qs('#content_area') || qs('#v65-product-parent'));
   }
 
   function unwrapBadWrapper(){
@@ -9776,23 +9819,44 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (!isPDP()) return;
 
     var area = qs('#content_area');
+    var v65 = qs('#v65-product-parent');
+    var roots = [];
+    if (v65) roots.push(v65);
+    if (area) roots.push(area);
+
+    function qsRoot(sel){
+      var ri;
+      for (ri = 0; ri < roots.length; ri++) {
+        var hit = qs(sel, roots[ri]);
+        if (hit) return hit;
+      }
+      return null;
+    }
+    function qsaRoot(sel){
+      var ri;
+      var acc = [];
+      for (ri = 0; ri < roots.length; ri++) {
+        acc = acc.concat(qsa(sel, roots[ri]));
+      }
+      return acc;
+    }
 
     // Find the TD that contains the main image
     var main =
-      qs('#product_photo', area) ||
-      qs('#product_photo_td', area) ||
-      qs('.vcss_img_wrap', area) ||
-      qs('.vCSS_img_wrap', area) ||
-      qs('.main-image', area) ||
-      qs('img#main-image', area);
+      qsRoot('#product_photo') ||
+      qsRoot('#product_photo_td') ||
+      qsRoot('.vcss_img_wrap') ||
+      qsRoot('.vCSS_img_wrap') ||
+      qsRoot('.main-image') ||
+      qsRoot('img#main-image');
 
     var mediaTd = main ? main.closest('td') : null;
 
     // Find TD that contains Add to Cart
     var addBtn =
-      qs('input[name="btnaddtocart"]', area) ||
-      qs('input[id*="btnaddtocart"]', area) ||
-      qsa('input[type="submit"], button', area).find(function(el){
+      qsRoot('input[name="btnaddtocart"]') ||
+      qsRoot('input[id*="btnaddtocart" i]') ||
+      qsaRoot('input[type="submit"], button').find(function(el){
         return /add to cart/i.test(el.value || el.textContent || '');
       });
 
@@ -9800,7 +9864,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
     // Fallback: TD containing first visible non-hidden select (NOT hidden leather select)
     if (!optionsTd){
-      var sel = qsa('select', area).find(function(s){
+      var sel = qsaRoot('select').find(function(s){
         if (s.classList.contains('mc-native-leather')) return false;
         return s.offsetParent !== null;
       });

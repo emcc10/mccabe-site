@@ -813,6 +813,23 @@ body.mc-product-page header.header {
   background: #fff !important;
 }
 
+/* PDP from URL only: template sets html.mc-url-looks-like-pdp before <body> (Volusion default.asp?ProductCode=…).
+   Replicate here so hero stays hidden even if template critical CSS is stale in cache. */
+html.mc-url-looks-like-pdp #if_homepage,
+html.mc-url-looks-like-pdp body #if_homepage,
+html.mc-url-looks-like-pdp body.is-home #if_homepage {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+  border: 0 !important;
+}
+
 /* ======================================
    VOLUSION MENU (NON-HOME PAGES)
 ====================================== */
