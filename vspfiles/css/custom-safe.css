@@ -893,14 +893,18 @@ body:not(.is-home) header.header .collapsing-search {
   pointer-events: auto !important;
 }
 
-/* Non-home: one flex row — nav + search */
+/* Non-home: one flex row — nav + search (also PDP when Volusion leaves body.is-home) */
 @media (min-width: 992px) {
-  body:not(.is-home) header.header > .header__section {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    > .header__section {
     padding-top: 18px !important;
     padding-bottom: 2px !important;
   }
 
-  body:not(.is-home) header.header > .mc-header-desktop-bar {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    > .mc-header-desktop-bar {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
@@ -915,7 +919,9 @@ body:not(.is-home) header.header .collapsing-search {
     max-width: 100% !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .microblock.main-menu {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .microblock.main-menu {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
@@ -926,7 +932,9 @@ body:not(.is-home) header.header .collapsing-search {
     box-sizing: border-box !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .mc-header-search-cart-wrap {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto !important;
     grid-template-rows: auto auto !important;
@@ -943,7 +951,9 @@ body:not(.is-home) header.header .collapsing-search {
     box-sizing: border-box !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap::before {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .mc-header-search-cart-wrap::before {
     content: "Search" !important;
     grid-column: 1 / -1 !important;
     grid-row: 1 !important;
@@ -953,11 +963,13 @@ body:not(.is-home) header.header .collapsing-search {
     text-transform: uppercase !important;
     color: #111111 !important;
     line-height: 1.2 !important;
-    margin: 225px !important;
+    margin: 0 !important;
     padding: 0 !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-below-nav {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .mc-header-search-below-nav {
     grid-column: 1 !important;
     grid-row: 2 !important;
     min-width: 0 !important;
@@ -965,7 +977,9 @@ body:not(.is-home) header.header .collapsing-search {
     max-width: 100% !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .mc-header-cart {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .mc-header-cart {
     grid-column: 2 !important;
     grid-row: 2 !important;
     align-self: center !important;
@@ -973,8 +987,12 @@ body:not(.is-home) header.header .collapsing-search {
     flex: 0 0 auto !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .collapsing-search,
-  body:not(.is-home) .mc-header-desktop-bar #collapsingSearch {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .collapsing-search,
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    #collapsingSearch {
     width: 100% !important;
     max-width: 100% !important;
     border-bottom: none !important;
@@ -985,16 +1003,27 @@ body:not(.is-home) header.header .collapsing-search {
     background: transparent !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form,
-  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .container,
-  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .collapsing-search__form,
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .collapsing-search__form
+    .container,
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .collapsing-search__form
+    .row {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .collapsing-search__form
+    .row {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
@@ -1005,13 +1034,24 @@ body:not(.is-home) header.header .collapsing-search {
     box-sizing: border-box !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row::after {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .collapsing-search__form
+    .row::after {
     display: none !important;
     content: none !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row #search,
-  body:not(.is-home) .mc-header-desktop-bar .collapsing-search__form .row .collapsing-search__input {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .collapsing-search__form
+    .row
+    #search,
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .collapsing-search__form
+    .row
+    .collapsing-search__input {
     flex: 1 1 auto !important;
     width: 100% !important;
     min-width: 0 !important;
@@ -1023,14 +1063,25 @@ body:not(.is-home) header.header .collapsing-search {
     line-height: 28px !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .microblock.main-menu #display_menu_1 {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .microblock.main-menu
+    #display_menu_1 {
     padding: 0 !important;
     margin: 0 !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .collapsing-search:focus-within,
-  html.mc-search-open body:not(.is-home) .mc-header-desktop-bar .collapsing-search,
-  body.mc-search-open body:not(.is-home) .mc-header-desktop-bar .collapsing-search {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .collapsing-search:focus-within,
+  html.mc-search-open
+    :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .collapsing-search,
+  body.mc-search-open
+    :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .collapsing-search {
     transform: none !important;
     padding: 0 !important;
     box-shadow: none !important;
@@ -1038,9 +1089,23 @@ body:not(.is-home) header.header .collapsing-search {
     background: transparent !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap:focus-within .collapsing-search__form .row,
-  html.mc-search-open body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap .collapsing-search__form .row,
-  body.mc-search-open body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap .collapsing-search__form .row {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .mc-header-search-cart-wrap:focus-within
+    .collapsing-search__form
+    .row,
+  html.mc-search-open
+    :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .mc-header-search-cart-wrap
+    .collapsing-search__form
+    .row,
+  body.mc-search-open
+    :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .mc-header-search-cart-wrap
+    .collapsing-search__form
+    .row {
     border-bottom: 2px solid #1a1a1a !important;
     padding-bottom: 5px !important;
     box-shadow: none !important;
@@ -1048,12 +1113,16 @@ body:not(.is-home) header.header .collapsing-search {
 }
 
 @media (max-width: 991px) {
-  body:not(.is-home) header.header > .mc-header-desktop-bar {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    > .mc-header-desktop-bar {
     flex-direction: column !important;
     align-items: stretch !important;
   }
 
-  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap {
+  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    .mc-header-desktop-bar
+    .mc-header-search-cart-wrap {
     width: 100% !important;
     max-width: 100% !important;
   }
@@ -3304,7 +3373,7 @@ body.mc-product-page select.mc-native-leather {
       #mcPlannerRow,
       #mcPlannerRow2 {
         flex-direction: row !important;
-        flex-wrap: wrap !important;
+        flex-wrap: nowrap !important;
         align-items: stretch !important;
       }
 
