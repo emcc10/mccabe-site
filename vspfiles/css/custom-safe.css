@@ -895,21 +895,21 @@ body:not(.is-home) header.header .collapsing-search {
 
 /* Non-home: one flex row — nav + search (also PDP when Volusion leaves body.is-home) */
 @media (min-width: 992px) {
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     header.header
-    > .header__section {
+    > .header__section:not(.header__section--middle) {
     padding-top: 18px !important;
     padding-bottom: 2px !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     header.header
     > .mc-header-desktop-bar {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
     gap: clamp(14px, 2.5vw, 22px) !important;
     padding: clamp(8px, 1.5vw, 12px) max(56px, 7.5vw) !important;
     box-sizing: border-box !important;
@@ -919,7 +919,7 @@ body:not(.is-home) header.header .collapsing-search {
     max-width: 100% !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .microblock.main-menu {
     display: flex !important;
@@ -927,12 +927,12 @@ body:not(.is-home) header.header .collapsing-search {
     align-items: center !important;
     padding: 0 !important;
     margin: 0 !important;
-    flex: 0 1 auto !important;
+    flex: 1 1 auto !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .mc-header-search-cart-wrap {
     display: grid !important;
@@ -941,17 +941,17 @@ body:not(.is-home) header.header .collapsing-search {
     column-gap: 10px !important;
     row-gap: 4px !important;
     align-items: end !important;
-    flex: 0 0 240px !important;
-    width: 240px !important;
-    min-width: 240px !important;
-    max-width: 240px !important;
+    flex: 0 1 auto !important;
+    width: auto !important;
+    min-width: min(200px, 22vw) !important;
+    max-width: min(260px, 32vw) !important;
     border-bottom: none !important;
     padding: 0 !important;
     margin: 0 !important;
     box-sizing: border-box !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .mc-header-search-cart-wrap::before {
     content: "Search" !important;
@@ -967,7 +967,7 @@ body:not(.is-home) header.header .collapsing-search {
     padding: 0 !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .mc-header-search-below-nav {
     grid-column: 1 !important;
@@ -977,7 +977,7 @@ body:not(.is-home) header.header .collapsing-search {
     max-width: 100% !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .mc-header-cart {
     grid-column: 2 !important;
@@ -987,10 +987,10 @@ body:not(.is-home) header.header .collapsing-search {
     flex: 0 0 auto !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .collapsing-search,
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     #collapsingSearch {
     width: 100% !important;
@@ -1003,14 +1003,14 @@ body:not(.is-home) header.header .collapsing-search {
     background: transparent !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .collapsing-search__form,
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .collapsing-search__form
     .container,
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .collapsing-search__form
     .row {
@@ -1020,7 +1020,7 @@ body:not(.is-home) header.header .collapsing-search {
     padding: 0 !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .collapsing-search__form
     .row {
@@ -1034,7 +1034,7 @@ body:not(.is-home) header.header .collapsing-search {
     box-sizing: border-box !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .collapsing-search__form
     .row::after {
@@ -1042,12 +1042,12 @@ body:not(.is-home) header.header .collapsing-search {
     content: none !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .collapsing-search__form
     .row
     #search,
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .collapsing-search__form
     .row
@@ -1063,7 +1063,7 @@ body:not(.is-home) header.header .collapsing-search {
     line-height: 28px !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .microblock.main-menu
     #display_menu_1 {
@@ -1071,15 +1071,15 @@ body:not(.is-home) header.header .collapsing-search {
     margin: 0 !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .collapsing-search:focus-within,
   html.mc-search-open
-    :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .collapsing-search,
   body.mc-search-open
-    :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .collapsing-search {
     transform: none !important;
@@ -1089,19 +1089,19 @@ body:not(.is-home) header.header .collapsing-search {
     background: transparent !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .mc-header-search-cart-wrap:focus-within
     .collapsing-search__form
     .row,
   html.mc-search-open
-    :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .mc-header-search-cart-wrap
     .collapsing-search__form
     .row,
   body.mc-search-open
-    :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+    :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .mc-header-search-cart-wrap
     .collapsing-search__form
@@ -1113,14 +1113,14 @@ body:not(.is-home) header.header .collapsing-search {
 }
 
 @media (max-width: 991px) {
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     header.header
     > .mc-header-desktop-bar {
     flex-direction: column !important;
     align-items: stretch !important;
   }
 
-  :is(body:not(.is-home), body.productdetails, body.mc-product-page, html.mc-url-looks-like-pdp body.is-home)
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
     .mc-header-desktop-bar
     .mc-header-search-cart-wrap {
     width: 100% !important;
@@ -1257,9 +1257,11 @@ html:not(.category) body:not(.is-home) #content_area_home .v-product__img img {
   display: block !important;
 }
 
-/* If a parent header row is hidden, force it visible on non-home */
-body:not(.is-home) .header__section--top,
-body:not(.is-home) header.header {
+/* If a parent header row is hidden, force it visible on interior + category */
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  .header__section--top,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header {
   display: flex !important;
   flex-direction: column !important;
   flex-wrap: nowrap !important;
@@ -1270,41 +1272,65 @@ body:not(.is-home) header.header {
 }
 
 /* Interior: logo row first, main menu (#display_menu_1) second, search strip last — beats theme float/order */
-body:not(.is-home) header.header > .header__section {
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  > .header__section:not(.header__section--middle) {
   order: 1 !important;
   width: 100% !important;
   max-width: 100% !important;
 }
 
-body:not(.is-home) header.header > .mc-header-desktop-bar,
-body:not(.is-home) header.header > .hidden-xs.col-xs-12,
-body:not(.is-home) header.header > .col-xs-12.hidden-xs {
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  > .mc-header-desktop-bar,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  > .hidden-xs.col-xs-12,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  > .col-xs-12.hidden-xs {
   order: 2 !important;
   width: 100% !important;
   max-width: 100% !important;
 }
 
-body:not(.is-home) header.header > .header__section--middle,
-body:not(.is-home) header.header > .mc-header-search-below-nav {
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  > .header__section--middle,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  > .mc-header-search-below-nav {
   order: 20 !important;
   width: 100% !important;
   max-width: 100% !important;
 }
 
-body:not(.is-home) header.header > .mc-header-cart {
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  > .mc-header-cart {
   order: 30 !important;
 }
 
 /* Interior: keep nav row above search; kill lift that overlaps category links */
-body:not(.is-home) header.header > .mc-header-desktop-bar,
-body:not(.is-home) header.header > .hidden-xs.col-xs-12,
-body:not(.is-home) header.header > .col-xs-12.hidden-xs {
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  > .mc-header-desktop-bar,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  > .hidden-xs.col-xs-12,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  > .col-xs-12.hidden-xs {
   position: relative !important;
   z-index: 3 !important;
 }
 
-body:not(.is-home) header.header > .header__section--middle,
-body:not(.is-home) header.header > .mc-header-search-below-nav {
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  > .header__section--middle,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  > .mc-header-search-below-nav {
   margin-top: 0 !important;
 }
 
@@ -1324,9 +1350,9 @@ html.mc-url-looks-like-pdp body.is-home header.header {
   margin-top: 0 !important;
 }
 
-body.productdetails header.header > .header__section,
-body.mc-product-page header.header > .header__section,
-html.mc-url-looks-like-pdp body.is-home header.header > .header__section {
+body.productdetails header.header > .header__section:not(.header__section--middle),
+body.mc-product-page header.header > .header__section:not(.header__section--middle),
+html.mc-url-looks-like-pdp body.is-home header.header > .header__section:not(.header__section--middle) {
   order: 1 !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -1675,7 +1701,9 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li:focus-within > a {
    menu column loses width and can shift right. Lock layout here.
 ===================================================== */
 @media (min-width: 992px) and (max-width: 1199px) {
-  body:not(.is-home) header.header > div {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    > .header__section:not(.header__section--middle) {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
@@ -1683,13 +1711,19 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li:focus-within > a {
     width: 100% !important;
     box-sizing: border-box !important;
   }
-  body:not(.is-home) header.header .header__section {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .header__section:not(.header__section--middle) {
     flex: 0 0 auto !important;
     min-width: 0 !important;
   }
   /* Menu column: take remaining space and center the nav */
-  body:not(.is-home) header.header .hidden-xs.col-lg-7.no-pad-lg,
-  body:not(.is-home) header.header div.hidden-xs.no-pad-lg {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .hidden-xs.col-lg-7.no-pad-lg,
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    div.hidden-xs.no-pad-lg {
     flex: 1 1 auto !important;
     min-width: 0 !important;
     max-width: 100% !important;
@@ -1698,16 +1732,20 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li:focus-within > a {
     align-items: center !important;
     width: auto !important;
   }
-  body:not(.is-home) header.header .microblock.main-menu {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .microblock.main-menu {
     width: 100% !important;
     max-width: 100% !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    padding-right: 80px !important; /* keep menu clear of cart icon */
+    padding-right: 12px !important;
     box-sizing: border-box !important;
   }
-  body:not(.is-home) header.header .microblock.mc-header-cart {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .microblock.mc-header-cart {
     flex: 0 0 auto !important;
   }
 }
@@ -3065,8 +3103,9 @@ body.mc-product-page select.mc-native-leather {
       line-height: 1 !important;
     }
 
-    /* FORCE HEADER COLUMNS TO BEHAVE LIKE A ROW ON NON-HOMEPAGE PAGES */
-    body:not(.is-home) .header__section {
+    /* Logo / top strip only — not .header__section--middle (duplicate search row) */
+    :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+      .header__section:not(.header__section--middle) {
       display: flex !important;
       align-items: center !important;
       justify-content: space-between !important;
@@ -4759,13 +4798,17 @@ body.is-home body .mc-cart-float {
    CATEGORY / NON-HOME: force menu single row, no overlap
    High specificity so theme/Volusion cannot override
    ========================================================= */
-body:not(.is-home) header.header .microblock.main-menu {
-  padding-right: 80px !important;
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  .microblock.main-menu {
+  padding-right: 12px !important;
   box-sizing: border-box !important;
   overflow: visible !important;
   min-width: 0 !important; /* allow flex shrink in row */
 }
-body:not(.is-home) header.header #display_menu_1 {
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  #display_menu_1 {
   display: flex !important;
   flex-wrap: nowrap !important;
   justify-content: center !important;
@@ -4775,9 +4818,18 @@ body:not(.is-home) header.header #display_menu_1 {
   overflow: visible !important;
 }
 /* Any top-level nav ul (direct child or nested) */
-body:not(.is-home) header.header #display_menu_1 ul.vnav--level1,
-body:not(.is-home) header.header #display_menu_1 ul.vnav--horizontal.vnav--level1,
-body:not(.is-home) header.header #display_menu_1 > ul {
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  #display_menu_1
+  ul.vnav--level1,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  #display_menu_1
+  ul.vnav--horizontal.vnav--level1,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  #display_menu_1
+  > ul {
   display: flex !important;
   flex-wrap: nowrap !important;
   justify-content: center !important;
@@ -4790,9 +4842,21 @@ body:not(.is-home) header.header #display_menu_1 > ul {
   left: auto !important;
   overflow: visible !important;
 }
-body:not(.is-home) header.header #display_menu_1 ul.vnav--level1 > li,
-body:not(.is-home) header.header #display_menu_1 ul.vnav--horizontal.vnav--level1 > li,
-body:not(.is-home) header.header #display_menu_1 > ul > li {
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  #display_menu_1
+  ul.vnav--level1
+  > li,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  #display_menu_1
+  ul.vnav--horizontal.vnav--level1
+  > li,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  #display_menu_1
+  > ul
+  > li {
   flex: 0 0 auto !important;
   flex-shrink: 0 !important;
   min-width: min-content !important;
@@ -4800,11 +4864,32 @@ body:not(.is-home) header.header #display_menu_1 > ul > li {
   padding: 0 !important;
   position: relative !important;
 }
-body:not(.is-home) header.header #display_menu_1 ul.vnav--level1 > li > a,
-body:not(.is-home) header.header #display_menu_1 ul.vnav--horizontal.vnav--level1 > li > a,
-body:not(.is-home) header.header #display_menu_1 > ul > li > a,
-body:not(.is-home) header.header #display_menu_1 .vnav__link,
-body:not(.is-home) header.header #display_menu_1 .vnav__label {
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  #display_menu_1
+  ul.vnav--level1
+  > li
+  > a,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  #display_menu_1
+  ul.vnav--horizontal.vnav--level1
+  > li
+  > a,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  #display_menu_1
+  > ul
+  > li
+  > a,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  #display_menu_1
+  .vnav__link,
+:is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+  header.header
+  #display_menu_1
+  .vnav__label {
   white-space: nowrap !important;
   flex-shrink: 0 !important;
   padding: 0 10px !important;
@@ -4816,7 +4901,10 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
    Gutters come from .mc-header-desktop-bar (matches hero-menu).
    ========================================================= */
 @media (min-width: 992px) {
-  body:not(.is-home) header.header .mc-header-desktop-bar .microblock.main-menu {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .mc-header-desktop-bar
+    .microblock.main-menu {
     padding: 0 !important;
     width: auto !important;
     max-width: none !important;
@@ -4826,7 +4914,10 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     box-sizing: border-box !important;
   }
 
-  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .mc-header-desktop-bar
+    #display_menu_1 {
     width: auto !important;
     margin: 0 auto !important;
     display: flex !important;
@@ -4834,9 +4925,21 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     align-items: center !important;
   }
 
-  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 > ul,
-  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--level1,
-  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 > ul.vnav--horizontal.vnav--level1 {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .mc-header-desktop-bar
+    #display_menu_1
+    > ul,
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .mc-header-desktop-bar
+    #display_menu_1
+    > ul.vnav--level1,
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .mc-header-desktop-bar
+    #display_menu_1
+    > ul.vnav--horizontal.vnav--level1 {
     width: auto !important;
     margin: 0 auto !important;
     padding-left: 0 !important;
@@ -4849,8 +4952,16 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     gap: clamp(14px, 2.5vw, 22px) !important;
   }
 
-  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 li.mc-vnav-cart,
-  body:not(.is-home) header.header .mc-header-desktop-bar #display_menu_1 .mc-vnav-cart {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .mc-header-desktop-bar
+    #display_menu_1
+    li.mc-vnav-cart,
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .mc-header-desktop-bar
+    #display_menu_1
+    .mc-vnav-cart {
     display: none !important;
     width: 0 !important;
     margin: 0 !important;
@@ -4864,14 +4975,20 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
    shift nav left on non-home desktop pages.
    ========================================================= */
 @media (min-width: 1200px) {
-  body:not(.is-home) header.header .hidden-xs.col-xs-12.no-pad-lg,
-  body:not(.is-home) header.header .mc-header-desktop-bar {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .hidden-xs.col-xs-12.no-pad-lg,
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .mc-header-desktop-bar {
     right: auto !important; /* cancel .col-lg-pull-2 offset */
     left: auto !important;
     position: relative !important;
   }
 
-  body:not(.is-home) header.header .col-xs-6.col-sm-4.col-md-3.col-lg-2.col-lg-push-7.microblock-group {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .col-xs-6.col-sm-4.col-md-3.col-lg-2.col-lg-push-7.microblock-group {
     left: auto !important; /* cancel .col-lg-push-7 offset */
     right: auto !important;
   }
@@ -4882,7 +4999,9 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
    Center across full header width (not within a 7/12 grid col).
    ========================================================= */
 @media (min-width: 992px) {
-  body:not(.is-home) header.header .hidden-xs.col-xs-12.no-pad-lg {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .hidden-xs.col-xs-12.no-pad-lg {
     float: none !important;
     clear: both !important;
     width: 100% !important;
@@ -4894,7 +5013,9 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     position: relative !important;
   }
 
-  body:not(.is-home) header.header .mc-header-desktop-bar {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .mc-header-desktop-bar {
     float: none !important;
     clear: both !important;
     width: 100% !important;
@@ -4905,7 +5026,10 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     position: relative !important;
   }
 
-  body:not(.is-home) header.header .hidden-xs.col-xs-12.no-pad-lg .microblock.main-menu {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .hidden-xs.col-xs-12.no-pad-lg
+    .microblock.main-menu {
     width: 100% !important;
     margin: 0 auto !important;
     padding: 0 !important;
@@ -4914,7 +5038,10 @@ body:not(.is-home) header.header #display_menu_1 .vnav__label {
     align-items: center !important;
   }
 
-  body:not(.is-home) header.header .hidden-xs.col-xs-12.no-pad-lg #display_menu_1 {
+  :is(body:not(.is-home), body.category, body.productdetails, body.mc-product-page, html.category body, html.mc-url-looks-like-pdp body.is-home)
+    header.header
+    .hidden-xs.col-xs-12.no-pad-lg
+    #display_menu_1 {
     width: 100% !important;
     margin: 0 auto !important;
     text-align: center !important;
