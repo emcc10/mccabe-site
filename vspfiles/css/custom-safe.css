@@ -415,7 +415,28 @@ html.mc-search-open #mcHeroSearchOverlay #search::placeholder,
 /* ======================================
    HOMEPAGE HERO VIDEO (HOME ONLY)
 ====================================== */
-/* Volusion often ships #if_homepage in HTML on all pages; URL sync removes is-home on interior */
+/* Volusion often ships #if_homepage in HTML on all pages; hero opens only with html.mc-allow-home-hero (template head). */
+#if_homepage {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+  border: 0 !important;
+}
+html.mc-allow-home-hero body.is-home #if_homepage {
+  display: block !important;
+  visibility: visible !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+}
 body:not(.is-home) #if_homepage {
   display: none !important;
   visibility: hidden !important;
@@ -732,10 +753,10 @@ body.is-home #slideshow-container {
   }
 }
 
-/* Homepage: hero supplies nav + search; hide duplicate desktop strip (load-order / theme overrides) */
-body.is-home header.header > .mc-header-desktop-bar,
-body.is-home header.header .mc-header-desktop-bar[data-mc-header-bar],
-html body.is-home .mc-header-desktop-bar {
+/* Homepage: hero supplies nav + search; hide duplicate desktop strip — only when URL allows home hero */
+html.mc-allow-home-hero body.is-home header.header > .mc-header-desktop-bar,
+html.mc-allow-home-hero body.is-home header.header .mc-header-desktop-bar[data-mc-header-bar],
+html.mc-allow-home-hero body.is-home .mc-header-desktop-bar {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -746,15 +767,6 @@ html body.is-home .mc-header-desktop-bar {
   overflow: hidden !important;
   pointer-events: none !important;
   border: 0 !important;
-}
-
-body.is-home #if_homepage {
-  display: block !important;
-  visibility: visible !important;
-  height: auto !important;
-  min-height: 0 !important;
-  overflow: visible !important;
-  pointer-events: auto !important;
 }
 
 /* PDP: keep desktop nav + search visible even if body.is-home is set incorrectly */
@@ -785,9 +797,7 @@ body.productdetails header.header .collapsing-search {
   opacity: 1 !important;
 }
 
-/* PDP: never show homepage hero (#if_homepage). When body.is-home is wrong on product URLs,
-   the hero block still matches body.is-home #if_homepage { display:block } — hide it here so
-   only one main nav strip exists and the header is not pushed down. */
+/* PDP: never show homepage hero (#if_homepage). Belt-and-suspenders with html.mc-url / body classes. */
 body.productdetails #if_homepage,
 body.productdetails.is-home #if_homepage,
 body.mc-product-page #if_homepage,
@@ -834,9 +844,18 @@ html.mc-url-looks-like-pdp body.is-home #if_homepage {
    VOLUSION MENU (NON-HOME PAGES)
 ====================================== */
 
-/* Hide native Volusion menu on homepage */
-body.is-home #display_menu_1 {
+/* Hide native Volusion menu on real homepage only (wrong is-home on PDP must keep header menu visible) */
+html.mc-allow-home-hero body.is-home #display_menu_1 {
   display: none !important;
+}
+
+/* PDP / product URL: always show main nav in header even if body.is-home is wrong */
+html.mc-url-looks-like-pdp body.is-home #display_menu_1,
+html.mc-url-looks-like-pdp body.is-home header.header nav.menu,
+html.mc-url-looks-like-pdp body.is-home header.header .main-menu {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Make sure it shows on non-home pages */

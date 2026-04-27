@@ -5,19 +5,49 @@
 <head>
 <script>
 (function () {
+  function apply() {
+    try {
+      var h = document.documentElement;
+      if (!h) return;
+      var p = String(location.pathname || "").toLowerCase();
+      var s = String(location.search || "");
+      var looksPdp = false;
+      if (/\/product-p\//i.test(p) || /\/-p\//i.test(p)) looksPdp = true;
+      if (!looksPdp && /-p\/[^/]+\.html?(\?.*)?$/i.test(p)) looksPdp = true;
+      if (!looksPdp && /\/productdetails\.asp/i.test(p)) looksPdp = true;
+      if (!looksPdp && /\/product\.asp/i.test(p) && /productcode=/i.test(s)) looksPdp = true;
+      if (!looksPdp && /-p\//i.test(p) && /\.html?(\?|$)/i.test(p)) looksPdp = true;
+      if (!looksPdp) {
+        var m = s.match(/(?:^|[?&])productcode=([^&]*)/i);
+        if (m && String(decodeURIComponent(String(m[1] || "").replace(/\+/g, " "))).trim()) looksPdp = true;
+      }
+      if (looksPdp) {
+        h.classList.add("mc-url-looks-like-pdp");
+        h.classList.remove("mc-allow-home-hero");
+        return;
+      }
+      h.classList.remove("mc-url-looks-like-pdp");
+      var raw = p.replace(/\/+/g, "/");
+      while (raw.length > 1 && raw.charAt(raw.length - 1) === "/") raw = raw.slice(0, -1);
+      var isHomePath =
+        raw === "" ||
+        raw === "/" ||
+        /\/(default|index)\.asp$/i.test(raw) ||
+        /\/(index|default)\.html?$/i.test(raw) ||
+        /\/(welcome|home)\.asp$/i.test(raw) ||
+        /\/(home|index)\.htm$/i.test(raw);
+      if (isHomePath) h.classList.add("mc-allow-home-hero");
+      else h.classList.remove("mc-allow-home-hero");
+    } catch (eMcUrlPdp) {}
+  }
+  window.mcApplyUrlHeroClassHints = apply;
+  apply();
   try {
-    var p = String(location.pathname || "").toLowerCase();
-    var s = String(location.search || "");
-    var looksPdp = false;
-    if (/\/product-p\//i.test(p) || /\/-p\//i.test(p)) looksPdp = true;
-    if (!looksPdp && /-p\/[^/]+\.html?$/i.test(p)) looksPdp = true;
-    if (!looksPdp && /\/productdetails\.asp/i.test(p)) looksPdp = true;
-    if (!looksPdp) {
-      var m = s.match(/(?:^|[?&])productcode=([^&]*)/i);
-      if (m && String(decodeURIComponent(String(m[1] || "").replace(/\+/g, " "))).trim()) looksPdp = true;
-    }
-    if (looksPdp) document.documentElement.classList.add("mc-url-looks-like-pdp");
-  } catch (eMcUrlPdp) {}
+    window.addEventListener("popstate", apply);
+    window.addEventListener("pageshow", function (ev) {
+      if (ev.persisted) apply();
+    });
+  } catch (ePopHint) {}
 })();
 </script>
 <script>
@@ -120,8 +150,10 @@
       var p = String(location.pathname || "").toLowerCase();
       var s = String(location.search || "");
       if (/\/product-p\//i.test(p) || /\/-p\//i.test(p)) return true;
-      if (/-p\/[^/]+\.html?$/i.test(p)) return true;
+      if (/-p\/[^/]+\.html?(\?.*)?$/i.test(p)) return true;
       if (/\/productdetails\.asp/i.test(p)) return true;
+      if (/\/product\.asp/i.test(p) && /productcode=/i.test(s)) return true;
+      if (/-p\//i.test(p) && /\.html?(\?|$)/i.test(p)) return true;
       var m = s.match(/(?:^|[?&])productcode=([^&]*)/i);
       if (m && String(decodeURIComponent(String(m[1] || "").replace(/\+/g, " "))).trim()) return true;
     } catch (eU) {}
@@ -165,15 +197,26 @@
 
   window.mcSyncHomeBodyClass = function mcSyncHomeBodyClass() {
     try {
+      if (typeof window.mcApplyUrlHeroClassHints === "function") window.mcApplyUrlHeroClassHints();
+      var root = document.documentElement;
       if (!document.body) return;
       if (mcDomLooksLikeProductPage() || mcPathLooksLikeProductOrInteriorUrl()) {
         document.body.classList.remove("is-home");
+        try {
+          if (root) root.classList.remove("mc-allow-home-hero");
+        } catch (eAhh) {}
         return;
       }
       if (typeof window.mcPathIsHomepage === "function" && window.mcPathIsHomepage()) {
         document.body.classList.add("is-home");
+        try {
+          if (root) root.classList.add("mc-allow-home-hero");
+        } catch (eAhh2) {}
       } else {
         document.body.classList.remove("is-home");
+        try {
+          if (root) root.classList.remove("mc-allow-home-hero");
+        } catch (eAhh3) {}
       }
     } catch (e2) {}
   };
@@ -231,8 +274,8 @@
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260428pdpurl: github->volusion deploy verification marker -->
-<meta name="mc-deploy-verify" content="20260428pdpurl">
+<!-- MC_DEPLOY_VERIFY_20260428heroGate: github->volusion deploy verification marker -->
+<meta name="mc-deploy-verify" content="20260428heroGate">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -388,6 +431,28 @@
     body:not(.is-home) body.mc-search-open header.header .collapsing-search {
       transform: none !important;
     }
+    /* Hero block exists in HTML on every page — default collapsed; only html.mc-allow-home-hero + is-home may open it */
+    #if_homepage {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      max-height: 0 !important;
+      overflow: hidden !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      pointer-events: none !important;
+      border: 0 !important;
+    }
+    html.mc-allow-home-hero body.is-home #if_homepage {
+      display: block !important;
+      visibility: visible !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      overflow: visible !important;
+      pointer-events: auto !important;
+    }
     /* Raw template often includes #if_homepage on every page — hide when URL is not homepage */
     body:not(.is-home) #if_homepage {
       display: none !important;
@@ -399,7 +464,7 @@
       padding: 0 !important;
       pointer-events: none !important;
     }
-    /* URL-only PDP hint (runs before body exists): beats body.is-home #if_homepage when path/query is a product page */
+    /* URL-only PDP hint (runs before body exists): beats body.is-home + allow glitches */
     html.mc-url-looks-like-pdp #if_homepage,
     html.mc-url-looks-like-pdp body #if_homepage,
     html.mc-url-looks-like-pdp body.is-home #if_homepage {
