@@ -1,4 +1,4 @@
-name: Deploy Volusion Template Only
+name: Deploy Volusion template + custom-safe.css
 
 on:
   push:
@@ -33,6 +33,12 @@ jobs:
             exit 1
           fi
 
+          echo "Checking custom-safe.css (browser loads this AFTER template — must deploy or header fixes never apply)..."
+          if [ ! -f "vspfiles/css/custom-safe.css" ]; then
+            echo "ERROR: vspfiles/css/custom-safe.css is missing"
+            exit 1
+          fi
+
           echo "Template found."
           echo "First 20 lines of local template:"
           head -20 template_266.html
@@ -58,7 +64,7 @@ jobs:
           echo "Testing port 2222..."
           nc -vz -w 20 "$FTP_SERVER" 2222
 
-      - name: Deploy template to both Volusion paths
+      - name: Deploy template + custom-safe.css to Volusion
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -81,9 +87,18 @@ jobs:
           echo "Uploading template to /template_266.html..."
           put template_266.html -o /template_266.html
 
+          echo "Uploading vspfiles/css/custom-safe.css to /v/vspfiles/css/custom-safe.css (same URL template loads)..."
+          put vspfiles/css/custom-safe.css -o /v/vspfiles/css/custom-safe.css
+
+          echo "Uploading optional fallback /vspfiles/css/custom-safe.css (template onerror)..."
+          set cmd:fail-exit no
+          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
+          set cmd:fail-exit yes
+
           echo "Downloading uploaded files back for verification..."
           get /v/template_266.html -o remote-v-template_266.html
           get /template_266.html -o remote-root-template_266.html
+          get /v/vspfiles/css/custom-safe.css -o remote-custom-safe.css
 
           bye
           EOF
@@ -94,6 +109,12 @@ jobs:
           echo "Remote /template_266.html first 20 lines:"
           head -20 remote-root-template_266.html || true
 
-          echo "Checking for deploy marker..."
-          grep -n "GITHUB TEMPLATE DEPLOY TEST" remote-v-template_266.html || true
-          grep -n "GITHUB TEMPLATE DEPLOY TEST" remote-root-template_266.html || true
+          echo "Checking template deploy marker (HTML comment)..."
+          grep -n "MC_DEPLOY_VERIFY" remote-v-template_266.html || true
+          grep -n "MC_DEPLOY_VERIFY" remote-root-template_266.html || true
+
+          echo "Checking CSS deploy marker..."
+          grep -n "MC_CSS_DEPLOY_VERIFY" remote-custom-safe.css || {
+            echo "ERROR: MC_CSS_DEPLOY_VERIFY missing from downloaded /v/vspfiles/css/custom-safe.css — upload path wrong or get failed"
+            exit 1
+          }
