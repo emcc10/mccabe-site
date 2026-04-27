@@ -15616,74 +15616,138 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 
 </style>
-<script>
+<style id="mccabe-global-top-menu-style">
+  /* =========================================================
+     MCCABE GLOBAL TOP MENU - SAME POSITION ON EVERY PAGE
+     ========================================================= */
+
+  #mccabe-global-top-menu {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 34px;
+    padding: 14px 20px 12px;
+    margin: 0;
+    background: #fff;
+    position: relative;
+    z-index: 999999;
+    font-family: Inter, Arial, sans-serif;
+    text-align: center;
+    line-height: 1;
+  }
+
+  #mccabe-global-top-menu a {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    color: #111;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  #mccabe-global-top-menu a:hover {
+    color: #777;
+    text-decoration: none;
+  }
+
+  body.mccabe-has-global-top-menu {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  body.mccabe-has-global-top-menu > #mccabe-global-top-menu:first-child {
+    margin-top: 0 !important;
+  }
+
+  /* Hide the older desktop top-link row so there are not two menus */
+  body.mccabe-has-global-top-menu .mccabe-old-top-menu-hidden {
+    display: none !important;
+  }
+
+  @media (max-width: 767px) {
+    #mccabe-global-top-menu {
+      display: none !important;
+    }
+  }
+</style>
+
+<script id="mccabe-global-top-menu-script">
 (function () {
-  function fixMcCabeTopMenuPosition() {
-    var menu = null;
+  function textHasMainMenu(el) {
+    var txt = (el.innerText || "").toUpperCase().replace(/\s+/g, " ").trim();
 
-    var candidates = Array.from(document.querySelectorAll(
-      'ul, nav, div, table, td'
-    )).filter(function (el) {
-      var txt = (el.innerText || '').toUpperCase();
-      return (
-        txt.includes('THEATER SEATING') &&
-        txt.includes('LIVING ROOM') &&
-        txt.includes('BEDROOM') &&
-        txt.includes('DINING')
-      );
-    });
+    return (
+      txt.indexOf("THEATER SEATING") !== -1 &&
+      txt.indexOf("BEAN BAGS") !== -1 &&
+      txt.indexOf("SOFAS") !== -1 &&
+      txt.indexOf("BEDROOM") !== -1 &&
+      txt.indexOf("ABOUT") !== -1 &&
+      txt.indexOf("CONTACT") !== -1
+    );
+  }
 
-    if (candidates.length) {
-      menu = candidates
-        .sort(function (a, b) {
-          return a.getBoundingClientRect().top - b.getBoundingClientRect().top;
-        })[0];
-    }
+  function hideOldTopMenuRows() {
+    var oldMenus = Array.from(document.querySelectorAll("body > div, body > table, body > ul, body > nav"));
 
-    if (!menu) return;
+    oldMenus.forEach(function (el) {
+      if (el.id === "mccabe-global-top-menu") return;
 
-    var wrapper = menu;
+      var rect = el.getBoundingClientRect();
+      if (rect.top > 180) return;
 
-    for (var i = 0; i < 6; i++) {
-      if (!wrapper.parentElement) break;
-
-      var parent = wrapper.parentElement;
-      var parentRect = parent.getBoundingClientRect();
-      var menuRect = menu.getBoundingClientRect();
-
-      if (
-        parentRect.width >= menuRect.width &&
-        parentRect.height < 180 &&
-        parentRect.top < 220
-      ) {
-        wrapper = parent;
+      if (textHasMainMenu(el)) {
+        el.classList.add("mccabe-old-top-menu-hidden");
       }
-    }
-
-    wrapper.classList.add('mccabe-fixed-top-menu-wrap');
-
-    wrapper.style.setProperty('margin-top', '0', 'important');
-    wrapper.style.setProperty('padding-top', '0', 'important');
-    wrapper.style.setProperty('top', '0', 'important');
-    wrapper.style.setProperty('transform', 'none', 'important');
-    wrapper.style.setProperty('position', 'relative', 'important');
-    wrapper.style.setProperty('z-index', '9999', 'important');
-
-    menu.style.setProperty('margin-top', '0', 'important');
-    menu.style.setProperty('padding-top', '0', 'important');
-    menu.style.setProperty('top', '0', 'important');
-    menu.style.setProperty('transform', 'none', 'important');
+    });
   }
 
-  fixMcCabeTopMenuPosition();
+  function buildGlobalTopMenu() {
+    if (document.getElementById("mccabe-global-top-menu")) return;
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', fixMcCabeTopMenuPosition);
+    var nav = document.createElement("div");
+    nav.id = "mccabe-global-top-menu";
+
+    nav.innerHTML =
+      '<a href="/category-s/186.htm">Theater Seating</a>' +
+      '<a href="/category-s/185.htm">Bean Bags</a>' +
+      '<a href="/category-s/187.htm">Sofas &amp; Sectionals</a>' +
+      '<a href="/category-s/188.htm">Bedroom</a>' +
+      '<a href="/aboutus.asp">About Us</a>' +
+      '<a href="/Articles.asp?ID=83">Contact Us</a>';
+
+    document.body.insertBefore(nav, document.body.firstChild);
+    document.body.classList.add("mccabe-has-global-top-menu");
+
+    hideOldTopMenuRows();
   }
 
-  window.addEventListener('load', fixMcCabeTopMenuPosition);
-  setTimeout(fixMcCabeTopMenuPosition, 250);
-  setTimeout(fixMcCabeTopMenuPosition, 750);
+  buildGlobalTopMenu();
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", buildGlobalTopMenu);
+  }
+
+  window.addEventListener("load", function () {
+    buildGlobalTopMenu();
+    hideOldTopMenuRows();
+  });
+
+  setTimeout(function () {
+    buildGlobalTopMenu();
+    hideOldTopMenuRows();
+  }, 300);
+
+  setTimeout(function () {
+    buildGlobalTopMenu();
+    hideOldTopMenuRows();
+  }, 1000);
 })();
 </script>
 </body>
