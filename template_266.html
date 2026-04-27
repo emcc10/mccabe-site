@@ -284,7 +284,7 @@
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260428pdpfix5: github->volusion deploy verification marker -->
+<!-- MC_DEPLOY_VERIFY_20260428pdpfix7: github->volusion deploy verification marker -->
 <meta name="mc-deploy-verify" content="20260428pdpfix4">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -463,14 +463,12 @@
     html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-cart {
       order: 30 !important;
     }
-    body:not(.is-home) html.mc-search-open header.header .collapsing-search,
-    body:not(.is-home) body.mc-search-open header.header .collapsing-search,
-    body.productdetails html.mc-search-open header.header .collapsing-search,
-    body.productdetails body.mc-search-open header.header .collapsing-search,
-    body.mc-product-page html.mc-search-open header.header .collapsing-search,
-    body.mc-product-page body.mc-search-open header.header .collapsing-search,
-    html.mc-url-looks-like-pdp body.is-home html.mc-search-open header.header .collapsing-search,
-    html.mc-url-looks-like-pdp body.is-home body.mc-search-open header.header .collapsing-search {
+    /* html is ancestor of body — mc-search-open may live on html or body */
+    html.mc-search-open body:not(.is-home) header.header .collapsing-search,
+    html.mc-search-open body.productdetails header.header .collapsing-search,
+    html.mc-search-open body.mc-product-page header.header .collapsing-search,
+    html.mc-search-open.mc-url-looks-like-pdp body.is-home header.header .collapsing-search,
+    body.mc-search-open header.header .collapsing-search {
       transform: none !important;
     }
     /* Hero block exists in HTML on every page — default collapsed; only html.mc-allow-home-hero + is-home may open it */
@@ -563,7 +561,10 @@
     }
     /* Interior desktop (≥992px): one row — nav | search→cart; overrides width:100% above */
     @media (min-width: 992px) {
-      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] {
+      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar],
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar],
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar],
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
@@ -575,7 +576,10 @@
         padding: clamp(8px, 1.5vw, 12px) max(56px, 7.5vw) !important;
         box-sizing: border-box !important;
       }
-      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
+      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
         flex: 0 1 auto !important;
         min-width: 0 !important;
         max-width: none !important;
@@ -585,7 +589,10 @@
         margin: 0 !important;
         padding: 0 !important;
       }
-      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
+      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
@@ -604,14 +611,26 @@
         margin: 0 !important;
       }
       body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .header__section--middle,
-      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav {
+      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .header__section--middle,
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .header__section--middle,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .header__section--middle,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav {
         width: auto !important;
         max-width: 100% !important;
         flex: 1 1 auto !important;
         min-width: 0 !important;
       }
       body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
-      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch {
+      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch {
         width: auto !important;
         max-width: 100% !important;
         border-bottom: none !important;
@@ -619,7 +638,10 @@
         padding: 4px 0 2px !important;
         transform: none !important;
       }
-      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container {
+      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container,
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container {
         max-width: 100% !important;
         width: 100% !important;
         margin: 0 !important;
@@ -630,13 +652,44 @@
         .collapsing-search:focus-within
         .collapsing-search__form
         .row,
+      body.productdetails
+        .mc-header-desktop-bar[data-mc-header-bar]
+        .collapsing-search:focus-within
+        .collapsing-search__form
+        .row,
+      body.mc-product-page
+        .mc-header-desktop-bar[data-mc-header-bar]
+        .collapsing-search:focus-within
+        .collapsing-search__form
+        .row,
+      html.mc-url-looks-like-pdp
+        body.is-home
+        .mc-header-desktop-bar[data-mc-header-bar]
+        .collapsing-search:focus-within
+        .collapsing-search__form
+        .row,
       html.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      body.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row {
+      html.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      html.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      html.mc-search-open.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      body.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      body.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      body.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      html.mc-url-looks-like-pdp body.is-home.mc-search-open .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row {
         border-bottom: none !important;
       }
       body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
       html.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      body.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
+      body.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
+      html.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
+      html.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
+      html.mc-search-open.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-url-looks-like-pdp body.is-home.mc-search-open .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
         border-bottom-color: #1a1a1a !important;
         border-bottom-width: 2px !important;
       }
@@ -644,7 +697,11 @@
       body:not(.is-home) header.header > .mc-header-search-below-nav,
       body:not(.is-home) header.header > .header__section.header__section--middle,
       body.productdetails header.header > .mc-header-search-below-nav,
-      body.productdetails header.header > .header__section.header__section--middle {
+      body.productdetails header.header > .header__section.header__section--middle,
+      body.mc-product-page header.header > .mc-header-search-below-nav,
+      body.mc-product-page header.header > .header__section.header__section--middle,
+      html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-search-below-nav,
+      html.mc-url-looks-like-pdp body.is-home header.header > .header__section.header__section--middle {
         display: none !important;
         visibility: hidden !important;
         height: 0 !important;
@@ -2674,10 +2731,20 @@ boot();
 <script>
 (function () {
   /**
-   * Palliser spec sheets: https://images.palliser.com/specsheet/en/{MODEL}%20{STYLE}.pdf
-   * Product Summary link: first 5-digit run in ProductCode + first word of product name (uppercase).
-   * Map below is still used by room-planner PDF dimension lookup (PATCH 3), not for this URL.
+   * Palliser product-summary PDFs (official CDN):
+   *   {BASE}{encodeURIComponent(MODEL + " " + STYLE)}.pdf
+   * Example: https://images.palliser.com/specsheet/en/41416%20FLICKS.pdf
+   * www.palliser.com does not serve this path (404); override if Palliser gives you a different base:
+   *   window.MC_PALLISER_SPEC_SHEET_BASE = "https://example.palliser.com/specsheet/en/";
+   * Map: style keyword (lowercase) -> 5-digit model. Used for title/path matching + reverse lookup.
    */
+  function mcPalliserSpecSheetBase() {
+    var b =
+      typeof window !== "undefined" && window.MC_PALLISER_SPEC_SHEET_BASE
+        ? String(window.MC_PALLISER_SPEC_SHEET_BASE).trim()
+        : "https://images.palliser.com/specsheet/en/";
+    return b.replace(/\/?$/, "/");
+  }
   var MC_PALLISER_SPEC_MODEL = {
     flicks: "41416",
     audio: "41422",
@@ -2693,6 +2760,81 @@ boot();
     sanibel: "40111",
     leeds: "77328"
   };
+
+  function mcPalliserHaystack() {
+    try {
+      var name = mcPalliserProductNameText();
+      var path = String(location.pathname || "").toLowerCase();
+      var pc = String(((document.querySelector('input[name="ProductCode"]') || {}).value || "")).trim();
+      return (name + " " + path + " " + pc).toLowerCase();
+    } catch (eH) {
+      return "";
+    }
+  }
+
+  function mcPalliserMapMatch() {
+    var hay = mcPalliserHaystack();
+    if (!hay) return null;
+    var keys = Object.keys(MC_PALLISER_SPEC_MODEL).sort(function (a, b) {
+      return b.length - a.length;
+    });
+    var i;
+    for (i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (hay.indexOf(k) !== -1) {
+        return { styleKey: k, model: String(MC_PALLISER_SPEC_MODEL[k] || "") };
+      }
+    }
+    return null;
+  }
+
+  function mcPalliserStyleFromModel(model) {
+    if (!model) return "";
+    var keys = Object.keys(MC_PALLISER_SPEC_MODEL);
+    var i;
+    for (i = 0; i < keys.length; i++) {
+      if (String(MC_PALLISER_SPEC_MODEL[keys[i]]) === String(model)) return keys[i].toUpperCase();
+    }
+    return "";
+  }
+
+  function mcPalliserResolveModelAndStyle() {
+    var model = "";
+    var style = "";
+    try {
+      var modelEl = document.getElementById("mcPalliserModel");
+      var styleEl = document.getElementById("mcPalliserStyle");
+      if (modelEl) {
+        var mv = String(modelEl.value || modelEl.textContent || "").trim();
+        if (/^\d{5}$/.test(mv)) model = mv;
+      }
+      if (styleEl) {
+        var sv = String(styleEl.value || styleEl.textContent || "").trim();
+        if (sv) style = sv.replace(/\s+/g, " ").trim().split(/\s+/)[0].toUpperCase();
+      }
+    } catch (eF) {}
+
+    var codeModel = mcPalliserFirstFiveDigitsFromProductCode();
+    if (!model) model = codeModel;
+
+    var mapped = mcPalliserMapMatch();
+    if (mapped && mapped.model) {
+      if (!model) model = mapped.model;
+      if (!style) style = mapped.styleKey.toUpperCase();
+    }
+
+    var styleWord = mcPalliserFirstWordFromProductName();
+    if (!style && styleWord) style = styleWord;
+
+    if (model && !style) style = mcPalliserStyleFromModel(model);
+
+    if (!model && styleWord) {
+      var lk = styleWord.toLowerCase();
+      if (MC_PALLISER_SPEC_MODEL[lk]) model = String(MC_PALLISER_SPEC_MODEL[lk]);
+    }
+
+    return { model: model, style: style };
+  }
 
   function mcPalliserFirstFiveDigitsFromProductCode() {
     var pc = String(((document.querySelector('input[name="ProductCode"]') || {}).value || "")).trim();
@@ -2718,6 +2860,21 @@ boot();
     var raw = mcPalliserProductNameText();
     if (!raw) return "";
     raw = raw.replace(/^palliser\s+/i, "").trim();
+    var skip = {
+      CUSTOM: 1,
+      THEATER: 1,
+      THEATRE: 1,
+      SECTIONAL: 1,
+      SECTIONALS: 1,
+      POWER: 1,
+      HOME: 1,
+      LEATHER: 1,
+      CHAIR: 1,
+      SEATING: 1,
+      RECLINER: 1,
+      MANUAL: 1,
+      ELECTRIC: 1
+    };
     var words = raw.split(/\s+/).filter(Boolean);
     var i;
     for (i = 0; i < words.length; i++) {
@@ -2725,18 +2882,18 @@ boot();
       if (!w) continue;
       var token = w.replace(/[^a-zA-Z0-9]/g, "");
       if (!token || /^\d+$/.test(token)) continue;
+      if (skip[token.toUpperCase()]) continue;
       return token.toUpperCase();
     }
     return "";
   }
 
   function mcBuildPalliserSpecSheetUrl() {
-    var model = mcPalliserFirstFiveDigitsFromProductCode();
-    var style = mcPalliserFirstWordFromProductName();
+    var r = mcPalliserResolveModelAndStyle();
+    var model = (r && r.model) || "";
+    var style = (r && r.style) || "";
     if (!model || !style) return "";
-    return (
-      "https://images.palliser.com/specsheet/en/" + encodeURIComponent(model + " " + style) + ".pdf"
-    );
+    return mcPalliserSpecSheetBase() + encodeURIComponent(model + " " + style) + ".pdf";
   }
 
   function mcRefreshProductSummaryButton() {
@@ -2803,6 +2960,7 @@ boot();
   }
 
   window.__MC_PALLISER_SPEC_MODEL = MC_PALLISER_SPEC_MODEL;
+  window.mcPalliserResolveModelAndStyle = mcPalliserResolveModelAndStyle;
   window.mcBuildPalliserSpecSheetUrl = mcBuildPalliserSpecSheetUrl;
   window.mcRefreshProductSummaryButton = mcRefreshProductSummaryButton;
   window.mcEnsureProductSummaryStandaloneForPdp = mcEnsureProductSummaryStandaloneForPdp;
@@ -10839,10 +10997,21 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
   var _fetchedDims = null;
 
   function detectStyle(){
+    try {
+      if (typeof window.mcPalliserResolveModelAndStyle === "function") {
+        var r0 = window.mcPalliserResolveModelAndStyle();
+        if (r0 && r0.model && r0.style) {
+          return { style: String(r0.style).toLowerCase(), model: String(r0.model) };
+        }
+      }
+    } catch (eR0) {}
     var name = (document.querySelector('h1.productnamecolor, .productnamecolor, #content_area h1')||{}).textContent||'';
     var pc = String(((document.querySelector('input[name="ProductCode"]')||{}).value||'')).toLowerCase();
     var hay = (name+' '+pc).toLowerCase();
-    for (var s in PALLISER_MODELS){
+    var keys = Object.keys(PALLISER_MODELS).sort(function (a, b) { return b.length - a.length; });
+    var si;
+    for (si = 0; si < keys.length; si++){
+      var s = keys[si];
       if (hay.indexOf(s) !== -1) return {style:s, model:PALLISER_MODELS[s]};
     }
     return null;
@@ -10973,8 +11142,29 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
 
   function fetchPlannerDimensions(){
     if (_fetchedDims){ applyDims(_fetchedDims); setupDimObserver(_fetchedDims); return; }
-    var info = detectStyle();
+    var pdfUrl =
+      typeof window.mcBuildPalliserSpecSheetUrl === "function" ? window.mcBuildPalliserSpecSheetUrl() : "";
+    var info = null;
+    try {
+      if (pdfUrl && typeof window.mcPalliserResolveModelAndStyle === "function") {
+        var r1 = window.mcPalliserResolveModelAndStyle();
+        if (r1 && r1.model && r1.style) {
+          info = { model: String(r1.model), style: String(r1.style).toLowerCase() };
+        }
+      }
+    } catch (eInf) {}
+    if (!info) info = detectStyle();
     if (!info) return;
+    if (!pdfUrl) {
+      var base =
+        (typeof window.MC_PALLISER_SPEC_SHEET_BASE === "string" && window.MC_PALLISER_SPEC_SHEET_BASE) ||
+        "https://images.palliser.com/specsheet/en/";
+      base = String(base).replace(/\/?$/, "/");
+      pdfUrl =
+        base +
+        encodeURIComponent(info.model + " " + String(info.style || "").toUpperCase()) +
+        ".pdf";
+    }
     var cacheKey = 'mc_dims_v2_' + info.style;
     try {
       var cached = sessionStorage.getItem(cacheKey);
@@ -10984,10 +11174,6 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
         return;
       }
     } catch(e){}
-    var pdfUrl =
-      "https://images.palliser.com/specsheet/en/" +
-      encodeURIComponent(info.model + " " + String(info.style || "").toUpperCase()) +
-      ".pdf";
     function fetchAB(url){ return fetch(url).then(function(r){ if (!r.ok) throw new Error('HTTP '+r.status); return r.arrayBuffer(); }); }
     var proxy1 = 'https://corsproxy.io/?'+encodeURIComponent(pdfUrl);
     var proxy2 = 'https://api.allorigins.win/raw?url='+encodeURIComponent(pdfUrl);
