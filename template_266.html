@@ -98,8 +98,31 @@
    * True homepage URL — #if_homepage / hero exist in HTML on every Volusion page; body.is-home toggles visibility.
    * Match store root and common Volusion entry paths (including subdirectory stores).
    */
+  function mcPathLooksLikeProductOrInteriorUrl() {
+    try {
+      var p = String(location.pathname || "").toLowerCase();
+      if (/\/product-p\//i.test(p) || /\/-p\//i.test(p)) return true;
+      if (/-p\/[^/]+\.html?$/i.test(p)) return true;
+    } catch (eU) {}
+    return false;
+  }
+
+  function mcDomLooksLikeProductPage() {
+    try {
+      if (document.getElementById("v65-product-parent")) return true;
+      if (document.body && document.body.classList.contains("productdetails")) return true;
+      var pc = document.querySelector('input[name="ProductCode"]');
+      if (pc && String(pc.value || "").trim()) return true;
+    } catch (eD) {}
+    return false;
+  }
+
   window.mcPathIsHomepage = function mcPathIsHomepage() {
     try {
+      /* Never treat real PDP / product chrome as homepage (prevents hero + duplicate nav). */
+      if (mcDomLooksLikeProductPage()) return false;
+      if (mcPathLooksLikeProductOrInteriorUrl()) return false;
+
       var raw = String(location.pathname || "").replace(/\\/g, "/");
       var p = raw.toLowerCase();
       p = p.replace(/\/+/g, "/");
@@ -118,6 +141,10 @@
   window.mcSyncHomeBodyClass = function mcSyncHomeBodyClass() {
     try {
       if (!document.body) return;
+      if (mcDomLooksLikeProductPage() || mcPathLooksLikeProductOrInteriorUrl()) {
+        document.body.classList.remove("is-home");
+        return;
+      }
       if (typeof window.mcPathIsHomepage === "function" && window.mcPathIsHomepage()) {
         document.body.classList.add("is-home");
       } else {
@@ -2803,7 +2830,7 @@ boot();
       mountInsertMode = "afterWmOpen";
     } else if (optionsColTd) {
       mountInsertMode = "optionsColumn";
-    } else if (hasProductCode && opts.allowTitleFallback) {
+    } else if (hasProductCode && opts.allowTitleFallback && !document.getElementById("v65-product-parent")) {
       mountInsertMode = "afterTitle";
     } else {
       return;
@@ -2889,7 +2916,7 @@ boot();
 
     try {
       mcRelocateMcInlineConfigToOptionsColumn();
-      [100, 350, 800, 1600, 3200].forEach(function (ms) {
+      [100, 250, 500, 900, 1600, 2400, 3600, 5200].forEach(function (ms) {
         setTimeout(mcRelocateMcInlineConfigToOptionsColumn, ms);
       });
     } catch (eRelSched) {}
@@ -9775,6 +9802,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   /* Only tag true PDPs: unconditional mc-product-page broke category-s/157.htm (nested v65 tables, no .v-product) — mcCollectGridProductCards skips table PLP collection when this class is set. */
   if (isPDP()) {
     document.body.classList.add('mc-product-page');
+    try {
+      if (typeof window.mcSyncHomeBodyClass === "function") window.mcSyncHomeBodyClass();
+    } catch (eHomePdp) {}
   } else {
     document.body.classList.remove('mc-product-page');
   }
