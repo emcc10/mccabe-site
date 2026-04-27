@@ -1,4 +1,4 @@
-name: Deploy Volusion Theme
+name: Deploy Volusion Template Only
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-template:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,22 +19,23 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lftp netcat-openbsd
 
-      - name: Verify local files exist
+      - name: Verify local template exists
         run: |
           echo "Repo root:"
           pwd
 
+          echo "Latest commit:"
+          git log -1 --oneline
+
+          echo "Checking template file..."
           if [ ! -f "template_266.html" ]; then
             echo "ERROR: template_266.html is missing from repo root"
             exit 1
           fi
 
-          if [ ! -f "vspfiles/css/custom-safe.css" ]; then
-            echo "ERROR: vspfiles/css/custom-safe.css is missing"
-            exit 1
-          fi
-
-          echo "Required files found."
+          echo "Template found."
+          echo "First 20 lines of local template:"
+          head -20 template_266.html
 
       - name: Check deploy secrets
         env:
@@ -50,39 +51,20 @@ jobs:
           echo "FTP_USERNAME is set"
           echo "FTP_PASSWORD is set"
 
-      - name: Test Volusion connection ports
+      - name: Test SFTP port
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
         run: |
           echo "Testing port 2222..."
-          if nc -vz -w 20 "$FTP_SERVER" 2222; then
-            echo "PORT_2222_OPEN=true" >> $GITHUB_ENV
-          else
-            echo "PORT_2222_OPEN=false" >> $GITHUB_ENV
-          fi
+          nc -vz -w 20 "$FTP_SERVER" 2222
 
-          echo "Testing port 21..."
-          if nc -vz -w 20 "$FTP_SERVER" 21; then
-            echo "PORT_21_OPEN=true" >> $GITHUB_ENV
-          else
-            echo "PORT_21_OPEN=false" >> $GITHUB_ENV
-          fi
-
-      - name: Deploy files to Volusion
+      - name: Deploy template to both Volusion paths
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          PORT_2222_OPEN: ${{ env.PORT_2222_OPEN }}
-          PORT_21_OPEN: ${{ env.PORT_21_OPEN }}
         run: |
-          echo "PORT_2222_OPEN=$PORT_2222_OPEN"
-          echo "PORT_21_OPEN=$PORT_21_OPEN"
-
-          if [ "$PORT_2222_OPEN" = "true" ]; then
-            echo "Using SFTP on port 2222..."
-
-            lftp <<EOF
+          lftp <<EOF
           set sftp:auto-confirm yes
           set ssl:verify-certificate no
           set net:timeout 90
@@ -93,33 +75,25 @@ jobs:
 
           open -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222
 
-          echo "Uploading template..."
           echo "Uploading template to /v/template_266.html..."
           put template_266.html -o /v/template_266.html
 
           echo "Uploading template to /template_266.html..."
           put template_266.html -o /template_266.html
 
-          echo "Uploading CSS..."
-          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
-
-          echo "Downloading remote files back for verification..."
-          get /v/template_266.html -o remote-template_266.html
-          get /vspfiles/css/custom-safe.css -o remote-custom-safe.css
+          echo "Downloading uploaded files back for verification..."
+          get /v/template_266.html -o remote-v-template_266.html
+          get /template_266.html -o remote-root-template_266.html
 
           bye
           EOF
 
-            echo "Checking uploaded template (MC_DEPLOY_VERIFY in View Source)..."
-            grep -n "MC_DEPLOY_VERIFY" remote-template_266.html || {
-              echo "WARNING: MC_DEPLOY_VERIFY not found in downloaded template — wrong path or upload failed"
-              exit 1
-            }
+          echo "Remote /v/template_266.html first 20 lines:"
+          head -20 remote-v-template_266.html || true
 
-            echo "Checking uploaded CSS (first 5 lines)..."
-            head -n 5 remote-custom-safe.css
+          echo "Remote /template_266.html first 20 lines:"
+          head -20 remote-root-template_266.html || true
 
-          else
-            echo "ERROR: Port 2222 is not open."
-            exit 1
-          fi
+          echo "Checking for deploy marker..."
+          grep -n "GITHUB TEMPLATE DEPLOY TEST" remote-v-template_266.html || true
+          grep -n "GITHUB TEMPLATE DEPLOY TEST" remote-root-template_266.html || true
