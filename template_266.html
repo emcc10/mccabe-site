@@ -773,18 +773,25 @@
       /* Duplicate strip: direct-child search blocks (order:20) are NOT the in-bar search — hide (inline = works if custom-safe.css never deployed) */
       html:not(.mc-allow-home-hero) body header.header > .mc-header-search-below-nav,
       html:not(.mc-allow-home-hero) body header.header > .header__section.header__section--middle,
+      html:not(.mc-allow-home-hero) body header.header > .header__section--middle,
       body:not(.is-home) header.header > .mc-header-search-below-nav,
       body:not(.is-home) header.header > .header__section.header__section--middle,
+      body:not(.is-home) header.header > .header__section--middle,
       body.category header.header > .mc-header-search-below-nav,
       body.category header.header > .header__section.header__section--middle,
+      body.category header.header > .header__section--middle,
       html.category body header.header > .mc-header-search-below-nav,
       html.category body header.header > .header__section.header__section--middle,
+      html.category body header.header > .header__section--middle,
       body.productdetails header.header > .mc-header-search-below-nav,
       body.productdetails header.header > .header__section.header__section--middle,
+      body.productdetails header.header > .header__section--middle,
       body.mc-product-page header.header > .mc-header-search-below-nav,
       body.mc-product-page header.header > .header__section.header__section--middle,
+      body.mc-product-page header.header > .header__section--middle,
       html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-search-below-nav,
-      html.mc-url-looks-like-pdp body.is-home header.header > .header__section.header__section--middle {
+      html.mc-url-looks-like-pdp body.is-home header.header > .header__section.header__section--middle,
+      html.mc-url-looks-like-pdp body.is-home header.header > .header__section--middle {
         display: none !important;
         visibility: hidden !important;
         height: 0 !important;
@@ -3194,22 +3201,43 @@ boot();
   }
 
   /**
-   * Volusion often renders [itemprop="offers"] (qty + add to cart) above our #mc-inline-config in the column.
-   * Move the inline block immediately before .v65-productdetail-cartqty so Room Planner / Product Summary stay above qty.
+   * Volusion often puts a standalone "Quantity:" / "Qty" row (and Klarna, etc.) before #mc-inline-config.
+   * Anchor = earliest of that label row or .v65-productdetail-cartqty — insert planner block before it so
+   * Room Planner + Product Summary stay above all cart chrome.
    */
+  function mcFindPdpCartQtyAnchor(root) {
+    var offers = root.querySelector('[itemprop="offers"]');
+    var qty =
+      (offers && offers.querySelector(".v65-productdetail-cartqty")) ||
+      root.querySelector(".v65-productdetail-cartqty");
+    if (!offers) return qty || null;
+    var kids = offers.children;
+    var i;
+    var el;
+    var t;
+    for (i = 0; i < kids.length; i++) {
+      el = kids[i];
+      if (!el || el.nodeType !== 1) continue;
+      if (el.id === "mc-inline-config") continue;
+      if (el.classList && el.classList.contains("v65-productdetail-cartqty")) return el;
+      t = (el.textContent || "").replace(/\s+/g, " ").trim();
+      if (/^(quantity|qty)\s*:?\s*$/i.test(t)) return el;
+      if (t.length <= 22 && /^(quantity|qty)\b/i.test(t) && !el.querySelector("#mcPlannerBtn")) return el;
+    }
+    return qty || null;
+  }
+
   function mcReorderInlineConfigBeforeCartQty() {
     var panel = document.getElementById("mc-inline-config");
     if (!panel || !panel.parentNode) return;
     var root = document.getElementById("v65-product-parent") || document.getElementById("content_area");
     if (!root) return;
-    var qty =
-      root.querySelector('[itemprop="offers"] .v65-productdetail-cartqty') ||
-      root.querySelector(".v65-productdetail-cartqty");
-    if (!qty || !qty.parentNode) return;
-    if (qty.contains(panel) || panel.contains(qty)) return;
-    if (qty.previousElementSibling === panel) return;
+    var anchor = mcFindPdpCartQtyAnchor(root);
+    if (!anchor || !anchor.parentNode) return;
+    if (anchor.contains(panel) || panel.contains(anchor)) return;
+    if (anchor.previousElementSibling === panel) return;
     try {
-      qty.parentNode.insertBefore(panel, qty);
+      anchor.parentNode.insertBefore(panel, anchor);
     } catch (eOrd) {}
   }
   try {
