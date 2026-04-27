@@ -3894,7 +3894,157 @@ window.applyPlannerToPage = function (payload) {
     room: payload && payload.room ? payload.room : null,
     seatCount: seatCount
   };
+  try { mcPersistPlannerCartTarget(window.__mcLastPlannerPayload, lineTotal); } catch (ePersistApply) {}
+  try { mcSyncPlannerFormForSubmit(window.__mcLastPlannerPayload, lineTotal); } catch (eSyncApply) {}
 };
+
+function mcBuildPlannerConfigFieldText(payload) {
+  var p = payload && typeof payload === "object" ? payload : {};
+  var opts = p.options && typeof p.options === "object" ? p.options : {};
+  var layout = Array.isArray(p.layout) ? p.layout : [];
+  var pieceList = [];
+  if (layout.length) {
+    layout.forEach(function (item) {
+      var id = String((item && item.id) || item || "").trim();
+      if (id) pieceList.push(id);
+    });
+  } else {
+    Object.keys(opts).forEach(function (id) {
+      var qty = Number(opts[id] || 0);
+      for (var i = 0; i < qty; i++) pieceList.push(String(id));
+    });
+  }
+  var text = pieceList.length ? "Configuration: " + pieceList.join(", ") : "Configuration";
+  var layoutPayload = { r: p.room || null, l: layout };
+  return text + " [MC_LAYOUT]" + JSON.stringify(layoutPayload) + "[/MC_LAYOUT]";
+}
+
+function mcPlannerDebugEnabled() {
+  try {
+    if (window.location && /[?&]mcPlannerDebug=1\b/i.test(window.location.search || "")) return true;
+  } catch (eQ) {}
+  try {
+    if (localStorage.getItem("mc_planner_debug") === "1") return true;
+  } catch (eLsDbg) {}
+  return false;
+}
+
+function mcPlannerDebugLog(label, data) {
+  if (!mcPlannerDebugEnabled()) return;
+  try {
+    console.log("[MC Planner Debug] " + label, data || {});
+  } catch (eLog) {}
+}
+
+function mcPersistPlannerCartTarget(payload, explicitTotal) {
+  var p = payload && typeof payload === "object" ? payload : {};
+  var pc = String(
+    p.productCode ||
+      ((document.querySelector('input[name=\"ProductCode\"]') || {}).value || "")
+  ).trim();
+  var total = Number(explicitTotal || 0);
+  if (!(total > 0)) total = Number(p.configurationTotal || 0);
+  if (!(total > 0) && typeof mcComputePlannerConfigurationTotal === "function") {
+    total = Number(mcComputePlannerConfigurationTotal(p.options || {})) || 0;
+  }
+  if (!(total > 0)) return;
+  var obj = { retailTotal: total, memberTotal: total, ts: Date.now(), pc: pc, name: "" };
+  try {
+    localStorage.setItem("mc_cart_target_last", JSON.stringify(obj));
+    if (pc) localStorage.setItem("mc_cart_target_" + pc, JSON.stringify(obj));
+  } catch (eLs) {}
+  try {
+    sessionStorage.setItem("mc_planner_config_total", String(total));
+    sessionStorage.setItem("mc_planner_config_ts", String(obj.ts));
+    sessionStorage.setItem("mc_planner_config_pc", pc);
+  } catch (eSs) {}
+  try {
+    document.cookie =
+      "mc_planner_ct=" +
+      encodeURIComponent(String(total)) +
+      "; path=/; max-age=21600; SameSite=Lax";
+    if (pc) {
+      document.cookie =
+        "mc_planner_pc=" +
+        encodeURIComponent(pc) +
+        "; path=/; max-age=21600; SameSite=Lax";
+    }
+  } catch (eCk) {}
+  mcPlannerDebugLog("persist-cart-target", {
+    productCode: pc,
+    total: total,
+    seatCount: Number(p.seatCount || 0),
+    options: p.options || {},
+    layoutCount: Array.isArray(p.layout) ? p.layout.length : 0
+  });
+}
+
+function mcSyncSeatCountSelectFallback(form, seatCount) {
+  if (!form || !(seatCount > 0)) return;
+  var selects = form.querySelectorAll("select");
+  var i;
+  for (i = 0; i < selects.length; i++) {
+    var sel = selects[i];
+    var sig = ((sel.name || "") + " " + (sel.id || "") + " " + (sel.title || "")).toLowerCase();
+    if (!/seat/.test(sig)) continue;
+    var chosen = -1;
+    var j;
+    for (j = 0; j < sel.options.length; j++) {
+      var txt = (sel.options[j].textContent || "").toLowerCase();
+      var val = String(sel.options[j].value || "");
+      if (
+        txt.indexOf(String(seatCount) + " seat") !== -1 ||
+        txt.indexOf(" " + String(seatCount) + " ") !== -1 ||
+        val === String(seatCount)
+      ) {
+        chosen = j;
+        break;
+      }
+    }
+    if (chosen >= 0 && sel.selectedIndex !== chosen) {
+      sel.selectedIndex = chosen;
+      try { sel.dispatchEvent(new Event("change", { bubbles: true })); } catch (eSel) {}
+    }
+  }
+}
+
+function mcSyncPlannerFormForSubmit(payload, explicitTotal) {
+  var p = payload && typeof payload === "object" ? payload : {};
+  var form = typeof mcFindProductDetailsForm === "function" ? mcFindProductDetailsForm(document) : null;
+  if (!form) return;
+
+  var cfgText = mcBuildPlannerConfigFieldText(p);
+  var configField =
+    form.querySelector('input[title*="Configuration Details" i], textarea[title*="Configuration Details" i], input[name^="TEXTBOX___"], textarea[name^="TEXTBOX___"]') ||
+    null;
+  if (!configField && window.__mcPlannerCartFieldName) {
+    configField = form.querySelector('[name="' + window.__mcPlannerCartFieldName + '"]');
+    if (!configField) {
+      configField = document.createElement("input");
+      configField.type = "hidden";
+      configField.name = window.__mcPlannerCartFieldName;
+      form.appendChild(configField);
+    }
+  }
+  if (configField) configField.value = cfgText;
+
+  mcSyncSeatCountSelectFallback(form, Number(p.seatCount || 0));
+
+  var total = Number(explicitTotal || 0);
+  if (!(total > 0)) total = Number(p.configurationTotal || 0);
+  mcPersistPlannerCartTarget(p, total);
+  mcPlannerDebugLog("sync-form-before-submit", {
+    productCode: String(
+      p.productCode ||
+        ((document.querySelector('input[name=\"ProductCode\"]') || {}).value || "")
+    ).trim(),
+    seatCount: Number(p.seatCount || 0),
+    total: total,
+    fieldName: configField ? (configField.name || configField.id || "") : "(missing)",
+    hasLayoutTag: !!(configField && /\[MC_LAYOUT\]/.test(configField.value || "")),
+    fieldPreview: configField ? String(configField.value || "").slice(0, 220) : ""
+  });
+}
 
 window.addEventListener("message", function (event) {
   if (event.origin !== location.origin) return;
@@ -4182,6 +4332,7 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
     if (!form.querySelector('input[name="ProductCode"], input#ProductCode')) return;
     try { writeSelects(window.__mcLastPlannerPayload || {}, "before-submit"); }
     catch (e) { console.warn(LOG, "submit-wrap", e); }
+    try { mcSyncPlannerFormForSubmit(window.__mcLastPlannerPayload || {}, 0); } catch (eSyncSubmit) {}
   }, true);
 })();
 </script>

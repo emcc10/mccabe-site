@@ -22,13 +22,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Upload template and CSS via SFTP
         env:
           SECRET_SFTP_HOST: ${{ secrets.SFTP_HOST }}
           SECRET_FTP_HOST: ${{ secrets.FTP_HOST }}
+          SECRET_FTP_SERVER: ${{ secrets.FTP_SERVER }}
           SECRET_SFTP_PORT: ${{ secrets.SFTP_PORT }}
+          SECRET_FTP_PORT: ${{ secrets.FTP_PORT }}
           SFTP_USER: ${{ secrets.FTP_USERNAME }}
           SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
           SFTP_TEMPLATE_REMOTE: ${{ secrets.SFTP_TEMPLATE_REMOTE }}
@@ -42,7 +44,10 @@ jobs:
           if [ -z "$SFTP_HOST" ]; then
             SFTP_HOST="${SECRET_FTP_HOST:-}"
           fi
-          SFTP_PORT="${SECRET_SFTP_PORT:-2222}"
+          if [ -z "$SFTP_HOST" ]; then
+            SFTP_HOST="${SECRET_FTP_SERVER:-}"
+          fi
+          SFTP_PORT="${SECRET_SFTP_PORT:-${SECRET_FTP_PORT:-2222}}"
 
           if [ -z "${SFTP_HOST:-}" ] || [ -z "${SFTP_USER:-}" ] || [ -z "${SFTP_PASS:-}" ]; then
             echo "::error::Missing secrets. Set SFTP_HOST (or FTP_HOST), FTP_USERNAME, and FTP_PASSWORD. Optional: SFTP_PORT (default 2222)."
@@ -372,7 +377,9 @@ jobs:
         env:
           SECRET_SFTP_HOST: ${{ secrets.SFTP_HOST }}
           SECRET_FTP_HOST: ${{ secrets.FTP_HOST }}
+          SECRET_FTP_SERVER: ${{ secrets.FTP_SERVER }}
           SECRET_SFTP_PORT: ${{ secrets.SFTP_PORT }}
+          SECRET_FTP_PORT: ${{ secrets.FTP_PORT }}
           SFTP_USER: ${{ secrets.FTP_USERNAME }}
           SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
           SFTP_TEMPLATE_REMOTE: ${{ secrets.SFTP_TEMPLATE_REMOTE }}
@@ -381,7 +388,8 @@ jobs:
           cd "${GITHUB_WORKSPACE}"
           export SFTP_HOST="${SECRET_SFTP_HOST:-}"
           if [ -z "${SFTP_HOST:-}" ]; then export SFTP_HOST="${SECRET_FTP_HOST:-}"; fi
-          export SFTP_PORT="${SECRET_SFTP_PORT:-2222}"
+          if [ -z "${SFTP_HOST:-}" ]; then export SFTP_HOST="${SECRET_FTP_SERVER:-}"; fi
+          export SFTP_PORT="${SECRET_SFTP_PORT:-${SECRET_FTP_PORT:-2222}}"
           python3 -m pip install -q paramiko --break-system-packages
           python3 scripts/volusion_sftp_force_template.py
 
@@ -390,7 +398,9 @@ jobs:
         env:
           SECRET_SFTP_HOST: ${{ secrets.SFTP_HOST }}
           SECRET_FTP_HOST: ${{ secrets.FTP_HOST }}
+          SECRET_FTP_SERVER: ${{ secrets.FTP_SERVER }}
           SECRET_SFTP_PORT: ${{ secrets.SFTP_PORT }}
+          SECRET_FTP_PORT: ${{ secrets.FTP_PORT }}
           SFTP_USER: ${{ secrets.FTP_USERNAME }}
           SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
           SFTP_TEMPLATE_REMOTE: ${{ secrets.SFTP_TEMPLATE_REMOTE }}
@@ -405,6 +415,7 @@ jobs:
           cd "${GITHUB_WORKSPACE}"
           export SFTP_HOST="${SECRET_SFTP_HOST:-}"
           if [ -z "${SFTP_HOST:-}" ]; then export SFTP_HOST="${SECRET_FTP_HOST:-}"; fi
-          export SFTP_PORT="${SECRET_SFTP_PORT:-2222}"
+          if [ -z "${SFTP_HOST:-}" ]; then export SFTP_HOST="${SECRET_FTP_SERVER:-}"; fi
+          export SFTP_PORT="${SECRET_SFTP_PORT:-${SECRET_FTP_PORT:-2222}}"
           python3 -m pip install -q paramiko --break-system-packages
           python3 scripts/volusion_sftp_verify_template.py
