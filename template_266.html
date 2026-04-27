@@ -3118,8 +3118,8 @@ boot();
     if (!hidePlannerSs && mcPlannerBtnEl) {
       mcPlannerBtnEl.onclick = openPlannerOverlay;
     } else if (hidePlannerSs) {
-      var plannerRow = document.getElementById("mcPlannerRow");
-      if (plannerRow) plannerRow.style.setProperty("display", "none", "important");
+      /* Hide only Room Planner — keep #mcPlannerRow visible so Product Summary stays on PDPs */
+      if (mcPlannerBtnEl) mcPlannerBtnEl.style.setProperty("display", "none", "important");
       var capHide = document.getElementById("mcConfigurationCaption");
       if (capHide) {
         capHide.textContent = "Choose configuration using the options below.";

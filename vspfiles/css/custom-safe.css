@@ -5014,7 +5014,8 @@ body.mc-product-page #mcPlannerRow {
   gap: 10px !important;
 }
 
-body.mc-product-page #mcPlannerBtn {
+body.mc-product-page #mcPlannerBtn,
+body.mc-product-page #mcProductSummaryBtn {
   min-width: 0 !important;
   max-width: 100% !important;
   width: auto !important;
@@ -5293,6 +5294,7 @@ body.mc-member-logged-in #content_area #relateditems .v-product:has(.mc-member-g
   }
 
   body.mc-product-page #mcPlannerBtn,
+  body.mc-product-page #mcProductSummaryBtn,
   body.mc-product-page #mcPlannerSummary {
     width: 100% !important;
     max-width: 100% !important;
