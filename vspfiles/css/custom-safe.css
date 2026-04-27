@@ -10861,57 +10861,25 @@ body.mc-product-page #v65-product-parent [class*="klarna"]{
   display:block !important;
 }
 /* =========================================================
-   FIX: Keep top/main menu in same vertical position on all pages
-   Product pages were pushing the menu lower.
+   FORCE TOP MENU VERTICAL ALIGNMENT SITEWIDE
    ========================================================= */
 
-body #if_homepage,
-body #content_area,
-body #v65-product-parent,
-body .v-product,
-body .productdetails,
-body form[name="MainForm"],
-body #display_menu_1,
-body #display_menu_2 {
+.mccabe-fixed-top-menu-wrap {
   margin-top: 0 !important;
   padding-top: 0 !important;
-}
-
-/* Main horizontal menu wrapper */
-body .vnav--horizontal,
-body .vnav--horizontal.vnav,
-body ul.vnav--horizontal,
-body #vnav,
-body #vnav ul,
-body #top-menu,
-body .top-menu,
-body .main-menu,
-body .custom-category-menu,
-body #custom-category-menu {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-/* Force the actual top navigation row to sit consistently */
-body .vnav--horizontal {
+  top: 0 !important;
+  transform: none !important;
   position: relative !important;
-  top: 0 !important;
-  transform: none !important;
+  z-index: 9999 !important;
 }
 
-/* Product-page specific reset */
-body:has(#v65-product-parent) .vnav--horizontal,
-body:has(#v65-product-parent) .custom-category-menu,
-body:has(#v65-product-parent) #custom-category-menu {
-  margin-top: 0 !important;
-  top: 0 !important;
-  transform: none !important;
-}
-
-/* Theater seating product pages specifically */
-body:has(a[href*="theater"]) .vnav--horizontal,
-body:has([href*="theater-seating"]) .vnav--horizontal,
-body:has(#v65-product-parent) .vnav--horizontal {
+.mccabe-fixed-top-menu-wrap ul,
+.mccabe-fixed-top-menu-wrap nav,
+.mccabe-fixed-top-menu-wrap table,
+.mccabe-fixed-top-menu-wrap td,
+.mccabe-fixed-top-menu-wrap div {
   margin-top: 0 !important;
   padding-top: 0 !important;
+  top: 0 !important;
+  transform: none !important;
 }
