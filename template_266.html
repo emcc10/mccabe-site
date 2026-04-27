@@ -15568,6 +15568,75 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 
 </style>
+<script>
+(function () {
+  function fixMcCabeTopMenuPosition() {
+    var menu = null;
 
+    var candidates = Array.from(document.querySelectorAll(
+      'ul, nav, div, table, td'
+    )).filter(function (el) {
+      var txt = (el.innerText || '').toUpperCase();
+      return (
+        txt.includes('THEATER SEATING') &&
+        txt.includes('LIVING ROOM') &&
+        txt.includes('BEDROOM') &&
+        txt.includes('DINING')
+      );
+    });
+
+    if (candidates.length) {
+      menu = candidates
+        .sort(function (a, b) {
+          return a.getBoundingClientRect().top - b.getBoundingClientRect().top;
+        })[0];
+    }
+
+    if (!menu) return;
+
+    var wrapper = menu;
+
+    for (var i = 0; i < 6; i++) {
+      if (!wrapper.parentElement) break;
+
+      var parent = wrapper.parentElement;
+      var parentRect = parent.getBoundingClientRect();
+      var menuRect = menu.getBoundingClientRect();
+
+      if (
+        parentRect.width >= menuRect.width &&
+        parentRect.height < 180 &&
+        parentRect.top < 220
+      ) {
+        wrapper = parent;
+      }
+    }
+
+    wrapper.classList.add('mccabe-fixed-top-menu-wrap');
+
+    wrapper.style.setProperty('margin-top', '0', 'important');
+    wrapper.style.setProperty('padding-top', '0', 'important');
+    wrapper.style.setProperty('top', '0', 'important');
+    wrapper.style.setProperty('transform', 'none', 'important');
+    wrapper.style.setProperty('position', 'relative', 'important');
+    wrapper.style.setProperty('z-index', '9999', 'important');
+
+    menu.style.setProperty('margin-top', '0', 'important');
+    menu.style.setProperty('padding-top', '0', 'important');
+    menu.style.setProperty('top', '0', 'important');
+    menu.style.setProperty('transform', 'none', 'important');
+  }
+
+  fixMcCabeTopMenuPosition();
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixMcCabeTopMenuPosition);
+  }
+
+  window.addEventListener('load', fixMcCabeTopMenuPosition);
+  setTimeout(fixMcCabeTopMenuPosition, 250);
+  setTimeout(fixMcCabeTopMenuPosition, 750);
+})();
+</script>
 </body>
 </html>
