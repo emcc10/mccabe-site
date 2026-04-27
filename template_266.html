@@ -722,6 +722,76 @@ document.addEventListener("DOMContentLoaded", function () {
 ========================================= -->
 
 <body>
+  <!-- MCCABE GLOBAL TOP MENU - FIXED SITEWIDE POSITION -->
+<style id="mccabe-global-top-nav-css">
+  #mccabe-global-top-nav {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 36px !important;
+    padding: 13px 20px 11px !important;
+    margin: 0 !important;
+    background: #fff !important;
+    position: relative !important;
+    top: 0 !important;
+    z-index: 999999 !important;
+    font-family: Inter, Arial, sans-serif !important;
+    line-height: 1 !important;
+    text-align: center !important;
+  }
+
+  #mccabe-global-top-nav a {
+    display: inline-block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #111 !important;
+    text-decoration: none !important;
+    text-transform: uppercase !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.12em !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  #mccabe-global-top-nav a:hover {
+    color: #777 !important;
+    text-decoration: none !important;
+  }
+/* Hide Volusion/original duplicate top category menu */
+body:has(#mccabe-global-top-nav) a[href*="category-s/186.htm"]:not(#mccabe-global-top-nav a) {
+  visibility: hidden !important;
+}
+
+body:has(#mccabe-global-top-nav) a[href*="category-s/186.htm"]:not(#mccabe-global-top-nav a)::after {
+  visibility: visible !important;
+}
+
+/* Hide any wrapper near the top that contains the old category menu */
+body:has(#mccabe-global-top-nav) div:has(> a[href*="category-s/186.htm"]):not(#mccabe-global-top-nav),
+body:has(#mccabe-global-top-nav) table:has(a[href*="category-s/186.htm"]),
+body:has(#mccabe-global-top-nav) ul:has(a[href*="category-s/186.htm"]),
+body:has(#mccabe-global-top-nav) nav:has(a[href*="category-s/186.htm"]):not(#mccabe-global-top-nav) {
+  display: none !important;
+}
+
+  @media (max-width: 767px) {
+    #mccabe-global-top-nav {
+      display: none !important;
+    }
+  }
+</style>
+
+<nav id="mccabe-global-top-nav" aria-label="Main category navigation">
+  <a href="/category-s/186.htm">Theater Seating</a>
+  <a href="/category-s/185.htm">Bean Bags</a>
+  <a href="/category-s/187.htm">Sofas &amp; Sectionals</a>
+  <a href="/category-s/188.htm">Bedroom</a>
+  <a href="/aboutus.asp">About Us</a>
+  <a href="/Articles.asp?ID=83">Contact Us</a>
+</nav>
 <script>
 (function () {
   try {
