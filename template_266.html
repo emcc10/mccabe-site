@@ -2134,6 +2134,10 @@ function gradeHeaderText(g) {
     `;
     anchorSelect.insertAdjacentElement("afterend", ui);
 
+    try {
+      document.dispatchEvent(new CustomEvent("mcWmOpenMounted", { bubbles: true }));
+    } catch (eMcWmEvt) {}
+
     // Modal
     const overlay = document.createElement("div");
     overlay.className = "wm-overlay";
@@ -2722,14 +2726,31 @@ boot();
     return false;
   }
 
-  function mount(){
+  function mount(opts){
+    opts = opts || {};
     if (document.getElementById("mc-inline-config")) return;
 
-    const wmOpen = document.getElementById("wmOpen");       // hidden modal trigger (still exists)
-    const wmSummary = document.getElementById("wmSummary"); // modal summary text (still exists)
     const area = document.getElementById("content_area");
+    if (!area) return;
+
+    const wmOpen = document.getElementById("wmOpen");       // hidden modal trigger (created async by leather script)
+    const wmSummary = document.getElementById("wmSummary"); // modal summary text (still exists)
     const optionsTable = document.querySelector("#options_table, table[id*='options_table']");
-    if (!area || !wmOpen) return;
+    var hasProductCode = !!(
+      document.querySelector('input[name="ProductCode"]') &&
+      String((document.querySelector('input[name="ProductCode"]') || {}).value || "").trim()
+    );
+
+    /* With options table, wait for #wmOpen unless we already waited long enough (Volusion/leather script can be >2s). Without options table, use wmOpen parent or a late title-anchor fallback. */
+    if (optionsTable) {
+      if (!wmOpen && !opts.forceWithoutWmOpen) return;
+    } else if (wmOpen && wmOpen.parentElement) {
+      /* ok */
+    } else if (hasProductCode && opts.allowTitleFallback) {
+      /* ok: insert below title */
+    } else {
+      return;
+    }
 
     const panel = document.createElement("div");
     panel.id = "mc-inline-config";
@@ -2788,8 +2809,23 @@ boot();
       optionsTable.style.setProperty("height", "0", "important");
       optionsTable.style.setProperty("overflow", "hidden", "important");
       optionsTable.insertAdjacentElement("afterend", panel);
-    } else {
+    } else if (wmOpen && wmOpen.parentElement) {
       wmOpen.parentElement.insertAdjacentElement("afterend", panel);
+    } else {
+      var titleEl =
+        document.querySelector("#v65-product-parent h1[itemprop='name']") ||
+        document.querySelector("#v65-product-parent h1") ||
+        document.querySelector("#content_area h1.vp-product-title") ||
+        document.querySelector("#content_area h1");
+      if (!titleEl || !titleEl.parentElement) return;
+      titleEl.insertAdjacentElement("afterend", panel);
+    }
+
+    if (!wmOpen) {
+      try {
+        var lrHide = document.getElementById("mcLeatherRow");
+        if (lrHide) lrHide.style.setProperty("display", "none", "important");
+      } catch (eLr) {}
     }
 
     var plannerOverlay = document.getElementById("mcPlannerOverlay");
@@ -2975,6 +3011,7 @@ boot();
 
     function renderLeatherPreviewStrip(){
       if (!mcLeatherStrip) return;
+      if (!wmOpen) return;
 
       var source = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
       if (!source.length) source = fallbackLeatherOptionsFromSelect();
@@ -3009,7 +3046,7 @@ boot();
 
         btn.onclick = function(e){
           e.preventDefault();
-          wmOpen.click();
+          if (wmOpen) wmOpen.click();
         };
 
         mcLeatherStrip.appendChild(btn);
@@ -3109,7 +3146,7 @@ boot();
     }
 
     // Button actions
-    if (mcLeatherBtn) mcLeatherBtn.onclick = () => wmOpen.click();
+    if (mcLeatherBtn && wmOpen) mcLeatherBtn.onclick = () => wmOpen.click();
 
     var hidePlannerSs =
       MC_HIDE_PLANNER_SECTIONALS && isSofasSectionalsContext();
@@ -4358,9 +4395,23 @@ window.addEventListener("message", function (event) {
 /* Vertex theater option-writer removed: heuristic scoring was picking wrong leather/option rows
  * and triggering a false upcharge in the cart. Native Volusion selects now drive pricing again. */
 
-// Mount inline UI after DOM + Volusion settle
-setTimeout(mount, 600);
-setTimeout(mount, 1400);
+// Mount inline UI after DOM + Volusion settle (#wmOpen is created asynchronously by leather modal)
+try {
+  document.addEventListener("mcWmOpenMounted", function () {
+    setTimeout(function () {
+      mount();
+    }, 0);
+    setTimeout(function () {
+      mount();
+    }, 120);
+  });
+} catch (eMcMntEv) {}
+;[0, 250, 500, 800, 1200, 1800, 2600, 3800, 5500, 8000].forEach(function (ms) {
+  setTimeout(mount, ms);
+});
+setTimeout(function () {
+  mount({ allowTitleFallback: true, forceWithoutWmOpen: true });
+}, 11000);
 
 function restoreConfigOnPageLoad() {
   try {
