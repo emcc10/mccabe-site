@@ -249,6 +249,16 @@
       document.body.classList.add('category');
     }
 
+    /* Category path (-s/###.htm): remove PDP-only planner/summary if mis-mounted (no product chrome). */
+    if (!document.getElementById("v65-product-parent") && /-s\/\d+\.html?/i.test(p)) {
+      try {
+        ["mc-inline-config", "mcProductSummaryRowStandalone"].forEach(function (cid) {
+          var el = document.getElementById(cid);
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        });
+      } catch (eStripMc) {}
+    }
+
     var area = document.getElementById('content_area');
     if (!area) return;
 
@@ -274,8 +284,8 @@
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260428heroGate: github->volusion deploy verification marker -->
-<meta name="mc-deploy-verify" content="20260428heroGate">
+<!-- MC_DEPLOY_VERIFY_20260428pdpfix4: github->volusion deploy verification marker -->
+<meta name="mc-deploy-verify" content="20260428pdpfix4">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -2720,6 +2730,11 @@ boot();
   }
 
   function mcEnsureProductSummaryStandaloneForPdp() {
+    if (
+      !document.getElementById("v65-product-parent") &&
+      !(document.body && document.body.classList.contains("productdetails"))
+    )
+      return;
     if (!document.querySelector('input[name="ProductCode"]')) return;
     if (document.getElementById("mcProductSummaryBtn")) return;
     var url = mcBuildPalliserSpecSheetUrl();
@@ -2867,8 +2882,12 @@ boot();
       document.querySelector("#v65-product-parent .mc-pdp-options-td") ||
       document.querySelector("#content_area .mc-pdp-options-td");
     if (optTd) return optTd;
-    var area = document.getElementById("content_area");
     var v65 = document.getElementById("v65-product-parent");
+    var area = document.getElementById("content_area");
+    var bod = document.body;
+    var pdpChrome =
+      !!v65 || (bod && (bod.classList.contains("productdetails") || bod.classList.contains("mc-product-page")));
+    if (!pdpChrome) return null;
     var scope = v65 || area;
     if (!scope) return null;
     var addBtn =
@@ -2905,6 +2924,12 @@ boot();
   function mount(opts){
     opts = opts || {};
     if (document.getElementById("mc-inline-config")) return;
+
+    if (
+      !document.getElementById("v65-product-parent") &&
+      !(document.body && document.body.classList.contains("productdetails"))
+    )
+      return;
 
     const area = document.getElementById("content_area");
     const v65root = document.getElementById("v65-product-parent");

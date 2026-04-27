@@ -816,11 +816,23 @@ body.mc-product-page.is-home #if_homepage {
 
 /* PDP: keep the real header pinned to the top of the viewport while scrolling */
 body.productdetails header.header,
-body.mc-product-page header.header {
+body.mc-product-page header.header,
+html.mc-url-looks-like-pdp body header.header {
   position: sticky !important;
   top: 0 !important;
   z-index: 9998 !important;
   background: #fff !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* No vertical shift from collapsed hero shell on product URLs */
+html.mc-url-looks-like-pdp #if_homepage,
+body.productdetails #if_homepage,
+body.mc-product-page #if_homepage {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
 }
 
 /* PDP from URL only: template sets html.mc-url-looks-like-pdp before <body> (Volusion default.asp?ProductCode=…).
@@ -2503,6 +2515,42 @@ body.mc-theater-seating-pdp #mcProductSummaryBtn {
   box-sizing: border-box !important;
   visibility: visible !important;
   opacity: 1 !important;
+}
+
+/* Category / listing pages: PDP planner + product summary must not appear */
+html.category #mc-inline-config,
+html.category #mcProductSummaryRowStandalone,
+body.category:not(.productdetails):not(.mc-product-page) #mc-inline-config,
+body.category:not(.productdetails):not(.mc-product-page) #mcProductSummaryRowStandalone {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+  border: 0 !important;
+}
+
+/* Room planner + product summary: single horizontal row (all viewports) */
+#mcPlannerRow,
+#mcPlannerRow2 {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+#mcPlannerRow > *,
+#mcPlannerRow2 > * {
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
 }
 
 /* Hidden leather select stays hidden without affecting layout */
@@ -10739,33 +10787,26 @@ body.vertex-flipbook-ready .vertex-flipbook-thumb img{
     text-align: left !important;
   }
 
-  /* cart area becomes a centered stack */
+  /* cart area: quantity label + input centered above add to cart (no left/transform hacks) */
   body.productdetails #v65-product-parent .v65-productdetail-cartqty,
   body.mc-product-page #v65-product-parent .v65-productdetail-cartqty {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 10px !important;
+    gap: 8px !important;
     width: 100% !important;
-    margin: 8px 0 0 0 !important;
+    max-width: 320px !important;
+    margin: 8px auto 0 auto !important;
     text-align: center !important;
   }
 
   body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .v65-productdetail-cartqty,
   body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .v65-productdetail-cartqty {
-    align-self: stretch !important;
+    align-self: center !important;
     width: 100% !important;
-  /* FORCE QTY BOX TO TRUE NARROW WIDTH */
-body.productdetails #v65-product-parent .v65-productdetail-cartqty,
-body.mc-product-page #v65-product-parent .v65-productdetail-cartqty {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
+  }
 
-}
   body.productdetails #v65-product-parent .v65-product-addtocart,
   body.mc-product-page #v65-product-parent .v65-product-addtocart {
     display: flex !important;
@@ -10835,15 +10876,6 @@ body.mc-product-page #v65-product-parent input[name^="QTY."] {
   text-align: center !important;
   flex: 0 0 30px !important;
 }
-body.productdetails #v65-product-parent input.v65-productdetail-cartqty,
-body.mc-product-page #v65-product-parent input.v65-productdetail-cartqty,
-body.productdetails #v65-product-parent input[name^="QTY."],
-body.mc-product-page #v65-product-parent input[name^="QTY."] {
-  position: relative !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-}
-
 body.productdetails #v65-product-parent .v65-product-addtocart,
 body.mc-product-page #v65-product-parent .v65-product-addtocart {
   display: flex !important;
@@ -10999,3 +11031,5 @@ body.mc-product-page #v65-product-parent [class*="klarna"]{
 #mcPlannerMemberTotal.is-visible{
   display:block !important;
 }
+}
+
