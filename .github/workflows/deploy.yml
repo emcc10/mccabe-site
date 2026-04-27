@@ -101,7 +101,7 @@ jobs:
           put template_266.html -o /template_266.html
 
           echo "Uploading CSS..."
-          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
+          echo "Skipping CSS upload temporarily because Volusion is locking custom-safe.css"
 
           echo "Downloading remote files back for verification..."
           get /v/template_266.html -o remote-template_266.html
