@@ -1,375 +1,49 @@
-name: Deploy to Volusion
+name: Deploy Volusion Theme
 
-# Volusion: template at /template_266.html (SFTP root). CSS: /v/vspfiles/css/custom-safe.css (wwwroot v/) and /vspfiles/css/….
-# Theme file mccabe-overrides.css is linked from the template (v/vspfiles/templates/266/css/…) and must be uploaded too — otherwise git revert never changes what the storefront serves for PDP layout.
-# Also uploads vspfiles/templates/266/css/mccabe-overrides.css (linked from template; not under css/ — may not appear in Volusion admin file tree).
-# Post-deploy verification downloads template_266.html via SFTP and checks mc-deploy-verify (authoritative). HTTP homepage can stay cached while SFTP already has the new file.
-# Optional repo variable SKIP_LIVE_VERIFY=true skips that SFTP download check.
-
-# Runs on every push to main (no paths: filter). Previously, only commits touching template/CSS/deploy script started the workflow—other pushes looked like “deploy never ran.”
 on:
   push:
     branches:
       - main
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Upload template and CSS via SFTP
-        env:
-          SECRET_SFTP_HOST: ${{ secrets.SFTP_HOST }}
-          SECRET_FTP_HOST: ${{ secrets.FTP_HOST }}
-          SECRET_FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          SECRET_SFTP_PORT: ${{ secrets.SFTP_PORT }}
-          SECRET_FTP_PORT: ${{ secrets.FTP_PORT }}
-          SFTP_USER: ${{ secrets.FTP_USERNAME }}
-          SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          SFTP_TEMPLATE_REMOTE: ${{ secrets.SFTP_TEMPLATE_REMOTE }}
-          SFTP_CSS_REMOTE_FILE: ${{ secrets.SFTP_CSS_REMOTE_FILE }}
+      - name: Install lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
+      - name: Verify local files exist
         run: |
-          set -euo pipefail
-          cd "${GITHUB_WORKSPACE}"
-          echo "::notice::deploy marker 20260419fullux — View Source mc-deploy-verify content=20260419fullux; CSS first line MC_DEPLOY_VERIFY_20260419fullux"
+          echo "Repo root:"
+          pwd
+          echo "Files:"
+          ls -la
+          echo "Checking expected files..."
+          test -f template_266.html
+          test -f vspfiles/css/custom-safe.css
 
-          SFTP_HOST="${SECRET_SFTP_HOST:-}"
-          if [ -z "$SFTP_HOST" ]; then
-            SFTP_HOST="${SECRET_FTP_HOST:-}"
-          fi
-          if [ -z "$SFTP_HOST" ]; then
-            SFTP_HOST="${SECRET_FTP_SERVER:-}"
-          fi
-          SFTP_PORT="${SECRET_SFTP_PORT:-${SECRET_FTP_PORT:-2222}}"
-
-          if [ -z "${SFTP_HOST:-}" ] || [ -z "${SFTP_USER:-}" ] || [ -z "${SFTP_PASS:-}" ]; then
-            echo "::error::Missing secrets. Set at least one host secret: SFTP_HOST, FTP_HOST, or FTP_SERVER — plus FTP_USERNAME and FTP_PASSWORD. Optional: SFTP_PORT or FTP_PORT (default 2222)."
-            exit 1
-          fi
-
-          if [ ! -f template_266.html ] || [ ! -f vspfiles/css/custom-safe.css ]; then
-            echo "::error::Expected files missing after checkout (template_266.html or vspfiles/css/custom-safe.css)."
-            ls -la
-            exit 1
-          fi
-          if [ ! -f vspfiles/templates/266/css/mccabe-overrides.css ]; then
-            echo "::error::Missing vspfiles/templates/266/css/mccabe-overrides.css (template links it after template.css)."
-            exit 1
-          fi
-          if [ ! -f vspfiles/templates/266/css/template.css ]; then
-            echo "::error::Missing vspfiles/templates/266/css/template.css (linked from template_266.html)."
-            exit 1
-          fi
-          for f in \
-            vspfiles/templates/266/js/min/design-toolkit.min.js \
-            vspfiles/templates/266/js/min/template.min.js; do
-            if [ ! -f "$f" ]; then
-              echo "::notice::Optional theme JS not in repo: $f — SFTP batch will skip those puts (Volusion may still serve copies uploaded earlier)."
-            fi
-          done
-
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq sshpass python3-pip
-
-          export SSHPASS="${SFTP_PASS}"
-          TEMPLATE_REMOTE="${SFTP_TEMPLATE_REMOTE:-}"
-          if [ -n "${TEMPLATE_REMOTE}" ]; then
-            if [ "${TEMPLATE_REMOTE#/}" = "${TEMPLATE_REMOTE}" ]; then
-              TEMPLATE_REMOTE="/${TEMPLATE_REMOTE}"
-            fi
-            if [ "${TEMPLATE_REMOTE}" = "/v/v/template_266.html" ]; then
-              TEMPLATE_REMOTE="/v/template_266.html"
-            fi
-          fi
-          CSS_REMOTE="${SFTP_CSS_REMOTE_FILE:-/vspfiles/css/custom-safe.css}"
-          export SFTP_CSS_REMOTE_FILE="${CSS_REMOTE}"
-          export SFTP_TEMPLATE_REMOTE="${TEMPLATE_REMOTE}"
-
-          echo "Deploying sftp://${SFTP_HOST}:${SFTP_PORT} as ${SFTP_USER}"
-          echo "Local template: $(wc -c < template_266.html | tr -d ' ') bytes; css: $(wc -c < vspfiles/css/custom-safe.css | tr -d ' ') bytes; mccabe: $(wc -c < vspfiles/templates/266/css/mccabe-overrides.css | tr -d ' ') bytes"
-          echo "Remote: template → ${TEMPLATE_REMOTE:-/template_266.html (then fallbacks)}; css → ${CSS_REMOTE}"
-
-          TCP_OK=0
-          echo "::group::Network: can this runner reach ${SFTP_HOST}:${SFTP_PORT}?"
-          if timeout 15 bash -c "cat < /dev/null > /dev/tcp/${SFTP_HOST}/${SFTP_PORT}" 2>/dev/null; then
-            TCP_OK=1
-            echo "TCP probe: port is open (connection accepted)."
-          else
-            echo "::warning::TCP probe failed (timeout or connection refused). Volusion or a firewall may block GitHub Actions IPs; FileZilla from home can still work."
-          fi
-          echo "::endgroup::"
-
-          # Use -o User=; disable agent/keys so sshpass is not confused by offered keys.
-          run_sftp_once() {
-            local batch="$1"
-            shift
-            sshpass -e sftp -4 -v -b "$batch" \
-              -oBatchMode=no \
-              -o ConnectTimeout=30 \
-              -o StrictHostKeyChecking=no \
-              -o UserKnownHostsFile=/dev/null \
-              -o IdentityAgent=none \
-              -o IdentitiesOnly=yes \
-              -o "User=${SFTP_USER}" \
-              -o PubkeyAuthentication=no \
-              "$@" \
-              -P "${SFTP_PORT}" \
-              "${SFTP_HOST}"
-          }
-
-          run_sftp_batch() {
-            local batch="$1"
-            local auth
-            for auth in "password" "keyboard-interactive,password" "password,keyboard-interactive" "keyboard-interactive"; do
-              echo "::group::OpenSSH SFTP PreferredAuthentications=${auth} (modern keys)"
-              if run_sftp_once "$batch" -o "PreferredAuthentications=${auth}" -o HostKeyAlgorithms=+ssh-rsa; then
-                echo "::endgroup::"
-                return 0
-              fi
-              echo "::endgroup::"
-              echo "::group::OpenSSH SFTP PreferredAuthentications=${auth} (legacy KEX/ciphers)"
-              if run_sftp_once "$batch" -o "PreferredAuthentications=${auth}" \
-                -o HostKeyAlgorithms=+ssh-rsa,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521 \
-                -o KexAlgorithms=+diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1 \
-                -o Ciphers=+aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,aes256-cbc,3des-cbc; then
-                echo "::endgroup::"
-                return 0
-              fi
-              echo "::endgroup::"
-            done
-            return 1
-          }
-
-          echo "::group::SFTP login check (pwd, ls)"
-          diag="$(mktemp)"
-          printf '%s\n' 'pwd' 'ls' 'bye' > "$diag"
-          if ! run_sftp_batch "$diag"; then
-            rm -f "$diag"
-            echo "::endgroup::"
-            echo "::warning::OpenSSH+sshpass could not log in. Trying Paramiko (different SSH stack; same secrets)."
-            if ! python3 -m pip install -q paramiko --break-system-packages; then
-              echo "::error::pip install paramiko failed on the runner."
-              exit 1
-            fi
-            export SFTP_HOST SFTP_PORT
-            set +e
-            python3 scripts/volusion_sftp_deploy.py
-            pm_rc=$?
-            set -e
-            if [ "$pm_rc" -eq 0 ]; then
-              echo "::notice::Deploy finished via Paramiko. Confirm live site with MC_DEPLOY_VERIFY."
-              exit 0
-            fi
-            if [ "$pm_rc" -eq 1 ]; then
-              echo "::error::Paramiko connected but no path pair worked. Set SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE to match FileZilla."
-            else
-              echo "::error::Paramiko could not connect or authenticate. TCP probe: $([ "${TCP_OK}" = 1 ] && echo OK || echo FAILED). Match FTP_USERNAME/FTP_PASSWORD to FileZilla; ask Volusion if SFTP from cloud IPs is restricted."
-            fi
-            exit 1
-          fi
-          rm -f "$diag"
-          echo "::endgroup::"
-
-          try_batch() {
-            local title="$1"
-            shift
-            local batch
-            batch="$(mktemp)"
-            printf '%s\n' "$@" > "$batch"
-            echo "::group::Try: $title"
-            echo "Batch commands:"
-            sed 's/^/  /' "$batch"
-            if run_sftp_batch "$batch"; then
-              echo "::endgroup::"
-              rm -f "$batch"
-              return 0
-            fi
-            echo "::endgroup::"
-            rm -f "$batch"
-            return 1
-          }
-
-          # Remote path for mccabe-overrides.css must match template: v/vspfiles/templates/266/css/mccabe-overrides.css
-          mccabe_remote_for_css() {
-            case "$1" in
-              /v/vspfiles/css/custom-safe.css|v/vspfiles/css/custom-safe.css) echo "/v/vspfiles/templates/266/css/mccabe-overrides.css" ;;
-              /vspfiles/css/custom-safe.css) echo "/vspfiles/templates/266/css/mccabe-overrides.css" ;;
-              /mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css) echo "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css" ;;
-              /mccabestheaterandliving.com/vspfiles/css/custom-safe.css) echo "/mccabestheaterandliving.com/vspfiles/templates/266/css/mccabe-overrides.css" ;;
-              vspfiles/css/custom-safe.css) echo "vspfiles/templates/266/css/mccabe-overrides.css" ;;
-              *) echo "/v/vspfiles/templates/266/css/mccabe-overrides.css" ;;
-            esac
-          }
-
-          try_put_pair() {
-            local title="$1" tpath="$2" cpath="$3"
-            local mpath tcss tjs
-            mpath="$(mccabe_remote_for_css "${cpath}")"
-            tcss="${mpath%/*}/template.css"
-            tjs="${mpath/\/css\//\/js\/min\/}"
-            tjs="${tjs%mccabe-overrides.css}"
-            try_batch "${title}" \
-              "put template_266.html ${tpath}" \
-              "put vspfiles/css/custom-safe.css ${cpath}" \
-              "put vspfiles/templates/266/css/mccabe-overrides.css ${mpath}" \
-              "put vspfiles/templates/266/css/template.css ${tcss}" \
-              "put vspfiles/templates/266/js/min/design-toolkit.min.js ${tjs}design-toolkit.min.js" \
-              "put vspfiles/templates/266/js/min/template.min.js ${tjs}template.min.js" \
-              "bye"
-          }
-
-          try_put_template_only() {
-            local title="$1" tpath="$2"
-            try_batch "${title}" \
-              "put template_266.html ${tpath}" \
-              "bye" || true
-          }
-
-          ok=0
-          if [ -n "${TEMPLATE_REMOTE}" ]; then
-            if try_put_pair "SFTP_TEMPLATE_REMOTE secret + css" "${TEMPLATE_REMOTE}" "${CSS_REMOTE}"; then ok=1; fi
-          fi
-          if [ "$ok" -ne 1 ]; then
-            if try_put_pair "template under /v (live theme URL)" "/v/template_266.html" "${CSS_REMOTE}"; then ok=1; fi
-          fi
-          if [ "$ok" -ne 1 ]; then
-            if try_put_pair "canonical template at SFTP root" "/template_266.html" "${CSS_REMOTE}"; then ok=1; fi
-          fi
-          if [ "$ok" -ne 1 ]; then
-            if try_put_pair "domain-prefixed paths" "/mccabestheaterandliving.com/v/template_266.html" "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css"; then ok=1; fi
-          fi
-          if [ "$ok" -ne 1 ]; then
-            if try_batch "login cwd (relative vspfiles/css)" \
-              "put template_266.html template_266.html" \
-              "put vspfiles/css/custom-safe.css vspfiles/css/custom-safe.css" \
-              "put vspfiles/templates/266/css/mccabe-overrides.css vspfiles/templates/266/css/mccabe-overrides.css" \
-              "put vspfiles/templates/266/css/template.css vspfiles/templates/266/css/template.css" \
-              "put vspfiles/templates/266/js/min/design-toolkit.min.js vspfiles/templates/266/js/min/design-toolkit.min.js" \
-              "put vspfiles/templates/266/js/min/template.min.js vspfiles/templates/266/js/min/template.min.js" \
-              "bye"; then ok=1; fi
-          fi
-
-          if [ "$ok" -ne 1 ]; then
-            echo "::error::All SFTP upload attempts failed (see -v output for paths/permissions)."
-            echo "::error::Match FileZilla / Volusion File Editor: template often /template_266.html or /v/template_266.html; css must match live file (e.g. /v/vspfiles/css/custom-safe.css under wwwroot v/). Set secrets SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE if yours differ."
-            exit 1
-          fi
-
-          echo "::group::Best-effort: mirror template to canonical Volusion paths (covers wrong SFTP_TEMPLATE_REMOTE)"
-          try_put_template_only "mirror → /v/template_266.html" "/v/template_266.html"
-          try_put_template_only "mirror → /v/v/template_266.html" "/v/v/template_266.html"
-          try_put_template_only "mirror → domain /v/" "/mccabestheaterandliving.com/v/template_266.html"
-          try_put_template_only "mirror → /template_266.html" "/template_266.html"
-          echo "::endgroup::"
-
-          try_put_css_only() {
-            local title="$1" cpath="$2"
-            try_batch "${title}" \
-              "put vspfiles/css/custom-safe.css ${cpath}" \
-              "bye" || true
-          }
-
-          echo "::group::Best-effort: mirror CSS to wwwroot v/vspfiles/css (Volusion File Editor: v/vspfiles/css/custom-safe.css)"
-          try_put_css_only "css → /v/vspfiles/css/custom-safe.css" "/v/vspfiles/css/custom-safe.css"
-          try_put_css_only "css → v/vspfiles/css/custom-safe.css" "v/vspfiles/css/custom-safe.css"
-          echo "::endgroup::"
-
-          try_put_mccabe_only() {
-            local title="$1" mpath="$2"
-            try_batch "${title}" \
-              "put vspfiles/templates/266/css/mccabe-overrides.css ${mpath}" \
-              "bye" || true
-          }
-          echo "::group::Best-effort: mccabe-overrides.css (under templates/266/css/ — often not listed in Volusion admin)"
-          try_put_mccabe_only "mccabe-overrides → /v/vspfiles/templates/266/css/" "/v/vspfiles/templates/266/css/mccabe-overrides.css"
-          try_put_mccabe_only "mccabe-overrides → v/vspfiles/templates/266/css/" "v/vspfiles/templates/266/css/mccabe-overrides.css"
-          try_put_mccabe_only "mccabe-overrides → /vspfiles/templates/266/css/" "/vspfiles/templates/266/css/mccabe-overrides.css"
-          try_put_mccabe_only "mccabe-overrides → domain v/" "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css"
-          try_put_mccabe_only "mccabe-overrides → domain legacy" "/mccabestheaterandliving.com/vspfiles/templates/266/css/mccabe-overrides.css"
-          try_put_mccabe_only "mccabe-overrides → relative" "vspfiles/templates/266/css/mccabe-overrides.css"
-          echo "::endgroup::"
-
-          try_put_template_css_only() {
-            local title="$1" rpath="$2"
-            try_batch "${title}" \
-              "put vspfiles/templates/266/css/template.css ${rpath}" \
-              "bye" || true
-          }
-          try_put_template266_js_only() {
-            local title="$1" dir="$2"
-            try_batch "${title}" \
-              "put vspfiles/templates/266/js/min/design-toolkit.min.js ${dir}/design-toolkit.min.js" \
-              "put vspfiles/templates/266/js/min/template.min.js ${dir}/template.min.js" \
-              "bye" || true
-          }
-          echo "::group::Best-effort: template.css + template JS (template_266.html links v/vspfiles/templates/266/…)"
-          try_put_template_css_only "template.css → /v/vspfiles/templates/266/css/" "/v/vspfiles/templates/266/css/template.css"
-          try_put_template_css_only "template.css → v/vspfiles/templates/266/css/" "v/vspfiles/templates/266/css/template.css"
-          try_put_template_css_only "template.css → /vspfiles/templates/266/css/" "/vspfiles/templates/266/css/template.css"
-          try_put_template_css_only "template.css → domain v/" "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/template.css"
-          try_put_template_css_only "template.css → domain legacy" "/mccabestheaterandliving.com/vspfiles/templates/266/css/template.css"
-          try_put_template_css_only "template.css → relative" "vspfiles/templates/266/css/template.css"
-          try_put_template266_js_only "JS → /v/vspfiles/templates/266/js/min" "/v/vspfiles/templates/266/js/min"
-          try_put_template266_js_only "JS → v/vspfiles/templates/266/js/min" "v/vspfiles/templates/266/js/min"
-          try_put_template266_js_only "JS → /vspfiles/templates/266/js/min" "/vspfiles/templates/266/js/min"
-          try_put_template266_js_only "JS → domain v/" "/mccabestheaterandliving.com/v/vspfiles/templates/266/js/min"
-          try_put_template266_js_only "JS → domain legacy" "/mccabestheaterandliving.com/vspfiles/templates/266/js/min"
-          echo "::endgroup::"
-
-          echo "::notice::Upload finished. Next step re-downloads template via SFTP and may check the public template URL (HTTP); storefront cache can still lag what you see in a browser."
-
-      # CSS often lands on /v/vspfiles/css/ while the live theme reads /v/template_266.html.
-      # Bash mirror uses || true and can hide template failures; force absolute paths with Paramiko.
-      - name: Force template to canonical Volusion paths
+      - name: Deploy files to Volusion
         env:
-          SECRET_SFTP_HOST: ${{ secrets.SFTP_HOST }}
-          SECRET_FTP_HOST: ${{ secrets.FTP_HOST }}
-          SECRET_FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          SECRET_SFTP_PORT: ${{ secrets.SFTP_PORT }}
-          SECRET_FTP_PORT: ${{ secrets.FTP_PORT }}
-          SFTP_USER: ${{ secrets.FTP_USERNAME }}
-          SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          SFTP_TEMPLATE_REMOTE: ${{ secrets.SFTP_TEMPLATE_REMOTE }}
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
-          set -euo pipefail
-          cd "${GITHUB_WORKSPACE}"
-          export SFTP_HOST="${SECRET_SFTP_HOST:-}"
-          if [ -z "${SFTP_HOST:-}" ]; then export SFTP_HOST="${SECRET_FTP_HOST:-}"; fi
-          if [ -z "${SFTP_HOST:-}" ]; then export SFTP_HOST="${SECRET_FTP_SERVER:-}"; fi
-          export SFTP_PORT="${SECRET_SFTP_PORT:-${SECRET_FTP_PORT:-2222}}"
-          python3 -m pip install -q paramiko --break-system-packages
-          python3 scripts/volusion_sftp_force_template.py
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222 <<EOF
+          set sftp:auto-confirm yes
+          set net:timeout 30
+          set net:max-retries 3
+          set net:reconnect-interval-base 5
+          set xfer:clobber yes
 
-      - name: Verify remote template via SFTP (mc-deploy-verify)
-        if: ${{ vars.SKIP_LIVE_VERIFY != 'true' }}
-        env:
-          SECRET_SFTP_HOST: ${{ secrets.SFTP_HOST }}
-          SECRET_FTP_HOST: ${{ secrets.FTP_HOST }}
-          SECRET_FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          SECRET_SFTP_PORT: ${{ secrets.SFTP_PORT }}
-          SECRET_FTP_PORT: ${{ secrets.FTP_PORT }}
-          SFTP_USER: ${{ secrets.FTP_USERNAME }}
-          SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          SFTP_TEMPLATE_REMOTE: ${{ secrets.SFTP_TEMPLATE_REMOTE }}
-          # Optional repo var VERIFY_HTTP_TEMPLATE_URL if public template URL differs from default.
-          VERIFY_HTTP_TEMPLATE_URL: ${{ vars.VERIFY_HTTP_TEMPLATE_URL }}
-          # Optional SKIP_HTTP_TEMPLATE_VERIFY=true to bypass HTTP check (emergency only).
-          SKIP_HTTP_TEMPLATE_VERIFY: ${{ vars.SKIP_HTTP_TEMPLATE_VERIFY }}
-          # If true, HTTP check must succeed (no WAF bypass when SFTP /v/ matched).
-          REQUIRE_HTTP_TEMPLATE_VERIFY: ${{ vars.REQUIRE_HTTP_TEMPLATE_VERIFY }}
-        run: |
-          set -euo pipefail
-          cd "${GITHUB_WORKSPACE}"
-          export SFTP_HOST="${SECRET_SFTP_HOST:-}"
-          if [ -z "${SFTP_HOST:-}" ]; then export SFTP_HOST="${SECRET_FTP_HOST:-}"; fi
-          if [ -z "${SFTP_HOST:-}" ]; then export SFTP_HOST="${SECRET_FTP_SERVER:-}"; fi
-          export SFTP_PORT="${SECRET_SFTP_PORT:-${SECRET_FTP_PORT:-2222}}"
-          python3 -m pip install -q paramiko --break-system-packages
-          python3 scripts/volusion_sftp_verify_template.py
+          put template_266.html -o /v/template_266.html
+
+          mkdir -p /v/vspfiles/css
+          put vspfiles/css/custom-safe.css -o /v/vspfiles/css/custom-safe.css
+
+          bye
+          EOF
