@@ -6048,13 +6048,20 @@ body.mc-product-page #v65-product-parent table:has(input[name="btnaddtocart"]) {
   box-shadow: none !important;
 }
 
-/* Room Planner + Product Summary: same pill button (not the leather ">" button) */
+/* Room Planner + Product Summary: same pill button (not the leather ">" button).
+   Include #v65-product-parent — on some PDPs #mc-inline-config is not under #content_area. */
 body.mc-product-page #content_area #mcPlannerBtn,
 body.mc-product-page #content_area #mcProductSummaryBtn,
+body.mc-product-page #v65-product-parent #mcPlannerBtn,
+body.mc-product-page #v65-product-parent #mcProductSummaryBtn,
 body.productdetails #content_area #mcPlannerBtn,
 body.productdetails #content_area #mcProductSummaryBtn,
+body.productdetails #v65-product-parent #mcPlannerBtn,
+body.productdetails #v65-product-parent #mcProductSummaryBtn,
 body.mc-theater-seating-pdp #content_area #mcPlannerBtn,
-body.mc-theater-seating-pdp #content_area #mcProductSummaryBtn {
+body.mc-theater-seating-pdp #content_area #mcProductSummaryBtn,
+body.mc-theater-seating-pdp #v65-product-parent #mcPlannerBtn,
+body.mc-theater-seating-pdp #v65-product-parent #mcProductSummaryBtn {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -6081,17 +6088,26 @@ body.mc-theater-seating-pdp #content_area #mcProductSummaryBtn {
 }
 body.mc-product-page #content_area #mcPlannerBtn:hover,
 body.mc-product-page #content_area #mcProductSummaryBtn:hover,
+body.mc-product-page #v65-product-parent #mcPlannerBtn:hover,
+body.mc-product-page #v65-product-parent #mcProductSummaryBtn:hover,
 body.productdetails #content_area #mcPlannerBtn:hover,
 body.productdetails #content_area #mcProductSummaryBtn:hover,
+body.productdetails #v65-product-parent #mcPlannerBtn:hover,
+body.productdetails #v65-product-parent #mcProductSummaryBtn:hover,
 body.mc-theater-seating-pdp #content_area #mcPlannerBtn:hover,
-body.mc-theater-seating-pdp #content_area #mcProductSummaryBtn:hover {
+body.mc-theater-seating-pdp #content_area #mcProductSummaryBtn:hover,
+body.mc-theater-seating-pdp #v65-product-parent #mcPlannerBtn:hover,
+body.mc-theater-seating-pdp #v65-product-parent #mcProductSummaryBtn:hover {
   background: #f5f5f5 !important;
   color: #111 !important;
   border-color: #333 !important;
 }
 body.mc-product-page #content_area #mcProductSummaryBtn:visited,
+body.mc-product-page #v65-product-parent #mcProductSummaryBtn:visited,
 body.productdetails #content_area #mcProductSummaryBtn:visited,
-body.mc-theater-seating-pdp #content_area #mcProductSummaryBtn:visited {
+body.productdetails #v65-product-parent #mcProductSummaryBtn:visited,
+body.mc-theater-seating-pdp #content_area #mcProductSummaryBtn:visited,
+body.mc-theater-seating-pdp #v65-product-parent #mcProductSummaryBtn:visited {
   color: #111 !important;
 }
 

@@ -785,6 +785,34 @@ body.productdetails header.header .collapsing-search {
   opacity: 1 !important;
 }
 
+/* PDP: never show homepage hero (#if_homepage). When body.is-home is wrong on product URLs,
+   the hero block still matches body.is-home #if_homepage { display:block } — hide it here so
+   only one main nav strip exists and the header is not pushed down. */
+body.productdetails #if_homepage,
+body.productdetails.is-home #if_homepage,
+body.mc-product-page #if_homepage,
+body.mc-product-page.is-home #if_homepage {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+  border: 0 !important;
+}
+
+/* PDP: keep the real header pinned to the top of the viewport while scrolling */
+body.productdetails header.header,
+body.mc-product-page header.header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 9998 !important;
+  background: #fff !important;
+}
+
 /* ======================================
    VOLUSION MENU (NON-HOME PAGES)
 ====================================== */
