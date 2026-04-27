@@ -3810,7 +3810,16 @@ window.applyPlannerToPage = function (payload) {
   if (summary) {
     var pieceList = "";
     if (layout.length) {
-      pieceList = layout.map(function(s){ return s.id || s; }).join(", ");
+      pieceList = layout
+        .map(function (s) {
+          if (s == null) return "";
+          var id = (s && s.id != null && s.id !== "") ? s.id : s;
+          return String(id != null ? id : "").trim();
+        })
+        .filter(function (x) {
+          return !!x;
+        })
+        .join(", ");
     } else if (Object.keys(opts).length) {
       var parts = [];
       Object.keys(opts).forEach(function(k){ for (var i = 0; i < (opts[k] || 0); i++) parts.push(k); });
@@ -3875,7 +3884,15 @@ window.applyPlannerToPage = function (payload) {
   }
   var cpe = document.getElementById("mcConfigurationPrice");
   if (cpe && hasPlannerConfig && lineTotal > 0) {
-    cpe.textContent = "Configuration total: " + formatMcCurrency(lineTotal);
+    var _fmt =
+      typeof window.formatMcCurrency === "function"
+        ? window.formatMcCurrency
+        : typeof formatMcCurrency === "function"
+          ? formatMcCurrency
+          : null;
+    cpe.textContent =
+      "Configuration total: " +
+      (_fmt ? _fmt(lineTotal) : "$" + Number(lineTotal || 0).toFixed(2));
     cpe.style.display = "block";
   } else if (cpe && !hasPlannerConfig) {
     cpe.style.display = "none";
@@ -3888,11 +3905,17 @@ window.applyPlannerToPage = function (payload) {
   if (window.__mcMemberPricing) {
     try { window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing })); } catch (e) {}
   }
+  var _pc =
+    (payload && payload.productCode) ||
+    ((document.querySelector('input[name="ProductCode"]') || {}).value || "") ||
+    "";
   window.__mcLastPlannerPayload = {
     options: configOpts,
     layout: layout,
     room: payload && payload.room ? payload.room : null,
-    seatCount: seatCount
+    seatCount: seatCount,
+    productCode: String(_pc).trim(),
+    configurationTotal: lineTotal > 0 ? lineTotal : Number(payload && payload.configurationTotal) || 0
   };
   try { mcPersistPlannerCartTarget(window.__mcLastPlannerPayload, lineTotal); } catch (ePersistApply) {}
   try { mcSyncPlannerFormForSubmit(window.__mcLastPlannerPayload, lineTotal); } catch (eSyncApply) {}
@@ -3932,9 +3955,13 @@ function mcPlannerDebugEnabled() {
 function mcPlannerDebugLog(label, data) {
   if (!mcPlannerDebugEnabled()) return;
   try {
-    console.log("[MC Planner Debug] " + label, data || {});
+    console.log("[MC Planner Debug] " + String(label || "event"), data != null ? data : {});
   } catch (eLog) {}
 }
+try {
+  window.mcPlannerDebugEnabled = mcPlannerDebugEnabled;
+  window.mcPlannerDebugLog = mcPlannerDebugLog;
+} catch (eWinDbg) {}
 
 function mcPersistPlannerCartTarget(payload, explicitTotal) {
   var p = payload && typeof payload === "object" ? payload : {};
@@ -4018,12 +4045,29 @@ function mcSyncPlannerFormForSubmit(payload, explicitTotal) {
     form.querySelector('input[title*="Configuration Details" i], textarea[title*="Configuration Details" i], input[name^="TEXTBOX___"], textarea[name^="TEXTBOX___"]') ||
     null;
   if (!configField && window.__mcPlannerCartFieldName) {
-    configField = form.querySelector('[name="' + window.__mcPlannerCartFieldName + '"]');
+    var wantNm = String(window.__mcPlannerCartFieldName);
+    var named = form.querySelectorAll("[name]");
+    var ai;
+    for (ai = 0; ai < named.length; ai++) {
+      if ((named[ai].name || "") === wantNm) {
+        configField = named[ai];
+        break;
+      }
+    }
     if (!configField) {
       configField = document.createElement("input");
       configField.type = "hidden";
-      configField.name = window.__mcPlannerCartFieldName;
+      configField.name = wantNm;
       form.appendChild(configField);
+    }
+  }
+  if (!configField) {
+    var tb = form.querySelector('input[name^="TEXTBOX___"], textarea[name^="TEXTBOX___"]');
+    if (tb && tb.name) {
+      configField = tb;
+      try {
+        window.__mcPlannerCartFieldName = tb.name;
+      } catch (eNm) {}
     }
   }
   if (configField) configField.value = cfgText;

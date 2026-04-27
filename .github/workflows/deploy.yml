@@ -50,7 +50,7 @@ jobs:
           SFTP_PORT="${SECRET_SFTP_PORT:-${SECRET_FTP_PORT:-2222}}"
 
           if [ -z "${SFTP_HOST:-}" ] || [ -z "${SFTP_USER:-}" ] || [ -z "${SFTP_PASS:-}" ]; then
-            echo "::error::Missing secrets. Set SFTP_HOST (or FTP_HOST), FTP_USERNAME, and FTP_PASSWORD. Optional: SFTP_PORT (default 2222)."
+            echo "::error::Missing secrets. Set at least one host secret: SFTP_HOST, FTP_HOST, or FTP_SERVER — plus FTP_USERNAME and FTP_PASSWORD. Optional: SFTP_PORT or FTP_PORT (default 2222)."
             exit 1
           fi
 
@@ -63,13 +63,15 @@ jobs:
             echo "::error::Missing vspfiles/templates/266/css/mccabe-overrides.css (template links it after template.css)."
             exit 1
           fi
+          if [ ! -f vspfiles/templates/266/css/template.css ]; then
+            echo "::error::Missing vspfiles/templates/266/css/template.css (linked from template_266.html)."
+            exit 1
+          fi
           for f in \
-            vspfiles/templates/266/css/template.css \
             vspfiles/templates/266/js/min/design-toolkit.min.js \
             vspfiles/templates/266/js/min/template.min.js; do
             if [ ! -f "$f" ]; then
-              echo "::error::Missing $f (linked from template_266.html)."
-              exit 1
+              echo "::notice::Optional theme JS not in repo: $f — SFTP batch will skip those puts (Volusion may still serve copies uploaded earlier)."
             fi
           done
 
