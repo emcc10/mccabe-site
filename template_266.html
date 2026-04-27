@@ -149,6 +149,10 @@
     try {
       var p = String(location.pathname || "").toLowerCase();
       var s = String(location.search || "");
+      /* Category / PLP (Volusion often leaves body.is-home on these) */
+      if (/-s\//i.test(p) && /\.html?(\?|$)/i.test(p)) return true;
+      if (/(?:^|[?&])categoryid=/i.test(s)) return true;
+      if (/\/searchresults\.asp/i.test(p)) return true;
       if (/\/product-p\//i.test(p) || /\/-p\//i.test(p)) return true;
       if (/-p\/[^/]+\.html?(\?.*)?$/i.test(p)) return true;
       if (/\/productdetails\.asp/i.test(p)) return true;
@@ -229,6 +233,9 @@
       if (ev.persisted) window.mcSyncHomeBodyClass();
     });
   } catch (ePop) {}
+  try {
+    if (document.body && typeof window.mcSyncHomeBodyClass === "function") window.mcSyncHomeBodyClass();
+  } catch (eEarlyHome) {}
 })();
 </script>
 <script>
@@ -284,8 +291,8 @@
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260428headercat1: github->volusion deploy verification marker -->
-<meta name="mc-deploy-verify" content="20260428pdpfix4">
+<!-- MC_DEPLOY_VERIFY_20260428headerfix2: github->volusion deploy verification marker -->
+<meta name="mc-deploy-verify" content="20260428headerfix2">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -408,6 +415,7 @@
     /* Interior: full-width search under nav even when custom-safe.css is old or fails.
        PDP: Volusion often leaves body.is-home — include product URL (html) + body classes so
        header flex/order matches category on first paint. */
+    html:not(.mc-allow-home-hero) body header.header,
     body:not(.is-home) header.header,
     body.category header.header,
     html.category body header.header,
@@ -419,6 +427,7 @@
       flex-wrap: nowrap !important;
       align-items: stretch !important;
     }
+    html:not(.mc-allow-home-hero) body header.header > .header__section:not(.header__section--middle),
     body:not(.is-home) header.header > .header__section:not(.header__section--middle),
     body.category header.header > .header__section:not(.header__section--middle),
     html.category body header.header > .header__section:not(.header__section--middle),
@@ -429,6 +438,9 @@
       width: 100% !important;
       max-width: 100% !important;
     }
+    html:not(.mc-allow-home-hero) body header.header > .mc-header-desktop-bar,
+    html:not(.mc-allow-home-hero) body header.header > .hidden-xs.col-xs-12,
+    html:not(.mc-allow-home-hero) body header.header > .col-xs-12.hidden-xs,
     body:not(.is-home) header.header > .mc-header-desktop-bar,
     body:not(.is-home) header.header > .hidden-xs.col-xs-12,
     body:not(.is-home) header.header > .col-xs-12.hidden-xs,
@@ -453,6 +465,8 @@
       position: relative !important;
       z-index: 3 !important;
     }
+    html:not(.mc-allow-home-hero) body header.header > .header__section--middle,
+    html:not(.mc-allow-home-hero) body header.header > .mc-header-search-below-nav,
     body:not(.is-home) header.header > .header__section--middle,
     body:not(.is-home) header.header > .mc-header-search-below-nav,
     body.category header.header > .header__section--middle,
@@ -471,6 +485,7 @@
       flex: 0 0 auto !important;
       margin-top: 0 !important;
     }
+    html:not(.mc-allow-home-hero) body header.header > .mc-header-cart,
     body:not(.is-home) header.header > .mc-header-cart,
     body.category header.header > .mc-header-cart,
     html.category body header.header > .mc-header-cart,
@@ -480,6 +495,7 @@
       order: 30 !important;
     }
     /* html is ancestor of body — mc-search-open may live on html or body */
+    html.mc-search-open:not(.mc-allow-home-hero) body header.header .collapsing-search,
     html.mc-search-open body:not(.is-home) header.header .collapsing-search,
     html.mc-search-open body.category header.header .collapsing-search,
     html.mc-search-open.category body header.header .collapsing-search,
@@ -512,6 +528,7 @@
       pointer-events: auto !important;
     }
     /* Raw template often includes #if_homepage on every page — hide when URL is not homepage */
+    html:not(.mc-allow-home-hero) body #if_homepage,
     body:not(.is-home) #if_homepage,
     body.category #if_homepage,
     html.category body #if_homepage,
@@ -542,7 +559,7 @@
       pointer-events: none !important;
       border: 0 !important;
     }
-    /* MC_HEADER_CRITICAL_20260428headercat1 — interior: flex bar (no clip); hero search top-right */
+    /* MC_HEADER_CRITICAL_20260428headerfix2 — interior: flex bar (no clip); hero search top-right */
     header.header .header__section--middle,
     header.header .mc-header-search-below-nav,
     #mcHeroSearchOverlay .header__section--middle {
@@ -581,7 +598,11 @@
     }
     /* Interior desktop (≥992px): one row — nav | search→cart; overrides width:100% above */
     @media (min-width: 992px) {
+      /* html:not(.mc-allow-home-hero) is set sync in head for every non-home URL — beats wrong body.is-home */
+      html:not(.mc-allow-home-hero) body .mc-header-desktop-bar[data-mc-header-bar],
       body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar],
+      body.category .mc-header-desktop-bar[data-mc-header-bar],
+      html.category body .mc-header-desktop-bar[data-mc-header-bar],
       body.productdetails .mc-header-desktop-bar[data-mc-header-bar],
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar],
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] {
@@ -589,7 +610,7 @@
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         align-items: center !important;
-        justify-content: center !important;
+        justify-content: flex-start !important;
         gap: clamp(14px, 2.5vw, 22px) !important;
         width: 100% !important;
         max-width: 100% !important;
@@ -749,6 +770,8 @@
         border-bottom-width: 2px !important;
       }
       /* Duplicate strip: direct-child search blocks (order:20) are NOT the in-bar search — hide (inline = works if custom-safe.css never deployed) */
+      html:not(.mc-allow-home-hero) body header.header > .mc-header-search-below-nav,
+      html:not(.mc-allow-home-hero) body header.header > .header__section.header__section--middle,
       body:not(.is-home) header.header > .mc-header-search-below-nav,
       body:not(.is-home) header.header > .header__section.header__section--middle,
       body.category header.header > .mc-header-search-below-nav,
