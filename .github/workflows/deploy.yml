@@ -89,6 +89,8 @@ jobs:
 
           echo "Using SFTP on port 2222..."
 
+          # Template loads /v/vspfiles/css/custom-safe.css first (see template_266.html). put -o does not
+          # create missing directories (550). /v/ exists because template upload works — mkdir vspfiles/css under /v.
           lftp <<EOF
           set sftp:auto-confirm yes
           set ssl:verify-certificate no
@@ -106,18 +108,39 @@ jobs:
           echo "Uploading template to /template_266.html..."
           put template_266.html -o /template_266.html
 
-          echo "Uploading CSS with retries..."
+          echo "Ensuring /v/vspfiles/css exists, uploading custom-safe.css (primary browser URL)..."
           set cmd:fail-exit no
-          for i in 1 2 3 4 5; do
-            put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
-            if [ $? -eq 0 ]; then
-              echo "CSS upload succeeded."
-              break
-            fi
-            echo "CSS upload failed, retry $i..."
-            sleep 15
-          done
+          cd /v
+          mkdir vspfiles
+          mkdir vspfiles/css
           set cmd:fail-exit yes
+          put vspfiles/css/custom-safe.css -o /v/vspfiles/css/custom-safe.css
+
+          echo "Uploading custom-safe.css to /vspfiles/css/ (template onerror fallback)..."
+          set cmd:fail-exit no
+          cd /
+          mkdir vspfiles
+          mkdir vspfiles/css
+          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
+          set cmd:fail-exit yes
+
+          echo "Downloading files for verification..."
+          get /v/template_266.html -o remote-template_266.html
+          get /v/vspfiles/css/custom-safe.css -o remote-custom-safe-v.css
 
           bye
           EOF
+
+          echo "Verify template marker..."
+          grep -n "MC_DEPLOY_VERIFY" remote-template_266.html || {
+            echo "ERROR: MC_DEPLOY_VERIFY not found in /v/template_266.html"
+            exit 1
+          }
+
+          echo "Verify CSS marker (confirms /v/vspfiles/css/custom-safe.css is what the site loads first)..."
+          grep -n "MC_CSS_DEPLOY_VERIFY" remote-custom-safe-v.css || {
+            echo "ERROR: MC_CSS_DEPLOY_VERIFY not found — /v/vspfiles/css upload failed or wrong path"
+            exit 1
+          }
+
+          head -n 3 remote-custom-safe-v.css
