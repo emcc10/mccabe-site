@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!--[if lte IE 9]><html class="no-js lt-ie10 mc-member-plp-price-pending" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
-<!--[if gt IE 9]><!--><html class="no-js mc-member-plp-price-pending" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="20260401q"><!--<![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js mc-member-plp-price-pending" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="DEPLOYTEST20260401q"><!--<![endif]-->
 <head>
 <script>
 (function () {
@@ -14950,194 +14950,263 @@ document.addEventListener('DOMContentLoaded', function () {
   window.addEventListener('load', startObs);
 })();
 </script>
+
 <script>
 (function () {
-  var PRODUCT_SLUG = '/palliser-vertex-media-seating-p/palliser-vertex-theater-chair.htm';
-  if (location.pathname.toLowerCase() !== PRODUCT_SLUG) return;
-
-  function collectVertexImages() {
-    var allImgs = Array.from(document.images);
-
-    var matches = allImgs.filter(function (img) {
-      var src = (img.currentSrc || img.src || '').toLowerCase();
-      return src.indexOf('/vspfiles/photos/customers/vertex') !== -1;
-    });
-
-    var seen = new Set();
-    var items = [];
-
-    matches.forEach(function (img) {
-      var src = (img.currentSrc || img.src || '').trim();
-      if (!src || seen.has(src)) return;
-      seen.add(src);
-      items.push({
-        img: img,
-        full: src,
-        thumb: src,
-        alt: img.alt || 'Vertex image'
-      });
-    });
-
-    return items;
+  function ready(fn){
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn);
+    } else {
+      fn();
+    }
   }
 
-  function buildFlipbook(items) {
-    if (!items || items.length < 2) return false;
-    if (document.getElementById('vertex-replace-flipbook')) return true;
-
-    var firstImg = items[0].img;
-    var firstBlock = firstImg.closest('a, div, td, li, p') || firstImg.parentNode;
-    if (!firstBlock || !firstBlock.parentNode) return false;
-
-    var parent = firstBlock.parentNode;
-    var wrappers = [];
-    var started = false;
-
-    Array.from(parent.children).forEach(function (child) {
-      var hasVertexImg = child.querySelector && child.querySelector('img[src*="/vspfiles/photos/customers/vertex"], img[src*="/vspfiles/photos/customers/Vertex"]');
-      if (child === firstBlock || hasVertexImg) started = true;
-      if (started && hasVertexImg) wrappers.push(child);
-    });
-
-    if (!wrappers.length) {
-      wrappers = items.map(function (item) {
-        return item.img.closest('a, div, td, li, p') || item.img;
-      });
-    }
-
-    var flip = document.createElement('section');
-    flip.id = 'vertex-replace-flipbook';
-    flip.style.maxWidth = '720px';
-    flip.style.margin = '18px auto 28px';
-    flip.style.background = '#fff';
-    flip.style.border = '1px solid #e9e6e1';
-    flip.style.overflow = 'hidden';
-
-    flip.innerHTML =
-      '<div class="vf-stage" style="position:relative;aspect-ratio:1/1;background:#f6f4ef;overflow:hidden;"></div>' +
-      '<div style="display:flex;align-items:center;justify-content:center;min-height:56px;padding:0 16px;border-top:1px solid #e9e6e1;background:#fff;position:relative;">' +
-        '<div class="vf-count" style="font-family:Inter,Arial,sans-serif;font-size:11px;line-height:1;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:#6e6a64;">Image <span class="vf-current">1</span> / <span class="vf-total">' + items.length + '</span></div>' +
-        '<button type="button" class="vf-prev" aria-label="Previous image" style="appearance:none;border:0;background:transparent;color:#4f4a43;width:48px;height:56px;cursor:pointer;font-size:18px;line-height:1;position:absolute;left:0;top:0;">&#10094;</button>' +
-        '<button type="button" class="vf-next" aria-label="Next image" style="appearance:none;border:0;background:transparent;color:#4f4a43;width:48px;height:56px;cursor:pointer;font-size:18px;line-height:1;position:absolute;right:0;top:0;">&#10095;</button>' +
-      '</div>' +
-      '<div class="vf-thumbs" style="display:flex;gap:10px;padding:14px 14px 16px;border-top:1px solid #e9e6e1;background:#fff;overflow-x:auto;overflow-y:hidden;"></div>';
-
-    wrappers[0].parentNode.insertBefore(flip, wrappers[0]);
-    setTimeout(function () {
-  items.forEach(function (item) {
-    if (item.img) {
-      item.img.style.display = 'none';
-      var a = item.img.closest('a');
-      if (a && a.children.length === 1) a.style.display = 'none';
-    }
-  });
-}, 0);
-
-    var stage = flip.querySelector('.vf-stage');
-    var thumbs = flip.querySelector('.vf-thumbs');
-    var currentEl = flip.querySelector('.vf-current');
-    var prevBtn = flip.querySelector('.vf-prev');
-    var nextBtn = flip.querySelector('.vf-next');
-
-    items.forEach(function (item, i) {
-      var slide = document.createElement('div');
-      slide.style.position = 'absolute';
-      slide.style.inset = '0';
-      slide.style.opacity = i === 0 ? '1' : '0';
-      slide.style.pointerEvents = i === 0 ? 'auto' : 'none';
-      slide.style.background = '#f6f4ef';
-      slide.style.zIndex = i === 0 ? '2' : '1';
-      slide.style.transition = 'opacity .22s ease';
-
-      var img = document.createElement('img');
-      img.src = item.full;
-      img.alt = item.alt;
-      img.loading = i === 0 ? 'eager' : 'lazy';
-      img.decoding = 'async';
-      img.style.width = '100%';
-      img.style.height = '100%';
-      img.style.objectFit = 'contain';
-      img.style.display = 'block';
-
-      slide.appendChild(img);
-      stage.appendChild(slide);
-
-      var thumb = document.createElement('button');
-      thumb.type = 'button';
-      thumb.setAttribute('data-index', i);
-      thumb.style.appearance = 'none';
-      thumb.style.border = i === 0 ? '1px solid #7c7468' : '1px solid transparent';
-      thumb.style.background = '#f6f4ef';
-      thumb.style.padding = '0';
-      thumb.style.cursor = 'pointer';
-      thumb.style.overflow = 'hidden';
-      thumb.style.flex = '0 0 78px';
-      thumb.style.width = '78px';
-
-      var thumbImg = document.createElement('img');
-      thumbImg.src = item.thumb;
-      thumbImg.alt = '';
-      thumbImg.loading = 'lazy';
-      thumbImg.style.width = '100%';
-      thumbImg.style.height = '78px';
-      thumbImg.style.objectFit = 'cover';
-      thumbImg.style.display = 'block';
-
-      thumb.appendChild(thumbImg);
-      thumbs.appendChild(thumb);
-    });
-
-    var slides = Array.from(stage.children);
-    var thumbButtons = Array.from(thumbs.querySelectorAll('button'));
-    var index = 0;
-
-    function goTo(i) {
-      index = (i + slides.length) % slides.length;
-
-      slides.forEach(function (slide, n) {
-        var active = n === index;
-        slide.style.opacity = active ? '1' : '0';
-        slide.style.pointerEvents = active ? 'auto' : 'none';
-        slide.style.zIndex = active ? '2' : '1';
-      });
-
-      thumbButtons.forEach(function (btn, n) {
-        btn.style.border = n === index ? '1px solid #7c7468' : '1px solid transparent';
-      });
-
-      currentEl.textContent = index + 1;
-    }
-
-    prevBtn.addEventListener('click', function () { goTo(index - 1); });
-    nextBtn.addEventListener('click', function () { goTo(index + 1); });
-
-    thumbButtons.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        goTo(parseInt(btn.getAttribute('data-index'), 10));
-      });
-    });
-
-    return true;
+  function isVertexPage(){
+    var txt = ((document.title || '') + ' ' + ((document.body && (document.body.innerText || document.body.textContent)) || '')).toLowerCase();
+    return txt.indexOf('vertex') !== -1;
   }
 
-  function boot() {
+  ready(function () {
+    if (!isVertexPage()) return;
+
     var tries = 0;
-    var timer = setInterval(function () {
+
+    function collectVertexImages() {
+      var allImgs = Array.from(document.images);
+
+      var matches = allImgs.filter(function (img) {
+        var src = (img.currentSrc || img.src || '').toLowerCase();
+        return src.indexOf('/vspfiles/photos/customers/vertex') !== -1;
+      });
+
+      var seen = new Set();
+      var items = [];
+
+      matches.forEach(function (img) {
+        var src = (img.currentSrc || img.src || '').trim();
+        if (!src || seen.has(src)) return;
+        seen.add(src);
+
+        items.push({
+          img: img,
+          full: src,
+          thumb: src,
+          alt: img.alt || 'Vertex image'
+        });
+      });
+
+      return items;
+    }
+
+    function buildFlipbook(items) {
+      if (!items || items.length < 2) return false;
+      if (document.getElementById('vertex-replace-flipbook')) return true;
+
+      document.body.classList.add('vertex-flipbook-ready');
+
+      var firstImg = items[0].img;
+      var firstBlock = firstImg.closest('a, div, td, li, p') || firstImg.parentNode;
+      if (!firstBlock || !firstBlock.parentNode) return false;
+
+      var parent = firstBlock.parentNode;
+      var wrappers = [];
+      var started = false;
+
+      Array.from(parent.children).forEach(function (child) {
+        var hasVertexImg = child.querySelector && child.querySelector('img[src*="/vspfiles/photos/customers/vertex"], img[src*="/vspfiles/photos/customers/Vertex"]');
+        if (child === firstBlock || hasVertexImg) started = true;
+        if (started && hasVertexImg) wrappers.push(child);
+      });
+
+      if (!wrappers.length) {
+        wrappers = items.map(function (item) {
+          return item.img.closest('a, div, td, li, p') || item.img;
+        });
+      }
+
+      var flipWrap = document.createElement('section');
+      flipWrap.className = 'vertex-desc-flipbook-wrap';
+
+      var flip = document.createElement('div');
+      flip.id = 'vertex-replace-flipbook';
+
+      flip.innerHTML =
+        '<div class="vf-stage"></div>' +
+        '<div style="display:flex;align-items:center;justify-content:center;min-height:56px;padding:0 16px;border-top:1px solid #e9e6e1;background:#fff;position:relative;">' +
+          '<div class="vf-count">Image <span class="vf-current">1</span> / <span class="vf-total">' + items.length + '</span></div>' +
+          '<button type="button" class="vf-prev" aria-label="Previous image" style="appearance:none;border:0;background:transparent;color:#4f4a43;width:48px;height:56px;cursor:pointer;font-size:18px;line-height:1;position:absolute;left:0;top:0;">&#10094;</button>' +
+          '<button type="button" class="vf-next" aria-label="Next image" style="appearance:none;border:0;background:transparent;color:#4f4a43;width:48px;height:56px;cursor:pointer;font-size:18px;line-height:1;position:absolute;right:0;top:0;">&#10095;</button>' +
+        '</div>' +
+        '<div class="vf-thumbs" style="display:flex;gap:10px;padding:14px 14px 16px;border-top:1px solid #e9e6e1;background:#fff;overflow-x:auto;overflow-y:hidden;"></div>';
+
+      flipWrap.appendChild(flip);
+      wrappers[0].parentNode.insertBefore(flipWrap, wrappers[0]);
+
+      var stage = flip.querySelector('.vf-stage');
+      var thumbs = flip.querySelector('.vf-thumbs');
+      var currentEl = flip.querySelector('.vf-current');
+      var prevBtn = flip.querySelector('.vf-prev');
+      var nextBtn = flip.querySelector('.vf-next');
+
+      items.forEach(function (item, i) {
+        var slide = document.createElement('div');
+        slide.style.position = 'absolute';
+        slide.style.inset = '0';
+        slide.style.opacity = i === 0 ? '1' : '0';
+        slide.style.pointerEvents = i === 0 ? 'auto' : 'none';
+        slide.style.background = '#f6f4ef';
+        slide.style.zIndex = i === 0 ? '2' : '1';
+        slide.style.transition = 'opacity .22s ease';
+
+        var img = document.createElement('img');
+        img.src = item.full;
+        img.alt = item.alt;
+        img.loading = i === 0 ? 'eager' : 'lazy';
+        img.decoding = 'async';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
+        img.style.display = 'block';
+
+        slide.appendChild(img);
+        stage.appendChild(slide);
+
+        var thumb = document.createElement('button');
+        thumb.type = 'button';
+        thumb.setAttribute('data-index', i);
+        thumb.style.appearance = 'none';
+        thumb.style.border = i === 0 ? '1px solid #7c7468' : '1px solid transparent';
+        thumb.style.background = '#f6f4ef';
+        thumb.style.padding = '0';
+        thumb.style.cursor = 'pointer';
+        thumb.style.overflow = 'hidden';
+        thumb.style.flex = '0 0 78px';
+        thumb.style.width = '78px';
+
+        var thumbImg = document.createElement('img');
+        thumbImg.src = item.thumb;
+        thumbImg.alt = '';
+        thumbImg.loading = 'lazy';
+        thumbImg.style.width = '100%';
+        thumbImg.style.height = '78px';
+        thumbImg.style.objectFit = 'cover';
+        thumbImg.style.display = 'block';
+
+        thumb.appendChild(thumbImg);
+        thumbs.appendChild(thumb);
+      });
+
+      var slides = Array.from(stage.children);
+      var thumbButtons = Array.from(thumbs.querySelectorAll('button'));
+      var index = 0;
+
+      function goTo(i) {
+        index = (i + slides.length) % slides.length;
+
+        slides.forEach(function (slide, n) {
+          var active = n === index;
+          slide.style.opacity = active ? '1' : '0';
+          slide.style.pointerEvents = active ? 'auto' : 'none';
+          slide.style.zIndex = active ? '2' : '1';
+        });
+
+        thumbButtons.forEach(function (btn, n) {
+          btn.style.border = n === index ? '1px solid #7c7468' : '1px solid transparent';
+        });
+
+        currentEl.textContent = index + 1;
+      }
+
+      prevBtn.addEventListener('click', function () { goTo(index - 1); });
+      nextBtn.addEventListener('click', function () { goTo(index + 1); });
+
+      thumbButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          goTo(parseInt(btn.getAttribute('data-index'), 10));
+        });
+      });
+               items.forEach(function (item) {
+        var img = item.img;
+        if (!img || flip.contains(img)) return;
+
+        var wrap =
+          img.closest('a') ||
+          img.closest('p') ||
+          img.closest('li') ||
+          img.closest('div') ||
+          img.closest('td') ||
+          img.parentElement;
+
+        if (!wrap || flip.contains(wrap)) return;
+
+        var txt = ((wrap.innerText || wrap.textContent || '').replace(/\s+/g,' ').trim());
+        var imgCount = wrap.querySelectorAll('img').length;
+
+        if (imgCount === 1 && txt.length < 120) {
+          wrap.classList.add('vertex-original-desc-image-wrap');
+        } else {
+          img.classList.add('vertex-original-desc-image-wrap');
+        }
+      });
+                     
+      return true;
+    }
+
+    function boot() {
       tries++;
       var items = collectVertexImages();
-      if (buildFlipbook(items) || tries > 30) {
-        clearInterval(timer);
-      }
-    }, 400);
-  }
+      if (buildFlipbook(items)) return;
+      if (tries < 30) setTimeout(boot, 400);
+    }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
-  } else {
     boot();
-  }
+  });
 })();
 </script>
+<style>
+body.vertex-flipbook-ready .vertex-desc-flipbook-wrap{
+  max-width:720px;
+  margin:18px auto 28px;
+}
+
+body.vertex-flipbook-ready #vertex-replace-flipbook{
+  position:relative;
+  background:#fff;
+  border:1px solid #e9e6e1;
+  overflow:hidden;
+}
+
+body.vertex-flipbook-ready #vertex-replace-flipbook .vf-stage{
+  position:relative;
+  aspect-ratio:1 / 1;
+  background:#f6f4ef;
+  overflow:hidden;
+}
+
+body.vertex-flipbook-ready #vertex-replace-flipbook .vf-count{
+  font-family:Inter, Arial, sans-serif;
+  font-size:11px;
+  line-height:1;
+  font-weight:500;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:#6e6a64;
+}
+
+body.vertex-flipbook-ready #vertex-replace-flipbook .vf-thumb-active{
+  border:1px solid #7c7468 !important;
+}
+
+body.vertex-flipbook-ready .vertex-original-desc-image-wrap{
+  display:none !important;
+}
+
+body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
+  display:none !important;
+}
+
+
+</style>
 
 </body>
 </html>
