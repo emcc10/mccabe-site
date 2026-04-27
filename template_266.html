@@ -560,7 +560,7 @@
       pointer-events: none !important;
       border: 0 !important;
     }
-    /* MC_HEADER_CRITICAL_20260428headerfix2 — interior: flex bar (no clip); hero search top-right */
+    /* MC_HEADER_CRITICAL_20260428pdpheader — interior: flex bar; PDP duplicate middle + search align */
     header.header .header__section--middle,
     header.header .mc-header-search-below-nav,
     #mcHeroSearchOverlay .header__section--middle {
@@ -773,16 +773,12 @@
       /* Duplicate strip: direct-child search blocks (order:20) are NOT the in-bar search — hide (inline = works if custom-safe.css never deployed) */
       html:not(.mc-allow-home-hero) body header.header > .mc-header-search-below-nav,
       html:not(.mc-allow-home-hero) body header.header > .header__section.header__section--middle,
-      html:not(.mc-allow-home-hero) body header.header > .header__section--middle,
       body:not(.is-home) header.header > .mc-header-search-below-nav,
       body:not(.is-home) header.header > .header__section.header__section--middle,
-      body:not(.is-home) header.header > .header__section--middle,
       body.category header.header > .mc-header-search-below-nav,
       body.category header.header > .header__section.header__section--middle,
-      body.category header.header > .header__section--middle,
       html.category body header.header > .mc-header-search-below-nav,
       html.category body header.header > .header__section.header__section--middle,
-      html.category body header.header > .header__section--middle,
       body.productdetails header.header > .mc-header-search-below-nav,
       body.productdetails header.header > .header__section.header__section--middle,
       body.productdetails header.header > .header__section--middle,

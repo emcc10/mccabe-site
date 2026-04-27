@@ -11445,3 +11445,14 @@ body.mc-theater-seating-pdp #mcProductSummaryBtn .mc-btn-icon {
   flex-shrink: 0 !important;
 }
 
+/* Narrow PDP column: shorter label + tracking so ROOM PLANNER / PRODUCT SUMMARY stay one line */
+body.productdetails #mcPlannerBtn,
+body.productdetails #mcProductSummaryBtn,
+body.mc-product-page #mcPlannerBtn,
+body.mc-product-page #mcProductSummaryBtn {
+  letter-spacing: 0.05em !important;
+  font-size: 11px !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
