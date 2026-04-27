@@ -303,7 +303,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260409a" rel="stylesheet">
+  <link href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260427d" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -864,6 +864,16 @@
     ref.parentNode.insertBefore(el, ref.nextSibling);
   } else {
     document.head.appendChild(el);
+  }
+  /* Same file again after custom-safe so PDP/header rules in mccabe-overrides win over stale custom-safe CDN/cache. */
+  var ov = document.createElement("link");
+  ov.rel = "stylesheet";
+  ov.href = "v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260427d";
+  ov.id = "mc-mccabe-overrides-after-custom-safe";
+  if (el.parentNode) {
+    el.parentNode.insertBefore(ov, el.nextSibling);
+  } else {
+    document.head.appendChild(ov);
   }
 })();
 </script>
