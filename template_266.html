@@ -16738,5 +16738,318 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
+  <script id="mccabe-room-planner-cart-price-fix">
+(function () {
+  var FOUR_L_DISCOUNT = 500;
+
+  function moneyToNumber(text) {
+    if (!text) return 0;
+    var clean = String(text).replace(/[^0-9.]/g, "");
+    return clean ? parseFloat(clean) : 0;
+  }
+
+  function isLoggedInCustomer() {
+    var txt = (document.body.innerText || "").toLowerCase();
+
+    if (document.querySelector('a[href*="logout"]')) return true;
+    if (txt.indexOf("log out") !== -1) return true;
+
+    return false;
+  }
+
+  function priceNearText(labelRegex, rejectRegex) {
+    var nodes = Array.from(document.querySelectorAll("body *")).filter(function (el) {
+      var txt = (el.innerText || "").trim();
+      if (!txt) return false;
+      if (!labelRegex.test(txt)) return false;
+      if (rejectRegex && rejectRegex.test(txt)) return false;
+      return /\$[0-9,]+/.test(txt);
+    });
+
+    for (var i = 0; i < nodes.length; i++) {
+      var txt = nodes[i].innerText || "";
+      var matches = txt.match(/\$[0-9,]+(?:\.\d{2})?/g);
+      if (!matches || !matches.length) continue;
+
+      var values = matches.map(moneyToNumber).filter(function (n) {
+        return n > 0;
+      });
+
+      if (values.length) return values[0];
+    }
+
+    return 0;
+  }
+
+  function getMemberUnitPrice() {
+    var selectors = [
+      ".member-price",
+      ".memberPrice",
+      "#memberPrice",
+      "#member-price",
+      "[class*='member'][class*='price']",
+      "[id*='member'][id*='price']"
+    ];
+
+    for (var i = 0; i < selectors.length; i++) {
+      var el = document.querySelector(selectors[i]);
+      if (!el) continue;
+
+      var txt = el.innerText || el.textContent || "";
+      if (/summary|planner|total|cart/i.test(txt)) continue;
+
+      var val = moneyToNumber(txt);
+      if (val > 0) return val;
+    }
+
+    var labeled = priceNearText(/member\s*price/i, /summary|planner|total|cart/i);
+    if (labeled > 0) return labeled;
+
+    return 0;
+  }
+
+  function getRetailUnitPrice() {
+    var selectors = [
+      "#product_productprice",
+      "#product_price",
+      ".product_productprice",
+      ".v65-productdetail-price",
+      ".productprice",
+      "[class*='productprice']",
+      "[id*='productprice']"
+    ];
+
+    for (var i = 0; i < selectors.length; i++) {
+      var el = document.querySelector(selectors[i]);
+      if (!el) continue;
+
+      var txt = el.innerText || el.textContent || "";
+      if (/summary|planner|total|cart|member/i.test(txt)) continue;
+
+      var val = moneyToNumber(txt);
+      if (val > 0) return val;
+    }
+
+    var labeled = priceNearText(/retail\s*price|product\s*price|price/i, /summary|planner|total|cart|member/i);
+    if (labeled > 0) return labeled;
+
+    return 0;
+  }
+
+  function getCorrectUnitPrice() {
+    var loggedIn = isLoggedInCustomer();
+
+    if (loggedIn) {
+      var member = getMemberUnitPrice();
+
+      if (member > 0) {
+        return member;
+      }
+    }
+
+    return getRetailUnitPrice();
+  }
+
+  function isFourL(name) {
+    name = String(name || "").toLowerCase();
+
+    return (
+      name.indexOf("4l") !== -1 ||
+      name.indexOf("4 l") !== -1 ||
+      name.indexOf("4-l") !== -1 ||
+      name.indexOf("armless loveseat") !== -1
+    );
+  }
+
+  function readPlannerData() {
+    var keys = [
+      "roomPlannerData",
+      "mccabeRoomPlannerData",
+      "ROOM_PLANNER_DATA"
+    ];
+
+    for (var i = 0; i < keys.length; i++) {
+      try {
+        var raw = localStorage.getItem(keys[i]);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+    }
+
+    return null;
+  }
+
+  function getPlannerCounts() {
+    var data = readPlannerData();
+
+    var normalPieceCount = 0;
+    var fourLCount = 0;
+
+    function add(name, count) {
+      count = Number(count || 0);
+      if (!count) return;
+
+      if (isFourL(name)) {
+        fourLCount += count;
+      } else {
+        normalPieceCount += count;
+      }
+    }
+
+    if (data && data.counts) {
+      Object.keys(data.counts).forEach(function (key) {
+        add(key, data.counts[key]);
+      });
+    }
+
+    if (data && Array.isArray(data.items)) {
+      data.items.forEach(function (item) {
+        add(item.name || item.title || item.type || item.sku || "", item.qty || item.quantity || item.count || 1);
+      });
+    }
+
+    if (data && Array.isArray(data.pieces)) {
+      data.pieces.forEach(function (item) {
+        add(item.name || item.title || item.type || item.sku || "", item.qty || item.quantity || item.count || 1);
+      });
+    }
+
+    var physicalPieces = normalPieceCount + fourLCount;
+    var effectiveSeatCount = normalPieceCount + (fourLCount * 2);
+
+    if (!effectiveSeatCount) {
+      physicalPieces = 1;
+      effectiveSeatCount = 1;
+    }
+
+    return {
+      physicalPieces: physicalPieces,
+      normalPieceCount: normalPieceCount,
+      fourLCount: fourLCount,
+      effectiveSeatCount: effectiveSeatCount
+    };
+  }
+
+  function getQtyInput() {
+    return (
+      document.querySelector('#v65-product-parent input[name="QTY"]') ||
+      document.querySelector('#v65-product-parent input[name="quantity"]') ||
+      document.querySelector('#v65-product-parent input[id*="qty"]') ||
+      document.querySelector('#v65-product-parent input[id*="QTY"]') ||
+      document.querySelector('input[name="QTY"]') ||
+      document.querySelector('input[name="quantity"]')
+    );
+  }
+
+  function setQuantityToBillableSeats(count) {
+    var input = getQtyInput();
+    if (!input) return;
+
+    input.value = String(count);
+    input.setAttribute("value", String(count));
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  function updateRoomPlannerCartPricing() {
+    if (!document.querySelector("#v65-product-parent")) return;
+
+    var unitPrice = getCorrectUnitPrice();
+    if (!unitPrice) return;
+
+    var counts = getPlannerCounts();
+    var discount = counts.fourLCount * FOUR_L_DISCOUNT;
+    var total = (unitPrice * counts.effectiveSeatCount) - discount;
+
+    window.mccabeRoomPlannerCartCalc = {
+      unitPrice: unitPrice,
+      effectiveSeatCount: counts.effectiveSeatCount,
+      physicalPieces: counts.physicalPieces,
+      fourLCount: counts.fourLCount,
+      discount: discount,
+      total: total
+    };
+
+    setQuantityToBillableSeats(counts.effectiveSeatCount);
+
+    console.log("McCabe room planner cart calc:", window.mccabeRoomPlannerCartCalc);
+  }
+
+  function moveQuantityAboveAddToCart() {
+    var product = document.querySelector("#v65-product-parent");
+    if (!product) return;
+
+    var qtyInput = getQtyInput();
+    var addBtn =
+      product.querySelector("#btn_addtocart") ||
+      product.querySelector("input[name='btnaddtocart']") ||
+      product.querySelector("input[id*='addtocart']") ||
+      product.querySelector(".v65-productdetail-cartbutton");
+
+    if (!qtyInput || !addBtn) return;
+
+    var qtyWrap = qtyInput.closest("tr, td, div, table") || qtyInput;
+    var btnWrap = addBtn.closest("tr, td, div, table") || addBtn;
+
+    if (qtyWrap && btnWrap && btnWrap.parentNode && qtyWrap !== btnWrap.previousElementSibling) {
+      btnWrap.parentNode.insertBefore(qtyWrap, btnWrap);
+    }
+
+    qtyWrap.style.setProperty("display", "flex", "important");
+    qtyWrap.style.setProperty("justify-content", "center", "important");
+    qtyWrap.style.setProperty("align-items", "center", "important");
+    qtyWrap.style.setProperty("gap", "10px", "important");
+    qtyWrap.style.setProperty("margin", "14px auto 10px", "important");
+    qtyWrap.style.setProperty("float", "none", "important");
+    qtyWrap.style.setProperty("clear", "both", "important");
+    qtyWrap.style.setProperty("text-align", "center", "important");
+
+    btnWrap.style.setProperty("text-align", "center", "important");
+    btnWrap.style.setProperty("float", "none", "important");
+    btnWrap.style.setProperty("clear", "both", "important");
+  }
+
+  function onPlannerMessage(event) {
+    var data = event.data;
+    if (!data) return;
+
+    if (typeof data === "string") {
+      try {
+        data = JSON.parse(data);
+      } catch (e) {}
+    }
+
+    if (!data || typeof data !== "object") return;
+
+    if (data.type === "ROOM_PLANNER_APPLY" || data.type === "roomPlannerApply") {
+      try {
+        localStorage.setItem("roomPlannerData", JSON.stringify(data.payload || data));
+      } catch (e) {}
+
+      setTimeout(updateRoomPlannerCartPricing, 50);
+      setTimeout(updateRoomPlannerCartPricing, 300);
+    }
+  }
+
+  function init() {
+    moveQuantityAboveAddToCart();
+    updateRoomPlannerCartPricing();
+  }
+
+  window.addEventListener("message", onPlannerMessage);
+  window.addEventListener("storage", updateRoomPlannerCartPricing);
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
+  window.addEventListener("load", function () {
+    init();
+    setTimeout(init, 300);
+    setTimeout(init, 1000);
+  });
+})();
+</script>
 </body>
 </html>
