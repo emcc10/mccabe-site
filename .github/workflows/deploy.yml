@@ -37,8 +37,8 @@ jobs:
             exit 1
           fi
 
-          if [ ! -f "vspfiles/css/mccabes-overrides.css" ]; then
-            echo "ERROR: vspfiles/css/mccabes-overrides.css is missing"
+          if [ ! -f "vspfiles/templates/266/css/mccabes-overrides.css" ]; then
+            echo "ERROR: vspfiles/templates/266/css/mccabes-overrides.css is missing"
             exit 1
           fi
 
