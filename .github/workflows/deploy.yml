@@ -1,4 +1,4 @@
-name: Deploy Volusion Theme
+name: Deploy Volusion Theme - Verify Uploads
 
 on:
   push:
@@ -27,6 +27,8 @@ jobs:
           echo "Latest commit:"
           git log -1 --oneline
 
+          echo "Checking files..."
+
           if [ ! -f "template_266.html" ]; then
             echo "ERROR: template_266.html is missing from repo root"
             exit 1
@@ -44,6 +46,15 @@ jobs:
 
           echo "Required files found."
 
+          echo "Template marker check:"
+          grep -n "GITHUB\|DEPLOY\|MCCABE" template_266.html | head -10 || true
+
+          echo "custom-safe marker check:"
+          grep -n "GITHUB\|DEPLOY\|MCCABE" vspfiles/css/custom-safe.css | head -10 || true
+
+          echo "mccabe-overrides marker check:"
+          grep -n "GITHUB\|DEPLOY\|MCCABE" vspfiles/templates/266/css/mccabe-overrides.css | head -10 || true
+
       - name: Check deploy secrets
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
@@ -58,42 +69,19 @@ jobs:
           echo "FTP_USERNAME is set"
           echo "FTP_PASSWORD is set"
 
-      - name: Test Volusion connection ports
+      - name: Test Volusion SFTP port
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
         run: |
           echo "Testing port 2222..."
-          if nc -vz -w 20 "$FTP_SERVER" 2222; then
-            echo "PORT_2222_OPEN=true" >> $GITHUB_ENV
-          else
-            echo "PORT_2222_OPEN=false" >> $GITHUB_ENV
-          fi
+          nc -vz -w 20 "$FTP_SERVER" 2222
 
-          echo "Testing port 21..."
-          if nc -vz -w 20 "$FTP_SERVER" 21; then
-            echo "PORT_21_OPEN=true" >> $GITHUB_ENV
-          else
-            echo "PORT_21_OPEN=false" >> $GITHUB_ENV
-          fi
-
-      - name: Deploy files to Volusion
+      - name: Deploy and verify remote files
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          PORT_2222_OPEN: ${{ env.PORT_2222_OPEN }}
-          PORT_21_OPEN: ${{ env.PORT_21_OPEN }}
         run: |
-          echo "PORT_2222_OPEN=$PORT_2222_OPEN"
-          echo "PORT_21_OPEN=$PORT_21_OPEN"
-
-          if [ "$PORT_2222_OPEN" != "true" ]; then
-            echo "ERROR: Port 2222 is not open. Do not deploy."
-            exit 1
-          fi
-
-          echo "Using SFTP on port 2222..."
-
           lftp <<EOF
           set sftp:auto-confirm yes
           set ssl:verify-certificate no
@@ -111,29 +99,29 @@ jobs:
           echo "Uploading template to /template_266.html..."
           put template_266.html -o /template_266.html
 
-          echo "Uploading custom-safe.css with retries..."
-          set cmd:fail-exit no
-          for i in 1 2 3 4 5; do
-            put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
-            if [ $? -eq 0 ]; then
-              echo "custom-safe.css upload succeeded."
-              break
-            fi
-            echo "custom-safe.css upload failed, retry $i..."
-            sleep 15
-          done
+          echo "Uploading custom-safe.css to /vspfiles/css/custom-safe.css..."
+          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
 
-          echo "Uploading mccabe-overrides.css with retries..."
-          for i in 1 2 3 4 5; do
-            put vspfiles/templates/266/css/mccabe-overrides.css -o /vspfiles/templates/266/css/mccabe-overrides.css
-            if [ $? -eq 0 ]; then
-              echo "mccabe-overrides.css upload succeeded."
-              break
-            fi
-            echo "mccabe-overrides.css upload failed, retry $i..."
-            sleep 15
-          done
-          set cmd:fail-exit yes
+          echo "Uploading mccabe-overrides.css to /vspfiles/templates/266/css/mccabe-overrides.css..."
+          put vspfiles/templates/266/css/mccabe-overrides.css -o /vspfiles/templates/266/css/mccabe-overrides.css
+
+          echo "Downloading uploaded files back for verification..."
+          get /v/template_266.html -o remote-v-template_266.html
+          get /template_266.html -o remote-root-template_266.html
+          get /vspfiles/css/custom-safe.css -o remote-custom-safe.css
+          get /vspfiles/templates/266/css/mccabe-overrides.css -o remote-mccabe-overrides.css
 
           bye
           EOF
+
+          echo "Remote /v/template_266.html marker check:"
+          grep -n "GITHUB\|DEPLOY\|MCCABE" remote-v-template_266.html | head -20 || true
+
+          echo "Remote /template_266.html marker check:"
+          grep -n "GITHUB\|DEPLOY\|MCCABE" remote-root-template_266.html | head -20 || true
+
+          echo "Remote custom-safe.css marker check:"
+          grep -n "GITHUB\|DEPLOY\|MCCABE" remote-custom-safe.css | head -20 || true
+
+          echo "Remote mccabe-overrides.css marker check:"
+          grep -n "GITHUB\|DEPLOY\|MCCABE" remote-mccabe-overrides.css | head -20 || true
