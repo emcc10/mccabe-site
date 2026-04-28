@@ -37,6 +37,11 @@ jobs:
             exit 1
           fi
 
+          if [ ! -f "vspfiles/css/mccabes-overrides.css" ]; then
+            echo "ERROR: vspfiles/css/mccabes-overrides.css is missing"
+            exit 1
+          fi
+
           echo "Required files found."
 
       - name: Check deploy secrets
@@ -106,7 +111,29 @@ jobs:
           echo "Uploading template to /template_266.html..."
           put template_266.html -o /template_266.html
 
-          echo "Skipping CSS upload temporarily because Volusion is locking custom-safe.css"
+          echo "Uploading custom-safe.css with retries..."
+          set cmd:fail-exit no
+          for i in 1 2 3 4 5; do
+            put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
+            if [ $? -eq 0 ]; then
+              echo "custom-safe.css upload succeeded."
+              break
+            fi
+            echo "custom-safe.css upload failed, retry $i..."
+            sleep 15
+          done
+
+          echo "Uploading mccabes-overrides.css with retries..."
+          for i in 1 2 3 4 5; do
+            put vspfiles/css/mccabes-overrides.css -o /vspfiles/css/mccabes-overrides.css
+            if [ $? -eq 0 ]; then
+              echo "mccabes-overrides.css upload succeeded."
+              break
+            fi
+            echo "mccabes-overrides.css upload failed, retry $i..."
+            sleep 15
+          done
+          set cmd:fail-exit yes
 
           bye
           EOF
