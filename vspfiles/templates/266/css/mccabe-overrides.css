@@ -1,4 +1,4 @@
-/* McCabe fixes — load after template.css (linked from template_266.html).
+/*0428 McCabe fixes — load after template.css (linked from template_266.html).
    Ensures hero copy + listing member block even if custom-safe.css fails to load.
    MC_OVERRIDES_VERIFY_20260427e — linked again at end of <body> after Volusion vnav.css so rules win. */
 
