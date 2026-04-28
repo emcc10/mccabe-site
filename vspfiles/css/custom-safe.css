@@ -7716,8 +7716,8 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   body.mc-product-page #content_area td.mc-pdp-options-td,
   body.productdetails #content_area td.mc-pdp-options-td {
     flex: 1 1 0% !important;
-    flex-basis: 42% !important;
-    max-width: 42% !important;
+    flex-basis: 62% !important;
+    max-width: 62% !important;
     min-width: 0 !important;
     order: 2 !important;
     position: relative !important;
