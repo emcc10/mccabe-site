@@ -490,9 +490,9 @@ html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__heading {
 
 html body.productdetails #mcConfigurationCaption,
 html body.mc-product-page #mcConfigurationCaption {
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
   line-height: 1.35 !important;
 }
 

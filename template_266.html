@@ -4568,7 +4568,11 @@ function getPlannerBaseSeatPriceForCalc(){
   if (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) {
     return window.__mcPerSeatPrice;
   }
-  var p = getPlannerSeatPrice();
+  var p = 0;
+  if (typeof getVolusionAddToCartSeatPrice === "function") {
+    p = getVolusionAddToCartSeatPrice(document);
+  }
+  if (!(p > 0)) p = getDisplayedPublicSeatPrice();
   if (p > 0) window.__mcPerSeatPrice = p;
   return p;
 }
@@ -16341,7 +16345,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
 <link rel="stylesheet" href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260427e" id="mc-mccabe-overrides-body-last" />
-<script id="mccabe-product-room-planner-price-fix">
+<script id="mccabe-product-room-planner-price-fix" type="text/plain" data-disabled="true">
 (function () {
   var FOUR_L_DISCOUNT = 500;
 
@@ -16666,7 +16670,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
-  <script id="mccabe-room-planner-cart-price-fix">
+  <script id="mccabe-room-planner-cart-price-fix" type="text/plain" data-disabled="true">
 (function () {
   var FOUR_L_DISCOUNT = 500;
 

@@ -11616,24 +11616,6 @@ body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartbutton 
   margin: 0 0 8px !important;
 }
 
-/* Configuration caption stays on one line */
-#roomPlannerApp .configuration-caption,
-#roomPlannerApp [class*="configuration-caption"],
-#roomPlannerApp [class*="config-caption"],
-#roomPlannerApp .caption,
-.room-planner-summary .configuration-caption,
-.mccabe-room-summary .configuration-caption {
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  display: block !important;
-  max-width: 100% !important;
-  font-size: 11px !important;
-  letter-spacing: .12em !important;
-  text-transform: uppercase !important;
-  line-height: 1.4 !important;
-}
-
 /* ---------- MINI LEATHER SWATCH SCROLLBAR FIX ---------- */
 
 .leather-mini-swatches,
