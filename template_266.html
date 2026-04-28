@@ -3317,6 +3317,19 @@ boot();
         }
       }
     }
+    if (!labelNode) {
+      var siblings = qtyWrap.parentNode && qtyWrap.parentNode.children ? qtyWrap.parentNode.children : [];
+      for (var si = 0; si < siblings.length; si++) {
+        var node = siblings[si];
+        if (!node || node === qtyWrap || node === addWrap) continue;
+        var nt = (node.textContent || "").replace(/\s+/g, " ").trim();
+        if (/^(quantity|qty)\s*:?\s*$/i.test(nt) && !node.querySelector("input,select,button,#mcPlannerBtn")) {
+          labelNode = node;
+          try { qtyWrap.insertBefore(node, qtyWrap.firstChild); } catch (eLblMove) {}
+          break;
+        }
+      }
+    }
     qtyWrap.style.setProperty("display", "flex", "important");
     qtyWrap.style.setProperty("flex-direction", "column", "important");
     qtyWrap.style.setProperty("align-items", "center", "important");
@@ -4625,7 +4638,7 @@ function calculatePlannerPrice(counts, seatPrice){
     var id = keys[i];
     var qty = counts[id] || 0;
     if (id === "4L") {
-      total += qty * ((2 * seatPrice) - 500);
+      total += qty * (2 * seatPrice);
     } else {
       total += qty * seatPrice;
     }
@@ -16550,7 +16563,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       '<p><strong>Unit price:</strong> ' + formatMoney(calc.unitPrice) + '</p>' +
       '<p><strong>Physical pieces:</strong> ' + calc.physicalPieces + '</p>' +
       '<p><strong>Billable seat count:</strong> ' + calc.effectiveSeats + '</p>' +
-      (calc.fourLCount ? '<p><strong>4L loveseat discount:</strong> -' + formatMoney(calc.discount) + '</p>' : '') +
       '<p><strong>Estimated total:</strong> ' + formatMoney(calc.total) + '</p>';
   }
 
@@ -16563,8 +16575,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
     if (!unitPrice) return;
 
-    var discount = counts.fourLCount * FOUR_L_DISCOUNT;
-    var total = unitPrice * counts.effectiveSeats - discount;
+    var total = unitPrice * counts.effectiveSeats;
 
     if (total < 0) total = 0;
 
@@ -16573,7 +16584,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       physicalPieces: counts.physicalPieces,
       effectiveSeats: counts.effectiveSeats,
       fourLCount: counts.fourLCount,
-      discount: discount,
+      discount: 0,
       total: total
     };
 
@@ -16889,15 +16900,14 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     if (!unitPrice) return;
 
     var counts = getPlannerCounts();
-    var discount = counts.fourLCount * FOUR_L_DISCOUNT;
-    var total = (unitPrice * counts.effectiveSeatCount) - discount;
+    var total = (unitPrice * counts.effectiveSeatCount);
 
     window.mccabeRoomPlannerCartCalc = {
       unitPrice: unitPrice,
       effectiveSeatCount: counts.effectiveSeatCount,
       physicalPieces: counts.physicalPieces,
       fourLCount: counts.fourLCount,
-      discount: discount,
+      discount: 0,
       total: total
     };
 
