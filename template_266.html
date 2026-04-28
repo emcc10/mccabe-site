@@ -16271,6 +16271,330 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
 <link rel="stylesheet" href="v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260427e" id="mc-mccabe-overrides-body-last" />
+<script id="mccabe-product-room-planner-price-fix">
+(function () {
+  var FOUR_L_DISCOUNT = 500;
 
+  function moneyToNumber(text) {
+    if (!text) return 0;
+    var n = String(text).replace(/[^0-9.]/g, "");
+    return n ? parseFloat(n) : 0;
+  }
+
+  function formatMoney(n) {
+    return "$" + Number(n || 0).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  function isLoggedInCustomer() {
+    var bodyText = (document.body.innerText || "").toLowerCase();
+
+    if (document.querySelector('a[href*="logout"]')) return true;
+    if (document.querySelector('a[href*="myaccount"]')) return true;
+    if (bodyText.indexOf("log out") !== -1) return true;
+    if (bodyText.indexOf("my account") !== -1 && bodyText.indexOf("sign in") === -1) return true;
+
+    return false;
+  }
+
+  function getRetailUnitPrice() {
+    var selectors = [
+      "#product_productprice",
+      "#product_price",
+      ".product_productprice",
+      ".v65-productdetail-price",
+      ".productprice",
+      "[class*='productprice']",
+      "[id*='productprice']"
+    ];
+
+    for (var i = 0; i < selectors.length; i++) {
+      var el = document.querySelector(selectors[i]);
+      var val = moneyToNumber(el && el.innerText);
+      if (val > 0) return val;
+    }
+
+    return 0;
+  }
+
+  function getMemberUnitPrice() {
+    var selectors = [
+      "#memberPrice",
+      "#member-price",
+      ".member-price",
+      ".memberPrice",
+      "[class*='member'][class*='price']",
+      "[id*='member'][id*='price']"
+    ];
+
+    for (var i = 0; i < selectors.length; i++) {
+      var el = document.querySelector(selectors[i]);
+      var val = moneyToNumber(el && el.innerText);
+      if (val > 0) return val;
+    }
+
+    return getRetailUnitPrice();
+  }
+
+  function getChosenUnitPrice() {
+    return isLoggedInCustomer() ? getMemberUnitPrice() : getRetailUnitPrice();
+  }
+
+  function isFourLName(name) {
+    name = String(name || "").toLowerCase();
+    return (
+      name.indexOf("4l") !== -1 ||
+      name.indexOf("4 l") !== -1 ||
+      name.indexOf("4-l") !== -1 ||
+      name.indexOf("four l") !== -1 ||
+      name.indexOf("armless loveseat") !== -1
+    );
+  }
+
+  function normalizePlannerCounts(raw) {
+    var physicalPieces = 0;
+    var effectiveSeats = 0;
+    var fourLCount = 0;
+
+    function addPiece(name, count) {
+      count = Number(count || 0);
+      if (!count || count < 0) return;
+
+      physicalPieces += count;
+
+      if (isFourLName(name)) {
+        fourLCount += count;
+        effectiveSeats += count * 2;
+      } else {
+        effectiveSeats += count;
+      }
+    }
+
+    if (!raw) {
+      return {
+        physicalPieces: 1,
+        effectiveSeats: 1,
+        fourLCount: 0
+      };
+    }
+
+    if (raw.counts && typeof raw.counts === "object") {
+      Object.keys(raw.counts).forEach(function (key) {
+        addPiece(key, raw.counts[key]);
+      });
+    } else if (Array.isArray(raw.items)) {
+      raw.items.forEach(function (item) {
+        addPiece(item.name || item.title || item.type || item.sku || "", item.qty || item.quantity || item.count || 1);
+      });
+    } else if (Array.isArray(raw.pieces)) {
+      raw.pieces.forEach(function (item) {
+        addPiece(item.name || item.title || item.type || item.sku || "", item.qty || item.quantity || item.count || 1);
+      });
+    }
+
+    if (!physicalPieces) {
+      physicalPieces = 1;
+      effectiveSeats = 1;
+    }
+
+    return {
+      physicalPieces: physicalPieces,
+      effectiveSeats: effectiveSeats,
+      fourLCount: fourLCount
+    };
+  }
+
+  function readPlannerData() {
+    var keys = [
+      "roomPlannerData",
+      "mccabeRoomPlannerData",
+      "ROOM_PLANNER_DATA"
+    ];
+
+    for (var i = 0; i < keys.length; i++) {
+      try {
+        var raw = localStorage.getItem(keys[i]);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+    }
+
+    return null;
+  }
+
+  function getQtyInput() {
+    return (
+      document.querySelector('#v65-product-parent input[name="QTY"]') ||
+      document.querySelector('#v65-product-parent input[name="quantity"]') ||
+      document.querySelector('#v65-product-parent input[id*="qty"]') ||
+      document.querySelector('#v65-product-parent input[id*="QTY"]') ||
+      document.querySelector('input[name="QTY"]') ||
+      document.querySelector('input[name="quantity"]')
+    );
+  }
+
+  function setVolusionQuantity(effectiveSeats) {
+    var input = getQtyInput();
+    if (!input) return;
+
+    input.value = String(effectiveSeats);
+    input.setAttribute("value", String(effectiveSeats));
+
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  function upsertPlannerPriceSummary(calc) {
+    var host =
+      document.querySelector("#roomPlannerSummary") ||
+      document.querySelector(".room-planner-summary") ||
+      document.querySelector("#roomPlannerApp") ||
+      document.querySelector("#v65-product-parent");
+
+    if (!host) return;
+
+    var box = document.getElementById("mccabe-room-planner-pricing-summary");
+
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "mccabe-room-planner-pricing-summary";
+      box.className = "mccabe-room-summary";
+
+      if (host.id === "v65-product-parent") {
+        host.appendChild(box);
+      } else {
+        host.parentNode.insertBefore(box, host.nextSibling);
+      }
+    }
+
+    var priceType = isLoggedInCustomer() ? "Member price" : "Retail price";
+
+    box.innerHTML =
+      '<h3>Room Planner Summary</h3>' +
+      '<p><strong>Pricing basis:</strong> ' + priceType + '</p>' +
+      '<p><strong>Unit price:</strong> ' + formatMoney(calc.unitPrice) + '</p>' +
+      '<p><strong>Physical pieces:</strong> ' + calc.physicalPieces + '</p>' +
+      '<p><strong>Billable seat count:</strong> ' + calc.effectiveSeats + '</p>' +
+      (calc.fourLCount ? '<p><strong>4L loveseat discount:</strong> -' + formatMoney(calc.discount) + '</p>' : '') +
+      '<p><strong>Estimated total:</strong> ' + formatMoney(calc.total) + '</p>';
+  }
+
+  function recalcRoomPlannerPrice() {
+    if (!document.querySelector("#v65-product-parent")) return;
+
+    var plannerData = readPlannerData();
+    var counts = normalizePlannerCounts(plannerData);
+    var unitPrice = getChosenUnitPrice();
+
+    if (!unitPrice) return;
+
+    var discount = counts.fourLCount * FOUR_L_DISCOUNT;
+    var total = unitPrice * counts.effectiveSeats - discount;
+
+    if (total < 0) total = 0;
+
+    var calc = {
+      unitPrice: unitPrice,
+      physicalPieces: counts.physicalPieces,
+      effectiveSeats: counts.effectiveSeats,
+      fourLCount: counts.fourLCount,
+      discount: discount,
+      total: total
+    };
+
+    window.mccabeRoomPlannerPriceCalc = calc;
+
+    setVolusionQuantity(counts.effectiveSeats);
+    upsertPlannerPriceSummary(calc);
+  }
+
+  function moveQuantityAboveCartButton() {
+    var product = document.querySelector("#v65-product-parent");
+    if (!product) return;
+
+    var qty =
+      product.querySelector(".v65-productdetail-cartqty") ||
+      product.querySelector("input[name='QTY']") ||
+      product.querySelector("input[name='quantity']");
+
+    var btn =
+      product.querySelector("#btn_addtocart") ||
+      product.querySelector("input[name='btnaddtocart']") ||
+      product.querySelector("input[id*='addtocart']") ||
+      product.querySelector(".v65-productdetail-cartbutton");
+
+    if (!qty || !btn) return;
+
+    var qtyWrap = qty.classList && qty.classList.contains("v65-productdetail-cartqty")
+      ? qty
+      : qty.closest("tr, td, div, table") || qty;
+
+    var btnWrap = btn.closest("tr, td, div, table") || btn;
+
+    if (qtyWrap && btnWrap && btnWrap.parentNode && qtyWrap !== btnWrap.previousElementSibling) {
+      btnWrap.parentNode.insertBefore(qtyWrap, btnWrap);
+    }
+
+    if (qtyWrap && qtyWrap.style) {
+      qtyWrap.style.setProperty("display", "flex", "important");
+      qtyWrap.style.setProperty("justify-content", "center", "important");
+      qtyWrap.style.setProperty("align-items", "center", "important");
+      qtyWrap.style.setProperty("gap", "10px", "important");
+      qtyWrap.style.setProperty("margin", "18px auto 10px", "important");
+      qtyWrap.style.setProperty("float", "none", "important");
+      qtyWrap.style.setProperty("clear", "both", "important");
+      qtyWrap.style.setProperty("text-align", "center", "important");
+    }
+
+    if (btnWrap && btnWrap.style) {
+      btnWrap.style.setProperty("text-align", "center", "important");
+      btnWrap.style.setProperty("float", "none", "important");
+      btnWrap.style.setProperty("clear", "both", "important");
+    }
+  }
+
+  function receivePlannerMessage(event) {
+    if (!event || !event.data) return;
+
+    var data = event.data;
+
+    if (typeof data === "string") {
+      try { data = JSON.parse(data); } catch (e) {}
+    }
+
+    if (!data || typeof data !== "object") return;
+
+    if (data.type === "ROOM_PLANNER_APPLY" || data.type === "roomPlannerApply") {
+      try {
+        localStorage.setItem("roomPlannerData", JSON.stringify(data.payload || data));
+      } catch (e) {}
+
+      setTimeout(recalcRoomPlannerPrice, 50);
+      setTimeout(recalcRoomPlannerPrice, 300);
+    }
+  }
+
+  function initMcCabeProductFixes() {
+    moveQuantityAboveCartButton();
+    recalcRoomPlannerPrice();
+  }
+
+  window.addEventListener("message", receivePlannerMessage);
+  window.addEventListener("storage", recalcRoomPlannerPrice);
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initMcCabeProductFixes);
+  } else {
+    initMcCabeProductFixes();
+  }
+
+  window.addEventListener("load", function () {
+    initMcCabeProductFixes();
+    setTimeout(initMcCabeProductFixes, 300);
+    setTimeout(initMcCabeProductFixes, 1000);
+  });
+})();
+</script>
 </body>
 </html>
