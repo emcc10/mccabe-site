@@ -1,4 +1,4 @@
-name: Deploy Volusion Theme
+name: Deploy Volusion Template - Hard Verify
 
 on:
   push:
@@ -7,17 +7,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-template:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Show checked-out files and markers
+      - name: Show GitHub file being deployed
         run: |
           echo "Current branch/ref:"
-          echo "${GITHUB_REF}"
+          echo "$GITHUB_REF"
 
           echo "Current commit:"
           git log -1 --oneline
@@ -25,50 +25,19 @@ jobs:
           echo "Repo root:"
           pwd
 
-          echo "Files named template_266.html:"
-          find . -name "template_266.html" -print
+          echo "Confirm template file exists:"
+          ls -la template_266.html
 
-          echo "Files named custom-safe.css:"
-          find . -name "custom-safe.css" -print
+          echo "Local template marker search:"
+          grep -n "FINAL TEMPLATE TEST\|GITHUB TEMPLATE\|0428\|DEPLOY TEST\|MC_DEPLOY_VERIFY" template_266.html || true
 
-          echo "Files named mccabe-overrides.css:"
-          find . -name "mccabe-overrides.css" -print
-
-          echo "Template marker search:"
-          grep -Rni "GITHUB TEMPLATE\|DEPLOY TEST\|0428\|MCCABE" . --include="template_266.html" || true
-
-          echo "CSS marker search:"
-          grep -Rni "CUSTOM-SAFE\|MCCABE-OVERRIDES\|DEPLOY TEST\|0428\|MCCABE" . --include="*.css" || true
+          echo "First 20 lines of local template:"
+          head -20 template_266.html
 
       - name: Install deploy tools
         run: |
           sudo apt-get update
           sudo apt-get install -y lftp netcat-openbsd
-
-      - name: Verify local files exist
-        run: |
-          echo "Repo root:"
-          pwd
-
-          echo "Latest commit:"
-          git log -1 --oneline
-
-          if [ ! -f "template_266.html" ]; then
-            echo "ERROR: template_266.html is missing from repo root"
-            exit 1
-          fi
-
-          if [ ! -f "vspfiles/css/custom-safe.css" ]; then
-            echo "ERROR: vspfiles/css/custom-safe.css is missing"
-            exit 1
-          fi
-
-          if [ ! -f "vspfiles/templates/266/css/mccabe-overrides.css" ]; then
-            echo "ERROR: vspfiles/templates/266/css/mccabe-overrides.css is missing"
-            exit 1
-          fi
-
-          echo "Required files found."
 
       - name: Check deploy secrets
         env:
@@ -84,14 +53,13 @@ jobs:
           echo "FTP_USERNAME is set"
           echo "FTP_PASSWORD is set"
 
-      - name: Test Volusion SFTP port
+      - name: Test Volusion SFTP
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
         run: |
-          echo "Testing port 2222..."
           nc -vz -w 20 "$FTP_SERVER" 2222
 
-      - name: Deploy files to Volusion
+      - name: Upload template and verify remote copies
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -100,8 +68,8 @@ jobs:
           lftp <<EOF
           set sftp:auto-confirm yes
           set ssl:verify-certificate no
-          set net:timeout 90
-          set net:max-retries 2
+          set net:timeout 120
+          set net:max-retries 3
           set net:reconnect-interval-base 10
           set xfer:clobber yes
           set cmd:fail-exit yes
@@ -114,29 +82,23 @@ jobs:
           echo "Uploading template to /template_266.html..."
           put template_266.html -o /template_266.html
 
-          echo "Uploading custom-safe.css to /vspfiles/css/custom-safe.css..."
-          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
-
-          echo "Uploading mccabe-overrides.css to /vspfiles/templates/266/css/mccabe-overrides.css..."
-          put vspfiles/templates/266/css/mccabe-overrides.css -o /vspfiles/templates/266/css/mccabe-overrides.css
-
-          echo "Downloading uploaded files back for verification..."
+          echo "Downloading /v/template_266.html back..."
           get /v/template_266.html -o remote-v-template_266.html
+
+          echo "Downloading /template_266.html back..."
           get /template_266.html -o remote-root-template_266.html
-          get /vspfiles/css/custom-safe.css -o remote-custom-safe.css
-          get /vspfiles/templates/266/css/mccabe-overrides.css -o remote-mccabe-overrides.css
 
           bye
           EOF
 
-          echo "Remote /v/template_266.html marker check:"
-          grep -n "GITHUB TEMPLATE\|DEPLOY TEST\|0428\|MCCABE" remote-v-template_266.html | head -30 || true
+          echo "Remote /v/template_266.html marker search:"
+          grep -n "FINAL TEMPLATE TEST\|GITHUB TEMPLATE\|0428\|DEPLOY TEST\|MC_DEPLOY_VERIFY" remote-v-template_266.html || true
 
-          echo "Remote /template_266.html marker check:"
-          grep -n "GITHUB TEMPLATE\|DEPLOY TEST\|0428\|MCCABE" remote-root-template_266.html | head -30 || true
+          echo "Remote /template_266.html marker search:"
+          grep -n "FINAL TEMPLATE TEST\|GITHUB TEMPLATE\|0428\|DEPLOY TEST\|MC_DEPLOY_VERIFY" remote-root-template_266.html || true
 
-          echo "Remote custom-safe.css marker check:"
-          grep -n "CUSTOM-SAFE\|DEPLOY TEST\|0428\|MCCABE" remote-custom-safe.css | head -30 || true
+          echo "Remote /v/template_266.html first 20 lines:"
+          head -20 remote-v-template_266.html
 
-          echo "Remote mccabe-overrides.css marker check:"
-          grep -n "MCCABE-OVERRIDES\|DEPLOY TEST\|0428\|MCCABE" remote-mccabe-overrides.css | head -30 || true
+          echo "Remote /template_266.html first 20 lines:"
+          head -20 remote-root-template_266.html
