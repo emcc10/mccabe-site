@@ -11669,3 +11669,84 @@ body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartbutton 
   gap: 7px !important;
   max-width: 100% !important;
 }
+/* =========================================================
+   MCCABE FIXES — DO NOT ADD NEW UI
+   ========================================================= */
+
+/* --- Keep the existing desktop menu aligned sitewide --- */
+
+@media (min-width: 768px) {
+  body #display_menu_1,
+  body #display_menu_2,
+  body .vnav--horizontal,
+  body ul.vnav--horizontal,
+  body .vnav {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+  }
+
+  body:has(#v65-product-parent) #display_menu_1,
+  body:has(#v65-product-parent) #display_menu_2,
+  body:has(#v65-product-parent) .vnav--horizontal,
+  body:has(#v65-product-parent) ul.vnav--horizontal,
+  body:has(#v65-product-parent) .vnav {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+  }
+}
+
+/* --- Configuration caption: show full text, no ellipsis --- */
+
+#roomPlannerApp .configuration-caption,
+#roomPlannerApp [class*="configuration-caption"],
+#roomPlannerApp [class*="config-caption"],
+#roomPlannerApp .caption,
+.room-planner-summary .configuration-caption,
+.mccabe-room-summary .configuration-caption,
+[class*="configuration"] .caption,
+[class*="config"] .caption {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  max-width: none !important;
+  display: block !important;
+}
+
+/* --- Mini leather swatches: no horizontal scrollbar --- */
+
+.leather-mini-swatches,
+.mini-leather-swatches,
+#miniLeatherSwatches,
+#leatherMiniSwatches,
+.mccabe-mini-swatches,
+[class*="mini"][class*="swatch"],
+[class*="leather"][class*="swatch"] {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  max-width: 100% !important;
+}
+
+.leather-mini-swatches::-webkit-scrollbar,
+.mini-leather-swatches::-webkit-scrollbar,
+#miniLeatherSwatches::-webkit-scrollbar,
+#leatherMiniSwatches::-webkit-scrollbar,
+.mccabe-mini-swatches::-webkit-scrollbar,
+[class*="mini"][class*="swatch"]::-webkit-scrollbar,
+[class*="leather"][class*="swatch"]::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* --- Remove accidental added room planner summary boxes --- */
+
+#mccabe-room-planner-pricing-summary,
+#mccabe-room-planner-summary,
+.room-planner-pricing-summary,
+.mccabe-room-summary {
+  display: none !important;
+}
