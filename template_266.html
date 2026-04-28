@@ -3304,6 +3304,19 @@ boot();
         qtyWrap.insertBefore(labelNode, qtyWrap.firstChild);
       } catch (eQLbl) {}
     }
+    if (!labelNode) {
+      var firstNode = qtyWrap.firstChild;
+      if (firstNode && firstNode.nodeType === 3) {
+        var raw = String(firstNode.nodeValue || "");
+        if (/^\s*(quantity|qty)\s*:?\s*$/i.test(raw)) {
+          var txt = document.createElement("div");
+          txt.textContent = raw.replace(/\s+/g, " ").trim();
+          qtyWrap.insertBefore(txt, firstNode);
+          qtyWrap.removeChild(firstNode);
+          labelNode = txt;
+        }
+      }
+    }
     qtyWrap.style.setProperty("display", "flex", "important");
     qtyWrap.style.setProperty("flex-direction", "column", "important");
     qtyWrap.style.setProperty("align-items", "center", "important");
@@ -3317,10 +3330,74 @@ boot();
       qInput.style.setProperty("display", "block", "important");
       qInput.style.setProperty("text-align", "center", "important");
     }
+    if (labelNode) {
+      labelNode.style.setProperty("display", "block", "important");
+      labelNode.style.setProperty("width", "100%", "important");
+      labelNode.style.setProperty("text-align", "center", "important");
+      labelNode.style.setProperty("margin", "0 0 4px 0", "important");
+    }
+  }
+  function mcForcePdpHeaderAndPlannerPresentation() {
+    var b = document.body;
+    if (!b) return;
+    var isPdp = b.classList.contains("productdetails") || b.classList.contains("mc-product-page");
+    if (!isPdp) return;
+    var header = document.querySelector("header.header");
+    if (header) {
+      header.style.setProperty("position", "sticky", "important");
+      header.style.setProperty("top", "0", "important");
+      header.style.setProperty("z-index", "10060", "important");
+      header.style.setProperty("background-color", "#fff", "important");
+    }
+    var bars = document.querySelectorAll(".mc-header-desktop-bar[data-mc-header-bar]");
+    var i;
+    for (i = 0; i < bars.length; i++) {
+      bars[i].style.setProperty("align-items", "center", "important");
+      bars[i].style.setProperty("justify-content", "space-between", "important");
+      bars[i].style.setProperty("min-height", "48px", "important");
+    }
+    var menu = document.querySelector(".mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu");
+    if (menu) {
+      menu.style.setProperty("align-self", "center", "important");
+      menu.style.setProperty("margin-top", "0", "important");
+      menu.style.setProperty("margin-bottom", "0", "important");
+      menu.style.setProperty("transform", "none", "important");
+    }
+    var searchWrap = document.querySelector(".mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap");
+    if (searchWrap) {
+      searchWrap.style.setProperty("align-self", "center", "important");
+      searchWrap.style.setProperty("margin-top", "0", "important");
+      searchWrap.style.setProperty("margin-bottom", "0", "important");
+      searchWrap.style.setProperty("padding-top", "0", "important");
+      searchWrap.style.setProperty("padding-bottom", "0", "important");
+    }
+    var dupRows = header ? header.querySelectorAll(":scope > .header__section--middle, :scope > .mc-header-search-below-nav, :scope > .header__section.header__section--middle") : [];
+    for (i = 0; i < dupRows.length; i++) {
+      dupRows[i].style.setProperty("display", "none", "important");
+      dupRows[i].style.setProperty("visibility", "hidden", "important");
+      dupRows[i].style.setProperty("height", "0", "important");
+      dupRows[i].style.setProperty("max-height", "0", "important");
+      dupRows[i].style.setProperty("overflow", "hidden", "important");
+      dupRows[i].style.setProperty("margin", "0", "important");
+      dupRows[i].style.setProperty("padding", "0", "important");
+      dupRows[i].style.setProperty("pointer-events", "none", "important");
+    }
+    var caption = document.getElementById("mcConfigurationCaption");
+    if (caption) {
+      caption.style.setProperty("white-space", "nowrap", "important");
+      caption.style.setProperty("overflow", "hidden", "important");
+      caption.style.setProperty("text-overflow", "ellipsis", "important");
+    }
+    var strip = document.getElementById("mcLeatherSwatchStrip");
+    if (strip) {
+      strip.style.setProperty("overflow-x", "hidden", "important");
+      strip.style.setProperty("overflow-y", "hidden", "important");
+    }
   }
   try {
     window.mcReorderInlineConfigBeforeCartQty = mcReorderInlineConfigBeforeCartQty;
     window.mcNormalizeQtyBlockAboveAtc = mcNormalizeQtyBlockAboveAtc;
+    window.mcForcePdpHeaderAndPlannerPresentation = mcForcePdpHeaderAndPlannerPresentation;
   } catch (eWOrd) {}
 
   /** If inline config was mounted under the title (or wrong column), move it into the options TD. */
@@ -3335,6 +3412,7 @@ boot();
     } catch (eRel) {}
     mcReorderInlineConfigBeforeCartQty();
     mcNormalizeQtyBlockAboveAtc();
+    mcForcePdpHeaderAndPlannerPresentation();
   }
 
   function mount(opts){
@@ -3467,11 +3545,13 @@ boot();
       mcRelocateMcInlineConfigToOptionsColumn();
       mcReorderInlineConfigBeforeCartQty();
       mcNormalizeQtyBlockAboveAtc();
+      mcForcePdpHeaderAndPlannerPresentation();
       [100, 250, 500, 900, 1600, 2400, 3600, 5200].forEach(function (ms) {
         setTimeout(function () {
           mcRelocateMcInlineConfigToOptionsColumn();
           mcReorderInlineConfigBeforeCartQty();
           mcNormalizeQtyBlockAboveAtc();
+          mcForcePdpHeaderAndPlannerPresentation();
         }, ms);
       });
     } catch (eRelSched) {}
@@ -4866,6 +4946,14 @@ window.applyPlannerToPage = function (payload) {
       window.mcReorderInlineConfigBeforeCartQty();
     }
   } catch (eReApply) {}
+  try {
+    if (typeof window.mcNormalizeQtyBlockAboveAtc === "function") {
+      window.mcNormalizeQtyBlockAboveAtc();
+    }
+    if (typeof window.mcForcePdpHeaderAndPlannerPresentation === "function") {
+      window.mcForcePdpHeaderAndPlannerPresentation();
+    }
+  } catch (eReApply2) {}
 };
 
 function mcBuildPlannerConfigFieldText(payload) {
