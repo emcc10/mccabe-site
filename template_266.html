@@ -3277,8 +3277,50 @@ boot();
       anchor.parentNode.insertBefore(panel, anchor);
     } catch (eOrd) {}
   }
+  function mcNormalizeQtyBlockAboveAtc() {
+    var root = document.getElementById("v65-product-parent") || document.getElementById("content_area");
+    if (!root) return;
+    var offers = root.querySelector('[itemprop="offers"]') || root;
+    var qtyWrap =
+      offers.querySelector(".v65-productdetail-cartqty") ||
+      root.querySelector(".v65-productdetail-cartqty");
+    var addWrap =
+      offers.querySelector(".v65-product-addtocart") ||
+      root.querySelector(".v65-product-addtocart");
+    if (!qtyWrap || !addWrap || !qtyWrap.parentNode) return;
+    try {
+      if (qtyWrap.nextElementSibling !== addWrap) qtyWrap.parentNode.insertBefore(qtyWrap, addWrap);
+    } catch (eQMove) {}
+    var labelNode = null;
+    var sib = qtyWrap.previousElementSibling;
+    if (sib) {
+      var t = (sib.textContent || "").replace(/\s+/g, " ").trim();
+      if (/^(quantity|qty)\s*:?\s*$/i.test(t) && !sib.querySelector("input,select,button,#mcPlannerBtn")) {
+        labelNode = sib;
+      }
+    }
+    if (labelNode) {
+      try {
+        qtyWrap.insertBefore(labelNode, qtyWrap.firstChild);
+      } catch (eQLbl) {}
+    }
+    qtyWrap.style.setProperty("display", "flex", "important");
+    qtyWrap.style.setProperty("flex-direction", "column", "important");
+    qtyWrap.style.setProperty("align-items", "center", "important");
+    qtyWrap.style.setProperty("justify-content", "center", "important");
+    qtyWrap.style.setProperty("text-align", "center", "important");
+    qtyWrap.style.setProperty("width", "100%", "important");
+    qtyWrap.style.setProperty("margin", "0 auto 10px auto", "important");
+    var qInput = qtyWrap.querySelector('input[name^="QTY."], input[name*="qty" i], input[name*="quantity" i], select[name*="qty" i], select[name*="quantity" i]');
+    if (qInput) {
+      qInput.style.setProperty("margin", "6px auto 0 auto", "important");
+      qInput.style.setProperty("display", "block", "important");
+      qInput.style.setProperty("text-align", "center", "important");
+    }
+  }
   try {
     window.mcReorderInlineConfigBeforeCartQty = mcReorderInlineConfigBeforeCartQty;
+    window.mcNormalizeQtyBlockAboveAtc = mcNormalizeQtyBlockAboveAtc;
   } catch (eWOrd) {}
 
   /** If inline config was mounted under the title (or wrong column), move it into the options TD. */
@@ -3292,6 +3334,7 @@ boot();
       optTd.insertBefore(panel, optTd.firstChild);
     } catch (eRel) {}
     mcReorderInlineConfigBeforeCartQty();
+    mcNormalizeQtyBlockAboveAtc();
   }
 
   function mount(opts){
@@ -3423,10 +3466,12 @@ boot();
     try {
       mcRelocateMcInlineConfigToOptionsColumn();
       mcReorderInlineConfigBeforeCartQty();
+      mcNormalizeQtyBlockAboveAtc();
       [100, 250, 500, 900, 1600, 2400, 3600, 5200].forEach(function (ms) {
         setTimeout(function () {
           mcRelocateMcInlineConfigToOptionsColumn();
           mcReorderInlineConfigBeforeCartQty();
+          mcNormalizeQtyBlockAboveAtc();
         }, ms);
       });
     } catch (eRelSched) {}
@@ -4490,6 +4535,9 @@ window.getVolusionAddToCartSeatPrice = getVolusionAddToCartSeatPrice;
 /* tryReadHowToGetSalePrice + extractHowToGetSalePriceFromScripts: assigned on window right after define (above) */
 function getMemberPlannerSeatPriceForCalc(){
   var state = window.__mcMemberPricing;
+  if (document.body && document.body.classList.contains("mc-member-logged-in")) {
+    if (state && state.memberSeatPrice > 0) return state.memberSeatPrice;
+  }
   if (!state || !state.unlocked) return 0;
   if (state.delta != null) {
     var publicSeatPrice = 0;
@@ -4501,6 +4549,9 @@ function getMemberPlannerSeatPriceForCalc(){
   return state.memberSeatPrice || 0;
 }
 function getPlannerBaseSeatPriceForCalc(){
+  if (window.__mcMemberPricing && !window.__mcMemberPricing.checked) {
+    try { detectMemberPricingState(); } catch (eDetect) {}
+  }
   var memberPrice = getMemberPlannerSeatPriceForCalc();
   if (memberPrice > 0) return memberPrice;
   if (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) {
@@ -4581,7 +4632,10 @@ function mcComputePlannerConfigurationTotal(counts){
     }
   }
   if (!hasPiece) return 0;
-  var u = typeof mcGetPlannerPerSeatUnitFromVolusion === "function" ? mcGetPlannerPerSeatUnitFromVolusion(document) : 0;
+  var u = typeof getPlannerBaseSeatPriceForCalc === "function" ? getPlannerBaseSeatPriceForCalc() : 0;
+  if (!(u > 0) && typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
+    u = mcGetPlannerPerSeatUnitFromVolusion(document);
+  }
   if (!(u > 0)) return 0;
   return Number(calculatePlannerPrice(counts, u)) || 0;
 }

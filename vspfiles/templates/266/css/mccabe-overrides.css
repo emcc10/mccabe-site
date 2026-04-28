@@ -450,3 +450,82 @@ html body.mc-product-page #mcPlannerBtn .mc-btn-icon,
 html body.mc-product-page #mcProductSummaryBtn .mc-btn-icon {
   flex-shrink: 0 !important;
 }
+
+/* Targeted PDP cleanup (no structural redesign) */
+html body.productdetails #v65-product-parent .v65-productdetail-cartqty,
+html body.productdetails #content_area .v65-productdetail-cartqty,
+html body.mc-product-page #v65-product-parent .v65-productdetail-cartqty,
+html body.mc-product-page #content_area .v65-productdetail-cartqty {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  margin: 0 auto 10px auto !important;
+}
+
+html body.productdetails #v65-product-parent .v65-productdetail-cartqty input[name^="QTY."],
+html body.productdetails #content_area .v65-productdetail-cartqty input[name^="QTY."],
+html body.mc-product-page #v65-product-parent .v65-productdetail-cartqty input[name^="QTY."],
+html body.mc-product-page #content_area .v65-productdetail-cartqty input[name^="QTY."] {
+  margin: 6px auto 0 auto !important;
+}
+
+html body.productdetails #mcConfigurationBlock,
+html body.mc-product-page #mcConfigurationBlock {
+  border: 1px solid #e2dfd8 !important;
+  border-radius: 2px !important;
+  padding: 14px 16px !important;
+  background: #fff !important;
+}
+
+html body.productdetails #mcConfigurationBlock .mc-configuration-rh__heading,
+html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__heading {
+  font-weight: 500 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 10px !important;
+}
+
+html body.productdetails #mcConfigurationCaption,
+html body.mc-product-page #mcConfigurationCaption {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.35 !important;
+}
+
+html body.productdetails #mcConfigurationBlock .mc-configuration-rh__caption,
+html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__caption,
+html body.productdetails #mcConfigurationBlock .mc-configuration-rh__pieces,
+html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__pieces {
+  font-weight: 300 !important;
+  letter-spacing: 0.03em !important;
+}
+
+html body.productdetails #mcLeatherSwatchStrip,
+html body.mc-product-page #mcLeatherSwatchStrip {
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+}
+
+html body.productdetails #mcLeatherSwatchStrip::-webkit-scrollbar,
+html body.mc-product-page #mcLeatherSwatchStrip::-webkit-scrollbar {
+  display: none !important;
+}
+
+@media (min-width: 992px) {
+  html body.productdetails .mc-header-desktop-bar[data-mc-header-bar],
+  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] {
+    min-height: 48px !important;
+    align-items: center !important;
+  }
+  html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    transform: none !important;
+  }
+}
