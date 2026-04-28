@@ -125,10 +125,10 @@ jobs:
 
           echo "Uploading mccabes-overrides.css with retries..."
           for i in 1 2 3 4 5; do
-            put vspfiles/templates/266/css/mccabes-overrides.css -o /vspfiles/templates/266/css/mccabes-overrides.css
+            put vspfiles/templates/266/css/mccabes-overrides.css -o /vspfiles/css/mccabes-overrides.css
             if [ $? -eq 0 ]; then
               echo "mccabes-overrides.css upload succeeded."
-              break
+            break
             fi
             echo "mccabes-overrides.css upload failed, retry $i..."
             sleep 15
