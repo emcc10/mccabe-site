@@ -11455,4 +11455,217 @@ body.mc-product-page #mcProductSummaryBtn {
   padding-left: 10px !important;
   padding-right: 10px !important;
 }
+/* =========================================================
+   MCCABE PRODUCT PAGE ALIGNMENT + RH STYLE FIXES
+   Add to very bottom of custom-safe.css
+   ========================================================= */
 
+/* ---------- MAIN MENU: LOCK VERTICAL POSITION SITEWIDE ---------- */
+
+body:not(.homepage) .vnav--horizontal,
+body:not(.homepage) ul.vnav--horizontal,
+body:not(.homepage) .vnav,
+body:not(.homepage) #vnav,
+body:not(.homepage) #display_menu_1,
+body:not(.homepage) #display_menu_2 {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  top: 0 !important;
+  transform: none !important;
+}
+
+/* Product pages specifically were dropping the menu lower */
+body:has(#v65-product-parent) .vnav--horizontal,
+body:has(#v65-product-parent) ul.vnav--horizontal,
+body:has(#v65-product-parent) .vnav,
+body:has(#v65-product-parent) #vnav,
+body:has(#v65-product-parent) #display_menu_1,
+body:has(#v65-product-parent) #display_menu_2 {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  top: 0 !important;
+  transform: none !important;
+}
+
+/* If the menu is inside the hero/header wrapper, prevent product page offset */
+body:has(#v65-product-parent) header,
+body:has(#v65-product-parent) .header,
+body:has(#v65-product-parent) #header,
+body:has(#v65-product-parent) .site-header,
+body:has(#v65-product-parent) #site-header {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* ---------- QUANTITY ABOVE ADD TO CART ---------- */
+
+body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartqty,
+body:has(#v65-product-parent) #v65-product-parent .productqty,
+body:has(#v65-product-parent) #v65-product-parent .quantity,
+body:has(#v65-product-parent) #v65-product-parent [class*="qty"],
+body:has(#v65-product-parent) #v65-product-parent [id*="qty"] {
+  text-align: center !important;
+}
+
+/* Quantity row centered above Add to Cart */
+body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartqty {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  margin: 18px auto 10px !important;
+  float: none !important;
+  clear: both !important;
+}
+
+/* Quantity label */
+body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartqty label,
+body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartqty span,
+body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartqty td {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  letter-spacing: .16em !important;
+  text-transform: uppercase !important;
+  font-weight: 400 !important;
+  color: #555 !important;
+  white-space: nowrap !important;
+}
+
+/* Quantity input */
+body:has(#v65-product-parent) #v65-product-parent input[name="QTY"],
+body:has(#v65-product-parent) #v65-product-parent input[name="quantity"],
+body:has(#v65-product-parent) #v65-product-parent input[id*="qty"],
+body:has(#v65-product-parent) #v65-product-parent input[id*="QTY"] {
+  width: 58px !important;
+  height: 38px !important;
+  text-align: center !important;
+  margin: 0 !important;
+  border: 1px solid #ccc !important;
+  border-radius: 0 !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+}
+
+/* Add to cart button centered below quantity */
+body:has(#v65-product-parent) #v65-product-parent #btn_addtocart,
+body:has(#v65-product-parent) #v65-product-parent input[name="btnaddtocart"],
+body:has(#v65-product-parent) #v65-product-parent input[id*="addtocart"],
+body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartbutton {
+  display: block !important;
+  margin: 10px auto 0 !important;
+  float: none !important;
+  clear: both !important;
+}
+
+/* ---------- ROOM PLANNER / PRODUCT SUMMARY RH STYLE ---------- */
+
+#mccabe-room-planner-summary,
+#roomPlannerSummary,
+.room-planner-summary,
+#roomPlannerApp .summary,
+#roomPlannerApp .planner-summary,
+.room-planner-card,
+.product-summary-box,
+.mccabe-product-summary,
+.mccabe-room-summary {
+  font-family: Inter, Arial, sans-serif !important;
+  color: #222 !important;
+  background: #fff !important;
+  border: 1px solid #ddd !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 18px 20px !important;
+  margin: 18px 0 !important;
+  letter-spacing: .01em !important;
+}
+
+#mccabe-room-planner-summary h3,
+#roomPlannerSummary h3,
+.room-planner-summary h3,
+#roomPlannerApp h3,
+.room-planner-card h3,
+.product-summary-box h3,
+.mccabe-product-summary h3,
+.mccabe-room-summary h3 {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: .18em !important;
+  text-transform: uppercase !important;
+  line-height: 1.3 !important;
+  margin: 0 0 12px !important;
+  color: #111 !important;
+}
+
+#mccabe-room-planner-summary p,
+#roomPlannerSummary p,
+.room-planner-summary p,
+#roomPlannerApp p,
+.room-planner-card p,
+.product-summary-box p,
+.mccabe-product-summary p,
+.mccabe-room-summary p {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 300 !important;
+  letter-spacing: .03em !important;
+  line-height: 1.65 !important;
+  color: #444 !important;
+  margin: 0 0 8px !important;
+}
+
+/* Configuration caption stays on one line */
+#roomPlannerApp .configuration-caption,
+#roomPlannerApp [class*="configuration-caption"],
+#roomPlannerApp [class*="config-caption"],
+#roomPlannerApp .caption,
+.room-planner-summary .configuration-caption,
+.mccabe-room-summary .configuration-caption {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
+  max-width: 100% !important;
+  font-size: 11px !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+  line-height: 1.4 !important;
+}
+
+/* ---------- MINI LEATHER SWATCH SCROLLBAR FIX ---------- */
+
+.leather-mini-swatches,
+.mini-leather-swatches,
+#miniLeatherSwatches,
+#leatherMiniSwatches,
+.mccabe-mini-swatches,
+[class*="mini"][class*="swatch"],
+[class*="leather"][class*="swatch"] {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.leather-mini-swatches::-webkit-scrollbar,
+.mini-leather-swatches::-webkit-scrollbar,
+#miniLeatherSwatches::-webkit-scrollbar,
+#leatherMiniSwatches::-webkit-scrollbar,
+.mccabe-mini-swatches::-webkit-scrollbar,
+[class*="mini"][class*="swatch"]::-webkit-scrollbar,
+[class*="leather"][class*="swatch"]::-webkit-scrollbar {
+  display: none !important;
+}
+
+.leather-mini-swatches,
+.mini-leather-swatches,
+#miniLeatherSwatches,
+#leatherMiniSwatches,
+.mccabe-mini-swatches {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+  max-width: 100% !important;
+}
