@@ -37,8 +37,8 @@ jobs:
             exit 1
           fi
 
-          if [ ! -f "vspfiles/templates/266/css/mccabes-overrides.css" ]; then
-            echo "ERROR: vspfiles/templates/266/css/mccabes-overrides.css is missing"
+          if [ ! -f "vspfiles/templates/266/css/mccabe-overrides.css" ]; then
+            echo "ERROR: vspfiles/templates/266/css/mccabe-overrides.css is missing"
             exit 1
           fi
 
@@ -123,14 +123,14 @@ jobs:
             sleep 15
           done
 
-          echo "Uploading mccabes-overrides.css with retries..."
+          echo "Uploading mccabe-overrides.css with retries..."
           for i in 1 2 3 4 5; do
-            put vspfiles/templates/266/css/mccabes-overrides.css -o /vspfiles/css/mccabes-overrides.css
+            put vspfiles/templates/266/css/mccabe-overrides.css -o /vspfiles/templates/266/css/mccabe-overrides.css
             if [ $? -eq 0 ]; then
-              echo "mccabes-overrides.css upload succeeded."
-            break
+              echo "mccabe-overrides.css upload succeeded."
+              break
             fi
-            echo "mccabes-overrides.css upload failed, retry $i..."
+            echo "mccabe-overrides.css upload failed, retry $i..."
             sleep 15
           done
           set cmd:fail-exit yes
