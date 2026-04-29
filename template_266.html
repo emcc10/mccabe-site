@@ -3588,7 +3588,7 @@ boot();
   } catch (eWOrd) {}
 
   function mcBootPdpQtyAndHeader() {
-    /* PDP header: #mc-final-pdp-menu-qty-fix. Quantity: #mc-final-quantity-under-config-script */
+    /* PDP UI: #mc-final-header-qty-ui-fix + #mc-final-header-search-qty-script */
   }
   try {
     if (document.readyState === "loading") {
@@ -17255,211 +17255,109 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
-<style id="mc-final-pdp-menu-qty-fix">
-  /* Keep existing desktop menu/header from dropping on PDPs */
-  @media (min-width: 992px) {
-    html body.productdetails header.header,
-    html body.mc-product-page header.header,
-    html body.mc-theater-seating-pdp header.header,
-    html.mc-paragon-pdp body header.header,
-    html.mc-url-looks-like-pdp body.is-home header.header {
-      padding-top: 0 !important;
-      margin-top: 0 !important;
-    }
-
-    html body.productdetails .mc-header-desktop-bar[data-mc-header-bar],
-    html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar],
-    html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar],
-    html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar],
-    html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] {
-      margin-top: 0 !important;
-      padding-top: clamp(8px, 1.5vw, 12px) !important;
-      padding-bottom: clamp(8px, 1.5vw, 12px) !important;
-      top: 0 !important;
-      transform: none !important;
-      align-items: center !important;
-    }
-
-    html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-    html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-    html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-    html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-    html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
-      margin-top: 0 !important;
-      padding-top: 0 !important;
-      top: 0 !important;
-      transform: none !important;
-      align-self: center !important;
-    }
-  }
-
-  /* Quantity row directly above Add to Cart */
-  #mc-volusion-qty-above-cart {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 10px !important;
-    width: 100% !important;
-    margin: 14px auto 10px !important;
-    padding: 0 !important;
-    text-align: center !important;
-    clear: both !important;
-    float: none !important;
-    box-sizing: border-box !important;
-  }
-
-  #mc-volusion-qty-above-cart label {
-    margin: 0 !important;
-    padding: 0 !important;
-    font-family: Inter, Arial, sans-serif !important;
-    font-size: 11px !important;
-    font-weight: 400 !important;
-    letter-spacing: .16em !important;
-    line-height: 1 !important;
-    text-transform: uppercase !important;
-    color: #555 !important;
-    white-space: nowrap !important;
-  }
-
-  #mc-volusion-qty-above-cart input {
-    width: 58px !important;
-    height: 38px !important;
-    text-align: center !important;
-    margin: 0 !important;
-    padding: 0 6px !important;
-    border: 1px solid #bbb !important;
-    border-radius: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  .mc-cart-button-row-centered {
-    width: 100% !important;
-    text-align: center !important;
-    clear: both !important;
-    float: none !important;
-  }
-</style>
-
-<script id="mc-final-pdp-qty-position-script">
-(function () {
-  function isPdp() {
-    return !!(
-      document.querySelector("#v65-product-parent") ||
-      document.body.classList.contains("productdetails") ||
-      document.querySelector('input[name="ProductCode"]')
-    );
-  }
-
-  function findQtyInput() {
-    return (
-      document.querySelector('#v65-product-parent input[name="QTY"]') ||
-      document.querySelector('#v65-product-parent input[name="Qty"]') ||
-      document.querySelector('#v65-product-parent input[name="qty"]') ||
-      document.querySelector('#v65-product-parent input[name="quantity"]') ||
-      document.querySelector('#v65-product-parent input[id*="qty" i]') ||
-      document.querySelector('#v65-product-parent input[id*="quantity" i]')
-    );
-  }
-
-  function findAddToCartButton() {
-    var root = document.querySelector("#v65-product-parent") || document;
-    var candidates = Array.from(root.querySelectorAll("input, button, a"));
-
-    return candidates.find(function (el) {
-      var text = String(el.value || el.innerText || el.textContent || "").toLowerCase();
-      var id = String(el.id || "").toLowerCase();
-      var name = String(el.name || "").toLowerCase();
-
-      return (
-        name === "btnaddtocart" ||
-        id.indexOf("addtocart") !== -1 ||
-        text.indexOf("add to cart") !== -1
-      );
-    });
-  }
-
-  function closestUsefulRow(el) {
-    if (!el) return null;
-    return el.closest("tr, td, table, div, p") || el.parentElement || el;
-  }
-
-  function moveQty() {
-    if (!isPdp()) return;
-
-    var qty = findQtyInput();
-    var addBtn = findAddToCartButton();
-
-    if (!qty || !addBtn) return;
-
-    var addRow = closestUsefulRow(addBtn);
-    if (!addRow || !addRow.parentNode) return;
-
-    var oldQtyRow = closestUsefulRow(qty);
-
-    var wrap = document.getElementById("mc-volusion-qty-above-cart");
-    if (!wrap) {
-      wrap = document.createElement("div");
-      wrap.id = "mc-volusion-qty-above-cart";
-    }
-
-    var label = wrap.querySelector("label");
-    if (!label) {
-      label = document.createElement("label");
-      label.textContent = "Quantity";
-      wrap.appendChild(label);
-    }
-
-    if (!qty.id) qty.id = "mc-volusion-qty-input";
-    label.setAttribute("for", qty.id);
-
-    wrap.appendChild(qty);
-
-    if (oldQtyRow && oldQtyRow !== qty && oldQtyRow !== wrap && oldQtyRow.childElementCount === 0) {
-      try { oldQtyRow.remove(); } catch (e) {}
-    }
-
-    addRow.parentNode.insertBefore(wrap, addRow);
-    addRow.classList.add("mc-cart-button-row-centered");
-
-    wrap.style.setProperty("display", "flex", "important");
-    wrap.style.setProperty("justify-content", "center", "important");
-    wrap.style.setProperty("align-items", "center", "important");
-    wrap.style.setProperty("gap", "10px", "important");
-    wrap.style.setProperty("margin", "14px auto 10px", "important");
-
-    addRow.style.setProperty("text-align", "center", "important");
-    addRow.style.setProperty("float", "none", "important");
-    addRow.style.setProperty("clear", "both", "important");
-  }
-
-  function run() {
-    moveQty();
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", run);
-  } else {
-    run();
-  }
-
-  window.addEventListener("load", function () {
-    run();
-    setTimeout(run, 300);
-    setTimeout(run, 1000);
-  });
-})();
-</script>
-<style id="mc-final-static-menu-search-icon-fix">
+<style id="mc-final-header-qty-ui-fix">
   /* =========================================================
-     FINAL HEADER FIX
-     Main menu is centered. Search is removed from menu flow.
-     Search collapses to icon and expands without moving menu.
+     FINAL HEADER + QUANTITY + PRODUCT UI FIX
+     Existing menu only. Existing quantity input only.
      ========================================================= */
+
+  /* ---------- GLOBAL PRODUCT PAGE TYPOGRAPHY ---------- */
+
+  body.mc-product-page #content_area,
+  body.productdetails #content_area,
+  body.mc-theater-seating-pdp #content_area,
+  html.mc-paragon-pdp body #content_area {
+    font-family: Inter, Arial, sans-serif !important;
+    color: #222 !important;
+  }
+
+  body.mc-product-page #content_area *,
+  body.productdetails #content_area *,
+  body.mc-theater-seating-pdp #content_area *,
+  html.mc-paragon-pdp body #content_area * {
+    font-family: Inter, Arial, sans-serif !important;
+  }
+
+  body.mc-product-page #content_area label,
+  body.productdetails #content_area label,
+  body.mc-product-page #content_area .mc-option-accordion__label,
+  body.mc-product-page #content_area .mc-option-accordion__header,
+  body.mc-product-page #content_area .mc-option-accordion__selected,
+  body.mc-product-page #content_area [class*="configuration"],
+  body.mc-product-page #content_area [class*="summary"],
+  body.mc-product-page #content_area [class*="member"],
+  body.mc-product-page #content_area [class*="login"] {
+    font-family: Inter, Arial, sans-serif !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.08em !important;
+    color: #333 !important;
+  }
+
+  body.mc-product-page #content_area p,
+  body.productdetails #content_area p,
+  body.mc-product-page #content_area .ProductDescription,
+  body.mc-product-page #content_area #mcProductSummaryRowStandalone,
+  body.mc-product-page #content_area .mc-product-summary {
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 300 !important;
+    letter-spacing: 0.03em !important;
+    line-height: 1.65 !important;
+    color: #444 !important;
+  }
+
+  /* ---------- BUTTON CONSISTENCY ---------- */
+
+  body.mc-product-page #content_area button,
+  body.mc-product-page #content_area input[type="button"],
+  body.mc-product-page #content_area input[type="submit"],
+  body.productdetails #content_area button,
+  body.productdetails #content_area input[type="button"],
+  body.productdetails #content_area input[type="submit"],
+  body.mc-product-page #content_area .mc-option-accordion__header,
+  body.mc-product-page #content_area .mc-option-accordion__selected {
+    min-height: 44px !important;
+    height: 44px !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+  }
+
+  body.mc-product-page #content_area .mc-option-accordion__header,
+  body.mc-product-page #content_area .mc-option-accordion__selected {
+    width: 100% !important;
+  }
+
+  /* ---------- CONFIGURATION CAPTION: FULL TEXT ---------- */
+
+  body.mc-product-page #content_area [class*="configuration"],
+  body.productdetails #content_area [class*="configuration"],
+  body.mc-product-page #content_area [class*="config"],
+  body.productdetails #content_area [class*="config"],
+  body.mc-product-page #content_area [class*="caption"],
+  body.productdetails #content_area [class*="caption"] {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    max-width: none !important;
+  }
+
+  /* ---------- HEADER: CENTER MENU, SEARCH/ACCOUNT/CART ON RIGHT ---------- */
 
   @media (min-width: 992px) {
     header.header {
       position: relative !important;
+      margin-top: 0 !important;
+      padding-top: 0 !important;
     }
 
     header.header .mc-header-desktop-bar[data-mc-header-bar] {
@@ -17469,12 +17367,28 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       justify-content: center !important;
       width: 100% !important;
       max-width: 100% !important;
-      min-height: 42px !important;
+      min-height: 44px !important;
       margin: 0 !important;
-      padding: 8px max(48px, 7vw) !important;
+      padding: 8px 72px !important;
       box-sizing: border-box !important;
-      transform: none !important;
       top: 0 !important;
+      transform: none !important;
+    }
+
+    body.productdetails header.header .mc-header-desktop-bar[data-mc-header-bar],
+    body.mc-product-page header.header .mc-header-desktop-bar[data-mc-header-bar],
+    body.mc-theater-seating-pdp header.header .mc-header-desktop-bar[data-mc-header-bar],
+    html.mc-paragon-pdp body header.header .mc-header-desktop-bar[data-mc-header-bar],
+    html.mc-url-looks-like-pdp body.is-home header.header .mc-header-desktop-bar[data-mc-header-bar] {
+      position: relative !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-height: 44px !important;
+      margin: 0 !important;
+      padding: 8px 72px !important;
+      top: 0 !important;
+      transform: none !important;
     }
 
     header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
@@ -17482,15 +17396,15 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       z-index: 2 !important;
       flex: 0 1 auto !important;
       width: auto !important;
-      max-width: calc(100% - 260px) !important;
+      max-width: calc(100vw - 360px) !important;
       margin: 0 auto !important;
       padding: 0 !important;
       display: flex !important;
-      justify-content: center !important;
       align-items: center !important;
+      justify-content: center !important;
       align-self: center !important;
-      transform: none !important;
       top: 0 !important;
+      transform: none !important;
     }
 
     header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu ul,
@@ -17501,8 +17415,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       justify-content: center !important;
       margin: 0 !important;
       padding: 0 !important;
-      transform: none !important;
       top: 0 !important;
+      transform: none !important;
     }
 
     header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu li,
@@ -17511,54 +17425,30 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       padding-top: 0 !important;
       line-height: 1 !important;
       vertical-align: middle !important;
-      transform: none !important;
       top: 0 !important;
+      transform: none !important;
     }
 
-    /* Product pages must use the exact same row geometry as all other pages */
-    body.productdetails header.header .mc-header-desktop-bar[data-mc-header-bar],
-    body.mc-product-page header.header .mc-header-desktop-bar[data-mc-header-bar],
-    body.mc-theater-seating-pdp header.header .mc-header-desktop-bar[data-mc-header-bar],
-    html.mc-paragon-pdp body header.header .mc-header-desktop-bar[data-mc-header-bar],
-    html.mc-url-looks-like-pdp body.is-home header.header .mc-header-desktop-bar[data-mc-header-bar] {
-      justify-content: center !important;
-      align-items: center !important;
-      min-height: 42px !important;
-      margin: 0 !important;
-      padding: 8px max(48px, 7vw) !important;
-      transform: none !important;
-      top: 0 !important;
-    }
-
-    body.productdetails header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-    body.mc-product-page header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-    body.mc-theater-seating-pdp header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-    html.mc-paragon-pdp body header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-    html.mc-url-looks-like-pdp body.is-home header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
-      align-self: center !important;
-      margin: 0 auto !important;
-      padding: 0 !important;
-      transform: none !important;
-      top: 0 !important;
-    }
-
-    /* Search/cart lives on the right and no longer affects centered menu */
+    /* This is the real fix: search/cart no longer consumes flex space. */
     header.header .mc-header-search-cart-wrap {
       position: absolute !important;
-      right: max(24px, 3vw) !important;
+      right: 36px !important;
       top: 50% !important;
       transform: translateY(-50%) !important;
-      z-index: 5 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: flex-end !important;
-      gap: 12px !important;
+      z-index: 9 !important;
       width: auto !important;
       min-width: 0 !important;
       max-width: none !important;
+      height: 40px !important;
       margin: 0 !important;
       padding: 0 !important;
       border: 0 !important;
+      display: flex !important;
+      flex: 0 0 auto !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      gap: 12px !important;
       background: transparent !important;
       box-sizing: border-box !important;
     }
@@ -17569,60 +17459,85 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     html.mc-paragon-pdp body header.header .mc-header-search-cart-wrap,
     html.mc-url-looks-like-pdp body.is-home header.header .mc-header-search-cart-wrap {
       position: absolute !important;
-      right: max(24px, 3vw) !important;
+      right: 36px !important;
       top: 50% !important;
       transform: translateY(-50%) !important;
       margin: 0 !important;
       padding: 0 !important;
+      width: auto !important;
+      height: 40px !important;
       align-self: auto !important;
     }
 
-    /* Collapse search to icon */
-    header.header .mc-header-search-cart-wrap .header__section--middle,
     header.header .mc-header-search-cart-wrap .mc-header-search-below-nav,
+    header.header .mc-header-search-cart-wrap .header__section--middle,
     header.header .mc-header-search-cart-wrap .collapsing-search,
     header.header .mc-header-search-cart-wrap #collapsingSearch {
-      width: 34px !important;
-      min-width: 34px !important;
-      max-width: 34px !important;
-      height: 34px !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      height: 40px !important;
       margin: 0 !important;
       padding: 0 !important;
-      overflow: visible !important;
       border: 0 !important;
       background: transparent !important;
       box-shadow: none !important;
+      flex: 0 0 auto !important;
       transform: none !important;
-      transition: width 180ms ease, max-width 180ms ease !important;
-    }
-
-    /* Expanded search stays right-aligned and opens left */
-    html.mc-search-open header.header .mc-header-search-cart-wrap .header__section--middle,
-    html.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-search-below-nav,
-    html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search,
-    html.mc-search-open header.header .mc-header-search-cart-wrap #collapsingSearch,
-    body.mc-search-open header.header .mc-header-search-cart-wrap .header__section--middle,
-    body.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-search-below-nav,
-    body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search,
-    body.mc-search-open header.header .mc-header-search-cart-wrap #collapsingSearch {
-      width: 220px !important;
-      min-width: 220px !important;
-      max-width: 220px !important;
+      overflow: visible !important;
     }
 
     header.header .mc-header-search-cart-wrap .collapsing-search__form,
     header.header .mc-header-search-cart-wrap .collapsing-search__form .container,
     header.header .mc-header-search-cart-wrap .collapsing-search__form .row {
-      width: 100% !important;
-      max-width: 100% !important;
+      width: auto !important;
+      max-width: none !important;
+      height: 40px !important;
       margin: 0 !important;
       padding: 0 !important;
       border: 0 !important;
       background: transparent !important;
       box-shadow: none !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
     }
 
-    /* Hide old visible “Search” label unless open */
+    /* Kill the stray always-visible search line. */
+    header.header .mc-header-search-cart-wrap input[type="text"],
+    header.header .mc-header-search-cart-wrap input[type="search"],
+    header.header .mc-header-search-cart-wrap #search {
+      width: 0 !important;
+      max-width: 0 !important;
+      min-width: 0 !important;
+      height: 34px !important;
+      opacity: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: 0 !important;
+      border-bottom: 1px solid #aaa !important;
+      background: transparent !important;
+      outline: none !important;
+      font-family: Inter, Arial, sans-serif !important;
+      font-size: 12px !important;
+      letter-spacing: 0.06em !important;
+      color: #111 !important;
+      transition: width 180ms ease, max-width 180ms ease, opacity 120ms ease !important;
+    }
+
+    html.mc-search-open header.header .mc-header-search-cart-wrap input[type="text"],
+    html.mc-search-open header.header .mc-header-search-cart-wrap input[type="search"],
+    html.mc-search-open header.header .mc-header-search-cart-wrap #search,
+    body.mc-search-open header.header .mc-header-search-cart-wrap input[type="text"],
+    body.mc-search-open header.header .mc-header-search-cart-wrap input[type="search"],
+    body.mc-search-open header.header .mc-header-search-cart-wrap #search {
+      width: 190px !important;
+      max-width: 190px !important;
+      opacity: 1 !important;
+      padding: 0 4px !important;
+    }
+
+    /* Hide visible Search label. */
     header.header .mc-header-search-cart-wrap label,
     header.header .mc-header-search-cart-wrap .search-label,
     header.header .mc-header-search-cart-wrap [for="search"] {
@@ -17636,45 +17551,15 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       pointer-events: none !important;
     }
 
-    header.header .mc-header-search-cart-wrap input[type="text"],
-    header.header .mc-header-search-cart-wrap input[type="search"],
-    header.header .mc-header-search-cart-wrap #search {
-      width: 0 !important;
-      max-width: 0 !important;
-      height: 32px !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      opacity: 0 !important;
+    /* Search icon should look like account/cart icons. */
+    #mc-search-icon-button {
+      width: 42px !important;
+      height: 42px !important;
+      min-width: 42px !important;
+      border-radius: 50% !important;
       border: 0 !important;
-      border-bottom: 1px solid #bdbdbd !important;
-      background: transparent !important;
-      font-family: Inter, Arial, sans-serif !important;
-      font-size: 12px !important;
-      letter-spacing: 0.06em !important;
-      color: #111 !important;
-      outline: none !important;
-      transition: width 180ms ease, max-width 180ms ease, opacity 120ms ease !important;
-    }
-
-    html.mc-search-open header.header .mc-header-search-cart-wrap input[type="text"],
-    html.mc-search-open header.header .mc-header-search-cart-wrap input[type="search"],
-    html.mc-search-open header.header .mc-header-search-cart-wrap #search,
-    body.mc-search-open header.header .mc-header-search-cart-wrap input[type="text"],
-    body.mc-search-open header.header .mc-header-search-cart-wrap input[type="search"],
-    body.mc-search-open header.header .mc-header-search-cart-wrap #search {
-      width: 180px !important;
-      max-width: 180px !important;
-      padding: 0 4px !important;
-      opacity: 1 !important;
-    }
-
-    /* Search icon button */
-    #mc-static-search-toggle {
-      width: 34px !important;
-      height: 34px !important;
-      min-width: 34px !important;
-      border: 0 !important;
-      background: transparent !important;
+      background: #fff !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08) !important;
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -17685,28 +17570,85 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       line-height: 1 !important;
     }
 
-    #mc-static-search-toggle svg {
+    #mc-search-icon-button svg {
       width: 16px !important;
       height: 16px !important;
       stroke: currentColor !important;
-      stroke-width: 1.7 !important;
+      stroke-width: 1.8 !important;
     }
+  }
+
+  /* ---------- QUANTITY MUST LIVE UNDER CONFIGURATION ---------- */
+
+  #mc-qty-under-configuration {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 10px auto 18px !important;
+    padding: 0 !important;
+    clear: both !important;
+    float: none !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    font-family: Inter, Arial, sans-serif !important;
+  }
+
+  #mc-qty-under-configuration label {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.16em !important;
+    text-transform: uppercase !important;
+    line-height: 1 !important;
+    color: #555 !important;
+    white-space: nowrap !important;
+  }
+
+  #mc-qty-under-configuration input {
+    width: 58px !important;
+    height: 36px !important;
+    margin: 0 !important;
+    padding: 0 6px !important;
+    text-align: center !important;
+    border: 1px solid #c9c9c9 !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 300 !important;
+    line-height: 36px !important;
+    color: #333 !important;
+    background: #fff !important;
+  }
+
+  .mc-add-cart-after-qty {
+    width: 100% !important;
+    text-align: center !important;
+    clear: both !important;
+    float: none !important;
+    margin-top: 0 !important;
   }
 </style>
 
-<script id="mc-final-static-menu-search-icon-script">
+<script id="mc-final-header-search-qty-script">
 (function () {
-  function findHeader() {
+  function header() {
     return document.querySelector("header.header");
   }
 
-  function findSearchWrap() {
-    var h = findHeader();
+  function searchWrap() {
+    var h = header();
     return h && h.querySelector(".mc-header-search-cart-wrap");
   }
 
-  function findSearchInput() {
-    var h = findHeader();
+  function searchInput() {
+    var h = header();
     return h && (
       h.querySelector("#search") ||
       h.querySelector('input[type="search"]') ||
@@ -17715,43 +17657,40 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     );
   }
 
-  function makeSearchIcon() {
-    var btn = document.getElementById("mc-static-search-toggle");
-    if (btn) return btn;
-
-    btn = document.createElement("button");
-    btn.id = "mc-static-search-toggle";
-    btn.type = "button";
-    btn.setAttribute("aria-label", "Search");
-    btn.innerHTML =
-      '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
-      '<circle cx="11" cy="11" r="7"></circle>' +
-      '<line x1="16.5" y1="16.5" x2="21" y2="21"></line>' +
-      '</svg>';
-
-    return btn;
-  }
-
-  function install() {
-    var wrap = findSearchWrap();
-    var input = findSearchInput();
+  function ensureSearchIcon() {
+    var wrap = searchWrap();
+    var input = searchInput();
     if (!wrap || !input) return;
 
-    var btn = makeSearchIcon();
+    var btn = document.getElementById("mc-search-icon-button");
+
+    if (!btn) {
+      btn = document.createElement("button");
+      btn.type = "button";
+      btn.id = "mc-search-icon-button";
+      btn.setAttribute("aria-label", "Search");
+      btn.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+        '<circle cx="11" cy="11" r="7"></circle>' +
+        '<line x1="16.5" y1="16.5" x2="21" y2="21"></line>' +
+        '</svg>';
+    }
 
     if (!wrap.contains(btn)) {
       wrap.insertBefore(btn, wrap.firstChild);
     }
 
-    if (btn.getAttribute("data-bound") !== "1") {
-      btn.setAttribute("data-bound", "1");
+    if (btn.getAttribute("data-mc-bound") !== "1") {
+      btn.setAttribute("data-mc-bound", "1");
       btn.addEventListener("click", function (e) {
         e.preventDefault();
         document.documentElement.classList.toggle("mc-search-open");
         if (document.body) document.body.classList.toggle("mc-search-open");
 
         if (document.documentElement.classList.contains("mc-search-open")) {
-          setTimeout(function () { input.focus(); }, 80);
+          setTimeout(function () {
+            input.focus();
+          }, 80);
         } else {
           input.blur();
         }
@@ -17759,8 +17698,145 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     }
   }
 
+  function isProductPage() {
+    return !!(
+      document.querySelector("#v65-product-parent") ||
+      document.body.classList.contains("productdetails") ||
+      document.body.classList.contains("mc-product-page") ||
+      document.querySelector('input[name="ProductCode"]')
+    );
+  }
+
+  function productRoot() {
+    return document.querySelector("#v65-product-parent") ||
+           document.querySelector("#content_area") ||
+           document;
+  }
+
+  function findQtyInput() {
+    var r = productRoot();
+
+    return (
+      r.querySelector('.vol-cartqty__wrap input') ||
+      r.querySelector('.v65-productdetail-cartqty input') ||
+      r.querySelector('input[name="QTY"]') ||
+      r.querySelector('input[name="Qty"]') ||
+      r.querySelector('input[name="qty"]') ||
+      r.querySelector('input[name="quantity"]') ||
+      r.querySelector('input[id*="qty" i]') ||
+      r.querySelector('input[id*="quantity" i]')
+    );
+  }
+
+  function findAddToCartButton() {
+    var r = productRoot();
+
+    return (
+      r.querySelector('input[name="btnaddtocart"]') ||
+      r.querySelector('#btn_addtocart') ||
+      Array.from(r.querySelectorAll("input, button, a")).find(function (el) {
+        var txt = String(el.value || el.innerText || el.textContent || "").toLowerCase();
+        var id = String(el.id || "").toLowerCase();
+        var name = String(el.name || "").toLowerCase();
+
+        return (
+          name.indexOf("addtocart") !== -1 ||
+          id.indexOf("addtocart") !== -1 ||
+          txt.indexOf("add to cart") !== -1
+        );
+      })
+    );
+  }
+
+  function findConfigurationBox() {
+    var r = productRoot();
+
+    var byId = r.querySelector("#mc-inline-config");
+    if (byId) return byId;
+
+    var candidates = Array.from(r.querySelectorAll("div, td, table, section"));
+
+    candidates = candidates.filter(function (el) {
+      var txt = String(el.innerText || "").toLowerCase().replace(/\s+/g, " ").trim();
+      if (!txt) return false;
+
+      var rect = el.getBoundingClientRect();
+      if (rect.height < 20 || rect.height > 170) return false;
+      if (rect.width < 150) return false;
+
+      return (
+        txt.indexOf("configuration") !== -1 &&
+        (
+          txt.indexOf("room planner") !== -1 ||
+          txt.indexOf("choose configuration") !== -1 ||
+          txt.indexOf("please use the room planner") !== -1
+        )
+      );
+    });
+
+    candidates.sort(function (a, b) {
+      return a.getBoundingClientRect().height - b.getBoundingClientRect().height;
+    });
+
+    return candidates[0] || null;
+  }
+
+  function usefulContainer(el) {
+    if (!el) return null;
+    return el.closest("tr, td, table, div, p") || el.parentElement || el;
+  }
+
+  function placeQuantityUnderConfiguration() {
+    if (!isProductPage()) return;
+
+    var qty = findQtyInput();
+    var addBtn = findAddToCartButton();
+    var configBox = findConfigurationBox();
+
+    if (!qty || !addBtn || !configBox) return;
+
+    var addRow = usefulContainer(addBtn);
+    if (addRow) addRow.classList.add("mc-add-cart-after-qty");
+
+    var qtyWrap = document.getElementById("mc-qty-under-configuration");
+
+    if (!qtyWrap) {
+      qtyWrap = document.createElement("div");
+      qtyWrap.id = "mc-qty-under-configuration";
+    }
+
+    var label = qtyWrap.querySelector("label");
+    if (!label) {
+      label = document.createElement("label");
+      label.textContent = "Quantity";
+      qtyWrap.appendChild(label);
+    }
+
+    if (!qty.id) qty.id = "mc-real-product-qty";
+    label.setAttribute("for", qty.id);
+
+    qtyWrap.appendChild(qty);
+
+    var configContainer = usefulContainer(configBox) || configBox;
+
+    if (configContainer.parentNode) {
+      configContainer.parentNode.insertBefore(qtyWrap, configContainer.nextSibling);
+    }
+
+    if (addRow && addRow.parentNode && qtyWrap.parentNode === addRow.parentNode) {
+      addRow.parentNode.insertBefore(addRow, qtyWrap.nextSibling);
+    }
+
+    qtyWrap.style.setProperty("display", "flex", "important");
+    qtyWrap.style.setProperty("justify-content", "center", "important");
+    qtyWrap.style.setProperty("align-items", "center", "important");
+    qtyWrap.style.setProperty("gap", "10px", "important");
+    qtyWrap.style.setProperty("margin", "10px auto 18px", "important");
+  }
+
   function run() {
-    install();
+    ensureSearchIcon();
+    placeQuantityUnderConfiguration();
   }
 
   if (document.readyState === "loading") {
@@ -17772,7 +17848,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   window.addEventListener("load", function () {
     run();
     setTimeout(run, 300);
-    setTimeout(run, 1000);
+    setTimeout(run, 900);
+    setTimeout(run, 1600);
   });
 })();
 </script>
