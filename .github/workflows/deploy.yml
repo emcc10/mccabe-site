@@ -88,24 +88,68 @@ jobs:
 
           echo "Using SFTP on port 2222..."
 
-          lftp <<EOF
+          # cmd:fail-exit yes stops the whole session on the first failed put (e.g. 550 on /v/).
+          # Then the other paths never run — use fail-exit no so every path is attempted.
+          lftp <<LFTP
           set sftp:auto-confirm yes
           set ssl:verify-certificate no
           set net:timeout 90
           set net:max-retries 2
           set net:reconnect-interval-base 10
           set xfer:clobber yes
-          set cmd:fail-exit yes
+          set cmd:fail-exit no
 
           open -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222
 
-          echo "Uploading template to /v/template_266.html..."
           put template_266.html -o /v/template_266.html
-
-          echo "Uploading template to /template_266.html..."
           put template_266.html -o /template_266.html
+          put template_266.html -o v/template_266.html
+          put template_266.html -o template_266.html
+          put template_266.html -o /v/v/template_266.html
+          put template_266.html -o /mccabestheaterandliving.com/v/template_266.html
 
           echo "Skipping CSS upload temporarily because Volusion is locking custom-safe.css"
 
           bye
-          EOF
+          LFTP
+
+      - name: Verify template on SFTP (mc-deploy-verify must match Git)
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          EXPECT=$(sed -n 's/.*name="mc-deploy-verify"[[:space:]]*content="\([^"]*\)".*/\1/p' template_266.html | head -1)
+          if [ -z "$EXPECT" ]; then
+            echo "No mc-deploy-verify meta in template; skipping remote marker check."
+            exit 0
+          fi
+          echo "Expect remote to contain mc-deploy-verify content: $EXPECT"
+
+          lftp <<LFTP
+          set sftp:auto-confirm yes
+          set ssl:verify-certificate no
+          set net:timeout 90
+          set cmd:fail-exit no
+          open -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222
+          get /v/template_266.html -o verify-v.html
+          get /template_266.html -o verify-root.html
+          get v/template_266.html -o verify-vrel.html
+          get template_266.html -o verify-rel.html
+          bye
+          LFTP
+
+          FOUND=""
+          for f in verify-v.html verify-root.html verify-vrel.html verify-rel.html; do
+            if [ -f "$f" ] && grep -Fq "$EXPECT" "$f"; then
+              echo "OK: marker found in downloaded $f"
+              FOUND=1
+              break
+            fi
+          done
+          if [ -z "$FOUND" ]; then
+            echo "ERROR: None of the downloaded template copies contain content \"$EXPECT\"."
+            echo "The upload likely went to a path Volusion does not serve, or SFTP did not write."
+            ls -la verify-*.html 2>/dev/null || true
+            exit 1
+          fi
