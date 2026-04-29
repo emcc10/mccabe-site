@@ -863,7 +863,46 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
   <style>
   .mc-cart-float__icon,
-  .mc-home-float__icon { width: 20px; height: 20px; display: block; }
+  .mc-home-float__icon,
+  .mc-search-float__icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+  body button.mc-search-float,
+  body .mc-search-float {
+    display: none !important;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  @media (min-width: 992px) {
+    body button.mc-search-float,
+    body .mc-search-float {
+      position: fixed !important;
+      top: 16px !important;
+      right: 116px !important;
+      z-index: 10070 !important;
+      width: 52px !important;
+      height: 52px !important;
+      max-width: 52px !important;
+      border: 0 !important;
+      border-radius: 50% !important;
+      background: #fff !important;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      cursor: pointer !important;
+      color: #111 !important;
+    }
+    .mc-search-float__icon {
+      width: 20px !important;
+      height: 20px !important;
+      display: block !important;
+    }
+  }
   /* Tighter inset; still clear of safe areas and hero menu */
   body a.mc-home-float, body .mc-home-float { margin-right: 0 !important; }
   body a.mc-cart-float, body .mc-cart-float {
@@ -1462,7 +1501,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var isHome = typeof window.mcPathIsHomepage === 'function' && window.mcPathIsHomepage();
     var overlay = isHome ? document.getElementById('mcHeroSearchOverlay') : null;
-    var menuRow = mcFindMainMenuRow();
 
     if (isHome && overlay) {
       if (mid.getAttribute('data-mc-search-mount') !== 'hero') {
@@ -1476,22 +1514,15 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    /* Interior: pull search back from hero overlay if URL is not homepage */
-    if (mid.getAttribute('data-mc-search-mount') === 'hero' && menuRow && menuRow.parentNode) {
-      try {
-        mcPlaceInteriorSearchInBar(menuRow, mid);
-      } catch (ePull) {}
-      mid.setAttribute('data-mc-search-mount', 'below-nav');
-    }
-
-    /* Interior: search + cart sit inside .mc-header-desktop-bar after main menu (beside Contact Us → cart) */
-    var placeRow = menuRow;
-    if (!placeRow && hHdr) {
-      placeRow = hHdr.querySelector('.mc-header-desktop-bar') || hHdr;
-    }
-    if (placeRow && placeRow.parentNode) {
-      mcPlaceInteriorSearchInBar(placeRow, mid);
-      mid.setAttribute('data-mc-search-mount', 'below-nav');
+    /* Interior: only recover from hero mount — never re-parent into bar after paint (avoids menu jump). */
+    if (mid.getAttribute('data-mc-search-mount') === 'hero') {
+      var menuRow = mcFindMainMenuRow();
+      if (menuRow && menuRow.parentNode) {
+        try {
+          mcPlaceInteriorSearchInBar(menuRow, mid);
+        } catch (ePull) {}
+        mid.setAttribute('data-mc-search-mount', 'below-nav');
+      }
     }
   }
 
@@ -1577,16 +1608,19 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (eSync) {}
     mcMountSearchLayout();
     bindSearchToggle();
-    /* Volusion often injects #display_menu_1 after first paint — retry */
-    [0, 120, 400, 1000, 2500, 6000].forEach(function (ms) {
-      setTimeout(mcMountSearchLayout, ms);
-    });
+    var isHomeRetry = typeof window.mcPathIsHomepage === 'function' && window.mcPathIsHomepage();
+    if (isHomeRetry) {
+      [0, 120, 400, 1000, 2500, 6000].forEach(function (ms) {
+        setTimeout(mcMountSearchLayout, ms);
+      });
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
   var hdr = document.querySelector('header.header');
-  if (hdr && typeof MutationObserver !== 'undefined') {
+  var obsHome = typeof window.mcPathIsHomepage === 'function' && window.mcPathIsHomepage();
+  if (hdr && typeof MutationObserver !== 'undefined' && obsHome) {
     var moT;
     var mo = new MutationObserver(function () {
       clearTimeout(moT);
@@ -16849,7 +16883,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 })();
 </script>
 <style id="mc-real-final-header-qty-fix">
-  /* Centered menu + absolute search cluster (body-last wins over mid-page CSS). */
+  /* Centered menu; search panel is hidden in-bar — opened via .mc-search-float + .mc-search-open (body-last). */
   @media (min-width: 992px) {
     header.header {
       position: relative !important;
@@ -16887,24 +16921,36 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     }
 
     header.header .mc-header-search-cart-wrap {
-      position: absolute !important;
-      right: 36px !important;
-      top: 50% !important;
-      transform: translateY(-50%) !important;
+      display: none !important;
+    }
+
+    html.mc-search-open header.header .mc-header-search-cart-wrap,
+    body.mc-search-open header.header .mc-header-search-cart-wrap {
       display: flex !important;
+      position: fixed !important;
+      top: 72px !important;
+      right: 116px !important;
+      left: auto !important;
+      transform: none !important;
+      z-index: 10075 !important;
       flex-direction: row !important;
-      flex-wrap: nowrap !important;
       align-items: center !important;
-      justify-content: flex-end !important;
-      gap: 12px !important;
+      flex-wrap: nowrap !important;
+      gap: 8px !important;
       width: auto !important;
-      max-width: none !important;
+      max-width: min(92vw, 380px) !important;
       margin: 0 !important;
-      padding: 0 !important;
+      padding: 10px 12px !important;
+      background: #fff !important;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14) !important;
+      border-radius: 4px !important;
       border: 0 !important;
-      background: transparent !important;
-      flex: none !important;
-      z-index: 20 !important;
+      box-sizing: border-box !important;
+    }
+
+    html.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-cart,
+    body.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-cart {
+      display: none !important;
     }
 
     header.header .mc-header-search-cart-wrap .mc-header-search-below-nav,
@@ -17011,54 +17057,34 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       border-bottom: none !important;
       padding-bottom: 0 !important;
     }
-
-    #mc-search-icon-button {
-      width: 44px !important;
-      height: 44px !important;
-      min-width: 44px !important;
-      min-height: 44px !important;
-      border-radius: 50% !important;
-      border: 1px solid rgba(0, 0, 0, 0.12) !important;
-      background: rgba(255, 255, 255, 0.92) !important;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      cursor: pointer !important;
-      color: #111 !important;
-      flex-shrink: 0 !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      box-sizing: border-box !important;
-    }
-
-    #mc-search-icon-button svg {
-      width: 18px !important;
-      height: 18px !important;
-      stroke: currentColor !important;
-      stroke-width: 1.8 !important;
-    }
   }
 
 </style>
 
 <script id="mc-real-final-header-qty-script">
 (function () {
-  function searchWrapEl() {
-    return document.querySelector("header.header .mc-header-search-cart-wrap");
+  function searchInputEl() {
+    var wrap = document.querySelector("header.header .mc-header-search-cart-wrap");
+    var inWrap =
+      (wrap &&
+        (wrap.querySelector("#search") ||
+          wrap.querySelector('input[type="search"]') ||
+          wrap.querySelector('input[type="text"]'))) ||
+      null;
+    return (
+      inWrap ||
+      document.querySelector("header.header #search") ||
+      document.getElementById("search")
+    );
   }
 
   function bindSearchIcon() {
-    var wrap = searchWrapEl();
-    var btn = document.getElementById("mc-search-icon-button");
-    if (!wrap || !btn || btn.getAttribute("data-mc-sbound") === "1") return;
-    var input =
-      wrap.querySelector("#search") ||
-      wrap.querySelector('input[type="search"]') ||
-      wrap.querySelector('input[type="text"]');
+    var btn = document.querySelector(".mc-search-float");
+    if (!btn || btn.getAttribute("data-mc-sbound") === "1") return;
     btn.setAttribute("data-mc-sbound", "1");
     btn.addEventListener("click", function (e) {
       e.preventDefault();
+      var input = searchInputEl();
       var on = document.documentElement.classList.toggle("mc-search-open");
       if (document.body) {
         if (on) document.body.classList.add("mc-search-open");
@@ -17080,29 +17106,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     });
   }
 
-  function addSearchIcon() {
-    var wrap = searchWrapEl();
-    if (!wrap || document.getElementById("mc-search-icon-button")) {
-      bindSearchIcon();
-      return;
-    }
-
-    var btn = document.createElement("button");
-    btn.type = "button";
-    btn.id = "mc-search-icon-button";
-    btn.setAttribute("aria-label", "Search");
-    btn.innerHTML =
-      '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
-      '<circle cx="11" cy="11" r="7" stroke="currentColor"></circle>' +
-      '<line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor"></line>' +
-      "</svg>";
-
-    wrap.insertBefore(btn, wrap.firstChild);
-    bindSearchIcon();
-  }
-
   function run() {
-    addSearchIcon();
+    bindSearchIcon();
   }
 
   if (document.readyState === "loading") {

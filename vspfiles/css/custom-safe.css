@@ -785,17 +785,19 @@ body.productdetails header.header nav.menu {
   visibility: visible !important;
   opacity: 1 !important;
 }
-body.productdetails header.header .mc-header-search-cart-wrap {
-  display: flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-body.productdetails header.header .mc-header-search-below-nav,
-body.productdetails header.header #collapsingSearch,
-body.productdetails header.header .collapsing-search {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+@media (max-width: 991px) {
+  body.productdetails header.header .mc-header-search-cart-wrap {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  body.productdetails header.header .mc-header-search-below-nav,
+  body.productdetails header.header #collapsingSearch,
+  body.productdetails header.header .collapsing-search {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
 }
 
 /* PDP: never show homepage hero (#if_homepage). Belt-and-suspenders with html.mc-url / body classes. */
@@ -869,17 +871,19 @@ body:not(.is-home) header.header .main-menu {
 }
 
 
-/* Force interior search strip visible on non-home (Volusion / theme overrides) */
-body:not(.is-home) header.header .mc-header-search-cart-wrap,
-body:not(.is-home) header.header .mc-header-search-below-nav,
-body:not(.is-home) header.header .header__section--middle,
-body:not(.is-home) header.header #collapsingSearch,
-body:not(.is-home) header.header .collapsing-search {
-  visibility: visible !important;
-  opacity: 1 !important;
-  max-height: none !important;
-  overflow: visible !important;
-  pointer-events: auto !important;
+/* Mobile: keep in-header search usable; desktop uses .mc-search-float + hidden wrap */
+@media (max-width: 991px) {
+  body:not(.is-home) header.header .mc-header-search-cart-wrap,
+  body:not(.is-home) header.header .mc-header-search-below-nav,
+  body:not(.is-home) header.header .header__section--middle,
+  body:not(.is-home) header.header #collapsingSearch,
+  body:not(.is-home) header.header .collapsing-search {
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+  }
 }
 
 
@@ -4479,6 +4483,40 @@ body.is-home body .mc-cart-float {
     display: flex !important;
     left: auto !important;
     right: calc(52px + 12px + max(52px, env(safe-area-inset-right))) !important;
+  }
+
+  html body button.mc-search-float,
+  html body .mc-search-float,
+  body button.mc-search-float,
+  body .mc-search-float {
+    position: fixed !important;
+    top: 16px !important;
+    right: 116px !important;
+    z-index: 10070 !important;
+    width: 52px !important;
+    height: 52px !important;
+    max-width: 52px !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    color: #111 !important;
+    box-sizing: border-box !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+
+  html body .mc-search-float__icon,
+  body .mc-search-float__icon {
+    width: 20px !important;
+    height: 20px !important;
+    display: block !important;
   }
 
   .mc-home-float,
@@ -10472,16 +10510,8 @@ body.mc-theater-seating-pdp .mc-configuration-rh__total {
   color: #1a1a1a !important;
 }
 
-/* Final 992–1199 desktop header clamp: keep product/category menu centered and prevent right drift. */
+/* Final 992–1199 desktop header clamp: center menu; search is off-flow (.mc-search-float). */
 @media (min-width: 992px) and (max-width: 1199px) {
-  body:not(.is-home) header.header > .mc-header-desktop-bar {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto !important;
-    align-items: center !important;
-    gap: 18px !important;
-    padding: 10px 24px !important;
-  }
-
   body:not(.is-home) header.header .mc-header-desktop-bar .microblock.main-menu {
     min-width: 0 !important;
     width: auto !important;
@@ -10505,12 +10535,6 @@ body.mc-theater-seating-pdp .mc-configuration-rh__total {
     padding: 0 !important;
     gap: 16px !important;
     justify-content: center !important;
-  }
-
-  body:not(.is-home) header.header .mc-header-desktop-bar .mc-header-search-cart-wrap {
-    width: min(320px, 32vw) !important;
-    max-width: min(320px, 32vw) !important;
-    min-width: 220px !important;
   }
 }
 
@@ -11638,27 +11662,58 @@ html.mc-paragon-pdp body [class*="cartqty__wrap"] label {
     )
     .mc-header-desktop-bar[data-mc-header-bar]
     .mc-header-search-cart-wrap {
-    position: absolute !important;
-    right: 36px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
+    display: none !important;
+  }
+
+  html.mc-search-open
+    :is(
+        html:not(.mc-allow-home-hero) body,
+        body:not(.is-home),
+        body.category,
+        body.productdetails,
+        body.mc-product-page,
+        body.mc-theater-seating-pdp,
+        html.category body,
+        html.mc-url-looks-like-pdp body.is-home,
+        html.mc-paragon-pdp body
+      )
+    .mc-header-desktop-bar[data-mc-header-bar]
+    .mc-header-search-cart-wrap,
+  body.mc-search-open
+    :is(
+        html:not(.mc-allow-home-hero) body,
+        body:not(.is-home),
+        body.category,
+        body.productdetails,
+        body.mc-product-page,
+        body.mc-theater-seating-pdp,
+        html.category body,
+        html.mc-url-looks-like-pdp body.is-home,
+        html.mc-paragon-pdp body
+      )
+    .mc-header-desktop-bar[data-mc-header-bar]
+    .mc-header-search-cart-wrap {
     display: flex !important;
+    position: fixed !important;
+    top: 72px !important;
+    right: 116px !important;
+    left: auto !important;
+    transform: none !important;
+    z-index: 10075 !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: flex-end !important;
-    gap: 12px !important;
+    gap: 8px !important;
     width: auto !important;
-    max-width: none !important;
+    max-width: min(92vw, 380px) !important;
     min-width: 0 !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 10px 12px !important;
     border: 0 !important;
-    background: transparent !important;
-    grid-template-columns: none !important;
-    grid-template-rows: none !important;
-    flex: none !important;
-    z-index: 20 !important;
+    background: #fff !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14) !important;
+    border-radius: 4px !important;
   }
 
   :is(
@@ -11715,51 +11770,6 @@ html.mc-paragon-pdp body [class*="cartqty__wrap"] label {
     max-width: 0 !important;
     opacity: 0 !important;
     visibility: hidden !important;
-  }
-
-  :is(
-      html:not(.mc-allow-home-hero) body,
-      body:not(.is-home),
-      body.category,
-      body.productdetails,
-      body.mc-product-page,
-      body.mc-theater-seating-pdp,
-      html.category body,
-      html.mc-url-looks-like-pdp body.is-home,
-      html.mc-paragon-pdp body
-    )
-    .mc-header-desktop-bar[data-mc-header-bar]
-    .mc-header-search-cart-wrap:focus-within,
-  html.mc-search-open
-    :is(
-        html:not(.mc-allow-home-hero) body,
-        body:not(.is-home),
-        body.category,
-        body.productdetails,
-        body.mc-product-page,
-        body.mc-theater-seating-pdp,
-        html.category body,
-        html.mc-url-looks-like-pdp body.is-home,
-        html.mc-paragon-pdp body
-      )
-    .mc-header-desktop-bar[data-mc-header-bar]
-    .mc-header-search-cart-wrap,
-  body.mc-search-open
-    :is(
-        html:not(.mc-allow-home-hero) body,
-        body:not(.is-home),
-        body.category,
-        body.productdetails,
-        body.mc-product-page,
-        body.mc-theater-seating-pdp,
-        html.category body,
-        html.mc-url-looks-like-pdp body.is-home,
-        html.mc-paragon-pdp body
-      )
-    .mc-header-desktop-bar[data-mc-header-bar]
-    .mc-header-search-cart-wrap {
-    border-bottom: none !important;
-    box-shadow: none !important;
   }
 }
 
