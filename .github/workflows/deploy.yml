@@ -1,4 +1,4 @@
-name: Deploy Volusion Theme
+name: Deploy Volusion Template Only
 
 on:
   push:
@@ -22,18 +22,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lftp netcat-openbsd
 
-      - name: Verify local files exist
+      - name: Verify local template exists
         run: |
           echo "Repo root:"
           pwd
+
           echo "Latest commit:"
           git log -1 --oneline
 
           test -f template_266.html || (echo "ERROR: template_266.html missing" && exit 1)
-          test -f vspfiles/css/custom-safe.css || (echo "ERROR: vspfiles/css/custom-safe.css missing" && exit 1)
-          test -f vspfiles/templates/266/css/mccabe-overrides.css || (echo "ERROR: vspfiles/templates/266/css/mccabe-overrides.css missing" && exit 1)
 
-          echo "Required files found."
+          echo "Template found."
+          echo "First 25 lines of template_266.html:"
+          head -25 template_266.html
+
+          echo "Template marker check:"
+          grep -n "0429\|0430\|DEPLOY\|GITHUB\|MCCABE\|FINAL\|TEST\|VOLUSION" template_266.html | head -40 || true
 
       - name: Check deploy secrets
         env:
@@ -56,7 +60,7 @@ jobs:
           echo "Testing port 2222..."
           nc -vz -w 20 "$FTP_SERVER" 2222
 
-      - name: Deploy files to Volusion
+      - name: Deploy HTML template only
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -79,15 +83,7 @@ jobs:
           echo "Uploading template backup to /v/template_266.html..."
           put template_266.html -o /v/template_266.html
 
-          echo "Uploading custom-safe.css..."
-          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
-
-          echo "Trying mccabe-overrides.css..."
-          set cmd:fail-exit no
-          put vspfiles/templates/266/css/mccabe-overrides.css -o /vspfiles/templates/266/css/mccabe-overrides.css
-          set cmd:fail-exit yes
-
-          echo "Deploy complete. If mccabe-overrides.css was locked, rerun later."
+          echo "HTML template deploy complete."
 
           bye
           EOF
