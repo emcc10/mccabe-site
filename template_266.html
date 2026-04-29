@@ -16578,50 +16578,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     upsertPlannerPriceSummary(calc);
   }
 
-  function moveQuantityAboveCartButton() {
-    var product = document.querySelector("#v65-product-parent");
-    if (!product) return;
-
-    var qty =
-      product.querySelector(".v65-productdetail-cartqty") ||
-      product.querySelector("input[name='QTY']") ||
-      product.querySelector("input[name='quantity']");
-
-    var btn =
-      product.querySelector("#btn_addtocart") ||
-      product.querySelector("input[name='btnaddtocart']") ||
-      product.querySelector("input[id*='addtocart']") ||
-      product.querySelector(".v65-productdetail-cartbutton");
-
-    if (!qty || !btn) return;
-
-    var qtyWrap = qty.classList && qty.classList.contains("v65-productdetail-cartqty")
-      ? qty
-      : qty.closest("tr, td, div, table") || qty;
-
-    var btnWrap = btn.closest("tr, td, div, table") || btn;
-
-    if (qtyWrap && btnWrap && btnWrap.parentNode && qtyWrap !== btnWrap.previousElementSibling) {
-      btnWrap.parentNode.insertBefore(qtyWrap, btnWrap);
-    }
-
-    if (qtyWrap && qtyWrap.style) {
-      qtyWrap.style.setProperty("display", "flex", "important");
-      qtyWrap.style.setProperty("justify-content", "center", "important");
-      qtyWrap.style.setProperty("align-items", "center", "important");
-      qtyWrap.style.setProperty("gap", "10px", "important");
-      qtyWrap.style.setProperty("margin", "18px auto 10px", "important");
-      qtyWrap.style.setProperty("float", "none", "important");
-      qtyWrap.style.setProperty("clear", "both", "important");
-      qtyWrap.style.setProperty("text-align", "center", "important");
-    }
-
-    if (btnWrap && btnWrap.style) {
-      btnWrap.style.setProperty("text-align", "center", "important");
-      btnWrap.style.setProperty("float", "none", "important");
-      btnWrap.style.setProperty("clear", "both", "important");
-    }
-  }
+  /* Qty DOM order is handled by #mc-final-hard-override (template end). Do not move blocks here. */
+  function moveQuantityAboveCartButton() {}
 
   function receivePlannerMessage(event) {
     if (!event || !event.data) return;
@@ -16645,7 +16603,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function initMcCabeProductFixes() {
-    moveQuantityAboveCartButton();
     recalcRoomPlannerPrice();
   }
 
@@ -16900,39 +16857,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     console.log("McCabe room planner cart calc:", window.mccabeRoomPlannerCartCalc);
   }
 
-  function moveQuantityAboveAddToCart() {
-    var product = document.querySelector("#v65-product-parent");
-    if (!product) return;
-
-    var qtyInput = getQtyInput();
-    var addBtn =
-      product.querySelector("#btn_addtocart") ||
-      product.querySelector("input[name='btnaddtocart']") ||
-      product.querySelector("input[id*='addtocart']") ||
-      product.querySelector(".v65-productdetail-cartbutton");
-
-    if (!qtyInput || !addBtn) return;
-
-    var qtyWrap = qtyInput.closest("tr, td, div, table") || qtyInput;
-    var btnWrap = addBtn.closest("tr, td, div, table") || addBtn;
-
-    if (qtyWrap && btnWrap && btnWrap.parentNode && qtyWrap !== btnWrap.previousElementSibling) {
-      btnWrap.parentNode.insertBefore(qtyWrap, btnWrap);
-    }
-
-    qtyWrap.style.setProperty("display", "flex", "important");
-    qtyWrap.style.setProperty("justify-content", "center", "important");
-    qtyWrap.style.setProperty("align-items", "center", "important");
-    qtyWrap.style.setProperty("gap", "10px", "important");
-    qtyWrap.style.setProperty("margin", "14px auto 10px", "important");
-    qtyWrap.style.setProperty("float", "none", "important");
-    qtyWrap.style.setProperty("clear", "both", "important");
-    qtyWrap.style.setProperty("text-align", "center", "important");
-
-    btnWrap.style.setProperty("text-align", "center", "important");
-    btnWrap.style.setProperty("float", "none", "important");
-    btnWrap.style.setProperty("clear", "both", "important");
-  }
+  /* Qty DOM order is handled by #mc-final-hard-override (template end). */
+  function moveQuantityAboveAddToCart() {}
 
   function onPlannerMessage(event) {
     var data = event.data;
@@ -16957,7 +16883,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function init() {
-    moveQuantityAboveAddToCart();
     updateRoomPlannerCartPricing();
   }
 
@@ -17181,56 +17106,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     }
   }
 
-  #mc-qty-under-configuration {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 10px !important;
-    width: 100% !important;
-    max-width: 320px !important;
-    margin: 10px auto 18px !important;
-    clear: both !important;
-    text-align: center !important;
-    font-family: Inter, Arial, sans-serif !important;
-    box-sizing: border-box !important;
-  }
-
-  #mc-qty-under-configuration .vol-cartqty__wrap {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 8px !important;
-    width: 100% !important;
-    margin: 0 !important;
-  }
-
-  #mc-qty-under-configuration .vol-cartqty__wrap label {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    order: 0 !important;
-    display: inline-block !important;
-    margin: 0 !important;
-    font-size: 11px !important;
-    font-weight: 400 !important;
-    letter-spacing: 0.16em !important;
-    text-transform: uppercase !important;
-    white-space: nowrap !important;
-  }
-
-  #mc-qty-under-configuration .mc-qty-synthetic-label {
-    font-size: 11px !important;
-    font-weight: 400 !important;
-    letter-spacing: 0.16em !important;
-    text-transform: uppercase !important;
-    white-space: nowrap !important;
-    margin: 0 !important;
-    cursor: default !important;
-    color: #555 !important;
-  }
 </style>
 
 <script id="mc-real-final-header-qty-script">
@@ -17292,101 +17167,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     bindSearchIcon();
   }
 
-  function findQtyInput() {
-    var root = document.querySelector("#v65-product-parent") || document.getElementById("content_area") || document;
-    return (
-      root.querySelector('input[name^="QTY."]') ||
-      root.querySelector('.vol-cartqty__wrap input[type="number"]') ||
-      root.querySelector('.vol-cartqty__wrap input') ||
-      root.querySelector('.v65-productdetail-cartqty input') ||
-      root.querySelector('input[name="QTY"]') ||
-      root.querySelector('input[name="Qty"]') ||
-      root.querySelector('input[name="qty"]') ||
-      root.querySelector('input[name="quantity"]') ||
-      root.querySelector('input[id*="qty" i]') ||
-      root.querySelector('input[id*="quantity" i]')
-    );
-  }
-
-  function findConfigAnchor() {
-    var root = document.querySelector("#v65-product-parent") || document.getElementById("content_area");
-    if (!root) return null;
-    return root.querySelector("#mcConfigurationBlock") || root.querySelector("#mc-inline-config");
-  }
-
-  function findAddToCart() {
-    var root = document.querySelector("#v65-product-parent") || document.getElementById("content_area") || document;
-    return (
-      root.querySelector('input[name="btnaddtocart"]') ||
-      root.querySelector("#btn_addtocart") ||
-      Array.from(root.querySelectorAll("input, button, a")).find(function (el) {
-        return /add\s*to\s*cart/i.test(el.value || el.textContent || "");
-      })
-    );
-  }
-
-  function shouldSkipQtyLayout() {
-    if (!document.body || !document.body.classList.contains("mc-theater-seating-pdp")) return false;
-    var island = document.querySelector("#v65-product-parent .v65-productdetail-cartqty, #v65-product-parent .vol-cartqty__wrap");
-    if (!island) return true;
-    var s = window.getComputedStyle(island);
-    if (s.display === "none" || s.visibility === "hidden") return true;
-    return false;
-  }
-
-  function usefulRow(el) {
-    if (!el) return null;
-    return el.closest("tr, td, table, div") || el.parentElement;
-  }
-
-  function moveQty() {
-    if (shouldSkipQtyLayout()) return;
-
-    var qtyInput = findQtyInput();
-    var cfg = findConfigAnchor();
-    var add = findAddToCart();
-    if (!qtyInput || !cfg || !add) return;
-
-    var qtyBlock =
-      qtyInput.closest(".vol-cartqty__wrap") ||
-      qtyInput.closest(".v65-productdetail-cartqty") ||
-      qtyInput;
-
-    var wrap = document.getElementById("mc-qty-under-configuration");
-    if (!wrap) {
-      wrap = document.createElement("div");
-      wrap.id = "mc-qty-under-configuration";
-    }
-    while (wrap.firstChild) {
-      wrap.removeChild(wrap.firstChild);
-    }
-
-    if (qtyBlock.querySelector && qtyBlock.querySelector("label")) {
-      wrap.appendChild(qtyBlock);
-    } else {
-      var lab = document.createElement("label");
-      lab.className = "mc-qty-synthetic-label";
-      lab.textContent = "Quantity";
-      if (!qtyInput.id) qtyInput.id = "mc-real-product-qty";
-      lab.setAttribute("for", qtyInput.id);
-      wrap.appendChild(lab);
-      wrap.appendChild(qtyInput);
-    }
-
-    var cfgRow = usefulRow(cfg) || cfg;
-    if (cfgRow.parentNode) {
-      cfgRow.parentNode.insertBefore(wrap, cfgRow.nextSibling);
-    }
-
-    var addRow = usefulRow(add) || add.parentElement;
-    if (addRow && addRow.parentNode === wrap.parentNode) {
-      addRow.parentNode.insertBefore(addRow, wrap.nextSibling);
-    }
-  }
-
   function run() {
     addSearchIcon();
-    moveQty();
   }
 
   if (document.readyState === "loading") {
@@ -17395,11 +17177,402 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     run();
   }
 
+  window.addEventListener("load", run);
+})();
+</script>
+<style id="mc-final-hard-override-20260430">
+  /* === LEGACY QTY WRAPPERS — must not create duplicate labels (hidden if any remain) === */
+  #mc-qty-under-configuration,
+  #mc-volusion-qty-above-cart,
+  #mc-qty-under-config-above-cart,
+  #mc-pdp-qty-wrap {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+    border: 0 !important;
+  }
+
+  /* === SINGLE QTY ROW — under Configuration, above ATC === */
+  #v65-product-parent #mc-final-qty-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 12px auto 14px !important;
+    box-sizing: border-box !important;
+    order: unset !important;
+    font-family: Inter, Arial, sans-serif !important;
+  }
+  #v65-product-parent #mc-final-qty-row .vol-cartqty__wrap,
+  #v65-product-parent #mc-final-qty-row .v65-productdetail-cartqty {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+  #v65-product-parent #mc-final-qty-row label,
+  #v65-product-parent #mc-final-qty-row .mc-final-qty-label {
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    color: #111 !important;
+    margin: 0 !important;
+  }
+
+  /* === HARD BUTTON SYSTEM (no pills) === */
+  html body #v65-product-parent #mcPlannerBtn,
+  html body #v65-product-parent #mcProductSummaryBtn,
+  html body #v65-product-parent #btn_addtocart,
+  html body #v65-product-parent input[name="btnaddtocart"],
+  html body #v65-product-parent #wmOpen.wm-btn,
+  html body #wmOpen.wm-btn {
+    font-family: Inter, Arial, sans-serif !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    border: 1px solid #222 !important;
+    border-radius: 2px !important;
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 0 24px !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    text-decoration: none !important;
+  }
+  html body #v65-product-parent #mcProductSummaryBtn span,
+  html body #v65-product-parent #mcPlannerBtn span {
+    text-align: center !important;
+  }
+  html body #v65-product-parent #mcPlannerRow {
+    justify-content: center !important;
+    gap: 10px !important;
+  }
+  html body #v65-product-parent #mcPlannerBtn,
+  html body #v65-product-parent #mcProductSummaryBtn {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+  }
+
+  /* === PURCHASE COLUMN TYPOGRAPHY === */
+  #v65-product-parent .ProductDescription,
+  #v65-product-parent .product-description,
+  #v65-product-parent #mcConfigurationCaption,
+  #v65-product-parent .mc-configuration-rh__caption,
+  #v65-product-parent .mc-product-availability,
+  #v65-product-parent #mcLeatherSummary,
+  #v65-product-parent .mc-pdp-member-pricing,
+  #v65-product-parent .mc-pdp-retail-member,
+  #v65-product-parent .product_list_price,
+  #v65-product-parent .product_productprice,
+  #v65-product-parent .mc-member-grid-price,
+  #v65-product-parent .mc-member-grid-price__hint {
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 300 !important;
+    letter-spacing: 0.03em !important;
+    line-height: 1.6 !important;
+    color: #333 !important;
+  }
+  #v65-product-parent #mcLeatherHeader,
+  #v65-product-parent .mc-configuration-rh__heading,
+  #v65-product-parent .mc-pdp-retail-label,
+  #v65-product-parent .mc-pdp-member-line__label,
+  #v65-product-parent a.mc-member-grid-price__login {
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    color: #111 !important;
+  }
+
+  /* === HEADER / SEARCH — no jump, no default underline, menu aligned === */
+  @media (min-width: 992px) {
+    html body header.header > .header__section:not(.header__section--middle) {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+    html body .mc-header-desktop-bar[data-mc-header-bar] {
+      position: relative !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-wrap: nowrap !important;
+      min-height: 44px !important;
+      padding: 8px 72px !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      transform: none !important;
+      top: auto !important;
+    }
+    html body.productdetails .mc-header-desktop-bar[data-mc-header-bar],
+    html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar],
+    html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar],
+    html body.category .mc-header-desktop-bar[data-mc-header-bar],
+    html body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar],
+    html.category body .mc-header-desktop-bar[data-mc-header-bar],
+    html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar],
+    html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] {
+      justify-content: center !important;
+      align-items: center !important;
+      min-height: 44px !important;
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+    }
+    html body .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
+      flex: 0 1 auto !important;
+      max-width: min(920px, calc(100vw - 280px)) !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      transform: none !important;
+    }
+    html body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
+      position: absolute !important;
+      right: 36px !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-bottom: 0 !important;
+      background: transparent !important;
+      width: auto !important;
+      flex: none !important;
+      z-index: 20 !important;
+    }
+    html body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
+    html body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+    html body .mc-header-desktop-bar[data-mc-header-bar] #search,
+    html body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__input {
+      border: 0 !important;
+      border-bottom: 0 !important;
+      box-shadow: none !important;
+    }
+    html:not(.mc-search-open) body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row {
+      border: 0 !important;
+      padding: 0 !important;
+    }
+    html body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before {
+      content: none !important;
+      display: none !important;
+    }
+    html body #mc-search-icon-button {
+      width: 52px !important;
+      height: 52px !important;
+      min-width: 52px !important;
+      min-height: 52px !important;
+      border-radius: 999px !important;
+      border: 1px solid rgba(0, 0, 0, 0.12) !important;
+      background: rgba(255, 255, 255, 0.92) !important;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      flex-shrink: 0 !important;
+    }
+    html body #mc-search-icon-button svg {
+      width: 20px !important;
+      height: 20px !important;
+    }
+    html body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search:focus-within,
+    html.mc-search-open body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
+    body.mc-search-open .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search {
+      transform: none !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+    }
+  }
+</style>
+<script id="mc-final-hard-override-script-20260430">
+(function () {
+  try {
+    window.mcFixPdpHeaderNavInline = function () {};
+    window.mcNormalizeQtyBlockAboveAtc = function () {};
+    window.mcBootPdpQtyAndHeader = function () {};
+  } catch (eN) {}
+
+  var LEGACY_WRAP_IDS = [
+    "mc-qty-under-configuration",
+    "mc-volusion-qty-above-cart",
+    "mc-qty-under-config-above-cart",
+    "mc-pdp-qty-wrap"
+  ];
+
+  function unwrapLegacyWrappers() {
+    LEGACY_WRAP_IDS.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el || !el.parentNode) return;
+      var p = el.parentNode;
+      while (el.firstChild) {
+        p.insertBefore(el.firstChild, el);
+      }
+      p.removeChild(el);
+    });
+  }
+
+  function findVolusionQtyInput(root) {
+    if (!root) return null;
+    return (
+      root.querySelector('input[name^="QTY."]') ||
+      root.querySelector('.vol-cartqty__wrap input[type="number"]') ||
+      root.querySelector('.vol-cartqty__wrap input') ||
+      root.querySelector('.v65-productdetail-cartqty input[name^="QTY."]') ||
+      root.querySelector(".v65-productdetail-cartqty input")
+    );
+  }
+
+  function findAddToCartControl(root) {
+    if (!root) return null;
+    return (
+      root.querySelector('input[name="btnaddtocart"]') ||
+      root.querySelector("#btn_addtocart")
+    );
+  }
+
+  function hideDuplicateQtyLabels(finalRow) {
+    var root = document.querySelector("#v65-product-parent");
+    if (!root) return;
+    var labels = root.querySelectorAll("label");
+    var i;
+    var lab;
+    var t;
+    for (i = 0; i < labels.length; i++) {
+      lab = labels[i];
+      if (!lab) continue;
+      if (finalRow && finalRow.contains(lab)) continue;
+      if (lab.closest(".mc-pdp-options-td")) continue;
+      t = (lab.textContent || "").replace(/\s+/g, " ").trim();
+      if (/^quantity|^qty\b/i.test(t)) {
+        lab.style.cssText = "display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;";
+      }
+    }
+    var syn = root.querySelectorAll(".mc-qty-synthetic-label");
+    for (i = 0; i < syn.length; i++) {
+      if (finalRow && finalRow.contains(syn[i])) continue;
+      syn[i].style.cssText = "display:none!important;";
+    }
+  }
+
+  function hideOrphanQtyTextRows(root) {
+    var offers = root.querySelector('[itemprop="offers"]');
+    if (!offers) return;
+    var ch = offers.children;
+    var j;
+    var el;
+    var t;
+    for (j = 0; j < ch.length; j++) {
+      el = ch[j];
+      if (!el || el.nodeType !== 1) continue;
+      if (el.id === "mc-inline-config" || el.id === "mc-final-qty-row") continue;
+      t = (el.textContent || "").replace(/\s+/g, " ").trim();
+      if (/^(quantity|qty)\s*:?\s*$/i.test(t) && !el.querySelector("input")) {
+        el.style.cssText = "display:none!important;";
+      }
+    }
+  }
+
+  function applyFinalQtyRow() {
+    var root = document.querySelector("#v65-product-parent");
+    if (!root) return;
+
+    unwrapLegacyWrappers();
+
+    var cfg = document.getElementById("mcConfigurationBlock");
+    if (!cfg || !cfg.parentNode) return;
+    var column = cfg.parentNode;
+
+    var input = findVolusionQtyInput(root);
+    var atc = findAddToCartControl(root);
+    if (!input || !atc) return;
+
+    var finalRow = document.getElementById("mc-final-qty-row");
+    if (!finalRow) {
+      finalRow = document.createElement("div");
+      finalRow.id = "mc-final-qty-row";
+    }
+    while (finalRow.firstChild) {
+      finalRow.removeChild(finalRow.firstChild);
+    }
+
+    var block = input.closest(".vol-cartqty__wrap") || input.closest(".v65-productdetail-cartqty");
+    if (block) {
+      finalRow.appendChild(block);
+    } else {
+      var lab = document.createElement("label");
+      lab.className = "mc-final-qty-label";
+      lab.textContent = "Quantity";
+      if (!input.id) {
+        input.id = "mc-vol-qty-" + String(Date.now()).slice(-6);
+      }
+      lab.setAttribute("for", input.id);
+      finalRow.appendChild(lab);
+      finalRow.appendChild(input);
+    }
+
+    column.insertBefore(finalRow, cfg.nextSibling);
+
+    var addHost =
+      atc.closest(".v65-product-addtocart") ||
+      atc.closest(".v65-productdetail-cartbutton") ||
+      atc.closest("div") ||
+      atc;
+    if (addHost && addHost.parentNode) {
+      column.insertBefore(addHost, finalRow.nextSibling);
+    }
+
+    hideDuplicateQtyLabels(finalRow);
+    hideOrphanQtyTextRows(root);
+  }
+
+  function run() {
+    applyFinalQtyRow();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", run);
+  } else {
+    run();
+  }
   window.addEventListener("load", function () {
     run();
     setTimeout(run, 400);
-    setTimeout(run, 1200);
-    setTimeout(run, 2800);
   });
 })();
 </script>
