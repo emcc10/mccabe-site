@@ -22,7 +22,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lftp netcat-openbsd
 
-      - name: Verify local files exist and show markers
+      - name: Verify local files exist
         run: |
           echo "Repo root:"
           pwd
@@ -31,16 +31,7 @@ jobs:
 
           test -f template_266.html || (echo "ERROR: template_266.html missing" && exit 1)
           test -f vspfiles/css/custom-safe.css || (echo "ERROR: vspfiles/css/custom-safe.css missing" && exit 1)
-          test -f vspfiles/templates/266/css/mccabe-overrides.css || (echo "ERROR: mccabe-overrides.css missing" && exit 1)
-
-          echo "Template marker check:"
-          grep -n "0429\|0430\|DEPLOY\|GITHUB\|MCCABE\|FINAL\|TEST" template_266.html | head -40 || true
-
-          echo "custom-safe marker check:"
-          grep -n "0429\|0430\|DEPLOY\|GITHUB\|MCCABE\|CUSTOM\|TEST" vspfiles/css/custom-safe.css | head -40 || true
-
-          echo "mccabe-overrides marker check:"
-          grep -n "0429\|0430\|DEPLOY\|GITHUB\|MCCABE\|OVERRIDES\|TEST" vspfiles/templates/266/css/mccabe-overrides.css | head -40 || true
+          test -f vspfiles/templates/266/css/mccabe-overrides.css || (echo "ERROR: vspfiles/templates/266/css/mccabe-overrides.css missing" && exit 1)
 
           echo "Required files found."
 
@@ -88,39 +79,15 @@ jobs:
           echo "Uploading template backup to /v/template_266.html..."
           put template_266.html -o /v/template_266.html
 
-          echo "Uploading custom-safe.css to /vspfiles/css/custom-safe.css..."
+          echo "Uploading custom-safe.css..."
           put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
 
-          echo "Trying mccabe-overrides.css to /vspfiles/templates/266/css/mccabe-overrides.css..."
+          echo "Trying mccabe-overrides.css..."
           set cmd:fail-exit no
           put vspfiles/templates/266/css/mccabe-overrides.css -o /vspfiles/templates/266/css/mccabe-overrides.css
           set cmd:fail-exit yes
-
-          echo "Downloading template files back for verification..."
-          get /template_266.html -o remote-template_266.html
-          get /v/template_266.html -o remote-v-template_266.html
 
           echo "Deploy complete. If mccabe-overrides.css was locked, rerun later."
 
           bye
           EOF
-
-          echo "Remote /template_266.html marker check:"
-          grep -n "0429\|0430\|DEPLOY\|GITHUB\|MCCABE\|FINAL\|TEST" remote-template_266.html | head -40 || true
-
-          echo "Remote /v/template_266.html marker check:"
-          grep -n "0429\|0430\|DEPLOY\|GITHUB\|MCCABE\|FINAL\|TEST" remote-v-template_266.html | head -40 || true
-
-          echo "Comparing local template to /template_266.html..."
-          if cmp -s template_266.html remote-template_266.html; then
-            echo "SUCCESS: /template_266.html matches local template_266.html"
-          else
-            echo "WARNING: /template_266.html does not exactly match local template_266.html"
-          fi
-
-          echo "Comparing local template to /v/template_266.html..."
-          if cmp -s template_266.html remote-v-template_266.html; then
-            echo "SUCCESS: /v/template_266.html matches local template_266.html"
-          else
-            echo "WARNING: /v/template_266.html does not exactly match local template_266.html"
-          fi
