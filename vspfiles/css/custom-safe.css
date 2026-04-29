@@ -1,4 +1,4 @@
-/* 0429 C_CSS_DEPLOY_VERIFY_20260429pdpforce — vol-cartqty text-align + PDP header; verify deploy matches template meta */
+/* 0429 C_CSS_DEPLOY_VERIFY_20260429alive — tail block wins over earlier grid/search; verify = template mc-deploy-verify */
 /* MC_DEPLOY_VERIFY — LAST-WIN: strip ::before Search labels; PDP layout + single search underline; see file end */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -11820,4 +11820,55 @@ body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartbutton 
 .room-planner-pricing-summary,
 .mccabe-room-summary {
   display: none !important;
+}
+
+/* --- MC_SAFE_TAIL_20260429alive: must be last — overrides grid .mc-header-search-cart-wrap + PDP qty if parser order still loses --- */
+@media (min-width: 992px) {
+  html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+  html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+  html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+  html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+  html body:has(#v65-product-parent) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 10px !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+  }
+  html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
+  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
+  html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
+  html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
+  html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
+  html body:has(#v65-product-parent) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before {
+    content: none !important;
+    display: none !important;
+  }
+}
+html body #v65-product-parent [class*="cartqty__wrap"],
+html body #content_area #v65-product-parent [class*="cartqty__wrap"] {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 320px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+html body #v65-product-parent [class*="cartqty__wrap"] label,
+html body #content_area #v65-product-parent [class*="cartqty__wrap"] label {
+  display: block !important;
+  flex: 0 0 100% !important;
+  width: 100% !important;
+  text-align: center !important;
+  margin: 0 0 6px 0 !important;
+  order: -1 !important;
 }

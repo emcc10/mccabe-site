@@ -310,9 +310,9 @@
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260429pdpforce: github->volusion deploy verification marker -->
-<!-- MC_CSS_DEPLOY_VERIFY_20260429pdpforce: same token as /vspfiles/css/custom-safe.css line 1 -->
-<meta name="mc-deploy-verify" content="20260429pdpforce">
+<!-- MC_DEPLOY_VERIFY_20260429alive: github->volusion deploy verification marker — search live View Source for this string -->
+<!-- MC_CSS_DEPLOY_VERIFY_20260429alive: same token as /vspfiles/css/custom-safe.css line 1 -->
+<meta name="mc-deploy-verify" content="20260429alive">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -322,7 +322,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429pdpforce" rel="stylesheet">
+  <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429alive" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -3415,7 +3415,12 @@ boot();
     var v65qty =
       offers.querySelector(".v65-productdetail-cartqty") || root.querySelector(".v65-productdetail-cartqty");
     var volWrap =
-      offers.querySelector(".vol-cartqty__wrap") || root.querySelector(".vol-cartqty__wrap");
+      offers.querySelector(".vol-cartqty__wrap") ||
+      root.querySelector(".vol-cartqty__wrap") ||
+      offers.querySelector("[class*='vol-cartqty']") ||
+      root.querySelector("[class*='vol-cartqty']") ||
+      offers.querySelector("[class*='cartqty__wrap']") ||
+      root.querySelector("[class*='cartqty__wrap']");
     var qtyWrap = null;
     if (v65qty && volWrap && v65qty.contains(volWrap)) qtyWrap = v65qty;
     else if (v65qty) qtyWrap = v65qty;
@@ -16580,9 +16585,9 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 </style>
 
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
-<link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429pdpforce" id="mc-mccabe-overrides-body-last" />
+<link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429alive" id="mc-mccabe-overrides-body-last" />
 <style id="mc-pdp-wins-last">
-  /* MC_PDP_TAIL_20260429pdpforce — MUST sit after custom-safe.css (head) + body-last link. Kills grid “Search” row + fixes qty. */
+  /* MC_PDP_TAIL_20260429alive — MUST sit after custom-safe.css (head) + body-last link. Kills grid “Search” row + fixes qty. */
   @media (min-width: 992px) {
     html body:has(#v65-product-parent) header.header > .header__section:not(.header__section--middle),
     html body.productdetails header.header > .header__section:not(.header__section--middle),
@@ -17300,6 +17305,70 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     setTimeout(init, 300);
     setTimeout(init, 1000);
   });
+})();
+</script>
+<script>
+/* MC_PDP_BODY_LAST_20260429alive — runs after Volusion hydrates DOM; re-calls normalizers + re-append stylesheet (last in cascade). */
+(function () {
+  var css =
+    '@media(min-width:992px){' +
+    'html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,' +
+    'html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,' +
+    'html body:has(#v65-product-parent) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap{' +
+    'display:flex!important;flex-flow:row nowrap!important;align-items:center!important;gap:10px!important;' +
+    'grid-template:none!important;}' +
+    'html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,' +
+    'html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,' +
+    'html body:has(#v65-product-parent) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before{' +
+    'content:none!important;display:none!important;}' +
+    '}' +
+    'html body #v65-product-parent [class*="cartqty__wrap"],html body #content_area #v65-product-parent [class*="cartqty__wrap"]{' +
+    'display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:center!important;' +
+    'justify-content:center!important;gap:8px!important;width:100%!important;max-width:320px!important;' +
+    'margin-left:auto!important;margin-right:auto!important;text-align:center!important;box-sizing:border-box!important;}' +
+    'html body #v65-product-parent [class*="cartqty__wrap"] label,html body #content_area #v65-product-parent [class*="cartqty__wrap"] label{' +
+    'display:block!important;flex:0 0 100%!important;width:100%!important;text-align:center!important;' +
+    'margin:0 0 6px 0!important;order:-1!important;}';
+
+  function tick() {
+    if (!document.getElementById("v65-product-parent")) return;
+    var el = document.getElementById("mc-pdp-js-body-last");
+    if (!el) {
+      el = document.createElement("style");
+      el.id = "mc-pdp-js-body-last";
+      document.body.appendChild(el);
+    }
+    el.textContent = css;
+    try {
+      if (typeof window.mcFixPdpHeaderNavInline === "function") window.mcFixPdpHeaderNavInline();
+    } catch (e1) {}
+    try {
+      if (typeof window.mcNormalizeQtyBlockAboveAtc === "function") window.mcNormalizeQtyBlockAboveAtc();
+    } catch (e2) {}
+  }
+
+  function armObserver() {
+    var root = document.getElementById("v65-product-parent");
+    if (!root || !window.MutationObserver) return;
+    var deb = null;
+    var ob = new MutationObserver(function () {
+      if (deb) window.clearTimeout(deb);
+      deb = window.setTimeout(function () {
+        deb = null;
+        tick();
+      }, 80);
+    });
+    try {
+      ob.observe(root, { childList: true, subtree: true });
+    } catch (eOb) {}
+  }
+
+  tick();
+  armObserver();
+  [120, 400, 900, 1800, 3500, 6500].forEach(function (ms) {
+    window.setTimeout(tick, ms);
+  });
+  window.addEventListener("load", tick);
 })();
 </script>
 </body>
