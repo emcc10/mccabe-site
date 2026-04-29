@@ -31,7 +31,7 @@ jobs:
 
           test -f template_266.html || (echo "ERROR: template_266.html missing" && exit 1)
           test -f vspfiles/css/custom-safe.css || (echo "ERROR: vspfiles/css/custom-safe.css missing" && exit 1)
-          test -f vspfiles/templates/266/css/mccabe-overrides.css || (echo "ERROR: vspfiles/templates/266/css/mccabe-overrides.css missing" && exit 1)
+          test -f vspfiles/templates/266/css/mccabe-overrides.css || (echo "ERROR: mccabe-overrides.css missing" && exit 1)
 
           echo "Required files found."
 
@@ -73,19 +73,21 @@ jobs:
 
           open -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222
 
-          echo "Uploading template to /v/template_266.html..."
-          put template_266.html -o /v/template_266.html
-
-          echo "Uploading template backup to /template_266.html..."
+          echo "Uploading template to /template_266.html..."
           put template_266.html -o /template_266.html
 
-          echo "Uploading custom-safe.css to /v/vspfiles/css/custom-safe.css..."
-          put vspfiles/css/custom-safe.css -o /v/vspfiles/css/custom-safe.css
+          echo "Uploading template backup to /v/template_266.html..."
+          put template_266.html -o /v/template_266.html
 
-          echo "Uploading mccabe-overrides.css to /v/vspfiles/templates/266/css/mccabe-overrides.css..."
-          put vspfiles/templates/266/css/mccabe-overrides.css -o /v/vspfiles/templates/266/css/mccabe-overrides.css
+          echo "Uploading custom-safe.css to /vspfiles/css/custom-safe.css..."
+          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
 
-          echo "Deploy complete."
+          echo "Trying mccabe-overrides.css to /vspfiles/templates/266/css/mccabe-overrides.css..."
+          set cmd:fail-exit no
+          put vspfiles/templates/266/css/mccabe-overrides.css -o /vspfiles/templates/266/css/mccabe-overrides.css
+          set cmd:fail-exit yes
+
+          echo "Deploy complete. If mccabe-overrides.css was locked, rerun later."
 
           bye
           EOF
