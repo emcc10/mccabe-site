@@ -695,3 +695,258 @@ html body #v65-product-parent .vol-cartqty__wrap input[value="-"] {
   margin: 4px 4px !important;
   vertical-align: middle !important;
 }
+
+/* ========== MC_PDP_COLUMN_RH_TYPO_20260430 (deployed with template_266) ==========
+   Inter RH-style purchase column; body-last header/qty script pairs with #mc-qty-under-configuration. */
+
+#mc-qty-under-configuration .vol-cartqty__wrap label,
+#mc-qty-under-configuration .vol-cartqty__wrap input {
+  font-family: Inter, Arial, sans-serif !important;
+}
+
+@media (min-width: 992px) {
+  body.productdetails .mc-header-desktop-bar .mc-header-search-below-nav,
+  body.mc-product-page .mc-header-desktop-bar .mc-header-search-below-nav,
+  body.mc-theater-seating-pdp .mc-header-desktop-bar .mc-header-search-below-nav,
+  html.mc-paragon-pdp body .mc-header-desktop-bar .mc-header-search-below-nav {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+}
+
+/* Purchase column typography (scoped; no category grid / checkout) */
+body.productdetails #content_area,
+body.productdetails #v65-product-parent,
+body.mc-product-page #content_area,
+body.mc-product-page #v65-product-parent,
+body.mc-theater-seating-pdp #content_area,
+body.mc-theater-seating-pdp #v65-product-parent,
+html.mc-paragon-pdp body #content_area,
+html.mc-paragon-pdp body #v65-product-parent {
+  font-family: Inter, Arial, sans-serif !important;
+}
+
+body.productdetails #content_area .mc-pdp-options-td,
+body.mc-product-page #content_area .mc-pdp-options-td,
+body.mc-theater-seating-pdp #content_area .mc-pdp-options-td,
+html.mc-paragon-pdp body #content_area .mc-pdp-options-td,
+body.productdetails #v65-product-parent .mc-pdp-options-td,
+body.mc-product-page #v65-product-parent .mc-pdp-options-td {
+  font-family: Inter, Arial, sans-serif !important;
+  color: #333 !important;
+}
+
+body.productdetails #content_area .ProductDescription,
+body.mc-product-page #content_area .ProductDescription,
+body.productdetails #content_area .product-description,
+body.mc-product-page #content_area .product-description,
+body.productdetails #v65-product-parent .ProductDescription,
+body.mc-product-page #v65-product-parent .ProductDescription {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.03em !important;
+  line-height: 1.65 !important;
+  color: #444 !important;
+}
+
+body.productdetails #content_area .mc-product-availability,
+body.mc-product-page #content_area .mc-product-availability,
+body.productdetails #content_area [class*="availability"],
+body.mc-product-page #content_area [class*="availability"] {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.05em !important;
+  line-height: 1.5 !important;
+  color: #555 !important;
+}
+
+body.productdetails #content_area .mc-pdp-retail-member,
+body.mc-product-page #content_area .mc-pdp-retail-member,
+body.productdetails #content_area .mc-pdp-member-pricing,
+body.mc-product-page #content_area .mc-pdp-member-pricing,
+body.productdetails #content_area .mc-pdp-retail-label,
+body.mc-product-page #content_area .mc-pdp-retail-label,
+body.productdetails #content_area .mc-pdp-retail-line,
+body.mc-product-page #content_area .mc-pdp-retail-line,
+body.productdetails #content_area .mc-pdp-member-line,
+body.mc-product-page #content_area .mc-pdp-member-line {
+  font-family: Inter, Arial, sans-serif !important;
+}
+
+body.productdetails #content_area .mc-pdp-retail-label,
+body.mc-product-page #content_area .mc-pdp-retail-label,
+body.productdetails #content_area .mc-pdp-member-line__label,
+body.mc-product-page #content_area .mc-pdp-member-line__label {
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: #333 !important;
+}
+
+body.productdetails #content_area .mc-pdp-member-line__amount,
+body.mc-product-page #content_area .mc-pdp-member-line__amount,
+body.productdetails #content_area .product_list_price,
+body.mc-product-page #content_area .product_list_price,
+body.productdetails #content_area .product_productprice,
+body.mc-product-page #content_area .product_productprice {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.04em !important;
+}
+
+body.productdetails #content_area a.mc-member-grid-price__login,
+body.mc-product-page #content_area a.mc-member-grid-price__login,
+body.productdetails #content_area .mc-member-grid-price,
+body.mc-product-page #content_area .mc-member-grid-price {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.08em !important;
+}
+
+/* Inline config: leather header, planner/summary, configuration */
+body.productdetails #mcLeatherHeader,
+body.mc-product-page #mcLeatherHeader {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: #555 !important;
+}
+
+body.productdetails #mcLeatherSummary,
+body.mc-product-page #mcLeatherSummary {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.04em !important;
+  color: #333 !important;
+}
+
+body.productdetails #mcPlannerBtn,
+body.mc-product-page #mcPlannerBtn,
+body.productdetails #mcProductSummaryBtn,
+body.mc-product-page #mcProductSummaryBtn {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  border: 1px solid #333 !important;
+  border-radius: 0 !important;
+  padding: 10px 16px !important;
+}
+
+body.productdetails #mcLeatherBtn,
+body.mc-product-page #mcLeatherBtn {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: none !important;
+  min-height: 0 !important;
+  min-width: 20px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body.productdetails #mcPlannerRow,
+body.mc-product-page #mcPlannerRow {
+  align-items: stretch !important;
+}
+
+body.productdetails #mcPlannerBtn span,
+body.mc-product-page #mcPlannerBtn span,
+body.productdetails #mcProductSummaryBtn span,
+body.mc-product-page #mcProductSummaryBtn span {
+  font: inherit !important;
+  letter-spacing: inherit !important;
+  text-transform: inherit !important;
+}
+
+body.productdetails #mcConfigurationBlock .mc-configuration-rh__heading,
+body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__heading {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: #333 !important;
+}
+
+body.productdetails #mcConfigurationCaption,
+body.mc-product-page #mcConfigurationCaption,
+body.productdetails #mcConfigurationBlock .mc-configuration-rh__caption,
+body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__caption {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.55 !important;
+  color: #444 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  max-width: none !important;
+}
+
+/* Volusion option labels in options column */
+body.productdetails #content_area .mc-pdp-options-td label,
+body.mc-product-page #content_area .mc-pdp-options-td label,
+body.productdetails #v65-product-parent .mc-pdp-options-td label,
+body.mc-product-page #v65-product-parent .mc-pdp-options-td label {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  color: #444 !important;
+}
+
+body.productdetails #content_area .v65-productdetail-cartqty,
+body.mc-product-page #content_area .v65-productdetail-cartqty {
+  font-family: Inter, Arial, sans-serif !important;
+}
+
+/* Add to cart coordinates with planner row */
+body.productdetails #content_area #btn_addtocart,
+body.mc-product-page #content_area #btn_addtocart,
+body.productdetails #v65-product-parent #btn_addtocart,
+body.mc-product-page #v65-product-parent #btn_addtocart,
+body.productdetails #content_area input[name="btnaddtocart"],
+body.mc-product-page #content_area input[name="btnaddtocart"] {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+}
+
+/* Undo column cartqty chrome when Volusion block is inside #mc-qty-under-configuration */
+html body.productdetails #v65-product-parent #mc-qty-under-configuration .v65-productdetail-cartqty,
+html body.mc-product-page #v65-product-parent #mc-qty-under-configuration .v65-productdetail-cartqty,
+html body #v65-product-parent #mc-qty-under-configuration .vol-cartqty__wrap {
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+}

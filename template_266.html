@@ -3398,13 +3398,11 @@ boot();
     return false;
   }
 
-  function mcFixPdpHeaderNavInline() {}
-
-  function mcNormalizeQtyBlockAboveAtc() {}
   try {
     window.mcReorderInlineConfigBeforeCartQty = mcReorderInlineConfigBeforeCartQty;
-    window.mcNormalizeQtyBlockAboveAtc = mcNormalizeQtyBlockAboveAtc;
-    window.mcFixPdpHeaderNavInline = mcFixPdpHeaderNavInline;
+    /* Neutralize any live template/Volusion snippet still calling these names (no inline layout writes). */
+    window.mcFixPdpHeaderNavInline = function () {};
+    window.mcNormalizeQtyBlockAboveAtc = function () {};
     window.mcIsProductDetailPage = mcIsProductDetailPage;
   } catch (eWOrd) {}
 
@@ -17045,12 +17043,22 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 })();
 </script>
 <style id="mc-real-final-header-qty-fix">
+  /* Centered menu + absolute search cluster (body-last wins over mid-page CSS). */
   @media (min-width: 992px) {
+    header.header {
+      position: relative !important;
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+
     header.header .mc-header-desktop-bar[data-mc-header-bar] {
       position: relative !important;
       display: flex !important;
+      flex-direction: row !important;
       align-items: center !important;
       justify-content: center !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
       margin: 0 !important;
       padding: 8px 72px !important;
       min-height: 44px !important;
@@ -17058,15 +17066,29 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       transform: none !important;
     }
 
+    body.productdetails header.header .mc-header-desktop-bar[data-mc-header-bar],
+    body.mc-product-page header.header .mc-header-desktop-bar[data-mc-header-bar],
+    body.mc-theater-seating-pdp header.header .mc-header-desktop-bar[data-mc-header-bar],
+    html.mc-paragon-pdp body header.header .mc-header-desktop-bar[data-mc-header-bar],
+    html.mc-url-looks-like-pdp body.is-home header.header .mc-header-desktop-bar[data-mc-header-bar] {
+      justify-content: center !important;
+      align-items: center !important;
+      min-height: 44px !important;
+      padding: 8px 72px !important;
+      margin: 0 !important;
+      transform: none !important;
+    }
+
     header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
       position: relative !important;
+      z-index: 2 !important;
       flex: 0 1 auto !important;
+      max-width: min(920px, calc(100vw - 280px)) !important;
       margin: 0 auto !important;
       padding: 0 !important;
       display: flex !important;
       justify-content: center !important;
       align-items: center !important;
-      top: 0 !important;
       transform: none !important;
     }
 
@@ -17076,44 +17098,109 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       top: 50% !important;
       transform: translateY(-50%) !important;
       display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
       align-items: center !important;
+      justify-content: flex-end !important;
       gap: 12px !important;
       width: auto !important;
+      max-width: none !important;
       margin: 0 !important;
       padding: 0 !important;
       border: 0 !important;
       background: transparent !important;
-      flex: 0 0 auto !important;
+      flex: none !important;
       z-index: 10 !important;
     }
 
-    header.header .mc-header-search-cart-wrap input[type="text"],
-    header.header .mc-header-search-cart-wrap input[type="search"],
-    header.header .mc-header-search-cart-wrap #search {
-      display: none !important;
-      width: 0 !important;
-      max-width: 0 !important;
-      opacity: 0 !important;
+    header.header .mc-header-search-cart-wrap .mc-header-search-below-nav,
+    header.header .mc-header-search-cart-wrap .header__section--middle {
+      flex: 0 0 auto !important;
+      min-width: 0 !important;
+      width: auto !important;
+    }
+
+    header.header .mc-header-search-cart-wrap .collapsing-search,
+    header.header .mc-header-search-cart-wrap #collapsingSearch {
       border: 0 !important;
+      box-shadow: none !important;
+      background: transparent !important;
     }
 
     header.header .mc-header-search-cart-wrap label,
     header.header .mc-header-search-cart-wrap .search-label {
-      display: none !important;
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    html:not(.mc-search-open) header.header .mc-header-search-cart-wrap input[type="text"],
+    html:not(.mc-search-open) header.header .mc-header-search-cart-wrap input[type="search"],
+    html:not(.mc-search-open) header.header .mc-header-search-cart-wrap #search {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      opacity: 0 !important;
+      border: 0 !important;
+      clip: rect(0, 0, 0, 0) !important;
+      overflow: hidden !important;
+      pointer-events: none !important;
+    }
+
+    html.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-search-below-nav,
+    html.mc-search-open header.header .mc-header-search-cart-wrap .header__section--middle,
+    body.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-search-below-nav,
+    body.mc-search-open header.header .mc-header-search-cart-wrap .header__section--middle {
+      max-width: 220px !important;
+    }
+
+    html.mc-search-open header.header .mc-header-search-cart-wrap input[type="text"],
+    html.mc-search-open header.header .mc-header-search-cart-wrap input[type="search"],
+    html.mc-search-open header.header .mc-header-search-cart-wrap #search,
+    body.mc-search-open header.header .mc-header-search-cart-wrap input[type="text"],
+    body.mc-search-open header.header .mc-header-search-cart-wrap input[type="search"],
+    body.mc-search-open header.header .mc-header-search-cart-wrap #search {
+      position: relative !important;
+      width: 160px !important;
+      max-width: 180px !important;
+      height: 34px !important;
+      opacity: 1 !important;
+      clip: auto !important;
+      overflow: visible !important;
+      pointer-events: auto !important;
+      margin: 0 4px 0 0 !important;
+      padding: 0 8px !important;
+      border: 0 !important;
+      border-bottom: 1px solid #bdbdbd !important;
+      background: transparent !important;
+      font-family: Inter, Arial, sans-serif !important;
+      font-size: 12px !important;
+      letter-spacing: 0.05em !important;
+      color: #111 !important;
+      box-sizing: border-box !important;
     }
 
     #mc-search-icon-button {
       width: 42px !important;
       height: 42px !important;
+      min-width: 42px !important;
       border-radius: 50% !important;
       border: 0 !important;
       background: #fff !important;
-      box-shadow: 0 2px 12px rgba(0,0,0,.08) !important;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
       cursor: pointer !important;
       color: #111 !important;
+      flex-shrink: 0 !important;
     }
 
     #mc-search-icon-button svg {
@@ -17122,10 +17209,17 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       stroke: currentColor !important;
       stroke-width: 1.8 !important;
     }
+
+    #mc-search-icon-button svg circle,
+    #mc-search-icon-button svg line {
+      stroke: currentColor !important;
+    }
   }
 
   #mc-qty-under-configuration {
     display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
     align-items: center !important;
     justify-content: center !important;
     gap: 10px !important;
@@ -17135,35 +17229,89 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     clear: both !important;
     text-align: center !important;
     font-family: Inter, Arial, sans-serif !important;
+    box-sizing: border-box !important;
   }
 
-  #mc-qty-under-configuration label {
-    display: inline-block !important;
-    width: auto !important;
-    flex: 0 0 auto !important;
+  #mc-qty-under-configuration .vol-cartqty__wrap {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 100% !important;
     margin: 0 !important;
+  }
+
+  #mc-qty-under-configuration .vol-cartqty__wrap label {
+    flex: 0 0 auto !important;
+    width: auto !important;
     order: 0 !important;
+    display: inline-block !important;
+    margin: 0 !important;
     font-size: 11px !important;
     font-weight: 400 !important;
-    letter-spacing: .16em !important;
+    letter-spacing: 0.16em !important;
     text-transform: uppercase !important;
     white-space: nowrap !important;
   }
 
-  #mc-qty-under-configuration input {
-    width: 58px !important;
-    height: 36px !important;
+  #mc-qty-under-configuration .mc-qty-synthetic-label {
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.16em !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
     margin: 0 !important;
-    text-align: center !important;
-    order: 1 !important;
+    cursor: default !important;
+    color: #555 !important;
   }
 </style>
 
 <script id="mc-real-final-header-qty-script">
 (function () {
+  function searchWrapEl() {
+    return document.querySelector("header.header .mc-header-search-cart-wrap");
+  }
+
+  function bindSearchIcon() {
+    var wrap = searchWrapEl();
+    var btn = document.getElementById("mc-search-icon-button");
+    if (!wrap || !btn || btn.getAttribute("data-mc-sbound") === "1") return;
+    var input =
+      wrap.querySelector("#search") ||
+      wrap.querySelector('input[type="search"]') ||
+      wrap.querySelector('input[type="text"]');
+    btn.setAttribute("data-mc-sbound", "1");
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      var on = document.documentElement.classList.toggle("mc-search-open");
+      if (document.body) {
+        if (on) document.body.classList.add("mc-search-open");
+        else document.body.classList.remove("mc-search-open");
+      } else if (!on) {
+        document.documentElement.classList.remove("mc-search-open");
+      }
+      if (input && on) {
+        setTimeout(function () {
+          try {
+            input.focus();
+          } catch (err) {}
+        }, 40);
+      } else if (input) {
+        try {
+          input.blur();
+        } catch (errB) {}
+      }
+    });
+  }
+
   function addSearchIcon() {
-    var wrap = document.querySelector("header.header .mc-header-search-cart-wrap");
-    if (!wrap || document.getElementById("mc-search-icon-button")) return;
+    var wrap = searchWrapEl();
+    if (!wrap || document.getElementById("mc-search-icon-button")) {
+      bindSearchIcon();
+      return;
+    }
 
     var btn = document.createElement("button");
     btn.type = "button";
@@ -17171,16 +17319,19 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     btn.setAttribute("aria-label", "Search");
     btn.innerHTML =
       '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
-      '<circle cx="11" cy="11" r="7"></circle>' +
-      '<line x1="16.5" y1="16.5" x2="21" y2="21"></line>' +
-      '</svg>';
+      '<circle cx="11" cy="11" r="7" stroke="currentColor"></circle>' +
+      '<line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor"></line>' +
+      "</svg>";
 
     wrap.insertBefore(btn, wrap.firstChild);
+    bindSearchIcon();
   }
 
   function findQtyInput() {
-    var root = document.querySelector("#v65-product-parent") || document;
+    var root = document.querySelector("#v65-product-parent") || document.getElementById("content_area") || document;
     return (
+      root.querySelector('input[name^="QTY."]') ||
+      root.querySelector('.vol-cartqty__wrap input[type="number"]') ||
       root.querySelector('.vol-cartqty__wrap input') ||
       root.querySelector('.v65-productdetail-cartqty input') ||
       root.querySelector('input[name="QTY"]') ||
@@ -17192,19 +17343,14 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     );
   }
 
-  function findConfigBox() {
-    var root = document.querySelector("#v65-product-parent") || document;
-    return (
-      root.querySelector("#mc-inline-config") ||
-      Array.from(root.querySelectorAll("div, td, table, section")).find(function (el) {
-        var txt = (el.innerText || "").toLowerCase();
-        return txt.includes("configuration") && txt.includes("room planner");
-      })
-    );
+  function findConfigAnchor() {
+    var root = document.querySelector("#v65-product-parent") || document.getElementById("content_area");
+    if (!root) return null;
+    return root.querySelector("#mcConfigurationBlock") || root.querySelector("#mc-inline-config");
   }
 
   function findAddToCart() {
-    var root = document.querySelector("#v65-product-parent") || document;
+    var root = document.querySelector("#v65-product-parent") || document.getElementById("content_area") || document;
     return (
       root.querySelector('input[name="btnaddtocart"]') ||
       root.querySelector("#btn_addtocart") ||
@@ -17214,34 +17360,60 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     );
   }
 
-  function moveQty() {
-    var qty = findQtyInput();
-    var config = findConfigBox();
-    var add = findAddToCart();
+  function shouldSkipQtyLayout() {
+    if (!document.body || !document.body.classList.contains("mc-theater-seating-pdp")) return false;
+    var island = document.querySelector("#v65-product-parent .v65-productdetail-cartqty, #v65-product-parent .vol-cartqty__wrap");
+    if (!island) return true;
+    var s = window.getComputedStyle(island);
+    if (s.display === "none" || s.visibility === "hidden") return true;
+    return false;
+  }
 
-    if (!qty || !config || !add) return;
+  function usefulRow(el) {
+    if (!el) return null;
+    return el.closest("tr, td, table, div") || el.parentElement;
+  }
+
+  function moveQty() {
+    if (shouldSkipQtyLayout()) return;
+
+    var qtyInput = findQtyInput();
+    var cfg = findConfigAnchor();
+    var add = findAddToCart();
+    if (!qtyInput || !cfg || !add) return;
+
+    var qtyBlock =
+      qtyInput.closest(".vol-cartqty__wrap") ||
+      qtyInput.closest(".v65-productdetail-cartqty") ||
+      qtyInput;
 
     var wrap = document.getElementById("mc-qty-under-configuration");
     if (!wrap) {
       wrap = document.createElement("div");
       wrap.id = "mc-qty-under-configuration";
     }
-
-    var label = wrap.querySelector("label");
-    if (!label) {
-      label = document.createElement("label");
-      label.textContent = "Quantity:";
-      wrap.appendChild(label);
+    while (wrap.firstChild) {
+      wrap.removeChild(wrap.firstChild);
     }
 
-    if (!qty.id) qty.id = "mc-real-product-qty";
-    label.setAttribute("for", qty.id);
-    wrap.appendChild(qty);
+    if (qtyBlock.querySelector && qtyBlock.querySelector("label")) {
+      wrap.appendChild(qtyBlock);
+    } else {
+      var lab = document.createElement("label");
+      lab.className = "mc-qty-synthetic-label";
+      lab.textContent = "Quantity";
+      if (!qtyInput.id) qtyInput.id = "mc-real-product-qty";
+      lab.setAttribute("for", qtyInput.id);
+      wrap.appendChild(lab);
+      wrap.appendChild(qtyInput);
+    }
 
-    var configContainer = config.closest("tr, td, div, table") || config;
-    configContainer.parentNode.insertBefore(wrap, configContainer.nextSibling);
+    var cfgRow = usefulRow(cfg) || cfg;
+    if (cfgRow.parentNode) {
+      cfgRow.parentNode.insertBefore(wrap, cfgRow.nextSibling);
+    }
 
-    var addRow = add.closest("tr, td, div, table") || add.parentElement;
+    var addRow = usefulRow(add) || add.parentElement;
     if (addRow && addRow.parentNode === wrap.parentNode) {
       addRow.parentNode.insertBefore(addRow, wrap.nextSibling);
     }
@@ -17260,8 +17432,9 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
   window.addEventListener("load", function () {
     run();
-    setTimeout(run, 500);
-    setTimeout(run, 1500);
+    setTimeout(run, 400);
+    setTimeout(run, 1200);
+    setTimeout(run, 2800);
   });
 })();
 </script>
