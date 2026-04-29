@@ -20,7 +20,7 @@ def _css_remote() -> str:
     p = os.environ.get("SFTP_CSS_REMOTE_FILE", "").strip()
     if p:
         return p
-    return "/vspfiles/css/custom-safe.css"
+    return "/v/vspfiles/css/custom-safe.css"
 
 
 def _mccabe_remote_for_css(c_path: str) -> str:

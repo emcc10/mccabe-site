@@ -14,10 +14,18 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install deploy tools
+      - name: Install tools (lftp = verify downloads; netcat = port check)
         run: |
           sudo apt-get update
           sudo apt-get install -y lftp netcat-openbsd
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Paramiko
+        run: pip install --disable-pip-version-check "paramiko>=3.4,<4"
 
       - name: Verify local files exist
         run: |
@@ -76,61 +84,24 @@ jobs:
             echo "PORT_21_OPEN=false" >> $GITHUB_ENV
           fi
 
-      - name: Deploy files to Volusion
+      # lftp put does NOT create /v/vspfiles/... parents — uploads often 550. Paramiko mkdir+prior does.
+      - name: Deploy template + CSS + overrides (Paramiko SFTP)
         env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_HOST: ${{ secrets.FTP_SERVER }}
+          SFTP_USER: ${{ secrets.FTP_USERNAME }}
+          SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: ${{ secrets.SFTP_PORT }}
+          SFTP_TEMPLATE_REMOTE: ${{ secrets.SFTP_TEMPLATE_REMOTE }}
+          SFTP_CSS_REMOTE_FILE: ${{ secrets.SFTP_CSS_REMOTE_FILE }}
         run: |
-          # PORT_2222_OPEN / PORT_21_OPEN come from GITHUB_ENV (previous step), not from the workflow env context.
           echo "PORT_2222_OPEN=$PORT_2222_OPEN"
-          echo "PORT_21_OPEN=$PORT_21_OPEN"
 
           if [ "$PORT_2222_OPEN" != "true" ]; then
             echo "ERROR: Port 2222 is not open. Do not deploy."
             exit 1
           fi
 
-          echo "Using SFTP on port 2222..."
-
-          # cmd:fail-exit yes stops the whole session on the first failed put (e.g. 550 on /v/).
-          # Then the other paths never run — use fail-exit no so every path is attempted.
-          lftp <<LFTP
-          set sftp:auto-confirm yes
-          set ssl:verify-certificate no
-          set net:timeout 90
-          set net:max-retries 2
-          set net:reconnect-interval-base 10
-          set xfer:clobber yes
-          set cmd:fail-exit no
-
-          open -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222
-
-          # --- template_266.html (browser: https://www.mccabestheaterandliving.com/v/template_266.html)
-          put template_266.html -o /v/template_266.html
-          put template_266.html -o /template_266.html
-          put template_266.html -o v/template_266.html
-          put template_266.html -o template_266.html
-          put template_266.html -o /v/v/template_266.html
-          put template_266.html -o /mccabestheaterandliving.com/v/template_266.html
-
-          # --- custom-safe.css (browser primary: /v/vspfiles/css/custom-safe.css)
-          put vspfiles/css/custom-safe.css -o /v/vspfiles/css/custom-safe.css
-          put vspfiles/css/custom-safe.css -o v/vspfiles/css/custom-safe.css
-          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
-          put vspfiles/css/custom-safe.css -o vspfiles/css/custom-safe.css
-          put vspfiles/css/custom-safe.css -o /v/custom-safe.css
-          put vspfiles/css/custom-safe.css -o /mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css
-
-          # --- mccabe-overrides.css (browser: /v/vspfiles/templates/266/css/mccabe-overrides.css)
-          put vspfiles/templates/266/css/mccabe-overrides.css -o /v/vspfiles/templates/266/css/mccabe-overrides.css
-          put vspfiles/templates/266/css/mccabe-overrides.css -o v/vspfiles/templates/266/css/mccabe-overrides.css
-          put vspfiles/templates/266/css/mccabe-overrides.css -o /vspfiles/templates/266/css/mccabe-overrides.css
-          put vspfiles/templates/266/css/mccabe-overrides.css -o vspfiles/templates/266/css/mccabe-overrides.css
-          put vspfiles/templates/266/css/mccabe-overrides.css -o /mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css
-
-          bye
-          LFTP
+          python scripts/volusion_sftp_deploy.py
 
       - name: Verify files on SFTP (markers must match Git)
         env:
@@ -152,9 +123,9 @@ jobs:
           get /template_266.html -o verify-root.html
           get v/template_266.html -o verify-vrel.html
           get template_266.html -o verify-rel.html
-          get /v/vspfiles/css/custom-safe.css -o verify-css-vabs.html
-          get v/vspfiles/css/custom-safe.css -o verify-css-vrel.html
-          get /vspfiles/css/custom-safe.css -o verify-css-root.html
+          get /v/vspfiles/css/custom-safe.css -o verify-css-vabs.bin
+          get v/vspfiles/css/custom-safe.css -o verify-css-vrel.bin
+          get /vspfiles/css/custom-safe.css -o verify-css-root.bin
           get /v/vspfiles/templates/266/css/mccabe-overrides.css -o verify-mccabe-vabs.css
           get v/vspfiles/templates/266/css/mccabe-overrides.css -o verify-mccabe-vrel.css
           bye
@@ -164,7 +135,7 @@ jobs:
           if [ -n "$EXPECT" ]; then
             echo "Expect template mc-deploy-verify: $EXPECT"
             for f in verify-v.html verify-root.html verify-vrel.html verify-rel.html; do
-              if [ -f "$f" ] && grep -Fq "$EXPECT" "$f"; then
+              if [ -s "$f" ] && grep -Fq "$EXPECT" "$f"; then
                 echo "OK: template marker in $f"
                 OK_TPL=1
                 break
@@ -180,8 +151,8 @@ jobs:
           if [ -n "$CSS_TOKEN" ]; then
             echo "Expect custom-safe contains: $CSS_TOKEN"
             OK_CSS=""
-            for f in verify-css-vabs.html verify-css-vrel.html verify-css-root.html; do
-              if [ -f "$f" ] && grep -Fq "$CSS_TOKEN" "$f"; then
+            for f in verify-css-vabs.bin verify-css-vrel.bin verify-css-root.bin; do
+              if [ -s "$f" ] && grep -Fq "$CSS_TOKEN" "$f"; then
                 echo "OK: custom-safe marker in $f"
                 OK_CSS=1
                 break
@@ -189,7 +160,7 @@ jobs:
             done
             if [ -z "$OK_CSS" ]; then
               echo "ERROR: No downloaded custom-safe copy contains \"$CSS_TOKEN\"."
-              ls -la verify-css-*.html 2>/dev/null || true
+              ls -la verify-css-*.bin 2>/dev/null || true
               exit 1
             fi
           fi
@@ -198,7 +169,7 @@ jobs:
             echo "Expect mccabe-overrides contains: $MC_TOKEN"
             OK_MC=""
             for f in verify-mccabe-vabs.css verify-mccabe-vrel.css; do
-              if [ -f "$f" ] && grep -Fq "$MC_TOKEN" "$f"; then
+              if [ -s "$f" ] && grep -Fq "$MC_TOKEN" "$f"; then
                 echo "OK: mccabe-overrides marker in $f"
                 OK_MC=1
                 break
