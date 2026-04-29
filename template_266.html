@@ -310,9 +310,9 @@
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260428headerfix2: github->volusion deploy verification marker -->
-<!-- MC_CSS_DEPLOY_VERIFY_20260428headerfix2: same token as /vspfiles/css/custom-safe.css line 1 (live CSS is that file; this comment is only so the token is visible on GitHub in the template) -->
-<meta name="mc-deploy-verify" content="20260428headerfix2">
+<!-- MC_DEPLOY_VERIFY_20260429volqtyhdr: github->volusion deploy verification marker -->
+<!-- MC_CSS_DEPLOY_VERIFY_20260429volqtyhdr: same token as /vspfiles/css/custom-safe.css line 1 -->
+<meta name="mc-deploy-verify" content="20260429volqtyhdr">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -322,7 +322,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429a" rel="stylesheet">
+  <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429volqtyhdr" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -3347,7 +3347,12 @@ boot();
       if (/^(quantity|qty)\s*:?\s*$/i.test(t)) return el;
       if (t.length <= 22 && /^(quantity|qty)\b/i.test(t) && !el.querySelector("#mcPlannerBtn")) return el;
     }
-    return qty || null;
+    var volFallback = offers.querySelector(".vol-cartqty__wrap");
+    return (
+      qty ||
+      (volFallback && (volFallback.closest(".v65-productdetail-cartqty") || volFallback)) ||
+      null
+    );
   }
 
   function mcReorderInlineConfigBeforeCartQty() {
@@ -3363,16 +3368,51 @@ boot();
       anchor.parentNode.insertBefore(panel, anchor);
     } catch (eOrd) {}
   }
+  function mcFixPdpHeaderNavInline() {
+    try {
+      if (!document.getElementById("v65-product-parent")) return;
+      var h = document.querySelector("header.header");
+      if (h) {
+        h.style.setProperty("position", "sticky", "important");
+        h.style.setProperty("top", "0", "important");
+        h.style.setProperty("z-index", "10070", "important");
+        h.style.setProperty("background-color", "#fff", "important");
+      }
+      var bar = document.querySelector(".mc-header-desktop-bar[data-mc-header-bar]");
+      if (bar) {
+        bar.style.setProperty("display", "flex", "important");
+        bar.style.setProperty("flex-direction", "row", "important");
+        bar.style.setProperty("align-items", "center", "important");
+        bar.style.setProperty("justify-content", "space-between", "important");
+        bar.style.setProperty("margin-top", "0", "important");
+        bar.style.setProperty("transform", "none", "important");
+      }
+      var menu = document.querySelector(".mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu");
+      if (menu) {
+        menu.style.setProperty("margin-top", "0", "important");
+        menu.style.setProperty("margin-bottom", "0", "important");
+        menu.style.setProperty("padding-top", "0", "important");
+        menu.style.setProperty("transform", "none", "important");
+        menu.style.setProperty("align-self", "center", "important");
+      }
+    } catch (eMcHdr) {}
+  }
+
   function mcNormalizeQtyBlockAboveAtc() {
     var root = document.getElementById("v65-product-parent") || document.getElementById("content_area");
     if (!root) return;
     var offers = root.querySelector('[itemprop="offers"]') || root;
-    var qtyWrap =
-      offers.querySelector(".v65-productdetail-cartqty") ||
-      root.querySelector(".v65-productdetail-cartqty");
+    var v65qty =
+      offers.querySelector(".v65-productdetail-cartqty") || root.querySelector(".v65-productdetail-cartqty");
+    var volWrap =
+      offers.querySelector(".vol-cartqty__wrap") || root.querySelector(".vol-cartqty__wrap");
+    var qtyWrap = null;
+    if (v65qty && volWrap && v65qty.contains(volWrap)) qtyWrap = v65qty;
+    else if (v65qty) qtyWrap = v65qty;
+    else if (volWrap) qtyWrap = volWrap;
+
     var addWrap =
-      offers.querySelector(".v65-product-addtocart") ||
-      root.querySelector(".v65-product-addtocart");
+      offers.querySelector(".v65-product-addtocart") || root.querySelector(".v65-product-addtocart");
     if (!qtyWrap || !addWrap || !qtyWrap.parentNode) return;
     try {
       if (qtyWrap.nextElementSibling !== addWrap) qtyWrap.parentNode.insertBefore(qtyWrap, addWrap);
@@ -3403,6 +3443,12 @@ boot();
         }
       }
     }
+    if (!labelNode && volWrap) {
+      var lab = volWrap.querySelector("label");
+      if (lab && lab.parentNode === volWrap) {
+        labelNode = lab;
+      }
+    }
     if (!labelNode) {
       var siblings = qtyWrap.parentNode && qtyWrap.parentNode.children ? qtyWrap.parentNode.children : [];
       for (var si = 0; si < siblings.length; si++) {
@@ -3411,7 +3457,9 @@ boot();
         var nt = (node.textContent || "").replace(/\s+/g, " ").trim();
         if (/^(quantity|qty)\s*:?\s*$/i.test(nt) && !node.querySelector("input,select,button,#mcPlannerBtn")) {
           labelNode = node;
-          try { qtyWrap.insertBefore(node, qtyWrap.firstChild); } catch (eLblMove) {}
+          try {
+            qtyWrap.insertBefore(node, qtyWrap.firstChild);
+          } catch (eLblMove) {}
           break;
         }
       }
@@ -3422,24 +3470,60 @@ boot();
     qtyWrap.style.setProperty("justify-content", "center", "important");
     qtyWrap.style.setProperty("text-align", "center", "important");
     qtyWrap.style.setProperty("width", "100%", "important");
+    qtyWrap.style.setProperty("max-width", "320px", "important");
     qtyWrap.style.setProperty("margin", "0 auto 10px auto", "important");
-    var qInput = qtyWrap.querySelector('input[name^="QTY."], input[name*="qty" i], input[name*="quantity" i], select[name*="qty" i], select[name*="quantity" i]');
+    if (volWrap && volWrap !== qtyWrap && qtyWrap.contains(volWrap)) {
+      volWrap.style.setProperty("display", "flex", "important");
+      volWrap.style.setProperty("flex-direction", "row", "important");
+      volWrap.style.setProperty("flex-wrap", "wrap", "important");
+      volWrap.style.setProperty("align-items", "center", "important");
+      volWrap.style.setProperty("justify-content", "center", "important");
+      volWrap.style.setProperty("gap", "8px", "important");
+      volWrap.style.setProperty("width", "100%", "important");
+    }
+    var qInput = qtyWrap.querySelector(
+      'input[name^="QTY."], input[name="QTY"], input[name*="qty" i], input[name*="quantity" i], select[name*="qty" i], select[name*="quantity" i]'
+    );
     if (qInput) {
       qInput.style.setProperty("margin", "6px auto 0 auto", "important");
       qInput.style.setProperty("display", "block", "important");
       qInput.style.setProperty("text-align", "center", "important");
+      qInput.style.setProperty("min-width", "48px", "important");
+      qInput.style.setProperty("width", "56px", "important");
     }
     if (labelNode) {
       labelNode.style.setProperty("display", "block", "important");
       labelNode.style.setProperty("width", "100%", "important");
       labelNode.style.setProperty("text-align", "center", "important");
       labelNode.style.setProperty("margin", "0 0 4px 0", "important");
+      labelNode.style.setProperty("order", "-1", "important");
     }
   }
   try {
     window.mcReorderInlineConfigBeforeCartQty = mcReorderInlineConfigBeforeCartQty;
     window.mcNormalizeQtyBlockAboveAtc = mcNormalizeQtyBlockAboveAtc;
+    window.mcFixPdpHeaderNavInline = mcFixPdpHeaderNavInline;
   } catch (eWOrd) {}
+
+  function mcBootPdpQtyAndHeader() {
+    if (!document.getElementById("v65-product-parent")) return;
+    try {
+      if (typeof window.mcFixPdpHeaderNavInline === "function") window.mcFixPdpHeaderNavInline();
+    } catch (eB1) {}
+    try {
+      if (typeof window.mcNormalizeQtyBlockAboveAtc === "function") window.mcNormalizeQtyBlockAboveAtc();
+    } catch (eB2) {}
+  }
+  try {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", mcBootPdpQtyAndHeader);
+    } else {
+      mcBootPdpQtyAndHeader();
+    }
+    [60, 150, 350, 800, 1800, 3500, 6000].forEach(function (ms) {
+      setTimeout(mcBootPdpQtyAndHeader, ms);
+    });
+  } catch (eSchedHdr) {}
 
   /** If inline config was mounted under the title (or wrong column), move it into the options TD. */
   function mcRelocateMcInlineConfigToOptionsColumn() {
@@ -3453,6 +3537,9 @@ boot();
     } catch (eRel) {}
     mcReorderInlineConfigBeforeCartQty();
     mcNormalizeQtyBlockAboveAtc();
+    try {
+      mcFixPdpHeaderNavInline();
+    } catch (eHdrRel) {}
   }
 
   function mount(opts){
@@ -3585,11 +3672,13 @@ boot();
       mcRelocateMcInlineConfigToOptionsColumn();
       mcReorderInlineConfigBeforeCartQty();
       mcNormalizeQtyBlockAboveAtc();
+      mcFixPdpHeaderNavInline();
       [100, 250, 500, 900, 1600, 2400, 3600, 5200].forEach(function (ms) {
         setTimeout(function () {
           mcRelocateMcInlineConfigToOptionsColumn();
           mcReorderInlineConfigBeforeCartQty();
           mcNormalizeQtyBlockAboveAtc();
+          mcFixPdpHeaderNavInline();
         }, ms);
       });
     } catch (eRelSched) {}
@@ -4991,6 +5080,11 @@ window.applyPlannerToPage = function (payload) {
       window.mcNormalizeQtyBlockAboveAtc();
     }
   } catch (eReApply2) {}
+  try {
+    if (typeof window.mcFixPdpHeaderNavInline === "function") {
+      window.mcFixPdpHeaderNavInline();
+    }
+  } catch (eReApply3) {}
 };
 
 function mcBuildPlannerConfigFieldText(payload) {
@@ -16449,7 +16543,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 </style>
 
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
-<link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260428c" id="mc-mccabe-overrides-body-last" />
+<link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429volqtyhdr" id="mc-mccabe-overrides-body-last" />
 <script id="mccabe-product-room-planner-price-fix" type="text/plain" data-disabled="true">
 (function () {
   var FOUR_L_DISCOUNT = 500;

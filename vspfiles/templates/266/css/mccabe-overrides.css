@@ -1,6 +1,6 @@
-/*0428 McCabe fixes — load after template.css (linked from template_266.html).
+/*0429 McCabe fixes — load after template.css (linked from template_266.html).
    Ensures hero copy + listing member block even if custom-safe.css fails to load.
-   MC_OVERRIDES_VERIFY_20260427e — linked again at end of <body> after Volusion vnav.css so rules win. */
+   MC_OVERRIDES_VERIFY_20260429volqtyhdr — linked again at end of <body> after Volusion vnav.css so rules win. */
 
 /* Category: bottom pager + compact subcats (duplicated if custom-safe absent) */
 .mc-category-pager {
@@ -558,14 +558,61 @@ html body.mc-product-page #mcLeatherSwatchStrip::-webkit-scrollbar {
 
 @media (min-width: 992px) {
   html body.productdetails .mc-header-desktop-bar[data-mc-header-bar],
-  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] {
+  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar],
+  html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar],
+  html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] {
     min-height: 48px !important;
     align-items: center !important;
   }
   html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
+  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+  html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+  html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
     transform: none !important;
   }
+}
+
+/* Volusion “vol-cartqty__wrap” PDP chrome (Paragon / newer store-dot layouts) — template.css only centered inline-block */
+html body #v65-product-parent .vol-cartqty__wrap,
+html body #content_area #v65-product-parent .vol-cartqty__wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  text-align: center !important;
+  width: 100% !important;
+  max-width: 320px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
+}
+
+html body #v65-product-parent .vol-cartqty__wrap label {
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+  margin: 0 0 8px 0 !important;
+  order: -1 !important;
+}
+
+html body #v65-product-parent .vol-cartqty__wrap input[name="QTY."],
+html body #v65-product-parent .vol-cartqty__wrap input[name^="QTY."] {
+  display: inline-block !important;
+  width: 56px !important;
+  min-width: 48px !important;
+  max-width: 72px !important;
+  height: 38px !important;
+  text-align: center !important;
+  margin: 4px 6px !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+}
+
+html body #v65-product-parent .vol-cartqty__wrap input[value="+"],
+html body #v65-product-parent .vol-cartqty__wrap input[value="-"] {
+  display: inline-block !important;
+  margin: 4px 4px !important;
+  vertical-align: middle !important;
 }
