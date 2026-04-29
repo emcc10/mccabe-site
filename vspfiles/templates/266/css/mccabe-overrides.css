@@ -448,7 +448,20 @@ html body.mc-product-page #mcConfigurationBlock {
   background: #fff !important;
 }
 
-html body.productdetails #mcConfigurationBlock .mc-configuration-rh__heading,
+html body.productdetails #mcPlannerBtn span,
+body.mc-product-page #mcPlannerBtn span,
+body.mc-theater-seating-pdp #mcPlannerBtn span,
+html.mc-paragon-pdp body #mcPlannerBtn span,
+body.productdetails #mcProductSummaryBtn span,
+body.mc-product-page #mcProductSummaryBtn span,
+body.mc-theater-seating-pdp #mcProductSummaryBtn span,
+html.mc-paragon-pdp body #mcProductSummaryBtn span {
+  font: inherit !important;
+  letter-spacing: inherit !important;
+  text-transform: inherit !important;
+}
+
+body.productdetails #mcConfigurationBlock .mc-configuration-rh__heading,
 html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__heading {
   font-weight: 500 !important;
   letter-spacing: 0.12em !important;
@@ -737,9 +750,70 @@ body.mc-product-page #content_area .mc-member-grid-price {
   letter-spacing: 0.08em !important;
 }
 
-/* Inline config: leather header, planner/summary, configuration */
+/* Unified RH purchase controls + typography (PDP family) */
+body.productdetails #mcPlannerRow,
+body.mc-product-page #mcPlannerRow,
+body.mc-theater-seating-pdp #mcPlannerRow,
+html.mc-paragon-pdp body #mcPlannerRow {
+  justify-content: center !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+}
+
+body.productdetails #mcPlannerBtn,
+body.mc-product-page #mcPlannerBtn,
+body.mc-theater-seating-pdp #mcPlannerBtn,
+html.mc-paragon-pdp body #mcPlannerBtn,
+body.productdetails #mcProductSummaryBtn,
+body.mc-product-page #mcProductSummaryBtn,
+body.mc-theater-seating-pdp #mcProductSummaryBtn,
+html.mc-paragon-pdp body #mcProductSummaryBtn {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: #111 !important;
+  line-height: 1 !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  border: 1px solid #1f1f1f !important;
+  border-radius: 3px !important;
+  background: #fff !important;
+  padding: 0 16px !important;
+  margin: 0 !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  width: auto !important;
+  white-space: nowrap !important;
+  text-decoration: none !important;
+}
+
+body.productdetails #mcPlannerBtn .mc-btn-icon,
+body.mc-product-page #mcPlannerBtn .mc-btn-icon,
+body.mc-theater-seating-pdp #mcPlannerBtn .mc-btn-icon,
+html.mc-paragon-pdp body #mcPlannerBtn .mc-btn-icon,
+body.productdetails #mcProductSummaryBtn .mc-btn-icon,
+body.mc-product-page #mcProductSummaryBtn .mc-btn-icon,
+body.mc-theater-seating-pdp #mcProductSummaryBtn .mc-btn-icon,
+html.mc-paragon-pdp body #mcProductSummaryBtn .mc-btn-icon {
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* Inline config: leather header — body text uses purchase column rules below */
 body.productdetails #mcLeatherHeader,
-body.mc-product-page #mcLeatherHeader {
+body.mc-product-page #mcLeatherHeader,
+body.mc-theater-seating-pdp #mcLeatherHeader,
+html.mc-paragon-pdp body #mcLeatherHeader {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 11px !important;
   font-weight: 400 !important;
@@ -749,7 +823,9 @@ body.mc-product-page #mcLeatherHeader {
 }
 
 body.productdetails #mcLeatherSummary,
-body.mc-product-page #mcLeatherSummary {
+body.mc-product-page #mcLeatherSummary,
+body.mc-theater-seating-pdp #mcLeatherSummary,
+html.mc-paragon-pdp body #mcLeatherSummary {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 12px !important;
   font-weight: 300 !important;
@@ -757,29 +833,11 @@ body.mc-product-page #mcLeatherSummary {
   color: #333 !important;
 }
 
-body.productdetails #mcPlannerBtn,
-body.mc-product-page #mcPlannerBtn,
-body.productdetails #mcProductSummaryBtn,
-body.mc-product-page #mcProductSummaryBtn {
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 12px !important;
-  font-weight: 400 !important;
-  letter-spacing: 0.14em !important;
-  text-transform: uppercase !important;
-  line-height: 1 !important;
-  min-height: 44px !important;
-  box-sizing: border-box !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 10px !important;
-  border: 1px solid #333 !important;
-  border-radius: 0 !important;
-  padding: 10px 16px !important;
-}
-
+/* Chevron-only leather affordance keeps compact hit target; no leather modal change */
 body.productdetails #mcLeatherBtn,
-body.mc-product-page #mcLeatherBtn {
+body.mc-product-page #mcLeatherBtn,
+body.mc-theater-seating-pdp #mcLeatherBtn,
+html.mc-paragon-pdp body #mcLeatherBtn {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 18px !important;
   font-weight: 400 !important;
@@ -795,21 +853,29 @@ body.mc-product-page #mcLeatherBtn {
   justify-content: center !important;
 }
 
-body.productdetails #mcPlannerRow,
-body.mc-product-page #mcPlannerRow {
-  align-items: stretch !important;
+body.productdetails #wmOpen.wm-btn,
+body.mc-product-page #wmOpen.wm-btn,
+body.mc-theater-seating-pdp #wmOpen.wm-btn,
+html.mc-paragon-pdp body #wmOpen.wm-btn {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: #111 !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  border: 1px solid #1f1f1f !important;
+  border-radius: 3px !important;
+  background: #fff !important;
+  padding: 0 16px !important;
+  cursor: pointer !important;
 }
-
-body.productdetails #mcPlannerBtn span,
-body.mc-product-page #mcPlannerBtn span,
-body.productdetails #mcProductSummaryBtn span,
-body.mc-product-page #mcProductSummaryBtn span {
-  font: inherit !important;
-  letter-spacing: inherit !important;
-  text-transform: inherit !important;
-}
-
-body.productdetails #mcConfigurationBlock .mc-configuration-rh__heading,
 body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__heading {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 11px !important;
@@ -821,8 +887,12 @@ body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__heading {
 
 body.productdetails #mcConfigurationCaption,
 body.mc-product-page #mcConfigurationCaption,
+body.mc-theater-seating-pdp #mcConfigurationCaption,
+html.mc-paragon-pdp body #mcConfigurationCaption,
 body.productdetails #mcConfigurationBlock .mc-configuration-rh__caption,
-body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__caption {
+body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__caption,
+body.mc-theater-seating-pdp #mcConfigurationBlock .mc-configuration-rh__caption,
+html.mc-paragon-pdp body #mcConfigurationBlock .mc-configuration-rh__caption {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 13px !important;
   font-weight: 300 !important;
@@ -853,20 +923,36 @@ body.mc-product-page #content_area .v65-productdetail-cartqty {
   font-family: Inter, Arial, sans-serif !important;
 }
 
-/* Add to cart coordinates with planner row */
+/* Add to cart — match planner / summary control */
 body.productdetails #content_area #btn_addtocart,
 body.mc-product-page #content_area #btn_addtocart,
+body.mc-theater-seating-pdp #content_area #btn_addtocart,
+html.mc-paragon-pdp body #content_area #btn_addtocart,
 body.productdetails #v65-product-parent #btn_addtocart,
 body.mc-product-page #v65-product-parent #btn_addtocart,
+body.mc-theater-seating-pdp #v65-product-parent #btn_addtocart,
+html.mc-paragon-pdp body #v65-product-parent #btn_addtocart,
 body.productdetails #content_area input[name="btnaddtocart"],
-body.mc-product-page #content_area input[name="btnaddtocart"] {
+body.mc-product-page #content_area input[name="btnaddtocart"],
+body.mc-theater-seating-pdp #content_area input[name="btnaddtocart"],
+html.mc-paragon-pdp body #content_area input[name="btnaddtocart"] {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 12px !important;
   font-weight: 400 !important;
   letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
+  color: #111 !important;
+  height: 44px !important;
   min-height: 44px !important;
   box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  border: 1px solid #1f1f1f !important;
+  border-radius: 3px !important;
+  background: #fff !important;
+  padding: 0 16px !important;
 }
 
 /* Undo column cartqty chrome when Volusion block is inside #mc-qty-under-configuration */
