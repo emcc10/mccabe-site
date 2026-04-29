@@ -310,9 +310,9 @@
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260429volqtyhdr: github->volusion deploy verification marker -->
-<!-- MC_CSS_DEPLOY_VERIFY_20260429volqtyhdr: same token as /vspfiles/css/custom-safe.css line 1 -->
-<meta name="mc-deploy-verify" content="20260429volqtyhdr">
+<!-- MC_DEPLOY_VERIFY_20260429qtyhdrfix: github->volusion deploy verification marker -->
+<!-- MC_CSS_DEPLOY_VERIFY_20260429qtyhdrfix: same token as /vspfiles/css/custom-safe.css line 1 -->
+<meta name="mc-deploy-verify" content="20260429qtyhdrfix">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -322,7 +322,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429volqtyhdr" rel="stylesheet">
+  <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429qtyhdrfix" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -3472,15 +3472,8 @@ boot();
     qtyWrap.style.setProperty("width", "100%", "important");
     qtyWrap.style.setProperty("max-width", "320px", "important");
     qtyWrap.style.setProperty("margin", "0 auto 10px auto", "important");
-    if (volWrap && volWrap !== qtyWrap && qtyWrap.contains(volWrap)) {
-      volWrap.style.setProperty("display", "flex", "important");
-      volWrap.style.setProperty("flex-direction", "row", "important");
-      volWrap.style.setProperty("flex-wrap", "wrap", "important");
-      volWrap.style.setProperty("align-items", "center", "important");
-      volWrap.style.setProperty("justify-content", "center", "important");
-      volWrap.style.setProperty("gap", "8px", "important");
-      volWrap.style.setProperty("width", "100%", "important");
-    }
+    /* Inner .vol-cartqty__wrap: layout from mccabe-overrides.css (label full width, stepper row below).
+       Do not set flex-direction inline — row fought “label above” when nested in .v65-productdetail-cartqty. */
     var qInput = qtyWrap.querySelector(
       'input[name^="QTY."], input[name="QTY"], input[name*="qty" i], input[name*="quantity" i], select[name*="qty" i], select[name*="quantity" i]'
     );
@@ -16543,7 +16536,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 </style>
 
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
-<link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429volqtyhdr" id="mc-mccabe-overrides-body-last" />
+<link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429qtyhdrfix" id="mc-mccabe-overrides-body-last" />
 <script id="mccabe-product-room-planner-price-fix" type="text/plain" data-disabled="true">
 (function () {
   var FOUR_L_DISCOUNT = 500;

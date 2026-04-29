@@ -1,6 +1,6 @@
 /*0429 McCabe fixes — load after template.css (linked from template_266.html).
    Ensures hero copy + listing member block even if custom-safe.css fails to load.
-   MC_OVERRIDES_VERIFY_20260429volqtyhdr — linked again at end of <body> after Volusion vnav.css so rules win. */
+   MC_OVERRIDES_VERIFY_20260429qtyhdrfix — linked again at end of <body> after Volusion vnav.css so rules win. */
 
 /* Category: bottom pager + compact subcats (duplicated if custom-safe absent) */
 .mc-category-pager {
@@ -572,15 +572,93 @@ html body.mc-product-page #mcLeatherSwatchStrip::-webkit-scrollbar {
     margin-bottom: 0 !important;
     transform: none !important;
   }
+
+  /* PDP: one-line search + cart (no “Search” label row); nav aligns with fixed home/cart icons */
+  :is(
+      body.productdetails,
+      body.mc-product-page,
+      body.mc-theater-seating-pdp,
+      html.mc-paragon-pdp body,
+      body:has(#v65-product-parent)
+    )
+    header.header
+    > .header__section:not(.header__section--middle) {
+    padding-top: 0 !important;
+  }
+
+  :is(
+      body.productdetails,
+      body.mc-product-page,
+      body.mc-theater-seating-pdp,
+      html.mc-paragon-pdp body,
+      body:has(#v65-product-parent)
+    )
+    .mc-header-desktop-bar
+    .mc-header-search-cart-wrap {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 10px !important;
+    grid-template-columns: initial !important;
+    grid-template-rows: initial !important;
+    row-gap: 0 !important;
+  }
+
+  :is(
+      body.productdetails,
+      body.mc-product-page,
+      body.mc-theater-seating-pdp,
+      html.mc-paragon-pdp body,
+      body:has(#v65-product-parent)
+    )
+    .mc-header-desktop-bar
+    .mc-header-search-cart-wrap::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  :is(
+      body.productdetails,
+      body.mc-product-page,
+      body.mc-theater-seating-pdp,
+      html.mc-paragon-pdp body,
+      body:has(#v65-product-parent)
+    )
+    .mc-header-desktop-bar
+    .mc-header-search-below-nav {
+    grid-column: initial !important;
+    grid-row: initial !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
+  :is(
+      body.productdetails,
+      body.mc-product-page,
+      body.mc-theater-seating-pdp,
+      html.mc-paragon-pdp body,
+      body:has(#v65-product-parent)
+    )
+    .mc-header-desktop-bar
+    .mc-header-cart {
+    grid-column: initial !important;
+    grid-row: initial !important;
+    flex: 0 0 auto !important;
+  }
 }
 
-/* Volusion “vol-cartqty__wrap” PDP chrome (Paragon / newer store-dot layouts) — template.css only centered inline-block */
+/* Volusion “vol-cartqty__wrap” PDP chrome (Paragon / newer store-dot layouts) —
+   row + wrap so label is one full line; − / qty / + share the row below (works without a DOM wrapper). */
 html body #v65-product-parent .vol-cartqty__wrap,
 html body #content_area #v65-product-parent .vol-cartqty__wrap {
   display: flex !important;
-  flex-direction: column !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
   align-items: center !important;
-  justify-content: flex-start !important;
+  justify-content: center !important;
+  gap: 8px !important;
   text-align: center !important;
   width: 100% !important;
   max-width: 320px !important;
@@ -591,9 +669,10 @@ html body #content_area #v65-product-parent .vol-cartqty__wrap {
 
 html body #v65-product-parent .vol-cartqty__wrap label {
   display: block !important;
+  flex: 0 0 100% !important;
   width: 100% !important;
   text-align: center !important;
-  margin: 0 0 8px 0 !important;
+  margin: 0 0 6px 0 !important;
   order: -1 !important;
 }
 

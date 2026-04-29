@@ -1,4 +1,4 @@
-/* 0429 C_CSS_DEPLOY_VERIFY_20260429volqtyhdr — vol-cartqty + PDP header; verify deploy matches template meta */
+/* 0429 C_CSS_DEPLOY_VERIFY_20260429qtyhdrfix — vol-cartqty text-align + PDP header; verify deploy matches template meta */
 /* MC_DEPLOY_VERIFY — LAST-WIN: strip ::before Search labels; PDP layout + single search underline; see file end */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -11202,6 +11202,21 @@ body.vertex-flipbook-ready .vertex-flipbook-thumb img{
   body.mc-product-page #v65-product-parent .v65-product-addtocart *,
   body.mc-theater-seating-pdp #v65-product-parent .v65-product-addtocart *,
   html.mc-paragon-pdp body #v65-product-parent .v65-product-addtocart * {
+    text-align: center !important;
+  }
+
+  /* .vol-cartqty__wrap often sits directly under [itemprop="offers"]; offers * { text-align:left } must not win here */
+  body.productdetails #v65-product-parent [itemprop="offers"] .vol-cartqty__wrap,
+  body.mc-product-page #v65-product-parent [itemprop="offers"] .vol-cartqty__wrap,
+  body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"] .vol-cartqty__wrap,
+  html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"] .vol-cartqty__wrap {
+    text-align: center !important;
+  }
+
+  body.productdetails #v65-product-parent [itemprop="offers"] .vol-cartqty__wrap *,
+  body.mc-product-page #v65-product-parent [itemprop="offers"] .vol-cartqty__wrap *,
+  body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"] .vol-cartqty__wrap *,
+  html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"] .vol-cartqty__wrap * {
     text-align: center !important;
   }
 body.productdetails #v65-product-parent .v65-productdetail-cartqty,
