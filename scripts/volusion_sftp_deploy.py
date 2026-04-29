@@ -248,7 +248,8 @@ def main() -> int:
     os.chdir(ws)
 
     host = os.environ["SFTP_HOST"]
-    port = int(os.environ.get("SFTP_PORT", "2222"))
+    # GitHub Actions sets SFTP_PORT to "" when the optional secret is unset (key present, empty value).
+    port = int((os.environ.get("SFTP_PORT") or "").strip() or "2222")
     user = os.environ["SFTP_USER"]
     password = os.environ["SFTP_PASS"]
 
