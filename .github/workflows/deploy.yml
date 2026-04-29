@@ -79,15 +79,21 @@ jobs:
           echo "Uploading template backup to /v/template_266.html..."
           put template_266.html -o /v/template_266.html
 
-          echo "Uploading custom-safe.css..."
+          echo "Uploading custom-safe.css to /v/vspfiles/css/custom-safe.css..."
+          put vspfiles/css/custom-safe.css -o /v/vspfiles/css/custom-safe.css
+
+          echo "Trying custom-safe.css root fallback..."
+          set cmd:fail-exit no
           put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
 
-          echo "Trying mccabe-overrides.css..."
-          set cmd:fail-exit no
+          echo "Uploading mccabe-overrides.css to /v/vspfiles/templates/266/css/mccabe-overrides.css..."
+          put vspfiles/templates/266/css/mccabe-overrides.css -o /v/vspfiles/templates/266/css/mccabe-overrides.css
+
+          echo "Trying mccabe-overrides.css root fallback..."
           put vspfiles/templates/266/css/mccabe-overrides.css -o /vspfiles/templates/266/css/mccabe-overrides.css
           set cmd:fail-exit yes
 
-          echo "Deploy complete. If mccabe-overrides.css was locked, rerun later."
+          echo "Deploy complete. If a CSS fallback was locked or missing, check the log."
 
           bye
           EOF
