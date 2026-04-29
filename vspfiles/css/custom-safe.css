@@ -3210,8 +3210,7 @@ body.mc-product-page select.mc-native-leather {
     }
 
     /* Choose Leather + Room Planner + Product Summary: same width */
-    .mc-config-btn,
-    #mcLeatherBtn,
+    .mc-config-btn:not(#mcLeatherBtn),
     #mcPlannerBtn,
     #mcProductSummaryBtn {
       width: 260px !important;
@@ -11918,4 +11917,196 @@ html.mc-paragon-pdp body [class*="cartqty__wrap"] label {
   text-align: center !important;
   margin: 0 0 6px 0 !important;
   order: -1 !important;
+}
+
+/* MC_HEADER_SEARCH_RH_20260429 — first-paint safe: absolute search cluster, no “Search” label/underline; all interior URL types */
+@media (min-width: 992px) {
+  :is(
+      html:not(.mc-allow-home-hero) body,
+      body:not(.is-home),
+      body.category,
+      body.productdetails,
+      body.mc-product-page,
+      body.mc-theater-seating-pdp,
+      html.category body,
+      html.mc-url-looks-like-pdp body.is-home,
+      html.mc-paragon-pdp body
+    )
+    header.header
+    > .header__section:not(.header__section--middle) {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  :is(
+      html:not(.mc-allow-home-hero) body,
+      body:not(.is-home),
+      body.category,
+      body.productdetails,
+      body.mc-product-page,
+      body.mc-theater-seating-pdp,
+      html.category body,
+      html.mc-url-looks-like-pdp body.is-home,
+      html.mc-paragon-pdp body
+    )
+    .mc-header-desktop-bar[data-mc-header-bar] {
+    justify-content: center !important;
+    align-items: center !important;
+    position: relative !important;
+    padding: 8px 72px !important;
+    min-height: 44px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  :is(
+      html:not(.mc-allow-home-hero) body,
+      body:not(.is-home),
+      body.category,
+      body.productdetails,
+      body.mc-product-page,
+      body.mc-theater-seating-pdp,
+      html.category body,
+      html.mc-url-looks-like-pdp body.is-home,
+      html.mc-paragon-pdp body
+    )
+    .mc-header-desktop-bar[data-mc-header-bar]
+    .microblock.main-menu {
+    flex: 0 1 auto !important;
+    max-width: min(920px, calc(100vw - 280px)) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  :is(
+      html:not(.mc-allow-home-hero) body,
+      body:not(.is-home),
+      body.category,
+      body.productdetails,
+      body.mc-product-page,
+      body.mc-theater-seating-pdp,
+      html.category body,
+      html.mc-url-looks-like-pdp body.is-home,
+      html.mc-paragon-pdp body
+    )
+    .mc-header-desktop-bar[data-mc-header-bar]
+    .mc-header-search-cart-wrap {
+    position: absolute !important;
+    right: 36px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+  }
+
+  :is(
+      html:not(.mc-allow-home-hero) body,
+      body:not(.is-home),
+      body.category,
+      body.productdetails,
+      body.mc-product-page,
+      body.mc-theater-seating-pdp,
+      html.category body,
+      html.mc-url-looks-like-pdp body.is-home,
+      html.mc-paragon-pdp body
+    )
+    .mc-header-desktop-bar[data-mc-header-bar]
+    .mc-header-search-cart-wrap::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  :is(
+      html:not(.mc-allow-home-hero) body,
+      body:not(.is-home),
+      body.category,
+      body.productdetails,
+      body.mc-product-page,
+      body.mc-theater-seating-pdp,
+      html.category body,
+      html.mc-url-looks-like-pdp body.is-home,
+      html.mc-paragon-pdp body
+    )
+    .mc-header-desktop-bar[data-mc-header-bar]
+    .collapsing-search__form
+    .row {
+    border-bottom: none !important;
+    border-top: none !important;
+    padding-bottom: 0 !important;
+    box-shadow: none !important;
+  }
+
+  :is(
+      html:not(.mc-allow-home-hero) body,
+      body:not(.is-home),
+      body.category,
+      body.productdetails,
+      body.mc-product-page,
+      body.mc-theater-seating-pdp,
+      html.category body,
+      html.mc-url-looks-like-pdp body.is-home,
+      html.mc-paragon-pdp body
+    )
+    .mc-header-desktop-bar[data-mc-header-bar]
+    .mc-header-search-cart-wrap:focus-within,
+  html.mc-search-open
+    :is(
+        html:not(.mc-allow-home-hero) body,
+        body:not(.is-home),
+        body.category,
+        body.productdetails,
+        body.mc-product-page,
+        body.mc-theater-seating-pdp,
+        html.category body,
+        html.mc-url-looks-like-pdp body.is-home,
+        html.mc-paragon-pdp body
+      )
+    .mc-header-desktop-bar[data-mc-header-bar]
+    .mc-header-search-cart-wrap,
+  body.mc-search-open
+    :is(
+        html:not(.mc-allow-home-hero) body,
+        body:not(.is-home),
+        body.category,
+        body.productdetails,
+        body.mc-product-page,
+        body.mc-theater-seating-pdp,
+        html.category body,
+        html.mc-url-looks-like-pdp body.is-home,
+        html.mc-paragon-pdp body
+      )
+    .mc-header-desktop-bar[data-mc-header-bar]
+    .mc-header-search-cart-wrap {
+    border-bottom: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* In-bar search: never show row underline on hover (collapsed icon state) */
+@media (min-width: 992px) {
+  header.header .mc-header-desktop-bar .collapsing-search:hover .collapsing-search__form .row {
+    border-bottom: none !important;
+  }
+  header.header .mc-header-desktop-bar .collapsing-search:focus-within,
+  html.mc-search-open header.header .mc-header-desktop-bar .collapsing-search,
+  body.mc-search-open header.header .mc-header-desktop-bar .collapsing-search {
+    transform: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
 }

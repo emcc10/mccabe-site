@@ -680,10 +680,16 @@ body.mc-product-page #v65-product-parent .mc-pdp-options-td {
 
 body.productdetails #content_area .ProductDescription,
 body.mc-product-page #content_area .ProductDescription,
+body.mc-theater-seating-pdp #content_area .ProductDescription,
+html.mc-paragon-pdp body #content_area .ProductDescription,
 body.productdetails #content_area .product-description,
 body.mc-product-page #content_area .product-description,
+body.mc-theater-seating-pdp #content_area .product-description,
+html.mc-paragon-pdp body #content_area .product-description,
 body.productdetails #v65-product-parent .ProductDescription,
-body.mc-product-page #v65-product-parent .ProductDescription {
+body.mc-product-page #v65-product-parent .ProductDescription,
+body.mc-theater-seating-pdp #v65-product-parent .ProductDescription,
+html.mc-paragon-pdp body #v65-product-parent .ProductDescription {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 13px !important;
   font-weight: 300 !important;
@@ -694,8 +700,12 @@ body.mc-product-page #v65-product-parent .ProductDescription {
 
 body.productdetails #content_area .mc-product-availability,
 body.mc-product-page #content_area .mc-product-availability,
+body.mc-theater-seating-pdp #content_area .mc-product-availability,
+html.mc-paragon-pdp body #content_area .mc-product-availability,
 body.productdetails #content_area [class*="availability"],
-body.mc-product-page #content_area [class*="availability"] {
+body.mc-product-page #content_area [class*="availability"],
+body.mc-theater-seating-pdp #content_area [class*="availability"],
+html.mc-paragon-pdp body #content_area [class*="availability"] {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 12px !important;
   font-weight: 300 !important;
@@ -706,21 +716,35 @@ body.mc-product-page #content_area [class*="availability"] {
 
 body.productdetails #content_area .mc-pdp-retail-member,
 body.mc-product-page #content_area .mc-pdp-retail-member,
+body.mc-theater-seating-pdp #content_area .mc-pdp-retail-member,
+html.mc-paragon-pdp body #content_area .mc-pdp-retail-member,
 body.productdetails #content_area .mc-pdp-member-pricing,
 body.mc-product-page #content_area .mc-pdp-member-pricing,
+body.mc-theater-seating-pdp #content_area .mc-pdp-member-pricing,
+html.mc-paragon-pdp body #content_area .mc-pdp-member-pricing,
 body.productdetails #content_area .mc-pdp-retail-label,
 body.mc-product-page #content_area .mc-pdp-retail-label,
+body.mc-theater-seating-pdp #content_area .mc-pdp-retail-label,
+html.mc-paragon-pdp body #content_area .mc-pdp-retail-label,
 body.productdetails #content_area .mc-pdp-retail-line,
 body.mc-product-page #content_area .mc-pdp-retail-line,
+body.mc-theater-seating-pdp #content_area .mc-pdp-retail-line,
+html.mc-paragon-pdp body #content_area .mc-pdp-retail-line,
 body.productdetails #content_area .mc-pdp-member-line,
-body.mc-product-page #content_area .mc-pdp-member-line {
+body.mc-product-page #content_area .mc-pdp-member-line,
+body.mc-theater-seating-pdp #content_area .mc-pdp-member-line,
+html.mc-paragon-pdp body #content_area .mc-pdp-member-line {
   font-family: Inter, Arial, sans-serif !important;
 }
 
 body.productdetails #content_area .mc-pdp-retail-label,
 body.mc-product-page #content_area .mc-pdp-retail-label,
+body.mc-theater-seating-pdp #content_area .mc-pdp-retail-label,
+html.mc-paragon-pdp body #content_area .mc-pdp-retail-label,
 body.productdetails #content_area .mc-pdp-member-line__label,
-body.mc-product-page #content_area .mc-pdp-member-line__label {
+body.mc-product-page #content_area .mc-pdp-member-line__label,
+body.mc-theater-seating-pdp #content_area .mc-pdp-member-line__label,
+html.mc-paragon-pdp body #content_area .mc-pdp-member-line__label {
   font-size: 11px !important;
   font-weight: 400 !important;
   letter-spacing: 0.12em !important;
@@ -730,10 +754,16 @@ body.mc-product-page #content_area .mc-pdp-member-line__label {
 
 body.productdetails #content_area .mc-pdp-member-line__amount,
 body.mc-product-page #content_area .mc-pdp-member-line__amount,
+body.mc-theater-seating-pdp #content_area .mc-pdp-member-line__amount,
+html.mc-paragon-pdp body #content_area .mc-pdp-member-line__amount,
 body.productdetails #content_area .product_list_price,
 body.mc-product-page #content_area .product_list_price,
+body.mc-theater-seating-pdp #content_area .product_list_price,
+html.mc-paragon-pdp body #content_area .product_list_price,
 body.productdetails #content_area .product_productprice,
-body.mc-product-page #content_area .product_productprice {
+body.mc-product-page #content_area .product_productprice,
+body.mc-theater-seating-pdp #content_area .product_productprice,
+html.mc-paragon-pdp body #content_area .product_productprice {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 13px !important;
   font-weight: 400 !important;
@@ -742,12 +772,16 @@ body.mc-product-page #content_area .product_productprice {
 
 body.productdetails #content_area a.mc-member-grid-price__login,
 body.mc-product-page #content_area a.mc-member-grid-price__login,
+body.mc-theater-seating-pdp #content_area a.mc-member-grid-price__login,
+html.mc-paragon-pdp body #content_area a.mc-member-grid-price__login,
 body.productdetails #content_area .mc-member-grid-price,
-body.mc-product-page #content_area .mc-member-grid-price {
+body.mc-product-page #content_area .mc-member-grid-price,
+body.mc-theater-seating-pdp #content_area .mc-member-grid-price,
+html.mc-paragon-pdp body #content_area .mc-member-grid-price {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 12px !important;
   font-weight: 400 !important;
-  letter-spacing: 0.08em !important;
+  letter-spacing: 0.14em !important;
 }
 
 /* Unified RH purchase controls + typography (PDP family) */
@@ -876,7 +910,10 @@ html.mc-paragon-pdp body #wmOpen.wm-btn {
   padding: 0 16px !important;
   cursor: pointer !important;
 }
-body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__heading {
+body.productdetails #mcConfigurationBlock .mc-configuration-rh__heading,
+body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__heading,
+body.mc-theater-seating-pdp #mcConfigurationBlock .mc-configuration-rh__heading,
+html.mc-paragon-pdp body #mcConfigurationBlock .mc-configuration-rh__heading {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 11px !important;
   font-weight: 500 !important;
@@ -908,8 +945,12 @@ html.mc-paragon-pdp body #mcConfigurationBlock .mc-configuration-rh__caption {
 /* Volusion option labels in options column */
 body.productdetails #content_area .mc-pdp-options-td label,
 body.mc-product-page #content_area .mc-pdp-options-td label,
+body.mc-theater-seating-pdp #content_area .mc-pdp-options-td label,
+html.mc-paragon-pdp body #content_area .mc-pdp-options-td label,
 body.productdetails #v65-product-parent .mc-pdp-options-td label,
-body.mc-product-page #v65-product-parent .mc-pdp-options-td label {
+body.mc-product-page #v65-product-parent .mc-pdp-options-td label,
+body.mc-theater-seating-pdp #v65-product-parent .mc-pdp-options-td label,
+html.mc-paragon-pdp body #v65-product-parent .mc-pdp-options-td label {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 11px !important;
   font-weight: 400 !important;
@@ -919,7 +960,9 @@ body.mc-product-page #v65-product-parent .mc-pdp-options-td label {
 }
 
 body.productdetails #content_area .v65-productdetail-cartqty,
-body.mc-product-page #content_area .v65-productdetail-cartqty {
+body.mc-product-page #content_area .v65-productdetail-cartqty,
+body.mc-theater-seating-pdp #content_area .v65-productdetail-cartqty,
+html.mc-paragon-pdp body #content_area .v65-productdetail-cartqty {
   font-family: Inter, Arial, sans-serif !important;
 }
 

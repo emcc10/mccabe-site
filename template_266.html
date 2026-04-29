@@ -17122,32 +17122,62 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       box-sizing: border-box !important;
     }
 
-    #mc-search-icon-button {
-      width: 42px !important;
-      height: 42px !important;
-      min-width: 42px !important;
-      border-radius: 50% !important;
+    html:not(.mc-search-open) header.header .mc-header-search-cart-wrap .collapsing-search__submit {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      opacity: 0 !important;
       border: 0 !important;
-      background: #fff !important;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+      pointer-events: none !important;
+    }
+
+    html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__submit,
+    body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__submit {
+      position: relative !important;
+      width: auto !important;
+      height: auto !important;
+      min-width: 0 !important;
+      opacity: 1 !important;
+      clip: auto !important;
+      overflow: visible !important;
+      pointer-events: auto !important;
+    }
+
+    header.header .mc-header-search-cart-wrap .collapsing-search__form .row {
+      border: 0 !important;
+      border-bottom: none !important;
+      padding-bottom: 0 !important;
+    }
+
+    #mc-search-icon-button {
+      width: 44px !important;
+      height: 44px !important;
+      min-width: 44px !important;
+      min-height: 44px !important;
+      border-radius: 999px !important;
+      border: 1px solid rgba(0, 0, 0, 0.12) !important;
+      background: rgba(255, 255, 255, 0.92) !important;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important;
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
       cursor: pointer !important;
       color: #111 !important;
       flex-shrink: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
     }
 
     #mc-search-icon-button svg {
-      width: 16px !important;
-      height: 16px !important;
+      width: 18px !important;
+      height: 18px !important;
       stroke: currentColor !important;
       stroke-width: 1.8 !important;
-    }
-
-    #mc-search-icon-button svg circle,
-    #mc-search-icon-button svg line {
-      stroke: currentColor !important;
     }
   }
 
