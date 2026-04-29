@@ -142,11 +142,27 @@ def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
     return out
 
 
-def _try_pair(sftp, t_path: str, c_path: str) -> None:
+def _try_pair(sftp, t_path: str, c_path: str) -> bool:
+    """Upload template + assets for this path pair. Each file is best-effort.
+    Returns True if template_266.html was written to t_path (Volusion often rejects css on the same try)."""
     m_path = _mccabe_remote_for_css(c_path)
-    _put_file(sftp, "template_266.html", t_path)
-    _put_file(sftp, "vspfiles/css/custom-safe.css", c_path)
-    _put_file(sftp, "vspfiles/templates/266/css/mccabe-overrides.css", m_path)
+    template_ok = False
+    try:
+        _put_file(sftp, "template_266.html", t_path)
+        template_ok = True
+        print(f"::notice::PARAMIKO_PUT_OK template → {t_path!r}", flush=True)
+    except Exception as exc:  # noqa: BLE001
+        print(f"::warning::PARAMIKO_PUT_SKIP template {t_path!r}: {exc}", flush=True)
+    try:
+        _put_file(sftp, "vspfiles/css/custom-safe.css", c_path)
+        print(f"::notice::PARAMIKO_PUT_OK css → {c_path!r}", flush=True)
+    except Exception as exc:  # noqa: BLE001
+        print(f"::warning::PARAMIKO_PUT_SKIP css {c_path!r}: {exc}", flush=True)
+    try:
+        _put_file(sftp, "vspfiles/templates/266/css/mccabe-overrides.css", m_path)
+        print(f"::notice::PARAMIKO_PUT_OK mccabe → {m_path!r}", flush=True)
+    except Exception as exc:  # noqa: BLE001
+        print(f"::warning::PARAMIKO_PUT_SKIP mccabe {m_path!r}: {exc}", flush=True)
     for tail in _template266_theme_tail_paths():
         local = f"vspfiles/{tail}"
         if not os.path.isfile(local):
@@ -154,13 +170,17 @@ def _try_pair(sftp, t_path: str, c_path: str) -> None:
         remote = _theme_asset_remote(m_path, tail)
         try:
             _put_file(sftp, local, remote)
+            print(f"::notice::PARAMIKO_PUT_OK theme {local!r} → {remote!r}", flush=True)
         except Exception as exc:  # noqa: BLE001
             print(f"PARAMIKO_TRY_PAIR_THEME_SKIP {local!r}→{remote!r}: {exc}", flush=True)
+    return template_ok
 
 
 def _mirror_template_to_canonical_paths(sftp) -> None:
     """Extra template writes — logged so Action logs show whether Volusion paths are writable."""
     for rel in (
+        "v/template_266.html",
+        "template_266.html",
         "/v/template_266.html",
         "/mccabestheaterandliving.com/v/template_266.html",
         "/v/v/template_266.html",
@@ -229,21 +249,40 @@ def _mirror_template266_theme_assets(sftp) -> None:
 
 
 def _try_home_relative(sftp) -> bool:
+    """Best-effort uploads from SFTP login directory. True if at least the template was written."""
+    template_ok = False
     try:
         _put_file(sftp, "template_266.html", "template_266.html")
+        template_ok = True
+        print("::notice::PARAMIKO_PUT_OK template → template_266.html (cwd-relative)", flush=True)
+    except Exception as exc:  # noqa: BLE001
+        print(f"::warning::PARAMIKO_PUT_SKIP template template_266.html: {exc}", flush=True)
+    try:
         _put_file(sftp, "vspfiles/css/custom-safe.css", "vspfiles/css/custom-safe.css")
+        print("::notice::PARAMIKO_PUT_OK css → vspfiles/css/custom-safe.css", flush=True)
+    except Exception as exc:  # noqa: BLE001
+        print(f"::warning::PARAMIKO_PUT_SKIP css vspfiles/css/custom-safe.css: {exc}", flush=True)
+    try:
         _put_file(
             sftp,
             "vspfiles/templates/266/css/mccabe-overrides.css",
             "vspfiles/templates/266/css/mccabe-overrides.css",
         )
-        for tail in _template266_theme_tail_paths():
-            local = f"vspfiles/{tail}"
-            if os.path.isfile(local):
+        print(
+            "::notice::PARAMIKO_PUT_OK mccabe → vspfiles/templates/266/css/mccabe-overrides.css",
+            flush=True,
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"::warning::PARAMIKO_PUT_SKIP mccabe (cwd-relative): {exc}", flush=True)
+    for tail in _template266_theme_tail_paths():
+        local = f"vspfiles/{tail}"
+        if os.path.isfile(local):
+            try:
                 _put_file(sftp, local, tail)
-        return True
-    except Exception:  # noqa: BLE001
-        return False
+                print(f"::notice::PARAMIKO_PUT_OK theme cwd-relative → {tail!r}", flush=True)
+            except Exception as exc:  # noqa: BLE001
+                print(f"::warning::PARAMIKO_PUT_SKIP theme {tail!r}: {exc}", flush=True)
+    return template_ok
 
 
 def main() -> int:
@@ -279,25 +318,21 @@ def main() -> int:
                 print(f"::notice::SFTP listdir(.)(sample)={sample}", flush=True)
             except Exception as exc_ls:  # noqa: BLE001
                 print(f"::notice::SFTP listdir(.) skipped: {exc_ls}", flush=True)
-            any_ok = False
+            template_ok_any = False
             for t_path, c_path in _template_css_pairs(c_remote):
                 print(f"PARAMIKO_TRY template={t_path!r} css={c_path!r}", flush=True)
-                try:
-                    _try_pair(sftp, t_path, c_path)
-                except Exception as exc:  # noqa: BLE001
-                    print(f"PARAMIKO_TRY_FAIL template={t_path!r}: {exc}", file=sys.stderr)
-                else:
-                    any_ok = True
-                    print(f"PARAMIKO_OK_PAIR template={t_path!r}", flush=True)
-            if any_ok:
+                if _try_pair(sftp, t_path, c_path):
+                    template_ok_any = True
+                    print(f"PARAMIKO_OK_TEMPLATE_WRITTEN path={t_path!r}", flush=True)
+            if template_ok_any:
                 _mirror_template_to_canonical_paths(sftp)
                 _mirror_css_to_canonical_paths(sftp)
                 _mirror_mccabe_to_canonical_paths(sftp)
                 _mirror_template266_theme_assets(sftp)
-                print("PARAMIKO_OK (one or more path pairs succeeded)", flush=True)
+                print("PARAMIKO_OK (template reached Volusion SFTP at least once; mirrors ran)", flush=True)
                 return 0
             if _try_home_relative(sftp):
-                print("PARAMIKO_OK (login-relative template + vspfiles/css/)", flush=True)
+                print("PARAMIKO_OK (cwd-relative template and/or assets)", flush=True)
                 _mirror_template_to_canonical_paths(sftp)
                 _mirror_css_to_canonical_paths(sftp)
                 _mirror_mccabe_to_canonical_paths(sftp)
