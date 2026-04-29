@@ -455,6 +455,7 @@
     html.category body header.header,
     body.productdetails header.header,
     body.mc-product-page header.header,
+    body.mc-theater-seating-pdp header.header,
     html.mc-paragon-pdp body header.header,
     html.mc-url-looks-like-pdp body.is-home header.header {
       display: flex !important;
@@ -468,6 +469,7 @@
     html.category body header.header > .header__section:not(.header__section--middle),
     body.productdetails header.header > .header__section:not(.header__section--middle),
     body.mc-product-page header.header > .header__section:not(.header__section--middle),
+    body.mc-theater-seating-pdp header.header > .header__section:not(.header__section--middle),
     html.mc-paragon-pdp body header.header > .header__section:not(.header__section--middle),
     html.mc-url-looks-like-pdp body.is-home header.header > .header__section:not(.header__section--middle) {
       order: 1 !important;
@@ -492,6 +494,9 @@
     body.mc-product-page header.header > .mc-header-desktop-bar,
     body.mc-product-page header.header > .hidden-xs.col-xs-12,
     body.mc-product-page header.header > .col-xs-12.hidden-xs,
+    body.mc-theater-seating-pdp header.header > .mc-header-desktop-bar,
+    body.mc-theater-seating-pdp header.header > .hidden-xs.col-xs-12,
+    body.mc-theater-seating-pdp header.header > .col-xs-12.hidden-xs,
     html.mc-paragon-pdp body header.header > .mc-header-desktop-bar,
     html.mc-paragon-pdp body header.header > .hidden-xs.col-xs-12,
     html.mc-paragon-pdp body header.header > .col-xs-12.hidden-xs,
@@ -516,6 +521,8 @@
     body.productdetails header.header > .mc-header-search-below-nav,
     body.mc-product-page header.header > .header__section--middle,
     body.mc-product-page header.header > .mc-header-search-below-nav,
+    body.mc-theater-seating-pdp header.header > .header__section--middle,
+    body.mc-theater-seating-pdp header.header > .mc-header-search-below-nav,
     html.mc-url-looks-like-pdp body.is-home header.header > .header__section--middle,
     html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-search-below-nav {
       order: 20 !important;
@@ -530,6 +537,7 @@
     html.category body header.header > .mc-header-cart,
     body.productdetails header.header > .mc-header-cart,
     body.mc-product-page header.header > .mc-header-cart,
+    body.mc-theater-seating-pdp header.header > .mc-header-cart,
     html.mc-paragon-pdp body header.header > .mc-header-cart,
     html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-cart {
       order: 30 !important;
@@ -654,12 +662,15 @@
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         align-items: center !important;
-        justify-content: flex-start !important;
-        gap: clamp(14px, 2.5vw, 22px) !important;
+        justify-content: center !important;
+        gap: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        padding: clamp(8px, 1.5vw, 12px) max(56px, 7.5vw) !important;
+        position: relative !important;
+        padding: 8px 72px !important;
+        min-height: 44px !important;
         box-sizing: border-box !important;
+        margin: 0 !important;
       }
       body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
       body.category .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
@@ -669,13 +680,15 @@
       body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
       html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
-        flex: 1 1 auto !important;
+        position: relative !important;
+        z-index: 2 !important;
+        flex: 0 1 auto !important;
         min-width: 0 !important;
-        max-width: none !important;
+        max-width: min(920px, calc(100vw - 280px)) !important;
+        margin: 0 auto !important;
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        margin: 0 !important;
         padding: 0 !important;
       }
       body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
@@ -686,22 +699,54 @@
       body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
       html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
+        position: absolute !important;
+        right: 36px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         align-items: center !important;
-        gap: clamp(8px, 1.2vw, 16px) !important;
-        flex: 0 1 auto !important;
-        position: relative !important;
-        right: auto !important;
-        top: auto !important;
-        transform: none !important;
-        min-width: 120px !important;
-        max-width: min(320px, 32vw) !important;
-        border-bottom: 0px solid rgba(0, 0, 0, 0.28) !important;
-        padding: 4px 0 8px !important;
-        box-sizing: border-box !important;
+        justify-content: flex-end !important;
+        gap: 12px !important;
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        flex: none !important;
         margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-bottom: 0 !important;
+        background: transparent !important;
+        box-sizing: border-box !important;
+        z-index: 10 !important;
+      }
+      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
+      body.category .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
+      html.category body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
+      html.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-search-open body.category .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-search-open.category body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.mc-search-open body.category .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.category body.mc-search-open .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-search-open body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.mc-search-open body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-search-open.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-search-open.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-url-looks-like-pdp body.is-home.mc-search-open .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
+        border: 0 !important;
+        border-bottom: 0 !important;
+        box-shadow: none !important;
       }
       body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .header__section--middle,
       body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
@@ -720,8 +765,8 @@
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .header__section--middle,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav {
         width: auto !important;
-        max-width: 100% !important;
-        flex: 1 1 auto !important;
+        max-width: none !important;
+        flex: 0 0 auto !important;
         min-width: 0 !important;
       }
       body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
@@ -742,10 +787,13 @@
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch {
         width: auto !important;
         max-width: 100% !important;
+        border: 0 !important;
         border-bottom: none !important;
         box-shadow: none !important;
-        padding: 4px 0 2px !important;
+        padding: 0 !important;
+        margin: 0 !important;
         transform: none !important;
+        background: transparent !important;
       }
       body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container,
       body.category .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container,
@@ -760,92 +808,17 @@
         margin: 0 !important;
         padding: 0 !important;
       }
-      body:not(.is-home)
-        .mc-header-desktop-bar[data-mc-header-bar]
-        .collapsing-search:focus-within
-        .collapsing-search__form
-        .row,
-      body.category
-        .mc-header-desktop-bar[data-mc-header-bar]
-        .collapsing-search:focus-within
-        .collapsing-search__form
-        .row,
-      html.category
-        body
-        .mc-header-desktop-bar[data-mc-header-bar]
-        .collapsing-search:focus-within
-        .collapsing-search__form
-        .row,
-      body.productdetails
-        .mc-header-desktop-bar[data-mc-header-bar]
-        .collapsing-search:focus-within
-        .collapsing-search__form
-        .row,
-      body.mc-product-page
-        .mc-header-desktop-bar[data-mc-header-bar]
-        .collapsing-search:focus-within
-        .collapsing-search__form
-        .row,
-      body.mc-theater-seating-pdp
-        .mc-header-desktop-bar[data-mc-header-bar]
-        .collapsing-search:focus-within
-        .collapsing-search__form
-        .row,
-      html.mc-paragon-pdp
-        body
-        .mc-header-desktop-bar[data-mc-header-bar]
-        .collapsing-search:focus-within
-        .collapsing-search__form
-        .row,
-      html.mc-url-looks-like-pdp
-        body.is-home
-        .mc-header-desktop-bar[data-mc-header-bar]
-        .collapsing-search:focus-within
-        .collapsing-search__form
-        .row,
-      html.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      html.mc-search-open body.category .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      html.mc-search-open.category body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      html.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      html.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      html.mc-search-open body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      html.mc-search-open.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      html.mc-search-open.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      body.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      body.mc-search-open body.category .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      html.category body.mc-search-open .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      body.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      body.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      body.mc-search-open body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      html.mc-search-open.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
-      html.mc-url-looks-like-pdp body.is-home.mc-search-open .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row {
+      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      body.category .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      html.category body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row {
         border-bottom: none !important;
-      }
-      body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
-      body.category .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
-      html.category body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
-      html.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      html.mc-search-open body.category .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      html.mc-search-open.category body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      body.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      body.mc-search-open body.category .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      html.category body.mc-search-open .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
-      html.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      body.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
-      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
-      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
-      html.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      body.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      html.mc-search-open body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      body.mc-search-open body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      html.mc-search-open.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
-      html.mc-search-open.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      html.mc-url-looks-like-pdp body.is-home.mc-search-open .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
-        border-bottom-color: #1a1a1a !important;
-        border-bottom-width: 2px !important;
+        padding-bottom: 0 !important;
+        box-shadow: none !important;
       }
       /* Duplicate strip: direct-child search blocks (order:20) are NOT the in-bar search — hide (inline = works if custom-safe.css never deployed) */
       html:not(.mc-allow-home-hero) body header.header > .mc-header-search-below-nav,
@@ -881,50 +854,6 @@
         pointer-events: none !important;
         border: 0 !important;
         clip-path: inset(50%) !important;
-      }
-      /* PDP: keep nav + in-bar search on one baseline; space-between so search does not compress centered menu */
-      body.productdetails .mc-header-desktop-bar[data-mc-header-bar],
-      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar],
-      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar],
-      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar],
-      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] {
-        justify-content: space-between !important;
-        align-items: center !important;
-      }
-      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
-        align-items: center !important;
-        align-self: center !important;
-      }
-      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
-        align-self: center !important;
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-      }
-      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
-      body.productdetails .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
-      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
-      body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
-      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
-      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
-      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
-      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
-      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
-      html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch {
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-        line-height: 1.15 !important;
       }
       body.productdetails header.header,
       body.mc-product-page header.header,
@@ -1466,6 +1395,12 @@ document.addEventListener("DOMContentLoaded", function () {
     <nav id="display_menu_1" class="menu" link-alignment="center"></nav>
   </div>
   <div class="mc-header-search-cart-wrap">
+    <button type="button" id="mc-search-icon-button" aria-label="Search">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" stroke="currentColor"></circle>
+        <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor"></line>
+      </svg>
+    </button>
     <div class="header__section header__section--middle mc-header-search-below-nav">
       <div class="collapsing-search" id="collapsingSearch">
         <form class="collapsing-search__form" action="/searchresults.asp" method="get" name="SearchBoxForm">

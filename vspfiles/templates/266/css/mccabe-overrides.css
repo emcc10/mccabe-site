@@ -319,6 +319,9 @@ body.category #content_area .mc-member-grid-price__hint {
   html body.mc-product-page header.header > .mc-header-search-below-nav,
   html body.mc-product-page header.header > .header__section.header__section--middle,
   html body.mc-product-page header.header > .header__section--middle,
+  html body.mc-theater-seating-pdp header.header > .mc-header-search-below-nav,
+  html body.mc-theater-seating-pdp header.header > .header__section.header__section--middle,
+  html body.mc-theater-seating-pdp header.header > .header__section--middle,
   html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-search-below-nav,
   html.mc-url-looks-like-pdp body.is-home header.header > .header__section.header__section--middle,
   html.mc-url-looks-like-pdp body.is-home header.header > .header__section--middle {
@@ -332,43 +335,6 @@ body.category #content_area .mc-member-grid-price__hint {
     pointer-events: none !important;
     border: 0 !important;
     clip-path: inset(50%) !important;
-  }
-
-  html body.productdetails .mc-header-desktop-bar[data-mc-header-bar],
-  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar],
-  html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] {
-    justify-content: space-between !important;
-    align-items: center !important;
-  }
-
-  html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-  html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
-    align-items: center !important;
-    align-self: center !important;
-  }
-
-  html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-  html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
-    align-self: center !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-  }
-
-  html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
-  html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
-  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
-  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
-  html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
-  html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch {
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    line-height: 1.15 !important;
   }
 
   html body.productdetails header.header,
@@ -443,44 +409,6 @@ html body.mc-product-page #content_area [itemprop="offers"] > .v65-product-addto
 html body.mc-theater-seating-pdp #content_area [itemprop="offers"] > .v65-product-addtocart,
 html.mc-paragon-pdp body #content_area [itemprop="offers"] > .v65-product-addtocart {
   order: 90 !important;
-}
-
-html body.productdetails #mcPlannerBtn,
-html body.productdetails #mcProductSummaryBtn,
-html body.mc-product-page #mcPlannerBtn,
-html body.mc-product-page #mcProductSummaryBtn,
-html body.mc-theater-seating-pdp #mcPlannerBtn,
-html body.mc-theater-seating-pdp #mcProductSummaryBtn,
-html.mc-paragon-pdp body #mcPlannerBtn,
-html.mc-paragon-pdp body #mcProductSummaryBtn {
-  white-space: nowrap !important;
-  flex-wrap: nowrap !important;
-  letter-spacing: 0.05em !important;
-  font-size: 11px !important;
-  padding-left: 10px !important;
-  padding-right: 10px !important;
-}
-
-html body.productdetails #mcPlannerBtn > span:first-child,
-html body.productdetails #mcProductSummaryBtn > span:first-child,
-html body.mc-product-page #mcPlannerBtn > span:first-child,
-html body.mc-product-page #mcProductSummaryBtn > span:first-child,
-html body.mc-theater-seating-pdp #mcPlannerBtn > span:first-child,
-html body.mc-theater-seating-pdp #mcProductSummaryBtn > span:first-child,
-html.mc-paragon-pdp body #mcPlannerBtn > span:first-child,
-html.mc-paragon-pdp body #mcProductSummaryBtn > span:first-child {
-  white-space: nowrap !important;
-}
-
-html body.productdetails #mcPlannerBtn .mc-btn-icon,
-html body.productdetails #mcProductSummaryBtn .mc-btn-icon,
-html body.mc-product-page #mcPlannerBtn .mc-btn-icon,
-html body.mc-product-page #mcProductSummaryBtn .mc-btn-icon,
-html body.mc-theater-seating-pdp #mcPlannerBtn .mc-btn-icon,
-html body.mc-theater-seating-pdp #mcProductSummaryBtn .mc-btn-icon,
-html.mc-paragon-pdp body #mcPlannerBtn .mc-btn-icon,
-html.mc-paragon-pdp body #mcProductSummaryBtn .mc-btn-icon {
-  flex-shrink: 0 !important;
 }
 
 /* Targeted PDP cleanup (no structural redesign) */
@@ -561,7 +489,7 @@ html body.mc-product-page #mcLeatherSwatchStrip::-webkit-scrollbar {
   html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar],
   html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar],
   html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] {
-    min-height: 48px !important;
+    min-height: 44px !important;
     align-items: center !important;
   }
   html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
