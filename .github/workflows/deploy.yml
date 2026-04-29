@@ -33,7 +33,7 @@ jobs:
         run: |
           nc -vz -w 20 "$FTP_SERVER" 2222
 
-      - name: Download likely template files from Volusion
+      - name: Search Volusion files for manual marker
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -50,32 +50,34 @@ jobs:
 
           open -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222
 
-          echo "Trying /v/template_266.html"
-          get /v/template_266.html -o downloaded-v-template_266.html
+          echo "Downloading likely root/template files..."
 
-          echo "Trying /template_266.html"
-          get /template_266.html -o downloaded-root-template_266.html
+          get /template_266.html -o template-root-266.html
+          get /template.html -o template-root.html
+          get /v/template_266.html -o template-v-266.html
+          get /v/template.html -o template-v.html
 
-          echo "Trying /vspfiles/templates/266/template_266.html"
-          get /vspfiles/templates/266/template_266.html -o downloaded-vspfiles-template_266.html
+          get /vspfiles/template_266.html -o template-vspfiles-266.html
+          get /vspfiles/template.html -o template-vspfiles.html
 
-          echo "Trying /v/vspfiles/templates/266/template_266.html"
-          get /v/vspfiles/templates/266/template_266.html -o downloaded-v-vspfiles-template_266.html
+          get /vspfiles/templates/266/template_266.html -o template-vspfiles-templates-266.html
+          get /vspfiles/templates/266/template.html -o template-vspfiles-templates-template.html
+          get /vspfiles/templates/266/template.asp -o template-vspfiles-templates-asp.html
+          get /vspfiles/templates/266/template.htm -o template-vspfiles-templates-htm.html
 
-          echo "Trying /vspfiles/templates/266/template.html"
-          get /vspfiles/templates/266/template.html -o downloaded-vspfiles-template.html
-
-          echo "Trying /v/vspfiles/templates/266/template.html"
-          get /v/vspfiles/templates/266/template.html -o downloaded-v-vspfiles-template.html
+          get /v/vspfiles/templates/266/template_266.html -o template-v-vspfiles-templates-266.html
+          get /v/vspfiles/templates/266/template.html -o template-v-vspfiles-templates-template.html
+          get /v/vspfiles/templates/266/template.asp -o template-v-vspfiles-templates-asp.html
+          get /v/vspfiles/templates/266/template.htm -o template-v-vspfiles-templates-htm.html
 
           bye
           EOF
 
           echo "Downloaded files:"
-          ls -la downloaded-* || true
+          ls -la template-* || true
 
-          echo "Searching for manual Volusion editor marker..."
-          grep -Rni "VOLUSION_EDITOR_MANUAL_MARKER_20260429" downloaded-* || true
+          echo "Searching for Volusion editor manual marker..."
+          grep -Rni "VOLUSION_EDITOR_MANUAL_MARKER_20260429" template-* || true
 
-          echo "Searching for template names/markers..."
-          grep -Rni "template_266\|MC_DEPLOY_VERIFY\|GITHUB TEMPLATE\|0428\|MCCABE" downloaded-* | head -80 || true
+          echo "Searching for anything that looks like your current template..."
+          grep -Rni "mccabe-overrides\|custom-safe\|mc-mccabe-overrides-body-last\|MC_DEPLOY_VERIFY\|template_266" template-* | head -100 || true
