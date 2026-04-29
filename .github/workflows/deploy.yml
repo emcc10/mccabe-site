@@ -72,6 +72,14 @@ jobs:
             echo "PORT_21_OPEN=false" >> $GITHUB_ENV
           fi
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Paramiko (SFTP deploy script)
+        run: pip install --disable-pip-version-check "paramiko>=3.4,<4"
+
       # lftp put does NOT create /v/vspfiles/... parents — uploads often 550. Paramiko mkdir+prior does.
       - name: Deploy template + CSS + overrides (Paramiko SFTP)
         env:
