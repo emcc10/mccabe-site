@@ -3441,7 +3441,7 @@ boot();
   }
 
   function mcNormalizeQtyBlockAboveAtc() {
-    if (document.getElementById("mc-volusion-qty-above-cart")) return;
+    if (document.getElementById("mc-qty-under-configuration")) return;
     var root =
       document.getElementById("v65-product-parent") ||
       document.getElementById("content_area");
@@ -3588,7 +3588,7 @@ boot();
   } catch (eWOrd) {}
 
   function mcBootPdpQtyAndHeader() {
-    /* PDP header: #mc-final-pdp-menu-qty-fix. Quantity: #mc-final-pdp-qty-position-script */
+    /* PDP header: #mc-final-pdp-menu-qty-fix. Quantity: #mc-final-quantity-under-config-script */
   }
   try {
     if (document.readyState === "loading") {
@@ -17435,6 +17435,332 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
   function run() {
     moveQty();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", run);
+  } else {
+    run();
+  }
+
+  window.addEventListener("load", function () {
+    run();
+    setTimeout(run, 300);
+    setTimeout(run, 1000);
+  });
+})();
+</script>
+<style id="mc-final-static-menu-search-icon-fix">
+  /* =========================================================
+     FINAL HEADER FIX
+     Main menu is centered. Search is removed from menu flow.
+     Search collapses to icon and expands without moving menu.
+     ========================================================= */
+
+  @media (min-width: 992px) {
+    header.header {
+      position: relative !important;
+    }
+
+    header.header .mc-header-desktop-bar[data-mc-header-bar] {
+      position: relative !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-height: 42px !important;
+      margin: 0 !important;
+      padding: 8px max(48px, 7vw) !important;
+      box-sizing: border-box !important;
+      transform: none !important;
+      top: 0 !important;
+    }
+
+    header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
+      position: relative !important;
+      z-index: 2 !important;
+      flex: 0 1 auto !important;
+      width: auto !important;
+      max-width: calc(100% - 260px) !important;
+      margin: 0 auto !important;
+      padding: 0 !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      align-self: center !important;
+      transform: none !important;
+      top: 0 !important;
+    }
+
+    header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu ul,
+    header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu .vnav,
+    header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu .vnav--horizontal {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      transform: none !important;
+      top: 0 !important;
+    }
+
+    header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu li,
+    header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu a {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      line-height: 1 !important;
+      vertical-align: middle !important;
+      transform: none !important;
+      top: 0 !important;
+    }
+
+    /* Product pages must use the exact same row geometry as all other pages */
+    body.productdetails header.header .mc-header-desktop-bar[data-mc-header-bar],
+    body.mc-product-page header.header .mc-header-desktop-bar[data-mc-header-bar],
+    body.mc-theater-seating-pdp header.header .mc-header-desktop-bar[data-mc-header-bar],
+    html.mc-paragon-pdp body header.header .mc-header-desktop-bar[data-mc-header-bar],
+    html.mc-url-looks-like-pdp body.is-home header.header .mc-header-desktop-bar[data-mc-header-bar] {
+      justify-content: center !important;
+      align-items: center !important;
+      min-height: 42px !important;
+      margin: 0 !important;
+      padding: 8px max(48px, 7vw) !important;
+      transform: none !important;
+      top: 0 !important;
+    }
+
+    body.productdetails header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+    body.mc-product-page header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+    body.mc-theater-seating-pdp header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+    html.mc-paragon-pdp body header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+    html.mc-url-looks-like-pdp body.is-home header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
+      align-self: center !important;
+      margin: 0 auto !important;
+      padding: 0 !important;
+      transform: none !important;
+      top: 0 !important;
+    }
+
+    /* Search/cart lives on the right and no longer affects centered menu */
+    header.header .mc-header-search-cart-wrap {
+      position: absolute !important;
+      right: max(24px, 3vw) !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      z-index: 5 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      gap: 12px !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      box-sizing: border-box !important;
+    }
+
+    body.productdetails header.header .mc-header-search-cart-wrap,
+    body.mc-product-page header.header .mc-header-search-cart-wrap,
+    body.mc-theater-seating-pdp header.header .mc-header-search-cart-wrap,
+    html.mc-paragon-pdp body header.header .mc-header-search-cart-wrap,
+    html.mc-url-looks-like-pdp body.is-home header.header .mc-header-search-cart-wrap {
+      position: absolute !important;
+      right: max(24px, 3vw) !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      align-self: auto !important;
+    }
+
+    /* Collapse search to icon */
+    header.header .mc-header-search-cart-wrap .header__section--middle,
+    header.header .mc-header-search-cart-wrap .mc-header-search-below-nav,
+    header.header .mc-header-search-cart-wrap .collapsing-search,
+    header.header .mc-header-search-cart-wrap #collapsingSearch {
+      width: 34px !important;
+      min-width: 34px !important;
+      max-width: 34px !important;
+      height: 34px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: visible !important;
+      border: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      transform: none !important;
+      transition: width 180ms ease, max-width 180ms ease !important;
+    }
+
+    /* Expanded search stays right-aligned and opens left */
+    html.mc-search-open header.header .mc-header-search-cart-wrap .header__section--middle,
+    html.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-search-below-nav,
+    html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search,
+    html.mc-search-open header.header .mc-header-search-cart-wrap #collapsingSearch,
+    body.mc-search-open header.header .mc-header-search-cart-wrap .header__section--middle,
+    body.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-search-below-nav,
+    body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search,
+    body.mc-search-open header.header .mc-header-search-cart-wrap #collapsingSearch {
+      width: 220px !important;
+      min-width: 220px !important;
+      max-width: 220px !important;
+    }
+
+    header.header .mc-header-search-cart-wrap .collapsing-search__form,
+    header.header .mc-header-search-cart-wrap .collapsing-search__form .container,
+    header.header .mc-header-search-cart-wrap .collapsing-search__form .row {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    /* Hide old visible “Search” label unless open */
+    header.header .mc-header-search-cart-wrap label,
+    header.header .mc-header-search-cart-wrap .search-label,
+    header.header .mc-header-search-cart-wrap [for="search"] {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      overflow: hidden !important;
+      clip: rect(0,0,0,0) !important;
+      white-space: nowrap !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    header.header .mc-header-search-cart-wrap input[type="text"],
+    header.header .mc-header-search-cart-wrap input[type="search"],
+    header.header .mc-header-search-cart-wrap #search {
+      width: 0 !important;
+      max-width: 0 !important;
+      height: 32px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      opacity: 0 !important;
+      border: 0 !important;
+      border-bottom: 1px solid #bdbdbd !important;
+      background: transparent !important;
+      font-family: Inter, Arial, sans-serif !important;
+      font-size: 12px !important;
+      letter-spacing: 0.06em !important;
+      color: #111 !important;
+      outline: none !important;
+      transition: width 180ms ease, max-width 180ms ease, opacity 120ms ease !important;
+    }
+
+    html.mc-search-open header.header .mc-header-search-cart-wrap input[type="text"],
+    html.mc-search-open header.header .mc-header-search-cart-wrap input[type="search"],
+    html.mc-search-open header.header .mc-header-search-cart-wrap #search,
+    body.mc-search-open header.header .mc-header-search-cart-wrap input[type="text"],
+    body.mc-search-open header.header .mc-header-search-cart-wrap input[type="search"],
+    body.mc-search-open header.header .mc-header-search-cart-wrap #search {
+      width: 180px !important;
+      max-width: 180px !important;
+      padding: 0 4px !important;
+      opacity: 1 !important;
+    }
+
+    /* Search icon button */
+    #mc-static-search-toggle {
+      width: 34px !important;
+      height: 34px !important;
+      min-width: 34px !important;
+      border: 0 !important;
+      background: transparent !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      cursor: pointer !important;
+      color: #111 !important;
+      line-height: 1 !important;
+    }
+
+    #mc-static-search-toggle svg {
+      width: 16px !important;
+      height: 16px !important;
+      stroke: currentColor !important;
+      stroke-width: 1.7 !important;
+    }
+  }
+</style>
+
+<script id="mc-final-static-menu-search-icon-script">
+(function () {
+  function findHeader() {
+    return document.querySelector("header.header");
+  }
+
+  function findSearchWrap() {
+    var h = findHeader();
+    return h && h.querySelector(".mc-header-search-cart-wrap");
+  }
+
+  function findSearchInput() {
+    var h = findHeader();
+    return h && (
+      h.querySelector("#search") ||
+      h.querySelector('input[type="search"]') ||
+      h.querySelector('input[type="text"][name*="search" i]') ||
+      h.querySelector('input[name="Search"]')
+    );
+  }
+
+  function makeSearchIcon() {
+    var btn = document.getElementById("mc-static-search-toggle");
+    if (btn) return btn;
+
+    btn = document.createElement("button");
+    btn.id = "mc-static-search-toggle";
+    btn.type = "button";
+    btn.setAttribute("aria-label", "Search");
+    btn.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+      '<circle cx="11" cy="11" r="7"></circle>' +
+      '<line x1="16.5" y1="16.5" x2="21" y2="21"></line>' +
+      '</svg>';
+
+    return btn;
+  }
+
+  function install() {
+    var wrap = findSearchWrap();
+    var input = findSearchInput();
+    if (!wrap || !input) return;
+
+    var btn = makeSearchIcon();
+
+    if (!wrap.contains(btn)) {
+      wrap.insertBefore(btn, wrap.firstChild);
+    }
+
+    if (btn.getAttribute("data-bound") !== "1") {
+      btn.setAttribute("data-bound", "1");
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        document.documentElement.classList.toggle("mc-search-open");
+        if (document.body) document.body.classList.toggle("mc-search-open");
+
+        if (document.documentElement.classList.contains("mc-search-open")) {
+          setTimeout(function () { input.focus(); }, 80);
+        } else {
+          input.blur();
+        }
+      });
+    }
+  }
+
+  function run() {
+    install();
   }
 
   if (document.readyState === "loading") {
