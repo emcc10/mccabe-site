@@ -37,6 +37,11 @@ jobs:
             exit 1
           fi
 
+          if [ ! -f "vspfiles/templates/266/css/mccabe-overrides.css" ]; then
+            echo "ERROR: vspfiles/templates/266/css/mccabe-overrides.css is missing"
+            exit 1
+          fi
+
           echo "Required files found."
 
       - name: Check deploy secrets
@@ -101,6 +106,7 @@ jobs:
 
           open -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222
 
+          # --- template_266.html (browser: https://www.mccabestheaterandliving.com/v/template_266.html)
           put template_266.html -o /v/template_266.html
           put template_266.html -o /template_266.html
           put template_266.html -o v/template_266.html
@@ -108,23 +114,33 @@ jobs:
           put template_266.html -o /v/v/template_266.html
           put template_266.html -o /mccabestheaterandliving.com/v/template_266.html
 
-          echo "Skipping CSS upload temporarily because Volusion is locking custom-safe.css"
+          # --- custom-safe.css (browser primary: /v/vspfiles/css/custom-safe.css)
+          put vspfiles/css/custom-safe.css -o /v/vspfiles/css/custom-safe.css
+          put vspfiles/css/custom-safe.css -o v/vspfiles/css/custom-safe.css
+          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
+          put vspfiles/css/custom-safe.css -o vspfiles/css/custom-safe.css
+          put vspfiles/css/custom-safe.css -o /v/custom-safe.css
+          put vspfiles/css/custom-safe.css -o /mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css
+
+          # --- mccabe-overrides.css (browser: /v/vspfiles/templates/266/css/mccabe-overrides.css)
+          put vspfiles/templates/266/css/mccabe-overrides.css -o /v/vspfiles/templates/266/css/mccabe-overrides.css
+          put vspfiles/templates/266/css/mccabe-overrides.css -o v/vspfiles/templates/266/css/mccabe-overrides.css
+          put vspfiles/templates/266/css/mccabe-overrides.css -o /vspfiles/templates/266/css/mccabe-overrides.css
+          put vspfiles/templates/266/css/mccabe-overrides.css -o vspfiles/templates/266/css/mccabe-overrides.css
+          put vspfiles/templates/266/css/mccabe-overrides.css -o /mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css
 
           bye
           LFTP
 
-      - name: Verify template on SFTP (mc-deploy-verify must match Git)
+      - name: Verify files on SFTP (markers must match Git)
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           EXPECT=$(sed -n 's/.*name="mc-deploy-verify"[[:space:]]*content="\([^"]*\)".*/\1/p' template_266.html | head -1)
-          if [ -z "$EXPECT" ]; then
-            echo "No mc-deploy-verify meta in template; skipping remote marker check."
-            exit 0
-          fi
-          echo "Expect remote to contain mc-deploy-verify content: $EXPECT"
+          CSS_TOKEN=$(head -c 8000 vspfiles/css/custom-safe.css | grep -aoE 'C_CSS_DEPLOY_VERIFY_[A-Za-z0-9]+' | head -1)
+          MC_TOKEN=$(head -c 8000 vspfiles/templates/266/css/mccabe-overrides.css | grep -aoE 'MC_OVERRIDES_VERIFY_[A-Za-z0-9]+' | head -1)
 
           lftp <<LFTP
           set sftp:auto-confirm yes
@@ -136,20 +152,61 @@ jobs:
           get /template_266.html -o verify-root.html
           get v/template_266.html -o verify-vrel.html
           get template_266.html -o verify-rel.html
+          get /v/vspfiles/css/custom-safe.css -o verify-css-vabs.html
+          get v/vspfiles/css/custom-safe.css -o verify-css-vrel.html
+          get /vspfiles/css/custom-safe.css -o verify-css-root.html
+          get /v/vspfiles/templates/266/css/mccabe-overrides.css -o verify-mccabe-vabs.css
+          get v/vspfiles/templates/266/css/mccabe-overrides.css -o verify-mccabe-vrel.css
           bye
           LFTP
 
-          FOUND=""
-          for f in verify-v.html verify-root.html verify-vrel.html verify-rel.html; do
-            if [ -f "$f" ] && grep -Fq "$EXPECT" "$f"; then
-              echo "OK: marker found in downloaded $f"
-              FOUND=1
-              break
+          OK_TPL=""
+          if [ -n "$EXPECT" ]; then
+            echo "Expect template mc-deploy-verify: $EXPECT"
+            for f in verify-v.html verify-root.html verify-vrel.html verify-rel.html; do
+              if [ -f "$f" ] && grep -Fq "$EXPECT" "$f"; then
+                echo "OK: template marker in $f"
+                OK_TPL=1
+                break
+              fi
+            done
+            if [ -z "$OK_TPL" ]; then
+              echo "ERROR: No downloaded template contains \"$EXPECT\"."
+              ls -la verify-*.html 2>/dev/null || true
+              exit 1
             fi
-          done
-          if [ -z "$FOUND" ]; then
-            echo "ERROR: None of the downloaded template copies contain content \"$EXPECT\"."
-            echo "The upload likely went to a path Volusion does not serve, or SFTP did not write."
-            ls -la verify-*.html 2>/dev/null || true
-            exit 1
+          fi
+
+          if [ -n "$CSS_TOKEN" ]; then
+            echo "Expect custom-safe contains: $CSS_TOKEN"
+            OK_CSS=""
+            for f in verify-css-vabs.html verify-css-vrel.html verify-css-root.html; do
+              if [ -f "$f" ] && grep -Fq "$CSS_TOKEN" "$f"; then
+                echo "OK: custom-safe marker in $f"
+                OK_CSS=1
+                break
+              fi
+            done
+            if [ -z "$OK_CSS" ]; then
+              echo "ERROR: No downloaded custom-safe copy contains \"$CSS_TOKEN\"."
+              ls -la verify-css-*.html 2>/dev/null || true
+              exit 1
+            fi
+          fi
+
+          if [ -n "$MC_TOKEN" ]; then
+            echo "Expect mccabe-overrides contains: $MC_TOKEN"
+            OK_MC=""
+            for f in verify-mccabe-vabs.css verify-mccabe-vrel.css; do
+              if [ -f "$f" ] && grep -Fq "$MC_TOKEN" "$f"; then
+                echo "OK: mccabe-overrides marker in $f"
+                OK_MC=1
+                break
+              fi
+            done
+            if [ -z "$OK_MC" ]; then
+              echo "ERROR: No downloaded mccabe-overrides copy contains \"$MC_TOKEN\"."
+              ls -la verify-mccabe-*.css 2>/dev/null || true
+              exit 1
+            fi
           fi
