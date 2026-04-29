@@ -62,6 +62,38 @@ def _theme_asset_remote(mccabe_path: str, tail: str) -> str:
     return f"{mccabe_path.rstrip('/')}/{tail.removeprefix('templates/266/').lstrip('/')}"
 
 
+def _ensure_remote_parent_dirs(sftp, remote_path: str) -> None:
+    """Best-effort mkdir -p for the parent of a remote file (avoids SFTP 550 when folders are missing)."""
+    remote_path = (remote_path or "").replace("\\", "/").strip()
+    if not remote_path or remote_path.endswith("/"):
+        return
+    parent = remote_path.rsplit("/", 1)[0].strip()
+    if not parent:
+        return
+    is_abs = parent.startswith("/")
+    parts = [p for p in parent.strip("/").split("/") if p]
+    if not parts:
+        return
+    cur = ""
+    for p in parts:
+        if is_abs:
+            cur = f"{cur}/{p}" if cur else f"/{p}"
+        else:
+            cur = f"{cur}/{p}" if cur else p
+        try:
+            sftp.stat(cur)
+        except Exception:
+            try:
+                sftp.mkdir(cur)
+            except Exception:
+                pass
+
+
+def _put_file(sftp, local: str, remote: str) -> None:
+    _ensure_remote_parent_dirs(sftp, remote)
+    sftp.put(local, remote, confirm=False)
+
+
 def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
     """Every (template_path, css_path) we try — same order as deploy.yml (secret first, then fallbacks).
 
@@ -109,16 +141,16 @@ def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
 
 def _try_pair(sftp, t_path: str, c_path: str) -> None:
     m_path = _mccabe_remote_for_css(c_path)
-    sftp.put("template_266.html", t_path)
-    sftp.put("vspfiles/css/custom-safe.css", c_path)
-    sftp.put("vspfiles/templates/266/css/mccabe-overrides.css", m_path)
+    _put_file(sftp, "template_266.html", t_path)
+    _put_file(sftp, "vspfiles/css/custom-safe.css", c_path)
+    _put_file(sftp, "vspfiles/templates/266/css/mccabe-overrides.css", m_path)
     for tail in _template266_theme_tail_paths():
         local = f"vspfiles/{tail}"
         if not os.path.isfile(local):
             continue
         remote = _theme_asset_remote(m_path, tail)
         try:
-            sftp.put(local, remote)
+            _put_file(sftp, local, remote)
         except Exception as exc:  # noqa: BLE001
             print(f"PARAMIKO_TRY_PAIR_THEME_SKIP {local!r}→{remote!r}: {exc}", flush=True)
 
@@ -132,8 +164,7 @@ def _mirror_template_to_canonical_paths(sftp) -> None:
         "/template_266.html",
     ):
         try:
-            # confirm=False: Volusion SFTP sometimes fails post-put size check (e.g. 196608 vs real size) on long paths.
-            sftp.put("template_266.html", rel, confirm=False)
+            _put_file(sftp, "template_266.html", rel)
             print(f"::notice::PARAMIKO_MIRROR_OK template → {rel}", flush=True)
         except Exception as exc:  # noqa: BLE001
             print(f"::warning::PARAMIKO_MIRROR_SKIP template {rel}: {exc}", flush=True)
@@ -148,7 +179,7 @@ def _mirror_css_to_canonical_paths(sftp) -> None:
         "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css",
     ):
         try:
-            sftp.put("vspfiles/css/custom-safe.css", rel, confirm=False)
+            _put_file(sftp, "vspfiles/css/custom-safe.css", rel)
             print(f"::notice::PARAMIKO_MIRROR_OK css → {rel}", flush=True)
         except Exception as exc:  # noqa: BLE001
             print(f"::warning::PARAMIKO_MIRROR_SKIP css {rel}: {exc}", flush=True)
@@ -165,7 +196,7 @@ def _mirror_mccabe_to_canonical_paths(sftp) -> None:
         "/mccabestheaterandliving.com/vspfiles/templates/266/css/mccabe-overrides.css",
     ):
         try:
-            sftp.put(local, rel, confirm=False)
+            _put_file(sftp, local, rel)
             print(f"::notice::PARAMIKO_MIRROR_OK mccabe-overrides → {rel}", flush=True)
         except Exception as exc:  # noqa: BLE001
             print(f"::warning::PARAMIKO_MIRROR_SKIP mccabe {rel}: {exc}", flush=True)
@@ -188,7 +219,7 @@ def _mirror_template266_theme_assets(sftp) -> None:
         for base in bases:
             rel = base + tail
             try:
-                sftp.put(local, rel, confirm=False)
+                _put_file(sftp, local, rel)
                 print(f"::notice::PARAMIKO_MIRROR_OK template266 → {rel}", flush=True)
             except Exception as exc:  # noqa: BLE001
                 print(f"::warning::PARAMIKO_MIRROR_SKIP template266 {rel}: {exc}", flush=True)
@@ -196,16 +227,17 @@ def _mirror_template266_theme_assets(sftp) -> None:
 
 def _try_home_relative(sftp) -> bool:
     try:
-        sftp.put("template_266.html", "template_266.html")
-        sftp.put("vspfiles/css/custom-safe.css", "vspfiles/css/custom-safe.css")
-        sftp.put(
+        _put_file(sftp, "template_266.html", "template_266.html")
+        _put_file(sftp, "vspfiles/css/custom-safe.css", "vspfiles/css/custom-safe.css")
+        _put_file(
+            sftp,
             "vspfiles/templates/266/css/mccabe-overrides.css",
             "vspfiles/templates/266/css/mccabe-overrides.css",
         )
         for tail in _template266_theme_tail_paths():
             local = f"vspfiles/{tail}"
             if os.path.isfile(local):
-                sftp.put(local, tail)
+                _put_file(sftp, local, tail)
         return True
     except Exception:  # noqa: BLE001
         return False
