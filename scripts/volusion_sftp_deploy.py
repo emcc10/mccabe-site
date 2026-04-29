@@ -116,6 +116,9 @@ def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
         raw.append((secret_t, v_wwwroot_css))
     raw.extend(
         [
+            # Site-root-relative: many Volusion SFTP logins are chrooted here (no leading slash).
+            ("v/template_266.html", "v/vspfiles/css/custom-safe.css"),
+            ("v/template_266.html", "vspfiles/css/custom-safe.css"),
             ("/v/template_266.html", c_remote),
             ("/v/template_266.html", v_wwwroot_css),
             ("/v/v/template_266.html", c_remote),
@@ -266,6 +269,16 @@ def main() -> int:
     try:
         sftp = paramiko.SFTPClient.from_transport(transport)
         try:
+            try:
+                cwd = sftp.getcwd()
+                print(f"::notice::SFTP getcwd={cwd!r}", flush=True)
+            except Exception as exc_gcwd:  # noqa: BLE001
+                print(f"::notice::SFTP getcwd unavailable: {exc_gcwd}", flush=True)
+            try:
+                sample = sorted(name.filename for name in sftp.listdir_attr("."))[:40]
+                print(f"::notice::SFTP listdir(.)(sample)={sample}", flush=True)
+            except Exception as exc_ls:  # noqa: BLE001
+                print(f"::notice::SFTP listdir(.) skipped: {exc_ls}", flush=True)
             any_ok = False
             for t_path, c_path in _template_css_pairs(c_remote):
                 print(f"PARAMIKO_TRY template={t_path!r} css={c_path!r}", flush=True)
