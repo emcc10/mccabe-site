@@ -11078,7 +11078,9 @@ body.vertex-flipbook-ready .vertex-flipbook-thumb img{
 }
 @media (min-width: 992px) {
   body.productdetails #v65-product-parent #v65-productdetail-action-wrapper,
-  body.mc-product-page #v65-product-parent #v65-productdetail-action-wrapper {
+  body.mc-product-page #v65-product-parent #v65-productdetail-action-wrapper,
+  body.mc-theater-seating-pdp #v65-product-parent #v65-productdetail-action-wrapper,
+  html.mc-paragon-pdp body #v65-product-parent #v65-productdetail-action-wrapper {
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
@@ -11093,7 +11095,9 @@ body.vertex-flipbook-ready .vertex-flipbook-thumb img{
 
   /* finance / offers block stays left */
   body.productdetails #v65-product-parent [itemprop="offers"],
-  body.mc-product-page #v65-product-parent [itemprop="offers"] {
+  body.mc-product-page #v65-product-parent [itemprop="offers"],
+  body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"],
+  html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"] {
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
@@ -11107,7 +11111,9 @@ body.vertex-flipbook-ready .vertex-flipbook-thumb img{
   }
 
   body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #v65-productdetail-action-wrapper,
-  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #v65-productdetail-action-wrapper {
+  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #v65-productdetail-action-wrapper,
+  body.mc-theater-seating-pdp #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #v65-productdetail-action-wrapper,
+  html.mc-paragon-pdp body #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #v65-productdetail-action-wrapper {
     justify-content: flex-start !important;
     align-items: flex-start !important;
     margin-left: 0 !important;
@@ -11119,7 +11125,9 @@ body.vertex-flipbook-ready .vertex-flipbook-thumb img{
 
   /* cart area: quantity label + input centered above add to cart (no left/transform hacks) */
   body.productdetails #v65-product-parent .v65-productdetail-cartqty,
-  body.mc-product-page #v65-product-parent .v65-productdetail-cartqty {
+  body.mc-product-page #v65-product-parent .v65-productdetail-cartqty,
+  body.mc-theater-seating-pdp #v65-product-parent .v65-productdetail-cartqty,
+  html.mc-paragon-pdp body #v65-product-parent .v65-productdetail-cartqty {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -11132,13 +11140,17 @@ body.vertex-flipbook-ready .vertex-flipbook-thumb img{
   }
 
   body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .v65-productdetail-cartqty,
-  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .v65-productdetail-cartqty {
+  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .v65-productdetail-cartqty,
+  body.mc-theater-seating-pdp #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .v65-productdetail-cartqty,
+  html.mc-paragon-pdp body #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .v65-productdetail-cartqty {
     align-self: center !important;
     width: 100% !important;
   }
 
   body.productdetails #v65-product-parent .v65-product-addtocart,
-  body.mc-product-page #v65-product-parent .v65-product-addtocart {
+  body.mc-product-page #v65-product-parent .v65-product-addtocart,
+  body.mc-theater-seating-pdp #v65-product-parent .v65-product-addtocart,
+  html.mc-paragon-pdp body #v65-product-parent .v65-product-addtocart {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
@@ -11149,7 +11161,9 @@ body.vertex-flipbook-ready .vertex-flipbook-thumb img{
   }
 
   body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .v65-product-addtocart,
-  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .v65-product-addtocart {
+  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .v65-product-addtocart,
+  body.mc-theater-seating-pdp #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .v65-product-addtocart,
+  html.mc-paragon-pdp body #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .v65-product-addtocart {
     align-self: stretch !important;
     width: 100% !important;
   }
@@ -11159,27 +11173,45 @@ body.vertex-flipbook-ready .vertex-flipbook-thumb img{
   body.productdetails #v65-product-parent #btn_addtocart,
   body.mc-product-page #v65-product-parent .v65-product-addtocart input,
   body.mc-product-page #v65-product-parent .v65-product-addtocart button,
-  body.mc-product-page #v65-product-parent #btn_addtocart {
+  body.mc-product-page #v65-product-parent #btn_addtocart,
+  body.mc-theater-seating-pdp #v65-product-parent .v65-product-addtocart input,
+  body.mc-theater-seating-pdp #v65-product-parent .v65-product-addtocart button,
+  body.mc-theater-seating-pdp #v65-product-parent #btn_addtocart,
+  html.mc-paragon-pdp body #v65-product-parent .v65-product-addtocart input,
+  html.mc-paragon-pdp body #v65-product-parent .v65-product-addtocart button,
+  html.mc-paragon-pdp body #v65-product-parent #btn_addtocart {
     margin: 0 auto !important;
   }
 
   body.productdetails #v65-product-parent #v65-productdetail-action-wrapper *,
   body.mc-product-page #v65-product-parent #v65-productdetail-action-wrapper *,
+  body.mc-theater-seating-pdp #v65-product-parent #v65-productdetail-action-wrapper *,
+  html.mc-paragon-pdp body #v65-product-parent #v65-productdetail-action-wrapper *,
   body.productdetails #v65-product-parent [itemprop="offers"] *,
-  body.mc-product-page #v65-product-parent [itemprop="offers"] * {
+  body.mc-product-page #v65-product-parent [itemprop="offers"] *,
+  body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"] *,
+  html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"] * {
     text-align: left !important;
   }
 
   body.productdetails #v65-product-parent .v65-productdetail-cartqty *,
   body.mc-product-page #v65-product-parent .v65-productdetail-cartqty *,
+  body.mc-theater-seating-pdp #v65-product-parent .v65-productdetail-cartqty *,
+  html.mc-paragon-pdp body #v65-product-parent .v65-productdetail-cartqty *,
   body.productdetails #v65-product-parent .v65-product-addtocart *,
-  body.mc-product-page #v65-product-parent .v65-product-addtocart * {
+  body.mc-product-page #v65-product-parent .v65-product-addtocart *,
+  body.mc-theater-seating-pdp #v65-product-parent .v65-product-addtocart *,
+  html.mc-paragon-pdp body #v65-product-parent .v65-product-addtocart * {
     text-align: center !important;
   }
 body.productdetails #v65-product-parent .v65-productdetail-cartqty,
 body.mc-product-page #v65-product-parent .v65-productdetail-cartqty,
+body.mc-theater-seating-pdp #v65-product-parent .v65-productdetail-cartqty,
+html.mc-paragon-pdp body #v65-product-parent .v65-productdetail-cartqty,
 body.productdetails #v65-product-parent .v65-product-addtocart,
-body.mc-product-page #v65-product-parent .v65-product-addtocart {
+body.mc-product-page #v65-product-parent .v65-product-addtocart,
+body.mc-theater-seating-pdp #v65-product-parent .v65-product-addtocart,
+html.mc-paragon-pdp body #v65-product-parent .v65-product-addtocart {
   width: 100% !important;
   max-width: 260px !important;
   margin-left: auto !important;
@@ -11187,27 +11219,35 @@ body.mc-product-page #v65-product-parent .v65-product-addtocart {
 }
 
 body.productdetails #v65-product-parent .v65-productdetail-cartqty,
-body.mc-product-page #v65-product-parent .v65-productdetail-cartqty {
+body.mc-product-page #v65-product-parent .v65-productdetail-cartqty,
+body.mc-theater-seating-pdp #v65-product-parent .v65-productdetail-cartqty,
+html.mc-paragon-pdp body #v65-product-parent .v65-productdetail-cartqty {
   margin-bottom: 10px !important;
 }
 body.productdetails #v65-product-parent input.v65-productdetail-cartqty,
 body.mc-product-page #v65-product-parent input.v65-productdetail-cartqty,
+body.mc-theater-seating-pdp #v65-product-parent input.v65-productdetail-cartqty,
+html.mc-paragon-pdp body #v65-product-parent input.v65-productdetail-cartqty,
 body.productdetails #v65-product-parent input[name^="QTY."],
-body.mc-product-page #v65-product-parent input[name^="QTY."] {
+body.mc-product-page #v65-product-parent input[name^="QTY."],
+body.mc-theater-seating-pdp #v65-product-parent input[name^="QTY."],
+html.mc-paragon-pdp body #v65-product-parent input[name^="QTY."] {
   display: block !important;
-  width: 30px !important;
-  min-width: 30px !important;
-  max-width: 30px !important;
-  height: 36px !important;
+  width: 56px !important;
+  min-width: 48px !important;
+  max-width: 72px !important;
+  height: 38px !important;
   min-height: 36px !important;
-  padding: 4px 0 !important;
-  margin: 0 auto 10px !important;
+  padding: 4px 6px !important;
+  margin: 6px auto 8px !important;
   box-sizing: border-box !important;
   text-align: center !important;
-  flex: 0 0 30px !important;
+  flex: 0 0 auto !important;
 }
 body.productdetails #v65-product-parent .v65-product-addtocart,
-body.mc-product-page #v65-product-parent .v65-product-addtocart {
+body.mc-product-page #v65-product-parent .v65-product-addtocart,
+body.mc-theater-seating-pdp #v65-product-parent .v65-product-addtocart,
+html.mc-paragon-pdp body #v65-product-parent .v65-product-addtocart {
   display: flex !important;
   justify-content: center !important;
   width: 100% !important;
@@ -11366,7 +11406,9 @@ body.mc-product-page #v65-product-parent [class*="klarna"]{
 /* PDP 2026-04-28: sticky header on product pages; planner/summary labels one line; offers column stacks with qty after prices */
 @media (min-width: 992px) {
   body.productdetails header.header,
-  body.mc-product-page header.header {
+  body.mc-product-page header.header,
+  body.mc-theater-seating-pdp header.header,
+  html.mc-paragon-pdp body header.header {
     position: sticky !important;
     top: 0 !important;
     z-index: 10050 !important;
@@ -11377,8 +11419,12 @@ body.mc-product-page #v65-product-parent [class*="klarna"]{
 
 body.productdetails #v65-product-parent [itemprop="offers"],
 body.mc-product-page #v65-product-parent [itemprop="offers"],
+body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"],
+html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"],
 body.productdetails #content_area [itemprop="offers"],
-body.mc-product-page #content_area [itemprop="offers"] {
+body.mc-product-page #content_area [itemprop="offers"],
+body.mc-theater-seating-pdp #content_area [itemprop="offers"],
+html.mc-paragon-pdp body #content_area [itemprop="offers"] {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
@@ -11387,22 +11433,34 @@ body.mc-product-page #content_area [itemprop="offers"] {
 
 body.productdetails #v65-product-parent [itemprop="offers"] > .v65-productdetail-cartqty,
 body.mc-product-page #v65-product-parent [itemprop="offers"] > .v65-productdetail-cartqty,
+body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"] > .v65-productdetail-cartqty,
+html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"] > .v65-productdetail-cartqty,
 body.productdetails #content_area [itemprop="offers"] > .v65-productdetail-cartqty,
-body.mc-product-page #content_area [itemprop="offers"] > .v65-productdetail-cartqty {
+body.mc-product-page #content_area [itemprop="offers"] > .v65-productdetail-cartqty,
+body.mc-theater-seating-pdp #content_area [itemprop="offers"] > .v65-productdetail-cartqty,
+html.mc-paragon-pdp body #content_area [itemprop="offers"] > .v65-productdetail-cartqty {
   order: 80 !important;
 }
 
 body.productdetails #v65-product-parent [itemprop="offers"] > .v65-product-addtocart,
 body.mc-product-page #v65-product-parent [itemprop="offers"] > .v65-product-addtocart,
+body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"] > .v65-product-addtocart,
+html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"] > .v65-product-addtocart,
 body.productdetails #content_area [itemprop="offers"] > .v65-product-addtocart,
-body.mc-product-page #content_area [itemprop="offers"] > .v65-product-addtocart {
+body.mc-product-page #content_area [itemprop="offers"] > .v65-product-addtocart,
+body.mc-theater-seating-pdp #content_area [itemprop="offers"] > .v65-product-addtocart,
+html.mc-paragon-pdp body #content_area [itemprop="offers"] > .v65-product-addtocart {
   order: 90 !important;
 }
 
 body.productdetails #v65-product-parent [itemprop="offers"] > #v65-productdetail-action-wrapper,
 body.mc-product-page #v65-product-parent [itemprop="offers"] > #v65-productdetail-action-wrapper,
+body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"] > #v65-productdetail-action-wrapper,
+html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"] > #v65-productdetail-action-wrapper,
 body.productdetails #content_area [itemprop="offers"] > #v65-productdetail-action-wrapper,
-body.mc-product-page #content_area [itemprop="offers"] > #v65-productdetail-action-wrapper {
+body.mc-product-page #content_area [itemprop="offers"] > #v65-productdetail-action-wrapper,
+body.mc-theater-seating-pdp #content_area [itemprop="offers"] > #v65-productdetail-action-wrapper,
+html.mc-paragon-pdp body #content_area [itemprop="offers"] > #v65-productdetail-action-wrapper {
   order: 85 !important;
   display: flex !important;
   flex-direction: column !important;
@@ -11412,8 +11470,12 @@ body.mc-product-page #content_area [itemprop="offers"] > #v65-productdetail-acti
 
 body.productdetails #v65-product-parent [itemprop="offers"] > #mc-inline-config,
 body.mc-product-page #v65-product-parent [itemprop="offers"] > #mc-inline-config,
+body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"] > #mc-inline-config,
+html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"] > #mc-inline-config,
 body.productdetails #content_area [itemprop="offers"] > #mc-inline-config,
-body.mc-product-page #content_area [itemprop="offers"] > #mc-inline-config {
+body.mc-product-page #content_area [itemprop="offers"] > #mc-inline-config,
+body.mc-theater-seating-pdp #content_area [itemprop="offers"] > #mc-inline-config,
+html.mc-paragon-pdp body #content_area [itemprop="offers"] > #mc-inline-config {
   order: 40 !important;
 }
 
@@ -11422,7 +11484,9 @@ body.productdetails #mcProductSummaryBtn,
 body.mc-product-page #mcPlannerBtn,
 body.mc-product-page #mcProductSummaryBtn,
 body.mc-theater-seating-pdp #mcPlannerBtn,
-body.mc-theater-seating-pdp #mcProductSummaryBtn {
+body.mc-theater-seating-pdp #mcProductSummaryBtn,
+html.mc-paragon-pdp body #mcPlannerBtn,
+html.mc-paragon-pdp body #mcProductSummaryBtn {
   white-space: nowrap !important;
   flex-wrap: nowrap !important;
 }
@@ -11432,7 +11496,9 @@ body.productdetails #mcProductSummaryBtn > span:first-child,
 body.mc-product-page #mcPlannerBtn > span:first-child,
 body.mc-product-page #mcProductSummaryBtn > span:first-child,
 body.mc-theater-seating-pdp #mcPlannerBtn > span:first-child,
-body.mc-theater-seating-pdp #mcProductSummaryBtn > span:first-child {
+body.mc-theater-seating-pdp #mcProductSummaryBtn > span:first-child,
+html.mc-paragon-pdp body #mcPlannerBtn > span:first-child,
+html.mc-paragon-pdp body #mcProductSummaryBtn > span:first-child {
   white-space: nowrap !important;
 }
 
@@ -11441,7 +11507,9 @@ body.productdetails #mcProductSummaryBtn .mc-btn-icon,
 body.mc-product-page #mcPlannerBtn .mc-btn-icon,
 body.mc-product-page #mcProductSummaryBtn .mc-btn-icon,
 body.mc-theater-seating-pdp #mcPlannerBtn .mc-btn-icon,
-body.mc-theater-seating-pdp #mcProductSummaryBtn .mc-btn-icon {
+body.mc-theater-seating-pdp #mcProductSummaryBtn .mc-btn-icon,
+html.mc-paragon-pdp body #mcPlannerBtn .mc-btn-icon,
+html.mc-paragon-pdp body #mcProductSummaryBtn .mc-btn-icon {
   flex-shrink: 0 !important;
 }
 
@@ -11449,7 +11517,11 @@ body.mc-theater-seating-pdp #mcProductSummaryBtn .mc-btn-icon {
 body.productdetails #mcPlannerBtn,
 body.productdetails #mcProductSummaryBtn,
 body.mc-product-page #mcPlannerBtn,
-body.mc-product-page #mcProductSummaryBtn {
+body.mc-product-page #mcProductSummaryBtn,
+body.mc-theater-seating-pdp #mcPlannerBtn,
+body.mc-theater-seating-pdp #mcProductSummaryBtn,
+html.mc-paragon-pdp body #mcPlannerBtn,
+html.mc-paragon-pdp body #mcProductSummaryBtn {
   letter-spacing: 0.05em !important;
   font-size: 11px !important;
   padding-left: 10px !important;
@@ -11507,12 +11579,13 @@ body:has(#v65-product-parent) #v65-product-parent [id*="qty"] {
   text-align: center !important;
 }
 
-/* Quantity row centered above Add to Cart */
+/* Quantity row: label stacked above input (Volusion uses QTY.* names) */
 body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartqty {
   display: flex !important;
+  flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
-  gap: 10px !important;
+  gap: 8px !important;
   width: 100% !important;
   margin: 18px auto 10px !important;
   float: none !important;
@@ -11533,8 +11606,9 @@ body:has(#v65-product-parent) #v65-product-parent .v65-productdetail-cartqty td 
   white-space: nowrap !important;
 }
 
-/* Quantity input */
+/* Quantity input (Volusion PDP uses QTY.* attribute names) */
 body:has(#v65-product-parent) #v65-product-parent input[name="QTY"],
+body:has(#v65-product-parent) #v65-product-parent input[name^="QTY."],
 body:has(#v65-product-parent) #v65-product-parent input[name="quantity"],
 body:has(#v65-product-parent) #v65-product-parent input[id*="qty"],
 body:has(#v65-product-parent) #v65-product-parent input[id*="QTY"] {

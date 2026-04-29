@@ -372,7 +372,9 @@ body.category #content_area .mc-member-grid-price__hint {
   }
 
   html body.productdetails header.header,
-  html body.mc-product-page header.header {
+  html body.mc-product-page header.header,
+  html body.mc-theater-seating-pdp header.header,
+  html.mc-paragon-pdp body header.header {
     position: sticky !important;
     top: 0 !important;
     z-index: 10060 !important;
@@ -383,8 +385,12 @@ body.category #content_area .mc-member-grid-price__hint {
 
 html body.productdetails #v65-product-parent [itemprop="offers"],
 html body.mc-product-page #v65-product-parent [itemprop="offers"],
+html body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"],
+html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"],
 html body.productdetails #content_area [itemprop="offers"],
-html body.mc-product-page #content_area [itemprop="offers"] {
+html body.mc-product-page #content_area [itemprop="offers"],
+html body.mc-theater-seating-pdp #content_area [itemprop="offers"],
+html.mc-paragon-pdp body #content_area [itemprop="offers"] {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
@@ -393,15 +399,23 @@ html body.mc-product-page #content_area [itemprop="offers"] {
 
 html body.productdetails #v65-product-parent [itemprop="offers"] > #mc-inline-config,
 html body.mc-product-page #v65-product-parent [itemprop="offers"] > #mc-inline-config,
+html body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"] > #mc-inline-config,
+html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"] > #mc-inline-config,
 html body.productdetails #content_area [itemprop="offers"] > #mc-inline-config,
-html body.mc-product-page #content_area [itemprop="offers"] > #mc-inline-config {
+html body.mc-product-page #content_area [itemprop="offers"] > #mc-inline-config,
+html body.mc-theater-seating-pdp #content_area [itemprop="offers"] > #mc-inline-config,
+html.mc-paragon-pdp body #content_area [itemprop="offers"] > #mc-inline-config {
   order: 40 !important;
 }
 
 html body.productdetails #v65-product-parent [itemprop="offers"] > #v65-productdetail-action-wrapper,
 html body.mc-product-page #v65-product-parent [itemprop="offers"] > #v65-productdetail-action-wrapper,
+html body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"] > #v65-productdetail-action-wrapper,
+html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"] > #v65-productdetail-action-wrapper,
 html body.productdetails #content_area [itemprop="offers"] > #v65-productdetail-action-wrapper,
-html body.mc-product-page #content_area [itemprop="offers"] > #v65-productdetail-action-wrapper {
+html body.mc-product-page #content_area [itemprop="offers"] > #v65-productdetail-action-wrapper,
+html body.mc-theater-seating-pdp #content_area [itemprop="offers"] > #v65-productdetail-action-wrapper,
+html.mc-paragon-pdp body #content_area [itemprop="offers"] > #v65-productdetail-action-wrapper {
   order: 85 !important;
   display: flex !important;
   flex-direction: column !important;
@@ -411,15 +425,23 @@ html body.mc-product-page #content_area [itemprop="offers"] > #v65-productdetail
 
 html body.productdetails #v65-product-parent [itemprop="offers"] > .v65-productdetail-cartqty,
 html body.mc-product-page #v65-product-parent [itemprop="offers"] > .v65-productdetail-cartqty,
+html body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"] > .v65-productdetail-cartqty,
+html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"] > .v65-productdetail-cartqty,
 html body.productdetails #content_area [itemprop="offers"] > .v65-productdetail-cartqty,
-html body.mc-product-page #content_area [itemprop="offers"] > .v65-productdetail-cartqty {
+html body.mc-product-page #content_area [itemprop="offers"] > .v65-productdetail-cartqty,
+html body.mc-theater-seating-pdp #content_area [itemprop="offers"] > .v65-productdetail-cartqty,
+html.mc-paragon-pdp body #content_area [itemprop="offers"] > .v65-productdetail-cartqty {
   order: 80 !important;
 }
 
 html body.productdetails #v65-product-parent [itemprop="offers"] > .v65-product-addtocart,
 html body.mc-product-page #v65-product-parent [itemprop="offers"] > .v65-product-addtocart,
+html body.mc-theater-seating-pdp #v65-product-parent [itemprop="offers"] > .v65-product-addtocart,
+html.mc-paragon-pdp body #v65-product-parent [itemprop="offers"] > .v65-product-addtocart,
 html body.productdetails #content_area [itemprop="offers"] > .v65-product-addtocart,
-html body.mc-product-page #content_area [itemprop="offers"] > .v65-product-addtocart {
+html body.mc-product-page #content_area [itemprop="offers"] > .v65-product-addtocart,
+html body.mc-theater-seating-pdp #content_area [itemprop="offers"] > .v65-product-addtocart,
+html.mc-paragon-pdp body #content_area [itemprop="offers"] > .v65-product-addtocart {
   order: 90 !important;
 }
 
@@ -428,7 +450,9 @@ html body.productdetails #mcProductSummaryBtn,
 html body.mc-product-page #mcPlannerBtn,
 html body.mc-product-page #mcProductSummaryBtn,
 html body.mc-theater-seating-pdp #mcPlannerBtn,
-html body.mc-theater-seating-pdp #mcProductSummaryBtn {
+html body.mc-theater-seating-pdp #mcProductSummaryBtn,
+html.mc-paragon-pdp body #mcPlannerBtn,
+html.mc-paragon-pdp body #mcProductSummaryBtn {
   white-space: nowrap !important;
   flex-wrap: nowrap !important;
   letter-spacing: 0.05em !important;
@@ -440,14 +464,22 @@ html body.mc-theater-seating-pdp #mcProductSummaryBtn {
 html body.productdetails #mcPlannerBtn > span:first-child,
 html body.productdetails #mcProductSummaryBtn > span:first-child,
 html body.mc-product-page #mcPlannerBtn > span:first-child,
-html body.mc-product-page #mcProductSummaryBtn > span:first-child {
+html body.mc-product-page #mcProductSummaryBtn > span:first-child,
+html body.mc-theater-seating-pdp #mcPlannerBtn > span:first-child,
+html body.mc-theater-seating-pdp #mcProductSummaryBtn > span:first-child,
+html.mc-paragon-pdp body #mcPlannerBtn > span:first-child,
+html.mc-paragon-pdp body #mcProductSummaryBtn > span:first-child {
   white-space: nowrap !important;
 }
 
 html body.productdetails #mcPlannerBtn .mc-btn-icon,
 html body.productdetails #mcProductSummaryBtn .mc-btn-icon,
 html body.mc-product-page #mcPlannerBtn .mc-btn-icon,
-html body.mc-product-page #mcProductSummaryBtn .mc-btn-icon {
+html body.mc-product-page #mcProductSummaryBtn .mc-btn-icon,
+html body.mc-theater-seating-pdp #mcPlannerBtn .mc-btn-icon,
+html body.mc-theater-seating-pdp #mcProductSummaryBtn .mc-btn-icon,
+html.mc-paragon-pdp body #mcPlannerBtn .mc-btn-icon,
+html.mc-paragon-pdp body #mcProductSummaryBtn .mc-btn-icon {
   flex-shrink: 0 !important;
 }
 
@@ -455,7 +487,11 @@ html body.mc-product-page #mcProductSummaryBtn .mc-btn-icon {
 html body.productdetails #v65-product-parent .v65-productdetail-cartqty,
 html body.productdetails #content_area .v65-productdetail-cartqty,
 html body.mc-product-page #v65-product-parent .v65-productdetail-cartqty,
-html body.mc-product-page #content_area .v65-productdetail-cartqty {
+html body.mc-product-page #content_area .v65-productdetail-cartqty,
+html body.mc-theater-seating-pdp #v65-product-parent .v65-productdetail-cartqty,
+html body.mc-theater-seating-pdp #content_area .v65-productdetail-cartqty,
+html.mc-paragon-pdp body #v65-product-parent .v65-productdetail-cartqty,
+html.mc-paragon-pdp body #content_area .v65-productdetail-cartqty {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -468,7 +504,11 @@ html body.mc-product-page #content_area .v65-productdetail-cartqty {
 html body.productdetails #v65-product-parent .v65-productdetail-cartqty input[name^="QTY."],
 html body.productdetails #content_area .v65-productdetail-cartqty input[name^="QTY."],
 html body.mc-product-page #v65-product-parent .v65-productdetail-cartqty input[name^="QTY."],
-html body.mc-product-page #content_area .v65-productdetail-cartqty input[name^="QTY."] {
+html body.mc-product-page #content_area .v65-productdetail-cartqty input[name^="QTY."],
+html body.mc-theater-seating-pdp #v65-product-parent .v65-productdetail-cartqty input[name^="QTY."],
+html body.mc-theater-seating-pdp #content_area .v65-productdetail-cartqty input[name^="QTY."],
+html.mc-paragon-pdp body #v65-product-parent .v65-productdetail-cartqty input[name^="QTY."],
+html.mc-paragon-pdp body #content_area .v65-productdetail-cartqty input[name^="QTY."] {
   margin: 6px auto 0 auto !important;
 }
 

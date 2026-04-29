@@ -24,9 +24,16 @@
       if (looksPdp) {
         h.classList.add("mc-url-looks-like-pdp");
         h.classList.remove("mc-allow-home-hero");
+        var mPar = s.match(/(?:^|[?&])productcode=([^&]*)/i);
+        var pcPar = mPar
+          ? String(decodeURIComponent(String(mPar[1] || "").replace(/\+/g, " "))).trim()
+          : "";
+        if (pcPar === "41417" || /\bparagon\b/i.test(p)) h.classList.add("mc-paragon-pdp");
+        else h.classList.remove("mc-paragon-pdp");
         return;
       }
       h.classList.remove("mc-url-looks-like-pdp");
+      h.classList.remove("mc-paragon-pdp");
       var raw = p.replace(/\/+/g, "/");
       while (raw.length > 1 && raw.charAt(raw.length - 1) === "/") raw = raw.slice(0, -1);
       var isHomePath =
@@ -42,6 +49,17 @@
   }
   window.mcApplyUrlHeroClassHints = apply;
   apply();
+  try {
+    document.addEventListener("DOMContentLoaded", function () {
+      try {
+        var he = document.documentElement;
+        var inp = document.querySelector('input[name="ProductCode"]');
+        var v = inp && String(inp.value || "").trim();
+        if (v === "41417") he.classList.add("mc-paragon-pdp");
+        if (/\bparagon\b/i.test(String(location.pathname || ""))) he.classList.add("mc-paragon-pdp");
+      } catch (eDomPar) {}
+    });
+  } catch (eDomPar2) {}
   try {
     window.addEventListener("popstate", apply);
     window.addEventListener("pageshow", function (ev) {
@@ -303,7 +321,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260427e" rel="stylesheet">
+  <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429a" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -422,6 +440,7 @@
     html.category body header.header,
     body.productdetails header.header,
     body.mc-product-page header.header,
+    html.mc-paragon-pdp body header.header,
     html.mc-url-looks-like-pdp body.is-home header.header {
       display: flex !important;
       flex-direction: column !important;
@@ -434,6 +453,7 @@
     html.category body header.header > .header__section:not(.header__section--middle),
     body.productdetails header.header > .header__section:not(.header__section--middle),
     body.mc-product-page header.header > .header__section:not(.header__section--middle),
+    html.mc-paragon-pdp body header.header > .header__section:not(.header__section--middle),
     html.mc-url-looks-like-pdp body.is-home header.header > .header__section:not(.header__section--middle) {
       order: 1 !important;
       width: 100% !important;
@@ -457,6 +477,9 @@
     body.mc-product-page header.header > .mc-header-desktop-bar,
     body.mc-product-page header.header > .hidden-xs.col-xs-12,
     body.mc-product-page header.header > .col-xs-12.hidden-xs,
+    html.mc-paragon-pdp body header.header > .mc-header-desktop-bar,
+    html.mc-paragon-pdp body header.header > .hidden-xs.col-xs-12,
+    html.mc-paragon-pdp body header.header > .col-xs-12.hidden-xs,
     html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-desktop-bar,
     html.mc-url-looks-like-pdp body.is-home header.header > .hidden-xs.col-xs-12,
     html.mc-url-looks-like-pdp body.is-home header.header > .col-xs-12.hidden-xs {
@@ -492,6 +515,7 @@
     html.category body header.header > .mc-header-cart,
     body.productdetails header.header > .mc-header-cart,
     body.mc-product-page header.header > .mc-header-cart,
+    html.mc-paragon-pdp body header.header > .mc-header-cart,
     html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-cart {
       order: 30 !important;
     }
@@ -502,6 +526,7 @@
     html.mc-search-open.category body header.header .collapsing-search,
     html.mc-search-open body.productdetails header.header .collapsing-search,
     html.mc-search-open body.mc-product-page header.header .collapsing-search,
+    html.mc-search-open.mc-paragon-pdp body header.header .collapsing-search,
     html.mc-search-open.mc-url-looks-like-pdp body.is-home header.header .collapsing-search,
     body.mc-search-open header.header .collapsing-search {
       transform: none !important;
@@ -535,6 +560,7 @@
     html.category body #if_homepage,
     body.productdetails #if_homepage,
     body.mc-product-page #if_homepage,
+    html.mc-paragon-pdp body #if_homepage,
     html.mc-url-looks-like-pdp body.is-home #if_homepage {
       display: none !important;
       visibility: hidden !important;
@@ -606,6 +632,8 @@
       html.category body .mc-header-desktop-bar[data-mc-header-bar],
       body.productdetails .mc-header-desktop-bar[data-mc-header-bar],
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar],
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar],
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar],
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] {
         display: flex !important;
         flex-direction: row !important;
@@ -623,6 +651,8 @@
       html.category body .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
       body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
         flex: 1 1 auto !important;
         min-width: 0 !important;
@@ -638,6 +668,8 @@
       html.category body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
       body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
         display: flex !important;
         flex-direction: row !important;
@@ -666,6 +698,10 @@
       body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .header__section--middle,
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .header__section--middle,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .header__section--middle,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .header__section--middle,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav {
         width: auto !important;
@@ -683,6 +719,10 @@
       body.productdetails .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch {
         width: auto !important;
@@ -697,6 +737,8 @@
       html.category body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container,
       body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container,
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container {
         max-width: 100% !important;
         width: 100% !important;
@@ -729,6 +771,17 @@
         .collapsing-search:focus-within
         .collapsing-search__form
         .row,
+      body.mc-theater-seating-pdp
+        .mc-header-desktop-bar[data-mc-header-bar]
+        .collapsing-search:focus-within
+        .collapsing-search__form
+        .row,
+      html.mc-paragon-pdp
+        body
+        .mc-header-desktop-bar[data-mc-header-bar]
+        .collapsing-search:focus-within
+        .collapsing-search__form
+        .row,
       html.mc-url-looks-like-pdp
         body.is-home
         .mc-header-desktop-bar[data-mc-header-bar]
@@ -740,12 +793,16 @@
       html.mc-search-open.category body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
       html.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
       html.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      html.mc-search-open body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      html.mc-search-open.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
       html.mc-search-open.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
       body.mc-search-open body:not(.is-home) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
       body.mc-search-open body.category .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
       html.category body.mc-search-open .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
       body.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
       body.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      body.mc-search-open body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
+      html.mc-search-open.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row,
       html.mc-url-looks-like-pdp body.is-home.mc-search-open .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .row {
         border-bottom: none !important;
       }
@@ -762,8 +819,13 @@
       html.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
       body.mc-search-open body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
       html.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
       body.mc-search-open body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-search-open body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.mc-search-open body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-search-open.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap:focus-within,
       html.mc-search-open.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
       html.mc-url-looks-like-pdp body.is-home.mc-search-open .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
@@ -785,6 +847,12 @@
       body.mc-product-page header.header > .mc-header-search-below-nav,
       body.mc-product-page header.header > .header__section.header__section--middle,
       body.mc-product-page header.header > .header__section--middle,
+      body.mc-theater-seating-pdp header.header > .mc-header-search-below-nav,
+      body.mc-theater-seating-pdp header.header > .header__section.header__section--middle,
+      body.mc-theater-seating-pdp header.header > .header__section--middle,
+      html.mc-paragon-pdp body header.header > .mc-header-search-below-nav,
+      html.mc-paragon-pdp body header.header > .header__section.header__section--middle,
+      html.mc-paragon-pdp body header.header > .header__section--middle,
       html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-search-below-nav,
       html.mc-url-looks-like-pdp body.is-home header.header > .header__section.header__section--middle,
       html.mc-url-looks-like-pdp body.is-home header.header > .header__section--middle {
@@ -802,18 +870,24 @@
       /* PDP: keep nav + in-bar search on one baseline; space-between so search does not compress centered menu */
       body.productdetails .mc-header-desktop-bar[data-mc-header-bar],
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar],
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar],
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar],
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] {
         justify-content: space-between !important;
         align-items: center !important;
       }
       body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
         align-items: center !important;
         align-self: center !important;
       }
       body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
         align-self: center !important;
         padding-top: 0 !important;
@@ -825,6 +899,10 @@
       body.productdetails .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
       body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
+      body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
+      html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
       html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch {
         padding-top: 0 !important;
@@ -834,7 +912,9 @@
         line-height: 1.15 !important;
       }
       body.productdetails header.header,
-      body.mc-product-page header.header {
+      body.mc-product-page header.header,
+      body.mc-theater-seating-pdp header.header,
+      html.mc-paragon-pdp body header.header {
         position: sticky !important;
         top: 0 !important;
         z-index: 10060 !important;
@@ -3137,6 +3217,11 @@ boot();
       if (!document.getElementById("v65-product-parent")) return false;
       var path = String(location.pathname || "").toLowerCase();
       var search = String(location.search || "").toLowerCase();
+      var pcInput = document.querySelector('input[name="ProductCode"]');
+      var pcVal = pcInput && String(pcInput.value || "").trim();
+      if (pcVal === "41417") return true;
+      if (/productcode=41417\b/i.test(search)) return true;
+      if (/\bparagon\b/i.test(path)) return true;
       if (/-s\/106(\b|\.|-|\/)/.test(path) || /\bcategoryid=106\b/.test(search)) return true;
       if (
         /customtheaterseating|palliser-theater-seating|theater-seating|theatre-seating|vertex-theater/i.test(
@@ -3161,7 +3246,7 @@ boot();
         document.title ||
         ""
       ).toLowerCase();
-      return /theater seating|theatre seating|theater chair|theatre chair|home theater|home theatre|palliser vertex/i.test(
+      return /theater seating|theatre seating|theater chair|theatre chair|home theater|home theatre|palliser vertex|\bparagon\b/i.test(
         titleText
       );
     } catch (eTh) {
@@ -3775,7 +3860,13 @@ boot();
     }
     function isTheaterSeatingPdp(){
       if (!document.getElementById("v65-product-parent")) return false;
-      if (!(document.body && (document.body.classList.contains("mc-product-page") || document.body.classList.contains("productdetails")))) {
+      var pcInput = document.querySelector('input[name="ProductCode"]');
+      var pcEarly = pcInput && String(pcInput.value || "").trim();
+      if (pcEarly === "41417") return true;
+      if (
+        !(document.body && (document.body.classList.contains("mc-product-page") || document.body.classList.contains("productdetails"))) &&
+        !(document.documentElement && document.documentElement.classList.contains("mc-paragon-pdp"))
+      ) {
         return false;
       }
       if (
@@ -3790,7 +3881,7 @@ boot();
         document.title ||
         ""
       ).toLowerCase();
-      return /theater seating|theatre seating|theater chair|theatre chair/.test(titleText);
+      return /theater seating|theatre seating|theater chair|theatre chair|\bparagon\b|home theater|home theatre/i.test(titleText);
     }
     function hideTheaterSeatDropdownRows(){
       if (!isTheaterSeatingPdp()) return;
@@ -10183,7 +10274,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     return (
       !!(document.body && document.body.classList.contains('mc-theater-seating-pdp')) ||
       !!document.querySelector('a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"]') ||
-      /theater seating|theatre seating|theater chair|theatre chair/.test(theaterTitle) ||
+      /theater seating|theatre seating|theater chair|theatre chair|\bparagon\b/i.test(theaterTitle) ||
       !!scope.querySelector('select[title*="Number of Seats"], select[title*="Choose Configuration"], select[title*="Choose Cover"]')
     );
   }
