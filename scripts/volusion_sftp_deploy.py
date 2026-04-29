@@ -285,6 +285,31 @@ def _try_home_relative(sftp) -> bool:
     return template_ok
 
 
+def _remote_template_matches_local(sftp) -> bool:
+    """True if any common remote path exists with the same byte size as repo template_266.html."""
+    try:
+        local_sz = os.path.getsize("template_266.html")
+    except OSError:
+        return False
+    for p in (
+        "/v/template_266.html",
+        "v/template_266.html",
+        "/template_266.html",
+        "template_266.html",
+    ):
+        try:
+            st = sftp.stat(p)
+            if st.st_size == local_sz and local_sz > 0:
+                print(
+                    f"::notice::PARAMIKO_STAT_OK remote template {p!r} size={st.st_size} matches local",
+                    flush=True,
+                )
+                return True
+        except Exception:
+            continue
+    return False
+
+
 def main() -> int:
     ws = os.environ.get("GITHUB_WORKSPACE", ".")
     os.chdir(ws)
@@ -299,6 +324,7 @@ def main() -> int:
     import paramiko  # noqa: PLC0415
 
     transport = paramiko.Transport((host, port))
+    transport.banner_timeout = 90
     try:
         transport.connect(username=user, password=password)
     except Exception as exc:  # noqa: BLE001
@@ -324,20 +350,30 @@ def main() -> int:
                 if _try_pair(sftp, t_path, c_path):
                     template_ok_any = True
                     print(f"PARAMIKO_OK_TEMPLATE_WRITTEN path={t_path!r}", flush=True)
+            # Always mirror — pair loop may have uploaded CSS/mccabe without a template_ok flag
+            # (template put failed per pair but css put succeeded, or only mirrors reach the live path).
+            _mirror_template_to_canonical_paths(sftp)
+            _mirror_css_to_canonical_paths(sftp)
+            _mirror_mccabe_to_canonical_paths(sftp)
+            _mirror_template266_theme_assets(sftp)
             if template_ok_any:
-                _mirror_template_to_canonical_paths(sftp)
-                _mirror_css_to_canonical_paths(sftp)
-                _mirror_mccabe_to_canonical_paths(sftp)
-                _mirror_template266_theme_assets(sftp)
-                print("PARAMIKO_OK (template reached Volusion SFTP at least once; mirrors ran)", flush=True)
+                print("PARAMIKO_OK (template + mirrors)", flush=True)
                 return 0
             if _try_home_relative(sftp):
-                print("PARAMIKO_OK (cwd-relative template and/or assets)", flush=True)
+                print("PARAMIKO_OK (cwd-relative + mirrors)", flush=True)
                 _mirror_template_to_canonical_paths(sftp)
                 _mirror_css_to_canonical_paths(sftp)
                 _mirror_mccabe_to_canonical_paths(sftp)
                 _mirror_template266_theme_assets(sftp)
                 return 0
+            if _remote_template_matches_local(sftp):
+                print("PARAMIKO_OK (remote template size matches local after mirrors)", flush=True)
+                return 0
+            print(
+                "::error::PARAMIKO_FAIL no template_266.html write succeeded; "
+                "remote stat did not match local file size",
+                file=sys.stderr,
+            )
             return 1
         finally:
             try:

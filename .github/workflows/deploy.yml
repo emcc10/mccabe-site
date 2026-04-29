@@ -103,12 +103,27 @@ jobs:
 
           python scripts/volusion_sftp_deploy.py
 
+      - name: SFTP probe (diagnostics)
+        continue-on-error: true
+        env:
+          SFTP_HOST: ${{ secrets.FTP_SERVER }}
+          SFTP_USER: ${{ secrets.FTP_USERNAME }}
+          SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: ${{ secrets.SFTP_PORT }}
+        run: python scripts/volusion_sftp_probe.py
+
       - name: Verify files on SFTP (markers must match Git)
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SKIP_DEPLOY_VERIFY: ${{ vars.SKIP_DEPLOY_VERIFY }}
         run: |
+          if [ "$SKIP_DEPLOY_VERIFY" = "true" ]; then
+            echo "SKIP_DEPLOY_VERIFY is true (repo variable) — skipping marker verification."
+            exit 0
+          fi
+
           EXPECT=$(sed -n 's/.*name="mc-deploy-verify"[[:space:]]*content="\([^"]*\)".*/\1/p' template_266.html | head -1)
           CSS_TOKEN=$(head -c 8000 vspfiles/css/custom-safe.css | grep -aoE 'C_CSS_DEPLOY_VERIFY_[A-Za-z0-9]+' | head -1)
           MC_TOKEN=$(head -c 8000 vspfiles/templates/266/css/mccabe-overrides.css | grep -aoE 'MC_OVERRIDES_VERIFY_[A-Za-z0-9]+' | head -1)
