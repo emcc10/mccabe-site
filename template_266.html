@@ -3441,6 +3441,7 @@ boot();
   }
 
   function mcNormalizeQtyBlockAboveAtc() {
+    if (document.getElementById("mc-volusion-qty-above-cart")) return;
     var root =
       document.getElementById("v65-product-parent") ||
       document.getElementById("content_area");
@@ -3587,13 +3588,7 @@ boot();
   } catch (eWOrd) {}
 
   function mcBootPdpQtyAndHeader() {
-    if (!mcIsProductDetailPage()) return;
-    try {
-      if (typeof window.mcFixPdpHeaderNavInline === "function") window.mcFixPdpHeaderNavInline();
-    } catch (eB1) {}
-    try {
-      if (typeof window.mcNormalizeQtyBlockAboveAtc === "function") window.mcNormalizeQtyBlockAboveAtc();
-    } catch (eB2) {}
+    /* PDP header: #mc-final-pdp-menu-qty-fix. Quantity: #mc-final-pdp-qty-position-script */
   }
   try {
     if (document.readyState === "loading") {
@@ -16625,117 +16620,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
 <link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260430dom" id="mc-mccabe-overrides-body-last" />
-<style id="mc-pdp-wins-last">
-  /* MC_PDP_TAIL_20260430dom — Store-dot: do not rely on #v65-product-parent or [data-mc-header-bar]. */
-  @media (min-width: 992px) {
-    html.mc-url-looks-like-pdp body header.header .mc-header-desktop-bar .mc-header-search-cart-wrap,
-    html.mc-paragon-pdp body header.header .mc-header-desktop-bar .mc-header-search-cart-wrap,
-    html.mc-url-looks-like-pdp body .mc-header-desktop-bar .mc-header-search-cart-wrap {
-      display: flex !important;
-      flex-direction: row !important;
-      flex-wrap: nowrap !important;
-      align-items: center !important;
-      gap: 10px !important;
-      grid-template-columns: none !important;
-      grid-template-rows: none !important;
-      align-content: center !important;
-    }
-    html.mc-url-looks-like-pdp body header.header .mc-header-desktop-bar .mc-header-search-cart-wrap::before,
-    html.mc-paragon-pdp body header.header .mc-header-desktop-bar .mc-header-search-cart-wrap::before,
-    html.mc-url-looks-like-pdp body .mc-header-desktop-bar .mc-header-search-cart-wrap::before {
-      content: none !important;
-      display: none !important;
-    }
-    html.mc-url-looks-like-pdp body header.header > .header__section:not(.header__section--middle),
-    html body:has(#v65-product-parent) header.header > .header__section:not(.header__section--middle),
-    html body.productdetails header.header > .header__section:not(.header__section--middle),
-    html body.mc-product-page header.header > .header__section:not(.header__section--middle),
-    html body.mc-theater-seating-pdp header.header > .header__section:not(.header__section--middle),
-    html.mc-paragon-pdp body header.header > .header__section:not(.header__section--middle),
-    html.mc-url-looks-like-pdp body.is-home header.header > .header__section:not(.header__section--middle) {
-      padding-top: 0 !important;
-    }
-    html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-    html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-    html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-    html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-    html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
-    html body:has(#v65-product-parent) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
-      display: flex !important;
-      flex-direction: row !important;
-      flex-wrap: nowrap !important;
-      align-items: center !important;
-      gap: 10px !important;
-      grid-template-columns: none !important;
-      grid-template-rows: none !important;
-      align-content: center !important;
-    }
-    html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
-    html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
-    html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
-    html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
-    html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
-    html body:has(#v65-product-parent) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before {
-      content: none !important;
-      display: none !important;
-    }
-    html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
-    html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
-    html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
-    html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
-    html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
-    html body:has(#v65-product-parent) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav {
-      grid-column: unset !important;
-      grid-row: unset !important;
-      flex: 1 1 auto !important;
-      min-width: 0 !important;
-    }
-    html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-cart,
-    html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-cart,
-    html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-cart,
-    html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-cart,
-    html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-cart,
-    html body:has(#v65-product-parent) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-cart {
-      grid-column: unset !important;
-      grid-row: unset !important;
-    }
-  }
-  /* Quantity: always-on (mobile + desktop); beats [itemprop="offers"] * { text-align:left } in custom-safe */
-  html.mc-url-looks-like-pdp body [class*="cartqty__wrap"],
-  html.mc-paragon-pdp body [class*="cartqty__wrap"],
-  html body #v65-product-parent .vol-cartqty__wrap,
-  html body #content_area #v65-product-parent .vol-cartqty__wrap {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 8px !important;
-    width: 100% !important;
-    max-width: 320px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    text-align: center !important;
-    box-sizing: border-box !important;
-  }
-  html.mc-url-looks-like-pdp body [class*="cartqty__wrap"] label,
-  html.mc-paragon-pdp body [class*="cartqty__wrap"] label,
-  html body #v65-product-parent .vol-cartqty__wrap label,
-  html body #content_area #v65-product-parent .vol-cartqty__wrap label {
-    display: block !important;
-    flex: 0 0 100% !important;
-    width: 100% !important;
-    text-align: center !important;
-    margin: 0 0 6px 0 !important;
-    order: -1 !important;
-  }
-  html.mc-url-looks-like-pdp body [itemprop="offers"] [class*="cartqty__wrap"],
-  html.mc-url-looks-like-pdp body [itemprop="offers"] [class*="cartqty__wrap"] *,
-  html body #v65-product-parent [itemprop="offers"] .vol-cartqty__wrap,
-  html body #v65-product-parent [itemprop="offers"] .vol-cartqty__wrap * {
-    text-align: center !important;
-  }
-</style>
 <script id="mccabe-product-room-planner-price-fix" type="text/plain" data-disabled="true">
 (function () {
   var FOUR_L_DISCOUNT = 500;
@@ -17371,86 +17255,212 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
-<script>
-/* MC_PDP_BODY_LAST_20260430dom — Store-dot may omit #v65-product-parent; use html.mc-url-looks-like-pdp + broad selectors. */
+<style id="mc-final-pdp-menu-qty-fix">
+  /* Keep existing desktop menu/header from dropping on PDPs */
+  @media (min-width: 992px) {
+    html body.productdetails header.header,
+    html body.mc-product-page header.header,
+    html body.mc-theater-seating-pdp header.header,
+    html.mc-paragon-pdp body header.header,
+    html.mc-url-looks-like-pdp body.is-home header.header {
+      padding-top: 0 !important;
+      margin-top: 0 !important;
+    }
+
+    html body.productdetails .mc-header-desktop-bar[data-mc-header-bar],
+    html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar],
+    html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar],
+    html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar],
+    html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] {
+      margin-top: 0 !important;
+      padding-top: clamp(8px, 1.5vw, 12px) !important;
+      padding-bottom: clamp(8px, 1.5vw, 12px) !important;
+      top: 0 !important;
+      transform: none !important;
+      align-items: center !important;
+    }
+
+    html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+    html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+    html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+    html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
+    html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      top: 0 !important;
+      transform: none !important;
+      align-self: center !important;
+    }
+  }
+
+  /* Quantity row directly above Add to Cart */
+  #mc-volusion-qty-above-cart {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin: 14px auto 10px !important;
+    padding: 0 !important;
+    text-align: center !important;
+    clear: both !important;
+    float: none !important;
+    box-sizing: border-box !important;
+  }
+
+  #mc-volusion-qty-above-cart label {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    letter-spacing: .16em !important;
+    line-height: 1 !important;
+    text-transform: uppercase !important;
+    color: #555 !important;
+    white-space: nowrap !important;
+  }
+
+  #mc-volusion-qty-above-cart input {
+    width: 58px !important;
+    height: 38px !important;
+    text-align: center !important;
+    margin: 0 !important;
+    padding: 0 6px !important;
+    border: 1px solid #bbb !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .mc-cart-button-row-centered {
+    width: 100% !important;
+    text-align: center !important;
+    clear: both !important;
+    float: none !important;
+  }
+</style>
+
+<script id="mc-final-pdp-qty-position-script">
 (function () {
-  var css =
-    '@media(min-width:992px){' +
-    'html.mc-url-looks-like-pdp body header.header .mc-header-desktop-bar .mc-header-search-cart-wrap,' +
-    'html.mc-paragon-pdp body header.header .mc-header-desktop-bar .mc-header-search-cart-wrap,' +
-    'html body.productdetails .mc-header-desktop-bar .mc-header-search-cart-wrap,' +
-    'html body.mc-product-page .mc-header-desktop-bar .mc-header-search-cart-wrap{' +
-    'display:flex!important;flex-flow:row nowrap!important;align-items:center!important;gap:10px!important;' +
-    'grid-template-columns:none!important;grid-template-rows:none!important;}' +
-    'html.mc-url-looks-like-pdp body header.header .mc-header-desktop-bar .mc-header-search-cart-wrap::before,' +
-    'html.mc-paragon-pdp body header.header .mc-header-desktop-bar .mc-header-search-cart-wrap::before,' +
-    'html body.productdetails .mc-header-desktop-bar .mc-header-search-cart-wrap::before,' +
-    'html body.mc-product-page .mc-header-desktop-bar .mc-header-search-cart-wrap::before{' +
-    'content:none!important;display:none!important;}' +
-    '}' +
-    'html.mc-url-looks-like-pdp body [class*="cartqty__wrap"],' +
-    'html.mc-paragon-pdp body [class*="cartqty__wrap"],' +
-    'html body #v65-product-parent [class*="cartqty__wrap"],' +
-    'html body #content_area [class*="cartqty__wrap"]{' +
-    'display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:center!important;' +
-    'justify-content:center!important;gap:8px!important;width:100%!important;max-width:320px!important;' +
-    'margin-left:auto!important;margin-right:auto!important;text-align:center!important;box-sizing:border-box!important;}' +
-    'html.mc-url-looks-like-pdp body [class*="cartqty__wrap"] label,' +
-    'html.mc-paragon-pdp body [class*="cartqty__wrap"] label,' +
-    'html body #v65-product-parent [class*="cartqty__wrap"] label,' +
-    'html body #content_area [class*="cartqty__wrap"] label{' +
-    'display:block!important;flex:0 0 100%!important;width:100%!important;text-align:center!important;' +
-    'margin:0 0 6px 0!important;order:-1!important;}';
-
-  function tick() {
-    if (typeof window.mcIsProductDetailPage === "function") {
-      if (!window.mcIsProductDetailPage()) return;
-    } else if (
-      !document.getElementById("v65-product-parent") &&
-      !document.documentElement.classList.contains("mc-url-looks-like-pdp")
-    ) {
-      return;
-    }
-    var el = document.getElementById("mc-pdp-js-body-last");
-    if (!el) {
-      el = document.createElement("style");
-      el.id = "mc-pdp-js-body-last";
-      document.body.appendChild(el);
-    }
-    el.textContent = css;
-    try {
-      if (typeof window.mcFixPdpHeaderNavInline === "function") window.mcFixPdpHeaderNavInline();
-    } catch (e1) {}
-    try {
-      if (typeof window.mcNormalizeQtyBlockAboveAtc === "function") window.mcNormalizeQtyBlockAboveAtc();
-    } catch (e2) {}
+  function isPdp() {
+    return !!(
+      document.querySelector("#v65-product-parent") ||
+      document.body.classList.contains("productdetails") ||
+      document.querySelector('input[name="ProductCode"]')
+    );
   }
 
-  function armObserver() {
-    var root =
-      document.getElementById("v65-product-parent") ||
-      document.getElementById("content_area") ||
-      document.body;
-    if (!root || !window.MutationObserver) return;
-    var deb = null;
-    var ob = new MutationObserver(function () {
-      if (deb) window.clearTimeout(deb);
-      deb = window.setTimeout(function () {
-        deb = null;
-        tick();
-      }, 80);
+  function findQtyInput() {
+    var root = document.querySelector("#v65-product-parent") || document.getElementById("content_area");
+    if (!root) return null;
+    return (
+      root.querySelector('input[name^="QTY."]') ||
+      root.querySelector('input[name="QTY"]') ||
+      root.querySelector('input[name="Qty"]') ||
+      root.querySelector('input[name="qty"]') ||
+      root.querySelector('input[name="quantity"]') ||
+      root.querySelector('input[id*="qty"]') ||
+      root.querySelector('input[id*="Qty"]') ||
+      root.querySelector('input[id*="quantity"]') ||
+      root.querySelector('input[id*="Quantity"]')
+    );
+  }
+
+  function findAddToCartButton() {
+    var root = document.querySelector("#v65-product-parent") || document.getElementById("content_area") || document;
+    var t =
+      root.querySelector("#btn_addtocart") ||
+      root.querySelector('input[name="btnaddtocart"]') ||
+      root.querySelector('button[name="btnaddtocart"]');
+    if (t) return t;
+    var candidates = Array.from(root.querySelectorAll("input, button, a"));
+
+    return candidates.find(function (el) {
+      var text = String(el.value || el.innerText || el.textContent || "").toLowerCase();
+      var id = String(el.id || "").toLowerCase();
+      var name = String(el.name || "").toLowerCase();
+
+      return (
+        name === "btnaddtocart" ||
+        id.indexOf("addtocart") !== -1 ||
+        text.indexOf("add to cart") !== -1
+      );
     });
-    try {
-      ob.observe(root, { childList: true, subtree: true });
-    } catch (eOb) {}
   }
 
-  tick();
-  armObserver();
-  [120, 400, 900, 1800, 3500, 6500].forEach(function (ms) {
-    window.setTimeout(tick, ms);
+  function closestUsefulRow(el) {
+    if (!el) return null;
+    return el.closest("tr, td, table, div, p") || el.parentElement || el;
+  }
+
+  function moveQty() {
+    if (!isPdp()) return;
+
+    var qty = findQtyInput();
+    var addBtn = findAddToCartButton();
+
+    if (!qty || !addBtn) return;
+
+    var addRow = closestUsefulRow(addBtn);
+    if (!addRow || !addRow.parentNode) return;
+
+    var qtyBlock = qty.closest(".vol-cartqty__wrap") || qty;
+    var oldQtyRow = closestUsefulRow(qtyBlock);
+
+    var wrap = document.getElementById("mc-volusion-qty-above-cart");
+    if (!wrap) {
+      wrap = document.createElement("div");
+      wrap.id = "mc-volusion-qty-above-cart";
+    }
+
+    var label = wrap.querySelector("label");
+    if (!qtyBlock.querySelector("label")) {
+      if (!label) {
+        label = document.createElement("label");
+        label.textContent = "Quantity";
+        wrap.appendChild(label);
+      }
+      var qInput = qtyBlock.querySelector('input[name^="QTY."], input[name="QTY"], input[name="Qty"], input[name="qty"], input[name="quantity"]') || qty;
+      if (!qInput.id) qInput.id = "mc-volusion-qty-input";
+      label.setAttribute("for", qInput.id);
+    }
+
+    wrap.appendChild(qtyBlock);
+
+    if (oldQtyRow && oldQtyRow !== qtyBlock && oldQtyRow !== wrap && oldQtyRow.childElementCount === 0) {
+      try { oldQtyRow.remove(); } catch (e) {}
+    }
+
+    addRow.parentNode.insertBefore(wrap, addRow);
+    addRow.classList.add("mc-cart-button-row-centered");
+
+    wrap.style.setProperty("display", "flex", "important");
+    wrap.style.setProperty("justify-content", "center", "important");
+    wrap.style.setProperty("align-items", "center", "important");
+    wrap.style.setProperty("gap", "10px", "important");
+    wrap.style.setProperty("margin", "14px auto 10px", "important");
+
+    addRow.style.setProperty("text-align", "center", "important");
+    addRow.style.setProperty("float", "none", "important");
+    addRow.style.setProperty("clear", "both", "important");
+  }
+
+  function run() {
+    moveQty();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", run);
+  } else {
+    run();
+  }
+
+  window.addEventListener("load", function () {
+    run();
+    setTimeout(run, 300);
+    setTimeout(run, 1000);
   });
-  window.addEventListener("load", tick);
 })();
 </script>
 </body>
