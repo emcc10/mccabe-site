@@ -308,46 +308,6 @@ body.category #content_area .mc-member-grid-price__hint {
   color: #22663a;
 }
 
-/* =============================================================================
-   PDP + HEADER — last-win block (duplicate link after custom-safe in template).
-   Volusion often serves theme CSS reliably while /v/vspfiles/css/custom-safe.css lags.
-   ============================================================================= */
-@media (min-width: 992px) {
-  html body.productdetails header.header > .mc-header-search-below-nav,
-  html body.productdetails header.header > .header__section.header__section--middle,
-  html body.productdetails header.header > .header__section--middle,
-  html body.mc-product-page header.header > .mc-header-search-below-nav,
-  html body.mc-product-page header.header > .header__section.header__section--middle,
-  html body.mc-product-page header.header > .header__section--middle,
-  html body.mc-theater-seating-pdp header.header > .mc-header-search-below-nav,
-  html body.mc-theater-seating-pdp header.header > .header__section.header__section--middle,
-  html body.mc-theater-seating-pdp header.header > .header__section--middle,
-  html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-search-below-nav,
-  html.mc-url-looks-like-pdp body.is-home header.header > .header__section.header__section--middle,
-  html.mc-url-looks-like-pdp body.is-home header.header > .header__section--middle {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    max-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    pointer-events: none !important;
-    border: 0 !important;
-    clip-path: inset(50%) !important;
-  }
-
-  html body.productdetails header.header,
-  html body.mc-product-page header.header,
-  html body.mc-theater-seating-pdp header.header,
-  html.mc-paragon-pdp body header.header {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 10060 !important;
-    background-color: #fff !important;
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06) !important;
-  }
-}
 
 html body.productdetails #v65-product-parent [itemprop="offers"],
 html body.mc-product-page #v65-product-parent [itemprop="offers"],
@@ -497,98 +457,6 @@ html body.mc-product-page #mcLeatherSwatchStrip::-webkit-scrollbar {
   display: none !important;
 }
 
-@media (min-width: 992px) {
-  html body.productdetails .mc-header-desktop-bar[data-mc-header-bar],
-  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar],
-  html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar],
-  html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] {
-    min-height: 44px !important;
-    align-items: center !important;
-  }
-  html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-  html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-  html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu,
-  html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    transform: none !important;
-  }
-
-  /* PDP: one-line search + cart (no “Search” label row); nav aligns with fixed home/cart icons */
-  :is(
-      body.productdetails,
-      body.mc-product-page,
-      body.mc-theater-seating-pdp,
-      html.mc-paragon-pdp body,
-      body:has(#v65-product-parent)
-    )
-    header.header
-    > .header__section:not(.header__section--middle) {
-    padding-top: 0 !important;
-  }
-
-  :is(
-      body.productdetails,
-      body.mc-product-page,
-      body.mc-theater-seating-pdp,
-      html.mc-paragon-pdp body,
-      body:has(#v65-product-parent)
-    )
-    .mc-header-desktop-bar
-    .mc-header-search-cart-wrap {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    gap: 10px !important;
-    grid-template-columns: initial !important;
-    grid-template-rows: initial !important;
-    row-gap: 0 !important;
-  }
-
-  :is(
-      body.productdetails,
-      body.mc-product-page,
-      body.mc-theater-seating-pdp,
-      html.mc-paragon-pdp body,
-      body:has(#v65-product-parent)
-    )
-    .mc-header-desktop-bar
-    .mc-header-search-cart-wrap::before {
-    content: none !important;
-    display: none !important;
-  }
-
-  :is(
-      body.productdetails,
-      body.mc-product-page,
-      body.mc-theater-seating-pdp,
-      html.mc-paragon-pdp body,
-      body:has(#v65-product-parent)
-    )
-    .mc-header-desktop-bar
-    .mc-header-search-below-nav {
-    grid-column: initial !important;
-    grid-row: initial !important;
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-    width: auto !important;
-  }
-
-  :is(
-      body.productdetails,
-      body.mc-product-page,
-      body.mc-theater-seating-pdp,
-      html.mc-paragon-pdp body,
-      body:has(#v65-product-parent)
-    )
-    .mc-header-desktop-bar
-    .mc-header-cart {
-    grid-column: initial !important;
-    grid-row: initial !important;
-    flex: 0 0 auto !important;
-  }
-}
 
 /* Volusion “vol-cartqty__wrap” PDP chrome (Paragon / newer store-dot layouts) —
    row + wrap so label is one full line; − / qty / + share the row below (works without a DOM wrapper). */
@@ -643,17 +511,6 @@ html body #v65-product-parent .vol-cartqty__wrap input[value="-"] {
 #mc-qty-under-configuration .vol-cartqty__wrap label,
 #mc-qty-under-configuration .vol-cartqty__wrap input {
   font-family: Inter, Arial, sans-serif !important;
-}
-
-@media (min-width: 992px) {
-  body.productdetails .mc-header-desktop-bar .mc-header-search-below-nav,
-  body.mc-product-page .mc-header-desktop-bar .mc-header-search-below-nav,
-  body.mc-theater-seating-pdp .mc-header-desktop-bar .mc-header-search-below-nav,
-  html.mc-paragon-pdp body .mc-header-desktop-bar .mc-header-search-below-nav {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    min-width: 0 !important;
-  }
 }
 
 /* Purchase column typography (scoped; no category grid / checkout) */
