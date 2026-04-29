@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """
-Paramiko SFTP deploy fallback.
+Paramiko SFTP deploy for Volusion.
 
-Template + CSS use different remote paths (Volusion):
-  template → /template_266.html first (SFTP root), then fallbacks under /v/, etc.
-  CSS      → /vspfiles/css/custom-safe.css and /v/vspfiles/css/custom-safe.css (File Editor: wwwroot/v/vspfiles/css/).
-  mccabe   → parallel to CSS under .../templates/266/css/mccabe-overrides.css (linked from template).
-  theme    → template.css + js/min/*.js under .../templates/266/ (same href/src as template).
+Volusion theme files live under SFTP root **/v** (same tree as https://host/v/…).
+We try **/v/...** absolute paths first, then paths relative to a chroot at **/v**
+(**template_266.html**, **vspfiles/...**), then **v/...** if the login cwd is above /v.
 
-Override with SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE (full paths).
+Override with SFTP_TEMPLATE_REMOTE / SFTP_CSS_REMOTE_FILE.
 """
 from __future__ import annotations
 
@@ -24,10 +22,11 @@ def _css_remote() -> str:
 
 
 def _mccabe_remote_for_css(c_path: str) -> str:
-    """Keep theme override path parallel to custom-safe (v/ wwwroot vs /vspfiles)."""
+    """Mccabe path parallel to custom-safe (under /v/vspfiles when CSS is under /v)."""
     mapping = {
         "/v/vspfiles/css/custom-safe.css": "/v/vspfiles/templates/266/css/mccabe-overrides.css",
-        "v/vspfiles/css/custom-safe.css": "/v/vspfiles/templates/266/css/mccabe-overrides.css",
+        "v/vspfiles/css/custom-safe.css": "v/vspfiles/templates/266/css/mccabe-overrides.css",
+        "vspfiles/css/custom-safe.css": "vspfiles/templates/266/css/mccabe-overrides.css",
         "/vspfiles/css/custom-safe.css": "/vspfiles/templates/266/css/mccabe-overrides.css",
         "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css": (
             "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css"
@@ -35,7 +34,6 @@ def _mccabe_remote_for_css(c_path: str) -> str:
         "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css": (
             "/mccabestheaterandliving.com/vspfiles/templates/266/css/mccabe-overrides.css"
         ),
-        "vspfiles/css/custom-safe.css": "vspfiles/templates/266/css/mccabe-overrides.css",
     }
     return mapping.get(c_path, "/v/vspfiles/templates/266/css/mccabe-overrides.css")
 
@@ -95,40 +93,43 @@ def _put_file(sftp, local: str, remote: str) -> None:
 
 
 def _template_css_pairs(c_remote: str) -> list[tuple[str, str]]:
-    """Every (template_path, css_path) we try — same order as deploy.yml (secret first, then fallbacks).
-
-    When SFTP_TEMPLATE_REMOTE is set, older Paramiko behavior stopped after the first successful put;
-    that path is often writable but not the file Volusion serves, so we always attempt the full list.
-    """
+    """(template_path, css_path) — /v/… first; then chroot-at-/v names; then v/… fallbacks."""
     secret_t = os.environ.get("SFTP_TEMPLATE_REMOTE", "").strip()
-    if secret_t and not secret_t.startswith("/"):
-        secret_t = "/" + secret_t
+    if secret_t and not secret_t.startswith("/") and not secret_t.startswith("v/"):
+        secret_t = "/v/" + secret_t.lstrip("/")
     if secret_t == "/v/v/template_266.html":
         secret_t = "/v/template_266.html"
+
     domain_t = "/mccabestheaterandliving.com/v/template_266.html"
     domain_c = "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css"
     domain_c_under_v = "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css"
-    v_wwwroot_css = "/v/vspfiles/css/custom-safe.css"
+    v_rel_css = "v/vspfiles/css/custom-safe.css"
+    v_abs_css = "/v/vspfiles/css/custom-safe.css"
 
     raw: list[tuple[str, str]] = []
     if secret_t:
         raw.append((secret_t, c_remote))
-        raw.append((secret_t, v_wwwroot_css))
+        raw.append((secret_t, v_abs_css))
+        if secret_t.startswith("/v/"):
+            under_v = secret_t[len("/v/"):]
+            raw.append((under_v, "vspfiles/css/custom-safe.css"))
+        elif secret_t.startswith("v/"):
+            raw.append((secret_t, v_rel_css))
+            raw.append((secret_t, "vspfiles/css/custom-safe.css"))
+
     raw.extend(
         [
-            # Site-root-relative: many Volusion SFTP logins are chrooted here (no leading slash).
-            ("v/template_266.html", "v/vspfiles/css/custom-safe.css"),
-            ("v/template_266.html", "vspfiles/css/custom-safe.css"),
+            ("/v/template_266.html", v_abs_css),
             ("/v/template_266.html", c_remote),
-            ("/v/template_266.html", v_wwwroot_css),
+            ("template_266.html", "vspfiles/css/custom-safe.css"),
+            ("v/template_266.html", v_rel_css),
+            ("v/template_266.html", "vspfiles/css/custom-safe.css"),
+            ("/v/v/template_266.html", v_abs_css),
             ("/v/v/template_266.html", c_remote),
-            ("/v/v/template_266.html", v_wwwroot_css),
+            ("/template_266.html", v_abs_css),
             ("/template_266.html", c_remote),
-            ("/template_266.html", v_wwwroot_css),
             (domain_t, domain_c),
             (domain_t, domain_c_under_v),
-            ("template_266.html", "vspfiles/css/custom-safe.css"),
-            ("template_266.html", "v/vspfiles/css/custom-safe.css"),
         ]
     )
 
@@ -177,13 +178,13 @@ def _try_pair(sftp, t_path: str, c_path: str) -> bool:
 
 
 def _mirror_template_to_canonical_paths(sftp) -> None:
-    """Extra template writes — logged so Action logs show whether Volusion paths are writable."""
+    """Extra template writes — /v/… first (Volusion SFTP root for storefront files)."""
     for rel in (
-        "v/template_266.html",
-        "template_266.html",
         "/v/template_266.html",
-        "/mccabestheaterandliving.com/v/template_266.html",
+        "template_266.html",
         "/v/v/template_266.html",
+        "v/template_266.html",
+        "/mccabestheaterandliving.com/v/template_266.html",
         "/template_266.html",
     ):
         try:
@@ -195,11 +196,12 @@ def _mirror_template_to_canonical_paths(sftp) -> None:
 
 def _mirror_css_to_canonical_paths(sftp) -> None:
     for rel in (
-        "/vspfiles/css/custom-safe.css",
         "/v/vspfiles/css/custom-safe.css",
+        "vspfiles/css/custom-safe.css",
         "v/vspfiles/css/custom-safe.css",
-        "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css",
+        "/vspfiles/css/custom-safe.css",
         "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css",
+        "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css",
     ):
         try:
             _put_file(sftp, "vspfiles/css/custom-safe.css", rel)
@@ -212,9 +214,9 @@ def _mirror_mccabe_to_canonical_paths(sftp) -> None:
     local = "vspfiles/templates/266/css/mccabe-overrides.css"
     for rel in (
         "/v/vspfiles/templates/266/css/mccabe-overrides.css",
+        "vspfiles/templates/266/css/mccabe-overrides.css",
         "v/vspfiles/templates/266/css/mccabe-overrides.css",
         "/vspfiles/templates/266/css/mccabe-overrides.css",
-        "vspfiles/templates/266/css/mccabe-overrides.css",
         "/mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css",
         "/mccabestheaterandliving.com/vspfiles/templates/266/css/mccabe-overrides.css",
     ):
@@ -228,9 +230,9 @@ def _mirror_mccabe_to_canonical_paths(sftp) -> None:
 def _mirror_template266_theme_assets(sftp) -> None:
     bases = (
         "/v/vspfiles/",
+        "vspfiles/",
         "v/vspfiles/",
         "/vspfiles/",
-        "vspfiles/",
         "/mccabestheaterandliving.com/v/vspfiles/",
         "/mccabestheaterandliving.com/vspfiles/",
     )
@@ -293,9 +295,9 @@ def _remote_template_matches_local(sftp) -> bool:
         return False
     for p in (
         "/v/template_266.html",
+        "template_266.html",
         "v/template_266.html",
         "/template_266.html",
-        "template_266.html",
     ):
         try:
             st = sftp.stat(p)

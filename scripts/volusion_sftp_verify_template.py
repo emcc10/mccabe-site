@@ -3,7 +3,7 @@
 After deploy: confirm mc-deploy-verify matches Git, confirm custom-safe.css marker
 exists on SFTP, then check the public template URL when possible.
 
-1) SFTP template: prefer /v/... paths; reject stale /v/ copies when those files exist.
+1) SFTP template: prefer **/v/…** (storefront root), then names relative to chroot at /v.
 2) SFTP CSS: require C_CSS_DEPLOY_VERIFY_* token from repo in at least one canonical path.
 3) HTTP: public template URL must show the same mc-deploy-verify marker (cache-busted).
 """
@@ -21,17 +21,18 @@ import ssl
 # SFTP paths that might be the live theme (browser …/v/template_266.html)
 _CANONICAL_V_PATHS: tuple[str, ...] = (
     "/v/template_266.html",
+    "template_266.html",
+    "v/template_266.html",
     "/mccabestheaterandliving.com/v/template_266.html",
     "/v/v/template_266.html",
-    "v/template_266.html",
 )
 
 # custom-safe.css — must reflect deploy marker or the storefront can look "unchanged"
 _CANONICAL_CSS_PATHS: tuple[str, ...] = (
     "/v/vspfiles/css/custom-safe.css",
-    "/vspfiles/css/custom-safe.css",
-    "v/vspfiles/css/custom-safe.css",
     "vspfiles/css/custom-safe.css",
+    "v/vspfiles/css/custom-safe.css",
+    "/vspfiles/css/custom-safe.css",
     "/mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css",
     "/mccabestheaterandliving.com/vspfiles/css/custom-safe.css",
 )
@@ -75,7 +76,10 @@ def _remote_custom_safe_has_token(sftp, token: str) -> str | None:
 def _normalize_secret_template_path() -> str:
     secret = os.environ.get("SFTP_TEMPLATE_REMOTE", "").strip()
     if secret and not secret.startswith("/"):
-        secret = "/" + secret
+        if secret.startswith("v/"):
+            secret = "/" + secret
+        else:
+            secret = "/v/" + secret.lstrip("/")
     if secret == "/v/v/template_266.html":
         secret = "/v/template_266.html"
     return secret

@@ -135,13 +135,15 @@ jobs:
           set cmd:fail-exit no
           open -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222
           get /v/template_266.html -o verify-v.html
-          get /template_266.html -o verify-root.html
+          get template_266.html -o verify-chroot.html
           get v/template_266.html -o verify-vrel.html
-          get template_266.html -o verify-rel.html
+          get /template_266.html -o verify-root.html
           get /v/vspfiles/css/custom-safe.css -o verify-css-vabs.bin
+          get vspfiles/css/custom-safe.css -o verify-css-chroot.bin
           get v/vspfiles/css/custom-safe.css -o verify-css-vrel.bin
           get /vspfiles/css/custom-safe.css -o verify-css-root.bin
           get /v/vspfiles/templates/266/css/mccabe-overrides.css -o verify-mccabe-vabs.css
+          get vspfiles/templates/266/css/mccabe-overrides.css -o verify-mccabe-chroot.css
           get v/vspfiles/templates/266/css/mccabe-overrides.css -o verify-mccabe-vrel.css
           bye
           LFTP
@@ -149,7 +151,7 @@ jobs:
           OK_TPL=""
           if [ -n "$EXPECT" ]; then
             echo "Expect template mc-deploy-verify: $EXPECT"
-            for f in verify-v.html verify-root.html verify-vrel.html verify-rel.html; do
+            for f in verify-v.html verify-chroot.html verify-vrel.html verify-root.html; do
               if [ -s "$f" ] && grep -Fq "$EXPECT" "$f"; then
                 echo "OK: template marker in $f"
                 OK_TPL=1
@@ -166,7 +168,7 @@ jobs:
           if [ -n "$CSS_TOKEN" ]; then
             echo "Expect custom-safe contains: $CSS_TOKEN"
             OK_CSS=""
-            for f in verify-css-vabs.bin verify-css-vrel.bin verify-css-root.bin; do
+            for f in verify-css-vabs.bin verify-css-chroot.bin verify-css-vrel.bin verify-css-root.bin; do
               if [ -s "$f" ] && grep -Fq "$CSS_TOKEN" "$f"; then
                 echo "OK: custom-safe marker in $f"
                 OK_CSS=1
@@ -183,7 +185,7 @@ jobs:
           if [ -n "$MC_TOKEN" ]; then
             echo "Expect mccabe-overrides contains: $MC_TOKEN"
             OK_MC=""
-            for f in verify-mccabe-vabs.css verify-mccabe-vrel.css; do
+            for f in verify-mccabe-vabs.css verify-mccabe-chroot.css verify-mccabe-vrel.css; do
               if [ -s "$f" ] && grep -Fq "$MC_TOKEN" "$f"; then
                 echo "OK: mccabe-overrides marker in $f"
                 OK_MC=1

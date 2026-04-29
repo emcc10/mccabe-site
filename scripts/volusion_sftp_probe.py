@@ -23,14 +23,16 @@ def _creds() -> tuple[str, str, str]:
 
 PATHS: tuple[str, ...] = (
     "/v/template_266.html",
-    "/template_266.html",
-    "v/template_266.html",
-    "template_266.html",
     "/v/vspfiles/css/custom-safe.css",
-    "v/vspfiles/css/custom-safe.css",
-    "/vspfiles/css/custom-safe.css",
     "/v/vspfiles/templates/266/css/mccabe-overrides.css",
+    "template_266.html",
+    "vspfiles/css/custom-safe.css",
+    "vspfiles/templates/266/css/mccabe-overrides.css",
+    "v/template_266.html",
+    "v/vspfiles/css/custom-safe.css",
     "v/vspfiles/templates/266/css/mccabe-overrides.css",
+    "/template_266.html",
+    "/vspfiles/css/custom-safe.css",
 )
 
 
@@ -60,7 +62,7 @@ def main() -> int:
                 print(f"::notice::PROBE getcwd={sftp.getcwd()!r}", flush=True)
             except Exception as exc:  # noqa: BLE001
                 print(f"::notice::PROBE getcwd: {exc}", flush=True)
-            for listdir_path in (".", "/", "/v", "v", "/vspfiles", "vspfiles"):
+            for listdir_path in ("/v", "v", ".", "vspfiles", "/", "/vspfiles"):
                 try:
                     names = [x.filename for x in sftp.listdir_attr(listdir_path)][:40]
                     print(f"::notice::PROBE listdir {listdir_path!r} n={len(names)} sample={names!r}", flush=True)

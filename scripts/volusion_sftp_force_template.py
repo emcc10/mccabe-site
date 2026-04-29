@@ -13,21 +13,23 @@ import sys
 
 def _paths() -> list[str]:
     secret = os.environ.get("SFTP_TEMPLATE_REMOTE", "").strip()
-    if secret and not secret.startswith("/"):
-        secret = "/" + secret
+    if secret and not secret.startswith("/") and not secret.startswith("v/"):
+        secret = "/v/" + secret.lstrip("/")
+    if secret == "v/v/template_266.html":
+        secret = "v/template_266.html"
     if secret == "/v/v/template_266.html":
         secret = "/v/template_266.html"
     out: list[str] = []
     seen: set[str] = set()
-    # /v/ first — same file as browser …/v/template_266.html (not SFTP root /template_266.html).
+    # /v is Volusion SFTP root for theme files (https://host/v/…).
     for p in (
         secret,
         "/v/template_266.html",
+        "template_266.html",
         "/mccabestheaterandliving.com/v/template_266.html",
         "/v/v/template_266.html",
         "v/template_266.html",
         "/template_266.html",
-        "template_266.html",
     ):
         if p and p not in seen:
             seen.add(p)
