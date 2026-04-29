@@ -67,7 +67,7 @@ jobs:
           import socket
 
           host = os.environ["SFTP_HOST"]
-          port = int(os.environ.get("SFTP_PORT") or "2222")
+          port = int((os.environ.get("SFTP_PORT") or "").strip() or "2222")
           s = socket.socket()
           s.settimeout(25)
           try:

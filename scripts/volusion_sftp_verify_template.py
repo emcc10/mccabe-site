@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-After deploy: confirm mc-deploy-verify matches Git.
+After deploy: confirm mc-deploy-verify matches Git, confirm custom-safe.css marker
+exists on SFTP, then check the public template URL when possible.
 
-1) SFTP: reject stale /v/ copies when those files exist.
-2) HTTP: public template URL must show the same marker (cache-busted). This catches
-   the case where SFTP only updated /template_266.html but the browser still reads /v/.
+1) SFTP template: prefer /v/... paths; reject stale /v/ copies when those files exist.
+2) SFTP CSS: require C_CSS_DEPLOY_VERIFY_* token from repo in at least one canonical path.
+3) HTTP: public template URL must show the same mc-deploy-verify marker (cache-busted).
 """
 from __future__ import annotations
 
@@ -56,7 +57,7 @@ def _css_token_from_local(ws: str) -> str:
 
 def _sftp_read_head(sftp, remote: str, limit: int = 16384) -> str | None:
     try:
-        with sftp.open(remote, "r") as handle:
+        with sftp.open(remote, "rb") as handle:
             raw = handle.read(limit)
         return raw.decode("utf-8", errors="replace")
     except Exception:  # noqa: BLE001
