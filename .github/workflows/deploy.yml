@@ -30,20 +30,9 @@ jobs:
           echo "Latest commit:"
           git log -1 --oneline
 
-          if [ ! -f "template_266.html" ]; then
-            echo "ERROR: template_266.html is missing from repo root"
-            exit 1
-          fi
-
-          if [ ! -f "vspfiles/css/custom-safe.css" ]; then
-            echo "ERROR: vspfiles/css/custom-safe.css is missing"
-            exit 1
-          fi
-
-          if [ ! -f "vspfiles/templates/266/css/mccabe-overrides.css" ]; then
-            echo "ERROR: vspfiles/templates/266/css/mccabe-overrides.css is missing"
-            exit 1
-          fi
+          test -f template_266.html || (echo "ERROR: template_266.html missing" && exit 1)
+          test -f vspfiles/css/custom-safe.css || (echo "ERROR: vspfiles/css/custom-safe.css missing" && exit 1)
+          test -f vspfiles/templates/266/css/mccabe-overrides.css || (echo "ERROR: vspfiles/templates/266/css/mccabe-overrides.css missing" && exit 1)
 
           echo "Required files found."
 
@@ -91,29 +80,11 @@ jobs:
           echo "Uploading template backup to /v/template_266.html..."
           put template_266.html -o /v/template_266.html
 
-          echo "Uploading custom-safe.css with retries..."
-          set cmd:fail-exit no
-          for i in 1 2 3 4 5; do
-            put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
-            if [ $? -eq 0 ]; then
-              echo "custom-safe.css upload succeeded."
-              break
-            fi
-            echo "custom-safe.css upload failed, retry $i..."
-            sleep 15
-          done
+          echo "Uploading custom-safe.css..."
+          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
 
-          echo "Uploading mccabe-overrides.css with retries..."
-          for i in 1 2 3 4 5; do
-            put vspfiles/templates/266/css/mccabe-overrides.css -o /vspfiles/templates/266/css/mccabe-overrides.css
-            if [ $? -eq 0 ]; then
-              echo "mccabe-overrides.css upload succeeded."
-              break
-            fi
-            echo "mccabe-overrides.css upload failed, retry $i..."
-            sleep 15
-          done
-          set cmd:fail-exit yes
+          echo "Uploading mccabe-overrides.css..."
+          put vspfiles/templates/266/css/mccabe-overrides.css -o /vspfiles/templates/266/css/mccabe-overrides.css
 
           echo "Deploy complete."
 
