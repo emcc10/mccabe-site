@@ -1,39 +1,13 @@
-name: Deploy Volusion Template - Hard Verify
+name: Find Real Volusion Template Path
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
-  deploy-template:
+  find-template-path:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Show GitHub file being deployed
-        run: |
-          echo "Current branch/ref:"
-          echo "$GITHUB_REF"
-
-          echo "Current commit:"
-          git log -1 --oneline
-
-          echo "Repo root:"
-          pwd
-
-          echo "Confirm template file exists:"
-          ls -la template_266.html
-
-          echo "Local template marker search:"
-          grep -n "FINAL TEMPLATE TEST\|GITHUB TEMPLATE\|0428\|DEPLOY TEST\|MC_DEPLOY_VERIFY" template_266.html || true
-
-          echo "First 20 lines of local template:"
-          head -20 template_266.html
-
       - name: Install deploy tools
         run: |
           sudo apt-get update
@@ -53,13 +27,13 @@ jobs:
           echo "FTP_USERNAME is set"
           echo "FTP_PASSWORD is set"
 
-      - name: Test Volusion SFTP
+      - name: Test SFTP
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
         run: |
           nc -vz -w 20 "$FTP_SERVER" 2222
 
-      - name: Upload template and verify remote copies
+      - name: Download likely template files from Volusion
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -69,36 +43,39 @@ jobs:
           set sftp:auto-confirm yes
           set ssl:verify-certificate no
           set net:timeout 120
-          set net:max-retries 3
+          set net:max-retries 2
           set net:reconnect-interval-base 10
           set xfer:clobber yes
-          set cmd:fail-exit yes
+          set cmd:fail-exit no
 
           open -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222
 
-          echo "Uploading template to /v/template_266.html..."
-          put template_266.html -o /v/template_266.html
+          echo "Trying /v/template_266.html"
+          get /v/template_266.html -o downloaded-v-template_266.html
 
-          echo "Uploading template to /template_266.html..."
-          put template_266.html -o /template_266.html
+          echo "Trying /template_266.html"
+          get /template_266.html -o downloaded-root-template_266.html
 
-          echo "Downloading /v/template_266.html back..."
-          get /v/template_266.html -o remote-v-template_266.html
+          echo "Trying /vspfiles/templates/266/template_266.html"
+          get /vspfiles/templates/266/template_266.html -o downloaded-vspfiles-template_266.html
 
-          echo "Downloading /template_266.html back..."
-          get /template_266.html -o remote-root-template_266.html
+          echo "Trying /v/vspfiles/templates/266/template_266.html"
+          get /v/vspfiles/templates/266/template_266.html -o downloaded-v-vspfiles-template_266.html
+
+          echo "Trying /vspfiles/templates/266/template.html"
+          get /vspfiles/templates/266/template.html -o downloaded-vspfiles-template.html
+
+          echo "Trying /v/vspfiles/templates/266/template.html"
+          get /v/vspfiles/templates/266/template.html -o downloaded-v-vspfiles-template.html
 
           bye
           EOF
 
-          echo "Remote /v/template_266.html marker search:"
-          grep -n "FINAL TEMPLATE TEST\|GITHUB TEMPLATE\|0428\|DEPLOY TEST\|MC_DEPLOY_VERIFY" remote-v-template_266.html || true
+          echo "Downloaded files:"
+          ls -la downloaded-* || true
 
-          echo "Remote /template_266.html marker search:"
-          grep -n "FINAL TEMPLATE TEST\|GITHUB TEMPLATE\|0428\|DEPLOY TEST\|MC_DEPLOY_VERIFY" remote-root-template_266.html || true
+          echo "Searching for manual Volusion editor marker..."
+          grep -Rni "VOLUSION_EDITOR_MANUAL_MARKER_20260429" downloaded-* || true
 
-          echo "Remote /v/template_266.html first 20 lines:"
-          head -20 remote-v-template_266.html
-
-          echo "Remote /template_266.html first 20 lines:"
-          head -20 remote-root-template_266.html
+          echo "Searching for template names/markers..."
+          grep -Rni "template_266\|MC_DEPLOY_VERIFY\|GITHUB TEMPLATE\|0428\|MCCABE" downloaded-* | head -80 || true
