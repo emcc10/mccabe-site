@@ -1,6 +1,6 @@
 /*0429 McCabe fixes — load after template.css (linked from template_266.html).
    Ensures hero copy + listing member block even if custom-safe.css fails to load.
-   MC_OVERRIDES_VERIFY_20260429qtyhdrfix — linked again at end of <body> after Volusion vnav.css so rules win. */
+   MC_OVERRIDES_VERIFY_20260429pdpforce — linked again at end of <body> after Volusion vnav.css so rules win. */
 
 /* Category: bottom pager + compact subcats (duplicated if custom-safe absent) */
 .mc-category-pager {

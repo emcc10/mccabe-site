@@ -310,9 +310,9 @@
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260429qtyhdrfix: github->volusion deploy verification marker -->
-<!-- MC_CSS_DEPLOY_VERIFY_20260429qtyhdrfix: same token as /vspfiles/css/custom-safe.css line 1 -->
-<meta name="mc-deploy-verify" content="20260429qtyhdrfix">
+<!-- MC_DEPLOY_VERIFY_20260429pdpforce: github->volusion deploy verification marker -->
+<!-- MC_CSS_DEPLOY_VERIFY_20260429pdpforce: same token as /vspfiles/css/custom-safe.css line 1 -->
+<meta name="mc-deploy-verify" content="20260429pdpforce">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1"> 
@@ -322,7 +322,7 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429qtyhdrfix" rel="stylesheet">
+  <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429pdpforce" rel="stylesheet">
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -3395,6 +3395,16 @@ boot();
         menu.style.setProperty("transform", "none", "important");
         menu.style.setProperty("align-self", "center", "important");
       }
+      var scw = document.querySelector(".mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap");
+      if (scw) {
+        scw.style.setProperty("display", "flex", "important");
+        scw.style.setProperty("flex-direction", "row", "important");
+        scw.style.setProperty("flex-wrap", "nowrap", "important");
+        scw.style.setProperty("align-items", "center", "important");
+        scw.style.setProperty("gap", "10px", "important");
+        scw.style.setProperty("grid-template-columns", "none", "important");
+        scw.style.setProperty("grid-template-rows", "none", "important");
+      }
     } catch (eMcHdr) {}
   }
 
@@ -3412,10 +3422,17 @@ boot();
     else if (volWrap) qtyWrap = volWrap;
 
     var addWrap =
-      offers.querySelector(".v65-product-addtocart") || root.querySelector(".v65-product-addtocart");
-    if (!qtyWrap || !addWrap || !qtyWrap.parentNode) return;
+      offers.querySelector(".v65-product-addtocart") ||
+      root.querySelector(".v65-product-addtocart") ||
+      offers.querySelector("#btn_addtocart") ||
+      root.querySelector("#btn_addtocart") ||
+      offers.querySelector(".vol-addtocart__wrap") ||
+      root.querySelector(".vol-addtocart__wrap");
+    if (!qtyWrap || !qtyWrap.parentNode) return;
     try {
-      if (qtyWrap.nextElementSibling !== addWrap) qtyWrap.parentNode.insertBefore(qtyWrap, addWrap);
+      if (addWrap && qtyWrap.nextElementSibling !== addWrap) {
+        qtyWrap.parentNode.insertBefore(qtyWrap, addWrap);
+      }
     } catch (eQMove) {}
     var labelNode = null;
     var sib = qtyWrap.previousElementSibling;
@@ -3472,14 +3489,28 @@ boot();
     qtyWrap.style.setProperty("width", "100%", "important");
     qtyWrap.style.setProperty("max-width", "320px", "important");
     qtyWrap.style.setProperty("margin", "0 auto 10px auto", "important");
-    /* Inner .vol-cartqty__wrap: layout from mccabe-overrides.css (label full width, stepper row below).
-       Do not set flex-direction inline — row fought “label above” when nested in .v65-productdetail-cartqty. */
+    var innerVol = qtyWrap.querySelector(".vol-cartqty__wrap");
+    if (innerVol) {
+      innerVol.style.setProperty("display", "flex", "important");
+      innerVol.style.setProperty("flex-direction", "row", "important");
+      innerVol.style.setProperty("flex-wrap", "wrap", "important");
+      innerVol.style.setProperty("justify-content", "center", "important");
+      innerVol.style.setProperty("align-items", "center", "important");
+      innerVol.style.setProperty("align-content", "center", "important");
+      innerVol.style.setProperty("gap", "8px", "important");
+      innerVol.style.setProperty("width", "100%", "important");
+      innerVol.style.setProperty("max-width", "320px", "important");
+      innerVol.style.setProperty("margin-left", "auto", "important");
+      innerVol.style.setProperty("margin-right", "auto", "important");
+      innerVol.style.setProperty("text-align", "center", "important");
+      innerVol.style.setProperty("box-sizing", "border-box", "important");
+    }
     var qInput = qtyWrap.querySelector(
       'input[name^="QTY."], input[name="QTY"], input[name*="qty" i], input[name*="quantity" i], select[name*="qty" i], select[name*="quantity" i]'
     );
     if (qInput) {
-      qInput.style.setProperty("margin", "6px auto 0 auto", "important");
-      qInput.style.setProperty("display", "block", "important");
+      qInput.style.setProperty("margin", innerVol ? "0 6px" : "6px auto 0 auto", "important");
+      qInput.style.setProperty("display", innerVol ? "inline-block" : "block", "important");
       qInput.style.setProperty("text-align", "center", "important");
       qInput.style.setProperty("min-width", "48px", "important");
       qInput.style.setProperty("width", "56px", "important");
@@ -3490,6 +3521,19 @@ boot();
       labelNode.style.setProperty("text-align", "center", "important");
       labelNode.style.setProperty("margin", "0 0 4px 0", "important");
       labelNode.style.setProperty("order", "-1", "important");
+      if (innerVol && innerVol.contains(labelNode)) {
+        labelNode.style.setProperty("flex", "0 0 100%", "important");
+      }
+    } else if (innerVol) {
+      var autoLab = innerVol.querySelector("label");
+      if (autoLab) {
+        autoLab.style.setProperty("display", "block", "important");
+        autoLab.style.setProperty("flex", "0 0 100%", "important");
+        autoLab.style.setProperty("width", "100%", "important");
+        autoLab.style.setProperty("text-align", "center", "important");
+        autoLab.style.setProperty("margin", "0 0 6px 0", "important");
+        autoLab.style.setProperty("order", "-1", "important");
+      }
     }
   }
   try {
@@ -16536,7 +16580,93 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 </style>
 
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
-<link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429qtyhdrfix" id="mc-mccabe-overrides-body-last" />
+<link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260429pdpforce" id="mc-mccabe-overrides-body-last" />
+<style id="mc-pdp-wins-last">
+  /* MC_PDP_TAIL_20260429pdpforce — MUST sit after custom-safe.css (head) + body-last link. Kills grid “Search” row + fixes qty. */
+  @media (min-width: 992px) {
+    html body:has(#v65-product-parent) header.header > .header__section:not(.header__section--middle),
+    html body.productdetails header.header > .header__section:not(.header__section--middle),
+    html body.mc-product-page header.header > .header__section:not(.header__section--middle),
+    html body.mc-theater-seating-pdp header.header > .header__section:not(.header__section--middle),
+    html.mc-paragon-pdp body header.header > .header__section:not(.header__section--middle),
+    html.mc-url-looks-like-pdp body.is-home header.header > .header__section:not(.header__section--middle) {
+      padding-top: 0 !important;
+    }
+    html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+    html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+    html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+    html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+    html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap,
+    html body:has(#v65-product-parent) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
+      gap: 10px !important;
+      grid-template-columns: none !important;
+      grid-template-rows: none !important;
+      align-content: center !important;
+    }
+    html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
+    html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
+    html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
+    html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
+    html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before,
+    html body:has(#v65-product-parent) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-cart-wrap::before {
+      content: none !important;
+      display: none !important;
+    }
+    html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
+    html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
+    html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
+    html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
+    html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav,
+    html body:has(#v65-product-parent) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-search-below-nav {
+      grid-column: unset !important;
+      grid-row: unset !important;
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+    }
+    html body.productdetails .mc-header-desktop-bar[data-mc-header-bar] .mc-header-cart,
+    html body.mc-product-page .mc-header-desktop-bar[data-mc-header-bar] .mc-header-cart,
+    html body.mc-theater-seating-pdp .mc-header-desktop-bar[data-mc-header-bar] .mc-header-cart,
+    html.mc-paragon-pdp body .mc-header-desktop-bar[data-mc-header-bar] .mc-header-cart,
+    html.mc-url-looks-like-pdp body.is-home .mc-header-desktop-bar[data-mc-header-bar] .mc-header-cart,
+    html body:has(#v65-product-parent) .mc-header-desktop-bar[data-mc-header-bar] .mc-header-cart {
+      grid-column: unset !important;
+      grid-row: unset !important;
+    }
+  }
+  /* Quantity: always-on (mobile + desktop); beats [itemprop="offers"] * { text-align:left } in custom-safe */
+  html body #v65-product-parent .vol-cartqty__wrap,
+  html body #content_area #v65-product-parent .vol-cartqty__wrap {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+  html body #v65-product-parent .vol-cartqty__wrap label,
+  html body #content_area #v65-product-parent .vol-cartqty__wrap label {
+    display: block !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin: 0 0 6px 0 !important;
+    order: -1 !important;
+  }
+  html body #v65-product-parent [itemprop="offers"] .vol-cartqty__wrap,
+  html body #v65-product-parent [itemprop="offers"] .vol-cartqty__wrap * {
+    text-align: center !important;
+  }
+</style>
 <script id="mccabe-product-room-planner-price-fix" type="text/plain" data-disabled="true">
 (function () {
   var FOUR_L_DISCOUNT = 500;
