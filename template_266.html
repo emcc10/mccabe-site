@@ -17352,28 +17352,18 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function findQtyInput() {
-    var root = document.querySelector("#v65-product-parent") || document.getElementById("content_area");
-    if (!root) return null;
     return (
-      root.querySelector('input[name^="QTY."]') ||
-      root.querySelector('input[name="QTY"]') ||
-      root.querySelector('input[name="Qty"]') ||
-      root.querySelector('input[name="qty"]') ||
-      root.querySelector('input[name="quantity"]') ||
-      root.querySelector('input[id*="qty"]') ||
-      root.querySelector('input[id*="Qty"]') ||
-      root.querySelector('input[id*="quantity"]') ||
-      root.querySelector('input[id*="Quantity"]')
+      document.querySelector('#v65-product-parent input[name="QTY"]') ||
+      document.querySelector('#v65-product-parent input[name="Qty"]') ||
+      document.querySelector('#v65-product-parent input[name="qty"]') ||
+      document.querySelector('#v65-product-parent input[name="quantity"]') ||
+      document.querySelector('#v65-product-parent input[id*="qty" i]') ||
+      document.querySelector('#v65-product-parent input[id*="quantity" i]')
     );
   }
 
   function findAddToCartButton() {
-    var root = document.querySelector("#v65-product-parent") || document.getElementById("content_area") || document;
-    var t =
-      root.querySelector("#btn_addtocart") ||
-      root.querySelector('input[name="btnaddtocart"]') ||
-      root.querySelector('button[name="btnaddtocart"]');
-    if (t) return t;
+    var root = document.querySelector("#v65-product-parent") || document;
     var candidates = Array.from(root.querySelectorAll("input, button, a"));
 
     return candidates.find(function (el) {
@@ -17405,8 +17395,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     var addRow = closestUsefulRow(addBtn);
     if (!addRow || !addRow.parentNode) return;
 
-    var qtyBlock = qty.closest(".vol-cartqty__wrap") || qty;
-    var oldQtyRow = closestUsefulRow(qtyBlock);
+    var oldQtyRow = closestUsefulRow(qty);
 
     var wrap = document.getElementById("mc-volusion-qty-above-cart");
     if (!wrap) {
@@ -17415,20 +17404,18 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     }
 
     var label = wrap.querySelector("label");
-    if (!qtyBlock.querySelector("label")) {
-      if (!label) {
-        label = document.createElement("label");
-        label.textContent = "Quantity";
-        wrap.appendChild(label);
-      }
-      var qInput = qtyBlock.querySelector('input[name^="QTY."], input[name="QTY"], input[name="Qty"], input[name="qty"], input[name="quantity"]') || qty;
-      if (!qInput.id) qInput.id = "mc-volusion-qty-input";
-      label.setAttribute("for", qInput.id);
+    if (!label) {
+      label = document.createElement("label");
+      label.textContent = "Quantity";
+      wrap.appendChild(label);
     }
 
-    wrap.appendChild(qtyBlock);
+    if (!qty.id) qty.id = "mc-volusion-qty-input";
+    label.setAttribute("for", qty.id);
 
-    if (oldQtyRow && oldQtyRow !== qtyBlock && oldQtyRow !== wrap && oldQtyRow.childElementCount === 0) {
+    wrap.appendChild(qty);
+
+    if (oldQtyRow && oldQtyRow !== qty && oldQtyRow !== wrap && oldQtyRow.childElementCount === 0) {
       try { oldQtyRow.remove(); } catch (e) {}
     }
 
