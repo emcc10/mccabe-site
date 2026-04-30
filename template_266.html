@@ -1097,6 +1097,45 @@ document.addEventListener("DOMContentLoaded", function () {
 })();
 </script>
 
+<style id="mc-qty-no-flicker-critical">
+  /* Volusion emits a bare "Quantity:" text node; hide it before first paint (inherits transparent). */
+  body.productdetails .mc-pdp-options-td:has(.v65-productdetail-cartqty),
+  body.mc-product-page .mc-pdp-options-td:has(.v65-productdetail-cartqty),
+  body.mc-theater-seating-pdp .mc-pdp-options-td:has(.v65-productdetail-cartqty) {
+    color: transparent !important;
+  }
+  body.productdetails .mc-pdp-options-td:has(.v65-productdetail-cartqty) *,
+  body.mc-product-page .mc-pdp-options-td:has(.v65-productdetail-cartqty) *,
+  body.mc-theater-seating-pdp .mc-pdp-options-td:has(.v65-productdetail-cartqty) * {
+    color: #333 !important;
+  }
+
+  body.productdetails .v65-productdetail-cartqty,
+  body.mc-product-page .v65-productdetail-cartqty,
+  body.mc-theater-seating-pdp .v65-productdetail-cartqty {
+    visibility: hidden;
+  }
+
+  body.productdetails #mc-final-qty-row .v65-productdetail-cartqty,
+  body.mc-product-page #mc-final-qty-row .v65-productdetail-cartqty,
+  body.mc-theater-seating-pdp #mc-final-qty-row .v65-productdetail-cartqty {
+    visibility: visible !important;
+  }
+
+  body.productdetails #mc-final-qty-row,
+  body.mc-product-page #mc-final-qty-row,
+  body.mc-theater-seating-pdp #mc-final-qty-row {
+    visibility: visible !important;
+    color: #333 !important;
+  }
+
+  body.productdetails #mc-final-qty-row label,
+  body.mc-product-page #mc-final-qty-row label,
+  body.mc-theater-seating-pdp #mc-final-qty-row label {
+    color: #111 !important;
+  }
+</style>
+
  
   <!-- DESIGN TOOLKIT -->
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js"></script>
@@ -16906,7 +16945,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   } catch (eN) {}
 
   var LEGACY_WRAP_IDS = [
-    "mc-final-qty-row",
     "mc-qty-under-configuration",
     "mc-volusion-qty-above-cart",
     "mc-qty-under-config-above-cart",
@@ -16987,54 +17025,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function applyFinalQtyRow() {
-    var root = document.querySelector("#v65-product-parent");
-    if (!root) return;
-
-    unwrapLegacyWrappers();
-
-    var cfg =
-      document.getElementById("mc-inline-config") || document.getElementById("mcConfigurationBlock");
-    if (!cfg || !cfg.parentNode) return;
-    var column = cfg.parentNode;
-
-    var input = findVolusionQtyInput(root);
-    var atc = findAddToCartControl(root);
-    if (!input || !atc) return;
-
-    var finalRow = document.getElementById("mc-final-qty-row");
-    if (!finalRow) {
-      finalRow = document.createElement("div");
-      finalRow.id = "mc-final-qty-row";
-    }
-    while (finalRow.firstChild) {
-      finalRow.removeChild(finalRow.firstChild);
-    }
-
-    var block = input.closest(".vol-cartqty__wrap") || input.closest(".v65-productdetail-cartqty");
-    if (block) {
-      finalRow.appendChild(block);
-    } else {
-      var lab = document.createElement("label");
-      lab.className = "mc-final-qty-label";
-      lab.textContent = "Quantity";
-      if (!input.id) {
-        input.id = "mc-vol-qty-" + String(Date.now()).slice(-6);
-      }
-      lab.setAttribute("for", input.id);
-      finalRow.appendChild(lab);
-      finalRow.appendChild(input);
-    }
-
-    column.insertBefore(finalRow, cfg.nextSibling);
-
-    var addHost =
-      atc.closest(".v65-product-addtocart") || atc.closest(".v65-productdetail-cartbutton");
-    if (addHost && addHost.parentNode) {
-      column.insertBefore(addHost, finalRow.nextSibling);
-    }
-
-    hideDuplicateQtyLabels(finalRow);
-    hideOrphanQtyTextRows(root);
+    /* Final structure + flicker control: mc-qty-no-flicker-critical (head) + mc-final-qty-no-flicker-position (body end). */
+    return;
   }
 
   function run() {
@@ -17049,38 +17041,29 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   window.addEventListener("load", run);
 })();
 </script>
-<script id="mc-final-force-qty-row-after-config">
+<script id="mc-final-qty-no-flicker-position">
 (function () {
-  function getRoot() {
+  function root() {
     return document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
   }
 
-  function findQtyInput(root) {
+  function findQtyInput(r) {
     return (
-      root.querySelector("input.v65-productdetail-cartqty") ||
-      root.querySelector('input[name^="QTY."]') ||
-      root.querySelector('input[name="QTY"]') ||
-      root.querySelector('input[name="Qty"]') ||
-      root.querySelector('input[name="qty"]') ||
-      root.querySelector('input[id*="qty" i]') ||
-      root.querySelector('input[id*="quantity" i]')
+      r.querySelector("#mc-final-qty-row input.v65-productdetail-cartqty") ||
+      r.querySelector("input.v65-productdetail-cartqty") ||
+      r.querySelector('input[name^="QTY."]') ||
+      r.querySelector('input[name="QTY"]') ||
+      r.querySelector('input[name="Qty"]') ||
+      r.querySelector('input[name="qty"]') ||
+      r.querySelector('input[id*="qty" i]') ||
+      r.querySelector('input[id*="quantity" i]')
     );
   }
 
-  function findAddToCart(root) {
+  function findConfig(r) {
     return (
-      root.querySelector('input[name="btnaddtocart"]') ||
-      root.querySelector("#btn_addtocart") ||
-      Array.from(root.querySelectorAll("input, button, a")).find(function (el) {
-        return /add\s*to\s*cart/i.test(String(el.value || el.textContent || ""));
-      })
-    );
-  }
-
-  function findConfigBox(root) {
-    return (
-      root.querySelector("#mc-inline-config") ||
-      Array.from(root.querySelectorAll("div, td, table, section")).find(function (el) {
+      r.querySelector("#mc-inline-config") ||
+      Array.from(r.querySelectorAll("div, td, table, section")).find(function (el) {
         var txt = String(el.innerText || "")
           .toLowerCase()
           .replace(/\s+/g, " ")
@@ -17093,11 +17076,21 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     );
   }
 
-  function closestBlock(el) {
+  function findAddToCart(r) {
+    return (
+      r.querySelector('input[name="btnaddtocart"]') ||
+      r.querySelector("#btn_addtocart") ||
+      Array.from(r.querySelectorAll("input, button, a")).find(function (el) {
+        return /add\s*to\s*cart/i.test(String(el.value || el.textContent || ""));
+      })
+    );
+  }
+
+  function block(el) {
     return el && (el.closest("tr, td, div, table") || el.parentElement || el);
   }
 
-  function removeStrayQuantityText(scope) {
+  function removeRawQuantityText(scope) {
     if (!scope) return;
 
     Array.from(scope.childNodes).forEach(function (node) {
@@ -17124,10 +17117,10 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function fixQty() {
-    var root = getRoot();
-    var qty = findQtyInput(root);
-    var config = findConfigBox(root);
-    var add = findAddToCart(root);
+    var r = root();
+    var qty = findQtyInput(r);
+    var config = findConfig(r);
+    var add = findAddToCart(r);
 
     if (!qty || !config || !add) return;
 
@@ -17139,10 +17132,10 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       config.closest("td") ||
       add.closest("td");
 
-    removeStrayQuantityText(optionsCell || root);
+    removeRawQuantityText(optionsCell || r);
 
     Array.from(
-      root.querySelectorAll(
+      r.querySelectorAll(
         "#mc-qty-under-configuration, #mc-volusion-qty-above-cart, #mc-qty-under-config-above-cart, #mc-pdp-qty-wrap"
       )
     ).forEach(function (el) {
@@ -17165,26 +17158,27 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     if (!qty.id) qty.id = "mc-real-product-qty";
     label.setAttribute("for", qty.id);
 
+    // IMPORTANT: row contains ONLY label + qty input.
     row.appendChild(qty);
 
-    var configBlock = closestBlock(config);
-    var addBlock = closestBlock(add);
-
-    // Critical: the config box must NOT be inside the quantity row.
-    if (config && row.contains(config)) {
-      var parent = row.parentNode || optionsCell;
+    // If config got accidentally placed inside qty row by old code, move it back out.
+    if (row.contains(config)) {
+      var parent = optionsCell || row.parentNode;
       if (parent) parent.insertBefore(config, row);
     }
 
-    // Place quantity row immediately after Configuration.
+    var configBlock = block(config);
+    var addBlock = block(add);
+
+    // Place qty row immediately after configuration.
     if (configBlock && configBlock.parentNode) {
       configBlock.parentNode.insertBefore(row, configBlock.nextSibling);
     } else if (addBlock && addBlock.parentNode) {
       addBlock.parentNode.insertBefore(row, addBlock);
     }
 
-    // Keep Add to Cart directly after quantity row when they share a parent.
-    if (addBlock && row.parentNode && addBlock.parentNode === row.parentNode) {
+    // Keep Add to Cart after qty.
+    if (addBlock && addBlock.parentNode === row.parentNode) {
       row.parentNode.insertBefore(addBlock, row.nextSibling);
     }
 
@@ -17200,7 +17194,9 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       "clear:both !important;" +
       "float:none !important;" +
       "text-align:center !important;" +
-      "box-sizing:border-box !important;";
+      "box-sizing:border-box !important;" +
+      "visibility:visible !important;" +
+      "color:#333 !important;";
 
     label.style.cssText =
       "display:inline-flex !important;" +
@@ -17214,8 +17210,11 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       "letter-spacing:.16em !important;" +
       "text-transform:uppercase !important;" +
       "line-height:1 !important;" +
-      "white-space:nowrap !important;";
+      "white-space:nowrap !important;" +
+      "visibility:visible !important;" +
+      "color:#111 !important;";
 
+    qty.style.setProperty("visibility", "visible", "important");
     qty.style.setProperty("width", "58px", "important");
     qty.style.setProperty("height", "36px", "important");
     qty.style.setProperty("margin", "0", "important");
@@ -17232,7 +17231,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     fixQty();
     setTimeout(fixQty, 250);
     setTimeout(fixQty, 750);
-    setTimeout(fixQty, 1500);
   });
 })();
 </script>
