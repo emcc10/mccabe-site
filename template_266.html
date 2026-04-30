@@ -16845,7 +16845,228 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
+<script id="mc-one-true-qty-fix">
+(function () {
+  function root() {
+    return document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
+  }
 
+  function findQtyInput(r) {
+    return (
+      r.querySelector("input.v65-productdetail-cartqty") ||
+      r.querySelector('input[name^="QTY."]') ||
+      r.querySelector('input[name="QTY"]') ||
+      r.querySelector('input[name="Qty"]') ||
+      r.querySelector('input[name="qty"]') ||
+      r.querySelector('input[id*="qty" i]') ||
+      r.querySelector('input[id*="quantity" i]')
+    );
+  }
+
+  function findConfig(r) {
+    return (
+      r.querySelector("#mc-inline-config") ||
+      Array.from(r.querySelectorAll("div, td, table, section")).find(function (el) {
+        var txt = String(el.innerText || "").toLowerCase().replace(/\s+/g, " ").trim();
+        return txt.indexOf("configuration") !== -1 &&
+               txt.indexOf("please use the room planner") !== -1;
+      })
+    );
+  }
+
+  function findAddToCart(r) {
+    return (
+      r.querySelector('input[name="btnaddtocart"]') ||
+      r.querySelector("#btn_addtocart") ||
+      Array.from(r.querySelectorAll("input, button, a")).find(function (el) {
+        return /add\s*to\s*cart/i.test(String(el.value || el.textContent || ""));
+      })
+    );
+  }
+
+  function removeRawQtyText(scope) {
+    if (!scope) return;
+
+    var walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
+    var nodes = [];
+
+    while (walker.nextNode()) {
+      nodes.push(walker.currentNode);
+    }
+
+    nodes.forEach(function (node) {
+      var txt = String(node.nodeValue || "").replace(/\s+/g, " ").trim().toLowerCase();
+      if (txt === "quantity:" || txt === "quantity") {
+        node.nodeValue = "";
+      }
+    });
+
+    Array.from(scope.querySelectorAll("label, span, div, p")).forEach(function (el) {
+      if (el.closest("#mc-final-qty-row")) return;
+      if (el.querySelector("input, button, a, #mc-inline-config")) return;
+
+      var txt = String(el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+      if (txt === "quantity:" || txt === "quantity") {
+        el.remove();
+      }
+    });
+  }
+
+  function nearestCellOrColumn(el) {
+    return (
+      el.closest(".mc-pdp-options-td") ||
+      el.closest("td") ||
+      el.closest("div") ||
+      document.querySelector("#v65-product-parent") ||
+      document.querySelector("#content_area") ||
+      document.body
+    );
+  }
+
+  function forceQuantityLayout() {
+    var r = root();
+    var qty = findQtyInput(r);
+    var config = findConfig(r);
+    var add = findAddToCart(r);
+
+    if (!qty || !config || !add) return;
+
+    var column =
+      config.closest(".mc-pdp-options-td") ||
+      qty.closest(".mc-pdp-options-td") ||
+      add.closest(".mc-pdp-options-td") ||
+      nearestCellOrColumn(add);
+
+    if (!column) return;
+
+    removeRawQtyText(column);
+
+    // Remove old duplicate wrappers, except the final row we are rebuilding.
+    Array.from(r.querySelectorAll(
+      "#mc-qty-under-configuration, #mc-volusion-qty-above-cart, #mc-qty-under-config-above-cart, #mc-pdp-qty-wrap"
+    )).forEach(function (el) {
+      el.remove();
+    });
+
+    var row = document.getElementById("mc-final-qty-row");
+    if (!row) {
+      row = document.createElement("div");
+      row.id = "mc-final-qty-row";
+    }
+
+    // If old code put config inside qty row, move config out first.
+    if (row.contains(config)) {
+      column.insertBefore(config, row);
+    }
+
+    // Rebuild row safely.
+    Array.from(row.childNodes).forEach(function (node) {
+      if (node !== qty) node.remove();
+    });
+
+    var label = row.querySelector("label");
+    if (!label) {
+      label = document.createElement("label");
+    }
+
+    label.textContent = "Quantity:";
+    if (!qty.id) qty.id = "mc-real-product-qty";
+    label.setAttribute("for", qty.id);
+
+    row.innerHTML = "";
+    row.appendChild(label);
+    row.appendChild(qty);
+
+    var configBlock = config.closest("div, table, td, tr") || config;
+    var addBlock = add.closest("div, table, td, tr") || add;
+
+    // Force vertical order: config, qty, add.
+    if (configBlock && configBlock.parentNode) {
+      configBlock.parentNode.insertBefore(row, configBlock.nextSibling);
+    } else {
+      column.appendChild(config);
+      column.appendChild(row);
+    }
+
+    if (addBlock && row.parentNode) {
+      row.parentNode.insertBefore(addBlock, row.nextSibling);
+    }
+
+    config.style.setProperty("display", "block", "important");
+    config.style.setProperty("width", "100%", "important");
+    config.style.setProperty("max-width", "420px", "important");
+    config.style.setProperty("margin", "12px auto 12px", "important");
+    config.style.setProperty("float", "none", "important");
+    config.style.setProperty("clear", "both", "important");
+    config.style.setProperty("position", "relative", "important");
+    config.style.setProperty("transform", "none", "important");
+
+    row.style.setProperty("display", "flex", "important");
+    row.style.setProperty("flex-direction", "row", "important");
+    row.style.setProperty("align-items", "center", "important");
+    row.style.setProperty("justify-content", "center", "important");
+    row.style.setProperty("gap", "10px", "important");
+    row.style.setProperty("width", "100%", "important");
+    row.style.setProperty("max-width", "320px", "important");
+    row.style.setProperty("margin", "10px auto 18px", "important");
+    row.style.setProperty("padding", "0", "important");
+    row.style.setProperty("clear", "both", "important");
+    row.style.setProperty("float", "none", "important");
+    row.style.setProperty("position", "relative", "important");
+    row.style.setProperty("transform", "none", "important");
+
+    label.style.setProperty("display", "inline-flex", "important");
+    label.style.setProperty("align-items", "center", "important");
+    label.style.setProperty("width", "auto", "important");
+    label.style.setProperty("margin", "0", "important");
+    label.style.setProperty("padding", "0", "important");
+    label.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
+    label.style.setProperty("font-size", "11px", "important");
+    label.style.setProperty("font-weight", "400", "important");
+    label.style.setProperty("letter-spacing", ".16em", "important");
+    label.style.setProperty("text-transform", "uppercase", "important");
+    label.style.setProperty("white-space", "nowrap", "important");
+
+    qty.style.setProperty("display", "inline-block", "important");
+    qty.style.setProperty("visibility", "visible", "important");
+    qty.style.setProperty("opacity", "1", "important");
+    qty.style.setProperty("width", "58px", "important");
+    qty.style.setProperty("height", "36px", "important");
+    qty.style.setProperty("margin", "0", "important");
+    qty.style.setProperty("text-align", "center", "important");
+    qty.style.setProperty("float", "none", "important");
+    qty.style.setProperty("position", "relative", "important");
+    qty.style.setProperty("transform", "none", "important");
+  }
+
+  function boot() {
+    forceQuantityLayout();
+
+    // Keep it stable if old Volusion/custom scripts re-render options.
+    var target = document.querySelector("#v65-product-parent") || document.querySelector("#content_area");
+    if (target && !target.__mcQtyObserver) {
+      target.__mcQtyObserver = true;
+      new MutationObserver(function () {
+        clearTimeout(window.__mcQtyTimer);
+        window.__mcQtyTimer = setTimeout(forceQuantityLayout, 50);
+      }).observe(target, { childList: true, subtree: true });
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+
+  window.addEventListener("load", function () {
+    boot();
+    setTimeout(forceQuantityLayout, 250);
+    setTimeout(forceQuantityLayout, 750);
+    setTimeout(forceQuantityLayout, 1500);
+  });
+})();
+</script>
  
 
 </body>
