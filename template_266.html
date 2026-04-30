@@ -460,6 +460,7 @@
     }
     body:not(.is-home) header.header > .header__section:not(.header__section--middle),
     body.category header.header > .header__section:not(.header__section--middle),
+    html.category body header.header > .header__section:not(.header__section--middle),
     body.productdetails header.header > .header__section:not(.header__section--middle),
     body.mc-product-page header.header > .header__section:not(.header__section--middle),
     body.mc-theater-seating-pdp header.header > .header__section:not(.header__section--middle) {
@@ -473,6 +474,9 @@
     body.category header.header > .mc-header-desktop-bar,
     body.category header.header > .hidden-xs.col-xs-12,
     body.category header.header > .col-xs-12.hidden-xs,
+    html.category body header.header > .mc-header-desktop-bar,
+    html.category body header.header > .hidden-xs.col-xs-12,
+    html.category body header.header > .col-xs-12.hidden-xs,
     body.productdetails header.header > .mc-header-desktop-bar,
     body.productdetails header.header > .hidden-xs.col-xs-12,
     body.productdetails header.header > .col-xs-12.hidden-xs,
@@ -492,6 +496,8 @@
     body:not(.is-home) header.header > .mc-header-search-below-nav,
     body.category header.header > .header__section--middle,
     body.category header.header > .mc-header-search-below-nav,
+    html.category body header.header > .header__section--middle,
+    html.category body header.header > .mc-header-search-below-nav,
     body.productdetails header.header > .header__section--middle,
     body.productdetails header.header > .mc-header-search-below-nav,
     body.mc-product-page header.header > .header__section--middle,
@@ -506,6 +512,7 @@
     }
     body:not(.is-home) header.header > .mc-header-cart,
     body.category header.header > .mc-header-cart,
+    html.category body header.header > .mc-header-cart,
     body.productdetails header.header > .mc-header-cart,
     body.mc-product-page header.header > .mc-header-cart,
     body.mc-theater-seating-pdp header.header > .mc-header-cart {
@@ -607,6 +614,7 @@
     @media (min-width: 992px) {
       body:not(.is-home) header.header .mc-header-desktop-bar[data-mc-header-bar],
       body.category header.header .mc-header-desktop-bar[data-mc-header-bar],
+      html.category body header.header .mc-header-desktop-bar[data-mc-header-bar],
       body.productdetails header.header .mc-header-desktop-bar[data-mc-header-bar],
       body.mc-product-page header.header .mc-header-desktop-bar[data-mc-header-bar],
       body.mc-theater-seating-pdp header.header .mc-header-desktop-bar[data-mc-header-bar] {
@@ -624,6 +632,7 @@
       }
       body:not(.is-home) header.header .microblock.main-menu,
       body.category header.header .microblock.main-menu,
+      html.category body header.header .microblock.main-menu,
       body.productdetails header.header .microblock.main-menu,
       body.mc-product-page header.header .microblock.main-menu,
       body.mc-theater-seating-pdp header.header .microblock.main-menu {
@@ -638,6 +647,7 @@
       }
       body:not(.is-home) header.header .mc-header-search-cart-wrap,
       body.category header.header .mc-header-search-cart-wrap,
+      html.category body header.header .mc-header-search-cart-wrap,
       body.productdetails header.header .mc-header-search-cart-wrap,
       body.mc-product-page header.header .mc-header-search-cart-wrap,
       body.mc-theater-seating-pdp header.header .mc-header-search-cart-wrap {
@@ -645,6 +655,7 @@
       }
       html.mc-search-open body:not(.is-home) header.header .mc-header-search-cart-wrap,
       html.mc-search-open body.category header.header .mc-header-search-cart-wrap,
+      html.mc-search-open.category body header.header .mc-header-search-cart-wrap,
       html.mc-search-open body.productdetails header.header .mc-header-search-cart-wrap,
       html.mc-search-open body.mc-product-page header.header .mc-header-search-cart-wrap,
       html.mc-search-open body.mc-theater-seating-pdp header.header .mc-header-search-cart-wrap {
@@ -729,6 +740,8 @@
       body:not(.is-home) header.header > .header__section.header__section--middle,
       body.category header.header > .mc-header-search-below-nav,
       body.category header.header > .header__section.header__section--middle,
+      html.category body header.header > .mc-header-search-below-nav,
+      html.category body header.header > .header__section.header__section--middle,
       body.productdetails header.header > .mc-header-search-below-nav,
       body.productdetails header.header > .header__section.header__section--middle,
       body.productdetails header.header > .header__section--middle,
