@@ -17030,6 +17030,10 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function run() {
+    try {
+      var rootEarly = document.querySelector("#v65-product-parent");
+      if (rootEarly) unwrapLegacyWrappers();
+    } catch (eUn) {}
     applyFinalQtyRow();
   }
 
