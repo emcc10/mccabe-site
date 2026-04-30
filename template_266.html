@@ -17049,5 +17049,138 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   window.addEventListener("load", run);
 })();
 </script>
+<script id="mc-fix-stray-qty-text-node-final">
+(function () {
+  function isQtyTextNode(node) {
+    return (
+      node &&
+      node.nodeType === 3 &&
+      String(node.nodeValue || "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase() === "quantity:"
+    );
+  }
+
+  function findQtyInput(root) {
+    return (
+      root.querySelector('input[class*="cartqty" i]') ||
+      root.querySelector('input[name^="QTY."]') ||
+      root.querySelector('input[name="QTY"]') ||
+      root.querySelector('input[name="Qty"]') ||
+      root.querySelector('input[name="qty"]') ||
+      root.querySelector('input[id*="qty" i]') ||
+      root.querySelector('input[id*="quantity" i]')
+    );
+  }
+
+  function closestCell(el) {
+    return el && (el.closest("td") || el.parentElement);
+  }
+
+  function fixQtyRow() {
+    var root = document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
+    var qty = findQtyInput(root);
+    if (!qty) return;
+
+    var cell = closestCell(qty);
+    if (!cell) return;
+
+    var strayText = Array.from(cell.childNodes).find(isQtyTextNode);
+
+    var row = document.getElementById("mc-final-qty-row");
+    if (!row) {
+      row = document.createElement("div");
+      row.id = "mc-final-qty-row";
+    }
+
+    var config = document.getElementById("mc-inline-config");
+    if (config && row.contains(config)) {
+      row.parentNode.insertBefore(config, row);
+      config.style.setProperty("margin", "0 0 12px", "important");
+    }
+
+    Array.from(row.querySelectorAll("label")).forEach(function (label, index) {
+      if (index > 0) label.remove();
+    });
+
+    var label = row.querySelector("label");
+    if (!label) {
+      label = document.createElement("label");
+      row.insertBefore(label, row.firstChild);
+    }
+
+    label.textContent = "Quantity:";
+    if (!qty.id) qty.id = "mc-real-product-qty";
+    label.setAttribute("for", qty.id);
+
+    row.appendChild(qty);
+
+    if (strayText) strayText.nodeValue = "";
+
+    var addBtn =
+      root.querySelector('input[name="btnaddtocart"]') ||
+      root.querySelector("#btn_addtocart") ||
+      Array.from(root.querySelectorAll("input, button, a")).find(function (el) {
+        return /add\s*to\s*cart/i.test(el.value || el.textContent || "");
+      });
+
+    var addRow = addBtn && (addBtn.closest("tr") || addBtn.closest("td") || addBtn.closest("div"));
+
+    if (config && config.parentNode) {
+      config.parentNode.insertBefore(row, config.nextSibling);
+    } else if (addRow && addRow.parentNode) {
+      addRow.parentNode.insertBefore(row, addRow);
+    } else if (cell) {
+      cell.appendChild(row);
+    }
+
+    if (addRow && addRow.parentNode === row.parentNode) {
+      addRow.parentNode.insertBefore(row, addRow);
+    }
+
+    row.style.setProperty("display", "flex", "important");
+    row.style.setProperty("align-items", "center", "important");
+    row.style.setProperty("justify-content", "center", "important");
+    row.style.setProperty("gap", "10px", "important");
+    row.style.setProperty("width", "100%", "important");
+    row.style.setProperty("max-width", "320px", "important");
+    row.style.setProperty("margin", "10px auto 18px", "important");
+    row.style.setProperty("padding", "0", "important");
+    row.style.setProperty("clear", "both", "important");
+    row.style.setProperty("float", "none", "important");
+
+    label.style.setProperty("display", "inline-flex", "important");
+    label.style.setProperty("align-items", "center", "important");
+    label.style.setProperty("width", "auto", "important");
+    label.style.setProperty("margin", "0", "important");
+    label.style.setProperty("padding", "0", "important");
+    label.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
+    label.style.setProperty("font-size", "11px", "important");
+    label.style.setProperty("font-weight", "400", "important");
+    label.style.setProperty("letter-spacing", ".16em", "important");
+    label.style.setProperty("text-transform", "uppercase", "important");
+    label.style.setProperty("line-height", "1", "important");
+    label.style.setProperty("white-space", "nowrap", "important");
+
+    qty.style.setProperty("width", "58px", "important");
+    qty.style.setProperty("height", "36px", "important");
+    qty.style.setProperty("margin", "0", "important");
+    qty.style.setProperty("text-align", "center", "important");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", fixQtyRow);
+  } else {
+    fixQtyRow();
+  }
+
+  window.addEventListener("load", function () {
+    fixQtyRow();
+    setTimeout(fixQtyRow, 300);
+    setTimeout(fixQtyRow, 900);
+  });
+})();
+</script>
 </body>
 </html>
