@@ -16846,7 +16846,134 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 })();
 </script>
 
- 
+ <script id="mc-surgical-qty-label-only">
+(function () {
+  function findQtyInput() {
+    var root = document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
+    return (
+      root.querySelector("input.v65-productdetail-cartqty") ||
+      root.querySelector('input[name^="QTY."]') ||
+      root.querySelector('input[name="QTY"]') ||
+      root.querySelector('input[name="Qty"]') ||
+      root.querySelector('input[name="qty"]')
+    );
+  }
+
+  function removeStrayQuantityText(scope, finalRow) {
+    if (!scope) return;
+
+    var walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
+    var nodes = [];
+
+    while (walker.nextNode()) {
+      nodes.push(walker.currentNode);
+    }
+
+    nodes.forEach(function (node) {
+      if (finalRow && finalRow.contains(node.parentNode)) return;
+
+      var txt = String(node.nodeValue || "").replace(/\s+/g, " ").trim().toLowerCase();
+
+      if (txt === "quantity:" || txt === "quantity") {
+        node.nodeValue = "";
+      }
+    });
+
+    Array.from(scope.querySelectorAll("label, span, div, p")).forEach(function (el) {
+      if (finalRow && finalRow.contains(el)) return;
+      if (el.querySelector("input, button, a, select, textarea")) return;
+
+      var txt = String(el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+
+      if (txt === "quantity:" || txt === "quantity") {
+        el.style.setProperty("display", "none", "important");
+        el.setAttribute("aria-hidden", "true");
+      }
+    });
+  }
+
+  function fixQtyLabelOnly() {
+    var qty = findQtyInput();
+    if (!qty) return;
+
+    var root = document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
+    var scope =
+      qty.closest(".mc-pdp-options-td") ||
+      qty.closest("td") ||
+      root;
+
+    var row = document.getElementById("mc-surgical-qty-row");
+
+    if (!row) {
+      row = document.createElement("div");
+      row.id = "mc-surgical-qty-row";
+    }
+
+    var label = row.querySelector("label");
+
+    if (!label) {
+      label = document.createElement("label");
+      label.textContent = "Quantity:";
+    }
+
+    if (!qty.id) {
+      qty.id = "mc-real-product-qty";
+    }
+
+    label.setAttribute("for", qty.id);
+
+    row.innerHTML = "";
+    row.appendChild(label);
+    row.appendChild(qty);
+
+    var originalParent = qty.parentNode;
+
+    if (originalParent !== row && originalParent) {
+      originalParent.insertBefore(row, qty);
+    }
+
+    removeStrayQuantityText(scope, row);
+
+    row.style.setProperty("display", "flex", "important");
+    row.style.setProperty("align-items", "center", "important");
+    row.style.setProperty("justify-content", "center", "important");
+    row.style.setProperty("gap", "10px", "important");
+    row.style.setProperty("width", "100%", "important");
+    row.style.setProperty("max-width", "320px", "important");
+    row.style.setProperty("margin", "10px auto 18px", "important");
+    row.style.setProperty("clear", "both", "important");
+    row.style.setProperty("float", "none", "important");
+
+    label.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
+    label.style.setProperty("font-size", "11px", "important");
+    label.style.setProperty("font-weight", "400", "important");
+    label.style.setProperty("letter-spacing", ".16em", "important");
+    label.style.setProperty("text-transform", "uppercase", "important");
+    label.style.setProperty("white-space", "nowrap", "important");
+    label.style.setProperty("margin", "0", "important");
+
+    qty.style.setProperty("display", "inline-block", "important");
+    qty.style.setProperty("visibility", "visible", "important");
+    qty.style.setProperty("opacity", "1", "important");
+    qty.style.setProperty("width", "58px", "important");
+    qty.style.setProperty("height", "36px", "important");
+    qty.style.setProperty("margin", "0", "important");
+    qty.style.setProperty("text-align", "center", "important");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", fixQtyLabelOnly);
+  } else {
+    fixQtyLabelOnly();
+  }
+
+  window.addEventListener("load", function () {
+    fixQtyLabelOnly();
+    setTimeout(fixQtyLabelOnly, 300);
+    setTimeout(fixQtyLabelOnly, 900);
+  });
+})();
+</script>
 
 </body>
 </html>
