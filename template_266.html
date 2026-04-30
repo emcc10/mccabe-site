@@ -446,46 +446,33 @@
     }
   </style>
   <style id="mc-header-search-critical">
-    /* Interior header: one shared rule set for bar + menu; search is body-level .mc-search-float (desktop). */
-    html:not(.mc-allow-home-hero) body header.header,
+    /* One interior header column stack — no separate theater/Paragon positioning. */
     body:not(.is-home) header.header,
     body.category header.header,
     html.category body header.header,
     body.productdetails header.header,
     body.mc-product-page header.header,
-    body.mc-theater-seating-pdp header.header,
-    html.mc-paragon-pdp body header.header,
-    html.mc-url-looks-like-pdp body.is-home header.header {
+    body.mc-theater-seating-pdp header.header {
       display: flex !important;
       flex-direction: column !important;
       flex-wrap: nowrap !important;
       align-items: stretch !important;
     }
-    html:not(.mc-allow-home-hero) body header.header > .header__section:not(.header__section--middle),
     body:not(.is-home) header.header > .header__section:not(.header__section--middle),
     body.category header.header > .header__section:not(.header__section--middle),
-    html.category body header.header > .header__section:not(.header__section--middle),
     body.productdetails header.header > .header__section:not(.header__section--middle),
     body.mc-product-page header.header > .header__section:not(.header__section--middle),
-    body.mc-theater-seating-pdp header.header > .header__section:not(.header__section--middle),
-    html.mc-paragon-pdp body header.header > .header__section:not(.header__section--middle),
-    html.mc-url-looks-like-pdp body.is-home header.header > .header__section:not(.header__section--middle) {
+    body.mc-theater-seating-pdp header.header > .header__section:not(.header__section--middle) {
       order: 1 !important;
       width: 100% !important;
       max-width: 100% !important;
     }
-    html:not(.mc-allow-home-hero) body header.header > .mc-header-desktop-bar,
-    html:not(.mc-allow-home-hero) body header.header > .hidden-xs.col-xs-12,
-    html:not(.mc-allow-home-hero) body header.header > .col-xs-12.hidden-xs,
     body:not(.is-home) header.header > .mc-header-desktop-bar,
     body:not(.is-home) header.header > .hidden-xs.col-xs-12,
     body:not(.is-home) header.header > .col-xs-12.hidden-xs,
     body.category header.header > .mc-header-desktop-bar,
     body.category header.header > .hidden-xs.col-xs-12,
     body.category header.header > .col-xs-12.hidden-xs,
-    html.category body header.header > .mc-header-desktop-bar,
-    html.category body header.header > .hidden-xs.col-xs-12,
-    html.category body header.header > .col-xs-12.hidden-xs,
     body.productdetails header.header > .mc-header-desktop-bar,
     body.productdetails header.header > .hidden-xs.col-xs-12,
     body.productdetails header.header > .col-xs-12.hidden-xs,
@@ -494,50 +481,34 @@
     body.mc-product-page header.header > .col-xs-12.hidden-xs,
     body.mc-theater-seating-pdp header.header > .mc-header-desktop-bar,
     body.mc-theater-seating-pdp header.header > .hidden-xs.col-xs-12,
-    body.mc-theater-seating-pdp header.header > .col-xs-12.hidden-xs,
-    html.mc-paragon-pdp body header.header > .mc-header-desktop-bar,
-    html.mc-paragon-pdp body header.header > .hidden-xs.col-xs-12,
-    html.mc-paragon-pdp body header.header > .col-xs-12.hidden-xs,
-    html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-desktop-bar,
-    html.mc-url-looks-like-pdp body.is-home header.header > .hidden-xs.col-xs-12,
-    html.mc-url-looks-like-pdp body.is-home header.header > .col-xs-12.hidden-xs {
+    body.mc-theater-seating-pdp header.header > .col-xs-12.hidden-xs {
       order: 2 !important;
       width: 100% !important;
       max-width: 100% !important;
       position: relative !important;
       z-index: 3 !important;
     }
-    html:not(.mc-allow-home-hero) body header.header > .header__section--middle,
-    html:not(.mc-allow-home-hero) body header.header > .mc-header-search-below-nav,
     body:not(.is-home) header.header > .header__section--middle,
     body:not(.is-home) header.header > .mc-header-search-below-nav,
     body.category header.header > .header__section--middle,
     body.category header.header > .mc-header-search-below-nav,
-    html.category body header.header > .header__section--middle,
-    html.category body header.header > .mc-header-search-below-nav,
     body.productdetails header.header > .header__section--middle,
     body.productdetails header.header > .mc-header-search-below-nav,
     body.mc-product-page header.header > .header__section--middle,
     body.mc-product-page header.header > .mc-header-search-below-nav,
     body.mc-theater-seating-pdp header.header > .header__section--middle,
-    body.mc-theater-seating-pdp header.header > .mc-header-search-below-nav,
-    html.mc-url-looks-like-pdp body.is-home header.header > .header__section--middle,
-    html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-search-below-nav {
+    body.mc-theater-seating-pdp header.header > .mc-header-search-below-nav {
       order: 20 !important;
       width: 100% !important;
       max-width: 100% !important;
       flex: 0 0 auto !important;
       margin-top: 0 !important;
     }
-    html:not(.mc-allow-home-hero) body header.header > .mc-header-cart,
     body:not(.is-home) header.header > .mc-header-cart,
     body.category header.header > .mc-header-cart,
-    html.category body header.header > .mc-header-cart,
     body.productdetails header.header > .mc-header-cart,
     body.mc-product-page header.header > .mc-header-cart,
-    body.mc-theater-seating-pdp header.header > .mc-header-cart,
-    html.mc-paragon-pdp body header.header > .mc-header-cart,
-    html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-cart {
+    body.mc-theater-seating-pdp header.header > .mc-header-cart {
       order: 30 !important;
     }
     html.mc-search-open header.header .collapsing-search,
@@ -638,11 +609,7 @@
       body.category header.header .mc-header-desktop-bar[data-mc-header-bar],
       body.productdetails header.header .mc-header-desktop-bar[data-mc-header-bar],
       body.mc-product-page header.header .mc-header-desktop-bar[data-mc-header-bar],
-      body.mc-theater-seating-pdp header.header .mc-header-desktop-bar[data-mc-header-bar],
-      html.category body header.header .mc-header-desktop-bar[data-mc-header-bar],
-      html.mc-paragon-pdp body header.header .mc-header-desktop-bar[data-mc-header-bar],
-      html.mc-url-looks-like-pdp body.is-home header.header .mc-header-desktop-bar[data-mc-header-bar],
-      html:not(.mc-allow-home-hero) body header.header .mc-header-desktop-bar[data-mc-header-bar] {
+      body.mc-theater-seating-pdp header.header .mc-header-desktop-bar[data-mc-header-bar] {
         position: relative !important;
         display: flex !important;
         justify-content: center !important;
@@ -654,20 +621,12 @@
         top: 0 !important;
         transform: none !important;
         box-sizing: border-box !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
       }
       body:not(.is-home) header.header .microblock.main-menu,
       body.category header.header .microblock.main-menu,
       body.productdetails header.header .microblock.main-menu,
       body.mc-product-page header.header .microblock.main-menu,
-      body.mc-theater-seating-pdp header.header .microblock.main-menu,
-      html.category body header.header .microblock.main-menu,
-      html.mc-paragon-pdp body header.header .microblock.main-menu,
-      html.mc-url-looks-like-pdp body.is-home header.header .microblock.main-menu,
-      html:not(.mc-allow-home-hero) body header.header .microblock.main-menu {
+      body.mc-theater-seating-pdp header.header .microblock.main-menu {
         position: relative !important;
         display: flex !important;
         justify-content: center !important;
@@ -676,31 +635,19 @@
         padding: 0 !important;
         top: 0 !important;
         transform: none !important;
-        flex: 0 1 auto !important;
-        min-width: 0 !important;
-        max-width: min(920px, calc(100vw - 280px)) !important;
-        z-index: 2 !important;
       }
-      html:not(.mc-allow-home-hero) body header.header .mc-header-search-cart-wrap,
       body:not(.is-home) header.header .mc-header-search-cart-wrap,
       body.category header.header .mc-header-search-cart-wrap,
       body.productdetails header.header .mc-header-search-cart-wrap,
       body.mc-product-page header.header .mc-header-search-cart-wrap,
-      body.mc-theater-seating-pdp header.header .mc-header-search-cart-wrap,
-      html.category body header.header .mc-header-search-cart-wrap,
-      html.mc-paragon-pdp body header.header .mc-header-search-cart-wrap,
-      html.mc-url-looks-like-pdp body.is-home header.header .mc-header-search-cart-wrap {
+      body.mc-theater-seating-pdp header.header .mc-header-search-cart-wrap {
         display: none !important;
       }
-      html.mc-search-open:not(.mc-allow-home-hero) body header.header .mc-header-search-cart-wrap,
       html.mc-search-open body:not(.is-home) header.header .mc-header-search-cart-wrap,
       html.mc-search-open body.category header.header .mc-header-search-cart-wrap,
       html.mc-search-open body.productdetails header.header .mc-header-search-cart-wrap,
       html.mc-search-open body.mc-product-page header.header .mc-header-search-cart-wrap,
-      html.mc-search-open body.mc-theater-seating-pdp header.header .mc-header-search-cart-wrap,
-      html.mc-search-open.category body header.header .mc-header-search-cart-wrap,
-      html.mc-search-open.mc-paragon-pdp body header.header .mc-header-search-cart-wrap,
-      html.mc-search-open.mc-url-looks-like-pdp body.is-home header.header .mc-header-search-cart-wrap {
+      html.mc-search-open body.mc-theater-seating-pdp header.header .mc-header-search-cart-wrap {
         display: flex !important;
         position: fixed !important;
         top: 72px !important;
@@ -722,7 +669,8 @@
         border: 0 !important;
         box-sizing: border-box !important;
       }
-      html.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-cart {
+      html.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-cart,
+      body.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-cart {
         display: none !important;
       }
       header.header .mc-header-search-cart-wrap,
@@ -741,12 +689,14 @@
       header.header .collapsing-search input,
       header.header #collapsingSearch input,
       header.header input[type="search"],
+      header.header input[type="text"][name*="search"],
+      header.header input[type="text"][name*="Search"],
       header.header #search,
       header.header .collapsing-search__input {
         display: none !important;
         width: 0 !important;
-        max-width: 0 !important;
         opacity: 0 !important;
+        max-width: 0 !important;
         visibility: hidden !important;
         border: 0 !important;
         border-bottom: 0 !important;
@@ -775,15 +725,10 @@
         visibility: visible !important;
         pointer-events: auto !important;
       }
-      /* Duplicate strip: direct-child search blocks are not used for in-bar search */
-      html:not(.mc-allow-home-hero) body header.header > .mc-header-search-below-nav,
-      html:not(.mc-allow-home-hero) body header.header > .header__section.header__section--middle,
       body:not(.is-home) header.header > .mc-header-search-below-nav,
       body:not(.is-home) header.header > .header__section.header__section--middle,
       body.category header.header > .mc-header-search-below-nav,
       body.category header.header > .header__section.header__section--middle,
-      html.category body header.header > .mc-header-search-below-nav,
-      html.category body header.header > .header__section.header__section--middle,
       body.productdetails header.header > .mc-header-search-below-nav,
       body.productdetails header.header > .header__section.header__section--middle,
       body.productdetails header.header > .header__section--middle,
@@ -792,13 +737,7 @@
       body.mc-product-page header.header > .header__section--middle,
       body.mc-theater-seating-pdp header.header > .mc-header-search-below-nav,
       body.mc-theater-seating-pdp header.header > .header__section.header__section--middle,
-      body.mc-theater-seating-pdp header.header > .header__section--middle,
-      html.mc-paragon-pdp body header.header > .mc-header-search-below-nav,
-      html.mc-paragon-pdp body header.header > .header__section.header__section--middle,
-      html.mc-paragon-pdp body header.header > .header__section--middle,
-      html.mc-url-looks-like-pdp body.is-home header.header > .mc-header-search-below-nav,
-      html.mc-url-looks-like-pdp body.is-home header.header > .header__section.header__section--middle,
-      html.mc-url-looks-like-pdp body.is-home header.header > .header__section--middle {
+      body.mc-theater-seating-pdp header.header > .header__section--middle {
         display: none !important;
         visibility: hidden !important;
         height: 0 !important;
@@ -913,6 +852,44 @@ document.addEventListener("DOMContentLoaded", function () {
     max-width: 52px !important;
   }
   </style>
+<script id="mc-search-float-toggle">
+(function () {
+  function searchInputEl() {
+    var wrap = document.querySelector("header.header .mc-header-search-cart-wrap");
+    var inWrap =
+      wrap &&
+      (wrap.querySelector("#search") ||
+        wrap.querySelector('input[type="search"]') ||
+        wrap.querySelector('input[type="text"]'));
+    return inWrap || document.querySelector("header.header #search") || document.getElementById("search");
+  }
+  function bind() {
+    var btn = document.querySelector(".mc-search-float");
+    if (!btn || btn.getAttribute("data-mc-sbound") === "1") return;
+    btn.setAttribute("data-mc-sbound", "1");
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      var input = searchInputEl();
+      var on = document.documentElement.classList.toggle("mc-search-open");
+      if (document.body) {
+        if (on) document.body.classList.add("mc-search-open");
+        else document.body.classList.remove("mc-search-open");
+      } else if (!on) document.documentElement.classList.remove("mc-search-open");
+      if (input && on) {
+        try {
+          input.focus();
+        } catch (err) {}
+      } else if (input) {
+        try {
+          input.blur();
+        } catch (errB) {}
+      }
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
+  else bind();
+})();
+</script>
   <!-- Hero headline: IDs + head CSS + sync script — Volusion often strips p/class/style; this must win -->
   <style id="mc-hero-copy-critical">
     #mc-hero-copy-tagline {
@@ -1513,17 +1490,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       return;
     }
-
-    /* Interior: only recover from hero mount — never re-parent into bar after paint (avoids menu jump). */
-    if (mid.getAttribute('data-mc-search-mount') === 'hero') {
-      var menuRow = mcFindMainMenuRow();
-      if (menuRow && menuRow.parentNode) {
-        try {
-          mcPlaceInteriorSearchInBar(menuRow, mid);
-        } catch (ePull) {}
-        mid.setAttribute('data-mc-search-mount', 'below-nav');
-      }
-    }
   }
 
   function mcPlaceInteriorSearchInBar(menuRow, mid) {
@@ -1608,26 +1574,9 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (eSync) {}
     mcMountSearchLayout();
     bindSearchToggle();
-    var isHomeRetry = typeof window.mcPathIsHomepage === 'function' && window.mcPathIsHomepage();
-    if (isHomeRetry) {
-      [0, 120, 400, 1000, 2500, 6000].forEach(function (ms) {
-        setTimeout(mcMountSearchLayout, ms);
-      });
-    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
-
-  var hdr = document.querySelector('header.header');
-  var obsHome = typeof window.mcPathIsHomepage === 'function' && window.mcPathIsHomepage();
-  if (hdr && typeof MutationObserver !== 'undefined' && obsHome) {
-    var moT;
-    var mo = new MutationObserver(function () {
-      clearTimeout(moT);
-      moT = setTimeout(mcMountSearchLayout, 60);
-    });
-    mo.observe(hdr, { childList: true, subtree: true });
-  }
 })();
 </script>
 
@@ -16882,241 +16831,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
-<style id="mc-real-final-header-qty-fix">
-  /* Centered menu; search panel is hidden in-bar — opened via .mc-search-float + .mc-search-open (body-last). */
-  @media (min-width: 992px) {
-    header.header {
-      position: relative !important;
-      margin-top: 0 !important;
-      padding-top: 0 !important;
-    }
-
-    header.header .mc-header-desktop-bar[data-mc-header-bar] {
-      position: relative !important;
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: center !important;
-      justify-content: center !important;
-      width: 100% !important;
-      box-sizing: border-box !important;
-      margin: 0 !important;
-      padding: 0 96px !important;
-      min-height: 48px !important;
-      height: 48px !important;
-      top: 0 !important;
-      transform: none !important;
-    }
-
-    header.header .mc-header-desktop-bar[data-mc-header-bar] .microblock.main-menu {
-      position: relative !important;
-      z-index: 2 !important;
-      flex: 0 1 auto !important;
-      max-width: min(920px, calc(100vw - 280px)) !important;
-      margin: 0 auto !important;
-      padding: 0 !important;
-      display: flex !important;
-      justify-content: center !important;
-      align-items: center !important;
-      transform: none !important;
-    }
-
-    header.header .mc-header-search-cart-wrap {
-      display: none !important;
-    }
-
-    html.mc-search-open header.header .mc-header-search-cart-wrap,
-    body.mc-search-open header.header .mc-header-search-cart-wrap {
-      display: flex !important;
-      position: fixed !important;
-      top: 72px !important;
-      right: 116px !important;
-      left: auto !important;
-      transform: none !important;
-      z-index: 10075 !important;
-      flex-direction: row !important;
-      align-items: center !important;
-      flex-wrap: nowrap !important;
-      gap: 8px !important;
-      width: auto !important;
-      max-width: min(92vw, 380px) !important;
-      margin: 0 !important;
-      padding: 10px 12px !important;
-      background: #fff !important;
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14) !important;
-      border-radius: 4px !important;
-      border: 0 !important;
-      box-sizing: border-box !important;
-    }
-
-    html.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-cart,
-    body.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-cart {
-      display: none !important;
-    }
-
-    header.header .mc-header-search-cart-wrap .mc-header-search-below-nav,
-    header.header .mc-header-search-cart-wrap .header__section--middle {
-      flex: 0 0 auto !important;
-      min-width: 0 !important;
-      width: auto !important;
-    }
-
-    header.header .mc-header-search-cart-wrap .collapsing-search,
-    header.header .mc-header-search-cart-wrap #collapsingSearch {
-      border: 0 !important;
-      box-shadow: none !important;
-      background: transparent !important;
-    }
-
-    header.header .mc-header-search-cart-wrap label,
-    header.header .mc-header-search-cart-wrap .search-label {
-      position: absolute !important;
-      width: 1px !important;
-      height: 1px !important;
-      overflow: hidden !important;
-      clip: rect(0, 0, 0, 0) !important;
-      white-space: nowrap !important;
-      opacity: 0 !important;
-      pointer-events: none !important;
-    }
-
-    html:not(.mc-search-open) body:not(.mc-search-open) header.header .mc-header-search-cart-wrap input[type="text"],
-    html:not(.mc-search-open) body:not(.mc-search-open) header.header .mc-header-search-cart-wrap input[type="search"],
-    html:not(.mc-search-open) body:not(.mc-search-open) header.header .mc-header-search-cart-wrap #search {
-      position: absolute !important;
-      width: 1px !important;
-      height: 1px !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      opacity: 0 !important;
-      border: 0 !important;
-      clip: rect(0, 0, 0, 0) !important;
-      overflow: hidden !important;
-      pointer-events: none !important;
-    }
-
-    html.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-search-below-nav,
-    html.mc-search-open header.header .mc-header-search-cart-wrap .header__section--middle,
-    body.mc-search-open header.header .mc-header-search-cart-wrap .mc-header-search-below-nav,
-    body.mc-search-open header.header .mc-header-search-cart-wrap .header__section--middle {
-      max-width: 220px !important;
-    }
-
-    html.mc-search-open header.header .mc-header-search-cart-wrap input[type="text"],
-    html.mc-search-open header.header .mc-header-search-cart-wrap input[type="search"],
-    html.mc-search-open header.header .mc-header-search-cart-wrap #search,
-    body.mc-search-open header.header .mc-header-search-cart-wrap input[type="text"],
-    body.mc-search-open header.header .mc-header-search-cart-wrap input[type="search"],
-    body.mc-search-open header.header .mc-header-search-cart-wrap #search {
-      position: relative !important;
-      width: 160px !important;
-      max-width: 180px !important;
-      height: 34px !important;
-      opacity: 1 !important;
-      clip: auto !important;
-      overflow: visible !important;
-      pointer-events: auto !important;
-      margin: 0 4px 0 0 !important;
-      padding: 0 8px !important;
-      border: 0 !important;
-      border-bottom: 1px solid #bdbdbd !important;
-      background: transparent !important;
-      font-family: Inter, Arial, sans-serif !important;
-      font-size: 12px !important;
-      letter-spacing: 0.05em !important;
-      color: #111 !important;
-      box-sizing: border-box !important;
-    }
-
-    html:not(.mc-search-open) body:not(.mc-search-open) header.header .mc-header-search-cart-wrap .collapsing-search__submit {
-      position: absolute !important;
-      width: 1px !important;
-      height: 1px !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      overflow: hidden !important;
-      clip: rect(0, 0, 0, 0) !important;
-      opacity: 0 !important;
-      border: 0 !important;
-      pointer-events: none !important;
-    }
-
-    html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__submit,
-    body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__submit {
-      position: relative !important;
-      width: auto !important;
-      height: auto !important;
-      min-width: 0 !important;
-      opacity: 1 !important;
-      clip: auto !important;
-      overflow: visible !important;
-      pointer-events: auto !important;
-    }
-
-    header.header .mc-header-search-cart-wrap .collapsing-search__form .row {
-      border: 0 !important;
-      border-bottom: none !important;
-      padding-bottom: 0 !important;
-    }
-  }
-
-</style>
-
-<script id="mc-real-final-header-qty-script">
-(function () {
-  function searchInputEl() {
-    var wrap = document.querySelector("header.header .mc-header-search-cart-wrap");
-    var inWrap =
-      (wrap &&
-        (wrap.querySelector("#search") ||
-          wrap.querySelector('input[type="search"]') ||
-          wrap.querySelector('input[type="text"]'))) ||
-      null;
-    return (
-      inWrap ||
-      document.querySelector("header.header #search") ||
-      document.getElementById("search")
-    );
-  }
-
-  function bindSearchIcon() {
-    var btn = document.querySelector(".mc-search-float");
-    if (!btn || btn.getAttribute("data-mc-sbound") === "1") return;
-    btn.setAttribute("data-mc-sbound", "1");
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      var input = searchInputEl();
-      var on = document.documentElement.classList.toggle("mc-search-open");
-      if (document.body) {
-        if (on) document.body.classList.add("mc-search-open");
-        else document.body.classList.remove("mc-search-open");
-      } else if (!on) {
-        document.documentElement.classList.remove("mc-search-open");
-      }
-      if (input && on) {
-        setTimeout(function () {
-          try {
-            input.focus();
-          } catch (err) {}
-        }, 40);
-      } else if (input) {
-        try {
-          input.blur();
-        } catch (errB) {}
-      }
-    });
-  }
-
-  function run() {
-    bindSearchIcon();
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", run);
-  } else {
-    run();
-  }
-})();
-</script>
 <style id="mc-final-hard-override-20260430">
   /* === LEGACY QTY WRAPPERS — must not create duplicate labels (hidden if any remain) === */
   #mc-qty-under-configuration,
@@ -17169,85 +16883,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     color: #111 !important;
     margin: 0 !important;
   }
-
-  /* === HARD BUTTON SYSTEM (no pills) === */
-  html body #v65-product-parent #mcPlannerBtn,
-  html body #v65-product-parent #mcProductSummaryBtn,
-  html body #v65-product-parent #btn_addtocart,
-  html body #v65-product-parent input[name="btnaddtocart"],
-  html body #v65-product-parent #wmOpen.wm-btn,
-  html body #wmOpen.wm-btn {
-    font-family: Inter, Arial, sans-serif !important;
-    height: 44px !important;
-    min-height: 44px !important;
-    max-height: 44px !important;
-    border: 1px solid #222 !important;
-    border-radius: 2px !important;
-    background: #fff !important;
-    color: #111 !important;
-    font-size: 12px !important;
-    font-weight: 400 !important;
-    letter-spacing: 0.14em !important;
-    text-transform: uppercase !important;
-    line-height: 1 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 8px !important;
-    padding: 0 24px !important;
-    text-align: center !important;
-    box-sizing: border-box !important;
-    text-decoration: none !important;
-  }
-  html body #v65-product-parent #mcProductSummaryBtn span,
-  html body #v65-product-parent #mcPlannerBtn span {
-    text-align: center !important;
-  }
-  html body #v65-product-parent #mcPlannerRow {
-    justify-content: center !important;
-    gap: 10px !important;
-  }
-  html body #v65-product-parent #mcPlannerBtn,
-  html body #v65-product-parent #mcProductSummaryBtn {
-    flex: 1 1 0 !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    white-space: nowrap !important;
-  }
-
-  /* === PURCHASE COLUMN TYPOGRAPHY === */
-  #v65-product-parent .ProductDescription,
-  #v65-product-parent .product-description,
-  #v65-product-parent #mcConfigurationCaption,
-  #v65-product-parent .mc-configuration-rh__caption,
-  #v65-product-parent .mc-product-availability,
-  #v65-product-parent #mcLeatherSummary,
-  #v65-product-parent .mc-pdp-member-pricing,
-  #v65-product-parent .mc-pdp-retail-member,
-  #v65-product-parent .product_list_price,
-  #v65-product-parent .product_productprice,
-  #v65-product-parent .mc-member-grid-price,
-  #v65-product-parent .mc-member-grid-price__hint {
-    font-family: Inter, Arial, sans-serif !important;
-    font-size: 13px !important;
-    font-weight: 300 !important;
-    letter-spacing: 0.03em !important;
-    line-height: 1.6 !important;
-    color: #333 !important;
-  }
-  #v65-product-parent #mcLeatherHeader,
-  #v65-product-parent .mc-configuration-rh__heading,
-  #v65-product-parent .mc-pdp-retail-label,
-  #v65-product-parent .mc-pdp-member-line__label,
-  #v65-product-parent a.mc-member-grid-price__login {
-    font-family: Inter, Arial, sans-serif !important;
-    font-size: 12px !important;
-    font-weight: 400 !important;
-    letter-spacing: 0.14em !important;
-    text-transform: uppercase !important;
-    color: #111 !important;
-  }
-
 </style>
 <script id="mc-final-hard-override-script-20260430">
 (function () {
@@ -17258,6 +16893,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   } catch (eN) {}
 
   var LEGACY_WRAP_IDS = [
+    "mc-final-qty-row",
     "mc-qty-under-configuration",
     "mc-volusion-qty-above-cart",
     "mc-qty-under-config-above-cart",
@@ -17343,7 +16979,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
     unwrapLegacyWrappers();
 
-    var cfg = document.getElementById("mcConfigurationBlock");
+    var cfg =
+      document.getElementById("mc-inline-config") || document.getElementById("mcConfigurationBlock");
     if (!cfg || !cfg.parentNode) return;
     var column = cfg.parentNode;
 
@@ -17378,10 +17015,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     column.insertBefore(finalRow, cfg.nextSibling);
 
     var addHost =
-      atc.closest(".v65-product-addtocart") ||
-      atc.closest(".v65-productdetail-cartbutton") ||
-      atc.closest("div") ||
-      atc;
+      atc.closest(".v65-product-addtocart") || atc.closest(".v65-productdetail-cartbutton");
     if (addHost && addHost.parentNode) {
       column.insertBefore(addHost, finalRow.nextSibling);
     }
@@ -17399,10 +17033,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   } else {
     run();
   }
-  window.addEventListener("load", function () {
-    run();
-    setTimeout(run, 400);
-  });
+  window.addEventListener("load", run);
 })();
 </script>
 </body>

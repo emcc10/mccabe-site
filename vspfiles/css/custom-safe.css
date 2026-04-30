@@ -2391,14 +2391,7 @@ body.mc-product-page #content_area .productoptionname {
 }
 
 /* PDP: keep inline planner/leather panel in normal flow */
-body.mc-product-page #mc-inline-config {
-  position: static !important;
-  display: block !important;
-  width: 100% !important;
-  clear: both !important;
-}
-
-/* Theater PDPs: same panel visibility (body may lack mc-product-page until other scripts run) */
+body.mc-product-page #mc-inline-config,
 body.mc-theater-seating-pdp #mc-inline-config {
   position: static !important;
   display: block !important;
@@ -2409,29 +2402,6 @@ body.mc-theater-seating-pdp #mc-inline-config {
   opacity: 1 !important;
   height: auto !important;
   overflow: visible !important;
-}
-
-body.mc-theater-seating-pdp #mcPlannerRow {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
-  gap: 10px !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-}
-
-body.mc-theater-seating-pdp #mcPlannerBtn,
-body.mc-theater-seating-pdp #mcProductSummaryBtn {
-  min-width: 0 !important;
-  max-width: 100% !important;
-  width: auto !important;
-  flex: 1 1 140px !important;
-  box-sizing: border-box !important;
-  visibility: visible !important;
-  opacity: 1 !important;
 }
 
 /* Category / listing pages: PDP planner + product summary must not appear */
@@ -4483,40 +4453,6 @@ body.is-home body .mc-cart-float {
     display: flex !important;
     left: auto !important;
     right: calc(52px + 12px + max(52px, env(safe-area-inset-right))) !important;
-  }
-
-  html body button.mc-search-float,
-  html body .mc-search-float,
-  body button.mc-search-float,
-  body .mc-search-float {
-    position: fixed !important;
-    top: 16px !important;
-    right: 116px !important;
-    z-index: 10070 !important;
-    width: 52px !important;
-    height: 52px !important;
-    max-width: 52px !important;
-    border: 0 !important;
-    border-radius: 50% !important;
-    background: #fff !important;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    cursor: pointer !important;
-    color: #111 !important;
-    box-sizing: border-box !important;
-    -webkit-appearance: none !important;
-    appearance: none !important;
-  }
-
-  html body .mc-search-float__icon,
-  body .mc-search-float__icon {
-    width: 20px !important;
-    height: 20px !important;
-    display: block !important;
   }
 
   .mc-home-float,
@@ -9065,27 +9001,6 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     padding: 0 !important;
   }
 
-  /* Single-row search rail after pseudo label removed (override grid + ::before row) */
-  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-cart-wrap {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    gap: 10px !important;
-    grid-template-columns: unset !important;
-    grid-template-rows: unset !important;
-    row-gap: 0 !important;
-  }
-
-  body:not(.is-home) .mc-header-desktop-bar .mc-header-search-below-nav {
-    grid-column: unset !important;
-    grid-row: unset !important;
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-    width: auto !important;
-    max-width: 100% !important;
-  }
-
   body:not(.is-home) .mc-header-desktop-bar .mc-header-cart {
     grid-column: unset !important;
     grid-row: unset !important;
@@ -11572,219 +11487,4 @@ html.mc-paragon-pdp body [class*="cartqty__wrap"] label {
   text-align: center !important;
   margin: 0 0 6px 0 !important;
   order: -1 !important;
-}
-
-/* MC_HEADER_SEARCH_RH_20260429 — first-paint safe: absolute search cluster, no “Search” label/underline; all interior URL types */
-@media (min-width: 992px) {
-  :is(
-      html:not(.mc-allow-home-hero) body,
-      body:not(.is-home),
-      body.category,
-      body.productdetails,
-      body.mc-product-page,
-      body.mc-theater-seating-pdp,
-      html.category body,
-      html.mc-url-looks-like-pdp body.is-home,
-      html.mc-paragon-pdp body
-    )
-    header.header
-    > .header__section:not(.header__section--middle) {
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-  }
-
-  :is(
-      html:not(.mc-allow-home-hero) body,
-      body:not(.is-home),
-      body.category,
-      body.productdetails,
-      body.mc-product-page,
-      body.mc-theater-seating-pdp,
-      html.category body,
-      html.mc-url-looks-like-pdp body.is-home,
-      html.mc-paragon-pdp body
-    )
-    .mc-header-desktop-bar[data-mc-header-bar] {
-    justify-content: center !important;
-    align-items: center !important;
-    position: relative !important;
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    padding: 0 96px !important;
-    min-height: 48px !important;
-    height: 48px !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    top: 0 !important;
-    transform: none !important;
-  }
-
-  :is(
-      html:not(.mc-allow-home-hero) body,
-      body:not(.is-home),
-      body.category,
-      body.productdetails,
-      body.mc-product-page,
-      body.mc-theater-seating-pdp,
-      html.category body,
-      html.mc-url-looks-like-pdp body.is-home,
-      html.mc-paragon-pdp body
-    )
-    .mc-header-desktop-bar[data-mc-header-bar]
-    .microblock.main-menu {
-    position: relative !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex: 0 1 auto !important;
-    max-width: min(920px, calc(100vw - 280px)) !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    padding: 0 !important;
-    top: 0 !important;
-    transform: none !important;
-  }
-
-  :is(
-      html:not(.mc-allow-home-hero) body,
-      body:not(.is-home),
-      body.category,
-      body.productdetails,
-      body.mc-product-page,
-      body.mc-theater-seating-pdp,
-      html.category body,
-      html.mc-url-looks-like-pdp body.is-home,
-      html.mc-paragon-pdp body
-    )
-    .mc-header-desktop-bar[data-mc-header-bar]
-    .mc-header-search-cart-wrap {
-    display: none !important;
-  }
-
-  html.mc-search-open
-    :is(
-        html:not(.mc-allow-home-hero) body,
-        body:not(.is-home),
-        body.category,
-        body.productdetails,
-        body.mc-product-page,
-        body.mc-theater-seating-pdp,
-        html.category body,
-        html.mc-url-looks-like-pdp body.is-home,
-        html.mc-paragon-pdp body
-      )
-    .mc-header-desktop-bar[data-mc-header-bar]
-    .mc-header-search-cart-wrap,
-  body.mc-search-open
-    :is(
-        html:not(.mc-allow-home-hero) body,
-        body:not(.is-home),
-        body.category,
-        body.productdetails,
-        body.mc-product-page,
-        body.mc-theater-seating-pdp,
-        html.category body,
-        html.mc-url-looks-like-pdp body.is-home,
-        html.mc-paragon-pdp body
-      )
-    .mc-header-desktop-bar[data-mc-header-bar]
-    .mc-header-search-cart-wrap {
-    display: flex !important;
-    position: fixed !important;
-    top: 72px !important;
-    right: 116px !important;
-    left: auto !important;
-    transform: none !important;
-    z-index: 10075 !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    gap: 8px !important;
-    width: auto !important;
-    max-width: min(92vw, 380px) !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    padding: 10px 12px !important;
-    border: 0 !important;
-    background: #fff !important;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14) !important;
-    border-radius: 4px !important;
-  }
-
-  :is(
-      html:not(.mc-allow-home-hero) body,
-      body:not(.is-home),
-      body.category,
-      body.productdetails,
-      body.mc-product-page,
-      body.mc-theater-seating-pdp,
-      html.category body,
-      html.mc-url-looks-like-pdp body.is-home,
-      html.mc-paragon-pdp body
-    )
-    .mc-header-desktop-bar[data-mc-header-bar]
-    .mc-header-search-cart-wrap::before {
-    content: none !important;
-    display: none !important;
-  }
-
-  :is(
-      html:not(.mc-allow-home-hero) body,
-      body:not(.is-home),
-      body.category,
-      body.productdetails,
-      body.mc-product-page,
-      body.mc-theater-seating-pdp,
-      html.category body,
-      html.mc-url-looks-like-pdp body.is-home,
-      html.mc-paragon-pdp body
-    )
-    .mc-header-desktop-bar[data-mc-header-bar]
-    .collapsing-search__form
-    .row {
-    border-bottom: none !important;
-    border-top: none !important;
-    padding-bottom: 0 !important;
-    box-shadow: none !important;
-  }
-
-  html:not(.mc-search-open) body:not(.mc-search-open) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search,
-  html:not(.mc-search-open) body:not(.mc-search-open) .mc-header-desktop-bar[data-mc-header-bar] #collapsingSearch,
-  html:not(.mc-search-open) body:not(.mc-search-open) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form,
-  html:not(.mc-search-open) body:not(.mc-search-open) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__form .container {
-    border: 0 !important;
-    border-bottom: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
-  }
-
-  html:not(.mc-search-open) body:not(.mc-search-open) .mc-header-desktop-bar[data-mc-header-bar] #search,
-  html:not(.mc-search-open) body:not(.mc-search-open) .mc-header-desktop-bar[data-mc-header-bar] .collapsing-search__input {
-    display: none !important;
-    width: 0 !important;
-    max-width: 0 !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-  }
-}
-
-/* In-bar search: never show row underline on hover (collapsed icon state) */
-@media (min-width: 992px) {
-  header.header .mc-header-desktop-bar .collapsing-search:hover .collapsing-search__form .row {
-    border-bottom: none !important;
-  }
-  header.header .mc-header-desktop-bar .collapsing-search:focus-within,
-  html.mc-search-open header.header .mc-header-desktop-bar .collapsing-search,
-  body.mc-search-open header.header .mc-header-desktop-bar .collapsing-search {
-    transform: none !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-    border: 0 !important;
-    background: transparent !important;
-  }
 }
