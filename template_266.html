@@ -16845,46 +16845,126 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
-<script id="mc-one-true-qty-fix">
-(function () {
-  function root() {
-    return document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
+<style id="mc-quantity-final-hard-fix-css">
+  #mc-final-qty-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 10px auto 18px !important;
+    padding: 0 !important;
+    clear: both !important;
+    float: none !important;
+    position: relative !important;
+    transform: none !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
   }
 
-  function findQtyInput(r) {
+  #mc-final-qty-row label {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.16em !important;
+    text-transform: uppercase !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    color: #333 !important;
+  }
+
+  #mc-final-qty-row input {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 58px !important;
+    height: 36px !important;
+    margin: 0 !important;
+    padding: 0 6px !important;
+    text-align: center !important;
+    border: 1px solid #c9c9c9 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-sizing: border-box !important;
+    float: none !important;
+    position: relative !important;
+    transform: none !important;
+  }
+
+  #mc-inline-config {
+    display: block !important;
+    width: 100% !important;
+    max-width: 420px !important;
+    margin: 12px auto 12px !important;
+    clear: both !important;
+    float: none !important;
+    position: relative !important;
+    transform: none !important;
+  }
+</style>
+
+<script id="mc-quantity-final-hard-fix-script">
+(function () {
+  function getRoot() {
+    return document.querySelector("#v65-product-parent") ||
+           document.querySelector("#content_area") ||
+           document;
+  }
+
+  function getQtyInput(root) {
     return (
-      r.querySelector("input.v65-productdetail-cartqty") ||
-      r.querySelector('input[name^="QTY."]') ||
-      r.querySelector('input[name="QTY"]') ||
-      r.querySelector('input[name="Qty"]') ||
-      r.querySelector('input[name="qty"]') ||
-      r.querySelector('input[id*="qty" i]') ||
-      r.querySelector('input[id*="quantity" i]')
+      root.querySelector("input.v65-productdetail-cartqty") ||
+      root.querySelector('input[name^="QTY."]') ||
+      root.querySelector('input[name="QTY"]') ||
+      root.querySelector('input[name="Qty"]') ||
+      root.querySelector('input[name="qty"]') ||
+      root.querySelector('input[id*="qty" i]') ||
+      root.querySelector('input[id*="quantity" i]')
     );
   }
 
-  function findConfig(r) {
+  function getConfig(root) {
     return (
-      r.querySelector("#mc-inline-config") ||
-      Array.from(r.querySelectorAll("div, td, table, section")).find(function (el) {
-        var txt = String(el.innerText || "").toLowerCase().replace(/\s+/g, " ").trim();
-        return txt.indexOf("configuration") !== -1 &&
-               txt.indexOf("please use the room planner") !== -1;
+      root.querySelector("#mc-inline-config") ||
+      Array.from(root.querySelectorAll("div, td, table, section")).find(function (el) {
+        var text = String(el.innerText || "").toLowerCase().replace(/\s+/g, " ").trim();
+        return text.indexOf("configuration") !== -1 &&
+               text.indexOf("please use the room planner") !== -1;
       })
     );
   }
 
-  function findAddToCart(r) {
+  function getAddToCart(root) {
     return (
-      r.querySelector('input[name="btnaddtocart"]') ||
-      r.querySelector("#btn_addtocart") ||
-      Array.from(r.querySelectorAll("input, button, a")).find(function (el) {
+      root.querySelector('input[name="btnaddtocart"]') ||
+      root.querySelector("#btn_addtocart") ||
+      Array.from(root.querySelectorAll("input, button, a")).find(function (el) {
         return /add\s*to\s*cart/i.test(String(el.value || el.textContent || ""));
       })
     );
   }
 
-  function removeRawQtyText(scope) {
+  function getColumn(qty, config, addBtn, root) {
+    return (
+      (config && config.closest(".mc-pdp-options-td")) ||
+      (qty && qty.closest(".mc-pdp-options-td")) ||
+      (addBtn && addBtn.closest(".mc-pdp-options-td")) ||
+      (config && config.closest("td")) ||
+      (qty && qty.closest("td")) ||
+      (addBtn && addBtn.closest("td")) ||
+      root
+    );
+  }
+
+  function removeTextQuantity(scope) {
     if (!scope) return;
 
     var walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
@@ -16900,87 +16980,99 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
         node.nodeValue = "";
       }
     });
+  }
 
-    Array.from(scope.querySelectorAll("label, span, div, p")).forEach(function (el) {
+  function removeOldQtyStuff(root) {
+    Array.from(root.querySelectorAll(
+      "#mc-qty-under-configuration, " +
+      "#mc-volusion-qty-above-cart, " +
+      "#mc-qty-under-config-above-cart, " +
+      "#mc-pdp-qty-wrap, " +
+      "#mc-qty-under-configuration, " +
+      "#mc-volusion-qty-wrap"
+    )).forEach(function (el) {
+      try { el.remove(); } catch (e) {}
+    });
+
+    Array.from(root.querySelectorAll("label, span, div, p")).forEach(function (el) {
       if (el.closest("#mc-final-qty-row")) return;
       if (el.querySelector("input, button, a, #mc-inline-config")) return;
 
       var txt = String(el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+
       if (txt === "quantity:" || txt === "quantity") {
-        el.remove();
+        try { el.remove(); } catch (e) {
+          el.style.setProperty("display", "none", "important");
+        }
       }
+    });
+
+    var rows = Array.from(root.querySelectorAll("#mc-final-qty-row"));
+    rows.slice(1).forEach(function (row) {
+      try { row.remove(); } catch (e) {}
     });
   }
 
-  function nearestCellOrColumn(el) {
-    return (
-      el.closest(".mc-pdp-options-td") ||
-      el.closest("td") ||
-      el.closest("div") ||
-      document.querySelector("#v65-product-parent") ||
-      document.querySelector("#content_area") ||
-      document.body
-    );
+  function directBlock(el) {
+    if (!el) return null;
+
+    if (el.id === "mc-inline-config") return el;
+
+    return el.closest("tr") ||
+           el.closest("td") ||
+           el.closest("div") ||
+           el.parentElement ||
+           el;
   }
 
-  function forceQuantityLayout() {
-    var r = root();
-    var qty = findQtyInput(r);
-    var config = findConfig(r);
-    var add = findAddToCart(r);
+  function fixQuantity() {
+    var root = getRoot();
+    var qty = getQtyInput(root);
+    var config = getConfig(root);
+    var addBtn = getAddToCart(root);
 
-    if (!qty || !config || !add) return;
+    if (!qty || !config || !addBtn) return;
 
-    var column =
-      config.closest(".mc-pdp-options-td") ||
-      qty.closest(".mc-pdp-options-td") ||
-      add.closest(".mc-pdp-options-td") ||
-      nearestCellOrColumn(add);
+    var column = getColumn(qty, config, addBtn, root);
 
     if (!column) return;
 
-    removeRawQtyText(column);
-
-    // Remove old duplicate wrappers, except the final row we are rebuilding.
-    Array.from(r.querySelectorAll(
-      "#mc-qty-under-configuration, #mc-volusion-qty-above-cart, #mc-qty-under-config-above-cart, #mc-pdp-qty-wrap"
-    )).forEach(function (el) {
-      el.remove();
-    });
+    removeOldQtyStuff(root);
+    removeTextQuantity(column);
 
     var row = document.getElementById("mc-final-qty-row");
+
     if (!row) {
       row = document.createElement("div");
       row.id = "mc-final-qty-row";
     }
 
-    // If old code put config inside qty row, move config out first.
     if (row.contains(config)) {
       column.insertBefore(config, row);
     }
 
-    // Rebuild row safely.
-    Array.from(row.childNodes).forEach(function (node) {
-      if (node !== qty) node.remove();
-    });
-
     var label = row.querySelector("label");
+
+    row.innerHTML = "";
+
     if (!label) {
       label = document.createElement("label");
     }
 
     label.textContent = "Quantity:";
-    if (!qty.id) qty.id = "mc-real-product-qty";
+
+    if (!qty.id) {
+      qty.id = "mc-real-product-qty";
+    }
+
     label.setAttribute("for", qty.id);
 
-    row.innerHTML = "";
     row.appendChild(label);
     row.appendChild(qty);
 
-    var configBlock = config.closest("div, table, td, tr") || config;
-    var addBlock = add.closest("div, table, td, tr") || add;
+    var configBlock = directBlock(config);
+    var addBlock = directBlock(addBtn);
 
-    // Force vertical order: config, qty, add.
     if (configBlock && configBlock.parentNode) {
       configBlock.parentNode.insertBefore(row, configBlock.nextSibling);
     } else {
@@ -16996,8 +17088,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     config.style.setProperty("width", "100%", "important");
     config.style.setProperty("max-width", "420px", "important");
     config.style.setProperty("margin", "12px auto 12px", "important");
-    config.style.setProperty("float", "none", "important");
     config.style.setProperty("clear", "both", "important");
+    config.style.setProperty("float", "none", "important");
     config.style.setProperty("position", "relative", "important");
     config.style.setProperty("transform", "none", "important");
 
@@ -17023,7 +17115,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     label.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
     label.style.setProperty("font-size", "11px", "important");
     label.style.setProperty("font-weight", "400", "important");
-    label.style.setProperty("letter-spacing", ".16em", "important");
+    label.style.setProperty("letter-spacing", "0.16em", "important");
     label.style.setProperty("text-transform", "uppercase", "important");
     label.style.setProperty("white-space", "nowrap", "important");
 
@@ -17033,37 +17125,44 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     qty.style.setProperty("width", "58px", "important");
     qty.style.setProperty("height", "36px", "important");
     qty.style.setProperty("margin", "0", "important");
+    qty.style.setProperty("padding", "0 6px", "important");
     qty.style.setProperty("text-align", "center", "important");
     qty.style.setProperty("float", "none", "important");
     qty.style.setProperty("position", "relative", "important");
     qty.style.setProperty("transform", "none", "important");
   }
 
-  function boot() {
-    forceQuantityLayout();
+  function bootQuantityFix() {
+    fixQuantity();
 
-    // Keep it stable if old Volusion/custom scripts re-render options.
-    var target = document.querySelector("#v65-product-parent") || document.querySelector("#content_area");
-    if (target && !target.__mcQtyObserver) {
-      target.__mcQtyObserver = true;
+    var target = document.querySelector("#v65-product-parent") ||
+                 document.querySelector("#content_area");
+
+    if (target && !target.__mcFinalQtyObserver) {
+      target.__mcFinalQtyObserver = true;
+
       new MutationObserver(function () {
-        clearTimeout(window.__mcQtyTimer);
-        window.__mcQtyTimer = setTimeout(forceQuantityLayout, 50);
-      }).observe(target, { childList: true, subtree: true });
+        clearTimeout(window.__mcFinalQtyTimer);
+        window.__mcFinalQtyTimer = setTimeout(fixQuantity, 25);
+      }).observe(target, {
+        childList: true,
+        subtree: true
+      });
     }
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot);
+    document.addEventListener("DOMContentLoaded", bootQuantityFix);
   } else {
-    boot();
+    bootQuantityFix();
   }
 
   window.addEventListener("load", function () {
-    boot();
-    setTimeout(forceQuantityLayout, 250);
-    setTimeout(forceQuantityLayout, 750);
-    setTimeout(forceQuantityLayout, 1500);
+    bootQuantityFix();
+    setTimeout(fixQuantity, 100);
+    setTimeout(fixQuantity, 300);
+    setTimeout(fixQuantity, 750);
+    setTimeout(fixQuantity, 1500);
   });
 })();
 </script>
