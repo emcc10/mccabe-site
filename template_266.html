@@ -16897,16 +16897,26 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     if (!qty) return;
 
     var root = document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
+
     var scope =
       qty.closest(".mc-pdp-options-td") ||
       qty.closest("td") ||
       root;
+
+    var oldParent = qty.parentNode;
+    var oldNext = qty.nextSibling;
+
+    if (!oldParent) return;
 
     var row = document.getElementById("mc-surgical-qty-row");
 
     if (!row) {
       row = document.createElement("div");
       row.id = "mc-surgical-qty-row";
+
+      oldParent.insertBefore(row, oldNext);
+    } else if (!document.body.contains(row)) {
+      oldParent.insertBefore(row, oldNext);
     }
 
     var label = row.querySelector("label");
@@ -16925,12 +16935,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     row.innerHTML = "";
     row.appendChild(label);
     row.appendChild(qty);
-
-    var originalParent = qty.parentNode;
-
-    if (originalParent !== row && originalParent) {
-      originalParent.insertBefore(row, qty);
-    }
 
     removeStrayQuantityText(scope, row);
 
