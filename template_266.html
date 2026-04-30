@@ -16845,28 +16845,91 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
-<script id="mc-only-final-qty-fix">
+<style id="mc-qty-stack-final-css">
+  #mc-inline-config {
+    display: block !important;
+    width: 100% !important;
+    max-width: 420px !important;
+    margin: 12px auto 12px !important;
+    float: none !important;
+    clear: both !important;
+    position: relative !important;
+    transform: none !important;
+  }
+
+  #mc-final-qty-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 10px auto 18px !important;
+    padding: 0 !important;
+    float: none !important;
+    clear: both !important;
+    position: relative !important;
+    transform: none !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+
+  #mc-final-qty-row label {
+    display: inline-flex !important;
+    align-items: center !important;
+    width: auto !important;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    letter-spacing: .16em !important;
+    text-transform: uppercase !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  #mc-final-qty-row input.v65-productdetail-cartqty,
+  #mc-final-qty-row input[name^="QTY."] {
+    display: inline-block !important;
+    width: 58px !important;
+    height: 36px !important;
+    margin: 0 !important;
+    padding: 0 6px !important;
+    text-align: center !important;
+    border: 1px solid #c9c9c9 !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+    float: none !important;
+    position: relative !important;
+    transform: none !important;
+  }
+</style>
+
+<script id="mc-qty-stack-final-script">
 (function () {
-  function root() {
+  function productRoot() {
     return document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
   }
 
-  function findQtyInput(r) {
+  function findQtyInput(root) {
     return (
-      r.querySelector("input.v65-productdetail-cartqty") ||
-      r.querySelector('input[name^="QTY."]') ||
-      r.querySelector('input[name="QTY"]') ||
-      r.querySelector('input[name="Qty"]') ||
-      r.querySelector('input[name="qty"]') ||
-      r.querySelector('input[id*="qty" i]') ||
-      r.querySelector('input[id*="quantity" i]')
+      root.querySelector("input.v65-productdetail-cartqty") ||
+      root.querySelector('input[name^="QTY."]') ||
+      root.querySelector('input[name="QTY"]') ||
+      root.querySelector('input[name="Qty"]') ||
+      root.querySelector('input[name="qty"]') ||
+      root.querySelector('input[id*="qty" i]') ||
+      root.querySelector('input[id*="quantity" i]')
     );
   }
 
-  function findConfigBox(r) {
+  function findConfig(root) {
     return (
-      r.querySelector("#mc-inline-config") ||
-      Array.from(r.querySelectorAll("div, td, table, section")).find(function (el) {
+      root.querySelector("#mc-inline-config") ||
+      Array.from(root.querySelectorAll("div, td, table, section")).find(function (el) {
         var txt = String(el.innerText || "").toLowerCase().replace(/\s+/g, " ").trim();
         return txt.indexOf("configuration") !== -1 &&
                txt.indexOf("please use the room planner") !== -1;
@@ -16874,81 +16937,78 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     );
   }
 
-  function findAddToCart(r) {
+  function findAddToCart(root) {
     return (
-      r.querySelector('input[name="btnaddtocart"]') ||
-      r.querySelector("#btn_addtocart") ||
-      Array.from(r.querySelectorAll("input, button, a")).find(function (el) {
+      root.querySelector('input[name="btnaddtocart"]') ||
+      root.querySelector("#btn_addtocart") ||
+      Array.from(root.querySelectorAll("input, button, a")).find(function (el) {
         return /add\s*to\s*cart/i.test(String(el.value || el.textContent || ""));
       })
     );
   }
 
-  function block(el) {
-    return el && (el.closest("tr, td, div, table") || el.parentElement || el);
+  function directBlock(el) {
+    return el && (el.closest("tr") || el.closest("td") || el.closest("div") || el.parentElement || el);
   }
 
-  function removeBadQuantityText(scope) {
+  function removeQuantityTextEverywhere(scope) {
     if (!scope) return;
 
-    // Remove raw text nodes saying Quantity:
-    Array.from(scope.childNodes).forEach(function (node) {
-      if (
-        node.nodeType === 3 &&
-        String(node.nodeValue || "").replace(/\s+/g, " ").trim().toLowerCase() === "quantity:"
-      ) {
+    var walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT, null);
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    nodes.forEach(function (node) {
+      var txt = String(node.nodeValue || "").replace(/\s+/g, " ").trim().toLowerCase();
+      if (txt === "quantity:" || txt === "quantity") {
         node.nodeValue = "";
       }
     });
 
-    // Hide/remove standalone quantity labels outside the final row
-    Array.from(scope.querySelectorAll("label, div, span, p")).forEach(function (el) {
-      var txt = String(el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+    Array.from(scope.querySelectorAll("label, div, span, p, td")).forEach(function (el) {
+      if (el.closest("#mc-final-qty-row")) return;
+      if (el.querySelector("input, button, a, #mc-inline-config")) return;
 
-      if (
-        (txt === "quantity" || txt === "quantity:") &&
-        !el.closest("#mc-final-qty-row") &&
-        !el.querySelector("input")
-      ) {
+      var txt = String(el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+      if (txt === "quantity:" || txt === "quantity") {
         el.style.setProperty("display", "none", "important");
         el.setAttribute("aria-hidden", "true");
       }
     });
   }
 
-  function removeOldWrappers(r) {
-    Array.from(r.querySelectorAll(
+  function removeOldQtyWrappers(root) {
+    Array.from(root.querySelectorAll(
       "#mc-qty-under-configuration, #mc-volusion-qty-above-cart, #mc-qty-under-config-above-cart, #mc-pdp-qty-wrap"
     )).forEach(function (el) {
-      try { el.remove(); } catch (e) {}
+      try { el.remove(); } catch(e) {}
     });
 
-    // If duplicate final rows somehow exist, keep the first and remove the rest.
-    var rows = Array.from(r.querySelectorAll("#mc-final-qty-row"));
+    var rows = Array.from(root.querySelectorAll("#mc-final-qty-row"));
     rows.slice(1).forEach(function (el) {
-      try { el.remove(); } catch (e) {}
+      try { el.remove(); } catch(e) {}
     });
   }
 
-  function fixQty() {
-    var r = root();
-    var qty = findQtyInput(r);
-    var config = findConfigBox(r);
-    var add = findAddToCart(r);
+  function fix() {
+    var root = productRoot();
+    var qty = findQtyInput(root);
+    var config = findConfig(root);
+    var add = findAddToCart(root);
 
     if (!qty || !config || !add) return;
 
     var optionsCell =
-      qty.closest(".mc-pdp-options-td") ||
       config.closest(".mc-pdp-options-td") ||
+      qty.closest(".mc-pdp-options-td") ||
       add.closest(".mc-pdp-options-td") ||
-      qty.closest("td") ||
       config.closest("td") ||
+      qty.closest("td") ||
       add.closest("td") ||
-      r;
+      root;
 
-    removeOldWrappers(r);
-    removeBadQuantityText(optionsCell);
+    removeOldQtyWrappers(root);
+    removeQuantityTextEverywhere(optionsCell);
 
     var row = document.getElementById("mc-final-qty-row");
     if (!row) {
@@ -16956,81 +17016,73 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       row.id = "mc-final-qty-row";
     }
 
-    // The final row must contain ONLY label + real input.
+    // Make sure row has only label + input.
     Array.from(row.childNodes).forEach(function (node) {
       if (node.nodeType === 3) node.nodeValue = "";
     });
 
-    Array.from(row.querySelectorAll("label")).forEach(function (label, index) {
-      if (index > 0) label.remove();
+    Array.from(row.querySelectorAll("label")).forEach(function (label, i) {
+      if (i > 0) label.remove();
     });
 
     var label = row.querySelector("label");
     if (!label) {
       label = document.createElement("label");
-      row.insertBefore(label, row.firstChild);
+      row.appendChild(label);
     }
 
     label.textContent = "Quantity:";
     if (!qty.id) qty.id = "mc-real-product-qty";
     label.setAttribute("for", qty.id);
 
-    // If config got accidentally inserted inside the quantity row, move it out before the row.
+    // If config got trapped inside qty row, pull it out before the row.
     if (row.contains(config)) {
-      var parent = optionsCell || row.parentNode;
-      if (parent) parent.insertBefore(config, row);
+      optionsCell.insertBefore(config, row);
     }
 
     row.appendChild(qty);
 
-    var configBlock = block(config);
-    var addBlock = block(add);
+    var configBlock = directBlock(config);
+    var addBlock = directBlock(add);
 
-    // Put quantity row immediately after Configuration.
+    // Put config first, then qty row, then Add to Cart.
+    if (optionsCell && configBlock && configBlock.parentNode !== optionsCell) {
+      optionsCell.appendChild(configBlock);
+    }
+
     if (configBlock && configBlock.parentNode) {
       configBlock.parentNode.insertBefore(row, configBlock.nextSibling);
-    } else if (addBlock && addBlock.parentNode) {
-      addBlock.parentNode.insertBefore(row, addBlock);
     } else {
       optionsCell.appendChild(row);
     }
 
-    // Put Add to Cart immediately after quantity row if same parent.
-    if (addBlock && row.parentNode && addBlock.parentNode === row.parentNode) {
+    if (addBlock && row.parentNode) {
       row.parentNode.insertBefore(addBlock, row.nextSibling);
     }
 
-    row.style.cssText =
-      "display:flex !important;" +
-      "align-items:center !important;" +
-      "justify-content:center !important;" +
-      "gap:10px !important;" +
-      "width:100% !important;" +
-      "max-width:320px !important;" +
-      "margin:10px auto 18px !important;" +
-      "padding:0 !important;" +
-      "clear:both !important;" +
-      "float:none !important;" +
-      "text-align:center !important;" +
-      "box-sizing:border-box !important;" +
-      "visibility:visible !important;";
+    // Force vertical stacking, not side-by-side.
+    if (configBlock) {
+      configBlock.style.setProperty("display", "block", "important");
+      configBlock.style.setProperty("width", "100%", "important");
+      configBlock.style.setProperty("max-width", "420px", "important");
+      configBlock.style.setProperty("margin", "12px auto 12px", "important");
+      configBlock.style.setProperty("float", "none", "important");
+      configBlock.style.setProperty("clear", "both", "important");
+      configBlock.style.setProperty("position", "relative", "important");
+      configBlock.style.setProperty("transform", "none", "important");
+    }
 
-    label.style.cssText =
-      "display:inline-flex !important;" +
-      "align-items:center !important;" +
-      "width:auto !important;" +
-      "margin:0 !important;" +
-      "padding:0 !important;" +
-      "font-family:Inter,Arial,sans-serif !important;" +
-      "font-size:11px !important;" +
-      "font-weight:400 !important;" +
-      "letter-spacing:.16em !important;" +
-      "text-transform:uppercase !important;" +
-      "line-height:1 !important;" +
-      "white-space:nowrap !important;" +
-      "visibility:visible !important;";
+    row.style.setProperty("display", "flex", "important");
+    row.style.setProperty("flex-direction", "row", "important");
+    row.style.setProperty("align-items", "center", "important");
+    row.style.setProperty("justify-content", "center", "important");
+    row.style.setProperty("gap", "10px", "important");
+    row.style.setProperty("width", "100%", "important");
+    row.style.setProperty("max-width", "320px", "important");
+    row.style.setProperty("margin", "10px auto 18px", "important");
+    row.style.setProperty("float", "none", "important");
+    row.style.setProperty("clear", "both", "important");
 
-    qty.style.setProperty("visibility", "visible", "important");
     qty.style.setProperty("display", "inline-block", "important");
     qty.style.setProperty("width", "58px", "important");
     qty.style.setProperty("height", "36px", "important");
@@ -17038,21 +17090,17 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     qty.style.setProperty("text-align", "center", "important");
   }
 
-  function run() {
-    fixQty();
-  }
-
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", run);
+    document.addEventListener("DOMContentLoaded", fix);
   } else {
-    run();
+    fix();
   }
 
   window.addEventListener("load", function () {
-    run();
-    setTimeout(run, 250);
-    setTimeout(run, 750);
-    setTimeout(run, 1500);
+    fix();
+    setTimeout(fix, 250);
+    setTimeout(fix, 750);
+    setTimeout(fix, 1500);
   });
 })();
 </script>
