@@ -1097,19 +1097,6 @@ document.addEventListener("DOMContentLoaded", function () {
 })();
 </script>
 
-<style id="mc-qty-critical-hide-duplicates">
-  body.productdetails .mc-pdp-options-td > label,
-  body.mc-product-page .mc-pdp-options-td > label,
-  body.productdetails .mc-pdp-options-td > .mc-qty-native-label,
-  body.mc-product-page .mc-pdp-options-td > .mc-qty-native-label {
-    display: none !important;
-  }
-
-  body.productdetails #mc-final-qty-row label,
-  body.mc-product-page #mc-final-qty-row label {
-    display: inline-flex !important;
-  }
-</style>
 
  
   <!-- DESIGN TOOLKIT -->
@@ -16534,7 +16521,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     upsertPlannerPriceSummary(calc);
   }
 
-  /* Qty DOM order is handled by #mc-only-final-qty-fix (template end). Do not move blocks here. */
+  /* Qty DOM order is handled by #mc-qty-stack-final-script (template end). Do not move blocks here. */
   function moveQuantityAboveCartButton() {}
 
   function receivePlannerMessage(event) {
@@ -16813,7 +16800,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     console.log("McCabe room planner cart calc:", window.mccabeRoomPlannerCartCalc);
   }
 
-  /* Qty DOM order is handled by #mc-only-final-qty-fix (template end). */
+  /* Qty DOM order is handled by #mc-qty-stack-final-script (template end). */
   function moveQuantityAboveAddToCart() {}
 
   function onPlannerMessage(event) {
