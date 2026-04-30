@@ -17049,22 +17049,15 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   window.addEventListener("load", run);
 })();
 </script>
-<script id="mc-fix-stray-qty-text-node-final">
+<script id="mc-final-force-qty-row-after-config">
 (function () {
-  function isQtyTextNode(node) {
-    return (
-      node &&
-      node.nodeType === 3 &&
-      String(node.nodeValue || "")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase() === "quantity:"
-    );
+  function getRoot() {
+    return document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
   }
 
   function findQtyInput(root) {
     return (
-      root.querySelector('input[class*="cartqty" i]') ||
+      root.querySelector("input.v65-productdetail-cartqty") ||
       root.querySelector('input[name^="QTY."]') ||
       root.querySelector('input[name="QTY"]') ||
       root.querySelector('input[name="Qty"]') ||
@@ -17074,35 +17067,93 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     );
   }
 
-  function closestCell(el) {
-    return el && (el.closest("td") || el.parentElement);
+  function findAddToCart(root) {
+    return (
+      root.querySelector('input[name="btnaddtocart"]') ||
+      root.querySelector("#btn_addtocart") ||
+      Array.from(root.querySelectorAll("input, button, a")).find(function (el) {
+        return /add\s*to\s*cart/i.test(String(el.value || el.textContent || ""));
+      })
+    );
   }
 
-  function fixQtyRow() {
-    var root = document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
+  function findConfigBox(root) {
+    return (
+      root.querySelector("#mc-inline-config") ||
+      Array.from(root.querySelectorAll("div, td, table, section")).find(function (el) {
+        var txt = String(el.innerText || "")
+          .toLowerCase()
+          .replace(/\s+/g, " ")
+          .trim();
+        return (
+          txt.indexOf("configuration") !== -1 &&
+          txt.indexOf("please use the room planner") !== -1
+        );
+      })
+    );
+  }
+
+  function closestBlock(el) {
+    return el && (el.closest("tr, td, div, table") || el.parentElement || el);
+  }
+
+  function removeStrayQuantityText(scope) {
+    if (!scope) return;
+
+    Array.from(scope.childNodes).forEach(function (node) {
+      if (
+        node.nodeType === 3 &&
+        String(node.nodeValue || "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .toLowerCase() === "quantity:"
+      ) {
+        node.nodeValue = "";
+      }
+    });
+
+    Array.from(scope.querySelectorAll("label")).forEach(function (label) {
+      var txt = String(label.textContent || "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+      if ((txt === "quantity" || txt === "quantity:") && !label.closest("#mc-final-qty-row")) {
+        label.remove();
+      }
+    });
+  }
+
+  function fixQty() {
+    var root = getRoot();
     var qty = findQtyInput(root);
-    if (!qty) return;
+    var config = findConfigBox(root);
+    var add = findAddToCart(root);
 
-    var cell = closestCell(qty);
-    if (!cell) return;
+    if (!qty || !config || !add) return;
 
-    var strayText = Array.from(cell.childNodes).find(isQtyTextNode);
+    var optionsCell =
+      qty.closest(".mc-pdp-options-td") ||
+      config.closest(".mc-pdp-options-td") ||
+      add.closest(".mc-pdp-options-td") ||
+      qty.closest("td") ||
+      config.closest("td") ||
+      add.closest("td");
+
+    removeStrayQuantityText(optionsCell || root);
+
+    Array.from(
+      root.querySelectorAll(
+        "#mc-qty-under-configuration, #mc-volusion-qty-above-cart, #mc-qty-under-config-above-cart, #mc-pdp-qty-wrap"
+      )
+    ).forEach(function (el) {
+      if (el.id !== "mc-final-qty-row") el.remove();
+    });
 
     var row = document.getElementById("mc-final-qty-row");
     if (!row) {
       row = document.createElement("div");
       row.id = "mc-final-qty-row";
     }
-
-    var config = document.getElementById("mc-inline-config");
-    if (config && row.contains(config)) {
-      row.parentNode.insertBefore(config, row);
-      config.style.setProperty("margin", "0 0 12px", "important");
-    }
-
-    Array.from(row.querySelectorAll("label")).forEach(function (label, index) {
-      if (index > 0) label.remove();
-    });
 
     var label = row.querySelector("label");
     if (!label) {
@@ -17116,52 +17167,54 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
     row.appendChild(qty);
 
-    if (strayText) strayText.nodeValue = "";
+    var configBlock = closestBlock(config);
+    var addBlock = closestBlock(add);
 
-    var addBtn =
-      root.querySelector('input[name="btnaddtocart"]') ||
-      root.querySelector("#btn_addtocart") ||
-      Array.from(root.querySelectorAll("input, button, a")).find(function (el) {
-        return /add\s*to\s*cart/i.test(el.value || el.textContent || "");
-      });
-
-    var addRow = addBtn && (addBtn.closest("tr") || addBtn.closest("td") || addBtn.closest("div"));
-
-    if (config && config.parentNode) {
-      config.parentNode.insertBefore(row, config.nextSibling);
-    } else if (addRow && addRow.parentNode) {
-      addRow.parentNode.insertBefore(row, addRow);
-    } else if (cell) {
-      cell.appendChild(row);
+    // Critical: the config box must NOT be inside the quantity row.
+    if (config && row.contains(config)) {
+      var parent = row.parentNode || optionsCell;
+      if (parent) parent.insertBefore(config, row);
     }
 
-    if (addRow && addRow.parentNode === row.parentNode) {
-      addRow.parentNode.insertBefore(row, addRow);
+    // Place quantity row immediately after Configuration.
+    if (configBlock && configBlock.parentNode) {
+      configBlock.parentNode.insertBefore(row, configBlock.nextSibling);
+    } else if (addBlock && addBlock.parentNode) {
+      addBlock.parentNode.insertBefore(row, addBlock);
     }
 
-    row.style.setProperty("display", "flex", "important");
-    row.style.setProperty("align-items", "center", "important");
-    row.style.setProperty("justify-content", "center", "important");
-    row.style.setProperty("gap", "10px", "important");
-    row.style.setProperty("width", "100%", "important");
-    row.style.setProperty("max-width", "320px", "important");
-    row.style.setProperty("margin", "10px auto 18px", "important");
-    row.style.setProperty("padding", "0", "important");
-    row.style.setProperty("clear", "both", "important");
-    row.style.setProperty("float", "none", "important");
+    // Keep Add to Cart directly after quantity row when they share a parent.
+    if (addBlock && row.parentNode && addBlock.parentNode === row.parentNode) {
+      row.parentNode.insertBefore(addBlock, row.nextSibling);
+    }
 
-    label.style.setProperty("display", "inline-flex", "important");
-    label.style.setProperty("align-items", "center", "important");
-    label.style.setProperty("width", "auto", "important");
-    label.style.setProperty("margin", "0", "important");
-    label.style.setProperty("padding", "0", "important");
-    label.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
-    label.style.setProperty("font-size", "11px", "important");
-    label.style.setProperty("font-weight", "400", "important");
-    label.style.setProperty("letter-spacing", ".16em", "important");
-    label.style.setProperty("text-transform", "uppercase", "important");
-    label.style.setProperty("line-height", "1", "important");
-    label.style.setProperty("white-space", "nowrap", "important");
+    row.style.cssText =
+      "display:flex !important;" +
+      "align-items:center !important;" +
+      "justify-content:center !important;" +
+      "gap:10px !important;" +
+      "width:100% !important;" +
+      "max-width:320px !important;" +
+      "margin:10px auto 18px !important;" +
+      "padding:0 !important;" +
+      "clear:both !important;" +
+      "float:none !important;" +
+      "text-align:center !important;" +
+      "box-sizing:border-box !important;";
+
+    label.style.cssText =
+      "display:inline-flex !important;" +
+      "align-items:center !important;" +
+      "width:auto !important;" +
+      "margin:0 !important;" +
+      "padding:0 !important;" +
+      "font-family:Inter,Arial,sans-serif !important;" +
+      "font-size:11px !important;" +
+      "font-weight:400 !important;" +
+      "letter-spacing:.16em !important;" +
+      "text-transform:uppercase !important;" +
+      "line-height:1 !important;" +
+      "white-space:nowrap !important;";
 
     qty.style.setProperty("width", "58px", "important");
     qty.style.setProperty("height", "36px", "important");
@@ -17170,15 +17223,16 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", fixQtyRow);
+    document.addEventListener("DOMContentLoaded", fixQty);
   } else {
-    fixQtyRow();
+    fixQty();
   }
 
   window.addEventListener("load", function () {
-    fixQtyRow();
-    setTimeout(fixQtyRow, 300);
-    setTimeout(fixQtyRow, 900);
+    fixQty();
+    setTimeout(fixQty, 250);
+    setTimeout(fixQty, 750);
+    setTimeout(fixQty, 1500);
   });
 })();
 </script>
