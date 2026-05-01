@@ -4951,6 +4951,84 @@ function mcSyncSeatCountSelectFallback(form, seatCount) {
 }
 
 var MC_VERTEX_THEATER_FOUR_L_DISCOUNT = 500;
+/** Volusion option value for Armless Loveseat (-$500); Peridon / cart discount row. */
+var MC_ARMLESS_LOVESEAT_OPTION_CODE = "855";
+
+function mcSelectOptionByExactValue(select, value) {
+  if (!select) return false;
+  select.disabled = false;
+  var want = String(value);
+  var i;
+  for (i = 0; i < select.options.length; i++) {
+    if (String(select.options[i].value) === want) {
+      select.selectedIndex = i;
+      select.value = want;
+      try { select.dispatchEvent(new Event("input", { bubbles: true })); } catch (e) {}
+      try { select.dispatchEvent(new Event("change", { bubbles: true })); } catch (e2) {}
+      return true;
+    }
+  }
+  return false;
+}
+
+function mcSelectOptionByText(select, patterns) {
+  if (!select) return false;
+  select.disabled = false;
+
+  var opts = Array.from(select.options || []);
+  var found = null;
+  var pi;
+  for (pi = 0; pi < opts.length; pi++) {
+    var opt = opts[pi];
+    var txt = String(opt.textContent || opt.innerText || "").toLowerCase();
+    var val = String(opt.value || "").toLowerCase();
+    var pj;
+    var hit = false;
+    for (pj = 0; pj < patterns.length; pj++) {
+      if (patterns[pj].test(txt) || patterns[pj].test(val)) {
+        hit = true;
+        break;
+      }
+    }
+    if (hit) {
+      found = opt;
+      break;
+    }
+  }
+  if (!found) return false;
+
+  select.value = found.value;
+  select.selectedIndex = opts.indexOf(found);
+
+  try { select.dispatchEvent(new Event("input", { bubbles: true })); } catch (e) {}
+  try { select.dispatchEvent(new Event("change", { bubbles: true })); } catch (e2) {}
+
+  return true;
+}
+
+function mcFindConfigSelect(form) {
+  var selects = Array.from(form.querySelectorAll("select"));
+  var si;
+  for (si = 0; si < selects.length; si++) {
+    var sel = selects[si];
+    var sig = String(
+      (sel.name || "") + " " + (sel.id || "") + " " + (sel.title || "") + " " + (sel.getAttribute("aria-label") || "")
+    ).toLowerCase();
+    var text = Array.from(sel.options || [])
+      .map(function (o) {
+        return String(o.textContent || "").toLowerCase();
+      })
+      .join(" | ");
+
+    if (
+      /config|configuration|piece|layout|loveseat|armless|seat/i.test(sig) ||
+      /armless loveseat|4l|configuration|straight|curved/i.test(text)
+    ) {
+      return sel;
+    }
+  }
+  return null;
+}
 
 function mcVertexTheaterFormHasPlannerSelects(form) {
   if (!form || !form.querySelector) return false;
@@ -5305,14 +5383,10 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
 </script>
 
 <!--
-  Vertex theater: deterministic planner -> Volusion option writer (cart price sync).
-  Native seat-count (___49) and row-shape (___2) options carry Volusion upcharges. For Add to Cart,
-  we force price-neutral natives (1-seat baseline + straight/curved row without 4L bundle options),
-  rely on billable quantity for seat multiples, and sync hidden selling unit + mcPersistPlannerCartTarget
-  to the planner total on submit (see mcVertexPlannerSubmitPriceSync).
-    SELECT___PALLISER-VERTEX-THEATER-CHAIR___49: always 750 (1 seat, baseline; avoids double-count with QTY).
-    SELECT___PALLISER-VERTEX-THEATER-CHAIR___2: 115 straight / 116 curved (no 760/761 loveseat row surcharges).
-    SELECT___PALLISER-VERTEX-THEATER-CHAIR___4 (leather): never touched.
+  Vertex / theater PDP: planner -> Volusion sync for cart.
+  Seat count SELECT___...___49 (when present): 750 baseline + QTY for billables.
+  Configuration via mcFindConfigSelect: layout with 4L selects Volusion value MC_ARMLESS_LOVESEAT_OPTION_CODE ("855")
+  first, then text fallback (Armless Loveseat / 4L); without 4L, regular / straight / curved text match. Leather untouched.
 -->
 <script>
 (function mcVertexTheaterDeterministicWriter(){
@@ -5349,12 +5423,14 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
 
   function setSelectValue(sel, val){
     if (!sel) return false;
+    sel.disabled = false;
     var want = String(val);
     if (String(sel.value) === want) return true;
     var i;
     for (i = 0; i < sel.options.length; i++) {
       if (String(sel.options[i].value) === want) {
         sel.selectedIndex = i;
+        try { sel.dispatchEvent(new Event("input", { bubbles: true })); } catch (eIn) {}
         try { sel.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) {}
         return true;
       }
@@ -5372,22 +5448,83 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
     if (!form) { console.log(LOG, tag, "no form"); return; }
     var sel49 = findSelectByNameSuffix(form, "49");
     var sel02 = findSelectByNameSuffix(form, "2");
-    if (!sel49 && !sel02) return;
+    var configSelect =
+      typeof mcFindConfigSelect === "function" ? mcFindConfigSelect(form) : null;
+    if (!configSelect) configSelect = sel02;
+    if (!sel49 && !configSelect) return;
 
     var s = summarizePayload(payload || {});
     var seatVal = SEAT_COUNT_NEUTRAL;
-    var cfgVal = s.isCurved ? "116" : "115";
+    var ok49 = sel49 ? setSelectValue(sel49, seatVal) : false;
+    var okCfg = false;
 
-    var ok49 = setSelectValue(sel49, seatVal);
-    var ok02 = setSelectValue(sel02, cfgVal);
+    if (configSelect) {
+      if (s.has4L) {
+        okCfg =
+          typeof mcSelectOptionByExactValue === "function" &&
+          mcSelectOptionByExactValue(configSelect, MC_ARMLESS_LOVESEAT_OPTION_CODE);
+        if (!okCfg) {
+          okCfg = mcSelectOptionByText(configSelect, [
+            /^855$/,
+            /armless\s+loveseat/i,
+            /\b4l\b/i,
+            /4\s*l/i
+          ]);
+        }
+        console.log("MC ARMLESS DISCOUNT SELECT", {
+          has4L: s.has4L,
+          armlessOptionCode: MC_ARMLESS_LOVESEAT_OPTION_CODE,
+          selected: okCfg,
+          selectName: configSelect && configSelect.name,
+          selectedText:
+            configSelect &&
+            configSelect.options[configSelect.selectedIndex] &&
+            configSelect.options[configSelect.selectedIndex].textContent,
+          selectedValue: configSelect && configSelect.value
+        });
+      } else {
+        var regPatterns = s.isCurved
+          ? [/curved/i, /regular/i, /standard/i, /no\s+armless/i]
+          : [/regular/i, /standard/i, /no\s+armless/i, /straight/i];
+        okCfg = mcSelectOptionByText(configSelect, regPatterns);
+        console.log("MC REGULAR CONFIG SELECT", {
+          has4L: s.has4L,
+          selected: okCfg,
+          selectName: configSelect && configSelect.name,
+          selectedText:
+            configSelect &&
+            configSelect.options[configSelect.selectedIndex] &&
+            configSelect.options[configSelect.selectedIndex].textContent,
+          selectedValue: configSelect && configSelect.value
+        });
+      }
+    }
+
+    if (tag === "before-submit") {
+      var qEl = form.querySelector(
+        'input[name^="QTY"], input[name="QTY"], input[class*="cartqty"]'
+      );
+      console.log("MC CART SUBMIT CHECK", {
+        has4L: s.has4L,
+        fourLCount: s.fourLCount,
+        seats: s.seats,
+        configSelectName: configSelect && configSelect.name,
+        configSelectedValue: configSelect && configSelect.value,
+        configSelectedText:
+          configSelect &&
+          configSelect.options[configSelect.selectedIndex] &&
+          configSelect.options[configSelect.selectedIndex].textContent,
+        qty: qEl && qEl.value
+      });
+    }
+
     console.log(LOG, tag, {
       seats: s.seats,
       has4L: s.has4L,
       isCurved: s.isCurved,
       seatOptionValue: seatVal,
-      configOptionValue: cfgVal,
       wrote_seatCount: ok49,
-      wrote_config: ok02
+      wrote_config: okCfg
     });
   }
 
