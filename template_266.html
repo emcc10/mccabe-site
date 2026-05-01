@@ -17036,13 +17036,41 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
-<script id="mc-remove-stray-qty-text-only">
+<script id="mc-safe-final-qty-fix">
 (function () {
-  function removeStrayQuantityOnly() {
-    var root = document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
-    var finalRow = document.querySelector("#mc-surgical-qty-row, #mc-final-qty-row");
+  function root() {
+    return document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
+  }
 
-    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  function findQtyInput(r) {
+    return (
+      r.querySelector("#mc-surgical-qty-row input.v65-productdetail-cartqty") ||
+      r.querySelector("input.v65-productdetail-cartqty") ||
+      r.querySelector('input[name^="QTY."]') ||
+      r.querySelector('input[name="QTY"]') ||
+      r.querySelector('input[name="Qty"]') ||
+      r.querySelector('input[name="qty"]')
+    );
+  }
+
+  function findConfig(r) {
+    return r.querySelector("#mc-inline-config");
+  }
+
+  function findAddToCart(r) {
+    return (
+      r.querySelector('input[name="btnaddtocart"]') ||
+      r.querySelector("#btn_addtocart") ||
+      Array.from(r.querySelectorAll("input, button, a")).find(function (el) {
+        return /add\s*to\s*cart/i.test(String(el.value || el.textContent || ""));
+      })
+    );
+  }
+
+  function removeOnlyRawQuantityText(scope, keepRow) {
+    if (!scope) return;
+
+    var walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
     var nodes = [];
 
     while (walker.nextNode()) {
@@ -17050,7 +17078,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     }
 
     nodes.forEach(function (node) {
-      if (finalRow && finalRow.contains(node.parentNode)) return;
+      if (keepRow && keepRow.contains(node.parentNode)) return;
 
       var txt = String(node.nodeValue || "").replace(/\s+/g, " ").trim().toLowerCase();
 
@@ -17058,30 +17086,104 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
         node.nodeValue = "";
       }
     });
+  }
 
-    Array.from(root.querySelectorAll("label, span, div, p")).forEach(function (el) {
-      if (finalRow && finalRow.contains(el)) return;
-      if (el.querySelector("input, button, a, select, textarea, #mc-inline-config")) return;
+  function fixQty() {
+    var r = root();
+    var qty = findQtyInput(r);
+    var config = findConfig(r);
+    var add = findAddToCart(r);
 
-      var txt = String(el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+    if (!qty || !config || !add) return;
 
-      if (txt === "quantity:" || txt === "quantity") {
-        el.style.setProperty("display", "none", "important");
-        el.setAttribute("aria-hidden", "true");
-      }
-    });
+    var scope =
+      config.closest(".mc-pdp-options-td") ||
+      qty.closest(".mc-pdp-options-td") ||
+      add.closest(".mc-pdp-options-td") ||
+      config.closest("td") ||
+      qty.closest("td") ||
+      add.closest("td") ||
+      r;
+
+    var row = document.getElementById("mc-surgical-qty-row");
+
+    if (!row) {
+      row = document.createElement("div");
+      row.id = "mc-surgical-qty-row";
+    }
+
+    row.innerHTML = "";
+
+    var label = document.createElement("label");
+    label.textContent = "Quantity:";
+
+    if (!qty.id) qty.id = "mc-real-product-qty";
+    label.setAttribute("for", qty.id);
+
+    row.appendChild(label);
+    row.appendChild(qty);
+
+    removeOnlyRawQuantityText(scope, row);
+
+    config.insertAdjacentElement("afterend", row);
+
+    var addBlock =
+      add.closest("tr") ||
+      add.closest("td") ||
+      add.closest("div") ||
+      add.parentElement;
+
+    if (addBlock && addBlock.parentNode === row.parentNode) {
+      row.parentNode.insertBefore(addBlock, row.nextSibling);
+    }
+
+    config.style.setProperty("display", "block", "important");
+    config.style.setProperty("width", "100%", "important");
+    config.style.setProperty("max-width", "420px", "important");
+    config.style.setProperty("margin", "12px auto 12px", "important");
+    config.style.setProperty("clear", "both", "important");
+    config.style.setProperty("float", "none", "important");
+
+    row.style.setProperty("display", "flex", "important");
+    row.style.setProperty("align-items", "center", "important");
+    row.style.setProperty("justify-content", "center", "important");
+    row.style.setProperty("gap", "10px", "important");
+    row.style.setProperty("width", "100%", "important");
+    row.style.setProperty("max-width", "320px", "important");
+    row.style.setProperty("margin", "10px auto 18px", "important");
+    row.style.setProperty("clear", "both", "important");
+    row.style.setProperty("float", "none", "important");
+
+    label.style.setProperty("display", "inline-flex", "important");
+    label.style.setProperty("align-items", "center", "important");
+    label.style.setProperty("width", "auto", "important");
+    label.style.setProperty("margin", "0", "important");
+    label.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
+    label.style.setProperty("font-size", "11px", "important");
+    label.style.setProperty("font-weight", "400", "important");
+    label.style.setProperty("letter-spacing", ".16em", "important");
+    label.style.setProperty("text-transform", "uppercase", "important");
+    label.style.setProperty("white-space", "nowrap", "important");
+
+    qty.style.setProperty("display", "inline-block", "important");
+    qty.style.setProperty("visibility", "visible", "important");
+    qty.style.setProperty("opacity", "1", "important");
+    qty.style.setProperty("width", "58px", "important");
+    qty.style.setProperty("height", "36px", "important");
+    qty.style.setProperty("margin", "0", "important");
+    qty.style.setProperty("text-align", "center", "important");
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", removeStrayQuantityOnly);
+    document.addEventListener("DOMContentLoaded", fixQty);
   } else {
-    removeStrayQuantityOnly();
+    fixQty();
   }
 
   window.addEventListener("load", function () {
-    removeStrayQuantityOnly();
-    setTimeout(removeStrayQuantityOnly, 300);
-    setTimeout(removeStrayQuantityOnly, 900);
+    fixQty();
+    setTimeout(fixQty, 300);
+    setTimeout(fixQty, 900);
   });
 })();
 </script>
