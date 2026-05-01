@@ -17261,48 +17261,99 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 </script>
 <script id="mc-remove-stray-qty-text-only">
 (function () {
+  function mcStrayQtyRoot() {
+    var ca = document.querySelector("#content_area");
+    var v65 = document.querySelector("#v65-product-parent");
+    if (ca && v65 && ca.contains(v65)) return ca;
+    return v65 || ca || document.body || document;
+  }
+
+  function normalizeQtyText(s) {
+    return String(s || "")
+      .replace(/[\u200b\uFEFF]/g, "")
+      .replace(/\u00a0/g, " ")
+      .replace(/[\u2007\u202f]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function isStrayQtyOnlyText(s) {
+    return /^(quantity|qty)\s*:?\s*$/i.test(normalizeQtyText(s));
+  }
+
+  function shouldSkipNode(node) {
+    if (!node || !node.parentElement) return true;
+    var pe = node.parentElement;
+    if (pe.closest("#mc-inline-config")) return true;
+    if (pe.closest("#mcPlannerBtn") || pe.closest(".mc-planner-overlay")) return true;
+    return false;
+  }
+
+  function shouldSkipEl(el) {
+    if (!el) return true;
+    return !!el.closest("#mc-inline-config");
+  }
+
   function removeStrayQuantityOnly() {
-    var root = document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
+    var root = mcStrayQtyRoot();
     var finalRow = document.querySelector("#mc-surgical-qty-row, #mc-final-qty-row");
 
     var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    var nodes = [];
-
-    while (walker.nextNode()) {
-      nodes.push(walker.currentNode);
+    var node;
+    while ((node = walker.nextNode())) {
+      if (finalRow && finalRow.contains(node.parentNode)) continue;
+      if (shouldSkipNode(node)) continue;
+      if (!isStrayQtyOnlyText(node.nodeValue)) continue;
+      node.nodeValue = "";
     }
 
-    nodes.forEach(function (node) {
-      if (finalRow && finalRow.contains(node.parentNode)) return;
-
-      var txt = String(node.nodeValue || "").replace(/\s+/g, " ").trim().toLowerCase();
-
-      if (txt === "quantity:" || txt === "quantity") {
-        node.nodeValue = "";
-      }
-    });
-
-    Array.from(root.querySelectorAll("label, span, div, p")).forEach(function (el) {
+    var tagSel =
+      "label, span, div, p, td, th, li, strong, b, em, small, font, h3, h4, h5, a";
+    Array.from(root.querySelectorAll(tagSel)).forEach(function (el) {
       if (finalRow && finalRow.contains(el)) return;
-      if (el.querySelector("input, button, a, select, textarea, #mc-inline-config")) return;
+      if (shouldSkipEl(el)) return;
+      if (el.querySelector("#mc-inline-config")) return;
+      if (
+        el.querySelector(
+          'input, button, select, textarea, [class*="cartqty"], #mc-real-product-qty, #mcPlannerBtn'
+        )
+      )
+        return;
 
-      var txt = String(el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+      if (!isStrayQtyOnlyText(el.textContent)) return;
 
-      if (txt === "quantity:" || txt === "quantity") {
-        el.style.setProperty("display", "none", "important");
-        el.setAttribute("aria-hidden", "true");
-      }
+      el.style.setProperty("display", "none", "important");
+      el.setAttribute("aria-hidden", "true");
     });
   }
 
+  function armObserver() {
+    var r = document.querySelector("#content_area") || document.querySelector("#v65-product-parent");
+    if (!r || r.dataset.mcStrayQtyObs) return;
+    r.dataset.mcStrayQtyObs = "1";
+    var t;
+    var obs = new MutationObserver(function () {
+      clearTimeout(t);
+      t = setTimeout(removeStrayQuantityOnly, 40);
+    });
+    try {
+      obs.observe(r, { childList: true, subtree: true, characterData: true });
+    } catch (eOb) {}
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", removeStrayQuantityOnly);
+    document.addEventListener("DOMContentLoaded", function () {
+      removeStrayQuantityOnly();
+      armObserver();
+    });
   } else {
     removeStrayQuantityOnly();
+    armObserver();
   }
 
   window.addEventListener("load", function () {
     removeStrayQuantityOnly();
+    armObserver();
     setTimeout(removeStrayQuantityOnly, 300);
     setTimeout(removeStrayQuantityOnly, 900);
     setTimeout(removeStrayQuantityOnly, 1600);
