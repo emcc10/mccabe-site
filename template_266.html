@@ -4793,6 +4793,24 @@ window.applyPlannerToPage = function (payload) {
     cpe.style.display = "none";
     cpe.textContent = "";
   }
+  try {
+    var _fourLc = Number(configOpts["4L"] || 0);
+    var _phys = 0;
+    Object.keys(configOpts).forEach(function (_pk) {
+      _phys += Number(configOpts[_pk] || 0);
+    });
+    var _unitForCalc =
+      typeof getPlannerBaseSeatPriceForCalc === "function" ? getPlannerBaseSeatPriceForCalc() : 0;
+    if (!(_unitForCalc > 0) && publicSeatPrice > 0) _unitForCalc = publicSeatPrice;
+    window.mccabeRoomPlannerPriceCalc = {
+      unitPrice: _unitForCalc,
+      physicalPieces: _phys,
+      effectiveSeats: seatCount,
+      fourLCount: _fourLc,
+      discount: _fourLc * 500,
+      total: lineTotal > 0 ? lineTotal : 0
+    };
+  } catch (eMccabeCalc) {}
   mcEnsurePlannerMemberPriceAboveAtc();
   if (window.__mcMemberPricing) {
     try { window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing })); } catch (e) {}
@@ -4932,6 +4950,152 @@ function mcSyncSeatCountSelectFallback(form, seatCount) {
   }
 }
 
+var MC_VERTEX_THEATER_FOUR_L_DISCOUNT = 500;
+
+function mcVertexTheaterFormHasPlannerSelects(form) {
+  if (!form || !form.querySelector) return false;
+  return !!form.querySelector('select[name^="SELECT___PALLISER-VERTEX-THEATER-CHAIR___49"]');
+}
+
+function mcVertexSummarizePlannerPayload(payload) {
+  var layout = payload && Array.isArray(payload.layout) ? payload.layout : [];
+  var opts = payload && payload.options && typeof payload.options === "object" ? payload.options : {};
+  var counts = {};
+  var WEDGE_IDS = { "5L": 1, "6L": 1, "7L": 1, "9L": 1 };
+  if (layout.length) {
+    layout.forEach(function (s) {
+      var id = String((s && s.id) || s || "").toUpperCase();
+      if (!id) return;
+      counts[id] = (counts[id] || 0) + 1;
+    });
+  } else {
+    Object.keys(opts).forEach(function (k) {
+      var id = String(k).toUpperCase();
+      var n = Number(opts[k] || 0);
+      if (n > 0) counts[id] = (counts[id] || 0) + n;
+    });
+  }
+  var ids = Object.keys(counts);
+  var fourL = counts["4L"] || 0;
+  var nonFourL = 0;
+  var hasWedge = false;
+  ids.forEach(function (id) {
+    if (id === "4L") return;
+    nonFourL += counts[id];
+    if (WEDGE_IDS[id]) hasWedge = true;
+  });
+  var seats;
+  if (payload && payload.seatCount != null && Number(payload.seatCount) > 0) {
+    seats = Number(payload.seatCount);
+  } else {
+    seats = nonFourL + 2 * fourL;
+  }
+  if (seats < 1) seats = 1;
+  if (seats > 6) seats = 6;
+  return {
+    seats: seats,
+    has4L: fourL > 0,
+    isCurved: hasWedge || !!(payload && payload.curved),
+    counts: counts,
+    fourLCount: fourL
+  };
+}
+
+function mcPlannerExpectedCartTotalFromPayload(payload) {
+  var p = payload && typeof payload === "object" ? payload : {};
+  var fromP = Number(p.configurationTotal);
+  if (fromP > 0) return fromP;
+  var s = mcVertexSummarizePlannerPayload(p);
+  var effectiveSeats = s.seats;
+  var fourLCount = s.fourLCount || 0;
+  var unit = typeof getPlannerBaseSeatPriceForCalc === "function" ? getPlannerBaseSeatPriceForCalc() : 0;
+  if (!(unit > 0) && typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
+    unit = mcGetPlannerPerSeatUnitFromVolusion(document);
+  }
+  if (!(unit > 0)) return 0;
+  var t = unit * effectiveSeats - MC_VERTEX_THEATER_FOUR_L_DISCOUNT * fourLCount;
+  return t > 0 ? t : 0;
+}
+
+function mcVertexCollectPlannerSelectDebug(form) {
+  var out = {};
+  if (!form || !form.querySelectorAll) return out;
+  var sels = form.querySelectorAll('select[name^="SELECT___PALLISER-VERTEX-THEATER-CHAIR___"]');
+  var i;
+  for (i = 0; i < sels.length; i++) {
+    var sel = sels[i];
+    var parts = (sel.name || "").split("___");
+    var short = parts.length ? parts[parts.length - 1] : sel.name || "";
+    out[short] = sel.value;
+  }
+  return out;
+}
+
+function mcVertexSetHiddenSellingUnitForLineTotal(form, lineTotal, qty) {
+  if (!(lineTotal > 0) || !(qty > 0) || !form) return;
+  var per = (lineTotal / qty).toFixed(2);
+  var names = [
+    "SellingPrice", "sellingprice", "ActualPrice", "actualprice", "HiddenPrice", "hiddenprice",
+    "SalePrice", "saleprice", "AddToCartPrice", "addtocartprice", "SoftAddPrice", "CartPrice", "ProductPrice"
+  ];
+  var ni;
+  for (ni = 0; ni < names.length; ni++) {
+    var inp = form.querySelector('input[type="hidden"][name="' + names[ni] + '"]');
+    if (!inp) continue;
+    try {
+      inp.value = per;
+    } catch (eH) {}
+  }
+}
+
+function mcVertexSetFormQuantityForPlanner(form, qty) {
+  if (!(qty > 0) || !form) return;
+  var qEl =
+    form.querySelector("#mc-real-product-qty") ||
+    form.querySelector('input[name="QTY"]') ||
+    form.querySelector('input[name="Qty"]') ||
+    form.querySelector('input[name="quantity"]') ||
+    form.querySelector('input[name^="QTY."]');
+  if (!qEl) return;
+  qEl.value = String(qty);
+  qEl.setAttribute("value", String(qty));
+  try {
+    qEl.dispatchEvent(new Event("input", { bubbles: true }));
+    qEl.dispatchEvent(new Event("change", { bubbles: true }));
+  } catch (eQ) {}
+}
+
+function mcVertexPlannerSubmitPriceSync(form, payload) {
+  if (!form || !mcVertexTheaterFormHasPlannerSelects(form)) return;
+  var p = payload && typeof payload === "object" ? payload : {};
+  var s = mcVertexSummarizePlannerPayload(p);
+  var effectiveSeats = s.seats;
+  var fourLCount = s.fourLCount || 0;
+  var discount = MC_VERTEX_THEATER_FOUR_L_DISCOUNT * fourLCount;
+  var unitPrice = typeof getPlannerBaseSeatPriceForCalc === "function" ? getPlannerBaseSeatPriceForCalc() : 0;
+  if (!(unitPrice > 0) && typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
+    unitPrice = mcGetPlannerPerSeatUnitFromVolusion(document);
+  }
+  var expectedCartTotal = mcPlannerExpectedCartTotalFromPayload(p);
+  var calc = window.mccabeRoomPlannerPriceCalc;
+  if (calc && calc.total > 0) {
+    expectedCartTotal = Number(calc.total);
+    if (calc.unitPrice > 0) unitPrice = Number(calc.unitPrice);
+  }
+  if (!(expectedCartTotal > 0)) return;
+  mcVertexSetFormQuantityForPlanner(form, effectiveSeats);
+  mcVertexSetHiddenSellingUnitForLineTotal(form, expectedCartTotal, effectiveSeats);
+  console.log("MC CART PRICE SYNC", {
+    unitPrice: unitPrice,
+    effectiveSeats: effectiveSeats,
+    fourLCount: fourLCount,
+    discount: discount,
+    expectedCartTotal: expectedCartTotal,
+    qtyValue: effectiveSeats,
+    selectedOptions: mcVertexCollectPlannerSelectDebug(form)
+  });
+}
+
 function mcSyncPlannerFormForSubmit(payload, explicitTotal) {
   var p = payload && typeof payload === "object" ? payload : {};
   var form = typeof mcFindProductDetailsForm === "function" ? mcFindProductDetailsForm(document) : null;
@@ -4969,10 +5133,15 @@ function mcSyncPlannerFormForSubmit(payload, explicitTotal) {
   }
   if (configField) configField.value = cfgText;
 
-  mcSyncSeatCountSelectFallback(form, Number(p.seatCount || 0));
+  if (!mcVertexTheaterFormHasPlannerSelects(form)) {
+    mcSyncSeatCountSelectFallback(form, Number(p.seatCount || 0));
+  }
 
   var total = Number(explicitTotal || 0);
   if (!(total > 0)) total = Number(p.configurationTotal || 0);
+  if (!(total > 0) && mcVertexTheaterFormHasPlannerSelects(form)) {
+    total = mcPlannerExpectedCartTotalFromPayload(p);
+  }
   mcPersistPlannerCartTarget(p, total);
   mcPlannerDebugLog("sync-form-before-submit", {
     productCode: String(
@@ -5131,19 +5300,13 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
 </script>
 
 <!--
-  Vertex theater: deterministic planner -> Volusion option writer.
-  Rules (sourced from calculatePlannerPrice in this template, line ~3658):
-    seats = non-4L pieces + 2 * 4L pieces   (capped at 6)
-    has4L = any 4L in layout
-    isCurved = any wedge piece in layout    (5L, 6L, 7L, 9L)
-  Mapping:
-    SELECT___PALLISER-VERTEX-THEATER-CHAIR___49 (seat count)
-      1->750, 2->744, 3->745, 4->746, 5->748, 6->749
-    SELECT___PALLISER-VERTEX-THEATER-CHAIR___2 (configuration)
-      has4L & isCurved  -> 761 (Chair, Loveseat, Chair - Curved)
-      has4L & !isCurved -> 760 (Chair, Loveseat, Chair - Straight)
-      !has4L & isCurved -> 116 (Curved)
-      !has4L & !isCurved-> 115 (Straight)
+  Vertex theater: deterministic planner -> Volusion option writer (cart price sync).
+  Native seat-count (___49) and row-shape (___2) options carry Volusion upcharges. For Add to Cart,
+  we force price-neutral natives (1-seat baseline + straight/curved row without 4L bundle options),
+  rely on billable quantity for seat multiples, and sync hidden selling unit + mcPersistPlannerCartTarget
+  to the planner total on submit (see mcVertexPlannerSubmitPriceSync).
+    SELECT___PALLISER-VERTEX-THEATER-CHAIR___49: always 750 (1 seat, baseline; avoids double-count with QTY).
+    SELECT___PALLISER-VERTEX-THEATER-CHAIR___2: 115 straight / 116 curved (no 760/761 loveseat row surcharges).
     SELECT___PALLISER-VERTEX-THEATER-CHAIR___4 (leather): never touched.
 -->
 <script>
@@ -5153,7 +5316,7 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
 
   var LOG = "[McCabe VERTEX MAP]";
   var WEDGE_IDS = { "5L":1, "6L":1, "7L":1, "9L":1 };
-  var SEAT_COUNT_VALUES = { 1:"750", 2:"744", 3:"745", 4:"746", 5:"748", 6:"749" };
+  var SEAT_COUNT_NEUTRAL = "750";
 
   function isPdp(){
     if (!document.body) return false;
@@ -5196,40 +5359,7 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
   }
 
   function summarizePayload(payload){
-    var layout = (payload && Array.isArray(payload.layout)) ? payload.layout : [];
-    var opts   = (payload && payload.options && typeof payload.options === "object") ? payload.options : {};
-    var counts = {};
-    if (layout.length) {
-      layout.forEach(function(s){
-        var id = String((s && s.id) || s || "").toUpperCase();
-        if (!id) return;
-        counts[id] = (counts[id] || 0) + 1;
-      });
-    } else {
-      Object.keys(opts).forEach(function(k){
-        var id = String(k).toUpperCase();
-        var n  = Number(opts[k] || 0);
-        if (n > 0) counts[id] = (counts[id] || 0) + n;
-      });
-    }
-    var ids = Object.keys(counts);
-    var fourL = counts["4L"] || 0;
-    var nonFourL = 0;
-    var hasWedge = false;
-    ids.forEach(function(id){
-      if (id === "4L") return;
-      nonFourL += counts[id];
-      if (WEDGE_IDS[id]) hasWedge = true;
-    });
-    var seats;
-    if (payload && payload.seatCount != null && Number(payload.seatCount) > 0) {
-      seats = Number(payload.seatCount);
-    } else {
-      seats = nonFourL + 2 * fourL;
-    }
-    if (seats < 1) seats = 1;
-    if (seats > 6) seats = 6;
-    return { seats: seats, has4L: fourL > 0, isCurved: hasWedge || !!(payload && payload.curved), counts: counts };
+    return mcVertexSummarizePlannerPayload(payload || {});
   }
 
   function writeSelects(payload, tag){
@@ -5241,10 +5371,8 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
     if (!sel49 && !sel02) return;
 
     var s = summarizePayload(payload || {});
-    var seatVal = SEAT_COUNT_VALUES[s.seats] || SEAT_COUNT_VALUES[1];
-    var cfgVal;
-    if (s.has4L) cfgVal = s.isCurved ? "761" : "760";
-    else         cfgVal = s.isCurved ? "116" : "115";
+    var seatVal = SEAT_COUNT_NEUTRAL;
+    var cfgVal = s.isCurved ? "116" : "115";
 
     var ok49 = setSelectValue(sel49, seatVal);
     var ok02 = setSelectValue(sel02, cfgVal);
@@ -5298,9 +5426,12 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
     var form = ev.target;
     if (!form || form.tagName !== "FORM") return;
     if (!form.querySelector('input[name="ProductCode"], input#ProductCode')) return;
-    try { writeSelects(window.__mcLastPlannerPayload || {}, "before-submit"); }
+    var payload = window.__mcLastPlannerPayload || {};
+    try { writeSelects(payload, "before-submit"); }
     catch (e) { console.warn(LOG, "submit-wrap", e); }
-    try { mcSyncPlannerFormForSubmit(window.__mcLastPlannerPayload || {}, 0); } catch (eSyncSubmit) {}
+    try { mcVertexPlannerSubmitPriceSync(form, payload); } catch (eVtx) { console.warn(LOG, "vertex-price-sync", eVtx); }
+    var exp = mcPlannerExpectedCartTotalFromPayload(payload);
+    try { mcSyncPlannerFormForSubmit(payload, exp); } catch (eSyncSubmit) {}
   }, true);
 })();
 </script>
