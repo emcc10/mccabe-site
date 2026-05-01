@@ -3248,17 +3248,7 @@ boot();
   }
 
   function mcReorderInlineConfigBeforeCartQty() {
-    var panel = document.getElementById("mc-inline-config");
-    if (!panel || !panel.parentNode) return;
-    var root = document.getElementById("v65-product-parent") || document.getElementById("content_area");
-    if (!root) return;
-    var anchor = mcFindPdpCartQtyAnchor(root);
-    if (!anchor || !anchor.parentNode) return;
-    if (anchor.contains(panel) || panel.contains(anchor)) return;
-    if (anchor.previousElementSibling === panel) return;
-    try {
-      anchor.parentNode.insertBefore(panel, anchor);
-    } catch (eOrd) {}
+    return;
   }
   function mcIsProductDetailPage() {
     try {
@@ -3429,7 +3419,7 @@ boot();
       [100, 250, 500, 900, 1600, 2400, 3600, 5200].forEach(function (ms) {
         setTimeout(function () {
           mcRelocateMcInlineConfigToOptionsColumn();
-          mcReorderInlineConfigBeforeCartQty();
+          /* mcReorderInlineConfigBeforeCartQty(); — disabled: was moving #mc-inline-config before qty after refresh */
         }, ms);
       });
     } catch (eRelSched) {}
