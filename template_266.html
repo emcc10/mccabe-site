@@ -5078,11 +5078,16 @@ function mcVertexPlannerSubmitPriceSync(form, payload) {
   }
   var expectedCartTotal = mcPlannerExpectedCartTotalFromPayload(p);
   var calc = window.mccabeRoomPlannerPriceCalc;
-  if (calc && calc.total > 0) {
+  if (!(expectedCartTotal > 0) && calc && calc.total > 0) {
     expectedCartTotal = Number(calc.total);
-    if (calc.unitPrice > 0) unitPrice = Number(calc.unitPrice);
   }
+  if (calc && calc.unitPrice > 0) unitPrice = Number(calc.unitPrice);
   if (!(expectedCartTotal > 0)) return;
+  try {
+    if (window.__mcLastPlannerPayload && typeof window.__mcLastPlannerPayload === "object") {
+      window.__mcLastPlannerPayload.configurationTotal = expectedCartTotal;
+    }
+  } catch (ePl) {}
   mcVertexSetFormQuantityForPlanner(form, effectiveSeats);
   mcVertexSetHiddenSellingUnitForLineTotal(form, expectedCartTotal, effectiveSeats);
   console.log("MC CART PRICE SYNC", {
