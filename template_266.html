@@ -17036,6 +17036,55 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
+<script id="mc-remove-stray-qty-text-only">
+(function () {
+  function removeStrayQuantityOnly() {
+    var root = document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
+    var finalRow = document.querySelector("#mc-surgical-qty-row, #mc-final-qty-row");
+
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    var nodes = [];
+
+    while (walker.nextNode()) {
+      nodes.push(walker.currentNode);
+    }
+
+    nodes.forEach(function (node) {
+      if (finalRow && finalRow.contains(node.parentNode)) return;
+
+      var txt = String(node.nodeValue || "").replace(/\s+/g, " ").trim().toLowerCase();
+
+      if (txt === "quantity:" || txt === "quantity") {
+        node.nodeValue = "";
+      }
+    });
+
+    Array.from(root.querySelectorAll("label, span, div, p")).forEach(function (el) {
+      if (finalRow && finalRow.contains(el)) return;
+      if (el.querySelector("input, button, a, select, textarea, #mc-inline-config")) return;
+
+      var txt = String(el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+
+      if (txt === "quantity:" || txt === "quantity") {
+        el.style.setProperty("display", "none", "important");
+        el.setAttribute("aria-hidden", "true");
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", removeStrayQuantityOnly);
+  } else {
+    removeStrayQuantityOnly();
+  }
+
+  window.addEventListener("load", function () {
+    removeStrayQuantityOnly();
+    setTimeout(removeStrayQuantityOnly, 300);
+    setTimeout(removeStrayQuantityOnly, 900);
+  });
+})();
+</script>
 
 </body>
 </html>
