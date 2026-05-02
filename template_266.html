@@ -17420,5 +17420,162 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
+<style id="mc-final-search-hero-hide-and-size">
+  /* Kill old homepage hero search overlay */
+  #mcHeroSearchOverlay,
+  #mcHeroSearchOverlay *,
+  .mc-hero-search-overlay,
+  .mc-hero-search-overlay * {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+  }
+
+  /* Beat mc-header-search-critical: higher-specificity overlay children */
+  #mcHeroSearchOverlay .header__section--middle,
+  #mcHeroSearchOverlay .mc-header-search-below-nav,
+  #mcHeroSearchOverlay .collapsing-search,
+  #mcHeroSearchOverlay #collapsingSearch,
+  #mcHeroSearchOverlay .collapsing-search__form,
+  #mcHeroSearchOverlay .collapsing-search__form .container,
+  #mcHeroSearchOverlay .collapsing-search__form .row,
+  html.mc-search-open #mcHeroSearchOverlay .collapsing-search__form .row,
+  body.mc-search-open #mcHeroSearchOverlay .collapsing-search__form .row,
+  #mcHeroSearchOverlay .collapsing-search:focus-within .collapsing-search__form .row {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+  }
+
+  .mc-hero-search-overlay .header__section--middle,
+  .mc-hero-search-overlay .mc-header-search-below-nav,
+  .mc-hero-search-overlay .collapsing-search,
+  .mc-hero-search-overlay #collapsingSearch,
+  .mc-hero-search-overlay .collapsing-search__form,
+  .mc-hero-search-overlay .collapsing-search__form .container,
+  .mc-hero-search-overlay .collapsing-search__form .row {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+  }
+
+  /* Remove any old search line/label in header by default */
+  header.header .mc-header-search-cart-wrap,
+  header.header .mc-header-search-below-nav,
+  header.header .header__section--middle,
+  header.header .collapsing-search,
+  header.header #collapsingSearch,
+  header.header .collapsing-search__form,
+  header.header .collapsing-search__form .container,
+  header.header .collapsing-search__form .row {
+    border: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+  }
+
+  header.header .mc-header-search-cart-wrap label,
+  header.header .mc-header-search-cart-wrap .collapsing-search__label,
+  header.header .mc-header-search-cart-wrap .search-label {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+
+  @media (min-width: 992px) {
+    /* Larger opened floating search panel */
+    html.mc-search-open header.header .mc-header-search-cart-wrap,
+    body.mc-search-open header.header .mc-header-search-cart-wrap {
+      display: flex !important;
+      position: fixed !important;
+      top: 72px !important;
+      right: 140px !important;
+      left: auto !important;
+      width: 420px !important;
+      max-width: calc(100vw - 180px) !important;
+      min-height: 64px !important;
+      height: auto !important;
+      padding: 14px 18px !important;
+      background: #fff !important;
+      border: 0 !important;
+      border-radius: 4px !important;
+      box-shadow: 0 10px 34px rgba(0,0,0,.16) !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 10px !important;
+      z-index: 10075 !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      box-sizing: border-box !important;
+    }
+
+    html.mc-search-open header.header .mc-header-search-cart-wrap #search,
+    html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__input,
+    body.mc-search-open header.header .mc-header-search-cart-wrap #search,
+    body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__input {
+      display: inline-block !important;
+      width: 360px !important;
+      max-width: 100% !important;
+      height: 42px !important;
+      min-height: 42px !important;
+      padding: 0 12px !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      border: 0 !important;
+      border-bottom: 1px solid #999 !important;
+      background: #fff !important;
+      box-shadow: none !important;
+      font-family: Inter, Arial, sans-serif !important;
+      font-size: 15px !important;
+      font-weight: 300 !important;
+      letter-spacing: .04em !important;
+      color: #111 !important;
+      outline: none !important;
+      box-sizing: border-box !important;
+    }
+
+    html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__submit,
+    body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__submit {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 42px !important;
+      height: 42px !important;
+      min-width: 42px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+    }
+  }
+</style>
 </body>
 </html>
