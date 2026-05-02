@@ -609,7 +609,7 @@
     body.mc-search-open #mcHeroSearchOverlay .collapsing-search__form .row,
     #mcHeroSearchOverlay .collapsing-search:focus-within .collapsing-search__form .row {
       border-bottom-color: rgba(255, 255, 255, 0.92) !important;
-      border-bottom-width: 2px !important;
+      border-bottom-width: 0px !important;
     }
     @media (min-width: 992px) {
       body:not(.is-home) header.header .mc-header-desktop-bar[data-mc-header-bar],
@@ -726,7 +726,7 @@
         height: auto !important;
         padding: 6px 8px !important;
         border: 0 !important;
-        border-bottom: 1px solid #bdbdbd !important;
+        border-bottom: 0px solid #bdbdbd !important;
         box-sizing: border-box !important;
       }
       html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__submit {
@@ -867,34 +867,60 @@ document.addEventListener("DOMContentLoaded", function () {
   </style>
 <script id="mc-search-float-toggle">
 (function () {
-  function getSearchWrap() {
-    return document.querySelector("header.header .mc-header-search-cart-wrap");
+  function ensureSearchIsInHeader() {
+    var header = document.querySelector("header.header");
+    var bar = header && header.querySelector(".mc-header-desktop-bar");
+    var wrap = header && header.querySelector(".mc-header-search-cart-wrap");
+    var hero = document.getElementById("mcHeroSearchOverlay");
+
+    if (!header || !bar || !wrap) return null;
+
+    if (hero && hero.contains(wrap)) {
+      bar.appendChild(wrap);
+    }
+
+    return wrap;
   }
 
   function getSearchInput() {
-    var wrap = getSearchWrap();
+    var wrap = ensureSearchIsInHeader();
     return (
-      (wrap && (
+      wrap &&
+      (
         wrap.querySelector("#search") ||
         wrap.querySelector(".collapsing-search__input") ||
         wrap.querySelector('input[type="search"]') ||
         wrap.querySelector('input[type="text"]')
-      )) ||
-      document.getElementById("search")
+      )
     );
   }
 
   function openSearch() {
+    var wrap = ensureSearchIsInHeader();
+    var input = getSearchInput();
+
     document.documentElement.classList.add("mc-search-open");
     if (document.body) document.body.classList.add("mc-search-open");
 
-    var wrap = getSearchWrap();
-    var input = getSearchInput();
-
     if (wrap) {
       wrap.style.setProperty("display", "flex", "important");
-      wrap.style.setProperty("visibility", "visible", "important");
+      wrap.style.setProperty("position", "fixed", "important");
+      wrap.style.setProperty("top", "52px", "important");
+      wrap.style.setProperty("right", "140px", "important");
+      wrap.style.setProperty("width", "460px", "important");
+      wrap.style.setProperty("max-width", "calc(100vw - 180px)", "important");
+      wrap.style.setProperty("min-height", "64px", "important");
+      wrap.style.setProperty("padding", "14px 18px", "important");
+      wrap.style.setProperty("background", "#fff", "important");
+      wrap.style.setProperty("border", "0", "important");
+      wrap.style.setProperty("box-shadow", "0 10px 34px rgba(0,0,0,.16)", "important");
+      wrap.style.setProperty("border-radius", "4px", "important");
+      wrap.style.setProperty("align-items", "center", "important");
+      wrap.style.setProperty("justify-content", "center", "important");
+      wrap.style.setProperty("gap", "10px", "important");
+      wrap.style.setProperty("z-index", "10075", "important");
       wrap.style.setProperty("opacity", "1", "important");
+      wrap.style.setProperty("visibility", "visible", "important");
       wrap.style.setProperty("pointer-events", "auto", "important");
     }
 
@@ -902,8 +928,15 @@ document.addEventListener("DOMContentLoaded", function () {
       input.style.setProperty("display", "inline-block", "important");
       input.style.setProperty("visibility", "visible", "important");
       input.style.setProperty("opacity", "1", "important");
-      input.style.setProperty("width", "200px", "important");
-      input.style.setProperty("max-width", "200px", "important");
+      input.style.setProperty("width", "380px", "important");
+      input.style.setProperty("max-width", "100%", "important");
+      input.style.setProperty("height", "42px", "important");
+      input.style.setProperty("padding", "0 12px", "important");
+      input.style.setProperty("border", "0", "important");
+      input.style.setProperty("border-bottom", "1px solid #999", "important");
+      input.style.setProperty("box-shadow", "none", "important");
+      input.style.setProperty("outline", "none", "important");
+      input.style.setProperty("background", "#fff", "important");
 
       setTimeout(function () {
         try { input.focus(); } catch (e) {}
@@ -921,25 +954,23 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function toggleSearch(e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (document.documentElement.classList.contains("mc-search-open")) {
-      closeSearch();
-    } else {
-      openSearch();
-    }
-  }
-
   document.addEventListener("click", function (e) {
     var btn = e.target.closest(".mc-search-float");
+
     if (btn) {
-      toggleSearch(e);
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (document.documentElement.classList.contains("mc-search-open")) {
+        closeSearch();
+      } else {
+        openSearch();
+      }
+
       return;
     }
 
-    var wrap = getSearchWrap();
+    var wrap = ensureSearchIsInHeader();
 
     if (
       document.documentElement.classList.contains("mc-search-open") &&
@@ -17420,8 +17451,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
-<style id="mc-final-search-hero-hide-and-size">
-  /* Kill old homepage hero search overlay */
+<style id="mc-search-final-position-lines-fix">
   #mcHeroSearchOverlay,
   #mcHeroSearchOverlay *,
   .mc-hero-search-overlay,
@@ -17440,51 +17470,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     overflow: hidden !important;
   }
 
-  /* Beat mc-header-search-critical: higher-specificity overlay children */
-  #mcHeroSearchOverlay .header__section--middle,
-  #mcHeroSearchOverlay .mc-header-search-below-nav,
-  #mcHeroSearchOverlay .collapsing-search,
-  #mcHeroSearchOverlay #collapsingSearch,
-  #mcHeroSearchOverlay .collapsing-search__form,
-  #mcHeroSearchOverlay .collapsing-search__form .container,
-  #mcHeroSearchOverlay .collapsing-search__form .row,
-  html.mc-search-open #mcHeroSearchOverlay .collapsing-search__form .row,
-  body.mc-search-open #mcHeroSearchOverlay .collapsing-search__form .row,
-  #mcHeroSearchOverlay .collapsing-search:focus-within .collapsing-search__form .row {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    height: 0 !important;
-    max-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-bottom: 0 !important;
-    box-shadow: none !important;
-    pointer-events: none !important;
-    overflow: hidden !important;
-  }
-
-  .mc-hero-search-overlay .header__section--middle,
-  .mc-hero-search-overlay .mc-header-search-below-nav,
-  .mc-hero-search-overlay .collapsing-search,
-  .mc-hero-search-overlay #collapsingSearch,
-  .mc-hero-search-overlay .collapsing-search__form,
-  .mc-hero-search-overlay .collapsing-search__form .container,
-  .mc-hero-search-overlay .collapsing-search__form .row {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    height: 0 !important;
-    max-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    pointer-events: none !important;
-    overflow: hidden !important;
-  }
-
-  /* Remove any old search line/label in header by default */
   header.header .mc-header-search-cart-wrap,
   header.header .mc-header-search-below-nav,
   header.header .header__section--middle,
@@ -17496,6 +17481,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     border: 0 !important;
     border-bottom: 0 !important;
     box-shadow: none !important;
+    background-image: none !important;
   }
 
   header.header .mc-header-search-cart-wrap label,
@@ -17507,21 +17493,21 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   @media (min-width: 992px) {
-    /* Larger opened floating search panel */
     html.mc-search-open header.header .mc-header-search-cart-wrap,
     body.mc-search-open header.header .mc-header-search-cart-wrap {
       display: flex !important;
       position: fixed !important;
-      top: 72px !important;
+      top: 52px !important;
       right: 140px !important;
       left: auto !important;
-      width: 420px !important;
+      width: 460px !important;
       max-width: calc(100vw - 180px) !important;
       min-height: 64px !important;
       height: auto !important;
       padding: 14px 18px !important;
       background: #fff !important;
       border: 0 !important;
+      border-bottom: 0 !important;
       border-radius: 4px !important;
       box-shadow: 0 10px 34px rgba(0,0,0,.16) !important;
       align-items: center !important;
@@ -17534,28 +17520,56 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       box-sizing: border-box !important;
     }
 
+    html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search,
+    html.mc-search-open header.header .mc-header-search-cart-wrap #collapsingSearch,
+    html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__form,
+    html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__form .container,
+    html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__form .row,
+    body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search,
+    body.mc-search-open header.header .mc-header-search-cart-wrap #collapsingSearch,
+    body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__form,
+    body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__form .container,
+    body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__form .row {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: 0 !important;
+      border-bottom: 0 !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      background-image: none !important;
+    }
+
     html.mc-search-open header.header .mc-header-search-cart-wrap #search,
     html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__input,
     body.mc-search-open header.header .mc-header-search-cart-wrap #search,
     body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__input {
       display: inline-block !important;
-      width: 360px !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      width: 380px !important;
       max-width: 100% !important;
       height: 42px !important;
       min-height: 42px !important;
       padding: 0 12px !important;
-      opacity: 1 !important;
-      visibility: visible !important;
+      margin: 0 !important;
       border: 0 !important;
       border-bottom: 1px solid #999 !important;
-      background: #fff !important;
       box-shadow: none !important;
+      outline: none !important;
+      background: #fff !important;
+      background-image: none !important;
       font-family: Inter, Arial, sans-serif !important;
       font-size: 15px !important;
       font-weight: 300 !important;
       letter-spacing: .04em !important;
       color: #111 !important;
-      outline: none !important;
       box-sizing: border-box !important;
     }
 
@@ -17570,7 +17584,9 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       padding: 0 !important;
       margin: 0 !important;
       border: 0 !important;
+      border-bottom: 0 !important;
       background: transparent !important;
+      box-shadow: none !important;
       opacity: 1 !important;
       visibility: visible !important;
       pointer-events: auto !important;
