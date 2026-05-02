@@ -17189,10 +17189,10 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       row.id = "mc-surgical-qty-row";
     }
 
-    row.innerHTML = "";
+    row.innerHTML = "quantity:";
 
     var label = document.createElement("label");
-    label.textContent = "Quantity:";
+    label.textContent = "";
 
     if (!qty.id) qty.id = "mc-real-product-qty";
     label.setAttribute("for", qty.id);
@@ -17264,6 +17264,108 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
+<style id="mc-hide-all-quantity-final">
+  body.productdetails input.v65-productdetail-cartqty,
+  body.productdetails input[name^="QTY."],
+  body.productdetails input[name="QTY"],
+  body.productdetails input[name="Qty"],
+  body.productdetails input[name="qty"],
+  body.productdetails #mc-surgical-qty-row,
+  body.productdetails #mc-final-qty-row,
+  body.productdetails #mc-simple-final-qty-row {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+</style>
 
+<script id="mc-remove-all-quantity-final">
+(function () {
+  function cleanQuantity() {
+    var root =
+      document.querySelector("#v65-product-parent") ||
+      document.querySelector("#content_area") ||
+      document;
+
+    var qtyInputs = Array.from(root.querySelectorAll(
+      'input.v65-productdetail-cartqty, input[name^="QTY."], input[name="QTY"], input[name="Qty"], input[name="qty"]'
+    ));
+
+    qtyInputs.forEach(function (input) {
+      input.value = "1";
+      input.style.setProperty("display", "none", "important");
+      input.style.setProperty("visibility", "hidden", "important");
+      input.style.setProperty("opacity", "0", "important");
+      input.style.setProperty("height", "0", "important");
+      input.style.setProperty("width", "0", "important");
+
+      var parent = input.parentElement;
+      if (parent && parent.id && /qty|quantity/i.test(parent.id)) {
+        parent.style.setProperty("display", "none", "important");
+      }
+    });
+
+    Array.from(root.querySelectorAll("#mc-surgical-qty-row, #mc-final-qty-row, #mc-simple-final-qty-row")).forEach(function (el) {
+      el.style.setProperty("display", "none", "important");
+      el.style.setProperty("visibility", "hidden", "important");
+      el.style.setProperty("height", "0", "important");
+      el.style.setProperty("margin", "0", "important");
+      el.style.setProperty("padding", "0", "important");
+    });
+
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    var nodes = [];
+
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    nodes.forEach(function (node) {
+      var txt = String(node.nodeValue || "")
+        .replace(/[\u200b\uFEFF]/g, "")
+        .replace(/\u00a0/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+
+      if (txt === "quantity:" || txt === "quantity" || txt === "qty:" || txt === "qty") {
+        node.nodeValue = "";
+      }
+    });
+
+    Array.from(root.querySelectorAll("label, span, div, p, td")).forEach(function (el) {
+      if (el.querySelector("input, button, a, select, textarea, #mc-inline-config")) return;
+
+      var txt = String(el.textContent || "")
+        .replace(/[\u200b\uFEFF]/g, "")
+        .replace(/\u00a0/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+
+      if (txt === "quantity:" || txt === "quantity" || txt === "qty:" || txt === "qty") {
+        el.style.setProperty("display", "none", "important");
+        el.setAttribute("aria-hidden", "true");
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", cleanQuantity);
+  } else {
+    cleanQuantity();
+  }
+
+  window.addEventListener("load", function () {
+    cleanQuantity();
+    setTimeout(cleanQuantity, 250);
+    setTimeout(cleanQuantity, 750);
+    setTimeout(cleanQuantity, 1500);
+  });
+})();
+</script>
 </body>
 </html>
