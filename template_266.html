@@ -867,40 +867,93 @@ document.addEventListener("DOMContentLoaded", function () {
   </style>
 <script id="mc-search-float-toggle">
 (function () {
-  function searchInputEl() {
-    var wrap = document.querySelector("header.header .mc-header-search-cart-wrap");
-    var inWrap =
-      wrap &&
-      (wrap.querySelector("#search") ||
+  function getSearchWrap() {
+    return document.querySelector("header.header .mc-header-search-cart-wrap");
+  }
+
+  function getSearchInput() {
+    var wrap = getSearchWrap();
+    return (
+      (wrap && (
+        wrap.querySelector("#search") ||
+        wrap.querySelector(".collapsing-search__input") ||
         wrap.querySelector('input[type="search"]') ||
-        wrap.querySelector('input[type="text"]'));
-    return inWrap || document.querySelector("header.header #search") || document.getElementById("search");
+        wrap.querySelector('input[type="text"]')
+      )) ||
+      document.getElementById("search")
+    );
   }
-  function bind() {
-    var btn = document.querySelector(".mc-search-float");
-    if (!btn || btn.getAttribute("data-mc-sbound") === "1") return;
-    btn.setAttribute("data-mc-sbound", "1");
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      var input = searchInputEl();
-      var on = document.documentElement.classList.toggle("mc-search-open");
-      if (document.body) {
-        if (on) document.body.classList.add("mc-search-open");
-        else document.body.classList.remove("mc-search-open");
-      } else if (!on) document.documentElement.classList.remove("mc-search-open");
-      if (input && on) {
-        try {
-          input.focus();
-        } catch (err) {}
-      } else if (input) {
-        try {
-          input.blur();
-        } catch (errB) {}
-      }
-    });
+
+  function openSearch() {
+    document.documentElement.classList.add("mc-search-open");
+    if (document.body) document.body.classList.add("mc-search-open");
+
+    var wrap = getSearchWrap();
+    var input = getSearchInput();
+
+    if (wrap) {
+      wrap.style.setProperty("display", "flex", "important");
+      wrap.style.setProperty("visibility", "visible", "important");
+      wrap.style.setProperty("opacity", "1", "important");
+      wrap.style.setProperty("pointer-events", "auto", "important");
+    }
+
+    if (input) {
+      input.style.setProperty("display", "inline-block", "important");
+      input.style.setProperty("visibility", "visible", "important");
+      input.style.setProperty("opacity", "1", "important");
+      input.style.setProperty("width", "200px", "important");
+      input.style.setProperty("max-width", "200px", "important");
+
+      setTimeout(function () {
+        try { input.focus(); } catch (e) {}
+      }, 50);
+    }
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
-  else bind();
+
+  function closeSearch() {
+    document.documentElement.classList.remove("mc-search-open");
+    if (document.body) document.body.classList.remove("mc-search-open");
+
+    var input = getSearchInput();
+    if (input) {
+      try { input.blur(); } catch (e) {}
+    }
+  }
+
+  function toggleSearch(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (document.documentElement.classList.contains("mc-search-open")) {
+      closeSearch();
+    } else {
+      openSearch();
+    }
+  }
+
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest(".mc-search-float");
+    if (btn) {
+      toggleSearch(e);
+      return;
+    }
+
+    var wrap = getSearchWrap();
+
+    if (
+      document.documentElement.classList.contains("mc-search-open") &&
+      wrap &&
+      !wrap.contains(e.target) &&
+      !e.target.closest(".mc-search-float")
+    ) {
+      closeSearch();
+    }
+  }, true);
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeSearch();
+  });
 })();
 </script>
   <!-- Hero headline: IDs + head CSS + sync script — Volusion often strips p/class/style; this must win -->
