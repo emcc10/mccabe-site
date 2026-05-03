@@ -3993,28 +3993,55 @@ function mcPlannerUserIsLoggedIn() {
   return !!(document.body && document.body.classList.contains("mc-member-logged-in"));
 }
 
-function mcIsParagonPdp() {
-  var pc = String(((document.querySelector('input[name="ProductCode"], input[name="productcode"]') || {}).value || "")).toLowerCase();
-  var title = String(document.title || document.body.innerText || "").toLowerCase();
-  var path = String(location.pathname || "").toLowerCase();
-  return /paragon/.test(pc + " " + title + " " + path);
-}
+function mcReadCurrentVisibleMemberUnitPrice() {
+  var root =
+    document.querySelector("#v65-product-parent") ||
+    document.querySelector("#content_area") ||
+    document;
 
-function mcHardPlannerUnitPrice() {
-  if (mcIsParagonPdp()) return 1899;
-  var st = window.__mcMemberPricing || {};
-  return (
-    Number(window.__MC_MEMBER_SEAT_PRICE) ||
-    Number(window.__mcPerSeatMemberPrice) ||
-    Number(window.__mcMemberSeatPrice) ||
-    Number(st.memberSeatPrice) ||
-    Number(st.memberPrice) ||
-    0
-  );
+  var candidates = [];
+
+  [
+    ".mc-member-price-caption",
+    ".mc-member-price",
+    "[data-mc-member-price]",
+    "#mcMemberPrice",
+    "#mcMemberPriceValue",
+    ".colors_pricebox",
+    "#priceWithOptions",
+    "[itemprop='price']"
+  ].forEach(function (sel) {
+    try {
+      root.querySelectorAll(sel).forEach(function (el) {
+        var txt =
+          (el.getAttribute && (el.getAttribute("content") || el.getAttribute("data-mc-member-price") || el.getAttribute("value"))) ||
+          el.textContent ||
+          "";
+        var matches = String(txt).match(/\$[\d,]+(?:\.\d{2})?/g) || [];
+        matches.forEach(function (m) {
+          var n = parseMcCurrency(m);
+          if (n > 0) candidates.push(n);
+        });
+      });
+    } catch (e) {}
+  });
+
+  // Prefer the visible logged-in member/sale price, not list price.
+  // Usually member price is the lower visible price above $0.
+  candidates = candidates
+    .filter(function (n) {
+      return n > 0;
+    })
+    .sort(function (a, b) {
+      return a - b;
+    });
+
+  if (candidates.length) return candidates[0];
+
+  return 0;
 }
 if (typeof window !== "undefined") {
-  window.mcIsParagonPdp = mcIsParagonPdp;
-  window.mcHardPlannerUnitPrice = mcHardPlannerUnitPrice;
+  window.mcReadCurrentVisibleMemberUnitPrice = mcReadCurrentVisibleMemberUnitPrice;
 }
 
 function mcReadMetaMemberSeatPriceForPlanner() {
@@ -4054,12 +4081,12 @@ function mcMemberPriceReadyForPlanner() {
 }
 
 /**
- * PDP planner unit: member sources first; defer Volusion hidden MAP/sale pipeline while member pricing is pending (avoids $1,399 flash).
+ * PDP planner unit: visible member price first; other fallbacks only when no visible price.
  */
 function mcGetCorrectPlannerUnitPrice() {
-  if (typeof mcHardPlannerUnitPrice === "function") {
-    var hardU = mcHardPlannerUnitPrice();
-    if (hardU > 0) return hardU;
+  if (typeof mcReadCurrentVisibleMemberUnitPrice === "function") {
+    var visU = mcReadCurrentVisibleMemberUnitPrice();
+    if (visU > 0) return visU;
   }
   var st = window.__mcMemberPricing || {};
   var loggedIn = typeof mcPlannerUserIsLoggedIn === "function" && mcPlannerUserIsLoggedIn();
@@ -4099,7 +4126,7 @@ function mcGetCorrectPlannerUnitPrice() {
     if (pending) return 0;
   }
 
-  if (typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
+  if (!loggedIn && typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
     return mcGetPlannerPerSeatUnitFromVolusion(document);
   }
   return 0;
@@ -4820,13 +4847,10 @@ function detectMemberPricingState(){
     refreshPlannerPriceForMemberState();
     try {
       console.log("MC FINAL PRICE CHECK", {
-        memberSeat: getMemberPlannerSeatPriceForCalc(),
-        baseSeat: getPlannerBaseSeatPriceForCalc(),
+        visibleMemberUnit: mcReadCurrentVisibleMemberUnitPrice(),
+        plannerUnit: getPlannerBaseSeatPriceForCalc(),
         mcPerSeatPrice: window.__mcPerSeatPrice,
         memberPricing: window.__mcMemberPricing,
-        hiddenFormPrice: typeof mcReadVolusionProductFormSellingUnit === "function"
-          ? mcReadVolusionProductFormSellingUnit(mcFindProductDetailsForm(document))
-          : null,
         payload: window.__mcLastPlannerPayload
       });
     } catch (eFinal) {}
@@ -4865,14 +4889,16 @@ window.getMcDisplayedSeatPrice = getDisplayedPublicSeatPrice;
 window.getVolusionAddToCartSeatPrice = getVolusionAddToCartSeatPrice;
 /* tryReadHowToGetSalePrice + extractHowToGetSalePriceFromScripts: assigned on window right after define (above) */
 function getMemberPlannerSeatPriceForCalc(){
-  return mcHardPlannerUnitPrice();
+  return getPlannerBaseSeatPriceForCalc();
 }
-function getPlannerBaseSeatPriceForCalc(){
-  var unit = mcHardPlannerUnitPrice();
-  if (unit > 0) {
-    window.__mcPerSeatPrice = unit;
-    return unit;
+function getPlannerBaseSeatPriceForCalc() {
+  var member = mcReadCurrentVisibleMemberUnitPrice();
+
+  if (member > 0) {
+    window.__mcPerSeatPrice = member;
+    return member;
   }
+
   return 0;
 }
 function ensurePriceWithOptionsLabel(scope){
@@ -4908,29 +4934,36 @@ function ensurePriceWithOptionsLabel(scope){
 /**
  * Per-seat math for planner counts. Pass seatPrice explicitly (public or member per-seat).
  */
-function calculatePlannerPrice(counts, seatPrice){
-  seatPrice = Number(seatPrice) || mcHardPlannerUnitPrice();
+function calculatePlannerPrice(counts, seatPrice) {
+  seatPrice = Number(seatPrice) || getPlannerBaseSeatPriceForCalc();
 
   if (!(seatPrice > 0)) return 0;
   if (!counts || typeof counts !== "object") return 0;
 
   var total = 0;
-  Object.keys(counts).forEach(function(id){
+
+  Object.keys(counts).forEach(function (id) {
     var qty = Number(counts[id] || 0);
     if (!qty) return;
 
-    if (id === "4L") total += qty * (2 * seatPrice);
-    else total += qty * seatPrice;
+    id = String(id).toUpperCase();
+
+    if (id === "4L") {
+      total += qty * 2 * seatPrice;
+    } else {
+      total += qty * seatPrice;
+    }
   });
 
   return total;
 }
 /**
- * Planner configuration line total from hard planner unit only (no Volusion / __mcPerSeatPrice / payload).
+ * Planner configuration total from visible member unit and piece counts (4L = 2 billable seats); no JS discounts.
  */
-function mcComputePlannerConfigurationTotal(counts){
-  var unit = mcHardPlannerUnitPrice();
+function mcComputePlannerConfigurationTotal(counts) {
+  var unit = getPlannerBaseSeatPriceForCalc();
   if (!(unit > 0)) return 0;
+
   return Number(calculatePlannerPrice(counts, unit)) || 0;
 }
 if (typeof window !== "undefined") {
@@ -5028,7 +5061,7 @@ window.applyPlannerToPage = function (payload) {
     delete payload.unitPrice;
   } catch (eCleanPayload) {}
 
-  window.__mcPerSeatPrice = mcHardPlannerUnitPrice();
+  getPlannerBaseSeatPriceForCalc();
 
   try {
     window.__mcApplyingPlannerToPage = true;
@@ -5173,13 +5206,13 @@ window.applyPlannerToPage = function (payload) {
       Object.keys(configOpts).forEach(function (_pk) {
         _phys += Number(configOpts[_pk] || 0);
       });
-      var _unitForCalc = mcHardPlannerUnitPrice();
+      var _unitForCalc = getPlannerBaseSeatPriceForCalc();
       window.mccabeRoomPlannerPriceCalc = {
         unitPrice: _unitForCalc,
         physicalPieces: _phys,
         effectiveSeats: seatCount,
         fourLCount: _fourLc,
-        discount: _fourLc * 500,
+        discount: 0,
         total: lineTotal > 0 ? lineTotal : 0
       };
     }
@@ -5224,9 +5257,9 @@ window.applyPlannerToPage = function (payload) {
     mcApplyPlannerAtcDisabledState(false);
   }
   mcRunParagonPriceSourceDebug();
-  console.log("MC PARAGON PRICE LOCK", {
-    isParagon: mcIsParagonPdp(),
-    hardUnit: mcHardPlannerUnitPrice(),
+  console.log("MC PRICE FINAL SOURCE", {
+    visibleMemberUnit: mcReadCurrentVisibleMemberUnitPrice(),
+    plannerUnit: getPlannerBaseSeatPriceForCalc(),
     mcPerSeatPrice: window.__mcPerSeatPrice,
     counts: window.__mcPlannerCounts,
     total: window.mccabeRoomPlannerPriceCalc && window.mccabeRoomPlannerPriceCalc.total
@@ -5287,7 +5320,6 @@ function mcPersistPlannerCartTarget(payload, explicitTotal) {
       ((document.querySelector('input[name=\"ProductCode\"]') || {}).value || "")
   ).trim();
   var total = Number(explicitTotal || 0);
-  if (!(total > 0)) total = Number(p.configurationTotal || 0);
   if (!(total > 0) && typeof mcComputePlannerConfigurationTotal === "function") {
     total = Number(mcComputePlannerConfigurationTotal(p.options || {})) || 0;
   }
@@ -5352,8 +5384,7 @@ function mcSyncSeatCountSelectFallback(form, seatCount) {
   }
 }
 
-var MC_VERTEX_THEATER_FOUR_L_DISCOUNT = 500;
-/** Volusion option value for Armless Loveseat (-$500); Peridon / cart discount row. */
+/** Volusion option value for armless loveseat configuration; pricing from backend options only. */
 var MC_ARMLESS_LOVESEAT_OPTION_CODE = "855";
 
 function mcSelectOptionByExactValue(select, value) {
@@ -5492,20 +5523,16 @@ function mcPlannerExpectedCartTotalFromPayload(payload) {
 
   var s = mcVertexSummarizePlannerPayload(p);
   var effectiveSeats = s.seats;
-  var fourLCount = s.fourLCount || 0;
 
   var unit = Number(calc.unitPrice) || 0;
 
-  if (!(unit > 0) && typeof mcHardPlannerUnitPrice === "function") {
-    unit = mcHardPlannerUnitPrice();
-  }
   if (!(unit > 0) && typeof getPlannerBaseSeatPriceForCalc === "function") {
     unit = getPlannerBaseSeatPriceForCalc();
   }
 
   if (!(unit > 0)) return 0;
 
-  var t = unit * effectiveSeats - MC_VERTEX_THEATER_FOUR_L_DISCOUNT * fourLCount;
+  var t = unit * effectiveSeats;
   return t > 0 ? t : 0;
 }
 
@@ -5524,40 +5551,9 @@ function mcVertexCollectPlannerSelectDebug(form) {
 }
 
 function mcVertexSetHiddenSellingUnitForLineTotal(form, lineTotal, qty) {
-  if (!(lineTotal > 0) || !(qty > 0) || !form) return;
-  var per = (lineTotal / qty).toFixed(2);
-  var names = [
-    "SellingPrice", "sellingprice", "ActualPrice", "actualprice", "HiddenPrice", "hiddenprice",
-    "SalePrice", "saleprice", "AddToCartPrice", "addtocartprice", "SoftAddPrice", "CartPrice", "ProductPrice"
-  ];
-  var ni;
-  for (ni = 0; ni < names.length; ni++) {
-    var inp = form.querySelector('input[type="hidden"][name="' + names[ni] + '"]');
-    if (!inp) continue;
-    try {
-      inp.value = per;
-    } catch (eH) {}
-  }
+  return;
 }
 
-function mcVertexScrubStale1399HiddenPrices(form, wantPerUnitStr) {
-  if (!form || !wantPerUnitStr) return;
-  try {
-    var nodes = form.querySelectorAll('input[type="hidden"]');
-    var i;
-    for (i = 0; i < nodes.length; i++) {
-      var inp = nodes[i];
-      var nm = ((inp.name || "") + " " + (inp.id || "")).toLowerCase();
-      if (!/price|sell|cost|amount|value|cart|unit|total/i.test(nm)) continue;
-      if (/productcode|qty|quantity|option|fee|ship|tax|weight/i.test(nm)) continue;
-      var n = parseFloat(String(inp.value || "").replace(/,/g, ""));
-      if (!(n > 0)) continue;
-      if (Math.abs(n - 1399) < 0.02 || Math.abs(n - 1399 * 4) < 0.02) {
-        inp.value = wantPerUnitStr;
-      }
-    }
-  } catch (eS) {}
-}
 
 function mcVertexSetFormQuantityForPlanner(form, qty) {
   if (!(qty > 0) || !form) return;
@@ -5616,11 +5612,6 @@ function mcVertexPlannerSubmitPriceSync(form, payload) {
 
   mcVertexSetFormQuantityForPlanner(form, effectiveSeats);
 
-  // This must write 1899 for the Paragon example, not 1399.
-  mcVertexSetHiddenSellingUnitForLineTotal(form, expectedCartTotal, effectiveSeats);
-
-  mcVertexScrubStale1399HiddenPrices(form, derivedUnit.toFixed(2));
-
   console.log("MC CART PRICE SYNC", {
     source: "window.mccabeRoomPlannerPriceCalc",
     unitPriceFromCalc: unitPrice,
@@ -5674,7 +5665,6 @@ function mcSyncPlannerFormForSubmit(payload, explicitTotal) {
   }
 
   var total = Number(explicitTotal || 0);
-  if (!(total > 0)) total = Number(p.configurationTotal || 0);
   if (!(total > 0) && mcVertexTheaterFormHasPlannerSelects(form)) {
     total = mcPlannerExpectedCartTotalFromPayload(p);
   }
@@ -10737,10 +10727,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }
 
     if (state.unlocked && window.__mcPlannerConfigApplied && window.__mcPlannerCounts) {
-      if (typeof mcHardPlannerUnitPrice === "function") {
-        var hardCap = mcHardPlannerUnitPrice();
-        if (hardCap > 0) memberDisplayPrice = hardCap;
-      }
+      var visCap = typeof mcReadCurrentVisibleMemberUnitPrice === "function" ? mcReadCurrentVisibleMemberUnitPrice() : 0;
+      if (visCap > 0) memberDisplayPrice = visCap;
     }
     if (state.unlocked && memberDisplayPrice > 0) {
       caption.innerHTML =
@@ -12781,7 +12769,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
       } else {
         var cnt = mcCount4LInRow(tr);
         var qty = mcGuessQtyFromRow(tr);
-        discount = cnt > 0 ? (cnt * 500 * qty) : 0;
+        discount = 0;
       }
       if (!(discount > 0) && fallbackDiscount > 0) discount = fallbackDiscount;
       if (!(discount > 0)) return;
@@ -17016,7 +17004,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 <link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260430dom" id="mc-mccabe-overrides-body-last" />
 <script id="mccabe-product-room-planner-price-fix" type="text/plain" data-disabled="true">
 (function () {
-  var FOUR_L_DISCOUNT = 500;
 
   function moneyToNumber(text) {
     if (!text) return 0;
@@ -17296,7 +17283,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 </script>
   <script id="mccabe-room-planner-cart-price-fix" type="text/plain" data-disabled="true">
 (function () {
-  var FOUR_L_DISCOUNT = 500;
 
   function moneyToNumber(text) {
     if (!text) return 0;
