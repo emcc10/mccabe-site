@@ -4674,26 +4674,35 @@ function mcReadVolusionProductFormSellingUnit(form) {
   return 0;
 }
 /**
- * Per-seat unit used to multiply planner piece counts: form hidden prices first, then Volusion sale helpers.
- * Intentionally does not use #priceWithOptions / getDisplayedPublicSeatPrice / getPlannerSeatPrice.
+ * Per-seat unit fallback chain for non–member-guarded callers: member globals/meta first, then hidden form / Volusion helpers.
  */
 function mcGetPlannerPerSeatUnitFromVolusion(root) {
   root = root || document;
-  var form = mcFindProductDetailsForm(root);
-  var fromForm = mcReadVolusionProductFormSellingUnit(form);
-  if (fromForm > 0) return fromForm;
-  var fromVol = getVolusionAddToCartSeatPrice(root);
-  if (fromVol > 0) return fromVol;
-  var hts = tryReadHowToGetSalePrice(0, true);
-  if (hts > 0) return hts;
-  if (typeof window.__MC_MEMBER_SEAT_PRICE === "number" && window.__MC_MEMBER_SEAT_PRICE > 0) {
-    return window.__MC_MEMBER_SEAT_PRICE;
-  }
+
+  var member =
+    Number(window.__MC_MEMBER_SEAT_PRICE) ||
+    Number(window.__mcPerSeatMemberPrice) ||
+    Number(window.__mcMemberSeatPrice) ||
+    0;
+
+  if (member > 0) return member;
+
   var metaLive = document.querySelector('meta[name="mc-member-seat-price"], meta[name="mc-member-price"]');
   if (metaLive && metaLive.getAttribute("content")) {
     var mp = parseMcCurrency(metaLive.getAttribute("content"));
     if (mp > 0) return mp;
   }
+
+  var form = mcFindProductDetailsForm(root);
+  var fromForm = mcReadVolusionProductFormSellingUnit(form);
+  if (fromForm > 0) return fromForm;
+
+  var fromVol = getVolusionAddToCartSeatPrice(root);
+  if (fromVol > 0) return fromVol;
+
+  var hts = tryReadHowToGetSalePrice(0, true);
+  if (hts > 0) return hts;
+
   return 0;
 }
 if (typeof window !== "undefined") {
@@ -5052,14 +5061,19 @@ window.applyPlannerToPage = function (payload) {
     window.__mcApplyingPlannerToPage = true;
   } catch (eFlag) {}
   try {
-    var _loggedInEarly = typeof mcPlannerUserIsLoggedIn === "function" && mcPlannerUserIsLoggedIn();
-  if (
-    !_loggedInEarly &&
-    (window.__mcPerSeatPrice == null || window.__mcPerSeatPrice <= 0)
-  ) {
-    var pu0 = typeof mcGetPlannerPerSeatUnitFromVolusion === "function" ? mcGetPlannerPerSeatUnitFromVolusion(document) : 0;
-    if (pu0 > 0) window.__mcPerSeatPrice = pu0;
-  }
+    if (window.__mcPerSeatPrice == null || window.__mcPerSeatPrice <= 0) {
+      var memberUnit =
+        Number(window.__MC_MEMBER_SEAT_PRICE) ||
+        Number(window.__mcPerSeatMemberPrice) ||
+        Number(window.__mcMemberSeatPrice) ||
+        0;
+
+      if (memberUnit > 0) {
+        window.__mcPerSeatPrice = memberUnit;
+      } else {
+        window.__mcPerSeatPrice = 0;
+      }
+    }
 
   var opts = payload.options && typeof payload.options === "object" ? payload.options : {};
   var layout = payload.layout && Array.isArray(payload.layout) ? payload.layout : [];
@@ -5145,10 +5159,25 @@ window.applyPlannerToPage = function (payload) {
   if (payloadUnit > 0) window.__mcPerSeatPrice = payloadUnit;
 
   var publicSeatPrice = (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) ? window.__mcPerSeatPrice : 0;
-  if (!(publicSeatPrice > 0) && !loggedIn && typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
-    publicSeatPrice = mcGetPlannerPerSeatUnitFromVolusion(document);
-    if (publicSeatPrice > 0) window.__mcPerSeatPrice = publicSeatPrice;
+  if (!(publicSeatPrice > 0)) {
+    publicSeatPrice =
+      Number(window.__MC_MEMBER_SEAT_PRICE) ||
+      Number(window.__mcPerSeatMemberPrice) ||
+      Number(window.__mcMemberSeatPrice) ||
+      0;
   }
+
+  if (!(publicSeatPrice > 0)) {
+    publicSeatPrice = 0;
+  }
+
+  console.log("MC PRICE SOURCE TRACE", {
+    MC_MEMBER_SEAT_PRICE: window.__MC_MEMBER_SEAT_PRICE,
+    mcPerSeatPrice: window.__mcPerSeatPrice,
+    hiddenVolusionUnit: typeof mcGetPlannerPerSeatUnitFromVolusion === "function" ? mcGetPlannerPerSeatUnitFromVolusion(document) : null,
+    formHiddenPrice: typeof mcReadVolusionProductFormSellingUnit === "function" ? mcReadVolusionProductFormSellingUnit(mcFindProductDetailsForm(document)) : null
+  });
+
   var lineTotal = 0;
   if (!(hasPlannerConfig && !loggedIn)) {
     if (fromPayload > 0) lineTotal = fromPayload;
