@@ -3993,6 +3993,94 @@ function mcPlannerUserIsLoggedIn() {
   return !!(document.body && document.body.classList.contains("mc-member-logged-in"));
 }
 
+function mcReadMetaMemberSeatPriceForPlanner() {
+  var metaLive = document.querySelector('meta[name="mc-member-seat-price"], meta[name="mc-member-price"]');
+  if (metaLive && metaLive.getAttribute("content")) {
+    var mp = parseMcCurrency(metaLive.getAttribute("content"));
+    if (mp > 0) return mp;
+  }
+  return 0;
+}
+
+function mcReadVisibleMemberPlannerSeatPrice() {
+  var root = document.querySelector("#v65-product-parent") || document;
+  var selectors = [
+    ".mc-member-price-caption__price-value",
+    ".mc-member-grid-price__amount",
+    "#memberPrice",
+    "#member-price",
+    ".mc-member-price",
+    ".memberPrice",
+    "[class*='member'][class*='price']"
+  ];
+  var i;
+  for (i = 0; i < selectors.length; i++) {
+    var el = root.querySelector(selectors[i]);
+    if (!el) continue;
+    var v = parseMcCurrency(el.textContent || el.innerText || "");
+    if (v > 0) return v;
+  }
+  return 0;
+}
+
+function mcMemberPriceReadyForPlanner() {
+  var st = window.__mcMemberPricing || {};
+  var price = Number(st.memberSeatPrice || st.memberPrice || window.__MC_MEMBER_SEAT_PRICE || 0);
+  return price > 0;
+}
+
+/**
+ * PDP planner unit: member sources first; defer Volusion hidden MAP/sale pipeline while member pricing is pending (avoids $1,399 flash).
+ */
+function mcGetCorrectPlannerUnitPrice() {
+  var st = window.__mcMemberPricing || {};
+  var loggedIn = typeof mcPlannerUserIsLoggedIn === "function" && mcPlannerUserIsLoggedIn();
+
+  var member =
+    Number(st.memberSeatPrice) ||
+    Number(st.memberPrice) ||
+    0;
+
+  if (!(member > 0) && loggedIn && st.unlocked && st.delta != null) {
+    var pub =
+      Number(st.publicSeatPrice) ||
+      (typeof getDisplayedPublicSeatPrice === "function" ? getDisplayedPublicSeatPrice() : 0);
+    var adj = pub - st.delta;
+    if (adj > 0) member = adj;
+  }
+
+  if (!(member > 0)) {
+    member = mcReadVisibleMemberPlannerSeatPrice();
+  }
+
+  if (!(member > 0)) {
+    member = Number(window.__MC_MEMBER_SEAT_PRICE) || 0;
+  }
+
+  if (!(member > 0)) {
+    member = mcReadMetaMemberSeatPriceForPlanner();
+  }
+
+  if (member > 0) return member;
+
+  if (loggedIn) {
+    var pending =
+      (document.documentElement && document.documentElement.classList.contains("mc-member-plp-price-pending")) ||
+      (document.body && document.body.classList.contains("mc-member-pricing-pending")) ||
+      !!(st && st.promise);
+    if (pending) return 0;
+  }
+
+  if (typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
+    return mcGetPlannerPerSeatUnitFromVolusion(document);
+  }
+  return 0;
+}
+if (typeof window !== "undefined") {
+  window.mcGetCorrectPlannerUnitPrice = mcGetCorrectPlannerUnitPrice;
+  window.mcMemberPriceReadyForPlanner = mcMemberPriceReadyForPlanner;
+}
+
 function mcRunParagonPriceSourceDebug() {
   if (!document.documentElement.classList.contains("mc-paragon-pdp")) return;
   try {
@@ -4108,7 +4196,12 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 try {
   window.addEventListener("mcMemberPricingReady", function () {
+    if (window.__mcApplyingPlannerToPage) return;
     mcRunParagonPriceSourceDebug();
+    try {
+      if (typeof recalcRoomPlannerPrice === "function") recalcRoomPlannerPrice();
+      else if (typeof window.recalcRoomPlannerPrice === "function") window.recalcRoomPlannerPrice();
+    } catch (eRecalcMr) {}
   });
 } catch (eMpr) {}
 function getMemberCreateAccountUrl(){
@@ -4137,7 +4230,6 @@ function refreshPlannerPriceForMemberState(){
   if (capEl && pieEl && pieEl.style.display !== "none") {
     capEl.style.display = "none";
   }
-  var memberSeat = getMemberPlannerSeatPriceForCalc();
   var memberTotal = calculatePlannerPrice(window.__mcPlannerCounts, memberSeat);
   if (window.__mcMemberPricing) {
     window.__mcMemberPricing.memberPlannerTotal = memberTotal > 0 ? memberTotal : 0;
@@ -4148,6 +4240,23 @@ function refreshPlannerPriceForMemberState(){
     if (cpeR) {
       cpeR.textContent = "Configuration total: " + formatMcCurrency(lineTotal);
       cpeR.style.display = "block";
+    }
+  } else {
+    var pk;
+    var hasPc = false;
+    var cnts = window.__mcPlannerCounts || {};
+    for (pk in cnts) {
+      if (cnts.hasOwnProperty(pk) && Number(cnts[pk] || 0) > 0) {
+        hasPc = true;
+        break;
+      }
+    }
+    if (hasPc) {
+      var cpeR2 = document.getElementById("mcConfigurationPrice");
+      if (cpeR2) {
+        cpeR2.textContent = "Calculating member price…";
+        cpeR2.style.display = "block";
+      }
     }
   }
   if (typeof mcEnsurePlannerMemberPriceAboveAtc === "function") mcEnsurePlannerMemberPriceAboveAtc();
@@ -4707,10 +4816,16 @@ window.getMcDisplayedSeatPrice = getDisplayedPublicSeatPrice;
 window.getVolusionAddToCartSeatPrice = getVolusionAddToCartSeatPrice;
 /* tryReadHowToGetSalePrice + extractHowToGetSalePriceFromScripts: assigned on window right after define (above) */
 function getMemberPlannerSeatPriceForCalc(){
-  var state = window.__mcMemberPricing;
   if (document.body && document.body.classList.contains("mc-member-logged-in")) {
-    if (state && state.memberSeatPrice > 0) return state.memberSeatPrice;
+    if (typeof mcGetCorrectPlannerUnitPrice === "function") {
+      var mc = mcGetCorrectPlannerUnitPrice();
+      if (mc > 0) return mc;
+    }
+    var st0 = window.__mcMemberPricing;
+    if (st0 && st0.memberSeatPrice > 0) return st0.memberSeatPrice;
+    return 0;
   }
+  var state = window.__mcMemberPricing;
   if (!state || !state.unlocked) return 0;
   if (state.delta != null) {
     var publicSeatPrice = 0;
@@ -4725,8 +4840,14 @@ function getPlannerBaseSeatPriceForCalc(){
   if (window.__mcMemberPricing && !window.__mcMemberPricing.checked) {
     try { detectMemberPricingState(); } catch (eDetect) {}
   }
-  var memberPrice = getMemberPlannerSeatPriceForCalc();
-  if (memberPrice > 0) return memberPrice;
+  var correct = typeof mcGetCorrectPlannerUnitPrice === "function" ? mcGetCorrectPlannerUnitPrice() : 0;
+  if (correct > 0) return correct;
+  var loggedIn = typeof mcPlannerUserIsLoggedIn === "function" && mcPlannerUserIsLoggedIn();
+  var pend =
+    (document.documentElement && document.documentElement.classList.contains("mc-member-plp-price-pending")) ||
+    (document.body && document.body.classList.contains("mc-member-pricing-pending")) ||
+    !!(window.__mcMemberPricing && window.__mcMemberPricing.promise);
+  if (loggedIn && pend) return 0;
   if (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) {
     return window.__mcPerSeatPrice;
   }
@@ -4735,7 +4856,11 @@ function getPlannerBaseSeatPriceForCalc(){
     p = getVolusionAddToCartSeatPrice(document);
   }
   if (!(p > 0)) p = getDisplayedPublicSeatPrice();
-  if (p > 0) window.__mcPerSeatPrice = p;
+  if (p > 0 && (!loggedIn || !pend)) {
+    try {
+      window.__mcPerSeatPrice = p;
+    } catch (eP) {}
+  }
   return p;
 }
 function ensurePriceWithOptionsLabel(scope){
@@ -4773,10 +4898,21 @@ function ensurePriceWithOptionsLabel(scope){
  */
 function calculatePlannerPrice(counts, seatPrice){
   if (seatPrice == null || seatPrice <= 0) {
-    if (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) {
+    seatPrice = typeof mcGetCorrectPlannerUnitPrice === "function" ? mcGetCorrectPlannerUnitPrice() : 0;
+    if (!(seatPrice > 0) && window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) {
       seatPrice = window.__mcPerSeatPrice;
-    } else if (typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
-      seatPrice = mcGetPlannerPerSeatUnitFromVolusion(document);
+    } else if (!(seatPrice > 0) && typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
+      if (
+        typeof mcPlannerUserIsLoggedIn !== "function" ||
+        !mcPlannerUserIsLoggedIn() ||
+        !(
+          (document.documentElement && document.documentElement.classList.contains("mc-member-plp-price-pending")) ||
+          (document.body && document.body.classList.contains("mc-member-pricing-pending")) ||
+          (window.__mcMemberPricing && window.__mcMemberPricing.promise)
+        )
+      ) {
+        seatPrice = mcGetPlannerPerSeatUnitFromVolusion(document);
+      }
     }
     if (!(seatPrice > 0)) return 0;
   }
@@ -4810,10 +4946,17 @@ function mcComputePlannerConfigurationTotal(counts){
   }
   if (!hasPiece) return 0;
   var u = typeof getPlannerBaseSeatPriceForCalc === "function" ? getPlannerBaseSeatPriceForCalc() : 0;
-  if (!(u > 0) && typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
-    u = mcGetPlannerPerSeatUnitFromVolusion(document);
-  }
   if (!(u > 0)) return 0;
+  if (hasPiece && u > 0) {
+    console.log("MC PLANNER UNIT PRICE SOURCE", {
+      chosenUnitPrice: u,
+      memberSeatPrice: window.__mcMemberPricing && window.__mcMemberPricing.memberSeatPrice,
+      windowMemberSeat: window.__MC_MEMBER_SEAT_PRICE,
+      fallbackVolusionUnit:
+        typeof mcGetPlannerPerSeatUnitFromVolusion === "function" ? mcGetPlannerPerSeatUnitFromVolusion(document) : null,
+      pending: document.documentElement && document.documentElement.classList.contains("mc-member-plp-price-pending")
+    });
+  }
   return Number(calculatePlannerPrice(counts, u)) || 0;
 }
 if (typeof window !== "undefined") {
@@ -4905,8 +5048,15 @@ function mcEnsurePlannerMemberPriceAboveAtc(){
 
 window.applyPlannerToPage = function (payload) {
   if (!payload || typeof payload !== "object") return;
-
-  if (window.__mcPerSeatPrice == null || window.__mcPerSeatPrice <= 0) {
+  try {
+    window.__mcApplyingPlannerToPage = true;
+  } catch (eFlag) {}
+  try {
+    var _loggedInEarly = typeof mcPlannerUserIsLoggedIn === "function" && mcPlannerUserIsLoggedIn();
+  if (
+    !_loggedInEarly &&
+    (window.__mcPerSeatPrice == null || window.__mcPerSeatPrice <= 0)
+  ) {
     var pu0 = typeof mcGetPlannerPerSeatUnitFromVolusion === "function" ? mcGetPlannerPerSeatUnitFromVolusion(document) : 0;
     if (pu0 > 0) window.__mcPerSeatPrice = pu0;
   }
@@ -4995,7 +5145,7 @@ window.applyPlannerToPage = function (payload) {
   if (payloadUnit > 0) window.__mcPerSeatPrice = payloadUnit;
 
   var publicSeatPrice = (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) ? window.__mcPerSeatPrice : 0;
-  if (!(publicSeatPrice > 0) && typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
+  if (!(publicSeatPrice > 0) && !loggedIn && typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
     publicSeatPrice = mcGetPlannerPerSeatUnitFromVolusion(document);
     if (publicSeatPrice > 0) window.__mcPerSeatPrice = publicSeatPrice;
   }
@@ -5031,6 +5181,9 @@ window.applyPlannerToPage = function (payload) {
   } else if (cpe && !hasPlannerConfig) {
     cpe.style.display = "none";
     cpe.textContent = "";
+  } else if (cpe && hasPlannerConfig && !(lineTotal > 0) && loggedIn) {
+    cpe.textContent = "Calculating member price…";
+    cpe.style.display = "block";
   } else if (cpe && hasPlannerConfig && !(lineTotal > 0)) {
     cpe.style.display = "none";
     cpe.textContent = "";
@@ -5057,8 +5210,11 @@ window.applyPlannerToPage = function (payload) {
         _phys += Number(configOpts[_pk] || 0);
       });
       var _unitForCalc =
-        typeof getPlannerBaseSeatPriceForCalc === "function" ? getPlannerBaseSeatPriceForCalc() : 0;
-      if (!(_unitForCalc > 0) && publicSeatPrice > 0) _unitForCalc = publicSeatPrice;
+        typeof mcGetCorrectPlannerUnitPrice === "function" ? mcGetCorrectPlannerUnitPrice() : 0;
+      if (!(_unitForCalc > 0) && typeof getPlannerBaseSeatPriceForCalc === "function") {
+        _unitForCalc = getPlannerBaseSeatPriceForCalc();
+      }
+      if (!(_unitForCalc > 0) && !loggedIn && publicSeatPrice > 0) _unitForCalc = publicSeatPrice;
       window.mccabeRoomPlannerPriceCalc = {
         unitPrice: _unitForCalc,
         physicalPieces: _phys,
@@ -5109,6 +5265,11 @@ window.applyPlannerToPage = function (payload) {
     mcApplyPlannerAtcDisabledState(false);
   }
   mcRunParagonPriceSourceDebug();
+  } finally {
+    try {
+      window.__mcApplyingPlannerToPage = false;
+    } catch (eApplyDone) {}
+  }
 };
 
 function mcBuildPlannerConfigFieldText(payload) {
@@ -5373,6 +5534,9 @@ function mcPlannerExpectedCartTotalFromPayload(payload) {
 
   // Do not use hidden Volusion form price as first source for planner cart total.
   // It is currently producing 1399.
+  if (!(unit > 0) && typeof mcGetCorrectPlannerUnitPrice === "function") {
+    unit = mcGetCorrectPlannerUnitPrice();
+  }
   if (!(unit > 0) && typeof getPlannerBaseSeatPriceForCalc === "function") {
     unit = getPlannerBaseSeatPriceForCalc();
   }
