@@ -3999,44 +3999,120 @@ function mcReadCurrentVisibleMemberUnitPrice() {
     document.querySelector("#content_area") ||
     document;
 
-  var candidates = [];
+  function parseMoney(txt) {
+    if (typeof parseMcCurrency === "function") return parseMcCurrency(txt);
+    var m = String(txt || "").replace(/,/g, "").match(/\$?\s*(\d+(?:\.\d{2})?)/);
+    return m ? Number(m[1]) : 0;
+  }
 
-  [
-    ".mc-member-price-caption",
-    ".mc-member-price",
-    "[data-mc-member-price]",
+  function dollarMatches(txt) {
+    return String(txt || "").match(/\$[\d,]+(?:\.\d{2})?/g) || [];
+  }
+
+  /*
+    1. FIRST: use explicit member-price elements only.
+    These should be the actual member/sale price display, not the whole product page.
+  */
+  var explicitSelectors = [
     "#mcMemberPrice",
     "#mcMemberPriceValue",
-    ".colors_pricebox",
-    "#priceWithOptions",
-    "[itemprop='price']"
-  ].forEach(function (sel) {
-    try {
-      root.querySelectorAll(sel).forEach(function (el) {
-        var txt =
-          (el.getAttribute && (el.getAttribute("content") || el.getAttribute("data-mc-member-price") || el.getAttribute("value"))) ||
-          el.textContent ||
-          "";
-        var matches = String(txt).match(/\$[\d,]+(?:\.\d{2})?/g) || [];
-        matches.forEach(function (m) {
-          var n = parseMcCurrency(m);
-          if (n > 0) candidates.push(n);
-        });
-      });
-    } catch (e) {}
-  });
+    ".mc-member-price",
+    ".mc-member-price-value",
+    ".mc-member-price-caption",
+    "[data-mc-member-price]",
+    "[data-member-price]",
+    "[data-price-type='member']",
+    "[data-price-type='sale']"
+  ];
 
-  // Prefer the visible logged-in member/sale price, not list price.
-  // Usually member price is the lower visible price above $0.
-  candidates = candidates
-    .filter(function (n) {
-      return n > 0;
-    })
-    .sort(function (a, b) {
-      return a - b;
+  for (var i = 0; i < explicitSelectors.length; i++) {
+    var els = Array.from(root.querySelectorAll(explicitSelectors[i]));
+    for (var j = 0; j < els.length; j++) {
+      var el = els[j];
+
+      var raw =
+        el.getAttribute("data-mc-member-price") ||
+        el.getAttribute("data-member-price") ||
+        el.getAttribute("content") ||
+        el.getAttribute("value") ||
+        el.textContent ||
+        "";
+
+      var nums = dollarMatches(raw).map(parseMoney).filter(function(n) {
+        return n > 0;
+      });
+
+      /*
+        Do not accept tiny option/upcharge prices like $99.
+        Furniture member unit prices should not be under $500.
+        This is not hard-coding a product price. It is filtering out option add-ons.
+      */
+      nums = nums.filter(function(n) {
+        return n >= 500;
+      });
+
+      if (nums.length) {
+        return nums[0];
+      }
+    }
+  }
+
+  /*
+    2. SECOND: find text labels that specifically say member price / sale price,
+    then read the nearest price in that same small container.
+  */
+  var possibleContainers = Array.from(root.querySelectorAll("div, span, td, p, section"));
+
+  for (var c = 0; c < possibleContainers.length; c++) {
+    var node = possibleContainers[c];
+    var txt = String(node.textContent || "").replace(/\s+/g, " ").trim();
+
+    if (!/member\s*price|member\s*pricing|sale\s*price/i.test(txt)) continue;
+
+    /*
+      Skip containers that are too large, because they may contain every price on the page.
+    */
+    if (txt.length > 300) continue;
+
+    /*
+      Skip option/configuration/upcharge containers.
+    */
+    if (/grade|upcharge|option|leather|affirm|klarna|monthly|payment|configuration|room planner/i.test(txt)) {
+      continue;
+    }
+
+    var prices = dollarMatches(txt).map(parseMoney).filter(function(n) {
+      return n >= 500;
     });
 
-  if (candidates.length) return candidates[0];
+    if (prices.length) {
+      /*
+        If same small container has retail + member, member/sale is usually the lower of the real furniture prices.
+        But still only among values >= 500 so $99 option prices are ignored.
+      */
+      prices.sort(function(a, b) { return a - b; });
+      return prices[0];
+    }
+  }
+
+  /*
+    3. THIRD: if existing member-pricing variables are available, use those.
+    Do not use window.__mcPerSeatPrice because that can be stale/poisoned.
+  */
+  var st = window.__mcMemberPricing || {};
+  var variablePrice =
+    Number(window.__MC_MEMBER_SEAT_PRICE) ||
+    Number(window.__mcPerSeatMemberPrice) ||
+    Number(window.__mcMemberSeatPrice) ||
+    Number(st.memberSeatPrice) ||
+    Number(st.memberPrice) ||
+    0;
+
+  if (variablePrice >= 500) return variablePrice;
+
+  console.warn("MC member unit price not found safely. Refusing to use option/upcharge/hidden fallback.", {
+    variablePrice: variablePrice
+  });
 
   return 0;
 }
@@ -4081,55 +4157,12 @@ function mcMemberPriceReadyForPlanner() {
 }
 
 /**
- * PDP planner unit: visible member price first; other fallbacks only when no visible price.
+ * PDP planner unit: same safe path as mcReadCurrentVisibleMemberUnitPrice (no page-wide scrape, no Volusion hidden).
  */
 function mcGetCorrectPlannerUnitPrice() {
-  if (typeof mcReadCurrentVisibleMemberUnitPrice === "function") {
-    var visU = mcReadCurrentVisibleMemberUnitPrice();
-    if (visU > 0) return visU;
-  }
-  var st = window.__mcMemberPricing || {};
-  var loggedIn = typeof mcPlannerUserIsLoggedIn === "function" && mcPlannerUserIsLoggedIn();
-
-  var member =
-    Number(st.memberSeatPrice) ||
-    Number(st.memberPrice) ||
-    0;
-
-  if (!(member > 0) && loggedIn && st.unlocked && st.delta != null) {
-    var pub =
-      Number(st.publicSeatPrice) ||
-      (typeof getDisplayedPublicSeatPrice === "function" ? getDisplayedPublicSeatPrice() : 0);
-    var adj = pub - st.delta;
-    if (adj > 0) member = adj;
-  }
-
-  if (!(member > 0)) {
-    member = mcReadVisibleMemberPlannerSeatPrice();
-  }
-
-  if (!(member > 0)) {
-    member = Number(window.__MC_MEMBER_SEAT_PRICE) || 0;
-  }
-
-  if (!(member > 0)) {
-    member = mcReadMetaMemberSeatPriceForPlanner();
-  }
-
-  if (member > 0) return member;
-
-  if (loggedIn) {
-    var pending =
-      (document.documentElement && document.documentElement.classList.contains("mc-member-plp-price-pending")) ||
-      (document.body && document.body.classList.contains("mc-member-pricing-pending")) ||
-      !!(st && st.promise);
-    if (pending) return 0;
-  }
-
-  if (!loggedIn && typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
-    return mcGetPlannerPerSeatUnitFromVolusion(document);
-  }
-  return 0;
+  return typeof mcReadCurrentVisibleMemberUnitPrice === "function"
+    ? mcReadCurrentVisibleMemberUnitPrice()
+    : 0;
 }
 if (typeof window !== "undefined") {
   window.mcGetCorrectPlannerUnitPrice = mcGetCorrectPlannerUnitPrice;
@@ -5257,6 +5290,18 @@ window.applyPlannerToPage = function (payload) {
     mcApplyPlannerAtcDisabledState(false);
   }
   mcRunParagonPriceSourceDebug();
+  try {
+    console.log("MC MEMBER PRICE READ", {
+      chosenMemberUnit: mcReadCurrentVisibleMemberUnitPrice(),
+      mcPerSeatPrice: window.__mcPerSeatPrice,
+      visiblePrices: Array.from(document.querySelectorAll("#v65-product-parent *")).map(function(el){
+        var txt = String(el.textContent || "").replace(/\s+/g, " ").trim();
+        if (!/\$[\d,]+/.test(txt)) return null;
+        if (txt.length > 180) return null;
+        return txt;
+      }).filter(Boolean).slice(0, 50)
+    });
+  } catch (eMcReadDbg) {}
   console.log("MC PRICE FINAL SOURCE", {
     visibleMemberUnit: mcReadCurrentVisibleMemberUnitPrice(),
     plannerUnit: getPlannerBaseSeatPriceForCalc(),
