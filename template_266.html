@@ -5059,6 +5059,11 @@ function mcEnsurePlannerMemberPriceAboveAtc(){
 window.applyPlannerToPage = function (payload) {
   if (!payload || typeof payload !== "object") return;
   try {
+    delete payload.configurationTotal;
+    delete payload.mcPlannerPerSeatUnit;
+    delete payload.unitPrice;
+  } catch (eCleanPayload) {}
+  try {
     window.__mcApplyingPlannerToPage = true;
   } catch (eFlag) {}
   try {
@@ -5155,8 +5160,7 @@ window.applyPlannerToPage = function (payload) {
   window.__mcPlannerSeatCount = hasPlannerConfig ? seatCount : 0;
 
   var loggedIn = mcPlannerUserIsLoggedIn();
-  var fromPayload = payload && Number(payload.configurationTotal);
-  var payloadUnit = payload && Number(payload.mcPlannerPerSeatUnit);
+  var fromPayload = 0;
   var memberUnit =
     Number(window.__MC_MEMBER_SEAT_PRICE) ||
     Number(window.__mcPerSeatMemberPrice) ||
@@ -5166,11 +5170,6 @@ window.applyPlannerToPage = function (payload) {
 
   if (memberUnit > 0) {
     window.__mcPerSeatPrice = memberUnit;
-  } else if (
-    payloadUnit > 0 &&
-    Math.abs(payloadUnit - 1399) > 0.02
-  ) {
-    window.__mcPerSeatPrice = payloadUnit;
   }
 
   var publicSeatPrice = (window.__mcPerSeatPrice != null && window.__mcPerSeatPrice > 0) ? window.__mcPerSeatPrice : 0;
@@ -5194,9 +5193,8 @@ window.applyPlannerToPage = function (payload) {
   });
 
   var lineTotal = 0;
-  if (!(hasPlannerConfig && !loggedIn)) {
-    if (fromPayload > 0) lineTotal = fromPayload;
-    else if (hasPlannerConfig) lineTotal = mcComputePlannerConfigurationTotal(configOpts);
+  if (hasPlannerConfig) {
+    lineTotal = mcComputePlannerConfigurationTotal(configOpts);
   }
   var memberSeat = getMemberPlannerSeatPriceForCalc();
   if (window.__mcMemberPricing) {
@@ -5288,7 +5286,7 @@ window.applyPlannerToPage = function (payload) {
         ? 0
         : lineTotal > 0
           ? lineTotal
-          : Number(payload && payload.configurationTotal) || 0,
+          : 0,
     mcPlannerSignInRequired: !!(hasPlannerConfig && !loggedIn)
   };
   if (loggedIn || !hasPlannerConfig) {
@@ -5825,6 +5823,14 @@ function restoreConfigOnPageLoad() {
     if (!raw) return;
     var data = JSON.parse(raw);
     if (!data || typeof data !== "object") return;
+    try {
+      delete data.configurationTotal;
+      delete data.mcPlannerPerSeatUnit;
+      delete data.unitPrice;
+    } catch (eCl) {}
+    try {
+      localStorage.setItem("roomPlannerData_" + prodCode, JSON.stringify(data));
+    } catch (eW) {}
     if (typeof window.applyPlannerToPage === "function") {
       console.log("[McCabe Planner] Restoring saved configuration for", prodCode);
       window.applyPlannerToPage(data);
@@ -6767,14 +6773,6 @@ window.initRoomPlanner = function (opts) {
         return;
       }
       var prodCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "unknown";
-      var unit =
-        typeof window.mcGetPlannerPerSeatUnitFromVolusion === "function"
-          ? window.mcGetPlannerPerSeatUnitFromVolusion(document)
-          : 0;
-      var configurationTotal =
-        unit > 0 && typeof window.calculatePlannerPrice === "function"
-          ? window.calculatePlannerPrice(counts, unit)
-          : 0;
       var payload = {
         productCode: prodCode,
         options: counts,
@@ -6782,23 +6780,12 @@ window.initRoomPlanner = function (opts) {
         room: getRoomPayload(),
         layout: layout,
         seatCount: seatCount,
-        configurationTotal: configurationTotal,
-        mcPlannerPerSeatUnit: unit,
         ts: Date.now()
       };
       var runTot = app.querySelector("#mcPlannerRunningTotal");
       if (runTot) {
-        if (configurationTotal > 0) {
-          runTot.style.display = "block";
-          runTot.textContent =
-            "Configuration total: " +
-            (typeof window.formatMcCurrency === "function"
-              ? window.formatMcCurrency(configurationTotal)
-              : "$" + Number(configurationTotal).toFixed(2));
-        } else {
-          runTot.style.display = "none";
-          runTot.textContent = "";
-        }
+        runTot.style.display = "none";
+        runTot.textContent = "";
       }
       try { localStorage.setItem("roomPlannerData_" + prodCode, JSON.stringify(payload)); } catch (e) {}
       if (opts.onApply && typeof opts.onApply === "function") {
@@ -6817,6 +6804,14 @@ window.initRoomPlanner = function (opts) {
       var raw = localStorage.getItem("roomPlannerData_" + prodCode);
       if (!raw) return;
       var data = JSON.parse(raw);
+      try {
+        delete data.configurationTotal;
+        delete data.mcPlannerPerSeatUnit;
+        delete data.unitPrice;
+      } catch (eCl) {}
+      try {
+        localStorage.setItem("roomPlannerData_" + prodCode, JSON.stringify(data));
+      } catch (eW) {}
       var layout = data.layout;
       if (!layout || !Array.isArray(layout) || layout.length === 0) return;
       var pieceMap = {};
