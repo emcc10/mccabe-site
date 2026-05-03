@@ -5602,19 +5602,22 @@ function mcVertexSetHiddenSellingUnitForLineTotal(form, lineTotal, qty) {
 
 function mcVertexSetFormQuantityForPlanner(form, qty) {
   if (!(qty > 0) || !form) return;
-  var qEl =
-    form.querySelector("#mc-real-product-qty") ||
-    form.querySelector('input[name="QTY"]') ||
-    form.querySelector('input[name="Qty"]') ||
-    form.querySelector('input[name="quantity"]') ||
-    form.querySelector('input[name^="QTY."]');
-  if (!qEl) return;
-  qEl.value = String(qty);
-  qEl.setAttribute("value", String(qty));
-  try {
-    qEl.dispatchEvent(new Event("input", { bubbles: true }));
-    qEl.dispatchEvent(new Event("change", { bubbles: true }));
-  } catch (eQ) {}
+  var sel =
+    'input.v65-productdetail-cartqty, input[name^="QTY."], input[name="QTY"], input[name="Qty"], input[name="quantity"]';
+  var list = Array.prototype.slice.call(form.querySelectorAll(sel));
+  var byId = form.querySelector("#mc-real-product-qty");
+  if (byId && list.indexOf(byId) === -1) list.push(byId);
+  var i, qEl;
+  for (i = 0; i < list.length; i++) {
+    qEl = list[i];
+    if (!qEl) continue;
+    qEl.value = String(qty);
+    qEl.setAttribute("value", String(qty));
+    try {
+      qEl.dispatchEvent(new Event("input", { bubbles: true }));
+      qEl.dispatchEvent(new Event("change", { bubbles: true }));
+    } catch (eQ) {}
+  }
 }
 
 function mcVertexPlannerSubmitPriceSync(form, payload) {
@@ -17200,10 +17203,14 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
   function getQtyInput() {
     return (
+      document.querySelector("#v65-product-parent input.v65-productdetail-cartqty") ||
+      document.querySelector('#v65-product-parent input[name^="QTY."]') ||
       document.querySelector('#v65-product-parent input[name="QTY"]') ||
       document.querySelector('#v65-product-parent input[name="quantity"]') ||
       document.querySelector('#v65-product-parent input[id*="qty"]') ||
       document.querySelector('#v65-product-parent input[id*="QTY"]') ||
+      document.querySelector("input.v65-productdetail-cartqty") ||
+      document.querySelector('input[name^="QTY."]') ||
       document.querySelector('input[name="QTY"]') ||
       document.querySelector('input[name="quantity"]')
     );
@@ -17518,10 +17525,14 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
   function getQtyInput() {
     return (
+      document.querySelector("#v65-product-parent input.v65-productdetail-cartqty") ||
+      document.querySelector('#v65-product-parent input[name^="QTY."]') ||
       document.querySelector('#v65-product-parent input[name="QTY"]') ||
       document.querySelector('#v65-product-parent input[name="quantity"]') ||
       document.querySelector('#v65-product-parent input[id*="qty"]') ||
       document.querySelector('#v65-product-parent input[id*="QTY"]') ||
+      document.querySelector("input.v65-productdetail-cartqty") ||
+      document.querySelector('input[name^="QTY."]') ||
       document.querySelector('input[name="QTY"]') ||
       document.querySelector('input[name="quantity"]')
     );
@@ -17784,6 +17795,30 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <script id="mc-remove-all-quantity-final">
 (function () {
+  function mcDomCleanQuantityPlannerBillable() {
+    if (!window.__mcPlannerConfigApplied) return 0;
+    var calc = window.mccabeRoomPlannerPriceCalc || {};
+    var n =
+      Number(calc.effectiveSeats) ||
+      Number(calc.billableSeats) ||
+      Number(calc.seats) ||
+      0;
+    if (n > 0) return n;
+    var data = window.__mcLastPlannerPayload;
+    if (data && Number(data.seatCount) > 0) return Number(data.seatCount);
+    if (data && data.options && typeof data.options === "object") {
+      var total = 0;
+      Object.keys(data.options).forEach(function (key) {
+        var q = Number(data.options[key] || 0);
+        if (!q) return;
+        var id = String(key).toUpperCase();
+        total += id === "4L" ? q * 2 : q;
+      });
+      if (total > 0) return total;
+    }
+    return 0;
+  }
+
   function cleanQuantity() {
     var root =
       document.querySelector("#v65-product-parent") ||
@@ -17795,7 +17830,10 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     ));
 
     qtyInputs.forEach(function (input) {
-      input.value = "1";
+      var bill = mcDomCleanQuantityPlannerBillable();
+      var v = bill > 0 ? bill : 1;
+      input.value = String(v);
+      input.setAttribute("value", String(v));
       input.style.setProperty("display", "none", "important");
       input.style.setProperty("visibility", "hidden", "important");
       input.style.setProperty("opacity", "0", "important");
@@ -18007,5 +18045,172 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     }
   }
 </style>
+
+<script id="mc-final-planner-cart-qty-sync">
+(function () {
+  function mcFindRealQtyInput(form) {
+    return (
+      (form && (
+        form.querySelector("input.v65-productdetail-cartqty") ||
+        form.querySelector('input[name^="QTY."]') ||
+        form.querySelector('input[name="QTY"]') ||
+        form.querySelector('input[name="Qty"]') ||
+        form.querySelector('input[name="qty"]')
+      )) ||
+      document.querySelector("input.v65-productdetail-cartqty") ||
+      document.querySelector('input[name^="QTY."]') ||
+      document.querySelector('input[name="QTY"]') ||
+      document.querySelector('input[name="Qty"]') ||
+      document.querySelector('input[name="qty"]')
+    );
+  }
+
+  function mcGetPlannerCounts() {
+    var calc = window.mccabeRoomPlannerPriceCalc || {};
+    var data = window.mccabeRoomPlannerData || window.roomPlannerData || window.__mcLastPlannerPayload || null;
+
+    if (calc.counts && typeof calc.counts === "object") return calc.counts;
+    if (data && data.counts && typeof data.counts === "object") return data.counts;
+    if (data && data.options && typeof data.options === "object") return data.options;
+
+    return null;
+  }
+
+  function mcGetPlannerBillableQty() {
+    var calc = window.mccabeRoomPlannerPriceCalc || {};
+    var data = window.mccabeRoomPlannerData || window.roomPlannerData || window.__mcLastPlannerPayload || null;
+
+    var direct =
+      Number(calc.effectiveSeats) ||
+      Number(calc.billableSeats) ||
+      Number(calc.seats) ||
+      (data && data.counts && Number(data.counts.effectiveSeats)) ||
+      (data && data.counts && Number(data.counts.billableSeats)) ||
+      (data && data.counts && Number(data.counts.seats)) ||
+      (data && Number(data.effectiveSeats)) ||
+      (data && Number(data.billableSeats)) ||
+      (data && Number(data.seatCount)) ||
+      0;
+
+    if (direct > 0) return direct;
+
+    var counts = mcGetPlannerCounts();
+    if (!counts) return 0;
+
+    var total = 0;
+
+    Object.keys(counts).forEach(function (key) {
+      var qty = Number(counts[key] || 0);
+      if (!qty) return;
+
+      var id = String(key).toUpperCase();
+
+      if (id === "4L") {
+        total += qty * 2;
+      } else {
+        total += qty;
+      }
+    });
+
+    return total;
+  }
+
+  function mcSyncPlannerQtyToCart(form) {
+    var billableQty = mcGetPlannerBillableQty();
+
+    if (!(billableQty > 0)) {
+      console.warn("MC CART QTY SYNC FAILED", {
+        qtyFound: false,
+        billableQty: billableQty,
+        calc: window.mccabeRoomPlannerPriceCalc,
+        payload: window.__mcLastPlannerPayload,
+        data: window.mccabeRoomPlannerData || window.roomPlannerData
+      });
+      return;
+    }
+
+    var sel =
+      'input.v65-productdetail-cartqty, input[name^="QTY."], input[name="QTY"], input[name="Qty"], input[name="qty"]';
+    var list = form ? Array.prototype.slice.call(form.querySelectorAll(sel)) : [];
+    var primary = mcFindRealQtyInput(form);
+    if (primary && list.indexOf(primary) === -1) list.unshift(primary);
+    if (!form && primary) list = [primary];
+    var byId = form && form.querySelector("#mc-real-product-qty");
+    if (byId && list.indexOf(byId) === -1) list.push(byId);
+
+    if (!list.length) {
+      console.warn("MC CART QTY SYNC FAILED", {
+        qtyFound: false,
+        billableQty: billableQty,
+        calc: window.mccabeRoomPlannerPriceCalc,
+        payload: window.__mcLastPlannerPayload,
+        data: window.mccabeRoomPlannerData || window.roomPlannerData
+      });
+      return;
+    }
+
+    list.forEach(function (qtyInput) {
+      if (!qtyInput) return;
+      qtyInput.disabled = false;
+      qtyInput.value = String(billableQty);
+      try {
+        qtyInput.setAttribute("value", String(billableQty));
+      } catch (eAttr) {}
+      try {
+        qtyInput.dispatchEvent(new Event("input", { bubbles: true }));
+      } catch (e) {}
+      try {
+        qtyInput.dispatchEvent(new Event("change", { bubbles: true }));
+      } catch (e2) {}
+    });
+
+    console.log("MC CART QTY SYNC OK", {
+      submittedQty: String(billableQty),
+      billableQty: billableQty,
+      inputsSynced: list.length,
+      expectedUnit: window.__mcPerSeatPrice,
+      expectedTotal: window.mccabeRoomPlannerPriceCalc && window.mccabeRoomPlannerPriceCalc.total
+    });
+  }
+
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest('input[name="btnaddtocart"], #btn_addtocart, input[type="submit"], button');
+    if (!btn) return;
+
+    var txt = String(btn.value || btn.textContent || "").toLowerCase();
+    var id = String(btn.id || "").toLowerCase();
+    var name = String(btn.name || "").toLowerCase();
+
+    if (
+      name.indexOf("btnaddtocart") === -1 &&
+      id.indexOf("addtocart") === -1 &&
+      txt.indexOf("add to cart") === -1
+    ) return;
+
+    var form =
+      btn.closest("form") ||
+      document.querySelector("#v65-product-parent form") ||
+      document.querySelector("form");
+
+    mcSyncPlannerQtyToCart(form);
+  }, true);
+
+  document.addEventListener("submit", function (e) {
+    var form = e.target;
+    if (!form || !form.querySelector) return;
+
+    if (
+      form.querySelector('input[name="btnaddtocart"]') ||
+      form.querySelector("#btn_addtocart") ||
+      form.querySelector("input.v65-productdetail-cartqty") ||
+      form.querySelector('input[name^="QTY."]')
+    ) {
+      mcSyncPlannerQtyToCart(form);
+    }
+  }, true);
+
+  window.mcSyncPlannerQtyToCart = mcSyncPlannerQtyToCart;
+})();
+</script>
 </body>
 </html>
