@@ -5355,17 +5355,30 @@ function mcVertexSummarizePlannerPayload(payload) {
 }
 
 function mcPlannerExpectedCartTotalFromPayload(payload) {
+  var calc = window.mccabeRoomPlannerPriceCalc || {};
+
+  if (Number(calc.total) > 0) {
+    return Number(calc.total);
+  }
+
   var p = payload && typeof payload === "object" ? payload : {};
   var fromP = Number(p.configurationTotal);
   if (fromP > 0) return fromP;
+
   var s = mcVertexSummarizePlannerPayload(p);
   var effectiveSeats = s.seats;
   var fourLCount = s.fourLCount || 0;
-  var unit = typeof getPlannerBaseSeatPriceForCalc === "function" ? getPlannerBaseSeatPriceForCalc() : 0;
-  if (!(unit > 0) && typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
-    unit = mcGetPlannerPerSeatUnitFromVolusion(document);
+
+  var unit = Number(calc.unitPrice) || 0;
+
+  // Do not use hidden Volusion form price as first source for planner cart total.
+  // It is currently producing 1399.
+  if (!(unit > 0) && typeof getPlannerBaseSeatPriceForCalc === "function") {
+    unit = getPlannerBaseSeatPriceForCalc();
   }
+
   if (!(unit > 0)) return 0;
+
   var t = unit * effectiveSeats - MC_VERTEX_THEATER_FOUR_L_DISCOUNT * fourLCount;
   return t > 0 ? t : 0;
 }
@@ -5401,6 +5414,25 @@ function mcVertexSetHiddenSellingUnitForLineTotal(form, lineTotal, qty) {
   }
 }
 
+function mcVertexScrubStale1399HiddenPrices(form, wantPerUnitStr) {
+  if (!form || !wantPerUnitStr) return;
+  try {
+    var nodes = form.querySelectorAll('input[type="hidden"]');
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      var inp = nodes[i];
+      var nm = ((inp.name || "") + " " + (inp.id || "")).toLowerCase();
+      if (!/price|sell|cost|amount|value|cart|unit|total/i.test(nm)) continue;
+      if (/productcode|qty|quantity|option|fee|ship|tax|weight/i.test(nm)) continue;
+      var n = parseFloat(String(inp.value || "").replace(/,/g, ""));
+      if (!(n > 0)) continue;
+      if (Math.abs(n - 1399) < 0.02 || Math.abs(n - 1399 * 4) < 0.02) {
+        inp.value = wantPerUnitStr;
+      }
+    }
+  } catch (eS) {}
+}
+
 function mcVertexSetFormQuantityForPlanner(form, qty) {
   if (!(qty > 0) || !form) return;
   var qEl =
@@ -5420,36 +5452,56 @@ function mcVertexSetFormQuantityForPlanner(form, qty) {
 
 function mcVertexPlannerSubmitPriceSync(form, payload) {
   if (!form || !mcVertexTheaterFormHasPlannerSelects(form)) return;
-  if (!mcPlannerUserIsLoggedIn()) return;
+
+  var calc = window.mccabeRoomPlannerPriceCalc || {};
   var p = payload && typeof payload === "object" ? payload : {};
   var s = mcVertexSummarizePlannerPayload(p);
-  var effectiveSeats = s.seats;
-  var fourLCount = s.fourLCount || 0;
-  var discount = MC_VERTEX_THEATER_FOUR_L_DISCOUNT * fourLCount;
-  var unitPrice = typeof getPlannerBaseSeatPriceForCalc === "function" ? getPlannerBaseSeatPriceForCalc() : 0;
-  if (!(unitPrice > 0) && typeof mcGetPlannerPerSeatUnitFromVolusion === "function") {
-    unitPrice = mcGetPlannerPerSeatUnitFromVolusion(document);
+
+  var effectiveSeats =
+    Number(calc.effectiveSeats) ||
+    Number(calc.billableSeats) ||
+    Number(s.seats) ||
+    1;
+
+  var unitPrice = Number(calc.unitPrice) || 0;
+
+  var expectedCartTotal =
+    Number(calc.total) ||
+    (unitPrice > 0 && effectiveSeats > 0 ? unitPrice * effectiveSeats : 0);
+
+  if (!(expectedCartTotal > 0) || !(effectiveSeats > 0)) {
+    console.warn("MC CART PRICE SYNC FAILED - missing calc", {
+      calc: calc,
+      payload: p,
+      summarized: s
+    });
+    return;
   }
-  var expectedCartTotal = mcPlannerExpectedCartTotalFromPayload(p);
-  var calc = window.mccabeRoomPlannerPriceCalc;
-  if (!(expectedCartTotal > 0) && calc && calc.total > 0) {
-    expectedCartTotal = Number(calc.total);
-  }
-  if (calc && calc.unitPrice > 0) unitPrice = Number(calc.unitPrice);
-  if (!(expectedCartTotal > 0)) return;
+
+  var derivedUnit = expectedCartTotal / effectiveSeats;
+
   try {
     if (window.__mcLastPlannerPayload && typeof window.__mcLastPlannerPayload === "object") {
       window.__mcLastPlannerPayload.configurationTotal = expectedCartTotal;
+      window.__mcLastPlannerPayload.effectiveSeats = effectiveSeats;
+      window.__mcLastPlannerPayload.unitPrice = derivedUnit;
     }
   } catch (ePl) {}
+
   mcVertexSetFormQuantityForPlanner(form, effectiveSeats);
+
+  // This must write 1899 for the Paragon example, not 1399.
+  mcVertexSetHiddenSellingUnitForLineTotal(form, expectedCartTotal, effectiveSeats);
+
+  mcVertexScrubStale1399HiddenPrices(form, derivedUnit.toFixed(2));
+
   console.log("MC CART PRICE SYNC", {
-    unitPrice: unitPrice,
+    source: "window.mccabeRoomPlannerPriceCalc",
+    unitPriceFromCalc: unitPrice,
+    derivedSubmittedUnit: derivedUnit,
     effectiveSeats: effectiveSeats,
-    fourLCount: fourLCount,
-    discount: discount,
     expectedCartTotal: expectedCartTotal,
-    qtyValue: effectiveSeats,
+    calc: calc,
     selectedOptions: mcVertexCollectPlannerSelectDebug(form)
   });
 }
@@ -5516,6 +5568,14 @@ function mcSyncPlannerFormForSubmit(payload, explicitTotal) {
     fieldPreview: configField ? String(configField.value || "").slice(0, 220) : ""
   });
 }
+
+try {
+  window.recalcRoomPlannerPrice = function () {
+    if (window.__mcLastPlannerPayload && typeof window.applyPlannerToPage === "function") {
+      window.applyPlannerToPage(window.__mcLastPlannerPayload);
+    }
+  };
+} catch (eRecalcGlobal) {}
 
 window.addEventListener("message", function (event) {
   if (event.origin !== location.origin) return;
@@ -5848,6 +5908,13 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
     var payload = window.__mcLastPlannerPayload || {};
     try { writeSelects(payload, "before-submit"); }
     catch (e) { console.warn(LOG, "submit-wrap", e); }
+    try {
+      if (typeof recalcRoomPlannerPrice === "function") recalcRoomPlannerPrice();
+      else if (typeof window.recalcRoomPlannerPrice === "function") window.recalcRoomPlannerPrice();
+      else if (window.__mcLastPlannerPayload && typeof window.applyPlannerToPage === "function") {
+        window.applyPlannerToPage(window.__mcLastPlannerPayload);
+      }
+    } catch (eRecalc) {}
     try { mcVertexPlannerSubmitPriceSync(form, payload); } catch (eVtx) { console.warn(LOG, "vertex-price-sync", eVtx); }
     var exp = mcPlannerExpectedCartTotalFromPayload(payload);
     try { mcSyncPlannerFormForSubmit(payload, exp); } catch (eSyncSubmit) {}
