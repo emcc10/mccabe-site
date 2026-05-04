@@ -17941,7 +17941,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <script id="mc-final-planner-cart-qty-sync">
 (function () {
-  var MC_CART_SYNC_BUILD = "266-mc-4l-split-20260201";
+  var MC_CART_SYNC_BUILD = "266-mc-4l-split-20260202";
 
   try {
     console.info("[McCabe]", "PDP cart / armless sync loaded", MC_CART_SYNC_BUILD);
@@ -18546,20 +18546,110 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
   function mcPlanner4LSplitSubmitAfterSync(ev) {
     var form = ev.target;
-    if (!form || form.tagName !== "FORM" || !form.querySelector) return;
-    if (!window.__mcPlannerConfigApplied) return;
-    var fourLCount = mcGetFourLCount();
-    if (!(fourLCount > 0)) return;
-    if (!form.querySelector('input[name="ProductCode"]')) return;
+    if (!mcShouldRunPlanner4LCartSplit(form)) return;
 
     ev.preventDefault();
     ev.stopPropagation();
 
     mcSyncPlannerQtyToCart(form);
     mcSyncArmlessLoveseatDiscount(form);
+    mcExecutePlanner4LCartSplit(form);
+  }
 
+  function mcPlanner4LSplitClickCapture(ev) {
+    var btn =
+      ev.target &&
+      ev.target.closest &&
+      ev.target.closest(
+        'input[name="btnaddtocart"], input[id*="btnaddtocart" i], input[id*="BtnAddToCart" i], button[name="btnaddtocart"], #btn_addtocart'
+      );
+    if (!btn) return;
+
+    var form = btn.closest && btn.closest("form");
+    if (!form) {
+      form =
+        document.querySelector("#v65-product-parent form") ||
+        document.querySelector('form[action*="ProductDetails" i], form[name="ProductDetails"]');
+    }
+    if (!mcShouldRunPlanner4LCartSplit(form)) return;
+
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+
+    mcSnapshotMemberUnitFloorBeforeCart();
+    mcSyncPlannerQtyToCart(form);
+    mcSyncArmlessLoveseatDiscount(form);
+    mcExecutePlanner4LCartSplit(form);
+  }
+
+  function mcShouldRunPlanner4LCartSplit(form) {
+    if (!form || form.tagName !== "FORM" || !form.querySelector) return false;
+    if (!(mcGetFourLCount() > 0)) return false;
+    var hasCfg =
+      window.__mcPlannerConfigApplied ||
+      (window.__mcLastPlannerPayload &&
+        window.__mcLastPlannerPayload.options &&
+        typeof window.__mcLastPlannerPayload.options === "object" &&
+        Object.keys(window.__mcLastPlannerPayload.options).length > 0);
+    if (!hasCfg) return false;
+    if (!form.querySelector('input[name="ProductCode"]')) return false;
+    return true;
+  }
+
+  function mcSetFormDataQtyFields(fd, form, mainQty) {
+    var sel =
+      'input.v65-productdetail-cartqty, input[name^="QTY."], input[name="QTY"], input[name="Qty"], input[name="qty"]';
+    var list = form ? Array.prototype.slice.call(form.querySelectorAll(sel)) : [];
+    list.forEach(function (inp) {
+      if (!inp || !inp.name) return;
+      fd.set(inp.name, String(mainQty));
+    });
+  }
+
+  function mcPostArmlessLoveHts(code, qty) {
+    var enc = new URLSearchParams();
+    enc.set("ProductCode", code);
+    enc.set("QTY." + code, String(qty));
+    enc.set("btnaddtocart", "btnaddtocart");
+    enc.set("AjaxError", "Y");
+
+    var urls = [
+      window.location.origin + "/ProductDetails.asp?ProductCode=" + encodeURIComponent(code),
+      window.location.origin + "/productdetails.asp?ProductCode=" + encodeURIComponent(code),
+      window.location.origin + "/ShoppingCart.asp?ProductCode=" + encodeURIComponent(code)
+    ];
+
+    function tryPost(i) {
+      if (i >= urls.length) {
+        return Promise.reject(new Error("MC 4L armless add: all endpoints failed"));
+      }
+      var url = urls[i];
+      console.log("MC 4L CART SPLIT armless try", i + 1, url);
+      return fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: enc.toString(),
+        credentials: "include",
+        redirect: "follow",
+        cache: "no-store"
+      })
+        .then(function (res) {
+          console.log("MC 4L CART SPLIT armless HTTP", res.status, url);
+          if (res.status >= 200 && res.status < 400) return res;
+          return tryPost(i + 1);
+        })
+        .catch(function () {
+          return tryPost(i + 1);
+        });
+    }
+
+    return tryPost(0);
+  }
+
+  function mcExecutePlanner4LCartSplit(form) {
     var mainPc = String((form.querySelector('input[name="ProductCode"]') || {}).value || "").trim();
     var billableQty = mcGetPlannerBillableQty();
+    var fourLCount = mcGetFourLCount();
     var mainQty = Math.max(0, billableQty - 2 * fourLCount);
     var armCode = String(window.MC_ARMLESS_LOVE_HTS_PRODUCT_CODE || "armless-love-hts");
     var armUnit = Number(window.MC_ARMLESS_LOVE_HTS_MEMBER_UNIT) || 3370;
@@ -18584,6 +18674,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     });
 
     var postUrl = form.getAttribute("action") || window.location.href;
+    if (!postUrl || !String(postUrl).trim()) postUrl = window.location.href;
     if (!/^https?:/i.test(postUrl)) {
       try {
         postUrl = new URL(postUrl, window.location.origin).href;
@@ -18602,40 +18693,30 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     if (mainQty > 0) {
       chain = chain.then(function () {
         var fd = new FormData(form);
-        if (btn && btn.name) fd.set(btn.name, btn.value || "Add To Cart");
-        console.log("MC 4L CART SPLIT step 1: main line", mainPc, "qty", mainQty);
-        return fetch(postUrl, { method: "POST", body: fd, credentials: "include", redirect: "follow" }).then(
-          function (res) {
-            console.log("MC 4L CART SPLIT main add HTTP", res.status);
-            return res;
+        mcSetFormDataQtyFields(fd, form, mainQty);
+        if (btn && btn.name) fd.set(btn.name, btn.value || btn.getAttribute("value") || "Add To Cart");
+        console.log("MC 4L CART SPLIT step 1: main", mainPc, "qty", mainQty, "URL", postUrl);
+        return fetch(postUrl, {
+          method: "POST",
+          body: fd,
+          credentials: "include",
+          redirect: "follow",
+          cache: "no-store"
+        }).then(function (res) {
+          console.log("MC 4L CART SPLIT main HTTP", res.status);
+          if (res.status < 200 || res.status >= 400) {
+            throw new Error("MC 4L main add failed HTTP " + res.status);
           }
-        );
+          return res;
+        });
       });
     } else {
-      console.log("MC 4L CART SPLIT step 1 skipped (mainQty 0), armless only");
+      console.log("MC 4L CART SPLIT step 1 skipped (mainQty 0)");
     }
 
     chain
       .then(function () {
-        var armUrl =
-          window.location.origin +
-          "/ProductDetails.asp?ProductCode=" +
-          encodeURIComponent(armCode);
-        var params = new URLSearchParams();
-        params.set("ProductCode", armCode);
-        params.set("QTY." + armCode, String(fourLCount));
-        params.set("btnaddtocart", "btnaddtocart");
-        console.log("MC 4L CART SPLIT step 2:", armCode, "qty", fourLCount);
-        return fetch(armUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: params.toString(),
-          credentials: "include",
-          redirect: "follow"
-        }).then(function (res) {
-          console.log("MC 4L CART SPLIT armless add HTTP", res.status);
-          return res;
-        });
+        return mcPostArmlessLoveHts(armCode, fourLCount);
       })
       .then(function () {
         window.location.href = "/shoppingcart.asp";
@@ -18648,6 +18729,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       });
   }
 
+  document.addEventListener("click", mcPlanner4LSplitClickCapture, true);
   document.addEventListener("submit", mcPlanner4LSplitSubmitAfterSync, true);
 
   setTimeout(mcSnapshotMemberUnitFloorBeforeCart, 1800);
