@@ -18173,6 +18173,95 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     });
   }
 
+  function mcPlannerHas4L() {
+    var calc = window.mccabeRoomPlannerPriceCalc || {};
+    var data = window.mccabeRoomPlannerData || window.roomPlannerData || window.__mcLastPlannerPayload || null;
+
+    var counts =
+      calc.counts ||
+      (data && data.counts) ||
+      (data && data.options) ||
+      null;
+
+    if (!counts) return false;
+
+    return Number(counts["4L"] || counts["4l"] || counts["4L_ARML"] || 0) > 0;
+  }
+
+  function mcFindArmlessDiscountSelect(form) {
+    var root = form || document;
+    var selects = Array.from(root.querySelectorAll("select"));
+
+    return selects.find(function (sel) {
+      var optionText = Array.from(sel.options || []).map(function (o) {
+        return String(o.textContent || "").toLowerCase();
+      }).join(" | ");
+
+      return /armless|4l|loveseat|discount/.test(optionText);
+    });
+  }
+
+  function mcSelectOptionByText(select, patterns) {
+    if (!select) return false;
+
+    select.disabled = false;
+
+    var opts = Array.from(select.options || []);
+    var found = opts.find(function (opt) {
+      var txt = String(opt.textContent || "").toLowerCase();
+      var val = String(opt.value || "").toLowerCase();
+
+      return patterns.some(function (re) {
+        return re.test(txt) || re.test(val);
+      });
+    });
+
+    if (!found) return false;
+
+    select.value = found.value;
+    select.selectedIndex = opts.indexOf(found);
+
+    try { select.dispatchEvent(new Event("input", { bubbles: true })); } catch(e) {}
+    try { select.dispatchEvent(new Event("change", { bubbles: true })); } catch(e) {}
+
+    return true;
+  }
+
+  function mcSyncArmlessLoveseatDiscount(form) {
+    var has4L = mcPlannerHas4L();
+    var sel = mcFindArmlessDiscountSelect(form);
+
+    if (!sel) {
+      console.warn("MC 4L DISCOUNT: no Volusion armless/4L discount select found");
+      return;
+    }
+
+    var selected = false;
+
+    if (has4L) {
+      selected = mcSelectOptionByText(sel, [
+        /armless\s+loveseat/,
+        /4l/,
+        /discount/
+      ]);
+    } else {
+      selected = mcSelectOptionByText(sel, [
+        /none/,
+        /no\s+discount/,
+        /standard/,
+        /regular/
+      ]);
+    }
+
+    console.log("MC 4L DISCOUNT SYNC", {
+      has4L: has4L,
+      selected: selected,
+      selectName: sel.name,
+      selectedValue: sel.value,
+      selectedText: sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].textContent
+    });
+  }
+
   document.addEventListener("click", function (e) {
     var btn = e.target.closest('input[name="btnaddtocart"], #btn_addtocart, input[type="submit"], button');
     if (!btn) return;
@@ -18193,6 +18282,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       document.querySelector("form");
 
     mcSyncPlannerQtyToCart(form);
+    mcSyncArmlessLoveseatDiscount(form);
   }, true);
 
   document.addEventListener("submit", function (e) {
@@ -18206,10 +18296,12 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       form.querySelector('input[name^="QTY."]')
     ) {
       mcSyncPlannerQtyToCart(form);
+      mcSyncArmlessLoveseatDiscount(form);
     }
   }, true);
 
   window.mcSyncPlannerQtyToCart = mcSyncPlannerQtyToCart;
+  window.mcSyncArmlessLoveseatDiscount = mcSyncArmlessLoveseatDiscount;
 })();
 </script>
 </body>
