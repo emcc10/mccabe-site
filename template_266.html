@@ -18177,6 +18177,13 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     var calc = window.mccabeRoomPlannerPriceCalc || {};
     var data = window.mccabeRoomPlannerData || window.roomPlannerData || window.__mcLastPlannerPayload || null;
 
+    if (Number(calc.fourLCount || 0) > 0) return true;
+
+    var plannerCounts = window.__mcPlannerCounts;
+    if (plannerCounts && Number(plannerCounts["4L"] || plannerCounts["4l"] || 0) > 0) {
+      return true;
+    }
+
     var counts =
       calc.counts ||
       (data && data.counts) ||
@@ -18188,6 +18195,23 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     return Number(counts["4L"] || counts["4l"] || counts["4L_ARML"] || 0) > 0;
   }
 
+  function mcSelectNeighborhoodText(sel) {
+    if (!sel) return "";
+    var bits = [];
+    bits.push(String(sel.name || "").toLowerCase());
+    bits.push(String(sel.id || "").toLowerCase());
+    try {
+      if (sel.id) {
+        var fid = String(sel.id).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+        var lab = document.querySelector('label[for="' + fid + '"]');
+        if (lab) bits.push(String(lab.textContent || "").toLowerCase());
+      }
+    } catch (eL) {}
+    var tr = sel.closest && sel.closest("tr");
+    if (tr) bits.push(String(tr.textContent || "").toLowerCase().slice(0, 600));
+    return bits.join(" | ");
+  }
+
   function mcFindArmlessDiscountSelect(form) {
     var root = form || document;
     var selects = Array.from(root.querySelectorAll("select"));
@@ -18197,7 +18221,16 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
         return String(o.textContent || "").toLowerCase();
       }).join(" | ");
 
-      return /armless|4l|loveseat|discount/.test(optionText);
+      if (/armless|4l|loveseat|discount/.test(optionText)) return true;
+
+      var name = String(sel.name || "").toLowerCase();
+      if (/armless|4l|loveseat|discount/.test(name)) return true;
+
+      var id = String(sel.id || "").toLowerCase();
+      if (/armless|4l|loveseat|discount/.test(id)) return true;
+
+      var hood = mcSelectNeighborhoodText(sel);
+      return /armless|4l|loveseat|discount/.test(hood);
     });
   }
 
@@ -18241,11 +18274,17 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     if (has4L) {
       selected = mcSelectOptionByText(sel, [
         /armless\s+loveseat/,
-        /4l/,
-        /discount/
+        /\b4l\b/,
+        /discount/,
+        /-\s*\$?\s*500/,
+        /\(\s*-?\s*\$?\s*500/,
+        /500\.00/,
+        /\byes\b(?![a-z])/
       ]);
     } else {
       selected = mcSelectOptionByText(sel, [
+        /^no\b/,
+        /\bno\b/,
         /none/,
         /no\s+discount/,
         /standard/,
@@ -18260,6 +18299,49 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       selectedValue: sel.value,
       selectedText: sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].textContent
     });
+
+    if (has4L && !selected) {
+      try {
+        console.warn("MC 4L DISCOUNT: no option matched discount patterns; labels are:", Array.from(sel.options).map(function (o) {
+          return String(o.textContent || "").trim();
+        }));
+      } catch (eOpt) {}
+    }
+  }
+
+  function mcHideArmlessDiscountOptionRow(form) {
+    var sel = mcFindArmlessDiscountSelect(form);
+    if (!sel) return;
+    try {
+      sel.disabled = false;
+    } catch (eEn) {}
+
+    var el = sel;
+    var i;
+    for (i = 0; i < 8 && el; i++) {
+      var tag = (el.tagName || "").toUpperCase();
+      if (tag === "TR" || tag === "LI" || (el.className && String(el.className).indexOf("option") !== -1)) {
+        try {
+          el.setAttribute("data-mc-planner-managed-discount", "1");
+          el.style.setProperty("display", "none", "important");
+          el.style.setProperty("visibility", "hidden", "important");
+          el.style.setProperty("height", "0", "important");
+          el.style.setProperty("overflow", "hidden", "important");
+          el.style.setProperty("margin", "0", "important");
+          el.style.setProperty("padding", "0", "important");
+        } catch (eH) {}
+        return;
+      }
+      el = el.parentElement;
+    }
+  }
+
+  function mcRunArmlessDiscountRowHide() {
+    var form =
+      document.querySelector("#v65-product-parent form") ||
+      document.querySelector('form[action*="ProductDetails" i], form[action*="shoppingcart" i]') ||
+      null;
+    mcHideArmlessDiscountOptionRow(form);
   }
 
   document.addEventListener("click", function (e) {
@@ -18299,6 +18381,17 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       mcSyncArmlessLoveseatDiscount(form);
     }
   }, true);
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mcRunArmlessDiscountRowHide);
+  } else {
+    mcRunArmlessDiscountRowHide();
+  }
+  window.addEventListener("load", function () {
+    mcRunArmlessDiscountRowHide();
+    setTimeout(mcRunArmlessDiscountRowHide, 400);
+    setTimeout(mcRunArmlessDiscountRowHide, 1200);
+  });
 
   window.mcSyncPlannerQtyToCart = mcSyncPlannerQtyToCart;
   window.mcSyncArmlessLoveseatDiscount = mcSyncArmlessLoveseatDiscount;
