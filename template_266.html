@@ -18087,7 +18087,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <script id="mc-final-planner-cart-qty-sync">
 (function () {
-  var MC_CART_SYNC_BUILD = "266-mc-4l-split-20260501b";
+  var MC_CART_SYNC_BUILD = "266-mc-4l-split-20260501c";
 
   try {
     console.info("[McCabe]", "PDP cart / armless sync loaded", MC_CART_SYNC_BUILD);
@@ -18809,6 +18809,127 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     return true;
   }
 
+  function mcVolusionFormQueryStringForSoftAdd(form, mainQty) {
+    mcSetDomPlannerMainQty(form, mainQty);
+    var params;
+    try {
+      params = new URLSearchParams(new FormData(form));
+    } catch (eFD) {
+      params = new URLSearchParams();
+      Array.prototype.slice.call(form.elements).forEach(function (el) {
+        if (!el || !el.name || el.disabled) return;
+        if ((el.type === "checkbox" || el.type === "radio") && !el.checked) return;
+        if (el.type === "file") return;
+        params.append(el.name, el.value != null ? String(el.value) : "");
+      });
+    }
+    params.set("AjaxError", "Y");
+    params.set("batchadd", "Y");
+    params.set("btnaddtocart", "btnaddtocart");
+    return params.toString();
+  }
+
+  function mcMergeArmlessInOpenSoftCart() {
+    try {
+      var wrap = document.querySelector(".soft_add_wrapper");
+      if (!wrap) return;
+      var armRaw = String(window.MC_ARMLESS_LOVE_HTS_PRODUCT_CODE || "armless-love-hts").trim();
+      var armCode = armRaw.toLowerCase().replace(/\s+/g, "");
+      var lis = Array.prototype.slice.call(wrap.querySelectorAll("ul.anchored-cart li.product-row"));
+      if (!lis.length) return;
+      var armLi = null;
+      var i;
+      for (i = 0; i < lis.length; i++) {
+        var li = lis[i];
+        var ht = (li.innerHTML || "").toLowerCase();
+        var tx = (li.textContent || "").toLowerCase();
+        if (armCode && ht.indexOf(armCode) !== -1) armLi = li;
+        else if (!armLi && tx.indexOf("armless") !== -1 && tx.indexOf("loveseat") !== -1) armLi = li;
+      }
+      if (!armLi) return;
+      var mainLi = wrap.querySelector("ul.anchored-cart li.recently-added");
+      if (mainLi === armLi) mainLi = null;
+      if (!mainLi) {
+        for (i = 0; i < lis.length; i++) {
+          if (lis[i] !== armLi) {
+            mainLi = lis[i];
+            break;
+          }
+        }
+      }
+      if (!mainLi || mainLi === armLi) return;
+      var armPriceEl = armLi.querySelector(".product-price");
+      var mainPriceEl = mainLi.querySelector(".product-price");
+      if (!armPriceEl || !mainPriceEl) return;
+      var armM = (armPriceEl.textContent || "").match(/\$[\d,]+(?:\.\d{2})?/);
+      var mainM = (mainPriceEl.textContent || "").match(/\$[\d,]+(?:\.\d{2})?/);
+      if (!armM || !mainM) return;
+      var sum = parseFloat(armM[0].replace(/[$,]/g, "")) + parseFloat(mainM[0].replace(/[$,]/g, ""));
+      var fmt = "$" + sum.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      mainPriceEl.textContent = (mainPriceEl.textContent || "").replace(/\$[\d,]+(?:\.\d{2})?/, fmt);
+      var det = mainLi.querySelector(".product-detail");
+      if (det && !det.querySelector(".mc-softcart-merged-armless-note")) {
+        var note = document.createElement("div");
+        note.className = "mc-softcart-merged-armless-note";
+        note.style.cssText = "font-size:11px;font-weight:400;color:#555;margin-top:4px;";
+        note.textContent = "Includes armless loveseat (room planner 4L).";
+        det.appendChild(note);
+      }
+      armLi.style.display = "none";
+      armLi.setAttribute("aria-hidden", "true");
+    } catch (eMrgS) {}
+  }
+
+  function mcPlannerAddMainTheaterLine(form, mainPc, mainQty) {
+    return new Promise(function (resolve, reject) {
+      if (!(mainQty > 0)) {
+        resolve();
+        return;
+      }
+      if (typeof window.SoftAddSingleItem === "function") {
+        try {
+          var qMain = mcVolusionFormQueryStringForSoftAdd(form, mainQty);
+          console.log("MC 4L CART SPLIT step 1: main SoftAddSingleItem", mainPc, mainQty);
+          window.SoftAddSingleItem(encodeURIComponent(mainPc), String(mainQty), qMain);
+          setTimeout(resolve, 650);
+          return;
+        } catch (eS) {
+          console.warn("MC 4L SoftAddSingleItem main failed", eS);
+        }
+      }
+      console.log("MC 4L CART SPLIT step 1: main iframe", mainPc, mainQty);
+      mcPlannerMainAddViaFormTargetIframe(form, mainQty).then(resolve).catch(reject);
+    });
+  }
+
+  function mcPlannerAddArmlessPlannerLine(armCode, fourLCount) {
+    return new Promise(function (resolve, reject) {
+      if (!(fourLCount > 0)) {
+        resolve();
+        return;
+      }
+      if (typeof window.SoftAddSingleItem === "function") {
+        try {
+          var qArm =
+            "ProductCode=" +
+            encodeURIComponent(armCode) +
+            "&QTY." +
+            encodeURIComponent(armCode) +
+            "=" +
+            encodeURIComponent(String(fourLCount)) +
+            "&btnaddtocart=btnaddtocart&AjaxError=Y&batchadd=Y";
+          console.log("MC 4L CART SPLIT step 2: armless SoftAddSingleItem", armCode, fourLCount);
+          window.SoftAddSingleItem(encodeURIComponent(armCode), String(fourLCount), qArm);
+          setTimeout(resolve, 650);
+          return;
+        } catch (eA) {
+          console.warn("MC 4L SoftAddSingleItem armless failed", eA);
+        }
+      }
+      mcPostArmlessLoveHts(armCode, fourLCount).then(resolve).catch(reject);
+    });
+  }
+
   function mcSetDomPlannerMainQty(form, mainQty) {
     if (!form || !(mainQty > 0)) return;
     var sel =
@@ -18837,6 +18958,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       iframe.name = iframeName;
       iframe.title = "add to cart";
       iframe.setAttribute("aria-hidden", "true");
+      iframe.setAttribute("sandbox", "allow-forms allow-scripts allow-same-origin allow-popups");
       iframe.style.cssText =
         "position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;border:0;pointer-events:none";
       document.body.appendChild(iframe);
@@ -18953,20 +19075,29 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function mcPlanner4LAfterCartSplitNavigate() {
-    try {
-      if (typeof window.show_soft_add === "function") {
-        window.show_soft_add();
-        return;
-      }
-      if (typeof window.ShowSoftAdd === "function") {
-        window.ShowSoftAdd();
-        return;
-      }
-    } catch (eS) {}
+    function tryVolusionSoftCartGlobals() {
+      try {
+        if (typeof window.show_soft_add === "function") {
+          window.show_soft_add();
+          return true;
+        }
+        if (typeof window.ShowSoftAdd === "function") {
+          window.ShowSoftAdd();
+          return true;
+        }
+      } catch (e0) {}
+      return false;
+    }
+    tryVolusionSoftCartGlobals();
+    [120, 350, 750, 1400, 2200].forEach(function (ms) {
+      setTimeout(function () {
+        mcMergeArmlessInOpenSoftCart();
+        tryVolusionSoftCartGlobals();
+      }, ms);
+    });
     var path = String(window.location.pathname || "");
     var onPdp = !!(document.getElementById("v65-product-parent") || /productdetails/i.test(path));
     if (onPdp) {
-      window.location.reload();
       return;
     }
     window.location.href = "/shoppingcart.asp";
@@ -19003,8 +19134,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
     if (mainQty > 0) {
       chain = chain.then(function () {
-        console.log("MC 4L CART SPLIT step 1: main (iframe)", mainPc, "qty", mainQty);
-        return mcPlannerMainAddViaFormTargetIframe(form, mainQty);
+        return mcPlannerAddMainTheaterLine(form, mainPc, mainQty);
       });
     } else {
       console.log("MC 4L CART SPLIT step 1 skipped (mainQty 0)");
@@ -19012,7 +19142,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
     chain
       .then(function () {
-        return mcPostArmlessLoveHts(armCode, fourLCount);
+        return mcPlannerAddArmlessPlannerLine(armCode, fourLCount);
       })
       .then(function () {
         mcPlanner4LAfterCartSplitNavigate();
