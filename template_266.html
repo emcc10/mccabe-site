@@ -4842,7 +4842,9 @@ function calculatePlannerPrice(counts, seatPrice) {
   if (!(seatPrice > 0)) return 0;
   if (!counts || typeof counts !== "object") return 0;
 
-  var total = 0;
+  var armlessUnit = Number(window.MC_ARMLESS_LOVE_HTS_MEMBER_UNIT) || 3370;
+  var billable = 0;
+  var fourL = 0;
 
   Object.keys(counts).forEach(function (id) {
     var qty = Number(counts[id] || 0);
@@ -4851,16 +4853,18 @@ function calculatePlannerPrice(counts, seatPrice) {
     id = String(id).toUpperCase();
 
     if (id === "4L") {
-      total += qty * 2 * seatPrice;
+      fourL += qty;
+      billable += qty * 2;
     } else {
-      total += qty * seatPrice;
+      billable += qty;
     }
   });
 
-  return total;
+  var mainQty = Math.max(0, billable - 2 * fourL);
+  return seatPrice * mainQty + armlessUnit * fourL;
 }
 /**
- * Planner configuration total from visible member unit and piece counts (4L = 2 billable seats); no JS discounts.
+ * Planner configuration total: main theater seats at member unit + armless-love-hts line (no discount-option math).
  */
 function mcComputePlannerConfigurationTotal(counts) {
   var unit = getPlannerBaseSeatPriceForCalc();
@@ -4872,6 +4876,9 @@ if (typeof window !== "undefined") {
   window.mcComputePlannerConfigurationTotal = mcComputePlannerConfigurationTotal;
   window.calculatePlannerPrice = calculatePlannerPrice;
 }
+
+window.MC_ARMLESS_LOVE_HTS_PRODUCT_CODE = window.MC_ARMLESS_LOVE_HTS_PRODUCT_CODE || "armless-love-hts";
+window.MC_ARMLESS_LOVE_HTS_MEMBER_UNIT = Number(window.MC_ARMLESS_LOVE_HTS_MEMBER_UNIT) || 3370;
 
 window.__mcPlannerConfigApplied = false;
 window.__mcPlannerSeatCount = 0;
@@ -5436,7 +5443,6 @@ function mcPlannerExpectedCartTotalFromPayload(payload) {
   var p = payload && typeof payload === "object" ? payload : {};
 
   var s = mcVertexSummarizePlannerPayload(p);
-  var effectiveSeats = s.seats;
 
   var unit = Number(calc.unitPrice) || 0;
 
@@ -5446,7 +5452,7 @@ function mcPlannerExpectedCartTotalFromPayload(payload) {
 
   if (!(unit > 0)) return 0;
 
-  var t = unit * effectiveSeats;
+  var t = calculatePlannerPrice(s.counts || {}, unit);
   return t > 0 ? t : 0;
 }
 
@@ -5506,7 +5512,7 @@ function mcVertexPlannerSubmitPriceSync(form, payload) {
 
   var expectedCartTotal =
     Number(calc.total) ||
-    (unitPrice > 0 && effectiveSeats > 0 ? unitPrice * effectiveSeats : 0);
+    (unitPrice > 0 ? calculatePlannerPrice(s.counts || {}, unitPrice) : 0);
 
   if (!(expectedCartTotal > 0) || !(effectiveSeats > 0)) {
     console.warn("MC CART PRICE SYNC FAILED - missing calc", {
@@ -5517,7 +5523,8 @@ function mcVertexPlannerSubmitPriceSync(form, payload) {
     return;
   }
 
-  var derivedUnit = expectedCartTotal / effectiveSeats;
+  var fourLc = Number(s.fourLCount || 0);
+  var derivedUnit = fourLc > 0 ? unitPrice : expectedCartTotal / effectiveSeats;
 
   try {
     if (window.__mcLastPlannerPayload && typeof window.__mcLastPlannerPayload === "object") {
@@ -5527,7 +5534,14 @@ function mcVertexPlannerSubmitPriceSync(form, payload) {
     }
   } catch (ePl) {}
 
-  mcVertexSetFormQuantityForPlanner(form, effectiveSeats);
+  var mainSeatQty = Math.max(0, effectiveSeats - 2 * fourLc);
+  if (fourLc > 0) {
+    if (mainSeatQty > 0) {
+      mcVertexSetFormQuantityForPlanner(form, mainSeatQty);
+    }
+  } else {
+    mcVertexSetFormQuantityForPlanner(form, effectiveSeats);
+  }
 
   console.log("MC CART PRICE SYNC", {
     source: "window.mccabeRoomPlannerPriceCalc",
@@ -5763,9 +5777,8 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
 
 <!--
   Vertex / theater PDP: planner -> Volusion sync for cart.
-  Seat count SELECT___...___49 (when present): 750 baseline + QTY for billables.
-  Configuration via mcFindConfigSelect: layout with 4L selects Volusion value MC_ARMLESS_LOVESEAT_OPTION_CODE ("855")
-  first, then text fallback (Armless Loveseat / 4L); without 4L, regular / straight / curved text match. Leather untouched.
+  Seat count SELECT___...___49 (when present): 750 baseline. 4L uses separate cart SKU armless-love-hts (not discount options).
+  Configuration select: neutral "regular/straight/curved" only — never armless-discount / 855.
 -->
 <script>
 (function mcVertexTheaterDeterministicWriter(){
@@ -5838,45 +5851,21 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
     var okCfg = false;
 
     if (configSelect) {
-      if (s.has4L) {
-        okCfg =
-          typeof mcSelectOptionByExactValue === "function" &&
-          mcSelectOptionByExactValue(configSelect, MC_ARMLESS_LOVESEAT_OPTION_CODE);
-        if (!okCfg) {
-          okCfg = mcSelectOptionByText(configSelect, [
-            /^855$/,
-            /armless\s+loveseat/i,
-            /\b4l\b/i,
-            /4\s*l/i
-          ]);
-        }
-        console.log("MC ARMLESS DISCOUNT SELECT", {
-          has4L: s.has4L,
-          armlessOptionCode: MC_ARMLESS_LOVESEAT_OPTION_CODE,
-          selected: okCfg,
-          selectName: configSelect && configSelect.name,
-          selectedText:
-            configSelect &&
-            configSelect.options[configSelect.selectedIndex] &&
-            configSelect.options[configSelect.selectedIndex].textContent,
-          selectedValue: configSelect && configSelect.value
-        });
-      } else {
-        var regPatterns = s.isCurved
-          ? [/curved/i, /regular/i, /standard/i, /no\s+armless/i]
-          : [/regular/i, /standard/i, /no\s+armless/i, /straight/i];
-        okCfg = mcSelectOptionByText(configSelect, regPatterns);
-        console.log("MC REGULAR CONFIG SELECT", {
-          has4L: s.has4L,
-          selected: okCfg,
-          selectName: configSelect && configSelect.name,
-          selectedText:
-            configSelect &&
-            configSelect.options[configSelect.selectedIndex] &&
-            configSelect.options[configSelect.selectedIndex].textContent,
-          selectedValue: configSelect && configSelect.value
-        });
-      }
+      /* 4L is cart-split to armless-love-hts — never select discount / armless loveseat option codes on the PDP. */
+      var regPatterns = s.isCurved
+        ? [/curved/i, /regular/i, /standard/i, /no\s+armless/i, /straight/i]
+        : [/regular/i, /standard/i, /no\s+armless/i, /straight/i];
+      okCfg = mcSelectOptionByText(configSelect, regPatterns);
+      console.log("MC THEATER CONFIG SELECT (4L uses separate SKU)", {
+        has4L: s.has4L,
+        selected: okCfg,
+        selectName: configSelect && configSelect.name,
+        selectedText:
+          configSelect &&
+          configSelect.options[configSelect.selectedIndex] &&
+          configSelect.options[configSelect.selectedIndex].textContent,
+        selectedValue: configSelect && configSelect.value
+      });
     }
 
     if (tag === "before-submit") {
@@ -12526,7 +12515,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     var mcCartTarget =
       mcReadCartTarget() || mcReadSessionPlannerCartTarget("", true) || mcReadPlannerCookieTarget();
     var mcPlannerLineTotal = mcCartTarget ? (Number(mcCartTarget.retailTotal) || 0) : 0;
-    var mcSuppressCart4L = mcPlannerLineTotal > 0;
+    var mcSuppressCart4L = true;
     var mcCartTargetApplied = false;
     var mcIsMember = mcCartLooksLoggedIn();
     var mcPending4LDiscount = 0;
@@ -12582,6 +12571,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     }
     function mcFinalEnforcePlannerLinePrice(root, total, cartTable){
       if (!(total > 0) || !root || !root.querySelectorAll) return;
+      if ((root.innerHTML || "").toLowerCase().indexOf("armless-love-hts") !== -1) return;
       var wantPc = String((mcCartTarget || {}).pc || "").trim().toLowerCase();
       var tblf = cartTable;
       if (!tblf || !tblf.querySelector) {
@@ -17424,7 +17414,10 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     if (!unitPrice) return;
 
     var counts = getPlannerCounts();
-    var total = (unitPrice * counts.effectiveSeatCount);
+    var fourL = counts.fourLCount || 0;
+    var mainSeats = Math.max(0, counts.effectiveSeatCount - 2 * fourL);
+    var armU = Number(window.MC_ARMLESS_LOVE_HTS_MEMBER_UNIT) || 3370;
+    var total = unitPrice * mainSeats + armU * fourL;
 
     window.mccabeRoomPlannerCartCalc = {
       unitPrice: unitPrice,
@@ -17435,7 +17428,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       total: total
     };
 
-    setQuantityToBillableSeats(counts.effectiveSeatCount);
+    setQuantityToBillableSeats(fourL > 0 ? mainSeats : counts.effectiveSeatCount);
 
     console.log("McCabe room planner cart calc:", window.mccabeRoomPlannerCartCalc);
   }
@@ -17948,7 +17941,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <script id="mc-final-planner-cart-qty-sync">
 (function () {
-  var MC_CART_SYNC_BUILD = "266-mc-sync-20260201";
+  var MC_CART_SYNC_BUILD = "266-mc-4l-split-20260201";
 
   try {
     console.info("[McCabe]", "PDP cart / armless sync loaded", MC_CART_SYNC_BUILD);
@@ -18029,8 +18022,15 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     return total;
   }
 
+  function mcGetFourLCount() {
+    var c = mcGetPlannerCounts() || window.__mcPlannerCounts || {};
+    return Number(c["4L"] || c["4l"] || 0);
+  }
+
   function mcSyncPlannerQtyToCart(form) {
     var billableQty = mcGetPlannerBillableQty();
+    var fourLCount = mcGetFourLCount();
+    var writeQty = fourLCount > 0 ? Math.max(0, billableQty - 2 * fourLCount) : billableQty;
 
     if (!(billableQty > 0)) {
       console.warn("MC CART QTY SYNC FAILED", {
@@ -18076,9 +18076,9 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     list.forEach(function (qtyInput) {
       if (!qtyInput) return;
       qtyInput.disabled = false;
-      qtyInput.value = String(billableQty);
+      qtyInput.value = String(writeQty);
       try {
-        qtyInput.setAttribute("value", String(billableQty));
+        qtyInput.setAttribute("value", String(writeQty));
       } catch (eAttr) {}
       try {
         qtyInput.dispatchEvent(new Event("input", { bubbles: true }));
@@ -18089,8 +18089,9 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     });
 
     console.log("MC CART QTY SYNC OK", {
-      submittedQty: String(billableQty),
+      submittedQty: String(writeQty),
       billableQty: billableQty,
+      fourLCount: fourLCount,
       inputsSynced: list.length,
       expectedUnit: window.__mcPerSeatPrice,
       expectedTotal: window.mccabeRoomPlannerPriceCalc && window.mccabeRoomPlannerPriceCalc.total
@@ -18409,98 +18410,35 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     return false;
   }
 
-  function mcSyncArmlessLoveseatDiscountRadios(form, has4L) {
-    var radioName = mcFindArmlessDiscountRadioName(form);
-    if (!radioName) return false;
-    var ok;
-    if (has4L) {
-      ok = mcPickRadioByPatterns(form, radioName, [
-        /armless\s+loveseat/,
-        /\b4l\b/,
-        /discount/,
-        /-\s*\$?\s*500/,
-        /500\.00/,
-        /\byes\b/
-      ]);
-    } else {
-      ok = mcPickRadioByPatterns(form, radioName, [/^no\b/, /\bno\b/, /none/, /standard/, /regular/]);
-    }
-    console.log("MC 4L DISCOUNT SYNC (radio)", { has4L: has4L, radioName: radioName, selected: ok });
-    return ok;
-  }
-
   function mcSyncArmlessLoveseatDiscount(form) {
-    var has4L = mcPlannerHas4L();
+    /* Legacy discount dropdown: keep neutral ($0 / No) — 4L is fulfilled via armless-love-hts cart line. */
     var sel = mcFindArmlessDiscountSelect(form);
-
     if (sel) {
       sel.disabled = false;
-
-      var selected = false;
-
-      if (has4L) {
-        selected = mcSelectOptionByText(sel, [
-          /armless\s+loveseat/,
-          /\b4l\b/,
-          /discount/,
-          /-\s*\$?\s*500/,
-          /\(\s*-?\s*\$?\s*500/,
-          /500\.00/,
-          /\byes\b(?![a-z])/
-        ]);
-      } else {
-        selected = mcSelectOptionByText(sel, [
+      if (
+        !mcSelectOptionByText(sel, [
           /^no\b/,
           /\bno\b/,
           /none/,
           /no\s+discount/,
           /standard/,
-          /regular/
-        ]);
-      }
-
-      if (has4L && !selected) {
-        var opts = Array.from(sel.options || []);
-        if (opts.length === 2) {
-          var t0 = String(opts[0].textContent || "")
-            .toLowerCase()
-            .trim();
-          if (/^no\b|none|without|^n\/?a\b/.test(t0)) {
-            sel.selectedIndex = 1;
-            selected = true;
-          }
-        }
-      }
-
-      if (selected) {
+          /regular/,
+          /\$0(?:\.00)?\b/
+        ])
+      ) {
         try {
-          if (typeof jQuery !== "undefined" && jQuery && jQuery(sel).length) {
-            jQuery(sel).val(sel.options[sel.selectedIndex].value).trigger("change");
+          var opts = Array.from(sel.options || []);
+          if (opts.length && String(opts[0].value || "").length) {
+            sel.selectedIndex = 0;
+            try { sel.dispatchEvent(new Event("change", { bubbles: true })); } catch (e0) {}
           }
-        } catch (ej2) {}
+        } catch (e1) {}
       }
-
-      console.log("MC 4L DISCOUNT SYNC", {
-        has4L: has4L,
-        selected: selected,
-        selectName: sel.name,
-        selectedValue: sel.value,
-        selectedText: sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].textContent
-      });
-
-      if (has4L && !selected) {
-        try {
-          console.warn("MC 4L DISCOUNT: no option matched discount patterns; labels are:", Array.from(sel.options).map(function (o) {
-            return String(o.textContent || "").trim();
-          }));
-        } catch (eOpt) {}
-      }
-      return;
     }
-
-    if (mcSyncArmlessLoveseatDiscountRadios(form, has4L)) return;
-
-    console.warn("MC 4L DISCOUNT: no Volusion armless/4L discount select or radio group found");
+    var radioName = sel ? null : mcFindArmlessDiscountRadioName(form);
+    if (radioName) {
+      mcPickRadioByPatterns(form, radioName, [/^no\b/, /\bno\b/, /none/, /standard/, /regular/]);
+    }
   }
 
   function mcRefreshMemberPriceHighWater() {
@@ -18606,6 +18544,112 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     }
   }, true);
 
+  function mcPlanner4LSplitSubmitAfterSync(ev) {
+    var form = ev.target;
+    if (!form || form.tagName !== "FORM" || !form.querySelector) return;
+    if (!window.__mcPlannerConfigApplied) return;
+    var fourLCount = mcGetFourLCount();
+    if (!(fourLCount > 0)) return;
+    if (!form.querySelector('input[name="ProductCode"]')) return;
+
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    mcSyncPlannerQtyToCart(form);
+    mcSyncArmlessLoveseatDiscount(form);
+
+    var mainPc = String((form.querySelector('input[name="ProductCode"]') || {}).value || "").trim();
+    var billableQty = mcGetPlannerBillableQty();
+    var mainQty = Math.max(0, billableQty - 2 * fourLCount);
+    var armCode = String(window.MC_ARMLESS_LOVE_HTS_PRODUCT_CODE || "armless-love-hts");
+    var armUnit = Number(window.MC_ARMLESS_LOVE_HTS_MEMBER_UNIT) || 3370;
+    var memberUnitPrice = 0;
+    if (typeof getPlannerBaseSeatPriceForCalc === "function") {
+      memberUnitPrice = Number(getPlannerBaseSeatPriceForCalc()) || 0;
+    }
+    if (!(memberUnitPrice > 0)) {
+      var c0 = window.mccabeRoomPlannerPriceCalc || {};
+      memberUnitPrice = Number(c0.unitPrice) || 0;
+    }
+
+    console.log("MC 4L CART SPLIT", {
+      mainProductCode: mainPc,
+      memberUnitPrice: memberUnitPrice,
+      billableQty: billableQty,
+      fourLCount: fourLCount,
+      mainQty: mainQty,
+      armlessProductCode: armCode,
+      armlessLoveQty: fourLCount,
+      expectedTotal: memberUnitPrice * mainQty + armUnit * fourLCount
+    });
+
+    var postUrl = form.getAttribute("action") || window.location.href;
+    if (!/^https?:/i.test(postUrl)) {
+      try {
+        postUrl = new URL(postUrl, window.location.origin).href;
+      } catch (eP) {
+        postUrl = window.location.href;
+      }
+    }
+
+    var btn =
+      form.querySelector('input[type="submit"][name="btnaddtocart"]') ||
+      form.querySelector('input[name="btnaddtocart"]') ||
+      form.querySelector('button[name="btnaddtocart"]');
+
+    var chain = Promise.resolve();
+
+    if (mainQty > 0) {
+      chain = chain.then(function () {
+        var fd = new FormData(form);
+        if (btn && btn.name) fd.set(btn.name, btn.value || "Add To Cart");
+        console.log("MC 4L CART SPLIT step 1: main line", mainPc, "qty", mainQty);
+        return fetch(postUrl, { method: "POST", body: fd, credentials: "include", redirect: "follow" }).then(
+          function (res) {
+            console.log("MC 4L CART SPLIT main add HTTP", res.status);
+            return res;
+          }
+        );
+      });
+    } else {
+      console.log("MC 4L CART SPLIT step 1 skipped (mainQty 0), armless only");
+    }
+
+    chain
+      .then(function () {
+        var armUrl =
+          window.location.origin +
+          "/ProductDetails.asp?ProductCode=" +
+          encodeURIComponent(armCode);
+        var params = new URLSearchParams();
+        params.set("ProductCode", armCode);
+        params.set("QTY." + armCode, String(fourLCount));
+        params.set("btnaddtocart", "btnaddtocart");
+        console.log("MC 4L CART SPLIT step 2:", armCode, "qty", fourLCount);
+        return fetch(armUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: params.toString(),
+          credentials: "include",
+          redirect: "follow"
+        }).then(function (res) {
+          console.log("MC 4L CART SPLIT armless add HTTP", res.status);
+          return res;
+        });
+      })
+      .then(function () {
+        window.location.href = "/shoppingcart.asp";
+      })
+      .catch(function (err) {
+        console.error("MC 4L CART SPLIT error", err);
+        try {
+          alert("Could not add all items to the cart. Please try again or contact us.");
+        } catch (eA) {}
+      });
+  }
+
+  document.addEventListener("submit", mcPlanner4LSplitSubmitAfterSync, true);
+
   setTimeout(mcSnapshotMemberUnitFloorBeforeCart, 1800);
 
   if (document.getElementById("v65-product-parent")) {
@@ -18619,6 +18663,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
   window.mcSyncPlannerQtyToCart = mcSyncPlannerQtyToCart;
   window.mcGetPlannerBillableQty = mcGetPlannerBillableQty;
+  window.mcGetFourLCount = mcGetFourLCount;
   window.mcSyncArmlessLoveseatDiscount = mcSyncArmlessLoveseatDiscount;
   window.mcDebugArmlessDiscount = function () {
     var form =
