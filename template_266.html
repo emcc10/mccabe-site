@@ -4931,6 +4931,15 @@ function getPlannerBaseSeatPriceForCalc() {
   var fromState = Number(st.memberSeatPrice || st.memberPrice || 0);
   if (fromState > floor) floor = fromState;
 
+  var fromMeta = 0;
+  try {
+    if (typeof mcReadMetaMemberSeatPriceForPlanner === "function") {
+      fromMeta = Number(mcReadMetaMemberSeatPriceForPlanner() || 0);
+    }
+  } catch (eMeta) {}
+
+  if (fromMeta > floor) floor = fromMeta;
+
   var member = raw;
   if (raw > 0 && floor > 0 && raw < floor - 75) {
     member = floor;
@@ -18057,6 +18066,13 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <script id="mc-final-planner-cart-qty-sync">
 (function () {
+  var MC_CART_SYNC_BUILD = "266-mc-sync-20260201";
+
+  try {
+    console.info("[McCabe]", "PDP cart / armless sync loaded", MC_CART_SYNC_BUILD);
+    window.__mcCartSyncBuild = MC_CART_SYNC_BUILD;
+  } catch (eInfo) {}
+
   try {
     if (!document.getElementById("mc-planner-armless-discount-css")) {
       var css = document.createElement("style");
@@ -18294,7 +18310,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     var ai;
 
     var volSels = document.querySelectorAll(
-      '#content_area select[name^="SELECT___"], #v65-product-parent select[name^="SELECT___"], #options_table select[name^="SELECT___"]'
+      '#content_area select[name^="SELECT___"], #content_area select[name^="select___"], #v65-product-parent select[name^="SELECT___"], #v65-product-parent select[name^="select___"], #options_table select[name^="SELECT___"], #options_table select[name^="select___"]'
     );
     for (ai = 0; ai < volSels.length; ai++) {
       if (seen.indexOf(volSels[ai]) !== -1) continue;
@@ -18748,13 +18764,45 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     }
   }
 
+  function mcRefreshMemberPriceHighWater() {
+    try {
+      if (typeof mcReadCurrentVisibleMemberUnitPrice !== "function") return;
+      if (!document.getElementById("v65-product-parent")) return;
+      var v = Number(mcReadCurrentVisibleMemberUnitPrice() || 0);
+      if (!(v > 0)) return;
+      var k =
+        "mc_mbr_hw_" +
+        String(location.pathname || "pdp")
+          .replace(/[^a-z0-9]+/gi, "_")
+          .slice(0, 120);
+      var prev = 0;
+      try {
+        prev = Number(sessionStorage.getItem(k) || 0);
+      } catch (eS) {}
+      if (v > prev) {
+        try {
+          sessionStorage.setItem(k, String(v));
+        } catch (e2) {}
+        prev = v;
+      }
+      window.__mcMemberUnitPriceFloor = Math.max(Number(window.__mcMemberUnitPriceFloor || 0), prev);
+    } catch (eH) {}
+  }
+
   function mcSnapshotMemberUnitFloorBeforeCart() {
     try {
+      mcRefreshMemberPriceHighWater();
       if (typeof mcReadCurrentVisibleMemberUnitPrice !== "function") return;
       var snapVis = Number(mcReadCurrentVisibleMemberUnitPrice() || 0);
       var st0 = window.__mcMemberPricing || {};
       var snapSt = Number(st0.memberSeatPrice || st0.memberPrice || 0);
-      var snap = Math.max(snapVis, snapSt);
+      var snapMeta = 0;
+      try {
+        if (typeof mcReadMetaMemberSeatPriceForPlanner === "function") {
+          snapMeta = Number(mcReadMetaMemberSeatPriceForPlanner() || 0);
+        }
+      } catch (eMt) {}
+      var snap = Math.max(snapVis, snapSt, snapMeta);
       if (snap > 0) {
         var prevF = Number(window.__mcMemberUnitPriceFloor || 0);
         window.__mcMemberUnitPriceFloor = Math.max(prevF, snap);
@@ -18814,6 +18862,15 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
   setTimeout(mcSnapshotMemberUnitFloorBeforeCart, 1800);
 
+  if (document.getElementById("v65-product-parent")) {
+    var hwTick = 0;
+    var hwIv = setInterval(function () {
+      hwTick++;
+      mcRefreshMemberPriceHighWater();
+      if (hwTick >= 48) clearInterval(hwIv);
+    }, 500);
+  }
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", mcRunArmlessDiscountRowHide);
   } else {
@@ -18833,6 +18890,17 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       }, 280);
     }
   });
+
+  try {
+    var caObs = document.getElementById("content_area");
+    if (caObs && window.MutationObserver && !caObs.__mcArmlessHideObs) {
+      caObs.__mcArmlessHideObs = true;
+      var obsCa = new MutationObserver(function () {
+        mcScheduleArmlessDiscountRowHide();
+      });
+      obsCa.observe(caObs, { childList: true, subtree: true });
+    }
+  } catch (eObCa) {}
 
   try {
     var v65obs = document.getElementById("v65-product-parent");
