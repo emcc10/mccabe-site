@@ -18087,7 +18087,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <script id="mc-final-planner-cart-qty-sync">
 (function () {
-  var MC_CART_SYNC_BUILD = "266-mc-4l-split-20260501c";
+  var MC_CART_SYNC_BUILD = "266-mc-4l-split-20260501d";
 
   try {
     console.info("[McCabe]", "PDP cart / armless sync loaded", MC_CART_SYNC_BUILD);
@@ -18809,26 +18809,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     return true;
   }
 
-  function mcVolusionFormQueryStringForSoftAdd(form, mainQty) {
-    mcSetDomPlannerMainQty(form, mainQty);
-    var params;
-    try {
-      params = new URLSearchParams(new FormData(form));
-    } catch (eFD) {
-      params = new URLSearchParams();
-      Array.prototype.slice.call(form.elements).forEach(function (el) {
-        if (!el || !el.name || el.disabled) return;
-        if ((el.type === "checkbox" || el.type === "radio") && !el.checked) return;
-        if (el.type === "file") return;
-        params.append(el.name, el.value != null ? String(el.value) : "");
-      });
-    }
-    params.set("AjaxError", "Y");
-    params.set("batchadd", "Y");
-    params.set("btnaddtocart", "btnaddtocart");
-    return params.toString();
-  }
-
   function mcMergeArmlessInOpenSoftCart() {
     try {
       var wrap = document.querySelector(".soft_add_wrapper");
@@ -18881,53 +18861,18 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function mcPlannerAddMainTheaterLine(form, mainPc, mainQty) {
-    return new Promise(function (resolve, reject) {
-      if (!(mainQty > 0)) {
-        resolve();
-        return;
-      }
-      if (typeof window.SoftAddSingleItem === "function") {
-        try {
-          var qMain = mcVolusionFormQueryStringForSoftAdd(form, mainQty);
-          console.log("MC 4L CART SPLIT step 1: main SoftAddSingleItem", mainPc, mainQty);
-          window.SoftAddSingleItem(encodeURIComponent(mainPc), String(mainQty), qMain);
-          setTimeout(resolve, 650);
-          return;
-        } catch (eS) {
-          console.warn("MC 4L SoftAddSingleItem main failed", eS);
-        }
-      }
-      console.log("MC 4L CART SPLIT step 1: main iframe", mainPc, mainQty);
-      mcPlannerMainAddViaFormTargetIframe(form, mainQty).then(resolve).catch(reject);
-    });
+    if (!(mainQty > 0)) {
+      return Promise.resolve();
+    }
+    console.log("MC 4L CART SPLIT step 1: main iframe", mainPc, "qty", mainQty);
+    return mcPlannerMainAddViaFormTargetIframe(form, mainQty);
   }
 
   function mcPlannerAddArmlessPlannerLine(armCode, fourLCount) {
-    return new Promise(function (resolve, reject) {
-      if (!(fourLCount > 0)) {
-        resolve();
-        return;
-      }
-      if (typeof window.SoftAddSingleItem === "function") {
-        try {
-          var qArm =
-            "ProductCode=" +
-            encodeURIComponent(armCode) +
-            "&QTY." +
-            encodeURIComponent(armCode) +
-            "=" +
-            encodeURIComponent(String(fourLCount)) +
-            "&btnaddtocart=btnaddtocart&AjaxError=Y&batchadd=Y";
-          console.log("MC 4L CART SPLIT step 2: armless SoftAddSingleItem", armCode, fourLCount);
-          window.SoftAddSingleItem(encodeURIComponent(armCode), String(fourLCount), qArm);
-          setTimeout(resolve, 650);
-          return;
-        } catch (eA) {
-          console.warn("MC 4L SoftAddSingleItem armless failed", eA);
-        }
-      }
-      mcPostArmlessLoveHts(armCode, fourLCount).then(resolve).catch(reject);
-    });
+    if (!(fourLCount > 0)) {
+      return Promise.resolve();
+    }
+    return mcPostArmlessLoveHts(armCode, fourLCount);
   }
 
   function mcSetDomPlannerMainQty(form, mainQty) {
@@ -18958,7 +18903,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       iframe.name = iframeName;
       iframe.title = "add to cart";
       iframe.setAttribute("aria-hidden", "true");
-      iframe.setAttribute("sandbox", "allow-forms allow-scripts allow-same-origin allow-popups");
       iframe.style.cssText =
         "position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;border:0;pointer-events:none";
       document.body.appendChild(iframe);
