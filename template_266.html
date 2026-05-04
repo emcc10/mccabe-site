@@ -18048,6 +18048,25 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <script id="mc-final-planner-cart-qty-sync">
 (function () {
+  try {
+    if (!document.getElementById("mc-planner-armless-discount-css")) {
+      var css = document.createElement("style");
+      css.id = "mc-planner-armless-discount-css";
+      css.textContent =
+        "body.productdetails #v65-product-parent [data-mc-planner-managed-discount='1'],body.productdetails #content_area [data-mc-planner-managed-discount='1'],body.productdetails .mc-planner-armless-discount-hidden,body.productdetails #options_table [data-mc-planner-managed-discount='1']{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important;line-height:0!important;}";
+      document.head.appendChild(css);
+    }
+  } catch (eCss) {}
+
+  var mcArmlessHideDeb = null;
+  function mcScheduleArmlessDiscountRowHide() {
+    if (mcArmlessHideDeb) clearTimeout(mcArmlessHideDeb);
+    mcArmlessHideDeb = setTimeout(function () {
+      mcArmlessHideDeb = null;
+      mcRunArmlessDiscountRowHide();
+    }, 80);
+  }
+
   function mcFindRealQtyInput(form) {
     return (
       (form && (
@@ -18173,6 +18192,19 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     });
   }
 
+  function mcPlannerLayoutHas4L(data) {
+    if (!data || !data.layout || !Array.isArray(data.layout)) return false;
+    var i, item, id;
+    for (i = 0; i < data.layout.length; i++) {
+      item = data.layout[i];
+      id = String((item && item.id) != null ? item.id : item || "")
+        .trim()
+        .toUpperCase();
+      if (id === "4L") return true;
+    }
+    return false;
+  }
+
   function mcPlannerHas4L() {
     var calc = window.mccabeRoomPlannerPriceCalc || {};
     var data = window.mccabeRoomPlannerData || window.roomPlannerData || window.__mcLastPlannerPayload || null;
@@ -18183,6 +18215,11 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     if (plannerCounts && Number(plannerCounts["4L"] || plannerCounts["4l"] || 0) > 0) {
       return true;
     }
+
+    if (data && mcPlannerLayoutHas4L(data)) return true;
+
+    var layout = window.__ROOM_PLANNER_LAYOUT__;
+    if (layout && mcPlannerLayoutHas4L({ layout: layout })) return true;
 
     var counts =
       calc.counts ||
@@ -18212,9 +18249,37 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     return bits.join(" | ");
   }
 
+  function mcCollectPdpSelects(form) {
+    var roots = [];
+    var v65 = document.getElementById("v65-product-parent");
+    if (v65) roots.push(v65);
+    var optTable =
+      document.getElementById("options_table") ||
+      document.querySelector("#v65-product-parent table[id*='options_table']") ||
+      document.querySelector("table[id*='options_table']");
+    if (optTable) roots.push(optTable);
+    var area = document.getElementById("content_area");
+    if (area) roots.push(area);
+    if (form) roots.push(form);
+
+    var seen = [];
+    var out = [];
+    var ri, r, arr, ai;
+    for (ri = 0; ri < roots.length; ri++) {
+      r = roots[ri];
+      if (!r || !r.querySelectorAll) continue;
+      arr = r.querySelectorAll("select");
+      for (ai = 0; ai < arr.length; ai++) {
+        if (seen.indexOf(arr[ai]) !== -1) continue;
+        seen.push(arr[ai]);
+        out.push(arr[ai]);
+      }
+    }
+    return out;
+  }
+
   function mcFindArmlessDiscountSelect(form) {
-    var root = form || document;
-    var selects = Array.from(root.querySelectorAll("select"));
+    var selects = mcCollectPdpSelects(form);
 
     return selects.find(function (sel) {
       var optionText = Array.from(sel.options || []).map(function (o) {
@@ -18222,6 +18287,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       }).join(" | ");
 
       if (/armless|4l|loveseat|discount/.test(optionText)) return true;
+      if (/-\s*\$?\s*500|500\.00|500\s*off|subtract|credit/.test(optionText)) return true;
 
       var name = String(sel.name || "").toLowerCase();
       if (/armless|4l|loveseat|discount/.test(name)) return true;
@@ -18230,7 +18296,10 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       if (/armless|4l|loveseat|discount/.test(id)) return true;
 
       var hood = mcSelectNeighborhoodText(sel);
-      return /armless|4l|loveseat|discount/.test(hood);
+      return (
+        /armless|4l|loveseat|discount/.test(hood) ||
+        /-\s*\$?\s*500|500\.00|500\s*off/.test(hood)
+      );
     });
   }
 
@@ -18256,6 +18325,11 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
     try { select.dispatchEvent(new Event("input", { bubbles: true })); } catch(e) {}
     try { select.dispatchEvent(new Event("change", { bubbles: true })); } catch(e) {}
+    try {
+      if (typeof jQuery !== "undefined" && jQuery && jQuery.fn && jQuery(select).length) {
+        jQuery(select).val(found.value).trigger("change");
+      }
+    } catch (ej) {}
 
     return true;
   }
@@ -18316,19 +18390,35 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       sel.disabled = false;
     } catch (eEn) {}
 
-    var el = sel;
+    var row =
+      (sel.closest && sel.closest("tr")) ||
+      (sel.closest && sel.closest(".v65-productdetail-options")) ||
+      (sel.closest && sel.closest(".v65-product-select")) ||
+      null;
+
+    var el = row;
     var i;
-    for (i = 0; i < 8 && el; i++) {
+    if (!el) el = sel.parentElement;
+    for (i = 0; i < 14 && el; i++) {
       var tag = (el.tagName || "").toUpperCase();
-      if (tag === "TR" || tag === "LI" || (el.className && String(el.className).indexOf("option") !== -1)) {
+      var cls = String(el.className || "");
+      if (
+        tag === "TR" ||
+        tag === "LI" ||
+        tag === "DD" ||
+        tag === "DT" ||
+        /v65-product|options|productdetail|option_row|option-row/i.test(cls)
+      ) {
         try {
           el.setAttribute("data-mc-planner-managed-discount", "1");
+          el.classList.add("mc-planner-armless-discount-hidden");
           el.style.setProperty("display", "none", "important");
           el.style.setProperty("visibility", "hidden", "important");
           el.style.setProperty("height", "0", "important");
           el.style.setProperty("overflow", "hidden", "important");
           el.style.setProperty("margin", "0", "important");
           el.style.setProperty("padding", "0", "important");
+          el.style.setProperty("border", "0", "important");
         } catch (eH) {}
         return;
       }
@@ -18365,6 +18455,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
     mcSyncPlannerQtyToCart(form);
     mcSyncArmlessLoveseatDiscount(form);
+    mcHideArmlessDiscountOptionRow(form);
   }, true);
 
   document.addEventListener("submit", function (e) {
@@ -18379,6 +18470,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     ) {
       mcSyncPlannerQtyToCart(form);
       mcSyncArmlessLoveseatDiscount(form);
+      mcHideArmlessDiscountOptionRow(form);
     }
   }, true);
 
@@ -18391,7 +18483,19 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     mcRunArmlessDiscountRowHide();
     setTimeout(mcRunArmlessDiscountRowHide, 400);
     setTimeout(mcRunArmlessDiscountRowHide, 1200);
+    setTimeout(mcRunArmlessDiscountRowHide, 2500);
   });
+
+  try {
+    var v65obs = document.getElementById("v65-product-parent");
+    if (v65obs && window.MutationObserver && !v65obs.__mcArmlessHideObs) {
+      v65obs.__mcArmlessHideObs = true;
+      var obs = new MutationObserver(function () {
+        mcScheduleArmlessDiscountRowHide();
+      });
+      obs.observe(v65obs, { childList: true, subtree: true });
+    }
+  } catch (eOb) {}
 
   window.mcSyncPlannerQtyToCart = mcSyncPlannerQtyToCart;
   window.mcSyncArmlessLoveseatDiscount = mcSyncArmlessLoveseatDiscount;
