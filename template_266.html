@@ -5044,14 +5044,34 @@ window.applyPlannerToPage = function (payload) {
     }
   }
 
-  var seatCount = (payload.seatCount != null && payload.seatCount !== "") ? Number(payload.seatCount) : NaN;
-  if (isNaN(seatCount) || seatCount < 0) {
-    seatCount = opts["4L"]
-      ? opts["4L"] * 2 + Object.keys(opts).filter(function(k){ return k !== "4L"; }).reduce(function(t, k){ return t + (opts[k] || 0); }, 0)
-      : Object.keys(opts).reduce(function(t, k){ return t + (opts[k] || 0); }, 0);
+  var configOpts = opts;
+  if (layout.length) {
+    configOpts = {};
+    for (var _mj = 0; _mj < layout.length; _mj++) {
+      var _seg = layout[_mj];
+      var _pid = _seg && (_seg.id != null && _seg.id !== "" ? _seg.id : _seg);
+      _pid = String(_pid != null ? _pid : "").trim().toUpperCase();
+      if (!_pid) continue;
+      configOpts[_pid] = (Number(configOpts[_pid]) || 0) + 1;
+    }
   }
 
-  var configOpts = opts;
+  var seatCount = (payload.seatCount != null && payload.seatCount !== "") ? Number(payload.seatCount) : NaN;
+  if (isNaN(seatCount) || seatCount < 0) {
+    seatCount = configOpts["4L"]
+      ? Number(configOpts["4L"] || 0) * 2 +
+        Object.keys(configOpts)
+          .filter(function (k) {
+            return k !== "4L";
+          })
+          .reduce(function (t, k) {
+            return t + (Number(configOpts[k]) || 0);
+          }, 0)
+      : Object.keys(configOpts).reduce(function (t, k) {
+          return t + (Number(configOpts[k]) || 0);
+        }, 0);
+  }
+
   window.__mcPlannerCounts = configOpts;
   window.__mcPlannerSeatCount = hasPlannerConfig ? seatCount : 0;
 
@@ -17110,7 +17130,16 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       };
     }
 
-    if (raw.counts && typeof raw.counts === "object") {
+    if (Array.isArray(raw.layout) && raw.layout.length) {
+      raw.layout.forEach(function (seg) {
+        var pid = seg && (seg.id != null && seg.id !== "" ? seg.id : seg);
+        addPiece(pid, 1);
+      });
+    } else if (raw.options && typeof raw.options === "object") {
+      Object.keys(raw.options).forEach(function (key) {
+        addPiece(key, raw.options[key]);
+      });
+    } else if (raw.counts && typeof raw.counts === "object") {
       Object.keys(raw.counts).forEach(function (key) {
         addPiece(key, raw.counts[key]);
       });
@@ -18034,7 +18063,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <script id="mc-final-planner-cart-qty-sync">
 (function () {
-  var MC_CART_SYNC_BUILD = "266-mc-4l-split-20260202";
+  var MC_CART_SYNC_BUILD = "266-mc-4l-split-20260501";
 
   try {
     console.info("[McCabe]", "PDP cart / armless sync loaded", MC_CART_SYNC_BUILD);
@@ -18062,13 +18091,32 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     var calc = window.mccabeRoomPlannerPriceCalc || {};
     var data = window.mccabeRoomPlannerData || window.roomPlannerData || window.__mcLastPlannerPayload || null;
 
-    if (calc.counts && typeof calc.counts === "object") return calc.counts;
     var pc = window.__mcPlannerCounts;
     if (pc && typeof pc === "object") {
       var pk;
       for (pk in pc) {
         if (Object.prototype.hasOwnProperty.call(pc, pk) && Number(pc[pk] || 0) > 0) return pc;
       }
+    }
+    if (calc.counts && typeof calc.counts === "object") return calc.counts;
+    var lay = window.__ROOM_PLANNER_LAYOUT__;
+    if (Array.isArray(lay) && lay.length) {
+      var hist = {};
+      for (var li = 0; li < lay.length; li++) {
+        var seg = lay[li];
+        var pid = seg && (seg.id != null && seg.id !== "" ? seg.id : seg);
+        pid = String(pid != null ? pid : "")
+          .trim()
+          .toUpperCase();
+        if (!pid) continue;
+        hist[pid] = (Number(hist[pid]) || 0) + 1;
+      }
+      var hk;
+      var histSum = 0;
+      for (hk in hist) {
+        if (Object.prototype.hasOwnProperty.call(hist, hk)) histSum += Number(hist[hk] || 0);
+      }
+      if (histSum > 0) return hist;
     }
     if (data && data.counts && typeof data.counts === "object") return data.counts;
     if (data && data.options && typeof data.options === "object") return data.options;
