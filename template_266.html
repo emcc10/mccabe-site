@@ -12559,9 +12559,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     var mcCartDelta = 0;
     var mcCartTarget =
       mcReadCartTarget() || mcReadSessionPlannerCartTarget("", true) || mcReadPlannerCookieTarget();
-    var mcPlannerLineTotal = mcCartTarget ? (Number(mcCartTarget.retailTotal) || 0) : 0;
     var mcSuppressCart4L = true;
-    var mcCartTargetApplied = false;
     var mcIsMember = mcCartLooksLoggedIn();
     var mcPending4LDiscount = 0;
     var mcPending4LPayload = null;
@@ -12952,21 +12950,8 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
         if (row.querySelector("img")) lineItemRows++;
       }
       if (lineItemRows === 0) {
-        /* keep mcSelectedCartTable for final enforce */
+        /* keep mcSelectedCartTable */
       } else {
-      var loneLineTr = null;
-      if (lineItemRows === 1) {
-        for (var r0 = 0; r0 < rows.length; r0++) {
-          var tr0 = rows[r0];
-          if (tr0.querySelector("th")) continue;
-          if (tr0.querySelectorAll("td").length < 4) continue;
-          if (!tr0.querySelector("img")) continue;
-          var rtx = (tr0.textContent || "").toLowerCase();
-          if (rtx.indexOf("tax:") !== -1 || /total:\s*\$/.test(rtx)) continue;
-          loneLineTr = tr0;
-          break;
-        }
-      }
       var rowIndex = 0;
       for (var ri = 0; ri < rows.length; ri++) {
         var tr = rows[ri];
@@ -12990,30 +12975,6 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
           return null;
         })();
         var removeHref = removeLink ? ((removeLink.href || removeLink.getAttribute("href") || "").trim()) : "";
-        var pcRowEarly = mcGuessProductCodeFromRow(tr, removeHref);
-        var allowSessionAny = lineItemRows === 1 && loneLineTr === tr;
-        var applyCartTgt = mcReadCartTargetPreferPc(pcRowEarly, allowSessionAny) || mcCartTarget;
-        if (!mcCartTargetApplied && applyCartTgt) {
-          /* Theater planner: cart line must match configuration total (retailTotal), not memberTotal. */
-          var desired = Number(applyCartTgt.retailTotal || 0);
-          if (desired > 0) {
-            var hit = false;
-            var rowNorm = rowText.replace(/\s+/g, "");
-            var pc = String(applyCartTgt.pc || "").toLowerCase().replace(/\s+/g, "");
-            var nm = String(applyCartTgt.name || "").toLowerCase();
-            var pcRowNorm = String(pcRowEarly || "").toLowerCase().replace(/\s+/g, "");
-            if (pc && pcRowNorm && pc === pcRowNorm) hit = true;
-            else if (pc && rowNorm.indexOf(pc) !== -1) hit = true;
-            else if (nm && nm.length > 5 && rowText.indexOf(nm) !== -1) hit = true;
-            else if (lineItemRows === 1 && loneLineTr === tr) hit = true;
-            else if (!pc && !nm) hit = true;
-            if (hit) {
-              var d = mcApplyCartTargetPrice(tr, desired);
-              if (d !== 0) mcCartDelta += d;
-              mcCartTargetApplied = true;
-            }
-          }
-        }
         var pcRowGuess = "";
         var nmRowGuess = "";
         var rowCached4LDiscount = 0;
@@ -13104,29 +13065,6 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
           }
         }
       }
-      // Deterministic fallback: if cart target wasn't matched by code/name, force-apply to primary row.
-      if (!mcCartTargetApplied && mcCartTarget && mcFallbackRow && mcFallbackRow.tr) {
-        var fr = mcFallbackRow.tr;
-        var flnk =
-          fr.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]') ||
-          (function(){
-            var links = fr.querySelectorAll("a[href]");
-            for (var Lf = 0; Lf < links.length; Lf++) {
-              var ltf = (links[Lf].textContent || "").toLowerCase();
-              var lhf = (links[Lf].getAttribute("href") || "").toLowerCase();
-              if (ltf.indexOf("remove") !== -1 || ltf.indexOf("delete") !== -1 || lhf.indexOf("remove") !== -1 || lhf.indexOf("delete") !== -1) return links[Lf];
-            }
-            return null;
-          })();
-        var fhMc = flnk ? ((flnk.href || flnk.getAttribute("href") || "").trim()) : "";
-        var fbTgt = mcReadCartTargetPreferPc(mcGuessProductCodeFromRow(fr, fhMc), lineItemRows === 1) || mcCartTarget;
-        var desiredFallback = Number(fbTgt.retailTotal || 0);
-        if (desiredFallback > 0) {
-          var d2 = mcApplyCartTargetPrice(fr, desiredFallback);
-          if (d2 !== 0) mcCartDelta += d2;
-          mcCartTargetApplied = true;
-        }
-      }
       }
     }
     if (!mcSuppressCart4L && mcTotal4LDiscount > 0) {
@@ -13179,13 +13117,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
       if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(note, anchor);
       else content.appendChild(note);
     }
-    if (mcSelectedCartTable) {
-      mcMergeArmlessLoveHtsSatelliteLine(mcSelectedCartTable);
-    }
-    if (mcPlannerLineTotal > 0) {
-      mcFinalEnforcePlannerLinePrice(content, mcPlannerLineTotal, mcSelectedCartTable);
-      mcAlignSubtotalForSingleLinePlanner(content, mcPlannerLineTotal, mcSelectedCartTable);
-    }
+    /* Split cart: show native Volusion line totals per SKU; do not merge armless row or enforce planner configuration total on a line. */
   }
   function runWhenCartReady() {
     if (!isCartPage()) return;
@@ -19375,6 +19307,22 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     return /armless|4l|loveseat|discount/.test(optionText + " " + sig);
   }
 
+  function hideDisplay(el) {
+    if (!el || !el.style) return;
+    el.style.setProperty("display", "none", "important");
+  }
+
+  function hideRowFor(el) {
+    if (!el) return;
+    var row =
+      el.closest("tr") ||
+      el.closest(".v65-productdetail-options-row") ||
+      el.closest(".productnamecolor") ||
+      el.closest("li") ||
+      null;
+    hideDisplay(row || el);
+  }
+
   function hideArmlessOptionRows() {
     var root = document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
 
@@ -19383,27 +19331,22 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
       sel.disabled = false;
 
-      var row =
-        sel.closest("tr") ||
-        sel.closest(".v65-productdetail-options-row") ||
-        sel.closest(".productnamecolor") ||
-        sel.closest("td") ||
-        sel.parentElement;
+      hideRowFor(sel);
 
-      if (row) {
-        row.style.setProperty("display", "none", "important");
-        row.style.setProperty("visibility", "hidden", "important");
-        row.style.setProperty("height", "0", "important");
-        row.style.setProperty("margin", "0", "important");
-        row.style.setProperty("padding", "0", "important");
-        row.style.setProperty("overflow", "hidden", "important");
+      if (sel.labels && sel.labels.length) {
+        Array.from(sel.labels).forEach(hideRowFor);
+      }
+      if (sel.id) {
+        var q = 'label[for="' + String(sel.id).replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"]';
+        Array.from(root.querySelectorAll(q)).forEach(hideRowFor);
       }
 
-      sel.style.setProperty("display", "none", "important");
-      sel.style.setProperty("visibility", "hidden", "important");
-      sel.style.setProperty("height", "0", "important");
-      sel.style.setProperty("width", "0", "important");
-      sel.style.setProperty("opacity", "0", "important");
+      var tr = sel.closest("tr");
+      if (tr && tr.previousElementSibling && tr.previousElementSibling.tagName === "TR") {
+        var prev = tr.previousElementSibling;
+        var ptxt = text(prev);
+        if (ptxt && /armless|loveseat|\b4\s*l\b|discount/.test(ptxt) && ptxt.length < 120) hideDisplay(prev);
+      }
     });
   }
 
