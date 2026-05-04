@@ -12569,9 +12569,99 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
         }
       }
     }
+    function mcMergeArmlessLoveHtsSatelliteLine(tbl) {
+      try {
+        var armRaw = String(window.MC_ARMLESS_LOVE_HTS_PRODUCT_CODE || "armless-love-hts").trim();
+        var armCode = armRaw.toLowerCase().replace(/\s+/g, "");
+        if (!tbl || !armCode) return;
+        var low = (tbl.innerHTML || "").toLowerCase();
+        if (low.indexOf(armRaw.toLowerCase()) === -1 && low.indexOf(armCode) === -1) return;
+
+        var rows0 = tbl.querySelectorAll("tbody tr, tr");
+        var armTr = null;
+        var mainTr = null;
+        var wantPc = String((mcCartTarget || {}).pc || "")
+          .toLowerCase()
+          .replace(/\s+/g, "");
+
+        for (var mi = 0; mi < rows0.length; mi++) {
+          var trm = rows0[mi];
+          if (trm.querySelector("th")) continue;
+          if (trm.querySelectorAll("td").length < 4) continue;
+          if (!trm.querySelector("img")) continue;
+          var rlm = trm.querySelector('a[href*="Remove"], a[href*="remove"], a[href*="Delete"], a[href*="delete"]');
+          var hrefm = rlm ? (rlm.getAttribute("href") || rlm.href || "").trim() : "";
+          var pcm = String(mcGuessProductCodeFromRow(trm, hrefm) || "")
+            .toLowerCase()
+            .replace(/\s+/g, "");
+          if (pcm && pcm === armCode) armTr = trm;
+          else if (wantPc && pcm === wantPc) mainTr = trm;
+        }
+        if (!armTr) return;
+        if (!mainTr) {
+          for (var mj = 0; mj < rows0.length; mj++) {
+            var trj = rows0[mj];
+            if (trj === armTr) continue;
+            if (trj.querySelector("th")) continue;
+            if (trj.querySelectorAll("td").length < 4) continue;
+            if (!trj.querySelector("img")) continue;
+            var rlj = trj.querySelector('a[href*="Remove"], a[href*="remove"]');
+            var hrefj = rlj ? (rlj.getAttribute("href") || rlj.href || "").trim() : "";
+            var pcj = String(mcGuessProductCodeFromRow(trj, hrefj) || "")
+              .toLowerCase()
+              .replace(/\s+/g, "");
+            if (pcj && pcj !== armCode) {
+              mainTr = trj;
+              break;
+            }
+          }
+        }
+        if (!mainTr || mainTr === armTr) return;
+
+        function rowLargestMoney(tr) {
+          var cells = tr.querySelectorAll("td");
+          var best = 0;
+          var bestCell = null;
+          for (var c = 0; c < cells.length; c++) {
+            var tx = (cells[c].textContent || "").trim();
+            var m = tx.match(/\$[\d,]+(?:\.\d{2})?/);
+            if (!m) continue;
+            var n = parseFloat(m[0].replace(/[$,]/g, ""));
+            if (n > best) {
+              best = n;
+              bestCell = cells[c];
+            }
+          }
+          return { n: best, cell: bestCell };
+        }
+
+        var armD = rowLargestMoney(armTr);
+        var mainD = rowLargestMoney(mainTr);
+        if (!(armD.n > 0) || !mainD.cell) return;
+
+        var sum = mainD.n + armD.n;
+        var txMain = (mainD.cell.textContent || "").trim();
+        mainD.cell.textContent = txMain.replace(/\$[\d,]+(?:\.\d{2})?/, mcFmtMoney(sum));
+
+        var pn = mainTr.querySelector(".product-name a, td a[href*='ProductDetails' i]");
+        if (pn && (pn.textContent || "").toLowerCase().indexOf("loveseat") === -1) {
+          var par = pn.parentNode;
+          if (par && !par.querySelector(".mc-cart-merged-armless-note")) {
+            var note = document.createElement("div");
+            note.className = "mc-cart-merged-armless-note";
+            note.style.cssText = "font-size:12px;font-weight:400;color:#555;margin-top:4px;";
+            note.textContent = "Includes armless loveseat (room planner 4L).";
+            par.appendChild(note);
+          }
+        }
+
+        armTr.style.display = "none";
+        armTr.setAttribute("aria-hidden", "true");
+        armTr.classList.add("mc-cart-merged-armless-love");
+      } catch (eMrg) {}
+    }
     function mcFinalEnforcePlannerLinePrice(root, total, cartTable){
       if (!(total > 0) || !root || !root.querySelectorAll) return;
-      if ((root.innerHTML || "").toLowerCase().indexOf("armless-love-hts") !== -1) return;
       var wantPc = String((mcCartTarget || {}).pc || "").trim().toLowerCase();
       var tblf = cartTable;
       if (!tblf || !tblf.querySelector) {
@@ -13043,6 +13133,9 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
       var anchor = content.querySelector("table") || content.firstElementChild || content;
       if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(note, anchor);
       else content.appendChild(note);
+    }
+    if (mcSelectedCartTable) {
+      mcMergeArmlessLoveHtsSatelliteLine(mcSelectedCartTable);
     }
     if (mcPlannerLineTotal > 0) {
       mcFinalEnforcePlannerLinePrice(content, mcPlannerLineTotal, mcSelectedCartTable);
@@ -17987,6 +18080,21 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     var calc = window.mccabeRoomPlannerPriceCalc || {};
     var data = window.mccabeRoomPlannerData || window.roomPlannerData || window.__mcLastPlannerPayload || null;
 
+    var countBillable = 0;
+    var countsOnly = mcGetPlannerCounts();
+    if (countsOnly) {
+      Object.keys(countsOnly).forEach(function (key) {
+        var qty = Number(countsOnly[key] || 0);
+        if (!qty) return;
+        var id = String(key).toUpperCase();
+        if (id === "4L") {
+          countBillable += qty * 2;
+        } else {
+          countBillable += qty;
+        }
+      });
+    }
+
     var direct =
       Number(calc.effectiveSeats) ||
       Number(calc.billableSeats) ||
@@ -17999,27 +18107,23 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       (data && Number(data.seatCount)) ||
       0;
 
-    if (direct > 0) return direct;
+    if (!(direct > 0) && countsOnly) {
+      var total = 0;
+      Object.keys(countsOnly).forEach(function (key) {
+        var qty = Number(countsOnly[key] || 0);
+        if (!qty) return;
+        var id = String(key).toUpperCase();
+        if (id === "4L") {
+          total += qty * 2;
+        } else {
+          total += qty;
+        }
+      });
+      direct = total;
+    }
 
-    var counts = mcGetPlannerCounts();
-    if (!counts) return 0;
-
-    var total = 0;
-
-    Object.keys(counts).forEach(function (key) {
-      var qty = Number(counts[key] || 0);
-      if (!qty) return;
-
-      var id = String(key).toUpperCase();
-
-      if (id === "4L") {
-        total += qty * 2;
-      } else {
-        total += qty;
-      }
-    });
-
-    return total;
+    var out = Math.max(Number(direct) || 0, Number(countBillable) || 0);
+    return out > 0 ? out : 0;
   }
 
   function mcGetFourLCount() {
@@ -18646,6 +18750,26 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     return tryPost(0);
   }
 
+  function mcPlanner4LAfterCartSplitNavigate() {
+    try {
+      if (typeof window.show_soft_add === "function") {
+        window.show_soft_add();
+        return;
+      }
+      if (typeof window.ShowSoftAdd === "function") {
+        window.ShowSoftAdd();
+        return;
+      }
+    } catch (eS) {}
+    var path = String(window.location.pathname || "");
+    var onPdp = !!(document.getElementById("v65-product-parent") || /productdetails/i.test(path));
+    if (onPdp) {
+      window.location.reload();
+      return;
+    }
+    window.location.href = "/shoppingcart.asp";
+  }
+
   function mcExecutePlanner4LCartSplit(form) {
     var mainPc = String((form.querySelector('input[name="ProductCode"]') || {}).value || "").trim();
     var billableQty = mcGetPlannerBillableQty();
@@ -18719,7 +18843,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
         return mcPostArmlessLoveHts(armCode, fourLCount);
       })
       .then(function () {
-        window.location.href = "/shoppingcart.asp";
+        mcPlanner4LAfterCartSplitNavigate();
       })
       .catch(function (err) {
         console.error("MC 4L CART SPLIT error", err);
