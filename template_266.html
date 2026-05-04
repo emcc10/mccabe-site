@@ -4925,7 +4925,16 @@ function getMemberPlannerSeatPriceForCalc(){
   return getPlannerBaseSeatPriceForCalc();
 }
 function getPlannerBaseSeatPriceForCalc() {
-  var member = mcReadCurrentVisibleMemberUnitPrice();
+  var raw = mcReadCurrentVisibleMemberUnitPrice();
+  var floor = Number(window.__mcMemberUnitPriceFloor || 0);
+  var st = window.__mcMemberPricing || {};
+  var fromState = Number(st.memberSeatPrice || st.memberPrice || 0);
+  if (fromState > floor) floor = fromState;
+
+  var member = raw;
+  if (raw > 0 && floor > 0 && raw < floor - 75) {
+    member = floor;
+  }
 
   if (member > 0) {
     window.__mcPerSeatPrice = member;
@@ -18053,7 +18062,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       var css = document.createElement("style");
       css.id = "mc-planner-armless-discount-css";
       css.textContent =
-        "body.productdetails #v65-product-parent [data-mc-planner-managed-discount='1'],body.productdetails #content_area [data-mc-planner-managed-discount='1'],body.productdetails .mc-planner-armless-discount-hidden,body.productdetails #options_table [data-mc-planner-managed-discount='1']{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important;line-height:0!important;}";
+        "[data-mc-planner-managed-discount='1'],.mc-planner-armless-discount-hidden,.mc-planner-armless-discount-hidden-row td,.mc-planner-armless-discount-hidden-row th{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important;line-height:0!important;font-size:0!important;}" +
+        "select.mc-planner-armless-discount-target{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important;clip:rect(0,0,0,0)!important;}";
       document.head.appendChild(css);
     }
   } catch (eCss) {}
@@ -18192,6 +18202,17 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     });
   }
 
+  function mcPlannerReadStoredPlannerPayload() {
+    try {
+      var raw = localStorage.getItem("roomPlannerData");
+      if (!raw) return null;
+      var d = JSON.parse(raw);
+      if (!d || typeof d !== "object") return null;
+      return d.payload && typeof d.payload === "object" ? d.payload : d;
+    } catch (eR) {}
+    return null;
+  }
+
   function mcPlannerLayoutHas4L(data) {
     if (!data || !data.layout || !Array.isArray(data.layout)) return false;
     var i, item, id;
@@ -18221,6 +18242,12 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     var layout = window.__ROOM_PLANNER_LAYOUT__;
     if (layout && mcPlannerLayoutHas4L({ layout: layout })) return true;
 
+    var stored = mcPlannerReadStoredPlannerPayload();
+    if (stored && mcPlannerLayoutHas4L(stored)) return true;
+    if (stored && stored.options && typeof stored.options === "object") {
+      if (Number(stored.options["4L"] || stored.options["4l"] || 0) > 0) return true;
+    }
+
     var counts =
       calc.counts ||
       (data && data.counts) ||
@@ -18245,11 +18272,36 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       }
     } catch (eL) {}
     var tr = sel.closest && sel.closest("tr");
-    if (tr) bits.push(String(tr.textContent || "").toLowerCase().slice(0, 600));
+    if (tr) {
+      try {
+        var tb = tr.closest && tr.closest("table");
+        if (tb && typeof tr.rowIndex === "number" && tr.rowIndex > 0 && tb.rows && tb.rows[tr.rowIndex - 1]) {
+          bits.push(
+            String(tb.rows[tr.rowIndex - 1].textContent || "")
+              .toLowerCase()
+              .slice(0, 500)
+          );
+        }
+      } catch (ePrev) {}
+      bits.push(String(tr.textContent || "").toLowerCase().slice(0, 700));
+    }
     return bits.join(" | ");
   }
 
   function mcCollectPdpSelects(form) {
+    var seen = [];
+    var out = [];
+    var ai;
+
+    var volSels = document.querySelectorAll(
+      '#content_area select[name^="SELECT___"], #v65-product-parent select[name^="SELECT___"], #options_table select[name^="SELECT___"]'
+    );
+    for (ai = 0; ai < volSels.length; ai++) {
+      if (seen.indexOf(volSels[ai]) !== -1) continue;
+      seen.push(volSels[ai]);
+      out.push(volSels[ai]);
+    }
+
     var roots = [];
     var v65 = document.getElementById("v65-product-parent");
     if (v65) roots.push(v65);
@@ -18260,11 +18312,11 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     if (optTable) roots.push(optTable);
     var area = document.getElementById("content_area");
     if (area) roots.push(area);
+    var main = document.getElementById("MainContent") || document.querySelector("main");
+    if (main) roots.push(main);
     if (form) roots.push(form);
 
-    var seen = [];
-    var out = [];
-    var ri, r, arr, ai;
+    var ri, r, arr;
     for (ri = 0; ri < roots.length; ri++) {
       r = roots[ri];
       if (!r || !r.querySelectorAll) continue;
@@ -18278,29 +18330,48 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     return out;
   }
 
+  function mcArmlessSelectScore(sel) {
+    var optionText = Array.from(sel.options || []).map(function (o) {
+      return String(o.textContent || "").toLowerCase();
+    }).join(" | ");
+    var name = String(sel.name || "").toLowerCase();
+    var id = String(sel.id || "").toLowerCase();
+    var hood = mcSelectNeighborhoodText(sel);
+    var full = optionText + " | " + name + " | " + id + " | " + hood;
+    var score = 0;
+    if (/armless/.test(full)) score += 14;
+    if (/loveseat/.test(full)) score += 12;
+    if (/(^|[^a-z0-9])4l([^a-z0-9]|$)/.test(full)) score += 10;
+    if (/discount|subtract|credit/.test(full)) score += 8;
+    if (/-\s*\$?\s*500|\(\s*-?\s*\$?\s*500|500\.00|500\s*off/.test(full)) score += 10;
+    if (/\byes\b/.test(optionText) && /\bno\b/.test(optionText) && /500|discount|subtract|\(/.test(optionText)) {
+      score += 6;
+    }
+    return score;
+  }
+
   function mcFindArmlessDiscountSelect(form) {
     var selects = mcCollectPdpSelects(form);
-
-    return selects.find(function (sel) {
-      var optionText = Array.from(sel.options || []).map(function (o) {
-        return String(o.textContent || "").toLowerCase();
-      }).join(" | ");
-
-      if (/armless|4l|loveseat|discount/.test(optionText)) return true;
-      if (/-\s*\$?\s*500|500\.00|500\s*off|subtract|credit/.test(optionText)) return true;
-
-      var name = String(sel.name || "").toLowerCase();
-      if (/armless|4l|loveseat|discount/.test(name)) return true;
-
-      var id = String(sel.id || "").toLowerCase();
-      if (/armless|4l|loveseat|discount/.test(id)) return true;
-
-      var hood = mcSelectNeighborhoodText(sel);
-      return (
-        /armless|4l|loveseat|discount/.test(hood) ||
-        /-\s*\$?\s*500|500\.00|500\s*off/.test(hood)
-      );
-    });
+    var best = null;
+    var bestScore = 0;
+    var i, s, sc;
+    for (i = 0; i < selects.length; i++) {
+      s = selects[i];
+      sc = mcArmlessSelectScore(s);
+      if (sc > bestScore) {
+        bestScore = sc;
+        best = s;
+      }
+    }
+    if (!best || bestScore < 6) return null;
+    if (bestScore >= 16) return best;
+    var nhood = mcSelectNeighborhoodText(best) + " " + String(best.name || "").toLowerCase();
+    if (bestScore >= 10 && /armless|loveseat/.test(nhood)) return best;
+    if (bestScore >= 10 && /armless|loveseat|\b4l\b|discount/.test(String(best.name || "").toLowerCase())) {
+      return best;
+    }
+    if (bestScore >= 8 && /armless|loveseat|discount/.test(nhood)) return best;
+    return null;
   }
 
   function mcSelectOptionByText(select, patterns) {
@@ -18334,72 +18405,273 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     return true;
   }
 
-  function mcSyncArmlessLoveseatDiscount(form) {
-    var has4L = mcPlannerHas4L();
-    var sel = mcFindArmlessDiscountSelect(form);
+  function mcMarkPlannerDiscountHidden(el) {
+    if (!el) return;
+    try {
+      el.setAttribute("data-mc-planner-managed-discount", "1");
+      el.classList.add("mc-planner-armless-discount-hidden");
+      el.style.setProperty("display", "none", "important");
+      el.style.setProperty("visibility", "hidden", "important");
+      el.style.setProperty("height", "0", "important");
+      el.style.setProperty("overflow", "hidden", "important");
+      el.style.setProperty("margin", "0", "important");
+      el.style.setProperty("padding", "0", "important");
+      el.style.setProperty("border", "0", "important");
+    } catch (eM) {}
+  }
 
-    if (!sel) {
-      console.warn("MC 4L DISCOUNT: no Volusion armless/4L discount select found");
-      return;
+  function mcRadioGroupNeighborhoodText(firstRadio) {
+    if (!firstRadio) return "";
+    var bits = [];
+    bits.push(String(firstRadio.name || "").toLowerCase());
+    var wrap = firstRadio.closest && firstRadio.closest("tr");
+    if (wrap) bits.push(String(wrap.textContent || "").toLowerCase().slice(0, 700));
+    return bits.join(" | ");
+  }
+
+  function mcFindArmlessDiscountRadioName(form) {
+    var roots = [];
+    var v65 = document.getElementById("v65-product-parent");
+    if (v65) roots.push(v65);
+    var area = document.getElementById("content_area");
+    if (area) roots.push(area);
+    if (form) roots.push(form);
+
+    var seen = {};
+    var names = [];
+    var ri, r, radios, i, inp, nm;
+    for (ri = 0; ri < roots.length; ri++) {
+      r = roots[ri];
+      if (!r || !r.querySelectorAll) continue;
+      radios = r.querySelectorAll('input[type="radio"]');
+      for (i = 0; i < radios.length; i++) {
+        inp = radios[i];
+        nm = inp.name || "";
+        if (!nm || seen[nm]) continue;
+        seen[nm] = true;
+        names.push(nm);
+      }
     }
 
-    var selected = false;
+    var best = null;
+    var bestScore = 0;
+    var j, ctx, score;
+    for (j = 0; j < names.length; j++) {
+      nm = names[j];
+      inp = null;
+      for (ri = 0; ri < roots.length; ri++) {
+        r = roots[ri];
+        if (!r || !r.querySelectorAll) continue;
+        radios = r.querySelectorAll('input[type="radio"]');
+        for (i = 0; i < radios.length; i++) {
+          if (radios[i].name === nm) {
+            inp = radios[i];
+            break;
+          }
+        }
+        if (inp) break;
+      }
+      if (!inp) {
+        var allr = document.querySelectorAll('input[type="radio"]');
+        for (i = 0; i < allr.length; i++) {
+          if (allr[i].name === nm) {
+            inp = allr[i];
+            break;
+          }
+        }
+      }
+      if (!inp) continue;
+      ctx = mcRadioGroupNeighborhoodText(inp);
+      score = 0;
+      if (/armless/.test(ctx)) score += 14;
+      if (/loveseat/.test(ctx)) score += 12;
+      if (/(^|[^a-z0-9])4l([^a-z0-9]|$)/.test(ctx)) score += 10;
+      if (/discount|subtract|credit/.test(ctx)) score += 8;
+      if (/-\s*\$?\s*500|500\.00/.test(ctx)) score += 6;
+      if (score > bestScore) {
+        bestScore = score;
+        best = nm;
+      }
+    }
+    if (best && bestScore >= 10) return best;
+    return null;
+  }
 
+  function mcPickRadioByPatterns(form, radioName, patterns) {
+    if (!radioName) return false;
+    var all = document.querySelectorAll('input[type="radio"]');
+    var i, inp, lab, txt, k;
+    for (i = 0; i < all.length; i++) {
+      inp = all[i];
+      if (inp.name !== radioName) continue;
+      txt = String(inp.value || "").toLowerCase();
+      try {
+        if (inp.id) {
+          lab = document.querySelector('label[for="' + String(inp.id).replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"]');
+          if (lab) txt += " " + String(lab.textContent || "").toLowerCase();
+        }
+      } catch (eLb) {}
+      for (k = 0; k < patterns.length; k++) {
+        if (patterns[k].test(txt)) {
+          inp.disabled = false;
+          inp.checked = true;
+          try { inp.dispatchEvent(new Event("input", { bubbles: true })); } catch (e1) {}
+          try { inp.dispatchEvent(new Event("change", { bubbles: true })); } catch (e2) {}
+          try {
+            if (typeof jQuery !== "undefined" && jQuery && jQuery(inp).length) {
+              jQuery(inp).prop("checked", true).trigger("change");
+            }
+          } catch (ej) {}
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function mcSyncArmlessLoveseatDiscountRadios(form, has4L) {
+    var radioName = mcFindArmlessDiscountRadioName(form);
+    if (!radioName) return false;
+    var ok;
     if (has4L) {
-      selected = mcSelectOptionByText(sel, [
+      ok = mcPickRadioByPatterns(form, radioName, [
         /armless\s+loveseat/,
         /\b4l\b/,
         /discount/,
         /-\s*\$?\s*500/,
-        /\(\s*-?\s*\$?\s*500/,
         /500\.00/,
-        /\byes\b(?![a-z])/
+        /\byes\b/
       ]);
     } else {
-      selected = mcSelectOptionByText(sel, [
-        /^no\b/,
-        /\bno\b/,
-        /none/,
-        /no\s+discount/,
-        /standard/,
-        /regular/
-      ]);
+      ok = mcPickRadioByPatterns(form, radioName, [/^no\b/, /\bno\b/, /none/, /standard/, /regular/]);
     }
+    console.log("MC 4L DISCOUNT SYNC (radio)", { has4L: has4L, radioName: radioName, selected: ok });
+    return ok;
+  }
 
-    console.log("MC 4L DISCOUNT SYNC", {
-      has4L: has4L,
-      selected: selected,
-      selectName: sel.name,
-      selectedValue: sel.value,
-      selectedText: sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].textContent
-    });
+  function mcSyncArmlessLoveseatDiscount(form) {
+    var has4L = mcPlannerHas4L();
+    var sel = mcFindArmlessDiscountSelect(form);
 
-    if (has4L && !selected) {
+    if (sel) {
       try {
-        console.warn("MC 4L DISCOUNT: no option matched discount patterns; labels are:", Array.from(sel.options).map(function (o) {
-          return String(o.textContent || "").trim();
-        }));
-      } catch (eOpt) {}
+        sel.classList.add("mc-planner-armless-discount-target");
+      } catch (eC) {}
+
+      sel.disabled = false;
+
+      var selected = false;
+
+      if (has4L) {
+        selected = mcSelectOptionByText(sel, [
+          /armless\s+loveseat/,
+          /\b4l\b/,
+          /discount/,
+          /-\s*\$?\s*500/,
+          /\(\s*-?\s*\$?\s*500/,
+          /500\.00/,
+          /\byes\b(?![a-z])/
+        ]);
+      } else {
+        selected = mcSelectOptionByText(sel, [
+          /^no\b/,
+          /\bno\b/,
+          /none/,
+          /no\s+discount/,
+          /standard/,
+          /regular/
+        ]);
+      }
+
+      if (has4L && !selected) {
+        var opts = Array.from(sel.options || []);
+        if (opts.length === 2) {
+          var t0 = String(opts[0].textContent || "")
+            .toLowerCase()
+            .trim();
+          if (/^no\b|none|without|^n\/?a\b/.test(t0)) {
+            sel.selectedIndex = 1;
+            selected = true;
+          }
+        }
+      }
+
+      if (selected) {
+        try {
+          if (typeof jQuery !== "undefined" && jQuery && jQuery(sel).length) {
+            jQuery(sel).val(sel.options[sel.selectedIndex].value).trigger("change");
+          }
+        } catch (ej2) {}
+      }
+
+      console.log("MC 4L DISCOUNT SYNC", {
+        has4L: has4L,
+        selected: selected,
+        selectName: sel.name,
+        selectedValue: sel.value,
+        selectedText: sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].textContent
+      });
+
+      if (has4L && !selected) {
+        try {
+          console.warn("MC 4L DISCOUNT: no option matched discount patterns; labels are:", Array.from(sel.options).map(function (o) {
+            return String(o.textContent || "").trim();
+          }));
+        } catch (eOpt) {}
+      }
+      return;
     }
+
+    if (mcSyncArmlessLoveseatDiscountRadios(form, has4L)) return;
+
+    console.warn("MC 4L DISCOUNT: no Volusion armless/4L discount select or radio group found");
   }
 
   function mcHideArmlessDiscountOptionRow(form) {
     var sel = mcFindArmlessDiscountSelect(form);
-    if (!sel) return;
+    var radioName = sel ? null : mcFindArmlessDiscountRadioName(form);
+    var firstRadio = null;
+    var rdx;
+    if (radioName) {
+      var allr2 = document.querySelectorAll('input[type="radio"]');
+      for (rdx = 0; rdx < allr2.length; rdx++) {
+        if (allr2[rdx].name === radioName) {
+          firstRadio = allr2[rdx];
+          break;
+        }
+      }
+    }
+
+    var anchor = sel || firstRadio;
+    if (!anchor) return;
+
     try {
-      sel.disabled = false;
+      if (sel) {
+        sel.classList.add("mc-planner-armless-discount-target");
+        sel.disabled = false;
+      }
+      if (firstRadio) firstRadio.disabled = false;
     } catch (eEn) {}
 
+    var tr = anchor.closest && anchor.closest("tr");
+    if (tr) {
+      try {
+        tr.classList.add("mc-planner-armless-discount-hidden-row");
+        mcMarkPlannerDiscountHidden(tr);
+        Array.from(tr.querySelectorAll("td, th")).forEach(mcMarkPlannerDiscountHidden);
+        mcHideArmlessDiscountHeaderAndCategoryRows(tr, anchor);
+      } catch (eTr) {}
+      return;
+    }
+
     var row =
-      (sel.closest && sel.closest("tr")) ||
-      (sel.closest && sel.closest(".v65-productdetail-options")) ||
-      (sel.closest && sel.closest(".v65-product-select")) ||
+      (anchor.closest && anchor.closest(".v65-productdetail-options")) ||
+      (anchor.closest && anchor.closest(".v65-product-select")) ||
       null;
 
-    var el = row;
+    var el = row || anchor.parentElement;
     var i;
-    if (!el) el = sel.parentElement;
-    for (i = 0; i < 14 && el; i++) {
+    for (i = 0; i < 18 && el; i++) {
       var tag = (el.tagName || "").toUpperCase();
       var cls = String(el.className || "");
       if (
@@ -18410,20 +18682,81 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
         /v65-product|options|productdetail|option_row|option-row/i.test(cls)
       ) {
         try {
-          el.setAttribute("data-mc-planner-managed-discount", "1");
-          el.classList.add("mc-planner-armless-discount-hidden");
-          el.style.setProperty("display", "none", "important");
-          el.style.setProperty("visibility", "hidden", "important");
-          el.style.setProperty("height", "0", "important");
-          el.style.setProperty("overflow", "hidden", "important");
-          el.style.setProperty("margin", "0", "important");
-          el.style.setProperty("padding", "0", "important");
-          el.style.setProperty("border", "0", "important");
+          el.classList.add("mc-planner-armless-discount-hidden-row");
+          mcMarkPlannerDiscountHidden(el);
+          if (tag === "TR") {
+            Array.from(el.querySelectorAll("td, th")).forEach(mcMarkPlannerDiscountHidden);
+          }
         } catch (eH) {}
+        mcHideArmlessDiscountHeaderAndCategoryRows(null, anchor);
         return;
       }
       el = el.parentElement;
     }
+
+    mcHideArmlessDiscountHeaderAndCategoryRows(null, anchor);
+  }
+
+  function mcHideArmlessDiscountHeaderAndCategoryRows(tr, anchor) {
+    if (tr) {
+      var p = tr.previousElementSibling;
+      var steps = 0;
+      while (p && steps < 6) {
+        if (p.nodeType === 1) {
+          var ptxt = String(p.textContent || "");
+          var pint =
+            p.querySelector &&
+            p.querySelector(
+              'select, input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), textarea, button'
+            );
+          if (
+            (/armless|loveseat|\b4l\b/i.test(ptxt) || (p.className && /heading|title|group|category/i.test(String(p.className)))) &&
+            !pint
+          ) {
+            mcMarkPlannerDiscountHidden(p);
+            if (p.querySelectorAll) {
+              Array.from(p.querySelectorAll("td, th")).forEach(mcMarkPlannerDiscountHidden);
+            }
+          }
+        }
+        p = p.previousElementSibling;
+        steps++;
+      }
+    }
+
+    var optTable =
+      (anchor && anchor.closest && anchor.closest("#options_table")) ||
+      document.getElementById("options_table") ||
+      document.querySelector("#v65-product-parent table[id*='options_table']") ||
+      document.querySelector("table[id*='options_table']");
+    if (!optTable || !optTable.querySelectorAll) return;
+
+    var rows = optTable.querySelectorAll("tr");
+    var i, r, rtxt, rint;
+    for (i = 0; i < rows.length; i++) {
+      r = rows[i];
+      if (tr && r === tr) continue;
+      rtxt = String(r.textContent || "");
+      if (!/armless|loveseat|\b4l\b/i.test(rtxt)) continue;
+      rint = r.querySelector('select, input[type="radio"]');
+      if (rint) continue;
+      mcMarkPlannerDiscountHidden(r);
+      Array.from(r.querySelectorAll("td, th")).forEach(mcMarkPlannerDiscountHidden);
+    }
+  }
+
+  function mcSnapshotMemberUnitFloorBeforeCart() {
+    try {
+      if (typeof mcReadCurrentVisibleMemberUnitPrice !== "function") return;
+      var snapVis = Number(mcReadCurrentVisibleMemberUnitPrice() || 0);
+      var st0 = window.__mcMemberPricing || {};
+      var snapSt = Number(st0.memberSeatPrice || st0.memberPrice || 0);
+      var snap = Math.max(snapVis, snapSt);
+      if (snap > 0) {
+        var prevF = Number(window.__mcMemberUnitPriceFloor || 0);
+        window.__mcMemberUnitPriceFloor = Math.max(prevF, snap);
+      }
+    } catch (eFl) {}
   }
 
   function mcRunArmlessDiscountRowHide() {
@@ -18453,6 +18786,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       document.querySelector("#v65-product-parent form") ||
       document.querySelector("form");
 
+    mcSnapshotMemberUnitFloorBeforeCart();
     mcSyncPlannerQtyToCart(form);
     mcSyncArmlessLoveseatDiscount(form);
     mcHideArmlessDiscountOptionRow(form);
@@ -18468,11 +18802,14 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       form.querySelector("input.v65-productdetail-cartqty") ||
       form.querySelector('input[name^="QTY."]')
     ) {
+      mcSnapshotMemberUnitFloorBeforeCart();
       mcSyncPlannerQtyToCart(form);
       mcSyncArmlessLoveseatDiscount(form);
       mcHideArmlessDiscountOptionRow(form);
     }
   }, true);
+
+  setTimeout(mcSnapshotMemberUnitFloorBeforeCart, 1800);
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", mcRunArmlessDiscountRowHide);
@@ -18484,6 +18821,14 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     setTimeout(mcRunArmlessDiscountRowHide, 400);
     setTimeout(mcRunArmlessDiscountRowHide, 1200);
     setTimeout(mcRunArmlessDiscountRowHide, 2500);
+    if (document.getElementById("v65-product-parent")) {
+      var armlessHideN = 0;
+      var armlessIv = setInterval(function () {
+        armlessHideN++;
+        mcRunArmlessDiscountRowHide();
+        if (armlessHideN >= 50) clearInterval(armlessIv);
+      }, 280);
+    }
   });
 
   try {
@@ -18499,6 +18844,21 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
   window.mcSyncPlannerQtyToCart = mcSyncPlannerQtyToCart;
   window.mcSyncArmlessLoveseatDiscount = mcSyncArmlessLoveseatDiscount;
+  window.mcDebugArmlessDiscount = function () {
+    var form =
+      document.querySelector("#v65-product-parent form") ||
+      document.querySelector('form[action*="ProductDetails" i], form[action*="shoppingcart" i]') ||
+      null;
+    var rows = mcCollectPdpSelects(form).map(function (s) {
+      return { name: s.name, score: mcArmlessSelectScore(s), options: Array.from(s.options).map(function (o) { return o.textContent.trim(); }) };
+    });
+    console.log("MC DEBUG armless", {
+      has4L: mcPlannerHas4L(),
+      pickedSelect: mcFindArmlessDiscountSelect(form) && mcFindArmlessDiscountSelect(form).name,
+      radioName: mcFindArmlessDiscountRadioName(form),
+      allScores: rows
+    });
+  };
 })();
 </script>
 </body>
