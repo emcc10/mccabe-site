@@ -5044,16 +5044,40 @@ window.applyPlannerToPage = function (payload) {
     }
   }
 
-  var configOpts = opts;
+  function mcBillableSeatsFromCountsMap(map) {
+    if (!map || typeof map !== "object") return 0;
+    var b = 0;
+    Object.keys(map).forEach(function (key) {
+      var qty = Number(map[key] || 0);
+      if (!qty) return;
+      var id = String(key).toUpperCase();
+      b += id === "4L" ? qty * 2 : qty;
+    });
+    return b;
+  }
+
+  var configOpts = {};
+  Object.keys(opts).forEach(function (_ok) {
+    var _n = Number(opts[_ok] || 0);
+    if (_n > 0) configOpts[_ok] = _n;
+  });
   if (layout.length) {
-    configOpts = {};
+    var fromLayout = {};
     for (var _mj = 0; _mj < layout.length; _mj++) {
       var _seg = layout[_mj];
       var _pid = _seg && (_seg.id != null && _seg.id !== "" ? _seg.id : _seg);
-      _pid = String(_pid != null ? _pid : "").trim().toUpperCase();
-      if (!_pid) continue;
-      configOpts[_pid] = (Number(configOpts[_pid]) || 0) + 1;
+      _pid = String(_pid != null ? _pid : "")
+        .trim()
+        .toUpperCase();
+      if (!_pid || _pid === "UNKNOWN") continue;
+      fromLayout[_pid] = (Number(fromLayout[_pid]) || 0) + 1;
     }
+    if (mcBillableSeatsFromCountsMap(fromLayout) > mcBillableSeatsFromCountsMap(configOpts)) {
+      configOpts = fromLayout;
+    }
+  }
+  if (!Object.keys(configOpts).length) {
+    configOpts = opts;
   }
 
   var seatCount = (payload.seatCount != null && payload.seatCount !== "") ? Number(payload.seatCount) : NaN;
@@ -18063,7 +18087,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <script id="mc-final-planner-cart-qty-sync">
 (function () {
-  var MC_CART_SYNC_BUILD = "266-mc-4l-split-20260501";
+  var MC_CART_SYNC_BUILD = "266-mc-4l-split-20260501b";
 
   try {
     console.info("[McCabe]", "PDP cart / armless sync loaded", MC_CART_SYNC_BUILD);
@@ -18125,6 +18149,22 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function mcGetPlannerBillableQty() {
+    var p = window.__mcLastPlannerPayload;
+    if (p && p.seatCount != null && p.seatCount !== "" && Number(p.seatCount) > 0) {
+      return Number(p.seatCount);
+    }
+    if (p && Array.isArray(p.layout) && p.layout.length) {
+      var sc = 0;
+      for (var si = 0; si < p.layout.length; si++) {
+        var seg = p.layout[si];
+        var pid = String((seg && (seg.id != null && seg.id !== "" ? seg.id : seg)) || "")
+          .trim()
+          .toUpperCase();
+        if (!pid) continue;
+        sc += pid === "4L" ? 2 : 1;
+      }
+      if (sc > 0) return sc;
+    }
     var calc = window.mccabeRoomPlannerPriceCalc || {};
     var data = window.mccabeRoomPlannerData || window.roomPlannerData || window.__mcLastPlannerPayload || null;
 
@@ -18175,6 +18215,22 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function mcGetFourLCount() {
+    var p = window.__mcLastPlannerPayload;
+    if (p && p.options && typeof p.options === "object") {
+      var fl = Number(p.options["4L"] || p.options["4l"] || 0);
+      if (fl > 0) return fl;
+    }
+    if (p && Array.isArray(p.layout) && p.layout.length) {
+      var n = 0;
+      for (var fi = 0; fi < p.layout.length; fi++) {
+        var seg = p.layout[fi];
+        var pid = String((seg && (seg.id != null && seg.id !== "" ? seg.id : seg)) || "")
+          .trim()
+          .toUpperCase();
+        if (pid === "4L") n++;
+      }
+      if (n > 0) return n;
+    }
     var c = mcGetPlannerCounts() || window.__mcPlannerCounts || {};
     return Number(c["4L"] || c["4l"] || 0);
   }
@@ -18697,6 +18753,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }, true);
 
   function mcPlanner4LSplitSubmitAfterSync(ev) {
+    if (window.__mcSkip4LSplitCapture) return;
     var form = ev.target;
     if (!mcShouldRunPlanner4LCartSplit(form)) return;
 
@@ -18709,6 +18766,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function mcPlanner4LSplitClickCapture(ev) {
+    if (window.__mcSkip4LSplitCapture) return;
     var btn =
       ev.target &&
       ev.target.closest &&
@@ -18737,15 +18795,111 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   function mcShouldRunPlanner4LCartSplit(form) {
     if (!form || form.tagName !== "FORM" || !form.querySelector) return false;
     if (!(mcGetFourLCount() > 0)) return false;
+    var p = window.__mcLastPlannerPayload;
     var hasCfg =
       window.__mcPlannerConfigApplied ||
-      (window.__mcLastPlannerPayload &&
-        window.__mcLastPlannerPayload.options &&
-        typeof window.__mcLastPlannerPayload.options === "object" &&
-        Object.keys(window.__mcLastPlannerPayload.options).length > 0);
+      (p &&
+        p.options &&
+        typeof p.options === "object" &&
+        Object.keys(p.options).length > 0) ||
+      (p && Array.isArray(p.layout) && p.layout.length > 0) ||
+      (p && p.seatCount != null && p.seatCount !== "" && Number(p.seatCount) > 0);
     if (!hasCfg) return false;
     if (!form.querySelector('input[name="ProductCode"]')) return false;
     return true;
+  }
+
+  function mcSetDomPlannerMainQty(form, mainQty) {
+    if (!form || !(mainQty > 0)) return;
+    var sel =
+      'input.v65-productdetail-cartqty, input[name^="QTY."], input[name="QTY"], input[name="Qty"], input[name="qty"]';
+    Array.prototype.slice.call(form.querySelectorAll(sel)).forEach(function (inp) {
+      if (!inp || !inp.name) return;
+      try {
+        inp.disabled = false;
+      } catch (eD) {}
+      inp.value = String(mainQty);
+      try {
+        inp.setAttribute("value", String(mainQty));
+      } catch (eA) {}
+    });
+  }
+
+  function mcPlannerMainAddViaFormTargetIframe(form, mainQty) {
+    return new Promise(function (resolve) {
+      if (!(mainQty > 0)) {
+        resolve();
+        return;
+      }
+      var savedTarget = form.getAttribute("target");
+      var iframeName = "mc4lmain_" + Date.now();
+      var iframe = document.createElement("iframe");
+      iframe.name = iframeName;
+      iframe.title = "add to cart";
+      iframe.setAttribute("aria-hidden", "true");
+      iframe.style.cssText =
+        "position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;border:0;pointer-events:none";
+      document.body.appendChild(iframe);
+
+      var settled = false;
+      var toMax = null;
+      function finish() {
+        if (settled) return;
+        settled = true;
+        try {
+          if (toMax) clearTimeout(toMax);
+        } catch (eT) {}
+        try {
+          if (savedTarget != null && savedTarget !== "") form.setAttribute("target", savedTarget);
+          else form.removeAttribute("target");
+        } catch (e1) {}
+        try {
+          window.__mcSkip4LSplitCapture = false;
+        } catch (eF) {}
+        setTimeout(function () {
+          try {
+            iframe.remove();
+          } catch (e2) {}
+        }, 400);
+        resolve();
+      }
+
+      try {
+        window.__mcSkip4LSplitCapture = true;
+      } catch (eS) {}
+
+      mcSetDomPlannerMainQty(form, mainQty);
+
+      var btn =
+        form.querySelector('input[type="submit"][name="btnaddtocart"]') ||
+        form.querySelector('input[name="btnaddtocart"]') ||
+        form.querySelector('button[name="btnaddtocart"]');
+
+      form.setAttribute("target", iframeName);
+
+      var loadCount = 0;
+      function onIframeLoad() {
+        loadCount++;
+        if (loadCount < 2) return;
+        try {
+          iframe.removeEventListener("load", onIframeLoad);
+        } catch (eRm) {}
+        finish();
+      }
+      try {
+        iframe.addEventListener("load", onIframeLoad);
+      } catch (eL) {}
+
+      try {
+        if (btn) btn.click();
+        else form.submit();
+      } catch (eClick) {
+        finish();
+        return;
+      }
+
+      toMax = setTimeout(finish, 8000);
+    });
   }
 
   function mcSetFormDataQtyFields(fd, form, mainQty) {
@@ -18845,42 +18999,12 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       expectedTotal: memberUnitPrice * mainQty + armUnit * fourLCount
     });
 
-    var postUrl = form.getAttribute("action") || window.location.href;
-    if (!postUrl || !String(postUrl).trim()) postUrl = window.location.href;
-    if (!/^https?:/i.test(postUrl)) {
-      try {
-        postUrl = new URL(postUrl, window.location.origin).href;
-      } catch (eP) {
-        postUrl = window.location.href;
-      }
-    }
-
-    var btn =
-      form.querySelector('input[type="submit"][name="btnaddtocart"]') ||
-      form.querySelector('input[name="btnaddtocart"]') ||
-      form.querySelector('button[name="btnaddtocart"]');
-
     var chain = Promise.resolve();
 
     if (mainQty > 0) {
       chain = chain.then(function () {
-        var fd = new FormData(form);
-        mcSetFormDataQtyFields(fd, form, mainQty);
-        if (btn && btn.name) fd.set(btn.name, btn.value || btn.getAttribute("value") || "Add To Cart");
-        console.log("MC 4L CART SPLIT step 1: main", mainPc, "qty", mainQty, "URL", postUrl);
-        return fetch(postUrl, {
-          method: "POST",
-          body: fd,
-          credentials: "include",
-          redirect: "follow",
-          cache: "no-store"
-        }).then(function (res) {
-          console.log("MC 4L CART SPLIT main HTTP", res.status);
-          if (res.status < 200 || res.status >= 400) {
-            throw new Error("MC 4L main add failed HTTP " + res.status);
-          }
-          return res;
-        });
+        console.log("MC 4L CART SPLIT step 1: main (iframe)", mainPc, "qty", mainQty);
+        return mcPlannerMainAddViaFormTargetIframe(form, mainQty);
       });
     } else {
       console.log("MC 4L CART SPLIT step 1 skipped (mainQty 0)");
@@ -18894,6 +19018,9 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
         mcPlanner4LAfterCartSplitNavigate();
       })
       .catch(function (err) {
+        try {
+          window.__mcSkip4LSplitCapture = false;
+        } catch (eFl) {}
         console.error("MC 4L CART SPLIT error", err);
         try {
           alert("Could not add all items to the cart. Please try again or contact us.");
