@@ -865,128 +865,6 @@ document.addEventListener("DOMContentLoaded", function () {
     max-width: 52px !important;
   }
   </style>
-<script id="mc-search-float-toggle">
-(function () {
-  function ensureSearchIsInHeader() {
-    var header = document.querySelector("header.header");
-    var bar = header && header.querySelector(".mc-header-desktop-bar");
-    var wrap = header && header.querySelector(".mc-header-search-cart-wrap");
-    var hero = document.getElementById("mcHeroSearchOverlay");
-
-    if (!header || !bar || !wrap) return null;
-
-    if (hero && hero.contains(wrap)) {
-      bar.appendChild(wrap);
-    }
-
-    return wrap;
-  }
-
-  function getSearchInput() {
-    var wrap = ensureSearchIsInHeader();
-    return (
-      wrap &&
-      (
-        wrap.querySelector("#search") ||
-        wrap.querySelector(".collapsing-search__input") ||
-        wrap.querySelector('input[type="search"]') ||
-        wrap.querySelector('input[type="text"]')
-      )
-    );
-  }
-
-  function openSearch() {
-    var wrap = ensureSearchIsInHeader();
-    var input = getSearchInput();
-
-    document.documentElement.classList.add("mc-search-open");
-    if (document.body) document.body.classList.add("mc-search-open");
-
-    if (wrap) {
-      wrap.style.setProperty("display", "flex", "important");
-      wrap.style.setProperty("position", "fixed", "important");
-      wrap.style.setProperty("top", "52px", "important");
-      wrap.style.setProperty("right", "140px", "important");
-      wrap.style.setProperty("width", "460px", "important");
-      wrap.style.setProperty("max-width", "calc(100vw - 180px)", "important");
-      wrap.style.setProperty("min-height", "64px", "important");
-      wrap.style.setProperty("padding", "14px 18px", "important");
-      wrap.style.setProperty("background", "#fff", "important");
-      wrap.style.setProperty("border", "0", "important");
-      wrap.style.setProperty("box-shadow", "0 10px 34px rgba(0,0,0,.16)", "important");
-      wrap.style.setProperty("border-radius", "4px", "important");
-      wrap.style.setProperty("align-items", "center", "important");
-      wrap.style.setProperty("justify-content", "center", "important");
-      wrap.style.setProperty("gap", "10px", "important");
-      wrap.style.setProperty("z-index", "10075", "important");
-      wrap.style.setProperty("opacity", "1", "important");
-      wrap.style.setProperty("visibility", "visible", "important");
-      wrap.style.setProperty("pointer-events", "auto", "important");
-    }
-
-    if (input) {
-      input.style.setProperty("display", "inline-block", "important");
-      input.style.setProperty("visibility", "visible", "important");
-      input.style.setProperty("opacity", "1", "important");
-      input.style.setProperty("width", "380px", "important");
-      input.style.setProperty("max-width", "100%", "important");
-      input.style.setProperty("height", "42px", "important");
-      input.style.setProperty("padding", "0 12px", "important");
-      input.style.setProperty("border", "0", "important");
-      input.style.setProperty("border-bottom", "1px solid #999", "important");
-      input.style.setProperty("box-shadow", "none", "important");
-      input.style.setProperty("outline", "none", "important");
-      input.style.setProperty("background", "#fff", "important");
-
-      setTimeout(function () {
-        try { input.focus(); } catch (e) {}
-      }, 50);
-    }
-  }
-
-  function closeSearch() {
-    document.documentElement.classList.remove("mc-search-open");
-    if (document.body) document.body.classList.remove("mc-search-open");
-
-    var input = getSearchInput();
-    if (input) {
-      try { input.blur(); } catch (e) {}
-    }
-  }
-
-  document.addEventListener("click", function (e) {
-    var btn = e.target.closest(".mc-search-float");
-
-    if (btn) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (document.documentElement.classList.contains("mc-search-open")) {
-        closeSearch();
-      } else {
-        openSearch();
-      }
-
-      return;
-    }
-
-    var wrap = ensureSearchIsInHeader();
-
-    if (
-      document.documentElement.classList.contains("mc-search-open") &&
-      wrap &&
-      !wrap.contains(e.target) &&
-      !e.target.closest(".mc-search-float")
-    ) {
-      closeSearch();
-    }
-  }, true);
-
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeSearch();
-  });
-})();
-</script>
   <!-- Hero headline: IDs + head CSS + sync script — Volusion often strips p/class/style; this must win -->
   <style id="mc-hero-copy-critical">
     #mc-hero-copy-tagline {
@@ -1632,34 +1510,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function bindSearchToggle() {
-    var toggle = document.getElementById('toggle1');
-    if (!toggle || toggle.getAttribute('data-mc-search-bound') === '1') return;
-    toggle.setAttribute('data-mc-search-bound', '1');
-    var root = document.documentElement;
-    var bod = document.body;
-    function flip() {
-      var wasOpen = root.classList.contains('mc-search-open');
-      root.classList.toggle('mc-search-open');
-      if (bod) bod.classList.toggle('mc-search-open');
-      var inp = document.getElementById('search');
-      if (!wasOpen && inp) {
-        window.setTimeout(function () {
-          inp.focus();
-        }, 0);
-      } else if (wasOpen && inp) {
-        inp.blur();
-      }
-    }
-    toggle.addEventListener('click', function (e) {
-      e.preventDefault();
-      flip();
-    });
-    toggle.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        flip();
-      }
-    });
+    return;
   }
 
   function boot() {
@@ -18069,6 +17920,31 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     }
   }
 </style>
+<style id="mc-search-one-controller-css">
+  html:not(.mc-search-open) header.header .mc-header-search-cart-wrap,
+  body:not(.mc-search-open) header.header .mc-header-search-cart-wrap {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search,
+  html.mc-search-open header.header .mc-header-search-cart-wrap #collapsingSearch,
+  html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__form,
+  html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__form .container,
+  html.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__form .row,
+  body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search,
+  body.mc-search-open header.header .mc-header-search-cart-wrap #collapsingSearch,
+  body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__form,
+  body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__form .container,
+  body.mc-search-open header.header .mc-header-search-cart-wrap .collapsing-search__form .row {
+    border: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    background-image: none !important;
+  }
+</style>
 
 <script id="mc-final-planner-cart-qty-sync">
 (function () {
@@ -18078,26 +17954,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     console.info("[McCabe]", "PDP cart / armless sync loaded", MC_CART_SYNC_BUILD);
     window.__mcCartSyncBuild = MC_CART_SYNC_BUILD;
   } catch (eInfo) {}
-
-  try {
-    if (!document.getElementById("mc-planner-armless-discount-css")) {
-      var css = document.createElement("style");
-      css.id = "mc-planner-armless-discount-css";
-      css.textContent =
-        "[data-mc-planner-managed-discount='1'],.mc-planner-armless-discount-hidden,.mc-planner-armless-discount-hidden-row td,.mc-planner-armless-discount-hidden-row th{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important;line-height:0!important;font-size:0!important;}" +
-        "select.mc-planner-armless-discount-target{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important;clip:rect(0,0,0,0)!important;}";
-      document.head.appendChild(css);
-    }
-  } catch (eCss) {}
-
-  var mcArmlessHideDeb = null;
-  function mcScheduleArmlessDiscountRowHide() {
-    if (mcArmlessHideDeb) clearTimeout(mcArmlessHideDeb);
-    mcArmlessHideDeb = setTimeout(function () {
-      mcArmlessHideDeb = null;
-      mcRunArmlessDiscountRowHide();
-    }, 80);
-  }
 
   function mcFindRealQtyInput(form) {
     return (
@@ -18444,21 +18300,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     return true;
   }
 
-  function mcMarkPlannerDiscountHidden(el) {
-    if (!el) return;
-    try {
-      el.setAttribute("data-mc-planner-managed-discount", "1");
-      el.classList.add("mc-planner-armless-discount-hidden");
-      el.style.setProperty("display", "none", "important");
-      el.style.setProperty("visibility", "hidden", "important");
-      el.style.setProperty("height", "0", "important");
-      el.style.setProperty("overflow", "hidden", "important");
-      el.style.setProperty("margin", "0", "important");
-      el.style.setProperty("padding", "0", "important");
-      el.style.setProperty("border", "0", "important");
-    } catch (eM) {}
-  }
-
   function mcRadioGroupNeighborhoodText(firstRadio) {
     if (!firstRadio) return "";
     var bits = [];
@@ -18593,10 +18434,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     var sel = mcFindArmlessDiscountSelect(form);
 
     if (sel) {
-      try {
-        sel.classList.add("mc-planner-armless-discount-target");
-      } catch (eC) {}
-
       sel.disabled = false;
 
       var selected = false;
@@ -18666,127 +18503,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     console.warn("MC 4L DISCOUNT: no Volusion armless/4L discount select or radio group found");
   }
 
-  function mcHideArmlessDiscountOptionRow(form) {
-    var sel = mcFindArmlessDiscountSelect(form);
-    var radioName = sel ? null : mcFindArmlessDiscountRadioName(form);
-    var firstRadio = null;
-    var rdx;
-    if (radioName) {
-      var allr2 = document.querySelectorAll('input[type="radio"]');
-      for (rdx = 0; rdx < allr2.length; rdx++) {
-        if (allr2[rdx].name === radioName) {
-          firstRadio = allr2[rdx];
-          break;
-        }
-      }
-    }
-
-    var anchor = sel || firstRadio;
-    if (!anchor) return;
-
-    try {
-      if (sel) {
-        sel.classList.add("mc-planner-armless-discount-target");
-        sel.disabled = false;
-      }
-      if (firstRadio) firstRadio.disabled = false;
-    } catch (eEn) {}
-
-    var tr = anchor.closest && anchor.closest("tr");
-    if (tr) {
-      try {
-        tr.classList.add("mc-planner-armless-discount-hidden-row");
-        mcMarkPlannerDiscountHidden(tr);
-        Array.from(tr.querySelectorAll("td, th")).forEach(mcMarkPlannerDiscountHidden);
-<<<<<<< HEAD
-        mcHideArmlessDiscountHeaderAndCategoryRows(tr, anchor);
-=======
->>>>>>> 0a53ab006976c556bb35bf107c9ee5d2d0bd72b4
-      } catch (eTr) {}
-      return;
-    }
-
-    var row =
-      (anchor.closest && anchor.closest(".v65-productdetail-options")) ||
-      (anchor.closest && anchor.closest(".v65-product-select")) ||
-      null;
-
-    var el = row || anchor.parentElement;
-    var i;
-    for (i = 0; i < 18 && el; i++) {
-      var tag = (el.tagName || "").toUpperCase();
-      var cls = String(el.className || "");
-      if (
-        tag === "TR" ||
-        tag === "LI" ||
-        tag === "DD" ||
-        tag === "DT" ||
-        /v65-product|options|productdetail|option_row|option-row/i.test(cls)
-      ) {
-        try {
-          el.classList.add("mc-planner-armless-discount-hidden-row");
-          mcMarkPlannerDiscountHidden(el);
-          if (tag === "TR") {
-            Array.from(el.querySelectorAll("td, th")).forEach(mcMarkPlannerDiscountHidden);
-          }
-        } catch (eH) {}
-        mcHideArmlessDiscountHeaderAndCategoryRows(null, anchor);
-        return;
-      }
-      el = el.parentElement;
-    }
-
-    mcHideArmlessDiscountHeaderAndCategoryRows(null, anchor);
-  }
-
-  function mcHideArmlessDiscountHeaderAndCategoryRows(tr, anchor) {
-    if (tr) {
-      var p = tr.previousElementSibling;
-      var steps = 0;
-      while (p && steps < 6) {
-        if (p.nodeType === 1) {
-          var ptxt = String(p.textContent || "");
-          var pint =
-            p.querySelector &&
-            p.querySelector(
-              'select, input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), textarea, button'
-            );
-          if (
-            (/armless|loveseat|\b4l\b/i.test(ptxt) || (p.className && /heading|title|group|category/i.test(String(p.className)))) &&
-            !pint
-          ) {
-            mcMarkPlannerDiscountHidden(p);
-            if (p.querySelectorAll) {
-              Array.from(p.querySelectorAll("td, th")).forEach(mcMarkPlannerDiscountHidden);
-            }
-          }
-        }
-        p = p.previousElementSibling;
-        steps++;
-      }
-    }
-
-    var optTable =
-      (anchor && anchor.closest && anchor.closest("#options_table")) ||
-      document.getElementById("options_table") ||
-      document.querySelector("#v65-product-parent table[id*='options_table']") ||
-      document.querySelector("table[id*='options_table']");
-    if (!optTable || !optTable.querySelectorAll) return;
-
-    var rows = optTable.querySelectorAll("tr");
-    var i, r, rtxt, rint;
-    for (i = 0; i < rows.length; i++) {
-      r = rows[i];
-      if (tr && r === tr) continue;
-      rtxt = String(r.textContent || "");
-      if (!/armless|loveseat|\b4l\b/i.test(rtxt)) continue;
-      rint = r.querySelector('select, input[type="radio"]');
-      if (rint) continue;
-      mcMarkPlannerDiscountHidden(r);
-      Array.from(r.querySelectorAll("td, th")).forEach(mcMarkPlannerDiscountHidden);
-    }
-  }
-
   function mcRefreshMemberPriceHighWater() {
     try {
       if (typeof mcReadCurrentVisibleMemberUnitPrice !== "function") return;
@@ -18833,45 +18549,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     } catch (eFl) {}
   }
 
-  function mcHideArmlessCategoryHeadingRows() {
-    var trs = document.querySelectorAll("#content_area tr, #v65-product-parent tr");
-    var i, tr, t, hasCtrl;
-    for (i = 0; i < trs.length; i++) {
-      tr = trs[i];
-      t = String(tr.textContent || "")
-        .replace(/\s+/g, " ")
-        .trim();
-      if (!/armless|loveseat|\b4l\b/i.test(t)) continue;
-      hasCtrl = tr.querySelector("select") || tr.querySelector('input[type="radio"]');
-      if (hasCtrl) continue;
-      mcMarkPlannerDiscountHidden(tr);
-      Array.from(tr.querySelectorAll("td, th")).forEach(mcMarkPlannerDiscountHidden);
-    }
-
-    var subs = document.querySelectorAll(
-      "#content_area .v65-productdetail-subheading, #v65-product-parent .v65-productdetail-subheading, #content_area [class*='subheading'], #v65-product-parent [class*='subheading']"
-    );
-    var j, sub, stxt;
-    for (j = 0; j < subs.length; j++) {
-      sub = subs[j];
-      stxt = String(sub.textContent || "").replace(/\s+/g, " ");
-      if (!/armless|loveseat|\b4l\b/i.test(stxt)) continue;
-      var trS = sub.closest && sub.closest("tr");
-      var hid = trS || sub;
-      mcMarkPlannerDiscountHidden(hid);
-      if (trS) Array.from(trS.querySelectorAll("td, th")).forEach(mcMarkPlannerDiscountHidden);
-    }
-  }
-
-  function mcRunArmlessDiscountRowHide() {
-    mcHideArmlessCategoryHeadingRows();
-    var form =
-      document.querySelector("#v65-product-parent form") ||
-      document.querySelector('form[action*="ProductDetails" i], form[action*="shoppingcart" i]') ||
-      null;
-    mcHideArmlessDiscountOptionRow(form);
-  }
-
   document.addEventListener("click", function (e) {
     var btn = e.target.closest('input[name="btnaddtocart"], #btn_addtocart, input[type="submit"], button');
     if (!btn) return;
@@ -18894,15 +18571,11 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     mcSnapshotMemberUnitFloorBeforeCart();
     mcSyncPlannerQtyToCart(form);
     mcSyncArmlessLoveseatDiscount(form);
-    mcHideArmlessDiscountOptionRow(form);
-    mcHideArmlessCategoryHeadingRows();
 
     function mcRecartSync() {
       mcSnapshotMemberUnitFloorBeforeCart();
       mcSyncPlannerQtyToCart(form);
       mcSyncArmlessLoveseatDiscount(form);
-      mcHideArmlessDiscountOptionRow(form);
-      mcHideArmlessCategoryHeadingRows();
     }
     try {
       requestAnimationFrame(mcRecartSync);
@@ -18925,14 +18598,10 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       mcSnapshotMemberUnitFloorBeforeCart();
       mcSyncPlannerQtyToCart(form);
       mcSyncArmlessLoveseatDiscount(form);
-      mcHideArmlessDiscountOptionRow(form);
-      mcHideArmlessCategoryHeadingRows();
       setTimeout(function () {
         mcSnapshotMemberUnitFloorBeforeCart();
         mcSyncPlannerQtyToCart(form);
         mcSyncArmlessLoveseatDiscount(form);
-        mcHideArmlessDiscountOptionRow(form);
-        mcHideArmlessCategoryHeadingRows();
       }, 100);
     }
   }, true);
@@ -18947,48 +18616,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       if (hwTick >= 48) clearInterval(hwIv);
     }, 500);
   }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", mcRunArmlessDiscountRowHide);
-  } else {
-    mcRunArmlessDiscountRowHide();
-  }
-  window.addEventListener("load", function () {
-    mcRunArmlessDiscountRowHide();
-    setTimeout(mcRunArmlessDiscountRowHide, 400);
-    setTimeout(mcRunArmlessDiscountRowHide, 1200);
-    setTimeout(mcRunArmlessDiscountRowHide, 2500);
-    if (document.getElementById("v65-product-parent")) {
-      var armlessHideN = 0;
-      var armlessIv = setInterval(function () {
-        armlessHideN++;
-        mcRunArmlessDiscountRowHide();
-        if (armlessHideN >= 50) clearInterval(armlessIv);
-      }, 280);
-    }
-  });
-
-  try {
-    var caObs = document.getElementById("content_area");
-    if (caObs && window.MutationObserver && !caObs.__mcArmlessHideObs) {
-      caObs.__mcArmlessHideObs = true;
-      var obsCa = new MutationObserver(function () {
-        mcScheduleArmlessDiscountRowHide();
-      });
-      obsCa.observe(caObs, { childList: true, subtree: true });
-    }
-  } catch (eObCa) {}
-
-  try {
-    var v65obs = document.getElementById("v65-product-parent");
-    if (v65obs && window.MutationObserver && !v65obs.__mcArmlessHideObs) {
-      v65obs.__mcArmlessHideObs = true;
-      var obs = new MutationObserver(function () {
-        mcScheduleArmlessDiscountRowHide();
-      });
-      obs.observe(v65obs, { childList: true, subtree: true });
-    }
-  } catch (eOb) {}
 
   window.mcSyncPlannerQtyToCart = mcSyncPlannerQtyToCart;
   window.mcGetPlannerBillableQty = mcGetPlannerBillableQty;
@@ -19008,6 +18635,210 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       allScores: rows
     });
   };
+})();
+</script>
+<script id="mc-search-float-toggle">
+(function () {
+  function getWrap() {
+    return document.querySelector("header.header .mc-header-search-cart-wrap");
+  }
+
+  function getInput() {
+    var wrap = getWrap();
+    return wrap && (
+      wrap.querySelector("#search") ||
+      wrap.querySelector(".collapsing-search__input") ||
+      wrap.querySelector('input[type="search"]') ||
+      wrap.querySelector('input[type="text"]')
+    );
+  }
+
+  function cleanInnerLines(wrap) {
+    if (!wrap) return;
+
+    Array.from(wrap.querySelectorAll(
+      ".collapsing-search, #collapsingSearch, .collapsing-search__form, .collapsing-search__form .container, .collapsing-search__form .row"
+    )).forEach(function (el) {
+      el.style.setProperty("border", "0", "important");
+      el.style.setProperty("border-bottom", "0", "important");
+      el.style.setProperty("box-shadow", "none", "important");
+      el.style.setProperty("background-image", "none", "important");
+      el.style.setProperty("margin", "0", "important");
+      el.style.setProperty("padding", "0", "important");
+    });
+  }
+
+  function openSearch() {
+    var wrap = getWrap();
+    var input = getInput();
+
+    document.documentElement.classList.add("mc-search-open");
+    if (document.body) document.body.classList.add("mc-search-open");
+
+    if (wrap) {
+      wrap.style.setProperty("display", "flex", "important");
+      wrap.style.setProperty("position", "fixed", "important");
+      wrap.style.setProperty("top", "52px", "important");
+      wrap.style.setProperty("right", "140px", "important");
+      wrap.style.setProperty("width", "460px", "important");
+      wrap.style.setProperty("max-width", "calc(100vw - 180px)", "important");
+      wrap.style.setProperty("min-height", "64px", "important");
+      wrap.style.setProperty("padding", "14px 18px", "important");
+      wrap.style.setProperty("background", "#fff", "important");
+      wrap.style.setProperty("border", "0", "important");
+      wrap.style.setProperty("border-bottom", "0", "important");
+      wrap.style.setProperty("box-shadow", "0 10px 34px rgba(0,0,0,.16)", "important");
+      wrap.style.setProperty("border-radius", "4px", "important");
+      wrap.style.setProperty("align-items", "center", "important");
+      wrap.style.setProperty("justify-content", "center", "important");
+      wrap.style.setProperty("gap", "10px", "important");
+      wrap.style.setProperty("z-index", "10075", "important");
+      wrap.style.setProperty("opacity", "1", "important");
+      wrap.style.setProperty("visibility", "visible", "important");
+      wrap.style.setProperty("pointer-events", "auto", "important");
+    }
+
+    cleanInnerLines(wrap);
+
+    if (input) {
+      input.style.setProperty("display", "inline-block", "important");
+      input.style.setProperty("visibility", "visible", "important");
+      input.style.setProperty("opacity", "1", "important");
+      input.style.setProperty("width", "380px", "important");
+      input.style.setProperty("max-width", "100%", "important");
+      input.style.setProperty("height", "42px", "important");
+      input.style.setProperty("padding", "0 12px", "important");
+      input.style.setProperty("border", "0", "important");
+      input.style.setProperty("border-bottom", "1px solid #999", "important");
+      input.style.setProperty("box-shadow", "none", "important");
+      input.style.setProperty("outline", "none", "important");
+      input.style.setProperty("background", "#fff", "important");
+      input.style.setProperty("background-image", "none", "important");
+
+      setTimeout(function () {
+        try { input.focus(); } catch(e) {}
+      }, 30);
+    }
+  }
+
+  function closeSearch() {
+    document.documentElement.classList.remove("mc-search-open");
+    if (document.body) document.body.classList.remove("mc-search-open");
+
+    var wrap = getWrap();
+    var input = getInput();
+
+    if (input) {
+      try { input.blur(); } catch(e) {}
+    }
+
+    if (wrap) {
+      wrap.style.setProperty("display", "none", "important");
+      wrap.style.setProperty("visibility", "hidden", "important");
+      wrap.style.setProperty("opacity", "0", "important");
+      wrap.style.setProperty("pointer-events", "none", "important");
+    }
+  }
+
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest(".mc-search-float");
+    var wrap = getWrap();
+
+    if (btn) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (document.documentElement.classList.contains("mc-search-open")) {
+        closeSearch();
+      } else {
+        openSearch();
+      }
+      return;
+    }
+
+    if (
+      document.documentElement.classList.contains("mc-search-open") &&
+      wrap &&
+      !wrap.contains(e.target)
+    ) {
+      closeSearch();
+    }
+  }, true);
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeSearch();
+  });
+
+  window.mcOpenSearch = openSearch;
+  window.mcCloseSearch = closeSearch;
+})();
+</script>
+<script id="mc-hide-armless-option-visual-only">
+(function () {
+  function text(el) {
+    return String(el && (el.textContent || el.innerText || "") || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function selectLooksArmless(sel) {
+    if (!sel || !sel.options) return false;
+
+    var optionText = Array.from(sel.options).map(function (o) {
+      return text(o);
+    }).join(" | ");
+
+    var sig = String((sel.name || "") + " " + (sel.id || "") + " " + (sel.title || "")).toLowerCase();
+
+    return /armless|4l|loveseat|discount/.test(optionText + " " + sig);
+  }
+
+  function hideArmlessOptionRows() {
+    var root = document.querySelector("#v65-product-parent") || document.querySelector("#content_area") || document;
+
+    Array.from(root.querySelectorAll("select")).forEach(function (sel) {
+      if (!selectLooksArmless(sel)) return;
+
+      sel.disabled = false;
+
+      var row =
+        sel.closest("tr") ||
+        sel.closest(".v65-productdetail-options-row") ||
+        sel.closest(".productnamecolor") ||
+        sel.closest("td") ||
+        sel.parentElement;
+
+      if (row) {
+        row.style.setProperty("display", "none", "important");
+        row.style.setProperty("visibility", "hidden", "important");
+        row.style.setProperty("height", "0", "important");
+        row.style.setProperty("margin", "0", "important");
+        row.style.setProperty("padding", "0", "important");
+        row.style.setProperty("overflow", "hidden", "important");
+      }
+
+      sel.style.setProperty("display", "none", "important");
+      sel.style.setProperty("visibility", "hidden", "important");
+      sel.style.setProperty("height", "0", "important");
+      sel.style.setProperty("width", "0", "important");
+      sel.style.setProperty("opacity", "0", "important");
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", hideArmlessOptionRows);
+  } else {
+    hideArmlessOptionRows();
+  }
+
+  window.addEventListener("load", function () {
+    hideArmlessOptionRows();
+    setTimeout(hideArmlessOptionRows, 300);
+    setTimeout(hideArmlessOptionRows, 1000);
+  });
+
+  window.mcHideArmlessOptionRows = hideArmlessOptionRows;
 })();
 </script>
 </body>
