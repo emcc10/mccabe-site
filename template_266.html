@@ -18087,7 +18087,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <script id="mc-final-planner-cart-qty-sync">
 (function () {
-  var MC_CART_SYNC_BUILD = "266-mc-4l-split-20260501d";
+  var MC_CART_SYNC_BUILD = "266-mc-4l-split-20260501e";
 
   try {
     console.info("[McCabe]", "PDP cart / armless sync loaded", MC_CART_SYNC_BUILD);
@@ -18148,40 +18148,58 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
     return null;
   }
 
-  function mcGetPlannerBillableQty() {
-    var p = window.__mcLastPlannerPayload;
-    if (p && p.seatCount != null && p.seatCount !== "" && Number(p.seatCount) > 0) {
-      return Number(p.seatCount);
-    }
-    if (p && Array.isArray(p.layout) && p.layout.length) {
-      var sc = 0;
-      for (var si = 0; si < p.layout.length; si++) {
-        var seg = p.layout[si];
-        var pid = String((seg && (seg.id != null && seg.id !== "" ? seg.id : seg)) || "")
-          .trim()
-          .toUpperCase();
-        if (!pid) continue;
-        sc += pid === "4L" ? 2 : 1;
-      }
-      if (sc > 0) return sc;
-    }
+  function mcGetMainProductCode() {
+    var el =
+      document.querySelector('input[name="ProductCode"]') ||
+      document.querySelector('input[name="productcode"]') ||
+      document.querySelector('input[name="PRODUCTCODE"]');
+    return el ? String(el.value || "").trim() : "";
+  }
+
+  function mcGetFourLCountFromPlanner() {
     var calc = window.mccabeRoomPlannerPriceCalc || {};
     var data = window.mccabeRoomPlannerData || window.roomPlannerData || window.__mcLastPlannerPayload || null;
 
-    var countBillable = 0;
-    var countsOnly = mcGetPlannerCounts();
-    if (countsOnly) {
-      Object.keys(countsOnly).forEach(function (key) {
-        var qty = Number(countsOnly[key] || 0);
-        if (!qty) return;
-        var id = String(key).toUpperCase();
-        if (id === "4L") {
-          countBillable += qty * 2;
-        } else {
-          countBillable += qty;
-        }
-      });
+    var counts =
+      calc.counts ||
+      (data && data.counts) ||
+      (data && data.options) ||
+      null;
+
+    if (!counts || typeof counts !== "object") {
+      counts = window.__mcPlannerCounts;
     }
+
+    if (counts && typeof counts === "object") {
+      var q4 = Number(
+        counts["4L"] ||
+          counts["4l"] ||
+          counts["4L_ARML"] ||
+          counts["armlessLoveseat"] ||
+          0
+      );
+      if (q4 > 0) return q4;
+    }
+
+    var lay = (data && data.layout) || window.__ROOM_PLANNER_LAYOUT__ || [];
+    if (Array.isArray(lay) && lay.length) {
+      var c4 = 0;
+      for (var i4 = 0; i4 < lay.length; i4++) {
+        var seg4 = lay[i4];
+        var pid4 = String((seg4 && (seg4.id != null && seg4.id !== "" ? seg4.id : seg4)) || "")
+          .trim()
+          .toUpperCase();
+        if (pid4 === "4L") c4++;
+      }
+      if (c4 > 0) return c4;
+    }
+
+    return 0;
+  }
+
+  function mcGetBillableQtyFromPlanner() {
+    var calc = window.mccabeRoomPlannerPriceCalc || {};
+    var data = window.mccabeRoomPlannerData || window.roomPlannerData || window.__mcLastPlannerPayload || null;
 
     var direct =
       Number(calc.effectiveSeats) ||
@@ -18195,44 +18213,119 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       (data && Number(data.seatCount)) ||
       0;
 
-    if (!(direct > 0) && countsOnly) {
-      var total = 0;
-      Object.keys(countsOnly).forEach(function (key) {
-        var qty = Number(countsOnly[key] || 0);
-        if (!qty) return;
-        var id = String(key).toUpperCase();
-        if (id === "4L") {
-          total += qty * 2;
-        } else {
-          total += qty;
-        }
-      });
-      direct = total;
+    if (direct > 0) {
+      var countsForMax =
+        calc.counts ||
+        (data && data.counts) ||
+        (data && data.options) ||
+        window.__mcPlannerCounts ||
+        null;
+      if (!countsForMax || typeof countsForMax !== "object") {
+        countsForMax = mcGetPlannerCounts();
+      }
+      var countSum = 0;
+      if (countsForMax && typeof countsForMax === "object") {
+        Object.keys(countsForMax).forEach(function (key) {
+          var qm = Number(countsForMax[key] || 0);
+          if (!qm) return;
+          var idm = String(key).toUpperCase();
+          countSum += idm === "4L" ? qm * 2 : qm;
+        });
+      }
+      return Math.max(direct, countSum);
     }
 
-    var out = Math.max(Number(direct) || 0, Number(countBillable) || 0);
-    return out > 0 ? out : 0;
+    var counts =
+      calc.counts ||
+      (data && data.counts) ||
+      (data && data.options) ||
+      null;
+
+    if (!counts || typeof counts !== "object") {
+      counts = window.__mcPlannerCounts;
+    }
+
+    if (!counts || typeof counts !== "object") {
+      counts = mcGetPlannerCounts();
+    }
+
+    if (!counts) {
+      var lay0 = (data && data.layout) || window.__ROOM_PLANNER_LAYOUT__ || [];
+      if (Array.isArray(lay0) && lay0.length) {
+        var sc0 = 0;
+        for (var li0 = 0; li0 < lay0.length; li0++) {
+          var seg0 = lay0[li0];
+          var pid0 = String((seg0 && (seg0.id != null && seg0.id !== "" ? seg0.id : seg0)) || "")
+            .trim()
+            .toUpperCase();
+          if (!pid0) continue;
+          sc0 += pid0 === "4L" ? 2 : 1;
+        }
+        if (sc0 > 0) return sc0;
+      }
+      return 0;
+    }
+
+    var total = 0;
+    Object.keys(counts).forEach(function (key) {
+      var qty = Number(counts[key] || 0);
+      if (!qty) return;
+      var id = String(key).toUpperCase();
+      if (id === "4L") {
+        total += qty * 2;
+      } else {
+        total += qty;
+      }
+    });
+    return total;
+  }
+
+  function mcBuildPlannerCartSplit() {
+    var armDefault = String(window.MC_ARMLESS_LOVE_HTS_PRODUCT_CODE || "armless-love-hts").trim();
+    var mainProductCode = mcGetMainProductCode();
+    var fourLCount = mcGetFourLCountFromPlanner();
+    var billableQty = mcGetBillableQtyFromPlanner();
+
+    var mainQty = billableQty - 2 * fourLCount;
+    if (mainQty < 0) mainQty = 0;
+
+    var items = [];
+
+    if (mainQty > 0 && mainProductCode) {
+      items.push({
+        productCode: mainProductCode,
+        quantity: mainQty,
+        role: "main-theater-seats"
+      });
+    }
+
+    if (fourLCount > 0) {
+      items.push({
+        productCode: armDefault,
+        quantity: fourLCount,
+        role: "4l-armless-loveseat"
+      });
+    }
+
+    console.log("MC PLANNER CART SPLIT", {
+      mainProductCode: mainProductCode,
+      billableQty: billableQty,
+      fourLCount: fourLCount,
+      mainQty: mainQty,
+      armlessProductCode: armDefault,
+      armlessQty: fourLCount,
+      items: items
+    });
+
+    return items;
+  }
+
+  function mcGetPlannerBillableQty() {
+    return mcGetBillableQtyFromPlanner();
   }
 
   function mcGetFourLCount() {
-    var p = window.__mcLastPlannerPayload;
-    if (p && p.options && typeof p.options === "object") {
-      var fl = Number(p.options["4L"] || p.options["4l"] || 0);
-      if (fl > 0) return fl;
-    }
-    if (p && Array.isArray(p.layout) && p.layout.length) {
-      var n = 0;
-      for (var fi = 0; fi < p.layout.length; fi++) {
-        var seg = p.layout[fi];
-        var pid = String((seg && (seg.id != null && seg.id !== "" ? seg.id : seg)) || "")
-          .trim()
-          .toUpperCase();
-        if (pid === "4L") n++;
-      }
-      if (n > 0) return n;
-    }
-    var c = mcGetPlannerCounts() || window.__mcPlannerCounts || {};
-    return Number(c["4L"] || c["4l"] || 0);
+    return mcGetFourLCountFromPlanner();
   }
 
   function mcSyncPlannerQtyToCart(form) {
@@ -19019,74 +19112,60 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function mcPlanner4LAfterCartSplitNavigate() {
-    function tryVolusionSoftCartGlobals() {
-      try {
-        if (typeof window.show_soft_add === "function") {
-          window.show_soft_add();
-          return true;
-        }
-        if (typeof window.ShowSoftAdd === "function") {
-          window.ShowSoftAdd();
-          return true;
-        }
-      } catch (e0) {}
-      return false;
-    }
-    tryVolusionSoftCartGlobals();
-    [120, 350, 750, 1400, 2200].forEach(function (ms) {
-      setTimeout(function () {
-        mcMergeArmlessInOpenSoftCart();
-        tryVolusionSoftCartGlobals();
-      }, ms);
-    });
-    var path = String(window.location.pathname || "");
-    var onPdp = !!(document.getElementById("v65-product-parent") || /productdetails/i.test(path));
-    if (onPdp) {
-      return;
-    }
     window.location.href = "/shoppingcart.asp";
   }
 
   function mcExecutePlanner4LCartSplit(form) {
-    var mainPc = String((form.querySelector('input[name="ProductCode"]') || {}).value || "").trim();
-    var billableQty = mcGetPlannerBillableQty();
-    var fourLCount = mcGetFourLCount();
-    var mainQty = Math.max(0, billableQty - 2 * fourLCount);
-    var armCode = String(window.MC_ARMLESS_LOVE_HTS_PRODUCT_CODE || "armless-love-hts");
+    var items = mcBuildPlannerCartSplit();
+    var mainEntry = null;
+    var armEntry = null;
+    var ix;
+    for (ix = 0; ix < items.length; ix++) {
+      if (items[ix].role === "main-theater-seats") mainEntry = items[ix];
+      if (items[ix].role === "4l-armless-loveseat") armEntry = items[ix];
+    }
+
     var armUnit = Number(window.MC_ARMLESS_LOVE_HTS_MEMBER_UNIT) || 3370;
     var memberUnitPrice = 0;
     if (typeof getPlannerBaseSeatPriceForCalc === "function") {
       memberUnitPrice = Number(getPlannerBaseSeatPriceForCalc()) || 0;
     }
     if (!(memberUnitPrice > 0)) {
-      var c0 = window.mccabeRoomPlannerPriceCalc || {};
-      memberUnitPrice = Number(c0.unitPrice) || 0;
+      var c00 = window.mccabeRoomPlannerPriceCalc || {};
+      memberUnitPrice = Number(c00.unitPrice) || 0;
     }
 
-    console.log("MC 4L CART SPLIT", {
-      mainProductCode: mainPc,
+    var mainQty = mainEntry ? Number(mainEntry.quantity) || 0 : 0;
+    var fourLCart = armEntry ? Number(armEntry.quantity) || 0 : 0;
+    var mainPc = mainEntry ? String(mainEntry.productCode || "").trim() : "";
+
+    console.log("MC 4L CART SPLIT execute", {
+      items: items,
       memberUnitPrice: memberUnitPrice,
-      billableQty: billableQty,
-      fourLCount: fourLCount,
       mainQty: mainQty,
-      armlessProductCode: armCode,
-      armlessLoveQty: fourLCount,
-      expectedTotal: memberUnitPrice * mainQty + armUnit * fourLCount
+      armlessQty: fourLCart,
+      expectedTotal: memberUnitPrice * mainQty + armUnit * fourLCart
     });
 
     var chain = Promise.resolve();
 
-    if (mainQty > 0) {
+    if (mainEntry && mainQty > 0 && mainPc) {
       chain = chain.then(function () {
         return mcPlannerAddMainTheaterLine(form, mainPc, mainQty);
       });
-    } else {
-      console.log("MC 4L CART SPLIT step 1 skipped (mainQty 0)");
+    } else if (mcGetFourLCountFromPlanner() > 0 && (!mainEntry || mainQty === 0)) {
+      console.warn("MC 4L CART SPLIT: main theater line not added", {
+        mainEntry: mainEntry,
+        billableQty: mcGetBillableQtyFromPlanner(),
+        mainProductCode: mcGetMainProductCode()
+      });
     }
 
     chain
       .then(function () {
-        return mcPlannerAddArmlessPlannerLine(armCode, fourLCount);
+        if (armEntry && fourLCart > 0) {
+          return mcPlannerAddArmlessPlannerLine(String(armEntry.productCode || "").trim(), fourLCart);
+        }
       })
       .then(function () {
         mcPlanner4LAfterCartSplitNavigate();
@@ -19119,6 +19198,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   window.mcSyncPlannerQtyToCart = mcSyncPlannerQtyToCart;
   window.mcGetPlannerBillableQty = mcGetPlannerBillableQty;
   window.mcGetFourLCount = mcGetFourLCount;
+  window.mcBuildPlannerCartSplit = mcBuildPlannerCartSplit;
   window.mcSyncArmlessLoveseatDiscount = mcSyncArmlessLoveseatDiscount;
   window.mcDebugArmlessDiscount = function () {
     var form =
