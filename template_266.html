@@ -1166,7 +1166,7 @@ document.addEventListener("DOMContentLoaded", function () {
   window.addEventListener("load", markCategoryOrListingPage);
 })();
 </script>
-<script src="/v/vspfiles/js/sectional-configs.js"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260506"></script>
 <script>
 (function () {
   function ready(fn) {
@@ -1177,19 +1177,27 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function getStyleFromPage() {
-    var text = document.body ? document.body.innerText : "";
-    var path = window.location.pathname;
-    var combined = (path + " " + text).toLowerCase();
-    var styles = Object.keys(window.SECTIONAL_CONFIGS || {});
+  function normalizeStyleKey(s) {
+    return String(s || '')
+      .toLowerCase()
+      .replace(/\s+/g, '')
+      .replace(/_/g, '-');
+  }
 
-    var withSc = styles.find(function (style) {
-      return combined.includes(style.toLowerCase() + "-sc");
-    });
-    if (withSc) return withSc;
+  function getStyleFromPage() {
+    if (!window.SECTIONAL_CONFIGS) return null;
+
+    var text = document.body ? document.body.innerText : '';
+    var path = window.location.pathname;
+    var combined = normalizeStyleKey(path + ' ' + text);
+
+    var styles = Object.keys(window.SECTIONAL_CONFIGS);
 
     return styles.find(function (style) {
-      return combined.includes(style.toLowerCase());
+      return (
+        combined.indexOf(normalizeStyleKey(style + '-SC')) !== -1 ||
+        combined.indexOf(normalizeStyleKey(style)) !== -1
+      );
     });
   }
 
@@ -1209,7 +1217,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  function triggerNativeChange(select) {
+  function triggerChange(select) {
     select.dispatchEvent(new Event("change", { bubbles: true }));
 
     if (typeof jQuery !== "undefined") {
@@ -1228,7 +1236,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     select.value = match.value;
-    triggerNativeChange(select);
+    triggerChange(select);
 
     Array.from(grid.querySelectorAll(".sectional-config-card")).forEach(function (card) {
       card.classList.toggle("is-selected", card.getAttribute("data-config-code") === cfg.code);
@@ -1237,25 +1245,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function initSectionalConfigCards() {
     if (!window.SECTIONAL_CONFIGS) {
-      console.warn("SECTIONAL_CONFIGS data missing.");
+      console.warn(
+        "SECTIONAL_CONFIGS missing. Check /v/vspfiles/js/sectional-configs.js or /vspfiles/js/sectional-configs.js"
+      );
       return;
     }
 
     var style = getStyleFromPage();
-    if (!style) return;
+    if (!style) {
+      console.warn("No matching sectional style found for this page.");
+      return;
+    }
 
     var configs = window.SECTIONAL_CONFIGS[style];
-    if (!configs || !configs.length) return;
+    if (!configs || !configs.length) {
+      console.warn("No configs found for style:", style);
+      return;
+    }
 
     var select = findConfigSelect(configs);
     if (!select) {
-      console.warn("Configuration dropdown not found for style:", style);
+      console.warn("Native configuration dropdown not found for style:", style);
       return;
     }
 
     if (document.querySelector("#sectionalConfigSelector")) return;
-
-    document.documentElement.classList.add("is-sectional-product");
 
     var wrap = document.createElement("div");
     wrap.id = "sectionalConfigSelector";
@@ -11834,73 +11848,139 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     );
   }
 
-  function normalizeRelatedItemsSection() {
-    var headings = Array.from(document.querySelectorAll('td, div, span, font, b, strong'))
-      .filter(function (el) {
-        var t = (el.textContent || '').trim().toLowerCase();
-        return t === 'related items' || t === 'related products';
-      });
-
-    headings.forEach(function (heading) {
-      var container = heading.closest('table') || heading.parentElement;
-
-      if (!container) return;
-
-      container.classList.add('mtl-related-items-section');
+  function findRelatedSection() {
+    var scope = document.getElementById('content_area') || document.body;
+    var candidates = Array.from(scope.querySelectorAll('table, div')).filter(function (el) {
+      return /related items|related products/i.test(el.innerText || '');
     });
+    var withImgs = candidates.filter(function (el) {
+      return el.querySelectorAll('img').length >= 1;
+    });
+    var tablePick = withImgs.find(function (el) {
+      return el.tagName === 'TABLE';
+    });
+    if (tablePick) return tablePick;
+    return withImgs[0] || null;
   }
 
-  function moveRelatedTitlesBelowImages() {
-    var sections = document.querySelectorAll('.mtl-related-items-section');
-
-    sections.forEach(function (section) {
-      var cells = Array.from(section.querySelectorAll('td'));
-
-      cells.forEach(function (cell) {
-        var imageLink = Array.from(cell.querySelectorAll('a')).find(function (a) {
-          return a.querySelector('img');
-        });
-
-        if (!imageLink) return;
-
-        var titleLinks = Array.from(cell.querySelectorAll('a')).filter(function (a) {
-          return !a.querySelector('img') && (a.textContent || '').trim().length > 0;
-        });
-
-        if (!titleLinks.length) return;
-
-        var mainTitle = titleLinks[titleLinks.length - 1];
-
-        mainTitle.classList.add('mtl-related-title');
-
-        imageLink.insertAdjacentElement('afterend', mainTitle);
-
-        titleLinks.forEach(function (a) {
-          if (a !== mainTitle) {
-            a.remove();
-          }
-        });
-      });
-    });
+  function cleanText(s) {
+    return String(s || '')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
-  function runMtlRelatedCleanup() {
+  function fixRelatedItemsCards() {
     if (!isMcProductDetailPage()) return;
-    normalizeRelatedItemsSection();
-    moveRelatedTitlesBelowImages();
+    if (document.querySelector('[data-mtl-related-rebuilt="1"]')) return;
+
+    var section = findRelatedSection();
+    if (!section) {
+      return;
+    }
+
+    var imageLinks = Array.from(section.querySelectorAll('a')).filter(function (a) {
+      return a.querySelector('img');
+    });
+
+    if (!imageLinks.length) {
+      return;
+    }
+
+    var headingEl = Array.from(
+      section.querySelectorAll('td, div, span, font, b, strong, h2, h3')
+    ).find(function (el) {
+      return /related items|related products/i.test(cleanText(el.textContent));
+    });
+
+    var grid = document.createElement('div');
+    grid.className = 'mtl-related-grid';
+
+    imageLinks.forEach(function (imageLink) {
+      var img = imageLink.querySelector('img');
+      var href = imageLink.getAttribute('href') || '';
+
+      var title = img.getAttribute('alt') || img.getAttribute('title') || cleanText(imageLink.getAttribute('title'));
+
+      if (!title) {
+        var matchingTextLink = Array.from(section.querySelectorAll('a')).find(function (a) {
+          return (
+            !a.querySelector('img') &&
+            a.getAttribute('href') === href &&
+            cleanText(a.textContent).length > 0
+          );
+        });
+
+        if (matchingTextLink) {
+          title = cleanText(matchingTextLink.textContent);
+        }
+      }
+
+      if (!title) {
+        title = 'View Product';
+      }
+
+      var card = document.createElement('div');
+      card.className = 'mtl-related-card';
+
+      var newImageLink = imageLink.cloneNode(true);
+      newImageLink.className = 'mtl-related-image-link';
+
+      var titleLink = document.createElement('a');
+      titleLink.className = 'mtl-related-title';
+      titleLink.href = href;
+      titleLink.textContent = title;
+
+      card.appendChild(newImageLink);
+      card.appendChild(titleLink);
+      grid.appendChild(card);
+    });
+
+    var mount = document.createElement('div');
+    mount.className = 'mtl-related-fixed';
+
+    var headingWrap = document.createElement('div');
+    headingWrap.className = 'mtl-related-heading';
+    headingWrap.textContent = headingEl ? cleanText(headingEl.textContent) : 'Related Items';
+
+    mount.appendChild(headingWrap);
+    mount.appendChild(grid);
+
+    var parent = section.parentNode;
+    if (!parent) {
+      return;
+    }
+
+    parent.insertBefore(mount, section);
+
+    try {
+      if (typeof section.remove === 'function') {
+        section.remove();
+      } else {
+        parent.removeChild(section);
+      }
+    } catch (eRm) {}
+
+    try {
+      mount.setAttribute('data-mtl-related-rebuilt', '1');
+    } catch (eAttr) {}
+  }
+
+  function runRelatedRebuild() {
+    fixRelatedItemsCards();
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', runMtlRelatedCleanup);
+    document.addEventListener('DOMContentLoaded', runRelatedRebuild);
   } else {
-    runMtlRelatedCleanup();
+    runRelatedRebuild();
   }
 
   window.addEventListener('load', function () {
-    runMtlRelatedCleanup();
-    setTimeout(runMtlRelatedCleanup, 0);
-    setTimeout(runMtlRelatedCleanup, 400);
-    setTimeout(runMtlRelatedCleanup, 1200);
+    runRelatedRebuild();
+    setTimeout(runRelatedRebuild, 0);
+    setTimeout(runRelatedRebuild, 400);
+    setTimeout(runRelatedRebuild, 1200);
+    setTimeout(runRelatedRebuild, 2500);
   });
 
   var ca = document.getElementById('content_area');
@@ -11908,7 +11988,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     var t;
     var mo = new MutationObserver(function () {
       clearTimeout(t);
-      t = setTimeout(runMtlRelatedCleanup, 80);
+      t = setTimeout(runRelatedRebuild, 120);
     });
     try {
       mo.observe(ca, { childList: true, subtree: true });
@@ -12002,7 +12082,7 @@ body.mc-product-page tr:has(> td[class*="vCSS_tab"]) {
   visibility: visible !important;
 }
 
-/* Category/listing grid only: flex order for image above title/price (PDP related items use .mtl-related-items-section in custom-safe.css) */
+/* Category/listing grid only: flex order for image above title/price (PDP Related Items use rebuilt .mtl-related-fixed grid in custom-safe.css) */
 html.is-category-or-listing-page #content_area .v-product .v-product__img,
 html.is-category-or-listing-page #content_area .v-product-grid .v-product .v-product__img {
   order: -1 !important;
