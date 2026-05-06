@@ -1093,12 +1093,14 @@ document.addEventListener("DOMContentLoaded", function () {
     window.isSectionalProductPage = function isSectionalProductPage() {
       var path = String(window.location.pathname || "").toLowerCase();
       if (path.indexOf("room-planner") !== -1) return false;
+      if (path.includes("-sc-")) return true;
+      try {
+        var pcEl = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+        var pcVal = pcEl ? String(pcEl.value || "").trim() : "";
+        if (/-sc-/i.test(pcVal)) return true;
+      } catch (ePc) {}
       var text = document.body ? String(document.body.innerText || "").toLowerCase() : "";
-      return (
-        path.includes("-sc-") ||
-        text.includes("choose configuration") ||
-        text.includes("configuration")
-      );
+      return text.indexOf("choose configuration") !== -1;
     };
 
     var pathOnly = String(window.location.pathname || "").toLowerCase();
@@ -1168,7 +1170,6 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260506"></script>
 <script>
-/* Single sectional diagram UI — data in sectional-configs.js only. */
 (function () {
   function ready(fn) {
     if (document.readyState === "loading") {
@@ -1178,57 +1179,26 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function normalizeStyleKey(s) {
-    return String(s || "")
-      .toLowerCase()
-      .replace(/\s+/g, "")
-      .replace(/_/g, "-");
+  function normalize(s) {
+    return String(s || "").toLowerCase().replace(/\s+/g, "").replace(/_/g, "-");
   }
 
   function getStyleFromPage() {
     if (!window.SECTIONAL_CONFIGS) return null;
-    var styles = Object.keys(window.SECTIONAL_CONFIGS);
-    var path = String(window.location.pathname || "");
-    var pathSeg = path.toLowerCase().match(/\/([^/]+)-sc-/i);
-    if (pathSeg) {
-      var slug = normalizeStyleKey(pathSeg[1]);
-      var byUrl = styles.find(function (style) {
-        return normalizeStyleKey(style) === slug;
-      });
-      if (byUrl) return byUrl;
-    }
-    try {
-      var pcEl = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
-      var pcVal = pcEl ? String(pcEl.value || "").trim() : "";
-      if (pcVal) {
-        var pcNorm = normalizeStyleKey(pcVal);
-        var byPc = styles.find(function (style) {
-          var sk = normalizeStyleKey(style);
-          return (
-            pcNorm.indexOf(sk + "-sc") !== -1 ||
-            (pcNorm.indexOf(sk) === 0 && /-sc-/i.test(pcVal))
-          );
-        });
-        if (byPc) return byPc;
-      }
-    } catch (ePc) {}
-    var text = document.body ? document.body.innerText : "";
-    var combined = normalizeStyleKey(path + " " + text);
-    return styles.find(function (style) {
-      return (
-        combined.indexOf(normalizeStyleKey(style + "-SC")) !== -1 ||
-        combined.indexOf(normalizeStyleKey(style)) !== -1
-      );
+
+    var bodyText = document.body ? document.body.innerText : "";
+    var path = window.location.pathname;
+    var combined = normalize(path + " " + bodyText);
+
+    return Object.keys(window.SECTIONAL_CONFIGS).find(function (style) {
+      return combined.includes(normalize(style + "-SC")) ||
+             combined.includes(normalize(style));
     });
   }
 
   function findConfigSelect(configs) {
-    var codes = configs
-      .map(function (c) {
-        return String(c.code || "").trim();
-      })
-      .filter(Boolean);
     var selects = Array.from(document.querySelectorAll("select"));
+
     return selects.find(function (select) {
       if (select.classList && select.classList.contains("mc-native-leather")) return false;
       var optionText = Array.from(select.options || [])
@@ -1236,38 +1206,19 @@ document.addEventListener("DOMContentLoaded", function () {
           return (opt.textContent || "") + " " + (opt.value || "");
         })
         .join(" ");
-      var norm = normalizeStyleKey(optionText);
-      return codes.some(function (code) {
-        if (!code) return false;
-        if (optionText.indexOf(code) !== -1) return true;
-        return norm.indexOf(normalizeStyleKey(code)) !== -1;
+
+      return configs.some(function (cfg) {
+        return optionText.indexOf(cfg.code) !== -1;
       });
     });
   }
 
   function triggerChange(select) {
     select.dispatchEvent(new Event("change", { bubbles: true }));
+
     if (typeof jQuery !== "undefined") {
       jQuery(select).trigger("change");
     }
-  }
-
-  function selectConfig(select, cfg, grid) {
-    var match = Array.from(select.options || []).find(function (opt) {
-      return (
-        (opt.textContent || "").indexOf(cfg.code) !== -1 ||
-        (opt.value || "").indexOf(cfg.code) !== -1
-      );
-    });
-    if (!match) {
-      console.warn("No matching Volusion option for config:", cfg.code);
-      return;
-    }
-    select.value = match.value;
-    triggerChange(select);
-    Array.from(grid.querySelectorAll(".sectional-config-card")).forEach(function (card) {
-      card.classList.toggle("is-selected", card.getAttribute("data-config-code") === cfg.code);
-    });
   }
 
   function markConfigRowOnly(select) {
@@ -1275,14 +1226,57 @@ document.addEventListener("DOMContentLoaded", function () {
     if (row) row.classList.add("mtl-native-config-row");
   }
 
+  function selectConfig(select, cfg, grid) {
+    var match = Array.from(select.options || []).find(function (opt) {
+      return (opt.textContent || "").indexOf(cfg.code) !== -1 ||
+             (opt.value || "").indexOf(cfg.code) !== -1;
+    });
+
+    if (!match) {
+      console.warn("No matching Volusion option for config:", cfg.code);
+      return;
+    }
+
+    select.value = match.value;
+    triggerChange(select);
+
+    Array.from(grid.querySelectorAll(".sectional-config-card")).forEach(function (card) {
+      card.classList.toggle(
+        "is-selected",
+        card.getAttribute("data-config-code") === cfg.code
+      );
+    });
+  }
+
   function initSectionalConfigCards() {
-    if (!window.SECTIONAL_CONFIGS) return;
+    console.log("MTL sectional card init running");
+
+    if (!window.SECTIONAL_CONFIGS) {
+      console.warn("SECTIONAL_CONFIGS missing.");
+      return;
+    }
+
     var style = getStyleFromPage();
-    if (!style) return;
+
+    if (!style) {
+      console.warn("No sectional style match found.");
+      return;
+    }
+
     var configs = window.SECTIONAL_CONFIGS[style];
-    if (!configs || !configs.length) return;
+
+    if (!configs || !configs.length) {
+      console.warn("No configs found for style:", style);
+      return;
+    }
+
     var select = findConfigSelect(configs);
-    if (!select) return;
+
+    if (!select) {
+      console.warn("Configuration dropdown not found for style:", style);
+      return;
+    }
+
     if (document.querySelector("#sectionalConfigSelector")) return;
 
     var wrap = document.createElement("div");
@@ -1302,46 +1296,42 @@ document.addEventListener("DOMContentLoaded", function () {
       card.type = "button";
       card.className = "sectional-config-card";
       card.setAttribute("data-config-code", cfg.code);
+
       card.innerHTML =
         '<div class="sectional-config-img-wrap">' +
-        '<img src="' +
-        cfg.image +
-        '" alt="' +
-        String(cfg.label || "").replace(/"/g, "&quot;") +
-        '">' +
-        "</div>" +
-        '<div class="sectional-config-label">' +
-        String(cfg.label || "").replace(/</g, "&lt;") +
-        "</div>" +
-        (cfg.description
-          ? '<div class="sectional-config-desc">' + String(cfg.description).replace(/</g, "&lt;") + "</div>"
-          : "");
+          '<img src="' + cfg.image + '" alt="' + (cfg.label || cfg.code) + '">' +
+        '</div>' +
+        '<div class="sectional-config-label">' + (cfg.label || cfg.code) + '</div>' +
+        (cfg.description ? '<div class="sectional-config-desc">' + cfg.description + '</div>' : "");
+
       card.addEventListener("click", function () {
         selectConfig(select, cfg, grid);
       });
+
       grid.appendChild(card);
     });
 
     wrap.appendChild(grid);
 
-    var optionsTable = select.closest("#options_table") || document.querySelector("#options_table");
+    var optionsTable = document.querySelector("#options_table");
     if (optionsTable && optionsTable.parentNode) {
       optionsTable.parentNode.insertBefore(wrap, optionsTable);
     } else {
       select.parentNode.insertBefore(wrap, select);
     }
 
-    var baseConfig = configs
-      .slice()
-      .sort(function (a, b) {
-        return Number(a.priceDiff || 0) - Number(b.priceDiff || 0);
-      })[0];
+    var baseConfig = configs.slice().sort(function (a, b) {
+      return Number(a.priceDiff || 0) - Number(b.priceDiff || 0);
+    })[0];
+
     if (baseConfig) {
       selectConfig(select, baseConfig, grid);
     }
 
     markConfigRowOnly(select);
     document.documentElement.classList.add("has-sectional-config-cards");
+
+    console.log("MTL sectional cards rendered:", style, configs.length);
   }
 
   ready(initSectionalConfigCards);
@@ -19432,6 +19422,116 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 
   window.mcHideArmlessOptionRows = hideArmlessOptionRows;
+})();
+</script>
+<script>
+(function () {
+  function ready(fn) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fn);
+    } else {
+      fn();
+    }
+  }
+
+  function cleanText(s) {
+    return String(s || "").replace(/\s+/g, " ").trim();
+  }
+
+  function findRelatedContainer() {
+    var scope = document.getElementById("content_area") || document;
+    var candidates = Array.from(scope.querySelectorAll("table, tbody, tr, td, div"));
+
+    return candidates
+      .filter(function (el) {
+        var text = cleanText(el.innerText || "");
+        var imgCount = el.querySelectorAll("a img").length;
+        var linkCount = el.querySelectorAll("a[href]").length;
+
+        return /related items|related products/i.test(text) && imgCount >= 1 && linkCount >= imgCount;
+      })
+      .sort(function (a, b) {
+        return a.innerHTML.length - b.innerHTML.length;
+      })[0] || null;
+  }
+
+  function fixRelatedItemsMaxFour() {
+    var container = findRelatedContainer();
+
+    if (!container) {
+      console.warn("Related Items container not found.");
+      return;
+    }
+
+    var imageLinks = Array.from(container.querySelectorAll("a[href]"))
+      .filter(function (a) {
+        return a.querySelector("img");
+      })
+      .slice(0, 4);
+
+    if (!imageLinks.length) return;
+
+    var cards = imageLinks.map(function (imageLink) {
+      var href = imageLink.getAttribute("href") || "#";
+      var img = imageLink.querySelector("img");
+
+      var titleLink = Array.from(container.querySelectorAll("a[href]")).find(function (a) {
+        return !a.querySelector("img") &&
+          a.getAttribute("href") === href &&
+          cleanText(a.textContent).length > 0;
+      });
+
+      var title = titleLink
+        ? cleanText(titleLink.textContent)
+        : cleanText(img.getAttribute("alt") || img.getAttribute("title") || "View Product");
+
+      return {
+        href: href,
+        imgSrc: img.getAttribute("src"),
+        imgAlt: title,
+        title: title
+      };
+    });
+
+    if (document.getElementById("mtlRelatedItemsFixed")) return;
+
+    var section = document.createElement("div");
+    section.id = "mtlRelatedItemsFixed";
+    section.className = "mtl-related-fixed-final";
+
+    var heading = document.createElement("div");
+    heading.className = "mtl-related-fixed-heading";
+    heading.textContent = "Related Items";
+
+    var grid = document.createElement("div");
+    grid.className = "mtl-related-fixed-grid";
+
+    cards.forEach(function (item) {
+      var card = document.createElement("div");
+      card.className = "mtl-related-fixed-card";
+
+      var titleSafe = String(item.title || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+      card.innerHTML =
+        '<a class="mtl-related-fixed-image-link" href="' + item.href + '">' +
+          '<img src="' + item.imgSrc + '" alt="' + item.imgAlt.replace(/"/g, "&quot;") + '">' +
+        '</a>' +
+        '<a class="mtl-related-fixed-title" href="' + item.href + '">' + titleSafe + '</a>';
+
+      grid.appendChild(card);
+    });
+
+    section.appendChild(heading);
+    section.appendChild(grid);
+
+    container.parentNode.insertBefore(section, container);
+    container.style.display = "none";
+  }
+
+  ready(fixRelatedItemsMaxFour);
 })();
 </script>
 <script>
