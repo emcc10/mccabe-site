@@ -11824,6 +11824,16 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
 <script>
 (function () {
+  function isMcProductDetailPage() {
+    var b = document.body;
+    return (
+      b &&
+      (b.classList.contains('productdetails') ||
+        b.classList.contains('mc-product-page') ||
+        b.classList.contains('mc-bean-bag-pdp'))
+    );
+  }
+
   function normalizeRelatedItemsSection() {
     var headings = Array.from(document.querySelectorAll('td, div, span, font, b, strong'))
       .filter(function (el) {
@@ -11875,6 +11885,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 
   function runMtlRelatedCleanup() {
+    if (!isMcProductDetailPage()) return;
     normalizeRelatedItemsSection();
     moveRelatedTitlesBelowImages();
   }
