@@ -1168,6 +1168,19 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260506"></script>
 <script>
+/* Deploy + config sanity (remove logs when stable). Console: document.documentElement.classList.contains("mtl-deploy-test-20260506") */
+(function () {
+  try {
+    document.documentElement.classList.add("mtl-deploy-test-20260506");
+  } catch (eClass) {}
+  console.log("MTL sectional configs loaded?", !!window.SECTIONAL_CONFIGS);
+  console.log(
+    "MTL sectional config styles:",
+    window.SECTIONAL_CONFIGS ? Object.keys(window.SECTIONAL_CONFIGS) : "NO CONFIGS"
+  );
+})();
+</script>
+<script>
 (function () {
   function ready(fn) {
     if (document.readyState === "loading") {
