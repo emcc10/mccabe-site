@@ -11489,20 +11489,78 @@ html.mc-paragon-pdp body [class*="cartqty__wrap"] label {
   order: -1 !important;
 }
 
-/* Sectional PDP: native Volusion options + selects (override template_266 inline hide rules) */
+/* Sectional PDP: native Volusion options table + non-leather selects visible.
+   Leather row uses mc-native-leather + custom strip (do not revert global select{display}). */
 html.is-sectional-product #options_table,
 html.is-sectional-product table#options_table,
 html.is-sectional-product table[id*="options_table"],
 html.is-sectional-product .v65-productdetail-options,
-html.is-sectional-product .product-options,
-html.is-sectional-product select,
-html.is-sectional-product option {
+html.is-sectional-product .product-options {
   display: revert !important;
   visibility: visible !important;
   opacity: 1 !important;
   height: auto !important;
   max-height: none !important;
   overflow: visible !important;
+}
+
+html.is-sectional-product #options_table select:not(.mc-native-leather),
+html.is-sectional-product table[id*="options_table"] select:not(.mc-native-leather),
+html.is-sectional-product #options_table option,
+html.is-sectional-product table[id*="options_table"] option {
+  display: revert !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+html.is-sectional-product #content_area select.mc-native-leather,
+html.is-sectional-product #v65-product-parent select.mc-native-leather {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html.is-sectional-product #mcPlannerRow,
+html.is-sectional-product #mcConfigurationBlock {
+  display: none !important;
+}
+
+html.is-sectional-product #mc-inline-config {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html.is-sectional-product #mcLeatherRow {
+  display: flex !important;
+  flex-direction: column !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html.is-sectional-product .wm-leather-summary {
+  display: none !important;
+}
+
+html.is-sectional-product #wmOpen.wm-btn {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 html.is-sectional-product #options_table tr,

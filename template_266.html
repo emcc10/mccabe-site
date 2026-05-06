@@ -2150,14 +2150,6 @@ html body.productdetails .v-product-grid > .v-product {
     return;
   }
 
-  if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
-    try {
-      document.documentElement.classList.add("is-sectional-product");
-    } catch (eSecWl) {}
-    window.__WM_LEATHER_MODAL_SCRIPT_LOADED__ = true;
-    return;
-  }
-
   // If you accidentally paste this twice, only the first one runs.
 if (window.__WM_LEATHER_MODAL_SCRIPT_LOADED__) return;
 window.__WM_LEATHER_MODAL_SCRIPT_LOADED__ = true;
@@ -3256,11 +3248,11 @@ boot();
 
   function mount(opts){
     opts = opts || {};
-    if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
+    var isSecPdp = typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage();
+    if (isSecPdp) {
       try {
         document.documentElement.classList.add("is-sectional-product");
       } catch (eSec) {}
-      return;
     }
     if (document.getElementById("mc-inline-config")) return;
 
@@ -3359,12 +3351,14 @@ boot();
 
     var panelAttached = false;
     if (mountInsertMode === "afterOptionsTable" && optionsTable) {
-      optionsTable.style.setProperty("position", "absolute", "important");
-      optionsTable.style.setProperty("left", "-9999px", "important");
-      optionsTable.style.setProperty("opacity", "0", "important");
-      optionsTable.style.setProperty("pointer-events", "none", "important");
-      optionsTable.style.setProperty("height", "0", "important");
-      optionsTable.style.setProperty("overflow", "hidden", "important");
+      if (!isSecPdp) {
+        optionsTable.style.setProperty("position", "absolute", "important");
+        optionsTable.style.setProperty("left", "-9999px", "important");
+        optionsTable.style.setProperty("opacity", "0", "important");
+        optionsTable.style.setProperty("pointer-events", "none", "important");
+        optionsTable.style.setProperty("height", "0", "important");
+        optionsTable.style.setProperty("overflow", "hidden", "important");
+      }
       optionsTable.insertAdjacentElement("afterend", panel);
       panelAttached = true;
     } else if (mountInsertMode === "afterWmOpen" && wmOpen && wmOpen.parentElement) {
@@ -3397,10 +3391,19 @@ boot();
       });
     } catch (eRelSched) {}
 
+    if (isSecPdp) {
+      try {
+        var prSec = document.getElementById("mcPlannerRow");
+        if (prSec) prSec.style.setProperty("display", "none", "important");
+        var cbSec = document.getElementById("mcConfigurationBlock");
+        if (cbSec) cbSec.style.setProperty("display", "none", "important");
+      } catch (eSecStrip) {}
+    }
+
     if (!wmOpen) {
       try {
         var lrHide = document.getElementById("mcLeatherRow");
-        if (lrHide) lrHide.style.setProperty("display", "none", "important");
+        if (lrHide && !isSecPdp) lrHide.style.setProperty("display", "none", "important");
       } catch (eLr) {}
     }
 
@@ -7989,6 +7992,17 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
   }
 }
 
+.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox > tbody > tr:nth-child(3) > td[width="100%"],
+.productdetails form .colors_descriptionbox {
+  background: transparent;
+  padding: 10px 15px;
+  border-width: 1px;
+  border-style: solid;
+  border-collapse: separate;
+  width: 80% !important;
+  margin-left: 173px !important;
+}
+
 .productdetails form .colors_descriptionbox td,
 .productdetails form .colors_descriptionbox td span {
   color: #545454;
@@ -10556,6 +10570,18 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       for (ri = 0; ri < rows.length; ri++) {
         var tr = rows[ri];
         try {
+          if (tr.querySelector && tr.querySelector('select.mc-native-leather')) continue;
+          if (tr.classList && tr.classList.contains('mc-leather-option-row')) continue;
+          var rowTxt = (tr.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+          if (rowTxt === "choose cover" || rowTxt === "choose leather") continue;
+          var labelCell = tr.querySelector("td[align='right'], .productoptionname, label");
+          var labelTxt = ((labelCell && labelCell.textContent) || "").replace(/\s+/g, " ").trim().toLowerCase();
+          if (
+            /choose cover|choose leather|select leather|select a leather/.test(labelTxt) &&
+            tr.querySelector('select')
+          ) {
+            continue;
+          }
           tr.classList.remove('mc-theater-hide-preleather');
           tr.style.removeProperty('display');
         } catch (eTr) {}
