@@ -7108,14 +7108,13 @@ body.mc-product-page #content_area .resp-tabs-list li {
   }
 }
 
-/* At 961px and below: accordion only; hide table label cell (label is in accordion header); panel closed by default */
+/* At 961px and below: accordion only; hide table label cell (label is in accordion header); panel closed by default.
+ * Do NOT clip raw #options_table selects — wrapSelectsAsAccordions may be unused; clipping would hide all native options. */
 @media (max-width: 961px) {
   body.mc-product-page #content_area #options_table .mc-accordion-row td:first-child,
   body.mc-product-page #content_area table[id*="options_table"] .mc-accordion-row td:first-child {
     display: none !important;
   }
-  body.mc-product-page #content_area #options_table select,
-  body.mc-product-page #content_area table[id*="options_table"] select,
   body.mc-product-page #content_area .mc-option-accordion .mc-option-accordion-native,
   body.mc-product-page #content_area .mc-option-accordion select {
     position: absolute !important;
@@ -10115,6 +10114,7 @@ margin-left: 72px !important;
   }
 
   function removeConfigurationDetails(scope){
+    if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) return;
     var optionsTable = q('#options_table', scope) || q('table[id*="options_table"]', scope);
     if (!optionsTable) return;
 
@@ -10543,6 +10543,26 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     });
   }
 
+  /** Theater PDP script may set display:none !important on "Choose configuration" rows; that beats CSS. Strip on sectionals. */
+  function unhideSectionalOptionRows(scope) {
+    if (typeof window.isSectionalProductPage !== "function" || !window.isSectionalProductPage()) return;
+    var root = scope || document;
+    if (!root.querySelectorAll) return;
+    var tables = root.querySelectorAll('#options_table, table[id*="options_table"]');
+    var ti;
+    for (ti = 0; ti < tables.length; ti++) {
+      var rows = tables[ti].querySelectorAll('tr');
+      var ri;
+      for (ri = 0; ri < rows.length; ri++) {
+        var tr = rows[ri];
+        try {
+          tr.classList.remove('mc-theater-hide-preleather');
+          tr.style.removeProperty('display');
+        } catch (eTr) {}
+      }
+    }
+  }
+
   function rearrangePriceCaption(scope){ /* handled by renderMemberPricingCaption */ }
 
   function ensureMemberCaptionMounted(caption) {
@@ -10846,6 +10866,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 
   function mcIsTheaterSeatingPdp(root){
+    if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
+      return false;
+    }
     var scope = root || document;
     var theaterTitle = (
       (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
@@ -10861,6 +10884,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
   function hideTheaterSeatPdpNativePricing(scope){
     var root = scope || document;
+    if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) return;
     if (!mcIsTheaterSeatingPdp(root)) return;
     try {
       document.body.classList.add('mc-theater-seating-pdp');
@@ -10912,6 +10936,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       forceMediaLayout(mediaScope);
       removeConfigurationDetails(scope);
       hideOptionsTable(scope);
+      unhideSectionalOptionRows(document);
       enforceMobileGutters(scope);
       clampFloatingIcons();
       clearAddToCartWrapperBackground(scope);

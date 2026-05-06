@@ -11492,6 +11492,7 @@ html.mc-paragon-pdp body [class*="cartqty__wrap"] label {
 /* Sectional PDP: native Volusion options + selects (override template_266 inline hide rules) */
 html.is-sectional-product #options_table,
 html.is-sectional-product table#options_table,
+html.is-sectional-product table[id*="options_table"],
 html.is-sectional-product .v65-productdetail-options,
 html.is-sectional-product .product-options,
 html.is-sectional-product select,
@@ -11504,13 +11505,15 @@ html.is-sectional-product option {
   overflow: visible !important;
 }
 
-html.is-sectional-product #options_table tr {
+html.is-sectional-product #options_table tr,
+html.is-sectional-product table[id*="options_table"] tr {
   display: table-row !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
 
-html.is-sectional-product #options_table td {
+html.is-sectional-product #options_table td,
+html.is-sectional-product table[id*="options_table"] td {
   display: table-cell !important;
   visibility: visible !important;
   opacity: 1 !important;
