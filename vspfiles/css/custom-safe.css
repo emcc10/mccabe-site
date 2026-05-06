@@ -2206,7 +2206,7 @@ nav.push-menu .push-menu__close-btn::before {
    PRODUCT PAGE FIXES (Volusion 266)
 ========================================= */
 
-/* Match template_266: hide native #options_table until mc-product-page (early class mc-hide-native-options-until-mc). Bean bags keep native UI. Sectional PDPs: keep native options visible (html.is-sectional-product). */
+/* Match template_266: hide native #options_table until mc-product-page (early class mc-hide-native-options-until-mc). Bean bags keep native UI. Sectional PDPs: #options_table clipped off-screen under html.is-sectional-product (see bottom of this file). */
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
@@ -11489,31 +11489,49 @@ html.mc-paragon-pdp body [class*="cartqty__wrap"] label {
   order: -1 !important;
 }
 
-/* Sectional PDP: native Volusion options table + non-leather selects visible.
-   Leather row uses mc-native-leather + custom strip (do not revert global select{display}). */
+/* Sectional PDP: native options table stays in DOM for cart/pricing; clip off-screen (not display:none). */
 html.is-sectional-product #options_table,
 html.is-sectional-product table#options_table,
 html.is-sectional-product table[id*="options_table"],
-html.is-sectional-product .v65-productdetail-options,
-html.is-sectional-product .product-options {
-  display: revert !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
+html.is-sectional-product body.mc-product-page #content_area #options_table,
+html.is-sectional-product body.mc-product-page #content_area table[id*="options_table"],
+html.is-sectional-product body.mc-product-page #v65-product-parent #options_table,
+html.is-sectional-product body.mc-product-page #v65-product-parent table[id*="options_table"],
+html.is-sectional-product body.productdetails #content_area #options_table,
+html.is-sectional-product body.productdetails #content_area table[id*="options_table"],
+html.is-sectional-product body.productdetails #v65-product-parent #options_table,
+html.is-sectional-product body.productdetails #v65-product-parent table[id*="options_table"] {
+  position: absolute !important;
+  left: -9999px !important;
+  top: auto !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
-html.is-sectional-product #options_table select:not(.mc-native-leather),
-html.is-sectional-product table[id*="options_table"] select:not(.mc-native-leather),
-html.is-sectional-product #options_table option,
-html.is-sectional-product table[id*="options_table"] option {
-  display: revert !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
+/* Configuration dropdown sometimes lives outside #options_table — clip only labeled configuration selects. */
+html.is-sectional-product body.productdetails #v65-product-parent form select[title*="Choose Configuration" i],
+html.is-sectional-product body.productdetails #content_area form select[title*="Choose Configuration" i],
+html.is-sectional-product body.mc-product-page #v65-product-parent form select[title*="Choose Configuration" i],
+html.is-sectional-product body.mc-product-page #content_area form select[title*="Choose Configuration" i],
+html.is-sectional-product body.productdetails #v65-product-parent form select[name*="Choose Configuration" i],
+html.is-sectional-product body.productdetails #content_area form select[name*="Choose Configuration" i],
+html.is-sectional-product body.mc-product-page #v65-product-parent form select[name*="Choose Configuration" i],
+html.is-sectional-product body.mc-product-page #content_area form select[name*="Choose Configuration" i],
+html.is-sectional-product body.productdetails #v65-product-parent form select[id*="Choose Configuration" i],
+html.is-sectional-product body.productdetails #content_area form select[id*="Choose Configuration" i],
+html.is-sectional-product body.mc-product-page #v65-product-parent form select[id*="Choose Configuration" i],
+html.is-sectional-product body.mc-product-page #content_area form select[id*="Choose Configuration" i] {
+  position: absolute !important;
+  left: -9999px !important;
+  top: auto !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 html.is-sectional-product #content_area select.mc-native-leather,
@@ -11563,38 +11581,23 @@ html.is-sectional-product #wmOpen.wm-btn {
   pointer-events: none !important;
 }
 
-html.is-sectional-product #options_table tr,
-html.is-sectional-product table[id*="options_table"] tr {
-  display: table-row !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-html.is-sectional-product #options_table td,
-html.is-sectional-product table[id*="options_table"] td {
-  display: table-cell !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-html.is-sectional-product body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area #options_table,
-html.is-sectional-product body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-html.is-sectional-product body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-html.is-sectional-product body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
-html.is-sectional-product body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
-html.is-sectional-product body.productdetails:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-html.is-sectional-product body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-html.is-sectional-product body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
-html.is-sectional-product body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
-html.is-sectional-product body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-html.is-sectional-product body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-html.is-sectional-product body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"] {
-  position: static !important;
-  left: auto !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  height: auto !important;
-  overflow: visible !important;
-  display: table !important;
-  visibility: visible !important;
+/* --- Product detail tabs (Volusion): normalize selected/hover weight --- */
+.productdetails span#Header_ProductDetail_ProductDetails_span:hover,
+.productdetails span#Header_ProductDetail_TechSpecs_span:hover,
+.productdetails span#Header_ProductDetail_ExtInfo_span:hover,
+.productdetails td#Header_ProductDetail_ProductDetails.vCSS_tab_unselected span#Header_ProductDetail_ProductDetails_span:hover,
+.productdetails td#Header_ProductDetail_TechSpecs.vCSS_tab_unselected span#Header_ProductDetail_TechSpecs_span:hover,
+.productdetails td#Header_ProductDetail_ExtInfo.vCSS_tab_unselected span#Header_ProductDetail_ExtInfo_span:hover,
+.productdetails td#Header_ProductDetail_ProductDetails span#Header_ProductDetail_ProductDetails_span,
+.productdetails td#Header_ProductDetail_ProductDetails.vCSS_tab_selected span#Header_ProductDetail_ProductDetails_span,
+.productdetails td#Header_ProductDetail_TechSpecs.vCSS_tab_selected span#Header_ProductDetail_TechSpecs_span,
+.productdetails td#Header_ProductDetail_ExtInfo.vCSS_tab_selected span#Header_ProductDetail_ExtInfo_span {
+  font-weight: normal !important;
+  background: white;
+  color: #000;
+  border-top: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid transparent;
+  border-left: 1px solid #ddd;
+  margin-left: 161px !important;
 }

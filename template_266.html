@@ -1142,6 +1142,201 @@ document.addEventListener("DOMContentLoaded", function () {
   } catch (e2) {}
 })();
 </script>
+<script>
+(function () {
+  "use strict";
+
+  function selectBaseConfiguration(select, configs, grid) {
+    if (!select || !configs || !configs.length) return;
+
+    var baseConfig = configs
+      .slice()
+      .sort(function (a, b) {
+        return Number(a.priceDiff || 0) - Number(b.priceDiff || 0);
+      })[0];
+
+    if (!baseConfig) return;
+
+    var matchedOption = Array.from(select.options).find(function (opt) {
+      var text = (opt.textContent || "").trim();
+      var value = (opt.value || "").trim();
+
+      return (
+        text.indexOf(baseConfig.code) !== -1 ||
+        value.indexOf(baseConfig.code) !== -1
+      );
+    });
+
+    if (!matchedOption) {
+      console.warn("Base configuration option not found:", baseConfig.code);
+      return;
+    }
+
+    select.value = matchedOption.value;
+
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+
+    if (typeof jQuery !== "undefined") {
+      jQuery(select).trigger("change");
+    }
+
+    if (grid) {
+      Array.from(grid.querySelectorAll(".sectional-config-card")).forEach(function (btn) {
+        btn.classList.toggle(
+          "is-selected",
+          btn.getAttribute("data-config-code") === baseConfig.code
+        );
+      });
+    }
+  }
+
+  function mcFindSectionalNativeConfigurationSelect() {
+    var tables = document.querySelectorAll('#options_table, table[id*="options_table"]');
+    var i;
+    for (i = 0; i < tables.length; i++) {
+      var rows = tables[i].querySelectorAll("tr");
+      var r;
+      for (r = 0; r < rows.length; r++) {
+        var row = rows[r];
+        var sel = row.querySelector("select");
+        if (!sel || (sel.classList && sel.classList.contains("mc-native-leather"))) continue;
+        var labelTxt = "";
+        var l = row.querySelector("label, td.productoptionname, .productoptionname");
+        if (l) labelTxt = (l.textContent || "").trim();
+        var meta =
+          (labelTxt + " " + (sel.getAttribute("title") || "") + " " + (sel.name || "") + " " + (sel.id || "")).toLowerCase();
+        if (
+          (/choose\s*configuration|^\s*configuration\.?\s*:?\s*$/i.test(labelTxt) || /choose\s*configuration/.test(meta)) &&
+          !/details/i.test(meta)
+        ) {
+          return sel;
+        }
+      }
+    }
+    for (i = 0; i < tables.length; i++) {
+      var sels = tables[i].querySelectorAll("select");
+      var j;
+      for (j = 0; j < sels.length; j++) {
+        var s = sels[j];
+        if (s.classList && s.classList.contains("mc-native-leather")) continue;
+        var t = ((s.getAttribute("title") || "") + " " + (s.name || "") + " " + (s.id || "")).toLowerCase();
+        if (/choose\s*configuration/.test(t)) return s;
+        if (/\bconfiguration\b/.test(t) && !/details|leather|cover|seat/i.test(t)) return s;
+      }
+    }
+    return null;
+  }
+
+  function mcResolveSectionalStyleKey() {
+    if (window.MC_SECTIONAL_STYLE_KEY) return String(window.MC_SECTIONAL_STYLE_KEY).trim().toLowerCase();
+    var ds =
+      document.documentElement.getAttribute("data-mc-sectional-style") ||
+      (document.body && document.body.getAttribute("data-mc-sectional-style"));
+    if (ds) return String(ds).trim().toLowerCase();
+    var path = String(location.pathname || "").toLowerCase();
+    var m =
+      path.match(/\/([a-z][a-z0-9]+)-sc-\d+/i) ||
+      path.match(/-([a-z][a-z0-9]+)-sc-/i) ||
+      path.match(/product-p\/([a-z0-9]+)/i);
+    if (m) return m[1].toLowerCase();
+    return "";
+  }
+
+  function mcInitSectionalConfigCardClicks(select, grid) {
+    if (!select || !grid) return;
+    grid.querySelectorAll(".sectional-config-card").forEach(function (btn) {
+      if (btn.getAttribute("data-mc-sectional-click-bound") === "1") return;
+      btn.setAttribute("data-mc-sectional-click-bound", "1");
+      btn.addEventListener(
+        "click",
+        function () {
+          var code = btn.getAttribute("data-config-code");
+          if (!code) return;
+          var matchedOption = Array.from(select.options).find(function (opt) {
+            var text = (opt.textContent || "").trim();
+            var value = (opt.value || "").trim();
+            return text.indexOf(code) !== -1 || value.indexOf(code) !== -1;
+          });
+          if (!matchedOption) return;
+          select.value = matchedOption.value;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+          if (typeof jQuery !== "undefined") jQuery(select).trigger("change");
+          grid.querySelectorAll(".sectional-config-card").forEach(function (b) {
+            b.classList.toggle("is-selected", b === btn);
+          });
+        },
+        false
+      );
+    });
+  }
+
+  var sectionalCfgDone = false;
+
+  function mcTryInitSectionalConfigurationUi() {
+    if (sectionalCfgDone) return;
+    if (typeof window.isSectionalProductPage !== "function" || !window.isSectionalProductPage()) return;
+
+    var grid =
+      document.querySelector("[data-mc-sectional-config-grid]") ||
+      document.querySelector(".mc-sectional-config-grid") ||
+      document.querySelector(".sectional-config-grid");
+    if (!grid) {
+      var anyCard = document.querySelector(".sectional-config-card");
+      if (anyCard && anyCard.parentElement) grid = anyCard.parentElement;
+    }
+    if (!grid || !grid.querySelector(".sectional-config-card")) return;
+
+    var styleKey = mcResolveSectionalStyleKey();
+    var pack = window.MC_SECTIONAL_CONFIGS || window.SECTIONAL_CONFIGS;
+    var configs = pack && styleKey ? pack[styleKey] : null;
+    if (!configs || !configs.length) return;
+
+    var select = mcFindSectionalNativeConfigurationSelect();
+    if (!select) return;
+
+    selectBaseConfiguration(select, configs, grid);
+    mcInitSectionalConfigCardClicks(select, grid);
+    sectionalCfgDone = true;
+  }
+
+  function mcRegisterSectionalConfigs(styleKey, list) {
+    if (!styleKey || !list || !list.length) return;
+    window.MC_SECTIONAL_CONFIGS = window.MC_SECTIONAL_CONFIGS || {};
+    window.MC_SECTIONAL_CONFIGS[String(styleKey).toLowerCase()] = list;
+    sectionalCfgDone = false;
+    mcTryInitSectionalConfigurationUi();
+  }
+
+  window.selectBaseConfiguration = selectBaseConfiguration;
+  window.mcFindSectionalNativeConfigurationSelect = mcFindSectionalNativeConfigurationSelect;
+  window.mcInitSectionalConfigCardClicks = mcInitSectionalConfigCardClicks;
+  window.mcTryInitSectionalConfigurationUi = mcTryInitSectionalConfigurationUi;
+  window.mcResolveSectionalStyleKey = mcResolveSectionalStyleKey;
+  window.mcRegisterSectionalConfigs = mcRegisterSectionalConfigs;
+
+  function schedule() {
+    mcTryInitSectionalConfigurationUi();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", schedule);
+  } else {
+    schedule();
+  }
+  window.addEventListener("load", schedule);
+  [120, 400, 900, 1800, 3200].forEach(function (ms) {
+    setTimeout(schedule, ms);
+  });
+
+  try {
+    var obs = new MutationObserver(function () {
+      if (sectionalCfgDone) return;
+      mcTryInitSectionalConfigurationUi();
+    });
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+  } catch (eObs) {}
+})();
+</script>
 <!-- MC_TEMPLATE: header-critical-bar-20260401q -->
 <!-- Do not override window.location.reload: CAPTCHA / bot checks (Cloudflare, etc.) call reload to finish; blocking it causes verify loops. -->
 <a class="mc-account-float" href="/myaccount.asp" aria-label="My account" rel="nofollow">
@@ -7530,7 +7725,7 @@ body.mc-product-page #content_area #mcLeatherSwatchStrip img {
   color: #111 !important;
 }
 
-/* Hide native options until custom PDP UI is active (avoids flash before body.mc-product-page / late Volusion inject). Bean bags keep native options. Sectionals (html.is-sectional-product) keep native options visible. */
+/* Hide native options until custom PDP UI is active (avoids flash before body.mc-product-page / late Volusion inject). Bean bags keep native options. Sectional PDPs clip #options_table off-screen in vspfiles/css/custom-safe.css (still in DOM). */
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
@@ -10539,6 +10734,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
   function hideOptionsTable(scope){
     if (isBeanBagProductPage()) return;
+    if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) return;
     var root = scope || document;
     var tables = qa('#options_table, table[id*="options_table"]', root);
     tables.forEach(function(t){
