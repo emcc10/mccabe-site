@@ -728,7 +728,8 @@ html.mc-paragon-pdp body #mcLeatherSummary {
 body.productdetails #mcLeatherBtn,
 body.mc-product-page #mcLeatherBtn,
 body.mc-theater-seating-pdp #mcLeatherBtn,
-html.mc-paragon-pdp body #mcLeatherBtn {
+html.mc-paragon-pdp body #mcLeatherBtn,
+html.is-sectional-product body #mcLeatherBtn {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 18px !important;
   font-weight: 400 !important;
@@ -747,7 +748,8 @@ html.mc-paragon-pdp body #mcLeatherBtn {
 body.productdetails #wmOpen.wm-btn,
 body.mc-product-page #wmOpen.wm-btn,
 body.mc-theater-seating-pdp #wmOpen.wm-btn,
-html.mc-paragon-pdp body #wmOpen.wm-btn {
+html.mc-paragon-pdp body #wmOpen.wm-btn,
+html.is-sectional-product body #wmOpen.wm-btn {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 12px !important;
   font-weight: 400 !important;
