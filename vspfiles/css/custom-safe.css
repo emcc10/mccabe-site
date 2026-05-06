@@ -2833,42 +2833,6 @@ body.mc-product-page select.mc-native-leather {
       }
     }
 
-    /* =========================================
-       RELATED ITEMS: image on top, text below
-    ========================================= */
-    #relateditems td,
-    .relateditems td {
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-    }
-
-    /* Image */
-    #relateditems td img,
-    .relateditems td img {
-      order: 1 !important;
-      display: block !important;
-    }
-
-    /* Title (covers common Volusion classes) */
-    #relateditems .productname,
-    #relateditems .ProductName,
-    #relateditems .vCSS_relatedProductName,
-    .relateditems .productname,
-    .relateditems .ProductName,
-    .relateditems .vCSS_relatedProductName {
-      order: 2 !important;
-      text-align: center !important;
-    }
-
-    /* Price */
-    #relateditems .price,
-    #relateditems .ProductPrice,
-    .relateditems .price,
-    .relateditems .ProductPrice {
-      order: 3 !important;
-      text-align: center !important;
-    }
 
     @media (max-width: 767px) {
       body.mc-product-page #content_area table {
@@ -11093,5 +11057,6 @@ html.has-sectional-config-cards .mtl-native-config-row {
   border-left: 1px solid #ddd;
   margin-left: 161px !important;
 }
+
 
 
