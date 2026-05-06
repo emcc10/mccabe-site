@@ -2206,7 +2206,7 @@ nav.push-menu .push-menu__close-btn::before {
    PRODUCT PAGE FIXES (Volusion 266)
 ========================================= */
 
-/* Match template_266: hide native #options_table until mc-product-page (non-sectional). Sectional: only .mtl-native-config-row is clipped after cards (see bottom). */
+/* Match template_266: hide native #options_table until mc-product-page (non-sectional PDPs). Sectionals: native config row hidden only after diagram cards mount. */
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
@@ -11489,7 +11489,7 @@ html.mc-paragon-pdp body [class*="cartqty__wrap"] label {
   order: -1 !important;
 }
 
-/* Sectional PDP: Room Planner block disabled; clip only .mtl-native-config-row after cards mount (custom-safe.css), not whole #options_table. */
+/* Sectional PDP: hide Room Planner block; keep leather row visible. */
 
 html.is-sectional-product #mcPlannerRow,
 html.is-sectional-product #mcConfigurationBlock {
@@ -11509,7 +11509,8 @@ html.is-sectional-product #mcLeatherRow {
   opacity: 1 !important;
 }
 
-/* Diagram cards: native options table only hidden after successful render */
+/* Diagram cards (sectional-configs.js + template render): clip native configuration row only after cards mount. */
+/* Layout for diagram card grid */
 .sectional-config-selector {
   margin: 28px 0;
   width: 100%;
@@ -11584,12 +11585,9 @@ html.is-sectional-product #mcLeatherRow {
   line-height: 1.35;
 }
 
-/* Sectional: clip only marked native config UI after cards mount — never a whole options table or a row that contains leather */
-html.has-sectional-config-cards .mtl-native-config-row,
-html.has-sectional-config-cards select.mtl-native-config-row {
+html.has-sectional-config-cards .mtl-native-config-row {
   position: absolute !important;
   left: -9999px !important;
-  top: auto !important;
   width: 1px !important;
   height: 1px !important;
   overflow: hidden !important;

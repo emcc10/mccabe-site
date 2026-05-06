@@ -1166,21 +1166,9 @@ document.addEventListener("DOMContentLoaded", function () {
   window.addEventListener("load", markCategoryOrListingPage);
 })();
 </script>
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260507"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260506"></script>
 <script>
-/* Deploy + config sanity (remove logs when stable). Console: document.documentElement.classList.contains("mtl-deploy-test-20260506") */
-(function () {
-  try {
-    document.documentElement.classList.add("mtl-deploy-test-20260506");
-  } catch (eClass) {}
-  console.log("MTL sectional configs loaded?", !!window.SECTIONAL_CONFIGS);
-  console.log(
-    "MTL sectional config styles:",
-    window.SECTIONAL_CONFIGS ? Object.keys(window.SECTIONAL_CONFIGS) : "NO CONFIGS"
-  );
-})();
-</script>
-<script>
+/* Single sectional diagram UI — data in sectional-configs.js only. */
 (function () {
   function ready(fn) {
     if (document.readyState === "loading") {
@@ -1191,20 +1179,17 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function normalizeStyleKey(s) {
-    return String(s || '')
+    return String(s || "")
       .toLowerCase()
-      .replace(/\s+/g, '')
-      .replace(/_/g, '-');
+      .replace(/\s+/g, "")
+      .replace(/_/g, "-");
   }
 
   function getStyleFromPage() {
     if (!window.SECTIONAL_CONFIGS) return null;
-
     var styles = Object.keys(window.SECTIONAL_CONFIGS);
-
     var path = String(window.location.pathname || "");
-    var pathLow = path.toLowerCase();
-    var pathSeg = pathLow.match(/\/([^/]+)-sc-/i);
+    var pathSeg = path.toLowerCase().match(/\/([^/]+)-sc-/i);
     if (pathSeg) {
       var slug = normalizeStyleKey(pathSeg[1]);
       var byUrl = styles.find(function (style) {
@@ -1212,7 +1197,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       if (byUrl) return byUrl;
     }
-
     try {
       var pcEl = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
       var pcVal = pcEl ? String(pcEl.value || "").trim() : "";
@@ -1228,10 +1212,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (byPc) return byPc;
       }
     } catch (ePc) {}
-
     var text = document.body ? document.body.innerText : "";
     var combined = normalizeStyleKey(path + " " + text);
-
     return styles.find(function (style) {
       return (
         combined.indexOf(normalizeStyleKey(style + "-SC")) !== -1 ||
@@ -1241,39 +1223,30 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function findConfigSelect(configs) {
-    var selects = Array.from(document.querySelectorAll("select"));
-
-    function looseCodes(cfgList) {
-      return cfgList.map(function (c) {
+    var codes = configs
+      .map(function (c) {
         return String(c.code || "").trim();
-      }).filter(Boolean);
-    }
-
-    var codes = looseCodes(configs);
-
+      })
+      .filter(Boolean);
+    var selects = Array.from(document.querySelectorAll("select"));
     return selects.find(function (select) {
       if (select.classList && select.classList.contains("mc-native-leather")) return false;
-
       var optionText = Array.from(select.options || [])
         .map(function (opt) {
           return (opt.textContent || "") + " " + (opt.value || "");
         })
         .join(" ");
-
-      var normOpts = normalizeStyleKey(optionText);
-
+      var norm = normalizeStyleKey(optionText);
       return codes.some(function (code) {
         if (!code) return false;
         if (optionText.indexOf(code) !== -1) return true;
-        var nc = normalizeStyleKey(code);
-        return nc.length > 0 && normOpts.indexOf(nc) !== -1;
+        return norm.indexOf(normalizeStyleKey(code)) !== -1;
       });
     });
   }
 
   function triggerChange(select) {
     select.dispatchEvent(new Event("change", { bubbles: true }));
-
     if (typeof jQuery !== "undefined") {
       jQuery(select).trigger("change");
     }
@@ -1281,67 +1254,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function selectConfig(select, cfg, grid) {
     var match = Array.from(select.options || []).find(function (opt) {
-      return (opt.textContent || "").indexOf(cfg.code) !== -1 || (opt.value || "").indexOf(cfg.code) !== -1;
+      return (
+        (opt.textContent || "").indexOf(cfg.code) !== -1 ||
+        (opt.value || "").indexOf(cfg.code) !== -1
+      );
     });
-
     if (!match) {
       console.warn("No matching Volusion option for config:", cfg.code);
       return;
     }
-
     select.value = match.value;
     triggerChange(select);
-
     Array.from(grid.querySelectorAll(".sectional-config-card")).forEach(function (card) {
       card.classList.toggle("is-selected", card.getAttribute("data-config-code") === cfg.code);
     });
   }
 
   function markConfigRowOnly(select) {
-    if (!select || !select.closest) return;
-
-    var tr = select.closest("tr");
-    if (tr) {
-      var leatherInRow =
-        tr.querySelector("select.mc-native-leather") ||
-        tr.querySelector(
-          "select[name*='Cover' i], select[name*='Leather' i], select[id*='Cover' i], select[id*='Leather' i]"
-        );
-      if (!leatherInRow) {
-        tr.classList.add("mtl-native-config-row");
-        return;
-      }
-    }
-
-    try {
-      select.classList.add("mtl-native-config-row");
-    } catch (eMark) {}
+    var row = select.closest("tr") || select.closest("div");
+    if (row) row.classList.add("mtl-native-config-row");
   }
 
   function initSectionalConfigCards() {
-    if (!window.SECTIONAL_CONFIGS) {
-      console.warn("SECTIONAL_CONFIGS missing. Confirm /v/vspfiles/js/sectional-configs.js is loading.");
-      return;
-    }
-
+    if (!window.SECTIONAL_CONFIGS) return;
     var style = getStyleFromPage();
-    if (!style) {
-      console.warn("No matching sectional style found for this page.");
-      return;
-    }
-
+    if (!style) return;
     var configs = window.SECTIONAL_CONFIGS[style];
-    if (!configs || !configs.length) {
-      console.warn("No configs found for style:", style);
-      return;
-    }
-
+    if (!configs || !configs.length) return;
     var select = findConfigSelect(configs);
-    if (!select) {
-      console.warn("Native configuration dropdown not found for style:", style);
-      return;
-    }
-
+    if (!select) return;
     if (document.querySelector("#sectionalConfigSelector")) return;
 
     var wrap = document.createElement("div");
@@ -1361,7 +1302,6 @@ document.addEventListener("DOMContentLoaded", function () {
       card.type = "button";
       card.className = "sectional-config-card";
       card.setAttribute("data-config-code", cfg.code);
-
       card.innerHTML =
         '<div class="sectional-config-img-wrap">' +
         '<img src="' +
@@ -1376,50 +1316,38 @@ document.addEventListener("DOMContentLoaded", function () {
         (cfg.description
           ? '<div class="sectional-config-desc">' + String(cfg.description).replace(/</g, "&lt;") + "</div>"
           : "");
-
       card.addEventListener("click", function () {
         selectConfig(select, cfg, grid);
       });
-
       grid.appendChild(card);
     });
 
     wrap.appendChild(grid);
 
     var optionsTable = select.closest("#options_table") || document.querySelector("#options_table");
-
     if (optionsTable && optionsTable.parentNode) {
       optionsTable.parentNode.insertBefore(wrap, optionsTable);
     } else {
       select.parentNode.insertBefore(wrap, select);
     }
 
-    var baseConfig = configs.slice().sort(function (a, b) {
-      return Number(a.priceDiff || 0) - Number(b.priceDiff || 0);
-    })[0];
-
+    var baseConfig = configs
+      .slice()
+      .sort(function (a, b) {
+        return Number(a.priceDiff || 0) - Number(b.priceDiff || 0);
+      })[0];
     if (baseConfig) {
       selectConfig(select, baseConfig, grid);
     }
 
     markConfigRowOnly(select);
     document.documentElement.classList.add("has-sectional-config-cards");
-
-    try {
-      if (typeof window.mcRelocateWmOpenTriggerIfNeeded === "function") window.mcRelocateWmOpenTriggerIfNeeded();
-    } catch (eRel) {}
   }
 
   ready(initSectionalConfigCards);
-  [250, 700, 1400, 2800, 5200].forEach(function (ms) {
+  [400, 1200, 2500, 5000].forEach(function (ms) {
     setTimeout(initSectionalConfigCards, ms);
   });
-  try {
-    var mo = new MutationObserver(function () {
-      initSectionalConfigCards();
-    });
-    mo.observe(document.documentElement, { childList: true, subtree: true });
-  } catch (eMo) {}
 })();
 </script>
 <!-- MC_TEMPLATE: header-critical-bar-20260401q -->
@@ -2434,13 +2362,6 @@ html body.productdetails .v-product-grid > .v-product {
 if (window.__WM_LEATHER_MODAL_SCRIPT_LOADED__) return;
 window.__WM_LEATHER_MODAL_SCRIPT_LOADED__ = true;
 
-try {
-  window.mcRelocateWmOpenTriggerIfNeeded = function () {
-    /* No-op: relocating #wmOpen's host off-screen broke leather when the native config row is clipped
-       instead of hiding the whole #options_table. Leather + summary must stay in normal flow. */
-  };
-} catch (eRelDef) {}
-
 var WM_DEBUG = false;
 function log() {
   if (WM_DEBUG) console.log.apply(console, ["[WM]"].concat([].slice.call(arguments)));
@@ -2747,9 +2668,6 @@ function gradeHeaderText(g) {
       <button class="wm-btn" id="wmOpen" type="button">Choose Leather & Color</button>
     `;
     anchorSelect.insertAdjacentElement("afterend", ui);
-    try {
-      if (typeof window.mcRelocateWmOpenTriggerIfNeeded === "function") window.mcRelocateWmOpenTriggerIfNeeded();
-    } catch (eRelWm) {}
 
     try {
       document.dispatchEvent(new CustomEvent("mcWmOpenMounted", { bubbles: true }));
@@ -10862,7 +10780,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         var tr = rows[ri];
         try {
           if (tr.classList && tr.classList.contains("mtl-native-config-row")) continue;
-          if (tr.querySelector && tr.querySelector("select.mtl-native-config-row")) continue;
           if (tr.querySelector && tr.querySelector('select.mc-native-leather')) continue;
           if (tr.classList && tr.classList.contains('mc-leather-option-row')) continue;
           var rowTxt = (tr.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
@@ -11902,140 +11819,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 })();
 </script>
-<!-- PDP safety: Related Items fixes must be card/href-scoped inside #content_area only (never Product Info tabs, never innerHTML on parent tables).
-     Sectional UI: configuration <select> row only (.mtl-native-config-row); leather stays in #options_table. -->
-
-<script>
-(function () {
-  function ready(fn) {
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", fn);
-    } else {
-      fn();
-    }
-  }
-
-  function isProductishPdp() {
-    var b = document.body;
-    return !!(
-      b &&
-      (b.classList.contains("productdetails") ||
-        b.classList.contains("mc-product-page") ||
-        b.classList.contains("mc-bean-bag-pdp"))
-    );
-  }
-
-  function clean(s) {
-    return String(s || "").replace(/\s+/g, " ").trim();
-  }
-
-  function findRelatedArea() {
-    var scope = document.getElementById("content_area") || document.body;
-    var candidates = Array.from(scope.querySelectorAll("table, tbody, tr, td, div"));
-    return (
-      candidates
-        .filter(function (el) {
-          if (
-            el.closest(
-              "#ProductDetail_ProductDetails, #ProductDetail_TechSpecs, #ProductDetail_ExtInfo, [id*='ProductDetail_ProductDetails'], [id*='Header_ProductDetail']"
-            )
-          ) {
-            return false;
-          }
-          var text = clean(el.innerText || "");
-          var imgs = el.querySelectorAll("a img").length;
-          var links = el.querySelectorAll("a[href]").length;
-          return (
-            /related items|related products/i.test(text) &&
-            imgs >= 1 &&
-            links >= imgs
-          );
-        })
-        .sort(function (a, b) {
-          return a.innerHTML.length - b.innerHTML.length;
-        })[0] || null
-    );
-  }
-
-  function fixRelatedItems() {
-    if (!isProductishPdp()) return;
-
-    var area = findRelatedArea();
-    if (!area) return;
-    if (area.getAttribute("data-mtl-related-safe-done") === "1") return;
-
-    area.classList.add("mtl-related-safe");
-
-    var imageLinks = Array.from(area.querySelectorAll("a[href]")).filter(function (a) {
-      return a.querySelector("img");
-    });
-
-    imageLinks.forEach(function (imageLink) {
-      var href = imageLink.getAttribute("href");
-      if (!href) return;
-
-      var img = imageLink.querySelector("img");
-
-      var matchingTitleLinks = Array.from(area.querySelectorAll("a[href]")).filter(function (a) {
-        return (
-          !a.querySelector("img") &&
-          a.getAttribute("href") === href &&
-          clean(a.textContent).length > 0
-        );
-      });
-
-      if (!matchingTitleLinks.length) {
-        var fallbackTitle = clean(img.getAttribute("alt")) || clean(img.getAttribute("title"));
-        if (!fallbackTitle) return;
-
-        var newTitle = document.createElement("a");
-        newTitle.href = href;
-        newTitle.className = "mtl-related-title-fixed";
-        newTitle.textContent = fallbackTitle;
-        imageLink.insertAdjacentElement("afterend", newTitle);
-        return;
-      }
-
-      var titleLink = matchingTitleLinks[0];
-      titleLink.classList.add("mtl-related-title-fixed");
-
-      imageLink.insertAdjacentElement("afterend", titleLink);
-
-      matchingTitleLinks.slice(1).forEach(function (dupe) {
-        dupe.remove();
-      });
-    });
-
-    try {
-      area.setAttribute("data-mtl-related-safe-done", "1");
-    } catch (eAttr) {}
-  }
-
-  function run() {
-    fixRelatedItems();
-  }
-
-  ready(run);
-  window.addEventListener("load", function () {
-    run();
-    setTimeout(run, 400);
-    setTimeout(run, 1200);
-    setTimeout(run, 2800);
-  });
-
-  var ca = document.getElementById("content_area");
-  if (ca && typeof MutationObserver !== "undefined") {
-    var t;
-    var mo = new MutationObserver(function () {
-      clearTimeout(t);
-      t = setTimeout(run, 150);
-    });
-    try {
-      mo.observe(ca, { childList: true, subtree: true });
-    } catch (eMo) {}
-  }
-})();
-</script>
 
 <script>
 (function(){
@@ -12120,22 +11903,6 @@ body.productdetails tr:has(> td[class*="vCSS_tab"]),
 body.mc-product-page tr:has(> td[class*="vCSS_tab"]) {
   display: flex !important;
   visibility: visible !important;
-}
-
-/* Category/listing grid only: flex order for image above title/price on category/listing grids */
-html.is-category-or-listing-page #content_area .v-product .v-product__img,
-html.is-category-or-listing-page #content_area .v-product-grid .v-product .v-product__img {
-  order: -1 !important;
-}
-html.is-category-or-listing-page #content_area .v-product .productnamecolor,
-html.is-category-or-listing-page #content_area .v-product .v-product__name,
-html.is-category-or-listing-page #content_area .v-product-grid .v-product .productnamecolor,
-html.is-category-or-listing-page #content_area .v-product-grid .v-product .v-product__name {
-  order: 1 !important;
-}
-html.is-category-or-listing-page #content_area .v-product .v-product__price,
-html.is-category-or-listing-page #content_area .v-product-grid .v-product .v-product__price {
-  order: 2 !important;
 }
 </style>
 <script>
@@ -19666,6 +19433,11 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
   window.mcHideArmlessOptionRows = hideArmlessOptionRows;
 })();
+</script>
+<script>
+  window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
+  document.documentElement.classList.add("mtl-cleanup-20260506-final");
+  console.log("MTL CLEANUP VERSION LOADED:", window.MTL_CLEANUP_VERSION);
 </script>
 </body>
 </html>
