@@ -11835,167 +11835,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 })();
 </script>
-
-<script>
-(function () {
-  function isMcProductDetailPage() {
-    var b = document.body;
-    return (
-      b &&
-      (b.classList.contains('productdetails') ||
-        b.classList.contains('mc-product-page') ||
-        b.classList.contains('mc-bean-bag-pdp'))
-    );
-  }
-
-  function findRelatedSection() {
-    var scope = document.getElementById('content_area') || document.body;
-    var candidates = Array.from(scope.querySelectorAll('table, div')).filter(function (el) {
-      return /related items|related products/i.test(el.innerText || '');
-    });
-    var withImgs = candidates.filter(function (el) {
-      return el.querySelectorAll('img').length >= 1;
-    });
-    var tablePick = withImgs.find(function (el) {
-      return el.tagName === 'TABLE';
-    });
-    if (tablePick) return tablePick;
-    return withImgs[0] || null;
-  }
-
-  function cleanText(s) {
-    return String(s || '')
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
-
-  function fixRelatedItemsCards() {
-    if (!isMcProductDetailPage()) return;
-    if (document.querySelector('[data-mtl-related-rebuilt="1"]')) return;
-
-    var section = findRelatedSection();
-    if (!section) {
-      return;
-    }
-
-    var imageLinks = Array.from(section.querySelectorAll('a')).filter(function (a) {
-      return a.querySelector('img');
-    });
-
-    if (!imageLinks.length) {
-      return;
-    }
-
-    var headingEl = Array.from(
-      section.querySelectorAll('td, div, span, font, b, strong, h2, h3')
-    ).find(function (el) {
-      return /related items|related products/i.test(cleanText(el.textContent));
-    });
-
-    var grid = document.createElement('div');
-    grid.className = 'mtl-related-grid';
-
-    imageLinks.forEach(function (imageLink) {
-      var img = imageLink.querySelector('img');
-      var href = imageLink.getAttribute('href') || '';
-
-      var title = img.getAttribute('alt') || img.getAttribute('title') || cleanText(imageLink.getAttribute('title'));
-
-      if (!title) {
-        var matchingTextLink = Array.from(section.querySelectorAll('a')).find(function (a) {
-          return (
-            !a.querySelector('img') &&
-            a.getAttribute('href') === href &&
-            cleanText(a.textContent).length > 0
-          );
-        });
-
-        if (matchingTextLink) {
-          title = cleanText(matchingTextLink.textContent);
-        }
-      }
-
-      if (!title) {
-        title = 'View Product';
-      }
-
-      var card = document.createElement('div');
-      card.className = 'mtl-related-card';
-
-      var newImageLink = imageLink.cloneNode(true);
-      newImageLink.className = 'mtl-related-image-link';
-
-      var titleLink = document.createElement('a');
-      titleLink.className = 'mtl-related-title';
-      titleLink.href = href;
-      titleLink.textContent = title;
-
-      card.appendChild(newImageLink);
-      card.appendChild(titleLink);
-      grid.appendChild(card);
-    });
-
-    var mount = document.createElement('div');
-    mount.className = 'mtl-related-fixed';
-
-    var headingWrap = document.createElement('div');
-    headingWrap.className = 'mtl-related-heading';
-    headingWrap.textContent = headingEl ? cleanText(headingEl.textContent) : 'Related Items';
-
-    mount.appendChild(headingWrap);
-    mount.appendChild(grid);
-
-    var parent = section.parentNode;
-    if (!parent) {
-      return;
-    }
-
-    parent.insertBefore(mount, section);
-
-    try {
-      if (typeof section.remove === 'function') {
-        section.remove();
-      } else {
-        parent.removeChild(section);
-      }
-    } catch (eRm) {}
-
-    try {
-      mount.setAttribute('data-mtl-related-rebuilt', '1');
-    } catch (eAttr) {}
-  }
-
-  function runRelatedRebuild() {
-    fixRelatedItemsCards();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', runRelatedRebuild);
-  } else {
-    runRelatedRebuild();
-  }
-
-  window.addEventListener('load', function () {
-    runRelatedRebuild();
-    setTimeout(runRelatedRebuild, 0);
-    setTimeout(runRelatedRebuild, 400);
-    setTimeout(runRelatedRebuild, 1200);
-    setTimeout(runRelatedRebuild, 2500);
-  });
-
-  var ca = document.getElementById('content_area');
-  if (ca && typeof MutationObserver !== 'undefined') {
-    var t;
-    var mo = new MutationObserver(function () {
-      clearTimeout(t);
-      t = setTimeout(runRelatedRebuild, 120);
-    });
-    try {
-      mo.observe(ca, { childList: true, subtree: true });
-    } catch (eMo) {}
-  }
-})();
-</script>
+<!-- PDP safety: Do not reintroduce Related Items DOM rebuilds (text match + closest table or innerHTML clears).
+     Never operate on #ProductDetail_ProductDetails / product info tab panels or broad tables that wrap Product Info.
+     Sectional diagram UI must only touch #options_table, the configuration <select>, #sectionalConfigSelector, and SECTIONAL_CONFIGS. -->
 
 <script>
 (function(){
@@ -12082,7 +11924,7 @@ body.mc-product-page tr:has(> td[class*="vCSS_tab"]) {
   visibility: visible !important;
 }
 
-/* Category/listing grid only: flex order for image above title/price (PDP Related Items use rebuilt .mtl-related-fixed grid in custom-safe.css) */
+/* Category/listing grid only: flex order for image above title/price on category/listing grids */
 html.is-category-or-listing-page #content_area .v-product .v-product__img,
 html.is-category-or-listing-page #content_area .v-product-grid .v-product .v-product__img {
   order: -1 !important;
