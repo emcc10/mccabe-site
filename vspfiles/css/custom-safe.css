@@ -11488,3 +11488,27 @@ html.mc-paragon-pdp body [class*="cartqty__wrap"] label {
   margin: 0 0 6px 0 !important;
   order: -1 !important;
 }
+
+/* Sectional PDP: Room Planner disabled — restore native options if other rules hid them */
+html.is-sectional-product #options_table,
+html.is-sectional-product table#options_table,
+html.is-sectional-product .v65-productdetail-options,
+html.is-sectional-product .product-options,
+html.is-sectional-product [id*="option"],
+html.is-sectional-product [name*="ProductOption"] {
+  display: revert !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+html.is-sectional-product #options_table tr,
+html.is-sectional-product #options_table td,
+html.is-sectional-product #options_table select,
+html.is-sectional-product #options_table option {
+  display: revert !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}

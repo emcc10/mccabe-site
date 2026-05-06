@@ -3222,8 +3222,34 @@ boot();
     mcReorderInlineConfigBeforeCartQty();
   }
 
+  /** Sectional PDPs: skip Room Planner mount (native Volusion options only). Standalone /room-planner/ excluded. */
+  function mcIsSectionalProductPageForRoomPlanner() {
+    var path = String(window.location.pathname || "").toLowerCase();
+    if (path.indexOf("room-planner") !== -1) return false;
+    var bod = "";
+    try {
+      bod =
+        document.body && document.body.innerText
+          ? String(document.body.innerText).toLowerCase()
+          : "";
+    } catch (eBod) {}
+    if (path.includes("-sc-")) return true;
+    if (bod.includes("choose configuration")) return true;
+    if (bod.includes("configuration")) return true;
+    return false;
+  }
+  try {
+    window.mcIsSectionalProductPageForRoomPlanner = mcIsSectionalProductPageForRoomPlanner;
+  } catch (eWSec) {}
+
   function mount(opts){
     opts = opts || {};
+    if (mcIsSectionalProductPageForRoomPlanner()) {
+      try {
+        document.documentElement.classList.add("is-sectional-product");
+      } catch (eSec) {}
+      return;
+    }
     if (document.getElementById("mc-inline-config")) return;
 
     if (
@@ -4964,6 +4990,15 @@ function mcEnsurePlannerMemberPriceAboveAtc(){
 
 window.applyPlannerToPage = function (payload) {
   if (!payload || typeof payload !== "object") return;
+  if (
+    typeof window.mcIsSectionalProductPageForRoomPlanner === "function" &&
+    window.mcIsSectionalProductPageForRoomPlanner()
+  ) {
+    try {
+      document.documentElement.classList.add("is-sectional-product");
+    } catch (eSecPl) {}
+    return;
+  }
   try {
     delete payload.configurationTotal;
     delete payload.mcPlannerPerSeatUnit;
@@ -5662,6 +5697,15 @@ function mcSyncPlannerFormForSubmit(payload, explicitTotal) {
 
 try {
   window.recalcRoomPlannerPrice = function () {
+    if (
+      typeof window.mcIsSectionalProductPageForRoomPlanner === "function" &&
+      window.mcIsSectionalProductPageForRoomPlanner()
+    ) {
+      try {
+        document.documentElement.classList.add("is-sectional-product");
+      } catch (eRecSec) {}
+      return;
+    }
     if (window.__mcLastPlannerPayload && typeof window.applyPlannerToPage === "function") {
       window.applyPlannerToPage(window.__mcLastPlannerPayload);
     }
@@ -5670,6 +5714,15 @@ try {
 
 window.addEventListener("message", function (event) {
   if (event.origin !== location.origin) return;
+  if (
+    typeof window.mcIsSectionalProductPageForRoomPlanner === "function" &&
+    window.mcIsSectionalProductPageForRoomPlanner()
+  ) {
+    try {
+      document.documentElement.classList.add("is-sectional-product");
+    } catch (eMsgSec) {}
+    return;
+  }
   if (!event.data || event.data.type !== "ROOM_PLANNER_APPLY") return;
   var payload = event.data.payload;
   if (!payload || typeof payload !== "object") return;
@@ -5827,6 +5880,15 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
 <script>
 (function mcVertexTheaterDeterministicWriter(){
   if (window.__mcVertexTheaterDeterministicWriter) return;
+  if (
+    typeof window.mcIsSectionalProductPageForRoomPlanner === "function" &&
+    window.mcIsSectionalProductPageForRoomPlanner()
+  ) {
+    try {
+      document.documentElement.classList.add("is-sectional-product");
+    } catch (eVtxSec) {}
+    return;
+  }
   window.__mcVertexTheaterDeterministicWriter = true;
 
   var LOG = "[McCabe VERTEX MAP]";
@@ -6026,6 +6088,15 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
 window.initRoomPlanner = function (opts) {
   try {
   opts = opts || {};
+  if (
+    typeof window.mcIsSectionalProductPageForRoomPlanner === "function" &&
+    window.mcIsSectionalProductPageForRoomPlanner()
+  ) {
+    try {
+      document.documentElement.classList.add("is-sectional-product");
+    } catch (eInitSec) {}
+    return;
+  }
   var PX_PER_INCH = 4, SEAT_DEPTH_IN = 40;
   var app = document.getElementById("roomPlannerApp");
   if (!app) return;
