@@ -11645,59 +11645,65 @@ html.has-sectional-config-cards body.productdetails #v65-product-parent table[id
   margin-left: 161px !important;
 }
 
-/* ========= Related Items: grid alignment + title link styling (see markRelatedTitleLinks in template) ========= */
-#ProductDetail_RelatedProducts,
-.v65-product-related,
-.productdetails [id*="Related"],
-.productdetails [class*="related"] {
-  width: 100%;
-}
-
-#ProductDetail_RelatedProducts table,
-.v65-product-related table,
-.productdetails [id*="Related"] table,
-.productdetails [class*="related"] table {
+/* Related Items repair — tightly scoped (JS adds .mtl-related-items-section near the heading only) */
+.mtl-related-items-section {
+  clear: both !important;
+  margin-top: 32px !important;
+  margin-bottom: 24px !important;
   width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
-#ProductDetail_RelatedProducts td,
-.v65-product-related td,
-.productdetails [id*="Related"] td,
-.productdetails [class*="related"] td {
+.mtl-related-items-section table,
+.mtl-related-items-section tbody,
+.mtl-related-items-section tr {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+.mtl-related-items-section td {
   vertical-align: top !important;
   text-align: center !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 10px 14px !important;
 }
 
-#ProductDetail_RelatedProducts img,
-.v65-product-related img,
-.productdetails [id*="Related"] img,
-.productdetails [class*="related"] img {
+.mtl-related-items-section img {
   display: block !important;
   margin: 0 auto 10px auto !important;
+  width: auto !important;
   max-width: 180px !important;
-  width: 100% !important;
-  height: 150px !important;
+  height: 145px !important;
+  max-height: 145px !important;
   object-fit: contain !important;
 }
 
-#ProductDetail_RelatedProducts a,
-.v65-product-related a,
-.productdetails [id*="Related"] a,
-.productdetails [class*="related"] a {
+.mtl-related-items-section a {
   text-align: center !important;
 }
 
-.related-item-title-link {
+.mtl-related-items-section a img {
+  margin-bottom: 10px !important;
+}
+
+.mtl-related-items-section .mtl-related-title {
   display: block !important;
-  min-height: 38px !important;
+  margin: 8px auto 0 auto !important;
+  min-height: 34px !important;
   line-height: 1.25 !important;
-  text-align: center !important;
   font-family: Inter, Arial, sans-serif !important;
   font-size: 12px !important;
   letter-spacing: 0.06em !important;
   text-transform: uppercase !important;
   color: #111 !important;
-  margin: 0 auto !important;
+  text-decoration: none !important;
+  text-align: center !important;
 }
 
 /* Category / listing: uniform centered product images (PDP excluded via html.is-category-or-listing-page) */

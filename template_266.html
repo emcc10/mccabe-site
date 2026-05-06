@@ -11542,79 +11542,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     } catch (eR) {}
   }
 
-  function mcMoveRelatedImageFirst(root) {
-    if (!root || !root.querySelectorAll) return;
-    var cells = root.querySelectorAll('td');
-    var i;
-    for (i = 0; i < cells.length; i++) {
-      var td = cells[i];
-      var v = td.querySelector('.v-product');
-      var box = v || td;
-      if (box.getAttribute && box.getAttribute('data-mc-related-layout-done') === '1') continue;
-      var img = box.querySelector('a[href] > img, .v-product__img img, .product_image img, a img');
-      if (!img) continue;
-      var imgHost =
-        img.parentElement && img.parentElement.tagName === 'A'
-          ? img.parentElement
-          : img.closest('a[href]') ||
-            box.querySelector('.v-product__img, .product_image') ||
-            img.parentElement;
-      if (!imgHost || !box.contains(imgHost)) continue;
-      var titleEl =
-        box.querySelector('.v-product__name') ||
-        box.querySelector('.productnamecolor') ||
-        box.querySelector('.v65-product-related-title');
-      try {
-        if (box.firstChild && box.firstChild !== imgHost) {
-          box.insertBefore(imgHost, box.firstChild);
-        }
-        if (titleEl && imgHost.nextSibling !== titleEl) {
-          box.insertBefore(titleEl, imgHost.nextSibling);
-        }
-        try {
-          box.setAttribute('data-mc-related-layout-done', '1');
-        } catch (eAttr2) {}
-      } catch (eR) {}
-    }
-  }
-  function mcLimitRelatedProductCount(maxVisible) {
-    try {
-      var root = document.querySelector('#content_area #v65-product-related, #content_area #related_products_content');
-      if (!root) return;
-      var table = root.querySelector('table.v65-productDisplay');
-      if (!table) return;
-      if (table.getAttribute('data-mc-related-limit-done') === '1') return;
-      var tbody = table.tBodies[0] || table;
-      var rows = [];
-      var ch = tbody.children;
-      var i, r, c;
-      for (i = 0; i < ch.length; i++) {
-        var row = ch[i];
-        if (
-          row &&
-          row.tagName === 'TR' &&
-          row.classList &&
-          row.classList.contains('v65-productDisplay-row')
-        ) rows.push(row);
-      }
-      if (!rows.length) return;
-
-      var groupSize = rows.length >= 3 ? 3 : rows.length;
-      for (r = 0; r < rows.length; r++) {
-        if (r >= groupSize) {
-          rows[r].style.setProperty('display', 'none', 'important');
-          continue;
-        }
-        var cells = rows[r].children;
-        for (c = 0; c < cells.length; c++) {
-          if (c >= maxVisible) cells[c].style.setProperty('display', 'none', 'important');
-        }
-      }
-
-      table.setAttribute('data-mc-related-limit-done', '1');
-    } catch (eLimit) {}
-  }
-
   function mcForceBuildRelatedGrid(maxVisible) {
     /* Disabled: pickBestCell/appendTitleContents could pair an image from one related row with a title link from another. Keep native Volusion table + CSS. */
     return false;
@@ -11849,56 +11776,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }
   }
 
-  function markRelatedTitleLinks() {
-    var roots = Array.from(
-      document.querySelectorAll(
-        '#ProductDetail_RelatedProducts, .v65-product-related, #content_area #relateditems, #content_area table.relateditems, #content_area #v65-product-related, #content_area #related_products_content'
-      )
-    );
-    roots.forEach(function (root) {
-      Array.from(root.querySelectorAll('a')).forEach(function (a) {
-        if (!a.querySelector('img') && (a.textContent || '').trim()) {
-          a.classList.add('related-item-title-link');
-        }
-      });
-    });
-  }
-
-  function fixRelatedItemHrefPairs() {
-    var relatedRoots = Array.from(
-      document.querySelectorAll(
-        '#ProductDetail_RelatedProducts, .v65-product-related, [id*="Related"], [class*="related"], #content_area #relateditems, #content_area table.relateditems, #content_area #v65-product-related'
-      )
-    );
-    relatedRoots.forEach(function (root) {
-      var links = Array.from(
-        root.querySelectorAll('a[href*="-p/"], a[href*="/product-p/"], a[href*=".htm"]')
-      );
-      links.forEach(function (link) {
-        var img = link.querySelector('img');
-        if (!img) return;
-        var card = link.closest('td, li, div');
-        if (!card) return;
-        var titleLink = Array.from(card.querySelectorAll('a')).find(function (a) {
-          return !a.querySelector('img') && (a.textContent || '').trim().length > 0;
-        });
-        if (!titleLink) return;
-        var imgHref = link.getAttribute('href');
-        var titleHref = titleLink.getAttribute('href');
-        if (imgHref && titleHref && imgHref !== titleHref) {
-          titleLink.setAttribute('href', imgHref);
-        }
-      });
-    });
-  }
-
   function mcRunRelatedFix() {
-    mcNormalizeRelatedItemImages(document);
-    mcLimitRelatedProductCount(4);
-    var relLegacy = document.querySelector('#content_area #relateditems, #content_area table.relateditems');
-    if (relLegacy) mcMoveRelatedImageFirst(relLegacy);
-    markRelatedTitleLinks();
-    fixRelatedItemHrefPairs();
     mcNormalizeRelatedItemImages(document);
   }
   function boot() {
@@ -11941,10 +11819,90 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     setTimeout(function(){ mcNormalizeRelatedItemImages(document); }, 900);
     window.addEventListener('load', function(){ mcNormalizeRelatedItemImages(document); });
   }
-  try {
-    window.mcMarkRelatedTitleLinks = markRelatedTitleLinks;
-    window.mcFixRelatedItemHrefPairs = fixRelatedItemHrefPairs;
-  } catch (eExp) {}
+})();
+</script>
+
+<script>
+(function () {
+  function normalizeRelatedItemsSection() {
+    var headings = Array.from(document.querySelectorAll('td, div, span, font, b, strong'))
+      .filter(function (el) {
+        var t = (el.textContent || '').trim().toLowerCase();
+        return t === 'related items' || t === 'related products';
+      });
+
+    headings.forEach(function (heading) {
+      var container = heading.closest('table') || heading.parentElement;
+
+      if (!container) return;
+
+      container.classList.add('mtl-related-items-section');
+    });
+  }
+
+  function moveRelatedTitlesBelowImages() {
+    var sections = document.querySelectorAll('.mtl-related-items-section');
+
+    sections.forEach(function (section) {
+      var cells = Array.from(section.querySelectorAll('td'));
+
+      cells.forEach(function (cell) {
+        var imageLink = Array.from(cell.querySelectorAll('a')).find(function (a) {
+          return a.querySelector('img');
+        });
+
+        if (!imageLink) return;
+
+        var titleLinks = Array.from(cell.querySelectorAll('a')).filter(function (a) {
+          return !a.querySelector('img') && (a.textContent || '').trim().length > 0;
+        });
+
+        if (!titleLinks.length) return;
+
+        var mainTitle = titleLinks[titleLinks.length - 1];
+
+        mainTitle.classList.add('mtl-related-title');
+
+        imageLink.insertAdjacentElement('afterend', mainTitle);
+
+        titleLinks.forEach(function (a) {
+          if (a !== mainTitle) {
+            a.remove();
+          }
+        });
+      });
+    });
+  }
+
+  function runMtlRelatedCleanup() {
+    normalizeRelatedItemsSection();
+    moveRelatedTitlesBelowImages();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runMtlRelatedCleanup);
+  } else {
+    runMtlRelatedCleanup();
+  }
+
+  window.addEventListener('load', function () {
+    runMtlRelatedCleanup();
+    setTimeout(runMtlRelatedCleanup, 0);
+    setTimeout(runMtlRelatedCleanup, 400);
+    setTimeout(runMtlRelatedCleanup, 1200);
+  });
+
+  var ca = document.getElementById('content_area');
+  if (ca && typeof MutationObserver !== 'undefined') {
+    var t;
+    var mo = new MutationObserver(function () {
+      clearTimeout(t);
+      t = setTimeout(runMtlRelatedCleanup, 80);
+    });
+    try {
+      mo.observe(ca, { childList: true, subtree: true });
+    } catch (eMo) {}
+  }
 })();
 </script>
 
@@ -12006,7 +11964,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 })();
 </script>
 
-<!-- PATCH: Restore product tabs · reorder related-item images · match planner dimensions -->
+<!-- PATCH: Restore product tabs · match planner dimensions -->
 <style>
 body.productdetails table:has(td[class*="vCSS_tab"]),
 body.mc-product-page table:has(td[class*="vCSS_tab"]) {
@@ -12033,187 +11991,20 @@ body.mc-product-page tr:has(> td[class*="vCSS_tab"]) {
   visibility: visible !important;
 }
 
+/* Category/listing grid only: flex order for image above title/price (PDP related items use .mtl-related-items-section in custom-safe.css) */
 html.is-category-or-listing-page #content_area .v-product .v-product__img,
-html.is-category-or-listing-page #content_area .v-product-grid .v-product .v-product__img,
-body.productdetails #content_area #relateditems .v-product .v-product__img,
-body.mc-product-page #content_area #relateditems .v-product .v-product__img,
-body.productdetails #content_area table.relateditems .v-product .v-product__img,
-body.mc-product-page #content_area table.relateditems .v-product .v-product__img,
-body.productdetails #content_area #v65-product-related .v-product .v-product__img,
-body.mc-product-page #content_area #v65-product-related .v-product .v-product__img {
+html.is-category-or-listing-page #content_area .v-product-grid .v-product .v-product__img {
   order: -1 !important;
 }
 html.is-category-or-listing-page #content_area .v-product .productnamecolor,
 html.is-category-or-listing-page #content_area .v-product .v-product__name,
 html.is-category-or-listing-page #content_area .v-product-grid .v-product .productnamecolor,
-html.is-category-or-listing-page #content_area .v-product-grid .v-product .v-product__name,
-body.productdetails #content_area #relateditems .v-product .productnamecolor,
-body.productdetails #content_area #relateditems .v-product .v-product__name,
-body.mc-product-page #content_area #relateditems .v-product .productnamecolor,
-body.mc-product-page #content_area #relateditems .v-product .v-product__name,
-body.productdetails #content_area table.relateditems .v-product .productnamecolor,
-body.productdetails #content_area table.relateditems .v-product .v-product__name,
-body.mc-product-page #content_area table.relateditems .v-product .productnamecolor,
-body.mc-product-page #content_area table.relateditems .v-product .v-product__name,
-body.productdetails #content_area #v65-product-related .v-product .productnamecolor,
-body.productdetails #content_area #v65-product-related .v-product .v-product__name,
-body.mc-product-page #content_area #v65-product-related .v-product .productnamecolor,
-body.mc-product-page #content_area #v65-product-related .v-product .v-product__name {
+html.is-category-or-listing-page #content_area .v-product-grid .v-product .v-product__name {
   order: 1 !important;
 }
 html.is-category-or-listing-page #content_area .v-product .v-product__price,
-html.is-category-or-listing-page #content_area .v-product-grid .v-product .v-product__price,
-body.productdetails #content_area #relateditems .v-product .v-product__price,
-body.mc-product-page #content_area #relateditems .v-product .v-product__price,
-body.productdetails #content_area table.relateditems .v-product .v-product__price,
-body.mc-product-page #content_area table.relateditems .v-product .v-product__price,
-body.productdetails #content_area #v65-product-related .v-product .v-product__price,
-body.mc-product-page #content_area #v65-product-related .v-product .v-product__price {
+html.is-category-or-listing-page #content_area .v-product-grid .v-product .v-product__price {
   order: 2 !important;
-}
-/* Related products (#relateditems): per table cell only — keep row layout, stack content inside each cell */
-body.productdetails #content_area #relateditems table td,
-body.mc-product-page #content_area #relateditems table td,
-body.productdetails #content_area table.relateditems td,
-body.mc-product-page #content_area table.relateditems td {
-  vertical-align: top !important;
-  text-align: center !important;
-}
-body.productdetails #content_area #relateditems table td .v-product,
-body.mc-product-page #content_area #relateditems table td .v-product,
-body.productdetails #content_area table.relateditems td .v-product,
-body.mc-product-page #content_area table.relateditems td .v-product {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  vertical-align: top !important;
-  text-align: center !important;
-}
-body.productdetails #content_area #relateditems table td .v-product .v-product__img,
-body.productdetails #content_area #relateditems table td .v-product .product_image,
-body.productdetails #content_area #relateditems table td .v-product .v-product__image,
-body.productdetails #content_area #relateditems table td .v-product > a:first-of-type,
-body.mc-product-page #content_area #relateditems table td .v-product .v-product__img,
-body.mc-product-page #content_area #relateditems table td .v-product .product_image,
-body.mc-product-page #content_area #relateditems table td .v-product .v-product__image,
-body.mc-product-page #content_area #relateditems table td .v-product > a:first-of-type,
-body.productdetails #content_area table.relateditems td .v-product .v-product__img,
-body.productdetails #content_area table.relateditems td .v-product .product_image,
-body.productdetails #content_area table.relateditems td .v-product > a:first-of-type,
-body.mc-product-page #content_area table.relateditems td .v-product .v-product__img,
-body.mc-product-page #content_area table.relateditems td .v-product .product_image,
-body.mc-product-page #content_area table.relateditems td .v-product > a:first-of-type,
-body.productdetails #content_area #relateditems table td .v-product img,
-body.mc-product-page #content_area #relateditems table td .v-product img,
-body.productdetails #content_area table.relateditems td .v-product img,
-body.mc-product-page #content_area table.relateditems td .v-product img {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  min-height: 180px !important;
-  margin: 0 0 12px 0 !important;
-  text-align: center !important;
-}
-body.productdetails #content_area #relateditems table td .v-product img,
-body.mc-product-page #content_area #relateditems table td .v-product img,
-body.productdetails #content_area table.relateditems td .v-product img,
-body.mc-product-page #content_area table.relateditems td .v-product img {
-  display: block !important;
-  width: auto !important;
-  max-width: 100% !important;
-  max-height: 160px !important;
-  height: auto !important;
-  margin: 0 auto !important;
-}
-body.productdetails #content_area #relateditems table td .v-product .v-product__name,
-body.productdetails #content_area #relateditems table td .v-product .productnamecolor,
-body.productdetails #content_area #relateditems table td .v-product .v65-product-related-title,
-body.productdetails #content_area #relateditems table td .v-product .v-product__price,
-body.productdetails #content_area #relateditems table td .v-product .product_price,
-body.productdetails #content_area #relateditems table td .v-product .mc-member-grid-price,
-body.productdetails #content_area #relateditems table td .v-product .v65-product-related-price,
-body.productdetails #content_area #relateditems table td .v-product .mc-member-price,
-body.mc-product-page #content_area #relateditems table td .v-product .v-product__name,
-body.mc-product-page #content_area #relateditems table td .v-product .productnamecolor,
-body.mc-product-page #content_area #relateditems table td .v-product .v65-product-related-title,
-body.mc-product-page #content_area #relateditems table td .v-product .v-product__price,
-body.mc-product-page #content_area #relateditems table td .v-product .product_price,
-body.mc-product-page #content_area #relateditems table td .v-product .mc-member-grid-price,
-body.mc-product-page #content_area #relateditems table td .v-product .v65-product-related-price,
-body.mc-product-page #content_area #relateditems table td .v-product .mc-member-price,
-body.productdetails #content_area table.relateditems td .v-product .v-product__name,
-body.productdetails #content_area table.relateditems td .v-product .productnamecolor,
-body.productdetails #content_area table.relateditems td .v-product .v65-product-related-title,
-body.productdetails #content_area table.relateditems td .v-product .v-product__price,
-body.productdetails #content_area table.relateditems td .v-product .product_price,
-body.productdetails #content_area table.relateditems td .v-product .mc-member-grid-price,
-body.productdetails #content_area table.relateditems td .v-product .v65-product-related-price,
-body.productdetails #content_area table.relateditems td .v-product .mc-member-price,
-body.mc-product-page #content_area table.relateditems td .v-product .v-product__name,
-body.mc-product-page #content_area table.relateditems td .v-product .productnamecolor,
-body.mc-product-page #content_area table.relateditems td .v-product .v65-product-related-title,
-body.mc-product-page #content_area table.relateditems td .v-product .v-product__price,
-body.mc-product-page #content_area table.relateditems td .v-product .product_price,
-body.mc-product-page #content_area table.relateditems td .v-product .mc-member-grid-price,
-body.mc-product-page #content_area table.relateditems td .v-product .v65-product-related-price,
-body.mc-product-page #content_area table.relateditems td .v-product .mc-member-price {
-  display: block !important;
-  float: none !important;
-  clear: both !important;
-  position: static !important;
-  margin-top: 0 !important;
-  width: 100% !important;
-  text-align: center !important;
-}
-body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) > a:first-of-type,
-body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) > a:first-of-type,
-body.productdetails #content_area table.relateditems tr > td:not(:has(.v-product)) > a:first-of-type,
-body.mc-product-page #content_area table.relateditems tr > td:not(:has(.v-product)) > a:first-of-type {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  min-height: 180px !important;
-  margin: 0 0 12px 0 !important;
-}
-body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .v-product__name,
-body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .productnamecolor,
-body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .v65-product-related-title,
-body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .v-product__price,
-body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .v65-product-related-price,
-body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .product_price,
-body.productdetails #content_area #relateditems table tr > td:not(:has(.v-product)) .mc-member-grid-price,
-body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .v-product__name,
-body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .productnamecolor,
-body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .v65-product-related-title,
-body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .v-product__price,
-body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .v65-product-related-price,
-body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .product_price,
-body.mc-product-page #content_area #relateditems table tr > td:not(:has(.v-product)) .mc-member-grid-price,
-body.productdetails #content_area table.relateditems table tr > td:not(:has(.v-product)) .v-product__name,
-body.productdetails #content_area table.relateditems table tr > td:not(:has(.v-product)) .productnamecolor,
-body.productdetails #content_area table.relateditems table tr > td:not(:has(.v-product)) .v65-product-related-title,
-body.productdetails #content_area table.relateditems table tr > td:not(:has(.v-product)) .v-product__price,
-body.productdetails #content_area table.relateditems table tr > td:not(:has(.v-product)) .v65-product-related-price,
-body.productdetails #content_area table.relateditems table tr > td:not(:has(.v-product)) .product_price,
-body.productdetails #content_area table.relateditems table tr > td:not(:has(.v-product)) .mc-member-grid-price,
-body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-product)) .v-product__name,
-body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-product)) .productnamecolor,
-body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-product)) .v65-product-related-title,
-body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-product)) .v-product__price,
-body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-product)) .v65-product-related-price,
-body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-product)) .product_price,
-body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-product)) .mc-member-grid-price {
-  display: block !important;
-  float: none !important;
-  clear: both !important;
-  position: static !important;
-  margin-top: 0 !important;
-  width: 100% !important;
-  text-align: center !important;
 }
 </style>
 <script>
@@ -12244,54 +12035,7 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
     });
   }
 
-  /* ---- PATCH 2: Related-item images above title/price (Volusion order varies) ---- */
-  function patchRelatedItemImages(){
-    /* Scope to related regions only — avoiding all body.productdetails .v-product prevents cross-card image moves on PDP. */
-    var prods = document.querySelectorAll(
-      '#content_area #relateditems .v-product-grid .v-product, ' +
-        '#content_area #relateditems td .v-product, ' +
-        '#content_area #relateditems .v-product, ' +
-        '#content_area table.relateditems .v-product-grid .v-product, ' +
-        '#content_area table.relateditems td .v-product, ' +
-        '#content_area #v65-product-related .v-product, ' +
-        '#content_area #related_products_content .v-product, ' +
-        '#ProductDetail_RelatedProducts .v-product'
-    );
-    prods.forEach(function(prod){
-      var img = prod.querySelector('.v-product__img');
-      if (!img){
-        var links = prod.querySelectorAll(':scope > a');
-        for (var i = 0; i < links.length; i++){
-          if (links[i].querySelector('img')){ img = links[i]; break; }
-        }
-      }
-      if (img && img.parentNode === prod && prod.firstElementChild !== img){
-        prod.insertBefore(img, prod.firstElementChild);
-      }
-    });
-    /* Table cells without .v-product wrapper: move image link before other direct children */
-    var tds = document.querySelectorAll(
-      '#content_area #relateditems tr > td, #content_area table.relateditems tr > td'
-    );
-    tds.forEach(function(td){
-      if (!td || td.querySelector('table')) return;
-      if (td.querySelector('.v-product')) return;
-      var imgHost = null;
-      var links = td.querySelectorAll(':scope > a');
-      var j;
-      for (j = 0; j < links.length; j++){
-        if (links[j].querySelector('img')){ imgHost = links[j]; break; }
-      }
-      if (!imgHost && td.querySelector(':scope > img')) {
-        imgHost = td.querySelector(':scope > img');
-      }
-      if (imgHost && td.firstElementChild && imgHost !== td.firstElementChild){
-        td.insertBefore(imgHost, td.firstElementChild);
-      }
-    });
-  }
-
-  /* ---- PATCH 3: Fetch planner dims from Palliser spec-sheet PDFs ---- */
+  /* ---- PATCH 2: Fetch planner dims from Palliser spec-sheet PDFs ---- */
   var PALLISER_MODELS = window.__MC_PALLISER_SPEC_MODEL || {
     flicks: "41416",
     audio: "41422",
@@ -12517,9 +12261,6 @@ body.mc-product-page #content_area table.relateditems table tr > td:not(:has(.v-
 
   function runPatches(){
     patchProductTabs();
-    patchRelatedItemImages();
-    if (typeof window.mcMarkRelatedTitleLinks === "function") window.mcMarkRelatedTitleLinks();
-    if (typeof window.mcFixRelatedItemHrefPairs === "function") window.mcFixRelatedItemHrefPairs();
     fetchPlannerDimensions();
   }
 
