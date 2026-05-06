@@ -1090,30 +1090,55 @@ document.addEventListener("DOMContentLoaded", function () {
 <script>
 (function () {
   try {
+    window.isSectionalProductPage = function isSectionalProductPage() {
+      var path = String(window.location.pathname || "").toLowerCase();
+      if (path.indexOf("room-planner") !== -1) return false;
+      var text = document.body ? String(document.body.innerText || "").toLowerCase() : "";
+      return (
+        path.includes("-sc-") ||
+        text.includes("choose configuration") ||
+        text.includes("configuration")
+      );
+    };
+
+    var pathOnly = String(window.location.pathname || "").toLowerCase();
+    if (pathOnly.indexOf("room-planner") === -1 && pathOnly.includes("-sc-")) {
+      try {
+        document.documentElement.classList.add("is-sectional-product");
+      } catch (eHtml) {}
+    }
+
     var b = document.body;
     if (!b) return;
-    var p = (location.pathname || '').toLowerCase();
+    var p = (location.pathname || "").toLowerCase();
     var pcEl =
       document.querySelector('input[name="ProductCode"]') ||
       document.querySelector('input[name="productcode"]');
-    var pc = String((pcEl && pcEl.value) || '').trim();
+    var pc = String((pcEl && pcEl.value) || "").trim();
     var catEarly =
       document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
-    var catEarlyV = catEarly && String(catEarly.value || '').trim();
+    var catEarlyV = catEarly && String(catEarly.value || "").trim();
     var isBean =
       /^BB/i.test(pc) ||
       /\/bean-bag-seating-s\//.test(p) ||
       /product-p\/bb-/i.test(p) ||
-      catEarlyV === '103';
+      catEarlyV === "103";
     if (isBean) {
-      b.classList.add('mc-bean-bag-pdp');
+      b.classList.add("mc-bean-bag-pdp");
       return;
+    }
+    if (window.isSectionalProductPage()) {
+      try {
+        document.documentElement.classList.add("is-sectional-product");
+      } catch (eSec) {}
     }
     var looksPdp =
       !!pcEl ||
-      !!document.getElementById('v65-product-parent') ||
-      (b.classList && b.classList.contains('productdetails'));
-    if (looksPdp) b.classList.add('mc-hide-native-options-until-mc');
+      !!document.getElementById("v65-product-parent") ||
+      (b.classList && b.classList.contains("productdetails"));
+    if (looksPdp && !window.isSectionalProductPage()) {
+      b.classList.add("mc-hide-native-options-until-mc");
+    }
   } catch (e2) {}
 })();
 </script>
@@ -2125,6 +2150,13 @@ html body.productdetails .v-product-grid > .v-product {
     return;
   }
 
+  if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
+    try {
+      document.documentElement.classList.add("is-sectional-product");
+    } catch (eSecWl) {}
+    window.__WM_LEATHER_MODAL_SCRIPT_LOADED__ = true;
+    return;
+  }
 
   // If you accidentally paste this twice, only the first one runs.
 if (window.__WM_LEATHER_MODAL_SCRIPT_LOADED__) return;
@@ -3222,29 +3254,9 @@ boot();
     mcReorderInlineConfigBeforeCartQty();
   }
 
-  /** Sectional PDPs: skip Room Planner mount (native Volusion options only). Standalone /room-planner/ excluded. */
-  function mcIsSectionalProductPageForRoomPlanner() {
-    var path = String(window.location.pathname || "").toLowerCase();
-    if (path.indexOf("room-planner") !== -1) return false;
-    var bod = "";
-    try {
-      bod =
-        document.body && document.body.innerText
-          ? String(document.body.innerText).toLowerCase()
-          : "";
-    } catch (eBod) {}
-    if (path.includes("-sc-")) return true;
-    if (bod.includes("choose configuration")) return true;
-    if (bod.includes("configuration")) return true;
-    return false;
-  }
-  try {
-    window.mcIsSectionalProductPageForRoomPlanner = mcIsSectionalProductPageForRoomPlanner;
-  } catch (eWSec) {}
-
   function mount(opts){
     opts = opts || {};
-    if (mcIsSectionalProductPageForRoomPlanner()) {
+    if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
       try {
         document.documentElement.classList.add("is-sectional-product");
       } catch (eSec) {}
@@ -4990,10 +5002,7 @@ function mcEnsurePlannerMemberPriceAboveAtc(){
 
 window.applyPlannerToPage = function (payload) {
   if (!payload || typeof payload !== "object") return;
-  if (
-    typeof window.mcIsSectionalProductPageForRoomPlanner === "function" &&
-    window.mcIsSectionalProductPageForRoomPlanner()
-  ) {
+  if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
     try {
       document.documentElement.classList.add("is-sectional-product");
     } catch (eSecPl) {}
@@ -5697,10 +5706,7 @@ function mcSyncPlannerFormForSubmit(payload, explicitTotal) {
 
 try {
   window.recalcRoomPlannerPrice = function () {
-    if (
-      typeof window.mcIsSectionalProductPageForRoomPlanner === "function" &&
-      window.mcIsSectionalProductPageForRoomPlanner()
-    ) {
+    if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
       try {
         document.documentElement.classList.add("is-sectional-product");
       } catch (eRecSec) {}
@@ -5714,10 +5720,7 @@ try {
 
 window.addEventListener("message", function (event) {
   if (event.origin !== location.origin) return;
-  if (
-    typeof window.mcIsSectionalProductPageForRoomPlanner === "function" &&
-    window.mcIsSectionalProductPageForRoomPlanner()
-  ) {
+  if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
     try {
       document.documentElement.classList.add("is-sectional-product");
     } catch (eMsgSec) {}
@@ -5880,10 +5883,7 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
 <script>
 (function mcVertexTheaterDeterministicWriter(){
   if (window.__mcVertexTheaterDeterministicWriter) return;
-  if (
-    typeof window.mcIsSectionalProductPageForRoomPlanner === "function" &&
-    window.mcIsSectionalProductPageForRoomPlanner()
-  ) {
+  if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
     try {
       document.documentElement.classList.add("is-sectional-product");
     } catch (eVtxSec) {}
@@ -6088,10 +6088,7 @@ window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
 window.initRoomPlanner = function (opts) {
   try {
   opts = opts || {};
-  if (
-    typeof window.mcIsSectionalProductPageForRoomPlanner === "function" &&
-    window.mcIsSectionalProductPageForRoomPlanner()
-  ) {
+  if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
     try {
       document.documentElement.classList.add("is-sectional-product");
     } catch (eInitSec) {}
@@ -7531,19 +7528,19 @@ body.mc-product-page #content_area #mcLeatherSwatchStrip img {
   color: #111 !important;
 }
 
-/* Hide native options until custom PDP UI is active (avoids flash before body.mc-product-page / late Volusion inject). Bean bags keep native options. */
-body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
-body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
-body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area #options_table,
-body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
-body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
-body.productdetails:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"] {
+/* Hide native options until custom PDP UI is active (avoids flash before body.mc-product-page / late Volusion inject). Bean bags keep native options. Sectionals (html.is-sectional-product) keep native options visible. */
+html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
+html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
+html:not(.is-sectional-product) body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area #options_table,
+html:not(.is-sectional-product) body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+html:not(.is-sectional-product) body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+html:not(.is-sectional-product) body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
+html:not(.is-sectional-product) body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
+html:not(.is-sectional-product) body.productdetails:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+html:not(.is-sectional-product) body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+html:not(.is-sectional-product) body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"] {
   position: absolute !important;
   left: -9999px !important;
   opacity: 0 !important;
@@ -9782,6 +9779,12 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
     if (!hasMarker) return false;
     document.body.classList.add('mc-product-page');
     try { document.body.classList.remove('mc-hide-native-options-until-mc'); } catch (eMcH) {}
+    try {
+      if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
+        document.documentElement.classList.add("is-sectional-product");
+        document.body.classList.remove("mc-hide-native-options-until-mc");
+      }
+    } catch (ePdSec) {}
     try { document.body.classList.remove('is-home'); } catch (eH) {}
     try {
       if (typeof isBeanBagProductPage === 'function' && isBeanBagProductPage()) {
@@ -10962,11 +10965,19 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       deb = setTimeout(function(){
         try {
           var ca = document.getElementById('content_area');
+          var isSec = typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage();
+          if (isSec) {
+            try {
+              document.documentElement.classList.add("is-sectional-product");
+              document.body.classList.remove("mc-hide-native-options-until-mc");
+            } catch (eRmH) {}
+          }
           if (
             ca &&
             ca.querySelector('#options_table, table[id*="options_table"]') &&
             !document.body.classList.contains('mc-product-page') &&
-            !document.body.classList.contains('mc-bean-bag-pdp')
+            !document.body.classList.contains('mc-bean-bag-pdp') &&
+            !isSec
           ) {
             document.body.classList.add('mc-hide-native-options-until-mc');
           }

@@ -2206,19 +2206,19 @@ nav.push-menu .push-menu__close-btn::before {
    PRODUCT PAGE FIXES (Volusion 266)
 ========================================= */
 
-/* Match template_266: hide native #options_table until mc-product-page (early class mc-hide-native-options-until-mc). Bean bags keep native UI. */
-body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
-body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
-body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area #options_table,
-body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
-body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
-body.productdetails:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"] {
+/* Match template_266: hide native #options_table until mc-product-page (early class mc-hide-native-options-until-mc). Bean bags keep native UI. Sectional PDPs: keep native options visible (html.is-sectional-product). */
+html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
+html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
+html:not(.is-sectional-product) body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area #options_table,
+html:not(.is-sectional-product) body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+html:not(.is-sectional-product) body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+html:not(.is-sectional-product) body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
+html:not(.is-sectional-product) body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
+html:not(.is-sectional-product) body.productdetails:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+html:not(.is-sectional-product) body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+html:not(.is-sectional-product) body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"] {
   position: absolute !important;
   left: -9999px !important;
   opacity: 0 !important;
@@ -11489,13 +11489,13 @@ html.mc-paragon-pdp body [class*="cartqty__wrap"] label {
   order: -1 !important;
 }
 
-/* Sectional PDP: Room Planner disabled — restore native options if other rules hid them */
+/* Sectional PDP: native Volusion options + selects (override template_266 inline hide rules) */
 html.is-sectional-product #options_table,
 html.is-sectional-product table#options_table,
 html.is-sectional-product .v65-productdetail-options,
 html.is-sectional-product .product-options,
-html.is-sectional-product [id*="option"],
-html.is-sectional-product [name*="ProductOption"] {
+html.is-sectional-product select,
+html.is-sectional-product option {
   display: revert !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -11504,11 +11504,36 @@ html.is-sectional-product [name*="ProductOption"] {
   overflow: visible !important;
 }
 
-html.is-sectional-product #options_table tr,
-html.is-sectional-product #options_table td,
-html.is-sectional-product #options_table select,
-html.is-sectional-product #options_table option {
-  display: revert !important;
+html.is-sectional-product #options_table tr {
+  display: table-row !important;
   visibility: visible !important;
   opacity: 1 !important;
+}
+
+html.is-sectional-product #options_table td {
+  display: table-cell !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html.is-sectional-product body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area #options_table,
+html.is-sectional-product body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+html.is-sectional-product body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+html.is-sectional-product body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
+html.is-sectional-product body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
+html.is-sectional-product body.productdetails:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+html.is-sectional-product body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+html.is-sectional-product body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
+html.is-sectional-product body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
+html.is-sectional-product body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
+html.is-sectional-product body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
+html.is-sectional-product body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"] {
+  position: static !important;
+  left: auto !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  display: table !important;
+  visibility: visible !important;
 }
