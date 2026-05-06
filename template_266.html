@@ -1335,6 +1335,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   ready(initSectionalConfigCards);
+  window.addEventListener("load", initSectionalConfigCards);
   [400, 1200, 2500, 5000].forEach(function (ms) {
     setTimeout(initSectionalConfigCards, ms);
   });
@@ -7728,26 +7729,6 @@ body.mc-product-page #content_area #mcLeatherSwatchStrip img {
   color: #111 !important;
 }
 
-/* Hide native options until custom PDP UI is active (avoids flash before body.mc-product-page / late Volusion inject). Bean bags keep native options. Sectional: only the configuration row (.mtl-native-config-row) is clipped after diagram cards (custom-safe.css). */
-html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
-html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
-html:not(.is-sectional-product) body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area #options_table,
-html:not(.is-sectional-product) body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-html:not(.is-sectional-product) body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-html:not(.is-sectional-product) body.mc-hide-native-options-until-mc:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
-html:not(.is-sectional-product) body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
-html:not(.is-sectional-product) body.productdetails:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-html:not(.is-sectional-product) body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-html:not(.is-sectional-product) body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"] {
-  position: absolute !important;
-  left: -9999px !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  height: 0 !important;
-  overflow: hidden !important;
-}
 body.mc-product-page #content_area .wm-swatch {
   border: 1px solid #ddd !important;
   border-radius: 6px !important;
@@ -19422,116 +19403,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 
   window.mcHideArmlessOptionRows = hideArmlessOptionRows;
-})();
-</script>
-<script>
-(function () {
-  function ready(fn) {
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", fn);
-    } else {
-      fn();
-    }
-  }
-
-  function cleanText(s) {
-    return String(s || "").replace(/\s+/g, " ").trim();
-  }
-
-  function findRelatedContainer() {
-    var scope = document.getElementById("content_area") || document;
-    var candidates = Array.from(scope.querySelectorAll("table, tbody, tr, td, div"));
-
-    return candidates
-      .filter(function (el) {
-        var text = cleanText(el.innerText || "");
-        var imgCount = el.querySelectorAll("a img").length;
-        var linkCount = el.querySelectorAll("a[href]").length;
-
-        return /related items|related products/i.test(text) && imgCount >= 1 && linkCount >= imgCount;
-      })
-      .sort(function (a, b) {
-        return a.innerHTML.length - b.innerHTML.length;
-      })[0] || null;
-  }
-
-  function fixRelatedItemsMaxFour() {
-    var container = findRelatedContainer();
-
-    if (!container) {
-      console.warn("Related Items container not found.");
-      return;
-    }
-
-    var imageLinks = Array.from(container.querySelectorAll("a[href]"))
-      .filter(function (a) {
-        return a.querySelector("img");
-      })
-      .slice(0, 4);
-
-    if (!imageLinks.length) return;
-
-    var cards = imageLinks.map(function (imageLink) {
-      var href = imageLink.getAttribute("href") || "#";
-      var img = imageLink.querySelector("img");
-
-      var titleLink = Array.from(container.querySelectorAll("a[href]")).find(function (a) {
-        return !a.querySelector("img") &&
-          a.getAttribute("href") === href &&
-          cleanText(a.textContent).length > 0;
-      });
-
-      var title = titleLink
-        ? cleanText(titleLink.textContent)
-        : cleanText(img.getAttribute("alt") || img.getAttribute("title") || "View Product");
-
-      return {
-        href: href,
-        imgSrc: img.getAttribute("src"),
-        imgAlt: title,
-        title: title
-      };
-    });
-
-    if (document.getElementById("mtlRelatedItemsFixed")) return;
-
-    var section = document.createElement("div");
-    section.id = "mtlRelatedItemsFixed";
-    section.className = "mtl-related-fixed-final";
-
-    var heading = document.createElement("div");
-    heading.className = "mtl-related-fixed-heading";
-    heading.textContent = "Related Items";
-
-    var grid = document.createElement("div");
-    grid.className = "mtl-related-fixed-grid";
-
-    cards.forEach(function (item) {
-      var card = document.createElement("div");
-      card.className = "mtl-related-fixed-card";
-
-      var titleSafe = String(item.title || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-
-      card.innerHTML =
-        '<a class="mtl-related-fixed-image-link" href="' + item.href + '">' +
-          '<img src="' + item.imgSrc + '" alt="' + item.imgAlt.replace(/"/g, "&quot;") + '">' +
-        '</a>' +
-        '<a class="mtl-related-fixed-title" href="' + item.href + '">' + titleSafe + '</a>';
-
-      grid.appendChild(card);
-    });
-
-    section.appendChild(heading);
-    section.appendChild(grid);
-
-    container.parentNode.insertBefore(section, container);
-    container.style.display = "none";
-  }
-
-  ready(fixRelatedItemsMaxFour);
 })();
 </script>
 <script>

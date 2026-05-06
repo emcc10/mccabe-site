@@ -867,73 +867,7 @@ html body #v65-product-parent #mc-qty-under-configuration .vol-cartqty__wrap {
   justify-content: center !important;
 }
 
-/* Related Items: max 4 cards (scoped IDs/classes only; see template mtlRelatedItemsFixed) */
-#mtlRelatedItemsFixed {
-  clear: both !important;
-  width: 100% !important;
-  margin: 32px 0 24px 0 !important;
-  padding: 0 !important;
-}
-
-.mtl-related-fixed-heading {
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 13px !important;
-  letter-spacing: 0.14em !important;
-  text-transform: uppercase !important;
-  color: #111 !important;
-  margin: 0 0 16px 0 !important;
-  font-weight: normal !important;
-}
-
-.mtl-related-fixed-grid {
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 18px !important;
-  align-items: start !important;
-}
-
-.mtl-related-fixed-card {
-  text-align: center !important;
-  min-width: 0 !important;
-}
-
-.mtl-related-fixed-image-link {
-  display: block !important;
-  text-align: center !important;
-  margin: 0 auto 8px auto !important;
-}
-
-.mtl-related-fixed-card img {
-  display: block !important;
-  margin: 0 auto 10px auto !important;
-  width: auto !important;
-  max-width: 180px !important;
-  height: 145px !important;
-  max-height: 145px !important;
-  object-fit: contain !important;
-}
-
-.mtl-related-fixed-title {
-  display: block !important;
-  text-align: center !important;
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 12px !important;
-  line-height: 1.25 !important;
-  letter-spacing: 0.06em !important;
-  text-transform: uppercase !important;
-  color: #111 !important;
-  text-decoration: none !important;
-  min-height: 34px !important;
-  margin: 0 auto !important;
-}
-
-@media (max-width: 767px) {
-  .mtl-related-fixed-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-}
-
-/* Sectional configuration cards: diagram UI only; hide native config row via .mtl-native-config-row (never #options_table) */
+/* Sectional configuration cards — hide only .mtl-native-config-row after cards render; never #options_table */
 .sectional-config-selector {
   margin: 28px 0 !important;
   width: 100% !important;
@@ -968,7 +902,7 @@ html body #v65-product-parent #mc-qty-under-configuration .vol-cartqty__wrap {
 
 .sectional-config-card:hover {
   border-color: #888 !important;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08) !important;
 }
 
 .sectional-config-card.is-selected {
@@ -1015,23 +949,4 @@ html.has-sectional-config-cards .mtl-native-config-row {
   overflow: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
-}
-
-@media (max-width: 767px) {
-  .sectional-config-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 10px !important;
-  }
-
-  .sectional-config-card {
-    padding: 9px !important;
-  }
-
-  .sectional-config-img-wrap {
-    min-height: 70px !important;
-  }
-
-  .sectional-config-img-wrap img {
-    max-height: 95px !important;
-  }
 }
