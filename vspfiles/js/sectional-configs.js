@@ -1,0 +1,41 @@
+/**
+ * Sectional configuration diagram cards — data only.
+ * Keys must match Volusion style names (see getStyleFromPage / product codes before "-SC-").
+ * Populate or replace entries in Volusion file manager as needed.
+ */
+window.SECTIONAL_CONFIGS = {
+  Alula: [
+    {
+      code: "07-15",
+      label: "07-15",
+      description: "Configuration 07-15",
+      priceDiff: 0,
+      image: "/v/vspfiles/sectional-diagrams/Alula-SC-07-15.png",
+    },
+    {
+      code: "07-16",
+      label: "07-16",
+      description: "Configuration 07-16",
+      priceDiff: 600,
+      image: "/v/vspfiles/sectional-diagrams/Alula-SC-07-16.png",
+    },
+  ],
+  Acacia: [
+    {
+      code: "67-10-09-10-66",
+      label: "67-10-09-10-66",
+      description: "Configuration 67-10-09-10-66",
+      priceDiff: 0,
+      image: "/v/vspfiles/sectional-diagrams/Acacia-SC-67-10-09-10-66.png",
+    },
+  ],
+  Atticus: [
+    {
+      code: "07-15",
+      label: "07-15",
+      description: "Configuration 07-15",
+      priceDiff: 0,
+      image: "/v/vspfiles/sectional-diagrams/Atticus-SC-07-15.png",
+    },
+  ],
+};
