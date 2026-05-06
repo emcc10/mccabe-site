@@ -10,7 +10,7 @@ window.SECTIONAL_CONFIGS = {
       label: "07-15",
       description: "Configuration 07-15",
       priceDiff: 0,
-      image: "/vspfiles/sectional-diagrams/Alula-SC-07-15.png",
+      image: "/v/vspfiles/sectional-diagrams/Alula-SC-07-15.png",
     },
     {
       code: "07-16",
@@ -26,7 +26,7 @@ window.SECTIONAL_CONFIGS = {
       label: "67-10-09-10-66",
       description: "Configuration 67-10-09-10-66",
       priceDiff: 0,
-      image: "/vspfiles/sectional-diagrams/Acacia-SC-67-10-09-10-66.png",
+      image: "/v/vspfiles/sectional-diagrams/Acacia-SC-67-10-09-10-66.png",
     },
   ],
   Atticus: [
@@ -35,7 +35,7 @@ window.SECTIONAL_CONFIGS = {
       label: "07-15",
       description: "Configuration 07-15",
       priceDiff: 0,
-      image: "/vspfiles/sectional-diagrams/Atticus-SC-07-15.png",
+      image: "/v/vspfiles/sectional-diagrams/Atticus-SC-07-15.png",
     },
   ],
 };

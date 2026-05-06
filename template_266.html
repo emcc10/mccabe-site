@@ -1243,11 +1243,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function markConfigRowOnly(select) {
+    var row = select.closest("tr") || select.closest("div");
+    if (row) row.classList.add("mtl-native-config-row");
+  }
+
   function initSectionalConfigCards() {
     if (!window.SECTIONAL_CONFIGS) {
-      console.warn(
-        "SECTIONAL_CONFIGS missing. Check /v/vspfiles/js/sectional-configs.js or /vspfiles/js/sectional-configs.js"
-      );
+      console.warn("SECTIONAL_CONFIGS missing. Confirm /v/vspfiles/js/sectional-configs.js is loading.");
       return;
     }
 
@@ -1329,6 +1332,7 @@ document.addEventListener("DOMContentLoaded", function () {
       selectConfig(select, baseConfig, grid);
     }
 
+    markConfigRowOnly(select);
     document.documentElement.classList.add("has-sectional-config-cards");
 
     try {
@@ -2362,17 +2366,8 @@ window.__WM_LEATHER_MODAL_SCRIPT_LOADED__ = true;
 
 try {
   window.mcRelocateWmOpenTriggerIfNeeded = function () {
-    var wm = document.getElementById("wmOpen");
-    if (!wm || !wm.parentNode) return;
-    var wrap = wm.parentNode;
-    if (wrap === document.body) return;
-    if (!document.documentElement.classList.contains("has-sectional-config-cards")) return;
-    try {
-      wrap.setAttribute("data-mc-wmopen-host", "1");
-      wrap.style.cssText =
-        "position:fixed!important;left:-9999px!important;top:0!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0.01!important;pointer-events:auto!important;z-index:2147483646!important;margin:0!important;padding:0!important;border:0!important;";
-      document.body.appendChild(wrap);
-    } catch (eMove) {}
+    /* No-op: relocating #wmOpen's host off-screen broke leather when the native config row is clipped
+       instead of hiding the whole #options_table. Leather + summary must stay in normal flow. */
   };
 } catch (eRelDef) {}
 
@@ -7755,7 +7750,7 @@ body.mc-product-page #content_area #mcLeatherSwatchStrip img {
   color: #111 !important;
 }
 
-/* Hide native options until custom PDP UI is active (avoids flash before body.mc-product-page / late Volusion inject). Bean bags keep native options. Sectional: #options_table is clipped only after diagram cards mount (html.has-sectional-config-cards in custom-safe.css). */
+/* Hide native options until custom PDP UI is active (avoids flash before body.mc-product-page / late Volusion inject). Bean bags keep native options. Sectional: only the configuration row (.mtl-native-config-row) is clipped after diagram cards (custom-safe.css). */
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
@@ -10796,6 +10791,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       for (ri = 0; ri < rows.length; ri++) {
         var tr = rows[ri];
         try {
+          if (tr.classList && tr.classList.contains("mtl-native-config-row")) continue;
           if (tr.querySelector && tr.querySelector('select.mc-native-leather')) continue;
           if (tr.classList && tr.classList.contains('mc-leather-option-row')) continue;
           var rowTxt = (tr.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
@@ -11835,9 +11831,140 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 })();
 </script>
-<!-- PDP safety: Do not reintroduce Related Items DOM rebuilds (text match + closest table or innerHTML clears).
-     Never operate on #ProductDetail_ProductDetails / product info tab panels or broad tables that wrap Product Info.
-     Sectional diagram UI must only touch #options_table, the configuration <select>, #sectionalConfigSelector, and SECTIONAL_CONFIGS. -->
+<!-- PDP safety: Related Items fixes must be card/href-scoped inside #content_area only (never Product Info tabs, never innerHTML on parent tables).
+     Sectional UI: configuration <select> row only (.mtl-native-config-row); leather stays in #options_table. -->
+
+<script>
+(function () {
+  function ready(fn) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fn);
+    } else {
+      fn();
+    }
+  }
+
+  function isProductishPdp() {
+    var b = document.body;
+    return !!(
+      b &&
+      (b.classList.contains("productdetails") ||
+        b.classList.contains("mc-product-page") ||
+        b.classList.contains("mc-bean-bag-pdp"))
+    );
+  }
+
+  function clean(s) {
+    return String(s || "").replace(/\s+/g, " ").trim();
+  }
+
+  function findRelatedArea() {
+    var scope = document.getElementById("content_area") || document.body;
+    var candidates = Array.from(scope.querySelectorAll("table, tbody, tr, td, div"));
+    return (
+      candidates
+        .filter(function (el) {
+          if (
+            el.closest(
+              "#ProductDetail_ProductDetails, #ProductDetail_TechSpecs, #ProductDetail_ExtInfo, [id*='ProductDetail_ProductDetails'], [id*='Header_ProductDetail']"
+            )
+          ) {
+            return false;
+          }
+          var text = clean(el.innerText || "");
+          var imgs = el.querySelectorAll("a img").length;
+          var links = el.querySelectorAll("a[href]").length;
+          return (
+            /related items|related products/i.test(text) &&
+            imgs >= 1 &&
+            links >= imgs
+          );
+        })
+        .sort(function (a, b) {
+          return a.innerHTML.length - b.innerHTML.length;
+        })[0] || null
+    );
+  }
+
+  function fixRelatedItems() {
+    if (!isProductishPdp()) return;
+
+    var area = findRelatedArea();
+    if (!area) return;
+    if (area.getAttribute("data-mtl-related-safe-done") === "1") return;
+
+    area.classList.add("mtl-related-safe");
+
+    var imageLinks = Array.from(area.querySelectorAll("a[href]")).filter(function (a) {
+      return a.querySelector("img");
+    });
+
+    imageLinks.forEach(function (imageLink) {
+      var href = imageLink.getAttribute("href");
+      if (!href) return;
+
+      var img = imageLink.querySelector("img");
+
+      var matchingTitleLinks = Array.from(area.querySelectorAll("a[href]")).filter(function (a) {
+        return (
+          !a.querySelector("img") &&
+          a.getAttribute("href") === href &&
+          clean(a.textContent).length > 0
+        );
+      });
+
+      if (!matchingTitleLinks.length) {
+        var fallbackTitle = clean(img.getAttribute("alt")) || clean(img.getAttribute("title"));
+        if (!fallbackTitle) return;
+
+        var newTitle = document.createElement("a");
+        newTitle.href = href;
+        newTitle.className = "mtl-related-title-fixed";
+        newTitle.textContent = fallbackTitle;
+        imageLink.insertAdjacentElement("afterend", newTitle);
+        return;
+      }
+
+      var titleLink = matchingTitleLinks[0];
+      titleLink.classList.add("mtl-related-title-fixed");
+
+      imageLink.insertAdjacentElement("afterend", titleLink);
+
+      matchingTitleLinks.slice(1).forEach(function (dupe) {
+        dupe.remove();
+      });
+    });
+
+    try {
+      area.setAttribute("data-mtl-related-safe-done", "1");
+    } catch (eAttr) {}
+  }
+
+  function run() {
+    fixRelatedItems();
+  }
+
+  ready(run);
+  window.addEventListener("load", function () {
+    run();
+    setTimeout(run, 400);
+    setTimeout(run, 1200);
+    setTimeout(run, 2800);
+  });
+
+  var ca = document.getElementById("content_area");
+  if (ca && typeof MutationObserver !== "undefined") {
+    var t;
+    var mo = new MutationObserver(function () {
+      clearTimeout(t);
+      t = setTimeout(run, 150);
+    });
+    try {
+      mo.observe(ca, { childList: true, subtree: true });
+    } catch (eMo) {}
+  }
+})();
+</script>
 
 <script>
 (function(){

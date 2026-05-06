@@ -2206,7 +2206,7 @@ nav.push-menu .push-menu__close-btn::before {
    PRODUCT PAGE FIXES (Volusion 266)
 ========================================= */
 
-/* Match template_266: hide native #options_table until mc-product-page (early class mc-hide-native-options-until-mc). Bean bags keep native UI. Sectional: native table stays visible until diagram cards mount (html.has-sectional-config-cards — see bottom of this file). */
+/* Match template_266: hide native #options_table until mc-product-page (non-sectional). Sectional: only .mtl-native-config-row is clipped after cards (see bottom). */
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
 html:not(.is-sectional-product) body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
@@ -11489,7 +11489,7 @@ html.mc-paragon-pdp body [class*="cartqty__wrap"] label {
   order: -1 !important;
 }
 
-/* Sectional PDP: Room Planner block disabled; leather + inline config stay usable. Do NOT clip #options_table until diagram cards exist (html.has-sectional-config-cards). */
+/* Sectional PDP: Room Planner block disabled; clip only .mtl-native-config-row after cards mount (custom-safe.css), not whole #options_table. */
 
 html.is-sectional-product #mcPlannerRow,
 html.is-sectional-product #mcConfigurationBlock {
@@ -11584,8 +11584,8 @@ html.is-sectional-product #mcLeatherRow {
   line-height: 1.35;
 }
 
-/* Hide native configuration table only after diagram cards mount — single selector, no html.is-sectional-product */
-html.has-sectional-config-cards #options_table {
+/* Sectional: hide only the native configuration row after cards mount (not entire #options_table — leather lives there too) */
+html.has-sectional-config-cards .mtl-native-config-row {
   position: absolute !important;
   left: -9999px !important;
   top: auto !important;
@@ -11634,6 +11634,36 @@ html.has-sectional-config-cards #options_table {
   border-bottom: 1px solid transparent;
   border-left: 1px solid #ddd;
   margin-left: 161px !important;
+}
+
+/* Related Items narrow repair (card/href moves only; scope .mtl-related-safe from JS) */
+.mtl-related-safe img {
+  display: block !important;
+  margin: 0 auto 10px auto !important;
+  max-width: 180px !important;
+  max-height: 145px !important;
+  width: auto !important;
+  height: 145px !important;
+  object-fit: contain !important;
+}
+
+.mtl-related-safe td,
+.mtl-related-safe div {
+  text-align: center;
+}
+
+.mtl-related-title-fixed {
+  display: block !important;
+  margin: 8px auto 14px auto !important;
+  text-align: center !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  color: #111 !important;
+  text-decoration: none !important;
+  min-height: 34px !important;
 }
 
 /* Category / listing: uniform centered product images (PDP excluded via html.is-category-or-listing-page) */
