@@ -864,3 +864,16 @@ html body #v65-product-parent #mc-qty-under-configuration .vol-cartqty__wrap {
   align-items: center !important;
   justify-content: center !important;
 }
+
+/* Sectional diagram cards: clip native config only (mirrors vspfiles/css/custom-safe.css — loaded earlier; keep here so body-last overrides win if paths diverge). */
+html.has-sectional-config-cards .mtl-native-config-row,
+html.has-sectional-config-cards select.mtl-native-config-row {
+  position: absolute !important;
+  left: -9999px !important;
+  top: auto !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

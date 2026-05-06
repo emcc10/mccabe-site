@@ -11584,8 +11584,9 @@ html.is-sectional-product #mcLeatherRow {
   line-height: 1.35;
 }
 
-/* Sectional: hide only the native configuration row after cards mount (not entire #options_table — leather lives there too) */
-html.has-sectional-config-cards .mtl-native-config-row {
+/* Sectional: clip only marked native config UI after cards mount — never a whole options table or a row that contains leather */
+html.has-sectional-config-cards .mtl-native-config-row,
+html.has-sectional-config-cards select.mtl-native-config-row {
   position: absolute !important;
   left: -9999px !important;
   top: auto !important;

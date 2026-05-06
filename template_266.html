@@ -1166,7 +1166,7 @@ document.addEventListener("DOMContentLoaded", function () {
   window.addEventListener("load", markCategoryOrListingPage);
 })();
 </script>
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260506"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260507"></script>
 <script>
 /* Deploy + config sanity (remove logs when stable). Console: document.documentElement.classList.contains("mtl-deploy-test-20260506") */
 (function () {
@@ -1200,15 +1200,41 @@ document.addEventListener("DOMContentLoaded", function () {
   function getStyleFromPage() {
     if (!window.SECTIONAL_CONFIGS) return null;
 
-    var text = document.body ? document.body.innerText : '';
-    var path = window.location.pathname;
-    var combined = normalizeStyleKey(path + ' ' + text);
-
     var styles = Object.keys(window.SECTIONAL_CONFIGS);
+
+    var path = String(window.location.pathname || "");
+    var pathLow = path.toLowerCase();
+    var pathSeg = pathLow.match(/\/([^/]+)-sc-/i);
+    if (pathSeg) {
+      var slug = normalizeStyleKey(pathSeg[1]);
+      var byUrl = styles.find(function (style) {
+        return normalizeStyleKey(style) === slug;
+      });
+      if (byUrl) return byUrl;
+    }
+
+    try {
+      var pcEl = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      var pcVal = pcEl ? String(pcEl.value || "").trim() : "";
+      if (pcVal) {
+        var pcNorm = normalizeStyleKey(pcVal);
+        var byPc = styles.find(function (style) {
+          var sk = normalizeStyleKey(style);
+          return (
+            pcNorm.indexOf(sk + "-sc") !== -1 ||
+            (pcNorm.indexOf(sk) === 0 && /-sc-/i.test(pcVal))
+          );
+        });
+        if (byPc) return byPc;
+      }
+    } catch (ePc) {}
+
+    var text = document.body ? document.body.innerText : "";
+    var combined = normalizeStyleKey(path + " " + text);
 
     return styles.find(function (style) {
       return (
-        combined.indexOf(normalizeStyleKey(style + '-SC')) !== -1 ||
+        combined.indexOf(normalizeStyleKey(style + "-SC")) !== -1 ||
         combined.indexOf(normalizeStyleKey(style)) !== -1
       );
     });
@@ -1217,15 +1243,30 @@ document.addEventListener("DOMContentLoaded", function () {
   function findConfigSelect(configs) {
     var selects = Array.from(document.querySelectorAll("select"));
 
+    function looseCodes(cfgList) {
+      return cfgList.map(function (c) {
+        return String(c.code || "").trim();
+      }).filter(Boolean);
+    }
+
+    var codes = looseCodes(configs);
+
     return selects.find(function (select) {
+      if (select.classList && select.classList.contains("mc-native-leather")) return false;
+
       var optionText = Array.from(select.options || [])
         .map(function (opt) {
           return (opt.textContent || "") + " " + (opt.value || "");
         })
         .join(" ");
 
-      return configs.some(function (cfg) {
-        return optionText.indexOf(cfg.code) !== -1;
+      var normOpts = normalizeStyleKey(optionText);
+
+      return codes.some(function (code) {
+        if (!code) return false;
+        if (optionText.indexOf(code) !== -1) return true;
+        var nc = normalizeStyleKey(code);
+        return nc.length > 0 && normOpts.indexOf(nc) !== -1;
       });
     });
   }
@@ -1257,8 +1298,24 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function markConfigRowOnly(select) {
-    var row = select.closest("tr") || select.closest("div");
-    if (row) row.classList.add("mtl-native-config-row");
+    if (!select || !select.closest) return;
+
+    var tr = select.closest("tr");
+    if (tr) {
+      var leatherInRow =
+        tr.querySelector("select.mc-native-leather") ||
+        tr.querySelector(
+          "select[name*='Cover' i], select[name*='Leather' i], select[id*='Cover' i], select[id*='Leather' i]"
+        );
+      if (!leatherInRow) {
+        tr.classList.add("mtl-native-config-row");
+        return;
+      }
+    }
+
+    try {
+      select.classList.add("mtl-native-config-row");
+    } catch (eMark) {}
   }
 
   function initSectionalConfigCards() {
@@ -10805,6 +10862,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         var tr = rows[ri];
         try {
           if (tr.classList && tr.classList.contains("mtl-native-config-row")) continue;
+          if (tr.querySelector && tr.querySelector("select.mtl-native-config-row")) continue;
           if (tr.querySelector && tr.querySelector('select.mc-native-leather')) continue;
           if (tr.classList && tr.classList.contains('mc-leather-option-row')) continue;
           var rowTxt = (tr.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
