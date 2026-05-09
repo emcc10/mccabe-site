@@ -96,7 +96,7 @@
 
     var productKey = Object.keys(allConfigs).find(function (key) {
       var k = key.toLowerCase();
-      return path.indexOf(k) !== -1 || pageTitle.indexOf(k) !== -1;
+      return path.includes(k) || pageTitle.includes(k);
     });
 
     var matchedConfigs = productKey ? allConfigs[productKey] : [];
