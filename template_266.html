@@ -1168,179 +1168,6 @@ document.addEventListener("DOMContentLoaded", function () {
   window.addEventListener("load", markCategoryOrListingPage);
 })();
 </script>
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260506"></script>
-<script>
-(function () {
-  function ready(fn) {
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", fn);
-    } else {
-      fn();
-    }
-  }
-
-  function normalize(s) {
-    return String(s || "").toLowerCase().replace(/\s+/g, "").replace(/_/g, "-");
-  }
-
-  function getStyleFromPage() {
-    if (!window.SECTIONAL_CONFIGS) return null;
-
-    var bodyText = document.body ? document.body.innerText : "";
-    var path = window.location.pathname;
-    var combined = normalize(path + " " + bodyText);
-
-    return Object.keys(window.SECTIONAL_CONFIGS).find(function (style) {
-      return combined.includes(normalize(style + "-SC")) ||
-             combined.includes(normalize(style));
-    });
-  }
-
-  function findConfigSelect(configs) {
-    var selects = Array.from(document.querySelectorAll("select"));
-
-    return selects.find(function (select) {
-      if (select.classList && select.classList.contains("mc-native-leather")) return false;
-      var optionText = Array.from(select.options || [])
-        .map(function (opt) {
-          return (opt.textContent || "") + " " + (opt.value || "");
-        })
-        .join(" ");
-
-      return configs.some(function (cfg) {
-        return optionText.indexOf(cfg.code) !== -1;
-      });
-    });
-  }
-
-  function triggerChange(select) {
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-
-    if (typeof jQuery !== "undefined") {
-      jQuery(select).trigger("change");
-    }
-  }
-
-  function markConfigRowOnly(select) {
-    var row = select.closest("tr") || select.closest("div");
-    if (row) row.classList.add("mtl-native-config-row");
-  }
-
-  function selectConfig(select, cfg, grid) {
-    var match = Array.from(select.options || []).find(function (opt) {
-      return (opt.textContent || "").indexOf(cfg.code) !== -1 ||
-             (opt.value || "").indexOf(cfg.code) !== -1;
-    });
-
-    if (!match) {
-      console.warn("No matching Volusion option for config:", cfg.code);
-      return;
-    }
-
-    select.value = match.value;
-    triggerChange(select);
-
-    Array.from(grid.querySelectorAll(".sectional-config-card")).forEach(function (card) {
-      card.classList.toggle(
-        "is-selected",
-        card.getAttribute("data-config-code") === cfg.code
-      );
-    });
-  }
-
-  function initSectionalConfigCards() {
-    console.log("MTL sectional card init running");
-
-    if (!window.SECTIONAL_CONFIGS) {
-      console.warn("SECTIONAL_CONFIGS missing.");
-      return;
-    }
-
-    var style = getStyleFromPage();
-
-    if (!style) {
-      console.warn("No sectional style match found.");
-      return;
-    }
-
-    var configs = window.SECTIONAL_CONFIGS[style];
-
-    if (!configs || !configs.length) {
-      console.warn("No configs found for style:", style);
-      return;
-    }
-
-    var select = findConfigSelect(configs);
-
-    if (!select) {
-      console.warn("Configuration dropdown not found for style:", style);
-      return;
-    }
-
-    if (document.querySelector("#sectionalConfigSelector")) return;
-
-    var wrap = document.createElement("div");
-    wrap.id = "sectionalConfigSelector";
-    wrap.className = "sectional-config-selector";
-
-    var title = document.createElement("div");
-    title.className = "sectional-config-title";
-    title.textContent = "Choose Configuration";
-    wrap.appendChild(title);
-
-    var grid = document.createElement("div");
-    grid.className = "sectional-config-grid";
-
-    configs.forEach(function (cfg) {
-      var card = document.createElement("button");
-      card.type = "button";
-      card.className = "sectional-config-card";
-      card.setAttribute("data-config-code", cfg.code);
-
-      card.innerHTML =
-        '<div class="sectional-config-img-wrap">' +
-          '<img src="' + cfg.image + '?v=20260506v2" alt="' + (cfg.label || cfg.code) + '">' +
-        '</div>' +
-        '<div class="sectional-config-label">' + (cfg.label || cfg.code) + '</div>' +
-        (cfg.description ? '<div class="sectional-config-desc">' + cfg.description + '</div>' : "");
-
-      card.addEventListener("click", function () {
-        selectConfig(select, cfg, grid);
-      });
-
-      grid.appendChild(card);
-    });
-
-    wrap.appendChild(grid);
-
-    var optionsTable = document.querySelector("#options_table");
-    if (optionsTable && optionsTable.parentNode) {
-      optionsTable.parentNode.insertBefore(wrap, optionsTable);
-    } else {
-      select.parentNode.insertBefore(wrap, select);
-    }
-
-    var baseConfig = configs.slice().sort(function (a, b) {
-      return Number(a.priceDiff || 0) - Number(b.priceDiff || 0);
-    })[0];
-
-    if (baseConfig) {
-      selectConfig(select, baseConfig, grid);
-    }
-
-    markConfigRowOnly(select);
-    document.documentElement.classList.add("has-sectional-config-cards");
-
-    console.log("MTL sectional cards rendered:", style, configs.length);
-  }
-
-  ready(initSectionalConfigCards);
-  window.addEventListener("load", initSectionalConfigCards);
-  [400, 1200, 2500, 5000].forEach(function (ms) {
-    setTimeout(initSectionalConfigCards, ms);
-  });
-})();
-</script>
 <!-- MC_TEMPLATE: header-critical-bar-20260401q -->
 <!-- Do not override window.location.reload: CAPTCHA / bot checks (Cloudflare, etc.) call reload to finish; blocking it causes verify loops. -->
 <a class="mc-account-float" href="/myaccount.asp" aria-label="My account" rel="nofollow">
@@ -2352,6 +2179,7 @@ html body.productdetails .v-product-grid > .v-product {
   // If you accidentally paste this twice, only the first one runs.
 if (window.__WM_LEATHER_MODAL_SCRIPT_LOADED__) return;
 window.__WM_LEATHER_MODAL_SCRIPT_LOADED__ = true;
+console.log("leather modal script loaded");
 
 var WM_DEBUG = false;
 function log() {
@@ -19405,6 +19233,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   window.mcHideArmlessOptionRows = hideArmlessOptionRows;
 })();
 </script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260509a"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260509a"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

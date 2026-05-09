@@ -1,9 +1,8 @@
 /**
  * Sectional configuration diagram cards — data only.
  * Keys must match Volusion style names (see getStyleFromPage / product codes before "-SC-").
- * Populate or replace entries in Volusion file manager as needed.
  */
-window.SECTIONAL_CONFIGS = {
+window.MTL_SECTIONAL_CONFIGS = {
   Alula: [
     {
       code: "07-15",
@@ -39,3 +38,7 @@ window.SECTIONAL_CONFIGS = {
     },
   ],
 };
+
+window.SECTIONAL_CONFIGS = window.MTL_SECTIONAL_CONFIGS;
+
+console.log("sectional-configs loaded", window.MTL_SECTIONAL_CONFIGS);
