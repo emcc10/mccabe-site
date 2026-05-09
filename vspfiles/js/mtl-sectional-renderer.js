@@ -1,5 +1,5 @@
 (function () {
-  console.log("mtl-sectional-renderer loaded 20260509d");
+  console.log("mtl-sectional-renderer loaded 20260509e");
 
   function getConfigsObject() {
     return window.MTL_SECTIONAL_CONFIGS || {};
@@ -88,7 +88,7 @@
 
         html += '<div class="mtl-sectional-card">';
         html += '<div class="mtl-sectional-image-wrap">';
-        html += '<img class="mtl-sectional-image" src="' + img + '?v=20260509d" alt="' + (cfg.label || cfg.code || "Sectional configuration") + '">';
+        html += '<img class="mtl-sectional-image" src="' + img + '?v=20260509e" alt="' + (cfg.label || cfg.code || "Sectional configuration") + '">';
         html += '</div>';
         html += '<div class="mtl-sectional-info">';
         html += '<div class="mtl-sectional-title">' + (cfg.label || cfg.code || "") + '</div>';

@@ -11,13 +11,6 @@ window.MTL_SECTIONAL_CONFIGS = {
       priceDiff: 0,
       image: "/v/vspfiles/sectional-diagrams/Alula-SC-07-15.png",
     },
-    {
-      code: "07-16",
-      label: "07-16",
-      description: "Configuration 07-16",
-      priceDiff: 600,
-      image: "/v/vspfiles/sectional-diagrams/Alula-SC-07-16.png",
-    },
   ],
   Acacia: [
     {
