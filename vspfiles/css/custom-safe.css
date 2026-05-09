@@ -10932,5 +10932,48 @@ html.is-sectional-product #mcLeatherRow {
   margin-left: 161px !important;
 }
 
+/* MTL sectional “Popular Configurations” cards (#mtl-sectional-configurations) */
+#mtl-sectional-configurations {
+  clear: both;
+  display: block !important;
+  width: 100%;
+  margin: 32px 0;
+  padding: 24px 0;
+}
+
+#mtl-sectional-configurations .mtl-sectional-heading {
+  font-family: Inter, Arial, sans-serif;
+  font-size: 18px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin: 0 0 20px;
+}
+
+#mtl-sectional-configurations .mtl-sectional-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+#mtl-sectional-configurations .mtl-sectional-card {
+  display: block !important;
+  border: 1px solid #ddd;
+  background: #fff;
+  padding: 16px;
+}
+
+#mtl-sectional-configurations .mtl-sectional-image-wrap {
+  display: block !important;
+  width: 100%;
+}
+
+#mtl-sectional-configurations img.mtl-sectional-image {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
 
 

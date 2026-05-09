@@ -1,208 +1,142 @@
-/**
- * Sectional diagram cards — runs after sectional-configs.js (window.MTL_SECTIONAL_CONFIGS).
- * Must not throw uncaught errors (wrapped startup).
- */
 (function () {
-  "use strict";
+  console.log("mtl-sectional-renderer loaded 20260509d");
 
-  console.log("sectional renderer loaded");
-
-  function ready(fn) {
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", fn);
-    } else {
-      fn();
-    }
+  function getConfigsObject() {
+    return window.MTL_SECTIONAL_CONFIGS || {};
   }
 
-  function getConfigsRoot() {
-    return window.MTL_SECTIONAL_CONFIGS || window.SECTIONAL_CONFIGS || null;
-  }
-
-  function normalizeDiagramImageUrl(raw) {
-    var s = String(raw || "").trim();
-    if (!s) return s;
-    if (/^\/v\//i.test(s)) return s;
-    var base = s.replace(/^.*\//, "").replace(/^\//, "");
-    if (!base) return "/v/vspfiles/sectional-diagrams/";
-    return "/v/vspfiles/sectional-diagrams/" + base;
-  }
-
-  function findConfigSelect(configs) {
-    var selects = Array.from(document.querySelectorAll("select"));
-
-    return selects.find(function (select) {
-      if (select.classList && select.classList.contains("mc-native-leather")) return false;
-      var optionText = Array.from(select.options || [])
-        .map(function (opt) {
-          return (opt.textContent || "") + " " + (opt.value || "");
-        })
-        .join(" ");
-
-      return configs.some(function (cfg) {
-        return optionText.indexOf(cfg.code) !== -1;
-      });
-    });
-  }
-
-  function triggerChange(select) {
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-    if (typeof jQuery !== "undefined") {
-      jQuery(select).trigger("change");
-    }
-  }
-
-  function markConfigRowOnly(select) {
-    var row = select.closest("tr") || select.closest("div");
-    if (row) row.classList.add("mtl-native-config-row");
-  }
-
-  function selectConfig(select, cfg, grid) {
-    var match = Array.from(select.options || []).find(function (opt) {
-      return (
-        (opt.textContent || "").indexOf(cfg.code) !== -1 ||
-        (opt.value || "").indexOf(cfg.code) !== -1
-      );
-    });
-
-    if (!match) {
-      console.warn("No matching Volusion option for config:", cfg.code);
-      return;
-    }
-
-    select.value = match.value;
-    triggerChange(select);
-
-    Array.from(grid.querySelectorAll(".sectional-config-card")).forEach(function (card) {
-      card.classList.toggle(
-        "is-selected",
-        card.getAttribute("data-config-code") === cfg.code
-      );
-    });
-  }
-
-  function initSectionalRenderer() {
-    var root = getConfigsRoot();
-    if (!root || typeof root !== "object") {
-      console.warn("MTL_SECTIONAL_CONFIGS / SECTIONAL_CONFIGS missing.");
-      return;
-    }
-    var allConfigs = root;
+  function getPageText() {
     var h1 = document.querySelector("h1");
-    var pageTitle = String(
-      (h1 && h1.textContent) || document.title || ""
-    ).toLowerCase();
-
-    var productKey = Object.keys(allConfigs).find(function (key) {
-      var k = key.toLowerCase();
-      return path.includes(k) || pageTitle.includes(k);
-    });
-
-    var matchedConfigs = productKey ? allConfigs[productKey] : [];
-
-    console.log("sectional productKey", productKey);
-    console.log("sectional matchedConfigs", matchedConfigs);
-
-    if (!Array.isArray(matchedConfigs) || !matchedConfigs.length) {
-      console.warn("No sectional configs matched this page", {
-        path: location.pathname,
-        title: pageTitle,
-        keys: Object.keys(allConfigs),
-      });
-      return;
-    }
-
-    var select = findConfigSelect(matchedConfigs);
-    if (!select) {
-      console.warn("Configuration dropdown not found for productKey:", productKey);
-      return;
-    }
-
-    if (document.querySelector("#sectionalConfigSelector")) return;
-
-    var wrap = document.createElement("div");
-    wrap.id = "sectionalConfigSelector";
-    wrap.className = "sectional-config-selector";
-
-    var title = document.createElement("div");
-    title.className = "sectional-config-title";
-    title.textContent = "Choose Configuration";
-    wrap.appendChild(title);
-
-    var grid = document.createElement("div");
-    grid.className = "sectional-config-grid";
-
-    matchedConfigs.forEach(function (cfg) {
-      var card = document.createElement("button");
-      card.type = "button";
-      card.className = "sectional-config-card";
-      card.setAttribute("data-config-code", cfg.code);
-
-      var imgSrc = normalizeDiagramImageUrl(cfg.image);
-
-      card.innerHTML =
-        '<div class="sectional-config-img-wrap">' +
-        '<img src="' +
-        imgSrc +
-        "?v=20260509b" +
-        '" alt="' +
-        String(cfg.label || cfg.code).replace(/"/g, "&quot;") +
-        '">' +
-        "</div>" +
-        '<div class="sectional-config-label">' +
-        String(cfg.label || cfg.code).replace(/</g, "&lt;") +
-        "</div>" +
-        (cfg.description
-          ? '<div class="sectional-config-desc">' +
-            String(cfg.description).replace(/</g, "&lt;") +
-            "</div>"
-          : "");
-
-      card.addEventListener("click", function () {
-        selectConfig(select, cfg, grid);
-      });
-
-      grid.appendChild(card);
-    });
-
-    wrap.appendChild(grid);
-
-    var optionsTable = document.querySelector("#options_table");
-    if (optionsTable && optionsTable.parentNode) {
-      optionsTable.parentNode.insertBefore(wrap, optionsTable);
-    } else {
-      select.parentNode.insertBefore(wrap, select);
-    }
-
-    var baseConfig = matchedConfigs
-      .slice()
-      .sort(function (a, b) {
-        return Number(a.priceDiff || 0) - Number(b.priceDiff || 0);
-      })[0];
-
-    if (baseConfig) {
-      selectConfig(select, baseConfig, grid);
-    }
-
-    markConfigRowOnly(select);
-    document.documentElement.classList.add("has-sectional-config-cards");
-
-    console.log("MTL sectional cards rendered:", productKey, matchedConfigs.length);
+    return [
+      location.pathname,
+      document.title,
+      h1 ? h1.textContent : "",
+      document.body ? document.body.innerText.slice(0, 3000) : ""
+    ].join(" ").toLowerCase();
   }
 
-  function safeInit() {
+  function getProductKey(configs) {
+    var pageText = getPageText();
+
+    return Object.keys(configs).find(function (key) {
+      return pageText.indexOf(key.toLowerCase()) !== -1;
+    });
+  }
+
+  function findInsertTarget() {
+    return (
+      document.querySelector("#options_table") ||
+      document.querySelector("#v65-product-parent") ||
+      document.querySelector("#content_area") ||
+      document.querySelector("form[action*='ShoppingCart']") ||
+      document.body
+    );
+  }
+
+  function normalizeImage(src) {
+    if (!src) return "";
+    if (src.indexOf("http") === 0) return src;
+    if (src.indexOf("/") === 0) return src;
+    return "/v/vspfiles/sectional-diagrams/" + src;
+  }
+
+  function renderSectionalConfigs() {
     try {
-      initSectionalRenderer();
+      console.log("renderSectionalConfigs starting");
+
+      if (document.querySelector("#mtl-sectional-configurations")) {
+        console.log("sectional configs already exist");
+        return;
+      }
+
+      var configs = getConfigsObject();
+
+      console.log("sectional configs found", configs);
+      console.log("sectional config keys", Object.keys(configs));
+
+      if (!configs || typeof configs !== "object" || !Object.keys(configs).length) {
+        console.warn("No MTL_SECTIONAL_CONFIGS object found");
+        return;
+      }
+
+      var productKey = getProductKey(configs);
+      var matchedConfigs = productKey ? configs[productKey] : [];
+
+      console.log("sectional productKey", productKey);
+      console.log("sectional matchedConfigs", matchedConfigs);
+
+      if (!Array.isArray(matchedConfigs) || !matchedConfigs.length) {
+        console.warn("No matched sectional configs", {
+          path: location.pathname,
+          title: document.title,
+          keys: Object.keys(configs)
+        });
+        return;
+      }
+
+      var section = document.createElement("section");
+      section.id = "mtl-sectional-configurations";
+      section.className = "mtl-sectional-configurations";
+
+      var html = "";
+      html += '<div class="mtl-sectional-inner">';
+      html += '<h3 class="mtl-sectional-heading">Popular Configurations</h3>';
+      html += '<div class="mtl-sectional-grid">';
+
+      matchedConfigs.forEach(function (cfg) {
+        var img = normalizeImage(cfg.image);
+
+        html += '<div class="mtl-sectional-card">';
+        html += '<div class="mtl-sectional-image-wrap">';
+        html += '<img class="mtl-sectional-image" src="' + img + '?v=20260509d" alt="' + (cfg.label || cfg.code || "Sectional configuration") + '">';
+        html += '</div>';
+        html += '<div class="mtl-sectional-info">';
+        html += '<div class="mtl-sectional-title">' + (cfg.label || cfg.code || "") + '</div>';
+        html += '<div class="mtl-sectional-desc">' + (cfg.description || "") + '</div>';
+
+        if (cfg.priceDiff) {
+          html += '<div class="mtl-sectional-price">Upgrade +' + cfg.priceDiff + '</div>';
+        }
+
+        html += '</div>';
+        html += '</div>';
+      });
+
+      html += '</div>';
+      html += '</div>';
+
+      section.innerHTML = html;
+
+      var target = findInsertTarget();
+
+      console.log("sectional insert target", target);
+
+      if (!target) {
+        console.error("No insertion target found");
+        return;
+      }
+
+      target.insertAdjacentElement("afterend", section);
+
+      console.log("sectional configurations inserted", matchedConfigs.length);
     } catch (err) {
       console.error("Sectional renderer failed:", err);
     }
   }
 
-  ready(safeInit);
-  window.addEventListener("load", safeInit);
-  [400, 1200, 2500, 5000].forEach(function (ms) {
-    setTimeout(safeInit, ms);
-  });
+  function scheduleRender() {
+    renderSectionalConfigs();
 
-  window.initSectionalRenderer = initSectionalRenderer;
+    setTimeout(renderSectionalConfigs, 500);
+    setTimeout(renderSectionalConfigs, 1500);
+    setTimeout(renderSectionalConfigs, 3000);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", scheduleRender);
+  } else {
+    scheduleRender();
+  }
+
+  window.addEventListener("load", scheduleRender);
 })();
