@@ -3311,7 +3311,8 @@ boot();
     /* With options table, normally wait for #wmOpen. Theater without leather-style selects mounts immediately; late force covers stuck PDPs. */
     var allowOptionsWithoutWm =
       !!opts.forceWithoutWmOpen ||
-      (mcIsTheaterSeatingPdpEarly() && !mcPdpMayReceiveWmOpenSoon());
+      (mcIsTheaterSeatingPdpEarly() && !mcPdpMayReceiveWmOpenSoon()) ||
+      isSecPdp;
 
     var mountInsertMode = "";
     if (optionsTable) {
@@ -3420,8 +3421,8 @@ boot();
 
     if (isSecPdp) {
       try {
-        var prSec = document.getElementById("mcPlannerRow");
-        if (prSec) prSec.style.setProperty("display", "none", "important");
+        var plannerBtnSec = document.getElementById("mcPlannerBtn");
+        if (plannerBtnSec) plannerBtnSec.style.setProperty("display", "none", "important");
         var cbSec = document.getElementById("mcConfigurationBlock");
         if (cbSec) cbSec.style.setProperty("display", "none", "important");
       } catch (eSecStrip) {}
@@ -19233,8 +19234,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   window.mcHideArmlessOptionRows = hideArmlessOptionRows;
 })();
 </script>
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260509e"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260509e"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260509f"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260509f"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

@@ -34,4 +34,4 @@ window.MTL_SECTIONAL_CONFIGS = {
 
 window.SECTIONAL_CONFIGS = window.MTL_SECTIONAL_CONFIGS;
 
-console.log("sectional-configs loaded", window.MTL_SECTIONAL_CONFIGS);
+console.log("sectional-configs loaded 20260509f", window.MTL_SECTIONAL_CONFIGS);
