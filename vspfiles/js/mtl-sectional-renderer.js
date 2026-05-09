@@ -82,13 +82,12 @@
   }
 
   function initSectionalRenderer() {
-    var allConfigs = getConfigsRoot() || {};
-    if (!allConfigs || typeof allConfigs !== "object") {
+    var root = getConfigsRoot();
+    if (!root || typeof root !== "object") {
       console.warn("MTL_SECTIONAL_CONFIGS / SECTIONAL_CONFIGS missing.");
       return;
     }
-
-    var path = location.pathname.toLowerCase();
+    var allConfigs = root;
     var h1 = document.querySelector("h1");
     var pageTitle = String(
       (h1 && h1.textContent) || document.title || ""
