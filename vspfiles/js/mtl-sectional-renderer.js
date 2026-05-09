@@ -15,26 +15,8 @@
     }
   }
 
-  function normalize(s) {
-    return String(s || "").toLowerCase().replace(/\s+/g, "").replace(/_/g, "-");
-  }
-
   function getConfigsRoot() {
     return window.MTL_SECTIONAL_CONFIGS || window.SECTIONAL_CONFIGS || null;
-  }
-
-  function getStyleFromPage(configsRoot) {
-    if (!configsRoot) return null;
-
-    var bodyText = document.body ? document.body.innerText : "";
-    var path = window.location.pathname;
-    var combined = normalize(path + " " + bodyText);
-
-    return Object.keys(configsRoot).find(function (style) {
-      return (
-        combined.includes(normalize(style + "-SC")) || combined.includes(normalize(style))
-      );
-    });
   }
 
   function normalizeDiagramImageUrl(raw) {
@@ -100,28 +82,40 @@
   }
 
   function initSectionalRenderer() {
-    var configsRoot = getConfigsRoot();
-    if (!configsRoot) {
+    var allConfigs = getConfigsRoot() || {};
+    if (!allConfigs || typeof allConfigs !== "object") {
       console.warn("MTL_SECTIONAL_CONFIGS / SECTIONAL_CONFIGS missing.");
       return;
     }
 
-    var style = getStyleFromPage(configsRoot);
-    if (!style) {
+    var path = location.pathname.toLowerCase();
+    var h1 = document.querySelector("h1");
+    var pageTitle = String(
+      (h1 && h1.textContent) || document.title || ""
+    ).toLowerCase();
+
+    var productKey = Object.keys(allConfigs).find(function (key) {
+      var k = key.toLowerCase();
+      return path.indexOf(k) !== -1 || pageTitle.indexOf(k) !== -1;
+    });
+
+    var matchedConfigs = productKey ? allConfigs[productKey] : [];
+
+    console.log("sectional productKey", productKey);
+    console.log("sectional matchedConfigs", matchedConfigs);
+
+    if (!Array.isArray(matchedConfigs) || !matchedConfigs.length) {
+      console.warn("No sectional configs matched this page", {
+        path: location.pathname,
+        title: pageTitle,
+        keys: Object.keys(allConfigs),
+      });
       return;
     }
-
-    var matchedConfigs = configsRoot[style];
-    if (!matchedConfigs || !matchedConfigs.length) {
-      console.warn("No configs found for style:", style);
-      return;
-    }
-
-    console.log("sectional page match", location.pathname, matchedConfigs);
 
     var select = findConfigSelect(matchedConfigs);
     if (!select) {
-      console.warn("Configuration dropdown not found for style:", style);
+      console.warn("Configuration dropdown not found for productKey:", productKey);
       return;
     }
 
@@ -151,7 +145,7 @@
         '<div class="sectional-config-img-wrap">' +
         '<img src="' +
         imgSrc +
-        "?v=20260509a" +
+        "?v=20260509b" +
         '" alt="' +
         String(cfg.label || cfg.code).replace(/"/g, "&quot;") +
         '">' +
@@ -194,7 +188,7 @@
     markConfigRowOnly(select);
     document.documentElement.classList.add("has-sectional-config-cards");
 
-    console.log("MTL sectional cards rendered:", style, matchedConfigs.length);
+    console.log("MTL sectional cards rendered:", productKey, matchedConfigs.length);
   }
 
   function safeInit() {
