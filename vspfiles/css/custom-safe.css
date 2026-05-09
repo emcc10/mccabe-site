@@ -10932,7 +10932,7 @@ html.is-sectional-product #mcLeatherRow {
   margin-left: 161px !important;
 }
 
-/* MTL sectional “Popular Configurations” cards — safe/diagrams-only (20260509fix1) */
+/* MTL sectional PDP — Popular Configurations + Product Summary (20260509final1) */
 #mtl-sectional-configurations {
   clear: both;
   display: block !important;
@@ -10941,7 +10941,8 @@ html.is-sectional-product #mcLeatherRow {
   padding: 20px 0;
 }
 
-#mtl-sectional-configurations .mtl-sectional-heading {
+#mtl-sectional-configurations .mtl-sectional-heading,
+#mtl-product-summary .mtl-summary-heading {
   font-family: Inter, Arial, sans-serif;
   font-size: 16px;
   letter-spacing: 0.12em;
@@ -10960,6 +10961,15 @@ html.is-sectional-product #mcLeatherRow {
   border: 1px solid #ddd;
   background: #fff;
   padding: 14px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+#mtl-sectional-configurations .mtl-sectional-card.is-selected {
+  border-color: #111;
+  box-shadow: 0 0 0 1px #111;
 }
 
 #mtl-sectional-configurations img.mtl-sectional-image {
@@ -10969,6 +10979,36 @@ html.is-sectional-product #mcLeatherRow {
   max-width: 100% !important;
   opacity: 1 !important;
   visibility: visible !important;
+}
+
+#mtl-product-summary {
+  clear: both;
+  display: block !important;
+  margin: 24px 0;
+  padding: 18px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  font-family: Inter, Arial, sans-serif;
+}
+
+#mtl-product-summary .mtl-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+#mtl-product-summary .mtl-summary-row:last-child {
+  border-bottom: 0;
+}
+
+#mtl-product-summary .mtl-summary-label {
+  font-weight: 600;
+}
+
+#mtl-product-summary .mtl-summary-value {
+  text-align: right;
 }
 
 
