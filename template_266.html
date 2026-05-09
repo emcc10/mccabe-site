@@ -3311,8 +3311,7 @@ boot();
     /* With options table, normally wait for #wmOpen. Theater without leather-style selects mounts immediately; late force covers stuck PDPs. */
     var allowOptionsWithoutWm =
       !!opts.forceWithoutWmOpen ||
-      (mcIsTheaterSeatingPdpEarly() && !mcPdpMayReceiveWmOpenSoon()) ||
-      isSecPdp;
+      (mcIsTheaterSeatingPdpEarly() && !mcPdpMayReceiveWmOpenSoon());
 
     var mountInsertMode = "";
     if (optionsTable) {
@@ -3421,8 +3420,8 @@ boot();
 
     if (isSecPdp) {
       try {
-        var plannerBtnSec = document.getElementById("mcPlannerBtn");
-        if (plannerBtnSec) plannerBtnSec.style.setProperty("display", "none", "important");
+        var prSec = document.getElementById("mcPlannerRow");
+        if (prSec) prSec.style.setProperty("display", "none", "important");
         var cbSec = document.getElementById("mcConfigurationBlock");
         if (cbSec) cbSec.style.setProperty("display", "none", "important");
       } catch (eSecStrip) {}
@@ -19234,8 +19233,12 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   window.mcHideArmlessOptionRows = hideArmlessOptionRows;
 })();
 </script>
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260509f"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260509f"></script>
+<!--
+  Sectional scripts (external) load last. Leather modal CSS ~line 1872 and script #wm-leather-modal-js ~line 2170
+  run earlier in document order, so they always execute before these files.
+-->
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260509fix1"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260509fix1"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
