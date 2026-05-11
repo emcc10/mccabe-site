@@ -2492,7 +2492,7 @@ body.mc-product-page select.mc-native-leather {
     vertical-align: top !important;
     position: relative !important;
     z-index: 5 !important;
-    padding-left: 18px !important;
+    padding-left: 28px !important;
     padding-right: 16px !important;
     overflow-x: visible !important;
     overflow-y: visible !important;
@@ -2579,7 +2579,7 @@ body.mc-product-page select.mc-native-leather {
       box-sizing: border-box !important;
     }
 
-    /* PDP only: retail + member price copy at 15px (options column). */
+    /* PDP only: retail + member price copy at 16px (options column). */
     body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row,
     body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row,
     body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row *,
@@ -2600,7 +2600,7 @@ body.mc-product-page select.mc-native-leather {
     body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #priceWithOptionsNoTax,
     body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #priceWithOptionsNoTax *,
     body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #priceWithOptionsNoTax * {
-      font-size: 15px !important;
+      font-size: 16px !important;
     }
 
     body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td [itemprop="offers"],
@@ -7015,7 +7015,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     align-items: flex-start !important;
-    gap: 24px !important;
+    gap: 28px !important;
     width: 100% !important;
     min-width: 0 !important;
   }
@@ -9756,7 +9756,7 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label
   width: auto !important;
   margin: 0 !important;
   flex: 0 0 auto !important;
-  font-size: 11px !important;
+  font-size: 16px !important;
   font-weight: 500 !important;
   line-height: 1.2 !important;
   letter-spacing: 0.14em !important;
@@ -9796,7 +9796,7 @@ body.mc-product-page #v65-product-parent .mc-pdp-member-pricing .mc-pdp-member-l
 body.productdetails #v65-product-parent .mc-pdp-member-line__label,
 body.mc-product-page #v65-product-parent .mc-pdp-member-line__label {
   display: block !important;
-  font-size: 11px !important;
+  font-size: 16px !important;
   font-weight: 500 !important;
   line-height: 1.2 !important;
   letter-spacing: 0.14em !important;
@@ -9823,6 +9823,69 @@ body.mc-product-page #v65-product-parent .mc-pdp-member-pricing + #priceWithOpti
 body.productdetails #v65-product-parent .mc-member-price-caption,
 body.mc-product-page #v65-product-parent .mc-member-price-caption {
   display: none !important;
+}
+
+/* PDP: retail label, member label/login, retail & member amounts = 16px (wins over options-column * rules). */
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .mc-pdp-retail-label,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .mc-pdp-retail-label,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .mc-pdp-retail-label,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .mc-pdp-retail-label,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line__label,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line__label,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line__label,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line__label,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-line__label,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-line__label,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-line__label,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-line__label,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line--locked,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line--locked,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line--locked,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line--locked,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-line--locked,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-line--locked,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-line--locked,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-line--locked,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line--locked *,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line--locked *,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line--locked *,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line--locked * {
+  font-size: 16px !important;
+}
+
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .product_list_price,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .product_list_price,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row font.product_list_price,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row font.product_list_price,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .product_productprice,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .product_productprice,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .v65-product-price,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .v65-product-price,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .product_price,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .product_price,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .price,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .price,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row #priceWithOptions,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row #priceWithOptions,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row #priceWithOptionsNoTax,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row #priceWithOptionsNoTax,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .product_list_price,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .product_list_price,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row font.product_list_price,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row font.product_list_price,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .product_productprice,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .product_productprice,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .v65-product-price,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .v65-product-price,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .product_price,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .product_price,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .price,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .price,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row #priceWithOptions,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row #priceWithOptions,
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row #priceWithOptionsNoTax,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row #priceWithOptionsNoTax {
+  font-size: 16px !important;
 }
 
 /* Theater / WM panel: configuration summary — RH typography (Inter, caps label, clean body). */
@@ -11371,7 +11434,7 @@ html.is-sectional-product body.productdetails #content_area #options_table,
 html.is-sectional-product body.mc-product-page #content_area #options_table,
 html.is-sectional-product body.productdetails #v65-product-parent table[id*="options_table"],
 html.is-sectional-product body.mc-product-page #v65-product-parent table[id*="options_table"] {
-  margin-top: 22px !important;
+  margin-top: 28px !important;
 }
 
 html.is-sectional-product body.productdetails #v65-product-parent [itemprop="offers"],

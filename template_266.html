@@ -1104,12 +1104,15 @@ document.addEventListener("DOMContentLoaded", function () {
         return false;
       }
       try {
-        var bodyEarly = document.body ? String(document.body.innerText || "").toLowerCase().slice(0, 8000) : "";
+        var prodRootEarly = document.getElementById("v65-product-parent");
+        var areaEarly = prodRootEarly
+          ? String(prodRootEarly.innerText || "").toLowerCase().slice(0, 12000)
+          : "";
         if (
-          bodyEarly.indexOf("theater seating") !== -1 ||
-          bodyEarly.indexOf("theatre seating") !== -1 ||
-          bodyEarly.indexOf("home theater") !== -1 ||
-          bodyEarly.indexOf("home theatre") !== -1
+          areaEarly.indexOf("theater seating") !== -1 ||
+          areaEarly.indexOf("theatre seating") !== -1 ||
+          areaEarly.indexOf("home theater") !== -1 ||
+          areaEarly.indexOf("home theatre") !== -1
         ) {
           return false;
         }
@@ -1120,7 +1123,12 @@ document.addEventListener("DOMContentLoaded", function () {
         var pcVal = pcEl ? String(pcEl.value || "").trim() : "";
         if (/-sc-/i.test(pcVal)) return true;
       } catch (ePc) {}
-      var text = document.body ? String(document.body.innerText || "").toLowerCase() : "";
+      var text = "";
+      try {
+        var prodR = document.getElementById("v65-product-parent");
+        text = prodR ? String(prodR.innerText || "").toLowerCase() : "";
+      } catch (eTxt) {}
+      if (!text && document.body) text = String(document.body.innerText || "").toLowerCase();
       return text.indexOf("choose configuration") !== -1;
     };
 
@@ -4010,8 +4018,6 @@ try {
 
     function renderLeatherPreviewStrip(){
       if (!mcLeatherStrip) return;
-      /* Sectional PDP: mini swatches are owned by mtl-sectional-renderer.js (native select + proper chips). */
-      if (document.documentElement.classList.contains("is-sectional-product")) return;
 
       var source = Array.isArray(window.__WM_LEATHER_OPTIONS__)
         ? window.__WM_LEATHER_OPTIONS__.slice()
@@ -4074,6 +4080,7 @@ try {
         mcLeatherStrip.appendChild(btn);
       });
     }
+    window.mcRenderLeatherPreviewStrip = renderLeatherPreviewStrip;
 
     function syncLeatherSummary(){
       if (!mcSum) return;
@@ -4108,6 +4115,7 @@ try {
         btn.dataset.selected = isActive ? "1" : "0";
       });
     }
+    window.mcSyncLeatherSummary = syncLeatherSummary;
 
     function hideLegacyLeatherRows(){
       var tables = Array.from(document.querySelectorAll("#options_table, table[id*='options_table']"));
@@ -7882,6 +7890,20 @@ body.productdetails #v65-product-parent #mcProductSummaryBtn:visited,
 body.mc-theater-seating-pdp #content_area #mcProductSummaryBtn:visited,
 body.mc-theater-seating-pdp #v65-product-parent #mcProductSummaryBtn:visited {
   color: #111 !important;
+}
+
+/* Room Planner + WM configuration caption: theater seating PDPs only (overrides inline-flex rules above). */
+body:not(.mc-theater-seating-pdp).mc-product-page #content_area #mcPlannerBtn,
+body:not(.mc-theater-seating-pdp).productdetails #content_area #mcPlannerBtn,
+body:not(.mc-theater-seating-pdp).mc-product-page #v65-product-parent #mcPlannerBtn,
+body:not(.mc-theater-seating-pdp).productdetails #v65-product-parent #mcPlannerBtn,
+body:not(.mc-theater-seating-pdp).mc-product-page #content_area #mcConfigurationBlock,
+body:not(.mc-theater-seating-pdp).productdetails #content_area #mcConfigurationBlock,
+body:not(.mc-theater-seating-pdp).mc-product-page #v65-product-parent #mcConfigurationBlock,
+body:not(.mc-theater-seating-pdp).productdetails #v65-product-parent #mcConfigurationBlock {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 /* Select a Leather ">" button – 20px, vertically aligned, no box (matches accordion toggle) */
@@ -19717,7 +19739,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=theater-guard-20260512"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=pdp-scope-20260506"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

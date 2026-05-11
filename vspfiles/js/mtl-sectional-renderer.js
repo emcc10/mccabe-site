@@ -1,11 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: theater-guard-20260512
+ * Cache: pdp-scope-20260506
  */
 (function () {
   "use strict";
 
-  var IMG_V = "theater-guard-20260512";
+  var IMG_V = "pdp-scope-20260506";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -22,8 +22,8 @@
 
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
-  window.MTL_RENDERER_VERSION = "theater-guard-20260512";
-  console.log("MTL_RENDERER_VERSION theater-guard-20260512");
+  window.MTL_RENDERER_VERSION = "pdp-scope-20260506";
+  console.log("MTL_RENDERER_VERSION pdp-scope-20260506");
 
   /** Palliser theater PDPs: never run sectional leather/cards/summary relocation. */
   function isTheaterSeatingProductPageForGuard() {
@@ -42,13 +42,10 @@
     }
     var blob = "";
     try {
-      blob = (
-        path +
-        " " +
-        String(document.title || "") +
-        " " +
-        (document.body ? document.body.innerText.slice(0, 6000) : "")
-      ).toLowerCase();
+      var pr = document.getElementById("v65-product-parent");
+      var prodSlice = pr ? String(pr.innerText || "").slice(0, 10000) : "";
+      if (!prodSlice && document.body) prodSlice = String(document.body.innerText || "").slice(0, 5000);
+      blob = (path + " " + String(document.title || "") + " " + prodSlice).toLowerCase();
     } catch (eBl) {}
     if (
       /\btheater seating\b|\btheatre seating\b|\bhome theater\b|\bhome theatre\b/.test(blob)
@@ -361,7 +358,8 @@
         if (picked) picked.textContent = lab;
         var ov = document.querySelector(".wm-overlay");
         if (ov) ov.style.display = "none";
-        hydrateMiniLeatherStripFromNativeSelect(sel);
+        if (typeof window.mcRenderLeatherPreviewStrip === "function") window.mcRenderLeatherPreviewStrip();
+        if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
       };
 
       grid.appendChild(card);
@@ -421,98 +419,6 @@
     if (isSectionalProductPageClient()) return injectSectionalNativeLeatherModal(sel);
     if (!isWmOverlayVisible()) return 0;
     return appendFallbackLeatherGridIfEmpty(sel);
-  }
-
-  /** Mini swatches: pill chips; native drives list; WM images by value. */
-  function hydrateMiniLeatherStripFromNativeSelect(leatherSel) {
-    if (!isSectionalProductPageClient() || !leatherSel) return;
-    var strip = document.getElementById("mcLeatherSwatchStrip");
-    if (!strip) return;
-    var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
-    if (!syn.length) return;
-
-    var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
-
-    strip.className = "mc-leather-mini-swatches";
-    strip.removeAttribute("style");
-    strip.innerHTML = "";
-
-    var max = Math.min(40, syn.length);
-    var i;
-    for (i = 0; i < max; i++) {
-      var s = syn[i];
-      if (!s) continue;
-      var val = String(s.value || "");
-      var wrow = wmRowForNativeValue(wm, val);
-      var nameLine =
-        ((wrow && ((wrow.family || "") + " " + (wrow.color || "")).trim()) || s.family || s.label).replace(/\s+/g, " ").trim();
-      var gradeLine = (wrow && wrow.grade != null && String(wrow.grade)) || s.grade || "";
-      if (gradeLine && !/^grade\b/i.test(String(gradeLine)))
-        gradeLine = /^base$/i.test(String(gradeLine)) ? "Grade 1000" : "Grade " + String(gradeLine).trim();
-      var mergedSw = (wrow && wrow.swatches) || s.swatches || [];
-      var imgUrl = pickFirstSwatchUrl({ swatches: mergedSw });
-
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mc-leather-mini-swatch mc-mini-swatch";
-      btn.setAttribute("data-leather-value", val);
-      btn.title = (nameLine + (gradeLine ? " · " + gradeLine : "")).trim();
-
-      if (String(leatherSel.value || "") === val) btn.setAttribute("data-selected", "1");
-
-      if (imgUrl) {
-        var im = document.createElement("img");
-        im.alt = "";
-        im.loading = "lazy";
-        im.src = imgUrl.indexOf("?") === -1 ? imgUrl + "?v=" + IMG_V : imgUrl + "&v=" + IMG_V;
-        btn.appendChild(im);
-      }
-
-      var lab = document.createElement("span");
-      lab.className = "mc-leather-mini-swatch__label";
-      lab.textContent = nameLine || val;
-      btn.appendChild(lab);
-
-      (function (v, bnode) {
-        bnode.addEventListener("click", function (ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          if (!v) return;
-          leatherSel.value = v;
-          leatherSel.dispatchEvent(new Event("change", { bubbles: true }));
-          leatherSel.dispatchEvent(new Event("input", { bubbles: true }));
-          if (typeof jQuery !== "undefined") jQuery(leatherSel).trigger("change");
-          var ms = document.getElementById("mcLeatherSummary");
-          if (ms) {
-            var opt = Array.prototype.find.call(leatherSel.options, function (op) { return String(op.value) === v; });
-            ms.textContent = opt ? String(opt.textContent || "").trim() : "";
-          }
-          var nodes = strip.querySelectorAll(".mc-leather-mini-swatch");
-          var ni;
-          for (ni = 0; ni < nodes.length; ni++) nodes[ni].removeAttribute("data-selected");
-          bnode.setAttribute("data-selected", "1");
-        });
-      })(val, btn);
-
-      strip.appendChild(btn);
-    }
-
-    var miniN = strip.querySelectorAll(".mc-leather-mini-swatch").length;
-    console.log("[MTL leather mini] .mc-leather-mini-swatch count:", miniN, "(expect > 0)");
-    try {
-      window.__MTL_LAST_MINI_LEATHER__ = { at: Date.now(), chips: miniN };
-    } catch (eM) {}
-  }
-
-  function scheduleHydrateMiniLeatherStrip(leatherSel) {
-    if (!leatherSel) return;
-    var run = function () {
-      hydrateMiniLeatherStripFromNativeSelect(findNativeLeatherSelectEl() || leatherSel);
-    };
-    run();
-    [250, 900, 2200, 5500].forEach(function (ms) {
-      setTimeout(run, ms);
-    });
   }
 
   function patchLeatherModalFallback(leatherSel) {
@@ -1543,23 +1449,19 @@
     updateProductSummary();
     updateSectionalCardPriceBadges();
     if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
-    scheduleHydrateMiniLeatherStrip(leatherSelNow);
+    function refreshTemplateMiniStrip() {
+      if (typeof window.mcRenderLeatherPreviewStrip === "function") window.mcRenderLeatherPreviewStrip();
+      if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
+    }
+    refreshTemplateMiniStrip();
+    [350, 900, 2200, 5000].forEach(function (ms) {
+      window.setTimeout(refreshTemplateMiniStrip, ms);
+    });
     if (leatherSelNow && leatherSelNow.dataset.mtlMiniStripBound !== "1") {
       leatherSelNow.dataset.mtlMiniStripBound = "1";
       leatherSelNow.addEventListener("change", function () {
-        hydrateMiniLeatherStripFromNativeSelect(leatherSelNow);
+        refreshTemplateMiniStrip();
       });
-    }
-    if (!document.documentElement.dataset.mtlMiniStripWmReady) {
-      document.documentElement.dataset.mtlMiniStripWmReady = "1";
-      document.addEventListener(
-        "wmLeatherOptionsReady",
-        function () {
-          var ls = findNativeLeatherSelectEl();
-          if (ls) hydrateMiniLeatherStripFromNativeSelect(ls);
-        },
-        false
-      );
     }
   }
 
