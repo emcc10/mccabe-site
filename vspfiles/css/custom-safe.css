@@ -2579,6 +2579,30 @@ body.mc-product-page select.mc-native-leather {
       box-sizing: border-box !important;
     }
 
+    /* PDP only: retail + member price copy at 15px (options column). */
+    body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row,
+    body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row,
+    body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row *,
+    body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row *,
+    body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing,
+    body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing,
+    body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing *,
+    body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing *,
+    body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-member-price-caption,
+    body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-member-price-caption,
+    body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-member-price-caption *,
+    body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-member-price-caption *,
+    body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #priceWithOptions,
+    body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #priceWithOptions,
+    body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #priceWithOptions *,
+    body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #priceWithOptions *,
+    body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #priceWithOptionsNoTax,
+    body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #priceWithOptionsNoTax,
+    body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #priceWithOptionsNoTax *,
+    body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #priceWithOptionsNoTax * {
+      font-size: 15px !important;
+    }
+
     body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td [itemprop="offers"],
     body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td [itemprop="offers"] {
       display: flex !important;
@@ -11190,6 +11214,43 @@ html.is-sectional-product #mcLeatherSwatchStrip .mc-mini-swatch[data-selected="1
 
 html.is-sectional-product #mcLeatherSwatchStrip .mc-mini-swatch:last-child {
   border-right: 0 !important;
+}
+
+/* Text chips when swatch images are unavailable (native options still exist). */
+html.is-sectional-product #mcLeatherSwatchStrip .mc-mini-swatch.mtl-mini-leather-textchip {
+  width: auto !important;
+  min-width: 44px !important;
+  height: auto !important;
+  min-height: 24px !important;
+  max-width: 120px !important;
+  padding: 4px 6px !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  text-align: center !important;
+}
+
+/* Sectional PDP: space between main product image column and options / #options_table */
+html.is-sectional-product body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-media-td,
+html.is-sectional-product body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-media-td,
+html.is-sectional-product body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-media-td,
+html.is-sectional-product body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-media-td {
+  padding-bottom: 28px !important;
+}
+
+html.is-sectional-product body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
+html.is-sectional-product body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
+html.is-sectional-product body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
+html.is-sectional-product body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #options_table {
+  margin-top: 14px !important;
+}
+
+@media (max-width: 767px) {
+  html.is-sectional-product body.productdetails #v65-product-parent img#product_photo,
+  html.is-sectional-product body.mc-product-page #content_area img#product_photo {
+    margin-bottom: 18px !important;
+  }
 }
 
 /* Sectional: theme hides #wmOpen with display:none (template ~2015). Off-screen + visually hidden; keep

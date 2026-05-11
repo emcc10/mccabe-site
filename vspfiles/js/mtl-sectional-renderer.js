@@ -1,11 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: debug-fix-20260511-2
+ * Cache: leather-cfg-fix-20260511-3
  */
 (function () {
   "use strict";
 
-  var IMG_V = "debug-fix-20260511-2";
+  var IMG_V = "leather-cfg-fix-20260511-3";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -22,8 +22,8 @@
 
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
-  window.MTL_RENDERER_VERSION = "debug-fix-20260511-2";
-  console.log("MTL_RENDERER_VERSION debug-fix-20260511-2");
+  window.MTL_RENDERER_VERSION = "leather-cfg-fix-20260511-3";
+  console.log("MTL_RENDERER_VERSION leather-cfg-fix-20260511-3");
 
   function isSectionalProductPageClient() {
     if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) return true;
@@ -102,17 +102,173 @@
   }
 
   function ensureLeatherOptionsFromNativeSelect(leatherSel) {
+    if (!isSectionalProductPageClient()) return;
     if (!leatherSel || !leatherSel.options || leatherSel.options.length < 1) return;
     var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
     if (!syn.length) return;
-    var prev = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__.length : 0;
-    if (!window.__WM_LEATHER_OPTIONS__ || window.__WM_LEATHER_OPTIONS__.length === 0 || syn.length > prev) {
-      window.__WM_LEATHER_OPTIONS__ = syn;
-      try {
-        document.dispatchEvent(new CustomEvent("wmLeatherOptionsReady", { bubbles: true }));
-      } catch (eEvt) {}
-      console.log("[MTL debug] __WM_LEATHER_OPTIONS__ set from native select, count=", syn.length);
+    var prev = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : null;
+    var prevLen = prev ? prev.length : 0;
+    var prevHasSwatches = !!(prev && prev.some(function (p) { return p && p.swatches && p.swatches.length; }));
+
+    var useSyn =
+      !prevLen ||
+      syn.length > prevLen ||
+      (!prevHasSwatches && prevLen > 0 && prev.every(function (p) { return !p || !p.swatches || !p.swatches.length; }));
+
+    if (!useSyn) return;
+
+    window.__WM_LEATHER_OPTIONS__ = syn;
+    try {
+      document.dispatchEvent(new CustomEvent("wmLeatherOptionsReady", { bubbles: true }));
+    } catch (eEvt) {}
+    console.log("[MTL] __WM_LEATHER_OPTIONS__ set from native leather <select>, count=", syn.length);
+  }
+
+  function isWmOverlayVisible() {
+    var ov = document.querySelector(".wm-overlay");
+    if (!ov) return false;
+    try {
+      return window.getComputedStyle(ov).display !== "none" && window.getComputedStyle(ov).visibility !== "hidden";
+    } catch (eC) {
+      return false;
     }
+  }
+
+  function ensureWmSectionsFallbackObserver(leatherSel) {
+    if (!isSectionalProductPageClient()) return;
+    if (document.documentElement.dataset.mtlWmSecObs === "1") return;
+    document.documentElement.dataset.mtlWmSecObs = "1";
+
+    function hook(ws) {
+      if (!ws || ws.dataset.mtlFallbackObs === "1") return;
+      ws.dataset.mtlFallbackObs = "1";
+      var obs = new MutationObserver(function () {
+        if (!isWmOverlayVisible()) return;
+        if (ws.querySelector(".wm-tile")) return;
+        renderFallbackLeatherIntoWmSections(leatherSel || findNativeLeatherSelectEl());
+      });
+      try {
+        obs.observe(ws, { childList: true, subtree: true });
+      } catch (eO) {}
+    }
+
+    var ex = document.getElementById("wmSections");
+    if (ex) hook(ex);
+    var moDoc = new MutationObserver(function () {
+      var ws = document.getElementById("wmSections");
+      if (ws) {
+        hook(ws);
+        moDoc.disconnect();
+      }
+    });
+    try {
+      moDoc.observe(document.documentElement, { childList: true, subtree: true });
+    } catch (eD) {}
+  }
+
+  function pickFirstSwatchUrl(o) {
+    if (!o || !o.swatches || !o.swatches.length) return "";
+    var sw = o.swatches[0];
+    if (!sw || typeof sw !== "object") return "";
+    return String(sw.url || sw.src || sw.image || sw.href || "").trim();
+  }
+
+  /** Mini swatches under “Select a Leather”: native `<select>` options drive the list; `__WM_LEATHER_OPTIONS__` supplies swatch images when values line up. */
+  function hydrateMiniLeatherStripFromNativeSelect(leatherSel) {
+    if (!isSectionalProductPageClient() || !leatherSel) return;
+    var strip = document.getElementById("mcLeatherSwatchStrip");
+    if (!strip) return;
+    var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
+    if (!syn.length) return;
+
+    var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
+    function wmHitForVal(val) {
+      var vs = String(val);
+      var h = wm.filter(function (w) {
+        return w && String(w.value) === vs;
+      });
+      return h.length ? h[0] : null;
+    }
+
+    strip.innerHTML = "";
+    var max = Math.min(36, syn.length);
+    var i;
+    for (i = 0; i < max; i++) {
+      var s = syn[i];
+      if (!s) continue;
+      var val = String(s.value || "");
+      var wmRow = wmHitForVal(val);
+      var o = wmRow
+        ? {
+            family: s.family,
+            color: s.color,
+            value: val,
+            label: wmRow.label || s.label,
+            swatches: wmRow.swatches || [],
+          }
+        : s;
+
+      var labelFull = String(
+        o.label || [o.family, o.color].filter(Boolean).join(" ").trim() || val
+      )
+        .replace(/\s+/g, " ")
+        .trim();
+      var imgUrl = pickFirstSwatchUrl(o);
+
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mc-mini-swatch";
+      btn.setAttribute("data-leather-value", val);
+      btn.title = labelFull;
+
+      if (String(leatherSel.value || "") === val) btn.setAttribute("data-selected", "1");
+
+      if (imgUrl) {
+        var im = document.createElement("img");
+        im.alt = "";
+        im.loading = "lazy";
+        im.src = imgUrl.indexOf("?") === -1 ? imgUrl + "?v=" + IMG_V : imgUrl + "&v=" + IMG_V;
+        btn.appendChild(im);
+      } else {
+        btn.classList.add("mtl-mini-leather-textchip");
+        var shortL = labelFull.length > 14 ? labelFull.slice(0, 12) + "…" : labelFull;
+        btn.textContent = shortL || "—";
+      }
+
+      (function (v, bnode) {
+        bnode.addEventListener("click", function (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          if (!v) return;
+          leatherSel.value = v;
+          leatherSel.dispatchEvent(new Event("change", { bubbles: true }));
+          leatherSel.dispatchEvent(new Event("input", { bubbles: true }));
+          if (typeof jQuery !== "undefined") jQuery(leatherSel).trigger("change");
+          var ms = document.getElementById("mcLeatherSummary");
+          if (ms) {
+            var opt = Array.prototype.find.call(leatherSel.options, function (op) { return String(op.value) === v; });
+            ms.textContent = opt ? String(opt.textContent || "").trim() : "";
+          }
+          var nodes = strip.querySelectorAll(".mc-mini-swatch");
+          var ni;
+          for (ni = 0; ni < nodes.length; ni++) nodes[ni].removeAttribute("data-selected");
+          bnode.setAttribute("data-selected", "1");
+        });
+      })(val, btn);
+
+      strip.appendChild(btn);
+    }
+  }
+
+  function scheduleHydrateMiniLeatherStrip(leatherSel) {
+    if (!leatherSel) return;
+    var run = function () {
+      hydrateMiniLeatherStripFromNativeSelect(findNativeLeatherSelectEl() || leatherSel);
+    };
+    run();
+    [250, 900, 2200, 5500].forEach(function (ms) {
+      setTimeout(run, ms);
+    });
   }
 
   function renderFallbackLeatherIntoWmSections(leatherSel) {
@@ -143,16 +299,19 @@
       b.title = o.label;
       b.onclick = function (ev) {
         ev.preventDefault();
-        leatherSel.value = o.value;
-        leatherSel.dispatchEvent(new Event("change", { bubbles: true }));
-        leatherSel.dispatchEvent(new Event("input", { bubbles: true }));
-        if (typeof jQuery !== "undefined") jQuery(leatherSel).trigger("change");
+        var sel = findNativeLeatherSelectEl() || leatherSel;
+        if (!sel) return;
+        sel.value = o.value;
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+        sel.dispatchEvent(new Event("input", { bubbles: true }));
+        if (typeof jQuery !== "undefined") jQuery(sel).trigger("change");
         var wmSummary = document.getElementById("wmSummary");
         if (wmSummary) wmSummary.textContent = o.label;
         var mcSum = document.getElementById("mcLeatherSummary");
         if (mcSum) mcSum.textContent = o.label;
         var ov = document.querySelector(".wm-overlay");
         if (ov) ov.style.display = "none";
+        hydrateMiniLeatherStripFromNativeSelect(sel);
       };
       grid.appendChild(b);
     });
@@ -164,19 +323,23 @@
     if (!isSectionalProductPageClient()) return;
     if (document.documentElement.dataset.mtlWmModalFallbackPatched === "1") return;
     document.documentElement.dataset.mtlWmModalFallbackPatched = "1";
+
+    function tryFillModalFromNative() {
+      var sel = findNativeLeatherSelectEl() || leatherSel;
+      if (!sel) return;
+      if (!isWmOverlayVisible()) return;
+      renderFallbackLeatherIntoWmSections(sel);
+    }
+
     document.addEventListener(
       "click",
-      function () {
-        window.setTimeout(function () {
-          var ov = document.querySelector(".wm-overlay");
-          if (!ov) return;
-          var disp = "";
-          try {
-            disp = window.getComputedStyle(ov).display;
-          } catch (eC) {}
-          if (disp === "none") return;
-          renderFallbackLeatherIntoWmSections(leatherSel || findNativeLeatherSelectEl());
-        }, 180);
+      function (ev) {
+        var t = ev.target;
+        if (!t || !t.closest) return;
+        if (!t.closest("#wmOpen, #mcLeatherBtn, #mcLeatherHeader, #mcLeatherHeaderRow, .wm-btn")) return;
+        [0, 90, 200, 400, 750, 1200].forEach(function (ms) {
+          window.setTimeout(tryFillModalFromNative, ms);
+        });
       },
       true
     );
@@ -428,6 +591,24 @@
     return String(display || "").replace(/\s*\([^)]*\)\s*$/g, "").trim();
   }
 
+  /** Parses +$N / + N style upcharges from Volusion option text (configuration row). */
+  function parseUpchargeFromOptionText(text) {
+    var s = String(text || "");
+    var m = s.match(/\+\s*\$?\s*([0-9][0-9,]*(?:\.[0-9]+)?)/i);
+    if (m) return Number(String(m[1]).replace(/,/g, ""));
+    m = s.match(/\(\s*(?:\+|plus)\s*\$?\s*([0-9][0-9,]*(?:\.[0-9]+)?)/i);
+    if (m) return Number(String(m[1]).replace(/,/g, ""));
+    return 0;
+  }
+
+  function effectiveConfigurationUpcharge(entry) {
+    if (!entry) return 0;
+    var pd = entry.priceDiff;
+    if (pd != null && pd !== "" && isFinite(Number(pd))) return Number(pd);
+    if (entry.upcharge != null && isFinite(Number(entry.upcharge))) return Number(entry.upcharge);
+    return parseUpchargeFromOptionText(entry.rawOptionText || entry.label || "");
+  }
+
   function extractPrimaryCode(display) {
     var cleaned = stripPricingSuffix(display);
     var digitsRun = cleaned.match(/\d(?:[\s\/-]*\d)+(?:[\s\/-]*\d)*/);
@@ -515,11 +696,13 @@
 
   function scheduleMoveLeatherAboveConfigurations(section) {
     if (!section) return;
-    moveLeatherAboveConfigurations(section);
+    function tick() {
+      moveLeatherAboveConfigurations(section);
+      placeProductSummaryRowBelowSectionalConfigurations(section);
+    }
+    tick();
     [500, 1500, 3000].forEach(function (ms) {
-      setTimeout(function () {
-        moveLeatherAboveConfigurations(section);
-      }, ms);
+      setTimeout(tick, ms);
     });
   }
 
@@ -1072,6 +1255,9 @@
         image = inferSectionalDiagramPngUrl(productKey, pcVal, mergedCode);
       }
       var priceDiff = jsonHit && jsonHit.priceDiff != null ? jsonHit.priceDiff : null;
+      var jsonPdNum = jsonHit && jsonHit.priceDiff != null ? Number(jsonHit.priceDiff) : null;
+      var inferredUp = parseUpchargeFromOptionText(rawText);
+      var upcharge = jsonPdNum != null && isFinite(jsonPdNum) ? jsonPdNum : inferredUp;
 
       merged.push({
         code: mergedCode,
@@ -1080,6 +1266,8 @@
         description: desc,
         image: image,
         priceDiff: priceDiff,
+        upcharge: upcharge,
+        rawOptionText: rawText,
         base: !!(jsonHit && jsonHit.base),
       });
     });
@@ -1149,6 +1337,18 @@
     }
   }
 
+  function placeProductSummaryRowBelowSectionalConfigurations(section) {
+    if (!isSectionalProductPageClient() || !section || !section.parentNode) return;
+    var row = document.getElementById("mcPlannerRow");
+    if (!row) return;
+    try {
+      if (row.parentNode === section.parentNode && section.nextElementSibling === row) return;
+      section.parentNode.insertBefore(row, section.nextSibling);
+    } catch (ePl) {
+      console.warn("[MTL] placeProductSummaryRowBelowSectionalConfigurations:", ePl);
+    }
+  }
+
   function finalizeSectionalUi(section) {
     try {
       document.documentElement.classList.add("has-sectional-config-cards");
@@ -1156,12 +1356,12 @@
     removeStandaloneDuplicateProductSummary();
     var leatherSelNow = findNativeLeatherSelectEl();
     ensureLeatherOptionsFromNativeSelect(leatherSelNow);
+    ensureWmSectionsFallbackObserver(leatherSelNow);
     patchLeatherModalFallback(leatherSelNow);
     applyAlulaPalliserPdfHref();
     if (typeof window.mcRefreshProductSummaryButton === "function") {
       window.mcRefreshProductSummaryButton();
     }
-    applyAlulaPalliserPdfHref();
     var legacyToggle = document.getElementById("mtl-sectional-more-native");
     if (legacyToggle) legacyToggle.remove();
     ensureProductSummary(section);
@@ -1178,6 +1378,24 @@
     updateProductSummary();
     updateSectionalCardPriceBadges();
     if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+    scheduleHydrateMiniLeatherStrip(leatherSelNow);
+    if (leatherSelNow && leatherSelNow.dataset.mtlMiniStripBound !== "1") {
+      leatherSelNow.dataset.mtlMiniStripBound = "1";
+      leatherSelNow.addEventListener("change", function () {
+        hydrateMiniLeatherStripFromNativeSelect(leatherSelNow);
+      });
+    }
+    if (!document.documentElement.dataset.mtlMiniStripWmReady) {
+      document.documentElement.dataset.mtlMiniStripWmReady = "1";
+      document.addEventListener(
+        "wmLeatherOptionsReady",
+        function () {
+          var ls = findNativeLeatherSelectEl();
+          if (ls) hydrateMiniLeatherStripFromNativeSelect(ls);
+        },
+        false
+      );
+    }
   }
 
   function renderSectionalPdp() {
@@ -1265,30 +1483,39 @@
       return;
     }
 
-    (function orderDefaultConfigurationFirst() {
-      var selVal = String(configSelect.value || "");
-      var defI = -1;
+    (function orderBasePriceConfigurationFirst() {
+      function up(c) {
+        return effectiveConfigurationUpcharge(c);
+      }
+      var ups = merged.map(up);
+      var minU = ups.length ? Math.min.apply(null, ups) : 0;
+      var candIdx = [];
       var i;
       for (i = 0; i < merged.length; i++) {
-        if (String(merged[i].nativeValue) === selVal) {
-          defI = i;
+        if (up(merged[i]) === minU) candIdx.push(i);
+      }
+      var defI = candIdx.length ? candIdx[0] : 0;
+      var k;
+      var j;
+      for (k = 0; k < candIdx.length; k++) {
+        j = candIdx[k];
+        if (normalizeCode(merged[j].code) === "07-15") {
+          defI = j;
           break;
         }
       }
-      if (defI < 0) {
-        defI = merged.findIndex(function (c) {
-          return c.base === true;
-        });
+      if (normalizeCode(merged[defI].code) !== "07-15") {
+        for (k = 0; k < candIdx.length; k++) {
+          j = candIdx[k];
+          if (merged[j].base === true) {
+            defI = j;
+            break;
+          }
+        }
       }
-      if (defI < 0) {
-        defI = merged.findIndex(function (c) {
-          return normalizeCode(c.code) === "07-15";
-        });
-      }
-      if (defI < 0) defI = 0;
       var first = merged[defI];
-      var rest = merged.filter(function (_, j) {
-        return j !== defI;
+      var rest = merged.filter(function (_, idx) {
+        return idx !== defI;
       });
       merged.length = 0;
       merged.push.apply(merged, [first].concat(rest));
