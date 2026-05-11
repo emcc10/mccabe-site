@@ -1,18 +1,66 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: 20260511sectional
+ * Cache: 20260512sectional
  */
 (function () {
   "use strict";
 
-  var IMG_V = "20260511sectional";
+  var IMG_V = "20260512sectional";
+  var SECTIONAL_DBG = /(?:[?&])mtlSectionalDebug=1(?:&|$)/.test(String(location.search || ""));
+  /** When true, do not collapse the Volusion Choose Configuration row (user opened "More configurations"). */
+  var nativeConfigRowUserExpanded = false;
+  var PLACEHOLDER_SVG =
+    "data:image/svg+xml," +
+    encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="360" height="220" viewBox="0 0 360 220"><rect fill="#f2f2f2" width="360" height="220"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#aaa" font-family="Arial,sans-serif" font-size="13">Configuration diagram</text></svg>'
+    );
+
   var state = { cfgByCode: {} };
+
+  function sectionalLog() {
+    if (!SECTIONAL_DBG) return;
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift("[mtl-sectional]");
+    console.log.apply(console, args);
+  }
 
   function normalizeCode(code) {
     return String(code || "")
       .replace(/\//g, "-")
       .trim()
       .toLowerCase();
+  }
+
+  function normalizeForMatch(text) {
+    return String(text || "")
+      .replace(/\//g, "-")
+      .replace(/\s+/g, "")
+      .toLowerCase();
+  }
+
+  function isPlaceholderConfigOption(opt) {
+    var t = String(opt.textContent || "").trim();
+    var v = String(opt.value || "").trim();
+    if (!t || !v) return true;
+    if (/choose|select|please select|^--|^-$/i.test(t)) return true;
+    return false;
+  }
+
+  function stripPricingSuffix(display) {
+    return String(display || "").replace(/\s*\([^)]*\)\s*$/g, "").trim();
+  }
+
+  function extractPrimaryCode(display) {
+    var cleaned = stripPricingSuffix(display);
+    var digitsRun = cleaned.match(/\d(?:[\s\/-]*\d)+(?:[\s\/-]*\d)*/);
+    if (digitsRun)
+      return String(digitsRun[0]).replace(/\s+/g, "").replace(/\//g, "-");
+
+    digitsRun = cleaned.match(/\d{5,}/);
+    if (digitsRun) return digitsRun[0];
+
+    cleaned = normalizeCode(stripPricingSuffix(display).split(/\s+/)[0]);
+    return cleaned || normalizeCode(display);
   }
 
   function findConfigurationSelect() {
@@ -36,11 +84,12 @@
       if (td) rowText += " " + td.innerText;
       if (parent) rowText += " " + parent.innerText;
 
-      return /choose configuration|configuration/i.test(rowText);
+      return /choose configuration|^configuration\b|choose\s+seat/i.test(rowText);
     });
   }
 
   function hideConfigurationRow() {
+    if (nativeConfigRowUserExpanded) return;
     var configSelect = findConfigurationSelect();
     if (!configSelect) {
       console.warn("No native configuration select found.");
@@ -57,6 +106,20 @@
       }
     }
     configSelect.dataset.mtlRowHidden = "1";
+  }
+
+  function revealNativeConfigurationRow() {
+    var configSelect = findConfigurationSelect();
+    if (!configSelect) return;
+    var row = configSelect.closest("tr") || configSelect.parentElement;
+    if (row) {
+      row.style.removeProperty("display");
+      row.style.removeProperty("visibility");
+    }
+    configSelect.dataset.mtlRowHidden = "0";
+    try {
+      configSelect.focus();
+    } catch (eF) {}
   }
 
   function scheduleHideConfigurationRow() {
@@ -149,39 +212,71 @@
     });
   }
 
-  function selectNativeConfiguration(code) {
+  function optionMatchesCode(opt, code) {
+    if (!opt || !code) return false;
+    var n = normalizeCode(code);
+    var text = normalizeForMatch(stripPricingSuffix(opt.textContent || ""));
+    var value = normalizeForMatch(opt.value || "");
+    if (value && (value === n || value.indexOf(n) !== -1)) return true;
+    if (text && (text === n || text.indexOf(n) !== -1)) return true;
+    var parts = n.split(/[-/]+/).filter(Boolean);
+    if (parts.length > 1) {
+      return parts.every(function (p) {
+        return !p || text.indexOf(p) !== -1 || value.indexOf(p) !== -1;
+      });
+    }
+    return false;
+  }
+
+  function selectNativeConfiguration(preferredValue, codeHint) {
     var sel = findConfigurationSelect();
     if (!sel) {
       console.warn("No native configuration select found.");
       return false;
     }
 
-    var normalizedCode = normalizeCode(code);
+    var opts = Array.from(sel.options);
+    var opt = null;
 
-    var option = Array.from(sel.options).find(function (opt) {
-      var text = String(opt.textContent || "")
-        .replace(/\//g, "-")
-        .trim()
-        .toLowerCase();
-      var value = String(opt.value || "")
-        .replace(/\//g, "-")
-        .trim()
-        .toLowerCase();
-      return text.indexOf(normalizedCode) !== -1 || value.indexOf(normalizedCode) !== -1;
-    });
+    if (preferredValue != null && String(preferredValue) !== "") {
+      opt = opts.find(function (o) {
+        return String(o.value) === String(preferredValue);
+      });
+    }
 
-    if (!option) {
-      console.warn("No matching Volusion option for configuration", code, sel);
+    if (!opt && codeHint) {
+      var normalizedCode = normalizeCode(codeHint);
+      opt = opts.find(function (o) {
+        return optionMatchesCode(o, normalizedCode);
+      });
+    }
+
+    if (!opt && codeHint) {
+      opt = opts.find(function (o) {
+        var text = String(o.textContent || "")
+          .replace(/\//g, "-")
+          .trim()
+          .toLowerCase();
+        var value = String(o.value || "")
+          .replace(/\//g, "-")
+          .trim()
+          .toLowerCase();
+        return text.indexOf(normalizedCode) !== -1 || value.indexOf(normalizedCode) !== -1;
+      });
+    }
+
+    if (!opt) {
+      console.warn("No matching Volusion option for configuration", codeHint, preferredValue, sel);
       return false;
     }
 
-    sel.value = option.value;
+    sel.value = opt.value;
     sel.dispatchEvent(new Event("change", { bubbles: true }));
     sel.dispatchEvent(new Event("input", { bubbles: true }));
     if (typeof jQuery !== "undefined") {
       jQuery(sel).trigger("change");
     }
-    console.log("Selected native configuration", code, sel.value);
+    sectionalLog("Selected native configuration", codeHint, "value=", sel.value);
     return true;
   }
 
@@ -304,24 +399,46 @@
     });
   }
 
-  function selectConfigurationCard(code) {
+  function syncCardsSelectionHighlight() {
+    var sec = document.getElementById("mtl-sectional-configurations");
+    if (!sec) return;
+    var sel = findConfigurationSelect();
+    if (!sel) return;
+    var val = String(sel.value || "");
+    var cards = Array.from(sec.querySelectorAll(".mtl-sectional-card"));
+    cards.forEach(function (card) {
+      card.classList.remove("is-selected");
+      var v = card.getAttribute("data-config-value");
+      if (v != null && String(v) === val) card.classList.add("is-selected");
+    });
+  }
+
+  function selectConfigurationCard(code, preferredNativeValue) {
     var cards = Array.from(document.querySelectorAll("#mtl-sectional-configurations .mtl-sectional-card"));
     cards.forEach(function (card) {
       card.classList.remove("is-selected");
     });
 
     var normalizedCode = normalizeCode(code);
-    var selectedCard = cards.find(function (card) {
-      var cardCode = normalizeCode(card.getAttribute("data-config-code") || "");
-      return cardCode === normalizedCode;
-    });
+    var selectedCard =
+      preferredNativeValue != null && cards.find(function (c) {
+        return String(c.getAttribute("data-config-value") || "") === String(preferredNativeValue);
+      });
+    if (!selectedCard) {
+      selectedCard = cards.find(function (card) {
+        var cardCode = normalizeCode(card.getAttribute("data-config-code") || "");
+        return cardCode === normalizedCode;
+      });
+    }
     if (selectedCard) {
       selectedCard.classList.add("is-selected");
     }
 
     window.__mtlSectionalSelectedConfig = code;
-    selectNativeConfiguration(code);
+    window.__mtlSectionalPreferredNativeValue = preferredNativeValue;
+    selectNativeConfiguration(preferredNativeValue, code);
     scheduleProductSummaryAfterConfigChange();
+    setTimeout(syncCardsSelectionHighlight, 50);
   }
 
   function bindConfigurationCardClicks() {
@@ -331,8 +448,10 @@
     Array.prototype.forEach.call(cards, function (card) {
       if (card.dataset.mtlConfigBound === "1") return;
       card.addEventListener("click", function () {
-        var c = card.getAttribute("data-config-code");
-        if (c) selectConfigurationCard(c);
+        var c = card.getAttribute("data-config-code") || "";
+        var v = card.getAttribute("data-config-value");
+        if (v !== null) selectConfigurationCard(c, v);
+        else selectConfigurationCard(c);
       });
       card.dataset.mtlConfigBound = "1";
     });
@@ -342,7 +461,15 @@
     var configSel = findConfigurationSelect();
     if (configSel && configSel.dataset.mtlObsChange !== "1") {
       configSel.addEventListener("change", function () {
-        window.setTimeout(updateProductSummary, 0);
+        var opt = configSel.selectedOptions && configSel.selectedOptions[0];
+        if (opt) {
+          window.__mtlSectionalPreferredNativeValue = opt.value;
+          window.__mtlSectionalSelectedConfig = extractPrimaryCode(opt.textContent || "");
+        }
+        window.setTimeout(function () {
+          syncCardsSelectionHighlight();
+          updateProductSummary();
+        }, 0);
         scheduleProductSummaryAfterConfigChange();
       });
       configSel.dataset.mtlObsChange = "1";
@@ -380,19 +507,103 @@
     }
   }
 
+  function ensureMoreConfigurationsToggle(section) {
+    if (!section || section.querySelector("#mtl-sectional-more-native")) return;
+    var wrap = document.createElement("div");
+    wrap.id = "mtl-sectional-more-native";
+    wrap.className = "mtl-sectional-more-native";
+    wrap.style.cssText = "margin-top:12px;font-size:13px;";
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = "mtl-sectional-toggle-native-row";
+    btn.style.cssText =
+      "background:transparent;border:0;padding:0;cursor:pointer;color:#333;text-decoration:underline;font:inherit;";
+    btn.setAttribute("aria-expanded", "false");
+    btn.textContent = "More configurations (show native menu)";
+    btn.addEventListener("click", function () {
+      var exp = btn.getAttribute("aria-expanded") === "true";
+      if (exp) {
+        nativeConfigRowUserExpanded = false;
+        btn.setAttribute("aria-expanded", "false");
+        btn.textContent = "More configurations (show native menu)";
+        scheduleHideConfigurationRow();
+      } else {
+        nativeConfigRowUserExpanded = true;
+        btn.setAttribute("aria-expanded", "true");
+        btn.textContent = "Hide native configuration menu";
+        revealNativeConfigurationRow();
+      }
+    });
+    wrap.appendChild(btn);
+    var inner = section.querySelector(".mtl-sectional-inner");
+    if (inner) inner.appendChild(wrap);
+    else section.appendChild(wrap);
+  }
+
+  function mergeNativeOptionsWithJson(configSelect, jsonCfgs) {
+    var jsonList = Array.isArray(jsonCfgs) ? jsonCfgs.slice() : [];
+    var usedJson = {};
+    var merged = [];
+
+    var byNormKey = {};
+    jsonList.forEach(function (c) {
+      if (!c || !c.code) return;
+      var k = normalizeCode(c.code);
+      if (!byNormKey[k]) byNormKey[k] = c;
+    });
+
+    Array.from(configSelect.options).forEach(function (opt) {
+      if (isPlaceholderConfigOption(opt)) return;
+
+      var rawText = String(opt.textContent || "").trim();
+      var primary = extractPrimaryCode(rawText);
+      var normKey = normalizeCode(primary);
+      var jsonHit = byNormKey[normKey];
+      if (!jsonHit) {
+        jsonHit = jsonList.find(function (c) {
+          if (!c || !c.code || usedJson[c.code]) return false;
+          return volusionHasOption({ options: [opt] }, c.code) || optionMatchesCode(opt, c.code);
+        });
+      }
+      if (jsonHit) usedJson[jsonHit.code] = true;
+
+      var label = jsonHit && jsonHit.label ? jsonHit.label : stripPricingSuffix(rawText) || primary;
+      var desc = jsonHit && jsonHit.description ? jsonHit.description : "";
+      var image = jsonHit && jsonHit.image ? String(jsonHit.image) : "";
+      var priceDiff = jsonHit && jsonHit.priceDiff != null ? jsonHit.priceDiff : null;
+
+      merged.push({
+        code: (jsonHit && jsonHit.code) || primary,
+        nativeValue: opt.value,
+        label: label,
+        description: desc,
+        image: image,
+        priceDiff: priceDiff,
+        base: !!(jsonHit && jsonHit.base),
+      });
+    });
+
+    return merged;
+  }
+
   function finalizeSectionalUi(section) {
+    try {
+      document.documentElement.classList.add("has-sectional-config-cards");
+    } catch (eCls) {}
     ensureProductSummary(section);
     scheduleMoveLeatherAboveConfigurations(section);
+    ensureMoreConfigurationsToggle(section);
     scheduleHideConfigurationRow();
     scheduleBindLeatherTrigger();
     bindConfigurationCardClicks();
     ensureObservers();
+    syncCardsSelectionHighlight();
     updateProductSummary();
   }
 
   function renderSectionalPdp() {
     var allConfigs = window.MTL_SECTIONAL_CONFIGS || {};
-    console.log("sectional configs", allConfigs);
+    sectionalLog("sectional configs keys", Object.keys(allConfigs));
 
     var pageText = [
       location.pathname,
@@ -417,44 +628,37 @@
       });
     }
 
-    var matchedConfigs = productKey ? allConfigs[productKey] : [];
+    var jsonFromKey = productKey ? allConfigs[productKey] : [];
+    if (!Array.isArray(jsonFromKey)) jsonFromKey = [];
 
-    console.log("sectional productKey", productKey);
-    console.log("sectional matchedConfigs", matchedConfigs);
-
-    if (!Array.isArray(matchedConfigs) || !matchedConfigs.length) {
-      console.warn("No matched sectional configs.");
-      return;
-    }
+    sectionalLog("sectional productKey", productKey, "json count", jsonFromKey.length);
 
     var secExistingEarly = document.getElementById("mtl-sectional-configurations");
     if (secExistingEarly && secExistingEarly.dataset.mtlFinalInit === "1") {
       finalizeSectionalUi(secExistingEarly);
       var selLog = findConfigurationSelect();
-      console.log("sectional config select", selLog);
-      console.log("selected sectional config", window.__mtlSectionalSelectedConfig);
-      console.log("native config select value", selLog && selLog.value);
+      sectionalLog("sectional config select", selLog);
+      sectionalLog("selected sectional config", window.__mtlSectionalSelectedConfig);
+      sectionalLog("native config select value", selLog && selLog.value);
       return;
     }
 
     var configSelect = findConfigurationSelect();
-    console.log("sectional config select", configSelect);
+    sectionalLog("sectional config select", configSelect);
     if (!configSelect) {
       console.warn("sectional renderer waiting for native configuration select");
       return;
     }
 
-    var filtered = matchedConfigs.filter(function (c) {
-      return c && c.code && volusionHasOption(configSelect, c.code);
-    });
-    if (!filtered.length) {
-      console.warn("No sectional configs match Volusion options.", productKey);
+    var merged = mergeNativeOptionsWithJson(configSelect, jsonFromKey);
+    if (!merged.length) {
+      console.warn("No Volusion configuration options to display as cards.", productKey);
       return;
     }
 
     state.cfgByCode = {};
-    filtered.forEach(function (c) {
-      state.cfgByCode[c.code] = c;
+    merged.forEach(function (c) {
+      if (c && c.code) state.cfgByCode[normalizeCode(c.code)] = c;
     });
 
     var existing = document.getElementById("mtl-sectional-configurations");
@@ -470,15 +674,20 @@
     var grid = document.createElement("div");
     grid.className = "mtl-sectional-grid";
 
-    filtered.forEach(function (cfg) {
+    merged.forEach(function (cfg) {
       var card = document.createElement("div");
       card.className = "mtl-sectional-card";
       card.setAttribute("data-config-code", cfg.code || "");
+      card.setAttribute("data-config-value", cfg.nativeValue != null ? String(cfg.nativeValue) : "");
 
       var img = document.createElement("img");
       img.className = "mtl-sectional-image";
-      var src = String(cfg.image || "");
-      img.src = src.indexOf("?") === -1 ? src + "?v=" + IMG_V : src + "&v=" + IMG_V;
+      var src = String(cfg.image || "").trim();
+      if (!src) {
+        img.src = PLACEHOLDER_SVG;
+      } else {
+        img.src = src.indexOf("?") === -1 ? src + "?v=" + IMG_V : src + "&v=" + IMG_V;
+      }
       img.alt = cfg.label || cfg.code || "Configuration";
 
       var tit = document.createElement("div");
@@ -513,22 +722,19 @@
     finalizeSectionalUi(section);
 
     var baseConfig =
-      matchedConfigs.find(function (c) {
+      merged.find(function (c) {
         return c.base === true;
-      }) || matchedConfigs[0];
+      }) || merged[0];
 
-    if (baseConfig && baseConfig.code) {
-      selectConfigurationCard(baseConfig.code);
+    if (baseConfig) {
+      selectConfigurationCard(baseConfig.code, baseConfig.nativeValue);
     }
 
-    console.log("selected sectional config", window.__mtlSectionalSelectedConfig);
-    console.log(
-      "native config select value",
-      findConfigurationSelect() && findConfigurationSelect().value
-    );
+    sectionalLog("selected sectional config", window.__mtlSectionalSelectedConfig);
+    sectionalLog("native config select value", findConfigurationSelect() && findConfigurationSelect().value);
 
     section.dataset.mtlFinalInit = "1";
-    console.log("sectional diagrams inserted:", filtered.length);
+    sectionalLog("sectional diagram cards inserted:", merged.length);
   }
 
   function runRender() {
@@ -541,7 +747,7 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer loaded 20260511sectional");
+  console.log("mtl-sectional-renderer loaded 20260512sectional");
 
   function boot() {
     runRender();
