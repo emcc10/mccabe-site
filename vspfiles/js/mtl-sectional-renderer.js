@@ -1,14 +1,12 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: 20260512sectional
+ * Cache: 20260513sectional
  */
 (function () {
   "use strict";
 
-  var IMG_V = "20260512sectional";
+  var IMG_V = "20260513sectional";
   var SECTIONAL_DBG = /(?:[?&])mtlSectionalDebug=1(?:&|$)/.test(String(location.search || ""));
-  /** When true, do not collapse the Volusion Choose Configuration row (user opened "More configurations"). */
-  var nativeConfigRowUserExpanded = false;
   var PLACEHOLDER_SVG =
     "data:image/svg+xml," +
     encodeURIComponent(
@@ -89,7 +87,6 @@
   }
 
   function hideConfigurationRow() {
-    if (nativeConfigRowUserExpanded) return;
     var configSelect = findConfigurationSelect();
     if (!configSelect) {
       console.warn("No native configuration select found.");
@@ -106,20 +103,6 @@
       }
     }
     configSelect.dataset.mtlRowHidden = "1";
-  }
-
-  function revealNativeConfigurationRow() {
-    var configSelect = findConfigurationSelect();
-    if (!configSelect) return;
-    var row = configSelect.closest("tr") || configSelect.parentElement;
-    if (row) {
-      row.style.removeProperty("display");
-      row.style.removeProperty("visibility");
-    }
-    configSelect.dataset.mtlRowHidden = "0";
-    try {
-      configSelect.focus();
-    } catch (eF) {}
   }
 
   function scheduleHideConfigurationRow() {
@@ -307,21 +290,31 @@
       .trim();
   }
 
-  function formatAdjustment(diff) {
-    var n = Number(diff);
-    if (!n || isNaN(n) || n === 0) return "$0";
-    return "+$" + n;
+  function styleSegmentToPascal(segment) {
+    var s = String(segment || "")
+      .trim()
+      .toLowerCase();
+    if (!s) return "";
+    return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
-  function getSelectedConfigurationAdjustment() {
-    var sel = findConfigurationSelect();
-    if (!sel || sel.selectedIndex < 0) return null;
-    var text = String((sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].textContent) || "").trim();
-    var paren = text.match(/\(\s*\+?\s*\$?\s*([\d,]+(?:\.\d{2})?)\s*\)/i);
-    if (paren) return parseFloat(paren[1].replace(/,/g, ""));
-    var plus = text.match(/\+\s*\$?\s*([\d,]+(?:\.\d{2})?)/);
-    if (plus) return parseFloat(plus[1].replace(/,/g, ""));
-    return null;
+  /** Prefix like "Alula-SC" to match filenames in sectional-configs.js (e.g. Alula-SC-07-15.png). */
+  function getSectionalDiagramPrefix(productKey, pcVal) {
+    if (productKey) {
+      var pk = String(productKey).replace(/\s+/g, "").trim();
+      if (pk) return pk + "-SC";
+    }
+    var pc = String(pcVal || "").trim();
+    var m = pc.match(/^([A-Za-z][A-Za-z0-9]*)-SC(?:-|$)/i);
+    if (!m) return "";
+    return styleSegmentToPascal(m[1]) + "-SC";
+  }
+
+  function inferSectionalDiagramPngUrl(productKey, pcVal, configCode) {
+    var prefix = getSectionalDiagramPrefix(productKey, pcVal);
+    var cod = normalizeCode(configCode).replace(/\s+/g, "");
+    if (!prefix || !cod) return "";
+    return "/v/vspfiles/sectional-diagrams/" + prefix + "-" + cod + ".png";
   }
 
   function refreshProductPriceLabel() {
@@ -340,6 +333,11 @@
 
   function ensureProductSummary(section) {
     var sum = document.getElementById("mtl-product-summary");
+    var legacyAdj = document.getElementById("mtl-sum-adj");
+    if (legacyAdj) {
+      var adjRow = legacyAdj.closest && legacyAdj.closest(".mtl-summary-row");
+      if (adjRow) adjRow.remove();
+    }
     if (!sum) {
       sum = document.createElement("div");
       sum.id = "mtl-product-summary";
@@ -347,7 +345,6 @@
         '<h3 class="mtl-summary-heading">Product Summary</h3>' +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Selected Leather</span><span class="mtl-summary-value" id="mtl-sum-leather">Not selected</span></div>' +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Selected Configuration</span><span class="mtl-summary-value" id="mtl-sum-config">—</span></div>' +
-        '<div class="mtl-summary-row"><span class="mtl-summary-label">Configuration Price Adjustment</span><span class="mtl-summary-value" id="mtl-sum-adj">$0</span></div>' +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Product Price</span><span class="mtl-summary-value" id="mtl-sum-price">—</span></div>';
     }
     if (section && section.parentNode) {
@@ -360,6 +357,11 @@
   }
 
   function updateProductSummary() {
+    var legacyAdj = document.getElementById("mtl-sum-adj");
+    if (legacyAdj) {
+      var adjRow = legacyAdj.closest && legacyAdj.closest(".mtl-summary-row");
+      if (adjRow) adjRow.remove();
+    }
     var sum = document.getElementById("mtl-product-summary");
     if (!sum) return;
     refreshProductPriceLabel();
@@ -376,20 +378,13 @@
     var cfg = code ? state.cfgByCode[code] : null;
     var configLabel = cfg ? cfg.label || cfg.code || code : code || "—";
 
-    var adjParsed = getSelectedConfigurationAdjustment();
-    var adjNum = adjParsed != null && !isNaN(adjParsed) ? adjParsed : cfg && cfg.priceDiff != null ? Number(cfg.priceDiff) : 0;
-    if (isNaN(adjNum)) adjNum = 0;
-    var adj = formatAdjustment(adjNum);
-
     var price = readDisplayedPrice();
 
     var elL = document.getElementById("mtl-sum-leather");
     var elC = document.getElementById("mtl-sum-config");
-    var elA = document.getElementById("mtl-sum-adj");
     var elP = document.getElementById("mtl-sum-price");
     if (elL) elL.textContent = leatherTxt;
     if (elC) elC.textContent = configLabel;
-    if (elA) elA.textContent = adj;
     if (elP) elP.textContent = price || "—";
   }
 
@@ -507,40 +502,7 @@
     }
   }
 
-  function ensureMoreConfigurationsToggle(section) {
-    if (!section || section.querySelector("#mtl-sectional-more-native")) return;
-    var wrap = document.createElement("div");
-    wrap.id = "mtl-sectional-more-native";
-    wrap.className = "mtl-sectional-more-native";
-    wrap.style.cssText = "margin-top:12px;font-size:13px;";
-    var btn = document.createElement("button");
-    btn.type = "button";
-    btn.id = "mtl-sectional-toggle-native-row";
-    btn.style.cssText =
-      "background:transparent;border:0;padding:0;cursor:pointer;color:#333;text-decoration:underline;font:inherit;";
-    btn.setAttribute("aria-expanded", "false");
-    btn.textContent = "More configurations (show native menu)";
-    btn.addEventListener("click", function () {
-      var exp = btn.getAttribute("aria-expanded") === "true";
-      if (exp) {
-        nativeConfigRowUserExpanded = false;
-        btn.setAttribute("aria-expanded", "false");
-        btn.textContent = "More configurations (show native menu)";
-        scheduleHideConfigurationRow();
-      } else {
-        nativeConfigRowUserExpanded = true;
-        btn.setAttribute("aria-expanded", "true");
-        btn.textContent = "Hide native configuration menu";
-        revealNativeConfigurationRow();
-      }
-    });
-    wrap.appendChild(btn);
-    var inner = section.querySelector(".mtl-sectional-inner");
-    if (inner) inner.appendChild(wrap);
-    else section.appendChild(wrap);
-  }
-
-  function mergeNativeOptionsWithJson(configSelect, jsonCfgs) {
+  function mergeNativeOptionsWithJson(configSelect, jsonCfgs, productKey, pcVal) {
     var jsonList = Array.isArray(jsonCfgs) ? jsonCfgs.slice() : [];
     var usedJson = {};
     var merged = [];
@@ -569,11 +531,15 @@
 
       var label = jsonHit && jsonHit.label ? jsonHit.label : stripPricingSuffix(rawText) || primary;
       var desc = jsonHit && jsonHit.description ? jsonHit.description : "";
-      var image = jsonHit && jsonHit.image ? String(jsonHit.image) : "";
+      var mergedCode = (jsonHit && jsonHit.code) || primary;
+      var image = jsonHit && jsonHit.image ? String(jsonHit.image).trim() : "";
+      if (!image) {
+        image = inferSectionalDiagramPngUrl(productKey, pcVal, mergedCode);
+      }
       var priceDiff = jsonHit && jsonHit.priceDiff != null ? jsonHit.priceDiff : null;
 
       merged.push({
-        code: (jsonHit && jsonHit.code) || primary,
+        code: mergedCode,
         nativeValue: opt.value,
         label: label,
         description: desc,
@@ -590,9 +556,10 @@
     try {
       document.documentElement.classList.add("has-sectional-config-cards");
     } catch (eCls) {}
+    var legacyToggle = document.getElementById("mtl-sectional-more-native");
+    if (legacyToggle) legacyToggle.remove();
     ensureProductSummary(section);
     scheduleMoveLeatherAboveConfigurations(section);
-    ensureMoreConfigurationsToggle(section);
     scheduleHideConfigurationRow();
     scheduleBindLeatherTrigger();
     bindConfigurationCardClicks();
@@ -650,7 +617,7 @@
       return;
     }
 
-    var merged = mergeNativeOptionsWithJson(configSelect, jsonFromKey);
+    var merged = mergeNativeOptionsWithJson(configSelect, jsonFromKey, productKey, pcVal);
     if (!merged.length) {
       console.warn("No Volusion configuration options to display as cards.", productKey);
       return;
@@ -747,7 +714,7 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer loaded 20260512sectional");
+  console.log("mtl-sectional-renderer loaded 20260513sectional");
 
   function boot() {
     runRender();
