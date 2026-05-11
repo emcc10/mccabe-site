@@ -2017,6 +2017,24 @@ document.addEventListener("DOMContentLoaded", function () {
   display:none !important;
 }
 
+/* Sectional PDP + inline scripts: programmatic .click() on #wmOpen must not hit display:none.
+   Mirrors custom-safe (~11157): keep off-screen only, same stacking as programmatic opener. */
+html.is-sectional-product #wmOpen {
+  display: block !important;
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: auto !important;
+}
+
 /* Room planner overlay: transition like leather modal, no webpage chrome */
 .mc-planner-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.5);
@@ -3062,13 +3080,41 @@ try {
     return mcPalliserSpecSheetBase() + encodeURIComponent(model + " " + style) + ".pdf";
   }
 
+  /** Title-case Palliser style token for visible summary link text (77302 · Alula). */
+  function mcPalliserSummaryStylePretty(styleTok) {
+    var t = String(styleTok || "").trim();
+    if (!t) return "";
+    return t
+      .toLowerCase()
+      .split(/\s+/g)
+      .filter(Boolean)
+      .map(function (w) {
+        return w.replace(/^[a-z]/, function (c) {
+          return c.toUpperCase();
+        });
+      })
+      .join(" ");
+  }
+
+  /** Matches theater PDP pattern: MODEL + middot + style name while href stays mcBuild URL (CDN PDF). */
+  function mcProductSummaryAnchorLabel(hasUrl, model, style) {
+    var m = String(model || "").trim();
+    var sPretty = mcPalliserSummaryStylePretty(style);
+    if (hasUrl && m && sPretty) return m + " \u00B7 " + sPretty;
+    return "Product Summary";
+  }
+
   function mcRefreshProductSummaryButton() {
     var anchors = [
       document.getElementById("mcProductSummaryBtn"),
       document.getElementById("mtl-sum-palliser-summary"),
     ].filter(Boolean);
     if (!anchors.length) return;
+    var r = mcPalliserResolveModelAndStyle();
+    var modelDisp = (r && r.model) || "";
+    var styleDisp = (r && r.style) || "";
     var url = mcBuildPalliserSpecSheetUrl();
+    var summaryLabel = mcProductSummaryAnchorLabel(!!url, modelDisp, styleDisp);
     var i;
     for (i = 0; i < anchors.length; i++) {
       var a = anchors[i];
@@ -3084,13 +3130,26 @@ try {
         a.href = url;
         a.setAttribute("aria-disabled", "false");
         a.style.opacity = "";
-        a.title = "Open Palliser product summary (PDF)";
+        a.title =
+          summaryLabel !== "Product Summary"
+            ? "Open Palliser product summary (PDF) — " + summaryLabel.replace(/\u00B7/g, "·")
+            : "Open Palliser product summary (PDF)";
       } else {
         a.href = "#";
         a.setAttribute("aria-disabled", "true");
         a.style.opacity = "0.45";
         a.title = "Palliser spec sheet not detected for this product";
       }
+      var k;
+      var spans = a.querySelectorAll("span");
+      var txtSpan = null;
+      for (k = 0; k < spans.length; k++) {
+        if (!spans[k].classList || !spans[k].classList.contains("mc-btn-icon")) {
+          txtSpan = spans[k];
+          break;
+        }
+      }
+      if (txtSpan) txtSpan.textContent = summaryLabel;
     }
   }
 
@@ -3114,12 +3173,14 @@ try {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
     a.href = url;
-    a.title = "Open Palliser product summary (PDF)";
     a.style.cssText =
       "padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:0;background:#fff;cursor:pointer;";
     a.innerHTML =
       '<span>Product Summary</span><span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>';
     wrap.appendChild(a);
+    try {
+      if (typeof mcRefreshProductSummaryButton === "function") mcRefreshProductSummaryButton();
+    } catch (eRs) {}
     var anchor =
       document.querySelector("#v65-product-parent h1") ||
       document.querySelector("#content_area h1") ||
@@ -3352,38 +3413,104 @@ try {
     mcReorderInlineConfigBeforeCartQty();
   }
 
-  function mcFireWmOpenProgrammatically(w) {
+  function mcFireWmOpenProgrammatically(w, evPassed) {
     if (!w) return;
+    var stub = {
+      preventDefault: function () {},
+      stopPropagation: function () {},
+      type: "click",
+    };
     try {
       w.click();
     } catch (eClk) {}
     try {
-      if (typeof jQuery !== "undefined" && jQuery.fn && jQuery(w).trigger) jQuery(w).trigger("click");
+      if (typeof jQuery !== "undefined" && jQuery.fn && jQuery(w).trigger)
+        jQuery(w).trigger("click");
     } catch (eJq) {}
+    function wmOverlayShowsFlex() {
+      var ov = document.querySelector(".wm-overlay");
+      if (!ov) return false;
+      if ((ov.style && ov.style.display) === "flex") return true;
+      try {
+        return String(window.getComputedStyle(ov).display || "").toLowerCase() === "flex";
+      } catch (eC) {
+        return false;
+      }
+    }
+    function callWmOpenOnclick(syncEv) {
+      try {
+        if (typeof w.onclick === "function") w.onclick(syncEv || stub);
+      } catch (eOh) {}
+    }
+    try {
+      if (!wmOverlayShowsFlex())
+        callWmOpenOnclick(
+          evPassed && typeof evPassed.preventDefault === "function" ? evPassed : stub
+        );
+    } catch (eSyn) {}
+    setTimeout(function () {
+      if (!wmOverlayShowsFlex()) callWmOpenOnclick(stub);
+    }, 55);
+    setTimeout(function () {
+      if (!wmOverlayShowsFlex()) callWmOpenOnclick(stub);
+    }, 160);
+  }
+
+  function mcEnsureWmOpenMutationObserver() {
+    if (typeof MutationObserver === "undefined" || window.__mcWmOpenMoBound) return;
+    window.__mcWmOpenMoBound = true;
+    var obs = new MutationObserver(function () {
+      var pending = Number(window.__mcPendingWmOpenTap || 0);
+      if (!pending) return;
+      if (Date.now() - pending > 14000) {
+        window.__mcPendingWmOpenTap = 0;
+        return;
+      }
+      if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+      var wm = document.getElementById("wmOpen");
+      if (!wm) return;
+      window.__mcPendingWmOpenTap = 0;
+      mcFireWmOpenProgrammatically(wm, null);
+    });
+    try {
+      obs.observe(document.documentElement || document.body, {
+        childList: true,
+        subtree: true,
+      });
+      window.__mcWmOpenMoRef = obs;
+    } catch (eMo) {}
   }
 
   /**
-   * Open Palliser leather modal — same hidden #wmOpen click as initIfReady wires (~2835).
-   * Resolves async #wmOpen (sectionals mount #mc-inline-config before leather UI exists).
+   * Open Palliser leather modal — same handler as initIfReady wires on #wmOpen (~2835).
+   * Ensures programmatic open when #wmOpen was display:none until sectional override applies.
    */
   window.mcOpenWmLeatherModal = function mcOpenWmLeatherModal(ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
     if (ev && ev.stopPropagation) ev.stopPropagation();
+    mcEnsureWmOpenMutationObserver();
+    window.__mcPendingWmOpenTap = Date.now();
     if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
     var w = document.getElementById("wmOpen");
     if (w) {
-      mcFireWmOpenProgrammatically(w);
+      mcFireWmOpenProgrammatically(w, ev);
       return;
     }
     var tries = 0;
+    var maxT =
+      typeof window.isSectionalProductPage === "function" &&
+      window.isSectionalProductPage()
+        ? 120
+        : 28;
     var tmr = setInterval(function () {
       tries++;
       if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
       var w2 = document.getElementById("wmOpen");
       if (w2) {
         clearInterval(tmr);
-        mcFireWmOpenProgrammatically(w2);
-      } else if (tries > 26) clearInterval(tmr);
+        window.__mcPendingWmOpenTap = 0;
+        mcFireWmOpenProgrammatically(w2, ev);
+      } else if (tries > maxT) clearInterval(tmr);
     }, 120);
   };
 
@@ -3686,11 +3813,29 @@ try {
       return out;
     }
 
+    function leatherStripOptionProbablyConfiguration(txt){
+      var s = String(txt || "").replace(/\s+/g, " ").trim();
+      if (!s) return true;
+      var hasLeatherCue = /\b(leather|cover|upholstery|fabric)\b|\bgrade\b|\bfoam\b|\bcupholder\b|\bmetal\b|\bwood\b|\bsteel\b|\bplastic\b|\bconsole\b|\bpower\b\s*head\b/i.test(
+        s
+      );
+      if (hasLeatherCue) return false;
+      if (/^[0-9][0-9\s\/\-x]*(?:[\/\-]|x|[0-9])[0-9\s\/\-]*$/i.test(s) && s.replace(/\s/g, "").length <= 42)
+        return true;
+      if (/^sectional\b/i.test(s)) return true;
+      if (/\bcustom\s+quotes?\b|\bshipping\b|\bin\s+stock\b/i.test(s)) return true;
+      return false;
+    }
+
     function fallbackLeatherOptionsFromSelect(){
       var table = optionsTable || document.querySelector("#options_table, table[id*='options_table']");
       var native =
         document.querySelector("select.mc-native-leather") ||
-        (table ? table.querySelector("select[name*='cover' i], select[id*='cover' i], select[name*='leather' i], select[id*='leather' i], select") : null);
+        (table
+          ? table.querySelector(
+              "select[name*='cover' i], select[id*='cover' i], select[name*='leather' i], select[id*='leather' i], select[name*='upholstery' i], select[id*='upholstery' i]"
+            )
+          : null);
       if (!native) return [];
 
       var rows = [];
@@ -3699,12 +3844,14 @@ try {
         var val = String(opt.value || "").trim();
         if (!txt || !val) return;
         if (/choose|select|please select|--/i.test(txt)) return;
+        if (leatherStripOptionProbablyConfiguration(txt)) return;
         var fc = splitLeatherFamilyColor(txt);
         if (!fc.family && !fc.color) return;
         rows.push({
           family: fc.family,
           color: fc.color,
           value: val,
+          label: normalizeLeatherText(txt),
           swatches: miniSwatchCandidates(fc.family, fc.color)
         });
       });
@@ -3736,7 +3883,15 @@ try {
     function renderLeatherPreviewStrip(){
       if (!mcLeatherStrip) return;
 
-      var source = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
+      var source = Array.isArray(window.__WM_LEATHER_OPTIONS__)
+        ? window.__WM_LEATHER_OPTIONS__.slice()
+        : [];
+      source = source.filter(function (o) {
+        var fudge = String((o && o.label) || ((o.family || "") + " " + (o.color || "")))
+          .replace(/\s+/g, " ")
+          .trim();
+        return fudge && !leatherStripOptionProbablyConfiguration(fudge);
+      });
       if (!source.length) source = fallbackLeatherOptionsFromSelect();
       if (!source.length){
         mcLeatherStrip.innerHTML = '<span style="font-size:12px;color:#777">Swatches unavailable</span>';
@@ -3746,7 +3901,9 @@ try {
       var unique = [];
       var seen = {};
       source.forEach(function(o){
-        var key = ((o.family || "") + "|" + (o.color || "")).toLowerCase();
+        var key = (((o.label || "") + "").replace(/\s+/g, " ") || ((o.family || "") + "|" + (o.color || "")))
+          .trim()
+          .toLowerCase();
         if (!key || seen[key]) return;
         seen[key] = true;
         unique.push(o);
@@ -3758,11 +3915,17 @@ try {
         btn.type = "button";
         btn.className = "mc-mini-swatch";
         var friendly = ((o.family || "") + " " + (o.color || "")).trim();
-        btn.title = friendly || "Leather swatch";
-        btn.dataset.lookup = friendly.toLowerCase();
+        var labelFull = "";
+        if (o && o.label) labelFull = String(o.label).replace(/\s+/g, " ").trim();
+        if (!labelFull && friendly) labelFull = normalizeLeatherText(friendly);
+        btn.title = labelFull || friendly || "Leather swatch";
+        btn.dataset.lookupFull = btn.title.toLowerCase();
+        btn.dataset.familyColor = normalizeLeatherText(friendly).toLowerCase();
+        btn.dataset.lookup = normalizeLeatherText(friendly).toLowerCase();
 
         var img = document.createElement("img");
-        img.alt = friendly || "Leather swatch";
+        img.alt = "";
+        img.setAttribute("role", "presentation");
         img.loading = "lazy";
         btn.appendChild(img);
         loadMiniSwatch(img, o.swatches, btn);
@@ -3781,10 +3944,30 @@ try {
       if (!txt || /^selected leather$|^choose|^select\s|^please\s/i.test(txt)) txt = "";
       mcSum.textContent = txt;
 
-      var activeText = (mcSum.textContent || "").toLowerCase();
+      var activeText = (mcSum.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+      function wmSummaryMatchesChip(active, chipTitle) {
+        var a = String(active || "").replace(/\s+/g, " ").trim().toLowerCase();
+        var t = String(chipTitle || "").replace(/\s+/g, " ").trim().toLowerCase();
+        if (!a || !t) return false;
+        if (a.indexOf(t) !== -1 || t.indexOf(a) !== -1) return true;
+        var stripG = function (x) {
+          return String(x || "")
+            .replace(/^grade\s*(?:1000|[0-9,]+)\s*/i, "")
+            .trim();
+        };
+        var aa = stripG(a);
+        var tt = stripG(t);
+        if (aa.indexOf(tt) !== -1 || tt.indexOf(aa) !== -1) return true;
+        var parts = tt.split(/\s+/).filter(function (w) {
+          return w.replace(/[^a-z0-9]/gi, "").length > 2;
+        });
+        return parts.length > 0 && parts.every(function (w) {
+          return aa.indexOf(w) !== -1;
+        });
+      }
       Array.from((mcLeatherStrip || document).querySelectorAll(".mc-mini-swatch")).forEach(function(btn){
-        var key = btn.dataset.lookup || "";
-        var isActive = !!key && activeText.indexOf(key) !== -1;
+        var ttl = btn.title || "";
+        var isActive = !!ttl && wmSummaryMatchesChip(activeText, ttl);
         btn.dataset.selected = isActive ? "1" : "0";
       });
     }
@@ -19372,8 +19555,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   Sectional scripts (external) load last. Leather modal CSS ~line 1872 and script #wm-leather-modal-js ~line 2170
   run earlier in document order, so they always execute before these files.
 -->
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260517sectional"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260517sectional"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260518sectional"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260518sectional"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

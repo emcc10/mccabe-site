@@ -1,11 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: 20260517sectional
+ * Cache: 20260518sectional
  */
 (function () {
   "use strict";
 
-  var IMG_V = "20260517sectional";
+  var IMG_V = "20260518sectional";
 
   /** Same inner markup as theater <a id="mcProductSummaryBtn"> in template_266.html (#mc-inline-config). */
   var PRODUCT_SUMMARY_LINK_INNER =
@@ -821,7 +821,7 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer loaded 20260517sectional");
+  console.log("mtl-sectional-renderer loaded 20260518sectional");
 
   function boot() {
     ensureMcWmOpenMountedListener();
