@@ -2468,8 +2468,11 @@ function gradeHeaderText(g) {
     } catch (eWm) {}
     return false;
   }
+  try {
+    window.wmIsLeatherEligiblePage = wmIsLeatherEligiblePage;
+  } catch (eWmEx) {}
 
- function selectLooksLeatherish(sel){
+  function selectLooksLeatherish(sel){
   const id = (sel.id || "").toLowerCase();
   const nm = (sel.name || "").toLowerCase();
   const hint = id + " " + nm;
@@ -2513,8 +2516,11 @@ function gradeHeaderText(g) {
 
   function hasRealOptions(sel){
     const real = Array.from(sel.options || []).filter(o => !isPlaceholderOption(o));
-    /* Sectionals: leather/cover options often populate only after configuration is chosen — allow single-option leather selects so #wmOpen still builds. */
-    const min = document.documentElement.classList.contains("is-sectional-product") ? 1 : 2;
+    /* Sectionals: cover/leather often has one real option until configuration is chosen - require only one then. */
+    const secEarly =
+      document.documentElement.classList.contains("is-sectional-product") ||
+      (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage());
+    const min = secEarly ? 1 : 2;
     return real.length >= min;
   }
 
@@ -2887,19 +2893,30 @@ function gradeHeaderText(g) {
     return true;
   }
 
-  // Boot: wait for Volusion to inject options; keep retrying briefly.
+  // Boot: wait for Volusion to inject options; keep retrying (sectionals need longer - leather may lag configuration).
 function boot(){
   var tries = 0;
   var path = String(location.pathname || "").toLowerCase();
   var secPath = path.indexOf("-sc-") !== -1;
-  var maxTries =
-    document.documentElement.classList.contains("is-sectional-product") || secPath ? 100 : 40;
+  var isSecClass = document.documentElement.classList.contains("is-sectional-product");
+  var isSecFn = typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage();
+  var eligible = typeof window.wmIsLeatherEligiblePage === "function" && window.wmIsLeatherEligiblePage();
+  var longRun = isSecClass || secPath || isSecFn || eligible;
+  var maxTries = longRun ? 240 : 40;
   var timer = setInterval(function(){
     tries++;
     if (initIfReady() || tries > maxTries) clearInterval(timer);
   }, 250);
 }
 boot();
+window.addEventListener("pageshow", function (ev) {
+  if (ev.persisted && !document.getElementById("wmOpen")) {
+    try {
+      window.__WM_LEATHER_MODAL_BUILT__ = false;
+    } catch (ePs) {}
+    boot();
+  }
+});
 
 try {
   window.mcTryInitWmLeather = function mcTryInitWmLeather() {
@@ -19590,8 +19607,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   Sectional scripts (external) load last. Leather modal CSS ~line 1872 and script #wm-leather-modal-js ~line 2170
   run earlier in document order, so they always execute before these files.
 -->
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260520sectional"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260520sectional"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260521sectional"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260521sectional"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

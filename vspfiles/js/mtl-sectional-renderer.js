@@ -1,6 +1,6 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: 20260520sectional
+ * Cache: 20260521sectional
  */
 (function () {
   "use strict";
@@ -789,6 +789,10 @@
       return;
     }
 
+    try {
+      document.documentElement.classList.add("is-sectional-product");
+    } catch (eSecHtml) {}
+
     state.cfgByCode = {};
     merged.forEach(function (c) {
       if (c && c.code) state.cfgByCode[normalizeCode(c.code)] = c;
@@ -883,7 +887,7 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer loaded 20260520sectional");
+  console.log("mtl-sectional-renderer loaded 20260521sectional");
 
   function boot() {
     ensureMcWmOpenMountedListener();
