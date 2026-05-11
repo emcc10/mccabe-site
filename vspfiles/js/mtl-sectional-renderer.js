@@ -1,11 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: 20260511diag
+ * Cache: debug-fix-20260511-2
  */
 (function () {
   "use strict";
 
-  var IMG_V = "20260511diag";
+  var IMG_V = "debug-fix-20260511-2";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -21,6 +21,354 @@
     );
 
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
+
+  window.MTL_RENDERER_VERSION = "debug-fix-20260511-2";
+  console.log("MTL_RENDERER_VERSION debug-fix-20260511-2");
+
+  function isSectionalProductPageClient() {
+    if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) return true;
+    return document.documentElement.classList.contains("is-sectional-product");
+  }
+
+  function isVolusionConfigurationRowSelect(sel) {
+    try {
+      var rowText = "";
+      var tr = sel.closest("tr");
+      var td = sel.closest("td");
+      if (tr) rowText += " " + tr.innerText;
+      if (td) rowText += " " + td.innerText;
+      if (sel.parentElement) rowText += " " + sel.parentElement.innerText;
+      rowText = rowText.toLowerCase();
+      if (!/choose configuration|configuration/i.test(rowText)) return false;
+      if (/(choose cover|choose leather|select leather|select a leather|upholstery|leather|fabric cover)/i.test(rowText))
+        return false;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function findNativeLeatherSelectEl() {
+    var sels = Array.from(
+      document.querySelectorAll("#options_table select, #v65-product-parent select, table[id*='options_table'] select")
+    );
+    var i;
+    var m = document.querySelector("select.mc-native-leather");
+    if (m && !isVolusionConfigurationRowSelect(m)) return m;
+    for (i = 0; i < sels.length; i++) {
+      var sel = sels[i];
+      if (isVolusionConfigurationRowSelect(sel)) continue;
+      var rowText = "";
+      var tr = sel.closest("tr");
+      if (tr) rowText = String(tr.innerText || "").toLowerCase();
+      if (
+        sel.classList.contains("mc-native-leather") ||
+        /(choose cover|choose leather|select leather|select a leather|upholstery|cover|fabric)/i.test(rowText)
+      ) {
+        return sel;
+      }
+    }
+    return null;
+  }
+
+  function isPlaceholderLeatherOption(opt) {
+    var t = String(opt.textContent || "").trim();
+    var v = String(opt.value || "").trim();
+    if (!t || !v) return true;
+    if (/choose|select|please select|^--|^-$/i.test(t)) return true;
+    return false;
+  }
+
+  function buildSyntheticWmLeatherOptionsFromSelect(sel) {
+    if (!sel || !sel.options) return [];
+    var out = [];
+    Array.prototype.forEach.call(sel.options, function (opt) {
+      if (isPlaceholderLeatherOption(opt)) return;
+      var label = String(opt.textContent || "").replace(/\s+/g, " ").trim();
+      var value = String(opt.value || "").trim();
+      var parts = label.split(/\s+/).filter(Boolean);
+      var family = parts[0] || label;
+      var color = parts.slice(1).join(" ") || "";
+      out.push({
+        family: family,
+        color: color,
+        grade: "Base",
+        value: value,
+        swatches: [],
+        label: label,
+      });
+    });
+    return out;
+  }
+
+  function ensureLeatherOptionsFromNativeSelect(leatherSel) {
+    if (!leatherSel || !leatherSel.options || leatherSel.options.length < 1) return;
+    var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
+    if (!syn.length) return;
+    var prev = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__.length : 0;
+    if (!window.__WM_LEATHER_OPTIONS__ || window.__WM_LEATHER_OPTIONS__.length === 0 || syn.length > prev) {
+      window.__WM_LEATHER_OPTIONS__ = syn;
+      try {
+        document.dispatchEvent(new CustomEvent("wmLeatherOptionsReady", { bubbles: true }));
+      } catch (eEvt) {}
+      console.log("[MTL debug] __WM_LEATHER_OPTIONS__ set from native select, count=", syn.length);
+    }
+  }
+
+  function renderFallbackLeatherIntoWmSections(leatherSel) {
+    if (!isSectionalProductPageClient() || !leatherSel) return;
+    var wmSections = document.getElementById("wmSections");
+    if (!wmSections) return;
+    var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
+    if (!syn.length) return;
+    if (wmSections.querySelector(".wm-tile")) return;
+    var ex = wmSections.querySelector(".mtl-fallback-leather-grid");
+    if (ex) ex.remove();
+    var wrap = document.createElement("div");
+    wrap.className = "mtl-fallback-leather-grid";
+    wrap.style.cssText = "margin:8px 0;padding:8px;border:1px dashed #888;background:#fafafa;";
+    var cap = document.createElement("div");
+    cap.textContent = "Leather / cover options (from native select)";
+    cap.style.cssText = "font-size:12px;font-weight:600;margin-bottom:8px;";
+    wrap.appendChild(cap);
+    var grid = document.createElement("div");
+    grid.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;max-height:55vh;overflow:auto;";
+    syn.forEach(function (o) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "mtl-fallback-leather-btn";
+      b.style.cssText =
+        "padding:10px 12px;border:1px solid #333;background:#fff;cursor:pointer;text-align:left;font-size:13px;";
+      b.textContent = o.label;
+      b.title = o.label;
+      b.onclick = function (ev) {
+        ev.preventDefault();
+        leatherSel.value = o.value;
+        leatherSel.dispatchEvent(new Event("change", { bubbles: true }));
+        leatherSel.dispatchEvent(new Event("input", { bubbles: true }));
+        if (typeof jQuery !== "undefined") jQuery(leatherSel).trigger("change");
+        var wmSummary = document.getElementById("wmSummary");
+        if (wmSummary) wmSummary.textContent = o.label;
+        var mcSum = document.getElementById("mcLeatherSummary");
+        if (mcSum) mcSum.textContent = o.label;
+        var ov = document.querySelector(".wm-overlay");
+        if (ov) ov.style.display = "none";
+      };
+      grid.appendChild(b);
+    });
+    wrap.appendChild(grid);
+    wmSections.appendChild(wrap);
+  }
+
+  function patchLeatherModalFallback(leatherSel) {
+    if (!isSectionalProductPageClient()) return;
+    if (document.documentElement.dataset.mtlWmModalFallbackPatched === "1") return;
+    document.documentElement.dataset.mtlWmModalFallbackPatched = "1";
+    document.addEventListener(
+      "click",
+      function () {
+        window.setTimeout(function () {
+          var ov = document.querySelector(".wm-overlay");
+          if (!ov) return;
+          var disp = "";
+          try {
+            disp = window.getComputedStyle(ov).display;
+          } catch (eC) {}
+          if (disp === "none") return;
+          renderFallbackLeatherIntoWmSections(leatherSel || findNativeLeatherSelectEl());
+        }, 180);
+      },
+      true
+    );
+  }
+
+  function removeStandaloneDuplicateProductSummary() {
+    if (!isSectionalProductPageClient()) return;
+    var st = document.getElementById("mcProductSummaryRowStandalone");
+    if (st) {
+      st.remove();
+      console.log("[MTL] removed #mcProductSummaryRowStandalone (duplicate Product Summary)");
+    }
+  }
+
+  function applyAlulaPalliserPdfHref() {
+    if (!isSectionalProductPageClient()) return;
+    var hay = (
+      String(document.title || "") +
+      " " +
+      String(location.pathname || "") +
+      " " +
+      String((document.querySelector('input[name="ProductCode"]') || {}).value || "")
+    ).toLowerCase();
+    if (!/alula|aloira/.test(hay)) return;
+    var a = document.getElementById("mcProductSummaryBtn");
+    if (!a) return;
+    var url = "https://images.palliser.com/specsheet/en/" + encodeURIComponent("77427 Alula") + ".pdf";
+    a.href = url;
+    a.style.opacity = "";
+    a.setAttribute("aria-disabled", "false");
+    var spans = a.querySelectorAll("span");
+    var k;
+    for (k = 0; k < spans.length; k++) {
+      if (!(spans[k].classList && spans[k].classList.contains("mc-btn-icon"))) {
+        spans[k].textContent = "Product Summary";
+        break;
+      }
+    }
+    a.title = "Open Palliser product summary (PDF) — 77427 · Alula";
+    console.log("[MTL] mcProductSummaryBtn href forced to Alula PDF:", url);
+  }
+
+  function collectMtlDebugSnapshot(ctx) {
+    ctx = ctx || {};
+    var pcEl = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+    var productCode = pcEl ? String(pcEl.value || "").trim() : "";
+    var titleEl = document.querySelector("h1") || document.querySelector(".productnamecolor");
+    var titleText = titleEl ? String(titleEl.textContent || "").replace(/\s+/g, " ").trim() : "";
+
+    var palliserModel = "";
+    var palliserStyle = "";
+    var summaryHref = "";
+    try {
+      if (typeof window.mcPalliserResolveModelAndStyle === "function") {
+        var r = window.mcPalliserResolveModelAndStyle();
+        palliserModel = (r && r.model) || "";
+        palliserStyle = (r && r.style) || "";
+      }
+      if (typeof window.mcBuildPalliserSpecSheetUrl === "function") summaryHref = window.mcBuildPalliserSpecSheetUrl() || "";
+    } catch (eP) {}
+
+    var cfgSel = findConfigurationSelect();
+    var mergedPreview = [];
+    try {
+      var pk = "";
+      var pageBlob = (
+        String(location.pathname) +
+        " " +
+        String(document.title) +
+        " " +
+        String(titleText)
+      ).toLowerCase();
+      var allC = window.MTL_SECTIONAL_CONFIGS || {};
+      pk =
+        Object.keys(allC).find(function (k) {
+          return pageBlob.indexOf(k.toLowerCase()) !== -1;
+        }) || "";
+      var jfk = pk && allC[pk] ? allC[pk] : [];
+      if (cfgSel) mergedPreview = mergeNativeOptionsWithJson(cfgSel, Array.isArray(jfk) ? jfk : [], pk, productCode);
+    } catch (eM) {
+      mergedPreview = [{ error: String(eM.message || eM) }];
+    }
+
+    var cfgIds = mergedPreview.map(function (m) {
+      return m && (m.code != null || m.nativeValue != null) ? String(m.code || "") + ":" + String(m.nativeValue || "") : "?";
+    });
+
+    var defaultCfg = "";
+    if (cfgSel && mergedPreview.length) {
+      var sv = String(cfgSel.value || "");
+      var hit = mergedPreview.find(function (m) {
+        return String(m.nativeValue) === sv;
+      });
+      defaultCfg = hit ? String(hit.code || hit.label || "") : String(mergedPreview[0].code || "");
+    }
+
+    var leatherSel = findNativeLeatherSelectEl();
+    var leatherOptCount = leatherSel && leatherSel.options ? leatherSel.options.length : 0;
+    var leatherTexts = [];
+    if (leatherSel && leatherSel.options) {
+      var j;
+      for (j = 0; j < Math.min(10, leatherSel.options.length); j++) {
+        leatherTexts.push(String(leatherSel.options[j].textContent || "").trim());
+      }
+    }
+
+    var wmOpts = window.__WM_LEATHER_OPTIONS__;
+    var wmOptsYes = Array.isArray(wmOpts) && wmOpts.length > 0;
+
+    var wmSections = document.getElementById("wmSections");
+    var modalSwatchCount = wmSections
+      ? wmSections.querySelectorAll(".wm-tile, .mtl-fallback-leather-btn").length
+      : 0;
+
+    var miniStrip = document.getElementById("mcLeatherSwatchStrip");
+    var miniCount = miniStrip ? miniStrip.querySelectorAll(".mc-mini-swatch, button").length : 0;
+
+    return {
+      productCode: productCode,
+      titleText: titleText,
+      detectedStyleName: palliserStyle,
+      palliserStyleNumber: palliserModel,
+      productSummaryHref: summaryHref || (document.getElementById("mcProductSummaryBtn") || {}).href || "",
+      mergedRecordCount: mergedPreview.length,
+      firstTenConfigIds: cfgIds.slice(0, 10),
+      defaultConfigurationDetected: defaultCfg,
+      leatherNativeSelectFound: !!leatherSel,
+      leatherNativeOptionCount: leatherOptCount,
+      firstTenLeatherOptionTexts: leatherTexts,
+      leatherSwatchDataSourceFound: wmOptsYes,
+      leatherModalContainerFound: !!wmSections,
+      leatherModalSwatchCountAfterRender: modalSwatchCount,
+      miniSwatchContainerFound: !!miniStrip,
+      miniSwatchCountAfterRender: miniCount,
+      mergedRecordsFull: mergedPreview,
+      context: ctx,
+    };
+  }
+
+  function renderMtlDebugPanel(data) {
+    var id = "mtl-debug-panel";
+    var el = document.getElementById(id);
+    if (!el) {
+      el = document.createElement("div");
+      el.id = id;
+      el.style.cssText =
+        "position:fixed;left:8px;bottom:8px;z-index:99999;max-width:min(440px,94vw);max-height:70vh;overflow:auto;background:#111;color:#eee;font:12px/1.4 Consolas,monospace;padding:10px 12px;border:2px solid #fc0;box-shadow:0 4px 20px rgba(0,0,0,.4);";
+      document.body.appendChild(el);
+    }
+    window.__MTL_DEBUG_SNAPSHOT__ = data;
+    console.log("[MTL DEBUG]", data);
+    var lines = [
+      "MTL_RENDERER_VERSION: " + String(window.MTL_RENDERER_VERSION || ""),
+      "1. ProductCode: " + data.productCode,
+      "2. Title: " + data.titleText,
+      "3. Detected style name: " + data.detectedStyleName,
+      "4. Palliser style #: " + data.palliserStyleNumber,
+      "5. Product Summary href: " + data.productSummaryHref,
+      "6. Config records (merged): " + data.mergedRecordCount,
+      "7. First 10 config id:value — " + JSON.stringify(data.firstTenConfigIds),
+      "8. Default config: " + data.defaultConfigurationDetected,
+      "9. Leather native select: " + (data.leatherNativeSelectFound ? "yes" : "no"),
+      "10. Leather option count: " + data.leatherNativeOptionCount,
+      "11. First 10 leather texts — " + JSON.stringify(data.firstTenLeatherOptionTexts),
+      "12. __WM_LEATHER_OPTIONS__ populated: " + (data.leatherSwatchDataSourceFound ? "yes" : "no"),
+      "13. #wmSections exists: " + (data.leatherModalContainerFound ? "yes" : "no"),
+      "14. Modal tile/fallback btn count: " + data.leatherModalSwatchCountAfterRender,
+      "15. Mini strip #mcLeatherSwatchStrip: " + (data.miniSwatchContainerFound ? "yes" : "no"),
+      "16. Mini swatch count: " + data.miniSwatchCountAfterRender,
+    ];
+    el.textContent = lines.join("\n");
+  }
+
+  function shouldRunSectionalDiagnostics() {
+    if (isSectionalProductPageClient()) return true;
+    if (/-sc-/i.test(String(location.pathname || ""))) return true;
+    try {
+      var pc = String((document.querySelector('input[name="ProductCode"]') || {}).value || "").toLowerCase();
+      if (/-sc-/.test(pc)) return true;
+    } catch (ePc) {}
+    return false;
+  }
+
+  function runMtlSectionalDiagnostic(label) {
+    if (!shouldRunSectionalDiagnostics()) return;
+    try {
+      var snap = collectMtlDebugSnapshot({ when: label || "" });
+      renderMtlDebugPanel(snap);
+    } catch (eDiag) {
+      console.error("[MTL DEBUG collect failed]", eDiag);
+    }
+  }
 
   function sectionalLog() {
     if (!SECTIONAL_DBG) return;
@@ -805,6 +1153,15 @@
     try {
       document.documentElement.classList.add("has-sectional-config-cards");
     } catch (eCls) {}
+    removeStandaloneDuplicateProductSummary();
+    var leatherSelNow = findNativeLeatherSelectEl();
+    ensureLeatherOptionsFromNativeSelect(leatherSelNow);
+    patchLeatherModalFallback(leatherSelNow);
+    applyAlulaPalliserPdfHref();
+    if (typeof window.mcRefreshProductSummaryButton === "function") {
+      window.mcRefreshProductSummaryButton();
+    }
+    applyAlulaPalliserPdfHref();
     var legacyToggle = document.getElementById("mtl-sectional-more-native");
     if (legacyToggle) legacyToggle.remove();
     ensureProductSummary(section);
@@ -902,6 +1259,7 @@
     }
 
     var merged = mergeNativeOptionsWithJson(configSelect, jsonFromKey, productKey, pcVal);
+    console.log("[MTL] mergeNativeOptionsWithJson result count:", merged.length, merged);
     if (!merged.length) {
       console.warn("No Volusion configuration options to display as cards.", productKey);
       return;
@@ -1010,10 +1368,7 @@
 
     finalizeSectionalUi(section);
 
-    var baseConfig =
-      merged.find(function (c) {
-        return c.base === true;
-      }) || merged[0];
+    var baseConfig = merged[0];
 
     if (baseConfig) {
       selectConfigurationCard(baseConfig.code, baseConfig.nativeValue);
@@ -1036,10 +1391,16 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer loaded 20260511diag");
-
   function boot() {
     ensureMcWmOpenMountedListener();
+    if (shouldRunSectionalDiagnostics()) {
+      window.setTimeout(function () {
+        runMtlSectionalDiagnostic("after DOMContentLoaded (0ms tick)");
+      }, 0);
+      window.setTimeout(function () {
+        runMtlSectionalDiagnostic("t+1500ms");
+      }, 1500);
+    }
     runRender();
     setTimeout(runRender, 400);
     setTimeout(runRender, 1200);
@@ -1047,6 +1408,9 @@
   }
 
   if (document.readyState !== "loading") boot();
-  else document.addEventListener("DOMContentLoaded", boot);
+  else
+    document.addEventListener("DOMContentLoaded", function () {
+      boot();
+    });
   window.addEventListener("load", runRender);
 })();
