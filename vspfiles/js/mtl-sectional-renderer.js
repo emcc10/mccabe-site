@@ -155,13 +155,21 @@
     if (document.documentElement.dataset.mtlWmSecObs === "1") return;
     document.documentElement.dataset.mtlWmSecObs = "1";
 
+    var deb = null;
+    function scheduleFillFromMutation() {
+      if (deb) clearTimeout(deb);
+      deb = setTimeout(function () {
+        deb = null;
+        fillLeatherModalFromNativeSelect(leatherSel || findNativeLeatherSelectEl());
+      }, 90);
+    }
+
     function hook(ws) {
       if (!ws || ws.dataset.mtlFallbackObs === "1") return;
       ws.dataset.mtlFallbackObs = "1";
       var obs = new MutationObserver(function () {
         if (!isWmOverlayVisible()) return;
-        if (ws.querySelector(".wm-tile")) return;
-        renderFallbackLeatherIntoWmSections(leatherSel || findNativeLeatherSelectEl());
+        scheduleFillFromMutation();
       });
       try {
         obs.observe(ws, { childList: true, subtree: true });
@@ -184,12 +192,197 @@
 
   function pickFirstSwatchUrl(o) {
     if (!o || !o.swatches || !o.swatches.length) return "";
-    var sw = o.swatches[0];
-    if (!sw || typeof sw !== "object") return "";
-    return String(sw.url || sw.src || sw.image || sw.href || "").trim();
+    var i;
+    var sw;
+    var u;
+    for (i = 0; i < o.swatches.length; i++) {
+      sw = o.swatches[i];
+      if (typeof sw === "string") u = String(sw).trim();
+      else if (sw && typeof sw === "object") u = String(sw.url || sw.src || sw.image || sw.href || "").trim();
+      else u = "";
+      if (u) return u;
+    }
+    return "";
   }
 
-  /** Mini swatches under “Select a Leather”: native `<select>` options drive the list; `__WM_LEATHER_OPTIONS__` supplies swatch images when values line up. */
+  function wmRowForNativeValue(wm, val) {
+    var vs = String(val);
+    var i;
+    for (i = 0; i < wm.length; i++) {
+      if (wm[i] && String(wm[i].value) === vs) return wm[i];
+    }
+    return null;
+  }
+
+  /**
+   * Sectional: WM may leave #wmSections with empty grade headers. Clear and inject native leather cards.
+   * @returns {number} cards injected
+   */
+  function injectSectionalNativeLeatherModal(leatherSel) {
+    if (!isSectionalProductPageClient() || !leatherSel) return 0;
+    if (!isWmOverlayVisible()) return 0;
+    var ws = document.getElementById("wmSections");
+    if (!ws) {
+      console.warn("[MTL leather modal] #wmSections not found");
+      return 0;
+    }
+    var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
+    if (!syn.length) {
+      console.warn("[MTL leather modal] no leather options on native <select>");
+      return 0;
+    }
+
+    var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
+    var tabPanel = ws.closest ? ws.closest(".wm-tabpanel") : null;
+    var beforeTiles = ws.querySelectorAll(".wm-tile").length;
+    var beforeGrades = ws.querySelectorAll(".wm-grade-row").length;
+
+    var existingGrid = ws.querySelector(".mtl-leather-modal-grid");
+    var existingN = existingGrid ? existingGrid.querySelectorAll(".mtl-leather-modal-card").length : 0;
+    if (existingGrid && existingN === syn.length) {
+      console.log("[MTL leather modal] skip reinject — already", syn.length, "cards");
+      return syn.length;
+    }
+
+    console.log("[MTL leather modal] container #wmSections", {
+      parentTab: tabPanel && tabPanel.id ? "#" + tabPanel.id : "(none)",
+      childrenBefore: ws.children.length,
+      wmTilesBefore: beforeTiles,
+      wmGradeRowsBefore: beforeGrades,
+      nativeLeatherOptions: syn.length,
+    });
+
+    ws.innerHTML = "";
+
+    var grid = document.createElement("div");
+    grid.className = "mtl-leather-modal-grid";
+
+    syn.forEach(function (s) {
+      var wrow = wmRowForNativeValue(wm, s.value);
+      var nameLine = (wrow && ((wrow.family || "") + " " + (wrow.color || "")).trim()) || s.family || s.label;
+      nameLine = String(nameLine).replace(/\s+/g, " ").trim();
+      var gradeRaw = (wrow && wrow.grade != null && String(wrow.grade)) || s.grade || "—";
+      var gradeLine = String(gradeRaw).replace(/\s+/g, " ").trim();
+      if (gradeLine && gradeLine !== "—" && !/^grade\b/i.test(gradeLine)) {
+        gradeLine = /^base$/i.test(gradeLine) ? "Grade 1000" : "Grade " + gradeLine;
+      }
+
+      var mergedSw = (wrow && wrow.swatches) || s.swatches || [];
+      var imgUrl = pickFirstSwatchUrl({ swatches: mergedSw });
+
+      var card = document.createElement("button");
+      card.type = "button";
+      card.className = "mtl-leather-modal-card";
+      card.setAttribute("data-leather-value", String(s.value));
+
+      var thumb = document.createElement("div");
+      thumb.className = "mtl-leather-modal-thumb";
+      if (imgUrl) {
+        var img = document.createElement("img");
+        img.alt = "";
+        img.loading = "lazy";
+        img.src = imgUrl.indexOf("?") === -1 ? imgUrl + "?v=" + IMG_V : imgUrl + "&v=" + IMG_V;
+        thumb.appendChild(img);
+      } else {
+        thumb.classList.add("mtl-leather-modal-thumb--empty");
+        thumb.textContent = "Swatch";
+      }
+
+      var meta = document.createElement("div");
+      meta.className = "mtl-leather-modal-meta";
+      var nameEl = document.createElement("div");
+      nameEl.className = "mtl-leather-modal-name";
+      nameEl.textContent = nameLine || "Leather";
+      var gradeEl = document.createElement("div");
+      gradeEl.className = "mtl-leather-modal-grade";
+      gradeEl.textContent = gradeLine;
+
+      meta.appendChild(nameEl);
+      meta.appendChild(gradeEl);
+      card.appendChild(thumb);
+      card.appendChild(meta);
+
+      card.onclick = function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        var sel = findNativeLeatherSelectEl() || leatherSel;
+        if (!sel) return;
+        sel.value = s.value;
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+        sel.dispatchEvent(new Event("input", { bubbles: true }));
+        if (typeof jQuery !== "undefined") jQuery(sel).trigger("change");
+        var lab = String(s.label || nameLine || "").replace(/\s+/g, " ").trim();
+        var wmSummary = document.getElementById("wmSummary");
+        if (wmSummary) wmSummary.textContent = lab;
+        var mcSum = document.getElementById("mcLeatherSummary");
+        if (mcSum) mcSum.textContent = lab;
+        var picked = document.getElementById("wmPicked");
+        if (picked) picked.textContent = lab;
+        var ov = document.querySelector(".wm-overlay");
+        if (ov) ov.style.display = "none";
+        hydrateMiniLeatherStripFromNativeSelect(sel);
+      };
+
+      grid.appendChild(card);
+    });
+
+    ws.appendChild(grid);
+    var nCards = grid.querySelectorAll(".mtl-leather-modal-card").length;
+    console.log("[MTL leather modal] injected .mtl-leather-modal-card count:", nCards, "(expect > 0 with leather options)");
+    try {
+      window.__MTL_LAST_LEATHER_MODAL_INJECT__ = { at: Date.now(), cards: nCards };
+    } catch (eW) {}
+    return nCards;
+  }
+
+  function appendFallbackLeatherGridIfEmpty(leatherSel) {
+    if (!leatherSel) return 0;
+    var wmSections = document.getElementById("wmSections");
+    if (!wmSections) return 0;
+    var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
+    if (!syn.length) return 0;
+    if (wmSections.querySelector(".wm-tile")) return 0;
+    Array.prototype.forEach.call(wmSections.querySelectorAll(".mtl-fallback-leather-grid"), function (n) {
+      n.remove();
+    });
+    var wrap = document.createElement("div");
+    wrap.className = "mtl-fallback-leather-grid";
+    wrap.style.cssText = "margin:8px 0;padding:8px;border:1px dashed #888;background:#fafafa;";
+    var grid = document.createElement("div");
+    grid.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;max-height:55vh;overflow:auto;";
+    syn.forEach(function (o) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "mtl-fallback-leather-btn";
+      b.style.cssText =
+        "padding:10px 12px;border:1px solid #333;background:#fff;cursor:pointer;text-align:left;font-size:13px;";
+      b.textContent = o.label;
+      b.onclick = function (ev) {
+        ev.preventDefault();
+        var sel = findNativeLeatherSelectEl() || leatherSel;
+        if (!sel) return;
+        sel.value = o.value;
+        sel.dispatchEvent(new Event("change", { bubbles: true }));
+        if (typeof jQuery !== "undefined") jQuery(sel).trigger("change");
+        var ov = document.querySelector(".wm-overlay");
+        if (ov) ov.style.display = "none";
+      };
+      grid.appendChild(b);
+    });
+    wrap.appendChild(grid);
+    wmSections.appendChild(wrap);
+    return syn.length;
+  }
+
+  function fillLeatherModalFromNativeSelect(leatherSel) {
+    var sel = leatherSel || findNativeLeatherSelectEl();
+    if (!sel) return 0;
+    if (isSectionalProductPageClient()) return injectSectionalNativeLeatherModal(sel);
+    if (!isWmOverlayVisible()) return 0;
+    return appendFallbackLeatherGridIfEmpty(sel);
+  }
+
+  /** Mini swatches: pill chips; native drives list; WM images by value. */
   function hydrateMiniLeatherStripFromNativeSelect(leatherSel) {
     if (!isSectionalProductPageClient() || !leatherSel) return;
     var strip = document.getElementById("mcLeatherSwatchStrip");
@@ -198,44 +391,31 @@
     if (!syn.length) return;
 
     var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
-    function wmHitForVal(val) {
-      var vs = String(val);
-      var h = wm.filter(function (w) {
-        return w && String(w.value) === vs;
-      });
-      return h.length ? h[0] : null;
-    }
 
+    strip.className = "mc-leather-mini-swatches";
+    strip.removeAttribute("style");
     strip.innerHTML = "";
-    var max = Math.min(36, syn.length);
+
+    var max = Math.min(40, syn.length);
     var i;
     for (i = 0; i < max; i++) {
       var s = syn[i];
       if (!s) continue;
       var val = String(s.value || "");
-      var wmRow = wmHitForVal(val);
-      var o = wmRow
-        ? {
-            family: s.family,
-            color: s.color,
-            value: val,
-            label: wmRow.label || s.label,
-            swatches: wmRow.swatches || [],
-          }
-        : s;
-
-      var labelFull = String(
-        o.label || [o.family, o.color].filter(Boolean).join(" ").trim() || val
-      )
-        .replace(/\s+/g, " ")
-        .trim();
-      var imgUrl = pickFirstSwatchUrl(o);
+      var wrow = wmRowForNativeValue(wm, val);
+      var nameLine =
+        ((wrow && ((wrow.family || "") + " " + (wrow.color || "")).trim()) || s.family || s.label).replace(/\s+/g, " ").trim();
+      var gradeLine = (wrow && wrow.grade != null && String(wrow.grade)) || s.grade || "";
+      if (gradeLine && !/^grade\b/i.test(String(gradeLine)))
+        gradeLine = /^base$/i.test(String(gradeLine)) ? "Grade 1000" : "Grade " + String(gradeLine).trim();
+      var mergedSw = (wrow && wrow.swatches) || s.swatches || [];
+      var imgUrl = pickFirstSwatchUrl({ swatches: mergedSw });
 
       var btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "mc-mini-swatch";
+      btn.className = "mc-leather-mini-swatch mc-mini-swatch";
       btn.setAttribute("data-leather-value", val);
-      btn.title = labelFull;
+      btn.title = (nameLine + (gradeLine ? " · " + gradeLine : "")).trim();
 
       if (String(leatherSel.value || "") === val) btn.setAttribute("data-selected", "1");
 
@@ -245,11 +425,12 @@
         im.loading = "lazy";
         im.src = imgUrl.indexOf("?") === -1 ? imgUrl + "?v=" + IMG_V : imgUrl + "&v=" + IMG_V;
         btn.appendChild(im);
-      } else {
-        btn.classList.add("mtl-mini-leather-textchip");
-        var shortL = labelFull.length > 14 ? labelFull.slice(0, 12) + "…" : labelFull;
-        btn.textContent = shortL || "—";
       }
+
+      var lab = document.createElement("span");
+      lab.className = "mc-leather-mini-swatch__label";
+      lab.textContent = nameLine || val;
+      btn.appendChild(lab);
 
       (function (v, bnode) {
         bnode.addEventListener("click", function (ev) {
@@ -265,7 +446,7 @@
             var opt = Array.prototype.find.call(leatherSel.options, function (op) { return String(op.value) === v; });
             ms.textContent = opt ? String(opt.textContent || "").trim() : "";
           }
-          var nodes = strip.querySelectorAll(".mc-mini-swatch");
+          var nodes = strip.querySelectorAll(".mc-leather-mini-swatch");
           var ni;
           for (ni = 0; ni < nodes.length; ni++) nodes[ni].removeAttribute("data-selected");
           bnode.setAttribute("data-selected", "1");
@@ -274,6 +455,12 @@
 
       strip.appendChild(btn);
     }
+
+    var miniN = strip.querySelectorAll(".mc-leather-mini-swatch").length;
+    console.log("[MTL leather mini] .mc-leather-mini-swatch count:", miniN, "(expect > 0)");
+    try {
+      window.__MTL_LAST_MINI_LEATHER__ = { at: Date.now(), chips: miniN };
+    } catch (eM) {}
   }
 
   function scheduleHydrateMiniLeatherStrip(leatherSel) {
@@ -287,65 +474,10 @@
     });
   }
 
-  function renderFallbackLeatherIntoWmSections(leatherSel) {
-    if (!isSectionalProductPageClient() || !leatherSel) return;
-    var wmSections = document.getElementById("wmSections");
-    if (!wmSections) return;
-    var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
-    if (!syn.length) return;
-    if (wmSections.querySelector(".wm-tile")) return;
-    var ex = wmSections.querySelector(".mtl-fallback-leather-grid");
-    if (ex) ex.remove();
-    var wrap = document.createElement("div");
-    wrap.className = "mtl-fallback-leather-grid";
-    wrap.style.cssText = "margin:8px 0;padding:8px;border:1px dashed #888;background:#fafafa;";
-    var cap = document.createElement("div");
-    cap.textContent = "Leather / cover options (from native select)";
-    cap.style.cssText = "font-size:12px;font-weight:600;margin-bottom:8px;";
-    wrap.appendChild(cap);
-    var grid = document.createElement("div");
-    grid.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;max-height:55vh;overflow:auto;";
-    syn.forEach(function (o) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = "mtl-fallback-leather-btn";
-      b.style.cssText =
-        "padding:10px 12px;border:1px solid #333;background:#fff;cursor:pointer;text-align:left;font-size:13px;";
-      b.textContent = o.label;
-      b.title = o.label;
-      b.onclick = function (ev) {
-        ev.preventDefault();
-        var sel = findNativeLeatherSelectEl() || leatherSel;
-        if (!sel) return;
-        sel.value = o.value;
-        sel.dispatchEvent(new Event("change", { bubbles: true }));
-        sel.dispatchEvent(new Event("input", { bubbles: true }));
-        if (typeof jQuery !== "undefined") jQuery(sel).trigger("change");
-        var wmSummary = document.getElementById("wmSummary");
-        if (wmSummary) wmSummary.textContent = o.label;
-        var mcSum = document.getElementById("mcLeatherSummary");
-        if (mcSum) mcSum.textContent = o.label;
-        var ov = document.querySelector(".wm-overlay");
-        if (ov) ov.style.display = "none";
-        hydrateMiniLeatherStripFromNativeSelect(sel);
-      };
-      grid.appendChild(b);
-    });
-    wrap.appendChild(grid);
-    wmSections.appendChild(wrap);
-  }
-
   function patchLeatherModalFallback(leatherSel) {
     if (!isSectionalProductPageClient()) return;
     if (document.documentElement.dataset.mtlWmModalFallbackPatched === "1") return;
     document.documentElement.dataset.mtlWmModalFallbackPatched = "1";
-
-    function tryFillModalFromNative() {
-      var sel = findNativeLeatherSelectEl() || leatherSel;
-      if (!sel) return;
-      if (!isWmOverlayVisible()) return;
-      renderFallbackLeatherIntoWmSections(sel);
-    }
 
     document.addEventListener(
       "click",
@@ -353,8 +485,10 @@
         var t = ev.target;
         if (!t || !t.closest) return;
         if (!t.closest("#wmOpen, #mcLeatherBtn, #mcLeatherHeader, #mcLeatherHeaderRow, .wm-btn")) return;
-        [0, 90, 200, 400, 750, 1200].forEach(function (ms) {
-          window.setTimeout(tryFillModalFromNative, ms);
+        [0, 40, 120, 280, 520, 900, 1600].forEach(function (ms) {
+          window.setTimeout(function () {
+            fillLeatherModalFromNativeSelect(findNativeLeatherSelectEl() || leatherSel);
+          }, ms);
         });
       },
       true
@@ -467,11 +601,16 @@
 
     var wmSections = document.getElementById("wmSections");
     var modalSwatchCount = wmSections
-      ? wmSections.querySelectorAll(".wm-tile, .mtl-fallback-leather-btn").length
+      ? wmSections.querySelectorAll(".mtl-leather-modal-card, .wm-tile, .mtl-fallback-leather-btn").length
       : 0;
 
     var miniStrip = document.getElementById("mcLeatherSwatchStrip");
-    var miniCount = miniStrip ? miniStrip.querySelectorAll(".mc-mini-swatch, button").length : 0;
+    var miniCount = miniStrip ? miniStrip.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length : 0;
+
+    var sec = document.getElementById("mtl-sectional-configurations");
+    var planner = document.getElementById("mcPlannerRow");
+    var summaryBeforePopular =
+      !!(sec && planner && sec.parentNode === planner.parentNode && sec.previousElementSibling === planner);
 
     return {
       productCode: productCode,
@@ -490,6 +629,7 @@
       leatherModalSwatchCountAfterRender: modalSwatchCount,
       miniSwatchContainerFound: !!miniStrip,
       miniSwatchCountAfterRender: miniCount,
+      productSummaryRowBeforePopularConfigurations: summaryBeforePopular,
       mergedRecordsFull: mergedPreview,
       context: ctx,
     };
@@ -525,6 +665,7 @@
       "14. Modal tile/fallback btn count: " + data.leatherModalSwatchCountAfterRender,
       "15. Mini strip #mcLeatherSwatchStrip: " + (data.miniSwatchContainerFound ? "yes" : "no"),
       "16. Mini swatch count: " + data.miniSwatchCountAfterRender,
+      "17. Product Summary row BEFORE #mtl-sectional-configurations: " + (data.productSummaryRowBeforePopularConfigurations ? "yes" : "no"),
     ];
     el.textContent = lines.join("\n");
   }
@@ -699,14 +840,31 @@
 
   function moveLeatherAboveConfigurations(section) {
     if (!section || !section.parentNode) return;
+    if (!isSectionalProductPageClient()) return;
     var parent = section.parentNode;
+    var planner = document.getElementById("mcPlannerRow");
     var block = findLeatherBlock();
-    if (!block || !block.parentNode) return;
-    if (block === section) return;
     try {
-      parent.insertBefore(block, section);
+      if (planner && planner.parentNode) {
+        parent.insertBefore(planner, section);
+      }
+      if (block && block.parentNode && block !== section) {
+        var ref = planner && planner.parentNode === parent ? planner : section;
+        parent.insertBefore(block, ref);
+      }
+      if (planner && planner.parentNode === parent) {
+        window.__MTL_LAYOUT_SUMMARY_BEFORE_CONFIG__ = {
+          ok: section.previousElementSibling === planner,
+          sectionId: section.id,
+          rowId: planner.id,
+        };
+        console.log(
+          "[MTL layout] Product Summary (#mcPlannerRow) immediately before Popular Configurations:",
+          window.__MTL_LAYOUT_SUMMARY_BEFORE_CONFIG__.ok
+        );
+      }
     } catch (eMv) {
-      console.warn("Could not move leather block above configurations:", eMv);
+      console.warn("Could not move sectional chrome above configurations:", eMv);
     }
   }
 
@@ -714,7 +872,6 @@
     if (!section) return;
     function tick() {
       moveLeatherAboveConfigurations(section);
-      placeProductSummaryRowBelowSectionalConfigurations(section);
     }
     tick();
     [500, 1500, 3000].forEach(function (ms) {
@@ -1350,18 +1507,6 @@
           if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
         }, ms);
       });
-    }
-  }
-
-  function placeProductSummaryRowBelowSectionalConfigurations(section) {
-    if (!isSectionalProductPageClient() || !section || !section.parentNode) return;
-    var row = document.getElementById("mcPlannerRow");
-    if (!row) return;
-    try {
-      if (row.parentNode === section.parentNode && section.nextElementSibling === row) return;
-      section.parentNode.insertBefore(row, section.nextSibling);
-    } catch (ePl) {
-      console.warn("[MTL] placeProductSummaryRowBelowSectionalConfigurations:", ePl);
     }
   }
 
