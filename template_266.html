@@ -2620,6 +2620,67 @@ function gradeHeaderText(g) {
     }
   }
 
+  /** Price/surcharge-only Volusion option labels — not leather names (avoids wm-name "0.00" + swatch 404s). */
+  function wmIsPriceOrNumericOnlyLabel(s) {
+    const t = cleanText(String(s || ""));
+    if (!t) return true;
+    if (/^\s*\$?\s*[\d,]+\.?\d{0,4}\s*$/i.test(t)) return true;
+    if (/^\s*\+\s*\$?\s*[\d.,]+\s*$/i.test(t)) return true;
+    const noNum = t.replace(/[\d.,$+\s\-]/g, "");
+    if (noNum.length === 0 && /[\d.]/.test(t)) return true;
+    return false;
+  }
+
+  function wmParsedLeatherLooksJunk(raw, fc, pr) {
+    const r = cleanText(String(raw || ""));
+    if (wmIsPriceOrNumericOnlyLabel(r)) return true;
+    const fam = String((fc && fc.family) || "").trim();
+    const col = String((fc && fc.color) || "").trim();
+    const combined = (fam + " " + col).trim();
+    if (combined && wmIsPriceOrNumericOnlyLabel(combined)) return true;
+    if (combined && /^[\d.,$\s\-+]+$/i.test(combined) && !/[a-z]/i.test(combined)) return true;
+    const rest = String((pr && pr.rest) || "").trim();
+    if (rest && wmIsPriceOrNumericOnlyLabel(rest) && (fam === rest || col === rest)) return true;
+    return false;
+  }
+
+  /** Prefer the row that is actually "Choose cover / Select a leather" over other leather-ish selects (e.g. surcharge selects). */
+  function wmLeatherSelectScore(sel) {
+    var rowTxt = "";
+    try {
+      var tr = sel.closest("tr");
+      var td = sel.closest("td");
+      if (tr) rowTxt += " " + String(tr.innerText || "");
+      if (td) rowTxt += " " + String(td.innerText || "");
+    } catch (eR) {}
+    rowTxt = rowTxt.toLowerCase();
+    var s = 0;
+    if (
+      /select\s+a\s+leather|choose\s+leather|choose\s+cover|upholstery|leather\s*cover|fabric\s*cover|select\s+leather/i.test(
+        rowTxt
+      )
+    ) {
+      s += 220;
+    }
+    if (sel.classList && sel.classList.contains("mc-native-leather")) s += 90;
+    var hint = (String(sel.id || "") + " " + String(sel.name || "")).toLowerCase();
+    if (/(leather|cover|upholstery)/.test(hint)) s += 50;
+    var opts = Array.from(sel.options || []).filter(function (o) {
+      return !isPlaceholderOption(o);
+    });
+    var sample = opts
+      .slice(0, 20)
+      .map(function (o) {
+        return String(o.textContent || "");
+      })
+      .join(" ")
+      .toLowerCase();
+    if (/grade\s*[0-9,]+/.test(sample)) s += 35;
+    if (/(traverse|solana|rein|evoque|aniline|leather|fabric|cowhide|microfiber|polyester)/i.test(sample)) s += 35;
+    s += Math.min(40, opts.length * 2);
+    return s;
+  }
+
   function initIfReady(){
     if (document.getElementById("wmOpen")) return true;
 
@@ -2630,9 +2691,14 @@ function gradeHeaderText(g) {
 
     const allSelects = Array.from(document.querySelectorAll("select"));
     const candidateSelects = allSelects
-      .filter(function (s) { return !isNativeConfigurationSelectEl(s); })
+      .filter(function (s) {
+        return !isNativeConfigurationSelectEl(s);
+      })
       .filter(selectLooksLeatherish)
-      .filter(hasRealOptions);
+      .filter(hasRealOptions)
+      .sort(function (a, b) {
+        return wmLeatherSelectScore(b) - wmLeatherSelectScore(a);
+      });
 
     if (!candidateSelects.length) { log("No leather-ish selects yet."); return false; }
 
@@ -2647,7 +2713,7 @@ function gradeHeaderText(g) {
         let fc = splitFamilyColor(pr.rest);
         if ((!fc.family && !fc.color) && secEarly) {
           const fallback = cleanText(pr.rest) || cleanText(raw);
-          if (fallback) {
+          if (fallback && !wmIsPriceOrNumericOnlyLabel(fallback)) {
             fc = splitFamilyColor(fallback);
             if (!fc.family && !fc.color) {
               fc = { family: fallback, color: "" };
@@ -2655,6 +2721,8 @@ function gradeHeaderText(g) {
           }
         }
         if (!fc.family && !fc.color) continue;
+
+        if (wmParsedLeatherLooksJunk(raw, fc, pr)) continue;
 
         all.push({
           selectEl: sel,
