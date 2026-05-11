@@ -1,11 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: 20260509final2
+ * Cache: 20260511sectional
  */
 (function () {
   "use strict";
 
-  var IMG_V = "20260509final2";
+  var IMG_V = "20260511sectional";
   var state = { cfgByCode: {} };
 
   function normalizeCode(code) {
@@ -16,7 +16,12 @@
   }
 
   function findConfigurationSelect() {
-    var selects = Array.from(document.querySelectorAll("select"));
+    var root =
+      document.querySelector("#v65-product-parent #options_table, #v65-product-parent table[id*='options_table']") ||
+      document.querySelector("#options_table, table[id*='options_table']");
+    var selects = root
+      ? Array.from(root.querySelectorAll("select"))
+      : Array.from(document.querySelectorAll("#v65-product-parent select, #options_table select"));
 
     return selects.find(function (sel) {
       if (sel.classList && sel.classList.contains("mc-native-leather")) return false;
@@ -44,7 +49,12 @@
     if (configSelect.dataset.mtlRowHidden === "1") return;
     var row = configSelect.closest("tr") || configSelect.parentElement;
     if (row) {
-      row.style.display = "none";
+      if (document.documentElement.classList.contains("is-sectional-product")) {
+        row.style.setProperty("display", "none", "important");
+        row.style.setProperty("visibility", "hidden", "important");
+      } else {
+        row.style.display = "none";
+      }
     }
     configSelect.dataset.mtlRowHidden = "1";
   }
@@ -176,12 +186,26 @@
   }
 
   function readDisplayedPrice() {
-    var el =
-      document.querySelector("#priceWithOptions") ||
-      document.querySelector(".v65-product-price") ||
-      document.querySelector(".product_productprice") ||
-      document.querySelector(".option_pricing") ||
-      document.querySelector('[itemprop="price"]');
+    var selectors = [
+      "#v65-product-parent #priceWithOptions",
+      "#content_area #priceWithOptions",
+      "#priceWithOptions",
+      "#v65-product-parent #priceWithOptionsNoTax",
+      "#content_area #priceWithOptionsNoTax",
+      ".colors_pricebox #priceWithOptions",
+      "font#priceWithOptions",
+      ".v65-product-price",
+      ".product_productprice",
+      ".option_pricing",
+      '[itemprop="price"]',
+    ];
+    var i;
+    var el = null;
+    for (i = 0; i < selectors.length; i++) {
+      el = document.querySelector(selectors[i]);
+      if (el && String(el.textContent || "").replace(/\s+/g, "").length) break;
+      el = null;
+    }
     if (!el) return "";
     return String(el.textContent || "")
       .replace(/\s+/g, " ")
@@ -210,7 +234,9 @@
     var i;
     for (i = 0; i < rows.length; i++) {
       var lab = rows[i].querySelector(".mtl-summary-label");
-      if (lab && /estimated\s+product\s+price/i.test(String(lab.textContent || ""))) {
+      if (!lab) continue;
+      var t = String(lab.textContent || "");
+      if (/estimated/i.test(t) && /price/i.test(t)) {
         lab.textContent = "Product Price";
         break;
       }
@@ -323,7 +349,8 @@
     }
 
     var priceEl =
-      document.querySelector("#priceWithOptions") ||
+      document.querySelector("#v65-product-parent #priceWithOptions, #content_area #priceWithOptions, #priceWithOptions") ||
+      document.querySelector("#v65-product-parent #priceWithOptionsNoTax") ||
       document.querySelector(".v65-product-price") ||
       document.querySelector('[itemprop="price"]');
     if (priceEl && priceEl.dataset.mtlPriceObs !== "1") {
@@ -376,9 +403,19 @@
       .join(" ")
       .toLowerCase();
 
-    var productKey = Object.keys(allConfigs).find(function (key) {
+    var pcInput = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+    var pcVal = pcInput ? String(pcInput.value || "").trim() : "";
+    var pcLower = pcVal.toLowerCase();
+
+    var keysList = Object.keys(allConfigs);
+    var productKey = keysList.find(function (key) {
       return pageText.indexOf(key.toLowerCase()) !== -1;
     });
+    if (!productKey && pcLower) {
+      productKey = keysList.find(function (key) {
+        return pcLower.indexOf(key.toLowerCase()) !== -1;
+      });
+    }
 
     var matchedConfigs = productKey ? allConfigs[productKey] : [];
 
@@ -504,7 +541,7 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer loaded 20260509final2");
+  console.log("mtl-sectional-renderer loaded 20260511sectional");
 
   function boot() {
     runRender();

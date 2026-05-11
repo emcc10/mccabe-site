@@ -3,6 +3,7 @@
  * Keys must match Volusion style names (see getStyleFromPage / product codes before "-SC-").
  */
 window.MTL_SECTIONAL_CONFIGS = {
+  /* Alula 07-15 diagram: not in git; upload via Volusion to vspfiles/sectional-diagrams/Alula-SC-07-15.png (live URL /v/vspfiles/sectional-diagrams/Alula-SC-07-15.png). */
   Alula: [
     {
       code: "07-15",
@@ -34,4 +35,4 @@ window.MTL_SECTIONAL_CONFIGS = {
 
 window.SECTIONAL_CONFIGS = window.MTL_SECTIONAL_CONFIGS;
 
-console.log("sectional-configs loaded 20260509final2", window.MTL_SECTIONAL_CONFIGS);
+console.log("sectional-configs loaded 20260511sectional", window.MTL_SECTIONAL_CONFIGS);

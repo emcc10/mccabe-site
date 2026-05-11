@@ -10946,6 +10946,26 @@ html.is-sectional-product #mcLeatherRow {
   opacity: 1 !important;
 }
 
+/* Sectional PDP: hide native "Choose Configuration" row (keep <select> in DOM; mobile "table-row !important" rules lose to this). */
+html.is-sectional-product #v65-product-parent #options_table tr:has(select[title*="Choose Configuration" i]),
+html.is-sectional-product #v65-product-parent #options_table tr:has(select[name*="Choose Configuration" i]),
+html.is-sectional-product #v65-product-parent #options_table tr:has(select[id*="Choose Configuration" i]),
+html.is-sectional-product #options_table tr:has(select[title*="Choose Configuration" i]),
+html.is-sectional-product #options_table tr:has(select[name*="Choose Configuration" i]),
+html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration" i]) {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  clip: rect(0, 0, 0, 0) !important;
+}
+
 /* --- Product detail tabs (Volusion): normalize selected/hover weight --- */
 .productdetails span#Header_ProductDetail_ProductDetails_span:hover,
 .productdetails span#Header_ProductDetail_TechSpecs_span:hover,
@@ -10982,7 +11002,7 @@ html.is-sectional-product #mcLeatherRow {
   }
 }
 
-/* MTL sectional PDP — Popular Configurations + Product Summary (20260509final2) */
+/* MTL sectional PDP — Popular Configurations + Product Summary (20260511sectional) */
 #mtl-sectional-configurations {
   clear: both;
   display: block !important;

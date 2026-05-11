@@ -2406,12 +2406,41 @@ function gradeHeaderText(g) {
 
   function wmIsLeatherEligiblePage(){
     try {
-      const isLeatherEligible =
-        document.documentElement.classList.contains("is-sectional-product") ||
-        /sectional|sofa|palliser|alula|acacia|atticus/i.test(
-          String(location.pathname || "") + " " + String(document.title || "")
-        );
-      if (isLeatherEligible) return true;
+      if (document.documentElement.classList.contains("is-sectional-product")) return true;
+      const path = String(location.pathname || "").toLowerCase();
+      const search = String(location.search || "").toLowerCase();
+      const titleText = (
+        (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
+        document.title ||
+        ""
+      ).toLowerCase();
+      const blob = path + " " + search + " " + titleText;
+      if (/sectional|sofa|palliser|alula|acacia|atticus/i.test(blob)) return true;
+      const pcInput = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      const pcVal = pcInput && String(pcInput.value || "").trim();
+      if (pcVal === "41417") return true;
+      if (/\bparagon\b/i.test(path)) return true;
+      if (/-s\/106(\b|\.|-|\/)/.test(path) || /\bcategoryid=106\b/i.test(search)) return true;
+      if (/customtheaterseating|palliser-theater-seating|theater-seating|theatre-seating|vertex-theater/i.test(path))
+        return true;
+      if (
+        document.querySelector(
+          'a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"], a[href*="theater-seating"], a[href*="theatre-seating"]'
+        )
+      )
+        return true;
+      if (
+        document.querySelector(
+          'select[title*="Number of Seats" i], select[title*="Choose Configuration" i]'
+        )
+      )
+        return true;
+      if (
+        /theater seating|theatre seating|theater chair|theatre chair|home theater|home theatre|palliser vertex|\bparagon\b/i.test(
+          titleText
+        )
+      )
+        return true;
     } catch (eWm) {}
     return false;
   }
@@ -19286,8 +19315,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   Sectional scripts (external) load last. Leather modal CSS ~line 1872 and script #wm-leather-modal-js ~line 2170
   run earlier in document order, so they always execute before these files.
 -->
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260509final2"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260509final2"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260511sectional"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260511sectional"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
