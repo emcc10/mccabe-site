@@ -1,11 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: 20260513sectional
+ * Cache: 20260514sectional
  */
 (function () {
   "use strict";
 
-  var IMG_V = "20260513sectional";
+  var IMG_V = "20260514sectional";
   var SECTIONAL_DBG = /(?:[?&])mtlSectionalDebug=1(?:&|$)/.test(String(location.search || ""));
   var PLACEHOLDER_SVG =
     "data:image/svg+xml," +
@@ -20,6 +20,62 @@
     var args = Array.prototype.slice.call(arguments);
     args.unshift("[mtl-sectional]");
     console.log.apply(console, args);
+  }
+
+  function sectionalIsLoggedIn() {
+    return !!(document.body && document.body.classList.contains("mc-member-logged-in"));
+  }
+
+  function quoteMailtoHref() {
+    var a = document.querySelector('footer a[href^="mailto:"]');
+    if (a) {
+      var h = String(a.getAttribute("href") || "").trim();
+      if (/^mailto:/i.test(h)) return h;
+    }
+    return "mailto:erin@mccabestheaterandliving.com";
+  }
+
+  function readDimensionsSnippetFromPdp() {
+    var candidates = [
+      document.getElementById("ProductDetail_TechSpecs_div"),
+      document.querySelector("#ProductDetail_TechSpecs_div"),
+      document.querySelector("td#ProductDetail_TechSpecs"),
+      document.getElementById("divDescription"),
+    ];
+    var dimLine = /\d+(?:\.\d+)?\s*(?:"|″|in(?:ch(?:es)?)?\.?)\s*[x×\u00d7]\s*\d+/i;
+    var i;
+    var k;
+    for (i = 0; i < candidates.length; i++) {
+      var root = candidates[i];
+      if (!root) continue;
+      var raw = String(root.innerText || root.textContent || "").replace(/\s+/g, " ").trim();
+      if (raw.length < 10) continue;
+      var parts = raw.split(/\n+/);
+      for (k = 0; k < parts.length; k++) {
+        var line = parts[k].trim();
+        if (line.length > 240) line = line.slice(0, 240) + "…";
+        if (dimLine.test(line)) return line;
+        if (/\b(overall|dimensions?|wxd|h\s*x\s*w)\b/i.test(line) && /\d/.test(line)) return line;
+      }
+      var m = raw.match(dimLine);
+      if (m && m.index != null) {
+        var sn = raw.slice(Math.max(0, m.index - 30), Math.min(raw.length, m.index + m[0].length + 40));
+        return sn.trim();
+      }
+    }
+    return "";
+  }
+
+  function ensureMemberClassObserver() {
+    if (typeof MutationObserver === "undefined" || !document.body) return;
+    if (document.body.dataset.mtlSectionalMemberObs === "1") return;
+    document.body.dataset.mtlSectionalMemberObs = "1";
+    var obs = new MutationObserver(function () {
+      syncCardsSelectionHighlight();
+      updateProductSummary();
+      updateSectionalCardPriceBadges();
+    });
+    obs.observe(document.body, { attributes: true, attributeFilter: ["class"] });
   }
 
   function normalizeCode(code) {
@@ -259,6 +315,9 @@
     if (typeof jQuery !== "undefined") {
       jQuery(sel).trigger("change");
     }
+    if (typeof window.mcTryInitWmLeather === "function") {
+      window.mcTryInitWmLeather();
+    }
     sectionalLog("Selected native configuration", codeHint, "value=", sel.value);
     return true;
   }
@@ -342,10 +401,15 @@
       sum = document.createElement("div");
       sum.id = "mtl-product-summary";
       sum.innerHTML =
-        '<h3 class="mtl-summary-heading">Product Summary</h3>' +
+        '<div class="mtl-summary-row mtl-summary-row--spec"><span class="mtl-summary-label">Specifications</span><span class="mtl-summary-value mtl-summary-value--spec"><a id="mtl-sum-spec" href="#" target="_blank" rel="noopener noreferrer">View Palliser spec sheet (PDF)</a></span></div>' +
+        '<div class="mtl-summary-row mtl-summary-row--dims"><span class="mtl-summary-label">Dimensions</span><span class="mtl-summary-value" id="mtl-sum-dims">—</span></div>' +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Selected Leather</span><span class="mtl-summary-value" id="mtl-sum-leather">Not selected</span></div>' +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Selected Configuration</span><span class="mtl-summary-value" id="mtl-sum-config">—</span></div>' +
-        '<div class="mtl-summary-row"><span class="mtl-summary-label">Product Price</span><span class="mtl-summary-value" id="mtl-sum-price">—</span></div>';
+        '<div class="mtl-summary-row"><span class="mtl-summary-label">Product Price</span><span class="mtl-summary-value" id="mtl-sum-price">—</span></div>' +
+        '<p id="mtl-sectional-quote-hint" class="mtl-sectional-quote-hint"></p>';
+      sum.dataset.mtlSummaryV2 = "1";
+    } else {
+      upgradeProductSummaryDom(sum);
     }
     if (section && section.parentNode) {
       try {
@@ -353,7 +417,87 @@
       } catch (eIns) {}
     }
     refreshProductPriceLabel();
+    refreshSpecsDimsQuote();
     return sum;
+  }
+
+  function upgradeProductSummaryDom(sum) {
+    if (!sum || sum.dataset.mtlSummaryV2 === "1") return;
+    var head = sum.querySelector(".mtl-summary-heading");
+    if (head) head.remove();
+    if (!document.getElementById("mtl-sum-spec")) {
+      var rSpec = document.createElement("div");
+      rSpec.className = "mtl-summary-row mtl-summary-row--spec";
+      rSpec.innerHTML =
+        '<span class="mtl-summary-label">Specifications</span><span class="mtl-summary-value mtl-summary-value--spec"><a id="mtl-sum-spec" href="#" target="_blank" rel="noopener noreferrer">View Palliser spec sheet (PDF)</a></span>';
+      sum.insertBefore(rSpec, sum.firstChild);
+    }
+    if (!document.getElementById("mtl-sum-dims")) {
+      var rDim = document.createElement("div");
+      rDim.className = "mtl-summary-row mtl-summary-row--dims";
+      rDim.innerHTML =
+        '<span class="mtl-summary-label">Dimensions</span><span class="mtl-summary-value" id="mtl-sum-dims">—</span>';
+      var specEl = document.getElementById("mtl-sum-spec");
+      var specRow = specEl && specEl.closest(".mtl-summary-row");
+      if (specRow && specRow.nextSibling) sum.insertBefore(rDim, specRow.nextSibling);
+      else sum.insertBefore(rDim, sum.firstChild);
+    }
+    if (!document.getElementById("mtl-sectional-quote-hint")) {
+      var hint = document.createElement("p");
+      hint.id = "mtl-sectional-quote-hint";
+      hint.className = "mtl-sectional-quote-hint";
+      sum.appendChild(hint);
+    }
+    sum.dataset.mtlSummaryV2 = "1";
+  }
+
+  function refreshSpecsDimsQuote() {
+    var specA = document.getElementById("mtl-sum-spec");
+    var dimsEl = document.getElementById("mtl-sum-dims");
+    var hint = document.getElementById("mtl-sectional-quote-hint");
+    var url = typeof window.mcBuildPalliserSpecSheetUrl === "function" ? window.mcBuildPalliserSpecSheetUrl() : "";
+    if (specA) {
+      if (url) {
+        specA.href = url;
+        specA.setAttribute("aria-disabled", "false");
+        specA.style.opacity = "";
+      } else {
+        specA.href = "#";
+        specA.setAttribute("aria-disabled", "true");
+        specA.style.opacity = "0.55";
+      }
+    }
+    if (dimsEl) {
+      var d = readDimensionsSnippetFromPdp();
+      if (d) {
+        dimsEl.textContent = d;
+      } else if (url) {
+        dimsEl.textContent = "";
+        var span = document.createElement("span");
+        span.className = "mtl-sum-dims-fallback";
+        span.appendChild(document.createTextNode("See the "));
+        var a = document.createElement("a");
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = "spec sheet (PDF)";
+        span.appendChild(a);
+        span.appendChild(document.createTextNode(" for dimensions."));
+        dimsEl.appendChild(span);
+      } else {
+        dimsEl.textContent = "—";
+      }
+    }
+    if (hint) {
+      var mail = quoteMailtoHref();
+      hint.textContent = "";
+      hint.appendChild(document.createTextNode("For custom quotes "));
+      var ma = document.createElement("a");
+      ma.href = mail;
+      ma.textContent = "send us an email";
+      hint.appendChild(ma);
+      hint.appendChild(document.createTextNode("."));
+    }
   }
 
   function updateProductSummary() {
@@ -364,6 +508,7 @@
     }
     var sum = document.getElementById("mtl-product-summary");
     if (!sum) return;
+    upgradeProductSummaryDom(sum);
     refreshProductPriceLabel();
 
     var wm = document.getElementById("wmSummary");
@@ -385,12 +530,25 @@
     var elP = document.getElementById("mtl-sum-price");
     if (elL) elL.textContent = leatherTxt;
     if (elC) elC.textContent = configLabel;
-    if (elP) elP.textContent = price || "—";
+    if (elP) {
+      elP.classList.remove("mtl-summary-price--guest");
+      if (sectionalIsLoggedIn()) {
+        elP.textContent = price || "—";
+      } else {
+        elP.classList.add("mtl-summary-price--guest");
+        elP.innerHTML =
+          '<a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see price';
+      }
+    }
+    refreshSpecsDimsQuote();
   }
 
   function scheduleProductSummaryAfterConfigChange() {
     [250, 800, 1500].forEach(function (ms) {
-      setTimeout(updateProductSummary, ms);
+      setTimeout(function () {
+        if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+        updateProductSummary();
+      }, ms);
     });
   }
 
@@ -463,6 +621,7 @@
         }
         window.setTimeout(function () {
           syncCardsSelectionHighlight();
+          if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
           updateProductSummary();
         }, 0);
         scheduleProductSummaryAfterConfigChange();
@@ -500,6 +659,35 @@
       });
       mcLeather.dataset.mtlLeatherObs = "1";
     }
+  }
+
+  function formatPriceDiffLabel(diff) {
+    var n = Number(diff);
+    if (!isFinite(n) || n === 0) return "";
+    if (n > 0) return "+$" + String(Math.round(n));
+    return "−$" + String(Math.round(Math.abs(n)));
+  }
+
+  function updateSectionalCardPriceBadges() {
+    var sec = document.getElementById("mtl-sectional-configurations");
+    if (!sec) return;
+    var logged = sectionalIsLoggedIn();
+    var cards = sec.querySelectorAll(".mtl-sectional-card");
+    Array.prototype.forEach.call(cards, function (card) {
+      var raw = card.getAttribute("data-mtl-price-diff");
+      var label = formatPriceDiffLabel(raw);
+      var ex = card.querySelector(".mtl-sectional-price");
+      if (!logged || !label) {
+        if (ex) ex.remove();
+        return;
+      }
+      if (!ex) {
+        ex = document.createElement("div");
+        ex.className = "mtl-sectional-price";
+        card.appendChild(ex);
+      }
+      ex.textContent = label;
+    });
   }
 
   function mergeNativeOptionsWithJson(configSelect, jsonCfgs, productKey, pcVal) {
@@ -564,8 +752,11 @@
     scheduleBindLeatherTrigger();
     bindConfigurationCardClicks();
     ensureObservers();
+    ensureMemberClassObserver();
     syncCardsSelectionHighlight();
     updateProductSummary();
+    updateSectionalCardPriceBadges();
+    if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
   }
 
   function renderSectionalPdp() {
@@ -646,6 +837,9 @@
       card.className = "mtl-sectional-card";
       card.setAttribute("data-config-code", cfg.code || "");
       card.setAttribute("data-config-value", cfg.nativeValue != null ? String(cfg.nativeValue) : "");
+      if (cfg.priceDiff != null && cfg.priceDiff !== "") {
+        card.setAttribute("data-mtl-price-diff", String(cfg.priceDiff));
+      }
 
       var img = document.createElement("img");
       img.className = "mtl-sectional-image";
@@ -714,7 +908,7 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer loaded 20260513sectional");
+  console.log("mtl-sectional-renderer loaded 20260514sectional");
 
   function boot() {
     runRender();

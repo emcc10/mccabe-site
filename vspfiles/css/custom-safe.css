@@ -11002,22 +11002,33 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   }
 }
 
-/* MTL sectional PDP — Popular Configurations + Product Summary (20260513sectional) */
+/* MTL sectional PDP — Popular Configurations + Product Summary (20260514sectional) */
 #mtl-sectional-configurations {
   clear: both;
   display: block !important;
   width: 100%;
+  max-width: 100%;
   margin: 28px 0;
   padding: 20px 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-#mtl-sectional-configurations .mtl-sectional-heading,
-#mtl-product-summary .mtl-summary-heading {
+#mtl-sectional-configurations .mtl-sectional-inner {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#mtl-sectional-configurations .mtl-sectional-heading {
   font-family: Inter, Arial, sans-serif;
   font-size: 16px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   margin: 0 0 16px;
+}
+
+#mtl-product-summary .mtl-summary-heading {
+  display: none !important;
 }
 
 #mtl-sectional-configurations .mtl-sectional-grid {
@@ -11067,6 +11078,9 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   border: 1px solid #ddd;
   background: #fafafa;
   font-family: Inter, Arial, sans-serif;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 #mtl-product-summary .mtl-summary-row {
@@ -11077,7 +11091,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   border-bottom: 1px solid #e5e5e5;
 }
 
-#mtl-product-summary .mtl-summary-row:last-child {
+#mtl-product-summary > .mtl-summary-row:last-of-type {
   border-bottom: 0;
 }
 
@@ -11087,6 +11101,155 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
 
 #mtl-product-summary .mtl-summary-value {
   text-align: right;
+}
+
+#mtl-product-summary .mtl-summary-value a {
+  color: #111;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+#mtl-product-summary .mtl-summary-value a:hover,
+#mtl-product-summary .mtl-summary-value a:focus {
+  color: #000;
+}
+
+#mtl-product-summary .mtl-summary-price--guest {
+  font-size: 13px;
+  text-align: right;
+}
+
+#mtl-sectional-configurations .mtl-sectional-price {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin-top: 8px;
+  letter-spacing: 0.04em;
+}
+
+#mtl-product-summary .mtl-sectional-quote-hint {
+  margin: 14px 0 0;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #555;
+  border: 0;
+}
+
+#mtl-product-summary .mtl-sectional-quote-hint a {
+  color: #111;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+html.is-sectional-product #mcLeatherRow {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+html.is-sectional-product .wm-overlay {
+  z-index: 100000 !important;
+}
+
+@media (max-width: 600px) {
+  #mtl-product-summary .mtl-summary-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  #mtl-product-summary .mtl-summary-value {
+    text-align: left;
+    max-width: 100%;
+    word-break: break-word;
+  }
+}
+
+/* Sectional PDP: Add to Cart — match Room Planner / Product Summary control styling */
+html.is-sectional-product body.productdetails #content_area .mc-atc-row,
+html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-row {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap,
+html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  min-width: 200px !important;
+  max-width: 100% !important;
+  padding: 14px 28px !important;
+  border: 1px solid #d0d0d0 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  background-color: #fff !important;
+  color: #545454 !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  font-family: inherit !important;
+  margin-left: 0 !important;
+  margin-top: 16px !important;
+}
+
+html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap:hover,
+html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap:hover {
+  background: #f5f5f5 !important;
+  background-color: #f5f5f5 !important;
+  color: #111 !important;
+  border-color: #333 !important;
+}
+
+html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap input[type="submit"],
+html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
+html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap input[type="submit"],
+html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"] {
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  letter-spacing: inherit !important;
+  text-transform: inherit !important;
+  cursor: pointer !important;
+  font-family: inherit !important;
+}
+
+html.is-sectional-product body.productdetails #content_area .v65-product-addtocart,
+html.is-sectional-product body.productdetails #content_area .v65-product-addtocart div,
+html.is-sectional-product body.productdetails #v65-product-parent .v65-product-addtocart,
+html.is-sectional-product body.productdetails #v65-product-parent .v65-product-addtocart div,
+html.is-sectional-product body.productdetails #content_area td:has(input[name="btnaddtocart"]),
+html.is-sectional-product body.productdetails #content_area tr:has(input[name="btnaddtocart"]),
+html.is-sectional-product body.productdetails #v65-product-parent td:has(input[name="btnaddtocart"]),
+html.is-sectional-product body.productdetails #v65-product-parent tr:has(input[name="btnaddtocart"]),
+html.is-sectional-product body.productdetails #content_area form:has(input[name="btnaddtocart"]),
+html.is-sectional-product body.productdetails #v65-product-parent form:has(input[name="btnaddtocart"]) {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }
 
 
