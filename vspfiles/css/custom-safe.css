@@ -11002,7 +11002,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   }
 }
 
-/* MTL sectional PDP — Popular Configurations + Product Summary (20260518sectional) */
+/* MTL sectional PDP — Popular Configurations + Product Summary (20260519sectional) */
 #mtl-sectional-configurations {
   clear: both;
   display: block !important;
@@ -11154,6 +11154,44 @@ html.is-sectional-product #mcLeatherHeader {
   -webkit-user-select: none !important;
 }
 
+html.is-sectional-product #mcLeatherSwatchStrip {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 3 !important;
+}
+
+html.is-sectional-product #mcLeatherSwatchStrip .mc-mini-swatch,
+html.is-sectional-product body.productdetails #mcLeatherSwatchStrip .mc-mini-swatch,
+html.is-sectional-product body.mc-product-page #mcLeatherSwatchStrip .mc-mini-swatch {
+  width: 32px !important;
+  height: 24px !important;
+  min-width: 32px !important;
+  border: 0 !important;
+  border-right: 1px solid #e6e6e6 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
+html.is-sectional-product #mcLeatherSwatchStrip .mc-mini-swatch img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+html.is-sectional-product #mcLeatherSwatchStrip .mc-mini-swatch[data-selected="1"] {
+  box-shadow: inset 0 -2px 0 #111 !important;
+}
+
+html.is-sectional-product #mcLeatherSwatchStrip .mc-mini-swatch:last-child {
+  border-right: 0 !important;
+}
+
 /* Sectional: theme hides #wmOpen with display:none (template ~2015). Off-screen + visually hidden; keep
    pointer-events: auto so programmatic .click() / MouseEvent reliably runs initIfReady's onclick (~2835). */
 html.is-sectional-product #wmOpen {
@@ -11273,6 +11311,10 @@ html.is-sectional-product .wm-overlay {
   z-index: 100000 !important;
 }
 
+html.is-sectional-product .wm-preview {
+  z-index: 100001 !important;
+}
+
 @media (max-width: 600px) {
   #mtl-product-summary .mtl-summary-row {
     flex-direction: column;
@@ -11300,20 +11342,24 @@ html.is-sectional-product .wm-overlay {
   }
 }
 
-/* Sectional PDP: Add to Cart — mirror body.productdetails #mcPlannerBtn / #mcProductSummaryBtn (template_266 ~7462) */
+/* Sectional PDP: Add to Cart — mirror body.productdetails #mcPlannerBtn / #mcProductSummaryBtn (template_266 ~7562) */
 html.is-sectional-product body.productdetails #content_area .mc-atc-row,
-html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-row {
+html.is-sectional-product body.mc-product-page #content_area .mc-atc-row,
+html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-row,
+html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-row {
   display: flex !important;
   align-items: center !important;
-  flex-wrap: wrap !important;
-  gap: 10px !important;
+  flex-wrap: nowrap !important;
+  gap: 0 !important;
   background: transparent !important;
   border: none !important;
   padding: 0 !important;
 }
 
 html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap,
-html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap {
+html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap,
+html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap,
+html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -11343,7 +11389,9 @@ html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button
 }
 
 html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap:hover,
-html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap:hover {
+html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap:hover,
+html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap:hover,
+html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap:hover {
   background: #f5f5f5 !important;
   background-color: #f5f5f5 !important;
   color: #111 !important;
@@ -11351,9 +11399,13 @@ html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button
 }
 
 html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap input[type="submit"],
+html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap input[type="submit"],
 html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
+html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
 html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap input[type="submit"],
-html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"] {
+html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[type="submit"],
+html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
+html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"] {
   display: inline-block !important;
   flex: 0 0 auto !important;
   width: auto !important;
@@ -11376,16 +11428,35 @@ html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button
   font-family: inherit !important;
 }
 
+html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
+html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
+html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper,
+html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper {
+  flex-shrink: 0 !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
 html.is-sectional-product body.productdetails #content_area .v65-product-addtocart,
+html.is-sectional-product body.mc-product-page #content_area .v65-product-addtocart,
 html.is-sectional-product body.productdetails #content_area .v65-product-addtocart div,
+html.is-sectional-product body.mc-product-page #content_area .v65-product-addtocart div,
 html.is-sectional-product body.productdetails #v65-product-parent .v65-product-addtocart,
+html.is-sectional-product body.mc-product-page #v65-product-parent .v65-product-addtocart,
 html.is-sectional-product body.productdetails #v65-product-parent .v65-product-addtocart div,
+html.is-sectional-product body.mc-product-page #v65-product-parent .v65-product-addtocart div,
 html.is-sectional-product body.productdetails #content_area td:has(input[name="btnaddtocart"]),
+html.is-sectional-product body.mc-product-page #content_area td:has(input[name="btnaddtocart"]),
 html.is-sectional-product body.productdetails #content_area tr:has(input[name="btnaddtocart"]),
+html.is-sectional-product body.mc-product-page #content_area tr:has(input[name="btnaddtocart"]),
 html.is-sectional-product body.productdetails #v65-product-parent td:has(input[name="btnaddtocart"]),
+html.is-sectional-product body.mc-product-page #v65-product-parent td:has(input[name="btnaddtocart"]),
 html.is-sectional-product body.productdetails #v65-product-parent tr:has(input[name="btnaddtocart"]),
+html.is-sectional-product body.mc-product-page #v65-product-parent tr:has(input[name="btnaddtocart"]),
 html.is-sectional-product body.productdetails #content_area form:has(input[name="btnaddtocart"]),
-html.is-sectional-product body.productdetails #v65-product-parent form:has(input[name="btnaddtocart"]) {
+html.is-sectional-product body.mc-product-page #content_area form:has(input[name="btnaddtocart"]),
+html.is-sectional-product body.productdetails #v65-product-parent form:has(input[name="btnaddtocart"]),
+html.is-sectional-product body.mc-product-page #v65-product-parent form:has(input[name="btnaddtocart"]) {
   background: transparent !important;
   background-color: transparent !important;
   border: 0 !important;

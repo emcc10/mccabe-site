@@ -2610,7 +2610,7 @@ function gradeHeaderText(g) {
     preview.innerHTML = `
       <div class="wm-preview-card" role="dialog" aria-modal="true">
         <div class="wm-preview-head">
-          <span id="wmPreviewTitle">Swatch</span>
+          <span id="wmPreviewTitle">Leather preview</span>
           <button class="wm-preview-close" type="button" aria-label="Close">&times;</button>
         </div>
         <div class="wm-preview-body">
@@ -2669,7 +2669,7 @@ function gradeHeaderText(g) {
 
     function openPreview(title, imgSrc){
       if (!imgSrc) return;
-      previewTit.textContent = title || "Swatch";
+      previewTit.textContent = title || "Leather preview";
       previewImg.src = imgSrc;
       preview.style.display = "flex";
     }
@@ -3859,15 +3859,21 @@ try {
     }
 
     function loadMiniSwatch(img, swatches, swatchBtn){
-      var urls = Array.isArray(swatches) ? swatches.slice(0) : [];
+      var urls = Array.isArray(swatches)
+        ? swatches.map(function (u) {
+            return String(u || "").trim();
+          }).filter(Boolean)
+        : [];
       var idx = 0;
       function tryNext(){
         if (idx >= urls.length){
           img.removeAttribute("src");
+          img.removeAttribute("srcset");
           img.classList.add("mc-mini-swatch--empty");
           img.style.display = "none";
           if (swatchBtn) {
-            swatchBtn.style.background = "linear-gradient(90deg,#ded8cd 0%,#c9bba0 30%,#9e8b6f 58%,#7f7362 100%)";
+            swatchBtn.style.background =
+              "linear-gradient(90deg,#ded8cd 0%,#c9bba0 30%,#9e8b6f 58%,#7f7362 100%)";
           }
           return;
         }
@@ -3875,6 +3881,10 @@ try {
         img.onerror = function(){
           if (img.naturalWidth === 0) tryNext();
         };
+        img.onload = function(){
+          img.style.opacity = "1";
+        };
+        img.style.opacity = "0";
         img.src = url;
       }
       tryNext();
@@ -3924,11 +3934,18 @@ try {
         btn.dataset.lookup = normalizeLeatherText(friendly).toLowerCase();
 
         var img = document.createElement("img");
-        img.alt = "";
-        img.setAttribute("role", "presentation");
+        var altLabel = labelFull || friendly || "Leather sample";
+        img.alt = altLabel;
         img.loading = "lazy";
         btn.appendChild(img);
-        loadMiniSwatch(img, o.swatches, btn);
+        var swList = Array.isArray(o.swatches)
+          ? o.swatches
+              .map(function (u) {
+                return String(u || "").trim();
+              })
+              .filter(Boolean)
+          : [];
+        loadMiniSwatch(img, swList, btn);
 
         btn.onclick = function (e) {
           if (typeof window.mcOpenWmLeatherModal === "function") window.mcOpenWmLeatherModal(e);
@@ -4063,6 +4080,13 @@ try {
     var mcLeatherHdrMount = document.getElementById("mcLeatherHeader");
     if (mcLeatherHdrMount && typeof window.mcOpenWmLeatherModal === "function") {
       mcLeatherHdrMount.onclick = window.mcOpenWmLeatherModal;
+    }
+    var mcLeatherHdrRowMount = document.getElementById("mcLeatherHeaderRow");
+    if (mcLeatherHdrRowMount && typeof window.mcOpenWmLeatherModal === "function") {
+      mcLeatherHdrRowMount.addEventListener("click", function (e) {
+        if (e.target && e.target.closest && e.target.closest("#mcLeatherBtn")) return;
+        window.mcOpenWmLeatherModal(e);
+      });
     }
 
     var mcPlannerBtnEl = document.getElementById("mcPlannerBtn");
@@ -19555,8 +19579,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   Sectional scripts (external) load last. Leather modal CSS ~line 1872 and script #wm-leather-modal-js ~line 2170
   run earlier in document order, so they always execute before these files.
 -->
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260518sectional"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260518sectional"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260519sectional"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260519sectional"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

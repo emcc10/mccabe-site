@@ -1,6 +1,7 @@
 /*0429 McCabe fixes — load after template.css (linked from template_266.html).
    Ensures hero copy + listing member block even if custom-safe.css fails to load.
-   MC_OVERRIDES_VERIFY_20260430dom — linked again at end of <body> after Volusion vnav.css so rules win. */
+   MC_OVERRIDES_VERIFY_20260430dom — linked again at end of <body> after Volusion vnav.css so rules win.
+   Sectional PDP wmOpen visibility: 20260519sectional (do not style sectional #wmOpen.wm-btn as visible control). */
 
 /* Category: bottom pager + compact subcats (duplicated if custom-safe absent) */
 .mc-category-pager {
@@ -750,11 +751,12 @@ html.is-sectional-product body #mcLeatherBtn {
   justify-content: center !important;
 }
 
+/* Sectional PDP: do NOT style html.is-sectional-product #wmOpen here — it must stay visually hidden
+   (custom-safe / template off-screen rules) so programmatic .click() opens the leather modal. */
 body.productdetails #wmOpen.wm-btn,
 body.mc-product-page #wmOpen.wm-btn,
 body.mc-theater-seating-pdp #wmOpen.wm-btn,
-html.mc-paragon-pdp body #wmOpen.wm-btn,
-html.is-sectional-product body #wmOpen.wm-btn {
+html.mc-paragon-pdp body #wmOpen.wm-btn {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 12px !important;
   font-weight: 400 !important;

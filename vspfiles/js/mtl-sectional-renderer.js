@@ -1,11 +1,14 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: 20260518sectional
+ * Cache: 20260519sectional
  */
 (function () {
   "use strict";
 
-  var IMG_V = "20260518sectional";
+  var IMG_V = "20260519sectional";
+
+  var CART_ICON_SVG =
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
 
   /** Same inner markup as theater <a id="mcProductSummaryBtn"> in template_266.html (#mc-inline-config). */
   var PRODUCT_SUMMARY_LINK_INNER =
@@ -169,6 +172,64 @@
       setTimeout(function () {
         moveLeatherAboveConfigurations(section);
       }, ms);
+    });
+  }
+
+  /** Mirrors template_266 injectAddToCartIcon (~10567) when Volusion markup lacks .mc-atc-button-wrap. */
+  function ensureSectionalAtcChrome() {
+    if (!document.documentElement.classList.contains("is-sectional-product")) return;
+    var root =
+      document.getElementById("v65-product-parent") ||
+      document.getElementById("content_area") ||
+      document.body;
+    var btn = root.querySelector(
+      'input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]'
+    );
+    if (!btn || !btn.parentNode) return;
+
+    if (btn.tagName === "INPUT" && String(btn.type || "").toLowerCase() === "image") {
+      try {
+        btn.type = "submit";
+      } catch (eImg) {}
+      btn.removeAttribute("src");
+      if (!btn.value) btn.value = "ADD TO CART";
+    }
+
+    var wrapExisting = btn.closest(".mc-atc-button-wrap");
+    if (wrapExisting) {
+      wrapExisting.style.setProperty("display", "inline-flex", "important");
+      wrapExisting.style.setProperty("align-items", "center", "important");
+      wrapExisting.style.setProperty("gap", "12px", "important");
+      var parEx = wrapExisting.parentNode;
+      if (parEx && parEx.classList) parEx.classList.add("mc-atc-row");
+      return;
+    }
+
+    var oldWrap = btn.closest(".mc-atc-wrap");
+    if (oldWrap) {
+      while (oldWrap.firstChild) oldWrap.parentNode.insertBefore(oldWrap.firstChild, oldWrap);
+      oldWrap.remove();
+    }
+
+    var parent = btn.parentNode;
+    var wrapper = document.createElement("div");
+    wrapper.className = "mc-atc-button-wrap";
+    parent.insertBefore(wrapper, btn);
+    wrapper.appendChild(btn);
+    var iconWrap = document.createElement("span");
+    iconWrap.innerHTML = CART_ICON_SVG;
+    iconWrap.classList.add("mc-cart-icon-wrapper");
+    wrapper.appendChild(iconWrap);
+    wrapper.style.setProperty("display", "inline-flex", "important");
+    wrapper.style.setProperty("align-items", "center", "important");
+    wrapper.style.setProperty("gap", "12px", "important");
+    if (parent.classList) parent.classList.add("mc-atc-row");
+  }
+
+  function scheduleSectionalAtcChrome() {
+    ensureSectionalAtcChrome();
+    [400, 1200, 2800, 5200].forEach(function (ms) {
+      setTimeout(ensureSectionalAtcChrome, ms);
     });
   }
 
@@ -662,6 +723,7 @@
     ensureProductSummary(section);
     scheduleMoveLeatherAboveConfigurations(section);
     scheduleHideConfigurationRow();
+    scheduleSectionalAtcChrome();
     ensureMcWmOpenMountedListener();
     bindConfigurationCardClicks();
     ensureObservers();
@@ -821,7 +883,7 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer loaded 20260518sectional");
+  console.log("mtl-sectional-renderer loaded 20260519sectional");
 
   function boot() {
     ensureMcWmOpenMountedListener();
