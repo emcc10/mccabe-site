@@ -2398,12 +2398,14 @@ function gradeHeaderText(g) {
       if (!a) return;
       if (b){
         baseNames.push(`${a} ${b}`);
+        baseNames.push(`${a.toLowerCase()} ${b.toLowerCase()}`);
         baseNames.push(`${a}_${b}`);
         baseNames.push(`${a}-${b}`);
         baseNames.push(`${slugify(a)}-${slugify(b)}`);
         baseNames.push(`${slugify(a)}_${slugify(b)}`);
       } else {
         baseNames.push(a);
+        baseNames.push(a.toLowerCase());
         baseNames.push(slugify(a));
       }
     }
@@ -2426,8 +2428,8 @@ function gradeHeaderText(g) {
     for (const baseDir of baseDirs){
       for (const n of baseNames.map(x=>x.trim()).filter(Boolean)){
         for (const e of exts) {
-          const url = baseDir + encodeURIComponent(n + e);
-          if (!unique[url]) { unique[url] = true; urls.push(url); }
+          const enc = baseDir + encodeURIComponent(n + e);
+          if (!unique[enc]) { unique[enc] = true; urls.push(enc); }
         }
       }
     }
@@ -2505,6 +2507,30 @@ function gradeHeaderText(g) {
     window.wmIsLeatherEligiblePage = wmIsLeatherEligiblePage;
   } catch (eWmEx) {}
 
+  /** Path/body guard: never treat as “sectional leather timing” on theater PDPs (avoids minOptions=1 + bad swatch parse). */
+  function wmIsTheaterSeatingPdpEarly(){
+    try {
+      if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
+    } catch (eB) {}
+    var path = String(location.pathname || "").toLowerCase();
+    if (
+      path.indexOf("theater-seating") !== -1 ||
+      path.indexOf("theatre-seating") !== -1 ||
+      path.indexOf("customtheaterseating") !== -1 ||
+      path.indexOf("home-theater") !== -1 ||
+      path.indexOf("home-theatre") !== -1 ||
+      /\bparagon\b/i.test(path) ||
+      /vertex-theater/i.test(path) ||
+      /-s\/106(\b|\.|-|\/)/.test(path)
+    ) {
+      return true;
+    }
+    var pcEl = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+    var pcVal = pcEl && String(pcEl.value || "").trim();
+    if (pcVal === "41417") return true;
+    return false;
+  }
+
   function selectLooksLeatherish(sel){
   let rowTxtEarly = "";
   try {
@@ -2568,8 +2594,9 @@ function gradeHeaderText(g) {
     const real = Array.from(sel.options || []).filter(o => !isPlaceholderOption(o));
     /* Sectionals: cover/leather often has one real option until configuration is chosen - require only one then. */
     const secEarly =
-      document.documentElement.classList.contains("is-sectional-product") ||
-      (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage());
+      !wmIsTheaterSeatingPdpEarly() &&
+      (document.documentElement.classList.contains("is-sectional-product") ||
+        (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()));
     const min = secEarly ? 1 : 2;
     return real.length >= min;
   }
@@ -2597,8 +2624,9 @@ function gradeHeaderText(g) {
     if (document.getElementById("wmOpen")) return true;
 
     const secEarly =
-      document.documentElement.classList.contains("is-sectional-product") ||
-      (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage());
+      !wmIsTheaterSeatingPdpEarly() &&
+      (document.documentElement.classList.contains("is-sectional-product") ||
+        (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()));
 
     const allSelects = Array.from(document.querySelectorAll("select"));
     const candidateSelects = allSelects
@@ -4016,7 +4044,7 @@ try {
       tryNext();
     }
 
-    function renderLeatherPreviewStrip(){
+    function renderLeatherPreviewStripCore(){
       if (!mcLeatherStrip) return;
 
       var source = Array.isArray(window.__WM_LEATHER_OPTIONS__)
@@ -4080,7 +4108,14 @@ try {
         mcLeatherStrip.appendChild(btn);
       });
     }
-    window.mcRenderLeatherPreviewStrip = renderLeatherPreviewStrip;
+
+    /* Theater / default PDP: template-driven preview chips only (not sectional — avoids fighting mtl-sectional-renderer). */
+    function renderLeatherPreviewStrip(){
+      if (!mcLeatherStrip) return;
+      if (document.documentElement.classList.contains("is-sectional-product")) return;
+      renderLeatherPreviewStripCore();
+    }
+    window.mcRenderLeatherPreviewStrip = renderLeatherPreviewStripCore;
 
     function syncLeatherSummary(){
       if (!mcSum) return;
@@ -19739,7 +19774,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=pdp-scope-20260506"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=swatch-fix-20260506"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
