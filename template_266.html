@@ -2473,6 +2473,27 @@ function gradeHeaderText(g) {
   } catch (eWmEx) {}
 
   function selectLooksLeatherish(sel){
+  let rowTxtEarly = "";
+  try {
+    const tr = sel.closest("tr");
+    const td = sel.closest("td");
+    const par = sel.parentElement;
+    if (tr) rowTxtEarly += " " + String(tr.innerText || "");
+    if (td) rowTxtEarly += " " + String(td.innerText || "");
+    if (par) rowTxtEarly += " " + String(par.innerText || "");
+  } catch (eREarly) {}
+  rowTxtEarly = rowTxtEarly.toLowerCase();
+  var titleAttr = String(sel.getAttribute("title") || "").toLowerCase();
+  var isConfigRow =
+    /choose\s+configuration|^configuration\b|choose\s+seat\b/i.test(rowTxtEarly) ||
+    (/choose\s+configuration|^\s*configuration\s*$/i.test(titleAttr) &&
+      !/(leather|cover|upholstery|fabric)/i.test(titleAttr));
+  var rowClaimsLeatherCover = /(choose\s+cover|choose\s+leather|select\s+leather|select\s+a\s+leather|upholstery|fabric\s*selection)/i.test(
+    rowTxtEarly
+  );
+  /** Configuration option text often includes "cover"/"leather"; never treat that select as leather (runs before hasKnown). */
+  if (isConfigRow && !rowClaimsLeatherCover) return false;
+
   const id = (sel.id || "").toLowerCase();
   const nm = (sel.name || "").toLowerCase();
   const hint = id + " " + nm;
@@ -2499,11 +2520,7 @@ function gradeHeaderText(g) {
   if (hinted || hasGrade || hasKnown) return true;
 
   if (wmIsLeatherEligiblePage()) {
-    let rowTxt = "";
-    try {
-      const tr = sel.closest("tr");
-      if (tr) rowTxt = String(tr.innerText || "").toLowerCase();
-    } catch (eR) {}
+    let rowTxt = rowTxtEarly;
     if (/choose\s+configuration|^configuration\s*$/i.test(rowTxt) && !/(leather|cover|upholstery|fabric|grade)/i.test(rowTxt)) {
       return false;
     }
@@ -2963,6 +2980,8 @@ try {
     apex: "44008",
     sanibel: "40111",
     leeds: "77328",
+    /* Alula sectional — product summary PDF (77302 · ALULA) */
+    alula: "77302",
     /* Titan: official PDF is https://images.palliser.com/specsheet/en/44004%20TITAN.pdf */
     titan: "44004"
   };
@@ -19624,8 +19643,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   Sectional scripts (external) load last. Leather modal CSS ~line 1872 and script #wm-leather-modal-js ~line 2170
   run earlier in document order, so they always execute before these files.
 -->
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260522sectional"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260522sectional"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260511diag"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

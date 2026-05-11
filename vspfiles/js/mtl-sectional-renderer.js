@@ -1,11 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: 20260522sectional
+ * Cache: 20260511diag
  */
 (function () {
   "use strict";
 
-  var IMG_V = "20260522sectional";
+  var IMG_V = "20260511diag";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -405,16 +405,16 @@
   }
 
   function refreshProductPriceLabel() {
-    var rows = document.querySelectorAll("#mtl-product-summary .mtl-summary-row");
+    var sum = document.getElementById("mtl-product-summary");
+    if (!sum) return;
+    var nodes = sum.querySelectorAll(
+      ".mtl-summary-label, .mtl-summary-row > span:first-of-type, .mtl-summary-row > div:first-of-type"
+    );
     var i;
-    for (i = 0; i < rows.length; i++) {
-      var lab = rows[i].querySelector(".mtl-summary-label");
-      if (!lab) continue;
-      var t = String(lab.textContent || "");
-      if (/estimated/i.test(t) && /price/i.test(t)) {
-        lab.textContent = "Product Price";
-        break;
-      }
+    for (i = 0; i < nodes.length; i++) {
+      var el = nodes[i];
+      var t = String(el.textContent || "");
+      if (/estimated/i.test(t) && /price/i.test(t)) el.textContent = "Product Price";
     }
   }
 
@@ -639,6 +639,31 @@
       priceEl.dataset.mtlPriceObs = "1";
     }
 
+    scheduleConfigSelectOptionsWatch(configSel);
+  }
+
+  var __mtlCfgOptWatchTimer = null;
+  var __mtlCfgOptWatchLastLen = -1;
+
+  function scheduleConfigSelectOptionsWatch(sel) {
+    if (!sel || sel.dataset.mtlCfgOptionsObs === "1") return;
+    sel.dataset.mtlCfgOptionsObs = "1";
+    __mtlCfgOptWatchLastLen = sel.options ? sel.options.length : 0;
+    if (typeof MutationObserver === "undefined") return;
+    var obs = new MutationObserver(function () {
+      var n = sel.options ? sel.options.length : 0;
+      if (n === __mtlCfgOptWatchLastLen) return;
+      __mtlCfgOptWatchLastLen = n;
+      var sec = document.getElementById("mtl-sectional-configurations");
+      if (sec) sec.removeAttribute("data-mtl-final-init");
+      if (__mtlCfgOptWatchTimer) clearTimeout(__mtlCfgOptWatchTimer);
+      __mtlCfgOptWatchTimer = setTimeout(function () {
+        runRender();
+      }, 120);
+    });
+    try {
+      obs.observe(sel, { childList: true, subtree: true });
+    } catch (eObs) {}
   }
 
   function formatPriceDiffLabel(diff) {
@@ -805,6 +830,22 @@
   }
 
   function renderSectionalPdp() {
+    var misLeather = document.querySelectorAll("#v65-product-parent select.mc-native-leather, #options_table select.mc-native-leather");
+    Array.prototype.forEach.call(misLeather, function (sel) {
+      var rowText = "";
+      var tr = sel.closest && sel.closest("tr");
+      var td = sel.closest && sel.closest("td");
+      if (tr) rowText += " " + tr.innerText;
+      if (td) rowText += " " + td.innerText;
+      rowText = rowText.toLowerCase();
+      if (
+        /choose\s+configuration|^configuration\b|choose\s+seat\b/i.test(rowText) &&
+        !/(choose\s+cover|choose\s+leather|select\s+leather|select\s+a\s+leather)/i.test(rowText)
+      ) {
+        sel.classList.remove("mc-native-leather");
+      }
+    });
+
     var allConfigs = window.MTL_SECTIONAL_CONFIGS || {};
     sectionalLog("sectional configs keys", Object.keys(allConfigs));
 
@@ -972,7 +1013,7 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer external-20260506H loaded 20260522sectional");
+  console.log("mtl-sectional-renderer loaded 20260511diag");
 
   function boot() {
     ensureMcWmOpenMountedListener();
