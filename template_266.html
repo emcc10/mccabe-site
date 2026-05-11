@@ -3985,6 +3985,8 @@ try {
 
     function renderLeatherPreviewStrip(){
       if (!mcLeatherStrip) return;
+      /* Sectional PDP: mini swatches are owned by mtl-sectional-renderer.js (native select + proper chips). */
+      if (document.documentElement.classList.contains("is-sectional-product")) return;
 
       var source = Array.isArray(window.__WM_LEATHER_OPTIONS__)
         ? window.__WM_LEATHER_OPTIONS__.slice()
@@ -4075,7 +4077,7 @@ try {
           return aa.indexOf(w) !== -1;
         });
       }
-      Array.from((mcLeatherStrip || document).querySelectorAll(".mc-mini-swatch")).forEach(function(btn){
+      Array.from((mcLeatherStrip || document).querySelectorAll(".mc-mini-swatch, .mc-leather-mini-swatch")).forEach(function(btn){
         var ttl = btn.title || "";
         var isActive = !!ttl && wmSummaryMatchesChip(activeText, ttl);
         btn.dataset.selected = isActive ? "1" : "0";
@@ -19690,7 +19692,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=leather-cfg-fix-20260511-3"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=leather-modal-native-20260512"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

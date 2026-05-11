@@ -1,11 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: leather-cfg-fix-20260511-3
+ * Cache: leather-modal-native-20260512
  */
 (function () {
   "use strict";
 
-  var IMG_V = "leather-cfg-fix-20260511-3";
+  var IMG_V = "leather-modal-native-20260512";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -22,8 +22,8 @@
 
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
-  window.MTL_RENDERER_VERSION = "leather-cfg-fix-20260511-3";
-  console.log("MTL_RENDERER_VERSION leather-cfg-fix-20260511-3");
+  window.MTL_RENDERER_VERSION = "leather-modal-native-20260512";
+  console.log("MTL_RENDERER_VERSION leather-modal-native-20260512");
 
   function isSectionalProductPageClient() {
     if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) return true;
@@ -79,23 +79,39 @@
     return false;
   }
 
+  /** Pull a display name + grade line from Volusion option text (avoids dumping raw "Grade ####" as the only label). */
+  function parseLeatherFromVolusionOption(opt) {
+    var full = String(opt.textContent || "").replace(/\s+/g, " ").trim();
+    var gradeLine = "—";
+    var gm = full.match(/\b(?:Grade|Gr\.?)\s*([0-9][0-9,\s]*(?:\/\s*[0-9][0-9,\s]*)?)\b/i);
+    if (gm) {
+      gradeLine = "Grade " + String(gm[1] || "").replace(/\s+/g, "").trim();
+    }
+    var name = full;
+    if (gm) {
+      name = full
+        .replace(/\b(?:Grade|Gr\.?)\s*[0-9][0-9,\s]*(?:\/\s*[0-9][0-9,\s]*)?\b/i, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+    if (!name) name = full;
+    return { fullLabel: full, name: name, grade: gradeLine };
+  }
+
   function buildSyntheticWmLeatherOptionsFromSelect(sel) {
     if (!sel || !sel.options) return [];
     var out = [];
     Array.prototype.forEach.call(sel.options, function (opt) {
       if (isPlaceholderLeatherOption(opt)) return;
-      var label = String(opt.textContent || "").replace(/\s+/g, " ").trim();
       var value = String(opt.value || "").trim();
-      var parts = label.split(/\s+/).filter(Boolean);
-      var family = parts[0] || label;
-      var color = parts.slice(1).join(" ") || "";
+      var parsed = parseLeatherFromVolusionOption(opt);
       out.push({
-        family: family,
-        color: color,
-        grade: "Base",
+        family: parsed.name,
+        color: "",
+        grade: parsed.grade,
         value: value,
         swatches: [],
-        label: label,
+        label: parsed.fullLabel,
       });
     });
     return out;
