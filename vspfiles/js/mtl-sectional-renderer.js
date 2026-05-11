@@ -1,11 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: 20260515sectional
+ * Cache: 20260516sectional
  */
 (function () {
   "use strict";
 
-  var IMG_V = "20260515sectional";
+  var IMG_V = "20260516sectional";
 
   /** Same inner markup as theater <a id="mcProductSummaryBtn"> in template_266.html (#mc-inline-config). */
   var PRODUCT_SUMMARY_LINK_INNER =
@@ -178,19 +178,10 @@
    *     html.is-sectional-product so the node is off-screen but not display:none (reliable programmatic click).
    * (2) After config cards sync, mcTryInitWmLeather / boot interval builds #wmOpen; we listen for mcWmOpenMounted.
    * (3) Clicks use the real #wmOpen element theater uses — not text-matched clones.
-   * (4) If .click() is ignored, jQuery .trigger("click") is attempted; overlay z-index: html.is-sectional-product .wm-overlay.
+   * (4) jQuery .trigger("click") after native .click(); overlay z-index: html.is-sectional-product .wm-overlay.
    */
-  function openLeatherModalFromInlineUi(ev) {
-    if (ev) {
-      ev.preventDefault();
-      ev.stopPropagation();
-    }
-    if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
-    var w = document.getElementById("wmOpen");
-    if (!w) {
-      sectionalLog("leather open: no #wmOpen yet (leather selects may still be populating)");
-      return;
-    }
+  function fireWmOpenClick(w) {
+    if (!w) return;
     try {
       w.click();
     } catch (eClk) {
@@ -201,6 +192,24 @@
     } catch (eJq) {}
   }
 
+  function openLeatherModalFromInlineUi(ev) {
+    if (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+    }
+    if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+    var w = document.getElementById("wmOpen");
+    if (!w) {
+      sectionalLog("leather open: no #wmOpen yet (leather selects may still be populating)");
+      setTimeout(function () {
+        if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+        fireWmOpenClick(document.getElementById("wmOpen"));
+      }, 160);
+      return;
+    }
+    fireWmOpenClick(w);
+  }
+
   function bindLeatherTrigger() {
     function bindEl(el) {
       if (!el || el.dataset.mtlLeatherBound === "1") return;
@@ -209,6 +218,7 @@
     }
     bindEl(document.getElementById("mcLeatherBtn"));
     bindEl(document.getElementById("mcLeatherHeader"));
+    bindEl(document.getElementById("mtl-sum-leather"));
   }
 
   function scheduleBindLeatherTrigger() {
@@ -517,6 +527,7 @@
       }
     }
     refreshQuoteAndPalliserSummary();
+    scheduleBindLeatherTrigger();
   }
 
   function scheduleProductSummaryAfterConfigChange() {
@@ -885,7 +896,7 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer loaded 20260515sectional");
+  console.log("mtl-sectional-renderer loaded 20260516sectional");
 
   function boot() {
     ensureMcWmOpenMountedListener();
