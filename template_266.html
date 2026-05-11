@@ -1129,7 +1129,32 @@ document.addEventListener("DOMContentLoaded", function () {
         text = prodR ? String(prodR.innerText || "").toLowerCase() : "";
       } catch (eTxt) {}
       if (!text && document.body) text = String(document.body.innerText || "").toLowerCase();
-      return text.indexOf("choose configuration") !== -1;
+
+      try {
+        var pcKeys = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+        var pcKeysVal = pcKeys ? String(pcKeys.value || "").trim().toLowerCase() : "";
+        var cfgMtl = window.MTL_SECTIONAL_CONFIGS;
+        if (cfgMtl && typeof cfgMtl === "object") {
+          var mtlKeys = Object.keys(cfgMtl);
+          var blobMtl = (
+            String(path || "").toLowerCase() +
+            " " +
+            String(document.title || "").toLowerCase() +
+            " " +
+            pcKeysVal
+          ).trim();
+          for (var mi = 0; mi < mtlKeys.length; mi++) {
+            var mk = String(mtlKeys[mi] || "").toLowerCase();
+            if (mk && blobMtl.indexOf(mk) !== -1) return true;
+          }
+        }
+      } catch (eMtl) {}
+
+      if (text.indexOf("choose configuration") !== -1) return true;
+      if (/\b(select|choose)\s+configuration\b/i.test(text)) return true;
+      if (/\bconfiguration\s*\(/i.test(text) && /\b(select|choose)\s+(a\s+)?leather\b/i.test(text)) return true;
+      if (/\bconfiguration\b/i.test(text) && /\bselect\s+a\s+leather\b/i.test(text)) return true;
+      return false;
     };
 
     var pathOnly = String(window.location.pathname || "").toLowerCase();
@@ -1158,15 +1183,19 @@ document.addEventListener("DOMContentLoaded", function () {
       b.classList.add("mc-bean-bag-pdp");
       return;
     }
-    if (window.isSectionalProductPage()) {
-      try {
-        document.documentElement.classList.add("is-sectional-product");
-      } catch (eSec) {}
-    } else {
-      try {
-        document.documentElement.classList.remove("is-sectional-product");
-      } catch (eSecR) {}
+    function mcSyncSectionalHtmlClassFromPdp() {
+      if (window.isSectionalProductPage()) {
+        try {
+          document.documentElement.classList.add("is-sectional-product");
+        } catch (eSec) {}
+      } else if (document.getElementById("v65-product-parent")) {
+        try {
+          document.documentElement.classList.remove("is-sectional-product");
+        } catch (eSecR) {}
+      }
     }
+    mcSyncSectionalHtmlClassFromPdp();
+    document.addEventListener("DOMContentLoaded", mcSyncSectionalHtmlClassFromPdp);
     var looksPdp =
       !!pcEl ||
       !!document.getElementById("v65-product-parent") ||
@@ -2543,10 +2572,16 @@ function gradeHeaderText(g) {
   } catch (eREarly) {}
   rowTxtEarly = rowTxtEarly.toLowerCase();
   var titleAttr = String(sel.getAttribute("title") || "").toLowerCase();
-  var isConfigRow =
-    /choose\s+configuration|^configuration\b|choose\s+seat\b/i.test(rowTxtEarly) ||
-    (/choose\s+configuration|^\s*configuration\s*$/i.test(titleAttr) &&
-      !/(leather|cover|upholstery|fabric)/i.test(titleAttr));
+  var isConfigRow = false;
+  if (
+    /choose\s+configuration|choose\s+seat\b|(^|[^a-z])configuration([^a-z]|$)/i.test(rowTxtEarly) ||
+    /choose\s+configuration|^\s*configuration\s*$/i.test(titleAttr)
+  ) {
+    isConfigRow = !/(choose cover|choose leather|select leather|select a leather|upholstery|leather|fabric cover)/i.test(
+      rowTxtEarly
+    );
+  }
+  if (/choose\s+seat\b/i.test(rowTxtEarly)) isConfigRow = true;
   var rowClaimsLeatherCover = /(choose\s+cover|choose\s+leather|select\s+leather|select\s+a\s+leather|upholstery|fabric\s*selection)/i.test(
     rowTxtEarly
   );
@@ -2580,7 +2615,7 @@ function gradeHeaderText(g) {
 
   if (wmIsLeatherEligiblePage()) {
     let rowTxt = rowTxtEarly;
-    if (/choose\s+configuration|^configuration\s*$/i.test(rowTxt) && !/(leather|cover|upholstery|fabric|grade)/i.test(rowTxt)) {
+    if (/(choose\s+seat\b|(^|[^a-z])configuration([^a-z]|$))/i.test(rowTxt) && !/(leather|cover|upholstery|fabric|grade)/i.test(rowTxt)) {
       return false;
     }
     if (/(choose cover|choose leather|select leather|select a leather|upholstery|leather cover|fabric)/i.test(hint + " " + lbl + " " + rowTxt)) return true;
@@ -19842,7 +19877,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-leather-20260513"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-leather-20260520"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

@@ -1,11 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: sectional-leather-20260513
+ * Cache: sectional-leather-20260520
  */
 (function () {
   "use strict";
 
-  var IMG_V = "sectional-leather-20260513";
+  var IMG_V = "sectional-leather-20260520";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -22,7 +22,7 @@
 
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
-  window.MTL_RENDERER_VERSION = "sectional-leather-20260513";
+  window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
 
   /** Palliser theater PDPs: never run sectional leather/cards/summary relocation. */
   function isTheaterSeatingProductPageForGuard() {
@@ -696,21 +696,81 @@
       ? Array.from(root.querySelectorAll("select"))
       : Array.from(document.querySelectorAll("#v65-product-parent select, #options_table select"));
 
-    return selects.find(function (sel) {
+    var found = selects.find(function (sel) {
       if (sel.classList && sel.classList.contains("mc-native-leather")) return false;
       if (sel.closest && sel.closest(".mc-native-leather")) return false;
-
-      var rowText = "";
-      var tr = sel.closest("tr");
-      var td = sel.closest("td");
-      var parent = sel.parentElement;
-
-      if (tr) rowText += " " + tr.innerText;
-      if (td) rowText += " " + td.innerText;
-      if (parent) rowText += " " + parent.innerText;
-
-      return /choose configuration|^configuration\b|choose\s+seat/i.test(rowText);
+      return isVolusionConfigurationRowSelect(sel);
     });
+    if (found) return found;
+
+    var path = String(location.pathname || "").toLowerCase();
+    var sectionalOrLikely =
+      document.documentElement.classList.contains("is-sectional-product") ||
+      (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) ||
+      path.indexOf("-sc-") !== -1;
+    if (!sectionalOrLikely) {
+      try {
+        var cfgEarly = window.MTL_SECTIONAL_CONFIGS;
+        if (cfgEarly && typeof cfgEarly === "object") {
+          var keysE = Object.keys(cfgEarly);
+          var blobE = (
+            path +
+            " " +
+            String(document.title || "").toLowerCase()
+          ).toLowerCase();
+          var pcE = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+          var pcEv = pcE ? String(pcE.value || "").toLowerCase() : "";
+          for (var ie = 0; ie < keysE.length; ie++) {
+            var ke = String(keysE[ie] || "").toLowerCase();
+            if (!ke) continue;
+            if (blobE.indexOf(ke) !== -1 || (pcEv && pcEv.indexOf(ke) !== -1)) {
+              sectionalOrLikely = true;
+              break;
+            }
+          }
+        }
+      } catch (eLik) {}
+    }
+    if (!sectionalOrLikely) return null;
+
+    var scored = [];
+    var si;
+    for (si = 0; si < selects.length; si++) {
+      var cand = selects[si];
+      if (cand.classList && cand.classList.contains("mc-native-leather")) continue;
+      if (cand.closest && cand.closest(".mc-native-leather")) continue;
+      var rt = "";
+      var trC = cand.closest("tr");
+      var tdC = cand.closest("td");
+      var parC = cand.parentElement;
+      if (trC) rt += " " + trC.innerText;
+      if (tdC) rt += " " + tdC.innerText;
+      if (parC) rt += " " + parC.innerText;
+      rt = rt.toLowerCase();
+      if (
+        /(choose\s+cover|choose\s+leather|select\s+leather|select\s+a\s+leather|upholstery|fabric\s*selection|fabric\s*cover)/i.test(
+          rt
+        )
+      )
+        continue;
+      var realOpts = Array.from(cand.options || []).filter(function (o) {
+        return !isPlaceholderConfigOption(o);
+      });
+      if (realOpts.length < 2) continue;
+      var joined = realOpts
+        .map(function (o) {
+          return String(o.textContent || "");
+        })
+        .join(" ");
+      if (!/\d/.test(joined)) continue;
+      var sc = realOpts.length;
+      if (/\d\s*[-–\/x]\s*\d/.test(joined)) sc += 10;
+      scored.push({ sel: cand, score: sc });
+    }
+    scored.sort(function (a, b) {
+      return b.score - a.score;
+    });
+    return scored.length ? scored[0].sel : null;
   }
 
   function hideConfigurationRow() {
@@ -1468,18 +1528,7 @@
     if (isTheaterSeatingProductPageForGuard() || !isSectionalProductPageClient()) return;
     var misLeather = document.querySelectorAll("#v65-product-parent select.mc-native-leather, #options_table select.mc-native-leather");
     Array.prototype.forEach.call(misLeather, function (sel) {
-      var rowText = "";
-      var tr = sel.closest && sel.closest("tr");
-      var td = sel.closest && sel.closest("td");
-      if (tr) rowText += " " + tr.innerText;
-      if (td) rowText += " " + td.innerText;
-      rowText = rowText.toLowerCase();
-      if (
-        /choose\s+configuration|^configuration\b|choose\s+seat\b/i.test(rowText) &&
-        !/(choose\s+cover|choose\s+leather|select\s+leather|select\s+a\s+leather)/i.test(rowText)
-      ) {
-        sel.classList.remove("mc-native-leather");
-      }
+      if (isVolusionConfigurationRowSelect(sel)) sel.classList.remove("mc-native-leather");
     });
 
     var allConfigs = window.MTL_SECTIONAL_CONFIGS || {};
