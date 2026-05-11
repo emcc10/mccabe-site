@@ -11184,6 +11184,128 @@ html.is-sectional-product #mcLeatherSwatchStrip {
   z-index: 3 !important;
 }
 
+/* Sectional mini leather chips (native select–driven); wins over legacy .mc-mini-swatch strip rules. */
+html.is-sectional-product #mcLeatherSwatchStrip.mc-leather-mini-swatches {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 8px !important;
+  align-items: stretch !important;
+  overflow: visible !important;
+}
+
+html.is-sectional-product #mcLeatherSwatchStrip.mc-leather-mini-swatches .mc-leather-mini-swatch.mc-mini-swatch {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-width: 92px !important;
+  max-width: 220px !important;
+  padding: 6px 8px !important;
+  border: 1px solid #d6d0c7 !important;
+  border-radius: 999px !important;
+  background: #fff !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  cursor: pointer !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
+html.is-sectional-product #mcLeatherSwatchStrip.mc-leather-mini-swatches .mc-leather-mini-swatch__label {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  text-align: left !important;
+}
+
+html.is-sectional-product #mcLeatherSwatchStrip.mc-leather-mini-swatches .mc-leather-mini-swatch img {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  flex: 0 0 auto !important;
+  display: block !important;
+}
+
+html.is-sectional-product #mcLeatherSwatchStrip.mc-leather-mini-swatches .mc-leather-mini-swatch[data-selected="1"] {
+  box-shadow: 0 0 0 2px #111 inset !important;
+  border-color: #111 !important;
+}
+
+/* Native leather replacement grid inside #wmSections (sectionals). */
+html.is-sectional-product .wm-overlay .mtl-leather-modal-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+  gap: 12px !important;
+  padding: 8px 4px !important;
+  max-height: 55vh !important;
+  overflow: auto !important;
+  box-sizing: border-box !important;
+}
+
+html.is-sectional-product .wm-overlay .mtl-leather-modal-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  text-align: left !important;
+  border: 1px solid #d6d0c7 !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  padding: 8px !important;
+  cursor: pointer !important;
+  font: 12px/1.25 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important;
+  margin: 0 !important;
+}
+
+html.is-sectional-product .wm-overlay .mtl-leather-modal-card:hover {
+  border-color: #111 !important;
+}
+
+html.is-sectional-product .wm-overlay .mtl-leather-modal-thumb {
+  width: 100% !important;
+  aspect-ratio: 1 !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  background: linear-gradient(135deg, #ece8e0, #d8d2c7) !important;
+  margin-bottom: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+html.is-sectional-product .wm-overlay .mtl-leather-modal-thumb img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+html.is-sectional-product .wm-overlay .mtl-leather-modal-thumb--empty {
+  font-size: 10px !important;
+  color: #555 !important;
+  padding: 6px !important;
+  text-align: center !important;
+}
+
+html.is-sectional-product .wm-overlay .mtl-leather-modal-name {
+  font-weight: 600 !important;
+  color: #222 !important;
+  word-break: break-word !important;
+}
+
+html.is-sectional-product .wm-overlay .mtl-leather-modal-grade {
+  font-size: 11px !important;
+  color: #666 !important;
+  margin-top: 2px !important;
+}
+
 html.is-sectional-product #mcLeatherSwatchStrip .mc-mini-swatch,
 html.is-sectional-product body.productdetails #mcLeatherSwatchStrip .mc-mini-swatch,
 html.is-sectional-product body.mc-product-page #mcLeatherSwatchStrip .mc-mini-swatch {
@@ -11231,7 +11353,7 @@ html.is-sectional-product #mcLeatherSwatchStrip .mc-mini-swatch.mtl-mini-leather
   text-align: center !important;
 }
 
-/* Sectional PDP: space between main product image column and options / #options_table */
+/* Sectional PDP: ≥22px vertical separation before options / purchase column (live Volusion may omit mc-pdp-main-row). */
 html.is-sectional-product body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-media-td,
 html.is-sectional-product body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-media-td,
 html.is-sectional-product body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-media-td,
@@ -11242,15 +11364,53 @@ html.is-sectional-product body.mc-product-page #content_area tr.mc-pdp-main-row 
 html.is-sectional-product body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
 html.is-sectional-product body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
 html.is-sectional-product body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
-html.is-sectional-product body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #options_table {
-  margin-top: 14px !important;
+html.is-sectional-product body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
+html.is-sectional-product body.productdetails #v65-product-parent #options_table,
+html.is-sectional-product body.mc-product-page #v65-product-parent #options_table,
+html.is-sectional-product body.productdetails #content_area #options_table,
+html.is-sectional-product body.mc-product-page #content_area #options_table,
+html.is-sectional-product body.productdetails #v65-product-parent table[id*="options_table"],
+html.is-sectional-product body.mc-product-page #v65-product-parent table[id*="options_table"] {
+  margin-top: 22px !important;
+}
+
+html.is-sectional-product body.productdetails #v65-product-parent [itemprop="offers"],
+html.is-sectional-product body.mc-product-page #v65-product-parent [itemprop="offers"] {
+  padding-left: 22px !important;
+  box-sizing: border-box !important;
 }
 
 @media (max-width: 767px) {
+  html.is-sectional-product body.productdetails #v65-product-parent [itemprop="offers"],
+  html.is-sectional-product body.mc-product-page #v65-product-parent [itemprop="offers"] {
+    padding-left: 0 !important;
+  }
   html.is-sectional-product body.productdetails #v65-product-parent img#product_photo,
   html.is-sectional-product body.mc-product-page #content_area img#product_photo {
     margin-bottom: 18px !important;
   }
+}
+
+/* Sectional: center Add to Cart under price / summary column. */
+html.is-sectional-product body.productdetails #v65-product-parent .v65-product-addtocart,
+html.is-sectional-product body.mc-product-page #v65-product-parent .v65-product-addtocart {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  width: 100% !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+html.is-sectional-product body.productdetails #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
+html.is-sectional-product body.mc-product-page #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
+html.is-sectional-product body.productdetails #v65-product-parent .v65-product-addtocart input.vCSS_input_addtocart,
+html.is-sectional-product body.mc-product-page #v65-product-parent .v65-product-addtocart input.vCSS_input_addtocart,
+html.is-sectional-product body.productdetails #v65-product-parent td.vCSS_input_addtocart,
+html.is-sectional-product body.mc-product-page #v65-product-parent td.vCSS_input_addtocart {
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
 /* Sectional: theme hides #wmOpen with display:none (template ~2015). Off-screen + visually hidden; keep

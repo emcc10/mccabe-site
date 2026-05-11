@@ -1,11 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: leather-modal-native-20260512
+ * Cache: theater-guard-20260512
  */
 (function () {
   "use strict";
 
-  var IMG_V = "leather-modal-native-20260512";
+  var IMG_V = "theater-guard-20260512";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -22,10 +22,51 @@
 
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
-  window.MTL_RENDERER_VERSION = "leather-modal-native-20260512";
-  console.log("MTL_RENDERER_VERSION leather-modal-native-20260512");
+  window.MTL_RENDERER_VERSION = "theater-guard-20260512";
+  console.log("MTL_RENDERER_VERSION theater-guard-20260512");
+
+  /** Palliser theater PDPs: never run sectional leather/cards/summary relocation. */
+  function isTheaterSeatingProductPageForGuard() {
+    try {
+      if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
+    } catch (eB) {}
+    var path = String(location.pathname || "").toLowerCase();
+    if (
+      path.indexOf("theater-seating") !== -1 ||
+      path.indexOf("theatre-seating") !== -1 ||
+      path.indexOf("customtheaterseating") !== -1 ||
+      path.indexOf("home-theater") !== -1 ||
+      path.indexOf("home-theatre") !== -1
+    ) {
+      return true;
+    }
+    var blob = "";
+    try {
+      blob = (
+        path +
+        " " +
+        String(document.title || "") +
+        " " +
+        (document.body ? document.body.innerText.slice(0, 6000) : "")
+      ).toLowerCase();
+    } catch (eBl) {}
+    if (
+      /\btheater seating\b|\btheatre seating\b|\bhome theater\b|\bhome theatre\b/.test(blob)
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  function stripSectionalHtmlClassIfTheater() {
+    if (!isTheaterSeatingProductPageForGuard()) return;
+    try {
+      document.documentElement.classList.remove("is-sectional-product");
+    } catch (eR) {}
+  }
 
   function isSectionalProductPageClient() {
+    if (isTheaterSeatingProductPageForGuard()) return false;
     if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) return true;
     return document.documentElement.classList.contains("is-sectional-product");
   }
@@ -635,59 +676,22 @@
     };
   }
 
-  function renderMtlDebugPanel(data) {
-    var id = "mtl-debug-panel";
-    var el = document.getElementById(id);
-    if (!el) {
-      el = document.createElement("div");
-      el.id = id;
-      el.style.cssText =
-        "position:fixed;left:8px;bottom:8px;z-index:99999;max-width:min(440px,94vw);max-height:70vh;overflow:auto;background:#111;color:#eee;font:12px/1.4 Consolas,monospace;padding:10px 12px;border:2px solid #fc0;box-shadow:0 4px 20px rgba(0,0,0,.4);";
-      document.body.appendChild(el);
-    }
-    window.__MTL_DEBUG_SNAPSHOT__ = data;
-    console.log("[MTL DEBUG]", data);
-    var lines = [
-      "MTL_RENDERER_VERSION: " + String(window.MTL_RENDERER_VERSION || ""),
-      "1. ProductCode: " + data.productCode,
-      "2. Title: " + data.titleText,
-      "3. Detected style name: " + data.detectedStyleName,
-      "4. Palliser style #: " + data.palliserStyleNumber,
-      "5. Product Summary href: " + data.productSummaryHref,
-      "6. Config records (merged): " + data.mergedRecordCount,
-      "7. First 10 config id:value — " + JSON.stringify(data.firstTenConfigIds),
-      "8. Default config: " + data.defaultConfigurationDetected,
-      "9. Leather native select: " + (data.leatherNativeSelectFound ? "yes" : "no"),
-      "10. Leather option count: " + data.leatherNativeOptionCount,
-      "11. First 10 leather texts — " + JSON.stringify(data.firstTenLeatherOptionTexts),
-      "12. __WM_LEATHER_OPTIONS__ populated: " + (data.leatherSwatchDataSourceFound ? "yes" : "no"),
-      "13. #wmSections exists: " + (data.leatherModalContainerFound ? "yes" : "no"),
-      "14. Modal tile/fallback btn count: " + data.leatherModalSwatchCountAfterRender,
-      "15. Mini strip #mcLeatherSwatchStrip: " + (data.miniSwatchContainerFound ? "yes" : "no"),
-      "16. Mini swatch count: " + data.miniSwatchCountAfterRender,
-      "17. Product Summary row BEFORE #mtl-sectional-configurations: " + (data.productSummaryRowBeforePopularConfigurations ? "yes" : "no"),
-    ];
-    el.textContent = lines.join("\n");
-  }
-
-  function shouldRunSectionalDiagnostics() {
-    if (isSectionalProductPageClient()) return true;
-    if (/-sc-/i.test(String(location.pathname || ""))) return true;
-    try {
-      var pc = String((document.querySelector('input[name="ProductCode"]') || {}).value || "").toLowerCase();
-      if (/-sc-/.test(pc)) return true;
-    } catch (ePc) {}
-    return false;
-  }
-
-  function runMtlSectionalDiagnostic(label) {
-    if (!shouldRunSectionalDiagnostics()) return;
+  /** Opt-in (?mtlSectionalDebug=1): console only — no on-screen panel. */
+  function runMtlSectionalDiagnosticConsoleOnly(label) {
+    if (!SECTIONAL_DBG) return;
     try {
       var snap = collectMtlDebugSnapshot({ when: label || "" });
-      renderMtlDebugPanel(snap);
+      console.log("[MTL DEBUG]", label || "", snap);
     } catch (eDiag) {
       console.error("[MTL DEBUG collect failed]", eDiag);
     }
+  }
+
+  function removeMtlDebugPanelIfPresent() {
+    try {
+      var el = document.getElementById("mtl-debug-panel");
+      if (el) el.remove();
+    } catch (eRm) {}
   }
 
   function sectionalLog() {
@@ -1560,6 +1564,7 @@
   }
 
   function renderSectionalPdp() {
+    if (isTheaterSeatingProductPageForGuard() || !isSectionalProductPageClient()) return;
     var misLeather = document.querySelectorAll("#v65-product-parent select.mc-native-leather, #options_table select.mc-native-leather");
     Array.prototype.forEach.call(misLeather, function (sel) {
       var rowText = "";
@@ -1771,6 +1776,10 @@
 
   function runRender() {
     try {
+      stripSectionalHtmlClassIfTheater();
+      removeMtlDebugPanelIfPresent();
+      if (isTheaterSeatingProductPageForGuard()) return;
+      if (!isSectionalProductPageClient()) return;
       renderSectionalPdp();
     } catch (err) {
       console.error("Sectional renderer failed:", err);
@@ -1779,14 +1788,42 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
+  /** Console helper: run after page load (open modal to test modal card count). */
+  window.MTL_verifySectionalLeatherUi = function () {
+    if (isTheaterSeatingProductPageForGuard()) {
+      console.log("[MTL verify] Skipped — theater seating PDP (sectional renderer inactive).");
+      return { skipped: "theater" };
+    }
+    var ws = document.getElementById("wmSections");
+    var strip = document.getElementById("mcLeatherSwatchStrip");
+    var sec = document.getElementById("mtl-sectional-configurations");
+    var row = document.getElementById("mcPlannerRow");
+    var ot = document.querySelector("#v65-product-parent #options_table, #v65-product-parent table[id*='options_table']");
+    var rep = {};
+    try {
+      rep = {
+        modalNativeCards: ws ? ws.querySelectorAll(".mtl-leather-modal-card").length : 0,
+        miniChips: strip ? strip.querySelectorAll(".mc-leather-mini-swatch").length : 0,
+        productSummaryImmediatelyBeforePopular: !!(sec && row && sec.previousElementSibling === row),
+        optionsTableMarginTop: ot && window.getComputedStyle ? window.getComputedStyle(ot).marginTop : "",
+      };
+    } catch (eV) {
+      rep.error = String(eV.message || eV);
+    }
+    console.log("[MTL verify] Open leather modal to refresh modal card count.", rep);
+    return rep;
+  };
+
   function boot() {
+    stripSectionalHtmlClassIfTheater();
+    removeMtlDebugPanelIfPresent();
     ensureMcWmOpenMountedListener();
-    if (shouldRunSectionalDiagnostics()) {
+    if (SECTIONAL_DBG && isSectionalProductPageClient() && !isTheaterSeatingProductPageForGuard()) {
       window.setTimeout(function () {
-        runMtlSectionalDiagnostic("after DOMContentLoaded (0ms tick)");
+        runMtlSectionalDiagnosticConsoleOnly("after DOMContentLoaded (0ms tick)");
       }, 0);
       window.setTimeout(function () {
-        runMtlSectionalDiagnostic("t+1500ms");
+        runMtlSectionalDiagnosticConsoleOnly("t+1500ms");
       }, 1500);
     }
     runRender();

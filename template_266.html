@@ -1093,6 +1093,27 @@ document.addEventListener("DOMContentLoaded", function () {
     window.isSectionalProductPage = function isSectionalProductPage() {
       var path = String(window.location.pathname || "").toLowerCase();
       if (path.indexOf("room-planner") !== -1) return false;
+      /* Theater seating PDPs use "Choose configuration" for seats — must NOT be treated as sofa/sectionals. */
+      if (
+        path.indexOf("theater-seating") !== -1 ||
+        path.indexOf("theatre-seating") !== -1 ||
+        path.indexOf("customtheaterseating") !== -1 ||
+        path.indexOf("home-theater") !== -1 ||
+        path.indexOf("home-theatre") !== -1
+      ) {
+        return false;
+      }
+      try {
+        var bodyEarly = document.body ? String(document.body.innerText || "").toLowerCase().slice(0, 8000) : "";
+        if (
+          bodyEarly.indexOf("theater seating") !== -1 ||
+          bodyEarly.indexOf("theatre seating") !== -1 ||
+          bodyEarly.indexOf("home theater") !== -1 ||
+          bodyEarly.indexOf("home theatre") !== -1
+        ) {
+          return false;
+        }
+      } catch (eBody) {}
       if (path.includes("-sc-")) return true;
       try {
         var pcEl = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
@@ -1133,6 +1154,10 @@ document.addEventListener("DOMContentLoaded", function () {
       try {
         document.documentElement.classList.add("is-sectional-product");
       } catch (eSec) {}
+    } else {
+      try {
+        document.documentElement.classList.remove("is-sectional-product");
+      } catch (eSecR) {}
     }
     var looksPdp =
       !!pcEl ||
@@ -19692,7 +19717,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=leather-modal-native-20260512"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=theater-guard-20260512"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
