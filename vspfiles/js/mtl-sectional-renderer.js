@@ -429,10 +429,6 @@
       sum = document.createElement("div");
       sum.id = "mtl-product-summary";
       sum.innerHTML =
-        '<div class="mtl-summary-row mtl-summary-row--palliser-summary">' +
-        '<a id="mtl-sum-palliser-summary" class="mc-config-btn" href="#" target="_blank" rel="noopener noreferrer">' +
-        PRODUCT_SUMMARY_LINK_INNER +
-        "</a></div>" +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Selected Configuration</span><span class="mtl-summary-value" id="mtl-sum-config">—</span></div>' +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Product Price</span><span class="mtl-summary-value" id="mtl-sum-price">—</span></div>' +
         '<p id="mtl-sectional-quote-hint" class="mtl-sectional-quote-hint"></p>';
@@ -470,14 +466,12 @@
       var dimRow = dimsN.closest(".mtl-summary-row");
       if (dimRow) dimRow.remove();
     }
-    if (!document.getElementById("mtl-sum-palliser-summary")) {
-      var rowPs = document.createElement("div");
-      rowPs.className = "mtl-summary-row mtl-summary-row--palliser-summary";
-      rowPs.innerHTML =
-        '<a id="mtl-sum-palliser-summary" class="mc-config-btn" href="#" target="_blank" rel="noopener noreferrer">' +
-        PRODUCT_SUMMARY_LINK_INNER +
-        "</a>";
-      sum.insertBefore(rowPs, sum.firstChild);
+    sum.querySelectorAll(".mtl-summary-row--palliser-summary").forEach(function (r) {
+      r.remove();
+    });
+    var oldPs = document.getElementById("mtl-sum-palliser-summary");
+    if (oldPs && oldPs.closest(".mtl-summary-row--palliser-summary")) {
+      oldPs.closest(".mtl-summary-row--palliser-summary").remove();
     }
     if (!document.getElementById("mtl-sectional-quote-hint")) {
       var hint = document.createElement("p");
@@ -912,6 +906,35 @@
       console.warn("No Volusion configuration options to display as cards.", productKey);
       return;
     }
+
+    (function orderDefaultConfigurationFirst() {
+      var selVal = String(configSelect.value || "");
+      var defI = -1;
+      var i;
+      for (i = 0; i < merged.length; i++) {
+        if (String(merged[i].nativeValue) === selVal) {
+          defI = i;
+          break;
+        }
+      }
+      if (defI < 0) {
+        defI = merged.findIndex(function (c) {
+          return c.base === true;
+        });
+      }
+      if (defI < 0) {
+        defI = merged.findIndex(function (c) {
+          return normalizeCode(c.code) === "07-15";
+        });
+      }
+      if (defI < 0) defI = 0;
+      var first = merged[defI];
+      var rest = merged.filter(function (_, j) {
+        return j !== defI;
+      });
+      merged.length = 0;
+      merged.push.apply(merged, [first].concat(rest));
+    })();
 
     try {
       document.documentElement.classList.add("is-sectional-product");

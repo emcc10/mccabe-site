@@ -2541,11 +2541,37 @@ function gradeHeaderText(g) {
     return real.length >= min;
   }
 
+  /** Exclude Volusion “Choose configuration” — it is not a leather/cover select and breaks swatch parsing. */
+  function isNativeConfigurationSelectEl(sel){
+    try {
+      var rowText = "";
+      var tr = sel.closest("tr");
+      var td = sel.closest("td");
+      var parent = sel.parentElement;
+      if (tr) rowText += " " + tr.innerText;
+      if (td) rowText += " " + td.innerText;
+      if (parent) rowText += " " + parent.innerText;
+      rowText = rowText.toLowerCase();
+      if (!/choose configuration|configuration/i.test(rowText)) return false;
+      if (/(choose cover|choose leather|select leather|select a leather|upholstery|leather|fabric cover)/i.test(rowText)) return false;
+      return true;
+    } catch (eCfg) {
+      return false;
+    }
+  }
+
   function initIfReady(){
     if (document.getElementById("wmOpen")) return true;
 
+    const secEarly =
+      document.documentElement.classList.contains("is-sectional-product") ||
+      (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage());
+
     const allSelects = Array.from(document.querySelectorAll("select"));
-    const candidateSelects = allSelects.filter(selectLooksLeatherish).filter(hasRealOptions);
+    const candidateSelects = allSelects
+      .filter(function (s) { return !isNativeConfigurationSelectEl(s); })
+      .filter(selectLooksLeatherish)
+      .filter(hasRealOptions);
 
     if (!candidateSelects.length) { log("No leather-ish selects yet."); return false; }
 
@@ -2557,7 +2583,16 @@ function gradeHeaderText(g) {
         if (!raw) continue;
 
         const pr = parseGradeAndRest(raw);
-        const fc = splitFamilyColor(pr.rest);
+        let fc = splitFamilyColor(pr.rest);
+        if ((!fc.family && !fc.color) && secEarly) {
+          const fallback = cleanText(pr.rest) || cleanText(raw);
+          if (fallback) {
+            fc = splitFamilyColor(fallback);
+            if (!fc.family && !fc.color) {
+              fc = { family: fallback, color: "" };
+            }
+          }
+        }
         if (!fc.family && !fc.color) continue;
 
         all.push({
@@ -2980,8 +3015,10 @@ try {
     apex: "44008",
     sanibel: "40111",
     leeds: "77328",
-    /* Alula sectional — product summary PDF (77302 · ALULA) */
-    alula: "77302",
+    /* Alula sectional — Palliser spec PDF uses 77427 + ALULA */
+    alula: "77427",
+    /* Common path/today typo; still resolves to Alula spec sheet */
+    aloira: "77427",
     /* Titan: official PDF is https://images.palliser.com/specsheet/en/44004%20TITAN.pdf */
     titan: "44004"
   };
@@ -3064,6 +3101,17 @@ try {
       if (MC_PALLISER_SPEC_MODEL[lk]) model = String(MC_PALLISER_SPEC_MODEL[lk]);
     }
 
+    /* Sectional PDP: spec sheet uses Palliser collection number + canonical style name (not Volusion / McCabe SKU). */
+    try {
+      if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
+        var hayX = mcPalliserHaystack();
+        if (/\balula\b|\/alula\b/i.test(hayX) || /\baloira\b/i.test(hayX)) {
+          if (!explicitModel) model = "77427";
+          style = "ALULA";
+        }
+      }
+    } catch (eSecPall) {}
+
     return { model: model, style: style };
   }
 
@@ -3127,7 +3175,7 @@ try {
     return mcPalliserSpecSheetBase() + encodeURIComponent(model + " " + style) + ".pdf";
   }
 
-  /** Title-case Palliser style token for visible summary link text (77302 · Alula). */
+  /** Title-case Palliser style token for tooltip / title attribute. */
   function mcPalliserSummaryStylePretty(styleTok) {
     var t = String(styleTok || "").trim();
     if (!t) return "";
@@ -3143,25 +3191,25 @@ try {
       .join(" ");
   }
 
-  /** Matches theater PDP pattern: MODEL + middot + style name while href stays mcBuild URL (CDN PDF). */
+  /** Visible anchor text is always the literal label; model/style belong in href + title only. */
   function mcProductSummaryAnchorLabel(hasUrl, model, style) {
-    var m = String(model || "").trim();
-    var sPretty = mcPalliserSummaryStylePretty(style);
-    if (hasUrl && m && sPretty) return m + " \u00B7 " + sPretty;
     return "Product Summary";
   }
 
   function mcRefreshProductSummaryButton() {
-    var anchors = [
-      document.getElementById("mcProductSummaryBtn"),
-      document.getElementById("mtl-sum-palliser-summary"),
-    ].filter(Boolean);
+    var anchors = [document.getElementById("mcProductSummaryBtn")].filter(Boolean);
     if (!anchors.length) return;
     var r = mcPalliserResolveModelAndStyle();
     var modelDisp = (r && r.model) || "";
     var styleDisp = (r && r.style) || "";
     var url = mcBuildPalliserSpecSheetUrl();
-    var summaryLabel = mcProductSummaryAnchorLabel(!!url, modelDisp, styleDisp);
+    var sPretty = mcPalliserSummaryStylePretty(styleDisp);
+    var titleDetail =
+      url && modelDisp && sPretty
+        ? "Open Palliser product summary (PDF) — " + modelDisp + " · " + sPretty
+        : url
+          ? "Open Palliser product summary (PDF)"
+          : "Palliser spec sheet not detected for this product";
     var i;
     for (i = 0; i < anchors.length; i++) {
       var a = anchors[i];
@@ -3177,15 +3225,12 @@ try {
         a.href = url;
         a.setAttribute("aria-disabled", "false");
         a.style.opacity = "";
-        a.title =
-          summaryLabel !== "Product Summary"
-            ? "Open Palliser product summary (PDF) — " + summaryLabel.replace(/\u00B7/g, "·")
-            : "Open Palliser product summary (PDF)";
+        a.title = titleDetail;
       } else {
         a.href = "#";
         a.setAttribute("aria-disabled", "true");
         a.style.opacity = "0.45";
-        a.title = "Palliser spec sheet not detected for this product";
+        a.title = titleDetail;
       }
       var k;
       var spans = a.querySelectorAll("span");
@@ -3196,7 +3241,7 @@ try {
           break;
         }
       }
-      if (txtSpan) txtSpan.textContent = summaryLabel;
+      if (txtSpan) txtSpan.textContent = "Product Summary";
     }
   }
 
@@ -3207,6 +3252,7 @@ try {
     )
       return;
     if (!document.querySelector('input[name="ProductCode"]')) return;
+    if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) return;
     if (document.getElementById("mcProductSummaryBtn")) return;
     var url = mcBuildPalliserSpecSheetUrl();
     if (!url) return;
