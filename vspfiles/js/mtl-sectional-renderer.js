@@ -20,7 +20,7 @@
       '<svg xmlns="http://www.w3.org/2000/svg" width="360" height="220" viewBox="0 0 360 220"><rect fill="#f2f2f2" width="360" height="220"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#aaa" font-family="Arial,sans-serif" font-size="13">Configuration diagram</text></svg>'
     );
 
-  var state = { cfgByCode: {} };
+  var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   function sectionalLog() {
     if (!SECTIONAL_DBG) return;
@@ -515,7 +515,13 @@
     refreshProductPriceLabel();
 
     var code = window.__mtlSectionalSelectedConfig;
-    var cfg = code ? state.cfgByCode[code] : null;
+    var nv = window.__mtlSectionalPreferredNativeValue;
+    var cfg =
+      nv != null && state.cfgByNativeValue[String(nv)]
+        ? state.cfgByNativeValue[String(nv)]
+        : code
+          ? state.cfgByCode[normalizeCode(code)]
+          : null;
     var configLabel = cfg ? cfg.label || cfg.code || code : code || "—";
 
     var price = readDisplayedPrice();
@@ -714,6 +720,68 @@
     return merged;
   }
 
+  /** Sectional mount hides #mcPlannerRow in template; restore row and keep only Product Summary (hide Room Planner). */
+  function ensureInlineProductSummaryVisibleWithPlannerHidden() {
+    if (!document.documentElement.classList.contains("is-sectional-product")) return;
+    var row = document.getElementById("mcPlannerRow");
+    var plannerBtn = document.getElementById("mcPlannerBtn");
+    var summaryBtn = document.getElementById("mcProductSummaryBtn");
+    if (row) {
+      row.style.setProperty("display", "flex", "important");
+      row.style.setProperty("visibility", "visible", "important");
+    }
+    if (plannerBtn) plannerBtn.style.setProperty("display", "none", "important");
+    if (summaryBtn) {
+      summaryBtn.style.setProperty("display", "inline-flex", "important");
+      if (typeof window.mcRefreshProductSummaryButton === "function") window.mcRefreshProductSummaryButton();
+    }
+  }
+
+  function bindSectionalLeatherUiRetries() {
+    if (!document.documentElement.classList.contains("is-sectional-product")) return;
+    var hdr = document.getElementById("mcLeatherHeader");
+    var btn = document.getElementById("mcLeatherBtn");
+    var row = document.getElementById("mcLeatherHeaderRow");
+    function openModal(ev) {
+      if (typeof window.mcOpenWmLeatherModal === "function") {
+        window.mcOpenWmLeatherModal(ev || { preventDefault: function () {}, stopPropagation: function () {} });
+      }
+    }
+    if (btn && btn.dataset.mtlSectionalLeatherBound !== "1") {
+      btn.dataset.mtlSectionalLeatherBound = "1";
+      btn.addEventListener("click", openModal);
+    }
+    if (hdr && hdr.dataset.mtlSectionalLeatherBound !== "1") {
+      hdr.dataset.mtlSectionalLeatherBound = "1";
+      hdr.addEventListener("click", openModal);
+    }
+    if (row && row.dataset.mtlSectionalLeatherBound !== "1") {
+      row.dataset.mtlSectionalLeatherBound = "1";
+      row.addEventListener("click", function (e) {
+        if (e.target && e.target.closest && e.target.closest("#mcLeatherBtn")) return;
+        openModal(e);
+      });
+    }
+    if (!document.documentElement.dataset.mtlWmLeatherReadyListen) {
+      document.documentElement.dataset.mtlWmLeatherReadyListen = "1";
+      document.addEventListener(
+        "wmLeatherOptionsReady",
+        function () {
+          if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+        },
+        false
+      );
+    }
+    if (!document.documentElement.dataset.mtlLeatherRetryScheduled) {
+      document.documentElement.dataset.mtlLeatherRetryScheduled = "1";
+      [400, 1200, 2500, 5000, 9000].forEach(function (ms) {
+        window.setTimeout(function () {
+          if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+        }, ms);
+      });
+    }
+  }
+
   function finalizeSectionalUi(section) {
     try {
       document.documentElement.classList.add("has-sectional-config-cards");
@@ -721,10 +789,12 @@
     var legacyToggle = document.getElementById("mtl-sectional-more-native");
     if (legacyToggle) legacyToggle.remove();
     ensureProductSummary(section);
+    ensureInlineProductSummaryVisibleWithPlannerHidden();
     scheduleMoveLeatherAboveConfigurations(section);
     scheduleHideConfigurationRow();
     scheduleSectionalAtcChrome();
     ensureMcWmOpenMountedListener();
+    bindSectionalLeatherUiRetries();
     bindConfigurationCardClicks();
     ensureObservers();
     ensureMemberClassObserver();
@@ -768,6 +838,19 @@
 
     var secExistingEarly = document.getElementById("mtl-sectional-configurations");
     if (secExistingEarly && secExistingEarly.dataset.mtlFinalInit === "1") {
+      var csCheck = findConfigurationSelect();
+      if (csCheck) {
+        var nReal = Array.from(csCheck.options).filter(function (o) {
+          return !isPlaceholderConfigOption(o);
+        }).length;
+        var nCards = secExistingEarly.querySelectorAll(".mtl-sectional-card").length;
+        if (nReal !== nCards) {
+          secExistingEarly.removeAttribute("data-mtl-final-init");
+          sectionalLog("sectional rebuild: option count", nReal, "cards", nCards);
+        }
+      }
+    }
+    if (secExistingEarly && secExistingEarly.dataset.mtlFinalInit === "1") {
       finalizeSectionalUi(secExistingEarly);
       var selLog = findConfigurationSelect();
       sectionalLog("sectional config select", selLog);
@@ -794,8 +877,10 @@
     } catch (eSecHtml) {}
 
     state.cfgByCode = {};
+    state.cfgByNativeValue = {};
     merged.forEach(function (c) {
       if (c && c.code) state.cfgByCode[normalizeCode(c.code)] = c;
+      if (c && c.nativeValue != null) state.cfgByNativeValue[String(c.nativeValue)] = c;
     });
 
     var existing = document.getElementById("mtl-sectional-configurations");
@@ -887,7 +972,7 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer loaded 20260522sectional");
+  console.log("mtl-sectional-renderer external-20260506H loaded 20260522sectional");
 
   function boot() {
     ensureMcWmOpenMountedListener();

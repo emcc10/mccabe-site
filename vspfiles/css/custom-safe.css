@@ -11307,8 +11307,9 @@ html.is-sectional-product body.productdetails #content_area #mtl-product-summary
   margin: 0 !important;
 }
 
-html.is-sectional-product .wm-overlay {
-  z-index: 100000 !important;
+html.is-sectional-product .wm-overlay .wm-modal {
+  z-index: 100001 !important;
+  position: relative !important;
 }
 
 html.is-sectional-product .wm-preview {
