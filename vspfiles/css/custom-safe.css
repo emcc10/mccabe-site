@@ -1,4 +1,5 @@
 /* 0429 C_CSS_DEPLOY_VERIFY_20260430dom — tail wins; Store-dot may omit #v65-product-parent */
+/* MC_ALULA_CSS_DIAG_20260512 — TEMP: red ::after marker + outlines at file end; remove after live verify */
 /* MC_DEPLOY_VERIFY — LAST-WIN: strip ::before Search labels; PDP layout + single search underline; see file end */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -11748,4 +11749,26 @@ html.is-sectional-product body.mc-product-page #v65-product-parent form:has(inpu
   box-shadow: none !important;
 }
 
+/* ========== TEMP: Alula / deploy load proof — REMOVE after confirming live (user ALULA test plan) ========== */
+body.productname-alula::after,
+html::after {
+  content: "CUSTOM SAFE CSS LIVE - ALULA TEST";
+  position: fixed !important;
+  top: 10px !important;
+  left: 10px !important;
+  z-index: 9999999 !important;
+  background: #ff0000 !important;
+  color: #fff !important;
+  font-size: 18px !important;
+  padding: 10px 14px !important;
+}
+
+td,
+.colors_pricebox,
+.product_productprice,
+.pricecolor,
+font,
+span {
+  outline: 1px solid rgba(255, 0, 0, 0.25) !important;
+}
 

@@ -1,11 +1,41 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: swatch-fix-20260506
+ * Cache: ALULA-JS-LIVE-20260512-1
  */
 (function () {
   "use strict";
 
-  var IMG_V = "swatch-fix-20260506";
+  window.MTL_ALULA_TEST = "ALULA-JS-LIVE-20260512-1";
+  console.log("ALULA JS LIVE TEST", window.MTL_ALULA_TEST);
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+      if (document.getElementById("alula-js-live-test")) return;
+      if (!document.body) return;
+      const badge = document.createElement("div");
+      badge.id = "alula-js-live-test";
+      badge.textContent = "ALULA JS LIVE TEST";
+      badge.style.cssText =
+        "position:fixed;top:60px;left:10px;z-index:9999999;background:#000;color:#fff;font-size:18px;padding:10px 14px;";
+      document.body.appendChild(badge);
+    },
+    false
+  );
+  if (document.readyState !== "loading") {
+    try {
+      if (!document.getElementById("alula-js-live-test") && document.body) {
+        const badge = document.createElement("div");
+        badge.id = "alula-js-live-test";
+        badge.textContent = "ALULA JS LIVE TEST";
+        badge.style.cssText =
+          "position:fixed;top:60px;left:10px;z-index:9999999;background:#000;color:#fff;font-size:18px;padding:10px 14px;";
+        document.body.appendChild(badge);
+      }
+    } catch (eAlulaBadge) {}
+  }
+
+  var IMG_V = "ALULA-JS-LIVE-20260512-1";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -22,8 +52,8 @@
 
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
-  window.MTL_RENDERER_VERSION = "swatch-fix-20260506";
-  console.log("MTL_RENDERER_VERSION swatch-fix-20260506");
+  window.MTL_RENDERER_VERSION = "ALULA-JS-LIVE-20260512-1";
+  console.log("MTL_RENDERER_VERSION ALULA-JS-LIVE-20260512-1");
 
   /** Palliser theater PDPs: never run sectional leather/cards/summary relocation. */
   function isTheaterSeatingProductPageForGuard() {
