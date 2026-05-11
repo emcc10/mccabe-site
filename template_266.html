@@ -2204,8 +2204,14 @@ function log() {
   if (WM_DEBUG) console.log.apply(console, ["[WM]"].concat([].slice.call(arguments)));
 }
 
-// IMPORTANT: do NOT block retries until we actually build UI
-if (window.__WM_LEATHER_MODAL_BUILT__) return;
+// IMPORTANT: do NOT block retries until we actually build UI.
+// bfcache / partial init can leave __WM_LEATHER_MODAL_BUILT__ true while #wmOpen is gone - never skip in that case.
+if (window.__WM_LEATHER_MODAL_BUILT__ && document.getElementById("wmOpen")) return;
+if (window.__WM_LEATHER_MODAL_BUILT__ && !document.getElementById("wmOpen")) {
+  try {
+    window.__WM_LEATHER_MODAL_BUILT__ = false;
+  } catch (eStale) {}
+}
 
 var GRADE_UPCHARGE = { "2000": 99, "3000": 149 };
 function gradeHeaderText(g) {
@@ -2406,7 +2412,7 @@ function gradeHeaderText(g) {
 
   function parseGradeAndRest(raw){
     const s = cleanText(raw);
-    const m = s.match(/Grade\s*([0-9,]+)\s*[-–:]?\s*(.*)$/i);
+    const m = s.match(/Grade\s*([0-9,]+)\s*[\u002D\u2013\u2014:]?\s*(.*)$/i);
     if (m) return { grade: String(m[1]).replace(/,/g,""), rest: (m[2] || "").trim() };
     return { grade: "Base", rest: s };
   }
@@ -2470,8 +2476,15 @@ function gradeHeaderText(g) {
 
   let lbl = "";
   if (sel.id){
-    const lab = document.querySelector(`label[for="${CSS.escape(sel.id)}"]`);
-    if (lab) lbl = (lab.textContent || "").toLowerCase();
+    try {
+      var selId = String(sel.id);
+      var idEsc =
+        typeof CSS !== "undefined" && typeof CSS.escape === "function"
+          ? CSS.escape(selId)
+          : selId.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+      const lab = document.querySelector('label[for="' + idEsc + '"]');
+      if (lab) lbl = (lab.textContent || "").toLowerCase();
+    } catch (eLab) {}
   }
 
   const opts = Array.from(sel.options || []);
@@ -2548,9 +2561,6 @@ function gradeHeaderText(g) {
       };
     });
     document.dispatchEvent(new CustomEvent("wmLeatherOptionsReady"));
-
-    // Mark built ONLY now
-    window.__WM_LEATHER_MODAL_BUILT__ = true;
 
     // Hide native leather dropdown (selection shown in "Selected leather" box); insert UI
     const anchorSelect = candidateSelects[0];
@@ -2873,6 +2883,7 @@ function gradeHeaderText(g) {
     };
 
     log("Initialized. Options parsed:", all.length);
+    window.__WM_LEATHER_MODAL_BUILT__ = true;
     return true;
   }
 
@@ -3062,7 +3073,7 @@ try {
     var words = raw.split(/\s+/).filter(Boolean);
     var i;
     for (i = 0; i < words.length; i++) {
-      var w = words[i].replace(/[\u2013\u2014\-–—]/g, "").trim();
+      var w = words[i].replace(/[\u002D\u2013\u2014]/g, "").trim();
       if (!w) continue;
       var token = w.replace(/[^a-zA-Z0-9]/g, "");
       if (!token || /^\d+$/.test(token)) continue;
@@ -3727,7 +3738,7 @@ try {
       var x = String(raw || "");
       x = x.replace(/\s*\(\s*\+\s*\$?\s*\d+(?:\.\d{2})?[^)]*\)\s*$/ig, "");
       x = x.replace(/\s*\+\s*\$?\s*\d+(?:\.\d{2})?\s*$/ig, "");
-      x = x.replace(/^grade\s*[0-9,]+\s*[-–:]?\s*/i, "");
+      x = x.replace(/^grade\s*[0-9,]+\s*[\u002D\u2013\u2014:]?\s*/i, "");
       return x.replace(/\s+/g, " ").trim();
     }
 
@@ -19579,8 +19590,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   Sectional scripts (external) load last. Leather modal CSS ~line 1872 and script #wm-leather-modal-js ~line 2170
   run earlier in document order, so they always execute before these files.
 -->
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260519sectional"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260519sectional"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260520sectional"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260520sectional"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
