@@ -11002,7 +11002,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   }
 }
 
-/* MTL sectional PDP — Popular Configurations + Product Summary (20260514sectional) */
+/* MTL sectional PDP — Popular Configurations + Product Summary (20260515sectional) */
 #mtl-sectional-configurations {
   clear: both;
   display: block !important;
@@ -11147,6 +11147,96 @@ html.is-sectional-product #mcLeatherRow {
   box-sizing: border-box;
 }
 
+/* Sectional: theme hides #wmOpen with display:none (template ~2015). Programmatic .click() on #wmOpen must
+   reach initIfReady's onclick (template ~2835). Off-screen + visually hidden keeps behavior consistent. */
+html.is-sectional-product #wmOpen {
+  display: block !important;
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* In-box Product Summary link — same visual control as body.productdetails #mcProductSummaryBtn / #mcPlannerBtn (template_266 ~7458). */
+html.is-sectional-product #mtl-product-summary #mtl-sum-palliser-summary,
+html.is-sectional-product body.productdetails #mtl-product-summary #mtl-sum-palliser-summary,
+html.is-sectional-product body.productdetails #content_area #mtl-product-summary #mtl-sum-palliser-summary,
+html.is-sectional-product body.productdetails #v65-product-parent #mtl-product-summary #mtl-sum-palliser-summary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  min-width: 200px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 14px 28px !important;
+  border: 1px solid #d0d0d0 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  color: #545454 !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  font-family: inherit !important;
+  height: 42px !important;
+  text-decoration: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+html.is-sectional-product #mtl-product-summary #mtl-sum-palliser-summary:hover {
+  background: #f5f5f5 !important;
+  color: #111 !important;
+  border-color: #333 !important;
+}
+
+html.is-sectional-product body.productdetails #mtl-product-summary #mtl-sum-palliser-summary:hover,
+html.is-sectional-product body.productdetails #content_area #mtl-product-summary #mtl-sum-palliser-summary:hover,
+html.is-sectional-product body.productdetails #v65-product-parent #mtl-product-summary #mtl-sum-palliser-summary:hover {
+  background: #f5f5f5 !important;
+  color: #111 !important;
+  border-color: #333 !important;
+}
+
+html.is-sectional-product #mtl-product-summary #mtl-sum-palliser-summary:visited {
+  color: #111 !important;
+}
+
+html.is-sectional-product body.productdetails #mtl-product-summary #mtl-sum-palliser-summary:visited,
+html.is-sectional-product body.productdetails #content_area #mtl-product-summary #mtl-sum-palliser-summary:visited,
+html.is-sectional-product body.productdetails #v65-product-parent #mtl-product-summary #mtl-sum-palliser-summary:visited {
+  color: #111 !important;
+}
+
+html.is-sectional-product #mtl-product-summary #mtl-sum-palliser-summary .mc-btn-icon,
+html.is-sectional-product body.productdetails #mtl-product-summary #mtl-sum-palliser-summary .mc-btn-icon,
+html.is-sectional-product body.productdetails #content_area #mtl-product-summary #mtl-sum-palliser-summary .mc-btn-icon {
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+#mtl-product-summary .mtl-summary-row.mtl-summary-row--palliser-summary {
+  display: block !important;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+#mtl-product-summary .mtl-summary-row.mtl-summary-row--palliser-summary .mc-config-btn {
+  margin: 0 !important;
+}
+
 html.is-sectional-product .wm-overlay {
   z-index: 100000 !important;
 }
@@ -11164,7 +11254,7 @@ html.is-sectional-product .wm-overlay {
   }
 }
 
-/* Sectional PDP: Add to Cart — match Room Planner / Product Summary control styling */
+/* Sectional PDP: Add to Cart — mirror body.productdetails #mcPlannerBtn / #mcProductSummaryBtn (template_266 ~7462) */
 html.is-sectional-product body.productdetails #content_area .mc-atc-row,
 html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-row {
   display: flex !important;
@@ -11186,7 +11276,7 @@ html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button
   max-width: 100% !important;
   padding: 14px 28px !important;
   border: 1px solid #d0d0d0 !important;
-  border-radius: 0 !important;
+  border-radius: 0px !important;
   background: #fff !important;
   background-color: #fff !important;
   color: #545454 !important;
@@ -11200,6 +11290,10 @@ html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button
   font-family: inherit !important;
   margin-left: 0 !important;
   margin-top: 16px !important;
+  height: 42px !important;
+  text-decoration: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
 
 html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap:hover,

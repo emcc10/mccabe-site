@@ -1,11 +1,15 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: 20260514sectional
+ * Cache: 20260515sectional
  */
 (function () {
   "use strict";
 
-  var IMG_V = "20260514sectional";
+  var IMG_V = "20260515sectional";
+
+  /** Same inner markup as theater <a id="mcProductSummaryBtn"> in template_266.html (#mc-inline-config). */
+  var PRODUCT_SUMMARY_LINK_INNER =
+    '<span>Product Summary</span><span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>';
   var SECTIONAL_DBG = /(?:[?&])mtlSectionalDebug=1(?:&|$)/.test(String(location.search || ""));
   var PLACEHOLDER_SVG =
     "data:image/svg+xml," +
@@ -33,37 +37,6 @@
       if (/^mailto:/i.test(h)) return h;
     }
     return "mailto:erin@mccabestheaterandliving.com";
-  }
-
-  function readDimensionsSnippetFromPdp() {
-    var candidates = [
-      document.getElementById("ProductDetail_TechSpecs_div"),
-      document.querySelector("#ProductDetail_TechSpecs_div"),
-      document.querySelector("td#ProductDetail_TechSpecs"),
-      document.getElementById("divDescription"),
-    ];
-    var dimLine = /\d+(?:\.\d+)?\s*(?:"|″|in(?:ch(?:es)?)?\.?)\s*[x×\u00d7]\s*\d+/i;
-    var i;
-    var k;
-    for (i = 0; i < candidates.length; i++) {
-      var root = candidates[i];
-      if (!root) continue;
-      var raw = String(root.innerText || root.textContent || "").replace(/\s+/g, " ").trim();
-      if (raw.length < 10) continue;
-      var parts = raw.split(/\n+/);
-      for (k = 0; k < parts.length; k++) {
-        var line = parts[k].trim();
-        if (line.length > 240) line = line.slice(0, 240) + "…";
-        if (dimLine.test(line)) return line;
-        if (/\b(overall|dimensions?|wxd|h\s*x\s*w)\b/i.test(line) && /\d/.test(line)) return line;
-      }
-      var m = raw.match(dimLine);
-      if (m && m.index != null) {
-        var sn = raw.slice(Math.max(0, m.index - 30), Math.min(raw.length, m.index + m[0].length + 40));
-        return sn.trim();
-      }
-    }
-    return "";
   }
 
   function ensureMemberClassObserver() {
@@ -199,20 +172,39 @@
     });
   }
 
+  /**
+   * Open Westmere/Palliser leather modal — same trigger as template_266 initIfReady assigns to #wmOpen (~2835).
+   * Verification path: (1) Theme hides #wmOpen with display:none (#wmOpen rule ~2015) → custom-safe overrides for
+   *     html.is-sectional-product so the node is off-screen but not display:none (reliable programmatic click).
+   * (2) After config cards sync, mcTryInitWmLeather / boot interval builds #wmOpen; we listen for mcWmOpenMounted.
+   * (3) Clicks use the real #wmOpen element theater uses — not text-matched clones.
+   * (4) If .click() is ignored, jQuery .trigger("click") is attempted; overlay z-index: html.is-sectional-product .wm-overlay.
+   */
+  function openLeatherModalFromInlineUi(ev) {
+    if (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+    }
+    if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+    var w = document.getElementById("wmOpen");
+    if (!w) {
+      sectionalLog("leather open: no #wmOpen yet (leather selects may still be populating)");
+      return;
+    }
+    try {
+      w.click();
+    } catch (eClk) {
+      sectionalLog("wmOpen.click threw", eClk);
+    }
+    try {
+      if (typeof jQuery !== "undefined" && jQuery.fn && jQuery(w).trigger) jQuery(w).trigger("click");
+    } catch (eJq) {}
+  }
+
   function bindLeatherTrigger() {
     function bindEl(el) {
       if (!el || el.dataset.mtlLeatherBound === "1") return;
-      el.addEventListener(
-        "click",
-        function (ev) {
-          var w = document.getElementById("wmOpen");
-          if (w) {
-            ev.preventDefault();
-            w.click();
-          }
-        },
-        false
-      );
+      el.addEventListener("click", openLeatherModalFromInlineUi, false);
       el.dataset.mtlLeatherBound = "1";
     }
     bindEl(document.getElementById("mcLeatherBtn"));
@@ -224,6 +216,19 @@
     [500, 1500, 3000].forEach(function (ms) {
       setTimeout(bindLeatherTrigger, ms);
     });
+  }
+
+  function ensureMcWmOpenMountedListener() {
+    if (document.documentElement.dataset.mtlWmOpenMountedListen === "1") return;
+    document.documentElement.dataset.mtlWmOpenMountedListen = "1";
+    document.addEventListener(
+      "mcWmOpenMounted",
+      function () {
+        if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+        scheduleBindLeatherTrigger();
+      },
+      false
+    );
   }
 
   function findInsertTarget() {
@@ -401,13 +406,15 @@
       sum = document.createElement("div");
       sum.id = "mtl-product-summary";
       sum.innerHTML =
-        '<div class="mtl-summary-row mtl-summary-row--spec"><span class="mtl-summary-label">Specifications</span><span class="mtl-summary-value mtl-summary-value--spec"><a id="mtl-sum-spec" href="#" target="_blank" rel="noopener noreferrer">View Palliser spec sheet (PDF)</a></span></div>' +
-        '<div class="mtl-summary-row mtl-summary-row--dims"><span class="mtl-summary-label">Dimensions</span><span class="mtl-summary-value" id="mtl-sum-dims">—</span></div>' +
+        '<div class="mtl-summary-row mtl-summary-row--palliser-summary">' +
+        '<a id="mtl-sum-palliser-summary" class="mc-config-btn" href="#" target="_blank" rel="noopener noreferrer">' +
+        PRODUCT_SUMMARY_LINK_INNER +
+        "</a></div>" +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Selected Leather</span><span class="mtl-summary-value" id="mtl-sum-leather">Not selected</span></div>' +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Selected Configuration</span><span class="mtl-summary-value" id="mtl-sum-config">—</span></div>' +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Product Price</span><span class="mtl-summary-value" id="mtl-sum-price">—</span></div>' +
         '<p id="mtl-sectional-quote-hint" class="mtl-sectional-quote-hint"></p>';
-      sum.dataset.mtlSummaryV2 = "1";
+      sum.dataset.mtlSummaryV3 = "1";
     } else {
       upgradeProductSummaryDom(sum);
     }
@@ -417,30 +424,33 @@
       } catch (eIns) {}
     }
     refreshProductPriceLabel();
-    refreshSpecsDimsQuote();
+    refreshQuoteAndPalliserSummary();
     return sum;
   }
 
   function upgradeProductSummaryDom(sum) {
-    if (!sum || sum.dataset.mtlSummaryV2 === "1") return;
-    var head = sum.querySelector(".mtl-summary-heading");
-    if (head) head.remove();
-    if (!document.getElementById("mtl-sum-spec")) {
-      var rSpec = document.createElement("div");
-      rSpec.className = "mtl-summary-row mtl-summary-row--spec";
-      rSpec.innerHTML =
-        '<span class="mtl-summary-label">Specifications</span><span class="mtl-summary-value mtl-summary-value--spec"><a id="mtl-sum-spec" href="#" target="_blank" rel="noopener noreferrer">View Palliser spec sheet (PDF)</a></span>';
-      sum.insertBefore(rSpec, sum.firstChild);
+    if (!sum) return;
+    sum.querySelectorAll(".mtl-summary-row--spec, .mtl-summary-row--dims").forEach(function (row) {
+      row.remove();
+    });
+    var specA = document.getElementById("mtl-sum-spec");
+    if (specA) {
+      var specRow = specA.closest(".mtl-summary-row");
+      if (specRow) specRow.remove();
     }
-    if (!document.getElementById("mtl-sum-dims")) {
-      var rDim = document.createElement("div");
-      rDim.className = "mtl-summary-row mtl-summary-row--dims";
-      rDim.innerHTML =
-        '<span class="mtl-summary-label">Dimensions</span><span class="mtl-summary-value" id="mtl-sum-dims">—</span>';
-      var specEl = document.getElementById("mtl-sum-spec");
-      var specRow = specEl && specEl.closest(".mtl-summary-row");
-      if (specRow && specRow.nextSibling) sum.insertBefore(rDim, specRow.nextSibling);
-      else sum.insertBefore(rDim, sum.firstChild);
+    var dimsN = document.getElementById("mtl-sum-dims");
+    if (dimsN) {
+      var dimRow = dimsN.closest(".mtl-summary-row");
+      if (dimRow) dimRow.remove();
+    }
+    if (!document.getElementById("mtl-sum-palliser-summary")) {
+      var rowPs = document.createElement("div");
+      rowPs.className = "mtl-summary-row mtl-summary-row--palliser-summary";
+      rowPs.innerHTML =
+        '<a id="mtl-sum-palliser-summary" class="mc-config-btn" href="#" target="_blank" rel="noopener noreferrer">' +
+        PRODUCT_SUMMARY_LINK_INNER +
+        "</a>";
+      sum.insertBefore(rowPs, sum.firstChild);
     }
     if (!document.getElementById("mtl-sectional-quote-hint")) {
       var hint = document.createElement("p");
@@ -448,46 +458,11 @@
       hint.className = "mtl-sectional-quote-hint";
       sum.appendChild(hint);
     }
-    sum.dataset.mtlSummaryV2 = "1";
+    sum.dataset.mtlSummaryV3 = "1";
   }
 
-  function refreshSpecsDimsQuote() {
-    var specA = document.getElementById("mtl-sum-spec");
-    var dimsEl = document.getElementById("mtl-sum-dims");
+  function refreshQuoteAndPalliserSummary() {
     var hint = document.getElementById("mtl-sectional-quote-hint");
-    var url = typeof window.mcBuildPalliserSpecSheetUrl === "function" ? window.mcBuildPalliserSpecSheetUrl() : "";
-    if (specA) {
-      if (url) {
-        specA.href = url;
-        specA.setAttribute("aria-disabled", "false");
-        specA.style.opacity = "";
-      } else {
-        specA.href = "#";
-        specA.setAttribute("aria-disabled", "true");
-        specA.style.opacity = "0.55";
-      }
-    }
-    if (dimsEl) {
-      var d = readDimensionsSnippetFromPdp();
-      if (d) {
-        dimsEl.textContent = d;
-      } else if (url) {
-        dimsEl.textContent = "";
-        var span = document.createElement("span");
-        span.className = "mtl-sum-dims-fallback";
-        span.appendChild(document.createTextNode("See the "));
-        var a = document.createElement("a");
-        a.href = url;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.textContent = "spec sheet (PDF)";
-        span.appendChild(a);
-        span.appendChild(document.createTextNode(" for dimensions."));
-        dimsEl.appendChild(span);
-      } else {
-        dimsEl.textContent = "—";
-      }
-    }
     if (hint) {
       var mail = quoteMailtoHref();
       hint.textContent = "";
@@ -498,6 +473,7 @@
       hint.appendChild(ma);
       hint.appendChild(document.createTextNode("."));
     }
+    if (typeof window.mcRefreshProductSummaryButton === "function") window.mcRefreshProductSummaryButton();
   }
 
   function updateProductSummary() {
@@ -540,7 +516,7 @@
           '<a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see price';
       }
     }
-    refreshSpecsDimsQuote();
+    refreshQuoteAndPalliserSummary();
   }
 
   function scheduleProductSummaryAfterConfigChange() {
@@ -750,6 +726,7 @@
     scheduleMoveLeatherAboveConfigurations(section);
     scheduleHideConfigurationRow();
     scheduleBindLeatherTrigger();
+    ensureMcWmOpenMountedListener();
     bindConfigurationCardClicks();
     ensureObservers();
     ensureMemberClassObserver();
@@ -908,9 +885,10 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer loaded 20260514sectional");
+  console.log("mtl-sectional-renderer loaded 20260515sectional");
 
   function boot() {
+    ensureMcWmOpenMountedListener();
     runRender();
     scheduleBindLeatherTrigger();
     setTimeout(runRender, 400);
