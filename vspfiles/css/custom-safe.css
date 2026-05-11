@@ -11002,7 +11002,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   }
 }
 
-/* MTL sectional PDP — Popular Configurations + Product Summary (20260516sectional) */
+/* MTL sectional PDP — Popular Configurations + Product Summary (20260517sectional) */
 #mtl-sectional-configurations {
   clear: both;
   display: block !important;
@@ -11147,6 +11147,13 @@ html.is-sectional-product #mcLeatherRow {
   box-sizing: border-box;
 }
 
+/* Sectional: label opens modal with mount(); avoid I-beam / text-selection UX that feels like a form field. */
+html.is-sectional-product #mcLeatherHeader {
+  cursor: pointer !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
 /* Sectional: theme hides #wmOpen with display:none (template ~2015). Off-screen + visually hidden; keep
    pointer-events: auto so programmatic .click() / MouseEvent reliably runs initIfReady's onclick (~2835). */
 html.is-sectional-product #wmOpen {
@@ -11212,12 +11219,6 @@ html.is-sectional-product body.productdetails #v65-product-parent #mtl-product-s
 html.is-sectional-product #mtl-product-summary #mtl-sum-palliser-summary > span:first-child,
 html.is-sectional-product body.productdetails #mtl-product-summary #mtl-sum-palliser-summary > span:first-child {
   white-space: nowrap !important;
-}
-
-/* Inline summary: clicking “Selected leather” opens same modal as #mcLeatherBtn */
-html.is-sectional-product #mtl-product-summary #mtl-sum-leather {
-  cursor: pointer !important;
-  text-decoration: underline !important;
 }
 
 html.is-sectional-product #mtl-product-summary #mtl-sum-palliser-summary:hover {

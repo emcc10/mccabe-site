@@ -1,11 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: 20260516sectional
+ * Cache: 20260517sectional
  */
 (function () {
   "use strict";
 
-  var IMG_V = "20260516sectional";
+  var IMG_V = "20260517sectional";
 
   /** Same inner markup as theater <a id="mcProductSummaryBtn"> in template_266.html (#mc-inline-config). */
   var PRODUCT_SUMMARY_LINK_INNER =
@@ -177,56 +177,9 @@
    * Verification path: (1) Theme hides #wmOpen with display:none (#wmOpen rule ~2015) → custom-safe overrides for
    *     html.is-sectional-product so the node is off-screen but not display:none (reliable programmatic click).
    * (2) After config cards sync, mcTryInitWmLeather / boot interval builds #wmOpen; we listen for mcWmOpenMounted.
-   * (3) Clicks use the real #wmOpen element theater uses — not text-matched clones.
+   * (3) Clicks use window.mcOpenWmLeatherModal (template_266 mount IIFE) so #wmOpen is resolved after async init.
    * (4) jQuery .trigger("click") after native .click(); overlay z-index: html.is-sectional-product .wm-overlay.
    */
-  function fireWmOpenClick(w) {
-    if (!w) return;
-    try {
-      w.click();
-    } catch (eClk) {
-      sectionalLog("wmOpen.click threw", eClk);
-    }
-    try {
-      if (typeof jQuery !== "undefined" && jQuery.fn && jQuery(w).trigger) jQuery(w).trigger("click");
-    } catch (eJq) {}
-  }
-
-  function openLeatherModalFromInlineUi(ev) {
-    if (ev) {
-      ev.preventDefault();
-      ev.stopPropagation();
-    }
-    if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
-    var w = document.getElementById("wmOpen");
-    if (!w) {
-      sectionalLog("leather open: no #wmOpen yet (leather selects may still be populating)");
-      setTimeout(function () {
-        if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
-        fireWmOpenClick(document.getElementById("wmOpen"));
-      }, 160);
-      return;
-    }
-    fireWmOpenClick(w);
-  }
-
-  function bindLeatherTrigger() {
-    function bindEl(el) {
-      if (!el || el.dataset.mtlLeatherBound === "1") return;
-      el.addEventListener("click", openLeatherModalFromInlineUi, false);
-      el.dataset.mtlLeatherBound = "1";
-    }
-    bindEl(document.getElementById("mcLeatherBtn"));
-    bindEl(document.getElementById("mcLeatherHeader"));
-    bindEl(document.getElementById("mtl-sum-leather"));
-  }
-
-  function scheduleBindLeatherTrigger() {
-    bindLeatherTrigger();
-    [500, 1500, 3000].forEach(function (ms) {
-      setTimeout(bindLeatherTrigger, ms);
-    });
-  }
 
   function ensureMcWmOpenMountedListener() {
     if (document.documentElement.dataset.mtlWmOpenMountedListen === "1") return;
@@ -235,7 +188,6 @@
       "mcWmOpenMounted",
       function () {
         if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
-        scheduleBindLeatherTrigger();
       },
       false
     );
@@ -420,7 +372,6 @@
         '<a id="mtl-sum-palliser-summary" class="mc-config-btn" href="#" target="_blank" rel="noopener noreferrer">' +
         PRODUCT_SUMMARY_LINK_INNER +
         "</a></div>" +
-        '<div class="mtl-summary-row"><span class="mtl-summary-label">Selected Leather</span><span class="mtl-summary-value" id="mtl-sum-leather">Not selected</span></div>' +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Selected Configuration</span><span class="mtl-summary-value" id="mtl-sum-config">—</span></div>' +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Product Price</span><span class="mtl-summary-value" id="mtl-sum-price">—</span></div>' +
         '<p id="mtl-sectional-quote-hint" class="mtl-sectional-quote-hint"></p>';
@@ -443,6 +394,11 @@
     sum.querySelectorAll(".mtl-summary-row--spec, .mtl-summary-row--dims").forEach(function (row) {
       row.remove();
     });
+    var sumLeatherEl = document.getElementById("mtl-sum-leather");
+    if (sumLeatherEl) {
+      var sumLeatherRow = sumLeatherEl.closest(".mtl-summary-row");
+      if (sumLeatherRow) sumLeatherRow.remove();
+    }
     var specA = document.getElementById("mtl-sum-spec");
     if (specA) {
       var specRow = specA.closest(".mtl-summary-row");
@@ -497,24 +453,14 @@
     upgradeProductSummaryDom(sum);
     refreshProductPriceLabel();
 
-    var wm = document.getElementById("wmSummary");
-    var mcL = document.getElementById("mcLeatherSummary");
-    var leatherTxt = "";
-    if (mcL && String(mcL.textContent || "").trim())
-      leatherTxt = String(mcL.textContent).trim();
-    else if (wm && String(wm.textContent || "").trim()) leatherTxt = String(wm.textContent).trim();
-    if (!leatherTxt) leatherTxt = "Not selected";
-
     var code = window.__mtlSectionalSelectedConfig;
     var cfg = code ? state.cfgByCode[code] : null;
     var configLabel = cfg ? cfg.label || cfg.code || code : code || "—";
 
     var price = readDisplayedPrice();
 
-    var elL = document.getElementById("mtl-sum-leather");
     var elC = document.getElementById("mtl-sum-config");
     var elP = document.getElementById("mtl-sum-price");
-    if (elL) elL.textContent = leatherTxt;
     if (elC) elC.textContent = configLabel;
     if (elP) {
       elP.classList.remove("mtl-summary-price--guest");
@@ -527,7 +473,6 @@
       }
     }
     refreshQuoteAndPalliserSummary();
-    scheduleBindLeatherTrigger();
   }
 
   function scheduleProductSummaryAfterConfigChange() {
@@ -627,25 +572,6 @@
       priceEl.dataset.mtlPriceObs = "1";
     }
 
-    var wm = document.getElementById("wmSummary");
-    if (wm && wm.dataset.mtlLeatherObs !== "1") {
-      new MutationObserver(updateProductSummary).observe(wm, {
-        childList: true,
-        characterData: true,
-        subtree: true,
-      });
-      wm.dataset.mtlLeatherObs = "1";
-    }
-
-    var mcLeather = document.getElementById("mcLeatherSummary");
-    if (mcLeather && mcLeather.dataset.mtlLeatherObs !== "1") {
-      new MutationObserver(updateProductSummary).observe(mcLeather, {
-        childList: true,
-        characterData: true,
-        subtree: true,
-      });
-      mcLeather.dataset.mtlLeatherObs = "1";
-    }
   }
 
   function formatPriceDiffLabel(diff) {
@@ -736,7 +662,6 @@
     ensureProductSummary(section);
     scheduleMoveLeatherAboveConfigurations(section);
     scheduleHideConfigurationRow();
-    scheduleBindLeatherTrigger();
     ensureMcWmOpenMountedListener();
     bindConfigurationCardClicks();
     ensureObservers();
@@ -896,12 +821,11 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer loaded 20260516sectional");
+  console.log("mtl-sectional-renderer loaded 20260517sectional");
 
   function boot() {
     ensureMcWmOpenMountedListener();
     runRender();
-    scheduleBindLeatherTrigger();
     setTimeout(runRender, 400);
     setTimeout(runRender, 1200);
     setTimeout(runRender, 2800);

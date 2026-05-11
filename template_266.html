@@ -3352,6 +3352,41 @@ try {
     mcReorderInlineConfigBeforeCartQty();
   }
 
+  function mcFireWmOpenProgrammatically(w) {
+    if (!w) return;
+    try {
+      w.click();
+    } catch (eClk) {}
+    try {
+      if (typeof jQuery !== "undefined" && jQuery.fn && jQuery(w).trigger) jQuery(w).trigger("click");
+    } catch (eJq) {}
+  }
+
+  /**
+   * Open Palliser leather modal — same hidden #wmOpen click as initIfReady wires (~2835).
+   * Resolves async #wmOpen (sectionals mount #mc-inline-config before leather UI exists).
+   */
+  window.mcOpenWmLeatherModal = function mcOpenWmLeatherModal(ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+    var w = document.getElementById("wmOpen");
+    if (w) {
+      mcFireWmOpenProgrammatically(w);
+      return;
+    }
+    var tries = 0;
+    var tmr = setInterval(function () {
+      tries++;
+      if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+      var w2 = document.getElementById("wmOpen");
+      if (w2) {
+        clearInterval(tmr);
+        mcFireWmOpenProgrammatically(w2);
+      } else if (tries > 26) clearInterval(tmr);
+    }, 120);
+  };
+
   function mount(opts){
     opts = opts || {};
     var isSecPdp = typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage();
@@ -3700,7 +3735,6 @@ try {
 
     function renderLeatherPreviewStrip(){
       if (!mcLeatherStrip) return;
-      if (!wmOpen) return;
 
       var source = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
       if (!source.length) source = fallbackLeatherOptionsFromSelect();
@@ -3733,9 +3767,8 @@ try {
         btn.appendChild(img);
         loadMiniSwatch(img, o.swatches, btn);
 
-        btn.onclick = function(e){
-          e.preventDefault();
-          if (wmOpen) wmOpen.click();
+        btn.onclick = function (e) {
+          if (typeof window.mcOpenWmLeatherModal === "function") window.mcOpenWmLeatherModal(e);
         };
 
         mcLeatherStrip.appendChild(btn);
@@ -3840,12 +3873,13 @@ try {
       });
     }
 
-    // Button actions — resolve #wmOpen on each click so late leather init still works after forceWithoutWmOpen mount.
-    if (mcLeatherBtn) {
-      mcLeatherBtn.onclick = function () {
-        var w = document.getElementById("wmOpen");
-        if (w) w.click();
-      };
+    // Button + label — #wmOpen is created async; mcOpenWmLeatherModal retries init + click.
+    if (mcLeatherBtn && typeof window.mcOpenWmLeatherModal === "function") {
+      mcLeatherBtn.onclick = window.mcOpenWmLeatherModal;
+    }
+    var mcLeatherHdrMount = document.getElementById("mcLeatherHeader");
+    if (mcLeatherHdrMount && typeof window.mcOpenWmLeatherModal === "function") {
+      mcLeatherHdrMount.onclick = window.mcOpenWmLeatherModal;
     }
 
     var mcPlannerBtnEl = document.getElementById("mcPlannerBtn");
@@ -3862,11 +3896,12 @@ try {
     setTimeout(renderLeatherPreviewStrip, 900);
     (function keepTryingSwatches(){
       var tries = 0;
+      var cap = isSecPdp ? 56 : 20;
       var timer = setInterval(function(){
         tries++;
         renderLeatherPreviewStrip();
         syncLeatherSummary();
-        if (tries > 20 || (mcLeatherStrip && mcLeatherStrip.querySelector(".mc-mini-swatch"))) {
+        if (tries > cap || (mcLeatherStrip && mcLeatherStrip.querySelector(".mc-mini-swatch"))) {
           clearInterval(timer);
         }
       }, 250);
@@ -5859,24 +5894,18 @@ try {
     setTimeout(function () {
       try {
         var b = document.getElementById("mcLeatherBtn");
-        if (b) {
-          b.onclick = function () {
-            var w = document.getElementById("wmOpen");
-            if (w) w.click();
-          };
-        }
+        if (b && typeof window.mcOpenWmLeatherModal === "function") b.onclick = window.mcOpenWmLeatherModal;
+        var h = document.getElementById("mcLeatherHeader");
+        if (h && typeof window.mcOpenWmLeatherModal === "function") h.onclick = window.mcOpenWmLeatherModal;
       } catch (eWmWire) {}
       mount();
     }, 0);
     setTimeout(function () {
       try {
         var b2 = document.getElementById("mcLeatherBtn");
-        if (b2) {
-          b2.onclick = function () {
-            var w2 = document.getElementById("wmOpen");
-            if (w2) w2.click();
-          };
-        }
+        if (b2 && typeof window.mcOpenWmLeatherModal === "function") b2.onclick = window.mcOpenWmLeatherModal;
+        var h2 = document.getElementById("mcLeatherHeader");
+        if (h2 && typeof window.mcOpenWmLeatherModal === "function") h2.onclick = window.mcOpenWmLeatherModal;
       } catch (eWmWire2) {}
       mount();
     }, 120);
@@ -19343,8 +19372,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   Sectional scripts (external) load last. Leather modal CSS ~line 1872 and script #wm-leather-modal-js ~line 2170
   run earlier in document order, so they always execute before these files.
 -->
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260516sectional"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260516sectional"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260517sectional"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260517sectional"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
