@@ -4660,6 +4660,11 @@ function mcHasRecentMemberAuth() {
     return false;
   }
 }
+try {
+  window.mcRememberRecentMemberAuth = mcRememberRecentMemberAuth;
+  window.mcClearRecentMemberAuth = mcClearRecentMemberAuth;
+  window.mcHasRecentMemberAuth = mcHasRecentMemberAuth;
+} catch (eMcAuthGlobal) {}
 async function mcConfirmRecentMemberAuth(maxAttempts, delayMs) {
   var attempts = Math.max(1, Number(maxAttempts) || 1);
   var waitMs = Math.max(150, Number(delayMs) || 0);
@@ -13800,6 +13805,18 @@ body.mc-product-page #content_area font.product_sale_price {
 <script>
 (function () {
   'use strict';
+  function mcLoginModalClearRecentAuth() {
+    try {
+      if (typeof window.mcClearRecentMemberAuth === "function") window.mcClearRecentMemberAuth();
+      else try { sessionStorage.removeItem("mc_recent_member_auth_ts"); } catch (eR0) {}
+    } catch (eR) {}
+  }
+  function mcLoginModalRememberRecentAuth() {
+    try {
+      if (typeof window.mcRememberRecentMemberAuth === "function") window.mcRememberRecentMemberAuth();
+      else try { sessionStorage.setItem("mc_recent_member_auth_ts", String(Date.now())); } catch (eM0) {}
+    } catch (eM) {}
+  }
   function mcLoginReturnTo() {
     return encodeURIComponent((location.pathname || '/') + (location.search || ''));
   }
@@ -14181,7 +14198,7 @@ async function mcSubmitAuthForm(form, mode) {
 
       var confirmed = await mcWaitForAuthSuccess(12000, 500);
       if (confirmed) {
-        mcRememberRecentMemberAuth();
+        mcLoginModalRememberRecentAuth();
         mcSetAuthStatus('login', 'Signed in. Refreshing...', 'success');
         mcCloseLoginModal();
         window.setTimeout(function () {
@@ -14193,12 +14210,12 @@ async function mcSubmitAuthForm(form, mode) {
       if (originalTarget) form.setAttribute('target', originalTarget);
       else form.removeAttribute('target');
 
-      mcClearRecentMemberAuth();
+      mcLoginModalClearRecentAuth();
       mcSetAuthStatus('login', 'We could not confirm the member session. Please try again.', 'error');
       mcToggleAuthPending(form, false);
       return false;
     } catch (eLogin) {
-      mcClearRecentMemberAuth();
+      mcLoginModalClearRecentAuth();
       mcSetAuthStatus('login', 'Could not sign in right now. Please try again.', 'error');
       mcToggleAuthPending(form, false);
       return false;
@@ -14227,7 +14244,7 @@ async function mcSubmitAuthForm(form, mode) {
       } catch (e4) {}
 
       if (!ok) {
-        mcClearRecentMemberAuth();
+        mcLoginModalClearRecentAuth();
         mcSetAuthStatus(mode, message, kind || 'error');
         mcToggleAuthPending(form, false);
       }
@@ -14240,7 +14257,7 @@ async function mcSubmitAuthForm(form, mode) {
         if (finished) return;
         try {
           if (await mcAuthSucceeded()) {
-            mcRememberRecentMemberAuth();
+            mcLoginModalRememberRecentAuth();
             mcSetAuthStatus(
               mode,
               mode === 'signup' ? 'Account created. Refreshing...' : 'Signed in. Refreshing...',
@@ -14341,7 +14358,7 @@ async function mcSubmitAuthForm(form, mode) {
       loginForm.removeAttribute('target');
       HTMLFormElement.prototype.submit.call(loginForm);
     } catch (eLoginSubmit) {
-      mcClearRecentMemberAuth();
+      mcLoginModalClearRecentAuth();
       mcSetAuthStatus('login', 'Could not sign in right now. Please try again.', 'error');
       mcToggleAuthPending(loginForm, false);
     }
@@ -16103,7 +16120,7 @@ if (document.body) {
 }
 
 if (!isLoggedIn) {
-  mcClearRecentMemberAuth();
+  mcLoginModalClearRecentAuth();
 }
     var retailAmt = 0;
     var memberAmt = 0;
@@ -19607,8 +19624,8 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   Sectional scripts (external) load last. Leather modal CSS ~line 1872 and script #wm-leather-modal-js ~line 2170
   run earlier in document order, so they always execute before these files.
 -->
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260521sectional"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260521sectional"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260522sectional"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=20260522sectional"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
