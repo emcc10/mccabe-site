@@ -1,5 +1,4 @@
 /* 0429 C_CSS_DEPLOY_VERIFY_20260430dom — tail wins; Store-dot may omit #v65-product-parent */
-/* MC_ALULA_CSS_DIAG_20260512 — TEMP: red ::after marker + outlines at file end; remove after live verify */
 /* MC_DEPLOY_VERIFY — LAST-WIN: strip ::before Search labels; PDP layout + single search underline; see file end */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -11749,26 +11748,49 @@ html.is-sectional-product body.mc-product-page #v65-product-parent form:has(inpu
   box-shadow: none !important;
 }
 
-/* ========== TEMP: Alula / deploy load proof — REMOVE after confirming live (user ALULA test plan) ========== */
-body.productname-alula::after,
-html::after {
-  content: "CUSTOM SAFE CSS LIVE - ALULA TEST";
-  position: fixed !important;
-  top: 10px !important;
-  left: 10px !important;
-  z-index: 9999999 !important;
-  background: #ff0000 !important;
-  color: #fff !important;
-  font-size: 18px !important;
-  padding: 10px 14px !important;
+/* ========== PDP retail + member: 16px (final win over inline * / label rules) ========== */
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.productdetails #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.mc-product-page #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.productdetails #v65-product-parent .mc-pdp-member-line__label,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line__label,
+html body.productdetails #v65-product-parent .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.productdetails #content_area .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.mc-product-page #content_area .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.productdetails #v65-product-parent .mc-pdp-member-line--locked,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line--locked,
+html body.productdetails #v65-product-parent .mc-pdp-member-line--locked a,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line--locked a {
+  font-size: 16px !important;
+  line-height: 1.2 !important;
 }
 
-td,
-.colors_pricebox,
-.product_productprice,
-.pricecolor,
-font,
-span {
-  outline: 1px solid rgba(255, 0, 0, 0.25) !important;
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-line,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-line,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_list_price,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_productprice,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_productprice,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+html body.productdetails #v65-product-parent .mc-pdp-member-line__amount,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line__amount,
+html body.productdetails #content_area .mc-pdp-retail-row .product_productprice,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice {
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+}
+
+html body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row *,
+html body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row *,
+html body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing *,
+html body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing *,
+html body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row *,
+html body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row *,
+html body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing *,
+html body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing * {
+  font-size: 16px !important;
 }
 

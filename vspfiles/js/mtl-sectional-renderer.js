@@ -1,41 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: ALULA-JS-LIVE-20260512-1
+ * Cache: sectional-leather-20260513
  */
 (function () {
   "use strict";
 
-  window.MTL_ALULA_TEST = "ALULA-JS-LIVE-20260512-1";
-  console.log("ALULA JS LIVE TEST", window.MTL_ALULA_TEST);
-
-  document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-      if (document.getElementById("alula-js-live-test")) return;
-      if (!document.body) return;
-      const badge = document.createElement("div");
-      badge.id = "alula-js-live-test";
-      badge.textContent = "ALULA JS LIVE TEST";
-      badge.style.cssText =
-        "position:fixed;top:60px;left:10px;z-index:9999999;background:#000;color:#fff;font-size:18px;padding:10px 14px;";
-      document.body.appendChild(badge);
-    },
-    false
-  );
-  if (document.readyState !== "loading") {
-    try {
-      if (!document.getElementById("alula-js-live-test") && document.body) {
-        const badge = document.createElement("div");
-        badge.id = "alula-js-live-test";
-        badge.textContent = "ALULA JS LIVE TEST";
-        badge.style.cssText =
-          "position:fixed;top:60px;left:10px;z-index:9999999;background:#000;color:#fff;font-size:18px;padding:10px 14px;";
-        document.body.appendChild(badge);
-      }
-    } catch (eAlulaBadge) {}
-  }
-
-  var IMG_V = "ALULA-JS-LIVE-20260512-1";
+  var IMG_V = "sectional-leather-20260513";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -52,8 +22,7 @@
 
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
-  window.MTL_RENDERER_VERSION = "ALULA-JS-LIVE-20260512-1";
-  console.log("MTL_RENDERER_VERSION ALULA-JS-LIVE-20260512-1");
+  window.MTL_RENDERER_VERSION = "sectional-leather-20260513";
 
   /** Palliser theater PDPs: never run sectional leather/cards/summary relocation. */
   function isTheaterSeatingProductPageForGuard() {
@@ -236,7 +205,7 @@
       if (!ws || ws.dataset.mtlFallbackObs === "1") return;
       ws.dataset.mtlFallbackObs = "1";
       var obs = new MutationObserver(function () {
-        if (!isWmOverlayVisible()) return;
+        if (!document.querySelector(".wm-overlay")) return;
         scheduleFillFromMutation();
       });
       try {
@@ -288,7 +257,7 @@
    */
   function injectSectionalNativeLeatherModal(leatherSel) {
     if (!isSectionalProductPageClient() || !leatherSel) return 0;
-    if (!isWmOverlayVisible()) return 0;
+    if (!document.querySelector(".wm-overlay")) return 0;
     var ws = document.getElementById("wmSections");
     if (!ws) {
       console.warn("[MTL leather modal] #wmSections not found");
