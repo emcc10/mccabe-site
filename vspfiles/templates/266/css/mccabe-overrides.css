@@ -114,6 +114,11 @@ html body #mc-hero-copy-subline {
   html body #mc-hero-copy-tagline {
     font-size: clamp(11px, 2.85vw, 36px) !important;
     letter-spacing: clamp(0.05em, 0.09vw, 0.12em) !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow-wrap: anywhere !important;
+    padding-left: max(12px, 3vw) !important;
+    padding-right: max(12px, 3vw) !important;
   }
 }
 
@@ -949,4 +954,30 @@ html.has-sectional-config-cards .mtl-native-config-row {
   overflow: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
+}
+
+/* Narrow phones: category pager + PDP utility buttons stay readable without clipping */
+@media (max-width: 480px) {
+  .mc-category-pager__btn {
+    min-width: 0 !important;
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  body.productdetails #mcPlannerBtn,
+  body.mc-product-page #mcPlannerBtn,
+  body.mc-theater-seating-pdp #mcPlannerBtn,
+  html.mc-paragon-pdp body #mcPlannerBtn,
+  body.productdetails #mcProductSummaryBtn,
+  body.mc-product-page #mcProductSummaryBtn,
+  body.mc-theater-seating-pdp #mcProductSummaryBtn,
+  html.mc-paragon-pdp body #mcProductSummaryBtn {
+    white-space: normal !important;
+    text-align: center !important;
+    line-height: 1.2 !important;
+    min-height: 44px !important;
+    height: auto !important;
+    padding: 10px 12px !important;
+  }
 }

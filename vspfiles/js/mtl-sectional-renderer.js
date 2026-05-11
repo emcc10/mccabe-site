@@ -1,11 +1,11 @@
 /**
  * Sectional PDP: configuration diagrams, native select sync, product summary.
- * Cache: 20260509final1
+ * Cache: 20260509final2
  */
 (function () {
   "use strict";
 
-  var IMG_V = "20260509final1";
+  var IMG_V = "20260509final2";
   var state = { cfgByCode: {} };
 
   function normalizeCode(code) {
@@ -47,6 +47,71 @@
       row.style.display = "none";
     }
     configSelect.dataset.mtlRowHidden = "1";
+  }
+
+  function scheduleHideConfigurationRow() {
+    hideConfigurationRow();
+    [500, 1500, 3000].forEach(function (ms) {
+      setTimeout(hideConfigurationRow, ms);
+    });
+  }
+
+  function findLeatherBlock() {
+    var row = document.getElementById("mcLeatherRow");
+    if (row) return row;
+    var hi = document.querySelector(".wm-leather-summary");
+    if (hi && hi.parentElement) return hi.parentElement;
+    return document.getElementById("mc-inline-config");
+  }
+
+  function moveLeatherAboveConfigurations(section) {
+    if (!section || !section.parentNode) return;
+    var parent = section.parentNode;
+    var block = findLeatherBlock();
+    if (!block || !block.parentNode) return;
+    if (block === section) return;
+    try {
+      parent.insertBefore(block, section);
+    } catch (eMv) {
+      console.warn("Could not move leather block above configurations:", eMv);
+    }
+  }
+
+  function scheduleMoveLeatherAboveConfigurations(section) {
+    if (!section) return;
+    moveLeatherAboveConfigurations(section);
+    [500, 1500, 3000].forEach(function (ms) {
+      setTimeout(function () {
+        moveLeatherAboveConfigurations(section);
+      }, ms);
+    });
+  }
+
+  function bindLeatherTrigger() {
+    function bindEl(el) {
+      if (!el || el.dataset.mtlLeatherBound === "1") return;
+      el.addEventListener(
+        "click",
+        function (ev) {
+          var w = document.getElementById("wmOpen");
+          if (w) {
+            ev.preventDefault();
+            w.click();
+          }
+        },
+        false
+      );
+      el.dataset.mtlLeatherBound = "1";
+    }
+    bindEl(document.getElementById("mcLeatherBtn"));
+    bindEl(document.getElementById("mcLeatherHeader"));
+  }
+
+  function scheduleBindLeatherTrigger() {
+    bindLeatherTrigger();
+    [500, 1500, 3000].forEach(function (ms) {
+      setTimeout(bindLeatherTrigger, ms);
+    });
   }
 
   function findInsertTarget() {
@@ -112,7 +177,11 @@
 
   function readDisplayedPrice() {
     var el =
-      document.querySelector("#priceWithOptions") || document.querySelector('[itemprop="price"]');
+      document.querySelector("#priceWithOptions") ||
+      document.querySelector(".v65-product-price") ||
+      document.querySelector(".product_productprice") ||
+      document.querySelector(".option_pricing") ||
+      document.querySelector('[itemprop="price"]');
     if (!el) return "";
     return String(el.textContent || "")
       .replace(/\s+/g, " ")
@@ -125,6 +194,29 @@
     return "+$" + n;
   }
 
+  function getSelectedConfigurationAdjustment() {
+    var sel = findConfigurationSelect();
+    if (!sel || sel.selectedIndex < 0) return null;
+    var text = String((sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].textContent) || "").trim();
+    var paren = text.match(/\(\s*\+?\s*\$?\s*([\d,]+(?:\.\d{2})?)\s*\)/i);
+    if (paren) return parseFloat(paren[1].replace(/,/g, ""));
+    var plus = text.match(/\+\s*\$?\s*([\d,]+(?:\.\d{2})?)/);
+    if (plus) return parseFloat(plus[1].replace(/,/g, ""));
+    return null;
+  }
+
+  function refreshProductPriceLabel() {
+    var rows = document.querySelectorAll("#mtl-product-summary .mtl-summary-row");
+    var i;
+    for (i = 0; i < rows.length; i++) {
+      var lab = rows[i].querySelector(".mtl-summary-label");
+      if (lab && /estimated\s+product\s+price/i.test(String(lab.textContent || ""))) {
+        lab.textContent = "Product Price";
+        break;
+      }
+    }
+  }
+
   function ensureProductSummary(section) {
     var sum = document.getElementById("mtl-product-summary");
     if (!sum) {
@@ -135,19 +227,21 @@
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Selected Leather</span><span class="mtl-summary-value" id="mtl-sum-leather">Not selected</span></div>' +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Selected Configuration</span><span class="mtl-summary-value" id="mtl-sum-config">—</span></div>' +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Configuration Price Adjustment</span><span class="mtl-summary-value" id="mtl-sum-adj">$0</span></div>' +
-        '<div class="mtl-summary-row"><span class="mtl-summary-label">Estimated Product Price</span><span class="mtl-summary-value" id="mtl-sum-price">—</span></div>';
+        '<div class="mtl-summary-row"><span class="mtl-summary-label">Product Price</span><span class="mtl-summary-value" id="mtl-sum-price">—</span></div>';
     }
     if (section && section.parentNode) {
       try {
         section.parentNode.insertBefore(sum, section.nextSibling);
       } catch (eIns) {}
     }
+    refreshProductPriceLabel();
     return sum;
   }
 
   function updateProductSummary() {
     var sum = document.getElementById("mtl-product-summary");
     if (!sum) return;
+    refreshProductPriceLabel();
 
     var wm = document.getElementById("wmSummary");
     var mcL = document.getElementById("mcLeatherSummary");
@@ -160,7 +254,12 @@
     var code = window.__mtlSectionalSelectedConfig;
     var cfg = code ? state.cfgByCode[code] : null;
     var configLabel = cfg ? cfg.label || cfg.code || code : code || "—";
-    var adj = cfg ? formatAdjustment(cfg.priceDiff) : "$0";
+
+    var adjParsed = getSelectedConfigurationAdjustment();
+    var adjNum = adjParsed != null && !isNaN(adjParsed) ? adjParsed : cfg && cfg.priceDiff != null ? Number(cfg.priceDiff) : 0;
+    if (isNaN(adjNum)) adjNum = 0;
+    var adj = formatAdjustment(adjNum);
+
     var price = readDisplayedPrice();
 
     var elL = document.getElementById("mtl-sum-leather");
@@ -171,6 +270,12 @@
     if (elC) elC.textContent = configLabel;
     if (elA) elA.textContent = adj;
     if (elP) elP.textContent = price || "—";
+  }
+
+  function scheduleProductSummaryAfterConfigChange() {
+    [250, 800, 1500].forEach(function (ms) {
+      setTimeout(updateProductSummary, ms);
+    });
   }
 
   function selectConfigurationCard(code) {
@@ -190,41 +295,21 @@
 
     window.__mtlSectionalSelectedConfig = code;
     selectNativeConfiguration(code);
-    setTimeout(updateProductSummary, 250);
-    setTimeout(updateProductSummary, 800);
+    scheduleProductSummaryAfterConfigChange();
   }
 
-  function moveLeatherAboveConfigurations(section) {
-    if (!section || !section.parentNode) return;
-    var parent = section.parentNode;
-
-    var mc = document.getElementById("mc-inline-config");
-    if (mc && mc.parentNode === parent) {
-      parent.insertBefore(mc, section);
-    }
-
-    var wmHi = document.querySelector(".wm-leather-summary");
-    var wmWrap = wmHi && wmHi.parentElement;
-    var wmo = document.getElementById("wmOpen");
-    if (wmWrap && wmo && wmWrap.contains(wmo) && wmWrap.parentNode) {
-      try {
-        parent.insertBefore(wmWrap, section);
-      } catch (eMv) {
-        console.warn("Could not move leather UI wrapper:", eMv);
-      }
-    }
-  }
-
-  function wireSectionClicks() {
+  function bindConfigurationCardClicks() {
     var sec = document.getElementById("mtl-sectional-configurations");
-    if (!sec || sec.dataset.mtlClickWired === "1") return;
-    sec.addEventListener("click", function (e) {
-      var card = e.target.closest(".mtl-sectional-card");
-      if (!card || !sec.contains(card)) return;
-      var c = card.getAttribute("data-config-code");
-      if (c) selectConfigurationCard(c);
+    if (!sec) return;
+    var cards = sec.querySelectorAll(".mtl-sectional-card");
+    Array.prototype.forEach.call(cards, function (card) {
+      if (card.dataset.mtlConfigBound === "1") return;
+      card.addEventListener("click", function () {
+        var c = card.getAttribute("data-config-code");
+        if (c) selectConfigurationCard(c);
+      });
+      card.dataset.mtlConfigBound = "1";
     });
-    sec.dataset.mtlClickWired = "1";
   }
 
   function ensureObservers() {
@@ -232,12 +317,15 @@
     if (configSel && configSel.dataset.mtlObsChange !== "1") {
       configSel.addEventListener("change", function () {
         window.setTimeout(updateProductSummary, 0);
+        scheduleProductSummaryAfterConfigChange();
       });
       configSel.dataset.mtlObsChange = "1";
     }
 
     var priceEl =
-      document.querySelector("#priceWithOptions") || document.querySelector('[itemprop="price"]');
+      document.querySelector("#priceWithOptions") ||
+      document.querySelector(".v65-product-price") ||
+      document.querySelector('[itemprop="price"]');
     if (priceEl && priceEl.dataset.mtlPriceObs !== "1") {
       var obs = new MutationObserver(updateProductSummary);
       obs.observe(priceEl, { childList: true, characterData: true, subtree: true });
@@ -263,6 +351,16 @@
       });
       mcLeather.dataset.mtlLeatherObs = "1";
     }
+  }
+
+  function finalizeSectionalUi(section) {
+    ensureProductSummary(section);
+    scheduleMoveLeatherAboveConfigurations(section);
+    scheduleHideConfigurationRow();
+    scheduleBindLeatherTrigger();
+    bindConfigurationCardClicks();
+    ensureObservers();
+    updateProductSummary();
   }
 
   function renderSectionalPdp() {
@@ -294,12 +392,7 @@
 
     var secExistingEarly = document.getElementById("mtl-sectional-configurations");
     if (secExistingEarly && secExistingEarly.dataset.mtlFinalInit === "1") {
-      moveLeatherAboveConfigurations(secExistingEarly);
-      ensureProductSummary(secExistingEarly);
-      hideConfigurationRow();
-      wireSectionClicks();
-      ensureObservers();
-      updateProductSummary();
+      finalizeSectionalUi(secExistingEarly);
       var selLog = findConfigurationSelect();
       console.log("sectional config select", selLog);
       console.log("selected sectional config", window.__mtlSectionalSelectedConfig);
@@ -380,19 +473,14 @@
       target.insertAdjacentElement("afterend", section);
     }
 
-    ensureProductSummary(section);
-    moveLeatherAboveConfigurations(section);
-    hideConfigurationRow();
-    wireSectionClicks();
-    ensureObservers();
+    finalizeSectionalUi(section);
 
     var baseConfig =
-      filtered.find(function (c) {
+      matchedConfigs.find(function (c) {
         return c.base === true;
-      }) || filtered[0];
+      }) || matchedConfigs[0];
 
     if (baseConfig && baseConfig.code) {
-      window.__mtlSectionalSelectedConfig = baseConfig.code;
       selectConfigurationCard(baseConfig.code);
     }
 
@@ -416,10 +504,11 @@
 
   window.findConfigurationSelect = findConfigurationSelect;
 
-  console.log("mtl-sectional-renderer loaded 20260509final1");
+  console.log("mtl-sectional-renderer loaded 20260509final2");
 
   function boot() {
     runRender();
+    scheduleBindLeatherTrigger();
     setTimeout(runRender, 400);
     setTimeout(runRender, 1200);
     setTimeout(runRender, 2800);
