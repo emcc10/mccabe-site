@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-final";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-final");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260513-theater-guard";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260513-theater-guard");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -116,10 +116,24 @@
 
   /** Palliser theater PDPs: never run sectional leather/cards/summary relocation. */
   function isTheaterSeatingProductPageForGuard() {
+    /* Sectional PDPs often include “Theater seating” nav / cross-sell copy in v65-product-parent — must not trigger theater guard. */
+    try {
+      if (document.documentElement.classList.contains("is-sectional-product")) return false;
+    } catch (eH) {}
+    try {
+      if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) return false;
+    } catch (eS) {}
+    var path = String(location.pathname || "").toLowerCase();
+    if (path.indexOf("-sc-") !== -1) return false;
+    try {
+      var pcG = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      var pcGu = pcG ? String(pcG.value || "").toLowerCase() : "";
+      if (pcGu.indexOf("-sc-") !== -1) return false;
+    } catch (ePc) {}
+
     try {
       if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
     } catch (eB) {}
-    var path = String(location.pathname || "").toLowerCase();
     if (
       path.indexOf("theater-seating") !== -1 ||
       path.indexOf("theatre-seating") !== -1 ||
@@ -139,7 +153,13 @@
     if (
       /\btheater seating\b|\btheatre seating\b|\bhome theater\b|\bhome theatre\b/.test(blob)
     ) {
-      return true;
+      if (
+        path.indexOf("theater") !== -1 ||
+        path.indexOf("theatre") !== -1 ||
+        path.indexOf("customtheater") !== -1
+      ) {
+        return true;
+      }
     }
     return false;
   }
