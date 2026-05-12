@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-modal-fix";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-modal-fix");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-modal-inspect";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-modal-inspect");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -2119,8 +2119,46 @@
     if (!leatherSel) return;
     var ws = document.getElementById("wmSections");
     if (!ws) return;
-    injectSectionalNativeLeatherModal(leatherSel);
-    console.log("[MTL] mtlFillSectionalLeatherModal called — injected cards");
+    var n = injectSectionalNativeLeatherModal(leatherSel);
+    console.log("[MTL] mtlFillSectionalLeatherModal called — injected cards:", n);
+    /* Update overlay in real time so we can see modal state after opening. */
+    window.setTimeout(function () {
+      try {
+        var ws2 = document.getElementById("wmSections");
+        var grid = ws2 && ws2.querySelector(".mtl-leather-modal-grid");
+        var tiles = ws2 && ws2.querySelectorAll(".wm-tile");
+        var cards = grid && grid.querySelectorAll(".mtl-leather-modal-card");
+        var body = ws2 && ws2.closest(".wm-modal-body");
+        var bodyH = body ? String(body.offsetHeight) + "px" : "—";
+        var wsH = ws2 ? String(ws2.offsetHeight) + "px" : "—";
+        __mtlDiag.leatherDebug =
+          "modal opened: grid=" + (grid ? "YES" : "NO") +
+          " cards=" + (cards ? cards.length : 0) +
+          " wm-tiles=" + (tiles ? tiles.length : 0) +
+          " ws.h=" + wsH + " body.h=" + bodyH;
+        mtlRefreshStageTrackerDom();
+      } catch (eD2) {}
+    }, 60);
+  };
+
+  /** Snapshot what is in #wmSections any time; call from DevTools or triggered on modal open. */
+  window.mtlInspectModalSections = function () {
+    var ws = document.getElementById("wmSections");
+    if (!ws) { console.log("[MTL inspect] #wmSections: NOT FOUND"); return; }
+    var grid = ws.querySelector(".mtl-leather-modal-grid");
+    var cards = ws.querySelectorAll(".mtl-leather-modal-card");
+    var tiles = ws.querySelectorAll(".wm-tile");
+    var gradeRows = ws.querySelectorAll(".wm-grade-row");
+    var body = ws.closest(".wm-modal-body");
+    console.log("[MTL inspect] #wmSections children:", ws.children.length);
+    console.log("[MTL inspect] .mtl-leather-modal-grid:", grid ? "found" : "none");
+    console.log("[MTL inspect] .mtl-leather-modal-card count:", cards.length);
+    console.log("[MTL inspect] .wm-tile count:", tiles.length);
+    console.log("[MTL inspect] .wm-grade-row count:", gradeRows.length);
+    console.log("[MTL inspect] #wmSections offsetHeight:", ws.offsetHeight);
+    console.log("[MTL inspect] .wm-modal-body offsetHeight:", body ? body.offsetHeight : "—");
+    console.log("[MTL inspect] #wmSections innerHTML slice:", ws.innerHTML.slice(0, 400));
+    if (grid) console.log("[MTL inspect] grid style.display:", window.getComputedStyle(grid).display);
   };
 
   function mtlRunStagePanel(stageLogName, panelKey, fn) {
