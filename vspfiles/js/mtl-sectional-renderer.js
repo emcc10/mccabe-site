@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-modal-sync";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-modal-sync");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-grid-persist";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-grid-persist");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
