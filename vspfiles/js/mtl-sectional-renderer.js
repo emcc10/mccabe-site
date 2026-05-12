@@ -5,7 +5,7 @@
 (function () {
   "use strict";
 
-  var IMG_V = "sectional-leather-20260512-theater-match";
+  var IMG_V = "sectional-leather-20260512-swatch-wrow";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -883,6 +883,20 @@
     var LEATHER_INFO = window.__MTL_LEATHER_INFO__ || {};
     var GRADE_UP = window.__MTL_GRADE_UPCHARGE__ || { "2000": 99, "3000": 149 };
 
+    /* Name-based fallback lookup: find a wm row whose family+color label matches s.family */
+    function wmRowByLabel(s){
+      var sLbl = String(s.family||s.label||"").replace(/\s+/g," ").trim().toLowerCase();
+      if (!sLbl) return null;
+      for (var i=0; i<wm.length; i++){
+        var r = wm[i]; if (!r) continue;
+        var rLbl = ((r.family||"")+" "+(r.color||"")).replace(/\s+/g," ").trim().toLowerCase();
+        if (rLbl && rLbl === sLbl) return r;
+        var rLbl2 = (r.label||"").replace(/\s+/g," ").trim().toLowerCase();
+        if (rLbl2 && rLbl2 === sLbl) return r;
+      }
+      return null;
+    }
+
     function gradeLabel(g){
       if (!g || /^base$/i.test(g)) return "Grade 1000";
       var amt = GRADE_UP[String(g)];
@@ -893,13 +907,18 @@
     /* Build enriched option list */
     var all = [];
     syn.forEach(function(s){
-      var wrow = wmRowForNativeValue(wm, s.value);
+      var wrow = wmRowForNativeValue(wm, s.value) || wmRowByLabel(s);
       var family   = (wrow && wrow.family) || s.family || "";
       var color    = (wrow && wrow.color)  || "";
       var gradeRaw = (wrow && wrow.grade != null ? String(wrow.grade) : "") || s.grade || "Base";
       var nameLine = (family + (color ? " " + color : "")).trim() || s.label || "";
       nameLine = nameLine.replace(/\s+/g," ").trim();
-      all.push({ family: family, color: color, grade: gradeRaw, value: s.value, label: s.label, nameLine: nameLine, swatches: buildSwatchUrls(family, color) });
+      /* Prefer the pre-computed swatch URLs from __WM_LEATHER_OPTIONS__ (same source as mini-swatches),
+         fall back to our own builder when no wrow match exists. */
+      var swatches = (wrow && Array.isArray(wrow.swatches) && wrow.swatches.length)
+        ? wrow.swatches
+        : buildSwatchUrls(family, color);
+      all.push({ family: family, color: color, grade: gradeRaw, value: s.value, label: s.label, nameLine: nameLine, swatches: swatches });
     });
 
     /* Group by grade, sorted */
