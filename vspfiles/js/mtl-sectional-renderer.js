@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-swatch-hyphen";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-swatch-hyphen");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-swatch-simple";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-swatch-simple");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -879,28 +879,11 @@
       if (gradeRaw) {
         gradeLine = /^base$/i.test(gradeRaw) ? "Grade 1000" : (/^grade\b/i.test(gradeRaw) ? gradeRaw : "Grade "+gradeRaw);
       }
-      /* Build swatch URL list. Primary format matches how mini swatches work:
-         family + color, spaces→hyphens (e.g. "Traverse-Chestnut.jpg").
-         Then fall through to the full possibleSwatchPaths list from __WM_LEATHER_OPTIONS__. */
+      /* Swatch image URL: use family+color with spaces→hyphens, same format mini swatches use. */
       var swFamily = (wrow && wrow.family) || s.family || "";
       var swColor  = (wrow && wrow.color)  || "";
       var swFull   = (swFamily + (swColor ? " " + swColor : "")).trim();
-      var swHyphen = swFull.replace(/\s+/g, "-");
-      var swBase   = "/v/vspfiles/swatches/";
-      var primaryUrls = [
-        swBase + swHyphen + ".jpg",
-        swBase + swHyphen + ".jpeg",
-        swBase + swHyphen + ".png",
-        swBase + encodeURIComponent(swFull) + ".jpg",
-        swBase + encodeURIComponent(swFull) + ".jpeg",
-      ];
-      var fallbackUrls = (wrow && wrow.swatches && wrow.swatches.length ? wrow.swatches : []);
-      /* Merge: primary first, then fallback (deduped) */
-      var seen = {};
-      var mergedSw = [];
-      primaryUrls.concat(fallbackUrls).forEach(function(u) {
-        if (u && !seen[u]) { seen[u] = true; mergedSw.push(u); }
-      });
+      var swUrl    = "/v/vspfiles/swatches/" + swFull.replace(/\s+/g, "-") + ".jpg";
 
       var card = document.createElement("button");
       card.type = "button";
@@ -915,19 +898,11 @@
       var thumb = document.createElement("div");
       thumb.style.cssText = "width:100%;aspect-ratio:1;border-radius:7px;overflow:hidden;background:linear-gradient(135deg,#ede9e0,#d5cfc4);margin-bottom:7px;display:flex;align-items:center;justify-content:center";
 
-      if (mergedSw.length) {
-        var img = document.createElement("img");
-        img.alt = ""; img.loading = "lazy";
-        img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block";
-        var swIdx = 0;
-        (function tryNextSwatch() {
-          if (swIdx >= mergedSw.length) return;
-          var url = mergedSw[swIdx++];
-          img.onerror = tryNextSwatch;
-          img.src = url;
-        })();
-        thumb.appendChild(img);
-      }
+      var img = document.createElement("img");
+      img.alt = ""; img.loading = "lazy";
+      img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block";
+      img.src = swUrl;
+      thumb.appendChild(img);
 
       var nameEl = document.createElement("div");
       nameEl.textContent = nameLine || "Leather";
