@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-modal-wrap";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-modal-wrap");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-modal-fix";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-modal-fix");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -2111,6 +2111,17 @@
     }
   }
   window.mtlDumpLeatherDiscoveryToConsole = mtlDumpLeatherDiscoveryToConsole;
+
+  /** Called by template's renderAllGradesTogether() when its own `all` array is empty. */
+  window.mtlFillSectionalLeatherModal = function mtlFillSectionalLeatherModal() {
+    if (!isSectionalProductPageClient()) return;
+    var leatherSel = findNativeLeatherSelectEl();
+    if (!leatherSel) return;
+    var ws = document.getElementById("wmSections");
+    if (!ws) return;
+    injectSectionalNativeLeatherModal(leatherSel);
+    console.log("[MTL] mtlFillSectionalLeatherModal called — injected cards");
+  };
 
   function mtlRunStagePanel(stageLogName, panelKey, fn) {
     console.log("[MTL] START " + stageLogName);
