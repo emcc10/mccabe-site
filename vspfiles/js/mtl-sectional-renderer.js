@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260512-swatch-cascade";
-  console.log("MTL_RENDERER_BUILD sectional-20260512-swatch-cascade");
+  window.MTL_RENDERER_BUILD = "sectional-20260512-stable";
+  console.log("MTL_RENDERER_BUILD sectional-20260512-stable");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -879,19 +879,11 @@
       if (gradeRaw) {
         gradeLine = /^base$/i.test(gradeRaw) ? "Grade 1000" : (/^grade\b/i.test(gradeRaw) ? gradeRaw : "Grade "+gradeRaw);
       }
-      /* Swatch URLs: try hyphenated first (matches mini swatch format), then other variants */
+      /* Swatch URL: family+color with spaces→hyphens matches mini swatch format */
       var swFamily = (wrow && wrow.family) || s.family || "";
       var swColor  = (wrow && wrow.color)  || "";
       var swFull   = (swFamily + (swColor ? " " + swColor : "")).trim();
-      var swBase   = "/v/vspfiles/swatches/";
-      var swUrls   = [
-        swBase + swFull.replace(/\s+/g, "-") + ".jpg",
-        swBase + swFull.replace(/\s+/g, "-") + ".jpeg",
-        swBase + encodeURIComponent(swFull) + ".jpg",
-        swBase + encodeURIComponent(swFull) + ".jpeg",
-        swBase + swFull.replace(/\s+/g, "_") + ".jpg",
-        swBase + swFull.replace(/\s+/g, " ") + ".jpg",
-      ];
+      var swUrl    = "/v/vspfiles/swatches/" + swFull.replace(/\s+/g, "-") + ".jpg";
 
       var card = document.createElement("button");
       card.type = "button";
@@ -912,14 +904,7 @@
       var img = document.createElement("img");
       img.alt = ""; img.loading = "lazy";
       img.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block";
-      /* Cascade through URL variants until one loads */
-      var swIdx = 0;
-      var trySwatchUrl = function() {
-        if (swIdx >= swUrls.length) { img.onerror = null; return; }
-        img.onerror = trySwatchUrl;
-        img.src = swUrls[swIdx++];
-      };
-      trySwatchUrl();
+      img.src = swUrl;
       thumb.appendChild(img);
       thumbWrap.appendChild(thumb);
 
