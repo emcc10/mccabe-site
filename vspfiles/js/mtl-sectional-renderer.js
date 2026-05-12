@@ -5,7 +5,7 @@
 (function () {
   "use strict";
 
-  var IMG_V = "sectional-leather-20260512-swatch-wrow";
+  var IMG_V = "sectional-leather-20260512-split-fix";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -883,16 +883,27 @@
     var LEATHER_INFO = window.__MTL_LEATHER_INFO__ || {};
     var GRADE_UP = window.__MTL_GRADE_UPCHARGE__ || { "2000": 99, "3000": 149 };
 
-    /* Name-based fallback lookup: find a wm row whose family+color label matches s.family */
-    function wmRowByLabel(s){
-      var sLbl = String(s.family||s.label||"").replace(/\s+/g," ").trim().toLowerCase();
+    /* Split "Traverse Chestnut" → {family:"Traverse", color:"Chestnut"} — matches template's splitFamilyColor */
+    function splitFamilyColor(raw){
+      var r = String(raw||"").replace(/\s+/g," ").trim();
+      if (!r) return {family:"",color:""};
+      if (!r.includes(" ") && r.includes("_")){ var i=r.indexOf("_"); return {family:r.slice(0,i),color:r.slice(i+1).replace(/_/g," ")}; }
+      if (!r.includes(" ") && r.includes("-")){ var i=r.indexOf("-"); return {family:r.slice(0,i),color:r.slice(i+1).replace(/-/g," ")}; }
+      var parts=r.split(" ").filter(Boolean);
+      return {family:parts.shift()||"", color:parts.join(" ").trim()};
+    }
+
+    /* Name-based fallback lookup for wm entry by label */
+    function wmRowByLabel(normName){
+      var sLbl = String(normName||"").replace(/\s+/g," ").trim().toLowerCase();
       if (!sLbl) return null;
       for (var i=0; i<wm.length; i++){
         var r = wm[i]; if (!r) continue;
         var rLbl = ((r.family||"")+" "+(r.color||"")).replace(/\s+/g," ").trim().toLowerCase();
         if (rLbl && rLbl === sLbl) return r;
-        var rLbl2 = (r.label||"").replace(/\s+/g," ").trim().toLowerCase();
-        if (rLbl2 && rLbl2 === sLbl) return r;
+        /* Also try matching against label with grade stripped */
+        var rStripped = (r.label||"").replace(/\bGrade\s*[0-9]+\s*/gi,"").replace(/\s+/g," ").trim().toLowerCase();
+        if (rStripped && rStripped === sLbl) return r;
       }
       return null;
     }
@@ -906,20 +917,27 @@
 
     /* Build enriched option list */
     var all = [];
+    var wmMatchCount = 0;
     syn.forEach(function(s){
-      var wrow = wmRowForNativeValue(wm, s.value) || wmRowByLabel(s);
-      var family   = (wrow && wrow.family) || s.family || "";
-      var color    = (wrow && wrow.color)  || "";
+      /* s.family = full name without grade e.g. "Traverse Chestnut"; s.color = "" */
+      var fc = splitFamilyColor(s.family || s.label || "");
+      var wrow = wmRowForNativeValue(wm, s.value) || wmRowByLabel(s.family || s.label || "");
+      if (wrow) wmMatchCount++;
+      var family   = (wrow && wrow.family) || fc.family || s.family || "";
+      var color    = (wrow && wrow.color)  || fc.color  || "";
       var gradeRaw = (wrow && wrow.grade != null ? String(wrow.grade) : "") || s.grade || "Base";
       var nameLine = (family + (color ? " " + color : "")).trim() || s.label || "";
       nameLine = nameLine.replace(/\s+/g," ").trim();
-      /* Prefer the pre-computed swatch URLs from __WM_LEATHER_OPTIONS__ (same source as mini-swatches),
-         fall back to our own builder when no wrow match exists. */
+      /* Prefer pre-computed wrow.swatches (proven to work for mini-swatches);
+         fall back to our own builder using properly-split family+color */
       var swatches = (wrow && Array.isArray(wrow.swatches) && wrow.swatches.length)
         ? wrow.swatches
         : buildSwatchUrls(family, color);
       all.push({ family: family, color: color, grade: gradeRaw, value: s.value, label: s.label, nameLine: nameLine, swatches: swatches });
     });
+    console.log("[MTL picker] wm entries:", wm.length, "| syn entries:", syn.length, "| wrow matches:", wmMatchCount,
+      "| sample wm[0]:", wm[0] ? (wm[0].family + " " + wm[0].color + " swatches:" + (wm[0].swatches||[]).length) : "none",
+      "| sample syn[0]:", syn[0] ? (syn[0].family + " val:" + syn[0].value) : "none");
 
     /* Group by grade, sorted */
     var grades = []; var byGrade = {};
