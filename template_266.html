@@ -1972,7 +1972,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   .wm-tab[data-active="1"]{border-color:#111}
 
-  .wm-modal-body{padding:14px 18px;overflow:auto}
+  .wm-modal-body{padding:14px 18px;overflow:auto;flex:1 1 auto;min-height:0}
   .wm-tabpanel{display:none}
   .wm-tabpanel[data-active="1"]{display:block}
 
@@ -3040,9 +3040,18 @@ function gradeHeaderText(g) {
     }
 
     function renderAllGradesTogether(){
-      /* If the sectional renderer already populated the section with its own grid, keep it. */
-      if (sectionsEl.querySelector(".mtl-leather-modal-grid")) {
-        console.log("[WM] sectional grid already present — skip renderAllGradesTogether");
+      /* Sectional pages: always let the renderer build leather cards.
+         The template's tile pipeline may mis-parse Volusion option text; the renderer
+         has more robust parsing and the correct card design. Clear #wmSections so the
+         renderer starts fresh, then call its fill function synchronously. */
+      if (
+        typeof window.isSectionalProductPage === "function" &&
+        window.isSectionalProductPage() &&
+        typeof window.mtlFillSectionalLeatherModal === "function"
+      ) {
+        sectionsEl.innerHTML = "";
+        window.mtlFillSectionalLeatherModal();
+        console.log("[WM] sectional: delegated to mtlFillSectionalLeatherModal");
         return;
       }
 
@@ -3052,7 +3061,6 @@ function gradeHeaderText(g) {
         .sort((a,b) => gradeSortKey(a) - gradeSortKey(b));
 
       if (!grades.length) {
-        /* all[] is empty — delegate to renderer which uses its own (less strict) parser. */
         if (typeof window.mtlFillSectionalLeatherModal === "function") {
           window.mtlFillSectionalLeatherModal();
         }
@@ -19940,7 +19948,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-debug-20260512-grid-persist"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-debug-20260512-always-inject"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-grid-persist";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-grid-persist");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-always-inject";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-always-inject");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -646,14 +646,7 @@
     var beforeTiles = ws.querySelectorAll(".wm-tile").length;
     var beforeGrades = ws.querySelectorAll(".wm-grade-row").length;
 
-    var existingGrid = ws.querySelector(".mtl-leather-modal-grid");
-    var existingN = existingGrid ? existingGrid.querySelectorAll(".mtl-leather-modal-card").length : 0;
-    if (existingGrid && existingN === syn.length) {
-      console.log("[MTL leather modal] skip reinject — already", syn.length, "cards");
-      return syn.length;
-    }
-
-    console.log("[MTL leather modal] container #wmSections", {
+    console.log("[MTL leather modal] injecting", syn.length, "cards into #wmSections", {
       parentTab: tabPanel && tabPanel.id ? "#" + tabPanel.id : "(none)",
       childrenBefore: ws.children.length,
       wmTilesBefore: beforeTiles,
