@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260515-leather-dom";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260515-leather-dom");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-leather-row-fix";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-leather-row-fix");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -186,9 +186,29 @@
       if (td) rowText += " " + td.innerText;
       if (sel.parentElement) rowText += " " + sel.parentElement.innerText;
       rowText = rowText.toLowerCase();
-      if (!/choose configuration|configuration/i.test(rowText)) return false;
-      if (/(choose cover|choose leather|select leather|select a leather|upholstery|leather|fabric cover)/i.test(rowText))
+      if (/(choose cover|choose leather|select leather|select a leather|select\s+a\s+leather|upholstery|fabric cover|\bselect\s+cover\b|\bcover\s*:\b|\bleather\s*:\b|\bgrade\b)/i.test(rowText))
         return false;
+
+      var optSample = "";
+      var oi;
+      var ol = sel.options ? sel.options.length : 0;
+      for (oi = 0; oi < Math.min(ol, 30); oi++) {
+        optSample += " " + String(sel.options[oi].textContent || "").toLowerCase();
+      }
+      if (
+        /\bgrade\b/.test(optSample) &&
+        /leather|nubuck|fabric|vinyl|microfiber|poly|polyurethane|boucle|chenille|velvet|wool|tweed/i.test(optSample) &&
+        !/sectional configuration|choose configuration/i.test(optSample)
+      ) {
+        return false;
+      }
+
+      if (
+        !/choose\s+configuration|choose\s+seat\b|select\s+configuration/i.test(rowText) &&
+        !/\bconfiguration\s*:/i.test(rowText)
+      )
+        return false;
+      if (/(upholstery|leather|fabric cover)(?![a-z])/i.test(rowText) && !/choose\s+configuration/i.test(rowText)) return false;
       return true;
     } catch (e) {
       return false;
@@ -202,7 +222,9 @@
     } catch (eCfg) {}
 
     var sels = Array.from(
-      document.querySelectorAll("#options_table select, #v65-product-parent select, table[id*='options_table'] select")
+      document.querySelectorAll(
+        "#options_table select, #v65-product-parent select, #content_area table[id*='options_table'] select, table[id*='options_table'] select"
+      )
     );
     var i;
     var m = document.querySelector("select.mc-native-leather");
@@ -415,7 +437,7 @@
     if (document.documentElement.dataset.mtlOptsTblLeatherObs === "1") return;
     document.documentElement.dataset.mtlOptsTblLeatherObs = "1";
     var root = document.querySelector(
-      "#v65-product-parent #options_table, #v65-product-parent table[id*='options_table'], #options_table, table[id*='options_table']"
+      "#v65-product-parent #options_table, #v65-product-parent table[id*='options_table'], #options_table, table[id*='options_table'], #content_area table[id*='options_table']"
     );
     if (!root || typeof MutationObserver === "undefined") return;
     var deb = null;
@@ -954,10 +976,15 @@
   function findConfigurationSelect() {
     var root =
       document.querySelector("#v65-product-parent #options_table, #v65-product-parent table[id*='options_table']") ||
-      document.querySelector("#options_table, table[id*='options_table']");
+      document.querySelector("#options_table, table[id*='options_table']") ||
+      document.querySelector("#content_area table[id*='options_table']");
     var selects = root
       ? Array.from(root.querySelectorAll("select"))
-      : Array.from(document.querySelectorAll("#v65-product-parent select, #options_table select"));
+      : Array.from(
+          document.querySelectorAll(
+            "#v65-product-parent select, #options_table select, #content_area table[id*='options_table'] select"
+          )
+        );
 
     var found = selects.find(function (sel) {
       if (sel.classList && sel.classList.contains("mc-native-leather")) return false;
