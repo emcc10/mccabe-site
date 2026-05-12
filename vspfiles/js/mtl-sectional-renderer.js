@@ -5,7 +5,7 @@
 (function () {
   "use strict";
 
-  var IMG_V = "sectional-leather-20260520";
+  var IMG_V = "sectional-leather-20260512-swatch-cascade2";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -879,11 +879,57 @@
       if (gradeRaw) {
         gradeLine = /^base$/i.test(gradeRaw) ? "Grade 1000" : (/^grade\b/i.test(gradeRaw) ? gradeRaw : "Grade "+gradeRaw);
       }
-      /* Swatch URL: family+color with spaces→hyphens matches mini swatch format */
+      /* Build candidate swatch URLs using the same cascade logic as the theater seating mini-swatches */
       var swFamily = (wrow && wrow.family) || s.family || "";
       var swColor  = (wrow && wrow.color)  || "";
-      var swFull   = (swFamily + (swColor ? " " + swColor : "")).trim();
-      var swUrl    = "/v/vspfiles/swatches/" + swFull.replace(/\s+/g, "-") + ".jpg";
+      var swUrls   = (function(f, c){
+        if (!f) return [];
+        var names = [];
+        function slugSw(x){ return String(x||"").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,""); }
+        function addSw(a, b){
+          if (b !== undefined && b !== "") {
+            names.push(a + " " + b);
+            names.push(a.toLowerCase() + " " + b.toLowerCase());
+            names.push(a + "_" + b);
+            names.push(a + "-" + b);
+            names.push(slugSw(a) + "-" + slugSw(b));
+            names.push(slugSw(a) + "_" + slugSw(b));
+          } else {
+            names.push(a);
+            names.push(a.toLowerCase());
+            names.push(slugSw(a));
+          }
+        }
+        var fNoParen = f.replace(/\s*\([^)]*\)\s*/g," ").replace(/\s+/g," ").trim();
+        var cNoParen = c.replace(/\s*\([^)]*\)\s*/g," ").replace(/\s+/g," ").trim();
+        var fAnd = f.replace(/\s*&\s*/g," and "); var cAnd = c.replace(/\s*&\s*/g," and ");
+        var colorVariants = [c];
+        if (/\bgrey\b/i.test(c)) colorVariants.push(c.replace(/\bgrey\b/gi,"gray"));
+        if (/\bgray\b/i.test(c)) colorVariants.push(c.replace(/\bgray\b/gi,"grey"));
+        if (/\begg\s+shell\b/i.test(c)) colorVariants.push(c.replace(/\begg\s+shell\b/gi,"eggshell"));
+        if (f && c) {
+          addSw(f, c);
+          colorVariants.forEach(function(cv){ if (cv !== c) addSw(f, cv); });
+          if (c !== c.toUpperCase()) addSw(f, c.toUpperCase());
+          if (fAnd !== f || cAnd !== c) addSw(fAnd, cAnd);
+          if (fNoParen !== f || cNoParen !== c) addSw(fNoParen, cNoParen);
+        } else {
+          addSw(f, "");
+          if (fNoParen !== f) addSw(fNoParen, "");
+        }
+        var out = []; var seen = {};
+        var exts = [".jpg",".jpeg",".png",".webp"];
+        var bases = ["/v/vspfiles/swatches/","/vspfiles/swatches/"];
+        bases.forEach(function(base){
+          names.forEach(function(n){
+            exts.forEach(function(ext){
+              var url = base + encodeURIComponent(n + ext);
+              if (!seen[url]){ seen[url]=true; out.push(url); }
+            });
+          });
+        });
+        return out;
+      })(swFamily, swColor);
 
       var card = document.createElement("button");
       card.type = "button";
@@ -900,8 +946,22 @@
 
       var img = document.createElement("img");
       img.alt = ""; img.loading = "lazy";
-      img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block";
-      img.src = swUrl;
+      img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 0.2s";
+      /* Cascade through candidate URLs exactly like the theater seating mini-swatches */
+      (function(imgEl, urls){
+        var idx = 0;
+        function tryNext(){
+          if (idx >= urls.length) {
+            imgEl.style.display = "none"; /* no image found — show beige background only */
+            return;
+          }
+          var url = urls[idx++];
+          imgEl.onerror = function(){ if (imgEl.naturalWidth === 0) tryNext(); };
+          imgEl.onload  = function(){ imgEl.style.opacity = "1"; };
+          imgEl.src = url;
+        }
+        tryNext();
+      })(img, swUrls);
       thumb.appendChild(img);
 
       var nameEl = document.createElement("div");
