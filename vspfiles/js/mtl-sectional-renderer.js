@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-leather-aggressive";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-leather-aggressive");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-modal-wrap";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-modal-wrap");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -1289,6 +1289,44 @@
    * (4) jQuery .trigger("click") after native .click(); overlay z-index: html.is-sectional-product .wm-overlay.
    */
 
+  function mtlWrapWmOpenForSectional() {
+    if (!isSectionalProductPageClient()) return;
+    var btn = document.getElementById("wmOpen");
+    if (!btn || btn.dataset.mtlModalWrapBound === "1") return;
+    btn.dataset.mtlModalWrapBound = "1";
+    var origOnclick = btn.onclick;
+    btn.onclick = function (e) {
+      if (typeof origOnclick === "function") {
+        try { origOnclick.call(btn, e); } catch (eO) {}
+      }
+      /* Inject our leather cards right after the template's renderAllGradesTogether() ran.
+         Use a micro-delay so any re-render from mcFireWmOpenProgrammatically retries is also covered. */
+      function doInject() {
+        var leatherSel = findNativeLeatherSelectEl();
+        if (!leatherSel) return;
+        var ws = document.getElementById("wmSections");
+        if (!ws) return;
+        var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
+        if (!syn.length) return;
+        /* If the template already rendered real .wm-tile content, leave it alone;
+           only replace if the section is empty or only has our own .mtl-leather-modal-grid. */
+        var hasTiles = ws.querySelectorAll(".wm-tile").length > 0;
+        if (hasTiles) {
+          console.log("[MTL modal-wrap] .wm-tile content already present, skip inject");
+          return;
+        }
+        console.log("[MTL modal-wrap] injecting", syn.length, "cards into #wmSections");
+        injectSectionalNativeLeatherModal(leatherSel);
+      }
+      /* Run at 0, 80, 200 ms to cover multiple renderAllGradesTogether() calls from
+         mcFireWmOpenProgrammatically (it fires onclick up to 3×). */
+      [0, 80, 200, 420].forEach(function (ms) {
+        window.setTimeout(doInject, ms);
+      });
+    };
+    console.log("[MTL] wrapped #wmOpen.onclick for sectional modal injection");
+  }
+
   function ensureMcWmOpenMountedListener() {
     if (document.documentElement.dataset.mtlWmOpenMountedListen === "1") return;
     document.documentElement.dataset.mtlWmOpenMountedListen = "1";
@@ -1296,9 +1334,21 @@
       "mcWmOpenMounted",
       function () {
         if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+        /* Give initIfReady a tick to complete, then wrap the onclick. */
+        window.setTimeout(function () {
+          mtlWrapWmOpenForSectional();
+          /* Also retry wrapping at short intervals in case #wmOpen isn't created yet. */
+          [120, 350, 800].forEach(function (ms) {
+            window.setTimeout(mtlWrapWmOpenForSectional, ms);
+          });
+        }, 0);
       },
       false
     );
+    /* Also try immediately and on a short schedule in case mcWmOpenMounted already fired. */
+    [0, 250, 600, 1400, 3000].forEach(function (ms) {
+      window.setTimeout(mtlWrapWmOpenForSectional, ms);
+    });
   }
 
   function findInsertTarget() {
