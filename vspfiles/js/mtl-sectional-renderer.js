@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-css-force";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-css-force");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-display-force";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-display-force");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -625,14 +625,21 @@
       console.warn("[MTL leather modal] #wmSections not found");
       return 0;
     }
-    /* Ensure modal body has minimum height so flexbox doesn't collapse it while we inject. */
+    /* Force the modal body and active tab panel to be visible.
+       Volusion site-wide CSS may set display:none on .wm-modal-body or .wm-tabpanel.
+       We always reapply because the modal may reopen after CSS changes. */
     try {
       var mb = ws.closest(".wm-modal-body");
-      if (mb && !mb.dataset.mtlMinH) {
-        mb.dataset.mtlMinH = "1";
+      if (mb) {
+        mb.style.setProperty("display", "block", "important");
         mb.style.setProperty("min-height", "200px", "important");
         mb.style.setProperty("flex", "1 1 auto", "important");
         mb.style.setProperty("overflow", "auto", "important");
+      }
+      var tp = ws.closest(".wm-tabpanel");
+      if (tp) {
+        tp.style.setProperty("display", "block", "important");
+        tp.setAttribute("data-active", "1");
       }
     } catch (eMb) {}
     var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
