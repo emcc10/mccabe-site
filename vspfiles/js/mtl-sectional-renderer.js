@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260512-stable";
-  console.log("MTL_RENDERER_BUILD sectional-20260512-stable");
+  window.MTL_RENDERER_BUILD = "sectional-20260512-v2";
+  console.log("MTL_RENDERER_BUILD sectional-20260512-v2");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -895,18 +895,14 @@
         "transition:border-color 0.15s"
       ].join(";");
 
-      /* Square swatch thumbnail using padding-bottom trick (works in all browsers) */
-      var thumbWrap = document.createElement("div");
-      thumbWrap.style.cssText = "width:100%;position:relative;margin-bottom:7px";
       var thumb = document.createElement("div");
-      thumb.style.cssText = "width:100%;height:0;padding-bottom:100%;position:relative;border-radius:7px;overflow:hidden;background:linear-gradient(135deg,#ede9e0,#d5cfc4)";
+      thumb.style.cssText = "width:100%;aspect-ratio:1/1;border-radius:7px;overflow:hidden;background:linear-gradient(135deg,#ede9e0,#d5cfc4);margin-bottom:7px;display:flex;align-items:center;justify-content:center";
 
       var img = document.createElement("img");
       img.alt = ""; img.loading = "lazy";
-      img.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block";
+      img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block";
       img.src = swUrl;
       thumb.appendChild(img);
-      thumbWrap.appendChild(thumb);
 
       var nameEl = document.createElement("div");
       nameEl.textContent = nameLine || "Leather";
@@ -915,7 +911,7 @@
       gradeEl.textContent = gradeLine;
       gradeEl.style.cssText = "font-size:11px;color:#777;margin-top:2px";
 
-      card.appendChild(thumbWrap); card.appendChild(nameEl); card.appendChild(gradeEl);
+      card.appendChild(thumb); card.appendChild(nameEl); card.appendChild(gradeEl);
 
       card.onmouseenter = function() { card.style.borderColor = "#111"; };
       card.onmouseleave = function() { card.style.borderColor = card.dataset.picked === "1" ? "#111" : "#ddd"; };
