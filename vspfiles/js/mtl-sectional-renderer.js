@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-loop-fix";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-loop-fix");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-force-on-open";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-force-on-open");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -1340,10 +1340,29 @@
         console.log("[MTL modal-wrap] injecting", syn.length, "cards into #wmSections");
         injectSectionalNativeLeatherModal(leatherSel);
       }
-      /* Run at 0, 80, 200 ms to cover multiple renderAllGradesTogether() calls from
-         mcFireWmOpenProgrammatically (it fires onclick up to 3×). */
+      /* Force display on modal body/tab panel in case Volusion CSS hides them,
+         and inject cards. Run at several intervals to survive renderAllGradesTogether rewrites. */
+      function doForceAndInject() {
+        /* Force visibility of the modal body and tab panel */
+        var wsNow = document.getElementById("wmSections");
+        if (wsNow) {
+          var mbNow = wsNow.closest(".wm-modal-body");
+          if (mbNow) {
+            mbNow.style.setProperty("display", "block", "important");
+            mbNow.style.setProperty("min-height", "200px", "important");
+            mbNow.style.setProperty("flex", "1 1 auto", "important");
+            mbNow.style.setProperty("overflow", "auto", "important");
+          }
+          var tpNow = wsNow.closest(".wm-tabpanel");
+          if (tpNow) {
+            tpNow.style.setProperty("display", "block", "important");
+            tpNow.setAttribute("data-active", "1");
+          }
+        }
+        doInject();
+      }
       [0, 80, 200, 420].forEach(function (ms) {
-        window.setTimeout(doInject, ms);
+        window.setTimeout(doForceAndInject, ms);
       });
     };
     console.log("[MTL] wrapped #wmOpen.onclick for sectional modal injection");
