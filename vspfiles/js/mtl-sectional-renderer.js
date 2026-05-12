@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-leather-dump";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-leather-dump");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-leather-dump2";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-leather-dump2");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -1952,13 +1952,53 @@
       console.log("[MTL leather-debug] __WM_LEATHER_OPTIONS__ length=", (window.__WM_LEATHER_OPTIONS__ || []).length);
       console.groupEnd();
 
+      var pickedInfo = "none";
+      var pickedReason = "";
+      if (leSel) {
+        var realCount = 0;
+        var firstLabel = "";
+        var firstOpt = "";
+        var sampleLabels = [];
+        var k2;
+        for (k2 = 0; k2 < (leSel.options || []).length; k2++) {
+          var opt = leSel.options[k2];
+          var txt = String((opt && opt.textContent) || "").replace(/\s+/g, " ").trim();
+          if (k2 === 0) firstOpt = txt;
+          var isPlaceholder = false;
+          try { isPlaceholder = !!isPlaceholderLeatherOption(opt); } catch (eIP) {}
+          if (!isPlaceholder) {
+            realCount++;
+            if (!firstLabel) firstLabel = txt;
+            if (sampleLabels.length < 3) sampleLabels.push(txt.slice(0, 32));
+          } else if (sampleLabels.length < 3) {
+            sampleLabels.push("[ph]" + txt.slice(0, 26));
+          }
+        }
+        var leId = leSel.id || leSel.name || ("<select>");
+        pickedInfo =
+          leId +
+          " opts=" + ((leSel.options || []).length) +
+          " real=" + realCount +
+          " 1st='" + firstOpt.slice(0, 36) + "'";
+        if (realCount === 0) {
+          pickedReason = "ALL_PLACEHOLDER (Volusion likely waiting on config pick)";
+        } else {
+          pickedReason = "OK first_real='" + firstLabel.slice(0, 36) + "'";
+        }
+        console.log("[MTL leather-debug] picked sample labels:", sampleLabels);
+      } else {
+        pickedReason = "findNativeLeatherSelectEl returned null";
+      }
+
       var summary =
         "sel=" + allSelects.length +
         " cfg=" + cfgCount +
         " leatherish=" + leatherishCount +
         " other=" + otherCount +
         " optsTbl=" + (optsTable ? "Y" : "N") +
-        " atcForm=" + (atcForm ? "Y" : "N");
+        " atcForm=" + (atcForm ? "Y" : "N") +
+        "\n  picked: " + pickedInfo +
+        "\n  reason: " + pickedReason;
       try {
         __mtlDiag.leatherDebug = summary;
         mtlRefreshStageTrackerDom();
