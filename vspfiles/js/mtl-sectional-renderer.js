@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-own-picker";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-own-picker");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-swatch-fix";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-swatch-fix");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -879,8 +879,31 @@
       if (gradeRaw) {
         gradeLine = /^base$/i.test(gradeRaw) ? "Grade 1000" : (/^grade\b/i.test(gradeRaw) ? gradeRaw : "Grade "+gradeRaw);
       }
-      var mergedSw = (wrow && wrow.swatches) || s.swatches || [];
-      var imgUrl = pickFirstSwatchUrl({ swatches: mergedSw });
+      /* Fallback wrow lookup by family name if value matching failed */
+      if (!wrow && s.family) {
+        var sFamLow = s.family.trim().toLowerCase();
+        for (var wi = 0; wi < wm.length; wi++) {
+          var we = wm[wi];
+          var weLabel = ((we.family || "") + " " + (we.color || "")).trim().toLowerCase();
+          var weFam = (we.family || "").trim().toLowerCase();
+          if (weLabel === sFamLow || weFam === sFamLow) { wrow = we; break; }
+        }
+      }
+      var mergedSw = (wrow && wrow.swatches && wrow.swatches.length ? wrow.swatches : null) ||
+                     (s.swatches && s.swatches.length ? s.swatches : null) || [];
+      /* Last resort: generate swatch URLs from the leather name directly */
+      if (!mergedSw.length && s.family) {
+        var swName = s.family.trim();
+        var swEnc = encodeURIComponent(swName);
+        mergedSw = [
+          "/v/vspfiles/swatches/" + swEnc + ".jpeg",
+          "/v/vspfiles/swatches/" + swEnc + ".jpg",
+          "/v/vspfiles/swatches/" + swEnc + ".png",
+          "/v/vspfiles/swatches/" + encodeURIComponent(swName.toLowerCase()) + ".jpeg",
+          "/v/vspfiles/swatches/" + swName.replace(/\s+/g,"-").toLowerCase() + ".jpeg",
+          "/v/vspfiles/swatches/" + swName.replace(/\s+/g,"_") + ".jpeg",
+        ];
+      }
 
       var card = document.createElement("button");
       card.type = "button";
@@ -894,15 +917,19 @@
 
       var thumb = document.createElement("div");
       thumb.style.cssText = "width:100%;aspect-ratio:1;border-radius:7px;overflow:hidden;background:linear-gradient(135deg,#ede9e0,#d5cfc4);margin-bottom:7px;display:flex;align-items:center;justify-content:center";
-      if (imgUrl) {
+
+      if (mergedSw.length) {
         var img = document.createElement("img");
-        img.src = imgUrl.indexOf("?") === -1 ? imgUrl+"?v="+IMG_V : imgUrl+"&v="+IMG_V;
         img.alt = ""; img.loading = "lazy";
         img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block";
+        var swIdx = 0;
+        (function tryNextSwatch() {
+          if (swIdx >= mergedSw.length) return;
+          var url = mergedSw[swIdx++];
+          img.onerror = tryNextSwatch;
+          img.src = url;
+        })();
         thumb.appendChild(img);
-      } else {
-        thumb.style.fontSize = "10px"; thumb.style.color = "#888";
-        thumb.textContent = "Swatch";
       }
 
       var nameEl = document.createElement("div");
