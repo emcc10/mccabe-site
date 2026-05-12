@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-force-on-open";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-force-on-open");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-no-tile-skip";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-no-tile-skip");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -1330,14 +1330,10 @@
         if (!ws) return;
         var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
         if (!syn.length) return;
-        /* If the template already rendered real .wm-tile content, leave it alone;
-           only replace if the section is empty or only has our own .mtl-leather-modal-grid. */
-        var hasTiles = ws.querySelectorAll(".wm-tile").length > 0;
-        if (hasTiles) {
-          console.log("[MTL modal-wrap] .wm-tile content already present, skip inject");
-          return;
-        }
-        console.log("[MTL modal-wrap] injecting", syn.length, "cards into #wmSections");
+        /* Always replace with our renderer cards — template's .wm-tile elements
+           may be hidden by Volusion site CSS. injectSectionalNativeLeatherModal
+           has its own skip guard (won't clear DOM if correct count already present). */
+        console.log("[MTL modal-wrap] doInject: calling injectSectionalNativeLeatherModal");
         injectSectionalNativeLeatherModal(leatherSel);
       }
       /* Force display on modal body/tab panel in case Volusion CSS hides them,
