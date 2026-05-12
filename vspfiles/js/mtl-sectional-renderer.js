@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-no-tile-skip";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-no-tile-skip");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-own-picker";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-own-picker");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -808,22 +808,197 @@
     return appendFallbackLeatherGridIfEmpty(sel);
   }
 
+  /* ── MTL Own Leather Picker ─────────────────────────────────────────────
+   * Completely bypasses the WM modal and its problematic CSS.
+   * Opens a self-contained overlay built entirely with inline styles.
+   * ──────────────────────────────────────────────────────────────────────── */
+  function mtlOpenOwnLeatherPicker() {
+    if (!isSectionalProductPageClient()) return;
+    var leatherSel = findNativeLeatherSelectEl();
+    if (!leatherSel) return;
+    var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
+    if (!syn.length) { console.warn("[MTL picker] no leather options"); return; }
+
+    /* Remove any existing picker */
+    var old = document.getElementById("mtl-own-picker");
+    if (old) old.parentNode.removeChild(old);
+
+    var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
+
+    /* Overlay backdrop */
+    var backdrop = document.createElement("div");
+    backdrop.id = "mtl-own-picker";
+    var bs = backdrop.style;
+    bs.position = "fixed"; bs.inset = "0"; bs.zIndex = "2147483647";
+    bs.background = "rgba(0,0,0,0.55)";
+    bs.display = "flex"; bs.alignItems = "center"; bs.justifyContent = "center";
+    bs.padding = "20px"; bs.boxSizing = "border-box";
+    bs.fontFamily = "system-ui,-apple-system,sans-serif";
+
+    /* Dialog box */
+    var dialog = document.createElement("div");
+    var ds = dialog.style;
+    ds.background = "#fff"; ds.borderRadius = "14px";
+    ds.boxShadow = "0 20px 60px rgba(0,0,0,0.4)";
+    ds.width = "min(980px,95vw)"; ds.maxHeight = "88vh";
+    ds.display = "flex"; ds.flexDirection = "column"; ds.overflow = "hidden";
+
+    /* Header */
+    var hdr = document.createElement("div");
+    var hs = hdr.style;
+    hs.padding = "16px 20px"; hs.borderBottom = "1px solid #e5e5e5";
+    hs.display = "flex"; hs.justifyContent = "space-between"; hs.alignItems = "center";
+    var title = document.createElement("div");
+    title.textContent = "Select Your Leather";
+    title.style.cssText = "font-size:18px;font-weight:700;color:#111";
+    var sub = document.createElement("div");
+    sub.textContent = "One leather applies to all seats";
+    sub.style.cssText = "font-size:13px;color:#666;margin-top:3px";
+    var titleWrap = document.createElement("div");
+    titleWrap.appendChild(title); titleWrap.appendChild(sub);
+    var closeBtn = document.createElement("button");
+    closeBtn.textContent = "✕";
+    closeBtn.style.cssText = "background:none;border:none;font-size:22px;cursor:pointer;color:#555;padding:4px 8px;line-height:1";
+    closeBtn.onclick = function() { backdrop.parentNode && backdrop.parentNode.removeChild(backdrop); };
+    hdr.appendChild(titleWrap); hdr.appendChild(closeBtn);
+
+    /* Scrollable body */
+    var body = document.createElement("div");
+    body.style.cssText = "overflow:auto;flex:1 1 auto;padding:16px 20px";
+
+    /* Grid */
+    var grid = document.createElement("div");
+    grid.style.cssText = "display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px";
+
+    syn.forEach(function(s) {
+      var wrow = wmRowForNativeValue(wm, s.value);
+      var nameLine = (wrow && ((wrow.family||"")+" "+(wrow.color||"")).trim()) || s.family || s.label;
+      nameLine = String(nameLine).replace(/\s+/g," ").trim();
+      var gradeRaw = (wrow && wrow.grade != null && String(wrow.grade)) || s.grade || "";
+      var gradeLine = "";
+      if (gradeRaw) {
+        gradeLine = /^base$/i.test(gradeRaw) ? "Grade 1000" : (/^grade\b/i.test(gradeRaw) ? gradeRaw : "Grade "+gradeRaw);
+      }
+      var mergedSw = (wrow && wrow.swatches) || s.swatches || [];
+      var imgUrl = pickFirstSwatchUrl({ swatches: mergedSw });
+
+      var card = document.createElement("button");
+      card.type = "button";
+      card.style.cssText = [
+        "display:flex","flex-direction:column","align-items:stretch",
+        "border:2px solid #ddd","border-radius:10px","background:#fff",
+        "padding:8px","cursor:pointer","text-align:left",
+        "font-family:inherit","font-size:12px","line-height:1.3",
+        "transition:border-color 0.15s"
+      ].join(";");
+
+      var thumb = document.createElement("div");
+      thumb.style.cssText = "width:100%;aspect-ratio:1;border-radius:7px;overflow:hidden;background:linear-gradient(135deg,#ede9e0,#d5cfc4);margin-bottom:7px;display:flex;align-items:center;justify-content:center";
+      if (imgUrl) {
+        var img = document.createElement("img");
+        img.src = imgUrl.indexOf("?") === -1 ? imgUrl+"?v="+IMG_V : imgUrl+"&v="+IMG_V;
+        img.alt = ""; img.loading = "lazy";
+        img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block";
+        thumb.appendChild(img);
+      } else {
+        thumb.style.fontSize = "10px"; thumb.style.color = "#888";
+        thumb.textContent = "Swatch";
+      }
+
+      var nameEl = document.createElement("div");
+      nameEl.textContent = nameLine || "Leather";
+      nameEl.style.cssText = "font-weight:600;color:#222;word-break:break-word";
+      var gradeEl = document.createElement("div");
+      gradeEl.textContent = gradeLine;
+      gradeEl.style.cssText = "font-size:11px;color:#777;margin-top:2px";
+
+      card.appendChild(thumb); card.appendChild(nameEl); card.appendChild(gradeEl);
+
+      card.onmouseenter = function() { card.style.borderColor = "#111"; };
+      card.onmouseleave = function() { card.style.borderColor = card.dataset.picked === "1" ? "#111" : "#ddd"; };
+
+      card.onclick = function() {
+        /* Clear picked state on siblings */
+        grid.querySelectorAll("button").forEach(function(b) {
+          b.style.borderColor = "#ddd"; b.dataset.picked = "0";
+        });
+        card.style.borderColor = "#111"; card.dataset.picked = "1";
+        leatherSel.value = s.value;
+        leatherSel.dispatchEvent(new Event("change", { bubbles: true }));
+        leatherSel.dispatchEvent(new Event("input", { bubbles: true }));
+        if (typeof jQuery !== "undefined") jQuery(leatherSel).trigger("change");
+        var lab = String(s.label || nameLine || "").replace(/\s+/g," ").trim();
+        ["wmSummary","mcLeatherSummary","wmPicked"].forEach(function(id) {
+          var el = document.getElementById(id); if (el) el.textContent = lab;
+        });
+        if (typeof window.mcRenderLeatherPreviewStrip === "function") window.mcRenderLeatherPreviewStrip();
+        if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
+        /* Close after short delay so user sees selection highlight */
+        window.setTimeout(function() {
+          backdrop.parentNode && backdrop.parentNode.removeChild(backdrop);
+          /* Also close the WM overlay if it somehow opened */
+          var wmOv = document.querySelector(".wm-overlay");
+          if (wmOv) wmOv.style.display = "none";
+        }, 220);
+      };
+
+      grid.appendChild(card);
+    });
+
+    body.appendChild(grid);
+
+    /* Footer */
+    var foot = document.createElement("div");
+    foot.style.cssText = "padding:14px 20px;border-top:1px solid #e5e5e5;display:flex;justify-content:flex-end;gap:10px";
+    var cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.style.cssText = "border:1px solid #ccc;background:#fff;border-radius:8px;padding:10px 20px;cursor:pointer;font-size:14px";
+    cancelBtn.onclick = function() { backdrop.parentNode && backdrop.parentNode.removeChild(backdrop); };
+    foot.appendChild(cancelBtn);
+
+    dialog.appendChild(hdr); dialog.appendChild(body); dialog.appendChild(foot);
+    backdrop.appendChild(dialog);
+    document.body.appendChild(backdrop);
+
+    /* Click outside to close */
+    backdrop.onclick = function(ev) { if (ev.target === backdrop) backdrop.parentNode && backdrop.parentNode.removeChild(backdrop); };
+
+    console.log("[MTL own picker] opened with", syn.length, "leather options");
+  }
+  window.mtlOpenOwnLeatherPicker = mtlOpenOwnLeatherPicker;
+
   function patchLeatherModalFallback(leatherSel) {
     if (!isSectionalProductPageClient()) return;
     if (document.documentElement.dataset.mtlWmModalFallbackPatched === "1") return;
     document.documentElement.dataset.mtlWmModalFallbackPatched = "1";
 
+    /* Intercept leather-button clicks in capture phase so we fire before the WM modal opens.
+       For sectional pages: open our own picker (immune to Volusion CSS) and suppress the WM modal. */
     document.addEventListener(
       "click",
       function (ev) {
         var t = ev.target;
         if (!t || !t.closest) return;
-        if (!t.closest("#wmOpen, #mcLeatherBtn, #mcLeatherHeader, #mcLeatherHeaderRow, .wm-btn")) return;
-        [0, 40, 120, 280, 520, 900, 1600].forEach(function (ms) {
-          window.setTimeout(function () {
-            fillLeatherModalFromNativeSelect(findNativeLeatherSelectEl() || leatherSel);
-          }, ms);
-        });
+        if (!t.closest("#mcLeatherBtn, #mcLeatherHeader, #mcLeatherHeaderRow")) return;
+        ev.stopPropagation();
+        ev.preventDefault();
+        mtlOpenOwnLeatherPicker();
+      },
+      true
+    );
+
+    /* Also intercept direct #wmOpen clicks (in case something bypasses mcLeatherBtn) */
+    document.addEventListener(
+      "click",
+      function (ev) {
+        var t = ev.target;
+        if (!t || !t.closest) return;
+        if (!t.closest("#wmOpen, .wm-btn")) return;
+        /* If our picker is already open, don't also open the WM modal */
+        if (document.getElementById("mtl-own-picker")) {
+          ev.stopPropagation();
+          ev.preventDefault();
+        }
       },
       true
     );
