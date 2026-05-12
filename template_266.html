@@ -2467,10 +2467,20 @@ function gradeHeaderText(g) {
 
 
   function isPlaceholderOption(opt){
-    const t = (opt.textContent || "").trim();
+    const t = (opt.textContent || "").replace(/\s+/g, " ").trim();
     const v = String(opt.value || "").trim();
     if (!t || !v) return true;
-    if (/choose|select|please select|--/i.test(t)) return true;
+    if (/^--+$|^[-–—]$/.test(t)) return true;
+    if (/\bplease\s+select\b/i.test(t)) return true;
+    if (/^choose\s*(\.\.\.|…)?$/i.test(t)) return true;
+    if (/^choose\s+(one|option|your|from|below)\b/i.test(t)) return true;
+    if (/^select\s*(\.\.\.|…)?$/i.test(t)) return true;
+    if (/^select\s+one\b/i.test(t)) return true;
+    if (/^select\s+from(\s+the)?\s+list\b/i.test(t)) return true;
+    if (/^select\s+a\s+(leather|cover|fabric|grade)\b/i.test(t)) return true;
+    if (/\bgrade\b|\bleather\b|\bfabric\b|\baniline\b|\bnubuck\b/i.test(t)) return false;
+    if (/\d/.test(t) && /[a-z]{2,}/i.test(t)) return false;
+    if (/^choose\b/i.test(t)) return t.length < 48;
     return false;
   }
 
@@ -19916,7 +19926,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-debug-20260516-leather-row-fix"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-debug-20260516-placeholder-unblock"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

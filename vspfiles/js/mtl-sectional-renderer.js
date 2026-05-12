@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-leather-row-fix";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-leather-row-fix");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-placeholder-unblock";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-placeholder-unblock");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -215,17 +215,53 @@
     }
   }
 
+  /** Row + associated <label for="…"> text for option-row heuristics (label is often outside the same <tr> Volusion prints). */
+  function getVolusionOptionRowContextLower(sel) {
+    var parts = [];
+    try {
+      var tr = sel.closest("tr");
+      var td = sel.closest("td");
+      if (tr) parts.push(String(tr.innerText || ""));
+      if (td) parts.push(String(td.innerText || ""));
+      if (sel.id) {
+        var idEsc =
+          typeof CSS !== "undefined" && typeof CSS.escape === "function"
+            ? CSS.escape(String(sel.id))
+            : String(sel.id).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+        var lab = document.querySelector('label[for="' + idEsc + '"]');
+        if (lab) parts.push(String(lab.textContent || ""));
+      }
+    } catch (eCtx) {}
+    return String(parts.join(" ")).toLowerCase().replace(/\s+/g, " ").trim();
+  }
+
   function findNativeLeatherSelectEl() {
     var configSel = null;
     try {
       configSel = findConfigurationSelect();
     } catch (eCfg) {}
 
-    var sels = Array.from(
+    var sels = [];
+    function pushUniqueSels(nodeList) {
+      var j;
+      for (j = 0; j < nodeList.length; j++) {
+        var node = nodeList[j];
+        if (!node || sels.indexOf(node) !== -1) continue;
+        sels.push(node);
+      }
+    }
+    pushUniqueSels(
       document.querySelectorAll(
         "#options_table select, #v65-product-parent select, #content_area table[id*='options_table'] select, table[id*='options_table'] select"
       )
     );
+    try {
+      var atcForm =
+        document.querySelector('form[action*="ProductDetails"]') ||
+        document.querySelector('form[action*="productdetails"]') ||
+        document.querySelector('form[action*="shoppingcart"]');
+      if (atcForm) pushUniqueSels(atcForm.querySelectorAll("select"));
+    } catch (eForm) {}
     var i;
     var m = document.querySelector("select.mc-native-leather");
     if (m && !isVolusionConfigurationRowSelect(m)) return m;
@@ -233,9 +269,7 @@
       var sel = sels[i];
       if (isVolusionConfigurationRowSelect(sel)) continue;
       if (configSel && sel === configSel) continue;
-      var rowText = "";
-      var tr = sel.closest("tr");
-      if (tr) rowText = String(tr.innerText || "").toLowerCase();
+      var rowText = getVolusionOptionRowContextLower(sel);
       if (
         sel.classList.contains("mc-native-leather") ||
         /(choose cover|choose leather|select leather|select a leather|select\s+a\s+leather|upholstery|cover|fabric|grade|swatch|palliser|material|color\s*choice)/i.test(
@@ -271,7 +305,7 @@
 
     if (!candidates.length) {
       var ot = document.querySelector(
-        "#v65-product-parent #options_table, #v65-product-parent table[id*='options_table'], #options_table, table[id*='options_table']"
+        "#v65-product-parent #options_table, #v65-product-parent table[id*='options_table'], #options_table, table[id*='options_table'], #content_area table[id*='options_table']"
       );
       if (ot) {
         var ordered = Array.from(ot.querySelectorAll("select"));
@@ -322,8 +356,7 @@
     }
 
     var scored = candidates.map(function (sel) {
-      var tr2 = sel.closest("tr");
-      var rt = tr2 ? String(tr2.innerText || "").toLowerCase() : "";
+      var rt = getVolusionOptionRowContextLower(sel);
       var score = realLeatherOptionCount(sel);
       if (/leather|cover|grade|fabric|upholstery|palliser|swatch|select\s+a|palette|color/.test(rt)) score += 100;
       return { sel: sel, score: score };
@@ -341,10 +374,20 @@
     if (!t || !v) return true;
     if (/^--+$|^[-–—]$/.test(t)) return true;
     if (/please\s+select/i.test(t)) return true;
-    if (/^choose\b/i.test(t)) return true;
     if (/^select\s*(\.\.\.|…)?$/i.test(t)) return true;
     if (/^select\s+one\b/i.test(t)) return true;
+    if (/^select\s+from(\s+the)?\s+list\b/i.test(t)) return true;
     if (/^select\s+a\s+(leather|cover|fabric|grade)\b/i.test(t)) return true;
+    if (/^choose\s*(\.\.\.|…)?$/i.test(t)) return true;
+    if (/^choose\s+(one|option|your|from|below)\b/i.test(t)) return true;
+    if (
+      /\bgrade\b|\bleather\b|\bfabric\b|\bnubuck\b|\baniline\b|\bvinyl\b|\bmicrofiber\b|\bchenille\b|\bvelvet\b|\bcowhide\b|\boucle\b|\bwool\b|\bfaux\b/i.test(
+        t
+      )
+    )
+      return false;
+    if (/\d/.test(t) && /[a-z]{2,}/i.test(t)) return false;
+    if (/^choose\b/i.test(t)) return t.length < 48;
     return false;
   }
 
@@ -434,6 +477,7 @@
 
   function ensureSectionalOptionsTableLeatherObserver() {
     if (!isSectionalProductPageClient()) return;
+    ensureSectionalV65LeatherObserver();
     if (document.documentElement.dataset.mtlOptsTblLeatherObs === "1") return;
     document.documentElement.dataset.mtlOptsTblLeatherObs = "1";
     var root = document.querySelector(
@@ -451,6 +495,26 @@
     try {
       obs.observe(root, { childList: true, subtree: true, attributes: true, characterData: true });
     } catch (eOb) {}
+  }
+
+  /** Volusion may inject the cover <select> after configuration changes outside #options_table; watch #v65-product-parent. */
+  function ensureSectionalV65LeatherObserver() {
+    if (!isSectionalProductPageClient()) return;
+    if (document.documentElement.dataset.mtlV65LeatherObs === "1") return;
+    document.documentElement.dataset.mtlV65LeatherObs = "1";
+    var root = document.getElementById("v65-product-parent");
+    if (!root || typeof MutationObserver === "undefined") return;
+    var deb = null;
+    var obs = new MutationObserver(function () {
+      if (deb) clearTimeout(deb);
+      deb = setTimeout(function () {
+        deb = null;
+        mtlSyncSectionalLeatherFromDom();
+      }, 220);
+    });
+    try {
+      obs.observe(root, { childList: true, subtree: true, attributes: true, characterData: true });
+    } catch (eV65) {}
   }
 
   function isWmOverlayVisible() {
