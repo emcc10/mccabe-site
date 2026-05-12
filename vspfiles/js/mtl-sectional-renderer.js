@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260514-leather-fallback";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260514-leather-fallback");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260515-leather-dom";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260515-leather-dom");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -242,10 +242,57 @@
       var id = String(sel.id || "").toLowerCase();
       var nm = String(sel.name || "").toLowerCase();
       if (/qty|quantity/.test(id + " " + nm)) return false;
-      return realLeatherOptionCount(sel) >= 1;
+      var real = realLeatherOptionCount(sel);
+      var optLen = sel.options ? sel.options.length : 0;
+      return real >= 1 || (optLen >= 2 && optLen <= 800);
     });
 
-    if (!candidates.length) return null;
+    if (!candidates.length) {
+      var ot = document.querySelector(
+        "#v65-product-parent #options_table, #v65-product-parent table[id*='options_table'], #options_table, table[id*='options_table']"
+      );
+      if (ot) {
+        var ordered = Array.from(ot.querySelectorAll("select"));
+        var nonCfgOrdered = ordered.filter(function (os) {
+          if (!os.options || os.options.length < 1) return false;
+          if (isVolusionConfigurationRowSelect(os)) return false;
+          if (configSel && os === configSel) return false;
+          var id2 = String(os.id || "").toLowerCase();
+          var nm2 = String(os.name || "").toLowerCase();
+          if (/qty|quantity/.test(id2 + " " + nm2)) return false;
+          return true;
+        });
+        if (nonCfgOrdered.length === 1) {
+          console.log("[MTL] findNativeLeatherSelectEl: options-table DOM order — sole non-config <select>");
+          return nonCfgOrdered[0];
+        }
+        if (nonCfgOrdered.length > 0 && configSel) {
+          var idxC = ordered.indexOf(configSel);
+          var pick = null;
+          var oi;
+          if (idxC !== -1) {
+            for (oi = 0; oi < ordered.length; oi++) {
+              if (oi <= idxC) continue;
+              var os3 = ordered[oi];
+              if (isVolusionConfigurationRowSelect(os3)) continue;
+              if (os3 === configSel) continue;
+              if (!os3.options || os3.options.length < 1) continue;
+              pick = os3;
+              break;
+            }
+          }
+          if (!pick) pick = nonCfgOrdered[0];
+          if (pick) {
+            console.log("[MTL] findNativeLeatherSelectEl: options-table DOM order — first <select> after configuration row");
+            return pick;
+          }
+        } else if (nonCfgOrdered.length > 0) {
+          console.log("[MTL] findNativeLeatherSelectEl: options-table DOM order — first non-config (no configSel match)");
+          return nonCfgOrdered[0];
+        }
+      }
+      return null;
+    }
 
     if (candidates.length === 1) {
       console.log("[MTL] findNativeLeatherSelectEl: sectional fallback — single non-config select");
@@ -267,10 +314,15 @@
   }
 
   function isPlaceholderLeatherOption(opt) {
-    var t = String(opt.textContent || "").trim();
+    var t = String(opt.textContent || "").replace(/\s+/g, " ").trim();
     var v = String(opt.value || "").trim();
     if (!t || !v) return true;
-    if (/choose|select|please select|^--|^-$/i.test(t)) return true;
+    if (/^--+$|^[-–—]$/.test(t)) return true;
+    if (/please\s+select/i.test(t)) return true;
+    if (/^choose\b/i.test(t)) return true;
+    if (/^select\s*(\.\.\.|…)?$/i.test(t)) return true;
+    if (/^select\s+one\b/i.test(t)) return true;
+    if (/^select\s+a\s+(leather|cover|fabric|grade)\b/i.test(t)) return true;
     return false;
   }
 
@@ -333,6 +385,50 @@
       document.dispatchEvent(new CustomEvent("wmLeatherOptionsReady", { bubbles: true }));
     } catch (eEvt) {}
     console.log("[MTL] __WM_LEATHER_OPTIONS__ set from native leather <select>, count=", syn.length);
+  }
+
+  function mtlSyncSectionalLeatherFromDom() {
+    if (!isSectionalProductPageClient()) return;
+    var le = findNativeLeatherSelectEl();
+    if (!le) return;
+    var syn = buildSyntheticWmLeatherOptionsFromSelect(le);
+    if (!syn.length) return;
+    ensureLeatherOptionsFromNativeSelect(le);
+    if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+    fillLeatherModalFromNativeSelect(le);
+    try {
+      __mtlDiag.leatherOpts = "YES";
+      var ws = document.getElementById("wmSections");
+      var nModal = ws ? ws.querySelectorAll(".mtl-leather-modal-card").length : 0;
+      __mtlDiag.leatherModal = nModal > 0 ? "YES" : "NO";
+      var strip = document.getElementById("mcLeatherSwatchStrip");
+      var nMini = strip ? strip.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length : 0;
+      __mtlDiag.miniSwatches = nMini > 0 ? "YES" : "NO";
+      mtlRefreshStageTrackerDom();
+    } catch (eDiag) {}
+    if (typeof window.mcRenderLeatherPreviewStrip === "function") window.mcRenderLeatherPreviewStrip();
+    if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
+  }
+
+  function ensureSectionalOptionsTableLeatherObserver() {
+    if (!isSectionalProductPageClient()) return;
+    if (document.documentElement.dataset.mtlOptsTblLeatherObs === "1") return;
+    document.documentElement.dataset.mtlOptsTblLeatherObs = "1";
+    var root = document.querySelector(
+      "#v65-product-parent #options_table, #v65-product-parent table[id*='options_table'], #options_table, table[id*='options_table']"
+    );
+    if (!root || typeof MutationObserver === "undefined") return;
+    var deb = null;
+    var obs = new MutationObserver(function () {
+      if (deb) clearTimeout(deb);
+      deb = setTimeout(function () {
+        deb = null;
+        mtlSyncSectionalLeatherFromDom();
+      }, 200);
+    });
+    try {
+      obs.observe(root, { childList: true, subtree: true, attributes: true, characterData: true });
+    } catch (eOb) {}
   }
 
   function isWmOverlayVisible() {
@@ -1390,6 +1486,7 @@
     [250, 800, 1500].forEach(function (ms) {
       setTimeout(function () {
         if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+        mtlSyncSectionalLeatherFromDom();
         updateProductSummary();
       }, ms);
     });
@@ -1465,6 +1562,7 @@
         window.setTimeout(function () {
           syncCardsSelectionHighlight();
           if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+          mtlSyncSectionalLeatherFromDom();
           updateProductSummary();
         }, 0);
         scheduleProductSummaryAfterConfigChange();
@@ -1691,16 +1789,15 @@
         });
         console.log("[MTL] native leather <select> option count:", leatherSelNow.options.length);
         console.log("[MTL] native leather <select> options:", texts);
-        var realCt = texts.filter(function (t) {
-          return t && !/^choose|^select|please select|^--|^-$/i.test(t);
-        }).length;
-        __mtlDiag.leatherOpts = realCt > 0 ? "YES" : "NO";
+        var synDiag = buildSyntheticWmLeatherOptionsFromSelect(leatherSelNow);
+        __mtlDiag.leatherOpts = synDiag.length > 0 ? "YES" : "NO";
       } else {
         console.log("[MTL] native leather <select>: null or empty");
         __mtlDiag.leatherOpts = "NO";
       }
       mtlRefreshStageTrackerDom();
       ensureLeatherOptionsFromNativeSelect(leatherSelNow);
+      ensureSectionalOptionsTableLeatherObserver();
     });
 
     mtlRunStagePanel("finalize: leather modal", "leatherModal", function () {
