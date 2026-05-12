@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-modal-inspect";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-modal-inspect");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-modal-sync";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-modal-sync");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -615,8 +615,9 @@
   function injectSectionalNativeLeatherModal(leatherSel) {
     try {
       if (!isSectionalProductPageClient() || !leatherSel) return 0;
-      if (!document.querySelector(".wm-overlay")) {
-        console.warn("[MTL leather modal] .wm-overlay not in DOM — skip inject");
+      /* Allow inject even when overlay is not yet visible (called synchronously before display:flex is set). */
+      if (!document.querySelector(".wm-overlay") && !document.getElementById("wmSections")) {
+        console.warn("[MTL leather modal] neither .wm-overlay nor #wmSections in DOM — skip inject");
         return 0;
       }
       var ws = document.getElementById("wmSections");
@@ -624,6 +625,16 @@
       console.warn("[MTL leather modal] #wmSections not found");
       return 0;
     }
+    /* Ensure modal body has minimum height so flexbox doesn't collapse it while we inject. */
+    try {
+      var mb = ws.closest(".wm-modal-body");
+      if (mb && !mb.dataset.mtlMinH) {
+        mb.dataset.mtlMinH = "1";
+        mb.style.setProperty("min-height", "200px", "important");
+        mb.style.setProperty("flex", "1 1 auto", "important");
+        mb.style.setProperty("overflow", "auto", "important");
+      }
+    } catch (eMb) {}
     var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
     if (!syn.length) {
       console.warn("[MTL leather modal] no leather options on native <select>");
