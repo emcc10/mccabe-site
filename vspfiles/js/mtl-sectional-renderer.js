@@ -5,7 +5,7 @@
 (function () {
   "use strict";
 
-  var IMG_V = "sectional-leather-20260512-swatch-cascade2";
+  var IMG_V = "sectional-leather-20260512-theater-match";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -809,9 +809,64 @@
   }
 
   /* ── MTL Own Leather Picker ─────────────────────────────────────────────
-   * Completely bypasses the WM modal and its problematic CSS.
-   * Opens a self-contained overlay built entirely with inline styles.
+   * Matches the theater seating leather picker exactly:
+   *   • Swatches tab with grade rows + zoom (+) buttons
+   *   • Leather Information tab with family descriptions/flags
+   *   • Preview overlay, footer with Apply/Cancel
+   *   • Cascade swatch URL loading (same as mini-swatches)
    * ──────────────────────────────────────────────────────────────────────── */
+
+  function buildSwatchUrls(family, color) {
+    var f = String(family || "").trim();
+    var c = String(color  || "").trim();
+    if (!f) return [];
+    var names = [];
+    function slug(x){ return String(x||"").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,""); }
+    function add(a, b){
+      if (b !== undefined && b !== "") {
+        names.push(a + " " + b);
+        names.push(a.toLowerCase() + " " + b.toLowerCase());
+        names.push(a + "_" + b);
+        names.push(a + "-" + b);
+        names.push(slug(a) + "-" + slug(b));
+        names.push(slug(a) + "_" + slug(b));
+      } else {
+        names.push(a);
+        names.push(a.toLowerCase());
+        names.push(slug(a));
+      }
+    }
+    var fNP = f.replace(/\s*\([^)]*\)\s*/g," ").replace(/\s+/g," ").trim();
+    var cNP = c.replace(/\s*\([^)]*\)\s*/g," ").replace(/\s+/g," ").trim();
+    var fA  = f.replace(/\s*&\s*/g," and ");
+    var cA  = c.replace(/\s*&\s*/g," and ");
+    var cvars = [c];
+    if (/\bgrey\b/i.test(c)) cvars.push(c.replace(/\bgrey\b/gi,"gray"));
+    if (/\bgray\b/i.test(c)) cvars.push(c.replace(/\bgray\b/gi,"grey"));
+    if (/\begg\s+shell\b/i.test(c)) cvars.push(c.replace(/\begg\s+shell\b/gi,"eggshell"));
+    if (f && c) {
+      add(f, c);
+      cvars.forEach(function(cv){ if (cv !== c) add(f, cv); });
+      if (c !== c.toUpperCase()) add(f, c.toUpperCase());
+      if (fA !== f || cA !== c) add(fA, cA);
+      if (fNP !== f || cNP !== c) add(fNP, cNP);
+    } else {
+      add(f, "");
+      if (fNP !== f) add(fNP, "");
+    }
+    var out = []; var seen = {};
+    var exts = [".jpg",".jpeg",".png",".webp"];
+    ["/v/vspfiles/swatches/","/vspfiles/swatches/"].forEach(function(base){
+      names.forEach(function(n){
+        exts.forEach(function(ext){
+          var url = base + encodeURIComponent(n + ext);
+          if (!seen[url]){ seen[url]=true; out.push(url); }
+        });
+      });
+    });
+    return out;
+  }
+
   function mtlOpenOwnLeatherPicker() {
     if (!isSectionalProductPageClient()) return;
     var leatherSel = findNativeLeatherSelectEl();
@@ -819,210 +874,251 @@
     var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
     if (!syn.length) { console.warn("[MTL picker] no leather options"); return; }
 
-    /* Remove any existing picker */
     var old = document.getElementById("mtl-own-picker");
     if (old) old.parentNode.removeChild(old);
+    var oldPrev = document.getElementById("mtl-own-preview");
+    if (oldPrev) oldPrev.parentNode.removeChild(oldPrev);
 
     var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
+    var LEATHER_INFO = window.__MTL_LEATHER_INFO__ || {};
+    var GRADE_UP = window.__MTL_GRADE_UPCHARGE__ || { "2000": 99, "3000": 149 };
 
-    /* Overlay backdrop */
-    var backdrop = document.createElement("div");
-    backdrop.id = "mtl-own-picker";
-    var bs = backdrop.style;
-    bs.position = "fixed"; bs.inset = "0"; bs.zIndex = "2147483647";
-    bs.background = "rgba(0,0,0,0.55)";
-    bs.display = "flex"; bs.alignItems = "center"; bs.justifyContent = "center";
-    bs.padding = "20px"; bs.boxSizing = "border-box";
-    bs.fontFamily = "system-ui,-apple-system,sans-serif";
+    function gradeLabel(g){
+      if (!g || /^base$/i.test(g)) return "Grade 1000";
+      var amt = GRADE_UP[String(g)];
+      return amt ? "Grade " + g + " (+$" + amt + "/seat)" : "Grade " + g;
+    }
+    function escHtml(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
-    /* Dialog box */
-    var dialog = document.createElement("div");
-    var ds = dialog.style;
-    ds.background = "#fff"; ds.borderRadius = "14px";
-    ds.boxShadow = "0 20px 60px rgba(0,0,0,0.4)";
-    ds.width = "min(980px,95vw)"; ds.maxHeight = "88vh";
-    ds.display = "flex"; ds.flexDirection = "column"; ds.overflow = "hidden";
-
-    /* Header */
-    var hdr = document.createElement("div");
-    var hs = hdr.style;
-    hs.padding = "16px 20px"; hs.borderBottom = "1px solid #e5e5e5";
-    hs.display = "flex"; hs.justifyContent = "space-between"; hs.alignItems = "center";
-    var title = document.createElement("div");
-    title.textContent = "Select Your Leather";
-    title.style.cssText = "font-size:18px;font-weight:700;color:#111";
-    var sub = document.createElement("div");
-    sub.textContent = "One leather applies to all seats";
-    sub.style.cssText = "font-size:13px;color:#666;margin-top:3px";
-    var titleWrap = document.createElement("div");
-    titleWrap.appendChild(title); titleWrap.appendChild(sub);
-    var closeBtn = document.createElement("button");
-    closeBtn.textContent = "✕";
-    closeBtn.style.cssText = "background:none;border:none;font-size:22px;cursor:pointer;color:#555;padding:4px 8px;line-height:1";
-    closeBtn.onclick = function() { backdrop.parentNode && backdrop.parentNode.removeChild(backdrop); };
-    hdr.appendChild(titleWrap); hdr.appendChild(closeBtn);
-
-    /* Scrollable body */
-    var body = document.createElement("div");
-    body.style.cssText = "overflow:auto;flex:1 1 auto;padding:16px 20px";
-
-    /* Grid */
-    var grid = document.createElement("div");
-    grid.style.cssText = "display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px";
-
-    syn.forEach(function(s) {
+    /* Build enriched option list */
+    var all = [];
+    syn.forEach(function(s){
       var wrow = wmRowForNativeValue(wm, s.value);
-      var nameLine = (wrow && ((wrow.family||"")+" "+(wrow.color||"")).trim()) || s.family || s.label;
-      nameLine = String(nameLine).replace(/\s+/g," ").trim();
-      var gradeRaw = (wrow && wrow.grade != null && String(wrow.grade)) || s.grade || "";
-      var gradeLine = "";
-      if (gradeRaw) {
-        gradeLine = /^base$/i.test(gradeRaw) ? "Grade 1000" : (/^grade\b/i.test(gradeRaw) ? gradeRaw : "Grade "+gradeRaw);
-      }
-      /* Build candidate swatch URLs using the same cascade logic as the theater seating mini-swatches */
-      var swFamily = (wrow && wrow.family) || s.family || "";
-      var swColor  = (wrow && wrow.color)  || "";
-      var swUrls   = (function(f, c){
-        if (!f) return [];
-        var names = [];
-        function slugSw(x){ return String(x||"").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,""); }
-        function addSw(a, b){
-          if (b !== undefined && b !== "") {
-            names.push(a + " " + b);
-            names.push(a.toLowerCase() + " " + b.toLowerCase());
-            names.push(a + "_" + b);
-            names.push(a + "-" + b);
-            names.push(slugSw(a) + "-" + slugSw(b));
-            names.push(slugSw(a) + "_" + slugSw(b));
-          } else {
-            names.push(a);
-            names.push(a.toLowerCase());
-            names.push(slugSw(a));
-          }
-        }
-        var fNoParen = f.replace(/\s*\([^)]*\)\s*/g," ").replace(/\s+/g," ").trim();
-        var cNoParen = c.replace(/\s*\([^)]*\)\s*/g," ").replace(/\s+/g," ").trim();
-        var fAnd = f.replace(/\s*&\s*/g," and "); var cAnd = c.replace(/\s*&\s*/g," and ");
-        var colorVariants = [c];
-        if (/\bgrey\b/i.test(c)) colorVariants.push(c.replace(/\bgrey\b/gi,"gray"));
-        if (/\bgray\b/i.test(c)) colorVariants.push(c.replace(/\bgray\b/gi,"grey"));
-        if (/\begg\s+shell\b/i.test(c)) colorVariants.push(c.replace(/\begg\s+shell\b/gi,"eggshell"));
-        if (f && c) {
-          addSw(f, c);
-          colorVariants.forEach(function(cv){ if (cv !== c) addSw(f, cv); });
-          if (c !== c.toUpperCase()) addSw(f, c.toUpperCase());
-          if (fAnd !== f || cAnd !== c) addSw(fAnd, cAnd);
-          if (fNoParen !== f || cNoParen !== c) addSw(fNoParen, cNoParen);
-        } else {
-          addSw(f, "");
-          if (fNoParen !== f) addSw(fNoParen, "");
-        }
-        var out = []; var seen = {};
-        var exts = [".jpg",".jpeg",".png",".webp"];
-        var bases = ["/v/vspfiles/swatches/","/vspfiles/swatches/"];
-        bases.forEach(function(base){
-          names.forEach(function(n){
-            exts.forEach(function(ext){
-              var url = base + encodeURIComponent(n + ext);
-              if (!seen[url]){ seen[url]=true; out.push(url); }
-            });
-          });
-        });
-        return out;
-      })(swFamily, swColor);
-
-      var card = document.createElement("button");
-      card.type = "button";
-      card.style.cssText = [
-        "display:flex","flex-direction:column","align-items:stretch",
-        "border:2px solid #ddd","border-radius:10px","background:#fff",
-        "padding:8px","cursor:pointer","text-align:left",
-        "font-family:inherit","font-size:12px","line-height:1.3",
-        "transition:border-color 0.15s"
-      ].join(";");
-
-      var thumb = document.createElement("div");
-      thumb.style.cssText = "width:100%;aspect-ratio:1/1;border-radius:7px;overflow:hidden;background:linear-gradient(135deg,#ede9e0,#d5cfc4);margin-bottom:7px;display:flex;align-items:center;justify-content:center";
-
-      var img = document.createElement("img");
-      img.alt = ""; img.loading = "lazy";
-      img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 0.2s";
-      /* Cascade through candidate URLs exactly like the theater seating mini-swatches */
-      (function(imgEl, urls){
-        var idx = 0;
-        function tryNext(){
-          if (idx >= urls.length) {
-            imgEl.style.display = "none"; /* no image found — show beige background only */
-            return;
-          }
-          var url = urls[idx++];
-          imgEl.onerror = function(){ if (imgEl.naturalWidth === 0) tryNext(); };
-          imgEl.onload  = function(){ imgEl.style.opacity = "1"; };
-          imgEl.src = url;
-        }
-        tryNext();
-      })(img, swUrls);
-      thumb.appendChild(img);
-
-      var nameEl = document.createElement("div");
-      nameEl.textContent = nameLine || "Leather";
-      nameEl.style.cssText = "font-weight:600;color:#222;word-break:break-word";
-      var gradeEl = document.createElement("div");
-      gradeEl.textContent = gradeLine;
-      gradeEl.style.cssText = "font-size:11px;color:#777;margin-top:2px";
-
-      card.appendChild(thumb); card.appendChild(nameEl); card.appendChild(gradeEl);
-
-      card.onmouseenter = function() { card.style.borderColor = "#111"; };
-      card.onmouseleave = function() { card.style.borderColor = card.dataset.picked === "1" ? "#111" : "#ddd"; };
-
-      card.onclick = function() {
-        /* Clear picked state on siblings */
-        grid.querySelectorAll("button").forEach(function(b) {
-          b.style.borderColor = "#ddd"; b.dataset.picked = "0";
-        });
-        card.style.borderColor = "#111"; card.dataset.picked = "1";
-        leatherSel.value = s.value;
-        leatherSel.dispatchEvent(new Event("change", { bubbles: true }));
-        leatherSel.dispatchEvent(new Event("input", { bubbles: true }));
-        if (typeof jQuery !== "undefined") jQuery(leatherSel).trigger("change");
-        var lab = String(s.label || nameLine || "").replace(/\s+/g," ").trim();
-        ["wmSummary","mcLeatherSummary","wmPicked"].forEach(function(id) {
-          var el = document.getElementById(id); if (el) el.textContent = lab;
-        });
-        if (typeof window.mcRenderLeatherPreviewStrip === "function") window.mcRenderLeatherPreviewStrip();
-        if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
-        /* Close after short delay so user sees selection highlight */
-        window.setTimeout(function() {
-          backdrop.parentNode && backdrop.parentNode.removeChild(backdrop);
-          /* Also close the WM overlay if it somehow opened */
-          var wmOv = document.querySelector(".wm-overlay");
-          if (wmOv) wmOv.style.display = "none";
-        }, 220);
-      };
-
-      grid.appendChild(card);
+      var family   = (wrow && wrow.family) || s.family || "";
+      var color    = (wrow && wrow.color)  || "";
+      var gradeRaw = (wrow && wrow.grade != null ? String(wrow.grade) : "") || s.grade || "Base";
+      var nameLine = (family + (color ? " " + color : "")).trim() || s.label || "";
+      nameLine = nameLine.replace(/\s+/g," ").trim();
+      all.push({ family: family, color: color, grade: gradeRaw, value: s.value, label: s.label, nameLine: nameLine, swatches: buildSwatchUrls(family, color) });
     });
 
-    body.appendChild(grid);
+    /* Group by grade, sorted */
+    var grades = []; var byGrade = {};
+    all.forEach(function(o){
+      var g = o.grade || "Base";
+      if (!byGrade[g]){ grades.push(g); byGrade[g] = []; }
+      byGrade[g].push(o);
+    });
+    grades.sort(function(a,b){
+      function gk(g){ if (!g||/^base$/i.test(g)) return 0; var n=parseInt(g,10); return isNaN(n)?9999:n; }
+      return gk(a)-gk(b);
+    });
+
+    /* State */
+    var picked = null; var pickedTile = null;
+    var curVal = leatherSel.value;
+    for (var ai=0; ai<all.length; ai++){ if (String(all[ai].value)===String(curVal)){ picked=all[ai]; break; } }
+
+    /* ── DOM ── */
+
+    /* Backdrop */
+    var backdrop = document.createElement("div");
+    backdrop.id = "mtl-own-picker";
+    backdrop.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:2147483647;padding:18px;box-sizing:border-box";
+    backdrop.onclick = function(ev){ if (ev.target===backdrop) closePicker(); };
+
+    /* Modal (reuse .wm-modal CSS from template) */
+    var modal = document.createElement("div");
+    modal.className = "wm-modal";
+
+    /* Header */
+    var modalHdr = document.createElement("div"); modalHdr.className = "wm-modal-header";
+    var titleWrap = document.createElement("div");
+    var titleEl = document.createElement("div"); titleEl.className = "wm-modal-title"; titleEl.textContent = "Select Your Leather";
+    var subEl   = document.createElement("div"); subEl.className   = "wm-modal-sub";   subEl.textContent   = "One leather applies to all seats";
+    titleWrap.appendChild(titleEl); titleWrap.appendChild(subEl);
+    var closeBtn = document.createElement("button");
+    closeBtn.type="button"; closeBtn.className="wm-close"; closeBtn.innerHTML="&times;"; closeBtn.setAttribute("aria-label","Close");
+    closeBtn.onclick = function(){ closePicker(); };
+    modalHdr.appendChild(titleWrap); modalHdr.appendChild(closeBtn);
+
+    /* Tabs */
+    var tabsEl = document.createElement("div"); tabsEl.className = "wm-tabs";
+    var tabSwBtn = document.createElement("button"); tabSwBtn.type="button"; tabSwBtn.className="wm-tab"; tabSwBtn.textContent="Swatches"; tabSwBtn.dataset.active="1";
+    var tabInBtn = document.createElement("button"); tabInBtn.type="button"; tabInBtn.className="wm-tab"; tabInBtn.textContent="Leather Information"; tabInBtn.dataset.active="0";
+    tabsEl.appendChild(tabSwBtn); tabsEl.appendChild(tabInBtn);
+
+    /* Body */
+    var bodyEl = document.createElement("div"); bodyEl.className = "wm-modal-body";
+    var panelSw = document.createElement("div"); panelSw.className="wm-tabpanel"; panelSw.dataset.active="1";
+    var panelIn = document.createElement("div"); panelIn.className="wm-tabpanel"; panelIn.dataset.active="0";
+    var infoGradeHdr = document.createElement("div"); infoGradeHdr.className="wm-infoGradeHeader";
+    var infoList     = document.createElement("div"); infoList.className="wm-info-list";
+    panelIn.appendChild(infoGradeHdr); panelIn.appendChild(infoList);
+    bodyEl.appendChild(panelSw); bodyEl.appendChild(panelIn);
 
     /* Footer */
-    var foot = document.createElement("div");
-    foot.style.cssText = "padding:14px 20px;border-top:1px solid #e5e5e5;display:flex;justify-content:flex-end;gap:10px";
-    var cancelBtn = document.createElement("button");
-    cancelBtn.textContent = "Cancel";
-    cancelBtn.style.cssText = "border:1px solid #ccc;background:#fff;border-radius:8px;padding:10px 20px;cursor:pointer;font-size:14px";
-    cancelBtn.onclick = function() { backdrop.parentNode && backdrop.parentNode.removeChild(backdrop); };
-    foot.appendChild(cancelBtn);
+    var footEl = document.createElement("div"); footEl.className = "wm-modal-footer";
+    var pickedLabel = document.createElement("div");
+    pickedLabel.textContent = picked ? (picked.nameLine || picked.label || "No selection") : "No selection";
+    var footRight = document.createElement("div");
+    var cancelSpan = document.createElement("span"); cancelSpan.className="wm-cancel"; cancelSpan.textContent="Cancel";
+    cancelSpan.onclick = function(){ closePicker(); };
+    var applyBtn = document.createElement("button"); applyBtn.type="button"; applyBtn.className="wm-apply"; applyBtn.textContent="Apply";
+    applyBtn.onclick = function(){ applyPicked(); };
+    footRight.appendChild(cancelSpan); footRight.appendChild(applyBtn);
+    footEl.appendChild(pickedLabel); footEl.appendChild(footRight);
 
-    dialog.appendChild(hdr); dialog.appendChild(body); dialog.appendChild(foot);
-    backdrop.appendChild(dialog);
+    /* Preview overlay */
+    var previewEl = document.createElement("div");
+    previewEl.id = "mtl-own-preview";
+    previewEl.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:2147483648;padding:18px;box-sizing:border-box";
+    previewEl.innerHTML =
+      '<div style="width:min(720px,92vw);background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #eee;font-size:14px;font-weight:600">' +
+          '<span id="mtl-preview-title">Leather preview</span>' +
+          '<button type="button" id="mtl-preview-close" style="border:0;background:none;font-size:22px;cursor:pointer;line-height:1">&times;</button>' +
+        '</div>' +
+        '<div style="padding:14px"><img id="mtl-preview-img" style="width:100%;height:auto;display:block;border-radius:12px;border:1px solid #eee" alt="Swatch preview"/></div>' +
+      '</div>';
+    previewEl.onclick = function(ev){ if (ev.target===previewEl) previewEl.style.display="none"; };
+    var prevImg=null, prevTitle=null;
+    function openPreview(name, src){
+      if (!src) return;
+      if (!prevImg){ prevImg=previewEl.querySelector("#mtl-preview-img"); prevTitle=previewEl.querySelector("#mtl-preview-title"); previewEl.querySelector("#mtl-preview-close").onclick=function(){ previewEl.style.display="none"; }; }
+      prevTitle.textContent = name||"Leather preview";
+      prevImg.src = src;
+      previewEl.style.display = "flex";
+    }
+
+    /* Tab switching */
+    var lastInfoGrade = null;
+    function setTab(which){
+      var sw = (which==="swatches");
+      tabSwBtn.dataset.active = sw?"1":"0"; tabInBtn.dataset.active = sw?"0":"1";
+      panelSw.dataset.active  = sw?"1":"0"; panelIn.dataset.active  = sw?"0":"1";
+      if (!sw) renderGradeInfo(lastInfoGrade||(grades[0]||"Base"));
+    }
+    tabSwBtn.onclick = function(e){ e.preventDefault(); setTab("swatches"); };
+    tabInBtn.onclick = function(e){ e.preventDefault(); setTab("info"); };
+
+    /* Leather Information renderer */
+    function renderGradeInfo(g){
+      lastInfoGrade = g;
+      var famNames=[]; var seen={};
+      (byGrade[g]||[]).forEach(function(o){ if (o.family && !seen[o.family]){ seen[o.family]=true; famNames.push(o.family); } });
+      famNames.sort(function(a,b){ return a.localeCompare(b,undefined,{sensitivity:"base"}); });
+      infoGradeHdr.textContent = gradeLabel(g) + "   Leather Information";
+      infoList.innerHTML = "";
+      if (!famNames.length){ infoList.innerHTML='<div class="wm-info-card">No info available for this grade.</div>'; return; }
+      famNames.forEach(function(fam){
+        var info = LEATHER_INFO[fam];
+        var card = document.createElement("div"); card.className="wm-info-card";
+        if (!info){ card.innerHTML="<h4>"+escHtml(fam)+"</h4><div class='wm-info-desc'>Details coming soon.</div>"; infoList.appendChild(card); return; }
+        card.innerHTML =
+          "<h4>"+escHtml(fam)+"</h4>"+
+          "<div class='wm-info-desc'>"+escHtml(info.description||"")+"</div>"+
+          "<div class='wm-info-meta'>"+
+            "<div><b>Available With Match</b><br>"+escHtml(info.match||"")+"</div><br>"+
+            "<div><b>Thickness</b><br>"+escHtml(info.thickness||"")+"</div><br>"+
+            "<div><b>Finish Type</b><br>"+escHtml(info.finishType||"")+"</div><br>"+
+            "<div><b>Corrected</b><br>"+escHtml(info.corrected||"")+"</div><br>"+
+            "<div><b>Country of Origin</b><br>"+escHtml(info.origin||"")+"</div>"+
+          "</div>"+
+          (info.flags||[]).map(function(fl){ return "<div class='wm-info-flag'><b>"+escHtml(fl.k)+"</b><div class='d'>"+escHtml(fl.v)+"</div></div>"; }).join("");
+        infoList.appendChild(card);
+      });
+    }
+
+    /* Tile builder (matches .wm-tile / .wm-swatch structure) */
+    function buildTile(o){
+      var tile = document.createElement("button");
+      tile.type="button"; tile.className="wm-tile";
+      tile.dataset.selected = (picked && picked.value===o.value) ? "1":"0";
+
+      var sw = document.createElement("div"); sw.className="wm-swatch";
+      var img = document.createElement("img"); img.alt=""; img.loading="lazy";
+      (function(imgEl, urls){
+        var idx=0;
+        function tryNext(){
+          if (idx>=urls.length){ imgEl.removeAttribute("src"); return; }
+          var url=urls[idx++];
+          imgEl.onerror=function(){ if (imgEl.naturalWidth===0) tryNext(); };
+          imgEl.src=url;
+        }
+        tryNext();
+      })(img, o.swatches);
+      sw.appendChild(img);
+
+      var zoom = document.createElement("button");
+      zoom.type="button"; zoom.className="wm-zoom"; zoom.textContent="+"; zoom.title="View larger";
+
+      var nameEl = document.createElement("div"); nameEl.className="wm-name";
+      nameEl.textContent = o.nameLine || "(Unnamed)";
+
+      tile.appendChild(sw); tile.appendChild(zoom); tile.appendChild(nameEl);
+
+      tile.onclick = function(e){
+        e.preventDefault();
+        if (pickedTile) pickedTile.dataset.selected="0";
+        tile.dataset.selected="1"; pickedTile=tile; picked=o;
+        pickedLabel.textContent = o.nameLine||o.label||"";
+      };
+      zoom.onclick = function(e){
+        e.preventDefault(); e.stopPropagation();
+        openPreview(o.nameLine, img.currentSrc||img.src);
+      };
+
+      if (tile.dataset.selected==="1") pickedTile=tile;
+      return tile;
+    }
+
+    /* Build swatch tab content */
+    var frag = document.createDocumentFragment();
+    grades.forEach(function(g){
+      var row = document.createElement("div"); row.className="wm-grade-row";
+      var titleDiv = document.createElement("div"); titleDiv.className="wm-grade-title"; titleDiv.textContent=gradeLabel(g);
+      var infoBtn  = document.createElement("button"); infoBtn.type="button"; infoBtn.className="wm-grade-infoBtn"; infoBtn.textContent="Leather Information";
+      infoBtn.onclick = function(e){ e.preventDefault(); e.stopPropagation(); lastInfoGrade=g; setTab("info"); };
+      row.appendChild(titleDiv); row.appendChild(infoBtn); frag.appendChild(row);
+
+      var grid = document.createElement("div"); grid.className="wm-grid";
+      var list = (byGrade[g]||[]).slice().sort(function(a,b){
+        var af=(a.family||"").localeCompare(b.family||"",undefined,{sensitivity:"base"});
+        return af||(a.color||"").localeCompare(b.color||"",undefined,{sensitivity:"base"});
+      });
+      list.forEach(function(o){ grid.appendChild(buildTile(o)); });
+      frag.appendChild(grid);
+    });
+    panelSw.appendChild(frag);
+
+    /* Apply / close */
+    function applyPicked(){
+      if (picked){
+        leatherSel.value = picked.value;
+        leatherSel.dispatchEvent(new Event("change",{bubbles:true}));
+        leatherSel.dispatchEvent(new Event("input",{bubbles:true}));
+        if (typeof jQuery!=="undefined") jQuery(leatherSel).trigger("change");
+        var lab = String(picked.nameLine||picked.label||"").replace(/\s+/g," ").trim();
+        ["wmSummary","mcLeatherSummary","wmPicked"].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=lab; });
+        if (typeof window.mcRenderLeatherPreviewStrip==="function") window.mcRenderLeatherPreviewStrip();
+        if (typeof window.mcSyncLeatherSummary==="function") window.mcSyncLeatherSummary();
+      }
+      closePicker();
+    }
+    function closePicker(){
+      if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
+      if (previewEl.parentNode) previewEl.parentNode.removeChild(previewEl);
+      var wmOv=document.querySelector(".wm-overlay"); if (wmOv) wmOv.style.display="none";
+    }
+
+    /* Assemble */
+    modal.appendChild(modalHdr); modal.appendChild(tabsEl); modal.appendChild(bodyEl); modal.appendChild(footEl);
+    backdrop.appendChild(modal);
+    document.body.appendChild(previewEl);
     document.body.appendChild(backdrop);
 
-    /* Click outside to close */
-    backdrop.onclick = function(ev) { if (ev.target === backdrop) backdrop.parentNode && backdrop.parentNode.removeChild(backdrop); };
-
-    console.log("[MTL own picker] opened with", syn.length, "leather options");
+    console.log("[MTL own picker] opened with", all.length, "leathers,", grades.length, "grade(s)");
   }
   window.mtlOpenOwnLeatherPicker = mtlOpenOwnLeatherPicker;
 
@@ -1031,14 +1127,20 @@
     if (document.documentElement.dataset.mtlWmModalFallbackPatched === "1") return;
     document.documentElement.dataset.mtlWmModalFallbackPatched = "1";
 
-    /* Intercept leather-button clicks in capture phase so we fire before the WM modal opens.
-       For sectional pages: open our own picker (immune to Volusion CSS) and suppress the WM modal. */
+    /* Override mcOpenWmLeatherModal so mini-swatch clicks open our picker instead of the WM modal */
+    window.mcOpenWmLeatherModal = function(ev) {
+      if (ev && ev.preventDefault) ev.preventDefault();
+      if (ev && ev.stopPropagation) ev.stopPropagation();
+      mtlOpenOwnLeatherPicker();
+    };
+
+    /* Intercept leather-button clicks in capture phase (covers mcLeatherBtn, header, etc.) */
     document.addEventListener(
       "click",
       function (ev) {
         var t = ev.target;
         if (!t || !t.closest) return;
-        if (!t.closest("#mcLeatherBtn, #mcLeatherHeader, #mcLeatherHeaderRow")) return;
+        if (!t.closest("#mcLeatherBtn, #mcLeatherHeader, #mcLeatherHeaderRow, .mc-mini-swatch, .mc-leather-mini-swatch")) return;
         ev.stopPropagation();
         ev.preventDefault();
         mtlOpenOwnLeatherPicker();
@@ -1046,18 +1148,16 @@
       true
     );
 
-    /* Also intercept direct #wmOpen clicks (in case something bypasses mcLeatherBtn) */
+    /* Also intercept direct #wmOpen / .wm-btn clicks — always open our picker, never the WM modal */
     document.addEventListener(
       "click",
       function (ev) {
         var t = ev.target;
         if (!t || !t.closest) return;
         if (!t.closest("#wmOpen, .wm-btn")) return;
-        /* If our picker is already open, don't also open the WM modal */
-        if (document.getElementById("mtl-own-picker")) {
-          ev.stopPropagation();
-          ev.preventDefault();
-        }
+        ev.stopPropagation();
+        ev.preventDefault();
+        mtlOpenOwnLeatherPicker();
       },
       true
     );

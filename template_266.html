@@ -2355,6 +2355,9 @@ function gradeHeaderText(g) {
     ]
   }
 };
+/* Expose leather info so the sectional renderer can populate its Leather Information tab */
+window.__MTL_LEATHER_INFO__ = LEATHER_INFO;
+window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
 
 
   function esc(s){
@@ -19948,7 +19951,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260512-swatch-cascade2"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260512-theater-match"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
