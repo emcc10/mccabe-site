@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-display-force";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-display-force");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-loop-fix";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-loop-fix");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -562,7 +562,11 @@
       if (!ws || ws.dataset.mtlFallbackObs === "1") return;
       ws.dataset.mtlFallbackObs = "1";
       var obs = new MutationObserver(function () {
-        if (!document.querySelector(".wm-overlay")) return;
+        /* Only act when the overlay is actually open (display:flex), not just present in the DOM. */
+        var ov = document.querySelector(".wm-overlay");
+        if (!ov) return;
+        var ovDisplay = (ov.style && ov.style.display) || window.getComputedStyle(ov).display;
+        if (ovDisplay !== "flex") return;
         scheduleFillFromMutation();
       });
       try {
@@ -652,6 +656,13 @@
     var tabPanel = ws.closest ? ws.closest(".wm-tabpanel") : null;
     var beforeTiles = ws.querySelectorAll(".wm-tile").length;
     var beforeGrades = ws.querySelectorAll(".wm-grade-row").length;
+
+    var existingGrid = ws.querySelector(".mtl-leather-modal-grid");
+    var existingN = existingGrid ? existingGrid.querySelectorAll(".mtl-leather-modal-card").length : 0;
+    if (existingGrid && existingN === syn.length) {
+      /* Cards already correct — touching the DOM would re-trigger the MutationObserver and cause an infinite loop. */
+      return syn.length;
+    }
 
     console.log("[MTL leather modal] injecting", syn.length, "cards into #wmSections", {
       parentTab: tabPanel && tabPanel.id ? "#" + tabPanel.id : "(none)",
