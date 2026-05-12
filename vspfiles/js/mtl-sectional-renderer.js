@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-leather-dump2";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-leather-dump2");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-leather-aggressive";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-leather-aggressive");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -57,7 +57,7 @@
         el.setAttribute("role", "status");
         el.setAttribute("aria-live", "polite");
         el.style.cssText =
-          "position:fixed;bottom:8px;right:8px;z-index:2147483647;max-width:min(360px,94vw);background:#111;color:#eee;font:11px/1.35 Consolas,system-ui,monospace;padding:10px 12px;border-radius:6px;box-shadow:0 4px 24px rgba(0,0,0,.5);opacity:.96;pointer-events:none;white-space:pre-wrap;word-break:break-word;";
+          "position:fixed;bottom:8px;right:8px;z-index:2147483647;max-width:min(520px,96vw);max-height:80vh;overflow:auto;background:#111;color:#eee;font:11px/1.35 Consolas,system-ui,monospace;padding:10px 12px;border-radius:6px;box-shadow:0 4px 24px rgba(0,0,0,.5);opacity:.96;pointer-events:auto;white-space:pre-wrap;word-break:break-word;";
         mount.appendChild(el);
       }
       mtlRefreshStageTrackerDom();
@@ -349,6 +349,20 @@
           console.log("[MTL] findNativeLeatherSelectEl: options-table DOM order — first non-config (no configSel match)");
           return nonCfgOrdered[0];
         }
+      }
+
+      var lastResort = sels.filter(function (s) {
+        if (!s || !s.options || s.options.length < 1) return false;
+        if (isVolusionConfigurationRowSelect(s)) return false;
+        if (configSel && s === configSel) return false;
+        var id = String(s.id || "").toLowerCase();
+        var nm = String(s.name || "").toLowerCase();
+        if (/qty|quantity/.test(id + " " + nm)) return false;
+        return true;
+      });
+      if (lastResort.length >= 1) {
+        console.log("[MTL] findNativeLeatherSelectEl: page-wide last-resort — exactly", lastResort.length, "non-config <select>(s)");
+        return lastResort[0];
       }
       return null;
     }
@@ -1990,6 +2004,42 @@
         pickedReason = "findNativeLeatherSelectEl returned null";
       }
 
+      var selSummaries = [];
+      var sIdx;
+      for (sIdx = 0; sIdx < allSelects.length; sIdx++) {
+        var sS = allSelects[sIdx];
+        var sId = String(sS.id || sS.name || ("sel#" + sIdx));
+        var sIsCfg = false;
+        try { sIsCfg = !!isVolusionConfigurationRowSelect(sS); } catch (eS) {}
+        var sRow = "";
+        try {
+          var sTr = sS.closest("tr");
+          if (sTr) sRow = String(sTr.innerText || "").replace(/\s+/g, " ").trim();
+        } catch (eR2) {}
+        var sLabel = "";
+        try {
+          if (sS.id) {
+            var sIdEsc =
+              typeof CSS !== "undefined" && typeof CSS.escape === "function"
+                ? CSS.escape(String(sS.id))
+                : String(sS.id).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+            var sLabEl = document.querySelector('label[for="' + sIdEsc + '"]');
+            if (sLabEl) sLabel = String(sLabEl.textContent || "").replace(/\s+/g, " ").trim();
+          }
+        } catch (eL3) {}
+        var sFirst = "";
+        if (sS.options && sS.options[0]) {
+          sFirst = String(sS.options[0].textContent || "").replace(/\s+/g, " ").trim();
+        }
+        selSummaries.push(
+          "[" + sIdx + (sIsCfg ? " CFG" : "") + "] id=" + sId.slice(0, 24) +
+          " opts=" + (sS.options ? sS.options.length : 0) +
+          " 1st='" + sFirst.slice(0, 30) + "'" +
+          " row='" + sRow.slice(0, 50) + "'" +
+          (sLabel ? " lab='" + sLabel.slice(0, 30) + "'" : "")
+        );
+      }
+
       var summary =
         "sel=" + allSelects.length +
         " cfg=" + cfgCount +
@@ -1998,7 +2048,8 @@
         " optsTbl=" + (optsTable ? "Y" : "N") +
         " atcForm=" + (atcForm ? "Y" : "N") +
         "\n  picked: " + pickedInfo +
-        "\n  reason: " + pickedReason;
+        "\n  reason: " + pickedReason +
+        (selSummaries.length ? "\n  " + selSummaries.join("\n  ") : "");
       try {
         __mtlDiag.leatherDebug = summary;
         mtlRefreshStageTrackerDom();
