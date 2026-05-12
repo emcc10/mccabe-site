@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-swatch-fix";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-swatch-fix");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-swatch-hyphen";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-swatch-hyphen");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -879,31 +879,28 @@
       if (gradeRaw) {
         gradeLine = /^base$/i.test(gradeRaw) ? "Grade 1000" : (/^grade\b/i.test(gradeRaw) ? gradeRaw : "Grade "+gradeRaw);
       }
-      /* Fallback wrow lookup by family name if value matching failed */
-      if (!wrow && s.family) {
-        var sFamLow = s.family.trim().toLowerCase();
-        for (var wi = 0; wi < wm.length; wi++) {
-          var we = wm[wi];
-          var weLabel = ((we.family || "") + " " + (we.color || "")).trim().toLowerCase();
-          var weFam = (we.family || "").trim().toLowerCase();
-          if (weLabel === sFamLow || weFam === sFamLow) { wrow = we; break; }
-        }
-      }
-      var mergedSw = (wrow && wrow.swatches && wrow.swatches.length ? wrow.swatches : null) ||
-                     (s.swatches && s.swatches.length ? s.swatches : null) || [];
-      /* Last resort: generate swatch URLs from the leather name directly */
-      if (!mergedSw.length && s.family) {
-        var swName = s.family.trim();
-        var swEnc = encodeURIComponent(swName);
-        mergedSw = [
-          "/v/vspfiles/swatches/" + swEnc + ".jpeg",
-          "/v/vspfiles/swatches/" + swEnc + ".jpg",
-          "/v/vspfiles/swatches/" + swEnc + ".png",
-          "/v/vspfiles/swatches/" + encodeURIComponent(swName.toLowerCase()) + ".jpeg",
-          "/v/vspfiles/swatches/" + swName.replace(/\s+/g,"-").toLowerCase() + ".jpeg",
-          "/v/vspfiles/swatches/" + swName.replace(/\s+/g,"_") + ".jpeg",
-        ];
-      }
+      /* Build swatch URL list. Primary format matches how mini swatches work:
+         family + color, spaces→hyphens (e.g. "Traverse-Chestnut.jpg").
+         Then fall through to the full possibleSwatchPaths list from __WM_LEATHER_OPTIONS__. */
+      var swFamily = (wrow && wrow.family) || s.family || "";
+      var swColor  = (wrow && wrow.color)  || "";
+      var swFull   = (swFamily + (swColor ? " " + swColor : "")).trim();
+      var swHyphen = swFull.replace(/\s+/g, "-");
+      var swBase   = "/v/vspfiles/swatches/";
+      var primaryUrls = [
+        swBase + swHyphen + ".jpg",
+        swBase + swHyphen + ".jpeg",
+        swBase + swHyphen + ".png",
+        swBase + encodeURIComponent(swFull) + ".jpg",
+        swBase + encodeURIComponent(swFull) + ".jpeg",
+      ];
+      var fallbackUrls = (wrow && wrow.swatches && wrow.swatches.length ? wrow.swatches : []);
+      /* Merge: primary first, then fallback (deduped) */
+      var seen = {};
+      var mergedSw = [];
+      primaryUrls.concat(fallbackUrls).forEach(function(u) {
+        if (u && !seen[u]) { seen[u] = true; mergedSw.push(u); }
+      });
 
       var card = document.createElement("button");
       card.type = "button";
