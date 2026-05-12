@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-placeholder-unblock";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-placeholder-unblock");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260516-leather-dump";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260516-leather-dump");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -40,6 +40,7 @@
       leatherOpts: "NO",
       leatherModal: "NO",
       miniSwatches: "NO",
+      leatherDebug: "—",
     };
   window.__mtlDiag = __mtlDiag;
 
@@ -88,7 +89,9 @@
       "\nLEATHER MODAL RENDERED: " +
       String(d.leatherModal || "—") +
       "\nMINI SWATCHES RENDERED: " +
-      String(d.miniSwatches || "—");
+      String(d.miniSwatches || "—") +
+      "\nLEATHER DEBUG: " +
+      String(d.leatherDebug || "—");
   }
 
   function detectPageKindForMtlDiagnostics() {
@@ -1845,6 +1848,129 @@
     }
   }
 
+  /**
+   * Walk every <select> on the page and log why each is/isn't classified as the leather control.
+   * Returns a short string summary for the on-page debug box ("3 selects: 1 cfg, 0 leather, 2 other").
+   */
+  function mtlDumpLeatherDiscoveryToConsole(reason) {
+    try {
+      var allSelects = Array.from(document.querySelectorAll("select"));
+      var optsTable =
+        document.querySelector("#v65-product-parent #options_table") ||
+        document.querySelector("#options_table") ||
+        document.querySelector("#v65-product-parent table[id*='options_table']") ||
+        document.querySelector("table[id*='options_table']") ||
+        document.querySelector("#content_area table[id*='options_table']");
+      var atcForm =
+        document.querySelector('form[action*="ProductDetails"]') ||
+        document.querySelector('form[action*="productdetails"]') ||
+        document.querySelector('form[action*="shoppingcart"]');
+      var v65 = document.getElementById("v65-product-parent");
+
+      console.groupCollapsed(
+        "[MTL leather-debug] %s — selects=%d, optsTable=%s, atcForm=%s, v65-product-parent=%s",
+        String(reason || "scan"),
+        allSelects.length,
+        optsTable ? "yes" : "NO",
+        atcForm ? "yes" : "NO",
+        v65 ? "yes" : "NO"
+      );
+
+      var cfgCount = 0;
+      var leatherishCount = 0;
+      var otherCount = 0;
+      var i;
+      for (i = 0; i < allSelects.length; i++) {
+        var sel = allSelects[i];
+        var info = {};
+        info.index = i;
+        info.id = sel.id || "";
+        info.name = sel.name || "";
+        info.className = sel.className || "";
+        info.inOptionsTable = !!(optsTable && optsTable.contains(sel));
+        info.inAtcForm = !!(atcForm && atcForm.contains(sel));
+        info.inV65 = !!(v65 && v65.contains(sel));
+        info.optionCount = sel.options ? sel.options.length : 0;
+        var firstOpts = [];
+        var oi;
+        for (oi = 0; oi < Math.min(info.optionCount, 6); oi++) {
+          firstOpts.push(
+            (oi + ":") + String((sel.options[oi].textContent || "").replace(/\s+/g, " ").trim()).slice(0, 80)
+          );
+        }
+        info.firstOptions = firstOpts;
+        info.rowText = "";
+        try {
+          var tr = sel.closest("tr");
+          if (tr) info.rowText = String(tr.innerText || "").replace(/\s+/g, " ").trim().slice(0, 160);
+        } catch (eR) {}
+        info.labelText = "";
+        try {
+          if (sel.id) {
+            var idEsc =
+              typeof CSS !== "undefined" && typeof CSS.escape === "function"
+                ? CSS.escape(String(sel.id))
+                : String(sel.id).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+            var lab = document.querySelector('label[for="' + idEsc + '"]');
+            if (lab) info.labelText = String(lab.textContent || "").replace(/\s+/g, " ").trim().slice(0, 160);
+          }
+        } catch (eL) {}
+        try {
+          info.isCfgRow = !!isVolusionConfigurationRowSelect(sel);
+        } catch (eCfg) {
+          info.isCfgRow = "ERR";
+        }
+        var realLeather = 0;
+        try {
+          var k;
+          for (k = 0; k < info.optionCount; k++) {
+            if (!isPlaceholderLeatherOption(sel.options[k])) realLeather++;
+          }
+        } catch (eP) {}
+        info.realLeatherOptionCount = realLeather;
+        var rowLow = (info.rowText + " " + info.labelText).toLowerCase();
+        info.rowLooksLeatherish =
+          /(choose cover|choose leather|select leather|select a leather|upholstery|cover|fabric|grade|swatch|palliser|material|color\s*choice)/i.test(
+            rowLow
+          );
+        if (info.isCfgRow === true) cfgCount++;
+        else if (info.rowLooksLeatherish || realLeather > 0) leatherishCount++;
+        else otherCount++;
+        console.log("[MTL leather-debug] select #" + i, info);
+      }
+
+      var cfgSel = null;
+      try {
+        cfgSel = findConfigurationSelect();
+      } catch (eC2) {}
+      var leSel = null;
+      try {
+        leSel = findNativeLeatherSelectEl();
+      } catch (eL2) {}
+      console.log("[MTL leather-debug] findConfigurationSelect ->", cfgSel);
+      console.log("[MTL leather-debug] findNativeLeatherSelectEl ->", leSel);
+      console.log("[MTL leather-debug] __WM_LEATHER_OPTIONS__ length=", (window.__WM_LEATHER_OPTIONS__ || []).length);
+      console.groupEnd();
+
+      var summary =
+        "sel=" + allSelects.length +
+        " cfg=" + cfgCount +
+        " leatherish=" + leatherishCount +
+        " other=" + otherCount +
+        " optsTbl=" + (optsTable ? "Y" : "N") +
+        " atcForm=" + (atcForm ? "Y" : "N");
+      try {
+        __mtlDiag.leatherDebug = summary;
+        mtlRefreshStageTrackerDom();
+      } catch (eD) {}
+      return summary;
+    } catch (eAll) {
+      console.error("[MTL leather-debug] dump failed:", eAll);
+      return "dump-failed";
+    }
+  }
+  window.mtlDumpLeatherDiscoveryToConsole = mtlDumpLeatherDiscoveryToConsole;
+
   function mtlRunStagePanel(stageLogName, panelKey, fn) {
     console.log("[MTL] START " + stageLogName);
     try {
@@ -1889,6 +2015,19 @@
       mtlRefreshStageTrackerDom();
       ensureLeatherOptionsFromNativeSelect(leatherSelNow);
       ensureSectionalOptionsTableLeatherObserver();
+
+      if (__mtlDiag.leatherOpts !== "YES") {
+        mtlDumpLeatherDiscoveryToConsole("finalize: leather options = NO");
+        [800, 2200, 5000].forEach(function (ms) {
+          window.setTimeout(function () {
+            if (__mtlDiag.leatherOpts === "YES") return;
+            mtlSyncSectionalLeatherFromDom();
+            if (__mtlDiag.leatherOpts !== "YES") {
+              mtlDumpLeatherDiscoveryToConsole("retry@" + ms + "ms");
+            }
+          }, ms);
+        });
+      }
     });
 
     mtlRunStagePanel("finalize: leather modal", "leatherModal", function () {
