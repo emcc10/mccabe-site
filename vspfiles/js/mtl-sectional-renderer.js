@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-always-inject";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-always-inject");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260512-css-force";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260512-css-force");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;

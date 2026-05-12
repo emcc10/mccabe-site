@@ -11301,6 +11301,18 @@ html.is-sectional-product #mcLeatherSwatchStrip.mc-leather-mini-swatches .mc-lea
   border-color: #111 !important;
 }
 
+/* Force the modal body and active tab panel to be visible —
+   Volusion site-wide CSS may set display:none on these. */
+html.is-sectional-product .wm-overlay .wm-modal-body {
+  display: block !important;
+  flex: 1 1 auto !important;
+  min-height: 120px !important;
+  overflow: auto !important;
+}
+html.is-sectional-product .wm-overlay .wm-tabpanel[data-active="1"] {
+  display: block !important;
+}
+
 /* Native leather replacement grid inside #wmSections (sectionals). */
 html.is-sectional-product .wm-overlay .mtl-leather-modal-grid {
   display: grid !important;
