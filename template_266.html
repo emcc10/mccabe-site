@@ -17715,7 +17715,11 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
     if (!unitPrice) return;
 
-    var total = unitPrice * counts.effectiveSeats;
+    /* Match updateRoomPlannerCartPricing / calculatePlannerPrice: 4L armless-love line bills MC_ARMLESS_LOVE_HTS_MEMBER_UNIT each, not full unitPrice × 2. */
+    var fourL = counts.fourLCount || 0;
+    var mainSeats = Math.max(0, counts.effectiveSeats - 2 * fourL);
+    var armU = Number(window.MC_ARMLESS_LOVE_HTS_MEMBER_UNIT) || 3370;
+    var total = unitPrice * mainSeats + armU * fourL;
 
     if (total < 0) total = 0;
 
@@ -17723,14 +17727,14 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
       unitPrice: unitPrice,
       physicalPieces: counts.physicalPieces,
       effectiveSeats: counts.effectiveSeats,
-      fourLCount: counts.fourLCount,
+      fourLCount: fourL,
       discount: 0,
       total: total
     };
 
     window.mccabeRoomPlannerPriceCalc = calc;
 
-    setVolusionQuantity(counts.effectiveSeats);
+    setVolusionQuantity(fourL > 0 ? mainSeats : counts.effectiveSeats);
     upsertPlannerPriceSummary(calc);
   }
 
@@ -19877,7 +19881,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-debug-20260513-theater-guard"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-debug-20260514-leather-fallback"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

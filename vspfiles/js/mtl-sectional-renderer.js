@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-debug-20260513-theater-guard";
-  console.log("MTL_RENDERER_BUILD sectional-debug-20260513-theater-guard");
+  window.MTL_RENDERER_BUILD = "sectional-debug-20260514-leather-fallback";
+  console.log("MTL_RENDERER_BUILD sectional-debug-20260514-leather-fallback");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -196,6 +196,11 @@
   }
 
   function findNativeLeatherSelectEl() {
+    var configSel = null;
+    try {
+      configSel = findConfigurationSelect();
+    } catch (eCfg) {}
+
     var sels = Array.from(
       document.querySelectorAll("#options_table select, #v65-product-parent select, table[id*='options_table'] select")
     );
@@ -205,17 +210,60 @@
     for (i = 0; i < sels.length; i++) {
       var sel = sels[i];
       if (isVolusionConfigurationRowSelect(sel)) continue;
+      if (configSel && sel === configSel) continue;
       var rowText = "";
       var tr = sel.closest("tr");
       if (tr) rowText = String(tr.innerText || "").toLowerCase();
       if (
         sel.classList.contains("mc-native-leather") ||
-        /(choose cover|choose leather|select leather|select a leather|upholstery|cover|fabric)/i.test(rowText)
+        /(choose cover|choose leather|select leather|select a leather|select\s+a\s+leather|upholstery|cover|fabric|grade|swatch|palliser|material|color\s*choice)/i.test(
+          rowText
+        )
       ) {
         return sel;
       }
     }
-    return null;
+
+    if (!isSectionalProductPageClient()) return null;
+
+    function realLeatherOptionCount(sel) {
+      if (!sel || !sel.options) return 0;
+      var n = 0;
+      var j;
+      for (j = 0; j < sel.options.length; j++) {
+        if (!isPlaceholderLeatherOption(sel.options[j])) n++;
+      }
+      return n;
+    }
+
+    var candidates = sels.filter(function (sel) {
+      if (isVolusionConfigurationRowSelect(sel)) return false;
+      if (configSel && sel === configSel) return false;
+      var id = String(sel.id || "").toLowerCase();
+      var nm = String(sel.name || "").toLowerCase();
+      if (/qty|quantity/.test(id + " " + nm)) return false;
+      return realLeatherOptionCount(sel) >= 1;
+    });
+
+    if (!candidates.length) return null;
+
+    if (candidates.length === 1) {
+      console.log("[MTL] findNativeLeatherSelectEl: sectional fallback — single non-config select");
+      return candidates[0];
+    }
+
+    var scored = candidates.map(function (sel) {
+      var tr2 = sel.closest("tr");
+      var rt = tr2 ? String(tr2.innerText || "").toLowerCase() : "";
+      var score = realLeatherOptionCount(sel);
+      if (/leather|cover|grade|fabric|upholstery|palliser|swatch|select\s+a|palette|color/.test(rt)) score += 100;
+      return { sel: sel, score: score };
+    });
+    scored.sort(function (a, b) {
+      return b.score - a.score;
+    });
+    console.log("[MTL] findNativeLeatherSelectEl: sectional fallback — picked highest score among", candidates.length, "selects");
+    return scored[0].sel;
   }
 
   function isPlaceholderLeatherOption(opt) {
