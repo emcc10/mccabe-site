@@ -5,7 +5,7 @@
 (function () {
   "use strict";
 
-  var IMG_V = "sectional-leather-20260512-eager";
+  var IMG_V = "sectional-leather-20260512-wm-source";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -870,9 +870,6 @@
   function mtlOpenOwnLeatherPicker() {
     if (!isSectionalProductPageClient()) return;
     var leatherSel = findNativeLeatherSelectEl();
-    if (!leatherSel) return;
-    var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
-    if (!syn.length) { console.warn("[MTL picker] no leather options"); return; }
 
     var old = document.getElementById("mtl-own-picker");
     if (old) old.parentNode.removeChild(old);
@@ -883,31 +880,6 @@
     var LEATHER_INFO = window.__MTL_LEATHER_INFO__ || {};
     var GRADE_UP = window.__MTL_GRADE_UPCHARGE__ || { "2000": 99, "3000": 149 };
 
-    /* Split "Traverse Chestnut" → {family:"Traverse", color:"Chestnut"} — matches template's splitFamilyColor */
-    function splitFamilyColor(raw){
-      var r = String(raw||"").replace(/\s+/g," ").trim();
-      if (!r) return {family:"",color:""};
-      if (!r.includes(" ") && r.includes("_")){ var i=r.indexOf("_"); return {family:r.slice(0,i),color:r.slice(i+1).replace(/_/g," ")}; }
-      if (!r.includes(" ") && r.includes("-")){ var i=r.indexOf("-"); return {family:r.slice(0,i),color:r.slice(i+1).replace(/-/g," ")}; }
-      var parts=r.split(" ").filter(Boolean);
-      return {family:parts.shift()||"", color:parts.join(" ").trim()};
-    }
-
-    /* Name-based fallback lookup for wm entry by label */
-    function wmRowByLabel(normName){
-      var sLbl = String(normName||"").replace(/\s+/g," ").trim().toLowerCase();
-      if (!sLbl) return null;
-      for (var i=0; i<wm.length; i++){
-        var r = wm[i]; if (!r) continue;
-        var rLbl = ((r.family||"")+" "+(r.color||"")).replace(/\s+/g," ").trim().toLowerCase();
-        if (rLbl && rLbl === sLbl) return r;
-        /* Also try matching against label with grade stripped */
-        var rStripped = (r.label||"").replace(/\bGrade\s*[0-9]+\s*/gi,"").replace(/\s+/g," ").trim().toLowerCase();
-        if (rStripped && rStripped === sLbl) return r;
-      }
-      return null;
-    }
-
     function gradeLabel(g){
       if (!g || /^base$/i.test(g)) return "Grade 1000";
       var amt = GRADE_UP[String(g)];
@@ -915,29 +887,45 @@
     }
     function escHtml(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
-    /* Build enriched option list */
+    /* PRIMARY DATA SOURCE: window.__WM_LEATHER_OPTIONS__ — same array the theater seating picker uses.
+       This has 37 entries with family/color/grade/value/swatches already parsed correctly. */
     var all = [];
-    var wmMatchCount = 0;
-    syn.forEach(function(s){
-      /* s.family = full name without grade e.g. "Traverse Chestnut"; s.color = "" */
-      var fc = splitFamilyColor(s.family || s.label || "");
-      var wrow = wmRowForNativeValue(wm, s.value) || wmRowByLabel(s.family || s.label || "");
-      if (wrow) wmMatchCount++;
-      var family   = (wrow && wrow.family) || fc.family || s.family || "";
-      var color    = (wrow && wrow.color)  || fc.color  || "";
-      var gradeRaw = (wrow && wrow.grade != null ? String(wrow.grade) : "") || s.grade || "Base";
-      var nameLine = (family + (color ? " " + color : "")).trim() || s.label || "";
-      nameLine = nameLine.replace(/\s+/g," ").trim();
-      /* Prefer pre-computed wrow.swatches (proven to work for mini-swatches);
-         fall back to our own builder using properly-split family+color */
-      var swatches = (wrow && Array.isArray(wrow.swatches) && wrow.swatches.length)
-        ? wrow.swatches
-        : buildSwatchUrls(family, color);
-      all.push({ family: family, color: color, grade: gradeRaw, value: s.value, label: s.label, nameLine: nameLine, swatches: swatches });
-    });
-    console.log("[MTL picker] wm entries:", wm.length, "| syn entries:", syn.length, "| wrow matches:", wmMatchCount,
-      "| sample wm[0]:", wm[0] ? (wm[0].family + " " + wm[0].color + " swatches:" + (wm[0].swatches||[]).length) : "none",
-      "| sample syn[0]:", syn[0] ? (syn[0].family + " val:" + syn[0].value) : "none");
+    if (wm.length) {
+      wm.forEach(function(r){
+        if (!r) return;
+        var family = r.family || "";
+        var color  = r.color  || "";
+        var nameLine = (family + (color ? " " + color : "")).trim() || r.label || "";
+        all.push({
+          family: family,
+          color: color,
+          grade: r.grade != null ? String(r.grade) : "Base",
+          value: r.value,
+          label: r.label || nameLine,
+          nameLine: nameLine.replace(/\s+/g," ").trim(),
+          swatches: Array.isArray(r.swatches) ? r.swatches.slice() : []
+        });
+      });
+    }
+    /* Fallback: read directly from native select if WM hasn't populated */
+    if (!all.length && leatherSel) {
+      var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
+      syn.forEach(function(s){
+        var raw = String(s.family || s.label || "").replace(/\s+/g," ").trim();
+        var parts = raw.split(" ").filter(Boolean);
+        var family = parts.shift() || "";
+        var color  = parts.join(" ").trim();
+        var nameLine = (family + (color ? " " + color : "")).trim();
+        all.push({
+          family: family, color: color,
+          grade: s.grade || "Base",
+          value: s.value, label: s.label, nameLine: nameLine,
+          swatches: buildSwatchUrls(family, color)
+        });
+      });
+    }
+    if (!all.length) { console.warn("[MTL picker] no leather options to show"); return; }
+    console.log("[MTL picker] total leathers:", all.length, "(source:", wm.length ? "__WM_LEATHER_OPTIONS__" : "native select", ")");
 
     /* Group by grade, sorted */
     var grades = []; var byGrade = {};
@@ -953,8 +941,10 @@
 
     /* State */
     var picked = null; var pickedTile = null;
-    var curVal = leatherSel.value;
-    for (var ai=0; ai<all.length; ai++){ if (String(all[ai].value)===String(curVal)){ picked=all[ai]; break; } }
+    var curVal = leatherSel ? leatherSel.value : "";
+    if (curVal) {
+      for (var ai=0; ai<all.length; ai++){ if (String(all[ai].value)===String(curVal)){ picked=all[ai]; break; } }
+    }
 
     /* ── DOM ── */
 
@@ -1075,18 +1065,19 @@
 
       /* Use padding-bottom:100% intrinsic-ratio trick — reliable across all browsers,
          no dependency on aspect-ratio or height:100% resolving from a non-explicit parent height */
+      /* Square wrapper using padding-bottom intrinsic ratio (rock-solid, no aspect-ratio dep) */
       var sw = document.createElement("div");
       sw.style.cssText = "position:relative;width:100%;padding-bottom:100%;border-radius:10px;border:1px solid #eee;background:#fafafa;overflow:hidden;margin-bottom:6px";
       var img = document.createElement("img"); img.alt=""; img.loading="eager";
-      img.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block";
-      var loadedImgSrc = "";
+      img.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none";
+      /* Cascade through swatch URLs — store the one that successfully loaded on the img element itself */
       (function(imgEl, urls){
         var idx=0;
         function tryNext(){
           if (idx>=urls.length){ imgEl.removeAttribute("src"); return; }
           var url=urls[idx++];
           imgEl.onerror=function(){ if (imgEl.naturalWidth===0) tryNext(); };
-          imgEl.onload =function(){ loadedImgSrc = imgEl.src; };
+          imgEl.onload =function(){ imgEl.setAttribute("data-loaded-src", imgEl.src); };
           imgEl.src=url;
         }
         tryNext();
@@ -1095,23 +1086,35 @@
 
       var zoom = document.createElement("button");
       zoom.type="button"; zoom.className="wm-zoom"; zoom.textContent="+"; zoom.title="View larger";
+      /* Make sure the zoom button is on top and clickable, regardless of any nested-button quirks */
+      zoom.style.cssText = "position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:999px;border:1px solid #ddd;background:rgba(255,255,255,.92);cursor:pointer;font-size:16px;line-height:26px;text-align:center;z-index:5;padding:0";
 
       var nameEl = document.createElement("div"); nameEl.className="wm-name";
       nameEl.textContent = o.nameLine || "(Unnamed)";
 
+      /* Use <div> wrapper instead of nested <button> to avoid invalid HTML (button inside button)
+         which breaks click handling on nested zoom button in some browsers */
       tile.appendChild(sw); tile.appendChild(zoom); tile.appendChild(nameEl);
 
       tile.onclick = function(e){
+        /* If the click came from the zoom button, don't treat as tile selection */
+        if (e.target === zoom || (e.target && e.target.closest && e.target.closest(".wm-zoom"))) return;
         e.preventDefault();
         if (pickedTile) pickedTile.dataset.selected="0";
         tile.dataset.selected="1"; pickedTile=tile; picked=o;
         pickedLabel.textContent = o.nameLine||o.label||"";
       };
-      zoom.onclick = function(e){
+      /* Use mousedown so we fire before the parent button's click handler picks the tile,
+         and grab src from the image's data attribute set by onload */
+      zoom.addEventListener("mousedown", function(e){
         e.preventDefault(); e.stopPropagation();
-        var src = loadedImgSrc || img.currentSrc || img.getAttribute("src");
+      });
+      zoom.addEventListener("click", function(e){
+        e.preventDefault(); e.stopPropagation();
+        var src = img.getAttribute("data-loaded-src") || img.currentSrc || img.getAttribute("src") || (o.swatches && o.swatches[0]) || "";
+        console.log("[MTL picker] zoom clicked, src:", src);
         if (src) openPreview(o.nameLine, src);
-      };
+      }, true);
 
       if (tile.dataset.selected==="1") pickedTile=tile;
       return tile;
@@ -1139,10 +1142,12 @@
     /* Apply / close */
     function applyPicked(){
       if (picked){
-        leatherSel.value = picked.value;
-        leatherSel.dispatchEvent(new Event("change",{bubbles:true}));
-        leatherSel.dispatchEvent(new Event("input",{bubbles:true}));
-        if (typeof jQuery!=="undefined") jQuery(leatherSel).trigger("change");
+        if (leatherSel) {
+          leatherSel.value = picked.value;
+          leatherSel.dispatchEvent(new Event("change",{bubbles:true}));
+          leatherSel.dispatchEvent(new Event("input",{bubbles:true}));
+          if (typeof jQuery!=="undefined") jQuery(leatherSel).trigger("change");
+        }
         var lab = String(picked.nameLine||picked.label||"").replace(/\s+/g," ").trim();
         ["wmSummary","mcLeatherSummary","wmPicked"].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=lab; });
         if (typeof window.mcRenderLeatherPreviewStrip==="function") window.mcRenderLeatherPreviewStrip();
