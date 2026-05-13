@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260512-v2";
-  console.log("MTL_RENDERER_BUILD sectional-20260512-v2");
+  window.MTL_RENDERER_BUILD = "sectional-20260512-v3";
+  console.log("MTL_RENDERER_BUILD sectional-20260512-v3");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -820,42 +820,37 @@
     var f = String(family || "").trim();
     var c = String(color  || "").trim();
     if (!f) return [];
-    var names = [];
     function slug(x){ return String(x||"").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,""); }
-    function add(a, b){
-      if (b !== undefined && b !== "") {
-        names.push(a + " " + b);
-        names.push(a.toLowerCase() + " " + b.toLowerCase());
-        names.push(a + "_" + b);
-        names.push(a + "-" + b);
-        names.push(slug(a) + "-" + slug(b));
-        names.push(slug(a) + "_" + slug(b));
-      } else {
-        names.push(a);
-        names.push(a.toLowerCase());
-        names.push(slug(a));
-      }
-    }
-    var fNP = f.replace(/\s*\([^)]*\)\s*/g," ").replace(/\s+/g," ").trim();
-    var cNP = c.replace(/\s*\([^)]*\)\s*/g," ").replace(/\s+/g," ").trim();
-    var fA  = f.replace(/\s*&\s*/g," and ");
-    var cA  = c.replace(/\s*&\s*/g," and ");
-    var cvars = [c];
-    if (/\bgrey\b/i.test(c)) cvars.push(c.replace(/\bgrey\b/gi,"gray"));
-    if (/\bgray\b/i.test(c)) cvars.push(c.replace(/\bgray\b/gi,"grey"));
-    if (/\begg\s+shell\b/i.test(c)) cvars.push(c.replace(/\begg\s+shell\b/gi,"eggshell"));
+    var names = [];
     if (f && c) {
-      add(f, c);
-      cvars.forEach(function(cv){ if (cv !== c) add(f, cv); });
-      if (c !== c.toUpperCase()) add(f, c.toUpperCase());
-      if (fA !== f || cA !== c) add(fA, cA);
-      if (fNP !== f || cNP !== c) add(fNP, cNP);
+      /* Confirmed working format: Family-Color.jpg (hyphen, title case) — try first */
+      names.push(f + "-" + c);                                /* Traverse-Oak          */
+      names.push(f + "-" + c.replace(/\s+/g,"-"));           /* Rein-Egg-Shell        */
+      names.push(f.toLowerCase() + "-" + c.toLowerCase());   /* traverse-oak          */
+      names.push(f.toLowerCase() + "-" + c.toLowerCase().replace(/\s+/g,"-")); /* rein-egg-shell */
+      /* Fallbacks */
+      names.push(f + " " + c);                               /* Traverse Oak          */
+      names.push(f.toLowerCase() + " " + c.toLowerCase());   /* traverse oak          */
+      names.push(f + "_" + c);                               /* Traverse_Oak          */
+      names.push(f + "_" + c.replace(/\s+/g,"_"));           /* Rein_Egg_Shell        */
+      names.push(slug(f) + "-" + slug(c));
+      names.push(slug(f) + "_" + slug(c));
+      /* Color spelling variants */
+      var cvars = [];
+      if (/\bgrey\b/i.test(c)) cvars.push(c.replace(/\bgrey\b/gi,"gray"));
+      if (/\bgray\b/i.test(c)) cvars.push(c.replace(/\bgray\b/gi,"grey"));
+      if (/\begg\s+shell\b/i.test(c)) cvars.push(c.replace(/\begg\s+shell\b/gi,"eggshell"));
+      cvars.forEach(function(cv){
+        names.push(f + "-" + cv);
+        names.push(f + " " + cv);
+      });
     } else {
-      add(f, "");
-      if (fNP !== f) add(fNP, "");
+      names.push(f);
+      names.push(f.toLowerCase());
+      names.push(slug(f));
     }
     var out = []; var seen = {};
-    var exts = [".jpeg",".jpg",".png",".webp",".gif"];
+    var exts = [".jpg",".jpeg",".png",".webp",".gif"]; /* .jpg first — confirmed working ext */
     ["/v/vspfiles/swatches/","/vspfiles/swatches/"].forEach(function(base){
       names.forEach(function(n){
         exts.forEach(function(ext){
@@ -1081,7 +1076,7 @@
           imgEl.src=url;
         }
         tryNext();
-      })(img, o.swatches);
+      })(img, (o.family ? buildSwatchUrls(o.family, o.color) : o.swatches));
       sw.appendChild(img);
 
       var zoom = document.createElement("button");

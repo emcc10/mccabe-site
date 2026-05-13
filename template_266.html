@@ -2426,34 +2426,33 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     const cAnd = (c || "").replace(/\s*&\s*/g, " and ");
 
     const baseNames = [];
-    function add(a, b){
-      if (!a) return;
-      if (b){
-        baseNames.push(`${a} ${b}`);
-        baseNames.push(`${a.toLowerCase()} ${b.toLowerCase()}`);
-        baseNames.push(`${a}_${b}`);
-        baseNames.push(`${a}-${b}`);
-        baseNames.push(`${slugify(a)}-${slugify(b)}`);
-        baseNames.push(`${slugify(a)}_${slugify(b)}`);
-      } else {
-        baseNames.push(a);
-        baseNames.push(a.toLowerCase());
-        baseNames.push(slugify(a));
-      }
-    }
     if (f && c){
-      add(f, c);
-      colorSwatchVariants(c).forEach(function(cv){ if (cv !== c) add(f, cv); });
-      if (c !== c.toUpperCase()) add(f, c.toUpperCase());
-      if (fAnd !== f || cAnd !== c) add(fAnd, cAnd);
-      if (fNoParen !== f || cNoParen !== c) add(fNoParen, cNoParen);
+      /* Confirmed working format: Family-Color.jpg — try first */
+      baseNames.push(`${f}-${c}`);
+      baseNames.push(`${f}-${c.replace(/\s+/g,"-")}`);
+      baseNames.push(`${f.toLowerCase()}-${c.toLowerCase()}`);
+      baseNames.push(`${f.toLowerCase()}-${c.toLowerCase().replace(/\s+/g,"-")}`);
+      /* Fallbacks */
+      baseNames.push(`${f} ${c}`);
+      baseNames.push(`${f.toLowerCase()} ${c.toLowerCase()}`);
+      baseNames.push(`${f}_${c}`);
+      baseNames.push(`${f}_${c.replace(/\s+/g,"_")}`);
+      baseNames.push(`${slugify(f)}-${slugify(c)}`);
+      baseNames.push(`${slugify(f)}_${slugify(c)}`);
+      colorSwatchVariants(c).forEach(function(cv){
+        if (cv !== c){ baseNames.push(`${f}-${cv}`); baseNames.push(`${f} ${cv}`); }
+      });
+      if (fAnd !== f || cAnd !== c){ baseNames.push(`${fAnd}-${cAnd}`); baseNames.push(`${fAnd} ${cAnd}`); }
+      if (fNoParen !== f || cNoParen !== c){ baseNames.push(`${fNoParen}-${cNoParen}`); baseNames.push(`${fNoParen} ${cNoParen}`); }
     } else if (f) {
-      add(f, "");
-      if (fNoParen !== f) add(fNoParen, "");
+      baseNames.push(f);
+      baseNames.push(f.toLowerCase());
+      baseNames.push(slugify(f));
+      if (fNoParen !== f){ baseNames.push(fNoParen); }
     }
 
     const baseDirs = ["/v/vspfiles/swatches/", "/vspfiles/swatches/"];
-    const exts = [".jpeg", ".jpg", ".png", ".webp", ".gif"];
+    const exts = [".jpg", ".jpeg", ".png", ".webp", ".gif"]; /* .jpg first */
 
     const urls = [];
     const unique = {};
@@ -4065,29 +4064,29 @@ try {
       if (!f) return [];
 
       var names = [];
-      function add(a, b){
-        if (b !== undefined && b !== "") {
-          names.push(a + " " + b);
-          names.push(a.toLowerCase() + " " + b.toLowerCase());
-          names.push(a + "_" + b);
-          names.push(a + "-" + b);
-          names.push(slugifyMini(a) + "-" + slugifyMini(b));
-          names.push(slugifyMini(a) + "_" + slugifyMini(b));
-        } else {
-          names.push(a);
-          names.push(a.toLowerCase());
-          names.push(slugifyMini(a));
-        }
-      }
       if (f && c) {
-        add(f, c);
-        colorSwatchVariantsMini(c).forEach(function(cv){ if (cv !== c) add(f, cv); });
-        if (c !== c.toUpperCase()) add(f, c.toUpperCase());
-        if (fAnd !== f || cAnd !== c) add(fAnd, cAnd);
-        if (fNoParen !== f || cNoParen !== c) add(fNoParen, cNoParen);
+        /* Confirmed working format: Family-Color.jpg — try first */
+        names.push(f + "-" + c);
+        names.push(f + "-" + c.replace(/\s+/g,"-"));
+        names.push(f.toLowerCase() + "-" + c.toLowerCase());
+        names.push(f.toLowerCase() + "-" + c.toLowerCase().replace(/\s+/g,"-"));
+        /* Fallbacks */
+        names.push(f + " " + c);
+        names.push(f.toLowerCase() + " " + c.toLowerCase());
+        names.push(f + "_" + c);
+        names.push(f + "_" + c.replace(/\s+/g,"_"));
+        names.push(slugifyMini(f) + "-" + slugifyMini(c));
+        names.push(slugifyMini(f) + "_" + slugifyMini(c));
+        colorSwatchVariantsMini(c).forEach(function(cv){
+          if (cv !== c){ names.push(f + "-" + cv); names.push(f + " " + cv); }
+        });
+        if (fAnd !== f || cAnd !== c){ names.push(fAnd + "-" + cAnd); names.push(fAnd + " " + cAnd); }
+        if (fNoParen !== f || cNoParen !== c){ names.push(fNoParen + "-" + cNoParen); names.push(fNoParen + " " + cNoParen); }
       } else {
-        add(f, "");
-        if (fNoParen !== f) add(fNoParen, "");
+        names.push(f);
+        names.push(f.toLowerCase());
+        names.push(slugifyMini(f));
+        if (fNoParen !== f) names.push(fNoParen);
       }
 
       var out = [];
@@ -19951,7 +19950,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260512-wm-source"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260512-v3"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
