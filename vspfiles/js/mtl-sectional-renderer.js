@@ -5,7 +5,7 @@
 (function () {
   "use strict";
 
-  var IMG_V = "sectional-leather-20260512-abs-img2";
+  var IMG_V = "sectional-leather-20260512-eager";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -1077,14 +1077,16 @@
          no dependency on aspect-ratio or height:100% resolving from a non-explicit parent height */
       var sw = document.createElement("div");
       sw.style.cssText = "position:relative;width:100%;padding-bottom:100%;border-radius:10px;border:1px solid #eee;background:#fafafa;overflow:hidden;margin-bottom:6px";
-      var img = document.createElement("img"); img.alt=""; img.loading="lazy";
+      var img = document.createElement("img"); img.alt=""; img.loading="eager";
       img.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block";
+      var loadedImgSrc = "";
       (function(imgEl, urls){
         var idx=0;
         function tryNext(){
           if (idx>=urls.length){ imgEl.removeAttribute("src"); return; }
           var url=urls[idx++];
           imgEl.onerror=function(){ if (imgEl.naturalWidth===0) tryNext(); };
+          imgEl.onload =function(){ loadedImgSrc = imgEl.src; };
           imgEl.src=url;
         }
         tryNext();
@@ -1107,7 +1109,8 @@
       };
       zoom.onclick = function(e){
         e.preventDefault(); e.stopPropagation();
-        openPreview(o.nameLine, img.currentSrc||img.src);
+        var src = loadedImgSrc || img.currentSrc || img.getAttribute("src");
+        if (src) openPreview(o.nameLine, src);
       };
 
       if (tile.dataset.selected==="1") pickedTile=tile;
