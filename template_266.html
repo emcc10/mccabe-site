@@ -11930,6 +11930,286 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 })();
 </script>
 <script>
+/* =========================================================
+   PDP RIGHT-COLUMN ACCORDION + TITLE RELOCATION (20260513-acc-v1)
+   - Moves H1 title into right column above pricing.
+   - Builds accordion rows: Select a Leather / Room Planner / Product Summary / Availability.
+   - Reuses existing window.mcOpenWmLeatherModal, #mcPlannerBtn, #mcProductSummaryBtn,
+     and existing availability text. Does NOT rebuild leather/planner/summary logic.
+   - Hides duplicate existing buttons once the accordion is in place.
+   ========================================================= */
+(function () {
+  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v1");
+  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v1";
+
+  function q(sel, root)  { return (root || document).querySelector(sel); }
+  function qa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
+
+  function isPdpPage() {
+    return !!document.querySelector('input[name="ProductCode"]') &&
+           !!(document.getElementById('v65-product-parent') || document.getElementById('content_area'));
+  }
+
+  function isSectionalPg() {
+    try { return typeof window.isSectionalProductPage === 'function' && window.isSectionalProductPage(); }
+    catch (e) { return false; }
+  }
+
+  /* Heuristic: theater seating pages have one of these style keywords. Excludes sectionals.
+     The existing renderer's window.isSectionalProductPage drives the exclusion. */
+  function isTheaterPg() {
+    if (isSectionalPg()) return false;
+    var pc = ((document.querySelector('input[name="ProductCode"]') || {}).value || '').toLowerCase();
+    var title = (document.title || '').toLowerCase();
+    var hay = pc + ' ' + title;
+    return /\b(theater|theatre|flicks|paragon|vivid|ace|vertex|catalina|beckett|audio|recliner-loveseat|home-theater)\b/.test(hay);
+  }
+
+  function findRightTd() {
+    var v65 = document.getElementById('v65-product-parent');
+    if (!v65) return null;
+    /* Row 2 is the main flex row: left=image, right=options. The right TD has align="right". */
+    var rightTd =
+      v65.querySelector('tr > td.mc-pdp-options-td') ||
+      v65.querySelector('td[align="right"][valign="top"]') ||
+      v65.querySelector('td[align="right"]');
+    return rightTd;
+  }
+
+  function findH1() {
+    return q('h1.vp-product-title') ||
+           q('h1.productnamecolorLARGE') ||
+           q('h1.productnamecolor') ||
+           q('#v65-product-parent h1') ||
+           q('#content_area h1');
+  }
+
+  function extractAvailabilityText() {
+    /* Look for "<b>Availability::</b> <text>" pattern in PDP */
+    var bolds = qa('b', document.getElementById('v65-product-parent') || document);
+    for (var i = 0; i < bolds.length; i++) {
+      if (/Availability::/i.test(bolds[i].textContent)) {
+        var node = bolds[i].nextSibling;
+        var collected = '';
+        while (node && node.nodeType !== 1) {
+          collected += (node.textContent || '');
+          node = node.nextSibling;
+        }
+        if (!collected && bolds[i].parentNode) {
+          /* Fallback: text after the bold inside its parent */
+          var ptxt = (bolds[i].parentNode.textContent || '').replace(/Availability::/i, '').trim();
+          collected = ptxt;
+        }
+        var clean = collected.replace(/\s+/g, ' ').trim();
+        if (clean) return clean;
+      }
+    }
+    /* Fallback to the schema.org meta if present */
+    var meta = q('meta[itemprop="availability"]');
+    if (meta) {
+      var raw = (meta.getAttribute('content') || '').replace(/^https?:\/\/schema\.org\//i, '');
+      if (raw) return raw.replace(/([a-z])([A-Z])/g, '$1 $2');
+    }
+    return 'Contact us for availability.';
+  }
+
+  function buildRow(id, label, onClickTrigger, panelBuilder) {
+    var row = document.createElement('div');
+    row.className = 'mc-acc-row';
+    row.id = 'mc-acc-row-' + id;
+    row.dataset.open = '0';
+
+    var header = document.createElement('button');
+    header.type = 'button';
+    header.className = 'mc-acc-header';
+    header.setAttribute('aria-expanded', 'false');
+    header.innerHTML =
+      '<span class="mc-acc-label">' + label + '</span>' +
+      '<span class="mc-acc-chevron" aria-hidden="true">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+      '</span>';
+
+    var panel = document.createElement('div');
+    panel.className = 'mc-acc-panel';
+    panel.setAttribute('aria-hidden', 'true');
+
+    if (typeof onClickTrigger === 'function') {
+      header.addEventListener('click', function (e) {
+        e.preventDefault();
+        try { onClickTrigger(e); } catch (eClick) { console.error('[MC accordion] trigger error', eClick); }
+      });
+    } else {
+      header.addEventListener('click', function (e) {
+        e.preventDefault();
+        var open = row.dataset.open === '1';
+        row.dataset.open = open ? '0' : '1';
+        header.setAttribute('aria-expanded', open ? 'false' : 'true');
+        panel.setAttribute('aria-hidden', open ? 'true' : 'false');
+      });
+      if (typeof panelBuilder === 'function') {
+        var content = panelBuilder();
+        if (content) panel.appendChild(content);
+      }
+    }
+
+    row.appendChild(header);
+    row.appendChild(panel);
+    return row;
+  }
+
+  function moveTitleIntoRightColumn(rightTd) {
+    var h1 = findH1();
+    if (!h1) return;
+    /* If H1 is already inside the right TD, just ensure it's at the top */
+    if (rightTd.contains(h1)) {
+      var wrap = h1.parentNode;
+      if (wrap && wrap !== rightTd && wrap.id === 'mc-pdp-title-right') return;
+    }
+    if (document.getElementById('mc-pdp-title-right')) return;
+    var titleWrap = document.createElement('div');
+    titleWrap.id = 'mc-pdp-title-right';
+    /* Move (not clone) the H1 so SEO/itemprop stays intact and we don't duplicate */
+    titleWrap.appendChild(h1);
+    rightTd.insertBefore(titleWrap, rightTd.firstChild);
+    /* Hide the now-empty original breadcrumb TR if it only held the title and spacers */
+    var breadcrumbTd = document.querySelector('#v65-product-parent .vCSS_breadcrumb_td');
+    if (breadcrumbTd) {
+      var hasMeaningfulChild = false;
+      var kids = breadcrumbTd.children;
+      for (var i = 0; i < kids.length; i++) {
+        var el = kids[i];
+        if (el === titleWrap) continue;
+        if (el.tagName === 'IMG' && /clear1x1\.gif/i.test(el.getAttribute('src') || '')) continue;
+        if (el.tagName === 'BR') continue;
+        var t = (el.textContent || '').replace(/\u00A0|\s/g, '');
+        if (!t && !el.querySelector('a, img:not([src*="clear1x1"])')) continue;
+        hasMeaningfulChild = true;
+        break;
+      }
+      if (!hasMeaningfulChild) {
+        var tr = breadcrumbTd.closest('tr');
+        if (tr) tr.style.setProperty('display', 'none', 'important');
+      }
+    }
+  }
+
+  function buildAccordion(rightTd) {
+    if (document.getElementById('mc-pdp-accordion')) return;
+    var acc = document.createElement('div');
+    acc.id = 'mc-pdp-accordion';
+    acc.className = 'mc-pdp-accordion';
+
+    /* Row 1: Select a Leather — trigger existing leather modal */
+    acc.appendChild(buildRow('leather', 'Select a Leather', function () {
+      if (typeof window.mcOpenWmLeatherModal === 'function') {
+        window.mcOpenWmLeatherModal();
+        return;
+      }
+      if (typeof window.mtlOpenOwnLeatherPicker === 'function') {
+        window.mtlOpenOwnLeatherPicker();
+        return;
+      }
+      var existing = q('#mcLeatherBtn') || q('#mcLeatherHeader');
+      if (existing) existing.click();
+    }));
+
+    /* Row 2: Room Planner — theater pages only (matches existing gating) */
+    if (isTheaterPg()) {
+      acc.appendChild(buildRow('roomplanner', 'Room Planner', function () {
+        var btn = q('#mcPlannerBtn');
+        if (btn) { btn.click(); return; }
+        /* Fallback: dispatch click on the configuration block which has the same handler */
+        var cfg = q('#mcConfigurationBlock');
+        if (cfg) cfg.click();
+      }));
+    }
+
+    /* Row 3: Product Summary — open the existing spec sheet URL in a new tab */
+    acc.appendChild(buildRow('summary', 'Product Summary', null, function () {
+      var c = document.createElement('div');
+      c.className = 'mc-acc-content';
+      var url = '';
+      try {
+        if (typeof window.mcBuildPalliserSpecSheetUrl === 'function') {
+          url = window.mcBuildPalliserSpecSheetUrl() || '';
+        }
+      } catch (eUrl) {}
+      if (!url) {
+        var existingLink = q('#mcProductSummaryBtn');
+        if (existingLink) url = existingLink.getAttribute('href') || '';
+      }
+      if (url && url !== '#') {
+        var a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className = 'mc-acc-link-btn';
+        a.textContent = 'Open Product Summary (PDF)';
+        c.appendChild(a);
+      } else {
+        c.textContent = 'Product summary is not available for this product yet.';
+      }
+      return c;
+    }));
+
+    /* Row 4: Availability — inline expand showing the existing PDP availability text */
+    acc.appendChild(buildRow('availability', 'Availability', null, function () {
+      var c = document.createElement('div');
+      c.className = 'mc-acc-content';
+      c.textContent = extractAvailabilityText();
+      return c;
+    }));
+
+    /* Insert AFTER the first .colors_pricebox (the retail/Affirm pricebox),
+       BEFORE the second one (which holds options_table + Add to Cart). */
+    var priceboxes = qa('.colors_pricebox', rightTd);
+    var firstPricebox = priceboxes[0];
+    var secondPricebox = priceboxes[1];
+    if (secondPricebox && secondPricebox.parentNode) {
+      secondPricebox.parentNode.insertBefore(acc, secondPricebox);
+    } else if (firstPricebox && firstPricebox.parentNode) {
+      if (firstPricebox.nextSibling) firstPricebox.parentNode.insertBefore(acc, firstPricebox.nextSibling);
+      else firstPricebox.parentNode.appendChild(acc);
+    } else {
+      rightTd.appendChild(acc);
+    }
+  }
+
+  function hideDuplicateTriggers() {
+    /* Once the accordion is in place, hide the older inline buttons that duplicate it. */
+    if (!document.getElementById('mc-pdp-accordion')) return;
+    var dupes = [
+      '#mcPlannerRow',
+      '#mcProductSummaryRowStandalone',
+      '#mcLeatherHeaderRow'
+    ];
+    dupes.forEach(function (sel) {
+      var el = q(sel);
+      if (el) el.style.setProperty('display', 'none', 'important');
+    });
+  }
+
+  function run() {
+    if (!isPdpPage()) return;
+    var rightTd = findRightTd();
+    if (!rightTd) return;
+    moveTitleIntoRightColumn(rightTd);
+    buildAccordion(rightTd);
+    hideDuplicateTriggers();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+  window.addEventListener('load', run);
+  setTimeout(run, 400);
+  setTimeout(run, 1200);
+  window.mcBuildPdpAccordion = run;
+})();
+</script>
+<script>
 (function () {
   function mcNormalizeRelatedItemImages(root) {
     try {
@@ -20005,7 +20285,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260512-v6"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260513-acc1"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

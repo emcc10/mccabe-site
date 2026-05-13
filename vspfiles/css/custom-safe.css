@@ -11895,3 +11895,151 @@ html body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-optio
   font-size: 16px !important;
 }
 
+/* =========================================================
+   PDP right-column accordion + title relocation (20260513-acc-v1)
+   - Title sits at top of right column above pricing
+   - Accordion sits between pricing pricebox and options pricebox
+   - PDP only (gated by body.mc-product-page / body.productdetails)
+   ========================================================= */
+
+/* Title in right column */
+body.mc-product-page #v65-product-parent #mc-pdp-title-right,
+body.productdetails #v65-product-parent #mc-pdp-title-right,
+body.mc-product-page #content_area #mc-pdp-title-right,
+body.productdetails #content_area #mc-pdp-title-right {
+  margin: 0 0 14px 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+}
+
+body.mc-product-page #v65-product-parent #mc-pdp-title-right h1,
+body.productdetails #v65-product-parent #mc-pdp-title-right h1,
+body.mc-product-page #content_area #mc-pdp-title-right h1,
+body.productdetails #content_area #mc-pdp-title-right h1 {
+  margin: 0 0 6px 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  font-size: 30px !important;
+  line-height: 1.2 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+}
+
+body.mc-product-page #v65-product-parent #mc-pdp-title-right h1 font,
+body.productdetails #v65-product-parent #mc-pdp-title-right h1 font,
+body.mc-product-page #content_area #mc-pdp-title-right h1 font,
+body.productdetails #content_area #mc-pdp-title-right h1 font {
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+  color: inherit !important;
+}
+
+/* Accordion shell */
+body.mc-product-page .mc-pdp-accordion,
+body.productdetails .mc-pdp-accordion {
+  margin: 16px 0 18px 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  border-top: 1px solid #ddd !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-row,
+body.productdetails .mc-pdp-accordion .mc-acc-row {
+  border-bottom: 1px solid #ddd !important;
+  background: #fff !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-header,
+body.productdetails .mc-pdp-accordion .mc-acc-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  padding: 14px 16px !important;
+  background: transparent !important;
+  border: 0 !important;
+  cursor: pointer !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  color: #333 !important;
+  text-align: left !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-header:hover,
+body.productdetails .mc-pdp-accordion .mc-acc-header:hover {
+  background: #f7f7f5 !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-label,
+body.productdetails .mc-pdp-accordion .mc-acc-label {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-chevron,
+body.productdetails .mc-pdp-accordion .mc-acc-chevron {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #686868 !important;
+  transition: transform 0.2s ease !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-header[aria-expanded="true"] .mc-acc-chevron,
+body.productdetails .mc-pdp-accordion .mc-acc-header[aria-expanded="true"] .mc-acc-chevron {
+  transform: rotate(180deg) !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-panel,
+body.productdetails .mc-pdp-accordion .mc-acc-panel {
+  display: none !important;
+  padding: 0 16px 16px 16px !important;
+  background: #fafafa !important;
+  border-top: 1px solid #eee !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-row[data-open="1"] > .mc-acc-panel,
+body.productdetails .mc-pdp-accordion .mc-acc-row[data-open="1"] > .mc-acc-panel {
+  display: block !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-content,
+body.productdetails .mc-pdp-accordion .mc-acc-content {
+  padding: 14px 0 4px 0 !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+  color: #333 !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-link-btn,
+body.productdetails .mc-pdp-accordion .mc-acc-link-btn {
+  display: inline-block !important;
+  padding: 10px 16px !important;
+  margin: 4px 0 0 0 !important;
+  border: 1px solid #333 !important;
+  background: #fff !important;
+  color: #333 !important;
+  text-decoration: none !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.03em !important;
+  cursor: pointer !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-link-btn:hover,
+body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
+  background: #f7f7f5 !important;
+}
+
