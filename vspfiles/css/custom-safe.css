@@ -12366,20 +12366,30 @@ body.mc-product-page #mcLeatherSwatchStrip {
 body.mc-product-page #content_area .mc-atc-button-wrap {
   /* min-width: 150px !important; */
   /* font-family: inherit !important; */
+  /* font-size: 14px !important; */
+  /* font-weight: 300 !important; */
+  /* letter-spacing: 0.15em !important; */
   /* margin-left: 90px; */
   /* margin-top: 30px; */
   min-width: 440px !important;
   font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.14em !important;
   color: #777 !important;
+  margin-left: 0px;
+  margin-top: 0px;
 }
 
 .mc-atc-button-wrap {
   /* background: rgb(255, 255, 255) !important; */
   /* border: 1px solid rgb(51, 51, 51) !important; */
   /* color: rgb(17, 17, 17) !important; */
+  /* border: 1px solid rgb(225, 225, 225) !important; */
+  /* color: #777 !important; */
   background: rgb(242, 242, 242) !important;
-  border: 1px solid rgb(225, 225, 225) !important;
-  color: #777 !important;
+  border: 1px solid #e2dfd8 !important;
+  color: #444 !important;
 }
 
 /* Retail-row pricing: bump to 15px / 1.5 line-height. */

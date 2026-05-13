@@ -11947,8 +11947,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
    - Each run() re-asserts position so other scripts can't push us around.
    ========================================================= */
 (function () {
-  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v5");
-  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v5";
+  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v6");
+  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v6";
 
   function q(sel, root)  { return (root || document).querySelector(sel); }
   function qa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
@@ -12242,6 +12242,54 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     main.parentNode.insertBefore(alt, main.nextSibling);
   }
 
+  /* Find the Palliser brand logo image and relocate it into a centered wrapper
+     directly under the relocated H1 title. Scaled to 70% via CSS class.
+     Defensive: only matches imgs whose src/alt contains "palliser" and that aren't
+     part of the main product image, altviews, or leather strip. */
+  function placePalliserLogoUnderTitle() {
+    var title = document.getElementById('mc-pdp-title-right');
+    if (!title || !title.parentNode) return;
+    var wrap = document.getElementById('mc-pdp-brand-logo');
+    /* If we've already moved a logo into the wrap, just re-assert position. */
+    if (wrap && wrap.querySelector('img')) {
+      if (title.nextSibling !== wrap) {
+        title.parentNode.insertBefore(wrap, title.nextSibling);
+      }
+      return;
+    }
+    var imgs = document.querySelectorAll('#v65-product-parent img, #content_area img');
+    var logo = null;
+    for (var i = 0; i < imgs.length; i++) {
+      var img = imgs[i];
+      if (!img || !img.getAttribute) continue;
+      if (img.closest && img.closest('#mc-pdp-brand-logo')) continue;
+      if (img.closest && img.closest('#altviews, .altviews')) continue;
+      if (img.id === 'product_photo' || img.id === 'main-image') continue;
+      if (img.closest && img.closest('#mcLeatherPicker, #mcLeatherSwatchStrip, .mtl-leather-modal')) continue;
+      var src = (img.getAttribute('src') || '').toLowerCase();
+      var alt = (img.getAttribute('alt') || '').toLowerCase();
+      if (!/palliser/i.test(src) && !/palliser/i.test(alt)) continue;
+      /* Skip likely product/swatch images by filename hints. */
+      if (/swatch|leather|cover|color-|configurator|sectional|paragon|theater-chair|recliner|sofa|loveseat|chaise/i.test(src + ' ' + alt)) continue;
+      /* Skip very large images (probably hero/product), prefer ~ logo-sized. */
+      var w = img.naturalWidth || img.width || 0;
+      if (w && w > 400) continue;
+      logo = img;
+      break;
+    }
+    if (!logo) return;
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'mc-pdp-brand-logo';
+      wrap.className = 'mc-pdp-brand-logo';
+    }
+    /* Move (not clone) so we don't duplicate the asset. */
+    wrap.appendChild(logo);
+    if (title.nextSibling !== wrap) {
+      title.parentNode.insertBefore(wrap, title.nextSibling);
+    }
+  }
+
   /* Hide the Volusion "Choose Options" / "Available Options" / "Chooser Options" label
      that floats above the options_table. Only hides nodes NOT inside our accordion. */
   function hideChooseOptionsLabel() {
@@ -12355,6 +12403,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   function run() {
     if (!isPdpPage()) return;
     placeTitle();
+    placePalliserLogoUnderTitle();
     placeAccordion();
     hostLeatherStripInsideAccordion();
     moveAltViewsUnderMainImage();
@@ -16683,7 +16732,7 @@ async function mcSubmitAuthForm(form, mode) {
       retailLabel = document.createElement('div');
       retailLabel.className = 'mc-pdp-retail-label';
     }
-    retailLabel.textContent = 'Retail:';
+    retailLabel.textContent = 'Retail Price';
     try {
       if (retailLabel.previousSibling !== nativeBlock.previousSibling || retailLabel.nextSibling !== nativeBlock) {
         nativeBlock.parentNode.insertBefore(retailLabel, nativeBlock);
@@ -16719,7 +16768,7 @@ async function mcSubmitAuthForm(form, mode) {
     if (isLoggedIn && memberText) {
       html +=
         '<div class="mc-pdp-member-line">' +
-        '<span class="mc-pdp-member-line__label">Member:</span>' +
+        '<span class="mc-pdp-member-line__label">Member Price</span>' +
         '<span class="mc-pdp-member-line__amount">' +
         memberText +
         '</span></div>';
@@ -16728,7 +16777,7 @@ async function mcSubmitAuthForm(form, mode) {
     } else {
       html +=
         '<div class="mc-pdp-member-line mc-pdp-member-line--locked">' +
-        '<span class="mc-pdp-member-line__label">Member:</span>' +
+        '<span class="mc-pdp-member-line__label">Member Price</span>' +
         '<span class="mc-pdp-member-line__amount"><a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see member pricing</span>' +
         '</div>';
     }
@@ -20450,7 +20499,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260513-acc5"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260513-acc6"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

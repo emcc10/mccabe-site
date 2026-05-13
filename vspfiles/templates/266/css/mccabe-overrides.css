@@ -807,9 +807,10 @@ body.mc-theater-seating-pdp #mcConfigurationBlock .mc-configuration-rh__heading,
 html.mc-paragon-pdp body #mcConfigurationBlock .mc-configuration-rh__heading {
   font-family: Inter, Arial, sans-serif !important;
   /* font-size: 11px !important; */
+  /* font-size: 13px !important; */
   /* font-weight: 500 !important; */
   /* color: #333 !important; */
-  font-size: 13px !important;
+  font-size: 12px !important;
   font-weight: 400 !important;
   letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
