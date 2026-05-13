@@ -63,28 +63,45 @@ jobs:
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
 
-      - name: Retry mtl-sectional-renderer.js if locked
+      - name: Retry locked files (template + renderer JS)
         shell: bash
         run: |
           set +e
-          # mtl-sectional-renderer.js is frequently locked by Volusion's runtime when first attempted.
-          # Retry up to 6 times with increasing sleeps. Each attempt is its own lftp session so the
-          # server has time to release the file handle between tries.
-          for attempt in 1 2 3 4 5 6; do
-            echo "=== Retry attempt $attempt for mtl-sectional-renderer.js ==="
-            sleep $((attempt * 5))
-            OUT=$(lftp -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222 -e "set sftp:auto-confirm yes; set net:max-retries 2; set net:timeout 30; put vspfiles/js/mtl-sectional-renderer.js -o /vspfiles/js/mtl-sectional-renderer.js; bye" 2>&1)
-            echo "$OUT"
-            echo "$OUT" | grep -q "Access failed"
-            STILL_LOCKED=$?
-            if [ "$STILL_LOCKED" != "0" ]; then
-              echo "=== mtl-sectional-renderer.js uploaded successfully on attempt $attempt ==="
-              break
-            fi
-            if [ "$attempt" = "6" ]; then
-              echo "=== WARNING: mtl-sectional-renderer.js still locked after 6 attempts. Continuing. ==="
-            fi
-          done
+          # Both template_266.html and mtl-sectional-renderer.js can be locked by Volusion's
+          # runtime when first attempted. Retry each up to 6 times with increasing sleeps.
+          # Each attempt is its own lftp session so the server has time to release file handles.
+
+          retry_file () {
+            local LOCAL="$1"
+            local REMOTE_A="$2"
+            local REMOTE_B="$3"
+            local LABEL="$4"
+            local attempt
+            for attempt in 1 2 3 4 5 6; do
+              echo "=== [$LABEL] retry attempt $attempt ==="
+              sleep $((attempt * 5))
+              local CMD="set sftp:auto-confirm yes; set net:max-retries 2; set net:timeout 30; put $LOCAL -o $REMOTE_A;"
+              if [ -n "$REMOTE_B" ]; then
+                CMD="$CMD put $LOCAL -o $REMOTE_B;"
+              fi
+              CMD="$CMD bye"
+              OUT=$(lftp -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222 -e "$CMD" 2>&1)
+              echo "$OUT"
+              echo "$OUT" | grep -q "Access failed"
+              STILL_LOCKED=$?
+              if [ "$STILL_LOCKED" != "0" ]; then
+                echo "=== [$LABEL] uploaded successfully on attempt $attempt ==="
+                return 0
+              fi
+              if [ "$attempt" = "6" ]; then
+                echo "=== WARNING: [$LABEL] still locked after 6 attempts. Continuing. ==="
+              fi
+            done
+            return 0
+          }
+
+          retry_file "template_266.html" "/template_266.html" "/v/template_266.html" "template_266.html"
+          retry_file "vspfiles/js/mtl-sectional-renderer.js" "/vspfiles/js/mtl-sectional-renderer.js" "" "mtl-sectional-renderer.js"
           exit 0
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
