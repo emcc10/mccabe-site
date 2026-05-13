@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260512-v3";
-  console.log("MTL_RENDERER_BUILD sectional-20260512-v3");
+  window.MTL_RENDERER_BUILD = "sectional-20260512-v4";
+  console.log("MTL_RENDERER_BUILD sectional-20260512-v4");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -994,7 +994,7 @@
     /* Preview overlay */
     var previewEl = document.createElement("div");
     previewEl.id = "mtl-own-preview";
-    previewEl.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:2147483648;padding:18px;box-sizing:border-box";
+    previewEl.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:2147483647;padding:18px;box-sizing:border-box";
     previewEl.innerHTML =
       '<div style="width:min(720px,92vw);background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #eee;font-size:14px;font-weight:600">' +
@@ -1159,8 +1159,8 @@
     /* Assemble */
     modal.appendChild(modalHdr); modal.appendChild(tabsEl); modal.appendChild(bodyEl); modal.appendChild(footEl);
     backdrop.appendChild(modal);
-    document.body.appendChild(previewEl);
     document.body.appendChild(backdrop);
+    document.body.appendChild(previewEl);
 
     console.log("[MTL own picker] opened with", all.length, "leathers,", grades.length, "grade(s)");
   }
