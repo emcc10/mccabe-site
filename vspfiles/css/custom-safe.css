@@ -12596,3 +12596,94 @@ body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
   display: flex !important;
 }
 
+/* =========================================================
+   Late overrides — keep these AT THE END so they win over the
+   higher-specificity black-ATC rule (~line 5779) and the #333
+   color stamps that ship earlier in this file.
+   ========================================================= */
+
+/* Add to Cart — light grey shell + soft border + grey text.
+   Targets the actual <input>/<button>, not just the wrap, so it overrides the
+   pre-existing background-color:#111 / color:#fff rule. */
+html body.mc-product-page #content_area input[name="btnaddtocart"],
+html body.mc-product-page #content_area input[id*="btnaddtocart"],
+html body.mc-product-page #content_area button[name="btnaddtocart"],
+html body.mc-product-page #content_area .v65-product-addtocart input[name="btnaddtocart"],
+html body.mc-product-page #content_area .v65-product-addtocart input[id*="btnaddtocart"],
+html body.mc-product-page #content_area .v65-product-addtocart button[name="btnaddtocart"],
+html body.productdetails #content_area input[name="btnaddtocart"],
+html body.productdetails #content_area input[id*="btnaddtocart"],
+html body.productdetails #content_area button[name="btnaddtocart"],
+html body.productdetails #content_area .v65-product-addtocart input[name="btnaddtocart"],
+html body.productdetails #content_area .v65-product-addtocart input[id*="btnaddtocart"],
+html body.productdetails #content_area .v65-product-addtocart button[name="btnaddtocart"],
+html body.mc-product-page #v65-product-parent input[name="btnaddtocart"],
+html body.mc-product-page #v65-product-parent button[name="btnaddtocart"],
+html body.productdetails #v65-product-parent input[name="btnaddtocart"],
+html body.productdetails #v65-product-parent button[name="btnaddtocart"] {
+  background: rgb(242, 242, 242) !important;
+  background-color: rgb(242, 242, 242) !important;
+  border: 1px solid rgb(225, 225, 225) !important;
+  color: #777 !important;
+}
+
+html body.mc-product-page #content_area input[name="btnaddtocart"]:hover,
+html body.mc-product-page #content_area button[name="btnaddtocart"]:hover,
+html body.mc-product-page #content_area .v65-product-addtocart input[name="btnaddtocart"]:hover,
+html body.mc-product-page #content_area .v65-product-addtocart button[name="btnaddtocart"]:hover,
+html body.productdetails #content_area input[name="btnaddtocart"]:hover,
+html body.productdetails #content_area button[name="btnaddtocart"]:hover,
+html body.productdetails #content_area .v65-product-addtocart input[name="btnaddtocart"]:hover,
+html body.productdetails #content_area .v65-product-addtocart button[name="btnaddtocart"]:hover {
+  background: rgb(232, 232, 232) !important;
+  background-color: rgb(232, 232, 232) !important;
+  border-color: rgb(210, 210, 210) !important;
+  color: #555 !important;
+}
+
+/* Final-word PDP body text color: #444 across pricebox, options TD, leather summary,
+   description, member-pricing, accordion content. Higher specificity (`html body`) so
+   it wins over the earlier #333 stamps in this and other CSS files. */
+html body.mc-product-page #content_area,
+html body.productdetails #content_area,
+html body.mc-product-page #v65-product-parent,
+html body.productdetails #v65-product-parent,
+html body.mc-product-page #content_area p,
+html body.productdetails #content_area p,
+html body.mc-product-page #content_area li,
+html body.productdetails #content_area li,
+html body.mc-product-page #content_area td,
+html body.productdetails #content_area td,
+html body.mc-product-page #content_area span,
+html body.productdetails #content_area span,
+html body.mc-product-page #content_area div,
+html body.productdetails #content_area div,
+html body.mc-product-page #content_area .mc-pdp-options-td,
+html body.productdetails #content_area .mc-pdp-options-td,
+html body.mc-product-page #v65-product-parent .mc-pdp-options-td,
+html body.productdetails #v65-product-parent .mc-pdp-options-td,
+html body.mc-product-page #content_area .mc-pdp-retail-label,
+html body.productdetails #content_area .mc-pdp-retail-label,
+html body.mc-product-page #content_area .mc-pdp-member-line__label,
+html body.productdetails #content_area .mc-pdp-member-line__label,
+html body.mc-product-page #content_area .mc-pdp-member-line__amount,
+html body.productdetails #content_area .mc-pdp-member-line__amount,
+html body.mc-product-page #content_area #mcLeatherSummary,
+html body.productdetails #content_area #mcLeatherSummary,
+html body.mc-product-page #content_area .mc-pdp-accordion .mc-acc-header,
+html body.productdetails #content_area .mc-pdp-accordion .mc-acc-header,
+html body.mc-product-page #content_area .mc-pdp-accordion .mc-acc-content,
+html body.productdetails #content_area .mc-pdp-accordion .mc-acc-content {
+  color: #444 !important;
+}
+
+/* Keep ATC button text at #777 even after the broad #444 sweep above. */
+html body.mc-product-page #content_area input[name="btnaddtocart"],
+html body.mc-product-page #content_area button[name="btnaddtocart"],
+html body.mc-product-page #content_area .v65-product-addtocart input[name="btnaddtocart"],
+html body.mc-product-page #content_area .v65-product-addtocart button[name="btnaddtocart"],
+html body.productdetails #content_area input[name="btnaddtocart"],
+html body.productdetails #content_area button[name="btnaddtocart"] {
+  color: #777 !important;
+}
+

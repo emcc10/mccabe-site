@@ -538,7 +538,8 @@ html.mc-paragon-pdp body #content_area .mc-pdp-options-td,
 body.productdetails #v65-product-parent .mc-pdp-options-td,
 body.mc-product-page #v65-product-parent .mc-pdp-options-td {
   font-family: Inter, Arial, sans-serif !important;
-  color: #333 !important;
+  /* color: #333 !important; */
+  color: #444 !important;
 }
 
 body.productdetails #content_area .ProductDescription,
@@ -614,7 +615,8 @@ html.mc-paragon-pdp body #content_area .mc-pdp-member-line__label {
   /* letter-spacing: 0.1em !important; */
   letter-spacing: 0.14em !important;
   text-transform: capitalize !important;
-  color: #333 !important;
+  /* color: #333 !important; */
+  color: #444 !important;
 }
 
 body.productdetails #content_area .mc-pdp-member-line__amount,
@@ -733,7 +735,8 @@ html.mc-paragon-pdp body #mcLeatherSummary {
   font-size: 12px !important;
   font-weight: 300 !important;
   letter-spacing: 0.04em !important;
-  color: #333 !important;
+  /* color: #333 !important; */
+  color: #444 !important;
 }
 
 /* Chevron-only leather affordance keeps compact hit target; no leather modal change */

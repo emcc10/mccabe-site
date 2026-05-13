@@ -11947,8 +11947,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
    - Each run() re-asserts position so other scripts can't push us around.
    ========================================================= */
 (function () {
-  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v4");
-  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v4";
+  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v5");
+  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v5";
 
   function q(sel, root)  { return (root || document).querySelector(sel); }
   function qa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
@@ -12145,12 +12145,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       c.appendChild(viewAll);
       return c;
     });
-    /* Default Select a Leather to OPEN so the mini swatch strip is visible without a click. */
-    leatherRow.dataset.open = '1';
-    var leatherHdr = leatherRow.querySelector('.mc-acc-header');
-    if (leatherHdr) leatherHdr.setAttribute('aria-expanded', 'true');
-    var leatherPnl = leatherRow.querySelector('.mc-acc-panel');
-    if (leatherPnl) leatherPnl.setAttribute('aria-hidden', 'false');
+    /* All accordion rows default to CLOSED on page load / refresh.
+       (Previously Select a Leather defaulted open; user wants every row closed.) */
     acc.appendChild(leatherRow);
 
     /* Row 2: Room Planner — theater pages only. Panel hosts a real .mc-config-btn that
@@ -20454,7 +20450,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260513-acc4"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260513-acc5"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
