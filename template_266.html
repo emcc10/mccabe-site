@@ -11931,17 +11931,19 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 </script>
 <script>
 /* =========================================================
-   PDP RIGHT-COLUMN ACCORDION + TITLE RELOCATION (20260513-acc-v2)
-   - Moves H1 title into right column above pricing.
-   - Builds accordion rows: Select a Leather / Room Planner / Product Summary / Availability.
+   PDP RIGHT-COLUMN ACCORDION + TITLE RELOCATION (20260513-acc-v3)
+   - Anchors insertion to .colors_pricebox elements instead of a single "right TD"
+     (theater PDPs split the right side into multiple TDs).
+   - Title goes BEFORE the first pricebox (retail pricing).
+   - Accordion goes BEFORE the second pricebox (options + Add to Cart).
    - Reuses existing window.mcOpenWmLeatherModal, #mcPlannerBtn, #mcProductSummaryBtn,
      and existing availability text. Does NOT rebuild leather/planner/summary logic.
    - Hides duplicate existing buttons + duplicate availability text in pricing pricebox.
-   - Forces final DOM order via appendChild at end of run() so other scripts can't push us around.
+   - Each run() re-asserts position so other scripts can't push us around.
    ========================================================= */
 (function () {
-  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v2");
-  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v2";
+  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v3");
+  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v3";
 
   function q(sel, root)  { return (root || document).querySelector(sel); }
   function qa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
@@ -11966,15 +11968,19 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     return /\b(theater|theatre|flicks|paragon|vivid|ace|vertex|catalina|beckett|audio|recliner-loveseat|home-theater)\b/.test(hay);
   }
 
-  function findRightTd() {
-    var v65 = document.getElementById('v65-product-parent');
-    if (!v65) return null;
-    /* Row 2 is the main flex row: left=image, right=options. The right TD has align="right". */
-    var rightTd =
-      v65.querySelector('tr > td.mc-pdp-options-td') ||
-      v65.querySelector('td[align="right"][valign="top"]') ||
-      v65.querySelector('td[align="right"]');
-    return rightTd;
+  function findScope() {
+    return document.getElementById('v65-product-parent') || document.getElementById('content_area') || document;
+  }
+
+  function findFirstPricebox() {
+    /* Retail/Member pricing + Affirm/Klarna pricebox — first .colors_pricebox in PDP. */
+    return q('.colors_pricebox', findScope());
+  }
+
+  function findSecondPricebox() {
+    /* Options table + Add to Cart pricebox — second .colors_pricebox in PDP. */
+    var all = qa('.colors_pricebox', findScope());
+    return all[1] || null;
   }
 
   function findH1() {
@@ -12058,44 +12064,49 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     return row;
   }
 
-  function moveTitleIntoRightColumn(rightTd) {
-    var h1 = findH1();
-    if (!h1) return;
-    /* If H1 is already inside the right TD, just ensure it's at the top */
-    if (rightTd.contains(h1)) {
-      var wrap = h1.parentNode;
-      if (wrap && wrap !== rightTd && wrap.id === 'mc-pdp-title-right') return;
-    }
-    if (document.getElementById('mc-pdp-title-right')) return;
-    var titleWrap = document.createElement('div');
-    titleWrap.id = 'mc-pdp-title-right';
-    /* Move (not clone) the H1 so SEO/itemprop stays intact and we don't duplicate */
-    titleWrap.appendChild(h1);
-    rightTd.insertBefore(titleWrap, rightTd.firstChild);
-    /* Hide the now-empty original breadcrumb TR if it only held the title and spacers */
+  function hideBreadcrumbRowIfEmpty() {
     var breadcrumbTd = document.querySelector('#v65-product-parent .vCSS_breadcrumb_td');
-    if (breadcrumbTd) {
-      var hasMeaningfulChild = false;
-      var kids = breadcrumbTd.children;
-      for (var i = 0; i < kids.length; i++) {
-        var el = kids[i];
-        if (el === titleWrap) continue;
-        if (el.tagName === 'IMG' && /clear1x1\.gif/i.test(el.getAttribute('src') || '')) continue;
-        if (el.tagName === 'BR') continue;
-        var t = (el.textContent || '').replace(/\u00A0|\s/g, '');
-        if (!t && !el.querySelector('a, img:not([src*="clear1x1"])')) continue;
-        hasMeaningfulChild = true;
-        break;
-      }
-      if (!hasMeaningfulChild) {
-        var tr = breadcrumbTd.closest('tr');
-        if (tr) tr.style.setProperty('display', 'none', 'important');
-      }
+    if (!breadcrumbTd) return;
+    var hasMeaningfulChild = false;
+    var kids = breadcrumbTd.children;
+    for (var i = 0; i < kids.length; i++) {
+      var el = kids[i];
+      if (el.id === 'mc-pdp-title-right') continue;
+      if (el.tagName === 'IMG' && /clear1x1\.gif/i.test(el.getAttribute('src') || '')) continue;
+      if (el.tagName === 'BR') continue;
+      var t = (el.textContent || '').replace(/\u00A0|\s/g, '');
+      if (!t && !el.querySelector('a, img:not([src*="clear1x1"])')) continue;
+      hasMeaningfulChild = true;
+      break;
+    }
+    if (!hasMeaningfulChild) {
+      var tr = breadcrumbTd.closest('tr');
+      if (tr) tr.style.setProperty('display', 'none', 'important');
     }
   }
 
-  function buildAccordion(rightTd) {
-    if (document.getElementById('mc-pdp-accordion')) return;
+  /* Place the H1 title immediately BEFORE the first pricebox (retail pricing). */
+  function placeTitle() {
+    var firstPricebox = findFirstPricebox();
+    if (!firstPricebox || !firstPricebox.parentNode) return;
+    var titleWrap = document.getElementById('mc-pdp-title-right');
+    var h1 = findH1();
+    if (!titleWrap) {
+      if (!h1) return;
+      titleWrap = document.createElement('div');
+      titleWrap.id = 'mc-pdp-title-right';
+    }
+    if (h1 && !titleWrap.contains(h1)) {
+      titleWrap.appendChild(h1);
+    }
+    /* Re-assert position: insert just before firstPricebox if not already there. */
+    if (firstPricebox.previousSibling !== titleWrap) {
+      firstPricebox.parentNode.insertBefore(titleWrap, firstPricebox);
+    }
+    hideBreadcrumbRowIfEmpty();
+  }
+
+  function buildAccordionElement() {
     var acc = document.createElement('div');
     acc.id = 'mc-pdp-accordion';
     acc.className = 'mc-pdp-accordion';
@@ -12171,18 +12182,28 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       return c;
     }));
 
-    /* Insert AFTER the first .colors_pricebox (the retail/Affirm pricebox),
-       BEFORE the second one (which holds options_table + Add to Cart). */
-    var priceboxes = qa('.colors_pricebox', rightTd);
-    var firstPricebox = priceboxes[0];
-    var secondPricebox = priceboxes[1];
+    return acc;
+  }
+
+  /* Place accordion immediately BEFORE the second pricebox (options + Add to Cart).
+     Re-asserts on every run() so other scripts can't push us around. */
+  function placeAccordion() {
+    var secondPricebox = findSecondPricebox();
+    var existingAcc = document.getElementById('mc-pdp-accordion');
+    if (!existingAcc) existingAcc = buildAccordionElement();
     if (secondPricebox && secondPricebox.parentNode) {
-      secondPricebox.parentNode.insertBefore(acc, secondPricebox);
-    } else if (firstPricebox && firstPricebox.parentNode) {
-      if (firstPricebox.nextSibling) firstPricebox.parentNode.insertBefore(acc, firstPricebox.nextSibling);
-      else firstPricebox.parentNode.appendChild(acc);
-    } else {
-      rightTd.appendChild(acc);
+      if (secondPricebox.previousSibling !== existingAcc) {
+        secondPricebox.parentNode.insertBefore(existingAcc, secondPricebox);
+      }
+      return;
+    }
+    /* Fallback: if only one pricebox, insert after it (so accordion is between pricing and whatever follows). */
+    var firstPricebox = findFirstPricebox();
+    if (firstPricebox && firstPricebox.parentNode) {
+      if (firstPricebox.nextSibling !== existingAcc) {
+        if (firstPricebox.nextSibling) firstPricebox.parentNode.insertBefore(existingAcc, firstPricebox.nextSibling);
+        else firstPricebox.parentNode.appendChild(existingAcc);
+      }
     }
   }
 
@@ -12239,40 +12260,12 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }
   }
 
-  /* Force the final DOM order in the right TD so other PDP scripts can't push us around.
-     appendChild() MOVES an existing node, so reapplying the desired order is idempotent. */
-  function reorderRightColumn(rightTd) {
-    if (!rightTd) return;
-    var title       = document.getElementById('mc-pdp-title-right');
-    var allPriceboxes = [];
-    var i, c;
-    for (i = 0; i < rightTd.children.length; i++) {
-      c = rightTd.children[i];
-      if (c.classList && c.classList.contains('colors_pricebox')) allPriceboxes.push(c);
-    }
-    var firstPricebox  = allPriceboxes[0];
-    var secondPricebox = allPriceboxes[1];
-    var accordion      = document.getElementById('mc-pdp-accordion');
-    var inlineConfig   = document.getElementById('mc-inline-config');
-
-    /* Move (appendChild = re-parent) into desired order at end of rightTd */
-    if (title          && title.parentNode          === rightTd) rightTd.appendChild(title);
-    if (firstPricebox)                                         rightTd.appendChild(firstPricebox);
-    if (accordion)                                             rightTd.appendChild(accordion);
-    if (secondPricebox)                                        rightTd.appendChild(secondPricebox);
-    /* Push inline-config (the old leather/planner/summary panel) to the very bottom; hidden via JS */
-    if (inlineConfig   && inlineConfig.parentNode   === rightTd) rightTd.appendChild(inlineConfig);
-  }
-
   function run() {
     if (!isPdpPage()) return;
-    var rightTd = findRightTd();
-    if (!rightTd) return;
-    moveTitleIntoRightColumn(rightTd);
-    buildAccordion(rightTd);
+    placeTitle();
+    placeAccordion();
     hideDuplicateTriggers();
     hideInlineAvailabilityInPricing();
-    reorderRightColumn(rightTd);
   }
 
   if (document.readyState === 'loading') {
@@ -20362,7 +20355,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260513-acc2"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260513-acc3"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
