@@ -11963,9 +11963,11 @@ body.productdetails .mc-pdp-accordion .mc-acc-header {
   border: 0 !important;
   cursor: pointer !important;
   font-family: inherit !important;
-  font-size: 14px !important;
+  /* font-size: 14px !important; */
+  /* letter-spacing: 0.06em !important; */
+  font-size: 13px !important;
   font-weight: 500 !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
   color: #333 !important;
   text-align: left !important;
@@ -12015,10 +12017,13 @@ body.productdetails .mc-pdp-accordion .mc-acc-row[data-open="1"] > .mc-acc-panel
 body.mc-product-page .mc-pdp-accordion .mc-acc-content,
 body.productdetails .mc-pdp-accordion .mc-acc-content {
   padding: 14px 0 4px 0 !important;
-  font-size: 15px !important;
+  /* font-size: 15px !important; */
+  /* color: #333 !important; */
+  /* font-weight: 400 !important; */
+  font-size: 14px !important;
   line-height: 1.5 !important;
-  color: #333 !important;
-  font-weight: 400 !important;
+  color: #777 !important;
+  font-weight: 300 !important;
   letter-spacing: normal !important;
   text-transform: none !important;
 }
@@ -12141,7 +12146,9 @@ body.productdetails .mc-pdp-accordion .mc-acc-config-btn {
   gap: 8px !important;
   padding: 10px 14px !important;
   margin: 8px 0 0 0 !important;
-  border: 1px solid #333 !important;
+  /* border: 1px solid #333 !important; */
+  /* letter-spacing: 0.05em !important; */
+  border: 1px solid #bebebe !important;
   border-radius: 0 !important;
   background: #fff !important;
   color: #333 !important;
@@ -12149,7 +12156,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-config-btn {
   font-family: inherit !important;
   font-size: 13px !important;
   font-weight: 500 !important;
-  letter-spacing: 0.05em !important;
+  letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
@@ -12231,12 +12238,12 @@ body.productdetails #product_options_heading > td:nth-child(2) > img:nth-child(1
 body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
 body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label {
   /* font-weight: 500 !important; */
-  /* letter-spacing: 0.14em !important; */
-  /* text-transform: uppercase !important; */
-  /* color: #6a6a6a !important; */
-  font-weight: 500 !important;
-  letter-spacing: 0.1em !important;
-  color: #545454 !important;
+  /* letter-spacing: 0.1em !important; */
+  /* color: #545454 !important; */
+  /* text-transform: capitalize (kept below) */
+  font-weight: 400 !important;
+  letter-spacing: 0.14em !important;
+  color: #444 !important;
   margin-top: -39px !important;
   text-transform: capitalize !important;
 }
@@ -12246,35 +12253,346 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label
 }
 
 .productnamecolorLARGE > span:nth-child(1) {
-  margin-top: 90px !important;
+  /* margin-top: 90px !important; */
+  margin-top: 89px !important;
   margin-left: 12px !important;
   width: 100% !important;
 }
 
 .productdetails span[itemprop="name"] {
   /* font-size: 25px; */
+  /* font-size: 20px !important; */
   /* text-transform: uppercase; */
-  font-size: 20px !important;
+  font-size: 16px !important;
+  letter-spacing: -0.03em !important;
 }
 
 .productdetails span[itemprop="name"],
 .productdetails .productnamecolorLARGE.colors_productname {
   /* color: #575757; */
-  color: #545454 !important;
+  /* color: #545454 !important; */
+  color: #777 !important;
 }
 
 div.product_productprice:nth-child(2) {
   margin-top: 5px !important;
-  font-style: unset !important;
+  /* font-style: unset !important; */
+  /* font-style was a typo for font-family in the Firefox DevTools edit. */
+  font-family: Inter, Arial, sans-serif !important;
+  color: #444 !important;
+  letter-spacing: 0.14em !important;
 }
 
 .mc-pdp-member-line__label {
   margin-top: 10px !important;
+  color: #444 !important;
+  /* `200px` from the Firefox DevTools edit was a typo; px is invalid on font-weight. */
+  font-weight: 200 !important;
+}
+
+.mc-pdp-member-line__amount {
+  /* `300px` from the Firefox DevTools edit was a typo; px is invalid on font-weight. */
+  font-weight: 300 !important;
 }
 
 /* Deeply-nested Volusion price span — nudge top margin to align with surrounding price chrome.
    Selector kept verbatim from the live override; brittle but matches the live tree exactly. */
-table.colors_pricebox:nth-child(3) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > b:nth-child(2) > font:nth-child(1) > div:nth-child(1) > span:nth-child(1) {
+table.colors_pricebox:nth-child(3) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > b:nth-child(2) > font:nth-child(1) > div:nth-child(1) > span:nth-child(1) {
   margin-top: 5px !important;
+}
+
+/* =========================================================
+   PDP Firefox DevTools session — round 2 (20260513-acc-v4 typography refresh)
+   - Global Inter, base color #444, 0.14em letter-spacing on PDPs.
+   - Pull config block up 35px on desktop.
+   - Larger leather swatch strip.
+   - Soft-grey ATC button shell.
+   - Retail-row price font size 15px / line-height 1.5.
+   - Larger heading hierarchy for retail/member labels.
+   - Reset altviews so the thumbnails sit directly under the main product image
+     (the position:absolute / 846px-margin experiments are NOT applied — those broke
+     the layout. Use the DOM move from template_266.html accordion script + this CSS.).
+   ========================================================= */
+
+/* Inline <style> baseline copied from the Firefox session into the persisted CSS. */
+body,
+body * {
+  /* font-weight: 300; */
+  /* letter-spacing: 1.1px; */
+  font-weight: 400;
+  color: #444 !important;
+  font-family: Inter, Arial, sans-serif !important;
+}
+
+body {
+  /* letter-spacing: 0.02em; */
+  letter-spacing: 0.14em;
+}
+
+body * {
+  font-family: Inter, Arial, sans-serif !important;
+}
+
+body.mc-product-page #content_area,
+body.mc-product-page #content_area p,
+body.mc-product-page #content_area li {
+  /* font-size: 14px !important; */
+  font-size: 15px !important;
+}
+
+.productdetails span[itemprop="name"] {
+  /* margin-left: 72px !important; */
+  margin-left: 13px !important;
+}
+
+.productdetails span[itemprop="name"],
+.productdetails .productnamecolorLARGE.colors_productname {
+  /* font-weight: 300; */
+  /* letter-spacing: -.02 !important; */
+  font-weight: 400;
+  color: #444 !important;
+  letter-spacing: 0.14em !important;
+}
+
+body.mc-product-page #content_area #mcLeatherSwatchStrip {
+  display: flex;
+}
+
+body.mc-product-page #mcLeatherSwatchStrip {
+  /* height: 42px !important; */
+  height: 45px !important;
+}
+
+body.mc-product-page #content_area .mc-atc-button-wrap {
+  /* min-width: 150px !important; */
+  /* font-family: inherit !important; */
+  /* margin-left: 90px; */
+  /* margin-top: 30px; */
+  min-width: 440px !important;
+  font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  color: #777 !important;
+}
+
+.mc-atc-button-wrap {
+  /* background: rgb(255, 255, 255) !important; */
+  /* border: 1px solid rgb(51, 51, 51) !important; */
+  /* color: rgb(17, 17, 17) !important; */
+  background: rgb(242, 242, 242) !important;
+  border: 1px solid rgb(225, 225, 225) !important;
+  color: #777 !important;
+}
+
+/* Retail-row pricing: bump to 15px / 1.5 line-height. */
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-line,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-line,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_list_price,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_productprice,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_productprice,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+html body.productdetails #v65-product-parent .mc-pdp-member-line__amount,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line__amount,
+html body.productdetails #content_area .mc-pdp-retail-row .product_productprice,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice {
+  /* font-size: 16px !important; */
+  /* line-height: 1.2 !important; */
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+/* Retail / member labels + locked-member link — 15px, Inter, #444. */
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.productdetails #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.mc-product-page #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.productdetails #v65-product-parent .mc-pdp-member-line__label,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line__label,
+html body.productdetails #v65-product-parent .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.productdetails #content_area .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.mc-product-page #content_area .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.productdetails #v65-product-parent .mc-pdp-member-line--locked,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line--locked,
+html body.productdetails #v65-product-parent .mc-pdp-member-line--locked a,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line--locked a {
+  /* font-size: 16px !important; */
+  font-size: 15px !important;
+  font-family: Inter, Arial, sans-serif !important;
+  color: #444 !important;
+}
+
+/* Retail-row price colors / letter-spacing (consolidated from the inline DevTools rule). */
+body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
+body.productdetails #content_area .mc-pdp-retail-row .product_list_price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row font.product_list_price,
+body.productdetails #content_area .mc-pdp-retail-row font.product_list_price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .product_productprice,
+body.productdetails #content_area .mc-pdp-retail-row .product_productprice,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+body.productdetails #content_area .mc-pdp-retail-row .v65-product-price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .product_price,
+body.productdetails #content_area .mc-pdp-retail-row .product_price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .price,
+body.productdetails #content_area .mc-pdp-retail-row .price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row #priceWithOptions,
+body.productdetails #content_area .mc-pdp-retail-row #priceWithOptions,
+body.productdetails #v65-product-parent .mc-pdp-retail-row #priceWithOptionsNoTax,
+body.productdetails #content_area .mc-pdp-retail-row #priceWithOptionsNoTax,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_list_price,
+body.mc-product-page #content_area .mc-pdp-retail-row .product_list_price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row font.product_list_price,
+body.mc-product-page #content_area .mc-pdp-retail-row font.product_list_price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_productprice,
+body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+body.mc-product-page #content_area .mc-pdp-retail-row .v65-product-price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_price,
+body.mc-product-page #content_area .mc-pdp-retail-row .product_price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .price,
+body.mc-product-page #content_area .mc-pdp-retail-row .price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row #priceWithOptions,
+body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptions,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row #priceWithOptionsNoTax,
+body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
+  /* letter-spacing: normal !important; */
+  /* color: #1a1a1a !important; */
+  letter-spacing: 0.14em !important;
+  color: #444 !important;
+}
+
+/* Sale price size override — equivalent of the 26620230411140605.css DevTools edit. */
+.home table.v65-productDisplay .product_saleprice,
+.home table.v65-productDisplay .product_saleprice b,
+.home #fpslider .item .sale,
+.home #fpslider .item .sale span,
+.category table.v65-productDisplay .product_saleprice,
+.category table.v65-productDisplay .product_saleprice b,
+.productdetails .colors_pricebox .product_saleprice,
+.productdetails .colors_pricebox .product_saleprice b,
+.productdetails .colors_lines_light .product_saleprice,
+.productdetails .colors_lines_light .product_saleprice b,
+.productdetails #content_area table[bgcolor="#CCCCCC"] font[color="#CC0000"],
+.shoppingcart table.v65-productDisplay .product_saleprice,
+.shoppingcart table.v65-productDisplay .product_saleprice span {
+  /* font-size: 16px; */
+  /* font-weight: bold; */
+  font-size: 15px;
+}
+
+/* Configuration block — pull up 35px on desktop so it stacks tight against the accordion. */
+@media (min-width: 992px) {
+  body.mc-product-page #mcConfigurationBlock,
+  body.productdetails #mcConfigurationBlock {
+    margin-top: -35px !important;
+  }
+}
+
+/* -----------------------------------------------------------------
+   ALT THUMBNAIL POSITIONING (alt views below main product image)
+   The earlier DevTools experiments used position:absolute with top:450px,
+   margin-left:846px, width:500px, and display:block ruby. Those all broke
+   the layout (thumbnails went off-screen or rendered as inline ruby text).
+   The correct approach is:
+     1) JS in template_266.html (moveAltViewsUnderMainImage) DOM-moves #altviews
+        to be the next sibling of #product_photo.
+     2) This CSS forces altviews back into normal flow (no absolute positioning)
+        and lays it out as a centered flex row directly beneath the main image.
+   ----------------------------------------------------------------- */
+@media (min-width: 992px) {
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) #altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) span#altviews,
+  body.productdetails :is(#content_area, #v65-product-parent) .altviews {
+    /* Reset bad rules that may exist in the DOM from inline edits / older overrides. */
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px !important;
+    order: 2 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 12px auto 24px auto !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    float: none !important;
+    clear: both !important;
+  }
+
+  /* Individual thumbnail links inside altviews: ~64px square, 3–4 per row. */
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews > div,
+  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews > div,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews a,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews > div,
+  body.productdetails :is(#content_area, #v65-product-parent) #altviews a,
+  body.productdetails :is(#content_area, #v65-product-parent) #altviews > div,
+  body.productdetails :is(#content_area, #v65-product-parent) span#altviews a,
+  body.productdetails :is(#content_area, #v65-product-parent) span#altviews > div,
+  body.productdetails :is(#content_area, #v65-product-parent) .altviews a,
+  body.productdetails :is(#content_area, #v65-product-parent) .altviews > div {
+    display: inline-block !important;
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+    height: auto !important;
+    vertical-align: top !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex: 0 0 72px !important;
+  }
+
+  /* And the actual thumbnail image fills its 72px slot. */
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) #altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) span#altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) .altviews img {
+    width: 100% !important;
+    max-width: 72px !important;
+    height: auto !important;
+    max-height: 72px !important;
+    object-fit: contain !important;
+    display: block !important;
+  }
+
+  /* The TD that holds the main image becomes a vertical flex container so
+     thumbnails (order:2) sit under the main image (order:1). */
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td,
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td,
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td,
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+  }
+
+  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > :not(#altviews):not(span#altviews):not(.altviews),
+  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > :not(#altviews):not(span#altviews):not(.altviews),
+  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > :not(#altviews):not(span#altviews):not(.altviews),
+  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > :not(#altviews):not(span#altviews):not(.altviews) {
+    order: 1 !important;
+  }
+}
+
+/* Element-rule remnant: prevent #altviews from being styled as ruby text. */
+#altviews {
+  /* display: block ruby !important; — invalid layout for thumbnails. */
+  display: flex !important;
 }
 
