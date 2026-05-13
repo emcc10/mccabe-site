@@ -12371,12 +12371,12 @@ body.mc-product-page #content_area .mc-atc-button-wrap {
   /* letter-spacing: 0.15em !important; */
   /* margin-left: 90px; */
   /* margin-top: 30px; */
+  /* color: #777 !important; */
   min-width: 440px !important;
   font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
   font-size: 12px !important;
   font-weight: 400 !important;
   letter-spacing: 0.14em !important;
-  color: #777 !important;
   margin-left: 0px;
   margin-top: 0px;
 }
@@ -12633,8 +12633,8 @@ html body.productdetails #v65-product-parent input[name="btnaddtocart"],
 html body.productdetails #v65-product-parent button[name="btnaddtocart"] {
   background: rgb(242, 242, 242) !important;
   background-color: rgb(242, 242, 242) !important;
-  border: 1px solid rgb(225, 225, 225) !important;
-  color: #777 !important;
+  border: 1px solid #e2dfd8 !important;
+  color: #444 !important;
 }
 
 html body.mc-product-page #content_area input[name="btnaddtocart"]:hover,
@@ -12647,8 +12647,8 @@ html body.productdetails #content_area .v65-product-addtocart input[name="btnadd
 html body.productdetails #content_area .v65-product-addtocart button[name="btnaddtocart"]:hover {
   background: rgb(232, 232, 232) !important;
   background-color: rgb(232, 232, 232) !important;
-  border-color: rgb(210, 210, 210) !important;
-  color: #555 !important;
+  border-color: #d6d2ca !important;
+  color: #444 !important;
 }
 
 /* Final-word PDP body text color: #444 across pricebox, options TD, leather summary,
@@ -12687,15 +12687,7 @@ html body.productdetails #content_area .mc-pdp-accordion .mc-acc-content {
   color: #444 !important;
 }
 
-/* Keep ATC button text at #777 even after the broad #444 sweep above. */
-html body.mc-product-page #content_area input[name="btnaddtocart"],
-html body.mc-product-page #content_area button[name="btnaddtocart"],
-html body.mc-product-page #content_area .v65-product-addtocart input[name="btnaddtocart"],
-html body.mc-product-page #content_area .v65-product-addtocart button[name="btnaddtocart"],
-html body.productdetails #content_area input[name="btnaddtocart"],
-html body.productdetails #content_area button[name="btnaddtocart"] {
-  color: #777 !important;
-}
+/* ATC button text stays #444 with the rest of the body text — no override needed. */
 
 /* =========================================================
    PDP Firefox DevTools session — round 3 (20260513-acc-v6)
