@@ -11931,16 +11931,17 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 </script>
 <script>
 /* =========================================================
-   PDP RIGHT-COLUMN ACCORDION + TITLE RELOCATION (20260513-acc-v1)
+   PDP RIGHT-COLUMN ACCORDION + TITLE RELOCATION (20260513-acc-v2)
    - Moves H1 title into right column above pricing.
    - Builds accordion rows: Select a Leather / Room Planner / Product Summary / Availability.
    - Reuses existing window.mcOpenWmLeatherModal, #mcPlannerBtn, #mcProductSummaryBtn,
      and existing availability text. Does NOT rebuild leather/planner/summary logic.
-   - Hides duplicate existing buttons once the accordion is in place.
+   - Hides duplicate existing buttons + duplicate availability text in pricing pricebox.
+   - Forces final DOM order via appendChild at end of run() so other scripts can't push us around.
    ========================================================= */
 (function () {
-  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v1");
-  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v1";
+  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v2");
+  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v2";
 
   function q(sel, root)  { return (root || document).querySelector(sel); }
   function qa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
@@ -12113,14 +12114,24 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       if (existing) existing.click();
     }));
 
-    /* Row 2: Room Planner — theater pages only (matches existing gating) */
+    /* Row 2: Room Planner — theater pages only. Expands inline with a button (matches Product Summary). */
     if (isTheaterPg()) {
-      acc.appendChild(buildRow('roomplanner', 'Room Planner', function () {
-        var btn = q('#mcPlannerBtn');
-        if (btn) { btn.click(); return; }
-        /* Fallback: dispatch click on the configuration block which has the same handler */
-        var cfg = q('#mcConfigurationBlock');
-        if (cfg) cfg.click();
+      acc.appendChild(buildRow('roomplanner', 'Room Planner', null, function () {
+        var c = document.createElement('div');
+        c.className = 'mc-acc-content';
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mc-acc-link-btn';
+        btn.textContent = 'Open Room Planner';
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          var existing = q('#mcPlannerBtn');
+          if (existing) { existing.click(); return; }
+          var cfg = q('#mcConfigurationBlock');
+          if (cfg) cfg.click();
+        });
+        c.appendChild(btn);
+        return c;
       }));
     }
 
@@ -12181,12 +12192,76 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     var dupes = [
       '#mcPlannerRow',
       '#mcProductSummaryRowStandalone',
-      '#mcLeatherHeaderRow'
+      '#mcLeatherHeaderRow',
+      '#mcProductSummaryBtn'
     ];
     dupes.forEach(function (sel) {
       var el = q(sel);
       if (el) el.style.setProperty('display', 'none', 'important');
     });
+  }
+
+  /* Hide the duplicate "Availability:: ..." line inside the pricing pricebox so it only
+     shows in the accordion row. Wraps the <b>Availability::</b> + its trailing text in a
+     display:none span, leaving the schema.org <meta itemprop="availability"> intact. */
+  function hideInlineAvailabilityInPricing() {
+    var scope = document.getElementById('v65-product-parent') || document;
+    /* Don't run twice */
+    if (scope.querySelector('.mc-avail-hidden')) return;
+    var bolds = scope.querySelectorAll('b');
+    for (var i = 0; i < bolds.length; i++) {
+      var b = bolds[i];
+      if (!/Availability::/i.test(b.textContent)) continue;
+      /* Skip if this bold is inside our accordion */
+      if (b.closest && b.closest('#mc-pdp-accordion')) continue;
+      var wrap = document.createElement('span');
+      wrap.className = 'mc-avail-hidden';
+      wrap.style.cssText = 'display:none !important';
+      var anchor = b;
+      /* Include the preceding <br> if present */
+      if (b.previousSibling && b.previousSibling.nodeName === 'BR') {
+        anchor = b.previousSibling;
+      }
+      if (anchor.parentNode) anchor.parentNode.insertBefore(wrap, anchor);
+      /* Move anchor (and b if anchor was a BR) into wrap, then trailing inline nodes
+         until we hit another <br>, block element, or end of parent. */
+      wrap.appendChild(anchor);
+      if (anchor !== b) wrap.appendChild(b);
+      var next = wrap.nextSibling;
+      while (next) {
+        if (next.nodeName === 'BR') break;
+        if (next.nodeType === 1 && /^(DIV|TABLE|P|H[1-6]|UL|OL|SECTION)$/.test(next.nodeName)) break;
+        var nn = next.nextSibling;
+        wrap.appendChild(next);
+        next = nn;
+      }
+      return;
+    }
+  }
+
+  /* Force the final DOM order in the right TD so other PDP scripts can't push us around.
+     appendChild() MOVES an existing node, so reapplying the desired order is idempotent. */
+  function reorderRightColumn(rightTd) {
+    if (!rightTd) return;
+    var title       = document.getElementById('mc-pdp-title-right');
+    var allPriceboxes = [];
+    var i, c;
+    for (i = 0; i < rightTd.children.length; i++) {
+      c = rightTd.children[i];
+      if (c.classList && c.classList.contains('colors_pricebox')) allPriceboxes.push(c);
+    }
+    var firstPricebox  = allPriceboxes[0];
+    var secondPricebox = allPriceboxes[1];
+    var accordion      = document.getElementById('mc-pdp-accordion');
+    var inlineConfig   = document.getElementById('mc-inline-config');
+
+    /* Move (appendChild = re-parent) into desired order at end of rightTd */
+    if (title          && title.parentNode          === rightTd) rightTd.appendChild(title);
+    if (firstPricebox)                                         rightTd.appendChild(firstPricebox);
+    if (accordion)                                             rightTd.appendChild(accordion);
+    if (secondPricebox)                                        rightTd.appendChild(secondPricebox);
+    /* Push inline-config (the old leather/planner/summary panel) to the very bottom; hidden via JS */
+    if (inlineConfig   && inlineConfig.parentNode   === rightTd) rightTd.appendChild(inlineConfig);
   }
 
   function run() {
@@ -12196,6 +12271,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     moveTitleIntoRightColumn(rightTd);
     buildAccordion(rightTd);
     hideDuplicateTriggers();
+    hideInlineAvailabilityInPricing();
+    reorderRightColumn(rightTd);
   }
 
   if (document.readyState === 'loading') {
@@ -20285,7 +20362,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260513-acc1"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260513-acc2"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
