@@ -10780,6 +10780,60 @@ margin-left: 72px !important;
       }, true);
     });
   }
+  function fixAltViewsLayout(scope){
+    var altviews = q('#altviews', scope);
+    if (!altviews) return;
+
+    var photo = q('#product_photo', scope);
+    if (!photo) return;
+
+    // Walk up from photo to find the TD that directly contains both the inner
+    // image table and #altviews (the outer left TD in v65-product-parent).
+    var outerTd = altviews.parentNode;
+    if (!outerTd) return;
+
+    var innerTable = outerTd.querySelector('table');
+    if (!innerTable) return;
+
+    // Override CDN float layout: make the outer TD a flex column so thumbnails
+    // stack below the main image.
+    outerTd.style.setProperty('display', 'flex', 'important');
+    outerTd.style.setProperty('flex-direction', 'column', 'important');
+    outerTd.style.setProperty('align-items', 'stretch', 'important');
+
+    // Kill the CDN float on the inner image table.
+    innerTable.style.setProperty('float', 'none', 'important');
+    innerTable.style.setProperty('width', '100%', 'important');
+
+    // Make altviews a wrapping flex row of thumbnails.
+    altviews.style.setProperty('float', 'none', 'important');
+    altviews.style.setProperty('width', '100%', 'important');
+    altviews.style.setProperty('display', 'flex', 'important');
+    altviews.style.setProperty('flex-direction', 'row', 'important');
+    altviews.style.setProperty('flex-wrap', 'wrap', 'important');
+    altviews.style.setProperty('gap', '8px', 'important');
+
+    // Style each thumbnail anchor.
+    var thumbLinks = altviews.querySelectorAll('a');
+    thumbLinks.forEach(function(a){
+      a.style.setProperty('flex', '0 0 calc(25% - 6px)', 'important');
+      a.style.setProperty('width', 'calc(25% - 6px)', 'important');
+      a.style.setProperty('aspect-ratio', '1/1', 'important');
+      a.style.setProperty('overflow', 'hidden', 'important');
+      a.style.setProperty('display', 'block', 'important');
+      a.style.setProperty('margin', '0', 'important');
+    });
+
+    // Style each thumbnail image.
+    var thumbImgs = altviews.querySelectorAll('img');
+    thumbImgs.forEach(function(img){
+      img.style.setProperty('width', '100%', 'important');
+      img.style.setProperty('height', '100%', 'important');
+      img.style.setProperty('object-fit', 'cover', 'important');
+      img.style.setProperty('display', 'block', 'important');
+    });
+  }
+
   function forceMediaLayout(scope){
     wireAltThumbClicks(scope);
 
@@ -10791,8 +10845,9 @@ margin-left: 72px !important;
       return;
     }
 
-    /* Desktop: PDP media layout is CSS-only (custom-safe.css). Strip legacy wrapper only. */
+    /* Desktop: strip legacy wrapper, then fix alt-thumbnail layout. */
     unwrapDesktopMediaWrap(scope);
+    fixAltViewsLayout(scope);
   }
 
   function removeConfigurationDetails(scope){
@@ -19950,7 +20005,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260512-v5"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260512-v6"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
