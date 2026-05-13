@@ -7333,65 +7333,91 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 }
 
 /* =========================================================
-   PDP desktop: thumbnails under main image
-   JS moves #altviews into .mc-pdp-media-td; these rules style it there.
+   PDP desktop: thumbnails below main image
+   The live Volusion DOM puts span#altviews inside the same outer TD as the
+   main image, after the inner image <table>. Making that outer TD a flex
+   column naturally stacks image above thumbnails — no JS DOM-moving needed.
+   Selector confirmed from live HTML inspection.
    ========================================================= */
 @media (min-width: 992px) {
-  body.mc-product-page #content_area .mc-pdp-media-td,
-  body.productdetails #content_area .mc-pdp-media-td,
-  body.mc-product-page #v65-product-parent .mc-pdp-media-td,
-  body.productdetails #v65-product-parent .mc-pdp-media-td {
+  /* Outer left TD: image + altviews already stacked in DOM order; make it flex column */
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:has(#product_photo),
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:has(#product_photo),
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:has(#product_photo),
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:has(#product_photo) {
     display: flex !important;
     flex-direction: column !important;
-    align-items: flex-start !important;
+    align-items: stretch !important;
+    gap: 12px !important;
   }
 
-  body.mc-product-page #content_area .mc-pdp-media-td #altviews,
-  body.mc-product-page #content_area .mc-pdp-media-td span#altviews,
-  body.productdetails #content_area .mc-pdp-media-td #altviews,
-  body.productdetails #content_area .mc-pdp-media-td span#altviews,
-  body.mc-product-page #v65-product-parent .mc-pdp-media-td #altviews,
-  body.productdetails #v65-product-parent .mc-pdp-media-td #altviews {
+  /* Inner image table: takes full width as first flex child */
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:has(#product_photo) > table,
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:has(#product_photo) > table,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:has(#product_photo) > table,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:has(#product_photo) > table {
+    width: 100% !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Thumbnail strip: flex row, wraps to next row after ~4 items */
+  body.mc-product-page #v65-product-parent span#altviews,
+  body.mc-product-page #v65-product-parent #altviews,
+  body.mc-product-page #content_area span#altviews,
+  body.mc-product-page #content_area #altviews,
+  body.productdetails #v65-product-parent span#altviews,
+  body.productdetails #v65-product-parent #altviews,
+  body.productdetails #content_area span#altviews,
+  body.productdetails #content_area #altviews {
     display: flex !important;
-    flex-wrap: wrap !important;
     flex-direction: row !important;
-    justify-content: flex-start !important;
-    align-items: flex-start !important;
+    flex-wrap: wrap !important;
     gap: 8px !important;
-    margin: 12px 0 0 0 !important;
+    margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     float: none !important;
     clear: none !important;
     font-size: 0 !important;
+    box-sizing: border-box !important;
   }
 
-  body.mc-product-page #content_area .mc-pdp-media-td #altviews a,
-  body.mc-product-page #content_area .mc-pdp-media-td span#altviews a,
-  body.productdetails #content_area .mc-pdp-media-td #altviews a,
-  body.productdetails #content_area .mc-pdp-media-td span#altviews a,
-  body.mc-product-page #v65-product-parent .mc-pdp-media-td #altviews a,
-  body.productdetails #v65-product-parent .mc-pdp-media-td #altviews a {
+  /* Each thumbnail anchor: ~4 per row */
+  body.mc-product-page #v65-product-parent span#altviews a,
+  body.mc-product-page #v65-product-parent #altviews a,
+  body.mc-product-page #content_area span#altviews a,
+  body.mc-product-page #content_area #altviews a,
+  body.productdetails #v65-product-parent span#altviews a,
+  body.productdetails #v65-product-parent #altviews a,
+  body.productdetails #content_area span#altviews a,
+  body.productdetails #content_area #altviews a {
     display: block !important;
-    flex: 0 0 64px !important;
-    width: 64px !important;
-    height: 64px !important;
+    flex: 0 0 calc(25% - 6px) !important;
+    width: calc(25% - 6px) !important;
+    aspect-ratio: 1 / 1 !important;
     overflow: hidden !important;
     border-radius: 4px !important;
-    border: 1px solid #e0e0e0 !important;
+    border: 1px solid #ddd !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
-  body.mc-product-page #content_area .mc-pdp-media-td #altviews img,
-  body.mc-product-page #content_area .mc-pdp-media-td span#altviews img,
-  body.productdetails #content_area .mc-pdp-media-td #altviews img,
-  body.productdetails #content_area .mc-pdp-media-td span#altviews img,
-  body.mc-product-page #v65-product-parent .mc-pdp-media-td #altviews img,
-  body.productdetails #v65-product-parent .mc-pdp-media-td #altviews img {
+  /* Thumbnail images: fill the anchor box */
+  body.mc-product-page #v65-product-parent span#altviews img,
+  body.mc-product-page #v65-product-parent #altviews img,
+  body.mc-product-page #content_area span#altviews img,
+  body.mc-product-page #content_area #altviews img,
+  body.productdetails #v65-product-parent span#altviews img,
+  body.productdetails #v65-product-parent #altviews img,
+  body.productdetails #content_area span#altviews img,
+  body.productdetails #content_area #altviews img {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
     display: block !important;
+    max-width: none !important;
+    max-height: none !important;
   }
 }
 

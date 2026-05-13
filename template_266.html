@@ -10780,27 +10780,6 @@ margin-left: 72px !important;
       }, true);
     });
   }
-  function moveThumbsUnderMainImageDesktop(scope){
-    if (isMobile()) return;
-    var mediaTd = q('.mc-pdp-media-td', scope);
-    if (!mediaTd) return;
-    var altviews = q('#altviews', scope) || q('span#altviews', scope) || q('.altviews', scope);
-    if (!altviews) return;
-    if (mediaTd.contains(altviews)) return;
-    var origParent = altviews.parentNode;
-    mediaTd.appendChild(altviews);
-    if (origParent && origParent !== mediaTd) {
-      var text = (origParent.textContent || '').trim();
-      var hasVisual = origParent.querySelector('img, a, input, select, button');
-      if (!text && !hasVisual) {
-        origParent.style.setProperty('display', 'none', 'important');
-        origParent.style.setProperty('width', '0', 'important');
-        origParent.style.setProperty('padding', '0', 'important');
-        origParent.style.setProperty('margin', '0', 'important');
-      }
-    }
-  }
-
   function forceMediaLayout(scope){
     wireAltThumbClicks(scope);
 
@@ -10812,8 +10791,7 @@ margin-left: 72px !important;
       return;
     }
 
-    /* Desktop: move altviews under the main image, then strip legacy wrapper. */
-    moveThumbsUnderMainImageDesktop(scope);
+    /* Desktop: PDP media layout is CSS-only (custom-safe.css). Strip legacy wrapper only. */
     unwrapDesktopMediaWrap(scope);
   }
 
