@@ -8292,10 +8292,10 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > *:not(#altviews):not(span#altviews):not(.altviews):not(a#product_photo_zoom_url):not(a#product_photo_zoom_url2) {
     grid-column: 1 / -1 !important;
     min-width: 0 !important;
-    max-width: 90% !important;
+    max-width: 30% !important;
     box-sizing: border-box !important;
     /* Default: align with cell edge (single-image PDPs have no #altviews — 250px was empty gutter). */
-    margin-left: 150px !important;
+    margin-left: 115px !important;
   }
 
   /* Thumbnail strip present: legacy offset aligns full-width rows with hero column */
