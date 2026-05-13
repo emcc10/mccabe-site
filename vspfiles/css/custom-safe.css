@@ -12697,3 +12697,233 @@ html body.productdetails #content_area button[name="btnaddtocart"] {
   color: #777 !important;
 }
 
+/* =========================================================
+   PDP Firefox DevTools session — round 3 (20260513-acc-v6)
+   - Retail / member labels uppercase + light weight.
+   - Retail / member numbers light weight.
+   - Body / pricebox text weight 300, letter-spacing 0.16em, line-height 1.6.
+   - Tabs panel display:block, lifted -30px on desktop.
+   - Product description font-size 13px.
+   - Description box shifted right + down on PDPs (makes room for the Palliser logo
+     that JS now places under the product title).
+   - Palliser logo: 70% size, centered, under H1.
+   - Main image up to 800px, alt-view thumbnails 84x85, photo TD padding tightened.
+   - Accordion rows get a 5px top margin.
+   ========================================================= */
+
+/* Body / base typography refresh */
+body,
+body * {
+  /* letter-spacing: 1.1px; */
+  letter-spacing: 1.14px;
+}
+
+/* PDP description text */
+.productdetails span[itemprop="description"] {
+  /* font-size: 16px; */
+  font-size: 13px;
+}
+
+/* Retail / member labels: uppercase + weight 300. */
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.productdetails #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.mc-product-page #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.productdetails #v65-product-parent .mc-pdp-member-line__label,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line__label,
+html body.productdetails #v65-product-parent .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.productdetails #content_area .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.mc-product-page #content_area .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.productdetails #v65-product-parent .mc-pdp-member-line--locked,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line--locked,
+html body.productdetails #v65-product-parent .mc-pdp-member-line--locked a,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line--locked a {
+  text-transform: uppercase !important;
+  font-weight: 300 !important;
+}
+
+/* Retail / member prices: weight 300. */
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-line,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-line,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_list_price,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_productprice,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_productprice,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+html body.productdetails #v65-product-parent .mc-pdp-member-line__amount,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line__amount,
+html body.productdetails #content_area .mc-pdp-retail-row .product_productprice,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice {
+  font-weight: 300 !important;
+}
+
+/* Broad PDP text: weight 300, letter-spacing 0.16em, line-height 1.6. */
+html body.mc-product-page #content_area,
+html body.productdetails #content_area,
+html body.mc-product-page #v65-product-parent,
+html body.productdetails #v65-product-parent,
+html body.mc-product-page #content_area p,
+html body.productdetails #content_area p,
+html body.mc-product-page #content_area li,
+html body.productdetails #content_area li,
+html body.mc-product-page #content_area td,
+html body.productdetails #content_area td,
+html body.mc-product-page #content_area span,
+html body.productdetails #content_area span,
+html body.mc-product-page #content_area div,
+html body.productdetails #content_area div,
+html body.mc-product-page #content_area .mc-pdp-options-td,
+html body.productdetails #content_area .mc-pdp-options-td,
+html body.mc-product-page #v65-product-parent .mc-pdp-options-td,
+html body.productdetails #v65-product-parent .mc-pdp-options-td,
+html body.mc-product-page #content_area .mc-pdp-retail-label,
+html body.productdetails #content_area .mc-pdp-retail-label,
+html body.mc-product-page #content_area .mc-pdp-member-line__label,
+html body.productdetails #content_area .mc-pdp-member-line__label,
+html body.mc-product-page #content_area .mc-pdp-member-line__amount,
+html body.productdetails #content_area .mc-pdp-member-line__amount,
+html body.mc-product-page #content_area #mcLeatherSummary,
+html body.productdetails #content_area #mcLeatherSummary,
+html body.mc-product-page #content_area .mc-pdp-accordion .mc-acc-header,
+html body.productdetails #content_area .mc-pdp-accordion .mc-acc-header,
+html body.mc-product-page #content_area .mc-pdp-accordion .mc-acc-content,
+html body.productdetails #content_area .mc-pdp-accordion .mc-acc-content {
+  font-weight: 300 !important;
+  letter-spacing: 0.16em !important;
+  line-height: 1.6;
+}
+
+/* Accordion rows: small breathing room between rows. */
+body.mc-product-page .mc-pdp-accordion .mc-acc-row,
+body.productdetails .mc-pdp-accordion .mc-acc-row {
+  margin-top: 5px !important;
+}
+
+/* Configuration heading line-height (line-height: 1.5; was written as "1.5 inherit"
+   in the DevTools session, which is invalid CSS — applying just 1.5). */
+body.productdetails .mc-configuration-rh__heading,
+body.mc-product-page .mc-configuration-rh__heading,
+body.mc-theater-seating-pdp .mc-configuration-rh__heading {
+  /* line-height: 1.2 !important; */
+  line-height: 1.5 !important;
+}
+
+/* Tabs panel under the product image: show, lifted slightly. */
+body.productdetails table:has(td[class*="vCSS_tab"]),
+body.mc-product-page table:has(td[class*="vCSS_tab"]) {
+  display: block !important;
+}
+
+@media (min-width: 992px) {
+  .productdetails table:has(td[class*="vCSS_tab"]) {
+    /* margin-top: 5px !important; */
+    margin-top: -30px !important;
+  }
+}
+
+/* Description box: shift right + down so the Palliser logo can sit under the title. */
+.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox > tbody > tr:nth-child(3) > td[width="100%"],
+.productdetails form .colors_descriptionbox {
+  /* margin-left: 173px !important; */
+  margin-left: 120px !important;
+  margin-top: 80px !important;
+}
+
+/* Main product image — allow up to 800px on desktop. */
+@media (min-width: 992px) {
+  body.mc-product-page #v65-product-parent img#product_photo,
+  body.productdetails #v65-product-parent img#product_photo,
+  body.mc-product-page #content_area #v65-product-parent img#product_photo,
+  body.productdetails #content_area #v65-product-parent img#product_photo {
+    max-width: 800px !important;
+  }
+}
+
+/* Alt-view thumbnails: slightly larger. */
+@media (min-width: 992px) {
+  body.mc-product-page :is(#content_area, #v65-product-parent) #altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) span#altviews img,
+  body.mc-product-page :is(#content_area, #v65-product-parent) .altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) #altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) span#altviews img,
+  body.productdetails :is(#content_area, #v65-product-parent) .altviews img {
+    max-width: 84px !important;
+    max-height: 85px !important;
+  }
+}
+
+/* Media TD: tighter right padding + max-width 60%. */
+@media (min-width: 992px) {
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child {
+    padding-right: 5px !important;
+    max-width: 60% !important;
+  }
+}
+
+/* Center the photo TD content (main image + thumbs + logo if it lives there). */
+#v65-product-parent > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1) {
+  text-align: center !important;
+}
+
+/* ---------- Sale-price & product-name sizing (was 26620230411140605.css) ---------- */
+
+.productdetails .colors_lines_light font.productnamecolorSMALL.colors_productname b {
+  /* border-bottom: 1px solid #222; */
+  border-bottom: 1px solid #777;
+}
+
+.shoppingcart .productnamecolorLARGE,
+.shoppingcart a.productnamecolorLARGE,
+.productdetails .colors_lines_light font.productnamecolorSMALL.colors_productname b,
+.productdetails #v65-product-history-header td:first-child::before {
+  /* font-size: 18px; */
+  /* line-height: 40px; */
+  font-size: 15px;
+  line-height: 35px;
+}
+
+.home .v65-productDisplay a.productnamecolor.colors_productname,
+.home a.productnamecolor.colors_productname,
+.home table.v65-productDisplay a.productnamecolor,
+.home #content_area > table > tbody > tr > td[width="2%"] a.colors_productname,
+.home #fpslider .item .name a,
+.category table.v65-productDisplay .productnamecolor,
+.productdetails .colors_lines_light a.productnamecolorsmall.colors_productname,
+.productdetails #v65-product-history-details .historyitem_productname a,
+.shoppingcart table.v65-productDisplay .productnamecolor,
+a.productnamecolor {
+  /* font-size: 16px; */
+  font-size: 14px;
+}
+
+/* ---------- Palliser brand logo under product title ---------- */
+/* The JS placePalliserLogoUnderTitle() in template_266.html finds the live Palliser
+   <img> and moves it into a #mc-pdp-brand-logo wrapper inserted right after the H1. */
+
+#mc-pdp-brand-logo {
+  display: block !important;
+  width: 100% !important;
+  max-width: 440px !important;
+  margin: 8px 0 16px 0 !important;
+  padding: 0 !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+#mc-pdp-brand-logo img {
+  display: inline-block !important;
+  /* User asked for ~70% of natural size; cap to a sensible max so it never overshoots
+     the right-column 440px stack. */
+  width: auto !important;
+  max-width: 70% !important;
+  height: auto !important;
+  transform: scale(1) !important;
+  margin: 0 auto !important;
+  float: none !important;
+}
+
