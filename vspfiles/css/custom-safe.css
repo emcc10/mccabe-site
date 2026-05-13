@@ -12043,3 +12043,172 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
   background: #f7f7f5 !important;
 }
 
+/* =========================================================
+   PDP right column width lock + in-panel buttons (20260513-acc-v4)
+   - Cap the option/pricing/ATC stack at 440px so it feels tight, not stretched.
+   - Make in-accordion buttons (Room Planner / Product Summary / View All Leathers)
+     look like the original .mc-config-btn pill: border, icon, full width.
+   - Show mini leather swatch strip inside the Select a Leather panel.
+   - Pull the relocated H1 title flush left so it aligns with the right-column edge.
+   ========================================================= */
+
+/* ----- 440px cap on the right-column stack (desktop only) ----- */
+@media (min-width: 992px) {
+  body.mc-product-page #mc-pdp-title-right,
+  body.productdetails #mc-pdp-title-right,
+  body.mc-product-page #mc-pdp-accordion,
+  body.productdetails #mc-pdp-accordion,
+  body.mc-product-page #v65-product-parent .colors_pricebox,
+  body.productdetails #v65-product-parent .colors_pricebox,
+  body.mc-product-page #content_area .colors_pricebox,
+  body.productdetails #content_area .colors_pricebox {
+    max-width: 440px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  body.mc-product-page #mcConfigurationBlock,
+  body.productdetails #mcConfigurationBlock {
+    width: 440px !important;
+    max-width: 440px !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* Add to Cart button matches the configuration box width and sits flush-left under it. */
+  body.mc-product-page #content_area input[name="btnaddtocart"],
+  body.mc-product-page #content_area input[id*="btnaddtocart"],
+  body.mc-product-page #content_area button[name="btnaddtocart"],
+  body.productdetails #content_area input[name="btnaddtocart"],
+  body.productdetails #content_area input[id*="btnaddtocart"],
+  body.productdetails #content_area button[name="btnaddtocart"],
+  body.mc-product-page #v65-product-parent input[name="btnaddtocart"],
+  body.mc-product-page #v65-product-parent input[id*="btnaddtocart"],
+  body.mc-product-page #v65-product-parent button[name="btnaddtocart"],
+  body.productdetails #v65-product-parent input[name="btnaddtocart"],
+  body.productdetails #v65-product-parent input[id*="btnaddtocart"],
+  body.productdetails #v65-product-parent button[name="btnaddtocart"] {
+    width: 440px !important;
+    max-width: 440px !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    display: block !important;
+  }
+}
+
+/* ----- Title relocation: flush left, sit at top of options column ----- */
+body.mc-product-page #mc-pdp-title-right,
+body.productdetails #mc-pdp-title-right {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  text-align: left !important;
+}
+
+body.mc-product-page #mc-pdp-title-right h1,
+body.productdetails #mc-pdp-title-right h1 {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  text-align: left !important;
+}
+
+/* Remove any top padding on the TD that now starts with the title so the title's top
+   visually aligns with the top of the main product image in the adjacent TD. */
+@media (min-width: 992px) {
+  body.mc-product-page #v65-product-parent td:has(> #mc-pdp-title-right),
+  body.productdetails #v65-product-parent td:has(> #mc-pdp-title-right),
+  body.mc-product-page #content_area td:has(> #mc-pdp-title-right),
+  body.productdetails #content_area td:has(> #mc-pdp-title-right) {
+    padding-top: 0 !important;
+    vertical-align: top !important;
+  }
+}
+
+/* ----- In-panel .mc-config-btn buttons: full-row pill matching original style ----- */
+body.mc-product-page .mc-pdp-accordion .mc-acc-config-btn,
+body.productdetails .mc-pdp-accordion .mc-acc-config-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 10px 14px !important;
+  margin: 8px 0 0 0 !important;
+  border: 1px solid #333 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  color: #333 !important;
+  text-decoration: none !important;
+  font-family: inherit !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-config-btn--full,
+body.productdetails .mc-pdp-accordion .mc-acc-config-btn--full {
+  display: flex !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-config-btn:hover,
+body.productdetails .mc-pdp-accordion .mc-acc-config-btn:hover {
+  background: #f7f7f5 !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-config-btn .mc-btn-icon,
+body.productdetails .mc-pdp-accordion .mc-acc-config-btn .mc-btn-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+}
+
+/* ----- Select a Leather panel: host the mini swatch strip ----- */
+body.mc-product-page .mc-pdp-accordion .mc-acc-content--leather,
+body.productdetails .mc-pdp-accordion .mc-acc-content--leather {
+  padding-top: 10px !important;
+  padding-bottom: 8px !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-leather-host,
+body.productdetails .mc-pdp-accordion .mc-acc-leather-host {
+  width: 100% !important;
+  margin: 0 0 8px 0 !important;
+}
+
+/* Re-style the relocated #mcLeatherPicker / strip when it lives inside the panel:
+   keep horizontal scroll, but let it match the new panel padding context. */
+body.mc-product-page .mc-pdp-accordion .mc-acc-leather-host #mcLeatherPicker,
+body.productdetails .mc-pdp-accordion .mc-acc-leather-host #mcLeatherPicker {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-leather-host #mcLeatherSwatchStrip,
+body.productdetails .mc-pdp-accordion .mc-acc-leather-host #mcLeatherSwatchStrip {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  gap: 6px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+

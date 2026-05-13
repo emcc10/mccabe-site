@@ -11931,19 +11931,24 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 </script>
 <script>
 /* =========================================================
-   PDP RIGHT-COLUMN ACCORDION + TITLE RELOCATION (20260513-acc-v3)
-   - Anchors insertion to .colors_pricebox elements instead of a single "right TD"
-     (theater PDPs split the right side into multiple TDs).
+   PDP RIGHT-COLUMN ACCORDION + TITLE RELOCATION (20260513-acc-v4)
+   - Anchors insertion to .colors_pricebox elements (theater PDPs split right side
+     into multiple TDs, so we don't try to find a single "right TD").
    - Title goes BEFORE the first pricebox (retail pricing).
    - Accordion goes BEFORE the second pricebox (options + Add to Cart).
-   - Reuses existing window.mcOpenWmLeatherModal, #mcPlannerBtn, #mcProductSummaryBtn,
-     and existing availability text. Does NOT rebuild leather/planner/summary logic.
+   - Select a Leather accordion panel hosts the existing #mcLeatherPicker swatch strip
+     (defaults to OPEN so mini swatches are visible).
+   - Room Planner / Product Summary accordion panels host real .mc-config-btn buttons
+     matching the original PDP button style.
+   - Moves #altviews into the media TD so thumbnails sit directly under the main image.
+   - Hides the Volusion "Choose Options" / "Available Options" label that floats above
+     the options_table.
    - Hides duplicate existing buttons + duplicate availability text in pricing pricebox.
    - Each run() re-asserts position so other scripts can't push us around.
    ========================================================= */
 (function () {
-  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v3");
-  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v3";
+  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v4");
+  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v4";
 
   function q(sel, root)  { return (root || document).querySelector(sel); }
   function qa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
@@ -12106,34 +12111,58 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     hideBreadcrumbRowIfEmpty();
   }
 
+  /* SVG icon helpers — reused on the in-panel buttons so they match the original
+     #mcPlannerBtn / #mcProductSummaryBtn icons. */
+  var ROOM_ICON_SVG =
+    '<span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>';
+  var PDF_ICON_SVG =
+    '<span class="mc-btn-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>';
+
   function buildAccordionElement() {
     var acc = document.createElement('div');
     acc.id = 'mc-pdp-accordion';
     acc.className = 'mc-pdp-accordion';
 
-    /* Row 1: Select a Leather — trigger existing leather modal */
-    acc.appendChild(buildRow('leather', 'Select a Leather', function () {
-      if (typeof window.mcOpenWmLeatherModal === 'function') {
-        window.mcOpenWmLeatherModal();
-        return;
-      }
-      if (typeof window.mtlOpenOwnLeatherPicker === 'function') {
-        window.mtlOpenOwnLeatherPicker();
-        return;
-      }
-      var existing = q('#mcLeatherBtn') || q('#mcLeatherHeader');
-      if (existing) existing.click();
-    }));
+    /* Row 1: Select a Leather — expands to show the existing #mcLeatherPicker mini-swatch
+       strip plus a "View all leathers" button that opens the existing modal. Open by default. */
+    var leatherRow = buildRow('leather', 'Select a Leather', null, function () {
+      var c = document.createElement('div');
+      c.className = 'mc-acc-content mc-acc-content--leather';
+      var stripHost = document.createElement('div');
+      stripHost.className = 'mc-acc-leather-host';
+      c.appendChild(stripHost);
+      var viewAll = document.createElement('button');
+      viewAll.type = 'button';
+      viewAll.className = 'mc-config-btn mc-acc-config-btn mc-acc-config-btn--full';
+      viewAll.innerHTML = '<span>View All Leathers</span>';
+      viewAll.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (typeof window.mcOpenWmLeatherModal === 'function') { window.mcOpenWmLeatherModal(); return; }
+        if (typeof window.mtlOpenOwnLeatherPicker === 'function') { window.mtlOpenOwnLeatherPicker(); return; }
+        var existing = q('#mcLeatherBtn') || q('#mcLeatherHeader');
+        if (existing) existing.click();
+      });
+      c.appendChild(viewAll);
+      return c;
+    });
+    /* Default Select a Leather to OPEN so the mini swatch strip is visible without a click. */
+    leatherRow.dataset.open = '1';
+    var leatherHdr = leatherRow.querySelector('.mc-acc-header');
+    if (leatherHdr) leatherHdr.setAttribute('aria-expanded', 'true');
+    var leatherPnl = leatherRow.querySelector('.mc-acc-panel');
+    if (leatherPnl) leatherPnl.setAttribute('aria-hidden', 'false');
+    acc.appendChild(leatherRow);
 
-    /* Row 2: Room Planner — theater pages only. Expands inline with a button (matches Product Summary). */
+    /* Row 2: Room Planner — theater pages only. Panel hosts a real .mc-config-btn that
+       delegates to the original #mcPlannerBtn click handler. */
     if (isTheaterPg()) {
       acc.appendChild(buildRow('roomplanner', 'Room Planner', null, function () {
         var c = document.createElement('div');
         c.className = 'mc-acc-content';
         var btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'mc-acc-link-btn';
-        btn.textContent = 'Open Room Planner';
+        btn.className = 'mc-config-btn mc-acc-config-btn mc-acc-config-btn--full';
+        btn.innerHTML = '<span>Room Planner</span>' + ROOM_ICON_SVG;
         btn.addEventListener('click', function (e) {
           e.preventDefault();
           var existing = q('#mcPlannerBtn');
@@ -12146,7 +12175,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       }));
     }
 
-    /* Row 3: Product Summary — open the existing spec sheet URL in a new tab */
+    /* Row 3: Product Summary — panel hosts a real .mc-config-btn anchor to the spec sheet URL. */
     acc.appendChild(buildRow('summary', 'Product Summary', null, function () {
       var c = document.createElement('div');
       c.className = 'mc-acc-content';
@@ -12165,8 +12194,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         a.href = url;
         a.target = '_blank';
         a.rel = 'noopener noreferrer';
-        a.className = 'mc-acc-link-btn';
-        a.textContent = 'Open Product Summary (PDF)';
+        a.className = 'mc-config-btn mc-acc-config-btn mc-acc-config-btn--full';
+        a.innerHTML = '<span>Product Summary</span>' + PDF_ICON_SVG;
         c.appendChild(a);
       } else {
         c.textContent = 'Product summary is not available for this product yet.';
@@ -12183,6 +12212,73 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }));
 
     return acc;
+  }
+
+  /* Move the existing #mcLeatherPicker (or just #mcLeatherSwatchStrip) into the
+     Select a Leather accordion panel's host slot. Idempotent. */
+  function hostLeatherStripInsideAccordion() {
+    var host = document.querySelector('#mc-acc-row-leather .mc-acc-leather-host');
+    if (!host) return;
+    var strip = document.getElementById('mcLeatherPicker') ||
+                document.getElementById('mcLeatherSwatchStrip');
+    if (!strip) return;
+    if (host.contains(strip)) return;
+    /* Move (not clone) so the existing JS that populates the strip still targets the live node */
+    host.appendChild(strip);
+  }
+
+  /* Move #altviews to be the next sibling of #product_photo inside the same TD,
+     so thumbnails render directly under the main image. Idempotent. */
+  function moveAltViewsUnderMainImage() {
+    var alt = document.getElementById('altviews') ||
+              document.querySelector('#content_area .altviews') ||
+              document.querySelector('#v65-product-parent .altviews');
+    if (!alt) return;
+    var main =
+      document.getElementById('product_photo') ||
+      document.querySelector('#content_area .vcss_img_wrap, #v65-product-parent .vcss_img_wrap') ||
+      document.querySelector('#content_area .vCSS_img_wrap, #v65-product-parent .vCSS_img_wrap') ||
+      document.querySelector('#content_area .main-image, #v65-product-parent .main-image') ||
+      document.querySelector('img#main-image');
+    if (!main || !main.parentNode) return;
+    /* If alt is already the next element sibling of main, nothing to do. */
+    if (main.nextElementSibling === alt) return;
+    main.parentNode.insertBefore(alt, main.nextSibling);
+  }
+
+  /* Hide the Volusion "Choose Options" / "Available Options" / "Chooser Options" label
+     that floats above the options_table. Only hides nodes NOT inside our accordion. */
+  function hideChooseOptionsLabel() {
+    var scope = document.getElementById('v65-product-parent') || document;
+    /* Skip if already hidden */
+    if (scope.querySelector('.mc-choose-options-hidden')) return;
+    var rx = /\b(choose|chooser|available)\s+options\b/i;
+    /* Look at common label-bearing elements only — keeps the scan cheap. */
+    var nodes = scope.querySelectorAll('b, strong, font, span, label, div, td, h2, h3, h4');
+    for (var i = 0; i < nodes.length; i++) {
+      var el = nodes[i];
+      if (!el || !el.textContent) continue;
+      if (el.closest && el.closest('#mc-pdp-accordion')) continue;
+      var t = (el.textContent || '').trim();
+      if (t.length > 60) continue;
+      if (!rx.test(t)) continue;
+      /* Only hide if this node's text is essentially just the label, not a paragraph. */
+      var letters = t.replace(/[^A-Za-z]/g, '');
+      if (letters.length > 30) continue;
+      el.classList.add('mc-choose-options-hidden');
+      el.style.setProperty('display', 'none', 'important');
+      /* Also hide a trailing <br> if present so we don't leave whitespace. */
+      var nxt = el.nextSibling;
+      if (nxt && nxt.nodeName === 'BR') {
+        var br = nxt;
+        var brWrap = document.createElement('span');
+        brWrap.className = 'mc-choose-options-hidden';
+        brWrap.style.cssText = 'display:none !important';
+        br.parentNode.insertBefore(brWrap, br);
+        brWrap.appendChild(br);
+      }
+      break;
+    }
   }
 
   /* Place accordion immediately BEFORE the second pricebox (options + Add to Cart).
@@ -12264,8 +12360,11 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (!isPdpPage()) return;
     placeTitle();
     placeAccordion();
+    hostLeatherStripInsideAccordion();
+    moveAltViewsUnderMainImage();
     hideDuplicateTriggers();
     hideInlineAvailabilityInPricing();
+    hideChooseOptionsLabel();
   }
 
   if (document.readyState === 'loading') {
@@ -20355,7 +20454,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260513-acc3"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260513-acc4"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
