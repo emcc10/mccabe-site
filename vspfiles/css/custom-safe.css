@@ -12067,6 +12067,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     box-sizing: border-box !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
+    margin-top: -13px !important;
   }
 
   body.mc-product-page #mcConfigurationBlock,
@@ -12210,5 +12211,70 @@ body.productdetails .mc-pdp-accordion .mc-acc-leather-host #mcLeatherSwatchStrip
   overflow-x: auto !important;
   overflow-y: hidden !important;
   -webkit-overflow-scrolling: touch !important;
+}
+
+/* =========================================================
+   PDP fine-tuning from Firefox DevTools session (20260513)
+   - Hide Volusion's "Choose Options" image label above options_table.
+   - Pull retail label up, restyle color/letter-spacing.
+   - Collapse member-line__amount gap.
+   - Nudge productnamecolorLARGE span position + sizing.
+   - Tighten product_productprice spacing.
+   ========================================================= */
+
+/* Hide Volusion "Choose Options" image label that sits above #options_table. */
+body.mc-product-page #product_options_heading > td:nth-child(2) > img:nth-child(1),
+body.productdetails #product_options_heading > td:nth-child(2) > img:nth-child(1) {
+  display: none !important;
+}
+
+body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label {
+  /* font-weight: 500 !important; */
+  /* letter-spacing: 0.14em !important; */
+  /* text-transform: uppercase !important; */
+  /* color: #6a6a6a !important; */
+  font-weight: 500 !important;
+  letter-spacing: 0.1em !important;
+  color: #545454 !important;
+  margin-top: -39px !important;
+  text-transform: capitalize !important;
+}
+
+.mc-pdp-member-line__amount {
+  margin-bottom: -100px !important;
+}
+
+.productnamecolorLARGE > span:nth-child(1) {
+  margin-top: 90px !important;
+  margin-left: 12px !important;
+  width: 100% !important;
+}
+
+.productdetails span[itemprop="name"] {
+  /* font-size: 25px; */
+  /* text-transform: uppercase; */
+  font-size: 20px !important;
+}
+
+.productdetails span[itemprop="name"],
+.productdetails .productnamecolorLARGE.colors_productname {
+  /* color: #575757; */
+  color: #545454 !important;
+}
+
+div.product_productprice:nth-child(2) {
+  margin-top: 5px !important;
+  font-style: unset !important;
+}
+
+.mc-pdp-member-line__label {
+  margin-top: 10px !important;
+}
+
+/* Deeply-nested Volusion price span — nudge top margin to align with surrounding price chrome.
+   Selector kept verbatim from the live override; brittle but matches the live tree exactly. */
+table.colors_pricebox:nth-child(3) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > table:nth-child(2) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > b:nth-child(2) > font:nth-child(1) > div:nth-child(1) > span:nth-child(1) {
+  margin-top: 5px !important;
 }
 
