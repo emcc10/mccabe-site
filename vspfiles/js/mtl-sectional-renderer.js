@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260512-v4";
-  console.log("MTL_RENDERER_BUILD sectional-20260512-v4");
+  window.MTL_RENDERER_BUILD = "sectional-20260512-v5";
+  console.log("MTL_RENDERER_BUILD sectional-20260512-v5");
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -45,26 +45,7 @@
   window.__mtlDiag = __mtlDiag;
 
   function ensureMtlStageTrackerDom() {
-    try {
-      var mount =
-        document.body ||
-        document.documentElement;
-      if (!mount) return;
-      var el = document.getElementById("mtl-sectional-stage-tracker");
-      if (!el) {
-        el = document.createElement("div");
-        el.id = "mtl-sectional-stage-tracker";
-        el.setAttribute("role", "status");
-        el.setAttribute("aria-live", "polite");
-        el.style.cssText =
-          "position:fixed;bottom:8px;right:8px;z-index:2147483647;max-width:min(520px,96vw);max-height:80vh;overflow:auto;background:#111;color:#eee;font:11px/1.35 Consolas,system-ui,monospace;padding:10px 12px;border-radius:6px;box-shadow:0 4px 24px rgba(0,0,0,.5);opacity:.96;pointer-events:auto;white-space:pre-wrap;word-break:break-word;";
-        mount.appendChild(el);
-      }
-      mtlRefreshStageTrackerDom();
-    } catch (eTk) {
-      console.error("[MTL] FAILURE stage tracker DOM", eTk);
-      if (eTk && eTk.stack) console.error(eTk.stack);
-    }
+    /* Debug overlay removed — diagnostics still available via window.__mtlDiag in the console */
   }
 
   function mtlRefreshStageTrackerDom() {
