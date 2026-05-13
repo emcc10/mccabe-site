@@ -7333,6 +7333,69 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 }
 
 /* =========================================================
+   PDP desktop: thumbnails under main image
+   JS moves #altviews into .mc-pdp-media-td; these rules style it there.
+   ========================================================= */
+@media (min-width: 992px) {
+  body.mc-product-page #content_area .mc-pdp-media-td,
+  body.productdetails #content_area .mc-pdp-media-td,
+  body.mc-product-page #v65-product-parent .mc-pdp-media-td,
+  body.productdetails #v65-product-parent .mc-pdp-media-td {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  body.mc-product-page #content_area .mc-pdp-media-td #altviews,
+  body.mc-product-page #content_area .mc-pdp-media-td span#altviews,
+  body.productdetails #content_area .mc-pdp-media-td #altviews,
+  body.productdetails #content_area .mc-pdp-media-td span#altviews,
+  body.mc-product-page #v65-product-parent .mc-pdp-media-td #altviews,
+  body.productdetails #v65-product-parent .mc-pdp-media-td #altviews {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    margin: 12px 0 0 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    float: none !important;
+    clear: none !important;
+    font-size: 0 !important;
+  }
+
+  body.mc-product-page #content_area .mc-pdp-media-td #altviews a,
+  body.mc-product-page #content_area .mc-pdp-media-td span#altviews a,
+  body.productdetails #content_area .mc-pdp-media-td #altviews a,
+  body.productdetails #content_area .mc-pdp-media-td span#altviews a,
+  body.mc-product-page #v65-product-parent .mc-pdp-media-td #altviews a,
+  body.productdetails #v65-product-parent .mc-pdp-media-td #altviews a {
+    display: block !important;
+    flex: 0 0 64px !important;
+    width: 64px !important;
+    height: 64px !important;
+    overflow: hidden !important;
+    border-radius: 4px !important;
+    border: 1px solid #e0e0e0 !important;
+  }
+
+  body.mc-product-page #content_area .mc-pdp-media-td #altviews img,
+  body.mc-product-page #content_area .mc-pdp-media-td span#altviews img,
+  body.productdetails #content_area .mc-pdp-media-td #altviews img,
+  body.productdetails #content_area .mc-pdp-media-td span#altviews img,
+  body.mc-product-page #v65-product-parent .mc-pdp-media-td #altviews img,
+  body.productdetails #v65-product-parent .mc-pdp-media-td #altviews img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+}
+
+/* =========================================================
    PDP: gallery + options in SEPARATE <tr> rows (Volusion inner table)
    JS adds tbody.mc-pdp-split-rows; tr { display:contents } joins cells in one flex row.
    Must load after other PDP rules.
