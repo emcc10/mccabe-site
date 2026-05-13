@@ -11943,12 +11943,14 @@ body.productdetails .mc-pdp-accordion {
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-  border-top: 1px solid #ddd !important;
+  /* border-top: 1px solid #ddd !important; */
+  border-top: 1px solid #e2dfd8 !important;
 }
 
 body.mc-product-page .mc-pdp-accordion .mc-acc-row,
 body.productdetails .mc-pdp-accordion .mc-acc-row {
-  border-bottom: 1px solid #ddd !important;
+  /* border-bottom: 1px solid #ddd !important; */
+  border-bottom: 1px solid #e2dfd8 !important;
   background: #fff !important;
 }
 
@@ -12006,7 +12008,8 @@ body.productdetails .mc-pdp-accordion .mc-acc-panel {
   display: none !important;
   padding: 0 16px 16px 16px !important;
   background: #fafafa !important;
-  border-top: 1px solid #eee !important;
+  /* border-top: 1px solid #eee !important; */
+  border-top: 1px solid #e2dfd8 !important;
 }
 
 body.mc-product-page .mc-pdp-accordion .mc-acc-row[data-open="1"] > .mc-acc-panel,
@@ -12033,7 +12036,8 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn {
   display: inline-block !important;
   padding: 10px 16px !important;
   margin: 4px 0 0 0 !important;
-  border: 1px solid #333 !important;
+  /* border: 1px solid #333 !important; */
+  border: 1px solid #e2dfd8 !important;
   background: #fff !important;
   color: #333 !important;
   text-decoration: none !important;
@@ -12147,8 +12151,9 @@ body.productdetails .mc-pdp-accordion .mc-acc-config-btn {
   padding: 10px 14px !important;
   margin: 8px 0 0 0 !important;
   /* border: 1px solid #333 !important; */
+  /* border: 1px solid #bebebe !important; */
   /* letter-spacing: 0.05em !important; */
-  border: 1px solid #bebebe !important;
+  border: 1px solid #e2dfd8 !important;
   border-radius: 0 !important;
   background: #fff !important;
   color: #333 !important;
@@ -12368,26 +12373,26 @@ body.mc-product-page #content_area .mc-atc-button-wrap {
   /* font-family: inherit !important; */
   /* font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important; */
   /* font-size: 14px !important; */
+  /* font-size: 12px !important; */
   /* font-weight: 300 !important; */
+  /* font-weight: 400 !important; */
   /* letter-spacing: 0.15em !important; */
+  /* letter-spacing: 0.14em !important; */
   /* margin-left: 90px; */
+  /* margin-left: 0px; */
   /* margin-top: 30px; */
+  /* margin-top: 0px; */
   /* color: #777 !important; */
   min-width: 440px !important;
-  font-size: 12px !important;
-  font-weight: 400 !important;
-  letter-spacing: 0.14em !important;
-  margin-left: 0px;
-  margin-top: 0px;
 }
 
 .mc-atc-button-wrap {
   /* background: rgb(255, 255, 255) !important; */
+  /* background: rgb(242, 242, 242) !important; */
   /* border: 1px solid rgb(51, 51, 51) !important; */
-  /* color: rgb(17, 17, 17) !important; */
   /* border: 1px solid rgb(225, 225, 225) !important; */
+  /* color: rgb(17, 17, 17) !important; */
   /* color: #777 !important; */
-  background: rgb(242, 242, 242) !important;
   border: 1px solid #e2dfd8 !important;
   color: #444 !important;
 }
@@ -12927,5 +12932,77 @@ a.productnamecolor {
   transform: scale(1) !important;
   margin: 0 auto !important;
   float: none !important;
+}
+
+/* =========================================================
+   PDP button borders + divider lines = #e2dfd8 (sitewide brand line color).
+   Late, broad sweep so every visible button border / horizontal rule on a PDP
+   uses the same warm-grey line color regardless of which earlier rule painted it.
+   ========================================================= */
+
+/* Add to Cart button (input/button + wrap) */
+html body.mc-product-page #content_area input[name="btnaddtocart"],
+html body.mc-product-page #content_area input[id*="btnaddtocart"],
+html body.mc-product-page #content_area button[name="btnaddtocart"],
+html body.mc-product-page #content_area .v65-product-addtocart input[name="btnaddtocart"],
+html body.mc-product-page #content_area .v65-product-addtocart input[id*="btnaddtocart"],
+html body.mc-product-page #content_area .v65-product-addtocart button[name="btnaddtocart"],
+html body.productdetails #content_area input[name="btnaddtocart"],
+html body.productdetails #content_area input[id*="btnaddtocart"],
+html body.productdetails #content_area button[name="btnaddtocart"],
+html body.productdetails #content_area .v65-product-addtocart input[name="btnaddtocart"],
+html body.productdetails #content_area .v65-product-addtocart input[id*="btnaddtocart"],
+html body.productdetails #content_area .v65-product-addtocart button[name="btnaddtocart"],
+html body.mc-product-page #v65-product-parent input[name="btnaddtocart"],
+html body.mc-product-page #v65-product-parent button[name="btnaddtocart"],
+html body.productdetails #v65-product-parent input[name="btnaddtocart"],
+html body.productdetails #v65-product-parent button[name="btnaddtocart"],
+html body.mc-product-page .mc-atc-button-wrap,
+html body.productdetails .mc-atc-button-wrap {
+  border-color: #e2dfd8 !important;
+}
+
+/* Accordion shell + rows + panels */
+html body.mc-product-page .mc-pdp-accordion,
+html body.productdetails .mc-pdp-accordion {
+  border-top-color: #e2dfd8 !important;
+}
+html body.mc-product-page .mc-pdp-accordion .mc-acc-row,
+html body.productdetails .mc-pdp-accordion .mc-acc-row {
+  border-bottom-color: #e2dfd8 !important;
+}
+html body.mc-product-page .mc-pdp-accordion .mc-acc-panel,
+html body.productdetails .mc-pdp-accordion .mc-acc-panel {
+  border-top-color: #e2dfd8 !important;
+}
+
+/* In-accordion config buttons + link buttons */
+html body.mc-product-page .mc-pdp-accordion .mc-acc-config-btn,
+html body.productdetails .mc-pdp-accordion .mc-acc-config-btn,
+html body.mc-product-page .mc-pdp-accordion .mc-acc-link-btn,
+html body.productdetails .mc-pdp-accordion .mc-acc-link-btn {
+  border-color: #e2dfd8 !important;
+}
+
+/* Other PDP buttons (Choose Leather, Room Planner, Product Summary, etc.) */
+html body.mc-product-page #content_area #mcLeatherBtn,
+html body.productdetails #content_area #mcLeatherBtn,
+html body.mc-product-page #content_area #mcPlannerBtn,
+html body.productdetails #content_area #mcPlannerBtn,
+html body.mc-product-page #content_area #mcProductSummaryBtn,
+html body.productdetails #content_area #mcProductSummaryBtn,
+html body.mc-product-page #content_area .mc-config-btn,
+html body.productdetails #content_area .mc-config-btn {
+  border-color: #e2dfd8 !important;
+}
+
+/* Horizontal rules / divider lines on PDPs */
+html body.mc-product-page #content_area hr,
+html body.productdetails #content_area hr,
+html body.mc-product-page #v65-product-parent hr,
+html body.productdetails #v65-product-parent hr {
+  border-color: #e2dfd8 !important;
+  background-color: #e2dfd8 !important;
+  color: #e2dfd8 !important;
 }
 
