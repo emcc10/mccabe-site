@@ -64,7 +64,9 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
 
       - name: Retry mtl-sectional-renderer.js if locked
+        shell: bash
         run: |
+          set +e
           # mtl-sectional-renderer.js is frequently locked by Volusion's runtime when first attempted.
           # Retry up to 6 times with increasing sleeps. Each attempt is its own lftp session so the
           # server has time to release the file handle between tries.
@@ -73,7 +75,9 @@ jobs:
             sleep $((attempt * 5))
             OUT=$(lftp -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222 -e "set sftp:auto-confirm yes; set net:max-retries 2; set net:timeout 30; put vspfiles/js/mtl-sectional-renderer.js -o /vspfiles/js/mtl-sectional-renderer.js; bye" 2>&1)
             echo "$OUT"
-            if ! echo "$OUT" | grep -q "Access failed"; then
+            echo "$OUT" | grep -q "Access failed"
+            STILL_LOCKED=$?
+            if [ "$STILL_LOCKED" != "0" ]; then
               echo "=== mtl-sectional-renderer.js uploaded successfully on attempt $attempt ==="
               break
             fi
@@ -81,6 +85,7 @@ jobs:
               echo "=== WARNING: mtl-sectional-renderer.js still locked after 6 attempts. Continuing. ==="
             fi
           done
+          exit 0
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
