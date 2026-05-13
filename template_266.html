@@ -2005,6 +2005,9 @@ document.addEventListener("DOMContentLoaded", function () {
     border:1px solid #eee;background:#fafafa;overflow:hidden
   }
   .wm-swatch img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+  /* Sectional picker: override aspect-ratio with padding-bottom trick so images always fill the square */
+  #mtl-own-picker .wm-swatch{position:relative;height:0;padding-bottom:100%;aspect-ratio:auto}
+  #mtl-own-picker .wm-swatch img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block}
   .wm-name{font-size:12px;margin-top:6px;line-height:1.2}
 
   .wm-zoom{
@@ -19951,7 +19954,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260512-abs-img"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260512-abs-img2"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
