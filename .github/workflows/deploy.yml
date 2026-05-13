@@ -32,14 +32,14 @@ jobs:
       - name: Deploy files to Volusion
         run: |
           echo "deployed=$(date -u '+%Y-%m-%dT%H:%M:%SZ') commit=$GITHUB_SHA" > deploy-marker.txt
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222 <<'EOF'
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222 <<'EOF' || true
           set sftp:auto-confirm yes
           set net:max-retries 2
           set net:timeout 30
           set cmd:fail-exit no
 
           echo "Uploading deploy marker"
-          put deploy-marker.txt -o /v/vspfiles/js/deploy-marker.txt
+          put deploy-marker.txt -o /vspfiles/js/deploy-marker.txt
 
           echo "Uploading template to /template_266.html"
           put template_266.html -o /template_266.html
@@ -72,4 +72,4 @@ jobs:
           echo "- /vspfiles/css/custom-safe.css"
           echo "- /vspfiles/js/sectional-configs.js"
           echo "- /vspfiles/js/mtl-sectional-renderer.js"
-          echo "- /v/vspfiles/js/deploy-marker.txt  ← verify at https://www.mccabestheaterandliving.com/v/vspfiles/js/deploy-marker.txt"
+          echo "- /vspfiles/js/deploy-marker.txt  <- verify at https://www.mccabestheaterandliving.com/v/vspfiles/js/deploy-marker.txt"
