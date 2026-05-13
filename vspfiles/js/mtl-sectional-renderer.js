@@ -5,7 +5,7 @@
 (function () {
   "use strict";
 
-  var IMG_V = "sectional-leather-20260512-swatch-fill";
+  var IMG_V = "sectional-leather-20260512-abs-img";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -985,18 +985,6 @@
     var tabInBtn = document.createElement("button"); tabInBtn.type="button"; tabInBtn.className="wm-tab"; tabInBtn.textContent="Leather Information"; tabInBtn.dataset.active="0";
     tabsEl.appendChild(tabSwBtn); tabsEl.appendChild(tabInBtn);
 
-    /* Inject CSS fix so swatch images always fill the square regardless of their natural aspect ratio.
-       .wm-swatch uses aspect-ratio:1/1 but height:100% on the img doesn't resolve in all browsers
-       when the parent height comes only from aspect-ratio — position:absolute fixes this. */
-    if (!document.getElementById("mtl-picker-swatch-style")) {
-      var swStyle = document.createElement("style");
-      swStyle.id = "mtl-picker-swatch-style";
-      swStyle.textContent =
-        "#mtl-own-picker .wm-swatch{position:relative;height:0;padding-bottom:100%;aspect-ratio:unset}" +
-        "#mtl-own-picker .wm-swatch img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}";
-      document.head.appendChild(swStyle);
-    }
-
     /* Body */
     var bodyEl = document.createElement("div"); bodyEl.className = "wm-modal-body";
     var panelSw = document.createElement("div"); panelSw.className="wm-tabpanel"; panelSw.dataset.active="1";
@@ -1079,14 +1067,18 @@
       });
     }
 
-    /* Tile builder (matches .wm-tile / .wm-swatch structure) */
+    /* Tile builder */
     function buildTile(o){
       var tile = document.createElement("button");
       tile.type="button"; tile.className="wm-tile";
       tile.dataset.selected = (picked && picked.value===o.value) ? "1":"0";
 
-      var sw = document.createElement("div"); sw.className="wm-swatch";
+      /* Use padding-bottom:100% intrinsic-ratio trick — reliable across all browsers,
+         no dependency on aspect-ratio or height:100% resolving from a non-explicit parent height */
+      var sw = document.createElement("div");
+      sw.style.cssText = "position:relative;width:100%;padding-bottom:100%;border-radius:10px;border:1px solid #eee;background:#fafafa;overflow:hidden;margin-bottom:6px";
       var img = document.createElement("img"); img.alt=""; img.loading="lazy";
+      img.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block";
       (function(imgEl, urls){
         var idx=0;
         function tryNext(){
