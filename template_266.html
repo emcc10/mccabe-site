@@ -11947,8 +11947,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
    - Each run() re-asserts position so other scripts can't push us around.
    ========================================================= */
 (function () {
-  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v7");
-  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v7";
+  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v8");
+  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v8";
 
   function q(sel, root)  { return (root || document).querySelector(sel); }
   function qa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
@@ -12243,47 +12243,72 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 
   /* Find the Palliser brand logo image and relocate it into a centered wrapper
-     directly under the relocated H1 title. Scaled to 70% via CSS class.
-     Defensive: only matches imgs whose src/alt contains "palliser" and that aren't
-     part of the main product image, altviews, or leather strip. */
+     directly under the relocated H1 title. Scaled to 70% via CSS.
+     STRICT: src/alt must contain BOTH "palliser" AND a logo/brand/vendor token,
+     and the img must NOT live inside any related-product / history / cross-sell
+     container. If nothing matches, do nothing (we'd rather move zero than move
+     the wrong image — last time the heuristic grabbed a "More items in this
+     collection" rail image and dropped it under the title, which the user
+     specifically called out). */
   function placePalliserLogoUnderTitle() {
     var title = document.getElementById('mc-pdp-title-right');
     if (!title || !title.parentNode) return;
     var wrap = document.getElementById('mc-pdp-brand-logo');
-    /* If we've already moved a logo into the wrap, just re-assert position. */
+    /* Already moved a logo — just re-assert its position. */
     if (wrap && wrap.querySelector('img')) {
       if (title.nextSibling !== wrap) {
         title.parentNode.insertBefore(wrap, title.nextSibling);
       }
       return;
     }
+    var SKIP_PARENTS_SEL = [
+      '#mc-pdp-brand-logo',
+      '#altviews', '.altviews',
+      '#mcLeatherPicker', '#mcLeatherSwatchStrip',
+      '.mtl-leather-modal', '.wm-modal',
+      /* "More items in this collection", "Related products", "Recently viewed", etc. */
+      '.v-products-list', '.v-product',
+      '.v65-productDisplay',
+      '#v65-product-history-details', '#v65-product-history-header',
+      'table[id*="v65-product-history" i]',
+      '.relatedproducts', '.related-products', '.related_products',
+      '.cross-sell', '.cross_sell',
+      '.upsell', '.up-sell',
+      '.v65-productCategoryMore',
+      '.mc-more-items', '.mc-related-rail', '.mc-collection-rail'
+    ].join(', ');
     var imgs = document.querySelectorAll('#v65-product-parent img, #content_area img');
     var logo = null;
     for (var i = 0; i < imgs.length; i++) {
       var img = imgs[i];
       if (!img || !img.getAttribute) continue;
-      if (img.closest && img.closest('#mc-pdp-brand-logo')) continue;
-      if (img.closest && img.closest('#altviews, .altviews')) continue;
       if (img.id === 'product_photo' || img.id === 'main-image') continue;
-      if (img.closest && img.closest('#mcLeatherPicker, #mcLeatherSwatchStrip, .mtl-leather-modal')) continue;
-      var src = (img.getAttribute('src') || '').toLowerCase();
-      var alt = (img.getAttribute('alt') || '').toLowerCase();
-      if (!/palliser/i.test(src) && !/palliser/i.test(alt)) continue;
-      /* Skip likely product/swatch images by filename hints. */
-      if (/swatch|leather|cover|color-|configurator|sectional|paragon|theater-chair|recliner|sofa|loveseat|chaise/i.test(src + ' ' + alt)) continue;
-      /* Skip very large images (probably hero/product), prefer ~ logo-sized. */
+      if (img.closest && img.closest(SKIP_PARENTS_SEL)) continue;
+      var src = (img.getAttribute('src') || '');
+      var alt = (img.getAttribute('alt') || '');
+      var lc = (src + ' ' + alt).toLowerCase();
+      /* Strict: require BOTH palliser and a logo/brand/vendor/manufacturer token. */
+      if (!/palliser/.test(lc)) continue;
+      if (!/(logo|brand|vendor|manufacturer)/.test(lc)) continue;
+      /* Reject clearly non-logo asset names. */
+      if (/swatch|leather|cover|configurator|sectional|paragon|recliner|sofa|loveseat|chaise|seating|chair/.test(lc)) continue;
+      /* Logos are usually small. Reject very large images. */
       var w = img.naturalWidth || img.width || 0;
       if (w && w > 400) continue;
       logo = img;
       break;
     }
-    if (!logo) return;
+    if (!logo) {
+      if (typeof console !== 'undefined' && console.log) {
+        console.log('[MC PDP] placePalliserLogoUnderTitle: no strict palliser+logo image found; not moving anything.');
+      }
+      return;
+    }
     if (!wrap) {
       wrap = document.createElement('div');
       wrap.id = 'mc-pdp-brand-logo';
       wrap.className = 'mc-pdp-brand-logo';
     }
-    /* Move (not clone) so we don't duplicate the asset. */
     wrap.appendChild(logo);
     if (title.nextSibling !== wrap) {
       title.parentNode.insertBefore(wrap, title.nextSibling);
@@ -12403,10 +12428,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   function run() {
     if (!isPdpPage()) return;
     placeTitle();
-    /* placePalliserLogoUnderTitle() intentionally NOT called — the heuristic was matching
-       a related-product image from the "More items in this collection" rail instead of
-       the actual Palliser brand logo. Will re-enable once we identify the live logo
-       element's exact selector. */
+    placePalliserLogoUnderTitle();
     placeAccordion();
     hostLeatherStripInsideAccordion();
     moveAltViewsUnderMainImage();
@@ -20502,7 +20524,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260513-acc7"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260513-acc8"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

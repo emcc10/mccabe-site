@@ -12366,6 +12366,7 @@ body.mc-product-page #mcLeatherSwatchStrip {
 body.mc-product-page #content_area .mc-atc-button-wrap {
   /* min-width: 150px !important; */
   /* font-family: inherit !important; */
+  /* font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important; */
   /* font-size: 14px !important; */
   /* font-weight: 300 !important; */
   /* letter-spacing: 0.15em !important; */
@@ -12373,7 +12374,6 @@ body.mc-product-page #content_area .mc-atc-button-wrap {
   /* margin-top: 30px; */
   /* color: #777 !important; */
   min-width: 440px !important;
-  font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
   font-size: 12px !important;
   font-weight: 400 !important;
   letter-spacing: 0.14em !important;
@@ -12710,10 +12710,17 @@ body * {
   letter-spacing: 1.14px;
 }
 
-/* PDP description text */
-.productdetails span[itemprop="description"] {
+/* PDP description text — !important + high specificity so the broad
+   `html body…#content_area span` rule below doesn't override these. */
+html body.productdetails span[itemprop="description"],
+html body.mc-product-page span[itemprop="description"],
+html body.productdetails #content_area span[itemprop="description"],
+html body.mc-product-page #content_area span[itemprop="description"],
+html body.productdetails #v65-product-parent span[itemprop="description"],
+html body.mc-product-page #v65-product-parent span[itemprop="description"] {
   /* font-size: 16px; */
-  font-size: 13px;
+  font-size: 13px !important;
+  letter-spacing: 1.14px !important;
 }
 
 /* Retail / member labels: uppercase + weight 300. */
@@ -12802,17 +12809,20 @@ body.mc-theater-seating-pdp .mc-configuration-rh__heading {
   line-height: 1.5 !important;
 }
 
-/* Tabs panel under the product image: show, lifted slightly. */
+/* Product Info / TechSpecs / ExtInfo tab strip — HIDDEN per user request
+   (deleted from PDP layout; description shows directly without the tab nav).
+   The previous rule was `display: block !important;` — overridden here to none. */
 body.productdetails table:has(td[class*="vCSS_tab"]),
 body.mc-product-page table:has(td[class*="vCSS_tab"]) {
-  display: block !important;
+  /* display: block !important; */
+  display: none !important;
 }
 
-@media (min-width: 992px) {
-  .productdetails table:has(td[class*="vCSS_tab"]) {
-    /* margin-top: 5px !important; */
-    margin-top: -30px !important;
-  }
+body.productdetails tr:has(> td[class*="vCSS_tab"]),
+body.mc-product-page tr:has(> td[class*="vCSS_tab"]),
+body.productdetails td[class*="vCSS_tab"],
+body.mc-product-page td[class*="vCSS_tab"] {
+  display: none !important;
 }
 
 /* Description box: shift right + down so the Palliser logo can sit under the title. */
