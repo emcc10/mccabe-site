@@ -10536,9 +10536,6 @@ margin-left: 72px !important;
   }
 
   function forceTabsInline(scope){
-    var mobile = isMobile();
-    var tabPad = mobile ? '6px 12px' : '12px 28px';
-
     qa('.resp-tabs-list, ul.resp-tabs-list, .ui-tabs-nav, .TabbedPanelsTabGroup', scope).forEach(function(tabWrap){
       tabWrap.style.setProperty('display','flex','important');
       tabWrap.style.setProperty('flex-wrap','nowrap','important');
@@ -10558,50 +10555,8 @@ margin-left: 72px !important;
       });
     });
 
-    var fixedParents = [];
-    qa('td[class*="vCSS_tab"]', scope).forEach(function(td){
-      td.style.setProperty('display','inline-flex','important');
-      td.style.setProperty('align-items','center','important');
-      td.style.setProperty('float','none','important');
-      td.style.setProperty('width','auto','important');
-      td.style.setProperty('height','auto','important');
-      td.style.setProperty('vertical-align','bottom','important');
-      td.style.setProperty('white-space','nowrap','important');
-      td.style.setProperty('overflow','visible','important');
-      td.style.setProperty('padding', tabPad, 'important');
-      td.style.setProperty('margin', mobile ? '0' : '0 16px 0 0', 'important');
-      qa('span, a, div', td).forEach(function(inner){
-        inner.style.setProperty('white-space','nowrap','important');
-        inner.style.setProperty('overflow','visible','important');
-        inner.style.setProperty('width','auto','important');
-        inner.style.setProperty('height','auto','important');
-        inner.style.setProperty('display','inline','important');
-        inner.style.setProperty('max-width','none','important');
-      });
-      var tr = td.parentElement;
-      if (tr && tr.tagName === 'TR' && fixedParents.indexOf(tr) === -1) {
-        fixedParents.push(tr);
-        tr.classList.add('mc-tabs-row');
-        tr.style.setProperty('display','flex','important');
-        tr.style.setProperty('flex-wrap','nowrap','important');
-        tr.style.setProperty('align-items','stretch','important');
-        tr.style.setProperty('gap','0','important');
-        tr.style.setProperty('height','auto','important');
-        var tbody = tr.parentElement;
-        if (tbody && tbody.tagName === 'TBODY') {
-          tbody.style.setProperty('display','block','important');
-          var tbl = tbody.parentElement;
-          if (tbl && tbl.tagName === 'TABLE') {
-            tbl.style.setProperty('display','block','important');
-            if (!mobile) {
-              tbl.style.setProperty('margin-bottom','-12px','important');
-              tbl.style.setProperty('margin-top','5px','important');
-              tbl.style.setProperty('margin-left','-16px','important');
-            }
-          }
-        }
-      }
-    });
+    /* Volusion vCSS_tab strips stay hidden via custom-safe.css — do NOT set inline-flex on
+       td[class*="vCSS_tab"] here; inline !important defeats stylesheet hides (#content_area). */
   }
 
   function findMainMedia(scope) {
@@ -12923,62 +12878,11 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 })();
 </script>
 
-<!-- PATCH: Restore product tabs · match planner dimensions -->
-<style>
-body.productdetails table:has(td[class*="vCSS_tab"]),
-body.mc-product-page table:has(td[class*="vCSS_tab"]) {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  height: auto !important;
-  overflow: visible !important;
-  pointer-events: auto !important;
-}
-body.productdetails td[class*="vCSS_tab"],
-body.mc-product-page td[class*="vCSS_tab"] {
-  visibility: visible !important;
-  opacity: 1 !important;
-  padding: 15px !important;
-}
-body.productdetails tbody:has(td[class*="vCSS_tab"]),
-body.mc-product-page tbody:has(td[class*="vCSS_tab"]) {
-  display: block !important;
-}
-body.productdetails tr:has(> td[class*="vCSS_tab"]),
-body.mc-product-page tr:has(> td[class*="vCSS_tab"]) {
-  display: flex !important;
-  visibility: visible !important;
-}
-</style>
+<!-- PDP: Volusion Product Info / Tech / Ext tabs stay hidden — see custom-safe.css vCSS_tab rules.
+     (Earlier “PATCH: Restore product tabs” JS/CSS reversed those hides — removed May 2026.) -->
 <script>
 (function(){
-  /* ---- PATCH 1: Force product tabs visible ---- */
-  function patchProductTabs(){
-    if (!document.body.classList.contains('productdetails') &&
-        !document.body.classList.contains('mc-product-page')) return;
-    var scope = document.querySelector('#content_area') || document.body;
-    var tabTds = scope.querySelectorAll('td[class*="vCSS_tab"]');
-    if (!tabTds.length) return;
-    tabTds.forEach(function(td){
-      var node = td;
-      while (node && node !== scope && node !== document.body){
-        var cs = window.getComputedStyle(node);
-        if (cs.display === 'none'){
-          var tag = node.tagName;
-          if (tag === 'TABLE' || tag === 'TBODY') node.style.setProperty('display','block','important');
-          else if (tag === 'TR') node.style.setProperty('display','flex','important');
-          else if (tag === 'TD') node.style.setProperty('display','inline-flex','important');
-          else node.style.setProperty('display','block','important');
-        }
-        if (cs.visibility === 'hidden') node.style.setProperty('visibility','visible','important');
-        if (parseFloat(cs.opacity) === 0) node.style.setProperty('opacity','1','important');
-        if (parseFloat(cs.maxHeight) === 0) node.style.setProperty('max-height','none','important');
-        node = node.parentElement;
-      }
-    });
-  }
-
-  /* ---- PATCH 2: Fetch planner dims from Palliser spec-sheet PDFs ---- */
+  /* Fetch planner dims from Palliser spec-sheet PDFs */
   var PALLISER_MODELS = window.__MC_PALLISER_SPEC_MODEL || {
     flicks: "41416",
     audio: "41422",
@@ -13203,7 +13107,6 @@ body.mc-product-page tr:has(> td[class*="vCSS_tab"]) {
   }
 
   function runPatches(){
-    patchProductTabs();
     fetchPlannerDimensions();
   }
 
