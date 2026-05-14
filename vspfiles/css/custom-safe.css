@@ -13389,3 +13389,13 @@ html body #v65-product-parent #mc-inline-config * {
   max-width: 100% !important;
   height: auto !important;
 }
+
+/* MTL PDP: custom retail/member block — final font-size override after earlier .mc-pdp-* rules (e.g. 14px ~9967–10027). */
+html body #v65-product-parent .mtl-product-price-block,
+html body #v65-product-parent .mtl-product-price-block *,
+html body #v65-product-parent .mtl-retail-label,
+html body #v65-product-parent .mtl-retail-price,
+html body #v65-product-parent .mtl-member-label,
+html body #v65-product-parent .mtl-member-price {
+  font-size: 16px !important;
+}

@@ -2664,6 +2664,12 @@
       try {
         document.documentElement.classList.add("has-sectional-config-cards");
       } catch (eCls) {}
+      if (section && section.id === "mtl-sectional-configurations") {
+        try {
+          section.setAttribute("data-mtl-generated", "true");
+          section.setAttribute("data-mtl-sectional-generated", "true");
+        } catch (eSecTag) {}
+      }
       removeStandaloneDuplicateProductSummary();
     });
 
@@ -2901,8 +2907,6 @@
       return;
     }
 
-    mtlRemoveSectionalGeneratedChrome();
-
     var configSelect = null;
     var merged = [];
 
@@ -2939,6 +2943,8 @@
       mtlRefreshStageTrackerDom();
       return;
     }
+
+    mtlRemoveSectionalGeneratedChrome();
 
     try {
       (function orderBasePriceConfigurationFirst() {
