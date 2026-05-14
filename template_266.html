@@ -7963,7 +7963,7 @@ body.mc-product-page #content_area .mc-atc-button-wrap:hover {
   background: #f5f5f5 !important;
   background-color: #f5f5f5 !important;
   color: #111 !important;
-  border-color: #333 !important;
+  border-color: #c9c4bc !important;
 }
 /* Input inside wrapper: no box, same font so it aligns with icon */
 body.mc-product-page #content_area .mc-atc-button-wrap input[type="submit"],
@@ -12469,21 +12469,35 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
           .replace(/^\s+|\s+$/g, '')
           .replace(/^https?:\/\/[^/]+/i, '');
 
+        function productSkuFromHref(href) {
+          var h = String(href || '');
+          var m =
+            h.match(/\/-p\/([^.\/?#]+)/i) ||
+            h.match(/\/product-p\/([^.\/?#]+)/i) ||
+            h.match(/[?&]ProductCode=([^&]+)/i);
+          if (!m || !m[1]) return '';
+          return String(m[1] || '').replace(/\.htm.*/i, '').toUpperCase();
+        }
+
         if (
-          /\/no[-_]?image|image[_-]?not[_-]?available|\/comingsoon|\/blank\.(gif|png|jpg)/i.test(chosen) ||
-          /-0\.(png|jpg|jpeg|webp)(\?|$)/i.test(chosen)
+          /\/no[-_]?image|image[_-]?not[_-]?available|\/comingsoon|\/blank\.(gif|png|jpg)|^about:blank$/i.test(
+            chosen
+          ) ||
+          /-0\.(png|jpg|jpeg|webp)(\?|$)/i.test(chosen) ||
+          /(?:transparent|spacer|clear|pixel|blank)[^/]*\.(gif|png)(\?|$)/i.test(chosen)
         ) {
           var td = img.closest && img.closest('td');
           var linkEl =
             link ||
-            (td && td.querySelector && td.querySelector('a[href*="-p/"], a[href*="product-p/"]')) ||
-            (img.parentElement && img.parentElement.tagName === 'A' ? img.parentElement : null) ||
-            (img.closest && img.closest('a[href*="product-p/"], a[href*="-p/"]'));
+            (img.closest && img.closest('a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="], a[href*="productcode="]')) ||
+            (td && td.querySelector && td.querySelector(
+              'a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="]'
+            )) ||
+            (img.parentElement && img.parentElement.tagName === 'A' ? img.parentElement : null);
           if (linkEl) {
             var href = linkEl.getAttribute('href') || '';
-            var m = href.match(/(?:product-p\/|-p\/)([^.?/#]+)/i);
-            if (m && m[1]) {
-              var code = m[1].replace(/\.htm.*/i, '').toUpperCase();
+            var code = productSkuFromHref(href);
+            if (code) {
               chosen = '/v/vspfiles/photos/' + code + '-1.jpg';
             }
           }
@@ -12531,7 +12545,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
             card.querySelector('.v-product__image img') ||
             card.querySelector('.product_image img');
           if (!img) return;
-          var link = card.querySelector('a[href*="-p/"], a[href*="product-p/"]');
+          var link = card.querySelector(
+            'a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="]'
+          );
           normalizeOne(img, link);
           try {
             card.setAttribute('data-mc-related-img-norm', '1');
@@ -12542,9 +12558,20 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       scope.querySelectorAll('#v65-product-related td.v65-productPhoto').forEach(function(td){
         try {
           var img = td.querySelector('img');
-          var link = td.querySelector('a[href*="-p/"], a[href*="product-p/"]');
+          var link =
+            td.querySelector('a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="]') ||
+            (img && img.closest && img.closest('a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="]'));
           normalizeOne(img, link);
         } catch (eTd) {}
+      });
+
+      scope.querySelectorAll('#content_area #v65-product-related img, #content_area #related_products_content img').forEach(function (imgEl) {
+        try {
+          if (!imgEl || (imgEl.closest && imgEl.closest('.mc-zoom-lens'))) return;
+          var lk =
+            (imgEl.closest && imgEl.closest('a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="]')) || null;
+          normalizeOne(imgEl, lk);
+        } catch (eImg) {}
       });
     } catch (e) {}
   }

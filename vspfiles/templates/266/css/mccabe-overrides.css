@@ -217,23 +217,36 @@ html.category #content_area .v65-pagepagination a {
 
 /* ===== PDP MAIN IMAGE =====
    Do NOT use clear:both on desktop: floated #altviews sits left; clear forces the
-   hero image onto a new row (thumbs stack above the main image). */
+   hero onto a new row (thumbs stack above the main image).
+   Desktop: width 100% of the flex media column (width:auto in old theme caused
+   “tiny hero” + flash when custom-safe and this file fought each other). */
+
 body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
 body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  width: auto !important;
   max-width: 100% !important;
+  min-width: 0 !important;
   height: auto !important;
   margin: 0 auto !important;
   float: none !important;
   clear: none !important;
+  object-fit: contain !important;
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 992px) {
+  body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
+  body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
+    width: 100% !important;
+  }
 }
 
 @media (max-width: 991px) {
   body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
   body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
+    width: 100% !important;
     clear: both !important;
   }
 }

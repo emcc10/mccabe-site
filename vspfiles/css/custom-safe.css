@@ -5670,30 +5670,8 @@ body.mc-product-page #content_area select:not(.mc-option-accordion-native) {
   }
 }
 
-/* Add to Cart – RH button style: black, white text, clean typography */
-body.mc-product-page #content_area input[name="btnaddtocart"],
-body.mc-product-page #content_area input[id*="btnaddtocart"],
-body.mc-product-page #content_area input[type="submit"][value*="Add to Cart" i],
-body.mc-product-page #content_area button[name="btnaddtocart"] {
-  display: inline-block !important;
-  width: max-content !important;
-  min-width: 240px !important;
-  max-width: 100% !important;
-  padding: 14px 28px !important;
-  margin-top: 18px !important;
-  border-radius: 0 !important;
-  color: #fff !important;
-  font-size: 14px !important;
-  font-weight: 400 !important;
-  letter-spacing: 0.15em !important;
-  text-transform: uppercase !important;
-  text-align: center !important;
-  cursor: pointer !important;
-  box-sizing: border-box !important;
-  overflow: visible !important;
-  white-space: nowrap !important;
-  font-family: inherit !important;
-}
+/* Add to Cart: visual chrome lives on `.mc-atc-button-wrap` (#e2dfd8 border — template_266 ~7937, custom-safe ~12343).
+   Do NOT paint the raw Volusion submit (border #111 / white text) — it defeats the outline pill and reads as black. */
 
 /* Don’t clip the Add to Cart button in the options column */
 /* Single Add to Cart: no second container/color – wrapper matches button */
@@ -5776,24 +5754,9 @@ body.productdetails #v65-product-parent div:has(input[name="btnaddtocart"]) {
   background-color: transparent !important;
   box-shadow: none !important;
 }
-body.mc-product-page #content_area .v65-product-addtocart input[name="btnaddtocart"],
-body.mc-product-page #content_area .v65-product-addtocart input[id*="btnaddtocart"],
-body.mc-product-page #content_area .v65-product-addtocart button[name="btnaddtocart"] {
-  background-color: #111 !important;
-  border: 1px solid #111 !important;
-  color: #fff !important;
-}
-
 body.mc-product-page #content_area td.mc-pdp-options-td,
 body.mc-product-page #content_area .mc-pdp-options-td {
   overflow: visible !important;
-}
-
-body.mc-product-page #content_area input[name="btnaddtocart"]:hover,
-body.mc-product-page #content_area input[id*="btnaddtocart"]:hover,
-body.mc-product-page #content_area button[name="btnaddtocart"]:hover {
-  background-color: #333 !important;
-  border-color: #333 !important;
 }
 
 /* =========================================================
@@ -5858,6 +5821,16 @@ body.mc-product-page #content_area .mc-option-accordion__panel {
   body.mc-product-page #content_area #mc-inline-config,
   body.mc-product-page #content_area #mcPlannerRow {
     max-width: 520px !important; /* matches your “wide table” look, but still responsive */
+  }
+
+  /* Sectional PDP: selected configuration (#mc-inline-config) same measure as options / accordion (440px). */
+  html.is-sectional-product body.mc-product-page #content_area #mc-inline-config,
+  html.is-sectional-product body.productdetails #content_area #mc-inline-config,
+  html.is-sectional-product body.mc-product-page #v65-product-parent #mc-inline-config,
+  html.is-sectional-product body.productdetails #v65-product-parent #mc-inline-config {
+    max-width: 440px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 }
 
@@ -12661,9 +12634,10 @@ body.productdetails #content_area .mc-atc-button-wrap {
 }
 
 .mc-atc-button-wrap {
-  /* ATC chrome — user pasted final values */
-  background: rgb(249, 249, 249) !important;
-  border: 1px solid #d4d4d4 !important;
+  /* Outline pill shared with accordion / planner — matches #mcPlannerBtn / config boxes (#e2dfd8). */
+  background: #fff !important;
+  background-color: #fff !important;
+  border: 1px solid #e2dfd8 !important;
   color: #444 !important;
   min-width: 440px !important;
   margin-left: 0px !important;
@@ -12692,7 +12666,7 @@ html body.mc-product-page #v65-product-parent .mc-atc-button-wrap {
   margin-right: 0 !important;
 }
 
-/* Retail-row pricing: bump to 15px / 1.5 line-height. */
+/* Retail-row pricing: 16px (keep in sync with ~12042 retail + member block). */
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-line,
 html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-line,
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
@@ -12705,13 +12679,11 @@ html body.productdetails #v65-product-parent .mc-pdp-member-line__amount,
 html body.mc-product-page #v65-product-parent .mc-pdp-member-line__amount,
 html body.productdetails #content_area .mc-pdp-retail-row .product_productprice,
 html body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice {
-  /* font-size: 16px !important; */
-  /* line-height: 1.2 !important; */
-  font-size: 15px !important;
-  line-height: 1.5 !important;
+  font-size: 16px !important;
+  line-height: 1.2 !important;
 }
 
-/* Retail / member labels + locked-member link — 15px, Inter, #444. */
+/* Retail / member labels + locked-member link — 16px, Inter, #444. */
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
 html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
 html body.productdetails #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
@@ -12726,8 +12698,7 @@ html body.productdetails #v65-product-parent .mc-pdp-member-line--locked,
 html body.mc-product-page #v65-product-parent .mc-pdp-member-line--locked,
 html body.productdetails #v65-product-parent .mc-pdp-member-line--locked a,
 html body.mc-product-page #v65-product-parent .mc-pdp-member-line--locked a {
-  /* font-size: 16px !important; */
-  font-size: 15px !important;
+  font-size: 16px !important;
   font-family: Inter, Arial, sans-serif !important;
   color: #444 !important;
 }
@@ -12765,9 +12736,7 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row #priceWithOptions,
 body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptions,
 body.mc-product-page #v65-product-parent .mc-pdp-retail-row #priceWithOptionsNoTax,
 body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
-  /* letter-spacing: normal !important; */
-  /* color: #1a1a1a !important; */
-  letter-spacing: 0.14em !important;
+  letter-spacing: 0.02em !important;
   color: #444 !important;
 }
 
@@ -13402,4 +13371,22 @@ html body .mc-pdp-accordion .mc-acc-header,
 html body .mc-pdp-accordion .mc-acc-label,
 html body .mc-pdp-accordion .mc-acc-header * {
   font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+}
+
+/* Price box + selected configuration strip: same sans as options (Volusion <font> tags). */
+html body #v65-product-parent .colors_pricebox,
+html body #v65-product-parent .colors_pricebox *,
+html body #v65-product-parent #mc-inline-config,
+html body #v65-product-parent #mc-inline-config * {
+  font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+}
+
+/* Related PDP rails: guarantee images paint (lazy / broken src handled in template normalize). */
+:is(body.productdetails, body.mc-product-page) #content_area #v65-product-related img,
+:is(body.productdetails, body.mc-product-page) #content_area #related_products_content img {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  max-width: 100% !important;
+  height: auto !important;
 }
