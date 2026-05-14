@@ -790,6 +790,9 @@ html.mc-paragon-pdp body #wmOpen.wm-btn {
 
 /* Sectional configuration cards — mirrors custom-safe when global CSS is stale on template 266 */
 html.is-sectional-product body #mtl-sectional-configurations .mtl-sectional-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
   border: 1px solid #ddd !important;
   background: #fff !important;
 }

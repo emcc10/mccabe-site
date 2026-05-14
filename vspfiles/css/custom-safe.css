@@ -11375,13 +11375,23 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   }
 }
 
+@media (max-width: 767px) {
+  #mc-acc-row-popularconfig #mtl-sectional-configurations.mtl-sectional-configurations .mtl-sectional-card {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
 #mc-acc-row-popularconfig #mtl-sectional-configurations {
   margin: 8px 0 0 !important;
   padding: 0 !important;
 }
 
 #mtl-sectional-configurations .mtl-sectional-card {
-  display: block !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
   border: 1px solid #ddd !important;
   background: #fff !important;
   padding: 14px !important;
@@ -11390,6 +11400,29 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
     border-color 0.15s ease,
     box-shadow 0.15s ease,
     background-color 0.15s ease !important;
+}
+
+#mtl-sectional-configurations .mtl-sectional-card > * {
+  flex: 0 0 auto !important;
+}
+
+#mtl-sectional-configurations .mtl-sectional-title {
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
+  font-size: 1.35rem !important;
+  font-weight: 500 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0.02em !important;
+  color: #1a1a1a !important;
+  margin: 12px 0 8px !important;
+}
+
+#mtl-sectional-configurations .mtl-sectional-desc {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  color: #555 !important;
+  margin: 0 !important;
 }
 
 #mtl-sectional-configurations .mtl-sectional-card:hover {
@@ -11408,9 +11441,31 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   width: 100% !important;
   height: auto !important;
   max-width: 100% !important;
+  aspect-ratio: 16 / 10 !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  background: #e6e4df !important;
   opacity: 1 !important;
   visibility: visible !important;
   box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+
+/* Sectional + Palliser RH configurator headings + our PDP accordion rows — Cormorant (headings only; option copy stays Inter). */
+html.is-sectional-product body.productdetails #mcConfigurationBlock .mc-configuration-rh__heading,
+html.is-sectional-product body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__heading {
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: #2a2a2a !important;
+}
+
+body.mc-product-page .mc-pdp-accordion .mc-acc-label,
+body.productdetails .mc-pdp-accordion .mc-acc-label {
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
+  font-weight: 500 !important;
 }
 
 #mtl-product-summary {
@@ -11711,14 +11766,50 @@ html.is-sectional-product body.mc-product-page #v65-product-parent [itemprop="of
   box-sizing: border-box !important;
 }
 
+/* Sectional PDP: hero image fills the media column through tablet (narrow Volusion omit #content_area on photo). */
+@media (max-width: 991px) {
+  html.is-sectional-product body.productdetails #v65-product-parent img#product_photo,
+  html.is-sectional-product body.mc-product-page #v65-product-parent img#product_photo,
+  html.is-sectional-product body.productdetails #content_area img#product_photo,
+  html.is-sectional-product body.mc-product-page #content_area img#product_photo {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin: 12px auto 18px auto !important;
+    float: none !important;
+    clear: both !important;
+    box-sizing: border-box !important;
+  }
+
+  html.is-sectional-product #v65-product-parent span#altviews,
+  html.is-sectional-product #v65-product-parent #altviews,
+  html.is-sectional-product #content_area span#altviews {
+    justify-content: center !important;
+    gap: 8px !important;
+    margin: 4px 0 14px !important;
+  }
+
+  html.is-sectional-product #v65-product-related .v-products-list td,
+  html.is-sectional-product #related_products_content .v-products-list td {
+    padding: 6px !important;
+  }
+}
+
 @media (max-width: 767px) {
   html.is-sectional-product body.productdetails #v65-product-parent [itemprop="offers"],
   html.is-sectional-product body.mc-product-page #v65-product-parent [itemprop="offers"] {
     padding-left: 0 !important;
   }
+}
+
+@media (max-width: 767px) {
   html.is-sectional-product body.productdetails #v65-product-parent img#product_photo,
+  html.is-sectional-product body.mc-product-page #v65-product-parent img#product_photo,
+  html.is-sectional-product body.productdetails #content_area img#product_photo,
   html.is-sectional-product body.mc-product-page #content_area img#product_photo {
-    margin-bottom: 18px !important;
+    margin-bottom: 14px !important;
   }
 }
 

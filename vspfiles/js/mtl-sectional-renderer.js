@@ -23,7 +23,7 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260520-popular-v13";
+  window.MTL_RENDERER_BUILD = "sectional-20260520-popular-v14";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -2990,7 +2990,21 @@
 
         var desc = document.createElement("div");
         desc.className = "mtl-sectional-desc";
-        desc.textContent = cfg.description || "";
+        var descText = String(cfg.description || "").trim();
+        if (!descText && cfg.rawOptionText) {
+          var rtFull = stripPricingSuffix(String(cfg.rawOptionText).trim());
+          var lab = String(cfg.label || "").trim();
+          var rtNorm = rtFull.replace(/\s+/g, " ").toLowerCase();
+          var labNorm = lab.replace(/\s+/g, " ").toLowerCase();
+          if (rtFull) {
+            if (labNorm && rtNorm.indexOf(labNorm) === 0) {
+              descText = rtFull.slice(lab.length).replace(/^[\s—\-,:]+/, "").trim();
+            } else if (!labNorm || rtNorm !== labNorm) {
+              descText = rtFull;
+            }
+          }
+        }
+        desc.textContent = descText;
 
         card.appendChild(img);
         card.appendChild(tit);
