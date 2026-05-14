@@ -23,7 +23,7 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260521-classfix-v16";
+  window.MTL_RENDERER_BUILD = "sectional-20260513-pricedup-v17";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -928,6 +928,8 @@
     var backdrop = document.createElement("div");
     backdrop.id = "mtl-own-picker";
     backdrop.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:2147483647;padding:18px;box-sizing:border-box";
+    backdrop.setAttribute("data-mtl-generated", "true");
+    backdrop.setAttribute("data-mtl-sectional-generated", "true");
     backdrop.onclick = function(ev){ if (ev.target===backdrop) closePicker(); };
 
     /* Modal (reuse .wm-modal CSS from template) */
@@ -975,6 +977,8 @@
     /* Preview overlay */
     var previewEl = document.createElement("div");
     previewEl.id = "mtl-own-preview";
+    previewEl.setAttribute("data-mtl-generated", "true");
+    previewEl.setAttribute("data-mtl-sectional-generated", "true");
     previewEl.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:2147483647;padding:18px;box-sizing:border-box";
     previewEl.innerHTML =
       '<div style="width:min(720px,92vw);background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)">' +
@@ -1525,6 +1529,35 @@
     return scored.length ? scored[0].sel : null;
   }
 
+  /** Sectional PDP: remove chrome from a prior injection pass (safe to omit price UI; template uses only data-mtl-generated there). */
+  function mtlRemoveSectionalGeneratedChrome() {
+    document.querySelectorAll('[data-mtl-sectional-generated="true"]').forEach(function (el) {
+      try {
+        el.remove();
+      } catch (eRm) {}
+    });
+  }
+
+  /** Hide Volusion duplicate #priceWithOptions / .option_pricing after custom retail/member block exists and cards mounted. */
+  function mtlHideLegacyVolusionPriceDuplicatesForSectional() {
+    if (!document.documentElement.classList.contains("is-sectional-product")) return;
+    if (!window.__mtlReplacementRenderSucceeded) return;
+    if (!document.querySelector(".mtl-product-price-block")) return;
+    document
+      .querySelectorAll(
+        "#v65-product-parent .option_pricing, #content_area .option_pricing," +
+          "#v65-product-parent #priceWithOptions, #content_area #priceWithOptions," +
+          "#v65-product-parent #priceWithOptionsNoTax, #content_area #priceWithOptionsNoTax"
+      )
+      .forEach(function (n) {
+        if (!n || (n.closest && n.closest(".mtl-product-price-block"))) return;
+        try {
+          n.style.setProperty("display", "none", "important");
+          n.style.setProperty("visibility", "hidden", "important");
+        } catch (eH) {}
+      });
+  }
+
   function hideConfigurationRow() {
     if (!window.__mtlReplacementRenderSucceeded) {
       return;
@@ -1549,8 +1582,12 @@
 
   function scheduleHideConfigurationRow() {
     hideConfigurationRow();
+    mtlHideLegacyVolusionPriceDuplicatesForSectional();
     [500, 1500, 3000].forEach(function (ms) {
-      setTimeout(hideConfigurationRow, ms);
+      setTimeout(function () {
+        hideConfigurationRow();
+        mtlHideLegacyVolusionPriceDuplicatesForSectional();
+      }, ms);
     });
   }
 
@@ -1950,6 +1987,8 @@
     if (!sum) {
       sum = document.createElement("div");
       sum.id = "mtl-product-summary";
+      sum.setAttribute("data-mtl-generated", "true");
+      sum.setAttribute("data-mtl-sectional-generated", "true");
       sum.innerHTML =
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Selected Configuration</span><span class="mtl-summary-value" id="mtl-sum-config">—</span></div>' +
         '<div class="mtl-summary-row"><span class="mtl-summary-label">Product Price</span><span class="mtl-summary-value" id="mtl-sum-price">—</span></div>' +
@@ -1958,6 +1997,10 @@
     } else {
       upgradeProductSummaryDom(sum);
     }
+    try {
+      sum.setAttribute("data-mtl-generated", "true");
+      sum.setAttribute("data-mtl-sectional-generated", "true");
+    } catch (eSumAttr) {}
     var accordion = document.getElementById("mc-pdp-accordion");
     var anchoredInAccordion =
       section && section.closest ? !!section.closest("#mc-pdp-accordion") : false;
@@ -2858,6 +2901,8 @@
       return;
     }
 
+    mtlRemoveSectionalGeneratedChrome();
+
     var configSelect = null;
     var merged = [];
 
@@ -3016,6 +3061,10 @@
       inner.appendChild(grid);
       section.innerHTML = "";
       section.appendChild(inner);
+      try {
+        section.setAttribute("data-mtl-generated", "true");
+        section.setAttribute("data-mtl-sectional-generated", "true");
+      } catch (eSecAttr) {}
 
       var target = findInsertTarget();
       var targetChain =

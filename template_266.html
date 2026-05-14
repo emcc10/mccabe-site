@@ -16776,6 +16776,23 @@ async function mcSubmitAuthForm(form, mode) {
       else retailRow.parentNode.appendChild(wrap);
     }
 
+    try {
+      retailLabel.classList.add('mtl-retail-label');
+      if (nativeBlock.classList) nativeBlock.classList.add('mtl-retail-price');
+      var pb = wrap.closest('.mtl-product-price-block') || retailRow.closest('.mtl-product-price-block');
+      if (!pb) {
+        pb = document.createElement('div');
+        pb.className = 'mtl-product-price-block';
+        pb.setAttribute('data-mtl-generated', 'true');
+        retailRow.parentNode.insertBefore(pb, retailRow);
+        pb.appendChild(retailRow);
+        pb.appendChild(wrap);
+      } else {
+        if (retailRow.parentNode !== pb) pb.appendChild(retailRow);
+        if (wrap.parentNode !== pb) pb.appendChild(wrap);
+      }
+    } catch (ePriceBlock) {}
+
     var html = '';
     if (isLoggedIn && memberText) {
       html +=
@@ -16795,6 +16812,14 @@ async function mcSubmitAuthForm(form, mode) {
     }
 
     mcSetStableHtml(wrap, html);
+    try {
+      wrap.querySelectorAll('.mc-pdp-member-line__label').forEach(function (el) {
+        el.classList.add('mtl-member-label');
+      });
+      wrap.querySelectorAll('.mc-pdp-member-line__amount').forEach(function (el) {
+        el.classList.add('mtl-member-price');
+      });
+    } catch (eMCls) {}
     try {
       nativeBlock.style.setProperty('visibility', 'visible', 'important');
       nativeBlock.style.setProperty('opacity', '1', 'important');
