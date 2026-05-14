@@ -23,8 +23,8 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260512-v5";
-  console.log("MTL_RENDERER_BUILD sectional-20260512-v5");
+  window.MTL_RENDERER_BUILD = "sectional-20260520-popular-v13";
+  console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
   window.__mtlReplacementRenderSucceeded = window.__mtlReplacementRenderSucceeded || false;
@@ -2678,7 +2678,18 @@
     });
 
     mtlRunStage("finalize: accordion popular configs", function () {
-      mountPopularConfigurationsInAccordion(section);
+      function syncAccordionPopularAndSummary() {
+        mountPopularConfigurationsInAccordion(section);
+        ensureProductSummary(section);
+        try {
+          updateProductSummary();
+        } catch (eUpd) {}
+      }
+      syncAccordionPopularAndSummary();
+      /* Accordion run() repeats at ~400ms/1200ms; late mount otherwise yields “nothing changed” + stale script cache. */
+      [450, 1100, 2400].forEach(function (ms) {
+        window.setTimeout(syncAccordionPopularAndSummary, ms);
+      });
     });
 
     mtlRunStagePanel("finalize: product summary DOM", "productSummary", function () {
