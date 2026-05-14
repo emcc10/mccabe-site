@@ -1,5 +1,5 @@
 /* 0429 C_CSS_DEPLOY_VERIFY_20260430dom — tail wins; Store-dot may omit #v65-product-parent */
-/* MC_DEPLOY_VERIFY — LAST-WIN: strip ::before Search labels; PDP layout + single search underline; see file end */
+/* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
 /* Global typography aligned with category member-price amount (Inter; body text 400 / 0.02em). */
@@ -7232,46 +7232,70 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   }
 }
 
+/*
+ Related / "More from this collection":
+ Volusion uses table.v65-productDisplay with separate rows for images | names | prices.
+ Native (non-carousel) blocks need real table layout at every viewport.
+ IMPORTANT: Never target tables inside `.mc-related-carousel__viewport` — that wrapper's CSS
+ deliberately uses display:block/flex on the table/tbody (.mc-related-carousel__viewport table {})
+ and a high-specificity `display:table !important` on #v65-product-related was overriding it,
+ collapsing image/title rows (titles row vs images stacked in column + huge gaps).
+*/
+:is(html body.productdetails, html body.mc-product-page)
+  :is(#content_area #v65-product-related, #content_area #related_products_content, #v65-product-related, #related_products_content):not(:has(.mc-related-carousel))
+  table.v65-productDisplay {
+  display: table !important;
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+:is(html body.productdetails, html body.mc-product-page)
+  :is(#content_area #v65-product-related, #content_area #related_products_content, #v65-product-related, #related_products_content):not(:has(.mc-related-carousel))
+  tbody {
+  display: table-row-group !important;
+  width: 100% !important;
+}
+
+:is(html body.productdetails, html body.mc-product-page)
+  :is(#content_area #v65-product-related, #content_area #related_products_content, #v65-product-related, #related_products_content):not(:has(.mc-related-carousel))
+  tr {
+  display: table-row !important;
+}
+
+:is(html body.productdetails, html body.mc-product-page)
+  :is(#content_area #v65-product-related, #content_area #related_products_content, #v65-product-related, #related_products_content):not(:has(.mc-related-carousel))
+  td {
+  display: table-cell !important;
+  vertical-align: top !important;
+  text-align: center !important;
+}
+
+/* Reinforce carousel strip when present (wins specificity vs accidental generic table rules). */
+:is(html body.productdetails, html body.mc-product-page)
+  #content_area
+  :is(#v65-product-related, #related_products_content)
+  .mc-related-carousel__viewport
+  table.v65-productDisplay {
+  display: block !important;
+  width: max-content !important;
+  min-width: 100% !important;
+  margin: 0 !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+:is(html body.productdetails, html body.mc-product-page)
+  #content_area
+  :is(#v65-product-related, #related_products_content)
+  .mc-related-carousel__viewport
+  tbody {
+  display: block !important;
+  width: 100% !important;
+}
+
 @media (min-width: 992px) {
-  /*
-   Related / "More from this collection": Volusion uses table.v65-productDisplay with separate
-   rows for images | names | prices — display:block rules elsewhere stack rows vertically.
-   Force real table layout + horizontal carousel strip (nowrap).
-  */
-  html body.productdetails #content_area #v65-product-related table.v65-productDisplay,
-  html body.mc-product-page #content_area #v65-product-related table.v65-productDisplay,
-  html body.productdetails #content_area #related_products_content table.v65-productDisplay,
-  html body.mc-product-page #content_area #related_products_content table.v65-productDisplay {
-    display: table !important;
-    width: 100% !important;
-    table-layout: fixed !important;
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
-  }
-
-  html body.productdetails #content_area #v65-product-related tbody,
-  html body.mc-product-page #content_area #v65-product-related tbody,
-  html body.productdetails #content_area #related_products_content tbody,
-  html body.mc-product-page #content_area #related_products_content tbody {
-    display: table-row-group !important;
-    width: 100% !important;
-  }
-
-  html body.productdetails #content_area #v65-product-related tr,
-  html body.mc-product-page #content_area #v65-product-related tr,
-  html body.productdetails #content_area #related_products_content tr,
-  html body.mc-product-page #content_area #related_products_content tr {
-    display: table-row !important;
-  }
-
-  html body.productdetails #content_area #v65-product-related td,
-  html body.mc-product-page #content_area #v65-product-related td,
-  html body.productdetails #content_area #related_products_content td,
-  html body.mc-product-page #content_area #related_products_content td {
-    display: table-cell !important;
-    vertical-align: top !important;
-    text-align: center !important;
-  }
 
   html body.productdetails #content_area .mc-related-carousel__viewport,
   html body.mc-product-page #content_area .mc-related-carousel__viewport {
@@ -7384,32 +7408,23 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
     box-sizing: border-box !important;
   }
 
-  /* Hero image sizing (desktop) — Palliser PDP layout */
+  /*
+   PDP hero image — unified for all PDPs.
+   Older rule used min-width:600px + margin-left:70px inside a ~55%/58% flex column:
+   overflow / shrink left the hero looking like a tiny thumb (esp. sectionals + split-rows).
+   */
   body.mc-product-page #v65-product-parent img#product_photo,
   body.productdetails #v65-product-parent img#product_photo,
   body.mc-product-page #content_area #v65-product-parent img#product_photo,
   body.productdetails #content_area #v65-product-parent img#product_photo {
-    width: auto !important;
-    max-width: 650px !important;
-    min-width: 600px !important;
-    height: auto !important;
-    margin-left: 70px !important;
-    margin-top: 66px !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Sectional PDPs: fill the media column — do not force 600px min-width or left offset (makes hero tiny in flex layouts). */
-  html.is-sectional-product body.mc-product-page #v65-product-parent img#product_photo,
-  html.is-sectional-product body.productdetails #v65-product-parent img#product_photo,
-  html.is-sectional-product body.mc-product-page #content_area #v65-product-parent img#product_photo,
-  html.is-sectional-product body.productdetails #content_area #v65-product-parent img#product_photo {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     height: auto !important;
     margin-left: 0 !important;
-    margin-right: 0 !important;
-    margin-top: 20px !important;
+    margin-right: auto !important;
+    margin-top: clamp(16px, 3vw, 40px) !important;
+    object-fit: contain !important;
     box-sizing: border-box !important;
   }
 }
@@ -11723,29 +11738,30 @@ html.is-sectional-product #mcLeatherSwatchStrip .mc-mini-swatch.mtl-mini-leather
   text-align: center !important;
 }
 
-/* Sectional PDP: ≥22px vertical separation before options / purchase column (live Volusion may omit mc-pdp-main-row). */
-html.is-sectional-product body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-media-td,
-html.is-sectional-product body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-media-td,
-html.is-sectional-product body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-media-td,
-html.is-sectional-product body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-media-td {
+/* PDP: vertical separation media vs options column (uniform; was sectional-only). */
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-media-td,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-media-td,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-media-td,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-media-td {
   padding-bottom: 28px !important;
 }
 
-html.is-sectional-product body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
-html.is-sectional-product body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
-html.is-sectional-product body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
-html.is-sectional-product body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
-html.is-sectional-product body.productdetails #v65-product-parent #options_table,
-html.is-sectional-product body.mc-product-page #v65-product-parent #options_table,
-html.is-sectional-product body.productdetails #content_area #options_table,
-html.is-sectional-product body.mc-product-page #content_area #options_table,
-html.is-sectional-product body.productdetails #v65-product-parent table[id*="options_table"],
-html.is-sectional-product body.mc-product-page #v65-product-parent table[id*="options_table"] {
+body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
+body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
+body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
+body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td #options_table,
+body.productdetails #v65-product-parent #options_table,
+body.mc-product-page #v65-product-parent #options_table,
+body.productdetails #content_area #options_table,
+body.mc-product-page #content_area #options_table,
+body.productdetails #v65-product-parent table[id*="options_table"],
+body.mc-product-page #v65-product-parent table[id*="options_table"] {
   margin-top: 28px !important;
 }
 
-html.is-sectional-product body.productdetails #v65-product-parent [itemprop="offers"],
-html.is-sectional-product body.mc-product-page #v65-product-parent [itemprop="offers"] {
+/* Align microdata offers block with the rest of the purchase column stacking. */
+body.productdetails #v65-product-parent [itemprop="offers"],
+body.mc-product-page #v65-product-parent [itemprop="offers"] {
   padding-left: 22px !important;
   box-sizing: border-box !important;
 }
@@ -11782,8 +11798,8 @@ html.is-sectional-product body.mc-product-page #v65-product-parent [itemprop="of
 }
 
 @media (max-width: 767px) {
-  html.is-sectional-product body.productdetails #v65-product-parent [itemprop="offers"],
-  html.is-sectional-product body.mc-product-page #v65-product-parent [itemprop="offers"] {
+  body.productdetails #v65-product-parent [itemprop="offers"],
+  body.mc-product-page #v65-product-parent [itemprop="offers"] {
     padding-left: 0 !important;
   }
 }
@@ -11797,25 +11813,26 @@ html.is-sectional-product body.mc-product-page #v65-product-parent [itemprop="of
   }
 }
 
-/* Sectional: center Add to Cart under price / summary column. */
-html.is-sectional-product body.productdetails #v65-product-parent .v65-product-addtocart,
-html.is-sectional-product body.mc-product-page #v65-product-parent .v65-product-addtocart {
+/* PDP: Add to Cart column alignment (matches flush-left 440px stack — was sectional-centered only). */
+body.productdetails #v65-product-parent .v65-product-addtocart,
+body.mc-product-page #v65-product-parent .v65-product-addtocart {
   display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
   flex-wrap: wrap !important;
   width: 100% !important;
-  text-align: center !important;
+  max-width: 440px !important;
+  text-align: left !important;
   box-sizing: border-box !important;
 }
 
-html.is-sectional-product body.productdetails #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
-html.is-sectional-product body.mc-product-page #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
-html.is-sectional-product body.productdetails #v65-product-parent .v65-product-addtocart input.vCSS_input_addtocart,
-html.is-sectional-product body.mc-product-page #v65-product-parent .v65-product-addtocart input.vCSS_input_addtocart,
-html.is-sectional-product body.productdetails #v65-product-parent td.vCSS_input_addtocart,
-html.is-sectional-product body.mc-product-page #v65-product-parent td.vCSS_input_addtocart {
-  margin-left: auto !important;
+body.productdetails #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
+body.mc-product-page #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
+body.productdetails #v65-product-parent .v65-product-addtocart input.vCSS_input_addtocart,
+body.mc-product-page #v65-product-parent .v65-product-addtocart input.vCSS_input_addtocart,
+body.productdetails #v65-product-parent td.vCSS_input_addtocart,
+body.mc-product-page #v65-product-parent td.vCSS_input_addtocart {
+  margin-left: 0 !important;
   margin-right: auto !important;
 }
 
@@ -11970,11 +11987,11 @@ html.is-sectional-product .wm-preview {
   }
 }
 
-/* Sectional PDP: Add to Cart — mirror body.productdetails #mcPlannerBtn / #mcProductSummaryBtn (template_266 ~7562) */
-html.is-sectional-product body.productdetails #content_area .mc-atc-row,
-html.is-sectional-product body.mc-product-page #content_area .mc-atc-row,
-html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-row,
-html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-row {
+/* PDP: Add to Cart row + inner control chrome (uniform; widths come from desktop 440px block below). */
+body.productdetails #content_area .mc-atc-row,
+body.mc-product-page #content_area .mc-atc-row,
+body.productdetails #v65-product-parent .mc-atc-row,
+body.mc-product-page #v65-product-parent .mc-atc-row {
   display: flex !important;
   align-items: center !important;
   flex-wrap: nowrap !important;
@@ -11984,58 +12001,14 @@ html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-row {
   padding: 0 !important;
 }
 
-html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap,
-html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap,
-html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap,
-html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 12px !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  padding: 12px 22px !important;
-  border: 1px solid #e2dfd8 !important;
-  border-radius: 0px !important;
-  background: #fff !important;
-  background-color: #fff !important;
-  color: #444 !important;
-  font-size: 11px !important;
-  font-weight: 400 !important;
-  letter-spacing: 0.05em !important;
-  text-transform: uppercase !important;
-  text-align: center !important;
-  cursor: pointer !important;
-  box-sizing: border-box !important;
-  font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-  margin-left: 0 !important;
-  margin-top: 8px !important;
-  margin-bottom: 8px !important;
-  height: auto !important;
-  min-height: 44px !important;
-  text-decoration: none !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
-}
-
-html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap:hover,
-html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap:hover,
-html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap:hover,
-html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap:hover {
-  background: #faf9f7 !important;
-  background-color: #faf9f7 !important;
-  color: #111 !important;
-  border-color: #c9c4bc !important;
-}
-
-html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap input[type="submit"],
-html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap input[type="submit"],
-html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
-html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
-html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap input[type="submit"],
-html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[type="submit"],
-html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
-html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"] {
+body.productdetails #content_area .mc-atc-button-wrap input[type="submit"],
+body.mc-product-page #content_area .mc-atc-button-wrap input[type="submit"],
+body.productdetails #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
+body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
+body.productdetails #v65-product-parent .mc-atc-button-wrap input[type="submit"],
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[type="submit"],
+body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"] {
   display: inline-block !important;
   flex: 0 0 auto !important;
   width: auto !important;
@@ -12058,35 +12031,35 @@ html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-butto
   font-family: inherit !important;
 }
 
-html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
-html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
-html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper,
-html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper {
+body.productdetails #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
+body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
+body.productdetails #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper,
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper {
   flex-shrink: 0 !important;
   display: inline-block !important;
   vertical-align: middle !important;
 }
 
-html.is-sectional-product body.productdetails #content_area .v65-product-addtocart,
-html.is-sectional-product body.mc-product-page #content_area .v65-product-addtocart,
-html.is-sectional-product body.productdetails #content_area .v65-product-addtocart div,
-html.is-sectional-product body.mc-product-page #content_area .v65-product-addtocart div,
-html.is-sectional-product body.productdetails #v65-product-parent .v65-product-addtocart,
-html.is-sectional-product body.mc-product-page #v65-product-parent .v65-product-addtocart,
-html.is-sectional-product body.productdetails #v65-product-parent .v65-product-addtocart div,
-html.is-sectional-product body.mc-product-page #v65-product-parent .v65-product-addtocart div,
-html.is-sectional-product body.productdetails #content_area td:has(input[name="btnaddtocart"]),
-html.is-sectional-product body.mc-product-page #content_area td:has(input[name="btnaddtocart"]),
-html.is-sectional-product body.productdetails #content_area tr:has(input[name="btnaddtocart"]),
-html.is-sectional-product body.mc-product-page #content_area tr:has(input[name="btnaddtocart"]),
-html.is-sectional-product body.productdetails #v65-product-parent td:has(input[name="btnaddtocart"]),
-html.is-sectional-product body.mc-product-page #v65-product-parent td:has(input[name="btnaddtocart"]),
-html.is-sectional-product body.productdetails #v65-product-parent tr:has(input[name="btnaddtocart"]),
-html.is-sectional-product body.mc-product-page #v65-product-parent tr:has(input[name="btnaddtocart"]),
-html.is-sectional-product body.productdetails #content_area form:has(input[name="btnaddtocart"]),
-html.is-sectional-product body.mc-product-page #content_area form:has(input[name="btnaddtocart"]),
-html.is-sectional-product body.productdetails #v65-product-parent form:has(input[name="btnaddtocart"]),
-html.is-sectional-product body.mc-product-page #v65-product-parent form:has(input[name="btnaddtocart"]) {
+body.productdetails #content_area .v65-product-addtocart,
+body.mc-product-page #content_area .v65-product-addtocart,
+body.productdetails #content_area .v65-product-addtocart div,
+body.mc-product-page #content_area .v65-product-addtocart div,
+body.productdetails #v65-product-parent .v65-product-addtocart,
+body.mc-product-page #v65-product-parent .v65-product-addtocart,
+body.productdetails #v65-product-parent .v65-product-addtocart div,
+body.mc-product-page #v65-product-parent .v65-product-addtocart div,
+body.productdetails #content_area td:has(input[name="btnaddtocart"]),
+body.mc-product-page #content_area td:has(input[name="btnaddtocart"]),
+body.productdetails #content_area tr:has(input[name="btnaddtocart"]),
+body.mc-product-page #content_area tr:has(input[name="btnaddtocart"]),
+body.productdetails #v65-product-parent td:has(input[name="btnaddtocart"]),
+body.mc-product-page #v65-product-parent td:has(input[name="btnaddtocart"]),
+body.productdetails #v65-product-parent tr:has(input[name="btnaddtocart"]),
+body.mc-product-page #v65-product-parent tr:has(input[name="btnaddtocart"]),
+body.productdetails #content_area form:has(input[name="btnaddtocart"]),
+body.mc-product-page #content_area form:has(input[name="btnaddtocart"]),
+body.productdetails #v65-product-parent form:has(input[name="btnaddtocart"]),
+body.mc-product-page #v65-product-parent form:has(input[name="btnaddtocart"]) {
   background: transparent !important;
   background-color: transparent !important;
   border: 0 !important;
@@ -12332,6 +12305,18 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     margin-right: 0 !important;
   }
 
+  body.mc-product-page #v65-product-parent #options_table,
+  body.productdetails #v65-product-parent #options_table,
+  body.mc-product-page #content_area #v65-product-parent #options_table,
+  body.productdetails #content_area #v65-product-parent #options_table {
+    width: 100% !important;
+    max-width: 440px !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    table-layout: fixed !important;
+  }
+
   /* Add to Cart button matches the configuration box width and sits flush-left under it. */
   body.mc-product-page #content_area input[name="btnaddtocart"],
   body.mc-product-page #content_area input[id*="btnaddtocart"],
@@ -12363,13 +12348,50 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     min-width: 440px !important;
     width: 440px !important;
     max-width: 440px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    padding: 12px 22px !important;
+    border: 1px solid #e2dfd8 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    background-color: #fff !important;
+    color: #444 !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    font-family:
+      Inter,
+      system-ui,
+      -apple-system,
+      "Helvetica Neue",
+      Helvetica,
+      Arial,
+      sans-serif !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    min-height: 44px !important;
+    text-decoration: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
     /* Use width/min-width only — flex-basis: 440px becomes HEIGHT when a column flex ancestor is present. */
     flex-grow: 0 !important;
     flex-shrink: 0 !important;
     flex-basis: auto !important;
     height: auto !important;
-    min-height: 0 !important;
-    align-self: center !important;
+    align-self: flex-start !important;
+  }
+
+  body.mc-product-page #content_area .mc-atc-button-wrap:hover,
+  body.productdetails #content_area .mc-atc-button-wrap:hover,
+  body.mc-product-page #v65-product-parent .mc-atc-button-wrap:hover,
+  body.productdetails #v65-product-parent .mc-atc-button-wrap:hover {
+    background: #faf9f7 !important;
+    background-color: #faf9f7 !important;
+    color: #111 !important;
+    border-color: #c9c4bc !important;
   }
 }
 
@@ -13314,49 +13336,6 @@ html body.productdetails #v65-product-parent hr {
     flex-grow: 0 !important;
     flex-shrink: 0 !important;
     flex-basis: auto !important;
-    height: auto !important;
-    min-height: 0 !important;
-    align-self: center !important;
-  }
-}
-
-/* Sectional PDP: do not apply the 440px ATC width lock (right column is narrow; match config pill border #e2dfd8). */
-@media (min-width: 992px) {
-  html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap,
-  html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap,
-  html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
-  html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap {
-    width: auto !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    flex-grow: 0 !important;
-    flex-shrink: 1 !important;
-    flex-basis: auto !important;
-  }
-
-  html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
-  html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap input[id*="btnaddtocart"],
-  html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
-  html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
-  html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
-  html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
-  html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
-  html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"] {
-    width: auto !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
-
-  /* Unwrapped Volusion ATC inputs (if .mc-atc-button-wrap is missing) */
-  html.is-sectional-product body.mc-product-page #v65-product-parent input[name="btnaddtocart"],
-  html.is-sectional-product body.mc-product-page #v65-product-parent input[id*="btnaddtocart"],
-  html.is-sectional-product body.productdetails #v65-product-parent input[name="btnaddtocart"],
-  html.is-sectional-product body.productdetails #v65-product-parent input[id*="btnaddtocart"],
-  html.is-sectional-product body.mc-product-page #v65-product-parent button[name="btnaddtocart"],
-  html.is-sectional-product body.productdetails #v65-product-parent button[name="btnaddtocart"] {
-    width: auto !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
   }
 }
 
