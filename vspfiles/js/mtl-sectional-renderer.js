@@ -1565,6 +1565,9 @@
   function moveLeatherAboveConfigurations(section) {
     if (!section || !section.parentNode) return;
     if (!isSectionalProductPageClient()) return;
+    if (document.getElementById("mc-pdp-accordion") && section.closest && section.closest("#mc-pdp-accordion")) {
+      return;
+    }
     var parent = section.parentNode;
     var planner = document.getElementById("mcPlannerRow");
     var block = findLeatherBlock();
@@ -1589,6 +1592,32 @@
       }
     } catch (eMv) {
       console.warn("Could not move sectional chrome above configurations:", eMv);
+    }
+  }
+
+  function mountPopularConfigurationsInAccordion(section) {
+    try {
+      if (!section || !document.documentElement.classList.contains("is-sectional-product")) return;
+      if (typeof window.mcEnsureSectionalPopularAccordionRow === "function") {
+        window.mcEnsureSectionalPopularAccordionRow();
+      }
+      var acc = document.getElementById("mc-pdp-accordion");
+      var row = document.getElementById("mc-acc-row-popularconfig");
+      if (!acc || !row) return;
+      var host = row.querySelector(".mc-acc-content--popular-host");
+      if (!host || host.contains(section)) return;
+      host.appendChild(section);
+      section.dataset.mtlAccordionPopular = "1";
+      var hid = section.querySelector(".mtl-sectional-heading");
+      if (hid) {
+        hid.setAttribute("hidden", "");
+        hid.style.display = "none";
+      }
+      section.style.marginTop = "0";
+      section.style.marginBottom = "0";
+      section.style.paddingTop = "0";
+    } catch (eM) {
+      console.warn("[MTL] mountPopularConfigurationsInAccordion", eM);
     }
   }
 
@@ -1929,7 +1958,17 @@
     } else {
       upgradeProductSummaryDom(sum);
     }
-    if (section && section.parentNode) {
+    var accordion = document.getElementById("mc-pdp-accordion");
+    var anchoredInAccordion =
+      section && section.closest ? !!section.closest("#mc-pdp-accordion") : false;
+    var anchorParent = accordion && accordion.parentNode ? accordion.parentNode : null;
+    if (accordion && anchoredInAccordion && anchorParent) {
+      try {
+        anchorParent.insertBefore(sum, accordion.nextSibling);
+      } catch (eAcc) {
+        console.error("[MTL] FAILURE product summary insert after accordion", eAcc);
+      }
+    } else if (section && section.parentNode) {
       try {
         section.parentNode.insertBefore(sum, section.nextSibling);
       } catch (eIns) {
@@ -2246,9 +2285,10 @@
     return merged;
   }
 
-  /** Sectional mount hides #mcPlannerRow in template; restore row and keep only Product Summary (hide Room Planner). */
+  /** Template PDP accordion already exposes Product Summary; keep legacy row hidden vs duplicating triggers. */
   function ensureInlineProductSummaryVisibleWithPlannerHidden() {
     if (!document.documentElement.classList.contains("is-sectional-product")) return;
+    if (document.getElementById("mc-pdp-accordion")) return;
     var row = document.getElementById("mcPlannerRow");
     var plannerBtn = document.getElementById("mcPlannerBtn");
     var summaryBtn = document.getElementById("mcProductSummaryBtn");
@@ -2635,6 +2675,10 @@
       }
       var legacyToggle = document.getElementById("mtl-sectional-more-native");
       if (legacyToggle) legacyToggle.remove();
+    });
+
+    mtlRunStage("finalize: accordion popular configs", function () {
+      mountPopularConfigurationsInAccordion(section);
     });
 
     mtlRunStagePanel("finalize: product summary DOM", "productSummary", function () {

@@ -7233,33 +7233,67 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 }
 
 @media (min-width: 992px) {
-  /* Related block: PLP-style wrapping grid (four across) instead of a long horizontal track */
-  body.productdetails #content_area .mc-related-carousel__viewport,
-  body.mc-product-page #content_area .mc-related-carousel__viewport {
-    overflow-x: visible !important;
-    scroll-snap-type: none !important;
-  }
-
-  body.productdetails #content_area .mc-related-carousel__viewport table,
-  body.mc-product-page #content_area .mc-related-carousel__viewport table {
+  /*
+   Related / "More from this collection": Volusion uses table.v65-productDisplay with separate
+   rows for images | names | prices — display:block rules elsewhere stack rows vertically.
+   Force real table layout + horizontal carousel strip (nowrap).
+  */
+  html body.productdetails #content_area #v65-product-related table.v65-productDisplay,
+  html body.mc-product-page #content_area #v65-product-related table.v65-productDisplay,
+  html body.productdetails #content_area #related_products_content table.v65-productDisplay,
+  html body.mc-product-page #content_area #related_products_content table.v65-productDisplay {
+    display: table !important;
     width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
   }
 
-  body.productdetails #content_area .mc-related-carousel__viewport .mc-related-carousel__list,
-  body.productdetails #content_area .mc-related-carousel__viewport .mc-related-carousel__row,
-  body.mc-product-page #content_area .mc-related-carousel__viewport .mc-related-carousel__list,
-  body.mc-product-page #content_area .mc-related-carousel__viewport .mc-related-carousel__row {
-    flex-wrap: wrap !important;
+  html body.productdetails #content_area #v65-product-related tbody,
+  html body.mc-product-page #content_area #v65-product-related tbody,
+  html body.productdetails #content_area #related_products_content tbody,
+  html body.mc-product-page #content_area #related_products_content tbody {
+    display: table-row-group !important;
     width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
   }
 
-  body.productdetails #content_area .mc-related-carousel .mc-related-carousel__nav,
-  body.mc-product-page #content_area .mc-related-carousel .mc-related-carousel__nav {
-    display: none !important;
+  html body.productdetails #content_area #v65-product-related tr,
+  html body.mc-product-page #content_area #v65-product-related tr,
+  html body.productdetails #content_area #related_products_content tr,
+  html body.mc-product-page #content_area #related_products_content tr {
+    display: table-row !important;
+  }
+
+  html body.productdetails #content_area #v65-product-related td,
+  html body.mc-product-page #content_area #v65-product-related td,
+  html body.productdetails #content_area #related_products_content td,
+  html body.mc-product-page #content_area #related_products_content td {
+    display: table-cell !important;
+    vertical-align: top !important;
+    text-align: center !important;
+  }
+
+  html body.productdetails #content_area .mc-related-carousel__viewport,
+  html body.mc-product-page #content_area .mc-related-carousel__viewport {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x proximity !important;
+  }
+
+  html body.productdetails #content_area .mc-related-carousel__viewport .mc-related-carousel__list,
+  html body.productdetails #content_area .mc-related-carousel__viewport .mc-related-carousel__row,
+  html body.mc-product-page #content_area .mc-related-carousel__viewport .mc-related-carousel__list,
+  html body.mc-product-page #content_area .mc-related-carousel__viewport .mc-related-carousel__row {
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    width: max-content !important;
+    min-width: 100% !important;
+  }
+
+  html body.productdetails #content_area .mc-related-carousel .mc-related-carousel__nav,
+  html body.mc-product-page #content_area .mc-related-carousel .mc-related-carousel__nav {
+    display: flex !important;
   }
 }
 
@@ -7355,6 +7389,20 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   body.productdetails #v65-product-parent img#product_photo,
   body.mc-product-page #content_area #v65-product-parent img#product_photo,
   body.productdetails #content_area #v65-product-parent img#product_photo {
+    width: auto !important;
+    max-width: 650px !important;
+    min-width: 600px !important;
+    height: auto !important;
+    margin-left: 70px !important;
+    margin-top: 66px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Sectional PDPs: same hero treatment as standard / theater when body classes differ. */
+  html.is-sectional-product body.mc-product-page #v65-product-parent img#product_photo,
+  html.is-sectional-product body.productdetails #v65-product-parent img#product_photo,
+  html.is-sectional-product body.mc-product-page #content_area #v65-product-parent img#product_photo,
+  html.is-sectional-product body.productdetails #content_area #v65-product-parent img#product_photo {
     width: auto !important;
     max-width: 650px !important;
     min-width: 600px !important;
@@ -11299,6 +11347,37 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   display: grid !important;
   grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: 18px;
+}
+
+/* Popular Configurations inside PDP accordion — two columns on desktop, stacked mobile, cards ~70% of cell */
+#mc-acc-row-popularconfig #mtl-sectional-configurations .mtl-sectional-grid {
+  grid-template-columns: 1fr !important;
+  justify-items: center !important;
+  gap: 22px !important;
+}
+
+@media (min-width: 768px) {
+  #mc-acc-row-popularconfig #mtl-sectional-configurations .mtl-sectional-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+#mc-acc-row-popularconfig #mtl-sectional-configurations.mtl-sectional-configurations .mtl-sectional-card {
+  box-sizing: border-box !important;
+  width: 92% !important;
+  max-width: 360px !important;
+}
+
+@media (min-width: 768px) {
+  #mc-acc-row-popularconfig #mtl-sectional-configurations.mtl-sectional-configurations .mtl-sectional-card {
+    width: 70% !important;
+    max-width: none !important;
+  }
+}
+
+#mc-acc-row-popularconfig #mtl-sectional-configurations {
+  margin: 8px 0 0 !important;
+  padding: 0 !important;
 }
 
 #mtl-sectional-configurations .mtl-sectional-card {

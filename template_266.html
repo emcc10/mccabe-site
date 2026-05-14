@@ -11914,8 +11914,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
    - Each run() re-asserts position so other scripts can't push us around.
    ========================================================= */
 (function () {
-  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v11");
-  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v11";
+  console.log("MC_PDP_ACCORDION_BUILD acc-20260513-v12");
+  window.MC_PDP_ACCORDION_BUILD = "acc-20260513-v12";
 
   function q(sel, root)  { return (root || document).querySelector(sel); }
   function qa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
@@ -12174,8 +12174,33 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       return c;
     }));
 
+    /* Sectional PDPs — Popular Configurations (MTL renders into host; accordion label replaces h3 heading). */
+    if (isSectionalPg()) {
+      acc.appendChild(buildRow('popularconfig', 'POPULAR CONFIGURATIONS', null, function () {
+        var wrap = document.createElement('div');
+        wrap.className = 'mc-acc-content mc-acc-content--popular-host';
+        return wrap;
+      }));
+    }
+
     return acc;
   }
+
+  /** Sectional PDP: append Popular Configurations row when accordion lacked it (idempotent; safe vs leather strip migration). */
+  window.mcEnsureSectionalPopularAccordionRow = function () {
+    try {
+      if (!isSectionalPg()) return;
+      var acc = document.getElementById('mc-pdp-accordion');
+      if (!acc || document.getElementById('mc-acc-row-popularconfig')) return;
+      acc.appendChild(buildRow('popularconfig', 'POPULAR CONFIGURATIONS', null, function () {
+        var wrap = document.createElement('div');
+        wrap.className = 'mc-acc-content mc-acc-content--popular-host';
+        return wrap;
+      }));
+    } catch (eE) {
+      if (typeof console !== 'undefined' && console.warn) console.warn('[MC PDP] mcEnsureSectionalPopularAccordionRow', eE);
+    }
+  };
 
   /* Move the existing #mcLeatherPicker (or just #mcLeatherSwatchStrip) into the
      Select a Leather accordion panel's host slot. Idempotent. */
@@ -12402,6 +12427,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     hideDuplicateTriggers();
     hideInlineAvailabilityInPricing();
     hideChooseOptionsLabel();
+    if (typeof window.mcEnsureSectionalPopularAccordionRow === 'function') {
+      window.mcEnsureSectionalPopularAccordionRow();
+    }
   }
 
   if (document.readyState === 'loading') {
