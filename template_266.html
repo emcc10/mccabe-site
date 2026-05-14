@@ -7950,7 +7950,8 @@ body.mc-product-page #content_area .mc-atc-button-wrap {
   cursor: pointer !important;
   box-sizing: border-box !important;
   font-family: inherit !important;
-  margin-left: 90px;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
   margin-top: 30px;
 }
 body.mc-product-page #content_area .mc-atc-button-wrap:hover {
@@ -12458,7 +12459,11 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         img.loading = 'eager';
         img.decoding = 'async';
         img.removeAttribute('srcset');
-        img.removeAttribute('');
+        try {
+          img.removeAttribute('data-src');
+          img.removeAttribute('data-original');
+          img.removeAttribute('data-lazy');
+        } catch (eRm) {}
         img.setAttribute('src', chosen);
 
         img.onerror = function(){
@@ -12485,24 +12490,28 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       );
 
       cards.forEach(function(card){
-        if (card.getAttribute && card.getAttribute('data-mc-related-img-norm') === '1') return;
-        var img =
-          card.querySelector('img') ||
-          card.querySelector('.v-product__img img') ||
-          card.querySelector('.v-product__image img') ||
-          card.querySelector('.product_image img');
-        if (!img) return;
-        var link = card.querySelector('a[href*="-p/"], a[href*="product-p/"]');
-        normalizeOne(img, link);
         try {
-          card.setAttribute('data-mc-related-img-norm', '1');
-        } catch (eNorm) {}
+          if (card.getAttribute && card.getAttribute('data-mc-related-img-norm') === '1') return;
+          var img =
+            card.querySelector('img') ||
+            card.querySelector('.v-product__img img') ||
+            card.querySelector('.v-product__image img') ||
+            card.querySelector('.product_image img');
+          if (!img) return;
+          var link = card.querySelector('a[href*="-p/"], a[href*="product-p/"]');
+          normalizeOne(img, link);
+          try {
+            card.setAttribute('data-mc-related-img-norm', '1');
+          } catch (eNorm) {}
+        } catch (eCard) {}
       });
 
       scope.querySelectorAll('#v65-product-related td.v65-productPhoto').forEach(function(td){
-        var img = td.querySelector('img');
-        var link = td.querySelector('a[href*="-p/"], a[href*="product-p/"]');
-        normalizeOne(img, link);
+        try {
+          var img = td.querySelector('img');
+          var link = td.querySelector('a[href*="-p/"], a[href*="product-p/"]');
+          normalizeOne(img, link);
+        } catch (eTd) {}
       });
     } catch (e) {}
   }

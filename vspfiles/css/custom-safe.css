@@ -7039,7 +7039,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 }
 
 /* =========================================================
-   PDP: related products — 3 across, horizontal scroll + arrows
+   PDP: related products — 4 across (PLP-like), horizontal scroll fallback + arrows
    ========================================================= */
 .mc-related-carousel {
   position: relative;
@@ -7094,9 +7094,9 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 .mc-related-carousel__viewport .mc-related-carousel__list > li,
 .mc-related-carousel__viewport .mc-related-carousel__list > .v-product,
 .mc-related-carousel__viewport .mc-related-carousel__list > div.v-product {
-  flex: 0 0 calc((100cqi - 24px) / 3) !important;
-  min-width: calc((100cqi - 24px) / 3) !important;
-  max-width: calc((100cqi - 24px) / 3) !important;
+  flex: 0 0 calc((100cqi - 36px) / 4) !important;
+  min-width: calc((100cqi - 36px) / 4) !important;
+  max-width: calc((100cqi - 36px) / 4) !important;
   scroll-snap-align: start;
   box-sizing: border-box !important;
 }
@@ -7105,9 +7105,9 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   .mc-related-carousel__viewport .mc-related-carousel__list > li,
   .mc-related-carousel__viewport .mc-related-carousel__list > .v-product,
   .mc-related-carousel__viewport .mc-related-carousel__list > div.v-product {
-    flex: 0 0 calc((100vw - 140px) / 3) !important;
-    min-width: calc((100vw - 140px) / 3) !important;
-    max-width: calc((100vw - 140px) / 3) !important;
+    flex: 0 0 calc((100vw - 176px) / 4) !important;
+    min-width: calc((100vw - 176px) / 4) !important;
+    max-width: calc((100vw - 176px) / 4) !important;
   }
 }
 
@@ -7122,11 +7122,11 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   box-sizing: border-box !important;
 }
 
-/* Exactly 3 slots visible; each cell = 1/3 of carousel viewport (not full track) */
+/* Exactly 4 slots visible; each cell = 1/4 of carousel viewport (not full track) */
 .mc-related-carousel__viewport .mc-related-carousel__row td {
-  flex: 0 0 calc((100cqi - 24px) / 3) !important;
-  min-width: calc((100cqi - 24px) / 3) !important;
-  max-width: calc((100cqi - 24px) / 3) !important;
+  flex: 0 0 calc((100cqi - 36px) / 4) !important;
+  min-width: calc((100cqi - 36px) / 4) !important;
+  max-width: calc((100cqi - 36px) / 4) !important;
   scroll-snap-align: start;
   box-sizing: border-box !important;
   vertical-align: top !important;
@@ -7134,9 +7134,9 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 
 @supports not (container-type: inline-size) {
   .mc-related-carousel__viewport .mc-related-carousel__row td {
-    flex: 0 0 calc((100vw - 140px) / 3) !important;
-    min-width: calc((100vw - 140px) / 3) !important;
-    max-width: calc((100vw - 140px) / 3) !important;
+    flex: 0 0 calc((100vw - 176px) / 4) !important;
+    min-width: calc((100vw - 176px) / 4) !important;
+    max-width: calc((100vw - 176px) / 4) !important;
   }
 }
 
@@ -7229,6 +7229,37 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
       min-width: 88vw !important;
       max-width: 88vw !important;
     }
+  }
+}
+
+@media (min-width: 992px) {
+  /* Related block: PLP-style wrapping grid (four across) instead of a long horizontal track */
+  body.productdetails #content_area .mc-related-carousel__viewport,
+  body.mc-product-page #content_area .mc-related-carousel__viewport {
+    overflow-x: visible !important;
+    scroll-snap-type: none !important;
+  }
+
+  body.productdetails #content_area .mc-related-carousel__viewport table,
+  body.mc-product-page #content_area .mc-related-carousel__viewport table {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  body.productdetails #content_area .mc-related-carousel__viewport .mc-related-carousel__list,
+  body.productdetails #content_area .mc-related-carousel__viewport .mc-related-carousel__row,
+  body.mc-product-page #content_area .mc-related-carousel__viewport .mc-related-carousel__list,
+  body.mc-product-page #content_area .mc-related-carousel__viewport .mc-related-carousel__row {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.productdetails #content_area .mc-related-carousel .mc-related-carousel__nav,
+  body.mc-product-page #content_area .mc-related-carousel .mc-related-carousel__nav {
+    display: none !important;
   }
 }
 
@@ -7590,6 +7621,61 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   width: 100% !important;
   text-align: center !important;
   align-items: center !important;
+}
+
+/* PDP related: same 280px image tile + contain as category PLP (name/price already stacked in rules above) */
+:is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .v-product__img,
+:is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .v-product__image,
+:is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .v-product__image-wrap,
+:is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .product_image,
+:is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .vcss_img,
+:is(body.productdetails, body.mc-product-page) #content_area #v65-product-related td.v65-productPhoto {
+  height: 280px !important;
+  min-height: 280px !important;
+  max-height: 280px !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  background: #ffffff !important;
+  box-sizing: border-box !important;
+  line-height: 0 !important;
+}
+
+:is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .v-product__img a,
+:is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .v-product__image a,
+:is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .product_image a,
+:is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .vcss_img a,
+:is(body.productdetails, body.mc-product-page) #content_area #v65-product-related td.v65-productPhoto a {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+  line-height: 0 !important;
+}
+
+:is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .v-product__img img,
+:is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .v-product__image img,
+:is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .product_image img,
+:is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .vcss_img img,
+:is(body.productdetails, body.mc-product-page) #content_area #v65-product-related td.v65-productPhoto img {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  display: block !important;
+  margin: 0 !important;
+  flex-shrink: 1 !important;
 }
 
 /* Category listing: uniform image tile + contain (late in file; wins over older blocks) */
@@ -12408,6 +12494,26 @@ body.productdetails #content_area .mc-atc-button-wrap {
   box-sizing: border-box !important;
 }
 
+/* Center ATC stack under the 440px configuration column (template may set margin-left on .mc-atc-button-wrap) */
+html body.productdetails #content_area .mc-atc-row,
+html body.mc-product-page #content_area .mc-atc-row,
+html body.productdetails #v65-product-parent .mc-atc-row,
+html body.mc-product-page #v65-product-parent .mc-atc-row {
+  justify-content: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 100% !important;
+  max-width: 440px !important;
+}
+
+html body.productdetails #content_area .mc-atc-button-wrap,
+html body.mc-product-page #content_area .mc-atc-button-wrap,
+html body.productdetails #v65-product-parent .mc-atc-button-wrap,
+html body.mc-product-page #v65-product-parent .mc-atc-button-wrap {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
 /* Retail-row pricing: bump to 15px / 1.5 line-height. */
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-line,
 html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-line,
@@ -12828,15 +12934,9 @@ body.mc-theater-seating-pdp .mc-configuration-rh__heading {
   line-height: 1.5 !important;
 }
 
-/* Product Info / TechSpecs / ExtInfo tab strip — HIDDEN per user request
-   (deleted from PDP layout; description shows directly without the tab nav).
-   The previous rule was `display: block !important;` — overridden here to none. */
-body.productdetails table:has(td[class*="vCSS_tab"]),
-body.mc-product-page table:has(td[class*="vCSS_tab"]) {
-  /* display: block !important; */
-  display: none !important;
-}
-
+/* Product Info / TechSpecs / ExtInfo TAB CELLS only — MUST NOT hide the parent <table>:
+   Volusion nests the Product Details description (#ProductDetail_ProductDetails_div2) in that same table.
+   Older `table:has(td.vCSS_tab) { display:none }` removed the entire description block (May 2026). */
 body.productdetails tr:has(> td[class*="vCSS_tab"]),
 body.mc-product-page tr:has(> td[class*="vCSS_tab"]),
 body.productdetails td[class*="vCSS_tab"],
@@ -12844,12 +12944,20 @@ body.mc-product-page td[class*="vCSS_tab"] {
   display: none !important;
 }
 
-/* Beat `#content_area td[class*="vCSS_tab"]` tab styling embedded in template_266.html (~8346). */
-html body.productdetails #content_area table:has(td[class*="vCSS_tab"]),
-html body.mc-product-page #content_area table:has(td[class*="vCSS_tab"]),
+/* Extra specificity over template #content_area td[class*="vCSS_tab"] { display: inline-flex } */
+html body.productdetails #content_area tr:has(> td[class*="vCSS_tab"]),
+html body.mc-product-page #content_area tr:has(> td[class*="vCSS_tab"]),
 html body.productdetails #content_area td[class*="vCSS_tab"],
 html body.mc-product-page #content_area td[class*="vCSS_tab"] {
   display: none !important;
+}
+
+/* Ensure long description/content pane stays visible once tab chrome is CSS-hidden */
+html body.productdetails #ProductDetail_ProductDetails_div2,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Description box: shift right + down so the Palliser logo can sit under the title. */
