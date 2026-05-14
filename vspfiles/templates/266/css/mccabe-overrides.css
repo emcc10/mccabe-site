@@ -411,7 +411,7 @@ html body.mc-product-page #mcConfigurationBlock {
   border: 1px solid #e2dfd8 !important;
   border-radius: 2px !important;
   padding: 14px 16px !important;
-  background: #fff !important;
+  background: #f4f4f4 !important;
 }
 
 html body.productdetails #mcPlannerBtn span,
@@ -429,8 +429,10 @@ html.mc-paragon-pdp body #mcProductSummaryBtn span {
 
 body.productdetails #mcConfigurationBlock .mc-configuration-rh__heading,
 html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__heading {
-  font-weight: 500 !important;
-  letter-spacing: 0.12em !important;
+  /* font-weight: 500 !important; */
+  /* letter-spacing: 0.12em !important; */
+  font-weight: 600 !important;
+  letter-spacing: 0.16em !important;
   text-transform: uppercase !important;
   margin-bottom: 10px !important;
 }
@@ -808,11 +810,13 @@ html.mc-paragon-pdp body #mcConfigurationBlock .mc-configuration-rh__heading {
   font-family: Inter, Arial, sans-serif !important;
   /* font-size: 11px !important; */
   /* font-size: 13px !important; */
+  /* font-weight: 400 !important; */
   /* font-weight: 500 !important; */
+  /* letter-spacing: 0.14em !important; */
   /* color: #333 !important; */
   font-size: 12px !important;
-  font-weight: 400 !important;
-  letter-spacing: 0.14em !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.16em !important;
   text-transform: uppercase !important;
   color: #444 !important;
 }
