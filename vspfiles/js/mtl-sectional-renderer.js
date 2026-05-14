@@ -23,7 +23,7 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260520-popular-v14";
+  window.MTL_RENDERER_BUILD = "sectional-20260521-visual-v15";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */

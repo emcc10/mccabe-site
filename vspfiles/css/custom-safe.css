@@ -7398,17 +7398,18 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
     box-sizing: border-box !important;
   }
 
-  /* Sectional PDPs: same hero treatment as standard / theater when body classes differ. */
+  /* Sectional PDPs: fill the media column — do not force 600px min-width or left offset (makes hero tiny in flex layouts). */
   html.is-sectional-product body.mc-product-page #v65-product-parent img#product_photo,
   html.is-sectional-product body.productdetails #v65-product-parent img#product_photo,
   html.is-sectional-product body.mc-product-page #content_area #v65-product-parent img#product_photo,
   html.is-sectional-product body.productdetails #content_area #v65-product-parent img#product_photo {
-    width: auto !important;
-    max-width: 650px !important;
-    min-width: 600px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     height: auto !important;
-    margin-left: 70px !important;
-    margin-top: 66px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 20px !important;
     box-sizing: border-box !important;
   }
 }
@@ -11407,12 +11408,12 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
 }
 
 #mtl-sectional-configurations .mtl-sectional-title {
-  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
-  font-size: 1.35rem !important;
-  font-weight: 500 !important;
-  line-height: 1.25 !important;
-  letter-spacing: 0.02em !important;
-  color: #1a1a1a !important;
+  font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.04em !important;
+  color: #333 !important;
   margin: 12px 0 8px !important;
 }
 
@@ -11449,23 +11450,6 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   visibility: visible !important;
   box-sizing: border-box !important;
   flex-shrink: 0 !important;
-}
-
-/* Sectional + Palliser RH configurator headings + our PDP accordion rows — Cormorant (headings only; option copy stays Inter). */
-html.is-sectional-product body.productdetails #mcConfigurationBlock .mc-configuration-rh__heading,
-html.is-sectional-product body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__heading {
-  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
-  font-weight: 500 !important;
-  font-size: 13px !important;
-  letter-spacing: 0.12em !important;
-  text-transform: uppercase !important;
-  color: #2a2a2a !important;
-}
-
-body.mc-product-page .mc-pdp-accordion .mc-acc-label,
-body.productdetails .mc-pdp-accordion .mc-acc-label {
-  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
-  font-weight: 500 !important;
 }
 
 #mtl-product-summary {
@@ -12008,25 +11992,27 @@ html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-butto
   align-items: center !important;
   justify-content: center !important;
   gap: 12px !important;
-  min-width: 200px !important;
+  min-width: 0 !important;
   max-width: 100% !important;
-  padding: 14px 28px !important;
-  border: 1px solid #d0d0d0 !important;
+  padding: 12px 22px !important;
+  border: 1px solid #e2dfd8 !important;
   border-radius: 0px !important;
   background: #fff !important;
   background-color: #fff !important;
-  color: #545454 !important;
-  font-size: 12px !important;
+  color: #444 !important;
+  font-size: 11px !important;
   font-weight: 400 !important;
-  letter-spacing: 0.15em !important;
+  letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
   text-align: center !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
-  font-family: inherit !important;
+  font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
   margin-left: 0 !important;
-  margin-top: 16px !important;
-  height: 42px !important;
+  margin-top: 8px !important;
+  margin-bottom: 8px !important;
+  height: auto !important;
+  min-height: 44px !important;
   text-decoration: none !important;
   -webkit-appearance: none !important;
   appearance: none !important;
@@ -12036,10 +12022,10 @@ html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap:
 html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap:hover,
 html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap:hover,
 html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap:hover {
-  background: #f5f5f5 !important;
-  background-color: #f5f5f5 !important;
+  background: #faf9f7 !important;
+  background-color: #faf9f7 !important;
   color: #111 !important;
-  border-color: #333 !important;
+  border-color: #c9c4bc !important;
 }
 
 html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap input[type="submit"],
@@ -13334,6 +13320,46 @@ html body.productdetails #v65-product-parent hr {
   }
 }
 
+/* Sectional PDP: do not apply the 440px ATC width lock (right column is narrow; match config pill border #e2dfd8). */
+@media (min-width: 992px) {
+  html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap,
+  html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap,
+  html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
+  html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex-grow: 0 !important;
+    flex-shrink: 1 !important;
+    flex-basis: auto !important;
+  }
+
+  html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
+  html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap input[id*="btnaddtocart"],
+  html.is-sectional-product body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
+  html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
+  html.is-sectional-product body.productdetails #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
+  html.is-sectional-product body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
+  html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
+  html.is-sectional-product body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"] {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Unwrapped Volusion ATC inputs (if .mc-atc-button-wrap is missing) */
+  html.is-sectional-product body.mc-product-page #v65-product-parent input[name="btnaddtocart"],
+  html.is-sectional-product body.mc-product-page #v65-product-parent input[id*="btnaddtocart"],
+  html.is-sectional-product body.productdetails #v65-product-parent input[name="btnaddtocart"],
+  html.is-sectional-product body.productdetails #v65-product-parent input[id*="btnaddtocart"],
+  html.is-sectional-product body.mc-product-page #v65-product-parent button[name="btnaddtocart"],
+  html.is-sectional-product body.productdetails #v65-product-parent button[name="btnaddtocart"] {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
 /* =========================================================
    Display serif — Cormorant Garamond (headings / editorial titles ONLY).
    No font-size, color, spacing, line-height, or transform changes.
@@ -13389,5 +13415,12 @@ html body #options_table * {
 }
 
 html body #content_area .wm-info-card h4 {
+  font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+}
+
+/* PDP accordion + RH config headings: sans only — do not inherit display serif. */
+html body .mc-pdp-accordion .mc-acc-header,
+html body .mc-pdp-accordion .mc-acc-label,
+html body .mc-pdp-accordion .mc-acc-header * {
   font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
