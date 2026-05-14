@@ -12476,7 +12476,11 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
             h.match(/\/product-p\/([^.\/?#]+)/i) ||
             h.match(/[?&]ProductCode=([^&]+)/i);
           if (!m || !m[1]) return '';
-          return String(m[1] || '').replace(/\.htm.*/i, '').toUpperCase();
+          var raw = String(m[1]);
+          try {
+            raw = decodeURIComponent(raw.replace(/\+/g, ' ')).trim();
+          } catch (eDec) {}
+          return raw.replace(/\.htm.*/i, '').toUpperCase();
         }
 
         if (
