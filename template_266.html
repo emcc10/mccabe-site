@@ -1114,17 +1114,22 @@ document.addEventListener("DOMContentLoaded", function () {
       ) {
         return false;
       }
+      /* Theater guard must NOT scan all of #v65-product-parent (nav/footer mention "Theater Seating").
+         Only the visible product identity (title / schema name). */
       try {
         var prodRootEarly = document.getElementById("v65-product-parent");
-        var areaEarly = prodRootEarly
-          ? String(prodRootEarly.innerText || "").toLowerCase().slice(0, 12000)
-          : "";
+        var titleHay = " " + String(document.title || "").toLowerCase();
+        var h1n = prodRootEarly ? prodRootEarly.querySelector("h1") : document.querySelector("h1");
+        var nm = prodRootEarly ? prodRootEarly.querySelector('[itemprop="name"]') : document.querySelector('#v65-product-parent [itemprop="name"]');
+        if (h1n) titleHay += " " + String(h1n.textContent || "").toLowerCase();
+        if (nm) titleHay += " " + String(nm.textContent || "").toLowerCase();
         if (
-          areaEarly.indexOf("theater seating") !== -1 ||
-          areaEarly.indexOf("theatre seating") !== -1 ||
-          areaEarly.indexOf("home theater") !== -1 ||
-          areaEarly.indexOf("home theatre") !== -1
+          /\b(theater|theatre)\s+seating\b/i.test(titleHay) &&
+          !/\bsectional\b/i.test(titleHay)
         ) {
+          return false;
+        }
+        if (/\bhome\s+(theater|theatre)\b/i.test(titleHay) && !/\bsectional\b/i.test(titleHay)) {
           return false;
         }
       } catch (eBody) {}
@@ -11914,8 +11919,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
    - Each run() re-asserts position so other scripts can't push us around.
    ========================================================= */
 (function () {
-  console.log("MC_PDP_ACCORDION_BUILD acc-20260521-v15");
-  window.MC_PDP_ACCORDION_BUILD = "acc-20260521-v15";
+  console.log("MC_PDP_ACCORDION_BUILD acc-20260521-v16 sectional-class-detect-fix");
+  window.MC_PDP_ACCORDION_BUILD = "acc-20260521-v16";
 
   function q(sel, root)  { return (root || document).querySelector(sel); }
   function qa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
@@ -20475,7 +20480,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260511diag"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260521-visual15"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260521-classfix16"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
