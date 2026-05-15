@@ -11674,7 +11674,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   position: absolute !important;
   top: 8px !important;
   right: 8px !important;
-  z-index: 3 !important;
+  z-index: 6 !important;
   box-sizing: border-box !important;
   width: 40px !important;
   height: 40px !important;
@@ -11716,7 +11716,9 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   visibility: visible !important;
   box-sizing: border-box !important;
   flex: 0 0 auto !important;
-  pointer-events: none !important;
+  pointer-events: auto !important;
+  -webkit-user-drag: none !important;
+  user-select: none !important;
 }
 
 #mtl-sectional-configurations .mtl-sectional-card:hover {
@@ -11754,7 +11756,7 @@ body.mtl-sectional-diagram-lightbox-open {
   padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px))
     max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) !important;
   box-sizing: border-box !important;
-  background: rgba(0, 0, 0, 0.9) !important;
+  background: rgba(0, 0, 0, 0.58) !important;
   cursor: zoom-out !important;
 }
 

@@ -1059,7 +1059,7 @@ html.is-sectional-product body #mtl-sectional-configurations .mtl-sectional-card
   position: absolute !important;
   top: 8px !important;
   right: 8px !important;
-  z-index: 3 !important;
+  z-index: 6 !important;
   box-sizing: border-box !important;
   width: 40px !important;
   height: 40px !important;
@@ -1089,5 +1089,7 @@ html.is-sectional-product body #mtl-sectional-configurations .mtl-sectional-card
   max-height: none !important;
   object-fit: contain !important;
   object-position: top center !important;
-  pointer-events: none !important;
+  pointer-events: auto !important;
+  -webkit-user-drag: none !important;
+  user-select: none !important;
 }
