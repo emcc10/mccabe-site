@@ -315,15 +315,15 @@ def iter_text_spans_with_text(page: fitz.Page) -> list[tuple[fitz.Rect, str]]:
     return out
 
 
-def union_popular_diagram_images_in_cell(
+def select_largest_popular_diagram_image_in_cell(
     page: fitz.Page, cell: fitz.Rect, *, min_area: float = 8000.0
 ) -> fitz.Rect | None:
     """
-    Palliser places the sectional renders as embedded raster images (not text).
-    Union image bboxes inside the Popular grid cell. Some lines (e.g. Colebrook) use two
-    smaller renders per cell — lower min_area vs the legacy 20k threshold so both union in.
+    One Popular cell should show a single sectional render. Palliser sometimes embeds a second
+    smaller bitmap in the same quadrant (e.g. Creighton) — unioning them produced “two graphics”.
+    Keep the largest qualifying image in the cell.
     """
-    u: fitz.Rect | None = None
+    hits: list[fitz.Rect] = []
     cell_a = max(cell.get_area(), 1.0)
     floor = max(3500.0, min(float(min_area), 0.02 * cell_a))
     try:
@@ -340,8 +340,10 @@ def union_popular_diagram_images_in_cell(
         cy = (bb.y0 + bb.y1) * 0.5
         if not (cell.x0 - 3.0 <= cx <= cell.x1 + 3.0 and cell.y0 - 3.0 <= cy <= cell.y1 + 3.0):
             continue
-        u = bb if u is None else (u | bb)
-    return u
+        hits.append(bb)
+    if not hits:
+        return None
+    return max(hits, key=lambda r: r.get_area())
 
 
 def popular_configuration_block_clip(
@@ -413,7 +415,7 @@ def popular_configuration_block_clip(
                 continue
         text_u = r if text_u is None else (text_u | r)
 
-    img_u = union_popular_diagram_images_in_cell(page, cell, min_area=min_image_area)
+    img_u = select_largest_popular_diagram_image_in_cell(page, cell, min_area=min_image_area)
 
     u: fitz.Rect | None = None
     if img_u is not None:
@@ -427,6 +429,7 @@ def popular_configuration_block_clip(
 
     if img_u is not None:
         u.y0 = min(u.y0, img_u.y0 - 6.0)
+        u.y1 = max(u.y1, img_u.y1 + 10.0)
     u.y1 = min(y_bot - 3.0, max(u.y1, anchor.y1 + 14.0))
 
     right_col = (anchor.x0 + anchor.x1) * 0.5 >= mid_x
