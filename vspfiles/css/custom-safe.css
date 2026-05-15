@@ -7860,6 +7860,18 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   flex-shrink: 1 !important;
 }
 
+/* PDP related: enforce single strip (Volusion + scripts must never stack two grids) */
+html body.productdetails #v65-product-related .mc-related-plp-grid ~ .mc-related-plp-grid,
+html body.mc-product-page #v65-product-related .mc-related-plp-grid ~ .mc-related-plp-grid {
+  display: none !important;
+}
+
+html body.productdetails #v65-product-related .mc-related-plp-grid,
+html body.mc-product-page #v65-product-related .mc-related-plp-grid {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+}
+
 /* PDP related: single row of up to four (no wrapping); horizontal scroll on narrow viewports */
 :is(body.productdetails, body.mc-product-page) .mc-related-plp-grid {
   display: flex !important;
@@ -7922,6 +7934,17 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   font-weight: 400 !important;
   color: #333 !important;
   display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+:is(body.productdetails, body.mc-product-page) .mc-related-plp-card__price .product_saleprice,
+:is(body.productdetails, body.mc-product-page) .mc-related-plp-card__price .product_sale_price,
+:is(body.productdetails, body.mc-product-page) .mc-related-plp-card__price .product_price,
+:is(body.productdetails, body.mc-product-page) .mc-related-plp-card__price font.pricecolorsmall {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 :is(body.productdetails, body.mc-product-page) .mc-related-plp-card__title a,

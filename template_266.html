@@ -12581,8 +12581,27 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       if (td.classList.contains('v65-productPhoto')) return 'photo';
       if (td.classList.contains('v65-productName')) return 'name';
       if (td.classList.contains('v65-productDetailInfo')) return 'detail';
+      if (td.querySelector && td.querySelector('.product_price, .product_sale_price, .product_saleprice, .v65-product-related-price, font.pricecolorsmall, [itemprop="price"]'))
+        return 'detail';
     }
     return '';
+  }
+
+  function mcRelatedResolveTriplet(r0, r1, r2) {
+    if (!r0 || !r1 || !r2) return null;
+    var nameR = null;
+    var photoR = null;
+    var detailR = null;
+    var trip = [r0, r1, r2];
+    var z;
+    for (z = 0; z < 3; z++) {
+      var k = mcRelatedRowKind(trip[z]);
+      if (k === 'photo') photoR = trip[z];
+      else if (k === 'name') nameR = trip[z];
+      else if (k === 'detail') detailR = trip[z];
+    }
+    if (!nameR || !photoR || !detailR) return null;
+    return { nameR: nameR, photoR: photoR, detailR: detailR };
   }
 
   function mcCountRelatedNameRowProducts(nameR) {
@@ -12604,6 +12623,13 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       for (ri = 0; ri < roots.length; ri++) {
         var root = roots[ri];
         if (!root) continue;
+        var killGrids = root.querySelectorAll('.mc-related-plp-grid');
+        var kg;
+        for (kg = 1; kg < killGrids.length; kg++) {
+          try {
+            killGrids[kg].parentNode.removeChild(killGrids[kg]);
+          } catch (eKg) {}
+        }
         var tables = root.querySelectorAll('table.v65-productDisplay');
         var convertedHere = false;
         var ti;
@@ -12621,8 +12647,17 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
           }
 
           if (table.getAttribute && table.getAttribute('data-mc-related-plp') === '1') {
-            convertedHere = true;
-            continue;
+            var existGrid = table.nextElementSibling;
+            if (existGrid && existGrid.classList && existGrid.classList.contains('mc-related-plp-grid')) {
+              convertedHere = true;
+              continue;
+            }
+            try {
+              table.removeAttribute('data-mc-related-plp');
+            } catch (eRa) {}
+            try {
+              table.style.removeProperty('display');
+            } catch (eRs) {}
           }
 
           var nextSib = table.nextElementSibling;
@@ -12639,18 +12674,18 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
           for (ch = tbody.firstElementChild; ch; ch = ch.nextElementSibling) {
             if (ch.tagName === 'TR' && ch.classList && ch.classList.contains('v65-productDisplay-row')) rows.push(ch);
           }
-          if (rows.length !== 3) continue;
-          var nameR = null;
-          var photoR = null;
-          var detailR = null;
-          var rj;
-          for (rj = 0; rj < rows.length; rj++) {
-            var k = mcRelatedRowKind(rows[rj]);
-            if (k === 'photo') photoR = rows[rj];
-            else if (k === 'name') nameR = rows[rj];
-            else if (k === 'detail') detailR = rows[rj];
+          if (rows.length < 3) continue;
+          /* Volusion often emits 6 rows: two blocks of (name | detail | photo) with 4 SKUs each. We only use the FIRST valid triplet and cap at maxN cards. */
+          var triple = null;
+          var si;
+          for (si = 0; si + 2 < rows.length; si++) {
+            triple = mcRelatedResolveTriplet(rows[si], rows[si + 1], rows[si + 2]);
+            if (triple) break;
           }
-          if (!nameR || !photoR || !detailR) continue;
+          if (!triple) continue;
+          var nameR = triple.nameR;
+          var photoR = triple.photoR;
+          var detailR = triple.detailR;
 
           var nameCount = mcCountRelatedNameRowProducts(nameR);
           var maxSlots = Math.min(photoR.cells.length, detailR.cells.length, nameCount);
