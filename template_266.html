@@ -12615,6 +12615,56 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     return n;
   }
 
+  /** Volusion sometimes omits the photo in a related photo cell (e.g. Juno). Build PLP thumb from name link. */
+  function mcRelatedPlpMediaNeedsFallback(mediaEl) {
+    if (!mediaEl || !mediaEl.querySelector) return true;
+    var img = mediaEl.querySelector('img');
+    if (!img) return true;
+    var src = String(img.getAttribute('src') || '').trim();
+    if (!src || /^data:/i.test(src)) return true;
+    if (/clear1x1\.gif/i.test(src)) return true;
+    return false;
+  }
+
+  function mcRelatedEnsurePlpCardMedia(mediaEl, nameA, phTd) {
+    if (!mediaEl || !mcRelatedPlpMediaNeedsFallback(mediaEl)) return;
+    var href = '';
+    if (nameA) href = String(nameA.getAttribute('href') || nameA.href || '').trim();
+    if (!href && phTd && phTd.querySelector) {
+      var phL = phTd.querySelector('a[href]');
+      if (phL) href = String(phL.getAttribute('href') || phL.href || '').trim();
+    }
+    if (!href) return;
+    var code = mcVolusionProductCodeFromHref(href);
+    if (!code) return;
+    var link = document.createElement('a');
+    try {
+      link.setAttribute('href', href);
+      link.href = href;
+    } catch (eH) {}
+    var im = document.createElement('img');
+    im.setAttribute('alt', '');
+    im.setAttribute('src', '/v/vspfiles/photos/' + code + '-1.jpg');
+    try {
+      im.loading = 'eager';
+    } catch (eL) {}
+    im.onerror = function () {
+      var cur = im.getAttribute('src') || '';
+      if (/-1\.(jpg|jpeg|png|webp)(\?|$)/i.test(cur)) {
+        im.onerror = null;
+        im.setAttribute('src', '/v/vspfiles/photos/' + code + '-2T.jpg');
+        return;
+      }
+      if (/-2T\.(jpg|jpeg|png|webp)(\?|$)/i.test(cur)) {
+        im.onerror = null;
+        im.setAttribute('src', '/v/vspfiles/photos/' + code + '-1.jpg');
+      }
+    };
+    link.appendChild(im);
+    mediaEl.textContent = '';
+    mediaEl.appendChild(link);
+  }
+
   function mcConvertRelatedV65TablesToPlpGrid(maxN) {
     maxN = maxN || 4;
     try {
@@ -12710,16 +12760,17 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
             var media = document.createElement('div');
             media.className = 'mc-related-plp-card__media';
+            var nameAForCard = nameTd.querySelector && nameTd.querySelector('a[href]');
             var phA = phTd.querySelector && phTd.querySelector('a[href]');
             if (phA) media.appendChild(phA.cloneNode(true));
             else media.appendChild(phTd.cloneNode(true));
+            mcRelatedEnsurePlpCardMedia(media, nameAForCard, phTd);
             card.appendChild(media);
 
             /* Do not nest <td clone> inside <div> — invalid HTML breaks layout/order in browsers */
             var titleEl = document.createElement('div');
             titleEl.className = 'mc-related-plp-card__title';
-            var nameA = nameTd.querySelector && nameTd.querySelector('a[href]');
-            if (nameA) titleEl.appendChild(nameA.cloneNode(true));
+            if (nameAForCard) titleEl.appendChild(nameAForCard.cloneNode(true));
             else titleEl.textContent = (nameTd.textContent || '').replace(/\s+/g, ' ').trim();
             card.appendChild(titleEl);
 
