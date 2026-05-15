@@ -12610,11 +12610,11 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
       scope
         .querySelectorAll(
-          '#content_area #v65-product-related img, ' +
-          '#content_area #related_products_content img, ' +
-          '#content_area #relateditems img, ' +
-          '#content_area #related-products img, ' +
-          '#content_area table.relateditems img'
+          '#content_area #v65-product-related img, #v65-product-related img, ' +
+          '#content_area #related_products_content img, #related_products_content img, ' +
+          '#content_area #relateditems img, #relateditems img, ' +
+          '#content_area #related-products img, #related-products img, ' +
+          '#content_area table.relateditems img, table.relateditems img'
         )
         .forEach(function (imgEl) {
         try {
@@ -12930,19 +12930,23 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     setTimeout(mcRunRelatedFix, 0);
     setTimeout(mcRunRelatedFix, 400);
     setTimeout(mcRunRelatedFix, 1200);
+    setTimeout(mcRunRelatedFix, 2600);
+    setTimeout(mcRunRelatedFix, 4800);
   });
-  var ca = document.getElementById('content_area');
-  if (ca && typeof MutationObserver !== 'undefined') {
+  /* Related Items may render outside #content_area (Volusion) — observing only #content_area missed late inject + lazy img. */
+  var moRoot = typeof document.body !== 'undefined' && document.body ? document.body : null;
+  if (moRoot && typeof MutationObserver !== 'undefined') {
     var t;
     var mo = new MutationObserver(function () {
       clearTimeout(t);
-      t = setTimeout(mcRunRelatedFix, 80);
+      t = setTimeout(mcRunRelatedFix, 120);
     });
     try {
-      mo.observe(ca, { childList: true, subtree: true });
+      mo.observe(moRoot, { childList: true, subtree: true });
     } catch (eMo) {}
   }
 
+  window.mcNormalizeRelatedItemImages = mcNormalizeRelatedItemImages;
   document.addEventListener('DOMContentLoaded', function(){
     mcNormalizeRelatedItemImages(document);
     setTimeout(function(){ mcNormalizeRelatedItemImages(document); }, 300);
