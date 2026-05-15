@@ -7860,35 +7860,37 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   flex-shrink: 1 !important;
 }
 
-/* PDP related: JS-built PLP grid (mc-related-plp-grid) — image, then title, then price like category */
+/* PDP related: single row of up to four (no wrapping); horizontal scroll on narrow viewports */
 :is(body.productdetails, body.mc-product-page) .mc-related-plp-grid {
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 24px 18px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
   width: 100% !important;
   max-width: 100% !important;
   margin: 12px 0 0 0 !important;
   box-sizing: border-box !important;
-}
-
-@media (max-width: 991px) {
-  :is(body.productdetails, body.mc-product-page) .mc-related-plp-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 
 :is(body.productdetails, body.mc-product-page) .mc-related-plp-card {
   display: flex !important;
   flex-direction: column !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: 25% !important;
   align-items: center !important;
   justify-content: flex-start !important;
   text-align: center !important;
-  width: 100% !important;
-  min-width: 0 !important;
   box-sizing: border-box !important;
 }
 
 :is(body.productdetails, body.mc-product-page) .mc-related-plp-card__media {
+  order: 1 !important;
   width: 100% !important;
   height: 280px !important;
   min-height: 280px !important;
@@ -7901,6 +7903,30 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   justify-content: center !important;
   background: #ffffff !important;
   box-sizing: border-box !important;
+}
+
+:is(body.productdetails, body.mc-product-page) .mc-related-plp-card__title {
+  order: 2 !important;
+  width: 100% !important;
+  margin: 0 0 8px 0 !important;
+  line-height: 1.35 !important;
+  font-size: inherit !important;
+  display: block !important;
+}
+
+:is(body.productdetails, body.mc-product-page) .mc-related-plp-card__price {
+  order: 3 !important;
+  width: 100% !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: #333 !important;
+  display: block !important;
+}
+
+:is(body.productdetails, body.mc-product-page) .mc-related-plp-card__title a,
+:is(body.productdetails, body.mc-product-page) .mc-related-plp-card__price a {
+  order: unset !important;
 }
 
 :is(body.productdetails, body.mc-product-page) .mc-related-plp-card__media a {
@@ -7924,13 +7950,6 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   margin: 0 auto !important;
 }
 
-:is(body.productdetails, body.mc-product-page) .mc-related-plp-card__title {
-  width: 100% !important;
-  margin: 0 0 8px 0 !important;
-  line-height: 1.35 !important;
-  font-size: inherit !important;
-}
-
 :is(body.productdetails, body.mc-product-page) .mc-related-plp-card__title a {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 13px !important;
@@ -7939,14 +7958,6 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   text-transform: none !important;
   color: #111 !important;
   text-decoration: none !important;
-}
-
-:is(body.productdetails, body.mc-product-page) .mc-related-plp-card__price {
-  width: 100% !important;
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 13px !important;
-  font-weight: 400 !important;
-  color: #333 !important;
 }
 
 /* Category listing: uniform image tile + contain (late in file; wins over older blocks) */
