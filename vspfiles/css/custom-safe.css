@@ -6204,7 +6204,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
 }
 
 .mc-member-grid-price__regular {
-  font-size: 15px;
+  font-size: 13px;
   color: #333;
   margin-bottom: 6px;
 }
@@ -6218,7 +6218,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
 }
 
 .mc-member-grid-price__amount {
-  font-size: 15px;
+  font-size: 13px;
   margin-top: 2px;
   color: #111;
 }
@@ -11951,7 +11951,7 @@ body.productdetails #v65-product-parent .v65-product-addtocart input.vCSS_input_
 body.mc-product-page #v65-product-parent .v65-product-addtocart input.vCSS_input_addtocart,
 body.productdetails #v65-product-parent td.vCSS_input_addtocart,
 body.mc-product-page #v65-product-parent td.vCSS_input_addtocart {
-  margin-left: 0 !important;
+  margin-left: 12px !important;
   margin-right: auto !important;
 }
 
@@ -12344,7 +12344,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-panel {
   display: none !important;
   padding: 0 16px 16px 16px !important;
   background: #fafafa !important;
-  /* border-top: 1px solid #eee !important; */
+
   border-top: 1px solid #e2dfd8 !important;
 }
 
@@ -12356,10 +12356,8 @@ body.productdetails .mc-pdp-accordion .mc-acc-row[data-open="1"] > .mc-acc-panel
 body.mc-product-page .mc-pdp-accordion .mc-acc-content,
 body.productdetails .mc-pdp-accordion .mc-acc-content {
   padding: 14px 0 4px 0 !important;
-  /* font-size: 15px !important; */
-  /* color: #333 !important; */
-  /* font-weight: 400 !important; */
-  font-size: 14px !important;
+
+  font-size: 13px !important;
   line-height: 1.5 !important;
   color: #777 !important;
   font-weight: 300 !important;
@@ -12372,7 +12370,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn {
   display: inline-block !important;
   padding: 10px 16px !important;
   margin: 4px 0 0 0 !important;
-  /* border: 1px solid #333 !important; */
+
   border: 1px solid #e2dfd8 !important;
   background: #fff !important;
   color: #333 !important;
@@ -12553,9 +12551,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-config-btn {
   gap: 8px !important;
   padding: 10px 14px !important;
   margin: 8px 0 0 0 !important;
-  /* border: 1px solid #333 !important; */
-  /* border: 1px solid #bebebe !important; */
-  /* letter-spacing: 0.05em !important; */
+
   border: 1px solid #e2dfd8 !important;
   border-radius: 0 !important;
   background: #fff !important;
@@ -12645,10 +12641,7 @@ body.productdetails #product_options_heading > td:nth-child(2) > img:nth-child(1
 
 body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
 body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label {
-  /* font-weight: 500 !important; */
-  /* letter-spacing: 0.1em !important; */
-  /* color: #545454 !important; */
-  /* text-transform: capitalize (kept below) */
+
   font-weight: 400 !important;
   letter-spacing: 0.14em !important;
   color: #444 !important;
@@ -12661,31 +12654,27 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label
 }
 
 .productnamecolorLARGE > span:nth-child(1) {
-  /* margin-top: 90px !important; */
+
   margin-top: 89px !important;
   margin-left: 12px !important;
   width: 100% !important;
 }
 
 .productdetails span[itemprop="name"] {
-  /* font-size: 25px; */
-  /* font-size: 20px !important; */
-  /* text-transform: uppercase; */
+
   font-size: 14px !important;
   letter-spacing: -0.03em !important;
 }
 
 .productdetails span[itemprop="name"],
 .productdetails .productnamecolorLARGE.colors_productname {
-  /* color: #575757; */
-  /* color: #545454 !important; */
+
   color: #777 !important;
 }
 
 div.product_productprice:nth-child(2) {
   margin-top: 5px !important;
-  /* font-style: unset !important; */
-  /* font-style was a typo for font-family in the Firefox DevTools edit. */
+
   font-family: Inter, Arial, sans-serif !important;
   color: #444 !important;
   letter-spacing: 0.14em !important;
@@ -12694,12 +12683,12 @@ div.product_productprice:nth-child(2) {
 .mc-pdp-member-line__label {
   margin-top: 10px !important;
   color: #444 !important;
-  /* `200px` from the Firefox DevTools edit was a typo; px is invalid on font-weight. */
+
   font-weight: 200 !important;
 }
 
 .mc-pdp-member-line__amount {
-  /* `300px` from the Firefox DevTools edit was a typo; px is invalid on font-weight. */
+
   font-weight: 300 !important;
 }
 
@@ -12715,7 +12704,7 @@ table.colors_pricebox:nth-child(3) > tbody:nth-child(1) > tr:nth-child(1) > td:n
    - Pull config block up 35px on desktop.
    - Larger leather swatch strip.
    - Soft-grey ATC button shell.
-   - Retail-row price font size 15px / line-height 1.5.
+   - Retail-row price font size 13px / line-height 1.5.
    - Larger heading hierarchy for retail/member labels.
    - Reset altviews so the thumbnails sit directly under the main product image
      (the position:absolute / 846px-margin experiments are NOT applied — those broke
@@ -12725,15 +12714,14 @@ table.colors_pricebox:nth-child(3) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 /* Inline <style> baseline copied from the Firefox session into the persisted CSS. */
 body,
 body * {
-  /* font-weight: 300; */
-  /* letter-spacing: 1.1px; */
+
   font-weight: 400;
   color: #444 !important;
   font-family: Inter, Arial, sans-serif !important;
 }
 
 body {
-  /* letter-spacing: 0.02em; */
+
   letter-spacing: 0.14em;
 }
 
@@ -12744,19 +12732,18 @@ body * {
 body.mc-product-page #content_area,
 body.mc-product-page #content_area p,
 body.mc-product-page #content_area li {
-  /* font-size: 14px !important; */
-  font-size: 15px !important;
+
+  font-size: 13px !important;
 }
 
 .productdetails span[itemprop="name"] {
-  /* margin-left: 72px !important; */
+
   margin-left: 13px !important;
 }
 
 .productdetails span[itemprop="name"],
 .productdetails .productnamecolorLARGE.colors_productname {
-  /* font-weight: 300; */
-  /* letter-spacing: -.02 !important; */
+
   font-weight: 400;
   color: #444 !important;
   letter-spacing: 0.14em !important;
@@ -12767,7 +12754,7 @@ body.mc-product-page #content_area #mcLeatherSwatchStrip {
 }
 
 body.mc-product-page #mcLeatherSwatchStrip {
-  /* height: 42px !important; */
+
   height: 45px !important;
 }
 
@@ -12786,31 +12773,12 @@ body.productdetails #content_area .mc-atc-button-wrap {
   border: 1px solid #e2dfd8 !important;
   color: #444 !important;
   min-width: 440px !important;
-  margin-left: 0px !important;
+  margin-left: 12px !important;
   margin-right: 0px !important;
   margin-top: 5px !important;
   box-sizing: border-box !important;
 }
 
-/* Center ATC stack under the 440px configuration column (template may set margin-left on .mc-atc-button-wrap) */
-html body.productdetails #content_area .mc-atc-row,
-html body.mc-product-page #content_area .mc-atc-row,
-html body.productdetails #v65-product-parent .mc-atc-row,
-html body.mc-product-page #v65-product-parent .mc-atc-row {
-  justify-content: center !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  width: 100% !important;
-  max-width: 440px !important;
-}
-
-html body.productdetails #content_area .mc-atc-button-wrap,
-html body.mc-product-page #content_area .mc-atc-button-wrap,
-html body.productdetails #v65-product-parent .mc-atc-button-wrap,
-html body.mc-product-page #v65-product-parent .mc-atc-button-wrap {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
 
 /* Retail-row pricing: 16px (keep in sync with ~12042 retail + member block). */
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-line,
@@ -13113,7 +13081,7 @@ html body.productdetails #content_area .mc-pdp-accordion .mc-acc-content {
    PDP Firefox DevTools session — round 3 (20260513-acc-v6)
    - Retail / member labels uppercase + semibold weight.
    - Retail / member prices semibold weight.
-   - Broad PDP text weight 600 (final pasted selector).
+   - Broad PDP text weight 300 (final pasted selector).
    - Tabs panel display:block, lifted -30px on desktop.
    - Product description font-size 13px.
    - Description box shifted right + down on PDPs (makes room for the Palliser logo
@@ -13126,7 +13094,6 @@ html body.productdetails #content_area .mc-pdp-accordion .mc-acc-content {
 /* Body / base typography refresh */
 body,
 body * {
-  /* letter-spacing: 1.1px; */
   letter-spacing: 1.14px;
 }
 
@@ -13140,6 +13107,7 @@ html body.productdetails #v65-product-parent span[itemprop="description"],
 html body.mc-product-page #v65-product-parent span[itemprop="description"] {
   font-size: 13px !important;
   letter-spacing: 1.14px !important;
+font-weight: 300px !important;
 }
 
 /* Retail / member labels: uppercase + semibold weight. */
@@ -13209,6 +13177,7 @@ html body.productdetails #content_area .mc-pdp-accordion .mc-acc-header,
 html body.mc-product-page #content_area .mc-pdp-accordion .mc-acc-content,
 html body.productdetails #content_area .mc-pdp-accordion .mc-acc-content {
   font-weight: 600 !important;
+font-size: 13px;
 }
 
 /* Accordion rows: small breathing room between rows. */
@@ -13371,7 +13340,7 @@ html body.productdetails #v65-product-parent input[name="btnaddtocart"],
 html body.productdetails #v65-product-parent button[name="btnaddtocart"],
 html body.mc-product-page .mc-atc-button-wrap,
 html body.productdetails .mc-atc-button-wrap {
-  border-color: #d4d4d4 !important;
+  border-color: ##e2dfd8 !important;
 }
 
 /* Accordion shell + rows + panels */
