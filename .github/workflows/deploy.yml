@@ -84,7 +84,8 @@ jobs:
           attempt=1
           while [ "$attempt" -le 3 ]; do
             echo "=== Full mirror attempt ${attempt} of 3 ==="
-            if lftp -u "${FTP_USERNAME},${FTP_PASSWORD}" "sftp://${FTP_SERVER}:2222" -f "$LFTP_BATCH"; then
+            # Older/distinct lftp builds on ubuntu-latest reject "-f"; feeding the batch via stdin works.
+            if lftp -u "${FTP_USERNAME},${FTP_PASSWORD}" "sftp://${FTP_SERVER}:2222" < "$LFTP_BATCH"; then
               exit 0
             fi
             if [ "$attempt" -eq 3 ]; then
