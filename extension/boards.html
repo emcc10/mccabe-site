@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>My Boards — McCabe's</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 32px max(24px, 6vw);
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 14px;
+        line-height: 1.45;
+        color: #4b5563;
+        background: #ffffff;
+      }
+      .page {
+        max-width: 920px;
+        margin: 0 auto;
+      }
+      .masthead {
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #e5e5e5;
+      }
+      .title {
+        margin: 0 0 6px;
+        font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+        font-size: 32px;
+        font-weight: 600;
+        color: #1f2937;
+        letter-spacing: 0.02em;
+      }
+      .subtitle {
+        margin: 0;
+        color: #8b95a1;
+        font-size: 13px;
+      }
+      .notice {
+        min-height: 20px;
+        margin: 0 0 12px;
+        font-size: 13px;
+        color: #6b7280;
+      }
+      .notice.error {
+        color: #b45309;
+      }
+      .sections {
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+      }
+      .board-block h2 {
+        margin: 0 0 12px;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 22px;
+        font-weight: 600;
+        color: #111827;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        border: 1px solid #e5e5e5;
+        padding: 12px;
+        background: #fafafa;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .card img {
+        width: 100%;
+        max-height: 140px;
+        object-fit: contain;
+        background: #fff;
+        border: 1px solid #ececec;
+        display: none;
+      }
+      .card img.visible {
+        display: block;
+      }
+      .card-title {
+        font-weight: 500;
+        color: #374151;
+        margin: 0;
+        font-size: 14px;
+      }
+      .meta {
+        font-size: 12px;
+        color: #6b7280;
+        margin: 0;
+        word-break: break-word;
+      }
+      .card-actions {
+        margin-top: auto;
+        display: flex;
+        justify-content: flex-end;
+      }
+      .btn {
+        font: inherit;
+        cursor: pointer;
+        border-radius: 2px;
+        padding: 6px 12px;
+        border: 1px solid #c8c8c8;
+        background: #fff;
+        color: #374151;
+        font-size: 12px;
+      }
+      .btn:hover {
+        border-color: #9ca3af;
+      }
+      .btn.danger:hover {
+        border-color: #b91c1c;
+        color: #b91c1c;
+      }
+      .empty {
+        text-align: center;
+        padding: 48px 16px;
+        border: 1px dashed #d4d4d4;
+        color: #9ca3af;
+        font-size: 13px;
+      }
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="masthead">
+        <h1 class="title">My Boards</h1>
+        <p class="subtitle">Locally saved picks from Save to McCabe's Board. Delete clears storage only.</p>
+      </header>
+
+      <p id="notice" class="notice" role="status"></p>
+      <section id="boardSections" class="sections" aria-live="polite"></section>
+      <p id="empty" class="empty hidden">Nothing saved yet. Use the extension on a shopping page.</p>
+    </main>
+    <script src="boards.js"></script>
+  </body>
+</html>

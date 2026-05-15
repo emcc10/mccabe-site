@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Save to McCabe's Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="header">
+        <h1 class="title">Save to McCabe's Board</h1>
+        <p class="subtitle">Capture inspiration from any shop — edit details before saving.</p>
+      </header>
+
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <section class="preview" aria-label="Product preview">
+        <div class="preview-image-wrap">
+          <img id="previewImage" class="preview-image" alt="" />
+        </div>
+        <div class="preview-meta">
+          <label class="field">
+            <span class="label">Title</span>
+            <input id="fieldTitle" type="text" class="input" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span class="label">Image URL</span>
+            <input id="fieldImage" type="url" class="input" autocomplete="off" spellcheck="false" />
+          </label>
+          <label class="field">
+            <span class="label">Price</span>
+            <input id="fieldPrice" type="text" class="input" autocomplete="off" placeholder="Leave blank if unavailable" />
+          </label>
+          <div class="read-only">
+            <span class="label">Source site</span>
+            <span id="fieldSource" class="muted"></span>
+          </div>
+          <div class="read-only">
+            <span class="label">Page URL</span>
+            <a id="fieldUrl" class="link muted" href="#" target="_blank" rel="noopener noreferrer"></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="actions">
+        <label class="field">
+          <span class="label">Board</span>
+          <div class="row">
+            <select id="boardSelect" class="select"></select>
+            <button id="btnOpenBoards" type="button" class="btn btn-ghost" title="Open My Boards test page">My Boards</button>
+          </div>
+        </label>
+
+        <div id="newBoardRow" class="new-board hidden">
+          <label class="field grow">
+            <span class="label">New board name</span>
+            <input id="newBoardName" type="text" class="input" maxlength="80" autocomplete="off" />
+          </label>
+        </div>
+
+        <div class="row end">
+          <button id="btnSave" type="button" class="btn btn-primary">Save item</button>
+        </div>
+      </section>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

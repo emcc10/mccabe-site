@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Save to McCabe's Board",
+  "version": "1.0.0",
+  "description": "Save products from shopping sites to your McCabe's inspiration board.",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "action": {
+    "default_title": "Save to McCabe's Board",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
