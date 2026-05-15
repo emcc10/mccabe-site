@@ -5,7 +5,7 @@
 (function () {
   "use strict";
 
-  var IMG_V = "sectional-leather-20260512-wm-source";
+  var IMG_V = "sectional-diagram-20260515-contain-layout";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -23,7 +23,7 @@
   var state = { cfgByCode: {}, cfgByNativeValue: {} };
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260513-pricedup-v17";
+  window.MTL_RENDERER_BUILD = "sectional-20260515-diagram-layout-dims";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -1439,6 +1439,34 @@
     return cleaned || normalizeCode(display);
   }
 
+  /** Display model/configuration id like Volusion catalog (e.g. 07-15 → 07/15). */
+  function formatDiagramConfigCode(code) {
+    var s = String(code || "").trim();
+    if (!s) return "";
+    return s.replace(/-/g, "/");
+  }
+
+  /**
+   * Best-effort human title from native option label when JSON omits configurationTitle.
+   * Strips trailing price parentheses and trailing configuration code tokens.
+   */
+  function deriveConfigurationTitleFromOption(rawText, mergedCode) {
+    var s = stripPricingSuffix(String(rawText || "").trim());
+    if (!s) return "";
+    s = stripPricingSuffix(s);
+    var c = String(mergedCode || "").trim();
+    if (!c) return "";
+    var esc = c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/-/g, "[\\s\\/-]*");
+    var reEnd = new RegExp("(?:\\s|[-–—,:])+(" + esc + ")\\s*$", "i");
+    s = s.replace(reEnd, "").trim();
+    var reStart = new RegExp("^\\s*(" + esc + ")\\s*[-–—,:]+\\s*", "i");
+    s = s.replace(reStart, "").trim();
+    if (!s) return "";
+    if (/^configuration$/i.test(s)) return "";
+    if (/^configuration\s+[\d\-\/]+$/i.test(s)) return "";
+    return s;
+  }
+
   function findConfigurationSelect() {
     var root =
       document.querySelector("#v65-product-parent #options_table, #v65-product-parent table[id*='options_table']") ||
@@ -2098,7 +2126,9 @@
         : code
           ? state.cfgByCode[normalizeCode(code)]
           : null;
-    var configLabel = cfg ? cfg.label || cfg.code || code : code || "—";
+    var configLabel = cfg
+      ? cfg.configurationTitle || cfg.label || cfg.code || code
+      : code || "—";
 
     var price = readDisplayedPrice();
 
@@ -2312,11 +2342,21 @@
       var inferredUp = parseUpchargeFromOptionText(rawText);
       var upcharge = jsonPdNum != null && isFinite(jsonPdNum) ? jsonPdNum : inferredUp;
 
+      var configurationTitle =
+        jsonHit && jsonHit.configurationTitle != null ? String(jsonHit.configurationTitle).trim() : "";
+      var dimensionsIn =
+        jsonHit && jsonHit.dimensionsIn != null ? String(jsonHit.dimensionsIn).trim() : "";
+      var dimensionsCm =
+        jsonHit && jsonHit.dimensionsCm != null ? String(jsonHit.dimensionsCm).trim() : "";
+
       merged.push({
         code: mergedCode,
         nativeValue: opt.value,
         label: label,
+        configurationTitle: configurationTitle,
         description: desc,
+        dimensionsIn: dimensionsIn,
+        dimensionsCm: dimensionsCm,
         image: image,
         priceDiff: priceDiff,
         upcharge: upcharge,
@@ -3025,6 +3065,12 @@
           card.setAttribute("data-mtl-price-diff", String(cfg.priceDiff));
         }
 
+        var body = document.createElement("div");
+        body.className = "mtl-sectional-card-body";
+
+        var figure = document.createElement("figure");
+        figure.className = "mtl-sectional-figure";
+
         var img = document.createElement("img");
         img.className = "mtl-sectional-image";
         var src = String(cfg.image || "").trim();
@@ -3033,14 +3079,47 @@
         } else {
           img.src = src.indexOf("?") === -1 ? src + "?v=" + IMG_V : src + "&v=" + IMG_V;
         }
-        img.alt = cfg.label || cfg.code || "Configuration";
+        img.alt = cfg.configurationTitle || cfg.label || cfg.code || "Configuration";
+        figure.appendChild(img);
 
-        var tit = document.createElement("div");
-        tit.className = "mtl-sectional-title";
-        tit.textContent = cfg.label || cfg.code || "";
+        var meta = document.createElement("div");
+        meta.className = "mtl-sectional-meta";
 
-        var desc = document.createElement("div");
-        desc.className = "mtl-sectional-desc";
+        var nameText = String(cfg.configurationTitle || "").trim();
+        if (!nameText) {
+          nameText = deriveConfigurationTitleFromOption(cfg.rawOptionText, cfg.code);
+        }
+        if (nameText) {
+          var nameEl = document.createElement("div");
+          nameEl.className = "mtl-sectional-config-name";
+          nameEl.textContent = nameText;
+          meta.appendChild(nameEl);
+        }
+
+        var codeDisplay = formatDiagramConfigCode(cfg.code);
+        if (codeDisplay) {
+          var codeEl = document.createElement("div");
+          codeEl.className = "mtl-sectional-config-code";
+          codeEl.textContent = codeDisplay;
+          meta.appendChild(codeEl);
+        }
+
+        var dimInStr = String(cfg.dimensionsIn || "").trim();
+        if (dimInStr) {
+          var dimInEl = document.createElement("div");
+          dimInEl.className = "mtl-sectional-dimension-in";
+          dimInEl.textContent = dimInStr;
+          meta.appendChild(dimInEl);
+        }
+
+        var dimCmStr = String(cfg.dimensionsCm || "").trim();
+        if (dimCmStr) {
+          var dimCmEl = document.createElement("div");
+          dimCmEl.className = "mtl-sectional-dimension-cm";
+          dimCmEl.textContent = dimCmStr;
+          meta.appendChild(dimCmEl);
+        }
+
         var descText = String(cfg.description || "").trim();
         if (!descText && cfg.rawOptionText) {
           var rtFull = stripPricingSuffix(String(cfg.rawOptionText).trim());
@@ -3055,11 +3134,22 @@
             }
           }
         }
-        desc.textContent = descText;
+        var nameNorm = nameText.replace(/\s+/g, " ").toLowerCase();
+        var descNorm = descText.replace(/\s+/g, " ").toLowerCase();
+        if (
+          descText &&
+          descNorm !== nameNorm &&
+          !/^configuration\s+[\d\-\/]+$/.test(descText)
+        ) {
+          var desc = document.createElement("div");
+          desc.className = "mtl-sectional-desc";
+          desc.textContent = descText;
+          meta.appendChild(desc);
+        }
 
-        card.appendChild(img);
-        card.appendChild(tit);
-        card.appendChild(desc);
+        body.appendChild(figure);
+        body.appendChild(meta);
+        card.appendChild(body);
         grid.appendChild(card);
       });
 

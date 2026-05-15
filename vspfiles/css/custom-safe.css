@@ -11622,7 +11622,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
 #mc-acc-row-popularconfig #mtl-sectional-configurations.mtl-sectional-configurations .mtl-sectional-card {
   box-sizing: border-box !important;
   width: 92% !important;
-  max-width: 360px !important;
+  max-width: 440px !important;
 }
 
 @media (min-width: 768px) {
@@ -11659,18 +11659,69 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
     background-color 0.15s ease !important;
 }
 
-#mtl-sectional-configurations .mtl-sectional-card > * {
-  flex: 0 0 auto !important;
+/* Diagram + spec copy — matches manufacturer reference (sofa left, title / model / dims right) */
+#mtl-sectional-configurations .mtl-sectional-card-body {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 14px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
 }
 
-#mtl-sectional-configurations .mtl-sectional-title {
+@media (max-width: 479px) {
+  #mtl-sectional-configurations .mtl-sectional-card-body {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+}
+
+#mtl-sectional-configurations .mtl-sectional-figure {
+  flex: 1 1 52% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #fff !important;
+}
+
+#mtl-sectional-configurations .mtl-sectional-meta {
+  flex: 1 1 44% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+#mtl-sectional-configurations .mtl-sectional-config-name {
   font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  color: #111 !important;
+  margin: 0 !important;
+}
+
+#mtl-sectional-configurations .mtl-sectional-config-code {
+  font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
   line-height: 1.35 !important;
-  letter-spacing: 0.04em !important;
-  color: #333 !important;
-  margin: 12px 0 8px !important;
+  color: #111 !important;
+  margin: 0 !important;
+}
+
+#mtl-sectional-configurations .mtl-sectional-dimension-in,
+#mtl-sectional-configurations .mtl-sectional-dimension-cm {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+  color: #111 !important;
+  margin: 0 !important;
 }
 
 #mtl-sectional-configurations .mtl-sectional-desc {
@@ -11679,7 +11730,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   font-weight: 400 !important;
   line-height: 1.5 !important;
   color: #555 !important;
-  margin: 0 !important;
+  margin: 4px 0 0 !important;
 }
 
 #mtl-sectional-configurations .mtl-sectional-card:hover {
@@ -11693,19 +11744,30 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   box-shadow: inset 0 0 0 1px #c4c4c4 !important;
 }
 
+/* No fixed aspect-ratio or cover — avoids cropping wide diagrams (looked like a white block over the sofa) */
+#mtl-sectional-configurations .mtl-sectional-figure img.mtl-sectional-image,
 #mtl-sectional-configurations img.mtl-sectional-image {
   display: block !important;
   width: 100% !important;
   height: auto !important;
   max-width: 100% !important;
-  aspect-ratio: 16 / 10 !important;
-  object-fit: cover !important;
+  max-height: min(220px, 48vw) !important;
+  object-fit: contain !important;
   object-position: center !important;
-  background: #e6e4df !important;
+  background: transparent !important;
   opacity: 1 !important;
   visibility: visible !important;
   box-sizing: border-box !important;
   flex-shrink: 0 !important;
+}
+
+#mtl-sectional-configurations .mtl-sectional-price {
+  flex: 0 0 auto !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #333 !important;
+  margin-top: 8px !important;
+  letter-spacing: 0.04em !important;
 }
 
 #mtl-product-summary {
@@ -11755,14 +11817,6 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
 #mtl-product-summary .mtl-summary-price--guest {
   font-size: 13px;
   text-align: right;
-}
-
-#mtl-sectional-configurations .mtl-sectional-price {
-  font-size: 13px;
-  font-weight: 600;
-  color: #333;
-  margin-top: 8px;
-  letter-spacing: 0.04em;
 }
 
 #mtl-product-summary .mtl-sectional-quote-hint {
