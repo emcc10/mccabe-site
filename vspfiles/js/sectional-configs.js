@@ -1,6 +1,7 @@
 /**
  * Sectional configuration diagram cards — data only.
  * Keys must match Volusion style names (see getStyleFromPage / product codes before "-SC-").
+ * Cards show the full PNG (no CSS crop). Use dimensionsIn / dimensionsCm for spec text beside the image.
  */
 window.MTL_SECTIONAL_CONFIGS = {
   /* Alula 07-15 diagram: not in git; upload via Volusion to vspfiles/sectional-diagrams/Alula-SC-07-15.png (live URL /v/vspfiles/sectional-diagrams/Alula-SC-07-15.png). */

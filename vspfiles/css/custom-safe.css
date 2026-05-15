@@ -11646,44 +11646,37 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
     background-color 0.15s ease !important;
 }
 
-/* Diagram + spec copy — stretch row so the figure can grow with content; tight gap */
+/* Diagram on top (full card width), copy + dimensions below — full PNG visible (object-fit: contain; no cropping). */
 #mtl-sectional-configurations .mtl-sectional-card-body {
   display: flex !important;
-  flex-direction: row !important;
+  flex-direction: column !important;
   align-items: stretch !important;
-  gap: 10px !important;
+  gap: 12px !important;
   flex: 1 1 auto !important;
   min-width: 0 !important;
 }
 
-@media (max-width: 479px) {
-  #mtl-sectional-configurations .mtl-sectional-card-body {
-    flex-direction: column !important;
-    align-items: stretch !important;
-  }
-}
-
-/* Wider slot for the drawing; min-height so thumbnails aren’t tiny vs. text column */
 #mtl-sectional-configurations .mtl-sectional-figure {
-  flex: 1 1 58% !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
   min-width: 0 !important;
-  min-height: min(260px, 48vw) !important;
   margin: 0 !important;
   padding: 0 !important;
   display: flex !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
+  align-items: center !important;
+  justify-content: center !important;
   background: #fff !important;
   cursor: zoom-in !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 #mtl-sectional-configurations .mtl-sectional-meta {
-  flex: 1 1 36% !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
   min-width: 0 !important;
   display: flex !important;
   flex-direction: column !important;
-  justify-content: center !important;
+  justify-content: flex-start !important;
   gap: 4px !important;
 }
 
@@ -11735,23 +11728,21 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   box-shadow: inset 0 0 0 1px #c4c4c4 !important;
 }
 
-/* Card thumbnail: crop wide canvas diagrams (dead white on the right) so the sofa reads larger.
-   Full uncropped PNG opens in the lightbox. */
+/* Thumbnail shows the whole asset — no cover/cropping (Manufacturer composite + HTML dimensions next to PNG). Lightbox opens full-resolution. */
 #mtl-sectional-configurations .mtl-sectional-figure img.mtl-sectional-image,
 #mtl-sectional-configurations img.mtl-sectional-image {
   display: block !important;
   width: 100% !important;
-  height: 100% !important;
-  min-height: min(240px, 44vw) !important;
-  max-width: none !important;
-  max-height: none !important;
-  object-fit: cover !important;
-  object-position: left center !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: min(460px, 72vw) !important;
+  object-fit: contain !important;
+  object-position: center center !important;
   background: transparent !important;
   opacity: 1 !important;
   visibility: visible !important;
   box-sizing: border-box !important;
-  flex: 1 1 auto !important;
+  flex: 0 0 auto !important;
   pointer-events: none !important;
 }
 
@@ -11789,16 +11780,16 @@ body.mtl-sectional-diagram-lightbox-open {
 
 .mtl-sectional-diagram-lightbox__panel {
   position: relative !important;
-  max-width: min(96vw, 1280px) !important;
-  max-height: 92vh !important;
+  max-width: min(98vw, 1600px) !important;
+  max-height: 94vh !important;
   margin: auto !important;
   cursor: default !important;
 }
 
 .mtl-sectional-diagram-lightbox__img {
   display: block !important;
-  max-width: min(96vw, 1280px) !important;
-  max-height: 92vh !important;
+  max-width: min(98vw, 1600px) !important;
+  max-height: 94vh !important;
   width: auto !important;
   height: auto !important;
   object-fit: contain !important;

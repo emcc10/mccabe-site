@@ -28,7 +28,7 @@
   var __mtlSectionalDiagramDocClickBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260515-diagram-click-layout2";
+  window.MTL_RENDERER_BUILD = "sectional-20260515-diagram-contain-fullpng";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
