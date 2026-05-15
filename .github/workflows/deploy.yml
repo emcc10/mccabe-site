@@ -14,8 +14,7 @@ on:
         default: "/vspfiles"
 
 jobs:
-  genesis:
-    name: Genesis — Volusion full deploy
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -106,9 +105,9 @@ jobs:
           retry_file "vspfiles/js/mtl-sectional-renderer.js" "$REMOTE_VSPFILES/js/mtl-sectional-renderer.js" "" "mtl-sectional-renderer.js"
           exit 0
 
-      - name: Deploy summary (Welcome to Genesis)
+      - name: Deploy summary
         run: |
-          echo "Genesis deploy finished."
+          echo "Volusion deploy finished."
           echo "Mirrored local vspfiles/ → ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.remote_vspfiles_path || '/vspfiles' }} (recursive)."
           echo "Templates: /template_266.html and /v/template_266.html"
           echo "Marker: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.remote_vspfiles_path || '/vspfiles' }}/js/deploy-marker.txt"
