@@ -12588,11 +12588,11 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
       scope
         .querySelectorAll(
-          '#content_area #v65-product-related td.v65-productPhoto, ' +
-          '#content_area #related_products_content td.v65-productPhoto, ' +
-          '#content_area #relateditems td.v65-productPhoto, ' +
-          '#content_area #related-products td.v65-productPhoto, ' +
-          '#content_area table.relateditems td.v65-productPhoto'
+          '#content_area #v65-product-related td.v65-productPhoto, #v65-product-related td.v65-productPhoto, ' +
+          '#content_area #related_products_content td.v65-productPhoto, #related_products_content td.v65-productPhoto, ' +
+          '#content_area #relateditems td.v65-productPhoto, #relateditems td.v65-productPhoto, ' +
+          '#content_area #related-products td.v65-productPhoto, #related-products td.v65-productPhoto, ' +
+          '#content_area table.relateditems td.v65-productPhoto, table.relateditems td.v65-productPhoto'
         )
         .forEach(function(td){
         try {

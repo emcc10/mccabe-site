@@ -7222,7 +7222,10 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
     #related_products_content,
     #content_area #relateditems,
     #content_area #related-products,
-    #content_area table.relateditems
+    #content_area table.relateditems,
+    #relateditems,
+    #related-products,
+    table.relateditems
   ):not(:has(.mc-related-carousel))
   table.v65-productDisplay {
   display: table !important;
@@ -7240,7 +7243,10 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
     #related_products_content,
     #content_area #relateditems,
     #content_area #related-products,
-    #content_area table.relateditems
+    #content_area table.relateditems,
+    #relateditems,
+    #related-products,
+    table.relateditems
   ):not(:has(.mc-related-carousel))
   tbody {
   display: table-row-group !important;
@@ -7255,7 +7261,10 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
     #related_products_content,
     #content_area #relateditems,
     #content_area #related-products,
-    #content_area table.relateditems
+    #content_area table.relateditems,
+    #relateditems,
+    #related-products,
+    table.relateditems
   ):not(:has(.mc-related-carousel))
   tr {
   display: table-row !important;
@@ -7269,7 +7278,10 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
     #related_products_content,
     #content_area #relateditems,
     #content_area #related-products,
-    #content_area table.relateditems
+    #content_area table.relateditems,
+    #relateditems,
+    #related-products,
+    table.relateditems
   ):not(:has(.mc-related-carousel))
   td {
   display: table-cell !important;
@@ -7292,8 +7304,40 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 }
 
 :is(html body.productdetails, html body.mc-product-page)
+  #v65-product-related
+  .mc-related-carousel__viewport
+  table.v65-productDisplay,
+:is(html body.productdetails, html body.mc-product-page)
+  #related_products_content
+  .mc-related-carousel__viewport
+  table.v65-productDisplay {
+  display: block !important;
+  width: max-content !important;
+  min-width: 100% !important;
+  margin: 0 !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+:is(html body.productdetails, html body.mc-product-page)
   #content_area
   :is(#v65-product-related, #related_products_content)
+  .mc-related-carousel__viewport
+  tbody {
+  display: block !important;
+  width: 100% !important;
+}
+
+:is(html body.productdetails, html body.mc-product-page)
+  #related_products_content
+  .mc-related-carousel__viewport
+  tbody {
+  display: block !important;
+  width: 100% !important;
+}
+
+:is(html body.productdetails, html body.mc-product-page)
+  #v65-product-related
   .mc-related-carousel__viewport
   tbody {
   display: block !important;
@@ -7303,7 +7347,11 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 @media (min-width: 992px) {
 
   html body.productdetails #content_area .mc-related-carousel__viewport,
-  html body.mc-product-page #content_area .mc-related-carousel__viewport {
+  html body.mc-product-page #content_area .mc-related-carousel__viewport,
+  html body.productdetails #v65-product-related .mc-related-carousel__viewport,
+  html body.mc-product-page #v65-product-related .mc-related-carousel__viewport,
+  html body.productdetails #related_products_content .mc-related-carousel__viewport,
+  html body.mc-product-page #related_products_content .mc-related-carousel__viewport {
     overflow-x: auto !important;
     overflow-y: hidden !important;
     scroll-snap-type: x proximity !important;
@@ -7312,7 +7360,15 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   html body.productdetails #content_area .mc-related-carousel__viewport .mc-related-carousel__list,
   html body.productdetails #content_area .mc-related-carousel__viewport .mc-related-carousel__row,
   html body.mc-product-page #content_area .mc-related-carousel__viewport .mc-related-carousel__list,
-  html body.mc-product-page #content_area .mc-related-carousel__viewport .mc-related-carousel__row {
+  html body.mc-product-page #content_area .mc-related-carousel__viewport .mc-related-carousel__row,
+  html body.productdetails #v65-product-related .mc-related-carousel__viewport .mc-related-carousel__list,
+  html body.productdetails #v65-product-related .mc-related-carousel__viewport .mc-related-carousel__row,
+  html body.mc-product-page #v65-product-related .mc-related-carousel__viewport .mc-related-carousel__list,
+  html body.mc-product-page #v65-product-related .mc-related-carousel__viewport .mc-related-carousel__row,
+  html body.productdetails #related_products_content .mc-related-carousel__viewport .mc-related-carousel__list,
+  html body.productdetails #related_products_content .mc-related-carousel__viewport .mc-related-carousel__row,
+  html body.mc-product-page #related_products_content .mc-related-carousel__viewport .mc-related-carousel__list,
+  html body.mc-product-page #related_products_content .mc-related-carousel__viewport .mc-related-carousel__row {
     flex-wrap: nowrap !important;
     flex-direction: row !important;
     align-items: stretch !important;
@@ -7321,7 +7377,11 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   }
 
   html body.productdetails #content_area .mc-related-carousel .mc-related-carousel__nav,
-  html body.mc-product-page #content_area .mc-related-carousel .mc-related-carousel__nav {
+  html body.mc-product-page #content_area .mc-related-carousel .mc-related-carousel__nav,
+  html body.productdetails #v65-product-related .mc-related-carousel .mc-related-carousel__nav,
+  html body.mc-product-page #v65-product-related .mc-related-carousel .mc-related-carousel__nav,
+  html body.productdetails #related_products_content .mc-related-carousel .mc-related-carousel__nav,
+  html body.mc-product-page #related_products_content .mc-related-carousel .mc-related-carousel__nav {
     display: flex !important;
   }
 }
@@ -7698,11 +7758,26 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 :is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .v-product__image-wrap,
 :is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .product_image,
 :is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .vcss_img,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .mc-related-carousel__viewport .v-product .v-product__img,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .mc-related-carousel__viewport .v-product .v-product__image,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .mc-related-carousel__viewport .v-product .v-product__image-wrap,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .mc-related-carousel__viewport .v-product .product_image,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .mc-related-carousel__viewport .v-product .vcss_img,
+:is(body.productdetails, body.mc-product-page) #related_products_content .mc-related-carousel__viewport .v-product .v-product__img,
+:is(body.productdetails, body.mc-product-page) #related_products_content .mc-related-carousel__viewport .v-product .v-product__image,
+:is(body.productdetails, body.mc-product-page) #related_products_content .mc-related-carousel__viewport .v-product .v-product__image-wrap,
+:is(body.productdetails, body.mc-product-page) #related_products_content .mc-related-carousel__viewport .v-product .product_image,
+:is(body.productdetails, body.mc-product-page) #related_products_content .mc-related-carousel__viewport .v-product .vcss_img,
 :is(body.productdetails, body.mc-product-page) #content_area #v65-product-related td.v65-productPhoto,
 :is(body.productdetails, body.mc-product-page) #content_area #related_products_content td.v65-productPhoto,
 :is(body.productdetails, body.mc-product-page) #content_area #relateditems td.v65-productPhoto,
 :is(body.productdetails, body.mc-product-page) #content_area #related-products td.v65-productPhoto,
-:is(body.productdetails, body.mc-product-page) #content_area table.relateditems td.v65-productPhoto {
+:is(body.productdetails, body.mc-product-page) #content_area table.relateditems td.v65-productPhoto,
+:is(body.productdetails, body.mc-product-page) #v65-product-related td.v65-productPhoto,
+:is(body.productdetails, body.mc-product-page) #related_products_content td.v65-productPhoto,
+:is(body.productdetails, body.mc-product-page) #relateditems td.v65-productPhoto,
+:is(body.productdetails, body.mc-product-page) #related-products td.v65-productPhoto,
+:is(body.productdetails, body.mc-product-page) table.relateditems td.v65-productPhoto {
   height: 280px !important;
   min-height: 280px !important;
   max-height: 280px !important;
@@ -7723,11 +7798,24 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 :is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .v-product__image a,
 :is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .product_image a,
 :is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .vcss_img a,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .mc-related-carousel__viewport .v-product .v-product__img a,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .mc-related-carousel__viewport .v-product .v-product__image a,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .mc-related-carousel__viewport .v-product .product_image a,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .mc-related-carousel__viewport .v-product .vcss_img a,
+:is(body.productdetails, body.mc-product-page) #related_products_content .mc-related-carousel__viewport .v-product .v-product__img a,
+:is(body.productdetails, body.mc-product-page) #related_products_content .mc-related-carousel__viewport .v-product .v-product__image a,
+:is(body.productdetails, body.mc-product-page) #related_products_content .mc-related-carousel__viewport .v-product .product_image a,
+:is(body.productdetails, body.mc-product-page) #related_products_content .mc-related-carousel__viewport .v-product .vcss_img a,
 :is(body.productdetails, body.mc-product-page) #content_area #v65-product-related td.v65-productPhoto a,
 :is(body.productdetails, body.mc-product-page) #content_area #related_products_content td.v65-productPhoto a,
 :is(body.productdetails, body.mc-product-page) #content_area #relateditems td.v65-productPhoto a,
 :is(body.productdetails, body.mc-product-page) #content_area #related-products td.v65-productPhoto a,
-:is(body.productdetails, body.mc-product-page) #content_area table.relateditems td.v65-productPhoto a {
+:is(body.productdetails, body.mc-product-page) #content_area table.relateditems td.v65-productPhoto a,
+:is(body.productdetails, body.mc-product-page) #v65-product-related td.v65-productPhoto a,
+:is(body.productdetails, body.mc-product-page) #related_products_content td.v65-productPhoto a,
+:is(body.productdetails, body.mc-product-page) #relateditems td.v65-productPhoto a,
+:is(body.productdetails, body.mc-product-page) #related-products td.v65-productPhoto a,
+:is(body.productdetails, body.mc-product-page) table.relateditems td.v65-productPhoto a {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -7743,11 +7831,24 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 :is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .v-product__image img,
 :is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .product_image img,
 :is(body.productdetails, body.mc-product-page) #content_area .mc-related-carousel__viewport .v-product .vcss_img img,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .mc-related-carousel__viewport .v-product .v-product__img img,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .mc-related-carousel__viewport .v-product .v-product__image img,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .mc-related-carousel__viewport .v-product .product_image img,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .mc-related-carousel__viewport .v-product .vcss_img img,
+:is(body.productdetails, body.mc-product-page) #related_products_content .mc-related-carousel__viewport .v-product .v-product__img img,
+:is(body.productdetails, body.mc-product-page) #related_products_content .mc-related-carousel__viewport .v-product .v-product__image img,
+:is(body.productdetails, body.mc-product-page) #related_products_content .mc-related-carousel__viewport .v-product .product_image img,
+:is(body.productdetails, body.mc-product-page) #related_products_content .mc-related-carousel__viewport .v-product .vcss_img img,
 :is(body.productdetails, body.mc-product-page) #content_area #v65-product-related td.v65-productPhoto img,
 :is(body.productdetails, body.mc-product-page) #content_area #related_products_content td.v65-productPhoto img,
 :is(body.productdetails, body.mc-product-page) #content_area #relateditems td.v65-productPhoto img,
 :is(body.productdetails, body.mc-product-page) #content_area #related-products td.v65-productPhoto img,
-:is(body.productdetails, body.mc-product-page) #content_area table.relateditems td.v65-productPhoto img {
+:is(body.productdetails, body.mc-product-page) #content_area table.relateditems td.v65-productPhoto img,
+:is(body.productdetails, body.mc-product-page) #v65-product-related td.v65-productPhoto img,
+:is(body.productdetails, body.mc-product-page) #related_products_content td.v65-productPhoto img,
+:is(body.productdetails, body.mc-product-page) #relateditems td.v65-productPhoto img,
+:is(body.productdetails, body.mc-product-page) #related-products td.v65-productPhoto img,
+:is(body.productdetails, body.mc-product-page) table.relateditems td.v65-productPhoto img {
   max-width: 100% !important;
   max-height: 100% !important;
   width: auto !important;
@@ -13425,19 +13526,35 @@ html body #v65-product-parent #mc-inline-config * {
   font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
 
-/* Related PDP rails (incl. legacy #relateditems / table.relateditems): visibility + lazy src handled in template normalize. */
-:is(body.productdetails, body.mc-product-page) #content_area #v65-product-related img,
-:is(body.productdetails, body.mc-product-page) #content_area #related_products_content img {
+/* Related PDP rails: Volusion may place #v65-product-related OUTSIDE #content_area — duplicate selectors cover both roots. Table / list only (carousel uses .mc-related-carousel__viewport rules above). */
+:is(body.productdetails, body.mc-product-page) #content_area #v65-product-related table.v65-productDisplay img,
+:is(body.productdetails, body.mc-product-page) #v65-product-related table.v65-productDisplay img,
+:is(body.productdetails, body.mc-product-page) #content_area #related_products_content table.v65-productDisplay img,
+:is(body.productdetails, body.mc-product-page) #related_products_content table.v65-productDisplay img,
+:is(body.productdetails, body.mc-product-page) #content_area #v65-product-related .v-products-list img,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .v-products-list img,
+:is(body.productdetails, body.mc-product-page) #content_area #related_products_content .v-products-list img,
+:is(body.productdetails, body.mc-product-page) #related_products_content .v-products-list img,
+:is(body.productdetails, body.mc-product-page) #content_area #v65-product-related ul.v-product-grid img,
+:is(body.productdetails, body.mc-product-page) #v65-product-related ul.v-product-grid img,
+:is(body.productdetails, body.mc-product-page) #content_area #v65-product-related .v-product-grid .v-product .v-product__img img,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .v-product-grid .v-product .v-product__img img,
+:is(body.productdetails, body.mc-product-page) #content_area #v65-product-related .v-product-grid .v-product .product_image img,
+:is(body.productdetails, body.mc-product-page) #v65-product-related .v-product-grid .v-product .product_image img {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
   max-width: 100% !important;
+  width: auto !important;
   height: auto !important;
 }
 
 :is(body.productdetails, body.mc-product-page) #content_area #relateditems:not(:has(.mc-related-carousel)) img,
+:is(body.productdetails, body.mc-product-page) #relateditems:not(:has(.mc-related-carousel)) img,
 :is(body.productdetails, body.mc-product-page) #content_area #related-products:not(:has(.mc-related-carousel)) img,
-:is(body.productdetails, body.mc-product-page) #content_area table.relateditems:not(:has(.mc-related-carousel)) img {
+:is(body.productdetails, body.mc-product-page) #related-products:not(:has(.mc-related-carousel)) img,
+:is(body.productdetails, body.mc-product-page) #content_area table.relateditems:not(:has(.mc-related-carousel)) img,
+:is(body.productdetails, body.mc-product-page) table.relateditems:not(:has(.mc-related-carousel)) img {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
