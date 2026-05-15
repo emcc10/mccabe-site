@@ -1,7 +1,9 @@
 Diagram PNGs on Volusion: /v/vspfiles/sectional-diagrams/{Style}-SC-{code}.png
 
-Regenerate all from Palliser PDFs (auto page find, no per-config editing):
+Source files live in this folder in Git (commit them after regenerating) so CI deploy can mirror them to Volusion with the rest of vspfiles/.
+
+Regenerate from Palliser Product Summary PDFs (auto crop, 300 DPI default):
   tools/sectional-diagrams/export_diagrams.ps1
 or:  python tools/sectional-diagrams/export_sectional_diagrams.py --publish
 
-When adding a NEW style: add rows here + one block in tools/sectional-diagrams/catalog.json (palliser model/style + pdf name).
+When adding a NEW style: add rows in vspfiles/js/sectional-configs.js + one palliser block in tools/sectional-diagrams/catalog.json, run export, commit the new PNGs here.

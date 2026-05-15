@@ -2,15 +2,18 @@
 """
 One-shot Palliser spec PDF → sectional diagram PNGs for the site.
 
-- Reads configuration *codes* from vspfiles/js/sectional-configs.js (no duplicate list).
-- Uses catalog.json only for Palliser CDN model/style + pdf filename per style name.
-- Finds the correct PDF page automatically by scanning page text for each configuration code (no manual page picking).
-- Writes vspfiles/sectional-diagrams/{Style}-SC-{code}.png matching existing image URLs.
+- Reads configuration codes from vspfiles/js/sectional-configs.js.
+- Downloads the Product Summary PDF (same URL pattern as Palliser: …/specsheet/en/{model}%20{STYLE}.pdf).
+- Locates the POPULAR CONFIGURATIONS page and each kit code (07/15 style in the PDF).
+- Crops a generous block per configuration: title + vector diagram + code + imperial/metric lines
+  (union of text in that grid cell + padded bounds — not a tight icon-only crop).
+- Renders at catalog “dpi” (default 300). Optional frame trim shaves outer PDF rule pixels.
 
   pip install -r requirements.txt
   python export_sectional_diagrams.py --publish
 
 Optional: --skip-fetch when PDFs already exist under pdfs/.
+Optional: --full-page rasterize whole page (no Popular block crop).
 """
 
 from __future__ import annotations
@@ -181,11 +184,14 @@ def page_has_code_hint(page_text: str, code: str) -> bool:
         if compact in collapsed_t:
             return True
 
-    dash_parts = code.split("-")
-    if len(dash_parts) >= 3:
-        head = dash_parts[:3]
-        if all(p in page_text for p in head if len(p) >= 2):
+    dash_parts = [p for p in code.split("-") if p]
+    if len(dash_parts) >= 2:
+        joined_slash = "/".join(dash_parts)
+        if joined_slash in page_text:
             return True
+        if joined_slash.upper() in page_text.upper():
+            return True
+
     return False
 
 
@@ -198,7 +204,205 @@ def find_pages_for_code(doc: fitz.Document, code: str) -> list[int]:
             text = ""
         if page_has_code_hint(text, code):
             hits.append(i + 1)
-    return hits
+    if not hits:
+        return hits
+
+    def sort_key(p: int) -> tuple:
+        page = doc[p - 1]
+        popular = 1 if is_popular_configurations_page(page) else 0
+        labeled = 1 if find_label_anchor_rect(page, code) else 0
+        return (popular, labeled, -p)
+
+    return sorted(hits, key=sort_key, reverse=True)
+
+
+def is_popular_configurations_page(page: fitz.Page) -> bool:
+    t = page.get_text("text") or ""
+    return "POPULAR CONFIGURATIONS" in t.upper()
+
+
+def popular_grid_vertical_bounds(page: fitz.Page) -> tuple[float, float] | None:
+    """Content band between the Popular header and the footer disclaimer (page coords)."""
+    pr = page.rect
+    pop = page.search_for("POPULAR CONFIGURATIONS")
+    if not pop:
+        return None
+    y_top = min(r.y1 for r in pop) + 2.0
+    y_bot = pr.y1 - 28.0
+    foot = page.search_for("Dimensions shown as Width x Depth x Height")
+    if foot:
+        y_bot = min(y_bot, foot[0].y0 - 10.0)
+    if y_bot <= y_top + 40.0:
+        return None
+    return (y_top, y_bot)
+
+
+def anchor_search_needles(code: str) -> list[str]:
+    """Label text drawn in Palliser PDFs uses slashes instead of dashes (optionally W2 in the SKU)."""
+    c = str(code or "").strip().replace(" ", "")
+    if not c:
+        return []
+    return [c.replace("-", "/")]
+
+
+def find_label_anchor_rect(page: fitz.Page, code: str) -> fitz.Rect | None:
+    for needle in anchor_search_needles(code):
+        try:
+            hits = page.search_for(needle, quads=False)
+        except Exception:
+            hits = []
+        if hits:
+            u = hits[0]
+            for r in hits[1:]:
+                u |= r
+            return u
+    return None
+
+
+def inflate_rect(rect: fitz.Rect, pad: float) -> fitz.Rect:
+    return fitz.Rect(rect.x0 - pad, rect.y0 - pad, rect.x1 + pad, rect.y1 + pad)
+
+
+def _rects_overlap_x(a: fitz.Rect, b: fitz.Rect) -> bool:
+    return max(a.x0, b.x0) < min(a.x1, b.x1)
+
+
+def iter_text_span_rects(page: fitz.Page) -> list[fitz.Rect]:
+    out: list[fitz.Rect] = []
+    try:
+        d = page.get_text("dict")
+    except Exception:
+        return out
+    for bl in d.get("blocks", []):
+        if bl.get("type") != 0:
+            continue
+        for line in bl.get("lines", []):
+            for sp in line.get("spans", []):
+                bb = sp.get("bbox")
+                if not bb:
+                    continue
+                out.append(fitz.Rect(bb))
+    return out
+
+
+def union_popular_diagram_images_in_cell(page: fitz.Page, cell: fitz.Rect) -> fitz.Rect | None:
+    """
+    Palliser places the sectional renders as embedded raster images (not text).
+    Union large image bboxes inside the Popular grid cell — matches sofa-left + text-right layout.
+    """
+    u: fitz.Rect | None = None
+    try:
+        infos = page.get_image_info(xrefs=True) or []
+    except Exception:
+        infos = []
+    for info in infos:
+        bb = fitz.Rect(info["bbox"])
+        if bb.get_area() < 20000.0:
+            continue
+        if not bb.intersects(cell):
+            continue
+        cx = (bb.x0 + bb.x1) * 0.5
+        cy = (bb.y0 + bb.y1) * 0.5
+        if not (cell.x0 - 3.0 <= cx <= cell.x1 + 3.0 and cell.y0 - 3.0 <= cy <= cell.y1 + 3.0):
+            continue
+        u = bb if u is None else (u | bb)
+    return u
+
+
+def popular_configuration_block_clip(
+    page: fitz.Page,
+    anchor: fitz.Rect,
+    *,
+    mid_y_ratio: float = 0.5,
+    column_slack_pt: float = 34.0,
+    pad_pt: float = 26.0,
+    frame_trim_pt: float = 3.0,
+) -> fitz.Rect | None:
+    """
+    2×2 Popular grid: column by page centerline; row by anchor vs mid-band.
+    Union text spans + embedded diagram images in that cell (sofa render + title + code + dimensions).
+    Inflate so chaise/bumper ends and dimension lines are not clipped.
+    """
+    pr = page.rect
+    vb = popular_grid_vertical_bounds(page)
+    if not vb:
+        return None
+    y_top, y_bot = vb
+    band_h = y_bot - y_top
+    if band_h < 80.0:
+        return None
+
+    mid_x = pr.x0 + pr.width * 0.5
+    mid_y = y_top + band_h * float(mid_y_ratio)
+
+    if (anchor.x0 + anchor.x1) * 0.5 < mid_x:
+        x0 = pr.x0 + 6.0
+        x1 = mid_x + 5.0
+    else:
+        x0 = mid_x - 5.0
+        x1 = pr.x1 - 6.0
+
+    if anchor.y0 < mid_y:
+        y0 = y_top + 1.0
+        y1 = mid_y + 2.0
+    else:
+        y0 = mid_y - 2.0
+        y1 = y_bot - 2.0
+
+    cell = fitz.Rect(x0, y0, x1, y1)
+    u = fitz.Rect(cell)
+
+    col_lo = cell.x0 - column_slack_pt
+    col_hi = cell.x1 + column_slack_pt
+
+    for r in iter_text_span_rects(page):
+        cy = (r.y0 + r.y1) * 0.5
+        if cy < y_top - 8.0 or cy > y_bot + 8.0:
+            continue
+        cx = (r.x0 + r.x1) * 0.5
+        if cx < col_lo or cx > col_hi:
+            continue
+        if not _rects_overlap_x(r, cell):
+            continue
+        if anchor.y0 < mid_y:
+            if r.y1 < y_top - 12.0 or r.y0 > mid_y + 28.0:
+                continue
+        else:
+            if r.y0 > y_bot + 12.0 or r.y1 < mid_y - 28.0:
+                continue
+        u |= r
+
+    img_u = union_popular_diagram_images_in_cell(page, cell)
+    if img_u is not None:
+        u |= img_u
+
+    # Ensure vector diagram band above titles is included (text often starts at title baseline).
+    if anchor.y0 < mid_y:
+        u.y0 = min(u.y0, y_top + 4.0)
+    else:
+        u.y0 = min(u.y0, mid_y + 8.0)
+
+    # Widen to full column so vector sectional art (often wider than text spans) is not clipped.
+    u = fitz.Rect(
+        min(u.x0, cell.x0 + 2.0),
+        u.y0,
+        max(u.x1, cell.x1 - 2.0),
+        u.y1,
+    )
+
+    u.y1 = max(u.y1, min(y_bot - 2.0, anchor.y1 + 24.0))
+
+    u = inflate_rect(u, pad_pt)
+    u = u & pr
+    u = fitz.Rect(
+        max(pr.x0, u.x0 + frame_trim_pt),
+        max(pr.y0, u.y0 + frame_trim_pt),
+        min(pr.x1, u.x1 - frame_trim_pt),
+        min(pr.y1, u.y1 - frame_trim_pt),
+    )
+    if u.width < 40.0 or u.height < 40.0:
+        return None
+    return u
 
 
 def rasterize_page_from_doc(
@@ -206,19 +410,25 @@ def rasterize_page_from_doc(
     page_1based: int,
     out_path: Path,
     dpi: int,
+    clip: fitz.Rect | None = None,
 ) -> None:
     if page_1based < 1 or page_1based > len(doc):
         raise ValueError(f"page {page_1based} out of range (1–{len(doc)})")
     page = doc[page_1based - 1]
     z = dpi / 72.0
     mat = fitz.Matrix(z, z)
-    pix = page.get_pixmap(matrix=mat, alpha=False)
+    tgt = clip
+    if tgt is not None:
+        tgt = tgt & page.rect
+    pix = page.get_pixmap(matrix=mat, clip=tgt, alpha=False)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     pix.save(out_path.as_posix())
 
 
-def cmd_publish(cat: dict, pdf_dir: Path, out_root: Path, configs_js: Path, skip_fetch: bool) -> int:
-    dpi = int(cat.get("dpi") or 200)
+def cmd_publish(
+    cat: dict, pdf_dir: Path, out_root: Path, configs_js: Path, skip_fetch: bool, grid_clip: bool
+) -> int:
+    dpi = int(cat.get("dpi") or 300)
     pall = cat.get("palliser") or {}
 
     try:
@@ -270,17 +480,37 @@ def cmd_publish(cat: dict, pdf_dir: Path, out_root: Path, configs_js: Path, skip
                     )
                     ec = 1
                     continue
+                page_use = pages[0]
                 if len(pages) > 1:
                     print(
-                        f"Note {style} “{code}”: multiple hits {pages}; using first page ({pages[0]})."
+                        f"Note {style} “{code}”: multiple PDF page hits {pages}; using best page ({page_use})."
                     )
-                page_use = pages[0]
+                pg = doc[page_use - 1]
+
+                clip: fitz.Rect | None = None
+                if grid_clip and is_popular_configurations_page(pg):
+                    anch = find_label_anchor_rect(pg, str(code).strip())
+                    if anch:
+                        clip = popular_configuration_block_clip(
+                            pg,
+                            anch,
+                            mid_y_ratio=float(cat.get("popularMidYRatio") or 0.5),
+                            column_slack_pt=float(cat.get("popularColumnSlackPt") or 34.0),
+                            pad_pt=float(cat.get("popularCropPadPt") or 26.0),
+                            frame_trim_pt=float(cat.get("popularFrameTrimPt") or 3.0),
+                        )
+                    if clip is None:
+                        print(
+                            f"Note {style} “{code}”: Popular page but could not derive block clip — using full page."
+                        )
+
                 safe = str(code).replace("/", "-").replace("\\", "-")
                 out_name = f"{style}-SC-{safe}.png"
                 out_path = out_root / out_name
                 rel = out_path.relative_to(repo_root())
-                rasterize_page_from_doc(doc, page_use, out_path, dpi)
-                print(f"OK {rel}  (PDF page {page_use})")
+                rasterize_page_from_doc(doc, page_use, out_path, dpi, clip)
+                lbl = "popular-block" if clip else "full page"
+                print(f"OK {rel}  (PDF page {page_use}, {lbl})")
         finally:
             doc.close()
 
@@ -300,6 +530,11 @@ def main() -> int:
         action="store_true",
         help="With --publish, do not download; require PDFs already in pdfs/",
     )
+    ap.add_argument(
+        "--full-page",
+        action="store_true",
+        help="Disable Popular Configurations quadrant crops (export full page raster for every match).",
+    )
     args = ap.parse_args()
 
     if not args.publish:
@@ -311,6 +546,12 @@ def main() -> int:
         return 1
 
     cat = load_catalog(args.catalog)
+    grid_clip = cat.get("clipPopularConfigurationsGrid")
+    if grid_clip is False:
+        use_grid = False
+    else:
+        use_grid = not args.full_page
+
     rel_js = Path(str(cat.get("configsJs") or "../../vspfiles/js/sectional-configs.js"))
     configs_js = (tool_dir() / rel_js).resolve()
     pdf_dir = tool_dir() / "pdfs"
@@ -320,7 +561,7 @@ def main() -> int:
         print(f"configsJs not found: {configs_js}", file=sys.stderr)
         return 1
 
-    return cmd_publish(cat, pdf_dir, out_root, configs_js, args.skip_fetch)
+    return cmd_publish(cat, pdf_dir, out_root, configs_js, args.skip_fetch, use_grid)
 
 
 if __name__ == "__main__":
