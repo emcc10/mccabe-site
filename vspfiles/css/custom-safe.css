@@ -11741,7 +11741,7 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   letter-spacing: 0.04em !important;
 }
 
-/* Full-screen preview when clicking a configuration diagram image */
+/* Configuration diagram lightbox (opened from magnifying-glass control only). */
 body.mtl-sectional-diagram-lightbox-open {
   overflow: hidden !important;
 }

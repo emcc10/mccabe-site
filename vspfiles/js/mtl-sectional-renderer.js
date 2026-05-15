@@ -2275,6 +2275,9 @@
     var lbImg = document.createElement("img");
     lbImg.className = "mtl-sectional-diagram-lightbox__img";
     lbImg.alt = "";
+    try {
+      lbImg.draggable = false;
+    } catch (eLbDrag) {}
 
     panel.appendChild(lbImg);
     root.appendChild(closeBtn);
@@ -2326,7 +2329,11 @@
     bindSectionalDiagramLightboxEscapeOnce();
     var img = root._mtlLbImg;
     if (!img) return;
-    if (root.classList.contains("is-open")) return;
+    if (root.classList.contains("is-open")) {
+      img.alt = String(altText || "Configuration diagram");
+      img.src = fullSrc;
+      return;
+    }
 
     var histOk = false;
     try {
