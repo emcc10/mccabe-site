@@ -1,3 +1,7 @@
-Diagram PNGs are hosted on Volusion under vspfiles/sectional-diagrams/ (e.g. Alula-SC-07-15.png -> /v/vspfiles/sectional-diagrams/Alula-SC-07-15.png).
+Diagram PNGs on Volusion: /v/vspfiles/sectional-diagrams/{Style}-SC-{code}.png
 
-Source each file from the manufacturer PDF for that sofa style/configuration. Export or rasterize the diagram page and apply only cropping (margins/bleed)—do not repaint, mask, or add HTML text over the art. Dimensions and headings belong in that PNG exactly as supplied in the PDF.
+Regenerate all from Palliser PDFs (auto page find, no per-config editing):
+  tools/sectional-diagrams/export_diagrams.ps1
+or:  python tools/sectional-diagrams/export_sectional_diagrams.py --publish
+
+When adding a NEW style: add rows here + one block in tools/sectional-diagrams/catalog.json (palliser model/style + pdf name).

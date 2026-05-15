@@ -1,0 +1,1 @@
+PDFs are downloaded automatically from Palliser (see catalog.json) when you run export_diagrams.ps1 or export_sectional_diagrams.py --publish.

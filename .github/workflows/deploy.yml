@@ -139,6 +139,7 @@ jobs:
 
           retry_file "template_266.html" "/template_266.html" "/v/template_266.html" "template_266.html"
           retry_file "vspfiles/js/mtl-sectional-renderer.js" "$REMOTE_VSPFILES/js/mtl-sectional-renderer.js" "" "mtl-sectional-renderer.js"
+          retry_file "vspfiles/js/sectional-configs.js" "$REMOTE_VSPFILES/js/sectional-configs.js" "" "sectional-configs.js"
           exit 0
 
       - name: Deploy summary

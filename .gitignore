@@ -21,3 +21,7 @@ build/
 # Python cache (for utility scripts)
 __pycache__/
 *.pyc
+
+# Local manufacturer PDFs for diagram export tool (see tools/sectional-diagrams/)
+tools/sectional-diagrams/pdfs/*.pdf
+tools/sectional-diagrams/thumbs/

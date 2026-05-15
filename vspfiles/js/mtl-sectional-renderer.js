@@ -25,10 +25,10 @@
   /** Full-screen diagram preview (one shared node on <body>). */
   var __mtlSectionalLbEl = null;
   var __mtlSectionalLbEscBound = false;
-  var __mtlSectionalDiagramDocClickBound = false;
+  var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260515-pdf-diagram-only";
+  window.MTL_RENDERER_BUILD = "sectional-20260515-diagram-zoom-and-history-v1";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -2196,8 +2196,74 @@
         if (v !== null) selectConfigurationCard(c, v);
         else selectConfigurationCard(c);
       });
+
+      var fig = card.querySelector(".mtl-sectional-figure");
+      if (fig && fig.dataset.mtlDblDiagBound !== "1") {
+        fig.addEventListener("dblclick", function (ev) {
+          var im = fig.querySelector("img.mtl-sectional-image");
+          if (!im) return;
+          var src = String(im.getAttribute("src") || im.src || "").trim();
+          if (!src || src.indexOf("data:image/svg+xml") === 0) return;
+          ev.preventDefault();
+          openSectionalDiagramLightbox(src, im.alt || "Configuration diagram");
+        });
+        fig.dataset.mtlDblDiagBound = "1";
+      }
+
+      var zoomBtn = card.querySelector(".mtl-sectional-diagram-zoom");
+      if (zoomBtn && zoomBtn.dataset.mtlZoomBound !== "1") {
+        zoomBtn.addEventListener("click", function (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          var im = card.querySelector("img.mtl-sectional-image");
+          if (!im) return;
+          var src = String(im.getAttribute("src") || im.src || "").trim();
+          if (!src || src.indexOf("data:image/svg+xml") === 0) return;
+          openSectionalDiagramLightbox(src, im.alt || "Configuration diagram");
+        });
+        zoomBtn.dataset.mtlZoomBound = "1";
+      }
+
       card.dataset.mtlConfigBound = "1";
     });
+  }
+
+  function finalizeSectionalDiagramLightboxClosed() {
+    var root = __mtlSectionalLbEl || document.getElementById("mtl-sectional-diagram-lightbox");
+    if (!root || !root.classList.contains("is-open")) return;
+    root.classList.remove("is-open");
+    root.setAttribute("aria-hidden", "true");
+    root.removeAttribute("data-mtl-lb-history");
+    try {
+      document.body.classList.remove("mtl-sectional-diagram-lightbox-open");
+    } catch (eBody) {}
+    var lbImg = root._mtlLbImg;
+    if (lbImg) {
+      lbImg.removeAttribute("src");
+      lbImg.alt = "";
+    }
+  }
+
+  function bindSectionalDiagramLightboxPopstateOnce() {
+    if (__mtlSectionalLbPopstateBound) return;
+    __mtlSectionalLbPopstateBound = true;
+    window.addEventListener("popstate", function () {
+      finalizeSectionalDiagramLightboxClosed();
+    });
+  }
+
+  function requestCloseSectionalDiagramLightbox() {
+    var root = __mtlSectionalLbEl || document.getElementById("mtl-sectional-diagram-lightbox");
+    if (!root || !root.classList.contains("is-open")) return;
+    if (root.getAttribute("data-mtl-lb-history") === "1") {
+      try {
+        history.back();
+      } catch (eH) {
+        finalizeSectionalDiagramLightboxClosed();
+      }
+    } else {
+      finalizeSectionalDiagramLightboxClosed();
+    }
   }
 
   function ensureSectionalDiagramLightbox() {
@@ -2227,18 +2293,8 @@
     root.appendChild(closeBtn);
     root.appendChild(panel);
 
-    function closeLb() {
-      root.classList.remove("is-open");
-      root.setAttribute("aria-hidden", "true");
-      try {
-        document.body.classList.remove("mtl-sectional-diagram-lightbox-open");
-      } catch (eBody) {}
-      lbImg.removeAttribute("src");
-      lbImg.alt = "";
-    }
-
     root.addEventListener("click", function (e) {
-      if (e.target === root) closeLb();
+      if (e.target === root) requestCloseSectionalDiagramLightbox();
     });
     panel.addEventListener("click", function (e) {
       e.stopPropagation();
@@ -2246,10 +2302,10 @@
     closeBtn.addEventListener("click", function (e) {
       e.preventDefault();
       e.stopPropagation();
-      closeLb();
+      requestCloseSectionalDiagramLightbox();
     });
 
-    root._mtlCloseDiagramLb = closeLb;
+    root._mtlCloseDiagramLb = requestCloseSectionalDiagramLightbox;
     root._mtlLbImg = lbImg;
 
     try {
@@ -2278,10 +2334,21 @@
 
   function openSectionalDiagramLightbox(fullSrc, altText) {
     if (!fullSrc || String(fullSrc).indexOf("data:image/svg+xml") === 0) return;
+    bindSectionalDiagramLightboxPopstateOnce();
     var root = ensureSectionalDiagramLightbox();
     bindSectionalDiagramLightboxEscapeOnce();
     var img = root._mtlLbImg;
     if (!img) return;
+    if (root.classList.contains("is-open")) return;
+
+    var histOk = false;
+    try {
+      history.pushState({ mtlSectionalDiagramLb: 1 }, "", String(window.location.href || ""));
+      histOk = true;
+    } catch (ePs) {}
+    root.removeAttribute("data-mtl-lb-history");
+    if (histOk) root.setAttribute("data-mtl-lb-history", "1");
+
     img.alt = String(altText || "Configuration diagram");
     img.src = fullSrc;
     root.classList.add("is-open");
@@ -2295,50 +2362,6 @@
         cb.focus();
       } catch (eF) {}
     }
-  }
-
-  /** Click / keyboard: full-size diagram via document capture (Volusion/accordion handlers won’t eat the event). */
-  function bindSectionalDiagramFigureClicks() {
-    if (__mtlSectionalDiagramDocClickBound) return;
-    __mtlSectionalDiagramDocClickBound = true;
-
-    document.addEventListener(
-      "click",
-      function (e) {
-        var t = e.target;
-        if (!t || !t.closest) return;
-        var fig = t.closest("#mtl-sectional-configurations .mtl-sectional-figure");
-        if (!fig) return;
-        var im = fig.querySelector("img.mtl-sectional-image");
-        if (!im) return;
-        var src = String(im.getAttribute("src") || im.src || "").trim();
-        if (!src || src.indexOf("data:image/svg+xml") === 0) return;
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-        openSectionalDiagramLightbox(src, im.alt || "Configuration diagram");
-      },
-      true
-    );
-
-    document.addEventListener(
-      "keydown",
-      function (e) {
-        if (e.key !== "Enter" && e.key !== " ") return;
-        var ae = document.activeElement;
-        if (!ae || !ae.classList || !ae.classList.contains("mtl-sectional-figure")) return;
-        if (!document.getElementById("mtl-sectional-configurations") || !document.getElementById("mtl-sectional-configurations").contains(ae))
-          return;
-        var im = ae.querySelector("img.mtl-sectional-image");
-        if (!im) return;
-        var src = String(im.getAttribute("src") || im.src || "").trim();
-        if (!src || src.indexOf("data:image/svg+xml") === 0) return;
-        e.preventDefault();
-        e.stopPropagation();
-        openSectionalDiagramLightbox(src, im.alt || "Configuration diagram");
-      },
-      true
-    );
   }
 
   function ensureObservers() {
@@ -3042,6 +3065,14 @@
     sectionalLog("sectional productKey", productKey, "json count", jsonFromKey.length);
 
     var secExistingEarly = document.getElementById("mtl-sectional-configurations");
+    var cardDomVersionWanted = String(window.MTL_RENDERER_BUILD || "").trim();
+    if (secExistingEarly && secExistingEarly.dataset.mtlFinalInit === "1") {
+      var cardDomVersionHave = String(secExistingEarly.getAttribute("data-mtl-card-dom-v") || "").trim();
+      if (cardDomVersionWanted && cardDomVersionHave !== cardDomVersionWanted) {
+        secExistingEarly.removeAttribute("data-mtl-final-init");
+        sectionalLog("sectional rebuild: card DOM version", cardDomVersionHave, "->", cardDomVersionWanted);
+      }
+    }
     if (secExistingEarly && secExistingEarly.dataset.mtlFinalInit === "1") {
       var csCheck = findConfigurationSelect();
       if (csCheck) {
@@ -3220,10 +3251,19 @@
             })
             .join(" — ");
         img.alt = altLabel || cfg.label || cfg.code || "Configuration diagram";
-        figure.setAttribute("role", "button");
-        figure.setAttribute("tabindex", "0");
-        figure.setAttribute("aria-label", "Enlarge diagram: " + img.alt);
         figure.appendChild(img);
+
+        var zoomBtn = document.createElement("button");
+        zoomBtn.type = "button";
+        zoomBtn.className = "mtl-sectional-diagram-zoom";
+        zoomBtn.setAttribute(
+          "aria-label",
+          "Enlarge diagram. Use the diagram area to choose this configuration and refresh price."
+        );
+        zoomBtn.setAttribute("title", "Enlarge diagram (double-click the image)");
+        zoomBtn.innerHTML =
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>';
+        figure.appendChild(zoomBtn);
 
         body.appendChild(figure);
         card.appendChild(body);
@@ -3296,6 +3336,9 @@
 
     if (section && __mtlDiag.configCards === "YES") {
       section.dataset.mtlFinalInit = "1";
+      try {
+        section.setAttribute("data-mtl-card-dom-v", String(window.MTL_RENDERER_BUILD || "").trim());
+      } catch (eV) {}
       window.__mtlReplacementRenderSucceeded = true;
       scheduleHideConfigurationRow();
     }
@@ -3379,22 +3422,4 @@
     ensureMcWmOpenMountedListener();
     if (SECTIONAL_DBG && isSectionalProductPageClient() && !isTheaterSeatingProductPageForGuard()) {
       window.setTimeout(function () {
-        runMtlSectionalDiagnosticConsoleOnly("after DOMContentLoaded (0ms tick)");
-      }, 0);
-      window.setTimeout(function () {
-        runMtlSectionalDiagnosticConsoleOnly("t+1500ms");
-      }, 1500);
-    }
-    runRender();
-    setTimeout(runRender, 400);
-    setTimeout(runRender, 1200);
-    setTimeout(runRender, 2800);
-  }
-
-  if (document.readyState !== "loading") boot();
-  else
-    document.addEventListener("DOMContentLoaded", function () {
-      boot();
-    });
-  window.addEventListener("load", runRender);
-})();
+ 

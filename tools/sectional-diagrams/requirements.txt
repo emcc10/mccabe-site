@@ -1,0 +1,2 @@
+# PDF → PNG for sectional configuration diagrams (run: pip install -r requirements.txt)
+pymupdf>=1.24.0

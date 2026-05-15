@@ -1,0 +1,10 @@
+{
+  "_comment": "Add one palliser block only when you add a NEW style row to vspfiles/js/sectional-configs.js. Diagram pages are found automatically via PDF text matching — no manual page numbers or per-image cropping in this repo.",
+  "dpi": 200,
+  "configsJs": "../../vspfiles/js/sectional-configs.js",
+  "palliser": {
+    "Alula": { "model": "77427", "style": "ALULA", "pdf": "Alula.pdf" },
+    "Acacia": { "model": "41080", "style": "ACACIA", "pdf": "Acacia.pdf" },
+    "Atticus": { "model": "77325", "style": "ATTICUS", "pdf": "Atticus.pdf" }
+  }
+}

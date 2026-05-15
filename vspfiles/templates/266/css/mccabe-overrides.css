@@ -1032,3 +1032,35 @@ html.has-sectional-config-cards .mtl-native-config-row {
     padding: 10px 12px !important;
   }
 }
+
+/* Sectional PDP: PDF composite diagram cards — wins if custom-safe.css is stale (load order). */
+html.is-sectional-product body #mtl-sectional-configurations .mtl-sectional-card--pdf-diagram .mtl-sectional-card-body {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  min-width: 0 !important;
+}
+
+html.is-sectional-product body #mtl-sectional-configurations .mtl-sectional-card--pdf-diagram .mtl-sectional-figure {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #fff !important;
+  cursor: zoom-in !important;
+  overflow: visible !important;
+}
+
+html.is-sectional-product body #mtl-sectional-configurations .mtl-sectional-card--pdf-diagram .mtl-sectional-figure img.mtl-sectional-image {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: top center !important;
+  pointer-events: none !important;
+}

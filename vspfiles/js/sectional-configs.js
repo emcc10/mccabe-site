@@ -2,10 +2,10 @@
  * Sectional configuration diagram cards — data only.
  * Keys must match Volusion style names (see getStyleFromPage / product codes before "-SC-").
  *
- * Diagram PNG for each configuration must be exported from that style’s Palliser/spec PDF so the PNG
- * already includes the sofa graphic plus title / model ID / dimensions (matching the PDF). Only
- * cropping is applied when exporting—never paint white over the render or recreate type in HTML.
- * This file references paths only; upload final PNGs to /v/vspfiles/sectional-diagrams/ on Volusion.
+ * Regenerate every diagram PNG (no manual PDF pages): from repo,
+ *   tools/sectional-diagrams/export_diagrams.ps1   OR   python export_sectional_diagrams.py --publish
+ * Codes are read from this file; Palliser download URLs live only in tools/sectional-diagrams/catalog.json.
+ * Then deploy vspfiles/sectional-diagrams/*.png to Volusion.
  */
 window.MTL_SECTIONAL_CONFIGS = {
   Alula: [
