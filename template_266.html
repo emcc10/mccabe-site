@@ -12458,10 +12458,26 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         if (!img) return;
 
         var src = img.getAttribute('src') || '';
-        var dataSrc = img.getAttribute('data-src') || '';
+        var dataSrc =
+          img.getAttribute('data-src') ||
+          img.getAttribute('datasrc') ||
+          (img.dataset && (img.dataset.src || img.dataset.original || img.dataset.lazySrc)) ||
+          '';
         var dataOriginal = img.getAttribute('data-original') || '';
         var dataLazy = img.getAttribute('data-lazy') || '';
-        var chosen = dataSrc || dataOriginal || dataLazy || src;
+        var chosen = (String(dataSrc || dataOriginal || dataLazy || src || '').trim());
+
+        if (!chosen) {
+          var linkFb =
+            link ||
+            (img.closest &&
+              img.closest('a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="], a[href*="productcode="]'));
+          if (linkFb) {
+            var href0 = linkFb.getAttribute('href') || '';
+            var code0 = productSkuFromHref(href0);
+            if (code0) chosen = '/v/vspfiles/photos/' + code0 + '-1.jpg';
+          }
+        }
 
         if (!chosen) return;
 
@@ -12512,6 +12528,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         img.removeAttribute('srcset');
         try {
           img.removeAttribute('data-src');
+          img.removeAttribute('datasrc');
           img.removeAttribute('data-original');
           img.removeAttribute('data-lazy');
         } catch (eRm) {}
@@ -12534,8 +12551,12 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       var cards = scope.querySelectorAll(
         '.mc-related-carousel__viewport .v-product, ' +
         '.mc-related-carousel__viewport .v65-product-related-item, ' +
+        '#relateditems .v-product, ' +
+        '#relateditems .v65-product-related-item, ' +
         '#related-products .v-product, ' +
         '#related-products .v65-product-related-item, ' +
+        'table.relateditems .v-product, ' +
+        'table.relateditems .v65-product-related-item, ' +
         '.v65-product-related .v-product, ' +
         '.v65-product-related-item'
       );
@@ -12559,21 +12580,59 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         } catch (eCard) {}
       });
 
-      scope.querySelectorAll('#v65-product-related td.v65-productPhoto').forEach(function(td){
+      scope
+        .querySelectorAll(
+          '#content_area #v65-product-related td.v65-productPhoto, ' +
+          '#content_area #related_products_content td.v65-productPhoto, ' +
+          '#content_area #relateditems td.v65-productPhoto, ' +
+          '#content_area #related-products td.v65-productPhoto, ' +
+          '#content_area table.relateditems td.v65-productPhoto'
+        )
+        .forEach(function(td){
         try {
           var img = td.querySelector('img');
           var link =
-            td.querySelector('a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="]') ||
-            (img && img.closest && img.closest('a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="]'));
+            td.querySelector(
+              'a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="], a[href*="productcode="]'
+            ) ||
+            (img && img.closest && img.closest(
+              'a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="], a[href*="productcode="]'
+            ));
           normalizeOne(img, link);
         } catch (eTd) {}
       });
 
-      scope.querySelectorAll('#content_area #v65-product-related img, #content_area #related_products_content img').forEach(function (imgEl) {
+      scope
+        .querySelectorAll(
+          '#content_area #v65-product-related img, ' +
+          '#content_area #related_products_content img, ' +
+          '#content_area #relateditems img, ' +
+          '#content_area #related-products img, ' +
+          '#content_area table.relateditems img'
+        )
+        .forEach(function (imgEl) {
         try {
           if (!imgEl || (imgEl.closest && imgEl.closest('.mc-zoom-lens'))) return;
+          if (imgEl.id === 'product_photo' || imgEl.id === 'main-image') return;
+          if (imgEl.closest && imgEl.closest('#altviews, .altviews')) return;
+          if (imgEl.closest && imgEl.closest('.mtl-sectional-configurations, #mtl-sectional-configurations'))
+            return;
+          if (imgEl.closest && imgEl.closest('#mcLeatherSwatchStrip, .wm-tile, .mc-leather-mini-swatch'))
+            return;
+          if (
+            imgEl.closest &&
+            imgEl.closest('#v65-product-parent') &&
+            !imgEl.closest(
+              '#relateditems, #related-products, #v65-product-related, #related_products_content, table.relateditems, .mc-related-carousel, .mc-related-carousel__viewport'
+            )
+          )
+            return;
           var lk =
-            (imgEl.closest && imgEl.closest('a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="]')) || null;
+            (imgEl.closest &&
+              imgEl.closest(
+                'a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="], a[href*="productcode="]'
+              )) ||
+            null;
           normalizeOne(imgEl, lk);
         } catch (eImg) {}
       });
