@@ -283,6 +283,20 @@ def _span_noise(t: str) -> bool:
     return False
 
 
+def _span_looks_dimension_line(t: str) -> bool:
+    """Imperial / metric dimension lines beside Popular diagrams (often right of the render)."""
+    s = (t or "").strip().replace("\u00d7", "x")
+    if len(s) < 5:
+        return False
+    if '"' in s and re.search(r"\d", s) and re.search(r"\d+\s*\"\s*[xX]\s*\d+", s):
+        return True
+    if re.search(r"\b\d{2,3}\s*cm\b", s, re.I):
+        return True
+    if re.search(r"\bW\s*\d", s, re.I) and re.search(r"\bD\s*\d", s, re.I):
+        return True
+    return False
+
+
 def iter_text_spans_with_text(page: fitz.Page) -> list[tuple[fitz.Rect, str]]:
     out: list[tuple[fitz.Rect, str]] = []
     try:
@@ -301,19 +315,24 @@ def iter_text_spans_with_text(page: fitz.Page) -> list[tuple[fitz.Rect, str]]:
     return out
 
 
-def union_popular_diagram_images_in_cell(page: fitz.Page, cell: fitz.Rect) -> fitz.Rect | None:
+def union_popular_diagram_images_in_cell(
+    page: fitz.Page, cell: fitz.Rect, *, min_area: float = 8000.0
+) -> fitz.Rect | None:
     """
     Palliser places the sectional renders as embedded raster images (not text).
-    Union large image bboxes inside the Popular grid cell — matches sofa-left + text-right layout.
+    Union image bboxes inside the Popular grid cell. Some lines (e.g. Colebrook) use two
+    smaller renders per cell — lower min_area vs the legacy 20k threshold so both union in.
     """
     u: fitz.Rect | None = None
+    cell_a = max(cell.get_area(), 1.0)
+    floor = max(3500.0, min(float(min_area), 0.02 * cell_a))
     try:
         infos = page.get_image_info(xrefs=True) or []
     except Exception:
         infos = []
     for info in infos:
         bb = fitz.Rect(info["bbox"])
-        if bb.get_area() < 20000.0:
+        if bb.get_area() < floor:
             continue
         if not bb.intersects(cell):
             continue
@@ -334,6 +353,7 @@ def popular_configuration_block_clip(
     pad_pt: float = 12.0,
     frame_trim_pt: float = 2.0,
     bottom_right_extra_trim_pt: float = 0.0,
+    min_image_area: float = 8000.0,
 ) -> fitz.Rect | None:
     """
     2×2 Popular grid: column by page centerline; row by anchor vs mid-band.
@@ -378,7 +398,10 @@ def popular_configuration_block_clip(
         if cy < y_top - 8.0 or cy > y_bot + 8.0:
             continue
         cx = (r.x0 + r.x1) * 0.5
-        if cx < col_lo or cx > col_hi:
+        dim = _span_looks_dimension_line(raw)
+        col_lo_x = col_lo - (18.0 if dim else 0.0)
+        col_hi_x = col_hi + (72.0 if dim else 0.0)
+        if cx < col_lo_x or cx > col_hi_x:
             continue
         if not _rects_overlap_x(r, cell):
             continue
@@ -390,7 +413,7 @@ def popular_configuration_block_clip(
                 continue
         text_u = r if text_u is None else (text_u | r)
 
-    img_u = union_popular_diagram_images_in_cell(page, cell)
+    img_u = union_popular_diagram_images_in_cell(page, cell, min_area=min_image_area)
 
     u: fitz.Rect | None = None
     if img_u is not None:
