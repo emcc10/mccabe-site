@@ -1,10 +1,11 @@
 {
-  "_comment": "Tighter Popular crops: popularCropPadPt ~12, popularColumnSlackPt ~22. Re-export: python export_sectional_diagrams.py --publish",
+  "_comment": "Tighter Popular crops: popularCropPadPt ~12, popularColumnSlackPt ~22; popularBottomRightExtraTrimPt trims bottom edge of bottom-right grid cell only. Re-export: python export_sectional_diagrams.py --publish",
   "dpi": 300,
   "popularMidYRatio": 0.5,
   "popularColumnSlackPt": 22,
   "popularCropPadPt": 12,
   "popularFrameTrimPt": 2,
+  "popularBottomRightExtraTrimPt": 18,
   "clipPopularConfigurationsGrid": true,
   "configsJs": "../../vspfiles/js/sectional-configs.js",
   "palliser": {

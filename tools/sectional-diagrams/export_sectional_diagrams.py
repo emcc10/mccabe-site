@@ -333,6 +333,7 @@ def popular_configuration_block_clip(
     column_slack_pt: float = 22.0,
     pad_pt: float = 12.0,
     frame_trim_pt: float = 2.0,
+    bottom_right_extra_trim_pt: float = 0.0,
 ) -> fitz.Rect | None:
     """
     2×2 Popular grid: column by page centerline; row by anchor vs mid-band.
@@ -404,6 +405,11 @@ def popular_configuration_block_clip(
     if img_u is not None:
         u.y0 = min(u.y0, img_u.y0 - 6.0)
     u.y1 = min(y_bot - 3.0, max(u.y1, anchor.y1 + 14.0))
+
+    right_col = (anchor.x0 + anchor.x1) * 0.5 >= mid_x
+    bottom_row = anchor.y0 >= mid_y
+    if right_col and bottom_row and bottom_right_extra_trim_pt > 0.0:
+        u.y1 = max(u.y0 + 72.0, u.y1 - float(bottom_right_extra_trim_pt))
 
     u = inflate_rect(u, pad_pt)
     u = u & pr
@@ -508,9 +514,10 @@ def cmd_publish(
                             pg,
                             anch,
                             mid_y_ratio=float(cat.get("popularMidYRatio") or 0.5),
-                            column_slack_pt=float(cat.get("popularColumnSlackPt") or 34.0),
-                            pad_pt=float(cat.get("popularCropPadPt") or 26.0),
-                            frame_trim_pt=float(cat.get("popularFrameTrimPt") or 3.0),
+                            column_slack_pt=float(cat.get("popularColumnSlackPt") or 22.0),
+                            pad_pt=float(cat.get("popularCropPadPt") or 12.0),
+                            frame_trim_pt=float(cat.get("popularFrameTrimPt") or 2.0),
+                            bottom_right_extra_trim_pt=float(cat.get("popularBottomRightExtraTrimPt") or 18.0),
                         )
                     if clip is None:
                         print(
