@@ -429,6 +429,16 @@ def popular_configuration_block_clip(
         u.y0 = min(u.y0, img_u.y0 - 6.0)
     u.y1 = min(y_bot - 3.0, max(u.y1, anchor.y1 + 14.0))
 
+    # Some PDFs leave a wide empty margin inside the Popular cell to the right of the art.
+    # If the union is much wider than bitmap + anchor + captured text, pull x1 in.
+    if img_u is not None and u is not None:
+        rightmost = max(img_u.x1, anchor.x1)
+        if text_u is not None:
+            rightmost = max(rightmost, text_u.x1)
+        dead = float(u.x1 - rightmost)
+        if dead > 42.0:
+            u.x1 = min(u.x1, rightmost + 14.0)
+
     right_col = (anchor.x0 + anchor.x1) * 0.5 >= mid_x
     bottom_row = anchor.y0 >= mid_y
     if right_col and bottom_row and bottom_right_extra_trim_pt > 0.0:
