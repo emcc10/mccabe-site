@@ -28,35 +28,117 @@ const linkSignInOnline = document.getElementById('linkSignInOnline');
 const linkLocalBoards = document.getElementById('linkLocalBoards');
 
 /**
- * Volusion storefronts typically set CustomerID when a shopper is signed in.
+ * Guess whether the shopper is signed in at mccabes.com — no Volusion deploy needed.
+ *
+ * Strategy: cookie hints (often CustomerID) + /api/v1/users/current fetched from any
+ * open McCabe's tab so the browser sends first-party cookies (extension fetch does not).
  */
-async function isLoggedInToMccabesStore() {
-  if (!chrome.cookies || !chrome.cookies.get) return false;
-  const storeUrl = `${MCCABES_STORE_ORIGIN}/`;
+function looksLikeSessionValue(value) {
+  const v = String(value ?? '').trim();
+  if (!v) return false;
+  const lv = v.toLowerCase();
+  if (lv === '0' || lv === 'false' || lv === 'null' || lv === 'undefined') return false;
+  return true;
+}
 
-  const looksLikeSession = (value) =>
-    Boolean(value && String(value).trim().length > 0 && String(value).trim() !== '0');
+function inferLoginFromCookieList(cookieList) {
+  for (const c of cookieList) {
+    const n = (c.name || '').trim();
+    const v = c.value ?? '';
+    if (/^customerid$/i.test(n) && looksLikeSessionValue(v)) return true;
+    if (/^custid$/i.test(n) && looksLikeSessionValue(v)) return true;
+    if (/^sessioncustomer(?:id)?$/i.test(n) && looksLikeSessionValue(v)) return true;
+  }
+  return false;
+}
 
-  try {
-    const direct = await chrome.cookies.get({
-      url: storeUrl,
-      name: 'CustomerID'
-    });
-    if (direct && looksLikeSession(direct.value)) return true;
-  } catch (_) {
-    // continue
+async function tryLoginFromCookies() {
+  if (!chrome.cookies?.getAll) return false;
+
+  const indexUrls = [
+    `${MCCABES_STORE_ORIGIN}/`,
+    'https://mccabestheaterandliving.com/'
+  ];
+
+  for (const url of indexUrls) {
+    try {
+      const list = await chrome.cookies.getAll({ url });
+      if (inferLoginFromCookieList(list)) return true;
+    } catch (_) {
+      //
+    }
   }
 
   try {
-    const domainCookies = await chrome.cookies.getAll({
-      domain: '.mccabestheaterandliving.com'
+    const dot = await chrome.cookies.getAll({ domain: '.mccabestheaterandliving.com' });
+    if (inferLoginFromCookieList(dot)) return true;
+  } catch (_) {
+    //
+  }
+
+  try {
+    const apex = await chrome.cookies.getAll({ domain: 'www.mccabestheaterandliving.com' });
+    if (inferLoginFromCookieList(apex)) return true;
+  } catch (_) {
+    //
+  }
+
+  return false;
+}
+
+async function tryLoginFromVolusionTabProbe() {
+  if (!chrome.scripting?.executeScript || !chrome.tabs?.query) return false;
+
+  let tabs = [];
+  try {
+    tabs = await chrome.tabs.query({
+      url: ['https://www.mccabestheaterandliving.com/*', 'https://mccabestheaterandliving.com/*']
     });
-    return domainCookies.some(
-      (c) => /^customerid$/i.test(c.name) && looksLikeSession(c.value)
-    );
   } catch (_) {
     return false;
   }
+
+  const prioritized = [...tabs.filter((t) => t.active), ...tabs.filter((t) => !t.active)];
+
+  for (const tab of prioritized.slice(0, 14)) {
+    if (tab.id == null || tab.discarded || tab.url == null) continue;
+    try {
+      const injected = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: async () => {
+          try {
+            const res = await fetch('/api/v1/users/current', {
+              credentials: 'include'
+            });
+            if (res.status === 401 || res.status === 403) return false;
+            if (!res.ok) return false;
+            const ct = res.headers.get('content-type') || '';
+            if (!ct.includes('json')) return false;
+            const json = await res.json();
+            const id = json?.data?.id ?? json?.data?.customerId ?? json?.id;
+            const email = json?.data?.email;
+            const numId = typeof id === 'number' ? id : Number(id);
+            if (Number.isFinite(numId) && numId > 0) return true;
+            if (typeof id === 'string' && id.trim() && id.trim() !== '0') return true;
+            return Boolean(email && typeof email === 'string' && email.includes('@'));
+          } catch (_) {
+            return false;
+          }
+        }
+      });
+      if (injected?.[0]?.result === true) return true;
+    } catch (_) {
+      // Restricted tabs, unloaded pages, CSP edge cases — skip.
+    }
+  }
+
+  return false;
+}
+
+async function isLoggedInToMccabesStore() {
+  const fromCookies = await tryLoginFromCookies();
+  if (fromCookies) return true;
+  return tryLoginFromVolusionTabProbe();
 }
 
 async function refreshOnlineBoardsUi() {
@@ -239,9 +321,8 @@ async function init() {
 
   if (chrome.cookies && chrome.cookies.onChanged) {
     chrome.cookies.onChanged.addListener((change) => {
-      const c = change.cookie;
-      if (!c || !/mccabestheaterandliving\.com$/i.test(c.domain || '')) return;
-      if (!/^customerid$/i.test(c.name)) return;
+      const d = change.cookie?.domain ?? '';
+      if (!d.includes('mccabestheaterandliving.com')) return;
       void refreshOnlineBoardsUi();
     });
   }
