@@ -3,7 +3,8 @@
   "name": "Save to McCabe's Board",
   "version": "1.0.0",
   "description": "Save products from shopping sites to your McCabe's inspiration board.",
-  "permissions": ["storage", "activeTab", "scripting"],
+  "permissions": ["storage", "activeTab", "scripting", "cookies"],
+  "host_permissions": ["https://www.mccabestheaterandliving.com/*"],
   "action": {
     "default_title": "Save to McCabe's Board",
     "default_popup": "popup.html"

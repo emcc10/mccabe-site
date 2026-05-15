@@ -52,11 +52,26 @@
       <section class="actions">
         <label class="field">
           <span class="label">Board</span>
-          <div class="row">
-            <select id="boardSelect" class="select"></select>
-            <button id="btnOpenBoards" type="button" class="btn btn-ghost" title="Open My Boards test page">My Boards</button>
-          </div>
+          <select id="boardSelect" class="select"></select>
         </label>
+
+        <div class="account-boards-row" aria-live="polite">
+          <a
+            id="linkMyBoardsOnline"
+            class="boards-online-link link hidden"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            >My Boards</a>
+          <p id="signInForBoards" class="sign-in-for-boards muted hidden">
+            Sign in to your McCabe's account online to open My Boards.
+            <a id="linkSignInOnline" class="link" href="#" target="_blank" rel="noopener noreferrer">Sign in</a>
+          </p>
+        </div>
+
+        <p class="local-saves-hint muted">
+          <button type="button" id="linkLocalBoards" class="btn-link">Saved on this device</button>
+        </p>
 
         <div id="newBoardRow" class="new-board hidden">
           <label class="field grow">

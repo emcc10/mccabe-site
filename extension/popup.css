@@ -202,3 +202,41 @@ body {
 .hidden {
   display: none !important;
 }
+
+.boards-online-link {
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.sign-in-for-boards {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.sign-in-for-boards .link {
+  margin-left: 4px;
+}
+
+.local-saves-hint {
+  margin: 6px 0 0;
+  font-size: 11px;
+}
+
+.btn-link {
+  font: inherit;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #6b7280;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.btn-link:hover {
+  color: #374151;
+}

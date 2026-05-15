@@ -1,6 +1,16 @@
 const STORAGE_KEY = 'mccabe_board_v1';
 const BOARD_NEW_VALUE = '__create_new_board__';
 
+/** Production store — used for My Boards link + login detection. */
+const MCCABES_STORE_ORIGIN = 'https://www.mccabestheaterandliving.com';
+// TODO: point to the live inspiration-board URL when it ships (account area for now).
+const MCCABES_MY_BOARDS_PATH = '/myaccount.asp';
+const MCCABES_LOGIN_PATH = '/login.asp';
+
+function mccabesAbsoluteUrl(path) {
+  return `${MCCABES_STORE_ORIGIN}${path}`;
+}
+
 const statusEl = document.getElementById('status');
 const previewImage = document.getElementById('previewImage');
 const fieldTitle = document.getElementById('fieldTitle');
@@ -12,7 +22,54 @@ const boardSelect = document.getElementById('boardSelect');
 const newBoardRow = document.getElementById('newBoardRow');
 const newBoardName = document.getElementById('newBoardName');
 const btnSave = document.getElementById('btnSave');
-const btnOpenBoards = document.getElementById('btnOpenBoards');
+const linkMyBoardsOnline = document.getElementById('linkMyBoardsOnline');
+const signInForBoards = document.getElementById('signInForBoards');
+const linkSignInOnline = document.getElementById('linkSignInOnline');
+const linkLocalBoards = document.getElementById('linkLocalBoards');
+
+/**
+ * Volusion storefronts typically set CustomerID when a shopper is signed in.
+ */
+async function isLoggedInToMccabesStore() {
+  if (!chrome.cookies || !chrome.cookies.get) return false;
+  const storeUrl = `${MCCABES_STORE_ORIGIN}/`;
+
+  const looksLikeSession = (value) =>
+    Boolean(value && String(value).trim().length > 0 && String(value).trim() !== '0');
+
+  try {
+    const direct = await chrome.cookies.get({
+      url: storeUrl,
+      name: 'CustomerID'
+    });
+    if (direct && looksLikeSession(direct.value)) return true;
+  } catch (_) {
+    // continue
+  }
+
+  try {
+    const domainCookies = await chrome.cookies.getAll({
+      domain: '.mccabestheaterandliving.com'
+    });
+    return domainCookies.some(
+      (c) => /^customerid$/i.test(c.name) && looksLikeSession(c.value)
+    );
+  } catch (_) {
+    return false;
+  }
+}
+
+async function refreshOnlineBoardsUi() {
+  const loggedIn = await isLoggedInToMccabesStore();
+  const boardsUrl = mccabesAbsoluteUrl(MCCABES_MY_BOARDS_PATH);
+  const loginUrl = mccabesAbsoluteUrl(MCCABES_LOGIN_PATH);
+
+  linkMyBoardsOnline.href = boardsUrl;
+  linkSignInOnline.href = loginUrl;
+
+  linkMyBoardsOnline.classList.toggle('hidden', !loggedIn);
+  signInForBoards.classList.toggle('hidden', loggedIn);
+}
 
 /**
  * Later: ship saved items to a signed-in McCabe's account / API.
@@ -157,6 +214,8 @@ async function init() {
   const state = await loadState();
   populateBoardSelect(state.boards.length ? state.boards : ['Inspiration']);
 
+  await refreshOnlineBoardsUi();
+
   const hints = await requestHintsFromTab(tab.id);
   if (hints) {
     applyHints(hints);
@@ -178,7 +237,16 @@ async function init() {
   fieldImage.addEventListener('input', refreshPreviewFromFields);
   boardSelect.addEventListener('change', toggleNewBoardRow);
 
-  btnOpenBoards.addEventListener('click', () => {
+  if (chrome.cookies && chrome.cookies.onChanged) {
+    chrome.cookies.onChanged.addListener((change) => {
+      const c = change.cookie;
+      if (!c || !/mccabestheaterandliving\.com$/i.test(c.domain || '')) return;
+      if (!/^customerid$/i.test(c.name)) return;
+      void refreshOnlineBoardsUi();
+    });
+  }
+
+  linkLocalBoards.addEventListener('click', () => {
     const url = chrome.runtime.getURL('boards.html');
     chrome.tabs.create({ url });
   });
@@ -232,7 +300,12 @@ async function init() {
       boardSelect.value = boardName;
       newBoardName.value = '';
       toggleNewBoardRow();
-      setStatus('Saved locally. Open My Boards to review.');
+      const online = await isLoggedInToMccabesStore();
+      setStatus(
+        online
+          ? 'Saved locally. Open My Boards on mccabes.com to review in your account.'
+          : "Saved on this device. Sign in to McCabe's online, then use My Boards above."
+      );
     } catch (e) {
       setStatus('Save failed. Please try again.', true);
       void e;
