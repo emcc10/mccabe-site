@@ -5,7 +5,45 @@
 (function () {
   "use strict";
 
-  var IMG_V = "sectional-diagrams-20260521b";
+  var IMG_V = "sectional-diagrams-github-raw-v1";
+
+  /**
+   * Diagram PNGs load from GitHub (same files as in-repo vspfiles/sectional-diagrams/).
+   * After you push to main, the live site picks up new images without Volusion file uploads.
+   * Optional override (must end with /): window.MTL_SECTIONAL_DIAGRAM_BASE = "https://raw.githubusercontent.com/OWNER/REPO/branch/vspfiles/sectional-diagrams/";
+   */
+  var DEFAULT_MTL_SECTIONAL_DIAGRAM_BASE =
+    "https://raw.githubusercontent.com/emcc10/mccabe-site/main/vspfiles/sectional-diagrams/";
+
+  function sectionalDiagramImageBase() {
+    try {
+      var o = typeof window !== "undefined" ? window.MTL_SECTIONAL_DIAGRAM_BASE : null;
+      if (o != null) {
+        var t = String(o).trim();
+        if (t) return t.replace(/\/?$/, "/");
+      }
+    } catch (eBase) {}
+    return DEFAULT_MTL_SECTIONAL_DIAGRAM_BASE;
+  }
+
+  /** Volusion path, basename, or full https URL → final img src (before ?v= cache-bust). */
+  function resolveSectionalDiagramAssetUrl(pathOrUrl) {
+    var s = String(pathOrUrl || "").trim();
+    if (!s) return "";
+    var lc = s.toLowerCase();
+    if (lc.indexOf("https://") === 0 || lc.indexOf("http://") === 0) return s;
+    var legacy = "/v/vspfiles/sectional-diagrams/";
+    if (s.indexOf(legacy) === 0) {
+      s = s.slice(legacy.length);
+    } else {
+      var marker = "sectional-diagrams/";
+      var mi = s.indexOf(marker);
+      if (mi !== -1) s = s.slice(mi + marker.length);
+    }
+    s = s.replace(/^\/+/, "");
+    if (!s) return "";
+    return sectionalDiagramImageBase() + s;
+  }
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -28,7 +66,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260521-single-diagram-clip-v1";
+  window.MTL_RENDERER_BUILD = "sectional-20260515-github-diagram-urls-v1";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -1972,7 +2010,7 @@
     var prefix = getSectionalDiagramPrefix(productKey, pcVal);
     var cod = normalizeCode(configCode).replace(/\s+/g, "");
     if (!prefix || !cod) return "";
-    return "/v/vspfiles/sectional-diagrams/" + prefix + "-" + cod + ".png";
+    return resolveSectionalDiagramAssetUrl(prefix + "-" + cod + ".png");
   }
 
   function mtlEscapeRegExp(s) {
@@ -2600,6 +2638,8 @@
       var image = jsonHit && jsonHit.image ? String(jsonHit.image).trim() : "";
       if (!image) {
         image = inferSectionalDiagramPngUrl(productKey, pcVal, mergedCode);
+      } else {
+        image = resolveSectionalDiagramAssetUrl(image);
       }
       var priceDiff = jsonHit && jsonHit.priceDiff != null ? jsonHit.priceDiff : null;
       var jsonPdNum = jsonHit && jsonHit.priceDiff != null ? Number(jsonHit.priceDiff) : null;

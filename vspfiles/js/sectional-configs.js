@@ -11,7 +11,8 @@
  * Popular configurations on that PDF: 07-15, 07-09-19, 07-09-08, 12-40 (see tools/sectional-diagrams/export_sectional_diagrams.py, 300 DPI).
  *
  * Regenerate PNGs: tools/sectional-diagrams/export_diagrams.ps1
- * Upload vspfiles/sectional-diagrams/*.png to Volusion. Renderer appends ?v= cache-bust on img src.
+ * Commit + push PNGs to GitHub (main). Renderer loads them from raw.githubusercontent.com (no Volusion upload).
+ * image paths may stay as /v/vspfiles/sectional-diagrams/… — mtl-sectional-renderer rewrites to GitHub.
  */
 window.MTL_SECTIONAL_CONFIGS = {
   Alula: [
