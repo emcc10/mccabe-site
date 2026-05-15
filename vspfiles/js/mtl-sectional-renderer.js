@@ -2919,7 +2919,6 @@
         mountPopularConfigurationsInAccordion(section);
         ensureProductSummary(section);
         try {
-          bindSectionalDiagramFigureClicks();
           bindConfigurationCardClicks();
         } catch (eBnd) {}
         try {
@@ -2962,7 +2961,6 @@
 
     mtlRunStage("finalize: config cards bind & observers", function () {
       bindConfigurationCardClicks();
-      bindSectionalDiagramFigureClicks();
       ensureObservers();
       ensureMemberClassObserver();
       syncCardsSelectionHighlight();
@@ -3422,4 +3420,22 @@
     ensureMcWmOpenMountedListener();
     if (SECTIONAL_DBG && isSectionalProductPageClient() && !isTheaterSeatingProductPageForGuard()) {
       window.setTimeout(function () {
- 
+        runMtlSectionalDiagnosticConsoleOnly("after DOMContentLoaded (0ms tick)");
+      }, 0);
+      window.setTimeout(function () {
+        runMtlSectionalDiagnosticConsoleOnly("t+1500ms");
+      }, 1500);
+    }
+    runRender();
+    setTimeout(runRender, 400);
+    setTimeout(runRender, 1200);
+    setTimeout(runRender, 2800);
+  }
+
+  if (document.readyState !== "loading") boot();
+  else
+    document.addEventListener("DOMContentLoaded", function () {
+      boot();
+    });
+  window.addEventListener("load", runRender);
+})();

@@ -1043,6 +1043,7 @@ html.is-sectional-product body #mtl-sectional-configurations .mtl-sectional-card
 }
 
 html.is-sectional-product body #mtl-sectional-configurations .mtl-sectional-card--pdf-diagram .mtl-sectional-figure {
+  position: relative !important;
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -1050,8 +1051,34 @@ html.is-sectional-product body #mtl-sectional-configurations .mtl-sectional-card
   align-items: center !important;
   justify-content: center !important;
   background: #fff !important;
-  cursor: zoom-in !important;
+  cursor: pointer !important;
   overflow: visible !important;
+}
+
+html.is-sectional-product body #mtl-sectional-configurations .mtl-sectional-card--pdf-diagram .mtl-sectional-diagram-zoom {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  z-index: 3 !important;
+  box-sizing: border-box !important;
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  border-radius: 6px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #333 !important;
+  cursor: zoom-in !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+html.is-sectional-product body #mtl-sectional-configurations .mtl-sectional-card--pdf-diagram .mtl-sectional-diagram-zoom:hover {
+  background: #fff !important;
+  border-color: rgba(0, 0, 0, 0.22) !important;
 }
 
 html.is-sectional-product body #mtl-sectional-configurations .mtl-sectional-card--pdf-diagram .mtl-sectional-figure img.mtl-sectional-image {
