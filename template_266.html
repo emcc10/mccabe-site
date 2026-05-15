@@ -12475,12 +12475,15 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }
   }
 
-  /** Volusion often renders both rails — duplicates SKUs (e.g. 8 tiles). Keep canonical `#v65-product-related`. */
+  /** Volusion often renders two *top-level* related blocks — duplicates SKUs (e.g. 8 tiles). Keep one rail.
+      NOTE: `td#related_products_content` is normally NESTED inside `table#v65-product-related` (single rail).
+      Never hide that cell — both roots would match the same `table.v65-productDisplay` and the UI would vanish. */
   function mcRelatedHideDuplicateVolusionRails() {
     try {
       var primary = document.getElementById('v65-product-related');
       var dup = document.getElementById('related_products_content');
       if (!primary || !dup) return;
+      if (primary.contains(dup)) return;
       var tPrimary = primary.querySelector('table.v65-productDisplay');
       var tDup = dup.querySelector('table.v65-productDisplay');
       if (!tPrimary || !tDup) return;
