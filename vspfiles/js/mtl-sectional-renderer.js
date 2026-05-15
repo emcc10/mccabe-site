@@ -28,7 +28,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260521-productkey-from-sku-v1";
+  window.MTL_RENDERER_BUILD = "sectional-20260521-style-from-slug-v1";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -1963,7 +1963,7 @@
       if (pk) return pk + "-SC";
     }
     var pc = String(pcVal || "").trim();
-    var m = pc.match(/^([A-Za-z][A-Za-z0-9]*)-SC(?:-|$)/i);
+    var m = pc.match(/^([A-Za-z][A-Za-z0-9]*)[-_]SC(?:[-_]|$)/i);
     if (!m) return "";
     return styleSegmentToPascal(m[1]) + "-SC";
   }
@@ -1981,19 +1981,25 @@
 
   /**
    * Resolve Palliser / sectional style for diagram + JSON rows.
-   * Volusion sectional SKUs are typically "{Style}-SC-{…}" — that wins over stray mentions of other lines
-   * in related products, nav, or the first N characters of body text.
+   * 1) Volusion hidden ProductCode often looks like "{Style}-SC-…" (or _SC_).
+   * 2) When the code is numeric-only, the product URL slug usually contains "{style}-sc-{digits}".
+   * 3) Otherwise match known config keys on title / name / path (word boundaries only).
    */
   function resolveSectionalProductStyleKey(pcVal, allConfigs) {
     var cfg = allConfigs && typeof allConfigs === "object" ? allConfigs : {};
     var pc = String(pcVal || "").trim();
-    var m = pc.match(/^([A-Za-z][A-Za-z0-9]*)-SC(?:-|$)/i);
+    var m = pc.match(/^([A-Za-z][A-Za-z0-9]*)[-_]SC(?:[-_]|$)/i);
     if (m && m[1]) {
       var fromCode = styleSegmentToPascal(m[1]);
       if (fromCode) {
         sectionalLog("sectional productKey from ProductCode", fromCode);
         return fromCode;
       }
+    }
+    var fromSlug = extractStyleFromSlugPath(String(location.pathname || ""), cfg);
+    if (fromSlug) {
+      sectionalLog("sectional productKey from URL slug", fromSlug);
+      return fromSlug;
     }
     var keys = Object.keys(cfg).slice();
     keys.sort(function (a, b) {
@@ -2043,6 +2049,52 @@
       return "Alula";
     }
     return "";
+  }
+
+  /** e.g. /…/palliser-colebrook-sc-07-15-… → Colebrook when not inferrable from ProductCode. */
+  function extractStyleFromSlugPath(pathname, cfg) {
+    var p = String(pathname || "")
+      .replace(/\\/g, "/")
+      .replace(/_/g, "-")
+      .toLowerCase();
+    if (!p) return "";
+    var keys = Object.keys(cfg || {}).slice();
+    keys.sort(function (a, b) {
+      return b.length - a.length;
+    });
+    var i;
+    for (i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      var low = String(k).toLowerCase();
+      var esc = mtlEscapeRegExp(low);
+      if (new RegExp("[^a-z0-9]" + esc + "-sc-\\d+", "i").test(p)) return k;
+      if (new RegExp("^" + esc + "-sc-\\d+", "i").test(p)) return k;
+    }
+    var GENERIC = {
+      palliser: 1,
+      sectionals: 1,
+      sectional: 1,
+      seating: 1,
+      product: 1,
+      store: 1,
+      category: 1,
+      products: 1,
+      shop: 1,
+      home: 1,
+    };
+    var re = /([a-z][a-z0-9]{2,})-sc-\d+/gi;
+    var m;
+    var candidates = [];
+    while ((m = re.exec(p)) !== null) {
+      var seg = m[1];
+      if (GENERIC[seg]) continue;
+      candidates.push(styleSegmentToPascal(seg));
+    }
+    if (!candidates.length) return "";
+    for (i = candidates.length - 1; i >= 0; i--) {
+      if (cfg[candidates[i]]) return candidates[i];
+    }
+    return candidates[candidates.length - 1];
   }
 
   function refreshProductPriceLabel() {
@@ -3116,6 +3168,12 @@
         secExistingEarly.removeAttribute("data-mtl-final-init");
         sectionalLog("sectional rebuild: card DOM version", cardDomVersionHave, "->", cardDomVersionWanted);
       }
+      var haveStyle = String(secExistingEarly.getAttribute("data-mtl-resolved-style") || "").trim();
+      var wantStyle = String(productKey || "").trim();
+      if (wantStyle !== haveStyle) {
+        secExistingEarly.removeAttribute("data-mtl-final-init");
+        sectionalLog("sectional rebuild: resolved style", haveStyle, "->", wantStyle);
+      }
     }
     if (secExistingEarly && secExistingEarly.dataset.mtlFinalInit === "1") {
       var csCheck = findConfigurationSelect();
@@ -3385,6 +3443,7 @@
       section.dataset.mtlFinalInit = "1";
       try {
         section.setAttribute("data-mtl-card-dom-v", String(window.MTL_RENDERER_BUILD || "").trim());
+        section.setAttribute("data-mtl-resolved-style", String(productKey || "").trim());
       } catch (eV) {}
       window.__mtlReplacementRenderSucceeded = true;
       scheduleHideConfigurationRow();
