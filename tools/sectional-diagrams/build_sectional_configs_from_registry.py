@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
-Build vspfiles/js/sectional-configs.js + palliser entries for tools/sectional-diagrams/catalog.json
-from sectional_styles_registry.json by scanning each Palliser Product Summary PDF Popular page.
+Build vspfiles/js/sectional-configs.js + palliser map in catalog.json from:
+  - sectional_styles_registry.json (model + token per style)
+  - Palliser PDF Popular pages (strict configuration code lines)
+  - mccabe_plp_codes.json (union: store PLP SKUs not always repeated on PDF)
 """
 from __future__ import annotations
 
@@ -22,6 +24,7 @@ from urllib.parse import quote
 ROOT = Path(__file__).resolve().parent.parent.parent
 TOOL = Path(__file__).resolve().parent
 REG = TOOL / "sectional_styles_registry.json"
+PLP = TOOL / "mccabe_plp_codes.json"
 OUT_JS = ROOT / "vspfiles" / "js" / "sectional-configs.js"
 OUT_CAT = TOOL / "catalog.json"
 PDF_DIR = TOOL / "pdfs"
@@ -45,7 +48,7 @@ def load_pdf(key: str, model: str, token: str) -> fitz.Document:
     return fitz.open(pdf_path.as_posix())
 
 
-def popular_page_lines(doc: fitz.Document) -> list[str]:
+def popular_lines(doc: fitz.Document) -> list[str]:
     lines: list[str] = []
     for i in range(len(doc)):
         t = doc[i].get_text("text") or ""
@@ -58,31 +61,37 @@ def popular_page_lines(doc: fitz.Document) -> list[str]:
     return lines
 
 
-def is_config_code_line(s: str) -> bool:
+def strict_code_line(s: str) -> bool:
     s = s.strip()
     if not s or " " in s or len(s) > 56:
         return False
     parts = s.split("/")
-    if len(parts) < 2 or len(parts) > 8:
+    if len(parts) < 2:
         return False
-    for p in parts:
-        if not re.fullmatch(r"[0-9A-Za-z]{1,6}", p):
-            return False
-    if re.fullmatch(r"\d{2,3}/\d{2,3}", s) and len(parts) == 2:
-        a, b = int(parts[0]), int(parts[1])
-        if 50 <= a <= 220 and 50 <= b <= 220:
-            return False
+    if re.match(r"^\d{2}(?:/\d{2})+$", s):
+        if re.fullmatch(r"\d{2,3}/\d{2,3}", s):
+            a, b = int(parts[0]), int(parts[1])
+            if 50 <= a <= 220 and 50 <= b <= 220:
+                return False
+        return True
+    if re.match(r"^\d{2}/\d{2}/\d[A-Za-z]/\d{2}$", s):
+        return True
+    if re.match(r"^\d{2}/[Ww]\d(?:/\d{2}){3,}$", s):
+        return True
+    if re.match(r"^[A-Za-z]\d/\d{2}/[A-Za-z]\d$", s):
+        return True
+    if re.match(r"^\d(?:/[A-Za-z]\d){4,}$", s):
+        return True
+    if re.match(r"^[A-Za-z]\d(?:/[A-Za-z]?\d){2,}$", s):
+        return True
+    if re.match(r"^(?:[A-Z]{2}|\d[A-Z])(?:/(?:[A-Z]{2}|\d[A-Z]|[A-Z]\d|\d{2}))+$", s):
+        return True
+    if re.match(r"^(?:[A-Z]\d|\d{2})(?:/(?:[A-Z]\d|\d{2}|[A-Z]{2})){2,}$", s):
+        return True
     if len(parts) >= 3 and all(re.fullmatch(r"[A-Za-z0-9]{1,5}", p) for p in parts):
         if not all(p.isdigit() for p in parts):
             return True
-    patterns = [
-        r"^\d{2}(?:/\d{2})+$",
-        r"^\d{2}/\d{2}/\d[A-Za-z]/\d{2}$",
-        r"^[A-Za-z]\d/\d{2}/[A-Za-z]\d$",
-        r"^\d(?:/[A-Za-z]\d){4,}$",
-        r"^[A-Za-z]\d(?:/[A-Za-z]?\d){2,}$",
-    ]
-    return any(re.match(p, s) for p in patterns)
+    return False
 
 
 def prune_subcodes(codes: list[str]) -> list[str]:
@@ -95,34 +104,50 @@ def prune_subcodes(codes: list[str]) -> list[str]:
     return sorted(keep, key=lambda x: (-len(x), x))
 
 
-def extract_pairs(lines: list[str]) -> list[tuple[str, str]]:
-    raw: list[tuple[str, str, str]] = []  # dash, slash, title
-    prev = ""
-    for s in lines:
-        if is_config_code_line(s):
-            slash = s
-            dash = s.replace("/", "-")
-            title = prev.strip() if prev else "Configuration"
-            if title.upper().startswith("POPULAR"):
-                title = "Configuration"
-            raw.append((dash, slash, title))
-        if not is_config_code_line(s):
-            prev = s
-    slash_list = [b for _, b, __ in raw]
-    good_slash = set(prune_subcodes(slash_list))
-    return [(a, c) for a, b, c in raw if b in good_slash]
+def pdf_codes_for_style(key: str, model: str, token: str) -> list[str]:
+    doc = load_pdf(key, model, token)
+    try:
+        lines = popular_lines(doc)
+        slash = [s for s in lines if strict_code_line(s)]
+        good = prune_subcodes(slash)
+        return [c.replace("/", "-") for c in good]
+    finally:
+        doc.close()
 
 
 def js_escape(s: str) -> str:
     return s.replace("\\", "\\\\").replace('"', '\\"')
 
 
-def build_js(registry: dict) -> str:
+def merge_catalog(registry: dict) -> None:
+    cat = json.loads(OUT_CAT.read_text(encoding="utf-8"))
+    pall = cat.get("palliser") or {}
+    defaults = {
+        "popularColumnSlackPt": 12,
+        "popularCropPadPt": 10,
+        "popularImageMinAreaPt2": 4200,
+    }
+    for row in registry["styles"]:
+        key = row["key"]
+        entry = {
+            "model": str(row["model"]),
+            "style": row["token"],
+            "pdf": f"{key}.pdf",
+            **defaults,
+        }
+        if key == "Harlo":
+            entry["exportCodeAliases"] = {"88-81-11-81-04": "67/A2/10/09/10/66"}
+        pall[key] = entry
+    cat["palliser"] = pall
+    OUT_CAT.write_text(json.dumps(cat, indent=2) + "\n", encoding="utf-8")
+
+
+def build_js(registry: dict, plp: dict[str, list[str]]) -> str:
     lines_out: list[str] = []
     lines_out.append("/**")
     lines_out.append(" * Sectional configuration diagram cards — AUTO-GENERATED by")
     lines_out.append(" *   py -3 tools/sectional-diagrams/build_sectional_configs_from_registry.py")
-    lines_out.append(" * Source: tools/sectional-diagrams/sectional_styles_registry.json + Palliser PDFs.")
+    lines_out.append(" * Source: sectional_styles_registry.json + Palliser PDFs + mccabe_plp_codes.json")
     lines_out.append(" */")
     lines_out.append("(function () {")
     lines_out.append(
@@ -145,27 +170,28 @@ def build_js(registry: dict) -> str:
         key = row["key"]
         model = row["model"]
         token = row["token"]
-        print("SCAN", key, model, token, flush=True)
-        doc = load_pdf(key, model, token)
-        try:
-            plines = popular_page_lines(doc)
-            pairs = extract_pairs(plines)
-            if not pairs:
-                print("  WARN: no codes", key, flush=True)
-                continue
-        finally:
-            doc.close()
+        print("BUILD", key, flush=True)
+        from_pdf = pdf_codes_for_style(key, model, token)
+        from_store = [c.lower().replace("/", "-") for c in plp.get(key, [])]
+        merged: dict[str, str] = {}
+        for c in from_pdf + from_store:
+            k = c.lower().replace("/", "-")
+            merged[k] = c if "/" not in c else c.replace("/", "-")
+        codes_sorted = sorted(merged.values(), key=lambda x: (len(x), x.lower()))
+        if not codes_sorted:
+            print("  WARN empty", key, flush=True)
+            continue
 
         lines_out.append(f"    {key}: [")
-        for code, title in pairs:
-            fn = f"{key}-SC-{code}.png"
+        for code in codes_sorted:
+            dash = code.replace("/", "-")
             lines_out.append("      {")
-            lines_out.append(f'        code: "{js_escape(code)}",')
-            lines_out.append(f'        label: "{js_escape(code)}",')
-            lines_out.append(f'        configurationTitle: "{js_escape(title)}",')
+            lines_out.append(f'        code: "{js_escape(dash)}",')
+            lines_out.append(f'        label: "{js_escape(dash)}",')
+            lines_out.append(f'        configurationTitle: "Popular configuration",')
             lines_out.append('        description: "",')
             lines_out.append("        priceDiff: 0,")
-            lines_out.append(f'        image: img("{js_escape(fn)}"),')
+            lines_out.append(f'        image: img("{js_escape(key)}-SC-{js_escape(dash)}.png"),')
             lines_out.append("      },")
         lines_out.append("    ],")
 
@@ -173,37 +199,17 @@ def build_js(registry: dict) -> str:
     lines_out.append("")
     lines_out.append("  window.SECTIONAL_CONFIGS = window.MTL_SECTIONAL_CONFIGS;")
     lines_out.append("")
-    lines_out.append('  console.log("sectional-configs", "registry-auto", window.MTL_SECTIONAL_CONFIGS);')
+    lines_out.append('  console.log("sectional-configs", "registry-merge-v2", window.MTL_SECTIONAL_CONFIGS);')
     lines_out.append("})();")
     return "\n".join(lines_out) + "\n"
 
 
-def merge_catalog(registry: dict) -> None:
-    cat = json.loads(OUT_CAT.read_text(encoding="utf-8"))
-    pall = cat.get("palliser") or {}
-    defaults = {
-        "popularColumnSlackPt": 12,
-        "popularCropPadPt": 10,
-        "popularImageMinAreaPt2": 4200,
-    }
-    for row in registry["styles"]:
-        key = row["key"]
-        entry = {
-            "model": str(row["model"]),
-            "style": row["token"],
-            "pdf": f"{key}.pdf",
-            **defaults,
-        }
-        pall[key] = entry
-    cat["palliser"] = pall
-    OUT_CAT.write_text(json.dumps(cat, indent=2) + "\n", encoding="utf-8")
-
-
 def main() -> int:
     reg = json.loads(REG.read_text(encoding="utf-8"))
-    OUT_JS.write_text(build_js(reg), encoding="utf-8")
+    plp = json.loads(PLP.read_text(encoding="utf-8")) if PLP.is_file() else {}
+    OUT_JS.write_text(build_js(reg, plp), encoding="utf-8")
     merge_catalog(reg)
-    print("Wrote", OUT_JS, "and", OUT_CAT)
+    print("Wrote", OUT_JS, "and merged catalog palliser map")
     return 0
 
 
