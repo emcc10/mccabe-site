@@ -152,7 +152,10 @@
       "pdf": "Harlo.pdf",
       "popularColumnSlackPt": 12,
       "popularCropPadPt": 10,
-      "popularImageMinAreaPt2": 4200
+      "popularImageMinAreaPt2": 4200,
+      "exportCodeAliases": {
+        "88-81-11-81-04": "67/A2/10/09/10/66"
+      }
     },
     "Asher": {
       "model": "41065",

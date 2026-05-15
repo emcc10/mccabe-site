@@ -539,7 +539,12 @@ def cmd_publish(
             for code in codes:
                 if not str(code).strip():
                     continue
-                pages = find_pages_for_code(doc, str(code).strip())
+                raw_code = str(code).strip()
+                aliases = info.get("exportCodeAliases") or {}
+                lookup = str(
+                    aliases.get(raw_code) or aliases.get(raw_code.replace("-", "/")) or raw_code
+                ).strip()
+                pages = find_pages_for_code(doc, lookup)
                 if not pages:
                     print(
                         f"FAIL {style} config “{code}”: no PDF page mentions this code ({np} pages). "
@@ -557,7 +562,7 @@ def cmd_publish(
 
                 clip: fitz.Rect | None = None
                 if grid_clip and is_popular_configurations_page(pg):
-                    anch = find_label_anchor_rect(pg, str(code).strip())
+                    anch = find_label_anchor_rect(pg, lookup)
                     if anch:
                         ck = popular_clip_kwargs_from_catalog(cat, info)
                         clip = popular_configuration_block_clip(pg, anch, **ck)
