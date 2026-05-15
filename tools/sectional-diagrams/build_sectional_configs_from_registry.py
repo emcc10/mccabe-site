@@ -72,6 +72,9 @@ def is_config_code_line(s: str) -> bool:
         a, b = int(parts[0]), int(parts[1])
         if 50 <= a <= 220 and 50 <= b <= 220:
             return False
+    if len(parts) >= 3 and all(re.fullmatch(r"[A-Za-z0-9]{1,5}", p) for p in parts):
+        if not all(p.isdigit() for p in parts):
+            return True
     patterns = [
         r"^\d{2}(?:/\d{2})+$",
         r"^\d{2}/\d{2}/\d[A-Za-z]/\d{2}$",
