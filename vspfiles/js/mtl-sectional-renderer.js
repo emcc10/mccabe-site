@@ -28,7 +28,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260516-diagram-lightbox-only-v1";
+  window.MTL_RENDERER_BUILD = "sectional-20260521-productkey-from-sku-v1";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -1975,6 +1975,76 @@
     return "/v/vspfiles/sectional-diagrams/" + prefix + "-" + cod + ".png";
   }
 
+  function mtlEscapeRegExp(s) {
+    return String(s || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  /**
+   * Resolve Palliser / sectional style for diagram + JSON rows.
+   * Volusion sectional SKUs are typically "{Style}-SC-{…}" — that wins over stray mentions of other lines
+   * in related products, nav, or the first N characters of body text.
+   */
+  function resolveSectionalProductStyleKey(pcVal, allConfigs) {
+    var cfg = allConfigs && typeof allConfigs === "object" ? allConfigs : {};
+    var pc = String(pcVal || "").trim();
+    var m = pc.match(/^([A-Za-z][A-Za-z0-9]*)-SC(?:-|$)/i);
+    if (m && m[1]) {
+      var fromCode = styleSegmentToPascal(m[1]);
+      if (fromCode) {
+        sectionalLog("sectional productKey from ProductCode", fromCode);
+        return fromCode;
+      }
+    }
+    var keys = Object.keys(cfg).slice();
+    keys.sort(function (a, b) {
+      return b.length - a.length;
+    });
+    var nmEl =
+      document.querySelector("#v65-product-parent [itemprop='name']") ||
+      document.querySelector('[itemprop="name"]');
+    var nameT = nmEl ? String(nmEl.textContent || "") : "";
+    var h1el = document.querySelector("#v65-product-parent h1") || document.querySelector("h1");
+    var h1t = h1el ? String(h1el.textContent || "") : "";
+    var identityHay = (
+      String(location.pathname || "") +
+      " " +
+      String(document.title || "") +
+      " " +
+      nameT +
+      " " +
+      h1t +
+      " " +
+      pc
+    )
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+    var ki;
+    for (ki = 0; ki < keys.length; ki++) {
+      var key = keys[ki];
+      var rx = new RegExp("\\b" + mtlEscapeRegExp(String(key).toLowerCase()) + "\\b", "i");
+      if (rx.test(identityHay)) {
+        sectionalLog("sectional productKey from identity text", key);
+        return key;
+      }
+    }
+    var pathTitlePc = (
+      String(location.pathname || "") +
+      " " +
+      String(document.title || "") +
+      " " +
+      pc
+    ).toLowerCase();
+    if (/\baloira\b/i.test(pathTitlePc) && cfg.Alula) {
+      sectionalLog("sectional productKey alias: Aloira → Alula (path/title/pc only)");
+      return "Alula";
+    }
+    if (/\baloira\b/i.test(identityHay) && cfg.Alula) {
+      sectionalLog("sectional productKey alias: Aloira → Alula (identity)");
+      return "Alula";
+    }
+    return "";
+  }
+
   function refreshProductPriceLabel() {
     var sum = document.getElementById("mtl-product-summary");
     if (!sum) return;
@@ -3026,33 +3096,10 @@
     var allConfigs = window.MTL_SECTIONAL_CONFIGS || {};
     sectionalLog("sectional configs keys", Object.keys(allConfigs));
 
-    var pageText = [
-      location.pathname,
-      document.title,
-      document.querySelector("h1") ? document.querySelector("h1").textContent : "",
-      document.body ? document.body.innerText.slice(0, 3000) : "",
-    ]
-      .join(" ")
-      .toLowerCase();
-
     var pcInput = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
     var pcVal = pcInput ? String(pcInput.value || "").trim() : "";
-    var pcLower = pcVal.toLowerCase();
 
-    var keysList = Object.keys(allConfigs);
-    var productKey = keysList.find(function (key) {
-      return pageText.indexOf(key.toLowerCase()) !== -1;
-    });
-    if (!productKey && pcLower) {
-      productKey = keysList.find(function (key) {
-        return pcLower.indexOf(key.toLowerCase()) !== -1;
-      });
-    }
-    /* Storefront may use “Aloira” naming while Palliser / configs use Alula (77427 line). */
-    if (!productKey && /\baloira\b/i.test(pageText + " " + pcLower) && allConfigs.Alula) {
-      productKey = "Alula";
-      sectionalLog('sectional productKey alias: Aloira page → Alula configs');
-    }
+    var productKey = resolveSectionalProductStyleKey(pcVal, allConfigs);
 
     var jsonFromKey = productKey ? allConfigs[productKey] : [];
     if (!Array.isArray(jsonFromKey)) jsonFromKey = [];
