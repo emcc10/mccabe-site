@@ -3,9 +3,10 @@ const BOARD_NEW_VALUE = '__create_new_board__';
 
 /** Production store — used for My Boards link + login detection. */
 const MCCABES_STORE_ORIGIN = 'https://www.mccabestheaterandliving.com';
-// TODO: point to the live inspiration-board URL when it ships (account area for now).
-const MCCABES_MY_BOARDS_PATH = '/myaccount.asp';
+// Site page customers use (needs deploy to /v/vspfiles/).
+const MCCABES_MY_BOARDS_PATH = '/v/vspfiles/my-boards.html';
 const MCCABES_LOGIN_PATH = '/login.asp';
+const MCCABES_BOARD_SAVE_URL = `${MCCABES_STORE_ORIGIN}/v/vspfiles/boards/save.php`;
 
 function mccabesAbsoluteUrl(path) {
   return `${MCCABES_STORE_ORIGIN}${path}`;
@@ -154,12 +155,74 @@ async function refreshOnlineBoardsUi() {
 }
 
 /**
- * Later: ship saved items to a signed-in McCabe's account / API.
- * @param {object} item
+ * POST the saved item using a normal mccabes.com tab so session cookies attach (popup cannot send them cross-origin).
+ * @returns {Promise<{ok: boolean, reason?: string, status?: number}>}
  */
 async function syncToMccabesAccount(item) {
-  void item;
-  // TODO: Implement backend sync once McCabe's account + API are available.
+  if (!chrome.scripting?.executeScript || !chrome.tabs?.query) {
+    return { ok: false, reason: 'missing_api' };
+  }
+
+  let tabs = [];
+  try {
+    tabs = await chrome.tabs.query({
+      url: ['https://www.mccabestheaterandliving.com/*', 'https://mccabestheaterandliving.com/*']
+    });
+  } catch (_) {
+    return { ok: false, reason: 'tab_query_failed' };
+  }
+
+  if (!tabs.length) {
+    return { ok: false, reason: 'no_store_tab' };
+  }
+
+  const ordered = [...tabs.filter((t) => t.active), ...tabs.filter((t) => !t.active)];
+  const endpoint = MCCABES_BOARD_SAVE_URL;
+
+  for (const tab of ordered.slice(0, 8)) {
+    if (tab.id == null || tab.discarded) continue;
+    try {
+      const injected = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: async (payloadItem, url) => {
+          try {
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ item: payloadItem })
+            });
+            const text = await res.text();
+            let body = {};
+            try {
+              body = JSON.parse(text);
+            } catch (_) {
+              body = {};
+            }
+            return { status: res.status, body };
+          } catch (e) {
+            return { status: 0, body: {}, error: String(e) };
+          }
+        },
+        args: [item, endpoint]
+      });
+      const r = injected?.[0]?.result;
+      if (!r) continue;
+      if (r.status === 200 && r.body && r.body.ok) {
+        return { ok: true, status: 200 };
+      }
+      if (r.status === 401) {
+        return { ok: false, reason: 'sign_in_required', status: 401 };
+      }
+      if (r.status >= 400) {
+        return { ok: false, reason: 'server_error', status: r.status };
+      }
+    } catch (_) {
+      //
+    }
+  }
+
+  return { ok: false, reason: 'sync_failed' };
 }
 
 function setStatus(text, asError = false) {
@@ -376,17 +439,30 @@ async function init() {
       }
       next.items.unshift(item);
       await persistState(next);
-      await syncToMccabesAccount(item);
+      const syncRes = await syncToMccabesAccount(item);
       populateBoardSelect(next.boards);
       boardSelect.value = boardName;
       newBoardName.value = '';
       toggleNewBoardRow();
-      const online = await isLoggedInToMccabesStore();
-      setStatus(
-        online
-          ? 'Saved locally. Open My Boards on mccabes.com to review in your account.'
-          : "Saved on this device. Sign in to McCabe's online, then use My Boards above."
-      );
+
+      if (syncRes.ok) {
+        setStatus("Saved on this device and to your McCabe's account. Open My Boards on mccabes.com.");
+      } else if (syncRes.reason === 'no_store_tab') {
+        setStatus(
+          "Saved locally. Open mccabes.com in a Chrome tab while signed in, then save again to add this item to your account."
+        );
+      } else if (syncRes.reason === 'sign_in_required') {
+        setStatus(
+          "Saved locally. Sign in on mccabes.com—then save again with a store tab open to sync to My Boards."
+        );
+      } else if (syncRes.reason === 'server_error') {
+        setStatus('Saved locally. Account sync was rejected—check that /v/vspfiles/boards/ is deployed.', true);
+      } else {
+        setStatus(
+          'Saved locally. Could not sync to your account yet (try a mccabes.com tab signed in).',
+          true
+        );
+      }
     } catch (e) {
       setStatus('Save failed. Please try again.', true);
       void e;

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Boards — McCabe's Theater &amp; Living</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-page.css" />
+</head>
+<body>
+  <main class="mc-boards">
+    <header class="mc-boards__masthead">
+      <h1 class="mc-boards__title">My boards</h1>
+      <p class="mc-boards__lede">Ideas you saved with the &ldquo;Save to McCabe&rsquo;s Board&rdquo; Chrome extension—only visible when you are signed in here.</p>
+    </header>
+
+    <section id="mc-boards-msg" class="mc-boards__msg" aria-live="polite"></section>
+
+    <nav class="mc-boards__toolbar">
+      <a class="mc-boards__link" href="/">Continue shopping</a>
+      <span class="mc-boards__dot">·</span>
+      <a class="mc-boards__link" href="/login.asp" id="mc-boards-signin">Sign in</a>
+    </nav>
+
+    <div id="mc-boards-root" class="mc-boards__root"></div>
+  </main>
+
+  <script src="/v/vspfiles/boards/my-boards-page.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #4b5563;
+  background: #fff;
+}
+
+.mc-boards {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 36px 22px 56px;
+}
+
+.mc-boards__masthead {
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.mc-boards__title {
+  margin: 0 0 8px;
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #1f2937;
+}
+
+.mc-boards__lede {
+  margin: 0;
+  max-width: 52ch;
+  font-size: 0.95rem;
+  color: #7c8794;
+}
+
+.mc-boards__msg {
+  min-height: 1.25em;
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+}
+
+.mc-boards__msg.mc-boards__msg--err {
+  color: #b45309;
+}
+
+.mc-boards__toolbar {
+  margin-bottom: 28px;
+  font-size: 0.88rem;
+}
+
+.mc-boards__link {
+  color: #6b7280;
+}
+
+.mc-boards__link:hover {
+  color: #111827;
+}
+
+.mc-boards__dot {
+  margin: 0 6px;
+  color: #d1d5db;
+}
+
+.mc-boards__group {
+  margin-bottom: 32px;
+}
+
+.mc-boards__group-title {
+  margin: 0 0 12px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.45rem;
+  color: #374151;
+}
+
+.mc-boards__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 14px;
+}
+
+.mc-boards__card {
+  border: 1px solid #e5e5e5;
+  padding: 12px;
+  background: #fafafa;
+}
+
+.mc-boards__card img {
+  display: none;
+  width: 100%;
+  max-height: 140px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid #ececec;
+  margin-bottom: 8px;
+}
+
+.mc-boards__card img.mc-boards__img--on {
+  display: block;
+}
+
+.mc-boards__card-title {
+  margin: 0 0 4px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.mc-boards__meta {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  color: #6b7280;
+  word-break: break-word;
+}
+
+.mc-boards__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.mc-boards__btn {
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 6px 11px;
+  border-radius: 2px;
+  border: 1px solid #c8c8c8;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+}
+
+.mc-boards__btn:hover {
+  border-color: #9ca3af;
+}
+
+.mc-boards__btn--danger:hover {
+  border-color: #dc2626;
+  color: #b91c1c;
+}
+
+.mc-boards__empty {
+  padding: 40px 16px;
+  text-align: center;
+  border: 1px dashed #d4d4d4;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
