@@ -267,8 +267,24 @@ def _rects_overlap_x(a: fitz.Rect, b: fitz.Rect) -> bool:
     return max(a.x0, b.x0) < min(a.x1, b.x1)
 
 
-def iter_text_span_rects(page: fitz.Page) -> list[fitz.Rect]:
-    out: list[fitz.Rect] = []
+def _span_noise(t: str) -> bool:
+    s = (t or "").strip()
+    if not s:
+        return True
+    u = s.upper()
+    if "POPULAR" in u:
+        return True
+    if s.startswith("*") or "Select pieces from this collection" in s:
+        return True
+    if "Dimensions shown as Width x Depth x Height" in s:
+        return True
+    if "Please allow up to" in s and "centimeter" in s.lower():
+        return True
+    return False
+
+
+def iter_text_spans_with_text(page: fitz.Page) -> list[tuple[fitz.Rect, str]]:
+    out: list[tuple[fitz.Rect, str]] = []
     try:
         d = page.get_text("dict")
     except Exception:
@@ -281,7 +297,7 @@ def iter_text_span_rects(page: fitz.Page) -> list[fitz.Rect]:
                 bb = sp.get("bbox")
                 if not bb:
                     continue
-                out.append(fitz.Rect(bb))
+                out.append((fitz.Rect(bb), str(sp.get("text") or "")))
     return out
 
 
@@ -314,14 +330,14 @@ def popular_configuration_block_clip(
     anchor: fitz.Rect,
     *,
     mid_y_ratio: float = 0.5,
-    column_slack_pt: float = 34.0,
-    pad_pt: float = 26.0,
-    frame_trim_pt: float = 3.0,
+    column_slack_pt: float = 22.0,
+    pad_pt: float = 12.0,
+    frame_trim_pt: float = 2.0,
 ) -> fitz.Rect | None:
     """
     2×2 Popular grid: column by page centerline; row by anchor vs mid-band.
-    Union text spans + embedded diagram images in that cell (sofa render + title + code + dimensions).
-    Inflate so chaise/bumper ends and dimension lines are not clipped.
+    Union only this cell's diagram image + its title/code/dimension spans (excludes section header,
+    footnotes, and the neighbor cell — no full-column stretch).
     """
     pr = page.rect
     vb = popular_grid_vertical_bounds(page)
@@ -350,12 +366,13 @@ def popular_configuration_block_clip(
         y1 = y_bot - 2.0
 
     cell = fitz.Rect(x0, y0, x1, y1)
-    u = fitz.Rect(cell)
-
     col_lo = cell.x0 - column_slack_pt
     col_hi = cell.x1 + column_slack_pt
 
-    for r in iter_text_span_rects(page):
+    text_u: fitz.Rect | None = None
+    for r, raw in iter_text_spans_with_text(page):
+        if _span_noise(raw):
+            continue
         cy = (r.y0 + r.y1) * 0.5
         if cy < y_top - 8.0 or cy > y_bot + 8.0:
             continue
@@ -370,27 +387,23 @@ def popular_configuration_block_clip(
         else:
             if r.y0 > y_bot + 12.0 or r.y1 < mid_y - 28.0:
                 continue
-        u |= r
+        text_u = r if text_u is None else (text_u | r)
 
     img_u = union_popular_diagram_images_in_cell(page, cell)
+
+    u: fitz.Rect | None = None
     if img_u is not None:
-        u |= img_u
-
-    # Ensure vector diagram band above titles is included (text often starts at title baseline).
-    if anchor.y0 < mid_y:
-        u.y0 = min(u.y0, y_top + 4.0)
+        u = fitz.Rect(img_u)
+    if text_u is not None:
+        u = text_u if u is None else (u | text_u)
+    if u is None:
+        u = fitz.Rect(anchor)
     else:
-        u.y0 = min(u.y0, mid_y + 8.0)
+        u |= anchor
 
-    # Widen to full column so vector sectional art (often wider than text spans) is not clipped.
-    u = fitz.Rect(
-        min(u.x0, cell.x0 + 2.0),
-        u.y0,
-        max(u.x1, cell.x1 - 2.0),
-        u.y1,
-    )
-
-    u.y1 = max(u.y1, min(y_bot - 2.0, anchor.y1 + 24.0))
+    if img_u is not None:
+        u.y0 = min(u.y0, img_u.y0 - 6.0)
+    u.y1 = min(y_bot - 3.0, max(u.y1, anchor.y1 + 14.0))
 
     u = inflate_rect(u, pad_pt)
     u = u & pr

@@ -1,10 +1,10 @@
 {
-  "_comment": "dpi>=300 for sharp Popular diagrams. popularCropPadPt / popularFrameTrimPt tune generous crop vs outer PDF rule. Re-export after changes: python export_sectional_diagrams.py --publish",
+  "_comment": "Tighter Popular crops: popularCropPadPt ~12, popularColumnSlackPt ~22. Re-export: python export_sectional_diagrams.py --publish",
   "dpi": 300,
   "popularMidYRatio": 0.5,
-  "popularColumnSlackPt": 36,
-  "popularCropPadPt": 28,
-  "popularFrameTrimPt": 3,
+  "popularColumnSlackPt": 22,
+  "popularCropPadPt": 12,
+  "popularFrameTrimPt": 2,
   "clipPopularConfigurationsGrid": true,
   "configsJs": "../../vspfiles/js/sectional-configs.js",
   "palliser": {

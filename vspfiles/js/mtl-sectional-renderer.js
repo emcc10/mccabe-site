@@ -5,7 +5,7 @@
 (function () {
   "use strict";
 
-  var IMG_V = "palliser-popular-300dpi-20260515-imgunion";
+  var IMG_V = "palliser-popular-tightcrop-20260515";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -28,7 +28,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260515-palliser-popular-imgunion-v1";
+  window.MTL_RENDERER_BUILD = "sectional-20260515-tightcrop-diagram-popup-v1";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -2205,7 +2205,7 @@
           var src = String(im.getAttribute("src") || im.src || "").trim();
           if (!src || src.indexOf("data:image/svg+xml") === 0) return;
           ev.preventDefault();
-          openSectionalDiagramLightbox(src, im.alt || "Configuration diagram");
+          openSectionalDiagramInNewWindow(src, im.alt || "Configuration diagram");
         });
         fig.dataset.mtlDblDiagBound = "1";
       }
@@ -2219,7 +2219,7 @@
           if (!im) return;
           var src = String(im.getAttribute("src") || im.src || "").trim();
           if (!src || src.indexOf("data:image/svg+xml") === 0) return;
-          openSectionalDiagramLightbox(src, im.alt || "Configuration diagram");
+          openSectionalDiagramInNewWindow(src, im.alt || "Configuration diagram");
         });
         zoomBtn.dataset.mtlZoomBound = "1";
       }
@@ -2330,6 +2330,53 @@
       },
       true
     );
+  }
+
+  function openSectionalDiagramInNewWindow(fullSrc, altText) {
+    if (!fullSrc || String(fullSrc).indexOf("data:image/svg+xml") === 0) return;
+    var t = String(altText || "Configuration diagram");
+    var sw = Math.min(1200, Math.max(640, (window.screen && window.screen.availWidth) ? window.screen.availWidth - 48 : 1000));
+    var sh = Math.min(920, Math.max(480, (window.screen && window.screen.availHeight) ? window.screen.availHeight - 80 : 800));
+    var specs =
+      "noopener,noreferrer,width=" +
+      sw +
+      ",height=" +
+      sh +
+      ",left=60,top=40,scrollbars=yes,resizable=yes";
+    var w = null;
+    try {
+      w = window.open("", "mtlSectionalDiagram", specs);
+    } catch (eOpen) {}
+    if (!w) {
+      openSectionalDiagramLightbox(fullSrc, altText);
+      return;
+    }
+    try {
+      w.document.title = t;
+      var st = w.document.createElement("style");
+      st.textContent =
+        "html,body{margin:0;background:#1a1a1a;color:#eee;font-family:system-ui,sans-serif}" +
+        ".wrap{padding:16px;text-align:center}" +
+        "img{max-width:100%;max-height:calc(100vh - 56px);width:auto;height:auto;object-fit:contain;vertical-align:middle}" +
+        ".cap{margin:0 0 12px;font-size:14px;line-height:1.35}";
+      w.document.head.appendChild(st);
+      var div = w.document.createElement("div");
+      div.className = "wrap";
+      var p = w.document.createElement("p");
+      p.className = "cap";
+      p.textContent = t;
+      var im = w.document.createElement("img");
+      im.src = fullSrc;
+      im.alt = t;
+      div.appendChild(p);
+      div.appendChild(im);
+      w.document.body.appendChild(div);
+    } catch (eDom) {
+      try {
+        w.close();
+      } catch (eClose) {}
+      openSectionalDiagramLightbox(fullSrc, altText);
+    }
   }
 
   function openSectionalDiagramLightbox(fullSrc, altText) {
@@ -3256,9 +3303,9 @@
         zoomBtn.className = "mtl-sectional-diagram-zoom";
         zoomBtn.setAttribute(
           "aria-label",
-          "Enlarge diagram. Use the diagram area to choose this configuration and refresh price."
+          "Open enlarged diagram in a new window. Click the picture area to choose this configuration and refresh price."
         );
-        zoomBtn.setAttribute("title", "Enlarge diagram (double-click the image)");
+        zoomBtn.setAttribute("title", "Open diagram in new window (double-click image)");
         zoomBtn.innerHTML =
           '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>';
         figure.appendChild(zoomBtn);
