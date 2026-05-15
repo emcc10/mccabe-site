@@ -107,12 +107,46 @@ window.MTL_SECTIONAL_CONFIGS = {
       image: "/v/vspfiles/sectional-diagrams/Atticus-SC-07-11-08.png",
     },
   ],
+  Colebrook: [
+    {
+      code: "07-15",
+      label: "07-15",
+      configurationTitle: "3-Seat Chaise Sectional",
+      description: "",
+      priceDiff: 0,
+      image: "/v/vspfiles/sectional-diagrams/Colebrook-SC-07-15.png",
+    },
+    {
+      code: "07-09-19",
+      label: "07-09-19",
+      configurationTitle: "4-Seat Bumper Sectional",
+      description: "",
+      priceDiff: 0,
+      image: "/v/vspfiles/sectional-diagrams/Colebrook-SC-07-09-19.png",
+    },
+    {
+      code: "07-09-08",
+      label: "07-09-08",
+      configurationTitle: "4-Seat Corner Curve Sectional",
+      description: "",
+      priceDiff: 0,
+      image: "/v/vspfiles/sectional-diagrams/Colebrook-SC-07-09-08.png",
+    },
+    {
+      code: "12-40",
+      label: "12-40",
+      configurationTitle: "5-Seat L-Sectional",
+      description: "",
+      priceDiff: 0,
+      image: "/v/vspfiles/sectional-diagrams/Colebrook-SC-12-40.png",
+    },
+  ],
 };
 
 window.SECTIONAL_CONFIGS = window.MTL_SECTIONAL_CONFIGS;
 
 console.log(
   "sectional-configs",
-  "20260516alula-diagrams",
+  "20260521colebrook-diagrams",
   window.MTL_SECTIONAL_CONFIGS
 );

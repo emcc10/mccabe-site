@@ -1,16 +1,25 @@
 {
-  "_comment": "Tighter Popular crops: popularCropPadPt ~12, popularColumnSlackPt ~22; popularBottomRightExtraTrimPt trims bottom edge of bottom-right grid cell only. Re-export: python export_sectional_diagrams.py --publish",
+  "_comment": "Popular crop tuning: popularColumnSlackPt, popularCropPadPt, popularImageMinAreaPt2 (min embedded image area in pt² for diagram union). Per-style overrides live on palliser.{Style}. Re-export: py -3 export_sectional_diagrams.py --publish",
   "dpi": 300,
   "popularMidYRatio": 0.5,
   "popularColumnSlackPt": 22,
   "popularCropPadPt": 12,
   "popularFrameTrimPt": 2,
   "popularBottomRightExtraTrimPt": 18,
+  "popularImageMinAreaPt2": 8000,
   "clipPopularConfigurationsGrid": true,
   "configsJs": "../../vspfiles/js/sectional-configs.js",
   "palliser": {
     "Alula": { "model": "77427", "style": "ALULA", "pdf": "Alula.pdf" },
     "Acacia": { "model": "41080", "style": "ACACIA", "pdf": "Acacia.pdf" },
-    "Atticus": { "model": "77325", "style": "ATTICUS", "pdf": "Atticus.pdf" }
+    "Atticus": { "model": "77325", "style": "ATTICUS", "pdf": "Atticus.pdf" },
+    "Colebrook": {
+      "model": "77267",
+      "style": "COLEBROOK",
+      "pdf": "Colebrook.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    }
   }
 }

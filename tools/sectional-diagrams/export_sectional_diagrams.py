@@ -429,16 +429,6 @@ def popular_configuration_block_clip(
         u.y0 = min(u.y0, img_u.y0 - 6.0)
     u.y1 = min(y_bot - 3.0, max(u.y1, anchor.y1 + 14.0))
 
-    # Some PDFs leave a wide empty margin inside the Popular cell to the right of the art.
-    # If the union is much wider than bitmap + anchor + captured text, pull x1 in.
-    if img_u is not None and u is not None:
-        rightmost = max(img_u.x1, anchor.x1)
-        if text_u is not None:
-            rightmost = max(rightmost, text_u.x1)
-        dead = float(u.x1 - rightmost)
-        if dead > 42.0:
-            u.x1 = min(u.x1, rightmost + 14.0)
-
     right_col = (anchor.x0 + anchor.x1) * 0.5 >= mid_x
     bottom_row = anchor.y0 >= mid_y
     if right_col and bottom_row and bottom_right_extra_trim_pt > 0.0:
@@ -475,6 +465,29 @@ def rasterize_page_from_doc(
     pix = page.get_pixmap(matrix=mat, clip=tgt, alpha=False)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     pix.save(out_path.as_posix())
+
+
+def popular_clip_kwargs_from_catalog(cat: dict, style_info: dict) -> dict:
+    """Merge global catalog.json Popular-crop keys with optional per-style overrides on palliser.{Style}."""
+    inf = style_info if isinstance(style_info, dict) else {}
+
+    def gv(key: str, dflt: float) -> float:
+        v = inf.get(key)
+        if v is not None and str(v).strip() != "":
+            return float(v)
+        v2 = cat.get(key)
+        if v2 is not None and str(v2).strip() != "":
+            return float(v2)
+        return float(dflt)
+
+    return {
+        "mid_y_ratio": gv("popularMidYRatio", 0.5),
+        "column_slack_pt": gv("popularColumnSlackPt", 22.0),
+        "pad_pt": gv("popularCropPadPt", 12.0),
+        "frame_trim_pt": gv("popularFrameTrimPt", 2.0),
+        "bottom_right_extra_trim_pt": gv("popularBottomRightExtraTrimPt", 18.0),
+        "min_image_area": gv("popularImageMinAreaPt2", 8000.0),
+    }
 
 
 def cmd_publish(
@@ -543,15 +556,8 @@ def cmd_publish(
                 if grid_clip and is_popular_configurations_page(pg):
                     anch = find_label_anchor_rect(pg, str(code).strip())
                     if anch:
-                        clip = popular_configuration_block_clip(
-                            pg,
-                            anch,
-                            mid_y_ratio=float(cat.get("popularMidYRatio") or 0.5),
-                            column_slack_pt=float(cat.get("popularColumnSlackPt") or 22.0),
-                            pad_pt=float(cat.get("popularCropPadPt") or 12.0),
-                            frame_trim_pt=float(cat.get("popularFrameTrimPt") or 2.0),
-                            bottom_right_extra_trim_pt=float(cat.get("popularBottomRightExtraTrimPt") or 18.0),
-                        )
+                        ck = popular_clip_kwargs_from_catalog(cat, info)
+                        clip = popular_configuration_block_clip(pg, anch, **ck)
                     if clip is None:
                         print(
                             f"Note {style} “{code}”: Popular page but could not derive block clip — using full page."
