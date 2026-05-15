@@ -25,9 +25,10 @@
   /** Full-screen diagram preview (one shared node on <body>). */
   var __mtlSectionalLbEl = null;
   var __mtlSectionalLbEscBound = false;
+  var __mtlSectionalDiagramDocClickBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260515-diagram-lightbox";
+  window.MTL_RENDERER_BUILD = "sectional-20260515-diagram-click-layout2";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -2317,36 +2318,48 @@
     }
   }
 
-  /** Click / Enter on figure opens full-size diagram; does not change configuration (stops propagation). */
+  /** Click / keyboard: full-size diagram via document capture (Volusion/accordion handlers won’t eat the event). */
   function bindSectionalDiagramFigureClicks() {
-    var sec = document.getElementById("mtl-sectional-configurations");
-    if (!sec) return;
-    var figs = sec.querySelectorAll(".mtl-sectional-figure");
-    Array.prototype.forEach.call(figs, function (fig) {
-      if (fig.dataset.mtlDiagramLbBound === "1") return;
-      fig.dataset.mtlDiagramLbBound = "1";
-      fig.setAttribute("role", "button");
-      fig.setAttribute("tabindex", "0");
-      var im0 = fig.querySelector("img.mtl-sectional-image");
-      var label0 = im0 && im0.alt ? im0.alt : "Configuration diagram";
-      fig.setAttribute("aria-label", "Enlarge diagram: " + label0);
+    if (__mtlSectionalDiagramDocClickBound) return;
+    __mtlSectionalDiagramDocClickBound = true;
 
-      fig.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
+    document.addEventListener(
+      "click",
+      function (e) {
+        var t = e.target;
+        if (!t || !t.closest) return;
+        var fig = t.closest("#mtl-sectional-configurations .mtl-sectional-figure");
+        if (!fig) return;
         var im = fig.querySelector("img.mtl-sectional-image");
         if (!im) return;
-        openSectionalDiagramLightbox(String(im.getAttribute("src") || im.src || "").trim(), im.alt || label0);
-      });
-      fig.addEventListener("keydown", function (e) {
+        var src = String(im.getAttribute("src") || im.src || "").trim();
+        if (!src || src.indexOf("data:image/svg+xml") === 0) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        openSectionalDiagramLightbox(src, im.alt || "Configuration diagram");
+      },
+      true
+    );
+
+    document.addEventListener(
+      "keydown",
+      function (e) {
         if (e.key !== "Enter" && e.key !== " ") return;
+        var ae = document.activeElement;
+        if (!ae || !ae.classList || !ae.classList.contains("mtl-sectional-figure")) return;
+        if (!document.getElementById("mtl-sectional-configurations") || !document.getElementById("mtl-sectional-configurations").contains(ae))
+          return;
+        var im = ae.querySelector("img.mtl-sectional-image");
+        if (!im) return;
+        var src = String(im.getAttribute("src") || im.src || "").trim();
+        if (!src || src.indexOf("data:image/svg+xml") === 0) return;
         e.preventDefault();
         e.stopPropagation();
-        var im = fig.querySelector("img.mtl-sectional-image");
-        if (!im) return;
-        openSectionalDiagramLightbox(String(im.getAttribute("src") || im.src || "").trim(), im.alt || label0);
-      });
-    });
+        openSectionalDiagramLightbox(src, im.alt || "Configuration diagram");
+      },
+      true
+    );
   }
 
   function ensureObservers() {
@@ -2904,6 +2917,10 @@
         mountPopularConfigurationsInAccordion(section);
         ensureProductSummary(section);
         try {
+          bindSectionalDiagramFigureClicks();
+          bindConfigurationCardClicks();
+        } catch (eBnd) {}
+        try {
           updateProductSummary();
         } catch (eUpd) {}
       }
@@ -3214,6 +3231,9 @@
           img.src = src.indexOf("?") === -1 ? src + "?v=" + IMG_V : src + "&v=" + IMG_V;
         }
         img.alt = cfg.configurationTitle || cfg.label || cfg.code || "Configuration";
+        figure.setAttribute("role", "button");
+        figure.setAttribute("tabindex", "0");
+        figure.setAttribute("aria-label", "Enlarge diagram: " + img.alt);
         figure.appendChild(img);
 
         var meta = document.createElement("div");
