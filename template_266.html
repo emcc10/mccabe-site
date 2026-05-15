@@ -12457,15 +12457,34 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       function normalizeOne(img, link) {
         if (!img) return;
 
+        function productSkuFromHref(href) {
+          var h = String(href || '');
+          var m =
+            h.match(/\/-p\/([^.\/?#]+)/i) ||
+            h.match(/\/product-p\/([^.\/?#]+)/i) ||
+            h.match(/[?&]ProductCode=([^&]+)/i) ||
+            h.match(/[?&]productcode=([^&]+)/i);
+          if (!m || !m[1]) return '';
+          var raw = String(m[1]);
+          try {
+            raw = decodeURIComponent(raw.replace(/\+/g, ' ')).trim();
+          } catch (eDec) {}
+          return raw.replace(/\.htm.*/i, '').toUpperCase();
+        }
+
         var src = img.getAttribute('src') || '';
         var dataSrc =
           img.getAttribute('data-src') ||
           img.getAttribute('datasrc') ||
-          (img.dataset && (img.dataset.src || img.dataset.original || img.dataset.lazySrc)) ||
+          (img.dataset && (img.dataset.src || img.dataset.original || img.dataset.lazySrc || img.dataset.lazy)) ||
           '';
         var dataOriginal = img.getAttribute('data-original') || '';
         var dataLazy = img.getAttribute('data-lazy') || '';
-        var chosen = (String(dataSrc || dataOriginal || dataLazy || src || '').trim());
+        var chosen = String(dataSrc || dataOriginal || dataLazy || src || '').trim();
+
+        if (/^(data:image|about:blank)/i.test(chosen)) {
+          chosen = '';
+        }
 
         if (!chosen) {
           var linkFb =
@@ -12481,24 +12500,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
         if (!chosen) return;
 
-        chosen = chosen
-          .replace(/^\s+|\s+$/g, '')
-          .replace(/^https?:\/\/[^/]+/i, '');
-
-        function productSkuFromHref(href) {
-          var h = String(href || '');
-          var m =
-            h.match(/\/-p\/([^.\/?#]+)/i) ||
-            h.match(/\/product-p\/([^.\/?#]+)/i) ||
-            h.match(/[?&]ProductCode=([^&]+)/i);
-          if (!m || !m[1]) return '';
-          var raw = String(m[1]);
-          try {
-            raw = decodeURIComponent(raw.replace(/\+/g, ' ')).trim();
-          } catch (eDec) {}
-          return raw.replace(/\.htm.*/i, '').toUpperCase();
-        }
-
+        chosen = chosen.replace(/^\s+|\s+$/g, '').replace(/^https?:\/\/[^/]+/i, '');
         if (
           /\/no[-_]?image|image[_-]?not[_-]?available|\/comingsoon|\/blank\.(gif|png|jpg)|^about:blank$/i.test(
             chosen
@@ -12511,7 +12513,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
             link ||
             (img.closest && img.closest('a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="], a[href*="productcode="]')) ||
             (td && td.querySelector && td.querySelector(
-              'a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="]'
+              'a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="], a[href*="productcode="]'
             )) ||
             (img.parentElement && img.parentElement.tagName === 'A' ? img.parentElement : null);
           if (linkEl) {
@@ -12551,6 +12553,10 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       var cards = scope.querySelectorAll(
         '.mc-related-carousel__viewport .v-product, ' +
         '.mc-related-carousel__viewport .v65-product-related-item, ' +
+        '#v65-product-related .v-product, ' +
+        '#v65-product-related .v65-product-related-item, ' +
+        '#related_products_content .v-product, ' +
+        '#related_products_content .v65-product-related-item, ' +
         '#relateditems .v-product, ' +
         '#relateditems .v65-product-related-item, ' +
         '#related-products .v-product, ' +
@@ -12571,7 +12577,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
             card.querySelector('.product_image img');
           if (!img) return;
           var link = card.querySelector(
-            'a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="]'
+            'a[href*="-p/"], a[href*="product-p/"], a[href*="ProductCode="], a[href*="productcode="]'
           );
           normalizeOne(img, link);
           try {
