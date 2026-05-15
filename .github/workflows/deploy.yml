@@ -5,9 +5,17 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      remote_vspfiles_path:
+        description: >-
+          Absolute SFTP path for the vspfiles tree (browser URL is usually /v/vspfiles/...).
+          If uploads succeed but the site never changes, try /v/vspfiles or ask Volusion where /v/ maps on SFTP.
+        required: true
+        default: "/vspfiles"
 
 jobs:
-  deploy:
+  genesis:
+    name: Genesis — Volusion full deploy
     runs-on: ubuntu-latest
 
     steps:
@@ -29,47 +37,41 @@ jobs:
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
 
-      - name: Deploy files to Volusion
+      - name: Write deploy marker (local)
         run: |
-          echo "deployed=$(date -u '+%Y-%m-%dT%H:%M:%SZ') commit=$GITHUB_SHA" > deploy-marker.txt
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222 <<'EOF' || true
-          set sftp:auto-confirm yes
-          set net:max-retries 2
-          set net:timeout 30
-          set cmd:fail-exit no
+          echo "deployed=$(date -u '+%Y-%m-%dT%H:%M:%SZ') commit=$GITHUB_SHA ref=$GITHUB_REF" > deploy-marker.txt
 
-          echo "Uploading deploy marker"
-          put deploy-marker.txt -o /vspfiles/js/deploy-marker.txt
-
-          echo "Uploading template to /template_266.html"
-          put template_266.html -o /template_266.html
-
-          echo "Uploading template to /v/template_266.html"
-          put template_266.html -o /v/template_266.html
-
-          echo "Uploading custom-safe.css"
-          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
-
-          echo "Uploading sectional-configs.js"
-          put vspfiles/js/sectional-configs.js -o /vspfiles/js/sectional-configs.js
-
-          echo "Uploading mtl-sectional-renderer.js"
-          put vspfiles/js/mtl-sectional-renderer.js -o /vspfiles/js/mtl-sectional-renderer.js
-
-          bye
-          EOF
+      - name: Mirror entire vspfiles/ to Volusion
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          REMOTE_VSPFILES: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.remote_vspfiles_path || '/vspfiles' }}
+        run: |
+          set -euo pipefail
+          echo "Remote vspfiles root: $REMOTE_VSPFILES"
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222 <<EOF
+          set sftp:auto-confirm yes
+          set net:max-retries 4
+          set net:timeout 120
+          set cmd:fail-exit yes
+          mirror -R -v --parallel=3 vspfiles "${REMOTE_VSPFILES}"
+          put deploy-marker.txt -o "${REMOTE_VSPFILES}/js/deploy-marker.txt"
+          put template_266.html -o /template_266.html
+          put template_266.html -o /v/template_266.html
+          bye
+          EOF
 
-      - name: Retry locked files (template + renderer JS)
+      - name: Retry locked files (template + sectional renderer)
         shell: bash
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          REMOTE_VSPFILES: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.remote_vspfiles_path || '/vspfiles' }}
         run: |
           set +e
-          # Both template_266.html and mtl-sectional-renderer.js can be locked by Volusion's
-          # runtime when first attempted. Retry each up to 6 times with increasing sleeps.
-          # Each attempt is its own lftp session so the server has time to release file handles.
+          # Volusion can briefly lock hot files; re-put after short waits.
 
           retry_file () {
             local LOCAL="$1"
@@ -80,7 +82,7 @@ jobs:
             for attempt in 1 2 3 4 5 6; do
               echo "=== [$LABEL] retry attempt $attempt ==="
               sleep $((attempt * 5))
-              local CMD="set sftp:auto-confirm yes; set net:max-retries 2; set net:timeout 30; put $LOCAL -o $REMOTE_A;"
+              local CMD="set sftp:auto-confirm yes; set net:max-retries 2; set net:timeout 60; put $LOCAL -o $REMOTE_A;"
               if [ -n "$REMOTE_B" ]; then
                 CMD="$CMD put $LOCAL -o $REMOTE_B;"
               fi
@@ -101,20 +103,13 @@ jobs:
           }
 
           retry_file "template_266.html" "/template_266.html" "/v/template_266.html" "template_266.html"
-          retry_file "vspfiles/js/mtl-sectional-renderer.js" "/vspfiles/js/mtl-sectional-renderer.js" "" "mtl-sectional-renderer.js"
+          retry_file "vspfiles/js/mtl-sectional-renderer.js" "$REMOTE_VSPFILES/js/mtl-sectional-renderer.js" "" "mtl-sectional-renderer.js"
           exit 0
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
 
-      - name: Deploy summary
+      - name: Deploy summary (Welcome to Genesis)
         run: |
-          echo "Volusion deploy complete."
-          echo "Uploaded:"
-          echo "- /template_266.html"
-          echo "- /v/template_266.html"
-          echo "- /vspfiles/css/custom-safe.css"
-          echo "- /vspfiles/js/sectional-configs.js"
-          echo "- /vspfiles/js/mtl-sectional-renderer.js"
-          echo "- /vspfiles/js/deploy-marker.txt  <- verify at https://www.mccabestheaterandliving.com/v/vspfiles/js/deploy-marker.txt"
+          echo "Genesis deploy finished."
+          echo "Mirrored local vspfiles/ → ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.remote_vspfiles_path || '/vspfiles' }} (recursive)."
+          echo "Templates: /template_266.html and /v/template_266.html"
+          echo "Marker: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.remote_vspfiles_path || '/vspfiles' }}/js/deploy-marker.txt"
+          echo "Verify: https://www.mccabestheaterandliving.com/v/vspfiles/js/deploy-marker.txt"
