@@ -1,5 +1,5 @@
 {
-  "_comment": "Popular crop tuning. popularImageMinAreaPt2: min embedded image area (pt²) to count as diagram art. Exporter keeps the largest image per cell (avoids double graphics). Re-export: py -3 export_sectional_diagrams.py --publish",
+  "_comment": "Popular crop tuning. popularImageMinAreaPt2: min embedded image area (pt\u00b2) to count as diagram art. Exporter keeps the largest image per cell (avoids double graphics). Re-export: py -3 export_sectional_diagrams.py --publish",
   "dpi": 300,
   "popularMidYRatio": 0.5,
   "popularColumnSlackPt": 22,
@@ -10,9 +10,30 @@
   "clipPopularConfigurationsGrid": true,
   "configsJs": "../../vspfiles/js/sectional-configs.js",
   "palliser": {
-    "Alula": { "model": "77427", "style": "ALULA", "pdf": "Alula.pdf" },
-    "Acacia": { "model": "41080", "style": "ACACIA", "pdf": "Acacia.pdf" },
-    "Atticus": { "model": "77325", "style": "ATTICUS", "pdf": "Atticus.pdf" },
+    "Alula": {
+      "model": "77427",
+      "style": "ALULA",
+      "pdf": "Alula.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Acacia": {
+      "model": "41080",
+      "style": "ACACIA",
+      "pdf": "Acacia.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Atticus": {
+      "model": "77325",
+      "style": "ATTICUS",
+      "pdf": "Atticus.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
     "Colebrook": {
       "model": "77267",
       "style": "COLEBROOK",
@@ -33,6 +54,182 @@
       "model": "77694",
       "style": "LEXI",
       "pdf": "Lexi.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Barrett": {
+      "model": "77558",
+      "style": "BARRETT",
+      "pdf": "Barrett.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Corissa": {
+      "model": "77500",
+      "style": "CORISSA",
+      "pdf": "Corissa.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Juno": {
+      "model": "77494",
+      "style": "JUNO",
+      "pdf": "Juno.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Jura": {
+      "model": "77201",
+      "style": "JURA",
+      "pdf": "Jura.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Brookes": {
+      "model": "77696",
+      "style": "BROOKES",
+      "pdf": "Brookes.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Leeds": {
+      "model": "77328",
+      "style": "LEEDS",
+      "pdf": "Leeds.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Charli": {
+      "model": "77743",
+      "style": "CHARLI",
+      "pdf": "Charli.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Laguna": {
+      "model": "77752",
+      "style": "LAGUNA",
+      "pdf": "Laguna.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Henry": {
+      "model": "41051",
+      "style": "HENRY",
+      "pdf": "Henry.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Essex": {
+      "model": "40112",
+      "style": "ESSEX",
+      "pdf": "Essex.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Luna": {
+      "model": "40110",
+      "style": "LUNA",
+      "pdf": "Luna.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Harlo": {
+      "model": "41052",
+      "style": "HARLO",
+      "pdf": "Harlo.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Asher": {
+      "model": "41065",
+      "style": "ASHER",
+      "pdf": "Asher.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Hastings": {
+      "model": "41068",
+      "style": "HASTINGS",
+      "pdf": "Hastings.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Keiran": {
+      "model": "41500",
+      "style": "KEIRAN",
+      "pdf": "Keiran.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Kenaston": {
+      "model": "41064",
+      "style": "KENASTON",
+      "pdf": "Kenaston.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Leighton": {
+      "model": "41063",
+      "style": "LEIGHTON",
+      "pdf": "Leighton.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Keoni": {
+      "model": "44000",
+      "style": "KEONI",
+      "pdf": "Keoni.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Armina": {
+      "model": "44010",
+      "style": "ARMINA",
+      "pdf": "Armina.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Colton": {
+      "model": "44007",
+      "style": "COLTON",
+      "pdf": "Colton.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Apex": {
+      "model": "44008",
+      "style": "APEX",
+      "pdf": "Apex.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Lotus": {
+      "model": "44007",
+      "style": "LOTUS",
+      "pdf": "Lotus.pdf",
       "popularColumnSlackPt": 12,
       "popularCropPadPt": 10,
       "popularImageMinAreaPt2": 4200
