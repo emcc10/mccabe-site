@@ -2532,7 +2532,7 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
         ""
       ).toLowerCase();
       const blob = path + " " + search + " " + titleText;
-      if (/sectional|sofa|palliser|alula|acacia|atticus/i.test(blob)) return true;
+      if (/sectional|sofa|palliser|alula|acacia|atticus|colebrook|creighton/i.test(blob)) return true;
       const pcInput = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
       const pcVal = pcInput && String(pcInput.value || "").trim();
       if (pcVal === "41417") return true;
@@ -3236,6 +3236,9 @@ try {
     aloira: "77427",
     acacia: "41080",
     atticus: "77325",
+    /* Sectionals — same model numbers as tools/sectional-diagrams/catalog.json */
+    colebrook: "77267",
+    creighton: "77294",
     /* Titan: official PDF is https://images.palliser.com/specsheet/en/44004%20TITAN.pdf */
     titan: "44004"
   };
@@ -3325,6 +3328,12 @@ try {
         if (/\balula\b|\/alula\b/i.test(hayX) || /\baloira\b/i.test(hayX)) {
           if (!explicitModel) model = "77427";
           style = "ALULA";
+        } else if (/\bcolebrook\b/i.test(hayX)) {
+          if (!explicitModel) model = "77267";
+          style = "COLEBROOK";
+        } else if (/\bcreighton\b/i.test(hayX)) {
+          if (!explicitModel) model = "77294";
+          style = "CREIGHTON";
         }
       }
     } catch (eSecPall) {}

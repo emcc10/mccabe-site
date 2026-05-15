@@ -2,6 +2,10 @@
  * Sectional configuration diagram cards — data only.
  * Keys must match Volusion style names (see getStyleFromPage / product codes before "-SC-").
  *
+ * Wired collections (each gets Popular-block PNGs when you run export_sectional_diagrams.py --publish):
+ *   Alula, Acacia, Atticus, Colebrook, Creighton.
+ * Add a new top-level key here + palliser.{Style} in tools/sectional-diagrams/catalog.json, then re-export.
+ *
  * If the PDP title uses “Aloira” instead of “Alula”, the renderer maps that page to the Alula config row (same Palliser line).
  * Product Summary PDF: https://images.palliser.com/specsheet/en/77427%20ALULA.pdf
  * Popular configurations on that PDF: 07-15, 07-09-19, 07-09-08, 12-40 (see tools/sectional-diagrams/export_sectional_diagrams.py, 300 DPI).
