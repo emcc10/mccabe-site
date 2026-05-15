@@ -1,5 +1,5 @@
 {
-  "_comment": "Popular crop tuning: popularColumnSlackPt, popularCropPadPt, popularImageMinAreaPt2 (min embedded image area in pt² for diagram union). Per-style overrides live on palliser.{Style}. Re-export: py -3 export_sectional_diagrams.py --publish",
+  "_comment": "Popular crop tuning. popularImageMinAreaPt2: min embedded image area (pt²) to count as diagram art. Exporter keeps the largest image per cell (avoids double graphics). Re-export: py -3 export_sectional_diagrams.py --publish",
   "dpi": 300,
   "popularMidYRatio": 0.5,
   "popularColumnSlackPt": 22,
@@ -17,6 +17,14 @@
       "model": "77267",
       "style": "COLEBROOK",
       "pdf": "Colebrook.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
+    },
+    "Creighton": {
+      "model": "77294",
+      "style": "CREIGHTON",
+      "pdf": "Creighton.pdf",
       "popularColumnSlackPt": 12,
       "popularCropPadPt": 10,
       "popularImageMinAreaPt2": 4200

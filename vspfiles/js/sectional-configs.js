@@ -141,12 +141,46 @@ window.MTL_SECTIONAL_CONFIGS = {
       image: "/v/vspfiles/sectional-diagrams/Colebrook-SC-12-40.png",
     },
   ],
+  Creighton: [
+    {
+      code: "07-40",
+      label: "07-40",
+      configurationTitle: "4-Seat L-Sectional",
+      description: "",
+      priceDiff: 0,
+      image: "/v/vspfiles/sectional-diagrams/Creighton-SC-07-40.png",
+    },
+    {
+      code: "07-09-08",
+      label: "07-09-08",
+      configurationTitle: "4-Seat Corner Curve Sectional",
+      description: "",
+      priceDiff: 0,
+      image: "/v/vspfiles/sectional-diagrams/Creighton-SC-07-09-08.png",
+    },
+    {
+      code: "12-35",
+      label: "12-35",
+      configurationTitle: "5-Seat L-Sectional (alternate)",
+      description: "",
+      priceDiff: 0,
+      image: "/v/vspfiles/sectional-diagrams/Creighton-SC-12-35.png",
+    },
+    {
+      code: "12-40",
+      label: "12-40",
+      configurationTitle: "5-Seat L-Sectional",
+      description: "",
+      priceDiff: 0,
+      image: "/v/vspfiles/sectional-diagrams/Creighton-SC-12-40.png",
+    },
+  ],
 };
 
 window.SECTIONAL_CONFIGS = window.MTL_SECTIONAL_CONFIGS;
 
 console.log(
   "sectional-configs",
-  "20260521colebrook-diagrams",
+  "20260521creighton-single-diagram",
   window.MTL_SECTIONAL_CONFIGS
 );
