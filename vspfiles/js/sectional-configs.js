@@ -3,7 +3,7 @@
  * Keys must match Volusion style names (see getStyleFromPage / product codes before "-SC-").
  *
  * Wired collections (each gets Popular-block PNGs when you run export_sectional_diagrams.py --publish):
- *   Alula, Acacia, Atticus, Colebrook, Creighton.
+ *   Alula, Acacia, Atticus, Colebrook, Creighton, Lexi.
  * Add a new top-level key here + palliser.{Style} in tools/sectional-diagrams/catalog.json, then re-export.
  *
  * If the PDP title uses “Aloira” instead of “Alula”, the renderer maps that page to the Alula config row (same Palliser line).
@@ -194,13 +194,39 @@
         image: img("Creighton-SC-12-40.png"),
       },
     ],
+    Lexi: [
+      {
+        code: "92-15",
+        label: "92-15",
+        configurationTitle: "3-Seat Chaise Sectional",
+        description: "",
+        priceDiff: 0,
+        image: img("Lexi-SC-92-15.png"),
+      },
+      {
+        code: "92-40",
+        label: "92-40",
+        configurationTitle: "4-Seat L-Sectional",
+        description: "",
+        priceDiff: 0,
+        image: img("Lexi-SC-92-40.png"),
+      },
+      {
+        code: "39-10-19",
+        label: "39-10-19",
+        configurationTitle: "4-Seat Bumper Sectional",
+        description: "",
+        priceDiff: 0,
+        image: img("Lexi-SC-39-10-19.png"),
+      },
+    ],
   };
 
   window.SECTIONAL_CONFIGS = window.MTL_SECTIONAL_CONFIGS;
 
   console.log(
     "sectional-configs",
-    "20260515-github-img-urls",
+    "20260515-lexi-diagrams",
     window.MTL_SECTIONAL_CONFIGS
   );
 })();

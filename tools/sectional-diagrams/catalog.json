@@ -28,6 +28,14 @@
       "popularColumnSlackPt": 12,
       "popularCropPadPt": 10,
       "popularImageMinAreaPt2": 4200
+    },
+    "Lexi": {
+      "model": "77694",
+      "style": "LEXI",
+      "pdf": "Lexi.pdf",
+      "popularColumnSlackPt": 12,
+      "popularCropPadPt": 10,
+      "popularImageMinAreaPt2": 4200
     }
   }
 }
