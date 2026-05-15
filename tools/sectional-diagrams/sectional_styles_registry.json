@@ -1,0 +1,33 @@
+{
+  "_comment": "McCabe Palliser sectionals from category 187 + 188 — model + Palliser PDF style token",
+  "styles": [
+    { "key": "Alula", "model": "77427", "token": "ALULA" },
+    { "key": "Acacia", "model": "41080", "token": "ACACIA" },
+    { "key": "Atticus", "model": "77325", "token": "ATTICUS" },
+    { "key": "Colebrook", "model": "77267", "token": "COLEBROOK" },
+    { "key": "Creighton", "model": "77294", "token": "CREIGHTON" },
+    { "key": "Lexi", "model": "77694", "token": "LEXI" },
+    { "key": "Barrett", "model": "77558", "token": "BARRETT" },
+    { "key": "Corissa", "model": "77500", "token": "CORISSA" },
+    { "key": "Juno", "model": "77494", "token": "JUNO" },
+    { "key": "Jura", "model": "77201", "token": "JURA" },
+    { "key": "Brookes", "model": "77696", "token": "BROOKES" },
+    { "key": "Leeds", "model": "77328", "token": "LEEDS" },
+    { "key": "Charli", "model": "77743", "token": "CHARLI" },
+    { "key": "Laguna", "model": "77752", "token": "LAGUNA" },
+    { "key": "Henry", "model": "41051", "token": "HENRY" },
+    { "key": "Essex", "model": "40112", "token": "ESSEX" },
+    { "key": "Luna", "model": "40110", "token": "LUNA" },
+    { "key": "Harlo", "model": "41052", "token": "HARLO" },
+    { "key": "Asher", "model": "41065", "token": "ASHER" },
+    { "key": "Hastings", "model": "41068", "token": "HASTINGS" },
+    { "key": "Keiran", "model": "41500", "token": "KEIRAN" },
+    { "key": "Kenaston", "model": "41064", "token": "KENASTON" },
+    { "key": "Leighton", "model": "41063", "token": "LEIGHTON" },
+    { "key": "Keoni", "model": "44000", "token": "KEONI" },
+    { "key": "Armina", "model": "44010", "token": "ARMINA" },
+    { "key": "Colton", "model": "44007", "token": "COLTON" },
+    { "key": "Apex", "model": "44008", "token": "APEX" },
+    { "key": "Lotus", "model": "44007", "token": "LOTUS" }
+  ]
+}
