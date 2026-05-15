@@ -1,18 +1,19 @@
 /**
  * Sectional configuration diagram cards — data only.
  * Keys must match Volusion style names (see getStyleFromPage / product codes before "-SC-").
- * Cards show the full PNG (no CSS crop). Use dimensionsIn / dimensionsCm for spec text beside the image.
+ *
+ * Diagram PNG for each configuration must be exported from that style’s Palliser/spec PDF so the PNG
+ * already includes the sofa graphic plus title / model ID / dimensions (matching the PDF). Only
+ * cropping is applied when exporting—never paint white over the render or recreate type in HTML.
+ * This file references paths only; upload final PNGs to /v/vspfiles/sectional-diagrams/ on Volusion.
  */
 window.MTL_SECTIONAL_CONFIGS = {
-  /* Alula 07-15 diagram: not in git; upload via Volusion to vspfiles/sectional-diagrams/Alula-SC-07-15.png (live URL /v/vspfiles/sectional-diagrams/Alula-SC-07-15.png). */
   Alula: [
     {
       code: "07-15",
       label: "07-15",
       configurationTitle: "3-Seat Chaise Sectional",
       description: "",
-      dimensionsIn: '84 x 62"',
-      dimensionsCm: "214 x 158 cm",
       priceDiff: 0,
       image: "/v/vspfiles/sectional-diagrams/Alula-SC-07-15.png",
     },
@@ -22,7 +23,6 @@ window.MTL_SECTIONAL_CONFIGS = {
       code: "67-10-09-10-66",
       label: "67-10-09-10-66",
       description: "Configuration 67-10-09-10-66",
-      /* Add configurationTitle, dimensionsIn, dimensionsCm when spec is confirmed — shown beside diagram. */
       priceDiff: 0,
       image: "/v/vspfiles/sectional-diagrams/Acacia-SC-67-10-09-10-66.png",
     },
@@ -32,7 +32,6 @@ window.MTL_SECTIONAL_CONFIGS = {
       code: "07-15",
       label: "07-15",
       description: "Configuration 07-15",
-      /* Add configurationTitle, dimensionsIn, dimensionsCm when spec is confirmed — shown beside diagram. */
       priceDiff: 0,
       image: "/v/vspfiles/sectional-diagrams/Atticus-SC-07-15.png",
     },
@@ -41,4 +40,4 @@ window.MTL_SECTIONAL_CONFIGS = {
 
 window.SECTIONAL_CONFIGS = window.MTL_SECTIONAL_CONFIGS;
 
-console.log("sectional-configs", "20260515diag-dims", window.MTL_SECTIONAL_CONFIGS);
+console.log("sectional-configs", "20260515pdf-diagram-png", window.MTL_SECTIONAL_CONFIGS);

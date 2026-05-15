@@ -5,7 +5,7 @@
 (function () {
   "use strict";
 
-  var IMG_V = "sectional-diagram-20260515-contain-layout";
+  var IMG_V = "sectional-pdf-diagram-20260515";
 
   var CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
@@ -28,7 +28,7 @@
   var __mtlSectionalDiagramDocClickBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
-  window.MTL_RENDERER_BUILD = "sectional-20260515-diagram-contain-fullpng";
+  window.MTL_RENDERER_BUILD = "sectional-20260515-pdf-diagram-only";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -1449,27 +1449,6 @@
     var s = String(code || "").trim();
     if (!s) return "";
     return s.replace(/-/g, "/");
-  }
-
-  /**
-   * Best-effort human title from native option label when JSON omits configurationTitle.
-   * Strips trailing price parentheses and trailing configuration code tokens.
-   */
-  function deriveConfigurationTitleFromOption(rawText, mergedCode) {
-    var s = stripPricingSuffix(String(rawText || "").trim());
-    if (!s) return "";
-    s = stripPricingSuffix(s);
-    var c = String(mergedCode || "").trim();
-    if (!c) return "";
-    var esc = c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/-/g, "[\\s\\/-]*");
-    var reEnd = new RegExp("(?:\\s|[-–—,:])+(" + esc + ")\\s*$", "i");
-    s = s.replace(reEnd, "").trim();
-    var reStart = new RegExp("^\\s*(" + esc + ")\\s*[-–—,:]+\\s*", "i");
-    s = s.replace(reStart, "").trim();
-    if (!s) return "";
-    if (/^configuration$/i.test(s)) return "";
-    if (/^configuration\s+[\d\-\/]+$/i.test(s)) return "";
-    return s;
   }
 
   function findConfigurationSelect() {
@@ -3209,7 +3188,7 @@
 
       merged.forEach(function (cfg) {
         var card = document.createElement("div");
-        card.className = "mtl-sectional-card";
+        card.className = "mtl-sectional-card mtl-sectional-card--pdf-diagram";
         card.setAttribute("data-config-code", cfg.code || "");
         card.setAttribute("data-config-value", cfg.nativeValue != null ? String(cfg.nativeValue) : "");
         if (cfg.priceDiff != null && cfg.priceDiff !== "") {
@@ -3230,79 +3209,23 @@
         } else {
           img.src = src.indexOf("?") === -1 ? src + "?v=" + IMG_V : src + "&v=" + IMG_V;
         }
-        img.alt = cfg.configurationTitle || cfg.label || cfg.code || "Configuration";
+        var altLabel =
+          [
+            productKey ? String(productKey).trim() : "",
+            cfg.configurationTitle ? String(cfg.configurationTitle).trim() : "",
+            formatDiagramConfigCode(cfg.code),
+          ]
+            .filter(function (x) {
+              return !!x;
+            })
+            .join(" — ");
+        img.alt = altLabel || cfg.label || cfg.code || "Configuration diagram";
         figure.setAttribute("role", "button");
         figure.setAttribute("tabindex", "0");
         figure.setAttribute("aria-label", "Enlarge diagram: " + img.alt);
         figure.appendChild(img);
 
-        var meta = document.createElement("div");
-        meta.className = "mtl-sectional-meta";
-
-        var nameText = String(cfg.configurationTitle || "").trim();
-        if (!nameText) {
-          nameText = deriveConfigurationTitleFromOption(cfg.rawOptionText, cfg.code);
-        }
-        if (nameText) {
-          var nameEl = document.createElement("div");
-          nameEl.className = "mtl-sectional-config-name";
-          nameEl.textContent = nameText;
-          meta.appendChild(nameEl);
-        }
-
-        var codeDisplay = formatDiagramConfigCode(cfg.code);
-        if (codeDisplay) {
-          var codeEl = document.createElement("div");
-          codeEl.className = "mtl-sectional-config-code";
-          codeEl.textContent = codeDisplay;
-          meta.appendChild(codeEl);
-        }
-
-        var dimInStr = String(cfg.dimensionsIn || "").trim();
-        if (dimInStr) {
-          var dimInEl = document.createElement("div");
-          dimInEl.className = "mtl-sectional-dimension-in";
-          dimInEl.textContent = dimInStr;
-          meta.appendChild(dimInEl);
-        }
-
-        var dimCmStr = String(cfg.dimensionsCm || "").trim();
-        if (dimCmStr) {
-          var dimCmEl = document.createElement("div");
-          dimCmEl.className = "mtl-sectional-dimension-cm";
-          dimCmEl.textContent = dimCmStr;
-          meta.appendChild(dimCmEl);
-        }
-
-        var descText = String(cfg.description || "").trim();
-        if (!descText && cfg.rawOptionText) {
-          var rtFull = stripPricingSuffix(String(cfg.rawOptionText).trim());
-          var lab = String(cfg.label || "").trim();
-          var rtNorm = rtFull.replace(/\s+/g, " ").toLowerCase();
-          var labNorm = lab.replace(/\s+/g, " ").toLowerCase();
-          if (rtFull) {
-            if (labNorm && rtNorm.indexOf(labNorm) === 0) {
-              descText = rtFull.slice(lab.length).replace(/^[\s—\-,:]+/, "").trim();
-            } else if (!labNorm || rtNorm !== labNorm) {
-              descText = rtFull;
-            }
-          }
-        }
-        var nameNorm = nameText.replace(/\s+/g, " ").toLowerCase();
-        var descNorm = descText.replace(/\s+/g, " ").toLowerCase();
-        if (
-          descText &&
-          descNorm !== nameNorm &&
-          !/^configuration\s+[\d\-\/]+$/.test(descText)
-        ) {
-          var desc = document.createElement("div");
-          desc.className = "mtl-sectional-desc";
-          desc.textContent = descText;
-          meta.appendChild(desc);
-        }
-
         body.appendChild(figure);
-        body.appendChild(meta);
         card.appendChild(body);
         grid.appendChild(card);
       });

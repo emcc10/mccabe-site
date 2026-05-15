@@ -11646,20 +11646,19 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
     background-color 0.15s ease !important;
 }
 
-/* Diagram on top (full card width), copy + dimensions below — full PNG visible (object-fit: contain; no cropping). */
-#mtl-sectional-configurations .mtl-sectional-card-body {
+/* PDF-export diagram: one composite PNG (graphic + type + dimensions). No HTML typography beside the image. */
+#mtl-sectional-configurations .mtl-sectional-card--pdf-diagram .mtl-sectional-card-body {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
-  gap: 12px !important;
+  gap: 0 !important;
   flex: 1 1 auto !important;
   min-width: 0 !important;
 }
 
-#mtl-sectional-configurations .mtl-sectional-figure {
+#mtl-sectional-configurations .mtl-sectional-card--pdf-diagram .mtl-sectional-figure {
   flex: 0 0 auto !important;
   width: 100% !important;
-  min-width: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
   display: flex !important;
@@ -11670,51 +11669,21 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   overflow: visible !important;
 }
 
-#mtl-sectional-configurations .mtl-sectional-meta {
-  flex: 0 0 auto !important;
+/* Full width/height from intrinsic PNG — do not cap height (avoids squashing the PDF layout). */
+#mtl-sectional-configurations .mtl-sectional-card--pdf-diagram .mtl-sectional-figure img.mtl-sectional-image {
+  display: block !important;
   width: 100% !important;
-  min-width: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: flex-start !important;
-  gap: 4px !important;
-}
-
-#mtl-sectional-configurations .mtl-sectional-config-name {
-  font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  line-height: 1.3 !important;
-  color: #111 !important;
-  margin: 0 !important;
-}
-
-#mtl-sectional-configurations .mtl-sectional-config-code {
-  font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  line-height: 1.35 !important;
-  color: #111 !important;
-  margin: 0 !important;
-}
-
-#mtl-sectional-configurations .mtl-sectional-dimension-in,
-#mtl-sectional-configurations .mtl-sectional-dimension-cm {
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 13px !important;
-  font-weight: 400 !important;
-  line-height: 1.45 !important;
-  color: #111 !important;
-  margin: 0 !important;
-}
-
-#mtl-sectional-configurations .mtl-sectional-desc {
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 13px !important;
-  font-weight: 400 !important;
-  line-height: 1.5 !important;
-  color: #555 !important;
-  margin: 4px 0 0 !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: top center !important;
+  background: transparent !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-sizing: border-box !important;
+  flex: 0 0 auto !important;
+  pointer-events: none !important;
 }
 
 #mtl-sectional-configurations .mtl-sectional-card:hover {
@@ -11726,24 +11695,6 @@ html.is-sectional-product #options_table tr:has(select[id*="Choose Configuration
   border-color: #c4c4c4 !important;
   background: #f0f0f0 !important;
   box-shadow: inset 0 0 0 1px #c4c4c4 !important;
-}
-
-/* Thumbnail shows the whole asset — no cover/cropping (Manufacturer composite + HTML dimensions next to PNG). Lightbox opens full-resolution. */
-#mtl-sectional-configurations .mtl-sectional-figure img.mtl-sectional-image,
-#mtl-sectional-configurations img.mtl-sectional-image {
-  display: block !important;
-  width: 100% !important;
-  height: auto !important;
-  max-width: 100% !important;
-  max-height: min(460px, 72vw) !important;
-  object-fit: contain !important;
-  object-position: center center !important;
-  background: transparent !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  box-sizing: border-box !important;
-  flex: 0 0 auto !important;
-  pointer-events: none !important;
 }
 
 #mtl-sectional-configurations .mtl-sectional-price {

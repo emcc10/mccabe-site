@@ -1,1 +1,3 @@
 Diagram PNGs are hosted on Volusion under vspfiles/sectional-diagrams/ (e.g. Alula-SC-07-15.png -> /v/vspfiles/sectional-diagrams/Alula-SC-07-15.png).
+
+Source each file from the manufacturer PDF for that sofa style/configuration. Export or rasterize the diagram page and apply only cropping (margins/bleed)—do not repaint, mask, or add HTML text over the art. Dimensions and headings belong in that PNG exactly as supplied in the PDF.
