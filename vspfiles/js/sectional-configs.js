@@ -2,9 +2,9 @@
  * Sectional configuration diagram cards — data only.
  * Keys must match Volusion style names (see getStyleFromPage / product codes before "-SC-").
  *
- * Alula Product Summary PDF (example): https://images.palliser.com/specsheet/en/77427%20ALULA.pdf
- * Popular configurations: 07-15, 07-09-19, 07-09-08, 12-40 — each PNG is cropped from that PDF page
- * labeled POPULAR CONFIGURATIONS (see tools/sectional-diagrams/export_sectional_diagrams.py, 300 DPI).
+ * If the PDP title uses “Aloira” instead of “Alula”, the renderer maps that page to the Alula config row (same Palliser line).
+ * Product Summary PDF: https://images.palliser.com/specsheet/en/77427%20ALULA.pdf
+ * Popular configurations on that PDF: 07-15, 07-09-19, 07-09-08, 12-40 (see tools/sectional-diagrams/export_sectional_diagrams.py, 300 DPI).
  *
  * Regenerate PNGs: tools/sectional-diagrams/export_diagrams.ps1
  * Upload vspfiles/sectional-diagrams/*.png to Volusion. Renderer appends ?v= cache-bust on img src.
@@ -113,6 +113,6 @@ window.SECTIONAL_CONFIGS = window.MTL_SECTIONAL_CONFIGS;
 
 console.log(
   "sectional-configs",
-  "20260515palliser-popular-300dpi",
+  "20260516alula-diagrams",
   window.MTL_SECTIONAL_CONFIGS
 );
