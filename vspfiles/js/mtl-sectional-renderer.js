@@ -66,7 +66,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260516-summary-fix-v6";
+  window.MTL_RENDERER_BUILD = "sectional-20260516-no-forced-config-v8";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -667,17 +667,15 @@
   }
 
   function ensureLeatherOptionsFromNativeSelect(leatherSel) {
-    if (!isSectionalProductPageClient()) return;
+    if (isSectionalProductPageClient()) {
+      if (typeof window.mcTryInitWmLeather === "function") {
+        window.mcTryInitWmLeather();
+      }
+      return;
+    }
     if (!leatherSel || !leatherSel.options || leatherSel.options.length < 1) return;
     var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
     if (!syn.length) return;
-    if (isSectionalProductPageClient()) {
-      window.__WM_LEATHER_OPTIONS__ = syn;
-      try {
-        document.dispatchEvent(new CustomEvent("wmLeatherOptionsReady", { bubbles: true }));
-      } catch (eSec) {}
-      return;
-    }
     var prev = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : null;
     var prevLen = prev ? prev.length : 0;
     var prevHasSwatches = !!(prev && prev.some(function (p) { return p && p.swatches && p.swatches.length; }));
@@ -696,33 +694,85 @@
     console.log("[MTL] __WM_LEATHER_OPTIONS__ set from native leather <select>, count=", syn.length);
   }
 
-  function mtlSyncSectionalLeatherFromDom() {
+  function wmLeatherOptionsLookCorrupt(opts) {
+    if (!opts || !opts.length) return false;
+    var bad = 0;
+    var i;
+    for (i = 0; i < opts.length; i++) {
+      var o = opts[i];
+      if (!o) continue;
+      var f = String(o.family || "").trim();
+      var lab = String(o.label || "").trim();
+      if (/^\$?\s*[\d,]+\.?\d*\s*$/.test(f) || /^\$?\s*[\d,]+\.?\d*\s*$/.test(lab)) bad++;
+    }
+    return bad >= Math.min(2, opts.length);
+  }
+
+  /** Tear down stale theater leather UI so initIfReady re-parses after Volusion injects new cover options. */
+  function mtlRebuildTheaterLeatherUi() {
+    if (!isSectionalProductPageClient()) return;
+    try {
+      window.__WM_LEATHER_MODAL_BUILT__ = false;
+    } catch (eFlag) {}
+    try {
+      window.__WM_LEATHER_OPTIONS__ = [];
+    } catch (eOpt) {}
+    var wmOpen = document.getElementById("wmOpen");
+    if (wmOpen) {
+      var uiBlock = wmOpen.parentElement;
+      if (uiBlock && uiBlock.querySelector && uiBlock.querySelector("#wmSummary")) {
+        uiBlock.remove();
+      } else {
+        wmOpen.remove();
+      }
+    }
+    var overlays = document.querySelectorAll("body > .wm-overlay");
+    var oi;
+    for (oi = 0; oi < overlays.length; oi++) {
+      if (overlays[oi].querySelector("#wmSections")) overlays[oi].remove();
+    }
+    if (typeof window.mcTryInitWmLeather === "function") {
+      window.mcTryInitWmLeather();
+    }
+  }
+
+  /** Sectionals use the same theater leather pipeline (initIfReady → __WM_LEATHER_OPTIONS__ → mini strip + modal). */
+  function mtlRefreshSectionalLeatherUi() {
     if (!isSectionalProductPageClient()) return;
     ensureSectionalLeatherStripDom();
+    syncSectionalLeatherAccordionHost();
     var le = findNativeLeatherSelectEl();
-    if (!le) return;
+    if (le) {
+      try {
+        le.classList.add("mc-native-leather");
+      } catch (eCls) {}
+    }
+    var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
+    if (!document.getElementById("wmOpen") || wmLeatherOptionsLookCorrupt(wm)) {
+      mtlRebuildTheaterLeatherUi();
+    } else if (typeof window.mcTryInitWmLeather === "function") {
+      window.mcTryInitWmLeather();
+    }
+    if (typeof window.mcRenderLeatherPreviewStrip === "function") {
+      window.mcRenderLeatherPreviewStrip();
+    }
+    if (typeof window.mcSyncLeatherSummary === "function") {
+      window.mcSyncLeatherSummary();
+    }
     try {
-      le.classList.add("mc-native-leather");
-    } catch (eCls) {}
-    var syn = buildSyntheticWmLeatherOptionsFromSelect(le);
-    if (!syn.length) return;
-    ensureLeatherOptionsFromNativeSelect(le);
-    if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
-    fillLeatherModalFromNativeSelect(le);
-    try {
-      __mtlDiag.leatherOpts = "YES";
-      var ws = document.getElementById("wmSections");
-      var nModal = ws ? ws.querySelectorAll(".mtl-leather-modal-card").length : 0;
-      __mtlDiag.leatherModal = nModal > 0 ? "YES" : "NO";
+      __mtlDiag.leatherOpts = le ? "YES" : "NO";
       var strip = document.getElementById("mcLeatherSwatchStrip");
-      var nMini = strip ? strip.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length : 0;
+      var nMini = strip
+        ? strip.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length
+        : 0;
       __mtlDiag.miniSwatches = nMini > 0 ? "YES" : "NO";
+      __mtlDiag.leatherModal = document.getElementById("wmOpen") ? "YES" : "NO";
       mtlRefreshStageTrackerDom();
     } catch (eDiag) {}
-    syncSectionalLeatherAccordionHost();
-    renderSectionalMiniLeatherStripFromNative(le);
-    if (typeof window.mcRenderLeatherPreviewStrip === "function") window.mcRenderLeatherPreviewStrip();
-    if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
+  }
+
+  function mtlSyncSectionalLeatherFromDom() {
+    mtlRefreshSectionalLeatherUi();
   }
 
   /**
@@ -818,73 +868,34 @@
   }
 
   function installSectionalLeatherStripRenderer() {
-    if (window.__mcSectionalMiniStripRender) return;
-    window.__mcSectionalMiniStripRender = function () {
-      var n = renderSectionalMiniLeatherStripFromNative(findNativeLeatherSelectEl());
-      if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
-      return n;
-    };
-    window.mcRenderLeatherPreviewStrip = window.__mcSectionalMiniStripRender;
+    /* No-op: sectionals use template renderLeatherPreviewStripCore + __WM_LEATHER_OPTIONS__ (theater path). */
   }
 
-  /** Leather UI for sectionals — must not depend on configuration cards / merge success. */
-  function bootstrapSectionalLeatherUi(leatherSelOptional) {
+  /** Sectionals: same theater leather init + mini strip; only accordion host placement is sectional-specific. */
+  function bootstrapSectionalLeatherUi() {
     if (!isSectionalProductPageClient()) return;
-    ensureSectionalWmLeatherModalShell();
     mtlRemoveLeatherPickerHint();
     try {
       document.documentElement.classList.add("is-sectional-product");
     } catch (eCls) {}
 
-    installSectionalLeatherStripRenderer();
     ensureSectionalLeatherStripDom();
-    syncSectionalLeatherAccordionHost();
-
-    var leatherSel = leatherSelOptional || findNativeLeatherSelectEl();
-    if (leatherSel) {
-      ensureLeatherOptionsFromNativeSelect(leatherSel);
-      fillLeatherModalFromNativeSelect(leatherSel);
-    } else {
-      mtlSyncSectionalLeatherFromDom();
-      leatherSel = findNativeLeatherSelectEl();
-    }
-
+    bindViewAllLeathersButtons();
+    bindSectionalLeatherUiRetries();
     ensureSectionalOptionsTableLeatherObserver();
     ensureSectionalV65LeatherObserver();
-    ensureWmSectionsFallbackObserver(leatherSel);
-    patchLeatherModalFallback(leatherSel);
-    bindViewAllLeathersButtons();
-    ensureMcWmOpenMountedListener();
-    mtlWrapWmOpenForSectional();
-    bindSectionalLeatherUiRetries();
 
-    if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
-    syncSectionalLeatherAccordionHost();
-
-    var nMini = renderSectionalMiniLeatherStripFromNative(leatherSel);
-    [80, 350, 900, 1800].forEach(function (ms) {
-      window.setTimeout(function () {
-        syncSectionalLeatherAccordionHost();
-        renderSectionalMiniLeatherStripFromNative(findNativeLeatherSelectEl());
-        if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
-      }, ms);
+    mtlRefreshSectionalLeatherUi();
+    [80, 350, 900, 1800, 3500].forEach(function (ms) {
+      window.setTimeout(mtlRefreshSectionalLeatherUi, ms);
     });
-    try {
-      __mtlDiag.leatherOpts = leatherSel ? "YES" : "NO";
-      var ws = document.getElementById("wmSections");
-      var nModal = ws ? ws.querySelectorAll(".mtl-leather-modal-card").length : 0;
-      __mtlDiag.leatherModal = nModal > 0 ? "YES" : "NO";
-      __mtlDiag.miniSwatches = nMini > 0 ? "YES" : "NO";
-      mtlRefreshStageTrackerDom();
-    } catch (eDiag) {}
 
     if (!document.documentElement.dataset.mtlLeatherStripReadyListen) {
       document.documentElement.dataset.mtlLeatherStripReadyListen = "1";
       document.addEventListener(
         "wmLeatherOptionsReady",
         function () {
-          renderSectionalMiniLeatherStripFromNative(findNativeLeatherSelectEl());
-          if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
+          mtlRefreshSectionalLeatherUi();
         },
         false
       );
@@ -901,6 +912,7 @@
     });
   }
   window.scheduleSectionalLeatherBootstrap = scheduleSectionalLeatherBootstrap;
+  window.mtlRefreshSectionalLeatherUi = mtlRefreshSectionalLeatherUi;
 
   function ensureSectionalOptionsTableLeatherObserver() {
     if (!isSectionalProductPageClient()) return;
@@ -1208,10 +1220,12 @@
   }
 
   function fillLeatherModalFromNativeSelect(leatherSel) {
-    if (isSectionalProductPageClient()) ensureSectionalWmLeatherModalShell();
+    if (isSectionalProductPageClient()) {
+      if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+      return 0;
+    }
     var sel = leatherSel || findNativeLeatherSelectEl();
     if (!sel) return 0;
-    if (isSectionalProductPageClient()) return injectSectionalNativeLeatherModal(sel);
     if (!isWmOverlayVisible()) return 0;
     return appendFallbackLeatherGridIfEmpty(sel);
   }
@@ -1640,55 +1654,16 @@
         if (ev && ev.preventDefault) ev.preventDefault();
         if (ev && ev.stopPropagation) ev.stopPropagation();
         if (ev && ev.stopImmediatePropagation) ev.stopImmediatePropagation();
-        mtlOpenOwnLeatherPicker();
+        if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+        if (typeof window.mcOpenWmLeatherModal === "function") {
+          window.mcOpenWmLeatherModal(ev);
+        }
       });
     });
   }
 
-  function patchLeatherModalFallback(leatherSel) {
-    if (!isSectionalProductPageClient()) return;
-    if (document.documentElement.dataset.mtlWmModalFallbackPatched === "1") return;
-    document.documentElement.dataset.mtlWmModalFallbackPatched = "1";
-
-    /* Override mcOpenWmLeatherModal so mini-swatch clicks open our picker instead of the WM modal */
-    window.mcOpenWmLeatherModal = function(ev) {
-      if (ev && ev.preventDefault) ev.preventDefault();
-      if (ev && ev.stopPropagation) ev.stopPropagation();
-      mtlOpenOwnLeatherPicker();
-    };
-
-    /* Intercept leather-button clicks in capture phase (covers mcLeatherBtn, header, etc.) */
-    document.addEventListener(
-      "click",
-      function (ev) {
-        var t = ev.target;
-        if (!t || !t.closest) return;
-        if (
-          !t.closest(
-            "#mcLeatherBtn, #mcLeatherHeader, #mcLeatherHeaderRow, #mc-acc-row-leather .mc-acc-config-btn, .mc-mini-swatch, .mc-leather-mini-swatch"
-          )
-        )
-          return;
-        ev.stopPropagation();
-        ev.preventDefault();
-        mtlOpenOwnLeatherPicker();
-      },
-      true
-    );
-
-    /* Also intercept direct #wmOpen / .wm-btn clicks — always open our picker, never the WM modal */
-    document.addEventListener(
-      "click",
-      function (ev) {
-        var t = ev.target;
-        if (!t || !t.closest) return;
-        if (!t.closest("#wmOpen, .wm-btn")) return;
-        ev.stopPropagation();
-        ev.preventDefault();
-        mtlOpenOwnLeatherPicker();
-      },
-      true
-    );
+  function patchLeatherModalFallback() {
+    /* Intentionally empty — sectionals use template mcOpenWmLeatherModal / initIfReady (same as theater). */
   }
 
   function removeStandaloneDuplicateProductSummary() {
@@ -2243,6 +2218,8 @@
    */
 
   function mtlWrapWmOpenForSectional() {
+    /* Disabled — hijacking #wmOpen replaced theater modal tiles with empty sectional inject. */
+    return;
     if (!isSectionalProductPageClient()) return;
     var btn = document.getElementById("wmOpen");
     if (!btn || btn.dataset.mtlModalWrapBound === "1") return;
@@ -2301,22 +2278,13 @@
     document.addEventListener(
       "mcWmOpenMounted",
       function () {
-        if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
-        /* Give initIfReady a tick to complete, then wrap the onclick. */
-        window.setTimeout(function () {
-          mtlWrapWmOpenForSectional();
-          /* Also retry wrapping at short intervals in case #wmOpen isn't created yet. */
-          [120, 350, 800].forEach(function (ms) {
-            window.setTimeout(mtlWrapWmOpenForSectional, ms);
-          });
-        }, 0);
+        mtlRefreshSectionalLeatherUi();
+        [120, 350, 800].forEach(function (ms) {
+          window.setTimeout(mtlRefreshSectionalLeatherUi, ms);
+        });
       },
       false
     );
-    /* Also try immediately and on a short schedule in case mcWmOpenMounted already fired. */
-    [0, 250, 600, 1400, 3000].forEach(function (ms) {
-      window.setTimeout(mtlWrapWmOpenForSectional, ms);
-    });
   }
 
   function findInsertTarget() {
@@ -2854,11 +2822,7 @@
     scheduleProductSummaryAfterConfigChange();
     setTimeout(syncCardsSelectionHighlight, 50);
     [120, 400, 900, 1800].forEach(function (ms) {
-      window.setTimeout(function () {
-        mtlSyncSectionalLeatherFromDom();
-        syncSectionalLeatherAccordionHost();
-        renderSectionalMiniLeatherStripFromNative(findNativeLeatherSelectEl());
-      }, ms);
+      window.setTimeout(mtlRefreshSectionalLeatherUi, ms);
     });
   }
 
@@ -3457,12 +3421,11 @@
   /** Called by template's renderAllGradesTogether() when its own `all` array is empty. */
   window.mtlFillSectionalLeatherModal = function mtlFillSectionalLeatherModal() {
     if (!isSectionalProductPageClient()) return;
-    var leatherSel = findNativeLeatherSelectEl();
-    if (!leatherSel) return;
-    var ws = document.getElementById("wmSections");
-    if (!ws) return;
-    var n = injectSectionalNativeLeatherModal(leatherSel);
-    console.log("[MTL] mtlFillSectionalLeatherModal called — injected cards:", n);
+    if (typeof window.mcTryInitWmLeather === "function") {
+      window.mcTryInitWmLeather();
+    }
+    mtlRefreshSectionalLeatherUi();
+    console.log("[MTL] mtlFillSectionalLeatherModal — delegated to theater mcTryInitWmLeather");
     /* Update overlay in real time so we can see modal state after opening. */
     window.setTimeout(function () {
       try {
@@ -3542,13 +3505,11 @@
     });
 
     mtlRunStagePanel("finalize: leather modal refresh", "leatherModal", function () {
-      leatherSelNow = leatherSelNow || findNativeLeatherSelectEl();
-      var fillRet = fillLeatherModalFromNativeSelect(leatherSelNow);
-      console.log("[MTL] fillLeatherModalFromNativeSelect return:", fillRet);
+      mtlRefreshSectionalLeatherUi();
       var ws = document.getElementById("wmSections");
-      var nModal = ws ? ws.querySelectorAll(".mtl-leather-modal-card").length : 0;
-      console.log("[MTL] .mtl-leather-modal-card count in #wmSections:", nModal);
-      __mtlDiag.leatherModal = nModal > 0 ? "YES" : "NO";
+      var nModal = ws ? ws.querySelectorAll(".wm-tile").length : 0;
+      console.log("[MTL] .wm-tile count in #wmSections:", nModal);
+      __mtlDiag.leatherModal = document.getElementById("wmOpen") ? "YES" : "NO";
       mtlRefreshStageTrackerDom();
       if (__mtlDiag.leatherOpts !== "YES") {
         mtlDumpLeatherDiscoveryToConsole("finalize: leather options = NO");
@@ -3660,21 +3621,20 @@
     });
 
     mtlRunStagePanel("finalize: mini swatch strip", "miniSwatches", function () {
-      leatherSelNow = leatherSelNow || findNativeLeatherSelectEl();
-      var nMini = renderSectionalMiniLeatherStripFromNative(leatherSelNow);
+      mtlRefreshSectionalLeatherUi();
+      var strip = document.getElementById("mcLeatherSwatchStrip");
+      var nMini = strip ? strip.querySelectorAll(".mc-mini-swatch").length : 0;
       console.log("[MTL] mini swatch nodes in #mcLeatherSwatchStrip:", nMini);
       __mtlDiag.miniSwatches = nMini > 0 ? "YES" : "NO";
       mtlRefreshStageTrackerDom();
       [350, 900, 2200, 5000].forEach(function (ms) {
-        window.setTimeout(function () {
-          renderSectionalMiniLeatherStripFromNative(findNativeLeatherSelectEl());
-        }, ms);
+        window.setTimeout(mtlRefreshSectionalLeatherUi, ms);
       });
+      leatherSelNow = leatherSelNow || findNativeLeatherSelectEl();
       if (leatherSelNow && leatherSelNow.dataset.mtlMiniStripBound !== "1") {
         leatherSelNow.dataset.mtlMiniStripBound = "1";
         leatherSelNow.addEventListener("change", function () {
-          renderSectionalMiniLeatherStripFromNative(leatherSelNow);
-          if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
+          mtlRefreshSectionalLeatherUi();
         });
       }
     });
@@ -3975,16 +3935,17 @@
       if (errFin2 && errFin2.stack) console.error(errFin2.stack);
     }
 
-    console.log("[MTL] START selectConfigurationCard (initial sync)");
     try {
-      var baseConfig = merged[0];
-      if (baseConfig) {
-        selectConfigurationCard(baseConfig.code, baseConfig.nativeValue);
+      syncCardsSelectionHighlight();
+      var cs0 = findConfigurationSelect();
+      if (cs0 && cs0.selectedOptions && cs0.selectedOptions[0]) {
+        var opt0 = cs0.selectedOptions[0];
+        window.__mtlSectionalPreferredNativeValue = opt0.value;
+        window.__mtlSectionalSelectedConfig = extractPrimaryCode(opt0.textContent || "");
       }
-      console.log("[MTL] SUCCESS selectConfigurationCard (initial sync)");
-    } catch (errSel) {
-      console.error("[MTL] FAILURE selectConfigurationCard (initial sync)", errSel);
-      if (errSel && errSel.stack) console.error(errSel.stack);
+      mtlRefreshSectionalLeatherUi();
+    } catch (errSync) {
+      console.warn("[MTL] post-cards Volusion sync (no forced configuration)", errSync);
     }
 
     sectionalLog("selected sectional config", window.__mtlSectionalSelectedConfig);
@@ -4073,8 +4034,6 @@
     console.log("[MTL verify] Open leather modal to refresh modal card count.", rep);
     return rep;
   };
-
-  installSectionalLeatherStripRenderer();
 
   function boot() {
     mtlRemoveLeatherPickerHint();

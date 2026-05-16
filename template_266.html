@@ -2656,7 +2656,6 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
 
   function hasRealOptions(sel){
     const real = Array.from(sel.options || []).filter(o => !isPlaceholderOption(o));
-    /* Sectionals: cover/leather often has one real option until configuration is chosen - require only one then. */
     const secEarly =
       !wmIsTheaterSeatingPdpEarly() &&
       (document.documentElement.classList.contains("is-sectional-product") ||
@@ -2764,7 +2763,7 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
         return wmLeatherSelectScore(b) - wmLeatherSelectScore(a);
       });
 
-    if (!candidateSelects.length && secEarly) {
+    if (secEarly) {
       var otSec = document.querySelector(
         "#v65-product-parent #options_table, #options_table, table[id*='options_table']"
       );
@@ -2772,10 +2771,17 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
         var orderedSec = Array.from(otSec.querySelectorAll("select")).filter(function (s) {
           return !isNativeConfigurationSelectEl(s) && hasRealOptions(s);
         });
-        if (orderedSec.length === 1) {
-          candidateSelects = [orderedSec[0]];
-        } else if (orderedSec.length > 1) {
-          candidateSelects = [orderedSec[orderedSec.length - 1]];
+        if (orderedSec.length) {
+          orderedSec.sort(function (a, b) {
+            return wmLeatherSelectScore(b) - wmLeatherSelectScore(a);
+          });
+          var bestSec = orderedSec[0];
+          if (
+            !candidateSelects.length ||
+            wmLeatherSelectScore(bestSec) > wmLeatherSelectScore(candidateSelects[0])
+          ) {
+            candidateSelects = [bestSec];
+          }
         }
       }
     }
@@ -3075,30 +3081,12 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     }
 
     function renderAllGradesTogether(){
-      /* Sectional pages: always let the renderer build leather cards.
-         The template's tile pipeline may mis-parse Volusion option text; the renderer
-         has more robust parsing and the correct card design. Clear #wmSections so the
-         renderer starts fresh, then call its fill function synchronously. */
-      if (
-        typeof window.isSectionalProductPage === "function" &&
-        window.isSectionalProductPage() &&
-        typeof window.mtlFillSectionalLeatherModal === "function"
-      ) {
-        sectionsEl.innerHTML = "";
-        window.mtlFillSectionalLeatherModal();
-        console.log("[WM] sectional: delegated to mtlFillSectionalLeatherModal");
-        return;
-      }
-
       sectionsEl.innerHTML = "";
 
       const grades = Array.from(new Set(all.map(o => o.grade)))
         .sort((a,b) => gradeSortKey(a) - gradeSortKey(b));
 
       if (!grades.length) {
-        if (typeof window.mtlFillSectionalLeatherModal === "function") {
-          window.mtlFillSectionalLeatherModal();
-        }
         return;
       }
 
@@ -3176,7 +3164,7 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     return true;
   }
 
-  // Boot: wait for Volusion to inject options; keep retrying (sectionals need longer - leather may lag configuration).
+  // Boot: wait for Volusion to inject options; sectionals retry longer until cover/leather select is ready.
 function boot(){
   var tries = 0;
   var path = String(location.pathname || "").toLowerCase();
@@ -3204,7 +3192,10 @@ window.addEventListener("pageshow", function (ev) {
 try {
   window.mcTryInitWmLeather = function mcTryInitWmLeather() {
     try {
-      if (document.getElementById("wmOpen")) return true;
+      var sec =
+        document.documentElement.classList.contains("is-sectional-product") ||
+        (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage());
+      if (document.getElementById("wmOpen") && !sec) return true;
       return !!initIfReady();
     } catch (eTry) {
       return false;
@@ -4250,13 +4241,6 @@ try {
 
     function renderLeatherPreviewStripCore(){
       if (!mcLeatherStrip) return;
-      if (
-        document.documentElement.classList.contains("is-sectional-product") &&
-        typeof window.__mcSectionalMiniStripRender === "function"
-      ) {
-        window.__mcSectionalMiniStripRender();
-        return;
-      }
 
       var source = Array.isArray(window.__WM_LEATHER_OPTIONS__)
         ? window.__WM_LEATHER_OPTIONS__.slice()
@@ -4322,14 +4306,6 @@ try {
 
     function renderLeatherPreviewStrip(){
       if (!mcLeatherStrip) return;
-      if (
-        document.documentElement.classList.contains("is-sectional-product") &&
-        typeof window.__mcSectionalMiniStripRender === "function"
-      ) {
-        window.__mcSectionalMiniStripRender();
-        return;
-      }
-      if (document.documentElement.classList.contains("is-sectional-product")) return;
       renderLeatherPreviewStripCore();
     }
     window.mcRenderLeatherPreviewStrip = renderLeatherPreviewStripCore;
@@ -12424,14 +12400,13 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       viewAll.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        if (typeof window.scheduleSectionalLeatherBootstrap === 'function') {
-          window.scheduleSectionalLeatherBootstrap();
+        if (typeof window.mcTryInitWmLeather === 'function') {
+          window.mcTryInitWmLeather();
         }
-        if (typeof window.mtlOpenOwnLeatherPicker === 'function') {
-          window.mtlOpenOwnLeatherPicker();
+        if (typeof window.mcOpenWmLeatherModal === 'function') {
+          window.mcOpenWmLeatherModal(e);
           return;
         }
-        if (typeof window.mcOpenWmLeatherModal === 'function') { window.mcOpenWmLeatherModal(e); return; }
         var existing = q('#mcLeatherBtn') || q('#mcLeatherHeader');
         if (existing) existing.click();
       });
@@ -21425,7 +21400,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-summary-fix-v6"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-no-forced-config-v8"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
