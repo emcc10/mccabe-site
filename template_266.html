@@ -2709,6 +2709,15 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
       var td = sel.closest("td");
       if (tr) rowTxt += " " + String(tr.innerText || "");
       if (td) rowTxt += " " + String(td.innerText || "");
+      if (sel.id) {
+        var selId = String(sel.id);
+        var idEsc2 =
+          typeof CSS !== "undefined" && typeof CSS.escape === "function"
+            ? CSS.escape(selId)
+            : selId.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+        var lab2 = document.querySelector('label[for="' + idEsc2 + '"]');
+        if (lab2) rowTxt += " " + String(lab2.textContent || "");
+      }
     } catch (eR) {}
     rowTxt = rowTxt.toLowerCase();
     var s = 0;
@@ -2738,6 +2747,57 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     return s;
   }
 
+  /** Row + <label for="…"> copy (Volusion often puts the real “Choose cover” text on the label, not inside the <tr>). */
+  function wmCoverRowContext(sel) {
+    var parts = [];
+    try {
+      var tr = sel.closest("tr");
+      var td = sel.closest("td");
+      var par = sel.parentElement;
+      if (tr) parts.push(String(tr.innerText || ""));
+      if (td) parts.push(String(td.innerText || ""));
+      if (par) parts.push(String(par.innerText || ""));
+      if (sel.id) {
+        var sid = String(sel.id);
+        var idEsc3 =
+          typeof CSS !== "undefined" && typeof CSS.escape === "function"
+            ? CSS.escape(sid)
+            : sid.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+        var lab3 = document.querySelector('label[for="' + idEsc3 + '"]');
+        if (lab3) parts.push(String(lab3.textContent || ""));
+      }
+    } catch (eCtx) {}
+    return String(parts.join(" ")).toLowerCase().replace(/\s+/g, " ").trim();
+  }
+
+  function rowDeclaresUpholsteryCover(sel) {
+    var t = wmCoverRowContext(sel);
+    if (!t) return false;
+    if (
+      /(^|[^a-z])configuration([^a-z]|$)/i.test(t) &&
+      !/(cover|leather|upholstery|fabric\s*selection|fabric\s*cover|select\s+a\s+fabric)/i.test(t)
+    ) {
+      return false;
+    }
+    return /(choose\s+cover|choose\s+leather|select\s+leather|select\s+a\s+leather|select\s+a\s+(fabric|cover|grade|material|swatch)|upholstery|leather\s*cover|fabric\s*cover|fabric\s*&\s*leather|color\s*&\s*fabric|colour\s*&\s*fabric|material\s*selection|\b(leather\s+)?palette\b|select\s+(a\s+)?swatch|leather\s*grade|select\s+your\s+cover|cover\s*&\s*color|upholster(y)?\s*choice|\bfabric\s*selection\b|\bcolour\s*&\s*cover\b|\bcolor\s*&\s*cover\b)/i.test(
+      t
+    );
+  }
+
+  function sectionalDiscoveryEarly() {
+    return (
+      !wmIsTheaterSeatingPdpEarly() &&
+      (document.documentElement.classList.contains("is-sectional-product") ||
+        (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()))
+    );
+  }
+
+  function countNonPlaceholderOptions(sel) {
+    return Array.from(sel.options || []).filter(function (o) {
+      return !isPlaceholderOption(o);
+    }).length;
+  }
+
   /**
    * Single source of truth: which native cover <select> drives the Palliser/theater WM leather UI (modal + accordion strip).
    * Sectional PDP must use the same rules — mtl-sectional-renderer delegates here to avoid mismatched selects and rebuild storms.
@@ -2750,7 +2810,15 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     function acceptable(s) {
       if (!s || s.id === "mc-sectional-cover-proxy") return false;
       if (isNativeConfigurationSelectEl(s)) return false;
-      if (!hasRealOptions(s)) return false;
+      var sec = sectionalDiscoveryEarly();
+      var n = countNonPlaceholderOptions(s);
+      /* Theater + non-explicit rows: require same “real leather list” signal as before (≥2 non-placeholder opts + selectLooksLeatherish). */
+      if (sec && rowDeclaresUpholsteryCover(s)) {
+        if (n < 1) return false;
+        /* Label says “Choose cover” but option TEXT may still be Volusion placeholders — selectLooksLeatherish often stays false early. */
+        return true;
+      }
+      if (n < 2) return false;
       return selectLooksLeatherish(s);
     }
     var list = [];
@@ -21707,7 +21775,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-gallery-fallback-v15"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-gallery-fallback-v16"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
