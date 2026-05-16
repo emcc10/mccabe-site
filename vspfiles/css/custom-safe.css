@@ -11830,17 +11830,16 @@ body.mtl-sectional-diagram-lightbox-open {
   overflow-x: hidden;
 }
 
-/* Selected configuration box: above Add to Cart, not inside accordion */
+/* Selected configuration box: above Add to Cart (outside accordion menu) */
 #mtl-product-summary.mtl-product-summary--above-atc,
-html.is-sectional-product #mtl-product-summary.mtl-product-summary--above-atc {
+html.is-sectional-product #mtl-product-summary.mtl-product-summary--above-atc,
+html.is-sectional-product body.productdetails #mtl-product-summary {
+  display: block !important;
+  visibility: visible !important;
   margin: 16px 0 12px !important;
   width: 100% !important;
   max-width: 440px !important;
   box-sizing: border-box !important;
-}
-
-.mc-pdp-accordion > #mtl-product-summary {
-  display: none !important;
 }
 
 #mtl-product-summary .mtl-summary-row {

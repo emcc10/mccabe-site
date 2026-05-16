@@ -66,7 +66,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260515-github-diagram-urls-v1";
+  window.MTL_RENDERER_BUILD = "sectional-20260516-summary-fix-v6";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -316,11 +316,18 @@
 
   function findPdpAddToCartAnchor() {
     var scope = document.getElementById("v65-product-parent") || document.getElementById("content_area") || document;
+    var atcRow = scope.querySelector(".mc-atc-row");
+    if (atcRow && atcRow.parentNode) return { parent: atcRow.parentNode, before: atcRow };
+    var wrap = scope.querySelector(".mc-atc-button-wrap");
+    if (wrap && wrap.parentNode) return { parent: wrap.parentNode, before: wrap };
     var btn =
+      scope.querySelector('.mc-atc-button-wrap input[name="btnaddtocart"], .mc-atc-button-wrap button[name="btnaddtocart"]') ||
       scope.querySelector('input[name="btnaddtocart"]') ||
       scope.querySelector('button[name="btnaddtocart"]') ||
       scope.querySelector('input[id*="btnaddtocart" i]');
     if (!btn) return null;
+    var wrapBtn = btn.closest(".mc-atc-button-wrap");
+    if (wrapBtn && wrapBtn.parentNode) return { parent: wrapBtn.parentNode, before: wrapBtn };
     var qty =
       scope.querySelector(".v65-productdetail-cartqty") ||
       scope.querySelector(".vol-cartqty__wrap");
@@ -333,25 +340,62 @@
 
   function mountProductSummaryAboveAtc(sum) {
     if (!sum || !isSectionalProductPageClient()) return;
-    var acc = document.getElementById("mc-pdp-accordion");
-    if (acc && sum.parentNode === acc) {
-      try {
-        acc.removeChild(sum);
-      } catch (eRm) {}
-    }
-    var anchor = findPdpAddToCartAnchor();
-    if (anchor && anchor.parent) {
-      try {
-        if (sum.parentNode !== anchor.parent || sum.nextElementSibling !== anchor.before) {
-          anchor.parent.insertBefore(sum, anchor.before);
-        }
-      } catch (eIns) {
-        console.warn("[MTL] mountProductSummaryAboveAtc insertBefore", eIns);
-      }
-    }
+
     try {
       sum.classList.add("mtl-product-summary--above-atc");
+      sum.style.setProperty("display", "block", "important");
+      sum.style.setProperty("visibility", "visible", "important");
     } catch (eCls) {}
+
+    function tryInsert(anchor) {
+      if (!anchor || !anchor.parent) return false;
+      try {
+        anchor.parent.insertBefore(sum, anchor.before);
+        return true;
+      } catch (eIns) {
+        console.warn("[MTL] mountProductSummaryAboveAtc insertBefore", eIns);
+        return false;
+      }
+    }
+
+    if (tryInsert(findPdpAddToCartAnchor())) return;
+
+    var acc = document.getElementById("mc-pdp-accordion");
+    if (acc && acc.parentNode) {
+      try {
+        acc.parentNode.insertBefore(sum, acc.nextSibling);
+        return;
+      } catch (eAcc) {
+        console.warn("[MTL] mountProductSummaryAboveAtc fallback after accordion", eAcc);
+      }
+    }
+
+    var optionsTd =
+      document.querySelector("#v65-product-parent #options_table td") ||
+      document.querySelector("#options_table td");
+    if (optionsTd) {
+      try {
+        var atcInput = optionsTd.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]');
+        var atcTr = atcInput && atcInput.closest ? atcInput.closest("tr") : null;
+        if (atcTr && atcTr.parentNode) {
+          atcTr.parentNode.insertBefore(sum, atcTr);
+        } else {
+          optionsTd.appendChild(sum);
+        }
+        return;
+      } catch (eTd) {
+        console.warn("[MTL] mountProductSummaryAboveAtc options td fallback", eTd);
+      }
+    }
+
+    if (!sum.parentNode) {
+      var section = document.getElementById("mtl-sectional-configurations");
+      if (section && section.parentNode) {
+        try {
+          section.parentNode.insertBefore(sum, section.nextSibling);
+        } catch (eSec) {}
+      }
+    }
   }
   window.mountProductSummaryAboveAtc = mountProductSummaryAboveAtc;
 
@@ -3572,6 +3616,12 @@
     mtlRunStage("finalize: layout move & ATC", function () {
       scheduleMoveLeatherAboveConfigurations(section);
       scheduleSectionalAtcChrome();
+      [150, 600, 1500, 3200].forEach(function (ms) {
+        window.setTimeout(function () {
+          var sumAtc = document.getElementById("mtl-product-summary");
+          if (sumAtc) mountProductSummaryAboveAtc(sumAtc);
+        }, ms);
+      });
     });
 
     mtlRunStage("finalize: config cards bind & observers", function () {
