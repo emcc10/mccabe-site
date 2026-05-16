@@ -987,6 +987,9 @@
     bootstrapSectionalLeatherUi();
     [200, 450, 900, 1500, 2800, 5000, 9000].forEach(function (ms) {
       window.setTimeout(function () {
+        if (typeof window.MTL_promptVolusionCoverOptions === "function") {
+          window.MTL_promptVolusionCoverOptions();
+        }
         bootstrapSectionalLeatherUi();
       }, ms);
     });

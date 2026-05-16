@@ -12912,8 +12912,16 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (typeof window.mcRenderLeatherPreviewStrip === "function") {
       window.mcRenderLeatherPreviewStrip();
     }
-    if (isSectionalPg() && typeof window.MTL_retryMountPopularConfigurations === "function") {
-      window.MTL_retryMountPopularConfigurations();
+    if (isSectionalPg()) {
+      if (typeof window.MTL_promptVolusionCoverOptions === "function") {
+        window.MTL_promptVolusionCoverOptions();
+      }
+      if (typeof window.MTL_retryMountPopularConfigurations === "function") {
+        window.MTL_retryMountPopularConfigurations();
+      }
+      if (typeof window.MTL_runRender === "function") {
+        window.MTL_runRender();
+      }
     }
     if (!window.__mcAccLeatherReadyListen) {
       window.__mcAccLeatherReadyListen = true;
@@ -12922,8 +12930,10 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         if (typeof window.mcRenderLeatherPreviewStrip === "function") {
           window.mcRenderLeatherPreviewStrip();
         }
-        if (isSectionalPg() && typeof window.MTL_retryMountPopularConfigurations === "function") {
-          window.MTL_retryMountPopularConfigurations();
+        if (isSectionalPg()) {
+          if (typeof window.MTL_retryMountPopularConfigurations === "function") {
+            window.MTL_retryMountPopularConfigurations();
+          }
         }
         if (typeof window.mcSyncLeatherSummary === "function") {
           window.mcSyncLeatherSummary();
