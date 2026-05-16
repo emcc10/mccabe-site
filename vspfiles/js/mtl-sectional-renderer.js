@@ -66,7 +66,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260516-gallery-fallback-v13";
+  window.MTL_RENDERER_BUILD = "sectional-20260516-gallery-fallback-v14";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -984,6 +984,10 @@
 
   function scheduleSectionalLeatherBootstrap() {
     if (!isSectionalProductPageClient()) return;
+    /* runRender/boot were each scheduling another full bootstrap+timeout ladder — stacking 5× Volusion-heavy work and freezing refreshes */
+    if (window.__mtlLeatherBootstrapScheduled) return;
+    window.__mtlLeatherBootstrapScheduled = true;
+
     bootstrapSectionalLeatherUi();
     [200, 450, 900, 1500, 2800, 5000, 9000].forEach(function (ms) {
       window.setTimeout(function () {

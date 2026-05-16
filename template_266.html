@@ -13002,14 +13002,15 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       window.mcRenderLeatherPreviewStrip();
     }
     if (isSectionalPg()) {
+      /* Full MTL_runRender + prompt on every accordion pass duplicated mtl-sectional-renderer boot (runRender/load timers) and starved main thread */
       if (typeof window.MTL_promptVolusionCoverOptions === "function") {
-        window.MTL_promptVolusionCoverOptions();
+        if (!document.documentElement.dataset.mtlAccVolusionPrompted) {
+          document.documentElement.dataset.mtlAccVolusionPrompted = "1";
+          window.MTL_promptVolusionCoverOptions();
+        }
       }
       if (typeof window.MTL_retryMountPopularConfigurations === "function") {
         window.MTL_retryMountPopularConfigurations();
-      }
-      if (typeof window.MTL_runRender === "function") {
-        window.MTL_runRender();
       }
     }
     if (!window.__mcAccLeatherReadyListen) {
@@ -21699,7 +21700,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-gallery-fallback-v13"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-gallery-fallback-v14"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
