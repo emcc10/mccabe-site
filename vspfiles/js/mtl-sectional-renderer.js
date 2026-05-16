@@ -65,7 +65,7 @@
   var __mtlSectionalLbEscBound = false;
   var __mtlSectionalLbPopstateBound = false;
 
-  window.MTL_RENDERER_VERSION = "sectional-leather-20260520";
+  window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
   window.MTL_RENDERER_BUILD = "sectional-20260515-github-diagram-urls-v1";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
@@ -201,7 +201,72 @@
   function isSectionalProductPageClient() {
     if (isTheaterSeatingProductPageForGuard()) return false;
     if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) return true;
-    return document.documentElement.classList.contains("is-sectional-product");
+    if (document.documentElement.classList.contains("is-sectional-product")) return true;
+    try {
+      var path = String(window.location.pathname || "").toLowerCase();
+      if (path.indexOf("room-planner") === -1 && path.includes("-sc-")) return true;
+      var pcEl = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      var pcVal = pcEl ? String(pcEl.value || "").trim() : "";
+      if (/-sc-/i.test(pcVal)) return true;
+    } catch (ePath) {}
+    return false;
+  }
+
+  /** Ensure #mcLeatherSwatchStrip exists (template mount or accordion host). */
+  function ensureSectionalLeatherStripDom() {
+    var strip = document.getElementById("mcLeatherSwatchStrip");
+    if (strip) return strip;
+
+    if (typeof window.mcMountInlineConfig === "function") {
+      try {
+        window.mcMountInlineConfig({ forceWithoutWmOpen: true });
+      } catch (eMount) {}
+      strip = document.getElementById("mcLeatherSwatchStrip");
+      if (strip) return strip;
+    }
+
+    if (typeof window.mcBuildPdpAccordion === "function") {
+      try {
+        window.mcBuildPdpAccordion();
+      } catch (eAcc) {}
+    }
+
+    var host = document.querySelector("#mc-acc-row-leather .mc-acc-leather-host");
+    var picker = document.getElementById("mcLeatherPicker");
+    if (!picker) {
+      picker = document.createElement("div");
+      picker.id = "mcLeatherPicker";
+      picker.style.cssText =
+        "display:flex;align-items:center;gap:6px;width:100%;margin:0;padding:0";
+    }
+    if (!strip) {
+      strip = document.createElement("div");
+      strip.id = "mcLeatherSwatchStrip";
+      strip.style.cssText =
+        "display:flex;flex-wrap:nowrap;align-items:stretch;gap:6px;flex:1 1 auto;min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch";
+      if (!picker.contains(strip)) picker.appendChild(strip);
+    }
+    if (host && picker.parentNode !== host) {
+      host.appendChild(picker);
+    } else if (!picker.parentNode) {
+      var inline = document.getElementById("mc-inline-config") || document.getElementById("mcLeatherRow");
+      if (inline) inline.appendChild(picker);
+      else {
+        var optTd =
+          document.querySelector("#v65-product-parent #options_table td") ||
+          document.querySelector("#options_table td");
+        if (optTd) optTd.insertBefore(picker, optTd.firstChild);
+      }
+    }
+    return document.getElementById("mcLeatherSwatchStrip");
+  }
+
+  function syncSectionalLeatherAccordionHost() {
+    if (typeof window.mcBuildPdpAccordion === "function") {
+      try {
+        window.mcBuildPdpAccordion();
+      } catch (eRun) {}
+    }
   }
 
   function isVolusionConfigurationRowSelect(sel) {
@@ -495,6 +560,7 @@
 
   function mtlSyncSectionalLeatherFromDom() {
     if (!isSectionalProductPageClient()) return;
+    ensureSectionalLeatherStripDom();
     var le = findNativeLeatherSelectEl();
     if (!le) return;
     var syn = buildSyntheticWmLeatherOptionsFromSelect(le);
@@ -512,6 +578,7 @@
       __mtlDiag.miniSwatches = nMini > 0 ? "YES" : "NO";
       mtlRefreshStageTrackerDom();
     } catch (eDiag) {}
+    syncSectionalLeatherAccordionHost();
     renderSectionalMiniLeatherStripFromNative(le);
     if (typeof window.mcRenderLeatherPreviewStrip === "function") window.mcRenderLeatherPreviewStrip();
     if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
@@ -522,7 +589,7 @@
    * Does not depend on theater __WM_LEATHER_OPTIONS__ or config-card finalize.
    */
   function renderSectionalMiniLeatherStripFromNative(leatherSel) {
-    var strip = document.getElementById("mcLeatherSwatchStrip");
+    var strip = ensureSectionalLeatherStripDom();
     if (!strip) return 0;
     var sel = leatherSel || findNativeLeatherSelectEl();
     if (!sel || !sel.options || sel.options.length < 1) {
@@ -629,6 +696,8 @@
     } catch (eCls) {}
 
     installSectionalLeatherStripRenderer();
+    ensureSectionalLeatherStripDom();
+    syncSectionalLeatherAccordionHost();
 
     var leatherSel = leatherSelOptional || findNativeLeatherSelectEl();
     if (leatherSel) {
@@ -648,9 +717,16 @@
     bindSectionalLeatherUiRetries();
 
     if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
-    if (typeof window.mcBuildPdpAccordion === "function") window.mcBuildPdpAccordion();
+    syncSectionalLeatherAccordionHost();
 
     var nMini = renderSectionalMiniLeatherStripFromNative(leatherSel);
+    [80, 350, 900, 1800].forEach(function (ms) {
+      window.setTimeout(function () {
+        syncSectionalLeatherAccordionHost();
+        renderSectionalMiniLeatherStripFromNative(findNativeLeatherSelectEl());
+        if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
+      }, ms);
+    });
     try {
       __mtlDiag.leatherOpts = leatherSel ? "YES" : "NO";
       var ws = document.getElementById("wmSections");
@@ -682,6 +758,7 @@
       }, ms);
     });
   }
+  window.scheduleSectionalLeatherBootstrap = scheduleSectionalLeatherBootstrap;
 
   function ensureSectionalOptionsTableLeatherObserver() {
     if (!isSectionalProductPageClient()) return;
@@ -1379,7 +1456,12 @@
       function (ev) {
         var t = ev.target;
         if (!t || !t.closest) return;
-        if (!t.closest("#mcLeatherBtn, #mcLeatherHeader, #mcLeatherHeaderRow, .mc-mini-swatch, .mc-leather-mini-swatch")) return;
+        if (
+          !t.closest(
+            "#mcLeatherBtn, #mcLeatherHeader, #mcLeatherHeaderRow, #mc-acc-row-leather .mc-acc-config-btn, .mc-mini-swatch, .mc-leather-mini-swatch"
+          )
+        )
+          return;
         ev.stopPropagation();
         ev.preventDefault();
         mtlOpenOwnLeatherPicker();
@@ -2858,7 +2940,7 @@
   }
 
   function bindSectionalLeatherUiRetries() {
-    if (!document.documentElement.classList.contains("is-sectional-product")) return;
+    if (!isSectionalProductPageClient()) return;
     var hdr = document.getElementById("mcLeatherHeader");
     var btn = document.getElementById("mcLeatherBtn");
     var row = document.getElementById("mcLeatherHeaderRow");
@@ -3711,10 +3793,13 @@
     return rep;
   };
 
+  installSectionalLeatherStripRenderer();
+
   function boot() {
     stripSectionalHtmlClassIfTheater();
     removeMtlDebugPanelIfPresent();
     ensureMcWmOpenMountedListener();
+    if (isSectionalProductPageClient()) scheduleSectionalLeatherBootstrap();
     if (SECTIONAL_DBG && isSectionalProductPageClient() && !isTheaterSeatingProductPageForGuard()) {
       window.setTimeout(function () {
         runMtlSectionalDiagnosticConsoleOnly("after DOMContentLoaded (0ms tick)");
