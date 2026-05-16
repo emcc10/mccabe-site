@@ -267,7 +267,82 @@
         window.mcBuildPdpAccordion();
       } catch (eRun) {}
     }
+    var host = document.querySelector("#mc-acc-row-leather .mc-acc-leather-host");
+    if (!host) return;
+    var picker = document.getElementById("mcLeatherPicker");
+    var strip = document.getElementById("mcLeatherSwatchStrip");
+    if (picker && strip && !picker.contains(strip)) picker.appendChild(strip);
+    var move = picker || strip;
+    if (move && !host.contains(move)) host.appendChild(move);
   }
+
+  /** Minimal #wmSections shell so sectional modal injection can run if template initIfReady has not fired yet. */
+  function ensureSectionalWmLeatherModalShell() {
+    var ws = document.getElementById("wmSections");
+    if (ws) return ws;
+    var overlay = document.querySelector(".wm-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "wm-overlay";
+      overlay.style.display = "none";
+      overlay.innerHTML =
+        '<motion class="wm-modal" role="dialog" aria-modal="true">' +
+        '<div class="wm-modal-body"><div class="wm-tabpanel" data-active="1"><motion id="wmSections"></motion></motion></div>' +
+        "</motion>";
+      document.body.appendChild(overlay);
+    }
+    ws = document.getElementById("wmSections");
+    if (!ws && overlay) {
+      var body = overlay.querySelector(".wm-modal-body");
+      if (body) {
+        ws = document.createElement("div");
+        ws.id = "wmSections";
+        body.appendChild(ws);
+      }
+    }
+    return ws;
+  }
+
+  function findPdpAddToCartAnchor() {
+    var scope = document.getElementById("v65-product-parent") || document.getElementById("content_area") || document;
+    var btn =
+      scope.querySelector('input[name="btnaddtocart"]') ||
+      scope.querySelector('button[name="btnaddtocart"]') ||
+      scope.querySelector('input[id*="btnaddtocart" i]');
+    if (!btn) return null;
+    var qty =
+      scope.querySelector(".v65-productdetail-cartqty") ||
+      scope.querySelector(".vol-cartqty__wrap");
+    if (qty && qty.parentNode) return { parent: qty.parentNode, before: qty };
+    var tr = btn.closest("tr");
+    if (tr && tr.parentNode) return { parent: tr.parentNode, before: tr };
+    if (btn.parentNode) return { parent: btn.parentNode, before: btn };
+    return null;
+  }
+
+  function mountProductSummaryAboveAtc(sum) {
+    if (!sum || !isSectionalProductPageClient()) return;
+    var acc = document.getElementById("mc-pdp-accordion");
+    if (acc && sum.parentNode === acc) {
+      try {
+        acc.removeChild(sum);
+      } catch (eRm) {}
+    }
+    var anchor = findPdpAddToCartAnchor();
+    if (anchor && anchor.parent) {
+      try {
+        if (sum.parentNode !== anchor.parent || sum.nextElementSibling !== anchor.before) {
+          anchor.parent.insertBefore(sum, anchor.before);
+        }
+      } catch (eIns) {
+        console.warn("[MTL] mountProductSummaryAboveAtc insertBefore", eIns);
+      }
+    }
+    try {
+      sum.classList.add("mtl-product-summary--above-atc");
+    } catch (eCls) {}
+  }
+  window.mountProductSummaryAboveAtc = mountProductSummaryAboveAtc;
 
   function isVolusionConfigurationRowSelect(sel) {
     try {
