@@ -4665,7 +4665,10 @@ try {
       document.addEventListener("wmLeatherOptionsReady", function () {
         renderLeatherPreviewStrip();
         syncLeatherSummary();
-        if (isSecPdp && typeof window.mcHostLeatherStripInsideAccordion === "function") {
+        if (
+          document.documentElement.classList.contains("is-sectional-product") &&
+          typeof window.mcHostLeatherStripInsideAccordion === "function"
+        ) {
           window.mcHostLeatherStripInsideAccordion();
         }
       });
