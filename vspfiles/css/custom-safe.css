@@ -11830,14 +11830,17 @@ body.mtl-sectional-diagram-lightbox-open {
   overflow-x: hidden;
 }
 
-/* Inside PDP accordion: selected configuration sits directly under Select a Leather */
-.mc-pdp-accordion > #mtl-product-summary {
-  margin: 0 0 0 0 !important;
+/* Selected configuration box: above Add to Cart, not inside accordion */
+#mtl-product-summary.mtl-product-summary--above-atc,
+html.is-sectional-product #mtl-product-summary.mtl-product-summary--above-atc {
+  margin: 16px 0 12px !important;
   width: 100% !important;
-  max-width: 100% !important;
-  border-left: 0 !important;
-  border-right: 0 !important;
-  border-radius: 0 !important;
+  max-width: 440px !important;
+  box-sizing: border-box !important;
+}
+
+.mc-pdp-accordion > #mtl-product-summary {
+  display: none !important;
 }
 
 #mtl-product-summary .mtl-summary-row {

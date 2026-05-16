@@ -285,10 +285,21 @@
       overlay = document.createElement("div");
       overlay.className = "wm-overlay";
       overlay.style.display = "none";
-      overlay.innerHTML =
-        '<motion class="wm-modal" role="dialog" aria-modal="true">' +
-        '<div class="wm-modal-body"><div class="wm-tabpanel" data-active="1"><motion id="wmSections"></motion></motion></div>' +
-        "</motion>";
+      var modalEl = document.createElement("div");
+      modalEl.className = "wm-modal";
+      modalEl.setAttribute("role", "dialog");
+      modalEl.setAttribute("aria-modal", "true");
+      var modalBodyEl = document.createElement("div");
+      modalBodyEl.className = "wm-modal-body";
+      var panelEl = document.createElement("div");
+      panelEl.className = "wm-tabpanel";
+      panelEl.setAttribute("data-active", "1");
+      var wsEl = document.createElement("div");
+      wsEl.id = "wmSections";
+      panelEl.appendChild(wsEl);
+      modalBodyEl.appendChild(panelEl);
+      modalEl.appendChild(modalBodyEl);
+      overlay.appendChild(modalEl);
       document.body.appendChild(overlay);
     }
     ws = document.getElementById("wmSections");
@@ -616,6 +627,13 @@
     if (!leatherSel || !leatherSel.options || leatherSel.options.length < 1) return;
     var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
     if (!syn.length) return;
+    if (isSectionalProductPageClient()) {
+      window.__WM_LEATHER_OPTIONS__ = syn;
+      try {
+        document.dispatchEvent(new CustomEvent("wmLeatherOptionsReady", { bubbles: true }));
+      } catch (eSec) {}
+      return;
+    }
     var prev = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : null;
     var prevLen = prev ? prev.length : 0;
     var prevHasSwatches = !!(prev && prev.some(function (p) { return p && p.swatches && p.swatches.length; }));
@@ -639,6 +657,9 @@
     ensureSectionalLeatherStripDom();
     var le = findNativeLeatherSelectEl();
     if (!le) return;
+    try {
+      le.classList.add("mc-native-leather");
+    } catch (eCls) {}
     var syn = buildSyntheticWmLeatherOptionsFromSelect(le);
     if (!syn.length) return;
     ensureLeatherOptionsFromNativeSelect(le);
@@ -670,15 +691,13 @@
     var sel = leatherSel || findNativeLeatherSelectEl();
     if (!sel || !sel.options || sel.options.length < 1) {
       strip.classList.remove("mc-leather-mini-swatches");
-      strip.innerHTML =
-        '<span style="font-size:12px;color:#777">Swatches unavailable</span>';
+      strip.innerHTML = '';
       return 0;
     }
     var syn = buildSyntheticWmLeatherOptionsFromSelect(sel);
     if (!syn.length) {
       strip.classList.remove("mc-leather-mini-swatches");
-      strip.innerHTML =
-        '<span style="font-size:12px;color:#777">Swatches unavailable</span>';
+      strip.innerHTML = '';
       return 0;
     }
     ensureLeatherOptionsFromNativeSelect(sel);
@@ -767,6 +786,7 @@
   /** Leather UI for sectionals — must not depend on configuration cards / merge success. */
   function bootstrapSectionalLeatherUi(leatherSelOptional) {
     if (!isSectionalProductPageClient()) return;
+    ensureSectionalWmLeatherModalShell();
     mtlRemoveLeatherPickerHint();
     try {
       document.documentElement.classList.add("is-sectional-product");
@@ -966,10 +986,7 @@
     try {
       if (!isSectionalProductPageClient() || !leatherSel) return 0;
       /* Allow inject even when overlay is not yet visible (called synchronously before display:flex is set). */
-      if (!document.querySelector(".wm-overlay") && !document.getElementById("wmSections")) {
-        console.warn("[MTL leather modal] neither .wm-overlay nor #wmSections in DOM — skip inject");
-        return 0;
-      }
+      ensureSectionalWmLeatherModalShell();
       var ws = document.getElementById("wmSections");
     if (!ws) {
       console.warn("[MTL leather modal] #wmSections not found");
@@ -1147,6 +1164,7 @@
   }
 
   function fillLeatherModalFromNativeSelect(leatherSel) {
+    if (isSectionalProductPageClient()) ensureSectionalWmLeatherModalShell();
     var sel = leatherSel || findNativeLeatherSelectEl();
     if (!sel) return 0;
     if (isSectionalProductPageClient()) return injectSectionalNativeLeatherModal(sel);
@@ -2349,6 +2367,7 @@
     if (typeof window.mcTryInitWmLeather === "function") {
       window.mcTryInitWmLeather();
     }
+    scheduleSectionalLeatherBootstrap();
     sectionalLog("Selected native configuration", codeHint, "value=", sel.value);
     return true;
   }
@@ -2567,37 +2586,21 @@
       sum.setAttribute("data-mtl-generated", "true");
       sum.setAttribute("data-mtl-sectional-generated", "true");
     } catch (eSumAttr) {}
-    var accordion = document.getElementById("mc-pdp-accordion");
-    var leatherRow = document.getElementById("mc-acc-row-leather");
-    var anchoredInAccordion =
-      section && section.closest ? !!section.closest("#mc-pdp-accordion") : false;
-    var anchorParent = accordion && accordion.parentNode ? accordion.parentNode : null;
-    if (accordion && leatherRow && accordion.contains(leatherRow)) {
-      try {
-        var afterLeather = leatherRow.nextElementSibling;
-        if (sum.parentNode !== accordion || sum.previousElementSibling !== leatherRow) {
-          accordion.insertBefore(sum, afterLeather);
-        }
-      } catch (eLeatherIns) {
-        console.error("[MTL] FAILURE product summary insert after leather row", eLeatherIns);
-      }
-    } else if (accordion && anchoredInAccordion && anchorParent) {
-      try {
-        anchorParent.insertBefore(sum, accordion.nextSibling);
-      } catch (eAcc) {
-        console.error("[MTL] FAILURE product summary insert after accordion", eAcc);
-      }
+    mountProductSummaryAboveAtc(sum);
+    if (isSectionalProductPageClient()) {
+      [80, 350, 900, 1800].forEach(function (ms) {
+        window.setTimeout(function () {
+          mountProductSummaryAboveAtc(sum);
+        }, ms);
+      });
     } else if (section && section.parentNode) {
       try {
-        section.parentNode.insertBefore(sum, section.nextSibling);
+        if (sum.parentNode !== section.parentNode) {
+          section.parentNode.insertBefore(sum, section.nextSibling);
+        }
       } catch (eIns) {
-        console.error("[MTL] FAILURE product summary insertBefore (selector: #mtl-sectional-configurations parent)", eIns);
-        if (eIns && eIns.stack) console.error(eIns.stack);
+        console.error("[MTL] FAILURE product summary insertBefore", eIns);
       }
-    } else {
-      console.warn(
-        "[MTL] Product Summary mount skipped insertBefore — section or section.parentNode null (expected parent of #mtl-sectional-configurations)"
-      );
     }
     refreshProductPriceLabel();
     refreshQuoteAndPalliserSummary();
@@ -2694,6 +2697,7 @@
       }
     }
     refreshQuoteAndPalliserSummary();
+    mountProductSummaryAboveAtc(sum);
   }
 
   function scheduleProductSummaryAfterConfigChange() {
@@ -2701,7 +2705,10 @@
       setTimeout(function () {
         if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
         mtlSyncSectionalLeatherFromDom();
+        scheduleSectionalLeatherBootstrap();
         updateProductSummary();
+        var sum = document.getElementById("mtl-product-summary");
+        if (sum) mountProductSummaryAboveAtc(sum);
       }, ms);
     });
   }
@@ -2998,6 +3005,7 @@
           syncCardsSelectionHighlight();
           if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
           mtlSyncSectionalLeatherFromDom();
+          scheduleSectionalLeatherBootstrap();
           updateProductSummary();
         }, 0);
         scheduleProductSummaryAfterConfigChange();
