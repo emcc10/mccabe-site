@@ -1132,7 +1132,9 @@
 
   function mtlOpenOwnLeatherPicker() {
     if (!isSectionalProductPageClient()) return;
+    ensureSectionalLeatherStripDom();
     var leatherSel = findNativeLeatherSelectEl();
+    if (leatherSel) ensureLeatherOptionsFromNativeSelect(leatherSel);
 
     var old = document.getElementById("mtl-own-picker");
     if (old) old.parentNode.removeChild(old);
@@ -1187,7 +1189,34 @@
         });
       });
     }
-    if (!all.length) { console.warn("[MTL picker] no leather options to show"); return; }
+    if (!all.length) {
+      console.warn("[MTL picker] no leather options to show");
+      var hint = document.getElementById("mtl-own-picker-hint");
+      if (!hint) {
+        hint = document.createElement("div");
+        hint.id = "mtl-own-picker-hint";
+        hint.setAttribute("role", "alert");
+        hint.style.cssText =
+          "position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box";
+        hint.innerHTML =
+          '<motion style="background:#fff;padding:22px 26px;max-width:360px;text-align:center;font:14px/1.5 Inter,Arial,sans-serif">' +
+          "<p style=\"margin:0 0 14px\">Leather choices load after you pick a sectional configuration. Select a configuration below, then open leathers again.</p>" +
+          '<button type="button" style="border:1px solid #333;background:#fff;padding:8px 18px;cursor:pointer">OK</button></motion>';
+        var hintBtn = hint.querySelector("button");
+        if (hintBtn) {
+          hintBtn.addEventListener("click", function () {
+            if (hint.parentNode) hint.parentNode.removeChild(hint);
+          });
+        }
+        hint.addEventListener("click", function (ev) {
+          if (ev.target === hint && hint.parentNode) hint.parentNode.removeChild(hint);
+        });
+        document.body.appendChild(hint);
+      }
+      return;
+    }
+    var staleHint = document.getElementById("mtl-own-picker-hint");
+    if (staleHint && staleHint.parentNode) staleHint.parentNode.removeChild(staleHint);
     console.log("[MTL picker] total leathers:", all.length, "(source:", wm.length ? "__WM_LEATHER_OPTIONS__" : "native select", ")");
 
     /* Group by grade, sorted */
@@ -2575,6 +2604,58 @@
     });
   }
 
+  function sectionalConfigStorageKey() {
+    var pcInp = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+    var pc = pcInp ? String(pcInp.value || "").trim() : "";
+    return pc ? "mtl_sectional_config_" + pc : "";
+  }
+
+  function saveSectionalConfigToStorage(code, preferredNativeValue) {
+    var key = sectionalConfigStorageKey();
+    if (!key || !code) return;
+    try {
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          code: String(code),
+          nativeValue: preferredNativeValue != null ? String(preferredNativeValue) : "",
+          ts: Date.now(),
+        })
+      );
+    } catch (eSave) {}
+  }
+
+  function restoreSectionalConfigFromStorage() {
+    var key = sectionalConfigStorageKey();
+    if (!key) return false;
+    var raw;
+    try {
+      raw = localStorage.getItem(key);
+    } catch (eGet) {
+      return false;
+    }
+    if (!raw) return false;
+    var data;
+    try {
+      data = JSON.parse(raw);
+    } catch (eParse) {
+      return false;
+    }
+    if (!data || !data.code) return false;
+    if (!document.querySelector("#mtl-sectional-configurations .mtl-sectional-card")) return false;
+    selectConfigurationCard(data.code, data.nativeValue || null);
+    return true;
+  }
+
+  function scheduleSectionalConfigRestore() {
+    if (!isSectionalProductPageClient()) return;
+    [400, 1100, 2400, 4500].forEach(function (ms) {
+      window.setTimeout(function () {
+        restoreSectionalConfigFromStorage();
+      }, ms);
+    });
+  }
+
   function selectConfigurationCard(code, preferredNativeValue) {
     var cards = Array.from(document.querySelectorAll("#mtl-sectional-configurations .mtl-sectional-card"));
     cards.forEach(function (card) {
@@ -2598,9 +2679,17 @@
 
     window.__mtlSectionalSelectedConfig = code;
     window.__mtlSectionalPreferredNativeValue = preferredNativeValue;
+    saveSectionalConfigToStorage(code, preferredNativeValue);
     selectNativeConfiguration(preferredNativeValue, code);
     scheduleProductSummaryAfterConfigChange();
     setTimeout(syncCardsSelectionHighlight, 50);
+    [120, 400, 900, 1800].forEach(function (ms) {
+      window.setTimeout(function () {
+        mtlSyncSectionalLeatherFromDom();
+        syncSectionalLeatherAccordionHost();
+        renderSectionalMiniLeatherStripFromNative(findNativeLeatherSelectEl());
+      }, ms);
+    });
   }
 
   function bindConfigurationCardClicks() {
