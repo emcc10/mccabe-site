@@ -477,7 +477,8 @@
   function isPlaceholderLeatherOption(opt) {
     var t = String(opt.textContent || "").replace(/\s+/g, " ").trim();
     var v = String(opt.value || "").trim();
-    if (!t || !v) return true;
+    if (!t) return true;
+    if (!v && /^(select|choose|please|--)/i.test(t)) return true;
     if (/^--+$|^[-–—]$/.test(t)) return true;
     if (/please\s+select/i.test(t)) return true;
     if (/^select\s*(\.\.\.|…)?$/i.test(t)) return true;
@@ -691,6 +692,7 @@
   /** Leather UI for sectionals — must not depend on configuration cards / merge success. */
   function bootstrapSectionalLeatherUi(leatherSelOptional) {
     if (!isSectionalProductPageClient()) return;
+    mtlRemoveLeatherPickerHint();
     try {
       document.documentElement.classList.add("is-sectional-product");
     } catch (eCls) {}
@@ -1191,41 +1193,12 @@
       });
     }
     if (!all.length) {
-      console.warn("[MTL picker] no leather options to show");
-      var hint = document.getElementById("mtl-own-picker-hint");
-      if (!hint) {
-        hint = document.createElement("div");
-        hint.id = "mtl-own-picker-hint";
-        hint.setAttribute("role", "alert");
-        hint.style.cssText =
-          "position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box";
-        var card = document.createElement("div");
-        card.style.cssText =
-          "background:#fff;padding:22px 26px;max-width:360px;text-align:center;font:14px/1.5 Inter,Arial,sans-serif";
-        var msg = document.createElement("p");
-        msg.style.margin = "0 0 14px";
-        msg.textContent =
-          "Leather choices load after you pick a sectional configuration. Select a configuration below, then open leathers again.";
-        var hintBtn = document.createElement("button");
-        hintBtn.type = "button";
-        hintBtn.textContent = "OK";
-        hintBtn.style.cssText = "border:1px solid #333;background:#fff;padding:8px 18px;cursor:pointer";
-        hintBtn.addEventListener("click", function () {
-          if (hint.parentNode) hint.parentNode.removeChild(hint);
-        });
-        card.appendChild(msg);
-        card.appendChild(hintBtn);
-        hint.appendChild(card);
-        hint.addEventListener("click", function (ev) {
-          if (ev.target === hint && hint.parentNode) hint.parentNode.removeChild(hint);
-        });
-        document.body.appendChild(hint);
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[MTL picker] no leather options yet — skipping open");
       }
       return;
     }
-    var staleHint = document.getElementById("mtl-own-picker-hint");
-    if (staleHint && staleHint.parentNode) staleHint.parentNode.removeChild(staleHint);
-    console.log("[MTL picker] total leathers:", all.length, "(source:", wm.length ? "__WM_LEATHER_OPTIONS__" : "native select", ")");
+    console.log("[MTL picker] total leathers:", all.length);
 
     /* Group by grade, sorted */
     var grades = []; var byGrade = {};
