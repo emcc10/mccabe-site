@@ -1133,18 +1133,99 @@
     return out;
   }
 
+  function mtlRemoveLeatherPickerHint() {
+    var hint = document.getElementById("mtl-own-picker-hint");
+    if (hint && hint.parentNode) hint.parentNode.removeChild(hint);
+  }
+
+  function mtlGatherLeatherPickerRows() {
+    mtlRemoveLeatherPickerHint();
+    mtlSyncSectionalLeatherFromDom();
+    if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+
+    var leatherSel = findNativeLeatherSelectEl();
+    if (!leatherSel) {
+      var configSel = null;
+      try {
+        configSel = findConfigurationSelect();
+      } catch (eCfg) {}
+      var scan = document.querySelectorAll(
+        "#options_table select, #v65-product-parent select, #content_area select, form[action*='ProductDetails'] select, form[action*='productdetails'] select"
+      );
+      var si;
+      var best = null;
+      var bestN = 0;
+      for (si = 0; si < scan.length; si++) {
+        var s = scan[si];
+        if (!s || !s.options) continue;
+        if (configSel && s === configSel) continue;
+        if (isVolusionConfigurationRowSelect(s)) continue;
+        var idn = String(s.id || "") + " " + String(s.name || "");
+        if (/qty|quantity/i.test(idn)) continue;
+        var syn = buildSyntheticWmLeatherOptionsFromSelect(s);
+        if (syn.length > bestN) {
+          bestN = syn.length;
+          best = s;
+        }
+      }
+      if (best && bestN > 0) leatherSel = best;
+    }
+    if (leatherSel) ensureLeatherOptionsFromNativeSelect(leatherSel);
+
+    var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
+    var all = [];
+    if (wm.length) {
+      wm.forEach(function (r) {
+        if (!r) return;
+        var family = r.family || "";
+        var color = r.color || "";
+        var nameLine = (family + (color ? " " + color : "")).trim() || r.label || "";
+        all.push({
+          family: family,
+          color: color,
+          grade: r.grade != null ? String(r.grade) : "Base",
+          value: r.value,
+          label: r.label || nameLine,
+          nameLine: nameLine.replace(/\s+/g, " ").trim(),
+          swatches: Array.isArray(r.swatches) ? r.swatches.slice() : [],
+        });
+      });
+    }
+    if (!all.length && leatherSel) {
+      buildSyntheticWmLeatherOptionsFromSelect(leatherSel).forEach(function (s) {
+        var raw = String(s.family || s.label || "")
+          .replace(/\s+/g, " ")
+          .trim();
+        var parts = raw.split(" ").filter(Boolean);
+        var family = parts.shift() || "";
+        var color = parts.join(" ").trim();
+        var nameLine = (family + (color ? " " + color : "")).trim();
+        all.push({
+          family: family,
+          color: color,
+          grade: s.grade || "Base",
+          value: s.value,
+          label: s.label,
+          nameLine: nameLine,
+          swatches: buildSwatchUrls(family, color),
+        });
+      });
+    }
+    return { all: all, leatherSel: leatherSel };
+  }
+
   function mtlOpenOwnLeatherPicker() {
     if (!isSectionalProductPageClient()) return;
     ensureSectionalLeatherStripDom();
-    var leatherSel = findNativeLeatherSelectEl();
-    if (leatherSel) ensureLeatherOptionsFromNativeSelect(leatherSel);
+    var gathered = mtlGatherLeatherPickerRows();
+    var all = gathered.all;
+    var leatherSel = gathered.leatherSel;
 
     var old = document.getElementById("mtl-own-picker");
     if (old) old.parentNode.removeChild(old);
     var oldPrev = document.getElementById("mtl-own-preview");
     if (oldPrev) oldPrev.parentNode.removeChild(oldPrev);
 
-    var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
     var LEATHER_INFO = window.__MTL_LEATHER_INFO__ || {};
     var GRADE_UP = window.__MTL_GRADE_UPCHARGE__ || { "2000": 99, "3000": 149 };
 
@@ -1155,43 +1236,6 @@
     }
     function escHtml(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
-    /* PRIMARY DATA SOURCE: window.__WM_LEATHER_OPTIONS__ — same array the theater seating picker uses.
-       This has 37 entries with family/color/grade/value/swatches already parsed correctly. */
-    var all = [];
-    if (wm.length) {
-      wm.forEach(function(r){
-        if (!r) return;
-        var family = r.family || "";
-        var color  = r.color  || "";
-        var nameLine = (family + (color ? " " + color : "")).trim() || r.label || "";
-        all.push({
-          family: family,
-          color: color,
-          grade: r.grade != null ? String(r.grade) : "Base",
-          value: r.value,
-          label: r.label || nameLine,
-          nameLine: nameLine.replace(/\s+/g," ").trim(),
-          swatches: Array.isArray(r.swatches) ? r.swatches.slice() : []
-        });
-      });
-    }
-    /* Fallback: read directly from native select if WM hasn't populated */
-    if (!all.length && leatherSel) {
-      var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
-      syn.forEach(function(s){
-        var raw = String(s.family || s.label || "").replace(/\s+/g," ").trim();
-        var parts = raw.split(" ").filter(Boolean);
-        var family = parts.shift() || "";
-        var color  = parts.join(" ").trim();
-        var nameLine = (family + (color ? " " + color : "")).trim();
-        all.push({
-          family: family, color: color,
-          grade: s.grade || "Base",
-          value: s.value, label: s.label, nameLine: nameLine,
-          swatches: buildSwatchUrls(family, color)
-        });
-      });
-    }
     if (!all.length) {
       if (typeof console !== "undefined" && console.warn) {
         console.warn("[MTL picker] no leather options yet — skipping open");
@@ -1447,6 +1491,7 @@
     console.log("[MTL own picker] opened with", all.length, "leathers,", grades.length, "grade(s)");
   }
   window.mtlOpenOwnLeatherPicker = mtlOpenOwnLeatherPicker;
+  window.mtlRemoveLeatherPickerHint = mtlRemoveLeatherPickerHint;
 
   function bindViewAllLeathersButtons() {
     if (!isSectionalProductPageClient()) return;
@@ -3899,6 +3944,7 @@
   installSectionalLeatherStripRenderer();
 
   function boot() {
+    mtlRemoveLeatherPickerHint();
     stripSectionalHtmlClassIfTheater();
     removeMtlDebugPanelIfPresent();
     ensureMcWmOpenMountedListener();
