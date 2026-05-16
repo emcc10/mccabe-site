@@ -6176,6 +6176,12 @@ window.applyPlannerToPage = function (payload) {
           : 0,
     mcPlannerSignInRequired: !!(hasPlannerConfig && !loggedIn)
   };
+  try {
+    var pcSave = String(window.__mcLastPlannerPayload.productCode || _pc || "").trim();
+    if (pcSave && hasPlannerConfig) {
+      localStorage.setItem("roomPlannerData_" + pcSave, JSON.stringify(window.__mcLastPlannerPayload));
+    }
+  } catch (eLsSave) {}
   if (loggedIn || !hasPlannerConfig) {
     try { mcSyncPlannerFormForSubmit(window.__mcLastPlannerPayload, lineTotal); } catch (eSyncApply) {}
   } else {

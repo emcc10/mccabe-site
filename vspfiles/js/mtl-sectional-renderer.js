@@ -712,6 +712,7 @@
     ensureSectionalV65LeatherObserver();
     ensureWmSectionsFallbackObserver(leatherSel);
     patchLeatherModalFallback(leatherSel);
+    bindViewAllLeathersButtons();
     ensureMcWmOpenMountedListener();
     mtlWrapWmOpenForSectional();
     bindSectionalLeatherUiRetries();
@@ -1198,16 +1199,23 @@
         hint.setAttribute("role", "alert");
         hint.style.cssText =
           "position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box";
-        hint.innerHTML =
-          '<motion style="background:#fff;padding:22px 26px;max-width:360px;text-align:center;font:14px/1.5 Inter,Arial,sans-serif">' +
-          "<p style=\"margin:0 0 14px\">Leather choices load after you pick a sectional configuration. Select a configuration below, then open leathers again.</p>" +
-          '<button type="button" style="border:1px solid #333;background:#fff;padding:8px 18px;cursor:pointer">OK</button></motion>';
-        var hintBtn = hint.querySelector("button");
-        if (hintBtn) {
-          hintBtn.addEventListener("click", function () {
-            if (hint.parentNode) hint.parentNode.removeChild(hint);
-          });
-        }
+        var card = document.createElement("div");
+        card.style.cssText =
+          "background:#fff;padding:22px 26px;max-width:360px;text-align:center;font:14px/1.5 Inter,Arial,sans-serif";
+        var msg = document.createElement("p");
+        msg.style.margin = "0 0 14px";
+        msg.textContent =
+          "Leather choices load after you pick a sectional configuration. Select a configuration below, then open leathers again.";
+        var hintBtn = document.createElement("button");
+        hintBtn.type = "button";
+        hintBtn.textContent = "OK";
+        hintBtn.style.cssText = "border:1px solid #333;background:#fff;padding:8px 18px;cursor:pointer";
+        hintBtn.addEventListener("click", function () {
+          if (hint.parentNode) hint.parentNode.removeChild(hint);
+        });
+        card.appendChild(msg);
+        card.appendChild(hintBtn);
+        hint.appendChild(card);
         hint.addEventListener("click", function (ev) {
           if (ev.target === hint && hint.parentNode) hint.parentNode.removeChild(hint);
         });
@@ -1466,6 +1474,21 @@
     console.log("[MTL own picker] opened with", all.length, "leathers,", grades.length, "grade(s)");
   }
   window.mtlOpenOwnLeatherPicker = mtlOpenOwnLeatherPicker;
+
+  function bindViewAllLeathersButtons() {
+    if (!isSectionalProductPageClient()) return;
+    var btns = document.querySelectorAll("#mc-acc-row-leather .mc-acc-config-btn");
+    Array.prototype.forEach.call(btns, function (btn) {
+      if (!btn || btn.dataset.mtlViewAllBound === "1") return;
+      btn.dataset.mtlViewAllBound = "1";
+      btn.addEventListener("click", function (ev) {
+        if (ev && ev.preventDefault) ev.preventDefault();
+        if (ev && ev.stopPropagation) ev.stopPropagation();
+        if (ev && ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+        mtlOpenOwnLeatherPicker();
+      });
+    });
+  }
 
   function patchLeatherModalFallback(leatherSel) {
     if (!isSectionalProductPageClient()) return;
@@ -2626,6 +2649,7 @@
   }
 
   function restoreSectionalConfigFromStorage() {
+    if (document.documentElement.dataset.mtlConfigRestored === "1") return false;
     var key = sectionalConfigStorageKey();
     if (!key) return false;
     var raw;
@@ -2643,7 +2667,9 @@
     }
     if (!data || !data.code) return false;
     if (!document.querySelector("#mtl-sectional-configurations .mtl-sectional-card")) return false;
-    selectConfigurationCard(data.code, data.nativeValue || null);
+    var nv = data.nativeValue != null && String(data.nativeValue) !== "" ? data.nativeValue : null;
+    selectConfigurationCard(data.code, nv);
+    document.documentElement.dataset.mtlConfigRestored = "1";
     return true;
   }
 
@@ -3406,6 +3432,7 @@
       function syncAccordionPopularAndSummary() {
         mountPopularConfigurationsInAccordion(section);
         ensureProductSummary(section);
+        bindViewAllLeathersButtons();
         try {
           bindConfigurationCardClicks();
         } catch (eBnd) {}
@@ -3418,6 +3445,10 @@
       [450, 1100, 2400].forEach(function (ms) {
         window.setTimeout(syncAccordionPopularAndSummary, ms);
       });
+    });
+
+    mtlRunStage("finalize: restore saved sectional configuration", function () {
+      scheduleSectionalConfigRestore();
     });
 
     mtlRunStagePanel("finalize: product summary DOM", "productSummary", function () {

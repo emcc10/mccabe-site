@@ -11830,6 +11830,16 @@ body.mtl-sectional-diagram-lightbox-open {
   overflow-x: hidden;
 }
 
+/* Inside PDP accordion: selected configuration sits directly under Select a Leather */
+.mc-pdp-accordion > #mtl-product-summary {
+  margin: 0 0 0 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+}
+
 #mtl-product-summary .mtl-summary-row {
   display: flex;
   justify-content: space-between;
