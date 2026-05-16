@@ -66,7 +66,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260516-leather-accordion-v9";
+  window.MTL_RENDERER_BUILD = "sectional-20260516-leather-accordion-v10";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -666,10 +666,57 @@
     return out;
   }
 
+  function mtlSplitLeatherFamilyColor(label) {
+    var t = String(label || "").replace(/\s+/g, " ").trim();
+    if (!t) return { family: "", color: "" };
+    var gm = t.match(/\b(?:Grade|Gr\.?)\s*([0-9][0-9,\s]*(?:\/\s*[0-9][0-9,\s]*)?)\b/i);
+    if (gm) {
+      t = t
+        .replace(/\b(?:Grade|Gr\.?)\s*[0-9][0-9,\s]*(?:\/\s*[0-9][0-9,\s]*)?\b/i, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+    var parts = t.split(/\s+/).filter(Boolean);
+    if (!parts.length) return { family: "", color: "" };
+    return { family: parts[0], color: parts.slice(1).join(" ") };
+  }
+
+  function mtlSyncNativeSelectToWmOptions(leatherSel) {
+    if (!leatherSel || !leatherSel.options) return;
+    var syn = buildSyntheticWmLeatherOptionsFromSelect(leatherSel);
+    if (!syn.length) return;
+    window.__WM_LEATHER_OPTIONS__ = syn.map(function (s) {
+      var fc = mtlSplitLeatherFamilyColor(s.label || s.family || "");
+      var family = fc.family || String(s.family || "").trim();
+      var color = fc.color || "";
+      return {
+        family: family,
+        color: color,
+        grade: s.grade,
+        value: s.value,
+        label: s.label,
+        swatches: buildSwatchUrls(family, color),
+      };
+    });
+    try {
+      document.dispatchEvent(new CustomEvent("wmLeatherOptionsReady", { bubbles: true }));
+    } catch (eEvt) {}
+  }
+
   function ensureLeatherOptionsFromNativeSelect(leatherSel) {
     if (isSectionalProductPageClient()) {
       if (typeof window.mcTryInitWmLeather === "function") {
         window.mcTryInitWmLeather();
+      }
+      var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
+      var needsNative =
+        !wm.length ||
+        wm.every(function (o) {
+          return !o || !o.swatches || !o.swatches.length;
+        });
+      if (needsNative) {
+        var le = leatherSel || findNativeLeatherSelectEl();
+        if (le) mtlSyncNativeSelectToWmOptions(le);
       }
       return;
     }
@@ -731,7 +778,9 @@
     for (oi = 0; oi < overlays.length; oi++) {
       if (overlays[oi].querySelector("#wmSections")) overlays[oi].remove();
     }
-    if (typeof window.mcTryInitWmLeather === "function") {
+    if (typeof window.mcForceInitWmLeather === "function") {
+      window.mcForceInitWmLeather();
+    } else if (typeof window.mcTryInitWmLeather === "function") {
       window.mcTryInitWmLeather();
     }
   }
@@ -746,15 +795,23 @@
       try {
         le.classList.add("mc-native-leather");
       } catch (eCls) {}
+      ensureLeatherOptionsFromNativeSelect(le);
     }
     var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
-    if (!document.getElementById("wmOpen") || wmLeatherOptionsLookCorrupt(wm)) {
+    if (wmLeatherOptionsLookCorrupt(wm)) {
       mtlRebuildTheaterLeatherUi();
     } else if (typeof window.mcTryInitWmLeather === "function") {
       window.mcTryInitWmLeather();
     }
     if (typeof window.mcRenderLeatherPreviewStrip === "function") {
       window.mcRenderLeatherPreviewStrip();
+    }
+    var stripAfter = document.getElementById("mcLeatherSwatchStrip");
+    var nAfter = stripAfter
+      ? stripAfter.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length
+      : 0;
+    if (!nAfter && typeof window.__mcSectionalMiniStripRender === "function") {
+      window.__mcSectionalMiniStripRender();
     }
     if (typeof window.mcSyncLeatherSummary === "function") {
       window.mcSyncLeatherSummary();
@@ -868,7 +925,33 @@
   }
 
   function installSectionalLeatherStripRenderer() {
-    /* No-op: sectionals use template renderLeatherPreviewStripCore + __WM_LEATHER_OPTIONS__ (theater path). */
+    window.__mcSectionalMiniStripRender = function () {
+      var strip = document.getElementById("mcLeatherSwatchStrip");
+      var n = 0;
+      if (typeof window.mcRenderLeatherPreviewStrip === "function") {
+        window.mcRenderLeatherPreviewStrip();
+        if (strip) {
+          n = strip.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length;
+        }
+      }
+      if (!n) {
+        var le = findNativeLeatherSelectEl();
+        if (le) {
+          mtlSyncNativeSelectToWmOptions(le);
+          if (typeof window.mcRenderLeatherPreviewStrip === "function") {
+            window.mcRenderLeatherPreviewStrip();
+            if (strip) {
+              n = strip.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length;
+            }
+          }
+        }
+        if (!n) n = renderSectionalMiniLeatherStripFromNative(le);
+      }
+      if (typeof window.mcSyncLeatherSummary === "function") {
+        window.mcSyncLeatherSummary();
+      }
+      return n;
+    };
   }
 
   /** Sectionals: same theater leather init + mini strip; only accordion host placement is sectional-specific. */
@@ -878,7 +961,11 @@
     try {
       document.documentElement.classList.add("is-sectional-product");
     } catch (eCls) {}
+    try {
+      delete document.documentElement.dataset.mtlWmModalFallbackPatched;
+    } catch (eDs) {}
 
+    installSectionalLeatherStripRenderer();
     ensureSectionalLeatherStripDom();
     bindViewAllLeathersButtons();
     bindSectionalLeatherUiRetries();
@@ -1654,9 +1741,10 @@
         if (ev && ev.preventDefault) ev.preventDefault();
         if (ev && ev.stopPropagation) ev.stopPropagation();
         if (ev && ev.stopImmediatePropagation) ev.stopImmediatePropagation();
-        if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
         if (typeof window.mcOpenWmLeatherModal === "function") {
           window.mcOpenWmLeatherModal(ev);
+        } else if (typeof window.mcOpenWmLeatherOverlay === "function") {
+          window.mcOpenWmLeatherOverlay(ev);
         }
       });
     });

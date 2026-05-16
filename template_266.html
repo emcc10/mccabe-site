@@ -2283,9 +2283,7 @@ function log() {
   if (WM_DEBUG) console.log.apply(console, ["[WM]"].concat([].slice.call(arguments)));
 }
 
-// IMPORTANT: do NOT block retries until we actually build UI.
-// bfcache / partial init can leave __WM_LEATHER_MODAL_BUILT__ true while #wmOpen is gone - never skip in that case.
-if (window.__WM_LEATHER_MODAL_BUILT__ && document.getElementById("wmOpen")) return;
+// bfcache / partial init can leave __WM_LEATHER_MODAL_BUILT__ true while #wmOpen is gone.
 if (window.__WM_LEATHER_MODAL_BUILT__ && !document.getElementById("wmOpen")) {
   try {
     window.__WM_LEATHER_MODAL_BUILT__ = false;
@@ -2767,7 +2765,12 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     if (wmOpenStale) {
       if (!secEarly) return true;
       var wmStale = window.__WM_LEATHER_OPTIONS__;
-      if (Array.isArray(wmStale) && wmStale.length > 0 && !wmOptsLookCorruptForInit(wmStale)) return true;
+      if (Array.isArray(wmStale) && wmStale.length > 0 && !wmOptsLookCorruptForInit(wmStale)) {
+        var allNoSw = wmStale.every(function (o) {
+          return !o || !o.swatches || !o.swatches.length;
+        });
+        if (!allNoSw) return true;
+      }
       try {
         var uiBlock = wmOpenStale.parentElement;
         if (uiBlock && uiBlock.querySelector && uiBlock.querySelector("#wmSummary")) uiBlock.remove();
@@ -2783,37 +2786,32 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     }
 
     const allSelects = Array.from(document.querySelectorAll("select"));
-    const candidateSelects = allSelects
-      .filter(function (s) {
-        return !isNativeConfigurationSelectEl(s);
-      })
-      .filter(selectLooksLeatherish)
-      .filter(hasRealOptions)
-      .sort(function (a, b) {
-        return wmLeatherSelectScore(b) - wmLeatherSelectScore(a);
-      });
+    var candidateSelects = [];
+    var otSec = document.querySelector(
+      "#v65-product-parent #options_table, #options_table, table[id*='options_table']"
+    );
 
-    if (secEarly) {
-      var otSec = document.querySelector(
-        "#v65-product-parent #options_table, #options_table, table[id*='options_table']"
-      );
-      if (otSec) {
-        var orderedSec = Array.from(otSec.querySelectorAll("select")).filter(function (s) {
+    /* Sectionals: pick cover/leather from options_table by row label + option text — not selectLooksLeatherish alone. */
+    if (secEarly && otSec) {
+      candidateSelects = Array.from(otSec.querySelectorAll("select"))
+        .filter(function (s) {
           return !isNativeConfigurationSelectEl(s) && hasRealOptions(s);
+        })
+        .sort(function (a, b) {
+          return wmLeatherSelectScore(b) - wmLeatherSelectScore(a);
         });
-        if (orderedSec.length) {
-          orderedSec.sort(function (a, b) {
-            return wmLeatherSelectScore(b) - wmLeatherSelectScore(a);
-          });
-          var bestSec = orderedSec[0];
-          if (
-            !candidateSelects.length ||
-            wmLeatherSelectScore(bestSec) > wmLeatherSelectScore(candidateSelects[0])
-          ) {
-            candidateSelects = [bestSec];
-          }
-        }
-      }
+    }
+
+    if (!candidateSelects.length) {
+      candidateSelects = allSelects
+        .filter(function (s) {
+          return !isNativeConfigurationSelectEl(s);
+        })
+        .filter(selectLooksLeatherish)
+        .filter(hasRealOptions)
+        .sort(function (a, b) {
+          return wmLeatherSelectScore(b) - wmLeatherSelectScore(a);
+        });
     }
 
     if (!candidateSelects.length) { log("No leather-ish selects yet."); return false; }
@@ -3219,13 +3217,49 @@ window.addEventListener("pageshow", function (ev) {
   }
 });
 
+  window.mcForceInitWmLeather = function mcForceInitWmLeather() {
+    try {
+      window.__WM_LEATHER_MODAL_BUILT__ = false;
+      window.__WM_LEATHER_OPTIONS__ = [];
+    } catch (eReset) {}
+    var wmOpenStale = document.getElementById("wmOpen");
+    if (wmOpenStale) {
+      try {
+        var uiBlock = wmOpenStale.parentElement;
+        if (uiBlock && uiBlock.querySelector && uiBlock.querySelector("#wmSummary")) uiBlock.remove();
+        else wmOpenStale.remove();
+      } catch (eRm) {}
+    }
+    document.querySelectorAll("body > .wm-overlay").forEach(function (ov) {
+      if (ov.querySelector("#wmSections")) ov.remove();
+    });
+    return !!initIfReady();
+  };
+
+  window.mcOpenWmLeatherOverlay = function mcOpenWmLeatherOverlay(ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    var wm = document.getElementById("wmOpen");
+    var stub = {
+      preventDefault: function () {},
+      stopPropagation: function () {},
+    };
+    if (wm && typeof wm.onclick === "function") {
+      wm.onclick(ev || stub);
+      return true;
+    }
+    var ov = document.querySelector(".wm-overlay");
+    if (ov) {
+      ov.style.display = "flex";
+      ov.style.setProperty("display", "flex", "important");
+      return true;
+    }
+    return false;
+  };
+
 try {
   window.mcTryInitWmLeather = function mcTryInitWmLeather() {
     try {
-      var sec =
-        document.documentElement.classList.contains("is-sectional-product") ||
-        (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage());
-      if (document.getElementById("wmOpen") && !sec) return true;
       return !!initIfReady();
     } catch (eTry) {
       return false;
@@ -3860,6 +3894,33 @@ try {
     } catch (eMo) {}
   }
 
+  function mcWmLeatherNeedsForceInit() {
+    if (!document.getElementById("wmOpen")) return true;
+    var o = window.__WM_LEATHER_OPTIONS__;
+    if (!Array.isArray(o) || !o.length) return true;
+    var bad = 0;
+    var noSw = 0;
+    for (var i = 0; i < o.length; i++) {
+      var item = o[i];
+      if (!item) continue;
+      var f = String(item.family || "").trim();
+      var lab = String(item.label || "").trim();
+      if (/^\$?\s*[\d,]+\.?\d*\s*$/.test(f) || /^\$?\s*[\d,]+\.?\d*\s*$/.test(lab)) bad++;
+      if (!item.swatches || !item.swatches.length) noSw++;
+    }
+    if (bad >= Math.min(2, o.length)) return true;
+    if (noSw === o.length) return true;
+    return false;
+  }
+
+  function mcEnsureWmLeatherInit() {
+    if (typeof window.mcForceInitWmLeather === "function" && mcWmLeatherNeedsForceInit()) {
+      window.mcForceInitWmLeather();
+    } else if (typeof window.mcTryInitWmLeather === "function") {
+      window.mcTryInitWmLeather();
+    }
+  }
+
   /**
    * Open Palliser leather modal — same handler as initIfReady wires on #wmOpen (~2835).
    * Ensures programmatic open when #wmOpen was display:none until sectional override applies.
@@ -3869,7 +3930,7 @@ try {
     if (ev && ev.stopPropagation) ev.stopPropagation();
     mcEnsureWmOpenMutationObserver();
     window.__mcPendingWmOpenTap = Date.now();
-    if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+    mcEnsureWmLeatherInit();
     var w = document.getElementById("wmOpen");
     if (w) {
       mcFireWmOpenProgrammatically(w, ev);
@@ -3883,13 +3944,17 @@ try {
         : 28;
     var tmr = setInterval(function () {
       tries++;
-      if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+      mcEnsureWmLeatherInit();
       var w2 = document.getElementById("wmOpen");
       if (w2) {
         clearInterval(tmr);
         window.__mcPendingWmOpenTap = 0;
         mcFireWmOpenProgrammatically(w2, ev);
-      } else if (tries > maxT) clearInterval(tmr);
+      } else if (tries > maxT) {
+        clearInterval(tmr);
+        window.__mcPendingWmOpenTap = 0;
+        if (typeof window.mcOpenWmLeatherOverlay === "function") window.mcOpenWmLeatherOverlay(ev);
+      }
     }, 120);
   };
 
@@ -4216,7 +4281,12 @@ try {
       var bestScore = -1;
       if (table) {
         Array.from(table.querySelectorAll("select")).forEach(function (sel) {
-          if (!sel || !sel.options || sel.options.length < 2) return;
+          if (!sel || !sel.options || sel.options.length < 1) return;
+          var realOpts = Array.from(sel.options).filter(function (o) {
+            var t = String(o.textContent || "").replace(/\s+/g, " ").trim();
+            return t && !/^(choose|select|please select|--)/i.test(t);
+          });
+          if (!realOpts.length) return;
           var row = "";
           try {
             var tr = sel.closest("tr");
@@ -4328,6 +4398,13 @@ try {
       });
       if (!source.length) source = fallbackLeatherOptionsFromSelect();
       if (!source.length) {
+        if (
+          document.documentElement.classList.contains("is-sectional-product") &&
+          typeof window.__mcSectionalMiniStripRender === "function"
+        ) {
+          var secN = window.__mcSectionalMiniStripRender();
+          if (secN > 0) return;
+        }
         mcLeatherStrip.innerHTML = "";
         return;
       }
@@ -12475,9 +12552,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       viewAll.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        if (typeof window.mcTryInitWmLeather === 'function') {
-          window.mcTryInitWmLeather();
-        }
         if (typeof window.mcOpenWmLeatherModal === 'function') {
           window.mcOpenWmLeatherModal(e);
           return;
@@ -12803,12 +12877,30 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (typeof window.mcRenderLeatherPreviewStrip === "function") {
       window.mcRenderLeatherPreviewStrip();
     }
+    if (
+      (document.documentElement.classList.contains("is-sectional-product") ||
+        (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage())) &&
+      typeof window.__mcSectionalMiniStripRender === "function"
+    ) {
+      var _mcStrip = document.getElementById("mcLeatherSwatchStrip");
+      var _mcN = _mcStrip
+        ? _mcStrip.querySelectorAll(".mc-mini-swatch, .mc-leather-mini-swatch").length
+        : 0;
+      if (!_mcN) window.__mcSectionalMiniStripRender();
+    }
     if (!window.__mcAccLeatherReadyListen) {
       window.__mcAccLeatherReadyListen = true;
       document.addEventListener("wmLeatherOptionsReady", function () {
         hostLeatherStripInsideAccordion();
         if (typeof window.mcRenderLeatherPreviewStrip === "function") {
           window.mcRenderLeatherPreviewStrip();
+        }
+        if (typeof window.__mcSectionalMiniStripRender === "function") {
+          var _st2 = document.getElementById("mcLeatherSwatchStrip");
+          var _n2 = _st2
+            ? _st2.querySelectorAll(".mc-mini-swatch, .mc-leather-mini-swatch").length
+            : 0;
+          if (!_n2) window.__mcSectionalMiniStripRender();
         }
         if (typeof window.mcSyncLeatherSummary === "function") {
           window.mcSyncLeatherSummary();
@@ -21485,7 +21577,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-leather-accordion-v9"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-leather-accordion-v10"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
