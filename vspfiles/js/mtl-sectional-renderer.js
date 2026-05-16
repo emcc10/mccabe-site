@@ -66,7 +66,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260516-leather-restore-v11";
+  window.MTL_RENDERER_BUILD = "sectional-20260516-barrett-fix-v12";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -811,10 +811,22 @@
     var nAfter = stripAfter
       ? stripAfter.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length
       : 0;
-    if (!nAfter && typeof window.mcHostLeatherStripInsideAccordion === "function") {
-      window.mcHostLeatherStripInsideAccordion();
-      if (typeof window.mcRenderLeatherPreviewStrip === "function") {
-        window.mcRenderLeatherPreviewStrip();
+    if (!nAfter) {
+      var le = findNativeLeatherSelectEl();
+      if (le) {
+        ensureLeatherOptionsFromNativeSelect(le);
+        if (typeof window.mcHostLeatherStripInsideAccordion === "function") {
+          window.mcHostLeatherStripInsideAccordion();
+        }
+        if (typeof window.mcRenderLeatherPreviewStrip === "function") {
+          window.mcRenderLeatherPreviewStrip();
+        }
+        nAfter = stripAfter
+          ? stripAfter.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length
+          : 0;
+      }
+      if (!nAfter && le) {
+        nAfter = renderSectionalMiniLeatherStripFromNative(le);
       }
     }
     if (typeof window.mcSyncLeatherSummary === "function") {
@@ -950,6 +962,9 @@
     ensureSectionalOptionsTableLeatherObserver();
     ensureSectionalV65LeatherObserver();
 
+    if (typeof window.MTL_promptVolusionCoverOptions === "function") {
+      window.MTL_promptVolusionCoverOptions();
+    }
     mtlRefreshSectionalLeatherUi();
     [80, 350, 900, 1800, 3500].forEach(function (ms) {
       window.setTimeout(mtlRefreshSectionalLeatherUi, ms);
@@ -2222,11 +2237,46 @@
 
   window.MTL_retryMountPopularConfigurations = function () {
     var section = document.getElementById("mtl-sectional-configurations");
+    var host = document.querySelector("#mc-acc-row-popularconfig .mc-acc-content--popular-host");
+    console.log(
+      "[MTL] config renderer retry — section:",
+      !!section,
+      "accordion host:",
+      !!host,
+      "cards:",
+      section ? section.querySelectorAll(".mtl-sectional-card").length : 0
+    );
     if (!section) {
-      console.log("[MTL] config renderer retry — no #mtl-sectional-configurations yet");
       return;
     }
     mountPopularConfigurationsInAccordion(section);
+  };
+
+  /** Volusion may inject the cover <select> after configuration / smart-match scripts run. */
+  window.MTL_promptVolusionCoverOptions = function () {
+    if (!isSectionalProductPageClient()) return;
+    try {
+      if (typeof window.UpdateHiddenSmartMatchOptions === "function") {
+        window.UpdateHiddenSmartMatchOptions("load");
+      }
+    } catch (eSm) {}
+    var cs = findConfigurationSelect();
+    if (!cs) return;
+    try {
+      var m = String(cs.name || "").match(/___(\d+)\s*$/);
+      var catId = m ? m[1] : "2";
+      if (typeof window.change_option === "function") {
+        window.change_option(cs.name, cs.value);
+      }
+      if (typeof window.AutoUpdatePriceWithSelectedOptions === "function") {
+        window.AutoUpdatePriceWithSelectedOptions(cs.value, catId);
+      }
+      cs.dispatchEvent(new Event("change", { bubbles: true }));
+    } catch (eCh) {}
+    if (typeof window.mcTryInitWmLeather === "function") {
+      window.mcTryInitWmLeather();
+    }
+    mtlRefreshSectionalLeatherUi();
   };
 
   function scheduleMoveLeatherAboveConfigurations(section) {
@@ -3792,6 +3842,7 @@
       __mtlDiag.configCards =
         secExistingEarly.querySelectorAll(".mtl-sectional-card").length > 0 ? "YES" : "NO";
       mtlRefreshStageTrackerDom();
+      mountPopularConfigurationsInAccordion(secExistingEarly);
       console.log("[MTL] START finalize (existing mounted section)");
       try {
         finalizeSectionalUi(secExistingEarly);
@@ -3985,16 +4036,24 @@
         section.setAttribute("data-mtl-sectional-generated", "true");
       } catch (eSecAttr) {}
 
+      var popHost = document.querySelector("#mc-acc-row-popularconfig .mc-acc-content--popular-host");
       var target = findInsertTarget();
       var targetChain =
-        "#options_table, #v65-product-parent, #content_area, document.body (findInsertTarget order)";
-      if (!target) {
+        "#mc-acc-row-popularconfig .mc-acc-content--popular-host, #options_table, #v65-product-parent, #content_area, document.body";
+      if (!target && !popHost) {
         console.error("[MTL] FAILURE configuration cards render — insert target null", targetChain);
         __mtlDiag.configCards = "FAILED";
         mtlRefreshStageTrackerDom();
         return;
       }
-      if (!existing || !target.contains(section)) {
+      if (popHost && (!existing || !popHost.contains(section))) {
+        try {
+          popHost.appendChild(section);
+          console.log("[MTL] config renderer mounted in accordion host (initial insert)");
+        } catch (errHost) {
+          console.error("[MTL] FAILURE configuration cards render accordion host", errHost);
+        }
+      } else if (!existing || (target && !target.contains(section))) {
         try {
           target.insertAdjacentElement("afterend", section);
         } catch (errIns) {
@@ -4054,6 +4113,8 @@
     }
     sectionalLog("sectional diagram cards inserted:", merged.length);
   }
+
+  window.MTL_runRender = runRender;
 
   function runRender() {
     ensureMtlStageTrackerDom();

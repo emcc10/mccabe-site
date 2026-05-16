@@ -10970,12 +10970,18 @@ margin-left: 72px !important;
   }
 
   function forceOptionLabel(scope){
+    var secPg =
+      document.documentElement.classList.contains("is-sectional-product") ||
+      (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage());
     qa(
       '#options_table .productoptionname, #options_table td.productoptionname, #options_table td[align="right"], #options_table label,' +
       'table[id*="options_table"] .productoptionname, table[id*="options_table"] td.productoptionname, table[id*="options_table"] td[align="right"], table[id*="options_table"] label,' +
-      '#mcLeatherHeader',
+      (secPg ? '' : '#mcLeatherHeader,'),
       scope
     ).forEach(function(el){
+      if (secPg && (el.id === "mcLeatherHeader" || (el.closest && el.closest("#mcLeatherRow")))) {
+        return;
+      }
       el.style.setProperty('text-align','left','important');
       el.style.setProperty('padding-left','0','important');
       el.style.setProperty('margin-left','0','important');
@@ -12848,7 +12854,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       '#mcProductSummaryBtn'
     ];
     if (isSectionalPg()) {
-      dupes.push('#mc-inline-config #mcLeatherRow');
+      dupes.push('#mc-inline-config #mcLeatherRow', '#mcLeatherRow');
     }
     dupes.forEach(function (sel) {
       var el = q(sel);
@@ -21594,7 +21600,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-leather-restore-v11"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-barrett-fix-v12"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
