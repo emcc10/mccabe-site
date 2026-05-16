@@ -4234,6 +4234,13 @@ try {
 
     function renderLeatherPreviewStripCore(){
       if (!mcLeatherStrip) return;
+      if (
+        document.documentElement.classList.contains("is-sectional-product") &&
+        typeof window.__mcSectionalMiniStripRender === "function"
+      ) {
+        window.__mcSectionalMiniStripRender();
+        return;
+      }
 
       var source = Array.isArray(window.__WM_LEATHER_OPTIONS__)
         ? window.__WM_LEATHER_OPTIONS__.slice()
@@ -12220,8 +12227,14 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       c.appendChild(viewAll);
       return c;
     });
-    /* All accordion rows default to CLOSED on page load / refresh.
-       (Previously Select a Leather defaulted open; user wants every row closed.) */
+    /* Sectionals: open Select a Leather so mini swatches in the accordion host are visible. */
+    if (isSectionalPg()) {
+      leatherRow.dataset.open = "1";
+      var leatherHdr = leatherRow.querySelector(".mc-acc-header");
+      var leatherPnl = leatherRow.querySelector(".mc-acc-panel");
+      if (leatherHdr) leatherHdr.setAttribute("aria-expanded", "true");
+      if (leatherPnl) leatherPnl.setAttribute("aria-hidden", "false");
+    }
     acc.appendChild(leatherRow);
 
     /* Row 2: Room Planner — theater pages only. Panel hosts a real .mc-config-btn that
@@ -21198,7 +21211,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260515-github-diagram-urls-v1"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-leather-bootstrap-v1"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

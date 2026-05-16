@@ -512,8 +512,175 @@
       __mtlDiag.miniSwatches = nMini > 0 ? "YES" : "NO";
       mtlRefreshStageTrackerDom();
     } catch (eDiag) {}
+    renderSectionalMiniLeatherStripFromNative(le);
     if (typeof window.mcRenderLeatherPreviewStrip === "function") window.mcRenderLeatherPreviewStrip();
     if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
+  }
+
+  /**
+   * Populate #mcLeatherSwatchStrip from the native cover <select> (sectionals).
+   * Does not depend on theater __WM_LEATHER_OPTIONS__ or config-card finalize.
+   */
+  function renderSectionalMiniLeatherStripFromNative(leatherSel) {
+    var strip = document.getElementById("mcLeatherSwatchStrip");
+    if (!strip) return 0;
+    var sel = leatherSel || findNativeLeatherSelectEl();
+    if (!sel || !sel.options || sel.options.length < 1) {
+      strip.classList.remove("mc-leather-mini-swatches");
+      strip.innerHTML =
+        '<span style="font-size:12px;color:#777">Swatches unavailable</span>';
+      return 0;
+    }
+    var syn = buildSyntheticWmLeatherOptionsFromSelect(sel);
+    if (!syn.length) {
+      strip.classList.remove("mc-leather-mini-swatches");
+      strip.innerHTML =
+        '<span style="font-size:12px;color:#777">Swatches unavailable</span>';
+      return 0;
+    }
+    ensureLeatherOptionsFromNativeSelect(sel);
+    strip.classList.add("mc-leather-mini-swatches");
+    strip.innerHTML = "";
+    var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
+    var unique = [];
+    var seen = {};
+    syn.forEach(function (s) {
+      var wrow = wmRowForNativeValue(wm, s.value);
+      var nameLine =
+        (wrow && ((wrow.family || "") + " " + (wrow.color || "")).trim()) ||
+        s.family ||
+        s.label ||
+        "";
+      nameLine = String(nameLine).replace(/\s+/g, " ").trim();
+      var key = nameLine.toLowerCase();
+      if (!key || seen[key]) return;
+      seen[key] = true;
+      unique.push({ s: s, wrow: wrow, nameLine: nameLine });
+    });
+    var curVal = String(sel.value || "");
+    unique.slice(0, 12).forEach(function (row) {
+      var s = row.s;
+      var nameLine = row.nameLine || "Leather";
+      var mergedSw = (row.wrow && row.wrow.swatches) || s.swatches || [];
+      var imgUrl = pickFirstSwatchUrl({ swatches: mergedSw });
+      if (!imgUrl && s.family) {
+        var built = buildSwatchUrls(s.family, s.color || "");
+        imgUrl = built.length ? built[0] : "";
+      }
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mc-leather-mini-swatch mc-mini-swatch";
+      btn.title = nameLine;
+      btn.setAttribute("data-leather-value", String(s.value));
+      if (curVal && String(s.value) === curVal) btn.dataset.selected = "1";
+      var lbl = document.createElement("span");
+      lbl.className = "mc-leather-mini-swatch__label";
+      lbl.textContent = nameLine.length > 28 ? nameLine.slice(0, 26) + "…" : nameLine;
+      var img = document.createElement("img");
+      img.alt = "";
+      img.loading = "lazy";
+      if (imgUrl) {
+        img.src = imgUrl.indexOf("?") === -1 ? imgUrl + "?v=" + IMG_V : imgUrl + "&v=" + IMG_V;
+      } else {
+        img.classList.add("mc-mini-swatch--empty");
+        img.style.display = "none";
+      }
+      btn.appendChild(img);
+      btn.appendChild(lbl);
+      btn.addEventListener("click", function (ev) {
+        if (ev && ev.preventDefault) ev.preventDefault();
+        if (ev && ev.stopPropagation) ev.stopPropagation();
+        sel.value = s.value;
+        try {
+          sel.dispatchEvent(new Event("input", { bubbles: true }));
+        } catch (eIn) {}
+        try {
+          sel.dispatchEvent(new Event("change", { bubbles: true }));
+        } catch (eCh) {}
+        if (typeof jQuery !== "undefined") jQuery(sel).trigger("change");
+        var lab = String(s.label || nameLine || "").replace(/\s+/g, " ").trim();
+        ["wmSummary", "mcLeatherSummary", "wmPicked"].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) el.textContent = lab;
+        });
+        renderSectionalMiniLeatherStripFromNative(sel);
+        if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
+      });
+      strip.appendChild(btn);
+    });
+    return unique.length;
+  }
+
+  function installSectionalLeatherStripRenderer() {
+    if (window.__mcSectionalMiniStripRender) return;
+    window.__mcSectionalMiniStripRender = function () {
+      var n = renderSectionalMiniLeatherStripFromNative(findNativeLeatherSelectEl());
+      if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
+      return n;
+    };
+    window.mcRenderLeatherPreviewStrip = window.__mcSectionalMiniStripRender;
+  }
+
+  /** Leather UI for sectionals — must not depend on configuration cards / merge success. */
+  function bootstrapSectionalLeatherUi(leatherSelOptional) {
+    if (!isSectionalProductPageClient()) return;
+    try {
+      document.documentElement.classList.add("is-sectional-product");
+    } catch (eCls) {}
+
+    installSectionalLeatherStripRenderer();
+
+    var leatherSel = leatherSelOptional || findNativeLeatherSelectEl();
+    if (leatherSel) {
+      ensureLeatherOptionsFromNativeSelect(leatherSel);
+      fillLeatherModalFromNativeSelect(leatherSel);
+    } else {
+      mtlSyncSectionalLeatherFromDom();
+      leatherSel = findNativeLeatherSelectEl();
+    }
+
+    ensureSectionalOptionsTableLeatherObserver();
+    ensureSectionalV65LeatherObserver();
+    ensureWmSectionsFallbackObserver(leatherSel);
+    patchLeatherModalFallback(leatherSel);
+    ensureMcWmOpenMountedListener();
+    mtlWrapWmOpenForSectional();
+    bindSectionalLeatherUiRetries();
+
+    if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
+    if (typeof window.mcBuildPdpAccordion === "function") window.mcBuildPdpAccordion();
+
+    var nMini = renderSectionalMiniLeatherStripFromNative(leatherSel);
+    try {
+      __mtlDiag.leatherOpts = leatherSel ? "YES" : "NO";
+      var ws = document.getElementById("wmSections");
+      var nModal = ws ? ws.querySelectorAll(".mtl-leather-modal-card").length : 0;
+      __mtlDiag.leatherModal = nModal > 0 ? "YES" : "NO";
+      __mtlDiag.miniSwatches = nMini > 0 ? "YES" : "NO";
+      mtlRefreshStageTrackerDom();
+    } catch (eDiag) {}
+
+    if (!document.documentElement.dataset.mtlLeatherStripReadyListen) {
+      document.documentElement.dataset.mtlLeatherStripReadyListen = "1";
+      document.addEventListener(
+        "wmLeatherOptionsReady",
+        function () {
+          renderSectionalMiniLeatherStripFromNative(findNativeLeatherSelectEl());
+          if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
+        },
+        false
+      );
+    }
+  }
+
+  function scheduleSectionalLeatherBootstrap() {
+    if (!isSectionalProductPageClient()) return;
+    bootstrapSectionalLeatherUi();
+    [200, 450, 900, 1500, 2800, 5000, 9000].forEach(function (ms) {
+      window.setTimeout(function () {
+        bootstrapSectionalLeatherUi();
+      }, ms);
+    });
   }
 
   function ensureSectionalOptionsTableLeatherObserver() {
@@ -3004,6 +3171,11 @@
   function finalizeSectionalUi(section) {
     var leatherSelNow = null;
 
+    mtlRunStagePanel("finalize: sectional leather bootstrap", "leatherOpts", function () {
+      bootstrapSectionalLeatherUi();
+      leatherSelNow = findNativeLeatherSelectEl();
+    });
+
     mtlRunStage("finalize: chrome & dedupe", function () {
       try {
         document.documentElement.classList.add("has-sectional-config-cards");
@@ -3017,41 +3189,8 @@
       removeStandaloneDuplicateProductSummary();
     });
 
-    mtlRunStagePanel("finalize: leather options", "leatherOpts", function () {
-      leatherSelNow = findNativeLeatherSelectEl();
-      if (leatherSelNow && leatherSelNow.options) {
-        var texts = Array.prototype.map.call(leatherSelNow.options, function (o) {
-          return String(o.textContent || "").trim();
-        });
-        console.log("[MTL] native leather <select> option count:", leatherSelNow.options.length);
-        console.log("[MTL] native leather <select> options:", texts);
-        var synDiag = buildSyntheticWmLeatherOptionsFromSelect(leatherSelNow);
-        __mtlDiag.leatherOpts = synDiag.length > 0 ? "YES" : "NO";
-      } else {
-        console.log("[MTL] native leather <select>: null or empty");
-        __mtlDiag.leatherOpts = "NO";
-      }
-      mtlRefreshStageTrackerDom();
-      ensureLeatherOptionsFromNativeSelect(leatherSelNow);
-      ensureSectionalOptionsTableLeatherObserver();
-
-      if (__mtlDiag.leatherOpts !== "YES") {
-        mtlDumpLeatherDiscoveryToConsole("finalize: leather options = NO");
-        [800, 2200, 5000].forEach(function (ms) {
-          window.setTimeout(function () {
-            if (__mtlDiag.leatherOpts === "YES") return;
-            mtlSyncSectionalLeatherFromDom();
-            if (__mtlDiag.leatherOpts !== "YES") {
-              mtlDumpLeatherDiscoveryToConsole("retry@" + ms + "ms");
-            }
-          }, ms);
-        });
-      }
-    });
-
-    mtlRunStagePanel("finalize: leather modal", "leatherModal", function () {
-      ensureWmSectionsFallbackObserver(leatherSelNow);
-      patchLeatherModalFallback(leatherSelNow);
+    mtlRunStagePanel("finalize: leather modal refresh", "leatherModal", function () {
+      leatherSelNow = leatherSelNow || findNativeLeatherSelectEl();
       var fillRet = fillLeatherModalFromNativeSelect(leatherSelNow);
       console.log("[MTL] fillLeatherModalFromNativeSelect return:", fillRet);
       var ws = document.getElementById("wmSections");
@@ -3059,6 +3198,18 @@
       console.log("[MTL] .mtl-leather-modal-card count in #wmSections:", nModal);
       __mtlDiag.leatherModal = nModal > 0 ? "YES" : "NO";
       mtlRefreshStageTrackerDom();
+      if (__mtlDiag.leatherOpts !== "YES") {
+        mtlDumpLeatherDiscoveryToConsole("finalize: leather options = NO");
+        [800, 2200, 5000].forEach(function (ms) {
+          window.setTimeout(function () {
+            if (__mtlDiag.leatherOpts === "YES") return;
+            bootstrapSectionalLeatherUi();
+            if (__mtlDiag.leatherOpts !== "YES") {
+              mtlDumpLeatherDiscoveryToConsole("retry@" + ms + "ms");
+            }
+          }, ms);
+        });
+      }
     });
 
     mtlRunStage("finalize: misc links & template refresh", function () {
@@ -3110,11 +3261,6 @@
       scheduleSectionalAtcChrome();
     });
 
-    mtlRunStage("finalize: wm open listener & leather UI binds", function () {
-      ensureMcWmOpenMountedListener();
-      bindSectionalLeatherUiRetries();
-    });
-
     mtlRunStage("finalize: config cards bind & observers", function () {
       bindConfigurationCardClicks();
       ensureObservers();
@@ -3151,23 +3297,21 @@
     });
 
     mtlRunStagePanel("finalize: mini swatch strip", "miniSwatches", function () {
-      function refreshTemplateMiniStrip() {
-        if (typeof window.mcRenderLeatherPreviewStrip === "function") window.mcRenderLeatherPreviewStrip();
-        if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
-      }
-      refreshTemplateMiniStrip();
-      [350, 900, 2200, 5000].forEach(function (ms) {
-        window.setTimeout(refreshTemplateMiniStrip, ms);
-      });
-      var strip = document.getElementById("mcLeatherSwatchStrip");
-      var nMini = strip ? strip.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length : 0;
+      leatherSelNow = leatherSelNow || findNativeLeatherSelectEl();
+      var nMini = renderSectionalMiniLeatherStripFromNative(leatherSelNow);
       console.log("[MTL] mini swatch nodes in #mcLeatherSwatchStrip:", nMini);
       __mtlDiag.miniSwatches = nMini > 0 ? "YES" : "NO";
       mtlRefreshStageTrackerDom();
+      [350, 900, 2200, 5000].forEach(function (ms) {
+        window.setTimeout(function () {
+          renderSectionalMiniLeatherStripFromNative(findNativeLeatherSelectEl());
+        }, ms);
+      });
       if (leatherSelNow && leatherSelNow.dataset.mtlMiniStripBound !== "1") {
         leatherSelNow.dataset.mtlMiniStripBound = "1";
         leatherSelNow.addEventListener("change", function () {
-          refreshTemplateMiniStrip();
+          renderSectionalMiniLeatherStripFromNative(leatherSelNow);
+          if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
         });
       }
     });
@@ -3179,6 +3323,8 @@
     if (isTheaterSeatingProductPageForGuard() || !isSectionalProductPageClient()) {
       return;
     }
+
+    scheduleSectionalLeatherBootstrap();
 
     var misLeather = document.querySelectorAll("#v65-product-parent select.mc-native-leather, #options_table select.mc-native-leather");
     Array.prototype.forEach.call(misLeather, function (sel) {
@@ -3262,6 +3408,7 @@
         __mtlDiag.configData = "NO";
         __mtlDiag.configCards = "NO";
         mtlRefreshStageTrackerDom();
+        scheduleSectionalLeatherBootstrap();
         console.log("[MTL] SUCCESS configuration parsing (no select to parse)");
         return;
       }
@@ -3271,6 +3418,7 @@
         __mtlDiag.configData = "NO";
         __mtlDiag.configCards = "NO";
         mtlRefreshStageTrackerDom();
+        scheduleSectionalLeatherBootstrap();
         console.warn("[MTL] No Volusion configuration options to display as cards.", productKey);
         console.log("[MTL] SUCCESS configuration parsing (zero merged rows)");
         return;
@@ -3525,6 +3673,7 @@
       }
       console.log("[MTL] SUCCESS page detection — proceeding to renderSectionalPdp");
 
+      scheduleSectionalLeatherBootstrap();
       renderSectionalPdp();
     } catch (err) {
       console.error("[MTL] FAILURE page detection / runRender", err);
