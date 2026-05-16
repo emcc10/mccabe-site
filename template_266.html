@@ -2744,13 +2744,43 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     return s;
   }
 
-  function initIfReady(){
-    if (document.getElementById("wmOpen")) return true;
+  function wmOptsLookCorruptForInit(opts) {
+    if (!opts || !opts.length) return true;
+    var bad = 0;
+    for (var i = 0; i < opts.length; i++) {
+      var o = opts[i];
+      if (!o) continue;
+      var f = String(o.family || "").trim();
+      var lab = String(o.label || "").trim();
+      if (/^\$?\s*[\d,]+\.?\d*\s*$/.test(f) || /^\$?\s*[\d,]+\.?\d*\s*$/.test(lab)) bad++;
+    }
+    return bad >= Math.min(2, opts.length);
+  }
 
+  function initIfReady(){
     const secEarly =
       !wmIsTheaterSeatingPdpEarly() &&
       (document.documentElement.classList.contains("is-sectional-product") ||
         (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()));
+
+    var wmOpenStale = document.getElementById("wmOpen");
+    if (wmOpenStale) {
+      if (!secEarly) return true;
+      var wmStale = window.__WM_LEATHER_OPTIONS__;
+      if (Array.isArray(wmStale) && wmStale.length > 0 && !wmOptsLookCorruptForInit(wmStale)) return true;
+      try {
+        var uiBlock = wmOpenStale.parentElement;
+        if (uiBlock && uiBlock.querySelector && uiBlock.querySelector("#wmSummary")) uiBlock.remove();
+        else wmOpenStale.remove();
+      } catch (eRmUi) {}
+      document.querySelectorAll("body > .wm-overlay").forEach(function (ov) {
+        if (ov.querySelector("#wmSections")) ov.remove();
+      });
+      try {
+        window.__WM_LEATHER_MODAL_BUILT__ = false;
+        window.__WM_LEATHER_OPTIONS__ = [];
+      } catch (eReset) {}
+    }
 
     const allSelects = Array.from(document.querySelectorAll("select"));
     const candidateSelects = allSelects
@@ -4176,15 +4206,60 @@ try {
       return false;
     }
 
-    function fallbackLeatherOptionsFromSelect(){
-      var table = optionsTable || document.querySelector("#options_table, table[id*='options_table']");
-      var native =
+    function findLeatherSelectOnPdp() {
+      var table =
+        optionsTable ||
+        document.querySelector(
+          "#v65-product-parent #options_table, #options_table, table[id*='options_table']"
+        );
+      var best = null;
+      var bestScore = -1;
+      if (table) {
+        Array.from(table.querySelectorAll("select")).forEach(function (sel) {
+          if (!sel || !sel.options || sel.options.length < 2) return;
+          var row = "";
+          try {
+            var tr = sel.closest("tr");
+            var td = sel.closest("td");
+            if (tr) row += " " + String(tr.innerText || "");
+            if (td) row += " " + String(td.innerText || "");
+          } catch (eRow) {}
+          row = row.toLowerCase();
+          if (
+            /choose\s+configuration|configuration\s*\(/i.test(row) &&
+            !/choose\s+cover|choose\s+leather|select\s+a\s+leather|upholstery/i.test(row)
+          ) {
+            return;
+          }
+          var score = 0;
+          if (/select\s+a\s+leather|choose\s+cover|choose\s+leather|upholstery/i.test(row)) score += 220;
+          var sample = Array.from(sel.options)
+            .slice(0, 40)
+            .map(function (o) {
+              return String(o.textContent || "").toLowerCase();
+            })
+            .join(" ");
+          if (/grade\s*[0-9,]+/.test(sample)) score += 50;
+          if (/(traverse|solana|rein|evoque|aniline|leather|fabric|nubuck)/i.test(sample)) score += 40;
+          if (score > bestScore) {
+            bestScore = score;
+            best = sel;
+          }
+        });
+      }
+      if (best && bestScore > 0) return best;
+      return (
         document.querySelector("select.mc-native-leather") ||
         (table
           ? table.querySelector(
               "select[name*='cover' i], select[id*='cover' i], select[name*='leather' i], select[id*='leather' i], select[name*='upholstery' i], select[id*='upholstery' i]"
             )
-          : null);
+          : null)
+      );
+    }
+
+    function fallbackLeatherOptionsFromSelect(){
+      var native = findLeatherSelectOnPdp();
       if (!native) return [];
 
       var rows = [];
@@ -4252,8 +4327,8 @@ try {
         return fudge && !leatherStripOptionProbablyConfiguration(fudge);
       });
       if (!source.length) source = fallbackLeatherOptionsFromSelect();
-      if (!source.length){
-        mcLeatherStrip.innerHTML = '<span style="font-size:12px;color:#777">Swatches unavailable</span>';
+      if (!source.length) {
+        mcLeatherStrip.innerHTML = "";
         return;
       }
 
@@ -12413,14 +12488,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       c.appendChild(viewAll);
       return c;
     });
-    /* Sectionals: open Select a Leather so mini swatches in the accordion host are visible. */
-    if (isSectionalPg()) {
-      leatherRow.dataset.open = "1";
-      var leatherHdr = leatherRow.querySelector(".mc-acc-header");
-      var leatherPnl = leatherRow.querySelector(".mc-acc-panel");
-      if (leatherHdr) leatherHdr.setAttribute("aria-expanded", "true");
-      if (leatherPnl) leatherPnl.setAttribute("aria-hidden", "false");
-    }
     acc.appendChild(leatherRow);
 
     /* Row 2: Room Planner — theater pages only. Panel hosts a real .mc-config-btn that
@@ -12730,6 +12797,24 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     placePalliserLogoUnderTitle();
     placeAccordion();
     hostLeatherStripInsideAccordion();
+    if (typeof window.mcTryInitWmLeather === "function") {
+      window.mcTryInitWmLeather();
+    }
+    if (typeof window.mcRenderLeatherPreviewStrip === "function") {
+      window.mcRenderLeatherPreviewStrip();
+    }
+    if (!window.__mcAccLeatherReadyListen) {
+      window.__mcAccLeatherReadyListen = true;
+      document.addEventListener("wmLeatherOptionsReady", function () {
+        hostLeatherStripInsideAccordion();
+        if (typeof window.mcRenderLeatherPreviewStrip === "function") {
+          window.mcRenderLeatherPreviewStrip();
+        }
+        if (typeof window.mcSyncLeatherSummary === "function") {
+          window.mcSyncLeatherSummary();
+        }
+      });
+    }
     moveAltViewsUnderMainImage();
     hideDuplicateTriggers();
     hideInlineAvailabilityInPricing();
@@ -21400,7 +21485,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-no-forced-config-v8"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-leather-accordion-v9"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
