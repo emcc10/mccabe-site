@@ -66,7 +66,14 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260516-gallery-fallback-v16";
+  window.MTL_RENDERER_BUILD = "sectional-20260516-gallery-fallback-v17";
+
+  /** Template owns native leather `<select>` discovery; prefers __McCabeLeatherCollectImpl so `mcCollectNativeLeatherSelectsForPdp` can’t be swapped by other scripts */
+  function mtlGetNativeLeatherCollectFn() {
+    if (typeof window.__McCabeLeatherCollectImpl === "function") return window.__McCabeLeatherCollectImpl;
+    if (typeof window.mcCollectNativeLeatherSelectsForPdp === "function") return window.mcCollectNativeLeatherSelectsForPdp;
+    return null;
+  }
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -495,8 +502,9 @@
      * same selectLooksLeatherish + ≥2 meaningful options theater PDPs already use — so renderer + initIfReady
      * always resolve the identical native leather <select>.
      */
-    if (typeof window.mcCollectNativeLeatherSelectsForPdp === "function") {
-      var canonList = window.mcCollectNativeLeatherSelectsForPdp();
+    var collectFn = mtlGetNativeLeatherCollectFn();
+    if (collectFn) {
+      var canonList = collectFn();
       if (canonList && canonList.length) {
         var ci;
         for (ci = 0; ci < canonList.length; ci++) {
@@ -1307,11 +1315,9 @@
     if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
 
     var leatherSel = findNativeLeatherSelectEl();
-    if (
-      !leatherSel &&
-      typeof window.mcCollectNativeLeatherSelectsForPdp === "function"
-    ) {
-      var canonPk = window.mcCollectNativeLeatherSelectsForPdp();
+    if (!leatherSel) {
+      var collectPk = mtlGetNativeLeatherCollectFn();
+      var canonPk = collectPk ? collectPk() : null;
       if (canonPk && canonPk.length) leatherSel = canonPk[0];
     }
     if (!leatherSel) {

@@ -2840,8 +2840,30 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
   }
 
   try {
+    /* Imperative alias on window can be overwritten by Volusion/other scripts; renderer reads __McCabeLeatherCollectImpl first. */
+    window.__McCabeLeatherCollectImpl = mcCollectNativeLeatherSelectsInner;
+    if (typeof Object.defineProperty === "function") {
+      Object.defineProperty(window, "mcCollectNativeLeatherSelectsForPdp", {
+        configurable: true,
+        enumerable: true,
+        get: function () {
+          return window.__McCabeLeatherCollectImpl;
+        },
+        set: function () {
+          if (typeof console !== "undefined" && typeof console.warn === "function") {
+            console.warn(
+              "[WM] Ignoring reassignment of mcCollectNativeLeatherSelectsForPdp — use template #wm-leather-modal-js only for native leather discovery."
+            );
+          }
+        },
+      });
+    } else {
+      window.mcCollectNativeLeatherSelectsForPdp = mcCollectNativeLeatherSelectsInner;
+    }
+  } catch (eMcColl) {
+    window.__McCabeLeatherCollectImpl = mcCollectNativeLeatherSelectsInner;
     window.mcCollectNativeLeatherSelectsForPdp = mcCollectNativeLeatherSelectsInner;
-  } catch (eMcColl) {}
+  }
 
   function wmOptsLookCorruptForInit(opts) {
     if (!opts || !opts.length) return true;
@@ -21775,7 +21797,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-gallery-fallback-v16"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-gallery-fallback-v17"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
