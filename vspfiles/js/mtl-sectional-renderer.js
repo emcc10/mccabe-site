@@ -2423,10 +2423,20 @@
       sum.setAttribute("data-mtl-sectional-generated", "true");
     } catch (eSumAttr) {}
     var accordion = document.getElementById("mc-pdp-accordion");
+    var leatherRow = document.getElementById("mc-acc-row-leather");
     var anchoredInAccordion =
       section && section.closest ? !!section.closest("#mc-pdp-accordion") : false;
     var anchorParent = accordion && accordion.parentNode ? accordion.parentNode : null;
-    if (accordion && anchoredInAccordion && anchorParent) {
+    if (accordion && leatherRow && accordion.contains(leatherRow)) {
+      try {
+        var afterLeather = leatherRow.nextElementSibling;
+        if (sum.parentNode !== accordion || sum.previousElementSibling !== leatherRow) {
+          accordion.insertBefore(sum, afterLeather);
+        }
+      } catch (eLeatherIns) {
+        console.error("[MTL] FAILURE product summary insert after leather row", eLeatherIns);
+      }
+    } else if (accordion && anchoredInAccordion && anchorParent) {
       try {
         anchorParent.insertBefore(sum, accordion.nextSibling);
       } catch (eAcc) {

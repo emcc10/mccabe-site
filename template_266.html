@@ -6714,12 +6714,22 @@ setTimeout(function () {
 
 function restoreConfigOnPageLoad() {
   try {
+    if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) return;
     var prodCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "";
     if (!prodCode) return;
     var raw = localStorage.getItem("roomPlannerData_" + prodCode);
     if (!raw) return;
     var data = JSON.parse(raw);
     if (!data || typeof data !== "object") return;
+    var hasLayout = data.layout && Array.isArray(data.layout) && data.layout.length > 0;
+    var hasOpts = false;
+    if (data.options && typeof data.options === "object") {
+      var ok = Object.keys(data.options);
+      for (var oi = 0; oi < ok.length; oi++) {
+        if (Number(data.options[ok[oi]] || 0) > 0) { hasOpts = true; break; }
+      }
+    }
+    if (!hasLayout && !hasOpts) return;
     try {
       delete data.configurationTotal;
       delete data.mcPlannerPerSeatUnit;
@@ -6728,22 +6738,57 @@ function restoreConfigOnPageLoad() {
     try {
       localStorage.setItem("roomPlannerData_" + prodCode, JSON.stringify(data));
     } catch (eW) {}
+    window.__mcLastPlannerPayload = data;
     if (typeof window.applyPlannerToPage === "function") {
       console.log("[McCabe Planner] Restoring saved configuration for", prodCode);
       window.applyPlannerToPage(data);
     }
+    if (typeof window.mcSyncPlannerConfigurationPriceDisplay === "function") {
+      window.mcSyncPlannerConfigurationPriceDisplay();
+    }
   } catch (e) { console.warn("[McCabe Planner] restore error:", e); }
 }
-/* Disabled: auto-restoring stale planner data on load can force old seat counts into cart. */
+
+function scheduleRestorePlannerConfigOnPdp() {
+  if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) return;
+  [0, 350, 900, 1800, 3200, 5500].forEach(function (ms) {
+    setTimeout(restoreConfigOnPageLoad, ms);
+  });
+}
 
 function clearPlannerWhenLeavingProductPage() {
-  try {
-    var prodCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "";
-    if (prodCode) localStorage.removeItem("roomPlannerData_" + prodCode);
-  } catch (e) {}
+  /* Do not clear on refresh or tab close — users lose in-progress layouts. Cleared only when switching products (see scheduleRestorePlannerConfigOnPdp). */
 }
-window.addEventListener("pagehide", clearPlannerWhenLeavingProductPage);
-window.addEventListener("beforeunload", clearPlannerWhenLeavingProductPage);
+
+function mcTrackPdpProductForPlannerStorage() {
+  try {
+    var pcInp = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+    var pc = pcInp ? String(pcInp.value || "").trim() : "";
+    if (!pc) return;
+    var prev = String(sessionStorage.getItem("mc_planner_active_product") || "").trim();
+    if (prev && prev !== pc) {
+      try { localStorage.removeItem("roomPlannerData_" + prev); } catch (eRm) {}
+    }
+    sessionStorage.setItem("mc_planner_active_product", pc);
+  } catch (eTr) {}
+}
+
+try {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () {
+      mcTrackPdpProductForPlannerStorage();
+      scheduleRestorePlannerConfigOnPdp();
+    });
+  } else {
+    mcTrackPdpProductForPlannerStorage();
+    scheduleRestorePlannerConfigOnPdp();
+  }
+  window.addEventListener("pageshow", function (ev) {
+    if (ev && ev.persisted) return;
+    mcTrackPdpProductForPlannerStorage();
+    scheduleRestorePlannerConfigOnPdp();
+  });
+} catch (eSchedRestore) {}
 
 })();
 </script>
@@ -12372,8 +12417,15 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       viewAll.innerHTML = '<span>View All Leathers</span>';
       viewAll.addEventListener('click', function (e) {
         e.preventDefault();
-        if (typeof window.mcOpenWmLeatherModal === 'function') { window.mcOpenWmLeatherModal(); return; }
-        if (typeof window.mtlOpenOwnLeatherPicker === 'function') { window.mtlOpenOwnLeatherPicker(); return; }
+        e.stopPropagation();
+        if (typeof window.scheduleSectionalLeatherBootstrap === 'function') {
+          window.scheduleSectionalLeatherBootstrap();
+        }
+        if (typeof window.mtlOpenOwnLeatherPicker === 'function') {
+          window.mtlOpenOwnLeatherPicker();
+          return;
+        }
+        if (typeof window.mcOpenWmLeatherModal === 'function') { window.mcOpenWmLeatherModal(e); return; }
         var existing = q('#mcLeatherBtn') || q('#mcLeatherHeader');
         if (existing) existing.click();
       });
@@ -21367,7 +21419,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260520-leather-ui-v2"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260520-pdp-fixes-v3"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
