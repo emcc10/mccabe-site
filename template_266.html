@@ -3966,7 +3966,8 @@ try {
         document.documentElement.classList.add("is-sectional-product");
       } catch (eSec) {}
     }
-    if (document.getElementById("mc-inline-config")) return;
+    var panelAlready = document.getElementById("mc-inline-config");
+    if (panelAlready && !isSecPdp) return;
 
     if (
       !document.getElementById("v65-product-parent") &&
@@ -4016,7 +4017,10 @@ try {
       return;
     }
 
-    const panel = document.createElement("div");
+    var panel = panelAlready;
+    var panelAttached = !!panelAlready;
+    if (!panel) {
+    panel = document.createElement("div");
     panel.id = "mc-inline-config";
     panel.style.margin = "0 0 12px";
 
@@ -4064,8 +4068,9 @@ try {
         </div>
       </div>
     `;
+    }
 
-    var panelAttached = false;
+    if (!panelAttached) {
     if (mountInsertMode === "afterOptionsTable" && optionsTable) {
       if (!isSecPdp) {
         optionsTable.style.setProperty("position", "absolute", "important");
@@ -4093,6 +4098,7 @@ try {
         titleEl.insertAdjacentElement("afterend", panel);
         panelAttached = true;
       }
+    }
     }
     if (!panelAttached) return;
 
@@ -4398,13 +4404,6 @@ try {
       });
       if (!source.length) source = fallbackLeatherOptionsFromSelect();
       if (!source.length) {
-        if (
-          document.documentElement.classList.contains("is-sectional-product") &&
-          typeof window.__mcSectionalMiniStripRender === "function"
-        ) {
-          var secN = window.__mcSectionalMiniStripRender();
-          if (secN > 0) return;
-        }
         mcLeatherStrip.innerHTML = "";
         return;
       }
@@ -4607,6 +4606,9 @@ try {
     }
 
     // Keep summary synced to modal selection changes
+    if (isSecPdp) {
+      console.log("[MC PDP] swatch renderer mounted (sectional remount path)");
+    }
     renderLeatherPreviewStrip();
     setTimeout(renderLeatherPreviewStrip, 900);
     (function keepTryingSwatches(){
@@ -4658,12 +4660,29 @@ try {
       window.__mcLeatherRowObserver.observe(optionsTable, { childList: true, subtree: true });
     }
 
-    document.addEventListener("wmLeatherOptionsReady", function(){
-      renderLeatherPreviewStrip();
-      syncLeatherSummary();
-    });
+    if (!window.__mcMountLeatherReadyBound) {
+      window.__mcMountLeatherReadyBound = true;
+      document.addEventListener("wmLeatherOptionsReady", function () {
+        renderLeatherPreviewStrip();
+        syncLeatherSummary();
+        if (isSecPdp && typeof window.mcHostLeatherStripInsideAccordion === "function") {
+          window.mcHostLeatherStripInsideAccordion();
+        }
+      });
+    }
 
     if (isSecPdp) {
+      if (typeof window.mcHostLeatherStripInsideAccordion === "function") {
+        window.mcHostLeatherStripInsideAccordion();
+      }
+      if (typeof window.mcTryInitWmLeather === "function") {
+        window.mcTryInitWmLeather();
+      }
+      renderLeatherPreviewStrip();
+      var _swN = mcLeatherStrip
+        ? mcLeatherStrip.querySelectorAll(".mc-mini-swatch").length
+        : 0;
+      console.log("[MC PDP] sectional mini swatch count after mount:", _swN);
       try {
         if (typeof window.scheduleSectionalLeatherBootstrap === "function") {
           window.scheduleSectionalLeatherBootstrap();
@@ -12661,7 +12680,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (host.contains(strip)) return;
     /* Move (not clone) so the existing JS that populates the strip still targets the live node */
     host.appendChild(strip);
+    console.log("[MC PDP] leather strip hosted in accordion", strip.id || strip.className);
   }
+  window.mcHostLeatherStripInsideAccordion = hostLeatherStripInsideAccordion;
 
   /* Move #altviews to be the next sibling of #product_photo inside the same TD,
      so thumbnails render directly under the main image. Idempotent. */
@@ -12819,8 +12840,13 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       '#mcPlannerRow',
       '#mcProductSummaryRowStandalone',
       '#mcLeatherHeaderRow',
+      '#mcLeatherHeader',
+      '#mcLeatherBtn',
       '#mcProductSummaryBtn'
     ];
+    if (isSectionalPg()) {
+      dupes.push('#mc-inline-config #mcLeatherRow');
+    }
     dupes.forEach(function (sel) {
       var el = q(sel);
       if (el) el.style.setProperty('display', 'none', 'important');
@@ -12877,16 +12903,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (typeof window.mcRenderLeatherPreviewStrip === "function") {
       window.mcRenderLeatherPreviewStrip();
     }
-    if (
-      (document.documentElement.classList.contains("is-sectional-product") ||
-        (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage())) &&
-      typeof window.__mcSectionalMiniStripRender === "function"
-    ) {
-      var _mcStrip = document.getElementById("mcLeatherSwatchStrip");
-      var _mcN = _mcStrip
-        ? _mcStrip.querySelectorAll(".mc-mini-swatch, .mc-leather-mini-swatch").length
-        : 0;
-      if (!_mcN) window.__mcSectionalMiniStripRender();
+    if (isSectionalPg() && typeof window.MTL_retryMountPopularConfigurations === "function") {
+      window.MTL_retryMountPopularConfigurations();
     }
     if (!window.__mcAccLeatherReadyListen) {
       window.__mcAccLeatherReadyListen = true;
@@ -12895,12 +12913,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         if (typeof window.mcRenderLeatherPreviewStrip === "function") {
           window.mcRenderLeatherPreviewStrip();
         }
-        if (typeof window.__mcSectionalMiniStripRender === "function") {
-          var _st2 = document.getElementById("mcLeatherSwatchStrip");
-          var _n2 = _st2
-            ? _st2.querySelectorAll(".mc-mini-swatch, .mc-leather-mini-swatch").length
-            : 0;
-          if (!_n2) window.__mcSectionalMiniStripRender();
+        if (isSectionalPg() && typeof window.MTL_retryMountPopularConfigurations === "function") {
+          window.MTL_retryMountPopularConfigurations();
         }
         if (typeof window.mcSyncLeatherSummary === "function") {
           window.mcSyncLeatherSummary();
@@ -21577,7 +21591,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-leather-accordion-v10"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-leather-restore-v11"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

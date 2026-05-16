@@ -11508,9 +11508,19 @@ html.is-sectional-product #mc-inline-config {
   opacity: 1 !important;
 }
 
-html.is-sectional-product #mcLeatherRow {
+/* Sectional: leather UI lives only inside the accordion — hide duplicate row near Add To Cart. */
+html.is-sectional-product #mc-inline-config #mcLeatherRow {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html.is-sectional-product #mc-acc-row-leather .mc-acc-leather-host #mcLeatherPicker,
+html.is-sectional-product #mc-acc-row-leather .mc-acc-leather-host #mcLeatherSwatchStrip {
   display: flex !important;
-  flex-direction: column !important;
   visibility: visible !important;
   opacity: 1 !important;
 }

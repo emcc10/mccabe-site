@@ -66,7 +66,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260516-leather-accordion-v10";
+  window.MTL_RENDERER_BUILD = "sectional-20260516-leather-restore-v11";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -778,9 +778,7 @@
     for (oi = 0; oi < overlays.length; oi++) {
       if (overlays[oi].querySelector("#wmSections")) overlays[oi].remove();
     }
-    if (typeof window.mcForceInitWmLeather === "function") {
-      window.mcForceInitWmLeather();
-    } else if (typeof window.mcTryInitWmLeather === "function") {
+    if (typeof window.mcTryInitWmLeather === "function") {
       window.mcTryInitWmLeather();
     }
   }
@@ -803,6 +801,9 @@
     } else if (typeof window.mcTryInitWmLeather === "function") {
       window.mcTryInitWmLeather();
     }
+    if (typeof window.mcHostLeatherStripInsideAccordion === "function") {
+      window.mcHostLeatherStripInsideAccordion();
+    }
     if (typeof window.mcRenderLeatherPreviewStrip === "function") {
       window.mcRenderLeatherPreviewStrip();
     }
@@ -810,8 +811,11 @@
     var nAfter = stripAfter
       ? stripAfter.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length
       : 0;
-    if (!nAfter && typeof window.__mcSectionalMiniStripRender === "function") {
-      window.__mcSectionalMiniStripRender();
+    if (!nAfter && typeof window.mcHostLeatherStripInsideAccordion === "function") {
+      window.mcHostLeatherStripInsideAccordion();
+      if (typeof window.mcRenderLeatherPreviewStrip === "function") {
+        window.mcRenderLeatherPreviewStrip();
+      }
     }
     if (typeof window.mcSyncLeatherSummary === "function") {
       window.mcSyncLeatherSummary();
@@ -925,33 +929,7 @@
   }
 
   function installSectionalLeatherStripRenderer() {
-    window.__mcSectionalMiniStripRender = function () {
-      var strip = document.getElementById("mcLeatherSwatchStrip");
-      var n = 0;
-      if (typeof window.mcRenderLeatherPreviewStrip === "function") {
-        window.mcRenderLeatherPreviewStrip();
-        if (strip) {
-          n = strip.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length;
-        }
-      }
-      if (!n) {
-        var le = findNativeLeatherSelectEl();
-        if (le) {
-          mtlSyncNativeSelectToWmOptions(le);
-          if (typeof window.mcRenderLeatherPreviewStrip === "function") {
-            window.mcRenderLeatherPreviewStrip();
-            if (strip) {
-              n = strip.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length;
-            }
-          }
-        }
-        if (!n) n = renderSectionalMiniLeatherStripFromNative(le);
-      }
-      if (typeof window.mcSyncLeatherSummary === "function") {
-        window.mcSyncLeatherSummary();
-      }
-      return n;
-    };
+    /* Sectionals use the same theater mini-swatch renderer (mcRenderLeatherPreviewStrip). */
   }
 
   /** Sectionals: same theater leather init + mini strip; only accordion host placement is sectional-specific. */
@@ -2209,10 +2187,20 @@
       }
       var acc = document.getElementById("mc-pdp-accordion");
       var row = document.getElementById("mc-acc-row-popularconfig");
-      if (!acc || !row) return;
-      var host = row.querySelector(".mc-acc-content--popular-host");
-      if (!host || host.contains(section)) return;
-      host.appendChild(section);
+      var host = row ? row.querySelector(".mc-acc-content--popular-host") : null;
+      var nCards = section.querySelectorAll(".mtl-sectional-card").length;
+      console.log(
+        "[MTL] config renderer — accordion:",
+        !!acc,
+        "host:",
+        !!host,
+        "cards:",
+        nCards
+      );
+      if (!acc || !row || !host) return;
+      if (!host.contains(section)) {
+        host.appendChild(section);
+      }
       section.dataset.mtlAccordionPopular = "1";
       var hid = section.querySelector(".mtl-sectional-heading");
       if (hid) {
@@ -2222,10 +2210,24 @@
       section.style.marginTop = "0";
       section.style.marginBottom = "0";
       section.style.paddingTop = "0";
+      section.style.display = "block";
+      section.style.visibility = "visible";
+      if (nCards > 0) {
+        console.log("[MTL] config renderer mounted in accordion (" + nCards + " cards)");
+      }
     } catch (eM) {
       console.warn("[MTL] mountPopularConfigurationsInAccordion", eM);
     }
   }
+
+  window.MTL_retryMountPopularConfigurations = function () {
+    var section = document.getElementById("mtl-sectional-configurations");
+    if (!section) {
+      console.log("[MTL] config renderer retry — no #mtl-sectional-configurations yet");
+      return;
+    }
+    mountPopularConfigurationsInAccordion(section);
+  };
 
   function scheduleMoveLeatherAboveConfigurations(section) {
     if (!section) return;
@@ -4005,7 +4007,9 @@
       }
       __mtlDiag.configCards = section.querySelectorAll(".mtl-sectional-card").length > 0 ? "YES" : "NO";
       mtlRefreshStageTrackerDom();
-      console.log("[MTL] SUCCESS configuration cards render; cards:", section.querySelectorAll(".mtl-sectional-card").length);
+      var cardCountDone = section.querySelectorAll(".mtl-sectional-card").length;
+      console.log("[MTL] SUCCESS configuration cards render; cards:", cardCountDone);
+      console.log("[MTL] config data loaded —", cardCountDone, "card(s)");
     } catch (errCards) {
       console.error("[MTL] FAILURE configuration cards render", errCards);
       if (errCards && errCards.stack) console.error(errCards.stack);
