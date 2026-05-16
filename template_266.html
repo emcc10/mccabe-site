@@ -2755,6 +2755,53 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     return bad >= Math.min(2, opts.length);
   }
 
+  /** When Volusion has no upholstery row yet (SKU often shows configuration only). */
+  var WM_SECTIONAL_LEATHER_SAMPLES = [
+    { grade: "2000", family: "Rein", color: "Pebble" },
+    { grade: "2000", family: "Traverse", color: "Oak" },
+    { grade: "2000", family: "Traverse", color: "Charcoal" },
+    { grade: "3000", family: "Solana", color: "Dijon" },
+    { grade: "3000", family: "Solana", color: "Fossil" },
+    { grade: "3000", family: "Evoque", color: "Atlantic" },
+    { grade: "3000", family: "Evoque", color: "Stone" },
+    { grade: "3000", family: "Evoque", color: "Frost" }
+  ];
+
+  function wmRemoveSectionalLeatherProxy() {
+    try {
+      var w = document.getElementById("mc-sectional-leather-proxy-wrap");
+      if (w) w.remove();
+    } catch (eRmPx) {}
+  }
+
+  /** Hidden select so modal + preview strip mirror theater behavior when native cover dropdown is absent. */
+  function wmEnsureSectionalLeatherProxySelect() {
+    var existing = document.getElementById("mc-sectional-cover-proxy");
+    if (existing && existing.options.length >= WM_SECTIONAL_LEATHER_SAMPLES.length - 2) return existing;
+    wmRemoveSectionalLeatherProxy();
+    var wrap = document.createElement("div");
+    wrap.id = "mc-sectional-leather-proxy-wrap";
+    wrap.setAttribute("aria-hidden", "true");
+    wrap.style.cssText = "position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;";
+    var sel = document.createElement("select");
+    sel.id = "mc-sectional-cover-proxy";
+    sel.name = "_mc_sectional_cover_gallery_do_not_submit";
+    sel.setAttribute("tabindex", "-1");
+    WM_SECTIONAL_LEATHER_SAMPLES.forEach(function (row, idx) {
+      var opt = document.createElement("option");
+      opt.value = "gallery-" + idx;
+      opt.textContent = "Grade " + row.grade + " " + row.family + " " + row.color;
+      sel.appendChild(opt);
+    });
+    sel.selectedIndex = 0;
+    wrap.appendChild(sel);
+    try {
+      document.body.appendChild(wrap);
+    } catch (eBody) {}
+    console.log("[WM] sectional — using browse gallery leather proxy (native cover select not loaded yet)");
+    return sel;
+  }
+
   function initIfReady(){
     const secEarly =
       !wmIsTheaterSeatingPdpEarly() &&
@@ -2795,7 +2842,11 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     if (secEarly && otSec) {
       candidateSelects = Array.from(otSec.querySelectorAll("select"))
         .filter(function (s) {
-          return !isNativeConfigurationSelectEl(s) && hasRealOptions(s);
+          return (
+            s.id !== "mc-sectional-cover-proxy" &&
+            !isNativeConfigurationSelectEl(s) &&
+            hasRealOptions(s)
+          );
         })
         .sort(function (a, b) {
           return wmLeatherSelectScore(b) - wmLeatherSelectScore(a);
@@ -2805,13 +2856,19 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     if (!candidateSelects.length) {
       candidateSelects = allSelects
         .filter(function (s) {
-          return !isNativeConfigurationSelectEl(s);
+          return s.id !== "mc-sectional-cover-proxy" && !isNativeConfigurationSelectEl(s);
         })
         .filter(selectLooksLeatherish)
         .filter(hasRealOptions)
         .sort(function (a, b) {
           return wmLeatherSelectScore(b) - wmLeatherSelectScore(a);
         });
+    }
+
+    /* Palliser sectional SKUs sometimes ship without an upholstery Volusion row (configuration only): drive swatches/modal anyway. */
+    if (!candidateSelects.length && secEarly) {
+      var proxySel = wmEnsureSectionalLeatherProxySelect();
+      if (proxySel && hasRealOptions(proxySel)) candidateSelects = [proxySel];
     }
 
     if (!candidateSelects.length) { log("No leather-ish selects yet."); return false; }
