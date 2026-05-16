@@ -2803,12 +2803,44 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
   }
 
   function initIfReady(){
+    var wmOpenStale;
     const secEarly =
       !wmIsTheaterSeatingPdpEarly() &&
       (document.documentElement.classList.contains("is-sectional-product") ||
         (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()));
 
-    var wmOpenStale = document.getElementById("wmOpen");
+    try {
+      if (document.getElementById("mc-sectional-cover-proxy")) {
+        var otCheck = document.querySelector(
+          "#v65-product-parent #options_table, #options_table, table[id*='options_table']"
+        );
+        var hasVolusionCoverSel =
+          otCheck &&
+          Array.from(otCheck.querySelectorAll("select")).some(function (s) {
+            if (!s || s.id === "mc-sectional-cover-proxy") return false;
+            if (isNativeConfigurationSelectEl(s)) return false;
+            return hasRealOptions(s);
+          });
+        if (hasVolusionCoverSel) {
+          wmRemoveSectionalLeatherProxy();
+          wmOpenStale = document.getElementById("wmOpen");
+          if (wmOpenStale) {
+            try {
+              var ub = wmOpenStale.parentElement;
+              if (ub && ub.querySelector && ub.querySelector("#wmSummary")) ub.remove();
+              else wmOpenStale.remove();
+            } catch (eDrop) {}
+            document.querySelectorAll("body > .wm-overlay").forEach(function (ov) {
+              if (ov.querySelector("#wmSections")) ov.remove();
+            });
+            window.__WM_LEATHER_MODAL_BUILT__ = false;
+            window.__WM_LEATHER_OPTIONS__ = [];
+          }
+        }
+      }
+    } catch (eVolCover) {}
+
+    wmOpenStale = document.getElementById("wmOpen");
     if (wmOpenStale) {
       if (!secEarly) return true;
       var wmStale = window.__WM_LEATHER_OPTIONS__;
@@ -21667,7 +21699,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-barrett-fix-v12"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-gallery-fallback-v13"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
