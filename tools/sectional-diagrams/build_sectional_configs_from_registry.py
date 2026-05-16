@@ -119,6 +119,54 @@ def js_escape(s: str) -> str:
     return s.replace("\\", "\\\\").replace('"', '\\"')
 
 
+# Volusion PLP / PDF Popular strings sometimes disagree (order, piece mnemonics, or wrong-line PDF).
+# Aliases: Volusion code -> substring to find in the *lookup* PDF (slashes ok).
+# exportCodeSourcePdf: Volusion code -> other style's PDF filename in tools/sectional-diagrams/pdfs/.
+CATALOG_ENTRY_MANUAL: dict[str, dict] = {
+    "Harlo": {
+        "exportCodeAliases": {"88-81-11-81-04": "67/A2/10/09/10/66"},
+    },
+    "Charli": {
+        "exportCodeAliases": {"e3-90-e4": "E4/90/E3"},
+    },
+    "Laguna": {
+        "exportCodeAliases": {"e3-90-e4": "E4/90/E3"},
+    },
+    "Henry": {
+        "exportCodeAliases": {"47-10-09-10-46": "47/10/09/10/46"},
+        "exportCodeSourcePdf": {"47-10-09-10-46": "Harlo.pdf"},
+    },
+    "Essex": {
+        # McCabe "07/9W/08" = sectional pieces 07 + 9W + 08; Popular row is LB/9W/LA on the Essex PDF.
+        "exportCodeAliases": {"07-9w-08": "LB/9W/LA"},
+    },
+    "Luna": {
+        "exportCodeAliases": {"07-9w-08": "LB/9W/LA"},
+    },
+    "Lotus": {
+        # PLP uses Apex-style wedge kit; diagram only appears on Apex spec — same layout, different cover line.
+        "exportCodeAliases": {"5w-1w-1l-s2-4w": "5W/1W/1L/S2/4W"},
+        "exportCodeSourcePdf": {"5w-1w-1l-s2-4w": "Apex.pdf"},
+    },
+}
+
+
+def _merge_catalog_manual(entry: dict, key: str) -> None:
+    man = CATALOG_ENTRY_MANUAL.get(key)
+    if not man:
+        return
+    for mk, mv in man.items():
+        if mk in ("exportCodeAliases", "exportCodeSourcePdf") and isinstance(mv, dict):
+            cur = entry.get(mk)
+            if isinstance(cur, dict):
+                merged = {**cur, **mv}
+            else:
+                merged = dict(mv)
+            entry[mk] = merged
+        else:
+            entry[mk] = mv
+
+
 def merge_catalog(registry: dict) -> None:
     cat = json.loads(OUT_CAT.read_text(encoding="utf-8"))
     pall = cat.get("palliser") or {}
@@ -135,8 +183,7 @@ def merge_catalog(registry: dict) -> None:
             "pdf": f"{key}.pdf",
             **defaults,
         }
-        if key == "Harlo":
-            entry["exportCodeAliases"] = {"88-81-11-81-04": "67/A2/10/09/10/66"}
+        _merge_catalog_manual(entry, key)
         pall[key] = entry
     cat["palliser"] = pall
     OUT_CAT.write_text(json.dumps(cat, indent=2) + "\n", encoding="utf-8")

@@ -3236,10 +3236,29 @@ try {
     aloira: "77427",
     acacia: "41080",
     atticus: "77325",
+    barrett: "77558",
+    brookes: "77696",
+    charli: "77743",
+    corissa: "77500",
     /* Sectionals — same model numbers as tools/sectional-diagrams/catalog.json */
     colebrook: "77267",
     creighton: "77294",
+    essex: "40112",
+    harlo: "41052",
+    hastings: "41068",
+    henry: "41051",
+    juno: "77494",
+    jura: "77201",
+    keiran: "41500",
+    kenaston: "41064",
+    keoni: "44000",
+    laguna: "77752",
+    leighton: "41063",
     lexi: "77694",
+    luna: "40110",
+    lotus: "44007",
+    colton: "44007",
+    armina: "44010",
     /* Titan: official PDF is https://images.palliser.com/specsheet/en/44004%20TITAN.pdf */
     titan: "44004"
   };
@@ -5511,11 +5530,8 @@ function getMemberPlannerSeatPriceForCalc(){
   return getPlannerBaseSeatPriceForCalc();
 }
 function getPlannerBaseSeatPriceForCalc() {
-  var raw = mcReadCurrentVisibleMemberUnitPrice();
-  var floor = Number(window.__mcMemberUnitPriceFloor || 0);
   var st = window.__mcMemberPricing || {};
   var fromState = Number(st.memberSeatPrice || st.memberPrice || 0);
-  if (fromState > floor) floor = fromState;
 
   var fromMeta = 0;
   try {
@@ -5524,10 +5540,55 @@ function getPlannerBaseSeatPriceForCalc() {
     }
   } catch (eMeta) {}
 
+  var volLive = 0;
+  try {
+    if (typeof getVolusionAddToCartSeatPrice === "function") {
+      volLive = Number(getVolusionAddToCartSeatPrice(document)) || 0;
+    }
+  } catch (eVol) {}
+
+  var fromForm = 0;
+  try {
+    var form =
+      typeof mcFindProductDetailsForm === "function" ? mcFindProductDetailsForm(document) : null;
+    if (form && typeof mcReadVolusionProductFormSellingUnit === "function") {
+      fromForm = Number(mcReadVolusionProductFormSellingUnit(form)) || 0;
+    }
+  } catch (eForm) {}
+
+  /* Volusion option-aware unit (matches add-to-cart) — prefer over stale/MAP DOM scrape when they disagree. */
+  var volBacked = fromForm > 0 ? fromForm : volLive > 0 ? volLive : 0;
+  if (!(volBacked > 0) && fromState > 0) volBacked = fromState;
+  if (!(volBacked > 0) && fromMeta > 0) volBacked = fromMeta;
+
+  var raw =
+    typeof mcReadCurrentVisibleMemberUnitPrice === "function"
+      ? mcReadCurrentVisibleMemberUnitPrice()
+      : 0;
+
+  var floor = Number(window.__mcMemberUnitPriceFloor || 0);
+  if (fromState > floor) floor = fromState;
   if (fromMeta > floor) floor = fromMeta;
+  if (volBacked > floor) floor = volBacked;
 
   var member = raw;
   if (raw > 0 && floor > 0 && raw < floor - 75) {
+    member = floor;
+  }
+
+  if (
+    volBacked > 0 &&
+    member > 0 &&
+    member > volBacked + 50 &&
+    member > volBacked * 1.05
+  ) {
+    member = volBacked;
+  }
+
+  if (!(member > 0) && volBacked > 0) {
+    member = volBacked;
+  }
+  if (!(member > 0) && floor > 0) {
     member = floor;
   }
 
@@ -5569,6 +5630,22 @@ function ensurePriceWithOptionsLabel(scope){
 }
 
 /**
+ * Collapse planner layout / option keys (e.g. "4L Armless Loveseat") to canonical codes (4L, 5L, …)
+ * so 4L billable math and armless cart split stay aligned with Volusion.
+ */
+function mcNormalizePlannerPieceKey(raw) {
+  var s = String(raw == null ? "" : raw).replace(/\s+/g, " ").trim();
+  if (!s) return "";
+  var u = s.toUpperCase();
+  var m = u.match(/\b([1-9]L)\b/);
+  if (m) return m[1];
+  return u;
+}
+if (typeof window !== "undefined") {
+  window.mcNormalizePlannerPieceKey = mcNormalizePlannerPieceKey;
+}
+
+/**
  * Per-seat math for planner counts. Pass seatPrice explicitly (public or member per-seat).
  */
 function calculatePlannerPrice(counts, seatPrice) {
@@ -5585,7 +5662,7 @@ function calculatePlannerPrice(counts, seatPrice) {
     var qty = Number(counts[id] || 0);
     if (!qty) return;
 
-    id = String(id).toUpperCase();
+    id = mcNormalizePlannerPieceKey(id) || String(id).toUpperCase();
 
     if (id === "4L") {
       fourL += qty;
@@ -5791,7 +5868,7 @@ window.applyPlannerToPage = function (payload) {
     Object.keys(map).forEach(function (key) {
       var qty = Number(map[key] || 0);
       if (!qty) return;
-      var id = String(key).toUpperCase();
+      var id = mcNormalizePlannerPieceKey(key) || String(key).toUpperCase();
       b += id === "4L" ? qty * 2 : qty;
     });
     return b;
@@ -5800,16 +5877,19 @@ window.applyPlannerToPage = function (payload) {
   var configOpts = {};
   Object.keys(opts).forEach(function (_ok) {
     var _n = Number(opts[_ok] || 0);
-    if (_n > 0) configOpts[_ok] = _n;
+    if (!(_n > 0)) return;
+    var _nk = mcNormalizePlannerPieceKey(_ok) || String(_ok).trim().toUpperCase();
+    configOpts[_nk] = (Number(configOpts[_nk]) || 0) + _n;
   });
   if (layout.length) {
     var fromLayout = {};
     for (var _mj = 0; _mj < layout.length; _mj++) {
       var _seg = layout[_mj];
       var _pid = _seg && (_seg.id != null && _seg.id !== "" ? _seg.id : _seg);
-      _pid = String(_pid != null ? _pid : "")
-        .trim()
-        .toUpperCase();
+      _pid = mcNormalizePlannerPieceKey(_pid) ||
+        String(_pid != null ? _pid : "")
+          .trim()
+          .toUpperCase();
       if (!_pid || _pid === "UNKNOWN") continue;
       fromLayout[_pid] = (Number(fromLayout[_pid]) || 0) + 1;
     }
@@ -5818,7 +5898,14 @@ window.applyPlannerToPage = function (payload) {
     }
   }
   if (!Object.keys(configOpts).length) {
-    configOpts = opts;
+    var fb = {};
+    Object.keys(opts).forEach(function (k) {
+      var q = Number(opts[k] || 0);
+      if (!(q > 0)) return;
+      var nk = mcNormalizePlannerPieceKey(k) || String(k).trim().toUpperCase();
+      fb[nk] = (Number(fb[nk]) || 0) + q;
+    });
+    configOpts = fb;
   }
 
   var seatCount = (payload.seatCount != null && payload.seatCount !== "") ? Number(payload.seatCount) : NaN;
@@ -6181,7 +6268,7 @@ function mcVertexSummarizePlannerPayload(payload) {
   var WEDGE_IDS = { "5L": 1, "6L": 1, "7L": 1, "9L": 1 };
   if (layout.length) {
     layout.forEach(function (s) {
-      var id = String((s && s.id) || s || "").toUpperCase();
+      var id = mcNormalizePlannerPieceKey((s && s.id) || s || "") || String((s && s.id) || s || "").toUpperCase();
       if (!id) return;
       counts[id] = (counts[id] || 0) + 1;
     });
@@ -20084,13 +20171,15 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
   function mcPlannerLayoutHas4L(data) {
     if (!data || !data.layout || !Array.isArray(data.layout)) return false;
-    var i, item, id;
+    var i, item, id, norm;
     for (i = 0; i < data.layout.length; i++) {
       item = data.layout[i];
-      id = String((item && item.id) != null ? item.id : item || "")
-        .trim()
-        .toUpperCase();
-      if (id === "4L") return true;
+      id = String((item && item.id) != null ? item.id : item || "").trim();
+      norm =
+        typeof window.mcNormalizePlannerPieceKey === "function"
+          ? window.mcNormalizePlannerPieceKey(id)
+          : id.toUpperCase();
+      if (norm === "4L" || id.toUpperCase() === "4L") return true;
     }
     return false;
   }
@@ -21108,7 +21197,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   Sectional scripts (external) load last. Leather modal CSS ~line 1872 and script #wm-leather-modal-js ~line 2170
   run earlier in document order, so they always execute before these files.
 -->
-<script src="/v/vspfiles/js/sectional-configs.js?v=20260515-lexi-diagrams"></script>
+<script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
 <script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260515-github-diagram-urls-v1"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";

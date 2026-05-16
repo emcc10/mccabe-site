@@ -195,6 +195,10 @@ def page_has_code_hint(page_text: str, code: str) -> bool:
     return False
 
 
+def normalize_config_code_key(code: str) -> str:
+    return str(code or "").strip().lower().replace("/", "-")
+
+
 def find_pages_for_code(doc: fitz.Document, code: str) -> list[int]:
     hits: list[int] = []
     for i in range(len(doc)):
@@ -533,6 +537,11 @@ def cmd_publish(
                 ec = 1
                 continue
 
+        source_pdf_map_raw = info.get("exportCodeSourcePdf") or {}
+        source_pdf_map = {
+            normalize_config_code_key(k): str(v).strip() for k, v in source_pdf_map_raw.items() if str(v).strip()
+        }
+
         doc = fitz.open(pdf_path)
         try:
             np = len(doc)
@@ -541,43 +550,67 @@ def cmd_publish(
                     continue
                 raw_code = str(code).strip()
                 aliases = info.get("exportCodeAliases") or {}
+                alias_key = normalize_config_code_key(raw_code)
                 lookup = str(
-                    aliases.get(raw_code) or aliases.get(raw_code.replace("-", "/")) or raw_code
+                    aliases.get(raw_code)
+                    or aliases.get(raw_code.replace("-", "/"))
+                    or aliases.get(alias_key)
+                    or raw_code
                 ).strip()
-                pages = find_pages_for_code(doc, lookup)
-                if not pages:
-                    print(
-                        f"FAIL {style} config “{code}”: no PDF page mentions this code ({np} pages). "
-                        "If specs are diagram-only with no searchable text, we need OCR or a Palliser-provided SVG — not wired here.",
-                        file=sys.stderr,
-                    )
-                    ec = 1
-                    continue
-                page_use = pages[0]
-                if len(pages) > 1:
-                    print(
-                        f"Note {style} “{code}”: multiple PDF page hits {pages}; using best page ({page_use})."
-                    )
-                pg = doc[page_use - 1]
-
-                clip: fitz.Rect | None = None
-                if grid_clip and is_popular_configurations_page(pg):
-                    anch = find_label_anchor_rect(pg, lookup)
-                    if anch:
-                        ck = popular_clip_kwargs_from_catalog(cat, info)
-                        clip = popular_configuration_block_clip(pg, anch, **ck)
-                    if clip is None:
+                alt_pdf_name = source_pdf_map.get(alias_key)
+                doc_use = doc
+                doc_use_owned = False
+                if alt_pdf_name:
+                    alt_path = pdf_dir / alt_pdf_name
+                    if not alt_path.is_file():
                         print(
-                            f"Note {style} “{code}”: Popular page but could not derive block clip — using full page."
+                            f"FAIL {style} config “{code}”: exportCodeSourcePdf points to missing {alt_path}",
+                            file=sys.stderr,
                         )
+                        ec = 1
+                        continue
+                    doc_use = fitz.open(alt_path)
+                    doc_use_owned = True
+                    np = len(doc_use)
+                try:
+                    pages = find_pages_for_code(doc_use, lookup)
+                    if not pages:
+                        print(
+                            f"FAIL {style} config “{code}”: no PDF page mentions this code ({np} pages). "
+                            "If specs are diagram-only with no searchable text, we need OCR or a Palliser-provided SVG — not wired here.",
+                            file=sys.stderr,
+                        )
+                        ec = 1
+                        continue
+                    page_use = pages[0]
+                    if len(pages) > 1:
+                        print(
+                            f"Note {style} “{code}”: multiple PDF page hits {pages}; using best page ({page_use})."
+                        )
+                    pg = doc_use[page_use - 1]
 
-                safe = str(code).replace("/", "-").replace("\\", "-")
-                out_name = f"{style}-SC-{safe}.png"
-                out_path = out_root / out_name
-                rel = out_path.relative_to(repo_root())
-                rasterize_page_from_doc(doc, page_use, out_path, dpi, clip)
-                lbl = "popular-block" if clip else "full page"
-                print(f"OK {rel}  (PDF page {page_use}, {lbl})")
+                    clip: fitz.Rect | None = None
+                    if grid_clip and is_popular_configurations_page(pg):
+                        anch = find_label_anchor_rect(pg, lookup)
+                        if anch:
+                            ck = popular_clip_kwargs_from_catalog(cat, info)
+                            clip = popular_configuration_block_clip(pg, anch, **ck)
+                        if clip is None:
+                            print(
+                                f"Note {style} “{code}”: Popular page but could not derive block clip — using full page."
+                            )
+
+                    safe = str(code).replace("/", "-").replace("\\", "-")
+                    out_name = f"{style}-SC-{safe}.png"
+                    out_path = out_root / out_name
+                    rel = out_path.relative_to(repo_root())
+                    rasterize_page_from_doc(doc_use, page_use, out_path, dpi, clip)
+                    lbl = "popular-block" if clip else "full page"
+                    src_note = f", source {alt_pdf_name}" if alt_pdf_name else ""
+                    print(f"OK {rel}  (PDF page {page_use}, {lbl}{src_note})")
+                finally:
+                    if doc_use_owned:
+                        doc_use.close()
         finally:
             doc.close()
 

@@ -112,7 +112,10 @@
       "pdf": "Charli.pdf",
       "popularColumnSlackPt": 12,
       "popularCropPadPt": 10,
-      "popularImageMinAreaPt2": 4200
+      "popularImageMinAreaPt2": 4200,
+      "exportCodeAliases": {
+        "e3-90-e4": "E4/90/E3"
+      }
     },
     "Laguna": {
       "model": "77752",
@@ -120,7 +123,10 @@
       "pdf": "Laguna.pdf",
       "popularColumnSlackPt": 12,
       "popularCropPadPt": 10,
-      "popularImageMinAreaPt2": 4200
+      "popularImageMinAreaPt2": 4200,
+      "exportCodeAliases": {
+        "e3-90-e4": "E4/90/E3"
+      }
     },
     "Henry": {
       "model": "41051",
@@ -128,7 +134,13 @@
       "pdf": "Henry.pdf",
       "popularColumnSlackPt": 12,
       "popularCropPadPt": 10,
-      "popularImageMinAreaPt2": 4200
+      "popularImageMinAreaPt2": 4200,
+      "exportCodeAliases": {
+        "47-10-09-10-46": "47/10/09/10/46"
+      },
+      "exportCodeSourcePdf": {
+        "47-10-09-10-46": "Harlo.pdf"
+      }
     },
     "Essex": {
       "model": "40112",
@@ -136,7 +148,10 @@
       "pdf": "Essex.pdf",
       "popularColumnSlackPt": 12,
       "popularCropPadPt": 10,
-      "popularImageMinAreaPt2": 4200
+      "popularImageMinAreaPt2": 4200,
+      "exportCodeAliases": {
+        "07-9w-08": "LB/9W/LA"
+      }
     },
     "Luna": {
       "model": "40110",
@@ -144,7 +159,10 @@
       "pdf": "Luna.pdf",
       "popularColumnSlackPt": 12,
       "popularCropPadPt": 10,
-      "popularImageMinAreaPt2": 4200
+      "popularImageMinAreaPt2": 4200,
+      "exportCodeAliases": {
+        "07-9w-08": "LB/9W/LA"
+      }
     },
     "Harlo": {
       "model": "41052",
@@ -235,7 +253,13 @@
       "pdf": "Lotus.pdf",
       "popularColumnSlackPt": 12,
       "popularCropPadPt": 10,
-      "popularImageMinAreaPt2": 4200
+      "popularImageMinAreaPt2": 4200,
+      "exportCodeAliases": {
+        "5w-1w-1l-s2-4w": "5W/1W/1L/S2/4W"
+      },
+      "exportCodeSourcePdf": {
+        "5w-1w-1l-s2-4w": "Apex.pdf"
+      }
     }
   }
 }
