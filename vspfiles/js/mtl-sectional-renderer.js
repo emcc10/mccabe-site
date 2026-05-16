@@ -66,7 +66,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260516-gallery-fallback-v14";
+  window.MTL_RENDERER_BUILD = "sectional-20260516-gallery-fallback-v15";
   console.log("MTL_RENDERER_BUILD", window.MTL_RENDERER_BUILD);
 
   /** Set true only after configuration cards mount succeeded; `hideConfigurationRow` no-ops until then. */
@@ -487,6 +487,30 @@
     var i;
     var m = document.querySelector("select.mc-native-leather");
     if (m && !isVolusionConfigurationRowSelect(m)) return m;
+
+    /*
+     * Sectionals historically used shotgun heuristics (sole non-config <select>, any select with ≥1 option),
+     * which bound the theater WM UI to surcharge rows → corrupt __WM_LEATHER_OPTIONS__ → mtlRebuildTheaterLeatherUi()
+     * in a tight loop and froze refreshes. The template leather script exposes the authoritative candidate list —
+     * same selectLooksLeatherish + ≥2 meaningful options theater PDPs already use — so renderer + initIfReady
+     * always resolve the identical native leather <select>.
+     */
+    if (typeof window.mcCollectNativeLeatherSelectsForPdp === "function") {
+      var canonList = window.mcCollectNativeLeatherSelectsForPdp();
+      if (canonList && canonList.length) {
+        var ci;
+        for (ci = 0; ci < canonList.length; ci++) {
+          var canonSel = canonList[ci];
+          if (!canonSel) continue;
+          if (isVolusionConfigurationRowSelect(canonSel)) continue;
+          if (configSel && canonSel === configSel) continue;
+          console.log("[MTL] findNativeLeatherSelectEl: mcCollectNativeLeatherSelectsForPdp (canonical)");
+          return canonSel;
+        }
+      }
+    }
+
+    /* Fallback when collector absent or nothing matched yet (early Volusion injections). Kept narrower than sectional shotgun. */
     for (i = 0; i < sels.length; i++) {
       var sel = sels[i];
       if (isVolusionConfigurationRowSelect(sel)) continue;
@@ -502,106 +526,7 @@
       }
     }
 
-    if (!isSectionalProductPageClient()) return null;
-
-    function realLeatherOptionCount(sel) {
-      if (!sel || !sel.options) return 0;
-      var n = 0;
-      var j;
-      for (j = 0; j < sel.options.length; j++) {
-        if (!isPlaceholderLeatherOption(sel.options[j])) n++;
-      }
-      return n;
-    }
-
-    var candidates = sels.filter(function (sel) {
-      if (isVolusionConfigurationRowSelect(sel)) return false;
-      if (configSel && sel === configSel) return false;
-      var id = String(sel.id || "").toLowerCase();
-      var nm = String(sel.name || "").toLowerCase();
-      if (/qty|quantity/.test(id + " " + nm)) return false;
-      var real = realLeatherOptionCount(sel);
-      var optLen = sel.options ? sel.options.length : 0;
-      return real >= 1 || (optLen >= 2 && optLen <= 800);
-    });
-
-    if (!candidates.length) {
-      var ot = document.querySelector(
-        "#v65-product-parent #options_table, #v65-product-parent table[id*='options_table'], #options_table, table[id*='options_table'], #content_area table[id*='options_table']"
-      );
-      if (ot) {
-        var ordered = Array.from(ot.querySelectorAll("select"));
-        var nonCfgOrdered = ordered.filter(function (os) {
-          if (!os.options || os.options.length < 1) return false;
-          if (isVolusionConfigurationRowSelect(os)) return false;
-          if (configSel && os === configSel) return false;
-          var id2 = String(os.id || "").toLowerCase();
-          var nm2 = String(os.name || "").toLowerCase();
-          if (/qty|quantity/.test(id2 + " " + nm2)) return false;
-          return true;
-        });
-        if (nonCfgOrdered.length === 1) {
-          console.log("[MTL] findNativeLeatherSelectEl: options-table DOM order — sole non-config <select>");
-          return nonCfgOrdered[0];
-        }
-        if (nonCfgOrdered.length > 0 && configSel) {
-          var idxC = ordered.indexOf(configSel);
-          var pick = null;
-          var oi;
-          if (idxC !== -1) {
-            for (oi = 0; oi < ordered.length; oi++) {
-              if (oi <= idxC) continue;
-              var os3 = ordered[oi];
-              if (isVolusionConfigurationRowSelect(os3)) continue;
-              if (os3 === configSel) continue;
-              if (!os3.options || os3.options.length < 1) continue;
-              pick = os3;
-              break;
-            }
-          }
-          if (!pick) pick = nonCfgOrdered[0];
-          if (pick) {
-            console.log("[MTL] findNativeLeatherSelectEl: options-table DOM order — first <select> after configuration row");
-            return pick;
-          }
-        } else if (nonCfgOrdered.length > 0) {
-          console.log("[MTL] findNativeLeatherSelectEl: options-table DOM order — first non-config (no configSel match)");
-          return nonCfgOrdered[0];
-        }
-      }
-
-      var lastResort = sels.filter(function (s) {
-        if (!s || !s.options || s.options.length < 1) return false;
-        if (isVolusionConfigurationRowSelect(s)) return false;
-        if (configSel && s === configSel) return false;
-        var id = String(s.id || "").toLowerCase();
-        var nm = String(s.name || "").toLowerCase();
-        if (/qty|quantity/.test(id + " " + nm)) return false;
-        return true;
-      });
-      if (lastResort.length >= 1) {
-        console.log("[MTL] findNativeLeatherSelectEl: page-wide last-resort — exactly", lastResort.length, "non-config <select>(s)");
-        return lastResort[0];
-      }
-      return null;
-    }
-
-    if (candidates.length === 1) {
-      console.log("[MTL] findNativeLeatherSelectEl: sectional fallback — single non-config select");
-      return candidates[0];
-    }
-
-    var scored = candidates.map(function (sel) {
-      var rt = getVolusionOptionRowContextLower(sel);
-      var score = realLeatherOptionCount(sel);
-      if (/leather|cover|grade|fabric|upholstery|palliser|swatch|select\s+a|palette|color/.test(rt)) score += 100;
-      return { sel: sel, score: score };
-    });
-    scored.sort(function (a, b) {
-      return b.score - a.score;
-    });
-    console.log("[MTL] findNativeLeatherSelectEl: sectional fallback — picked highest score among", candidates.length, "selects");
-    return scored[0].sel;
+    return null;
   }
 
   function isPlaceholderLeatherOption(opt) {
@@ -1382,6 +1307,13 @@
     if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
 
     var leatherSel = findNativeLeatherSelectEl();
+    if (
+      !leatherSel &&
+      typeof window.mcCollectNativeLeatherSelectsForPdp === "function"
+    ) {
+      var canonPk = window.mcCollectNativeLeatherSelectsForPdp();
+      if (canonPk && canonPk.length) leatherSel = canonPk[0];
+    }
     if (!leatherSel) {
       var configSel = null;
       try {
@@ -1393,6 +1325,9 @@
       var si;
       var best = null;
       var bestN = 0;
+      /** Never “max option count wins” across arbitrary PDP selects — mirror findNative fallback row keywords only. */
+      var rowHintRx =
+        /(choose cover|choose leather|select leather|select a leather|select\s+a\s+leather|upholstery|cover|fabric|grade|swatch|palliser|material|color\s*choice)/i;
       for (si = 0; si < scan.length; si++) {
         var s = scan[si];
         if (!s || !s.options) continue;
@@ -1400,6 +1335,8 @@
         if (isVolusionConfigurationRowSelect(s)) continue;
         var idn = String(s.id || "") + " " + String(s.name || "");
         if (/qty|quantity/i.test(idn)) continue;
+        var ctxLc = getVolusionOptionRowContextLower(s);
+        if (!rowHintRx.test(ctxLc)) continue;
         var syn = buildSyntheticWmLeatherOptionsFromSelect(s);
         if (syn.length > bestN) {
           bestN = syn.length;

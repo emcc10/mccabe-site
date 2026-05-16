@@ -2653,13 +2653,9 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
 
 
   function hasRealOptions(sel){
+    /* Same minimum as non-sectional PDPs: one real Volusion surcharge row shouldn’t steal the theater leather UX. */
     const real = Array.from(sel.options || []).filter(o => !isPlaceholderOption(o));
-    const secEarly =
-      !wmIsTheaterSeatingPdpEarly() &&
-      (document.documentElement.classList.contains("is-sectional-product") ||
-        (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()));
-    const min = secEarly ? 1 : 2;
-    return real.length >= min;
+    return real.length >= 2;
   }
 
   /** Exclude Volusion “Choose configuration” — it is not a leather/cover select and breaks swatch parsing. */
@@ -2742,6 +2738,43 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     return s;
   }
 
+  /**
+   * Single source of truth: which native cover <select> drives the Palliser/theater WM leather UI (modal + accordion strip).
+   * Sectional PDP must use the same rules — mtl-sectional-renderer delegates here to avoid mismatched selects and rebuild storms.
+   */
+  function mcCollectNativeLeatherSelectsInner() {
+    var allSelects = Array.from(document.querySelectorAll("select"));
+    var otSec = document.querySelector(
+      "#v65-product-parent #options_table, #options_table, table[id*='options_table']"
+    );
+    function acceptable(s) {
+      if (!s || s.id === "mc-sectional-cover-proxy") return false;
+      if (isNativeConfigurationSelectEl(s)) return false;
+      if (!hasRealOptions(s)) return false;
+      return selectLooksLeatherish(s);
+    }
+    var list = [];
+    if (otSec) {
+      list = Array.from(otSec.querySelectorAll("select"))
+        .filter(acceptable)
+        .sort(function (a, b) {
+          return wmLeatherSelectScore(b) - wmLeatherSelectScore(a);
+        });
+    }
+    if (!list.length) {
+      list = allSelects
+        .filter(acceptable)
+        .sort(function (a, b) {
+          return wmLeatherSelectScore(b) - wmLeatherSelectScore(a);
+        });
+    }
+    return list;
+  }
+
+  try {
+    window.mcCollectNativeLeatherSelectsForPdp = mcCollectNativeLeatherSelectsInner;
+  } catch (eMcColl) {}
+
   function wmOptsLookCorruptForInit(opts) {
     if (!opts || !opts.length) return true;
     var bad = 0;
@@ -2809,6 +2842,8 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
       (document.documentElement.classList.contains("is-sectional-product") ||
         (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()));
 
+    var leatherCandidates = mcCollectNativeLeatherSelectsInner();
+
     try {
       if (document.getElementById("mc-sectional-cover-proxy")) {
         var otCheck = document.querySelector(
@@ -2816,10 +2851,12 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
         );
         var hasVolusionCoverSel =
           otCheck &&
-          Array.from(otCheck.querySelectorAll("select")).some(function (s) {
-            if (!s || s.id === "mc-sectional-cover-proxy") return false;
-            if (isNativeConfigurationSelectEl(s)) return false;
-            return hasRealOptions(s);
+          leatherCandidates.some(function (s) {
+            try {
+              return otCheck.contains(s);
+            } catch (eCt) {
+              return false;
+            }
           });
         if (hasVolusionCoverSel) {
           wmRemoveSectionalLeatherProxy();
@@ -2864,38 +2901,8 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
       } catch (eReset) {}
     }
 
-    const allSelects = Array.from(document.querySelectorAll("select"));
-    var candidateSelects = [];
-    var otSec = document.querySelector(
-      "#v65-product-parent #options_table, #options_table, table[id*='options_table']"
-    );
-
-    /* Sectionals: pick cover/leather from options_table by row label + option text — not selectLooksLeatherish alone. */
-    if (secEarly && otSec) {
-      candidateSelects = Array.from(otSec.querySelectorAll("select"))
-        .filter(function (s) {
-          return (
-            s.id !== "mc-sectional-cover-proxy" &&
-            !isNativeConfigurationSelectEl(s) &&
-            hasRealOptions(s)
-          );
-        })
-        .sort(function (a, b) {
-          return wmLeatherSelectScore(b) - wmLeatherSelectScore(a);
-        });
-    }
-
-    if (!candidateSelects.length) {
-      candidateSelects = allSelects
-        .filter(function (s) {
-          return s.id !== "mc-sectional-cover-proxy" && !isNativeConfigurationSelectEl(s);
-        })
-        .filter(selectLooksLeatherish)
-        .filter(hasRealOptions)
-        .sort(function (a, b) {
-          return wmLeatherSelectScore(b) - wmLeatherSelectScore(a);
-        });
-    }
+    /* Same candidate pipeline theater + sectional: shared with mtl-sectional-renderer via mcCollectNativeLeatherSelectsForPdp */
+    var candidateSelects = leatherCandidates;
 
     /* Palliser sectional SKUs sometimes ship without an upholstery Volusion row (configuration only): drive swatches/modal anyway. */
     if (!candidateSelects.length && secEarly) {
@@ -21700,7 +21707,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-gallery-fallback-v14"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-gallery-fallback-v15"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
