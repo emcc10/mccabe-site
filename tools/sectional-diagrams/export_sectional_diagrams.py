@@ -250,16 +250,27 @@ def anchor_search_needles(code: str) -> list[str]:
 
 
 def find_label_anchor_rect(page: fitz.Page, code: str) -> fitz.Rect | None:
+    """
+    Anchor the Popular cell for this kit code. Some PDFs repeat the same code string in two
+    different Popular cells (e.g. Creighton has two distinct 12/35 layouts); unioning all
+    hits produced a spanning rect that merged multiple diagrams into one PNG crop.
+    """
+    vb = popular_grid_vertical_bounds(page)
     for needle in anchor_search_needles(code):
         try:
-            hits = page.search_for(needle, quads=False)
+            hits = list(page.search_for(needle, quads=False) or [])
         except Exception:
             hits = []
-        if hits:
-            u = hits[0]
-            for r in hits[1:]:
-                u |= r
-            return u
+        kept = []
+        for r in hits:
+            cy = (r.y0 + r.y1) * 0.5
+            if vb and (cy < vb[0] - 6.0 or cy > vb[1] + 6.0):
+                continue
+            kept.append(r)
+        if not kept:
+            continue
+        kept.sort(key=lambda r: (r.y0, r.x0))
+        return kept[0]
     return None
 
 
@@ -350,6 +361,34 @@ def select_largest_popular_diagram_image_in_cell(
     return max(hits, key=lambda r: r.get_area())
 
 
+def popular_row_vertical_bounds(
+    vb: tuple[float, float],
+    anchor: fitz.Rect,
+    *,
+    mid_y_ratio: float = 0.5,
+    row_split: str = "halves",
+) -> tuple[float, float]:
+    """Within Popular vertical band, pick the row slice containing this anchor (2 or 3 rows)."""
+    y_top, y_bot = vb
+    h = y_bot - y_top
+    if h < 40.0:
+        return (y_top, y_bot)
+    cy = (anchor.y0 + anchor.y1) * 0.5
+    rs = (row_split or "halves").strip().lower()
+    if rs == "thirds":
+        seg = h / 3.0
+        idx = int((cy - y_top) / seg)
+        if idx < 0:
+            idx = 0
+        elif idx > 2:
+            idx = 2
+        return (y_top + idx * seg, y_top + (idx + 1) * seg)
+    mid_y = y_top + h * float(mid_y_ratio)
+    if cy < mid_y:
+        return (y_top, mid_y)
+    return (mid_y, y_bot)
+
+
 def popular_configuration_block_clip(
     page: fitz.Page,
     anchor: fitz.Rect,
@@ -360,11 +399,13 @@ def popular_configuration_block_clip(
     frame_trim_pt: float = 2.0,
     bottom_right_extra_trim_pt: float = 0.0,
     min_image_area: float = 8000.0,
+    row_split: str = "halves",
 ) -> fitz.Rect | None:
     """
-    2×2 Popular grid: column by page centerline; row by anchor vs mid-band.
-    Union only this cell's diagram image + its title/code/dimension spans (excludes section header,
-    footnotes, and the neighbor cell — no full-column stretch).
+    Popular grid (usually 2×2 at two row bands, or some styles 2 columns × three row slices).
+    Column by page centerline; row band from halves (legacy) or thirds (Creighton-class PDFs).
+    Union only this cell's diagram image + titles/code/dimensions, then clamp to row slice so
+    neighbor rows cannot bleed into the raster.
     """
     pr = page.rect
     vb = popular_grid_vertical_bounds(page)
@@ -378,6 +419,16 @@ def popular_configuration_block_clip(
     mid_x = pr.x0 + pr.width * 0.5
     mid_y = y_top + band_h * float(mid_y_ratio)
 
+    rs = (row_split or "halves").strip().lower()
+    row_y0, row_y1 = popular_row_vertical_bounds(
+        (y_top, y_bot),
+        anchor,
+        mid_y_ratio=mid_y_ratio,
+        row_split=row_split,
+    )
+    y0 = row_y0 + 1.0
+    y1 = row_y1 - 2.0
+
     if (anchor.x0 + anchor.x1) * 0.5 < mid_x:
         x0 = pr.x0 + 6.0
         x1 = mid_x + 5.0
@@ -385,18 +436,13 @@ def popular_configuration_block_clip(
         x0 = mid_x - 5.0
         x1 = pr.x1 - 6.0
 
-    if anchor.y0 < mid_y:
-        y0 = y_top + 1.0
-        y1 = mid_y + 2.0
-    else:
-        y0 = mid_y - 2.0
-        y1 = y_bot - 2.0
-
     cell = fitz.Rect(x0, y0, x1, y1)
     col_lo = cell.x0 - column_slack_pt
     col_hi = cell.x1 + column_slack_pt
 
     text_u: fitz.Rect | None = None
+    row_tol_lo = row_y0 - 18.0
+    row_tol_hi = row_y1 + 30.0
     for r, raw in iter_text_spans_with_text(page):
         if _span_noise(raw):
             continue
@@ -411,12 +457,8 @@ def popular_configuration_block_clip(
             continue
         if not _rects_overlap_x(r, cell):
             continue
-        if anchor.y0 < mid_y:
-            if r.y1 < y_top - 12.0 or r.y0 > mid_y + 28.0:
-                continue
-        else:
-            if r.y0 > y_bot + 12.0 or r.y1 < mid_y - 28.0:
-                continue
+        if cy < row_tol_lo or cy > row_tol_hi:
+            continue
         text_u = r if text_u is None else (text_u | r)
 
     img_u = select_largest_popular_diagram_image_in_cell(page, cell, min_area=min_image_area)
@@ -436,8 +478,16 @@ def popular_configuration_block_clip(
         u.y1 = max(u.y1, img_u.y1 + 10.0)
     u.y1 = min(y_bot - 3.0, max(u.y1, anchor.y1 + 14.0))
 
+    # Clamp to column × row slice (Creighton Popular uses three rows — prevents next row's titles).
+    row_cell_cap = inflate_rect(cell, 10.0)
+    u &= row_cell_cap
+
     right_col = (anchor.x0 + anchor.x1) * 0.5 >= mid_x
-    bottom_row = anchor.y0 >= mid_y
+    anchor_cy = (anchor.y0 + anchor.y1) * 0.5
+    if rs == "thirds":
+        bottom_row = anchor_cy >= y_top + 2 * band_h / 3.0 - 4.0
+    else:
+        bottom_row = anchor_cy >= mid_y
     if right_col and bottom_row and bottom_right_extra_trim_pt > 0.0:
         u.y1 = max(u.y0 + 72.0, u.y1 - float(bottom_right_extra_trim_pt))
 
@@ -487,6 +537,15 @@ def popular_clip_kwargs_from_catalog(cat: dict, style_info: dict) -> dict:
             return float(v2)
         return float(dflt)
 
+    def gs(key: str, dflt: str) -> str:
+        v = inf.get(key)
+        if v is not None and str(v).strip() != "":
+            return str(v).strip()
+        v2 = cat.get(key)
+        if v2 is not None and str(v2).strip() != "":
+            return str(v2).strip()
+        return dflt
+
     return {
         "mid_y_ratio": gv("popularMidYRatio", 0.5),
         "column_slack_pt": gv("popularColumnSlackPt", 22.0),
@@ -494,11 +553,18 @@ def popular_clip_kwargs_from_catalog(cat: dict, style_info: dict) -> dict:
         "frame_trim_pt": gv("popularFrameTrimPt", 2.0),
         "bottom_right_extra_trim_pt": gv("popularBottomRightExtraTrimPt", 18.0),
         "min_image_area": gv("popularImageMinAreaPt2", 8000.0),
+        "row_split": gs("popularRowSplit", "halves"),
     }
 
 
 def cmd_publish(
-    cat: dict, pdf_dir: Path, out_root: Path, configs_js: Path, skip_fetch: bool, grid_clip: bool
+    cat: dict,
+    pdf_dir: Path,
+    out_root: Path,
+    configs_js: Path,
+    skip_fetch: bool,
+    grid_clip: bool,
+    only_styles: set[str] | None,
 ) -> int:
     dpi = int(cat.get("dpi") or 300)
     pall = cat.get("palliser") or {}
@@ -511,6 +577,8 @@ def cmd_publish(
 
     ec = 0
     for style, codes in style_codes.items():
+        if only_styles and style.upper() not in only_styles:
+            continue
         info = pall.get(style) or pall.get(style.capitalize())
         if not isinstance(info, dict):
             print(
@@ -635,6 +703,16 @@ def main() -> int:
         action="store_true",
         help="Disable Popular Configurations quadrant crops (export full page raster for every match).",
     )
+    ap.add_argument(
+        "--only-style",
+        metavar="STYLE",
+        action="append",
+        default=None,
+        help=(
+            "Only export diagram PNGs for this style key from sectional-configs.js "
+            "(repeat flag for multiple). Example: --only-style Creighton"
+        ),
+    )
     args = ap.parse_args()
 
     if not args.publish:
@@ -661,7 +739,11 @@ def main() -> int:
         print(f"configsJs not found: {configs_js}", file=sys.stderr)
         return 1
 
-    return cmd_publish(cat, pdf_dir, out_root, configs_js, args.skip_fetch, use_grid)
+    only: set[str] | None = None
+    if args.only_style:
+        only = {str(s).strip().upper() for s in args.only_style if str(s).strip()}
+
+    return cmd_publish(cat, pdf_dir, out_root, configs_js, args.skip_fetch, use_grid, only)
 
 
 if __name__ == "__main__":

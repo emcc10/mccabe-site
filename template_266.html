@@ -2784,6 +2784,40 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     );
   }
 
+  /**
+   * Technical Volusion fields (smart-match hidden category values, naked price ladders) —
+   * never drive __WM_LEATHER_OPTIONS__ / .mc-native-leather.
+   */
+  function mcRejectTechnicalNonLeatherSelect(sel) {
+    if (!sel) return true;
+    if (String(sel.id || "").toLowerCase() === "mc-sectional-cover-proxy") return true;
+    try {
+      var cn = String(sel.className || "");
+      if (/\bv65-hidden-option-cat-vals\b/i.test(cn)) return true;
+      if (/\bv65-hidden-option\b/i.test(cn)) return true;
+    } catch (eCn) {}
+    var opts = Array.from(sel.options || []).filter(function (o) {
+      return !isPlaceholderOption(o);
+    });
+    if (!opts.length) return false;
+    function optLooksMoneyOnly(txt) {
+      var t = String(txt || "").replace(/\s+/g, " ").trim();
+      /* e.g. 1,446.00 / 0.00 or $1,446.00 or single 1446.00 */
+      return (
+        /^\$?\s*[\d,]+\.\d{2}\s*$/.test(t) ||
+        /^\$?\s*[\d,]+\.\d{2}(\s*[\/|,]\s*\$?\s*[\d,]+\.\d{2})+$/.test(t)
+      );
+    }
+    var nMoney = opts.filter(function (o) {
+      return optLooksMoneyOnly(o.textContent);
+    }).length;
+    if (nMoney === opts.length && !rowDeclaresUpholsteryCover(sel)) return true;
+    return false;
+  }
+  try {
+    window.__McCabeRejectLeatherSourceSelect = mcRejectTechnicalNonLeatherSelect;
+  } catch (eRejEx) {}
+
   function sectionalDiscoveryEarly() {
     return (
       !wmIsTheaterSeatingPdpEarly() &&
@@ -2809,6 +2843,11 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     );
     function acceptable(s) {
       if (!s || s.id === "mc-sectional-cover-proxy") return false;
+      if (typeof window.__McCabeRejectLeatherSourceSelect === "function") {
+        try {
+          if (window.__McCabeRejectLeatherSourceSelect(s)) return false;
+        } catch (eAcc) {}
+      }
       if (isNativeConfigurationSelectEl(s)) return false;
       var sec = sectionalDiscoveryEarly();
       var n = countNonPlaceholderOptions(s);
@@ -2878,51 +2917,19 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
     return bad >= Math.min(2, opts.length);
   }
 
-  /** When Volusion has no upholstery row yet (SKU often shows configuration only). */
-  var WM_SECTIONAL_LEATHER_SAMPLES = [
-    { grade: "2000", family: "Rein", color: "Pebble" },
-    { grade: "2000", family: "Traverse", color: "Oak" },
-    { grade: "2000", family: "Traverse", color: "Charcoal" },
-    { grade: "3000", family: "Solana", color: "Dijon" },
-    { grade: "3000", family: "Solana", color: "Fossil" },
-    { grade: "3000", family: "Evoque", color: "Atlantic" },
-    { grade: "3000", family: "Evoque", color: "Stone" },
-    { grade: "3000", family: "Evoque", color: "Frost" }
-  ];
-
-  function wmRemoveSectionalLeatherProxy() {
+  function wmRemoveStaleSectionalLeatherGalleryIfAny() {
     try {
       var w = document.getElementById("mc-sectional-leather-proxy-wrap");
       if (w) w.remove();
-    } catch (eRmPx) {}
-  }
-
-  /** Hidden select so modal + preview strip mirror theater behavior when native cover dropdown is absent. */
-  function wmEnsureSectionalLeatherProxySelect() {
-    var existing = document.getElementById("mc-sectional-cover-proxy");
-    if (existing && existing.options.length >= WM_SECTIONAL_LEATHER_SAMPLES.length - 2) return existing;
-    wmRemoveSectionalLeatherProxy();
-    var wrap = document.createElement("div");
-    wrap.id = "mc-sectional-leather-proxy-wrap";
-    wrap.setAttribute("aria-hidden", "true");
-    wrap.style.cssText = "position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;";
-    var sel = document.createElement("select");
-    sel.id = "mc-sectional-cover-proxy";
-    sel.name = "_mc_sectional_cover_gallery_do_not_submit";
-    sel.setAttribute("tabindex", "-1");
-    WM_SECTIONAL_LEATHER_SAMPLES.forEach(function (row, idx) {
-      var opt = document.createElement("option");
-      opt.value = "gallery-" + idx;
-      opt.textContent = "Grade " + row.grade + " " + row.family + " " + row.color;
-      sel.appendChild(opt);
-    });
-    sel.selectedIndex = 0;
-    wrap.appendChild(sel);
-    try {
-      document.body.appendChild(wrap);
-    } catch (eBody) {}
-    console.log("[WM] sectional — using browse gallery leather proxy (native cover select not loaded yet)");
-    return sel;
+      var orphan = document.getElementById("mc-sectional-cover-proxy");
+      if (orphan) {
+        try {
+          var pw = orphan.parentElement;
+          if (pw && pw.id === "mc-sectional-leather-proxy-wrap") pw.remove();
+          else if (pw) orphan.remove();
+        } catch (eOp) {}
+      }
+    } catch (eRm) {}
   }
 
   function initIfReady(){
@@ -2932,40 +2939,9 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
       (document.documentElement.classList.contains("is-sectional-product") ||
         (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()));
 
-    var leatherCandidates = mcCollectNativeLeatherSelectsInner();
+    wmRemoveStaleSectionalLeatherGalleryIfAny();
 
-    try {
-      if (document.getElementById("mc-sectional-cover-proxy")) {
-        var otCheck = document.querySelector(
-          "#v65-product-parent #options_table, #options_table, table[id*='options_table']"
-        );
-        var hasVolusionCoverSel =
-          otCheck &&
-          leatherCandidates.some(function (s) {
-            try {
-              return otCheck.contains(s);
-            } catch (eCt) {
-              return false;
-            }
-          });
-        if (hasVolusionCoverSel) {
-          wmRemoveSectionalLeatherProxy();
-          wmOpenStale = document.getElementById("wmOpen");
-          if (wmOpenStale) {
-            try {
-              var ub = wmOpenStale.parentElement;
-              if (ub && ub.querySelector && ub.querySelector("#wmSummary")) ub.remove();
-              else wmOpenStale.remove();
-            } catch (eDrop) {}
-            document.querySelectorAll("body > .wm-overlay").forEach(function (ov) {
-              if (ov.querySelector("#wmSections")) ov.remove();
-            });
-            window.__WM_LEATHER_MODAL_BUILT__ = false;
-            window.__WM_LEATHER_OPTIONS__ = [];
-          }
-        }
-      }
-    } catch (eVolCover) {}
+    var leatherCandidates = mcCollectNativeLeatherSelectsInner();
 
     wmOpenStale = document.getElementById("wmOpen");
     if (wmOpenStale) {
@@ -2993,12 +2969,6 @@ window.__MTL_GRADE_UPCHARGE__ = GRADE_UPCHARGE;
 
     /* Same candidate pipeline theater + sectional: shared with mtl-sectional-renderer via mcCollectNativeLeatherSelectsForPdp */
     var candidateSelects = leatherCandidates;
-
-    /* Palliser sectional SKUs sometimes ship without an upholstery Volusion row (configuration only): drive swatches/modal anyway. */
-    if (!candidateSelects.length && secEarly) {
-      var proxySel = wmEnsureSectionalLeatherProxySelect();
-      if (proxySel && hasRealOptions(proxySel)) candidateSelects = [proxySel];
-    }
 
     if (!candidateSelects.length) { log("No leather-ish selects yet."); return false; }
 
@@ -4305,6 +4275,9 @@ try {
         if (prSec) prSec.style.setProperty("display", "none", "important");
         var cbSec = document.getElementById("mcConfigurationBlock");
         if (cbSec) cbSec.style.setProperty("display", "none", "important");
+        /* Accordion owns “Select a Leather”; hide duplicate inline chrome (IDs stay live for scripting). */
+        var lrHideSec = document.getElementById("mcLeatherRow");
+        if (lrHideSec) lrHideSec.style.setProperty("display", "none", "important");
       } catch (eSecStrip) {}
     }
 
@@ -4464,6 +4437,12 @@ try {
     }
 
     function findLeatherSelectOnPdp() {
+      if (typeof window.__McCabeLeatherCollectImpl === "function") {
+        try {
+          var canonList = window.__McCabeLeatherCollectImpl();
+          if (canonList && canonList.length) return canonList[0];
+        } catch (eCanon) {}
+      }
       var table =
         optionsTable ||
         document.querySelector(
@@ -4474,6 +4453,11 @@ try {
       if (table) {
         Array.from(table.querySelectorAll("select")).forEach(function (sel) {
           if (!sel || !sel.options || sel.options.length < 1) return;
+          if (typeof window.__McCabeRejectLeatherSourceSelect === "function") {
+            try {
+              if (window.__McCabeRejectLeatherSourceSelect(sel)) return;
+            } catch (eRJ) {}
+          }
           var realOpts = Array.from(sel.options).filter(function (o) {
             var t = String(o.textContent || "").replace(/\s+/g, " ").trim();
             return t && !/^(choose|select|please select|--)/i.test(t);
@@ -4510,13 +4494,22 @@ try {
         });
       }
       if (best && bestScore > 0) return best;
+      var pinnedNl = document.querySelector("select.mc-native-leather");
+      if (
+        pinnedNl &&
+        typeof window.__McCabeRejectLeatherSourceSelect === "function"
+      ) {
+        try {
+          if (window.__McCabeRejectLeatherSourceSelect(pinnedNl)) pinnedNl = null;
+        } catch (ePn) {}
+      }
+      if (pinnedNl) return pinnedNl;
       return (
-        document.querySelector("select.mc-native-leather") ||
-        (table
+        table
           ? table.querySelector(
               "select[name*='cover' i], select[id*='cover' i], select[name*='leather' i], select[id*='leather' i], select[name*='upholstery' i], select[id*='upholstery' i]"
             )
-          : null)
+          : null
       );
     }
 
@@ -21797,7 +21790,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   run earlier in document order, so they always execute before these files.
 -->
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"></script>
-<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-gallery-fallback-v17"></script>
+<script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-leather-wm-consolidated-v19"></script>
 <script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");

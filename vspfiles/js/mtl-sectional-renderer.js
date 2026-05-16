@@ -5,7 +5,7 @@
 (function () {
   "use strict";
 
-  var IMG_V = "sectional-diagrams-github-raw-v1";
+  var IMG_V = "sectional-diagrams-github-raw-v3";
 
   /**
    * Diagram PNGs load from GitHub (same files as in-repo vspfiles/sectional-diagrams/).
@@ -66,7 +66,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260516-gallery-fallback-v17";
+  window.MTL_RENDERER_BUILD = "sectional-20260516-leather-wm-consolidated-v19";
 
   /** Template owns native leather `<select>` discovery; prefers __McCabeLeatherCollectImpl so `mcCollectNativeLeatherSelectsForPdp` can’t be swapped by other scripts */
   function mtlGetNativeLeatherCollectFn() {
@@ -464,6 +464,20 @@
     return String(parts.join(" ")).toLowerCase().replace(/\s+/g, " ").trim();
   }
 
+  /** Never treat Volusion hidden smart-match price dumps as leather DOM (aligned with wm-leather __McCabeRejectLeatherSourceSelect). */
+  function mtlRejectAsLeatherSource(sel) {
+    if (!sel) return false;
+    if (typeof window.__McCabeRejectLeatherSourceSelect === "function") {
+      try {
+        return !!window.__McCabeRejectLeatherSourceSelect(sel);
+      } catch (eRJ) {}
+    }
+    try {
+      if (sel.classList && sel.classList.contains("v65-hidden-option-cat-vals")) return true;
+    } catch (eC) {}
+    return false;
+  }
+
   function findNativeLeatherSelectEl() {
     var configSel = null;
     try {
@@ -492,17 +506,32 @@
       if (atcForm) pushUniqueSels(atcForm.querySelectorAll("select"));
     } catch (eForm) {}
     var i;
-    var m = document.querySelector("select.mc-native-leather");
-    if (m && !isVolusionConfigurationRowSelect(m)) return m;
+    var pinned = document.querySelector("select.mc-native-leather");
+    if (pinned && (isVolusionConfigurationRowSelect(pinned) || mtlRejectAsLeatherSource(pinned))) {
+      try {
+        pinned.classList.remove("mc-native-leather");
+      } catch (eUnpin) {}
+      pinned = null;
+    }
 
     /*
-     * Sectionals historically used shotgun heuristics (sole non-config <select>, any select with ≥1 option),
-     * which bound the theater WM UI to surcharge rows → corrupt __WM_LEATHER_OPTIONS__ → mtlRebuildTheaterLeatherUi()
-     * in a tight loop and froze refreshes. The template leather script exposes the authoritative candidate list —
-     * same selectLooksLeatherish + ≥2 meaningful options theater PDPs already use — so renderer + initIfReady
-     * always resolve the identical native leather <select>.
+     * Canonical list from wm-leather-modal-js. Pinned mc-native-leather counts only when it appears in that list.
      */
     var collectFn = mtlGetNativeLeatherCollectFn();
+    if (pinned && collectFn) {
+      try {
+        var pinList = collectFn();
+        if (pinList && pinList.indexOf(pinned) !== -1) {
+          console.log("[MTL] findNativeLeatherSelectEl: pinned mc-native-leather (collector-backed)");
+          return pinned;
+        }
+      } catch (ePx) {}
+      try {
+        pinned.classList.remove("mc-native-leather");
+      } catch (eRp) {}
+      pinned = null;
+    }
+
     if (collectFn) {
       var canonList = collectFn();
       if (canonList && canonList.length) {
@@ -510,22 +539,23 @@
         for (ci = 0; ci < canonList.length; ci++) {
           var canonSel = canonList[ci];
           if (!canonSel) continue;
+          if (mtlRejectAsLeatherSource(canonSel)) continue;
           if (isVolusionConfigurationRowSelect(canonSel)) continue;
           if (configSel && canonSel === configSel) continue;
-          console.log("[MTL] findNativeLeatherSelectEl: mcCollectNativeLeatherSelectsForPdp (canonical)");
+          console.log("[MTL] findNativeLeatherSelectEl: __McCabeLeatherCollectImpl (canonical)");
           return canonSel;
         }
       }
     }
 
-    /* Fallback when collector absent or nothing matched yet (early Volusion injections). Kept narrower than sectional shotgun. */
+    /* Fallback when collector absent or upholstery row not classified yet — never hidden smart-match price fields */
     for (i = 0; i < sels.length; i++) {
       var sel = sels[i];
       if (isVolusionConfigurationRowSelect(sel)) continue;
+      if (mtlRejectAsLeatherSource(sel)) continue;
       if (configSel && sel === configSel) continue;
       var rowText = getVolusionOptionRowContextLower(sel);
       if (
-        sel.classList.contains("mc-native-leather") ||
         /(choose cover|choose leather|select leather|select a leather|select\s+a\s+leather|upholstery|cover|fabric|grade|swatch|palliser|material|color\s*choice)/i.test(
           rowText
         )
@@ -716,16 +746,13 @@
     }
   }
 
-  /** Sectionals use the same theater leather pipeline (initIfReady → __WM_LEATHER_OPTIONS__ → mini strip + modal). */
+  /** Sectionals use the same theater leather pipeline (initIfReady → __WM_LEATHER_OPTIONS__ → mcRenderLeatherPreviewStrip). */
   function mtlRefreshSectionalLeatherUi() {
     if (!isSectionalProductPageClient()) return;
     ensureSectionalLeatherStripDom();
     syncSectionalLeatherAccordionHost();
     var le = findNativeLeatherSelectEl();
     if (le) {
-      try {
-        le.classList.add("mc-native-leather");
-      } catch (eCls) {}
       ensureLeatherOptionsFromNativeSelect(le);
     }
     var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
@@ -745,21 +772,14 @@
       ? stripAfter.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length
       : 0;
     if (!nAfter) {
-      var le = findNativeLeatherSelectEl();
-      if (le) {
-        ensureLeatherOptionsFromNativeSelect(le);
-        if (typeof window.mcHostLeatherStripInsideAccordion === "function") {
-          window.mcHostLeatherStripInsideAccordion();
-        }
-        if (typeof window.mcRenderLeatherPreviewStrip === "function") {
-          window.mcRenderLeatherPreviewStrip();
-        }
-        nAfter = stripAfter
-          ? stripAfter.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length
-          : 0;
+      if (typeof window.mcTryInitWmLeather === "function") {
+        window.mcTryInitWmLeather();
       }
-      if (!nAfter && le) {
-        nAfter = renderSectionalMiniLeatherStripFromNative(le);
+      if (typeof window.mcHostLeatherStripInsideAccordion === "function") {
+        window.mcHostLeatherStripInsideAccordion();
+      }
+      if (typeof window.mcRenderLeatherPreviewStrip === "function") {
+        window.mcRenderLeatherPreviewStrip();
       }
     }
     if (typeof window.mcSyncLeatherSummary === "function") {
@@ -779,98 +799,6 @@
 
   function mtlSyncSectionalLeatherFromDom() {
     mtlRefreshSectionalLeatherUi();
-  }
-
-  /**
-   * Populate #mcLeatherSwatchStrip from the native cover <select> (sectionals).
-   * Does not depend on theater __WM_LEATHER_OPTIONS__ or config-card finalize.
-   */
-  function renderSectionalMiniLeatherStripFromNative(leatherSel) {
-    var strip = ensureSectionalLeatherStripDom();
-    if (!strip) return 0;
-    var sel = leatherSel || findNativeLeatherSelectEl();
-    if (!sel || !sel.options || sel.options.length < 1) {
-      strip.classList.remove("mc-leather-mini-swatches");
-      strip.innerHTML = '';
-      return 0;
-    }
-    var syn = buildSyntheticWmLeatherOptionsFromSelect(sel);
-    if (!syn.length) {
-      strip.classList.remove("mc-leather-mini-swatches");
-      strip.innerHTML = '';
-      return 0;
-    }
-    ensureLeatherOptionsFromNativeSelect(sel);
-    strip.classList.add("mc-leather-mini-swatches");
-    strip.innerHTML = "";
-    var wm = Array.isArray(window.__WM_LEATHER_OPTIONS__) ? window.__WM_LEATHER_OPTIONS__ : [];
-    var unique = [];
-    var seen = {};
-    syn.forEach(function (s) {
-      var wrow = wmRowForNativeValue(wm, s.value);
-      var nameLine =
-        (wrow && ((wrow.family || "") + " " + (wrow.color || "")).trim()) ||
-        s.family ||
-        s.label ||
-        "";
-      nameLine = String(nameLine).replace(/\s+/g, " ").trim();
-      var key = nameLine.toLowerCase();
-      if (!key || seen[key]) return;
-      seen[key] = true;
-      unique.push({ s: s, wrow: wrow, nameLine: nameLine });
-    });
-    var curVal = String(sel.value || "");
-    unique.slice(0, 12).forEach(function (row) {
-      var s = row.s;
-      var nameLine = row.nameLine || "Leather";
-      var mergedSw = (row.wrow && row.wrow.swatches) || s.swatches || [];
-      var imgUrl = pickFirstSwatchUrl({ swatches: mergedSw });
-      if (!imgUrl && s.family) {
-        var built = buildSwatchUrls(s.family, s.color || "");
-        imgUrl = built.length ? built[0] : "";
-      }
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "mc-leather-mini-swatch mc-mini-swatch";
-      btn.title = nameLine;
-      btn.setAttribute("data-leather-value", String(s.value));
-      if (curVal && String(s.value) === curVal) btn.dataset.selected = "1";
-      var lbl = document.createElement("span");
-      lbl.className = "mc-leather-mini-swatch__label";
-      lbl.textContent = nameLine.length > 28 ? nameLine.slice(0, 26) + "…" : nameLine;
-      var img = document.createElement("img");
-      img.alt = "";
-      img.loading = "lazy";
-      if (imgUrl) {
-        img.src = imgUrl.indexOf("?") === -1 ? imgUrl + "?v=" + IMG_V : imgUrl + "&v=" + IMG_V;
-      } else {
-        img.classList.add("mc-mini-swatch--empty");
-        img.style.display = "none";
-      }
-      btn.appendChild(img);
-      btn.appendChild(lbl);
-      btn.addEventListener("click", function (ev) {
-        if (ev && ev.preventDefault) ev.preventDefault();
-        if (ev && ev.stopPropagation) ev.stopPropagation();
-        sel.value = s.value;
-        try {
-          sel.dispatchEvent(new Event("input", { bubbles: true }));
-        } catch (eIn) {}
-        try {
-          sel.dispatchEvent(new Event("change", { bubbles: true }));
-        } catch (eCh) {}
-        if (typeof jQuery !== "undefined") jQuery(sel).trigger("change");
-        var lab = String(s.label || nameLine || "").replace(/\s+/g, " ").trim();
-        ["wmSummary", "mcLeatherSummary", "wmPicked"].forEach(function (id) {
-          var el = document.getElementById(id);
-          if (el) el.textContent = lab;
-        });
-        renderSectionalMiniLeatherStripFromNative(sel);
-        if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
-      });
-      strip.appendChild(btn);
-    });
-    return unique.length;
   }
 
   function installSectionalLeatherStripRenderer() {
@@ -3713,7 +3641,9 @@
     mtlRunStagePanel("finalize: mini swatch strip", "miniSwatches", function () {
       mtlRefreshSectionalLeatherUi();
       var strip = document.getElementById("mcLeatherSwatchStrip");
-      var nMini = strip ? strip.querySelectorAll(".mc-mini-swatch").length : 0;
+      var nMini = strip
+        ? strip.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length
+        : 0;
       console.log("[MTL] mini swatch nodes in #mcLeatherSwatchStrip:", nMini);
       __mtlDiag.miniSwatches = nMini > 0 ? "YES" : "NO";
       mtlRefreshStageTrackerDom();
@@ -3742,6 +3672,7 @@
     var misLeather = document.querySelectorAll("#v65-product-parent select.mc-native-leather, #options_table select.mc-native-leather");
     Array.prototype.forEach.call(misLeather, function (sel) {
       if (isVolusionConfigurationRowSelect(sel)) sel.classList.remove("mc-native-leather");
+      else if (mtlRejectAsLeatherSource(sel)) sel.classList.remove("mc-native-leather");
     });
 
     var allConfigs = window.MTL_SECTIONAL_CONFIGS || {};

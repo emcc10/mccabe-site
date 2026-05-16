@@ -1,5 +1,5 @@
 {
-  "_comment": "Popular crop tuning. popularImageMinAreaPt2: min embedded image area (pt\u00b2) to count as diagram art. Exporter keeps the largest image per cell (avoids double graphics). Re-export: py -3 export_sectional_diagrams.py --publish",
+  "_comment": "Popular crop tuning: optional popularRowSplit thirds for three-row Popular grids (e.g. Creighton). Re-export: py -3 export_sectional_diagrams.py --publish --skip-fetch --only-style Creighton",
   "dpi": 300,
   "popularMidYRatio": 0.5,
   "popularColumnSlackPt": 22,
@@ -48,7 +48,8 @@
       "pdf": "Creighton.pdf",
       "popularColumnSlackPt": 12,
       "popularCropPadPt": 10,
-      "popularImageMinAreaPt2": 4200
+      "popularImageMinAreaPt2": 4200,
+      "popularRowSplit": "thirds"
     },
     "Lexi": {
       "model": "77694",
