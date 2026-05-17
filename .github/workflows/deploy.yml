@@ -5,28 +5,22 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      remote_vspfiles_path:
-        description: >-
-          Absolute SFTP path for the vspfiles tree (browser URL is usually /v/vspfiles/...).
-          If uploads succeed but the site never changes, try /v/vspfiles or ask Volusion where /v/ maps on SFTP.
-        required: true
-        default: "/vspfiles"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Clean apt sources
+      - name: Remove problematic Microsoft/Azure apt sources
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo rm -f /etc/apt/sources.list.d/azure-cli.list
           sudo apt-get update
 
-      - name: Install tools
+      - name: Install lftp and netcat
         run: |
           sudo apt-get install -y lftp netcat-openbsd openssh-client
 
@@ -36,7 +30,7 @@ jobs:
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
 
-      - name: Seed SSH known_hosts (fixes flaky "Host key verification failed")
+      - name: Seed SSH known_hosts (non-interactive SFTP)
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
         run: |
@@ -45,107 +39,58 @@ jobs:
           if ssh-keyscan -T -t rsa,ecdsa,ed25519 -p 2222 "$FTP_SERVER" >> ~/.ssh/known_hosts 2>/dev/null; then
             chmod 600 ~/.ssh/known_hosts
           else
-            echo "::warning::ssh-keyscan failed; if deploy fails on host key, check FTP_SERVER secret (hostname/IP) and port 2222."
+            echo "::warning::ssh-keyscan failed; deploy may fail on host-key verification depending on SSH/lftp defaults."
           fi
 
-      - name: Write deploy marker (local)
-        run: |
-          echo "deployed=$(date -u '+%Y-%m-%dT%H:%M:%SZ') commit=$GITHUB_SHA ref=$GITHUB_REF" > deploy-marker.txt
-
-      - name: Mirror vspfiles/ to Volusion
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          REMOTE_VSPFILES: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.remote_vspfiles_path || '/vspfiles' }}
+      - name: Deploy template and JS to Volusion
         run: |
           set -euo pipefail
-          echo "Remote vspfiles root: $REMOTE_VSPFILES"
+          echo "Uploading template to /template_266.html..."
+          echo "Uploading template to /v/template_266.html..."
+          echo "Uploading sectional-configs.js..."
+          echo "Uploading mtl-sectional-renderer.js..."
 
-          LFTP_BATCH="$(mktemp)"
-          trap 'rm -f "$LFTP_BATCH"' EXIT
-
-          # Plain heredoc — avoids fragile printf quoting that can leak "printf" into the lftp batch.
-          cat <<EOF >"$LFTP_BATCH"
-          set net:connection-limit 1
-          set cmd:parallel 1
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222 <<'EOF'
           set sftp:auto-confirm yes
-          set net:max-retries 6
-          set net:reconnect-interval-base 12
-          set net:timeout 300
-          set xfer:use-temp-file yes
-          set sftp:connect-program "ssh -a -x -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no"
-          set cmd:fail-exit yes
-          mirror -R -v --parallel=1 --no-perms --exclude-glob '.git/' vspfiles ${REMOTE_VSPFILES}
-          put deploy-marker.txt -o ${REMOTE_VSPFILES}/js/deploy-marker.txt
+          set net:max-retries 3
+          set net:timeout 30
+          set xfer:clobber yes
+
           put template_266.html -o /template_266.html
           put template_266.html -o /v/template_266.html
+          put vspfiles/js/sectional-configs.js -o /vspfiles/js/sectional-configs.js
+          put vspfiles/js/mtl-sectional-renderer.js -o /vspfiles/js/mtl-sectional-renderer.js
           bye
           EOF
-
-          attempt=1
-          while [ "$attempt" -le 3 ]; do
-            echo "=== Full mirror attempt ${attempt} of 3 ==="
-            if lftp -u "${FTP_USERNAME},${FTP_PASSWORD}" "sftp://${FTP_SERVER}:2222" <"$LFTP_BATCH"; then
-              exit 0
-            fi
-            if [ "$attempt" -eq 3 ]; then
-              echo "::error::Mirror failed after 3 attempts."
-              exit 1
-            fi
-            echo "Mirror failed (locks or transient SFTP). Waiting 55s before retry..."
-            sleep 55
-            attempt=$((attempt + 1))
-          done
-
-      - name: Retry locked files (template + sectional renderer)
-        shell: bash
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          REMOTE_VSPFILES: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.remote_vspfiles_path || '/vspfiles' }}
+
+      - name: Deploy custom-safe.css (best effort)
+        continue-on-error: true
         run: |
-          set +e
+          set -euo pipefail
+          echo "Uploading custom-safe.css..."
 
-          retry_file () {
-            local LOCAL="$1"
-            local REMOTE_A="$2"
-            local REMOTE_B="$3"
-            local LABEL="$4"
-            local attempt
-            for attempt in 1 2 3 4 5 6; do
-              echo "=== [$LABEL] retry attempt $attempt ==="
-              sleep $((attempt * 5))
-              local CMD="set cmd:parallel 1; set sftp:auto-confirm yes; set net:max-retries 2; set net:timeout 90; put $LOCAL -o $REMOTE_A;"
-              if [ -n "$REMOTE_B" ]; then
-                CMD="$CMD put $LOCAL -o $REMOTE_B;"
-              fi
-              CMD="$CMD bye"
-              OUT=$(lftp -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222 -e "$CMD" 2>&1)
-              echo "$OUT"
-              echo "$OUT" | grep -q "Access failed"
-              STILL_LOCKED=$?
-              if [ "$STILL_LOCKED" != "0" ]; then
-                echo "=== [$LABEL] uploaded successfully on attempt $attempt ==="
-                return 0
-              fi
-              if [ "$attempt" = "6" ]; then
-                echo "=== WARNING: [$LABEL] still locked after 6 attempts. Continuing. ==="
-              fi
-            done
-            return 0
-          }
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222 <<'EOF'
+          set sftp:auto-confirm yes
+          set net:max-retries 3
+          set net:timeout 30
+          set xfer:clobber yes
 
-          retry_file "template_266.html" "/template_266.html" "/v/template_266.html" "template_266.html"
-          retry_file "vspfiles/js/mtl-sectional-renderer.js" "$REMOTE_VSPFILES/js/mtl-sectional-renderer.js" "" "mtl-sectional-renderer.js"
-          retry_file "vspfiles/js/sectional-configs.js" "$REMOTE_VSPFILES/js/sectional-configs.js" "" "sectional-configs.js"
-          exit 0
+          put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
+          bye
+          EOF
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
 
-      - name: Deploy summary
+      - name: Print deploy marker
         run: |
-          echo "Volusion deploy finished."
-          echo "Mirrored local vspfiles/ → ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.remote_vspfiles_path || '/vspfiles' }} (recursive)."
-          echo "Templates: /template_266.html and /v/template_266.html"
-          echo "Marker: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.remote_vspfiles_path || '/vspfiles' }}/js/deploy-marker.txt"
-          echo "Verify: https://www.mccabestheaterandliving.com/v/vspfiles/js/deploy-marker.txt"
+          STAMP="$(date -u '+%Y%m%d%H%M')"
+          echo "Deploy completed at $(date -u)"
+          echo "Uploaded template (both roots), sectional-configs.js, mtl-sectional-renderer.js, and attempted custom-safe.css"
+          echo "Verify renderer (CDN path; SFTP uploads to /vspfiles/js/..., not /v/vspfiles/js):"
+          echo "https://www.mccabestheaterandliving.com/v/vspfiles/js/mtl-sectional-renderer.js?v=deploy-test-${STAMP}"
