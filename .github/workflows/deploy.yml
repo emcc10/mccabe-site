@@ -43,6 +43,7 @@ jobs:
           echo "Deploy completed at $(date -u)"
           echo "Uploaded template (both roots), sectional-configs.js, mtl-sectional-renderer.js, custom-safe.css, and mccabe-overrides.css"
           echo "Verify CSS marker in:"
-          echo "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=deploy-test-${STAMP}"
+          echo "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=20260518plp4"
+          echo "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat"
           echo "Verify renderer (CDN path; SFTP uploads to /vspfiles/js/..., not /v/vspfiles/js):"
           echo "https://www.mccabestheaterandliving.com/v/vspfiles/js/mtl-sectional-renderer.js?v=deploy-test-${STAMP}"
