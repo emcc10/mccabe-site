@@ -494,9 +494,11 @@ body.is-home #slideshow-container {
   position: relative;
   z-index: 1 !important;
   min-height: 100vh;
+  height: 100vh;
   overflow: hidden;
   width: 100% !important;
   max-width: 100% !important;
+  background: #000;
 }
 
 #slideshow-container .mc-hero-video-el {
@@ -504,7 +506,8 @@ body.is-home #slideshow-container {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: contain !important;
+  object-position: center center !important;
   z-index: 1;
 }
 
@@ -515,11 +518,24 @@ body.is-home #slideshow-container {
 }
 
 #slideshow-container .mc-hero-overlay {
-  position: relative;
+  position: absolute;
+  inset: 0;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
   color: #ffffff;
   text-align: center;
-  padding-top: clamp(200px, 28vh, 340px);
+  padding: clamp(72px, 11vh, 120px) max(16px, 3vw) 24px;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+#slideshow-container .mc-hero-overlay .hero-logo-wrap,
+#slideshow-container .mc-hero-overlay #mc-hero-copy-tagline {
+  pointer-events: auto;
 }
 
 #mc-hero-copy-tagline,
@@ -537,10 +553,8 @@ body.is-home #slideshow-container #mc-hero-copy-tagline,
   text-align: center !important;
   white-space: nowrap !important;
   max-width: min(96vw, 920px) !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
+  margin: 0 auto !important;
   box-sizing: border-box !important;
-  margin-top: -215px !important;
 }
 
 #mc-hero-copy-subline,
@@ -776,11 +790,12 @@ body.is-home #slideshow-container {
     display: none !important;
   }
 
-  /* hero container: not full-page */
+  /* hero container: shorter than desktop but tall enough for full-frame video (contain) */
   #slideshow-container .mc-hero-video {
     min-height: 0 !important;
-    height: 52vh !important; /* adjust 45 60vh */
-    background: #000 !important; /* letterbox for contain */
+    height: min(62vh, 56.25vw) !important;
+    max-height: 72vh !important;
+    background: #000 !important;
     overflow: hidden !important;
   }
 
@@ -790,11 +805,17 @@ body.is-home #slideshow-container {
     object-position: center center !important;
   }
 
-  /* overlay: proportional spacing + type */
+  /* overlay: centered stack — logo + tagline sit together over video */
   #slideshow-container .mc-hero-overlay {
-    padding-top: 18vh !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+    position: absolute !important;
+    inset: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.3em !important;
+    padding: clamp(48px, 10vh, 72px) 16px 16px !important;
+    pointer-events: none !important;
   }
 
   /* Do not use bare `p` here — !important beats inline styles and blocked the 36px tagline */
@@ -806,7 +827,7 @@ body.is-home #slideshow-container {
     color: #d8d6d3 !important;
     -webkit-text-fill-color: #d8d6d3 !important;
     text-transform: none !important;
-    margin: 0.15em auto 0.3em !important;
+    margin: 0 auto !important;
     white-space: normal !important;
     word-wrap: break-word !important;
     overflow-wrap: anywhere !important;
@@ -1856,15 +1877,18 @@ a.hero-cart-link {
   /* 1) STOP the hero from being full-page on mobile */
   #slideshow-container .mc-hero-video {
     min-height: 0 !important; /* overrides your desktop min-height:100vh */
-    height: 42vh !important; /* adjust: 40 60vh */
+    height: min(62vh, 56.25vw) !important;
+    max-height: 72vh !important;
     overflow: hidden !important;
+    background: #000 !important;
   }
 
-  /* 2) Keep video proportional (no stretching), fill the hero box */
+  /* 2) Full frame visible (no crop) */
   #slideshow-container .mc-hero-video-el {
     width: 100% !important;
     height: 100% !important;
-    object-fit: cover !important; /* proportional crop, not distortion */
+    object-fit: contain !important;
+    object-position: center center !important;
     display: block !important;
 
     /* IMPORTANT: don't let the video block taps/clicks */
@@ -1892,10 +1916,6 @@ a.hero-cart-link {
     opacity: 1 !important;
   }
 
-  /* 5) If your hero overlay text is covering too much, contain it */
-  #slideshow-container .mc-hero-overlay {
-    padding-top: 18vh !important; /* stops giant spacing on mobile */
-  }
 }
 
 @media (max-width: 991px) {
@@ -2027,7 +2047,8 @@ a.hero-cart-link {
     z-index: 1 !important;
   }
   #slideshow-container .mc-hero-overlay {
-    position: relative !important;
+    position: absolute !important;
+    inset: 0 !important;
     z-index: 5 !important;
     pointer-events: none !important;
   }
@@ -6047,30 +6068,27 @@ body.productdetails #v65-product-parent .product_list_price {
 body.is-home #slideshow-container .mc-hero-overlay .hero-logo-wrap {
   display: flex;
   justify-content: center;
-  margin: 0 auto 0;
+  align-items: center;
+  margin: 0 auto;
   max-width: min(96vw, 980px);
 }
 
 body.is-home #slideshow-container .mc-hero-overlay .hero-logo-wrap + #mc-hero-copy-tagline {
-  margin-top: 0.35em !important;
+  margin-top: 0.2em !important;
 }
 
 body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
 #if_homepage #slideshow-container .mc-hero-overlay .hero-logo-img {
   display: block;
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
-  max-width: none;
-  max-height: none;
-  margin-left: auto;
-  margin-right: auto;
+  width: min(520px, 72vw);
+  height: auto;
+  max-width: min(96vw, 980px);
+  max-height: min(28vh, 220px);
+  margin: 0 auto;
   object-fit: contain;
   object-position: center center;
   opacity: 0.4;
   filter: brightness(150%);
-  margin-top: -200px;
 }
 
 @media (max-width: 991px) {
@@ -7697,11 +7715,11 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
   body.is-home #slideshow-container .mc-hero-video {
     min-height: 100vh !important;
     height: 100vh !important;
-    background: transparent !important;
+    background: #000 !important;
   }
 
   body.is-home #slideshow-container .mc-hero-video-el {
-    object-fit: cover !important;
+    object-fit: contain !important;
     object-position: center center !important;
   }
 }
