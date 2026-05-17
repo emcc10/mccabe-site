@@ -83,7 +83,14 @@ retry_put_all "template_266.html" "template" \
   "v/template_266.html"
 
 retry_put "vspfiles/js/sectional-configs.js" "/vspfiles/js/sectional-configs.js" "sectional-configs.js"
+retry_put "vspfiles/js/mc-site-fix.js" "/vspfiles/js/mc-site-fix.js" "mc-site-fix.js"
+retry_put_all "vspfiles/js/mc-site-fix.js" "mc-site-fix-v" \
+  "/v/vspfiles/js/mc-site-fix.js" \
+  "vspfiles/js/mc-site-fix.js"
 retry_put "vspfiles/js/mtl-sectional-renderer.js" "/vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer.js"
+retry_put_all "vspfiles/js/mtl-sectional-renderer.js" "mtl-renderer-v" \
+  "/v/vspfiles/js/mtl-sectional-renderer.js" \
+  "vspfiles/js/mtl-sectional-renderer.js"
 
 echo "Uploading custom-safe.css (both /v/ and chroot-relative paths)..."
 retry_put_all "vspfiles/css/custom-safe.css" "custom-safe" \
@@ -118,7 +125,8 @@ verify_url() {
   fi
 }
 
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css" "C_CSS_DEPLOY_VERIFY_20260518live"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css" "C_CSS_DEPLOY_VERIFY_20260518js"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-site-fix.js?v=20260518b" "MC_SITE_FIX_BUILD_20260518b"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/mc-live-patch.css?v=20260518" "MC_LIVE_PATCH_DEPLOY_20260518live"
 verify_url "https://www.mccabestheaterandliving.com/-s/177.htm" "MC_LIVE_PATCH_20260518"
 
