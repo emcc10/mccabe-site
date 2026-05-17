@@ -11,7 +11,7 @@
  *   output/sofa-renders.zip
  */
 import AdmZip from 'adm-zip';
-import { mkdirSync, readdirSync, existsSync, readFileSync } from 'fs';
+import { mkdirSync, readdirSync, existsSync } from 'fs';
 import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
@@ -158,14 +158,29 @@ export async function createSofaMask(image, optionalMaskPath = null) {
     }
   }
 
-  const blurred = await sharp(Buffer.from(mask), {
-    raw: { width, height, channels: 1 },
-  })
-    .blur(MASK_BLUR_SIGMA)
-    .raw()
-    .toBuffer();
+  return featherMask(mask, width, height, MASK_BLUR_SIGMA);
+}
 
-  return new Uint8Array(blurred);
+/** Box-feather mask (sharp blur breaks single-channel raw buffers). */
+function featherMask(mask, width, height, sigma) {
+  const radius = Math.max(1, Math.round(sigma));
+  const out = new Uint8Array(mask.length);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sum = 0;
+      let count = 0;
+      for (let dy = -radius; dy <= radius; dy++) {
+        const yy = clamp(y + dy, 0, height - 1);
+        for (let dx = -radius; dx <= radius; dx++) {
+          const xx = clamp(x + dx, 0, width - 1);
+          sum += mask[yy * width + xx];
+          count++;
+        }
+      }
+      out[y * width + x] = Math.round(sum / count);
+    }
+  }
+  return out;
 }
 
 /**

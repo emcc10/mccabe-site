@@ -1,4 +1,4 @@
-/* 0517c C_CSS_DEPLOY_VERIFY_20260517plp3 — tail wins; Store-dot may omit #v65-product-parent */
+/* 0518 C_CSS_DEPLOY_VERIFY_20260518plp4 — tail wins; Store-dot may omit #v65-product-parent */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -13779,7 +13779,9 @@ html body #v65-product-parent .mtl-member-price {
   font-size: 16px !important;
 }
 
-/* Category PLP: final lock — gray mat, fixed stage, baseline alignment (beats template late inline + legacy white-tile blocks) */
+/* Category PLP: final lock — gray mat, fixed stage (html[data-mc-category-plp] works before body.category exists) */
+html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
+html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,
 :is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product > a.v-product__img,
 :is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product .v-product__img,
 :is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product a.v-product__img,
@@ -13792,8 +13794,8 @@ html body #v65-product-parent .mtl-member-price {
 :is(html.category, body.category) ul.v-product-grid > li.v-product > a.v-product__img,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img,
 :is(html.category, body.category) ul.v-product-grid > li.v-product a.v-product__img,
-html.category body.category .v-product-grid a.mc-plp-thumb-mat,
-html.category body.category a.v-product__img.mc-plp-thumb-mat {
+:is(html.category, body.category) .v-product-grid a.mc-plp-thumb-mat,
+:is(html.category, body.category) a.v-product__img.mc-plp-thumb-mat {
   order: 1 !important;
   display: flex !important;
   align-items: flex-end !important;
@@ -13811,6 +13813,8 @@ html.category body.category a.v-product__img.mc-plp-thumb-mat {
   text-decoration: none !important;
 }
 
+html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img > img,
+html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img > img,
 :is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product > a.v-product__img > img,
 :is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product .v-product__img img,
 :is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product a.v-product__img > img,
@@ -13821,8 +13825,8 @@ html.category body.category a.v-product__img.mc-plp-thumb-mat {
 :is(html.category, body.category) .v-product-grid .v-product a.v-product__img > img,
 :is(html.category, body.category) ul.v-product-grid > li.v-product > a.v-product__img > img,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img,
-html.category body.category .v-product-grid a.mc-plp-thumb-mat > img,
-html.category body.category a.v-product__img.mc-plp-thumb-mat > img {
+:is(html.category, body.category) .v-product-grid a.mc-plp-thumb-mat > img,
+:is(html.category, body.category) a.v-product__img.mc-plp-thumb-mat > img {
   width: 100% !important;
   height: var(--mc-plp-stage-h, 220px) !important;
   min-height: 0 !important;
@@ -13839,12 +13843,14 @@ html.category body.category a.v-product__img.mc-plp-thumb-mat > img {
 }
 
 @media (max-width: 991px) {
+  html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
+  html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,
   :is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product > a.v-product__img,
   :is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product a.v-product__img,
   :is(html.category, body.category) .v-product-grid .v-product > a.v-product__img,
   :is(html.category, body.category) .v-product-grid .v-product a.v-product__img,
-  html.category body.category .v-product-grid a.mc-plp-thumb-mat,
-  html.category body.category a.v-product__img.mc-plp-thumb-mat {
+  :is(html.category, body.category) .v-product-grid a.mc-plp-thumb-mat,
+  :is(html.category, body.category) a.v-product__img.mc-plp-thumb-mat {
     height: var(--mc-plp-tile-h, 220px) !important;
     min-height: var(--mc-plp-tile-h, 220px) !important;
     max-height: var(--mc-plp-tile-h, 220px) !important;
