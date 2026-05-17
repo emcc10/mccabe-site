@@ -632,6 +632,11 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   -webkit-text-fill-color: #ffffff !important;
 }
 
+/* Schema store-name meta must not render as visible text (template.css can expose it as display:block) */
+meta[itemprop="name"] {
+  display: none !important;
+}
+
 /* Homepage: Volusion injects store title into empty #display_homepage_title — hide white logo strip below hero */
 html.mc-allow-home-hero body.is-home header.header > .header__section,
 html.mc-allow-home-hero body.is-home #display_homepage_title,
