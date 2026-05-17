@@ -955,8 +955,8 @@ document.addEventListener("DOMContentLoaded", function () {
     el.style.setProperty('letter-spacing', '0.12em', 'important');
     el.style.setProperty('color', '#d8d6d3', 'important');
     el.style.setProperty('text-transform', 'none', 'important');
-    el.style.setProperty('margin-top', '0.15em', 'important');
-    el.style.setProperty('margin-bottom', '0.3em', 'important');
+    el.style.setProperty('margin-top', '0.2em', 'important');
+    el.style.setProperty('margin-bottom', '0', 'important');
     el.style.setProperty('white-space', 'nowrap', 'important');
   }
   function mcHeroEnsureCopy() {
@@ -977,7 +977,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (t.textContent.replace(/\s+/g, ' ').trim().indexOf('CUSTOM FURNITURE') === -1) t.textContent = TAG;
     paintTagline(t);
     ov.style.setProperty('z-index', '5', 'important');
-    ov.style.setProperty('position', 'relative', 'important');
     t.style.setProperty('-webkit-text-fill-color', '#d8d6d3', 'important');
     try {
       if (window.matchMedia && window.matchMedia('(max-width: 991px)').matches) {
