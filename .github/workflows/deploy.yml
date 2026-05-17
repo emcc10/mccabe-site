@@ -45,7 +45,7 @@ jobs:
           echo "Uploaded template (both roots), JS, custom-safe.css, mc-live-patch.css, mccabe-overrides.css"
           echo "After deploy, View Source on any page should contain: MC_LIVE_PATCH_20260518"
           echo "Verify CSS deployed (line 1 must show C_CSS_DEPLOY_VERIFY_20260518js):"
-          echo "Verify JS: mtl-sectional-renderer.js must contain MC_SITE_FIX_BUILD_20260518b"
+          echo "Verify JS (gray mats): https://www.mccabestheaterandliving.com/v/vspfiles/js/mtl-sectional-renderer.js — search MC_SITE_FIX_BUILD_20260518b"
           echo "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css"
           echo "https://www.mccabestheaterandliving.com/v/vspfiles/css/mc-live-patch.css?v=20260518"
           echo "If HTML still shows MC_DEPLOY_VERIFY_20260430dom, re-publish template in Volusion Design admin."

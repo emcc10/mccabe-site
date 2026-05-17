@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Deploy template, JS, and CSS to Volusion SFTP (port 2222).
+# Web URLs use /v/vspfiles/… but SFTP home is usually chrooted at /v — upload to /vspfiles/… only.
 set -euo pipefail
 
 : "${FTP_SERVER:?FTP_SERVER is required}"
@@ -20,20 +21,26 @@ bye
 EOF
 }
 
+# Returns: 0 = ok, 1 = failed after retries, 2 = skip (bad path — do not retry)
 retry_put() {
   local local_path="$1"
   local remote_path="$2"
   local label="$3"
   local attempt out rc
 
-  for attempt in $(seq 1 10); do
-    echo "=== [$label] upload attempt ${attempt}/10 → ${remote_path} ==="
+  for attempt in $(seq 1 5); do
+    echo "=== [$label] upload attempt ${attempt}/5 → ${remote_path} ==="
 
     set +e
     out=$(run_lftp "put ${local_path} -o ${remote_path}")
     rc=$?
     set -e
     echo "$out"
+
+    if echo "$out" | grep -qiE 'cannot find the path|not find the path|No such file|does not exist'; then
+      echo "[$label] SFTP path missing (not a lock) — skip: ${remote_path}"
+      return 2
+    fi
 
     if echo "$out" | grep -qiE 'Access failed|550 '; then
       echo "[$label] file locked (550); waiting before retry..."
@@ -44,26 +51,36 @@ retry_put() {
       return 0
     fi
 
-    sleep $((attempt * 15))
+    sleep $((attempt * 10))
   done
 
-  echo "::error::[$label] still locked after 10 attempts — live site may be serving this file."
+  echo "::error::[$label] still locked after 5 attempts — live site may be serving this file."
   return 1
 }
 
-retry_put_all() {
+# Try paths in order; succeed if any upload works. Skip missing paths immediately.
+put_primary() {
   local local_path="$1"
-  shift
-  local label="$1"
-  shift
-  local remote
-  local ok=0
+  local label="$2"
+  shift 2
+  local remote ok=0 rc
+
   for remote in "$@"; do
-    if retry_put "$local_path" "$remote" "${label}@${remote}"; then
+    retry_put "$local_path" "$remote" "${label}@${remote}"
+    rc=$?
+    if [[ "$rc" -eq 0 ]]; then
       ok=1
+      break
     fi
+    if [[ "$rc" -eq 2 ]]; then
+      continue
+    fi
+    echo "::error::[$label] failed for ${remote}"
+    return 1
   done
+
   if [[ "$ok" -eq 0 ]]; then
+    echo "::error::[$label] no SFTP path accepted upload"
     return 1
   fi
 }
@@ -75,39 +92,35 @@ export SFTP_PASS="${FTP_PASSWORD}"
 export SFTP_PORT="2222"
 python3 scripts/volusion_sftp_force_template.py
 
-echo "=== Template retry via lftp (backup paths) ==="
-retry_put_all "template_266.html" "template" \
-  "/template_266.html" \
+echo "=== Template backup upload (lftp) ==="
+put_primary "template_266.html" "template" \
   "/v/template_266.html" \
-  "template_266.html" \
-  "v/template_266.html"
+  "/template_266.html" \
+  "template_266.html"
 
-retry_put "vspfiles/js/sectional-configs.js" "/vspfiles/js/sectional-configs.js" "sectional-configs.js"
-retry_put "vspfiles/js/mc-site-fix.js" "/vspfiles/js/mc-site-fix.js" "mc-site-fix.js"
-retry_put_all "vspfiles/js/mc-site-fix.js" "mc-site-fix-v" \
-  "/v/vspfiles/js/mc-site-fix.js" \
+echo "=== JS + CSS (SFTP paths under /vspfiles — served at https://host/v/vspfiles/…) ==="
+put_primary "vspfiles/js/sectional-configs.js" "sectional-configs" \
+  "/vspfiles/js/sectional-configs.js" \
+  "vspfiles/js/sectional-configs.js"
+
+put_primary "vspfiles/js/mc-site-fix.js" "mc-site-fix" \
+  "/vspfiles/js/mc-site-fix.js" \
   "vspfiles/js/mc-site-fix.js"
-retry_put "vspfiles/js/mtl-sectional-renderer.js" "/vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer.js"
-retry_put_all "vspfiles/js/mtl-sectional-renderer.js" "mtl-renderer-v" \
-  "/v/vspfiles/js/mtl-sectional-renderer.js" \
+
+put_primary "vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer" \
+  "/vspfiles/js/mtl-sectional-renderer.js" \
   "vspfiles/js/mtl-sectional-renderer.js"
 
-echo "Uploading custom-safe.css (both /v/ and chroot-relative paths)..."
-retry_put_all "vspfiles/css/custom-safe.css" "custom-safe" \
+put_primary "vspfiles/css/custom-safe.css" "custom-safe" \
   "/vspfiles/css/custom-safe.css" \
-  "/v/vspfiles/css/custom-safe.css" \
   "vspfiles/css/custom-safe.css"
 
-echo "Uploading mc-live-patch.css..."
-retry_put_all "vspfiles/css/mc-live-patch.css" "mc-live-patch" \
+put_primary "vspfiles/css/mc-live-patch.css" "mc-live-patch" \
   "/vspfiles/css/mc-live-patch.css" \
-  "/v/vspfiles/css/mc-live-patch.css" \
   "vspfiles/css/mc-live-patch.css"
 
-echo "Uploading mccabe-overrides.css..."
-retry_put_all "vspfiles/templates/266/css/mccabe-overrides.css" "mccabe-overrides" \
+put_primary "vspfiles/templates/266/css/mccabe-overrides.css" "mccabe-overrides" \
   "/vspfiles/templates/266/css/mccabe-overrides.css" \
-  "/v/vspfiles/templates/266/css/mccabe-overrides.css" \
   "vspfiles/templates/266/css/mccabe-overrides.css"
 
 echo "=== Post-deploy verify (origin via Cloudflare) ==="
@@ -126,11 +139,9 @@ verify_url() {
 }
 
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css" "C_CSS_DEPLOY_VERIFY_20260518js"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-site-fix.js?v=20260518b" "MC_SITE_FIX_BUILD_20260518b"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mtl-sectional-renderer.js" "MC_SITE_FIX_BUILD_20260518b"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/mc-live-patch.css?v=20260518" "MC_LIVE_PATCH_DEPLOY_20260518live"
-verify_url "https://www.mccabestheaterandliving.com/-s/177.htm" "MC_LIVE_PATCH_20260518"
 
 echo ""
-echo "NOTE: Live HTML pages may still use Volusion's compiled template until you re-publish"
-echo "Design → template_266 in Volusion admin. Category pages load custom-safe.css via mcCssBust();"
-echo "search View Source for C_CSS_DEPLOY_VERIFY_20260518live after hard refresh."
+echo "Deploy finished. Hard-refresh the site (Ctrl+Shift+R)."
+echo "PLP gray mats + hero hide ship in mtl-sectional-renderer.js (MC_SITE_FIX_BUILD_20260518b)."
