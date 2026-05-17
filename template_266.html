@@ -624,12 +624,16 @@
       border: 0 !important;
     }
     /* Category PLP: always hide collapsed homepage hero (beats body.is-home + mc-allow-home-hero glitches). */
-    html.category #if_homepage,
-    html.category body #if_homepage,
-    html.category body.is-home #if_homepage,
+    :is(html.category, body.category) #if_homepage,
+    :is(html.category, body.category) body #if_homepage,
+    :is(html.category, body.category) body.is-home #if_homepage,
     html.category.mc-allow-home-hero body.is-home #if_homepage,
-    html.category #slideshow-container,
-    html.category #slideshow-container .mc-hero-video {
+    body.category.is-home #if_homepage,
+    html.category.mc-allow-home-hero body.is-home #slideshow-container,
+    html.category body.is-home #slideshow-container,
+    body.category.is-home #slideshow-container,
+    :is(html.category, body.category) #slideshow-container,
+    :is(html.category, body.category) #slideshow-container .mc-hero-video {
       display: none !important;
       visibility: hidden !important;
       height: 0 !important;

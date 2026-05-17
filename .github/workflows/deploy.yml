@@ -91,13 +91,6 @@ jobs:
           retry_put "vspfiles/js/sectional-configs.js" "/vspfiles/js/sectional-configs.js" "sectional-configs.js"
           retry_put "vspfiles/js/mtl-sectional-renderer.js" "/vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer.js"
 
-      - name: Deploy custom-safe.css
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-        run: |
-          set -euo pipefail
           echo "Uploading custom-safe.css..."
           retry_put "vspfiles/css/custom-safe.css" "/vspfiles/css/custom-safe.css" "custom-safe.css"
 
@@ -105,6 +98,6 @@ jobs:
         run: |
           STAMP="$(date -u '+%Y%m%d%H%M')"
           echo "Deploy completed at $(date -u)"
-          echo "Uploaded template (both roots), sectional-configs.js, mtl-sectional-renderer.js, and attempted custom-safe.css"
+          echo "Uploaded template (both roots), sectional-configs.js, mtl-sectional-renderer.js, and custom-safe.css"
           echo "Verify renderer (CDN path; SFTP uploads to /vspfiles/js/..., not /v/vspfiles/js):"
           echo "https://www.mccabestheaterandliving.com/v/vspfiles/js/mtl-sectional-renderer.js?v=deploy-test-${STAMP}"

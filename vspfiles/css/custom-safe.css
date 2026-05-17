@@ -518,13 +518,18 @@ html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video-el {
   z-index: 1;
 }
 
-/* Category PLP: never show homepage hero shell (black video bar) */
-html.category #if_homepage,
-html.category body #if_homepage,
-html.category body.is-home #if_homepage,
+/* Category PLP: never show homepage hero shell (black video bar).
+   Must beat html.mc-allow-home-hero body.is-home #slideshow-container { display:block }. */
+:is(html.category, body.category) #if_homepage,
+:is(html.category, body.category) body #if_homepage,
+:is(html.category, body.category) body.is-home #if_homepage,
 html.category.mc-allow-home-hero body.is-home #if_homepage,
-html.category #slideshow-container,
-html.category #slideshow-container .mc-hero-video {
+body.category.is-home #if_homepage,
+html.category.mc-allow-home-hero body.is-home #slideshow-container,
+html.category body.is-home #slideshow-container,
+body.category.is-home #slideshow-container,
+:is(html.category, body.category) #slideshow-container,
+:is(html.category, body.category) #slideshow-container .mc-hero-video {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -823,8 +828,8 @@ body.is-home #slideshow-container {
     display: none !important;
   }
 
-  /* hero container: shorter than desktop; video still fills the box (cover) */
-  #slideshow-container .mc-hero-video {
+  /* hero container: shorter than desktop; video still fills the box (cover) — home only */
+  html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video {
     min-height: max(280px, 52vh) !important;
     min-height: max(280px, 52svh) !important;
     height: max(280px, 52vh) !important;
@@ -833,7 +838,7 @@ body.is-home #slideshow-container {
     overflow: hidden !important;
   }
 
-  #slideshow-container .mc-hero-video-el {
+  html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video-el {
     object-fit: cover !important;
     object-position: center center !important;
   }
@@ -1901,8 +1906,8 @@ a.hero-cart-link {
 }
 
 @media (max-width: 991px) {
-  /* 1) STOP the hero from being full-page on mobile */
-  #slideshow-container .mc-hero-video {
+  /* 1) STOP the hero from being full-page on mobile — home only */
+  html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video {
     min-height: max(280px, 52vh) !important;
     min-height: max(280px, 52svh) !important;
     height: max(280px, 52vh) !important;
@@ -1912,7 +1917,7 @@ a.hero-cart-link {
   }
 
   /* 2) Fill hero box edge-to-edge */
-  #slideshow-container .mc-hero-video-el {
+  html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video-el {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
