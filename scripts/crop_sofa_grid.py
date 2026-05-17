@@ -87,13 +87,13 @@ def sofa_only_bbox(rgba: Image.Image) -> tuple[int, int, int, int] | None:
         else:
             gap_start = None
 
-    if gaps:
-        gap_start, gap_end = gaps[-1]
+    bottom_gaps = [(start, end) for start, end in gaps if start > h * 0.45]
+    if bottom_gaps:
+        gap_start, _gap_end = bottom_gaps[-1]
         sofa_bottom = gap_start - 1
-        for y in range(gap_start - 1, -1, -1):
+        for y in range(gap_start - 1, max(-1, gap_start - 12), -1):
             if inks[y] >= w * 0.05:
                 sofa_bottom = y
-        sofa_bottom = max(0, sofa_bottom)
     else:
         sofa_bottom = h - 1
         for y in range(h - 1, -1, -1):
@@ -101,7 +101,7 @@ def sofa_only_bbox(rgba: Image.Image) -> tuple[int, int, int, int] | None:
                 sofa_bottom = y
                 break
 
-    if sofa_bottom < h * 0.35:
+    if sofa_bottom < h * 0.25:
         sofa_bottom = h - 1
     return (full[0], full[1], full[2], full[1] + sofa_bottom + 1)
 
