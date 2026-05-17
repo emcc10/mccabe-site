@@ -3,7 +3,7 @@
  * keep original luminance (folds, shadows, texture). No AI.
  */
 import AdmZip from 'adm-zip';
-import { mkdirSync, readdirSync, existsSync } from 'fs';
+import { mkdirSync, readdirSync, existsSync, writeFileSync } from 'fs';
 import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
@@ -35,11 +35,9 @@ function isNearWhite(r, g, b) {
   return r > BG_THRESH && g > BG_THRESH && b > BG_THRESH;
 }
 
-/** Near-white background fringe — leave unchanged. */
+/** Only skip true white background pixels (not cognac highlights). */
 function isBackgroundFringe(r, g, b) {
-  const bright = pixelBrightness(r, g, b);
-  const maxDiff = Math.max(Math.abs(r - g), Math.abs(r - b), Math.abs(g - b));
-  return bright > 215 && maxDiff < 28;
+  return isNearWhite(r, g, b);
 }
 
 /** Cognac/orange anti-alias at leather edges — must recolor fully, not skip. */
@@ -215,11 +213,11 @@ export async function getSwatchTargetColor(swatchPath) {
   const medL = medianOf(use.map((s) => s.L));
   const medA = medianOf(use.map((s) => s.a));
   const medB = medianOf(use.map((s) => s.b));
-  const [r, g, b] = labToRgb(medL, medA + 2, medB + 1);
+  const [r, g, b] = labToRgb(medL, medA, medB);
   return {
-    r,
-    g: Math.round(g * 0.88),
-    b: Math.max(0, Math.round(b * 0.95)),
+    r: Math.round(r),
+    g: Math.round(g * 0.82),
+    b: Math.round(b),
   };
 }
 
@@ -249,15 +247,12 @@ function buildLocalContrast(data, width, height, channels, mask) {
   return contrast;
 }
 
-/** Fade color shift only in deep shadows and high-contrast detail (piping/seams). */
-function colorShiftStrength(lab, contrast) {
-  let s = clamp((lab.L - 10) / 34, 0, 1);
-
-  if (contrast > 24) {
-    s *= 1 - clamp((contrast - 24) / 38, 0, 0.75);
-  }
-
-  return clamp(s, 0, 1);
+/** Blend strength: full on flat leather, lower on piping/seams and deep creases. */
+function recolorBlendStrength(lum, contrast) {
+  let s = 1;
+  if (lum < 40) s = Math.min(s, clamp((lum - 16) / 24, 0, 1));
+  if (contrast > 26) s = Math.min(s, 1 - clamp((contrast - 26) / 34, 0, 0.7));
+  return s;
 }
 
 /**
@@ -412,7 +407,7 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * Lab anchor: cognac on sofa → swatch face color; each pixel keeps its offset (shade/texture).
+ * Luminance-ratio recolor: cognac brightness × swatch color (burgundy, not orange cast).
  */
 export function recolorSofa(
   baseImage,
@@ -420,13 +415,14 @@ export function recolorSofa(
   sourceColor,
   targetColor,
   leatherBottomY = null,
-  sofaBounds = null,
+  _sofaBounds = null,
 ) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
 
-  const srcLab = rgbToLab(sourceColor.r, sourceColor.g, sourceColor.b);
-  const tgtLab = rgbToLab(targetColor.r, targetColor.g, targetColor.b);
+  const srcLum =
+    pixelBrightness(sourceColor.r, sourceColor.g, sourceColor.b) || 80;
+  const { r: tR, g: tG, b: tB } = targetColor;
   const contrast = buildLocalContrast(data, width, height, channels, mask);
 
   const yMax =
@@ -449,27 +445,20 @@ export function recolorSofa(
       if (isFloorShadowPixel(oR, oG, oB)) continue;
       if (pixelBrightness(oR, oG, oB) < FOOT_BRIGHTNESS) continue;
 
-      const lab = rgbToLab(oR, oG, oB);
-      let s = colorShiftStrength(lab, contrast[j]);
+      const lum = pixelBrightness(oR, oG, oB);
+      let shade = lum / srcLum;
+      shade = clamp(shade, 0.52, 1.28);
+
+      let nR = tR * shade;
+      let nG = tG * shade;
+      let nB = tB * shade;
+
+      let s = recolorBlendStrength(lum, contrast[j]);
       if (isWarmEdgePixel(oR, oG, oB)) s = 1;
 
-      const fullL = tgtLab.L + (lab.L - srcLab.L);
-      let fullA = tgtLab.a + (lab.a - srcLab.a);
-      let fullB = tgtLab.b + (lab.b - srcLab.b);
-      if (lab.L > 50) {
-        fullB -= (tgtLab.b - srcLab.b) * 0.4;
-        fullA -= (tgtLab.a - srcLab.a) * 0.08;
-      }
-
-      const newL = lab.L + (fullL - lab.L) * s;
-      const newA = lab.a + (fullA - lab.a) * s;
-      const newB = lab.b + (fullB - lab.b) * s;
-
-      const [nR, nG, nB] = labToRgb(newL, newA, newB);
-
-      out[p] = nR;
-      out[p + 1] = nG;
-      out[p + 2] = nB;
+      out[p] = Math.round(clamp(oR * (1 - s) + nR * s, 0, 255));
+      out[p + 1] = Math.round(clamp(oG * (1 - s) + nG * s, 0, 255));
+      out[p + 2] = Math.round(clamp(oB * (1 - s) + nB * s, 0, 255));
       if (channels === 4) out[p + 3] = oA;
     }
   }
@@ -497,6 +486,12 @@ export async function processSwatch(
   const outName = `${basename(swatchPath, extname(swatchPath))}.png`;
   const outPath = join(OUTPUT_DIR, outName);
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
+
+  const stampPath = join(OUTPUT_DIR, '_last-render.txt');
+  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: luminance-ratio-v2\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
+  mkdirSync(OUTPUT_DIR, { recursive: true });
+  writeFileSync(stampPath, stamp);
+
   return { outPath, targetColor };
 }
 
