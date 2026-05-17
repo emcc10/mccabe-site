@@ -30,18 +30,6 @@ jobs:
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
 
-      - name: Seed SSH known_hosts (non-interactive SFTP)
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-        run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          if ssh-keyscan -T -t rsa,ecdsa,ed25519 -p 2222 "$FTP_SERVER" >> ~/.ssh/known_hosts 2>/dev/null; then
-            chmod 600 ~/.ssh/known_hosts
-          else
-            echo "::warning::ssh-keyscan failed; deploy may fail on host-key verification depending on SSH/lftp defaults."
-          fi
-
       - name: Deploy template and JS to Volusion
         run: |
           set -euo pipefail
@@ -55,6 +43,7 @@ jobs:
           set net:max-retries 3
           set net:timeout 30
           set xfer:clobber yes
+          set sftp:connect-program "ssh -a -x -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no"
 
           put template_266.html -o /template_266.html
           put template_266.html -o /v/template_266.html
@@ -78,6 +67,7 @@ jobs:
           set net:max-retries 3
           set net:timeout 30
           set xfer:clobber yes
+          set sftp:connect-program "ssh -a -x -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no"
 
           put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
           bye
