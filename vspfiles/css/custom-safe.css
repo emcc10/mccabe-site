@@ -1,4 +1,4 @@
-/* 0429 C_CSS_DEPLOY_VERIFY_20260430dom — tail wins; Store-dot may omit #v65-product-parent */
+/* 0517 C_CSS_DEPLOY_VERIFY_20260517plp — tail wins; Store-dot may omit #v65-product-parent */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -467,9 +467,9 @@ body:not(.is-home) #if_homepage {
   pointer-events: none !important;
 }
 
-/* Full-bleed: no white space on sides of slideshow */
-#if_homepage,
-body.is-home #if_homepage {
+/* Full-bleed: homepage hero only (never on category — avoids black bar when body.is-home is wrong) */
+html.mc-allow-home-hero body.is-home #if_homepage,
+html.mc-allow-home-hero body.is-home #slideshow-container {
   width: 100vw !important;
   max-width: 100vw !important;
   margin-left: calc(-50vw + 50%) !important;
@@ -477,7 +477,7 @@ body.is-home #if_homepage {
   padding: 0 !important;
   box-sizing: border-box !important;
 }
-body.is-home #slideshow-container {
+html.mc-allow-home-hero body.is-home #slideshow-container {
   display: block !important;
   visibility: visible !important;
   position: relative !important;
@@ -494,8 +494,8 @@ body.is-home #slideshow-container {
   box-sizing: border-box !important;
 }
 
-/* Full-bleed hero: video fills the box (cover). Height tracks viewport but won't squash below a floor when devtools resize height. */
-#slideshow-container .mc-hero-video {
+/* Homepage hero video only — do not style .mc-hero-video on category/PLP pages */
+html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video {
   position: relative;
   z-index: 1 !important;
   width: 100% !important;
@@ -508,7 +508,7 @@ body.is-home #slideshow-container {
   min-height: max(520px, 100svh);
 }
 
-#slideshow-container .mc-hero-video-el {
+html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video-el {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -516,6 +516,27 @@ body.is-home #slideshow-container {
   object-fit: cover !important;
   object-position: center center !important;
   z-index: 1;
+}
+
+/* Category PLP: never show homepage hero shell (black video bar) */
+html.category #if_homepage,
+html.category body #if_homepage,
+html.category body.is-home #if_homepage,
+html.category.mc-allow-home-hero body.is-home #if_homepage,
+html.category #slideshow-container,
+html.category #slideshow-container .mc-hero-video {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  border: 0 !important;
+  background: transparent !important;
 }
 
 /* Hide "open in separate window" / Picture-in-Picture on hero video */

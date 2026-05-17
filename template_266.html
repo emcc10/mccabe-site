@@ -48,6 +48,15 @@
       }
       h.classList.remove("mc-url-looks-like-pdp");
       h.classList.remove("mc-paragon-pdp");
+      /* Category PLP (-s/177.htm etc.): never allow homepage hero (avoids black bar + wrong is-home pairing). */
+      if (/-s\//i.test(p) && /\.html?(\?|$)/i.test(p)) {
+        h.classList.remove("mc-allow-home-hero");
+        return;
+      }
+      if (/\/searchresults\.asp/i.test(p)) {
+        h.classList.remove("mc-allow-home-hero");
+        return;
+      }
       var raw = p.replace(/\/+/g, "/");
       while (raw.length > 1 && raw.charAt(raw.length - 1) === "/") raw = raw.slice(0, -1);
       var isHomePath =
@@ -614,6 +623,26 @@
       pointer-events: none !important;
       border: 0 !important;
     }
+    /* Category PLP: always hide collapsed homepage hero (beats body.is-home + mc-allow-home-hero glitches). */
+    html.category #if_homepage,
+    html.category body #if_homepage,
+    html.category body.is-home #if_homepage,
+    html.category.mc-allow-home-hero body.is-home #if_homepage,
+    html.category #slideshow-container,
+    html.category #slideshow-container .mc-hero-video {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      max-height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      border: 0 !important;
+      background: transparent !important;
+    }
     /* Hero overlay search only (desktop nav bar has no visible in-flow search — .mc-search-float) */
     #mcHeroSearchOverlay .header__section--middle,
     #mcHeroSearchOverlay .mc-header-search-below-nav {
@@ -1047,17 +1076,48 @@ document.addEventListener("DOMContentLoaded", function () {
   html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid {
     background-color: #ffffff !important;
   }
-  html.category body:not(.productdetails):not(.is-home) #content_area .v-product__img,
-  html.category body:not(.productdetails):not(.is-home) #content_area .v-product__image,
-  html.category body:not(.productdetails):not(.is-home) #content_area .product_image,
-  html.category body:not(.productdetails):not(.is-home) #content_area .vcss_img,
-  html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li .v-product__img,
-  html.category body:not(.productdetails):not(.is-home) #content_area a.v-product__img {
-    background-color: #f2f2f2 !important;
+  html.category body:not(.productdetails) #content_area a.v-product__img,
+  html.category body:not(.productdetails) #content_area .v-product__img,
+  html.category body:not(.productdetails) #content_area .v-product__image,
+  html.category body:not(.productdetails) #content_area .product_image,
+  html.category body:not(.productdetails) #content_area .vcss_img,
+  html.category body:not(.productdetails) #content_area ul.v-product-grid > li .v-product__img {
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    height: 280px !important;
+    min-height: 280px !important;
+    max-height: 280px !important;
+    padding: 14px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    background: #f2f2f2 !important;
   }
-  html.category body:not(.productdetails):not(.is-home) #content_area .v-product__img a,
-  html.category body:not(.productdetails):not(.is-home) #content_area .product_image a {
-    background-color: transparent !important;
+  html.category body:not(.productdetails) #content_area .v-product__img img,
+  html.category body:not(.productdetails) #content_area a.v-product__img > img {
+    width: 100% !important;
+    height: 220px !important;
+    max-width: 100% !important;
+    max-height: 220px !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+    margin: 0 auto !important;
+    border: 0 !important;
+    display: block !important;
+  }
+  @media (max-width: 991px) {
+    html.category body:not(.productdetails) #content_area a.v-product__img,
+    html.category body:not(.productdetails) #content_area .v-product__img {
+      height: 220px !important;
+      min-height: 220px !important;
+      max-height: 220px !important;
+      padding: 12px !important;
+    }
+    html.category body:not(.productdetails) #content_area .v-product__img img,
+    html.category body:not(.productdetails) #content_area a.v-product__img > img {
+      height: 172px !important;
+      max-height: 172px !important;
+    }
   }
   </style>
 
