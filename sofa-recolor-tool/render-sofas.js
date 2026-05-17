@@ -282,7 +282,27 @@ export async function createSofaMask(image, optionalMaskPath = null) {
     }
   }
 
-  return mask;
+  return erodeMask(mask, width, height, 1);
+}
+
+function erodeMask(mask, width, height, radius) {
+  const out = new Uint8Array(mask.length);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let ok = 255;
+      for (let dy = -radius; dy <= radius && ok; dy++) {
+        for (let dx = -radius; dx <= radius && ok; dx++) {
+          const yy = y + dy;
+          const xx = x + dx;
+          if (yy < 0 || yy >= height || xx < 0 || xx >= width || mask[yy * width + xx] < 128) {
+            ok = 0;
+          }
+        }
+      }
+      out[y * width + x] = ok;
+    }
+  }
+  return out;
 }
 
 /**
@@ -396,7 +416,8 @@ export function recolorSofa(
       if (pixelBrightness(oR, oG, oB) < FOOT_BRIGHTNESS) continue;
 
       const hsl = rgbToHsl(oR, oG, oB);
-      const strength = clamp((hsl.l - 0.05) / 0.22, 0, 1);
+      const strength =
+        hsl.l < 0.13 ? clamp((hsl.l - 0.035) / 0.095, 0, 1) : 1;
       const nh = hsl.h + dHue * strength;
       const ns = clamp(hsl.s * (1 + (satMul - 1) * strength), 0, 1);
       const [nR, nG, nB] = hslToRgb(nh, ns, hsl.l);
