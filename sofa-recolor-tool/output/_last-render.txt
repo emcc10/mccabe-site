@@ -1,4 +1,4 @@
-2026-05-17T19:57:02.090Z
+2026-05-17T19:58:29.418Z
 Bali-Currant.jpg
-method: luminance-ratio-v2
-target: 68,25,29
+method: lab-anchor
+target: 68,30,29

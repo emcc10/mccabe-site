@@ -35,17 +35,6 @@ function isNearWhite(r, g, b) {
   return r > BG_THRESH && g > BG_THRESH && b > BG_THRESH;
 }
 
-/** Only skip true white background pixels (not cognac highlights). */
-function isBackgroundFringe(r, g, b) {
-  return isNearWhite(r, g, b);
-}
-
-/** Cognac/orange anti-alias at leather edges — must recolor fully, not skip. */
-function isWarmEdgePixel(r, g, b) {
-  const bright = pixelBrightness(r, g, b);
-  return bright > 150 && r > g + 6 && g > b;
-}
-
 function medianOf(arr) {
   const s = [...arr].sort((a, b) => a - b);
   const m = Math.floor(s.length / 2);
@@ -214,11 +203,7 @@ export async function getSwatchTargetColor(swatchPath) {
   const medA = medianOf(use.map((s) => s.a));
   const medB = medianOf(use.map((s) => s.b));
   const [r, g, b] = labToRgb(medL, medA, medB);
-  return {
-    r: Math.round(r),
-    g: Math.round(g * 0.82),
-    b: Math.round(b),
-  };
+  return { r, g, b };
 }
 
 function buildLocalContrast(data, width, height, channels, mask) {
@@ -247,12 +232,12 @@ function buildLocalContrast(data, width, height, channels, mask) {
   return contrast;
 }
 
-/** Blend strength: full on flat leather, lower on piping/seams and deep creases. */
-function recolorBlendStrength(lum, contrast) {
+/** Full Lab shift on flat leather; ease only in deep creases and tight piping. */
+function labShiftStrength(labL, contrast) {
   let s = 1;
-  if (lum < 40) s = Math.min(s, clamp((lum - 16) / 24, 0, 1));
-  if (contrast > 26) s = Math.min(s, 1 - clamp((contrast - 26) / 34, 0, 0.7));
-  return s;
+  if (labL < 24) s = clamp((labL - 8) / 16, 0, 1);
+  if (contrast > 34) s *= 1 - clamp((contrast - 34) / 50, 0, 0.5);
+  return clamp(s, 0, 1);
 }
 
 /**
@@ -407,7 +392,7 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * Luminance-ratio recolor: cognac brightness × swatch color (burgundy, not orange cast).
+ * Lab anchor: cognac → swatch, keep per-pixel shade. No RGB blending (avoids watercolor).
  */
 export function recolorSofa(
   baseImage,
@@ -420,9 +405,8 @@ export function recolorSofa(
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
 
-  const srcLum =
-    pixelBrightness(sourceColor.r, sourceColor.g, sourceColor.b) || 80;
-  const { r: tR, g: tG, b: tB } = targetColor;
+  const srcLab = rgbToLab(sourceColor.r, sourceColor.g, sourceColor.b);
+  const tgtLab = rgbToLab(targetColor.r, targetColor.g, targetColor.b);
   const contrast = buildLocalContrast(data, width, height, channels, mask);
 
   const yMax =
@@ -441,24 +425,25 @@ export function recolorSofa(
       const oA = channels === 4 ? data[p + 3] : 255;
 
       if (isNearWhite(oR, oG, oB)) continue;
-      if (isBackgroundFringe(oR, oG, oB)) continue;
       if (isFloorShadowPixel(oR, oG, oB)) continue;
       if (pixelBrightness(oR, oG, oB) < FOOT_BRIGHTNESS) continue;
 
-      const lum = pixelBrightness(oR, oG, oB);
-      let shade = lum / srcLum;
-      shade = clamp(shade, 0.52, 1.28);
+      const lab = rgbToLab(oR, oG, oB);
+      const s = labShiftStrength(lab.L, contrast[j]);
 
-      let nR = tR * shade;
-      let nG = tG * shade;
-      let nB = tB * shade;
+      const fullL = tgtLab.L + (lab.L - srcLab.L);
+      const fullA = tgtLab.a + (lab.a - srcLab.a);
+      const fullB = tgtLab.b + (lab.b - srcLab.b);
 
-      let s = recolorBlendStrength(lum, contrast[j]);
-      if (isWarmEdgePixel(oR, oG, oB)) s = 1;
+      const newL = lab.L + (fullL - lab.L) * s;
+      const newA = lab.a + (fullA - lab.a) * s;
+      const newB = lab.b + (fullB - lab.b) * s;
 
-      out[p] = Math.round(clamp(oR * (1 - s) + nR * s, 0, 255));
-      out[p + 1] = Math.round(clamp(oG * (1 - s) + nG * s, 0, 255));
-      out[p + 2] = Math.round(clamp(oB * (1 - s) + nB * s, 0, 255));
+      const [nR, nG, nB] = labToRgb(newL, newA, newB);
+
+      out[p] = nR;
+      out[p + 1] = nG;
+      out[p + 2] = nB;
       if (channels === 4) out[p + 3] = oA;
     }
   }
@@ -488,7 +473,7 @@ export async function processSwatch(
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: luminance-ratio-v2\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
+  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: lab-anchor\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   writeFileSync(stampPath, stamp);
 
