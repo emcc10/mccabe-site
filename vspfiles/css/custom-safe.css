@@ -1126,16 +1126,10 @@ html:not(.category) body:not(.is-home) #content_area_home .v-product__img img {
   object-position: top center !important;
 }
 
-/* Category grids: uniform product scale — fill tile (cover), centered crop */
-:is(html.category, body.category) #content_area .v-product-grid .v-product__img img,
-:is(html.category, body.category) #content_area ul.v-product-grid .v-product__img img {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  object-fit: cover !important;
-  object-position: center center !important;
-  display: block !important;
+/* Category grids: gray mat + fixed stage (see --mc-plp-* block below) */
+:is(html.category, body.category) #content_area .v-product-grid a.v-product__img,
+:is(html.category, body.category) #content_area ul.v-product-grid .v-product__img {
+  background: var(--mc-plp-mat-bg, #f2f2f2) !important;
 }
 
 /* If a parent header row is hidden, force it visible on interior + category */
@@ -6395,6 +6389,22 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   order: 5;
 }
 
+/* Category PLP: light gray mat on every thumb + fixed stage (uniform product scale, baseline aligned) */
+:root {
+  --mc-plp-mat-bg: #f2f2f2;
+  --mc-plp-mat-pad: 14px;
+  --mc-plp-tile-h: 280px;
+  --mc-plp-stage-h: 220px;
+}
+
+@media (max-width: 991px) {
+  :root {
+    --mc-plp-tile-h: 220px;
+    --mc-plp-stage-h: 172px;
+    --mc-plp-mat-pad: 12px;
+  }
+}
+
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
 :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
 :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
@@ -6402,24 +6412,26 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 :is(html.category, body.category) .v-product-grid .v-product .vcss_img,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__image,
-:is(html.category, body.category) ul.v-product-grid > li.v-product .product_image {
+:is(html.category, body.category) ul.v-product-grid > li.v-product .product_image,
+:is(html.category, body.category) .v-product-grid .v-product a.v-product__img {
   order: 1;
   flex: 0 0 auto;
   flex-shrink: 0;
   width: 100%;
-  height: 280px;
-  min-height: 280px;
-  max-height: 280px;
+  height: var(--mc-plp-tile-h);
+  min-height: var(--mc-plp-tile-h);
+  max-height: var(--mc-plp-tile-h);
   overflow: hidden;
   display: flex !important;
-  align-items: center !important;
+  align-items: flex-end !important;
   justify-content: center !important;
   position: relative;
   margin: 0 !important;
-  padding: 0 !important;
-  box-sizing: border-box;
-  background: #ffffff !important;
+  padding: var(--mc-plp-mat-pad) !important;
+  box-sizing: border-box !important;
+  background: var(--mc-plp-mat-bg) !important;
   line-height: 0 !important;
+  text-decoration: none !important;
 }
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img a,
@@ -6431,13 +6443,14 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__image a,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image a {
   display: flex !important;
-  align-items: center !important;
+  align-items: flex-end !important;
   justify-content: center !important;
   width: 100% !important;
   height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
-  background: #ffffff !important;
+  background: transparent !important;
+  box-sizing: border-box !important;
 }
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
@@ -6446,17 +6459,22 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 :is(html.category, body.category) .v-product-grid .v-product .product_image img,
 :is(html.category, body.category) .v-product-grid .v-product .vcss_img img,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img,
-:is(html.category, body.category) ul.v-product-grid > li.v-product .product_image img {
+:is(html.category, body.category) ul.v-product-grid > li.v-product .product_image img,
+:is(html.category, body.category) .v-product-grid .v-product a.v-product__img > img {
   width: 100% !important;
-  height: 100% !important;
+  height: var(--mc-plp-stage-h) !important;
   max-width: 100% !important;
-  max-height: 100% !important;
-  object-fit: cover !important;
-  object-position: center center !important;
+  max-height: var(--mc-plp-stage-h) !important;
+  min-height: 0 !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
   display: block !important;
-  margin: 0 !important;
-  flex-shrink: 0 !important;
-  vertical-align: middle !important;
+  margin: 0 auto !important;
+  flex: 0 0 auto !important;
+  vertical-align: bottom !important;
+  border: 0 !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
 }
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__name,
@@ -6649,17 +6667,18 @@ body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
   :is(html.category, body.category) .v-product-grid .v-product .product_image,
   :is(html.category, body.category) .v-product-grid .v-product .vcss_img,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img,
-  :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image {
-    height: 220px !important;
-    min-height: 220px !important;
-    max-height: 220px !important;
+  :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image,
+  :is(html.category, body.category) .v-product-grid .v-product a.v-product__img {
+    height: var(--mc-plp-tile-h) !important;
+    min-height: var(--mc-plp-tile-h) !important;
+    max-height: var(--mc-plp-tile-h) !important;
+    padding: var(--mc-plp-mat-pad) !important;
     overflow: hidden !important;
     margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-end !important;
     justify-content: center !important;
-    background: #ffffff !important;
+    background: var(--mc-plp-mat-bg) !important;
   }
 
   :is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
@@ -6668,13 +6687,14 @@ body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
   :is(html.category, body.category) .v-product-grid .v-product .product_image img,
   :is(html.category, body.category) .v-product-grid .v-product .vcss_img img,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img,
-  :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image img {
+  :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image img,
+  :is(html.category, body.category) .v-product-grid .v-product a.v-product__img > img {
     width: 100% !important;
-    height: 100% !important;
+    height: var(--mc-plp-stage-h) !important;
     max-width: 100% !important;
-    max-height: 100% !important;
-    object-fit: cover !important;
-    object-position: center center !important;
+    max-height: var(--mc-plp-stage-h) !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
   }
 
   :is(html.category, body.category) .v-product-grid .v-product .v-product__name,
