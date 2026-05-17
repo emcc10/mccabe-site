@@ -174,26 +174,28 @@ export async function loadImage(path) {
   };
 }
 
-export async function saveImage(data, path, width, height) {
+export async function saveImage(data, path, width, height, blurSigma = 0.2) {
   mkdirSync(dirname(path), { recursive: true });
-  await sharp(data, {
+  let pipeline = sharp(data, {
     raw: { width, height, channels: 4 },
-  })
-    .png()
-    .toFile(path);
+  });
+  if (blurSigma > 0) pipeline = pipeline.blur(blurSigma);
+  await pipeline.png().toFile(path);
 }
 
 /**
- * Center crop, drop fold highlights/shadows (by lightness), Lab median = face color.
+ * Center 50% crop → targetColor = medianRGB*0.75 + averageRGB*0.25
  */
 export async function getSwatchTargetColor(swatchPath) {
   const { data, width, height, channels } = await loadImage(swatchPath);
-  const x0 = Math.floor(width * 0.2);
-  const y0 = Math.floor(height * 0.2);
-  const x1 = Math.ceil(width * 0.8);
-  const y1 = Math.ceil(height * 0.8);
+  const x0 = Math.floor(width * 0.25);
+  const y0 = Math.floor(height * 0.25);
+  const x1 = Math.ceil(width * 0.75);
+  const y1 = Math.ceil(height * 0.75);
 
-  const samples = [];
+  const rs = [];
+  const gs = [];
+  const bs = [];
 
   for (let y = y0; y < y1; y++) {
     for (let x = x0; x < x1; x++) {
@@ -204,32 +206,60 @@ export async function getSwatchTargetColor(swatchPath) {
       const a = channels === 4 ? data[i + 3] : 255;
       if (a < 20) continue;
       if (isNearWhite(r, g, b)) continue;
-      const lab = rgbToLab(r, g, b);
-      samples.push(lab);
+      rs.push(r);
+      gs.push(g);
+      bs.push(b);
     }
   }
 
-  if (!samples.length) {
+  if (!rs.length) {
     throw new Error(`No usable swatch pixels in center crop: ${swatchPath}`);
   }
 
-  const byL = [...samples].sort((a, b) => a.L - b.L);
-  const p30 = byL[Math.floor(byL.length * 0.3)].L;
-  const p70 = byL[Math.floor(byL.length * 0.7)].L;
-  const face = samples.filter((s) => s.L >= p30 && s.L <= p70);
-  const use = face.length > 20 ? face : samples;
+  const avg = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
 
-  const medL = medianOf(use.map((s) => s.L));
-  const medA = medianOf(use.map((s) => s.a));
-  const medB = medianOf(use.map((s) => s.b));
-  const [r, g, b] = labToRgb(medL, medA, medB);
-  return { r, g, b };
+  return {
+    r: Math.round(medianOf(rs) * 0.75 + avg(rs) * 0.25),
+    g: Math.round(medianOf(gs) * 0.75 + avg(gs) * 0.25),
+    b: Math.round(medianOf(bs) * 0.75 + avg(bs) * 0.25),
+  };
 }
 
-/** Only ease the deepest crease pixels (no contrast-based banding on arms). */
-function labShiftStrength(labL) {
-  if (labL >= 16) return 1;
-  return clamp((labL - 5) / 11, 0, 1);
+/** Optional 5% grain from swatch center (color only). */
+export async function sampleSwatchGrain(swatchPath) {
+  const { data, width, height, channels } = await loadImage(swatchPath);
+  const x0 = Math.floor(width * 0.35);
+  const y0 = Math.floor(height * 0.35);
+  const x1 = Math.ceil(width * 0.65);
+  const y1 = Math.ceil(height * 0.65);
+  const grains = [];
+  for (let y = y0; y < y1; y += 2) {
+    for (let x = x0; x < x1; x += 2) {
+      const i = (y * width + x) * channels;
+      grains.push([data[i], data[i + 1], data[i + 2]]);
+    }
+  }
+  return grains.length ? grains : [[68, 30, 29]];
+}
+
+function applySoftFinish(out, mask, width, height, channels) {
+  for (let j = 0, p = 0; j < width * height; j++, p += channels) {
+    if (mask[j] < 128) continue;
+    const r = out[p];
+    const g = out[p + 1];
+    const b = out[p + 2];
+    if (isNearWhite(r, g, b) || isProtectedShadowOrGray(r, g, b)) continue;
+
+    let nr = (r - 128) * 0.97 + 128;
+    let ng = (g - 128) * 0.97 + 128;
+    let nb = (b - 128) * 0.97 + 128;
+
+    const hsl = rgbToHsl(nr, ng, nb);
+    const [sr, sg, sb] = hslToRgb(hsl.h, clamp(hsl.s * 1.03, 0, 1), hsl.l);
+    out[p] = sr;
+    out[p + 1] = sg;
+    out[p + 2] = sb;
+  }
 }
 
 /**
