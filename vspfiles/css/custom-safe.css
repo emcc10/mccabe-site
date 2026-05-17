@@ -12921,8 +12921,8 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label
 
 .productdetails span[itemprop="name"] {
 
-  font-size: 14px !important;
-  letter-spacing: -0.03em !important;
+  font-size: 18px !important;
+  letter-spacing: .16em !important;
 }
 
 .productdetails span[itemprop="name"],
