@@ -30,74 +30,19 @@ jobs:
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
 
-      - name: Deploy template and JS to Volusion
+      - name: Deploy template, JS, and CSS to Volusion
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-        run: |
-          set -euo pipefail
-
-          run_lftp() {
-            local batch="$1"
-            lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "sftp://${FTP_SERVER}:2222" 2>&1 <<EOF
-          set sftp:auto-confirm yes
-          set net:max-retries 2
-          set net:timeout 120
-          set xfer:clobber yes
-          set xfer:use-temp-file yes
-          set sftp:connect-program "ssh -a -x -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no"
-          ${batch}
-          bye
-          EOF
-          }
-
-          # Volusion (Windows SFTP) returns 550 while live JS is served. Retry direct put only
-          # (do not use "mv -f" — server maps mv to mmv, which has no -f flag).
-          retry_put() {
-            local local_path="$1"
-            local remote_path="$2"
-            local label="$3"
-            local attempt out rc
-
-            for attempt in $(seq 1 10); do
-              echo "=== [$label] upload attempt ${attempt}/10 ==="
-
-              set +e
-              out=$(run_lftp "put ${local_path} -o ${remote_path}")
-              rc=$?
-              set -e
-              echo "$out"
-
-              if echo "$out" | grep -qiE 'Access failed|550 '; then
-                echo "[$label] file locked (550); waiting before retry..."
-              elif [[ "$rc" -ne 0 ]] || echo "$out" | grep -qiE 'put:.*[Ff]atal|Login failed'; then
-                echo "[$label] upload error (exit ${rc}); waiting before retry..."
-              else
-                echo "=== [$label] uploaded successfully ==="
-                return 0
-              fi
-
-              sleep $((attempt * 15))
-            done
-
-            echo "::error::[$label] still locked after 10 attempts — live site may be serving this file."
-            return 1
-          }
-
-          echo "Uploading template to /template_266.html and /v/template_266.html..."
-          run_lftp "put template_266.html -o /template_266.html; put template_266.html -o /v/template_266.html"
-
-          retry_put "vspfiles/js/sectional-configs.js" "/vspfiles/js/sectional-configs.js" "sectional-configs.js"
-          retry_put "vspfiles/js/mtl-sectional-renderer.js" "/vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer.js"
-
-          echo "Uploading custom-safe.css..."
-          retry_put "vspfiles/css/custom-safe.css" "/vspfiles/css/custom-safe.css" "custom-safe.css"
+        run: bash .github/scripts/deploy-volusion.sh
 
       - name: Print deploy marker
         run: |
           STAMP="$(date -u '+%Y%m%d%H%M')"
           echo "Deploy completed at $(date -u)"
           echo "Uploaded template (both roots), sectional-configs.js, mtl-sectional-renderer.js, and custom-safe.css"
+          echo "Verify CSS marker in:"
+          echo "https://www.mccabestheaterandliving.com/vspfiles/css/custom-safe.css?v=deploy-test-${STAMP}"
           echo "Verify renderer (CDN path; SFTP uploads to /vspfiles/js/..., not /v/vspfiles/js):"
           echo "https://www.mccabestheaterandliving.com/v/vspfiles/js/mtl-sectional-renderer.js?v=deploy-test-${STAMP}"
