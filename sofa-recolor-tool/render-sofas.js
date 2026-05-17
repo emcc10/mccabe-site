@@ -209,8 +209,56 @@ export async function getSwatchTargetColor(swatchPath) {
   const medL = medianOf(use.map((s) => s.L));
   const medA = medianOf(use.map((s) => s.a));
   const medB = medianOf(use.map((s) => s.b));
-  const [r, g, b] = labToRgb(medL, medA, medB);
+  const [r, g, b] = labToRgb(medL, medA + 5, medB - 1.5);
   return { r, g, b };
+}
+
+function buildLocalContrast(data, width, height, channels, mask) {
+  const lum = new Float32Array(width * height);
+  for (let j = 0, p = 0; j < width * height; j++, p += channels) {
+    lum[j] = mask[j] >= 128 ? pixelBrightness(data[p], data[p + 1], data[p + 2]) : 0;
+  }
+
+  const contrast = new Float32Array(width * height);
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      const j = y * width + x;
+      if (mask[j] < 128) continue;
+      let lo = lum[j];
+      let hi = lum[j];
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const v = lum[(y + dy) * width + (x + dx)];
+          if (v < lo) lo = v;
+          if (v > hi) hi = v;
+        }
+      }
+      contrast[j] = hi - lo;
+    }
+  }
+  return contrast;
+}
+
+/** Fade color shift in creases, piping, and back-cushion lower edge. */
+function colorShiftStrength(lab, y, contrast, sofaBounds) {
+  let s = clamp((lab.L - 10) / 34, 0, 1);
+
+  if (contrast > 22) {
+    s *= 1 - clamp((contrast - 22) / 36, 0, 0.82);
+  }
+
+  if (sofaBounds) {
+    const y0 = sofaBounds.minY + sofaBounds.height * 0.18;
+    const y1 = sofaBounds.minY + sofaBounds.height * 0.52;
+    if (y >= y0 && y <= y1) {
+      const t = (y - y0) / Math.max(1, y1 - y0);
+      if (t > 0.38 && lab.L < 52) {
+        s *= 1 - (t - 0.38) * 0.72;
+      }
+    }
+  }
+
+  return clamp(s, 0, 1);
 }
 
 /**
@@ -373,12 +421,14 @@ export function recolorSofa(
   sourceColor,
   targetColor,
   leatherBottomY = null,
+  sofaBounds = null,
 ) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
 
   const srcLab = rgbToLab(sourceColor.r, sourceColor.g, sourceColor.b);
   const tgtLab = rgbToLab(targetColor.r, targetColor.g, targetColor.b);
+  const contrast = buildLocalContrast(data, width, height, channels, mask);
 
   const yMax =
     leatherBottomY == null ? height - 1 : Math.min(height - 1, leatherBottomY);
@@ -401,16 +451,15 @@ export function recolorSofa(
       if (pixelBrightness(oR, oG, oB) < FOOT_BRIGHTNESS) continue;
 
       const lab = rgbToLab(oR, oG, oB);
-      let newL = tgtLab.L + (lab.L - srcLab.L);
-      let newA = tgtLab.a + (lab.a - srcLab.a);
-      let newB = tgtLab.b + (lab.b - srcLab.b);
+      const s = colorShiftStrength(lab, y, contrast[j], sofaBounds);
 
-      if (lab.L < 22) {
-        const f = clamp((lab.L - 6) / 16, 0, 1);
-        newL = lab.L + (newL - lab.L) * f;
-        newA = lab.a + (newA - lab.a) * f;
-        newB = lab.b + (newB - lab.b) * f;
-      }
+      const fullL = tgtLab.L + (lab.L - srcLab.L);
+      const fullA = tgtLab.a + (lab.a - srcLab.a);
+      const fullB = tgtLab.b + (lab.b - srcLab.b);
+
+      const newL = lab.L + (fullL - lab.L) * s;
+      const newA = lab.a + (fullA - lab.a) * s;
+      const newB = lab.b + (fullB - lab.b) * s;
 
       const [nR, nG, nB] = labToRgb(newL, newA, newB);
 
@@ -430,9 +479,17 @@ export async function processSwatch(
   mask,
   sourceColor,
   leatherBottomY,
+  sofaBounds,
 ) {
   const targetColor = await getSwatchTargetColor(swatchPath);
-  const outData = recolorSofa(baseSofa, mask, sourceColor, targetColor, leatherBottomY);
+  const outData = recolorSofa(
+    baseSofa,
+    mask,
+    sourceColor,
+    targetColor,
+    leatherBottomY,
+    sofaBounds,
+  );
   const outName = `${basename(swatchPath, extname(swatchPath))}.png`;
   const outPath = join(OUTPUT_DIR, outName);
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
@@ -532,6 +589,7 @@ export async function main(argv = process.argv) {
       mask,
       sourceColor,
       leatherBottomY,
+      sofaBounds,
     );
     console.log(
       `  ${basename(swPath)} → target RGB(${targetColor.r}, ${targetColor.g}, ${targetColor.b})`,
@@ -554,6 +612,7 @@ export async function main(argv = process.argv) {
       mask,
       sourceColor,
       leatherBottomY,
+      sofaBounds,
     );
     console.log(
       `  ${file} → RGB(${targetColor.r}, ${targetColor.g}, ${targetColor.b}) → ${basename(outPath)}`,
