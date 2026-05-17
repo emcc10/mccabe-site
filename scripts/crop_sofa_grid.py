@@ -47,6 +47,11 @@ def white_to_alpha(img: Image.Image, threshold: int = WHITE_THRESHOLD) -> Image.
             r, g, b, a = px[x, y]
             if r >= threshold and g >= threshold and b >= threshold:
                 px[x, y] = (255, 255, 255, 0)
+            elif r >= 235 and g >= 235 and b >= 235:
+                # Soft edge so compositing does not leave a white halo.
+                edge = max(r, g, b)
+                alpha = min(255, int((255 - edge) * 18))
+                px[x, y] = (r, g, b, alpha)
     return rgba
 
 
@@ -68,17 +73,37 @@ def sofa_only_bbox(rgba: Image.Image) -> tuple[int, int, int, int] | None:
         return None
     crop = rgba.crop(full)
     w, h = crop.size
-    y = h - 1
-    while y > 0 and row_ink(crop, y) < w * 0.03:
-        y -= 1
-    while y > 0 and row_ink(crop, y) >= w * 0.08:
-        y -= 1
-    while y > 0 and row_ink(crop, y) < w * 0.03:
-        y -= 1
-    sofa_bottom = y + 1
+    inks = [row_ink(crop, y) for y in range(h)]
+
+    gaps: list[tuple[int, int]] = []
+    gap_start: int | None = None
+    for y in range(h):
+        if inks[y] < w * 0.05:
+            if gap_start is None:
+                gap_start = y
+        elif gap_start is not None and y - gap_start >= 8:
+            gaps.append((gap_start, y))
+            gap_start = None
+        else:
+            gap_start = None
+
+    if gaps:
+        gap_start, gap_end = gaps[-1]
+        sofa_bottom = gap_start - 1
+        for y in range(gap_start - 1, -1, -1):
+            if inks[y] >= w * 0.05:
+                sofa_bottom = y
+        sofa_bottom = max(0, sofa_bottom)
+    else:
+        sofa_bottom = h - 1
+        for y in range(h - 1, -1, -1):
+            if inks[y] > w * 0.12:
+                sofa_bottom = y
+                break
+
     if sofa_bottom < h * 0.35:
-        sofa_bottom = h
-    return (full[0], full[1], full[2], full[1] + sofa_bottom)
+        sofa_bottom = h - 1
+    return (full[0], full[1], full[2], full[1] + sofa_bottom + 1)
 
 
 def scale_sofa_to_width(sofa: Image.Image, target_width: int) -> Image.Image:

@@ -4,47 +4,47 @@
   "files": {
     "bali-silk": {
       "width": 800,
-      "height": 433,
+      "height": 435,
       "inRoomPreview": "bali-silk.jpg"
     },
     "evoque-mist": {
       "width": 800,
-      "height": 421,
+      "height": 423,
       "inRoomPreview": "evoque-mist.jpg"
     },
     "evoque-ardesia": {
       "width": 800,
-      "height": 432,
+      "height": 434,
       "inRoomPreview": "evoque-ardesia.jpg"
     },
     "evoque-frost": {
       "width": 800,
-      "height": 400,
+      "height": 405,
       "inRoomPreview": "evoque-frost.jpg"
     },
     "evoque-atlantic": {
       "width": 800,
-      "height": 396,
+      "height": 401,
       "inRoomPreview": "evoque-atlantic.jpg"
     },
     "bali-spider": {
       "width": 800,
-      "height": 395,
+      "height": 399,
       "inRoomPreview": "bali-spider.jpg"
     },
     "bali-currant": {
       "width": 800,
-      "height": 401,
+      "height": 403,
       "inRoomPreview": "bali-currant.jpg"
     },
     "bali-marble": {
       "width": 800,
-      "height": 396,
+      "height": 398,
       "inRoomPreview": "bali-marble.jpg"
     },
     "bali-harvest": {
       "width": 800,
-      "height": 393,
+      "height": 396,
       "inRoomPreview": "bali-harvest.jpg"
     }
   },
