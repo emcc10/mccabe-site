@@ -156,6 +156,9 @@
       if (pathMatch || gridMatch) {
         h.classList.add('category');
         if (b) b.classList.add('category');
+        if (typeof window.mcApplyCategoryPlpThumbMat === 'function') {
+          window.mcApplyCategoryPlpThumbMat();
+        }
       }
 
       h.classList.remove('mc-member-plp-price-pending');
