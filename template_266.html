@@ -555,6 +555,29 @@
       overflow: visible !important;
       pointer-events: auto !important;
     }
+    /* Volusion fills #display_homepage_title at runtime — hide duplicate title strip under hero */
+    html.mc-allow-home-hero body.is-home header.header > .header__section,
+    html.mc-allow-home-hero body.is-home #display_homepage_title,
+    html.mc-allow-home-hero body.is-home #display_homepage_title * {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      max-height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      font-size: 0 !important;
+      line-height: 0 !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    html.mc-allow-home-hero body.is-home header.header {
+      min-height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      background: transparent !important;
+    }
     /* Raw template often includes #if_homepage on every page — hide when URL is not homepage */
     html:not(.mc-allow-home-hero) body #if_homepage,
     body:not(.is-home) #if_homepage,
@@ -8145,8 +8168,11 @@ window.initRoomPlanner = function (opts) {
 }
 
 .hero-nav a,
-.hero-cart {
-  color: #fff;
+.hero-cart,
+#slideshow-container .hero-menu a,
+#slideshow-container .hero-nav a {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
   font-size: clamp(12px, 1.4vw, 15px);
   font-weight: 700;
   letter-spacing: 0.12em;

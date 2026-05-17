@@ -594,6 +594,12 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
 }
 
 #slideshow-container .hero-nav a {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
   transition: background 0.15s ease, color 0.15s ease !important;
   border-radius: 4px !important;
 }
@@ -601,7 +607,39 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
 #slideshow-container .hero-nav a:hover,
 #slideshow-container .hero-nav a:focus-visible {
   background: rgba(255, 255, 255, 0.22) !important;
-  color: #fff !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Homepage: Volusion injects store title into empty #display_homepage_title — hide white logo strip below hero */
+html.mc-allow-home-hero body.is-home header.header > .header__section,
+html.mc-allow-home-hero body.is-home #display_homepage_title,
+html.mc-allow-home-hero body.is-home #display_homepage_title *,
+html.mc-allow-home-hero body.is-home #homepage_title,
+html.mc-allow-home-hero body.is-home .vol-logo__link {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html.mc-allow-home-hero body.is-home header.header {
+  min-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Search: top-right band (same top offset as .hero-menu); above video, below menu z-index */
