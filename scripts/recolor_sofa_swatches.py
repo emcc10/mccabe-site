@@ -129,20 +129,42 @@ def recolor_rgba(sofa: Image.Image, target_rgb: tuple[int, int, int]) -> Image.I
     for y in range(h):
         for x in range(w):
             r, g, b, a = src_px[x, y]
-            if a < 16:
-                out_px[x, y] = (0, 0, 0)
-                continue
             if is_leg_pixel(r, g, b):
                 out_px[x, y] = (r, g, b)
 
     colored.putalpha(alpha)
-    return colored
+    out_px = colored.load()
+    apx = alpha.load()
+    for y in range(h):
+        for x in range(w):
+            a = apx[x, y]
+            if a < 20:
+                out_px[x, y] = (0, 0, 0, 0)
+    return defringe(colored)
 
 
 def soften_alpha(img: Image.Image, radius: float = 0.45) -> Image.Image:
     r, g, b, a = img.split()
     a = a.filter(ImageFilter.GaussianBlur(radius))
     return Image.merge("RGBA", (r, g, b, a))
+
+
+def defringe(img: Image.Image) -> Image.Image:
+    """Remove warm halos on semi-transparent edge pixels."""
+    px = img.load()
+    w, h = img.size
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a >= 240:
+                continue
+            if a < 8:
+                px[x, y] = (0, 0, 0, 0)
+                continue
+            # Pull fringe toward neutral gray for this luminance.
+            lum = int(0.299 * r + 0.587 * g + 0.114 * b)
+            px[x, y] = (lum, lum, lum, a)
+    return img
 
 
 def scale_to_width(img: Image.Image, width: int) -> Image.Image:
@@ -275,7 +297,7 @@ def build_swatches(
     for slug, target in colors.items():
         recolored = recolor_rgba(base_sofa, target)
         recolored = soften_alpha(recolored, 0.45)
-        recolored = trim_transparent(recolored, pad=2)
+        recolored = trim_transparent(recolored, pad=6)
         recolored = scale_to_width(recolored, product_width)
 
         dest = out_dir / f"{slug}.png"
