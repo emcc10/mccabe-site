@@ -5,7 +5,8 @@
   "description": "Batch recolor a base sofa PNG to leather swatch colors (deterministic, no AI).",
   "type": "module",
   "scripts": {
-    "render": "node render-sofas.js"
+    "preview": "node render-sofas.js --currant",
+    "render": "node render-sofas.js --all"
   },
   "dependencies": {
     "adm-zip": "^0.5.16",

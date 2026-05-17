@@ -25,8 +25,22 @@ input/
 
 ## Run
 
+**One swatch (fast — default Bali Currant):**
+
+```bash
+npm run preview
+```
+
+**All swatches + ZIP:**
+
 ```bash
 npm run render
+```
+
+Single swatch by name:
+
+```bash
+node render-sofas.js Rein-Eggshell.jpg
 ```
 
 ## Output
@@ -47,7 +61,7 @@ Output filenames match swatch filenames (extension changed to `.png`).
 2. **Median** RGB on that crop.
 3. **Average** RGB on that crop.
 4. `targetColor = median × 0.75 + average × 0.25`
-5. Sofa pixels (non–near-white) are recolored using luminance-shaped shading from the original photo.
+5. Sofa pixels keep **original luminance** (folds, shadows, highlights). Only Lab **a/b** shift from cognac on the photo → swatch color.
 
 ## Mask
 

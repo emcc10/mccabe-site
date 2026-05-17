@@ -1,4 +1,4 @@
-/* 0518 C_CSS_DEPLOY_VERIFY_20260518plp4 — tail wins; Store-dot may omit #v65-product-parent */
+/* 0518b C_CSS_DEPLOY_VERIFY_20260518hdr — tail wins; Store-dot may omit #v65-product-parent */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -604,8 +604,8 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   line-height: 0 !important;
 }
 
-/* Hero menu: above search + video layers (search z-index lower so it never covers nav links) */
-#slideshow-container .hero-menu {
+/* Hero menu: homepage only — above search + video layers */
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu {
   position: absolute;
   top: 18px !important;
   left: 50% !important;
@@ -618,29 +618,29 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   padding: clamp(8px, 1.5vw, 12px) max(56px, 7.5vw) clamp(8px, 1.5vw, 12px) max(56px, 7.5vw);
   box-sizing: border-box;
   max-width: 100%;
+  flex-wrap: nowrap !important;
 }
 
-/* ===== HOMEPAGE HERO MENU: NO WRAP ===== */
-#slideshow-container .hero-menu,
-#slideshow-container .hero-menu * {
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu,
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu * {
   white-space: nowrap !important;
 }
 
-#slideshow-container .hero-menu a {
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu a {
   display: inline-block !important;
   font-size: clamp(12px, 1.4vw, 15px) !important;
   padding: 0 clamp(4px, 0.5vw, 8px) !important;
 }
 
-.hero-nav {
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: nowrap !important;
   align-items: center;
   gap: clamp(14px, 2.5vw, 22px);
   white-space: nowrap !important;
 }
 
-#slideshow-container .hero-nav a {
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav a {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
   font-weight: 700 !important;
@@ -651,8 +651,8 @@ body.is-home #slideshow-container #mc-hero-copy-subline,
   border-radius: 4px !important;
 }
 
-#slideshow-container .hero-nav a:hover,
-#slideshow-container .hero-nav a:focus-visible {
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav a:hover,
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav a:focus-visible {
   background: rgba(255, 255, 255, 0.22) !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
@@ -663,17 +663,21 @@ meta[itemprop="name"] {
   display: none !important;
 }
 
-/* Homepage: Volusion injects store title into empty #display_homepage_title — hide white logo strip below hero */
-html.mc-allow-home-hero body.is-home header.header > .header__section,
-html.mc-allow-home-hero body.is-home #display_homepage_title,
-html.mc-allow-home-hero body.is-home #display_homepage_title *,
-html.mc-allow-home-hero body.is-home #homepage_title,
-html.mc-allow-home-hero body.is-home .vol-logo__link {
+/* Volusion injects "McCabe's Theater & Living" text into #display_homepage_title on every page — never show in header */
+header.header #display_homepage_title,
+header.header #display_homepage_title *,
+#display_homepage_title,
+#display_homepage_title *,
+#display_homepage_title .vol-logo,
+#display_homepage_title .vol-logo__link,
+#display_homepage_title a.vol-logo__link {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
   min-height: 0 !important;
   max-height: 0 !important;
+  width: 0 !important;
+  max-width: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
   overflow: hidden !important;
@@ -684,6 +688,20 @@ html.mc-allow-home-hero body.is-home .vol-logo__link {
   pointer-events: none !important;
 }
 
+/* Collapse empty logo column so it does not push nav / hero menu */
+header.header .header__section > .col-xs-6.col-sm-8.col-md-9.col-lg-3:first-child {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  flex: 0 0 0 !important;
+}
+
+/* Homepage: collapse header chrome (hero overlay is the logo) */
+html.mc-allow-home-hero body.is-home header.header > .header__section,
 html.mc-allow-home-hero body.is-home header.header {
   min-height: 0 !important;
   padding-top: 0 !important;
@@ -692,6 +710,22 @@ html.mc-allow-home-hero body.is-home header.header {
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+}
+
+/* Hero overlay menu: homepage only (never on category / PLP) */
+html:not(.mc-allow-home-hero) #slideshow-container .hero-menu,
+html:not(.mc-allow-home-hero) #slideshow-container .hero-nav,
+html[data-mc-category-plp="1"] #slideshow-container .hero-menu,
+html[data-mc-category-plp="1"] #slideshow-container .hero-nav,
+html.category #slideshow-container .hero-menu,
+html.category #slideshow-container .hero-nav,
+body.category #slideshow-container .hero-menu,
+body.category #slideshow-container .hero-nav {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
 }
 
 /* Search: top-right band (same top offset as .hero-menu); above video, below menu z-index */
@@ -823,8 +857,8 @@ body.is-home #slideshow-container {
 
 /* Mobile: hero video + overlay proportional */
 @media (max-width: 991px) {
-  /* keep hero menu hidden on mobile */
-  #slideshow-container .hero-menu {
+  /* keep hero menu hidden on mobile (homepage uses push nav) */
+  html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu {
     display: none !important;
   }
 
@@ -2089,7 +2123,7 @@ a.hero-cart-link {
   #slideshow-container .mc-hero-overlay a {
     pointer-events: auto !important;
   }
-  #slideshow-container .hero-menu {
+  html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu {
     position: absolute !important;
     z-index: 10 !important;
   }
@@ -9479,11 +9513,11 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   /* ---------------------------------------------------------
      3) HOMEPAGE HERO: move search up to align with main menu
      --------------------------------------------------------- */
-  #slideshow-container .hero-menu {
+  html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu {
     z-index: 45 !important;
   }
 
-  #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
+  html.mc-allow-home-hero body.is-home #slideshow-container #mcHeroSearchOverlay.mc-hero-search-overlay {
     top: 18px !important;
     /* Stay below .hero-menu so nav is never covered / clipped by overlay */
     z-index: 22 !important;

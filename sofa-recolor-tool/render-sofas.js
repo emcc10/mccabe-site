@@ -1,14 +1,6 @@
 /**
- * Batch sofa recolor — deterministic, same dimensions as base, no AI.
- *
- * Input:
- *   input/sofa.png
- *   input/swatches/*.jpg|png|webp
- *   input/mask.png (optional; white = recolor, black = keep)
- *
- * Output:
- *   output/<swatch-filename>.png
- *   output/sofa-renders.zip
+ * Batch sofa recolor — replace source leather hue with swatch color;
+ * keep original luminance (folds, shadows, texture). No AI.
  */
 import AdmZip from 'adm-zip';
 import { mkdirSync, readdirSync, existsSync } from 'fs';
@@ -24,6 +16,7 @@ const OUTPUT_DIR = join(ROOT, 'output');
 const SOFA_PATH = join(INPUT_DIR, 'sofa.png');
 const MASK_PATH = join(INPUT_DIR, 'mask.png');
 const ZIP_PATH = join(OUTPUT_DIR, 'sofa-renders.zip');
+const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 
 const BG_THRESH = 235;
 const FOOT_BRIGHTNESS = 35;
@@ -43,6 +36,58 @@ function isNearWhite(r, g, b) {
   return r > BG_THRESH && g > BG_THRESH && b > BG_THRESH;
 }
 
+function medianOf(arr) {
+  const s = [...arr].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+function srgbToLinear(c) {
+  const v = c / 255;
+  return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+}
+
+function linearToSrgb(c) {
+  const v = clamp(c, 0, 1);
+  return v <= 0.0031308 ? v * 12.92 * 255 : (1.055 * v ** (1 / 2.4) - 0.055) * 255;
+}
+
+function rgbToLab(r, g, b) {
+  const lr = srgbToLinear(r);
+  const lg = srgbToLinear(g);
+  const lb = srgbToLinear(b);
+  let x = lr * 0.4124564 + lg * 0.3575761 + lb * 0.1804375;
+  let y = lr * 0.2126729 + lg * 0.7151522 + lb * 0.072175;
+  let z = lr * 0.0193339 + lg * 0.119192 + lb * 0.9503041;
+  x /= 0.95047;
+  z /= 1.08883;
+  const f = (t) => (t > 0.008856 ? t ** (1 / 3) : (903.3 * t + 16) / 116);
+  const fx = f(x);
+  const fy = f(y);
+  const fz = f(z);
+  return { L: 116 * fy - 16, a: 500 * (fx - fy), b: 200 * (fy - fz) };
+}
+
+function labToRgb(L, a, b) {
+  const fy = (L + 16) / 116;
+  const fx = a / 500 + fy;
+  const fz = fy - b / 200;
+  const finv = (t) => (t > 0.206897 ? t ** 3 : (116 * t - 16) / 903.3);
+  let y = finv(fy);
+  let x = finv(fx);
+  let z = finv(fz);
+  x *= 0.95047;
+  z *= 1.08883;
+  const lr = x * 3.2404542 + y * -1.5371385 + z * -0.4985314;
+  const lg = x * -0.969266 + y * 1.8760108 + z * 0.041556;
+  const lb = x * 0.0556434 + y * -0.2040259 + z * 1.0572252;
+  return [
+    Math.round(clamp(linearToSrgb(lr), 0, 255)),
+    Math.round(clamp(linearToSrgb(lg), 0, 255)),
+    Math.round(clamp(linearToSrgb(lb), 0, 255)),
+  ];
+}
+
 /**
  * @returns {Promise<{ data: Buffer, width: number, height: number, channels: number }>}
  */
@@ -57,9 +102,6 @@ export async function loadImage(path) {
   };
 }
 
-/**
- * @param {Buffer} data RGBA
- */
 export async function saveImage(data, path, width, height) {
   mkdirSync(dirname(path), { recursive: true });
   await sharp(data, {
@@ -71,7 +113,6 @@ export async function saveImage(data, path, width, height) {
 
 /**
  * Center 50% crop → median & average RGB → targetColor = median*0.75 + average*0.25
- * @returns {{ r: number, g: number, b: number }}
  */
 export async function getSwatchTargetColor(swatchPath) {
   const { data, width, height, channels } = await loadImage(swatchPath);
@@ -103,35 +144,53 @@ export async function getSwatchTargetColor(swatchPath) {
     throw new Error(`No usable swatch pixels in center crop: ${swatchPath}`);
   }
 
-  const median = (arr) => {
-    const s = [...arr].sort((a, b) => a - b);
-    const m = Math.floor(s.length / 2);
-    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
-  };
-
   const avg = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
-
-  const medR = median(rs);
-  const medG = median(gs);
-  const medB = median(bs);
-  const avgR = avg(rs);
-  const avgG = avg(gs);
-  const avgB = avg(bs);
+  const medR = medianOf(rs);
+  const medG = medianOf(gs);
+  const medB = medianOf(bs);
 
   return {
-    r: Math.round(medR * 0.75 + avgR * 0.25),
-    g: Math.round(medG * 0.75 + avgG * 0.25),
-    b: Math.round(medB * 0.75 + avgB * 0.25),
+    r: Math.round(medR * 0.75 + avg(rs) * 0.25),
+    g: Math.round(medG * 0.75 + avg(gs) * 0.25),
+    b: Math.round(medB * 0.75 + avg(bs) * 0.25),
   };
 }
 
 /**
- * Sofa mask 0–255 (feathered). Optional input/mask.png overrides auto mask.
- * @returns {Promise<Uint8Array>}
+ * Cognac / base leather color from midtone upholstery on the sofa photo.
  */
+export function getSourceLeatherColor(baseImage, mask) {
+  const { data, width, height, channels } = baseImage;
+  const rs = [];
+  const gs = [];
+  const bs = [];
+
+  for (let j = 0, p = 0; j < width * height; j++, p += channels) {
+    if (mask[j] < 200) continue;
+    const r = data[p];
+    const g = data[p + 1];
+    const b = data[p + 2];
+    if (isNearWhite(r, g, b)) continue;
+    const bright = pixelBrightness(r, g, b);
+    if (bright < 48 || bright > 195) continue;
+    rs.push(r);
+    gs.push(g);
+    bs.push(b);
+  }
+
+  if (!rs.length) {
+    return { r: 140, g: 85, b: 45 };
+  }
+
+  return {
+    r: Math.round(medianOf(rs)),
+    g: Math.round(medianOf(gs)),
+    b: Math.round(medianOf(bs)),
+  };
+}
+
 export async function createSofaMask(image, optionalMaskPath = null) {
   const { data, width, height, channels } = image;
-
   let mask = new Uint8Array(width * height);
 
   if (optionalMaskPath && existsSync(optionalMaskPath)) {
@@ -150,18 +209,13 @@ export async function createSofaMask(image, optionalMaskPath = null) {
       const r = data[p];
       const g = data[p + 1];
       const b = data[p + 2];
-      if (isNearWhite(r, g, b)) {
-        mask[j] = 0;
-      } else {
-        mask[j] = 255;
-      }
+      mask[j] = isNearWhite(r, g, b) ? 0 : 255;
     }
   }
 
   return featherMask(mask, width, height, MASK_BLUR_SIGMA);
 }
 
-/** Box-feather mask (sharp blur breaks single-channel raw buffers). */
 function featherMask(mask, width, height, sigma) {
   const radius = Math.max(1, Math.round(sigma));
   const out = new Uint8Array(mask.length);
@@ -183,10 +237,6 @@ function featherMask(mask, width, height, sigma) {
   return out;
 }
 
-/**
- * @param {Uint8Array} mask
- * @returns {{ minX: number, minY: number, maxX: number, maxY: number, width: number, height: number }}
- */
 export function getSofaBounds(mask, imgWidth, imgHeight) {
   let minX = imgWidth;
   let minY = imgHeight;
@@ -206,7 +256,14 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
   }
 
   if (!any) {
-    return { minX: 0, minY: 0, maxX: imgWidth - 1, maxY: imgHeight - 1, width: imgWidth, height: imgHeight };
+    return {
+      minX: 0,
+      minY: 0,
+      maxX: imgWidth - 1,
+      maxY: imgHeight - 1,
+      width: imgWidth,
+      height: imgHeight,
+    };
   }
 
   return {
@@ -220,49 +277,16 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * Optional 5–8% grain from swatch center (color only, no fold tiling).
+ * Lab shift: keep each pixel's L (shadows/highlights); move a,b from source leather → target swatch.
  */
-function sampleSwatchGrainRgb(swatchPath, swatchW, swatchH, swatchChannels, swatchData) {
-  const cx0 = Math.floor(swatchW * 0.35);
-  const cy0 = Math.floor(swatchH * 0.35);
-  const cx1 = Math.ceil(swatchW * 0.65);
-  const cy1 = Math.ceil(swatchH * 0.65);
-  const grains = [];
-  for (let y = cy0; y < cy1; y += 2) {
-    for (let x = cx0; x < cx1; x += 2) {
-      const i = (y * swatchW + x) * swatchChannels;
-      grains.push([swatchData[i], swatchData[i + 1], swatchData[i + 2]]);
-    }
-  }
-  return grains.length ? grains : [[128, 128, 128]];
-}
-
-let grainCache = null;
-
-function getGrainOffset(x, y, grains) {
-  const g = grains[(x * 17 + y * 31) % grains.length];
-  return g;
-}
-
-/**
- * @param {{ data: Buffer, width: number, height: number, channels: number }} baseImage
- * @param {Uint8Array} mask
- * @param {{ r: number, g: number, b: number }} targetColor
- * @param {ReturnType<typeof getSofaBounds>} sofaBounds
- * @param {string} [swatchPath] for subtle grain
- * @returns {Buffer} RGBA output
- */
-export function recolorSofa(baseImage, mask, targetColor, sofaBounds, swatchPath = null) {
+export function recolorSofa(baseImage, mask, sourceColor, targetColor, _sofaBounds = null) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
-  const { r: tR, g: tG, b: tB } = targetColor;
 
-  const yBack0 = sofaBounds.minY + sofaBounds.height * 0.2;
-  const yBack1 = sofaBounds.minY + sofaBounds.height * 0.55;
-
-  if (swatchPath && !grainCache) {
-    // lazy; set per swatch in processSwatch
-  }
+  const srcLab = rgbToLab(sourceColor.r, sourceColor.g, sourceColor.b);
+  const tgtLab = rgbToLab(targetColor.r, targetColor.g, targetColor.b);
+  const deltaA = tgtLab.a - srcLab.a;
+  const deltaB = tgtLab.b - srcLab.b;
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -276,49 +300,16 @@ export function recolorSofa(baseImage, mask, targetColor, sofaBounds, swatchPath
       const oB = data[p + 2];
       const oA = channels === 4 ? data[p + 3] : 255;
 
-      if (isNearWhite(oR, oG, oB)) {
-        out[p] = oR;
-        out[p + 1] = oG;
-        out[p + 2] = oB;
-        if (channels === 4) out[p + 3] = oA;
-        continue;
-      }
+      if (isNearWhite(oR, oG, oB)) continue;
 
-      const bright = pixelBrightness(oR, oG, oB);
+      if (pixelBrightness(oR, oG, oB) < FOOT_BRIGHTNESS) continue;
 
-      if (bright < FOOT_BRIGHTNESS) {
-        continue;
-      }
+      const lab = rgbToLab(oR, oG, oB);
+      const shifted = labToRgb(lab.L, lab.a + deltaA, lab.b + deltaB);
 
-      let lum = bright;
-      let shade = lum / 128;
-      shade = clamp(shade, 0.55, 1.35);
-
-      if (y >= yBack0 && y <= yBack1 && shade < 0.82) {
-        shade = shade * 0.75 + 0.82 * 0.25;
-      }
-
-      let nR = tR * shade;
-      let nG = tG * shade;
-      let nB = tB * shade;
-
-      nR = nR * 0.82 + oR * 0.18;
-      nG = nG * 0.82 + oG * 0.18;
-      nB = nB * 0.82 + oB * 0.18;
-
-      if (grainCache?.grains?.length) {
-        const [gR, gG, gB] = getGrainOffset(x, y, grainCache.grains);
-        const grainAmt = 0.065 * m;
-        nR = nR * (1 - grainAmt) + gR * grainAmt;
-        nG = nG * (1 - grainAmt) + gG * grainAmt;
-        nB = nB * (1 - grainAmt) + gB * grainAmt;
-      }
-
-      const w = m;
-
-      out[p] = Math.round(clamp(oR * (1 - w) + nR * w, 0, 255));
-      out[p + 1] = Math.round(clamp(oG * (1 - w) + nG * w, 0, 255));
-      out[p + 2] = Math.round(clamp(oB * (1 - w) + nB * w, 0, 255));
+      out[p] = Math.round(clamp(oR * (1 - m) + shifted[0] * m, 0, 255));
+      out[p + 1] = Math.round(clamp(oG * (1 - m) + shifted[1] * m, 0, 255));
+      out[p + 2] = Math.round(clamp(oB * (1 - m) + shifted[2] * m, 0, 255));
       if (channels === 4) out[p + 3] = oA;
     }
   }
@@ -326,28 +317,20 @@ export function recolorSofa(baseImage, mask, targetColor, sofaBounds, swatchPath
   return out;
 }
 
-/**
- * @returns {Promise<string>} output png path
- */
-export async function processSwatch(swatchPath, baseSofa, mask, sofaBounds) {
+export async function processSwatch(swatchPath, baseSofa, mask, sourceColor, sofaBounds) {
   const targetColor = await getSwatchTargetColor(swatchPath);
-  const sw = await loadImage(swatchPath);
-  grainCache = {
-    grains: sampleSwatchGrainRgb(swatchPath, sw.width, sw.height, sw.channels, sw.data),
-  };
-
-  const outData = recolorSofa(baseSofa, mask, targetColor, sofaBounds, swatchPath);
-  grainCache = null;
-
+  const outData = recolorSofa(baseSofa, mask, sourceColor, targetColor, sofaBounds);
   const outName = `${basename(swatchPath, extname(swatchPath))}.png`;
   const outPath = join(OUTPUT_DIR, outName);
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
-  return outPath;
+  return { outPath, targetColor };
 }
 
 export function zipOutputs(outputDir, zipPath) {
   const zip = new AdmZip();
-  const files = readdirSync(outputDir).filter((f) => f.toLowerCase().endsWith('.png') && f !== 'sofa-renders.zip');
+  const files = readdirSync(outputDir).filter(
+    (f) => f.toLowerCase().endsWith('.png') && f !== 'sofa-renders.zip',
+  );
   if (!files.length) {
     throw new Error(`No PNG files to zip in ${outputDir}`);
   }
@@ -359,10 +342,38 @@ export function zipOutputs(outputDir, zipPath) {
   return files.length;
 }
 
-export async function main() {
+function resolveSwatchArg(name) {
+  if (!name) return null;
+  const base = basename(name);
+  const direct = join(SWATCH_DIR, base);
+  if (existsSync(direct)) return direct;
+  const hit = readdirSync(SWATCH_DIR).find(
+    (f) => f.toLowerCase() === base.toLowerCase() || f.toLowerCase().startsWith(base.toLowerCase()),
+  );
+  return hit ? join(SWATCH_DIR, hit) : null;
+}
+
+function parseCli(argv) {
+  const args = argv.slice(2);
+  let all = false;
+  let swatchFile = null;
+  let zip = false;
+
+  for (const a of args) {
+    if (a === '--all') all = true;
+    else if (a === '--zip') zip = true;
+    else if (a === '--currant' || a === '--current') swatchFile = DEFAULT_PREVIEW_SWATCH;
+    else if (a.startsWith('--swatch=')) swatchFile = a.slice('--swatch='.length);
+    else if (!a.startsWith('-')) swatchFile = a;
+  }
+
+  if (all) return { mode: 'all', zip: true };
+  return { mode: 'one', swatchFile: swatchFile || DEFAULT_PREVIEW_SWATCH, zip };
+}
+
+export async function main(argv = process.argv) {
   if (!existsSync(SOFA_PATH)) {
     console.error(`Missing base sofa: ${SOFA_PATH}`);
-    console.error('Place your clean sofa image at input/sofa.png');
     process.exit(1);
   }
   if (!existsSync(SWATCH_DIR)) {
@@ -370,15 +381,7 @@ export async function main() {
     process.exit(1);
   }
 
-  const swatches = readdirSync(SWATCH_DIR)
-    .filter((f) => SWATCH_EXT.has(extname(f).toLowerCase()))
-    .sort((a, b) => a.localeCompare(b));
-
-  if (!swatches.length) {
-    console.error(`No swatch images in ${SWATCH_DIR}`);
-    process.exit(1);
-  }
-
+  const cli = parseCli(argv);
   mkdirSync(OUTPUT_DIR, { recursive: true });
 
   console.log(`Base sofa: ${SOFA_PATH}`);
@@ -389,20 +392,53 @@ export async function main() {
   if (maskPath) console.log(`Using mask: ${maskPath}`);
   const mask = await createSofaMask(baseSofa, maskPath);
   const sofaBounds = getSofaBounds(mask, baseSofa.width, baseSofa.height);
+  const sourceColor = getSourceLeatherColor(baseSofa, mask);
+  console.log(
+    `  Source leather (cognac on photo): RGB(${sourceColor.r}, ${sourceColor.g}, ${sourceColor.b})`,
+  );
   console.log(
     `  Sofa bounds: ${sofaBounds.width}x${sofaBounds.height} at (${sofaBounds.minX},${sofaBounds.minY})`,
   );
 
+  if (cli.mode === 'one') {
+    const swPath = resolveSwatchArg(cli.swatchFile);
+    if (!swPath) {
+      console.error(`Swatch not found: ${cli.swatchFile}`);
+      process.exit(1);
+    }
+    const { outPath, targetColor } = await processSwatch(
+      swPath,
+      baseSofa,
+      mask,
+      sourceColor,
+      sofaBounds,
+    );
+    console.log(
+      `  ${basename(swPath)} → target RGB(${targetColor.r}, ${targetColor.g}, ${targetColor.b})`,
+    );
+    console.log(`\nDone. 1 PNG: ${outPath}`);
+    console.log('Run all swatches: npm run render');
+    return;
+  }
+
+  const swatches = readdirSync(SWATCH_DIR)
+    .filter((f) => SWATCH_EXT.has(extname(f).toLowerCase()))
+    .sort((a, b) => a.localeCompare(b));
+
   const written = [];
   for (const file of swatches) {
     const swPath = join(SWATCH_DIR, file);
-    const target = await getSwatchTargetColor(swPath);
-    console.log(
-      `  ${file} → target RGB(${target.r}, ${target.g}, ${target.b})`,
+    const { outPath, targetColor } = await processSwatch(
+      swPath,
+      baseSofa,
+      mask,
+      sourceColor,
+      sofaBounds,
     );
-    const outPath = await processSwatch(swPath, baseSofa, mask, sofaBounds);
+    console.log(
+      `  ${file} → RGB(${targetColor.r}, ${targetColor.g}, ${targetColor.b}) → ${basename(outPath)}`,
+    );
     written.push(outPath);
-    console.log(`    wrote ${outPath}`);
   }
 
   const n = zipOutputs(OUTPUT_DIR, ZIP_PATH);

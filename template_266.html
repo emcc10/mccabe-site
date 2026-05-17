@@ -189,6 +189,32 @@
 </script>
 <script>
 (function () {
+  function mcHideVolusionHeaderTextLogo() {
+    try {
+      var el = document.getElementById('display_homepage_title');
+      if (!el) return;
+      el.setAttribute('aria-hidden', 'true');
+      el.style.setProperty('display', 'none', 'important');
+      el.style.setProperty('visibility', 'hidden', 'important');
+      el.style.setProperty('height', '0', 'important');
+      el.style.setProperty('overflow', 'hidden', 'important');
+    } catch (eHideLogo) {}
+  }
+  mcHideVolusionHeaderTextLogo();
+  document.addEventListener('DOMContentLoaded', mcHideVolusionHeaderTextLogo);
+  window.addEventListener('load', mcHideVolusionHeaderTextLogo);
+  try {
+    document.addEventListener('DOMContentLoaded', function () {
+      var el = document.getElementById('display_homepage_title');
+      if (!el || typeof MutationObserver === 'undefined') return;
+      var mo = new MutationObserver(mcHideVolusionHeaderTextLogo);
+      mo.observe(el, { childList: true, subtree: true, characterData: true });
+    });
+  } catch (eMoLogo) {}
+})();
+</script>
+<script>
+(function () {
   function markCategoryListing() {
     try {
       var p = (location.pathname || '').toLowerCase();
@@ -362,8 +388,12 @@
       document.body.classList.remove('productdetails');
       document.body.classList.remove('mc-product-page');
       document.body.classList.remove('mc-bean-bag-pdp');
+      document.body.classList.remove('is-home');
       document.body.classList.add('category');
     }
+    document.documentElement.classList.remove('mc-allow-home-hero');
+    document.documentElement.setAttribute('data-mc-category-plp', '1');
+    document.documentElement.classList.add('category');
 
     /* Category path (-s/###.htm): remove PDP-only planner/summary if mis-mounted (no product chrome). */
     if (!document.getElementById("v65-product-parent") && /-s\/\d+\.html?/i.test(p)) {
@@ -690,28 +720,42 @@
     meta[itemprop="name"] {
       display: none !important;
     }
-    /* Volusion fills #display_homepage_title at runtime — hide duplicate title strip under hero */
-    html.mc-allow-home-hero body.is-home header.header > .header__section,
-    html.mc-allow-home-hero body.is-home #display_homepage_title,
-    html.mc-allow-home-hero body.is-home #display_homepage_title * {
+    /* Volusion fills #display_homepage_title with text logo — hide on all pages (hero overlay is homepage logo) */
+    header.header #display_homepage_title,
+    header.header #display_homepage_title *,
+    #display_homepage_title,
+    #display_homepage_title * {
       display: none !important;
       visibility: hidden !important;
       height: 0 !important;
-      min-height: 0 !important;
-      max-height: 0 !important;
+      width: 0 !important;
       margin: 0 !important;
       padding: 0 !important;
       overflow: hidden !important;
-      font-size: 0 !important;
-      line-height: 0 !important;
       opacity: 0 !important;
       pointer-events: none !important;
     }
+    header.header .header__section > .col-xs-6.col-sm-8.col-md-9.col-lg-3:first-child {
+      display: none !important;
+      width: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+    }
+    html.mc-allow-home-hero body.is-home header.header > .header__section,
     html.mc-allow-home-hero body.is-home header.header {
       min-height: 0 !important;
       padding: 0 !important;
       margin: 0 !important;
       background: transparent !important;
+    }
+    html:not(.mc-allow-home-hero) #slideshow-container .hero-menu,
+    html[data-mc-category-plp="1"] #slideshow-container .hero-menu,
+    html.category #slideshow-container .hero-menu {
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      pointer-events: none !important;
     }
     /* Raw template often includes #if_homepage on every page — hide when URL is not homepage */
     html:not(.mc-allow-home-hero) body #if_homepage,
