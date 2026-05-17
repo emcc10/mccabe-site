@@ -121,9 +121,7 @@ export async function getSwatchTargetColor(swatchPath) {
   const x1 = Math.ceil(width * 0.75);
   const y1 = Math.ceil(height * 0.75);
 
-  const rs = [];
-  const gs = [];
-  const bs = [];
+  const samples = [];
 
   for (let y = y0; y < y1; y++) {
     for (let x = x0; x < x1; x++) {
@@ -134,26 +132,38 @@ export async function getSwatchTargetColor(swatchPath) {
       const a = channels === 4 ? data[i + 3] : 255;
       if (a < 20) continue;
       if (isNearWhite(r, g, b)) continue;
-      rs.push(r);
-      gs.push(g);
-      bs.push(b);
+      const { L } = rgbToLab(r, g, b);
+      samples.push({ r, g, b, L });
     }
   }
 
-  if (!rs.length) {
+  if (!samples.length) {
     throw new Error(`No usable swatch pixels in center crop: ${swatchPath}`);
   }
 
+  const rs = samples.map((s) => s.r);
+  const gs = samples.map((s) => s.g);
+  const bs = samples.map((s) => s.b);
   const avg = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
-  const medR = medianOf(rs);
-  const medG = medianOf(gs);
-  const medB = medianOf(bs);
 
-  return {
-    r: Math.round(medR * 0.75 + avg(rs) * 0.25),
-    g: Math.round(medG * 0.75 + avg(gs) * 0.25),
-    b: Math.round(medB * 0.75 + avg(bs) * 0.25),
-  };
+  const midR = medianOf(rs) * 0.75 + avg(rs) * 0.25;
+  const midG = medianOf(gs) * 0.75 + avg(gs) * 0.25;
+  const midB = medianOf(bs) * 0.75 + avg(bs) * 0.25;
+
+  const byL = [...samples].sort((a, b) => a.L - b.L);
+  const darkN = Math.max(1, Math.floor(byL.length * 0.35));
+  const darkSlice = byL.slice(0, darkN);
+  const darkR = avg(darkSlice.map((s) => s.r));
+  const darkG = avg(darkSlice.map((s) => s.g));
+  const darkB = avg(darkSlice.map((s) => s.b));
+
+  const r = Math.round(midR * 0.4 + darkR * 0.6);
+  const g = Math.round(midG * 0.4 + darkG * 0.6);
+  const b = Math.round(midB * 0.4 + darkB * 0.6);
+
+  const tl = rgbToLab(r, g, b);
+  const [dr, dg, db] = labToRgb(tl.L - 4, tl.a, tl.b);
+  return { r: dr, g: dg, b: db };
 }
 
 /**
@@ -276,10 +286,26 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
   };
 }
 
+/** How much to apply swatch color (fade in deep shadows to avoid painted creases). */
+function colorShiftStrength(labL, y, sofaBounds) {
+  let s = clamp((labL - 12) / 40, 0, 1);
+  if (!sofaBounds) return s;
+
+  const yBack0 = sofaBounds.minY + sofaBounds.height * 0.2;
+  const yBack1 = sofaBounds.minY + sofaBounds.height * 0.55;
+  if (y >= yBack0 && y <= yBack1 && labL < 48) {
+    const t = (y - yBack0) / Math.max(1, yBack1 - yBack0);
+    const lowerBand = t > 0.5 ? (t - 0.5) / 0.5 : 0;
+    s *= 1 - lowerBand * 0.7;
+    if (labL < 38) s *= clamp((labL - 8) / 30, 0, 1);
+  }
+  return s;
+}
+
 /**
- * Lab shift: keep each pixel's L (shadows/highlights); move a,b from source leather → target swatch.
+ * Lab shift: keep each pixel's L; move a,b toward swatch. Shadows keep structure, not flat color fill.
  */
-export function recolorSofa(baseImage, mask, sourceColor, targetColor, _sofaBounds = null) {
+export function recolorSofa(baseImage, mask, sourceColor, targetColor, sofaBounds = null) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
 
@@ -287,6 +313,7 @@ export function recolorSofa(baseImage, mask, sourceColor, targetColor, _sofaBoun
   const tgtLab = rgbToLab(targetColor.r, targetColor.g, targetColor.b);
   const deltaA = tgtLab.a - srcLab.a;
   const deltaB = tgtLab.b - srcLab.b;
+  const deltaL = tgtLab.L - srcLab.L;
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -305,11 +332,25 @@ export function recolorSofa(baseImage, mask, sourceColor, targetColor, _sofaBoun
       if (pixelBrightness(oR, oG, oB) < FOOT_BRIGHTNESS) continue;
 
       const lab = rgbToLab(oR, oG, oB);
-      const shifted = labToRgb(lab.L, lab.a + deltaA, lab.b + deltaB);
 
-      out[p] = Math.round(clamp(oR * (1 - m) + shifted[0] * m, 0, 255));
-      out[p + 1] = Math.round(clamp(oG * (1 - m) + shifted[1] * m, 0, 255));
-      out[p + 2] = Math.round(clamp(oB * (1 - m) + shifted[2] * m, 0, 255));
+      if (sofaBounds && y > sofaBounds.maxY - 28 && Math.hypot(lab.a, lab.b) < 10 && lab.L < 88) {
+        continue;
+      }
+
+      const s = colorShiftStrength(lab.L, y, sofaBounds);
+      const midW = clamp((lab.L - 28) / 55, 0, 1);
+      const newL = lab.L + deltaL * 0.18 * s * midW;
+      const shifted = labToRgb(newL, lab.a + deltaA * s, lab.b + deltaB * s);
+
+      let keepOrig = 0;
+      if (lab.L < 32) keepOrig = ((32 - lab.L) / 32) * 0.55;
+      const nR = shifted[0] * (1 - keepOrig) + oR * keepOrig;
+      const nG = shifted[1] * (1 - keepOrig) + oG * keepOrig;
+      const nB = shifted[2] * (1 - keepOrig) + oB * keepOrig;
+
+      out[p] = Math.round(clamp(oR * (1 - m) + nR * m, 0, 255));
+      out[p + 1] = Math.round(clamp(oG * (1 - m) + nG * m, 0, 255));
+      out[p + 2] = Math.round(clamp(oB * (1 - m) + nB * m, 0, 255));
       if (channels === 4) out[p + 3] = oA;
     }
   }
