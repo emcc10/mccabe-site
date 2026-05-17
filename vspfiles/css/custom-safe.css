@@ -2755,7 +2755,7 @@ body.mc-product-page select.mc-native-leather {
 
     .mc-member-price-caption__option-label {
       display: block !important;
-      font-size: 16px !important;
+      font-size: 14px !important;
       font-weight: 300 !important;
       letter-spacing: 0.06em !important;
       text-transform: none;
@@ -2764,7 +2764,7 @@ body.mc-product-page select.mc-native-leather {
 
     .mc-member-price-caption__price-value {
       display: block !important;
-      font-size: 24px !important;
+      font-size: 14px !important;
       font-weight: 400 !important;
       text-transform: capitalize;
       color: rgb(69, 69, 69) !important;
@@ -5503,7 +5503,7 @@ body.mc-product-page #content_area .product_sale_price,
 body.mc-product-page #content_area .product_sale_price b,
 body.mc-product-page #content_area .product_sale_price span {
   font-size: 32px !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
   margin: 0 0 18px 0 !important;
   letter-spacing: 0.05em !important;
 }
@@ -6114,8 +6114,8 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
 
 .mc-login-modal__title {
   margin: 0 0 8px 0;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight:400;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -6211,7 +6211,7 @@ body.is-home #slideshow-container .mc-hero-overlay .hero-logo-img,
 
 .mc-member-grid-price__label {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.02em;
   text-transform: none;
   color: #333;
@@ -10239,7 +10239,7 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label
   margin: 0 !important;
   flex: 0 0 auto !important;
   font-size: 14px !important;
-  font-weight: 500 !important;
+  font-weight: 400 !important;
   line-height: 1.2 !important;
   letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
@@ -10279,7 +10279,7 @@ body.productdetails #v65-product-parent .mc-pdp-member-line__label,
 body.mc-product-page #v65-product-parent .mc-pdp-member-line__label {
   display: block !important;
   font-size: 14px !important;
-  font-weight: 500 !important;
+  font-weight: 400 !important;
   line-height: 1.2 !important;
   letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
@@ -12516,7 +12516,7 @@ body.productdetails #content_area #mc-pdp-title-right h1 {
   text-align: left !important;
   font-size: 30px !important;
   line-height: 1.2 !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
   letter-spacing: 0.03em !important;
 }
 
@@ -13385,7 +13385,7 @@ html body.mc-product-page #v65-product-parent .mc-pdp-member-line--locked,
 html body.productdetails #v65-product-parent .mc-pdp-member-line--locked a,
 html body.mc-product-page #v65-product-parent .mc-pdp-member-line--locked a {
   text-transform: uppercase !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
 }
 
 /* Retail / member prices: semibold weight. */
@@ -13401,7 +13401,7 @@ html body.productdetails #v65-product-parent .mc-pdp-member-line__amount,
 html body.mc-product-page #v65-product-parent .mc-pdp-member-line__amount,
 html body.productdetails #content_area .mc-pdp-retail-row .product_productprice,
 html body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice {
-  font-weight: 600 !important;
+  font-weight: 400 !important;
 }
 
 /* Broad PDP text: semibold weight (final DevTools sweep). */
@@ -13435,7 +13435,7 @@ html body.mc-product-page #content_area .mc-pdp-accordion .mc-acc-header,
 html body.productdetails #content_area .mc-pdp-accordion .mc-acc-header,
 html body.mc-product-page #content_area .mc-pdp-accordion .mc-acc-content,
 html body.productdetails #content_area .mc-pdp-accordion .mc-acc-content {
-  font-weight: 600 !important;
+  font-weight: 400 !important;
 font-size: 13px;
 }
 
