@@ -12975,7 +12975,7 @@ body,
 body * {
 
   font-weight: 400;
-  color: #fbfbfb !important;
+  color: #444 !important;
   font-family: Inter, Arial, sans-serif !important;
   font-size: 18px !important;
 }
