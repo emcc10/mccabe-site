@@ -157,12 +157,12 @@ export async function getSwatchTargetColor(swatchPath) {
   const darkG = avg(darkSlice.map((s) => s.g));
   const darkB = avg(darkSlice.map((s) => s.b));
 
-  const r = Math.round(midR * 0.4 + darkR * 0.6);
-  const g = Math.round(midG * 0.4 + darkG * 0.6);
-  const b = Math.round(midB * 0.4 + darkB * 0.6);
+  const r = Math.round(midR * 0.45 + darkR * 0.55);
+  const g = Math.round(midG * 0.45 + darkG * 0.55);
+  const b = Math.round(midB * 0.45 + darkB * 0.55);
 
   const tl = rgbToLab(r, g, b);
-  const [dr, dg, db] = labToRgb(tl.L - 4, tl.a, tl.b);
+  const [dr, dg, db] = labToRgb(tl.L - 2.5, tl.a, tl.b);
   return { r: dr, g: dg, b: db };
 }
 
@@ -339,11 +339,24 @@ export function recolorSofa(baseImage, mask, sourceColor, targetColor, sofaBound
 
       const s = colorShiftStrength(lab.L, y, sofaBounds);
       const midW = clamp((lab.L - 28) / 55, 0, 1);
-      const newL = lab.L + deltaL * 0.18 * s * midW;
-      const shifted = labToRgb(newL, lab.a + deltaA * s, lab.b + deltaB * s);
+      const newL = lab.L + deltaL * 0.14 * s * midW;
+      const chromaFade = clamp(lab.L / 36, 0, 1);
+      const shifted = labToRgb(
+        newL,
+        lab.a + deltaA * s * chromaFade,
+        lab.b + deltaB * s * chromaFade,
+      );
 
       let keepOrig = 0;
-      if (lab.L < 32) keepOrig = ((32 - lab.L) / 32) * 0.55;
+      if (lab.L < 34) keepOrig = ((34 - lab.L) / 34) * 0.5;
+      if (sofaBounds) {
+        const yBack0 = sofaBounds.minY + sofaBounds.height * 0.2;
+        const yBack1 = sofaBounds.minY + sofaBounds.height * 0.55;
+        if (y >= yBack0 && y <= yBack1 && lab.L < 46) {
+          const t = (y - yBack0) / Math.max(1, yBack1 - yBack0);
+          if (t > 0.45) keepOrig = Math.max(keepOrig, (t - 0.45) * 0.9);
+        }
+      }
       const nR = shifted[0] * (1 - keepOrig) + oR * keepOrig;
       const nG = shifted[1] * (1 - keepOrig) + oG * keepOrig;
       const nB = shifted[2] * (1 - keepOrig) + oB * keepOrig;
