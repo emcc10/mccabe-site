@@ -22,6 +22,9 @@ build/
 __pycache__/
 *.pyc
 
+# Sofa recolor tool — generated previews (keep out of SCM; avoids UI freeze on big PNGs)
+sofa-recolor-tool/output/
+
 # Local manufacturer PDFs for diagram export tool (see tools/sectional-diagrams/)
 tools/sectional-diagrams/pdfs/*.pdf
 tools/sectional-diagrams/thumbs/

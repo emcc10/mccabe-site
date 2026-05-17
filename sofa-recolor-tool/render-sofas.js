@@ -127,7 +127,7 @@ function isProtectedShadowOrGray(r, g, b) {
 
   const maxDiff = Math.max(Math.abs(r - g), Math.abs(r - b), Math.abs(g - b));
   if (maxDiff < 26 && bright > 28 && bright < 225) return true;
-  if (b > r + 2 && bright < 200) return true;
+  if (b >= r && bright < 200) return true;
 
   const { a, b: lb } = rgbToLab(r, g, b);
   if (Math.hypot(a, lb) < 14 && bright > 32 && bright < 210) return true;
@@ -137,7 +137,11 @@ function isProtectedShadowOrGray(r, g, b) {
 function isUpholsteryLeather(r, g, b) {
   if (isNearWhite(r, g, b)) return false;
   if (isProtectedShadowOrGray(r, g, b)) return false;
-  return isWarmLeather(r, g, b);
+  const hsl = rgbToHsl(r, g, b);
+  if (hsl.s < 0.12) return false;
+  const lum = pixelBrightness(r, g, b);
+  if (lum > 218 && hsl.s < 0.22) return false;
+  return true;
 }
 
 function labToRgb(L, a, b) {
@@ -174,17 +178,17 @@ export async function loadImage(path) {
   };
 }
 
-export async function saveImage(data, path, width, height, blurSigma = 0.3) {
+export async function saveImage(data, path, width, height) {
   mkdirSync(dirname(path), { recursive: true });
-  let pipeline = sharp(data, {
+  await sharp(data, {
     raw: { width, height, channels: 4 },
-  });
-  if (blurSigma >= 0.3) pipeline = pipeline.blur(blurSigma);
-  await pipeline.png().toFile(path);
+  })
+    .png()
+    .toFile(path);
 }
 
 /**
- * Center 50% crop → targetColor = medianRGB*0.75 + averageRGB*0.25
+ * Center 50% crop; face-tone Lab median (keeps depth when mapped from cognac sofa).
  */
 export async function getSwatchTargetColor(swatchPath) {
   const { data, width, height, channels } = await loadImage(swatchPath);
@@ -193,9 +197,7 @@ export async function getSwatchTargetColor(swatchPath) {
   const x1 = Math.ceil(width * 0.75);
   const y1 = Math.ceil(height * 0.75);
 
-  const rs = [];
-  const gs = [];
-  const bs = [];
+  const samples = [];
 
   for (let y = y0; y < y1; y++) {
     for (let x = x0; x < x1; x++) {
@@ -206,61 +208,33 @@ export async function getSwatchTargetColor(swatchPath) {
       const a = channels === 4 ? data[i + 3] : 255;
       if (a < 20) continue;
       if (isNearWhite(r, g, b)) continue;
-      rs.push(r);
-      gs.push(g);
-      bs.push(b);
+      samples.push(rgbToLab(r, g, b));
     }
   }
 
-  if (!rs.length) {
+  if (!samples.length) {
     throw new Error(`No usable swatch pixels in center crop: ${swatchPath}`);
   }
 
-  const avg = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
+  const byL = [...samples].sort((a, b) => a.L - b.L);
+  const p30 = byL[Math.floor(byL.length * 0.3)].L;
+  const p70 = byL[Math.floor(byL.length * 0.7)].L;
+  const face = samples.filter((s) => s.L >= p30 && s.L <= p70);
+  const use = face.length > 20 ? face : samples;
 
-  return {
-    r: Math.round(medianOf(rs) * 0.75 + avg(rs) * 0.25),
-    g: Math.round(medianOf(gs) * 0.75 + avg(gs) * 0.25),
-    b: Math.round(medianOf(bs) * 0.75 + avg(bs) * 0.25),
-  };
+  const [r, g, b] = labToRgb(
+    medianOf(use.map((s) => s.L)),
+    medianOf(use.map((s) => s.a)),
+    medianOf(use.map((s) => s.b)),
+  );
+  return { r, g, b };
 }
 
-/** Optional 5% grain from swatch center (color only). */
-export async function sampleSwatchGrain(swatchPath) {
-  const { data, width, height, channels } = await loadImage(swatchPath);
-  const x0 = Math.floor(width * 0.35);
-  const y0 = Math.floor(height * 0.35);
-  const x1 = Math.ceil(width * 0.65);
-  const y1 = Math.ceil(height * 0.65);
-  const grains = [];
-  for (let y = y0; y < y1; y += 2) {
-    for (let x = x0; x < x1; x += 2) {
-      const i = (y * width + x) * channels;
-      grains.push([data[i], data[i + 1], data[i + 2]]);
-    }
-  }
-  return grains.length ? grains : [[68, 30, 29]];
+function labShiftStrength(labL) {
+  if (labL >= 16) return 1;
+  return clamp((labL - 5) / 11, 0, 1);
 }
 
-function applySoftFinish(out, mask, width, height, channels) {
-  for (let j = 0, p = 0; j < width * height; j++, p += channels) {
-    if (mask[j] < 128) continue;
-    const r = out[p];
-    const g = out[p + 1];
-    const b = out[p + 2];
-    if (isNearWhite(r, g, b) || isProtectedShadowOrGray(r, g, b)) continue;
-
-    let nr = (r - 128) * 0.97 + 128;
-    let ng = (g - 128) * 0.97 + 128;
-    let nb = (b - 128) * 0.97 + 128;
-
-    const hsl = rgbToHsl(nr, ng, nb);
-    const [sr, sg, sb] = hslToRgb(hsl.h, clamp(hsl.s * 1.03, 0, 1), hsl.l);
-    out[p] = sr;
-    out[p + 1] = sg;
-    out[p + 2] = sb;
-  }
-}
 
 /**
  * Cognac / base leather color from midtone upholstery on the sofa photo.
@@ -394,32 +368,29 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * Luminance shading + soft leather blend (Bali Currant / oxblood spec).
+ * Lab anchor from cognac → swatch (preserves folds/highlights). Floor shadow untouched.
  */
 export function recolorSofa(
   baseImage,
   mask,
-  _sourceColor,
+  sourceColor,
   targetColor,
-  _leatherBottomY = null,
-  sofaBounds = null,
-  grainColors = null,
+  leatherBottomY = null,
+  _sofaBounds = null,
 ) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
-  const { r: tR, g: tG, b: tB } = targetColor;
 
-  const yBack0 = sofaBounds
-    ? sofaBounds.minY + sofaBounds.height * 0.2
-    : 0;
-  const yBack1 = sofaBounds
-    ? sofaBounds.minY + sofaBounds.height * 0.55
-    : height;
+  const srcLab = rgbToLab(sourceColor.r, sourceColor.g, sourceColor.b);
+  const tgtLab = rgbToLab(targetColor.r, targetColor.g, targetColor.b);
+  const yCut =
+    leatherBottomY == null ? height - 1 : Math.min(height - 1, leatherBottomY);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const j = y * width + x;
       if (mask[j] < 128) continue;
+      if (y > yCut) continue;
 
       const p = j * channels;
       const oR = data[p];
@@ -429,38 +400,26 @@ export function recolorSofa(
 
       if (!isUpholsteryLeather(oR, oG, oB)) continue;
 
-      const lum = pixelBrightness(oR, oG, oB);
-      let shade = lum / 128;
-      shade = clamp(shade, 0.58, 1.28);
+      const lab = rgbToLab(oR, oG, oB);
+      const s = labShiftStrength(lab.L);
 
-      if (y >= yBack0 && y <= yBack1 && shade < 0.84) {
-        shade = shade * 0.72 + 0.84 * 0.28;
-      }
+      const fullL = tgtLab.L + (lab.L - srcLab.L);
+      const fullA = tgtLab.a + (lab.a - srcLab.a);
+      const fullB = tgtLab.b + (lab.b - srcLab.b);
 
-      let nR = tR * shade;
-      let nG = tG * shade;
-      let nB = tB * shade;
+      const newL = lab.L + (fullL - lab.L) * s;
+      const newA = lab.a + (fullA - lab.a) * s;
+      const newB = lab.b + (fullB - lab.b) * s;
 
-      if (grainColors?.length) {
-        const [gR, gG, gB] = grainColors[(x * 17 + y * 31) % grainColors.length];
-        const grainAmt = 0.05;
-        nR = nR * (1 - grainAmt) + gR * grainAmt;
-        nG = nG * (1 - grainAmt) + gG * grainAmt;
-        nB = nB * (1 - grainAmt) + gB * grainAmt;
-      }
+      const [nR, nG, nB] = labToRgb(newL, newA, newB);
 
-      nR = nR * 0.82 + oR * 0.18;
-      nG = nG * 0.82 + oG * 0.18;
-      nB = nB * 0.82 + oB * 0.18;
-
-      out[p] = Math.round(clamp(nR, 0, 255));
-      out[p + 1] = Math.round(clamp(nG, 0, 255));
-      out[p + 2] = Math.round(clamp(nB, 0, 255));
+      out[p] = nR;
+      out[p + 1] = nG;
+      out[p + 2] = nB;
       if (channels === 4) out[p + 3] = oA;
     }
   }
 
-  applySoftFinish(out, mask, width, height, channels);
   return out;
 }
 
@@ -473,7 +432,6 @@ export async function processSwatch(
   sofaBounds,
 ) {
   const targetColor = await getSwatchTargetColor(swatchPath);
-  const grainColors = await sampleSwatchGrain(swatchPath);
   const outData = recolorSofa(
     baseSofa,
     mask,
@@ -481,14 +439,13 @@ export async function processSwatch(
     targetColor,
     leatherBottomY,
     sofaBounds,
-    grainColors,
   );
   const outName = `${basename(swatchPath, extname(swatchPath))}.png`;
   const outPath = join(OUTPUT_DIR, outName);
-  await saveImage(outData, outPath, baseSofa.width, baseSofa.height, 0.3);
+  await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: oxblood-luminance-spec\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
+  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: lab-anchor-v4\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   writeFileSync(stampPath, stamp);
 
