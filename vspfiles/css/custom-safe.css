@@ -1,4 +1,4 @@
-/* 0518 C_CSS_DEPLOY_VERIFY_20260518live — tail wins; Store-dot may omit #v65-product-parent */
+/* 0518 C_CSS_DEPLOY_VERIFY_20260518js — tail wins; Store-dot may omit #v65-product-parent */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -13902,6 +13902,66 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img > img
     height: var(--mc-plp-stage-h, 172px) !important;
     max-height: var(--mc-plp-stage-h, 172px) !important;
   }
+}
+
+/* Site-wide: hide homepage hero shell on every non-home URL (baked template leaves #if_homepage in HTML) */
+html:not(.mc-allow-home-hero) #if_homepage,
+html:not(.mc-allow-home-hero) #slideshow-container,
+html:not(.mc-allow-home-hero) #slideshow-container .mc-hero-video,
+body:not(.is-home) #if_homepage,
+body:not(.is-home) #slideshow-container,
+body:not(.is-home) #slideshow-container .mc-hero-video,
+body:not(.is-home) .mc-hero-video {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+/* PLP thumbs without html.category (Volusion baked template omits class until JS runs) */
+body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img,
+body:not(.productdetails) #content_area .v-product-grid a.v-product__img,
+html.is-category-or-listing-page #content_area ul.v-product-grid > li.v-product > a.v-product__img,
+html.is-category-or-listing-page .v-product-grid a.v-product__img {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: var(--mc-plp-tile-h, 280px) !important;
+  min-height: var(--mc-plp-tile-h, 280px) !important;
+  max-height: var(--mc-plp-tile-h, 280px) !important;
+  margin: 0 !important;
+  padding: var(--mc-plp-mat-pad, 14px) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  background: var(--mc-plp-mat-bg, #f2f2f2) !important;
+  line-height: 0 !important;
+}
+
+body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img > img,
+body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img,
+html.is-category-or-listing-page #content_area ul.v-product-grid > li.v-product > a.v-product__img > img,
+html.is-category-or-listing-page .v-product-grid a.v-product__img > img {
+  width: 100% !important;
+  height: var(--mc-plp-stage-h, 220px) !important;
+  max-width: 100% !important;
+  max-height: var(--mc-plp-stage-h, 220px) !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  margin: 0 auto !important;
+  border: 0 !important;
+  border-width: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
 }
 
 /* C_BAKED_TEMPLATE_OVERRIDE_20260518live — live pages use Volusion-compiled template (not SFTP file); mcCssBust loads this file */

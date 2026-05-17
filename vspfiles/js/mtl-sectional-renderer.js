@@ -2,6 +2,15 @@
  * Sectional PDP: configuration diagrams, native select sync, product summary.
  * Diagnostics: window.MTL_RENDERER_BUILD (see console on load).
  */
+/* MC_SITE_FIX_BOOT_20260518b — PLP gray mats + site-wide hero/logo (baked Volusion template) */
+(function (w, d) {
+  if (w.__MC_SITE_FIX_BOOT__) return;
+  w.__MC_SITE_FIX_BOOT__ = 1;
+  var s = d.createElement("script");
+  s.src = "/v/vspfiles/js/mc-site-fix.js?v=20260518b";
+  s.async = false;
+  (d.head || d.documentElement).appendChild(s);
+})(window, document);
 (function () {
   "use strict";
 
