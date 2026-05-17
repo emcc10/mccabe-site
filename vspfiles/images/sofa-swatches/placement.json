@@ -1,0 +1,60 @@
+{
+  "productWidthPx": 800,
+  "referenceSofaWidthPx": 671,
+  "files": {
+    "bali-silk": {
+      "width": 800,
+      "height": 433,
+      "inRoomPreview": "bali-silk.jpg"
+    },
+    "evoque-mist": {
+      "width": 800,
+      "height": 421,
+      "inRoomPreview": "evoque-mist.jpg"
+    },
+    "evoque-ardesia": {
+      "width": 800,
+      "height": 432,
+      "inRoomPreview": "evoque-ardesia.jpg"
+    },
+    "evoque-frost": {
+      "width": 800,
+      "height": 400,
+      "inRoomPreview": "evoque-frost.jpg"
+    },
+    "evoque-atlantic": {
+      "width": 800,
+      "height": 396,
+      "inRoomPreview": "evoque-atlantic.jpg"
+    },
+    "bali-spider": {
+      "width": 800,
+      "height": 395,
+      "inRoomPreview": "bali-spider.jpg"
+    },
+    "bali-currant": {
+      "width": 800,
+      "height": 401,
+      "inRoomPreview": "bali-currant.jpg"
+    },
+    "bali-marble": {
+      "width": 800,
+      "height": 396,
+      "inRoomPreview": "bali-marble.jpg"
+    },
+    "bali-harvest": {
+      "width": 800,
+      "height": 393,
+      "inRoomPreview": "bali-harvest.jpg"
+    }
+  },
+  "room": {
+    "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\vspfiles\\images\\lifestyle\\timeless-traditional-room.png",
+    "room_width": 1024,
+    "room_height": 682,
+    "sofa_width": 491,
+    "x": 266,
+    "y": 491,
+    "widthRatio": 0.48
+  }
+}
