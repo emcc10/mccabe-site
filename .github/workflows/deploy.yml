@@ -31,51 +31,89 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
 
       - name: Deploy template and JS to Volusion
-        run: |
-          set -euo pipefail
-          echo "Uploading template to /template_266.html..."
-          echo "Uploading template to /v/template_266.html..."
-          echo "Uploading sectional-configs.js..."
-          echo "Uploading mtl-sectional-renderer.js..."
-
-          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222 <<'EOF'
-          set sftp:auto-confirm yes
-          set net:max-retries 3
-          set net:timeout 30
-          set xfer:clobber yes
-          set sftp:connect-program "ssh -a -x -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no"
-
-          put template_266.html -o /template_266.html
-          put template_266.html -o /v/template_266.html
-          put vspfiles/js/sectional-configs.js -o /vspfiles/js/sectional-configs.js
-          put vspfiles/js/mtl-sectional-renderer.js -o /vspfiles/js/mtl-sectional-renderer.js
-          bye
-          EOF
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          run_lftp() {
+            local batch="$1"
+            lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "sftp://${FTP_SERVER}:2222" 2>&1 <<EOF
+          set sftp:auto-confirm yes
+          set net:max-retries 2
+          set net:timeout 120
+          set xfer:clobber yes
+          set xfer:use-temp-file yes
+          set sftp:connect-program "ssh -a -x -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no"
+          ${batch}
+          bye
+          EOF
+          }
+
+          # Volusion on Windows often returns 550 while a JS file is served. Retry with temp + mv.
+          retry_put() {
+            local local_path="$1"
+            local remote_path="$2"
+            local label="$3"
+            local attempt out rc tmp_remote cmd
+
+            for attempt in $(seq 1 8); do
+              echo "=== [$label] upload attempt ${attempt}/8 ==="
+              tmp_remote="${remote_path}.deploy-${GITHUB_RUN_ID}"
+
+              if [[ "$attempt" -le 4 ]]; then
+                cmd="put ${local_path} -o ${tmp_remote}; mv -f ${tmp_remote} ${remote_path}"
+              else
+                cmd="put ${local_path} -o ${remote_path}"
+              fi
+
+              set +e
+              out=$(run_lftp "${cmd}")
+              rc=$?
+              set -e
+              echo "$out"
+
+              if [[ "$rc" -eq 0 ]] && ! echo "$out" | grep -qiE 'Access failed|550 '; then
+                echo "=== [$label] uploaded successfully ==="
+                return 0
+              fi
+
+              echo "[$label] locked or failed (exit ${rc}); waiting before retry..."
+              sleep $((attempt * 12))
+            done
+
+            echo "::error::[$label] still locked after 8 attempts — live site may be serving these JS files."
+            return 1
+          }
+
+          echo "Uploading template to /template_266.html and /v/template_266.html..."
+          run_lftp "put template_266.html -o /template_266.html; put template_266.html -o /v/template_266.html"
+
+          retry_put "vspfiles/js/sectional-configs.js" "/vspfiles/js/sectional-configs.js" "sectional-configs.js"
+          retry_put "vspfiles/js/mtl-sectional-renderer.js" "/vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer.js"
 
       - name: Deploy custom-safe.css (best effort)
         continue-on-error: true
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           set -euo pipefail
           echo "Uploading custom-safe.css..."
 
           lftp -u "$FTP_USERNAME","$FTP_PASSWORD" sftp://"$FTP_SERVER":2222 <<'EOF'
           set sftp:auto-confirm yes
-          set net:max-retries 3
-          set net:timeout 30
+          set net:max-retries 2
+          set net:timeout 120
           set xfer:clobber yes
+          set xfer:use-temp-file yes
           set sftp:connect-program "ssh -a -x -p 2222 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no"
-
           put vspfiles/css/custom-safe.css -o /vspfiles/css/custom-safe.css
           bye
           EOF
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
 
       - name: Print deploy marker
         run: |
