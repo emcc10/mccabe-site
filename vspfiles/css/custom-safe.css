@@ -13857,12 +13857,14 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img > img
     padding: var(--mc-plp-mat-pad, 12px) !important;
   }
 
+  html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img > img,
+  html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img > img,
   :is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product > a.v-product__img > img,
   :is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product a.v-product__img > img,
   :is(html.category, body.category) .v-product-grid .v-product > a.v-product__img > img,
   :is(html.category, body.category) .v-product-grid .v-product a.v-product__img > img,
-  html.category body.category .v-product-grid a.mc-plp-thumb-mat > img,
-  html.category body.category a.v-product__img.mc-plp-thumb-mat > img {
+  :is(html.category, body.category) .v-product-grid a.mc-plp-thumb-mat > img,
+  :is(html.category, body.category) a.v-product__img.mc-plp-thumb-mat > img {
     height: var(--mc-plp-stage-h, 172px) !important;
     max-height: var(--mc-plp-stage-h, 172px) !important;
   }
