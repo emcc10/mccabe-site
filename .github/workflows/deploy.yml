@@ -43,10 +43,12 @@ jobs:
       - name: Print deploy marker
         run: |
           echo "Deploy completed at $(date -u)"
-          echo "Verify: https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?bust=1"
-          echo "  must contain MC_PLP_ENFORCER_20260518d"
-          echo "Verify: https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?bust=1"
-          echo "  line 1 must contain C_CSS_DEPLOY_VERIFY_20260518d"
+          echo "Verify design-toolkit (PLP enforcer inlined):"
+          echo "  https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js"
+          echo "  must contain MC_DTK_PLP_20260519"
+          echo "Verify enforcer (no ?bust=1 — that URL is a stale CF cache bucket):"
+          echo "  https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js"
           echo "Then hard-refresh https://www.mccabestheaterandliving.com/-s/177.htm"
-          echo "If still broken, Cloudflare Purge by URL:"
+          echo "Optional CF purge (frozen query strings on baked HTML):"
           echo "  /v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-leather-idempotent-v20"
+          echo "  /v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260516sectional-diagram-ux"

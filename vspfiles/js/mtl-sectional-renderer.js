@@ -4428,8 +4428,6 @@
   if (w.__MC_PLP_ENFORCER_LOADING__) return;
   w.__MC_PLP_ENFORCER_LOADING__ = 1;
   var s = d.createElement("script");
-  s.src =
-    "/v/vspfiles/js/mc-plp-enforcer.js?v=20260518e&m=" +
-    Date.now();
+  s.src = "/v/vspfiles/js/mc-plp-enforcer.js?m=" + Date.now();
   (d.head || d.documentElement).appendChild(s);
 })(window, document);

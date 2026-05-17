@@ -1,6 +1,6 @@
 /**
  * PLP gray mats + site-wide hero/logo — beats baked template inline CSS (~line 16308).
- * MC_PLP_ENFORCER_20260518e
+ * MC_PLP_ENFORCER_20260519
  */
 (function (global) {
   "use strict";
