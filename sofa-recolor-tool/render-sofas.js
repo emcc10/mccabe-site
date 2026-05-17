@@ -35,11 +35,17 @@ function isNearWhite(r, g, b) {
   return r > BG_THRESH && g > BG_THRESH && b > BG_THRESH;
 }
 
-/** Anti-aliased edge pixels between leather and white background. */
-function isEdgeFringe(r, g, b) {
+/** Near-white background fringe — leave unchanged. */
+function isBackgroundFringe(r, g, b) {
   const bright = pixelBrightness(r, g, b);
   const maxDiff = Math.max(Math.abs(r - g), Math.abs(r - b), Math.abs(g - b));
-  return bright > 198 && maxDiff < 38;
+  return bright > 215 && maxDiff < 28;
+}
+
+/** Cognac/orange anti-alias at leather edges — must recolor fully, not skip. */
+function isWarmEdgePixel(r, g, b) {
+  const bright = pixelBrightness(r, g, b);
+  return bright > 150 && r > g + 6 && g > b;
 }
 
 function medianOf(arr) {
@@ -209,8 +215,12 @@ export async function getSwatchTargetColor(swatchPath) {
   const medL = medianOf(use.map((s) => s.L));
   const medA = medianOf(use.map((s) => s.a));
   const medB = medianOf(use.map((s) => s.b));
-  const [r, g, b] = labToRgb(medL, medA + 5, medB - 1.5);
-  return { r, g, b };
+  const [r, g, b] = labToRgb(medL, medA + 2, medB + 1);
+  return {
+    r,
+    g: Math.round(g * 0.88),
+    b: Math.max(0, Math.round(b * 0.95)),
+  };
 }
 
 function buildLocalContrast(data, width, height, channels, mask) {
@@ -239,23 +249,12 @@ function buildLocalContrast(data, width, height, channels, mask) {
   return contrast;
 }
 
-/** Fade color shift in creases, piping, and back-cushion lower edge. */
-function colorShiftStrength(lab, y, contrast, sofaBounds) {
+/** Fade color shift only in deep shadows and high-contrast detail (piping/seams). */
+function colorShiftStrength(lab, contrast) {
   let s = clamp((lab.L - 10) / 34, 0, 1);
 
-  if (contrast > 22) {
-    s *= 1 - clamp((contrast - 22) / 36, 0, 0.82);
-  }
-
-  if (sofaBounds) {
-    const y0 = sofaBounds.minY + sofaBounds.height * 0.18;
-    const y1 = sofaBounds.minY + sofaBounds.height * 0.52;
-    if (y >= y0 && y <= y1) {
-      const t = (y - y0) / Math.max(1, y1 - y0);
-      if (t > 0.38 && lab.L < 52) {
-        s *= 1 - (t - 0.38) * 0.72;
-      }
-    }
+  if (contrast > 24) {
+    s *= 1 - clamp((contrast - 24) / 38, 0, 0.75);
   }
 
   return clamp(s, 0, 1);
@@ -446,16 +445,21 @@ export function recolorSofa(
       const oA = channels === 4 ? data[p + 3] : 255;
 
       if (isNearWhite(oR, oG, oB)) continue;
-      if (isEdgeFringe(oR, oG, oB)) continue;
+      if (isBackgroundFringe(oR, oG, oB)) continue;
       if (isFloorShadowPixel(oR, oG, oB)) continue;
       if (pixelBrightness(oR, oG, oB) < FOOT_BRIGHTNESS) continue;
 
       const lab = rgbToLab(oR, oG, oB);
-      const s = colorShiftStrength(lab, y, contrast[j], sofaBounds);
+      let s = colorShiftStrength(lab, contrast[j]);
+      if (isWarmEdgePixel(oR, oG, oB)) s = 1;
 
       const fullL = tgtLab.L + (lab.L - srcLab.L);
-      const fullA = tgtLab.a + (lab.a - srcLab.a);
-      const fullB = tgtLab.b + (lab.b - srcLab.b);
+      let fullA = tgtLab.a + (lab.a - srcLab.a);
+      let fullB = tgtLab.b + (lab.b - srcLab.b);
+      if (lab.L > 50) {
+        fullB -= (tgtLab.b - srcLab.b) * 0.4;
+        fullA -= (tgtLab.a - srcLab.a) * 0.08;
+      }
 
       const newL = lab.L + (fullL - lab.L) * s;
       const newA = lab.a + (fullA - lab.a) * s;
