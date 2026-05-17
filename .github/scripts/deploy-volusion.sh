@@ -54,7 +54,8 @@ retry_put() {
 }
 
 echo "Uploading template to /template_266.html and /v/template_266.html..."
-run_lftp "put template_266.html -o /template_266.html; put template_266.html -o /v/template_266.html"
+retry_put "template_266.html" "/template_266.html" "template_266.html"
+retry_put "template_266.html" "/v/template_266.html" "template_266-v"
 
 retry_put "vspfiles/js/sectional-configs.js" "/vspfiles/js/sectional-configs.js" "sectional-configs.js"
 retry_put "vspfiles/js/mtl-sectional-renderer.js" "/vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer.js"
@@ -62,5 +63,26 @@ retry_put "vspfiles/js/mtl-sectional-renderer.js" "/vspfiles/js/mtl-sectional-re
 echo "Uploading custom-safe.css..."
 retry_put "vspfiles/css/custom-safe.css" "/vspfiles/css/custom-safe.css" "custom-safe.css"
 
-echo "Uploading mccabe-overrides.css (last stylesheet on PLP)..."
+echo "Uploading mc-live-patch.css (new file — bypasses Cloudflare cache on custom-safe.css)..."
+retry_put "vspfiles/css/mc-live-patch.css" "/vspfiles/css/mc-live-patch.css" "mc-live-patch.css"
+
+echo "Uploading mccabe-overrides.css..."
 retry_put "vspfiles/templates/266/css/mccabe-overrides.css" "/vspfiles/templates/266/css/mccabe-overrides.css" "mccabe-overrides.css"
+
+echo "=== Post-deploy verify (origin via Cloudflare) ==="
+verify_url() {
+  local url="$1"
+  local needle="$2"
+  local line
+  line=$(curl -fsSL "$url" -H "Cache-Control: no-cache" -H "Pragma: no-cache" 2>/dev/null | head -n 1 || true)
+  echo "  $url"
+  echo "  -> ${line:-[fetch failed]}"
+  if [[ -n "$line" && "$line" == *"$needle"* ]]; then
+    echo "  OK: found $needle"
+  else
+    echo "  WARN: expected $needle (Cloudflare may still serve old cache — purge CDN or wait)"
+  fi
+}
+
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/mc-live-patch.css?v=20260518" "MC_LIVE_PATCH_DEPLOY_20260518"
+verify_url "https://www.mccabestheaterandliving.com/-s/177.htm" "MC_LIVE_PATCH_20260518"

@@ -4,6 +4,49 @@
 <!--[if lte IE 9]><html class="no-js lt-ie10 mc-member-plp-price-pending" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" ><![endif]-->
 <!--[if gt IE 9]><!--><html class="no-js mc-member-plp-price-pending" lang="en" data-category-scroll="true" data-product-reviews="true" data-enable-vol-cart="true" data-mc-search-fix="*DEPLOYTEST20260401q"><!--<![endif]-->
 <head>
+<!-- MC_LIVE_PATCH_20260518 — search View Source for this after deploy -->
+<script>
+(function () {
+  try {
+    var p = String(location.pathname || "").toLowerCase();
+    var h = document.documentElement;
+    if (/-s\//.test(p) && /\.html?/i.test(p)) {
+      if (h) {
+        h.setAttribute("data-mc-category-plp", "1");
+        h.classList.add("category");
+        h.classList.remove("mc-allow-home-hero");
+      }
+    }
+    function hideLogo() {
+      var el = document.getElementById("display_homepage_title");
+      if (!el) return;
+      el.setAttribute("aria-hidden", "true");
+      el.style.setProperty("display", "none", "important");
+      el.style.setProperty("visibility", "hidden", "important");
+      el.style.setProperty("height", "0", "important");
+      el.style.setProperty("width", "0", "important");
+      el.style.setProperty("overflow", "hidden", "important");
+    }
+    hideLogo();
+    document.addEventListener("DOMContentLoaded", function () {
+      hideLogo();
+      if (/-s\//.test(p) && document.body) {
+        document.body.classList.remove("is-home");
+        document.body.classList.add("category");
+      }
+    });
+  } catch (eLivePatch) {}
+})();
+</script>
+<style id="mc-live-patch-inline">
+header.header #display_homepage_title,header.header #display_homepage_title *,#display_homepage_title,#display_homepage_title *{display:none!important;visibility:hidden!important;height:0!important;width:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important;font-size:0!important}
+header.header .header__section>.col-xs-6.col-sm-8.col-md-9.col-lg-3:first-child{display:none!important;width:0!important;padding:0!important;margin:0!important;overflow:hidden!important}
+html[data-mc-category-plp="1"] #if_homepage,html[data-mc-category-plp="1"] #slideshow-container,html[data-mc-category-plp="1"] #slideshow-container .mc-hero-video,html.category #if_homepage,html.category #slideshow-container,html.category #slideshow-container .mc-hero-video,body.category #if_homepage,body.category #slideshow-container{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;background:transparent!important}
+html[data-mc-category-plp="1"] .v-product-grid .v-product>a.v-product__img,html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,html.category .v-product-grid .v-product>a.v-product__img,html.category .v-product-grid .v-product a.v-product__img{display:flex!important;align-items:flex-end!important;justify-content:center!important;width:100%!important;height:280px!important;min-height:280px!important;max-height:280px!important;margin:0!important;padding:14px!important;overflow:hidden!important;background:#f2f2f2!important;box-sizing:border-box!important}
+html[data-mc-category-plp="1"] .v-product-grid .v-product>a.v-product__img>img,html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img>img,html.category .v-product-grid .v-product>a.v-product__img>img,html.category .v-product-grid .v-product a.v-product__img>img{width:100%!important;height:220px!important;max-width:100%!important;max-height:220px!important;object-fit:contain!important;object-position:center bottom!important;margin:0 auto!important;border:0!important;display:block!important}
+@media (max-width:991px){html[data-mc-category-plp="1"] .v-product-grid .v-product>a.v-product__img,html.category .v-product-grid .v-product>a.v-product__img{height:220px!important;min-height:220px!important;max-height:220px!important;padding:12px!important}html[data-mc-category-plp="1"] .v-product-grid .v-product>a.v-product__img>img,html.category .v-product-grid .v-product>a.v-product__img>img{height:172px!important;max-height:172px!important}}
+</style>
+<link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260518" id="mc-live-patch-css">
 <script>
 (function () {
   function apply() {
@@ -19569,6 +19612,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
 <link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" id="mc-mccabe-overrides-body-last" />
+<link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260518" id="mc-live-patch-last" />
 <script id="mccabe-product-room-planner-price-fix" type="text/plain" data-disabled="true">
 (function () {
 
