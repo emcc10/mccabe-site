@@ -11919,6 +11919,19 @@ html.is-sectional-product #mcLeatherSwatchStrip {
   pointer-events: auto !important;
   position: relative !important;
   z-index: 3 !important;
+  min-height: 48px !important;
+  contain: layout paint !important;
+}
+
+html.is-sectional-product #mcLeatherSwatchStrip > img,
+html.is-sectional-product #mcLeatherSwatchStrip img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
+.mc-acc-content--leather {
+  overflow: visible !important;
 }
 
 /* Sectional mini leather chips (native select–driven); wins over legacy .mc-mini-swatch strip rules. */

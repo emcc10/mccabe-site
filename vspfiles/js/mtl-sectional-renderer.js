@@ -7,6 +7,13 @@
 
   var IMG_V = "sectional-diagrams-github-raw-v3";
 
+  window.MTL_LEATHER_LOCK = window.MTL_LEATHER_LOCK || {
+    nativeSelectPinned: false,
+    swatchesRendered: false,
+    handlersBound: false,
+    observerBound: false,
+  };
+
   /**
    * Diagram PNGs load from GitHub (same files as in-repo vspfiles/sectional-diagrams/).
    * After you push to main, the live site picks up new images without Volusion file uploads.
@@ -66,7 +73,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260516-leather-wm-consolidated-v19";
+  window.MTL_RENDERER_BUILD = "sectional-20260516-leather-idempotent-v20";
 
   /** Template owns native leather `<select>` discovery; prefers __McCabeLeatherCollectImpl so `mcCollectNativeLeatherSelectsForPdp` can’t be swapped by other scripts */
   function mtlGetNativeLeatherCollectFn() {
@@ -479,6 +486,13 @@
   }
 
   function findNativeLeatherSelectEl() {
+    try {
+      if (window.MTL_LEATHER_LOCK && window.MTL_LEATHER_LOCK.nativeSelectPinned) {
+        var earlyPinned = document.querySelector(".mc-native-leather");
+        if (earlyPinned) return earlyPinned;
+      }
+    } catch (eEarlyPin) {}
+
     var configSel = null;
     try {
       configSel = findConfigurationSelect();
@@ -523,6 +537,10 @@
         var pinList = collectFn();
         if (pinList && pinList.indexOf(pinned) !== -1) {
           console.log("[MTL] findNativeLeatherSelectEl: pinned mc-native-leather (collector-backed)");
+          try {
+            window.MTL_LEATHER_LOCK.nativeSelectPinned = true;
+            console.log("[MTL] native leather select pinned once; skipping future re-pin");
+          } catch (ePinOnce) {}
           return pinned;
         }
       } catch (ePx) {}
@@ -744,6 +762,47 @@
     if (typeof window.mcTryInitWmLeather === "function") {
       window.mcTryInitWmLeather();
     }
+    try {
+      window.MTL_LEATHER_LOCK.swatchesRendered = false;
+      window.MTL_LEATHER_LOCK.nativeSelectPinned = false;
+      var stripR = document.getElementById("mcLeatherSwatchStrip");
+      if (stripR && stripR.dataset) delete stripR.dataset.mtlSwatchesRendered;
+    } catch (eLockReset) {}
+  }
+
+  /**
+   * Calls template mcRenderLeatherPreviewStrip once per PDP strip (avoids repeated img GETs / flicker).
+   * Pass force=true after user picks a leather so selection highlighting can refresh without stripping locks first.
+   */
+  function mtlInvokeRenderLeatherPreviewStrip(force) {
+    force = !!force;
+    var strip = document.querySelector("#mcLeatherSwatchStrip");
+    if (!strip) {
+      console.warn("[MTL] swatch render skipped: #mcLeatherSwatchStrip missing");
+      return;
+    }
+    if (
+      !force &&
+      window.MTL_LEATHER_LOCK.swatchesRendered &&
+      strip.children.length > 0
+    ) {
+      return;
+    }
+    if (
+      !force &&
+      strip.dataset.mtlSwatchesRendered === "true" &&
+      strip.children.length > 0
+    ) {
+      window.MTL_LEATHER_LOCK.swatchesRendered = true;
+      return;
+    }
+    if (typeof window.mcRenderLeatherPreviewStrip !== "function") return;
+    window.mcRenderLeatherPreviewStrip();
+    if (strip.children.length > 0) {
+      strip.dataset.mtlSwatchesRendered = "true";
+      window.MTL_LEATHER_LOCK.swatchesRendered = true;
+      console.log("[MTL] leather swatches rendered once:", strip.children.length);
+    }
   }
 
   /** Sectionals use the same theater leather pipeline (initIfReady → __WM_LEATHER_OPTIONS__ → mcRenderLeatherPreviewStrip). */
@@ -751,6 +810,44 @@
     if (!isSectionalProductPageClient()) return;
     ensureSectionalLeatherStripDom();
     syncSectionalLeatherAccordionHost();
+
+    var strip = document.querySelector("#mcLeatherSwatchStrip");
+    if (!strip) {
+      console.warn("[MTL] swatch render skipped: #mcLeatherSwatchStrip missing");
+      return;
+    }
+    if (
+      window.MTL_LEATHER_LOCK.swatchesRendered &&
+      strip.children.length > 0
+    ) {
+      try {
+        __mtlDiag.leatherOpts = document.querySelector(".mc-native-leather") ? "YES" : "NO";
+        __mtlDiag.miniSwatches = "YES";
+        __mtlDiag.leatherModal = document.getElementById("wmOpen") ? "YES" : "NO";
+        mtlRefreshStageTrackerDom();
+      } catch (eDiagEarly) {}
+      if (typeof window.mcSyncLeatherSummary === "function") {
+        window.mcSyncLeatherSummary();
+      }
+      return;
+    }
+    if (
+      strip.dataset.mtlSwatchesRendered === "true" &&
+      strip.children.length > 0
+    ) {
+      window.MTL_LEATHER_LOCK.swatchesRendered = true;
+      try {
+        __mtlDiag.leatherOpts = document.querySelector(".mc-native-leather") ? "YES" : "NO";
+        __mtlDiag.miniSwatches = "YES";
+        __mtlDiag.leatherModal = document.getElementById("wmOpen") ? "YES" : "NO";
+        mtlRefreshStageTrackerDom();
+      } catch (eDiagDs) {}
+      if (typeof window.mcSyncLeatherSummary === "function") {
+        window.mcSyncLeatherSummary();
+      }
+      return;
+    }
+
     var le = findNativeLeatherSelectEl();
     if (le) {
       ensureLeatherOptionsFromNativeSelect(le);
@@ -764,9 +861,7 @@
     if (typeof window.mcHostLeatherStripInsideAccordion === "function") {
       window.mcHostLeatherStripInsideAccordion();
     }
-    if (typeof window.mcRenderLeatherPreviewStrip === "function") {
-      window.mcRenderLeatherPreviewStrip();
-    }
+    mtlInvokeRenderLeatherPreviewStrip(false);
     var stripAfter = document.getElementById("mcLeatherSwatchStrip");
     var nAfter = stripAfter
       ? stripAfter.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length
@@ -778,18 +873,16 @@
       if (typeof window.mcHostLeatherStripInsideAccordion === "function") {
         window.mcHostLeatherStripInsideAccordion();
       }
-      if (typeof window.mcRenderLeatherPreviewStrip === "function") {
-        window.mcRenderLeatherPreviewStrip();
-      }
+      mtlInvokeRenderLeatherPreviewStrip(false);
     }
     if (typeof window.mcSyncLeatherSummary === "function") {
       window.mcSyncLeatherSummary();
     }
     try {
       __mtlDiag.leatherOpts = le ? "YES" : "NO";
-      var strip = document.getElementById("mcLeatherSwatchStrip");
-      var nMini = strip
-        ? strip.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length
+      var stripDiag = document.getElementById("mcLeatherSwatchStrip");
+      var nMini = stripDiag
+        ? stripDiag.querySelectorAll(".mc-leather-mini-swatch, .mc-mini-swatch").length
         : 0;
       __mtlDiag.miniSwatches = nMini > 0 ? "YES" : "NO";
       __mtlDiag.leatherModal = document.getElementById("wmOpen") ? "YES" : "NO";
@@ -822,20 +915,22 @@
     bindSectionalLeatherUiRetries();
     ensureSectionalOptionsTableLeatherObserver();
     ensureSectionalV65LeatherObserver();
+    ensureSectionalAccordionLeatherObserver();
 
     if (typeof window.MTL_promptVolusionCoverOptions === "function") {
       window.MTL_promptVolusionCoverOptions();
     }
     mtlRefreshSectionalLeatherUi();
-    [80, 350, 900, 1800, 3500].forEach(function (ms) {
-      window.setTimeout(mtlRefreshSectionalLeatherUi, ms);
-    });
 
     if (!document.documentElement.dataset.mtlLeatherStripReadyListen) {
       document.documentElement.dataset.mtlLeatherStripReadyListen = "1";
       document.addEventListener(
         "wmLeatherOptionsReady",
         function () {
+          var st = document.querySelector("#mcLeatherSwatchStrip");
+          if (st && st.dataset.mtlSwatchesRendered === "true" && st.children.length > 0) {
+            return;
+          }
           mtlRefreshSectionalLeatherUi();
         },
         false
@@ -850,14 +945,17 @@
     window.__mtlLeatherBootstrapScheduled = true;
 
     bootstrapSectionalLeatherUi();
-    [200, 450, 900, 1500, 2800, 5000, 9000].forEach(function (ms) {
+    if (!document.documentElement.dataset.mtlLeatherBootstrapDeferredOnce) {
+      document.documentElement.dataset.mtlLeatherBootstrapDeferredOnce = "1";
       window.setTimeout(function () {
+        var st = document.querySelector("#mcLeatherSwatchStrip");
+        if (st && st.dataset.mtlSwatchesRendered === "true" && st.children.length > 0) return;
         if (typeof window.MTL_promptVolusionCoverOptions === "function") {
           window.MTL_promptVolusionCoverOptions();
         }
         bootstrapSectionalLeatherUi();
-      }, ms);
-    });
+      }, 1200);
+    }
   }
   window.scheduleSectionalLeatherBootstrap = scheduleSectionalLeatherBootstrap;
   window.mtlRefreshSectionalLeatherUi = mtlRefreshSectionalLeatherUi;
@@ -873,6 +971,14 @@
     if (!root || typeof MutationObserver === "undefined") return;
     var deb = null;
     var obs = new MutationObserver(function () {
+      var stripChk = document.querySelector("#mcLeatherSwatchStrip");
+      if (
+        stripChk &&
+        stripChk.dataset.mtlSwatchesRendered === "true" &&
+        stripChk.children.length > 0
+      ) {
+        return;
+      }
       if (deb) clearTimeout(deb);
       deb = setTimeout(function () {
         deb = null;
@@ -893,6 +999,14 @@
     if (!root || typeof MutationObserver === "undefined") return;
     var deb = null;
     var obs = new MutationObserver(function () {
+      var stripChk = document.querySelector("#mcLeatherSwatchStrip");
+      if (
+        stripChk &&
+        stripChk.dataset.mtlSwatchesRendered === "true" &&
+        stripChk.children.length > 0
+      ) {
+        return;
+      }
       if (deb) clearTimeout(deb);
       deb = setTimeout(function () {
         deb = null;
@@ -902,6 +1016,29 @@
     try {
       obs.observe(root, { childList: true, subtree: true, attributes: true, characterData: true });
     } catch (eV65) {}
+  }
+
+  /** Accordion leather row mount — refresh strip until first successful raster (then observers no-op). */
+  function ensureSectionalAccordionLeatherObserver() {
+    if (!isSectionalProductPageClient()) return;
+    if (window.MTL_LEATHER_LOCK.observerBound) return;
+    var root = document.querySelector("#mc-acc-row-leather");
+    if (!root || typeof MutationObserver === "undefined") return;
+    window.MTL_LEATHER_LOCK.observerBound = true;
+    try {
+      var deb = null;
+      new MutationObserver(function () {
+        var strip = document.querySelector("#mcLeatherSwatchStrip");
+        if (strip && strip.dataset.mtlSwatchesRendered === "true" && strip.children.length > 0) return;
+        if (deb) clearTimeout(deb);
+        deb = setTimeout(function () {
+          deb = null;
+          mtlRefreshSectionalLeatherUi();
+        }, 120);
+      }).observe(root, { childList: true, subtree: true });
+    } catch (eAccMo) {
+      window.MTL_LEATHER_LOCK.observerBound = false;
+    }
   }
 
   function isWmOverlayVisible() {
@@ -1107,7 +1244,7 @@
         if (picked) picked.textContent = lab;
         var ov = document.querySelector(".wm-overlay");
         if (ov) ov.style.display = "none";
-        if (typeof window.mcRenderLeatherPreviewStrip === "function") window.mcRenderLeatherPreviewStrip();
+        if (typeof window.mcRenderLeatherPreviewStrip === "function") mtlInvokeRenderLeatherPreviewStrip(true);
         if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
       };
 
@@ -1580,7 +1717,7 @@
         }
         var lab = String(picked.nameLine||picked.label||"").replace(/\s+/g," ").trim();
         ["wmSummary","mcLeatherSummary","wmPicked"].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=lab; });
-        if (typeof window.mcRenderLeatherPreviewStrip==="function") window.mcRenderLeatherPreviewStrip();
+        if (typeof window.mcRenderLeatherPreviewStrip==="function") mtlInvokeRenderLeatherPreviewStrip(true);
         if (typeof window.mcSyncLeatherSummary==="function") window.mcSyncLeatherSummary();
       }
       closePicker();
@@ -1604,21 +1741,24 @@
 
   function bindViewAllLeathersButtons() {
     if (!isSectionalProductPageClient()) return;
-    var btns = document.querySelectorAll("#mc-acc-row-leather .mc-acc-config-btn");
-    Array.prototype.forEach.call(btns, function (btn) {
-      if (!btn || btn.dataset.mtlViewAllBound === "1") return;
-      btn.dataset.mtlViewAllBound = "1";
-      btn.addEventListener("click", function (ev) {
-        if (ev && ev.preventDefault) ev.preventDefault();
-        if (ev && ev.stopPropagation) ev.stopPropagation();
-        if (ev && ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+    if (window.MTL_LEATHER_LOCK.handlersBound) return;
+    window.MTL_LEATHER_LOCK.handlersBound = true;
+    document.addEventListener(
+      "click",
+      function (ev) {
+        var btn = ev.target && ev.target.closest && ev.target.closest("#mc-acc-row-leather .mc-acc-config-btn");
+        if (!btn) return;
+        if (ev.preventDefault) ev.preventDefault();
+        if (ev.stopPropagation) ev.stopPropagation();
+        if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
         if (typeof window.mcOpenWmLeatherModal === "function") {
           window.mcOpenWmLeatherModal(ev);
         } else if (typeof window.mcOpenWmLeatherOverlay === "function") {
           window.mcOpenWmLeatherOverlay(ev);
         }
-      });
-    });
+      },
+      true
+    );
   }
 
   function patchLeatherModalFallback() {
@@ -2297,9 +2437,6 @@
       "mcWmOpenMounted",
       function () {
         mtlRefreshSectionalLeatherUi();
-        [120, 350, 800].forEach(function (ms) {
-          window.setTimeout(mtlRefreshSectionalLeatherUi, ms);
-        });
       },
       false
     );
@@ -2840,7 +2977,11 @@
     scheduleProductSummaryAfterConfigChange();
     setTimeout(syncCardsSelectionHighlight, 50);
     [120, 400, 900, 1800].forEach(function (ms) {
-      window.setTimeout(mtlRefreshSectionalLeatherUi, ms);
+      window.setTimeout(function () {
+        var st = document.querySelector("#mcLeatherSwatchStrip");
+        if (st && st.dataset.mtlSwatchesRendered === "true" && st.children.length > 0) return;
+        mtlRefreshSectionalLeatherUi();
+      }, ms);
     });
   }
 
@@ -3193,6 +3334,8 @@
 
   function bindSectionalLeatherUiRetries() {
     if (!isSectionalProductPageClient()) return;
+    if (document.documentElement.dataset.mtlSectionalLeatherRetriesInstalled === "1") return;
+    document.documentElement.dataset.mtlSectionalLeatherRetriesInstalled = "1";
     var hdr = document.getElementById("mcLeatherHeader");
     var btn = document.getElementById("mcLeatherBtn");
     var row = document.getElementById("mcLeatherHeaderRow");
@@ -3226,10 +3369,12 @@
         false
       );
     }
-    if (!document.documentElement.dataset.mtlLeatherRetryScheduled) {
-      document.documentElement.dataset.mtlLeatherRetryScheduled = "1";
+    if (!document.documentElement.dataset.mtlMcTryInitLadderScheduled) {
+      document.documentElement.dataset.mtlMcTryInitLadderScheduled = "1";
       [400, 1200, 2500, 5000, 9000].forEach(function (ms) {
         window.setTimeout(function () {
+          var st = document.querySelector("#mcLeatherSwatchStrip");
+          if (st && st.dataset.mtlSwatchesRendered === "true" && st.children.length > 0) return;
           if (typeof window.mcTryInitWmLeather === "function") window.mcTryInitWmLeather();
         }, ms);
       });
@@ -3533,6 +3678,8 @@
         mtlDumpLeatherDiscoveryToConsole("finalize: leather options = NO");
         [800, 2200, 5000].forEach(function (ms) {
           window.setTimeout(function () {
+            var st = document.querySelector("#mcLeatherSwatchStrip");
+            if (st && st.dataset.mtlSwatchesRendered === "true" && st.children.length > 0) return;
             if (__mtlDiag.leatherOpts === "YES") return;
             bootstrapSectionalLeatherUi();
             if (__mtlDiag.leatherOpts !== "YES") {
@@ -3647,14 +3794,11 @@
       console.log("[MTL] mini swatch nodes in #mcLeatherSwatchStrip:", nMini);
       __mtlDiag.miniSwatches = nMini > 0 ? "YES" : "NO";
       mtlRefreshStageTrackerDom();
-      [350, 900, 2200, 5000].forEach(function (ms) {
-        window.setTimeout(mtlRefreshSectionalLeatherUi, ms);
-      });
       leatherSelNow = leatherSelNow || findNativeLeatherSelectEl();
       if (leatherSelNow && leatherSelNow.dataset.mtlMiniStripBound !== "1") {
         leatherSelNow.dataset.mtlMiniStripBound = "1";
         leatherSelNow.addEventListener("change", function () {
-          mtlRefreshSectionalLeatherUi();
+          if (typeof window.mcSyncLeatherSummary === "function") window.mcSyncLeatherSummary();
         });
       }
     });
