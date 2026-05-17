@@ -1,55 +1,146 @@
 {
+  "method": "reference-recolor",
   "productWidthPx": 800,
-  "referenceSofaWidthPx": 671,
+  "colors": {
+    "bali-silk": [
+      187,
+      178,
+      169
+    ],
+    "evoque-mist": [
+      170,
+      170,
+      170
+    ],
+    "evoque-ardesia": [
+      73,
+      66,
+      63
+    ],
+    "evoque-frost": [
+      182,
+      182,
+      182
+    ],
+    "evoque-atlantic": [
+      25,
+      31,
+      41
+    ],
+    "bali-spider": [
+      20,
+      20,
+      20
+    ],
+    "bali-currant": [
+      50,
+      18,
+      17
+    ],
+    "bali-marble": [
+      45,
+      36,
+      27
+    ],
+    "bali-harvest": [
+      110,
+      91,
+      70
+    ]
+  },
   "files": {
     "bali-silk": {
       "width": 800,
       "height": 328,
+      "rgb": [
+        187,
+        178,
+        169
+      ],
       "inRoomPreview": "bali-silk.jpg"
     },
     "evoque-mist": {
       "width": 800,
-      "height": 318,
+      "height": 328,
+      "rgb": [
+        170,
+        170,
+        170
+      ],
       "inRoomPreview": "evoque-mist.jpg"
     },
     "evoque-ardesia": {
       "width": 800,
-      "height": 330,
+      "height": 328,
+      "rgb": [
+        73,
+        66,
+        63
+      ],
       "inRoomPreview": "evoque-ardesia.jpg"
     },
     "evoque-frost": {
       "width": 800,
-      "height": 316,
+      "height": 328,
+      "rgb": [
+        182,
+        182,
+        182
+      ],
       "inRoomPreview": "evoque-frost.jpg"
     },
     "evoque-atlantic": {
       "width": 800,
-      "height": 314,
+      "height": 328,
+      "rgb": [
+        25,
+        31,
+        41
+      ],
       "inRoomPreview": "evoque-atlantic.jpg"
     },
     "bali-spider": {
       "width": 800,
-      "height": 313,
+      "height": 328,
+      "rgb": [
+        20,
+        20,
+        20
+      ],
       "inRoomPreview": "bali-spider.jpg"
     },
     "bali-currant": {
       "width": 800,
-      "height": 323,
+      "height": 328,
+      "rgb": [
+        50,
+        18,
+        17
+      ],
       "inRoomPreview": "bali-currant.jpg"
     },
     "bali-marble": {
       "width": 800,
-      "height": 316,
+      "height": 328,
+      "rgb": [
+        45,
+        36,
+        27
+      ],
       "inRoomPreview": "bali-marble.jpg"
     },
     "bali-harvest": {
       "width": 800,
-      "height": 316,
+      "height": 328,
+      "rgb": [
+        110,
+        91,
+        70
+      ],
       "inRoomPreview": "bali-harvest.jpg"
     }
   },
   "room": {
-    "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\vspfiles\\images\\lifestyle\\timeless-traditional-room.png",
     "room_width": 1024,
     "room_height": 682,
     "sofa_width": 491,
