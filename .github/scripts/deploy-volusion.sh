@@ -20,8 +20,6 @@ bye
 EOF
 }
 
-# Volusion returns 550 while live files are served. Retry direct put only
-# (do not use "mv -f" — server maps mv to mmv, which has no -f flag).
 retry_put() {
   local local_path="$1"
   local remote_path="$2"
@@ -29,7 +27,7 @@ retry_put() {
   local attempt out rc
 
   for attempt in $(seq 1 10); do
-    echo "=== [$label] upload attempt ${attempt}/10 ==="
+    echo "=== [$label] upload attempt ${attempt}/10 → ${remote_path} ==="
 
     set +e
     out=$(run_lftp "put ${local_path} -o ${remote_path}")
@@ -53,21 +51,57 @@ retry_put() {
   return 1
 }
 
-echo "Uploading template to /template_266.html and /v/template_266.html..."
-retry_put "template_266.html" "/template_266.html" "template_266.html"
-retry_put "template_266.html" "/v/template_266.html" "template_266-v"
+retry_put_all() {
+  local local_path="$1"
+  shift
+  local label="$1"
+  shift
+  local remote
+  local ok=0
+  for remote in "$@"; do
+    if retry_put "$local_path" "$remote" "${label}@${remote}"; then
+      ok=1
+    fi
+  done
+  if [[ "$ok" -eq 0 ]]; then
+    return 1
+  fi
+}
+
+echo "=== Force template to all canonical SFTP paths (paramiko) ==="
+export SFTP_HOST="${FTP_SERVER}"
+export SFTP_USER="${FTP_USERNAME}"
+export SFTP_PASS="${FTP_PASSWORD}"
+export SFTP_PORT="2222"
+python3 scripts/volusion_sftp_force_template.py
+
+echo "=== Template retry via lftp (backup paths) ==="
+retry_put_all "template_266.html" "template" \
+  "/template_266.html" \
+  "/v/template_266.html" \
+  "template_266.html" \
+  "v/template_266.html"
 
 retry_put "vspfiles/js/sectional-configs.js" "/vspfiles/js/sectional-configs.js" "sectional-configs.js"
 retry_put "vspfiles/js/mtl-sectional-renderer.js" "/vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer.js"
 
-echo "Uploading custom-safe.css..."
-retry_put "vspfiles/css/custom-safe.css" "/vspfiles/css/custom-safe.css" "custom-safe.css"
+echo "Uploading custom-safe.css (both /v/ and chroot-relative paths)..."
+retry_put_all "vspfiles/css/custom-safe.css" "custom-safe" \
+  "/vspfiles/css/custom-safe.css" \
+  "/v/vspfiles/css/custom-safe.css" \
+  "vspfiles/css/custom-safe.css"
 
-echo "Uploading mc-live-patch.css (new file — bypasses Cloudflare cache on custom-safe.css)..."
-retry_put "vspfiles/css/mc-live-patch.css" "/vspfiles/css/mc-live-patch.css" "mc-live-patch.css"
+echo "Uploading mc-live-patch.css..."
+retry_put_all "vspfiles/css/mc-live-patch.css" "mc-live-patch" \
+  "/vspfiles/css/mc-live-patch.css" \
+  "/v/vspfiles/css/mc-live-patch.css" \
+  "vspfiles/css/mc-live-patch.css"
 
 echo "Uploading mccabe-overrides.css..."
-retry_put "vspfiles/templates/266/css/mccabe-overrides.css" "/vspfiles/templates/266/css/mccabe-overrides.css" "mccabe-overrides.css"
+retry_put_all "vspfiles/templates/266/css/mccabe-overrides.css" "mccabe-overrides" \
+  "/vspfiles/templates/266/css/mccabe-overrides.css" \
+  "/v/vspfiles/templates/266/css/mccabe-overrides.css" \
+  "vspfiles/templates/266/css/mccabe-overrides.css"
 
 echo "=== Post-deploy verify (origin via Cloudflare) ==="
 verify_url() {
@@ -80,9 +114,15 @@ verify_url() {
   if [[ -n "$line" && "$line" == *"$needle"* ]]; then
     echo "  OK: found $needle"
   else
-    echo "  WARN: expected $needle (Cloudflare may still serve old cache — purge CDN or wait)"
+    echo "  WARN: expected $needle (purge Cloudflare cache for /v/vspfiles/* if needed)"
   fi
 }
 
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/mc-live-patch.css?v=20260518" "MC_LIVE_PATCH_DEPLOY_20260518"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css" "C_CSS_DEPLOY_VERIFY_20260518live"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/mc-live-patch.css?v=20260518" "MC_LIVE_PATCH_DEPLOY_20260518live"
 verify_url "https://www.mccabestheaterandliving.com/-s/177.htm" "MC_LIVE_PATCH_20260518"
+
+echo ""
+echo "NOTE: Live HTML pages may still use Volusion's compiled template until you re-publish"
+echo "Design → template_266 in Volusion admin. Category pages load custom-safe.css via mcCssBust();"
+echo "search View Source for C_CSS_DEPLOY_VERIFY_20260518live after hard refresh."
