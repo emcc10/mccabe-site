@@ -8270,11 +8270,11 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   overflow-wrap: break-word !important;
   word-break: normal !important;
   text-align: center !important;
-  font-size: 16px !important;
-  letter-spacing: 0.02em !important;
+  font-size: 17px !important;
+  letter-spacing: 0.14em !important;
   margin-top: 9px !important;
   text-transform: uppercase;
-  font-weight: 300 !important;
+  font-weight: 400 !important;
 }
 .v-product-grid {
   display: flex !important;
