@@ -1051,12 +1051,13 @@ document.addEventListener("DOMContentLoaded", function () {
   html.category body:not(.productdetails):not(.is-home) #content_area .v-product__image,
   html.category body:not(.productdetails):not(.is-home) #content_area .product_image,
   html.category body:not(.productdetails):not(.is-home) #content_area .vcss_img,
-  html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li .v-product__img {
-    background-color: #ffffff !important;
+  html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li .v-product__img,
+  html.category body:not(.productdetails):not(.is-home) #content_area a.v-product__img {
+    background-color: #f2f2f2 !important;
   }
   html.category body:not(.productdetails):not(.is-home) #content_area .v-product__img a,
   html.category body:not(.productdetails):not(.is-home) #content_area .product_image a {
-    background-color: #ffffff !important;
+    background-color: transparent !important;
   }
   </style>
 
@@ -15600,9 +15601,9 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
 }
 /* Category grid: image then title then price; constrain images (template fallback) */
 :is(html.category, body.category) .v-product-grid .v-product{display:flex;flex-direction:column;align-items:stretch;box-sizing:border-box;min-width:100%!important}
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,:is(html.category, body.category) .v-product-grid .v-product .product_image,:is(html.category, body.category) .v-product-grid .v-product .vcss_img{order:1;flex:0 0 auto;width:100%;height:280px;min-height:280px;max-height:280px;overflow:hidden;margin:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;position:relative;background:#fff}
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img a,:is(html.category, body.category) .v-product-grid .v-product .v-product__image a,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap a,:is(html.category, body.category) .v-product-grid .v-product .product_image a,:is(html.category, body.category) .v-product-grid .v-product .vcss_img a{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important}
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,:is(html.category, body.category) .v-product-grid .v-product .product_image img,:is(html.category, body.category) .v-product-grid .v-product .vcss_img img{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:cover!important;object-position:center center!important;display:block!important;margin:0!important}
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,:is(html.category, body.category) .v-product-grid .v-product .product_image,:is(html.category, body.category) .v-product-grid .v-product .vcss_img,:is(html.category, body.category) .v-product-grid .v-product a.v-product__img{order:1;flex:0 0 auto;width:100%;height:280px;min-height:280px;max-height:280px;overflow:hidden;margin:0!important;padding:14px!important;display:flex!important;align-items:flex-end!important;justify-content:center!important;position:relative;background:#f2f2f2!important;box-sizing:border-box!important}
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img a,:is(html.category, body.category) .v-product-grid .v-product .v-product__image a,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap a,:is(html.category, body.category) .v-product-grid .v-product .product_image a,:is(html.category, body.category) .v-product-grid .v-product .vcss_img a{display:flex!important;align-items:flex-end!important;justify-content:center!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;background:transparent!important}
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,:is(html.category, body.category) .v-product-grid .v-product .product_image img,:is(html.category, body.category) .v-product-grid .v-product .vcss_img img,:is(html.category, body.category) .v-product-grid .v-product a.v-product__img>img{width:100%!important;height:220px!important;max-width:100%!important;max-height:220px!important;object-fit:contain!important;object-position:center bottom!important;display:block!important;margin:0 auto!important;border:0!important}
 :is(html.category, body.category) .v-product-grid .v-product .v-product__name,:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,:is(html.category, body.category) .v-product-grid .v-product h2,:is(html.category, body.category) .v-product-grid .v-product h3,:is(html.category, body.category) .v-product-grid .v-product h4{order:2;flex:0 1 auto;line-height:1.25;display:flex;align-items:flex-start;justify-content:flex-start;text-align:left;min-height:0!important;box-sizing:border-box;width:100%;margin-top:4px!important}
 :is(html.category, body.category) .v-product-grid .v-product .productnamecolor a,:is(html.category, body.category) .v-product-grid .v-product .v-product__name a{width:100%;text-align:left!important}
 :is(html.category, body.category) .v-product-grid .v-product .mc-member-grid-price{order:4;min-height:0!important;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;width:100%;text-align:left!important}
@@ -15613,7 +15614,7 @@ body #content_area td:has(.mc-member-grid-price) .product_saleprice {
 :is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] a,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] .vnav__link,:is(html.category, body.category) .sidebar-wrapper [id^="display_menu_"] .vnav__label,:is(html.category, body.category) .sidebar-wrapper .menu a{font-weight:400!important;letter-spacing:.08em!important;text-transform:uppercase!important;font-size:11px!important;color:#1a1a1a!important}
 :is(html.category, body.category) #content_area .vnav--level2,:is(html.category, body.category) #content_area .vnav--level3,:is(html.category, body.category) #content_area .vnav--level2>li,:is(html.category, body.category) #content_area .vnav--level3>li{text-align:left!important}
 :is(html.category, body.category) #content_area .vnav--level2 a,:is(html.category, body.category) #content_area .vnav--level3 a{font-weight:400!important;letter-spacing:.06em!important;text-transform:uppercase!important;font-size:11px!important}
-@media (max-width:991px){:is(html.category, body.category) .v-product-grid .v-product .v-product__img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,:is(html.category, body.category) .v-product-grid .v-product .product_image,:is(html.category, body.category) .v-product-grid .v-product .vcss_img,:is(html.category, body.category) ul.v-product-grid>li.v-product .v-product__img{height:220px!important;min-height:220px!important;max-height:220px!important;overflow:hidden!important;margin:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important}:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,:is(html.category, body.category) .v-product-grid .v-product .product_image img,:is(html.category, body.category) .v-product-grid .v-product .vcss_img img,:is(html.category, body.category) ul.v-product-grid>li.v-product .v-product__img img{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:cover!important;object-position:center center!important;margin:0!important}:is(html.category, body.category) .v-product-grid .v-product .v-product__name,:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,:is(html.category, body.category) .v-product-grid .v-product h2,:is(html.category, body.category) .v-product-grid .v-product h3,:is(html.category, body.category) .v-product-grid .v-product h4{min-height:0!important;align-items:flex-start!important;justify-content:flex-start!important;text-align:left!important;margin-top:3px!important;margin-bottom:0!important;padding-top:0!important}:is(html.category, body.category) .v-product-grid .v-product{gap:0!important;row-gap:0!important}}
+@media (max-width:991px){:is(html.category, body.category) .v-product-grid .v-product .v-product__img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,:is(html.category, body.category) .v-product-grid .v-product .product_image,:is(html.category, body.category) .v-product-grid .v-product .vcss_img,:is(html.category, body.category) ul.v-product-grid>li.v-product .v-product__img,:is(html.category, body.category) .v-product-grid .v-product a.v-product__img{height:220px!important;min-height:220px!important;max-height:220px!important;overflow:hidden!important;margin:0!important;padding:12px!important;display:flex!important;align-items:flex-end!important;justify-content:center!important;background:#f2f2f2!important}:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,:is(html.category, body.category) .v-product-grid .v-product .product_image img,:is(html.category, body.category) .v-product-grid .v-product .vcss_img img,:is(html.category, body.category) ul.v-product-grid>li.v-product .v-product__img img,:is(html.category, body.category) .v-product-grid .v-product a.v-product__img>img{width:100%!important;height:172px!important;max-width:100%!important;max-height:172px!important;object-fit:contain!important;object-position:center bottom!important;margin:0 auto!important;border:0!important}:is(html.category, body.category) .v-product-grid .v-product .v-product__name,:is(html.category, body.category) .v-product-grid .v-product .productnamecolor,:is(html.category, body.category) .v-product-grid .v-product h2,:is(html.category, body.category) .v-product-grid .v-product h3,:is(html.category, body.category) .v-product-grid .v-product h4{min-height:0!important;align-items:flex-start!important;justify-content:flex-start!important;text-align:left!important;margin-top:3px!important;margin-bottom:0!important;padding-top:0!important}:is(html.category, body.category) .v-product-grid .v-product{gap:0!important;row-gap:0!important}}
 
 .mc-pdp-retail-member {
   display: block !important;
@@ -18547,45 +18548,33 @@ window.addEventListener('mcMemberPricingReady', function () {
     max-width: 96vw !important;
   }
 
-  /* 2) Category grid — centered thumbnails in fixed-height tiles */
+  /* 2) Category grid — gray mat + fixed stage (match custom-safe --mc-plp-*) */
   :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
-  :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
-  :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
-  :is(html.category, body.category) .v-product-grid .v-product .product_image,
-  :is(html.category, body.category) .v-product-grid .v-product .vcss_img,
+  :is(html.category, body.category) .v-product-grid .v-product a.v-product__img,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img {
     height: 220px !important;
     min-height: 220px !important;
     max-height: 220px !important;
     overflow: hidden !important;
-    padding: 0 !important;
+    padding: 12px !important;
     margin: 0 !important;
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-end !important;
     justify-content: center !important;
-  }
-  :is(html.category, body.category) .v-product-grid .v-product .v-product__img a,
-  :is(html.category, body.category) .v-product-grid .v-product .product_image a,
-  :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img a {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    height: 100% !important;
+    background: #f2f2f2 !important;
+    box-sizing: border-box !important;
   }
   :is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
-  :is(html.category, body.category) .v-product-grid .v-product .v-product__image img,
-  :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,
-  :is(html.category, body.category) .v-product-grid .v-product .product_image img,
-  :is(html.category, body.category) .v-product-grid .v-product .vcss_img img,
+  :is(html.category, body.category) .v-product-grid .v-product a.v-product__img > img,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img {
     width: 100% !important;
-    height: 100% !important;
+    height: 172px !important;
     max-width: 100% !important;
-    max-height: 100% !important;
-    object-fit: cover !important;
-    object-position: center center !important;
-    margin: 0 !important;
+    max-height: 172px !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+    margin: 0 auto !important;
+    border: 0 !important;
   }
   :is(html.category, body.category) .v-product-grid .v-product .v-product__name,
   :is(html.category, body.category) .v-product-grid .v-product .productnamecolor,
