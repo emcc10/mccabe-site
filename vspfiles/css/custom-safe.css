@@ -8609,15 +8609,6 @@ body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li .v-p
 body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li .product_image,
 body.is-home:not(.productdetails) #content_area .v-product-grid .v-product__img,
 body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-product__img,
-:is(html.category, body.category) #content_area .v-product-grid .v-product__img,
-:is(html.category, body.category) #content_area .v-product-grid .v-product__image,
-:is(html.category, body.category) #content_area .v-product-grid .v-product__image-wrap,
-:is(html.category, body.category) #content_area .v-product-grid .product_image,
-:is(html.category, body.category) #content_area .v-product-grid .vcss_img,
-:is(html.category, body.category) #content_area ul.v-product-grid > li .v-product__img,
-:is(html.category, body.category) #content_area ul.v-product-grid > li .v-product__image,
-:is(html.category, body.category) #content_area ul.v-product-grid > li .product_image,
-html.vol-list.category #content_area ul.v-product-grid > li .v-product__img,
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product .v-product__img,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product .v-product__img {
   background: #ffffff !important;
@@ -8631,8 +8622,6 @@ body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product_
 body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li .v-product__img a,
 body.is-home:not(.productdetails) #content_area .v-product-grid .v-product__img a,
 body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-product__img a,
-:is(html.category, body.category) #content_area .v-product-grid .v-product__img a,
-:is(html.category, body.category) #content_area ul.v-product-grid > li .v-product__img a,
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product .v-product__img a,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product .v-product__img a {
   display: flex !important;
@@ -8648,14 +8637,6 @@ body.is-home:not(.productdetails) #content_area_home .v-product-grid .v-product_
 body.is-home:not(.productdetails) #content_area_home ul.v-product-grid > li .v-product__img img,
 body.is-home:not(.productdetails) #content_area .v-product-grid .v-product__img img,
 body.is-home:not(.productdetails) #content_area ul.v-product-grid > li .v-product__img img,
-:is(html.category, body.category) #content_area .v-product-grid .v-product__img img,
-:is(html.category, body.category) #content_area .v-product-grid .v-product__image img,
-:is(html.category, body.category) #content_area .v-product-grid .v-product__image-wrap img,
-:is(html.category, body.category) #content_area .v-product-grid .product_image img,
-:is(html.category, body.category) #content_area .v-product-grid .vcss_img img,
-:is(html.category, body.category) #content_area ul.v-product-grid > li .v-product__img img,
-:is(html.category, body.category) #content_area ul.v-product-grid > li .product_image img,
-html.vol-list.category #content_area ul.v-product-grid > li .v-product__img img,
 body:not(.productdetails) #content_area table.v65-productDisplay .v-product-grid .v-product .v-product__img img,
 body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-grid > li.v-product .v-product__img img {
   object-fit: contain !important;
