@@ -171,14 +171,14 @@ export async function saveImage(data, path, width, height) {
 }
 
 /**
- * Center 50% crop → median & average RGB → targetColor = median*0.75 + average*0.25
+ * Center crop, drop fold highlights/shadows (by lightness), Lab median = face color.
  */
 export async function getSwatchTargetColor(swatchPath) {
   const { data, width, height, channels } = await loadImage(swatchPath);
-  const x0 = Math.floor(width * 0.25);
-  const y0 = Math.floor(height * 0.25);
-  const x1 = Math.ceil(width * 0.75);
-  const y1 = Math.ceil(height * 0.75);
+  const x0 = Math.floor(width * 0.2);
+  const y0 = Math.floor(height * 0.2);
+  const x1 = Math.ceil(width * 0.8);
+  const y1 = Math.ceil(height * 0.8);
 
   const samples = [];
 
@@ -191,8 +191,8 @@ export async function getSwatchTargetColor(swatchPath) {
       const a = channels === 4 ? data[i + 3] : 255;
       if (a < 20) continue;
       if (isNearWhite(r, g, b)) continue;
-      const { L } = rgbToLab(r, g, b);
-      samples.push({ r, g, b, L });
+      const lab = rgbToLab(r, g, b);
+      samples.push(lab);
     }
   }
 
@@ -200,29 +200,17 @@ export async function getSwatchTargetColor(swatchPath) {
     throw new Error(`No usable swatch pixels in center crop: ${swatchPath}`);
   }
 
-  const rs = samples.map((s) => s.r);
-  const gs = samples.map((s) => s.g);
-  const bs = samples.map((s) => s.b);
-  const avg = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
-
-  const midR = medianOf(rs) * 0.75 + avg(rs) * 0.25;
-  const midG = medianOf(gs) * 0.75 + avg(gs) * 0.25;
-  const midB = medianOf(bs) * 0.75 + avg(bs) * 0.25;
-
   const byL = [...samples].sort((a, b) => a.L - b.L);
-  const darkN = Math.max(1, Math.floor(byL.length * 0.35));
-  const darkSlice = byL.slice(0, darkN);
-  const darkR = avg(darkSlice.map((s) => s.r));
-  const darkG = avg(darkSlice.map((s) => s.g));
-  const darkB = avg(darkSlice.map((s) => s.b));
+  const p30 = byL[Math.floor(byL.length * 0.3)].L;
+  const p70 = byL[Math.floor(byL.length * 0.7)].L;
+  const face = samples.filter((s) => s.L >= p30 && s.L <= p70);
+  const use = face.length > 20 ? face : samples;
 
-  const r = Math.round(midR * 0.45 + darkR * 0.55);
-  const g = Math.round(midG * 0.45 + darkG * 0.55);
-  const b = Math.round(midB * 0.45 + darkB * 0.55);
-
-  const tl = rgbToLab(r, g, b);
-  const [dr, dg, db] = labToRgb(tl.L - 2.5, tl.a, tl.b);
-  return { r: dr, g: dg, b: db };
+  const medL = medianOf(use.map((s) => s.L));
+  const medA = medianOf(use.map((s) => s.a));
+  const medB = medianOf(use.map((s) => s.b));
+  const [r, g, b] = labToRgb(medL, medA, medB);
+  return { r, g, b };
 }
 
 /**
@@ -377,8 +365,7 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * HSL shift: lock original lightness (texture/shadows); shift hue/sat toward swatch.
- * Hard mask = crisp outline. Floor shadow rows untouched.
+ * Lab anchor: cognac on sofa → swatch face color; each pixel keeps its offset (shade/texture).
  */
 export function recolorSofa(
   baseImage,
@@ -390,10 +377,8 @@ export function recolorSofa(
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
 
-  const srcHsl = rgbToHsl(sourceColor.r, sourceColor.g, sourceColor.b);
-  const tgtHsl = rgbToHsl(targetColor.r, targetColor.g, targetColor.b);
-  const dHue = hueDelta(srcHsl.h, tgtHsl.h);
-  const satMul = srcHsl.s > 0.04 ? tgtHsl.s / srcHsl.s : 1;
+  const srcLab = rgbToLab(sourceColor.r, sourceColor.g, sourceColor.b);
+  const tgtLab = rgbToLab(targetColor.r, targetColor.g, targetColor.b);
 
   const yMax =
     leatherBottomY == null ? height - 1 : Math.min(height - 1, leatherBottomY);
@@ -415,12 +400,19 @@ export function recolorSofa(
       if (isFloorShadowPixel(oR, oG, oB)) continue;
       if (pixelBrightness(oR, oG, oB) < FOOT_BRIGHTNESS) continue;
 
-      const hsl = rgbToHsl(oR, oG, oB);
-      const strength =
-        hsl.l < 0.13 ? clamp((hsl.l - 0.035) / 0.095, 0, 1) : 1;
-      const nh = hsl.h + dHue * strength;
-      const ns = clamp(hsl.s * (1 + (satMul - 1) * strength), 0, 1);
-      const [nR, nG, nB] = hslToRgb(nh, ns, hsl.l);
+      const lab = rgbToLab(oR, oG, oB);
+      let newL = tgtLab.L + (lab.L - srcLab.L);
+      let newA = tgtLab.a + (lab.a - srcLab.a);
+      let newB = tgtLab.b + (lab.b - srcLab.b);
+
+      if (lab.L < 22) {
+        const f = clamp((lab.L - 6) / 16, 0, 1);
+        newL = lab.L + (newL - lab.L) * f;
+        newA = lab.a + (newA - lab.a) * f;
+        newB = lab.b + (newB - lab.b) * f;
+      }
+
+      const [nR, nG, nB] = labToRgb(newL, newA, newB);
 
       out[p] = nR;
       out[p + 1] = nG;
