@@ -1072,6 +1072,19 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product>a.v-product__img>img,h
   }
 })();
 </script>
+<script id="mc-plp-enforcer-loader">
+(function () {
+  function mcCssBust() {
+    return 'v=' + Date.now() + '&m=' + Math.random().toString(36).slice(2, 12);
+  }
+  if (window.__MC_PLP_ENFORCER_LOADING__) return;
+  window.__MC_PLP_ENFORCER_LOADING__ = 1;
+  var s = document.createElement('script');
+  s.id = 'mc-plp-enforcer-js';
+  s.src = '/v/vspfiles/js/mc-plp-enforcer.js?' + mcCssBust();
+  (document.head || document.documentElement).appendChild(s);
+})();
+</script>
 <script>
 window.showSlides = function(){};
 </script>

@@ -58,7 +58,6 @@ retry_put() {
   return 1
 }
 
-# Try paths in order; succeed if any upload works. Skip missing paths immediately.
 put_primary() {
   local local_path="$1"
   local label="$2"
@@ -85,35 +84,22 @@ put_primary() {
   fi
 }
 
-echo "=== Force template to all canonical SFTP paths (paramiko) ==="
-export SFTP_HOST="${FTP_SERVER}"
-export SFTP_USER="${FTP_USERNAME}"
-export SFTP_PASS="${FTP_PASSWORD}"
-export SFTP_PORT="2222"
-python3 scripts/volusion_sftp_force_template.py
+echo "=== Assets first (fast path — fixes live category pages via mcCssBust + enforcer) ==="
+put_primary "vspfiles/css/custom-safe.css" "custom-safe" \
+  "/vspfiles/css/custom-safe.css" \
+  "vspfiles/css/custom-safe.css"
 
-echo "=== Template backup upload (lftp) ==="
-put_primary "template_266.html" "template" \
-  "/v/template_266.html" \
-  "/template_266.html" \
-  "template_266.html"
-
-echo "=== JS + CSS (SFTP paths under /vspfiles — served at https://host/v/vspfiles/…) ==="
-put_primary "vspfiles/js/sectional-configs.js" "sectional-configs" \
-  "/vspfiles/js/sectional-configs.js" \
-  "vspfiles/js/sectional-configs.js"
-
-put_primary "vspfiles/js/mc-site-fix.js" "mc-site-fix" \
-  "/vspfiles/js/mc-site-fix.js" \
-  "vspfiles/js/mc-site-fix.js"
+put_primary "vspfiles/js/mc-plp-enforcer.js" "mc-plp-enforcer" \
+  "/vspfiles/js/mc-plp-enforcer.js" \
+  "vspfiles/js/mc-plp-enforcer.js"
 
 put_primary "vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer" \
   "/vspfiles/js/mtl-sectional-renderer.js" \
   "vspfiles/js/mtl-sectional-renderer.js"
 
-put_primary "vspfiles/css/custom-safe.css" "custom-safe" \
-  "/vspfiles/css/custom-safe.css" \
-  "vspfiles/css/custom-safe.css"
+put_primary "vspfiles/js/mc-site-fix.js" "mc-site-fix" \
+  "/vspfiles/js/mc-site-fix.js" \
+  "vspfiles/js/mc-site-fix.js"
 
 put_primary "vspfiles/css/mc-live-patch.css" "mc-live-patch" \
   "/vspfiles/css/mc-live-patch.css" \
@@ -123,25 +109,41 @@ put_primary "vspfiles/templates/266/css/mccabe-overrides.css" "mccabe-overrides"
   "/vspfiles/templates/266/css/mccabe-overrides.css" \
   "vspfiles/templates/266/css/mccabe-overrides.css"
 
-echo "=== Post-deploy verify (origin via Cloudflare) ==="
+put_primary "vspfiles/js/sectional-configs.js" "sectional-configs" \
+  "/vspfiles/js/sectional-configs.js" \
+  "vspfiles/js/sectional-configs.js"
+
+if [[ "${SKIP_TEMPLATE_DEPLOY:-0}" != "1" ]]; then
+  echo "=== Template (optional — set SKIP_TEMPLATE_DEPLOY=1 to skip) ==="
+  export SFTP_HOST="${FTP_SERVER}"
+  export SFTP_USER="${FTP_USERNAME}"
+  export SFTP_PASS="${FTP_PASSWORD}"
+  export SFTP_PORT="2222"
+  python3 scripts/volusion_sftp_force_template.py || echo "::warning::force template had errors; assets above may still be live"
+  put_primary "template_266.html" "template" "/v/template_266.html" "/template_266.html" || true
+else
+  echo "=== SKIP_TEMPLATE_DEPLOY=1 — template upload skipped ==="
+fi
+
+echo "=== Post-deploy verify ==="
 verify_url() {
   local url="$1"
   local needle="$2"
-  local line
-  line=$(curl -fsSL "$url" -H "Cache-Control: no-cache" -H "Pragma: no-cache" 2>/dev/null | head -n 1 || true)
+  local body
+  body=$(curl -fsSL "$url" -H "Cache-Control: no-cache" -H "Pragma: no-cache" 2>/dev/null | head -c 8000 || true)
   echo "  $url"
-  echo "  -> ${line:-[fetch failed]}"
-  if [[ -n "$line" && "$line" == *"$needle"* ]]; then
+  if [[ -n "$body" && "$body" == *"$needle"* ]]; then
     echo "  OK: found $needle"
   else
-    echo "  WARN: expected $needle (purge Cloudflare cache for /v/vspfiles/* if needed)"
+    echo "  WARN: expected $needle"
   fi
 }
 
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css" "C_CSS_DEPLOY_VERIFY_20260518js"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mtl-sectional-renderer.js" "MC_SITE_FIX_BUILD_20260518b"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/mc-live-patch.css?v=20260518" "MC_LIVE_PATCH_DEPLOY_20260518live"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?bust=1" "C_CSS_DEPLOY_VERIFY_20260518d"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?bust=1" "MC_PLP_ENFORCER_20260518d"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mtl-sectional-renderer.js?bust=1" "MC_PLP_ENFORCER_20260518d"
 
 echo ""
-echo "Deploy finished. Hard-refresh the site (Ctrl+Shift+R)."
-echo "PLP gray mats + hero hide ship in mtl-sectional-renderer.js (MC_SITE_FIX_BUILD_20260518b)."
+echo "Deploy finished (~2–4 min). Hard-refresh category 177 (Ctrl+Shift+R)."
+echo "If still broken: Cloudflare Purge → Purge by URL →"
+echo "  /v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-leather-idempotent-v20"

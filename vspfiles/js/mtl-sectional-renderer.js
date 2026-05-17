@@ -4422,3 +4422,14 @@
   }
   global.mcSiteFixRun = run;
 })(typeof window !== "undefined" ? window : this);
+
+/* Load cache-busted enforcer (beats baked inline PLP CSS at ~line 16308) */
+(function (w, d) {
+  if (w.__MC_PLP_ENFORCER_LOADING__) return;
+  w.__MC_PLP_ENFORCER_LOADING__ = 1;
+  var s = d.createElement("script");
+  s.src =
+    "/v/vspfiles/js/mc-plp-enforcer.js?v=20260518d&m=" +
+    Date.now();
+  (d.head || d.documentElement).appendChild(s);
+})(window, document);

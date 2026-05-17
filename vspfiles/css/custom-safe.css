@@ -1,4 +1,4 @@
-/* 0518 C_CSS_DEPLOY_VERIFY_20260518js — tail wins; Store-dot may omit #v65-product-parent */
+/* 0518d C_CSS_DEPLOY_VERIFY_20260518d — tail wins; Store-dot may omit #v65-product-parent */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -13904,14 +13904,11 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img > img
   }
 }
 
-/* Site-wide: hide homepage hero shell on every non-home URL (baked template leaves #if_homepage in HTML) */
-html:not(.mc-allow-home-hero) #if_homepage,
-html:not(.mc-allow-home-hero) #slideshow-container,
-html:not(.mc-allow-home-hero) #slideshow-container .mc-hero-video,
-body:not(.is-home) #if_homepage,
-body:not(.is-home) #slideshow-container,
-body:not(.is-home) #slideshow-container .mc-hero-video,
-body:not(.is-home) .mc-hero-video {
+/* Site-wide: hide hero shell by default (category pages often keep body.is-home — beats body:not(.is-home) rules) */
+#if_homepage,
+#slideshow-container,
+#slideshow-container .mc-hero-video,
+.mc-hero-video {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -13924,6 +13921,25 @@ body:not(.is-home) .mc-hero-video {
   pointer-events: none !important;
   border: 0 !important;
   background: transparent !important;
+}
+
+html.mc-allow-home-hero body.is-home #if_homepage,
+html.mc-allow-home-hero body.is-home #slideshow-container {
+  display: block !important;
+  visibility: visible !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video {
+  display: block !important;
+  height: auto !important;
+  min-height: max(520px, 100vh) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 /* PLP thumbs without html.category (Volusion baked template omits class until JS runs) */
