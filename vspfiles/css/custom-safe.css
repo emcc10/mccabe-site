@@ -481,6 +481,9 @@ body.is-home #slideshow-container {
   display: block !important;
   visibility: visible !important;
   position: relative !important;
+  z-index: 2 !important;
+  isolation: isolate !important;
+  flex-shrink: 0 !important;
   width: 100vw !important;
   max-width: 100vw !important;
   margin-left: calc(-50vw + 50%) !important;
@@ -490,15 +493,19 @@ body.is-home #slideshow-container {
   padding: 0 !important;
   box-sizing: border-box !important;
 }
+
+/* Full-bleed hero: video fills the box (cover). Height tracks viewport but won't squash below a floor when devtools resize height. */
 #slideshow-container .mc-hero-video {
   position: relative;
   z-index: 1 !important;
-  min-height: 100vh;
-  height: 100vh;
-  overflow: hidden;
   width: 100% !important;
   max-width: 100% !important;
+  overflow: hidden;
   background: #000;
+  height: 100vh;
+  height: 100svh;
+  min-height: max(520px, 100vh);
+  min-height: max(520px, 100svh);
 }
 
 #slideshow-container .mc-hero-video-el {
@@ -506,7 +513,7 @@ body.is-home #slideshow-container {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain !important;
+  object-fit: cover !important;
   object-position: center center !important;
   z-index: 1;
 }
@@ -790,18 +797,18 @@ body.is-home #slideshow-container {
     display: none !important;
   }
 
-  /* hero container: shorter than desktop but tall enough for full-frame video (contain) */
+  /* hero container: shorter than desktop; video still fills the box (cover) */
   #slideshow-container .mc-hero-video {
-    min-height: 0 !important;
-    height: min(62vh, 56.25vw) !important;
-    max-height: 72vh !important;
+    min-height: max(280px, 52vh) !important;
+    min-height: max(280px, 52svh) !important;
+    height: max(280px, 52vh) !important;
+    height: max(280px, 52svh) !important;
     background: #000 !important;
     overflow: hidden !important;
   }
 
-  /* video: fully visible, proportional (no crop) */
   #slideshow-container .mc-hero-video-el {
-    object-fit: contain !important;
+    object-fit: cover !important;
     object-position: center center !important;
   }
 
@@ -1876,18 +1883,19 @@ a.hero-cart-link {
 @media (max-width: 991px) {
   /* 1) STOP the hero from being full-page on mobile */
   #slideshow-container .mc-hero-video {
-    min-height: 0 !important; /* overrides your desktop min-height:100vh */
-    height: min(62vh, 56.25vw) !important;
-    max-height: 72vh !important;
+    min-height: max(280px, 52vh) !important;
+    min-height: max(280px, 52svh) !important;
+    height: max(280px, 52vh) !important;
+    height: max(280px, 52svh) !important;
     overflow: hidden !important;
     background: #000 !important;
   }
 
-  /* 2) Full frame visible (no crop) */
+  /* 2) Fill hero box edge-to-edge */
   #slideshow-container .mc-hero-video-el {
     width: 100% !important;
     height: 100% !important;
-    object-fit: contain !important;
+    object-fit: cover !important;
     object-position: center center !important;
     display: block !important;
 
@@ -7709,19 +7717,34 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
 }
 
 /* =========================================================
-   HOME: restore full hero visibility on desktop
+   HOME: full-viewport hero on desktop (cover fill; min-height floor when height is squeezed)
    ========================================================= */
 @media (min-width: 992px) {
   body.is-home #slideshow-container .mc-hero-video {
-    min-height: 100vh !important;
     height: 100vh !important;
+    height: 100svh !important;
+    min-height: max(520px, 100vh) !important;
+    min-height: max(520px, 100svh) !important;
     background: #000 !important;
   }
 
   body.is-home #slideshow-container .mc-hero-video-el {
-    object-fit: contain !important;
+    object-fit: cover !important;
     object-position: center center !important;
   }
+}
+
+/* Keep homepage content below the hero — not sliding up over a shrunken slideshow */
+html.mc-allow-home-hero body.is-home #if_homepage {
+  position: relative !important;
+  z-index: 2 !important;
+  isolation: isolate !important;
+  flex-shrink: 0 !important;
+}
+
+html.mc-allow-home-hero body.is-home #content_area_home {
+  position: relative !important;
+  z-index: 1 !important;
 }
 
 /* =========================================================
