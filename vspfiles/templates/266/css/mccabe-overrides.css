@@ -1198,3 +1198,102 @@ html.is-category-or-listing-page .v-product-grid .v-product a.v-product__img > i
   height: 220px !important;
   max-height: 220px !important;
 }
+
+/* MC_OVERRIDES_BODY_LAST_20260518e — #mc-mccabe-overrides-body-last loads after baked inline object-fit:cover */
+html body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img,
+html body:not(.productdetails) #content_area .v-product-grid a.v-product__img,
+html.category body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img,
+html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img,
+html.is-category-or-listing-page #content_area ul.v-product-grid > li.v-product > a.v-product__img,
+html.is-category-or-listing-page .v-product-grid a.v-product__img,
+:is(html.category, body.category) .v-product-grid .v-product > a.v-product__img,
+:is(html.category, body.category) .v-product-grid .v-product a.v-product__img {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 280px !important;
+  min-height: 280px !important;
+  max-height: 280px !important;
+  margin: 0 !important;
+  padding: 14px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  background: #f2f2f2 !important;
+  line-height: 0 !important;
+}
+
+html body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img > img,
+html body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img,
+html.category body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img > img,
+html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img,
+html.category .v-product-grid .v-product .v-product__img img,
+html.category .v-product-grid .v-product .v-product__image img,
+html.category .v-product-grid .v-product a.v-product__img > img,
+html.is-category-or-listing-page .v-product-grid a.v-product__img > img,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img {
+  width: 100% !important;
+  height: 220px !important;
+  max-width: 100% !important;
+  max-height: 220px !important;
+  min-height: 0 !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  margin: 0 auto !important;
+  border: 0 !important;
+  border-width: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+}
+
+@media (max-width: 991px) {
+  html body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img,
+  html.category body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img,
+  :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img {
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+    padding: 12px !important;
+  }
+
+  html body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img > img,
+  html.category body:not(.productdetails) #content_area ul.v-product-grid > li.v-product > a.v-product__img > img,
+  html.category .v-product-grid .v-product .v-product__img img,
+  :is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
+  :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img {
+    height: 172px !important;
+    max-height: 172px !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+  }
+}
+
+#if_homepage,
+#slideshow-container,
+#slideshow-container .mc-hero-video {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  background: transparent !important;
+}
+
+html.mc-allow-home-hero body.is-home #if_homepage,
+html.mc-allow-home-hero body.is-home #slideshow-container {
+  display: block !important;
+  height: auto !important;
+  opacity: 1 !important;
+}
+
+#display_homepage_title,
+#display_homepage_title * {
+  display: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+}

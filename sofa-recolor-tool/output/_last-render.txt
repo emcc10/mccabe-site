@@ -1,4 +1,4 @@
-2026-05-17T20:01:35.644Z
+2026-05-17T20:05:17.003Z
 Bali-Currant.jpg
-method: lab-anchor-v4
-target: 68,30,29
+method: oxblood-luminance-spec
+target: 62,28,26

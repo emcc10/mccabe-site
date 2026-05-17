@@ -174,12 +174,12 @@ export async function loadImage(path) {
   };
 }
 
-export async function saveImage(data, path, width, height, blurSigma = 0.2) {
+export async function saveImage(data, path, width, height, blurSigma = 0.3) {
   mkdirSync(dirname(path), { recursive: true });
   let pipeline = sharp(data, {
     raw: { width, height, channels: 4 },
   });
-  if (blurSigma > 0) pipeline = pipeline.blur(blurSigma);
+  if (blurSigma >= 0.3) pipeline = pipeline.blur(blurSigma);
   await pipeline.png().toFile(path);
 }
 
@@ -394,21 +394,27 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * Lab anchor: cognac → swatch, keep per-pixel shade. No RGB blending (avoids watercolor).
+ * Luminance shading + soft leather blend (Bali Currant / oxblood spec).
  */
 export function recolorSofa(
   baseImage,
   mask,
-  sourceColor,
+  _sourceColor,
   targetColor,
-  leatherBottomY = null,
-  _sofaBounds = null,
+  _leatherBottomY = null,
+  sofaBounds = null,
+  grainColors = null,
 ) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
+  const { r: tR, g: tG, b: tB } = targetColor;
 
-  const srcLab = rgbToLab(sourceColor.r, sourceColor.g, sourceColor.b);
-  const tgtLab = rgbToLab(targetColor.r, targetColor.g, targetColor.b);
+  const yBack0 = sofaBounds
+    ? sofaBounds.minY + sofaBounds.height * 0.2
+    : 0;
+  const yBack1 = sofaBounds
+    ? sofaBounds.minY + sofaBounds.height * 0.55
+    : height;
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -423,26 +429,38 @@ export function recolorSofa(
 
       if (!isUpholsteryLeather(oR, oG, oB)) continue;
 
-      const lab = rgbToLab(oR, oG, oB);
-      const s = labShiftStrength(lab.L);
+      const lum = pixelBrightness(oR, oG, oB);
+      let shade = lum / 128;
+      shade = clamp(shade, 0.58, 1.28);
 
-      const fullL = tgtLab.L + (lab.L - srcLab.L);
-      const fullA = tgtLab.a + (lab.a - srcLab.a);
-      const fullB = tgtLab.b + (lab.b - srcLab.b);
+      if (y >= yBack0 && y <= yBack1 && shade < 0.84) {
+        shade = shade * 0.72 + 0.84 * 0.28;
+      }
 
-      const newL = lab.L + (fullL - lab.L) * s;
-      const newA = lab.a + (fullA - lab.a) * s;
-      const newB = lab.b + (fullB - lab.b) * s;
+      let nR = tR * shade;
+      let nG = tG * shade;
+      let nB = tB * shade;
 
-      const [nR, nG, nB] = labToRgb(newL, newA, newB);
+      if (grainColors?.length) {
+        const [gR, gG, gB] = grainColors[(x * 17 + y * 31) % grainColors.length];
+        const grainAmt = 0.05;
+        nR = nR * (1 - grainAmt) + gR * grainAmt;
+        nG = nG * (1 - grainAmt) + gG * grainAmt;
+        nB = nB * (1 - grainAmt) + gB * grainAmt;
+      }
 
-      out[p] = nR;
-      out[p + 1] = nG;
-      out[p + 2] = nB;
+      nR = nR * 0.82 + oR * 0.18;
+      nG = nG * 0.82 + oG * 0.18;
+      nB = nB * 0.82 + oB * 0.18;
+
+      out[p] = Math.round(clamp(nR, 0, 255));
+      out[p + 1] = Math.round(clamp(nG, 0, 255));
+      out[p + 2] = Math.round(clamp(nB, 0, 255));
       if (channels === 4) out[p + 3] = oA;
     }
   }
 
+  applySoftFinish(out, mask, width, height, channels);
   return out;
 }
 
@@ -455,6 +473,7 @@ export async function processSwatch(
   sofaBounds,
 ) {
   const targetColor = await getSwatchTargetColor(swatchPath);
+  const grainColors = await sampleSwatchGrain(swatchPath);
   const outData = recolorSofa(
     baseSofa,
     mask,
@@ -462,13 +481,14 @@ export async function processSwatch(
     targetColor,
     leatherBottomY,
     sofaBounds,
+    grainColors,
   );
   const outName = `${basename(swatchPath, extname(swatchPath))}.png`;
   const outPath = join(OUTPUT_DIR, outName);
-  await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
+  await saveImage(outData, outPath, baseSofa.width, baseSofa.height, 0.3);
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: lab-anchor-v4\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
+  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: oxblood-luminance-spec\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   writeFileSync(stampPath, stamp);
 

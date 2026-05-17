@@ -1,7 +1,6 @@
 /**
- * PLP gray mats + site-wide hero/logo — runs after baked template inline CSS.
- * Loaded with cache-bust from template mcCssBust (and end of mtl-sectional-renderer).
- * MC_PLP_ENFORCER_20260518d
+ * PLP gray mats + site-wide hero/logo — beats baked template inline CSS (~line 16308).
+ * MC_PLP_ENFORCER_20260518e
  */
 (function (global) {
   "use strict";
@@ -16,7 +15,11 @@
 
   var FINAL_CSS =
     "html body:not(.productdetails) #content_area ul.v-product-grid>li.v-product>a.v-product__img," +
-    "html body:not(.productdetails) #content_area .v-product-grid a.v-product__img{" +
+    "html body:not(.productdetails) #content_area .v-product-grid a.v-product__img," +
+    "html.category body:not(.productdetails) #content_area ul.v-product-grid>li.v-product>a.v-product__img," +
+    "html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img," +
+    "html.is-category-or-listing-page #content_area ul.v-product-grid>li.v-product>a.v-product__img," +
+    "html.is-category-or-listing-page .v-product-grid a.v-product__img{" +
     "display:flex!important;align-items:flex-end!important;justify-content:center!important;" +
     "width:100%!important;height:" +
     TILE +
@@ -29,17 +32,21 @@
     MAT +
     "!important;line-height:0!important}" +
     "html body:not(.productdetails) #content_area ul.v-product-grid>li.v-product>a.v-product__img>img," +
-    "html body:not(.productdetails) #content_area .v-product-grid a.v-product__img>img{" +
+    "html body:not(.productdetails) #content_area .v-product-grid a.v-product__img>img," +
+    "html.category body:not(.productdetails) #content_area ul.v-product-grid>li.v-product>a.v-product__img>img," +
+    "html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img>img," +
+    "html.category .v-product-grid .v-product .v-product__img img," +
+    "html.category .v-product-grid .v-product a.v-product__img>img," +
+    "html.is-category-or-listing-page .v-product-grid a.v-product__img>img{" +
     "width:100%!important;height:" +
     STAGE +
     "px!important;max-width:100%!important;max-height:" +
     STAGE +
     "px!important;min-height:0!important;object-fit:contain!important;" +
-    "object-position:center bottom!important;margin:0 auto!important;border:0!important;" +
-    "border-width:0!important;display:block!important;box-sizing:border-box!important;" +
-    "background:transparent!important}" +
+    "object-position:center bottom!important;margin:0 auto!important;border:0!important;border-width:0!important;" +
+    "display:block!important;box-sizing:border-box!important;background:transparent!important}" +
     "@media(max-width:991px){html body:not(.productdetails) #content_area ul.v-product-grid>li.v-product>a.v-product__img," +
-    "html body:not(.productdetails) #content_area .v-product-grid a.v-product__img{height:" +
+    "html.category body:not(.productdetails) #content_area ul.v-product-grid>li.v-product>a.v-product__img{height:" +
     TILE_M +
     "px!important;min-height:" +
     TILE_M +
@@ -47,18 +54,19 @@
     TILE_M +
     "px!important;padding:12px!important}" +
     "html body:not(.productdetails) #content_area ul.v-product-grid>li.v-product>a.v-product__img>img," +
-    "html body:not(.productdetails) #content_area .v-product-grid a.v-product__img>img{height:" +
+    "html.category body:not(.productdetails) #content_area ul.v-product-grid>li.v-product>a.v-product__img>img," +
+    "html.category .v-product-grid .v-product .v-product__img img{height:" +
     STAGE_M +
     "px!important;max-height:" +
     STAGE_M +
-    "px!important}}" +
+    "px!important;object-fit:contain!important;object-position:center bottom!important}}" +
     "#if_homepage,#slideshow-container,#slideshow-container .mc-hero-video,.mc-hero-video{" +
     "display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;" +
     "max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;" +
     "opacity:0!important;pointer-events:none!important;background:transparent!important;border:0!important}" +
     "html.mc-allow-home-hero body.is-home #if_homepage,html.mc-allow-home-hero body.is-home #slideshow-container{" +
     "display:block!important;height:auto!important;min-height:0!important;max-height:none!important;" +
-    "opacity:1!important;visibility:visible!important;pointer-events:auto!important}" +
+    "opacity:1!important;visibility:visible!important}" +
     "#display_homepage_title,#display_homepage_title *{display:none!important;visibility:hidden!important;" +
     "height:0!important;width:0!important;overflow:hidden!important;opacity:0!important;" +
     "pointer-events:none!important;font-size:0!important}";
@@ -79,14 +87,19 @@
     if (!el) {
       el = document.createElement("style");
       el.id = id;
-      (document.body || document.head || document.documentElement).appendChild(el);
     }
     el.textContent = isHome()
       ? FINAL_CSS.replace(
-          /#if_homepage,#slideshow-container[\s\S]*?pointer-events:auto!important\}/,
+          /#if_homepage,#slideshow-container[\s\S]*?visibility:visible!important\}/,
           ""
         )
       : FINAL_CSS;
+    var root = document.body || document.documentElement;
+    if (root && el.parentNode !== root) {
+      root.appendChild(el);
+    } else if (root && el !== root.lastElementChild) {
+      root.appendChild(el);
+    }
   }
 
   function applyInline() {
@@ -117,6 +130,7 @@
         if (!img) return;
         img.style.setProperty("border", "0", "important");
         img.style.setProperty("border-width", "0", "important");
+        img.style.setProperty("outline", "0", "important");
         img.style.setProperty("object-fit", "contain", "important");
         img.style.setProperty("object-position", "center bottom", "important");
         img.style.setProperty("height", stage + "px", "important");
@@ -137,6 +151,7 @@
           n.style.setProperty("min-height", "0", "important");
           n.style.setProperty("opacity", "0", "important");
           n.style.setProperty("overflow", "hidden", "important");
+          n.style.setProperty("background", "transparent", "important");
         });
     }
 
@@ -157,7 +172,8 @@
   document.addEventListener("DOMContentLoaded", run);
   global.addEventListener("load", run);
   global.addEventListener("resize", applyInline);
-  [0, 100, 400, 1200, 3000].forEach(function (t) {
+  global.setInterval(run, 400);
+  [0, 50, 150, 400, 1000, 2500, 5000].forEach(function (t) {
     global.setTimeout(run, t);
   });
   global.mcPlpEnforcerRun = run;

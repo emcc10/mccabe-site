@@ -1053,16 +1053,26 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product>a.v-product__img>img,h
   function mcCssBust() {
     return 'v=' + Date.now() + '&m=' + Math.random().toString(36).slice(2, 12);
   }
+  function mcLoadPlpEnforcer() {
+    if (window.__MC_PLP_ENFORCER_LOADING__) return;
+    window.__MC_PLP_ENFORCER_LOADING__ = 1;
+    var s = document.createElement('script');
+    s.id = 'mc-plp-enforcer-js';
+    s.src = '/v/vspfiles/js/mc-plp-enforcer.js?' + mcCssBust();
+    (document.head || document.documentElement).appendChild(s);
+  }
   var el = document.createElement('link');
   el.rel = 'stylesheet';
   el.id = 'mc-custom-safe-css';
   el.href = '/v/vspfiles/css/custom-safe.css?' + mcCssBust();
+  el.onload = function () { mcLoadPlpEnforcer(); };
   el.onerror = function () {
     this.onerror = function () {
       this.onerror = null;
       this.href = '/vspfiles/css/custom-safe.css?' + mcCssBust();
     };
     this.href = '/v/custom-safe.css?' + mcCssBust();
+    mcLoadPlpEnforcer();
   };
   var ref = document.querySelector('link[href*="d21ivvgspl06jm.cloudfront.net/theme-assets"]');
   if (ref && ref.parentNode) {
@@ -1070,6 +1080,7 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product>a.v-product__img>img,h
   } else {
     document.head.appendChild(el);
   }
+  mcLoadPlpEnforcer();
 })();
 </script>
 <script id="mc-plp-enforcer-loader">

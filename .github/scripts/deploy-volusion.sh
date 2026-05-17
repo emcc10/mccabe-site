@@ -93,6 +93,10 @@ put_primary "vspfiles/js/mc-plp-enforcer.js" "mc-plp-enforcer" \
   "/vspfiles/js/mc-plp-enforcer.js" \
   "vspfiles/js/mc-plp-enforcer.js"
 
+put_primary "vspfiles/templates/266/js/min/template.min.js" "template.min" \
+  "/vspfiles/templates/266/js/min/template.min.js" \
+  "vspfiles/templates/266/js/min/template.min.js"
+
 put_primary "vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer" \
   "/vspfiles/js/mtl-sectional-renderer.js" \
   "vspfiles/js/mtl-sectional-renderer.js"
@@ -140,8 +144,9 @@ verify_url() {
 }
 
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?bust=1" "C_CSS_DEPLOY_VERIFY_20260518d"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?bust=1" "MC_PLP_ENFORCER_20260518d"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mtl-sectional-renderer.js?bust=1" "MC_PLP_ENFORCER_20260518d"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?bust=1" "MC_PLP_ENFORCER_20260518e"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260516sectional-diagram-ux" "MC_OVERRIDES_BODY_LAST_20260518e"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/template.min.js" "MC_PLP_ENFORCER_LOADING__"
 
 echo ""
 echo "Deploy finished (~2–4 min). Hard-refresh category 177 (Ctrl+Shift+R)."
