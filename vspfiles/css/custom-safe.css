@@ -1,4 +1,4 @@
-/* 0517 C_CSS_DEPLOY_VERIFY_20260517plp — tail wins; Store-dot may omit #v65-product-parent */
+/* 0517b C_CSS_DEPLOY_VERIFY_20260517plp2 — tail wins; Store-dot may omit #v65-product-parent */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -13849,10 +13849,14 @@ html body #v65-product-parent .mtl-member-price {
 }
 
 /* Category PLP: final lock — gray mat, fixed stage, baseline alignment */
-:is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__img,
-:is(html.category, body.category) #content_area .v-product-grid .v-product a.v-product__img,
-:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__img,
-:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product a.v-product__img {
+:is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product .v-product__img,
+:is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product a.v-product__img,
+:is(html.category, body.category) :is(#content_area, .content_area-wrapper) ul.v-product-grid > li.v-product .v-product__img,
+:is(html.category, body.category) :is(#content_area, .content_area-wrapper) ul.v-product-grid > li.v-product a.v-product__img,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img,
+:is(html.category, body.category) .v-product-grid .v-product a.v-product__img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product a.v-product__img {
   display: flex !important;
   align-items: flex-end !important;
   justify-content: center !important;
@@ -13861,9 +13865,12 @@ html body #v65-product-parent .mtl-member-price {
   box-sizing: border-box !important;
 }
 
-:is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__img img,
-:is(html.category, body.category) #content_area .v-product-grid .v-product a.v-product__img > img,
-:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__img img {
+:is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product .v-product__img img,
+:is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product a.v-product__img > img,
+:is(html.category, body.category) :is(#content_area, .content_area-wrapper) ul.v-product-grid > li.v-product .v-product__img img,
+:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
+:is(html.category, body.category) .v-product-grid .v-product a.v-product__img > img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img {
   width: 100% !important;
   height: var(--mc-plp-stage-h, 220px) !important;
   max-width: 100% !important;

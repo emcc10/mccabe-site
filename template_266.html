@@ -18724,63 +18724,7 @@ window.addEventListener('mcMemberPricingReady', function () {
   }
 }
 
-/* Category cards (all viewports): uniform image tile + cover (same frame height per row) */
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
-:is(html.category, body.category) .v-product-grid .v-product .product_image,
-:is(html.category, body.category) .v-product-grid .v-product .vcss_img,
-:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img {
-  height: 280px !important;
-  min-height: 280px !important;
-  max-height: 280px !important;
-  width: 100% !important;
-  overflow: hidden !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  display: block !important;
-  position: relative !important;
-}
-
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img a,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image a,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap a,
-:is(html.category, body.category) .v-product-grid .v-product .product_image a,
-:is(html.category, body.category) .v-product-grid .v-product .vcss_img a {
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-:is(html.category, body.category) .v-product-grid .v-product .v-product__img img,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image img,
-:is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap img,
-:is(html.category, body.category) .v-product-grid .v-product .product_image img,
-:is(html.category, body.category) .v-product-grid .v-product .vcss_img img,
-:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: none !important;
-  max-height: none !important;
-  object-fit: cover !important;
-  object-position: center !important;
-  display: block !important;
-}
-
-@media (max-width: 991px) {
-  :is(html.category, body.category) .v-product-grid .v-product .v-product__img,
-  :is(html.category, body.category) .v-product-grid .v-product .v-product__image,
-  :is(html.category, body.category) .v-product-grid .v-product .v-product__image-wrap,
-  :is(html.category, body.category) .v-product-grid .v-product .product_image,
-  :is(html.category, body.category) .v-product-grid .v-product .vcss_img,
-  :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img {
-    height: 220px !important;
-    min-height: 220px !important;
-    max-height: 220px !important;
-  }
-}
+/* Category PLP thumbs: gray mat + contain — see mc-category-grid-critical, custom-safe --mc-plp-*, ~15666 (no object-fit:cover here; this block is late in the document and overrides /v/vspfiles/css/custom-safe.css). */
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__name,
 :is(html.category, body.category) .v-product-grid .v-product .productnamecolor,
