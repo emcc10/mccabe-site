@@ -61,3 +61,6 @@ retry_put "vspfiles/js/mtl-sectional-renderer.js" "/vspfiles/js/mtl-sectional-re
 
 echo "Uploading custom-safe.css..."
 retry_put "vspfiles/css/custom-safe.css" "/vspfiles/css/custom-safe.css" "custom-safe.css"
+
+echo "Uploading mccabe-overrides.css (last stylesheet on PLP)..."
+retry_put "vspfiles/templates/266/css/mccabe-overrides.css" "/vspfiles/templates/266/css/mccabe-overrides.css" "mccabe-overrides.css"
