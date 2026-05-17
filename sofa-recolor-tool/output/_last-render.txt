@@ -1,4 +1,4 @@
-2026-05-17T19:59:15.609Z
+2026-05-17T20:01:35.644Z
 Bali-Currant.jpg
-method: lab-anchor
+method: lab-anchor-v4
 target: 68,30,29

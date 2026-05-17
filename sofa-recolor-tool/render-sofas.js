@@ -114,10 +114,30 @@ function hueDelta(fromH, toH) {
   return d;
 }
 
-function isFloorShadowPixel(r, g, b) {
+function isWarmLeather(r, g, b) {
+  return r >= g - 4 && r >= b - 6;
+}
+
+/** Floor drop shadow / neutral gray only — warm leather highlights are never skipped. */
+function isProtectedShadowOrGray(r, g, b) {
+  if (isWarmLeather(r, g, b)) return false;
+
   const bright = pixelBrightness(r, g, b);
+  if (bright < FOOT_BRIGHTNESS) return true;
+
   const maxDiff = Math.max(Math.abs(r - g), Math.abs(r - b), Math.abs(g - b));
-  return maxDiff < 20 && bright > 36 && bright < 210;
+  if (maxDiff < 26 && bright > 28 && bright < 225) return true;
+  if (b > r + 2 && bright < 200) return true;
+
+  const { a, b: lb } = rgbToLab(r, g, b);
+  if (Math.hypot(a, lb) < 14 && bright > 32 && bright < 210) return true;
+  return false;
+}
+
+function isUpholsteryLeather(r, g, b) {
+  if (isNearWhite(r, g, b)) return false;
+  if (isProtectedShadowOrGray(r, g, b)) return false;
+  return isWarmLeather(r, g, b);
 }
 
 function labToRgb(L, a, b) {
@@ -206,38 +226,10 @@ export async function getSwatchTargetColor(swatchPath) {
   return { r, g, b };
 }
 
-function buildLocalContrast(data, width, height, channels, mask) {
-  const lum = new Float32Array(width * height);
-  for (let j = 0, p = 0; j < width * height; j++, p += channels) {
-    lum[j] = mask[j] >= 128 ? pixelBrightness(data[p], data[p + 1], data[p + 2]) : 0;
-  }
-
-  const contrast = new Float32Array(width * height);
-  for (let y = 1; y < height - 1; y++) {
-    for (let x = 1; x < width - 1; x++) {
-      const j = y * width + x;
-      if (mask[j] < 128) continue;
-      let lo = lum[j];
-      let hi = lum[j];
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          const v = lum[(y + dy) * width + (x + dx)];
-          if (v < lo) lo = v;
-          if (v > hi) hi = v;
-        }
-      }
-      contrast[j] = hi - lo;
-    }
-  }
-  return contrast;
-}
-
-/** Full Lab shift on flat leather; ease only in deep creases and tight piping. */
-function labShiftStrength(labL, contrast) {
-  let s = 1;
-  if (labL < 24) s = clamp((labL - 8) / 16, 0, 1);
-  if (contrast > 34) s *= 1 - clamp((contrast - 34) / 50, 0, 0.5);
-  return clamp(s, 0, 1);
+/** Only ease the deepest crease pixels (no contrast-based banding on arms). */
+function labShiftStrength(labL) {
+  if (labL >= 16) return 1;
+  return clamp((labL - 5) / 11, 0, 1);
 }
 
 /**
@@ -297,27 +289,7 @@ export async function createSofaMask(image, optionalMaskPath = null) {
     }
   }
 
-  return erodeMask(mask, width, height, 1);
-}
-
-function erodeMask(mask, width, height, radius) {
-  const out = new Uint8Array(mask.length);
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      let ok = 255;
-      for (let dy = -radius; dy <= radius && ok; dy++) {
-        for (let dx = -radius; dx <= radius && ok; dx++) {
-          const yy = y + dy;
-          const xx = x + dx;
-          if (yy < 0 || yy >= height || xx < 0 || xx >= width || mask[yy * width + xx] < 128) {
-            ok = 0;
-          }
-        }
-      }
-      out[y * width + x] = ok;
-    }
-  }
-  return out;
+  return mask;
 }
 
 /**
@@ -340,7 +312,7 @@ export function getLeatherBottomY(baseImage, mask, imgWidth, imgHeight) {
       const b = data[p + 2];
       if (isNearWhite(r, g, b)) continue;
       counted++;
-      if (isFloorShadowPixel(r, g, b)) shadow++;
+      if (isProtectedShadowOrGray(r, g, b)) shadow++;
       else leather++;
     }
 
@@ -407,16 +379,11 @@ export function recolorSofa(
 
   const srcLab = rgbToLab(sourceColor.r, sourceColor.g, sourceColor.b);
   const tgtLab = rgbToLab(targetColor.r, targetColor.g, targetColor.b);
-  const contrast = buildLocalContrast(data, width, height, channels, mask);
-
-  const yMax =
-    leatherBottomY == null ? height - 1 : Math.min(height - 1, leatherBottomY);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const j = y * width + x;
       if (mask[j] < 128) continue;
-      if (y > yMax) continue;
 
       const p = j * channels;
       const oR = data[p];
@@ -424,12 +391,10 @@ export function recolorSofa(
       const oB = data[p + 2];
       const oA = channels === 4 ? data[p + 3] : 255;
 
-      if (isNearWhite(oR, oG, oB)) continue;
-      if (isFloorShadowPixel(oR, oG, oB)) continue;
-      if (pixelBrightness(oR, oG, oB) < FOOT_BRIGHTNESS) continue;
+      if (!isUpholsteryLeather(oR, oG, oB)) continue;
 
       const lab = rgbToLab(oR, oG, oB);
-      const s = labShiftStrength(lab.L, contrast[j]);
+      const s = labShiftStrength(lab.L);
 
       const fullL = tgtLab.L + (lab.L - srcLab.L);
       const fullA = tgtLab.a + (lab.a - srcLab.a);
@@ -473,7 +438,7 @@ export async function processSwatch(
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: lab-anchor\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
+  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: lab-anchor-v4\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   writeFileSync(stampPath, stamp);
 
