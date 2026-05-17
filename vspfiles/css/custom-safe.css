@@ -6454,9 +6454,9 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   object-fit: contain !important;
   object-position: center center !important;
   display: block !important;
-  margin: 0 !important;
+  margin: 0 auto !important;
   flex-shrink: 1 !important;
-  vertical-align: top !important;
+  vertical-align: middle !important;
 }
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__name,
@@ -13884,4 +13884,48 @@ html body #v65-product-parent .mtl-retail-price,
 html body #v65-product-parent .mtl-member-label,
 html body #v65-product-parent .mtl-member-price {
   font-size: 16px !important;
+}
+
+/* Category PLP: center each product thumbnail in its tile (wins over template fallback cover rules) */
+:is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__img,
+:is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__image,
+:is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__image-wrap,
+:is(html.category, body.category) #content_area .v-product-grid .v-product .product_image,
+:is(html.category, body.category) #content_area .v-product-grid .v-product .vcss_img,
+:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__img,
+:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .product_image {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+:is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__img a,
+:is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__image a,
+:is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__image-wrap a,
+:is(html.category, body.category) #content_area .v-product-grid .v-product .product_image a,
+:is(html.category, body.category) #content_area .v-product-grid .v-product .vcss_img a,
+:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__img a,
+:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .product_image a {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+:is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__img img,
+:is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__image img,
+:is(html.category, body.category) #content_area .v-product-grid .v-product .v-product__image-wrap img,
+:is(html.category, body.category) #content_area .v-product-grid .v-product .product_image img,
+:is(html.category, body.category) #content_area .v-product-grid .v-product .vcss_img img,
+:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .v-product__img img,
+:is(html.category, body.category) #content_area ul.v-product-grid > li.v-product .product_image img {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: block !important;
 }
