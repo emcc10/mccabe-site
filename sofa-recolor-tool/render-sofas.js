@@ -20,7 +20,6 @@ const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 
 const BG_THRESH = 235;
 const FOOT_BRIGHTNESS = 35;
-const MASK_BLUR_SIGMA = 1.2;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
@@ -34,6 +33,13 @@ function pixelBrightness(r, g, b) {
 
 function isNearWhite(r, g, b) {
   return r > BG_THRESH && g > BG_THRESH && b > BG_THRESH;
+}
+
+/** Anti-aliased edge pixels between leather and white background. */
+function isEdgeFringe(r, g, b) {
+  const bright = pixelBrightness(r, g, b);
+  const maxDiff = Math.max(Math.abs(r - g), Math.abs(r - b), Math.abs(g - b));
+  return bright > 198 && maxDiff < 38;
 }
 
 function medianOf(arr) {
@@ -66,6 +72,59 @@ function rgbToLab(r, g, b) {
   const fy = f(y);
   const fz = f(z);
   return { L: 116 * fy - 16, a: 500 * (fx - fy), b: 200 * (fy - fz) };
+}
+
+function rgbToHsl(r, g, b) {
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const l = (max + min) / 2;
+  if (max === min) return { h: 0, s: 0, l };
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h = 0;
+  if (max === rn) h = ((gn - bn) / d + (gn < bn ? 6 : 0)) / 6;
+  else if (max === gn) h = ((bn - rn) / d + 2) / 6;
+  else h = ((rn - gn) / d + 4) / 6;
+  return { h, s, l };
+}
+
+function hslToRgb(h, s, l) {
+  if (s === 0) {
+    const v = Math.round(l * 255);
+    return [v, v, v];
+  }
+  const hue2rgb = (p, q, t) => {
+    let tt = t;
+    if (tt < 0) tt += 1;
+    if (tt > 1) tt -= 1;
+    if (tt < 1 / 6) return p + (q - p) * 6 * tt;
+    if (tt < 1 / 2) return q;
+    if (tt < 2 / 3) return p + (q - p) * (2 / 3 - tt) * 6;
+    return p;
+  };
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  return [
+    Math.round(clamp(hue2rgb(p, q, h + 1 / 3) * 255, 0, 255)),
+    Math.round(clamp(hue2rgb(p, q, h) * 255, 0, 255)),
+    Math.round(clamp(hue2rgb(p, q, h - 1 / 3) * 255, 0, 255)),
+  ];
+}
+
+function hueDelta(fromH, toH) {
+  let d = toH - fromH;
+  if (d > 0.5) d -= 1;
+  if (d < -0.5) d += 1;
+  return d;
+}
+
+function isFloorShadowPixel(r, g, b) {
+  const bright = pixelBrightness(r, g, b);
+  const maxDiff = Math.max(Math.abs(r - g), Math.abs(r - b), Math.abs(g - b));
+  return maxDiff < 20 && bright > 36 && bright < 210;
 }
 
 function labToRgb(L, a, b) {
@@ -223,28 +282,39 @@ export async function createSofaMask(image, optionalMaskPath = null) {
     }
   }
 
-  return featherMask(mask, width, height, MASK_BLUR_SIGMA);
+  return mask;
 }
 
-function featherMask(mask, width, height, sigma) {
-  const radius = Math.max(1, Math.round(sigma));
-  const out = new Uint8Array(mask.length);
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      let sum = 0;
-      let count = 0;
-      for (let dy = -radius; dy <= radius; dy++) {
-        const yy = clamp(y + dy, 0, height - 1);
-        for (let dx = -radius; dx <= radius; dx++) {
-          const xx = clamp(x + dx, 0, width - 1);
-          sum += mask[yy * width + xx];
-          count++;
-        }
-      }
-      out[y * width + x] = Math.round(sum / count);
+/**
+ * Last row that is still upholstery (exclude floor drop shadow below).
+ */
+export function getLeatherBottomY(baseImage, mask, imgWidth, imgHeight) {
+  const { data, channels } = baseImage;
+
+  for (let y = imgHeight - 1; y >= 0; y--) {
+    let leather = 0;
+    let shadow = 0;
+    let counted = 0;
+
+    for (let x = 0; x < imgWidth; x++) {
+      const j = y * imgWidth + x;
+      if (mask[j] < 128) continue;
+      const p = j * channels;
+      const r = data[p];
+      const g = data[p + 1];
+      const b = data[p + 2];
+      if (isNearWhite(r, g, b)) continue;
+      counted++;
+      if (isFloorShadowPixel(r, g, b)) shadow++;
+      else leather++;
+    }
+
+    if (counted > 24 && leather > shadow && leather > counted * 0.2) {
+      return Math.min(imgHeight - 1, y + 8);
     }
   }
-  return out;
+
+  return imgHeight - 1;
 }
 
 export function getSofaBounds(mask, imgWidth, imgHeight) {
@@ -286,40 +356,33 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
   };
 }
 
-/** How much to apply swatch color (fade in deep shadows to avoid painted creases). */
-function colorShiftStrength(labL, y, sofaBounds) {
-  let s = clamp((labL - 12) / 40, 0, 1);
-  if (!sofaBounds) return s;
-
-  const yBack0 = sofaBounds.minY + sofaBounds.height * 0.2;
-  const yBack1 = sofaBounds.minY + sofaBounds.height * 0.55;
-  if (y >= yBack0 && y <= yBack1 && labL < 48) {
-    const t = (y - yBack0) / Math.max(1, yBack1 - yBack0);
-    const lowerBand = t > 0.5 ? (t - 0.5) / 0.5 : 0;
-    s *= 1 - lowerBand * 0.7;
-    if (labL < 38) s *= clamp((labL - 8) / 30, 0, 1);
-  }
-  return s;
-}
-
 /**
- * Lab shift: keep each pixel's L; move a,b toward swatch. Shadows keep structure, not flat color fill.
+ * HSL shift: lock original lightness (texture/shadows); shift hue/sat toward swatch.
+ * Hard mask = crisp outline. Floor shadow rows untouched.
  */
-export function recolorSofa(baseImage, mask, sourceColor, targetColor, sofaBounds = null) {
+export function recolorSofa(
+  baseImage,
+  mask,
+  sourceColor,
+  targetColor,
+  leatherBottomY = null,
+) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
 
-  const srcLab = rgbToLab(sourceColor.r, sourceColor.g, sourceColor.b);
-  const tgtLab = rgbToLab(targetColor.r, targetColor.g, targetColor.b);
-  const deltaA = tgtLab.a - srcLab.a;
-  const deltaB = tgtLab.b - srcLab.b;
-  const deltaL = tgtLab.L - srcLab.L;
+  const srcHsl = rgbToHsl(sourceColor.r, sourceColor.g, sourceColor.b);
+  const tgtHsl = rgbToHsl(targetColor.r, targetColor.g, targetColor.b);
+  const dHue = hueDelta(srcHsl.h, tgtHsl.h);
+  const satMul = srcHsl.s > 0.04 ? tgtHsl.s / srcHsl.s : 1;
+
+  const yMax =
+    leatherBottomY == null ? height - 1 : Math.min(height - 1, leatherBottomY);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const j = y * width + x;
-      const m = mask[j] / 255;
-      if (m < 0.004) continue;
+      if (mask[j] < 128) continue;
+      if (y > yMax) continue;
 
       const p = j * channels;
       const oR = data[p];
@@ -328,42 +391,19 @@ export function recolorSofa(baseImage, mask, sourceColor, targetColor, sofaBound
       const oA = channels === 4 ? data[p + 3] : 255;
 
       if (isNearWhite(oR, oG, oB)) continue;
-
+      if (isEdgeFringe(oR, oG, oB)) continue;
+      if (isFloorShadowPixel(oR, oG, oB)) continue;
       if (pixelBrightness(oR, oG, oB) < FOOT_BRIGHTNESS) continue;
 
-      const lab = rgbToLab(oR, oG, oB);
+      const hsl = rgbToHsl(oR, oG, oB);
+      const strength = clamp((hsl.l - 0.05) / 0.22, 0, 1);
+      const nh = hsl.h + dHue * strength;
+      const ns = clamp(hsl.s * (1 + (satMul - 1) * strength), 0, 1);
+      const [nR, nG, nB] = hslToRgb(nh, ns, hsl.l);
 
-      if (sofaBounds && y > sofaBounds.maxY - 28 && Math.hypot(lab.a, lab.b) < 10 && lab.L < 88) {
-        continue;
-      }
-
-      const s = colorShiftStrength(lab.L, y, sofaBounds);
-      const midW = clamp((lab.L - 28) / 55, 0, 1);
-      const newL = lab.L + deltaL * 0.14 * s * midW;
-      const chromaFade = clamp(lab.L / 36, 0, 1);
-      const shifted = labToRgb(
-        newL,
-        lab.a + deltaA * s * chromaFade,
-        lab.b + deltaB * s * chromaFade,
-      );
-
-      let keepOrig = 0;
-      if (lab.L < 34) keepOrig = ((34 - lab.L) / 34) * 0.5;
-      if (sofaBounds) {
-        const yBack0 = sofaBounds.minY + sofaBounds.height * 0.2;
-        const yBack1 = sofaBounds.minY + sofaBounds.height * 0.55;
-        if (y >= yBack0 && y <= yBack1 && lab.L < 46) {
-          const t = (y - yBack0) / Math.max(1, yBack1 - yBack0);
-          if (t > 0.45) keepOrig = Math.max(keepOrig, (t - 0.45) * 0.9);
-        }
-      }
-      const nR = shifted[0] * (1 - keepOrig) + oR * keepOrig;
-      const nG = shifted[1] * (1 - keepOrig) + oG * keepOrig;
-      const nB = shifted[2] * (1 - keepOrig) + oB * keepOrig;
-
-      out[p] = Math.round(clamp(oR * (1 - m) + nR * m, 0, 255));
-      out[p + 1] = Math.round(clamp(oG * (1 - m) + nG * m, 0, 255));
-      out[p + 2] = Math.round(clamp(oB * (1 - m) + nB * m, 0, 255));
+      out[p] = nR;
+      out[p + 1] = nG;
+      out[p + 2] = nB;
       if (channels === 4) out[p + 3] = oA;
     }
   }
@@ -371,9 +411,15 @@ export function recolorSofa(baseImage, mask, sourceColor, targetColor, sofaBound
   return out;
 }
 
-export async function processSwatch(swatchPath, baseSofa, mask, sourceColor, sofaBounds) {
+export async function processSwatch(
+  swatchPath,
+  baseSofa,
+  mask,
+  sourceColor,
+  leatherBottomY,
+) {
   const targetColor = await getSwatchTargetColor(swatchPath);
-  const outData = recolorSofa(baseSofa, mask, sourceColor, targetColor, sofaBounds);
+  const outData = recolorSofa(baseSofa, mask, sourceColor, targetColor, leatherBottomY);
   const outName = `${basename(swatchPath, extname(swatchPath))}.png`;
   const outPath = join(OUTPUT_DIR, outName);
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
@@ -446,6 +492,12 @@ export async function main(argv = process.argv) {
   if (maskPath) console.log(`Using mask: ${maskPath}`);
   const mask = await createSofaMask(baseSofa, maskPath);
   const sofaBounds = getSofaBounds(mask, baseSofa.width, baseSofa.height);
+  const leatherBottomY = getLeatherBottomY(
+    baseSofa,
+    mask,
+    baseSofa.width,
+    baseSofa.height,
+  );
   const sourceColor = getSourceLeatherColor(baseSofa, mask);
   console.log(
     `  Source leather (cognac on photo): RGB(${sourceColor.r}, ${sourceColor.g}, ${sourceColor.b})`,
@@ -453,6 +505,7 @@ export async function main(argv = process.argv) {
   console.log(
     `  Sofa bounds: ${sofaBounds.width}x${sofaBounds.height} at (${sofaBounds.minX},${sofaBounds.minY})`,
   );
+  console.log(`  Recolor stops above floor shadow (y <= ${leatherBottomY})`);
 
   if (cli.mode === 'one') {
     const swPath = resolveSwatchArg(cli.swatchFile);
@@ -465,7 +518,7 @@ export async function main(argv = process.argv) {
       baseSofa,
       mask,
       sourceColor,
-      sofaBounds,
+      leatherBottomY,
     );
     console.log(
       `  ${basename(swPath)} → target RGB(${targetColor.r}, ${targetColor.g}, ${targetColor.b})`,
@@ -487,7 +540,7 @@ export async function main(argv = process.argv) {
       baseSofa,
       mask,
       sourceColor,
-      sofaBounds,
+      leatherBottomY,
     );
     console.log(
       `  ${file} → RGB(${targetColor.r}, ${targetColor.g}, ${targetColor.b}) → ${basename(outPath)}`,
