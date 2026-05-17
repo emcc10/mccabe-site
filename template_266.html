@@ -48,13 +48,16 @@
       }
       h.classList.remove("mc-url-looks-like-pdp");
       h.classList.remove("mc-paragon-pdp");
-      /* Category PLP (-s/177.htm etc.): never allow homepage hero (avoids black bar + wrong is-home pairing). */
+      /* Category PLP (-s/177.htm etc.): never allow homepage hero; flag PLP for CSS before <body> exists. */
       if (/-s\//i.test(p) && /\.html?(\?|$)/i.test(p)) {
         h.classList.remove("mc-allow-home-hero");
+        h.classList.add("category");
+        h.setAttribute("data-mc-category-plp", "1");
         return;
       }
       if (/\/searchresults\.asp/i.test(p)) {
         h.classList.remove("mc-allow-home-hero");
+        h.setAttribute("data-mc-category-plp", "1");
         return;
       }
       var raw = p.replace(/\/+/g, "/");
@@ -213,6 +216,7 @@
 
       if (pathMatch || gridMatch) {
         h.classList.add('category');
+        h.setAttribute('data-mc-category-plp', '1');
         if (b) b.classList.add('category');
         if (typeof window.mcApplyCategoryPlpThumbMat === 'function') {
           window.mcApplyCategoryPlpThumbMat();
@@ -417,7 +421,63 @@
   <meta id="v65-logo-dimensions" data-width="250" data-height="70">
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
-  <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260516sectional-diagram-ux" rel="stylesheet">
+  <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
+  <link href="/v/vspfiles/css/custom-safe.css?v=20260518plp4" rel="stylesheet" id="mc-custom-safe-css-static">
+  <style id="mc-plp-url-critical">
+  /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
+  html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
+  html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,
+  html.category .v-product-grid .v-product > a.v-product__img,
+  html.category .v-product-grid .v-product a.v-product__img {
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 280px !important;
+    min-height: 280px !important;
+    max-height: 280px !important;
+    margin: 0 !important;
+    padding: 14px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    background: #f2f2f2 !important;
+    line-height: 0 !important;
+    text-decoration: none !important;
+  }
+  html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img > img,
+  html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img > img,
+  html.category .v-product-grid .v-product > a.v-product__img > img,
+  html.category .v-product-grid .v-product a.v-product__img > img {
+    width: 100% !important;
+    height: 220px !important;
+    max-width: 100% !important;
+    max-height: 220px !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+    margin: 0 auto !important;
+    border: 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+  }
+  @media (max-width: 991px) {
+    html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
+    html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,
+    html.category .v-product-grid .v-product > a.v-product__img,
+    html.category .v-product-grid .v-product a.v-product__img {
+      height: 220px !important;
+      min-height: 220px !important;
+      max-height: 220px !important;
+      padding: 12px !important;
+    }
+    html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img > img,
+    html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img > img,
+    html.category .v-product-grid .v-product > a.v-product__img > img,
+    html.category .v-product-grid .v-product a.v-product__img > img {
+      height: 172px !important;
+      max-height: 172px !important;
+    }
+  }
+  </style>
   <style id="mc-category-pager-critical">
     /* Category Next/Prev: must work even when custom-safe.css does not load */
     #mc-category-pager.mc-category-pager {
@@ -898,6 +958,9 @@
 <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
 <script>
 (function () {
+  if (document.getElementById('mc-custom-safe-css-static') || document.getElementById('mc-custom-safe-css')) {
+    return;
+  }
   function mcCssBust() {
     return 'v=' + Date.now() + '&m=' + Math.random().toString(36).slice(2, 12);
   }
@@ -19459,7 +19522,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 </style>
 
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
-<link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260516sectional-diagram-ux" id="mc-mccabe-overrides-body-last" />
+<link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" id="mc-mccabe-overrides-body-last" />
 <script id="mccabe-product-room-planner-price-fix" type="text/plain" data-disabled="true">
 (function () {
 
