@@ -20,7 +20,11 @@ const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 const BG_THRESH = 235;
 const FLOOR_MARGIN_PX = 18;
 const SWATCH_CENTER_CROP = 0.35;
-const SWATCH_SAMPLE_MIN_L = 0.18;
+const SWATCH_BLUR_PX = 16;
+const SWATCH_CLUSTER_K = 3;
+const SWATCH_CLUSTER_SHADOW_L = 0.18;
+const SWATCH_CLUSTER_HIGHLIGHT_L = 0.85;
+const SWATCH_KMEANS_MAX_PIXELS = 12000;
 const SWATCH_SAT_SCALE = 0.9;
 const SEAM_HSL_L = 0.12;
 const HIGHLIGHT_HSL_L = 0.82;
@@ -238,8 +242,144 @@ export async function saveImage(data, path, width, height) {
     .toFile(path);
 }
 
+function isSwatchFoldShadow(hsl) {
+  return hsl.l < SWATCH_CLUSTER_SHADOW_L;
+}
+
+function isSwatchFoldHighlight(hsl) {
+  return (
+    hsl.l > SWATCH_CLUSTER_HIGHLIGHT_L ||
+    (hsl.l > 0.72 && hsl.s < 0.07)
+  );
+}
+
+function meanHueCircular(pixels) {
+  let sumX = 0;
+  let sumY = 0;
+  for (const p of pixels) {
+    const ang = p.h * 2 * Math.PI;
+    sumX += Math.cos(ang);
+    sumY += Math.sin(ang);
+  }
+  let h = Math.atan2(sumY, sumX) / (2 * Math.PI);
+  if (h < 0) h += 1;
+  return h;
+}
+
+function distHslFeature(a, b) {
+  const dh = a.hx - b.hx;
+  const dy = a.hy - b.hy;
+  const ds = (a.s - b.s) * 1.4;
+  const dl = (a.l - b.l) * 0.65;
+  return dh * dh + dy * dy + ds * ds + dl * dl;
+}
+
+function pickInitialCentroids(pixels, k) {
+  const sorted = [...pixels].sort((a, b) => a.s - b.s);
+  const centroids = [];
+  for (let i = 0; i < k; i++) {
+    const idx = Math.min(
+      sorted.length - 1,
+      Math.floor(((i + 0.5) / k) * sorted.length),
+    );
+    const p = sorted[idx];
+    centroids.push({ hx: p.hx, hy: p.hy, s: p.s, l: p.l });
+  }
+  return centroids;
+}
+
+function kMeansHsl(pixels, k = SWATCH_CLUSTER_K) {
+  let centroids = pickInitialCentroids(pixels, k);
+  const assign = new Uint8Array(pixels.length);
+
+  for (let iter = 0; iter < 30; iter++) {
+    let moved = false;
+    for (let i = 0; i < pixels.length; i++) {
+      let best = 0;
+      let bestD = Infinity;
+      for (let c = 0; c < k; c++) {
+        const d = distHslFeature(pixels[i], centroids[c]);
+        if (d < bestD) {
+          bestD = d;
+          best = c;
+        }
+      }
+      if (assign[i] !== best) moved = true;
+      assign[i] = best;
+    }
+
+    const next = Array.from({ length: k }, () => ({
+      hx: 0,
+      hy: 0,
+      s: 0,
+      l: 0,
+      n: 0,
+    }));
+    for (let i = 0; i < pixels.length; i++) {
+      const c = assign[i];
+      const p = pixels[i];
+      next[c].hx += p.hx;
+      next[c].hy += p.hy;
+      next[c].s += p.s;
+      next[c].l += p.l;
+      next[c].n++;
+    }
+    for (let c = 0; c < k; c++) {
+      if (next[c].n === 0) continue;
+      centroids[c] = {
+        hx: next[c].hx / next[c].n,
+        hy: next[c].hy / next[c].n,
+        s: next[c].s / next[c].n,
+        l: next[c].l / next[c].n,
+      };
+    }
+    if (!moved) break;
+  }
+
+  return assign;
+}
+
+function summarizeClusters(pixels, assign, k) {
+  const groups = Array.from({ length: k }, () => []);
+  for (let i = 0; i < pixels.length; i++) {
+    groups[assign[i]].push(pixels[i]);
+  }
+
+  return groups.map((members, id) => {
+    if (!members.length) {
+      return { id, count: 0, meanH: 0, meanS: 0, meanL: 0, medianL: 0 };
+    }
+    const ls = members.map((p) => p.l);
+    return {
+      id,
+      count: members.length,
+      meanH: meanHueCircular(members),
+      meanS: members.reduce((s, p) => s + p.s, 0) / members.length,
+      meanL: members.reduce((s, p) => s + p.l, 0) / members.length,
+      medianL: medianOf(ls),
+      members,
+    };
+  });
+}
+
+function pickDominantLeatherCluster(clusters) {
+  const isValid = (c) =>
+    c.count > 12 &&
+    c.meanL >= SWATCH_CLUSTER_SHADOW_L &&
+    c.meanL <= SWATCH_CLUSTER_HIGHLIGHT_L &&
+    !(c.meanL > 0.72 && c.meanS < 0.06);
+
+  const valid = clusters.filter(isValid);
+  const pool = valid.length ? valid : clusters.filter((c) => c.count > 0);
+  if (!pool.length) {
+    throw new Error('No swatch clusters found');
+  }
+
+  return pool.reduce((best, c) => (c.meanS > best.meanS ? c : best));
+}
+
 /**
- * Center 35% crop, median RGB (excludes shadow/fold + white).
+ * Center 35% crop → blur 16px → k-means (k=3) → most saturated leather cluster.
  */
 export async function getSwatchTargetRgb(swatchPath) {
   const meta = await sharp(swatchPath).metadata();
@@ -253,6 +393,7 @@ export async function getSwatchTargetRgb(swatchPath) {
 
   const { data, info } = await sharp(swatchPath)
     .extract({ left: x0, top: y0, width: cw, height: ch })
+    .blur(SWATCH_BLUR_PX)
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -260,9 +401,7 @@ export async function getSwatchTargetRgb(swatchPath) {
   const channels = info.channels;
   const w = info.width;
   const h = info.height;
-  const rs = [];
-  const gs = [];
-  const bs = [];
+  const pixels = [];
 
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
@@ -273,23 +412,57 @@ export async function getSwatchTargetRgb(swatchPath) {
       const a = channels === 4 ? data[i + 3] : 255;
       if (a < 20) continue;
       if (isNearWhite(r, g, b)) continue;
-      const { l } = rgbToHsl(r, g, b);
-      if (l < SWATCH_SAMPLE_MIN_L) continue;
-      if (l > 0.95) continue;
-      rs.push(r);
-      gs.push(g);
-      bs.push(b);
+      const hsl = rgbToHsl(r, g, b);
+      if (isSwatchFoldShadow(hsl) || isSwatchFoldHighlight(hsl)) continue;
+      const ang = hsl.h * 2 * Math.PI;
+      pixels.push({
+        h: hsl.h,
+        s: hsl.s,
+        l: hsl.l,
+        hx: Math.cos(ang),
+        hy: Math.sin(ang),
+      });
     }
   }
 
-  if (!rs.length) {
-    throw new Error(`No usable swatch pixels in center crop: ${swatchPath}`);
+  if (pixels.length < SWATCH_CLUSTER_K * 8) {
+    throw new Error(`Too few swatch pixels after fold filter: ${swatchPath}`);
   }
 
+  let sample = pixels;
+  if (pixels.length > SWATCH_KMEANS_MAX_PIXELS) {
+    sample = [];
+    const step = pixels.length / SWATCH_KMEANS_MAX_PIXELS;
+    for (let i = 0; i < SWATCH_KMEANS_MAX_PIXELS; i++) {
+      sample.push(pixels[Math.floor(i * step)]);
+    }
+  }
+
+  const assign = kMeansHsl(sample, SWATCH_CLUSTER_K);
+  const clusters = summarizeClusters(sample, assign, SWATCH_CLUSTER_K);
+  const chosen = pickDominantLeatherCluster(clusters);
+
+  const targetH = chosen.meanH;
+  const targetS = chosen.meanS;
+  const targetL = chosen.medianL;
+  const [r, g, b] = hslToRgb(targetH, targetS, targetL);
+
   return {
-    r: Math.round(medianOf(rs)),
-    g: Math.round(medianOf(gs)),
-    b: Math.round(medianOf(bs)),
+    r,
+    g,
+    b,
+    hsl: { h: targetH, s: targetS, l: targetL },
+    cluster: {
+      id: chosen.id,
+      count: chosen.count,
+      meanS: chosen.meanS,
+      clusters: clusters.map((c) => ({
+        id: c.id,
+        count: c.count,
+        meanS: Math.round(c.meanS * 1000) / 1000,
+        meanL: Math.round(c.meanL * 1000) / 1000,
+      })),
+    },
   };
 }
 
@@ -452,7 +625,7 @@ export function recolorSofa(
 ) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
-  const swatchHsl = rgbToHsl(swatchRgb.r, swatchRgb.g, swatchRgb.b);
+  const swatchHsl = swatchRgb.hsl ?? rgbToHsl(swatchRgb.r, swatchRgb.g, swatchRgb.b);
   const finalH = swatchHsl.h;
   const finalS = swatchHsl.s * SWATCH_SAT_SCALE;
   const yFloor = sofaBottomY - FLOOR_MARGIN_PX;
@@ -504,15 +677,16 @@ export async function processSwatch(
 ) {
   const swatchName = basename(swatchPath, extname(swatchPath));
   const targetRgb = await getSwatchTargetRgb(swatchPath);
-  const targetHsl = rgbToHsl(targetRgb.r, targetRgb.g, targetRgb.b);
   console.log({
     swatchName,
     targetRGB: [targetRgb.r, targetRgb.g, targetRgb.b],
     targetHSL: [
-      Math.round(targetHsl.h * 1000) / 1000,
-      Math.round(targetHsl.s * 1000) / 1000,
-      Math.round(targetHsl.l * 1000) / 1000,
+      Math.round(targetRgb.hsl.h * 1000) / 1000,
+      Math.round(targetRgb.hsl.s * 1000) / 1000,
+      Math.round(targetRgb.hsl.l * 1000) / 1000,
     ],
+    cluster: targetRgb.cluster.id,
+    clusterStats: targetRgb.cluster.clusters,
   });
 
   const debugPath = await saveDebugColorChip(
@@ -534,7 +708,7 @@ export async function processSwatch(
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${swatchName}\nmethod: hsl-hue-replace\ntargetRGB: ${targetRgb.r},${targetRgb.g},${targetRgb.b}\ndebugChip: ${basename(debugPath)}\n`;
+  const stamp = `${new Date().toISOString()}\n${swatchName}\nmethod: hsl-hue-replace\nsampling: kmeans-saturated-cluster\ntargetRGB: ${targetRgb.r},${targetRgb.g},${targetRgb.b}\ncluster: ${targetRgb.cluster.id}\ndebugChip: ${basename(debugPath)}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   try {
     writeFileSync(stampPath, stamp);
