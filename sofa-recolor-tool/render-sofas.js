@@ -1,5 +1,5 @@
 /**
- * Direct opaque luminance recolor — no overlays, no partial RGB blend.
+ * HSL color-blend recolor — original L preserved; hue/sat from swatch.
  */
 import AdmZip from 'adm-zip';
 import {
@@ -32,9 +32,12 @@ const SWATCH_BLUR_PX = 12;
 const MASK_DILATE_RADIUS = 2;
 const MASK_FEATHER_RADIUS = 0;
 const MASK_APPLY_THRESH = 128;
-const LUM_SHADE_DIV = 165;
-const LUM_SHADE_MIN = 0.45;
-const LUM_SHADE_MAX = 1.22;
+const SHADOW_L_THRESHOLD = 0.16;
+const SAT_BASE_WEIGHT = 0.55;
+const SAT_TARGET_WEIGHT = 0.45;
+const SHADOW_SAT_BASE_WEIGHT = 0.8;
+const SHADOW_SAT_TARGET_WEIGHT = 0.2;
+const SHADOW_HUE_BLEND = 0.5;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
@@ -56,7 +59,7 @@ function isNearWhite(r, g, b) {
   return r > BG_THRESH && g > BG_THRESH && b > BG_THRESH;
 }
 
-function rgbToHsl(r, g, b) {
+export function rgbToHsl(r, g, b) {
   const rn = r / 255;
   const gn = g / 255;
   const bn = b / 255;
@@ -71,6 +74,55 @@ function rgbToHsl(r, g, b) {
   else if (max === gn) h = ((bn - rn) / d + 2) / 6;
   else h = ((rn - gn) / d + 4) / 6;
   return { h, s, l };
+}
+
+export function hslToRgb(h, s, l) {
+  if (s <= 0) {
+    const v = Math.round(clamp(l, 0, 1) * 255);
+    return { r: v, g: v, b: v };
+  }
+  const hue = ((h % 1) + 1) % 1;
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const hk = hue * 6;
+  const t = [hk + 2, hk, hk - 2];
+  const rgb = t.map((ti) => {
+    let x = ti;
+    if (x < 0) x += 6;
+    if (x >= 6) x -= 6;
+    let c;
+    if (x < 1) c = p + (q - p) * x;
+    else if (x < 3) c = q;
+    else if (x < 4) c = p + (q - p) * (4 - x);
+    else c = p;
+    return Math.round(clamp(c, 0, 1) * 255);
+  });
+  return { r: rgb[1], g: rgb[2], b: rgb[0] };
+}
+
+/** Circular hue blend (h in 0–1). */
+export function blendHue(h1, h2, t) {
+  let d = h2 - h1;
+  if (d > 0.5) d -= 1;
+  if (d < -0.5) d += 1;
+  return ((h1 + d * t) % 1 + 1) % 1;
+}
+
+/** HSL color blend — keeps base L; swatch hue/sat. */
+export function blendHslPixel(baseHsl, targetHsl) {
+  const finalL = baseHsl.l;
+  let finalH;
+  let finalS;
+
+  if (baseHsl.l < SHADOW_L_THRESHOLD) {
+    finalH = blendHue(baseHsl.h, targetHsl.h, SHADOW_HUE_BLEND);
+    finalS = baseHsl.s * SHADOW_SAT_BASE_WEIGHT + targetHsl.s * SHADOW_SAT_TARGET_WEIGHT;
+  } else {
+    finalH = targetHsl.h;
+    finalS = baseHsl.s * SAT_BASE_WEIGHT + targetHsl.s * SAT_TARGET_WEIGHT;
+  }
+
+  return hslToRgb(finalH, clamp(finalS, 0, 1), clamp(finalL, 0, 1));
 }
 
 function pixelSaturation(r, g, b) {
@@ -137,11 +189,6 @@ function morphologyDilate(src, width, height, radius) {
   return out;
 }
 
-export function luminanceShade(r, g, b) {
-  const lum = pixelBrightness(r, g, b);
-  return clamp(lum / LUM_SHADE_DIV, LUM_SHADE_MIN, LUM_SHADE_MAX);
-}
-
 export async function loadImage(path) {
   const { data, info } = await sharp(path).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   return {
@@ -180,8 +227,8 @@ export async function saveImage(data, path, width, height, channels = 4) {
   return size;
 }
 
-/** Center crop, blur, median RGB target. */
-export async function getSwatchTargetRgb(swatchPath) {
+/** Center crop, blur, median RGB → HSL target. */
+export async function getSwatchTargetHsl(swatchPath) {
   const meta = await sharp(swatchPath).metadata();
   const width = meta.width;
   const height = meta.height;
@@ -219,11 +266,11 @@ export async function getSwatchTargetRgb(swatchPath) {
 
   if (!rs.length) throw new Error(`No swatch pixels: ${swatchPath}`);
 
-  return {
-    r: Math.round(medianOf(rs)),
-    g: Math.round(medianOf(gs)),
-    b: Math.round(medianOf(bs)),
-  };
+  const r = Math.round(medianOf(rs));
+  const g = Math.round(medianOf(gs));
+  const b = Math.round(medianOf(bs));
+  const hsl = rgbToHsl(r, g, b);
+  return { r, g, b, hsl };
 }
 
 export function getSofaBottomY(baseImage) {
@@ -274,13 +321,12 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
 }
 
 /**
- * Direct opaque replace inside mask — luminance shading only.
+ * HSL color blend inside mask — base L unchanged, no RGB multiply/opacity.
  */
-export function recolorSofa(baseImage, mask, targetRgb, sofaBottomY) {
+export function recolorSofa(baseImage, mask, targetHsl, sofaBottomY) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
   const yMax = sofaBottomY + FLOOR_BELOW_SOFA_PX;
-  const { r: tR, g: tG, b: tB } = targetRgb;
 
   for (let y = 0; y < height; y++) {
     if (y > yMax) continue;
@@ -289,14 +335,12 @@ export function recolorSofa(baseImage, mask, targetRgb, sofaBottomY) {
       if (mask[j] < MASK_APPLY_THRESH) continue;
 
       const p = j * channels;
-      const oR = data[p];
-      const oG = data[p + 1];
-      const oB = data[p + 2];
-      const shade = luminanceShade(oR, oG, oB);
+      const base = rgbToHsl(data[p], data[p + 1], data[p + 2]);
+      const { r, g, b } = blendHslPixel(base, targetHsl);
 
-      out[p] = Math.round(clamp(tR * shade, 0, 255));
-      out[p + 1] = Math.round(clamp(tG * shade, 0, 255));
-      out[p + 2] = Math.round(clamp(tB * shade, 0, 255));
+      out[p] = r;
+      out[p + 1] = g;
+      out[p + 2] = b;
       if (channels === 4) out[p + 3] = data[p + 3];
     }
   }
@@ -306,13 +350,18 @@ export function recolorSofa(baseImage, mask, targetRgb, sofaBottomY) {
 
 export async function processSwatch(swatchPath, baseSofa, mask, sofaBottomY) {
   const swatchName = basename(swatchPath, extname(swatchPath));
-  const target = await getSwatchTargetRgb(swatchPath);
+  const target = await getSwatchTargetHsl(swatchPath);
   console.log({
     swatchName,
     targetRGB: [target.r, target.g, target.b],
+    targetHSL: [
+      Math.round(target.hsl.h * 360),
+      Math.round(target.hsl.s * 100) / 100,
+      Math.round(target.hsl.l * 100) / 100,
+    ],
   });
 
-  const outData = recolorSofa(baseSofa, mask, target, sofaBottomY);
+  const outData = recolorSofa(baseSofa, mask, target.hsl, sofaBottomY);
   const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
   const bytes = await saveImage(outData, outPath, baseSofa.width, baseSofa.height, baseSofa.channels);
   console.log(`  wrote ${swatchName}.png (${Math.round(bytes / 1024)} KB)`);
@@ -376,7 +425,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: direct luminance replace (opaque)');
+  console.log('  method: HSL color blend (L preserved)');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   if (maskPath) console.log(`  mask: ${maskPath}`);

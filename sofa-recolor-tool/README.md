@@ -1,6 +1,6 @@
 # Sofa Recolor Tool
 
-**Direct opaque luminance recolor** — no overlays, opacity, or RGB blending.
+**HSL color-blend** recolor — original lightness and shading preserved; swatch controls hue and saturation.
 
 ## Commands
 
@@ -11,19 +11,19 @@ npm run preview
 npm run render
 ```
 
-## Pipeline
-
-1. **Leather mask** — upholstery, seams, bottom front rail; excludes legs, background, floor shadow only below sofa base
-2. **Swatch target** — center crop, median RGB
-3. **Per masked pixel** (fully opaque):
+## Per upholstery pixel
 
 ```
-lum = 0.2126*r + 0.7152*g + 0.0722*b
-shade = clamp(lum / 165, 0.45, 1.22)
-finalR = targetR * shade
-finalG = targetG * shade
-finalB = targetB * shade
-alpha = original alpha
+base = original HSL
+target = swatch HSL (median from center crop)
+
+finalL = base.l                    // 100% original luminance
+finalH = target.h
+finalS = base.s * 0.55 + target.s * 0.45
+
+if base.l < 0.16:                 // deep seams/shadows
+  finalH = blend(base.h, target.h, 0.5)
+  finalS = base.s * 0.8 + target.s * 0.2
 ```
 
-No LAB, no `mask/255` blend, no semi-transparent layers.
+Convert back to RGB. Binary mask only — no opacity overlays, no luminance multiply, no flat RGB replace.
