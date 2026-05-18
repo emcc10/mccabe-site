@@ -1,5 +1,5 @@
 /**
- * HSL color-blend recolor — original L preserved; hue/sat from swatch.
+ * RGB color-balance recolor — one median target per swatch; scales original channels.
  */
 import AdmZip from 'adm-zip';
 import {
@@ -27,17 +27,16 @@ const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 
 const BG_THRESH = 235;
 const FLOOR_BELOW_SOFA_PX = 6;
-const SWATCH_CENTER_CROP = 0.35;
+const SWATCH_CENTER_CROP = 0.4;
 const SWATCH_BLUR_PX = 12;
+const SWATCH_LUM_MIN = 25;
+const SWATCH_LUM_MAX = 230;
 const MASK_DILATE_RADIUS = 2;
-const MASK_FEATHER_RADIUS = 0;
 const MASK_APPLY_THRESH = 128;
-const SHADOW_L_THRESHOLD = 0.16;
-const SAT_BASE_WEIGHT = 0.55;
-const SAT_TARGET_WEIGHT = 0.45;
-const SHADOW_SAT_BASE_WEIGHT = 0.8;
-const SHADOW_SAT_TARGET_WEIGHT = 0.2;
-const SHADOW_HUE_BLEND = 0.5;
+const RATIO_MIN = 0.45;
+const RATIO_MAX = 2.2;
+const ORIGINAL_BLEND = 0.35;
+const BALANCE_BLEND = 0.65;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
@@ -59,81 +58,19 @@ function isNearWhite(r, g, b) {
   return r > BG_THRESH && g > BG_THRESH && b > BG_THRESH;
 }
 
-export function rgbToHsl(r, g, b) {
-  const rn = r / 255;
-  const gn = g / 255;
-  const bn = b / 255;
-  const max = Math.max(rn, gn, bn);
-  const min = Math.min(rn, gn, bn);
-  const l = (max + min) / 2;
-  if (max === min) return { h: 0, s: 0, l };
-  const d = max - min;
-  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-  let h = 0;
-  if (max === rn) h = ((gn - bn) / d + (gn < bn ? 6 : 0)) / 6;
-  else if (max === gn) h = ((bn - rn) / d + 2) / 6;
-  else h = ((rn - gn) / d + 4) / 6;
-  return { h, s, l };
-}
-
-export function hslToRgb(h, s, l) {
-  if (s <= 0) {
-    const v = Math.round(clamp(l, 0, 1) * 255);
-    return { r: v, g: v, b: v };
-  }
-  const hue = ((h % 1) + 1) % 1;
-  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-  const p = 2 * l - q;
-  const hk = hue * 6;
-  const t = [hk + 2, hk, hk - 2];
-  const rgb = t.map((ti) => {
-    let x = ti;
-    if (x < 0) x += 6;
-    if (x >= 6) x -= 6;
-    let c;
-    if (x < 1) c = p + (q - p) * x;
-    else if (x < 3) c = q;
-    else if (x < 4) c = p + (q - p) * (4 - x);
-    else c = p;
-    return Math.round(clamp(c, 0, 1) * 255);
-  });
-  return { r: rgb[1], g: rgb[2], b: rgb[0] };
-}
-
-/** Circular hue blend (h in 0–1). */
-export function blendHue(h1, h2, t) {
-  let d = h2 - h1;
-  if (d > 0.5) d -= 1;
-  if (d < -0.5) d += 1;
-  return ((h1 + d * t) % 1 + 1) % 1;
-}
-
-/** HSL color blend — keeps base L; swatch hue/sat. */
-export function blendHslPixel(baseHsl, targetHsl) {
-  const finalL = baseHsl.l;
-  let finalH;
-  let finalS;
-
-  if (baseHsl.l < SHADOW_L_THRESHOLD) {
-    finalH = blendHue(baseHsl.h, targetHsl.h, SHADOW_HUE_BLEND);
-    finalS = baseHsl.s * SHADOW_SAT_BASE_WEIGHT + targetHsl.s * SHADOW_SAT_TARGET_WEIGHT;
-  } else {
-    finalH = targetHsl.h;
-    finalS = baseHsl.s * SAT_BASE_WEIGHT + targetHsl.s * SAT_TARGET_WEIGHT;
-  }
-
-  return hslToRgb(finalH, clamp(finalS, 0, 1), clamp(finalL, 0, 1));
-}
-
 function pixelSaturation(r, g, b) {
-  return rgbToHsl(r, g, b).s;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  if (max === min) return 0;
+  const l = (max + min) / 510;
+  const d = (max - min) / 255;
+  return l > 0.5 ? d / (2 - l * 2) : d / (l * 2);
 }
 
 function rgbMaxDiff(r, g, b) {
   return Math.max(Math.abs(r - g), Math.abs(r - b), Math.abs(g - b));
 }
 
-/** True floor shadow below sofa base — not front rail or cushion. */
 function isFloorShadowPixel(r, g, b, y, sofaBottomY) {
   if (y <= sofaBottomY) return false;
   const bright = pixelBrightness(r, g, b);
@@ -142,7 +79,6 @@ function isFloorShadowPixel(r, g, b, y, sofaBottomY) {
   return rgbMaxDiff(r, g, b) < 28;
 }
 
-/** Legs only — narrow band at very bottom, dark and neutral. */
 function isLegPixel(r, g, b, y, sofaBottomY) {
   if (y < sofaBottomY - 2) return false;
   if (pixelBrightness(r, g, b) > 48) return false;
@@ -163,7 +99,6 @@ function isUpholsteryPixel(r, g, b, y, sofaBottomY) {
 
   const lum = pixelBrightness(r, g, b);
   const sat = pixelSaturation(r, g, b);
-
   if (sat >= 0.05) return true;
   if (lum >= 6 && lum <= 200) return true;
   return false;
@@ -187,6 +122,28 @@ function morphologyDilate(src, width, height, radius) {
     }
   }
   return out;
+}
+
+/** Channel ratios from one target RGB and sofa average RGB. */
+export function computeColorBalanceRatios(targetRgb, baseRgb) {
+  const safe = (v) => Math.max(v, 1);
+  return {
+    r: clamp(targetRgb.r / safe(baseRgb.r), RATIO_MIN, RATIO_MAX),
+    g: clamp(targetRgb.g / safe(baseRgb.g), RATIO_MIN, RATIO_MAX),
+    b: clamp(targetRgb.b / safe(baseRgb.b), RATIO_MIN, RATIO_MAX),
+  };
+}
+
+/** original * 0.35 + (original * ratio) * 0.65 */
+export function applyColorBalancePixel(oR, oG, oB, ratios) {
+  const newR = oR * ratios.r;
+  const newG = oG * ratios.g;
+  const newB = oB * ratios.b;
+  return {
+    r: Math.round(clamp(oR * ORIGINAL_BLEND + newR * BALANCE_BLEND, 0, 255)),
+    g: Math.round(clamp(oG * ORIGINAL_BLEND + newG * BALANCE_BLEND, 0, 255)),
+    b: Math.round(clamp(oB * ORIGINAL_BLEND + newB * BALANCE_BLEND, 0, 255)),
+  };
 }
 
 export async function loadImage(path) {
@@ -227,8 +184,11 @@ export async function saveImage(data, path, width, height, channels = 4) {
   return size;
 }
 
-/** Center crop, blur, median RGB → HSL target. */
-export async function getSwatchTargetHsl(swatchPath) {
+/**
+ * ONE median RGB from center 40% of blurred swatch crop (textured reference).
+ * Excludes edge highlights/shadows; never reads debug files.
+ */
+export async function getSwatchTargetRgb(swatchPath) {
   const meta = await sharp(swatchPath).metadata();
   const width = meta.width;
   const height = meta.height;
@@ -258,6 +218,8 @@ export async function getSwatchTargetHsl(swatchPath) {
       const b = data[i + 2];
       const a = channels === 4 ? data[i + 3] : 255;
       if (a < 20 || isNearWhite(r, g, b)) continue;
+      const lum = pixelBrightness(r, g, b);
+      if (lum < SWATCH_LUM_MIN || lum > SWATCH_LUM_MAX) continue;
       rs.push(r);
       gs.push(g);
       bs.push(b);
@@ -266,11 +228,55 @@ export async function getSwatchTargetHsl(swatchPath) {
 
   if (!rs.length) throw new Error(`No swatch pixels: ${swatchPath}`);
 
-  const r = Math.round(medianOf(rs));
-  const g = Math.round(medianOf(gs));
-  const b = Math.round(medianOf(bs));
-  const hsl = rgbToHsl(r, g, b);
-  return { r, g, b, hsl };
+  return {
+    r: Math.round(medianOf(rs)),
+    g: Math.round(medianOf(gs)),
+    b: Math.round(medianOf(bs)),
+    cropWidth: cw,
+    cropHeight: ch,
+    cropBuffer: data,
+    cropChannels: channels,
+    cropW: info.width,
+    cropH: info.height,
+  };
+}
+
+/** Diagnostic only — textured crop preview; not used for ratios. */
+export async function saveDebugSwatchCrop(swatchName, target) {
+  const path = join(OUTPUT_DIR, `DEBUG-${swatchName}-crop.png`);
+  await sharp(target.cropBuffer, {
+    raw: { width: target.cropW, height: target.cropH, channels: target.cropChannels },
+  }).png().toFile(path);
+}
+
+/** Average RGB of masked upholstery on base sofa. */
+export function computeSofaAverageRgb(baseImage, mask, sofaBottomY) {
+  const { data, width, height, channels } = baseImage;
+  const yMax = sofaBottomY + FLOOR_BELOW_SOFA_PX;
+  let sumR = 0;
+  let sumG = 0;
+  let sumB = 0;
+  let n = 0;
+
+  for (let y = 0; y < height; y++) {
+    if (y > yMax) continue;
+    for (let x = 0; x < width; x++) {
+      const j = y * width + x;
+      if (mask[j] < MASK_APPLY_THRESH) continue;
+      const p = j * channels;
+      sumR += data[p];
+      sumG += data[p + 1];
+      sumB += data[p + 2];
+      n++;
+    }
+  }
+
+  if (!n) return { r: 90, g: 60, b: 40 };
+  return {
+    r: sumR / n,
+    g: sumG / n,
+    b: sumB / n,
+  };
 }
 
 export function getSofaBottomY(baseImage) {
@@ -320,10 +326,7 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
   return morphologyDilate(hard, width, height, MASK_DILATE_RADIUS);
 }
 
-/**
- * HSL color blend inside mask — base L unchanged, no RGB multiply/opacity.
- */
-export function recolorSofa(baseImage, mask, targetHsl, sofaBottomY) {
+export function recolorSofa(baseImage, mask, ratios, sofaBottomY) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
   const yMax = sofaBottomY + FLOOR_BELOW_SOFA_PX;
@@ -335,8 +338,10 @@ export function recolorSofa(baseImage, mask, targetHsl, sofaBottomY) {
       if (mask[j] < MASK_APPLY_THRESH) continue;
 
       const p = j * channels;
-      const base = rgbToHsl(data[p], data[p + 1], data[p + 2]);
-      const { r, g, b } = blendHslPixel(base, targetHsl);
+      const oR = data[p];
+      const oG = data[p + 1];
+      const oB = data[p + 2];
+      const { r, g, b } = applyColorBalancePixel(oR, oG, oB, ratios);
 
       out[p] = r;
       out[p + 1] = g;
@@ -348,24 +353,37 @@ export function recolorSofa(baseImage, mask, targetHsl, sofaBottomY) {
   return out;
 }
 
-export async function processSwatch(swatchPath, baseSofa, mask, sofaBottomY) {
+export async function processSwatch(swatchPath, baseSofa, mask, sofaBottomY, sofaAvgRgb) {
   const swatchName = basename(swatchPath, extname(swatchPath));
-  const target = await getSwatchTargetHsl(swatchPath);
+  const target = await getSwatchTargetRgb(swatchPath);
+  const ratios = computeColorBalanceRatios(target, sofaAvgRgb);
+
   console.log({
     swatchName,
     targetRGB: [target.r, target.g, target.b],
-    targetHSL: [
-      Math.round(target.hsl.h * 360),
-      Math.round(target.hsl.s * 100) / 100,
-      Math.round(target.hsl.l * 100) / 100,
+    sofaAvgRGB: [
+      Math.round(sofaAvgRgb.r),
+      Math.round(sofaAvgRgb.g),
+      Math.round(sofaAvgRgb.b),
+    ],
+    ratios: [
+      Math.round(ratios.r * 1000) / 1000,
+      Math.round(ratios.g * 1000) / 1000,
+      Math.round(ratios.b * 1000) / 1000,
     ],
   });
 
-  const outData = recolorSofa(baseSofa, mask, target.hsl, sofaBottomY);
+  try {
+    await saveDebugSwatchCrop(swatchName, target);
+  } catch (err) {
+    console.warn(`  debug crop skipped: ${err.message}`);
+  }
+
+  const outData = recolorSofa(baseSofa, mask, ratios, sofaBottomY);
   const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
   const bytes = await saveImage(outData, outPath, baseSofa.width, baseSofa.height, baseSofa.channels);
   console.log(`  wrote ${swatchName}.png (${Math.round(bytes / 1024)} KB)`);
-  return { outPath, target };
+  return { outPath, target, ratios };
 }
 
 export function zipOutputs(outputDir, zipPath) {
@@ -425,13 +443,17 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: HSL color blend (L preserved)');
+  console.log('  method: RGB color balance (one target per swatch)');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   if (maskPath) console.log(`  mask: ${maskPath}`);
   const mask = await createUpholsteryMask(baseSofa, maskPath);
   const sofaBottomY = getSofaBottomY(baseSofa);
-  console.log(`  sofa bottom y=${sofaBottomY}, recolor through y=${sofaBottomY + FLOOR_BELOW_SOFA_PX}`);
+  const sofaAvgRgb = computeSofaAverageRgb(baseSofa, mask, sofaBottomY);
+  console.log(
+    `  sofa avg RGB: [${Math.round(sofaAvgRgb.r)}, ${Math.round(sofaAvgRgb.g)}, ${Math.round(sofaAvgRgb.b)}]`,
+  );
+  console.log(`  recolor through y=${sofaBottomY + FLOOR_BELOW_SOFA_PX}`);
 
   if (cli.mode === 'one') {
     const swPath = resolveSwatchArg(cli.swatchFile);
@@ -439,7 +461,7 @@ export async function main(argv = process.argv) {
       console.error(`Swatch not found: ${cli.swatchFile}`);
       process.exit(1);
     }
-    const { outPath } = await processSwatch(swPath, baseSofa, mask, sofaBottomY);
+    const { outPath } = await processSwatch(swPath, baseSofa, mask, sofaBottomY, sofaAvgRgb);
     console.log(`\nDone: ${outPath}`);
     return;
   }
@@ -449,7 +471,7 @@ export async function main(argv = process.argv) {
     .sort((a, b) => a.localeCompare(b));
 
   for (const file of swatches) {
-    await processSwatch(join(SWATCH_DIR, file), baseSofa, mask, sofaBottomY);
+    await processSwatch(join(SWATCH_DIR, file), baseSofa, mask, sofaBottomY, sofaAvgRgb);
   }
 
   const onDisk = readdirSync(OUTPUT_DIR).filter(

@@ -2,7 +2,7 @@
   "name": "sofa-recolor-tool",
   "version": "2.1.0",
   "private": true,
-  "description": "Direct opaque luminance recolor on base sofa photo (batch).",
+  "description": "RGB color-balance recolor on base sofa photo (batch).",
   "type": "module",
   "scripts": {
     "preview": "node render-sofas.js --currant",
