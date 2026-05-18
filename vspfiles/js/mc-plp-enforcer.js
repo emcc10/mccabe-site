@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260528
+ * MC_PLP_ENFORCER_20260529
  *
  * DOM (category listing):
  *   table.colors_backgroundlight + SearchResults_SubCat_Angle  ← black bar (legacy subcat chrome)
@@ -10,36 +10,13 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260528";
-
-  /** Overrides baked template width:100% + white tile on img (gray mat -> white box -> sofa). */
-  var THUMB_FIX_CSS =
-    "html.category #content_area .v-product-grid a.v-product__img," +
-    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img{" +
-    "background:#f2f2f2!important;background-color:#f2f2f2!important;" +
-    "border:0!important;box-shadow:none!important}" +
-    "html.category #content_area .v-product-grid a.v-product__img>img," +
-    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img>img{" +
-    "width:auto!important;max-width:calc(100% - 4px)!important;height:220px!important;" +
-    "max-height:220px!important;background:transparent!important;background-color:transparent!important;" +
-    "border:0!important;box-shadow:none!important;object-fit:contain!important;" +
-    "object-position:center bottom!important}" +
-    "html.category #content_area .v-product-grid a.v-product__img .v-product__image-wrap," +
-    "html.category #content_area .v-product-grid a.v-product__img span," +
-    "html.category #content_area .v-product-grid a.v-product__img div," +
-    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img .v-product__image-wrap," +
-    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img span," +
-    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img div{" +
-    "background:transparent!important;background-color:transparent!important;" +
-    "border:0!important;box-shadow:none!important;padding:0!important;margin:0!important}" +
-    "@media(max-width:991px){html.category #content_area .v-product-grid a.v-product__img>img," +
-    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img>img{" +
-    "height:172px!important;max-height:172px!important}}";
+  var VERSION = "20260529";
+  var PLP_MAT = "#f3f3f1";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
 
-  var MAT = "#f2f2f2";
+  var MAT = PLP_MAT;
   var TILE = 280;
   var STAGE = 220;
   var TILE_M = 220;
@@ -280,17 +257,31 @@
     });
   }
 
-  function injectThumbFixStyle() {
+  function fixPLPThumbBackgrounds() {
     if (!isCategoryPlp()) return;
-    var id = "mc-plp-thumb-fix";
-    var el = document.getElementById(id);
-    if (!el) {
-      el = document.createElement("style");
-      el.id = id;
-    }
-    el.textContent = THUMB_FIX_CSS;
-    var root = document.body || document.documentElement;
-    if (el.parentNode !== root) root.appendChild(el);
+    document
+      .querySelectorAll(
+        '#content_area .v-product-grid img[src*="/v/vspfiles/photos/"],' +
+          '#content_area .v-product-grid img[src*="vspfiles/photos"]'
+      )
+      .forEach(function (img) {
+        if (!img.closest(".v-product-grid") || img.closest("#v65-product-related")) return;
+
+        img.style.setProperty("background", "transparent", "important");
+        img.style.setProperty("border", "0", "important");
+        img.style.setProperty("box-shadow", "none", "important");
+
+        var el = img.parentElement;
+        var i;
+        for (i = 0; i < 5 && el; i++) {
+          if (!el.closest || !el.closest(".v-product-grid")) break;
+          el.style.setProperty("background", PLP_MAT, "important");
+          el.style.setProperty("background-color", PLP_MAT, "important");
+          el.style.setProperty("border", "0", "important");
+          el.style.setProperty("box-shadow", "none", "important");
+          el = el.parentElement;
+        }
+      });
   }
 
   function clearInnerThumbChrome(node) {
@@ -328,7 +319,12 @@
     wrap.style.setProperty("box-shadow", "none", "important");
     wrap.style.setProperty("line-height", "0", "important");
 
-    wrap.querySelectorAll(".v-product__image-wrap, span, div").forEach(clearInnerThumbChrome);
+    wrap.querySelectorAll(".v-product__image-wrap, span, div").forEach(function (node) {
+      node.style.setProperty("background", PLP_MAT, "important");
+      node.style.setProperty("background-color", PLP_MAT, "important");
+      node.style.setProperty("border", "0", "important");
+      node.style.setProperty("box-shadow", "none", "important");
+    });
 
     var img = wrap.querySelector(":scope > img") || wrap.querySelector("img");
     if (!img) return;
@@ -381,8 +377,8 @@
   function run() {
     if (!isCategoryPlp()) return;
     markCategory();
-    injectThumbFixStyle();
     removeLegacyCategoryBars();
+    fixPLPThumbBackgrounds();
     applyThumbs();
     hideHero();
   }

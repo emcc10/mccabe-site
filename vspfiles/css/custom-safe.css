@@ -14177,3 +14177,39 @@ html.category #content_area .v-product-grid a.v-product__img > img {
     max-height: 172px !important;
   }
 }
+
+/* MC PLP THUMB BACKGROUND FIX */
+html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos/"],
+html.category #content_area .v-product-grid img[src*="/v/vspfiles/product/"],
+html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos"],
+html.category #content_area .v-product-grid img[src*="vspfiles/photos"] {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+html.category #content_area .v-product-grid a:has(img[src*="/v/vspfiles/photos/"]),
+html.category #content_area .v-product-grid a:has(img[src*="vspfiles/photos"]),
+html.category #content_area .v-product-grid div:has(> img[src*="/v/vspfiles/photos/"]),
+html.category #content_area .v-product-grid div:has(> img[src*="vspfiles/photos"]),
+html.category #content_area .v-product-grid td:has(img[src*="/v/vspfiles/photos/"]),
+html.category #content_area .v-product-grid td:has(img[src*="vspfiles/photos"]) {
+  background: #f3f3f1 !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+html.category #content_area .v-product-grid .v-product,
+html.category #content_area .v-product-grid .v-product__img,
+html.category #content_area .v-product-grid .product_image,
+html.category #content_area .v-product-grid .product_productphoto,
+html.category #content_area .v-product-grid .product-photo,
+html.category #content_area .v-product-grid .product-image,
+html.category #content_area .v-product-grid .product-image-wrapper,
+html.category #content_area .v-product-grid .productimg,
+html.category #content_area .v-product-grid .v65-productPhoto,
+html.category #content_area .v-product-grid .v65-productPhoto a {
+  background: #f3f3f1 !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
