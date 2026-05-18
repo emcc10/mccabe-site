@@ -2,7 +2,16 @@
  * Photographic leather recolor — swatch H/S + original sofa L (HSL); no cognac bleed in midtones. No AI.
  */
 import AdmZip from 'adm-zip';
-import { mkdirSync, readdirSync, existsSync, writeFileSync } from 'fs';
+import {
+  mkdirSync,
+  readdirSync,
+  existsSync,
+  writeFileSync,
+  renameSync,
+  unlinkSync,
+  statSync,
+} from 'fs';
+import { tmpdir } from 'os';
 import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
@@ -233,13 +242,45 @@ export async function loadImage(path) {
   };
 }
 
-export async function saveImage(data, path, width, height) {
+/** Write via temp file + verify size (OneDrive often blocks large direct writes). */
+export async function saveImage(data, path, width, height, channels = 4) {
   mkdirSync(dirname(path), { recursive: true });
+  const tmpPath = join(
+    tmpdir(),
+    `sofa-recolor-${Date.now()}-${basename(path).replace(/[^\w.-]/g, '_')}`,
+  );
+
   await sharp(data, {
-    raw: { width, height, channels: 4 },
+    raw: { width, height, channels },
   })
     .png()
-    .toFile(path);
+    .toFile(tmpPath);
+
+  try {
+    if (existsSync(path)) unlinkSync(path);
+  } catch {
+    /* locked target */
+  }
+
+  try {
+    renameSync(tmpPath, path);
+  } catch {
+    await sharp(tmpPath).toFile(path);
+    try {
+      unlinkSync(tmpPath);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (!existsSync(path)) {
+    throw new Error(`Sofa PNG not created: ${path}`);
+  }
+  const { size } = statSync(path);
+  if (size < 10_000) {
+    throw new Error(`Sofa PNG too small (${size} bytes), write likely failed: ${path}`);
+  }
+  return size;
 }
 
 function isSwatchFoldShadow(hsl) {
@@ -466,6 +507,7 @@ export async function getSwatchTargetRgb(swatchPath) {
   };
 }
 
+/** Flat fill = algorithmic target (not a photo of the swatch). */
 export async function saveDebugColorChip(swatchName, r, g, b) {
   const path = join(OUTPUT_DIR, `DEBUG-${swatchName}-target-color.png`);
   await sharp({
@@ -476,6 +518,26 @@ export async function saveDebugColorChip(swatchName, r, g, b) {
       background: { r, g, b },
     },
   })
+    .png()
+    .toFile(path);
+  return path;
+}
+
+/** Center crop of swatch (blurred) for side-by-side QA vs target chip. */
+export async function saveDebugSwatchCrop(swatchPath, swatchName) {
+  const meta = await sharp(swatchPath).metadata();
+  const width = meta.width;
+  const height = meta.height;
+  const margin = (1 - SWATCH_CENTER_CROP) / 2;
+  const x0 = Math.floor(width * margin);
+  const y0 = Math.floor(height * margin);
+  const cw = Math.max(1, Math.floor(width * SWATCH_CENTER_CROP));
+  const ch = Math.max(1, Math.floor(height * SWATCH_CENTER_CROP));
+  const path = join(OUTPUT_DIR, `DEBUG-${swatchName}-swatch-crop.png`);
+  await sharp(swatchPath)
+    .extract({ left: x0, top: y0, width: cw, height: ch })
+    .blur(SWATCH_BLUR_PX)
+    .resize(DEBUG_CHIP_SIZE, DEBUG_CHIP_SIZE, { fit: 'cover' })
     .png()
     .toFile(path);
   return path;
@@ -689,13 +751,6 @@ export async function processSwatch(
     clusterStats: targetRgb.cluster.clusters,
   });
 
-  const debugPath = await saveDebugColorChip(
-    swatchName,
-    targetRgb.r,
-    targetRgb.g,
-    targetRgb.b,
-  );
-
   const outData = recolorSofa(
     baseSofa,
     mask,
@@ -705,7 +760,22 @@ export async function processSwatch(
   );
   const outName = `${swatchName}.png`;
   const outPath = join(OUTPUT_DIR, outName);
-  await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
+  const bytes = await saveImage(
+    outData,
+    outPath,
+    baseSofa.width,
+    baseSofa.height,
+    baseSofa.channels,
+  );
+  console.log(`  wrote ${outName} (${Math.round(bytes / 1024)} KB)`);
+
+  const debugPath = await saveDebugColorChip(
+    swatchName,
+    targetRgb.r,
+    targetRgb.g,
+    targetRgb.b,
+  );
+  await saveDebugSwatchCrop(swatchPath, swatchName);
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
   const stamp = `${new Date().toISOString()}\n${swatchName}\nmethod: hsl-hue-replace\nsampling: kmeans-saturated-cluster\ntargetRGB: ${targetRgb.r},${targetRgb.g},${targetRgb.b}\ncluster: ${targetRgb.cluster.id}\ndebugChip: ${basename(debugPath)}\n`;
@@ -829,7 +899,7 @@ export async function main(argv = process.argv) {
   const written = [];
   for (const file of swatches) {
     const swPath = join(SWATCH_DIR, file);
-    const { outPath, targetColor } = await processSwatch(
+    const { outPath } = await processSwatch(
       swPath,
       baseSofa,
       mask,
@@ -837,12 +907,27 @@ export async function main(argv = process.argv) {
       sofaBottomY,
       sofaBounds,
     );
-    console.log(`  → ${basename(outPath)}`);
     written.push(outPath);
   }
 
-  const n = zipOutputs(OUTPUT_DIR, ZIP_PATH);
-  console.log(`\nDone. ${written.length} PNG(s), zip: ${ZIP_PATH} (${n} files)`);
+  const sofaOnDisk = readdirSync(OUTPUT_DIR).filter(
+    (f) => f.toLowerCase().endsWith('.png') && !f.startsWith('DEBUG-'),
+  );
+  console.log(`\nSofa PNGs on disk: ${sofaOnDisk.length} / ${swatches.length}`);
+  if (sofaOnDisk.length < swatches.length) {
+    console.warn(
+      'WARNING: Some sofa renders are missing. Close sofa-renders.zip in Explorer/OneDrive, then run npm run render again.',
+    );
+  }
+
+  try {
+    const n = zipOutputs(OUTPUT_DIR, ZIP_PATH);
+    console.log(`Zip: ${ZIP_PATH} (${n} sofa files)`);
+  } catch (err) {
+    console.warn(`Zip skipped: ${err.message}`);
+  }
+
+  console.log(`\nDone. ${written.length} sofa render(s) in:\n  ${OUTPUT_DIR}`);
 }
 
 const isMain =
