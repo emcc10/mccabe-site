@@ -22080,6 +22080,20 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
   console.log("MTL CLEANUP VERSION LOADED:", window.MTL_CLEANUP_VERSION);
 </script>
+<script id="mc-plp-body-boot">
+(function (w, d) {
+  function loadPlpEnforcer() {
+    if (w.__MC_PLP_ENFORCER__ || w.__MC_PLP_ENFORCER_LOADING__) return;
+    w.__MC_PLP_ENFORCER_LOADING__ = 1;
+    var s = d.createElement("script");
+    s.src = "/v/vspfiles/js/mc-plp-enforcer.js?m=" + Date.now();
+    (d.body || d.head || d.documentElement).appendChild(s);
+  }
+  loadPlpEnforcer();
+  d.addEventListener("DOMContentLoaded", loadPlpEnforcer);
+  w.addEventListener("load", loadPlpEnforcer);
+})(window, document);
+</script>
   <!--Start of Tawk.to Script-->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();

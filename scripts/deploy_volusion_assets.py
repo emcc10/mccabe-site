@@ -18,6 +18,7 @@ CRITICAL = (
 OPTIONAL = (
     "vspfiles/css/custom-safe.css",
     "vspfiles/css/mc-live-patch.css",
+    "vspfiles/css/mc-plp-body-last.css",
     "vspfiles/js/mc-site-fix.js",
     "vspfiles/templates/266/css/mccabe-overrides.css",
     "vspfiles/js/sectional-configs.js",

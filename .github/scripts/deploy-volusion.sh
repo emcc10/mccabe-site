@@ -125,6 +125,10 @@ put_primary "vspfiles/templates/266/css/mccabe-overrides.css" "mccabe-overrides"
   "/vspfiles/templates/266/css/mccabe-overrides.css" \
   "vspfiles/templates/266/css/mccabe-overrides.css"
 
+put_primary "vspfiles/css/mc-plp-body-last.css" "mc-plp-body-last" \
+  "/vspfiles/css/mc-plp-body-last.css" \
+  "vspfiles/css/mc-plp-body-last.css"
+
 put_primary "vspfiles/js/sectional-configs.js" "sectional-configs" \
   "/vspfiles/js/sectional-configs.js" \
   "vspfiles/js/sectional-configs.js"
@@ -156,7 +160,7 @@ verify_url() {
 }
 
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "C_CSS_DEPLOY_VERIFY_20260518e"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js" "MC_PLP_ENFORCER_20260519"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js" "MC_PLP_ENFORCER_20260520"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260519"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/template.min.js" "MC_PLP_ENFORCER_LOADING__"
 
