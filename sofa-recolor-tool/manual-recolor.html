@@ -213,7 +213,6 @@
       <div class="canvas-wrap" id="wrap">
         <canvas id="resultCanvas"></canvas>
         <canvas id="maskCanvas"></canvas>
-        <canvas id="paintCanvas"></canvas>
       </div>
       <p class="hint" id="sizeHint">Load a sofa image to begin.</p>
     </div>
@@ -234,10 +233,8 @@
 
     const resultCanvas = document.getElementById('resultCanvas');
     const maskCanvas = document.getElementById('maskCanvas');
-    const paintCanvas = document.getElementById('paintCanvas');
     const resultCtx = resultCanvas.getContext('2d', { willReadFrequently: true });
     const maskCtx = maskCanvas.getContext('2d');
-    const paintCtx = paintCanvas.getContext('2d');
 
     function clamp(v, lo, hi) {
       return Math.max(lo, Math.min(hi, v));
@@ -367,10 +364,11 @@
     function resizeCanvases(w, h) {
       width = w;
       height = h;
-      for (const c of [resultCanvas, maskCanvas, paintCanvas]) {
+      for (const c of [resultCanvas, maskCanvas]) {
         c.width = w;
         c.height = h;
       }
+      maskCanvas.classList.add('mask-edit');
       document.getElementById('sizeHint').textContent = `${w} × ${h}px`;
     }
 
@@ -438,7 +436,7 @@
     });
 
     function paintAt(clientX, clientY) {
-      const rect = paintCanvas.getBoundingClientRect();
+      const rect = maskCanvas.getBoundingClientRect();
       const scaleX = width / rect.width;
       const scaleY = height / rect.height;
       const x = (clientX - rect.left) * scaleX;
@@ -455,16 +453,16 @@
       render();
     }
 
-    paintCanvas.addEventListener('pointerdown', (e) => {
+    maskCanvas.addEventListener('pointerdown', (e) => {
       isDrawing = true;
-      paintCanvas.setPointerCapture(e.pointerId);
+      maskCanvas.setPointerCapture(e.pointerId);
       paintAt(e.clientX, e.clientY);
     });
-    paintCanvas.addEventListener('pointermove', (e) => {
+    maskCanvas.addEventListener('pointermove', (e) => {
       if (!isDrawing) return;
       paintAt(e.clientX, e.clientY);
     });
-    paintCanvas.addEventListener('pointerup', () => {
+    maskCanvas.addEventListener('pointerup', () => {
       isDrawing = false;
       try {
         localStorage.setItem(STORAGE_MASK, maskCanvas.toDataURL('image/png'));
@@ -503,14 +501,15 @@
       viewMode = 'preview';
       document.getElementById('viewPreview').classList.add('active');
       document.getElementById('viewMask').classList.remove('active');
-      document.getElementById('maskCanvas').style.opacity = '0.35';
+      maskCanvas.style.pointerEvents = 'auto';
       render();
     };
     document.getElementById('viewMask').onclick = () => {
       viewMode = 'mask';
       document.getElementById('viewMask').classList.add('active');
       document.getElementById('viewPreview').classList.remove('active');
-      document.getElementById('maskCanvas').style.opacity = '1';
+      maskCanvas.style.opacity = '1';
+      maskCanvas.style.pointerEvents = 'auto';
       render();
     };
 
