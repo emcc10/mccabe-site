@@ -1,12 +1,12 @@
 /**
- * Soft HSL leather transfer — original L preserved; hue/sat from swatch only.
+ * Safe LAB A/B transfer — color-convert only; L untouched; float RGB 0–1.
  */
 import AdmZip from 'adm-zip';
+import convert from 'color-convert';
 import {
   mkdirSync,
   readdirSync,
   existsSync,
-  writeFileSync,
   renameSync,
   unlinkSync,
   statSync,
@@ -33,19 +33,10 @@ const SWATCH_BLUR_PX = 12;
 const MASK_DILATE_RADIUS = 1;
 const MASK_FEATHER_RADIUS = 0;
 const MASK_APPLY_THRESH = 220;
-const SAT_BASE_WEIGHT = 0.72;
-const SAT_TARGET_WEIGHT = 0.28;
-const HUE_MIX_MAX = 0.35;
-const SAT_MIX_MAX = 0.25;
-const SHADOW_PROTECT_LO = 0.05;
-const SHADOW_PROTECT_HI = 0.28;
-const WARM_HUE_LO = 15 / 360;
-const WARM_HUE_HI = 40 / 360;
-const WARM_SAT_SCALE = 0.82;
-const L_SHADOW_BUMP = 0.015;
-const L_HIGHLIGHT_TRIM = 0.01;
-const RECOLOR_BLEND = 0.96;
-const ORIGINAL_BLEND = 0.04;
+/** Max A/B pull toward swatch in fully lit leather (L channel 0–100). */
+const AB_MIX_MAX = 0.55;
+const SHADOW_PROTECT_LO = 5;
+const SHADOW_PROTECT_HI = 28;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
@@ -67,6 +58,7 @@ function medianOf(arr) {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
+/** Mask heuristics only — not used for recolor. */
 function rgbToHsl(r, g, b) {
   const rn = r / 255;
   const gn = g / 255;
@@ -84,29 +76,6 @@ function rgbToHsl(r, g, b) {
   return { h, s, l };
 }
 
-function hslToRgb(h, s, l) {
-  if (s === 0) {
-    const v = Math.round(l * 255);
-    return [v, v, v];
-  }
-  const hue2rgb = (p, q, t) => {
-    let tt = t;
-    if (tt < 0) tt += 1;
-    if (tt > 1) tt -= 1;
-    if (tt < 1 / 6) return p + (q - p) * 6 * tt;
-    if (tt < 1 / 2) return q;
-    if (tt < 2 / 3) return p + (q - p) * (2 / 3 - tt) * 6;
-    return p;
-  };
-  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-  const p = 2 * l - q;
-  return [
-    Math.round(clamp(hue2rgb(p, q, h + 1 / 3) * 255, 0, 255)),
-    Math.round(clamp(hue2rgb(p, q, h) * 255, 0, 255)),
-    Math.round(clamp(hue2rgb(p, q, h - 1 / 3) * 255, 0, 255)),
-  ];
-}
-
 function pixelSaturation(r, g, b) {
   return rgbToHsl(r, g, b).s;
 }
@@ -117,8 +86,7 @@ function rgbMaxDiff(r, g, b) {
 
 function isLegPixel(r, g, b, y, sofaBottomY) {
   if (y < sofaBottomY - 6) return false;
-  const lum = pixelBrightness(r, g, b);
-  if (lum > 52) return false;
+  if (pixelBrightness(r, g, b) > 52) return false;
   return pixelSaturation(r, g, b) < 0.14;
 }
 
@@ -132,8 +100,7 @@ function isFloorAmbientPixel(r, g, b) {
 function isEdgeGlowPixel(r, g, b) {
   const lum = pixelBrightness(r, g, b);
   if (lum > 228) return true;
-  const sat = pixelSaturation(r, g, b);
-  return sat < 0.06 && lum > 175;
+  return pixelSaturation(r, g, b) < 0.06 && lum > 175;
 }
 
 function isUpholsteryPixel(r, g, b, y, sofaBottomY) {
@@ -143,16 +110,13 @@ function isUpholsteryPixel(r, g, b, y, sofaBottomY) {
   if (lum > 250) return false;
   if (isLegPixel(r, g, b, y, sofaBottomY)) return false;
   if (y > sofaBottomY - 12 && isFloorAmbientPixel(r, g, b)) return false;
-  const sat = pixelSaturation(r, g, b);
-  if (sat >= 0.06) return true;
-  if (lum >= 8 && lum <= 120) return true;
-  return false;
+  if (pixelSaturation(r, g, b) >= 0.06) return true;
+  return lum >= 8 && lum <= 120;
 }
 
 function boxBlurChannel(src, width, height, radius) {
   const tmp = new Float32Array(src.length);
   const out = new Float32Array(src.length);
-
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let sum = 0;
@@ -166,7 +130,6 @@ function boxBlurChannel(src, width, height, radius) {
       tmp[y * width + x] = sum / n;
     }
   }
-
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let sum = 0;
@@ -180,7 +143,6 @@ function boxBlurChannel(src, width, height, radius) {
       out[y * width + x] = sum / n;
     }
   }
-
   return out;
 }
 
@@ -204,18 +166,34 @@ function morphologyDilate(src, width, height, radius) {
   return out;
 }
 
-function featherMask(mask, width, height, radius = 1) {
-  const blurred = boxBlurChannel(
-    Float32Array.from(mask, (v) => v),
-    width,
-    height,
-    radius,
-  );
+function featherMask(mask, width, height, radius) {
+  const blurred = boxBlurChannel(Float32Array.from(mask, (v) => v), width, height, radius);
   const result = new Uint8Array(mask.length);
   for (let j = 0; j < mask.length; j++) {
     result[j] = Math.round(clamp(blurred[j], 0, 255));
   }
   return result;
+}
+
+function smoothstep(edge0, edge1, x) {
+  const t = clamp((x - edge0) / (edge1 - edge0), 0, 1);
+  return t * t * (3 - 2 * t);
+}
+
+/** RGB float 0–1 → LAB via color-convert (L 0–100, a/b signed). */
+export function rgbFloatToLab(rf, gf, bf) {
+  const lab = convert.rgb.lab([rf * 255, gf * 255, bf * 255]);
+  return { L: lab[0], a: lab[1], b: lab[2] };
+}
+
+/** LAB → RGB float 0–1, clipped. */
+export function labToRgbFloat(L, a, b) {
+  const [r, g, bOut] = convert.lab.rgb([L, a, b]);
+  return {
+    r: clamp(r / 255, 0, 1),
+    g: clamp(g / 255, 0, 1),
+    b: clamp(bOut / 255, 0, 1),
+  };
 }
 
 export async function loadImage(path) {
@@ -256,8 +234,8 @@ export async function saveImage(data, path, width, height, channels = 4) {
   return size;
 }
 
-/** Center 35% crop, blur 12px, median RGB → HSL. */
-export async function getSwatchTargetHsl(swatchPath) {
+/** Center 35% crop, blur 12px, median RGB → LAB (color-convert). */
+export async function getSwatchTargetLab(swatchPath) {
   const meta = await sharp(swatchPath).metadata();
   const width = meta.width;
   const height = meta.height;
@@ -298,8 +276,12 @@ export async function getSwatchTargetHsl(swatchPath) {
   const r = Math.round(medianOf(rs));
   const g = Math.round(medianOf(gs));
   const b = Math.round(medianOf(bs));
-  const hsl = rgbToHsl(r, g, b);
-  return { r, g, b, hsl };
+  const rf = r / 255;
+  const gf = g / 255;
+  const bf = b / 255;
+  const lab = rgbFloatToLab(rf, gf, bf);
+
+  return { r, g, b, lab };
 }
 
 export function getSofaBottomY(baseImage) {
@@ -353,38 +335,15 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
   return m;
 }
 
-function smoothstep(edge0, edge1, x) {
-  const t = clamp((x - edge0) / (edge1 - edge0), 0, 1);
-  return t * t * (3 - 2 * t);
-}
-
-function hueDelta(h1, h2) {
-  let d = h2 - h1;
-  if (d > 0.5) d -= 1;
-  if (d < -0.5) d += 1;
-  return d;
-}
-
-function mixHue(baseH, targetH, t) {
-  let h = baseH + hueDelta(baseH, targetH) * t;
-  if (h < 0) h += 1;
-  if (h >= 1) h -= 1;
-  return h;
-}
-
-function mixLinear(a, b, t) {
-  return a + (b - a) * t;
-}
-
 /**
- * Gentle soft HSL nudge — original L and lighting preserved; dark shadows protected.
+ * RGB → LAB → blend A/B only → RGB. L never modified.
  */
-export function recolorSofa(baseImage, mask, targetHsl, sofaBottomY) {
+export function recolorSofa(baseImage, mask, targetLab, sofaBottomY) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
-  const targetH = targetHsl.h;
-  const targetS = targetHsl.s;
   const yFloor = sofaBottomY - FLOOR_MARGIN_PX;
+  const tA = targetLab.a;
+  const tB = targetLab.b;
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -397,33 +356,28 @@ export function recolorSofa(baseImage, mask, targetHsl, sofaBottomY) {
       const oG = data[p + 1];
       const oB = data[p + 2];
 
-      const base = rgbToHsl(oR, oG, oB);
-      let baseH = base.h;
-      let baseS = base.s;
+      const rf = oR / 255;
+      const gf = oG / 255;
+      const bf = oB / 255;
 
-      if (baseH >= WARM_HUE_LO && baseH <= WARM_HUE_HI) {
-        baseS *= WARM_SAT_SCALE;
-      }
+      const base = rgbFloatToLab(rf, gf, bf);
+      const shadowProtect = smoothstep(SHADOW_PROTECT_LO, SHADOW_PROTECT_HI, base.L);
+      const mix = shadowProtect * AB_MIX_MAX;
 
-      const shadowProtect = smoothstep(SHADOW_PROTECT_LO, SHADOW_PROTECT_HI, base.l);
-      const workS = clamp(baseS * SAT_BASE_WEIGHT + targetS * SAT_TARGET_WEIGHT, 0, 1);
+      const finalL = base.L;
+      const finalA = base.a + (tA - base.a) * mix;
+      const finalB = base.b + (tB - base.b) * mix;
 
-      const finalH = mixHue(baseH, targetH, shadowProtect * HUE_MIX_MAX);
-      const finalS = mixLinear(baseS, workS, shadowProtect * SAT_MIX_MAX);
-
-      let finalL = base.l;
-      if (finalL < 0.18) finalL = clamp(finalL + L_SHADOW_BUMP, 0, 1);
-      if (finalL > 0.88) finalL = clamp(finalL - L_HIGHLIGHT_TRIM, 0, 1);
-
-      const [nR, nG, nB] = hslToRgb(finalH, finalS, finalL);
-      const recR = nR * RECOLOR_BLEND + oR * ORIGINAL_BLEND;
-      const recG = nG * RECOLOR_BLEND + oG * ORIGINAL_BLEND;
-      const recB = nB * RECOLOR_BLEND + oB * ORIGINAL_BLEND;
-
+      const rec = labToRgbFloat(finalL, finalA, finalB);
       const mw = mask[j] / 255;
-      out[p] = Math.round(oR + (recR - oR) * mw);
-      out[p + 1] = Math.round(oG + (recG - oG) * mw);
-      out[p + 2] = Math.round(oB + (recB - oB) * mw);
+
+      const nR = rf + (rec.r - rf) * mw;
+      const nG = gf + (rec.g - gf) * mw;
+      const nB = bf + (rec.b - bf) * mw;
+
+      out[p] = Math.round(clamp(nR, 0, 1) * 255);
+      out[p + 1] = Math.round(clamp(nG, 0, 1) * 255);
+      out[p + 2] = Math.round(clamp(nB, 0, 1) * 255);
       if (channels === 4) out[p + 3] = data[p + 3];
     }
   }
@@ -433,18 +387,18 @@ export function recolorSofa(baseImage, mask, targetHsl, sofaBottomY) {
 
 export async function processSwatch(swatchPath, baseSofa, mask, sofaBottomY) {
   const swatchName = basename(swatchPath, extname(swatchPath));
-  const target = await getSwatchTargetHsl(swatchPath);
+  const target = await getSwatchTargetLab(swatchPath);
   console.log({
     swatchName,
     targetRGB: [target.r, target.g, target.b],
-    targetHSL: [
-      Math.round(target.hsl.h * 1000) / 1000,
-      Math.round(target.hsl.s * 1000) / 1000,
-      Math.round(target.hsl.l * 1000) / 1000,
+    targetLAB: [
+      Math.round(target.lab.L * 100) / 100,
+      Math.round(target.lab.a * 100) / 100,
+      Math.round(target.lab.b * 100) / 100,
     ],
   });
 
-  const outData = recolorSofa(baseSofa, mask, target.hsl, sofaBottomY);
+  const outData = recolorSofa(baseSofa, mask, target.lab, sofaBottomY);
   const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
   const bytes = await saveImage(outData, outPath, baseSofa.width, baseSofa.height, baseSofa.channels);
   console.log(`  wrote ${swatchName}.png (${Math.round(bytes / 1024)} KB)`);
@@ -508,7 +462,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: soft-hsl-gentle');
+  console.log('  method: lab-ab-transfer (color-convert)');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   if (maskPath) console.log(`  mask: ${maskPath}`);

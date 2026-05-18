@@ -1,29 +1,24 @@
 # Sofa Recolor Tool
 
-Soft **HSL transfer** on a base sofa photo: original lighting and luminance preserved; only hue and saturation shift toward each swatch.
+Safe **LAB A/B transfer** via [color-convert](https://www.npmjs.com/package/color-convert) (no custom color math). Original **L (luminance) is never modified**.
 
 ## Commands
 
 ```bash
 cd sofa-recolor-tool
 npm install
-npm run preview          # Bali-Currant → output/Bali-Currant.png
-npm run render           # all swatches + sofa-renders.zip
-npm run serve            # click swatches in browser (after render)
+npm run preview
+npm run render
 ```
 
-## Method (`soft-hsl-transfer`)
+## Pipeline (`lab-ab-transfer`)
 
-1. Upholstery mask (leather + seams; no legs / bg / floor shadow) → dilate 1px → feather ~0.8px  
-2. Per pixel: `finalH = swatchH`, `finalS = baseS×0.35 + swatchS×0.75`, `finalL = baseL` (+ shadow/highlight tweaks)  
-3. Light softness pass on recolored upholstery only  
+1. Upholstery mask → dilate 1px (no feather)
+2. Per masked pixel (float RGB 0–1):
+   - `RGB → LAB` (color-convert: L 0–100, signed a/b)
+   - `finalL = baseL` (unchanged)
+   - `finalA/B = lerp(base, target, mix)` — mix reduced in deep shadows
+   - `LAB → RGB` → clip 0–1 → uint8
+3. Swatch target: center 35% crop, blur 12px, **median RGB** → LAB
 
-Optional: place `input/mask.png` (same size as sofa) to refine silhouette.
-
-## Layout
-
-| Path | Role |
-|------|------|
-| `input/sofa.png` | Base cognac sofa |
-| `input/swatches/*.jpg` | Leather swatches |
-| `output/*.png` | Rendered sofas (gitignored) |
+No HSL recolor, no multiply/overlay, no homemade LAB.
