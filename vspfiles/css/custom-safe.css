@@ -1186,10 +1186,10 @@ html:not(.category) body:not(.is-home) #content_area_home .v-product__img img {
   object-position: top center !important;
 }
 
-/* Category grids: gray mat + fixed stage (see --mc-plp-* block below) */
+/* Category grids: white thumb bg + fixed stage (see --mc-plp-* block below) */
 :is(html.category, body.category) #content_area .v-product-grid a.v-product__img,
 :is(html.category, body.category) #content_area ul.v-product-grid .v-product__img {
-  background: var(--mc-plp-mat-bg, #f2f2f2) !important;
+  background: var(--mc-plp-mat-bg, #ffffff) !important;
 }
 
 /* If a parent header row is hidden, force it visible on interior + category */
@@ -6449,9 +6449,9 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   order: 5;
 }
 
-/* Category PLP: light gray mat on every thumb + fixed stage (uniform product scale, baseline aligned) */
+/* Category PLP: white thumb background + fixed stage (uniform product scale, baseline aligned) */
 :root {
-  --mc-plp-mat-bg: #f2f2f2;
+  --mc-plp-mat-bg: #ffffff;
   --mc-plp-mat-pad: 14px;
   --mc-plp-tile-h: 280px;
   --mc-plp-stage-h: 220px;
@@ -13844,7 +13844,7 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,
   margin: 0 !important;
   padding: var(--mc-plp-mat-pad, 14px) !important;
   box-sizing: border-box !important;
-  background: var(--mc-plp-mat-bg, #f2f2f2) !important;
+  background: var(--mc-plp-mat-bg, #ffffff) !important;
   line-height: 0 !important;
   text-decoration: none !important;
 }
@@ -13960,7 +13960,7 @@ html.is-category-or-listing-page .v-product-grid a.v-product__img {
   padding: var(--mc-plp-mat-pad, 14px) !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
-  background: var(--mc-plp-mat-bg, #f2f2f2) !important;
+  background: var(--mc-plp-mat-bg, #ffffff) !important;
   line-height: 0 !important;
 }
 
@@ -14063,7 +14063,7 @@ body:not(.productdetails) #content_area .v-product-grid a.v-product__img {
   padding: var(--mc-plp-mat-pad, 14px) !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
-  background: var(--mc-plp-mat-bg, #f2f2f2) !important;
+  background: var(--mc-plp-mat-bg, #ffffff) !important;
   line-height: 0 !important;
   text-decoration: none !important;
 }
@@ -14143,7 +14143,7 @@ html.category #content_area .v-product-grid a.v-product__img {
   padding: 14px !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
-  background: #f2f2f2 !important;
+  background: #ffffff !important;
   border: 0 !important;
   box-shadow: none !important;
 }
@@ -14158,7 +14158,7 @@ html.category #content_area .v-product-grid a.v-product__img > img {
   object-position: center bottom !important;
   display: block !important;
   margin: 0 auto !important;
-  background: transparent !important;
+  background: #ffffff !important;
   border: 0 !important;
 }
 
@@ -14178,12 +14178,12 @@ html.category #content_area .v-product-grid a.v-product__img > img {
   }
 }
 
-/* MC PLP THUMB BACKGROUND FIX */
+/* MC PLP THUMB — all white, no gray mat */
 html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos/"],
 html.category #content_area .v-product-grid img[src*="/v/vspfiles/product/"],
 html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos"],
 html.category #content_area .v-product-grid img[src*="vspfiles/photos"] {
-  background: transparent !important;
+  background: #ffffff !important;
   box-shadow: none !important;
   border: 0 !important;
 }
@@ -14194,7 +14194,7 @@ html.category #content_area .v-product-grid div:has(> img[src*="/v/vspfiles/phot
 html.category #content_area .v-product-grid div:has(> img[src*="vspfiles/photos"]),
 html.category #content_area .v-product-grid td:has(img[src*="/v/vspfiles/photos/"]),
 html.category #content_area .v-product-grid td:has(img[src*="vspfiles/photos"]) {
-  background: #f3f3f1 !important;
+  background: #ffffff !important;
   box-shadow: none !important;
   border: 0 !important;
 }
@@ -14209,7 +14209,7 @@ html.category #content_area .v-product-grid .product-image-wrapper,
 html.category #content_area .v-product-grid .productimg,
 html.category #content_area .v-product-grid .v65-productPhoto,
 html.category #content_area .v-product-grid .v65-productPhoto a {
-  background: #f3f3f1 !important;
+  background: #ffffff !important;
   box-shadow: none !important;
   border: 0 !important;
 }

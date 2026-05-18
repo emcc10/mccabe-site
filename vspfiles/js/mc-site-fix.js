@@ -8,7 +8,7 @@
   if (global.__MC_SITE_FIX_LOADED__) return;
   global.__MC_SITE_FIX_LOADED__ = true;
 
-  var MAT = "#f2f2f2";
+  var MAT = "#ffffff";
   var TILE_H = 280;
   var STAGE_H = 220;
   var TILE_H_M = 220;
@@ -49,7 +49,7 @@
       "width:0!important;padding:0!important;margin:0!important;overflow:hidden!important}" +
       "#content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat," +
       ".v-product-grid a.v-product__img.mc-plp-thumb-mat{display:flex!important;align-items:flex-end!important;" +
-      "justify-content:center!important;background:#f2f2f2!important;box-sizing:border-box!important;" +
+      "justify-content:center!important;background:#ffffff!important;box-sizing:border-box!important;" +
       "height:280px!important;min-height:280px!important;max-height:280px!important;padding:14px!important;" +
       "overflow:hidden!important;width:100%!important;margin:0!important}" +
       "#content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat>img," +

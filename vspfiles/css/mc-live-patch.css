@@ -79,7 +79,7 @@ body.category .v-product-grid .v-product a.v-product__img {
   padding: 14px !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
-  background: #f2f2f2 !important;
+  background: #ffffff !important;
   line-height: 0 !important;
   text-decoration: none !important;
 }
@@ -143,7 +143,7 @@ html.is-category-or-listing-page .v-product-grid .v-product a.v-product__img {
   display: flex !important;
   align-items: flex-end !important;
   justify-content: center !important;
-  background: #f2f2f2 !important;
+  background: #ffffff !important;
   padding: 14px !important;
   height: 280px !important;
   min-height: 280px !important;

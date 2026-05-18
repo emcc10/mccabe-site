@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260529
+ * MC_PLP_ENFORCER_20260530
  *
  * DOM (category listing):
  *   table.colors_backgroundlight + SearchResults_SubCat_Angle  ← black bar (legacy subcat chrome)
@@ -10,8 +10,8 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260529";
-  var PLP_MAT = "#f3f3f1";
+  var VERSION = "20260530";
+  var PLP_MAT = "#ffffff";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
@@ -267,7 +267,8 @@
       .forEach(function (img) {
         if (!img.closest(".v-product-grid") || img.closest("#v65-product-related")) return;
 
-        img.style.setProperty("background", "transparent", "important");
+        img.style.setProperty("background", PLP_MAT, "important");
+        img.style.setProperty("background-color", PLP_MAT, "important");
         img.style.setProperty("border", "0", "important");
         img.style.setProperty("box-shadow", "none", "important");
 
@@ -335,6 +336,8 @@
     } catch (eAttr) {}
 
     clearInnerThumbChrome(img);
+    img.style.setProperty("background", PLP_MAT, "important");
+    img.style.setProperty("background-color", PLP_MAT, "important");
     img.style.setProperty("display", "block", "important");
     img.style.setProperty("width", "auto", "important");
     img.style.setProperty("max-width", "100%", "important");

@@ -1,16 +1,22 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260527
+ * MC_PLP_ENFORCER_20260530
+ *
+ * DOM (category listing):
+ *   table.colors_backgroundlight + SearchResults_SubCat_Angle  ← black bar (legacy subcat chrome)
+ *   #content_area > table > tr > td.colors_lines_light           ← breadcrumb divider
+ *   .v-product-grid > .v-product > a.v-product__img > img      ← thumb (flat, no inner wrapper)
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260527";
+  var VERSION = "20260530";
+  var PLP_MAT = "#ffffff";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
 
-  var MAT = "#f2f2f2";
+  var MAT = PLP_MAT;
   var TILE = 280;
   var STAGE = 220;
   var TILE_M = 220;
@@ -251,6 +257,42 @@
     });
   }
 
+  function fixPLPThumbBackgrounds() {
+    if (!isCategoryPlp()) return;
+    document
+      .querySelectorAll(
+        '#content_area .v-product-grid img[src*="/v/vspfiles/photos/"],' +
+          '#content_area .v-product-grid img[src*="vspfiles/photos"]'
+      )
+      .forEach(function (img) {
+        if (!img.closest(".v-product-grid") || img.closest("#v65-product-related")) return;
+
+        img.style.setProperty("background", "transparent", "important");
+        img.style.setProperty("border", "0", "important");
+        img.style.setProperty("box-shadow", "none", "important");
+
+        var el = img.parentElement;
+        var i;
+        for (i = 0; i < 5 && el; i++) {
+          if (!el.closest || !el.closest(".v-product-grid")) break;
+          el.style.setProperty("background", PLP_MAT, "important");
+          el.style.setProperty("background-color", PLP_MAT, "important");
+          el.style.setProperty("border", "0", "important");
+          el.style.setProperty("box-shadow", "none", "important");
+          el = el.parentElement;
+        }
+      });
+  }
+
+  function clearInnerThumbChrome(node) {
+    if (!node || !node.style) return;
+    node.style.setProperty("background", "transparent", "important");
+    node.style.setProperty("background-color", "transparent", "important");
+    node.style.setProperty("border", "0", "important");
+    node.style.setProperty("box-shadow", "none", "important");
+    node.style.setProperty("outline", "0", "important");
+  }
+
   function fixThumb(wrap) {
     if (!wrap || !wrap.classList || !wrap.classList.contains("v-product__img")) return;
     if (!wrap.closest(".v-product-grid")) return;
@@ -277,6 +319,13 @@
     wrap.style.setProperty("box-shadow", "none", "important");
     wrap.style.setProperty("line-height", "0", "important");
 
+    wrap.querySelectorAll(".v-product__image-wrap, span, div").forEach(function (node) {
+      node.style.setProperty("background", PLP_MAT, "important");
+      node.style.setProperty("background-color", PLP_MAT, "important");
+      node.style.setProperty("border", "0", "important");
+      node.style.setProperty("box-shadow", "none", "important");
+    });
+
     var img = wrap.querySelector(":scope > img") || wrap.querySelector("img");
     if (!img) return;
 
@@ -285,19 +334,19 @@
       img.removeAttribute("border");
     } catch (eAttr) {}
 
-    img.style.setProperty("border", "0", "important");
-    img.style.setProperty("outline", "0", "important");
-    img.style.setProperty("background", "transparent", "important");
-    img.style.setProperty("background-color", "transparent", "important");
+    clearInnerThumbChrome(img);
     img.style.setProperty("display", "block", "important");
     img.style.setProperty("width", "auto", "important");
     img.style.setProperty("max-width", "100%", "important");
     img.style.setProperty("height", stage + "px", "important");
     img.style.setProperty("max-height", stage + "px", "important");
     img.style.setProperty("min-height", "0", "important");
+    img.style.setProperty("min-width", "0", "important");
     img.style.setProperty("object-fit", "contain", "important");
     img.style.setProperty("object-position", "center bottom", "important");
     img.style.setProperty("margin", "0 auto", "important");
+    img.style.setProperty("padding", "0", "important");
+    img.style.setProperty("flex", "0 0 auto", "important");
     img.style.transformOrigin = "center bottom";
 
     normalizeScale(wrap, img);
@@ -329,6 +378,7 @@
     if (!isCategoryPlp()) return;
     markCategory();
     removeLegacyCategoryBars();
+    fixPLPThumbBackgrounds();
     applyThumbs();
     hideHero();
   }
