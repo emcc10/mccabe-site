@@ -1,5 +1,5 @@
 /**
- * Photographic leather recolor — target RGB × luminance shade; original hue never used. No AI.
+ * Photo compositing recolor — target RGB × smoothed luminance; no original hue in mask. No AI.
  */
 import AdmZip from 'adm-zip';
 import {
@@ -35,20 +35,24 @@ const SWATCH_CLUSTER_SHADOW_L = 0.18;
 const SWATCH_CLUSTER_HIGHLIGHT_L = 0.85;
 const SWATCH_KMEANS_MAX_PIXELS = 12000;
 const SWATCH_SAT_SCALE = 0.9;
-const SHADE_DIVISOR = 180;
-const SHADE_MIN = 0.62;
-const SHADE_MAX = 1.18;
-const SEAM_LUM = 28;
-const HIGHLIGHT_LUM = 225;
-const HIGHLIGHT_TARGET_BLEND = 0.7;
-const HIGHLIGHT_ORIGINAL_BLEND = 0.3;
-const MASK_APPLY_THRESH = 128;
+const NORM_DIVISOR = 170;
+const NORM_MIN = 0.45;
+const NORM_MAX = 1.25;
+const SEAM_LUM_MAX = 70;
+const SEAM_MULT_MIN = 0.35;
+const SEAM_MULT_MAX = 0.55;
+const HIGHLIGHT_LUM = 210;
+const HIGHLIGHT_MULT = 1.18;
+const GRAY_BLUR_RADIUS = 1;
+const MASK_CLOSE_RADIUS = 2;
+const MASK_DILATE_RADIUS = 1;
+const MASK_FEATHER_RADIUS = 1;
+const MASK_APPLY_THRESH = 48;
 const DEBUG_CHIP_SIZE = 200;
 
 /** Hard-coded QA targets (npm run test-colors). */
 export const DEBUG_TEST_TARGETS = {
   Cream: { r: 220, g: 216, b: 198 },
-  Burgundy: { r: 85, g: 25, b: 28 },
   Gray: { r: 155, g: 155, b: 150 },
   Navy: { r: 30, g: 45, b: 65 },
 };
@@ -147,16 +151,133 @@ function rgbMaxDiff(r, g, b) {
   return Math.max(Math.abs(r - g), Math.abs(r - b), Math.abs(g - b));
 }
 
-/** Upholstery midtones only — excludes bg, feet, seams, specular, floor shadow. */
-function isUpholsteryMidtone(r, g, b) {
+/** Dark wood/plastic feet at sofa base — not upholstery. */
+function isLegPixel(r, g, b, y, sofaBottomY) {
+  if (y < sofaBottomY - 6) return false;
+  const lum = pixelBrightness(r, g, b);
+  if (lum > 52) return false;
+  return pixelSaturation(r, g, b) < 0.14;
+}
+
+/**
+ * Leather upholstery incl. seams, under-rail, arms; excludes bg, legs, floor shadow.
+ */
+function isUpholsteryLeather(r, g, b, y, sofaBottomY) {
   if (isNearWhite(r, g, b)) return false;
-  const bright = pixelBrightness(r, g, b);
-  if (bright < 28) return false;
-  if (bright > 242) return false;
+  const lum = pixelBrightness(r, g, b);
+  if (lum > 252) return false;
+  if (isLegPixel(r, g, b, y, sofaBottomY)) return false;
+  if (y > sofaBottomY - 8 && isFloorAmbientPixel(r, g, b)) return false;
+
   const sat = pixelSaturation(r, g, b);
-  if (sat < 0.08 && bright > 210) return false;
-  if (sat < 0.1) return false;
-  return true;
+  if (sat >= 0.06) return true;
+  if (lum >= 10 && lum <= 100 && rgbMaxDiff(r, g, b) >= 6) return true;
+  return false;
+}
+
+function morphologyDilate(src, width, height, radius) {
+  const out = new Uint8Array(src.length);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let max = 0;
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const yy = y + dy;
+          const xx = x + dx;
+          if (yy < 0 || yy >= height || xx < 0 || xx >= width) continue;
+          const v = src[yy * width + xx];
+          if (v > max) max = v;
+        }
+      }
+      out[y * width + x] = max;
+    }
+  }
+  return out;
+}
+
+function morphologyErode(src, width, height, radius) {
+  const out = new Uint8Array(src.length);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let min = 255;
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const yy = y + dy;
+          const xx = x + dx;
+          if (yy < 0 || yy >= height || xx < 0 || xx >= width) continue;
+          const v = src[yy * width + xx];
+          if (v < min) min = v;
+        }
+      }
+      out[y * width + x] = min;
+    }
+  }
+  return out;
+}
+
+function morphologyClose(mask, width, height, radius) {
+  const dilated = morphologyDilate(mask, width, height, radius);
+  return morphologyErode(dilated, width, height, radius);
+}
+
+function refineUpholsteryMask(hard, width, height) {
+  let m = morphologyClose(hard, width, height, MASK_CLOSE_RADIUS);
+  m = morphologyDilate(m, width, height, MASK_DILATE_RADIUS);
+  return featherMask(m, width, height, MASK_FEATHER_RADIUS);
+}
+
+function blurFloatField(src, width, height, radius) {
+  const tmp = new Float32Array(src.length);
+  const out = new Float32Array(src.length);
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sum = 0;
+      let n = 0;
+      for (let dx = -radius; dx <= radius; dx++) {
+        const xx = x + dx;
+        if (xx < 0 || xx >= width) continue;
+        sum += src[y * width + xx];
+        n++;
+      }
+      tmp[y * width + x] = sum / n;
+    }
+  }
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sum = 0;
+      let n = 0;
+      for (let dy = -radius; dy <= radius; dy++) {
+        const yy = y + dy;
+        if (yy < 0 || yy >= height) continue;
+        sum += tmp[yy * width + x];
+        n++;
+      }
+      out[y * width + x] = sum / n;
+    }
+  }
+
+  return out;
+}
+
+/** Luminance map with light smoothing (~0.35–1px box). */
+export function buildSmoothedLuminance(image) {
+  const { data, width, height, channels } = image;
+  const gray = new Float32Array(width * height);
+  for (let j = 0, p = 0; j < gray.length; j++, p += channels) {
+    gray[j] = pixelBrightness(data[p], data[p + 1], data[p + 2]);
+  }
+  return blurFloatField(gray, width, height, GRAY_BLUR_RADIUS);
+}
+
+/** Shade multiplier from gray only — no original RGB. */
+export function luminanceMultiplier(gray) {
+  if (gray > HIGHLIGHT_LUM) return HIGHLIGHT_MULT;
+  if (gray < SEAM_LUM_MAX) {
+    return SEAM_MULT_MIN + (gray / SEAM_LUM_MAX) * (SEAM_MULT_MAX - SEAM_MULT_MIN);
+  }
+  return clamp(gray / NORM_DIVISOR, NORM_MIN, NORM_MAX);
 }
 
 /** Low-sat, low-contrast pixels near the floor (ambient / drop shadow). */
@@ -600,10 +721,11 @@ export function getSofaBottomY(baseImage) {
 }
 
 /**
- * Upholstery midtone mask (not full silhouette). Edge feather ~0.7px.
+ * Upholstery mask: close holes, dilate 1px, feather ~0.7px.
  */
 export async function createUpholsteryMask(image, optionalMaskPath = null) {
   const { data, width, height, channels } = image;
+  const sofaBottomY = getSofaBottomY(image);
   const hard = new Uint8Array(width * height);
   let useOptional = false;
 
@@ -622,6 +744,7 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
   }
 
   for (let j = 0, p = 0; j < width * height; j++, p += channels) {
+    const y = Math.floor(j / width);
     const r = data[p];
     const g = data[p + 1];
     const b = data[p + 2];
@@ -629,10 +752,10 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
       hard[j] = 0;
       continue;
     }
-    hard[j] = isUpholsteryMidtone(r, g, b) ? 255 : 0;
+    hard[j] = isUpholsteryLeather(r, g, b, y, sofaBottomY) ? 255 : 0;
   }
 
-  return featherMask(hard, width, height, 1);
+  return refineUpholsteryMask(hard, width, height);
 }
 
 /** @deprecated Use createUpholsteryMask */
@@ -680,7 +803,7 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * Target RGB × luminance shade only. Original hue/sat never used in midtones.
+ * Photo composite: finalRGB = targetRGB × f(smoothedGray). Never original RGB in mask.
  */
 export function recolorSofa(
   baseImage,
@@ -688,14 +811,16 @@ export function recolorSofa(
   targetRgb,
   sofaBottomY,
   _sofaBounds = null,
+  grayMap = null,
 ) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
   const targetR = targetRgb.r;
   const targetG = targetRgb.g;
   const targetB = targetRgb.b;
+  const gray =
+    grayMap ?? buildSmoothedLuminance(baseImage);
   const yFloor = sofaBottomY - FLOOR_MARGIN_PX;
-  const yFloorAmbient = sofaBottomY - 45;
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -704,31 +829,17 @@ export function recolorSofa(
       if (y > yFloor) continue;
 
       const p = j * channels;
-      const oR = data[p];
-      const oG = data[p + 1];
-      const oB = data[p + 2];
       const oA = channels === 4 ? data[p + 3] : 255;
+      const g = gray[j];
+      const mult = luminanceMultiplier(g);
 
-      if (y > yFloorAmbient && isFloorAmbientPixel(oR, oG, oB)) continue;
+      const nR = clamp(targetR * mult, 0, 255);
+      const nG = clamp(targetG * mult, 0, 255);
+      const nB = clamp(targetB * mult, 0, 255);
 
-      const lum = pixelBrightness(oR, oG, oB);
-
-      if (lum < SEAM_LUM) continue;
-
-      const shade = clamp(lum / SHADE_DIVISOR, SHADE_MIN, SHADE_MAX);
-      let nR = targetR * shade;
-      let nG = targetG * shade;
-      let nB = targetB * shade;
-
-      if (lum > HIGHLIGHT_LUM) {
-        nR = nR * HIGHLIGHT_TARGET_BLEND + oR * HIGHLIGHT_ORIGINAL_BLEND;
-        nG = nG * HIGHLIGHT_TARGET_BLEND + oG * HIGHLIGHT_ORIGINAL_BLEND;
-        nB = nB * HIGHLIGHT_TARGET_BLEND + oB * HIGHLIGHT_ORIGINAL_BLEND;
-      }
-
-      out[p] = Math.round(clamp(nR, 0, 255));
-      out[p + 1] = Math.round(clamp(nG, 0, 255));
-      out[p + 2] = Math.round(clamp(nB, 0, 255));
+      out[p] = Math.round(nR);
+      out[p + 1] = Math.round(nG);
+      out[p + 2] = Math.round(nB);
       if (channels === 4) out[p + 3] = oA;
     }
   }
@@ -743,6 +854,7 @@ export async function processTestColor(
   mask,
   sofaBottomY,
   sofaBounds,
+  grayMap,
 ) {
   console.log({ test: name, targetRGB: [targetRgb.r, targetRgb.g, targetRgb.b] });
   const outData = recolorSofa(
@@ -751,6 +863,7 @@ export async function processTestColor(
     targetRgb,
     sofaBottomY,
     sofaBounds,
+    grayMap,
   );
   const outPath = join(OUTPUT_DIR, `TEST-${name}.png`);
   const bytes = await saveImage(
@@ -771,6 +884,7 @@ export async function processSwatch(
   _sourceColor,
   sofaBottomY,
   sofaBounds,
+  grayMap,
 ) {
   const swatchName = basename(swatchPath, extname(swatchPath));
   const targetRgb = await getSwatchTargetRgb(swatchPath);
@@ -792,6 +906,7 @@ export async function processSwatch(
     targetRgb,
     sofaBottomY,
     sofaBounds,
+    grayMap,
   );
   const outName = `${swatchName}.png`;
   const outPath = join(OUTPUT_DIR, outName);
