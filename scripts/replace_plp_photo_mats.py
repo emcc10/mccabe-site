@@ -2,11 +2,10 @@
 """Replace baked gray PLP photo backgrounds with white and optionally upload via SFTP.
 
 Volusion product photos live at /vspfiles/photos/*.jpg|png on the store server.
-Use when thumbnails still show a gray mat inside the image file itself.
 
 Examples:
   py -3 scripts/replace_plp_photo_mats.py --category /category-s/177.htm --dry-run
-  py -3 scripts/replace_plp_photo_mats.py --file 77180-01-1.jpg --upload
+  py -3 scripts/replace_plp_photo_mats.py --category /category-s/177.htm
   py -3 scripts/replace_plp_photo_mats.py --category /category-s/177.htm --upload
 """
 from __future__ import annotations
@@ -15,7 +14,9 @@ import argparse
 import os
 import re
 import sys
+import urllib.error
 import urllib.request
+from collections import deque
 from io import BytesIO
 from pathlib import Path
 
@@ -25,26 +26,66 @@ SITE = "https://www.mccabestheaterandliving.com"
 PHOTO_RE = re.compile(r"/vspfiles/photos/([^\"'?]+\.(?:jpg|jpeg|png))", re.I)
 UA = {"User-Agent": "Mozilla/5.0 (McCabe PLP mat fix)"}
 
+# Volusion / export mat colors seen on PLP thumbs
+MAT_COLORS = (
+    (242, 242, 242),  # #f2f2f2
+    (243, 243, 241),  # #f3f3f1
+    (241, 241, 241),
+    (238, 238, 238),
+    (235, 235, 235),
+)
+MAT_TOLERANCE = 8
 
-def is_gray_mat_pixel(r: int, g: int, b: int) -> bool:
-    if abs(r - g) > 10 or abs(r - b) > 10 or abs(g - b) > 10:
-        return False
-    return 225 <= r <= 248
+
+def near_mat_color(r: int, g: int, b: int) -> bool:
+    for mr, mg, mb in MAT_COLORS:
+        if abs(r - mr) <= MAT_TOLERANCE and abs(g - mg) <= MAT_TOLERANCE and abs(b - mb) <= MAT_TOLERANCE:
+            return True
+    if abs(r - g) <= 6 and abs(r - b) <= 6 and 228 <= r <= 246:
+        return True
+    return False
 
 
-def replace_gray_with_white(img: Image.Image) -> tuple[Image.Image, int]:
+def replace_mat_background(img: Image.Image) -> tuple[Image.Image, int]:
+    """Flood-fill mat gray from image edges only — preserves interior sofa shadows."""
     rgba = img.convert("RGBA")
-    px = rgba.load()
     w, h = rgba.size
+    px = rgba.load()
+    visited = bytearray(w * h)
+    q: deque[tuple[int, int]] = deque()
     changed = 0
+
+    def push(x: int, y: int) -> None:
+        idx = y * w + x
+        if visited[idx]:
+            return
+        r, g, b, a = px[x, y]
+        if a < 10 or not near_mat_color(r, g, b):
+            return
+        visited[idx] = 1
+        q.append((x, y))
+
+    for x in range(w):
+        push(x, 0)
+        push(x, h - 1)
     for y in range(h):
-        for x in range(w):
-            r, g, b, a = px[x, y]
-            if a < 10:
-                continue
-            if is_gray_mat_pixel(r, g, b):
-                px[x, y] = (255, 255, 255, a)
-                changed += 1
+        push(0, y)
+        push(w - 1, y)
+
+    while q:
+        x, y = q.popleft()
+        r, g, b, a = px[x, y]
+        px[x, y] = (255, 255, 255, a)
+        changed += 1
+        if x > 0:
+            push(x - 1, y)
+        if x + 1 < w:
+            push(x + 1, y)
+        if y > 0:
+            push(x, y - 1)
+        if y + 1 < h:
+            push(x, y + 1)
+
     return rgba, changed
 
 
@@ -57,17 +98,20 @@ def fetch(url: str) -> bytes:
 def collect_photo_names(category_path: str) -> list[str]:
     url = SITE + category_path
     html = fetch(url).decode("utf-8", "replace")
-    names = sorted(set(PHOTO_RE.findall(html)))
-    return names
+    return sorted(n for n in set(PHOTO_RE.findall(html)) if "{" not in n and "}" not in n)
 
 
 def process_file(name: str, out_dir: Path | None, dry_run: bool) -> tuple[int, int]:
     url = f"{SITE}/v/vspfiles/photos/{name}"
-    raw = fetch(url)
+    try:
+        raw = fetch(url)
+    except urllib.error.HTTPError as exc:
+        print(f"{name}: SKIP ({exc.code})")
+        return 0, 0
     img = Image.open(BytesIO(raw))
-    fixed, changed = replace_gray_with_white(img)
+    fixed, changed = replace_mat_background(img)
     total = img.size[0] * img.size[1]
-    print(f"{name}: {changed} gray pixels / {total} ({100 * changed / max(total, 1):.2f}%)")
+    print(f"{name}: {changed} mat pixels / {total} ({100 * changed / max(total, 1):.2f}%)")
     if dry_run or changed == 0:
         return changed, 0
     out_dir = out_dir or Path("tmp/plp-photos-fixed")
@@ -103,15 +147,19 @@ def upload_files(local_dir: Path, names: list[str]) -> int:
                     print(f"skip missing {local}", file=sys.stderr)
                     fail += 1
                     continue
-                remote = f"/vspfiles/photos/{name}"
-                want = local.stat().st_size
-                sftp.put(str(local), remote, confirm=False)
-                got = sftp.stat(remote).st_size
-                if got == want:
-                    print(f"uploaded {name} -> {remote} ({want} bytes)")
-                else:
-                    print(f"SIZE_MISMATCH {name} want={want} got={got}", file=sys.stderr)
-                    fail += 1
+                for remote in (f"/vspfiles/photos/{name}", f"/v/vspfiles/photos/{name}"):
+                    try:
+                        want = local.stat().st_size
+                        sftp.put(str(local), remote, confirm=False)
+                        got = sftp.stat(remote).st_size
+                        if got == want:
+                            print(f"uploaded {name} -> {remote} ({want} bytes)")
+                            break
+                        print(f"SIZE_MISMATCH {remote} want={want} got={got}", file=sys.stderr)
+                        fail += 1
+                    except OSError as exc:
+                        print(f"upload fail {remote}: {exc}", file=sys.stderr)
+                        fail += 1
         finally:
             sftp.close()
     finally:
@@ -140,6 +188,7 @@ def main() -> int:
         if changed > 0 and not args.dry_run:
             touched.append(name)
 
+    print(f"Fixed {len(touched)} file(s) -> {args.out_dir}")
     if args.upload and not args.dry_run:
         if not touched:
             print("Nothing to upload.")
