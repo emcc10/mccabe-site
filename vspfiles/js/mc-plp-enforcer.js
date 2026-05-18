@@ -1,15 +1,16 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260524
+ * MC_PLP_ENFORCER_20260525
  *
  * DOM (category listing):
- *   #content_area > table > tr > td.colors_lines_light > img[clear1x1]  ← black bar
- *   .v-product-grid > .v-product > a.v-product__img > img               ← thumb (flat, no inner wrapper)
+ *   #content_area table.colors_backgroundlight > tr > td.colors_lines_light  ← black bar (legacy subcat chrome)
+ *   #content_area > table > tr > td.colors_lines_light (single cell)         ← breadcrumb divider
+ *   .v-product-grid > .v-product > a.v-product__img > img                  ← thumb (flat, no inner wrapper)
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260524";
+  var VERSION = "20260525";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
@@ -65,16 +66,57 @@
     document.documentElement.classList.remove("mc-allow-home-hero");
   }
 
-  /** Issue A: remove <tr><td class="colors_lines_light"> after breadcrumbs. */
-  function removeBreadcrumbDivider() {
-    document.querySelectorAll("#content_area > table").forEach(function (table) {
+  function looksLikeProductTable(tbl) {
+    if (!tbl || !tbl.querySelector) return false;
+    if (
+      tbl.querySelector(
+        'a[href*="-p/"], a[href*="product-p/"], a.productnamecolor, .v-product, .productnamecolor'
+      )
+    ) {
+      return true;
+    }
+    var imgs = tbl.querySelectorAll("img");
+    var i;
+    for (i = 0; i < imgs.length; i++) {
+      var src = (imgs[i].getAttribute("src") || "").toLowerCase();
+      if (src && src.indexOf("clear1x1") === -1) return true;
+    }
+    return false;
+  }
+
+  /** Issue A: remove legacy subcat chrome table + breadcrumb divider rows. */
+  function removeLegacyCategoryBars() {
+    var scope = document.getElementById("content_area") || document.body;
+    if (!scope) return;
+
+    scope.querySelectorAll("table.colors_backgroundlight").forEach(function (tbl) {
+      if (looksLikeProductTable(tbl)) return;
+
+      var angle = tbl.querySelector('img[src*="SearchResults_SubCat_Angle"]');
+      var spacer15 = tbl.querySelector('img[src*="clear1x1.gif"][width="15"][height="15"]');
+      var width215 = String(tbl.getAttribute("width") || "") === "215";
+
+      if (angle || spacer15 || width215) {
+        tbl.parentNode.removeChild(tbl);
+        return;
+      }
+
+      Array.prototype.forEach.call(tbl.rows, function (tr) {
+        var td = tr.querySelector("td.colors_lines_light");
+        if (!td) return;
+        var img = td.querySelector('img[src*="clear1x1"]');
+        if (!img) return;
+        tr.parentNode.removeChild(tr);
+      });
+    });
+
+    scope.querySelectorAll(":scope > table").forEach(function (table) {
       Array.prototype.forEach.call(table.rows, function (tr) {
         if (tr.cells.length !== 1) return;
         var td = tr.cells[0];
         if (!td.classList.contains("colors_lines_light")) return;
-        var img = td.querySelector("img");
+        var img = td.querySelector('img[src*="clear1x1"]');
         if (!img) return;
-        if (!/clear1x1\.gif/i.test(img.getAttribute("src") || "")) return;
         tr.parentNode.removeChild(tr);
       });
     });
@@ -276,7 +318,7 @@
   function run() {
     if (!isCategoryPlp()) return;
     markCategory();
-    removeBreadcrumbDivider();
+    removeLegacyCategoryBars();
     applyThumbs();
     hideHero();
   }
@@ -299,7 +341,7 @@
         run();
       });
     });
-    var root = document.getElementById("content_area") || document.body;
+    var root = document.body || document.getElementById("content_area");
     if (root) {
       mo.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["src"] });
     }
