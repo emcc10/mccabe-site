@@ -397,7 +397,10 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
   };
 }
 
-/** Bali-Currant HSL path for every swatch (same code path that looks correct). */
+/**
+ * Saturated (Currant, Africa, Twilight): rotate hue + anchor lightness.
+ * Low-sat (Stone, Silk): snap to target hue/sat — rotating cognac hue goes through green.
+ */
 export function recolorSofa(
   baseImage,
   mask,
@@ -412,7 +415,10 @@ export function recolorSofa(
   const srcHsl = rgbToHsl(sourceColor.r, sourceColor.g, sourceColor.b);
   const tgtHsl = rgbToHsl(targetColor.r, targetColor.g, targetColor.b);
   const dHue = hueDelta(srcHsl.h, tgtHsl.h);
+  const dLight = tgtHsl.l - srcHsl.l;
   const srcSat = Math.max(srcHsl.s, 0.08);
+  const neutralTarget = tgtHsl.s < 0.32;
+
   const yCut =
     leatherBottomY == null ? height - 1 : Math.min(height - 1, leatherBottomY);
 
@@ -431,10 +437,18 @@ export function recolorSofa(
       if (!shouldRecolorPixel(oR, oG, oB)) continue;
 
       const hsl = rgbToHsl(oR, oG, oB);
-      const nh = hsl.h + dHue;
-      const satBlend = clamp(hsl.s / srcSat, 0, 1.2);
-      const ns = clamp(hsl.s + (tgtHsl.s - srcHsl.s) * satBlend, 0, 1);
-      const [nR, nG, nB] = hslToRgb(nh, ns, hsl.l);
+      const blend = clamp(hsl.s / srcSat, 0, 1.2);
+      let nh;
+      let ns;
+      if (neutralTarget) {
+        nh = tgtHsl.h;
+        ns = clamp(tgtHsl.s + (hsl.s - tgtHsl.s) * 0.06, 0, 1);
+      } else {
+        nh = hsl.h + dHue;
+        ns = clamp(hsl.s + (tgtHsl.s - srcHsl.s) * blend, 0, 1);
+      }
+      const nl = clamp(hsl.l + dLight * blend, 0, 1);
+      const [nR, nG, nB] = hslToRgb(nh, ns, nl);
 
       out[p] = nR;
       out[p + 1] = nG;
@@ -468,7 +482,11 @@ export async function processSwatch(
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: hsl-currant\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
+  const mode =
+    rgbToHsl(targetColor.r, targetColor.g, targetColor.b).s < 0.32
+      ? 'hsl-neutral-snap'
+      : 'hsl-saturated';
+  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: ${mode}\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   writeFileSync(stampPath, stamp);
 
