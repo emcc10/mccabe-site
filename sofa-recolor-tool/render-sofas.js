@@ -1,5 +1,5 @@
 /**
- * LAB recolor — preserves sofa lighting contrast; shifts level/chroma to swatch.
+ * LAB Color mode — 100% original sofa L (texture/shadows); overall swatch a/b.
  */
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
@@ -28,21 +28,9 @@ const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 
 const BG_THRESH = 235;
 const FLOOR_BELOW_SOFA_PX = 4;
-const SWATCH_CENTER_CROP = 0.4;
-const SWATCH_BLUR_PX = 10;
-const SWATCH_LUM_PCT_LO = 0.35;
-const SWATCH_LUM_PCT_HI = 0.65;
+const SWATCH_BLUR_PX = 6;
 const MASK_DILATE_RADIUS = 2;
 const MASK_APPLY_THRESH = 128;
-const SOFA_L_PCT_LO = 0.03;
-const SOFA_L_PCT_HI = 0.97;
-const SWATCH_L_PCT_DARK = 0.08;
-const SWATCH_L_PCT_BRIGHT = 0.92;
-const CHROMA_TEXTURE = 0.06;
-const MIN_CONTRAST_KEEP = 0.72;
-const HIGHLIGHT_L_START = 92;
-const HIGHLIGHT_L_END = 99;
-const HIGHLIGHT_AB_DAMP = 0.18;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
@@ -213,28 +201,10 @@ function morphologyDilate(src, width, height, radius) {
 }
 
 /**
- * Shift sofa L toward swatch while keeping fold contrast (no min-max crush).
+ * Photoshop Color: pixel L unchanged; chroma = overall swatch (full image mean).
  */
-export function applySwatchMapPixel(baseLab, profile, sofaStats) {
-  const sofaMid = (sofaStats.L_min + sofaStats.L_max) / 2;
-  const sofaSpan = Math.max(4, sofaStats.L_max - sofaStats.L_min);
-  const swatchMid = profile.lab.L;
-  const swatchSpan = Math.max(4, profile.L_bright - profile.L_dark);
-
-  const spanScale = clamp(swatchSpan / sofaSpan, MIN_CONTRAST_KEEP, 1.05);
-  const finalL = clamp(swatchMid + (baseLab.L - sofaMid) * spanScale, 1, 99);
-
-  let finalA = profile.lab.a + (baseLab.a - sofaStats.avgA) * CHROMA_TEXTURE;
-  let finalB = profile.lab.b + (baseLab.b - sofaStats.avgB) * CHROMA_TEXTURE;
-
-  const hi = smoothstep(HIGHLIGHT_L_START, HIGHLIGHT_L_END, baseLab.L);
-  if (hi > 0) {
-    const k = 1 - hi * HIGHLIGHT_AB_DAMP;
-    finalA *= k;
-    finalB *= k;
-  }
-
-  return labToRgb(finalL, finalA, finalB);
+export function applyLabColorMode(baseLab, targetLab) {
+  return labToRgb(baseLab.L, targetLab.a, targetLab.b);
 }
 
 export async function loadImage(path) {
@@ -275,64 +245,29 @@ export async function saveImage(data, path, width, height, channels = 4) {
   return size;
 }
 
-/** Sofa L range + average chroma (texture reference only). */
-export function computeSofaLabStats(baseImage, mask, sofaBottomY) {
-  const { data, width, height, channels } = baseImage;
-  const yMax = sofaBottomY + FLOOR_BELOW_SOFA_PX;
-  const Ls = [];
-  let sumA = 0;
-  let sumB = 0;
-  let n = 0;
-
-  for (let y = 0; y < height; y++) {
-    if (y > yMax) continue;
-    for (let x = 0; x < width; x++) {
-      const j = y * width + x;
-      if (mask[j] < MASK_APPLY_THRESH) continue;
-      const p = j * channels;
-      const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
-      Ls.push(lab.L);
-      sumA += lab.a;
-      sumB += lab.b;
-      n++;
-    }
-  }
-
-  if (!n) return { L_min: 8, L_max: 55, avgA: 12, avgB: 18 };
-  Ls.sort((a, b) => a - b);
-  return {
-    L_min: percentile(Ls, SOFA_L_PCT_LO),
-    L_max: percentile(Ls, SOFA_L_PCT_HI),
-    avgA: sumA / n,
-    avgB: sumB / n,
-  };
-}
-
 /**
- * Swatch profile from center 40% of uploaded JPG (fresh read, core-tone median).
+ * Overall swatch color — mean of ALL leather pixels on full uploaded image.
  */
-export async function getSwatchProfile(swatchPath) {
+export async function getSwatchOverallColor(swatchPath) {
   const resolved = resolveOriginalSwatchPath(swatchPath) || resolve(swatchPath);
   if (!resolved.startsWith(resolve(SWATCH_DIR))) {
     throw new Error(`Swatch must be under input/swatches: ${swatchPath}`);
   }
 
-  const meta = await sharp(resolved).metadata();
-  const margin = (1 - SWATCH_CENTER_CROP) / 2;
-  const x0 = Math.floor(meta.width * margin);
-  const y0 = Math.floor(meta.height * margin);
-  const cw = Math.max(1, Math.floor(meta.width * SWATCH_CENTER_CROP));
-  const ch = Math.max(1, Math.floor(meta.height * SWATCH_CENTER_CROP));
-
   const { data, info } = await sharp(resolved)
-    .extract({ left: x0, top: y0, width: cw, height: ch })
     .blur(SWATCH_BLUR_PX)
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
 
   const channels = info.channels;
-  const samples = [];
+  let sumR = 0;
+  let sumG = 0;
+  let sumB = 0;
+  let sumL = 0;
+  let sumA = 0;
+  let sumLabB = 0;
+  let n = 0;
 
   for (let y = 0; y < info.height; y++) {
     for (let x = 0; x < info.width; x++) {
@@ -340,38 +275,28 @@ export async function getSwatchProfile(swatchPath) {
       const r = data[i];
       const g = data[i + 1];
       const b = data[i + 2];
-      const a = channels === 4 ? data[i + 3] : 255;
-      if (a < 20 || isNearWhite(r, g, b)) continue;
-      samples.push({ r, g, b, lum: pixelBrightness(r, g, b) });
+      const alpha = channels === 4 ? data[i + 3] : 255;
+      if (alpha < 20 || isNearWhite(r, g, b)) continue;
+
+      const lab = rgbToLab(r, g, b);
+      sumR += r;
+      sumG += g;
+      sumB += b;
+      sumL += lab.L;
+      sumA += lab.a;
+      sumLabB += lab.b;
+      n++;
     }
   }
 
-  if (!samples.length) throw new Error(`No swatch pixels: ${resolved}`);
-
-  const lums = samples.map((s) => s.lum).sort((a, b) => a - b);
-  const lumLo = percentile(lums, SWATCH_LUM_PCT_LO);
-  const lumHi = percentile(lums, SWATCH_LUM_PCT_HI);
-  const core = samples.filter((s) => s.lum >= lumLo && s.lum <= lumHi);
-  const use = core.length >= 8 ? core : samples;
-
-  const r = Math.round(medianOf(use.map((s) => s.r)));
-  const g = Math.round(medianOf(use.map((s) => s.g)));
-  const b = Math.round(medianOf(use.map((s) => s.b)));
-  const lab = rgbToLab(r, g, b);
-
-  const labLs = samples
-    .map((s) => rgbToLab(s.r, s.g, s.b).L)
-    .sort((a, b) => a - b);
-  const L_dark = percentile(labLs, SWATCH_L_PCT_DARK);
-  const L_bright = percentile(labLs, SWATCH_L_PCT_BRIGHT);
+  if (!n) throw new Error(`No swatch pixels: ${resolved}`);
 
   return {
-    r,
-    g,
-    b,
-    lab,
-    L_dark,
-    L_bright,
+    r: Math.round(sumR / n),
+    g: Math.round(sumG / n),
+    b: Math.round(sumB / n),
+    lab: { L: sumL / n, a: sumA / n, b: sumLabB / n },
+    pixelCount: n,
     sourceFile: basename(resolved),
   };
 }
@@ -420,7 +345,7 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
   return morphologyDilate(hard, width, height, MASK_DILATE_RADIUS);
 }
 
-export function recolorSofa(baseImage, mask, profile, sofaStats, sofaBottomY) {
+export function recolorSofa(baseImage, mask, targetLab, sofaBottomY) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
   const yMax = sofaBottomY + FLOOR_BELOW_SOFA_PX;
@@ -433,45 +358,42 @@ export function recolorSofa(baseImage, mask, profile, sofaStats, sofaBottomY) {
 
       const p = j * channels;
       const baseLab = rgbToLab(data[p], data[p + 1], data[p + 2]);
-      const { r, g, b } = applySwatchMapPixel(baseLab, profile, sofaStats);
+      const { r, g, b } = applyLabColorMode(baseLab, targetLab);
 
       out[p] = r;
       out[p + 1] = g;
       out[p + 2] = b;
-      if (channels === 4) out[p + 3] = 255;
+      if (channels === 4) out[p + 3] = data[p + 3];
     }
   }
 
   return out;
 }
 
-export async function processSwatch(swatchPath, baseSofa, mask, sofaStats, sofaBottomY) {
+export async function processSwatch(swatchPath, baseSofa, mask, sofaBottomY) {
   const resolved = resolveOriginalSwatchPath(swatchPath);
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
 
   const swatchName = basename(resolved, extname(resolved));
-  const profile = await getSwatchProfile(resolved);
+  const target = await getSwatchOverallColor(resolved);
 
   console.log({
     swatchName,
-    source: `input/swatches/${profile.sourceFile}`,
-    targetRGB: [profile.r, profile.g, profile.b],
-    L_range: [
-      Math.round(profile.L_dark * 10) / 10,
-      Math.round(profile.L_bright * 10) / 10,
-    ],
-    targetLAB: [
-      Math.round(profile.lab.L * 10) / 10,
-      Math.round(profile.lab.a * 10) / 10,
-      Math.round(profile.lab.b * 10) / 10,
+    source: `input/swatches/${target.sourceFile}`,
+    overallRGB: [target.r, target.g, target.b],
+    pixelsSampled: target.pixelCount,
+    overallLAB: [
+      Math.round(target.lab.L * 10) / 10,
+      Math.round(target.lab.a * 10) / 10,
+      Math.round(target.lab.b * 10) / 10,
     ],
   });
 
-  const outData = recolorSofa(baseSofa, mask, profile, sofaStats, sofaBottomY);
+  const outData = recolorSofa(baseSofa, mask, target.lab, sofaBottomY);
   const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
   const bytes = await saveImage(outData, outPath, baseSofa.width, baseSofa.height, baseSofa.channels);
   console.log(`  wrote ${swatchName}.png (${Math.round(bytes / 1024)} KB)`);
-  return { outPath, profile };
+  return { outPath, target };
 }
 
 export function zipOutputs(outputDir, zipPath) {
@@ -535,15 +457,11 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: LAB contrast-preserve (shift level + swatch chroma)');
+  console.log('  method: LAB Color (sofa L preserved, overall swatch chroma)');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   const mask = await createUpholsteryMask(baseSofa, maskPath);
   const sofaBottomY = getSofaBottomY(baseSofa);
-  const sofaStats = computeSofaLabStats(baseSofa, mask, sofaBottomY);
-  console.log(
-    `  sofa L ${Math.round(sofaStats.L_min)}–${Math.round(sofaStats.L_max)}`,
-  );
 
   if (cli.mode === 'one') {
     const swPath = resolveSwatchArg(cli.swatchFile);
@@ -551,13 +469,13 @@ export async function main(argv = process.argv) {
       console.error(`Swatch not found: ${cli.swatchFile}`);
       process.exit(1);
     }
-    const { outPath } = await processSwatch(swPath, baseSofa, mask, sofaStats, sofaBottomY);
+    const { outPath } = await processSwatch(swPath, baseSofa, mask, sofaBottomY);
     console.log(`\nDone: ${outPath}`);
     return;
   }
 
   for (const file of swatchFiles) {
-    await processSwatch(join(SWATCH_DIR, file), baseSofa, mask, sofaStats, sofaBottomY);
+    await processSwatch(join(SWATCH_DIR, file), baseSofa, mask, sofaBottomY);
   }
 
   const onDisk = readdirSync(OUTPUT_DIR).filter(
