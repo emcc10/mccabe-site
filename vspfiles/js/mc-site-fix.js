@@ -101,7 +101,16 @@
     });
   }
 
+  function isCategoryPlp() {
+    try {
+      var p = String(global.location.pathname || "").toLowerCase();
+      return (/-s\//.test(p) || /category-s\//.test(p)) && /\.html?/i.test(p);
+    } catch (eCatPath) {}
+    return false;
+  }
+
   function applyPlpThumbs() {
+    if (isCategoryPlp() || global.__MC_PLP_ENFORCER__ || global.mcPlpEnforcerRun) return;
     var mobile = global.innerWidth <= 991;
     var tileH = mobile ? TILE_H_M : TILE_H;
     var stageH = mobile ? STAGE_H_M : STAGE_H;
@@ -172,12 +181,14 @@
     document.addEventListener("DOMContentLoaded", run);
   }
   global.addEventListener("load", run);
-  global.addEventListener("resize", applyPlpThumbs);
-  [50, 150, 400, 800, 1500, 3000, 6000].forEach(function (ms) {
-    global.setTimeout(run, ms);
-  });
+  if (!isCategoryPlp()) {
+    global.addEventListener("resize", applyPlpThumbs);
+    [400, 1500].forEach(function (ms) {
+      global.setTimeout(run, ms);
+    });
+  }
 
-  if (typeof MutationObserver !== "undefined" && document.body) {
+  if (typeof MutationObserver !== "undefined" && document.body && !isCategoryPlp()) {
     var scheduled = false;
     var mo = new MutationObserver(function () {
       if (scheduled) return;

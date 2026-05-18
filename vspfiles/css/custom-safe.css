@@ -13815,7 +13815,7 @@ html body #v65-product-parent .mtl-member-price {
   font-size: 16px !important;
 }
 
-/* Category PLP: final lock — gray mat, fixed stage (html[data-mc-category-plp] works before body.category exists) */
+/* Category PLP: final lock — white thumb bg, fixed stage */
 html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
 html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,
 :is(html.category, body.category) :is(#content_area, .content_area-wrapper) .v-product-grid .v-product > a.v-product__img,
