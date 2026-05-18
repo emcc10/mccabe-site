@@ -33,10 +33,8 @@ const SWATCH_BLUR_PX = 12;
 const MASK_DILATE_RADIUS = 1;
 const MASK_FEATHER_RADIUS = 0;
 const MASK_APPLY_THRESH = 220;
-/** Max A/B pull toward swatch in fully lit leather (L channel 0–100). */
-const AB_MIX_MAX = 0.55;
-const SHADOW_PROTECT_LO = 5;
-const SHADOW_PROTECT_HI = 28;
+/** Max original chroma retained on A/B (90% swatch, 10% base). */
+const AB_ORIGINAL_RETAIN = 0.1;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
@@ -173,11 +171,6 @@ function featherMask(mask, width, height, radius) {
     result[j] = Math.round(clamp(blurred[j], 0, 255));
   }
   return result;
-}
-
-function smoothstep(edge0, edge1, x) {
-  const t = clamp((x - edge0) / (edge1 - edge0), 0, 1);
-  return t * t * (3 - 2 * t);
 }
 
 /** RGB float 0–1 → LAB via color-convert (L 0–100, a/b signed). */
@@ -361,12 +354,11 @@ export function recolorSofa(baseImage, mask, targetLab, sofaBottomY) {
       const bf = oB / 255;
 
       const base = rgbFloatToLab(rf, gf, bf);
-      const shadowProtect = smoothstep(SHADOW_PROTECT_LO, SHADOW_PROTECT_HI, base.L);
-      const mix = shadowProtect * AB_MIX_MAX;
 
       const finalL = base.L;
-      const finalA = base.a + (tA - base.a) * mix;
-      const finalB = base.b + (tB - base.b) * mix;
+      // Replace chroma with swatch; keep at most 10% original A/B for texture.
+      const finalA = tA + (base.a - tA) * AB_ORIGINAL_RETAIN;
+      const finalB = tB + (base.b - tB) * AB_ORIGINAL_RETAIN;
 
       const rec = labToRgbFloat(finalL, finalA, finalB);
       const mw = mask[j] / 255;

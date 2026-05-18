@@ -17,7 +17,7 @@ npm run render
 2. Per masked pixel (float RGB 0–1):
    - `RGB → LAB` (color-convert: L 0–100, signed a/b)
    - `finalL = baseL` (unchanged)
-   - `finalA/B = lerp(base, target, mix)` — mix reduced in deep shadows
+   - `finalA/B = lerp(target, base, 0.10)` — replace chroma; max 10% original
    - `LAB → RGB` → clip 0–1 → uint8
 3. Swatch target: center 35% crop, blur 12px, **median RGB** → LAB
 
