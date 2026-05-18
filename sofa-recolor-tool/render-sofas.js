@@ -1,5 +1,5 @@
 /**
- * Photographic leather recolor — upholstery midtones only; Lab a/b transfer; original L kept. No AI.
+ * Photographic leather recolor — uniform swatch LAB a/b + original sofa L; no per-pixel chroma. No AI.
  */
 import AdmZip from 'adm-zip';
 import { mkdirSync, readdirSync, existsSync, writeFileSync } from 'fs';
@@ -19,8 +19,11 @@ const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 
 const BG_THRESH = 235;
 const FLOOR_MARGIN_PX = 18;
-const SPECULAR_BRIGHT = 215;
-const SPECULAR_ORIGINAL_BLEND = 0.7;
+const SWATCH_BLUR_PX = 16;
+const HIGHLIGHT_LAB_L = 82;
+const HIGHLIGHT_ORIGINAL_BLEND = 0.35;
+const SEAM_LAB_L = 18;
+const MASK_FEATHER_SIGMA = 0.7;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
@@ -136,21 +139,19 @@ function isFloorAmbientPixel(r, g, b) {
   return rgbMaxDiff(r, g, b) < 22;
 }
 
-function lerp(a, b, t) {
-  return a + (b - a) * t;
+/** Edge-only mask feather (Gaussian ~0.7px). */
+async function featherMask(mask, width, height, sigma = MASK_FEATHER_SIGMA) {
+  const { data } = await sharp(Buffer.from(mask), {
+    raw: { width, height, channels: 1 },
+  })
+    .blur(sigma)
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  return new Uint8Array(data);
 }
 
-/** Post-LAB: saturation boost only (no contrast/sharpen). */
-function applySaturationBoost(r, g, b, factor = 1.08) {
-  const hsl = rgbToHsl(r, g, b);
-  const ns = clamp(hsl.s * factor, 0, 1);
-  return hslToRgb(hsl.h, ns, hsl.l);
-}
-
-const SHADOW_LAB_L = 70;
-
-/** Separable box blur (~0.8px feather) — sharp.blur() collapses sparse upholstery masks. */
-function featherMask(mask, width, height, radius = 1) {
+/** @deprecated box blur — use featherMask (sharp) */
+function featherMaskBox(mask, width, height, radius = 1) {
   const src = new Float32Array(width * height);
   const tmp = new Float32Array(width * height);
   const out = new Float32Array(width * height);
@@ -235,7 +236,7 @@ export async function saveImage(data, path, width, height) {
 }
 
 /**
- * Center 40% crop, 8px blur, mean L/a/b (full swatch chroma for transfer).
+ * One smooth swatch color: center 40% crop, heavy blur, median LAB (not per-pixel texture).
  */
 export async function getSwatchLabStats(swatchPath) {
   const meta = await sharp(swatchPath).metadata();
@@ -248,7 +249,7 @@ export async function getSwatchLabStats(swatchPath) {
 
   const { data, info } = await sharp(swatchPath)
     .extract({ left: x0, top: y0, width: cw, height: ch })
-    .blur(8)
+    .blur(SWATCH_BLUR_PX)
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -256,10 +257,9 @@ export async function getSwatchLabStats(swatchPath) {
   const channels = info.channels;
   const w = info.width;
   const h = info.height;
-  let sumL = 0;
-  let sumA = 0;
-  let sumB = 0;
-  let count = 0;
+  const ls = [];
+  const as = [];
+  const bs = [];
 
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
@@ -271,21 +271,20 @@ export async function getSwatchLabStats(swatchPath) {
       if (a < 20) continue;
       if (isNearWhite(r, g, b)) continue;
       const lab = rgbToLab(r, g, b);
-      sumL += lab.L;
-      sumA += lab.a;
-      sumB += lab.b;
-      count++;
+      ls.push(lab.L);
+      as.push(lab.a);
+      bs.push(lab.b);
     }
   }
 
-  if (!count) {
+  if (!ls.length) {
     throw new Error(`No usable swatch pixels in center crop: ${swatchPath}`);
   }
 
   return {
-    meanL: sumL / count,
-    meanA: sumA / count,
-    meanB: sumB / count,
+    meanL: medianOf(ls),
+    meanA: medianOf(as),
+    meanB: medianOf(bs),
   };
 }
 
@@ -342,7 +341,7 @@ export function getSofaBottomY(baseImage) {
 }
 
 /**
- * Upholstery midtone mask (not full silhouette). Feathered 0.8px.
+ * Upholstery midtone mask (not full silhouette). Edge feather ~0.7px.
  */
 export async function createUpholsteryMask(image, optionalMaskPath = null) {
   const { data, width, height, channels } = image;
@@ -374,7 +373,7 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
     hard[j] = isUpholsteryMidtone(r, g, b) ? 255 : 0;
   }
 
-  return featherMask(hard, width, height, 1);
+  return featherMask(hard, width, height, MASK_FEATHER_SIGMA);
 }
 
 /** @deprecated Use createUpholsteryMask */
@@ -422,7 +421,7 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * Neutralize cognac chroma → apply swatch a/b; keep L; shadow + floor protected.
+ * Uniform swatch a/b + original sofa L only (no per-pixel chroma variation).
  */
 export function recolorSofa(
   baseImage,
@@ -433,8 +432,8 @@ export function recolorSofa(
 ) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
-  const swatchA = swatchLab.meanA;
-  const swatchB = swatchLab.meanB;
+  const targetA = swatchLab.meanA;
+  const targetB = swatchLab.meanB;
   const yFloor = sofaBottomY - FLOOR_MARGIN_PX;
   const yFloorAmbient = sofaBottomY - 45;
 
@@ -453,25 +452,15 @@ export function recolorSofa(
 
       if (y > yFloorAmbient && isFloorAmbientPixel(oR, oG, oB)) continue;
 
-      const { L: origL, a: As, b: Bs } = rgbToLab(oR, oG, oB);
-      const finalL = origL;
+      const { L: origL } = rgbToLab(oR, oG, oB);
 
-      const neutralA = lerp(As, 0, 0.92);
-      const neutralB = lerp(Bs, 0, 0.92);
-      const blendedA = neutralA * 0.08 + swatchA * 0.92;
-      const blendedB = neutralB * 0.08 + swatchB * 0.92;
+      if (origL < SEAM_LAB_L) continue;
 
-      const shadowBlend = clamp(origL / SHADOW_LAB_L, 0, 1);
-      const finalA = swatchA * (1 - shadowBlend) + blendedA * shadowBlend;
-      const finalB = swatchB * (1 - shadowBlend) + blendedB * shadowBlend;
-
-      let [nR, nG, nB] = labToRgb(finalL, finalA, finalB);
-      [nR, nG, nB] = applySaturationBoost(nR, nG, nB, 1.08);
+      const [nR, nG, nB] = labToRgb(origL, targetA, targetB);
 
       let t = maskW;
-      const bright = pixelBrightness(oR, oG, oB);
-      if (bright > SPECULAR_BRIGHT) {
-        t *= 1 - SPECULAR_ORIGINAL_BLEND;
+      if (origL > HIGHLIGHT_LAB_L) {
+        t *= 1 - HIGHLIGHT_ORIGINAL_BLEND;
       }
 
       out[p] = Math.round(oR + (nR - oR) * t);
@@ -517,7 +506,7 @@ export async function processSwatch(
   const targetColor = { r, g, b };
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${swatchName}\nmethod: lab-neutralize-chroma\ntargetLab: ${swatchLab.meanL.toFixed(2)},${swatchLab.meanA.toFixed(2)},${swatchLab.meanB.toFixed(2)}\n`;
+  const stamp = `${new Date().toISOString()}\n${swatchName}\nmethod: lab-uniform-luminance\ntargetLab: ${swatchLab.meanL.toFixed(2)},${swatchLab.meanA.toFixed(2)},${swatchLab.meanB.toFixed(2)}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   try {
     writeFileSync(stampPath, stamp);
