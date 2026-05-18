@@ -86,9 +86,18 @@ put_primary() {
 
 echo "=== Assets via Paramiko (size-verified; /v/vspfiles + chroot paths) ==="
 export SFTP_PORT="2222"
+set +e
 python3 scripts/deploy_volusion_assets.py
+py_rc=$?
+set -e
+if [[ "$py_rc" -ne 0 ]]; then
+  echo "::warning::Paramiko deploy exited $py_rc — continuing with lftp for remaining assets"
+fi
 
-echo "=== Assets via lftp (fallback) ==="
+echo "=== Assets via lftp (fallback + large JS) ==="
+put_primary "vspfiles/templates/266/js/min/design-toolkit.min.js" "design-toolkit" \
+  "/vspfiles/templates/266/js/min/design-toolkit.min.js" \
+  "vspfiles/templates/266/js/min/design-toolkit.min.js"
 put_primary "vspfiles/css/custom-safe.css" "custom-safe" \
   "/vspfiles/css/custom-safe.css" \
   "vspfiles/css/custom-safe.css"
@@ -101,9 +110,8 @@ put_primary "vspfiles/templates/266/js/min/template.min.js" "template.min" \
   "/vspfiles/templates/266/js/min/template.min.js" \
   "vspfiles/templates/266/js/min/template.min.js"
 
-put_primary "vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer" \
-  "/vspfiles/js/mtl-sectional-renderer.js" \
-  "vspfiles/js/mtl-sectional-renderer.js"
+# mtl-sectional-renderer.js is ~175KB; Volusion SFTP truncates /vspfiles/js/*.js at 128 KiB — skip.
+echo "=== skip mtl-sectional-renderer.js (175KB > Volusion 128 KiB SFTP cap) ==="
 
 put_primary "vspfiles/js/mc-site-fix.js" "mc-site-fix" \
   "/vspfiles/js/mc-site-fix.js" \
