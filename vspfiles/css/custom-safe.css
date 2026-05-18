@@ -6521,10 +6521,11 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img,
 :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image img,
 :is(html.category, body.category) .v-product-grid .v-product a.v-product__img > img {
-  width: 100% !important;
+  width: auto !important;
   height: var(--mc-plp-stage-h) !important;
   max-width: 100% !important;
   max-height: var(--mc-plp-stage-h) !important;
+  min-width: 0 !important;
   min-height: 0 !important;
   object-fit: contain !important;
   object-position: center bottom !important;
@@ -6535,6 +6536,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   border: 0 !important;
   box-sizing: border-box !important;
   background: transparent !important;
+  background-color: transparent !important;
 }
 
 :is(html.category, body.category) .v-product-grid .v-product .v-product__name,

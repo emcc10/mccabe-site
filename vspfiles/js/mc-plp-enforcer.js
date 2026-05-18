@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260527
+ * MC_PLP_ENFORCER_20260528
  *
  * DOM (category listing):
  *   table.colors_backgroundlight + SearchResults_SubCat_Angle  ← black bar (legacy subcat chrome)
@@ -10,7 +10,31 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260527";
+  var VERSION = "20260528";
+
+  /** Overrides baked template width:100% + white tile on img (gray mat -> white box -> sofa). */
+  var THUMB_FIX_CSS =
+    "html.category #content_area .v-product-grid a.v-product__img," +
+    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img{" +
+    "background:#f2f2f2!important;background-color:#f2f2f2!important;" +
+    "border:0!important;box-shadow:none!important}" +
+    "html.category #content_area .v-product-grid a.v-product__img>img," +
+    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img>img{" +
+    "width:auto!important;max-width:calc(100% - 4px)!important;height:220px!important;" +
+    "max-height:220px!important;background:transparent!important;background-color:transparent!important;" +
+    "border:0!important;box-shadow:none!important;object-fit:contain!important;" +
+    "object-position:center bottom!important}" +
+    "html.category #content_area .v-product-grid a.v-product__img .v-product__image-wrap," +
+    "html.category #content_area .v-product-grid a.v-product__img span," +
+    "html.category #content_area .v-product-grid a.v-product__img div," +
+    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img .v-product__image-wrap," +
+    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img span," +
+    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img div{" +
+    "background:transparent!important;background-color:transparent!important;" +
+    "border:0!important;box-shadow:none!important;padding:0!important;margin:0!important}" +
+    "@media(max-width:991px){html.category #content_area .v-product-grid a.v-product__img>img," +
+    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img>img{" +
+    "height:172px!important;max-height:172px!important}}";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
@@ -256,6 +280,28 @@
     });
   }
 
+  function injectThumbFixStyle() {
+    if (!isCategoryPlp()) return;
+    var id = "mc-plp-thumb-fix";
+    var el = document.getElementById(id);
+    if (!el) {
+      el = document.createElement("style");
+      el.id = id;
+    }
+    el.textContent = THUMB_FIX_CSS;
+    var root = document.body || document.documentElement;
+    if (el.parentNode !== root) root.appendChild(el);
+  }
+
+  function clearInnerThumbChrome(node) {
+    if (!node || !node.style) return;
+    node.style.setProperty("background", "transparent", "important");
+    node.style.setProperty("background-color", "transparent", "important");
+    node.style.setProperty("border", "0", "important");
+    node.style.setProperty("box-shadow", "none", "important");
+    node.style.setProperty("outline", "0", "important");
+  }
+
   function fixThumb(wrap) {
     if (!wrap || !wrap.classList || !wrap.classList.contains("v-product__img")) return;
     if (!wrap.closest(".v-product-grid")) return;
@@ -282,6 +328,8 @@
     wrap.style.setProperty("box-shadow", "none", "important");
     wrap.style.setProperty("line-height", "0", "important");
 
+    wrap.querySelectorAll(".v-product__image-wrap, span, div").forEach(clearInnerThumbChrome);
+
     var img = wrap.querySelector(":scope > img") || wrap.querySelector("img");
     if (!img) return;
 
@@ -290,19 +338,19 @@
       img.removeAttribute("border");
     } catch (eAttr) {}
 
-    img.style.setProperty("border", "0", "important");
-    img.style.setProperty("outline", "0", "important");
-    img.style.setProperty("background", "transparent", "important");
-    img.style.setProperty("background-color", "transparent", "important");
+    clearInnerThumbChrome(img);
     img.style.setProperty("display", "block", "important");
     img.style.setProperty("width", "auto", "important");
     img.style.setProperty("max-width", "100%", "important");
     img.style.setProperty("height", stage + "px", "important");
     img.style.setProperty("max-height", stage + "px", "important");
     img.style.setProperty("min-height", "0", "important");
+    img.style.setProperty("min-width", "0", "important");
     img.style.setProperty("object-fit", "contain", "important");
     img.style.setProperty("object-position", "center bottom", "important");
     img.style.setProperty("margin", "0 auto", "important");
+    img.style.setProperty("padding", "0", "important");
+    img.style.setProperty("flex", "0 0 auto", "important");
     img.style.transformOrigin = "center bottom";
 
     normalizeScale(wrap, img);
@@ -333,6 +381,7 @@
   function run() {
     if (!isCategoryPlp()) return;
     markCategory();
+    injectThumbFixStyle();
     removeLegacyCategoryBars();
     applyThumbs();
     hideHero();
