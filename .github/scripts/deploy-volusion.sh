@@ -106,6 +106,10 @@ put_primary "vspfiles/js/mc-plp-enforcer.js" "mc-plp-enforcer" \
   "/vspfiles/js/mc-plp-enforcer.js" \
   "vspfiles/js/mc-plp-enforcer.js"
 
+put_primary "vspfiles/templates/266/js/mc-plp-enforcer.js" "mc-plp-enforcer-template" \
+  "/vspfiles/templates/266/js/mc-plp-enforcer.js" \
+  "vspfiles/templates/266/js/mc-plp-enforcer.js"
+
 # template.min.js + mtl-sectional-renderer.js exceed Volusion 128 KiB SFTP cap — SKIP_CAP in Paramiko (not an error).
 echo "=== skip template.min.js + mtl-sectional-renderer.js (>128 KiB; use Volusion File Manager or GitHub for renderer) ==="
 
@@ -160,8 +164,9 @@ verify_url() {
 }
 
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "C_CSS_DEPLOY_VERIFY_20260518e"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260525" "MC_PLP_ENFORCER_20260525"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260525"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260526" "MC_PLP_ENFORCER_20260526"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260526" "MC_PLP_ENFORCER_20260526"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260526"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/template.min.js" "MC_PLP_ENFORCER_LOADING__"
 
 echo ""

@@ -12,6 +12,7 @@ VOLUSION_JS_CAP = 131072
 CRITICAL = (
     "vspfiles/templates/266/js/min/design-toolkit.min.js",
     "vspfiles/js/mc-plp-enforcer.js",
+    "vspfiles/templates/266/js/mc-plp-enforcer.js",
 )
 
 # Upload if possible; failure is a warning (size cap or path).
