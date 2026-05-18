@@ -27,20 +27,25 @@ const ZIP_PATH = join(OUTPUT_DIR, 'sofa-renders.zip');
 const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 
 const BG_THRESH = 235;
-const FLOOR_MARGIN_PX = 18;
+const FLOOR_MARGIN_PX = 28;
 const SWATCH_CENTER_CROP = 0.35;
 const SWATCH_BLUR_PX = 12;
 const MASK_DILATE_RADIUS = 1;
-const MASK_FEATHER_RADIUS = 1;
-const MASK_APPLY_THRESH = 32;
-const SOFT_BLUR_RADIUS = 1;
-const SOFT_BLEND = 0.92;
-const SAT_BASE_WEIGHT = 0.35;
-const SAT_TARGET_WEIGHT = 0.75;
-const SHADOW_L = 0.22;
-const SHADOW_LIFT = 0.04;
-const HIGHLIGHT_L = 0.82;
-const HIGHLIGHT_REDUCE = 0.02;
+const MASK_FEATHER_RADIUS = 0;
+const MASK_APPLY_THRESH = 220;
+const SAT_BASE_WEIGHT = 0.72;
+const SAT_TARGET_WEIGHT = 0.28;
+const HUE_MIX_MAX = 0.35;
+const SAT_MIX_MAX = 0.25;
+const SHADOW_PROTECT_LO = 0.05;
+const SHADOW_PROTECT_HI = 0.28;
+const WARM_HUE_LO = 15 / 360;
+const WARM_HUE_HI = 40 / 360;
+const WARM_SAT_SCALE = 0.82;
+const L_SHADOW_BUMP = 0.015;
+const L_HIGHLIGHT_TRIM = 0.01;
+const RECOLOR_BLEND = 0.96;
+const ORIGINAL_BLEND = 0.04;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
@@ -124,12 +129,20 @@ function isFloorAmbientPixel(r, g, b) {
   return rgbMaxDiff(r, g, b) < 22;
 }
 
+function isEdgeGlowPixel(r, g, b) {
+  const lum = pixelBrightness(r, g, b);
+  if (lum > 228) return true;
+  const sat = pixelSaturation(r, g, b);
+  return sat < 0.06 && lum > 175;
+}
+
 function isUpholsteryPixel(r, g, b, y, sofaBottomY) {
   if (isNearWhite(r, g, b)) return false;
+  if (isEdgeGlowPixel(r, g, b)) return false;
   const lum = pixelBrightness(r, g, b);
-  if (lum > 252) return false;
+  if (lum > 250) return false;
   if (isLegPixel(r, g, b, y, sofaBottomY)) return false;
-  if (y > sofaBottomY - 8 && isFloorAmbientPixel(r, g, b)) return false;
+  if (y > sofaBottomY - 12 && isFloorAmbientPixel(r, g, b)) return false;
   const sat = pixelSaturation(r, g, b);
   if (sat >= 0.06) return true;
   if (lum >= 8 && lum <= 120) return true;
@@ -333,26 +346,42 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
     hard[j] = isUpholsteryPixel(r, g, b, y, sofaBottomY) ? 255 : 0;
   }
 
-  const dilated = morphologyDilate(hard, width, height, MASK_DILATE_RADIUS);
-  return featherMask(dilated, width, height, MASK_FEATHER_RADIUS);
+  let m = morphologyDilate(hard, width, height, MASK_DILATE_RADIUS);
+  if (MASK_FEATHER_RADIUS > 0) {
+    m = featherMask(m, width, height, MASK_FEATHER_RADIUS);
+  }
+  return m;
 }
 
-function smoothstep(t) {
-  const x = clamp(t, 0, 1);
-  return x * x * (3 - 2 * x);
+function smoothstep(edge0, edge1, x) {
+  const t = clamp((x - edge0) / (edge1 - edge0), 0, 1);
+  return t * t * (3 - 2 * t);
+}
+
+function hueDelta(h1, h2) {
+  let d = h2 - h1;
+  if (d > 0.5) d -= 1;
+  if (d < -0.5) d += 1;
+  return d;
+}
+
+function mixHue(baseH, targetH, t) {
+  let h = baseH + hueDelta(baseH, targetH) * t;
+  if (h < 0) h += 1;
+  if (h >= 1) h -= 1;
+  return h;
+}
+
+function mixLinear(a, b, t) {
+  return a + (b - a) * t;
 }
 
 /**
- * Soft HSL transfer + micro softness (92% blurred recolor, 8% sharp recolor).
+ * Gentle soft HSL nudge — original L and lighting preserved; dark shadows protected.
  */
 export function recolorSofa(baseImage, mask, targetHsl, sofaBottomY) {
   const { data, width, height, channels } = baseImage;
-  const n = width * height;
-  const recR = new Float32Array(n);
-  const recG = new Float32Array(n);
-  const recB = new Float32Array(n);
-  const inMask = new Uint8Array(n);
-
+  const out = Buffer.from(data);
   const targetH = targetHsl.h;
   const targetS = targetHsl.s;
   const yFloor = sofaBottomY - FLOOR_MARGIN_PX;
@@ -360,8 +389,7 @@ export function recolorSofa(baseImage, mask, targetHsl, sofaBottomY) {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const j = y * width + x;
-      const mw = mask[j] / 255;
-      if (mw < MASK_APPLY_THRESH / 255) continue;
+      if (mask[j] < MASK_APPLY_THRESH) continue;
       if (y > yFloor) continue;
 
       const p = j * channels;
@@ -370,47 +398,34 @@ export function recolorSofa(baseImage, mask, targetHsl, sofaBottomY) {
       const oB = data[p + 2];
 
       const base = rgbToHsl(oR, oG, oB);
-      let finalL = base.l;
-      const finalS = clamp(
-        base.s * SAT_BASE_WEIGHT + targetS * SAT_TARGET_WEIGHT,
-        0,
-        1,
-      );
-      const finalH = targetH;
+      let baseH = base.h;
+      let baseS = base.s;
 
-      if (finalL < SHADOW_L) finalL = clamp(finalL + SHADOW_LIFT, 0, 1);
-      if (finalL > HIGHLIGHT_L) finalL = clamp(finalL - HIGHLIGHT_REDUCE, 0, 1);
+      if (baseH >= WARM_HUE_LO && baseH <= WARM_HUE_HI) {
+        baseS *= WARM_SAT_SCALE;
+      }
+
+      const shadowProtect = smoothstep(SHADOW_PROTECT_LO, SHADOW_PROTECT_HI, base.l);
+      const workS = clamp(baseS * SAT_BASE_WEIGHT + targetS * SAT_TARGET_WEIGHT, 0, 1);
+
+      const finalH = mixHue(baseH, targetH, shadowProtect * HUE_MIX_MAX);
+      const finalS = mixLinear(baseS, workS, shadowProtect * SAT_MIX_MAX);
+
+      let finalL = base.l;
+      if (finalL < 0.18) finalL = clamp(finalL + L_SHADOW_BUMP, 0, 1);
+      if (finalL > 0.88) finalL = clamp(finalL - L_HIGHLIGHT_TRIM, 0, 1);
 
       const [nR, nG, nB] = hslToRgb(finalH, finalS, finalL);
-      recR[j] = nR;
-      recG[j] = nG;
-      recB[j] = nB;
-      inMask[j] = 1;
+      const recR = nR * RECOLOR_BLEND + oR * ORIGINAL_BLEND;
+      const recG = nG * RECOLOR_BLEND + oG * ORIGINAL_BLEND;
+      const recB = nB * RECOLOR_BLEND + oB * ORIGINAL_BLEND;
+
+      const mw = mask[j] / 255;
+      out[p] = Math.round(oR + (recR - oR) * mw);
+      out[p + 1] = Math.round(oG + (recG - oG) * mw);
+      out[p + 2] = Math.round(oB + (recB - oB) * mw);
+      if (channels === 4) out[p + 3] = data[p + 3];
     }
-  }
-
-  const blurR = boxBlurChannel(recR, width, height, SOFT_BLUR_RADIUS);
-  const blurG = boxBlurChannel(recG, width, height, SOFT_BLUR_RADIUS);
-  const blurB = boxBlurChannel(recB, width, height, SOFT_BLUR_RADIUS);
-
-  const out = Buffer.from(data);
-
-  for (let j = 0; j < n; j++) {
-    if (!inMask[j]) continue;
-    const mw = smoothstep((mask[j] - MASK_APPLY_THRESH) / (255 - MASK_APPLY_THRESH));
-    const p = j * channels;
-
-    const sharpR = recR[j];
-    const sharpG = recG[j];
-    const sharpB = recB[j];
-    const softR = blurR[j] * SOFT_BLEND + sharpR * (1 - SOFT_BLEND);
-    const softG = blurG[j] * SOFT_BLEND + sharpG * (1 - SOFT_BLEND);
-    const softB = blurB[j] * SOFT_BLEND + sharpB * (1 - SOFT_BLEND);
-
-    out[p] = Math.round(data[p] + (softR - data[p]) * mw);
-    out[p + 1] = Math.round(data[p + 1] + (softG - data[p + 1]) * mw);
-    out[p + 2] = Math.round(data[p + 2] + (softB - data[p + 2]) * mw);
-    if (channels === 4) out[p + 3] = data[p + 3];
   }
 
   return out;
@@ -493,7 +508,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: soft-hsl-transfer');
+  console.log('  method: soft-hsl-gentle');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   if (maskPath) console.log(`  mask: ${maskPath}`);
