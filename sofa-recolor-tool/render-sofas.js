@@ -38,7 +38,6 @@ const SWATCH_SAT_SCALE = 0.9;
 const SEAM_HSL_L = 0.12;
 const HIGHLIGHT_HSL_L = 0.82;
 const HIGHLIGHT_ORIGINAL_BLEND = 0.2;
-const MASK_FEATHER_SIGMA = 0.7;
 const DEBUG_CHIP_SIZE = 200;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
@@ -155,19 +154,11 @@ function isFloorAmbientPixel(r, g, b) {
   return rgbMaxDiff(r, g, b) < 22;
 }
 
-/** Edge-only mask feather (Gaussian ~0.7px). */
-async function featherMask(mask, width, height, sigma = MASK_FEATHER_SIGMA) {
-  const { data } = await sharp(Buffer.from(mask), {
-    raw: { width, height, channels: 1 },
-  })
-    .blur(sigma)
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  return new Uint8Array(data);
-}
-
-/** @deprecated box blur — use featherMask (sharp) */
-function featherMaskBox(mask, width, height, radius = 1) {
+/**
+ * Separable box blur for edge feather (~0.7–1px).
+ * sharp.blur() collapses sparse upholstery masks to a bottom strip — do not use it here.
+ */
+function featherMask(mask, width, height, radius = 1) {
   const src = new Float32Array(width * height);
   const tmp = new Float32Array(width * height);
   const out = new Float32Array(width * height);
@@ -628,7 +619,7 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
     hard[j] = isUpholsteryMidtone(r, g, b) ? 255 : 0;
   }
 
-  return featherMask(hard, width, height, MASK_FEATHER_SIGMA);
+  return featherMask(hard, width, height, 1);
 }
 
 /** @deprecated Use createUpholsteryMask */
