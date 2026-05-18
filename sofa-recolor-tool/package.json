@@ -1,18 +1,16 @@
 {
   "name": "sofa-recolor-tool",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Batch recolor a base sofa PNG to leather swatch colors (deterministic, no AI).",
+  "description": "Manual sofa leather recolor with brush mask and HSL sliders.",
   "type": "module",
   "scripts": {
-    "preview": "node render-sofas.js --currant",
-    "render": "node render-sofas.js --all",
-    "test-colors": "node render-sofas.js --test-colors",
-    "manifest": "node build-manifest.js",
-    "serve": "node build-manifest.js && node serve-preview.js"
+    "manual": "node serve-manual.js",
+    "serve": "node serve-manual.js",
+    "preview": "node serve-preview.js",
+    "manifest": "node build-manifest.js"
   },
   "dependencies": {
-    "adm-zip": "^0.5.16",
     "sharp": "^0.33.5"
   }
 }

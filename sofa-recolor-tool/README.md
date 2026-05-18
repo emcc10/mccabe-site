@@ -1,72 +1,43 @@
-# Sofa Recolor Tool
+# Sofa Manual Recolor Tool
 
-Deterministic batch recolor: one base sofa + many leather swatch photos → one PNG per swatch + ZIP.
+Automated batch recolor was removed. Use the browser tool to paint a mask and tune HSL sliders per leather color.
 
-No AI. No resize. Same pixel dimensions as `input/sofa.png` every time.
-
-## Setup
+## Quick start
 
 ```bash
 cd sofa-recolor-tool
 npm install
+npm run manual
 ```
 
-## Input layout
+Open **http://127.0.0.1:3457/manual-recolor.html**
 
-```
-input/
-  sofa.png              ← required: white-background product shot
-  mask.png              ← optional: white = recolor, black = keep
-  swatches/
-    Rein-Eggshell.jpg
-    Bali-Silk.jpg
-    ...
-```
+## Workflow
 
-## Run
+1. Load **input/sofa.png** (auto-loaded when served) or upload your base sofa.
+2. **Paint** the upholstery mask (arms, cushions, front rail). Erase legs, floor, background.
+3. Upload a swatch for reference; set **preset name** (e.g. `Bali-Currant`).
+4. Adjust sliders until the preview looks right.
+5. **Save settings for name** — stores sliders in the browser.
+6. **Save preview PNG** — one full-size PNG, no resize.
+7. Repeat for each leather, then **Batch export all presets** to download every saved name.
 
-**One swatch (fast — default Bali Currant):**
+## Presets
 
-```bash
-npm run preview
-```
-
-**All swatches + ZIP:**
-
-```bash
-npm run render
-```
-
-Single swatch by name:
-
-```bash
-node render-sofas.js Rein-Eggshell.jpg
-```
-
-## Output
-
-```
-output/
-  Rein-Eggshell.png
-  Bali-Silk.png
-  ...
-  sofa-renders.zip
-```
-
-Output filenames match swatch filenames (extension changed to `.png`).
-
-## How color is computed
-
-1. Center **50%** crop of each swatch (avoids fold edges).
-2. **Median** RGB on that crop.
-3. **Average** RGB on that crop.
-4. `targetColor = median × 0.75 + average × 0.25`
-5. Sofa pixels keep **original luminance** (folds, shadows, highlights). Only Lab **a/b** shift from cognac on the photo → swatch color.
+- Saved in browser `localStorage`.
+- **Export presets JSON** to back up or move to another machine.
+- **Import presets JSON** before batch export on a new session.
 
 ## Mask
 
-Auto mask: pixels where `r,g,b > 235` are background. Everything else is upholstery (feathered ~1.2px).
+- **Download mask PNG** / **Load mask PNG** — reuse the same mask across colors.
+- Mask is also cached in `localStorage` for the same browser session.
 
-Pixels with brightness `< 35` (feet) are left unchanged.
+## Files
 
-Optional `input/mask.png` must be the same size as `sofa.png`.
+| Path | Purpose |
+|------|---------|
+| `manual-recolor.html` | Main tool |
+| `input/sofa.png` | Base cognac sofa |
+| `input/swatches/*.jpg` | Leather swatches (reference only) |
+| `output/` | Your exported PNGs (local) |
