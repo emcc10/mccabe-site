@@ -26,12 +26,15 @@ const MASK_PATH = join(INPUT_DIR, 'mask.png');
 const ZIP_PATH = join(OUTPUT_DIR, 'sofa-renders.zip');
 const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 
-const BG_THRESH = 235;
+const BG_THRESH = 238;
+const EDGE_LUM_MAX = 218;
 const FLOOR_BELOW_SOFA_PX = 4;
-const MASK_DILATE_RADIUS = 2;
+const MASK_DILATE_RADIUS = 1;
+const MASK_ERODE_RADIUS = 1;
 const MASK_APPLY_THRESH = 128;
 const MIN_LAB_STD = 0.8;
-const TRANSFER_STRENGTH = 1;
+const L_TRANSFER_STRENGTH = 0.38;
+const AB_TRANSFER_STRENGTH = 1;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
@@ -141,15 +144,21 @@ function isLegPixel(r, g, b, y, sofaBottomY) {
   return pixelSaturation(r, g, b) < 0.12;
 }
 
-function isEdgeGlowPixel(r, g, b) {
+/** Anti-aliased edge / white fringe — causes gray halo if recolored. */
+function isEdgeFringePixel(r, g, b) {
   const lum = pixelBrightness(r, g, b);
-  if (lum > 248) return true;
-  return pixelSaturation(r, g, b) < 0.04 && lum > 200;
+  if (lum > 228) return true;
+  if (lum > EDGE_LUM_MAX && pixelSaturation(r, g, b) < 0.22) return true;
+  return false;
+}
+
+function isEdgeGlowPixel(r, g, b) {
+  return isEdgeFringePixel(r, g, b);
 }
 
 function isUpholsteryPixel(r, g, b, y, sofaBottomY) {
   if (isNearWhite(r, g, b)) return false;
-  if (isEdgeGlowPixel(r, g, b)) return false;
+  if (isEdgeFringePixel(r, g, b)) return false;
   if (isLegPixel(r, g, b, y, sofaBottomY)) return false;
   if (isFloorShadowPixel(r, g, b, y, sofaBottomY)) return false;
   if (isUnderSofaGapPixel(r, g, b, y, sofaBottomY)) return false;
@@ -157,8 +166,28 @@ function isUpholsteryPixel(r, g, b, y, sofaBottomY) {
   const lum = pixelBrightness(r, g, b);
   const sat = pixelSaturation(r, g, b);
   if (sat >= 0.05) return true;
-  if (lum >= 6 && lum <= 200) return true;
+  if (lum >= 6 && lum <= EDGE_LUM_MAX) return true;
   return false;
+}
+
+function morphologyErode(src, width, height, radius) {
+  const out = new Uint8Array(src.length);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let min = 255;
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const yy = y + dy;
+          const xx = x + dx;
+          if (yy < 0 || yy >= height || xx < 0 || xx >= width) continue;
+          const v = src[yy * width + xx];
+          if (v < min) min = v;
+        }
+      }
+      out[y * width + x] = min;
+    }
+  }
+  return out;
 }
 
 function morphologyDilate(src, width, height, radius) {
@@ -213,20 +242,41 @@ export function computeLabStats(labSamples) {
   };
 }
 
-export function transferLabPixel(pixel, src, dst, strength = TRANSFER_STRENGTH) {
-  const scaleL = dst.stdL / src.stdL;
+/**
+ * Reinhard on chroma; gentle L shift — keeps highlights/shadows, avoids light-swatches haze.
+ */
+export function transferLabPixel(pixel, src, dst) {
   const scaleA = dst.stdA / src.stdA;
   const scaleB = dst.stdB / src.stdB;
-
-  const outL = (pixel.L - src.meanL) * scaleL + dst.meanL;
   const outA = (pixel.a - src.meanA) * scaleA + dst.meanA;
   const outB = (pixel.b - src.meanB) * scaleB + dst.meanB;
 
-  const L = pixel.L + (outL - pixel.L) * strength;
-  const a = pixel.a + (outA - pixel.a) * strength;
-  const b = pixel.b + (outB - pixel.b) * strength;
+  const a = pixel.a + (outA - pixel.a) * AB_TRANSFER_STRENGTH;
+  const b = pixel.b + (outB - pixel.b) * AB_TRANSFER_STRENGTH;
 
-  return labToRgb(clamp(L, 0, 100), a, b);
+  const targetL = (pixel.L - src.meanL) * (dst.stdL / src.stdL) + dst.meanL;
+  let finalL = pixel.L + (targetL - pixel.L) * L_TRANSFER_STRENGTH;
+
+  if (pixel.L > 70) {
+    const t = clamp((pixel.L - 70) / 25, 0, 1);
+    const preserve = t * t * (3 - 2 * t);
+    finalL = finalL + (pixel.L - finalL) * preserve;
+  }
+
+  return labToRgb(clamp(finalL, 0, 100), a, b);
+}
+
+function touchesBackground(mask, width, height, x, y) {
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      if (dx === 0 && dy === 0) continue;
+      const xx = x + dx;
+      const yy = y + dy;
+      if (xx < 0 || yy < 0 || xx >= width || yy >= height) return true;
+      if (mask[yy * width + xx] < MASK_APPLY_THRESH) return true;
+    }
+  }
+  return false;
 }
 
 export async function loadImage(path) {
@@ -364,7 +414,11 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
     hard[j] = isUpholsteryPixel(data[p], data[p + 1], data[p + 2], y, sofaBottomY) ? 255 : 0;
   }
 
-  return morphologyDilate(hard, width, height, MASK_DILATE_RADIUS);
+  let m = morphologyDilate(hard, width, height, MASK_DILATE_RADIUS);
+  if (MASK_ERODE_RADIUS > 0) {
+    m = morphologyErode(m, width, height, MASK_ERODE_RADIUS);
+  }
+  return m;
 }
 
 export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY) {
@@ -379,7 +433,13 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
       if (mask[j] < MASK_APPLY_THRESH) continue;
 
       const p = j * channels;
-      const baseLab = rgbToLab(data[p], data[p + 1], data[p + 2]);
+      const oR = data[p];
+      const oG = data[p + 1];
+      const oB = data[p + 2];
+      if (isEdgeFringePixel(oR, oG, oB)) continue;
+      if (touchesBackground(mask, width, height, x, y)) continue;
+
+      const baseLab = rgbToLab(oR, oG, oB);
       const { r, g, b } = transferLabPixel(baseLab, sofaStats, swatchStats);
 
       out[p] = r;
@@ -479,7 +539,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: Reinhard LAB transfer (full swatch stats)');
+  console.log('  method: Reinhard chroma + preserved highlights (anti-halo mask)');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   const mask = await createUpholsteryMask(baseSofa, maskPath);
