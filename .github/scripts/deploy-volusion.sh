@@ -133,9 +133,27 @@ put_primary "vspfiles/css/mc-plp-body-last.css" "mc-plp-body-last" \
   "/vspfiles/css/mc-plp-body-last.css" \
   "vspfiles/css/mc-plp-body-last.css"
 
-put_primary "vspfiles/js/sectional-configs.js" "sectional-configs" \
-  "/vspfiles/js/sectional-configs.js" \
-  "vspfiles/js/sectional-configs.js"
+echo "=== PLP product photos (replace baked gray mat with white) ==="
+photo_fail=0
+photo_ok=0
+shopt -s nullglob
+for f in vspfiles/photos/*.jpg vspfiles/photos/*.jpeg vspfiles/photos/*.png; do
+  base=$(basename "$f")
+  if put_primary "$f" "plp-photo-${base}" \
+    "/vspfiles/photos/${base}" \
+    "/v/vspfiles/photos/${base}" \
+    "vspfiles/photos/${base}"; then
+    photo_ok=$((photo_ok + 1))
+  else
+    photo_fail=$((photo_fail + 1))
+  fi
+done
+shopt -u nullglob
+echo "PLP photos: ${photo_ok} uploaded, ${photo_fail} failed"
+if [[ "$photo_fail" -gt 0 ]]; then
+  echo "::error::PLP photo upload failed — gray mats will remain until photos are on server"
+  exit 1
+fi
 
 if [[ "${SKIP_TEMPLATE_DEPLOY:-0}" != "1" ]]; then
   echo "=== Template (optional — set SKIP_TEMPLATE_DEPLOY=1 to skip) ==="
@@ -168,6 +186,15 @@ verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforce
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260531" "MC_PLP_ENFORCER_20260531"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260528"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/template.min.js" "MC_PLP_ENFORCER_LOADING__"
+
+echo ""
+echo "=== Verify PLP photo on origin (77170-01-1.jpg must be 23747 bytes) ==="
+want_photo=23747
+got_photo=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/photos/77170-01-1.jpg?v=$(date +%s)" -H "Cache-Control: no-cache" | wc -c | tr -d ' ')
+echo "  live bytes: ${got_photo} (want ${want_photo})"
+if [[ "$got_photo" != "$want_photo" ]]; then
+  echo "::warning::PLP photo size mismatch — CDN may still cache old gray mat image"
+fi
 
 echo ""
 echo "Deploy finished (~2–4 min). Hard-refresh category 177 (Ctrl+Shift+R)."

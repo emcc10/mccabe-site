@@ -37,7 +37,7 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          SKIP_TEMPLATE_DEPLOY: "1"
+          SKIP_TEMPLATE_DEPLOY: "0"
         run: bash .github/scripts/deploy-volusion.sh
 
       - name: Print deploy marker

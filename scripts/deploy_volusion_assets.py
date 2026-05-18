@@ -6,17 +6,14 @@ import glob
 import os
 import sys
 
-# Volusion SFTP truncates many files under /vspfiles/js/ to 131072 bytes (128 KiB).
 VOLUSION_JS_CAP = 131072
 
-# Must succeed for category PLP fix (design-toolkit has inlined enforcer).
 CRITICAL = (
     "vspfiles/templates/266/js/min/design-toolkit.min.js",
     "vspfiles/js/mc-plp-enforcer.js",
     "vspfiles/templates/266/js/mc-plp-enforcer.js",
 )
 
-# Upload if possible; failure is a warning (size cap or path).
 OPTIONAL = (
     "vspfiles/css/custom-safe.css",
     "vspfiles/css/mc-live-patch.css",
@@ -26,7 +23,6 @@ OPTIONAL = (
     "vspfiles/js/sectional-configs.js",
 )
 
-# Over 128 KiB on /vspfiles/js/ — cannot upload via SFTP without truncation; skip.
 SKIP_OVER_CAP = (
     "vspfiles/js/mtl-sectional-renderer.js",
     "vspfiles/templates/266/js/min/template.min.js",
@@ -35,14 +31,36 @@ SKIP_OVER_CAP = (
 
 def _remotes(rel: str) -> list[str]:
     rel = rel.replace("\\", "/")
-    paths = [f"/v/{rel}", rel, f"/{rel}"]
+    paths = [f"/vspfiles/{rel.split('vspfiles/', 1)[-1]}" if "vspfiles/" in rel else rel]
+    paths.extend([f"/v/{rel}", rel, f"/{rel}"])
     if rel.startswith("vspfiles/templates/266/js/min/"):
         name = rel.rsplit("/", 1)[-1]
         paths.append(f"/vspfiles/templates/266/js/min/{name}")
-    return paths
+    seen: set[str] = set()
+    out: list[str] = []
+    for p in paths:
+        if p and p not in seen:
+            seen.add(p)
+            out.append(p)
+    return out
 
 
-def _upload_one(sftp, local: str) -> bool:
+def _photo_remotes(name: str) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for p in (
+        f"/vspfiles/photos/{name}",
+        f"/v/vspfiles/photos/{name}",
+        f"/mccabestheaterandliving.com/v/vspfiles/photos/{name}",
+        f"vspfiles/photos/{name}",
+    ):
+        if p not in seen:
+            seen.add(p)
+            out.append(p)
+    return out
+
+
+def _upload_one(sftp, local: str, remotes: list[str] | None = None) -> bool:
     want = os.path.getsize(local)
     if local.replace("\\", "/") in {p.replace("\\", "/") for p in SKIP_OVER_CAP}:
         if want > VOLUSION_JS_CAP:
@@ -53,25 +71,19 @@ def _upload_one(sftp, local: str) -> bool:
             )
             return True
 
+    paths = remotes if remotes is not None else _remotes(local)
     last_exc: Exception | None = None
-    for remote in _remotes(local):
+    for remote in paths:
         try:
             sftp.put(local, remote, confirm=False)
             got = sftp.stat(remote).st_size
             if got == want:
                 print(f"::notice::PUT_OK {local!r} -> {remote!r} size={want}", flush=True)
                 return True
-            if got == VOLUSION_JS_CAP and want > VOLUSION_JS_CAP:
-                print(
-                    f"::warning::TRUNCATED {remote!r} at {VOLUSION_JS_CAP} bytes "
-                    f"(local {want}) — Volusion 128 KiB cap",
-                    flush=True,
-                )
-            else:
-                print(
-                    f"::warning::SIZE_MISMATCH {remote!r} want={want} got={got}",
-                    flush=True,
-                )
+            print(
+                f"::warning::SIZE_MISMATCH {remote!r} want={want} got={got}",
+                flush=True,
+            )
             last_exc = None
         except Exception as exc:  # noqa: BLE001
             last_exc = exc
@@ -103,6 +115,7 @@ def main() -> int:
 
     critical_fail = 0
     optional_fail = 0
+    photo_fail = 0
     try:
         sftp = paramiko.SFTPClient.from_transport(transport)
         try:
@@ -130,9 +143,10 @@ def main() -> int:
             if plp_photos:
                 print(f"::notice::PLP_PHOTOS uploading {len(plp_photos)} file(s)", flush=True)
             for local in plp_photos:
-                ok = _upload_one(sftp, local)
+                name = os.path.basename(local)
+                ok = _upload_one(sftp, local, _photo_remotes(name))
                 if not ok:
-                    optional_fail += 1
+                    photo_fail += 1
         finally:
             sftp.close()
     finally:
@@ -140,6 +154,9 @@ def main() -> int:
 
     if critical_fail:
         print(f"::error::{critical_fail} critical asset(s) failed", file=sys.stderr)
+        return 1
+    if photo_fail:
+        print(f"::error::{photo_fail} PLP photo(s) failed to upload", file=sys.stderr)
         return 1
     if optional_fail:
         print(f"::warning::{optional_fail} optional asset(s) failed", flush=True)
