@@ -1,5 +1,5 @@
 /**
- * RGB color-balance recolor — one median target per swatch; scales original channels.
+ * RGB color-balance recolor — colors extracted fresh from input/swatches/*.jpg only.
  */
 import AdmZip from 'adm-zip';
 import {
@@ -39,6 +39,59 @@ const ORIGINAL_BLEND = 0.35;
 const BALANCE_BLEND = 0.65;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
+/** Leather id filenames: Collection-Name.jpg (e.g. Evoque-Atlantic.jpg). */
+const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
+const SWATCH_BLOCK_PATTERN = /^(debug|test|chip|palette|cache|flat|target|color-)/i;
+
+/** Only true uploaded leather swatches in input/swatches — never output or debug assets. */
+export function isOriginalSwatchFile(filename) {
+  const base = basename(filename);
+  if (SWATCH_BLOCK_PATTERN.test(base)) return false;
+  return SWATCH_ID_PATTERN.test(base);
+}
+
+export function listOriginalSwatches() {
+  if (!existsSync(SWATCH_DIR)) return [];
+  return readdirSync(SWATCH_DIR)
+    .filter((f) => SWATCH_EXT.has(extname(f).toLowerCase()) && isOriginalSwatchFile(f))
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+}
+
+/** Remove generated debug/color artifacts from output (never used as swatch source). */
+export function cleanGeneratedArtifacts(outputDir = OUTPUT_DIR) {
+  if (!existsSync(outputDir)) return 0;
+  let removed = 0;
+  for (const f of readdirSync(outputDir)) {
+    const lower = f.toLowerCase();
+    if (
+      lower.startsWith('debug-') ||
+      lower.startsWith('test-') ||
+      lower.includes('-chip') ||
+      lower.includes('palette') ||
+      lower.includes('target-color') ||
+      lower.includes('flat-color') ||
+      (lower.endsWith('.json') && lower.includes('target'))
+    ) {
+      try {
+        unlinkSync(join(outputDir, f));
+        removed++;
+      } catch {
+        /* locked */
+      }
+    }
+  }
+  return removed;
+}
+
+/** Swatch path must live under input/swatches (no output/cache reads). */
+export function resolveOriginalSwatchPath(filename) {
+  const base = basename(filename);
+  if (!isOriginalSwatchFile(base)) return null;
+  const resolved = resolve(join(SWATCH_DIR, base));
+  if (!resolved.startsWith(resolve(SWATCH_DIR))) return null;
+  if (!existsSync(resolved)) return null;
+  return resolved;
+}
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
@@ -185,11 +238,14 @@ export async function saveImage(data, path, width, height, channels = 4) {
 }
 
 /**
- * ONE median RGB from center 40% of blurred swatch crop (textured reference).
- * Excludes edge highlights/shadows; never reads debug files.
+ * ONE median RGB from center 40% of the uploaded swatch file (fresh read each render).
  */
 export async function getSwatchTargetRgb(swatchPath) {
-  const meta = await sharp(swatchPath).metadata();
+  const resolved = resolve(swatchPath);
+  if (!resolved.startsWith(resolve(SWATCH_DIR))) {
+    throw new Error(`Swatch must be under input/swatches: ${swatchPath}`);
+  }
+  const meta = await sharp(resolved).metadata();
   const width = meta.width;
   const height = meta.height;
   const margin = (1 - SWATCH_CENTER_CROP) / 2;
@@ -198,7 +254,7 @@ export async function getSwatchTargetRgb(swatchPath) {
   const cw = Math.max(1, Math.floor(width * SWATCH_CENTER_CROP));
   const ch = Math.max(1, Math.floor(height * SWATCH_CENTER_CROP));
 
-  const { data, info } = await sharp(swatchPath)
+  const { data, info } = await sharp(resolved)
     .extract({ left: x0, top: y0, width: cw, height: ch })
     .blur(SWATCH_BLUR_PX)
     .ensureAlpha()
@@ -226,27 +282,14 @@ export async function getSwatchTargetRgb(swatchPath) {
     }
   }
 
-  if (!rs.length) throw new Error(`No swatch pixels: ${swatchPath}`);
+  if (!rs.length) throw new Error(`No swatch pixels: ${resolved}`);
 
   return {
     r: Math.round(medianOf(rs)),
     g: Math.round(medianOf(gs)),
     b: Math.round(medianOf(bs)),
-    cropWidth: cw,
-    cropHeight: ch,
-    cropBuffer: data,
-    cropChannels: channels,
-    cropW: info.width,
-    cropH: info.height,
+    sourceFile: basename(resolved),
   };
-}
-
-/** Diagnostic only — textured crop preview; not used for ratios. */
-export async function saveDebugSwatchCrop(swatchName, target) {
-  const path = join(OUTPUT_DIR, `DEBUG-${swatchName}-crop.png`);
-  await sharp(target.cropBuffer, {
-    raw: { width: target.cropW, height: target.cropH, channels: target.cropChannels },
-  }).png().toFile(path);
 }
 
 /** Average RGB of masked upholstery on base sofa. */
@@ -354,12 +397,17 @@ export function recolorSofa(baseImage, mask, ratios, sofaBottomY) {
 }
 
 export async function processSwatch(swatchPath, baseSofa, mask, sofaBottomY, sofaAvgRgb) {
-  const swatchName = basename(swatchPath, extname(swatchPath));
-  const target = await getSwatchTargetRgb(swatchPath);
+  const resolved = resolveOriginalSwatchPath(swatchPath);
+  if (!resolved) {
+    throw new Error(`Not an original swatch under input/swatches: ${swatchPath}`);
+  }
+  const swatchName = basename(resolved, extname(resolved));
+  const target = await getSwatchTargetRgb(resolved);
   const ratios = computeColorBalanceRatios(target, sofaAvgRgb);
 
   console.log({
     swatchName,
+    source: `input/swatches/${target.sourceFile}`,
     targetRGB: [target.r, target.g, target.b],
     sofaAvgRGB: [
       Math.round(sofaAvgRgb.r),
@@ -372,12 +420,6 @@ export async function processSwatch(swatchPath, baseSofa, mask, sofaBottomY, sof
       Math.round(ratios.b * 1000) / 1000,
     ],
   });
-
-  try {
-    await saveDebugSwatchCrop(swatchName, target);
-  } catch (err) {
-    console.warn(`  debug crop skipped: ${err.message}`);
-  }
 
   const outData = recolorSofa(baseSofa, mask, ratios, sofaBottomY);
   const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
@@ -405,12 +447,14 @@ export function zipOutputs(outputDir, zipPath) {
 function resolveSwatchArg(name) {
   if (!name) return null;
   const base = basename(name);
-  const direct = join(SWATCH_DIR, base);
-  if (existsSync(direct)) return direct;
-  const hit = readdirSync(SWATCH_DIR).find(
-    (f) => f.toLowerCase() === base.toLowerCase() || f.toLowerCase().startsWith(base.toLowerCase()),
-  );
-  return hit ? join(SWATCH_DIR, hit) : null;
+  const direct = resolveOriginalSwatchPath(base);
+  if (direct) return direct;
+  const stem = basename(base, extname(base));
+  const hit = listOriginalSwatches().find((f) => {
+    const fStem = basename(f, extname(f));
+    return fStem.toLowerCase() === stem.toLowerCase();
+  });
+  return hit ? resolveOriginalSwatchPath(hit) : null;
 }
 
 function parseCli(argv) {
@@ -440,10 +484,20 @@ export async function main(argv = process.argv) {
   const cli = parseCli(argv);
   mkdirSync(OUTPUT_DIR, { recursive: true });
 
+  const removed = cleanGeneratedArtifacts();
+  if (removed) console.log(`  cleaned ${removed} generated artifact(s) from output/`);
+
+  const swatchFiles = listOriginalSwatches();
+  if (!swatchFiles.length) {
+    console.error(`No leather swatches in ${SWATCH_DIR}`);
+    process.exit(1);
+  }
+  console.log(`  swatch source: ${SWATCH_DIR} (${swatchFiles.length} files)`);
+
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: RGB color balance (one target per swatch)');
+  console.log('  method: RGB color balance (fresh read from uploaded swatches)');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   if (maskPath) console.log(`  mask: ${maskPath}`);
@@ -466,18 +520,14 @@ export async function main(argv = process.argv) {
     return;
   }
 
-  const swatches = readdirSync(SWATCH_DIR)
-    .filter((f) => SWATCH_EXT.has(extname(f).toLowerCase()))
-    .sort((a, b) => a.localeCompare(b));
-
-  for (const file of swatches) {
+  for (const file of swatchFiles) {
     await processSwatch(join(SWATCH_DIR, file), baseSofa, mask, sofaBottomY, sofaAvgRgb);
   }
 
   const onDisk = readdirSync(OUTPUT_DIR).filter(
-    (f) => f.endsWith('.png') && !f.startsWith('DEBUG-') && !f.startsWith('TEST-'),
+    (f) => f.endsWith('.png') && isOriginalSwatchFile(f.replace(/\.png$/i, '.jpg')),
   );
-  console.log(`\nSofa PNGs: ${onDisk.length} / ${swatches.length}`);
+  console.log(`\nSofa PNGs: ${onDisk.length} / ${swatchFiles.length}`);
 
   try {
     const n = zipOutputs(OUTPUT_DIR, ZIP_PATH);

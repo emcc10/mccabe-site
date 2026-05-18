@@ -1,22 +1,25 @@
 # Sofa Recolor Tool
 
-**RGB color balance** — scales original sofa channels; one median target per swatch.
+**RGB color balance** from uploaded leather swatches only.
 
-## Pipeline
+## Source of truth
 
-1. **One target RGB** — center 40% of swatch, light blur (textured reference), median of mid-tones only
-2. **Sofa average RGB** — mean of masked upholstery (fixed per batch)
-3. **Ratios** — `target / sofaAvg`, clamped `0.45`–`2.2`
-4. **Per pixel** — `new = original * ratio`; `final = original * 0.35 + new * 0.65`
-
-No HSL, LAB, hue rotate, opacity overlays, or flat RGB replace.
-
-`DEBUG-*-crop.png` files are diagnostic previews only — never used for export.
+- **Only** `input/swatches/*.jpg` (e.g. `Evoque-Atlantic.jpg`, `Rein-Caramel.jpg`)
+- Each render maps 1:1: `Evoque-Atlantic.jpg` → `output/Evoque-Atlantic.png`
+- Color is extracted fresh on every run (center 40% crop, median RGB)
+- No debug chips, flat color squares, cached palettes, or output files used as input
 
 ## Commands
 
 ```bash
 npm install
-npm run preview
-npm run render
+npm run preview    # Bali-Currant
+npm run render     # all swatches + rebuild manifest.json
+npm run serve      # preview grid
 ```
+
+## Pipeline
+
+1. List leather files in `input/swatches/` (Collection-Name pattern)
+2. Delete any `DEBUG-*` / chip / palette artifacts from `output/`
+3. Median RGB from uploaded swatch image → color balance ratios → sofa PNG
