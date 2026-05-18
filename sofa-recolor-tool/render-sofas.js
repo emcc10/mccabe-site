@@ -124,6 +124,7 @@ function isUpholsteryMidtone(r, g, b) {
   if (bright > 242) return false;
   const sat = pixelSaturation(r, g, b);
   if (sat < 0.08 && bright > 210) return false;
+  if (sat < 0.1) return false;
   return true;
 }
 
@@ -145,14 +146,46 @@ function applyLeatherSoftness(r, g, b) {
   return hslToRgb(hsl.h, ns, hsl.l);
 }
 
-async function featherMask(mask, width, height, sigma = 0.8) {
-  const { data } = await sharp(Buffer.from(mask), {
-    raw: { width, height, channels: 1 },
-  })
-    .blur(sigma)
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  return new Uint8Array(data);
+/** Separable box blur (~0.8px feather) — sharp.blur() collapses sparse upholstery masks. */
+function featherMask(mask, width, height, radius = 1) {
+  const src = new Float32Array(width * height);
+  const tmp = new Float32Array(width * height);
+  const out = new Float32Array(width * height);
+  for (let j = 0; j < mask.length; j++) src[j] = mask[j];
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sum = 0;
+      let n = 0;
+      for (let dx = -radius; dx <= radius; dx++) {
+        const xx = x + dx;
+        if (xx < 0 || xx >= width) continue;
+        sum += src[y * width + xx];
+        n++;
+      }
+      tmp[y * width + x] = sum / n;
+    }
+  }
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sum = 0;
+      let n = 0;
+      for (let dy = -radius; dy <= radius; dy++) {
+        const yy = y + dy;
+        if (yy < 0 || yy >= height) continue;
+        sum += tmp[yy * width + x];
+        n++;
+      }
+      out[y * width + x] = sum / n;
+    }
+  }
+
+  const result = new Uint8Array(width * height);
+  for (let j = 0; j < mask.length; j++) {
+    result[j] = Math.round(clamp(out[j], 0, 255));
+  }
+  return result;
 }
 
 function labToRgb(L, a, b) {
@@ -231,7 +264,8 @@ export async function getSwatchLabStats(swatchPath) {
       const a = channels === 4 ? data[i + 3] : 255;
       if (a < 20) continue;
       if (isNearWhite(r, g, b)) continue;
-      if (!isUpholsteryMidtone(r, g, b)) continue;
+      const bright = pixelBrightness(r, g, b);
+      if (bright < 12 || bright > 250) continue;
       labs.push(rgbToLab(r, g, b));
     }
   }
@@ -293,15 +327,19 @@ export function getSourceLeatherColor(baseImage, mask) {
   };
 }
 
-/** Lowest row of non-background sofa (for floor shadow exclusion). */
+/** Lowest row of saturated leather (not gray floor shadow). */
 export function getSofaBottomY(baseImage) {
   const { data, width, height, channels } = baseImage;
   for (let y = height - 1; y >= 0; y--) {
     for (let x = 0; x < width; x++) {
       const p = (y * width + x) * channels;
-      if (!isNearWhite(data[p], data[p + 1], data[p + 2])) {
-        return y;
-      }
+      const r = data[p];
+      const g = data[p + 1];
+      const b = data[p + 2];
+      if (isNearWhite(r, g, b)) continue;
+      if (pixelBrightness(r, g, b) < 35) continue;
+      if (pixelSaturation(r, g, b) < 0.12) continue;
+      return y;
     }
   }
   return height - 1;
@@ -340,8 +378,7 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
     hard[j] = isUpholsteryMidtone(r, g, b) ? 255 : 0;
   }
 
-  const mask = await featherMask(hard, width, height, 0.8);
-  return mask;
+  return featherMask(hard, width, height, 1);
 }
 
 /** @deprecated Use createUpholsteryMask */
@@ -465,7 +502,11 @@ export async function processSwatch(
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
   const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: lab-ab-midtone\ntargetAb: ${swatchLab.meanA.toFixed(2)},${swatchLab.meanB.toFixed(2)}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
-  writeFileSync(stampPath, stamp);
+  try {
+    writeFileSync(stampPath, stamp);
+  } catch {
+    /* OneDrive may lock _last-render.txt */
+  }
 
   return { outPath, targetColor, swatchLab };
 }
