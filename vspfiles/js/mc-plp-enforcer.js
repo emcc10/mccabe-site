@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260525
+ * MC_PLP_ENFORCER_20260526
  *
  * DOM (category listing):
  *   #content_area table.colors_backgroundlight > tr > td.colors_lines_light  ← black bar (legacy subcat chrome)
@@ -10,7 +10,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260525";
+  var VERSION = "20260526";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
@@ -86,10 +86,7 @@
 
   /** Issue A: remove legacy subcat chrome table + breadcrumb divider rows. */
   function removeLegacyCategoryBars() {
-    var scope = document.getElementById("content_area") || document.body;
-    if (!scope) return;
-
-    scope.querySelectorAll("table.colors_backgroundlight").forEach(function (tbl) {
+    document.querySelectorAll("table.colors_backgroundlight").forEach(function (tbl) {
       if (looksLikeProductTable(tbl)) return;
 
       var angle = tbl.querySelector('img[src*="SearchResults_SubCat_Angle"]');
@@ -110,17 +107,12 @@
       });
     });
 
-    scope.querySelectorAll(":scope > table").forEach(function (table) {
-      Array.prototype.forEach.call(table.rows, function (tr) {
-        if (tr.cells.length !== 1) return;
-        var td = tr.cells[0];
-        if (!td.classList.contains("colors_lines_light")) return;
-        var img = td.querySelector('img[src*="clear1x1"]');
-        if (!img) return;
-        tr.parentNode.removeChild(tr);
-      });
-    });
-  }
+    var scope = document.getElementById("content_area");
+    if (!scope) return;
+    var child;
+    for (child = scope.firstElementChild; child; child = child.nextElementSibling) {
+      if (child.tagName !== "TABLE") continue;
+      Array.prototype.forEach.call(child.rows, function (tr) {
 
   function haystack(wrap, img) {
     return (

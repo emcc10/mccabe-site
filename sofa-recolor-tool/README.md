@@ -1,43 +1,29 @@
-# Sofa Manual Recolor Tool
+# Sofa Recolor Tool
 
-Automated batch recolor was removed. Use the browser tool to paint a mask and tune HSL sliders per leather color.
+Soft **HSL transfer** on a base sofa photo: original lighting and luminance preserved; only hue and saturation shift toward each swatch.
 
-## Quick start
+## Commands
 
 ```bash
 cd sofa-recolor-tool
 npm install
-npm run manual
+npm run preview          # Bali-Currant → output/Bali-Currant.png
+npm run render           # all swatches + sofa-renders.zip
+npm run serve            # click swatches in browser (after render)
 ```
 
-Open **http://127.0.0.1:3457/manual-recolor.html**
+## Method (`soft-hsl-transfer`)
 
-## Workflow
+1. Upholstery mask (leather + seams; no legs / bg / floor shadow) → dilate 1px → feather ~0.8px  
+2. Per pixel: `finalH = swatchH`, `finalS = baseS×0.35 + swatchS×0.75`, `finalL = baseL` (+ shadow/highlight tweaks)  
+3. Light softness pass on recolored upholstery only  
 
-1. Load **input/sofa.png** (auto-loaded when served) or upload your base sofa.
-2. **Paint** the upholstery mask (arms, cushions, front rail). Erase legs, floor, background.
-3. Upload a swatch for reference; set **preset name** (e.g. `Bali-Currant`).
-4. Adjust sliders until the preview looks right.
-5. **Save settings for name** — stores sliders in the browser.
-6. **Save preview PNG** — one full-size PNG, no resize.
-7. Repeat for each leather, then **Batch export all presets** to download every saved name.
+Optional: place `input/mask.png` (same size as sofa) to refine silhouette.
 
-## Presets
+## Layout
 
-- Saved in browser `localStorage`.
-- **Export presets JSON** to back up or move to another machine.
-- **Import presets JSON** before batch export on a new session.
-
-## Mask
-
-- **Download mask PNG** / **Load mask PNG** — reuse the same mask across colors.
-- Mask is also cached in `localStorage` for the same browser session.
-
-## Files
-
-| Path | Purpose |
-|------|---------|
-| `manual-recolor.html` | Main tool |
+| Path | Role |
+|------|------|
 | `input/sofa.png` | Base cognac sofa |
-| `input/swatches/*.jpg` | Leather swatches (reference only) |
-| `output/` | Your exported PNGs (local) |
+| `input/swatches/*.jpg` | Leather swatches |
+| `output/*.png` | Rendered sofas (gitignored) |

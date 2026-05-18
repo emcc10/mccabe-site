@@ -1,16 +1,17 @@
 {
   "name": "sofa-recolor-tool",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
-  "description": "Manual sofa leather recolor with brush mask and HSL sliders.",
+  "description": "Soft HSL leather transfer on base sofa photo (batch).",
   "type": "module",
   "scripts": {
-    "manual": "node serve-manual.js",
-    "serve": "node serve-manual.js",
-    "preview": "node serve-preview.js",
-    "manifest": "node build-manifest.js"
+    "preview": "node render-sofas.js --currant",
+    "render": "node render-sofas.js --all",
+    "manifest": "node build-manifest.js",
+    "serve": "node build-manifest.js && node serve-preview.js"
   },
   "dependencies": {
+    "adm-zip": "^0.5.16",
     "sharp": "^0.33.5"
   }
 }
