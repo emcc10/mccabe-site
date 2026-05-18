@@ -1,4 +1,5 @@
-2026-05-18T17:59:17.576Z
+2026-05-18T18:01:28.237Z
 Traverse-Vanilla.jpg
-method: lab-anchor-v4
-target: 142,131,104
+method: lab-transfer
+targetLab: 53.56,-0.16,15.40
+targetRgb: 138,127,102

@@ -1,6 +1,5 @@
 /**
- * Batch sofa recolor — replace source leather hue with swatch color;
- * keep original luminance (folds, shadows, texture). No AI.
+ * Batch sofa recolor — LAB transfer from swatch center-crop means; sofa L shading kept. No AI.
  */
 import AdmZip from 'adm-zip';
 import { mkdirSync, readdirSync, existsSync, writeFileSync } from 'fs';
@@ -224,16 +223,19 @@ export async function saveImage(data, path, width, height) {
 }
 
 /**
- * Center 50% crop → Lab median of mid-lightness face pixels (flat leather tone).
+ * Center 50% crop → mean L/a/b in Lab (full swatch statistics, not a single median RGB).
  */
-export async function getSwatchTargetColor(swatchPath) {
+export async function getSwatchLabStats(swatchPath) {
   const { data, width, height, channels } = await loadImage(swatchPath);
   const x0 = Math.floor(width * 0.25);
   const y0 = Math.floor(height * 0.25);
   const x1 = Math.ceil(width * 0.75);
   const y1 = Math.ceil(height * 0.75);
 
-  const samples = [];
+  let sumL = 0;
+  let sumA = 0;
+  let sumB = 0;
+  let count = 0;
 
   for (let y = y0; y < y1; y++) {
     for (let x = x0; x < x1; x++) {
@@ -244,26 +246,23 @@ export async function getSwatchTargetColor(swatchPath) {
       const a = channels === 4 ? data[i + 3] : 255;
       if (a < 20) continue;
       if (isNearWhite(r, g, b)) continue;
-      samples.push(rgbToLab(r, g, b));
+      const lab = rgbToLab(r, g, b);
+      sumL += lab.L;
+      sumA += lab.a;
+      sumB += lab.b;
+      count++;
     }
   }
 
-  if (!samples.length) {
+  if (!count) {
     throw new Error(`No usable swatch pixels in center crop: ${swatchPath}`);
   }
 
-  const byL = [...samples].sort((a, b) => a.L - b.L);
-  const p30 = byL[Math.floor(byL.length * 0.3)].L;
-  const p70 = byL[Math.floor(byL.length * 0.7)].L;
-  const face = samples.filter((s) => s.L >= p30 && s.L <= p70);
-  const use = face.length > 20 ? face : samples;
-
-  const [r, g, b] = labToRgb(
-    medianOf(use.map((s) => s.L)),
-    medianOf(use.map((s) => s.a)),
-    medianOf(use.map((s) => s.b)),
-  );
-  return { r, g, b };
+  return {
+    meanL: sumL / count,
+    meanA: sumA / count,
+    meanB: sumB / count,
+  };
 }
 
 
@@ -398,30 +397,19 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
   };
 }
 
-function labShiftStrength(labL) {
-  if (labL >= 16) return 1;
-  return clamp((labL - 5) / 11, 0, 1);
-}
-
 /**
- * Lab anchor: each pixel keeps its offset from cognac → mapped to swatch (real folds/highlights).
+ * LAB transfer: sofa L shading + swatch mean a/b; L nudged 15% toward swatch; shadow floor.
  */
 export function recolorSofa(
   baseImage,
   mask,
-  sourceColor,
-  targetColor,
+  swatchLab,
   leatherBottomY = null,
   _sofaBounds = null,
 ) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
-
-  const srcLab = rgbToLab(sourceColor.r, sourceColor.g, sourceColor.b);
-  const tgtLab = rgbToLab(targetColor.r, targetColor.g, targetColor.b);
-  const srcChroma = Math.hypot(srcLab.a, srcLab.b);
-  const tgtChroma = Math.hypot(tgtLab.a, tgtLab.b);
-  const chromaK = clamp(tgtChroma / Math.max(srcChroma, 5), 0.45, 1);
+  const { meanL, meanA, meanB } = swatchLab;
 
   const yCut =
     leatherBottomY == null ? height - 1 : Math.min(height - 1, leatherBottomY);
@@ -440,23 +428,11 @@ export function recolorSofa(
 
       if (!shouldRecolorPixel(oR, oG, oB)) continue;
 
-      const lab = rgbToLab(oR, oG, oB);
-      const s = labShiftStrength(lab.L);
+      const { L: origL } = rgbToLab(oR, oG, oB);
+      let finalL = origL * 0.85 + meanL * 0.15;
+      if (finalL < origL - 10) finalL = origL - 10;
 
-      const fullL = tgtLab.L + (lab.L - srcLab.L);
-      let fullA = srcLab.a + (tgtLab.a - srcLab.a) * chromaK + (lab.a - srcLab.a);
-      let fullB = srcLab.b + (tgtLab.b - srcLab.b) * chromaK + (lab.b - srcLab.b);
-
-      if (lab.L > 50) {
-        fullB -= (tgtLab.b - srcLab.b) * chromaK * 0.4;
-        fullA -= (tgtLab.a - srcLab.a) * chromaK * 0.08;
-      }
-
-      const newL = lab.L + (fullL - lab.L) * s;
-      const newA = lab.a + (fullA - lab.a) * s;
-      const newB = lab.b + (fullB - lab.b) * s;
-
-      const [nR, nG, nB] = labToRgb(newL, newA, newB);
+      const [nR, nG, nB] = labToRgb(finalL, meanA, meanB);
 
       out[p] = nR;
       out[p + 1] = nG;
@@ -472,16 +448,15 @@ export async function processSwatch(
   swatchPath,
   baseSofa,
   mask,
-  sourceColor,
+  _sourceColor,
   leatherBottomY,
   sofaBounds,
 ) {
-  const targetColor = await getSwatchTargetColor(swatchPath);
+  const swatchLab = await getSwatchLabStats(swatchPath);
   const outData = recolorSofa(
     baseSofa,
     mask,
-    sourceColor,
-    targetColor,
+    swatchLab,
     leatherBottomY,
     sofaBounds,
   );
@@ -489,12 +464,15 @@ export async function processSwatch(
   const outPath = join(OUTPUT_DIR, outName);
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
 
+  const [r, g, b] = labToRgb(swatchLab.meanL, swatchLab.meanA, swatchLab.meanB);
+  const targetColor = { r, g, b };
+
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: lab-anchor-v4\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
+  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: lab-transfer\ntargetLab: ${swatchLab.meanL.toFixed(2)},${swatchLab.meanA.toFixed(2)},${swatchLab.meanB.toFixed(2)}\ntargetRgb: ${r},${g},${b}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   writeFileSync(stampPath, stamp);
 
-  return { outPath, targetColor };
+  return { outPath, targetColor, swatchLab };
 }
 
 export function zipOutputs(outputDir, zipPath) {
