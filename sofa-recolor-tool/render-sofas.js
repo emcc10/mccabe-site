@@ -165,13 +165,16 @@ function isProtectedShadowOrGray(r, g, b) {
   return false;
 }
 
-function isUpholsteryLeather(r, g, b) {
+function isFootPixel(r, g, b) {
+  const bright = pixelBrightness(r, g, b);
+  return bright < FOOT_BRIGHTNESS && Math.max(r, g, b) < 72;
+}
+
+/** Masked upholstery only — do not skip low-sat highlights (that leaves cognac haze). */
+function shouldRecolorPixel(r, g, b) {
   if (isNearWhite(r, g, b)) return false;
   if (isProtectedShadowOrGray(r, g, b)) return false;
-  const hsl = rgbToHsl(r, g, b);
-  if (hsl.s < 0.12) return false;
-  const lum = pixelBrightness(r, g, b);
-  if (lum > 218 && hsl.s < 0.22) return false;
+  if (isFootPixel(r, g, b)) return false;
   return true;
 }
 
@@ -393,7 +396,7 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * Saturated swatches: HSL hue shift. Neutral/taupes: luminance colorize (avoids green Lab/hue artifacts).
+ * Same HSL mapping as Bali-Currant for every swatch. Neutrals snap toward target hue/sat.
  */
 export function recolorSofa(
   baseImage,
@@ -410,8 +413,7 @@ export function recolorSofa(
   const tgtHsl = rgbToHsl(targetColor.r, targetColor.g, targetColor.b);
   const dHue = hueDelta(srcHsl.h, tgtHsl.h);
   const srcSat = Math.max(srcHsl.s, 0.08);
-  const useColorize = tgtHsl.s < 0.22;
-  const { r: tr, g: tg, b: tb } = targetColor;
+  const neutralTarget = tgtHsl.s < 0.18;
   const yCut =
     leatherBottomY == null ? height - 1 : Math.min(height - 1, leatherBottomY);
 
@@ -427,22 +429,22 @@ export function recolorSofa(
       const oB = data[p + 2];
       const oA = channels === 4 ? data[p + 3] : 255;
 
-      if (!isUpholsteryLeather(oR, oG, oB)) continue;
+      if (!shouldRecolorPixel(oR, oG, oB)) continue;
 
-      let nR;
-      let nG;
-      let nB;
+      const hsl = rgbToHsl(oR, oG, oB);
+      let nh;
+      let ns;
 
-      if (useColorize) {
-        const lum = pixelBrightness(oR, oG, oB);
-        [nR, nG, nB] = colorFromLuminance(lum, tr, tg, tb);
+      if (neutralTarget) {
+        nh = tgtHsl.h;
+        ns = clamp(tgtHsl.s + (hsl.s - tgtHsl.s) * 0.22, 0, 1);
       } else {
-        const hsl = rgbToHsl(oR, oG, oB);
-        const nh = hsl.h + dHue;
+        nh = hsl.h + dHue;
         const satBlend = clamp(hsl.s / srcSat, 0, 1.2);
-        const ns = clamp(hsl.s + (tgtHsl.s - srcHsl.s) * satBlend, 0, 1);
-        [nR, nG, nB] = hslToRgb(nh, ns, hsl.l);
+        ns = clamp(hsl.s + (tgtHsl.s - srcHsl.s) * satBlend, 0, 1);
       }
+
+      const [nR, nG, nB] = hslToRgb(nh, ns, hsl.l);
 
       out[p] = nR;
       out[p + 1] = nG;
