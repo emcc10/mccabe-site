@@ -928,7 +928,7 @@ export async function processSwatch(
   await saveDebugSwatchCrop(swatchPath, swatchName);
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${swatchName}\nmethod: target-rgb-shade\nsampling: kmeans-saturated-cluster\ntargetRGB: ${targetRgb.r},${targetRgb.g},${targetRgb.b}\ncluster: ${targetRgb.cluster.id}\ndebugChip: ${basename(debugPath)}\n`;
+  const stamp = `${new Date().toISOString()}\n${swatchName}\nmethod: luminance-composite\nsampling: kmeans-saturated-cluster\ntargetRGB: ${targetRgb.r},${targetRgb.g},${targetRgb.b}\ncluster: ${targetRgb.cluster.id}\ndebugChip: ${basename(debugPath)}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   try {
     writeFileSync(stampPath, stamp);
@@ -1012,6 +1012,7 @@ export async function main(argv = process.argv) {
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   if (maskPath) console.log(`Optional mask refine: ${maskPath}`);
   const mask = await createUpholsteryMask(baseSofa, maskPath);
+  const grayMap = buildSmoothedLuminance(baseSofa);
   const sofaBounds = getSofaBounds(mask, baseSofa.width, baseSofa.height);
   const sofaBottomY = getSofaBottomY(baseSofa);
   const sourceColor = getSourceLeatherColor(baseSofa, mask);
@@ -1035,9 +1036,10 @@ export async function main(argv = process.argv) {
         mask,
         sofaBottomY,
         sofaBounds,
+        grayMap,
       );
     }
-    console.log(`\nDone. 4 TEST-*.png in:\n  ${OUTPUT_DIR}`);
+    console.log(`\nDone. ${Object.keys(DEBUG_TEST_TARGETS).length} TEST-*.png in:\n  ${OUTPUT_DIR}`);
     return;
   }
 
@@ -1077,6 +1079,7 @@ export async function main(argv = process.argv) {
       sourceColor,
       sofaBottomY,
       sofaBounds,
+      grayMap,
     );
     written.push(outPath);
   }
