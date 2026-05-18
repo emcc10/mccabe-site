@@ -170,10 +170,9 @@ function isFootPixel(r, g, b) {
   return bright < FOOT_BRIGHTNESS && Math.max(r, g, b) < 72;
 }
 
-/** Masked upholstery only — do not skip low-sat highlights (that leaves cognac haze). */
+/** Every masked leather pixel — including crease shadows (skipping them caused cognac fringes). */
 function shouldRecolorPixel(r, g, b) {
   if (isNearWhite(r, g, b)) return false;
-  if (isProtectedShadowOrGray(r, g, b)) return false;
   if (isFootPixel(r, g, b)) return false;
   return true;
 }
@@ -437,7 +436,7 @@ export function recolorSofa(
 
       if (neutralTarget) {
         nh = tgtHsl.h;
-        ns = clamp(tgtHsl.s + (hsl.s - tgtHsl.s) * 0.22, 0, 1);
+        ns = clamp(tgtHsl.s + (hsl.s - tgtHsl.s) * 0.06, 0, 1);
       } else {
         nh = hsl.h + dHue;
         const satBlend = clamp(hsl.s / srcSat, 0, 1.2);
@@ -478,11 +477,7 @@ export async function processSwatch(
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const mode =
-    rgbToHsl(targetColor.r, targetColor.g, targetColor.b).s < 0.22
-      ? 'lum-colorize'
-      : 'hsl-hue-lock';
-  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: ${mode}\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
+  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: hsl-hue-lock-v2\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   writeFileSync(stampPath, stamp);
 
