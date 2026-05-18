@@ -35,6 +35,9 @@ const MASK_APPLY_THRESH = 128;
 const MIN_LAB_STD = 0.8;
 const L_TRANSFER_STRENGTH = 0.38;
 const AB_TRANSFER_STRENGTH = 1;
+/** Swatches above this mean L need a stronger lift off the dark cognac base photo. */
+const LIGHT_SWATCH_MEAN_L = 52;
+const MID_SWATCH_MEAN_L = 40;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
@@ -242,24 +245,97 @@ export function computeLabStats(labSamples) {
   };
 }
 
-/**
- * Reinhard on chroma; gentle L shift — keeps highlights/shadows, avoids light-swatches haze.
- */
-export function transferLabPixel(pixel, src, dst) {
+function smoothstep(edge0, edge1, x) {
+  const t = clamp((x - edge0) / (edge1 - edge0), 0, 1);
+  return t * t * (3 - 2 * t);
+}
+
+/** Per-swatch transfer tuning — light leathers need lift + swatch-anchored chroma (not cognac-gray). */
+export function getTransferProfile(dst) {
+  if (dst.meanL >= LIGHT_SWATCH_MEAN_L) {
+    return {
+      mode: 'light',
+      lStrength: 0.95,
+      lContrast: 1.14,
+      chromaTexture: 0.5,
+      chromaScaleMin: 0.42,
+      chromaScaleMax: 1.1,
+      highlightPreserveL: 91,
+      shadowChromaPull: 0.4,
+    };
+  }
+  if (dst.meanL >= MID_SWATCH_MEAN_L) {
+    return {
+      mode: 'mid',
+      lStrength: 0.66,
+      lContrast: 1.1,
+      chromaTexture: 0.58,
+      chromaScaleMin: 0.45,
+      chromaScaleMax: 1.2,
+      highlightPreserveL: 80,
+      shadowChromaPull: 0.22,
+    };
+  }
+  return {
+    mode: 'standard',
+    lStrength: L_TRANSFER_STRENGTH,
+    lContrast: 1,
+    chromaTexture: 1,
+    chromaScaleMin: 0.3,
+    chromaScaleMax: 2,
+    highlightPreserveL: 70,
+    shadowChromaPull: 0,
+  };
+}
+
+function transferChromaReinhard(pixel, src, dst, strength = AB_TRANSFER_STRENGTH) {
   const scaleA = dst.stdA / src.stdA;
   const scaleB = dst.stdB / src.stdB;
   const outA = (pixel.a - src.meanA) * scaleA + dst.meanA;
   const outB = (pixel.b - src.meanB) * scaleB + dst.meanB;
+  return {
+    a: pixel.a + (outA - pixel.a) * strength,
+    b: pixel.b + (outB - pixel.b) * strength,
+  };
+}
 
-  const a = pixel.a + (outA - pixel.a) * AB_TRANSFER_STRENGTH;
-  const b = pixel.b + (outB - pixel.b) * AB_TRANSFER_STRENGTH;
+/** Anchor chroma on swatch mean — avoids gray mud when src sofa is warm/dark. */
+function transferChromaSwatchAnchored(pixel, src, dst, profile) {
+  const scaleA = clamp(dst.stdA / src.stdA, profile.chromaScaleMin, profile.chromaScaleMax);
+  const scaleB = clamp(dst.stdB / src.stdB, profile.chromaScaleMin, profile.chromaScaleMax);
+  let outA = dst.meanA + (pixel.a - src.meanA) * scaleA * profile.chromaTexture;
+  let outB = dst.meanB + (pixel.b - src.meanB) * scaleB * profile.chromaTexture;
+
+  if (profile.shadowChromaPull > 0) {
+    const shadowT = clamp((src.meanL - pixel.L) / (src.stdL * 1.6), 0, 1);
+    outA += (dst.meanA - outA) * shadowT * profile.shadowChromaPull;
+    outB += (dst.meanB - outB) * shadowT * profile.shadowChromaPull;
+  }
+
+  return { a: outA, b: outB };
+}
+
+export function transferLabPixel(pixel, src, dst) {
+  const profile = getTransferProfile(dst);
+
+  const { a, b } =
+    profile.mode === 'standard'
+      ? transferChromaReinhard(pixel, src, dst)
+      : transferChromaSwatchAnchored(pixel, src, dst, profile);
 
   const targetL = (pixel.L - src.meanL) * (dst.stdL / src.stdL) + dst.meanL;
-  let finalL = pixel.L + (targetL - pixel.L) * L_TRANSFER_STRENGTH;
+  let finalL = pixel.L + (targetL - pixel.L) * profile.lStrength;
 
-  if (pixel.L > 70) {
-    const t = clamp((pixel.L - 70) / 25, 0, 1);
-    const preserve = t * t * (3 - 2 * t);
+  if (profile.mode === 'light' && pixel.L > 28 && pixel.L < 78) {
+    finalL += (dst.meanL - src.meanL) * 0.08;
+  }
+
+  if (profile.lContrast > 1) {
+    finalL = dst.meanL + (finalL - dst.meanL) * profile.lContrast;
+  }
+
+  if (pixel.L > profile.highlightPreserveL) {
+    const preserve = smoothstep(profile.highlightPreserveL, profile.highlightPreserveL + 10, pixel.L);
     finalL = finalL + (pixel.L - finalL) * preserve;
   }
 
@@ -539,7 +615,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: Reinhard chroma + preserved highlights (anti-halo mask)');
+  console.log('  method: Reinhard (dark) / swatch-anchored lift (light & mid)');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   const mask = await createUpholsteryMask(baseSofa, maskPath);
