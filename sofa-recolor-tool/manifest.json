@@ -1,0 +1,164 @@
+{
+  "swatches": [
+    {
+      "name": "Bali-Carob",
+      "swatch": "input/swatches/Bali-Carob.jpg",
+      "render": "output/Bali-Carob.png"
+    },
+    {
+      "name": "Bali-Currant",
+      "swatch": "input/swatches/Bali-Currant.jpg",
+      "render": "output/Bali-Currant.png"
+    },
+    {
+      "name": "Bali-Harvest",
+      "swatch": "input/swatches/Bali-Harvest.jpg",
+      "render": "output/Bali-Harvest.png"
+    },
+    {
+      "name": "Bali-Marble",
+      "swatch": "input/swatches/Bali-Marble.jpg",
+      "render": "output/Bali-Marble.png"
+    },
+    {
+      "name": "Bali-Rainstorm",
+      "swatch": "input/swatches/Bali-Rainstorm.jpg",
+      "render": "output/Bali-Rainstorm.png"
+    },
+    {
+      "name": "Bali-Silk",
+      "swatch": "input/swatches/Bali-Silk.jpg",
+      "render": "output/Bali-Silk.png"
+    },
+    {
+      "name": "Bali-Spider",
+      "swatch": "input/swatches/Bali-Spider.jpg",
+      "render": "output/Bali-Spider.png"
+    },
+    {
+      "name": "Evoque-Ardesia",
+      "swatch": "input/swatches/Evoque-Ardesia.jpg",
+      "render": "output/Evoque-Ardesia.png"
+    },
+    {
+      "name": "Evoque-Atlantic",
+      "swatch": "input/swatches/Evoque-Atlantic.jpg",
+      "render": "output/Evoque-Atlantic.png"
+    },
+    {
+      "name": "Evoque-Frost",
+      "swatch": "input/swatches/Evoque-Frost.jpg",
+      "render": "output/Evoque-Frost.png"
+    },
+    {
+      "name": "Evoque-Mist",
+      "swatch": "input/swatches/Evoque-Mist.jpg",
+      "render": "output/Evoque-Mist.png"
+    },
+    {
+      "name": "Evoque-Stone",
+      "swatch": "input/swatches/Evoque-Stone.jpg",
+      "render": "output/Evoque-Stone.png"
+    },
+    {
+      "name": "Rein-Bruin",
+      "swatch": "input/swatches/Rein-Bruin.jpg",
+      "render": "output/Rein-Bruin.png"
+    },
+    {
+      "name": "Rein-Caramel",
+      "swatch": "input/swatches/Rein-Caramel.jpg",
+      "render": "output/Rein-Caramel.png"
+    },
+    {
+      "name": "Rein-Eggshell",
+      "swatch": "input/swatches/Rein-Eggshell.jpg",
+      "render": "output/Rein-Eggshell.png"
+    },
+    {
+      "name": "Rein-Granite",
+      "swatch": "input/swatches/Rein-Granite.jpg",
+      "render": "output/Rein-Granite.png"
+    },
+    {
+      "name": "Rein-Gray",
+      "swatch": "input/swatches/Rein-Gray.jpg",
+      "render": "output/Rein-Gray.png"
+    },
+    {
+      "name": "Rein-Grey",
+      "swatch": "input/swatches/Rein-Grey.jpg",
+      "render": "output/Rein-Grey.png"
+    },
+    {
+      "name": "Rein-Parchment",
+      "swatch": "input/swatches/Rein-Parchment.jpg",
+      "render": "output/Rein-Parchment.png"
+    },
+    {
+      "name": "Rein-Toast",
+      "swatch": "input/swatches/Rein-Toast.jpg",
+      "render": "output/Rein-Toast.png"
+    },
+    {
+      "name": "Rein-Twilight",
+      "swatch": "input/swatches/Rein-Twilight.jpg",
+      "render": "output/Rein-Twilight.png"
+    },
+    {
+      "name": "Solana-Africa",
+      "swatch": "input/swatches/Solana-Africa.jpg",
+      "render": "output/Solana-Africa.png"
+    },
+    {
+      "name": "Solana-Cocoa",
+      "swatch": "input/swatches/Solana-Cocoa.jpg",
+      "render": "output/Solana-Cocoa.png"
+    },
+    {
+      "name": "Solana-Mountain",
+      "swatch": "input/swatches/Solana-Mountain.jpg",
+      "render": "output/Solana-Mountain.png"
+    },
+    {
+      "name": "Solana-Phantom",
+      "swatch": "input/swatches/Solana-Phantom.jpg",
+      "render": "output/Solana-Phantom.png"
+    },
+    {
+      "name": "Solana-Trail",
+      "swatch": "input/swatches/Solana-Trail.jpg",
+      "render": "output/Solana-Trail.png"
+    },
+    {
+      "name": "Solana-Tusk",
+      "swatch": "input/swatches/Solana-Tusk.jpg",
+      "render": "output/Solana-Tusk.png"
+    },
+    {
+      "name": "Traverse-Chestnut",
+      "swatch": "input/swatches/Traverse-Chestnut.jpg",
+      "render": "output/Traverse-Chestnut.png"
+    },
+    {
+      "name": "Traverse-Clamshell",
+      "swatch": "input/swatches/Traverse-Clamshell.jpg",
+      "render": "output/Traverse-Clamshell.png"
+    },
+    {
+      "name": "Traverse-Haze",
+      "swatch": "input/swatches/Traverse-Haze.jpg",
+      "render": "output/Traverse-Haze.png"
+    },
+    {
+      "name": "Traverse-Oak",
+      "swatch": "input/swatches/Traverse-Oak.jpg",
+      "render": "output/Traverse-Oak.png"
+    },
+    {
+      "name": "Traverse-Vanilla",
+      "swatch": "input/swatches/Traverse-Vanilla.jpg",
+      "render": "output/Traverse-Vanilla.png"
+    }
+  ]
+}

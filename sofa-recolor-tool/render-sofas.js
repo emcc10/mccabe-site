@@ -114,6 +114,36 @@ function hueDelta(fromH, toH) {
   return d;
 }
 
+/** PIL-style colorize: map grayscale shading → target shadow/mid/highlight. */
+function colorFromLuminance(lum, tr, tg, tb) {
+  const shadow = [
+    Math.round(clamp(tr * 0.5, 0, 255)),
+    Math.round(clamp(tg * 0.5, 0, 255)),
+    Math.round(clamp(tb * 0.5, 0, 255)),
+  ];
+  const mid = [tr, tg, tb];
+  const highlight = [
+    Math.round(clamp(tr * 1.14 + 10, 0, 255)),
+    Math.round(clamp(tg * 1.14 + 10, 0, 255)),
+    Math.round(clamp(tb * 1.14 + 10, 0, 255)),
+  ];
+  const t = clamp(lum / 255, 0, 1);
+  if (t <= 0.5) {
+    const u = t * 2;
+    return [
+      Math.round(shadow[0] + (mid[0] - shadow[0]) * u),
+      Math.round(shadow[1] + (mid[1] - shadow[1]) * u),
+      Math.round(shadow[2] + (mid[2] - shadow[2]) * u),
+    ];
+  }
+  const u = (t - 0.5) * 2;
+  return [
+    Math.round(mid[0] + (highlight[0] - mid[0]) * u),
+    Math.round(mid[1] + (highlight[1] - mid[1]) * u),
+    Math.round(mid[2] + (highlight[2] - mid[2]) * u),
+  ];
+}
+
 function isWarmLeather(r, g, b) {
   return r >= g - 4 && r >= b - 6;
 }
@@ -127,7 +157,8 @@ function isProtectedShadowOrGray(r, g, b) {
 
   const maxDiff = Math.max(Math.abs(r - g), Math.abs(r - b), Math.abs(g - b));
   if (maxDiff < 26 && bright > 28 && bright < 225) return true;
-  if (b >= r && bright < 200) return true;
+  if (b >= r - 1 && bright < 200) return true;
+  if (g > r + 4 && b > r && bright < 180) return true;
 
   const { a, b: lb } = rgbToLab(r, g, b);
   if (Math.hypot(a, lb) < 14 && bright > 32 && bright < 210) return true;
@@ -188,7 +219,7 @@ export async function saveImage(data, path, width, height) {
 }
 
 /**
- * Center 50% crop; face-tone Lab median (keeps depth when mapped from cognac sofa).
+ * Center 50% crop → median*0.75 + average*0.25 (RGB, no Lab — avoids green cast).
  */
 export async function getSwatchTargetColor(swatchPath) {
   const { data, width, height, channels } = await loadImage(swatchPath);
@@ -197,7 +228,9 @@ export async function getSwatchTargetColor(swatchPath) {
   const x1 = Math.ceil(width * 0.75);
   const y1 = Math.ceil(height * 0.75);
 
-  const samples = [];
+  const rs = [];
+  const gs = [];
+  const bs = [];
 
   for (let y = y0; y < y1; y++) {
     for (let x = x0; x < x1; x++) {
@@ -208,31 +241,23 @@ export async function getSwatchTargetColor(swatchPath) {
       const a = channels === 4 ? data[i + 3] : 255;
       if (a < 20) continue;
       if (isNearWhite(r, g, b)) continue;
-      samples.push(rgbToLab(r, g, b));
+      rs.push(r);
+      gs.push(g);
+      bs.push(b);
     }
   }
 
-  if (!samples.length) {
+  if (!rs.length) {
     throw new Error(`No usable swatch pixels in center crop: ${swatchPath}`);
   }
 
-  const byL = [...samples].sort((a, b) => a.L - b.L);
-  const p30 = byL[Math.floor(byL.length * 0.3)].L;
-  const p70 = byL[Math.floor(byL.length * 0.7)].L;
-  const face = samples.filter((s) => s.L >= p30 && s.L <= p70);
-  const use = face.length > 20 ? face : samples;
+  const avg = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
 
-  const [r, g, b] = labToRgb(
-    medianOf(use.map((s) => s.L)),
-    medianOf(use.map((s) => s.a)),
-    medianOf(use.map((s) => s.b)),
-  );
-  return { r, g, b };
-}
-
-function labShiftStrength(labL) {
-  if (labL >= 16) return 1;
-  return clamp((labL - 5) / 11, 0, 1);
+  return {
+    r: Math.round(medianOf(rs) * 0.75 + avg(rs) * 0.25),
+    g: Math.round(medianOf(gs) * 0.75 + avg(gs) * 0.25),
+    b: Math.round(medianOf(bs) * 0.75 + avg(bs) * 0.25),
+  };
 }
 
 
@@ -368,7 +393,7 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * Lab anchor from cognac → swatch (preserves folds/highlights). Floor shadow untouched.
+ * Saturated swatches: HSL hue shift. Neutral/taupes: luminance colorize (avoids green Lab/hue artifacts).
  */
 export function recolorSofa(
   baseImage,
@@ -381,8 +406,12 @@ export function recolorSofa(
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
 
-  const srcLab = rgbToLab(sourceColor.r, sourceColor.g, sourceColor.b);
-  const tgtLab = rgbToLab(targetColor.r, targetColor.g, targetColor.b);
+  const srcHsl = rgbToHsl(sourceColor.r, sourceColor.g, sourceColor.b);
+  const tgtHsl = rgbToHsl(targetColor.r, targetColor.g, targetColor.b);
+  const dHue = hueDelta(srcHsl.h, tgtHsl.h);
+  const srcSat = Math.max(srcHsl.s, 0.08);
+  const useColorize = tgtHsl.s < 0.22;
+  const { r: tr, g: tg, b: tb } = targetColor;
   const yCut =
     leatherBottomY == null ? height - 1 : Math.min(height - 1, leatherBottomY);
 
@@ -400,18 +429,20 @@ export function recolorSofa(
 
       if (!isUpholsteryLeather(oR, oG, oB)) continue;
 
-      const lab = rgbToLab(oR, oG, oB);
-      const s = labShiftStrength(lab.L);
+      let nR;
+      let nG;
+      let nB;
 
-      const fullL = tgtLab.L + (lab.L - srcLab.L);
-      const fullA = tgtLab.a + (lab.a - srcLab.a);
-      const fullB = tgtLab.b + (lab.b - srcLab.b);
-
-      const newL = lab.L + (fullL - lab.L) * s;
-      const newA = lab.a + (fullA - lab.a) * s;
-      const newB = lab.b + (fullB - lab.b) * s;
-
-      const [nR, nG, nB] = labToRgb(newL, newA, newB);
+      if (useColorize) {
+        const lum = pixelBrightness(oR, oG, oB);
+        [nR, nG, nB] = colorFromLuminance(lum, tr, tg, tb);
+      } else {
+        const hsl = rgbToHsl(oR, oG, oB);
+        const nh = hsl.h + dHue;
+        const satBlend = clamp(hsl.s / srcSat, 0, 1.2);
+        const ns = clamp(hsl.s + (tgtHsl.s - srcHsl.s) * satBlend, 0, 1);
+        [nR, nG, nB] = hslToRgb(nh, ns, hsl.l);
+      }
 
       out[p] = nR;
       out[p + 1] = nG;
@@ -445,7 +476,11 @@ export async function processSwatch(
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: lab-anchor-v4\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
+  const mode =
+    rgbToHsl(targetColor.r, targetColor.g, targetColor.b).s < 0.22
+      ? 'lum-colorize'
+      : 'hsl-hue-lock';
+  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: ${mode}\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   writeFileSync(stampPath, stamp);
 

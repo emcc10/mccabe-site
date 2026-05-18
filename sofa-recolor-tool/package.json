@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "preview": "node render-sofas.js --currant",
-    "render": "node render-sofas.js --all"
+    "render": "node render-sofas.js --all",
+    "manifest": "node build-manifest.js",
+    "serve": "node build-manifest.js && node serve-preview.js"
   },
   "dependencies": {
     "adm-zip": "^0.5.16",

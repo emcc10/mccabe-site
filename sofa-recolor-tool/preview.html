@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sofa swatch preview</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #f4f4f4;
+      color: #222;
+    }
+    header {
+      padding: 1rem 1.25rem;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+    }
+    header h1 { margin: 0 0 0.25rem; font-size: 1.25rem; font-weight: 600; }
+    header p { margin: 0; font-size: 0.9rem; color: #555; }
+    main {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) 320px;
+      gap: 1rem;
+      padding: 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    @media (max-width: 800px) {
+      main { grid-template-columns: 1fr; }
+    }
+    .sofa-panel {
+      background: #fff;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .sofa-panel img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+    }
+    .sofa-label {
+      margin-top: 0.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .swatches {
+      background: #fff;
+      border-radius: 8px;
+      padding: 0.75rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+    .swatches h2 {
+      margin: 0 0 0.75rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+    }
+    button.swatch {
+      border: 2px solid transparent;
+      border-radius: 6px;
+      padding: 0;
+      cursor: pointer;
+      background: #eee;
+      overflow: hidden;
+      text-align: left;
+    }
+    button.swatch:hover { border-color: #999; }
+    button.swatch.active { border-color: #1a5fb4; }
+    button.swatch img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+    }
+    button.swatch span {
+      display: block;
+      padding: 0.35rem 0.4rem;
+      font-size: 0.7rem;
+      line-height: 1.2;
+      background: #fff;
+    }
+    .missing {
+      color: #a40;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sofa color preview</h1>
+    <p>Click a swatch to view the pre-rendered sofa. Run <code>npm run render</code> after changing colors.</p>
+  </header>
+  <main>
+    <section class="sofa-panel">
+      <img id="sofa" src="input/sofa.png" alt="Sofa preview" />
+      <p class="sofa-label" id="label">Original (cognac)</p>
+      <p class="missing" id="hint" hidden></p>
+    </section>
+    <aside class="swatches">
+      <h2>Leather swatches</h2>
+      <div class="grid" id="grid"></div>
+    </aside>
+  </main>
+  <script>
+    const sofa = document.getElementById('sofa');
+    const label = document.getElementById('label');
+    const hint = document.getElementById('hint');
+    const grid = document.getElementById('grid');
+    let active = null;
+
+    async function init() {
+      const res = await fetch('manifest.json');
+      const { swatches } = await res.json();
+
+      const orig = document.createElement('button');
+      orig.type = 'button';
+      orig.className = 'swatch';
+      orig.innerHTML = '<img src="input/sofa.png" alt="" /><span>Original</span>';
+      orig.onclick = () => select(null, 'Original (cognac)', 'input/sofa.png');
+      grid.appendChild(orig);
+
+      for (const s of swatches) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'swatch';
+        btn.dataset.render = s.render;
+        btn.innerHTML = `<img src="${s.swatch}" alt="" loading="lazy" /><span>${s.name}</span>`;
+        btn.onclick = () => select(btn, s.name, s.render);
+        grid.appendChild(btn);
+      }
+
+      const currant = swatches.find((s) => s.name === 'Bali-Currant');
+      if (currant) {
+        const btn = [...grid.querySelectorAll('.swatch')].find((b) => b.dataset.render === currant.render);
+        if (btn) btn.click();
+      }
+    }
+
+    function select(btn, name, src) {
+      if (active) active.classList.remove('active');
+      active = btn;
+      if (btn) btn.classList.add('active');
+      label.textContent = name;
+      hint.hidden = true;
+      const img = new Image();
+      img.onload = () => {
+        sofa.src = src + '?t=' + Date.now();
+        hint.hidden = true;
+      };
+      img.onerror = () => {
+        sofa.src = 'input/sofa.png';
+        hint.hidden = false;
+        hint.textContent = 'No render yet — run: npm run render';
+      };
+      img.src = src;
+    }
+
+    init().catch(() => {
+      grid.innerHTML = '<p class="missing">Run <code>npm run manifest</code> then refresh.</p>';
+    });
+  </script>
+</body>
+</html>
