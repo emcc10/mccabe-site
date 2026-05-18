@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260526
+ * MC_PLP_ENFORCER_20260527
  *
  * DOM (category listing):
  *   table.colors_backgroundlight + SearchResults_SubCat_Angle  ← black bar (legacy subcat chrome)
@@ -10,7 +10,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260526";
+  var VERSION = "20260527";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
@@ -65,11 +65,29 @@
     document.documentElement.classList.remove("mc-allow-home-hero");
   }
 
+  function isLegacySubcatChromeTable(tbl) {
+    if (!tbl) return false;
+    if (tbl.querySelector('img[src*="SearchResults_SubCat_Angle"]')) return true;
+    if (
+      String(tbl.getAttribute("width") || "") === "215" &&
+      tbl.querySelector("td.colors_lines_light")
+    ) {
+      return true;
+    }
+    if (
+      tbl.querySelector('img[src*="clear1x1.gif"][width="15"][height="15"]') &&
+      tbl.querySelector("td.colors_lines_light")
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   function looksLikeProductTable(tbl) {
     if (!tbl || !tbl.querySelector) return false;
     if (
       tbl.querySelector(
-        'a[href*="-p/"], a[href*="product-p/"], a.productnamecolor, .v-product, .productnamecolor'
+        'a[href*="-p/"], a[href*="product-p/"], a.productnamecolor, .v-product, .productnamecolor, .v-product-grid'
       )
     ) {
       return true;
@@ -78,24 +96,23 @@
     var i;
     for (i = 0; i < imgs.length; i++) {
       var src = (imgs[i].getAttribute("src") || "").toLowerCase();
-      if (src && src.indexOf("clear1x1") === -1) return true;
+      if (!src) continue;
+      if (src.indexOf("clear1x1") !== -1) continue;
+      if (src.indexOf("searchresults_subcat_angle") !== -1) continue;
+      if (src.indexOf("divider_horizontal") !== -1) continue;
+      return true;
     }
     return false;
   }
 
   function removeLegacyCategoryBars() {
     document.querySelectorAll("table.colors_backgroundlight").forEach(function (tbl) {
-      if (looksLikeProductTable(tbl)) return;
-
-      var angle = tbl.querySelector('img[src*="SearchResults_SubCat_Angle"]');
-      var spacer15 = tbl.querySelector('img[src*="clear1x1.gif"][width="15"][height="15"]');
-      var width215 = String(tbl.getAttribute("width") || "") === "215";
-
-      if (angle || spacer15 || width215) {
+      if (isLegacySubcatChromeTable(tbl)) {
         tbl.parentNode.removeChild(tbl);
         return;
       }
 
+      if (looksLikeProductTable(tbl)) return;
       Array.prototype.forEach.call(tbl.rows, function (tr) {
         var td = tr.querySelector("td.colors_lines_light");
         if (!td) return;
