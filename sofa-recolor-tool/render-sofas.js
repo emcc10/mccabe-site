@@ -232,20 +232,20 @@ export async function saveImage(data, path, width, height) {
 }
 
 /**
- * Center crop, light blur, mid-L band → mean a/b only (chrominance for transfer).
+ * Center 40% crop, 8px blur, mean L/a/b (full swatch chroma for transfer).
  */
 export async function getSwatchLabStats(swatchPath) {
   const meta = await sharp(swatchPath).metadata();
   const width = meta.width;
   const height = meta.height;
-  const x0 = Math.floor(width * 0.25);
-  const y0 = Math.floor(height * 0.25);
-  const cw = Math.ceil(width * 0.75) - x0;
-  const ch = Math.ceil(height * 0.75) - y0;
+  const x0 = Math.floor(width * 0.3);
+  const y0 = Math.floor(height * 0.3);
+  const cw = Math.max(1, Math.ceil(width * 0.7) - x0);
+  const ch = Math.max(1, Math.ceil(height * 0.7) - y0);
 
   const { data, info } = await sharp(swatchPath)
     .extract({ left: x0, top: y0, width: cw, height: ch })
-    .blur(0.6)
+    .blur(8)
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -253,7 +253,10 @@ export async function getSwatchLabStats(swatchPath) {
   const channels = info.channels;
   const w = info.width;
   const h = info.height;
-  const labs = [];
+  let sumL = 0;
+  let sumA = 0;
+  let sumB = 0;
+  let count = 0;
 
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
@@ -264,32 +267,22 @@ export async function getSwatchLabStats(swatchPath) {
       const a = channels === 4 ? data[i + 3] : 255;
       if (a < 20) continue;
       if (isNearWhite(r, g, b)) continue;
-      const bright = pixelBrightness(r, g, b);
-      if (bright < 12 || bright > 250) continue;
-      labs.push(rgbToLab(r, g, b));
+      const lab = rgbToLab(r, g, b);
+      sumL += lab.L;
+      sumA += lab.a;
+      sumB += lab.b;
+      count++;
     }
   }
 
-  if (!labs.length) {
+  if (!count) {
     throw new Error(`No usable swatch pixels in center crop: ${swatchPath}`);
   }
 
-  const byL = [...labs].sort((a, b) => a.L - b.L);
-  const p25 = byL[Math.floor(byL.length * 0.25)].L;
-  const p75 = byL[Math.floor(byL.length * 0.75)].L;
-  const mid = labs.filter((s) => s.L >= p25 && s.L <= p75);
-  const use = mid.length > 20 ? mid : labs;
-
-  let sumA = 0;
-  let sumB = 0;
-  for (const s of use) {
-    sumA += s.a;
-    sumB += s.b;
-  }
-
   return {
-    meanA: sumA / use.length,
-    meanB: sumB / use.length,
+    meanL: sumL / count,
+    meanA: sumA / count,
+    meanB: sumB / count,
   };
 }
 

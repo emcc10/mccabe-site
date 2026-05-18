@@ -1047,19 +1047,20 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product>a.v-product__img>img,h
 <link href="//d21ivvgspl06jm.cloudfront.net/theme-assets/icons/theme-icons-base.css" rel="stylesheet">
 <script>
 (function () {
-  if (document.getElementById('mc-custom-safe-css-static') || document.getElementById('mc-custom-safe-css')) {
-    return;
-  }
   function mcCssBust() {
     return 'v=' + Date.now() + '&m=' + Math.random().toString(36).slice(2, 12);
   }
   function mcLoadPlpEnforcer() {
-    if (window.__MC_PLP_ENFORCER_LOADING__) return;
+    if (window.__MC_PLP_ENFORCER__ || window.__MC_PLP_ENFORCER_LOADING__) return;
     window.__MC_PLP_ENFORCER_LOADING__ = 1;
     var s = document.createElement('script');
     s.id = 'mc-plp-enforcer-js';
     s.src = '/v/vspfiles/js/mc-plp-enforcer.js?' + mcCssBust();
     (document.head || document.documentElement).appendChild(s);
+  }
+  mcLoadPlpEnforcer();
+  if (document.getElementById('mc-custom-safe-css-static') || document.getElementById('mc-custom-safe-css')) {
+    return;
   }
   var el = document.createElement('link');
   el.rel = 'stylesheet';
@@ -1400,7 +1401,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
  
   <!-- DESIGN TOOLKIT -->
-  <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js"></script>
+  <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260520plp"></script>
 
 </head>
 

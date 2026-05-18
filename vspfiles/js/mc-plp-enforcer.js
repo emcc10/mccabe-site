@@ -123,8 +123,7 @@
   function styleWrap(wrap, tile, stage, pad) {
     if (!wrap || !wrap.closest || !wrap.closest(".v-product-grid")) return;
     if (wrap.closest("#v65-product-related")) return;
-    var tag = wrap.tagName ? wrap.tagName.toLowerCase() : "";
-    if (tag !== "a" && tag !== "motion") {
+    if (wrap.tagName && wrap.tagName.toLowerCase() !== "a") {
       var innerA = wrap.querySelector("a.v-product__img");
       if (innerA) wrap = innerA;
     }
