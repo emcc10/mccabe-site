@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260530
+ * MC_PLP_ENFORCER_20260531
  *
  * DOM (category listing):
  *   table.colors_backgroundlight + SearchResults_SubCat_Angle  ← black bar (legacy subcat chrome)
@@ -10,11 +10,26 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260530";
+  var VERSION = "20260531";
   var PLP_MAT = "#ffffff";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
+
+  (function injectPlpWhiteCritical() {
+    if (document.getElementById("mc-plp-white-critical")) return;
+    var st = document.createElement("style");
+    st.id = "mc-plp-white-critical";
+    st.textContent =
+      "html[data-mc-category-plp=\"1\"] #content_area .v-product-grid a.v-product__img," +
+      "html.category #content_area .v-product-grid a.v-product__img," +
+      "html.category #content_area .v-product-grid .v-product__img," +
+      "html.category #content_area .v-product-grid .v-product{background:#fff!important;" +
+      "border:0!important;box-shadow:none!important}" +
+      "html.category #content_area .v-product-grid a.v-product__img>img," +
+      "html.category #content_area .v-product-grid .v-product__img img{background:#fff!important;border:0!important}";
+    (document.head || document.documentElement).appendChild(st);
+  })();
 
   var MAT = PLP_MAT;
   var TILE = 280;
@@ -257,43 +272,6 @@
     });
   }
 
-  function fixPLPThumbBackgrounds() {
-    if (!isCategoryPlp()) return;
-    document
-      .querySelectorAll(
-        '#content_area .v-product-grid img[src*="/v/vspfiles/photos/"],' +
-          '#content_area .v-product-grid img[src*="vspfiles/photos"]'
-      )
-      .forEach(function (img) {
-        if (!img.closest(".v-product-grid") || img.closest("#v65-product-related")) return;
-
-        img.style.setProperty("background", PLP_MAT, "important");
-        img.style.setProperty("background-color", PLP_MAT, "important");
-        img.style.setProperty("border", "0", "important");
-        img.style.setProperty("box-shadow", "none", "important");
-
-        var el = img.parentElement;
-        var i;
-        for (i = 0; i < 5 && el; i++) {
-          if (!el.closest || !el.closest(".v-product-grid")) break;
-          el.style.setProperty("background", PLP_MAT, "important");
-          el.style.setProperty("background-color", PLP_MAT, "important");
-          el.style.setProperty("border", "0", "important");
-          el.style.setProperty("box-shadow", "none", "important");
-          el = el.parentElement;
-        }
-      });
-  }
-
-  function clearInnerThumbChrome(node) {
-    if (!node || !node.style) return;
-    node.style.setProperty("background", "transparent", "important");
-    node.style.setProperty("background-color", "transparent", "important");
-    node.style.setProperty("border", "0", "important");
-    node.style.setProperty("box-shadow", "none", "important");
-    node.style.setProperty("outline", "0", "important");
-  }
-
   function fixThumb(wrap) {
     if (!wrap || !wrap.classList || !wrap.classList.contains("v-product__img")) return;
     if (!wrap.closest(".v-product-grid")) return;
@@ -303,6 +281,7 @@
     var tile = mobile ? TILE_M : TILE;
     var stage = mobile ? STAGE_M : STAGE;
     var pad = mobile ? PAD_M : PAD;
+    var initialized = wrap.getAttribute("data-mc-plp-thumb") === "1";
 
     wrap.style.setProperty("display", "flex", "important");
     wrap.style.setProperty("align-items", "flex-end", "important");
@@ -320,22 +299,17 @@
     wrap.style.setProperty("box-shadow", "none", "important");
     wrap.style.setProperty("line-height", "0", "important");
 
-    wrap.querySelectorAll(".v-product__image-wrap, span, div").forEach(function (node) {
-      node.style.setProperty("background", PLP_MAT, "important");
-      node.style.setProperty("background-color", PLP_MAT, "important");
-      node.style.setProperty("border", "0", "important");
-      node.style.setProperty("box-shadow", "none", "important");
-    });
-
     var img = wrap.querySelector(":scope > img") || wrap.querySelector("img");
     if (!img) return;
 
-    try {
-      img.removeAttribute("style");
-      img.removeAttribute("border");
-    } catch (eAttr) {}
+    if (!initialized) {
+      try {
+        img.removeAttribute("style");
+        img.removeAttribute("border");
+      } catch (eAttr) {}
+      wrap.setAttribute("data-mc-plp-thumb", "1");
+    }
 
-    clearInnerThumbChrome(img);
     img.style.setProperty("background", PLP_MAT, "important");
     img.style.setProperty("background-color", PLP_MAT, "important");
     img.style.setProperty("display", "block", "important");
@@ -350,6 +324,8 @@
     img.style.setProperty("margin", "0 auto", "important");
     img.style.setProperty("padding", "0", "important");
     img.style.setProperty("flex", "0 0 auto", "important");
+    img.style.setProperty("border", "0", "important");
+    img.style.setProperty("box-shadow", "none", "important");
     img.style.transformOrigin = "center bottom";
 
     normalizeScale(wrap, img);
@@ -381,32 +357,40 @@
     if (!isCategoryPlp()) return;
     markCategory();
     removeLegacyCategoryBars();
-    fixPLPThumbBackgrounds();
     applyThumbs();
     hideHero();
   }
 
-  run();
-  document.addEventListener("DOMContentLoaded", run);
-  global.addEventListener("load", run);
-  global.addEventListener("resize", applyThumbs);
-  [0, 100, 400, 1200, 3000].forEach(function (t) {
-    global.setTimeout(run, t);
-  });
+  if (isCategoryPlp()) {
+    markCategory();
+    run();
+    document.addEventListener("DOMContentLoaded", run);
+    global.addEventListener("load", run);
+    global.addEventListener("resize", applyThumbs);
+  }
 
-  if (typeof MutationObserver !== "undefined") {
+  if (typeof MutationObserver !== "undefined" && isCategoryPlp()) {
     var scheduled = false;
-    var mo = new MutationObserver(function () {
+    var mo = new MutationObserver(function (mutations) {
+      var needsBar = false;
+      var i;
+      for (i = 0; i < mutations.length; i++) {
+        if (mutations[i].type === "childList") {
+          needsBar = true;
+          break;
+        }
+      }
+      if (!needsBar) return;
       if (scheduled) return;
       scheduled = true;
       global.requestAnimationFrame(function () {
         scheduled = false;
-        run();
+        removeLegacyCategoryBars();
       });
     });
-    var root = document.body || document.getElementById("content_area");
+    var root = document.getElementById("content_area") || document.body;
     if (root) {
-      mo.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["src"] });
+      mo.observe(root, { childList: true, subtree: true });
     }
   }
 
