@@ -7,6 +7,7 @@
   "scripts": {
     "preview": "node render-sofas.js --currant",
     "render": "node render-sofas.js --all",
+    "test-colors": "node render-sofas.js --test-colors",
     "manifest": "node build-manifest.js",
     "serve": "node build-manifest.js && node serve-preview.js"
   },
