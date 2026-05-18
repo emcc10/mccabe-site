@@ -1,5 +1,5 @@
 /**
- * Batch sofa recolor — LAB transfer from swatch center-crop means; sofa L shading kept. No AI.
+ * Photographic leather recolor — upholstery midtones only; Lab a/b transfer; original L kept. No AI.
  */
 import AdmZip from 'adm-zip';
 import { mkdirSync, readdirSync, existsSync, writeFileSync } from 'fs';
@@ -18,7 +18,9 @@ const ZIP_PATH = join(OUTPUT_DIR, 'sofa-renders.zip');
 const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 
 const BG_THRESH = 235;
-const FOOT_BRIGHTNESS = 35;
+const FLOOR_MARGIN_PX = 18;
+const SPECULAR_BRIGHT = 215;
+const SPECULAR_ORIGINAL_BLEND = 0.7;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
@@ -106,77 +108,51 @@ function hslToRgb(h, s, l) {
   ];
 }
 
-function hueDelta(fromH, toH) {
-  let d = toH - fromH;
-  if (d > 0.5) d -= 1;
-  if (d < -0.5) d += 1;
-  return d;
+function pixelSaturation(r, g, b) {
+  return rgbToHsl(r, g, b).s;
 }
 
-/** PIL-style colorize: map grayscale shading → target shadow/mid/highlight. */
-function colorFromLuminance(lum, tr, tg, tb) {
-  const shadow = [
-    Math.round(clamp(tr * 0.5, 0, 255)),
-    Math.round(clamp(tg * 0.5, 0, 255)),
-    Math.round(clamp(tb * 0.5, 0, 255)),
-  ];
-  const mid = [tr, tg, tb];
-  const highlight = [
-    Math.round(clamp(tr * 1.14 + 10, 0, 255)),
-    Math.round(clamp(tg * 1.14 + 10, 0, 255)),
-    Math.round(clamp(tb * 1.14 + 10, 0, 255)),
-  ];
-  const t = clamp(lum / 255, 0, 1);
-  if (t <= 0.5) {
-    const u = t * 2;
-    return [
-      Math.round(shadow[0] + (mid[0] - shadow[0]) * u),
-      Math.round(shadow[1] + (mid[1] - shadow[1]) * u),
-      Math.round(shadow[2] + (mid[2] - shadow[2]) * u),
-    ];
-  }
-  const u = (t - 0.5) * 2;
-  return [
-    Math.round(mid[0] + (highlight[0] - mid[0]) * u),
-    Math.round(mid[1] + (highlight[1] - mid[1]) * u),
-    Math.round(mid[2] + (highlight[2] - mid[2]) * u),
-  ];
+function rgbMaxDiff(r, g, b) {
+  return Math.max(Math.abs(r - g), Math.abs(r - b), Math.abs(g - b));
 }
 
-function isWarmLeather(r, g, b) {
-  return r >= g - 4 && r >= b - 6;
-}
-
-/** Floor drop shadow / neutral gray only — warm leather highlights are never skipped. */
-function isProtectedShadowOrGray(r, g, b) {
-  if (isWarmLeather(r, g, b)) return false;
-
-  const bright = pixelBrightness(r, g, b);
-  if (bright < FOOT_BRIGHTNESS) return true;
-
-  const maxDiff = Math.max(Math.abs(r - g), Math.abs(r - b), Math.abs(g - b));
-  if (maxDiff < 26 && bright > 28 && bright < 225) return true;
-  if (b >= r - 1 && bright < 200) return true;
-  if (g > r + 4 && b > r && bright < 180) return true;
-
-  const { a, b: lb } = rgbToLab(r, g, b);
-  if (Math.hypot(a, lb) < 14 && bright > 32 && bright < 210) return true;
-  return false;
-}
-
-/** Dark wood feet only — not deep leather creases (those stay warm/orange if skipped). */
-function isFootPixel(r, g, b) {
-  const bright = pixelBrightness(r, g, b);
-  if (bright >= 55) return false;
-  if (isWarmLeather(r, g, b)) return false;
-  return Math.max(r, g, b) < 80;
-}
-
-/** Every masked leather pixel — including crease shadows (skipping them caused cognac fringes). */
-function shouldRecolorPixel(r, g, b) {
+/** Upholstery midtones only — excludes bg, feet, seams, specular, floor shadow. */
+function isUpholsteryMidtone(r, g, b) {
   if (isNearWhite(r, g, b)) return false;
-  if (isFootPixel(r, g, b)) return false;
+  const bright = pixelBrightness(r, g, b);
+  if (bright < 28) return false;
+  if (bright > 242) return false;
+  const sat = pixelSaturation(r, g, b);
+  if (sat < 0.08 && bright > 210) return false;
   return true;
+}
+
+/** Low-sat, low-contrast pixels near the floor (ambient / drop shadow). */
+function isFloorAmbientPixel(r, g, b) {
+  const bright = pixelBrightness(r, g, b);
+  if (bright > 200) return false;
+  if (pixelSaturation(r, g, b) >= 0.08) return false;
+  return rgbMaxDiff(r, g, b) < 22;
+}
+
+function applyLeatherSoftness(r, g, b) {
+  const mid = 128;
+  const cr = clamp(mid + (r - mid) * 0.97, 0, 255);
+  const cg = clamp(mid + (g - mid) * 0.97, 0, 255);
+  const cb = clamp(mid + (b - mid) * 0.97, 0, 255);
+  const hsl = rgbToHsl(cr, cg, cb);
+  const ns = clamp(hsl.s * 1.02, 0, 1);
+  return hslToRgb(hsl.h, ns, hsl.l);
+}
+
+async function featherMask(mask, width, height, sigma = 0.8) {
+  const { data } = await sharp(Buffer.from(mask), {
+    raw: { width, height, channels: 1 },
+  })
+    .blur(sigma)
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  return new Uint8Array(data);
 }
 
 function labToRgb(L, a, b) {
