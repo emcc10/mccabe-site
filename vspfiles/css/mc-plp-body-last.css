@@ -1,0 +1,59 @@
+/* MC_PLP_BODY_LAST_20260520 — after baked inline category thumb rules */
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product > a.v-product__img,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li .v-product__img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product > a.v-product__img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img,
+:is(html.category, body.category) .v-product-grid .v-product > a.v-product__img,
+:is(html.category, body.category) .v-product-grid .v-product .vcss_img,
+html.is-category-or-listing-page #content_area ul.v-product-grid > li.v-product > a.v-product__img {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 280px !important;
+  min-height: 280px !important;
+  max-height: 280px !important;
+  margin: 0 !important;
+  padding: 14px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  background: #f2f2f2 !important;
+  line-height: 0 !important;
+}
+
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product > a.v-product__img > img,
+html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product .v-product__img img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product > a.v-product__img > img,
+:is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img,
+:is(html.category, body.category) .v-product-grid .v-product .vcss_img img,
+:is(html.category, body.category) .v-product-grid .v-product .product_image img {
+  width: 100% !important;
+  height: 220px !important;
+  max-width: 100% !important;
+  max-height: 220px !important;
+  min-height: 0 !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  margin: 0 auto !important;
+  border: 0 !important;
+  border-width: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+}
+
+@media (max-width: 991px) {
+  html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product > a.v-product__img,
+  :is(html.category, body.category) ul.v-product-grid > li.v-product > a.v-product__img {
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+    padding: 12px !important;
+  }
+
+  html.category body:not(.productdetails):not(.is-home) #content_area ul.v-product-grid > li.v-product > a.v-product__img > img,
+  :is(html.category, body.category) ul.v-product-grid > li.v-product > a.v-product__img > img {
+    height: 172px !important;
+    max-height: 172px !important;
+  }
+}
