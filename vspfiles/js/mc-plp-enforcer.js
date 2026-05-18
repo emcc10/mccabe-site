@@ -1,10 +1,17 @@
 /**
- * PLP category layout — matches template critical CSS (280px mat / 220px stage).
- * MC_PLP_ENFORCER_20260523
+ * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
+ * MC_PLP_ENFORCER_20260524
+ *
+ * DOM (category listing):
+ *   #content_area > table > tr > td.colors_lines_light > img[clear1x1]  ← black bar
+ *   .v-product-grid > .v-product > a.v-product__img > img               ← thumb (flat, no inner wrapper)
  */
 (function (global) {
   "use strict";
-  if (global.__MC_PLP_ENFORCER__) return;
+
+  var VERSION = "20260524";
+  if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
+  global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
 
   var MAT = "#f2f2f2";
@@ -14,71 +21,19 @@
   var STAGE_M = 172;
   var PAD = 14;
   var PAD_M = 12;
+  var TARGET_FILL = 0.78;
 
-  var WRAP_SEL =
-    "#content_area .v-product-grid a.v-product__img," +
-    "#content_area .v-product-grid .v-product__img";
+  /** Known oversized PNG crops — matched against href / alt / title. */
+  var SCALE_OVERRIDES = {
+    miami: 0.84,
+    juno: 0.88,
+    alula: 0.86,
+    "juno apartment": 0.88,
+    "miami track": 0.84,
+    "miami roll": 0.84,
+  };
 
-  var HERO_SEL =
-    "#if_homepage,#slideshow-container,#slideshow-container .mc-hero-video," +
-    ".mc-hero-video,video.mc-hero-video-el,.mc-hero-video-el";
-
-  var FINAL_CSS =
-    "/* MC PLP THUMBNAIL CLEANUP 20260518 */" +
-    "html[data-mc-category-plp='1'] #content_area>table>tbody>tr>td.colors_lines_light," +
-    "html[data-mc-category-plp='1'] #content_area>table>tr>td.colors_lines_light," +
-    "html.category #content_area>table>tbody>tr>td.colors_lines_light{display:none!important;height:0!important;" +
-    "padding:0!important;margin:0!important;border:0!important;background:transparent!important}" +
-    "html[data-mc-category-plp='1'] #content_area .v-product-grid .v-product{background:transparent!important}" +
-    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img," +
-    "html[data-mc-category-plp='1'] #content_area .v-product-grid .v-product__img," +
-    "html.category #content_area .v-product-grid a.v-product__img{" +
-    "display:flex!important;align-items:flex-end!important;justify-content:center!important;" +
-    "width:100%!important;height:" +
-    TILE +
-    "px!important;min-height:" +
-    TILE +
-    "px!important;max-height:" +
-    TILE +
-    "px!important;margin:0!important;padding:" +
-    PAD +
-    "px!important;overflow:hidden!important;box-sizing:border-box!important;" +
-    "background:" +
-    MAT +
-    "!important;background-color:" +
-    MAT +
-    "!important;border:0!important;box-shadow:none!important;line-height:0!important}" +
-    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img>img," +
-    "html[data-mc-category-plp='1'] #content_area .v-product-grid .v-product__img img," +
-    "html.category #content_area .v-product-grid a.v-product__img>img{" +
-    "height:" +
-    STAGE +
-    "px!important;max-height:" +
-    STAGE +
-    "px!important;width:auto!important;max-width:100%!important;min-height:0!important;" +
-    "object-fit:contain!important;object-position:center bottom!important;" +
-    "display:block!important;margin:0 auto!important;background:transparent!important;" +
-    "background-color:transparent!important;border:0!important;box-shadow:none!important}" +
-    "@media(max-width:991px){html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img," +
-    "html.category #content_area .v-product-grid a.v-product__img{height:" +
-    TILE_M +
-    "px!important;min-height:" +
-    TILE_M +
-    "px!important;max-height:" +
-    TILE_M +
-    "px!important;padding:" +
-    PAD_M +
-    "px!important}" +
-    "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img>img," +
-    "html.category #content_area .v-product-grid a.v-product__img>img{height:" +
-    STAGE_M +
-    "px!important;max-height:" +
-    STAGE_M +
-    "px!important}}" +
-    "html[data-mc-category-plp='1'] #if_homepage,html[data-mc-category-plp='1'] #slideshow-container," +
-    "html[data-mc-category-plp='1'] video.mc-hero-video-el,html.category #slideshow-container," +
-    "html.category video.mc-hero-video-el{display:none!important;height:0!important;min-height:0!important;" +
-    "opacity:0!important;overflow:hidden!important;background:transparent!important}";
+  var THUMB_SEL = "#content_area .v-product-grid a.v-product__img";
 
   function isCategoryPlp() {
     try {
@@ -110,48 +65,150 @@
     document.documentElement.classList.remove("mc-allow-home-hero");
   }
 
-  function injectFinalStyle() {
-    var id = "mc-plp-enforcer-final";
-    var el = document.getElementById(id);
-    if (!el) {
-      el = document.createElement("style");
-      el.id = id;
-    }
-    el.textContent = FINAL_CSS;
-    var root = document.body || document.documentElement;
-    if (root && el.parentNode !== root) root.appendChild(el);
-    else if (root && el !== root.lastElementChild) root.appendChild(el);
-  }
-
-  /** Volusion listing HTML: remove divider <tr> after breadcrumbs (colors_lines_light). */
-  function removeListingDividerRow() {
-    if (!isCategoryPlp()) return;
+  /** Issue A: remove <tr><td class="colors_lines_light"> after breadcrumbs. */
+  function removeBreadcrumbDivider() {
     document.querySelectorAll("#content_area > table").forEach(function (table) {
-      if (table.getAttribute("data-mc-divider-removed")) return;
-      var i;
-      for (i = 0; i < table.rows.length; i++) {
-        var tr = table.rows[i];
-        if (tr.cells.length !== 1) continue;
+      Array.prototype.forEach.call(table.rows, function (tr) {
+        if (tr.cells.length !== 1) return;
         var td = tr.cells[0];
-        if (!td.classList.contains("colors_lines_light")) continue;
+        if (!td.classList.contains("colors_lines_light")) return;
         var img = td.querySelector("img");
-        if (img && /clear1x1\.gif/i.test(img.getAttribute("src") || "")) {
-          tr.parentNode.removeChild(tr);
-          table.setAttribute("data-mc-divider-removed", "1");
-          break;
-        }
-      }
+        if (!img) return;
+        if (!/clear1x1\.gif/i.test(img.getAttribute("src") || "")) return;
+        tr.parentNode.removeChild(tr);
+      });
     });
   }
 
-  function styleThumb(wrap, tile, stage, pad) {
-    if (!wrap || !wrap.closest || !wrap.closest(".v-product-grid")) return;
-    if (wrap.closest("#v65-product-related")) return;
-    if (wrap.tagName && wrap.tagName.toLowerCase() !== "a") {
-      var innerA = wrap.querySelector("a.v-product__img");
-      if (innerA) wrap = innerA;
+  function haystack(wrap, img) {
+    return (
+      (wrap.getAttribute("href") || "") +
+      " " +
+      (img.getAttribute("alt") || "") +
+      " " +
+      (img.getAttribute("title") || "") +
+      " " +
+      (img.getAttribute("src") || "")
+    ).toLowerCase();
+  }
+
+  function manualScale(wrap, img) {
+    var text = haystack(wrap, img);
+    var key;
+    for (key in SCALE_OVERRIDES) {
+      if (Object.prototype.hasOwnProperty.call(SCALE_OVERRIDES, key) && text.indexOf(key) !== -1) {
+        return SCALE_OVERRIDES[key];
+      }
     }
-    wrap.classList.add("mc-plp-thumb-mat");
+    return null;
+  }
+
+  function applyScale(img, scale) {
+    scale = Math.max(0.7, Math.min(1, scale));
+    scale = Math.round(scale * 100) / 100;
+    img.setAttribute("data-scale", String(scale));
+    img.style.setProperty("--thumb-scale", String(scale));
+    img.style.transformOrigin = "center bottom";
+    if (scale < 0.995) {
+      img.style.transform = "scale(var(--thumb-scale))";
+    } else {
+      img.style.transform = "";
+      img.removeAttribute("data-scale");
+    }
+  }
+
+  function measureFill(img, cb) {
+    if (!img.complete || !img.naturalWidth) {
+      img.addEventListener(
+        "load",
+        function () {
+          measureFill(img, cb);
+        },
+        { once: true }
+      );
+      return;
+    }
+    try {
+      var maxSide = 160;
+      var nw = img.naturalWidth;
+      var nh = img.naturalHeight;
+      var w = nw >= nh ? maxSide : Math.round((maxSide * nw) / nh);
+      var h = nh >= nw ? maxSide : Math.round((maxSide * nh) / nw);
+      if (w < 1) w = 1;
+      if (h < 1) h = 1;
+
+      var canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      var ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+      var data = ctx.getImageData(0, 0, w, h).data;
+
+      var minX = w;
+      var minY = h;
+      var maxX = 0;
+      var maxY = 0;
+      var found = false;
+      var x;
+      var y;
+      for (y = 0; y < h; y++) {
+        for (x = 0; x < w; x++) {
+          var i = (y * w + x) * 4;
+          var r = data[i];
+          var g = data[i + 1];
+          var b = data[i + 2];
+          var a = data[i + 3];
+          if (a < 20) continue;
+          if (r > 238 && g > 238 && b > 238) continue;
+          found = true;
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x > maxX) maxX = x;
+          if (y > maxY) maxY = y;
+        }
+      }
+      if (!found) {
+        cb(1);
+        return;
+      }
+      var fillW = (maxX - minX + 1) / w;
+      var fillH = (maxY - minY + 1) / h;
+      cb(Math.max(fillW, fillH));
+    } catch (err) {
+      cb(1);
+    }
+  }
+
+  function normalizeScale(wrap, img) {
+    var forced = manualScale(wrap, img);
+    if (forced != null) {
+      applyScale(img, forced);
+      img.setAttribute("data-mc-scale-done", "1");
+      return;
+    }
+    if (img.getAttribute("data-mc-scale-done") === "1") return;
+
+    measureFill(img, function (fill) {
+      var scale = 1;
+      if (fill > TARGET_FILL + 0.04) {
+        scale = TARGET_FILL / fill;
+      }
+      applyScale(img, scale);
+      img.setAttribute("data-mc-scale-done", "1");
+    });
+  }
+
+  /** Issue B + C: gray mat on anchor; strip img border/white; per-image scale. */
+  function fixThumb(wrap) {
+    if (!wrap || !wrap.classList || !wrap.classList.contains("v-product__img")) return;
+    if (!wrap.closest(".v-product-grid")) return;
+    if (wrap.closest("#v65-product-related")) return;
+
+    var mobile = global.innerWidth <= 991;
+    var tile = mobile ? TILE_M : TILE;
+    var stage = mobile ? STAGE_M : STAGE;
+    var pad = mobile ? PAD_M : PAD;
+
     wrap.style.setProperty("display", "flex", "important");
     wrap.style.setProperty("align-items", "flex-end", "important");
     wrap.style.setProperty("justify-content", "center", "important");
@@ -166,70 +223,69 @@
     wrap.style.setProperty("background-color", MAT, "important");
     wrap.style.setProperty("border", "0", "important");
     wrap.style.setProperty("box-shadow", "none", "important");
-    wrap.style.setProperty("margin", "0", "important");
+    wrap.style.setProperty("line-height", "0", "important");
 
-    var img = wrap.querySelector("img");
+    var img = wrap.querySelector(":scope > img") || wrap.querySelector("img");
     if (!img) return;
+
     try {
       img.removeAttribute("style");
       img.removeAttribute("border");
     } catch (eAttr) {}
 
-    img.style.setProperty("height", stage + "px", "important");
-    img.style.setProperty("max-height", stage + "px", "important");
+    img.style.setProperty("border", "0", "important");
+    img.style.setProperty("outline", "0", "important");
+    img.style.setProperty("background", "transparent", "important");
+    img.style.setProperty("background-color", "transparent", "important");
+    img.style.setProperty("display", "block", "important");
     img.style.setProperty("width", "auto", "important");
     img.style.setProperty("max-width", "100%", "important");
+    img.style.setProperty("height", stage + "px", "important");
+    img.style.setProperty("max-height", stage + "px", "important");
     img.style.setProperty("min-height", "0", "important");
     img.style.setProperty("object-fit", "contain", "important");
     img.style.setProperty("object-position", "center bottom", "important");
-    img.style.setProperty("display", "block", "important");
     img.style.setProperty("margin", "0 auto", "important");
-    img.style.setProperty("background", "transparent", "important");
-    img.style.setProperty("background-color", "transparent", "important");
-    img.style.setProperty("border", "0", "important");
-    img.style.setProperty("box-shadow", "none", "important");
+    img.style.transformOrigin = "center bottom";
+
+    normalizeScale(wrap, img);
   }
 
   function hideHero() {
     if (isHome()) return;
-    global.document.documentElement.classList.remove("mc-allow-home-hero");
-    if (global.document.body) global.document.body.classList.remove("is-home");
-    document.querySelectorAll(HERO_SEL).forEach(function (n) {
-      n.style.setProperty("display", "none", "important");
-      n.style.setProperty("height", "0", "important");
-      n.style.setProperty("min-height", "0", "important");
-      n.style.setProperty("opacity", "0", "important");
-      n.style.setProperty("overflow", "hidden", "important");
-      n.style.setProperty("background", "transparent", "important");
-    });
+    document.documentElement.classList.remove("mc-allow-home-hero");
+    if (document.body) document.body.classList.remove("is-home");
+    document
+      .querySelectorAll(
+        "#if_homepage,#slideshow-container,#slideshow-container .mc-hero-video,.mc-hero-video,video.mc-hero-video-el"
+      )
+      .forEach(function (n) {
+        n.style.setProperty("display", "none", "important");
+        n.style.setProperty("height", "0", "important");
+        n.style.setProperty("min-height", "0", "important");
+        n.style.setProperty("opacity", "0", "important");
+        n.style.setProperty("overflow", "hidden", "important");
+      });
   }
 
   function applyThumbs() {
     if (!isCategoryPlp()) return;
-    var mobile = global.innerWidth <= 991;
-    var tile = mobile ? TILE_M : TILE;
-    var stage = mobile ? STAGE_M : STAGE;
-    var pad = mobile ? PAD_M : PAD;
-
-    document.querySelectorAll(WRAP_SEL).forEach(function (wrap) {
-      styleThumb(wrap, tile, stage, pad);
-    });
+    document.querySelectorAll(THUMB_SEL).forEach(fixThumb);
   }
 
   function run() {
+    if (!isCategoryPlp()) return;
     markCategory();
-    removeListingDividerRow();
-    injectFinalStyle();
-    hideHero();
+    removeBreadcrumbDivider();
     applyThumbs();
+    hideHero();
   }
 
   run();
   document.addEventListener("DOMContentLoaded", run);
   global.addEventListener("load", run);
   global.addEventListener("resize", applyThumbs);
-  global.setInterval(run, 400);
-  [0, 50, 150, 400, 1000, 2500].forEach(function (t) {
+  [0, 100, 400, 1200, 3000].forEach(function (t) {
     global.setTimeout(run, t);
   });
 
@@ -245,12 +301,7 @@
     });
     var root = document.getElementById("content_area") || document.body;
     if (root) {
-      mo.observe(root, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["style", "class", "src"],
-      });
+      mo.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["src"] });
     }
   }
 
