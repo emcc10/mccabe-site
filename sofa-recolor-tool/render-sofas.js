@@ -199,45 +199,63 @@ export async function saveImage(data, path, width, height) {
 }
 
 /**
- * Center 50% crop → mean L/a/b in Lab (full swatch statistics, not a single median RGB).
+ * Center crop, light blur, mid-L band → mean a/b only (chrominance for transfer).
  */
 export async function getSwatchLabStats(swatchPath) {
-  const { data, width, height, channels } = await loadImage(swatchPath);
+  const meta = await sharp(swatchPath).metadata();
+  const width = meta.width;
+  const height = meta.height;
   const x0 = Math.floor(width * 0.25);
   const y0 = Math.floor(height * 0.25);
-  const x1 = Math.ceil(width * 0.75);
-  const y1 = Math.ceil(height * 0.75);
+  const cw = Math.ceil(width * 0.75) - x0;
+  const ch = Math.ceil(height * 0.75) - y0;
 
-  let sumL = 0;
-  let sumA = 0;
-  let sumB = 0;
-  let count = 0;
+  const { data, info } = await sharp(swatchPath)
+    .extract({ left: x0, top: y0, width: cw, height: ch })
+    .blur(0.6)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
 
-  for (let y = y0; y < y1; y++) {
-    for (let x = x0; x < x1; x++) {
-      const i = (y * width + x) * channels;
+  const channels = info.channels;
+  const w = info.width;
+  const h = info.height;
+  const labs = [];
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * channels;
       const r = data[i];
       const g = data[i + 1];
       const b = data[i + 2];
       const a = channels === 4 ? data[i + 3] : 255;
       if (a < 20) continue;
       if (isNearWhite(r, g, b)) continue;
-      const lab = rgbToLab(r, g, b);
-      sumL += lab.L;
-      sumA += lab.a;
-      sumB += lab.b;
-      count++;
+      if (!isUpholsteryMidtone(r, g, b)) continue;
+      labs.push(rgbToLab(r, g, b));
     }
   }
 
-  if (!count) {
+  if (!labs.length) {
     throw new Error(`No usable swatch pixels in center crop: ${swatchPath}`);
   }
 
+  const byL = [...labs].sort((a, b) => a.L - b.L);
+  const p25 = byL[Math.floor(byL.length * 0.25)].L;
+  const p75 = byL[Math.floor(byL.length * 0.75)].L;
+  const mid = labs.filter((s) => s.L >= p25 && s.L <= p75);
+  const use = mid.length > 20 ? mid : labs;
+
+  let sumA = 0;
+  let sumB = 0;
+  for (const s of use) {
+    sumA += s.a;
+    sumB += s.b;
+  }
+
   return {
-    meanL: sumL / count,
-    meanA: sumA / count,
-    meanB: sumB / count,
+    meanA: sumA / use.length,
+    meanB: sumB / use.length,
   };
 }
 
@@ -275,9 +293,27 @@ export function getSourceLeatherColor(baseImage, mask) {
   };
 }
 
-export async function createSofaMask(image, optionalMaskPath = null) {
+/** Lowest row of non-background sofa (for floor shadow exclusion). */
+export function getSofaBottomY(baseImage) {
+  const { data, width, height, channels } = baseImage;
+  for (let y = height - 1; y >= 0; y--) {
+    for (let x = 0; x < width; x++) {
+      const p = (y * width + x) * channels;
+      if (!isNearWhite(data[p], data[p + 1], data[p + 2])) {
+        return y;
+      }
+    }
+  }
+  return height - 1;
+}
+
+/**
+ * Upholstery midtone mask (not full silhouette). Feathered 0.8px.
+ */
+export async function createUpholsteryMask(image, optionalMaskPath = null) {
   const { data, width, height, channels } = image;
-  let mask = new Uint8Array(width * height);
+  const hard = new Uint8Array(width * height);
+  let useOptional = false;
 
   if (optionalMaskPath && existsSync(optionalMaskPath)) {
     const m = await loadImage(optionalMaskPath);
@@ -286,52 +322,31 @@ export async function createSofaMask(image, optionalMaskPath = null) {
         `mask.png must match sofa size ${width}x${height}, got ${m.width}x${m.height}`,
       );
     }
+    useOptional = true;
     for (let j = 0, i = 0; j < width * height; j++, i += m.channels) {
       const lum = pixelBrightness(m.data[i], m.data[i + 1], m.data[i + 2]);
-      mask[j] = lum > 127 ? 255 : 0;
-    }
-  } else {
-    for (let j = 0, p = 0; j < width * height; j++, p += channels) {
-      const r = data[p];
-      const g = data[p + 1];
-      const b = data[p + 2];
-      mask[j] = isNearWhite(r, g, b) ? 0 : 255;
+      hard[j] = lum > 127 ? 255 : 0;
     }
   }
 
+  for (let j = 0, p = 0; j < width * height; j++, p += channels) {
+    const r = data[p];
+    const g = data[p + 1];
+    const b = data[p + 2];
+    if (useOptional && hard[j] < 128) {
+      hard[j] = 0;
+      continue;
+    }
+    hard[j] = isUpholsteryMidtone(r, g, b) ? 255 : 0;
+  }
+
+  const mask = await featherMask(hard, width, height, 0.8);
   return mask;
 }
 
-/**
- * Last row that is still upholstery (exclude floor drop shadow below).
- */
-export function getLeatherBottomY(baseImage, mask, imgWidth, imgHeight) {
-  const { data, channels } = baseImage;
-
-  for (let y = imgHeight - 1; y >= 0; y--) {
-    let leather = 0;
-    let shadow = 0;
-    let counted = 0;
-
-    for (let x = 0; x < imgWidth; x++) {
-      const j = y * imgWidth + x;
-      if (mask[j] < 128) continue;
-      const p = j * channels;
-      const r = data[p];
-      const g = data[p + 1];
-      const b = data[p + 2];
-      if (isNearWhite(r, g, b)) continue;
-      counted++;
-      if (isProtectedShadowOrGray(r, g, b)) shadow++;
-      else leather++;
-    }
-
-    if (counted > 24 && leather > shadow && leather > counted * 0.2) {
-      return Math.min(imgHeight - 1, y + 8);
-    }
-  }
-
-  return imgHeight - 1;
+/** @deprecated Use createUpholsteryMask */
+export async function createSofaMask(image, optionalMaskPath = null) {
+  return createUpholsteryMask(image, optionalMaskPath);
 }
 
 export function getSofaBounds(mask, imgWidth, imgHeight) {
@@ -374,27 +389,27 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * LAB transfer: sofa L shading + swatch mean a/b; L nudged 15% toward swatch; shadow floor.
+ * Lab a/b only — original L preserved; feathered mask; specular + floor protected.
  */
 export function recolorSofa(
   baseImage,
   mask,
   swatchLab,
-  leatherBottomY = null,
+  sofaBottomY,
   _sofaBounds = null,
 ) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
-  const { meanL, meanA, meanB } = swatchLab;
-
-  const yCut =
-    leatherBottomY == null ? height - 1 : Math.min(height - 1, leatherBottomY);
+  const { meanA, meanB } = swatchLab;
+  const yFloor = sofaBottomY - FLOOR_MARGIN_PX;
+  const yFloorAmbient = sofaBottomY - 45;
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const j = y * width + x;
-      if (mask[j] < 128) continue;
-      if (y > yCut) continue;
+      const maskW = mask[j] / 255;
+      if (maskW < 0.004) continue;
+      if (y > yFloor) continue;
 
       const p = j * channels;
       const oR = data[p];
@@ -402,17 +417,21 @@ export function recolorSofa(
       const oB = data[p + 2];
       const oA = channels === 4 ? data[p + 3] : 255;
 
-      if (!shouldRecolorPixel(oR, oG, oB)) continue;
+      if (y > yFloorAmbient && isFloorAmbientPixel(oR, oG, oB)) continue;
 
       const { L: origL } = rgbToLab(oR, oG, oB);
-      let finalL = origL * 0.85 + meanL * 0.15;
-      if (finalL < origL - 10) finalL = origL - 10;
+      let [nR, nG, nB] = labToRgb(origL, meanA, meanB);
+      [nR, nG, nB] = applyLeatherSoftness(nR, nG, nB);
 
-      const [nR, nG, nB] = labToRgb(finalL, meanA, meanB);
+      let t = maskW;
+      const bright = pixelBrightness(oR, oG, oB);
+      if (bright > SPECULAR_BRIGHT) {
+        t *= 1 - SPECULAR_ORIGINAL_BLEND;
+      }
 
-      out[p] = nR;
-      out[p + 1] = nG;
-      out[p + 2] = nB;
+      out[p] = Math.round(oR + (nR - oR) * t);
+      out[p + 1] = Math.round(oG + (nG - oG) * t);
+      out[p + 2] = Math.round(oB + (nB - oB) * t);
       if (channels === 4) out[p + 3] = oA;
     }
   }
@@ -425,7 +444,7 @@ export async function processSwatch(
   baseSofa,
   mask,
   _sourceColor,
-  leatherBottomY,
+  sofaBottomY,
   sofaBounds,
 ) {
   const swatchLab = await getSwatchLabStats(swatchPath);
@@ -433,18 +452,18 @@ export async function processSwatch(
     baseSofa,
     mask,
     swatchLab,
-    leatherBottomY,
+    sofaBottomY,
     sofaBounds,
   );
   const outName = `${basename(swatchPath, extname(swatchPath))}.png`;
   const outPath = join(OUTPUT_DIR, outName);
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
 
-  const [r, g, b] = labToRgb(swatchLab.meanL, swatchLab.meanA, swatchLab.meanB);
+  const [r, g, b] = labToRgb(50, swatchLab.meanA, swatchLab.meanB);
   const targetColor = { r, g, b };
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: lab-transfer\ntargetLab: ${swatchLab.meanL.toFixed(2)},${swatchLab.meanA.toFixed(2)},${swatchLab.meanB.toFixed(2)}\ntargetRgb: ${r},${g},${b}\n`;
+  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: lab-ab-midtone\ntargetAb: ${swatchLab.meanA.toFixed(2)},${swatchLab.meanB.toFixed(2)}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   writeFileSync(stampPath, stamp);
 
@@ -514,15 +533,10 @@ export async function main(argv = process.argv) {
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
-  if (maskPath) console.log(`Using mask: ${maskPath}`);
-  const mask = await createSofaMask(baseSofa, maskPath);
+  if (maskPath) console.log(`Optional mask refine: ${maskPath}`);
+  const mask = await createUpholsteryMask(baseSofa, maskPath);
   const sofaBounds = getSofaBounds(mask, baseSofa.width, baseSofa.height);
-  const leatherBottomY = getLeatherBottomY(
-    baseSofa,
-    mask,
-    baseSofa.width,
-    baseSofa.height,
-  );
+  const sofaBottomY = getSofaBottomY(baseSofa);
   const sourceColor = getSourceLeatherColor(baseSofa, mask);
   console.log(
     `  Source leather (cognac on photo): RGB(${sourceColor.r}, ${sourceColor.g}, ${sourceColor.b})`,
@@ -530,7 +544,9 @@ export async function main(argv = process.argv) {
   console.log(
     `  Sofa bounds: ${sofaBounds.width}x${sofaBounds.height} at (${sofaBounds.minX},${sofaBounds.minY})`,
   );
-  console.log(`  Recolor stops above floor shadow (y <= ${leatherBottomY})`);
+  console.log(
+    `  Upholstery only; floor excluded below y=${sofaBottomY - FLOOR_MARGIN_PX} (sofa bottom y=${sofaBottomY})`,
+  );
 
   if (cli.mode === 'one') {
     const swPath = resolveSwatchArg(cli.swatchFile);
@@ -543,11 +559,11 @@ export async function main(argv = process.argv) {
       baseSofa,
       mask,
       sourceColor,
-      leatherBottomY,
+      sofaBottomY,
       sofaBounds,
     );
     console.log(
-      `  ${basename(swPath)} → target RGB(${targetColor.r}, ${targetColor.g}, ${targetColor.b})`,
+      `  ${basename(swPath)} → preview RGB(${targetColor.r}, ${targetColor.g}, ${targetColor.b})`,
     );
     console.log(`\nDone. 1 PNG: ${outPath}`);
     console.log('Run all swatches: npm run render');
@@ -566,7 +582,7 @@ export async function main(argv = process.argv) {
       baseSofa,
       mask,
       sourceColor,
-      leatherBottomY,
+      sofaBottomY,
       sofaBounds,
     );
     console.log(
