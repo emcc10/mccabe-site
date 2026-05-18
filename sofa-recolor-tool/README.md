@@ -1,10 +1,12 @@
 # Sofa Recolor Tool
 
-Maps sofa **fold structure** onto each swatch’s **brightness range**, then applies swatch **color only** (no brown bleed in shadows).
+## How it works
 
-## Source
+1. **Overall swatch color** — average of every pixel on the full uploaded JPG (highlights, midtones, shadows included), not a center crop spot
+2. **Sofa unchanged structure** — each pixel keeps its original **lightness** (folds, seams, highlights, shadows)
+3. **Swatch color applied** — LAB Color mode: sofa L + overall swatch a/b
 
-Only `input/swatches/*.jpg` — one file → one render.
+One swatch file → one overall color → one render.
 
 ## Commands
 
