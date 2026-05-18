@@ -1,5 +1,5 @@
 /**
- * Photographic leather recolor — uniform swatch LAB a/b + original sofa L; no per-pixel chroma. No AI.
+ * Photographic leather recolor — swatch H/S + original sofa L (HSL); no cognac bleed in midtones. No AI.
  */
 import AdmZip from 'adm-zip';
 import { mkdirSync, readdirSync, existsSync, writeFileSync } from 'fs';
@@ -19,11 +19,14 @@ const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 
 const BG_THRESH = 235;
 const FLOOR_MARGIN_PX = 18;
-const SWATCH_BLUR_PX = 16;
-const HIGHLIGHT_LAB_L = 82;
-const HIGHLIGHT_ORIGINAL_BLEND = 0.35;
-const SEAM_LAB_L = 18;
+const SWATCH_CENTER_CROP = 0.35;
+const SWATCH_SAMPLE_MIN_L = 0.18;
+const SWATCH_SAT_SCALE = 0.9;
+const SEAM_HSL_L = 0.12;
+const HIGHLIGHT_HSL_L = 0.82;
+const HIGHLIGHT_ORIGINAL_BLEND = 0.2;
 const MASK_FEATHER_SIGMA = 0.7;
+const DEBUG_CHIP_SIZE = 200;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
@@ -236,20 +239,20 @@ export async function saveImage(data, path, width, height) {
 }
 
 /**
- * One smooth swatch color: center 40% crop, heavy blur, median LAB (not per-pixel texture).
+ * Center 35% crop, median RGB (excludes shadow/fold + white).
  */
-export async function getSwatchLabStats(swatchPath) {
+export async function getSwatchTargetRgb(swatchPath) {
   const meta = await sharp(swatchPath).metadata();
   const width = meta.width;
   const height = meta.height;
-  const x0 = Math.floor(width * 0.3);
-  const y0 = Math.floor(height * 0.3);
-  const cw = Math.max(1, Math.ceil(width * 0.7) - x0);
-  const ch = Math.max(1, Math.ceil(height * 0.7) - y0);
+  const margin = (1 - SWATCH_CENTER_CROP) / 2;
+  const x0 = Math.floor(width * margin);
+  const y0 = Math.floor(height * margin);
+  const cw = Math.max(1, Math.floor(width * SWATCH_CENTER_CROP));
+  const ch = Math.max(1, Math.floor(height * SWATCH_CENTER_CROP));
 
   const { data, info } = await sharp(swatchPath)
     .extract({ left: x0, top: y0, width: cw, height: ch })
-    .blur(SWATCH_BLUR_PX)
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -257,8 +260,8 @@ export async function getSwatchLabStats(swatchPath) {
   const channels = info.channels;
   const w = info.width;
   const h = info.height;
-  const ls = [];
-  const as = [];
+  const rs = [];
+  const gs = [];
   const bs = [];
 
   for (let y = 0; y < h; y++) {
@@ -270,22 +273,39 @@ export async function getSwatchLabStats(swatchPath) {
       const a = channels === 4 ? data[i + 3] : 255;
       if (a < 20) continue;
       if (isNearWhite(r, g, b)) continue;
-      const lab = rgbToLab(r, g, b);
-      ls.push(lab.L);
-      as.push(lab.a);
-      bs.push(lab.b);
+      const { l } = rgbToHsl(r, g, b);
+      if (l < SWATCH_SAMPLE_MIN_L) continue;
+      if (l > 0.95) continue;
+      rs.push(r);
+      gs.push(g);
+      bs.push(b);
     }
   }
 
-  if (!ls.length) {
+  if (!rs.length) {
     throw new Error(`No usable swatch pixels in center crop: ${swatchPath}`);
   }
 
   return {
-    meanL: medianOf(ls),
-    meanA: medianOf(as),
-    meanB: medianOf(bs),
+    r: Math.round(medianOf(rs)),
+    g: Math.round(medianOf(gs)),
+    b: Math.round(medianOf(bs)),
   };
+}
+
+export async function saveDebugColorChip(swatchName, r, g, b) {
+  const path = join(OUTPUT_DIR, `DEBUG-${swatchName}-target-color.png`);
+  await sharp({
+    create: {
+      width: DEBUG_CHIP_SIZE,
+      height: DEBUG_CHIP_SIZE,
+      channels: 3,
+      background: { r, g, b },
+    },
+  })
+    .png()
+    .toFile(path);
+  return path;
 }
 
 
@@ -421,19 +441,20 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * Uniform swatch a/b + original sofa L only (no per-pixel chroma variation).
+ * HSL hue replace: swatch H/S, original L; no original hue in midtones.
  */
 export function recolorSofa(
   baseImage,
   mask,
-  swatchLab,
+  swatchRgb,
   sofaBottomY,
   _sofaBounds = null,
 ) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
-  const targetA = swatchLab.meanA;
-  const targetB = swatchLab.meanB;
+  const swatchHsl = rgbToHsl(swatchRgb.r, swatchRgb.g, swatchRgb.b);
+  const finalH = swatchHsl.h;
+  const finalS = swatchHsl.s * SWATCH_SAT_SCALE;
   const yFloor = sofaBottomY - FLOOR_MARGIN_PX;
   const yFloorAmbient = sofaBottomY - 45;
 
@@ -452,14 +473,14 @@ export function recolorSofa(
 
       if (y > yFloorAmbient && isFloorAmbientPixel(oR, oG, oB)) continue;
 
-      const { L: origL } = rgbToLab(oR, oG, oB);
+      const baseHsl = rgbToHsl(oR, oG, oB);
 
-      if (origL < SEAM_LAB_L) continue;
+      if (baseHsl.l < SEAM_HSL_L) continue;
 
-      const [nR, nG, nB] = labToRgb(origL, targetA, targetB);
+      const [nR, nG, nB] = hslToRgb(finalH, finalS, baseHsl.l);
 
       let t = maskW;
-      if (origL > HIGHLIGHT_LAB_L) {
+      if (baseHsl.l > HIGHLIGHT_HSL_L) {
         t *= 1 - HIGHLIGHT_ORIGINAL_BLEND;
       }
 
@@ -482,31 +503,38 @@ export async function processSwatch(
   sofaBounds,
 ) {
   const swatchName = basename(swatchPath, extname(swatchPath));
-  const swatchLab = await getSwatchLabStats(swatchPath);
+  const targetRgb = await getSwatchTargetRgb(swatchPath);
+  const targetHsl = rgbToHsl(targetRgb.r, targetRgb.g, targetRgb.b);
   console.log({
     swatchName,
-    meanLAB: [
-      Math.round(swatchLab.meanL * 100) / 100,
-      Math.round(swatchLab.meanA * 100) / 100,
-      Math.round(swatchLab.meanB * 100) / 100,
+    targetRGB: [targetRgb.r, targetRgb.g, targetRgb.b],
+    targetHSL: [
+      Math.round(targetHsl.h * 1000) / 1000,
+      Math.round(targetHsl.s * 1000) / 1000,
+      Math.round(targetHsl.l * 1000) / 1000,
     ],
   });
+
+  const debugPath = await saveDebugColorChip(
+    swatchName,
+    targetRgb.r,
+    targetRgb.g,
+    targetRgb.b,
+  );
+
   const outData = recolorSofa(
     baseSofa,
     mask,
-    swatchLab,
+    targetRgb,
     sofaBottomY,
     sofaBounds,
   );
-  const outName = `${basename(swatchPath, extname(swatchPath))}.png`;
+  const outName = `${swatchName}.png`;
   const outPath = join(OUTPUT_DIR, outName);
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
 
-  const [r, g, b] = labToRgb(swatchLab.meanL, swatchLab.meanA, swatchLab.meanB);
-  const targetColor = { r, g, b };
-
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${swatchName}\nmethod: lab-uniform-luminance\ntargetLab: ${swatchLab.meanL.toFixed(2)},${swatchLab.meanA.toFixed(2)},${swatchLab.meanB.toFixed(2)}\n`;
+  const stamp = `${new Date().toISOString()}\n${swatchName}\nmethod: hsl-hue-replace\ntargetRGB: ${targetRgb.r},${targetRgb.g},${targetRgb.b}\ndebugChip: ${basename(debugPath)}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   try {
     writeFileSync(stampPath, stamp);
@@ -514,13 +542,16 @@ export async function processSwatch(
     /* OneDrive may lock _last-render.txt */
   }
 
-  return { outPath, targetColor, swatchLab };
+  return { outPath, targetColor: targetRgb, debugPath };
 }
 
 export function zipOutputs(outputDir, zipPath) {
   const zip = new AdmZip();
   const files = readdirSync(outputDir).filter(
-    (f) => f.toLowerCase().endsWith('.png') && f !== 'sofa-renders.zip',
+    (f) =>
+      f.toLowerCase().endsWith('.png') &&
+      f !== 'sofa-renders.zip' &&
+      !f.startsWith('DEBUG-'),
   );
   if (!files.length) {
     throw new Error(`No PNG files to zip in ${outputDir}`);
