@@ -1,5 +1,5 @@
 /**
- * LAB luminance-map recolor — sofa fold structure → swatch brightness range; swatch chroma only.
+ * LAB recolor — preserves sofa lighting contrast; shifts level/chroma to swatch.
  */
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
@@ -38,11 +38,11 @@ const SOFA_L_PCT_LO = 0.03;
 const SOFA_L_PCT_HI = 0.97;
 const SWATCH_L_PCT_DARK = 0.08;
 const SWATCH_L_PCT_BRIGHT = 0.92;
-const CHROMA_TEXTURE = 0.08;
-const HIGHLIGHT_L_START = 88;
-const HIGHLIGHT_L_END = 97;
-const HIGHLIGHT_AB_DAMP = 0.35;
-const BLACK_LEATHER_L_BRIGHT = 22;
+const CHROMA_TEXTURE = 0.06;
+const MIN_CONTRAST_KEEP = 0.72;
+const HIGHLIGHT_L_START = 92;
+const HIGHLIGHT_L_END = 99;
+const HIGHLIGHT_AB_DAMP = 0.18;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
@@ -212,34 +212,29 @@ function morphologyDilate(src, width, height, radius) {
   return out;
 }
 
-/** Map sofa pixel L onto swatch leather brightness range. */
-export function mapSofaLToSwatchL(sofaL, sofaRange, profile) {
-  const span = Math.max(0.5, sofaRange.L_max - sofaRange.L_min);
-  const t = clamp((sofaL - sofaRange.L_min) / span, 0, 1);
-  let L = profile.L_dark + t * (profile.L_bright - profile.L_dark);
-
-  if (profile.isDarkLeather && t < 0.18) {
-    const floor = 1.5 + (t / 0.18) * profile.L_dark * 0.35;
-    L = Math.min(L, floor);
-  }
-
-  return clamp(L, 0, 100);
-}
-
 /**
- * Luminance map + swatch chroma. Never blends original brown a/b into shadows.
+ * Shift sofa L toward swatch while keeping fold contrast (no min-max crush).
  */
 export function applySwatchMapPixel(baseLab, profile, sofaStats) {
-  const finalL = mapSofaLToSwatchL(baseLab.L, sofaStats, profile);
+  const sofaMid = (sofaStats.L_min + sofaStats.L_max) / 2;
+  const sofaSpan = Math.max(4, sofaStats.L_max - sofaStats.L_min);
+  const swatchMid = profile.lab.L;
+  const swatchSpan = Math.max(4, profile.L_bright - profile.L_dark);
 
-  const finalA = profile.lab.a + (baseLab.a - sofaStats.avgA) * CHROMA_TEXTURE;
-  const finalB = profile.lab.b + (baseLab.b - sofaStats.avgB) * CHROMA_TEXTURE;
+  const spanScale = clamp(swatchSpan / sofaSpan, MIN_CONTRAST_KEEP, 1.05);
+  const finalL = clamp(swatchMid + (baseLab.L - sofaMid) * spanScale, 1, 99);
 
-  const hi = smoothstep(HIGHLIGHT_L_START, HIGHLIGHT_L_END, finalL);
-  const a = hi > 0 ? finalA * (1 - hi * HIGHLIGHT_AB_DAMP) : finalA;
-  const b = hi > 0 ? finalB * (1 - hi * HIGHLIGHT_AB_DAMP) : finalB;
+  let finalA = profile.lab.a + (baseLab.a - sofaStats.avgA) * CHROMA_TEXTURE;
+  let finalB = profile.lab.b + (baseLab.b - sofaStats.avgB) * CHROMA_TEXTURE;
 
-  return labToRgb(finalL, a, b);
+  const hi = smoothstep(HIGHLIGHT_L_START, HIGHLIGHT_L_END, baseLab.L);
+  if (hi > 0) {
+    const k = 1 - hi * HIGHLIGHT_AB_DAMP;
+    finalA *= k;
+    finalB *= k;
+  }
+
+  return labToRgb(finalL, finalA, finalB);
 }
 
 export async function loadImage(path) {
@@ -377,7 +372,6 @@ export async function getSwatchProfile(swatchPath) {
     lab,
     L_dark,
     L_bright,
-    isDarkLeather: L_bright < BLACK_LEATHER_L_BRIGHT,
     sourceFile: basename(resolved),
   };
 }
@@ -541,7 +535,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: LAB luminance map (swatch L range + chroma)');
+  console.log('  method: LAB contrast-preserve (shift level + swatch chroma)');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   const mask = await createUpholsteryMask(baseSofa, maskPath);
