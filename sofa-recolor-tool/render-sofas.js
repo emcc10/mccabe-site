@@ -1,5 +1,5 @@
 /**
- * Safe LAB A/B transfer — color-convert only; L untouched; float RGB 0–1.
+ * Luminance remapping — sofa L-structure + swatch gradient curve (color-convert LAB).
  */
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
@@ -33,13 +33,42 @@ const SWATCH_BLUR_PX = 12;
 const MASK_DILATE_RADIUS = 1;
 const MASK_FEATHER_RADIUS = 0;
 const MASK_APPLY_THRESH = 220;
-/** Max original chroma retained on A/B (90% swatch, 10% base). */
-const AB_ORIGINAL_RETAIN = 0.1;
+
+const LAB_LUT_BINS = 101;
+const SWATCH_L_PCT_LO = 0.05;
+const SWATCH_L_PCT_HI = 0.95;
+const SOFA_L_PCT_LO = 0.02;
+const SOFA_L_PCT_HI = 0.98;
+const BLACK_SWATCH_L_THRESHOLD = 18;
+const BLACK_SHADOW_T_MAX = 0.22;
+const HIGHLIGHT_L_START = 76;
+const HIGHLIGHT_L_END = 94;
+const HIGHLIGHT_CHROMA_REDUCE = 0.72;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
+}
+
+function smoothstep(edge0, edge1, x) {
+  const t = clamp((x - edge0) / (edge1 - edge0), 0, 1);
+  return t * t * (3 - 2 * t);
+}
+
+function percentile(sorted, p) {
+  if (!sorted.length) return 0;
+  const idx = (sorted.length - 1) * p;
+  const lo = Math.floor(idx);
+  const hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
+}
+
+function medianOf(arr) {
+  const s = [...arr].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
 function pixelBrightness(r, g, b) {
@@ -50,13 +79,6 @@ function isNearWhite(r, g, b) {
   return r > BG_THRESH && g > BG_THRESH && b > BG_THRESH;
 }
 
-function medianOf(arr) {
-  const s = [...arr].sort((a, b) => a - b);
-  const m = Math.floor(s.length / 2);
-  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
-}
-
-/** Mask heuristics only — not used for recolor. */
 function rgbToHsl(r, g, b) {
   const rn = r / 255;
   const gn = g / 255;
@@ -173,7 +195,7 @@ function featherMask(mask, width, height, radius) {
   return result;
 }
 
-/** RGB float 0–1 → LAB via color-convert (L 0–100, a/b signed). */
+/** RGB float 0–1 → LAB (L 0–100, signed a/b). */
 export function rgbFloatToLab(rf, gf, bf) {
   const lab = convert.rgb.lab([rf * 255, gf * 255, bf * 255]);
   return { L: lab[0], a: lab[1], b: lab[2] };
@@ -187,6 +209,81 @@ export function labToRgbFloat(L, a, b) {
     g: clamp(g / 255, 0, 1),
     b: clamp(bOut / 255, 0, 1),
   };
+}
+
+/** Fill empty LAB LUT bins by linear interpolation. */
+function finalizeLabLut(rawBins) {
+  const lutA = new Float32Array(LAB_LUT_BINS);
+  const lutB = new Float32Array(LAB_LUT_BINS);
+  const filled = new Uint8Array(LAB_LUT_BINS);
+
+  for (let i = 0; i < LAB_LUT_BINS; i++) {
+    const bin = rawBins[i];
+    if (bin.a.length) {
+      lutA[i] = medianOf(bin.a);
+      lutB[i] = medianOf(bin.b);
+      filled[i] = 1;
+    }
+  }
+
+  let prev = -1;
+  for (let i = 0; i < LAB_LUT_BINS; i++) {
+    if (!filled[i]) continue;
+    if (prev >= 0) {
+      for (let j = prev + 1; j < i; j++) {
+        const t = (j - prev) / (i - prev);
+        lutA[j] = lutA[prev] + (lutA[i] - lutA[prev]) * t;
+        lutB[j] = lutB[prev] + (lutB[i] - lutB[prev]) * t;
+        filled[j] = 1;
+      }
+    }
+    prev = i;
+  }
+
+  if (prev < 0) {
+    lutA.fill(0);
+    lutB.fill(0);
+    return { lutA, lutB };
+  }
+
+  for (let i = 0; i < prev; i++) {
+    lutA[i] = lutA[prev];
+    lutB[i] = lutB[prev];
+  }
+  for (let i = prev + 1; i < LAB_LUT_BINS; i++) {
+    lutA[i] = lutA[prev];
+    lutB[i] = lutB[prev];
+  }
+
+  return { lutA, lutB };
+}
+
+export function sampleSwatchLabAtL(curve, L) {
+  const li = clamp(L, 0, 100);
+  const lo = Math.floor(li);
+  const hi = Math.min(lo + 1, 100);
+  const t = li - lo;
+  return {
+    a: curve.lutA[lo] + (curve.lutA[hi] - curve.lutA[lo]) * t,
+    b: curve.lutB[lo] + (curve.lutB[hi] - curve.lutB[lo]) * t,
+  };
+}
+
+/** Map normalized sofa luminance t → swatch L on brightness curve. */
+export function mapLuminanceToSwatch(t, curve) {
+  const tn = clamp(t, 0, 1);
+  let targetL = curve.L_dark + tn * (curve.L_bright - curve.L_dark);
+
+  if (curve.isBlackLeather) {
+    if (tn < BLACK_SHADOW_T_MAX) {
+      const shadowT = tn / BLACK_SHADOW_T_MAX;
+      const floorL = 1.5 + shadowT * curve.L_dark * 0.12;
+      targetL = Math.min(targetL, floorL);
+    }
+    if (tn < 0.06) targetL = Math.min(targetL, 3);
+  }
+
+  return clamp(targetL, 0, 100);
 }
 
 export async function loadImage(path) {
@@ -227,8 +324,8 @@ export async function saveImage(data, path, width, height, channels = 4) {
   return size;
 }
 
-/** Center 35% crop, blur 12px, median RGB → LAB (color-convert). */
-export async function getSwatchTargetLab(swatchPath) {
+/** Swatch gradient curve: per-L median a/b + brightness range + hue/sat stats. */
+export async function buildSwatchLuminanceCurve(swatchPath) {
   const meta = await sharp(swatchPath).metadata();
   const width = meta.width;
   const height = meta.height;
@@ -246,6 +343,10 @@ export async function getSwatchTargetLab(swatchPath) {
     .toBuffer({ resolveWithObject: true });
 
   const channels = info.channels;
+  const rawBins = Array.from({ length: LAB_LUT_BINS }, () => ({ a: [], b: [] }));
+  const Ls = [];
+  const hues = [];
+  const sats = [];
   const rs = [];
   const gs = [];
   const bs = [];
@@ -256,25 +357,70 @@ export async function getSwatchTargetLab(swatchPath) {
       const r = data[i];
       const g = data[i + 1];
       const b = data[i + 2];
-      const a = channels === 4 ? data[i + 3] : 255;
-      if (a < 20 || isNearWhite(r, g, b)) continue;
+      const alpha = channels === 4 ? data[i + 3] : 255;
+      if (alpha < 20 || isNearWhite(r, g, b)) continue;
+
       rs.push(r);
       gs.push(g);
       bs.push(b);
+      const hsl = rgbToHsl(r, g, b);
+      hues.push(hsl.h);
+      sats.push(hsl.s);
+
+      const lab = rgbFloatToLab(r / 255, g / 255, b / 255);
+      Ls.push(lab.L);
+      const bin = clamp(Math.round(lab.L), 0, 100);
+      rawBins[bin].a.push(lab.a);
+      rawBins[bin].b.push(lab.b);
     }
   }
 
-  if (!rs.length) throw new Error(`No swatch pixels: ${swatchPath}`);
+  if (!Ls.length) throw new Error(`No swatch pixels: ${swatchPath}`);
 
-  const r = Math.round(medianOf(rs));
-  const g = Math.round(medianOf(gs));
-  const b = Math.round(medianOf(bs));
-  const rf = r / 255;
-  const gf = g / 255;
-  const bf = b / 255;
-  const lab = rgbFloatToLab(rf, gf, bf);
+  Ls.sort((a, b) => a - b);
+  const { lutA, lutB } = finalizeLabLut(rawBins);
+  const L_dark = percentile(Ls, SWATCH_L_PCT_LO);
+  const L_core = percentile(Ls, 0.5);
+  const L_bright = percentile(Ls, SWATCH_L_PCT_HI);
+  const medianL = percentile(Ls, 0.5);
 
-  return { r, g, b, lab };
+  return {
+    lutA,
+    lutB,
+    L_dark,
+    L_core,
+    L_bright,
+    medianL,
+    medianHue: medianOf(hues),
+    medianSat: medianOf(sats),
+    isBlackLeather:
+      L_bright < BLACK_SWATCH_L_THRESHOLD + 2 && medianOf(sats) < 0.12,
+    medianRGB: [Math.round(medianOf(rs)), Math.round(medianOf(gs)), Math.round(medianOf(bs))],
+  };
+}
+
+export function computeSofaLRange(baseImage, mask, sofaBottomY) {
+  const { data, width, height, channels } = baseImage;
+  const yFloor = sofaBottomY - FLOOR_MARGIN_PX;
+  const Ls = [];
+
+  for (let y = 0; y < height; y++) {
+    if (y > yFloor) continue;
+    for (let x = 0; x < width; x++) {
+      const j = y * width + x;
+      if (mask[j] < MASK_APPLY_THRESH) continue;
+      const p = j * channels;
+      const lab = rgbFloatToLab(data[p] / 255, data[p + 1] / 255, data[p + 2] / 255);
+      Ls.push(lab.L);
+    }
+  }
+
+  if (!Ls.length) return { min: 5, max: 85 };
+  Ls.sort((a, b) => a - b);
+  return {
+    min: percentile(Ls, SOFA_L_PCT_LO),
+    max: percentile(Ls, SOFA_L_PCT_HI),
+  };
 }
 
 export function getSofaBottomY(baseImage) {
@@ -329,14 +475,13 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
 }
 
 /**
- * RGB → LAB → blend A/B only → RGB. L never modified.
+ * Luminance gradient-map: sofa L-structure → swatch brightness curve → LAB color.
  */
-export function recolorSofa(baseImage, mask, targetLab, sofaBottomY) {
+export function recolorSofa(baseImage, mask, curve, sofaLRange, sofaBottomY) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
   const yFloor = sofaBottomY - FLOOR_MARGIN_PX;
-  const tA = targetLab.a;
-  const tB = targetLab.b;
+  const span = Math.max(1, sofaLRange.max - sofaLRange.min);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -345,22 +490,23 @@ export function recolorSofa(baseImage, mask, targetLab, sofaBottomY) {
       if (y > yFloor) continue;
 
       const p = j * channels;
-      const oR = data[p];
-      const oG = data[p + 1];
-      const oB = data[p + 2];
+      const rf = data[p] / 255;
+      const gf = data[p + 1] / 255;
+      const bf = data[p + 2] / 255;
 
-      const rf = oR / 255;
-      const gf = oG / 255;
-      const bf = oB / 255;
+      const baseLab = rgbFloatToLab(rf, gf, bf);
+      const sofaL = baseLab.L;
 
-      const base = rgbFloatToLab(rf, gf, bf);
+      const t = (sofaL - sofaLRange.min) / span;
+      const targetL = mapLuminanceToSwatch(t, curve);
+      const { a: swA, b: swB } = sampleSwatchLabAtL(curve, targetL);
 
-      const finalL = base.L;
-      // Replace chroma with swatch; keep at most 10% original A/B for texture.
-      const finalA = tA + (base.a - tA) * AB_ORIGINAL_RETAIN;
-      const finalB = tB + (base.b - tB) * AB_ORIGINAL_RETAIN;
+      const hiMix = smoothstep(HIGHLIGHT_L_START, HIGHLIGHT_L_END, sofaL);
+      const chromaKeep = 1 - hiMix * HIGHLIGHT_CHROMA_REDUCE;
+      const finalA = swA * chromaKeep;
+      const finalB = swB * chromaKeep;
 
-      const rec = labToRgbFloat(finalL, finalA, finalB);
+      const rec = labToRgbFloat(targetL, finalA, finalB);
       const mw = mask[j] / 255;
 
       const nR = rf + (rec.r - rf) * mw;
@@ -377,24 +523,25 @@ export function recolorSofa(baseImage, mask, targetLab, sofaBottomY) {
   return out;
 }
 
-export async function processSwatch(swatchPath, baseSofa, mask, sofaBottomY) {
+export async function processSwatch(swatchPath, baseSofa, mask, sofaLRange, sofaBottomY) {
   const swatchName = basename(swatchPath, extname(swatchPath));
-  const target = await getSwatchTargetLab(swatchPath);
+  const curve = await buildSwatchLuminanceCurve(swatchPath);
   console.log({
     swatchName,
-    targetRGB: [target.r, target.g, target.b],
-    targetLAB: [
-      Math.round(target.lab.L * 100) / 100,
-      Math.round(target.lab.a * 100) / 100,
-      Math.round(target.lab.b * 100) / 100,
-    ],
+    medianRGB: curve.medianRGB,
+    medianHue: Math.round(curve.medianHue * 360),
+    medianSat: Math.round(curve.medianSat * 100) / 100,
+    L_dark: Math.round(curve.L_dark * 10) / 10,
+    L_core: Math.round(curve.L_core * 10) / 10,
+    L_bright: Math.round(curve.L_bright * 10) / 10,
+    blackLeather: curve.isBlackLeather,
   });
 
-  const outData = recolorSofa(baseSofa, mask, target.lab, sofaBottomY);
+  const outData = recolorSofa(baseSofa, mask, curve, sofaLRange, sofaBottomY);
   const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
   const bytes = await saveImage(outData, outPath, baseSofa.width, baseSofa.height, baseSofa.channels);
   console.log(`  wrote ${swatchName}.png (${Math.round(bytes / 1024)} KB)`);
-  return { outPath, target };
+  return { outPath, curve };
 }
 
 export function zipOutputs(outputDir, zipPath) {
@@ -454,13 +601,19 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: lab-ab-transfer (color-convert)');
+  console.log('  method: luminance gradient-map (LAB)');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   if (maskPath) console.log(`  mask: ${maskPath}`);
   const mask = await createUpholsteryMask(baseSofa, maskPath);
   const sofaBottomY = getSofaBottomY(baseSofa);
-  console.log(`  floor cut y=${sofaBottomY - FLOOR_MARGIN_PX} (bottom y=${sofaBottomY})`);
+  const sofaLRange = computeSofaLRange(baseSofa, mask, sofaBottomY);
+  console.log(
+    `  floor cut y=${sofaBottomY - FLOOR_MARGIN_PX} (bottom y=${sofaBottomY})`,
+  );
+  console.log(
+    `  sofa L range: ${Math.round(sofaLRange.min * 10) / 10} – ${Math.round(sofaLRange.max * 10) / 10}`,
+  );
 
   if (cli.mode === 'one') {
     const swPath = resolveSwatchArg(cli.swatchFile);
@@ -468,7 +621,7 @@ export async function main(argv = process.argv) {
       console.error(`Swatch not found: ${cli.swatchFile}`);
       process.exit(1);
     }
-    const { outPath } = await processSwatch(swPath, baseSofa, mask, sofaBottomY);
+    const { outPath } = await processSwatch(swPath, baseSofa, mask, sofaLRange, sofaBottomY);
     console.log(`\nDone: ${outPath}`);
     return;
   }
@@ -478,7 +631,7 @@ export async function main(argv = process.argv) {
     .sort((a, b) => a.localeCompare(b));
 
   for (const file of swatches) {
-    await processSwatch(join(SWATCH_DIR, file), baseSofa, mask, sofaBottomY);
+    await processSwatch(join(SWATCH_DIR, file), baseSofa, mask, sofaLRange, sofaBottomY);
   }
 
   const onDisk = readdirSync(OUTPUT_DIR).filter(

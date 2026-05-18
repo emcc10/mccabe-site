@@ -1,6 +1,6 @@
 # Sofa Recolor Tool
 
-Safe **LAB A/B transfer** via [color-convert](https://www.npmjs.com/package/color-convert) (no custom color math). Original **L (luminance) is never modified**.
+**Luminance gradient-map** recolor: sofa folds/highlights/shadows drive mapping; swatch controls hue, saturation, and brightness curve.
 
 ## Commands
 
@@ -11,14 +11,13 @@ npm run preview
 npm run render
 ```
 
-## Pipeline (`lab-ab-transfer`)
+## Pipeline
 
-1. Upholstery mask → dilate 1px (no feather)
-2. Per masked pixel (float RGB 0–1):
-   - `RGB → LAB` (color-convert: L 0–100, signed a/b)
-   - `finalL = baseL` (unchanged)
-   - `finalA/B = lerp(target, base, 0.10)` — replace chroma; max 10% original
-   - `LAB → RGB` → clip 0–1 → uint8
-3. Swatch target: center 35% crop, blur 12px, **median RGB** → LAB
+1. **Leather mask** — upholstery only (no bg, legs, floor bleed)
+2. **Sofa L range** — p2–p98 LAB L on masked leather
+3. **Swatch curve** — center crop, per-L median a/b LUT + L_dark / L_core / L_bright (p5/p50/p95)
+4. **Gradient map** — normalize sofa L → map to swatch L curve → sample swatch chroma at that L
+5. **Highlights** — reduce a/b above L≈76 (speculars stay soft, not neon)
+6. **Black leathers** — median L &lt; 18: deepest folds pushed toward true black
 
-No HSL recolor, no multiply/overlay, no homemade LAB.
+Uses [color-convert](https://www.npmjs.com/package/color-convert) for RGB↔LAB only.
