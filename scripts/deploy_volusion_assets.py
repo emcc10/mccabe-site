@@ -121,6 +121,18 @@ def main() -> int:
                         critical_fail += 1
                     elif local not in SKIP_OVER_CAP:
                         optional_fail += 1
+
+            plp_photos = sorted(
+                glob.glob("vspfiles/photos/*.jpg")
+                + glob.glob("vspfiles/photos/*.jpeg")
+                + glob.glob("vspfiles/photos/*.png")
+            )
+            if plp_photos:
+                print(f"::notice::PLP_PHOTOS uploading {len(plp_photos)} file(s)", flush=True)
+            for local in plp_photos:
+                ok = _upload_one(sftp, local)
+                if not ok:
+                    optional_fail += 1
         finally:
             sftp.close()
     finally:

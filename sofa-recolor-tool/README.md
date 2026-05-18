@@ -1,14 +1,10 @@
 # Sofa Recolor Tool
 
-**LAB color mode** (like Photoshop Color): keeps sofa lighting (L), applies true swatch color (a/b).
+Maps sofa **fold structure** onto each swatch’s **brightness range**, then applies swatch **color only** (no brown bleed in shadows).
 
-## Source of truth
+## Source
 
-Only `input/swatches/*.jpg` — one file → one median core tone → one render.
-
-## Why not RGB channel balance?
-
-Scaling brown sofa RGB cannot produce navy, gray, or cream — ratios leave warm undertones. LAB separates lightness from color correctly.
+Only `input/swatches/*.jpg` — one file → one render.
 
 ## Commands
 
