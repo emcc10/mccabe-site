@@ -267,7 +267,8 @@
       .forEach(function (img) {
         if (!img.closest(".v-product-grid") || img.closest("#v65-product-related")) return;
 
-        img.style.setProperty("background", "transparent", "important");
+        img.style.setProperty("background", PLP_MAT, "important");
+        img.style.setProperty("background-color", PLP_MAT, "important");
         img.style.setProperty("border", "0", "important");
         img.style.setProperty("box-shadow", "none", "important");
 
@@ -335,6 +336,8 @@
     } catch (eAttr) {}
 
     clearInnerThumbChrome(img);
+    img.style.setProperty("background", PLP_MAT, "important");
+    img.style.setProperty("background-color", PLP_MAT, "important");
     img.style.setProperty("display", "block", "important");
     img.style.setProperty("width", "auto", "important");
     img.style.setProperty("max-width", "100%", "important");
