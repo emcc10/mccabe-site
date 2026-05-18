@@ -224,7 +224,7 @@ export async function saveImage(data, path, width, height) {
 }
 
 /**
- * Center 50% crop → median*0.75 + average*0.25 (RGB, no Lab — avoids green cast).
+ * Center 50% crop → Lab median of mid-lightness face pixels (flat leather tone).
  */
 export async function getSwatchTargetColor(swatchPath) {
   const { data, width, height, channels } = await loadImage(swatchPath);
@@ -233,9 +233,7 @@ export async function getSwatchTargetColor(swatchPath) {
   const x1 = Math.ceil(width * 0.75);
   const y1 = Math.ceil(height * 0.75);
 
-  const rs = [];
-  const gs = [];
-  const bs = [];
+  const samples = [];
 
   for (let y = y0; y < y1; y++) {
     for (let x = x0; x < x1; x++) {
@@ -246,23 +244,26 @@ export async function getSwatchTargetColor(swatchPath) {
       const a = channels === 4 ? data[i + 3] : 255;
       if (a < 20) continue;
       if (isNearWhite(r, g, b)) continue;
-      rs.push(r);
-      gs.push(g);
-      bs.push(b);
+      samples.push(rgbToLab(r, g, b));
     }
   }
 
-  if (!rs.length) {
+  if (!samples.length) {
     throw new Error(`No usable swatch pixels in center crop: ${swatchPath}`);
   }
 
-  const avg = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
+  const byL = [...samples].sort((a, b) => a.L - b.L);
+  const p30 = byL[Math.floor(byL.length * 0.3)].L;
+  const p70 = byL[Math.floor(byL.length * 0.7)].L;
+  const face = samples.filter((s) => s.L >= p30 && s.L <= p70);
+  const use = face.length > 20 ? face : samples;
 
-  return {
-    r: Math.round(medianOf(rs) * 0.75 + avg(rs) * 0.25),
-    g: Math.round(medianOf(gs) * 0.75 + avg(gs) * 0.25),
-    b: Math.round(medianOf(bs) * 0.75 + avg(bs) * 0.25),
-  };
+  const [r, g, b] = labToRgb(
+    medianOf(use.map((s) => s.L)),
+    medianOf(use.map((s) => s.a)),
+    medianOf(use.map((s) => s.b)),
+  );
+  return { r, g, b };
 }
 
 
@@ -397,9 +398,13 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
   };
 }
 
+function labShiftStrength(labL) {
+  if (labL >= 16) return 1;
+  return clamp((labL - 5) / 11, 0, 1);
+}
+
 /**
- * Saturated (Currant, Africa, Twilight): rotate hue + anchor lightness.
- * Low-sat (Stone, Silk): snap to target hue/sat — rotating cognac hue goes through green.
+ * Lab anchor: each pixel keeps its offset from cognac → mapped to swatch (real folds/highlights).
  */
 export function recolorSofa(
   baseImage,
@@ -412,12 +417,11 @@ export function recolorSofa(
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
 
-  const srcHsl = rgbToHsl(sourceColor.r, sourceColor.g, sourceColor.b);
-  const tgtHsl = rgbToHsl(targetColor.r, targetColor.g, targetColor.b);
-  const dHue = hueDelta(srcHsl.h, tgtHsl.h);
-  const dLight = tgtHsl.l - srcHsl.l;
-  const srcSat = Math.max(srcHsl.s, 0.08);
-  const neutralTarget = tgtHsl.s < 0.32;
+  const srcLab = rgbToLab(sourceColor.r, sourceColor.g, sourceColor.b);
+  const tgtLab = rgbToLab(targetColor.r, targetColor.g, targetColor.b);
+  const srcChroma = Math.hypot(srcLab.a, srcLab.b);
+  const tgtChroma = Math.hypot(tgtLab.a, tgtLab.b);
+  const chromaK = clamp(tgtChroma / Math.max(srcChroma, 5), 0.45, 1);
 
   const yCut =
     leatherBottomY == null ? height - 1 : Math.min(height - 1, leatherBottomY);
@@ -436,19 +440,23 @@ export function recolorSofa(
 
       if (!shouldRecolorPixel(oR, oG, oB)) continue;
 
-      const hsl = rgbToHsl(oR, oG, oB);
-      const blend = clamp(hsl.s / srcSat, 0, 1.2);
-      let nh;
-      let ns;
-      if (neutralTarget) {
-        nh = tgtHsl.h;
-        ns = clamp(tgtHsl.s + (hsl.s - tgtHsl.s) * 0.06, 0, 1);
-      } else {
-        nh = hsl.h + dHue;
-        ns = clamp(hsl.s + (tgtHsl.s - srcHsl.s) * blend, 0, 1);
+      const lab = rgbToLab(oR, oG, oB);
+      const s = labShiftStrength(lab.L);
+
+      const fullL = tgtLab.L + (lab.L - srcLab.L);
+      let fullA = srcLab.a + (tgtLab.a - srcLab.a) * chromaK + (lab.a - srcLab.a);
+      let fullB = srcLab.b + (tgtLab.b - srcLab.b) * chromaK + (lab.b - srcLab.b);
+
+      if (lab.L > 50) {
+        fullB -= (tgtLab.b - srcLab.b) * chromaK * 0.4;
+        fullA -= (tgtLab.a - srcLab.a) * chromaK * 0.08;
       }
-      const nl = clamp(hsl.l + dLight * blend, 0, 1);
-      const [nR, nG, nB] = hslToRgb(nh, ns, nl);
+
+      const newL = lab.L + (fullL - lab.L) * s;
+      const newA = lab.a + (fullA - lab.a) * s;
+      const newB = lab.b + (fullB - lab.b) * s;
+
+      const [nR, nG, nB] = labToRgb(newL, newA, newB);
 
       out[p] = nR;
       out[p + 1] = nG;
@@ -482,11 +490,7 @@ export async function processSwatch(
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const mode =
-    rgbToHsl(targetColor.r, targetColor.g, targetColor.b).s < 0.32
-      ? 'hsl-neutral-snap'
-      : 'hsl-saturated';
-  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: ${mode}\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
+  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: lab-anchor-v4\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   writeFileSync(stampPath, stamp);
 
