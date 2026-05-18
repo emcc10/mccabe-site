@@ -44,8 +44,8 @@ def _upload_one(sftp, local: str) -> bool:
     if local.replace("\\", "/") in {p.replace("\\", "/") for p in SKIP_OVER_CAP}:
         if want > VOLUSION_JS_CAP:
             print(
-                f"::warning::SKIP_CAP {local!r} size={want} exceeds Volusion "
-                f"{VOLUSION_JS_CAP}-byte SFTP limit for large JS",
+                f"::notice::SKIP_CAP {local!r} size={want} — over Volusion "
+                f"{VOLUSION_JS_CAP}-byte SFTP limit (expected; not uploaded)",
                 flush=True,
             )
             return True

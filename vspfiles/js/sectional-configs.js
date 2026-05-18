@@ -968,3 +968,17 @@
 
   console.log("sectional-configs", "registry-merge-v2", window.MTL_SECTIONAL_CONFIGS);
 })();
+
+/* MC_SECTIONAL_CONFIGS_PLP_BOOT_20260520 — category pages load this file; pulls enforcer (SFTP-safe). */
+(function (w, d) {
+  function loadPlpEnforcer() {
+    if (w.__MC_PLP_ENFORCER__ || w.__MC_PLP_ENFORCER_LOADING__) return;
+    w.__MC_PLP_ENFORCER_LOADING__ = 1;
+    var s = d.createElement("script");
+    s.src = "/v/vspfiles/js/mc-plp-enforcer.js?m=" + Date.now();
+    (d.head || d.documentElement).appendChild(s);
+  }
+  loadPlpEnforcer();
+  d.addEventListener("DOMContentLoaded", loadPlpEnforcer);
+  w.addEventListener("load", loadPlpEnforcer);
+})(window, document);

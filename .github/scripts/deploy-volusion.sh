@@ -106,12 +106,12 @@ put_primary "vspfiles/js/mc-plp-enforcer.js" "mc-plp-enforcer" \
   "/vspfiles/js/mc-plp-enforcer.js" \
   "vspfiles/js/mc-plp-enforcer.js"
 
-put_primary "vspfiles/templates/266/js/min/template.min.js" "template.min" \
-  "/vspfiles/templates/266/js/min/template.min.js" \
-  "vspfiles/templates/266/js/min/template.min.js"
+# template.min.js + mtl-sectional-renderer.js exceed Volusion 128 KiB SFTP cap — SKIP_CAP in Paramiko (not an error).
+echo "=== skip template.min.js + mtl-sectional-renderer.js (>128 KiB; use Volusion File Manager or GitHub for renderer) ==="
 
-# mtl-sectional-renderer.js is ~175KB; Volusion SFTP truncates /vspfiles/js/*.js at 128 KiB — skip.
-echo "=== skip mtl-sectional-renderer.js (175KB > Volusion 128 KiB SFTP cap) ==="
+put_primary "vspfiles/js/sectional-configs.js" "sectional-configs" \
+  "/vspfiles/js/sectional-configs.js" \
+  "vspfiles/js/sectional-configs.js"
 
 put_primary "vspfiles/js/mc-site-fix.js" "mc-site-fix" \
   "/vspfiles/js/mc-site-fix.js" \
@@ -162,5 +162,8 @@ verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/
 
 echo ""
 echo "Deploy finished (~2–4 min). Hard-refresh category 177 (Ctrl+Shift+R)."
-echo "If still broken: Cloudflare Purge → Purge by URL →"
-echo "  /v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-leather-idempotent-v20"
+echo "SKIP_CAP on template.min / mtl-sectional-renderer is normal (128 KiB Volusion limit)."
+echo "PLP fix: design-toolkit.min.js OR sectional-configs.js (MC_SECTIONAL_CONFIGS_PLP_BOOT_20260520)."
+echo "If still broken, Cloudflare Purge by URL:"
+echo "  /v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"
+echo "  /v/vspfiles/templates/266/js/min/design-toolkit.min.js"
