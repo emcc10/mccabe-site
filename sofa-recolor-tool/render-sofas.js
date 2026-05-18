@@ -165,9 +165,12 @@ function isProtectedShadowOrGray(r, g, b) {
   return false;
 }
 
+/** Dark wood feet only — not deep leather creases (those stay warm/orange if skipped). */
 function isFootPixel(r, g, b) {
   const bright = pixelBrightness(r, g, b);
-  return bright < FOOT_BRIGHTNESS && Math.max(r, g, b) < 72;
+  if (bright >= 55) return false;
+  if (isWarmLeather(r, g, b)) return false;
+  return Math.max(r, g, b) < 80;
 }
 
 /** Every masked leather pixel — including crease shadows (skipping them caused cognac fringes). */
@@ -394,9 +397,7 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
   };
 }
 
-/**
- * Same HSL mapping as Bali-Currant for every swatch. Neutrals snap toward target hue/sat.
- */
+/** Bali-Currant HSL path for every swatch (same code path that looks correct). */
 export function recolorSofa(
   baseImage,
   mask,
@@ -412,7 +413,6 @@ export function recolorSofa(
   const tgtHsl = rgbToHsl(targetColor.r, targetColor.g, targetColor.b);
   const dHue = hueDelta(srcHsl.h, tgtHsl.h);
   const srcSat = Math.max(srcHsl.s, 0.08);
-  const neutralTarget = tgtHsl.s < 0.18;
   const yCut =
     leatherBottomY == null ? height - 1 : Math.min(height - 1, leatherBottomY);
 
@@ -431,18 +431,9 @@ export function recolorSofa(
       if (!shouldRecolorPixel(oR, oG, oB)) continue;
 
       const hsl = rgbToHsl(oR, oG, oB);
-      let nh;
-      let ns;
-
-      if (neutralTarget) {
-        nh = tgtHsl.h;
-        ns = clamp(tgtHsl.s + (hsl.s - tgtHsl.s) * 0.06, 0, 1);
-      } else {
-        nh = hsl.h + dHue;
-        const satBlend = clamp(hsl.s / srcSat, 0, 1.2);
-        ns = clamp(hsl.s + (tgtHsl.s - srcHsl.s) * satBlend, 0, 1);
-      }
-
+      const nh = hsl.h + dHue;
+      const satBlend = clamp(hsl.s / srcSat, 0, 1.2);
+      const ns = clamp(hsl.s + (tgtHsl.s - srcHsl.s) * satBlend, 0, 1);
       const [nR, nG, nB] = hslToRgb(nh, ns, hsl.l);
 
       out[p] = nR;
@@ -477,7 +468,7 @@ export async function processSwatch(
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: hsl-hue-lock-v2\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
+  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: hsl-currant\ntarget: ${targetColor.r},${targetColor.g},${targetColor.b}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   writeFileSync(stampPath, stamp);
 
