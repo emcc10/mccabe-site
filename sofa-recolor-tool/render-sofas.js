@@ -419,7 +419,7 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * Lab a/b only — original L preserved; feathered mask; specular + floor protected.
+ * Lab: keep sofa L; swatch dominates a/b (85%). Feathered mask; specular + floor protected.
  */
 export function recolorSofa(
   baseImage,
@@ -449,8 +449,11 @@ export function recolorSofa(
 
       if (y > yFloorAmbient && isFloorAmbientPixel(oR, oG, oB)) continue;
 
-      const { L: origL } = rgbToLab(oR, oG, oB);
-      let [nR, nG, nB] = labToRgb(origL, meanA, meanB);
+      const { L: Ls, a: As, b: Bs } = rgbToLab(oR, oG, oB);
+      const finalL = Ls;
+      const finalA = As * 0.15 + meanA * 0.85;
+      const finalB = Bs * 0.15 + meanB * 0.85;
+      let [nR, nG, nB] = labToRgb(finalL, finalA, finalB);
       [nR, nG, nB] = applyLeatherSoftness(nR, nG, nB);
 
       let t = maskW;
@@ -477,7 +480,16 @@ export async function processSwatch(
   sofaBottomY,
   sofaBounds,
 ) {
+  const swatchName = basename(swatchPath, extname(swatchPath));
   const swatchLab = await getSwatchLabStats(swatchPath);
+  console.log({
+    swatchName,
+    meanLAB: [
+      Math.round(swatchLab.meanL * 100) / 100,
+      Math.round(swatchLab.meanA * 100) / 100,
+      Math.round(swatchLab.meanB * 100) / 100,
+    ],
+  });
   const outData = recolorSofa(
     baseSofa,
     mask,
@@ -489,11 +501,11 @@ export async function processSwatch(
   const outPath = join(OUTPUT_DIR, outName);
   await saveImage(outData, outPath, baseSofa.width, baseSofa.height);
 
-  const [r, g, b] = labToRgb(50, swatchLab.meanA, swatchLab.meanB);
+  const [r, g, b] = labToRgb(swatchLab.meanL, swatchLab.meanA, swatchLab.meanB);
   const targetColor = { r, g, b };
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${basename(swatchPath)}\nmethod: lab-ab-midtone\ntargetAb: ${swatchLab.meanA.toFixed(2)},${swatchLab.meanB.toFixed(2)}\n`;
+  const stamp = `${new Date().toISOString()}\n${swatchName}\nmethod: lab-ab-85\ntargetLab: ${swatchLab.meanL.toFixed(2)},${swatchLab.meanA.toFixed(2)},${swatchLab.meanB.toFixed(2)}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   try {
     writeFileSync(stampPath, stamp);
@@ -619,9 +631,7 @@ export async function main(argv = process.argv) {
       sofaBottomY,
       sofaBounds,
     );
-    console.log(
-      `  ${file} → RGB(${targetColor.r}, ${targetColor.g}, ${targetColor.b}) → ${basename(outPath)}`,
-    );
+    console.log(`  → ${basename(outPath)}`);
     written.push(outPath);
   }
 
