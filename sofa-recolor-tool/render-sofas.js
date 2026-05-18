@@ -136,15 +136,18 @@ function isFloorAmbientPixel(r, g, b) {
   return rgbMaxDiff(r, g, b) < 22;
 }
 
-function applyLeatherSoftness(r, g, b) {
-  const mid = 128;
-  const cr = clamp(mid + (r - mid) * 0.97, 0, 255);
-  const cg = clamp(mid + (g - mid) * 0.97, 0, 255);
-  const cb = clamp(mid + (b - mid) * 0.97, 0, 255);
-  const hsl = rgbToHsl(cr, cg, cb);
-  const ns = clamp(hsl.s * 1.02, 0, 1);
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+/** Post-LAB: saturation boost only (no contrast/sharpen). */
+function applySaturationBoost(r, g, b, factor = 1.08) {
+  const hsl = rgbToHsl(r, g, b);
+  const ns = clamp(hsl.s * factor, 0, 1);
   return hslToRgb(hsl.h, ns, hsl.l);
 }
+
+const SHADOW_LAB_L = 70;
 
 /** Separable box blur (~0.8px feather) — sharp.blur() collapses sparse upholstery masks. */
 function featherMask(mask, width, height, radius = 1) {
@@ -419,7 +422,7 @@ export function getSofaBounds(mask, imgWidth, imgHeight) {
 }
 
 /**
- * Lab: keep sofa L; swatch dominates a/b (85%). Feathered mask; specular + floor protected.
+ * Neutralize cognac chroma → apply swatch a/b; keep L; shadow + floor protected.
  */
 export function recolorSofa(
   baseImage,
@@ -430,7 +433,8 @@ export function recolorSofa(
 ) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
-  const { meanA, meanB } = swatchLab;
+  const swatchA = swatchLab.meanA;
+  const swatchB = swatchLab.meanB;
   const yFloor = sofaBottomY - FLOOR_MARGIN_PX;
   const yFloorAmbient = sofaBottomY - 45;
 
@@ -449,12 +453,20 @@ export function recolorSofa(
 
       if (y > yFloorAmbient && isFloorAmbientPixel(oR, oG, oB)) continue;
 
-      const { L: Ls, a: As, b: Bs } = rgbToLab(oR, oG, oB);
-      const finalL = Ls;
-      const finalA = As * 0.15 + meanA * 0.85;
-      const finalB = Bs * 0.15 + meanB * 0.85;
+      const { L: origL, a: As, b: Bs } = rgbToLab(oR, oG, oB);
+      const finalL = origL;
+
+      const neutralA = lerp(As, 0, 0.92);
+      const neutralB = lerp(Bs, 0, 0.92);
+      const blendedA = neutralA * 0.08 + swatchA * 0.92;
+      const blendedB = neutralB * 0.08 + swatchB * 0.92;
+
+      const shadowBlend = clamp(origL / SHADOW_LAB_L, 0, 1);
+      const finalA = swatchA * (1 - shadowBlend) + blendedA * shadowBlend;
+      const finalB = swatchB * (1 - shadowBlend) + blendedB * shadowBlend;
+
       let [nR, nG, nB] = labToRgb(finalL, finalA, finalB);
-      [nR, nG, nB] = applyLeatherSoftness(nR, nG, nB);
+      [nR, nG, nB] = applySaturationBoost(nR, nG, nB, 1.08);
 
       let t = maskW;
       const bright = pixelBrightness(oR, oG, oB);
@@ -505,7 +517,7 @@ export async function processSwatch(
   const targetColor = { r, g, b };
 
   const stampPath = join(OUTPUT_DIR, '_last-render.txt');
-  const stamp = `${new Date().toISOString()}\n${swatchName}\nmethod: lab-ab-85\ntargetLab: ${swatchLab.meanL.toFixed(2)},${swatchLab.meanA.toFixed(2)},${swatchLab.meanB.toFixed(2)}\n`;
+  const stamp = `${new Date().toISOString()}\n${swatchName}\nmethod: lab-neutralize-chroma\ntargetLab: ${swatchLab.meanL.toFixed(2)},${swatchLab.meanA.toFixed(2)},${swatchLab.meanB.toFixed(2)}\n`;
   mkdirSync(OUTPUT_DIR, { recursive: true });
   try {
     writeFileSync(stampPath, stamp);
