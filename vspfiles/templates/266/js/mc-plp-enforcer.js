@@ -1,15 +1,21 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260612
+ * MC_PLP_ENFORCER_20260613
  *
  * Thumbnails: .mc-plp-image-box + visible-sofa width normalization (no crop, no scale transform).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260612";
+  var VERSION = "20260613";
+
+  function plpVerNum(v) {
+    var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
+    return isNaN(n) ? 0 : n;
+  }
+
   var PLP_MAT = "#ffffff";
-  if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
+  if (plpVerNum(global.__MC_PLP_ENFORCER_VER__) >= plpVerNum(VERSION)) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
 
