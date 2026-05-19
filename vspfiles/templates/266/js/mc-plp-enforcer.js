@@ -11,9 +11,10 @@
   "use strict";
 
   var VERSION = "20260602";
-  if (global.__MC_PLP_ENFORCER__) return;
-  global.__MC_PLP_ENFORCER__ = true;
+  var PLP_MAT = "#ffffff";
+  if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
+  global.__MC_PLP_ENFORCER__ = true;
 
   (function injectPlpBodyLastCss() {
     function attach() {
