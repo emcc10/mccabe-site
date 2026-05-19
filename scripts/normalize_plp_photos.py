@@ -134,7 +134,7 @@ def process_file(
 
     print(
         f"{path.name}: bounds {bounds.visible_w}x{bounds.visible_h} "
-        f"@ ({bounds.min_x},{bounds.min_y}) in {bounds.img_w}×{bounds.img_h}"
+        f"@ ({bounds.min_x},{bounds.min_y}) in {bounds.img_w}x{bounds.img_h}"
     )
 
     if dry_run:
