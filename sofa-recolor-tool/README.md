@@ -1,16 +1,25 @@
 # Sofa Recolor Tool
 
-Dual pipeline batch recolor from `input/sofa.png` and `input/swatches/*.jpg`.
+Simple LAB batch recolor for ecommerce sofa renders.
 
-## Pipelines
+## How it works
 
-**A — Dark / medium leather** (cognac base)  
-Hero chroma + high-frequency a/b texture; **preserves** original sofa luminance and depth restore.
+1. **Neutral-gray master** — built from `input/sofa.png` using the mask: upholstery pixels become gray at the **same luminance** (photographic detail kept).
+2. **Manual mask** — `input/mask.png` is required (white = upholstery, black = background). No auto mask.
+3. **Per swatch** — median LAB **a/b** from the swatch image; **L** from the master is preserved.
+4. **Light leathers** — optional mild L lift (~12% toward LAB L 82) when swatch RGB avg > 145.
 
-**B — Light leather** (Silk, Eggshell, Frost, Tusk, Vanilla, Mist, etc.)  
-Per swatch: `finalBaseL = cognacL × 0.55 + lightTargetL × 0.45` (+ detail × 0.65). Targets: cream 190, off-white 200, gray/taupe 175. Then hero a/b + ±2 texture residual. No flat remap / CLAHE.
+No depth restore, CLAHE, hero clustering, texture residuals, or dual pipelines.
 
-**Mask** (both pipelines): close holes, dilate 2px, include cognac edge pixels, ~0.5px feather.
+## Inputs
+
+| File | Required |
+|------|----------|
+| `input/sofa.png` | Yes |
+| `input/mask.png` | Yes (manually cleaned) |
+| `input/swatches/*.jpg` | Yes |
+
+`input/master-sofa.png` is written when present (optional reference).
 
 ## Commands
 
@@ -20,4 +29,4 @@ npm run preview
 npm run render
 ```
 
-Source: `input/swatches/*.jpg` only.
+Outputs: `output/{Swatch-Name}.png`
