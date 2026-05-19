@@ -14130,52 +14130,18 @@ html.category #content_area .v-product-grid .v-product {
   background: transparent !important;
 }
 
-html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img,
-html.category #content_area .v-product-grid a.v-product__img {
-  display: flex !important;
-  align-items: flex-end !important;
-  justify-content: center !important;
-  width: 100% !important;
-  height: 280px !important;
-  min-height: 280px !important;
-  max-height: 280px !important;
-  margin: 0 !important;
-  padding: 14px !important;
-  overflow: hidden !important;
-  box-sizing: border-box !important;
-  background: #ffffff !important;
-  border: 0 !important;
-  box-shadow: none !important;
+/* Category PLP thumbs: mc-plp-body-last.css + mc-plp-enforcer.js (.mc-plp-image-box) */
+html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img.mc-plp-image-box,
+html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box {
+  overflow: visible !important;
+  max-height: none !important;
 }
 
-html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img > img,
-html.category #content_area .v-product-grid a.v-product__img > img {
-  height: 220px !important;
-  max-height: 220px !important;
-  width: auto !important;
-  max-width: 100% !important;
-  object-fit: contain !important;
-  object-position: center bottom !important;
-  display: block !important;
-  margin: 0 auto !important;
-  background: #ffffff !important;
-  border: 0 !important;
-}
-
-@media (max-width: 991px) {
-  html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img,
-  html.category #content_area .v-product-grid a.v-product__img {
-    height: 220px !important;
-    min-height: 220px !important;
-    max-height: 220px !important;
-    padding: 12px !important;
-  }
-
-  html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img > img,
-  html.category #content_area .v-product-grid a.v-product__img > img {
-    height: 172px !important;
-    max-height: 172px !important;
-  }
+html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img,
+html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img {
+  max-height: none !important;
+  transform: none !important;
+  clip-path: none !important;
 }
 
 /* MC PLP THUMB — all white, no gray mat */
