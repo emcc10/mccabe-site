@@ -61,6 +61,11 @@ function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
 }
 
+function smoothstep(edge0, edge1, x) {
+  const t = clamp((x - edge0) / (edge1 - edge0), 0, 1);
+  return t * t * (3 - 2 * t);
+}
+
 export function rgbToLab(r, g, b) {
   const lab = convert.rgb.lab([r, g, b]);
   return { L: lab[0], a: lab[1], b: lab[2] };
@@ -287,29 +292,15 @@ export function computeLabStats(labSamples) {
   };
 }
 
-/**
- * Swatch chroma from median a/b on mid-tone leather (ignores shadow center).
- * Normalizes hue direction × median chroma magnitude; adaptive gain from saturation.
- */
-export function computeRepresentativeSwatchStats(samples) {
-  const base = computeLabStats(samples);
-  if (samples.length < 64) {
-    return { ...base, chromaMag: Math.hypot(base.meanA, base.meanB), satFactor: 1, chromaGain: CHROMA_GAIN_BASE };
+/** Median a/b for one swatch luminance zone (shadow / mid / highlight). */
+function computeZoneChroma(samples) {
+  if (!samples.length) {
+    return { meanA: 0, meanB: 0, meanL: 50, chromaMag: 0 };
   }
-
-  const sorted = [...samples].sort((a, b) => a.L - b.L);
-  const n = sorted.length;
-  const lLo = sorted[Math.floor(n * 0.4)].L;
-  const lHi = sorted[Math.floor(n * 0.92)].L;
-  const body = lHi > lLo ? sorted.filter((s) => s.L >= lLo && s.L <= lHi) : sorted;
-  const band = body.length >= n * 0.15 ? body : sorted;
-
-  const bodyStats = computeLabStats(band);
-  const medianL = medianOf(band.map((s) => s.L));
-  let medianA = medianOf(band.map((s) => s.a));
-  let medianB = medianOf(band.map((s) => s.b));
-
-  const medianChromaMag = medianOf(band.map((s) => Math.hypot(s.a, s.b)));
+  const medianL = medianOf(samples.map((s) => s.L));
+  let medianA = medianOf(samples.map((s) => s.a));
+  let medianB = medianOf(samples.map((s) => s.b));
+  const medianChromaMag = medianOf(samples.map((s) => Math.hypot(s.a, s.b)));
   const dirMag = Math.hypot(medianA, medianB);
   if (dirMag > 0.4) {
     const norm = medianChromaMag / dirMag;
@@ -319,10 +310,54 @@ export function computeRepresentativeSwatchStats(samples) {
     medianA = 0;
     medianB = 0;
   }
+  return { meanA: medianA, meanB: medianB, meanL: medianL, chromaMag: medianChromaMag };
+}
 
-  const repRgb = labToRgb(medianL, medianA, medianB);
+/**
+ * Shadow / midtone / highlight chroma from swatch (not one flat median).
+ */
+export function computeRepresentativeSwatchStats(samples) {
+  const base = computeLabStats(samples);
+  const fallback = computeZoneChroma(samples);
+  const zonesFallback = { shadow: fallback, mid: fallback, highlight: fallback };
+
+  if (samples.length < 64) {
+    return {
+      ...base,
+      zones: zonesFallback,
+      chromaMag: fallback.chromaMag,
+      satFactor: 1,
+      chromaGain: CHROMA_GAIN_BASE,
+    };
+  }
+
+  const sorted = [...samples].sort((a, b) => a.L - b.L);
+  const n = sorted.length;
+  const lGlare = sorted[Math.floor(n * 0.94)].L;
+  const usable = sorted.filter((s) => s.L <= lGlare);
+
+  const pick = (lo, hi, fallbackLo, fallbackHi) => {
+    const band = usable.filter((s) => s.L >= lo && s.L <= hi);
+    if (band.length >= n * 0.04) return band;
+    return usable.filter((s) => s.L >= fallbackLo && s.L <= fallbackHi);
+  };
+
+  const l12 = usable[Math.floor(usable.length * 0.12)].L;
+  const l38 = usable[Math.floor(usable.length * 0.38)].L;
+  const l62 = usable[Math.floor(usable.length * 0.62)].L;
+  const l86 = usable[Math.floor(usable.length * 0.86)].L;
+
+  const zones = {
+    shadow: computeZoneChroma(pick(l12, l38, usable[0].L, l38)),
+    mid: computeZoneChroma(pick(l38, l62, l12, l86)),
+    highlight: computeZoneChroma(pick(l62, l86, l38, usable[usable.length - 1].L)),
+  };
+
+  const bodyStats = computeLabStats(usable);
+  const mid = zones.mid;
+  const repRgb = labToRgb(mid.meanL, mid.meanA, mid.meanB);
   const rgbSat = pixelSaturation(repRgb.r, repRgb.g, repRgb.b);
-  const chromaMag = medianChromaMag;
+  const chromaMag = mid.chromaMag;
 
   let satFactor = 1;
   if (chromaMag < 4) {
@@ -343,15 +378,42 @@ export function computeRepresentativeSwatchStats(samples) {
   }
 
   return {
-    meanL: medianL,
-    meanA: medianA,
-    meanB: medianB,
+    meanL: mid.meanL,
+    meanA: mid.meanA,
+    meanB: mid.meanB,
     stdL: bodyStats.stdL,
     stdA: Math.max(bodyStats.stdA, MIN_LAB_STD),
     stdB: Math.max(bodyStats.stdB, MIN_LAB_STD),
+    zones,
     chromaMag,
     satFactor,
     chromaGain,
+  };
+}
+
+/** Pick swatch shadow/mid/highlight chroma from original sofa pixel L. */
+export function getSwatchChromaForPixelL(pixelL, src, dst) {
+  const z = dst.zones;
+  if (!z) {
+    return { meanA: dst.meanA, meanB: dst.meanB };
+  }
+
+  const lS = src.zoneL?.shadow ?? src.meanL - src.stdL * 0.55;
+  const lM = src.zoneL?.mid ?? src.meanL;
+  const lH = src.zoneL?.highlight ?? src.meanL + src.stdL * 0.75;
+
+  if (pixelL <= lM) {
+    const t = smoothstep(lS, lM, pixelL);
+    return {
+      meanA: z.shadow.meanA + (z.mid.meanA - z.shadow.meanA) * t,
+      meanB: z.shadow.meanB + (z.mid.meanB - z.shadow.meanB) * t,
+    };
+  }
+
+  const t = smoothstep(lM, lH, pixelL);
+  return {
+    meanA: z.mid.meanA + (z.highlight.meanA - z.mid.meanA) * t,
+    meanB: z.mid.meanB + (z.highlight.meanB - z.mid.meanB) * t,
   };
 }
 
@@ -484,28 +546,32 @@ export function chromaBlendFactor(dst, edgeT = 0) {
 }
 
 /**
- * Automotive-style colorize: L fixed; strong median swatch a/b transfer (2–3× gain).
+ * Automotive-style colorize: L fixed; zone-mapped swatch a/b transfer (2–3× gain).
  */
 export function transferLabPixel(pixel, src, dst, opts = {}) {
   const finalL = pixel.L;
   const edgeT = clamp(opts.edgeStrength ?? 0, 0, 1);
   const t = chromaBlendFactor(dst, edgeT);
 
+  const zone = getSwatchChromaForPixelL(pixel.L, src, dst);
+  const dstA = zone.meanA;
+  const dstB = zone.meanB;
+
   const scaleA = clamp(dst.stdA / src.stdA, CHROMA_SCALE_MIN, CHROMA_SCALE_MAX);
   const scaleB = clamp(dst.stdB / src.stdB, CHROMA_SCALE_MIN, CHROMA_SCALE_MAX);
 
   const relA = pixel.a - src.meanA;
   const relB = pixel.b - src.meanB;
-  const targetA = dst.meanA + relA * scaleA * CHROMA_TEXTURE;
-  const targetB = dst.meanB + relB * scaleB * CHROMA_TEXTURE;
+  const targetA = dstA + relA * scaleA * CHROMA_TEXTURE;
+  const targetB = dstB + relB * scaleB * CHROMA_TEXTURE;
 
   let a = pixel.a + (targetA - pixel.a) * t;
   let b = pixel.b + (targetB - pixel.b) * t;
 
   if (opts.cognacEdge || opts.fringeEdge) {
     const snap = clamp(edgeT * 0.75, 0, 0.98);
-    a = a + (dst.meanA - a) * snap;
-    b = b + (dst.meanB - b) * snap;
+    a = a + (dstA - a) * snap;
+    b = b + (dstB - b) * snap;
   }
 
   a = clamp(a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
@@ -624,9 +690,20 @@ export function computeSofaLabStats(baseImage, mask, sofaBottomY) {
   }
 
   if (!samples.length) {
-    return computeLabStats([{ L: 40, a: 15, b: 20 }]);
+    const empty = computeLabStats([{ L: 40, a: 15, b: 20 }]);
+    return { ...empty, zoneL: { shadow: 28, mid: 40, highlight: 52 } };
   }
-  return computeLabStats(samples);
+
+  const stats = computeLabStats(samples);
+  const ls = samples.map((s) => s.L).sort((a, b) => a - b);
+  return {
+    ...stats,
+    zoneL: {
+      shadow: percentileSorted(ls, 0.24),
+      mid: percentileSorted(ls, 0.5),
+      highlight: percentileSorted(ls, 0.76),
+    },
+  };
 }
 
 export function getSofaBottomY(baseImage) {
@@ -747,6 +824,22 @@ export async function processSwatch(swatchPath, baseSofa, mask, sofaStats, sofaB
       Math.round(swatch.stats.meanA * 10) / 10,
       Math.round(swatch.stats.meanB * 10) / 10,
     ],
+    zones: swatch.stats.zones
+      ? {
+          shadow: [
+            Math.round(swatch.stats.zones.shadow.meanA * 10) / 10,
+            Math.round(swatch.stats.zones.shadow.meanB * 10) / 10,
+          ],
+          mid: [
+            Math.round(swatch.stats.zones.mid.meanA * 10) / 10,
+            Math.round(swatch.stats.zones.mid.meanB * 10) / 10,
+          ],
+          highlight: [
+            Math.round(swatch.stats.zones.highlight.meanA * 10) / 10,
+            Math.round(swatch.stats.zones.highlight.meanB * 10) / 10,
+          ],
+        }
+      : null,
     chromaGain: Math.round((swatch.stats.chromaGain ?? CHROMA_GAIN_BASE) * 100) / 100,
     satFactor: Math.round((swatch.stats.satFactor ?? 1) * 100) / 100,
   });
@@ -819,7 +912,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: LAB chroma transfer + leather depth restore (contrast/detail)');
+  console.log('  method: 3-zone swatch chroma × sofa L + depth restore');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   const mask = await createUpholsteryMask(baseSofa, maskPath);
