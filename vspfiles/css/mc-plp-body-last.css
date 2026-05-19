@@ -1,4 +1,4 @@
-/* MC PLP THUMBNAIL CLEANUP 20260518 */
+/* MC PLP THUMBNAIL CLEANUP — load last; beats live template mc-category-grid-critical */
 
 html[data-mc-category-plp="1"] #content_area > table > tbody > tr > td.colors_lines_light,
 html[data-mc-category-plp="1"] #content_area > table > tr > td.colors_lines_light,
@@ -11,12 +11,21 @@ html.category #content_area > table > tbody > tr > td.colors_lines_light {
   background: transparent !important;
 }
 
-html[data-mc-category-plp="1"] #content_area .v-product-grid .v-product {
+html[data-mc-category-plp="1"] #content_area .v-product-grid .v-product,
+html.category #content_area .v-product-grid .v-product {
   background: transparent !important;
 }
 
+/* Match live template selector exactly — white wrapper, no gray mat */
+html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img,
+html.category body:not(.productdetails) #content_area .v-product-grid .v-product__img,
+html.category body:not(.productdetails) #content_area a.v-product__img,
+html.category body:not(.productdetails) #content_area .v-product__img,
+html.category body:not(.productdetails) #content_area .v-product__image,
+html.category body:not(.productdetails) #content_area .product_image,
+html.category body:not(.productdetails) #content_area .vcss_img,
+html.category body:not(.productdetails) #content_area ul.v-product-grid > li .v-product__img,
 html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img,
-html[data-mc-category-plp="1"] #content_area .v-product-grid .v-product__img,
 html.category #content_area .v-product-grid a.v-product__img {
   display: flex !important;
   align-items: flex-end !important;
@@ -35,14 +44,18 @@ html.category #content_area .v-product-grid a.v-product__img {
   line-height: 0 !important;
 }
 
+html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img,
+html.category body:not(.productdetails) #content_area .v-product-grid .v-product__img img,
+html.category body:not(.productdetails) #content_area a.v-product__img > img,
+html.category body:not(.productdetails) #content_area .v-product__img img,
 html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img > img,
-html[data-mc-category-plp="1"] #content_area .v-product-grid .v-product__img img,
 html.category #content_area .v-product-grid a.v-product__img > img {
   height: 220px !important;
   max-height: 220px !important;
   width: auto !important;
   max-width: 100% !important;
   min-height: 0 !important;
+  min-width: 0 !important;
   object-fit: contain !important;
   object-position: center bottom !important;
   display: block !important;
@@ -53,7 +66,8 @@ html.category #content_area .v-product-grid a.v-product__img > img {
 }
 
 @media (max-width: 991px) {
-  html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img,
+  html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img,
+  html.category body:not(.productdetails) #content_area .v-product-grid .v-product__img,
   html.category #content_area .v-product-grid a.v-product__img {
     height: 220px !important;
     min-height: 220px !important;
@@ -61,23 +75,10 @@ html.category #content_area .v-product-grid a.v-product__img > img {
     padding: 12px !important;
   }
 
-  html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img > img,
+  html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img,
+  html.category body:not(.productdetails) #content_area .v-product-grid .v-product__img img,
   html.category #content_area .v-product-grid a.v-product__img > img {
     height: 172px !important;
     max-height: 172px !important;
   }
-}
-
-html[data-mc-category-plp="1"] #if_homepage,
-html[data-mc-category-plp="1"] #slideshow-container,
-html[data-mc-category-plp="1"] video.mc-hero-video-el,
-html.category #if_homepage,
-html.category #slideshow-container,
-html.category video.mc-hero-video-el {
-  display: none !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  opacity: 0 !important;
-  overflow: hidden !important;
-  background: transparent !important;
 }

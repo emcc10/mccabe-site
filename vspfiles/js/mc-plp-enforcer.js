@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260531
+ * MC_PLP_ENFORCER_20260601
  *
  * DOM (category listing):
  *   table.colors_backgroundlight + SearchResults_SubCat_Angle  ← black bar (legacy subcat chrome)
@@ -10,25 +10,23 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260531";
+  var VERSION = "20260601";
   var PLP_MAT = "#ffffff";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
 
-  (function injectPlpWhiteCritical() {
-    if (document.getElementById("mc-plp-white-critical")) return;
-    var st = document.createElement("style");
-    st.id = "mc-plp-white-critical";
-    st.textContent =
-      "html[data-mc-category-plp=\"1\"] #content_area .v-product-grid a.v-product__img," +
-      "html.category #content_area .v-product-grid a.v-product__img," +
-      "html.category #content_area .v-product-grid .v-product__img," +
-      "html.category #content_area .v-product-grid .v-product{background:#fff!important;" +
-      "border:0!important;box-shadow:none!important}" +
-      "html.category #content_area .v-product-grid a.v-product__img>img," +
-      "html.category #content_area .v-product-grid .v-product__img img{background:#fff!important;border:0!important}";
-    (document.head || document.documentElement).appendChild(st);
+  (function injectPlpBodyLastCss() {
+    function attach() {
+      if (document.getElementById("mc-plp-body-last-css")) return;
+      var l = document.createElement("link");
+      l.id = "mc-plp-body-last-css";
+      l.rel = "stylesheet";
+      l.href = "/v/vspfiles/css/mc-plp-body-last.css?v=20260601";
+      (document.body || document.documentElement).appendChild(l);
+    }
+    if (document.body) attach();
+    else document.addEventListener("DOMContentLoaded", attach);
   })();
 
   var MAT = PLP_MAT;
