@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-label="Transitional interior mood">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4a4540"/>
+      <stop offset="50%" stop-color="#9a8f7a"/>
+      <stop offset="100%" stop-color="#ece8e1"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="520" fill="url(#bg)"/>
+  <rect x="60" y="160" width="300" height="280" rx="2" fill="#b8aea0" opacity="0.55"/>
+  <rect x="380" y="100" width="340" height="180" rx="2" fill="#ece8e1" opacity="0.88"/>
+  <rect x="420" y="320" width="280" height="120" rx="2" fill="#7d7468" opacity="0.6"/>
+</svg>

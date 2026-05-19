@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-label="Coastal interior mood">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8fa9b5"/>
+      <stop offset="40%" stop-color="#d4cfc4"/>
+      <stop offset="100%" stop-color="#f5f3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="520" fill="url(#bg)"/>
+  <ellipse cx="200" cy="400" rx="280" ry="100" fill="#f5f3ee" opacity="0.7"/>
+  <rect x="120" y="140" width="360" height="200" rx="3" fill="#f5f3ee" opacity="0.92"/>
+  <rect x="520" y="180" width="200" height="260" rx="3" fill="#5c7a86" opacity="0.45"/>
+  <circle cx="680" cy="100" r="60" fill="#c9b896" opacity="0.5"/>
+</svg>
