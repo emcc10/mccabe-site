@@ -32,10 +32,19 @@ const MASK_APPLY_THRESH = 128;
 const BG_THRESH = 238;
 const LAB_CHROMA_CLAMP = 72;
 
-/** Mild L lift for very light swatches (LAB L scale 0–100). */
-const LIGHT_SWATCH_RGB_AVG = 145;
-const LIGHT_LIFT_BLEND = 0.12;
-const LIGHT_LIFT_TARGET_L = 82;
+/** Named light leathers: blend master L toward bright swatch body (RGB luminance). */
+const LIGHT_LEATHER_KEYWORDS = ['silk', 'eggshell', 'frost', 'parchment', 'vanilla', 'tusk', 'mist'];
+const LIGHT_L_MASTER = 0.35;
+const LIGHT_L_SWATCH = 0.65;
+const LIGHT_L_CLAMP_LO = 125;
+const LIGHT_L_CLAMP_HI = 235;
+const LIGHT_SEAM_MASTER_L = 55;
+const LIGHT_SEAM_CLAMP_LO = 75;
+const LIGHT_SEAM_CLAMP_HI = 130;
+const SWATCH_LUM_TRIM = 0.15;
+const SWATCH_K_MEANS = 3;
+const SWATCH_CLUSTER_POP_WEIGHT = 0.65;
+const SWATCH_CLUSTER_SAT_WEIGHT = 0.35;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
@@ -119,6 +128,17 @@ function medianOf(values) {
   return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 }
 
+function percentileOfSorted(sorted, p) {
+  if (!sorted.length) return 0;
+  const idx = clamp(Math.floor(sorted.length * p), 0, sorted.length - 1);
+  return sorted[idx];
+}
+
+export function isNamedLightLeather(swatchStem) {
+  const s = swatchStem.toLowerCase();
+  return LIGHT_LEATHER_KEYWORDS.some((k) => s.includes(k));
+}
+
 /** Mean RGB of non-background swatch pixels. */
 export function computeSwatchRgbAvg(data, width, height, channels) {
   let sum = 0;
@@ -139,7 +159,7 @@ export function computeSwatchRgbAvg(data, width, height, channels) {
 }
 
 /**
- * Median LAB of all non-background swatch pixels (simple color anchor).
+ * Leather color: trim luminance extremes, k=3, pick dominant saturated cluster centroid.
  */
 export async function getSwatchMedianLab(swatchPath) {
   const resolved = resolveOriginalSwatchPath(swatchPath) || resolve(swatchPath);
@@ -147,10 +167,9 @@ export async function getSwatchMedianLab(swatchPath) {
     throw new Error(`Swatch must be under input/swatches: ${swatchPath}`);
   }
 
+  const swatchStem = basename(resolved, extname(resolved));
   const { data, info } = await sharp(resolved).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  const Ls = [];
-  const As = [];
-  const Bs = [];
+  const rawPixels = [];
 
   for (let y = 0; y < info.height; y++) {
     for (let x = 0; x < info.width; x++) {
@@ -160,31 +179,37 @@ export async function getSwatchMedianLab(swatchPath) {
       const b = data[i + 2];
       const alpha = info.channels === 4 ? data[i + 3] : 255;
       if (alpha < 20 || isNearWhite(r, g, b)) continue;
-      const lab = rgbToLab(r, g, b);
-      Ls.push(lab.L);
-      As.push(lab.a);
-      Bs.push(lab.b);
+      rawPixels.push({ r, g, b, lum: pixelBrightness(r, g, b) });
     }
   }
 
-  if (!Ls.length) {
-    throw new Error(`No swatch pixels: ${resolved}`);
+  if (rawPixels.length < SWATCH_K_MEANS) {
+    throw new Error(`Not enough swatch pixels: ${resolved}`);
   }
 
-  const rgbAvg = computeSwatchRgbAvg(data, info.width, info.height, info.channels);
-  const meanL = medianOf(Ls);
-  const meanA = medianOf(As);
-  const meanB = medianOf(Bs);
-  const meanRgb = labToRgb(meanL, meanA, meanB);
+  const sortedLum = rawPixels.map((p) => p.lum).sort((a, b) => a - b);
+  const lo = percentileOfSorted(sortedLum, SWATCH_LUM_TRIM);
+  const hi = percentileOfSorted(sortedLum, 1 - SWATCH_LUM_TRIM);
+  const trimmed = rawPixels.filter((p) => p.lum >= lo && p.lum <= hi);
+  const pixels = trimmed.length >= SWATCH_K_MEANS ? trimmed : rawPixels;
+
+  const { centroids, labels } = kMeansRgb(pixels, SWATCH_K_MEANS);
+  const leather = pickLeatherClusterCentroid(centroids, labels, pixels.length);
+  const r = Math.round(leather.r);
+  const g = Math.round(leather.g);
+  const b = Math.round(leather.b);
+  const lab = rgbToLab(r, g, b);
 
   return {
-    meanL,
-    meanA,
-    meanB,
-    rgbAvg,
-    isLightSwatch: rgbAvg > LIGHT_SWATCH_RGB_AVG || meanL > 68,
-    overallRGB: [meanRgb.r, meanRgb.g, meanRgb.b],
-    pixelCount: Ls.length,
+    meanL: lab.L,
+    meanA: lab.a,
+    meanB: lab.b,
+    swatchLumRgb: pixelBrightness(r, g, b),
+    clusterPop: leather.population,
+    clusterSat: leather.saturation,
+    isNamedLight: isNamedLightLeather(swatchStem),
+    overallRGB: [r, g, b],
+    pixelCount: pixels.length,
     sourceFile: basename(resolved),
   };
 }
@@ -197,7 +222,8 @@ export async function getSwatchLabStats(swatchPath) {
       meanL: s.meanL,
       meanA: s.meanA,
       meanB: s.meanB,
-      isLightSwatch: s.isLightSwatch,
+      isLightSwatch: s.isNamedLight,
+      isNamedLight: s.isNamedLight,
     },
     overallRGB: s.overallRGB,
     pixelCount: s.pixelCount,
@@ -276,15 +302,18 @@ export async function loadUpholsteryMask(maskPath, width, height) {
   return mask;
 }
 
-export function computeFinalLabL(originalL, swatch) {
-  if (!swatch.isLightSwatch) {
-    return originalL;
+/** RGB luminance for named light leathers; null = keep master LAB L. */
+export function computeLightLeatherLum(masterLumRgb, swatch) {
+  let finalL = masterLumRgb * LIGHT_L_MASTER + swatch.swatchLumRgb * LIGHT_L_SWATCH;
+  finalL = clamp(finalL, LIGHT_L_CLAMP_LO, LIGHT_L_CLAMP_HI);
+  if (masterLumRgb < LIGHT_SEAM_MASTER_L) {
+    finalL = clamp(finalL, LIGHT_SEAM_CLAMP_LO, LIGHT_SEAM_CLAMP_HI);
   }
-  return originalL * (1 - LIGHT_LIFT_BLEND) + LIGHT_LIFT_TARGET_L * LIGHT_LIFT_BLEND;
+  return finalL;
 }
 
 /**
- * Masked pixels only: keep L (mild lift on light swatches), swatch median a/b.
+ * Masked pixels only: preserve master L (dark); named lights blend toward swatch body L.
  */
 export function recolorSofa(masterImage, mask, swatch) {
   const { data, width, height, channels } = masterImage;
@@ -294,11 +323,21 @@ export function recolorSofa(masterImage, mask, swatch) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
 
     const p = j * channels;
-    const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
-    const finalL = computeFinalLabL(lab.L, swatch);
+    const masterLum = pixelBrightness(data[p], data[p + 1], data[p + 2]);
     const a = clamp(swatch.meanA, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const b = clamp(swatch.meanB, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const { r, g, b: bOut } = labToRgb(finalL, a, b);
+
+    let r;
+    let g;
+    let bOut;
+    if (swatch.isNamedLight) {
+      const finalLum = computeLightLeatherLum(masterLum, swatch);
+      const baseLab = rgbToLab(finalLum, finalLum, finalLum);
+      ({ r, g, b: bOut } = labToRgb(baseLab.L, a, b));
+    } else {
+      const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
+      ({ r, g, b: bOut } = labToRgb(lab.L, a, b));
+    }
 
     out[p] = r;
     out[p + 1] = g;
@@ -319,14 +358,17 @@ export async function processSwatch(swatchPath, masterImage, mask) {
   console.log({
     swatchName,
     source: `input/swatches/${swatch.sourceFile}`,
-    medianLAB: [
+    leatherLAB: [
       Math.round(swatch.meanL * 10) / 10,
       Math.round(swatch.meanA * 10) / 10,
       Math.round(swatch.meanB * 10) / 10,
     ],
-    overallRGB: swatch.overallRGB,
+    leatherRGB: swatch.overallRGB,
+    clusterPop: Math.round((swatch.clusterPop ?? 0) * 100),
+    clusterSat: Math.round((swatch.clusterSat ?? 0) * 100) / 100,
     pixelsSampled: swatch.pixelCount,
-    lightLift: swatch.isLightSwatch,
+    lightLeather: swatch.isNamedLight,
+    swatchLumRgb: swatch.isNamedLight ? Math.round(swatch.swatchLumRgb) : undefined,
   });
 
   const outData = recolorSofa(masterImage, mask, swatch);
@@ -400,7 +442,7 @@ export async function main(argv = process.argv) {
   console.log(`  swatch source: ${SWATCH_DIR} (${swatchFiles.length} files)`);
   console.log(`  source photo: ${SOFA_PATH}`);
   console.log(`  mask: ${MASK_PATH}`);
-  console.log('  method: neutral-gray master | preserve L | swatch median a/b');
+  console.log('  method: neutral-gray master | median a/b | light L blend for silk/creams');
 
   const sourceSofa = await loadImage(SOFA_PATH);
   console.log(`  ${sourceSofa.width}x${sourceSofa.height}`);
