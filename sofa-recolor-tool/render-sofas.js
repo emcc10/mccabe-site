@@ -367,7 +367,7 @@ export function chromaBlendFactor(dst, edgeT = 0) {
   const gain = (dst.chromaGain ?? CHROMA_GAIN_BASE) * (dst.satFactor ?? 1);
   let t = 1 - Math.exp(-gain * 0.82);
   if ((dst.chromaMag ?? 0) < 4) {
-    t = Math.min(0.97, t + 0.14);
+    t = Math.min(0.98, t + 0.17);
   } else if ((dst.chromaMag ?? 0) > 12) {
     t = Math.min(0.98, t + 0.06);
   }
