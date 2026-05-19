@@ -254,13 +254,14 @@ function scorePatchWindow(mask, width, originX, originY, patchSize) {
   return score;
 }
 
-function centroidPatchOrigin(bandMask, width, height, patchSize) {
+function centroidPatchOrigin(bandMask, width, height, patchSize, used = null) {
   let sumX = 0;
   let sumY = 0;
   let n = 0;
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      if (!bandMask[y * width + x]) continue;
+      const j = y * width + x;
+      if (!bandMask[j] || used?.[j]) continue;
       sumX += x;
       sumY += y;
       n++;
@@ -297,16 +298,16 @@ function extractSequentialBandPatches(data, width, height, channels, masks, patc
     const count = combined.reduce((a, v) => a + v, 0);
     if (count < patchSize) mask = masks[name];
 
-    patches[name] = extractBandPatch(data, width, height, channels, mask, patchSize);
+    patches[name] = extractBandPatch(data, width, height, channels, mask, patchSize, used);
     markPatchUsed(used, width, patches[name].origin.x, patches[name].origin.y, patchSize);
   }
 
   return patches;
 }
 
-function extractBandPatch(data, width, height, channels, bandMask, patchSize) {
-  const sliding = findBestPatchOrigin(bandMask, width, height, patchSize);
-  const centered = centroidPatchOrigin(bandMask, width, height, patchSize);
+function extractBandPatch(data, width, height, channels, bandMask, patchSize, used = null) {
+  const sliding = findBestPatchOrigin(bandMask, width, height, patchSize, used);
+  const centered = centroidPatchOrigin(bandMask, width, height, patchSize, used);
   const origin = centered.score >= sliding.score * 0.85 ? centered : sliding;
   const patch = extractPatchFromSwatch(
     data,
