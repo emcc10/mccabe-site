@@ -6,6 +6,13 @@ import { existsSync } from 'fs';
 import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
+import {
+  resolveTextureSample,
+  samplePatchRgbValid,
+  pickTexturePatch,
+} from './texture-transfer.js';
+
+export { pickTexturePatch } from './texture-transfer.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SWATCH_DIR = join(__dirname, 'input', 'swatches');
@@ -205,20 +212,19 @@ function findBestPatchOrigin(mask, width, height, patchSize, used = null) {
 }
 
 function extractPatchFromSwatch(data, width, height, channels, originX, originY, patchSize) {
-  const out = Buffer.alloc(patchSize * patchSize * channels);
+  const out = Buffer.alloc(patchSize * patchSize * 3);
   for (let dy = 0; dy < patchSize; dy++) {
     const sy = clamp(originY + dy, 0, height - 1);
     for (let dx = 0; dx < patchSize; dx++) {
       const sx = clamp(originX + dx, 0, width - 1);
       const si = (sy * width + sx) * channels;
-      const di = (dy * patchSize + dx) * channels;
+      const di = (dy * patchSize + dx) * 3;
       out[di] = data[si];
       out[di + 1] = data[si + 1];
       out[di + 2] = data[si + 2];
-      if (channels === 4) out[di + 3] = data[si + 3];
     }
   }
-  return { data: out, width: patchSize, height: patchSize, channels };
+  return { data: out, width: patchSize, height: patchSize, channels: 3 };
 }
 
 function computePatchStats(patch) {
@@ -377,26 +383,9 @@ function extractBandPatch(data, width, height, channels, bandMask, patchSize, us
   return { ...patch, origin, coverage: origin.score, stats };
 }
 
-function samplePatchRgb(patch, px, py) {
-  const x = ((px % patch.width) + patch.width) % patch.width;
-  const y = ((py % patch.height) + patch.height) % patch.height;
-  const i = (y * patch.width + x) * patch.channels;
-  return { r: patch.data[i], g: patch.data[i + 1], b: patch.data[i + 2] };
-}
-
-export function pickTexturePatch(texture, u) {
-  const t = clamp(u, 0, 1);
-  if (t < 1 / 3) return { patch: texture.patches.shadow, localU: t * 3 };
-  if (t < 2 / 3) return { patch: texture.patches.midtone, localU: (t - 1 / 3) * 3 };
-  return { patch: texture.patches.highlight, localU: (t - 2 / 3) * 3 };
-}
-
 export function sampleTextureLab(texture, sofaX, sofaY, u) {
-  const { patch, localU } = pickTexturePatch(texture, u);
-  const px = (sofaX * 1.07 + sofaY * 0.41 + Math.floor(localU * 97)) % patch.width;
-  const py =
-    (Math.floor(localU * (patch.height - 1)) + sofaX * 0.23 + sofaY * 0.19) % patch.height;
-  const { r, g, b } = samplePatchRgb(patch, px, py);
+  const { patch, px, py } = resolveTextureSample(texture, sofaX, sofaY, u);
+  const { r, g, b } = samplePatchRgbValid(patch, px, py);
   const lab = rgbToLab(r, g, b);
   return { lab, patchMeanL: patch.stats.meanL };
 }

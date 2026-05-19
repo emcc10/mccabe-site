@@ -4,7 +4,12 @@
  */
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
-import { getSwatchTexture, sampleTextureLab } from './swatch-texture.js';
+import { getSwatchTexture } from './swatch-texture.js';
+import {
+  buildTransferMaps,
+  validateTransferRgbMap,
+  bandNameFromU,
+} from './texture-transfer.js';
 import {
   getMaterialClass,
   getMaterialBlendProfile,
@@ -69,7 +74,14 @@ export function rgbToLab(r, g, b) {
 }
 
 export function labToRgb(L, a, b) {
-  const [r, g, bOut] = convert.lab.rgb([L, a, b]);
+  if (!Number.isFinite(L) || !Number.isFinite(a) || !Number.isFinite(b)) {
+    return { r: 0, g: 0, b: 0 };
+  }
+  const [r, g, bOut] = convert.lab.rgb([
+    clamp(L, 0, 100),
+    clamp(a, -128, 128),
+    clamp(b, -128, 128),
+  ]);
   return {
     r: clamp(Math.round(r), 0, 255),
     g: clamp(Math.round(g), 0, 255),
@@ -484,23 +496,33 @@ export function computeSofaLuminanceMapRange(masterImage, mask) {
 
 /**
  * Texture transfer + material-class blend (light / dark-cool / standard).
+ * @param {object} [options] transferMaps, skipTransferValidation
  */
-export function recolorSofa(masterImage, mask, texture) {
+export function recolorSofa(masterImage, mask, texture, options = {}) {
   const { data, width, height, channels } = masterImage;
   const out = Buffer.from(data);
+  const transferMaps =
+    options.transferMaps || buildTransferMaps(masterImage, mask, texture);
+  if (!options.skipTransferValidation) {
+    validateTransferRgbMap(transferMaps, mask);
+  }
+
   const { lo, span } = computeSofaLuminanceMapRange(masterImage, mask);
   const masterMeanL = computeMaskedMeanL(masterImage, mask);
   const profile = getMaterialBlendProfile(texture);
+  const { rgbMap } = transferMaps;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
 
     const p = j * channels;
-    const x = j % width;
-    const y = (j / width) | 0;
     const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
     const u = clamp((lab.L - lo) / span, 0, 1);
-    const { lab: texLab, patchMeanL } = sampleTextureLab(texture, x, y, u);
+    const band = bandNameFromU(u);
+    const patchMeanL = texture.patches[band].stats.meanL;
+
+    const o = j * 3;
+    const texLab = rgbToLab(rgbMap[o], rgbMap[o + 1], rgbMap[o + 2]);
 
     const blended = blendMaterialResponse(
       lab.L,

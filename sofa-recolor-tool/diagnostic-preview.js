@@ -1,7 +1,8 @@
 /**
- * Texture extraction diagnostic — real swatch patches (not flat color chips).
- * Usage: node diagnostic-preview.js Bali-Spider Evoque-Atlantic Bali-Silk
- *        node diagnostic-preview.js Bali-Silk --render  (include sofa preview)
+ * Texture diagnostic: swatch patches + transfer-map debug (+ optional sofa render).
+ * Usage:
+ *   node diagnostic-preview.js Bali-Silk --transfer-debug
+ *   node diagnostic-preview.js Bali-Silk --render
  */
 import { mkdirSync, existsSync } from 'fs';
 import { basename, dirname, extname, join } from 'path';
@@ -17,6 +18,11 @@ import {
   resolveOriginalSwatchPath,
 } from './render-sofas.js';
 import { getMaterialClass, getMaterialBlendProfile } from './material-blend.js';
+import {
+  buildTransferMaps,
+  validateTransferRgbMap,
+  saveTransferDebugImages,
+} from './texture-transfer.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SOFA_PATH = join(__dirname, 'input', 'sofa.png');
@@ -47,7 +53,7 @@ function logPatch(label, patch) {
   );
 }
 
-async function runOneSwatch(swatchArg, renderSofa, masterImage, mask, width, height, channels) {
+async function runOneSwatch(swatchArg, opts, masterImage, mask, width, height, channels) {
   const swatchPath = resolveSwatchPath(swatchArg);
   if (!swatchPath) {
     console.error(`Swatch not found: ${swatchArg}`);
@@ -82,12 +88,36 @@ async function runOneSwatch(swatchArg, renderSofa, masterImage, mask, width, hei
   );
   console.log('  saved: extracted-shadow/midtone/highlight-texture.png');
 
-  if (renderSofa && masterImage) {
-    const finalData = recolorSofa(masterImage, mask, texture);
-    await saveImage(finalData, join(outDir, 'final-output.png'), width, height, channels);
-    console.log('  saved: final-output.png (texture transfer preview)');
+  if (opts.transferDebug && masterImage) {
+    console.log('\n  --- Transfer map debug (before sofa) ---');
+    const maps = buildTransferMaps(masterImage, mask, texture);
+    const debugPaths = await saveTransferDebugImages(maps, mask, outDir);
+    console.log('  transfer stats:', maps.stats);
+    console.log('  debug-sampled-rgb.png (must look like leather texture on upholstery shape)');
+    console.log('  debug-sofa-uv-lookup.png (R=patch U, G=patch V, B=sofa luminance u)');
+    console.log('  debug-band-assignment.png (64=shadow, 128=mid, 192=highlight)');
+    for (const [k, p] of Object.entries(debugPaths)) {
+      console.log(`    ${k}: ${basename(p)}`);
+    }
+
+    validateTransferRgbMap(maps, mask);
+    console.log('  transfer validation: PASS');
+
+    if (opts.renderSofa) {
+      const finalData = recolorSofa(masterImage, mask, texture, {
+        transferMaps: maps,
+        skipTransferValidation: true,
+      });
+      await saveImage(finalData, join(outDir, 'final-output.png'), width, height, channels);
+      console.log('  saved: final-output.png (after transfer verified)');
+    } else {
+      console.log('  (sofa render skipped — add --render after transfer map looks correct)');
+    }
+  } else if (opts.renderSofa) {
+    console.error('  --render requires sofa/mask; use --transfer-debug --render together');
+    return false;
   } else {
-    console.log('  (sofa render skipped — use --render to preview transfer)');
+    console.log('  (transfer debug skipped — use --transfer-debug)');
   }
 
   return true;
@@ -96,11 +126,15 @@ async function runOneSwatch(swatchArg, renderSofa, masterImage, mask, width, hei
 async function main() {
   const argv = process.argv.slice(2);
   const renderSofa = argv.includes('--render');
+  const transferDebug = argv.includes('--transfer-debug') || renderSofa;
   const swatchArgs = argv.filter((a) => !a.startsWith('--'));
   const swatches = swatchArgs.length ? swatchArgs : DEFAULT_SWATCHES;
 
-  console.log('Texture extraction diagnostic (real swatch patches)');
+  console.log('Texture diagnostic');
   console.log(`Swatches: ${swatches.join(', ')}`);
+  if (transferDebug) {
+    console.log('Mode: transfer-map debug' + (renderSofa ? ' + sofa render' : ''));
+  }
 
   let masterImage;
   let mask;
@@ -108,9 +142,9 @@ async function main() {
   let height;
   let channels;
 
-  if (renderSofa) {
+  if (transferDebug) {
     if (!existsSync(SOFA_PATH) || !existsSync(MASK_PATH)) {
-      console.error('Missing input/sofa.png or input/mask.png (required for --render)');
+      console.error('Missing input/sofa.png or input/mask.png');
       process.exit(1);
     }
     const sourceSofa = await loadImage(SOFA_PATH);
@@ -121,16 +155,17 @@ async function main() {
     masterImage = buildNeutralGrayMaster(sourceSofa, mask);
   }
 
+  const opts = { renderSofa, transferDebug };
   let ok = 0;
   for (const arg of swatches) {
-    if (await runOneSwatch(arg, renderSofa, masterImage, mask, width, height, channels)) ok++;
+    if (await runOneSwatch(arg, opts, masterImage, mask, width, height, channels)) ok++;
   }
 
   if (!ok) process.exit(1);
-  console.log(`\nDone. ${ok} swatch(s) — open texture PNGs to verify grain/variation.`);
+  console.log(`\nDone. ${ok} swatch(s). Open debug-sampled-rgb.png first — it must match the swatch material.`);
 }
 
 main().catch((err) => {
-  console.error(err);
+  console.error(err.message || err);
   process.exit(1);
 });
