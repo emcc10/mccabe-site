@@ -773,6 +773,10 @@ export function restoreLightLeatherDepth(oR, oG, oB, r, g, b, origLum, detailBlu
     finalL = Math.min(finalL, seamCap);
   }
 
+  const curL = pixelBrightness(r, g, b);
+  if (curL < 1) {
+    return { r: oR, g: oG, b: oB };
+  }
   return scaleRgbToLuminance(r, g, b, clamp(finalL, 0, 255));
 }
 
@@ -925,6 +929,10 @@ export function restoreLeatherDepth(oR, oG, oB, r, g, b, origLum, blurLum, ancho
     finalL = Math.min(finalL, origLum);
   }
 
+  const curL = pixelBrightness(r, g, b);
+  if (curL < 1) {
+    return { r: oR, g: oG, b: oB };
+  }
   return scaleRgbToLuminance(r, g, b, clamp(finalL, 0, 255));
 }
 
