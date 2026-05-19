@@ -79,6 +79,16 @@ const LIGHT_NEUTRAL_A_MIN = -3;
 const LIGHT_NEUTRAL_A_MAX = 4;
 const LIGHT_NEUTRAL_B_MIN = 0;
 const LIGHT_NEUTRAL_B_MAX = 10;
+/** Light-leather material depth (luminance only — not global brightness lift). */
+const LIGHT_DETAIL_BLUR_RADIUS = 8;
+const LIGHT_DETAIL_STRENGTH = 1.35;
+const LIGHT_SPECULAR_LUM = 170;
+const LIGHT_SPECULAR_BLEND = 0.75;
+const LIGHT_CREASE_LUM = 85;
+const LIGHT_CREASE_BLEND = 0.45;
+const LIGHT_SEAM_DEPTH_MIN = 12;
+const LIGHT_CLAHE_CLIP = 1.5;
+const LIGHT_CLAHE_TILES = 8;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
@@ -724,19 +734,180 @@ function midtoneDetailWeight(origLum) {
   return clamp(t, 0, 1);
 }
 
+function scaleRgbToLuminance(r, g, b, targetLum) {
+  const curL = pixelBrightness(r, g, b);
+  if (curL < 1) {
+    return { r, g, b };
+  }
+  const scale = targetLum / curL;
+  return {
+    r: clamp(Math.round(r * scale), 0, 255),
+    g: clamp(Math.round(g * scale), 0, 255),
+    b: clamp(Math.round(b * scale), 0, 255),
+  };
+}
+
+/**
+ * Light leather: grain, specular sheen, crease/seam structure (no global lift).
+ */
+export function restoreLightLeatherDepth(oR, oG, oB, r, g, b, origLum, detailBlurLum, localMeanLum) {
+  let nL = pixelBrightness(r, g, b);
+  const detail = origLum - detailBlurLum;
+  let finalL = nL + detail * LIGHT_DETAIL_STRENGTH;
+
+  if (origLum > LIGHT_SPECULAR_LUM) {
+    const t = smoothstep(LIGHT_SPECULAR_LUM, 248, origLum) * LIGHT_SPECULAR_BLEND;
+    finalL = finalL * (1 - t) + origLum * t;
+  }
+
+  if (origLum < LIGHT_CREASE_LUM) {
+    const t = clamp((LIGHT_CREASE_LUM - origLum) / LIGHT_CREASE_LUM, 0, 1) * LIGHT_CREASE_BLEND;
+    finalL = finalL * (1 - t) + origLum * t;
+  }
+
+  const seamDepth = localMeanLum - origLum;
+  if (seamDepth > LIGHT_SEAM_DEPTH_MIN) {
+    const seamW = clamp((seamDepth - LIGHT_SEAM_DEPTH_MIN) / 24, 0, 1);
+    const seamCap = localMeanLum - 5;
+    finalL = finalL * (1 - seamW * 0.5) + origLum * (seamW * 0.5);
+    finalL = Math.min(finalL, seamCap);
+  }
+
+  return scaleRgbToLuminance(r, g, b, clamp(finalL, 0, 255));
+}
+
+function buildClippedTileLut(hist, count, clipLimit) {
+  if (count < 16) return null;
+  const maxBin = (clipLimit * count) / 256;
+  const clipped = new Float32Array(256);
+  let excess = 0;
+  for (let i = 0; i < 256; i++) {
+    if (hist[i] > maxBin) {
+      excess += hist[i] - maxBin;
+      clipped[i] = maxBin;
+    } else {
+      clipped[i] = hist[i];
+    }
+  }
+  const redist = excess / 256;
+  for (let i = 0; i < 256; i++) {
+    clipped[i] += redist;
+  }
+  const lut = new Uint8Array(256);
+  let cum = 0;
+  for (let i = 0; i < 256; i++) {
+    cum += clipped[i];
+    lut[i] = clamp(Math.round((cum / count) * 255), 0, 255);
+  }
+  return lut;
+}
+
+function sampleTileLut(luts, tilesX, tilesY, tileW, tileH, x, y, lumVal) {
+  const fx = clamp(x / tileW - 0.5, 0, tilesX - 1);
+  const fy = clamp(y / tileH - 0.5, 0, tilesY - 1);
+  const tx0 = Math.floor(fx);
+  const ty0 = Math.floor(fy);
+  const tx1 = Math.min(tx0 + 1, tilesX - 1);
+  const ty1 = Math.min(ty0 + 1, tilesY - 1);
+  const wx = fx - tx0;
+  const wy = fy - ty0;
+  const v = clamp(Math.round(lumVal), 0, 255);
+
+  const l00 = luts[ty0 * tilesX + tx0];
+  const l10 = luts[ty0 * tilesX + tx1];
+  const l01 = luts[ty1 * tilesX + tx0];
+  const l11 = luts[ty1 * tilesX + tx1];
+  if (!l00 || !l10 || !l01 || !l11) return lumVal;
+
+  const top = l00[v] * (1 - wx) + l10[v] * wx;
+  const bot = l01[v] * (1 - wx) + l11[v] * wx;
+  return top * (1 - wy) + bot * wy;
+}
+
+/** Local CLAHE on upholstery luminance only (masked pixels). */
+export function applyClaheOnMask(
+  outData,
+  mask,
+  width,
+  height,
+  channels,
+  yMax,
+  origLum,
+  localMeanLum,
+  tiles = LIGHT_CLAHE_TILES,
+  clipLimit = LIGHT_CLAHE_CLIP,
+) {
+  const tilesX = tiles;
+  const tilesY = tiles;
+  const tileW = width / tilesX;
+  const tileH = height / tilesY;
+  const nTiles = tilesX * tilesY;
+  const luts = new Array(nTiles);
+  const hist = new Uint32Array(256);
+
+  for (let ty = 0; ty < tilesY; ty++) {
+    const y0 = Math.floor(ty * tileH);
+    const y1 = Math.floor((ty + 1) * tileH);
+    for (let tx = 0; tx < tilesX; tx++) {
+      const x0 = Math.floor(tx * tileW);
+      const x1 = Math.floor((tx + 1) * tileW);
+      hist.fill(0);
+      let count = 0;
+      for (let y = y0; y < y1; y++) {
+        if (y > yMax) continue;
+        for (let x = x0; x < x1; x++) {
+          const j = y * width + x;
+          if (mask[j] < MASK_APPLY_THRESH) continue;
+          const p = j * channels;
+          const lum = pixelBrightness(outData[p], outData[p + 1], outData[p + 2]);
+          const bin = clamp(Math.round(lum), 0, 255);
+          hist[bin]++;
+          count++;
+        }
+      }
+      luts[ty * tilesX + tx] = buildClippedTileLut(hist, count, clipLimit);
+    }
+  }
+
+  for (let y = 0; y < height; y++) {
+    if (y > yMax) continue;
+    for (let x = 0; x < width; x++) {
+      const j = y * width + x;
+      if (mask[j] < MASK_APPLY_THRESH) continue;
+      const p = j * channels;
+      const curL = pixelBrightness(outData[p], outData[p + 1], outData[p + 2]);
+      let mapped = sampleTileLut(luts, tilesX, tilesY, tileW, tileH, x, y, curL);
+
+      const seamDepth = localMeanLum[j] - origLum[j];
+      if (seamDepth > LIGHT_SEAM_DEPTH_MIN) {
+        mapped = Math.min(mapped, localMeanLum[j] - 4);
+      }
+
+      const scale = mapped / Math.max(curL, 1);
+      outData[p] = clamp(Math.round(outData[p] * scale), 0, 255);
+      outData[p + 1] = clamp(Math.round(outData[p + 1] * scale), 0, 255);
+      outData[p + 2] = clamp(Math.round(outData[p + 2] * scale), 0, 255);
+    }
+  }
+}
+
 /**
  * Contrast-only leather depth: original micro-detail, shadows, speculars.
  */
 export function restoreLeatherDepth(oR, oG, oB, r, g, b, origLum, blurLum, anchors, depthOpts = {}) {
-  const lightLeather = depthOpts.lightLeatherMode === true;
-  const shadowLock = depthOpts.shadowLockStrength ?? DEPTH_SHADOW_LOCK_STRENGTH;
+  if (depthOpts.lightLeatherMode === true) {
+    const detailBlur = depthOpts.detailBlurLum ?? blurLum;
+    const localMean = depthOpts.localMeanLum ?? detailBlur;
+    return restoreLightLeatherDepth(oR, oG, oB, r, g, b, origLum, detailBlur, localMean);
+  }
 
+  const shadowLock = depthOpts.shadowLockStrength ?? DEPTH_SHADOW_LOCK_STRENGTH;
   const detail = origLum - blurLum;
   let nL = pixelBrightness(r, g, b);
 
   nL = applySubtleSCurve(nL, anchors.black, anchors.white);
 
-  if (!lightLeather && origLum < DEPTH_SHADOW_LOCK_LUM) {
+  if (origLum < DEPTH_SHADOW_LOCK_LUM) {
     const t = clamp((DEPTH_SHADOW_LOCK_LUM - origLum) / DEPTH_SHADOW_LOCK_LUM, 0, 1);
     nL = nL + (origLum - nL) * t * shadowLock;
     nL = Math.min(nL, origLum);
@@ -750,26 +921,11 @@ export function restoreLeatherDepth(oR, oG, oB, r, g, b, origLum, blurLum, ancho
   const midW = midtoneDetailWeight(origLum);
   let finalL = nL + detail * (DEPTH_DETAIL_BLEND + midW * DEPTH_MICROCONTRAST);
 
-  if (lightLeather) {
-    const panelW = smoothstep(42, 100, origLum) * (1 - smoothstep(175, 215, origLum));
-    finalL += panelW * 22;
-  }
-
-  if (!lightLeather && origLum < DEPTH_SHADOW_LOCK_LUM) {
+  if (origLum < DEPTH_SHADOW_LOCK_LUM) {
     finalL = Math.min(finalL, origLum);
   }
 
-  finalL = clamp(finalL, 0, 255);
-  const curL = pixelBrightness(r, g, b);
-  if (curL < 1) {
-    return { r: oR, g: oG, b: oB };
-  }
-  const scale = finalL / curL;
-  return {
-    r: clamp(Math.round(r * scale), 0, 255),
-    g: clamp(Math.round(g * scale), 0, 255),
-    b: clamp(Math.round(b * scale), 0, 255),
-  };
+  return scaleRgbToLuminance(r, g, b, clamp(finalL, 0, 255));
 }
 
 /**
@@ -1010,6 +1166,10 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
   const blurLum = boxBlurLuminance(origLum, width, height);
   const anchors = computeLuminanceAnchors(origLum, mask, width, height);
   const abMaps = buildSofaAbTextureMaps(baseImage, width, height, channels);
+  const lightLeather = swatchStats.isLightSwatch === true;
+  const detailBlurLum = lightLeather
+    ? gaussianBlurFloat(origLum, width, height, LIGHT_DETAIL_BLUR_RADIUS)
+    : blurLum;
 
   for (let y = 0; y < height; y++) {
     if (y > yMax) continue;
@@ -1042,7 +1202,9 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
 
       ({ r, g, b } = restoreLeatherDepth(oR, oG, oB, r, g, b, origLum[j], blurLum[j], anchors, {
         shadowLockStrength: swatchStats.shadowLockStrength,
-        lightLeatherMode: swatchStats.isLightSwatch === true,
+        lightLeatherMode: lightLeather,
+        detailBlurLum: detailBlurLum[j],
+        localMeanLum: detailBlurLum[j],
       }));
 
       out[p] = r;
@@ -1050,6 +1212,10 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
       out[p + 2] = b;
       if (channels === 4) out[p + 3] = data[p + 3];
     }
+  }
+
+  if (lightLeather) {
+    applyClaheOnMask(out, mask, width, height, channels, yMax, origLum, detailBlurLum);
   }
 
   return out;
