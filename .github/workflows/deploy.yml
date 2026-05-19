@@ -9,7 +9,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -48,7 +48,10 @@ jobs:
           echo "  must contain MC_DTK_PLP_20260609"
           echo "Verify enforcer (no ?bust=1 — that URL is a stale CF cache bucket):"
           echo "  https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js"
-          echo "Then hard-refresh https://www.mccabestheaterandliving.com/-s/177.htm"
+          echo "Template must match repo after deploy:"
+          echo "  https://www.mccabestheaterandliving.com/v/template_266.html"
+          echo "  search for mc-plp-enforcer.js?v= from template_266.html body script"
+          echo "Baked category pages still need Volusion File Editor → template_266 → Save once."
           echo "Optional CF purge (frozen query strings on baked HTML):"
           echo "  /v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260516-leather-idempotent-v20"
           echo "  /v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260516sectional-diagram-ux"

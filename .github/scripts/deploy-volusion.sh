@@ -84,6 +84,48 @@ put_primary() {
   fi
 }
 
+deploy_template() {
+  if [[ "${SKIP_TEMPLATE_DEPLOY:-0}" == "1" ]]; then
+    echo "=== SKIP_TEMPLATE_DEPLOY=1 — template upload skipped ==="
+    return 0
+  fi
+  if [[ ! -f template_266.html ]]; then
+    echo "::error::Missing template_266.html in repo root"
+    return 1
+  fi
+  echo "=== Template FIRST (before photos — ~$(wc -c < template_266.html) bytes) ==="
+  export SFTP_HOST="${FTP_SERVER}"
+  export SFTP_USER="${FTP_USERNAME}"
+  export SFTP_PASS="${FTP_PASSWORD}"
+  export SFTP_PORT="2222"
+  python3 scripts/volusion_sftp_force_template.py
+  put_primary "template_266.html" "template" "/v/template_266.html" "/template_266.html"
+}
+
+verify_live_template() {
+  local needle="$1"
+  local url="https://www.mccabestheaterandliving.com/v/template_266.html?v=$(date +%s)"
+  local body
+  echo "=== Verify live template (full file) ==="
+  echo "  $url"
+  body=$(curl -fsSL "$url" -H "Cache-Control: no-cache" -H "Pragma: no-cache" 2>/dev/null || true)
+  if [[ -n "$body" && "$body" == *"$needle"* ]]; then
+    echo "  OK: live template contains ${needle}"
+    return 0
+  fi
+  echo "::error::Live /v/template_266.html missing ${needle} — copy/paste in Volusion File Editor means SFTP did not update the active file, or deploy was skipped."
+  return 1
+}
+
+TEMPLATE_ENFORCER_TAG=$(grep -oE 'mc-plp-enforcer\.js\?v=[0-9]+' template_266.html 2>/dev/null | head -1 || true)
+if [[ -z "$TEMPLATE_ENFORCER_TAG" ]]; then
+  TEMPLATE_ENFORCER_TAG="mc-plp-enforcer.js?v=20260609"
+fi
+
+python3 scripts/announce_deploy_markers.py || true
+deploy_template
+verify_live_template "$TEMPLATE_ENFORCER_TAG"
+
 echo "=== Assets via Paramiko (size-verified; /v/vspfiles + chroot paths) ==="
 export SFTP_PORT="2222"
 set +e
@@ -155,20 +197,7 @@ done
 shopt -u nullglob
 echo "PLP photos: ${photo_ok} uploaded, ${photo_fail} failed"
 if [[ "$photo_fail" -gt 0 ]]; then
-  echo "::error::PLP photo upload failed — gray mats will remain until photos are on server"
-  exit 1
-fi
-
-if [[ "${SKIP_TEMPLATE_DEPLOY:-0}" != "1" ]]; then
-  echo "=== Template (optional — set SKIP_TEMPLATE_DEPLOY=1 to skip) ==="
-  export SFTP_HOST="${FTP_SERVER}"
-  export SFTP_USER="${FTP_USERNAME}"
-  export SFTP_PASS="${FTP_PASSWORD}"
-  export SFTP_PORT="2222"
-  python3 scripts/volusion_sftp_force_template.py
-  put_primary "template_266.html" "template" "/v/template_266.html" "/template_266.html"
-else
-  echo "=== SKIP_TEMPLATE_DEPLOY=1 — template upload skipped ==="
+  echo "::warning::PLP photo upload failed for ${photo_fail} file(s) — template already deployed; gray mats may persist on those SKUs"
 fi
 
 echo "=== Post-deploy verify ==="
@@ -204,7 +233,11 @@ fi
 echo ""
 echo "Deploy finished (~2–4 min). Hard-refresh category 177 (Ctrl+Shift+R)."
 echo "SKIP_CAP on template.min / mtl-sectional-renderer is normal (128 KiB Volusion limit)."
-echo "PLP fix: single enforcer v20260609 via design-toolkit.min.js + template body script."
+echo "PLP fix: single enforcer via design-toolkit.min.js + template body script (${TEMPLATE_ENFORCER_TAG})."
+verify_live_template "$TEMPLATE_ENFORCER_TAG"
+echo ""
+echo "Category/product HTML is Volusion-BAKED: after SFTP template updates, open Volusion"
+echo "Design → File Editor → template_266.html → Save once so /category-s/*.htm picks up changes."
 echo "If still broken, Cloudflare Purge by URL:"
 echo "  /v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"
 echo "  /v/vspfiles/templates/266/js/min/design-toolkit.min.js"
