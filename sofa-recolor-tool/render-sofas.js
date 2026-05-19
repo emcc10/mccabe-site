@@ -43,12 +43,21 @@ const CHROMA_SCALE_MIN = 0.85;
 const CHROMA_SCALE_MAX = 1.35;
 const LAB_CHROMA_CLAMP = 72;
 
-/** Hero swatch sampling — perceived leather color, not shadow-averaged neutrals. */
+/** Hero swatch sampling — population-weighted cluster, not max-saturation. */
 const HERO_BORDER_FRAC = 0.2;
-const HERO_L_MIN = 38;
-const HERO_L_MAX = 82;
-const HERO_SAT_MIN = 0.12;
-const HERO_K_MEANS = 3;
+const HERO_L_MIN = 42;
+const HERO_L_MAX = 88;
+const HERO_SAT_MIN = 0.04;
+const HERO_LUM_TRIM = 0.08;
+const HERO_K_MEANS = 4;
+const HERO_L_TARGET = 68;
+const HERO_SCORE_POP = 0.65;
+const HERO_SCORE_MIDL = 0.25;
+const HERO_SCORE_CHROMA_PEN = 0.45;
+const HERO_CHROMA_PEN_THRESHOLD = 18;
+const NEUTRAL_CHROMA_AVG = 14;
+const NEUTRAL_GAIN_MULT = 0.55;
+const NEUTRAL_AB_CLAMP = 8;
 
 /** Post-recolor contrast restoration (luminance only — chroma unchanged). */
 const DEPTH_BLUR_RADIUS = 2;
@@ -329,9 +338,23 @@ function collectInteriorSwatchPixels(data, width, height, channels, lMin, lMax, 
   return out;
 }
 
-/** Filter swatch pixels for hero sampling (interior, mid-L, saturated). */
+/** Exclude darkest/lightest 8% of luminance in the candidate pool. */
+function trimLuminanceExtremes(pool) {
+  if (pool.length < HERO_K_MEANS * 4) {
+    return pool.map((p) => p.lab);
+  }
+  const sorted = [...pool].sort((a, b) => a.lab.L - b.lab.L);
+  const trim = Math.floor(sorted.length * HERO_LUM_TRIM);
+  const end = sorted.length - trim;
+  if (end - trim < HERO_K_MEANS) {
+    return sorted.map((p) => p.lab);
+  }
+  return sorted.slice(trim, end).map((p) => p.lab);
+}
+
+/** Filter swatch pixels for hero sampling. */
 export function filterHeroSwatchPixels(data, width, height, channels) {
-  const strict = collectInteriorSwatchPixels(
+  let pool = collectInteriorSwatchPixels(
     data,
     width,
     height,
@@ -340,25 +363,37 @@ export function filterHeroSwatchPixels(data, width, height, channels) {
     HERO_L_MAX,
     HERO_SAT_MIN,
   );
-  if (strict.length >= 48) {
-    return { samples: strict.map((p) => p.lab), tier: 'strict' };
+
+  if (pool.length < HERO_K_MEANS) {
+    pool = collectInteriorSwatchPixels(data, width, height, channels, HERO_L_MIN, HERO_L_MAX, 0.02);
   }
 
-  const midL = collectInteriorSwatchPixels(data, width, height, channels, HERO_L_MIN, HERO_L_MAX, 0);
-  if (midL.length >= HERO_K_MEANS) {
-    midL.sort((a, b) => b.sat - a.sat);
-    const keep = Math.max(64, Math.floor(midL.length * 0.55));
-    return { samples: midL.slice(0, keep).map((p) => p.lab), tier: 'midL-sat-rank' };
+  if (pool.length < HERO_K_MEANS) {
+    return { samples: [], tier: 'none' };
   }
 
-  const darkMid = collectInteriorSwatchPixels(data, width, height, channels, 22, HERO_L_MAX, 0);
-  if (darkMid.length >= HERO_K_MEANS) {
-    darkMid.sort((a, b) => b.sat - a.sat);
-    const keep = Math.max(64, Math.floor(darkMid.length * 0.45));
-    return { samples: darkMid.slice(0, keep).map((p) => p.lab), tier: 'dark-sat-rank' };
-  }
+  const samples = trimLuminanceExtremes(pool);
+  return { samples, tier: samples.length === pool.length ? 'hero' : 'hero-trimmed' };
+}
 
-  return { samples: [], tier: 'none' };
+/** Score cluster: population + mid-L fit − extreme chroma penalty. */
+export function scoreHeroCluster(members, totalCount) {
+  const n = members.length;
+  if (!n) return -Infinity;
+
+  const population = n / totalCount;
+  const avgL = members.reduce((s, p) => s + p.L, 0) / n;
+  const midLCloseness = 1 - clamp(Math.abs(avgL - HERO_L_TARGET) / 36, 0, 1);
+
+  const avgChroma = members.reduce((s, p) => s + Math.hypot(p.a, p.b), 0) / n;
+  const excess = Math.max(0, avgChroma - HERO_CHROMA_PEN_THRESHOLD);
+  const extremeChromaPenalty = excess > 0 ? (excess / 10) ** 1.65 : 0;
+
+  return (
+    population * HERO_SCORE_POP +
+    midLCloseness * HERO_SCORE_MIDL -
+    extremeChromaPenalty * HERO_SCORE_CHROMA_PEN
+  );
 }
 
 function kMeansLabAB(samples, k = HERO_K_MEANS) {
