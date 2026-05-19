@@ -44,10 +44,12 @@ const LIGHT_BODY_SAT_MAX = 0.42;
 const LIGHT_BODY_WARM_B_MIN = 6;
 const LIGHT_BODY_WARM_A_MIN = -2;
 const LIGHT_BODY_SHADOW_MIN_PIXELS = 80;
-const L_BLEND_MASTER = 0.68;
-const L_BLEND_SWATCH = 0.32;
-const LIGHT_L_LIFT = 8;
-const LIGHT_L_MAX = 94;
+const L_BLEND_MASTER = 0.52;
+const L_BLEND_SWATCH = 0.48;
+const LIGHT_SHADOW_ANCHOR = 58;
+const LIGHT_SHADOW_COMPRESS = 0.78;
+const LIGHT_L_LIFT = 10;
+const LIGHT_L_MAX = 96;
 /** Sofa L percentiles for shadow → mid → highlight color mapping. */
 const SOFA_L_MAP_LO = 0.08;
 const SOFA_L_MAP_HI = 0.92;
@@ -478,10 +480,13 @@ export function computeSofaLuminanceMapRange(masterImage, mask) {
   return { lo, hi, span: Math.max(hi - lo, SOFA_L_MAP_MIN_SPAN) };
 }
 
-/** Sofa L + swatch L; light neutrals get +8 LAB lift capped at 94. */
+/** Sofa L + swatch L; light neutrals compress shadows then +10 LAB (max 96). */
 export function computeFinalLabL(masterL, swatchL, isVeryLightLeather) {
   let finalL = masterL * L_BLEND_MASTER + swatchL * L_BLEND_SWATCH;
   if (isVeryLightLeather) {
+    if (finalL < LIGHT_SHADOW_ANCHOR) {
+      finalL = LIGHT_SHADOW_ANCHOR + (finalL - LIGHT_SHADOW_ANCHOR) * LIGHT_SHADOW_COMPRESS;
+    }
     finalL += LIGHT_L_LIFT;
     finalL = Math.min(finalL, LIGHT_L_MAX);
   }
@@ -538,7 +543,7 @@ export async function processSwatch(swatchPath, masterImage, mask) {
     midtone: fmtTone(palette.midtone),
     highlight: fmtTone(palette.highlight),
     lightLeather: palette.isNamedLight,
-    lBlend: palette.isNamedLight ? '68/32 +8 (max 94)' : '68/32',
+    lBlend: palette.isNamedLight ? '52/48 shadowCompress +10 (max 96)' : '52/48',
   });
 
   const outData = recolorSofa(masterImage, mask, palette);
