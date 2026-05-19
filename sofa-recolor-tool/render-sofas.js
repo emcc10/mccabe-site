@@ -314,18 +314,13 @@ export function computeLabStats(labSamples) {
   };
 }
 
-/** Mean RGB of interior swatch pixels (no L/sat filter) — for light-neutral lift detection. */
-export function computeInteriorSwatchRgbAvg(data, width, height, channels) {
-  const xMin = Math.floor(width * HERO_BORDER_FRAC);
-  const xMax = Math.ceil(width * (1 - HERO_BORDER_FRAC));
-  const yMin = Math.floor(height * HERO_BORDER_FRAC);
-  const yMax = Math.ceil(height * (1 - HERO_BORDER_FRAC));
+/** Mean RGB of all non-background swatch pixels — light-neutral lift detection only. */
+export function computeFullSwatchRgbAvg(data, width, height, channels) {
   let sum = 0;
   let n = 0;
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      if (x < xMin || x >= xMax || y < yMin || y >= yMax) continue;
       const i = (y * width + x) * channels;
       const r = data[i];
       const g = data[i + 1];
@@ -591,7 +586,7 @@ export function computeHeroSwatchStats(heroSamples, swatchRgbAvg = 0) {
   const meanB = pool.reduce((s, p) => s + p.b, 0) / pool.length;
   const meanL = medianOf(pool.map((p) => p.L));
 
-  const stats = finishHeroStats(meanA, meanB, meanL, heroSamples, avgSwatchChroma);
+  const stats = finishHeroStats(meanA, meanB, meanL, heroSamples, avgSwatchChroma, swatchRgbAvg);
   stats.heroClusterScore = bestScore;
   return stats;
 }
@@ -901,7 +896,7 @@ export async function getSwatchLabStats(swatchPath) {
     );
   }
 
-  const swatchRgbAvg = computeInteriorSwatchRgbAvg(data, info.width, info.height, info.channels);
+  const swatchRgbAvg = computeFullSwatchRgbAvg(data, info.width, info.height, info.channels);
   const stats = computeHeroSwatchStats(heroes, swatchRgbAvg);
   stats.heroTier = tier;
   const meanRgb = labToRgb(stats.meanL, stats.meanA, stats.meanB);
