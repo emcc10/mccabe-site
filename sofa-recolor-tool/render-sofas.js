@@ -1,5 +1,5 @@
 /**
- * Reinhard LAB color transfer — swatch overall stats; sofa texture preserved.
+ * LAB chroma-only recolor — preserve sofa L (lighting); transfer swatch a/b only.
  */
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
@@ -29,7 +29,6 @@ const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 const BG_THRESH = 238;
 const EDGE_LUM_MAX = 210;
 const EDGE_RECOLOR_DISTANCE = 4;
-const CHROMA_RICHNESS = 1.12;
 /** Do not recolor pixels in this band above the scanned sofa bottom (cast shadow on floor). */
 const CAST_SHADOW_BAND_PX = 34;
 const BODY_RECOLOR_MARGIN_ABOVE_BOTTOM_PX = 8;
@@ -37,11 +36,10 @@ const MASK_DILATE_RADIUS = 0;
 const MASK_ERODE_RADIUS = 1;
 const MASK_APPLY_THRESH = 128;
 const MIN_LAB_STD = 0.8;
-const L_TRANSFER_STRENGTH = 0.38;
-const AB_TRANSFER_STRENGTH = 1;
-/** Swatches above this mean L need a stronger lift off the dark cognac base photo. */
-const LIGHT_SWATCH_MEAN_L = 52;
-const MID_SWATCH_MEAN_L = 40;
+const CHROMA_STRENGTH = 0.88;
+const CHROMA_TEXTURE = 0.42;
+const CHROMA_SCALE_MIN = 0.72;
+const CHROMA_SCALE_MAX = 1.22;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
@@ -304,13 +302,9 @@ export function computeRepresentativeSwatchStats(samples) {
     meanL < 55;
 
   if (isCoolGray) {
-    meanL = Math.max(meanL, chromaStats.meanL, bodyStats.meanL);
     meanB -= clamp((repRgb.g - repRgb.b) * 0.06 + (repRgb.r - repRgb.b) * 0.03, 0.5, 3.5);
     meanA -= clamp((repRgb.r - repRgb.g) * 0.02, 0, 1.2);
   }
-
-  meanA *= 1.05;
-  meanB *= 1.05;
 
   return {
     meanL,
@@ -322,164 +316,56 @@ export function computeRepresentativeSwatchStats(samples) {
   };
 }
 
-function smoothstep(edge0, edge1, x) {
-  const t = clamp((x - edge0) / (edge1 - edge0), 0, 1);
-  return t * t * (3 - 2 * t);
-}
-
-/** Per-swatch transfer tuning — light leathers need lift + swatch-anchored chroma (not cognac-gray). */
-export function getTransferProfile(dst) {
-  const chromaMag = Math.hypot(dst.meanA, dst.meanB);
-
-  if (dst.meanL >= LIGHT_SWATCH_MEAN_L) {
-    return {
-      mode: 'light',
-      lStrength: 0.84,
-      lContrast: 1,
-      lRelative: 0.08,
-      chromaTexture: 0.9,
-      chromaScaleMin: 0.55,
-      chromaScaleMax: 1.08,
-      highlightPreserveL: 97,
-      highlightPreserveMix: chromaMag < 12 ? 0.25 : 0.45,
-      shadowChromaPull: 0.04,
-    };
+/**
+ * Keep original photo luminance in RGB after a/b shift (no overlay/blend modes).
+ */
+export function restoreOriginalLuminance(oR, oG, oB, r, g, b) {
+  const origLum = pixelBrightness(oR, oG, oB);
+  const newLum = pixelBrightness(r, g, b);
+  if (newLum < 1) {
+    return { r: oR, g: oG, b: oB };
   }
-  if (dst.meanL >= MID_SWATCH_MEAN_L) {
-    return {
-      mode: 'mid',
-      lStrength: 0.62,
-      lContrast: 1,
-      lRelative: 0.18,
-      chromaTexture: 0.65,
-      chromaScaleMin: 0.48,
-      chromaScaleMax: 1.15,
-      highlightPreserveL: 82,
-      highlightPreserveMix: 0.5,
-      shadowChromaPull: 0.1,
-    };
-  }
-  if (dst.meanL < MID_SWATCH_MEAN_L && chromaMag < 10) {
-    return {
-      mode: 'neutral',
-      lStrength: 0.52,
-      lContrast: 1,
-      lRelative: 0.22,
-      chromaTexture: 0.78,
-      chromaScaleMin: 0.45,
-      chromaScaleMax: 1.15,
-      highlightPreserveL: 75,
-      highlightPreserveMix: 0.45,
-      shadowChromaPull: 0.08,
-    };
-  }
+  const scale = origLum / newLum;
   return {
-    mode: 'standard',
-    lStrength: L_TRANSFER_STRENGTH,
-    lContrast: 1,
-    lRelative: 0,
-    chromaTexture: 1,
-    chromaScaleMin: 0.3,
-    chromaScaleMax: 2,
-    highlightPreserveL: 70,
-    highlightPreserveMix: 0.55,
-    shadowChromaPull: 0,
+    r: clamp(Math.round(r * scale), 0, 255),
+    g: clamp(Math.round(g * scale), 0, 255),
+    b: clamp(Math.round(b * scale), 0, 255),
   };
 }
 
-/** Push chroma outward from swatch mean for richer leather color. */
-function enrichChroma(a, b, dst, boost = CHROMA_RICHNESS) {
-  const da = a - dst.meanA;
-  const db = b - dst.meanB;
-  const mag = Math.hypot(dst.meanA, dst.meanB);
-  const neutralBoost = mag < 6 ? 1.06 : boost;
-  return {
-    a: dst.meanA + da * neutralBoost,
-    b: dst.meanB + db * neutralBoost,
-  };
-}
-
-function transferChromaReinhard(pixel, src, dst, strength = AB_TRANSFER_STRENGTH) {
-  const scaleA = dst.stdA / src.stdA;
-  const scaleB = dst.stdB / src.stdB;
-  const outA = (pixel.a - src.meanA) * scaleA + dst.meanA;
-  const outB = (pixel.b - src.meanB) * scaleB + dst.meanB;
-  return {
-    a: pixel.a + (outA - pixel.a) * strength,
-    b: pixel.b + (outB - pixel.b) * strength,
-  };
-}
-
-/** Anchor chroma on swatch mean — avoids gray mud when src sofa is warm/dark. */
-function transferChromaSwatchAnchored(pixel, src, dst, profile) {
-  const scaleA = clamp(dst.stdA / src.stdA, profile.chromaScaleMin, profile.chromaScaleMax);
-  const scaleB = clamp(dst.stdB / src.stdB, profile.chromaScaleMin, profile.chromaScaleMax);
-  let outA = dst.meanA + (pixel.a - src.meanA) * scaleA * profile.chromaTexture;
-  let outB = dst.meanB + (pixel.b - src.meanB) * scaleB * profile.chromaTexture;
-
-  if (profile.shadowChromaPull > 0) {
-    const shadowT = clamp((src.meanL - pixel.L) / (src.stdL * 1.6), 0, 1);
-    outA += (dst.meanA - outA) * shadowT * profile.shadowChromaPull;
-    outB += (dst.meanB - outB) * shadowT * profile.shadowChromaPull;
-  }
-
-  return { a: outA, b: outB };
-}
-
+/**
+ * Automotive-style colorize: original L unchanged; soft swatch a/b transfer only.
+ */
 export function transferLabPixel(pixel, src, dst, opts = {}) {
-  const profile = getTransferProfile(dst);
+  const finalL = pixel.L;
+
+  const scaleA = clamp(dst.stdA / src.stdA, CHROMA_SCALE_MIN, CHROMA_SCALE_MAX);
+  const scaleB = clamp(dst.stdB / src.stdB, CHROMA_SCALE_MIN, CHROMA_SCALE_MAX);
+
+  const targetA = dst.meanA + (pixel.a - src.meanA) * scaleA * CHROMA_TEXTURE;
+  const targetB = dst.meanB + (pixel.b - src.meanB) * scaleB * CHROMA_TEXTURE;
+
+  let strength = CHROMA_STRENGTH;
   const edgeT = clamp(opts.edgeStrength ?? 0, 0, 1);
-  const forceEdge = opts.cognacEdge || opts.fringeEdge;
-
-  let { a, b } =
-    profile.mode === 'standard'
-      ? transferChromaReinhard(pixel, src, dst, AB_TRANSFER_STRENGTH + edgeT * 0.2)
-      : transferChromaSwatchAnchored(pixel, src, dst, profile);
-
   if (edgeT > 0) {
-    const snap = forceEdge ? Math.min(1, edgeT * 1.15) : edgeT * 0.55;
+    strength = Math.min(1, strength + edgeT * 0.1);
+  }
+
+  let a = pixel.a + (targetA - pixel.a) * strength;
+  let b = pixel.b + (targetB - pixel.b) * strength;
+
+  if (opts.cognacEdge || opts.fringeEdge) {
+    const snap = clamp(edgeT * 0.55, 0, 0.9);
     a = a + (dst.meanA - a) * snap;
     b = b + (dst.meanB - b) * snap;
   }
 
-  ({ a, b } = enrichChroma(a, b, dst));
-
-  let finalL;
-  const lStrength = profile.lStrength + edgeT * (forceEdge ? 0.18 : 0.1);
-
-  if (profile.lRelative > 0) {
-    const dL = dst.meanL - src.meanL;
-    finalL = pixel.L + dL * lStrength;
-    finalL += (pixel.L - src.meanL) * profile.lRelative * (dst.stdL / src.stdL);
-  } else {
-    const targetL = (pixel.L - src.meanL) * (dst.stdL / src.stdL) + dst.meanL;
-    finalL = pixel.L + (targetL - pixel.L) * lStrength;
+  const { r, g, b: bOut } = labToRgb(finalL, a, b);
+  const orig = opts.originalRgb;
+  if (orig) {
+    return restoreOriginalLuminance(orig.r, orig.g, orig.b, r, g, bOut);
   }
-
-  if (profile.lContrast > 1) {
-    finalL = dst.meanL + (finalL - dst.meanL) * profile.lContrast;
-  }
-
-  if (forceEdge && opts.fringeEdge) {
-    finalL = pixel.L + (dst.meanL - src.meanL) * 0.92;
-    a = dst.meanA;
-    b = dst.meanB;
-  }
-
-  const preserveMix = profile.highlightPreserveMix ?? 0.5;
-  if (pixel.L > profile.highlightPreserveL && preserveMix > 0) {
-    const preserve =
-      smoothstep(profile.highlightPreserveL, profile.highlightPreserveL + 10, pixel.L) *
-      preserveMix;
-    finalL = finalL + (pixel.L - finalL) * preserve;
-  }
-
-  if (profile.mode === 'light') {
-    const hazeCap = dst.meanL + dst.stdL * 0.85;
-    finalL = Math.min(finalL, hazeCap);
-  }
-
-  return labToRgb(clamp(finalL, 0, 100), a, b);
+  return { r, g, b: bOut };
 }
 
 export function distanceToBackground(mask, width, height, x, y, maxDist) {
@@ -667,6 +553,7 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
         edgeStrength,
         cognacEdge,
         fringeEdge,
+        originalRgb: { r: oR, g: oG, b: oB },
       });
 
       out[p] = r;
@@ -766,7 +653,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: mid-tone swatch; edge cognac fix; richer chroma; de-hazed lights');
+  console.log('  method: LAB chroma-only (L preserved); no swatch luminance transfer');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   const mask = await createUpholsteryMask(baseSofa, maskPath);

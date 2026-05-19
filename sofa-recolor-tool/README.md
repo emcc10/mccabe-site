@@ -1,8 +1,6 @@
 # Sofa Recolor Tool
 
-**Reinhard LAB color transfer** — matches the swatch’s overall color *distribution* (mean + variation from every swatch pixel), not a single flat RGB.
-
-Preserves sofa folds, shadows, highlights, and seam contrast.
+**LAB chroma-only recolor** — transfers hue, saturation, and color temperature from each swatch (a/b channels only). The sofa photograph’s **L channel is never changed**: all lighting, highlights, shadows, and contrast stay intact. No overlay, multiply, or opacity blending.
 
 ## Commands
 
