@@ -270,6 +270,36 @@ function centroidPatchOrigin(bandMask, width, height, patchSize) {
   return { x, y, score: scorePatchWindow(bandMask, width, x, y, patchSize) };
 }
 
+function markPatchUsed(used, width, originX, originY, patchSize) {
+  for (let dy = 0; dy < patchSize; dy++) {
+    const row = (originY + dy) * width;
+    for (let dx = 0; dx < patchSize; dx++) {
+      used[row + originX + dx] = 1;
+    }
+  }
+}
+
+/** Shadow → mid → highlight patches from distinct swatch regions. */
+function extractSequentialBandPatches(data, width, height, channels, masks, patchSize) {
+  const used = new Uint8Array(width * height);
+  const patches = {};
+
+  for (const name of ['shadow', 'midtone', 'highlight']) {
+    const combined = new Uint8Array(width * height);
+    for (let j = 0; j < width * height; j++) {
+      combined[j] = masks[name][j] && !used[j];
+    }
+    let mask = combined;
+    const count = combined.reduce((a, v) => a + v, 0);
+    if (count < patchSize) mask = masks[name];
+
+    patches[name] = extractBandPatch(data, width, height, channels, mask, patchSize);
+    markPatchUsed(used, width, patches[name].origin.x, patches[name].origin.y, patchSize);
+  }
+
+  return patches;
+}
+
 function extractBandPatch(data, width, height, channels, bandMask, patchSize) {
   const sliding = findBestPatchOrigin(bandMask, width, height, patchSize);
   const centered = centroidPatchOrigin(bandMask, width, height, patchSize);
@@ -329,11 +359,14 @@ export async function getSwatchTexture(swatchPath) {
     ? buildLightBodyBandMasks(meta, width, height)
     : buildTertileBandMasks(meta, width, height, p33, p66);
 
-  const patches = {
-    shadow: extractBandPatch(data, width, height, channels, masks.shadow, TEXTURE_PATCH_SIZE),
-    midtone: extractBandPatch(data, width, height, channels, masks.midtone, TEXTURE_PATCH_SIZE),
-    highlight: extractBandPatch(data, width, height, channels, masks.highlight, TEXTURE_PATCH_SIZE),
-  };
+  const patches = extractSequentialBandPatches(
+    data,
+    width,
+    height,
+    channels,
+    masks,
+    TEXTURE_PATCH_SIZE,
+  );
 
   return {
     patches,
