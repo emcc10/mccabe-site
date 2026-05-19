@@ -80,8 +80,20 @@ def main() -> int:
             for remote in _paths():
                 try:
                     sftp.put(local, remote, confirm=False)
-                    print(f"::notice::FORCE_TEMPLATE_OK → {remote}", flush=True)
-                    ok_any = True
+                    want = os.path.getsize(local)
+                    got = sftp.stat(remote).st_size
+                    ok_size = got == want
+                    print(
+                        f"::notice::FORCE_TEMPLATE_OK → {remote} size={got} want={want}",
+                        flush=True,
+                    )
+                    if ok_size:
+                        ok_any = True
+                    else:
+                        print(
+                            f"::warning::FORCE_TEMPLATE_SIZE_MISMATCH {remote!r}",
+                            flush=True,
+                        )
                 except Exception as exc:  # noqa: BLE001
                     print(f"::warning::FORCE_TEMPLATE_SKIP {remote!r}: {exc}", flush=True)
         finally:
