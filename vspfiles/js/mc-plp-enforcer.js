@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260604
+ * MC_PLP_ENFORCER_20260605
  *
  * DOM (category listing):
  *   table.colors_backgroundlight + SearchResults_SubCat_Angle  ← black bar (legacy subcat chrome)
@@ -10,7 +10,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260604";
+  var VERSION = "20260605";
   var PLP_MAT = "#ffffff";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
@@ -22,7 +22,7 @@
       var l = document.createElement("link");
       l.id = "mc-plp-body-last-css";
       l.rel = "stylesheet";
-      l.href = "/v/vspfiles/css/mc-plp-body-last.css?v=20260604";
+      l.href = "/v/vspfiles/css/mc-plp-body-last.css?v=20260605";
       (document.body || document.documentElement).appendChild(l);
     }
     if (document.body) attach();
@@ -36,11 +36,14 @@
   var STAGE_M = 172;
   var PAD = 14;
   var PAD_M = 12;
-  var TARGET_FILL = 0.82;
-  var SCALE_MIN = 0.65;
-  var SCALE_MAX = 1.55;
+  var REF_STORAGE_KEY = "MC_PLP_JUNO_APT_REF";
+  var SCALE_MIN = 0.45;
+  var SCALE_MAX = 2.2;
+  var BOUNDS_SAMPLE = 320;
 
   var THUMB_SEL = "#content_area .v-product-grid a.v-product__img";
+  var normalizeScheduled = false;
+  var normalizeGen = 0;
 
   function isCategoryPlp() {
     try {
@@ -145,92 +148,238 @@
     }
   }
 
-  function applyScale(img, scale) {
-    scale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, scale));
-    scale = Math.round(scale * 100) / 100;
-    img.setAttribute("data-scale", String(scale));
-    img.style.setProperty("--thumb-scale", String(scale));
-    img.style.transformOrigin = "center bottom";
-    if (Math.abs(scale - 1) > 0.005) {
-      img.style.transform = "scale(var(--thumb-scale))";
-    } else {
-      img.style.transform = "";
-      img.removeAttribute("data-scale");
-    }
+  function productText(wrap) {
+    var product = wrap.closest(".v-product");
+    var nameEl =
+      (product &&
+        product.querySelector(
+          ".v-product__title, .v-product__title a, a.productnamecolor, .productnamecolor"
+        )) ||
+      null;
+    var img = wrap.querySelector("img");
+    return (
+      (nameEl ? nameEl.textContent : "") +
+      " " +
+      (wrap.getAttribute("href") || "") +
+      " " +
+      (img ? img.getAttribute("alt") || "" : "") +
+      " " +
+      (img ? img.getAttribute("title") || "" : "") +
+      " " +
+      (img ? img.getAttribute("src") || "" : "")
+    )
+      .toLowerCase()
+      .replace(/\s+/g, " ");
   }
 
-  function measureFill(img, cb) {
+  function isJunoApartmentRef(wrap) {
+    return /juno\s+apartment/.test(productText(wrap));
+  }
+
+  function isBackgroundPixel(r, g, b, a) {
+    if (a < 20) return true;
+    if (r > 235 && g > 235 && b > 235) return true;
+    var hi = Math.max(r, g, b);
+    var lo = Math.min(r, g, b);
+    if (hi - lo < 18 && hi > 192) return true;
+    return false;
+  }
+
+  function detectSofaBounds(img, cb) {
+    function run() {
+      try {
+        var nw = img.naturalWidth;
+        var nh = img.naturalHeight;
+        if (!nw || !nh) {
+          cb(null);
+          return;
+        }
+        var maxSide = BOUNDS_SAMPLE;
+        var w = nw >= nh ? maxSide : Math.round((maxSide * nw) / nh);
+        var h = nh >= nw ? maxSide : Math.round((maxSide * nh) / nw);
+        if (w < 1) w = 1;
+        if (h < 1) h = 1;
+
+        var canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        var data = ctx.getImageData(0, 0, w, h).data;
+
+        var minX = w;
+        var minY = h;
+        var maxX = 0;
+        var maxY = 0;
+        var found = false;
+        var x;
+        var y;
+        for (y = 0; y < h; y++) {
+          for (x = 0; x < w; x++) {
+            var i = (y * w + x) * 4;
+            if (isBackgroundPixel(data[i], data[i + 1], data[i + 2], data[i + 3])) continue;
+            found = true;
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+          }
+        }
+        if (!found) {
+          cb(null);
+          return;
+        }
+
+        var sx = nw / w;
+        var sy = nh / h;
+        cb({
+          visibleW: (maxX - minX + 1) * sx,
+          visibleH: (maxY - minY + 1) * sy,
+          minX: minX * sx,
+          minY: minY * sy,
+          maxX: (maxX + 1) * sx,
+          maxY: (maxY + 1) * sy,
+          nw: nw,
+          nh: nh,
+        });
+      } catch (err) {
+        cb(null);
+      }
+    }
+
     if (!img.complete || !img.naturalWidth) {
-      img.addEventListener(
-        "load",
-        function () {
-          measureFill(img, cb);
-        },
-        { once: true }
-      );
+      img.addEventListener("load", run, { once: true });
+      img.addEventListener("error", function () {
+        cb(null);
+      }, { once: true });
       return;
     }
+    run();
+  }
+
+  function fitScale(nw, nh, boxW, boxH) {
+    return Math.min(boxW / nw, boxH / nh);
+  }
+
+  function displayedVisibleWidth(bounds, boxW, boxH) {
+    return bounds.visibleW * fitScale(bounds.nw, bounds.nh, boxW, boxH);
+  }
+
+  function contentHeight(nw, nh, boxW, stage) {
+    return nh * fitScale(nw, nh, boxW, stage);
+  }
+
+  function footOffsetPx(bounds, boxW, stage, scale) {
+    return ((bounds.nh - bounds.maxY) / bounds.nh) * contentHeight(bounds.nw, bounds.nh, boxW, stage) * scale;
+  }
+
+  function saveReference(ref) {
     try {
-      var maxSide = 160;
-      var nw = img.naturalWidth;
-      var nh = img.naturalHeight;
-      var w = nw >= nh ? maxSide : Math.round((maxSide * nw) / nh);
-      var h = nh >= nw ? maxSide : Math.round((maxSide * nh) / nw);
-      if (w < 1) w = 1;
-      if (h < 1) h = 1;
+      global.sessionStorage.setItem(REF_STORAGE_KEY, JSON.stringify(ref));
+    } catch (e) {}
+  }
 
-      var canvas = document.createElement("canvas");
-      canvas.width = w;
-      canvas.height = h;
-      var ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, w, h);
-      var data = ctx.getImageData(0, 0, w, h).data;
-
-      var minX = w;
-      var minY = h;
-      var maxX = 0;
-      var maxY = 0;
-      var found = false;
-      var x;
-      var y;
-      for (y = 0; y < h; y++) {
-        for (x = 0; x < w; x++) {
-          var i = (y * w + x) * 4;
-          var r = data[i];
-          var g = data[i + 1];
-          var b = data[i + 2];
-          var a = data[i + 3];
-          if (a < 20) continue;
-          if (r > 238 && g > 238 && b > 238) continue;
-          found = true;
-          if (x < minX) minX = x;
-          if (y < minY) minY = y;
-          if (x > maxX) maxX = x;
-          if (y > maxY) maxY = y;
-        }
-      }
-      if (!found) {
-        cb(1);
-        return;
-      }
-      var fillW = (maxX - minX + 1) / w;
-      var fillH = (maxY - minY + 1) / h;
-      cb(Math.max(fillW, fillH));
-    } catch (err) {
-      cb(1);
+  function loadReference() {
+    try {
+      var raw = global.sessionStorage.getItem(REF_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e2) {
+      return null;
     }
   }
 
-  function normalizeScale(wrap, img) {
-    if (img.getAttribute("data-mc-scale-done") === "1") return;
+  function applySofaTransform(img, scale, translateY) {
+    scale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, scale));
+    scale = Math.round(scale * 1000) / 1000;
+    translateY = Math.round(translateY * 10) / 10;
+    img.style.transformOrigin = "center bottom";
+    if (Math.abs(scale - 1) < 0.005 && Math.abs(translateY) < 0.5) {
+      img.style.transform = "";
+      img.removeAttribute("data-scale");
+      return;
+    }
+    img.setAttribute("data-scale", String(scale));
+    img.style.transform = "translateY(" + translateY + "px) scale(" + scale + ")";
+  }
 
-    measureFill(img, function (fill) {
-      var scale = 1;
-      if (fill > 0.02) {
-        scale = TARGET_FILL / fill;
+  function normalizeSofaSizes() {
+    if (!isCategoryPlp()) return;
+    var gen = ++normalizeGen;
+    var mobile = global.innerWidth <= 991;
+    var stage = mobile ? STAGE_M : STAGE;
+    var pad = mobile ? PAD_M : PAD;
+    var wraps = Array.prototype.slice.call(document.querySelectorAll(THUMB_SEL));
+    if (!wraps.length) return;
+
+    var pending = wraps.length;
+    var entries = [];
+    var junoEntry = null;
+
+    function doneOne() {
+      pending--;
+      if (pending > 0) return;
+      if (gen !== normalizeGen) return;
+
+      var ref = junoEntry ? junoEntry.bounds : null;
+      var refBoxW = junoEntry ? junoEntry.boxW : 0;
+      if (ref && junoEntry) {
+        saveReference({
+          visibleW: ref.visibleW,
+          visibleH: ref.visibleH,
+          maxY: ref.maxY,
+          nh: ref.nh,
+          nw: ref.nw,
+          boxW: refBoxW,
+          stage: stage,
+        });
+      } else {
+        var cached = loadReference();
+        if (cached && cached.visibleW > 0) {
+          ref = cached;
+          refBoxW = cached.boxW || refBoxW;
+        }
       }
-      applyScale(img, scale);
-      img.setAttribute("data-mc-scale-done", "1");
+
+      if (!ref || !ref.visibleW) return;
+
+      var refVisW = displayedVisibleWidth(ref, refBoxW || entries[0].boxW, stage);
+      var refFoot = footOffsetPx(ref, refBoxW || entries[0].boxW, stage, 1);
+
+      entries.forEach(function (entry) {
+        if (!entry.bounds || gen !== normalizeGen) return;
+        var visW = displayedVisibleWidth(entry.bounds, entry.boxW, stage);
+        if (!visW) return;
+        var scale = refVisW / visW;
+        var foot = footOffsetPx(entry.bounds, entry.boxW, stage, scale);
+        applySofaTransform(entry.img, scale, refFoot - foot);
+        entry.img.setAttribute("data-mc-scale-done", "1");
+      });
+    }
+
+    wraps.forEach(function (wrap) {
+      var img = wrap.querySelector(":scope > img") || wrap.querySelector("img");
+      if (!img) {
+        doneOne();
+        return;
+      }
+      img.removeAttribute("data-mc-scale-done");
+      var boxW = Math.max(40, wrap.clientWidth - pad * 2);
+      detectSofaBounds(img, function (bounds) {
+        if (gen !== normalizeGen) return;
+        var entry = { wrap: wrap, img: img, bounds: bounds, boxW: boxW };
+        entries.push(entry);
+        if (bounds && isJunoApartmentRef(wrap)) junoEntry = entry;
+        doneOne();
+      });
+    });
+  }
+
+  function scheduleNormalize() {
+    if (normalizeScheduled) return;
+    normalizeScheduled = true;
+    global.requestAnimationFrame(function () {
+      normalizeScheduled = false;
+      normalizeSofaSizes();
     });
   }
 
@@ -289,8 +438,12 @@
     img.style.setProperty("border", "0", "important");
     img.style.setProperty("box-shadow", "none", "important");
     img.style.transformOrigin = "center bottom";
+  }
 
-    normalizeScale(wrap, img);
+  function applyThumbs() {
+    if (!isCategoryPlp()) return;
+    document.querySelectorAll(THUMB_SEL).forEach(fixThumb);
+    scheduleNormalize();
   }
 
   function hideHero() {
@@ -308,11 +461,6 @@
         n.style.setProperty("opacity", "0", "important");
         n.style.setProperty("overflow", "hidden", "important");
       });
-  }
-
-  function applyThumbs() {
-    if (!isCategoryPlp()) return;
-    document.querySelectorAll(THUMB_SEL).forEach(fixThumb);
   }
 
   function run() {
