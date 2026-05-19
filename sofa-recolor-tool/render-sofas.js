@@ -27,13 +27,14 @@ const ZIP_PATH = join(OUTPUT_DIR, 'sofa-renders.zip');
 const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 
 const BG_THRESH = 238;
-const EDGE_LUM_MAX = 215;
-const EDGE_SKIP_DISTANCE = 2;
+const EDGE_LUM_MAX = 210;
+const EDGE_RECOLOR_DISTANCE = 4;
+const CHROMA_RICHNESS = 1.12;
 /** Do not recolor pixels in this band above the scanned sofa bottom (cast shadow on floor). */
 const CAST_SHADOW_BAND_PX = 34;
 const BODY_RECOLOR_MARGIN_ABOVE_BOTTOM_PX = 8;
 const MASK_DILATE_RADIUS = 0;
-const MASK_ERODE_RADIUS = 2;
+const MASK_ERODE_RADIUS = 1;
 const MASK_APPLY_THRESH = 128;
 const MIN_LAB_STD = 0.8;
 const L_TRANSFER_STRENGTH = 0.38;
@@ -163,12 +164,19 @@ function isLegPixel(r, g, b, y, sofaBottomY) {
   return pixelSaturation(r, g, b) < 0.12;
 }
 
-/** Anti-aliased edge / white fringe — causes gray halo if recolored. */
+/** Anti-aliased white fringe at silhouette. */
 function isEdgeFringePixel(r, g, b) {
   const lum = pixelBrightness(r, g, b);
-  if (lum > 228) return true;
-  if (lum > EDGE_LUM_MAX && pixelSaturation(r, g, b) < 0.22) return true;
+  if (lum > 232) return true;
+  if (lum > EDGE_LUM_MAX && pixelSaturation(r, g, b) < 0.2) return true;
   return false;
+}
+
+/** Warm cognac bleed on cushion/arm edges in the base photo. */
+function isCognacFringePixel(r, g, b) {
+  const sat = pixelSaturation(r, g, b);
+  if (sat < 0.04) return false;
+  return r > g + 3 && r > b + 2 && g >= b - 8;
 }
 
 function isEdgeGlowPixel(r, g, b) {
@@ -301,11 +309,8 @@ export function computeRepresentativeSwatchStats(samples) {
     meanA -= clamp((repRgb.r - repRgb.g) * 0.02, 0, 1.2);
   }
 
-  const isLightNeutral = meanL >= LIGHT_SWATCH_MEAN_L && chromaMag < 14;
-  if (isLightNeutral) {
-    meanB *= 0.88;
-    meanA *= 0.92;
-  }
+  meanA *= 1.05;
+  meanB *= 1.05;
 
   return {
     meanL,
@@ -329,14 +334,15 @@ export function getTransferProfile(dst) {
   if (dst.meanL >= LIGHT_SWATCH_MEAN_L) {
     return {
       mode: 'light',
-      lStrength: 0.8,
+      lStrength: 0.84,
       lContrast: 1,
-      lRelative: 0.12,
-      chromaTexture: 0.72,
-      chromaScaleMin: 0.5,
-      chromaScaleMax: 1.05,
-      highlightPreserveL: 93,
-      shadowChromaPull: 0.06,
+      lRelative: 0.08,
+      chromaTexture: 0.9,
+      chromaScaleMin: 0.55,
+      chromaScaleMax: 1.08,
+      highlightPreserveL: 97,
+      highlightPreserveMix: chromaMag < 12 ? 0.25 : 0.45,
+      shadowChromaPull: 0.04,
     };
   }
   if (dst.meanL >= MID_SWATCH_MEAN_L) {
@@ -349,6 +355,7 @@ export function getTransferProfile(dst) {
       chromaScaleMin: 0.48,
       chromaScaleMax: 1.15,
       highlightPreserveL: 82,
+      highlightPreserveMix: 0.5,
       shadowChromaPull: 0.1,
     };
   }
@@ -358,10 +365,11 @@ export function getTransferProfile(dst) {
       lStrength: 0.52,
       lContrast: 1,
       lRelative: 0.22,
-      chromaTexture: 0.7,
+      chromaTexture: 0.78,
       chromaScaleMin: 0.45,
       chromaScaleMax: 1.15,
       highlightPreserveL: 75,
+      highlightPreserveMix: 0.45,
       shadowChromaPull: 0.08,
     };
   }
@@ -374,7 +382,20 @@ export function getTransferProfile(dst) {
     chromaScaleMin: 0.3,
     chromaScaleMax: 2,
     highlightPreserveL: 70,
+    highlightPreserveMix: 0.55,
     shadowChromaPull: 0,
+  };
+}
+
+/** Push chroma outward from swatch mean for richer leather color. */
+function enrichChroma(a, b, dst, boost = CHROMA_RICHNESS) {
+  const da = a - dst.meanA;
+  const db = b - dst.meanB;
+  const mag = Math.hypot(dst.meanA, dst.meanB);
+  const neutralBoost = mag < 6 ? 1.06 : boost;
+  return {
+    a: dst.meanA + da * neutralBoost,
+    b: dst.meanB + db * neutralBoost,
   };
 }
 
@@ -405,37 +426,64 @@ function transferChromaSwatchAnchored(pixel, src, dst, profile) {
   return { a: outA, b: outB };
 }
 
-export function transferLabPixel(pixel, src, dst) {
+export function transferLabPixel(pixel, src, dst, opts = {}) {
   const profile = getTransferProfile(dst);
+  const edgeT = clamp(opts.edgeStrength ?? 0, 0, 1);
+  const forceEdge = opts.cognacEdge || opts.fringeEdge;
 
-  const { a, b } =
+  let { a, b } =
     profile.mode === 'standard'
-      ? transferChromaReinhard(pixel, src, dst)
+      ? transferChromaReinhard(pixel, src, dst, AB_TRANSFER_STRENGTH + edgeT * 0.2)
       : transferChromaSwatchAnchored(pixel, src, dst, profile);
 
+  if (edgeT > 0) {
+    const snap = forceEdge ? Math.min(1, edgeT * 1.15) : edgeT * 0.55;
+    a = a + (dst.meanA - a) * snap;
+    b = b + (dst.meanB - b) * snap;
+  }
+
+  ({ a, b } = enrichChroma(a, b, dst));
+
   let finalL;
+  const lStrength = profile.lStrength + edgeT * (forceEdge ? 0.18 : 0.1);
+
   if (profile.lRelative > 0) {
     const dL = dst.meanL - src.meanL;
-    finalL = pixel.L + dL * profile.lStrength;
+    finalL = pixel.L + dL * lStrength;
     finalL += (pixel.L - src.meanL) * profile.lRelative * (dst.stdL / src.stdL);
   } else {
     const targetL = (pixel.L - src.meanL) * (dst.stdL / src.stdL) + dst.meanL;
-    finalL = pixel.L + (targetL - pixel.L) * profile.lStrength;
+    finalL = pixel.L + (targetL - pixel.L) * lStrength;
   }
 
   if (profile.lContrast > 1) {
     finalL = dst.meanL + (finalL - dst.meanL) * profile.lContrast;
   }
 
-  if (pixel.L > profile.highlightPreserveL) {
-    const preserve = smoothstep(profile.highlightPreserveL, profile.highlightPreserveL + 10, pixel.L);
+  if (forceEdge && opts.fringeEdge) {
+    finalL = pixel.L + (dst.meanL - src.meanL) * 0.92;
+    a = dst.meanA;
+    b = dst.meanB;
+  }
+
+  const preserveMix = profile.highlightPreserveMix ?? 0.5;
+  if (pixel.L > profile.highlightPreserveL && preserveMix > 0) {
+    const preserve =
+      smoothstep(profile.highlightPreserveL, profile.highlightPreserveL + 10, pixel.L) *
+      preserveMix;
     finalL = finalL + (pixel.L - finalL) * preserve;
+  }
+
+  if (profile.mode === 'light') {
+    const hazeCap = dst.meanL + dst.stdL * 0.85;
+    finalL = Math.min(finalL, hazeCap);
   }
 
   return labToRgb(clamp(finalL, 0, 100), a, b);
 }
 
-function distanceToBackground(mask, width, height, x, y, maxDist) {
+export function distanceToBackground(mask, width, height, x, y, maxDist) {
+  if (mask[y * width + x] < MASK_APPLY_THRESH) return 0;
   for (let d = 1; d <= maxDist; d++) {
     for (let dy = -d; dy <= d; dy++) {
       for (let dx = -d; dx <= d; dx++) {
@@ -608,13 +656,18 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
       const oG = data[p + 1];
       const oB = data[p + 2];
       if (isCastShadowPixel(oR, oG, oB, y, sofaBottomY)) continue;
-      if (isEdgeFringePixel(oR, oG, oB)) continue;
-      if (distanceToBackground(mask, width, height, x, y, EDGE_SKIP_DISTANCE) <= EDGE_SKIP_DISTANCE) {
-        continue;
-      }
+
+      const edgeDist = distanceToBackground(mask, width, height, x, y, EDGE_RECOLOR_DISTANCE);
+      const edgeStrength = edgeDist <= EDGE_RECOLOR_DISTANCE ? (EDGE_RECOLOR_DISTANCE - edgeDist + 1) / (EDGE_RECOLOR_DISTANCE + 1) : 0;
+      const fringeEdge = edgeStrength > 0 && isEdgeFringePixel(oR, oG, oB);
+      const cognacEdge = edgeStrength > 0 && (isCognacFringePixel(oR, oG, oB) || fringeEdge);
 
       const baseLab = rgbToLab(oR, oG, oB);
-      const { r, g, b } = transferLabPixel(baseLab, sofaStats, swatchStats);
+      const { r, g, b } = transferLabPixel(baseLab, sofaStats, swatchStats, {
+        edgeStrength,
+        cognacEdge,
+        fringeEdge,
+      });
 
       out[p] = r;
       out[p + 1] = g;
@@ -713,7 +766,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: mid-tone swatch stats; smooth lift on lights; floor shadow protected');
+  console.log('  method: mid-tone swatch; edge cognac fix; richer chroma; de-hazed lights');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   const mask = await createUpholsteryMask(baseSofa, maskPath);
