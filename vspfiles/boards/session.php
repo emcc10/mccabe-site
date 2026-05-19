@@ -1,6 +1,6 @@
 <?php
 /**
- * Returns saved inspiration items for the signed-in shopper.
+ * Auth probe for My Boards page (does not require sign-in to call).
  */
 header('Content-Type: application/json; charset=UTF-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
@@ -14,14 +14,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 $cid = mc_boards_customer_id();
-if ($cid === '') {
-    http_response_code(401);
-    echo json_encode(['ok' => false, 'error' => 'sign_in_required', 'signedIn' => false, 'items' => []]);
-    exit;
+$signedIn = $cid !== '';
+
+$payload = [
+    'ok' => true,
+    'signedIn' => $signedIn,
+    'items' => [],
+];
+
+if ($signedIn) {
+    $payload['items'] = mc_boards_read_items($cid);
 }
 
-echo json_encode([
-    'ok' => true,
-    'signedIn' => true,
-    'items' => mc_boards_read_items($cid),
-], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

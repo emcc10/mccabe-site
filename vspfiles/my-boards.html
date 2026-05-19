@@ -4,18 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inspiration Boards — McCabe's Theater &amp; Living</title>
-  <meta name="description" content="Curate furniture and room ideas by style — traditional, modern, coastal, and more." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-page.css?v=20260521" />
+  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-critical.css?v=20260522" />
+  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-page.css?v=20260522" />
+  <link rel="stylesheet" href="/vspfiles/boards/my-boards-page.css?v=20260522" />
 </head>
 <body class="mc-my-boards-page">
   <div class="mc-boards-shell">
     <header class="mc-boards-site-header" role="banner">
-      <div class="mc-boards-site-header__inner">
+      <motion class="mc-boards-site-header__inner">
         <a class="mc-boards-site-logo" href="/" title="McCabe's Theater &amp; Living">
-          <img src="/v/vspfiles/images/mccabe-logo.svg" width="220" height="48" alt="McCabe's Theater &amp; Living" />
+          <img src="/v/vspfiles/images/mccabe-logo.svg" width="220" height="48" alt="McCabe's Theater &amp; Living" onerror="this.onerror=null;this.src='/vspfiles/images/mccabe-logo.svg';" />
         </a>
         <nav class="mc-boards-site-nav" aria-label="Site">
           <a href="/">Shop</a>
@@ -27,13 +28,13 @@
 
     <section class="mc-boards-hero" aria-hidden="true">
       <div class="mc-boards-hero__collage">
-        <img class="mc-boards-hero__tile mc-boards-hero__tile--1" src="/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png" alt="" />
-        <img class="mc-boards-hero__tile mc-boards-hero__tile--2" src="/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png" alt="" />
-        <img class="mc-boards-hero__tile mc-boards-hero__tile--3" src="/v/vspfiles/boards/showcase/contemporary-atlantic-navy-recliner-front.png" alt="" />
-        <img class="mc-boards-hero__tile mc-boards-hero__tile--4" src="/v/vspfiles/boards/showcase/modern-pacific-charcoal-sofa-angle.png" alt="" />
-        <img class="mc-boards-hero__tile mc-boards-hero__tile--5" src="/v/vspfiles/boards/showcase/traditional-carob-recliner-front.png" alt="" />
+        <img class="mc-boards-hero__tile" src="/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png" alt="" />
+        <img class="mc-boards-hero__tile" src="/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png" alt="" />
+        <img class="mc-boards-hero__tile" src="/v/vspfiles/boards/showcase/contemporary-atlantic-navy-recliner-front.png" alt="" />
+        <img class="mc-boards-hero__tile" src="/v/vspfiles/boards/showcase/modern-pacific-charcoal-sofa-angle.png" alt="" />
+        <img class="mc-boards-hero__tile" src="/v/vspfiles/boards/showcase/traditional-carob-recliner-front.png" alt="" />
       </div>
-      <div class="mc-boards-hero__veil"></div>
+      <div class="mc-boards-hero__veil"></motion>
     </section>
 
     <main class="mc-boards" id="mc-boards-main">
@@ -41,41 +42,60 @@
         <p class="mc-boards__eyebrow">Interior design studio</p>
         <h1 class="mc-boards__title">Your inspiration boards</h1>
         <p class="mc-boards__lede">
-          Curate by <em>style</em> and <em>furniture type</em>—like a designer&rsquo;s mood board.
-          Save pieces with the Chrome extension, then refine rooms with McCabe&rsquo;s team.
+          Explore styles, take the quiz, spin the color wheel, and save pieces with
+          <strong>Save to McCabe&rsquo;s Board</strong> while signed in.
         </p>
       </header>
 
+      <section class="mc-boards__library" aria-labelledby="mc-boards-tools-heading">
+        <h2 id="mc-boards-tools-heading" class="mc-boards__library-title">Design tools</h2>
+        <div class="mc-boards__tools-grid">
+          <div class="mc-boards__tool-panel" id="mc-boards-quiz-panel">
+            <h3 class="mc-boards__tool-title">What&rsquo;s your style?</h3>
+            <p class="mc-boards__tool-sub">Quick quiz—no email required.</p>
+            <div id="mc-boards-quiz"></div>
+          </div>
+          <div class="mc-boards__tool-panel" id="mc-boards-wheel-panel">
+            <h3 class="mc-boards__tool-title">Color wheel</h3>
+            <p class="mc-boards__tool-sub">Tap a hue to see palettes &amp; style matches.</p>
+            <div id="mc-boards-color-wheel"></motion>
+            <p id="mc-boards-wheel-result" class="mc-boards__wheel-result" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <h2 class="mc-boards__library-title mc-boards__library-title--spaced" id="mc-boards-trends-heading">Home d&eacute;cor trends</h2>
+        <p class="mc-boards__library-sub">Curated from leading design publishers—spring 2026 direction.</p>
+        <div id="mc-boards-trends" class="mc-boards__trends"></div>
+      </section>
+
       <section id="mc-boards-style-library" class="mc-boards__library" aria-labelledby="mc-boards-style-heading">
         <div class="mc-boards__library-head">
-          <div>
-            <h2 id="mc-boards-style-heading" class="mc-boards__library-title">Explore by style</h2>
-            <p class="mc-boards__library-sub">Muted palettes and room direction—not loud color, just considered contrast.</p>
-          </div>
+          <h2 id="mc-boards-style-heading" class="mc-boards__library-title">Explore by style</h2>
+          <p class="mc-boards__library-sub">McCabe pieces matched to traditional, modern, mid-century, and more.</p>
         </div>
         <div id="mc-boards-styles" class="mc-boards__style-track" role="list"></div>
 
         <h2 class="mc-boards__library-title mc-boards__library-title--spaced" id="mc-boards-lifestyle-heading">Curated lifestyle looks</h2>
-        <p class="mc-boards__library-sub mc-boards__library-sub--below">Real McCabe pieces in room palettes—select a look to jump to that style.</p>
-        <div id="mc-boards-lifestyle" class="mc-boards__lifestyle-grid" role="list" aria-labelledby="mc-boards-lifestyle-heading"></div>
+        <p class="mc-boards__library-sub mc-boards__library-sub--below">Your product photos in designer room palettes.</p>
+        <div id="mc-boards-lifestyle" class="mc-boards__lifestyle-grid" role="list"></motion>
 
         <h2 class="mc-boards__library-title mc-boards__library-title--spaced">Style guide</h2>
-        <div id="mc-boards-style-guide" class="mc-boards__style-guide"></div>
+        <motion id="mc-boards-style-guide" class="mc-boards__style-guide"></motion>
 
         <h2 class="mc-boards__library-title mc-boards__library-title--spaced">Furniture type</h2>
         <div id="mc-boards-types" class="mc-boards__type-row" role="list"></div>
       </section>
 
+      <section id="mc-boards-account" class="mc-boards__account" aria-live="polite">
+        <h2 class="mc-boards__section-label">Your saved boards</h2>
+        <div id="mc-boards-account-banner" class="mc-boards__account-banner"></div>
+      </section>
+
       <section id="mc-boards-msg" class="mc-boards__msg" aria-live="polite"></section>
-
       <nav id="mc-boards-tabs" class="mc-boards__tabs" aria-label="Your boards" hidden></nav>
-
       <div id="mc-boards-root" class="mc-boards__root"></div>
 
       <footer class="mc-boards__footer">
-        <p class="mc-boards__footer-note">
-          Lifestyle looks use product photography from <code>/v/vspfiles/boards/showcase/</code>. Edit style assignments in <code>board-styles.js</code>.
-        </p>
         <a class="mc-boards__btn mc-boards__btn--outline" href="/">Continue shopping</a>
       </footer>
     </main>
@@ -85,7 +105,16 @@
     </footer>
   </div>
 
-  <script src="/v/vspfiles/boards/board-styles.js?v=20260521"></script>
-  <script src="/v/vspfiles/boards/my-boards-page.js?v=20260521" defer></script>
+  <script>
+    window.MC_BOARDS_API_BASE = (function () {
+      var p = String(location.pathname || '');
+      if (p.indexOf('/v/vspfiles/') !== -1) return '/v/vspfiles/boards/';
+      if (p.indexOf('/vspfiles/') !== -1) return '/vspfiles/boards/';
+      return '/v/vspfiles/boards/';
+    })();
+  </script>
+  <script src="/v/vspfiles/boards/board-styles.js?v=20260522"></script>
+  <script src="/vspfiles/boards/board-styles.js?v=20260522"></script>
+  <script src="/v/vspfiles/boards/my-boards-page.js?v=20260522"></script>
 </body>
 </html>

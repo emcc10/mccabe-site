@@ -3,6 +3,105 @@
  * Product PNGs: /v/vspfiles/boards/showcase/
  */
 window.MC_BOARD_STYLES = {
+  assetBases: ['/v/vspfiles/boards/', '/vspfiles/boards/'],
+
+  decorTrends: [
+    {
+      title: 'Warm minimalism',
+      styleId: 'transitional',
+      blurb: 'Layered neutrals, soft leather, and quiet contrast—rooms feel calm but not cold.',
+      sources: [
+        { label: 'Houzz — Transitional Ideas', url: 'https://www.houzz.com/photos/transitional' },
+        { label: 'AD — Neutral Interiors', url: 'https://www.architecturaldigest.com/topic/neutral' }
+      ]
+    },
+    {
+      title: 'Walnut & cognac comeback',
+      styleId: 'mid-century',
+      blurb: 'Low profiles, wood frames, and caramel leather anchor the space.',
+      sources: [
+        { label: 'Elle Decor — Mid-Century', url: 'https://www.elledecor.com/design-decor/interior-designers/glimpse-inside-midcentury-modern-home' }
+      ]
+    },
+    {
+      title: 'Media rooms in deep blue',
+      styleId: 'contemporary',
+      blurb: 'Navy upholstery and dimmable layers for theater-style lounging.',
+      sources: [
+        { label: 'House Beautiful — Home Theater', url: 'https://www.housebeautiful.com/room-decorating/theater-rooms/' }
+      ]
+    },
+    {
+      title: 'Performance leather & power comfort',
+      styleId: 'transitional',
+      blurb: 'Reclining sectionals with tailored stitching—comfort without bulk.',
+      sources: [
+        { label: 'Better Homes — Living Trends', url: 'https://www.bhg.com/decorating/' }
+      ]
+    },
+    {
+      title: 'Jewel-tone accents (edited)',
+      styleId: 'contemporary',
+      blurb: 'One rich accent per room—emerald, navy, or terracotta on a neutral field.',
+      sources: [
+        { label: 'Veranda — Color Trends', url: 'https://www.veranda.com/decorating-ideas/' }
+      ]
+    }
+  ],
+
+  styleQuiz: {
+    title: 'What style are you?',
+    questions: [
+      {
+        q: 'Which mood feels most like home?',
+        choices: [
+          { t: 'Tailored & timeless', s: { traditional: 2, transitional: 1 } },
+          { t: 'Clean & edited', s: { modern: 2, contemporary: 1 } },
+          { t: 'Sun-washed & easy', s: { coastal: 3 } },
+          { t: 'Warm & vintage', s: { 'mid-century': 3 } }
+        ]
+      },
+      {
+        q: 'Pick a sofa silhouette:',
+        choices: [
+          { t: 'Plush recliner', s: { traditional: 2, transitional: 2 } },
+          { t: 'Track-arm low profile', s: { modern: 3 } },
+          { t: 'Walnut accent chair', s: { 'mid-century': 3 } },
+          { t: 'Bold navy media sofa', s: { contemporary: 3 } }
+        ]
+      },
+      {
+        q: 'Your ideal palette:',
+        choices: [
+          { t: 'Cream & cognac', s: { traditional: 1, 'mid-century': 2, transitional: 1 } },
+          { t: 'Greige & charcoal', s: { modern: 2, transitional: 2 } },
+          { t: 'Sand & soft blue', s: { coastal: 3, transitional: 1 } },
+          { t: 'Navy & brass', s: { contemporary: 3, modern: 1 } }
+        ]
+      },
+      {
+        q: 'Primary room to design:',
+        choices: [
+          { t: 'Family den', s: { traditional: 2, transitional: 2 } },
+          { t: 'Open great room', s: { modern: 2, transitional: 1 } },
+          { t: 'Home theater', s: { contemporary: 3 } },
+          { t: 'Reading nook', s: { 'mid-century': 2, coastal: 1, modern: 1 } }
+        ]
+      }
+    ]
+  },
+
+  colorWheel: [
+    { id: 'cream', label: 'Ivory linen', hex: '#f4efe6', styles: ['transitional', 'coastal', 'traditional'] },
+    { id: 'greige', label: 'Greige', hex: '#c8bfb2', styles: ['transitional', 'modern'] },
+    { id: 'cognac', label: 'Cognac', hex: '#a67c5b', styles: ['mid-century', 'traditional', 'transitional'] },
+    { id: 'charcoal', label: 'Charcoal', hex: '#4a4540', styles: ['modern', 'contemporary'] },
+    { id: 'navy', label: 'Midnight navy', hex: '#1e3a5f', styles: ['contemporary'] },
+    { id: 'sage', label: 'Sage', hex: '#8a9a8c', styles: ['coastal', 'transitional'] },
+    { id: 'terracotta', label: 'Terracotta', hex: '#c67b4e', styles: ['mid-century', 'contemporary'] },
+    { id: 'walnut', label: 'Walnut', hex: '#6b4423', styles: ['mid-century', 'traditional'] }
+  ],
+
   styles: [
     {
       id: 'traditional',

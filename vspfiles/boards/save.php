@@ -24,8 +24,10 @@ if (!$sameParty) {
     exit;
 }
 
-$cid = isset($_COOKIE['CustomerID']) ? trim((string) $_COOKIE['CustomerID']) : '';
-if ($cid === '' || $cid === '0') {
+require_once __DIR__ . '/_auth.php';
+
+$cid = mc_boards_customer_id();
+if ($cid === '') {
     http_response_code(401);
     echo json_encode(['ok' => false, 'error' => 'sign_in_required']);
     exit;
