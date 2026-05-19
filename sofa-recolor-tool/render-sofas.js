@@ -1,6 +1,6 @@
 /**
- * Simple LAB recolor: neutral-gray master sofa + manual mask.
- * Preserve photographic L; replace a/b with swatch median; mild L lift on light leathers only.
+ * LAB recolor: neutral-gray master sofa + manual mask.
+ * Swatch shadow/mid/highlight palette mapped to sofa luminance; photographic L preserved.
  */
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
@@ -38,9 +38,10 @@ const L_BLEND_MASTER = 0.82;
 const L_BLEND_SWATCH = 0.18;
 const LIGHT_L_BLEND_MASTER = 0.72;
 const LIGHT_L_BLEND_SWATCH = 0.28;
-const SWATCH_LUM_TRIM = 0.15;
-const SWATCH_K_MEANS = 3;
-const SWATCH_CLUSTER_MIN_POP = 0.12;
+/** Sofa L percentiles used to map shadow → mid → highlight swatch tones. */
+const SOFA_L_MAP_LO = 0.08;
+const SOFA_L_MAP_HI = 0.92;
+const SOFA_L_MAP_MIN_SPAN = 4;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
@@ -142,96 +143,79 @@ export function pixelSaturation(r, g, b) {
   return (max - min) / (max + min < 255 ? max + min : 510);
 }
 
-function kMeansRgb(pixels, k = SWATCH_K_MEANS) {
-  const n = pixels.length;
-  if (n < k) return { centroids: pixels.slice(), labels: pixels.map((_, i) => i) };
-
-  const centroids = [];
-  for (let c = 0; c < k; c++) {
-    const idx = Math.min(n - 1, Math.floor((n * (c + 1)) / (k + 1)));
-    centroids.push({ r: pixels[idx].r, g: pixels[idx].g, b: pixels[idx].b });
+function medianLabFromPixels(pixels) {
+  if (!pixels.length) {
+    return { L: 50, a: 0, b: 0, rgb: [128, 128, 128] };
   }
-  const labels = new Uint8Array(n);
-
-  for (let iter = 0; iter < 28; iter++) {
-    for (let i = 0; i < n; i++) {
-      let best = 0;
-      let bestD = Infinity;
-      for (let c = 0; c < k; c++) {
-        const dr = pixels[i].r - centroids[c].r;
-        const dg = pixels[i].g - centroids[c].g;
-        const db = pixels[i].b - centroids[c].b;
-        const d = dr * dr + dg * dg + db * db;
-        if (d < bestD) {
-          bestD = d;
-          best = c;
-        }
-      }
-      labels[i] = best;
-    }
-
-    const sums = Array.from({ length: k }, () => ({ r: 0, g: 0, b: 0, n: 0 }));
-    for (let i = 0; i < n; i++) {
-      const c = labels[i];
-      sums[c].r += pixels[i].r;
-      sums[c].g += pixels[i].g;
-      sums[c].b += pixels[i].b;
-      sums[c].n++;
-    }
-
-    let stable = true;
-    for (let c = 0; c < k; c++) {
-      if (sums[c].n === 0) continue;
-      const nr = sums[c].r / sums[c].n;
-      const ng = sums[c].g / sums[c].n;
-      const nb = sums[c].b / sums[c].n;
-      if (
-        Math.abs(nr - centroids[c].r) > 0.5 ||
-        Math.abs(ng - centroids[c].g) > 0.5 ||
-        Math.abs(nb - centroids[c].b) > 0.5
-      ) {
-        stable = false;
-      }
-      centroids[c] = { r: nr, g: ng, b: nb };
-    }
-    if (stable) break;
+  const Ls = [];
+  const as = [];
+  const bs = [];
+  for (const p of pixels) {
+    const lab = rgbToLab(p.r, p.g, p.b);
+    Ls.push(lab.L);
+    as.push(lab.a);
+    bs.push(lab.b);
   }
-
-  return { centroids, labels };
+  const L = medianOf(Ls);
+  const a = medianOf(as);
+  const b = medianOf(bs);
+  const { r, g, b: bOut } = labToRgb(L, a, b);
+  return { L, a, b, rgb: [r, g, bOut] };
 }
 
-/** Pick cluster with largest population + highest saturation (weighted score). */
-export function pickLeatherClusterCentroid(centroids, labels, pixelCount) {
-  const k = centroids.length;
-  const counts = new Array(k).fill(0);
-  for (let i = 0; i < labels.length; i++) {
-    counts[labels[i]]++;
+function lerpLabTone(t0, t1, t) {
+  return {
+    L: t0.L + (t1.L - t0.L) * t,
+    a: t0.a + (t1.a - t0.a) * t,
+    b: t0.b + (t1.b - t0.b) * t,
+  };
+}
+
+/** Map normalized sofa luminance u∈[0,1] to shadow → mid → highlight. */
+export function interpolateSwatchPalette(palette, u) {
+  const t = clamp(u, 0, 1);
+  const { shadow, midtone, highlight } = palette;
+  if (t <= 0.5) return lerpLabTone(shadow, midtone, t * 2);
+  return lerpLabTone(midtone, highlight, (t - 0.5) * 2);
+}
+
+async function loadSwatchPixels(swatchPath) {
+  const resolved = resolveOriginalSwatchPath(swatchPath) || resolve(swatchPath);
+  if (!resolved.startsWith(resolve(SWATCH_DIR))) {
+    throw new Error(`Swatch must be under input/swatches: ${swatchPath}`);
   }
 
-  let best = 0;
-  let bestScore = -Infinity;
-  for (let c = 0; c < k; c++) {
-    if (!counts[c]) continue;
-    const pop = counts[c] / pixelCount;
-    if (pop < SWATCH_CLUSTER_MIN_POP) continue;
-    const sat = pixelSaturation(centroids[c].r, centroids[c].g, centroids[c].b);
-    const score = pop + sat;
-    if (score > bestScore) {
-      bestScore = score;
-      best = c;
+  const { data, info } = await sharp(resolved).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const pixels = [];
+
+  for (let y = 0; y < info.height; y++) {
+    for (let x = 0; x < info.width; x++) {
+      const i = (y * info.width + x) * info.channels;
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const alpha = info.channels === 4 ? data[i + 3] : 255;
+      if (alpha < 20 || isNearWhite(r, g, b)) continue;
+      pixels.push({ r, g, b, lum: pixelBrightness(r, g, b) });
     }
   }
-  if (bestScore === -Infinity) {
-    best = counts.indexOf(Math.max(...counts));
+
+  if (pixels.length < 9) {
+    throw new Error(`Not enough swatch pixels: ${resolved}`);
   }
 
-  const chosen = centroids[best];
+  pixels.sort((a, b) => a.lum - b.lum);
+  const third = Math.floor(pixels.length / 3);
+  const shadowPx = pixels.slice(0, third);
+  const midPx = pixels.slice(third, third * 2);
+  const hiPx = pixels.slice(third * 2);
+
   return {
-    r: chosen.r,
-    g: chosen.g,
-    b: chosen.b,
-    population: counts[best] / pixelCount,
-    saturation: pixelSaturation(chosen.r, chosen.g, chosen.b),
+    resolved,
+    pixels,
+    shadowPx,
+    midPx,
+    hiPx,
   };
 }
 
@@ -255,58 +239,40 @@ export function computeSwatchRgbAvg(data, width, height, channels) {
 }
 
 /**
- * Leather color: trim luminance extremes, k=3, pick dominant saturated cluster centroid.
+ * Shadow / mid / highlight from luminance tertiles (per-band median LAB, not one flat color).
  */
-export async function getSwatchMedianLab(swatchPath) {
-  const resolved = resolveOriginalSwatchPath(swatchPath) || resolve(swatchPath);
-  if (!resolved.startsWith(resolve(SWATCH_DIR))) {
-    throw new Error(`Swatch must be under input/swatches: ${swatchPath}`);
-  }
-
+export async function getSwatchPalette(swatchPath) {
+  const { resolved, pixels, shadowPx, midPx, hiPx } = await loadSwatchPixels(swatchPath);
   const swatchStem = basename(resolved, extname(resolved));
-  const { data, info } = await sharp(resolved).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  const rawPixels = [];
-
-  for (let y = 0; y < info.height; y++) {
-    for (let x = 0; x < info.width; x++) {
-      const i = (y * info.width + x) * info.channels;
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-      const alpha = info.channels === 4 ? data[i + 3] : 255;
-      if (alpha < 20 || isNearWhite(r, g, b)) continue;
-      rawPixels.push({ r, g, b, lum: pixelBrightness(r, g, b) });
-    }
-  }
-
-  if (rawPixels.length < SWATCH_K_MEANS) {
-    throw new Error(`Not enough swatch pixels: ${resolved}`);
-  }
-
-  const sortedLum = rawPixels.map((p) => p.lum).sort((a, b) => a - b);
-  const lo = percentileOfSorted(sortedLum, SWATCH_LUM_TRIM);
-  const hi = percentileOfSorted(sortedLum, 1 - SWATCH_LUM_TRIM);
-  const trimmed = rawPixels.filter((p) => p.lum >= lo && p.lum <= hi);
-  const pixels = trimmed.length >= SWATCH_K_MEANS ? trimmed : rawPixels;
-
-  const { centroids, labels } = kMeansRgb(pixels, SWATCH_K_MEANS);
-  const leather = pickLeatherClusterCentroid(centroids, labels, pixels.length);
-  const r = Math.round(leather.r);
-  const g = Math.round(leather.g);
-  const b = Math.round(leather.b);
-  const lab = rgbToLab(r, g, b);
+  const shadow = medianLabFromPixels(shadowPx);
+  const midtone = medianLabFromPixels(midPx);
+  const highlight = medianLabFromPixels(hiPx);
 
   return {
-    meanL: lab.L,
-    meanA: lab.a,
-    meanB: lab.b,
-    swatchLumRgb: pixelBrightness(r, g, b),
-    clusterPop: leather.population,
-    clusterSat: leather.saturation,
+    shadow,
+    midtone,
+    highlight,
     isNamedLight: isNamedLightLeather(swatchStem),
-    overallRGB: [r, g, b],
     pixelCount: pixels.length,
     sourceFile: basename(resolved),
+    bandCounts: { shadow: shadowPx.length, mid: midPx.length, highlight: hiPx.length },
+  };
+}
+
+/** @deprecated Use getSwatchPalette; returns midtone fields for legacy callers. */
+export async function getSwatchMedianLab(swatchPath) {
+  const palette = await getSwatchPalette(swatchPath);
+  const m = palette.midtone;
+  return {
+    meanL: m.L,
+    meanA: m.a,
+    meanB: m.b,
+    swatchLumRgb: pixelBrightness(m.rgb[0], m.rgb[1], m.rgb[2]),
+    isNamedLight: palette.isNamedLight,
+    overallRGB: m.rgb,
+    pixelCount: palette.pixelCount,
+    sourceFile: palette.sourceFile,
+    palette,
   };
 }
 
@@ -398,7 +364,7 @@ export async function loadUpholsteryMask(maskPath, width, height) {
   return mask;
 }
 
-/** Blend swatch L into neutral-master L without flattening photographic structure. */
+/** Blend mapped swatch L into neutral-master L without flattening photographic structure. */
 export function computeFinalLabL(masterL, swatchL, isVeryLightLeather) {
   if (isVeryLightLeather) {
     return masterL * LIGHT_L_BLEND_MASTER + swatchL * LIGHT_L_BLEND_SWATCH;
@@ -406,21 +372,40 @@ export function computeFinalLabL(masterL, swatchL, isVeryLightLeather) {
   return masterL * L_BLEND_MASTER + swatchL * L_BLEND_SWATCH;
 }
 
+/** Masked sofa L percentiles for palette mapping. */
+export function computeSofaLuminanceMapRange(masterImage, mask) {
+  const { data, width, height, channels } = masterImage;
+  const Ls = [];
+  for (let j = 0; j < width * height; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) continue;
+    const p = j * channels;
+    Ls.push(rgbToLab(data[p], data[p + 1], data[p + 2]).L);
+  }
+  Ls.sort((a, b) => a - b);
+  const lo = percentileOfSorted(Ls, SOFA_L_MAP_LO);
+  const hi = percentileOfSorted(Ls, SOFA_L_MAP_HI);
+  return { lo, hi, span: Math.max(hi - lo, SOFA_L_MAP_MIN_SPAN) };
+}
+
 /**
- * Masked pixels: cluster a/b; L = mostly original neutral master + mild swatch L.
+ * Masked pixels: shadow/mid/highlight a/b by sofa L; L mostly from neutral master.
  */
-export function recolorSofa(masterImage, mask, swatch) {
+export function recolorSofa(masterImage, mask, palette) {
   const { data, width, height, channels } = masterImage;
   const out = Buffer.from(data);
+  const { lo, span } = computeSofaLuminanceMapRange(masterImage, mask);
+  const isLight = palette.isNamedLight;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
 
     const p = j * channels;
     const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
-    const finalL = computeFinalLabL(lab.L, swatch.meanL, swatch.isNamedLight);
-    const a = clamp(swatch.meanA, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const b = clamp(swatch.meanB, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const u = clamp((lab.L - lo) / span, 0, 1);
+    const tone = interpolateSwatchPalette(palette, u);
+    const finalL = computeFinalLabL(lab.L, tone.L, isLight);
+    const a = clamp(tone.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const b = clamp(tone.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const { r, g, b: bOut } = labToRgb(finalL, a, b);
 
     out[p] = r;
@@ -437,29 +422,29 @@ export async function processSwatch(swatchPath, masterImage, mask) {
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
 
   const swatchName = basename(resolved, extname(resolved));
-  const swatch = await getSwatchMedianLab(resolved);
+  const palette = await getSwatchPalette(resolved);
+
+  const fmtTone = (t) => ({
+    rgb: t.rgb,
+    lab: [Math.round(t.L * 10) / 10, Math.round(t.a * 10) / 10, Math.round(t.b * 10) / 10],
+  });
 
   console.log({
     swatchName,
-    source: `input/swatches/${swatch.sourceFile}`,
-    leatherLAB: [
-      Math.round(swatch.meanL * 10) / 10,
-      Math.round(swatch.meanA * 10) / 10,
-      Math.round(swatch.meanB * 10) / 10,
-    ],
-    leatherRGB: swatch.overallRGB,
-    clusterPop: Math.round((swatch.clusterPop ?? 0) * 100),
-    clusterSat: Math.round((swatch.clusterSat ?? 0) * 100) / 100,
-    pixelsSampled: swatch.pixelCount,
-    lightLeather: swatch.isNamedLight,
-    lBlend: swatch.isNamedLight ? '72/28' : '82/18',
+    source: `input/swatches/${palette.sourceFile}`,
+    shadow: fmtTone(palette.shadow),
+    midtone: fmtTone(palette.midtone),
+    highlight: fmtTone(palette.highlight),
+    pixelsSampled: palette.pixelCount,
+    lightLeather: palette.isNamedLight,
+    lBlend: palette.isNamedLight ? '72/28' : '82/18',
   });
 
-  const outData = recolorSofa(masterImage, mask, swatch);
+  const outData = recolorSofa(masterImage, mask, palette);
   const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
   const bytes = await saveImage(outData, outPath, masterImage.width, masterImage.height, masterImage.channels);
   console.log(`  wrote ${swatchName}.png (${Math.round(bytes / 1024)} KB)`);
-  return { outPath, swatch };
+  return { outPath, palette };
 }
 
 export function zipOutputs(outputDir, zipPath) {
@@ -526,7 +511,7 @@ export async function main(argv = process.argv) {
   console.log(`  swatch source: ${SWATCH_DIR} (${swatchFiles.length} files)`);
   console.log(`  source photo: ${SOFA_PATH}`);
   console.log(`  mask: ${MASK_PATH}`);
-  console.log('  method: neutral master L + cluster a/b (82/18 L, 72/28 light)');
+  console.log('  method: neutral master L + swatch palette a/b by sofa L (82/18, 72/28 light)');
 
   const sourceSofa = await loadImage(SOFA_PATH);
   console.log(`  ${sourceSofa.width}x${sourceSofa.height}`);

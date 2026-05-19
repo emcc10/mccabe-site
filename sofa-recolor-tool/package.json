@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "preview": "node render-sofas.js --currant",
-    "diagnostic": "node diagnostic-preview.js Bali-Silk",
+    "diagnostic": "node diagnostic-preview.js Bali-Spider Evoque-Atlantic Bali-Silk",
     "render": "node render-sofas.js --all && node build-manifest.js",
     "manifest": "node build-manifest.js",
     "serve": "node build-manifest.js && node serve-preview.js"
