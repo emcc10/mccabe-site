@@ -133,7 +133,7 @@ def process_file(
         return None, None
 
     print(
-        f"{path.name}: bounds {bounds.visible_w}×{bounds.visible_h} "
+        f"{path.name}: bounds {bounds.visible_w}x{bounds.visible_h} "
         f"@ ({bounds.min_x},{bounds.min_y}) in {bounds.img_w}×{bounds.img_h}"
     )
 
@@ -176,6 +176,7 @@ def main() -> int:
     parser.add_argument("--padding", type=_parse_pad, default="60,24,60,24")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--manifest", type=Path, help="Write JSON manifest of placements")
+    parser.add_argument("--file", action="append", dest="files", help="Process only these filenames")
     args = parser.parse_args()
 
     if args.in_place and args.output_dir:
@@ -192,6 +193,9 @@ def main() -> int:
         for p in input_dir.iterdir()
         if p.suffix.lower() in {".jpg", ".jpeg", ".png"}
     )
+    if args.files:
+        want = {f.lower() for f in args.files}
+        files = [p for p in files if p.name.lower() in want]
     if not files:
         print("No images found.", file=sys.stderr)
         return 1
@@ -220,7 +224,7 @@ def main() -> int:
             continue
         dest = out_dir / path.name
         save_image(norm, dest)
-        print(f"  → {dest} ({args.canvas[0]}×{args.canvas[1]})")
+        print(f"  -> {dest} ({args.canvas[0]}x{args.canvas[1]})")
 
     print(f"Normalized {ok}/{len(files)} image(s)")
     if args.manifest and not args.dry_run:

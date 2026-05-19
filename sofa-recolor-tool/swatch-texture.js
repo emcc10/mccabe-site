@@ -239,8 +239,41 @@ function buildTertileBandMasks(meta, width, height, p33, p66) {
   return { shadow, midtone: mid, highlight: hi };
 }
 
+function scorePatchWindow(mask, width, originX, originY, patchSize) {
+  let score = 0;
+  for (let dy = 0; dy < patchSize; dy++) {
+    const row = (originY + dy) * width;
+    for (let dx = 0; dx < patchSize; dx++) {
+      if (mask[row + originX + dx]) score++;
+    }
+  }
+  return score;
+}
+
+function centroidPatchOrigin(bandMask, width, height, patchSize) {
+  let sumX = 0;
+  let sumY = 0;
+  let n = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (!bandMask[y * width + x]) continue;
+      sumX += x;
+      sumY += y;
+      n++;
+    }
+  }
+  if (!n) return { x: 0, y: 0, score: 0 };
+  const cx = Math.round(sumX / n);
+  const cy = Math.round(sumY / n);
+  const x = clamp(cx - Math.floor(patchSize / 2), 0, Math.max(0, width - patchSize));
+  const y = clamp(cy - Math.floor(patchSize / 2), 0, Math.max(0, height - patchSize));
+  return { x, y, score: scorePatchWindow(bandMask, width, x, y, patchSize) };
+}
+
 function extractBandPatch(data, width, height, channels, bandMask, patchSize) {
-  const origin = findBestPatchOrigin(bandMask, width, height, patchSize);
+  const sliding = findBestPatchOrigin(bandMask, width, height, patchSize);
+  const centered = centroidPatchOrigin(bandMask, width, height, patchSize);
+  const origin = centered.score >= sliding.score * 0.85 ? centered : sliding;
   const patch = extractPatchFromSwatch(
     data,
     width,

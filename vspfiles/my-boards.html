@@ -1,32 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="mc-my-boards-page">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>My Boards — McCabe's Theater &amp; Living</title>
+  <title>Inspiration Boards — McCabe's Theater &amp; Living</title>
+  <meta name="description" content="View and manage furniture and decor ideas you saved to your McCabe's inspiration boards." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-page.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-page.css?v=20260519" />
 </head>
-<body>
-  <main class="mc-boards">
-    <header class="mc-boards__masthead">
-      <h1 class="mc-boards__title">My boards</h1>
-      <p class="mc-boards__lede">Ideas you saved with the &ldquo;Save to McCabe&rsquo;s Board&rdquo; Chrome extension—only visible when you are signed in here.</p>
+<body class="mc-my-boards-page">
+  <div class="mc-boards-shell">
+    <header class="mc-boards-site-header" role="banner">
+      <div class="mc-boards-site-header__inner">
+        <a class="mc-boards-site-logo" href="/" title="McCabe's Theater &amp; Living">
+          <img src="/v/vspfiles/images/mccabe-logo.png" width="220" height="48" alt="McCabe's Theater &amp; Living" />
+        </a>
+        <nav class="mc-boards-site-nav" aria-label="Site">
+          <a href="/">Shop</a>
+          <a href="/myaccount.asp">My account</a>
+          <a href="/login.asp" id="mc-boards-signin">Sign in</a>
+        </nav>
+      </div>
     </header>
 
-    <section id="mc-boards-msg" class="mc-boards__msg" aria-live="polite"></section>
+    <main class="mc-boards" id="mc-boards-main">
+      <header class="mc-boards__masthead">
+        <p class="mc-boards__eyebrow">Your saved ideas</p>
+        <h1 class="mc-boards__title">Inspiration boards</h1>
+        <p class="mc-boards__lede">
+          Pieces you saved with <span class="mc-boards__lede-strong">Save to McCabe&rsquo;s Board</span> while signed in on this site.
+          Browse by board, open product pages, or remove items you no longer need.
+        </p>
+      </header>
 
-    <nav class="mc-boards__toolbar">
-      <a class="mc-boards__link" href="/">Continue shopping</a>
-      <span class="mc-boards__dot">·</span>
-      <a class="mc-boards__link" href="/login.asp" id="mc-boards-signin">Sign in</a>
-    </nav>
+      <section id="mc-boards-msg" class="mc-boards__msg" aria-live="polite"></section>
 
-    <div id="mc-boards-root" class="mc-boards__root"></div>
-  </main>
+      <nav id="mc-boards-tabs" class="mc-boards__tabs" aria-label="Boards" hidden></nav>
 
-  <script src="/v/vspfiles/boards/my-boards-page.js" defer></script>
+      <motion id="mc-boards-root" class="mc-boards__root"></div>
+
+      <footer class="mc-boards__footer">
+        <a class="mc-boards__btn mc-boards__btn--outline" href="/">Continue shopping</a>
+      </footer>
+    </main>
+
+    <footer class="mc-boards-site-footer" role="contentinfo">
+      <p>&copy; <span id="mc-boards-year"></span> McCabe&rsquo;s Theater &amp; Living. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script src="/v/vspfiles/boards/my-boards-page.js?v=20260519" defer></script>
 </body>
 </html>
