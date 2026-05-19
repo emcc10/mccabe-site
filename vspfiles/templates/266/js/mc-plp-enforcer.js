@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260613
+ * MC_PLP_ENFORCER_20260614
  *
  * Thumbnails: .mc-plp-image-box + visible-sofa width normalization (no crop, no scale transform).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260613";
+  var VERSION = "20260614";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -32,8 +32,10 @@
     else document.addEventListener("DOMContentLoaded", attach);
   })();
 
-  var TARGET_WIDTH = 300;
+  var TARGET_VISIBLE_W = 300;
   var BOX_HEIGHT = 260;
+  var NORMALIZED_W = 420;
+  var NORMALIZED_H = 260;
   var BOUNDS_JSON = "/v/vspfiles/js/mc-plp-sofa-bounds.json";
   var BOUNDS_SAMPLE = 320;
 
@@ -254,11 +256,33 @@
     }
   }
 
+  function isPreNormalizedPhoto(img) {
+    return (
+      img &&
+      img.naturalWidth === NORMALIZED_W &&
+      img.naturalHeight === NORMALIZED_H
+    );
+  }
+
+  function targetVisibleWidth(parent) {
+    var boxW = parent && parent.clientWidth ? parent.clientWidth : 280;
+    return Math.min(360, Math.max(TARGET_VISIBLE_W, boxW - 20));
+  }
+
   function getVisibleBounds(img, cb) {
     var file = photoFilename(img.currentSrc || img.src);
     withBoundsMap(function (map) {
       if (file && map[file] && map[file].visibleW > 0) {
-        cb({ width: map[file].visibleW, height: map[file].visibleH });
+        var b = map[file];
+        var nw = img.naturalWidth || b.nw;
+        var nh = img.naturalHeight || b.nh;
+        if (b.nw > 0 && b.nh > 0 && nw > 0 && nh > 0) {
+          var sx = nw / b.nw;
+          var sy = nh / b.nh;
+          cb({ width: b.visibleW * sx, height: b.visibleH * sy });
+          return;
+        }
+        cb({ width: b.visibleW, height: b.visibleH });
         return;
       }
       if (!file) {
@@ -294,31 +318,50 @@
     img.style.setProperty("transform", "none", "important");
   }
 
-  function applyNormalizedImage(img, parent, bounds) {
-    if (!bounds || !bounds.width) return;
-
-    var scale = TARGET_WIDTH / bounds.width;
-    var finalWidth = Math.round(img.naturalWidth * scale * 1000) / 1000;
-    var finalHeight = Math.round(img.naturalHeight * scale * 1000) / 1000;
-
+  function applyImageBoxLayout(parent) {
     parent.classList.add("mc-plp-image-box");
-    clearClippingStyles(img, parent);
-
-    img.style.setProperty("width", finalWidth + "px", "important");
-    img.style.setProperty("height", finalHeight + "px", "important");
-    img.style.setProperty("max-width", "none", "important");
-    img.style.setProperty("max-height", "none", "important");
-    img.style.setProperty("object-fit", "contain", "important");
-    img.style.setProperty("object-position", "center bottom", "important");
-    img.style.setProperty("transform", "none", "important");
-    img.style.setProperty("display", "block", "important");
-
     parent.style.setProperty("height", BOX_HEIGHT + "px", "important");
     parent.style.setProperty("overflow", "visible", "important");
     parent.style.setProperty("display", "flex", "important");
     parent.style.setProperty("align-items", "flex-end", "important");
     parent.style.setProperty("justify-content", "center", "important");
     parent.style.setProperty("width", "100%", "important");
+  }
+
+  function applyPreNormalizedPhoto(img, parent) {
+    applyImageBoxLayout(parent);
+    clearClippingStyles(img, parent);
+    img.classList.add("mc-plp-img-fit");
+    img.style.setProperty("width", "100%", "important");
+    img.style.setProperty("height", "auto", "important");
+    img.style.setProperty("max-width", NORMALIZED_W + "px", "important");
+    img.style.setProperty("max-height", BOX_HEIGHT + "px", "important");
+    img.style.setProperty("object-fit", "contain", "important");
+    img.style.setProperty("object-position", "center bottom", "important");
+    img.style.setProperty("transform", "none", "important");
+    img.style.setProperty("display", "block", "important");
+  }
+
+  function applyNormalizedImage(img, parent, bounds) {
+    if (!bounds || !bounds.width) return;
+
+    var targetW = targetVisibleWidth(parent);
+    var scale = targetW / bounds.width;
+    var finalWidth = Math.round(img.naturalWidth * scale * 1000) / 1000;
+    var finalHeight = Math.round(img.naturalHeight * scale * 1000) / 1000;
+
+    applyImageBoxLayout(parent);
+    clearClippingStyles(img, parent);
+    img.classList.add("mc-plp-img-sized");
+
+    img.style.setProperty("width", finalWidth + "px", "important");
+    img.style.setProperty("height", finalHeight + "px", "important");
+    img.style.setProperty("max-width", "100%", "important");
+    img.style.setProperty("max-height", BOX_HEIGHT + "px", "important");
+    img.style.setProperty("object-fit", "contain", "important");
+    img.style.setProperty("object-position", "center bottom", "important");
+    img.style.setProperty("transform", "none", "important");
+    img.style.setProperty("display", "block", "important");
   }
 
   function normalizePLPImages() {
@@ -339,6 +382,10 @@
 
       function apply() {
         if (!img.naturalWidth) return;
+        if (isPreNormalizedPhoto(img)) {
+          applyPreNormalizedPhoto(img, parent);
+          return;
+        }
         getVisibleBounds(img, function (bounds) {
           applyNormalizedImage(img, parent, bounds);
         });
