@@ -199,7 +199,7 @@ fi
 echo ""
 echo "Deploy finished (~2–4 min). Hard-refresh category 177 (Ctrl+Shift+R)."
 echo "SKIP_CAP on template.min / mtl-sectional-renderer is normal (128 KiB Volusion limit)."
-echo "PLP fix: design-toolkit.min.js OR sectional-configs.js (MC_SECTIONAL_CONFIGS_PLP_BOOT_20260520)."
+echo "PLP fix: single enforcer v20260602 via design-toolkit.min.js + template body script."
 echo "If still broken, Cloudflare Purge by URL:"
 echo "  /v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"
 echo "  /v/vspfiles/templates/266/js/min/design-toolkit.min.js"
