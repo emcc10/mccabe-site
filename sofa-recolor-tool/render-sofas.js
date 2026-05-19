@@ -542,9 +542,9 @@ export async function processSwatch(swatchPath, masterImage, mask) {
   });
 
   const outData = recolorSofa(masterImage, mask, palette);
-  const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
+  const outPath = join(OUTPUT_DIR, `${swatchName}-fixed.png`);
   const bytes = await saveImage(outData, outPath, masterImage.width, masterImage.height, masterImage.channels);
-  console.log(`  wrote ${swatchName}.png (${Math.round(bytes / 1024)} KB)`);
+  console.log(`  wrote ${swatchName}-fixed.png (${Math.round(bytes / 1024)} KB)`);
   return { outPath, palette };
 }
 

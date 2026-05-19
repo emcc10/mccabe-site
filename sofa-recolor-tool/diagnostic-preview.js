@@ -84,8 +84,8 @@ async function runOneSwatch(swatchArg, renderSofa, masterImage, mask, width, hei
 
   if (renderSofa && masterImage) {
     const finalData = recolorSofa(masterImage, mask, palette);
-    await saveImage(finalData, join(outDir, 'final-output.png'), width, height, channels);
-    console.log('  saved: final-output.png (sofa texture + swatch color)');
+    await saveImage(finalData, join(outDir, 'final-output-fixed.png'), width, height, channels);
+    console.log('  saved: final-output-fixed.png (sofa texture + swatch color)');
   } else {
     console.log('  (sofa render skipped — use --render)');
   }
