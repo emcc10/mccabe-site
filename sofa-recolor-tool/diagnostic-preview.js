@@ -16,6 +16,7 @@ import {
   getSwatchTexture,
   resolveOriginalSwatchPath,
 } from './render-sofas.js';
+import { getMaterialClass, getMaterialBlendProfile } from './material-blend.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SOFA_PATH = join(__dirname, 'input', 'sofa.png');
@@ -62,6 +63,7 @@ async function runOneSwatch(swatchArg, renderSofa, masterImage, mask, width, hei
 
   const texture = await getSwatchTexture(swatchPath);
   console.log(`  method: ${texture.extractionMethod}`);
+  console.log(`  material: ${getMaterialClass(texture)}`, getMaterialBlendProfile(texture));
   logPatch('shadow texture', texture.patches.shadow);
   logPatch('midtone texture', texture.patches.midtone);
   logPatch('highlight texture', texture.patches.highlight);

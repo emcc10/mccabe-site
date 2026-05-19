@@ -545,7 +545,8 @@ export async function processSwatch(swatchPath, masterImage, mask) {
     shadow: fmtPatch('shadow'),
     midtone: fmtPatch('midtone'),
     highlight: fmtPatch('highlight'),
-    textureLDetail: TEXTURE_L_DETAIL,
+    materialClass: getMaterialClass(texture),
+    materialBlend: getMaterialBlendProfile(texture),
   });
 
   const outData = recolorSofa(masterImage, mask, texture);
@@ -619,7 +620,7 @@ export async function main(argv = process.argv) {
   console.log(`  swatch source: ${SWATCH_DIR} (${swatchFiles.length} files)`);
   console.log(`  source photo: ${SOFA_PATH}`);
   console.log(`  mask: ${MASK_PATH}`);
-  console.log('  method: texture transfer (sofa L placement, chroma from swatch patches)');
+  console.log('  method: texture transfer + material-class luminance blend');
 
   const sourceSofa = await loadImage(SOFA_PATH);
   console.log(`  ${sourceSofa.width}x${sourceSofa.height}`);
