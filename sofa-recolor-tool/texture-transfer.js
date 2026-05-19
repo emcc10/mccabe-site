@@ -162,7 +162,7 @@ export function buildTransferMaps(masterImage, mask, texture) {
     const max = Math.max(rgb.r, rgb.g, rgb.b);
     const min = Math.min(rgb.r, rgb.g, rgb.b);
     const sat = max === min ? 0 : (max - min) / (max + min < 255 ? max + min : 510);
-    if (bright < 35 && sat > 0.12) speckleCount++;
+    if (bright < 12 && sat > 0.18) speckleCount++;
   }
 
   return {
@@ -212,9 +212,9 @@ export function validateTransferRgbMap(maps, mask) {
     );
   }
 
-  if (speckleFrac > 0.06 && meanBright < 55) {
+  if (speckleFrac > 0.04 && meanBright < 22) {
     throw new Error(
-      `Texture transfer speckle failure: ${(speckleFrac * 100).toFixed(1)}% saturated dark pixels ` +
+      `Texture transfer speckle failure: ${(speckleFrac * 100).toFixed(1)}% saturated near-black pixels ` +
         `(Christmas-light pattern). Check debug-sampled-rgb.png before rendering sofa.`,
     );
   }
