@@ -57,7 +57,7 @@ function logTone(label, tone) {
   );
 }
 
-async function runOneSwatch(swatchArg, renderSofa, masterImage, mask, width, height, channels) {
+async function runOneSwatch(swatchArg, renderSofa, masterImage, sourceSofa, mask, width, height, channels) {
   const swatchPath = resolveSwatchPath(swatchArg);
   if (!swatchPath) {
     console.error(`Swatch not found: ${swatchArg}`);
@@ -82,8 +82,8 @@ async function runOneSwatch(swatchArg, renderSofa, masterImage, mask, width, hei
   await saveChip(join(outDir, 'extracted-highlight-color.png'), palette.highlight.rgb);
   console.log('  saved: extracted-shadow/midtone/highlight-color.png (solid swatch colors)');
 
-  if (renderSofa && masterImage) {
-    const finalData = recolorSofa(masterImage, mask, palette);
+  if (renderSofa && masterImage && sourceSofa) {
+    const finalData = recolorSofa(masterImage, mask, palette, sourceSofa);
     await saveImage(finalData, join(outDir, 'final-output-fixed.png'), width, height, channels);
     console.log('  saved: final-output-fixed.png (sofa texture + swatch color)');
   } else {
@@ -102,6 +102,7 @@ async function main() {
   console.log('Color-transfer diagnostic (sofa texture preserved, swatch color only)');
 
   let masterImage;
+  let sourceSofa;
   let mask;
   let width;
   let height;
@@ -112,7 +113,7 @@ async function main() {
       console.error('Missing input/sofa.png or input/mask.png');
       process.exit(1);
     }
-    const sourceSofa = await loadImage(SOFA_PATH);
+    sourceSofa = await loadImage(SOFA_PATH);
     width = sourceSofa.width;
     height = sourceSofa.height;
     channels = sourceSofa.channels;
@@ -122,7 +123,7 @@ async function main() {
 
   let ok = 0;
   for (const arg of swatches) {
-    if (await runOneSwatch(arg, renderSofa, masterImage, mask, width, height, channels)) ok++;
+    if (await runOneSwatch(arg, renderSofa, masterImage, sourceSofa, mask, width, height, channels)) ok++;
   }
 
   if (!ok) process.exit(1);

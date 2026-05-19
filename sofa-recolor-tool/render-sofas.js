@@ -547,6 +547,7 @@ export async function processSwatch(swatchPath, masterImage, mask, sourceSofa) {
     highlight: fmtTone(palette.highlight),
     lightLeather: palette.isNamedLight,
     lBlend: palette.isNamedLight ? '52/48 shadowCompress +10 (max 96)' : '52/48',
+    leatherDetail: 'original HF L×0.42 + spec×0.18 (±6 clamp)',
   });
 
   const outData = recolorSofa(masterImage, mask, palette, sourceSofa);
