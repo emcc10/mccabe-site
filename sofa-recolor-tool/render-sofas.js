@@ -314,6 +314,32 @@ export function computeLabStats(labSamples) {
   };
 }
 
+/** Mean RGB of interior swatch pixels (no L/sat filter) — for light-neutral lift detection. */
+export function computeInteriorSwatchRgbAvg(data, width, height, channels) {
+  const xMin = Math.floor(width * HERO_BORDER_FRAC);
+  const xMax = Math.ceil(width * (1 - HERO_BORDER_FRAC));
+  const yMin = Math.floor(height * HERO_BORDER_FRAC);
+  const yMax = Math.ceil(height * (1 - HERO_BORDER_FRAC));
+  let sum = 0;
+  let n = 0;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (x < xMin || x >= xMax || y < yMin || y >= yMax) continue;
+      const i = (y * width + x) * channels;
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const alpha = channels === 4 ? data[i + 3] : 255;
+      if (alpha < 20 || isNearWhite(r, g, b)) continue;
+      sum += r + g + b;
+      n++;
+    }
+  }
+
+  return n ? sum / (3 * n) : 0;
+}
+
 function collectInteriorSwatchPixels(data, width, height, channels, lMin, lMax, minSat) {
   const xMin = Math.floor(width * HERO_BORDER_FRAC);
   const xMax = Math.ceil(width * (1 - HERO_BORDER_FRAC));
@@ -452,7 +478,7 @@ function kMeansLabAB(samples, k = HERO_K_MEANS) {
   return { centroids, labels };
 }
 
-function finishHeroStats(meanA, meanB, meanL, spreadSamples, avgSwatchChroma) {
+function finishHeroStats(meanA, meanB, meanL, spreadSamples, avgSwatchChroma, swatchRgbAvg = 0) {
   const spread = spreadSamples.length ? computeLabStats(spreadSamples) : computeLabStats([{ L: meanL, a: meanA, b: meanB }]);
   const repRgb = labToRgb(meanL, meanA, meanB);
   const rgbSat = pixelSaturation(repRgb.r, repRgb.g, repRgb.b);
@@ -484,10 +510,12 @@ function finishHeroStats(meanA, meanB, meanL, spreadSamples, avgSwatchChroma) {
   }
 
   const heroRgbAvg = (repRgb.r + repRgb.g + repRgb.b) / 3;
+  const liftRgbAvg =
+    isNeutral && swatchRgbAvg > heroRgbAvg ? swatchRgbAvg : heroRgbAvg;
   let lightLiftTier = 0;
-  if (heroRgbAvg > LIGHT_HERO_RGB_LIFT_STRONG || meanL > LIGHT_HERO_L_LIFT_STRONG) {
+  if (liftRgbAvg > LIGHT_HERO_RGB_LIFT_STRONG || meanL > LIGHT_HERO_L_LIFT_STRONG) {
     lightLiftTier = 2;
-  } else if (heroRgbAvg > LIGHT_HERO_RGB_LIFT || meanL > LIGHT_HERO_L_LIFT) {
+  } else if (liftRgbAvg > LIGHT_HERO_RGB_LIFT || meanL > LIGHT_HERO_L_LIFT) {
     lightLiftTier = 1;
   }
 
@@ -496,6 +524,8 @@ function finishHeroStats(meanA, meanB, meanL, spreadSamples, avgSwatchChroma) {
     meanA,
     meanB,
     heroRgbAvg,
+    liftRgbAvg,
+    swatchRgbAvg,
     stdL: spread.stdL,
     stdA: Math.max(spread.stdA, MIN_LAB_STD),
     stdB: Math.max(spread.stdB, MIN_LAB_STD),
@@ -515,12 +545,12 @@ function finishHeroStats(meanA, meanB, meanL, spreadSamples, avgSwatchChroma) {
 /** Light cream/beige swatches: partial lift toward hero L (dark swatches keep original L). */
 export function computeFinalLabL(originalL, dst) {
   const heroL = dst.meanL;
-  const heroRgbAvg = dst.heroRgbAvg ?? 0;
+  const liftRgbAvg = dst.liftRgbAvg ?? dst.heroRgbAvg ?? 0;
 
-  if (heroRgbAvg > LIGHT_HERO_RGB_LIFT_STRONG || heroL > LIGHT_HERO_L_LIFT_STRONG) {
+  if (liftRgbAvg > LIGHT_HERO_RGB_LIFT_STRONG || heroL > LIGHT_HERO_L_LIFT_STRONG) {
     return originalL * (1 - LIGHT_L_BLEND_STRONG) + heroL * LIGHT_L_BLEND_STRONG;
   }
-  if (heroRgbAvg > LIGHT_HERO_RGB_LIFT || heroL > LIGHT_HERO_L_LIFT) {
+  if (liftRgbAvg > LIGHT_HERO_RGB_LIFT || heroL > LIGHT_HERO_L_LIFT) {
     return originalL * (1 - LIGHT_L_BLEND_SOFT) + heroL * LIGHT_L_BLEND_SOFT;
   }
   return originalL;
@@ -529,9 +559,9 @@ export function computeFinalLabL(originalL, dst) {
 /**
  * Hero color: k=4 clusters; highest population + mid-L score (not max saturation).
  */
-export function computeHeroSwatchStats(heroSamples) {
+export function computeHeroSwatchStats(heroSamples, swatchRgbAvg = 0) {
   if (!heroSamples.length) {
-    return finishHeroStats(0, 0, 50, [], 0);
+    return finishHeroStats(0, 0, 50, [], 0, swatchRgbAvg);
   }
 
   const avgSwatchChroma =
@@ -539,7 +569,7 @@ export function computeHeroSwatchStats(heroSamples) {
 
   if (heroSamples.length < HERO_K_MEANS) {
     const s = computeLabStats(heroSamples);
-    return finishHeroStats(s.meanA, s.meanB, s.meanL, heroSamples, avgSwatchChroma);
+    return finishHeroStats(s.meanA, s.meanB, s.meanL, heroSamples, avgSwatchChroma, swatchRgbAvg);
   }
 
   const { labels } = kMeansLabAB(heroSamples, HERO_K_MEANS);
@@ -871,7 +901,8 @@ export async function getSwatchLabStats(swatchPath) {
     );
   }
 
-  const stats = computeHeroSwatchStats(heroes);
+  const swatchRgbAvg = computeInteriorSwatchRgbAvg(data, info.width, info.height, info.channels);
+  const stats = computeHeroSwatchStats(heroes, swatchRgbAvg);
   stats.heroTier = tier;
   const meanRgb = labToRgb(stats.meanL, stats.meanA, stats.meanB);
   return {
@@ -1038,6 +1069,7 @@ export async function processSwatch(swatchPath, baseSofa, mask, sofaStats, sofaB
     neutral: swatch.stats.isNeutral ?? false,
     lightLift: swatch.stats.lightLiftTier ?? 0,
     heroRgbAvg: Math.round(swatch.stats.heroRgbAvg ?? 0),
+    liftRgbAvg: Math.round(swatch.stats.liftRgbAvg ?? swatch.stats.heroRgbAvg ?? 0),
     chromaGain: Math.round((swatch.stats.chromaGain ?? CHROMA_GAIN_BASE) * 100) / 100,
     satFactor: Math.round((swatch.stats.satFactor ?? 1) * 100) / 100,
   });
@@ -1110,7 +1142,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: hero chroma + ab texture residual; depth restore; L preserved');
+  console.log('  method: hero chroma + ab texture residual; depth restore; light L lift');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   const mask = await createUpholsteryMask(baseSofa, maskPath);
