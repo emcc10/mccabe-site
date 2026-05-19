@@ -33,9 +33,10 @@ const EDGE_RECOLOR_DISTANCE = 4;
 /** Do not recolor pixels in this band above the scanned sofa bottom (cast shadow on floor). */
 const CAST_SHADOW_BAND_PX = 34;
 const BODY_RECOLOR_MARGIN_ABOVE_BOTTOM_PX = 8;
-const MASK_DILATE_RADIUS = 0;
-const MASK_ERODE_RADIUS = 1;
-const MASK_APPLY_THRESH = 128;
+const MASK_CLOSE_RADIUS = 2;
+const MASK_DILATE_RADIUS = 2;
+const MASK_ERODE_RADIUS = 0;
+const MASK_APPLY_THRESH = 96;
 const MIN_LAB_STD = 0.8;
 const CHROMA_GAIN_BASE = 2.5;
 const LAB_CHROMA_CLAMP = 72;
@@ -79,16 +80,17 @@ const LIGHT_NEUTRAL_A_MIN = -3;
 const LIGHT_NEUTRAL_A_MAX = 4;
 const LIGHT_NEUTRAL_B_MIN = 0;
 const LIGHT_NEUTRAL_B_MAX = 10;
-/** Lifted neutral sofa base targets (RGB luminance). */
-const LIGHT_BASE_SHADOW_MIN = 118;
-const LIGHT_BASE_MID_LO = 185;
-const LIGHT_BASE_MID_HI = 210;
-const LIGHT_BASE_HIGH_LO = 220;
-const LIGHT_BASE_HIGH_HI = 235;
-const LIGHT_BASE_SEAM_MIN = 115;
-const LIGHT_BASE_STRUCTURE_BLUR = 6;
-const LIGHT_BASE_DETAIL = 0.18;
-const LIGHT_CHROMA_STRENGTH = 0.88;
+/** Photographic light base: blend cognac L toward per-swatch target, keep detail. */
+const LIGHT_LIFT_ORIG = 0.55;
+const LIGHT_LIFT_TARGET = 0.45;
+const LIGHT_TARGET_CREAM = 190;
+const LIGHT_TARGET_OFFWHITE = 200;
+const LIGHT_TARGET_GRAY = 175;
+const LIGHT_DETAIL_BLUR = 10;
+const LIGHT_DETAIL_STRENGTH = 0.65;
+const LIGHT_PANEL_SHADOW_FLOOR = 102;
+const LIGHT_SEAM_SHADOW_FLOOR = 78;
+const LIGHT_HIGHLIGHT_CAP = 235;
 const LIGHT_TEXTURE_MAX = 2;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
@@ -132,6 +134,22 @@ export function isLightLeatherPipeline(stats, swatchStem) {
   const stem = swatchStem.toLowerCase();
   if (LIGHT_LEATHER_STEMS.has(stem)) return true;
   return stats.isLightSwatch === true;
+}
+
+/** Per-swatch lifted luminance target (RGB-scale). */
+export function getLightTargetL(swatchStem) {
+  const stem = swatchStem.toLowerCase();
+  if (stem.includes('eggshell') || stem.includes('parchment')) return LIGHT_TARGET_OFFWHITE;
+  if (
+    stem.includes('frost') ||
+    stem.includes('mist') ||
+    stem.includes('tusk') ||
+    stem.includes('spider') ||
+    stem.includes('haze')
+  ) {
+    return LIGHT_TARGET_GRAY;
+  }
+  return LIGHT_TARGET_CREAM;
 }
 
 export function isOriginalSwatchFile(filename) {
@@ -283,6 +301,25 @@ function morphologyErode(src, width, height, radius) {
       }
       out[y * width + x] = min;
     }
+  }
+  return out;
+}
+
+function morphologyClose(src, width, height, radius) {
+  return morphologyErode(morphologyDilate(src, width, height, radius), width, height, radius);
+}
+
+/** ~0.5px soft mask edge for edge pixel inclusion without wide bleed. */
+function featherMaskHalfPx(mask, width, height) {
+  const n = mask.length;
+  const soft = new Float32Array(n);
+  for (let j = 0; j < n; j++) {
+    soft[j] = mask[j] / 255;
+  }
+  const blurred = boxBlurLuminance(soft, width, height, 1);
+  const out = new Uint8Array(n);
+  for (let j = 0; j < n; j++) {
+    out[j] = blurred[j] >= 0.5 ? 255 : blurred[j] >= 0.35 ? 200 : 0;
   }
   return out;
 }
@@ -634,26 +671,10 @@ function percentileSorted(sorted, p) {
   return sorted[idx];
 }
 
-/** Map cognac upholstery luminance → lifted neutral gray (structure preserved). */
-export function mapLightNeutralLuminance(origLum, black, white) {
-  const range = Math.max(white - black, 16);
-  const t = clamp((origLum - black) / range, 0, 1);
-  if (t <= 0.38) {
-    const u = smoothstep(0, 0.38, t);
-    return LIGHT_BASE_SHADOW_MIN + u * (LIGHT_BASE_MID_LO - LIGHT_BASE_SHADOW_MIN);
-  }
-  if (t <= 0.78) {
-    const u = (t - 0.38) / 0.4;
-    return LIGHT_BASE_MID_LO + u * (LIGHT_BASE_MID_HI - LIGHT_BASE_MID_LO);
-  }
-  const u = (t - 0.78) / 0.22;
-  return LIGHT_BASE_HIGH_LO + u * (LIGHT_BASE_HIGH_HI - LIGHT_BASE_HIGH_LO);
-}
-
 /**
- * Desaturated, lifted neutral sofa for light-leather pipeline (not cognac L).
+ * Photographic light base: gentle lift from cognac L + preserved detail (not flat remap).
  */
-export function buildLightNeutralSofaBase(cognacImage, mask, sofaBottomY) {
+export function buildLightNeutralSofaBase(cognacImage, mask, sofaBottomY, lightTargetL) {
   const { data, width, height, channels } = cognacImage;
   const out = Buffer.from(data);
   const yMax = sofaBottomY - BODY_RECOLOR_MARGIN_ABOVE_BOTTOM_PX;
@@ -666,8 +687,7 @@ export function buildLightNeutralSofaBase(cognacImage, mask, sofaBottomY) {
     origLum[j] = pixelBrightness(data[p], data[p + 1], data[p + 2]);
   }
 
-  const anchors = computeLuminanceAnchors(origLum, mask, width, height);
-  const blurLum = gaussianBlurFloat(origLum, width, height, LIGHT_BASE_STRUCTURE_BLUR);
+  const blurLum = gaussianBlurFloat(origLum, width, height, LIGHT_DETAIL_BLUR);
 
   for (let y = 0; y < height; y++) {
     if (y > yMax) continue;
@@ -675,19 +695,20 @@ export function buildLightNeutralSofaBase(cognacImage, mask, sofaBottomY) {
       const j = y * width + x;
       if (mask[j] < MASK_APPLY_THRESH) continue;
       const p = j * channels;
-      const lum = origLum[j];
-      let mapped = mapLightNeutralLuminance(lum, anchors.black, anchors.white);
-      mapped += (lum - blurLum[j]) * LIGHT_BASE_DETAIL;
+      const originalL = origLum[j];
+      let baseL = originalL * LIGHT_LIFT_ORIG + lightTargetL * LIGHT_LIFT_TARGET;
+      const detail = originalL - blurLum[j];
+      baseL += detail * LIGHT_DETAIL_STRENGTH;
 
-      const seamDepth = blurLum[j] - lum;
+      const seamDepth = blurLum[j] - originalL;
+      const shadowFloor = seamDepth > 10 ? LIGHT_SEAM_SHADOW_FLOOR : LIGHT_PANEL_SHADOW_FLOOR;
+      baseL = Math.max(baseL, shadowFloor);
       if (seamDepth > 10) {
-        const seamTarget = clamp(blurLum[j] - 14, LIGHT_BASE_SEAM_MIN, mapped - 4);
-        mapped = mapped * 0.55 + seamTarget * 0.45;
-        mapped = clamp(mapped, LIGHT_BASE_SEAM_MIN, blurLum[j] - 5);
+        baseL = Math.min(baseL, blurLum[j] - 4);
       }
+      baseL = Math.min(baseL, LIGHT_HIGHLIGHT_CAP);
 
-      mapped = clamp(mapped, LIGHT_BASE_SEAM_MIN, LIGHT_BASE_HIGH_HI);
-      const g = Math.round(mapped);
+      const g = Math.round(clamp(baseL, 0, 255));
       out[p] = g;
       out[p + 1] = g;
       out[p + 2] = g;
@@ -1147,8 +1168,8 @@ export function transferLabPixel(pixel, src, dst, opts = {}) {
     }
   }
 
-  let a = dst.meanA * (lightPipeline ? LIGHT_CHROMA_STRENGTH : 1) + resA;
-  let b = dst.meanB * (lightPipeline ? LIGHT_CHROMA_STRENGTH : 1) + resB;
+  let a = dst.meanA + resA;
+  let b = dst.meanB + resB;
 
   if (opts.cognacEdge || opts.fringeEdge) {
     const snap = clamp((opts.edgeStrength ?? 0) * 0.92, 0, 1);
@@ -1319,13 +1340,33 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
       hard[j] = 0;
       continue;
     }
-    hard[j] = isUpholsteryPixel(data[p], data[p + 1], data[p + 2], y, sofaBottomY) ? 255 : 0;
+    const r = data[p];
+    const g = data[p + 1];
+    const b = data[p + 2];
+    if (isUpholsteryPixel(r, g, b, y, sofaBottomY)) {
+      hard[j] = 255;
+      continue;
+    }
+    const lum = pixelBrightness(r, g, b);
+    if (
+      lum <= EDGE_LUM_MAX &&
+      !isNearWhite(r, g, b) &&
+      !isCastShadowPixel(r, g, b, y, sofaBottomY) &&
+      (isCognacFringePixel(r, g, b) || (lum > 40 && pixelSaturation(r, g, b) >= 0.03))
+    ) {
+      hard[j] = 255;
+      continue;
+    }
+    hard[j] = 0;
   }
 
-  let m = morphologyDilate(hard, width, height, MASK_DILATE_RADIUS);
+  let m = morphologyClose(hard, width, height, MASK_CLOSE_RADIUS);
+  m = morphologyDilate(m, width, height, MASK_DILATE_RADIUS);
   if (MASK_ERODE_RADIUS > 0) {
     m = morphologyErode(m, width, height, MASK_ERODE_RADIUS);
   }
+  m = morphologyClose(m, width, height, 1);
+  m = featherMaskHalfPx(m, width, height);
   return m;
 }
 
@@ -1347,7 +1388,9 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
 
   const blurLum = boxBlurLuminance(origLum, width, height);
   const anchors = computeLuminanceAnchors(origLum, mask, width, height);
-  const abMaps = buildSofaAbTextureMaps(baseImage, width, height, channels);
+  const textureImage =
+    lightPipeline && recolorOpts.cognacImage ? recolorOpts.cognacImage : baseImage;
+  const abMaps = buildSofaAbTextureMaps(textureImage, width, height, textureImage.channels);
 
   for (let y = 0; y < height; y++) {
     if (y > yMax) continue;
@@ -1401,28 +1444,25 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
   return out;
 }
 
-export async function processSwatch(
-  swatchPath,
-  cognacSofa,
-  lightSofa,
-  mask,
-  cognacSofaStats,
-  sofaBottomY,
-) {
+export async function processSwatch(swatchPath, cognacSofa, mask, cognacSofaStats, sofaBottomY) {
   const resolved = resolveOriginalSwatchPath(swatchPath);
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
 
   const swatchName = basename(resolved, extname(resolved));
   const swatch = await getSwatchLabStats(resolved);
   const lightPipeline = isLightLeatherPipeline(swatch.stats, swatchName);
-  const renderBase = lightPipeline ? lightSofa : cognacSofa;
+  const lightTargetL = getLightTargetL(swatchName);
+  const renderBase = lightPipeline
+    ? buildLightNeutralSofaBase(cognacSofa, mask, sofaBottomY, lightTargetL)
+    : cognacSofa;
   const pipelineSofaStats = lightPipeline
-    ? computeSofaLabStats(lightSofa, mask, sofaBottomY)
+    ? computeSofaLabStats(renderBase, mask, sofaBottomY)
     : cognacSofaStats;
 
   console.log({
     swatchName,
-    pipeline: lightPipeline ? 'light-neutral-base' : 'cognac-preserve-L',
+    pipeline: lightPipeline ? 'light-photographic-base' : 'cognac-preserve-L',
+    lightTargetL: lightPipeline ? lightTargetL : undefined,
     source: `input/swatches/${swatch.sourceFile}`,
     overallRGB: swatch.overallRGB,
     pixelsSampled: swatch.pixelCount,
@@ -1522,11 +1562,7 @@ export async function main(argv = process.argv) {
   const mask = await createUpholsteryMask(baseSofa, maskPath);
   const sofaBottomY = getSofaBottomY(baseSofa);
   const cognacSofaStats = computeSofaLabStats(baseSofa, mask, sofaBottomY);
-  const lightSofa = buildLightNeutralSofaBase(baseSofa, mask, sofaBottomY);
-  const lightSofaStats = computeSofaLabStats(lightSofa, mask, sofaBottomY);
-  console.log(
-    `  cognac LAB L ${Math.round(cognacSofaStats.meanL)} | light-base RGB ~${Math.round(lightSofaStats.meanL)}`,
-  );
+  console.log(`  cognac LAB L ${Math.round(cognacSofaStats.meanL)} | mask dilate ${MASK_DILATE_RADIUS}px`);
 
   if (cli.mode === 'one') {
     const swPath = resolveSwatchArg(cli.swatchFile);
@@ -1534,27 +1570,13 @@ export async function main(argv = process.argv) {
       console.error(`Swatch not found: ${cli.swatchFile}`);
       process.exit(1);
     }
-    const { outPath } = await processSwatch(
-      swPath,
-      baseSofa,
-      lightSofa,
-      mask,
-      cognacSofaStats,
-      sofaBottomY,
-    );
+    const { outPath } = await processSwatch(swPath, baseSofa, mask, cognacSofaStats, sofaBottomY);
     console.log(`\nDone: ${outPath}`);
     return;
   }
 
   for (const file of swatchFiles) {
-    await processSwatch(
-      join(SWATCH_DIR, file),
-      baseSofa,
-      lightSofa,
-      mask,
-      cognacSofaStats,
-      sofaBottomY,
-    );
+    await processSwatch(join(SWATCH_DIR, file), baseSofa, mask, cognacSofaStats, sofaBottomY);
   }
 
   const onDisk = readdirSync(OUTPUT_DIR).filter(
