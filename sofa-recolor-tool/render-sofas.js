@@ -27,10 +27,13 @@ const ZIP_PATH = join(OUTPUT_DIR, 'sofa-renders.zip');
 const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 
 const BG_THRESH = 238;
-const EDGE_LUM_MAX = 218;
-const FLOOR_BELOW_SOFA_PX = 4;
-const MASK_DILATE_RADIUS = 1;
-const MASK_ERODE_RADIUS = 1;
+const EDGE_LUM_MAX = 215;
+const EDGE_SKIP_DISTANCE = 2;
+/** Do not recolor pixels in this band above the scanned sofa bottom (cast shadow on floor). */
+const CAST_SHADOW_BAND_PX = 34;
+const BODY_RECOLOR_MARGIN_ABOVE_BOTTOM_PX = 8;
+const MASK_DILATE_RADIUS = 0;
+const MASK_ERODE_RADIUS = 2;
 const MASK_APPLY_THRESH = 128;
 const MIN_LAB_STD = 0.8;
 const L_TRANSFER_STRENGTH = 0.38;
@@ -134,6 +137,19 @@ function isFloorShadowPixel(r, g, b, y, sofaBottomY) {
   return rgbMaxDiff(r, g, b) < 30;
 }
 
+/** Gray drop shadow under sofa — must stay original, not leather color. */
+function isCastShadowPixel(r, g, b, y, sofaBottomY) {
+  if (y < sofaBottomY - CAST_SHADOW_BAND_PX) return false;
+  if (y > sofaBottomY + 6) return isFloorShadowPixel(r, g, b, y, sofaBottomY);
+
+  const lum = pixelBrightness(r, g, b);
+  const sat = pixelSaturation(r, g, b);
+  if (lum < 18 || lum > 210) return false;
+  if (sat >= 0.2) return false;
+  if (sat < 0.11 && rgbMaxDiff(r, g, b) < 32) return true;
+  return sat < 0.14 && lum < 175 && rgbMaxDiff(r, g, b) < 24;
+}
+
 /** Gap / floor strip between legs — avoid cyan recolor artifacts. */
 function isUnderSofaGapPixel(r, g, b, y, sofaBottomY) {
   if (y < sofaBottomY - 18 || y > sofaBottomY + 4) return false;
@@ -162,6 +178,7 @@ function isEdgeGlowPixel(r, g, b) {
 function isUpholsteryPixel(r, g, b, y, sofaBottomY) {
   if (isNearWhite(r, g, b)) return false;
   if (isEdgeFringePixel(r, g, b)) return false;
+  if (isCastShadowPixel(r, g, b, y, sofaBottomY)) return false;
   if (isLegPixel(r, g, b, y, sofaBottomY)) return false;
   if (isFloorShadowPixel(r, g, b, y, sofaBottomY)) return false;
   if (isUnderSofaGapPixel(r, g, b, y, sofaBottomY)) return false;
@@ -245,6 +262,61 @@ export function computeLabStats(labSamples) {
   };
 }
 
+/**
+ * Swatch stats from mid-tone leather (not center shadow / glare).
+ * Chroma from brighter band so cool grays keep their tint.
+ */
+export function computeRepresentativeSwatchStats(samples) {
+  if (samples.length < 64) return computeLabStats(samples);
+
+  const sorted = [...samples].sort((a, b) => a.L - b.L);
+  const n = sorted.length;
+  const lLo = sorted[Math.floor(n * 0.4)].L;
+  const lHi = sorted[Math.floor(n * 0.92)].L;
+  const body =
+    lHi > lLo ? sorted.filter((s) => s.L >= lLo && s.L <= lHi) : sorted;
+
+  const bodyStats = computeLabStats(body.length >= n * 0.15 ? body : sorted);
+
+  const lBright = sorted[Math.floor(n * 0.78)].L;
+  const bright = sorted.filter((s) => s.L >= lBright);
+  const chromaStats =
+    bright.length >= n * 0.06 ? computeLabStats(bright) : bodyStats;
+
+  let meanL = bodyStats.meanL;
+  let meanA = chromaStats.meanA;
+  let meanB = chromaStats.meanB;
+
+  const repRgb = labToRgb(meanL, meanA, meanB);
+  const chromaMag = Math.hypot(meanA, meanB);
+  const isCoolGray =
+    chromaMag < 10 &&
+    repRgb.b <= repRgb.r - 1 &&
+    repRgb.b <= repRgb.g - 1 &&
+    meanL < 55;
+
+  if (isCoolGray) {
+    meanL = Math.max(meanL, chromaStats.meanL, bodyStats.meanL);
+    meanB -= clamp((repRgb.g - repRgb.b) * 0.06 + (repRgb.r - repRgb.b) * 0.03, 0.5, 3.5);
+    meanA -= clamp((repRgb.r - repRgb.g) * 0.02, 0, 1.2);
+  }
+
+  const isLightNeutral = meanL >= LIGHT_SWATCH_MEAN_L && chromaMag < 14;
+  if (isLightNeutral) {
+    meanB *= 0.88;
+    meanA *= 0.92;
+  }
+
+  return {
+    meanL,
+    meanA,
+    meanB,
+    stdL: bodyStats.stdL,
+    stdA: Math.max(bodyStats.stdA, chromaStats.stdA, MIN_LAB_STD),
+    stdB: Math.max(bodyStats.stdB, chromaStats.stdB, MIN_LAB_STD),
+  };
+}
+
 function smoothstep(edge0, edge1, x) {
   const t = clamp((x - edge0) / (edge1 - edge0), 0, 1);
   return t * t * (3 - 2 * t);
@@ -252,34 +324,52 @@ function smoothstep(edge0, edge1, x) {
 
 /** Per-swatch transfer tuning — light leathers need lift + swatch-anchored chroma (not cognac-gray). */
 export function getTransferProfile(dst) {
+  const chromaMag = Math.hypot(dst.meanA, dst.meanB);
+
   if (dst.meanL >= LIGHT_SWATCH_MEAN_L) {
     return {
       mode: 'light',
-      lStrength: 0.95,
-      lContrast: 1.14,
-      chromaTexture: 0.5,
-      chromaScaleMin: 0.42,
-      chromaScaleMax: 1.1,
-      highlightPreserveL: 91,
-      shadowChromaPull: 0.4,
+      lStrength: 0.8,
+      lContrast: 1,
+      lRelative: 0.12,
+      chromaTexture: 0.72,
+      chromaScaleMin: 0.5,
+      chromaScaleMax: 1.05,
+      highlightPreserveL: 93,
+      shadowChromaPull: 0.06,
     };
   }
   if (dst.meanL >= MID_SWATCH_MEAN_L) {
     return {
       mode: 'mid',
-      lStrength: 0.66,
-      lContrast: 1.1,
-      chromaTexture: 0.58,
+      lStrength: 0.62,
+      lContrast: 1,
+      lRelative: 0.18,
+      chromaTexture: 0.65,
+      chromaScaleMin: 0.48,
+      chromaScaleMax: 1.15,
+      highlightPreserveL: 82,
+      shadowChromaPull: 0.1,
+    };
+  }
+  if (dst.meanL < MID_SWATCH_MEAN_L && chromaMag < 10) {
+    return {
+      mode: 'neutral',
+      lStrength: 0.52,
+      lContrast: 1,
+      lRelative: 0.22,
+      chromaTexture: 0.7,
       chromaScaleMin: 0.45,
-      chromaScaleMax: 1.2,
-      highlightPreserveL: 80,
-      shadowChromaPull: 0.22,
+      chromaScaleMax: 1.15,
+      highlightPreserveL: 75,
+      shadowChromaPull: 0.08,
     };
   }
   return {
     mode: 'standard',
     lStrength: L_TRANSFER_STRENGTH,
     lContrast: 1,
+    lRelative: 0,
     chromaTexture: 1,
     chromaScaleMin: 0.3,
     chromaScaleMax: 2,
@@ -323,11 +413,14 @@ export function transferLabPixel(pixel, src, dst) {
       ? transferChromaReinhard(pixel, src, dst)
       : transferChromaSwatchAnchored(pixel, src, dst, profile);
 
-  const targetL = (pixel.L - src.meanL) * (dst.stdL / src.stdL) + dst.meanL;
-  let finalL = pixel.L + (targetL - pixel.L) * profile.lStrength;
-
-  if (profile.mode === 'light' && pixel.L > 28 && pixel.L < 78) {
-    finalL += (dst.meanL - src.meanL) * 0.08;
+  let finalL;
+  if (profile.lRelative > 0) {
+    const dL = dst.meanL - src.meanL;
+    finalL = pixel.L + dL * profile.lStrength;
+    finalL += (pixel.L - src.meanL) * profile.lRelative * (dst.stdL / src.stdL);
+  } else {
+    const targetL = (pixel.L - src.meanL) * (dst.stdL / src.stdL) + dst.meanL;
+    finalL = pixel.L + (targetL - pixel.L) * profile.lStrength;
   }
 
   if (profile.lContrast > 1) {
@@ -342,17 +435,19 @@ export function transferLabPixel(pixel, src, dst) {
   return labToRgb(clamp(finalL, 0, 100), a, b);
 }
 
-function touchesBackground(mask, width, height, x, y) {
-  for (let dy = -1; dy <= 1; dy++) {
-    for (let dx = -1; dx <= 1; dx++) {
-      if (dx === 0 && dy === 0) continue;
-      const xx = x + dx;
-      const yy = y + dy;
-      if (xx < 0 || yy < 0 || xx >= width || yy >= height) return true;
-      if (mask[yy * width + xx] < MASK_APPLY_THRESH) return true;
+function distanceToBackground(mask, width, height, x, y, maxDist) {
+  for (let d = 1; d <= maxDist; d++) {
+    for (let dy = -d; dy <= d; dy++) {
+      for (let dx = -d; dx <= d; dx++) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== d) continue;
+        const xx = x + dx;
+        const yy = y + dy;
+        if (xx < 0 || yy < 0 || xx >= width || yy >= height) return d;
+        if (mask[yy * width + xx] < MASK_APPLY_THRESH) return d;
+      }
     }
   }
-  return false;
+  return maxDist + 1;
 }
 
 export async function loadImage(path) {
@@ -418,7 +513,7 @@ export async function getSwatchLabStats(swatchPath) {
 
   if (!samples.length) throw new Error(`No swatch pixels: ${resolved}`);
 
-  const stats = computeLabStats(samples);
+  const stats = computeRepresentativeSwatchStats(samples);
   const meanRgb = labToRgb(stats.meanL, stats.meanA, stats.meanB);
   return {
     stats,
@@ -430,7 +525,7 @@ export async function getSwatchLabStats(swatchPath) {
 
 export function computeSofaLabStats(baseImage, mask, sofaBottomY) {
   const { data, width, height, channels } = baseImage;
-  const yMax = sofaBottomY + FLOOR_BELOW_SOFA_PX;
+  const yMax = sofaBottomY - BODY_RECOLOR_MARGIN_ABOVE_BOTTOM_PX;
   const samples = [];
 
   for (let y = 0; y < height; y++) {
@@ -500,7 +595,7 @@ export async function createUpholsteryMask(image, optionalMaskPath = null) {
 export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY) {
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
-  const yMax = sofaBottomY + FLOOR_BELOW_SOFA_PX;
+  const yMax = sofaBottomY - BODY_RECOLOR_MARGIN_ABOVE_BOTTOM_PX;
 
   for (let y = 0; y < height; y++) {
     if (y > yMax) continue;
@@ -512,8 +607,11 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
       const oR = data[p];
       const oG = data[p + 1];
       const oB = data[p + 2];
+      if (isCastShadowPixel(oR, oG, oB, y, sofaBottomY)) continue;
       if (isEdgeFringePixel(oR, oG, oB)) continue;
-      if (touchesBackground(mask, width, height, x, y)) continue;
+      if (distanceToBackground(mask, width, height, x, y, EDGE_SKIP_DISTANCE) <= EDGE_SKIP_DISTANCE) {
+        continue;
+      }
 
       const baseLab = rgbToLab(oR, oG, oB);
       const { r, g, b } = transferLabPixel(baseLab, sofaStats, swatchStats);
@@ -615,7 +713,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: Reinhard (dark) / swatch-anchored lift (light & mid)');
+  console.log('  method: mid-tone swatch stats; smooth lift on lights; floor shadow protected');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   const mask = await createUpholsteryMask(baseSofa, maskPath);
