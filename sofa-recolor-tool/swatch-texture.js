@@ -144,8 +144,30 @@ function findBestPatchOrigin(mask, width, height, patchSize, used = null) {
     }
   };
 
-  tryWindow(8);
-  if (bestScore < patchSize * 4) tryWindow(1);
+  tryWindow(12);
+  if (bestScore < patchSize * 4) tryWindow(4);
+
+  const refineRadius = 48;
+  for (let y = clamp(bestY - refineRadius, 0, maxY); y <= clamp(bestY + refineRadius, 0, maxY); y++) {
+    for (let x = clamp(bestX - refineRadius, 0, maxX); x <= clamp(bestX + refineRadius, 0, maxX); x++) {
+      let bandHits = 0;
+      let usedHits = 0;
+      for (let dy = 0; dy < patchSize; dy++) {
+        const row = (y + dy) * width;
+        for (let dx = 0; dx < patchSize; dx++) {
+          const j = row + x + dx;
+          if (mask[j]) bandHits++;
+          if (used?.[j]) usedHits++;
+        }
+      }
+      const score = bandHits - usedHits * 2;
+      if (score > bestScore) {
+        bestScore = score;
+        bestX = x;
+        bestY = y;
+      }
+    }
+  }
 
   return { x: bestX, y: bestY, score: Math.max(0, bestScore) };
 }
@@ -275,11 +297,12 @@ function centroidPatchOrigin(bandMask, width, height, patchSize, used = null) {
   return { x, y, score: scorePatchWindow(bandMask, width, x, y, patchSize) };
 }
 
-function markPatchUsed(used, width, originX, originY, patchSize) {
+function markPatchUsed(used, width, bandMask, originX, originY, patchSize) {
   for (let dy = 0; dy < patchSize; dy++) {
     const row = (originY + dy) * width;
     for (let dx = 0; dx < patchSize; dx++) {
-      used[row + originX + dx] = 1;
+      const j = row + originX + dx;
+      if (bandMask[j]) used[j] = 1;
     }
   }
 }
@@ -290,16 +313,16 @@ function extractSequentialBandPatches(data, width, height, channels, masks, patc
   const patches = {};
 
   for (const name of ['shadow', 'midtone', 'highlight']) {
-    const combined = new Uint8Array(width * height);
-    for (let j = 0; j < width * height; j++) {
-      combined[j] = masks[name][j] && !used[j];
-    }
-    let mask = combined;
-    const count = combined.reduce((a, v) => a + v, 0);
-    if (count < patchSize) mask = masks[name];
-
-    patches[name] = extractBandPatch(data, width, height, channels, mask, patchSize, used);
-    markPatchUsed(used, width, patches[name].origin.x, patches[name].origin.y, patchSize);
+    patches[name] = extractBandPatch(
+      data,
+      width,
+      height,
+      channels,
+      masks[name],
+      patchSize,
+      used,
+    );
+    markPatchUsed(used, width, masks[name], patches[name].origin.x, patches[name].origin.y, patchSize);
   }
 
   return patches;

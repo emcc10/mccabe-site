@@ -113,7 +113,7 @@
 
   function emptyState(title, text, actionsHtml) {
     return (
-      '<motion class="mc-boards__empty">' +
+      '<div class="mc-boards__empty">' +
       '<h2 class="mc-boards__empty-title">' +
       title +
       '</h2>' +
@@ -123,7 +123,7 @@
       (actionsHtml
         ? '<div class="mc-boards__empty-actions">' + actionsHtml + '</div>'
         : '') +
-      '</motion>'
+      '</div>'
     );
   }
 
@@ -152,7 +152,7 @@
     }
     card.appendChild(thumb);
 
-    var body = document.createElement('motion');
+    var body = document.createElement('div');
     body.className = 'mc-boards__card-body';
 
     var title = document.createElement('p');
