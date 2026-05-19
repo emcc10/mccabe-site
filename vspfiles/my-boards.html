@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-page.css?v=20260520" />
 </head>
 <body class="mc-my-boards-page">
-  <motion class="mc-boards-shell">
+  <div class="mc-boards-shell">
     <header class="mc-boards-site-header" role="banner">
       <div class="mc-boards-site-header__inner">
         <a class="mc-boards-site-logo" href="/" title="McCabe's Theater &amp; Living">
@@ -47,13 +47,13 @@
       </header>
 
       <section id="mc-boards-style-library" class="mc-boards__library" aria-labelledby="mc-boards-style-heading">
-        <motion class="mc-boards__library-head">
+        <div class="mc-boards__library-head">
           <div>
             <h2 id="mc-boards-style-heading" class="mc-boards__library-title">Explore by style</h2>
             <p class="mc-boards__library-sub">Muted palettes and room direction—not loud color, just considered contrast.</p>
           </div>
         </div>
-        <div id="mc-boards-styles" class="mc-boards__style-track" role="list"></motion>
+        <motion id="mc-boards-styles" class="mc-boards__style-track" role="list"></div>
 
         <h2 class="mc-boards__library-title mc-boards__library-title--spaced">Furniture type</h2>
         <div id="mc-boards-types" class="mc-boards__type-row" role="list"></div>
