@@ -4,7 +4,12 @@
  */
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
-import { getSwatchTexture, sampleTextureLab, TEXTURE_L_DETAIL } from './swatch-texture.js';
+import { getSwatchTexture, sampleTextureLab } from './swatch-texture.js';
+import {
+  getMaterialClass,
+  getMaterialBlendProfile,
+  blendMaterialResponse,
+} from './material-blend.js';
 import {
   mkdirSync,
   readdirSync,
@@ -448,6 +453,20 @@ export async function loadUpholsteryMask(maskPath, width, height) {
   return mask;
 }
 
+/** Masked mean L on upholstery (neutral master). */
+export function computeMaskedMeanL(masterImage, mask) {
+  const { data, width, height, channels } = masterImage;
+  let sum = 0;
+  let n = 0;
+  for (let j = 0; j < width * height; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) continue;
+    const p = j * channels;
+    sum += rgbToLab(data[p], data[p + 1], data[p + 2]).L;
+    n++;
+  }
+  return n ? sum / n : 50;
+}
+
 /** Masked sofa L percentiles for texture placement. */
 export function computeSofaLuminanceMapRange(masterImage, mask) {
   const { data, width, height, channels } = masterImage;
@@ -464,12 +483,14 @@ export function computeSofaLuminanceMapRange(masterImage, mask) {
 }
 
 /**
- * Texture transfer: sample real swatch patches; sofa L drives placement + subtle grain.
+ * Texture transfer + material-class blend (light / dark-cool / standard).
  */
 export function recolorSofa(masterImage, mask, texture) {
   const { data, width, height, channels } = masterImage;
   const out = Buffer.from(data);
   const { lo, span } = computeSofaLuminanceMapRange(masterImage, mask);
+  const masterMeanL = computeMaskedMeanL(masterImage, mask);
+  const profile = getMaterialBlendProfile(texture);
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
@@ -481,11 +502,19 @@ export function recolorSofa(masterImage, mask, texture) {
     const u = clamp((lab.L - lo) / span, 0, 1);
     const { lab: texLab, patchMeanL } = sampleTextureLab(texture, x, y, u);
 
-    const relL = texLab.L - patchMeanL;
-    const finalL = lab.L + relL * TEXTURE_L_DETAIL;
-    const a = clamp(texLab.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const b = clamp(texLab.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const { r, g, b: bOut } = labToRgb(finalL, a, b);
+    const blended = blendMaterialResponse(
+      lab.L,
+      lab.a,
+      lab.b,
+      texLab,
+      patchMeanL,
+      u,
+      profile,
+      masterMeanL,
+    );
+    const a = clamp(blended.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const b = clamp(blended.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const { r, g, b: bOut } = labToRgb(blended.L, a, b);
 
     out[p] = r;
     out[p + 1] = g;
