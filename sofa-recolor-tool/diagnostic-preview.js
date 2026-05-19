@@ -1,25 +1,15 @@
 /**
- * Palette diagnostic — shadow / mid / highlight chips + final render per swatch.
- * Usage: node diagnostic-preview.js Bali-Spider Evoque-Atlantic Bali-Silk
+ * Extraction diagnostic — shadow / mid / highlight chips only (no sofa render).
+ * Usage: node diagnostic-preview.js Bali-Silk
  */
-import { mkdirSync, existsSync } from 'fs';
+import { mkdirSync } from 'fs';
 import { basename, dirname, extname, join } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
-import {
-  loadImage,
-  saveImage,
-  loadUpholsteryMask,
-  buildNeutralGrayMaster,
-  getSwatchPalette,
-  recolorSofa,
-  resolveOriginalSwatchPath,
-} from './render-sofas.js';
+import { getSwatchPalette, resolveOriginalSwatchPath } from './render-sofas.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SOFA_PATH = join(__dirname, 'input', 'sofa.png');
-const MASK_PATH = join(__dirname, 'input', 'mask.png');
-const DEFAULT_SWATCHES = ['Bali-Spider', 'Evoque-Atlantic', 'Bali-Silk'];
+const DEFAULT_SWATCHES = ['Bali-Silk'];
 const CHIP_SIZE = 512;
 
 function makeColorChip(r, g, b, size = CHIP_SIZE) {
@@ -57,7 +47,7 @@ function logTone(label, tone) {
   );
 }
 
-async function runOneSwatch(swatchArg, masterImage, mask, width, height, channels) {
+async function runOneSwatch(swatchArg) {
   const swatchPath = resolveSwatchPath(swatchArg);
   if (!swatchPath) {
     console.error(`Swatch not found: ${swatchArg}`);
@@ -72,6 +62,10 @@ async function runOneSwatch(swatchArg, masterImage, mask, width, height, channel
   console.log(`Output: ${outDir}`);
 
   const palette = await getSwatchPalette(swatchPath);
+  console.log(`  method: ${palette.extractionMethod}`);
+  if (palette.bandCounts) {
+    console.log(`  bands: ${JSON.stringify(palette.bandCounts)}`);
+  }
   logTone('shadow', palette.shadow);
   logTone('midtone', palette.midtone);
   logTone('highlight', palette.highlight);
@@ -79,38 +73,24 @@ async function runOneSwatch(swatchArg, masterImage, mask, width, height, channel
   await saveChip(join(outDir, 'extracted-shadow-color.png'), palette.shadow.rgb);
   await saveChip(join(outDir, 'extracted-midtone-color.png'), palette.midtone.rgb);
   await saveChip(join(outDir, 'extracted-highlight-color.png'), palette.highlight.rgb);
-  console.log('  1–3. extracted-shadow/midtone/highlight-color.png');
-
-  const finalData = recolorSofa(masterImage, mask, palette);
-  await saveImage(finalData, join(outDir, 'final-output.png'), width, height, channels);
-  console.log(`  4. final-output.png (palette mapped by sofa L, blend ${palette.isNamedLight ? '72/28' : '82/18'})`);
+  console.log('  chips: extracted-shadow/midtone/highlight-color.png');
+  console.log('  (sofa render skipped until chips match swatch)');
 
   return true;
 }
 
 async function main() {
   const swatchArgs = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_SWATCHES;
-
-  if (!existsSync(SOFA_PATH) || !existsSync(MASK_PATH)) {
-    console.error('Missing input/sofa.png or input/mask.png');
-    process.exit(1);
-  }
-
-  console.log('Palette diagnostic (no batch render)');
+  console.log('Extraction diagnostic — chips only, no sofa render');
   console.log(`Swatches: ${swatchArgs.join(', ')}`);
-
-  const sourceSofa = await loadImage(SOFA_PATH);
-  const { width, height, channels } = sourceSofa;
-  const mask = await loadUpholsteryMask(MASK_PATH, width, height);
-  const masterImage = buildNeutralGrayMaster(sourceSofa, mask);
 
   let ok = 0;
   for (const arg of swatchArgs) {
-    if (await runOneSwatch(arg, masterImage, mask, width, height, channels)) ok++;
+    if (await runOneSwatch(arg)) ok++;
   }
 
   if (!ok) process.exit(1);
-  console.log(`\nDone. ${ok} swatch diagnostic(s) in output/diagnostic/<name>/`);
+  console.log(`\nDone. ${ok} swatch(s) in output/diagnostic/<name>/`);
 }
 
 main().catch((err) => {

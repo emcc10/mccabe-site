@@ -34,6 +34,16 @@ const LAB_CHROMA_CLAMP = 72;
 
 /** Preserve neutral-master L structure; nudge toward swatch L (LAB 0–100). */
 const LIGHT_LEATHER_KEYWORDS = ['silk', 'eggshell', 'frost', 'parchment', 'vanilla', 'tusk', 'mist'];
+/** Bright-body palette extraction (ignore folded shadow); not whole-swatch tertiles. */
+const LIGHT_BODY_SAMPLING_KEYWORDS = ['silk', 'eggshell', 'vanilla', 'parchment'];
+const LIGHT_BODY_L_EXCLUDE = 60;
+const LIGHT_BODY_L_SAMPLE = 70;
+const LIGHT_BODY_L_SHADOW_MAX = 72;
+const LIGHT_BODY_SAT_MIN = 0.02;
+const LIGHT_BODY_SAT_MAX = 0.42;
+const LIGHT_BODY_WARM_B_MIN = 6;
+const LIGHT_BODY_WARM_A_MIN = -2;
+const LIGHT_BODY_SHADOW_MIN_PIXELS = 80;
 const L_BLEND_MASTER = 0.82;
 const L_BLEND_SWATCH = 0.18;
 const LIGHT_L_BLEND_MASTER = 0.72;
@@ -136,6 +146,31 @@ export function isNamedLightLeather(swatchStem) {
   return LIGHT_LEATHER_KEYWORDS.some((k) => s.includes(k));
 }
 
+export function isLightBodySampling(swatchStem) {
+  const s = swatchStem.toLowerCase();
+  return LIGHT_BODY_SAMPLING_KEYWORDS.some((k) => s.includes(k));
+}
+
+function enrichSwatchPixel(p) {
+  const lab = rgbToLab(p.r, p.g, p.b);
+  return {
+    ...p,
+    labL: lab.L,
+    labA: lab.a,
+    labB: lab.b,
+    sat: pixelSaturation(p.r, p.g, p.b),
+  };
+}
+
+function isWarmLightBodyPixel(x) {
+  return (
+    x.labB >= LIGHT_BODY_WARM_B_MIN &&
+    x.labA >= LIGHT_BODY_WARM_A_MIN &&
+    x.sat >= LIGHT_BODY_SAT_MIN &&
+    x.sat <= LIGHT_BODY_SAT_MAX
+  );
+}
+
 export function pixelSaturation(r, g, b) {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
@@ -204,18 +239,65 @@ async function loadSwatchPixels(swatchPath) {
     throw new Error(`Not enough swatch pixels: ${resolved}`);
   }
 
-  pixels.sort((a, b) => a.lum - b.lum);
-  const third = Math.floor(pixels.length / 3);
-  const shadowPx = pixels.slice(0, third);
-  const midPx = pixels.slice(third, third * 2);
-  const hiPx = pixels.slice(third * 2);
+  return { resolved, pixels };
+}
+
+/** Whole swatch luminance tertiles (dark/mid leathers). */
+function extractFullSwatchTertilePalette(rawPixels) {
+  const sorted = [...rawPixels].sort((a, b) => a.lum - b.lum);
+  const third = Math.floor(sorted.length / 3);
+  const shadowPx = sorted.slice(0, third);
+  const midPx = sorted.slice(third, third * 2);
+  const hiPx = sorted.slice(third * 2);
+  return {
+    shadow: medianLabFromPixels(shadowPx),
+    midtone: medianLabFromPixels(midPx),
+    highlight: medianLabFromPixels(hiPx),
+    extractionMethod: 'full-tertile',
+    bandCounts: { shadow: shadowPx.length, mid: midPx.length, highlight: hiPx.length },
+  };
+}
+
+/**
+ * Light leathers: sample bright body only (L>70), warm beige; shadow from L 60–72 band.
+ * Ignores folded diagonal shadows and gray-brown folds (L<60).
+ */
+function extractLightBodyPalette(rawPixels) {
+  const all = rawPixels.map(enrichSwatchPixel);
+  const warm = (x) => isWarmLightBodyPixel(x);
+
+  const body = all.filter((x) => x.labL > LIGHT_BODY_L_SAMPLE && warm(x));
+  if (body.length < 48) {
+    throw new Error(
+      `Not enough bright-body pixels (${body.length}); need L>${LIGHT_BODY_L_SAMPLE} warm beige`,
+    );
+  }
+
+  body.sort((a, b) => a.labL - b.labL);
+  const n = body.length;
+
+  const shadowBand = all.filter(
+    (x) => x.labL >= LIGHT_BODY_L_EXCLUDE && x.labL < LIGHT_BODY_L_SHADOW_MAX && warm(x),
+  );
+  const shadowPx =
+    shadowBand.length >= LIGHT_BODY_SHADOW_MIN_PIXELS
+      ? shadowBand
+      : body.slice(0, Math.max(1, Math.floor(n * 0.25)));
+
+  const midPx = body.slice(Math.floor(n * 0.35), Math.floor(n * 0.65));
+  const hiPx = body.slice(Math.floor(n * 0.88));
 
   return {
-    resolved,
-    pixels,
-    shadowPx,
-    midPx,
-    hiPx,
+    shadow: medianLabFromPixels(shadowPx),
+    midtone: medianLabFromPixels(midPx),
+    highlight: medianLabFromPixels(hiPx),
+    extractionMethod: 'light-body',
+    bandCounts: {
+      shadow: shadowPx.length,
+      mid: midPx.length,
+      highlight: hiPx.length,
+      body: n,
+    },
   };
 }
 
@@ -242,20 +324,23 @@ export function computeSwatchRgbAvg(data, width, height, channels) {
  * Shadow / mid / highlight from luminance tertiles (per-band median LAB, not one flat color).
  */
 export async function getSwatchPalette(swatchPath) {
-  const { resolved, pixels, shadowPx, midPx, hiPx } = await loadSwatchPixels(swatchPath);
+  const { resolved, pixels } = await loadSwatchPixels(swatchPath);
   const swatchStem = basename(resolved, extname(resolved));
-  const shadow = medianLabFromPixels(shadowPx);
-  const midtone = medianLabFromPixels(midPx);
-  const highlight = medianLabFromPixels(hiPx);
+  const useLightBody = isLightBodySampling(swatchStem);
+  const tones = useLightBody
+    ? extractLightBodyPalette(pixels)
+    : extractFullSwatchTertilePalette(pixels);
 
   return {
-    shadow,
-    midtone,
-    highlight,
+    shadow: tones.shadow,
+    midtone: tones.midtone,
+    highlight: tones.highlight,
     isNamedLight: isNamedLightLeather(swatchStem),
+    isLightBodySampling: useLightBody,
+    extractionMethod: tones.extractionMethod,
     pixelCount: pixels.length,
     sourceFile: basename(resolved),
-    bandCounts: { shadow: shadowPx.length, mid: midPx.length, highlight: hiPx.length },
+    bandCounts: tones.bandCounts,
   };
 }
 
