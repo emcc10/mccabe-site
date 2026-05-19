@@ -365,7 +365,7 @@ export function filterHeroSwatchPixels(data, width, height, channels) {
   );
 
   if (pool.length < HERO_K_MEANS) {
-    pool = collectInteriorSwatchPixels(data, width, height, channels, 28, HERO_L_MAX, 0.02);
+    pool = collectInteriorSwatchPixels(data, width, height, channels, HERO_L_MIN, HERO_L_MAX, 0);
   }
 
   if (pool.length < HERO_K_MEANS) {
