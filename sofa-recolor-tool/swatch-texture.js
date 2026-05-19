@@ -71,19 +71,31 @@ function isNearWhite(r, g, b) {
   return r > BG_THRESH && g > BG_THRESH && b > BG_THRESH;
 }
 
+/** Hard override: Bali-Silk must never route as dark/cool (e.g. false match on "ink"). */
+export function isBaliSilkSwatch(swatchStem) {
+  return String(swatchStem).toLowerCase().includes('bali-silk');
+}
+
+function stemHasKeyword(stem, keyword) {
+  return stem.split(/[-_]/).includes(keyword);
+}
+
 export function isNamedLightLeather(swatchStem) {
+  if (isBaliSilkSwatch(swatchStem)) return true;
   const s = swatchStem.toLowerCase();
-  return LIGHT_LEATHER_KEYWORDS.some((k) => s.includes(k));
+  return LIGHT_LEATHER_KEYWORDS.some((k) => stemHasKeyword(s, k) || s.includes(k));
 }
 
 export function isLightBodySampling(swatchStem) {
+  if (isBaliSilkSwatch(swatchStem)) return true;
   const s = swatchStem.toLowerCase();
-  return LIGHT_BODY_SAMPLING_KEYWORDS.some((k) => s.includes(k));
+  return LIGHT_BODY_SAMPLING_KEYWORDS.some((k) => stemHasKeyword(s, k) || s.includes(k));
 }
 
 export function isDarkCoolLeather(swatchStem) {
+  if (isBaliSilkSwatch(swatchStem)) return false;
   const s = swatchStem.toLowerCase();
-  return DARK_COOL_LEATHER_KEYWORDS.some((k) => s.includes(k));
+  return DARK_COOL_LEATHER_KEYWORDS.some((k) => stemHasKeyword(s, k));
 }
 
 function resolveSwatchPath(swatchPath) {
@@ -418,6 +430,7 @@ export async function getSwatchTexture(swatchPath) {
 
   return {
     patches,
+    isBaliSilk: isBaliSilkSwatch(swatchStem),
     isNamedLight: isNamedLightLeather(swatchStem),
     isDarkCool: isDarkCoolLeather(swatchStem),
     isLightBodySampling: isLightBodySampling(swatchStem),

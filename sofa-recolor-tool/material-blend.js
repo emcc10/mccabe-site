@@ -12,7 +12,12 @@ function smoothstep(edge0, edge1, x) {
   return t * t * (3 - 2 * t);
 }
 
+function isBaliSilkTexture(texture) {
+  return texture.isBaliSilk || String(texture.sourceFile || '').toLowerCase().includes('bali-silk');
+}
+
 export function getMaterialClass(texture) {
+  if (isBaliSilkTexture(texture)) return 'light';
   if (texture.isNamedLight) return 'light';
   if (texture.isDarkCool) return 'darkCool';
   return 'standard';
@@ -20,6 +25,20 @@ export function getMaterialClass(texture) {
 
 /** Per-class blend knobs (texture-patch pipeline; not flat LAB). */
 export function getMaterialBlendProfile(texture) {
+  if (isBaliSilkTexture(texture)) {
+    return {
+      contrastRetain: 0.55,
+      textureLBlend: 0.62,
+      textureChromaBlend: 0.94,
+      textureGrain: 0.48,
+      shadowLift: 9,
+      highlightBroaden: 0.45,
+      creaseSuppress: 0.35,
+      minFinalL: 58,
+      minTextureL: 62,
+    };
+  }
+
   switch (getMaterialClass(texture)) {
     case 'light':
       return {
@@ -30,6 +49,7 @@ export function getMaterialBlendProfile(texture) {
         shadowLift: 7.5,
         highlightBroaden: 0.4,
         creaseSuppress: 0.28,
+        minFinalL: 52,
       };
     case 'darkCool':
       return {
@@ -98,9 +118,18 @@ export function blendMaterialResponse(masterL, masterA, masterB, texLab, patchMe
     structL += (texLab.L - structL) * shW;
   }
 
-  let baseL = structL * (1 - textureLBlend) + texLab.L * textureLBlend;
-  const relL = texLab.L - patchMeanL;
+  let texL = texLab.L;
+  if (profile.minTextureL != null) {
+    texL = Math.max(texL, profile.minTextureL);
+  }
+
+  let baseL = structL * (1 - textureLBlend) + texL * textureLBlend;
+  const relL = texL - patchMeanL;
   let finalL = baseL + relL * textureGrain;
+
+  if (profile.minFinalL != null) {
+    finalL = Math.max(finalL, profile.minFinalL);
+  }
 
   let a = masterA * (1 - textureChromaBlend) + texLab.a * textureChromaBlend;
   let b = masterB * (1 - textureChromaBlend) + texLab.b * textureChromaBlend;
