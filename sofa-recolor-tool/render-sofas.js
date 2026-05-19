@@ -32,15 +32,12 @@ const MASK_APPLY_THRESH = 128;
 const BG_THRESH = 238;
 const LAB_CHROMA_CLAMP = 72;
 
-/** Named light leathers: blend master L toward bright swatch body (RGB luminance). */
+/** Preserve neutral-master L structure; nudge toward swatch L (LAB 0–100). */
 const LIGHT_LEATHER_KEYWORDS = ['silk', 'eggshell', 'frost', 'parchment', 'vanilla', 'tusk', 'mist'];
-const LIGHT_L_MASTER = 0.35;
-const LIGHT_L_SWATCH = 0.65;
-const LIGHT_L_CLAMP_LO = 125;
-const LIGHT_L_CLAMP_HI = 235;
-const LIGHT_SEAM_MASTER_L = 55;
-const LIGHT_SEAM_CLAMP_LO = 75;
-const LIGHT_SEAM_CLAMP_HI = 130;
+const L_BLEND_MASTER = 0.82;
+const L_BLEND_SWATCH = 0.18;
+const LIGHT_L_BLEND_MASTER = 0.72;
+const LIGHT_L_BLEND_SWATCH = 0.28;
 const SWATCH_LUM_TRIM = 0.15;
 const SWATCH_K_MEANS = 3;
 const SWATCH_CLUSTER_MIN_POP = 0.12;
@@ -401,18 +398,16 @@ export async function loadUpholsteryMask(maskPath, width, height) {
   return mask;
 }
 
-/** RGB luminance for named light leathers; null = keep master LAB L. */
-export function computeLightLeatherLum(masterLumRgb, swatch) {
-  let finalL = masterLumRgb * LIGHT_L_MASTER + swatch.swatchLumRgb * LIGHT_L_SWATCH;
-  finalL = clamp(finalL, LIGHT_L_CLAMP_LO, LIGHT_L_CLAMP_HI);
-  if (masterLumRgb < LIGHT_SEAM_MASTER_L) {
-    finalL = clamp(finalL, LIGHT_SEAM_CLAMP_LO, LIGHT_SEAM_CLAMP_HI);
+/** Blend swatch L into neutral-master L without flattening photographic structure. */
+export function computeFinalLabL(masterL, swatchL, isVeryLightLeather) {
+  if (isVeryLightLeather) {
+    return masterL * LIGHT_L_BLEND_MASTER + swatchL * LIGHT_L_BLEND_SWATCH;
   }
-  return finalL;
+  return masterL * L_BLEND_MASTER + swatchL * L_BLEND_SWATCH;
 }
 
 /**
- * Masked pixels only: preserve master L (dark); named lights blend toward swatch body L.
+ * Masked pixels: cluster a/b; L = mostly original neutral master + mild swatch L.
  */
 export function recolorSofa(masterImage, mask, swatch) {
   const { data, width, height, channels } = masterImage;
@@ -422,21 +417,11 @@ export function recolorSofa(masterImage, mask, swatch) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
 
     const p = j * channels;
-    const masterLum = pixelBrightness(data[p], data[p + 1], data[p + 2]);
+    const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
+    const finalL = computeFinalLabL(lab.L, swatch.meanL, swatch.isNamedLight);
     const a = clamp(swatch.meanA, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const b = clamp(swatch.meanB, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-
-    let r;
-    let g;
-    let bOut;
-    if (swatch.isNamedLight) {
-      const finalLum = computeLightLeatherLum(masterLum, swatch);
-      const baseLab = rgbToLab(finalLum, finalLum, finalLum);
-      ({ r, g, b: bOut } = labToRgb(baseLab.L, a, b));
-    } else {
-      const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
-      ({ r, g, b: bOut } = labToRgb(lab.L, a, b));
-    }
+    const { r, g, b: bOut } = labToRgb(finalL, a, b);
 
     out[p] = r;
     out[p + 1] = g;
@@ -467,7 +452,7 @@ export async function processSwatch(swatchPath, masterImage, mask) {
     clusterSat: Math.round((swatch.clusterSat ?? 0) * 100) / 100,
     pixelsSampled: swatch.pixelCount,
     lightLeather: swatch.isNamedLight,
-    swatchLumRgb: swatch.isNamedLight ? Math.round(swatch.swatchLumRgb) : undefined,
+    lBlend: swatch.isNamedLight ? '72/28' : '82/18',
   });
 
   const outData = recolorSofa(masterImage, mask, swatch);
@@ -541,7 +526,7 @@ export async function main(argv = process.argv) {
   console.log(`  swatch source: ${SWATCH_DIR} (${swatchFiles.length} files)`);
   console.log(`  source photo: ${SOFA_PATH}`);
   console.log(`  mask: ${MASK_PATH}`);
-  console.log('  method: neutral master | k=3 swatch cluster a/b | light L blend');
+  console.log('  method: neutral master L + cluster a/b (82/18 L, 72/28 light)');
 
   const sourceSofa = await loadImage(SOFA_PATH);
   console.log(`  ${sourceSofa.width}x${sourceSofa.height}`);
