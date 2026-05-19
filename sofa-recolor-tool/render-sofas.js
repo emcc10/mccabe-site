@@ -1152,8 +1152,8 @@ export function transferLabPixel(pixel, src, dst, opts = {}) {
 
   if (opts.cognacEdge || opts.fringeEdge) {
     const snap = clamp((opts.edgeStrength ?? 0) * 0.92, 0, 1);
-    a = a + (targetA - a) * snap;
-    b = b + (targetB - b) * snap;
+    a = a + (dst.meanA - a) * snap;
+    b = b + (dst.meanB - b) * snap;
   }
 
   a = clamp(a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
