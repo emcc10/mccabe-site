@@ -43,8 +43,7 @@ const LIGHT_SEAM_CLAMP_LO = 75;
 const LIGHT_SEAM_CLAMP_HI = 130;
 const SWATCH_LUM_TRIM = 0.15;
 const SWATCH_K_MEANS = 3;
-const SWATCH_CLUSTER_POP_WEIGHT = 0.65;
-const SWATCH_CLUSTER_SAT_WEIGHT = 0.35;
+const SWATCH_CLUSTER_MIN_POP = 0.12;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
@@ -137,6 +136,106 @@ function percentileOfSorted(sorted, p) {
 export function isNamedLightLeather(swatchStem) {
   const s = swatchStem.toLowerCase();
   return LIGHT_LEATHER_KEYWORDS.some((k) => s.includes(k));
+}
+
+export function pixelSaturation(r, g, b) {
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  if (max === min) return 0;
+  return (max - min) / (max + min < 255 ? max + min : 510);
+}
+
+function kMeansRgb(pixels, k = SWATCH_K_MEANS) {
+  const n = pixels.length;
+  if (n < k) return { centroids: pixels.slice(), labels: pixels.map((_, i) => i) };
+
+  const centroids = [];
+  for (let c = 0; c < k; c++) {
+    const idx = Math.min(n - 1, Math.floor((n * (c + 1)) / (k + 1)));
+    centroids.push({ r: pixels[idx].r, g: pixels[idx].g, b: pixels[idx].b });
+  }
+  const labels = new Uint8Array(n);
+
+  for (let iter = 0; iter < 28; iter++) {
+    for (let i = 0; i < n; i++) {
+      let best = 0;
+      let bestD = Infinity;
+      for (let c = 0; c < k; c++) {
+        const dr = pixels[i].r - centroids[c].r;
+        const dg = pixels[i].g - centroids[c].g;
+        const db = pixels[i].b - centroids[c].b;
+        const d = dr * dr + dg * dg + db * db;
+        if (d < bestD) {
+          bestD = d;
+          best = c;
+        }
+      }
+      labels[i] = best;
+    }
+
+    const sums = Array.from({ length: k }, () => ({ r: 0, g: 0, b: 0, n: 0 }));
+    for (let i = 0; i < n; i++) {
+      const c = labels[i];
+      sums[c].r += pixels[i].r;
+      sums[c].g += pixels[i].g;
+      sums[c].b += pixels[i].b;
+      sums[c].n++;
+    }
+
+    let stable = true;
+    for (let c = 0; c < k; c++) {
+      if (sums[c].n === 0) continue;
+      const nr = sums[c].r / sums[c].n;
+      const ng = sums[c].g / sums[c].n;
+      const nb = sums[c].b / sums[c].n;
+      if (
+        Math.abs(nr - centroids[c].r) > 0.5 ||
+        Math.abs(ng - centroids[c].g) > 0.5 ||
+        Math.abs(nb - centroids[c].b) > 0.5
+      ) {
+        stable = false;
+      }
+      centroids[c] = { r: nr, g: ng, b: nb };
+    }
+    if (stable) break;
+  }
+
+  return { centroids, labels };
+}
+
+/** Pick cluster with largest population + highest saturation (weighted score). */
+export function pickLeatherClusterCentroid(centroids, labels, pixelCount) {
+  const k = centroids.length;
+  const counts = new Array(k).fill(0);
+  for (let i = 0; i < labels.length; i++) {
+    counts[labels[i]]++;
+  }
+
+  let best = 0;
+  let bestScore = -Infinity;
+  for (let c = 0; c < k; c++) {
+    if (!counts[c]) continue;
+    const pop = counts[c] / pixelCount;
+    if (pop < SWATCH_CLUSTER_MIN_POP) continue;
+    const sat = pixelSaturation(centroids[c].r, centroids[c].g, centroids[c].b);
+    const score = pop + sat;
+    if (score > bestScore) {
+      bestScore = score;
+      best = c;
+    }
+  }
+  if (bestScore === -Infinity) {
+    best = counts.indexOf(Math.max(...counts));
+  }
+
+  const chosen = centroids[best];
+  return {
+    r: chosen.r,
+    g: chosen.g,
+    b: chosen.b,
+    population: counts[best] / pixelCount,
+    saturation: pixelSaturation(chosen.r, chosen.g, chosen.b),
+  };
 }
 
 /** Mean RGB of non-background swatch pixels. */
@@ -442,7 +541,7 @@ export async function main(argv = process.argv) {
   console.log(`  swatch source: ${SWATCH_DIR} (${swatchFiles.length} files)`);
   console.log(`  source photo: ${SOFA_PATH}`);
   console.log(`  mask: ${MASK_PATH}`);
-  console.log('  method: neutral-gray master | median a/b | light L blend for silk/creams');
+  console.log('  method: neutral master | k=3 swatch cluster a/b | light L blend');
 
   const sourceSofa = await loadImage(SOFA_PATH);
   console.log(`  ${sourceSofa.width}x${sourceSofa.height}`);
