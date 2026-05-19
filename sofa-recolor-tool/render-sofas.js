@@ -36,12 +36,11 @@ const MASK_DILATE_RADIUS = 0;
 const MASK_ERODE_RADIUS = 1;
 const MASK_APPLY_THRESH = 128;
 const MIN_LAB_STD = 0.8;
-/** Multiplier on (target − pixel) a/b delta — strong dyed-leather look. */
 const CHROMA_GAIN_BASE = 2.5;
-const CHROMA_TEXTURE = 0.72;
-const CHROMA_SCALE_MIN = 0.85;
-const CHROMA_SCALE_MAX = 1.35;
 const LAB_CHROMA_CLAMP = 72;
+/** High-frequency a/b texture from sofa; large-scale cognac chroma removed by blur. */
+const TEXTURE_BLUR_RADIUS = 15;
+const TEXTURE_RESIDUAL_MAX = 4;
 
 /** Hero swatch sampling — population-weighted cluster, not max-saturation. */
 const HERO_BORDER_FRAC = 0.2;
@@ -559,6 +558,73 @@ export function computeLuminanceAnchors(origLum, mask, width, height) {
   };
 }
 
+function makeGaussianKernel1D(radius) {
+  const sigma = Math.max(radius / 2.5, 1);
+  const size = radius * 2 + 1;
+  const kernel = new Float32Array(size);
+  let sum = 0;
+  for (let i = 0; i < size; i++) {
+    const x = i - radius;
+    const v = Math.exp(-(x * x) / (2 * sigma * sigma));
+    kernel[i] = v;
+    sum += v;
+  }
+  for (let i = 0; i < size; i++) kernel[i] /= sum;
+  return kernel;
+}
+
+export function gaussianBlurFloat(src, width, height, radius = TEXTURE_BLUR_RADIUS) {
+  const kernel = makeGaussianKernel1D(radius);
+  const tmp = new Float32Array(src.length);
+  const out = new Float32Array(src.length);
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sum = 0;
+      for (let k = -radius; k <= radius; k++) {
+        const xx = clamp(x + k, 0, width - 1);
+        sum += src[y * width + xx] * kernel[k + radius];
+      }
+      tmp[y * width + x] = sum;
+    }
+  }
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sum = 0;
+      for (let k = -radius; k <= radius; k++) {
+        const yy = clamp(y + k, 0, height - 1);
+        sum += tmp[yy * width + x] * kernel[k + radius];
+      }
+      out[y * width + x] = sum;
+    }
+  }
+
+  return out;
+}
+
+/** Original sofa a/b and blurred a/b for high-frequency texture residual only. */
+export function buildSofaAbTextureMaps(baseImage, width, height, channels) {
+  const n = width * height;
+  const { data } = baseImage;
+  const origA = new Float32Array(n);
+  const origB = new Float32Array(n);
+
+  for (let j = 0; j < n; j++) {
+    const p = j * channels;
+    const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
+    origA[j] = lab.a;
+    origB[j] = lab.b;
+  }
+
+  return {
+    origA,
+    origB,
+    blurA: gaussianBlurFloat(origA, width, height, TEXTURE_BLUR_RADIUS),
+    blurB: gaussianBlurFloat(origB, width, height, TEXTURE_BLUR_RADIUS),
+  };
+}
+
 export function boxBlurLuminance(src, width, height, radius = DEPTH_BLUR_RADIUS) {
   const out = new Float32Array(src.length);
   for (let y = 0; y < height; y++) {
@@ -651,50 +717,33 @@ export function restoreOriginalLuminance(oR, oG, oB, r, g, b) {
   };
 }
 
-/** Map 2–3× gain to a strong blend toward target (no overshoot past swatch chroma). */
-export function chromaBlendFactor(dst, edgeT = 0) {
-  const gain = (dst.chromaGain ?? CHROMA_GAIN_BASE) * (dst.satFactor ?? 1);
-  let t = 1 - Math.exp(-gain * 0.82);
-  if ((dst.chromaMag ?? 0) < 4) {
-    t = Math.min(0.98, t + 0.17);
-  } else if ((dst.chromaMag ?? 0) > 12) {
-    t = Math.min(0.98, t + 0.06);
-  }
-  if (edgeT > 0) {
-    t = Math.min(0.99, t + edgeT * 0.1);
-  }
-  return t;
-}
-
 /**
- * Automotive-style colorize: L fixed; single hero swatch a/b target (2–3× gain).
+ * L fixed; hero a/b + clamped high-frequency texture residual (no cognac large-scale chroma).
  */
 export function transferLabPixel(pixel, src, dst, opts = {}) {
   const finalL = pixel.L;
-  const edgeT = clamp(opts.edgeStrength ?? 0, 0, 1);
-  const t = chromaBlendFactor(dst, edgeT);
+  const targetA = dst.meanA;
+  const targetB = dst.meanB;
 
-  const scaleA = clamp(dst.stdA / src.stdA, CHROMA_SCALE_MIN, CHROMA_SCALE_MAX);
-  const scaleB = clamp(dst.stdB / src.stdB, CHROMA_SCALE_MIN, CHROMA_SCALE_MAX);
-
-  const relA = pixel.a - src.meanA;
-  const relB = pixel.b - src.meanB;
-  const targetA = dst.meanA + relA * scaleA * CHROMA_TEXTURE;
-  const targetB = dst.meanB + relB * scaleB * CHROMA_TEXTURE;
-
-  let a = pixel.a + (targetA - pixel.a) * t;
-  let b = pixel.b + (targetB - pixel.b) * t;
-
-  if (opts.cognacEdge || opts.fringeEdge) {
-    const snap = clamp(edgeT * 0.75, 0, 0.98);
-    a = a + (dst.meanA - a) * snap;
-    b = b + (dst.meanB - b) * snap;
+  let resA = 0;
+  let resB = 0;
+  if (opts.textureResidual) {
+    resA = clamp(opts.textureResidual.a, -TEXTURE_RESIDUAL_MAX, TEXTURE_RESIDUAL_MAX);
+    resB = clamp(opts.textureResidual.b, -TEXTURE_RESIDUAL_MAX, TEXTURE_RESIDUAL_MAX);
+    if (dst.isNeutral) {
+      const nLim = Math.min(TEXTURE_RESIDUAL_MAX, 3);
+      resA = clamp(resA, -nLim, nLim);
+      resB = clamp(resB, -nLim, nLim);
+    }
   }
 
-  if (dst.isNeutral && dst.neutralAbClamp > 0) {
-    const lim = dst.neutralAbClamp;
-    a = pixel.a + clamp(a - pixel.a, -lim, lim);
-    b = pixel.b + clamp(b - pixel.b, -lim, lim);
+  let a = targetA + resA;
+  let b = targetB + resB;
+
+  if (opts.cognacEdge || opts.fringeEdge) {
+    const snap = clamp((opts.edgeStrength ?? 0) * 0.92, 0, 1);
+    a = a + (targetA - a) * snap;
+    b = b + (targetB - b) * snap;
   }
 
   a = clamp(a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
@@ -879,6 +928,7 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
 
   const blurLum = boxBlurLuminance(origLum, width, height);
   const anchors = computeLuminanceAnchors(origLum, mask, width, height);
+  const abMaps = buildSofaAbTextureMaps(baseImage, width, height, channels);
 
   for (let y = 0; y < height; y++) {
     if (y > yMax) continue;
@@ -903,6 +953,10 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
         cognacEdge,
         fringeEdge,
         originalRgb: { r: oR, g: oG, b: oB },
+        textureResidual: {
+          a: abMaps.origA[j] - abMaps.blurA[j],
+          b: abMaps.origB[j] - abMaps.blurB[j],
+        },
       });
 
       ({ r, g, b } = restoreLeatherDepth(oR, oG, oB, r, g, b, origLum[j], blurLum[j], anchors));
@@ -1012,7 +1066,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: hero k=4 scored cluster + depth restore; L preserved');
+  console.log('  method: hero chroma + ab texture residual; depth restore; L preserved');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   const mask = await createUpholsteryMask(baseSofa, maskPath);
