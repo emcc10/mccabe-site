@@ -1,10 +1,21 @@
 (function () {
   'use strict';
 
-  var API_LIST = '/v/vspfiles/boards/list.php';
-  var API_DELETE = '/v/vspfiles/boards/delete.php';
+  var API_BASE = window.MC_BOARDS_API_BASE || '/v/vspfiles/boards/';
+  var API_LIST = API_BASE + 'list.php';
+  var API_DELETE = API_BASE + 'delete.php';
+  var API_SESSION = API_BASE + 'session.php';
 
-  var config = window.MC_BOARD_STYLES || { styles: [], furnitureTypes: [], boardStyleHints: {} };
+  var config = window.MC_BOARD_STYLES || {
+    styles: [],
+    furnitureTypes: [],
+    boardStyleHints: {},
+    lifestyleLooks: [],
+    products: [],
+    decorTrends: [],
+    styleQuiz: null,
+    colorWheel: []
+  };
 
   var msg = document.getElementById('mc-boards-msg');
   var root = document.getElementById('mc-boards-root');
@@ -15,12 +26,39 @@
   var typesEl = document.getElementById('mc-boards-types');
   var signInLink = document.getElementById('mc-boards-signin');
   var yearEl = document.getElementById('mc-boards-year');
+  var accountBanner = document.getElementById('mc-boards-account-banner');
+  var quizEl = document.getElementById('mc-boards-quiz');
+  var wheelEl = document.getElementById('mc-boards-color-wheel');
+  var wheelResult = document.getElementById('mc-boards-wheel-result');
+  var trendsEl = document.getElementById('mc-boards-trends');
 
   var activeBoardFilter = '__all__';
   var activeStyleFilter = null;
+  var quizStep = 0;
+  var quizScores = {};
 
   if (yearEl) {
     yearEl.textContent = String(new Date().getFullYear());
+  }
+
+  function assetUrl(path) {
+    var p = String(path || '');
+    if (/^https?:\/\//i.test(p)) return p;
+    var rel = p
+      .replace(/^\/v\/vspfiles\/boards\//, '')
+      .replace(/^\/vspfiles\/boards\//, '')
+      .replace(/^\//, '');
+    return API_BASE + rel;
+  }
+
+  function domSignedInHint() {
+    if (!document.body) return false;
+    if (document.body.classList.contains('mc-member-logged-in')) return true;
+    if (document.querySelector('a[href*="logout"]')) return true;
+    var t = (document.body.innerText || '').toLowerCase();
+    if (t.indexOf('log out') !== -1 || t.indexOf('logout') !== -1) return true;
+    if (t.indexOf('my account') !== -1 && t.indexOf('sign in') === -1) return true;
+    return false;
   }
 
   function setMsg(text, kind) {
@@ -126,7 +164,7 @@
         var visual = document.createElement('div');
         visual.className = 'mc-boards__style-visual';
         var img = document.createElement('img');
-        img.src = style.moodImage;
+        img.src = assetUrl(style.moodImage);
         img.alt = style.label + ' interior mood';
         img.loading = 'lazy';
         visual.appendChild(img);
@@ -184,6 +222,191 @@
 
     renderLifestyleLooks();
     renderStyleGuide();
+    renderQuiz();
+    renderColorWheel();
+    renderTrends();
+  }
+
+  function renderTrends() {
+    if (!trendsEl) return;
+    trendsEl.innerHTML = '';
+    var list = config.decorTrends || [];
+    for (var i = 0; i < list.length; i++) {
+      (function (tr) {
+        var card = document.createElement('article');
+        card.className = 'mc-boards__trend-card';
+        var style = getStyleById(tr.styleId);
+        var tag = document.createElement('p');
+        tag.className = 'mc-boards__trend-style';
+        tag.textContent = style ? style.label : tr.styleId;
+        card.appendChild(tag);
+        var h3 = document.createElement('h3');
+        h3.className = 'mc-boards__trend-title';
+        h3.textContent = tr.title;
+        card.appendChild(h3);
+        var p = document.createElement('p');
+        p.className = 'mc-boards__trend-blurb';
+        p.textContent = tr.blurb;
+        card.appendChild(p);
+        if (tr.sources && tr.sources.length) {
+          var links = document.createElement('p');
+          links.className = 'mc-boards__trend-links';
+          for (var s = 0; s < tr.sources.length; s++) {
+            var a = document.createElement('a');
+            a.href = tr.sources[s].url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = tr.sources[s].label;
+            links.appendChild(a);
+            if (s < tr.sources.length - 1) {
+              links.appendChild(document.createTextNode(' · '));
+            }
+          }
+          card.appendChild(links);
+        }
+        card.addEventListener('click', function () {
+          activateStyleFilter(tr.styleId, false);
+        });
+        trendsEl.appendChild(card);
+      })(list[i]);
+    }
+  }
+
+  function renderColorWheel() {
+    if (!wheelEl) return;
+    wheelEl.innerHTML = '';
+    var colors = config.colorWheel || [];
+    var wheel = document.createElement('div');
+    wheel.className = 'mc-boards__wheel';
+    wheel.setAttribute('role', 'list');
+    for (var i = 0; i < colors.length; i++) {
+      (function (c) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mc-boards__wheel-slice';
+        btn.style.backgroundColor = c.hex;
+        btn.title = c.label;
+        btn.setAttribute('aria-label', c.label);
+        btn.addEventListener('click', function () {
+          wheel.querySelectorAll('.mc-boards__wheel-slice').forEach(function (el) {
+            el.classList.remove('is-active');
+          });
+          btn.classList.add('is-active');
+          var styleNames = (c.styles || [])
+            .map(function (id) {
+              var st = getStyleById(id);
+              return st ? st.label : id;
+            })
+            .join(', ');
+          if (wheelResult) {
+            wheelResult.innerHTML =
+              '<strong>' +
+              c.label +
+              '</strong> pairs with ' +
+              styleNames +
+              '.';
+          }
+          if (c.styles && c.styles[0]) {
+            activateStyleFilter(c.styles[0], false);
+          }
+        });
+        wheel.appendChild(btn);
+      })(colors[i]);
+    }
+    wheelEl.appendChild(wheel);
+  }
+
+  function renderQuiz() {
+    if (!quizEl || !config.styleQuiz) return;
+    var quiz = config.styleQuiz;
+    quizStep = 0;
+    quizScores = {};
+    quizEl.innerHTML = '';
+
+    function renderStep() {
+      quizEl.innerHTML = '';
+      var questions = quiz.questions || [];
+      if (quizStep >= questions.length) {
+        showQuizResult();
+        return;
+      }
+      var q = questions[quizStep];
+      var prompt = document.createElement('p');
+      prompt.className = 'mc-boards__quiz-q';
+      prompt.textContent = q.q;
+      quizEl.appendChild(prompt);
+      var list = document.createElement('div');
+      list.className = 'mc-boards__quiz-choices';
+      for (var i = 0; i < q.choices.length; i++) {
+        (function (choice) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'mc-boards__quiz-btn';
+          btn.textContent = choice.t;
+          btn.addEventListener('click', function () {
+            var keys = Object.keys(choice.s || {});
+            for (var k = 0; k < keys.length; k++) {
+              quizScores[keys[k]] = (quizScores[keys[k]] || 0) + choice.s[keys[k]];
+            }
+            quizStep++;
+            renderStep();
+          });
+          list.appendChild(btn);
+        })(q.choices[i]);
+      }
+      quizEl.appendChild(list);
+      var prog = document.createElement('p');
+      prog.className = 'mc-boards__quiz-prog';
+      prog.textContent = 'Question ' + (quizStep + 1) + ' of ' + questions.length;
+      quizEl.appendChild(prog);
+    }
+
+    function showQuizResult() {
+      var bestId = 'transitional';
+      var bestScore = -1;
+      var ids = Object.keys(quizScores);
+      for (var i = 0; i < ids.length; i++) {
+        if (quizScores[ids[i]] > bestScore) {
+          bestScore = quizScores[ids[i]];
+          bestId = ids[i];
+        }
+      }
+      var style = getStyleById(bestId);
+      quizEl.innerHTML =
+        '<p class="mc-boards__quiz-result">Your lead style is <strong>' +
+        (style ? style.label : bestId) +
+        '</strong>.</p><p class="mc-boards__quiz-sub">' +
+        (style ? style.tagline : '') +
+        '</p>';
+      var again = document.createElement('button');
+      again.type = 'button';
+      again.className = 'mc-boards__btn mc-boards__btn--ghost';
+      again.textContent = 'Take again';
+      again.onclick = function () {
+        renderQuiz();
+      };
+      quizEl.appendChild(again);
+      activateStyleFilter(bestId, false);
+    }
+
+    renderStep();
+  }
+
+  function setAccountBanner(signedIn, note) {
+    if (!accountBanner) return;
+    if (signedIn) {
+      accountBanner.className = 'mc-boards__account-banner mc-boards__account-banner--ok';
+      accountBanner.innerHTML =
+        '<p>Signed in — items saved with the Chrome extension appear below.</p>';
+      return;
+    }
+    accountBanner.className = 'mc-boards__account-banner mc-boards__account-banner--warn';
+    accountBanner.innerHTML =
+      '<p><strong>Sign in</strong> on mccabes.com to sync saved pieces to this page. ' +
+      (note || 'You can still explore styles, the quiz, and trends above.') +
+      '</p><p class="mc-boards__account-actions">' +
+      '<a class="mc-boards__btn" href="/login.asp">Sign in</a> ' +
+      '<a class="mc-boards__btn mc-boards__btn--ghost" href="/myaccount.asp">My account</a></p>';
   }
 
   function renderLifestyleLooks() {
@@ -214,7 +437,7 @@
 
         var prod = document.createElement('img');
         prod.className = 'mc-boards__lifestyle-product';
-        prod.src = look.image;
+        prod.src = assetUrl(look.image);
         prod.alt = product ? product.name : look.title;
         prod.loading = 'lazy';
         scene.appendChild(prod);
@@ -294,7 +517,7 @@
       var nameCell = document.createElement('td');
       nameCell.className = 'mc-boards__guide-name';
       var thumb = document.createElement('img');
-      thumb.src = prod.image;
+      thumb.src = assetUrl(prod.image);
       thumb.alt = '';
       thumb.loading = 'lazy';
       var nameSpan = document.createElement('span');

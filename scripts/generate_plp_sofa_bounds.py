@@ -65,14 +65,40 @@ def bounds_from_url(name: str) -> dict | None:
     return b.as_dict() if b else None
 
 
+def load_category_paths() -> list[str]:
+    paths_file = ROOT / "scripts" / "plp_category_paths.txt"
+    paths: list[str] = []
+    if paths_file.is_file():
+        for line in paths_file.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line and not line.startswith("#"):
+                paths.append(line if line.startswith("/") else "/" + line)
+    return paths
+
+
 def main() -> int:
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--category", default="/category-s/177.htm")
+    parser.add_argument("--category", action="append", dest="categories")
+    parser.add_argument("--all-categories", action="store_true")
     args = parser.parse_args()
 
-    names = fetch_category_photos(args.category)
+    names: list[str] = []
+    seen_names: set[str] = set()
+    if args.all_categories:
+        for cat in load_category_paths():
+            for name in fetch_category_photos(cat):
+                if name not in seen_names:
+                    seen_names.add(name)
+                    names.append(name)
+    else:
+        cats = args.categories or ["/category-s/177.htm"]
+        for cat in cats:
+            for name in fetch_category_photos(cat):
+                if name not in seen_names:
+                    seen_names.add(name)
+                    names.append(name)
     out: dict[str, dict] = {}
     seen: set[str] = set()
 

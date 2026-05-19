@@ -14,7 +14,7 @@
 <body class="mc-my-boards-page">
   <div class="mc-boards-shell">
     <header class="mc-boards-site-header" role="banner">
-      <motion class="mc-boards-site-header__inner">
+      <div class="mc-boards-site-header__inner">
         <a class="mc-boards-site-logo" href="/" title="McCabe's Theater &amp; Living">
           <img src="/v/vspfiles/images/mccabe-logo.svg" width="220" height="48" alt="McCabe's Theater &amp; Living" onerror="this.onerror=null;this.src='/vspfiles/images/mccabe-logo.svg';" />
         </a>
@@ -34,7 +34,7 @@
         <img class="mc-boards-hero__tile" src="/v/vspfiles/boards/showcase/modern-pacific-charcoal-sofa-angle.png" alt="" />
         <img class="mc-boards-hero__tile" src="/v/vspfiles/boards/showcase/traditional-carob-recliner-front.png" alt="" />
       </div>
-      <div class="mc-boards-hero__veil"></motion>
+      <div class="mc-boards-hero__veil"></div>
     </section>
 
     <main class="mc-boards" id="mc-boards-main">
@@ -58,7 +58,7 @@
           <div class="mc-boards__tool-panel" id="mc-boards-wheel-panel">
             <h3 class="mc-boards__tool-title">Color wheel</h3>
             <p class="mc-boards__tool-sub">Tap a hue to see palettes &amp; style matches.</p>
-            <div id="mc-boards-color-wheel"></motion>
+            <div id="mc-boards-color-wheel"></div>
             <p id="mc-boards-wheel-result" class="mc-boards__wheel-result" aria-live="polite"></p>
           </div>
         </div>
@@ -77,10 +77,10 @@
 
         <h2 class="mc-boards__library-title mc-boards__library-title--spaced" id="mc-boards-lifestyle-heading">Curated lifestyle looks</h2>
         <p class="mc-boards__library-sub mc-boards__library-sub--below">Your product photos in designer room palettes.</p>
-        <div id="mc-boards-lifestyle" class="mc-boards__lifestyle-grid" role="list"></motion>
+        <div id="mc-boards-lifestyle" class="mc-boards__lifestyle-grid" role="list"></div>
 
         <h2 class="mc-boards__library-title mc-boards__library-title--spaced">Style guide</h2>
-        <motion id="mc-boards-style-guide" class="mc-boards__style-guide"></motion>
+        <div id="mc-boards-style-guide" class="mc-boards__style-guide"></div>
 
         <h2 class="mc-boards__library-title mc-boards__library-title--spaced">Furniture type</h2>
         <div id="mc-boards-types" class="mc-boards__type-row" role="list"></div>
@@ -114,7 +114,6 @@
     })();
   </script>
   <script src="/v/vspfiles/boards/board-styles.js?v=20260522"></script>
-  <script src="/vspfiles/boards/board-styles.js?v=20260522"></script>
   <script src="/v/vspfiles/boards/my-boards-page.js?v=20260522"></script>
 </body>
 </html>
