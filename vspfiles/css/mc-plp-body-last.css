@@ -1,4 +1,69 @@
-/* MC PLP THUMBNAIL CLEANUP — load last; beats live template mc-category-grid-critical */
+/* MC PLP THUMBNAIL — load last; no crop, no cover, no overflow clip */
+
+.mc-plp-image-box {
+  width: 100% !important;
+  height: 260px !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  overflow: visible !important;
+  background: transparent !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  line-height: 0 !important;
+}
+
+.mc-plp-image-box img {
+  display: block !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  max-width: none !important;
+  max-height: none !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  transform: none !important;
+  clip-path: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Beat custom-safe / template fixed-stage + overflow:hidden on category PLP */
+html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img.mc-plp-image-box,
+html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box,
+html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img.mc-plp-image-box {
+  width: 100% !important;
+  height: 260px !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  overflow: visible !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img,
+html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img,
+html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img {
+  display: block !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  max-width: none !important;
+  max-height: none !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  transform: none !important;
+  clip-path: none !important;
+}
 
 html[data-mc-category-plp="1"] #content_area > table > tbody > tr > td.colors_lines_light,
 html[data-mc-category-plp="1"] #content_area > table > tr > td.colors_lines_light,
@@ -16,69 +81,7 @@ html.category #content_area .v-product-grid .v-product {
   background: transparent !important;
 }
 
-/* Match live template selector exactly — white wrapper, no gray mat */
-html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img,
-html.category body:not(.productdetails) #content_area .v-product-grid .v-product__img,
-html.category body:not(.productdetails) #content_area a.v-product__img,
-html.category body:not(.productdetails) #content_area .v-product__img,
-html.category body:not(.productdetails) #content_area .v-product__image,
-html.category body:not(.productdetails) #content_area .product_image,
-html.category body:not(.productdetails) #content_area .vcss_img,
-html.category body:not(.productdetails) #content_area ul.v-product-grid > li .v-product__img,
-html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img,
-html.category #content_area .v-product-grid a.v-product__img {
-  display: flex !important;
-  align-items: flex-end !important;
-  justify-content: center !important;
-  width: 100% !important;
-  height: 280px !important;
-  min-height: 280px !important;
-  max-height: 280px !important;
-  margin: 0 !important;
-  padding: 14px !important;
-  overflow: hidden !important;
-  box-sizing: border-box !important;
-  background: #ffffff !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  line-height: 0 !important;
-}
-
-html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img,
-html.category body:not(.productdetails) #content_area .v-product-grid .v-product__img img,
-html.category body:not(.productdetails) #content_area a.v-product__img > img,
-html.category body:not(.productdetails) #content_area .v-product__img img,
-html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img > img,
-html.category #content_area .v-product-grid a.v-product__img > img {
-  height: 220px !important;
-  max-height: 220px !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-height: 0 !important;
-  min-width: 0 !important;
-  object-fit: contain !important;
-  object-position: center bottom !important;
-  display: block !important;
-  margin: 0 auto !important;
+html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos/"],
+html.category #content_area .v-product-grid img[src*="/v/vspfiles/product/"] {
   background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
-@media (max-width: 991px) {
-  html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img,
-  html.category body:not(.productdetails) #content_area .v-product-grid .v-product__img,
-  html.category #content_area .v-product-grid a.v-product__img {
-    height: 220px !important;
-    min-height: 220px !important;
-    max-height: 220px !important;
-    padding: 12px !important;
-  }
-
-  html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img,
-  html.category body:not(.productdetails) #content_area .v-product-grid .v-product__img img,
-  html.category #content_area .v-product-grid a.v-product__img > img {
-    height: 172px !important;
-    max-height: 172px !important;
-  }
 }
