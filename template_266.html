@@ -1049,15 +1049,6 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product>a.v-product__img>img,h
   function mcCssBust() {
     return 'v=' + Date.now() + '&m=' + Math.random().toString(36).slice(2, 12);
   }
-  function mcLoadPlpEnforcer() {
-    if (window.__MC_PLP_ENFORCER__ || window.__MC_PLP_ENFORCER_LOADING__) return;
-    window.__MC_PLP_ENFORCER_LOADING__ = 1;
-    var s = document.createElement('script');
-    s.id = 'mc-plp-enforcer-js';
-    s.src = '/v/vspfiles/js/mc-plp-enforcer.js?' + mcCssBust();
-    (document.head || document.documentElement).appendChild(s);
-  }
-  mcLoadPlpEnforcer();
   if (document.getElementById('mc-custom-safe-css-static') || document.getElementById('mc-custom-safe-css')) {
     return;
   }
@@ -1065,14 +1056,12 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product>a.v-product__img>img,h
   el.rel = 'stylesheet';
   el.id = 'mc-custom-safe-css';
   el.href = '/v/vspfiles/css/custom-safe.css?' + mcCssBust();
-  el.onload = function () { mcLoadPlpEnforcer(); };
   el.onerror = function () {
     this.onerror = function () {
       this.onerror = null;
       this.href = '/vspfiles/css/custom-safe.css?' + mcCssBust();
     };
     this.href = '/v/custom-safe.css?' + mcCssBust();
-    mcLoadPlpEnforcer();
   };
   var ref = document.querySelector('link[href*="d21ivvgspl06jm.cloudfront.net/theme-assets"]');
   if (ref && ref.parentNode) {
@@ -1080,20 +1069,6 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product>a.v-product__img>img,h
   } else {
     document.head.appendChild(el);
   }
-  mcLoadPlpEnforcer();
-})();
-</script>
-<script id="mc-plp-enforcer-loader">
-(function () {
-  function mcCssBust() {
-    return 'v=' + Date.now() + '&m=' + Math.random().toString(36).slice(2, 12);
-  }
-  if (window.__MC_PLP_ENFORCER_LOADING__) return;
-  window.__MC_PLP_ENFORCER_LOADING__ = 1;
-  var s = document.createElement('script');
-  s.id = 'mc-plp-enforcer-js';
-  s.src = '/v/vspfiles/js/mc-plp-enforcer.js?' + mcCssBust();
-  (document.head || document.documentElement).appendChild(s);
 })();
 </script>
 <script>
@@ -19634,7 +19609,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
 <link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260520plp-mat" id="mc-mccabe-overrides-body-last" />
-<link rel="stylesheet" href="/v/vspfiles/css/mc-plp-body-last.css?v=20260520plp" id="mc-plp-body-last-css" />
+<link rel="stylesheet" href="/v/vspfiles/css/mc-plp-body-last.css?v=20260602" id="mc-plp-body-last-css" />
 <link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260518" id="mc-live-patch-last" />
 <script id="mccabe-product-room-planner-price-fix" type="text/plain" data-disabled="true">
 (function () {
@@ -22077,33 +22052,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
   console.log("MTL CLEANUP VERSION LOADED:", window.MTL_CLEANUP_VERSION);
 </script>
-<script id="mc-plp-body-boot">
-(function (w, d) {
-  function loadPlpEnforcer() {
-    if (w.__MC_PLP_ENFORCER__ || w.__MC_PLP_ENFORCER_LOADING__) return;
-    w.__MC_PLP_ENFORCER_LOADING__ = 1;
-    var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-plp-enforcer.js?m=" + Date.now();
-    (d.body || d.head || d.documentElement).appendChild(s);
-  }
-  loadPlpEnforcer();
-  d.addEventListener("DOMContentLoaded", loadPlpEnforcer);
-  w.addEventListener("load", loadPlpEnforcer);
-})(window, document);
-</script>
-  <!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/6a04bd3e2df0a01c36f9d799/1joh86fip';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->
-  <script src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260601"></script>
+  <script src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260602"></script>
 </body>
 </html>
