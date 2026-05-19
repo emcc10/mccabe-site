@@ -114,8 +114,8 @@ function buildPixelMeta(data, width, height, channels) {
   return { meta, p33, p66 };
 }
 
-function findBestPatchOrigin(mask, width, height, patchSize) {
-  let bestScore = 0;
+function findBestPatchOrigin(mask, width, height, patchSize, used = null) {
+  let bestScore = -Infinity;
   let bestX = 0;
   let bestY = 0;
   const maxX = Math.max(1, width - patchSize);
@@ -124,13 +124,17 @@ function findBestPatchOrigin(mask, width, height, patchSize) {
   const tryWindow = (step) => {
     for (let y = 0; y < maxY; y += step) {
       for (let x = 0; x < maxX; x += step) {
-        let score = 0;
+        let bandHits = 0;
+        let usedHits = 0;
         for (let dy = 0; dy < patchSize; dy++) {
           const row = (y + dy) * width;
           for (let dx = 0; dx < patchSize; dx++) {
-            if (mask[row + x + dx]) score++;
+            const j = row + x + dx;
+            if (mask[j]) bandHits++;
+            if (used?.[j]) usedHits++;
           }
         }
+        const score = bandHits - usedHits * 2;
         if (score > bestScore) {
           bestScore = score;
           bestX = x;
@@ -141,9 +145,9 @@ function findBestPatchOrigin(mask, width, height, patchSize) {
   };
 
   tryWindow(8);
-  if (bestScore < patchSize * 8) tryWindow(1);
+  if (bestScore < patchSize * 4) tryWindow(1);
 
-  return { x: bestX, y: bestY, score: bestScore };
+  return { x: bestX, y: bestY, score: Math.max(0, bestScore) };
 }
 
 function extractPatchFromSwatch(data, width, height, channels, originX, originY, patchSize) {
@@ -212,8 +216,8 @@ function buildLightBodyBandMasks(meta, width, height) {
   const n = body.length;
   const midMask = new Uint8Array(width * height);
   const hiMask = new Uint8Array(width * height);
-  for (const { j } of body.slice(Math.floor(n * 0.35), Math.floor(n * 0.65))) midMask[j] = 1;
-  for (const { j } of body.slice(Math.floor(n * 0.88))) hiMask[j] = 1;
+  for (const { j } of body.slice(Math.floor(n * 0.3), Math.floor(n * 0.72))) midMask[j] = 1;
+  for (const { j } of body.slice(Math.floor(n * 0.72))) hiMask[j] = 1;
 
   let shadowUse = shadowMask;
   const shadowCount = shadowMask.reduce((a, v) => a + v, 0);
