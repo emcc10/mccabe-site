@@ -1,6 +1,6 @@
 # Sofa Recolor Tool
 
-**LAB chroma recolor** — hero a/b + ab texture residual. Dark swatches keep sofa L. Light leathers: swatch L blend, neutral a/b clamp, then material-depth pass (grain detail, specular/crease restore, masked CLAHE) without global brightness lift.
+**LAB chroma recolor** — hero a/b + ab texture residual. Dark swatches keep sofa L. Light leathers: swatch L blend, soft material depth, edge-preserving surface smooth (no CLAHE).
 
 ## Commands
 

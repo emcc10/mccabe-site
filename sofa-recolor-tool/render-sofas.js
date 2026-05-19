@@ -81,14 +81,16 @@ const LIGHT_NEUTRAL_B_MIN = 0;
 const LIGHT_NEUTRAL_B_MAX = 10;
 /** Light-leather material depth (luminance only — not global brightness lift). */
 const LIGHT_DETAIL_BLUR_RADIUS = 8;
-const LIGHT_DETAIL_STRENGTH = 1.35;
+const LIGHT_DETAIL_STRENGTH = 0.45;
 const LIGHT_SPECULAR_LUM = 170;
-const LIGHT_SPECULAR_BLEND = 0.75;
+const LIGHT_SPECULAR_BLEND = 0.35;
 const LIGHT_CREASE_LUM = 85;
-const LIGHT_CREASE_BLEND = 0.45;
+const LIGHT_CREASE_BLEND = 0.25;
 const LIGHT_SEAM_DEPTH_MIN = 12;
-const LIGHT_CLAHE_CLIP = 1.5;
-const LIGHT_CLAHE_TILES = 8;
+/** Edge-preserving surface smooth on upholstery (flat panels only). */
+const LIGHT_SURFACE_SIGMA_SPATIAL = 0.35;
+const LIGHT_SURFACE_SIGMA_RANGE = 28;
+const LIGHT_SURFACE_BLEND = 0.35;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
@@ -828,6 +830,97 @@ function sampleTileLut(luts, tilesX, tilesY, tileW, tileH, x, y, lumVal) {
   return top * (1 - wy) + bot * wy;
 }
 
+/** Gentle bilateral-style smooth on masked upholstery; skips edges/seams. */
+export function applyLightLeatherSurfaceSmooth(
+  outData,
+  mask,
+  width,
+  height,
+  channels,
+  yMax,
+  origLum,
+  localMeanLum,
+) {
+  const n = width * height;
+  const smoothR = new Float32Array(n);
+  const smoothG = new Float32Array(n);
+  const smoothB = new Float32Array(n);
+  const sigmaS = LIGHT_SURFACE_SIGMA_SPATIAL;
+  const sigmaR = LIGHT_SURFACE_SIGMA_RANGE;
+  const sigmaS2 = 2 * sigmaS * sigmaS;
+  const sigmaR2 = 2 * sigmaR * sigmaR;
+  const radius = 1;
+
+  for (let y = 0; y < height; y++) {
+    if (y > yMax) continue;
+    for (let x = 0; x < width; x++) {
+      const j = y * width + x;
+      if (mask[j] < MASK_APPLY_THRESH) continue;
+      const p = j * channels;
+      const cr = outData[p];
+      const cg = outData[p + 1];
+      const cb = outData[p + 2];
+      let sr = 0;
+      let sg = 0;
+      let sb = 0;
+      let wsum = 0;
+
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const xx = x + dx;
+          const yy = y + dy;
+          if (xx < 0 || yy < 0 || xx >= width || yy >= height) continue;
+          const jj = yy * width + xx;
+          if (mask[jj] < MASK_APPLY_THRESH) continue;
+          const pp = jj * channels;
+          const nr = outData[pp];
+          const ng = outData[pp + 1];
+          const nb = outData[pp + 2];
+          const spatialW = Math.exp(-(dx * dx + dy * dy) / sigmaS2);
+          const dr = nr - cr;
+          const dg = ng - cg;
+          const db = nb - cb;
+          const rangeW = Math.exp(-(dr * dr + dg * dg + db * db) / sigmaR2);
+          const w = spatialW * rangeW;
+          sr += nr * w;
+          sg += ng * w;
+          sb += nb * w;
+          wsum += w;
+        }
+      }
+
+      if (wsum > 0) {
+        smoothR[j] = sr / wsum;
+        smoothG[j] = sg / wsum;
+        smoothB[j] = sb / wsum;
+      } else {
+        smoothR[j] = cr;
+        smoothG[j] = cg;
+        smoothB[j] = cb;
+      }
+    }
+  }
+
+  for (let y = 0; y < height; y++) {
+    if (y > yMax) continue;
+    for (let x = 0; x < width; x++) {
+      const j = y * width + x;
+      if (mask[j] < MASK_APPLY_THRESH) continue;
+      const seamDepth = localMeanLum[j] - origLum[j];
+      const edgeW = clamp(seamDepth / 18, 0, 1);
+      const gradW = clamp(Math.abs(origLum[j] - localMeanLum[j]) / 14, 0, 1);
+      const preserve = Math.max(edgeW, gradW);
+      const blend = LIGHT_SURFACE_BLEND * (1 - preserve);
+      if (blend < 0.01) continue;
+
+      const p = j * channels;
+      outData[p] = clamp(Math.round(outData[p] * (1 - blend) + smoothR[j] * blend), 0, 255);
+      outData[p + 1] = clamp(Math.round(outData[p + 1] * (1 - blend) + smoothG[j] * blend), 0, 255);
+      outData[p + 2] = clamp(Math.round(outData[p + 2] * (1 - blend) + smoothB[j] * blend), 0, 255);
+    }
+  }
+}
+
 /** Local CLAHE on upholstery luminance only (masked pixels). */
 export function applyClaheOnMask(
   outData,
@@ -838,8 +931,8 @@ export function applyClaheOnMask(
   yMax,
   origLum,
   localMeanLum,
-  tiles = LIGHT_CLAHE_TILES,
-  clipLimit = LIGHT_CLAHE_CLIP,
+  tiles = 8,
+  clipLimit = 1.5,
 ) {
   const tilesX = tiles;
   const tilesY = tiles;
@@ -1223,7 +1316,7 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
   }
 
   if (lightLeather) {
-    applyClaheOnMask(out, mask, width, height, channels, yMax, origLum, detailBlurLum);
+    applyLightLeatherSurfaceSmooth(out, mask, width, height, channels, yMax, origLum, detailBlurLum);
   }
 
   return out;
