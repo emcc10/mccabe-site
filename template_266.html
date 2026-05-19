@@ -22029,11 +22029,23 @@ s0.parentNode.insertBefore(s1,s0);
   if (!/\/my-boards\.html/i.test(String(location.pathname || ''))) return;
   document.documentElement.classList.add('mc-my-boards-page');
   if (document.body) document.body.classList.add('mc-my-boards-page');
+  if (!window.MC_BOARDS_API_BASE) {
+    var p = String(location.pathname || '');
+    window.MC_BOARDS_API_BASE =
+      p.indexOf('/v/vspfiles/') !== -1 ? '/v/vspfiles/boards/' : '/vspfiles/boards/';
+  }
+  if (!document.querySelector('link[href*="fonts.googleapis.com"][href*="Cormorant"]')) {
+    var gf = document.createElement('link');
+    gf.rel = 'stylesheet';
+    gf.href =
+      'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap';
+    document.head.appendChild(gf);
+  }
   var hrefs = [
-    '/v/vspfiles/boards/my-boards-critical.css?v=20260522',
-    '/v/vspfiles/boards/my-boards-page.css?v=20260522',
-    '/vspfiles/boards/my-boards-critical.css?v=20260522',
-    '/vspfiles/boards/my-boards-page.css?v=20260522'
+    '/v/vspfiles/boards/my-boards-critical.css?v=20260523',
+    '/v/vspfiles/boards/my-boards-page.css?v=20260523',
+    '/vspfiles/boards/my-boards-critical.css?v=20260523',
+    '/vspfiles/boards/my-boards-page.css?v=20260523'
   ];
   var have = {};
   document.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
@@ -22049,12 +22061,23 @@ s0.parentNode.insertBefore(s1,s0);
     have[base] = true;
   });
   if (!document.querySelector('script[src*="board-styles.js"]')) {
-    var s1 = document.createElement('script');
-    s1.src = '/v/vspfiles/boards/board-styles.js?v=20260522';
-    document.body.appendChild(s1);
-    var s2 = document.createElement('script');
-    s2.src = '/v/vspfiles/boards/my-boards-page.js?v=20260522';
-    document.body.appendChild(s2);
+    function loadBoardsPageJs() {
+      var s2 = document.createElement('script');
+      s2.src = '/v/vspfiles/boards/my-boards-page.js?v=20260523';
+      document.body.appendChild(s2);
+    }
+    function loadBoardStyles(src) {
+      var s1 = document.createElement('script');
+      s1.src = src;
+      s1.onload = loadBoardsPageJs;
+      s1.onerror = function () {
+        if (src.indexOf('/vspfiles/') === -1) {
+          loadBoardStyles('/vspfiles/boards/board-styles.js?v=20260523');
+        }
+      };
+      document.body.appendChild(s1);
+    }
+    loadBoardStyles('/v/vspfiles/boards/board-styles.js?v=20260523');
   }
 })();
   </script>
