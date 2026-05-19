@@ -1,6 +1,6 @@
 # Sofa Recolor Tool
 
-**LAB chroma-only recolor** — transfers hue, saturation, and color temperature from each swatch (a/b channels only). The sofa photograph’s **L channel is never changed**: all lighting, highlights, shadows, and contrast stay intact. No overlay, multiply, or opacity blending.
+**LAB chroma-only recolor** — transfers hue/saturation/temperature from each swatch (a/b only). A second **luminance-only** pass restores original leather depth: micro-contrast, specular highlights, shadow pockets, and black point. No swatch overlay or global saturation boost.
 
 ## Commands
 

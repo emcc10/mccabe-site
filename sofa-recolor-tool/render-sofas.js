@@ -43,6 +43,16 @@ const CHROMA_SCALE_MIN = 0.85;
 const CHROMA_SCALE_MAX = 1.35;
 const LAB_CHROMA_CLAMP = 72;
 
+/** Post-recolor contrast restoration (luminance only — chroma unchanged). */
+const DEPTH_BLUR_RADIUS = 2;
+const DEPTH_DETAIL_BLEND = 0.88;
+const DEPTH_MICROCONTRAST = 0.32;
+const DEPTH_SHADOW_LOCK_LUM = 78;
+const DEPTH_SHADOW_LOCK_STRENGTH = 0.92;
+const DEPTH_SPECULAR_LUM = 192;
+const DEPTH_SPECULAR_BLEND = 0.9;
+const DEPTH_S_CURVE = 0.11;
+
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
 const SWATCH_BLOCK_PATTERN = /^(debug|test|chip|palette|cache|flat|target|color-)/i;
@@ -345,6 +355,102 @@ export function computeRepresentativeSwatchStats(samples) {
   };
 }
 
+function percentileSorted(sorted, p) {
+  if (!sorted.length) return 0;
+  const idx = clamp(Math.floor(sorted.length * p), 0, sorted.length - 1);
+  return sorted[idx];
+}
+
+/** Black/white anchors from original upholstery luminance (preserves black point). */
+export function computeLuminanceAnchors(origLum, mask, width, height) {
+  const samples = [];
+  for (let j = 0; j < width * height; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) continue;
+    samples.push(origLum[j]);
+  }
+  if (!samples.length) return { black: 0, white: 255 };
+  samples.sort((a, b) => a - b);
+  return {
+    black: percentileSorted(samples, 0.03),
+    white: percentileSorted(samples, 0.97),
+  };
+}
+
+export function boxBlurLuminance(src, width, height, radius = DEPTH_BLUR_RADIUS) {
+  const out = new Float32Array(src.length);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sum = 0;
+      let count = 0;
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const yy = y + dy;
+          const xx = x + dx;
+          if (yy < 0 || yy >= height || xx < 0 || xx >= width) continue;
+          sum += src[yy * width + xx];
+          count++;
+        }
+      }
+      out[y * width + x] = sum / count;
+    }
+  }
+  return out;
+}
+
+/** Subtle S-curve on luminance — anchored at original black point, does not lift shadows. */
+export function applySubtleSCurve(lum, black, white, strength = DEPTH_S_CURVE) {
+  const range = Math.max(white - black, 8);
+  const t = clamp((lum - black) / range, 0, 1);
+  const bump = strength * (t - 0.5) * (1 - Math.abs(t - 0.5) * 1.6);
+  const curved = clamp(t + bump, 0, 1);
+  return black + curved * range;
+}
+
+function midtoneDetailWeight(origLum) {
+  const t = 1 - Math.abs(origLum - 118) / 118;
+  return clamp(t, 0, 1);
+}
+
+/**
+ * Contrast-only leather depth: original micro-detail, shadows, speculars.
+ */
+export function restoreLeatherDepth(oR, oG, oB, r, g, b, origLum, blurLum, anchors) {
+  const detail = origLum - blurLum;
+  let nL = pixelBrightness(r, g, b);
+
+  nL = applySubtleSCurve(nL, anchors.black, anchors.white);
+
+  if (origLum < DEPTH_SHADOW_LOCK_LUM) {
+    const t = clamp((DEPTH_SHADOW_LOCK_LUM - origLum) / DEPTH_SHADOW_LOCK_LUM, 0, 1);
+    nL = nL + (origLum - nL) * t * DEPTH_SHADOW_LOCK_STRENGTH;
+    nL = Math.min(nL, origLum);
+  }
+
+  if (origLum > DEPTH_SPECULAR_LUM) {
+    const t = smoothstep(DEPTH_SPECULAR_LUM, 248, origLum) * DEPTH_SPECULAR_BLEND;
+    nL = nL + (origLum - nL) * t;
+  }
+
+  const midW = midtoneDetailWeight(origLum);
+  let finalL = nL + detail * (DEPTH_DETAIL_BLEND + midW * DEPTH_MICROCONTRAST);
+
+  if (origLum < DEPTH_SHADOW_LOCK_LUM) {
+    finalL = Math.min(finalL, origLum);
+  }
+
+  finalL = clamp(finalL, 0, 255);
+  const curL = pixelBrightness(r, g, b);
+  if (curL < 1) {
+    return { r: oR, g: oG, b: oB };
+  }
+  const scale = finalL / curL;
+  return {
+    r: clamp(Math.round(r * scale), 0, 255),
+    g: clamp(Math.round(g * scale), 0, 255),
+    b: clamp(Math.round(b * scale), 0, 255),
+  };
+}
+
 /**
  * Keep original photo luminance in RGB after a/b shift (no overlay/blend modes).
  */
@@ -575,6 +681,17 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
   const { data, width, height, channels } = baseImage;
   const out = Buffer.from(data);
   const yMax = sofaBottomY - BODY_RECOLOR_MARGIN_ABOVE_BOTTOM_PX;
+  const nPix = width * height;
+
+  const origLum = new Float32Array(nPix);
+  for (let j = 0; j < nPix; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) continue;
+    const p = j * channels;
+    origLum[j] = pixelBrightness(data[p], data[p + 1], data[p + 2]);
+  }
+
+  const blurLum = boxBlurLuminance(origLum, width, height);
+  const anchors = computeLuminanceAnchors(origLum, mask, width, height);
 
   for (let y = 0; y < height; y++) {
     if (y > yMax) continue;
@@ -594,12 +711,14 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
       const cognacEdge = edgeStrength > 0 && (isCognacFringePixel(oR, oG, oB) || fringeEdge);
 
       const baseLab = rgbToLab(oR, oG, oB);
-      const { r, g, b } = transferLabPixel(baseLab, sofaStats, swatchStats, {
+      let { r, g, b } = transferLabPixel(baseLab, sofaStats, swatchStats, {
         edgeStrength,
         cognacEdge,
         fringeEdge,
         originalRgb: { r: oR, g: oG, b: oB },
       });
+
+      ({ r, g, b } = restoreLeatherDepth(oR, oG, oB, r, g, b, origLum[j], blurLum[j], anchors));
 
       out[p] = r;
       out[p + 1] = g;
@@ -700,7 +819,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: LAB L preserved; strong median chroma transfer (2–3×)');
+  console.log('  method: LAB chroma transfer + leather depth restore (contrast/detail)');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   const mask = await createUpholsteryMask(baseSofa, maskPath);
