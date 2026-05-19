@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260603
+ * MC_PLP_ENFORCER_20260604
  *
  * DOM (category listing):
  *   table.colors_backgroundlight + SearchResults_SubCat_Angle  ← black bar (legacy subcat chrome)
@@ -10,7 +10,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260603";
+  var VERSION = "20260604";
   var PLP_MAT = "#ffffff";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
@@ -22,7 +22,7 @@
       var l = document.createElement("link");
       l.id = "mc-plp-body-last-css";
       l.rel = "stylesheet";
-      l.href = "/v/vspfiles/css/mc-plp-body-last.css?v=20260603";
+      l.href = "/v/vspfiles/css/mc-plp-body-last.css?v=20260604";
       (document.body || document.documentElement).appendChild(l);
     }
     if (document.body) attach();
@@ -36,16 +36,9 @@
   var STAGE_M = 172;
   var PAD = 14;
   var PAD_M = 12;
-  var TARGET_FILL = 0.78;
-
-  var SCALE_OVERRIDES = {
-    miami: 0.84,
-    juno: 0.88,
-    alula: 0.86,
-    "juno apartment": 0.88,
-    "miami track": 0.84,
-    "miami roll": 0.84,
-  };
+  var TARGET_FILL = 0.82;
+  var SCALE_MIN = 0.65;
+  var SCALE_MAX = 1.55;
 
   var THUMB_SEL = "#content_area .v-product-grid a.v-product__img";
 
@@ -152,36 +145,13 @@
     }
   }
 
-  function haystack(wrap, img) {
-    return (
-      (wrap.getAttribute("href") || "") +
-      " " +
-      (img.getAttribute("alt") || "") +
-      " " +
-      (img.getAttribute("title") || "") +
-      " " +
-      (img.getAttribute("src") || "")
-    ).toLowerCase();
-  }
-
-  function manualScale(wrap, img) {
-    var text = haystack(wrap, img);
-    var key;
-    for (key in SCALE_OVERRIDES) {
-      if (Object.prototype.hasOwnProperty.call(SCALE_OVERRIDES, key) && text.indexOf(key) !== -1) {
-        return SCALE_OVERRIDES[key];
-      }
-    }
-    return null;
-  }
-
   function applyScale(img, scale) {
-    scale = Math.max(0.7, Math.min(1, scale));
+    scale = Math.max(SCALE_MIN, Math.min(SCALE_MAX, scale));
     scale = Math.round(scale * 100) / 100;
     img.setAttribute("data-scale", String(scale));
     img.style.setProperty("--thumb-scale", String(scale));
     img.style.transformOrigin = "center bottom";
-    if (scale < 0.995) {
+    if (Math.abs(scale - 1) > 0.005) {
       img.style.transform = "scale(var(--thumb-scale))";
     } else {
       img.style.transform = "";
@@ -252,17 +222,11 @@
   }
 
   function normalizeScale(wrap, img) {
-    var forced = manualScale(wrap, img);
-    if (forced != null) {
-      applyScale(img, forced);
-      img.setAttribute("data-mc-scale-done", "1");
-      return;
-    }
     if (img.getAttribute("data-mc-scale-done") === "1") return;
 
     measureFill(img, function (fill) {
       var scale = 1;
-      if (fill > TARGET_FILL + 0.04) {
+      if (fill > 0.02) {
         scale = TARGET_FILL / fill;
       }
       applyScale(img, scale);
@@ -311,7 +275,7 @@
     img.style.setProperty("background", PLP_MAT, "important");
     img.style.setProperty("background-color", PLP_MAT, "important");
     img.style.setProperty("display", "block", "important");
-    img.style.setProperty("width", "auto", "important");
+    img.style.setProperty("width", "100%", "important");
     img.style.setProperty("max-width", "100%", "important");
     img.style.setProperty("height", stage + "px", "important");
     img.style.setProperty("max-height", stage + "px", "important");
