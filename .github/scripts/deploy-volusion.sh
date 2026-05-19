@@ -99,7 +99,8 @@ deploy_template() {
   export SFTP_PASS="${FTP_PASSWORD}"
   export SFTP_PORT="2222"
   python3 scripts/volusion_sftp_force_template.py
-  put_primary "template_266.html" "template" "/v/template_266.html" "/template_266.html"
+  # Template is uploaded only via Paramiko above (MD5 read-back). lftp duplicate put
+  # can hit 550 locks and leave a same-size stale file without the enforcer tag.
 }
 
 verify_live_template_http() {
@@ -227,19 +228,18 @@ verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-sofa-bo
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/template.min.js" "MC_PLP_ENFORCER_LOADING__"
 
 echo ""
-echo "=== Verify PLP photo on origin (77170-01-1.jpg must be 23747 bytes) ==="
-want_photo=23747
+echo "=== Verify PLP photo on origin (77170-01-1.jpg — normalized asset byte size) ==="
+want_photo=$(wc -c < vspfiles/photos/77170-01-1.jpg | tr -d ' ')
 got_photo=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/photos/77170-01-1.jpg?v=$(date +%s)" -H "Cache-Control: no-cache" | wc -c | tr -d ' ')
-echo "  live bytes: ${got_photo} (want ${want_photo})"
+echo "  live bytes: ${got_photo} (want ${want_photo} from repo)"
 if [[ "$got_photo" != "$want_photo" ]]; then
-  echo "::warning::PLP photo size mismatch — CDN may still cache old gray mat image"
+  echo "::warning::PLP photo size mismatch — CDN may still cache old gray-mat image; purge /v/vspfiles/photos/77170-01-1.jpg"
 fi
 
 echo ""
 echo "Deploy finished (~2–4 min). Hard-refresh category 177 (Ctrl+Shift+R)."
 echo "SKIP_CAP on template.min / mtl-sectional-renderer is normal (128 KiB Volusion limit)."
 echo "PLP fix: single enforcer via design-toolkit.min.js + template body script (${TEMPLATE_ENFORCER_TAG})."
-verify_template_on_sftp "$TEMPLATE_ENFORCER_TAG"
 verify_live_template_http "$TEMPLATE_ENFORCER_TAG"
 echo ""
 echo "Category/product HTML is Volusion-BAKED: after SFTP template updates, open Volusion"

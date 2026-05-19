@@ -2,16 +2,17 @@
 """Verify template_266.html on Volusion SFTP (source of truth for deploy).
 
 The public URL /v/template_266.html is often stale (CDN or Volusion DB copy) while SFTP
-has the new file. CI must pass when SFTP contains the expected marker, not only HTTP.
+has the new file. CI must pass when SFTP bytes match the repo file (MD5), not only size.
 """
 from __future__ import annotations
 
+import hashlib
 import os
 import re
 import sys
 
 
-def _paths() -> list[str]:
+def template_remote_paths() -> list[str]:
     secret = os.environ.get("SFTP_TEMPLATE_REMOTE", "").strip()
     if secret and not secret.startswith("/") and not secret.startswith("v/"):
         secret = "/v/" + secret.lstrip("/")
@@ -33,7 +34,7 @@ def _paths() -> list[str]:
     return out
 
 
-def _needle() -> str:
+def template_needle() -> str:
     env = os.environ.get("TEMPLATE_NEEDLE", "").strip()
     if env:
         return env
@@ -47,28 +48,54 @@ def _needle() -> str:
     return ""
 
 
-def _tail_contains(sftp, remote: str, needle: str, tail_bytes: int = 131072) -> tuple[bool, int]:
-    st = sftp.stat(remote)
-    size = int(st.st_size)
-    start = max(0, size - tail_bytes)
+def md5_hex(data: bytes) -> str:
+    return hashlib.md5(data).hexdigest()
+
+
+def read_local_template() -> bytes:
+    with open("template_266.html", "rb") as handle:
+        return handle.read()
+
+
+def read_remote_template(sftp, remote: str) -> bytes:
     with sftp.open(remote, "rb") as handle:
-        if start:
-            handle.seek(start)
-        blob = handle.read().decode("utf-8", errors="replace")
-    return needle in blob, size
+        return handle.read()
+
+
+def check_remote(
+    sftp,
+    remote: str,
+    local_data: bytes,
+    local_md5: str,
+    needle: str,
+) -> tuple[bool, int, bool, bool]:
+    """Return (ok, remote_size, md5_match, needle_present)."""
+    remote_data = read_remote_template(sftp, remote)
+    remote_size = len(remote_data)
+    md5_match = md5_hex(remote_data) == local_md5
+    text = remote_data.decode("utf-8", errors="replace")
+    needle_present = bool(needle and needle in text)
+    ok = md5_match or (remote_size == len(local_data) and needle_present)
+    return ok, remote_size, md5_match, needle_present
 
 
 def main() -> int:
     os.chdir(os.environ.get("GITHUB_WORKSPACE", "."))
-    needle = _needle()
+    needle = template_needle()
     if not needle:
-        print("::error::No TEMPLATE_NEEDLE or mc-plp-enforcer tag in template_266.html", file=sys.stderr)
+        print(
+            "::error::No TEMPLATE_NEEDLE or mc-plp-enforcer tag in template_266.html",
+            file=sys.stderr,
+        )
         return 1
     if not os.path.isfile("template_266.html"):
         print("::error::Missing template_266.html", file=sys.stderr)
         return 1
 
-    want_size = os.path.getsize("template_266.html")
+    local_data = read_local_template()
+    local_md5 = md5_hex(local_data)
+    want_size = len(local_data)
+
     host = (
         os.environ.get("SFTP_HOST", "").strip()
         or os.environ.get("FTP_SERVER", "").strip()
@@ -91,7 +118,6 @@ def main() -> int:
         return 1
 
     matched: list[str] = []
-    sized: list[str] = []
     try:
         sftp = paramiko.SFTPClient.from_transport(transport)
         try:
@@ -100,21 +126,25 @@ def main() -> int:
             except Exception as exc:  # noqa: BLE001
                 print(f"::notice::getcwd: {exc}", flush=True)
 
-            for remote in _paths():
+            print(
+                f"::notice::Local template md5={local_md5} size={want_size} needle={needle!r}",
+                flush=True,
+            )
+
+            for remote in template_remote_paths():
                 try:
-                    has_needle, size = _tail_contains(sftp, remote, needle)
+                    ok, size, md5_ok, needle_ok = check_remote(
+                        sftp, remote, local_data, local_md5, needle
+                    )
                 except Exception as exc:  # noqa: BLE001
                     print(f"::warning::SKIP {remote!r}: {exc}", flush=True)
                     continue
-                size_ok = size == want_size
                 print(
                     f"::notice::CHECK {remote!r} size={size} want={want_size} "
-                    f"needle={'yes' if has_needle else 'no'}",
+                    f"md5={'yes' if md5_ok else 'no'} needle={'yes' if needle_ok else 'no'}",
                     flush=True,
                 )
-                if size_ok:
-                    sized.append(remote)
-                if has_needle:
+                if ok:
                     matched.append(remote)
         finally:
             try:
@@ -126,20 +156,16 @@ def main() -> int:
 
     if matched:
         print(
-            f"::notice::SFTP template OK — {needle!r} on: {', '.join(matched)}",
+            f"::notice::SFTP template OK — md5/needle on: {', '.join(matched)}",
             flush=True,
         )
-        if not sized:
-            print(
-                "::warning::SFTP size mismatch vs local (needle present) — "
-                "file may be partial or wrong path duplicated",
-                flush=True,
-            )
         return 0
 
     print(
-        f"::error::SFTP template missing {needle!r} on all paths. "
-        f"Tried: {', '.join(_paths())}",
+        f"::error::SFTP template does not match repo (md5={local_md5}, needle={needle!r}). "
+        f"Tried: {', '.join(template_remote_paths())}. "
+        "Volusion may be serving a stale copy at the same byte size — re-run deploy or "
+        "upload template_266.html via Volusion File Editor.",
         file=sys.stderr,
     )
     return 1

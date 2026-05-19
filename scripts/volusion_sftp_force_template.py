@@ -3,38 +3,19 @@
 Write template_266.html to every canonical Volusion SFTP path (confirm=False).
 
 Use when CSS updates but the active theme file may be a different path than the
-pair that succeeded first. Exits 1 if no put succeeds.
+pair that succeeded first. Exits 1 if no put succeeds with matching MD5 read-back.
 """
 from __future__ import annotations
 
 import os
 import sys
 
-
-def _paths() -> list[str]:
-    secret = os.environ.get("SFTP_TEMPLATE_REMOTE", "").strip()
-    if secret and not secret.startswith("/") and not secret.startswith("v/"):
-        secret = "/v/" + secret.lstrip("/")
-    if secret == "v/v/template_266.html":
-        secret = "v/template_266.html"
-    if secret == "/v/v/template_266.html":
-        secret = "/v/template_266.html"
-    out: list[str] = []
-    seen: set[str] = set()
-    # /v is Volusion SFTP root for theme files (https://host/v/…).
-    for p in (
-        secret,
-        "/v/template_266.html",
-        "template_266.html",
-        "/mccabestheaterandliving.com/v/template_266.html",
-        "/v/v/template_266.html",
-        "v/template_266.html",
-        "/template_266.html",
-    ):
-        if p and p not in seen:
-            seen.add(p)
-            out.append(p)
-    return out
+from verify_template_sftp import (
+    check_remote,
+    md5_hex,
+    read_local_template,
+    template_remote_paths,
+)
 
 
 def main() -> int:
@@ -44,6 +25,17 @@ def main() -> int:
     if not os.path.isfile(local):
         print(f"::error::Missing {local}", file=sys.stderr)
         return 1
+
+    local_data = read_local_template()
+    local_md5 = md5_hex(local_data)
+    want = len(local_data)
+    needle = ""
+    try:
+        from verify_template_sftp import template_needle
+
+        needle = template_needle()
+    except Exception:  # noqa: BLE001
+        pass
 
     host = (
         os.environ.get("SFTP_HOST", "").strip()
@@ -73,25 +65,26 @@ def main() -> int:
         print(f"::error::force template connect failed: {exc}", file=sys.stderr)
         return 1
 
-    ok_any = False
+    verified: list[str] = []
     try:
         sftp = paramiko.SFTPClient.from_transport(transport)
         try:
-            for remote in _paths():
+            for remote in template_remote_paths():
                 try:
                     sftp.put(local, remote, confirm=False)
-                    want = os.path.getsize(local)
-                    got = sftp.stat(remote).st_size
-                    ok_size = got == want
+                    ok, got, md5_ok, needle_ok = check_remote(
+                        sftp, remote, local_data, local_md5, needle
+                    )
                     print(
-                        f"::notice::FORCE_TEMPLATE_OK → {remote} size={got} want={want}",
+                        f"::notice::FORCE_TEMPLATE → {remote} size={got} want={want} "
+                        f"md5={'yes' if md5_ok else 'no'} needle={'yes' if needle_ok else 'no'}",
                         flush=True,
                     )
-                    if ok_size:
-                        ok_any = True
+                    if ok:
+                        verified.append(remote)
                     else:
                         print(
-                            f"::warning::FORCE_TEMPLATE_SIZE_MISMATCH {remote!r}",
+                            f"::warning::FORCE_TEMPLATE_READBACK_MISMATCH {remote!r}",
                             flush=True,
                         )
                 except Exception as exc:  # noqa: BLE001
@@ -104,13 +97,17 @@ def main() -> int:
     finally:
         transport.close()
 
-    if not ok_any:
+    if not verified:
         print(
-            "::error::Could not write template_266.html to any canonical SFTP path. "
+            "::error::Could not write template_266.html with matching MD5 on any SFTP path. "
             "Check SFTP_TEMPLATE_REMOTE and permissions.",
             file=sys.stderr,
         )
         return 1
+    print(
+        f"::notice::FORCE_TEMPLATE verified on: {', '.join(verified)}",
+        flush=True,
+    )
     return 0
 
 
