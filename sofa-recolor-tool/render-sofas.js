@@ -446,14 +446,17 @@ function kMeansLabAB(samples, k = HERO_K_MEANS) {
   return { centroids, labels };
 }
 
-function finishHeroStats(meanA, meanB, meanL, spreadSamples) {
+function finishHeroStats(meanA, meanB, meanL, spreadSamples, avgSwatchChroma) {
   const spread = spreadSamples.length ? computeLabStats(spreadSamples) : computeLabStats([{ L: meanL, a: meanA, b: meanB }]);
   const repRgb = labToRgb(meanL, meanA, meanB);
   const rgbSat = pixelSaturation(repRgb.r, repRgb.g, repRgb.b);
   const chromaMag = Math.hypot(meanA, meanB);
+  const isNeutral = avgSwatchChroma < NEUTRAL_CHROMA_AVG;
 
   let satFactor = 1;
-  if (chromaMag < 4) {
+  if (isNeutral) {
+    satFactor = 0.95;
+  } else if (chromaMag < 4) {
     satFactor = 0.92;
   } else if (chromaMag < 12) {
     satFactor = 1.1 + rgbSat * 0.65;
@@ -470,6 +473,10 @@ function finishHeroStats(meanA, meanB, meanL, spreadSamples) {
     chromaGain = 2.65;
   }
 
+  if (isNeutral) {
+    chromaGain *= NEUTRAL_GAIN_MULT;
+  }
+
   return {
     meanL,
     meanA,
@@ -478,35 +485,39 @@ function finishHeroStats(meanA, meanB, meanL, spreadSamples) {
     stdA: Math.max(spread.stdA, MIN_LAB_STD),
     stdB: Math.max(spread.stdB, MIN_LAB_STD),
     chromaMag,
+    avgSwatchChroma,
     satFactor,
     chromaGain,
+    isNeutral,
+    neutralAbClamp: isNeutral ? NEUTRAL_AB_CLAMP : 0,
   };
 }
 
 /**
- * Hero color: k=3 cluster on filtered swatch; pick most saturated cluster centroid.
+ * Hero color: k=4 clusters; highest population + mid-L score (not max saturation).
  */
 export function computeHeroSwatchStats(heroSamples) {
   if (!heroSamples.length) {
-    return finishHeroStats(0, 0, 50, []);
+    return finishHeroStats(0, 0, 50, [], 0);
   }
+
+  const avgSwatchChroma =
+    heroSamples.reduce((s, p) => s + Math.hypot(p.a, p.b), 0) / heroSamples.length;
 
   if (heroSamples.length < HERO_K_MEANS) {
     const s = computeLabStats(heroSamples);
-    return finishHeroStats(s.meanA, s.meanB, s.meanL, heroSamples);
+    return finishHeroStats(s.meanA, s.meanB, s.meanL, heroSamples, avgSwatchChroma);
   }
 
-  const { centroids, labels } = kMeansLabAB(heroSamples, HERO_K_MEANS);
+  const { labels } = kMeansLabAB(heroSamples, HERO_K_MEANS);
   let bestCluster = 0;
-  let bestSat = -1;
+  let bestScore = -Infinity;
 
   for (let c = 0; c < HERO_K_MEANS; c++) {
     const members = heroSamples.filter((_, i) => labels[i] === c);
-    if (!members.length) continue;
-    const avgSat =
-      members.reduce((sum, p) => sum + Math.hypot(p.a, p.b), 0) / members.length;
-    if (avgSat > bestSat) {
-      bestSat = avgSat;
+    const score = scoreHeroCluster(members, heroSamples.length);
+    if (score > bestScore) {
+      bestScore = score;
       bestCluster = c;
     }
   }
@@ -517,7 +528,9 @@ export function computeHeroSwatchStats(heroSamples) {
   const meanB = pool.reduce((s, p) => s + p.b, 0) / pool.length;
   const meanL = medianOf(pool.map((p) => p.L));
 
-  return finishHeroStats(meanA, meanB, meanL, heroSamples);
+  const stats = finishHeroStats(meanA, meanB, meanL, heroSamples, avgSwatchChroma);
+  stats.heroClusterScore = bestScore;
+  return stats;
 }
 
 /** @deprecated alias */
@@ -678,6 +691,12 @@ export function transferLabPixel(pixel, src, dst, opts = {}) {
     b = b + (dst.meanB - b) * snap;
   }
 
+  if (dst.isNeutral && dst.neutralAbClamp > 0) {
+    const lim = dst.neutralAbClamp;
+    a = pixel.a + clamp(a - pixel.a, -lim, lim);
+    b = pixel.b + clamp(b - pixel.b, -lim, lim);
+  }
+
   a = clamp(a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
   b = clamp(b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
 
@@ -759,7 +778,9 @@ export async function getSwatchLabStats(swatchPath) {
   );
 
   if (!heroes.length) {
-    throw new Error(`No hero swatch pixels (L ${HERO_L_MIN}–${HERO_L_MAX}, sat ≥ ${HERO_SAT_MIN}): ${resolved}`);
+    throw new Error(
+      `No hero swatch pixels (L ${HERO_L_MIN}–${HERO_L_MAX}, sat ≥ ${HERO_SAT_MIN}, trimmed): ${resolved}`,
+    );
   }
 
   const stats = computeHeroSwatchStats(heroes);
@@ -918,6 +939,7 @@ export async function processSwatch(swatchPath, baseSofa, mask, sofaStats, sofaB
       Math.round(swatch.stats.meanB * 10) / 10,
     ],
     heroTier: swatch.heroTier ?? swatch.stats.heroTier,
+    neutral: swatch.stats.isNeutral ?? false,
     chromaGain: Math.round((swatch.stats.chromaGain ?? CHROMA_GAIN_BASE) * 100) / 100,
     satFactor: Math.round((swatch.stats.satFactor ?? 1) * 100) / 100,
   });
@@ -990,7 +1012,7 @@ export async function main(argv = process.argv) {
   console.log(`Base sofa: ${SOFA_PATH}`);
   const baseSofa = await loadImage(SOFA_PATH);
   console.log(`  ${baseSofa.width}x${baseSofa.height}`);
-  console.log('  method: hero swatch chroma (k=3) + depth restore; L preserved');
+  console.log('  method: hero k=4 scored cluster + depth restore; L preserved');
 
   const maskPath = existsSync(MASK_PATH) ? MASK_PATH : null;
   const mask = await createUpholsteryMask(baseSofa, maskPath);
