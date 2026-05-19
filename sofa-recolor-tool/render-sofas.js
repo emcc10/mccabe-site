@@ -1,20 +1,9 @@
 /**
- * Texture transfer: neutral-gray master sofa + manual mask.
- * Real swatch texture patches mapped by sofa luminance; sofa lighting preserved.
+ * Color transfer: neutral-gray master (sofa L/texture) + swatch palette (chroma only).
+ * No swatch texture tiling or UV mapping.
  */
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
-import { getSwatchTexture } from './swatch-texture.js';
-import {
-  buildTransferMaps,
-  validateTransferRgbMap,
-  bandNameFromU,
-} from './texture-transfer.js';
-import {
-  getMaterialClass,
-  getMaterialBlendProfile,
-  blendMaterialResponse,
-} from './material-blend.js';
 import {
   mkdirSync,
   readdirSync,
@@ -55,7 +44,11 @@ const LIGHT_BODY_SAT_MAX = 0.42;
 const LIGHT_BODY_WARM_B_MIN = 6;
 const LIGHT_BODY_WARM_A_MIN = -2;
 const LIGHT_BODY_SHADOW_MIN_PIXELS = 80;
-/** Sofa L percentiles used to place shadow → mid → highlight texture samples. */
+const L_BLEND_MASTER = 0.82;
+const L_BLEND_SWATCH = 0.18;
+const LIGHT_L_BLEND_MASTER = 0.72;
+const LIGHT_L_BLEND_SWATCH = 0.28;
+/** Sofa L percentiles for shadow → mid → highlight color mapping. */
 const SOFA_L_MAP_LO = 0.08;
 const SOFA_L_MAP_HI = 0.92;
 const SOFA_L_MAP_MIN_SPAN = 4;
@@ -155,12 +148,18 @@ function percentileOfSorted(sorted, p) {
   return sorted[idx];
 }
 
+export function isBaliSilkSwatch(swatchStem) {
+  return String(swatchStem).toLowerCase().includes('bali-silk');
+}
+
 export function isNamedLightLeather(swatchStem) {
+  if (isBaliSilkSwatch(swatchStem)) return true;
   const s = swatchStem.toLowerCase();
   return LIGHT_LEATHER_KEYWORDS.some((k) => s.includes(k));
 }
 
 export function isLightBodySampling(swatchStem) {
+  if (isBaliSilkSwatch(swatchStem)) return true;
   const s = swatchStem.toLowerCase();
   return LIGHT_BODY_SAMPLING_KEYWORDS.some((k) => s.includes(k));
 }
@@ -349,6 +348,7 @@ export async function getSwatchPalette(swatchPath) {
     shadow: tones.shadow,
     midtone: tones.midtone,
     highlight: tones.highlight,
+    isBaliSilk: isBaliSilkSwatch(swatchStem),
     isNamedLight: isNamedLightLeather(swatchStem),
     isLightBodySampling: useLightBody,
     extractionMethod: tones.extractionMethod,
@@ -360,22 +360,20 @@ export async function getSwatchPalette(swatchPath) {
 
 /** @deprecated Use getSwatchPalette; returns midtone fields for legacy callers. */
 export async function getSwatchMedianLab(swatchPath) {
-  const texture = await getSwatchTexture(swatchPath);
-  const m = texture.patches.midtone.stats;
-  const lab = { L: m.meanL, a: m.meanA, b: m.meanB };
+  const palette = await getSwatchPalette(swatchPath);
+  const m = palette.midtone;
   return {
-    meanL: lab.L,
-    meanA: lab.a,
-    meanB: lab.b,
+    meanL: m.L,
+    meanA: m.a,
+    meanB: m.b,
     swatchLumRgb: pixelBrightness(m.rgb[0], m.rgb[1], m.rgb[2]),
-    isNamedLight: texture.isNamedLight,
+    isNamedLight: palette.isNamedLight,
     overallRGB: m.rgb,
-    sourceFile: texture.sourceFile,
-    texture,
+    pixelCount: palette.pixelCount,
+    sourceFile: palette.sourceFile,
+    palette,
   };
 }
-
-export { getSwatchTexture } from './swatch-texture.js';
 
 /** @deprecated alias */
 export async function getSwatchLabStats(swatchPath) {
@@ -465,21 +463,7 @@ export async function loadUpholsteryMask(maskPath, width, height) {
   return mask;
 }
 
-/** Masked mean L on upholstery (neutral master). */
-export function computeMaskedMeanL(masterImage, mask) {
-  const { data, width, height, channels } = masterImage;
-  let sum = 0;
-  let n = 0;
-  for (let j = 0; j < width * height; j++) {
-    if (mask[j] < MASK_APPLY_THRESH) continue;
-    const p = j * channels;
-    sum += rgbToLab(data[p], data[p + 1], data[p + 2]).L;
-    n++;
-  }
-  return n ? sum / n : 50;
-}
-
-/** Masked sofa L percentiles for texture placement. */
+/** Masked sofa L percentiles for palette color placement. */
 export function computeSofaLuminanceMapRange(masterImage, mask) {
   const { data, width, height, channels } = masterImage;
   const Ls = [];
@@ -494,23 +478,22 @@ export function computeSofaLuminanceMapRange(masterImage, mask) {
   return { lo, hi, span: Math.max(hi - lo, SOFA_L_MAP_MIN_SPAN) };
 }
 
+/** Sofa L + mild swatch L; swatch a/b only (no swatch texture pixels). */
+export function computeFinalLabL(masterL, swatchL, isVeryLightLeather) {
+  if (isVeryLightLeather) {
+    return masterL * LIGHT_L_BLEND_MASTER + swatchL * LIGHT_L_BLEND_SWATCH;
+  }
+  return masterL * L_BLEND_MASTER + swatchL * L_BLEND_SWATCH;
+}
+
 /**
- * Texture transfer + material-class blend (light / dark-cool / standard).
- * @param {object} [options] transferMaps, skipTransferValidation
+ * Color transfer: preserve sofa luminance/texture from master; apply swatch palette chroma.
  */
-export function recolorSofa(masterImage, mask, texture, options = {}) {
+export function recolorSofa(masterImage, mask, palette) {
   const { data, width, height, channels } = masterImage;
   const out = Buffer.from(data);
-  const transferMaps =
-    options.transferMaps || buildTransferMaps(masterImage, mask, texture);
-  if (!options.skipTransferValidation) {
-    validateTransferRgbMap(transferMaps, mask);
-  }
-
   const { lo, span } = computeSofaLuminanceMapRange(masterImage, mask);
-  const masterMeanL = computeMaskedMeanL(masterImage, mask);
-  const profile = getMaterialBlendProfile(texture);
-  const { rgbMap } = transferMaps;
+  const isLight = palette.isNamedLight;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
@@ -518,25 +501,11 @@ export function recolorSofa(masterImage, mask, texture, options = {}) {
     const p = j * channels;
     const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
     const u = clamp((lab.L - lo) / span, 0, 1);
-    const band = bandNameFromU(u);
-    const patchMeanL = texture.patches[band].stats.meanL;
-
-    const o = j * 3;
-    const texLab = rgbToLab(rgbMap[o], rgbMap[o + 1], rgbMap[o + 2]);
-
-    const blended = blendMaterialResponse(
-      lab.L,
-      lab.a,
-      lab.b,
-      texLab,
-      patchMeanL,
-      u,
-      profile,
-      masterMeanL,
-    );
-    const a = clamp(blended.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const b = clamp(blended.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const { r, g, b: bOut } = labToRgb(blended.L, a, b);
+    const tone = interpolateSwatchPalette(palette, u);
+    const finalL = computeFinalLabL(lab.L, tone.L, isLight);
+    const a = clamp(tone.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const b = clamp(tone.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const { r, g, b: bOut } = labToRgb(finalL, a, b);
 
     out[p] = r;
     out[p + 1] = g;
@@ -552,30 +521,29 @@ export async function processSwatch(swatchPath, masterImage, mask) {
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
 
   const swatchName = basename(resolved, extname(resolved));
-  const texture = await getSwatchTexture(resolved);
+  const palette = await getSwatchPalette(resolved);
 
-  const fmtPatch = (name) => ({
-    coverage: texture.patches[name].coverage,
-    medianRgb: texture.patches[name].stats.rgb,
+  const fmtTone = (t) => ({
+    rgb: t.rgb,
+    lab: [Math.round(t.L * 10) / 10, Math.round(t.a * 10) / 10, Math.round(t.b * 10) / 10],
   });
 
   console.log({
     swatchName,
-    source: `input/swatches/${texture.sourceFile}`,
-    method: texture.extractionMethod,
-    patchSize: texture.patches.shadow.width,
-    shadow: fmtPatch('shadow'),
-    midtone: fmtPatch('midtone'),
-    highlight: fmtPatch('highlight'),
-    materialClass: getMaterialClass(texture),
-    materialBlend: getMaterialBlendProfile(texture),
+    source: `input/swatches/${palette.sourceFile}`,
+    extraction: palette.extractionMethod,
+    shadow: fmtTone(palette.shadow),
+    midtone: fmtTone(palette.midtone),
+    highlight: fmtTone(palette.highlight),
+    lightLeather: palette.isNamedLight,
+    lBlend: palette.isNamedLight ? '72/28' : '82/18',
   });
 
-  const outData = recolorSofa(masterImage, mask, texture);
+  const outData = recolorSofa(masterImage, mask, palette);
   const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
   const bytes = await saveImage(outData, outPath, masterImage.width, masterImage.height, masterImage.channels);
   console.log(`  wrote ${swatchName}.png (${Math.round(bytes / 1024)} KB)`);
-  return { outPath, texture };
+  return { outPath, palette };
 }
 
 export function zipOutputs(outputDir, zipPath) {
@@ -642,7 +610,7 @@ export async function main(argv = process.argv) {
   console.log(`  swatch source: ${SWATCH_DIR} (${swatchFiles.length} files)`);
   console.log(`  source photo: ${SOFA_PATH}`);
   console.log(`  mask: ${MASK_PATH}`);
-  console.log('  method: texture transfer + material-class luminance blend');
+  console.log('  method: sofa L/texture + swatch color palette (no texture transfer)');
 
   const sourceSofa = await loadImage(SOFA_PATH);
   console.log(`  ${sourceSofa.width}x${sourceSofa.height}`);

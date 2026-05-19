@@ -1,21 +1,36 @@
-<!-- Paste into a Volusion article / content area to show boards inside the full store template.
-     Link the article from nav instead of /v/vspfiles/my-boards.html if you want header/footer from template. -->
-<link rel="stylesheet" href="/v/vspfiles/boards/my-boards-page.css?v=20260519" />
+<!-- Volusion article embed: full store header/footer + designer boards UI -->
+<link rel="stylesheet" href="/v/vspfiles/boards/my-boards-page.css?v=20260520" />
 <div class="mc-boards-shell">
+  <section class="mc-boards-hero" aria-hidden="true">
+    <div class="mc-boards-hero__collage">
+      <img class="mc-boards-hero__tile mc-boards-hero__tile--1" src="/v/vspfiles/boards/mood/transitional.svg" alt="" />
+      <img class="mc-boards-hero__tile mc-boards-hero__tile--2" src="/v/vspfiles/boards/mood/coastal.svg" alt="" />
+      <img class="mc-boards-hero__tile mc-boards-hero__tile--3" src="/v/vspfiles/boards/mood/traditional.svg" alt="" />
+    </div>
+    <div class="mc-boards-hero__veil"></div>
+  </section>
   <main class="mc-boards" id="mc-boards-main">
     <header class="mc-boards__masthead">
-      <p class="mc-boards__eyebrow">Your saved ideas</p>
-      <h1 class="mc-boards__title">Inspiration boards</h1>
-      <p class="mc-boards__lede">
-        Pieces you saved with <span class="mc-boards__lede-strong">Save to McCabe&rsquo;s Board</span> while signed in on this site.
-      </p>
+      <p class="mc-boards__eyebrow">Interior design studio</p>
+      <h1 class="mc-boards__title">Your inspiration boards</h1>
+      <p class="mc-boards__lede">Curate by <em>style</em> and <em>furniture type</em>—like a designer&rsquo;s mood board.</p>
     </header>
+    <section id="mc-boards-style-library" class="mc-boards__library" aria-labelledby="mc-boards-style-heading">
+      <div class="mc-boards__library-head">
+        <h2 id="mc-boards-style-heading" class="mc-boards__library-title">Explore by style</h2>
+        <p class="mc-boards__library-sub">Muted palettes and room direction—not loud color, just considered contrast.</p>
+      </div>
+      <div id="mc-boards-styles" class="mc-boards__style-track" role="list"></div>
+      <h2 class="mc-boards__library-title mc-boards__library-title--spaced">Furniture type</h2>
+      <div id="mc-boards-types" class="mc-boards__type-row" role="list"></div>
+    </section>
     <section id="mc-boards-msg" class="mc-boards__msg" aria-live="polite"></section>
-    <nav id="mc-boards-tabs" class="mc-boards__tabs" aria-label="Boards" hidden></nav>
+    <nav id="mc-boards-tabs" class="mc-boards__tabs" aria-label="Your boards" hidden></nav>
     <div id="mc-boards-root" class="mc-boards__root"></div>
     <footer class="mc-boards__footer">
       <a class="mc-boards__btn mc-boards__btn--outline" href="/">Continue shopping</a>
     </footer>
   </main>
 </div>
-<script src="/v/vspfiles/boards/my-boards-page.js?v=20260519" defer></script>
+<script src="/v/vspfiles/boards/board-styles.js?v=20260520"></script>
+<script src="/v/vspfiles/boards/my-boards-page.js?v=20260520" defer></script>

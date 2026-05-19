@@ -4,14 +4,18 @@
   var API_LIST = '/v/vspfiles/boards/list.php';
   var API_DELETE = '/v/vspfiles/boards/delete.php';
 
+  var config = window.MC_BOARD_STYLES || { styles: [], furnitureTypes: [], boardStyleHints: {} };
+
   var msg = document.getElementById('mc-boards-msg');
   var root = document.getElementById('mc-boards-root');
   var tabs = document.getElementById('mc-boards-tabs');
+  var stylesEl = document.getElementById('mc-boards-styles');
+  var typesEl = document.getElementById('mc-boards-types');
   var signInLink = document.getElementById('mc-boards-signin');
   var yearEl = document.getElementById('mc-boards-year');
 
   var activeBoardFilter = '__all__';
-  var lastGrouped = null;
+  var activeStyleFilter = null;
 
   if (yearEl) {
     yearEl.textContent = String(new Date().getFullYear());
@@ -22,6 +26,157 @@
     msg.textContent = text || '';
     msg.classList.toggle('mc-boards__msg--err', kind === 'err');
     msg.classList.toggle('mc-boards__msg--ok', kind === 'ok');
+  }
+
+  function getStyleById(id) {
+    var list = config.styles || [];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === id) return list[i];
+    }
+    return list[0] || null;
+  }
+
+  function resolveStyleForBoard(boardName) {
+    var key = String(boardName || '').toLowerCase().trim();
+    var hints = config.boardStyleHints || {};
+    if (hints[key]) return getStyleById(hints[key]);
+    var parts = key.split(/\s+/);
+    for (var p = 0; p < parts.length; p++) {
+      if (hints[parts[p]]) return getStyleById(hints[parts[p]]);
+    }
+    for (var hintKey in hints) {
+      if (hints.hasOwnProperty(hintKey) && key.indexOf(hintKey) !== -1) {
+        return getStyleById(hints[hintKey]);
+      }
+    }
+    return getStyleById('transitional');
+  }
+
+  function inferFurnitureType(item) {
+    var blob = (
+      String(item.title || '') +
+      ' ' +
+      String(item.source || '') +
+      ' ' +
+      String(item.url || '')
+    ).toLowerCase();
+    if (/sectional|sofa|loveseat|chair|ottoman|seating/.test(blob)) return 'Seating';
+    if (/theater|theatre|media|entertainment|tv/.test(blob)) return 'Media rooms';
+    if (/dining|table|chair/.test(blob)) return 'Dining';
+    if (/bed|mattress|nightstand|dresser/.test(blob)) return 'Bedroom';
+    return 'Accents';
+  }
+
+  function paletteEl(colors, className) {
+    var wrap = document.createElement('div');
+    wrap.className = className || 'mc-boards__palette';
+    wrap.setAttribute('aria-label', 'Color palette');
+    for (var i = 0; i < colors.length; i++) {
+      var sw = document.createElement('span');
+      sw.className = 'mc-boards__swatch';
+      sw.style.backgroundColor = colors[i];
+      sw.title = colors[i];
+      wrap.appendChild(sw);
+    }
+    return wrap;
+  }
+
+  function renderStyleLibrary() {
+    if (!stylesEl) return;
+
+    stylesEl.innerHTML = '';
+    var styles = config.styles || [];
+
+    for (var s = 0; s < styles.length; s++) {
+      (function (style) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className =
+          'mc-boards__style-card' +
+          (activeStyleFilter === style.id ? ' is-active' : '');
+        btn.setAttribute('role', 'listitem');
+        btn.setAttribute('data-style-id', style.id);
+
+        var visual = document.createElement('div');
+        visual.className = 'mc-boards__style-visual';
+        var img = document.createElement('img');
+        img.src = style.moodImage;
+        img.alt = style.label + ' interior mood';
+        img.loading = 'lazy';
+        visual.appendChild(img);
+
+        var body = document.createElement('div');
+        body.className = 'mc-boards__style-body';
+
+        var label = document.createElement('p');
+        label.className = 'mc-boards__style-label';
+        label.textContent = style.label;
+        body.appendChild(label);
+
+        var tag = document.createElement('p');
+        tag.className = 'mc-boards__style-tagline';
+        tag.textContent = style.tagline;
+        body.appendChild(tag);
+
+        body.appendChild(paletteEl(style.palette));
+
+        btn.appendChild(visual);
+        btn.appendChild(body);
+
+        btn.addEventListener('click', function () {
+          if (activeStyleFilter === style.id) {
+            activeStyleFilter = null;
+          } else {
+            activeStyleFilter = style.id;
+            var matchBoard = findBoardForStyle(style.id);
+            if (matchBoard) {
+              activeBoardFilter = matchBoard;
+            }
+          }
+          renderStyleLibrary();
+          renderBoardTabsFromDom();
+          applyBoardFilter();
+          if (activeStyleFilter) {
+            var target = document.querySelector(
+              '.mc-boards__group[data-style-id="' + activeStyleFilter + '"]'
+            );
+            if (target) {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        });
+
+        stylesEl.appendChild(btn);
+      })(styles[s]);
+    }
+
+    if (typesEl) {
+      typesEl.innerHTML = '';
+      var types = config.furnitureTypes || [];
+      for (var t = 0; t < types.length; t++) {
+        var chip = document.createElement('div');
+        chip.className = 'mc-boards__type-chip';
+        chip.setAttribute('role', 'listitem');
+        chip.innerHTML =
+          '<strong>Type</strong><span>' +
+          types[t].label +
+          '</span><small>' +
+          types[t].desc +
+          '</small>';
+        typesEl.appendChild(chip);
+      }
+    }
+  }
+
+  function findBoardForStyle(styleId) {
+    if (!root) return null;
+    var sections = root.querySelectorAll('.mc-boards__group');
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].getAttribute('data-style-id') === styleId) {
+        return sections[i].getAttribute('data-board-name');
+      }
+    }
+    return null;
   }
 
   function groupByBoard(items) {
@@ -59,20 +214,29 @@
   function renderTabs(boardNames, grouped) {
     if (!tabs) return;
     tabs.innerHTML = '';
-    if (!boardNames.length || boardNames.length < 2) {
+    var prevLabel = tabs.previousElementSibling;
+    if (prevLabel && prevLabel.classList.contains('mc-boards__section-label')) {
+      prevLabel.remove();
+    }
+    if (!boardNames.length) {
       tabs.hidden = true;
       return;
     }
 
-    tabs.hidden = false;
+    tabs.hidden = boardNames.length < 2;
 
-    function addTab(label, value, count) {
+    var label = document.createElement('p');
+    label.className = 'mc-boards__section-label';
+    label.textContent = 'Your saved boards';
+    tabs.parentNode.insertBefore(label, tabs);
+
+    function addTab(btnLabel, value, count) {
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className =
         'mc-boards__tab' + (activeBoardFilter === value ? ' is-active' : '');
       btn.setAttribute('data-board', value);
-      btn.textContent = label;
+      btn.textContent = btnLabel;
       if (typeof count === 'number') {
         var span = document.createElement('span');
         span.className = 'mc-boards__tab-count';
@@ -81,22 +245,44 @@
       }
       btn.addEventListener('click', function () {
         activeBoardFilter = value;
+        activeStyleFilter = null;
+        renderStyleLibrary();
         renderTabs(boardNames, grouped);
         applyBoardFilter();
       });
       tabs.appendChild(btn);
     }
 
-    var total = 0;
-    for (var t = 0; t < boardNames.length; t++) {
-      total += grouped[boardNames[t]].length;
+    if (boardNames.length >= 2) {
+      var total = 0;
+      for (var x = 0; x < boardNames.length; x++) {
+        total += grouped[boardNames[x]].length;
+      }
+      addTab('All boards', '__all__', total);
     }
-    addTab('All boards', '__all__', total);
 
     for (var b = 0; b < boardNames.length; b++) {
       var name = boardNames[b];
       addTab(name, name, grouped[name].length);
     }
+  }
+
+  function renderBoardTabsFromDom() {
+    var sections = root ? root.querySelectorAll('.mc-boards__group') : [];
+    var names = [];
+    for (var i = 0; i < sections.length; i++) {
+      names.push(sections[i].getAttribute('data-board-name'));
+    }
+    if (!names.length) return;
+    var grouped = {};
+    for (var n = 0; n < names.length; n++) {
+      grouped[names[n]] = [];
+    }
+    var oldLabel = tabs && tabs.previousElementSibling;
+    if (oldLabel && oldLabel.classList.contains('mc-boards__section-label')) {
+      oldLabel.remove();
+    }
+    renderTabs(names, grouped);
   }
 
   function applyBoardFilter() {
@@ -105,15 +291,27 @@
     for (var i = 0; i < sections.length; i++) {
       var sec = sections[i];
       var board = sec.getAttribute('data-board-name') || '';
-      var show =
+      var styleId = sec.getAttribute('data-style-id') || '';
+      var showBoard =
         activeBoardFilter === '__all__' || activeBoardFilter === board;
-      sec.classList.toggle('is-filtered-out', !show);
+      var showStyle = !activeStyleFilter || activeStyleFilter === styleId;
+      sec.classList.toggle('is-filtered-out', !(showBoard && showStyle));
     }
   }
 
-  function emptyState(title, text, actionsHtml) {
+  function emptyStateRich(title, text, actionsHtml) {
+    var moods = (config.styles || []).slice(0, 3);
+    var imgs = moods
+      .map(function (m) {
+        return '<img src="' + m.moodImage + '" alt="" />';
+      })
+      .join('');
     return (
-      '<div class="mc-boards__empty">' +
+      '<div class="mc-boards__empty mc-boards__empty--rich">' +
+      '<div class="mc-boards__empty-visual">' +
+      imgs +
+      '</div>' +
+      '<div class="mc-boards__empty-inner">' +
       '<h2 class="mc-boards__empty-title">' +
       title +
       '</h2>' +
@@ -123,37 +321,45 @@
       (actionsHtml
         ? '<div class="mc-boards__empty-actions">' + actionsHtml + '</div>'
         : '') +
-      '</div>'
+      '</div></div>'
     );
   }
 
-  function cardEl(item) {
+  function cardEl(item, style) {
     var card = document.createElement('article');
     card.className = 'mc-boards__card';
+    if (style && style.palette && style.palette[1]) {
+      card.style.setProperty('--mc-card-accent', style.palette[1]);
+    }
 
     var thumb = document.createElement('div');
     thumb.className = 'mc-boards__thumb';
 
     if (item.image) {
       var img = document.createElement('img');
-      img.alt = '';
+      img.alt = item.title || 'Saved product';
       img.loading = 'lazy';
       img.decoding = 'async';
       img.src = item.image;
       img.onerror = function () {
         thumb.classList.add('mc-boards__thumb--empty');
-        thumb.textContent = 'No image';
+        thumb.textContent = 'Image unavailable';
         img.remove();
       };
       thumb.appendChild(img);
     } else {
       thumb.classList.add('mc-boards__thumb--empty');
-      thumb.textContent = 'No image';
+      thumb.textContent = 'Add image via extension';
     }
     card.appendChild(thumb);
 
     var body = document.createElement('div');
     body.className = 'mc-boards__card-body';
+
+    var typeLine = document.createElement('p');
+    typeLine.className = 'mc-boards__card-type';
+    typeLine.textContent = inferFurnitureType(item);
+    body.appendChild(typeLine);
 
     var title = document.createElement('p');
     title.className = 'mc-boards__card-title';
@@ -186,7 +392,7 @@
     if (saved) {
       var savedEl = document.createElement('p');
       savedEl.className = 'mc-boards__saved';
-      savedEl.textContent = 'Saved ' + saved;
+      savedEl.textContent = 'Pinned ' + saved;
       body.appendChild(savedEl);
     }
 
@@ -238,29 +444,99 @@
     return card;
   }
 
+  function buildGroupSection(name, list) {
+    var style = resolveStyleForBoard(name);
+    var section = document.createElement('section');
+    section.className = 'mc-boards__group';
+    section.setAttribute('data-board-name', name);
+    section.setAttribute('data-style-id', style ? style.id : 'transitional');
+    section.id = 'mc-board-' + slugId(name);
+
+    var banner = document.createElement('div');
+    banner.className = 'mc-boards__mood-banner';
+
+    var moodImgWrap = document.createElement('div');
+    moodImgWrap.className = 'mc-boards__mood-image';
+    var moodImg = document.createElement('img');
+    moodImg.src = style ? style.moodImage : '';
+    moodImg.alt = (style ? style.label : 'Board') + ' mood';
+    moodImg.loading = 'lazy';
+    moodImgWrap.appendChild(moodImg);
+
+    var panel = document.createElement('div');
+    panel.className = 'mc-boards__mood-panel';
+
+    var styleLabel = document.createElement('p');
+    styleLabel.className = 'mc-boards__group-style';
+    styleLabel.textContent = style ? style.label + ' style' : 'Curated board';
+    panel.appendChild(styleLabel);
+
+    var h2 = document.createElement('h2');
+    h2.className = 'mc-boards__group-title';
+    h2.textContent = name;
+    panel.appendChild(h2);
+
+    var metaHead = document.createElement('p');
+    metaHead.className = 'mc-boards__group-meta';
+    metaHead.textContent =
+      list.length +
+      ' pinned piece' +
+      (list.length === 1 ? '' : 's') +
+      (style ? ' · ' + style.tagline : '');
+    panel.appendChild(metaHead);
+
+    if (style && style.palette) {
+      panel.appendChild(paletteEl(style.palette, 'mc-boards__group-palette'));
+    }
+
+    banner.appendChild(moodImgWrap);
+    banner.appendChild(panel);
+    section.appendChild(banner);
+
+    var grid = document.createElement('div');
+    grid.className = 'mc-boards__grid';
+
+    for (var k = 0; k < list.length; k++) {
+      grid.appendChild(cardEl(list[k], style));
+    }
+    section.appendChild(grid);
+
+    return section;
+  }
+
   async function load() {
+    renderStyleLibrary();
+
     if (!root) return;
     setMsg('Loading your boards…');
     root.innerHTML = '';
+
+    var oldLabel = tabs && tabs.previousElementSibling;
+    if (oldLabel && oldLabel.classList.contains('mc-boards__section-label')) {
+      oldLabel.remove();
+    }
     if (tabs) {
       tabs.hidden = true;
       tabs.innerHTML = '';
     }
 
     try {
-      var res = await fetch(API_LIST, { credentials: 'include', cache: 'no-store' });
+      var res = await fetch(API_LIST, {
+        credentials: 'include',
+        cache: 'no-store'
+      });
       var data = await res.json().catch(function () {
         return {};
       });
 
       if (res.status === 401 || (data && data.error === 'sign_in_required')) {
         setSignedInUi(false);
-        setMsg('Sign in to view the items saved to your account.', 'err');
-        root.innerHTML = emptyState(
-          'Sign in to see your boards',
-          'Your inspiration boards are tied to your McCabe&rsquo;s account. Sign in, then save items with the Chrome extension while shopping.',
+        setMsg('');
+        root.innerHTML = emptyStateRich(
+          'Sign in to open your studio',
+          'Your boards live on your McCabe&rsquo;s account. Sign in, pick a style direction above, and save pieces while you shop.',
           '<a class="mc-boards__btn" href="/login.asp">Sign in</a>' +
-            '<a class="mc-boards__btn mc-boards__btn--danger" href="/">Continue shopping</a>'
+            '<a class="mc-boards__btn mc-boards__btn--ghost" href="/">Browse collections</a>'
         );
         return;
       }
@@ -274,16 +550,15 @@
 
       if (data.items.length === 0) {
         setMsg('');
-        root.innerHTML = emptyState(
-          'No saved items yet',
-          'Install the &ldquo;Save to McCabe&rsquo;s Board&rdquo; Chrome extension, sign in on this site, and save products while you browse.',
-          '<a class="mc-boards__btn" href="/">Start shopping</a>'
+        root.innerHTML = emptyStateRich(
+          'Your mood board is ready',
+          'Name a board after a style—&ldquo;Coastal Living&rdquo; or &ldquo;Modern Media&rdquo;—then save sofas, sectionals, and accents with the Chrome extension.',
+          '<a class="mc-boards__btn" href="/">Explore furniture</a>'
         );
         return;
       }
 
       var grouped = groupByBoard(data.items);
-      lastGrouped = grouped;
       var boardNames = Object.keys(grouped).sort(function (a, b) {
         return a.localeCompare(b);
       });
@@ -297,50 +572,18 @@
 
       setMsg(
         data.items.length +
-          ' saved item' +
-          (data.items.length === 1 ? '' : 's') +
-          ' across ' +
+          ' pieces across ' +
           boardNames.length +
           ' board' +
           (boardNames.length === 1 ? '' : 's') +
-          '.',
+          ' — organized by style and type.',
         'ok'
       );
 
       renderTabs(boardNames, grouped);
 
       for (var b = 0; b < boardNames.length; b++) {
-        var name = boardNames[b];
-        var list = grouped[name];
-        var section = document.createElement('section');
-        section.className = 'mc-boards__group';
-        section.setAttribute('data-board-name', name);
-        section.id = 'mc-board-' + slugId(name);
-
-        var head = document.createElement('div');
-        head.className = 'mc-boards__group-head';
-
-        var h2 = document.createElement('h2');
-        h2.className = 'mc-boards__group-title';
-        h2.textContent = name;
-        head.appendChild(h2);
-
-        var metaHead = document.createElement('p');
-        metaHead.className = 'mc-boards__group-meta';
-        metaHead.textContent =
-          list.length + ' item' + (list.length === 1 ? '' : 's');
-        head.appendChild(metaHead);
-
-        section.appendChild(head);
-
-        var grid = document.createElement('div');
-        grid.className = 'mc-boards__grid';
-
-        for (var k = 0; k < list.length; k++) {
-          grid.appendChild(cardEl(list[k]));
-        }
-        section.appendChild(grid);
-        root.appendChild(section);
+        root.appendChild(buildGroupSection(boardNames[b], grouped[boardNames[b]]));
       }
 
       applyBoardFilter();
@@ -350,10 +593,12 @@
   }
 
   function slugId(name) {
-    return String(name)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '') || 'board';
+    return (
+      String(name)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') || 'board'
+    );
   }
 
   load();
