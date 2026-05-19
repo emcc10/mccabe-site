@@ -232,6 +232,10 @@ html.mc-my-boards-page body {
   max-width: 48ch;
 }
 
+.mc-boards__library-sub--below {
+  margin: -8px 0 18px;
+}
+
 .mc-boards__style-track {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
