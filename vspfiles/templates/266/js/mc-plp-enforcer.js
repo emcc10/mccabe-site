@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260606
+ * MC_PLP_ENFORCER_20260609
  *
  * DOM (category listing):
  *   table.colors_backgroundlight + SearchResults_SubCat_Angle  ← black bar (legacy subcat chrome)
@@ -10,7 +10,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260606";
+  var VERSION = "20260609";
   var PLP_MAT = "#ffffff";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
@@ -22,7 +22,7 @@
       var l = document.createElement("link");
       l.id = "mc-plp-body-last-css";
       l.rel = "stylesheet";
-      l.href = "/v/vspfiles/css/mc-plp-body-last.css?v=20260606";
+      l.href = "/v/vspfiles/css/mc-plp-body-last.css?v=20260609";
       (document.body || document.documentElement).appendChild(l);
     }
     if (document.body) attach();
@@ -38,6 +38,13 @@
   var PAD_M = 12;
   var REF_STORAGE_KEY = "MC_PLP_JUNO_APT_REF";
   var JUNO_APT_PHOTO = "77494-91-1.jpg";
+  var JUNO_APT_BOUNDS = {
+    visibleW: 757,
+    visibleH: 335,
+    maxY: 357,
+    nh: 410,
+    nw: 800,
+  };
   var BOUNDS_JSON = "/v/vspfiles/js/mc-plp-sofa-bounds.json";
   var SCALE_MIN = 0.45;
   var SCALE_MAX = 2.2;
@@ -387,6 +394,8 @@
           if (cached && cached.visibleW > 0) {
             ref = cached;
             refBoxW = cached.boxW || refBoxW;
+          } else {
+            ref = JUNO_APT_BOUNDS;
           }
         }
 
@@ -523,6 +532,12 @@
     removeLegacyCategoryBars();
     applyThumbs();
     hideHero();
+    if (!global.__MC_PLP_NORM_RETRIES__) {
+      global.__MC_PLP_NORM_RETRIES__ = 1;
+      [200, 800, 2500].forEach(function (ms) {
+        global.setTimeout(applyThumbs, ms);
+      });
+    }
   }
 
   if (isCategoryPlp()) {

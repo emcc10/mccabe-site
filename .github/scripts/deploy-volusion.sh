@@ -186,9 +186,9 @@ verify_url() {
 }
 
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "C_CSS_DEPLOY_VERIFY_20260518e"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260606" "MC_PLP_ENFORCER_20260606"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260606" "MC_PLP_ENFORCER_20260606"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260606"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260609" "MC_PLP_ENFORCER_20260609"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260609" "MC_PLP_ENFORCER_20260609"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260609"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-sofa-bounds.json?v=$(date +%s)" "77494-91-1.jpg"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/template.min.js" "MC_PLP_ENFORCER_LOADING__"
 
@@ -204,7 +204,7 @@ fi
 echo ""
 echo "Deploy finished (~2–4 min). Hard-refresh category 177 (Ctrl+Shift+R)."
 echo "SKIP_CAP on template.min / mtl-sectional-renderer is normal (128 KiB Volusion limit)."
-echo "PLP fix: single enforcer v20260606 via design-toolkit.min.js + template body script."
+echo "PLP fix: single enforcer v20260609 via design-toolkit.min.js + template body script."
 echo "If still broken, Cloudflare Purge by URL:"
 echo "  /v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"
 echo "  /v/vspfiles/templates/266/js/min/design-toolkit.min.js"
