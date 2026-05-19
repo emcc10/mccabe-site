@@ -897,11 +897,53 @@
     return section;
   }
 
+  async function fetchBoardsData() {
+    var sessionRes = await fetch(API_SESSION, {
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    var sessionData = await sessionRes.json().catch(function () {
+      return {};
+    });
+    if (sessionData && sessionData.ok && sessionData.signedIn) {
+      return {
+        signedIn: true,
+        items: Array.isArray(sessionData.items) ? sessionData.items : []
+      };
+    }
+    if (domSignedInHint()) {
+      var listRes = await fetch(API_LIST, { credentials: 'include', cache: 'no-store' });
+      var listData = await listRes.json().catch(function () {
+        return {};
+      });
+      if (listRes.ok && listData && listData.ok) {
+        return {
+          signedIn: true,
+          items: Array.isArray(listData.items) ? listData.items : []
+        };
+      }
+    }
+    var res = await fetch(API_LIST, { credentials: 'include', cache: 'no-store' });
+    var data = await res.json().catch(function () {
+      return {};
+    });
+    if (res.status === 401 || (data && data.error === 'sign_in_required')) {
+      return { signedIn: false, items: [] };
+    }
+    if (data && data.ok) {
+      return {
+        signedIn: true,
+        items: Array.isArray(data.items) ? data.items : []
+      };
+    }
+    return { signedIn: domSignedInHint(), items: [], error: true };
+  }
+
   async function load() {
     renderStyleLibrary();
 
     if (!root) return;
-    setMsg('Loading your boards…');
+    setMsg('Loading your saved boards…');
     root.innerHTML = '';
 
     var oldLabel = tabs && tabs.previousElementSibling;
@@ -914,44 +956,45 @@
     }
 
     try {
-      var res = await fetch(API_LIST, {
-        credentials: 'include',
-        cache: 'no-store'
-      });
-      var data = await res.json().catch(function () {
-        return {};
-      });
+      var boardData = await fetchBoardsData();
 
-      if (res.status === 401 || (data && data.error === 'sign_in_required')) {
+      if (!boardData.signedIn) {
         setSignedInUi(false);
-        setMsg('');
-        root.innerHTML = emptyStateRich(
-          'Sign in to open your studio',
-          'Your boards live on your McCabe&rsquo;s account. Sign in, pick a style direction above, and save pieces while you shop.',
-          '<a class="mc-boards__btn" href="/login.asp">Sign in</a>' +
-            '<a class="mc-boards__btn mc-boards__btn--ghost" href="/">Browse collections</a>'
+        setAccountBanner(
+          false,
+          'If you are already signed in, try opening this page from the same browser tab where you logged in at mccabes.com.'
         );
+        setMsg('');
+        root.innerHTML =
+          '<div class="mc-boards__empty">' +
+          '<h2 class="mc-boards__empty-title">Save pieces while you shop</h2>' +
+          '<p class="mc-boards__empty-text">Use the Save to McCabe&rsquo;s Board extension after signing in. Your pins will show up here.</p>' +
+          '</div>';
         return;
       }
 
       setSignedInUi(true);
+      setAccountBanner(true);
 
-      if (!data.ok || !Array.isArray(data.items)) {
-        setMsg('Could not load your boards. Please try again in a moment.', 'err');
+      if (boardData.error) {
+        setMsg('Could not reach the boards server. Showing studio tools only.', 'err');
         return;
       }
 
-      if (data.items.length === 0) {
-        setMsg('');
-        root.innerHTML = emptyStateRich(
-          'Your mood board is ready',
-          'Name a board after a style—&ldquo;Coastal Living&rdquo; or &ldquo;Modern Media&rdquo;—then save sofas, sectionals, and accents with the Chrome extension.',
-          '<a class="mc-boards__btn" href="/">Explore furniture</a>'
-        );
+      var items = boardData.items;
+
+      if (items.length === 0) {
+        setMsg('Signed in — no saved items yet. Use the Chrome extension on any product page.');
+        root.innerHTML =
+          '<div class="mc-boards__empty">' +
+          '<h2 class="mc-boards__empty-title">Your mood board is ready</h2>' +
+          '<p class="mc-boards__empty-text">Name a board after a style, then save while browsing.</p>' +
+          '<div class="mc-boards__empty-actions"><a class="mc-boards__btn" href="/">Explore furniture</a></div>' +
+          '</div>';
         return;
       }
 
-      var grouped = groupByBoard(data.items);
+      var grouped = groupByBoard(items);
       var boardNames = Object.keys(grouped).sort(function (a, b) {
         return a.localeCompare(b);
       });
@@ -964,7 +1007,7 @@
       }
 
       setMsg(
-        data.items.length +
+        items.length +
           ' pieces across ' +
           boardNames.length +
           ' board' +

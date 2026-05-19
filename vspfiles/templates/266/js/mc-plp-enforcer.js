@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260614
+ * MC_PLP_ENFORCER_20260615
  *
  * Thumbnails: .mc-plp-image-box + visible-sofa width normalization (no crop, no scale transform).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260614";
+  var VERSION = "20260615";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -46,7 +46,29 @@
   function isCategoryPlp() {
     try {
       var p = String(global.location.pathname || "").toLowerCase();
-      return (/-s\//.test(p) || /category-s\//.test(p)) && /\.html?/i.test(p);
+      var body = global.document.body;
+      if (body && body.classList.contains("productdetails")) return false;
+      if (/(?:-p\/|product-p\/)/.test(p)) return false;
+      if (/(?:shoppingcart|one-page-checkout|checkout|orderconfirm)/i.test(p)) return false;
+      if (p === "/" || p === "/default.asp" || p === "/default.aspx") return false;
+      if (/\/index\.html?$/i.test(p)) return false;
+      if ((/-s\//.test(p) || /category-s\//.test(p)) && /\.html?/i.test(p)) return true;
+      if (/productslist\.asp|searchresults\.asp/.test(p)) return true;
+      if (
+        global.document.documentElement &&
+        global.document.documentElement.classList.contains("vol-list")
+      ) {
+        return true;
+      }
+      var root = global.document.getElementById("content_area");
+      if (
+        root &&
+        root.querySelector(
+          ".v-product-grid a.v-product__img, .v-product-grid .v-product__img, ul.v-product-grid li.v-product"
+        )
+      ) {
+        return true;
+      }
     } catch (e) {}
     return false;
   }

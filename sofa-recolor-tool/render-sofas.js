@@ -4,6 +4,7 @@
  */
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
+import { prepareOriginalLeatherDetail, applyLeatherDetailRestore } from './leather-detail.js';
 import {
   mkdirSync,
   readdirSync,
@@ -496,11 +497,12 @@ export function computeFinalLabL(masterL, swatchL, isVeryLightLeather) {
 /**
  * Color transfer: preserve sofa luminance/texture from master; apply swatch palette chroma.
  */
-export function recolorSofa(masterImage, mask, palette) {
+export function recolorSofa(masterImage, mask, palette, sourceSofa) {
   const { data, width, height, channels } = masterImage;
   const out = Buffer.from(data);
   const { lo, span } = computeSofaLuminanceMapRange(masterImage, mask);
   const isLight = palette.isNamedLight;
+  const leatherDetail = prepareOriginalLeatherDetail(sourceSofa);
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
@@ -509,7 +511,8 @@ export function recolorSofa(masterImage, mask, palette) {
     const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
     const u = clamp((lab.L - lo) / span, 0, 1);
     const tone = interpolateSwatchPalette(palette, u);
-    const finalL = computeFinalLabL(lab.L, tone.L, isLight);
+    let finalL = computeFinalLabL(lab.L, tone.L, isLight);
+    finalL = applyLeatherDetailRestore(finalL, j, leatherDetail);
     const a = clamp(tone.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const b = clamp(tone.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const { r, g, b: bOut } = labToRgb(finalL, a, b);
@@ -523,7 +526,7 @@ export function recolorSofa(masterImage, mask, palette) {
   return out;
 }
 
-export async function processSwatch(swatchPath, masterImage, mask) {
+export async function processSwatch(swatchPath, masterImage, mask, sourceSofa) {
   const resolved = resolveOriginalSwatchPath(swatchPath);
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
 
@@ -546,7 +549,7 @@ export async function processSwatch(swatchPath, masterImage, mask) {
     lBlend: palette.isNamedLight ? '52/48 shadowCompress +10 (max 96)' : '52/48',
   });
 
-  const outData = recolorSofa(masterImage, mask, palette);
+  const outData = recolorSofa(masterImage, mask, palette, sourceSofa);
   const outPath = join(OUTPUT_DIR, `${swatchName}-fixed.png`);
   const bytes = await saveImage(outData, outPath, masterImage.width, masterImage.height, masterImage.channels);
   console.log(`  wrote ${swatchName}-fixed.png (${Math.round(bytes / 1024)} KB)`);
@@ -640,13 +643,13 @@ export async function main(argv = process.argv) {
       console.error(`Swatch not found: ${cli.swatchFile}`);
       process.exit(1);
     }
-    const { outPath } = await processSwatch(swPath, masterImage, mask);
+    const { outPath } = await processSwatch(swPath, masterImage, mask, sourceSofa);
     console.log(`\nDone: ${outPath}`);
     return;
   }
 
   for (const file of swatchFiles) {
-    await processSwatch(join(SWATCH_DIR, file), masterImage, mask);
+    await processSwatch(join(SWATCH_DIR, file), masterImage, mask, sourceSofa);
   }
 
   const onDisk = readdirSync(OUTPUT_DIR).filter(
