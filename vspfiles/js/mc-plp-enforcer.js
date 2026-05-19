@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260609
+ * MC_PLP_ENFORCER_20260610
  *
  * DOM (category listing):
  *   table.colors_backgroundlight + SearchResults_SubCat_Angle  ← black bar (legacy subcat chrome)
@@ -10,7 +10,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260609";
+  var VERSION = "20260610";
   var PLP_MAT = "#ffffff";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
@@ -22,7 +22,7 @@
       var l = document.createElement("link");
       l.id = "mc-plp-body-last-css";
       l.rel = "stylesheet";
-      l.href = "/v/vspfiles/css/mc-plp-body-last.css?v=20260609";
+      l.href = "/v/vspfiles/css/mc-plp-body-last.css?v=20260610";
       (document.body || document.documentElement).appendChild(l);
     }
     if (document.body) attach();
@@ -49,6 +49,9 @@
   var SCALE_MIN = 0.45;
   var SCALE_MAX = 2.2;
   var BOUNDS_SAMPLE = 320;
+
+  var NORMALIZED_PHOTO_W = 420;
+  var NORMALIZED_PHOTO_H = 260;
 
   var THUMB_SEL = "#content_area .v-product-grid a.v-product__img";
   var normalizeScheduled = false;
@@ -356,8 +359,40 @@
     );
   }
 
+  function isPreNormalizedPhoto(img) {
+    return (
+      img &&
+      img.naturalWidth === NORMALIZED_PHOTO_W &&
+      img.naturalHeight === NORMALIZED_PHOTO_H
+    );
+  }
+
+  function clearSofaTransform(img) {
+    if (!img) return;
+    img.style.removeProperty("transform");
+    img.removeAttribute("data-scale");
+    img.removeAttribute("data-mc-scale-done");
+  }
+
   function normalizeSofaSizes() {
     if (!isCategoryPlp()) return;
+    var wraps = Array.prototype.slice.call(document.querySelectorAll(THUMB_SEL));
+    if (!wraps.length) return;
+
+    var needsJsScale = false;
+    wraps.forEach(function (wrap) {
+      var img = wrap.querySelector(":scope > img") || wrap.querySelector("img");
+      if (!img) return;
+      if (isPreNormalizedPhoto(img)) {
+        clearSofaTransform(img);
+        return;
+      }
+      needsJsScale = true;
+    });
+    if (!needsJsScale) {
+      return;
+    }
+
     withBoundsMap(function (map) {
       var gen = ++normalizeGen;
       var mobile = global.innerWidth <= 991;
@@ -487,14 +522,21 @@
     img.style.setProperty("background", PLP_MAT, "important");
     img.style.setProperty("background-color", PLP_MAT, "important");
     img.style.setProperty("display", "block", "important");
-    img.style.setProperty("width", "100%", "important");
-    img.style.setProperty("max-width", "100%", "important");
-    img.style.setProperty("height", stage + "px", "important");
-    img.style.setProperty("max-height", stage + "px", "important");
-    img.style.setProperty("min-height", "0", "important");
-    img.style.setProperty("min-width", "0", "important");
     img.style.setProperty("object-fit", "contain", "important");
     img.style.setProperty("object-position", "center bottom", "important");
+    if (isPreNormalizedPhoto(img)) {
+      img.style.setProperty("width", "100%", "important");
+      img.style.setProperty("height", "auto", "important");
+      img.style.setProperty("max-height", "100%", "important");
+      clearSofaTransform(img);
+    } else {
+      img.style.setProperty("width", "100%", "important");
+      img.style.setProperty("max-width", "100%", "important");
+      img.style.setProperty("height", stage + "px", "important");
+      img.style.setProperty("max-height", stage + "px", "important");
+    }
+    img.style.setProperty("min-height", "0", "important");
+    img.style.setProperty("min-width", "0", "important");
     img.style.setProperty("margin", "0 auto", "important");
     img.style.setProperty("padding", "0", "important");
     img.style.setProperty("flex", "0 0 auto", "important");
@@ -505,8 +547,13 @@
 
   function applyThumbs() {
     if (!isCategoryPlp()) return;
-    document.querySelectorAll(THUMB_SEL).forEach(fixThumb);
-    scheduleNormalize();
+    var needsJsScale = false;
+    document.querySelectorAll(THUMB_SEL).forEach(function (wrap) {
+      fixThumb(wrap);
+      var img = wrap.querySelector(":scope > img") || wrap.querySelector("img");
+      if (img && !isPreNormalizedPhoto(img)) needsJsScale = true;
+    });
+    if (needsJsScale) scheduleNormalize();
   }
 
   function hideHero() {
