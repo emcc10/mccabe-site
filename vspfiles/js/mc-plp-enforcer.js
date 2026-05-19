@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260611
+ * MC_PLP_ENFORCER_20260612
  *
  * Thumbnails: .mc-plp-image-box + visible-sofa width normalization (no crop, no scale transform).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260611";
+  var VERSION = "20260612";
   var PLP_MAT = "#ffffff";
   if (global.__MC_PLP_ENFORCER_VER__ === VERSION) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
@@ -174,8 +174,16 @@
   }
 
   function isProductPhoto(img) {
-    var src = img.currentSrc || img.src || "";
-    return src.indexOf("/v/vspfiles/photos/") !== -1 || src.indexOf("/v/vspfiles/product/") !== -1;
+    var src = String(img.currentSrc || img.src || "").toLowerCase();
+    return /vspfiles\/photos\//.test(src) || /vspfiles\/product\//.test(src);
+  }
+
+  function thumbBox(img) {
+    if (!img || !img.closest) return img ? img.parentElement : null;
+    return (
+      img.closest("a.v-product__img, .v-product__img") ||
+      img.parentElement
+    );
   }
 
   function isBackgroundPixel(r, g, b, a) {
@@ -310,11 +318,14 @@
   function normalizePLPImages() {
     if (!isCategoryPlp()) return;
 
-    document.querySelectorAll("#content_area .v-product-grid img").forEach(function (img) {
+    var root = document.getElementById("content_area");
+    if (!root) return;
+
+    root.querySelectorAll("img").forEach(function (img) {
       if (!isProductPhoto(img)) return;
       if (img.closest("#v65-product-related")) return;
 
-      var parent = img.parentElement;
+      var parent = thumbBox(img);
       if (!parent) return;
 
       parent.classList.add("mc-plp-image-box");
@@ -363,15 +374,15 @@
     }
   }
 
+  document.addEventListener("DOMContentLoaded", run);
+  global.addEventListener("load", run);
+  global.addEventListener("resize", normalizePLPImages);
   if (isCategoryPlp()) {
     markCategory();
     run();
-    document.addEventListener("DOMContentLoaded", run);
-    global.addEventListener("load", run);
-    global.addEventListener("resize", normalizePLPImages);
   }
 
-  if (typeof MutationObserver !== "undefined" && isCategoryPlp()) {
+  if (typeof MutationObserver !== "undefined") {
     var scheduled = false;
     var mo = new MutationObserver(function (mutations) {
       var needsBar = false;
@@ -389,6 +400,7 @@
       scheduled = true;
       global.requestAnimationFrame(function () {
         scheduled = false;
+        if (!isCategoryPlp()) return;
         if (needsBar) removeLegacyCategoryBars();
         if (needsThumb) normalizePLPImages();
       });
