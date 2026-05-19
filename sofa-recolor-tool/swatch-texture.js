@@ -12,9 +12,24 @@ const SWATCH_DIR = join(__dirname, 'input', 'swatches');
 
 const BG_THRESH = 238;
 const TEXTURE_PATCH_SIZE = 384;
-export const TEXTURE_L_DETAIL = 0.14;
-
 const LIGHT_LEATHER_KEYWORDS = ['silk', 'eggshell', 'frost', 'parchment', 'vanilla', 'tusk', 'mist'];
+const DARK_COOL_LEATHER_KEYWORDS = [
+  'spider',
+  'atlantic',
+  'navy',
+  'charcoal',
+  'slate',
+  'midnight',
+  'noir',
+  'black',
+  'currant',
+  'cobalt',
+  'denim',
+  'graphite',
+  'pewter',
+  'storm',
+  'ink',
+];
 const LIGHT_BODY_SAMPLING_KEYWORDS = ['silk', 'eggshell', 'vanilla', 'parchment'];
 const LIGHT_BODY_L_EXCLUDE = 60;
 const LIGHT_BODY_L_SAMPLE = 70;
@@ -64,6 +79,11 @@ export function isNamedLightLeather(swatchStem) {
 export function isLightBodySampling(swatchStem) {
   const s = swatchStem.toLowerCase();
   return LIGHT_BODY_SAMPLING_KEYWORDS.some((k) => s.includes(k));
+}
+
+export function isDarkCoolLeather(swatchStem) {
+  const s = swatchStem.toLowerCase();
+  return DARK_COOL_LEATHER_KEYWORDS.some((k) => s.includes(k));
 }
 
 function resolveSwatchPath(swatchPath) {
@@ -399,6 +419,7 @@ export async function getSwatchTexture(swatchPath) {
   return {
     patches,
     isNamedLight: isNamedLightLeather(swatchStem),
+    isDarkCool: isDarkCoolLeather(swatchStem),
     isLightBodySampling: isLightBodySampling(swatchStem),
     extractionMethod: isLightBodySampling(swatchStem) ? 'light-body-texture' : 'tertile-texture',
     sourceFile: basename(resolved),
