@@ -67,13 +67,18 @@ const DEPTH_SHADOW_LOCK_STRENGTH = 0.92;
 const DEPTH_SPECULAR_LUM = 192;
 const DEPTH_SPECULAR_BLEND = 0.9;
 const DEPTH_S_CURVE = 0.11;
-const LIGHT_HERO_RGB_LIFT = 150;
-const LIGHT_HERO_L_LIFT = 65;
-const LIGHT_HERO_RGB_LIFT_STRONG = 175;
-const LIGHT_HERO_L_LIFT_STRONG = 72;
-const LIGHT_L_BLEND_SOFT = 0.28;
-const LIGHT_L_BLEND_STRONG = 0.38;
-const LIGHT_SHADOW_LOCK_MULT = 0.65;
+const LIGHT_SWATCH_RGB = 145;
+const LIGHT_HERO_L = 65;
+const LIGHT_SWATCH_RGB_STRONG = 170;
+const LIGHT_HERO_L_STRONG = 72;
+const LIGHT_L_BLEND = 0.55;
+const LIGHT_L_BLEND_STRONG = 0.7;
+/** Shadow lock reduced 60% on light leathers; cognac shadow pull disabled separately. */
+const LIGHT_SHADOW_LOCK_MULT = 0.4;
+const LIGHT_NEUTRAL_A_MIN = -3;
+const LIGHT_NEUTRAL_A_MAX = 4;
+const LIGHT_NEUTRAL_B_MIN = 0;
+const LIGHT_NEUTRAL_B_MAX = 10;
 
 const SWATCH_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
@@ -505,12 +510,11 @@ function finishHeroStats(meanA, meanB, meanL, spreadSamples, avgSwatchChroma, sw
   }
 
   const heroRgbAvg = (repRgb.r + repRgb.g + repRgb.b) / 3;
-  const liftRgbAvg =
-    isNeutral && swatchRgbAvg > heroRgbAvg ? swatchRgbAvg : heroRgbAvg;
+  const swatchAvgRgb = swatchRgbAvg > 0 ? swatchRgbAvg : heroRgbAvg;
   let lightLiftTier = 0;
-  if (liftRgbAvg > LIGHT_HERO_RGB_LIFT_STRONG || meanL > LIGHT_HERO_L_LIFT_STRONG) {
+  if (meanL > LIGHT_HERO_L_STRONG || swatchAvgRgb > LIGHT_SWATCH_RGB_STRONG) {
     lightLiftTier = 2;
-  } else if (liftRgbAvg > LIGHT_HERO_RGB_LIFT || meanL > LIGHT_HERO_L_LIFT) {
+  } else if (meanL > LIGHT_HERO_L || swatchAvgRgb > LIGHT_SWATCH_RGB) {
     lightLiftTier = 1;
   }
 
@@ -519,7 +523,7 @@ function finishHeroStats(meanA, meanB, meanL, spreadSamples, avgSwatchChroma, sw
     meanA,
     meanB,
     heroRgbAvg,
-    liftRgbAvg,
+    swatchAvgRgb,
     swatchRgbAvg,
     stdL: spread.stdL,
     stdA: Math.max(spread.stdA, MIN_LAB_STD),
@@ -531,22 +535,23 @@ function finishHeroStats(meanA, meanB, meanL, spreadSamples, avgSwatchChroma, sw
     isNeutral,
     neutralAbClamp: isNeutral ? NEUTRAL_AB_CLAMP : 0,
     isLightSwatch: lightLiftTier > 0,
+    isNeutralLight: lightLiftTier > 0 && isNeutral,
     lightLiftTier,
     shadowLockStrength:
       lightLiftTier > 0 ? DEPTH_SHADOW_LOCK_STRENGTH * LIGHT_SHADOW_LOCK_MULT : DEPTH_SHADOW_LOCK_STRENGTH,
   };
 }
 
-/** Light cream/beige swatches: partial lift toward hero L (dark swatches keep original L). */
+/** Light leathers: render in swatch luminance, not cognac L (dark swatches keep original L). */
 export function computeFinalLabL(originalL, dst) {
   const heroL = dst.meanL;
-  const liftRgbAvg = dst.liftRgbAvg ?? dst.heroRgbAvg ?? 0;
+  const swatchAvgRgb = dst.swatchAvgRgb ?? dst.swatchRgbAvg ?? dst.heroRgbAvg ?? 0;
 
-  if (liftRgbAvg > LIGHT_HERO_RGB_LIFT_STRONG || heroL > LIGHT_HERO_L_LIFT_STRONG) {
+  if (swatchAvgRgb > LIGHT_SWATCH_RGB_STRONG || heroL > LIGHT_HERO_L_STRONG) {
     return originalL * (1 - LIGHT_L_BLEND_STRONG) + heroL * LIGHT_L_BLEND_STRONG;
   }
-  if (liftRgbAvg > LIGHT_HERO_RGB_LIFT || heroL > LIGHT_HERO_L_LIFT) {
-    return originalL * (1 - LIGHT_L_BLEND_SOFT) + heroL * LIGHT_L_BLEND_SOFT;
+  if (swatchAvgRgb > LIGHT_SWATCH_RGB || heroL > LIGHT_HERO_L) {
+    return originalL * (1 - LIGHT_L_BLEND) + heroL * LIGHT_L_BLEND;
   }
   return originalL;
 }
@@ -723,20 +728,18 @@ function midtoneDetailWeight(origLum) {
  * Contrast-only leather depth: original micro-detail, shadows, speculars.
  */
 export function restoreLeatherDepth(oR, oG, oB, r, g, b, origLum, blurLum, anchors, depthOpts = {}) {
+  const lightLeather = depthOpts.lightLeatherMode === true;
   const shadowLock = depthOpts.shadowLockStrength ?? DEPTH_SHADOW_LOCK_STRENGTH;
-  const relaxShadowCap = depthOpts.relaxShadowCap === true;
 
   const detail = origLum - blurLum;
   let nL = pixelBrightness(r, g, b);
 
   nL = applySubtleSCurve(nL, anchors.black, anchors.white);
 
-  if (origLum < DEPTH_SHADOW_LOCK_LUM) {
+  if (!lightLeather && origLum < DEPTH_SHADOW_LOCK_LUM) {
     const t = clamp((DEPTH_SHADOW_LOCK_LUM - origLum) / DEPTH_SHADOW_LOCK_LUM, 0, 1);
     nL = nL + (origLum - nL) * t * shadowLock;
-    if (!relaxShadowCap) {
-      nL = Math.min(nL, origLum);
-    }
+    nL = Math.min(nL, origLum);
   }
 
   if (origLum > DEPTH_SPECULAR_LUM) {
@@ -747,7 +750,12 @@ export function restoreLeatherDepth(oR, oG, oB, r, g, b, origLum, blurLum, ancho
   const midW = midtoneDetailWeight(origLum);
   let finalL = nL + detail * (DEPTH_DETAIL_BLEND + midW * DEPTH_MICROCONTRAST);
 
-  if (origLum < DEPTH_SHADOW_LOCK_LUM && !relaxShadowCap) {
+  if (lightLeather) {
+    const panelW = smoothstep(42, 100, origLum) * (1 - smoothstep(175, 215, origLum));
+    finalL += panelW * 22;
+  }
+
+  if (!lightLeather && origLum < DEPTH_SHADOW_LOCK_LUM) {
     finalL = Math.min(finalL, origLum);
   }
 
@@ -794,7 +802,10 @@ export function transferLabPixel(pixel, src, dst, opts = {}) {
   if (opts.textureResidual) {
     resA = clamp(opts.textureResidual.a, -TEXTURE_RESIDUAL_MAX, TEXTURE_RESIDUAL_MAX);
     resB = clamp(opts.textureResidual.b, -TEXTURE_RESIDUAL_MAX, TEXTURE_RESIDUAL_MAX);
-    if (dst.isNeutral) {
+    if (dst.isNeutralLight) {
+      resA = clamp(resA, -2, 2);
+      resB = clamp(resB, -2, 2);
+    } else if (dst.isNeutral) {
       const nLim = Math.min(TEXTURE_RESIDUAL_MAX, 3);
       resA = clamp(resA, -nLim, nLim);
       resB = clamp(resB, -nLim, nLim);
@@ -812,6 +823,11 @@ export function transferLabPixel(pixel, src, dst, opts = {}) {
 
   a = clamp(a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
   b = clamp(b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+
+  if (dst.isNeutralLight) {
+    a = clamp(a, LIGHT_NEUTRAL_A_MIN, LIGHT_NEUTRAL_A_MAX);
+    b = clamp(b, LIGHT_NEUTRAL_B_MIN, LIGHT_NEUTRAL_B_MAX);
+  }
 
   const { r, g, b: bOut } = labToRgb(finalL, a, b);
   const orig = opts.originalRgb;
@@ -1026,7 +1042,7 @@ export function recolorSofa(baseImage, mask, sofaStats, swatchStats, sofaBottomY
 
       ({ r, g, b } = restoreLeatherDepth(oR, oG, oB, r, g, b, origLum[j], blurLum[j], anchors, {
         shadowLockStrength: swatchStats.shadowLockStrength,
-        relaxShadowCap: swatchStats.isLightSwatch === true,
+        lightLeatherMode: swatchStats.isLightSwatch === true,
       }));
 
       out[p] = r;
@@ -1064,7 +1080,8 @@ export async function processSwatch(swatchPath, baseSofa, mask, sofaStats, sofaB
     neutral: swatch.stats.isNeutral ?? false,
     lightLift: swatch.stats.lightLiftTier ?? 0,
     heroRgbAvg: Math.round(swatch.stats.heroRgbAvg ?? 0),
-    liftRgbAvg: Math.round(swatch.stats.liftRgbAvg ?? swatch.stats.heroRgbAvg ?? 0),
+    swatchAvgRgb: Math.round(swatch.stats.swatchAvgRgb ?? swatch.stats.swatchRgbAvg ?? 0),
+    neutralLight: swatch.stats.isNeutralLight === true,
     chromaGain: Math.round((swatch.stats.chromaGain ?? CHROMA_GAIN_BASE) * 100) / 100,
     satFactor: Math.round((swatch.stats.satFactor ?? 1) * 100) / 100,
   });
