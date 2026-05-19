@@ -1,22 +1,21 @@
 /**
  * Swatch texture extraction and transfer onto sofa (preserves sofa L / lighting).
  */
-import { basename, extname, join, resolve } from 'path';
+import convert from 'color-convert';
+import { existsSync } from 'fs';
+import { basename, dirname, extname, join, resolve } from 'path';
+import { fileURLToPath } from 'url';
 import sharp from 'sharp';
-import {
-  rgbToLab,
-  labToRgb,
-  pixelSaturation,
-  isLightBodySampling,
-  isNamedLightLeather,
-  resolveOriginalSwatchPath,
-  SWATCH_DIR,
-} from './render-sofas.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const SWATCH_DIR = join(__dirname, 'input', 'swatches');
 
 const BG_THRESH = 238;
 const TEXTURE_PATCH_SIZE = 384;
-/** Subtle swatch luminance grain on sofa (sofa L dominates). */
-const TEXTURE_L_DETAIL = 0.14;
+export const TEXTURE_L_DETAIL = 0.14;
+
+const LIGHT_LEATHER_KEYWORDS = ['silk', 'eggshell', 'frost', 'parchment', 'vanilla', 'tusk', 'mist'];
+const LIGHT_BODY_SAMPLING_KEYWORDS = ['silk', 'eggshell', 'vanilla', 'parchment'];
 const LIGHT_BODY_L_EXCLUDE = 60;
 const LIGHT_BODY_L_SAMPLE = 70;
 const LIGHT_BODY_L_SHADOW_MAX = 72;
@@ -26,12 +25,53 @@ const LIGHT_BODY_WARM_B_MIN = 6;
 const LIGHT_BODY_WARM_A_MIN = -2;
 const LIGHT_BODY_SHADOW_MIN_PIXELS = 80;
 
+const SWATCH_ID_PATTERN = /^[a-z]+-[a-z]+\.(jpe?g|png|webp)$/i;
+
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
 }
 
+function rgbToLab(r, g, b) {
+  const lab = convert.rgb.lab([r, g, b]);
+  return { L: lab[0], a: lab[1], b: lab[2] };
+}
+
+function labToRgb(L, a, b) {
+  const [r, g, bOut] = convert.lab.rgb([L, a, b]);
+  return {
+    r: clamp(Math.round(r), 0, 255),
+    g: clamp(Math.round(g), 0, 255),
+    b: clamp(Math.round(bOut), 0, 255),
+  };
+}
+
+function pixelSaturation(r, g, b) {
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  if (max === min) return 0;
+  return (max - min) / (max + min < 255 ? max + min : 510);
+}
+
 function isNearWhite(r, g, b) {
   return r > BG_THRESH && g > BG_THRESH && b > BG_THRESH;
+}
+
+export function isNamedLightLeather(swatchStem) {
+  const s = swatchStem.toLowerCase();
+  return LIGHT_LEATHER_KEYWORDS.some((k) => s.includes(k));
+}
+
+export function isLightBodySampling(swatchStem) {
+  const s = swatchStem.toLowerCase();
+  return LIGHT_BODY_SAMPLING_KEYWORDS.some((k) => s.includes(k));
+}
+
+function resolveSwatchPath(swatchPath) {
+  const base = basename(swatchPath);
+  if (!SWATCH_ID_PATTERN.test(base)) return null;
+  const resolved = resolve(join(SWATCH_DIR, base));
+  if (!resolved.startsWith(resolve(SWATCH_DIR)) || !existsSync(resolved)) return null;
+  return resolved;
 }
 
 function isWarmLightBodyPixel(labL, labA, labB, sat) {
@@ -45,7 +85,7 @@ function isWarmLightBodyPixel(labL, labA, labB, sat) {
 
 function pixelAt(data, width, channels, x, y) {
   const i = (y * width + x) * channels;
-  return { r: data[i], g: data[i + 1], b: data[i + 2], i };
+  return { r: data[i], g: data[i + 1], b: data[i + 2] };
 }
 
 function buildPixelMeta(data, width, height, channels) {
@@ -62,8 +102,7 @@ function buildPixelMeta(data, width, height, channels) {
       const lab = rgbToLab(r, g, b);
       const sat = pixelSaturation(r, g, b);
       const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      const m = { r, g, b, labL: lab.L, labA: lab.a, labB: lab.b, sat, lum };
-      meta[j] = m;
+      meta[j] = { r, g, b, labL: lab.L, labA: lab.a, labB: lab.b, sat, lum };
       lumValues.push(lum);
     }
   }
@@ -75,29 +114,6 @@ function buildPixelMeta(data, width, height, channels) {
   return { meta, p33, p66 };
 }
 
-function makeBandPredicates(swatchStem, meta, p33, p66) {
-  if (isLightBodySampling(swatchStem)) {
-    return {
-      shadow: (m) =>
-        m.labL >= LIGHT_BODY_L_EXCLUDE &&
-        m.labL < LIGHT_BODY_L_SHADOW_MAX &&
-        isWarmLightBodyPixel(m.labL, m.labA, m.labB, m.sat),
-      midtone: (m) => m.labL > LIGHT_BODY_L_SAMPLE && isWarmLightBodyPixel(m.labL, m.labA, m.labB, m.sat),
-      highlight: (m) => m.labL > LIGHT_BODY_L_SAMPLE && isWarmLightBodyPixel(m.labL, m.labA, m.labB, m.sat),
-      midtoneRank: (m, body) => {
-        const idx = body.findIndex((b) => b.j === meta.indexOf(m));
-        return idx;
-      },
-    };
-  }
-
-  return {
-    shadow: (m) => m.lum <= p33,
-    midtone: (m) => m.lum > p33 && m.lum <= p66,
-    highlight: (m) => m.lum > p66,
-  };
-}
-
 function findBestPatchOrigin(mask, width, height, patchSize) {
   let bestScore = 0;
   let bestX = 0;
@@ -105,26 +121,9 @@ function findBestPatchOrigin(mask, width, height, patchSize) {
   const maxX = Math.max(1, width - patchSize);
   const maxY = Math.max(1, height - patchSize);
 
-  for (let y = 0; y < maxY; y += 8) {
-    for (let x = 0; x < maxX; x += 8) {
-      let score = 0;
-      for (let dy = 0; dy < patchSize; dy++) {
-        const row = (y + dy) * width;
-        for (let dx = 0; dx < patchSize; dx++) {
-          if (mask[row + x + dx]) score++;
-        }
-      }
-      if (score > bestScore) {
-        bestScore = score;
-        bestX = x;
-        bestY = y;
-      }
-    }
-  }
-
-  if (bestScore < patchSize * 8) {
-    for (let y = 0; y < maxY; y++) {
-      for (let x = 0; x < maxX; x++) {
+  const tryWindow = (step) => {
+    for (let y = 0; y < maxY; y += step) {
+      for (let x = 0; x < maxX; x += step) {
         let score = 0;
         for (let dy = 0; dy < patchSize; dy++) {
           const row = (y + dy) * width;
@@ -139,7 +138,10 @@ function findBestPatchOrigin(mask, width, height, patchSize) {
         }
       }
     }
-  }
+  };
+
+  tryWindow(8);
+  if (bestScore < patchSize * 8) tryWindow(1);
 
   return { x: bestX, y: bestY, score: bestScore };
 }
@@ -192,21 +194,6 @@ function computePatchStats(patch) {
   return { meanL, meanA, meanB, rgb: [r, g, bOut], validPixels: Ls.length };
 }
 
-function buildBandMask(meta, width, height, predicate, bodyFilter) {
-  const mask = new Uint8Array(width * height);
-  const body = [];
-
-  for (let j = 0; j < width * height; j++) {
-    const m = meta[j];
-    if (!m || !predicate(m)) continue;
-    if (bodyFilter && !bodyFilter(m)) continue;
-    mask[j] = 1;
-    body.push({ j, m });
-  }
-
-  return { mask, body };
-}
-
 function buildLightBodyBandMasks(meta, width, height) {
   const warm = (m) => isWarmLightBodyPixel(m.labL, m.labA, m.labB, m.sat);
 
@@ -223,15 +210,10 @@ function buildLightBodyBandMasks(meta, width, height) {
 
   body.sort((a, b) => a.m.labL - b.m.labL);
   const n = body.length;
-  const midSet = new Set(
-    body.slice(Math.floor(n * 0.35), Math.floor(n * 0.65)).map((b) => b.j),
-  );
-  const hiSet = new Set(body.slice(Math.floor(n * 0.88)).map((b) => b.j));
-
   const midMask = new Uint8Array(width * height);
   const hiMask = new Uint8Array(width * height);
-  for (const j of midSet) midMask[j] = 1;
-  for (const j of hiSet) hiMask[j] = 1;
+  for (const { j } of body.slice(Math.floor(n * 0.35), Math.floor(n * 0.65))) midMask[j] = 1;
+  for (const { j } of body.slice(Math.floor(n * 0.88))) hiMask[j] = 1;
 
   let shadowUse = shadowMask;
   const shadowCount = shadowMask.reduce((a, v) => a + v, 0);
@@ -241,6 +223,20 @@ function buildLightBodyBandMasks(meta, width, height) {
   }
 
   return { shadow: shadowUse, midtone: midMask, highlight: hiMask };
+}
+
+function buildTertileBandMasks(meta, width, height, p33, p66) {
+  const shadow = new Uint8Array(width * height);
+  const mid = new Uint8Array(width * height);
+  const hi = new Uint8Array(width * height);
+  for (let j = 0; j < width * height; j++) {
+    const m = meta[j];
+    if (!m) continue;
+    if (m.lum <= p33) shadow[j] = 1;
+    else if (m.lum <= p66) mid[j] = 1;
+    else hi[j] = 1;
+  }
+  return { shadow, midtone: mid, highlight: hi };
 }
 
 function extractBandPatch(data, width, height, channels, bandMask, patchSize) {
@@ -265,54 +261,6 @@ function samplePatchRgb(patch, px, py) {
   return { r: patch.data[i], g: patch.data[i + 1], b: patch.data[i + 2] };
 }
 
-/**
- * Load swatch, extract three real texture patches (shadow / mid / highlight).
- */
-export async function getSwatchTexture(swatchPath) {
-  const resolved = resolveOriginalSwatchPath(swatchPath) || resolve(swatchPath);
-  if (!resolved.startsWith(resolve(SWATCH_DIR))) {
-    throw new Error(`Swatch must be under input/swatches: ${swatchPath}`);
-  }
-
-  const swatchStem = basename(resolved, extname(resolved));
-  const { data, info } = await sharp(resolved).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  const { width, height, channels } = info;
-  const { meta, p33, p66 } = buildPixelMeta(data, width, height, channels);
-
-  let patches;
-  let extractionMethod;
-
-  if (isLightBodySampling(swatchStem)) {
-    const masks = buildLightBodyBandMasks(meta, width, height);
-    patches = {
-      shadow: extractBandPatch(data, width, height, channels, masks.shadow, TEXTURE_PATCH_SIZE),
-      midtone: extractBandPatch(data, width, height, channels, masks.midtone, TEXTURE_PATCH_SIZE),
-      highlight: extractBandPatch(data, width, height, channels, masks.highlight, TEXTURE_PATCH_SIZE),
-    };
-    extractionMethod = 'light-body-texture';
-  } else {
-    const preds = makeBandPredicates(swatchStem, meta, p33, p66);
-    const shadowM = buildBandMask(meta, width, height, preds.shadow).mask;
-    const midM = buildBandMask(meta, width, height, preds.midtone).mask;
-    const hiM = buildBandMask(meta, width, height, preds.highlight).mask;
-    patches = {
-      shadow: extractBandPatch(data, width, height, channels, shadowM, TEXTURE_PATCH_SIZE),
-      midtone: extractBandPatch(data, width, height, channels, midM, TEXTURE_PATCH_SIZE),
-      highlight: extractBandPatch(data, width, height, channels, hiM, TEXTURE_PATCH_SIZE),
-    };
-    extractionMethod = 'tertile-texture';
-  }
-
-  return {
-    patches,
-    isNamedLight: isNamedLightLeather(swatchStem),
-    isLightBodySampling: isLightBodySampling(swatchStem),
-    extractionMethod,
-    sourceFile: basename(resolved),
-    swatchSize: { width, height },
-  };
-}
-
 export function pickTexturePatch(texture, u) {
   const t = clamp(u, 0, 1);
   if (t < 1 / 3) return { patch: texture.patches.shadow, localU: t * 3 };
@@ -322,15 +270,44 @@ export function pickTexturePatch(texture, u) {
 
 export function sampleTextureLab(texture, sofaX, sofaY, u) {
   const { patch, localU } = pickTexturePatch(texture, u);
-  const px =
-    (sofaX * 1.07 + sofaY * 0.41 + Math.floor(localU * 97)) %
-    patch.width;
+  const px = (sofaX * 1.07 + sofaY * 0.41 + Math.floor(localU * 97)) % patch.width;
   const py =
-    (Math.floor(localU * (patch.height - 1)) + sofaX * 0.23 + sofaY * 0.19) %
-    patch.height;
+    (Math.floor(localU * (patch.height - 1)) + sofaX * 0.23 + sofaY * 0.19) % patch.height;
   const { r, g, b } = samplePatchRgb(patch, px, py);
   const lab = rgbToLab(r, g, b);
-  return { lab, patch, patchMeanL: patch.stats.meanL };
+  return { lab, patchMeanL: patch.stats.meanL };
 }
 
-export { TEXTURE_L_DETAIL };
+/**
+ * Extract three real texture patches from the swatch (preserves grain / mottling).
+ */
+export async function getSwatchTexture(swatchPath) {
+  const resolved = resolveSwatchPath(swatchPath) || resolve(swatchPath);
+  if (!resolved?.startsWith(resolve(SWATCH_DIR))) {
+    throw new Error(`Swatch must be under input/swatches: ${swatchPath}`);
+  }
+
+  const swatchStem = basename(resolved, extname(resolved));
+  const { data, info } = await sharp(resolved).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { width, height, channels } = info;
+  const { meta, p33, p66 } = buildPixelMeta(data, width, height, channels);
+
+  const masks = isLightBodySampling(swatchStem)
+    ? buildLightBodyBandMasks(meta, width, height)
+    : buildTertileBandMasks(meta, width, height, p33, p66);
+
+  const patches = {
+    shadow: extractBandPatch(data, width, height, channels, masks.shadow, TEXTURE_PATCH_SIZE),
+    midtone: extractBandPatch(data, width, height, channels, masks.midtone, TEXTURE_PATCH_SIZE),
+    highlight: extractBandPatch(data, width, height, channels, masks.highlight, TEXTURE_PATCH_SIZE),
+  };
+
+  return {
+    patches,
+    isNamedLight: isNamedLightLeather(swatchStem),
+    isLightBodySampling: isLightBodySampling(swatchStem),
+    extractionMethod: isLightBodySampling(swatchStem) ? 'light-body-texture' : 'tertile-texture',
+    sourceFile: basename(resolved),
+    swatchSize: { width, height },
+  };
+}

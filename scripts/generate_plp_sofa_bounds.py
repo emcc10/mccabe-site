@@ -12,6 +12,10 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from plp_sofa_bounds import detect_sofa_bounds  # noqa: E402
+
 PHOTOS = ROOT / "vspfiles" / "photos"
 OUT = ROOT / "vspfiles" / "js" / "mc-plp-sofa-bounds.json"
 SITE = "https://www.mccabestheaterandliving.com"
@@ -19,50 +23,9 @@ PHOTO_RE = re.compile(r"/vspfiles/photos/([^\"'?]+\.(?:jpg|jpeg|png))", re.I)
 UA = {"User-Agent": "Mozilla/5.0 (McCabe PLP bounds)"}
 
 
-def is_background(r: int, g: int, b: int, a: int) -> bool:
-    if a < 20:
-        return True
-    if r > 235 and g > 235 and b > 235:
-        return True
-    hi = max(r, g, b)
-    lo = min(r, g, b)
-    if hi - lo < 18 and hi > 192:
-        return True
-    return False
-
-
-def bounds_for_image(img: Image.Image) -> dict | None:
-    img = img.convert("RGBA")
-    w, h = img.size
-    px = img.load()
-    min_x, min_y, max_x, max_y = w, h, 0, 0
-    found = False
-    for y in range(h):
-        for x in range(w):
-            r, g, b, a = px[x, y]
-            if is_background(r, g, b, a):
-                continue
-            found = True
-            min_x = min(min_x, x)
-            min_y = min(min_y, y)
-            max_x = max(max_x, x)
-            max_y = max(max_y, y)
-    if not found:
-        return None
-    return {
-        "visibleW": max_x - min_x + 1,
-        "visibleH": max_y - min_y + 1,
-        "minX": min_x,
-        "minY": min_y,
-        "maxX": max_x + 1,
-        "maxY": max_y + 1,
-        "nw": w,
-        "nh": h,
-    }
-
-
 def bounds_for(path: Path) -> dict | None:
-    return bounds_for_image(Image.open(path))
+    b = detect_sofa_bounds(Image.open(path))
+    return b.as_dict() if b else None
 
 
 def fetch_category_photos(category_path: str) -> list[str]:
@@ -98,7 +61,8 @@ def bounds_from_url(name: str) -> dict | None:
     req = urllib.request.Request(url, headers=UA)
     with urllib.request.urlopen(req, timeout=60) as resp:
         data = resp.read()
-    return bounds_for_image(Image.open(BytesIO(data)))
+    b = detect_sofa_bounds(Image.open(BytesIO(data)))
+    return b.as_dict() if b else None
 
 
 def main() -> int:
@@ -116,7 +80,7 @@ def main() -> int:
         seen.add(name)
         path = PHOTOS / name
         b = bounds_for(path) if path.exists() else None
-        if not b and path.exists() is False:
+        if not b and not path.exists():
             try:
                 b = bounds_from_url(name)
             except Exception as exc:  # noqa: BLE001

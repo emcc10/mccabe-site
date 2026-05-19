@@ -1,9 +1,10 @@
 /**
- * LAB recolor: neutral-gray master sofa + manual mask.
- * Swatch shadow/mid/highlight palette mapped to sofa luminance; photographic L preserved.
+ * Texture transfer: neutral-gray master sofa + manual mask.
+ * Real swatch texture patches mapped by sofa luminance; sofa lighting preserved.
  */
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
+import { getSwatchTexture, sampleTextureLab, TEXTURE_L_DETAIL } from './swatch-texture.js';
 import {
   mkdirSync,
   readdirSync,
@@ -44,11 +45,7 @@ const LIGHT_BODY_SAT_MAX = 0.42;
 const LIGHT_BODY_WARM_B_MIN = 6;
 const LIGHT_BODY_WARM_A_MIN = -2;
 const LIGHT_BODY_SHADOW_MIN_PIXELS = 80;
-const L_BLEND_MASTER = 0.82;
-const L_BLEND_SWATCH = 0.18;
-const LIGHT_L_BLEND_MASTER = 0.72;
-const LIGHT_L_BLEND_SWATCH = 0.28;
-/** Sofa L percentiles used to map shadow → mid → highlight swatch tones. */
+/** Sofa L percentiles used to place shadow → mid → highlight texture samples. */
 const SOFA_L_MAP_LO = 0.08;
 const SOFA_L_MAP_HI = 0.92;
 const SOFA_L_MAP_MIN_SPAN = 4;
@@ -346,20 +343,22 @@ export async function getSwatchPalette(swatchPath) {
 
 /** @deprecated Use getSwatchPalette; returns midtone fields for legacy callers. */
 export async function getSwatchMedianLab(swatchPath) {
-  const palette = await getSwatchPalette(swatchPath);
-  const m = palette.midtone;
+  const texture = await getSwatchTexture(swatchPath);
+  const m = texture.patches.midtone.stats;
+  const lab = { L: m.meanL, a: m.meanA, b: m.meanB };
   return {
-    meanL: m.L,
-    meanA: m.a,
-    meanB: m.b,
+    meanL: lab.L,
+    meanA: lab.a,
+    meanB: lab.b,
     swatchLumRgb: pixelBrightness(m.rgb[0], m.rgb[1], m.rgb[2]),
-    isNamedLight: palette.isNamedLight,
+    isNamedLight: texture.isNamedLight,
     overallRGB: m.rgb,
-    pixelCount: palette.pixelCount,
-    sourceFile: palette.sourceFile,
-    palette,
+    sourceFile: texture.sourceFile,
+    texture,
   };
 }
+
+export { getSwatchTexture } from './swatch-texture.js';
 
 /** @deprecated alias */
 export async function getSwatchLabStats(swatchPath) {
@@ -449,15 +448,7 @@ export async function loadUpholsteryMask(maskPath, width, height) {
   return mask;
 }
 
-/** Blend mapped swatch L into neutral-master L without flattening photographic structure. */
-export function computeFinalLabL(masterL, swatchL, isVeryLightLeather) {
-  if (isVeryLightLeather) {
-    return masterL * LIGHT_L_BLEND_MASTER + swatchL * LIGHT_L_BLEND_SWATCH;
-  }
-  return masterL * L_BLEND_MASTER + swatchL * L_BLEND_SWATCH;
-}
-
-/** Masked sofa L percentiles for palette mapping. */
+/** Masked sofa L percentiles for texture placement. */
 export function computeSofaLuminanceMapRange(masterImage, mask) {
   const { data, width, height, channels } = masterImage;
   const Ls = [];
@@ -473,24 +464,27 @@ export function computeSofaLuminanceMapRange(masterImage, mask) {
 }
 
 /**
- * Masked pixels: shadow/mid/highlight a/b by sofa L; L mostly from neutral master.
+ * Texture transfer: sample real swatch patches; sofa L drives placement + subtle grain.
  */
-export function recolorSofa(masterImage, mask, palette) {
+export function recolorSofa(masterImage, mask, texture) {
   const { data, width, height, channels } = masterImage;
   const out = Buffer.from(data);
   const { lo, span } = computeSofaLuminanceMapRange(masterImage, mask);
-  const isLight = palette.isNamedLight;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
 
     const p = j * channels;
+    const x = j % width;
+    const y = (j / width) | 0;
     const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
     const u = clamp((lab.L - lo) / span, 0, 1);
-    const tone = interpolateSwatchPalette(palette, u);
-    const finalL = computeFinalLabL(lab.L, tone.L, isLight);
-    const a = clamp(tone.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const b = clamp(tone.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const { lab: texLab, patchMeanL } = sampleTextureLab(texture, x, y, u);
+
+    const relL = texLab.L - patchMeanL;
+    const finalL = lab.L + relL * TEXTURE_L_DETAIL;
+    const a = clamp(texLab.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const b = clamp(texLab.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const { r, g, b: bOut } = labToRgb(finalL, a, b);
 
     out[p] = r;
@@ -507,29 +501,29 @@ export async function processSwatch(swatchPath, masterImage, mask) {
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
 
   const swatchName = basename(resolved, extname(resolved));
-  const palette = await getSwatchPalette(resolved);
+  const texture = await getSwatchTexture(resolved);
 
-  const fmtTone = (t) => ({
-    rgb: t.rgb,
-    lab: [Math.round(t.L * 10) / 10, Math.round(t.a * 10) / 10, Math.round(t.b * 10) / 10],
+  const fmtPatch = (name) => ({
+    coverage: texture.patches[name].coverage,
+    medianRgb: texture.patches[name].stats.rgb,
   });
 
   console.log({
     swatchName,
-    source: `input/swatches/${palette.sourceFile}`,
-    shadow: fmtTone(palette.shadow),
-    midtone: fmtTone(palette.midtone),
-    highlight: fmtTone(palette.highlight),
-    pixelsSampled: palette.pixelCount,
-    lightLeather: palette.isNamedLight,
-    lBlend: palette.isNamedLight ? '72/28' : '82/18',
+    source: `input/swatches/${texture.sourceFile}`,
+    method: texture.extractionMethod,
+    patchSize: texture.patches.shadow.width,
+    shadow: fmtPatch('shadow'),
+    midtone: fmtPatch('midtone'),
+    highlight: fmtPatch('highlight'),
+    textureLDetail: TEXTURE_L_DETAIL,
   });
 
-  const outData = recolorSofa(masterImage, mask, palette);
+  const outData = recolorSofa(masterImage, mask, texture);
   const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
   const bytes = await saveImage(outData, outPath, masterImage.width, masterImage.height, masterImage.channels);
   console.log(`  wrote ${swatchName}.png (${Math.round(bytes / 1024)} KB)`);
-  return { outPath, palette };
+  return { outPath, texture };
 }
 
 export function zipOutputs(outputDir, zipPath) {
@@ -596,7 +590,7 @@ export async function main(argv = process.argv) {
   console.log(`  swatch source: ${SWATCH_DIR} (${swatchFiles.length} files)`);
   console.log(`  source photo: ${SOFA_PATH}`);
   console.log(`  mask: ${MASK_PATH}`);
-  console.log('  method: neutral master L + swatch palette a/b by sofa L (82/18, 72/28 light)');
+  console.log('  method: texture transfer (sofa L placement, chroma from swatch patches)');
 
   const sourceSofa = await loadImage(SOFA_PATH);
   console.log(`  ${sourceSofa.width}x${sourceSofa.height}`);
