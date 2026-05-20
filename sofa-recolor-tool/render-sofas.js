@@ -17,8 +17,7 @@ import { tmpdir } from 'os';
 import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
-import { prepareSourceLGrain, applySourceLGrain } from './leather-detail.js';
-import { cleanSofaCompositing, maskBoundingBox } from './compositing-cleanup.js';
+import { applyPhotographicBackground } from './compositing-cleanup.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
@@ -58,12 +57,8 @@ const BALI_BODY_MIN_PIXEL = { r: 155, g: 145, b: 130 };
 const BALI_SAMPLE_FLOOR = { r: 170, g: 160, b: 145 };
 const BALI_SAMPLE_RANGE = { r: [185, 215], g: [175, 205], b: [155, 190] };
 const BALI_OUTPUT_FLOOR = { r: 170, g: 160, b: 145 };
+/** Photo luminance shape from source; ivory anchor from validated swatch (color locked). */
 const BALI_L_STRUCTURE = 0.96;
-const BALI_MID_CONTRAST = 0.11;
-const BALI_HIGHLIGHT_U_START = 0.72;
-const BALI_TOP_CUSHION_V = 0.5;
-const BALI_HIGHLIGHT_PULL = 5;
-const BALI_HIGHLIGHT_CEIL_ABOVE_ANCHOR = 11;
 const CHROMA_SWATCH = 1;
 /** Diagnostic: force uniform upholstery chroma; L from source only. */
 export const BRUTE_FORCE_CHROMA_A = 2;
@@ -686,28 +681,6 @@ export function photoLuminanceOnly(r, g, b) {
   return rgbToLab(r, g, b).L;
 }
 
-/** L-only: mid contrast, tame washed top cushions — no chroma change. */
-export function applyBaliPhotographicLMatch(finalL, u, v, anchorL) {
-  let L = finalL;
-  const delta = L - anchorL;
-  const midBoost = Math.sin(u * Math.PI) * BALI_MID_CONTRAST;
-  L = anchorL + delta * (1 + midBoost);
-
-  if (u > BALI_HIGHLIGHT_U_START && v < BALI_TOP_CUSHION_V) {
-    const tu = (u - BALI_HIGHLIGHT_U_START) / (1 - BALI_HIGHLIGHT_U_START);
-    const tv = 1 - v / BALI_TOP_CUSHION_V;
-    L -= tu * tv * BALI_HIGHLIGHT_PULL;
-  }
-  if (u > 0.84) {
-    L -= ((u - 0.84) / 0.16) * 2.5;
-  }
-  const ceil = anchorL + BALI_HIGHLIGHT_CEIL_ABOVE_ANCHOR;
-  if (L > ceil) {
-    L = ceil + (L - ceil) * 0.4;
-  }
-  return L;
-}
-
 /** Swatch a/b only — zero cognac chroma. */
 export function swatchChromaForPixel(palette, u) {
   const tone = interpolateSwatchPalette(palette, u);
@@ -715,52 +688,74 @@ export function swatchChromaForPixel(palette, u) {
 }
 
 /**
- * Colorize photographed sofa: preserve photo L; replace all chroma with swatch.
+ * Bali-Silk: neutral master (structure) + source photo L (micro-contrast) + swatch chroma.
+ * No grain overlays, no painterly L tweaks.
  */
-export function recolorSofa(sourceImage, mask, palette) {
-  const { data, width, height, channels } = sourceImage;
-  const out = Buffer.from(data);
-  const { lo, span } = computeSofaLuminanceMapRange(sourceImage, mask);
-  const meanPhotoL = palette.isBaliSilk ? meanMaskedLab(sourceImage, mask).L : 0;
-  const anchorL = palette.isBaliSilk ? palette.midtone.L : 0;
-  const grain = palette.isBaliSilk ? prepareSourceLGrain(sourceImage) : null;
-  const box = palette.isBaliSilk ? maskBoundingBox(mask, width, height) : null;
-  const vSpan = box ? Math.max(box.maxY - box.minY, 1) : 1;
+export function recolorBaliSilkPhotographic(neutralMaster, sourceImage, mask, palette) {
+  const { data: nData, width, height, channels } = neutralMaster;
+  const { data: sData } = sourceImage;
+  const out = Buffer.alloc(width * height * channels);
+  for (let j = 0; j < width * height; j++) {
+    out[j * channels + 3] = 255;
+  }
+
+  const { lo, span } = computeSofaLuminanceMapRange(neutralMaster, mask);
+  const meanSourceL = meanMaskedLab(sourceImage, mask).L;
+  const anchorL = palette.midtone.L;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
 
     const p = j * channels;
-    const r = data[p];
-    const g = data[p + 1];
-    const bIn = data[p + 2];
-    const photoL = photoLuminanceOnly(r, g, bIn);
+    const neutralL = photoLuminanceOnly(nData[p], nData[p + 1], nData[p + 2]);
+    const sourceL = photoLuminanceOnly(sData[p], sData[p + 1], sData[p + 2]);
+    const u = clamp((neutralL - lo) / span, 0, 1);
+    const chroma = swatchChromaForPixel(palette, u);
+
+    const finalL = clamp(anchorL + (sourceL - meanSourceL) * BALI_L_STRUCTURE, 0, 100);
+    const finalA = clamp(chroma.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const finalB = clamp(chroma.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const { r, g, b } = labToRgb(finalL, finalA, finalB);
+
+    out[p] = r;
+    out[p + 1] = g;
+    out[p + 2] = b;
+  }
+
+  applyPhotographicBackground(out, mask, width, height, channels);
+  return out;
+}
+
+/**
+ * Colorize photographed sofa: preserve photo L; replace all chroma with swatch.
+ */
+export function recolorSofa(sourceImage, mask, palette) {
+  if (palette.isBaliSilk) {
+    throw new Error('Bali-Silk must use recolorBaliSilkPhotographic(neutralMaster, source, mask, palette)');
+  }
+
+  const { data, width, height, channels } = sourceImage;
+  const out = Buffer.from(data);
+  const { lo, span } = computeSofaLuminanceMapRange(sourceImage, mask);
+
+  for (let j = 0; j < width * height; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) continue;
+
+    const p = j * channels;
+    const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
+    const photoL = lab.L;
     const u = clamp((photoL - lo) / span, 0, 1);
     const chroma = swatchChromaForPixel(palette, u);
 
-    let finalL;
-    if (palette.isBaliSilk) {
-      const y = Math.floor(j / width);
-      const v = (y - box.minY) / vSpan;
-      finalL = anchorL + (photoL - meanPhotoL) * BALI_L_STRUCTURE;
-      finalL = applyBaliPhotographicLMatch(finalL, u, v, anchorL);
-      finalL = applySourceLGrain(finalL, j, grain);
-    } else {
-      finalL = computeFinalLabL(photoL, chroma.L);
-    }
-    finalL = clamp(finalL, 0, 100);
+    const finalL = clamp(computeFinalLabL(photoL, chroma.L), 0, 100);
     const finalA = clamp(chroma.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const finalB = clamp(chroma.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const { r: outR, g: outG, b: bOut } = labToRgb(finalL, finalA, finalB);
+    const { r, g, b: bOut } = labToRgb(finalL, finalA, finalB);
 
-    out[p] = outR;
-    out[p + 1] = outG;
+    out[p] = r;
+    out[p + 1] = g;
     out[p + 2] = bOut;
     if (channels === 4) out[p + 3] = data[p + 3];
-  }
-
-  if (palette.isBaliSilk) {
-    cleanSofaCompositing(out, sourceImage, mask);
   }
 
   return out;
@@ -853,7 +848,7 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
 
   if (isBali) {
     deleteBaliSilkOutputs();
-    console.log('  cleared previous Bali-Silk outputs');
+    console.log('  cleared previous Bali-Silk outputs (fresh render from inputs only)');
   }
 
   const palette = await getSwatchPalette(resolved);
@@ -863,25 +858,44 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
     lab: [Math.round(t.L * 10) / 10, Math.round(t.a * 10) / 10, Math.round(t.b * 10) / 10],
   });
 
-  console.log({
-    swatchName,
-    source: `input/swatches/${palette.sourceFile}`,
-    extraction: palette.extractionMethod,
-    validatedSampleRgb: palette.validatedSampleRgb || null,
-    shadow: fmtTone(palette.shadow),
-    midtone: fmtTone(palette.midtone),
-    highlight: fmtTone(palette.highlight),
-    lightLeather: palette.isNamedLight,
-    lBlend: isBali
-      ? `anchor L + photo ΔL×${BALI_L_STRUCTURE} (validated swatch chroma)`
-      : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
-    chroma: 'swatch a/b 100% (0% cognac)',
-    realism: isBali
-      ? 'L×0.96 + mid contrast + top highlight tame + grain 50% + compositing'
-      : null,
-  });
-
-  const outData = recolorSofa(sourceImage, mask, palette);
+  let outData;
+  if (isBali) {
+    const neutralMaster = buildNeutralGrayMaster(sourceImage, mask);
+    await saveImage(
+      neutralMaster.data,
+      NEUTRAL_MASTER_PATH,
+      neutralMaster.width,
+      neutralMaster.height,
+      neutralMaster.channels,
+    );
+    console.log({
+      swatchName,
+      inputs: `sofa.png + neutral-master.png + swatches/${palette.sourceFile}`,
+      extraction: palette.extractionMethod,
+      validatedSampleRgb: palette.validatedSampleRgb,
+      shadow: fmtTone(palette.shadow),
+      midtone: fmtTone(palette.midtone),
+      highlight: fmtTone(palette.highlight),
+      lBlend: `anchor L + source photo ΔL×${BALI_L_STRUCTURE}`,
+      chroma: 'swatch a/b 100% (color locked)',
+      realism: 'source micro-contrast only; no overlays/smoothing',
+      background: '#ffffff + contact shadow',
+    });
+    outData = recolorBaliSilkPhotographic(neutralMaster, sourceImage, mask, palette);
+  } else {
+    console.log({
+      swatchName,
+      source: `input/swatches/${palette.sourceFile}`,
+      extraction: palette.extractionMethod,
+      shadow: fmtTone(palette.shadow),
+      midtone: fmtTone(palette.midtone),
+      highlight: fmtTone(palette.highlight),
+      lightLeather: palette.isNamedLight,
+      lBlend: `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
+      chroma: 'swatch a/b 100% (0% cognac)',
+    });
+    outData = recolorSofa(sourceImage, mask, palette);
+  }
   const outImage = {
     data: outData,
     width: sourceImage.width,
@@ -995,7 +1009,7 @@ export async function main(argv = process.argv) {
     return;
   }
 
-  console.log('  method: validated Bali sample + photo structure L + swatch chroma only');
+  console.log('  method: fresh inputs only — neutral master + validated swatch + photo L');
 
   if (cli.mode === 'one') {
     const swPath = resolveSwatchArg(cli.swatchFile);
