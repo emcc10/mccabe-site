@@ -1,5 +1,5 @@
 /**
- * Photographic LAB recolor: preserve original sofa L/texture; swatch palette for a/b only.
+ * LAB recolor: true neutral master (L only, a=b=0) + swatch chroma; no cognac a/b in base.
  */
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
@@ -24,7 +24,9 @@ const SWATCH_DIR = join(INPUT_DIR, 'swatches');
 const OUTPUT_DIR = join(ROOT, 'output');
 const SOFA_PATH = join(INPUT_DIR, 'sofa.png');
 const MASK_PATH = join(INPUT_DIR, 'mask.png');
-const MASTER_SOFA_PATH = join(INPUT_DIR, 'master-sofa.png');
+const NEUTRAL_MASTER_PATH = join(INPUT_DIR, 'neutral-master.png');
+/** @deprecated alias — same file as neutral-master.png */
+const MASTER_SOFA_PATH = NEUTRAL_MASTER_PATH;
 const ZIP_PATH = join(OUTPUT_DIR, 'sofa-renders.zip');
 const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 
@@ -410,7 +412,7 @@ export async function getSwatchLabStats(swatchPath) {
 }
 
 /**
- * Neutral-gray master: same luminance as source, zero chroma (photographic detail preserved).
+ * True neutral master: source LAB L preserved; upholstery a=b=0 (no cognac chroma in base).
  */
 export function buildNeutralGrayMaster(sourceImage, mask) {
   const { data, width, height, channels } = sourceImage;
@@ -419,13 +421,36 @@ export function buildNeutralGrayMaster(sourceImage, mask) {
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
     const p = j * channels;
-    const lum = Math.round(pixelBrightness(data[p], data[p + 1], data[p + 2]));
-    out[p] = lum;
-    out[p + 1] = lum;
-    out[p + 2] = lum;
+    const { L } = rgbToLab(data[p], data[p + 1], data[p + 2]);
+    const { r, g, b } = labToRgb(L, 0, 0);
+    out[p] = r;
+    out[p + 1] = g;
+    out[p + 2] = b;
+    if (channels === 4) out[p + 3] = data[p + 3];
   }
 
   return { data: out, width, height, channels };
+}
+
+/** Mean LAB on masked upholstery (verify neutral master has a,b ≈ 0). */
+export function meanMaskedLab(image, mask) {
+  const { data, width, height, channels } = image;
+  let sumL = 0;
+  let sumA = 0;
+  let sumB = 0;
+  let n = 0;
+  for (let j = 0; j < width * height; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) continue;
+    const p = j * channels;
+    const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
+    sumL += lab.L;
+    sumA += lab.a;
+    sumB += lab.b;
+    n++;
+  }
+  return n
+    ? { n, L: sumL / n, a: sumA / n, b: sumB / n }
+    : { n: 0, L: 0, a: 0, b: 0 };
 }
 
 export async function loadImage(path) {
@@ -526,16 +551,13 @@ export function computeFinalLabL(originalL, swatchL, isLightLeather, isBaliSilk 
 }
 
 /**
- * Photographic recolor on original sofa pixels — no texture reconstruction.
+ * Recolor from true neutral master: neutral L + swatch chroma only (no cognac a/b).
  */
-export function recolorSofa(sourceImage, mask, palette) {
-  const { data, width, height, channels } = sourceImage;
+export function recolorSofa(neutralMaster, mask, palette) {
+  const { data, width, height, channels } = neutralMaster;
   const out = Buffer.from(data);
-  const { lo, span } = computeSofaLuminanceMapRange(sourceImage, mask);
+  const { lo, span } = computeSofaLuminanceMapRange(neutralMaster, mask);
   const isLight = palette.isNamedLight;
-  const isBaliSilk = palette.isBaliSilk;
-  const chromaOrig = isBaliSilk ? BALI_SILK_CHROMA_ORIGINAL : CHROMA_ORIGINAL;
-  const chromaSw = isBaliSilk ? BALI_SILK_CHROMA_SWATCH : CHROMA_SWATCH;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
@@ -545,16 +567,13 @@ export function recolorSofa(sourceImage, mask, palette) {
     const u = clamp((lab.L - lo) / span, 0, 1);
     const tone = interpolateSwatchPalette(palette, u);
 
-    const finalL = clamp(computeFinalLabL(lab.L, tone.L, isLight, isBaliSilk), 0, 100);
-    let finalA = lab.a * chromaOrig + tone.a * chromaSw;
-    let finalB = lab.b * chromaOrig + tone.b * chromaSw;
-    if (isBaliSilk) {
-      const warm = applyBaliSilkChromaFineTune(finalA, finalB, u);
-      finalA = warm.a;
-      finalB = warm.b;
-    }
-    finalA = clamp(finalA, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    finalB = clamp(finalB, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const finalL = clamp(
+      isLight ? computeFinalLabL(lab.L, tone.L, true, palette.isBaliSilk) : lab.L,
+      0,
+      100,
+    );
+    const finalA = clamp(tone.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const finalB = clamp(tone.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const { r, g, b: bOut } = labToRgb(finalL, finalA, finalB);
 
     out[p] = r;
@@ -644,7 +663,7 @@ export function publishRenderOutputs(swatchName, primaryPngPath) {
   return { primary: abs, diagnostic: resolve(copies[0]), legacyFixed: resolve(copies[1]) };
 }
 
-export async function processSwatch(swatchPath, sourceImage, mask) {
+export async function processSwatch(swatchPath, neutralMaster, mask) {
   const resolved = resolveOriginalSwatchPath(swatchPath);
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
 
@@ -664,19 +683,23 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
     midtone: fmtTone(palette.midtone),
     highlight: fmtTone(palette.highlight),
     lightLeather: palette.isNamedLight,
-    lBlend: palette.isBaliSilk
-      ? 'L 78/22 +2 ×0.95'
-      : palette.isNamedLight
-        ? 'L 78/22 +6'
-        : 'L 92/8',
-    chroma: palette.isBaliSilk
-      ? 'a/b 2/98 + gray -12% brown -10% (shadows) cream pull'
-      : 'a/b 12/88 from palette by sofa u',
+    lBlend: palette.isNamedLight
+      ? palette.isBaliSilk
+        ? 'neutral L 78/22 +2 ×0.95'
+        : 'neutral L 78/22 +6'
+      : 'neutral L only',
+    chroma: 'swatch palette a/b only (no cognac blend)',
   });
 
-  const outData = recolorSofa(sourceImage, mask, palette);
+  const outData = recolorSofa(neutralMaster, mask, palette);
   const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
-  const bytes = await saveImage(outData, outPath, sourceImage.width, sourceImage.height, sourceImage.channels);
+  const bytes = await saveImage(
+    outData,
+    outPath,
+    neutralMaster.width,
+    neutralMaster.height,
+    neutralMaster.channels,
+  );
   console.log(`  wrote ${swatchName}.png (${Math.round(bytes / 1024)} KB)`);
   publishRenderOutputs(swatchName, outPath);
   return { outPath, palette };
@@ -762,18 +785,22 @@ export async function main(argv = process.argv) {
     return;
   }
 
-  console.log('  method: photographic LAB recolor (original L + swatch a/b)');
+  console.log('  method: neutral LAB master (L only) + swatch chroma');
 
-  const masterImage = buildNeutralGrayMaster(sourceSofa, mask);
+  const neutralMaster = buildNeutralGrayMaster(sourceSofa, mask);
+  const masterStats = meanMaskedLab(neutralMaster, mask);
+  console.log(
+    `  neutral master upholstery LAB: L=${masterStats.L.toFixed(2)} a=${masterStats.a.toFixed(2)} b=${masterStats.b.toFixed(2)} (a,b should be ~0)`,
+  );
 
   await saveImage(
-    masterImage.data,
-    MASTER_SOFA_PATH,
-    masterImage.width,
-    masterImage.height,
-    masterImage.channels,
+    neutralMaster.data,
+    NEUTRAL_MASTER_PATH,
+    neutralMaster.width,
+    neutralMaster.height,
+    neutralMaster.channels,
   );
-  console.log(`  master: ${MASTER_SOFA_PATH}`);
+  console.log(`  neutral master: ${NEUTRAL_MASTER_PATH}`);
 
   if (cli.mode === 'one') {
     const swPath = resolveSwatchArg(cli.swatchFile);
@@ -781,13 +808,13 @@ export async function main(argv = process.argv) {
       console.error(`Swatch not found: ${cli.swatchFile}`);
       process.exit(1);
     }
-    const { outPath } = await processSwatch(swPath, sourceSofa, mask);
+    const { outPath } = await processSwatch(swPath, neutralMaster, mask);
     console.log(`\nDone: ${outPath}`);
     return;
   }
 
   for (const file of swatchFiles) {
-    await processSwatch(join(SWATCH_DIR, file), sourceSofa, mask);
+    await processSwatch(join(SWATCH_DIR, file), neutralMaster, mask);
   }
 
   const onDisk = readdirSync(OUTPUT_DIR).filter(
