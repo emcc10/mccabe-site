@@ -5462,11 +5462,31 @@ function mcRunParagonPriceSourceDebug() {
   } catch (eDbg) {}
 }
 
+function mcWirePlannerLoginGateCtas(g) {
+  if (!g) return;
+  if (g.querySelector("[data-mc-open-login]")) {
+    g.dataset.mcModalCtas = "1";
+    return;
+  }
+  var row =
+    g.querySelector(".mc-planner-login-gate__actions") ||
+    g.querySelector('div[style*="flex"]');
+  if (!row) return;
+  row.className = "mc-planner-login-gate__actions";
+  row.innerHTML =
+    '<button type="button" class="mc-config-btn" data-mc-open-login style="display:inline-block;padding:8px 14px;border:1px solid #333;background:#fff;color:#111;font-size:12px;cursor:pointer;">Sign In</button>' +
+    '<button type="button" class="mc-config-btn" data-mc-open-signup style="display:inline-block;padding:8px 14px;border:1px solid #333;background:#fff;color:#111;font-size:12px;cursor:pointer;">Create Account</button>';
+  g.dataset.mcModalCtas = "1";
+}
+
 function mcEnsurePlannerLoginGate() {
   var block = document.getElementById("mcConfigurationBlock");
   if (!block) return null;
   var g = document.getElementById("mcPlannerLoginGate");
-  if (g) return g;
+  if (g) {
+    mcWirePlannerLoginGateCtas(g);
+    return g;
+  }
   g = document.createElement("div");
   g.id = "mcPlannerLoginGate";
   g.className = "mc-planner-login-gate";
@@ -5474,7 +5494,7 @@ function mcEnsurePlannerLoginGate() {
   g.setAttribute("aria-label", "Member sign in");
   g.innerHTML =
     '<p class="mc-planner-login-gate__msg" style="margin:0 0 12px;font-size:13px;line-height:1.45;color:#333;">Sign in to view member pricing and add your configured layout to cart.</p>' +
-    '<div style="display:flex;flex-wrap:wrap;gap:10px;">' +
+    '<div class="mc-planner-login-gate__actions" style="display:flex;flex-wrap:wrap;gap:10px;">' +
     '<button type="button" class="mc-config-btn" data-mc-open-login style="display:inline-block;padding:8px 14px;border:1px solid #333;background:#fff;color:#111;font-size:12px;cursor:pointer;">Sign In</button>' +
     '<button type="button" class="mc-config-btn" data-mc-open-signup style="display:inline-block;padding:8px 14px;border:1px solid #333;background:#fff;color:#111;font-size:12px;cursor:pointer;">Create Account</button>' +
     "</div>";
@@ -5484,6 +5504,7 @@ function mcEnsurePlannerLoginGate() {
   } else {
     block.appendChild(g);
   }
+  g.dataset.mcModalCtas = "1";
   return g;
 }
 
@@ -5582,6 +5603,9 @@ function refreshPlannerPriceForMemberState(){
   }
   mcSyncPlannerConfigurationPriceDisplay();
   try { window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing })); } catch (e) {}
+}
+if (typeof window !== "undefined") {
+  window.refreshPlannerPriceForMemberState = refreshPlannerPriceForMemberState;
 }
 /** Volusion myaccount HTML: logged in if logout/sign-out present or welcome dashboard; not if login-only page. */
 function volusionMyAccountHtmlIndicatesLoggedIn(html) {
@@ -16391,7 +16415,7 @@ body.mc-product-page #content_area font.product_sale_price {
     } catch (eVis2) {}
     return true;
   }
-  function mcCloseLoginModal() {
+  function mcCloseLoginModalOnly() {
     var m = document.getElementById('mc-login-modal');
     if (!m) return;
     m.classList.remove('mc-login-modal--open');
@@ -16404,6 +16428,56 @@ body.mc-product-page #content_area font.product_sale_price {
       m.style.removeProperty('z-index');
       document.body.style.overflow = '';
     } catch (e2) {}
+  }
+
+  async function mcRefreshMemberPricingAfterAuth() {
+    try {
+      if (typeof window.mcRememberRecentMemberAuth === 'function') window.mcRememberRecentMemberAuth();
+    } catch (eRem) {}
+    try {
+      window.__mcMemberPricing.promise = null;
+    } catch (ePr) {}
+    var state = null;
+    try {
+      if (typeof window.detectMemberPricingState === 'function') {
+        state = await window.detectMemberPricingState();
+      }
+    } catch (eDet) {}
+    try {
+      if (typeof window.forceProductFixes === 'function') window.forceProductFixes();
+    } catch (eFx) {}
+    try {
+      if (typeof window.mcRenderRetailMemberOnPdp === 'function') {
+        await window.mcRenderRetailMemberOnPdp();
+      }
+    } catch (ePdp) {}
+    try {
+      if (window.__mcPlannerConfigApplied) {
+        if (typeof window.refreshPlannerPriceForMemberState === 'function') {
+          window.refreshPlannerPriceForMemberState();
+        } else if (typeof refreshPlannerPriceForMemberState === 'function') {
+          refreshPlannerPriceForMemberState();
+        }
+        if (typeof window.mcSyncPlannerConfigurationPriceDisplay === 'function') {
+          window.mcSyncPlannerConfigurationPriceDisplay();
+        }
+        if (window.__mcLastPlannerPayload && typeof window.applyPlannerToPage === 'function') {
+          window.applyPlannerToPage(window.__mcLastPlannerPayload);
+        }
+      }
+    } catch (ePl) {}
+    try {
+      if (typeof window.recalcRoomPlannerPrice === 'function') window.recalcRoomPlannerPrice();
+    } catch (eRec) {}
+    try {
+      if (typeof mcRunParagonPriceSourceDebug === 'function') mcRunParagonPriceSourceDebug();
+    } catch (eDbg) {}
+    return state;
+  }
+
+  function mcCloseLoginModal(skipPricingRefresh) {
+    mcCloseLoginModalOnly();
+    if (skipPricingRefresh) return;
     try {
       window.__mcMemberPricing.promise = null;
     } catch (e3) {}
@@ -16427,6 +16501,8 @@ body.mc-product-page #content_area font.product_sale_price {
   }
   window.mcOpenLoginModal = mcOpenLoginModal;
   window.mcCloseLoginModal = mcCloseLoginModal;
+  window.mcCloseLoginModalOnly = mcCloseLoginModalOnly;
+  window.mcRefreshMemberPricingAfterAuth = mcRefreshMemberPricingAfterAuth;
   window.mcOpenSignupModal = mcOpenSignupModal;
 
   var mcIdleLogoutTimer = null;
@@ -16641,12 +16717,13 @@ async function mcSubmitAuthForm(form, mode) {
 
       var confirmed = await mcWaitForAuthSuccess(12000, 500);
       if (confirmed) {
-        mcLoginModalRememberRecentAuth();
-        mcSetAuthStatus('login', 'Signed in. Refreshing...', 'success');
-        mcCloseLoginModal();
-        window.setTimeout(function () {
-          window.location.reload();
-        }, 150);
+        mcSetAuthStatus('login', 'Signed in. Updating member pricing…', 'success');
+        try {
+          await mcRefreshMemberPricingAfterAuth();
+        } catch (eRefresh) {}
+        mcToggleAuthPending(form, false);
+        mcSetAuthStatus('login', '', '');
+        mcCloseLoginModal(true);
         return true;
       }
 
@@ -16700,16 +16777,20 @@ async function mcSubmitAuthForm(form, mode) {
         if (finished) return;
         try {
           if (await mcAuthSucceeded()) {
-            mcLoginModalRememberRecentAuth();
             mcSetAuthStatus(
               mode,
-              mode === 'signup' ? 'Account created. Refreshing...' : 'Signed in. Refreshing...',
+              mode === 'signup' ? 'Account created. Updating member pricing…' : 'Signed in. Updating member pricing…',
               'success'
             );
             cleanup(true, '', '');
-            window.setTimeout(function () {
-              window.location.reload();
-            }, 120);
+            mcToggleAuthPending(form, false);
+            mcSetAuthStatus(mode, '', '');
+            (async function () {
+              try {
+                await mcRefreshMemberPricingAfterAuth();
+              } catch (eRefreshSu) {}
+              mcCloseLoginModal(true);
+            })();
           }
         } catch (eAuth) {}
       }, 0);
@@ -16744,11 +16825,14 @@ async function mcSubmitAuthForm(form, mode) {
 
   document.addEventListener('click', function (e) {
     var loginLink = e.target.closest('.mc-member-grid-price__login, [data-mc-open-login]');
-  if (loginLink) {
-  e.preventDefault();
-  window.location.href = '/login.asp?ReturnTo=' + encodeURIComponent((location.pathname || '/') + (location.search || ''));
-  return;
-}
+    if (loginLink) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof window.mcOpenLoginModal === 'function') {
+        window.mcOpenLoginModal();
+      }
+      return;
+    }
 
     var signupLink = e.target.closest('[data-mc-open-signup]');
     if (signupLink) {
@@ -16782,31 +16866,12 @@ async function mcSubmitAuthForm(form, mode) {
   (function mcBindAuthForms() {
     var loginForm = document.getElementById('mc-member-login-form');
   if (loginForm) {
-  loginForm.addEventListener('submit', function (ev) {
-    ev.preventDefault();
-
-    try {
-      mcSetAuthStatus('login', '', '');
-      mcToggleAuthPending(loginForm, true);
-      mcSetAuthStatus('login', 'Signing in...', 'success');
-
-      mcSetLoginFormAction();
-
-      var emailEl = document.getElementById('mc-login-email');
-      if (emailEl) emailEl.setAttribute('name', 'EmailAddress');
-
-      var passwordEl = document.getElementById('mc-login-password');
-      if (passwordEl) passwordEl.setAttribute('name', 'Password');
-
-      loginForm.removeAttribute('target');
-      HTMLFormElement.prototype.submit.call(loginForm);
-    } catch (eLoginSubmit) {
-      mcLoginModalClearRecentAuth();
-      mcSetAuthStatus('login', 'Could not sign in right now. Please try again.', 'error');
-      mcToggleAuthPending(loginForm, false);
-    }
-  });
-}
+    loginForm.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      mcSubmitAuthForm(loginForm, 'login');
+    });
+  }
     var form = document.getElementById('mc-member-signup-form');
     if (!form) return;
     form.addEventListener('submit', function (ev) {
@@ -17436,9 +17501,7 @@ async function mcSubmitAuthForm(form, mode) {
     } else {
       html +=
         '<div class="mc-member-grid-price__label">Member price:</div>' +
-        '<div class="mc-member-grid-price__hint"><a href="' +
-        loginUrl +
-        '" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see member pricing</div>';
+        '<div class="mc-member-grid-price__hint"><a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see member pricing</div>';
     }
     html += '</div>';
 
