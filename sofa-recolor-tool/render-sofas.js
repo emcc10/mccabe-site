@@ -685,16 +685,9 @@ export function computeBaliFullLRange(sourceImage, mask) {
   return { lo, hi, span: Math.max(hi - lo, SOFA_L_MAP_MIN_SPAN) };
 }
 
-/**
- * Bali L: multiplicative scale from source photo (preserves relative microcontrast).
- * Chroma-only brightness anchor — no additive flattening.
- */
+/** Bali L: source photo L + brightness offset (preserves all ΔL from catalog photo). */
 export function baliPreservedPhotoL(photoL, meanPhotoL, anchorL) {
-  const scale = anchorL / Math.max(meanPhotoL, 1);
-  let L = photoL * scale;
-  if (L > 100) L = 100;
-  if (L < 0) L = 0;
-  return L;
+  return clamp(photoL + (anchorL - meanPhotoL), 0, 100);
 }
 
 export function computeFinalLabL(originalL, swatchL) {
@@ -719,13 +712,9 @@ export function swatchChromaForPixel(palette, u) {
 export function recolorSofa(sourceImage, mask, palette) {
   const { data, width, height, channels } = sourceImage;
   const out = Buffer.from(data);
+  const { lo, span } = computeSofaLuminanceMapRange(sourceImage, mask);
   const meanPhotoL = palette.isBaliSilk ? meanMaskedLab(sourceImage, mask).L : 0;
   const anchorL = palette.isBaliSilk ? palette.midtone.L : 0;
-  const lMap = palette.isBaliSilk
-    ? computeBaliFullLRange(sourceImage, mask)
-    : computeSofaLuminanceMapRange(sourceImage, mask);
-  const lo = lMap.lo;
-  const span = lMap.span;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
@@ -865,7 +854,7 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
     highlight: fmtTone(palette.highlight),
     lightLeather: palette.isNamedLight,
     lBlend: isBali
-      ? 'source photo L × scale (multiplicative, full min–max u map)'
+      ? 'source photo L + offset (swatch chroma only; no L processing)'
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali ? 'finalize bottom band + white bg only (no upholstery touch)' : null,
@@ -985,7 +974,7 @@ export async function main(argv = process.argv) {
     return;
   }
 
-  console.log('  method: Bali chroma only + multiplicative source L; finalize bg/bottom only');
+  console.log('  method: Bali chroma only + preserved source L; finalize bg/bottom only');
 
   if (cli.mode === 'one') {
     const swPath = resolveSwatchArg(cli.swatchFile);
