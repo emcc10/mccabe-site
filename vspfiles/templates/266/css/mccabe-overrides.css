@@ -867,11 +867,22 @@ body.mc-product-page #v65-product-parent .mc-pdp-options-td label,
 body.mc-theater-seating-pdp #v65-product-parent .mc-pdp-options-td label,
 html.mc-paragon-pdp body #v65-product-parent .mc-pdp-options-td label {
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 11px !important;
+  font-size: 13px !important;
   font-weight: 400 !important;
   letter-spacing: 0.1em !important;
   text-transform: uppercase !important;
   color: #444 !important;
+}
+
+body.productdetails #mcConfigurationBlock .mc-configuration-rh__pieces,
+body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__pieces,
+body.mc-theater-seating-pdp #mcConfigurationBlock .mc-configuration-rh__pieces,
+html.mc-paragon-pdp body #mcConfigurationBlock .mc-configuration-rh__pieces,
+body.productdetails #mcConfigurationBlock .mc-configuration-rh__pieces div,
+body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__pieces div,
+html.mc-paragon-pdp body #mcConfigurationBlock .mc-configuration-rh__pieces div {
+  font-size: 13px !important;
+  line-height: 1.45 !important;
 }
 
 body.productdetails #content_area .v65-productdetail-cartqty,

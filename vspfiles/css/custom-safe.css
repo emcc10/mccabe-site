@@ -10474,16 +10474,22 @@ html.mc-paragon-pdp body #mc-pdp-accordion .mc-acc-leather-host {
 body.mc-theater-seating-pdp #options_table.mc-native-options-offscreen,
 body.mc-theater-seating-pdp table[id*="options_table"].mc-native-options-offscreen,
 html.mc-paragon-pdp body #options_table.mc-native-options-offscreen,
-html.mc-paragon-pdp body table[id*="options_table"].mc-native-options-offscreen {
+html.mc-paragon-pdp body table[id*="options_table"].mc-native-options-offscreen,
+body.mc-product-page #options_table[data-mc-hide-native-options="1"],
+body.mc-product-page table[id*="options_table"][data-mc-hide-native-options="1"] {
   position: absolute !important;
   left: -9999px !important;
+  top: 0 !important;
   opacity: 0 !important;
+  visibility: hidden !important;
   pointer-events: none !important;
   height: 0 !important;
+  max-height: 0 !important;
   overflow: hidden !important;
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
+  z-index: -1 !important;
 }
 
 /* Final 992–1199 desktop header clamp: center menu; search is off-flow (.mc-search-float). */

@@ -6825,7 +6825,18 @@ window.applyPlannerToPage = function (payload) {
       } else {
         Object.keys(opts).forEach(function(k){ for (var i = 0; i < (opts[k] || 0); i++) list.push({ id: k, name: MC_PLANNER_PIECE_NAMES[k] || k, desc: MC_PLANNER_PIECE_DESCRIPTIONS[k] || "" }); });
       }
-      configPieces.innerHTML = list.map(function(p){ return "<div style=\"margin-bottom:6px\"><strong>" + (p.name || p.id) + "</strong>" + (p.desc ? " &mdash; " + p.desc : "") + "</div>"; }).join("");
+      configPieces.innerHTML = list
+        .map(function (p) {
+          return (
+            '<div style="margin-bottom:6px;font-size:13px;line-height:1.45">' +
+            "<strong>" +
+            (p.name || p.id) +
+            "</strong>" +
+            (p.desc ? " &mdash; " + p.desc : "") +
+            "</div>"
+          );
+        })
+        .join("");
       if (!mcPlannerUserIsLoggedIn()) {
         configCaption.style.display = "block";
         configCaption.classList.add("mc-configuration-rh__planner-only");
@@ -8852,7 +8863,7 @@ body.mc-product-page #content_area .mc-option-accordion__label,
 body.mc-product-page #content_area .mc-option-accordion__header {
   font-style: normal !important;
   font-weight: 400 !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   letter-spacing: 0.06em !important;
   text-transform: uppercase !important;
   color: #686868 !important;
@@ -8860,6 +8871,13 @@ body.mc-product-page #content_area .mc-option-accordion__header {
   margin-left: 0 !important;
   padding: 10px 14px 10px 0 !important;
   line-height: 1.2 !important;
+}
+body.mc-theater-seating-pdp #mcConfigurationBlock .mc-configuration-rh__pieces,
+body.mc-theater-seating-pdp #mcConfigurationBlock .mc-configuration-rh__pieces *,
+html.mc-paragon-pdp body #mcConfigurationBlock .mc-configuration-rh__pieces,
+html.mc-paragon-pdp body #mcConfigurationBlock .mc-configuration-rh__pieces * {
+  font-size: 13px !important;
+  line-height: 1.45 !important;
 }
 /* Product tabs – more padding so labels are not too short */
 body.mc-product-page #content_area .tab,
@@ -12371,6 +12389,35 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       return false;
     }
   }
+  function mcIsParagonOrTheaterPdpEarly() {
+    try {
+      if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
+      if (document.documentElement.classList.contains("mc-paragon-pdp")) return true;
+      var path = String(location.pathname || "").toLowerCase();
+      if (/\bparagon\b/i.test(path)) return true;
+      if (/-s\/106(\b|\.|-|\/)/.test(path)) return true;
+      var pcInput = document.querySelector('input[name="ProductCode"]');
+      var pcVal = pcInput && String(pcInput.value || "").trim();
+      if (pcVal === "41417") return true;
+      if (/\bparagon\b|theater seating|theatre seating|theater chair|theatre chair/.test(
+        (
+          (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
+          document.title ||
+          ""
+        ).toLowerCase()
+      )) {
+        return true;
+      }
+    } catch (eEarly) {}
+    return false;
+  }
+
+  function mcShouldKeepOptionsOffscreen() {
+    if (mcIsParagonOrTheaterPdpEarly()) return true;
+    if (document.getElementById("mc-inline-config")) return true;
+    return mcPdpKeepsNativeOptionsOffscreen();
+  }
+
   function mcPdpKeepsNativeOptionsOffscreen() {
     if (!document.getElementById("mc-inline-config")) return false;
     if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
@@ -12388,10 +12435,11 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (isBeanBagProductPage()) return;
     if (document.documentElement.classList.contains("has-sectional-config-cards")) return;
     var root = scope || document;
-    var keepOffscreen = mcPdpKeepsNativeOptionsOffscreen();
+    var keepOffscreen = mcShouldKeepOptionsOffscreen();
     var tables = qa('#options_table, table[id*="options_table"]', root);
     tables.forEach(function(t){
       if (keepOffscreen) {
+        if (t.dataset.mcHideNativeOptions === "1") return;
         if (typeof window.mcApplyOffscreenNativeOptionsTable === "function") {
           window.mcApplyOffscreenNativeOptionsTable(t);
           return;
@@ -12404,20 +12452,16 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         try { t.style.setProperty("pointer-events", "none", "important"); } catch (e3) {}
         try { t.style.setProperty("height", "0", "important"); } catch (e4) {}
         try { t.style.setProperty("overflow", "hidden", "important"); } catch (e5) {}
+        try { t.style.setProperty("display", "block", "important"); } catch (e6) {}
         return;
       }
+      if (document.body && document.body.classList.contains("mc-product-page")) return;
       try { t.style.removeProperty('position'); } catch (e0) {}
       try { t.style.removeProperty('left'); } catch (e1) {}
       try { t.style.removeProperty('opacity'); } catch (e2) {}
       try { t.style.removeProperty('pointer-events'); } catch (e3) {}
       try { t.style.removeProperty('height'); } catch (e4) {}
       try { t.style.removeProperty('overflow'); } catch (e5) {}
-      try { t.style.setProperty('position','static','important'); } catch (e6) {}
-      try { t.style.setProperty('left','auto','important'); } catch (e7) {}
-      try { t.style.setProperty('opacity','1','important'); } catch (e8) {}
-      try { t.style.setProperty('pointer-events','auto','important'); } catch (e9) {}
-      try { t.style.setProperty('height','auto','important'); } catch (e10) {}
-      try { t.style.setProperty('overflow','visible','important'); } catch (e11) {}
     });
   }
 
@@ -12854,9 +12898,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function boot() {
     forceProductFixes();
-    if (mcPdpKeepsNativeOptionsOffscreen()) {
+    if (mcShouldKeepOptionsOffscreen()) {
       setTimeout(forceProductFixes, 800);
-      setTimeout(forceProductFixes, 2200);
       return;
     }
     var tries = 0;
@@ -16889,6 +16932,12 @@ body.mc-product-page #content_area font.product_sale_price {
     }
     return false;
   }
+  function mcAuthDelayMs(ms) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, Math.max(0, Number(ms) || 0));
+    });
+  }
+
   async function mcWaitForAuthSuccess(maxMs, intervalMs) {
     var timeoutMs = Math.max(1000, Number(maxMs) || 0);
     var stepMs = Math.max(200, Number(intervalMs) || 0);
@@ -16897,9 +16946,62 @@ body.mc-product-page #content_area font.product_sale_price {
       try {
         if (await mcAuthSucceeded()) return true;
       } catch (eAuthPoll) {}
-      await mcDelay(stepMs);
+      var delayFn = typeof mcDelay === "function" ? mcDelay : mcAuthDelayMs;
+      await delayFn(stepMs);
     }
     return false;
+  }
+
+  function mcPostHiddenVolusionForm(actionUrl, fields) {
+    return new Promise(function (resolve, reject) {
+      var frame = mcGetAuthFrame();
+      var settled = false;
+      var timer = window.setTimeout(function () {
+        if (settled) return;
+        settled = true;
+        try {
+          frame.onload = null;
+        } catch (eT) {}
+        reject(new Error("timeout"));
+      }, 22000);
+      frame.onload = function () {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        try {
+          frame.onload = null;
+        } catch (eL) {}
+        window.setTimeout(function () {
+          resolve(true);
+        }, 200);
+      };
+      var f = document.createElement("form");
+      f.method = "POST";
+      f.action = actionUrl;
+      f.target = frame.name;
+      f.style.cssText = "position:absolute;left:-9999px;visibility:hidden";
+      Object.keys(fields || {}).forEach(function (key) {
+        var inp = document.createElement("input");
+        inp.type = "hidden";
+        inp.name = key;
+        inp.value = fields[key] == null ? "" : String(fields[key]);
+        f.appendChild(inp);
+      });
+      document.body.appendChild(f);
+      try {
+        f.submit();
+      } catch (eSub) {
+        settled = true;
+        window.clearTimeout(timer);
+        reject(eSub);
+        return;
+      }
+      window.setTimeout(function () {
+        try {
+          f.remove();
+        } catch (eRm) {}
+      }, 600);
+    });
   }
   function mcNormalizeLoginFormFields(form) {
     if (!form) return;
@@ -16952,26 +17054,38 @@ body.mc-product-page #content_area font.product_sale_price {
 
   async function mcPostVolusionLoginTwoStep(form) {
     mcNormalizeLoginFormFields(form);
-    var emailEl = document.getElementById('mc-login-email');
-    var passwordEl = document.getElementById('mc-login-password');
-    var email = emailEl ? String(emailEl.value || '').trim() : '';
-    var password = passwordEl ? String(passwordEl.value || '') : '';
+    var emailEl = document.getElementById("mc-login-email");
+    var passwordEl = document.getElementById("mc-login-password");
+    var email = emailEl ? String(emailEl.value || "").trim() : "";
+    var password = passwordEl ? String(passwordEl.value || "") : "";
     if (!email || !password) return false;
 
     var urls = mcVolusionLoginUrls();
     try {
-      var r1 = await mcFetchVolusionAuth(urls.step1, mcVolusionLoginStep1Body(email));
-      var html1 = await r1.text();
-      if (/invalid|not found|no account|does not exist/i.test(html1) && !/name\s*=\s*["']password["']/i.test(html1)) {
+      await mcPostHiddenVolusionForm(urls.step1, {
+        CustomerNewOld: "old",
+        email: email,
+        "imageField2.x": "1",
+        "imageField2.y": "1",
+      });
+      await mcAuthDelayMs(350);
+      await mcPostHiddenVolusionForm(urls.step2, {
+        CustomerNewOld: "old",
+        email: email,
+        password: password,
+        "imageField2.x": "1",
+        "imageField2.y": "1",
+      });
+    } catch (eLoginSteps) {
+      try {
+        await mcFetchVolusionAuth(urls.step1, mcVolusionLoginStep1Body(email));
+        await mcAuthDelayMs(300);
+        await mcFetchVolusionAuth(urls.step2, mcVolusionLoginStep2Body(email, password));
+      } catch (eFetchFallback) {
         return false;
       }
-      var r2 = await mcFetchVolusionAuth(urls.step2, mcVolusionLoginStep2Body(email, password));
-      var html2 = await r2.text();
-      if (mcLoginResponseLooksFailed(html2, r2.url)) return false;
-    } catch (eLoginSteps) {
-      return false;
     }
-    return await mcWaitForAuthSuccess(12000, 500);
+    return await mcWaitForAuthSuccess(15000, 500);
   }
 
   async function mcPostAuthWithFetch(form, mode) {
@@ -17030,9 +17144,25 @@ async function mcSubmitAuthForm(form, mode) {
   mcToggleAuthPending(form, true);
   mcSetAuthStatus(mode, mode === 'signup' ? 'Creating account.' : 'Signing in.', 'success');
 
+  var authFinished = false;
+  var watchdog = window.setTimeout(function () {
+    if (authFinished) return;
+    authFinished = true;
+    mcToggleAuthPending(form, false);
+    mcSetAuthStatus(
+      mode,
+      mode === 'signup'
+        ? 'Account setup timed out. Please try again.'
+        : 'Sign-in timed out. Check your email and password, or use “Open in a new tab” below.',
+      'error'
+    );
+  }, 28000);
+
   try {
-    var confirmed = await mcPostAuthWithFetch(form, mode);
+    var confirmed = authFinished ? false : await mcPostAuthWithFetch(form, mode);
+    if (authFinished) return false;
     if (confirmed) {
+      authFinished = true;
       mcLoginModalRememberRecentAuth();
       mcSetAuthStatus(
         mode,
@@ -17058,16 +17188,21 @@ async function mcSubmitAuthForm(form, mode) {
     mcToggleAuthPending(form, false);
     return false;
   } catch (eAuthAll) {
-    mcLoginModalClearRecentAuth();
-    mcSetAuthStatus(
-      mode,
-      mode === 'signup'
-        ? 'Could not create the account right now. Please try again.'
-        : 'Could not sign in right now. Please try again.',
-      'error'
-    );
-    mcToggleAuthPending(form, false);
+    if (!authFinished) {
+      mcLoginModalClearRecentAuth();
+      mcSetAuthStatus(
+        mode,
+        mode === 'signup'
+          ? 'Could not create the account right now. Please try again.'
+          : 'Could not sign in right now. Please try again.',
+        'error'
+      );
+      mcToggleAuthPending(form, false);
+    }
     return false;
+  } finally {
+    authFinished = true;
+    window.clearTimeout(watchdog);
   }
 }
 
