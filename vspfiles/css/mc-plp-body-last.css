@@ -7,7 +7,7 @@
   align-items: flex-end !important;
   justify-content: center !important;
   overflow: visible !important;
-  background: transparent !important;
+  background: #ffffff !important;
   min-height: 0 !important;
   max-height: none !important;
   padding: 0 !important;
@@ -100,4 +100,13 @@ html.category #content_area .v-product-grid .v-product {
 html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos/"],
 html.category #content_area .v-product-grid img[src*="/v/vspfiles/product/"] {
   background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html.category #content_area .v-product-grid a.v-product__img > img,
+html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img > img {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
