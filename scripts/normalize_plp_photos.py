@@ -57,6 +57,11 @@ def draw_bounds_debug(img: Image.Image, bounds: SofaBounds, color: tuple[int, in
     return out
 
 
+def is_sectional_filename(name: str) -> bool:
+    n = name.lower()
+    return "-sc-" in n or n.startswith("sc-")
+
+
 def normalize_sofa_image(
     img: Image.Image,
     bounds: SofaBounds,
@@ -65,6 +70,7 @@ def normalize_sofa_image(
     canvas_size: tuple[int, int] = DEFAULT_CANVAS,
     pad: tuple[int, int, int, int] = DEFAULT_PAD,
     bg: tuple[int, int, int, int] = (255, 255, 255, 255),
+    fill_inner_height: bool = False,
 ) -> tuple[Image.Image, dict]:
     """Return normalized RGBA canvas and placement metadata."""
     pad_l, pad_t, pad_r, pad_b = pad
@@ -76,7 +82,10 @@ def normalize_sofa_image(
 
     crop = img.crop((bounds.min_x, bounds.min_y, bounds.max_x, bounds.max_y)).convert("RGBA")
 
-    scale = target_sofa_width / bounds.visible_w
+    if fill_inner_height:
+        scale = inner_h / bounds.visible_h
+    else:
+        scale = target_sofa_width / bounds.visible_w
     scaled_w = max(1, round(bounds.visible_w * scale))
     scaled_h = max(1, round(bounds.visible_h * scale))
 
@@ -101,6 +110,7 @@ def normalize_sofa_image(
         "sourceSize": [bounds.img_w, bounds.img_h],
         "bounds": bounds.as_dict(),
         "targetSofaWidth": target_sofa_width,
+        "fillInnerHeight": fill_inner_height,
         "scaledSize": [scaled_w, scaled_h],
         "placement": {"x": x, "y": y, "w": scaled_w, "h": scaled_h},
         "canvas": list(canvas_size),
@@ -140,12 +150,14 @@ def process_file(
     if dry_run:
         return None, {"bounds": bounds.as_dict()}
 
+    fill_h = is_sectional_filename(path.name)
     norm, meta = normalize_sofa_image(
         img,
         bounds,
         target_sofa_width=target_sofa_width,
         canvas_size=canvas_size,
         pad=pad,
+        fill_inner_height=fill_h,
     )
 
     if debug_dir:

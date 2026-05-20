@@ -47,6 +47,11 @@ const LIGHT_BODY_WARM_A_MIN = -2;
 const LIGHT_BODY_SHADOW_MIN_PIXELS = 80;
 const L_BLEND_MASTER = 0.88;
 const L_BLEND_SWATCH = 0.12;
+/** Light leathers: L from swatch palette (sofa u = shape only), not cognac master L. */
+const LIGHT_L_FLOOR = 64;
+const LIGHT_SHADOW_SOFTEN = 0.72;
+const LIGHT_L_LIFT = 6;
+const LIGHT_L_MAX = 95;
 /** Sofa L percentiles for shadow → mid → highlight color mapping. */
 const SOFA_L_MAP_LO = 0.08;
 const SOFA_L_MAP_HI = 0.92;
@@ -477,8 +482,19 @@ export function computeSofaLuminanceMapRange(masterImage, mask) {
   return { lo, hi, span: Math.max(hi - lo, SOFA_L_MAP_MIN_SPAN) };
 }
 
-/** Preserve original sofa L; swatch contributes color family only (12%). */
-export function computeFinalLabL(masterL, swatchL) {
+/**
+ * Dark/mid leathers: mostly original sofa L + swatch color hint.
+ * Light neutrals: luminance from swatch tones (ivory family); master L only drives u mapping.
+ */
+export function computeFinalLabL(masterL, swatchL, isLightLeather) {
+  if (isLightLeather) {
+    let finalL = swatchL;
+    if (finalL < LIGHT_L_FLOOR) {
+      finalL = LIGHT_L_FLOOR + (finalL - LIGHT_L_FLOOR) * LIGHT_SHADOW_SOFTEN;
+    }
+    finalL += LIGHT_L_LIFT;
+    return Math.min(finalL, LIGHT_L_MAX);
+  }
   return masterL * L_BLEND_MASTER + swatchL * L_BLEND_SWATCH;
 }
 
@@ -490,6 +506,7 @@ export function recolorSofa(masterImage, mask, palette, sourceSofa) {
   const out = Buffer.from(data);
   const { lo, span } = computeSofaLuminanceMapRange(masterImage, mask);
   const leatherDetail = prepareOriginalLeatherDetail(sourceSofa);
+  const isLight = palette.isNamedLight;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
@@ -498,8 +515,8 @@ export function recolorSofa(masterImage, mask, palette, sourceSofa) {
     const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
     const u = clamp((lab.L - lo) / span, 0, 1);
     const tone = interpolateSwatchPalette(palette, u);
-    let finalL = computeFinalLabL(lab.L, tone.L);
-    finalL = applyLeatherDetailRestore(finalL, j, leatherDetail);
+    let finalL = computeFinalLabL(lab.L, tone.L, isLight);
+    finalL = applyLeatherDetailRestore(finalL, j, leatherDetail, isLight);
     const a = clamp(tone.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const b = clamp(tone.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const { r, g, b: bOut } = labToRgb(finalL, a, b);
@@ -533,8 +550,8 @@ export async function processSwatch(swatchPath, masterImage, mask, sourceSofa) {
     midtone: fmtTone(palette.midtone),
     highlight: fmtTone(palette.highlight),
     lightLeather: palette.isNamedLight,
-    lBlend: '88/12',
-    leatherDetail: 'HF×0.55(±8) edge×0.12 spec×0.22',
+    lBlend: palette.isNamedLight ? 'swatch-L ivory + lift (shape from u)' : '88/12',
+    leatherDetail: palette.isNamedLight ? 'light: micro HF only' : 'HF×0.55 edge×0.12 spec×0.22',
   });
 
   const outData = recolorSofa(masterImage, mask, palette, sourceSofa);

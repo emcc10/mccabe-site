@@ -13,6 +13,10 @@ const EDGE_GAIN = 0.12;
 const SPEC_GAUSS_RADIUS = 14;
 const SPEC_GAIN = 0.22;
 
+const LIGHT_DETAIL_GAIN = 0.28;
+const LIGHT_DETAIL_CLAMP = 4;
+const LIGHT_SPEC_GAIN = 0.14;
+
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
 }
@@ -87,10 +91,18 @@ export function prepareOriginalLeatherDetail(sourceImage) {
   return { originalL, gaussianDetail, localMeanEdge, gaussianSpec, width, height };
 }
 
-export function applyLeatherDetailRestore(finalL, j, detail) {
+export function applyLeatherDetailRestore(finalL, j, detail, isLightLeather = false) {
   const oL = detail.originalL[j];
-  let L = finalL;
 
+  if (isLightLeather) {
+    let detailAdd = (oL - detail.gaussianDetail[j]) * LIGHT_DETAIL_GAIN;
+    detailAdd = clamp(detailAdd, -LIGHT_DETAIL_CLAMP, LIGHT_DETAIL_CLAMP);
+    let L = finalL + detailAdd;
+    L += Math.max(0, oL - detail.gaussianSpec[j]) * LIGHT_SPEC_GAIN;
+    return L;
+  }
+
+  let L = finalL;
   let detailAdd = (oL - detail.gaussianDetail[j]) * DETAIL_GAIN;
   detailAdd = clamp(detailAdd, -DETAIL_CLAMP, DETAIL_CLAMP);
   L += detailAdd;
@@ -100,8 +112,6 @@ export function applyLeatherDetailRestore(finalL, j, detail) {
     L -= edge * EDGE_GAIN;
   }
 
-  const spec = Math.max(0, oL - detail.gaussianSpec[j]);
-  L += spec * SPEC_GAIN;
-
+  L += Math.max(0, oL - detail.gaussianSpec[j]) * SPEC_GAIN;
   return L;
 }

@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260617
+ * MC_PLP_ENFORCER_20260618
  *
  * Thumbnails: .mc-plp-image-box + visible-sofa width normalization (no crop, no scale transform).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260617";
+  var VERSION = "20260618";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -355,6 +355,11 @@
     img.style.removeProperty("max-height");
     img.style.removeProperty("min-height");
     img.style.setProperty("transform", "none", "important");
+    img.style.setProperty("border", "none", "important");
+    img.style.setProperty("outline", "none", "important");
+    img.style.setProperty("box-shadow", "none", "important");
+    img.style.setProperty("background", "transparent", "important");
+    img.removeAttribute("border");
   }
 
   function applyImageBoxLayout(parent) {
@@ -365,6 +370,8 @@
     parent.style.setProperty("align-items", "flex-end", "important");
     parent.style.setProperty("justify-content", "center", "important");
     parent.style.setProperty("width", "100%", "important");
+    parent.style.setProperty("background", "#ffffff", "important");
+    parent.style.setProperty("background-color", "#ffffff", "important");
   }
 
   function applyPreNormalizedPhoto(img, parent) {
