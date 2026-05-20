@@ -51,8 +51,14 @@ const DARK_L_SWATCH = 0.08;
 const LIGHT_L_ORIGINAL = 0.65;
 const LIGHT_L_SWATCH = 0.35;
 const LIGHT_L_LIFT = 6;
-/** Optional Bali trim if swatch b reads warm (0 = off; try -2.5 if needed). */
-const BALI_SILK_B_TRIM = 0;
+/** Bali-Silk final nudge only (pipeline unchanged). */
+const BALI_SILK_WARM_B = 3;
+const BALI_SILK_MID_L_LIFT = 5;
+const BALI_SILK_MID_U_LO = 0.12;
+const BALI_SILK_MID_U_HI = 0.88;
+const BALI_SILK_WARM_A_TARGET = 2;
+const BALI_SILK_GRAY_U_LO = 0.2;
+const BALI_SILK_GRAY_U_HI = 0.68;
 /** Diagnostic: force uniform upholstery chroma; L from source only. */
 export const BRUTE_FORCE_CHROMA_A = 2;
 export const BRUTE_FORCE_CHROMA_B = 10;
@@ -516,6 +522,34 @@ export function computeFinalLabL(originalL, swatchL, isLightLeather) {
   return originalL * DARK_L_ORIGINAL + swatchL * DARK_L_SWATCH;
 }
 
+/** Bell 0 at u edges; peaks midtones — highlights/deep shadows unchanged. */
+export function baliSilkMidtoneLift(u) {
+  if (u < BALI_SILK_MID_U_LO || u > BALI_SILK_MID_U_HI) return 0;
+  const t = (u - BALI_SILK_MID_U_LO) / (BALI_SILK_MID_U_HI - BALI_SILK_MID_U_LO);
+  return Math.sin(t * Math.PI) * BALI_SILK_MID_L_LIFT;
+}
+
+/** Warm ivory tweak: +b, mid L lift, less gray a/b in cushion/shadow mids. */
+export function applyBaliSilkFineTune(L, a, b, u) {
+  let outL = L + baliSilkMidtoneLift(u);
+  let outA = a;
+  let outB = b + BALI_SILK_WARM_B;
+
+  if (u < 0.72 && outA < BALI_SILK_WARM_A_TARGET) {
+    const pull = (1 - u / 0.72) * 0.55;
+    outA += (BALI_SILK_WARM_A_TARGET - outA) * pull;
+  }
+
+  if (u >= BALI_SILK_GRAY_U_LO && u <= BALI_SILK_GRAY_U_HI) {
+    const g = 1 - Math.abs(u - 0.42) / 0.26;
+    const grayCut = clamp(g, 0, 1);
+    outB += grayCut * 1;
+    if (outA < 1.8) outA += grayCut * 0.6;
+  }
+
+  return { L: outL, a: outA, b: outB };
+}
+
 /**
  * Recolor from true neutral master: neutral L + swatch chroma only (no cognac a/b).
  */
@@ -533,10 +567,17 @@ export function recolorSofa(neutralMaster, mask, palette) {
     const u = clamp((lab.L - lo) / span, 0, 1);
     const tone = interpolateSwatchPalette(palette, u);
 
-    const finalL = clamp(isLight ? computeFinalLabL(lab.L, tone.L, true) : lab.L, 0, 100);
-    const finalA = clamp(tone.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    let finalL = isLight ? computeFinalLabL(lab.L, tone.L, true) : lab.L;
+    let finalA = tone.a;
     let finalB = tone.b;
-    if (palette.isBaliSilk && BALI_SILK_B_TRIM !== 0) finalB += BALI_SILK_B_TRIM;
+    if (palette.isBaliSilk) {
+      const tuned = applyBaliSilkFineTune(finalL, finalA, finalB, u);
+      finalL = tuned.L;
+      finalA = tuned.a;
+      finalB = tuned.b;
+    }
+    finalL = clamp(finalL, 0, 100);
+    finalA = clamp(finalA, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     finalB = clamp(finalB, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const { r, g, b: bOut } = labToRgb(finalL, finalA, finalB);
 
@@ -648,8 +689,8 @@ export async function processSwatch(swatchPath, neutralMaster, mask) {
     highlight: fmtTone(palette.highlight),
     lightLeather: palette.isNamedLight,
     lBlend: palette.isNamedLight ? 'neutral L 65/35 +6' : 'neutral L only',
-    chroma: palette.isBaliSilk && BALI_SILK_B_TRIM
-      ? `swatch a/b only (b trim ${BALI_SILK_B_TRIM})`
+    chroma: palette.isBaliSilk
+      ? `swatch a/b + warm ivory nudge (b+${BALI_SILK_WARM_B}, mid L+${BALI_SILK_MID_L_LIFT})`
       : 'swatch a/b only',
   });
 

@@ -74,6 +74,71 @@ def _photo_remotes(name: str) -> list[str]:
     return out
 
 
+def _showcase_remotes(name: str) -> list[str]:
+    """Volusion chroot often serves under /v/vspfiles — try that path first."""
+    seen: set[str] = set()
+    out: list[str] = []
+    for p in (
+        f"/v/vspfiles/boards/showcase/{name}",
+        f"/vspfiles/boards/showcase/{name}",
+    ):
+        if p not in seen:
+            seen.add(p)
+            out.append(p)
+    return out
+
+
+def _ensure_remote_dir(sftp, remote: str) -> None:
+    directory = remote.rsplit("/", 1)[0]
+    if not directory:
+        return
+    parts = [p for p in directory.split("/") if p]
+    cur = ""
+    for part in parts:
+        cur += "/" + part
+        try:
+            sftp.stat(cur)
+        except OSError:
+            try:
+                sftp.mkdir(cur)
+            except OSError:
+                pass
+
+
+def _upload_chunked(sftp, local: str, remote: str, chunk_size: int = 16384) -> bool:
+    """Volusion SFTP often truncates single-shot put() at 32 KiB for PNGs."""
+    want = os.path.getsize(local)
+    _ensure_remote_dir(sftp, remote)
+    try:
+        try:
+            sftp.remove(remote)
+        except OSError:
+            pass
+        with open(local, "rb") as src:
+            with sftp.open(remote, "wb") as dst:
+                dst.set_pipelined(True)
+                while True:
+                    buf = src.read(chunk_size)
+                    if not buf:
+                        break
+                    dst.write(buf)
+    except Exception as exc:  # noqa: BLE001
+        print(f"::warning::CHUNK_PUT_SKIP {remote!r}: {exc}", flush=True)
+        return False
+    try:
+        got = sftp.stat(remote).st_size
+    except OSError:
+        return False
+    if got == want:
+        print(f"::notice::PUT_OK_CHUNKED {local!r} -> {remote!r} size={want}", flush=True)
+        return True
+    print(
+        f"::warning::SIZE_MISMATCH_CHUNKED {remote!r} want={want} got={got}",
+        flush=True,
+    )
+    return False
+
+
 def _upload_one(sftp, local: str, remotes: list[str] | None = None) -> bool:
     want = os.path.getsize(local)
     if local.replace("\\", "/") in {p.replace("\\", "/") for p in SKIP_OVER_CAP}:
@@ -86,9 +151,13 @@ def _upload_one(sftp, local: str, remotes: list[str] | None = None) -> bool:
             return True
 
     paths = remotes if remotes is not None else _remotes(local)
+    use_chunked_first = want > 31000 or local.lower().endswith(".png")
     last_exc: Exception | None = None
     for remote in paths:
         try:
+            _ensure_remote_dir(sftp, remote)
+            if use_chunked_first and _upload_chunked(sftp, local, remote):
+                return True
             sftp.put(local, remote, confirm=False)
             got = sftp.stat(remote).st_size
             if got == want:
@@ -98,6 +167,8 @@ def _upload_one(sftp, local: str, remotes: list[str] | None = None) -> bool:
                 f"::warning::SIZE_MISMATCH {remote!r} want={want} got={got}",
                 flush=True,
             )
+            if got < want and _upload_chunked(sftp, local, remote):
+                return True
             last_exc = None
         except Exception as exc:  # noqa: BLE001
             last_exc = exc
@@ -171,22 +242,16 @@ def main() -> int:
             showcase_fail = 0
             for local in showcase:
                 name = os.path.basename(local)
-                ok = _upload_one(
-                    sftp,
-                    local,
-                    [
-                        f"/vspfiles/boards/showcase/{name}",
-                        f"/v/vspfiles/boards/showcase/{name}",
-                    ],
-                )
+                ok = _upload_one(sftp, local, _showcase_remotes(name))
                 if not ok:
                     showcase_fail += 1
             if showcase_fail:
                 print(
-                    f"::error::{showcase_fail} boards showcase image(s) failed",
-                    file=sys.stderr,
+                    f"::warning::{showcase_fail} boards showcase image(s) failed "
+                    "(non-blocking — upload via Volusion File Manager if My Boards previews break)",
+                    flush=True,
                 )
-                critical_fail += showcase_fail
+                optional_fail += showcase_fail
         finally:
             sftp.close()
     finally:

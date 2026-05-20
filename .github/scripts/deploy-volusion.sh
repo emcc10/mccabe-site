@@ -140,6 +140,7 @@ py_rc=$?
 set -e
 if [[ "$py_rc" -ne 0 ]]; then
   echo "::warning::Paramiko deploy exited $py_rc — continuing with lftp for remaining assets"
+  echo "::notice::Showcase PNG / mood SVG failures do not block template_266 or PDP login deploys"
 fi
 
 echo "=== Assets via lftp (fallback + large JS) ==="
@@ -190,6 +191,7 @@ if command -v node >/dev/null 2>&1 && [[ -f scripts/sanitize-boards-css.mjs ]]; 
 fi
 
 echo "=== My Boards (page, JS, CSS, PHP, showcase PNGs) ==="
+run_lftp "mkdir -p /v/vspfiles/boards/showcase; mkdir -p /v/vspfiles/boards/mood; mkdir -p /vspfiles/boards/showcase; mkdir -p /vspfiles/boards/mood" || true
 boards_fail=0
 for f in \
   vspfiles/my-boards.html \
@@ -218,8 +220,8 @@ shopt -s nullglob
 for f in vspfiles/boards/showcase/*.png; do
   base=$(basename "$f")
   if put_primary "$f" "boards-showcase-${base}" \
-    "/vspfiles/boards/showcase/${base}" \
-    "/v/vspfiles/boards/showcase/${base}"; then
+    "/v/vspfiles/boards/showcase/${base}" \
+    "/vspfiles/boards/showcase/${base}"; then
     :
   else
     boards_fail=$((boards_fail + 1))
@@ -229,11 +231,11 @@ shopt -u nullglob
 for f in vspfiles/boards/mood/*.svg; do
   base=$(basename "$f")
   put_primary "$f" "boards-mood-${base}" \
-    "/vspfiles/boards/mood/${base}" \
-    "/v/vspfiles/boards/mood/${base}" || true
+    "/v/vspfiles/boards/mood/${base}" \
+    "/vspfiles/boards/mood/${base}" || true
 done
 if [[ "$boards_fail" -gt 0 ]]; then
-  echo "::warning::${boards_fail} My Boards file(s) failed lftp upload — check Paramiko step or upload manually"
+  echo "::warning::${boards_fail} My Boards showcase PNG(s) failed lftp upload (non-blocking; Paramiko chunked upload is primary)"
 fi
 
 echo "=== PLP product photos (replace baked gray mat with white) ==="
