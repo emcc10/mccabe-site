@@ -17,6 +17,8 @@ import { tmpdir } from 'os';
 import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
+import { prepareSourceLGrain, applySourceLGrain } from './leather-detail.js';
+import { cleanSofaCompositing } from './compositing-cleanup.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
@@ -56,7 +58,7 @@ const BALI_BODY_MIN_PIXEL = { r: 155, g: 145, b: 130 };
 const BALI_SAMPLE_FLOOR = { r: 170, g: 160, b: 145 };
 const BALI_SAMPLE_RANGE = { r: [185, 215], g: [175, 205], b: [155, 190] };
 const BALI_OUTPUT_FLOOR = { r: 170, g: 160, b: 145 };
-const BALI_L_STRUCTURE = 0.9;
+const BALI_L_STRUCTURE = 0.92;
 const CHROMA_SWATCH = 1;
 /** Diagnostic: force uniform upholstery chroma; L from source only. */
 export const BRUTE_FORCE_CHROMA_A = 2;
@@ -99,7 +101,7 @@ function pixelBrightness(r, g, b) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-function isNearWhite(r, g, b) {
+export function isNearWhite(r, g, b) {
   return r > BG_THRESH && g > BG_THRESH && b > BG_THRESH;
 }
 
@@ -694,6 +696,7 @@ export function recolorSofa(sourceImage, mask, palette) {
   const { lo, span } = computeSofaLuminanceMapRange(sourceImage, mask);
   const meanPhotoL = palette.isBaliSilk ? meanMaskedLab(sourceImage, mask).L : 0;
   const anchorL = palette.isBaliSilk ? palette.midtone.L : 0;
+  const grain = palette.isBaliSilk ? prepareSourceLGrain(sourceImage) : null;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
@@ -709,6 +712,7 @@ export function recolorSofa(sourceImage, mask, palette) {
     let finalL;
     if (palette.isBaliSilk) {
       finalL = anchorL + (photoL - meanPhotoL) * BALI_L_STRUCTURE;
+      finalL = applySourceLGrain(finalL, j, grain);
     } else {
       finalL = computeFinalLabL(photoL, chroma.L);
     }
@@ -721,6 +725,10 @@ export function recolorSofa(sourceImage, mask, palette) {
     out[p + 1] = outG;
     out[p + 2] = bOut;
     if (channels === 4) out[p + 3] = data[p + 3];
+  }
+
+  if (palette.isBaliSilk) {
+    cleanSofaCompositing(out, sourceImage, mask);
   }
 
   return out;
@@ -836,6 +844,7 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
       ? `anchor L + photo ΔL×${BALI_L_STRUCTURE} (validated swatch chroma)`
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
+    realism: isBali ? 'source L grain + floor/edge compositing cleanup' : null,
   });
 
   const outData = recolorSofa(sourceImage, mask, palette);

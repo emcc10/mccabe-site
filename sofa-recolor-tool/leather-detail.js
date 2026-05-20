@@ -1,13 +1,12 @@
 /**
- * Photographic L structure from original + neutral master (no chroma/warmth changes).
+ * Restore original cognac photo L grain onto recolored output (L only).
  */
 import { rgbToLab } from './render-sofas.js';
 
 const HF_RADIUS = 1;
-const MF_RADIUS = 4;
-export const PHOTO_HF_GAIN = 0.42;
-export const PHOTO_MF_GAIN = 0.14;
-export const NEUTRAL_HF_GAIN = 0.28;
+const MF_RADIUS = 3;
+export const PHOTO_HF_GAIN = 0.34;
+export const PHOTO_MF_GAIN = 0.11;
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
@@ -35,17 +34,6 @@ function boxBlurPass(src, dst, width, height, horizontal, radius) {
   }
 }
 
-function extractLabL(image) {
-  const { data, width, height, channels } = image;
-  const n = width * height;
-  const L = new Float32Array(n);
-  for (let j = 0; j < n; j++) {
-    const p = j * channels;
-    L[j] = rgbToLab(data[p], data[p + 1], data[p + 2]).L;
-  }
-  return { L, width, height };
-}
-
 function highPass(L, width, height, radius) {
   const tmp = new Float32Array(L.length);
   const blur = new Float32Array(L.length);
@@ -56,23 +44,22 @@ function highPass(L, width, height, radius) {
   return hf;
 }
 
-export function preparePhotographicStructure(sourceImage, neutralMaster) {
-  const src = extractLabL(sourceImage);
-  const neu = extractLabL(neutralMaster);
+export function prepareSourceLGrain(sourceImage) {
+  const { data, width, height, channels } = sourceImage;
+  const n = width * height;
+  const L = new Float32Array(n);
+  for (let j = 0; j < n; j++) {
+    const p = j * channels;
+    L[j] = rgbToLab(data[p], data[p + 1], data[p + 2]).L;
+  }
   return {
-    width: src.width,
-    height: src.height,
-    sourceHf: highPass(src.L, src.width, src.height, HF_RADIUS),
-    sourceMf: highPass(src.L, src.width, src.height, MF_RADIUS),
-    neutralHf: highPass(neu.L, neu.width, neu.height, HF_RADIUS),
+    width,
+    height,
+    sourceHf: highPass(L, width, height, HF_RADIUS),
+    sourceMf: highPass(L, width, height, MF_RADIUS),
   };
 }
 
-export function applyPhotographicLDetail(finalL, j, detail) {
-  return (
-    finalL +
-    detail.sourceHf[j] * PHOTO_HF_GAIN +
-    detail.sourceMf[j] * PHOTO_MF_GAIN +
-    detail.neutralHf[j] * NEUTRAL_HF_GAIN
-  );
+export function applySourceLGrain(finalL, j, grain) {
+  return finalL + grain.sourceHf[j] * PHOTO_HF_GAIN + grain.sourceMf[j] * PHOTO_MF_GAIN;
 }
