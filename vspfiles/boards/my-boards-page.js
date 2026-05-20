@@ -1,6 +1,9 @@
 (function () {
   'use strict';
 
+  if (window.__MC_BOARDS_APP_STARTED) return;
+  window.__MC_BOARDS_APP_STARTED = true;
+
   var API_BASE = window.MC_BOARDS_API_BASE || '/v/vspfiles/boards/';
   var API_LIST = API_BASE + 'list.php';
   var API_DELETE = API_BASE + 'delete.php';
@@ -30,7 +33,8 @@
   var quizEl = document.getElementById('mc-boards-quiz');
   var wheelEl = document.getElementById('mc-boards-color-wheel');
   var wheelResult = document.getElementById('mc-boards-wheel-result');
-  var trendsEl = document.getElementById('mc-boards-trends');
+  var triptychEl = document.getElementById('mc-boards-triptych');
+  var splitEl = document.getElementById('mc-boards-split');
 
   var activeBoardFilter = '__all__';
   var activeStyleFilter = null;
@@ -51,9 +55,66 @@
     return API_BASE + rel;
   }
 
+  function refreshConfig() {
+    if (window.MC_BOARD_STYLES && typeof window.MC_BOARD_STYLES === 'object') {
+      config = window.MC_BOARD_STYLES;
+    }
+  }
+
+  function catalogPhotoUrl(productIdOrSku) {
+    if (!productIdOrSku) return '';
+    var sku = String(productIdOrSku);
+    if (sku.indexOf('-') !== -1) sku = sku.split('-')[0];
+    if (!/^\d+$/.test(sku)) return '';
+    return '/v/vspfiles/photos/' + sku + '-01-1.jpg';
+  }
+
+  function bindImgFallback(img, styleId, productId) {
+    if (!img) return;
+    img.addEventListener('error', function () {
+      var step = img.getAttribute('data-mc-fallback') || '0';
+      if (step === '2') return;
+      if (step === '0') {
+        var photo = catalogPhotoUrl(productId);
+        if (photo) {
+          img.setAttribute('data-mc-fallback', '1');
+          img.src = photo;
+          return;
+        }
+      }
+      img.setAttribute('data-mc-fallback', '2');
+      var sid = styleId || 'transitional';
+      img.src = assetUrl('mood/' + sid + '.svg');
+    });
+  }
+
+  function readCookie(name) {
+    var parts = String(document.cookie || '').split(';');
+    for (var i = 0; i < parts.length; i++) {
+      var bit = parts[i].trim();
+      var eq = bit.indexOf('=');
+      if (eq === -1) continue;
+      if (bit.slice(0, eq).trim() === name) {
+        return decodeURIComponent(bit.slice(eq + 1));
+      }
+    }
+    return '';
+  }
+
   function domSignedInHint() {
     if (!document.body) return false;
     if (document.body.classList.contains('mc-member-logged-in')) return true;
+    var cookieNames = [
+      'CustomerID',
+      'customerid',
+      'CustomerId',
+      'Volusion_CustomerId',
+      'VolusionCustomerID'
+    ];
+    for (var c = 0; c < cookieNames.length; c++) {
+      var v = readCookie(cookieNames[c]);
+      if (v && v !== '0') return true;
+    }
     if (document.querySelector('a[href*="logout"]')) return true;
     var t = (document.body.innerText || '').toLowerCase();
     if (t.indexOf('log out') !== -1 || t.indexOf('logout') !== -1) return true;
@@ -145,7 +206,87 @@
     return wrap;
   }
 
+  function renderTriptych() {
+    if (!triptychEl) return;
+    triptychEl.innerHTML = '';
+    var ids = config.featuredTriptych || [];
+    for (var i = 0; i < ids.length && i < 3; i++) {
+      (function (productId) {
+        var product = getProductById(productId);
+        if (!product) return;
+        var style = getStyleById(product.primaryStyle);
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mc-boards__triptych-card';
+        var wrap = document.createElement('div');
+        wrap.className = 'mc-boards__triptych-img-wrap';
+        var img = document.createElement('img');
+        img.src = assetUrl(product.image);
+        img.alt = product.name;
+        img.loading = 'lazy';
+        bindImgFallback(img, product.primaryStyle, productId);
+        wrap.appendChild(img);
+        btn.appendChild(wrap);
+        var lab = document.createElement('p');
+        lab.className = 'mc-boards__triptych-label';
+        lab.textContent = product.name;
+        btn.appendChild(lab);
+        btn.addEventListener('click', function () {
+          if (style) activateStyleFilter(style.id, false);
+        });
+        triptychEl.appendChild(btn);
+      })(ids[i]);
+    }
+  }
+
+  function renderSplit() {
+    if (!splitEl) return;
+    splitEl.innerHTML = '';
+    var feat = config.splitFeature || {};
+    var product = getProductById(feat.productId);
+    var style = getStyleById(feat.styleId || (product && product.primaryStyle));
+    var copy = document.createElement('div');
+    copy.className = 'mc-boards__split-copy';
+    var kicker = document.createElement('p');
+    kicker.className = 'mc-boards__split-kicker';
+    kicker.textContent = style ? style.label : '';
+    copy.appendChild(kicker);
+    var title = document.createElement('h3');
+    title.className = 'mc-boards__split-title';
+    title.textContent = feat.title || (product ? product.name : '');
+    copy.appendChild(title);
+    var text = document.createElement('p');
+    text.className = 'mc-boards__split-text';
+    text.textContent = feat.text || (style ? style.tagline : '');
+    copy.appendChild(text);
+    if (style) {
+      var cta = document.createElement('button');
+      cta.type = 'button';
+      cta.className = 'mc-boards__btn';
+      cta.textContent = 'View ' + style.label;
+      cta.addEventListener('click', function () {
+        activateStyleFilter(style.id, true);
+      });
+      copy.appendChild(cta);
+    }
+    var media = document.createElement('div');
+    media.className = 'mc-boards__split-media';
+    if (product) {
+      var img = document.createElement('img');
+      img.src = assetUrl(product.image);
+      img.alt = product.name;
+      img.loading = 'lazy';
+      bindImgFallback(img, style ? style.id : null, product.id);
+      media.appendChild(img);
+    }
+    splitEl.appendChild(copy);
+    splitEl.appendChild(media);
+  }
+
   function renderStyleLibrary() {
+    refreshConfig();
+    renderTriptych();
+    renderSplit();
     if (!stylesEl) return;
 
     stylesEl.innerHTML = '';
@@ -167,25 +308,15 @@
         img.src = assetUrl(style.moodImage);
         img.alt = style.label + ' interior mood';
         img.loading = 'lazy';
+        bindImgFallback(img, style.id, style.catalogSku);
         visual.appendChild(img);
-
-        var body = document.createElement('div');
-        body.className = 'mc-boards__style-body';
 
         var label = document.createElement('p');
         label.className = 'mc-boards__style-label';
         label.textContent = style.label;
-        body.appendChild(label);
-
-        var tag = document.createElement('p');
-        tag.className = 'mc-boards__style-tagline';
-        tag.textContent = style.tagline;
-        body.appendChild(tag);
-
-        body.appendChild(paletteEl(style.palette));
 
         btn.appendChild(visual);
-        btn.appendChild(body);
+        btn.appendChild(label);
 
         btn.addEventListener('click', function () {
           if (activeStyleFilter === style.id) {
@@ -203,28 +334,9 @@
       })(styles[s]);
     }
 
-    if (typesEl) {
-      typesEl.innerHTML = '';
-      var types = config.furnitureTypes || [];
-      for (var t = 0; t < types.length; t++) {
-        var chip = document.createElement('div');
-        chip.className = 'mc-boards__type-chip';
-        chip.setAttribute('role', 'listitem');
-        chip.innerHTML =
-          '<strong>Type</strong><span>' +
-          types[t].label +
-          '</span><small>' +
-          types[t].desc +
-          '</small>';
-        typesEl.appendChild(chip);
-      }
-    }
-
     renderLifestyleLooks();
-    renderStyleGuide();
     renderQuiz();
     renderColorWheel();
-    renderTrends();
   }
 
   function renderTrends() {
@@ -276,19 +388,36 @@
     if (!wheelEl) return;
     wheelEl.innerHTML = '';
     var colors = config.colorWheel || [];
-    var wheel = document.createElement('div');
-    wheel.className = 'mc-boards__wheel';
-    wheel.setAttribute('role', 'list');
+    if (!colors.length) return;
+
+    var wrap = document.createElement('div');
+    wrap.className = 'mc-boards__wheel-wrap';
+
+    var disc = document.createElement('div');
+    disc.className = 'mc-boards__wheel-disc';
+    disc.setAttribute('aria-hidden', 'true');
+    var stops = [];
+    for (var d = 0; d < colors.length; d++) {
+      var pct = ((d + 0.5) / colors.length) * 100;
+      stops.push(colors[d].hex + ' ' + pct + '%');
+    }
+    disc.style.background =
+      'conic-gradient(from 0deg, ' + stops.join(', ') + ')';
+
+    var picks = document.createElement('div');
+    picks.className = 'mc-boards__wheel-picks';
+    picks.setAttribute('role', 'list');
+
     for (var i = 0; i < colors.length; i++) {
       (function (c) {
         var btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'mc-boards__wheel-slice';
+        btn.className = 'mc-boards__wheel-swatch';
         btn.style.backgroundColor = c.hex;
         btn.title = c.label;
         btn.setAttribute('aria-label', c.label);
         btn.addEventListener('click', function () {
-          wheel.querySelectorAll('.mc-boards__wheel-slice').forEach(function (el) {
+          picks.querySelectorAll('.mc-boards__wheel-swatch').forEach(function (el) {
             el.classList.remove('is-active');
           });
           btn.classList.add('is-active');
@@ -299,21 +428,19 @@
             })
             .join(', ');
           if (wheelResult) {
-            wheelResult.innerHTML =
-              '<strong>' +
-              c.label +
-              '</strong> pairs with ' +
-              styleNames +
-              '.';
+            wheelResult.textContent = c.label + ' - ' + styleNames;
           }
           if (c.styles && c.styles[0]) {
             activateStyleFilter(c.styles[0], false);
           }
         });
-        wheel.appendChild(btn);
+        picks.appendChild(btn);
       })(colors[i]);
     }
-    wheelEl.appendChild(wheel);
+
+    wrap.appendChild(disc);
+    wrap.appendChild(picks);
+    wheelEl.appendChild(wrap);
   }
 
   function renderQuiz() {
@@ -373,10 +500,8 @@
       }
       var style = getStyleById(bestId);
       quizEl.innerHTML =
-        '<p class="mc-boards__quiz-result">Your lead style is <strong>' +
+        '<p class="mc-boards__quiz-result">' +
         (style ? style.label : bestId) +
-        '</strong>.</p><p class="mc-boards__quiz-sub">' +
-        (style ? style.tagline : '') +
         '</p>';
       var again = document.createElement('button');
       again.type = 'button';
@@ -403,7 +528,7 @@
     accountBanner.className = 'mc-boards__account-banner mc-boards__account-banner--warn';
     accountBanner.innerHTML =
       '<p><strong>Sign in</strong> on mccabes.com to sync saved pieces to this page. ' +
-      (note || 'You can still explore styles, the quiz, and trends above.') +
+      (note || 'You can still explore styles and room looks above.') +
       '</p><p class="mc-boards__account-actions">' +
       '<a class="mc-boards__btn" href="/login.asp">Sign in</a> ' +
       '<a class="mc-boards__btn mc-boards__btn--ghost" href="/myaccount.asp">My account</a></p>';
@@ -423,7 +548,6 @@
         btn.type = 'button';
         btn.className =
           'mc-boards__lifestyle-card' +
-          (look.sceneClass ? ' ' + look.sceneClass : '') +
           (activeStyleFilter === look.styleId ? ' is-active' : '');
         btn.setAttribute('role', 'listitem');
         btn.setAttribute('data-style-id', look.styleId);
@@ -431,43 +555,20 @@
         var scene = document.createElement('div');
         scene.className = 'mc-boards__lifestyle-scene';
 
-        var floor = document.createElement('div');
-        floor.className = 'mc-boards__lifestyle-floor';
-        scene.appendChild(floor);
-
         var prod = document.createElement('img');
         prod.className = 'mc-boards__lifestyle-product';
         prod.src = assetUrl(look.image);
         prod.alt = product ? product.name : look.title;
         prod.loading = 'lazy';
+        bindImgFallback(prod, look.styleId, look.productId);
         scene.appendChild(prod);
 
         btn.appendChild(scene);
 
-        var cap = document.createElement('div');
-        cap.className = 'mc-boards__lifestyle-cap';
-
-        var styleTag = document.createElement('p');
-        styleTag.className = 'mc-boards__lifestyle-style';
-        styleTag.textContent = style ? style.label : look.styleId;
-        cap.appendChild(styleTag);
-
         var title = document.createElement('p');
         title.className = 'mc-boards__lifestyle-title';
         title.textContent = look.title;
-        cap.appendChild(title);
-
-        var room = document.createElement('p');
-        room.className = 'mc-boards__lifestyle-room';
-        room.textContent =
-          look.room + (product ? ' · ' + product.name : '');
-        cap.appendChild(room);
-
-        if (look.accents && look.accents.length) {
-          cap.appendChild(paletteEl(look.accents, 'mc-boards__palette'));
-        }
-
-        btn.appendChild(cap);
+        btn.appendChild(title);
 
         btn.addEventListener('click', function () {
           if (activeStyleFilter === look.styleId) {
@@ -520,6 +621,7 @@
       thumb.src = assetUrl(prod.image);
       thumb.alt = '';
       thumb.loading = 'lazy';
+      bindImgFallback(thumb, prod.primaryStyle);
       var nameSpan = document.createElement('span');
       nameSpan.textContent = prod.name;
       nameCell.appendChild(thumb);
@@ -936,7 +1038,10 @@
         items: Array.isArray(data.items) ? data.items : []
       };
     }
-    return { signedIn: domSignedInHint(), items: [], error: true };
+    if (domSignedInHint()) {
+      return { signedIn: true, items: [], error: true };
+    }
+    return { signedIn: false, items: [] };
   }
 
   async function load() {
@@ -1037,5 +1142,60 @@
     );
   }
 
-  load();
+  function startApp() {
+    if (window.__MC_BOARDS_APP_STARTED) return;
+    if (
+      !document.getElementById('mc-boards-main') &&
+      !document.getElementById('mc-boards-styles')
+    ) {
+      return;
+    }
+    window.__MC_BOARDS_APP_STARTED = true;
+    refreshConfig();
+    setSignedInUi(domSignedInHint());
+    setAccountBanner(domSignedInHint());
+    renderStyleLibrary();
+    load();
+  }
+
+  function ensureBoardStyles(done) {
+    refreshConfig();
+    if (config.styles && config.styles.length) {
+      done();
+      return;
+    }
+    var src = API_BASE + 'board-styles.js?v=20260527';
+    var tag = document.querySelector('script[src*="board-styles.js"]');
+    if (tag) {
+      tag.addEventListener('load', function () {
+        refreshConfig();
+        done();
+      });
+      window.setTimeout(function () {
+        refreshConfig();
+        if (config.styles && config.styles.length) done();
+      }, 150);
+      return;
+    }
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = function () {
+      refreshConfig();
+      done();
+    };
+    s.onerror = function () {
+      s.src = src.replace('/v/vspfiles/', '/vspfiles/');
+    };
+    (document.body || document.documentElement).appendChild(s);
+  }
+
+  function onReady() {
+    ensureBoardStyles(startApp);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', onReady);
+  } else {
+    onReady();
+  }
 })();

@@ -1,13 +1,17 @@
 /**
- * Restore original sofa high-frequency L detail (grain/specular) after color transfer.
+ * Restore original sofa photographic L structure (grain, edge, specular) after color transfer.
+ * High-frequency only — no panel smoothing or luminance normalization.
  */
 import convert from 'color-convert';
 
-const DETAIL_GAIN = 0.42;
-const SPEC_GAIN = 0.18;
-const DETAIL_CLAMP = 6;
-const GAUSS_RADIUS = 6;
-const MEAN_RADIUS = 12;
+const DETAIL_GAUSS_RADIUS = 10;
+const DETAIL_GAIN = 0.55;
+const DETAIL_CLAMP = 8;
+const EDGE_MEAN_RADIUS = 18;
+const EDGE_THRESHOLD = 6;
+const EDGE_GAIN = 0.12;
+const SPEC_GAUSS_RADIUS = 14;
+const SPEC_GAIN = 0.22;
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
@@ -64,7 +68,6 @@ function convolveSeparable(src, width, height, radius) {
   return out;
 }
 
-/** LAB L per pixel from source sofa (original luminance structure). */
 export function buildOriginalLPlane(sourceImage) {
   const { data, width, height, channels } = sourceImage;
   const L = new Float32Array(width * height);
@@ -75,23 +78,30 @@ export function buildOriginalLPlane(sourceImage) {
   return L;
 }
 
-/**
- * Precompute blurred fields for high-frequency detail + specular breakup.
- */
 export function prepareOriginalLeatherDetail(sourceImage) {
   const { width, height } = sourceImage;
   const originalL = buildOriginalLPlane(sourceImage);
-  const gaussianL = convolveSeparable(originalL, width, height, GAUSS_RADIUS);
-  const localMeanL = convolveSeparable(originalL, width, height, MEAN_RADIUS);
-  return { originalL, gaussianL, localMeanL, width, height };
+  const gaussianDetail = convolveSeparable(originalL, width, height, DETAIL_GAUSS_RADIUS);
+  const localMeanEdge = convolveSeparable(originalL, width, height, EDGE_MEAN_RADIUS);
+  const gaussianSpec = convolveSeparable(originalL, width, height, SPEC_GAUSS_RADIUS);
+  return { originalL, gaussianDetail, localMeanEdge, gaussianSpec, width, height };
 }
 
-/** Add clamped high-frequency L detail from original sofa only. */
 export function applyLeatherDetailRestore(finalL, j, detail) {
   const oL = detail.originalL[j];
-  const highFreq = oL - detail.gaussianL[j];
-  const spec = Math.max(0, oL - detail.localMeanL[j]);
-  let add = highFreq * DETAIL_GAIN + spec * SPEC_GAIN;
-  add = clamp(add, -DETAIL_CLAMP, DETAIL_CLAMP);
-  return finalL + add;
+  let L = finalL;
+
+  let detailAdd = (oL - detail.gaussianDetail[j]) * DETAIL_GAIN;
+  detailAdd = clamp(detailAdd, -DETAIL_CLAMP, DETAIL_CLAMP);
+  L += detailAdd;
+
+  const edge = detail.localMeanEdge[j] - oL;
+  if (edge > EDGE_THRESHOLD) {
+    L -= edge * EDGE_GAIN;
+  }
+
+  const spec = Math.max(0, oL - detail.gaussianSpec[j]);
+  L += spec * SPEC_GAIN;
+
+  return L;
 }

@@ -11,10 +11,7 @@ const repoRoot = path.join(__dirname, '..');
 const srcDir =
   process.env.MC_BOARD_ASSETS_DIR ||
   path.join(
-    repoRoot,
-    '..',
-    '..',
-    '..',
+    process.env.USERPROFILE || process.env.HOME || '',
     '.cursor',
     'projects',
     'c-Users-erink-OneDrive-Documents-GitHub-mccabe-site',

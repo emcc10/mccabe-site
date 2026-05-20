@@ -185,6 +185,10 @@ put_primary "vspfiles/css/mc-plp-body-last.css" "mc-plp-body-last" \
   "/vspfiles/css/mc-plp-body-last.css" \
   "vspfiles/css/mc-plp-body-last.css"
 
+if command -v node >/dev/null 2>&1 && [[ -f scripts/sanitize-boards-css.mjs ]]; then
+  node scripts/sanitize-boards-css.mjs || true
+fi
+
 echo "=== My Boards (page, JS, CSS, PHP, showcase PNGs) ==="
 boards_fail=0
 for f in \
@@ -193,6 +197,7 @@ for f in \
   vspfiles/boards/board-styles.js \
   vspfiles/boards/my-boards-page.css \
   vspfiles/boards/my-boards-critical.css \
+  vspfiles/boards/my-boards-bundle.css \
   vspfiles/boards/my-boards-fragment.html \
   vspfiles/boards/session.php \
   vspfiles/boards/list.php \
@@ -272,7 +277,8 @@ verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260617"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260520plp" "MC_DTK_PLP_20260617"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-sofa-bounds.json?v=$(date +%s)" "77494-91-1.jpg"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/board-styles.js?v=20260525" "MC_BOARD_STYLES"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-bundle.css?v=20260527" "mc-boards__feature"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/board-styles.js?v=20260527" "MC_BOARD_STYLES"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" "Interior design studio"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png?v=$(date +%s)" "PNG"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/template.min.js" "MC_PLP_ENFORCER_LOADING__"

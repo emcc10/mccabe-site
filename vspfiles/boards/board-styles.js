@@ -102,48 +102,67 @@ window.MC_BOARD_STYLES = {
     { id: 'walnut', label: 'Walnut', hex: '#6b4423', styles: ['mid-century', 'traditional'] }
   ],
 
+  featuredTriptych: [
+    '77696-lux-cognac-chair',
+    '77180-pacific-sofa',
+    '40113-london-fog'
+  ],
+
+  splitFeature: {
+    productId: '40109-atlantic-navy',
+    styleId: 'contemporary',
+    title: 'Contemporary media comfort',
+    text: 'Power reclining silhouettes and deep upholstery for theater rooms.'
+  },
+
   styles: [
     {
       id: 'traditional',
       label: 'Traditional',
-      tagline: 'Rich leather, generous comfort, timeless scale',
+      tagline: 'Rich leather, generous comfort',
+      catalogSku: '41067',
       moodImage: '/v/vspfiles/boards/showcase/traditional-carob-recliner-front.png',
-      palette: ['#f4efe6', '#c4a574', '#6b3f2a', '#3d2a22', '#8b5e3c']
+      palette: ['#f4f4f4', '#c4a574', '#6b3f2a', '#3d2a22', '#8b5e3c']
     },
     {
       id: 'transitional',
       label: 'Transitional',
-      tagline: 'Neutral leathers, balanced lines, everyday luxury',
+      tagline: 'Neutral leathers, balanced lines',
+      catalogSku: '40113',
       moodImage: '/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png',
-      palette: ['#f0ebe4', '#c8bfb2', '#9a8f82', '#5c534c', '#b8956b']
+      palette: ['#f0f0f0', '#c8bfb2', '#9a8f82', '#5c534c', '#888888']
     },
     {
       id: 'modern',
       label: 'Modern',
-      tagline: 'Track arms, edited silhouettes, cool contrast',
+      tagline: 'Track arms, edited silhouettes',
+      catalogSku: '77180',
       moodImage: '/v/vspfiles/boards/showcase/modern-pacific-charcoal-sofa-angle.png',
       palette: ['#ececea', '#a8a8a4', '#5a5a56', '#2a2a28', '#7a8790']
     },
     {
       id: 'coastal',
       label: 'Coastal',
-      tagline: 'Sun-washed neutrals, relaxed linen mood',
+      tagline: 'Sun-washed neutrals',
+      catalogSku: '40113',
       moodImage: '/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png',
-      palette: ['#f5f3ee', '#d8d2c8', '#8fa9b5', '#5c7a86', '#c9b896']
+      palette: ['#f5f5f5', '#d8d2c8', '#8fa9b5', '#5c7a86', '#c9b896']
     },
     {
       id: 'mid-century',
       label: 'Mid-Century',
-      tagline: 'Walnut frame, cognac leather, low profile',
+      tagline: 'Walnut frame, cognac leather',
+      catalogSku: '77696',
       moodImage: '/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png',
-      palette: ['#f0e6d8', '#c67b4e', '#6b4423', '#2f4f4f', '#d4a574']
+      palette: ['#f0f0f0', '#c67b4e', '#6b4423', '#2f4f4f', '#d4a574']
     },
     {
       id: 'contemporary',
       label: 'Contemporary',
-      tagline: 'Bold color, power comfort, gallery calm',
+      tagline: 'Bold color, power comfort',
+      catalogSku: '40109',
       moodImage: '/v/vspfiles/boards/showcase/contemporary-atlantic-navy-recliner-front.png',
-      palette: ['#e8eaed', '#5c6b7a', '#1e3a5f', '#152238', '#b8956b']
+      palette: ['#e8eaed', '#5c6b7a', '#1e3a5f', '#152238', '#888888']
     }
   ],
 

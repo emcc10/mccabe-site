@@ -15,6 +15,7 @@ from verify_template_sftp import (
     md5_hex,
     read_local_template,
     template_remote_paths,
+    write_remote_template,
 )
 
 
@@ -71,7 +72,7 @@ def main() -> int:
         try:
             for remote in template_remote_paths():
                 try:
-                    sftp.put(local, remote, confirm=False)
+                    write_remote_template(sftp, remote, local_data)
                     ok, got, md5_ok, needle_ok = check_remote(
                         sftp, remote, local_data, local_md5, needle
                     )

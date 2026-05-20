@@ -18,6 +18,7 @@ CRITICAL = (
     "vspfiles/boards/board-styles.js",
     "vspfiles/boards/my-boards-page.css",
     "vspfiles/boards/my-boards-critical.css",
+    "vspfiles/boards/my-boards-bundle.css",
     "vspfiles/boards/my-boards-fragment.html",
     "vspfiles/boards/session.php",
     "vspfiles/boards/list.php",

@@ -62,6 +62,45 @@ def read_remote_template(sftp, remote: str) -> bytes:
         return handle.read()
 
 
+def write_remote_template(sftp, remote: str, local_data: bytes) -> None:
+    """Overwrite remote template (remove first — Volusion often keeps stale same-size files)."""
+    for attempt in range(2):
+        try:
+            sftp.remove(remote)
+        except OSError:
+            pass
+        tmp = remote + ".deploy-tmp"
+        try:
+            try:
+                sftp.remove(tmp)
+            except OSError:
+                pass
+            with sftp.open(tmp, "wb") as handle:
+                handle.write(local_data)
+            try:
+                sftp.rename(tmp, remote)
+            except OSError:
+                with sftp.open(remote, "wb") as handle:
+                    handle.write(local_data)
+                try:
+                    sftp.remove(tmp)
+                except OSError:
+                    pass
+        except OSError:
+            with sftp.open(remote, "wb") as handle:
+                handle.write(local_data)
+        remote_data = read_remote_template(sftp, remote)
+        if md5_hex(remote_data) == md5_hex(local_data):
+            return
+        if attempt == 0:
+            print(
+                f"::warning::write_remote_template retry {remote!r} "
+                f"(got md5={md5_hex(remote_data)[:12]}…)",
+                flush=True,
+            )
+    raise OSError(f"remote write did not stick for {remote!r}")
+
+
 def check_remote(
     sftp,
     remote: str,
@@ -162,10 +201,12 @@ def main() -> int:
         return 0
 
     print(
-        f"::error::SFTP template does not match repo (md5={local_md5}, needle={needle!r}). "
+        f"::error::SFTP template does not match repo (md5={local_md5}, "
+        f"local_size={want_size}, needle={needle!r}). "
         f"Tried: {', '.join(template_remote_paths())}. "
-        "Volusion may be serving a stale copy at the same byte size — re-run deploy or "
-        "upload template_266.html via Volusion File Editor.",
+        "Volusion often keeps a stale file at the same byte size — the deploy step now "
+        "deletes before write; re-run deploy. If it persists, upload template_266.html "
+        "via Volusion Design → File Editor and Save.",
         file=sys.stderr,
     )
     return 1
