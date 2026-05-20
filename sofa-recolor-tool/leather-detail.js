@@ -1,16 +1,13 @@
 /**
- * Restore original cognac photo L detail onto recolored output (L only).
- * Uses actual source luminance frequencies — no synthetic grain.
+ * Low-amplitude original sofa L detail only (no synthetic grain or seam boost).
  */
 import { rgbToLab } from './render-sofas.js';
 
 const HF_RADIUS = 1;
 const MF_RADIUS = 2;
-/** Source photo HF/MF — direct transfer from original sofa L (no synthetic grain). */
-export const PHOTO_HF_GAIN = 1.02;
-export const PHOTO_MF_GAIN = 0.44;
-export const PHOTO_SEAM_GAIN = 0.18;
-const SEAM_GRAD_THRESH = 1.8;
+/** Subtle transfer — preserves catalog-photo softness. */
+export const PHOTO_HF_GAIN = 0.38;
+export const PHOTO_MF_GAIN = 0.1;
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
@@ -48,23 +45,6 @@ function highPass(L, width, height, radius) {
   return hf;
 }
 
-function gradientMagnitude(L, width, height) {
-  const g = new Float32Array(L.length);
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const j = y * width + x;
-      const xl = clamp(x - 1, 0, width - 1);
-      const xr = clamp(x + 1, 0, width - 1);
-      const yt = clamp(y - 1, 0, height - 1);
-      const yb = clamp(y + 1, 0, height - 1);
-      const gx = L[y * width + xr] - L[y * width + xl];
-      const gy = L[yb * width + x] - L[yt * width + x];
-      g[j] = Math.sqrt(gx * gx + gy * gy);
-    }
-  }
-  return g;
-}
-
 export function prepareSourceLGrain(sourceImage) {
   const { data, width, height, channels } = sourceImage;
   const n = width * height;
@@ -73,30 +53,14 @@ export function prepareSourceLGrain(sourceImage) {
     const p = j * channels;
     L[j] = rgbToLab(data[p], data[p + 1], data[p + 2]).L;
   }
-  const gradMag = gradientMagnitude(L, width, height);
-  const seamBoost = new Float32Array(n);
-  for (let j = 0; j < n; j++) {
-    seamBoost[j] = gradMag[j] > SEAM_GRAD_THRESH ? 1 : 0;
-  }
   return {
     width,
     height,
     sourceHf: highPass(L, width, height, HF_RADIUS),
     sourceMf: highPass(L, width, height, MF_RADIUS),
-    seamBoost,
   };
 }
 
-/**
- * @param {number} u - masked upholstery luminance map position 0–1 (more MF in mids/shadows).
- */
-export function applySourceLGrain(finalL, j, grain, u = 0.5) {
-  const shadowMidBoost = 1 + 0.55 * (1 - clamp(u, 0, 1));
-  const seam = grain.seamBoost[j] * PHOTO_SEAM_GAIN * grain.sourceHf[j];
-  return (
-    finalL +
-    grain.sourceHf[j] * PHOTO_HF_GAIN +
-    grain.sourceMf[j] * PHOTO_MF_GAIN * shadowMidBoost +
-    seam
-  );
+export function applySourceLGrain(finalL, j, grain) {
+  return finalL + grain.sourceHf[j] * PHOTO_HF_GAIN + grain.sourceMf[j] * PHOTO_MF_GAIN;
 }
