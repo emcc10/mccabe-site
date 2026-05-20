@@ -57,8 +57,6 @@ const BALI_BODY_MIN_PIXEL = { r: 155, g: 145, b: 130 };
 const BALI_SAMPLE_FLOOR = { r: 170, g: 160, b: 145 };
 const BALI_SAMPLE_RANGE = { r: [185, 215], g: [175, 205], b: [155, 190] };
 const BALI_OUTPUT_FLOOR = { r: 170, g: 160, b: 145 };
-/** Full source photo luminance shape (color via anchor + swatch chroma only). */
-const BALI_L_STRUCTURE = 1;
 const CHROMA_SWATCH = 1;
 /** Diagnostic: force uniform upholstery chroma; L from source only. */
 export const BRUTE_FORCE_CHROMA_A = 2;
@@ -672,6 +670,33 @@ export function computeSofaLuminanceMapRange(masterImage, mask) {
   return { lo, hi, span: Math.max(hi - lo, SOFA_L_MAP_MIN_SPAN) };
 }
 
+/** Full masked min/max L — no percentile compression (Bali chroma placement). */
+export function computeBaliFullLRange(sourceImage, mask) {
+  const { data, width, height, channels } = sourceImage;
+  let lo = 100;
+  let hi = 0;
+  for (let j = 0; j < width * height; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) continue;
+    const p = j * channels;
+    const L = rgbToLab(data[p], data[p + 1], data[p + 2]).L;
+    if (L < lo) lo = L;
+    if (L > hi) hi = L;
+  }
+  return { lo, hi, span: Math.max(hi - lo, SOFA_L_MAP_MIN_SPAN) };
+}
+
+/**
+ * Bali L: multiplicative scale from source photo (preserves relative microcontrast).
+ * Chroma-only brightness anchor — no additive flattening.
+ */
+export function baliPreservedPhotoL(photoL, meanPhotoL, anchorL) {
+  const scale = anchorL / Math.max(meanPhotoL, 1);
+  let L = photoL * scale;
+  if (L > 100) L = 100;
+  if (L < 0) L = 0;
+  return L;
+}
+
 export function computeFinalLabL(originalL, swatchL) {
   return originalL * COLOR_SHIFT_L_ORIGINAL + swatchL * COLOR_SHIFT_L_SWATCH;
 }
@@ -694,9 +719,14 @@ export function swatchChromaForPixel(palette, u) {
 export function recolorSofa(sourceImage, mask, palette) {
   const { data, width, height, channels } = sourceImage;
   const out = Buffer.from(data);
-  const { lo, span } = computeSofaLuminanceMapRange(sourceImage, mask);
   const meanPhotoL = palette.isBaliSilk ? meanMaskedLab(sourceImage, mask).L : 0;
   const anchorL = palette.isBaliSilk ? palette.midtone.L : 0;
+  const lMap = palette.isBaliSilk
+    ? computeBaliFullLRange(sourceImage, mask)
+    : computeSofaLuminanceMapRange(sourceImage, mask);
+  const lo = lMap.lo;
+  const span = lMap.span;
+
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
 
@@ -708,13 +738,9 @@ export function recolorSofa(sourceImage, mask, palette) {
     const u = clamp((photoL - lo) / span, 0, 1);
     const chroma = swatchChromaForPixel(palette, u);
 
-    let finalL;
-    if (palette.isBaliSilk) {
-      finalL = anchorL + (photoL - meanPhotoL) * BALI_L_STRUCTURE;
-    } else {
-      finalL = computeFinalLabL(photoL, chroma.L);
-    }
-    finalL = clamp(finalL, 0, 100);
+    const finalL = palette.isBaliSilk
+      ? baliPreservedPhotoL(photoL, meanPhotoL, anchorL)
+      : clamp(computeFinalLabL(photoL, chroma.L), 0, 100);
     const finalA = clamp(chroma.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const finalB = clamp(chroma.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const { r: outR, g: outG, b: bOut } = labToRgb(finalL, finalA, finalB);
@@ -839,7 +865,7 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
     highlight: fmtTone(palette.highlight),
     lightLeather: palette.isNamedLight,
     lBlend: isBali
-      ? `anchor L + photo ΔL×${BALI_L_STRUCTURE} (validated swatch chroma)`
+      ? 'source photo L × scale (multiplicative, full min–max u map)'
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali ? 'finalize bottom band + white bg only (no upholstery touch)' : null,
@@ -959,7 +985,7 @@ export async function main(argv = process.argv) {
     return;
   }
 
-  console.log('  method: source photo + Bali chroma; final bottom/background pass only');
+  console.log('  method: Bali chroma only + multiplicative source L; finalize bg/bottom only');
 
   if (cli.mode === 'one') {
     const swPath = resolveSwatchArg(cli.swatchFile);
