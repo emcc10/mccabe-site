@@ -23,6 +23,11 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from plp_sofa_bounds import SofaBounds, detect_sofa_bounds  # noqa: E402
 
+try:
+    from replace_plp_photo_mats import replace_mat_background  # noqa: E402
+except ImportError:
+    replace_mat_background = None  # type: ignore[misc, assignment]
+
 DEFAULT_TARGET_SOFA_W = 300
 DEFAULT_CANVAS = (420, 260)
 DEFAULT_PAD = (60, 24, 60, 24)  # left, top, right, bottom → 300×212 inner box
@@ -107,6 +112,8 @@ def normalize_sofa_image(
     x = pad_l + (inner_w - scaled_w) // 2
     y = pad_t + (inner_h - scaled_h) // 2
     canvas.paste(sofa, (x, y), sofa)
+    if replace_mat_background is not None:
+        canvas, _mat = replace_mat_background(canvas)
 
     meta = {
         "sourceSize": [bounds.img_w, bounds.img_h],

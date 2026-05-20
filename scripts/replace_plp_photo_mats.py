@@ -46,8 +46,8 @@ def near_mat_color(r: int, g: int, b: int) -> bool:
     return False
 
 
-def replace_mat_background(img: Image.Image) -> tuple[Image.Image, int]:
-    """Flood-fill mat gray from image edges only — preserves interior sofa shadows."""
+def replace_mat_background(img: Image.Image, *, global_pass: bool = True) -> tuple[Image.Image, int]:
+    """Remove Volusion gray mat. Edge flood first, then optional full-image pass for interior gray islands."""
     rgba = img.convert("RGBA")
     w, h = rgba.size
     px = rgba.load()
@@ -86,7 +86,29 @@ def replace_mat_background(img: Image.Image) -> tuple[Image.Image, int]:
         if y + 1 < h:
             push(x, y + 1)
 
+    if global_pass:
+        for y in range(h):
+            for x in range(w):
+                r, g, b, a = px[x, y]
+                if a >= 10 and near_mat_color(r, g, b):
+                    px[x, y] = (255, 255, 255, a)
+                    changed += 1
+
     return rgba, changed
+
+
+def process_local(path: Path, *, dry_run: bool) -> tuple[int, int]:
+    img = Image.open(path)
+    fixed, changed = replace_mat_background(img)
+    total = img.size[0] * img.size[1]
+    print(f"{path.name}: {changed} mat pixels / {total} ({100 * changed / max(total, 1):.2f}%)")
+    if dry_run or changed == 0:
+        return changed, 0
+    if path.suffix.lower() == ".png":
+        fixed.save(path, format="PNG", optimize=True)
+    else:
+        fixed.convert("RGB").save(path, format="JPEG", quality=92)
+    return changed, path.stat().st_size
 
 
 def fetch(url: str) -> bytes:
@@ -174,21 +196,46 @@ def main() -> int:
     parser.add_argument("--out-dir", type=Path, default=Path("tmp/plp-photos-fixed"))
     parser.add_argument("--dry-run", action="store_true", help="Analyze only, do not write files")
     parser.add_argument("--upload", action="store_true", help="SFTP upload fixed files")
+    parser.add_argument(
+        "--in-place",
+        action="store_true",
+        help="Rewrite files under --input-dir (do not fetch from live)",
+    )
+    parser.add_argument(
+        "--input-dir",
+        type=Path,
+        default=Path("vspfiles/photos"),
+        help="Local photos directory for --in-place",
+    )
     args = parser.parse_args()
 
-    names = args.files or collect_photo_names(args.category)
-    if not names:
-        print("No photos found.", file=sys.stderr)
-        return 1
-
-    print(f"Processing {len(names)} photo(s)...")
     touched: list[str] = []
-    for name in names:
-        changed, _size = process_file(name, args.out_dir, args.dry_run)
-        if changed > 0 and not args.dry_run:
-            touched.append(name)
-
-    print(f"Fixed {len(touched)} file(s) -> {args.out_dir}")
+    if args.in_place:
+        paths = sorted(
+            p
+            for p in args.input_dir.iterdir()
+            if p.suffix.lower() in {".jpg", ".jpeg", ".png"}
+        )
+        if args.files:
+            want = {f.lower() for f in args.files}
+            paths = [p for p in paths if p.name.lower() in want]
+        print(f"Processing {len(paths)} local photo(s) in {args.input_dir}...")
+        for path in paths:
+            changed, _size = process_local(path, dry_run=args.dry_run)
+            if changed > 0 and not args.dry_run:
+                touched.append(path.name)
+        print(f"Fixed {len(touched)} file(s) in {args.input_dir}")
+    else:
+        names = args.files or collect_photo_names(args.category)
+        if not names:
+            print("No photos found.", file=sys.stderr)
+            return 1
+        print(f"Processing {len(names)} photo(s)...")
+        for name in names:
+            changed, _size = process_file(name, args.out_dir, args.dry_run)
+            if changed > 0 and not args.dry_run:
+                touched.append(name)
+        print(f"Fixed {len(touched)} file(s) -> {args.out_dir}")
     if args.upload and not args.dry_run:
         if not touched:
             print("Nothing to upload.")
