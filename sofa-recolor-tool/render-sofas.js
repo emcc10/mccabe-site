@@ -48,22 +48,11 @@ const LIGHT_BODY_WARM_A_MIN = -2;
 const LIGHT_BODY_SHADOW_MIN_PIXELS = 80;
 const DARK_L_ORIGINAL = 0.92;
 const DARK_L_SWATCH = 0.08;
-const LIGHT_L_ORIGINAL = 0.78;
-const LIGHT_L_SWATCH = 0.22;
+const LIGHT_L_ORIGINAL = 0.65;
+const LIGHT_L_SWATCH = 0.35;
 const LIGHT_L_LIFT = 6;
-const CHROMA_ORIGINAL = 0.12;
-const CHROMA_SWATCH = 0.88;
-/** Bali-Silk: chroma balance only (L fine-tune separate; do not remap texture). */
-const BALI_SILK_CHROMA_ORIGINAL = 0.02;
-const BALI_SILK_CHROMA_SWATCH = 0.98;
-const BALI_SILK_L_LIFT = 2;
-const BALI_SILK_L_SCALE = 0.95;
-const BALI_SILK_GRAY_REDUCE = 0.12;
-const BALI_SILK_BROWN_REDUCE = 0.1;
-const BALI_SILK_BROWN_U_FADE = 0.58;
-const BALI_SILK_WARM_PULL = 0.1;
-const BALI_SILK_CREAM_A = 1.6;
-const BALI_SILK_CREAM_B = 14.5;
+/** Optional Bali trim if swatch b reads warm (0 = off; try -2.5 if needed). */
+const BALI_SILK_B_TRIM = 0;
 /** Diagnostic: force uniform upholstery chroma; L from source only. */
 export const BRUTE_FORCE_CHROMA_A = 2;
 export const BRUTE_FORCE_CHROMA_B = 10;
@@ -520,32 +509,9 @@ export function computeSofaLuminanceMapRange(masterImage, mask) {
   return { lo, hi, span: Math.max(hi - lo, SOFA_L_MAP_MIN_SPAN) };
 }
 
-/** Chroma-only: less gray/taupe, less brown in mids/shadows, warmer cream ivory. */
-export function applyBaliSilkChromaFineTune(a, b, u = 0.5) {
-  let fa = a * (1 - BALI_SILK_GRAY_REDUCE);
-  let fb = b * (1 - BALI_SILK_GRAY_REDUCE);
-
-  const shadowMid = 1 - clamp(u / BALI_SILK_BROWN_U_FADE, 0, 1);
-  const brownCut = BALI_SILK_BROWN_REDUCE * shadowMid;
-  if (fa > BALI_SILK_CREAM_A) {
-    fa -= (fa - BALI_SILK_CREAM_A) * brownCut;
-  }
-
-  fa += BALI_SILK_CREAM_A * BALI_SILK_WARM_PULL;
-  fb += BALI_SILK_CREAM_B * BALI_SILK_WARM_PULL;
-  return { a: fa, b: fb };
-}
-
-export function applyBaliSilkLFineTune(L) {
-  return clamp(L * BALI_SILK_L_SCALE, 0, 100);
-}
-
-export function computeFinalLabL(originalL, swatchL, isLightLeather, isBaliSilk = false) {
+export function computeFinalLabL(originalL, swatchL, isLightLeather) {
   if (isLightLeather) {
-    const lift = isBaliSilk ? BALI_SILK_L_LIFT : LIGHT_L_LIFT;
-    let L = originalL * LIGHT_L_ORIGINAL + swatchL * LIGHT_L_SWATCH + lift;
-    if (isBaliSilk) L = applyBaliSilkLFineTune(L);
-    return L;
+    return originalL * LIGHT_L_ORIGINAL + swatchL * LIGHT_L_SWATCH + LIGHT_L_LIFT;
   }
   return originalL * DARK_L_ORIGINAL + swatchL * DARK_L_SWATCH;
 }
@@ -567,13 +533,11 @@ export function recolorSofa(neutralMaster, mask, palette) {
     const u = clamp((lab.L - lo) / span, 0, 1);
     const tone = interpolateSwatchPalette(palette, u);
 
-    const finalL = clamp(
-      isLight ? computeFinalLabL(lab.L, tone.L, true, palette.isBaliSilk) : lab.L,
-      0,
-      100,
-    );
+    const finalL = clamp(isLight ? computeFinalLabL(lab.L, tone.L, true) : lab.L, 0, 100);
     const finalA = clamp(tone.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const finalB = clamp(tone.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    let finalB = tone.b;
+    if (palette.isBaliSilk && BALI_SILK_B_TRIM !== 0) finalB += BALI_SILK_B_TRIM;
+    finalB = clamp(finalB, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const { r, g, b: bOut } = labToRgb(finalL, finalA, finalB);
 
     out[p] = r;
@@ -683,12 +647,10 @@ export async function processSwatch(swatchPath, neutralMaster, mask) {
     midtone: fmtTone(palette.midtone),
     highlight: fmtTone(palette.highlight),
     lightLeather: palette.isNamedLight,
-    lBlend: palette.isNamedLight
-      ? palette.isBaliSilk
-        ? 'neutral L 78/22 +2 ×0.95'
-        : 'neutral L 78/22 +6'
-      : 'neutral L only',
-    chroma: 'swatch palette a/b only (no cognac blend)',
+    lBlend: palette.isNamedLight ? 'neutral L 65/35 +6' : 'neutral L only',
+    chroma: palette.isBaliSilk && BALI_SILK_B_TRIM
+      ? `swatch a/b only (b trim ${BALI_SILK_B_TRIM})`
+      : 'swatch a/b only',
   });
 
   const outData = recolorSofa(neutralMaster, mask, palette);
