@@ -4,9 +4,9 @@
 import { rgbToLab } from './render-sofas.js';
 
 const HF_RADIUS = 1;
-const MF_RADIUS = 3;
-export const PHOTO_HF_GAIN = 0.34;
-export const PHOTO_MF_GAIN = 0.11;
+const MF_RADIUS = 2;
+export const PHOTO_HF_GAIN = 0.5;
+export const PHOTO_MF_GAIN = 0.15;
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
