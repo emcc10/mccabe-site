@@ -23,11 +23,33 @@ def sectional_names() -> list[str]:
 
 
 def fetch_overwrite(name: str) -> None:
-    url = f"{SITE}/v/vspfiles/photos/{name}"
-    req = urllib.request.Request(url, headers=UA)
-    data = urllib.request.urlopen(req, timeout=90).read()
-    (PHOTOS / name).write_bytes(data)
-    print(f"  fetched {name} ({len(data)} bytes)")
+    """Prefer large originals; skip CDN 420×260 thumbs (cannot re-normalize up)."""
+    from io import BytesIO
+
+    from PIL import Image
+
+    for url in (
+        f"{SITE}/v/vspfiles/photos/{name}?mcorig={name}",
+        f"{SITE}/v/vspfiles/photos/{name}",
+    ):
+        try:
+            req = urllib.request.Request(url, headers=UA)
+            data = urllib.request.urlopen(req, timeout=90).read()
+        except Exception:  # noqa: BLE001
+            continue
+        try:
+            im = Image.open(BytesIO(data))
+            if im.size[0] >= 500 or im.size[1] >= 400:
+                (PHOTOS / name).write_bytes(data)
+                print(f"  fetched {name} ({len(data)} bytes, {im.size[0]}x{im.size[1]})")
+                return
+        except Exception:  # noqa: BLE001
+            continue
+    dest = PHOTOS / name
+    if dest.is_file() and dest.stat().st_size > 0:
+        print(f"  keep local {name} ({dest.stat().st_size} bytes)")
+        return
+    raise RuntimeError(f"no large original for {name}")
 
 
 def main() -> int:
