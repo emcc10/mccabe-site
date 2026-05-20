@@ -11,8 +11,6 @@ import {
   saveImage,
   loadUpholsteryMask,
   recolorSofa,
-  recolorBaliSilkPhotographic,
-  buildNeutralGrayMaster,
   getSwatchPalette,
   resolveOriginalSwatchPath,
   publishRenderOutputs,
@@ -85,9 +83,7 @@ async function runOneSwatch(swatchArg, renderSofa, sourceSofa, mask, width, heig
   console.log('  saved: extracted-shadow/midtone/highlight-color.png');
 
   if (renderSofa && sourceSofa) {
-    const finalData = palette.isBaliSilk
-      ? recolorBaliSilkPhotographic(buildNeutralGrayMaster(sourceSofa, mask), sourceSofa, mask, palette)
-      : recolorSofa(sourceSofa, mask, palette);
+    const finalData = recolorSofa(sourceSofa, mask, palette);
     const mainOut = join(__dirname, 'output', `${swatchName}.png`);
     await saveImage(finalData, mainOut, width, height, channels);
     await saveImage(finalData, join(outDir, 'final-output.png'), width, height, channels);
