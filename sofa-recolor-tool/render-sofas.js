@@ -9,6 +9,7 @@ import {
   readdirSync,
   existsSync,
   renameSync,
+  rmSync,
   unlinkSync,
   statSync,
 } from 'fs';
@@ -49,14 +50,14 @@ const LIGHT_BODY_SHADOW_MIN_PIXELS = 80;
 /** Color shift: preserve original photo L; tiny swatch L hint only. */
 const COLOR_SHIFT_L_ORIGINAL = 0.97;
 const COLOR_SHIFT_L_SWATCH = 0.03;
-/** Bali-Silk light body — hardcoded target (not fold/shadow sampling). */
+/** Bali-Silk validated sample reference (light body only). */
 export const BALI_SILK_TARGET_RGB = [192, 183, 168];
-/** Chroma: 0% original cognac a/b, 100% swatch. */
-const CHROMA_ORIGINAL = 0;
+const BALI_BODY_MIN_PIXEL = { r: 155, g: 145, b: 130 };
+const BALI_SAMPLE_FLOOR = { r: 170, g: 160, b: 145 };
+const BALI_SAMPLE_RANGE = { r: [185, 215], g: [175, 205], b: [155, 190] };
+const BALI_OUTPUT_FLOOR = { r: 170, g: 160, b: 145 };
+const BALI_L_STRUCTURE = 0.9;
 const CHROMA_SWATCH = 1;
-/** Extra ivory b in shadows/mids (decontaminate cognac undertone). */
-const SHADOW_CHROMA_B_BOOST = 2.5;
-const SHADOW_CHROMA_U_FADE = 0.52;
 /** Diagnostic: force uniform upholstery chroma; L from source only. */
 export const BRUTE_FORCE_CHROMA_A = 2;
 export const BRUTE_FORCE_CHROMA_B = 10;
@@ -201,6 +202,80 @@ export function pixelSaturation(r, g, b) {
   const min = Math.min(r, g, b);
   if (max === min) return 0;
   return (max - min) / (max + min < 255 ? max + min : 510);
+}
+
+function medianRgbFromPixels(pixels) {
+  if (!pixels.length) return [128, 128, 128];
+  const rs = [];
+  const gs = [];
+  const bs = [];
+  for (const p of pixels) {
+    rs.push(p.r);
+    gs.push(p.g);
+    bs.push(p.b);
+  }
+  rs.sort((a, b) => a - b);
+  gs.sort((a, b) => a - b);
+  bs.sort((a, b) => a - b);
+  return [medianOf(rs), medianOf(gs), medianOf(bs)];
+}
+
+export function isBaliLightBodyPixel(r, g, b) {
+  return r >= BALI_BODY_MIN_PIXEL.r && g >= BALI_BODY_MIN_PIXEL.g && b >= BALI_BODY_MIN_PIXEL.b;
+}
+
+export function validateBaliSilkSample(rgb) {
+  const [r, g, b] = rgb;
+  if (r < BALI_SAMPLE_FLOOR.r || g < BALI_SAMPLE_FLOOR.g || b < BALI_SAMPLE_FLOOR.b) {
+    throw new Error('BAD BALI SILK SAMPLE — sampled shadow/taupe instead of light body.');
+  }
+  const { r: rr, g: gr, b: br } = BALI_SAMPLE_RANGE;
+  if (r < rr[0] || r > rr[1] || g < gr[0] || g > gr[1] || b < br[0] || b > br[1]) {
+    console.warn(
+      `  warn: Bali sample RGB [${r}, ${g}, ${b}] outside approx range ${rr[0]}-${rr[1]} / ${gr[0]}-${gr[1]} / ${br[0]}-${br[1]}`,
+    );
+  }
+}
+
+export function isTaupeBrownRgb(r, g, b) {
+  if (r < BALI_OUTPUT_FLOOR.r || g < BALI_OUTPUT_FLOOR.g || b < BALI_OUTPUT_FLOOR.b) return true;
+  if (r < 180 && g < 172 && b < 158) return true;
+  const lab = rgbToLab(r, g, b);
+  return lab.L < 52 && lab.a > 3 && lab.b > 9;
+}
+
+export function validateBaliSilkOutput(rgb) {
+  const [r, g, b] = rgb;
+  if (isTaupeBrownRgb(r, g, b)) {
+    throw new Error(
+      `BAD BALI SILK OUTPUT — upholstery too dark/taupe (expected warm ivory): RGB [${r}, ${g}, ${b}]`,
+    );
+  }
+}
+
+export function deleteBaliSilkOutputs(outputDir = OUTPUT_DIR) {
+  if (!existsSync(outputDir)) return;
+  for (const f of readdirSync(outputDir)) {
+    if (f.toLowerCase().includes('bali-silk')) {
+      try {
+        unlinkSync(join(outputDir, f));
+      } catch {
+        /* locked */
+      }
+    }
+  }
+  const diag = join(outputDir, 'diagnostic', 'Bali-Silk');
+  if (existsSync(diag)) {
+    try {
+      rmSync(diag, { recursive: true, force: true });
+    } catch {
+      /* locked */
+    }
+  }
+}
+
+export function renderTimestamp() {
+  return new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 }
 
 function medianLabFromPixels(pixels) {
@@ -351,15 +426,39 @@ function labToneFromRgb(rgb) {
   return { L: lab.L, a: lab.a, b: lab.b, rgb: [r, g, b] };
 }
 
-/** Bali-Silk: single hardcoded light-body target — no swatch median/fold/shadow sampling. */
-export function buildHardcodedBaliSilkPalette() {
-  const tone = labToneFromRgb(BALI_SILK_TARGET_RGB);
+/**
+ * Bali-Silk: actual swatch image, light body only (no fold/shadow/dark pixels).
+ */
+export function extractBaliSilkValidatedPalette(rawPixels) {
+  const body = rawPixels.filter((p) => isBaliLightBodyPixel(p.r, p.g, p.b));
+  if (body.length < 48) {
+    throw new Error(
+      `BAD BALI SILK SAMPLE — only ${body.length} light-body pixels (need r>=${BALI_BODY_MIN_PIXEL.r} g>=${BALI_BODY_MIN_PIXEL.g} b>=${BALI_BODY_MIN_PIXEL.b})`,
+    );
+  }
+
+  body.sort((a, b) => a.lum - b.lum);
+  const brightStart = Math.floor(body.length * 0.4);
+  const bright = body.slice(brightStart);
+  const sampleRgb = medianRgbFromPixels(bright);
+  validateBaliSilkSample(sampleRgb);
+
+  const third = Math.max(1, Math.floor(bright.length / 3));
+  const shadowPx = bright.slice(0, third);
+  const midPx = bright.slice(third, third * 2);
+  const hiPx = bright.slice(third * 2);
+
   return {
-    shadow: tone,
-    midtone: tone,
-    highlight: tone,
-    extractionMethod: 'hardcoded-target-rgb',
-    bandCounts: { target: BALI_SILK_TARGET_RGB.join(',') },
+    shadow: medianLabFromPixels(shadowPx),
+    midtone: medianLabFromPixels(midPx),
+    highlight: medianLabFromPixels(hiPx),
+    extractionMethod: 'bali-validated-light-body',
+    bandCounts: {
+      body: body.length,
+      bright: bright.length,
+      sampleRgb: sampleRgb.join(','),
+    },
+    validatedSampleRgb: sampleRgb,
   };
 }
 
@@ -371,19 +470,20 @@ export async function getSwatchPalette(swatchPath) {
   const swatchStem = basename(resolved, extname(resolved));
 
   if (isBaliSilkSwatch(swatchStem)) {
-    const tones = buildHardcodedBaliSilkPalette();
+    const { resolved: swPath, pixels } = await loadSwatchPixels(swatchPath);
+    const tones = extractBaliSilkValidatedPalette(pixels);
     return {
       shadow: tones.shadow,
       midtone: tones.midtone,
       highlight: tones.highlight,
       isBaliSilk: true,
       isNamedLight: true,
-      isLightBodySampling: false,
+      isLightBodySampling: true,
       extractionMethod: tones.extractionMethod,
-      pixelCount: 0,
-      sourceFile: basename(resolved),
+      pixelCount: pixels.length,
+      sourceFile: basename(swPath),
       bandCounts: tones.bandCounts,
-      targetRgb: BALI_SILK_TARGET_RGB,
+      validatedSampleRgb: tones.validatedSampleRgb,
     };
   }
 
@@ -483,6 +583,26 @@ export function meanMaskedLab(image, mask) {
     : { n: 0, L: 0, a: 0, b: 0 };
 }
 
+/** Mean RGB on masked upholstery pixels. */
+export function meanMaskedRgb(image, mask) {
+  const { data, width, height, channels } = image;
+  let sr = 0;
+  let sg = 0;
+  let sb = 0;
+  let n = 0;
+  for (let j = 0; j < width * height; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) continue;
+    const p = j * channels;
+    sr += data[p];
+    sg += data[p + 1];
+    sb += data[p + 2];
+    n++;
+  }
+  return n
+    ? [Math.round(sr / n), Math.round(sg / n), Math.round(sb / n)]
+    : [0, 0, 0];
+}
+
 export async function loadImage(path) {
   const { data, info } = await sharp(path).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   return {
@@ -559,21 +679,10 @@ export function photoLuminanceOnly(r, g, b) {
   return rgbToLab(r, g, b).L;
 }
 
-/**
- * Swatch a/b only. Shadow/mid regions get extra ivory b to kill cognac undertone.
- */
+/** Swatch a/b only — zero cognac chroma. */
 export function swatchChromaForPixel(palette, u) {
   const tone = interpolateSwatchPalette(palette, u);
-  let a = tone.a * CHROMA_SWATCH;
-  let b = tone.b * CHROMA_SWATCH;
-
-  if (palette.isBaliSilk) {
-    const shadow = 1 - clamp(u / SHADOW_CHROMA_U_FADE, 0, 1);
-    b += shadow * SHADOW_CHROMA_B_BOOST;
-    a += shadow * 0.4;
-  }
-
-  return { a, b, L: tone.L };
+  return { a: tone.a * CHROMA_SWATCH, b: tone.b * CHROMA_SWATCH, L: tone.L };
 }
 
 /**
@@ -583,6 +692,8 @@ export function recolorSofa(sourceImage, mask, palette) {
   const { data, width, height, channels } = sourceImage;
   const out = Buffer.from(data);
   const { lo, span } = computeSofaLuminanceMapRange(sourceImage, mask);
+  const meanPhotoL = palette.isBaliSilk ? meanMaskedLab(sourceImage, mask).L : 0;
+  const anchorL = palette.isBaliSilk ? palette.midtone.L : 0;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
@@ -595,7 +706,13 @@ export function recolorSofa(sourceImage, mask, palette) {
     const u = clamp((photoL - lo) / span, 0, 1);
     const chroma = swatchChromaForPixel(palette, u);
 
-    const finalL = clamp(computeFinalLabL(photoL, chroma.L), 0, 100);
+    let finalL;
+    if (palette.isBaliSilk) {
+      finalL = anchorL + (photoL - meanPhotoL) * BALI_L_STRUCTURE;
+    } else {
+      finalL = computeFinalLabL(photoL, chroma.L);
+    }
+    finalL = clamp(finalL, 0, 100);
     const finalA = clamp(chroma.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const finalB = clamp(chroma.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const { r: outR, g: outG, b: bOut } = labToRgb(finalL, finalA, finalB);
@@ -692,6 +809,13 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
 
   const swatchName = basename(resolved, extname(resolved));
+  const isBali = isBaliSilkSwatch(swatchName);
+
+  if (isBali) {
+    deleteBaliSilkOutputs();
+    console.log('  cleared previous Bali-Silk outputs');
+  }
+
   const palette = await getSwatchPalette(resolved);
 
   const fmtTone = (t) => ({
@@ -703,29 +827,38 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
     swatchName,
     source: `input/swatches/${palette.sourceFile}`,
     extraction: palette.extractionMethod,
+    validatedSampleRgb: palette.validatedSampleRgb || null,
     shadow: fmtTone(palette.shadow),
     midtone: fmtTone(palette.midtone),
     highlight: fmtTone(palette.highlight),
     lightLeather: palette.isNamedLight,
-    lBlend: `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
-    targetRgb: palette.targetRgb || null,
-    chroma: palette.isBaliSilk
-      ? `swatch a/b 100% (0% cognac) + shadow ivory b+${SHADOW_CHROMA_B_BOOST}`
-      : 'swatch a/b 100% (0% cognac)',
+    lBlend: isBali
+      ? `anchor L + photo ΔL×${BALI_L_STRUCTURE} (validated swatch chroma)`
+      : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
+    chroma: 'swatch a/b 100% (0% cognac)',
   });
 
   const outData = recolorSofa(sourceImage, mask, palette);
-  if (palette.isBaliSilk) {
-    const mean = meanMaskedLab(
-      { data: outData, width: sourceImage.width, height: sourceImage.height, channels: sourceImage.channels },
-      mask,
-    );
-    const midRgb = labToRgb(mean.L, mean.a, mean.b);
+  const outImage = {
+    data: outData,
+    width: sourceImage.width,
+    height: sourceImage.height,
+    channels: sourceImage.channels,
+  };
+
+  if (isBali) {
+    const meanRgb = meanMaskedRgb(outImage, mask);
+    const meanLab = meanMaskedLab(outImage, mask);
     console.log(
-      `  upholstery mean: LAB L=${mean.L.toFixed(1)} a=${mean.a.toFixed(1)} b=${mean.b.toFixed(1)} → RGB [${midRgb.r}, ${midRgb.g}, ${midRgb.b}]`,
+      `  upholstery mean: RGB [${meanRgb[0]}, ${meanRgb[1]}, ${meanRgb[2]}]  LAB L=${meanLab.L.toFixed(1)} a=${meanLab.a.toFixed(1)} b=${meanLab.b.toFixed(1)}`,
     );
+    validateBaliSilkOutput(meanRgb);
+    console.log('  output validation: PASS (warm ivory range)');
   }
-  const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
+
+  const outPath = isBali
+    ? join(OUTPUT_DIR, `Bali-Silk-${renderTimestamp()}.png`)
+    : join(OUTPUT_DIR, `${swatchName}.png`);
   const bytes = await saveImage(
     outData,
     outPath,
@@ -733,8 +866,9 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
     sourceImage.height,
     sourceImage.channels,
   );
-  console.log(`  wrote ${swatchName}.png (${Math.round(bytes / 1024)} KB)`);
-  publishRenderOutputs(swatchName, outPath);
+  console.log(`\n  wrote ${basename(outPath)} (${Math.round(bytes / 1024)} KB)`);
+  console.log(`  ${resolve(outPath)}`);
+  if (!isBali) publishRenderOutputs(swatchName, outPath);
   return { outPath, palette };
 }
 
@@ -818,7 +952,7 @@ export async function main(argv = process.argv) {
     return;
   }
 
-  console.log('  method: photographic color shift (97% original L, swatch a/b)');
+  console.log('  method: validated Bali sample + photo structure L + swatch chroma only');
 
   if (cli.mode === 'one') {
     const swPath = resolveSwatchArg(cli.swatchFile);

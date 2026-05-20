@@ -16401,7 +16401,7 @@ body.mc-product-page #content_area font.product_sale_price {
         <input type="hidden" name="imageField2.y" value="1" />
         <div class="mc-login-modal__field">
           <label for="mc-login-email">Email (username)</label>
-          <input type="email" id="mc-login-email" name="email" required autocomplete="username" maxlength="75" />
+          <input type="email" id="mc-login-email" name="EmailAddress" required autocomplete="username" maxlength="75" />
         </div>
         <div class="mc-login-modal__field">
           <label for="mc-login-password">Password</label>
@@ -16538,6 +16538,7 @@ body.mc-product-page #content_area font.product_sale_price {
   function mcOpenLoginModal() {
     var m = mcPrepareLoginModal();
     if (!m) return false;
+    mcEnsureAuthFormBound();
     mcSetModalTab('login');
     m.classList.add('mc-login-modal--open');
     m.setAttribute('aria-hidden', 'false');
@@ -16563,6 +16564,7 @@ body.mc-product-page #content_area font.product_sale_price {
   function mcOpenSignupModal() {
     var m = mcPrepareLoginModal();
     if (!m) return false;
+    mcEnsureAuthFormBound();
     mcSetModalTab('signup');
     m.classList.add('mc-login-modal--open');
     m.setAttribute('aria-hidden', 'false');
@@ -16674,6 +16676,67 @@ body.mc-product-page #content_area font.product_sale_price {
   window.mcCloseLoginModalOnly = mcCloseLoginModalOnly;
   window.mcRefreshMemberPricingAfterAuth = mcRefreshMemberPricingAfterAuth;
   window.mcOpenSignupModal = mcOpenSignupModal;
+
+  function mcEnsureAuthFormBound() {
+    var loginForm = document.getElementById('mc-member-login-form');
+    if (loginForm && loginForm.getAttribute('data-mc-auth-bound') !== '1') {
+      loginForm.setAttribute('data-mc-auth-bound', '1');
+      loginForm.setAttribute('action', '/login.asp');
+      loginForm.setAttribute('target', '_self');
+      loginForm.addEventListener(
+        'submit',
+        function (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          try {
+            ev.stopImmediatePropagation();
+          } catch (eStop) {}
+          mcSubmitAuthForm(loginForm, 'login');
+          return false;
+        },
+        true
+      );
+      loginForm.onsubmit = function () {
+        return false;
+      };
+    }
+    var signupForm = document.getElementById('mc-member-signup-form');
+    if (signupForm && signupForm.getAttribute('data-mc-auth-bound') !== '1') {
+      signupForm.setAttribute('data-mc-auth-bound', '1');
+      signupForm.setAttribute('target', '_self');
+      signupForm.addEventListener(
+        'submit',
+        function (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          try {
+            ev.stopImmediatePropagation();
+          } catch (eStop2) {}
+          var nameEl = document.getElementById('mc-signup-display-name');
+          var emailEl = document.getElementById('mc-signup-email');
+          var pwEl = document.getElementById('mc-signup-password');
+          var fn = document.getElementById('mc-signup-firstname');
+          var ln = document.getElementById('mc-signup-lastname');
+          var e2 = document.getElementById('mc-signup-email2');
+          var p2 = document.getElementById('mc-signup-password2');
+          if (!nameEl || !emailEl || !pwEl || !fn || !ln || !e2 || !p2) return false;
+          var parts = mcSplitDisplayName(nameEl.value);
+          fn.value = parts.first;
+          ln.value = parts.last;
+          e2.value = emailEl.value;
+          p2.value = pwEl.value;
+          mcSetSignupFormAction();
+          mcSubmitAuthForm(signupForm, 'signup');
+          return false;
+        },
+        true
+      );
+      signupForm.onsubmit = function () {
+        return false;
+      };
+    }
+  }
+  window.mcEnsureAuthFormBound = mcEnsureAuthFormBound;
 
   var mcIdleLogoutTimer = null;
   function mcClearIdleLogoutTimer() {
@@ -16835,6 +16898,43 @@ body.mc-product-page #content_area font.product_sale_price {
     }
     return false;
   }
+  function mcNormalizeLoginFormFields(form) {
+    if (!form) return;
+    var emailEl = document.getElementById('mc-login-email');
+    if (emailEl) emailEl.setAttribute('name', 'EmailAddress');
+    var passwordEl = document.getElementById('mc-login-password');
+    if (passwordEl) passwordEl.setAttribute('name', 'Password');
+  }
+
+  async function mcPostAuthWithFetch(form, mode) {
+    if (!form) return false;
+    var action = form.getAttribute('action') || '';
+    if (mode === 'login') {
+      mcSetLoginFormAction();
+      mcNormalizeLoginFormFields(form);
+      action = form.getAttribute('action') || '/login.asp';
+    } else {
+      mcSetSignupFormAction();
+      action = form.getAttribute('action') || '/AccountSettings.asp';
+    }
+    try {
+      await fetch(action, {
+        method: 'POST',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Accept: 'text/html,application/xhtml+xml',
+        },
+        body: mcAuthFormBody(form),
+        redirect: 'follow',
+      });
+    } catch (eFetch) {
+      return false;
+    }
+    return await mcWaitForAuthSuccess(12000, 500);
+  }
+
   function mcLoginResponseLooksFailed(html, respUrl) {
     var raw = String(html || '');
     var stripped = raw
@@ -16863,135 +16963,48 @@ async function mcSubmitAuthForm(form, mode) {
   mcToggleAuthPending(form, true);
   mcSetAuthStatus(mode, mode === 'signup' ? 'Creating account.' : 'Signing in.', 'success');
 
-  if (mode === 'login') {
-    try {
-      mcSetLoginFormAction();
-
-      var emailEl = document.getElementById('mc-login-email');
-      if (emailEl && !form.querySelector('input[name="EmailAddress"]')) {
-        emailEl.setAttribute('name', 'EmailAddress');
-      }
-
-      var passwordEl = document.getElementById('mc-login-password');
-      if (passwordEl && !form.querySelector('input[name="Password"]')) {
-        passwordEl.setAttribute('name', 'Password');
-      }
-
-      mcSetAuthStatus('login', 'Signing in.', 'success');
-
-      var originalTarget = form.getAttribute('target') || '';
-      form.setAttribute('target', 'mc-member-auth-frame');
-      mcGetAuthFrame();
-
-      HTMLFormElement.prototype.submit.call(form);
-
-      var confirmed = await mcWaitForAuthSuccess(12000, 500);
-      if (confirmed) {
-        mcSetAuthStatus('login', 'Signed in. Updating member pricing…', 'success');
-        try {
-          await mcRefreshMemberPricingAfterAuth();
-        } catch (eRefresh) {}
-        mcToggleAuthPending(form, false);
-        mcSetAuthStatus('login', '', '');
-        mcCloseLoginModal(true);
-        return true;
-      }
-
-      if (originalTarget) form.setAttribute('target', originalTarget);
-      else form.removeAttribute('target');
-
-      mcLoginModalClearRecentAuth();
-      mcSetAuthStatus('login', 'We could not confirm the member session. Please try again.', 'error');
+  try {
+    var confirmed = await mcPostAuthWithFetch(form, mode);
+    if (confirmed) {
+      mcLoginModalRememberRecentAuth();
+      mcSetAuthStatus(
+        mode,
+        mode === 'signup' ? 'Account created. Updating member pricing…' : 'Signed in. Updating member pricing…',
+        'success'
+      );
+      try {
+        await mcRefreshMemberPricingAfterAuth();
+      } catch (eRefresh) {}
       mcToggleAuthPending(form, false);
-      return false;
-    } catch (eLogin) {
-      mcLoginModalClearRecentAuth();
-      mcSetAuthStatus('login', 'Could not sign in right now. Please try again.', 'error');
-      mcToggleAuthPending(form, false);
-      return false;
+      mcSetAuthStatus(mode, '', '');
+      mcCloseLoginModal(true);
+      return true;
     }
+    mcLoginModalClearRecentAuth();
+    mcSetAuthStatus(
+      mode,
+      mode === 'signup'
+        ? 'We could not confirm the new account. Please check your info and try again.'
+        : 'Login failed. Please check your email and password.',
+      'error'
+    );
+    mcToggleAuthPending(form, false);
+    return false;
+  } catch (eAuthAll) {
+    mcLoginModalClearRecentAuth();
+    mcSetAuthStatus(
+      mode,
+      mode === 'signup'
+        ? 'Could not create the account right now. Please try again.'
+        : 'Could not sign in right now. Please try again.',
+      'error'
+    );
+    mcToggleAuthPending(form, false);
+    return false;
   }
-
-  return new Promise(function(resolve) {
-    var originalTarget = form.getAttribute('target') || '';
-    var originalAction = form.getAttribute('action') || '';
-    var finished = false;
-
-    var cleanup = function(ok, message, kind) {
-      if (finished) return;
-      finished = true;
-
-      try { clearTimeout(timeoutId); } catch (e1) {}
-      try { clearInterval(pollId); } catch (e2) {}
-
-      try {
-        if (originalTarget) form.setAttribute('target', originalTarget);
-        else form.removeAttribute('target');
-      } catch (e3) {}
-
-      try {
-        if (originalAction) form.setAttribute('action', originalAction);
-      } catch (e4) {}
-
-      if (!ok) {
-        mcLoginModalClearRecentAuth();
-        mcSetAuthStatus(mode, message, kind || 'error');
-        mcToggleAuthPending(form, false);
-      }
-
-      resolve(ok);
-    };
-
-    var pollId = window.setInterval(function() {
-      window.setTimeout(async function() {
-        if (finished) return;
-        try {
-          if (await mcAuthSucceeded()) {
-            mcSetAuthStatus(
-              mode,
-              mode === 'signup' ? 'Account created. Updating member pricing…' : 'Signed in. Updating member pricing…',
-              'success'
-            );
-            cleanup(true, '', '');
-            mcToggleAuthPending(form, false);
-            mcSetAuthStatus(mode, '', '');
-            (async function () {
-              try {
-                await mcRefreshMemberPricingAfterAuth();
-              } catch (eRefreshSu) {}
-              mcCloseLoginModal(true);
-            })();
-          }
-        } catch (eAuth) {}
-      }, 0);
-    }, 900);
-
-    var timeoutId = window.setTimeout(function() {
-      cleanup(
-        false,
-        mode === 'signup'
-          ? 'We could not confirm the new account. Please check your info and try again.'
-          : 'Login failed. Please check your email and password.',
-        'error'
-      );
-    }, 25000);
-
-    try {
-      form.setAttribute('target', 'mc-member-auth-frame');
-      if (mode === 'signup') mcSetSignupFormAction();
-      if (mode === 'login') mcSetLoginFormAction();
-      HTMLFormElement.prototype.submit.call(form);
-    } catch (err) {
-      cleanup(
-        false,
-        mode === 'signup'
-          ? 'Could not create the account right now. Please try again.'
-          : 'Could not sign in right now. Please try again.',
-        'error'
-      );
-    }
-  });
 }
+
+  window.mcSubmitAuthForm = mcSubmitAuthForm;
 
   document.addEventListener('click', function (e) {
     if (typeof window.mcHandleLoginCtaClick === 'function' && window.mcHandleLoginCtaClick(e)) return;
@@ -17016,36 +17029,40 @@ async function mcSubmitAuthForm(form, mode) {
     }
   });
 
-  (function mcBindAuthForms() {
-    var loginForm = document.getElementById('mc-member-login-form');
-  if (loginForm) {
-    loginForm.addEventListener('submit', function (ev) {
+  mcEnsureAuthFormBound();
+  document.addEventListener(
+    'submit',
+    function (ev) {
+      var f = ev.target;
+      if (!f || !f.id) return;
+      if (f.id !== 'mc-member-login-form' && f.id !== 'mc-member-signup-form') return;
       ev.preventDefault();
       ev.stopPropagation();
-      mcSubmitAuthForm(loginForm, 'login');
-    });
-  }
-    var form = document.getElementById('mc-member-signup-form');
-    if (!form) return;
-    form.addEventListener('submit', function (ev) {
-      ev.preventDefault();
-      var nameEl = document.getElementById('mc-signup-display-name');
-      var emailEl = document.getElementById('mc-signup-email');
-      var pwEl = document.getElementById('mc-signup-password');
-      var fn = document.getElementById('mc-signup-firstname');
-      var ln = document.getElementById('mc-signup-lastname');
-      var e2 = document.getElementById('mc-signup-email2');
-      var p2 = document.getElementById('mc-signup-password2');
-      if (!nameEl || !emailEl || !pwEl || !fn || !ln || !e2 || !p2) return;
-      var parts = mcSplitDisplayName(nameEl.value);
-      fn.value = parts.first;
-      ln.value = parts.last;
-      e2.value = emailEl.value;
-      p2.value = pwEl.value;
-      mcSetSignupFormAction();
-      mcSubmitAuthForm(form, 'signup');
-    });
-  })();
+      try {
+        ev.stopImmediatePropagation();
+      } catch (eCap) {}
+      if (f.id === 'mc-member-login-form') {
+        mcSubmitAuthForm(f, 'login');
+      } else {
+        var nameEl = document.getElementById('mc-signup-display-name');
+        var emailEl = document.getElementById('mc-signup-email');
+        var pwEl = document.getElementById('mc-signup-password');
+        var fn = document.getElementById('mc-signup-firstname');
+        var ln = document.getElementById('mc-signup-lastname');
+        var e2 = document.getElementById('mc-signup-email2');
+        var p2 = document.getElementById('mc-signup-password2');
+        if (!nameEl || !emailEl || !pwEl || !fn || !ln || !e2 || !p2) return;
+        var parts = mcSplitDisplayName(nameEl.value);
+        fn.value = parts.first;
+        ln.value = parts.last;
+        e2.value = emailEl.value;
+        p2.value = pwEl.value;
+        mcSetSignupFormAction();
+        mcSubmitAuthForm(f, 'signup');
+      }
+    },
+    true
+  );
   document.addEventListener('keydown', function (ev) {
     if (ev.key === 'Escape') {
       var m = document.getElementById('mc-login-modal');
