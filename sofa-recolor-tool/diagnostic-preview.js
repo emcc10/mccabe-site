@@ -83,8 +83,8 @@ async function runOneSwatch(swatchArg, renderSofa, sourceSofa, neutralMaster, ma
   await saveChip(join(outDir, 'extracted-highlight-color.png'), palette.highlight.rgb);
   console.log('  saved: extracted-shadow/midtone/highlight-color.png');
 
-  if (renderSofa && neutralMaster) {
-    const finalData = recolorSofa(neutralMaster, mask, palette);
+  if (renderSofa && neutralMaster && sourceSofa) {
+    const finalData = recolorSofa(neutralMaster, mask, palette, sourceSofa);
     const mainOut = join(__dirname, 'output', `${swatchName}.png`);
     await saveImage(finalData, mainOut, width, height, channels);
     await saveImage(finalData, join(outDir, 'final-output.png'), width, height, channels);
@@ -104,6 +104,7 @@ async function main() {
 
   console.log('Neutral master + swatch chroma diagnostic');
 
+  let sourceSofa;
   let neutralMaster;
   let mask;
   let width;
@@ -115,7 +116,7 @@ async function main() {
       console.error('Missing input/sofa.png or input/mask.png');
       process.exit(1);
     }
-    const sourceSofa = await loadImage(SOFA_PATH);
+    sourceSofa = await loadImage(SOFA_PATH);
     width = sourceSofa.width;
     height = sourceSofa.height;
     channels = sourceSofa.channels;
@@ -125,7 +126,7 @@ async function main() {
 
   let ok = 0;
   for (const arg of swatches) {
-    if (await runOneSwatch(arg, renderSofa, null, neutralMaster, mask, width, height, channels)) ok++;
+    if (await runOneSwatch(arg, renderSofa, sourceSofa, neutralMaster, mask, width, height, channels)) ok++;
   }
 
   if (!ok) process.exit(1);

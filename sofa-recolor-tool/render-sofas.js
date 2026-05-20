@@ -16,6 +16,7 @@ import { tmpdir } from 'os';
 import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
+import { preparePhotographicLDetail, applyPhotographicLDetail } from './leather-detail.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
@@ -65,6 +66,12 @@ const BALI_SILK_MID_U_HI = 0.88;
 const BALI_SILK_WARM_A_TARGET = 2;
 const BALI_SILK_GRAY_U_LO = 0.2;
 const BALI_SILK_GRAY_U_HI = 0.68;
+/** L-only tonal polish (no hue/chroma change). */
+const TONAL_MID_L_LIFT = 5;
+const TONAL_MID_U_LO = 0.15;
+const TONAL_MID_U_HI = 0.78;
+const TONAL_HIGHLIGHT_LIFT = 10;
+const TONAL_HIGHLIGHT_U_START = 0.72;
 /** Diagnostic: force uniform upholstery chroma; L from source only. */
 export const BRUTE_FORCE_CHROMA_A = 2;
 export const BRUTE_FORCE_CHROMA_B = 10;
@@ -593,14 +600,30 @@ export function applyBaliSilkFineTune(L, a, b, u) {
   return { L: outL, a: outA, b: outB };
 }
 
+/** Highlight + mid L lift only; deep shadows unchanged. */
+export function applyPhotographicTonalLift(L, u) {
+  let lift = 0;
+  if (u >= TONAL_MID_U_LO && u <= TONAL_MID_U_HI) {
+    const t = (u - TONAL_MID_U_LO) / (TONAL_MID_U_HI - TONAL_MID_U_LO);
+    lift += Math.sin(t * Math.PI) * TONAL_MID_L_LIFT;
+  }
+  if (u >= TONAL_HIGHLIGHT_U_START) {
+    const t = (u - TONAL_HIGHLIGHT_U_START) / (1 - TONAL_HIGHLIGHT_U_START);
+    lift += t * TONAL_HIGHLIGHT_LIFT;
+  }
+  return L + lift;
+}
+
 /**
  * Recolor from true neutral master: neutral L + swatch chroma only (no cognac a/b).
  */
-export function recolorSofa(neutralMaster, mask, palette) {
+export function recolorSofa(neutralMaster, mask, palette, sourceSofa = null) {
   const { data, width, height, channels } = neutralMaster;
   const out = Buffer.from(data);
   const { lo, span } = computeSofaLuminanceMapRange(neutralMaster, mask);
   const isLight = palette.isNamedLight;
+  const usePhotoRealism = palette.isBaliSilk && sourceSofa;
+  const photoDetail = usePhotoRealism ? preparePhotographicLDetail(sourceSofa) : null;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
@@ -623,6 +646,10 @@ export function recolorSofa(neutralMaster, mask, palette) {
       finalL = tuned.L;
       finalA = tuned.a;
       finalB = tuned.b;
+    }
+    if (usePhotoRealism) {
+      finalL = applyPhotographicTonalLift(finalL, u);
+      finalL = applyPhotographicLDetail(finalL, j, photoDetail);
     }
     finalL = clamp(finalL, 0, 100);
     finalA = clamp(finalA, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
@@ -716,7 +743,7 @@ export function publishRenderOutputs(swatchName, primaryPngPath) {
   return { primary: abs, diagnostic: resolve(copies[0]), legacyFixed: resolve(copies[1]) };
 }
 
-export async function processSwatch(swatchPath, neutralMaster, mask) {
+export async function processSwatch(swatchPath, neutralMaster, mask, sourceSofa = null) {
   const resolved = resolveOriginalSwatchPath(swatchPath);
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
 
@@ -748,9 +775,10 @@ export async function processSwatch(swatchPath, neutralMaster, mask) {
         ? `hardcoded RGB ${BALI_SILK_TARGET_RGB.join('/')}`
         : `swatch a/b + warm ivory nudge`
       : 'swatch a/b only',
+    realism: palette.isBaliSilk && sourceSofa ? 'mid/hi L lift + source HF detail 22%' : null,
   });
 
-  const outData = recolorSofa(neutralMaster, mask, palette);
+  const outData = recolorSofa(neutralMaster, mask, palette, sourceSofa);
   if (palette.isBaliSilk) {
     const mean = meanMaskedLab({ data: outData, width: neutralMaster.width, height: neutralMaster.height, channels: neutralMaster.channels }, mask);
     const midRgb = labToRgb(mean.L, mean.a, mean.b);
@@ -874,13 +902,13 @@ export async function main(argv = process.argv) {
       console.error(`Swatch not found: ${cli.swatchFile}`);
       process.exit(1);
     }
-    const { outPath } = await processSwatch(swPath, neutralMaster, mask);
+    const { outPath } = await processSwatch(swPath, neutralMaster, mask, sourceSofa);
     console.log(`\nDone: ${outPath}`);
     return;
   }
 
   for (const file of swatchFiles) {
-    await processSwatch(join(SWATCH_DIR, file), neutralMaster, mask);
+    await processSwatch(join(SWATCH_DIR, file), neutralMaster, mask, sourceSofa);
   }
 
   const onDisk = readdirSync(OUTPUT_DIR).filter(
