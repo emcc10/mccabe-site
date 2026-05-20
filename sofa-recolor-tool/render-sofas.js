@@ -19,6 +19,7 @@ import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { prepareSourceLGrain, applySourceLGrain } from './leather-detail.js';
 import { cleanSofaCompositing, maskBoundingBox } from './compositing-cleanup.js';
+import { restorePhotographicEdges } from './photographic-edge.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
@@ -760,6 +761,7 @@ export function recolorSofa(sourceImage, mask, palette) {
   }
 
   if (palette.isBaliSilk) {
+    restorePhotographicEdges(out, sourceImage, mask);
     cleanSofaCompositing(out, sourceImage, mask);
   }
 
@@ -877,7 +879,7 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     realism: isBali
-      ? 'source L microdetail + surgical bottom band + ellipse shadow'
+      ? 'source L detail + photographic edges + baseline wipe + ellipse shadow'
       : null,
   });
 
