@@ -8,6 +8,7 @@
     "preview": "node render-sofas.js --currant",
     "bali": "node render-sofas.js Bali-Silk",
     "bali-brute": "node render-sofas.js Bali-Silk --brute-chroma",
+    "debug-pipeline": "node debug-pipeline.js",
     "diagnostic": "node diagnostic-preview.js Bali-Silk --render",
     "render": "node render-sofas.js --all && node build-manifest.js",
     "manifest": "node build-manifest.js",

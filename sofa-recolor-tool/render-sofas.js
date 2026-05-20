@@ -28,7 +28,7 @@ const MASTER_SOFA_PATH = join(INPUT_DIR, 'master-sofa.png');
 const ZIP_PATH = join(OUTPUT_DIR, 'sofa-renders.zip');
 const DEFAULT_PREVIEW_SWATCH = 'Bali-Currant.jpg';
 
-const MASK_APPLY_THRESH = 128;
+export const MASK_APPLY_THRESH = 128;
 const BG_THRESH = 238;
 const LAB_CHROMA_CLAMP = 72;
 
