@@ -10460,6 +10460,32 @@ body.mc-theater-seating-pdp .mc-configuration-rh__total {
   color: #1a1a1a !important;
 }
 
+/* Theater PDP: reserve space so configuration + accordion do not jump while scripts settle */
+body.mc-theater-seating-pdp #mcConfigurationBlock,
+html.mc-paragon-pdp body #mcConfigurationBlock {
+  min-height: 4.5em !important;
+}
+
+body.mc-theater-seating-pdp #mc-pdp-accordion .mc-acc-leather-host,
+html.mc-paragon-pdp body #mc-pdp-accordion .mc-acc-leather-host {
+  min-height: 42px !important;
+}
+
+body.mc-theater-seating-pdp #options_table.mc-native-options-offscreen,
+body.mc-theater-seating-pdp table[id*="options_table"].mc-native-options-offscreen,
+html.mc-paragon-pdp body #options_table.mc-native-options-offscreen,
+html.mc-paragon-pdp body table[id*="options_table"].mc-native-options-offscreen {
+  position: absolute !important;
+  left: -9999px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
 /* Final 992–1199 desktop header clamp: center menu; search is off-flow (.mc-search-float). */
 @media (min-width: 992px) and (max-width: 1199px) {
   body:not(.is-home) header.header .mc-header-desktop-bar .microblock.main-menu {

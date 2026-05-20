@@ -4225,11 +4225,24 @@ try {
 
   try {
     window.mcReorderInlineConfigBeforeCartQty = mcReorderInlineConfigBeforeCartQty;
+    window.mcApplyOffscreenNativeOptionsTable = mcApplyOffscreenNativeOptionsTable;
     /* Neutralize any live template/Volusion snippet still calling these names (no inline layout writes). */
     window.mcFixPdpHeaderNavInline = function () {};
     window.mcNormalizeQtyBlockAboveAtc = function () {};
     window.mcIsProductDetailPage = mcIsProductDetailPage;
   } catch (eWOrd) {}
+
+  function mcApplyOffscreenNativeOptionsTable(table) {
+    if (!table) return;
+    table.classList.add("mc-native-options-offscreen");
+    table.dataset.mcHideNativeOptions = "1";
+    table.style.setProperty("position", "absolute", "important");
+    table.style.setProperty("left", "-9999px", "important");
+    table.style.setProperty("opacity", "0", "important");
+    table.style.setProperty("pointer-events", "none", "important");
+    table.style.setProperty("height", "0", "important");
+    table.style.setProperty("overflow", "hidden", "important");
+  }
 
   /** If inline config was mounted under the title (or wrong column), move it into the options TD. */
   function mcRelocateMcInlineConfigToOptionsColumn() {
@@ -4237,11 +4250,30 @@ try {
     if (!panel || !panel.parentNode) return;
     var optTd = mcFindPdpOptionsColumnCell();
     if (!optTd) return;
-    if (optTd.contains(panel)) return;
+    if (optTd.contains(panel)) {
+      if (optTd.firstChild === panel) {
+        panel.dataset.mcConfigSlot = "options-top";
+        return;
+      }
+      if (panel.dataset.mcConfigSlot === "options-top") return;
+    }
     try {
       optTd.insertBefore(panel, optTd.firstChild);
+      panel.dataset.mcConfigSlot = "options-top";
     } catch (eRel) {}
     mcReorderInlineConfigBeforeCartQty();
+  }
+
+  function mcScheduleRelocateMcInlineConfig() {
+    var panel = document.getElementById("mc-inline-config");
+    if (!panel || panel.dataset.mcConfigSlot === "options-top") return;
+    [100, 400, 900].forEach(function (ms) {
+      setTimeout(function () {
+        if (!document.getElementById("mc-inline-config")) return;
+        if (document.getElementById("mc-inline-config").dataset.mcConfigSlot === "options-top") return;
+        mcRelocateMcInlineConfigToOptionsColumn();
+      }, ms);
+    });
   }
 
   function mcFireWmOpenProgrammatically(w, evPassed) {
@@ -4491,12 +4523,7 @@ try {
     if (!panelAttached) {
     if (mountInsertMode === "afterOptionsTable" && optionsTable) {
       if (!isSecPdp) {
-        optionsTable.style.setProperty("position", "absolute", "important");
-        optionsTable.style.setProperty("left", "-9999px", "important");
-        optionsTable.style.setProperty("opacity", "0", "important");
-        optionsTable.style.setProperty("pointer-events", "none", "important");
-        optionsTable.style.setProperty("height", "0", "important");
-        optionsTable.style.setProperty("overflow", "hidden", "important");
+        mcApplyOffscreenNativeOptionsTable(optionsTable);
       }
       optionsTable.insertAdjacentElement("afterend", panel);
       panelAttached = true;
@@ -4523,12 +4550,7 @@ try {
     try {
       mcRelocateMcInlineConfigToOptionsColumn();
       mcReorderInlineConfigBeforeCartQty();
-      [100, 250, 500, 900, 1600, 2400, 3600, 5200].forEach(function (ms) {
-        setTimeout(function () {
-          mcRelocateMcInlineConfigToOptionsColumn();
-          /* mcReorderInlineConfigBeforeCartQty(); — disabled: was moving #mc-inline-config before qty after refresh */
-        }, ms);
-      });
+      mcScheduleRelocateMcInlineConfig();
     } catch (eRelSched) {}
 
     if (isSecPdp) {
@@ -4845,7 +4867,7 @@ try {
       });
       if (!source.length) source = fallbackLeatherOptionsFromSelect();
       if (!source.length) {
-        mcLeatherStrip.innerHTML = "";
+        if (!mcLeatherStrip.querySelector(".mc-mini-swatch")) mcLeatherStrip.innerHTML = "";
         return;
       }
 
@@ -4859,6 +4881,10 @@ try {
         seen[key] = true;
         unique.push(o);
       });
+
+      var want = Math.min(unique.length, 8);
+      var have = mcLeatherStrip.querySelectorAll(".mc-mini-swatch").length;
+      if (have >= want && want > 0) return;
 
       mcLeatherStrip.innerHTML = "";
       unique.slice(0, 8).forEach(function(o){
@@ -5053,8 +5079,16 @@ try {
     renderLeatherPreviewStrip();
     setTimeout(renderLeatherPreviewStrip, 900);
     (function keepTryingSwatches(){
+      if (
+        mcLeatherStrip &&
+        mcLeatherStrip.querySelector(".mc-mini-swatch, .mc-leather-mini-swatch")
+      ) {
+        syncLeatherSummary();
+        return;
+      }
       var tries = 0;
-      var cap = isSecPdp ? 56 : 20;
+      var cap = isSecPdp ? 56 : 12;
+      var pollMs = isSecPdp ? 250 : 500;
       var timer = setInterval(function(){
         tries++;
         renderLeatherPreviewStrip();
@@ -5066,7 +5100,7 @@ try {
         ) {
           clearInterval(timer);
         }
-      }, 250);
+      }, pollMs);
     })();
     hideLegacyLeatherRows();
     hideTheaterSeatDropdownRows();
@@ -12149,12 +12183,41 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       return false;
     }
   }
+  function mcPdpKeepsNativeOptionsOffscreen() {
+    if (!document.getElementById("mc-inline-config")) return false;
+    if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
+    if (document.documentElement.classList.contains("mc-paragon-pdp")) return true;
+    if (document.querySelector(".mc-native-options-offscreen, [data-mc-hide-native-options='1']")) return true;
+    var title = (
+      (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
+      document.title ||
+      ""
+    ).toLowerCase();
+    return /\bparagon\b|theater seating|theatre seating|theater chair|theatre chair/.test(title);
+  }
+
   function hideOptionsTable(scope){
     if (isBeanBagProductPage()) return;
     if (document.documentElement.classList.contains("has-sectional-config-cards")) return;
     var root = scope || document;
+    var keepOffscreen = mcPdpKeepsNativeOptionsOffscreen();
     var tables = qa('#options_table, table[id*="options_table"]', root);
     tables.forEach(function(t){
+      if (keepOffscreen) {
+        if (typeof window.mcApplyOffscreenNativeOptionsTable === "function") {
+          window.mcApplyOffscreenNativeOptionsTable(t);
+          return;
+        }
+        t.classList.add("mc-native-options-offscreen");
+        t.dataset.mcHideNativeOptions = "1";
+        try { t.style.setProperty("position", "absolute", "important"); } catch (e0) {}
+        try { t.style.setProperty("left", "-9999px", "important"); } catch (e1) {}
+        try { t.style.setProperty("opacity", "0", "important"); } catch (e2) {}
+        try { t.style.setProperty("pointer-events", "none", "important"); } catch (e3) {}
+        try { t.style.setProperty("height", "0", "important"); } catch (e4) {}
+        try { t.style.setProperty("overflow", "hidden", "important"); } catch (e5) {}
+        return;
+      }
       try { t.style.removeProperty('position'); } catch (e0) {}
       try { t.style.removeProperty('left'); } catch (e1) {}
       try { t.style.removeProperty('opacity'); } catch (e2) {}
@@ -12603,6 +12666,11 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function boot() {
     forceProductFixes();
+    if (mcPdpKeepsNativeOptionsOffscreen()) {
+      setTimeout(forceProductFixes, 800);
+      setTimeout(forceProductFixes, 2200);
+      return;
+    }
     var tries = 0;
     var t = setInterval(function () {
       tries++;
@@ -13274,18 +13342,24 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     var existingAcc = document.getElementById('mc-pdp-accordion');
     if (!existingAcc) existingAcc = buildAccordionElement();
     if (secondPricebox && secondPricebox.parentNode) {
-      if (secondPricebox.previousSibling !== existingAcc) {
-        secondPricebox.parentNode.insertBefore(existingAcc, secondPricebox);
+      if (secondPricebox.previousSibling === existingAcc) {
+        existingAcc.dataset.mcAccAnchor = 'second-pricebox';
+        return;
       }
+      secondPricebox.parentNode.insertBefore(existingAcc, secondPricebox);
+      existingAcc.dataset.mcAccAnchor = 'second-pricebox';
       return;
     }
-    /* Fallback: if only one pricebox, insert after it (so accordion is between pricing and whatever follows). */
+    /* Wait for the options pricebox — avoid fallback placement that jumps when the second box appears. */
+    if (existingAcc.parentNode && existingAcc.dataset.mcAccAnchor) return;
+    if (existingAcc.parentNode) return;
     var firstPricebox = findFirstPricebox();
     if (firstPricebox && firstPricebox.parentNode) {
       if (firstPricebox.nextSibling !== existingAcc) {
         if (firstPricebox.nextSibling) firstPricebox.parentNode.insertBefore(existingAcc, firstPricebox.nextSibling);
         else firstPricebox.parentNode.appendChild(existingAcc);
       }
+      existingAcc.dataset.mcAccAnchor = 'first-pricebox-fallback';
     }
   }
 
@@ -13347,8 +13421,10 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }
   }
 
+  var __mcAccRunPending = false;
   function run() {
     if (!isPdpPage()) return;
+    __mcAccRunPending = false;
     placeTitle();
     placePalliserLogoUnderTitle();
     placeAccordion();
@@ -13357,7 +13433,10 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       window.mcTryInitWmLeather();
     }
     if (typeof window.mcRenderLeatherPreviewStrip === "function") {
-      window.mcRenderLeatherPreviewStrip();
+      var strip = document.getElementById("mcLeatherSwatchStrip");
+      if (!strip || !strip.querySelector(".mc-mini-swatch")) {
+        window.mcRenderLeatherPreviewStrip();
+      }
     }
     if (isSectionalPg()) {
       /* Full MTL_runRender + prompt on every accordion pass duplicated mtl-sectional-renderer boot (runRender/load timers) and starved main thread */
@@ -13397,15 +13476,21 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', run);
-  } else {
-    run();
+  function scheduleAccordionRun() {
+    if (__mcAccRunPending) return;
+    __mcAccRunPending = true;
+    setTimeout(run, 50);
   }
-  window.addEventListener('load', run);
-  setTimeout(run, 400);
-  setTimeout(run, 1200);
-  window.mcBuildPdpAccordion = run;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scheduleAccordionRun);
+  } else {
+    scheduleAccordionRun();
+  }
+  window.addEventListener('load', scheduleAccordionRun);
+  setTimeout(scheduleAccordionRun, 400);
+  setTimeout(scheduleAccordionRun, 1200);
+  window.mcBuildPdpAccordion = scheduleAccordionRun;
 })();
 </script>
 <script>
@@ -20251,6 +20336,13 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function fixQty() {
+    if (
+      document.body &&
+      (document.body.classList.contains("mc-theater-seating-pdp") ||
+        document.documentElement.classList.contains("mc-paragon-pdp"))
+    ) {
+      return;
+    }
     var r = root();
     var qty = findQtyInput(r);
     var config = findConfig(r);
