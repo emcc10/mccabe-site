@@ -51,7 +51,13 @@ const DARK_L_SWATCH = 0.08;
 const LIGHT_L_ORIGINAL = 0.65;
 const LIGHT_L_SWATCH = 0.35;
 const LIGHT_L_LIFT = 6;
-/** Bali-Silk final nudge only (pipeline unchanged). */
+/** Bali-Silk light body — hardcoded test target (not fold/shadow sampling). */
+export const BALI_SILK_TARGET_RGB = [192, 183, 168];
+/** When hardcoded target active: pull L toward target (neutral master L is ~33). */
+const BALI_SILK_HARD_L_ORIGINAL = 0.25;
+const BALI_SILK_HARD_L_TARGET = 0.75;
+/** Bali-Silk final nudge (off while hardcoded target is active). */
+const BALI_SILK_USE_FINE_TUNE = false;
 const BALI_SILK_WARM_B = 3;
 const BALI_SILK_MID_L_LIFT = 5;
 const BALI_SILK_MID_U_LO = 0.12;
@@ -347,12 +353,49 @@ export function computeSwatchRgbAvg(data, width, height, channels) {
   return n ? sum / (3 * n) : 0;
 }
 
+function labToneFromRgb(rgb) {
+  const [r, g, b] = rgb;
+  const lab = rgbToLab(r, g, b);
+  return { L: lab.L, a: lab.a, b: lab.b, rgb: [r, g, b] };
+}
+
+/** Bali-Silk: single hardcoded light-body target — no swatch median/fold/shadow sampling. */
+export function buildHardcodedBaliSilkPalette() {
+  const tone = labToneFromRgb(BALI_SILK_TARGET_RGB);
+  return {
+    shadow: tone,
+    midtone: tone,
+    highlight: tone,
+    extractionMethod: 'hardcoded-target-rgb',
+    bandCounts: { target: BALI_SILK_TARGET_RGB.join(',') },
+  };
+}
+
 /**
  * Shadow / mid / highlight from luminance tertiles (per-band median LAB, not one flat color).
  */
 export async function getSwatchPalette(swatchPath) {
-  const { resolved, pixels } = await loadSwatchPixels(swatchPath);
+  const resolved = resolveOriginalSwatchPath(swatchPath) || resolve(swatchPath);
   const swatchStem = basename(resolved, extname(resolved));
+
+  if (isBaliSilkSwatch(swatchStem)) {
+    const tones = buildHardcodedBaliSilkPalette();
+    return {
+      shadow: tones.shadow,
+      midtone: tones.midtone,
+      highlight: tones.highlight,
+      isBaliSilk: true,
+      isNamedLight: true,
+      isLightBodySampling: false,
+      extractionMethod: tones.extractionMethod,
+      pixelCount: 0,
+      sourceFile: basename(resolved),
+      bandCounts: tones.bandCounts,
+      targetRgb: BALI_SILK_TARGET_RGB,
+    };
+  }
+
+  const { resolved: swPath, pixels } = await loadSwatchPixels(swatchPath);
   const useLightBody = isLightBodySampling(swatchStem);
   const tones = useLightBody
     ? extractLightBodyPalette(pixels)
@@ -362,12 +405,12 @@ export async function getSwatchPalette(swatchPath) {
     shadow: tones.shadow,
     midtone: tones.midtone,
     highlight: tones.highlight,
-    isBaliSilk: isBaliSilkSwatch(swatchStem),
+    isBaliSilk: false,
     isNamedLight: isNamedLightLeather(swatchStem),
     isLightBodySampling: useLightBody,
     extractionMethod: tones.extractionMethod,
     pixelCount: pixels.length,
-    sourceFile: basename(resolved),
+    sourceFile: basename(swPath),
     bandCounts: tones.bandCounts,
   };
 }
@@ -567,10 +610,15 @@ export function recolorSofa(neutralMaster, mask, palette) {
     const u = clamp((lab.L - lo) / span, 0, 1);
     const tone = interpolateSwatchPalette(palette, u);
 
-    let finalL = isLight ? computeFinalLabL(lab.L, tone.L, true) : lab.L;
+    let finalL;
+    if (palette.extractionMethod === 'hardcoded-target-rgb') {
+      finalL = lab.L * BALI_SILK_HARD_L_ORIGINAL + tone.L * BALI_SILK_HARD_L_TARGET + LIGHT_L_LIFT;
+    } else {
+      finalL = isLight ? computeFinalLabL(lab.L, tone.L, true) : lab.L;
+    }
     let finalA = tone.a;
     let finalB = tone.b;
-    if (palette.isBaliSilk) {
+    if (palette.isBaliSilk && BALI_SILK_USE_FINE_TUNE) {
       const tuned = applyBaliSilkFineTune(finalL, finalA, finalB, u);
       finalL = tuned.L;
       finalA = tuned.a;
@@ -688,13 +736,28 @@ export async function processSwatch(swatchPath, neutralMaster, mask) {
     midtone: fmtTone(palette.midtone),
     highlight: fmtTone(palette.highlight),
     lightLeather: palette.isNamedLight,
-    lBlend: palette.isNamedLight ? 'neutral L 65/35 +6' : 'neutral L only',
+    lBlend:
+      palette.extractionMethod === 'hardcoded-target-rgb'
+        ? `neutral L ${BALI_SILK_HARD_L_ORIGINAL * 100}% / target ${BALI_SILK_HARD_L_TARGET * 100}% +6`
+        : palette.isNamedLight
+          ? 'neutral L 65/35 +6'
+          : 'neutral L only',
+    targetRgb: palette.targetRgb || null,
     chroma: palette.isBaliSilk
-      ? `swatch a/b + warm ivory nudge (b+${BALI_SILK_WARM_B}, mid L+${BALI_SILK_MID_L_LIFT})`
+      ? palette.extractionMethod === 'hardcoded-target-rgb'
+        ? `hardcoded RGB ${BALI_SILK_TARGET_RGB.join('/')}`
+        : `swatch a/b + warm ivory nudge`
       : 'swatch a/b only',
   });
 
   const outData = recolorSofa(neutralMaster, mask, palette);
+  if (palette.isBaliSilk) {
+    const mean = meanMaskedLab({ data: outData, width: neutralMaster.width, height: neutralMaster.height, channels: neutralMaster.channels }, mask);
+    const midRgb = labToRgb(mean.L, mean.a, mean.b);
+    console.log(
+      `  upholstery mean: LAB L=${mean.L.toFixed(1)} a=${mean.a.toFixed(1)} b=${mean.b.toFixed(1)} → RGB [${midRgb.r}, ${midRgb.g}, ${midRgb.b}]`,
+    );
+  }
   const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
   const bytes = await saveImage(
     outData,
