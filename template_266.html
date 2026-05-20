@@ -16079,6 +16079,9 @@ window.addEventListener('load', function () {
 .mc-login-modal__switch a{color:#333;text-decoration:underline;cursor:pointer}
 .mc-login-modal__signup{margin:12px 0 0;font-size:13px;text-align:center}
 .mc-login-modal__signup-note{display:block;font-size:11px;opacity:.75;margin-top:4px}
+.mc-login-modal__status{min-height:1.2em;font-size:13px;line-height:1.4;margin:0 0 10px}
+.mc-login-modal__status.is-error{color:#a11;font-weight:600}
+.mc-login-modal__status.is-success{color:#2d6a4f}
 
 /* Global member-price typography parity across PDP/PLP/home */
 body .mc-member-grid-price__label,
@@ -16401,11 +16404,11 @@ body.mc-product-page #content_area font.product_sale_price {
         <input type="hidden" name="imageField2.y" value="1" />
         <div class="mc-login-modal__field">
           <label for="mc-login-email">Email (username)</label>
-          <input type="email" id="mc-login-email" name="EmailAddress" required autocomplete="username" maxlength="75" />
+          <input type="email" id="mc-login-email" name="email" required autocomplete="username" maxlength="75" />
         </div>
         <div class="mc-login-modal__field">
           <label for="mc-login-password">Password</label>
-          <input type="password" id="mc-login-password" name="Password" required autocomplete="current-password" maxlength="80" />
+          <input type="password" id="mc-login-password" name="password" required autocomplete="current-password" maxlength="80" />
         </div>
         <button type="submit" class="mc-login-modal__submit">Log in</button>
       </form>
@@ -16901,22 +16904,83 @@ body.mc-product-page #content_area font.product_sale_price {
   function mcNormalizeLoginFormFields(form) {
     if (!form) return;
     var emailEl = document.getElementById('mc-login-email');
-    if (emailEl) emailEl.setAttribute('name', 'EmailAddress');
+    if (emailEl) emailEl.setAttribute('name', 'email');
     var passwordEl = document.getElementById('mc-login-password');
-    if (passwordEl) passwordEl.setAttribute('name', 'Password');
+    if (passwordEl) passwordEl.setAttribute('name', 'password');
+  }
+
+  function mcVolusionLoginUrls() {
+    var returnTo = mcLoginReturnTo();
+    return {
+      step1: '/login.asp?ReturnTo=' + returnTo,
+      step2: '/login.asp?ReturnTo=' + returnTo,
+    };
+  }
+
+  function mcVolusionLoginStep1Body(email) {
+    var body = new URLSearchParams();
+    body.append('CustomerNewOld', 'old');
+    body.append('email', String(email || '').trim());
+    body.append('imageField2.x', '1');
+    body.append('imageField2.y', '1');
+    return body.toString();
+  }
+
+  function mcVolusionLoginStep2Body(email, password) {
+    var body = new URLSearchParams();
+    body.append('CustomerNewOld', 'old');
+    body.append('email', String(email || '').trim());
+    body.append('password', String(password || ''));
+    body.append('imageField2.x', '1');
+    body.append('imageField2.y', '1');
+    return body.toString();
+  }
+
+  async function mcFetchVolusionAuth(url, body) {
+    return fetch(url, {
+      method: 'POST',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'text/html,application/xhtml+xml',
+      },
+      body: body,
+      redirect: 'follow',
+    });
+  }
+
+  async function mcPostVolusionLoginTwoStep(form) {
+    mcNormalizeLoginFormFields(form);
+    var emailEl = document.getElementById('mc-login-email');
+    var passwordEl = document.getElementById('mc-login-password');
+    var email = emailEl ? String(emailEl.value || '').trim() : '';
+    var password = passwordEl ? String(passwordEl.value || '') : '';
+    if (!email || !password) return false;
+
+    var urls = mcVolusionLoginUrls();
+    try {
+      var r1 = await mcFetchVolusionAuth(urls.step1, mcVolusionLoginStep1Body(email));
+      var html1 = await r1.text();
+      if (/invalid|not found|no account|does not exist/i.test(html1) && !/name\s*=\s*["']password["']/i.test(html1)) {
+        return false;
+      }
+      var r2 = await mcFetchVolusionAuth(urls.step2, mcVolusionLoginStep2Body(email, password));
+      var html2 = await r2.text();
+      if (mcLoginResponseLooksFailed(html2, r2.url)) return false;
+    } catch (eLoginSteps) {
+      return false;
+    }
+    return await mcWaitForAuthSuccess(12000, 500);
   }
 
   async function mcPostAuthWithFetch(form, mode) {
     if (!form) return false;
-    var action = form.getAttribute('action') || '';
     if (mode === 'login') {
-      mcSetLoginFormAction();
-      mcNormalizeLoginFormFields(form);
-      action = form.getAttribute('action') || '/login.asp';
-    } else {
-      mcSetSignupFormAction();
-      action = form.getAttribute('action') || '/AccountSettings.asp';
+      return await mcPostVolusionLoginTwoStep(form);
     }
+    mcSetSignupFormAction();
+    var action = form.getAttribute('action') || '/AccountSettings.asp';
     try {
       await fetch(action, {
         method: 'POST',
@@ -16950,8 +17014,11 @@ body.mc-product-page #content_area font.product_sale_price {
       return false;
     }
     if (/href\s*=\s*["'][^"']*logout\.asp[^"']*["']/i.test(stripped)) return false;
-    if (url.indexOf('/login.asp') !== -1) return true;
-    if (/returning customers?|if you've purchased from us before/i.test(lc)) {
+    if (url.indexOf('/customer_login.asp') !== -1) return true;
+    if (url.indexOf('/login.asp') !== -1 && /<input[^>]+name\s*=\s*["']password["']/i.test(stripped)) {
+      return true;
+    }
+    if (/returning customers?|if you've purchased from us before/i.test(lc) && /<input[^>]+name\s*=\s*["']password["']/i.test(stripped)) {
       return true;
     }
     return false;
@@ -16985,7 +17052,7 @@ async function mcSubmitAuthForm(form, mode) {
       mode,
       mode === 'signup'
         ? 'We could not confirm the new account. Please check your info and try again.'
-        : 'Login failed. Please check your email and password.',
+        : 'Sign-in failed. Check your email and password, or use “Open in a new tab” below.',
       'error'
     );
     mcToggleAuthPending(form, false);
