@@ -1,6 +1,6 @@
 /**
- * Color-transfer diagnostic — extracted palette chips + optional sofa render.
- * No swatch texture tiling. Usage: node diagnostic-preview.js Bali-Silk --render
+ * Color diagnostic — swatch palette chips + photographic recolor preview.
+ * Usage: node diagnostic-preview.js Bali-Silk --render
  */
 import { mkdirSync, existsSync } from 'fs';
 import { basename, dirname, extname, join } from 'path';
@@ -10,7 +10,6 @@ import {
   loadImage,
   saveImage,
   loadUpholsteryMask,
-  buildNeutralGrayMaster,
   recolorSofa,
   getSwatchPalette,
   resolveOriginalSwatchPath,
@@ -57,7 +56,7 @@ function logTone(label, tone) {
   );
 }
 
-async function runOneSwatch(swatchArg, renderSofa, masterImage, sourceSofa, mask, width, height, channels) {
+async function runOneSwatch(swatchArg, renderSofa, sourceSofa, mask, width, height, channels) {
   const swatchPath = resolveSwatchPath(swatchArg);
   if (!swatchPath) {
     console.error(`Swatch not found: ${swatchArg}`);
@@ -72,7 +71,7 @@ async function runOneSwatch(swatchArg, renderSofa, masterImage, sourceSofa, mask
   console.log(`Output: ${outDir}`);
 
   const palette = await getSwatchPalette(swatchPath);
-  console.log(`  extraction: ${palette.extractionMethod} (color only, no texture transfer)`);
+  console.log(`  extraction: ${palette.extractionMethod}`);
   logTone('shadow', palette.shadow);
   logTone('midtone', palette.midtone);
   logTone('highlight', palette.highlight);
@@ -80,12 +79,12 @@ async function runOneSwatch(swatchArg, renderSofa, masterImage, sourceSofa, mask
   await saveChip(join(outDir, 'extracted-shadow-color.png'), palette.shadow.rgb);
   await saveChip(join(outDir, 'extracted-midtone-color.png'), palette.midtone.rgb);
   await saveChip(join(outDir, 'extracted-highlight-color.png'), palette.highlight.rgb);
-  console.log('  saved: extracted-shadow/midtone/highlight-color.png (solid swatch colors)');
+  console.log('  saved: extracted-shadow/midtone/highlight-color.png');
 
-  if (renderSofa && masterImage && sourceSofa) {
-    const finalData = recolorSofa(masterImage, mask, palette, sourceSofa);
+  if (renderSofa && sourceSofa) {
+    const finalData = recolorSofa(sourceSofa, mask, palette);
     await saveImage(finalData, join(outDir, 'final-output-fixed.png'), width, height, channels);
-    console.log('  saved: final-output-fixed.png (sofa texture + swatch color)');
+    console.log('  saved: final-output-fixed.png (photographic recolor)');
   } else {
     console.log('  (sofa render skipped — use --render)');
   }
@@ -99,9 +98,8 @@ async function main() {
   const swatchArgs = argv.filter((a) => !a.startsWith('--'));
   const swatches = swatchArgs.length ? swatchArgs : DEFAULT_SWATCHES;
 
-  console.log('Color-transfer diagnostic (sofa texture preserved, swatch color only)');
+  console.log('Photographic LAB recolor diagnostic');
 
-  let masterImage;
   let sourceSofa;
   let mask;
   let width;
@@ -118,12 +116,11 @@ async function main() {
     height = sourceSofa.height;
     channels = sourceSofa.channels;
     mask = await loadUpholsteryMask(MASK_PATH, width, height);
-    masterImage = buildNeutralGrayMaster(sourceSofa, mask);
   }
 
   let ok = 0;
   for (const arg of swatches) {
-    if (await runOneSwatch(arg, renderSofa, masterImage, sourceSofa, mask, width, height, channels)) ok++;
+    if (await runOneSwatch(arg, renderSofa, sourceSofa, mask, width, height, channels)) ok++;
   }
 
   if (!ok) process.exit(1);

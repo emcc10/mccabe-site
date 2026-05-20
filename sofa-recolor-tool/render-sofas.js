@@ -1,10 +1,8 @@
 /**
- * Color transfer: neutral-gray master (sofa L/texture) + swatch palette (chroma only).
- * No swatch texture tiling or UV mapping.
+ * Photographic LAB recolor: preserve original sofa L/texture; swatch palette for a/b only.
  */
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
-import { prepareOriginalLeatherDetail, applyLeatherDetailRestore } from './leather-detail.js';
 import {
   mkdirSync,
   readdirSync,
@@ -45,13 +43,13 @@ const LIGHT_BODY_SAT_MAX = 0.42;
 const LIGHT_BODY_WARM_B_MIN = 6;
 const LIGHT_BODY_WARM_A_MIN = -2;
 const LIGHT_BODY_SHADOW_MIN_PIXELS = 80;
-const L_BLEND_MASTER = 0.88;
-const L_BLEND_SWATCH = 0.12;
-/** Light leathers: L from swatch palette (sofa u = shape only), not cognac master L. */
-const LIGHT_L_FLOOR = 64;
-const LIGHT_SHADOW_SOFTEN = 0.72;
+const DARK_L_ORIGINAL = 0.92;
+const DARK_L_SWATCH = 0.08;
+const LIGHT_L_ORIGINAL = 0.78;
+const LIGHT_L_SWATCH = 0.22;
 const LIGHT_L_LIFT = 6;
-const LIGHT_L_MAX = 95;
+const CHROMA_ORIGINAL = 0.12;
+const CHROMA_SWATCH = 0.88;
 /** Sofa L percentiles for shadow → mid → highlight color mapping. */
 const SOFA_L_MAP_LO = 0.08;
 const SOFA_L_MAP_HI = 0.92;
@@ -482,30 +480,20 @@ export function computeSofaLuminanceMapRange(masterImage, mask) {
   return { lo, hi, span: Math.max(hi - lo, SOFA_L_MAP_MIN_SPAN) };
 }
 
-/**
- * Dark/mid leathers: mostly original sofa L + swatch color hint.
- * Light neutrals: luminance from swatch tones (ivory family); master L only drives u mapping.
- */
-export function computeFinalLabL(masterL, swatchL, isLightLeather) {
+export function computeFinalLabL(originalL, swatchL, isLightLeather) {
   if (isLightLeather) {
-    let finalL = swatchL;
-    if (finalL < LIGHT_L_FLOOR) {
-      finalL = LIGHT_L_FLOOR + (finalL - LIGHT_L_FLOOR) * LIGHT_SHADOW_SOFTEN;
-    }
-    finalL += LIGHT_L_LIFT;
-    return Math.min(finalL, LIGHT_L_MAX);
+    return originalL * LIGHT_L_ORIGINAL + swatchL * LIGHT_L_SWATCH + LIGHT_L_LIFT;
   }
-  return masterL * L_BLEND_MASTER + swatchL * L_BLEND_SWATCH;
+  return originalL * DARK_L_ORIGINAL + swatchL * DARK_L_SWATCH;
 }
 
 /**
- * Color transfer: preserve sofa luminance/texture from master; apply swatch palette chroma.
+ * Photographic recolor on original sofa pixels — no texture reconstruction.
  */
-export function recolorSofa(masterImage, mask, palette, sourceSofa) {
-  const { data, width, height, channels } = masterImage;
+export function recolorSofa(sourceImage, mask, palette) {
+  const { data, width, height, channels } = sourceImage;
   const out = Buffer.from(data);
-  const { lo, span } = computeSofaLuminanceMapRange(masterImage, mask);
-  const leatherDetail = prepareOriginalLeatherDetail(sourceSofa);
+  const { lo, span } = computeSofaLuminanceMapRange(sourceImage, mask);
   const isLight = palette.isNamedLight;
 
   for (let j = 0; j < width * height; j++) {
@@ -515,11 +503,11 @@ export function recolorSofa(masterImage, mask, palette, sourceSofa) {
     const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
     const u = clamp((lab.L - lo) / span, 0, 1);
     const tone = interpolateSwatchPalette(palette, u);
-    let finalL = computeFinalLabL(lab.L, tone.L, isLight);
-    finalL = applyLeatherDetailRestore(finalL, j, leatherDetail, isLight);
-    const a = clamp(tone.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const b = clamp(tone.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const { r, g, b: bOut } = labToRgb(finalL, a, b);
+
+    const finalL = clamp(computeFinalLabL(lab.L, tone.L, isLight), 0, 100);
+    const finalA = clamp(lab.a * CHROMA_ORIGINAL + tone.a * CHROMA_SWATCH, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const finalB = clamp(lab.b * CHROMA_ORIGINAL + tone.b * CHROMA_SWATCH, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const { r, g, b: bOut } = labToRgb(finalL, finalA, finalB);
 
     out[p] = r;
     out[p + 1] = g;
@@ -530,7 +518,7 @@ export function recolorSofa(masterImage, mask, palette, sourceSofa) {
   return out;
 }
 
-export async function processSwatch(swatchPath, masterImage, mask, sourceSofa) {
+export async function processSwatch(swatchPath, sourceImage, mask) {
   const resolved = resolveOriginalSwatchPath(swatchPath);
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
 
@@ -550,13 +538,13 @@ export async function processSwatch(swatchPath, masterImage, mask, sourceSofa) {
     midtone: fmtTone(palette.midtone),
     highlight: fmtTone(palette.highlight),
     lightLeather: palette.isNamedLight,
-    lBlend: palette.isNamedLight ? 'swatch-L ivory + lift (shape from u)' : '88/12',
-    leatherDetail: palette.isNamedLight ? 'light: micro HF only' : 'HF×0.55 edge×0.12 spec×0.22',
+    lBlend: palette.isNamedLight ? 'L 78/22 +6' : 'L 92/8',
+    chroma: 'a/b 12/88 from palette by sofa u',
   });
 
-  const outData = recolorSofa(masterImage, mask, palette, sourceSofa);
+  const outData = recolorSofa(sourceImage, mask, palette);
   const outPath = join(OUTPUT_DIR, `${swatchName}-fixed.png`);
-  const bytes = await saveImage(outData, outPath, masterImage.width, masterImage.height, masterImage.channels);
+  const bytes = await saveImage(outData, outPath, sourceImage.width, sourceImage.height, sourceImage.channels);
   console.log(`  wrote ${swatchName}-fixed.png (${Math.round(bytes / 1024)} KB)`);
   return { outPath, palette };
 }
@@ -625,7 +613,7 @@ export async function main(argv = process.argv) {
   console.log(`  swatch source: ${SWATCH_DIR} (${swatchFiles.length} files)`);
   console.log(`  source photo: ${SOFA_PATH}`);
   console.log(`  mask: ${MASK_PATH}`);
-  console.log('  method: sofa L/texture + swatch color palette (no texture transfer)');
+  console.log('  method: photographic LAB recolor (original L + swatch a/b)');
 
   const sourceSofa = await loadImage(SOFA_PATH);
   console.log(`  ${sourceSofa.width}x${sourceSofa.height}`);
@@ -648,13 +636,13 @@ export async function main(argv = process.argv) {
       console.error(`Swatch not found: ${cli.swatchFile}`);
       process.exit(1);
     }
-    const { outPath } = await processSwatch(swPath, masterImage, mask, sourceSofa);
+    const { outPath } = await processSwatch(swPath, sourceSofa, mask);
     console.log(`\nDone: ${outPath}`);
     return;
   }
 
   for (const file of swatchFiles) {
-    await processSwatch(join(SWATCH_DIR, file), masterImage, mask, sourceSofa);
+    await processSwatch(join(SWATCH_DIR, file), sourceSofa, mask);
   }
 
   const onDisk = readdirSync(OUTPUT_DIR).filter(
