@@ -58,12 +58,14 @@ const BALI_BODY_MIN_PIXEL = { r: 155, g: 145, b: 130 };
 const BALI_SAMPLE_FLOOR = { r: 170, g: 160, b: 145 };
 const BALI_SAMPLE_RANGE = { r: [185, 215], g: [175, 205], b: [155, 190] };
 const BALI_OUTPUT_FLOOR = { r: 170, g: 160, b: 145 };
-const BALI_L_STRUCTURE = 0.96;
-const BALI_MID_CONTRAST = 0.11;
-const BALI_HIGHLIGHT_U_START = 0.72;
+/** Preserve source photo L shape; minimal tonal sculpting (color unchanged). */
+const BALI_L_STRUCTURE = 0.98;
+const BALI_MID_CONTRAST = 0.03;
+const BALI_HIGHLIGHT_U_START = 0.78;
 const BALI_TOP_CUSHION_V = 0.5;
-const BALI_HIGHLIGHT_PULL = 5;
+const BALI_HIGHLIGHT_PULL = 1.5;
 const BALI_HIGHLIGHT_CEIL_ABOVE_ANCHOR = 11;
+const BALI_HIGHLIGHT_CEIL_BLEND = 0.58;
 const CHROMA_SWATCH = 1;
 /** Diagnostic: force uniform upholstery chroma; L from source only. */
 export const BRUTE_FORCE_CHROMA_A = 2;

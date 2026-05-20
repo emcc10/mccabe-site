@@ -1,13 +1,15 @@
 /**
- * Floor/edge compositing cleanup — no geometry repaint.
+ * Seamless #ffffff + unified grounding shadow + floor artifact removal.
  */
 import { MASK_APPLY_THRESH, isNearWhite } from './render-sofas.js';
 
+const BG = 255;
 const FLOOR_SHADOW_MAX = 30;
 const FLOOR_FALLOFF_ROWS = 88;
-const FRINGE_PX = 4;
-const RAIL_BAND_ROWS = 10;
-const WHITE_LINE_LUM = 248;
+const FLOOR_BAND_ABOVE = 6;
+const FRINGE_PX = 3;
+const RAIL_BAND_ROWS = 8;
+const WHITE_LINE_LUM = 238;
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
@@ -36,62 +38,79 @@ function pixelLum(data, p) {
   return 0.2126 * data[p] + 0.7152 * data[p + 1] + 0.0722 * data[p + 2];
 }
 
-function rowWhiteFraction(data, y, width, channels, x0, x1) {
-  let white = 0;
-  let n = 0;
-  for (let x = x0; x <= x1; x++) {
-    const p = (y * width + x) * channels;
-    if (pixelLum(data, p) >= WHITE_LINE_LUM) white++;
-    n++;
-  }
-  return n ? white / n : 0;
+function floorShade(y, y0) {
+  const t = clamp((y - y0) / FLOOR_FALLOFF_ROWS, 0, 1);
+  return Math.round(BG - t * t * FLOOR_SHADOW_MAX);
 }
 
-/** Full-width soft contact shadow under sofa. */
-function paintFloorShadow(out, mask, width, height, channels, box) {
+function setRgb(out, p, v, channels) {
+  out[p] = v;
+  out[p + 1] = v;
+  out[p + 2] = v;
+  if (channels === 4) out[p + 3] = 255;
+}
+
+/** Pure white everywhere above the floor band (outside upholstery). */
+function forceWhiteCanvas(out, mask, width, height, channels, floorBandStart) {
+  for (let y = 0; y < floorBandStart; y++) {
+    for (let x = 0; x < width; x++) {
+      const j = y * width + x;
+      if (mask[j] >= MASK_APPLY_THRESH) continue;
+      setRgb(out, j * channels, BG, channels);
+    }
+  }
+}
+
+/** One continuous full-width grounding shadow — overwrites floor band entirely. */
+function paintUnifiedFloorShadow(out, mask, width, height, channels, box) {
   const y0 = box.maxY + 1;
-  for (let y = y0; y < height; y++) {
-    const t = clamp((y - y0) / FLOOR_FALLOFF_ROWS, 0, 1);
-    const shade = Math.round(255 - t * t * FLOOR_SHADOW_MAX);
+  const yStart = Math.max(0, box.maxY - FLOOR_BAND_ABOVE);
+  for (let y = yStart; y < height; y++) {
+    const shade = floorShade(y, y0);
     for (let x = 0; x < width; x++) {
       const j = y * width + x;
       if (mask[j] >= MASK_APPLY_THRESH) continue;
-      const p = j * channels;
-      out[p] = shade;
-      out[p + 1] = shade;
-      out[p + 2] = shade;
-      if (channels === 4) out[p + 3] = 255;
+      setRgb(out, j * channels, shade, channels);
     }
   }
 }
 
-/** Kill horizontal white/remnant lines in floor + rail band. */
-function eraseFloorWhiteLines(out, mask, width, height, channels, box) {
-  const yEnd = Math.min(height - 1, box.maxY + FLOOR_FALLOFF_ROWS);
-  for (let y = box.maxY - 2; y < yEnd; y++) {
-    const whiteFrac = rowWhiteFraction(out, y, width, channels, 0, width - 1);
-    if (whiteFrac < 0.35) continue;
-    const t = clamp((y - box.maxY) / FLOOR_FALLOFF_ROWS, 0, 1);
-    const shade = Math.round(255 - t * t * FLOOR_SHADOW_MAX);
+/** Repaint entire rows in floor band that still show white lines or fragments. */
+function scrubFloorArtifacts(out, mask, width, height, channels, box) {
+  const y0 = box.maxY + 1;
+  const yStart = Math.max(0, box.maxY - FLOOR_BAND_ABOVE);
+  const yEnd = Math.min(height, box.maxY + FLOOR_FALLOFF_ROWS + 16);
+
+  for (let y = yStart; y < yEnd; y++) {
+    let bright = 0;
+    let n = 0;
     for (let x = 0; x < width; x++) {
       const j = y * width + x;
       if (mask[j] >= MASK_APPLY_THRESH) continue;
-      const p = j * channels;
-      if (pixelLum(out, p) >= WHITE_LINE_LUM) {
-        out[p] = shade;
-        out[p + 1] = shade;
-        out[p + 2] = shade;
-      }
+      n++;
+      if (pixelLum(out, j * channels) >= WHITE_LINE_LUM) bright++;
+    }
+    if (!n) continue;
+    const brightFrac = bright / n;
+    if (brightFrac < 0.06 && bright < 3) continue;
+
+    const shade = floorShade(y, y0);
+    for (let x = 0; x < width; x++) {
+      const j = y * width + x;
+      if (mask[j] >= MASK_APPLY_THRESH) continue;
+      setRgb(out, j * channels, shade, channels);
     }
   }
 }
 
-/** Base rail / feet fringe: snap stray bright pixels to white or shadow. */
+/** Rail/feet fringe: white above floor; shadow shade in floor band (no fragmented patches). */
 function cleanRailAndFringe(out, source, mask, width, height, channels, box) {
-  const y0 = Math.max(0, box.maxY - RAIL_BAND_ROWS);
-  const y1 = Math.min(height - 1, box.maxY + RAIL_BAND_ROWS);
+  const y0 = box.maxY + 1;
+  const floorStart = Math.max(0, box.maxY - FLOOR_BAND_ABOVE);
+  const yRail0 = Math.max(0, box.maxY - RAIL_BAND_ROWS);
+  const yRail1 = Math.min(height - 1, box.maxY + 2);
 
-  for (let y = y0; y <= y1; y++) {
+  for (let y = yRail0; y <= yRail1; y++) {
     for (let x = 0; x < width; x++) {
       const j = y * width + x;
       const p = j * channels;
@@ -105,17 +124,14 @@ function cleanRailAndFringe(out, source, mask, width, height, channels, box) {
             const yy = y + dy;
             const xx = x + dx;
             if (yy < 0 || yy >= height || xx < 0 || xx >= width) continue;
-            if (mask[yy * width + xx] >= MASK_APPLY_THRESH) {
-              nearMask = true;
-              break;
-            }
+            if (mask[yy * width + xx] >= MASK_APPLY_THRESH) nearMask = true;
           }
         }
         if (!nearMask) continue;
-        if (lum >= WHITE_LINE_LUM - 4) {
-          out[p] = 255;
-          out[p + 1] = 255;
-          out[p + 2] = 255;
+        if (y >= floorStart) {
+          setRgb(out, p, floorShade(y, y0), channels);
+        } else if (lum >= WHITE_LINE_LUM - 6) {
+          setRgb(out, p, BG, channels);
         }
         continue;
       }
@@ -133,8 +149,7 @@ function cleanRailAndFringe(out, source, mask, width, height, channels, box) {
             const k = yy * width + xx;
             if (mask[k] < MASK_APPLY_THRESH) continue;
             const pk = k * channels;
-            const pl = pixelLum(out, pk);
-            if (pl > 245) continue;
+            if (pixelLum(out, pk) > 245) continue;
             ar += out[pk];
             ag += out[pk + 1];
             ab += out[pk + 2];
@@ -164,10 +179,12 @@ function cleanRailAndFringe(out, source, mask, width, height, channels, box) {
       const p = j * channels;
       const lum = pixelLum(out, p);
       const srcP = j * channels;
+      if (y >= floorStart) {
+        if (lum > WHITE_LINE_LUM - 10) setRgb(out, p, floorShade(y, y0), channels);
+        continue;
+      }
       if (lum > 248 && !isNearWhite(source[srcP], source[srcP + 1], source[srcP + 2])) {
-        out[p] = 255;
-        out[p + 1] = 255;
-        out[p + 2] = 255;
+        setRgb(out, p, BG, channels);
       }
     }
   }
@@ -177,10 +194,13 @@ export function cleanSofaCompositing(outBuffer, sourceImage, mask) {
   const { width, height, channels } = sourceImage;
   const out = outBuffer;
   const box = maskBoundingBox(mask, width, height);
+  const floorBandStart = Math.max(0, box.maxY - FLOOR_BAND_ABOVE);
 
-  paintFloorShadow(out, mask, width, height, channels, box);
-  eraseFloorWhiteLines(out, mask, width, height, channels, box);
+  forceWhiteCanvas(out, mask, width, height, channels, floorBandStart);
+  paintUnifiedFloorShadow(out, mask, width, height, channels, box);
+  scrubFloorArtifacts(out, mask, width, height, channels, box);
   cleanRailAndFringe(out, sourceImage.data, mask, width, height, channels, box);
+  paintUnifiedFloorShadow(out, mask, width, height, channels, box);
 
   return out;
 }
