@@ -5,6 +5,17 @@
 window.MC_BOARD_STYLES = {
   assetBases: ['/v/vspfiles/boards/', '/vspfiles/boards/'],
 
+  /** Live Volusion product photos (use these first - showcase PNGs may not be deployed). */
+  catalogPhotos: {
+    '77696': '/v/vspfiles/photos/77696-1.jpg',
+    '77180': '/v/vspfiles/photos/77180-01-1.jpg',
+    '40109': '/v/vspfiles/photos/40109-01-1.jpg',
+    '40113': '/v/vspfiles/photos/40113-01-1.jpg',
+    '77176': '/v/vspfiles/photos/77176-A1-1.jpg',
+    '41067': '/v/vspfiles/photos/40109-01-1.jpg',
+    '41500': '/v/vspfiles/photos/40113-01-1.jpg'
+  },
+
   decorTrends: [
     {
       title: 'Warm minimalism',
@@ -111,8 +122,9 @@ window.MC_BOARD_STYLES = {
   splitFeature: {
     productId: '40109-atlantic-navy',
     styleId: 'contemporary',
-    title: 'Contemporary media comfort',
-    text: 'Power reclining silhouettes and deep upholstery for theater rooms.'
+    title: 'Atlantic Navy power seating',
+    text:
+      'Deep navy performance fabric, power recline, and scale made for media rooms. Pair with low lighting and tailored side tables for a finished theater look.'
   },
 
   styles: [
@@ -181,6 +193,7 @@ window.MC_BOARD_STYLES = {
       name: 'Lux Cognac Chair',
       type: 'Accent chair',
       image: '/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png',
+      catalogPhoto: '/v/vspfiles/photos/77696-1.jpg',
       styles: ['mid-century', 'transitional', 'modern'],
       primaryStyle: 'mid-century'
     },
@@ -189,6 +202,7 @@ window.MC_BOARD_STYLES = {
       name: 'Pacific Charcoal Sofa',
       type: 'Sofa',
       image: '/v/vspfiles/boards/showcase/modern-pacific-charcoal-sofa-angle.png',
+      catalogPhoto: '/v/vspfiles/photos/77180-01-1.jpg',
       styles: ['modern', 'contemporary', 'transitional'],
       primaryStyle: 'modern'
     },
@@ -197,6 +211,7 @@ window.MC_BOARD_STYLES = {
       name: 'Pacific Charcoal Loveseat',
       type: 'Loveseat',
       image: '/v/vspfiles/boards/showcase/modern-pacific-charcoal-loveseat-angle.png',
+      catalogPhoto: '/v/vspfiles/photos/77180-01-1.jpg',
       styles: ['modern', 'contemporary', 'transitional'],
       primaryStyle: 'modern'
     },
@@ -205,6 +220,7 @@ window.MC_BOARD_STYLES = {
       name: 'Atlantic Navy Power Sofa',
       type: 'Power reclining sofa',
       image: '/v/vspfiles/boards/showcase/contemporary-atlantic-navy-recliner-front.png',
+      catalogPhoto: '/v/vspfiles/photos/40109-01-1.jpg',
       styles: ['contemporary', 'modern'],
       primaryStyle: 'contemporary'
     },
@@ -213,6 +229,7 @@ window.MC_BOARD_STYLES = {
       name: 'Carob Power Reclining Sofa',
       type: 'Power reclining sofa',
       image: '/v/vspfiles/boards/showcase/traditional-carob-recliner-front.png',
+      catalogPhoto: '/v/vspfiles/photos/40109-01-1.jpg',
       styles: ['traditional', 'transitional'],
       primaryStyle: 'traditional'
     },
@@ -221,6 +238,7 @@ window.MC_BOARD_STYLES = {
       name: 'Cognac Power Reclining Sofa',
       type: 'Power reclining sofa',
       image: '/v/vspfiles/boards/showcase/transitional-cognac-recliner-front.png',
+      catalogPhoto: '/v/vspfiles/photos/40113-01-1.jpg',
       styles: ['transitional', 'traditional'],
       primaryStyle: 'transitional'
     },
@@ -229,6 +247,7 @@ window.MC_BOARD_STYLES = {
       name: 'Coachella Madeira Sofa',
       type: 'Sofa',
       image: '/v/vspfiles/boards/showcase/transitional-coachella-madeira-sofa-front.png',
+      catalogPhoto: '/v/vspfiles/photos/77176-A1-1.jpg',
       styles: ['transitional', 'modern', 'traditional'],
       primaryStyle: 'transitional'
     },
@@ -237,6 +256,7 @@ window.MC_BOARD_STYLES = {
       name: 'London Fog Power Sofa',
       type: 'Power reclining sofa',
       image: '/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png',
+      catalogPhoto: '/v/vspfiles/photos/40113-01-1.jpg',
       styles: ['transitional', 'coastal', 'contemporary'],
       primaryStyle: 'coastal'
     }
