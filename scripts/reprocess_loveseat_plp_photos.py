@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+"""Re-fetch loveseat PLP thumbs from -2T sources and normalize like stationary sofas (cat 157)."""
+from __future__ import annotations
+
+import re
+import subprocess
+import sys
+import urllib.error
+import urllib.request
+from io import BytesIO
+from pathlib import Path
+
+from PIL import Image
+
+ROOT = Path(__file__).resolve().parents[1]
+PHOTOS = ROOT / "vspfiles" / "photos"
+SITE = "https://www.mccabestheaterandliving.com"
+UA = {"User-Agent": "Mozilla/5.0 (McCabe loveseat PLP)"}
+PHOTO_RE = re.compile(r"/vspfiles/photos/([^\"'?]+\.(?:jpg|jpeg|png))", re.I)
+
+
+def names_from_category(path: str = "/category-s/157.htm") -> list[str]:
+    req = urllib.request.Request(SITE + path, headers=UA)
+    html = urllib.request.urlopen(req, timeout=90).read().decode("utf-8", "replace")
+    return sorted(
+        n
+        for n in set(PHOTO_RE.findall(html))
+        if "{" not in n and "}" not in n and re.search(r"-03-1\.(jpe?g|png)$", n, re.I)
+    )
+
+
+def large_source_urls(plp_name: str) -> list[str]:
+    stem = plp_name.rsplit(".", 1)[0]
+    base = stem[:-2] if stem.lower().endswith("-1") else stem
+    variants = [
+        f"{base}-2T.jpg",
+        f"{base}-2t.jpg",
+        f"{base.upper()}-2T.jpg",
+        f"{base}-2S.jpg",
+        f"{base}-2.jpg",
+        plp_name,
+        plp_name.lower(),
+    ]
+    seen: set[str] = set()
+    urls: list[str] = []
+    for v in variants:
+        if v in seen:
+            continue
+        seen.add(v)
+        urls.append(f"{SITE}/v/vspfiles/photos/{v}")
+    return urls
+
+
+def fetch_large_original(plp_name: str) -> bytes:
+    for url in large_source_urls(plp_name):
+        try:
+            req = urllib.request.Request(url, headers=UA)
+            data = urllib.request.urlopen(req, timeout=90).read()
+            im = Image.open(BytesIO(data))
+            if im.size[0] >= 500 or im.size[1] >= 350:
+                print(f"  source {url.split('/')[-1]} ({im.size[0]}x{im.size[1]}, {len(data)} bytes)")
+                return data
+        except (urllib.error.HTTPError, OSError, ValueError):
+            continue
+    raise RuntimeError(f"no large source for {plp_name}")
+
+
+def write_plp_aliases(plp_name: str, data: bytes) -> None:
+    (PHOTOS / plp_name).write_bytes(data)
+    low = PHOTOS / plp_name.lower()
+    if low.name != plp_name:
+        low.write_bytes(data)
+
+
+def main() -> int:
+    py = sys.executable
+    names = names_from_category()
+    if not names:
+        print("No loveseat -03-1 photos on category 157.", file=sys.stderr)
+        return 1
+    print(f"Reprocessing {len(names)} loveseat PLP photo(s)...")
+    PHOTOS.mkdir(parents=True, exist_ok=True)
+
+    for name in names:
+        try:
+            write_plp_aliases(name, fetch_large_original(name))
+        except RuntimeError as exc:
+            print(f"  WARN {exc}", file=sys.stderr)
+
+    for name in names:
+        subprocess.run(
+            [
+                py,
+                str(ROOT / "scripts" / "replace_plp_photo_mats.py"),
+                "--in-place",
+                "--input-dir",
+                str(PHOTOS),
+                "--file",
+                name,
+            ],
+            cwd=ROOT,
+            check=False,
+        )
+
+    rc = 0
+    for name in names:
+        step = subprocess.run(
+            [
+                py,
+                str(ROOT / "scripts" / "normalize_plp_photos.py"),
+                "--input-dir",
+                str(PHOTOS),
+                "--in-place",
+                "--file",
+                name,
+            ],
+            cwd=ROOT,
+        )
+        if step.returncode != 0:
+            rc = step.returncode
+
+    if rc != 0:
+        return rc
+
+    subprocess.run(
+        [
+            py,
+            str(ROOT / "scripts" / "replace_plp_photo_mats.py"),
+            "--in-place",
+            "--input-dir",
+            str(PHOTOS),
+            "--file",
+            *names,
+        ],
+        cwd=ROOT,
+        check=False,
+    )
+
+    return subprocess.run(
+        [py, str(ROOT / "scripts" / "generate_plp_sofa_bounds.py")],
+        cwd=ROOT,
+        check=False,
+    ).returncode
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

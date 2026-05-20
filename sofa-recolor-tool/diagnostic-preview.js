@@ -13,6 +13,7 @@ import {
   recolorSofa,
   getSwatchPalette,
   resolveOriginalSwatchPath,
+  publishRenderOutputs,
 } from './render-sofas.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -83,8 +84,10 @@ async function runOneSwatch(swatchArg, renderSofa, sourceSofa, mask, width, heig
 
   if (renderSofa && sourceSofa) {
     const finalData = recolorSofa(sourceSofa, mask, palette);
-    await saveImage(finalData, join(outDir, 'final-output-fixed.png'), width, height, channels);
-    console.log('  saved: final-output-fixed.png (photographic recolor)');
+    const mainOut = join(__dirname, 'output', `${swatchName}.png`);
+    await saveImage(finalData, mainOut, width, height, channels);
+    await saveImage(finalData, join(outDir, 'final-output.png'), width, height, channels);
+    publishRenderOutputs(swatchName, mainOut);
   } else {
     console.log('  (sofa render skipped — use --render)');
   }

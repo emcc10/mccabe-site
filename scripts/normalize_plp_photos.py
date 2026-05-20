@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -65,6 +66,19 @@ def draw_bounds_debug(img: Image.Image, bounds: SofaBounds, color: tuple[int, in
 def is_sectional_filename(name: str) -> bool:
     n = name.lower()
     return "-sc-" in n or n.startswith("sc-")
+
+
+def is_loveseat_filename(name: str) -> bool:
+    """Stationary loveseat PLP thumbs (*-03-1.jpg), e.g. category 157."""
+    n = name.lower()
+    if "-sc-" in n:
+        return False
+    return bool(re.search(r"-03-1\.(jpe?g|png)$", n))
+
+
+def use_sofa_plp_contain_fit(name: str) -> bool:
+    """Sectionals and loveseats: fit full product in frame at sofa-like visible height."""
+    return is_sectional_filename(name) or is_loveseat_filename(name)
 
 
 def normalize_sofa_image(
@@ -159,7 +173,7 @@ def process_file(
     if dry_run:
         return None, {"bounds": bounds.as_dict()}
 
-    fill_h = is_sectional_filename(path.name)
+    fill_h = use_sofa_plp_contain_fit(path.name)
     norm, meta = normalize_sofa_image(
         img,
         bounds,

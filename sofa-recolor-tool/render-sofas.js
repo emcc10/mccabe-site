@@ -4,6 +4,7 @@
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
 import {
+  copyFileSync,
   mkdirSync,
   readdirSync,
   existsSync,
@@ -550,6 +551,26 @@ export function recolorSofa(sourceImage, mask, palette) {
   return out;
 }
 
+/** Mirror render to diagnostic folder + legacy -fixed name; log absolute paths. */
+export function publishRenderOutputs(swatchName, primaryPngPath) {
+  const diagDir = join(OUTPUT_DIR, 'diagnostic', swatchName);
+  mkdirSync(diagDir, { recursive: true });
+  const copies = [
+    join(diagDir, 'final-output.png'),
+    join(OUTPUT_DIR, `${swatchName}-fixed.png`),
+  ];
+  for (const dest of copies) {
+    copyFileSync(primaryPngPath, dest);
+  }
+  const abs = resolve(primaryPngPath);
+  console.log('\n  OPEN THIS RENDER (full path):');
+  console.log(`    ${abs}`);
+  console.log(`    ${resolve(copies[0])}`);
+  console.log(`    ${resolve(copies[1])}`);
+  console.log('  (Ignore *-texture.png in diagnostic — those are old debug files.)');
+  return { primary: abs, diagnostic: resolve(copies[0]), legacyFixed: resolve(copies[1]) };
+}
+
 export async function processSwatch(swatchPath, sourceImage, mask) {
   const resolved = resolveOriginalSwatchPath(swatchPath);
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
@@ -584,6 +605,7 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
   const outPath = join(OUTPUT_DIR, `${swatchName}.png`);
   const bytes = await saveImage(outData, outPath, sourceImage.width, sourceImage.height, sourceImage.channels);
   console.log(`  wrote ${swatchName}.png (${Math.round(bytes / 1024)} KB)`);
+  publishRenderOutputs(swatchName, outPath);
   return { outPath, palette };
 }
 
