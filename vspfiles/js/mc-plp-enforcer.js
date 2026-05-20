@@ -7,7 +7,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260621";
+  var VERSION = "20260622";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -513,4 +513,26 @@
   }
 
   global.mcPlpEnforcerRun = run;
+
+  function loadPdpAuthCtaFix() {
+    try {
+      var b = global.document.body;
+      var onPdp =
+        (b && b.classList.contains("productdetails")) ||
+        !!global.document.getElementById("v65-product-parent");
+      if (!onPdp) return;
+      if (global.__MC_PDP_AUTH_CTA_FIX_VER__) return;
+      if (global.document.querySelector('script[src*="mc-pdp-auth-cta-fix"]')) return;
+      var s = global.document.createElement("script");
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260622&mcrd=" + Date.now();
+      s.async = false;
+      (global.document.head || global.document.documentElement).appendChild(s);
+    } catch (eLoad) {}
+  }
+
+  loadPdpAuthCtaFix();
+  if (global.document.readyState === "loading") {
+    global.document.addEventListener("DOMContentLoaded", loadPdpAuthCtaFix);
+  }
+  global.addEventListener("load", loadPdpAuthCtaFix);
 })(window);

@@ -1333,8 +1333,9 @@ document.addEventListener("DOMContentLoaded", function () {
  
   <!-- DESIGN TOOLKIT -->
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260621plp"></script>
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260622"></script>
   <script id="mc-plp-enforcer-bridge">
-(function(g,d){var W="20260621",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};function cat(){try{var p=String(g.location.pathname||"").toLowerCase();if(g.document.body&&g.document.body.classList.contains("productdetails"))return false;if(/shoppingcart|one-page-checkout|checkout|orderconfirm/i.test(p))return false;if((/-s\//.test(p)||/category-s\//.test(p))&&/\.html?/i.test(p))return true;if(/productslist\.asp|searchresults\.asp/.test(p))return true;var r=d.getElementById("content_area");if(r&&r.querySelector(".v-product-grid a.v-product__img, ul.v-product-grid li.v-product"))return true;}catch(e){}return false;}function go(){if(!cat())return;if(vn(g.__MC_PLP_ENFORCER_VER__)>=vn(W)&&typeof g.mcPlpEnforcerRun==="function")return;d.querySelectorAll('script[src*="mc-plp-enforcer"]').forEach(function(s){try{s.remove();}catch(e2){}});delete g.__MC_PLP_ENFORCER__;delete g.__MC_PLP_ENFORCER_VER__;delete g.mcPlpEnforcerRun;var s=d.createElement("script");s.id="mc-plp-enforcer-js";s.src="/v/vspfiles/js/mc-plp-enforcer.js?v="+W+"&mcrd="+Date.now();s.onload=function(){try{g.mcPlpEnforcerRun&&g.mcPlpEnforcerRun();}catch(e3){}};(d.head||d.documentElement).appendChild(s);}if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",go);else go();g.addEventListener("load",go);[0,200,900,2500].forEach(function(t){g.setTimeout(go,t);});})(window,document);
+(function(g,d){var W="20260622",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};function cat(){try{var p=String(g.location.pathname||"").toLowerCase();if(g.document.body&&g.document.body.classList.contains("productdetails"))return false;if(/shoppingcart|one-page-checkout|checkout|orderconfirm/i.test(p))return false;if((/-s\//.test(p)||/category-s\//.test(p))&&/\.html?/i.test(p))return true;if(/productslist\.asp|searchresults\.asp/.test(p))return true;var r=d.getElementById("content_area");if(r&&r.querySelector(".v-product-grid a.v-product__img, ul.v-product-grid li.v-product"))return true;}catch(e){}return false;}function go(){if(!cat())return;if(vn(g.__MC_PLP_ENFORCER_VER__)>=vn(W)&&typeof g.mcPlpEnforcerRun==="function")return;d.querySelectorAll('script[src*="mc-plp-enforcer"]').forEach(function(s){try{s.remove();}catch(e2){}});delete g.__MC_PLP_ENFORCER__;delete g.__MC_PLP_ENFORCER_VER__;delete g.mcPlpEnforcerRun;var s=d.createElement("script");s.id="mc-plp-enforcer-js";s.src="/v/vspfiles/js/mc-plp-enforcer.js?v="+W+"&mcrd="+Date.now();s.onload=function(){try{g.mcPlpEnforcerRun&&g.mcPlpEnforcerRun();}catch(e3){}};(d.head||d.documentElement).appendChild(s);}if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",go);else go();g.addEventListener("load",go);[0,200,900,2500].forEach(function(t){g.setTimeout(go,t);});})(window,document);
   </script>
 
 </head>
@@ -5068,17 +5069,38 @@ try {
 
     var configBlock = document.getElementById("mcConfigurationBlock");
     if (configBlock) {
-      configBlock.style.cursor = "pointer";
-      configBlock.onclick = function (ev) {
-        if (
-          ev.target.closest(
-            'button, a, input, select, textarea, label, #mcPlannerLoginGate, [data-mc-open-login], [data-mc-open-signup]'
-          )
-        ) {
-          return;
+      var theaterCfg =
+        typeof mcIsTheaterSeatingPdpEarly === "function" && mcIsTheaterSeatingPdpEarly();
+      var configCaptionEl = document.getElementById("mcConfigurationCaption");
+      if (theaterCfg) {
+        configBlock.style.cursor = "default";
+        if (configCaptionEl) {
+          configCaptionEl.classList.add("mc-configuration-rh__planner-only");
+          configCaptionEl.style.cursor = "pointer";
+          configCaptionEl.onclick = function (ev) {
+            if (
+              ev.target.closest(
+                "#mcPlannerLoginGate, [data-mc-open-login], [data-mc-open-signup], .mc-configuration-rh__signin-cta, button, a"
+              )
+            ) {
+              return;
+            }
+            openPlannerOverlay();
+          };
         }
-        openPlannerOverlay();
-      };
+      } else {
+        configBlock.style.cursor = "pointer";
+        configBlock.onclick = function (ev) {
+          if (
+            ev.target.closest(
+              'button, a, input, select, textarea, label, #mcPlannerLoginGate, [data-mc-open-login], [data-mc-open-signup], .mc-configuration-rh__signin-cta'
+            )
+          ) {
+            return;
+          }
+          openPlannerOverlay();
+        };
+      }
     }
     try {
       if (typeof mcWirePlannerLoginGateCtas === "function") {
@@ -5519,9 +5541,53 @@ function mcWirePlannerLoginGateCtas(g) {
   mcBindPlannerGateAuthButtons(g);
   g.dataset.mcModalCtas = "1";
 }
+function mcHandleLoginCtaClick(e) {
+  if (!e || !e.target || !e.target.closest) return false;
+  var loginLink = e.target.closest(
+    ".mc-member-grid-price__login, [data-mc-open-login], .mc-configuration-rh__signin-cta, #mcPlannerLoginGate a[href*='login.asp'], #mcPlannerLoginGate a[href*='Login.asp']"
+  );
+  if (loginLink) {
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+    try {
+      e.stopImmediatePropagation();
+    } catch (eImm) {}
+    if (typeof window.mcOpenLoginModal === "function") {
+      window.mcOpenLoginModal();
+    }
+    return true;
+  }
+  var signupLink = e.target.closest(
+    "[data-mc-open-signup], #mcPlannerLoginGate a[href*='register.asp'], #mcPlannerLoginGate a[href*='AccountSettings.asp']"
+  );
+  if (signupLink) {
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+    try {
+      e.stopImmediatePropagation();
+    } catch (eImm2) {}
+    if (typeof window.mcOpenSignupModal === "function") {
+      window.mcOpenSignupModal();
+    }
+    return true;
+  }
+  return false;
+}
+
 if (typeof window !== "undefined") {
   window.mcWirePlannerLoginGateCtas = mcWirePlannerLoginGateCtas;
   window.mcBindPlannerGateAuthButtons = mcBindPlannerGateAuthButtons;
+  window.mcHandleLoginCtaClick = mcHandleLoginCtaClick;
+  if (!window.__MC_PDP_AUTH_CTA_CAPTURE__) {
+    window.__MC_PDP_AUTH_CTA_CAPTURE__ = true;
+    document.addEventListener(
+      "click",
+      function (e) {
+        mcHandleLoginCtaClick(e);
+      },
+      true
+    );
+  }
 }
 
 function mcEnsurePlannerLoginGate() {
@@ -6706,7 +6772,14 @@ window.applyPlannerToPage = function (payload) {
       configPieces.innerHTML = list.map(function(p){ return "<div style=\"margin-bottom:6px\"><strong>" + (p.name || p.id) + "</strong>" + (p.desc ? " &mdash; " + p.desc : "") + "</div>"; }).join("");
       if (!mcPlannerUserIsLoggedIn()) {
         configCaption.style.display = "block";
-        configCaption.textContent = "Sign in for configured price.";
+        configCaption.classList.add("mc-configuration-rh__planner-only");
+        configCaption.innerHTML =
+          '<button type="button" class="mc-configuration-rh__signin-cta" data-mc-open-login style="border:none;background:none;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer;">Sign in</button> for configured price.';
+        try {
+          if (typeof mcBindPlannerGateAuthButtons === "function") {
+            mcBindPlannerGateAuthButtons(configCaption);
+          }
+        } catch (eCapAuth) {}
       } else {
         configCaption.style.display = "none";
       }
@@ -22241,7 +22314,7 @@ s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
-  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260621"></script>
+  <script id="mc-plp-enforcer-js" src="/v/vspfiles/js/mc-plp-enforcer.js?v=20260622"></script>
   <script id="mc-my-boards-template-boot">
 (function () {
   if (!/\/my-boards\.html/i.test(String(location.pathname || ''))) return;
