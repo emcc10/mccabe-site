@@ -18,7 +18,7 @@ import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { prepareSourceLGrain, applySourceLGrain } from './leather-detail.js';
-import { cleanSofaCompositing, maskBoundingBox } from './compositing-cleanup.js';
+import { cleanSofaCompositing } from './compositing-cleanup.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
@@ -58,14 +58,8 @@ const BALI_BODY_MIN_PIXEL = { r: 155, g: 145, b: 130 };
 const BALI_SAMPLE_FLOOR = { r: 170, g: 160, b: 145 };
 const BALI_SAMPLE_RANGE = { r: [185, 215], g: [175, 205], b: [155, 190] };
 const BALI_OUTPUT_FLOOR = { r: 170, g: 160, b: 145 };
-/** Preserve source photo L shape; minimal tonal sculpting (color unchanged). */
-const BALI_L_STRUCTURE = 0.98;
-const BALI_MID_CONTRAST = 0.03;
-const BALI_HIGHLIGHT_U_START = 0.78;
-const BALI_TOP_CUSHION_V = 0.5;
-const BALI_HIGHLIGHT_PULL = 1.5;
-const BALI_HIGHLIGHT_CEIL_ABOVE_ANCHOR = 11;
-const BALI_HIGHLIGHT_CEIL_BLEND = 0.58;
+/** Full source photo L structure (color via anchor + swatch chroma only). */
+const BALI_L_STRUCTURE = 1;
 const CHROMA_SWATCH = 1;
 /** Diagnostic: force uniform upholstery chroma; L from source only. */
 export const BRUTE_FORCE_CHROMA_A = 2;
@@ -688,79 +682,6 @@ export function photoLuminanceOnly(r, g, b) {
   return rgbToLab(r, g, b).L;
 }
 
-/** L-only: mid contrast, tame washed top cushions — no chroma change. */
-export function applyBaliPhotographicLMatch(finalL, u, v, anchorL) {
-  let L = finalL;
-  const delta = L - anchorL;
-  const midBoost = Math.sin(u * Math.PI) * BALI_MID_CONTRAST;
-  L = anchorL + delta * (1 + midBoost);
-
-  if (u > BALI_HIGHLIGHT_U_START && v < BALI_TOP_CUSHION_V) {
-    const tu = (u - BALI_HIGHLIGHT_U_START) / (1 - BALI_HIGHLIGHT_U_START);
-    const tv = 1 - v / BALI_TOP_CUSHION_V;
-    L -= tu * tv * BALI_HIGHLIGHT_PULL;
-  }
-  if (u > 0.84) {
-    L -= ((u - 0.84) / 0.16) * 2.5;
-  }
-  const ceil = anchorL + BALI_HIGHLIGHT_CEIL_ABOVE_ANCHOR;
-  if (L > ceil) {
-    L = ceil + (L - ceil) * BALI_HIGHLIGHT_CEIL_BLEND;
-  }
-  return L;
-}
-
-/** 1px upholstery border: reduce halos using interior neighbors (L only). */
-function refineUpholsteryEdges(out, mask, width, height, channels) {
-  const border = new Uint8Array(width * height);
-  for (let y = 1; y < height - 1; y++) {
-    for (let x = 1; x < width - 1; x++) {
-      const j = y * width + x;
-      if (mask[j] < MASK_APPLY_THRESH) continue;
-      if (
-        mask[j - 1] < MASK_APPLY_THRESH ||
-        mask[j + 1] < MASK_APPLY_THRESH ||
-        mask[j - width] < MASK_APPLY_THRESH ||
-        mask[j + width] < MASK_APPLY_THRESH
-      ) {
-        border[j] = 1;
-      }
-    }
-  }
-
-  for (let y = 1; y < height - 1; y++) {
-    for (let x = 1; x < width - 1; x++) {
-      const j = y * width + x;
-      if (!border[j]) continue;
-      const p = j * channels;
-      const lum = 0.2126 * out[p] + 0.7152 * out[p + 1] + 0.0722 * out[p + 2];
-      if (lum < 248) continue;
-
-      let ar = 0;
-      let ag = 0;
-      let ab = 0;
-      let n = 0;
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          if (dx === 0 && dy === 0) continue;
-          const k = (y + dy) * width + (x + dx);
-          if (mask[k] < MASK_APPLY_THRESH || border[k]) continue;
-          const pk = k * channels;
-          ar += out[pk];
-          ag += out[pk + 1];
-          ab += out[pk + 2];
-          n++;
-        }
-      }
-      if (n < 2) continue;
-      const blend = 0.22;
-      out[p] = Math.round(out[p] * (1 - blend) + (ar / n) * blend);
-      out[p + 1] = Math.round(out[p + 1] * (1 - blend) + (ag / n) * blend);
-      out[p + 2] = Math.round(out[p + 2] * (1 - blend) + (ab / n) * blend);
-    }
-  }
-}
-
 /** Swatch a/b only — zero cognac chroma. */
 export function swatchChromaForPixel(palette, u) {
   const tone = interpolateSwatchPalette(palette, u);
@@ -777,9 +698,6 @@ export function recolorSofa(sourceImage, mask, palette) {
   const meanPhotoL = palette.isBaliSilk ? meanMaskedLab(sourceImage, mask).L : 0;
   const anchorL = palette.isBaliSilk ? palette.midtone.L : 0;
   const grain = palette.isBaliSilk ? prepareSourceLGrain(sourceImage) : null;
-  const box = palette.isBaliSilk ? maskBoundingBox(mask, width, height) : null;
-  const vSpan = box ? Math.max(box.maxY - box.minY, 1) : 1;
-
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
 
@@ -793,11 +711,8 @@ export function recolorSofa(sourceImage, mask, palette) {
 
     let finalL;
     if (palette.isBaliSilk) {
-      const y = Math.floor(j / width);
-      const v = (y - box.minY) / vSpan;
       finalL = anchorL + (photoL - meanPhotoL) * BALI_L_STRUCTURE;
       finalL = applySourceLGrain(finalL, j, grain, u);
-      finalL = applyBaliPhotographicLMatch(finalL, u, v, anchorL);
     } else {
       finalL = computeFinalLabL(photoL, chroma.L);
     }
@@ -813,7 +728,6 @@ export function recolorSofa(sourceImage, mask, palette) {
   }
 
   if (palette.isBaliSilk) {
-    refineUpholsteryEdges(out, mask, width, height, channels);
     cleanSofaCompositing(out, sourceImage, mask);
   }
 
@@ -931,7 +845,7 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     realism: isBali
-      ? 'source photo L detail + light sculpt + unified shadow + edge refine'
+      ? 'source photo L HF/MF + preserved feet + studio shadow'
       : null,
   });
 

@@ -6,11 +6,11 @@ import { rgbToLab } from './render-sofas.js';
 
 const HF_RADIUS = 1;
 const MF_RADIUS = 2;
-/** Source photo HF/MF gains (tuned for pore + cushion breakup). */
-export const PHOTO_HF_GAIN = 0.78;
-export const PHOTO_MF_GAIN = 0.3;
-export const PHOTO_SEAM_GAIN = 0.14;
-const SEAM_GRAD_THRESH = 2.2;
+/** Source photo HF/MF — direct transfer from original sofa L (no synthetic grain). */
+export const PHOTO_HF_GAIN = 1.02;
+export const PHOTO_MF_GAIN = 0.44;
+export const PHOTO_SEAM_GAIN = 0.18;
+const SEAM_GRAD_THRESH = 1.8;
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
@@ -91,7 +91,7 @@ export function prepareSourceLGrain(sourceImage) {
  * @param {number} u - masked upholstery luminance map position 0–1 (more MF in mids/shadows).
  */
 export function applySourceLGrain(finalL, j, grain, u = 0.5) {
-  const shadowMidBoost = 1 + 0.45 * (1 - clamp(u, 0, 1));
+  const shadowMidBoost = 1 + 0.55 * (1 - clamp(u, 0, 1));
   const seam = grain.seamBoost[j] * PHOTO_SEAM_GAIN * grain.sourceHf[j];
   return (
     finalL +
