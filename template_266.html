@@ -5472,17 +5472,11 @@ function mcEnsurePlannerLoginGate() {
   g.className = "mc-planner-login-gate";
   g.setAttribute("role", "region");
   g.setAttribute("aria-label", "Member sign in");
-  var loginHref = typeof getMemberLoginUrl === "function" ? getMemberLoginUrl() : "/login.asp";
-  var signupHref = typeof getMemberSignupUrl === "function" ? getMemberSignupUrl() : "/register.asp";
   g.innerHTML =
     '<p class="mc-planner-login-gate__msg" style="margin:0 0 12px;font-size:13px;line-height:1.45;color:#333;">Sign in to view member pricing and add your configured layout to cart.</p>' +
     '<div style="display:flex;flex-wrap:wrap;gap:10px;">' +
-    '<a class="mc-config-btn" href="' +
-    loginHref +
-    '" style="display:inline-block;padding:8px 14px;border:1px solid #333;background:#fff;color:#111;text-decoration:none;font-size:12px;">Sign In</a>' +
-    '<a class="mc-config-btn" href="' +
-    signupHref +
-    '" style="display:inline-block;padding:8px 14px;border:1px solid #333;background:#fff;color:#111;text-decoration:none;font-size:12px;">Create Account</a>' +
+    '<button type="button" class="mc-config-btn" data-mc-open-login style="display:inline-block;padding:8px 14px;border:1px solid #333;background:#fff;color:#111;font-size:12px;cursor:pointer;">Sign In</button>' +
+    '<button type="button" class="mc-config-btn" data-mc-open-signup style="display:inline-block;padding:8px 14px;border:1px solid #333;background:#fff;color:#111;font-size:12px;cursor:pointer;">Create Account</button>' +
     "</div>";
   var anchor = document.getElementById("mcConfigurationPrice");
   if (anchor && anchor.parentNode === block) {
@@ -16205,7 +16199,7 @@ body.mc-product-page #content_area font.product_sale_price {
       <button type="button" class="mc-login-modal__tab" data-mc-login-tab="signup" role="tab" aria-selected="false">Sign up</button>
     </div>
     <div id="mc-login-modal-panel-login" class="mc-login-modal__panel-body is-active">
-      <p class="mc-login-modal__hint">Sign in below. When login succeeds, this page will refresh and show member pricing.</p>
+      <p class="mc-login-modal__hint">Sign in below. Member pricing updates on this page when login succeeds — you stay on the product.</p>
       <div id="mc-login-modal-login-status" class="mc-login-modal__status" aria-live="polite"></div>
       <form id="mc-member-login-form" class="mc-login-modal__form" method="post" action="/login.asp" autocomplete="on">
         <input type="hidden" name="CustomerNewOld" value="old" />

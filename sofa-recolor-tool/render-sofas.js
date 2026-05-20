@@ -749,12 +749,21 @@ export async function main(argv = process.argv) {
   console.log(`  swatch source: ${SWATCH_DIR} (${swatchFiles.length} files)`);
   console.log(`  source photo: ${SOFA_PATH}`);
   console.log(`  mask: ${MASK_PATH}`);
-  console.log('  method: photographic LAB recolor (original L + swatch a/b)');
-
   const sourceSofa = await loadImage(SOFA_PATH);
   console.log(`  ${sourceSofa.width}x${sourceSofa.height}`);
 
   const mask = await loadUpholsteryMask(MASK_PATH, sourceSofa.width, sourceSofa.height);
+
+  if (cli.mode === 'brute-chroma') {
+    const label = basename(cli.swatchFile, extname(cli.swatchFile));
+    console.log('  method: BRUTE-FORCE fixed chroma diagnostic (not production pipeline)');
+    const { outPath } = await processBruteChromaDiagnostic(sourceSofa, mask, label);
+    console.log(`\nDone: ${outPath}`);
+    return;
+  }
+
+  console.log('  method: photographic LAB recolor (original L + swatch a/b)');
+
   const masterImage = buildNeutralGrayMaster(sourceSofa, mask);
 
   await saveImage(
