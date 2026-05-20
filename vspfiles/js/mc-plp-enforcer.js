@@ -7,7 +7,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260622";
+  var VERSION = "20260623";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -524,7 +524,7 @@
       if (global.__MC_PDP_AUTH_CTA_FIX_VER__) return;
       if (global.document.querySelector('script[src*="mc-pdp-auth-cta-fix"]')) return;
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260622&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260623&mcrd=" + Date.now();
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eLoad) {}
