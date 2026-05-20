@@ -1,15 +1,16 @@
 /**
- * Below sofa: pure white + one ellipse shadow + feet only.
+ * Seamless white + below-sofa wipe + flood bright fragments + ellipse shadow + feet.
  */
 import { MASK_APPLY_THRESH } from './render-sofas.js';
 
 const BG = 255;
-const STRIP_ABOVE = 10;
-const SHADOW_OPACITY = 0.13;
+const STRIP_ABOVE = 14;
+const BRIGHT_LUM = 175;
+const SHADOW_OPACITY = 0.12;
 const DARK_LUM_MAX = 108;
-const ELLIPSE_Y_OFFSET = 12;
-const ELLIPSE_RY = 40;
-const ELLIPSE_RX_PAD = 32;
+const ELLIPSE_Y_OFFSET = 10;
+const ELLIPSE_RY = 42;
+const ELLIPSE_RX_PAD = 36;
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
@@ -34,12 +35,12 @@ export function maskBoundingBox(mask, width, height) {
   return any ? { minX, minY, maxX, maxY } : { minX: 0, minY: 0, maxX: width - 1, maxY: height - 1 };
 }
 
-function pixelLum(r, g, b) {
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+function pixelLum(data, p) {
+  return 0.2126 * data[p] + 0.7152 * data[p + 1] + 0.0722 * data[p + 2];
 }
 
 function isDarkFoot(src, p) {
-  return pixelLum(src[p], src[p + 1], src[p + 2]) <= DARK_LUM_MAX;
+  return pixelLum(src, p) <= DARK_LUM_MAX;
 }
 
 function setWhite(out, p, channels) {
@@ -56,38 +57,60 @@ function copySource(out, src, p, channels) {
   if (channels === 4) out[p + 3] = src[p + 3] ?? 255;
 }
 
-/**
- * Erase everything below sofa baseline except upholstery (mask) and dark feet.
- * Also clear transition strip above baseline (mask contamination).
- */
-function eraseAllBelowBaseline(out, src, mask, width, height, channels, box) {
+/** Outside upholstery: seamless #ffffff (feet excluded). */
+function forceSeamlessWhite(out, src, mask, width, height, channels, box) {
   const bottom = box.maxY;
-  const x0 = Math.max(0, box.minX - 48);
-  const x1 = Math.min(width - 1, box.maxX + 48);
+  for (let j = 0; j < width * height; j++) {
+    if (mask[j] >= MASK_APPLY_THRESH) continue;
+    const p = j * channels;
+    if (isDarkFoot(src, p)) continue;
+    const y = Math.floor(j / width);
+    if (y <= bottom) {
+      setWhite(out, p, channels);
+    }
+  }
+}
+
+/** Below baseline + transition strip: only white (feet preserved). */
+function wipeBelowSilhouette(out, src, mask, width, height, channels, box) {
+  const bottom = box.maxY;
+  const x0 = Math.max(0, box.minX - 64);
+  const x1 = Math.min(width - 1, box.maxX + 64);
 
   for (let y = bottom - STRIP_ABOVE; y < height; y++) {
-    const belowBaseline = y > bottom;
-    const inStrip = y <= bottom;
     for (let x = 0; x < width; x++) {
       const j = y * width + x;
       if (mask[j] >= MASK_APPLY_THRESH) continue;
-
-      if (inStrip && (x < x0 || x > x1)) continue;
+      const inSpan = x >= x0 && x <= x1;
+      if (y <= bottom && !inSpan) continue;
 
       const p = j * channels;
       if (isDarkFoot(src, p)) {
         copySource(out, src, p, channels);
         continue;
       }
-
-      if (belowBaseline || inStrip) {
-        setWhite(out, p, channels);
-      }
+      setWhite(out, p, channels);
     }
   }
 }
 
-/** One soft ellipse shadow on white — only below baseline, not on feet. */
+/** Flood any remaining bright disconnected pixels under sofa to white. */
+function floodBrightFragmentsBelow(out, src, mask, width, height, channels, box) {
+  const bottom = box.maxY;
+  const x0 = Math.max(0, box.minX - 64);
+  const x1 = Math.min(width - 1, box.maxX + 64);
+
+  for (let y = bottom - STRIP_ABOVE; y < height; y++) {
+    for (let x = x0; x <= x1; x++) {
+      const j = y * width + x;
+      if (mask[j] >= MASK_APPLY_THRESH) continue;
+      const p = j * channels;
+      if (isDarkFoot(src, p)) continue;
+      if (pixelLum(out, p) >= BRIGHT_LUM) setWhite(out, p, channels);
+    }
+  }
+}
+
 function paintEllipseShadow(out, src, mask, width, height, channels, box) {
   const bottom = box.maxY;
   const cx = (box.minX + box.maxX) * 0.5;
@@ -105,9 +128,9 @@ function paintEllipseShadow(out, src, mask, width, height, channels, box) {
       const dx = (x - cx) / rx;
       const dy = (y - cy) / ry;
       const d2 = dx * dx + dy * dy;
-      if (d2 > 1.5) continue;
+      if (d2 > 1.55) continue;
 
-      const falloff = Math.exp(-d2 * 2.2);
+      const falloff = Math.exp(-d2 * 2.0);
       const shade = Math.round(BG * (1 - SHADOW_OPACITY * falloff));
       out[p] = shade;
       out[p + 1] = shade;
@@ -130,7 +153,9 @@ export function cleanSofaCompositing(outBuffer, sourceImage, mask) {
   const out = outBuffer;
   const box = maskBoundingBox(mask, width, height);
 
-  eraseAllBelowBaseline(out, src, mask, width, height, channels, box);
+  forceSeamlessWhite(out, src, mask, width, height, channels, box);
+  wipeBelowSilhouette(out, src, mask, width, height, channels, box);
+  floodBrightFragmentsBelow(out, src, mask, width, height, channels, box);
   paintEllipseShadow(out, src, mask, width, height, channels, box);
   restoreFeet(out, src, mask, width, height, channels);
 
