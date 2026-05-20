@@ -17,6 +17,7 @@ import { tmpdir } from 'os';
 import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
+import { prepareSourceLGrain, applySourceLGrain } from './leather-detail.js';
 import { cleanSofaCompositing } from './compositing-cleanup.js';
 import { restorePhotographicEdges } from './photographic-edge.js';
 
@@ -58,7 +59,7 @@ const BALI_BODY_MIN_PIXEL = { r: 155, g: 145, b: 130 };
 const BALI_SAMPLE_FLOOR = { r: 170, g: 160, b: 145 };
 const BALI_SAMPLE_RANGE = { r: [185, 215], g: [175, 205], b: [155, 190] };
 const BALI_OUTPUT_FLOOR = { r: 170, g: 160, b: 145 };
-const BALI_L_STRUCTURE = 0.96;
+const BALI_L_STRUCTURE = 0.98;
 const CHROMA_SWATCH = 1;
 /** Diagnostic: force uniform upholstery chroma; L from source only. */
 export const BRUTE_FORCE_CHROMA_A = 2;
@@ -696,6 +697,7 @@ export function recolorSofa(sourceImage, mask, palette) {
   const { lo, span } = computeSofaLuminanceMapRange(sourceImage, mask);
   const meanPhotoL = palette.isBaliSilk ? meanMaskedLab(sourceImage, mask).L : 0;
   const anchorL = palette.isBaliSilk ? palette.midtone.L : 0;
+  const grain = palette.isBaliSilk ? prepareSourceLGrain(sourceImage) : null;
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
 
@@ -710,6 +712,7 @@ export function recolorSofa(sourceImage, mask, palette) {
     let finalL;
     if (palette.isBaliSilk) {
       finalL = anchorL + (photoL - meanPhotoL) * BALI_L_STRUCTURE;
+      finalL = applySourceLGrain(finalL, j, grain);
     } else {
       finalL = computeFinalLabL(photoL, chroma.L);
     }
@@ -843,7 +846,7 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     realism: isBali
-      ? 'preserve source L + swatch chroma only; fringe AA + floor wipe'
+      ? 'source L×0.98 + low source HF; pure white bg + tight contact shadow'
       : null,
   });
 

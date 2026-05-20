@@ -1,16 +1,17 @@
 /**
- * Seamless white + below-sofa wipe + flood bright fragments + ellipse shadow + feet.
+ * Full-frame #ffffff + tight contact shadow under sofa + feet.
  */
 import { MASK_APPLY_THRESH } from './render-sofas.js';
 
 const BG = 255;
-const STRIP_ABOVE = 14;
-const BRIGHT_LUM = 175;
-const SHADOW_OPACITY = 0.12;
+const STRIP_ABOVE = 12;
+const BRIGHT_LUM = 170;
+const SHADOW_OPACITY = 0.09;
 const DARK_LUM_MAX = 108;
-const ELLIPSE_Y_OFFSET = 10;
-const ELLIPSE_RY = 42;
-const ELLIPSE_RX_PAD = 36;
+const ELLIPSE_Y_OFFSET = 6;
+const ELLIPSE_RY = 20;
+const ELLIPSE_RX_SCALE = 0.38;
+const SHADOW_ROWS = 32;
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
@@ -57,50 +58,38 @@ function copySource(out, src, p, channels) {
   if (channels === 4) out[p + 3] = src[p + 3] ?? 255;
 }
 
-/** Outside upholstery: seamless #ffffff (feet excluded). */
-function forceSeamlessWhite(out, src, mask, width, height, channels, box) {
-  const bottom = box.maxY;
+/** Every non-upholstery pixel → pure white (removes source vignette/gray). */
+function forceFullFrameWhite(out, src, mask, width, height, channels) {
   for (let j = 0; j < width * height; j++) {
     if (mask[j] >= MASK_APPLY_THRESH) continue;
     const p = j * channels;
     if (isDarkFoot(src, p)) continue;
-    const y = Math.floor(j / width);
-    if (y <= bottom) {
-      setWhite(out, p, channels);
-    }
+    setWhite(out, p, channels);
   }
 }
 
-/** Below baseline + transition strip: only white (feet preserved). */
-function wipeBelowSilhouette(out, src, mask, width, height, channels, box) {
+function wipeTransitionStrip(out, src, mask, width, height, channels, box) {
   const bottom = box.maxY;
-  const x0 = Math.max(0, box.minX - 64);
-  const x1 = Math.min(width - 1, box.maxX + 64);
+  const x0 = Math.max(0, box.minX - 48);
+  const x1 = Math.min(width - 1, box.maxX + 48);
 
-  for (let y = bottom - STRIP_ABOVE; y < height; y++) {
-    for (let x = 0; x < width; x++) {
+  for (let y = bottom - STRIP_ABOVE; y <= bottom; y++) {
+    for (let x = x0; x <= x1; x++) {
       const j = y * width + x;
       if (mask[j] >= MASK_APPLY_THRESH) continue;
-      const inSpan = x >= x0 && x <= x1;
-      if (y <= bottom && !inSpan) continue;
-
       const p = j * channels;
-      if (isDarkFoot(src, p)) {
-        copySource(out, src, p, channels);
-        continue;
-      }
+      if (isDarkFoot(src, p)) continue;
       setWhite(out, p, channels);
     }
   }
 }
 
-/** Flood any remaining bright disconnected pixels under sofa to white. */
-function floodBrightFragmentsBelow(out, src, mask, width, height, channels, box) {
+function floodBrightBelow(out, src, mask, width, height, channels, box) {
   const bottom = box.maxY;
-  const x0 = Math.max(0, box.minX - 64);
-  const x1 = Math.min(width - 1, box.maxX + 64);
+  const x0 = Math.max(0, box.minX - 48);
+  const x1 = Math.min(width - 1, box.maxX + 48);
 
-  for (let y = bottom - STRIP_ABOVE; y < height; y++) {
+  for (let y = bottom - STRIP_ABOVE; y < Math.min(height, bottom + SHADOW_ROWS + 8); y++) {
     for (let x = x0; x <= x1; x++) {
       const j = y * width + x;
       if (mask[j] >= MASK_APPLY_THRESH) continue;
@@ -111,15 +100,19 @@ function floodBrightFragmentsBelow(out, src, mask, width, height, channels, box)
   }
 }
 
-function paintEllipseShadow(out, src, mask, width, height, channels, box) {
+/** Small soft contact shadow — close under sofa only, no wide gray floor. */
+function paintTightContactShadow(out, src, mask, width, height, channels, box) {
   const bottom = box.maxY;
   const cx = (box.minX + box.maxX) * 0.5;
   const cy = bottom + ELLIPSE_Y_OFFSET;
-  const rx = (box.maxX - box.minX) * 0.5 + ELLIPSE_RX_PAD;
+  const rx = Math.max(40, (box.maxX - box.minX) * ELLIPSE_RX_SCALE);
   const ry = ELLIPSE_RY;
+  const yEnd = Math.min(height - 1, bottom + SHADOW_ROWS);
+  const x0 = Math.max(0, Math.floor(cx - rx - 4));
+  const x1 = Math.min(width - 1, Math.ceil(cx + rx + 4));
 
-  for (let y = bottom + 1; y < height; y++) {
-    for (let x = 0; x < width; x++) {
+  for (let y = bottom + 1; y <= yEnd; y++) {
+    for (let x = x0; x <= x1; x++) {
       const j = y * width + x;
       if (mask[j] >= MASK_APPLY_THRESH) continue;
       const p = j * channels;
@@ -128,15 +121,39 @@ function paintEllipseShadow(out, src, mask, width, height, channels, box) {
       const dx = (x - cx) / rx;
       const dy = (y - cy) / ry;
       const d2 = dx * dx + dy * dy;
-      if (d2 > 1.55) continue;
+      if (d2 > 1.1) continue;
 
-      const falloff = Math.exp(-d2 * 2.0);
+      const falloff = Math.exp(-d2 * 3.5);
       const shade = Math.round(BG * (1 - SHADOW_OPACITY * falloff));
       out[p] = shade;
       out[p + 1] = shade;
       out[p + 2] = shade;
       if (channels === 4) out[p + 3] = 255;
     }
+  }
+}
+
+/** Re-white everything outside sofa except feet and shadow core. */
+function enforceWhiteOutsideShadow(out, src, mask, width, height, channels, box) {
+  const bottom = box.maxY;
+  const cx = (box.minX + box.maxX) * 0.5;
+  const cy = bottom + ELLIPSE_Y_OFFSET;
+  const rx = Math.max(40, (box.maxX - box.minX) * ELLIPSE_RX_SCALE);
+  const ry = ELLIPSE_RY;
+
+  for (let j = 0; j < width * height; j++) {
+    if (mask[j] >= MASK_APPLY_THRESH) continue;
+    const p = j * channels;
+    if (isDarkFoot(src, p)) continue;
+
+    const x = j % width;
+    const y = Math.floor(j / width);
+    const dx = (x - cx) / rx;
+    const dy = (y - cy) / ry;
+    const d2 = dx * dx + dy * dy;
+    if (y > bottom && y <= bottom + SHADOW_ROWS && d2 <= 1.1) continue;
+
+    if (pixelLum(out, p) < BG) setWhite(out, p, channels);
   }
 }
 
@@ -153,10 +170,11 @@ export function cleanSofaCompositing(outBuffer, sourceImage, mask) {
   const out = outBuffer;
   const box = maskBoundingBox(mask, width, height);
 
-  forceSeamlessWhite(out, src, mask, width, height, channels, box);
-  wipeBelowSilhouette(out, src, mask, width, height, channels, box);
-  floodBrightFragmentsBelow(out, src, mask, width, height, channels, box);
-  paintEllipseShadow(out, src, mask, width, height, channels, box);
+  forceFullFrameWhite(out, src, mask, width, height, channels);
+  wipeTransitionStrip(out, src, mask, width, height, channels, box);
+  floodBrightBelow(out, src, mask, width, height, channels, box);
+  paintTightContactShadow(out, src, mask, width, height, channels, box);
+  enforceWhiteOutsideShadow(out, src, mask, width, height, channels, box);
   restoreFeet(out, src, mask, width, height, channels);
 
   return out;
