@@ -125,7 +125,7 @@ verify_template_on_sftp() {
 
 TEMPLATE_ENFORCER_TAG=$(grep -oE 'mc-plp-enforcer\.js\?v=[0-9]+' template_266.html 2>/dev/null | head -1 || true)
 if [[ -z "$TEMPLATE_ENFORCER_TAG" ]]; then
-  TEMPLATE_ENFORCER_TAG="mc-plp-enforcer.js?v=20260616"
+  TEMPLATE_ENFORCER_TAG="mc-plp-enforcer.js?v=20260617"
 fi
 
 python3 scripts/announce_deploy_markers.py || true
@@ -185,6 +185,52 @@ put_primary "vspfiles/css/mc-plp-body-last.css" "mc-plp-body-last" \
   "/vspfiles/css/mc-plp-body-last.css" \
   "vspfiles/css/mc-plp-body-last.css"
 
+echo "=== My Boards (page, JS, CSS, PHP, showcase PNGs) ==="
+boards_fail=0
+for f in \
+  vspfiles/my-boards.html \
+  vspfiles/boards/my-boards-page.js \
+  vspfiles/boards/board-styles.js \
+  vspfiles/boards/my-boards-page.css \
+  vspfiles/boards/my-boards-critical.css \
+  vspfiles/boards/my-boards-fragment.html \
+  vspfiles/boards/session.php \
+  vspfiles/boards/list.php \
+  vspfiles/boards/save.php \
+  vspfiles/boards/delete.php \
+  vspfiles/boards/_auth.php; do
+  base=$(basename "$f")
+  rel="${f#vspfiles/}"
+  if put_primary "$f" "boards-${base}" \
+    "/vspfiles/${rel}" \
+    "/v/vspfiles/${rel}"; then
+    :
+  else
+    boards_fail=$((boards_fail + 1))
+  fi
+done
+shopt -s nullglob
+for f in vspfiles/boards/showcase/*.png; do
+  base=$(basename "$f")
+  if put_primary "$f" "boards-showcase-${base}" \
+    "/vspfiles/boards/showcase/${base}" \
+    "/v/vspfiles/boards/showcase/${base}"; then
+    :
+  else
+    boards_fail=$((boards_fail + 1))
+  fi
+done
+shopt -u nullglob
+for f in vspfiles/boards/mood/*.svg; do
+  base=$(basename "$f")
+  put_primary "$f" "boards-mood-${base}" \
+    "/vspfiles/boards/mood/${base}" \
+    "/v/vspfiles/boards/mood/${base}" || true
+done
+if [[ "$boards_fail" -gt 0 ]]; then
+  echo "::warning::${boards_fail} My Boards file(s) failed lftp upload — check Paramiko step or upload manually"
+fi
+
 echo "=== PLP product photos (replace baked gray mat with white) ==="
 photo_fail=0
 photo_ok=0
@@ -221,10 +267,14 @@ verify_url() {
 }
 
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "C_CSS_DEPLOY_VERIFY_20260518e"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260616" "MC_PLP_ENFORCER_20260616"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260616" "MC_PLP_ENFORCER_20260616"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260616"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260617" "MC_PLP_ENFORCER_20260617"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260617" "MC_PLP_ENFORCER_20260617"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260617"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260520plp" "MC_DTK_PLP_20260617"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-sofa-bounds.json?v=$(date +%s)" "77494-91-1.jpg"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/board-styles.js?v=20260525" "MC_BOARD_STYLES"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" "Interior design studio"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png?v=$(date +%s)" "PNG"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/template.min.js" "MC_PLP_ENFORCER_LOADING__"
 
 echo ""
