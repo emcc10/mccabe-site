@@ -308,19 +308,52 @@
     media.className = 'mc-boards__split-media';
     if (product) {
       var img = document.createElement('img');
-      img.src = assetUrl(product.image);
+      img.src = resolveProductImage(product);
       img.alt = product.name;
       img.loading = 'lazy';
-      bindImgFallback(img, style ? style.id : null, product.id);
+      bindImgFallback(img, style ? style.id : null, product.id, product.image);
       media.appendChild(img);
     }
     splitEl.appendChild(copy);
     splitEl.appendChild(media);
   }
 
+  function renderCatalog() {
+    if (!catalogEl) return;
+    catalogEl.innerHTML = '';
+    var products = config.products || [];
+    for (var i = 0; i < products.length; i++) {
+      (function (product) {
+        var style = getStyleById(product.primaryStyle);
+        var card = document.createElement('article');
+        card.className = 'mc-boards__catalog-card';
+        var wrap = document.createElement('div');
+        wrap.className = 'mc-boards__catalog-img';
+        var img = document.createElement('img');
+        img.src = resolveProductImage(product);
+        img.alt = product.name;
+        img.loading = 'lazy';
+        bindImgFallback(img, product.primaryStyle, product.id, product.image);
+        wrap.appendChild(img);
+        card.appendChild(wrap);
+        var name = document.createElement('p');
+        name.className = 'mc-boards__catalog-name';
+        name.textContent = product.name;
+        card.appendChild(name);
+        var type = document.createElement('p');
+        type.className = 'mc-boards__catalog-type';
+        type.textContent =
+          (style ? style.label + ' · ' : '') + (product.type || '');
+        card.appendChild(type);
+        catalogEl.appendChild(card);
+      })(products[i]);
+    }
+  }
+
   function renderStyleLibrary() {
     refreshConfig();
     renderTriptych();
+    renderCatalog();
     renderSplit();
     if (!stylesEl) return;
 
@@ -340,18 +373,25 @@
         var visual = document.createElement('div');
         visual.className = 'mc-boards__style-visual';
         var img = document.createElement('img');
-        img.src = assetUrl(style.moodImage);
-        img.alt = style.label + ' interior mood';
+        img.src = resolveStyleImage(style);
+        img.alt = style.label;
         img.loading = 'lazy';
-        bindImgFallback(img, style.id, style.catalogSku);
+        bindImgFallback(img, style.id, style.catalogSku, style.moodImage);
         visual.appendChild(img);
 
+        var body = document.createElement('div');
+        body.className = 'mc-boards__style-body';
         var label = document.createElement('p');
         label.className = 'mc-boards__style-label';
         label.textContent = style.label;
+        body.appendChild(label);
+        var tag = document.createElement('p');
+        tag.className = 'mc-boards__style-tagline';
+        tag.textContent = style.tagline;
+        body.appendChild(tag);
 
         btn.appendChild(visual);
-        btn.appendChild(label);
+        btn.appendChild(body);
 
         btn.addEventListener('click', function () {
           if (activeStyleFilter === style.id) {
@@ -592,18 +632,34 @@
 
         var prod = document.createElement('img');
         prod.className = 'mc-boards__lifestyle-product';
-        prod.src = assetUrl(look.image);
+        prod.src = product ? resolveProductImage(product) : assetUrl(look.image);
         prod.alt = product ? product.name : look.title;
         prod.loading = 'lazy';
-        bindImgFallback(prod, look.styleId, look.productId);
+        bindImgFallback(
+          prod,
+          look.styleId,
+          product ? product.id : null,
+          look.image
+        );
         scene.appendChild(prod);
 
         btn.appendChild(scene);
 
+        var cap = document.createElement('div');
+        cap.className = 'mc-boards__lifestyle-cap';
+        var styleTag = document.createElement('p');
+        styleTag.className = 'mc-boards__lifestyle-style';
+        styleTag.textContent = style ? style.label : look.styleId;
+        cap.appendChild(styleTag);
         var title = document.createElement('p');
         title.className = 'mc-boards__lifestyle-title';
         title.textContent = look.title;
-        btn.appendChild(title);
+        cap.appendChild(title);
+        var room = document.createElement('p');
+        room.className = 'mc-boards__lifestyle-room';
+        room.textContent = look.room + (product ? ' · ' + product.name : '');
+        cap.appendChild(room);
+        btn.appendChild(cap);
 
         btn.addEventListener('click', function () {
           if (activeStyleFilter === look.styleId) {
@@ -656,7 +712,8 @@
       thumb.src = assetUrl(prod.image);
       thumb.alt = '';
       thumb.loading = 'lazy';
-      bindImgFallback(thumb, prod.primaryStyle);
+      bindImgFallback(thumb, prod.primaryStyle, prod.id, prod.image);
+      thumb.src = resolveProductImage(prod);
       var nameSpan = document.createElement('span');
       nameSpan.textContent = prod.name;
       nameCell.appendChild(thumb);
@@ -1199,7 +1256,7 @@
       done();
       return;
     }
-    var src = API_BASE + 'board-styles.js?v=20260527';
+    var src = API_BASE + 'board-styles.js?v=20260528';
     var tag = document.querySelector('script[src*="board-styles.js"]');
     if (tag) {
       tag.addEventListener('load', function () {

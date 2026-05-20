@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inspiration Boards — McCabe's Theater &amp; Living</title>
-  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-bundle.css?v=20260527" charset="utf-8" />
+  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-bundle.css?v=20260528" charset="utf-8" />
 </head>
 <body class="mc-my-boards-page">
   <div class="mc-boards-shell">
@@ -26,33 +26,52 @@
         <img
           id="mc-boards-feature-img"
           class="mc-boards__feature-img"
-          src="/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png"
-          alt="Featured furniture look"
+          src="/v/vspfiles/photos/40113-01-1.jpg"
+          alt="London Fog power sofa"
           data-mc-sku="40113"
         />
       </section>
 
       <header class="mc-boards__masthead">
         <h1 class="mc-boards__title">Inspiration boards</h1>
+        <p class="mc-boards__lede">
+          Curated McCabe seating by style. Save pieces with
+          <strong>Save to McCabe&rsquo;s Board</strong> while you shop.
+        </p>
       </header>
 
-      <section class="mc-boards__triptych" id="mc-boards-triptych" aria-label="Featured pieces"></section>
+      <section class="mc-boards__section" aria-label="Featured pieces">
+        <h2 class="mc-boards__section-title">Featured pieces</h2>
+        <p class="mc-boards__section-lede">Three directions to start your room plan.</p>
+        <div class="mc-boards__triptych" id="mc-boards-triptych"></div>
+      </section>
+
+      <section class="mc-boards__section" aria-label="McCabe catalog">
+        <h2 class="mc-boards__section-title">Pieces on your boards</h2>
+        <p class="mc-boards__section-lede">Real product photography from our catalog.</p>
+        <div class="mc-boards__catalog" id="mc-boards-catalog"></div>
+      </section>
 
       <section class="mc-boards__split" id="mc-boards-split" aria-label="Featured style"></section>
 
       <section class="mc-boards__section" aria-labelledby="mc-boards-style-heading">
         <h2 id="mc-boards-style-heading" class="mc-boards__section-title">Explore by style</h2>
+        <p class="mc-boards__section-lede">
+          Traditional, modern, mid-century, coastal, and more. Tap a style to filter your saved boards.
+        </p>
         <div id="mc-boards-styles" class="mc-boards__style-grid" role="list"></div>
       </section>
 
       <section class="mc-boards__section mc-boards__section--tools" aria-label="Style tools">
+        <h2 class="mc-boards__section-title">Style tools</h2>
+        <p class="mc-boards__section-lede">Quick quiz and color wheel to narrow your direction.</p>
         <div class="mc-boards__tools-row">
           <div class="mc-boards__tool-panel" id="mc-boards-quiz-panel">
-            <h2 class="mc-boards__section-title">Your style</h2>
+            <h3 class="mc-boards__tool-heading">Your style</h3>
             <div id="mc-boards-quiz"></div>
           </div>
           <div class="mc-boards__tool-panel" id="mc-boards-wheel-panel">
-            <h2 class="mc-boards__section-title">Color wheel</h2>
+            <h3 class="mc-boards__tool-heading">Color wheel</h3>
             <div id="mc-boards-color-wheel"></div>
             <p id="mc-boards-wheel-result" class="mc-boards__wheel-result" aria-live="polite"></p>
           </div>
@@ -61,6 +80,7 @@
 
       <section class="mc-boards__section" aria-labelledby="mc-boards-lifestyle-heading">
         <h2 id="mc-boards-lifestyle-heading" class="mc-boards__section-title">Room looks</h2>
+        <p class="mc-boards__section-lede">How the same pieces read in different rooms.</p>
         <div id="mc-boards-lifestyle" class="mc-boards__lifestyle-grid" role="list"></div>
       </section>
 
@@ -107,7 +127,7 @@
       return '/v/vspfiles/boards/';
     })();
   </script>
-  <script src="/v/vspfiles/boards/board-styles.js?v=20260527"></script>
-  <script src="/v/vspfiles/boards/my-boards-page.js?v=20260527" defer></script>
+  <script src="/v/vspfiles/boards/board-styles.js?v=20260528"></script>
+  <script src="/v/vspfiles/boards/my-boards-page.js?v=20260528" defer></script>
 </body>
 </html>
