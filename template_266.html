@@ -5812,6 +5812,7 @@ try {
   window.mcRememberRecentMemberAuth = mcRememberRecentMemberAuth;
   window.mcClearRecentMemberAuth = mcClearRecentMemberAuth;
   window.mcHasRecentMemberAuth = mcHasRecentMemberAuth;
+  window.volusionMyAccountHtmlIndicatesLoggedIn = volusionMyAccountHtmlIndicatesLoggedIn;
 } catch (eMcAuthGlobal) {}
 async function mcConfirmRecentMemberAuth(maxAttempts, delayMs) {
   var attempts = Math.max(1, Number(maxAttempts) || 1);
@@ -16650,47 +16651,79 @@ body.mc-product-page #content_area font.product_sale_price {
 
   async function mcRefreshMemberPricingAfterAuth() {
     try {
-      if (typeof window.mcRememberRecentMemberAuth === 'function') window.mcRememberRecentMemberAuth();
+      if (typeof window.mcRememberRecentMemberAuth === "function") window.mcRememberRecentMemberAuth();
     } catch (eRem) {}
     try {
       window.__mcMemberPricing.promise = null;
     } catch (ePr) {}
+    try {
+      document.body.classList.add("mc-member-logged-in");
+    } catch (eCls) {}
     var state = null;
     try {
-      if (typeof window.detectMemberPricingState === 'function') {
+      if (typeof window.detectMemberPricingState === "function") {
         state = await window.detectMemberPricingState();
       }
     } catch (eDet) {}
     try {
-      if (typeof window.forceProductFixes === 'function') window.forceProductFixes();
+      if (typeof window.refreshPlannerPriceForMemberState === "function") {
+        window.refreshPlannerPriceForMemberState();
+      } else if (typeof refreshPlannerPriceForMemberState === "function") {
+        refreshPlannerPriceForMemberState();
+      }
+    } catch (eRpf) {}
+    try {
+      if (typeof window.renderMemberPricingCaption === "function") {
+        window.renderMemberPricingCaption(document);
+      } else if (typeof renderMemberPricingCaption === "function") {
+        renderMemberPricingCaption(document);
+      }
+    } catch (eCap) {}
+    try {
+      if (typeof window.forceProductFixes === "function") window.forceProductFixes();
     } catch (eFx) {}
     try {
-      if (typeof window.mcRenderRetailMemberOnPdp === 'function') {
+      if (typeof window.mcRenderRetailMemberOnPdp === "function") {
         await window.mcRenderRetailMemberOnPdp();
       }
     } catch (ePdp) {}
     try {
       if (window.__mcPlannerConfigApplied) {
-        if (typeof window.refreshPlannerPriceForMemberState === 'function') {
-          window.refreshPlannerPriceForMemberState();
-        } else if (typeof refreshPlannerPriceForMemberState === 'function') {
-          refreshPlannerPriceForMemberState();
-        }
-        if (typeof window.mcSyncPlannerConfigurationPriceDisplay === 'function') {
+        if (typeof window.mcSyncPlannerConfigurationPriceDisplay === "function") {
           window.mcSyncPlannerConfigurationPriceDisplay();
         }
-        if (window.__mcLastPlannerPayload && typeof window.applyPlannerToPage === 'function') {
+        if (window.__mcLastPlannerPayload && typeof window.applyPlannerToPage === "function") {
           window.applyPlannerToPage(window.__mcLastPlannerPayload);
         }
       }
     } catch (ePl) {}
     try {
-      if (typeof window.recalcRoomPlannerPrice === 'function') window.recalcRoomPlannerPrice();
+      if (typeof window.recalcRoomPlannerPrice === "function") window.recalcRoomPlannerPrice();
     } catch (eRec) {}
     try {
-      if (typeof mcRunParagonPriceSourceDebug === 'function') mcRunParagonPriceSourceDebug();
+      window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing }));
+    } catch (eEv) {}
+    try {
+      if (typeof mcRunParagonPriceSourceDebug === "function") mcRunParagonPriceSourceDebug();
     } catch (eDbg) {}
     return state;
+  }
+
+  function mcFinishLoginModalAndRefreshPdp() {
+    mcCloseLoginModalOnly();
+    try {
+      document.body.style.overflow = "";
+    } catch (eOv) {}
+    window.setTimeout(function () {
+      mcRefreshMemberPricingAfterAuth().catch(function () {
+        try {
+          if (typeof window.detectMemberPricingState === "function") {
+            window.__mcMemberPricing.promise = null;
+            window.detectMemberPricingState();
+          }
+        } catch (eRetry) {}
+      });
+    }, 0);
   }
 
   function mcCloseLoginModal(skipPricingRefresh) {
@@ -16721,6 +16754,7 @@ body.mc-product-page #content_area font.product_sale_price {
   window.mcCloseLoginModal = mcCloseLoginModal;
   window.mcCloseLoginModalOnly = mcCloseLoginModalOnly;
   window.mcRefreshMemberPricingAfterAuth = mcRefreshMemberPricingAfterAuth;
+  window.mcFinishLoginModalAndRefreshPdp = mcFinishLoginModalAndRefreshPdp;
   window.mcOpenSignupModal = mcOpenSignupModal;
 
   function mcEnsureAuthFormBound() {
@@ -16903,34 +16937,74 @@ body.mc-product-page #content_area font.product_sale_price {
     return frame;
   }
 
+  function mcDomIndicatesLoggedIn() {
+    try {
+      if (document.body && document.body.classList.contains("mc-member-logged-in")) return true;
+      if (document.querySelector('a[href*="logout.asp"], a[href*="logoff.asp"]')) return true;
+    } catch (eDom) {}
+    return false;
+  }
+
+  function mcReadAuthFrameSnapshot() {
+    var frame = document.getElementById("mc-member-auth-frame");
+    if (!frame) return { html: "", url: "" };
+    try {
+      var win = frame.contentWindow;
+      var doc = frame.contentDocument || (win && win.document);
+      var url = win && win.location ? String(win.location.href || "") : "";
+      var html = doc && doc.documentElement ? doc.documentElement.innerHTML : "";
+      return { html: html, url: url };
+    } catch (eFrame) {
+      return { html: "", url: "" };
+    }
+  }
+
+  function mcVolusionAuthIndicatesSuccess(html, url) {
+    var check = window.volusionMyAccountHtmlIndicatesLoggedIn || volusionMyAccountHtmlIndicatesLoggedIn;
+    if (typeof check === "function" && check(html)) return true;
+    var u = String(url || "").toLowerCase();
+    if (/productdetails\.asp/i.test(u)) return true;
+    if (/\/\w+-p\//.test(u) && u.indexOf("login.asp") === -1 && u.indexOf("customer_login") === -1) {
+      return true;
+    }
+    if (mcDomIndicatesLoggedIn()) return true;
+    return false;
+  }
+
   async function mcAuthSucceeded() {
+    if (mcDomIndicatesLoggedIn()) return true;
     var ctrl = null;
     var timer = null;
     try {
-      if (typeof AbortController !== 'undefined') {
+      if (typeof AbortController !== "undefined") {
         ctrl = new AbortController();
         timer = window.setTimeout(function () {
-          try { ctrl.abort(); } catch (eA) {}
+          try {
+            ctrl.abort();
+          } catch (eA) {}
         }, 4500);
       }
-      var resp = await fetch('/myaccount.asp?mcAuthCheck=' + Date.now(), {
-        credentials: 'same-origin',
-        cache: 'no-store',
-        signal: ctrl ? ctrl.signal : undefined
+      var resp = await fetch("/myaccount.asp?mcAuthCheck=" + Date.now(), {
+        credentials: "same-origin",
+        cache: "no-store",
+        signal: ctrl ? ctrl.signal : undefined,
       });
       var html = await resp.text();
-      if (timer) { window.clearTimeout(timer); timer = null; }
-      if (typeof window.volusionMyAccountHtmlIndicatesLoggedIn === 'function') {
-        return !!window.volusionMyAccountHtmlIndicatesLoggedIn(html);
+      if (timer) {
+        window.clearTimeout(timer);
+        timer = null;
       }
-      if (typeof volusionMyAccountHtmlIndicatesLoggedIn === 'function') {
-        return !!volusionMyAccountHtmlIndicatesLoggedIn(html);
-      }
+      var check = window.volusionMyAccountHtmlIndicatesLoggedIn || volusionMyAccountHtmlIndicatesLoggedIn;
+      if (typeof check === "function") return !!check(html);
       return false;
     } catch (e2) {
-      if (timer) { try { window.clearTimeout(timer); } catch (eC) {} }
+      if (timer) {
+        try {
+          window.clearTimeout(timer);
+        } catch (eC) {}
+      }
     }
-    return false;
+    return mcDomIndicatesLoggedIn();
   }
   function mcAuthDelayMs(ms) {
     return new Promise(function (resolve) {
@@ -16972,8 +17046,8 @@ body.mc-product-page #content_area font.product_sale_price {
           frame.onload = null;
         } catch (eL) {}
         window.setTimeout(function () {
-          resolve(true);
-        }, 200);
+          resolve(mcReadAuthFrameSnapshot());
+        }, 280);
       };
       var f = document.createElement("form");
       f.method = "POST";
@@ -17068,24 +17142,48 @@ body.mc-product-page #content_area font.product_sale_price {
         "imageField2.x": "1",
         "imageField2.y": "1",
       });
-      await mcAuthDelayMs(350);
-      await mcPostHiddenVolusionForm(urls.step2, {
+      await mcAuthDelayMs(400);
+      var afterStep2 = await mcPostHiddenVolusionForm(urls.step2, {
         CustomerNewOld: "old",
         email: email,
         password: password,
         "imageField2.x": "1",
         "imageField2.y": "1",
       });
+      if (mcVolusionAuthIndicatesSuccess(afterStep2 && afterStep2.html, afterStep2 && afterStep2.url)) {
+        mcLoginModalRememberRecentAuth();
+        return true;
+      }
+      if (mcLoginResponseLooksFailed(afterStep2 && afterStep2.html, afterStep2 && afterStep2.url)) {
+        return false;
+      }
     } catch (eLoginSteps) {
       try {
         await mcFetchVolusionAuth(urls.step1, mcVolusionLoginStep1Body(email));
         await mcAuthDelayMs(300);
-        await mcFetchVolusionAuth(urls.step2, mcVolusionLoginStep2Body(email, password));
+        var r2 = await mcFetchVolusionAuth(urls.step2, mcVolusionLoginStep2Body(email, password));
+        var html2 = await r2.text();
+        if (mcVolusionAuthIndicatesSuccess(html2, r2.url)) {
+          mcLoginModalRememberRecentAuth();
+          return true;
+        }
+        if (mcLoginResponseLooksFailed(html2, r2.url)) return false;
       } catch (eFetchFallback) {
         return false;
       }
     }
-    return await mcWaitForAuthSuccess(15000, 500);
+    try {
+      var retryHtml = await mcConfirmRecentMemberAuth(6, 450);
+      if (retryHtml && volusionMyAccountHtmlIndicatesLoggedIn(retryHtml)) {
+        mcLoginModalRememberRecentAuth();
+        return true;
+      }
+    } catch (eConfirm) {}
+    if (await mcAuthSucceeded()) {
+      mcLoginModalRememberRecentAuth();
+      return true;
+    }
+    return await mcWaitForAuthSuccess(10000, 400);
   }
 
   async function mcPostAuthWithFetch(form, mode) {
@@ -17164,17 +17262,13 @@ async function mcSubmitAuthForm(form, mode) {
     if (confirmed) {
       authFinished = true;
       mcLoginModalRememberRecentAuth();
+      mcToggleAuthPending(form, false);
       mcSetAuthStatus(
         mode,
-        mode === 'signup' ? 'Account created. Updating member pricing…' : 'Signed in. Updating member pricing…',
-        'success'
+        mode === "signup" ? "Account created." : "Signed in.",
+        "success"
       );
-      try {
-        await mcRefreshMemberPricingAfterAuth();
-      } catch (eRefresh) {}
-      mcToggleAuthPending(form, false);
-      mcSetAuthStatus(mode, '', '');
-      mcCloseLoginModal(true);
+      mcFinishLoginModalAndRefreshPdp();
       return true;
     }
     mcLoginModalClearRecentAuth();
