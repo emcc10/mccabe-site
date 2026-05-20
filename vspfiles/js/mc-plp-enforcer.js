@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260620
+ * MC_PLP_ENFORCER_20260621
  *
  * Thumbnails: .mc-plp-image-box + visible-sofa width normalization (no crop, no scale transform).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260620";
+  var VERSION = "20260621";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);

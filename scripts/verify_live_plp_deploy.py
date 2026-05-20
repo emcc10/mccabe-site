@@ -40,7 +40,7 @@ def main() -> int:
     parser.add_argument(
         "--category",
         action="append",
-        default=["/category-s/177.htm", "/category-s/187.htm"],
+        default=["/category-s/177.htm", "/category-s/157.htm", "/category-s/187.htm"],
     )
     args = parser.parse_args()
     ver = args.version

@@ -122,19 +122,20 @@ def main() -> int:
     if rc != 0:
         return rc
 
-    subprocess.run(
-        [
-            py,
-            str(ROOT / "scripts" / "replace_plp_photo_mats.py"),
-            "--in-place",
-            "--input-dir",
-            str(PHOTOS),
-            "--file",
-            *names,
-        ],
-        cwd=ROOT,
-        check=False,
-    )
+    for name in names:
+        subprocess.run(
+            [
+                py,
+                str(ROOT / "scripts" / "replace_plp_photo_mats.py"),
+                "--in-place",
+                "--input-dir",
+                str(PHOTOS),
+                "--file",
+                name,
+            ],
+            cwd=ROOT,
+            check=False,
+        )
 
     return subprocess.run(
         [py, str(ROOT / "scripts" / "generate_plp_sofa_bounds.py")],
