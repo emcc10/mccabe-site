@@ -125,7 +125,7 @@ verify_template_on_sftp() {
 
 TEMPLATE_ENFORCER_TAG=$(grep -oE 'mc-plp-enforcer\.js\?v=[0-9]+' template_266.html 2>/dev/null | head -1 || true)
 if [[ -z "$TEMPLATE_ENFORCER_TAG" ]]; then
-  TEMPLATE_ENFORCER_TAG="mc-plp-enforcer.js?v=20260615"
+  TEMPLATE_ENFORCER_TAG="mc-plp-enforcer.js?v=20260616"
 fi
 
 python3 scripts/announce_deploy_markers.py || true
@@ -221,9 +221,9 @@ verify_url() {
 }
 
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "C_CSS_DEPLOY_VERIFY_20260518e"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260615" "MC_PLP_ENFORCER_20260615"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260615" "MC_PLP_ENFORCER_20260615"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260615"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260616" "MC_PLP_ENFORCER_20260616"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260616" "MC_PLP_ENFORCER_20260616"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260616"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-sofa-bounds.json?v=$(date +%s)" "77494-91-1.jpg"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/template.min.js" "MC_PLP_ENFORCER_LOADING__"
 
@@ -247,3 +247,9 @@ echo "Design → File Editor → template_266.html → Save once so /category-s/
 echo "If still broken, Cloudflare Purge by URL:"
 echo "  /v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"
 echo "  /v/vspfiles/templates/266/js/min/design-toolkit.min.js"
+echo ""
+echo "=== Live storefront verify ==="
+if ! python3 scripts/verify_live_plp_deploy.py; then
+  echo "::error::Live verify failed — assets may be on SFTP but category HTML or CDN is stale."
+  exit 1
+fi

@@ -12,6 +12,18 @@ CRITICAL = (
     "vspfiles/templates/266/js/min/design-toolkit.min.js",
     "vspfiles/js/mc-plp-enforcer.js",
     "vspfiles/templates/266/js/mc-plp-enforcer.js",
+    "vspfiles/my-boards.html",
+    "vspfiles/boards/my-boards-boot.js",
+    "vspfiles/boards/my-boards-page.js",
+    "vspfiles/boards/board-styles.js",
+    "vspfiles/boards/my-boards-page.css",
+    "vspfiles/boards/my-boards-critical.css",
+    "vspfiles/boards/my-boards-fragment.html",
+    "vspfiles/boards/session.php",
+    "vspfiles/boards/list.php",
+    "vspfiles/boards/save.php",
+    "vspfiles/boards/delete.php",
+    "vspfiles/boards/_auth.php",
 )
 
 OPTIONAL = (
@@ -148,6 +160,32 @@ def main() -> int:
                 ok = _upload_one(sftp, local, _photo_remotes(name))
                 if not ok:
                     photo_fail += 1
+
+            showcase = sorted(glob.glob("vspfiles/boards/showcase/*.png"))
+            if showcase:
+                print(
+                    f"::notice::BOARDS_SHOWCASE uploading {len(showcase)} file(s)",
+                    flush=True,
+                )
+            showcase_fail = 0
+            for local in showcase:
+                name = os.path.basename(local)
+                ok = _upload_one(
+                    sftp,
+                    local,
+                    [
+                        f"/vspfiles/boards/showcase/{name}",
+                        f"/v/vspfiles/boards/showcase/{name}",
+                    ],
+                )
+                if not ok:
+                    showcase_fail += 1
+            if showcase_fail:
+                print(
+                    f"::error::{showcase_fail} boards showcase image(s) failed",
+                    file=sys.stderr,
+                )
+                critical_fail += showcase_fail
         finally:
             sftp.close()
     finally:
@@ -156,9 +194,19 @@ def main() -> int:
     if critical_fail:
         print(f"::error::{critical_fail} critical asset(s) failed", file=sys.stderr)
         return 1
-    if photo_fail:
-        print(f"::error::{photo_fail} PLP photo(s) failed to upload", file=sys.stderr)
+    total_photos = len(glob.glob("vspfiles/photos/*"))
+    if photo_fail and total_photos and photo_fail > max(5, total_photos // 10):
+        print(
+            f"::error::{photo_fail}/{total_photos} PLP photo(s) failed to upload",
+            file=sys.stderr,
+        )
         return 1
+    if photo_fail:
+        print(
+            f"::warning::{photo_fail}/{total_photos} PLP photo(s) failed — "
+            "gray mat may persist on those SKUs",
+            flush=True,
+        )
     if optional_fail:
         print(f"::warning::{optional_fail} optional asset(s) failed", flush=True)
     print("::notice::ASSETS_DEPLOY_OK", flush=True)

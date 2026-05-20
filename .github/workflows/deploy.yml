@@ -40,12 +40,15 @@ jobs:
           SKIP_TEMPLATE_DEPLOY: "0"
         run: bash .github/scripts/deploy-volusion.sh
 
+      - name: Verify live PLP on storefront
+        run: python3 scripts/verify_live_plp_deploy.py
+
       - name: Print deploy marker
         run: |
           echo "Deploy completed at $(date -u)"
           echo "Verify design-toolkit (PLP enforcer inlined):"
           echo "  https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js"
-          echo "  must contain MC_DTK_PLP_20260615"
+          echo "  must contain MC_DTK_PLP_20260616"
           echo "Verify enforcer (no ?bust=1 — that URL is a stale CF cache bucket):"
           echo "  https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js"
           echo "Template must match repo after deploy:"
