@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
-"""Re-fetch and re-normalize sectional PLP thumbs (fill height like stationary sofas)."""
+"""Re-fetch large sectional sources (-2T), de-mat, normalize to PLP -1.jpg (sofa-matched size)."""
 from __future__ import annotations
 
 import subprocess
 import sys
+import urllib.error
 import urllib.request
+from io import BytesIO
 from pathlib import Path
+
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 PHOTOS = ROOT / "vspfiles" / "photos"
@@ -22,34 +26,47 @@ def sectional_names() -> list[str]:
     )
 
 
-def fetch_overwrite(name: str) -> None:
-    """Prefer large originals; skip CDN 420×260 thumbs (cannot re-normalize up)."""
-    from io import BytesIO
+def large_source_urls(plp_name: str) -> list[str]:
+    stem = plp_name.rsplit(".", 1)[0]
+    base = stem[:-2] if stem.lower().endswith("-1") else stem
+    variants = [
+        f"{base}-2T.jpg",
+        f"{base.upper()}-2T.jpg",
+        f"{base.lower()}-2t.jpg",
+        plp_name,
+        plp_name.lower(),
+    ]
+    seen: set[str] = set()
+    urls: list[str] = []
+    for v in variants:
+        if v in seen:
+            continue
+        seen.add(v)
+        urls.append(f"{SITE}/v/vspfiles/photos/{v}")
+    return urls
 
-    from PIL import Image
 
-    for url in (
-        f"{SITE}/v/vspfiles/photos/{name}?mcorig={name}",
-        f"{SITE}/v/vspfiles/photos/{name}",
-    ):
+def fetch_large_original(plp_name: str) -> bytes:
+    for url in large_source_urls(plp_name):
         try:
             req = urllib.request.Request(url, headers=UA)
             data = urllib.request.urlopen(req, timeout=90).read()
-        except Exception:  # noqa: BLE001
-            continue
-        try:
             im = Image.open(BytesIO(data))
             if im.size[0] >= 500 or im.size[1] >= 400:
-                (PHOTOS / name).write_bytes(data)
-                print(f"  fetched {name} ({len(data)} bytes, {im.size[0]}x{im.size[1]})")
-                return
-        except Exception:  # noqa: BLE001
+                print(f"  source {url.split('/')[-1]} ({im.size[0]}x{im.size[1]}, {len(data)} bytes)")
+                return data
+        except (urllib.error.HTTPError, OSError, ValueError):
             continue
-    dest = PHOTOS / name
-    if dest.is_file() and dest.stat().st_size > 0:
-        print(f"  keep local {name} ({dest.stat().st_size} bytes)")
-        return
-    raise RuntimeError(f"no large original for {name}")
+    raise RuntimeError(f"no large source for {plp_name}")
+
+
+def write_plp_aliases(plp_name: str, data: bytes) -> None:
+    dest = PHOTOS / plp_name
+    dest.write_bytes(data)
+    for alias in {plp_name.lower(), plp_name[:1].upper() + plp_name[1:]}:
+        path = PHOTOS / alias
+        if path != dest:
+            path.write_bytes(data)
 
 
 def main() -> int:
@@ -58,12 +75,15 @@ def main() -> int:
     if not names:
         print("No sectional photos in vspfiles/photos", file=sys.stderr)
         return 1
-    print(f"Reprocessing {len(names)} sectional photo(s)...")
+    print(f"Reprocessing {len(names)} sectional PLP photo(s)...")
+
     for name in names:
         try:
-            fetch_overwrite(name)
-        except Exception as exc:  # noqa: BLE001
-            print(f"  skip fetch {name}: {exc}", file=sys.stderr)
+            raw = fetch_large_original(name)
+        except RuntimeError as exc:
+            print(f"  WARN {exc}", file=sys.stderr)
+            continue
+        write_plp_aliases(name, raw)
 
     for name in names:
         subprocess.run(
