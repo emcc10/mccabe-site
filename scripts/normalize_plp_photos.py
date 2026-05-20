@@ -82,15 +82,12 @@ def normalize_sofa_image(
 
     crop = img.crop((bounds.min_x, bounds.min_y, bounds.max_x, bounds.max_y)).convert("RGBA")
 
-    center_crop_x = 0
     if fill_inner_height:
-        # Match stationary sofa PLP silhouette height; center-crop width if sectional is wider.
+        # Fit full sectional in inner box (no side crop). Prefer sofa height near stationary PLP.
         ref_h = min(inner_h, round(inner_h * 126 / 212))
-        scale = ref_h / bounds.visible_h
+        scale = min(inner_w / bounds.visible_w, ref_h / bounds.visible_h)
         scaled_w = max(1, round(bounds.visible_w * scale))
         scaled_h = max(1, round(bounds.visible_h * scale))
-        if scaled_w > inner_w:
-            center_crop_x = (scaled_w - inner_w) // 2
     else:
         scale = target_sofa_width / bounds.visible_w
         scaled_w = max(1, round(bounds.visible_w * scale))
@@ -105,9 +102,6 @@ def normalize_sofa_image(
             scaled_h = max(1, round(bounds.visible_h * scale))
 
     sofa = crop.resize((scaled_w, scaled_h), Image.Resampling.LANCZOS)
-    if center_crop_x > 0 and sofa.size[0] > inner_w:
-        sofa = sofa.crop((center_crop_x, 0, center_crop_x + inner_w, scaled_h))
-        scaled_w = inner_w
 
     canvas = Image.new("RGBA", canvas_size, bg)
     x = pad_l + (inner_w - scaled_w) // 2
