@@ -62,6 +62,9 @@ const BALI_SILK_BROWN_U_FADE = 0.58;
 const BALI_SILK_WARM_PULL = 0.1;
 const BALI_SILK_CREAM_A = 1.6;
 const BALI_SILK_CREAM_B = 14.5;
+/** Diagnostic: force uniform upholstery chroma; L from source only. */
+export const BRUTE_FORCE_CHROMA_A = 2;
+export const BRUTE_FORCE_CHROMA_B = 10;
 /** Sofa L percentiles for shadow → mid → highlight color mapping. */
 const SOFA_L_MAP_LO = 0.08;
 const SOFA_L_MAP_HI = 0.92;
@@ -563,6 +566,64 @@ export function recolorSofa(sourceImage, mask, palette) {
   return out;
 }
 
+/**
+ * Diagnostic: fixed LAB chroma on all upholstery; original source L only.
+ * No swatch extraction, cognac blend, palette, or Bali fine-tune.
+ */
+export function recolorSofaBruteForceChroma(
+  sourceImage,
+  mask,
+  fixedA = BRUTE_FORCE_CHROMA_A,
+  fixedB = BRUTE_FORCE_CHROMA_B,
+) {
+  const { data, width, height, channels } = sourceImage;
+  const out = Buffer.from(data);
+
+  for (let j = 0; j < width * height; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) continue;
+
+    const p = j * channels;
+    const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
+    const finalL = clamp(lab.L, 0, 100);
+    const { r, g, b: bOut } = labToRgb(finalL, fixedA, fixedB);
+
+    out[p] = r;
+    out[p + 1] = g;
+    out[p + 2] = bOut;
+    if (channels === 4) out[p + 3] = data[p + 3];
+  }
+
+  return out;
+}
+
+export async function processBruteChromaDiagnostic(sourceImage, mask, label = 'Bali-Silk') {
+  const ref = labToRgb(50, BRUTE_FORCE_CHROMA_A, BRUTE_FORCE_CHROMA_B);
+  console.log('\n  BRUTE-FORCE CHROMA DIAGNOSTIC');
+  console.log(`  forced LAB: a=${BRUTE_FORCE_CHROMA_A} b=${BRUTE_FORCE_CHROMA_B}`);
+  console.log(`  L: original source per pixel (no swatch, no cognac a/b)`);
+  console.log(`  reference RGB at L=50: [${ref.r}, ${ref.g}, ${ref.b}] (target ~228,221,206)`);
+
+  const outData = recolorSofaBruteForceChroma(sourceImage, mask);
+  const outPath = join(OUTPUT_DIR, `${label}-BRUTE-CHROMA.png`);
+  const bytes = await saveImage(
+    outData,
+    outPath,
+    sourceImage.width,
+    sourceImage.height,
+    sourceImage.channels,
+  );
+  console.log(`  wrote ${basename(outPath)} (${Math.round(bytes / 1024)} KB)`);
+
+  const diagDir = join(OUTPUT_DIR, 'diagnostic', label);
+  mkdirSync(diagDir, { recursive: true });
+  const diagPath = join(diagDir, 'brute-force-chroma.png');
+  copyFileSync(outPath, diagPath);
+  console.log('\n  OPEN THIS BRUTE-FORCE TEST:');
+  console.log(`    ${resolve(outPath)}`);
+  console.log(`    ${resolve(diagPath)}`);
+  return { outPath };
+}
+
 /** Mirror render to diagnostic folder + legacy -fixed name; log absolute paths. */
 export function publishRenderOutputs(swatchName, primaryPngPath) {
   const diagDir = join(OUTPUT_DIR, 'diagnostic', swatchName);
@@ -651,13 +712,16 @@ function resolveSwatchArg(name) {
 function parseCli(argv) {
   const args = argv.slice(2);
   let all = false;
+  let bruteChroma = false;
   let swatchFile = null;
   for (const a of args) {
     if (a === '--all') all = true;
+    else if (a === '--brute-chroma') bruteChroma = true;
     else if (a === '--currant' || a === '--current') swatchFile = DEFAULT_PREVIEW_SWATCH;
     else if (a.startsWith('--swatch=')) swatchFile = a.slice('--swatch='.length);
     else if (!a.startsWith('-')) swatchFile = a;
   }
+  if (bruteChroma) return { mode: 'brute-chroma', swatchFile: swatchFile || 'Bali-Silk' };
   if (all) return { mode: 'all' };
   return { mode: 'one', swatchFile: swatchFile || DEFAULT_PREVIEW_SWATCH };
 }
