@@ -5,9 +5,9 @@ import { rgbToLab } from './render-sofas.js';
 
 const HF_RADIUS = 1;
 const MF_RADIUS = 2;
-/** Subtle transfer — preserves catalog-photo softness. */
-export const PHOTO_HF_GAIN = 0.38;
-export const PHOTO_MF_GAIN = 0.1;
+/** Low-amplitude source L only — catalog softness, not enhancement. */
+export const PHOTO_HF_GAIN = 0.44;
+export const PHOTO_MF_GAIN = 0.12;
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
