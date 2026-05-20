@@ -16,7 +16,7 @@ import { tmpdir } from 'os';
 import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
-import { preparePhotographicLDetail, applyPhotographicLDetail } from './leather-detail.js';
+import { preparePhotographicStructure, applyPhotographicLDetail } from './leather-detail.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
@@ -54,9 +54,8 @@ const LIGHT_L_SWATCH = 0.35;
 const LIGHT_L_LIFT = 6;
 /** Bali-Silk light body — hardcoded test target (not fold/shadow sampling). */
 export const BALI_SILK_TARGET_RGB = [192, 183, 168];
-/** When hardcoded target active: pull L toward target (neutral master L is ~33). */
-const BALI_SILK_HARD_L_ORIGINAL = 0.25;
-const BALI_SILK_HARD_L_TARGET = 0.75;
+/** Preserve neutral-master L spread around swatch anchor (avoids flat/painted blend). */
+const BALI_SILK_L_STRUCTURE = 0.9;
 /** Bali-Silk final nudge (off while hardcoded target is active). */
 const BALI_SILK_USE_FINE_TUNE = false;
 const BALI_SILK_WARM_B = 3;
@@ -565,6 +564,19 @@ export function computeSofaLuminanceMapRange(masterImage, mask) {
   return { lo, hi, span: Math.max(hi - lo, SOFA_L_MAP_MIN_SPAN) };
 }
 
+export function meanMaskedNeutralL(neutralMaster, mask) {
+  const { data, width, height, channels } = neutralMaster;
+  let sum = 0;
+  let n = 0;
+  for (let j = 0; j < width * height; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) continue;
+    const p = j * channels;
+    sum += rgbToLab(data[p], data[p + 1], data[p + 2]).L;
+    n++;
+  }
+  return n ? sum / n : 50;
+}
+
 export function computeFinalLabL(originalL, swatchL, isLightLeather) {
   if (isLightLeather) {
     return originalL * LIGHT_L_ORIGINAL + swatchL * LIGHT_L_SWATCH + LIGHT_L_LIFT;
@@ -623,7 +635,8 @@ export function recolorSofa(neutralMaster, mask, palette, sourceSofa = null) {
   const { lo, span } = computeSofaLuminanceMapRange(neutralMaster, mask);
   const isLight = palette.isNamedLight;
   const usePhotoRealism = palette.isBaliSilk && sourceSofa;
-  const photoDetail = usePhotoRealism ? preparePhotographicLDetail(sourceSofa) : null;
+  const photoDetail = usePhotoRealism ? preparePhotographicStructure(sourceSofa, neutralMaster) : null;
+  const meanNeutralL = usePhotoRealism ? meanMaskedNeutralL(neutralMaster, mask) : 0;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
@@ -635,7 +648,8 @@ export function recolorSofa(neutralMaster, mask, palette, sourceSofa = null) {
 
     let finalL;
     if (palette.extractionMethod === 'hardcoded-target-rgb') {
-      finalL = lab.L * BALI_SILK_HARD_L_ORIGINAL + tone.L * BALI_SILK_HARD_L_TARGET + LIGHT_L_LIFT;
+      const anchor = tone.L + LIGHT_L_LIFT;
+      finalL = anchor + (lab.L - meanNeutralL) * BALI_SILK_L_STRUCTURE;
     } else {
       finalL = isLight ? computeFinalLabL(lab.L, tone.L, true) : lab.L;
     }
@@ -765,7 +779,7 @@ export async function processSwatch(swatchPath, neutralMaster, mask, sourceSofa 
     lightLeather: palette.isNamedLight,
     lBlend:
       palette.extractionMethod === 'hardcoded-target-rgb'
-        ? `neutral L ${BALI_SILK_HARD_L_ORIGINAL * 100}% / target ${BALI_SILK_HARD_L_TARGET * 100}% +6`
+        ? `anchor targetL+6 + neutral ΔL×${BALI_SILK_L_STRUCTURE}`
         : palette.isNamedLight
           ? 'neutral L 65/35 +6'
           : 'neutral L only',
@@ -775,7 +789,9 @@ export async function processSwatch(swatchPath, neutralMaster, mask, sourceSofa 
         ? `hardcoded RGB ${BALI_SILK_TARGET_RGB.join('/')}`
         : `swatch a/b + warm ivory nudge`
       : 'swatch a/b only',
-    realism: palette.isBaliSilk && sourceSofa ? 'mid/hi L lift + source HF detail 22%' : null,
+    realism: palette.isBaliSilk && sourceSofa
+      ? 'L structure preserve + multi-scale photo detail'
+      : null,
   });
 
   const outData = recolorSofa(neutralMaster, mask, palette, sourceSofa);
