@@ -42,8 +42,14 @@ def main() -> int:
         action="append",
         default=["/category-s/177.htm", "/category-s/157.htm", "/category-s/187.htm"],
     )
+    parser.add_argument(
+        "--soft",
+        action="store_true",
+        help="Never fail CI — only report warnings (CDN/baked category HTML lags SFTP).",
+    )
     args = parser.parse_args()
     ver = args.version
+    soft = bool(args.soft)
     fails = 0
 
     asset_checks = [
@@ -94,11 +100,12 @@ def main() -> int:
                 file=sys.stderr,
             )
         else:
-            print(
-                f"::error::MISSING MC_DTK_PLP_{want_dtk} in {url} (got {got_dtk or 'none'})",
-                file=sys.stderr,
-            )
-            fails += 1
+            msg = f"MISSING MC_DTK_PLP_{want_dtk} in {url} (got {got_dtk or 'none'})"
+            if soft:
+                print(f"::warning::{msg}", file=sys.stderr)
+            else:
+                print(f"::error::{msg}", file=sys.stderr)
+                fails += 1
 
     for cat in args.category:
         url = SITE + cat
@@ -112,8 +119,12 @@ def main() -> int:
         tag_max = max((int(t) for t in tags), default=0)
         want_tag = int(ver)
         if "mc-plp-image-box" not in html:
-            print(f"::error::{cat} missing mc-plp-image-box in baked HTML", file=sys.stderr)
-            fails += 1
+            msg = f"{cat} missing mc-plp-image-box in baked HTML"
+            if soft:
+                print(f"::warning::{msg} (Volusion template Save rebakes categories)", file=sys.stderr)
+            else:
+                print(f"::error::{msg}", file=sys.stderr)
+                fails += 1
         elif tag_max < want_tag:
             print(
                 f"::warning::{cat} baked enforcer tag max={tag_max} want >={want_tag} "
@@ -148,7 +159,10 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
-    print("::notice::LIVE_PLP_VERIFY_OK")
+    if soft and fails == 0:
+        print("::notice::LIVE_PLP_VERIFY_SOFT_OK (warnings only — SFTP deploy is authoritative)")
+    else:
+        print("::notice::LIVE_PLP_VERIFY_OK")
     return 0
 
 

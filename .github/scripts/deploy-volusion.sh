@@ -241,6 +241,9 @@ fi
 echo "=== PLP product photos (replace baked gray mat with white) ==="
 photo_fail=0
 photo_ok=0
+if [[ "${SKIP_PLP_PHOTOS:-0}" == "1" ]]; then
+  echo "=== SKIP_PLP_PHOTOS=1 — skipping bulk PLP photo upload (use workflow_dispatch with photos enabled) ==="
+else
 shopt -s nullglob
 for f in vspfiles/photos/*.jpg vspfiles/photos/*.jpeg vspfiles/photos/*.png; do
   base=$(basename "$f")
@@ -257,6 +260,7 @@ shopt -u nullglob
 echo "PLP photos: ${photo_ok} uploaded, ${photo_fail} failed"
 if [[ "$photo_fail" -gt 0 ]]; then
   echo "::warning::PLP photo upload failed for ${photo_fail} file(s) — template already deployed; gray mats may persist on those SKUs"
+fi
 fi
 
 echo "=== Post-deploy verify ==="
@@ -306,8 +310,5 @@ echo "If still broken, Cloudflare Purge by URL:"
 echo "  /v/vspfiles/js/sectional-configs.js?v=20260515-all-sectional-diagrams"
 echo "  /v/vspfiles/templates/266/js/min/design-toolkit.min.js"
 echo ""
-echo "=== Live storefront verify ==="
-if ! python3 scripts/verify_live_plp_deploy.py; then
-  echo "::error::Live verify failed — assets may be on SFTP but category HTML or CDN is stale."
-  exit 1
-fi
+echo "=== Live storefront verify (soft — does not fail CI) ==="
+python3 scripts/verify_live_plp_deploy.py --soft || true

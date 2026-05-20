@@ -220,18 +220,25 @@ def main() -> int:
                     elif local not in SKIP_OVER_CAP:
                         optional_fail += 1
 
+            skip_photos = os.environ.get("SKIP_PLP_PHOTOS", "").strip() in ("1", "true", "yes")
             plp_photos = sorted(
                 glob.glob("vspfiles/photos/*.jpg")
                 + glob.glob("vspfiles/photos/*.jpeg")
                 + glob.glob("vspfiles/photos/*.png")
             )
-            if plp_photos:
+            if skip_photos:
+                print(
+                    f"::notice::SKIP_PLP_PHOTOS=1 — skipping {len(plp_photos)} PLP photo(s)",
+                    flush=True,
+                )
+            elif plp_photos:
                 print(f"::notice::PLP_PHOTOS uploading {len(plp_photos)} file(s)", flush=True)
-            for local in plp_photos:
-                name = os.path.basename(local)
-                ok = _upload_one(sftp, local, _photo_remotes(name))
-                if not ok:
-                    photo_fail += 1
+            if not skip_photos:
+                for local in plp_photos:
+                    name = os.path.basename(local)
+                    ok = _upload_one(sftp, local, _photo_remotes(name))
+                    if not ok:
+                        photo_fail += 1
 
             showcase = sorted(glob.glob("vspfiles/boards/showcase/*.png"))
             if showcase:
