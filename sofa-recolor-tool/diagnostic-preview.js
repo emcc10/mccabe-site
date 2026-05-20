@@ -10,7 +10,6 @@ import {
   loadImage,
   saveImage,
   loadUpholsteryMask,
-  buildNeutralGrayMaster,
   recolorSofa,
   getSwatchPalette,
   resolveOriginalSwatchPath,
@@ -58,7 +57,7 @@ function logTone(label, tone) {
   );
 }
 
-async function runOneSwatch(swatchArg, renderSofa, sourceSofa, neutralMaster, mask, width, height, channels) {
+async function runOneSwatch(swatchArg, renderSofa, sourceSofa, mask, width, height, channels) {
   const swatchPath = resolveSwatchPath(swatchArg);
   if (!swatchPath) {
     console.error(`Swatch not found: ${swatchArg}`);
@@ -83,8 +82,8 @@ async function runOneSwatch(swatchArg, renderSofa, sourceSofa, neutralMaster, ma
   await saveChip(join(outDir, 'extracted-highlight-color.png'), palette.highlight.rgb);
   console.log('  saved: extracted-shadow/midtone/highlight-color.png');
 
-  if (renderSofa && neutralMaster && sourceSofa) {
-    const finalData = recolorSofa(neutralMaster, mask, palette, sourceSofa);
+  if (renderSofa && sourceSofa) {
+    const finalData = recolorSofa(sourceSofa, mask, palette);
     const mainOut = join(__dirname, 'output', `${swatchName}.png`);
     await saveImage(finalData, mainOut, width, height, channels);
     await saveImage(finalData, join(outDir, 'final-output.png'), width, height, channels);
@@ -102,10 +101,9 @@ async function main() {
   const swatchArgs = argv.filter((a) => !a.startsWith('--'));
   const swatches = swatchArgs.length ? swatchArgs : DEFAULT_SWATCHES;
 
-  console.log('Neutral master + swatch chroma diagnostic');
+  console.log('Photographic color shift diagnostic');
 
   let sourceSofa;
-  let neutralMaster;
   let mask;
   let width;
   let height;
@@ -121,12 +119,11 @@ async function main() {
     height = sourceSofa.height;
     channels = sourceSofa.channels;
     mask = await loadUpholsteryMask(MASK_PATH, width, height);
-    neutralMaster = buildNeutralGrayMaster(sourceSofa, mask);
   }
 
   let ok = 0;
   for (const arg of swatches) {
-    if (await runOneSwatch(arg, renderSofa, sourceSofa, neutralMaster, mask, width, height, channels)) ok++;
+    if (await runOneSwatch(arg, renderSofa, sourceSofa, mask, width, height, channels)) ok++;
   }
 
   if (!ok) process.exit(1);

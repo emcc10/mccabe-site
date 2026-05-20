@@ -544,79 +544,17 @@ export function computeSofaLuminanceMapRange(masterImage, mask) {
   return { lo, hi, span: Math.max(hi - lo, SOFA_L_MAP_MIN_SPAN) };
 }
 
-export function meanMaskedNeutralL(neutralMaster, mask) {
-  const { data, width, height, channels } = neutralMaster;
-  let sum = 0;
-  let n = 0;
-  for (let j = 0; j < width * height; j++) {
-    if (mask[j] < MASK_APPLY_THRESH) continue;
-    const p = j * channels;
-    sum += rgbToLab(data[p], data[p + 1], data[p + 2]).L;
-    n++;
-  }
-  return n ? sum / n : 50;
-}
-
-export function computeFinalLabL(originalL, swatchL, isLightLeather) {
-  if (isLightLeather) {
-    return originalL * LIGHT_L_ORIGINAL + swatchL * LIGHT_L_SWATCH + LIGHT_L_LIFT;
-  }
-  return originalL * DARK_L_ORIGINAL + swatchL * DARK_L_SWATCH;
-}
-
-/** Bell 0 at u edges; peaks midtones — highlights/deep shadows unchanged. */
-export function baliSilkMidtoneLift(u) {
-  if (u < BALI_SILK_MID_U_LO || u > BALI_SILK_MID_U_HI) return 0;
-  const t = (u - BALI_SILK_MID_U_LO) / (BALI_SILK_MID_U_HI - BALI_SILK_MID_U_LO);
-  return Math.sin(t * Math.PI) * BALI_SILK_MID_L_LIFT;
-}
-
-/** Warm ivory tweak: +b, mid L lift, less gray a/b in cushion/shadow mids. */
-export function applyBaliSilkFineTune(L, a, b, u) {
-  let outL = L + baliSilkMidtoneLift(u);
-  let outA = a;
-  let outB = b + BALI_SILK_WARM_B;
-
-  if (u < 0.72 && outA < BALI_SILK_WARM_A_TARGET) {
-    const pull = (1 - u / 0.72) * 0.55;
-    outA += (BALI_SILK_WARM_A_TARGET - outA) * pull;
-  }
-
-  if (u >= BALI_SILK_GRAY_U_LO && u <= BALI_SILK_GRAY_U_HI) {
-    const g = 1 - Math.abs(u - 0.42) / 0.26;
-    const grayCut = clamp(g, 0, 1);
-    outB += grayCut * 1;
-    if (outA < 1.8) outA += grayCut * 0.6;
-  }
-
-  return { L: outL, a: outA, b: outB };
-}
-
-/** Highlight + mid L lift only; deep shadows unchanged. */
-export function applyPhotographicTonalLift(L, u) {
-  let lift = 0;
-  if (u >= TONAL_MID_U_LO && u <= TONAL_MID_U_HI) {
-    const t = (u - TONAL_MID_U_LO) / (TONAL_MID_U_HI - TONAL_MID_U_LO);
-    lift += Math.sin(t * Math.PI) * TONAL_MID_L_LIFT;
-  }
-  if (u >= TONAL_HIGHLIGHT_U_START) {
-    const t = (u - TONAL_HIGHLIGHT_U_START) / (1 - TONAL_HIGHLIGHT_U_START);
-    lift += t * TONAL_HIGHLIGHT_LIFT;
-  }
-  return L + lift;
+export function computeFinalLabL(originalL, swatchL) {
+  return originalL * COLOR_SHIFT_L_ORIGINAL + swatchL * COLOR_SHIFT_L_SWATCH;
 }
 
 /**
- * Recolor from true neutral master: neutral L + swatch chroma only (no cognac a/b).
+ * Colorize original photographed sofa — preserve L/texture; shift chroma from swatch.
  */
-export function recolorSofa(neutralMaster, mask, palette, sourceSofa = null) {
-  const { data, width, height, channels } = neutralMaster;
+export function recolorSofa(sourceImage, mask, palette) {
+  const { data, width, height, channels } = sourceImage;
   const out = Buffer.from(data);
-  const { lo, span } = computeSofaLuminanceMapRange(neutralMaster, mask);
-  const isLight = palette.isNamedLight;
-  const usePhotoRealism = palette.isBaliSilk && sourceSofa;
-  const photoDetail = usePhotoRealism ? preparePhotographicStructure(sourceSofa, neutralMaster) : null;
-  const meanNeutralL = usePhotoRealism ? meanMaskedNeutralL(neutralMaster, mask) : 0;
+  const { lo, span } = computeSofaLuminanceMapRange(sourceImage, mask);
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
@@ -626,28 +564,9 @@ export function recolorSofa(neutralMaster, mask, palette, sourceSofa = null) {
     const u = clamp((lab.L - lo) / span, 0, 1);
     const tone = interpolateSwatchPalette(palette, u);
 
-    let finalL;
-    if (palette.extractionMethod === 'hardcoded-target-rgb') {
-      const anchor = tone.L + LIGHT_L_LIFT;
-      finalL = anchor + (lab.L - meanNeutralL) * BALI_SILK_L_STRUCTURE;
-    } else {
-      finalL = isLight ? computeFinalLabL(lab.L, tone.L, true) : lab.L;
-    }
-    let finalA = tone.a;
-    let finalB = tone.b;
-    if (palette.isBaliSilk && BALI_SILK_USE_FINE_TUNE) {
-      const tuned = applyBaliSilkFineTune(finalL, finalA, finalB, u);
-      finalL = tuned.L;
-      finalA = tuned.a;
-      finalB = tuned.b;
-    }
-    if (usePhotoRealism) {
-      finalL = applyPhotographicTonalLift(finalL, u);
-      finalL = applyPhotographicLDetail(finalL, j, photoDetail);
-    }
-    finalL = clamp(finalL, 0, 100);
-    finalA = clamp(finalA, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    finalB = clamp(finalB, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const finalL = clamp(computeFinalLabL(lab.L, tone.L), 0, 100);
+    const finalA = clamp(tone.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const finalB = clamp(tone.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
     const { r, g, b: bOut } = labToRgb(finalL, finalA, finalB);
 
     out[p] = r;
@@ -737,7 +656,7 @@ export function publishRenderOutputs(swatchName, primaryPngPath) {
   return { primary: abs, diagnostic: resolve(copies[0]), legacyFixed: resolve(copies[1]) };
 }
 
-export async function processSwatch(swatchPath, neutralMaster, mask, sourceSofa = null) {
+export async function processSwatch(swatchPath, sourceImage, mask) {
   const resolved = resolveOriginalSwatchPath(swatchPath);
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
 
@@ -757,26 +676,21 @@ export async function processSwatch(swatchPath, neutralMaster, mask, sourceSofa 
     midtone: fmtTone(palette.midtone),
     highlight: fmtTone(palette.highlight),
     lightLeather: palette.isNamedLight,
-    lBlend:
-      palette.extractionMethod === 'hardcoded-target-rgb'
-        ? `anchor targetL+6 + neutral ΔL×${BALI_SILK_L_STRUCTURE}`
-        : palette.isNamedLight
-          ? 'neutral L 65/35 +6'
-          : 'neutral L only',
+    lBlend: `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     targetRgb: palette.targetRgb || null,
     chroma: palette.isBaliSilk
       ? palette.extractionMethod === 'hardcoded-target-rgb'
         ? `hardcoded RGB ${BALI_SILK_TARGET_RGB.join('/')}`
-        : `swatch a/b + warm ivory nudge`
+        : 'swatch a/b only'
       : 'swatch a/b only',
-    realism: palette.isBaliSilk && sourceSofa
-      ? 'L structure preserve + multi-scale photo detail'
-      : null,
   });
 
-  const outData = recolorSofa(neutralMaster, mask, palette, sourceSofa);
+  const outData = recolorSofa(sourceImage, mask, palette);
   if (palette.isBaliSilk) {
-    const mean = meanMaskedLab({ data: outData, width: neutralMaster.width, height: neutralMaster.height, channels: neutralMaster.channels }, mask);
+    const mean = meanMaskedLab(
+      { data: outData, width: sourceImage.width, height: sourceImage.height, channels: sourceImage.channels },
+      mask,
+    );
     const midRgb = labToRgb(mean.L, mean.a, mean.b);
     console.log(
       `  upholstery mean: LAB L=${mean.L.toFixed(1)} a=${mean.a.toFixed(1)} b=${mean.b.toFixed(1)} → RGB [${midRgb.r}, ${midRgb.g}, ${midRgb.b}]`,
@@ -786,9 +700,9 @@ export async function processSwatch(swatchPath, neutralMaster, mask, sourceSofa 
   const bytes = await saveImage(
     outData,
     outPath,
-    neutralMaster.width,
-    neutralMaster.height,
-    neutralMaster.channels,
+    sourceImage.width,
+    sourceImage.height,
+    sourceImage.channels,
   );
   console.log(`  wrote ${swatchName}.png (${Math.round(bytes / 1024)} KB)`);
   publishRenderOutputs(swatchName, outPath);
@@ -875,22 +789,7 @@ export async function main(argv = process.argv) {
     return;
   }
 
-  console.log('  method: neutral LAB master (L only) + swatch chroma');
-
-  const neutralMaster = buildNeutralGrayMaster(sourceSofa, mask);
-  const masterStats = meanMaskedLab(neutralMaster, mask);
-  console.log(
-    `  neutral master upholstery LAB: L=${masterStats.L.toFixed(2)} a=${masterStats.a.toFixed(2)} b=${masterStats.b.toFixed(2)} (a,b should be ~0)`,
-  );
-
-  await saveImage(
-    neutralMaster.data,
-    NEUTRAL_MASTER_PATH,
-    neutralMaster.width,
-    neutralMaster.height,
-    neutralMaster.channels,
-  );
-  console.log(`  neutral master: ${NEUTRAL_MASTER_PATH}`);
+  console.log('  method: photographic color shift (97% original L, swatch a/b)');
 
   if (cli.mode === 'one') {
     const swPath = resolveSwatchArg(cli.swatchFile);
@@ -898,13 +797,13 @@ export async function main(argv = process.argv) {
       console.error(`Swatch not found: ${cli.swatchFile}`);
       process.exit(1);
     }
-    const { outPath } = await processSwatch(swPath, neutralMaster, mask, sourceSofa);
+    const { outPath } = await processSwatch(swPath, sourceSofa, mask);
     console.log(`\nDone: ${outPath}`);
     return;
   }
 
   for (const file of swatchFiles) {
-    await processSwatch(join(SWATCH_DIR, file), neutralMaster, mask, sourceSofa);
+    await processSwatch(join(SWATCH_DIR, file), sourceSofa, mask);
   }
 
   const onDisk = readdirSync(OUTPUT_DIR).filter(
