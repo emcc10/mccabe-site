@@ -5069,8 +5069,22 @@ try {
     var configBlock = document.getElementById("mcConfigurationBlock");
     if (configBlock) {
       configBlock.style.cursor = "pointer";
-      configBlock.onclick = openPlannerOverlay;
+      configBlock.onclick = function (ev) {
+        if (
+          ev.target.closest(
+            'button, a, input, select, textarea, label, #mcPlannerLoginGate, [data-mc-open-login], [data-mc-open-signup]'
+          )
+        ) {
+          return;
+        }
+        openPlannerOverlay();
+      };
     }
+    try {
+      if (typeof mcWirePlannerLoginGateCtas === "function") {
+        mcWirePlannerLoginGateCtas(document.getElementById("mcPlannerLoginGate"));
+      }
+    } catch (eGateWire) {}
 
     // Keep summary synced to modal selection changes
     if (isSecPdp) {
@@ -5462,21 +5476,52 @@ function mcRunParagonPriceSourceDebug() {
   } catch (eDbg) {}
 }
 
+function mcBindPlannerGateAuthButtons(g) {
+  if (!g) return;
+  var loginBtn = g.querySelector("[data-mc-open-login]");
+  var signupBtn = g.querySelector("[data-mc-open-signup]");
+  if (loginBtn) {
+    loginBtn.onclick = function (ev) {
+      if (ev && ev.preventDefault) ev.preventDefault();
+      if (ev && ev.stopPropagation) ev.stopPropagation();
+      if (ev && ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+      if (typeof window.mcOpenLoginModal === "function") window.mcOpenLoginModal();
+      return false;
+    };
+  }
+  if (signupBtn) {
+    signupBtn.onclick = function (ev) {
+      if (ev && ev.preventDefault) ev.preventDefault();
+      if (ev && ev.stopPropagation) ev.stopPropagation();
+      if (ev && ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+      if (typeof window.mcOpenSignupModal === "function") window.mcOpenSignupModal();
+      return false;
+    };
+  }
+}
+
 function mcWirePlannerLoginGateCtas(g) {
   if (!g) return;
-  if (g.querySelector("[data-mc-open-login]")) {
-    g.dataset.mcModalCtas = "1";
-    return;
+  var legacyLogin = g.querySelector('a[href*="login.asp"], a[href*="Login.asp"]');
+  var legacySignup = g.querySelector('a[href*="register.asp"], a[href*="AccountSettings.asp"]');
+  if ((legacyLogin || legacySignup) && !g.querySelector("button[data-mc-open-login]")) {
+    var row =
+      g.querySelector(".mc-planner-login-gate__actions") ||
+      g.querySelector('div[style*="flex"]') ||
+      g;
+    if (row) {
+      row.className = "mc-planner-login-gate__actions";
+      row.innerHTML =
+        '<button type="button" class="mc-config-btn" data-mc-open-login style="display:inline-block;padding:8px 14px;border:1px solid #333;background:#fff;color:#111;font-size:12px;cursor:pointer;">Sign In</button>' +
+        '<button type="button" class="mc-config-btn" data-mc-open-signup style="display:inline-block;padding:8px 14px;border:1px solid #333;background:#fff;color:#111;font-size:12px;cursor:pointer;">Create Account</button>';
+    }
   }
-  var row =
-    g.querySelector(".mc-planner-login-gate__actions") ||
-    g.querySelector('div[style*="flex"]');
-  if (!row) return;
-  row.className = "mc-planner-login-gate__actions";
-  row.innerHTML =
-    '<button type="button" class="mc-config-btn" data-mc-open-login style="display:inline-block;padding:8px 14px;border:1px solid #333;background:#fff;color:#111;font-size:12px;cursor:pointer;">Sign In</button>' +
-    '<button type="button" class="mc-config-btn" data-mc-open-signup style="display:inline-block;padding:8px 14px;border:1px solid #333;background:#fff;color:#111;font-size:12px;cursor:pointer;">Create Account</button>';
+  mcBindPlannerGateAuthButtons(g);
   g.dataset.mcModalCtas = "1";
+}
+if (typeof window !== "undefined") {
+  window.mcWirePlannerLoginGateCtas = mcWirePlannerLoginGateCtas;
+  window.mcBindPlannerGateAuthButtons = mcBindPlannerGateAuthButtons;
 }
 
 function mcEnsurePlannerLoginGate() {
@@ -5512,6 +5557,7 @@ function mcSetPlannerLoginGateVisible(show) {
   var g = mcEnsurePlannerLoginGate();
   if (!g) return;
   g.style.display = show ? "block" : "none";
+  if (show) mcBindPlannerGateAuthButtons(g);
 }
 
 function mcApplyPlannerAtcDisabledState(shouldGate) {
@@ -16823,25 +16869,45 @@ async function mcSubmitAuthForm(form, mode) {
   });
 }
 
-  document.addEventListener('click', function (e) {
+  function mcHandleLoginCtaClick(e) {
     var loginLink = e.target.closest('.mc-member-grid-price__login, [data-mc-open-login]');
     if (loginLink) {
       e.preventDefault();
       e.stopPropagation();
+      try {
+        e.stopImmediatePropagation();
+      } catch (eImm) {}
       if (typeof window.mcOpenLoginModal === 'function') {
         window.mcOpenLoginModal();
       }
-      return;
+      return true;
     }
-
     var signupLink = e.target.closest('[data-mc-open-signup]');
     if (signupLink) {
       e.preventDefault();
+      e.stopPropagation();
+      try {
+        e.stopImmediatePropagation();
+      } catch (eImm2) {}
       if (typeof window.mcOpenSignupModal === 'function') {
         window.mcOpenSignupModal();
       }
-      return;
+      return true;
     }
+    return false;
+  }
+
+  /* Capture phase: run before #mcConfigurationBlock bubble opens the room planner. */
+  document.addEventListener(
+    'click',
+    function (e) {
+      mcHandleLoginCtaClick(e);
+    },
+    true
+  );
+
+  document.addEventListener('click', function (e) {
+    if (mcHandleLoginCtaClick(e)) return;
 
     var t = e.target;
     if (t && t.closest && t.closest('[data-mc-close-login]')) {
