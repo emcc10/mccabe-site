@@ -1,11 +1,54 @@
 /**
  * PDP Sign In / Create Account — modal only, no /login.asp redirect, no room planner on gate clicks.
- * MC_PDP_AUTH_CTA_20260622
+ * MC_PDP_AUTH_CTA_20260623
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260622";
+  var VERSION = "20260623";
+
+  function handleAuthCtaClick(e) {
+    if (!e || !e.target || !e.target.closest) return false;
+
+    var loginEl = e.target.closest(
+      "[data-mc-open-login], .mc-member-grid-price__login, .mc-configuration-rh__signin-cta, #mcPlannerLoginGate a[href*='login.asp'], #mcPlannerLoginGate a[href*='Login.asp']"
+    );
+    if (loginEl) {
+      if (e.preventDefault) e.preventDefault();
+      if (e.stopPropagation) e.stopPropagation();
+      try {
+        e.stopImmediatePropagation();
+      } catch (eImm) {}
+      if (typeof global.mcOpenLoginModal === "function") {
+        global.mcOpenLoginModal();
+      } else {
+        global.__MC_PDP_PENDING_LOGIN_MODAL__ = true;
+      }
+      return true;
+    }
+
+    var signupEl = e.target.closest(
+      "[data-mc-open-signup], #mcPlannerLoginGate a[href*='register.asp'], #mcPlannerLoginGate a[href*='AccountSettings.asp']"
+    );
+    if (signupEl) {
+      if (e.preventDefault) e.preventDefault();
+      if (e.stopPropagation) e.stopPropagation();
+      try {
+        e.stopImmediatePropagation();
+      } catch (eImm2) {}
+      if (typeof global.mcOpenSignupModal === "function") {
+        global.mcOpenSignupModal();
+      } else {
+        global.__MC_PDP_PENDING_SIGNUP_MODAL__ = true;
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  global.mcHandleLoginCtaClick = handleAuthCtaClick;
+
   if (global.__MC_PDP_AUTH_CTA_FIX_VER__ === VERSION) return;
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
 
@@ -32,38 +75,6 @@
       return;
     }
     global.__MC_PDP_PENDING_SIGNUP_MODAL__ = true;
-  }
-
-  function handleAuthCtaClick(e) {
-    if (!e || !e.target || !e.target.closest) return false;
-
-    var loginEl = e.target.closest(
-      "[data-mc-open-login], .mc-member-grid-price__login, .mc-configuration-rh__signin-cta, #mcPlannerLoginGate a[href*='login.asp'], #mcPlannerLoginGate a[href*='Login.asp']"
-    );
-    if (loginEl) {
-      if (e.preventDefault) e.preventDefault();
-      if (e.stopPropagation) e.stopPropagation();
-      try {
-        e.stopImmediatePropagation();
-      } catch (eImm) {}
-      openLoginModal();
-      return true;
-    }
-
-    var signupEl = e.target.closest(
-      "[data-mc-open-signup], #mcPlannerLoginGate a[href*='register.asp'], #mcPlannerLoginGate a[href*='AccountSettings.asp']"
-    );
-    if (signupEl) {
-      if (e.preventDefault) e.preventDefault();
-      if (e.stopPropagation) e.stopPropagation();
-      try {
-        e.stopImmediatePropagation();
-      } catch (eImm2) {}
-      openSignupModal();
-      return true;
-    }
-
-    return false;
   }
 
   function convertLegacyGateLinks(g) {
@@ -188,10 +199,6 @@
       },
       true
     );
-  }
-
-  if (!global.mcHandleLoginCtaClick) {
-    global.mcHandleLoginCtaClick = handleAuthCtaClick;
   }
 
   global.addEventListener("load", function () {

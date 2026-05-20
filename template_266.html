@@ -1333,7 +1333,50 @@ document.addEventListener("DOMContentLoaded", function () {
  
   <!-- DESIGN TOOLKIT -->
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260621plp"></script>
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260622"></script>
+  <script id="mc-pdp-auth-cta-boot">
+(function (g) {
+  if (g.mcHandleLoginCtaClick) return;
+  g.mcHandleLoginCtaClick = function (e) {
+    if (!e || !e.target || !e.target.closest) return false;
+    var loginEl = e.target.closest(
+      "[data-mc-open-login], .mc-member-grid-price__login, .mc-configuration-rh__signin-cta, #mcPlannerLoginGate a[href*='login.asp']"
+    );
+    if (loginEl) {
+      if (e.preventDefault) e.preventDefault();
+      if (e.stopPropagation) e.stopPropagation();
+      try {
+        e.stopImmediatePropagation();
+      } catch (x) {}
+      if (typeof g.mcOpenLoginModal === "function") g.mcOpenLoginModal();
+      else g.__MC_PDP_PENDING_LOGIN_MODAL__ = true;
+      return true;
+    }
+    var signupEl = e.target.closest("[data-mc-open-signup]");
+    if (signupEl) {
+      if (e.preventDefault) e.preventDefault();
+      if (e.stopPropagation) e.stopPropagation();
+      try {
+        e.stopImmediatePropagation();
+      } catch (x2) {}
+      if (typeof g.mcOpenSignupModal === "function") g.mcOpenSignupModal();
+      else g.__MC_PDP_PENDING_SIGNUP_MODAL__ = true;
+      return true;
+    }
+    return false;
+  };
+  if (!g.__MC_PDP_AUTH_CTA_CAPTURE__) {
+    g.__MC_PDP_AUTH_CTA_CAPTURE__ = true;
+    document.addEventListener(
+      "click",
+      function (ev) {
+        g.mcHandleLoginCtaClick(ev);
+      },
+      true
+    );
+  }
+})(window);
+  </script>
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260623"></script>
   <script id="mc-plp-enforcer-bridge">
 (function(g,d){var W="20260622",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};function cat(){try{var p=String(g.location.pathname||"").toLowerCase();if(g.document.body&&g.document.body.classList.contains("productdetails"))return false;if(/shoppingcart|one-page-checkout|checkout|orderconfirm/i.test(p))return false;if((/-s\//.test(p)||/category-s\//.test(p))&&/\.html?/i.test(p))return true;if(/productslist\.asp|searchresults\.asp/.test(p))return true;var r=d.getElementById("content_area");if(r&&r.querySelector(".v-product-grid a.v-product__img, ul.v-product-grid li.v-product"))return true;}catch(e){}return false;}function go(){if(!cat())return;if(vn(g.__MC_PLP_ENFORCER_VER__)>=vn(W)&&typeof g.mcPlpEnforcerRun==="function")return;d.querySelectorAll('script[src*="mc-plp-enforcer"]').forEach(function(s){try{s.remove();}catch(e2){}});delete g.__MC_PLP_ENFORCER__;delete g.__MC_PLP_ENFORCER_VER__;delete g.mcPlpEnforcerRun;var s=d.createElement("script");s.id="mc-plp-enforcer-js";s.src="/v/vspfiles/js/mc-plp-enforcer.js?v="+W+"&mcrd="+Date.now();s.onload=function(){try{g.mcPlpEnforcerRun&&g.mcPlpEnforcerRun();}catch(e3){}};(d.head||d.documentElement).appendChild(s);}if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",go);else go();g.addEventListener("load",go);[0,200,900,2500].forEach(function(t){g.setTimeout(go,t);});})(window,document);
   </script>
@@ -4047,6 +4090,16 @@ try {
 </script>
  <script>
 (function(){
+  if (!window.mcHandleLoginCtaClick && typeof window.mcHandleLoginCtaClick !== "function") {
+    var boot = document.getElementById("mc-pdp-auth-cta-boot");
+    if (!boot) {
+      var s = document.createElement("script");
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260623&mcrd=" + Date.now();
+      s.async = false;
+      (document.head || document.documentElement).appendChild(s);
+    }
+  }
+
   if (window.__MC_INLINE_FINAL__) return;
 
   // 🚫 EXCLUDE BEAN BAGS FROM LEATHER + ROOM PLANNER (codes start with BB)

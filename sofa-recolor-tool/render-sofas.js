@@ -51,6 +51,12 @@ const COLOR_SHIFT_L_ORIGINAL = 0.97;
 const COLOR_SHIFT_L_SWATCH = 0.03;
 /** Bali-Silk light body — hardcoded target (not fold/shadow sampling). */
 export const BALI_SILK_TARGET_RGB = [192, 183, 168];
+/** Chroma: 0% original cognac a/b, 100% swatch. */
+const CHROMA_ORIGINAL = 0;
+const CHROMA_SWATCH = 1;
+/** Extra ivory b in shadows/mids (decontaminate cognac undertone). */
+const SHADOW_CHROMA_B_BOOST = 2.5;
+const SHADOW_CHROMA_U_FADE = 0.52;
 /** Diagnostic: force uniform upholstery chroma; L from source only. */
 export const BRUTE_FORCE_CHROMA_A = 2;
 export const BRUTE_FORCE_CHROMA_B = 10;
@@ -548,8 +554,30 @@ export function computeFinalLabL(originalL, swatchL) {
   return originalL * COLOR_SHIFT_L_ORIGINAL + swatchL * COLOR_SHIFT_L_SWATCH;
 }
 
+/** L from photo only — original a/b are discarded, not blended. */
+export function photoLuminanceOnly(r, g, b) {
+  return rgbToLab(r, g, b).L;
+}
+
 /**
- * Colorize original photographed sofa — preserve L/texture; shift chroma from swatch.
+ * Swatch a/b only. Shadow/mid regions get extra ivory b to kill cognac undertone.
+ */
+export function swatchChromaForPixel(palette, u) {
+  const tone = interpolateSwatchPalette(palette, u);
+  let a = tone.a * CHROMA_SWATCH;
+  let b = tone.b * CHROMA_SWATCH;
+
+  if (palette.isBaliSilk) {
+    const shadow = 1 - clamp(u / SHADOW_CHROMA_U_FADE, 0, 1);
+    b += shadow * SHADOW_CHROMA_B_BOOST;
+    a += shadow * 0.4;
+  }
+
+  return { a, b, L: tone.L };
+}
+
+/**
+ * Colorize photographed sofa: preserve photo L; replace all chroma with swatch.
  */
 export function recolorSofa(sourceImage, mask, palette) {
   const { data, width, height, channels } = sourceImage;
@@ -560,17 +588,20 @@ export function recolorSofa(sourceImage, mask, palette) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
 
     const p = j * channels;
-    const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
-    const u = clamp((lab.L - lo) / span, 0, 1);
-    const tone = interpolateSwatchPalette(palette, u);
+    const r = data[p];
+    const g = data[p + 1];
+    const bIn = data[p + 2];
+    const photoL = photoLuminanceOnly(r, g, bIn);
+    const u = clamp((photoL - lo) / span, 0, 1);
+    const chroma = swatchChromaForPixel(palette, u);
 
-    const finalL = clamp(computeFinalLabL(lab.L, tone.L), 0, 100);
-    const finalA = clamp(tone.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const finalB = clamp(tone.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const { r, g, b: bOut } = labToRgb(finalL, finalA, finalB);
+    const finalL = clamp(computeFinalLabL(photoL, chroma.L), 0, 100);
+    const finalA = clamp(chroma.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const finalB = clamp(chroma.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+    const { r: outR, g: outG, b: bOut } = labToRgb(finalL, finalA, finalB);
 
-    out[p] = r;
-    out[p + 1] = g;
+    out[p] = outR;
+    out[p + 1] = outG;
     out[p + 2] = bOut;
     if (channels === 4) out[p + 3] = data[p + 3];
   }
@@ -679,10 +710,8 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
     lBlend: `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     targetRgb: palette.targetRgb || null,
     chroma: palette.isBaliSilk
-      ? palette.extractionMethod === 'hardcoded-target-rgb'
-        ? `hardcoded RGB ${BALI_SILK_TARGET_RGB.join('/')}`
-        : 'swatch a/b only'
-      : 'swatch a/b only',
+      ? `swatch a/b 100% (0% cognac) + shadow ivory b+${SHADOW_CHROMA_B_BOOST}`
+      : 'swatch a/b 100% (0% cognac)',
   });
 
   const outData = recolorSofa(sourceImage, mask, palette);

@@ -125,7 +125,7 @@ verify_template_on_sftp() {
 
 TEMPLATE_ENFORCER_TAG=$(grep -oE 'mc-plp-enforcer\.js\?v=[0-9]+' template_266.html 2>/dev/null | head -1 || true)
 if [[ -z "$TEMPLATE_ENFORCER_TAG" ]]; then
-  TEMPLATE_ENFORCER_TAG="mc-plp-enforcer.js?v=20260622"
+  TEMPLATE_ENFORCER_TAG="mc-plp-enforcer.js?v=20260623"
 fi
 
 python3 scripts/announce_deploy_markers.py || true

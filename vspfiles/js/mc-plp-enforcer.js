@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260622
+ * MC_PLP_ENFORCER_20260623
  *
  * Thumbnails: .mc-plp-image-box + visible-sofa width normalization (no crop, no scale transform).
  */
