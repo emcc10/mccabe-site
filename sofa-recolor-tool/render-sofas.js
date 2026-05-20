@@ -1,5 +1,5 @@
 /**
- * LAB recolor: true neutral master (L only, a=b=0) + swatch chroma; no cognac a/b in base.
+ * Photographic color shift: original sofa L/texture preserved; swatch chroma only.
  */
 import AdmZip from 'adm-zip';
 import convert from 'color-convert';
@@ -16,7 +16,6 @@ import { tmpdir } from 'os';
 import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
-import { preparePhotographicStructure, applyPhotographicLDetail } from './leather-detail.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
@@ -47,30 +46,11 @@ const LIGHT_BODY_SAT_MAX = 0.42;
 const LIGHT_BODY_WARM_B_MIN = 6;
 const LIGHT_BODY_WARM_A_MIN = -2;
 const LIGHT_BODY_SHADOW_MIN_PIXELS = 80;
-const DARK_L_ORIGINAL = 0.92;
-const DARK_L_SWATCH = 0.08;
-const LIGHT_L_ORIGINAL = 0.65;
-const LIGHT_L_SWATCH = 0.35;
-const LIGHT_L_LIFT = 6;
-/** Bali-Silk light body — hardcoded test target (not fold/shadow sampling). */
+/** Color shift: preserve original photo L; tiny swatch L hint only. */
+const COLOR_SHIFT_L_ORIGINAL = 0.97;
+const COLOR_SHIFT_L_SWATCH = 0.03;
+/** Bali-Silk light body — hardcoded target (not fold/shadow sampling). */
 export const BALI_SILK_TARGET_RGB = [192, 183, 168];
-/** Preserve neutral-master L spread around swatch anchor (avoids flat/painted blend). */
-const BALI_SILK_L_STRUCTURE = 0.9;
-/** Bali-Silk final nudge (off while hardcoded target is active). */
-const BALI_SILK_USE_FINE_TUNE = false;
-const BALI_SILK_WARM_B = 3;
-const BALI_SILK_MID_L_LIFT = 5;
-const BALI_SILK_MID_U_LO = 0.12;
-const BALI_SILK_MID_U_HI = 0.88;
-const BALI_SILK_WARM_A_TARGET = 2;
-const BALI_SILK_GRAY_U_LO = 0.2;
-const BALI_SILK_GRAY_U_HI = 0.68;
-/** L-only tonal polish (no hue/chroma change). */
-const TONAL_MID_L_LIFT = 5;
-const TONAL_MID_U_LO = 0.15;
-const TONAL_MID_U_HI = 0.78;
-const TONAL_HIGHLIGHT_LIFT = 10;
-const TONAL_HIGHLIGHT_U_START = 0.72;
 /** Diagnostic: force uniform upholstery chroma; L from source only. */
 export const BRUTE_FORCE_CHROMA_A = 2;
 export const BRUTE_FORCE_CHROMA_B = 10;
