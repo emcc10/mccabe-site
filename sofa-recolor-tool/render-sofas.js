@@ -18,6 +18,7 @@ import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { finalizeBaliExport } from './finalize-bali-export.js';
+import { prepareSourceLGrain } from './leather-detail.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
@@ -58,6 +59,11 @@ const BALI_SAMPLE_FLOOR = { r: 170, g: 160, b: 145 };
 const BALI_SAMPLE_RANGE = { r: [185, 215], g: [175, 205], b: [155, 190] };
 const BALI_OUTPUT_FLOOR = { r: 170, g: 160, b: 145 };
 const CHROMA_SWATCH = 1;
+
+/** TEMPORARY realism stress-test — max source detail, not for production. */
+export const REALISM_STRESS_HF_GAIN = 1.15;
+export const REALISM_STRESS_MF_GAIN = 0.42;
+export const REALISM_STRESS_L_STRUCTURE = 1;
 /** Diagnostic: force uniform upholstery chroma; L from source only. */
 export const BRUTE_FORCE_CHROMA_A = 2;
 export const BRUTE_FORCE_CHROMA_B = 10;
@@ -256,7 +262,7 @@ export function validateBaliSilkOutput(rgb) {
 export function deleteBaliSilkOutputs(outputDir = OUTPUT_DIR) {
   if (!existsSync(outputDir)) return;
   for (const f of readdirSync(outputDir)) {
-    if (f.toLowerCase().includes('bali-silk')) {
+    if (f.toLowerCase().includes('bali-silk') && !f.includes('REALISM-STRESS')) {
       try {
         unlinkSync(join(outputDir, f));
       } catch {
@@ -670,8 +676,28 @@ export function computeSofaLuminanceMapRange(masterImage, mask) {
   return { lo, hi, span: Math.max(hi - lo, SOFA_L_MAP_MIN_SPAN) };
 }
 
-/** Full masked min/max L — no percentile compression (Bali chroma placement). */
-export function computeBaliFullLRange(sourceImage, mask) {
+/** Bali L: source photo L + brightness offset (preserves all ΔL from catalog photo). */
+export function baliPreservedPhotoL(photoL, meanPhotoL, anchorL) {
+  return clamp(photoL + (anchorL - meanPhotoL), 0, 100);
+}
+
+function meanMaskedRec709Luma(image, mask) {
+  const { data, width, height, channels } = image;
+  let sum = 0;
+  let n = 0;
+  for (let j = 0; j < width * height; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) continue;
+    const p = j * channels;
+    sum += pixelBrightness(data[p], data[p + 1], data[p + 2]);
+    n++;
+  }
+  return n ? sum / n : 0;
+}
+
+/**
+ * Swatch chroma in LAB, then restore each pixel's original Rec.709 luma (catalog microcontrast).
+ */
+function computeBaliFullLRange(sourceImage, mask) {
   const { data, width, height, channels } = sourceImage;
   let lo = 100;
   let hi = 0;
@@ -682,12 +708,48 @@ export function computeBaliFullLRange(sourceImage, mask) {
     if (L < lo) lo = L;
     if (L > hi) hi = L;
   }
-  return { lo, hi, span: Math.max(hi - lo, SOFA_L_MAP_MIN_SPAN) };
+  return { lo, hi, span: Math.max(hi - lo, 4) };
 }
 
-/** Bali L: source photo L + brightness offset (preserves all ΔL from catalog photo). */
-export function baliPreservedPhotoL(photoL, meanPhotoL, anchorL) {
-  return clamp(photoL + (anchorL - meanPhotoL), 0, 100);
+/** TEMPORARY: extreme source L/HF/MF preservation for pipeline debug. */
+export function baliRealismStressRgb(
+  r,
+  g,
+  b,
+  chroma,
+  grain,
+  j,
+  photoL,
+  meanPhotoL,
+  anchorL,
+  lumOffset,
+) {
+  let finalL = photoL + (anchorL - meanPhotoL) * REALISM_STRESS_L_STRUCTURE;
+  finalL += grain.sourceHf[j] * REALISM_STRESS_HF_GAIN + grain.sourceMf[j] * REALISM_STRESS_MF_GAIN;
+  finalL = clamp(finalL, 0, 100);
+  const { r: tr, g: tg, b: tb } = labToRgb(finalL, chroma.a, chroma.b);
+  const srcLum = pixelBrightness(r, g, b);
+  const outLum = pixelBrightness(tr, tg, tb);
+  const ratio = (srcLum + lumOffset) / Math.max(outLum, 0.25);
+  return {
+    r: clamp(Math.round(tr * ratio), 0, 255),
+    g: clamp(Math.round(tg * ratio), 0, 255),
+    b: clamp(Math.round(tb * ratio), 0, 255),
+  };
+}
+
+export function baliRgbPreserveSourceLuma(r, g, b, chroma, photoL, meanPhotoL, anchorL, lumOffset) {
+  const srcLum = pixelBrightness(r, g, b);
+  const finalL = baliPreservedPhotoL(photoL, meanPhotoL, anchorL);
+  const { r: tr, g: tg, b: tb } = labToRgb(finalL, chroma.a, chroma.b);
+  const outLum = pixelBrightness(tr, tg, tb);
+  const targetLum = srcLum + lumOffset;
+  const ratio = targetLum / Math.max(outLum, 0.5);
+  return {
+    r: clamp(Math.round(tr * ratio), 0, 255),
+    g: clamp(Math.round(tg * ratio), 0, 255),
+    b: clamp(Math.round(tb * ratio), 0, 255),
+  };
 }
 
 export function computeFinalLabL(originalL, swatchL) {
@@ -709,12 +771,25 @@ export function swatchChromaForPixel(palette, u) {
  * Photographic recolor: original buffer + mask pixels get swatch chroma and preserved photo L.
  * No post-recolor compositing, enhancement, or cleanup.
  */
-export function recolorSofa(sourceImage, mask, palette) {
+export function recolorSofa(sourceImage, mask, palette, options = {}) {
+  const realismStress = Boolean(options.realismStress && palette.isBaliSilk);
   const { data, width, height, channels } = sourceImage;
   const out = Buffer.from(data);
-  const { lo, span } = computeSofaLuminanceMapRange(sourceImage, mask);
+  const lMap = realismStress
+    ? computeBaliFullLRange(sourceImage, mask)
+    : computeSofaLuminanceMapRange(sourceImage, mask);
+  const lo = lMap.lo;
+  const span = lMap.span;
   const meanPhotoL = palette.isBaliSilk ? meanMaskedLab(sourceImage, mask).L : 0;
   const anchorL = palette.isBaliSilk ? palette.midtone.L : 0;
+  const meanSrcLum = palette.isBaliSilk ? meanMaskedRec709Luma(sourceImage, mask) : 0;
+  const midRgb = palette.isBaliSilk
+    ? labToRgb(anchorL, palette.midtone.a, palette.midtone.b)
+    : { r: 0, g: 0, b: 0 };
+  const lumOffset = palette.isBaliSilk
+    ? pixelBrightness(midRgb.r, midRgb.g, midRgb.b) - meanSrcLum
+    : 0;
+  const grain = realismStress ? prepareSourceLGrain(sourceImage) : null;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
@@ -727,16 +802,45 @@ export function recolorSofa(sourceImage, mask, palette) {
     const u = clamp((photoL - lo) / span, 0, 1);
     const chroma = swatchChromaForPixel(palette, u);
 
-    const finalL = palette.isBaliSilk
-      ? baliPreservedPhotoL(photoL, meanPhotoL, anchorL)
-      : clamp(computeFinalLabL(photoL, chroma.L), 0, 100);
-    const finalA = clamp(chroma.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const finalB = clamp(chroma.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
-    const { r: outR, g: outG, b: bOut } = labToRgb(finalL, finalA, finalB);
-
-    out[p] = outR;
-    out[p + 1] = outG;
-    out[p + 2] = bOut;
+    if (palette.isBaliSilk && realismStress) {
+      const rgb = baliRealismStressRgb(
+        r,
+        g,
+        bIn,
+        chroma,
+        grain,
+        j,
+        photoL,
+        meanPhotoL,
+        anchorL,
+        lumOffset,
+      );
+      out[p] = rgb.r;
+      out[p + 1] = rgb.g;
+      out[p + 2] = rgb.b;
+    } else if (palette.isBaliSilk) {
+      const rgb = baliRgbPreserveSourceLuma(
+        r,
+        g,
+        bIn,
+        chroma,
+        photoL,
+        meanPhotoL,
+        anchorL,
+        lumOffset,
+      );
+      out[p] = rgb.r;
+      out[p + 1] = rgb.g;
+      out[p + 2] = rgb.b;
+    } else {
+      const finalL = clamp(computeFinalLabL(photoL, chroma.L), 0, 100);
+      const finalA = clamp(chroma.a, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+      const finalB = clamp(chroma.b, -LAB_CHROMA_CLAMP, LAB_CHROMA_CLAMP);
+      const { r: outR, g: outG, b: bOut } = labToRgb(finalL, finalA, finalB);
+      out[p] = outR;
+      out[p + 1] = outG;
+      out[p + 2] = bOut;
+    }
     if (channels === 4) out[p + 3] = data[p + 3];
   }
 
@@ -825,7 +929,8 @@ export function publishRenderOutputs(swatchName, primaryPngPath) {
   return { primary: abs, diagnostic: resolve(copies[0]), legacyFixed: resolve(copies[1]) };
 }
 
-export async function processSwatch(swatchPath, sourceImage, mask) {
+export async function processSwatch(swatchPath, sourceImage, mask, options = {}) {
+  const realismStress = Boolean(options.realismStress);
   const resolved = resolveOriginalSwatchPath(swatchPath);
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
 
@@ -854,13 +959,19 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
     highlight: fmtTone(palette.highlight),
     lightLeather: palette.isNamedLight,
     lBlend: isBali
-      ? 'source photo L + offset (swatch chroma only; no L processing)'
+      ? realismStress
+        ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
+        : 'swatch chroma + per-pixel source Rec.709 luma preserved'
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
-    postProcess: isBali ? 'finalize bottom band + white bg only (no upholstery touch)' : null,
+    postProcess: isBali
+      ? realismStress
+        ? 'same finalize as production (bg/shadow unchanged)'
+        : 'finalize bottom band + white bg only (no upholstery touch)'
+      : null,
   });
 
-  const outData = recolorSofa(sourceImage, mask, palette);
+  const outData = recolorSofa(sourceImage, mask, palette, { realismStress });
   const outImage = {
     data: outData,
     width: sourceImage.width,
@@ -874,12 +985,18 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
     console.log(
       `  upholstery mean: RGB [${meanRgb[0]}, ${meanRgb[1]}, ${meanRgb[2]}]  LAB L=${meanLab.L.toFixed(1)} a=${meanLab.a.toFixed(1)} b=${meanLab.b.toFixed(1)}`,
     );
-    validateBaliSilkOutput(meanRgb);
-    console.log('  output validation: PASS (warm ivory range)');
+    if (realismStress) {
+      console.log('  (stress-test: color validation skipped — compare detail vs production render)');
+    } else {
+      validateBaliSilkOutput(meanRgb);
+      console.log('  output validation: PASS (warm ivory range)');
+    }
   }
 
   const outPath = isBali
-    ? join(OUTPUT_DIR, `Bali-Silk-${renderTimestamp()}.png`)
+    ? realismStress
+      ? join(OUTPUT_DIR, `Bali-Silk-REALISM-STRESS-${renderTimestamp()}.png`)
+      : join(OUTPUT_DIR, `Bali-Silk-${renderTimestamp()}.png`)
     : join(OUTPUT_DIR, `${swatchName}.png`);
   const bytes = await saveImage(
     outData,
@@ -925,15 +1042,18 @@ function parseCli(argv) {
   const args = argv.slice(2);
   let all = false;
   let bruteChroma = false;
+  let realismStress = false;
   let swatchFile = null;
   for (const a of args) {
     if (a === '--all') all = true;
     else if (a === '--brute-chroma') bruteChroma = true;
+    else if (a === '--realism-stress') realismStress = true;
     else if (a === '--currant' || a === '--current') swatchFile = DEFAULT_PREVIEW_SWATCH;
     else if (a.startsWith('--swatch=')) swatchFile = a.slice('--swatch='.length);
     else if (!a.startsWith('-')) swatchFile = a;
   }
   if (bruteChroma) return { mode: 'brute-chroma', swatchFile: swatchFile || 'Bali-Silk' };
+  if (realismStress) return { mode: 'realism-stress', swatchFile: swatchFile || 'Bali-Silk' };
   if (all) return { mode: 'all' };
   return { mode: 'one', swatchFile: swatchFile || DEFAULT_PREVIEW_SWATCH };
 }
@@ -971,6 +1091,19 @@ export async function main(argv = process.argv) {
     console.log('  method: BRUTE-FORCE fixed chroma diagnostic (not production pipeline)');
     const { outPath } = await processBruteChromaDiagnostic(sourceSofa, mask, label);
     console.log(`\nDone: ${outPath}`);
+    return;
+  }
+
+  if (cli.mode === 'realism-stress') {
+    const swPath = resolveSwatchArg(cli.swatchFile);
+    if (!swPath) {
+      console.error(`Swatch not found: ${cli.swatchFile}`);
+      process.exit(1);
+    }
+    console.log('  method: REALISM STRESS TEST — max source photo detail (debug only)');
+    const { outPath } = await processSwatch(swPath, sourceSofa, mask, { realismStress: true });
+    console.log(`\nDone: ${outPath}`);
+    console.log('  Compare side-by-side with latest Bali-Silk-*.png production render.');
     return;
   }
 
