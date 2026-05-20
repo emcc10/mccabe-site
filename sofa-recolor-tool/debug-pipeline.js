@@ -90,42 +90,57 @@ function countMask(mask) {
   return on;
 }
 
+function toRgba(buffer, width, height, inChannels) {
+  if (inChannels === 4) return buffer;
+  const data = Buffer.alloc(width * height * 4);
+  for (let j = 0; j < width * height; j++) {
+    const si = j * inChannels;
+    const di = j * 4;
+    data[di] = buffer[si];
+    data[di + 1] = buffer[si + 1];
+    data[di + 2] = buffer[si + 2];
+    data[di + 3] = 255;
+  }
+  return data;
+}
+
 /** Stage 02: white = upholstery mask. */
 function buildMaskVisualization(mask, width, height) {
-  const channels = 3;
-  const data = Buffer.alloc(width * height * channels);
+  const data = Buffer.alloc(width * height * 4);
   for (let j = 0; j < width * height; j++) {
     const v = mask[j] >= MASK_APPLY_THRESH ? 255 : 0;
-    const p = j * channels;
+    const p = j * 4;
     data[p] = v;
     data[p + 1] = v;
     data[p + 2] = v;
+    data[p + 3] = 255;
   }
-  return { data, width, height, channels };
+  return { data, width, height, channels: 4 };
 }
 
 /** Stage 03: grayscale L from source; background dim original. */
 function buildLabLVisualization(sourceImage, mask) {
   const { data, width, height, channels } = sourceImage;
-  const out = Buffer.alloc(width * height * channels);
+  const out = Buffer.alloc(width * height * 4);
 
   for (let j = 0; j < width * height; j++) {
-    const p = j * channels;
+    const si = j * channels;
+    const di = j * 4;
     if (mask[j] >= MASK_APPLY_THRESH) {
-      const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
+      const lab = rgbToLab(data[si], data[si + 1], data[si + 2]);
       const g = Math.round(clamp(lab.L / 100, 0, 1) * 255);
-      out[p] = g;
-      out[p + 1] = g;
-      out[p + 2] = g;
+      out[di] = g;
+      out[di + 1] = g;
+      out[di + 2] = g;
     } else {
-      out[p] = Math.round(data[p] * 0.25);
-      out[p + 1] = Math.round(data[p + 1] * 0.25);
-      out[p + 2] = Math.round(data[p + 2] * 0.25);
+      out[di] = Math.round(data[si] * 0.25);
+      out[di + 1] = Math.round(data[si + 1] * 0.25);
+      out[di + 2] = Math.round(data[si + 2] * 0.25);
     }
-    if (channels === 4) out[p + 3] = data[p + 3];
+    out[di + 3] = 255;
   }
 
-  return { data: out, width, height, channels };
+  return { data: out, width, height, channels: 4 };
 }
 
 function clamp(v, lo, hi) {
@@ -138,18 +153,17 @@ function clamp(v, lo, hi) {
  */
 function buildLabAbForcedRgb(sourceImage, mask, fixedA, fixedB) {
   const { data, width, height, channels } = sourceImage;
-  const out = Buffer.from(data);
+  const out = toRgba(Buffer.from(data), width, height, channels);
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
 
-    const p = j * channels;
-    const lab = rgbToLab(data[p], data[p + 1], data[p + 2]);
+    const p = j * 4;
+    const lab = rgbToLab(out[p], out[p + 1], out[p + 2]);
     const { r, g, b } = labToRgb(lab.L, fixedA, fixedB);
     out[p] = r;
     out[p + 1] = g;
     out[p + 2] = b;
-    if (channels === 4) out[p + 3] = data[p + 3];
   }
 
   return out;
@@ -162,8 +176,9 @@ function countChangedPixels(sourceImage, outData, mask) {
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
     masked++;
-    const p = j * channels;
-    if (data[p] !== outData[p] || data[p + 1] !== outData[p + 1] || data[p + 2] !== outData[p + 2]) {
+    const si = j * channels;
+    const di = j * 4;
+    if (data[si] !== outData[di] || data[si + 1] !== outData[di + 1] || data[si + 2] !== outData[di + 2]) {
       changed++;
     }
   }
