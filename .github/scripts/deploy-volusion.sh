@@ -155,6 +155,10 @@ put_primary "vspfiles/js/mc-plp-enforcer.js" "mc-plp-enforcer" \
   "/vspfiles/js/mc-plp-enforcer.js" \
   "vspfiles/js/mc-plp-enforcer.js"
 
+put_primary "vspfiles/js/mc-pdp-auth-cta-fix.js" "mc-pdp-auth-cta-fix" \
+  "/vspfiles/js/mc-pdp-auth-cta-fix.js" \
+  "vspfiles/js/mc-pdp-auth-cta-fix.js"
+
 put_primary "vspfiles/templates/266/js/mc-plp-enforcer.js" "mc-plp-enforcer-template" \
   "/vspfiles/templates/266/js/mc-plp-enforcer.js" \
   "vspfiles/templates/266/js/mc-plp-enforcer.js"
@@ -278,8 +282,9 @@ verify_url() {
 }
 
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "C_CSS_DEPLOY_VERIFY_20260518e"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260621" "MC_PLP_ENFORCER_20260621"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260621" "MC_PLP_ENFORCER_20260621"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260622" "MC_PLP_ENFORCER_20260622"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260622" "MC_PLP_ENFORCER_20260622"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260622" "MC_PDP_AUTH_CTA_20260622"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260621"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260520plp" "MC_DTK_PLP_20260621"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-sofa-bounds.json?v=$(date +%s)" "77494-91-1.jpg"

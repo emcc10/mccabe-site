@@ -12,6 +12,7 @@ CRITICAL = (
     "vspfiles/templates/266/js/min/design-toolkit.min.js",
     "vspfiles/js/mc-plp-enforcer.js",
     "vspfiles/templates/266/js/mc-plp-enforcer.js",
+    "vspfiles/js/mc-pdp-auth-cta-fix.js",
     "vspfiles/my-boards.html",
     "vspfiles/boards/my-boards-boot.js",
     "vspfiles/boards/my-boards-page.js",

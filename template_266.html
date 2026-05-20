@@ -5623,7 +5623,10 @@ function mcSetPlannerLoginGateVisible(show) {
   var g = mcEnsurePlannerLoginGate();
   if (!g) return;
   g.style.display = show ? "block" : "none";
-  if (show) mcBindPlannerGateAuthButtons(g);
+  if (show) {
+    mcWirePlannerLoginGateCtas(g);
+    mcBindPlannerGateAuthButtons(g);
+  }
 }
 
 function mcApplyPlannerAtcDisabledState(shouldGate) {
@@ -6775,11 +6778,6 @@ window.applyPlannerToPage = function (payload) {
         configCaption.classList.add("mc-configuration-rh__planner-only");
         configCaption.innerHTML =
           '<button type="button" class="mc-configuration-rh__signin-cta" data-mc-open-login style="border:none;background:none;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer;">Sign in</button> for configured price.';
-        try {
-          if (typeof mcBindPlannerGateAuthButtons === "function") {
-            mcBindPlannerGateAuthButtons(configCaption);
-          }
-        } catch (eCapAuth) {}
       } else {
         configCaption.style.display = "none";
       }
@@ -16942,45 +16940,8 @@ async function mcSubmitAuthForm(form, mode) {
   });
 }
 
-  function mcHandleLoginCtaClick(e) {
-    var loginLink = e.target.closest('.mc-member-grid-price__login, [data-mc-open-login]');
-    if (loginLink) {
-      e.preventDefault();
-      e.stopPropagation();
-      try {
-        e.stopImmediatePropagation();
-      } catch (eImm) {}
-      if (typeof window.mcOpenLoginModal === 'function') {
-        window.mcOpenLoginModal();
-      }
-      return true;
-    }
-    var signupLink = e.target.closest('[data-mc-open-signup]');
-    if (signupLink) {
-      e.preventDefault();
-      e.stopPropagation();
-      try {
-        e.stopImmediatePropagation();
-      } catch (eImm2) {}
-      if (typeof window.mcOpenSignupModal === 'function') {
-        window.mcOpenSignupModal();
-      }
-      return true;
-    }
-    return false;
-  }
-
-  /* Capture phase: run before #mcConfigurationBlock bubble opens the room planner. */
-  document.addEventListener(
-    'click',
-    function (e) {
-      mcHandleLoginCtaClick(e);
-    },
-    true
-  );
-
   document.addEventListener('click', function (e) {
-    if (mcHandleLoginCtaClick(e)) return;
+    if (typeof window.mcHandleLoginCtaClick === 'function' && window.mcHandleLoginCtaClick(e)) return;
 
     var t = e.target;
     if (t && t.closest && t.closest('[data-mc-close-login]')) {
