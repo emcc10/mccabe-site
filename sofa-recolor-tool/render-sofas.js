@@ -877,7 +877,7 @@ export async function processSwatch(swatchPath, sourceImage, mask) {
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     realism: isBali
-      ? 'subtle source L microdetail + surgical floor + ellipse shadow'
+      ? 'source L microdetail + surgical bottom band + ellipse shadow'
       : null,
   });
 

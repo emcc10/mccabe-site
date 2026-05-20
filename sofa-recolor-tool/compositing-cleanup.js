@@ -121,17 +121,11 @@ function paintEllipseGroundShadow(out, src, mask, width, height, channels, box) 
       if (d2 > 1.35) continue;
 
       const falloff = Math.exp(-d2 * 2.4);
-      const darken = SHADOW_OPACITY * falloff;
-      const shade = Math.round(BG * (1 - darken));
-      const cr = out[p];
-      const cg = out[p + 1];
-      const cb = out[p + 2];
-      const base = Math.min(cr, cg, cb);
-      const blended = Math.round(base * (1 - darken) + shade * darken);
-      setWhite(out, p, channels);
-      out[p] = blended;
-      out[p + 1] = blended;
-      out[p + 2] = blended;
+      const shade = Math.round(BG * (1 - SHADOW_OPACITY * falloff));
+      out[p] = shade;
+      out[p + 1] = shade;
+      out[p + 2] = shade;
+      if (channels === 4) out[p + 3] = 255;
     }
   }
 }
