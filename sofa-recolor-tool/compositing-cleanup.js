@@ -1,16 +1,16 @@
 /**
- * Studio floor: continuous shadow, no off-white line artifacts; feet from source.
+ * Surgical bottom-band cleanup + single ellipse grounding shadow.
  */
-import { MASK_APPLY_THRESH, isNearWhite } from './render-sofas.js';
+import { MASK_APPLY_THRESH } from './render-sofas.js';
 
 const BG = 255;
-const FLOOR_SHADOW_MAX = 32;
-const FLOOR_FALLOFF_ROWS = 88;
-const FRINGE_PX = 3;
-const OFF_WHITE_LUM = 228;
-const WHITE_LINE_LUM = 244;
-const PRODUCT_LUM_MAX = 108;
-const SOFA_X_PAD = 24;
+const ZONE_ABOVE = 12;
+const ZONE_BELOW = 35;
+const DARK_LUM_MAX = 108;
+const SHADOW_OPACITY = 0.14;
+const ELLIPSE_Y_OFFSET = 14;
+const ELLIPSE_RY = 38;
+const ELLIPSE_RX_PAD = 28;
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
@@ -35,127 +35,103 @@ export function maskBoundingBox(mask, width, height) {
   return any ? { minX, minY, maxX, maxY } : { minX: 0, minY: 0, maxX: width - 1, maxY: height - 1 };
 }
 
-function pixelLum(data, p) {
-  return 0.2126 * data[p] + 0.7152 * data[p + 1] + 0.0722 * data[p + 2];
+function pixelLum(r, g, b) {
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-function floorShade(y, y0) {
-  const t = clamp((y - y0) / FLOOR_FALLOFF_ROWS, 0, 1);
-  return Math.round(BG - t * t * FLOOR_SHADOW_MAX);
+function isDarkPixel(r, g, b) {
+  return pixelLum(r, g, b) <= DARK_LUM_MAX;
 }
 
-function isPreservedProductPixel(src, p) {
-  return pixelLum(src, p) <= PRODUCT_LUM_MAX;
+function isNearWhiteFragment(out, p, channels) {
+  const r = out[p];
+  const g = out[p + 1];
+  const b = out[p + 2];
+  if (r > 205 && g > 205 && b > 195) return true;
+  if (channels === 4 && out[p + 3] < 245) return true;
+  return false;
 }
 
-function copySourcePixel(out, src, p, channels) {
-  out[p] = src[p];
-  out[p + 1] = src[p + 1];
-  out[p + 2] = src[p + 2];
-  if (channels === 4) out[p + 3] = src[p + 3] ?? 255;
-}
-
-function setGray(out, p, v, channels) {
-  out[p] = v;
-  out[p + 1] = v;
-  out[p + 2] = v;
+function setWhite(out, p, channels) {
+  out[p] = BG;
+  out[p + 1] = BG;
+  out[p + 2] = BG;
   if (channels === 4) out[p + 3] = 255;
 }
 
-function preserveSourceFeet(out, src, mask, width, height, channels) {
+function preserveDarkFeet(out, src, mask, width, height, channels) {
   for (let j = 0; j < width * height; j++) {
     if (mask[j] >= MASK_APPLY_THRESH) continue;
     const p = j * channels;
-    if (isPreservedProductPixel(src, p)) copySourcePixel(out, src, p, channels);
-  }
-}
-
-/** One continuous grounding shadow (below sofa base). */
-function paintContinuousFloorShadow(out, src, mask, width, height, channels, box) {
-  const y0 = box.maxY + 1;
-  for (let y = y0; y < height; y++) {
-    const shade = floorShade(y, y0);
-    for (let x = 0; x < width; x++) {
-      const j = y * width + x;
-      if (mask[j] >= MASK_APPLY_THRESH) continue;
-      const p = j * channels;
-      if (isPreservedProductPixel(src, p)) continue;
-      setGray(out, p, shade, channels);
-    }
+    const r = src[p];
+    const g = src[p + 1];
+    const b = src[p + 2];
+    if (!isDarkPixel(r, g, b)) continue;
+    out[p] = r;
+    out[p + 1] = g;
+    out[p + 2] = b;
+    if (channels === 4) out[p + 3] = src[p + 3] ?? 255;
   }
 }
 
 /**
- * Remove off-white horizontal lines / mask fringe in transition band under sofa.
+ * Hard pass: y > bottom - 12 && y < bottom + 35 — strip fragment pixels to #fff.
  */
-function removeOffWhiteFloorArtifacts(out, src, mask, width, height, channels, box) {
-  const y0 = box.maxY + 1;
-  const x0 = Math.max(0, box.minX - SOFA_X_PAD);
-  const x1 = Math.min(width - 1, box.maxX + SOFA_X_PAD);
-  const yStart = Math.max(0, box.maxY - 5);
-  const yEnd = Math.min(height - 1, box.maxY + FLOOR_FALLOFF_ROWS);
+function surgicalBottomBandCleanup(out, mask, width, height, channels, box) {
+  const bottom = box.maxY;
+  const yLo = bottom - ZONE_ABOVE + 1;
+  const yHi = bottom + ZONE_BELOW - 1;
 
-  for (let y = yStart; y <= yEnd; y++) {
-    let feet = 0;
-    let offWhite = 0;
-    let n = 0;
-    for (let x = x0; x <= x1; x++) {
+  for (let y = Math.max(0, yLo); y <= Math.min(height - 1, yHi); y++) {
+    for (let x = 0; x < width; x++) {
       const j = y * width + x;
-      if (mask[j] >= MASK_APPLY_THRESH) continue;
-      n++;
       const p = j * channels;
-      if (isPreservedProductPixel(src, p)) feet++;
-      const lum = pixelLum(out, p);
-      if (lum >= OFF_WHITE_LUM) offWhite++;
-    }
-    if (feet > 2) continue;
-
-    const shade = y >= y0 ? floorShade(y, y0) : floorShade(y0, y0);
-    const repaintRow =
-      offWhite >= 2 ||
-      offWhite / Math.max(n, 1) > 0.04 ||
-      (y >= box.maxY - 2 && y <= box.maxY + 3 && offWhite > 0);
-
-    if (!repaintRow) continue;
-
-    for (let x = x0; x <= x1; x++) {
-      const j = y * width + x;
-      if (mask[j] >= MASK_APPLY_THRESH) continue;
-      const p = j * channels;
-      if (isPreservedProductPixel(src, p)) continue;
-      const lum = pixelLum(out, p);
-      if (lum >= OFF_WHITE_LUM || lum >= WHITE_LINE_LUM - 8) {
-        setGray(out, p, shade, channels);
-      }
+      const r = out[p];
+      const g = out[p + 1];
+      const b = out[p + 2];
+      if (isDarkPixel(r, g, b)) continue;
+      if (!isNearWhiteFragment(out, p, channels)) continue;
+      setWhite(out, p, channels);
     }
   }
 }
 
-/** White halos beside upholstery above floor only — never white in floor band. */
-function cleanUpperFringe(out, source, mask, width, height, channels, box) {
-  const yMax = Math.max(0, box.maxY - 2);
-  for (let y = Math.max(0, box.minY); y <= yMax; y++) {
+/** Single soft blurred ellipse shadow under sofa (10–16% darken on white). */
+function paintEllipseGroundShadow(out, src, mask, width, height, channels, box) {
+  const cx = (box.minX + box.maxX) * 0.5;
+  const cy = box.maxY + ELLIPSE_Y_OFFSET;
+  const rx = (box.maxX - box.minX) * 0.5 + ELLIPSE_RX_PAD;
+  const ry = ELLIPSE_RY;
+  const yMin = box.maxY + 1;
+  const yMax = Math.min(height - 1, box.maxY + ZONE_BELOW + 18);
+
+  for (let y = yMin; y <= yMax; y++) {
     for (let x = 0; x < width; x++) {
       const j = y * width + x;
       if (mask[j] >= MASK_APPLY_THRESH) continue;
       const p = j * channels;
-      if (isPreservedProductPixel(source, p)) continue;
+      const sr = src[p];
+      const sg = src[p + 1];
+      const sb = src[p + 2];
+      if (isDarkPixel(sr, sg, sb)) continue;
 
-      let nearMask = false;
-      for (let dy = -FRINGE_PX; dy <= FRINGE_PX && !nearMask; dy++) {
-        for (let dx = -FRINGE_PX; dx <= FRINGE_PX; dx++) {
-          const yy = y + dy;
-          const xx = x + dx;
-          if (yy < 0 || yy >= height || xx < 0 || xx >= width) continue;
-          if (mask[yy * width + xx] >= MASK_APPLY_THRESH) nearMask = true;
-        }
-      }
-      if (!nearMask) continue;
+      const dx = (x - cx) / rx;
+      const dy = (y - cy) / ry;
+      const d2 = dx * dx + dy * dy;
+      if (d2 > 1.35) continue;
 
-      const lum = pixelLum(out, p);
-      if (lum > 248 && !isNearWhite(source[p], source[p + 1], source[p + 2])) {
-        setGray(out, p, BG, channels);
-      }
+      const falloff = Math.exp(-d2 * 2.4);
+      const darken = SHADOW_OPACITY * falloff;
+      const shade = Math.round(BG * (1 - darken));
+      const cr = out[p];
+      const cg = out[p + 1];
+      const cb = out[p + 2];
+      const base = Math.min(cr, cg, cb);
+      const blended = Math.round(base * (1 - darken) + shade * darken);
+      setWhite(out, p, channels);
+      out[p] = blended;
+      out[p + 1] = blended;
+      out[p + 2] = blended;
     }
   }
 }
@@ -165,13 +141,9 @@ export function cleanSofaCompositing(outBuffer, sourceImage, mask) {
   const out = outBuffer;
   const box = maskBoundingBox(mask, width, height);
 
-  preserveSourceFeet(out, src, mask, width, height, channels);
-  removeOffWhiteFloorArtifacts(out, src, mask, width, height, channels, box);
-  paintContinuousFloorShadow(out, src, mask, width, height, channels, box);
-  removeOffWhiteFloorArtifacts(out, src, mask, width, height, channels, box);
-  paintContinuousFloorShadow(out, src, mask, width, height, channels, box);
-  cleanUpperFringe(out, src, mask, width, height, channels, box);
-  preserveSourceFeet(out, src, mask, width, height, channels);
+  surgicalBottomBandCleanup(out, mask, width, height, channels, box);
+  paintEllipseGroundShadow(out, src, mask, width, height, channels, box);
+  preserveDarkFeet(out, src, mask, width, height, channels);
 
   return out;
 }
