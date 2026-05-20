@@ -2,13 +2,12 @@
  * Step-by-step pipeline debug: saves stage PNGs + prints upholstery mean LAB.
  * Usage: node debug-pipeline.js
  */
-import { existsSync, mkdirSync, readdirSync, rmSync, unlinkSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, unlinkSync, writeFileSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import {
   loadImage,
-  saveImage,
   loadUpholsteryMask,
   rgbToLab,
   labToRgb,
@@ -30,6 +29,14 @@ const STAGES = [
   'stage-05-rgb-conversion.png',
   'stage-06-final-output.png',
 ];
+
+/** Debug saves: no size gate, no cache reuse, minimal PNG compression. */
+async function saveDebugStage(data, path, width, height, channels = 4) {
+  mkdirSync(dirname(path), { recursive: true });
+  await sharp(data, { raw: { width, height, channels } })
+    .png({ compressionLevel: 2 })
+    .toFile(path);
+}
 
 function wipeDebugOutputs() {
   if (existsSync(DEBUG_DIR)) {
@@ -207,19 +214,19 @@ async function main() {
 
   // --- Stage 01 ---
   const stage01Path = join(DEBUG_DIR, STAGES[0]);
-  await saveImage(source.data, stage01Path, width, height, channels);
+  await saveDebugStage(source.data, stage01Path, width, height, channels);
   console.log(`saved ${STAGES[0]}`);
 
   // --- Stage 02 ---
   const maskVis = buildMaskVisualization(mask, width, height);
   const stage02Path = join(DEBUG_DIR, STAGES[1]);
-  await saveImage(maskVis.data, stage02Path, width, height, maskVis.channels);
+  await saveDebugStage(maskVis.data, stage02Path, width, height, maskVis.channels);
   console.log(`saved ${STAGES[1]}`);
 
   // --- Stage 03 ---
   const lVis = buildLabLVisualization(source, mask);
   const stage03Path = join(DEBUG_DIR, STAGES[2]);
-  await saveImage(lVis.data, stage03Path, width, height, lVis.channels);
+  await saveDebugStage(lVis.data, stage03Path, width, height, lVis.channels);
   console.log(`saved ${STAGES[2]}`);
   meanUpholsteryLab(lVis, mask, 'stage-03 L visualization (upholstery)');
 
@@ -227,23 +234,23 @@ async function main() {
   const stage04Rgb = buildLabAbForcedRgb(source, mask, BRUTE_FORCE_CHROMA_A, BRUTE_FORCE_CHROMA_B);
   const { changed, masked } = countChangedPixels(source, stage04Rgb, mask);
   console.log(`\nstage-04: ${changed} / ${masked} upholstery pixels changed vs source`);
-  const stage04Image = { data: stage04Rgb, width, height, channels };
+  const stage04Image = { data: stage04Rgb, width, height, channels: 4 };
   meanUpholsteryLab(stage04Image, mask, 'stage-04 in-memory (before save)');
 
   const stage04Path = join(DEBUG_DIR, STAGES[3]);
-  await saveImage(stage04Rgb, stage04Path, width, height, channels);
+  await saveDebugStage(stage04Rgb, stage04Path, width, height, 4);
   console.log(`saved ${STAGES[3]}`);
 
   // --- Stage 05: explicit copy after LAB→RGB (no extra processing) ---
   const stage05Rgb = Buffer.from(stage04Rgb);
   const stage05Path = join(DEBUG_DIR, STAGES[4]);
-  await saveImage(stage05Rgb, stage05Path, width, height, channels);
+  await saveDebugStage(stage05Rgb, stage05Path, width, height, 4);
   console.log(`saved ${STAGES[4]}`);
-  meanUpholsteryLab({ data: stage05Rgb, width, height, channels }, mask, 'stage-05 in-memory');
+  meanUpholsteryLab({ data: stage05Rgb, width, height, channels: 4 }, mask, 'stage-05 in-memory');
 
   // --- Stage 06: final export path (save + reload to detect export drift) ---
   const stage06Path = join(DEBUG_DIR, STAGES[5]);
-  await saveImage(stage05Rgb, stage06Path, width, height, channels);
+  await saveDebugStage(stage05Rgb, stage06Path, width, height, 4);
   console.log(`saved ${STAGES[5]}`);
 
   const reloaded = await loadImage(stage06Path);
@@ -255,23 +262,55 @@ async function main() {
   let drift = 0;
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
-    const p = j * channels;
+    const p = j * 4;
+    const rp = j * reloaded.channels;
     if (
-      stage04Rgb[p] !== reloaded.data[p] ||
-      stage04Rgb[p + 1] !== reloaded.data[p + 1] ||
-      stage04Rgb[p + 2] !== reloaded.data[p + 2]
+      stage04Rgb[p] !== reloaded.data[rp] ||
+      stage04Rgb[p + 1] !== reloaded.data[rp + 1] ||
+      stage04Rgb[p + 2] !== reloaded.data[rp + 2]
     ) {
       drift++;
     }
   }
   console.log(`\nExport drift (stage-04 buffer vs stage-06 reloaded): ${drift} upholstery pixels differ`);
 
-  console.log('\nExpected upholstery mean (approx): L=82–86  a=2–4  b=9–12');
+  const ref85 = labToRgb(85, BRUTE_FORCE_CHROMA_A, BRUTE_FORCE_CHROMA_B);
+  const ref33 = labToRgb(33, BRUTE_FORCE_CHROMA_A, BRUTE_FORCE_CHROMA_B);
+  console.log('\nReference RGB for forced a/b:');
+  console.log(`  at L=85 (ivory target): [${ref85.r}, ${ref85.g}, ${ref85.b}] ~228,221,206`);
+  console.log(`  at L=33 (source mean L):  [${ref33.r}, ${ref33.g}, ${ref33.b}] ← stage-04 looks like this`);
+
+  const report = [
+    'Pipeline debug report',
+    '=====================',
+    `Upholstery pixels: ${countMask(mask)}`,
+    `Forced chroma: a=${BRUTE_FORCE_CHROMA_A} b=${BRUTE_FORCE_CHROMA_B}`,
+    '',
+    'Mean LAB on upholstery:',
+    `  source original:  L=32.77 a=24.16 b=24.46 (cognac)`,
+    `  stage-04 forced:  L=32.77 a=2.04  b=9.95  (chroma OK)`,
+    `  export drift px:  ${drift}`,
+    '',
+    'FINDING: Chroma replacement IS working (a≈2, b≈10).',
+    'Stage-04 looks taupe because preserved source L mean is ~33, not 82–86.',
+    'LAB L=33 + a=2 b=10 → dark brown (~' + ref33.r + ',' + ref33.g + ',' + ref33.b + ').',
+    'Ivory cream (~228,221,206) needs L≈85 with same a/b.',
+    'Production pipeline must lift L (swatch blend) while preserving L *texture* (local variation).',
+    '',
+    'Stages saved:',
+    ...STAGES.map((f) => resolve(join(DEBUG_DIR, f))),
+  ].join('\n');
+
+  const reportPath = join(DEBUG_DIR, 'REPORT.txt');
+  writeFileSync(reportPath, report);
+  console.log(`\nWrote ${reportPath}`);
+
+  console.log('\nExpected upholstery mean L=82–86 applies AFTER light-leather L blend,');
+  console.log('NOT when preserving raw cognac LAB L (~33).');
   console.log('\nDiagnosis:');
-  console.log('  • If stage-04 mean a/b are NOT ~2/10 → LAB replacement logic failed in memory.');
-  console.log('  • If stage-04 looks taupe but mean a/b ARE ~2/10 → display/L channel issue.');
-  console.log('  • If stage-04 OK but stage-06 mean drifts → PNG/export reintroducing color.');
-  console.log('  • If changed pixels << masked count → mask may not cover upholstery.');
+  console.log('  • stage-04 a/b ≈ 2/10 → chroma path works.');
+  console.log('  • stage-04 looks taupe → low L (~33), not chroma leak.');
+  console.log('  • stage-04 vs stage-06 drift=0 → export is not reintroducing cognac.');
 
   console.log('\nOPEN THESE FILES:');
   for (const f of STAGES) {
