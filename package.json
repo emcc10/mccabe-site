@@ -11,7 +11,8 @@
     "render:stage3c": "tsx scripts/renderStage3c.ts",
     "render:stage3d": "tsx scripts/renderStage3d.ts",
     "render:stage3e": "tsx scripts/renderStage3e.ts",
-    "render:stage3f": "tsx scripts/renderStage3f.ts"
+    "render:stage3f": "tsx scripts/renderStage3f.ts",
+    "render:stage4": "tsx scripts/renderStage4.ts"
   },
   "dependencies": {
     "color-convert": "^2.0.1",

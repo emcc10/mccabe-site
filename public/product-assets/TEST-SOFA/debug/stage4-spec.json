@@ -1,0 +1,84 @@
+{
+  "stage": 4,
+  "method": "relativeLuminanceRemap + swatchChroma",
+  "notUsing": "preserveLuminance + chromaBlend (Stage 2–3F)",
+  "pipeline": "recolorUpholsteryRelativeLRemap + compositePhase2",
+  "postRgbPasses": [],
+  "sourceUpholsteryLabStats": {
+    "minL": 0,
+    "maxL": 75,
+    "meanL": 32.40331469937135,
+    "p5": 15,
+    "p95": 56
+  },
+  "chroma": {
+    "targetA": 0.3,
+    "targetB": 4.2,
+    "a_out": "a_src * 0.12 + target_a * 0.88",
+    "b_out": "b_src * 0.10 + target_b * 0.90"
+  },
+  "lRemapFormula": [
+    "Ln = clamp((L_src - p5) / (p95 - p5), 0, 1)",
+    "L_mapped = L_low + Ln * (L_high - L_low)",
+    "L_out = L_mapped * mappedLBlend + L_src * (1 - mappedLBlend)"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "label": "A RELATIVE L REMAP",
+      "outputFile": "stage4-variant-A.png",
+      "params": {
+        "lLow": 70,
+        "lHigh": 90,
+        "mappedLBlend": 0.8,
+        "targetA": 0.3,
+        "targetB": 4.2,
+        "chromaSourceA": 0.12,
+        "chromaSourceB": 0.1,
+        "chromaTargetA": 0.88,
+        "chromaTargetB": 0.9
+      },
+      "upholsteryMeanLabDeltaFromSource": 46.990839484484745,
+      "lStdPreservationRatio": 0.5642903216074873,
+      "legExactMatchRatio": 1
+    },
+    {
+      "id": "B",
+      "label": "B RELATIVE L REMAP",
+      "outputFile": "stage4-variant-B.png",
+      "params": {
+        "lLow": 72,
+        "lHigh": 92,
+        "mappedLBlend": 0.82,
+        "targetA": 0.3,
+        "targetB": 4.2,
+        "chromaSourceA": 0.12,
+        "chromaSourceB": 0.1,
+        "chromaTargetA": 0.88,
+        "chromaTargetB": 0.9
+      },
+      "upholsteryMeanLabDeltaFromSource": 48.981557874028866,
+      "lStdPreservationRatio": 0.5559679617092524,
+      "legExactMatchRatio": 1
+    },
+    {
+      "id": "C",
+      "label": "C RELATIVE L REMAP",
+      "outputFile": "stage4-variant-C.png",
+      "params": {
+        "lLow": 74,
+        "lHigh": 94,
+        "mappedLBlend": 0.85,
+        "targetA": 0.3,
+        "targetB": 4.2,
+        "chromaSourceA": 0.12,
+        "chromaSourceB": 0.1,
+        "chromaTargetA": 0.88,
+        "chromaTargetB": 0.9
+      },
+      "upholsteryMeanLabDeltaFromSource": 51.509527706041425,
+      "lStdPreservationRatio": 0.5399371021898327,
+      "legExactMatchRatio": 1
+    }
+  ]
+}
