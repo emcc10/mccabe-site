@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  /* Guard duplicate <script> tags only — do not use __MC_BOARDS_APP_STARTED here (startApp needs it). */
+  /* Guard duplicate script tags; startApp sets __MC_BOARDS_APP_STARTED (build 20260532b). */
   if (window.__MC_BOARDS_PAGE_IIFE_DONE) return;
   window.__MC_BOARDS_PAGE_IIFE_DONE = true;
 
@@ -1294,7 +1294,7 @@
       done();
       return;
     }
-    var src = API_BASE + 'board-styles.js?v=20260531';
+    var src = API_BASE + 'board-styles.js?v=20260532';
     var tag = document.querySelector('script[src*="board-styles.js"]');
     if (tag) {
       refreshConfig();
