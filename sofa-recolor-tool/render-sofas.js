@@ -20,6 +20,8 @@ import sharp from 'sharp';
 import { finalizeBaliExport } from './finalize-bali-export.js';
 import {
   DETAIL_GAIN,
+  HIGHLIGHT_START,
+  LOWFREQ_RADIUS_BASE,
   recolorBaliUpholstery,
   REF_DETAIL_MIX,
   SOURCE_DETAIL_MIX,
@@ -1220,6 +1222,17 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     return processBaliRealismProbe(sourceImage, mask, palette);
   }
 
+  let referenceImage = null;
+  if (isBali && !realismStress) {
+    const refPath = resolveBaliRealismReferencePath();
+    if (refPath) {
+      referenceImage = await loadImage(refPath);
+      console.log(`  reference texture: ${basename(refPath)}`);
+    } else {
+      console.log('  warn: no reference PNG — source detail only (add input/Bali-Silk-realism-reference.png)');
+    }
+  }
+
   const fmtTone = (t) => ({
     rgb: t.rgb,
     lab: [Math.round(t.L * 10) / 10, Math.round(t.a * 10) / 10, Math.round(t.b * 10) / 10],
@@ -1237,7 +1250,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     lBlend: isBali
       ? realismStress
         ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
-        : `lowfreq L + detail×${DETAIL_GAIN} (src ${SOURCE_DETAIL_MIX}/ref ${REF_DETAIL_MIX}) + texture×${TEXTURE_STRENGTH}; highlight matte; NO luma lock`
+        : `lowfreq(r~${LOWFREQ_RADIUS_BASE})+detail×${DETAIL_GAIN} src/ref ${SOURCE_DETAIL_MIX}/${REF_DETAIL_MIX} tex×${TEXTURE_STRENGTH}; L>${HIGHLIGHT_START} matte; NO luma lock`
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali
@@ -1247,38 +1260,47 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
       : null,
   });
 
+  const detailVizHolder = { buf: null };
   const outData = recolorSofa(sourceImage, mask, palette, {
     realismStress,
-    skipFinalize: isBali,
+    skipFinalize: isBali && realismStress,
+    referenceImage,
+    detailVizHolder,
   });
 
-  if (isBali) {
-    const beforeFinalize = Buffer.from(outData);
-    finalizeBaliExport(outData, sourceImage, mask);
-    if (!realismStress) {
-      const srcVsRecolor = maskedRgbStats(
-        sourceImage.data,
-        beforeFinalize,
-        mask,
-        sourceImage.width,
-        sourceImage.height,
-        sourceImage.channels,
-      );
-      const recolorVsFinal = maskedRgbStats(
-        beforeFinalize,
-        outData,
-        mask,
-        sourceImage.width,
-        sourceImage.height,
-        sourceImage.channels,
-      );
-      console.log(
-        formatMaskedStats('masked Δ: source photo → recolor (color + preserved luma)', srcVsRecolor),
-      );
-      console.log(
-        formatMaskedStats('masked Δ: recolor → after finalize (upholstery should be ~0)', recolorVsFinal),
-      );
+  if (isBali && !realismStress) {
+    const ts = renderTimestamp();
+    const stripPath = join(PIPELINE_DEBUG_DIR, `${ts}-debug-strip.png`);
+    let prevPanel = Buffer.from(sourceImage.data);
+    if (previousBaliPath && existsSync(previousBaliPath)) {
+      prevPanel = (await loadImage(previousBaliPath)).data;
     }
+    const detailPanel = detailVizHolder.buf ?? outData;
+    await writeBaliDebugStrip(
+      [sourceImage.data, prevPanel, outData, detailPanel],
+      sourceImage.width,
+      sourceImage.height,
+      sourceImage.channels,
+      stripPath,
+    );
+    console.log(`  debug strip (source | previous | new | detail): ${resolve(stripPath)}`);
+    console.log(
+      '  REMOVED from production path: baliChromaOnlyPreserveSourceLuma, applySourceYResidualToRgb (per-pixel Rec.709 lock)',
+    );
+  }
+
+  if (isBali && realismStress) {
+    finalizeBaliExport(outData, sourceImage, mask);
+  } else if (isBali && !realismStress) {
+    const srcVsOut = maskedRgbStats(
+      sourceImage.data,
+      outData,
+      mask,
+      sourceImage.width,
+      sourceImage.height,
+      sourceImage.channels,
+    );
+    console.log(formatMaskedStats('masked Δ: source photo → final upholstery compose', srcVsOut));
   }
 
   const outImage = {

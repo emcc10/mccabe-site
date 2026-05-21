@@ -1,7 +1,27 @@
 /**
  * Bali upholstery: lowfreq source lighting + transferred leather detail (no per-pixel luma lock).
  */
-import { MASK_APPLY_THRESH, labToRgb, rgbToLab } from './render-sofas.js';
+import convert from 'color-convert';
+
+const MASK_APPLY_THRESH = 128;
+
+function rgbToLab(r, g, b) {
+  const lab = convert.rgb.lab([r, g, b]);
+  return { L: lab[0], a: lab[1], b: lab[2] };
+}
+
+function labToRgb(L, a, b) {
+  const [r, g, bOut] = convert.lab.rgb([
+    Math.max(0, Math.min(100, L)),
+    Math.max(-128, Math.min(128, a)),
+    Math.max(-128, Math.min(128, b)),
+  ]);
+  return {
+    r: Math.max(0, Math.min(255, Math.round(r))),
+    g: Math.max(0, Math.min(255, Math.round(g))),
+    b: Math.max(0, Math.min(255, Math.round(bOut))),
+  };
+}
 
 /** Blur radius for source/catalog lighting shape (px, scaled to ~600px height). */
 export const LOWFREQ_RADIUS_BASE = 16;
@@ -205,9 +225,9 @@ export function recolorBaliUpholstery(sourceImage, mask, palette, referenceImage
   const out = Buffer.from(data);
   const fields = prepareBaliComposeFields(sourceImage, referenceImage, mask);
   const detailViz = Buffer.alloc(width * height * channels);
-  const meanPhotoL = meanMaskedL(fields.srcL, mask);
+  const meanSrcLow = meanMaskedL(fields.srcLow, mask);
   const anchorL = palette.midtone.L;
-  const lShift = anchorL - meanPhotoL;
+  const lShift = anchorL - meanSrcLow;
 
   for (let j = 0; j < width * height; j++) {
     const p = j * channels;
@@ -232,7 +252,8 @@ export function recolorBaliUpholstery(sourceImage, mask, palette, referenceImage
       fields.refTexture[j] * TEXTURE_STRENGTH;
     detail *= w;
 
-    let finalL = fields.srcLow[j] + lShift + detail;
+    const baseL = fields.srcLow[j] * 0.82 + fields.srcL[j] * 0.18;
+    let finalL = baseL + lShift + detail;
     finalL = compressUpholsteryHighlights(finalL);
     finalL = clamp(finalL, 0, 100);
 

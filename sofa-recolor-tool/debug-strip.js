@@ -1,7 +1,7 @@
 /**
- * Mandatory 4-panel Bali debug strip for pipeline verification.
+ * Mandatory 4-panel Bali debug strip: source | previous | new | detail viz.
  */
-import { mkdirSync } from 'fs';
+import { mkdirSync, renameSync, unlinkSync, existsSync } from 'fs';
 import { dirname } from 'path';
 import sharp from 'sharp';
 
@@ -13,7 +13,7 @@ export async function writeBaliDebugStrip(panels, width, height, channels, outPa
   const strip = Buffer.alloc(stripW * height * channels);
   for (let y = 0; y < height; y++) {
     for (let col = 0; col < 4; col++) {
-      const panel = panels[col] ?? panels[0];
+      const panel = panels[col];
       for (let x = 0; x < width; x++) {
         const sj = y * width + x;
         const dj = y * stripW + col * width + x;
