@@ -14379,7 +14379,11 @@ html body.mc-product-page #content_area font.product_sale_price,
 html body.productdetails #content_area .mc-configuration-rh__total,
 html body.mc-product-page #content_area .mc-configuration-rh__total,
 html body.productdetails #content_area .mc-configuration-rh__caption,
-html body.mc-product-page #content_area .mc-configuration-rh__caption {
+html body.mc-product-page #content_area .mc-configuration-rh__caption,
+html body.productdetails #mcConfigurationBlock #mcConfigurationPrice.mc-configuration-rh__total,
+html body.mc-product-page #mcConfigurationBlock #mcConfigurationPrice.mc-configuration-rh__total,
+html body.productdetails #content_area .mc-pdp-sale-preview,
+html body.mc-product-page #content_area .mc-pdp-sale-preview {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 13px !important;
   font-weight: 400 !important;
@@ -14387,6 +14391,7 @@ html body.mc-product-page #content_area .mc-configuration-rh__caption {
   letter-spacing: 0.16em !important;
   text-transform: none !important;
   color: #444 !important;
+  white-space: pre-line !important;
 }
 html body.productdetails #content_area .mc-pdp-retail-label,
 html body.mc-product-page #content_area .mc-pdp-retail-label,

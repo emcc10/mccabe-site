@@ -459,7 +459,7 @@ body.productdetails .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-mem
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
-  <link href="/v/vspfiles/css/custom-safe.css?v=20260521c" rel="stylesheet" id="mc-custom-safe-css-static">
+  <link href="/v/vspfiles/css/custom-safe.css?v=20260521d" rel="stylesheet" id="mc-custom-safe-css-static">
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
   html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
@@ -5783,6 +5783,9 @@ function refreshPlannerPriceForMemberState(){
   }
   mcSyncPlannerConfigurationPriceDisplay();
   try { window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing })); } catch (e) {}
+  return;
+}
+  if (typeof mcSyncTheaterConfigurationFromDom === "function") mcSyncTheaterConfigurationFromDom();
 }
 if (typeof window !== "undefined") {
   window.refreshPlannerPriceForMemberState = refreshPlannerPriceForMemberState;
@@ -7156,11 +7159,8 @@ window.applyPlannerToPage = function (payload) {
     lineTotal = mcSyncPlannerConfigurationPriceDisplay() || lineTotal;
     schedulePlannerConfigurationPriceRetries();
   } else {
-    var cpeOff = document.getElementById("mcConfigurationPrice");
-    if (cpeOff) {
-      cpeOff.style.display = "none";
-      cpeOff.textContent = "";
-    }
+    ensureTheaterPlannerOptionPriceResync();
+    if (typeof mcSyncTheaterConfigurationFromDom === "function") mcSyncTheaterConfigurationFromDom();
   }
   if (window.__mcMemberPricing) {
     try { window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing })); } catch (e) {}
@@ -12990,6 +12990,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       scope ||
       document;
     if (!root || !root.querySelectorAll) return;
+    var hasMcPricing = !!document.querySelector('.mc-pdp-member-pricing, .mc-pdp-retail-row');
     var saleNodes = root.querySelectorAll(
       'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"]'
     );
@@ -12997,11 +12998,19 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     for (i = 0; i < saleNodes.length; i++) {
       var node = saleNodes[i];
       if (node.closest && node.closest('.mc-member-price-caption')) continue;
+      if (node.closest && node.closest('.mc-pdp-retail-row')) continue;
+      if (node.closest && node.closest('.mc-pdp-member-pricing')) continue;
+      if (node.closest && node.closest('.mc-pdp-sale-preview')) continue;
       try {
-        node.style.removeProperty('display');
-        node.style.removeProperty('visibility');
-        node.style.setProperty('display', 'block', 'important');
-        node.style.setProperty('visibility', 'visible', 'important');
+        if (hasMcPricing) {
+          node.style.setProperty('display', 'none', 'important');
+          node.style.setProperty('visibility', 'hidden', 'important');
+        } else {
+          node.style.removeProperty('display');
+          node.style.removeProperty('visibility');
+          node.style.setProperty('display', 'block', 'important');
+          node.style.setProperty('visibility', 'visible', 'important');
+        }
       } catch (eSaleHide) {}
     }
   }
@@ -13099,6 +13108,12 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       hideTheaterSeatPdpNativePricing(scope);
       ensurePriceWithOptionsLabel(scope);
       leftAlignPricingBlock(scope);
+      if (typeof mcIsTheaterPlannerPdp === "function" && mcIsTheaterPlannerPdp()) {
+        ensureTheaterPlannerOptionPriceResync();
+      }
+      if (typeof window.mcSyncTheaterConfigurationFromDom === "function") {
+        window.mcSyncTheaterConfigurationFromDom();
+      }
     } catch (e3) {}
   }
 
@@ -16332,25 +16347,33 @@ window.addEventListener('load', function () {
 .mc-login-modal__status.is-error{color:#a11;font-weight:600}
 .mc-login-modal__status.is-success{color:#2d6a4f}
 
-/* Global member-price typography parity across PDP/PLP/home */
+/* Global member-price typography — 13px stack (match product title / options) */
 body .mc-member-grid-price__label,
-body .mc-member-price-caption__option-label {
+body .mc-member-price-caption__option-label,
+body .mc-member-price-caption__headline,
+body .mc-member-price-caption__sub,
+body .mc-member-price-caption__cta,
+body .mc-pdp-sale-preview {
   display:block !important;
-  font-size:11px !important;
-  font-weight:500 !important;
-  letter-spacing:0.14em !important;
+  font-size:13px !important;
+  font-weight:400 !important;
+  letter-spacing:0.16em !important;
   text-transform:uppercase !important;
-  color:#6a6a6a !important;
-  line-height:1.35 !important;
+  color:#777 !important;
+  line-height:1.2 !important;
+}
+body .mc-member-grid-price__amount,
+body .mc-member-price-caption__price-value,
+body .mc-pdp-sale-preview {
+  text-transform:none !important;
+  color:#444 !important;
 }
 body .mc-member-grid-price__amount,
 body .mc-member-price-caption__price-value {
   display:block !important;
-  font-size:16px !important;
+  font-size:13px !important;
   font-weight:400 !important;
-  letter-spacing:0.02em !important;
-  text-transform:none !important;
-  color:#1a1a1a !important;
+  letter-spacing:0.16em !important;
   line-height:1.2 !important;
   margin-top:4px !important;
 }
