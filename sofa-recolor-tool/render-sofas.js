@@ -959,6 +959,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
   }
 
   const palette = await getSwatchPalette(resolved);
+  const refPath = isBali && !realismStress ? resolveBaliRealismReferencePath() : null;
 
   const fmtTone = (t) => ({
     rgb: t.rgb,
@@ -991,7 +992,6 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
       : null,
   });
 
-  const refPath = isBali && !realismStress ? resolveBaliRealismReferencePath() : null;
   const outData = recolorSofa(sourceImage, mask, palette, {
     realismStress,
     skipFinalize: isBali,

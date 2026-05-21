@@ -21,6 +21,22 @@ No depth restore, CLAHE, hero clustering, texture residuals, or dual pipelines.
 
 `input/master-sofa.png` is written when present (optional reference).
 
+## Bali-Silk (production)
+
+1. Recolor from `input/sofa.png` + mask (Bali chroma, preserved tone).
+2. **Reference realism transfer** — injects photographic L-detail from a donor render (not a full-image blend).
+3. Finalize pass — pure white background, contact shadow, bottom-band cleanup.
+
+| File | Role |
+|------|------|
+| `input/Bali-Silk-realism-reference.png` | Photorealistic donor (pin with `npm run bali-ref-setup` after `bali-stress`, or place your own 800×600 PNG) |
+
+```bash
+npm run bali-stress      # generate donor candidate
+npm run bali-ref-setup   # copy latest stress → input reference
+npm run bali             # production Bali-Silk-*.png
+```
+
 ## Commands
 
 ```bash
