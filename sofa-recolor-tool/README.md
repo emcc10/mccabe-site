@@ -23,22 +23,16 @@ No depth restore, CLAHE, hero clustering, texture residuals, or dual pipelines.
 
 ## Bali-Silk (production)
 
-1. Recolor from `input/sofa.png` + mask (Bali chroma, preserved tone).
-2. **Reference realism transfer** — injects photographic L-detail from a donor render (not a full-image blend).
-3. Finalize pass — pure white background, contact shadow, bottom-band cleanup.
+1. `input/sofa.png` → **swatch chroma only** (LAB a/b from Bali-Silk; **100% source L** per pixel).
+2. **Per-pixel source Rec.709 luma** restored after chroma swap (catalog microcontrast preserved).
+3. **Finalize only** — white background, contact shadow, bottom-band cleanup (upholstery untouched).
 
-| File | Role |
-|------|------|
-| `input/Bali-Silk-realism-reference.png` | Photorealistic donor (pin with `npm run bali-ref-setup` after `bali-stress`, or place your own 800×600 PNG) |
+No reference transfer, sharpening, smoothing, or upholstery post-processing.
 
 ```bash
-npm run bali-stress      # generate donor candidate
-npm run bali-ref-setup   # copy latest stress → input reference
 npm run bali             # production Bali-Silk-*.png
-npm run bali-probe       # TEMP: exaggerated realism + pipeline trace (debug)
+npm run bali-probe       # TEMP: pipeline debug + exaggerated source-detail test
 ```
-
-`bali-probe` writes `output/Bali-Silk-REALISM-PROBE-*.png` and `output/pipeline-debug/{timestamp}/` with stage PNGs + masked pixel-delta stats.
 
 ## Commands
 

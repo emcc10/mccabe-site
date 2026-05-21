@@ -758,12 +758,22 @@ export function baliRealismStressRgb(
 }
 
 /**
- * Production Bali: swatch a/b only; 100% per-pixel source LAB L + exact source Rec.709 luma.
- * No L remap, no reference transfer, no enhancement — catalog photo structure preserved.
+ * Production Bali: swatch a/b only; source LAB L + uniform tone offset (ΔL preserved).
+ * Per-pixel Rec.709 luma restored — catalog microcontrast, no post-enhancement.
  */
-export function baliChromaOnlyPreserveSourceLuma(r, g, b, chroma, photoL, lumOffset) {
+export function baliChromaOnlyPreserveSourceLuma(
+  r,
+  g,
+  b,
+  chroma,
+  photoL,
+  meanPhotoL,
+  anchorL,
+  lumOffset,
+) {
   const srcLum = pixelBrightness(r, g, b);
-  const { r: tr, g: tg, b: tb } = labToRgb(photoL, chroma.a, chroma.b);
+  const finalL = photoL + (anchorL - meanPhotoL);
+  const { r: tr, g: tg, b: tb } = labToRgb(clamp(finalL, 0, 100), chroma.a, chroma.b);
   const outLum = pixelBrightness(tr, tg, tb);
   const targetLum = srcLum + lumOffset;
   const ratio = targetLum / Math.max(outLum, 0.5);
@@ -774,9 +784,9 @@ export function baliChromaOnlyPreserveSourceLuma(r, g, b, chroma, photoL, lumOff
   };
 }
 
-/** @deprecated use baliChromaOnlyPreserveSourceLuma */
-export function baliRgbPreserveSourceLuma(r, g, b, chroma, photoL, _meanPhotoL, _anchorL, lumOffset) {
-  return baliChromaOnlyPreserveSourceLuma(r, g, b, chroma, photoL, lumOffset);
+/** @deprecated alias */
+export function baliRgbPreserveSourceLuma(r, g, b, chroma, photoL, meanPhotoL, anchorL, lumOffset) {
+  return baliChromaOnlyPreserveSourceLuma(r, g, b, chroma, photoL, meanPhotoL, anchorL, lumOffset);
 }
 
 export function computeFinalLabL(originalL, swatchL) {
@@ -862,7 +872,16 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
       out[p + 1] = rgb.g;
       out[p + 2] = rgb.b;
     } else if (palette.isBaliSilk) {
-      const rgb = baliChromaOnlyPreserveSourceLuma(r, g, bIn, chroma, photoL, lumOffset);
+      const rgb = baliChromaOnlyPreserveSourceLuma(
+        r,
+        g,
+        bIn,
+        chroma,
+        photoL,
+        meanPhotoL,
+        anchorL,
+        lumOffset,
+      );
       out[p] = rgb.r;
       out[p + 1] = rgb.g;
       out[p + 2] = rgb.b;
@@ -1097,8 +1116,6 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     return processBaliRealismProbe(sourceImage, mask, palette);
   }
 
-  const refPath = isBali && !realismStress ? resolveBaliRealismReferencePath() : null;
-
   const fmtTone = (t) => ({
     rgb: t.rgb,
     lab: [Math.round(t.L * 10) / 10, Math.round(t.a * 10) / 10, Math.round(t.b * 10) / 10],
@@ -1116,17 +1133,13 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     lBlend: isBali
       ? realismStress
         ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
-        : refPath
-          ? 'swatch chroma + reference photographic L-detail (masked)'
-          : 'swatch chroma + per-pixel source Rec.709 luma preserved'
+        : 'source ΔL + swatch a/b; per-pixel source Rec.709 luma (chroma only, no post)'
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali
       ? realismStress
-        ? 'same finalize as production (bg/shadow unchanged)'
-        : refPath
-          ? 'reference L-detail transfer + finalize bg/bottom'
-          : 'finalize bottom band + white bg only (no upholstery touch)'
+        ? 'finalize bg/bottom only (no upholstery touch)'
+        : 'finalize bg/bottom only — no reference, no upholstery post'
       : null,
   });
 
@@ -1134,51 +1147,6 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     realismStress,
     skipFinalize: isBali,
   });
-
-  if (isBali && refPath) {
-    const referenceImage = await loadImage(refPath);
-    const currentImage = {
-      data: outData,
-      width: sourceImage.width,
-      height: sourceImage.height,
-      channels: sourceImage.channels,
-    };
-    const beforeRef = Buffer.from(outData);
-    const transfer = applyReferenceRealismTransfer(
-      outData,
-      currentImage,
-      referenceImage,
-      mask,
-    );
-    const refDelta = maskedRgbStats(
-      beforeRef,
-      outData,
-      mask,
-      sourceImage.width,
-      sourceImage.height,
-      sourceImage.channels,
-    );
-    console.log({
-      realismReference: refPath.includes(INPUT_DIR)
-        ? `input/${DEFAULT_REFERENCE}`
-        : basename(refPath),
-      realismTransfer: transfer.bands,
-      localContrast: transfer.localContrast,
-      meanLCorrection: transfer.meanLShift,
-      lumaLock: transfer.lumaLock,
-      maskedDeltaAfterRef: refDelta,
-    });
-    console.log(
-      formatMaskedStats(
-        'masked Δ: recolor vs after reference transfer (if RMS≈0, luma lock cancelled detail)',
-        refDelta,
-      ),
-    );
-  } else if (isBali && !realismStress) {
-    console.log(
-      `  warn: no realism reference — add input/${DEFAULT_REFERENCE} (or run npm run bali-stress first)`,
-    );
-  }
 
   if (isBali) {
     finalizeBaliExport(outData, sourceImage, mask);
@@ -1335,7 +1303,7 @@ export async function main(argv = process.argv) {
   }
 
   console.log(
-    '  method: Bali chroma + reference realism transfer (when input reference present); finalize bg/bottom',
+    '  method: Bali chroma only + 100% source luminance; finalize bg/bottom only (no upholstery post)',
   );
 
   if (cli.mode === 'one') {
