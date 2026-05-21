@@ -22717,8 +22717,8 @@ s0.parentNode.insertBefore(s1,s0);
     document.head.appendChild(gf);
   }
   var hrefs = [
-    '/v/vspfiles/boards/my-boards-bundle.css?v=20260530',
-    '/vspfiles/boards/my-boards-bundle.css?v=20260530'
+    '/v/vspfiles/boards/my-boards-bundle.css?v=20260531',
+    '/vspfiles/boards/my-boards-bundle.css?v=20260531'
   ];
   var have = {};
   document.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
@@ -22736,7 +22736,7 @@ s0.parentNode.insertBefore(s1,s0);
   if (!document.querySelector('script[src*="board-styles.js"]')) {
     function loadBoardsPageJs() {
       var s2 = document.createElement('script');
-      s2.src = '/v/vspfiles/boards/my-boards-page.js?v=20260530';
+      s2.src = '/v/vspfiles/boards/my-boards-page.js?v=20260531';
       document.body.appendChild(s2);
     }
     function loadBoardStyles(src) {
@@ -22745,12 +22745,12 @@ s0.parentNode.insertBefore(s1,s0);
       s1.onload = loadBoardsPageJs;
       s1.onerror = function () {
         if (src.indexOf('/vspfiles/') === -1) {
-          loadBoardStyles('/vspfiles/boards/board-styles.js?v=20260530');
+          loadBoardStyles('/vspfiles/boards/board-styles.js?v=20260531');
         }
       };
       document.body.appendChild(s1);
     }
-    loadBoardStyles('/v/vspfiles/boards/board-styles.js?v=20260530');
+    loadBoardStyles('/v/vspfiles/boards/board-styles.js?v=20260531');
   }
 })();
   </script>

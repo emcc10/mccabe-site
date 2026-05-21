@@ -8,7 +8,7 @@
   if (window.__MC_BOARDS_BOOT_DONE) return;
   window.__MC_BOARDS_BOOT_DONE = true;
 
-  var VER = '20260530';
+  var VER = '20260531';
 
   var path = String(location.pathname || '');
   var base =

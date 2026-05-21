@@ -15,7 +15,8 @@ import { enforceLegExclusion, removeStrayBaseArtifacts } from './cleanup.js';
 import { runRenderQA } from './qa.js';
 import {
   assertBaseImageUrlInAssets,
-  assertValidSourceImagePath,
+  assertValidBuildInputPath,
+  assertValidRenderSourcePath,
 } from './sourceGuard.js';
 import {
   assetVersionFromRecord,
@@ -35,7 +36,7 @@ export async function ensureProductAssets(
   const config = getSingleProductConfig(productCode);
   let assets = loadSingleProductAssets(productCode);
   const srcPath = resolve(sourceImagePath(productCode));
-  assertValidSourceImagePath(srcPath, 'ensureProductAssets');
+  assertValidRenderSourcePath(srcPath, 'ensureProductAssets');
 
   if (!existsSync(srcPath)) {
     throw new Error(`Missing source image: ${srcPath}. Run buildSingleProductAssets first.`);
@@ -77,7 +78,7 @@ export async function renderProductSwatch(request: RenderRequest): Promise<Rende
   const cachePath = resolve(getCachedRenderPath(productCode, swatchCode, cacheKey));
   const basePath = resolve(sourceImagePath(productCode));
 
-  assertValidSourceImagePath(basePath, 'renderProductSwatch');
+  assertValidRenderSourcePath(basePath, 'renderProductSwatch');
   console.log(`[render] source (cognac base only): ${basePath}`);
 
   if (!forceRebuild) {
@@ -138,13 +139,13 @@ export function bootstrapFromLegacySofaTool(
   legacySourcePath: string,
   legacyMaskPath?: string,
 ): { sourcePath: string; maskOverridePath?: string } {
-  assertValidSourceImagePath(resolve(legacySourcePath), 'bootstrap input');
+  assertValidBuildInputPath(resolve(legacySourcePath), 'bootstrap input');
 
   const dir = productDir(productCode);
   mkdirSync(dir, { recursive: true });
   const destSource = join(dir, 'source.png');
   copyFileSync(legacySourcePath, destSource);
-  assertValidSourceImagePath(resolve(destSource), 'bootstrap output source.png');
+  assertValidRenderSourcePath(resolve(destSource), 'bootstrap output source.png');
 
   let maskOverridePath: string | undefined;
   if (legacyMaskPath && existsSync(legacyMaskPath)) {

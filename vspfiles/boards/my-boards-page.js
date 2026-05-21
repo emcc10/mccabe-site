@@ -1,8 +1,9 @@
 (function () {
   'use strict';
 
-  if (window.__MC_BOARDS_APP_STARTED) return;
-  window.__MC_BOARDS_APP_STARTED = true;
+  /* Guard duplicate <script> tags only — do not use __MC_BOARDS_APP_STARTED here (startApp needs it). */
+  if (window.__MC_BOARDS_PAGE_IIFE_DONE) return;
+  window.__MC_BOARDS_PAGE_IIFE_DONE = true;
 
   var API_BASE = window.MC_BOARDS_API_BASE || '/v/vspfiles/boards/';
   var API_LIST = API_BASE + 'list.php';
@@ -1293,9 +1294,14 @@
       done();
       return;
     }
-    var src = API_BASE + 'board-styles.js?v=20260530';
+    var src = API_BASE + 'board-styles.js?v=20260531';
     var tag = document.querySelector('script[src*="board-styles.js"]');
     if (tag) {
+      refreshConfig();
+      if (config.styles && config.styles.length) {
+        done();
+        return;
+      }
       tag.addEventListener('load', function () {
         refreshConfig();
         done();
@@ -1303,7 +1309,7 @@
       window.setTimeout(function () {
         refreshConfig();
         if (config.styles && config.styles.length) done();
-      }, 150);
+      }, 400);
       return;
     }
     var s = document.createElement('script');

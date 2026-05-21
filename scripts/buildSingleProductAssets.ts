@@ -11,7 +11,7 @@ import { REPO_ROOT } from '../src/recolor/paths.js';
 import { bootstrapFromLegacySofaTool, ensureProductAssets } from '../src/recolor/pipeline.js';
 import { saveSingleProductAssets, createEmptyAssetsRecord } from '../src/recolor/productAssets.js';
 import {
-  assertValidSourceImagePath,
+  assertValidBuildInputPath,
   removeSwatchRendersFromProductDir,
 } from '../src/recolor/sourceGuard.js';
 
@@ -26,7 +26,7 @@ const DEFAULT_MASK = resolve(REPO_ROOT, 'sofa-recolor-tool', 'input', 'mask.png'
 const sourcePath = resolve(sourceArg ?? COGNAC_SOURCE);
 const maskPath = maskArg ? resolve(maskArg) : DEFAULT_MASK;
 
-assertValidSourceImagePath(sourcePath, 'build input');
+assertValidBuildInputPath(sourcePath, 'build input');
 
 console.log(`Building assets for ${productCode}`);
 console.log(`  cognac source (input):  ${sourcePath}`);
