@@ -2163,10 +2163,16 @@
   function scheduleHideConfigurationRow() {
     hideConfigurationRow();
     mtlHideLegacyVolusionPriceDuplicatesForSectional();
+    try {
+      if (typeof window.mcEnsurePdpPriceStack === "function") window.mcEnsurePdpPriceStack();
+    } catch (ePriceStack) {}
     [500, 1500, 3000].forEach(function (ms) {
       setTimeout(function () {
         hideConfigurationRow();
         mtlHideLegacyVolusionPriceDuplicatesForSectional();
+        try {
+          if (typeof window.mcEnsurePdpPriceStack === "function") window.mcEnsurePdpPriceStack();
+        } catch (ePriceStack2) {}
       }, ms);
     });
   }
