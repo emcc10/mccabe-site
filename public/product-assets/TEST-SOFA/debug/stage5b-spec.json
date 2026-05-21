@@ -1,0 +1,36 @@
+{
+  "stage": "5B",
+  "lockedFrom": "Stage 5 variant B (medium detail)",
+  "detailStrength": 0.24,
+  "highlightStrength": 0.08,
+  "aVariationAmplitude": 0.12,
+  "bVariationAmplitude": 0.18,
+  "detailBlurPx": 8,
+  "base": "Stage 4B-v3",
+  "method": "Stage 4B-v3 base + realism pass (detail + highlight + micro a/b, upholstery mask only)",
+  "realismParams": {
+    "detailStrength": 0.24,
+    "highlightStrength": 0.08,
+    "aVariationAmplitude": 0.12,
+    "bVariationAmplitude": 0.18,
+    "detailBlurPx": 8
+  },
+  "baseUpholsteryMeanLab": {
+    "meanL": 71.86234735369274,
+    "meanA": 3.1375015601290146,
+    "meanB": 6.165209451425794,
+    "count": 152231
+  },
+  "outputUpholsteryMeanLab": {
+    "meanL": 71.77008625050088,
+    "meanA": 3.136627887880918,
+    "meanB": 6.163954779249956,
+    "count": 152231
+  },
+  "deltaMeanLFromBase": -0.0922611031918592,
+  "postRgbPasses": [],
+  "outputs": {
+    "single": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage5b-single.png",
+    "comparison": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage5b-comparison.png"
+  }
+}

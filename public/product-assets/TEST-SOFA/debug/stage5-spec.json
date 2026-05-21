@@ -1,0 +1,62 @@
+{
+  "stage": 5,
+  "base": "Stage 4B-v3 locked (color + edge cleanup unchanged)",
+  "method": "detail restore + highlight shaping + micro a/b variation (upholstery mask only)",
+  "baseUpholsteryMeanLab": {
+    "meanL": 71.86234735369274,
+    "meanA": 3.1375015601290146,
+    "meanB": 6.165209451425794,
+    "count": 152231
+  },
+  "sharedParams": {
+    "detailBlurPx": 8,
+    "highlightStrength": 0.08,
+    "aVariationAmplitude": 0.12,
+    "bVariationAmplitude": 0.18
+  },
+  "variants": [
+    {
+      "id": "A",
+      "label": "A LIGHT DETAIL",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage5-variant-A.png",
+      "detailStrength": 0.18,
+      "meanL": 71.76381288962169,
+      "meanA": 3.136930060237402,
+      "meanB": 6.164296365392069,
+      "deltaLFromBase": -0.09853446407105082
+    },
+    {
+      "id": "B",
+      "label": "B MEDIUM DETAIL",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage5-variant-B.png",
+      "detailStrength": 0.24,
+      "meanL": 71.77008625050088,
+      "meanA": 3.136627887880918,
+      "meanB": 6.163954779249956,
+      "deltaLFromBase": -0.0922611031918592
+    },
+    {
+      "id": "C",
+      "label": "C STRONGER DETAIL",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage5-variant-C.png",
+      "detailStrength": 0.3,
+      "meanL": 71.80588710578003,
+      "meanA": 3.136338853452976,
+      "meanB": 6.164309503320611,
+      "deltaLFromBase": -0.056460247912710315
+    }
+  ],
+  "outputs": {
+    "grid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage5-grid.png",
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage5-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage5-variant-B.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage5-variant-C.png"
+    ],
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage5-spec.json"
+  },
+  "notes": [
+    "Realism applied only inside core upholstery mask; legs/alpha/edges from Stage 4B-v3 preserved.",
+    "L detail is zero-mean over upholstery to avoid global darken."
+  ]
+}

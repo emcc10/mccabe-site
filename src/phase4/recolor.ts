@@ -73,6 +73,44 @@ export function computeUpholsteryLabStats(source: RgbaImage, upholstery: Mask): 
   };
 }
 
+export function relativeLRemapRgb(
+  r: number,
+  g: number,
+  b: number,
+  params: RelativeLRemapParams,
+  stats: UpholsteryLabStats,
+): { r: number; g: number; b: number } {
+  const span = Math.max(0.5, stats.p95 - stats.p5);
+  const sourceLBlend = 1 - params.mappedLBlend;
+  const src = rgbToLab(r, g, b);
+  const Ln = clamp((src.L - stats.p5) / span, 0, 1);
+  const L_mapped = params.lLow + Ln * (params.lHigh - params.lLow);
+  const L_out = L_mapped * params.mappedLBlend + src.L * sourceLBlend;
+  const a_out = src.a * params.chromaSourceA + params.targetA * params.chromaTargetA;
+  const b_out = src.b * params.chromaSourceB + params.targetB * params.chromaTargetB;
+  return labToRgb(L_out, a_out, b_out);
+}
+
+/** Apply Stage 4 relative L remap to every pixel in `mask` (writes into `out`). */
+export function applyRelativeLRemapToMask(
+  source: RgbaImage,
+  out: RgbaImage,
+  mask: Mask,
+  params: RelativeLRemapParams,
+  stats: UpholsteryLabStats,
+): void {
+  const { width, height, channels } = source;
+  for (let j = 0; j < width * height; j++) {
+    if (mask.data[j] < 128) continue;
+    const p = j * channels;
+    const rgb = relativeLRemapRgb(source.data[p], source.data[p + 1], source.data[p + 2], params, stats);
+    out[p] = rgb.r;
+    out[p + 1] = rgb.g;
+    out[p + 2] = rgb.b;
+    if (channels === 4) out[p + 3] = source.data[p + 3];
+  }
+}
+
 /**
  * Stage 4: relative luminance remap + swatch chroma (not preserveLuminance/chromaBlend).
  */

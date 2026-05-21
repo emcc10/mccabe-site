@@ -9,10 +9,12 @@ import { measureRecolorMetrics } from '../phase2/metrics.js';
 import { computeUpholsteryLabStats } from '../phase4/recolor.js';
 import type { RgbaImage } from '../phase1/segment.js';
 import {
-  applyCoverageBandsToFinal,
+  applyStage4bEdgeFixV3,
+  assertStage4bEdgeFixComplete,
+  auditStage4bEdgeFix,
+  buildContourRingPreviewRgb,
   buildEdgeBandPreviewRgb,
-  buildFootRingPreviewRgb,
-  countBandSourceRgbSurvivors,
+  buildFootCornerRingPreviewRgb,
   recolorWithStage4bCoverage,
 } from './coverage.js';
 import { LOCKED_4B } from './spec.js';
@@ -21,11 +23,11 @@ export const STAGE4B_SINGLE = join(DEBUG_DIR, 'stage4b-single.png');
 export const STAGE4B_COMPARISON = join(DEBUG_DIR, 'stage4b-comparison.png');
 export const STAGE4B_SPEC = join(DEBUG_DIR, 'stage4b-spec.json');
 
-export const STAGE4B_EDGEBAND_PREVIEW = join(DEBUG_DIR, 'stage4b-edgeband-preview.png');
-export const STAGE4B_FOOT_RING_PREVIEW = join(DEBUG_DIR, 'stage4b-foot-ring-preview.png');
-export const STAGE4B_SINGLE_EDGEFIXED = join(DEBUG_DIR, 'stage4b-single-edgefixed.png');
-export const STAGE4B_COMPARISON_EDGEFIXED = join(DEBUG_DIR, 'stage4b-comparison-edgefixed.png');
-export const STAGE4B_SPEC_EDGEFIXED = join(DEBUG_DIR, 'stage4b-spec-edgefixed.json');
+export const STAGE4B_SINGLE_EDGEFIXED_V3 = join(DEBUG_DIR, 'stage4b-single-edgefixed-v3.png');
+export const STAGE4B_COMPARISON_EDGEFIXED_V3 = join(DEBUG_DIR, 'stage4b-comparison-edgefixed-v3.png');
+export const STAGE4B_CORNER_RING_PREVIEW = join(DEBUG_DIR, 'stage4b-corner-ring-preview.png');
+export const STAGE4B_CONTOUR_RING_PREVIEW = join(DEBUG_DIR, 'stage4b-contour-ring-preview.png');
+export const STAGE4B_SPEC_EDGEFIXED_V3 = join(DEBUG_DIR, 'stage4b-spec-edgefixed-v3.json');
 
 const LABEL_H = 44;
 
@@ -105,7 +107,8 @@ async function writeTwoPanelComparison(
     .toFile(outPath);
 }
 
-export async function runStage4b() {
+/** Locked Stage 4B-v3 composite (color + edge cleanup). Used as Stage 5 base. */
+export async function buildStage4bV3Final() {
   if (!existsSync(SOURCE_OUT)) {
     throw new Error(`Missing ${SOURCE_OUT} — run npm run prove:stage2 first`);
   }
@@ -123,47 +126,49 @@ export async function runStage4b() {
     stats,
   );
   const final = compositePhase2(source, recolored, alpha, masks.upholsteryRecolor, legs);
-  applyCoverageBandsToFinal(
+  const forceResult = applyStage4bEdgeFixV3(
     source,
     recolored,
     final,
     alpha,
     legs,
-    masks.edgeBandOnly,
-    masks.footRing,
+    masks,
+    LOCKED_4B,
+    stats,
   );
 
-  const bandSurvivors = countBandSourceRgbSurvivors(
-    source,
-    final,
-    legs,
-    masks.edgeBandOnly,
-    masks.footRing,
-  );
+  const audit = auditStage4bEdgeFix(source, final, alpha, legs, masks, forceResult);
+  assertStage4bEdgeFixComplete(audit);
 
-  await writeRgbaPng(STAGE4B_SINGLE_EDGEFIXED, final);
+  return { source, base: final, upholstery, alpha, legs, stats, masks, audit };
+}
+
+export async function runStage4b() {
+  const built = await buildStage4bV3Final();
+  const { source, base: final, upholstery, legs, stats, masks, audit } = built;
+
+  await writeRgbaPng(STAGE4B_SINGLE_EDGEFIXED_V3, final);
   await writeTwoPanelComparison(
-    STAGE4B_COMPARISON_EDGEFIXED,
+    STAGE4B_COMPARISON_EDGEFIXED_V3,
     SOURCE_OUT,
-    STAGE4B_SINGLE_EDGEFIXED,
+    STAGE4B_SINGLE_EDGEFIXED_V3,
     'SOURCE',
     'STAGE 4B EDGE-FIXED',
   );
 
   await writeRgbPng(
-    STAGE4B_EDGEBAND_PREVIEW,
+    STAGE4B_CORNER_RING_PREVIEW,
     source.width,
     source.height,
-    buildEdgeBandPreviewRgb(source, masks.edgeBandOnly),
+    buildFootCornerRingPreviewRgb(source, masks.footCornerRing),
   );
   await writeRgbPng(
-    STAGE4B_FOOT_RING_PREVIEW,
+    STAGE4B_CONTOUR_RING_PREVIEW,
     source.width,
     source.height,
-    buildFootRingPreviewRgb(source, masks.footRing),
+    buildContourRingPreviewRgb(source, masks.contourRing),
   );
 
-  // Legacy filenames alias edge-fixed (same pipeline)
   await writeRgbaPng(STAGE4B_SINGLE, final);
   await writeTwoPanelComparison(
     STAGE4B_COMPARISON,
@@ -180,29 +185,39 @@ export async function runStage4b() {
     stage,
     lockedFrom,
     notFinalBaliSilk,
-    edgeFix: true,
-    method: 'recolorUpholsteryRelativeLRemap + edge/foot coverage + compositePhase2',
+    edgeFix: 'v3',
+    method:
+      'recolorUpholsteryRelativeLRemap + thin contour/foot rings + compositePhase2 + alpha-gated forceRemap',
     params,
     sourceUpholsteryLabStats: stats,
     coverage: {
       edgeExpandPx: 1,
-      footGuardPx: 1,
+      legRingPx: 1,
+      contourRingPx: 1,
+      upholsteryNearPx: 2,
       edgeBandPixelCount: countMask(masks.edgeBandOnly),
-      footRingPixelCount: countMask(masks.footRing),
+      footCornerRingPixelCount: countMask(masks.footCornerRing),
+      contourRingPixelCount: countMask(masks.contourRing),
+      cleanupUnionPixelCount: countMask(masks.cleanupUnion),
       upholsteryRecolorPixelCount: countMask(masks.upholsteryRecolor),
     },
     compositeAudit: {
-      bandSourceRgbSurvivors: bandSurvivors,
-      note: 'Trim/frame inside alpha intentionally keeps source; band survivors must be 0',
+      bandSourceRgbSurvivors: audit.bandSourceRgbSurvivors,
+      cornerSourceRgbSurvivors: audit.cornerSourceRgbSurvivors,
+      contourSourceRgbSurvivors: audit.contourSourceRgbSurvivors,
+      backgroundPixelsTouchedByCleanup: audit.backgroundPixelsTouchedByCleanup,
+      footCornerPixelsTouchedOutsideAlpha: audit.footCornerPixelsTouchedOutsideAlpha,
+      contourPixelsTouchedOutsideAlpha: audit.contourPixelsTouchedOutsideAlpha,
+      complete: true,
     },
     postRgbPasses: [],
     outputs: {
-      single: STAGE4B_SINGLE_EDGEFIXED,
-      comparison: STAGE4B_COMPARISON_EDGEFIXED,
-      edgebandPreview: STAGE4B_EDGEBAND_PREVIEW,
-      footRingPreview: STAGE4B_FOOT_RING_PREVIEW,
+      single: STAGE4B_SINGLE_EDGEFIXED_V3,
+      comparison: STAGE4B_COMPARISON_EDGEFIXED_V3,
+      cornerRingPreview: STAGE4B_CORNER_RING_PREVIEW,
+      contourRingPreview: STAGE4B_CONTOUR_RING_PREVIEW,
+      edgebandPreview: join(DEBUG_DIR, 'stage4b-edgeband-preview.png'),
       legacySingle: STAGE4B_SINGLE,
-      legacyComparison: STAGE4B_COMPARISON,
     },
     metrics: {
       upholsteryMeanLabDeltaFromSource: metrics.upholsteryMeanLabDeltaFromSource,
@@ -211,17 +226,24 @@ export async function runStage4b() {
     },
   };
 
-  writeFileSync(STAGE4B_SPEC_EDGEFIXED, JSON.stringify(specBody, null, 2));
+  writeFileSync(STAGE4B_SPEC_EDGEFIXED_V3, JSON.stringify(specBody, null, 2));
   writeFileSync(STAGE4B_SPEC, JSON.stringify(specBody, null, 2));
 
+  await writeRgbPng(
+    join(DEBUG_DIR, 'stage4b-edgeband-preview.png'),
+    source.width,
+    source.height,
+    buildEdgeBandPreviewRgb(source, masks.edgeBandOnly),
+  );
+
   return {
-    single: STAGE4B_SINGLE_EDGEFIXED,
-    comparison: STAGE4B_COMPARISON_EDGEFIXED,
-    spec: STAGE4B_SPEC_EDGEFIXED,
+    single: STAGE4B_SINGLE_EDGEFIXED_V3,
+    comparison: STAGE4B_COMPARISON_EDGEFIXED_V3,
+    spec: STAGE4B_SPEC_EDGEFIXED_V3,
     metrics,
     stats,
     masks,
-    bandSurvivors,
+    audit,
   };
 }
 

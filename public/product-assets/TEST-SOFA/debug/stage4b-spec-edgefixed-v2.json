@@ -1,0 +1,57 @@
+{
+  "stage": "4B",
+  "lockedFrom": "Stage 4 variant B",
+  "notFinalBaliSilk": true,
+  "edgeFix": "v2",
+  "method": "recolorUpholsteryRelativeLRemap + edge/foot/corner/contour coverage + compositePhase2 + forceRemap passes",
+  "params": {
+    "lLow": 72,
+    "lHigh": 92,
+    "mappedLBlend": 0.82,
+    "targetA": 0.3,
+    "targetB": 4.2,
+    "chromaSourceA": 0.12,
+    "chromaSourceB": 0.1,
+    "chromaTargetA": 0.88,
+    "chromaTargetB": 0.9
+  },
+  "sourceUpholsteryLabStats": {
+    "minL": 0,
+    "maxL": 75,
+    "meanL": 32.40331469937135,
+    "p5": 15,
+    "p95": 56
+  },
+  "coverage": {
+    "edgeExpandPx": 1,
+    "footGuardPx": 1,
+    "footJunctionPx": 2,
+    "contourPx": 1,
+    "edgeBandPixelCount": 4742,
+    "footRingPixelCount": 272,
+    "footJunctionPixelCount": 224,
+    "cornerCleanupPixelCount": 6629,
+    "contourCleanupPixelCount": 2796,
+    "upholsteryRecolorPixelCount": 159336
+  },
+  "compositeAudit": {
+    "bandSourceRgbSurvivors": 0,
+    "cornerSourceRgbSurvivors": 0,
+    "contourSourceRgbSurvivors": 0,
+    "complete": true
+  },
+  "postRgbPasses": [],
+  "outputs": {
+    "single": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage4b-single-edgefixed-v2.png",
+    "comparison": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage4b-comparison-edgefixed-v2.png",
+    "cornerCleanupPreview": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage4b-corner-cleanup-preview.png",
+    "contourCleanupPreview": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage4b-contour-cleanup-preview.png",
+    "edgebandPreview": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage4b-edgeband-preview.png",
+    "legacySingle": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage4b-single.png"
+  },
+  "metrics": {
+    "upholsteryMeanLabDeltaFromSource": 47.461804977485976,
+    "lStdPreservationRatio": 0.46744996806434075,
+    "legExactMatchRatio": 1
+  }
+}

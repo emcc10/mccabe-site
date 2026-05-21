@@ -2,19 +2,23 @@ import type { Mask } from '../phase1/masks.js';
 import { dilate, erode, intersect, subtract, union } from '../phase1/masks.js';
 import type { RgbaImage } from '../phase1/segment.js';
 import type { RelativeLRemapParams, UpholsteryLabStats } from '../phase4/recolor.js';
-import { recolorUpholsteryRelativeLRemap } from '../phase4/recolor.js';
+import { recolorUpholsteryRelativeLRemap, relativeLRemapRgb } from '../phase4/recolor.js';
 
+/** Thin boundary rings only (v3) — no blobs or rectangular fills */
 const EDGE_EXPAND_PX = 1;
-const FOOT_GUARD_PX = 1;
+const LEG_RING_PX = 1;
+const CONTOUR_RING_PX = 1;
+const UPHOLSTERY_NEAR_PX = 2;
 
 export interface Stage4bCoverageMasks {
-  /** Alpha silhouette outer 1px + 1px upholstery expand inside alpha, non-leg */
-  upholsteryEdgeBand: Mask;
-  /** Band pixels added beyond core upholstery (for debug preview) */
+  /** 1px upholstery expand inside alpha (recovers mask erode) */
   edgeBandOnly: Mask;
-  /** dilate(legs,1) ∩ alpha − legs */
-  footRing: Mask;
-  /** Core upholstery ∪ edge band ∪ foot ring — recolor + composite upholstery */
+  /** dilate(leg,1) ∩ alpha ∩ non-leg ∩ upholstery-neighborhood */
+  footCornerRing: Mask;
+  /** Outer alpha silhouette 1px ring */
+  contourRing: Mask;
+  /** All thin cleanup rings combined */
+  cleanupUnion: Mask;
   upholsteryRecolor: Mask;
 }
 
@@ -23,20 +27,33 @@ export function buildStage4bCoverageMasks(
   upholstery: Mask,
   legs: Mask,
 ): Stage4bCoverageMasks {
-  const nonLeg = subtract(alpha, legs);
-  const alphaContour = subtract(alpha, erode(alpha, EDGE_EXPAND_PX));
-  const expandInsideAlpha = subtract(intersect(dilate(upholstery, EDGE_EXPAND_PX), alpha), upholstery);
-  const upholsteryEdgeBand = intersect(union(alphaContour, expandInsideAlpha), nonLeg);
-  const edgeBandOnly = subtract(upholsteryEdgeBand, upholstery);
-  const legGuard = subtract(intersect(dilate(legs, FOOT_GUARD_PX), alpha), legs);
-  const footJunction = subtract(
-    intersect(dilate(upholstery, FOOT_GUARD_PX), dilate(legs, FOOT_GUARD_PX)),
-    legs,
-  );
-  const footRing = intersect(union(legGuard, footJunction), nonLeg);
-  const upholsteryRecolor = union(upholstery, upholsteryEdgeBand, footRing);
+  const nonLeg = intersect(subtract(alpha, legs), alpha);
+  const upholsteryNear = intersect(dilate(upholstery, UPHOLSTERY_NEAR_PX), alpha);
 
-  return { upholsteryEdgeBand, edgeBandOnly, footRing, upholsteryRecolor };
+  const edgeBandOnly = intersect(
+    subtract(intersect(dilate(upholstery, EDGE_EXPAND_PX), alpha), upholstery),
+    nonLeg,
+  );
+
+  const contourRing = intersect(subtract(alpha, erode(alpha, CONTOUR_RING_PX)), nonLeg);
+
+  const footCornerRing = intersect(
+    subtract(intersect(dilate(legs, LEG_RING_PX), alpha), legs),
+    intersect(upholsteryNear, nonLeg),
+  );
+
+  const cleanupUnion = union(edgeBandOnly, footCornerRing, contourRing);
+  const upholsteryRecolor = union(upholstery, cleanupUnion);
+
+  return { edgeBandOnly, footCornerRing, contourRing, cleanupUnion, upholsteryRecolor };
+}
+
+export function countMaskPixelsOutsideAlpha(mask: Mask, alpha: Mask): number {
+  let n = 0;
+  for (let j = 0; j < mask.data.length; j++) {
+    if (mask.data[j] >= 128 && alpha.data[j] < 128) n++;
+  }
+  return n;
 }
 
 export function recolorWithStage4bCoverage(
@@ -57,34 +74,100 @@ export function recolorWithStage4bCoverage(
   return { recolored, masks };
 }
 
-/** Overlay band mask on source for debug (magenta = edge band, cyan = foot ring). */
-export function buildCoveragePreviewRgb(
+function rgbMatchesSource(
   source: RgbaImage,
-  edgeBandOnly: Mask,
-  footRing: Mask,
-): Buffer {
-  const { width, height, channels } = source;
-  const buf = Buffer.alloc(width * height * 3);
-  for (let j = 0; j < width * height; j++) {
-    const p = j * channels;
-    const o = j * 3;
-    let r = source.data[p];
-    let g = source.data[p + 1];
-    let b = source.data[p + 2];
-    if (edgeBandOnly.data[j] >= 128) {
-      r = Math.round(r * 0.4 + 255 * 0.6);
-      g = Math.round(g * 0.4 + 60 * 0.6);
-      b = Math.round(b * 0.4 + 255 * 0.6);
-    } else if (footRing.data[j] >= 128) {
-      r = Math.round(r * 0.4 + 40 * 0.6);
-      g = Math.round(g * 0.4 + 220 * 0.6);
-      b = Math.round(b * 0.4 + 255 * 0.6);
-    }
-    buf[o] = r;
-    buf[o + 1] = g;
-    buf[o + 2] = b;
+  image: RgbaImage,
+  j: number,
+  tolerance: number,
+): boolean {
+  const p = j * source.channels;
+  return (
+    Math.abs(source.data[p] - image.data[p]) <= tolerance &&
+    Math.abs(source.data[p + 1] - image.data[p + 1]) <= tolerance &&
+    Math.abs(source.data[p + 2] - image.data[p + 2]) <= tolerance
+  );
+}
+
+export function countSourceRgbSurvivorsInMask(
+  source: RgbaImage,
+  final: RgbaImage,
+  alpha: Mask,
+  legs: Mask,
+  region: Mask,
+  tolerance = 0,
+): number {
+  const { channels } = source;
+  let n = 0;
+  for (let j = 0; j < source.data.length / channels; j++) {
+    if (legs.data[j] >= 128) continue;
+    if (region.data[j] < 128) continue;
+    if (alpha.data[j] < 128) continue;
+    if (rgbMatchesSource(source, final, j, tolerance)) n++;
   }
-  return buf;
+  return n;
+}
+
+export interface ForceRemapResult {
+  backgroundPixelsTouchedByCleanup: number;
+}
+
+/**
+ * Force Stage 4B remapped RGB into final/recolored for alpha-on, non-leg pixels in region only.
+ * Never writes when alpha is off.
+ */
+export function forceRemapRgbInMask(
+  source: RgbaImage,
+  recolored: RgbaImage,
+  final: RgbaImage,
+  alpha: Mask,
+  legs: Mask,
+  region: Mask,
+  params: RelativeLRemapParams,
+  stats: UpholsteryLabStats,
+): ForceRemapResult {
+  const { channels } = source;
+  let backgroundPixelsTouchedByCleanup = 0;
+
+  for (let j = 0; j < alpha.data.length; j++) {
+    if (region.data[j] < 128) continue;
+    if (legs.data[j] >= 128) continue;
+    if (alpha.data[j] < 128) {
+      backgroundPixelsTouchedByCleanup++;
+      continue;
+    }
+    const p = j * channels;
+    const rgb = relativeLRemapRgb(source.data[p], source.data[p + 1], source.data[p + 2], params, stats);
+    recolored.data[p] = rgb.r;
+    recolored.data[p + 1] = rgb.g;
+    recolored.data[p + 2] = rgb.b;
+    final.data[p] = rgb.r;
+    final.data[p + 1] = rgb.g;
+    final.data[p + 2] = rgb.b;
+  }
+
+  return { backgroundPixelsTouchedByCleanup };
+}
+
+export function applyStage4bEdgeFixV3(
+  source: RgbaImage,
+  recolored: RgbaImage,
+  final: RgbaImage,
+  alpha: Mask,
+  legs: Mask,
+  masks: Stage4bCoverageMasks,
+  params: RelativeLRemapParams,
+  stats: UpholsteryLabStats,
+): ForceRemapResult {
+  return forceRemapRgbInMask(
+    source,
+    recolored,
+    final,
+    alpha,
+    legs,
+    masks.cleanupUnion,
+    params,
+    stats,
+  );
 }
 
 export function buildEdgeBandPreviewRgb(source: RgbaImage, edgeBandOnly: Mask): Buffer {
@@ -108,7 +191,7 @@ export function buildEdgeBandPreviewRgb(source: RgbaImage, edgeBandOnly: Mask): 
   return buf;
 }
 
-export function buildFootRingPreviewRgb(source: RgbaImage, footRing: Mask): Buffer {
+export function buildFootCornerRingPreviewRgb(source: RgbaImage, footCornerRing: Mask): Buffer {
   const { width, height, channels } = source;
   const buf = Buffer.alloc(width * height * 3);
   for (let j = 0; j < width * height; j++) {
@@ -117,10 +200,10 @@ export function buildFootRingPreviewRgb(source: RgbaImage, footRing: Mask): Buff
     let r = source.data[p];
     let g = source.data[p + 1];
     let b = source.data[p + 2];
-    if (footRing.data[j] >= 128) {
-      r = Math.round(r * 0.35 + 40 * 0.65);
-      g = Math.round(g * 0.35 + 220 * 0.65);
-      b = Math.round(b * 0.35 + 255 * 0.65);
+    if (footCornerRing.data[j] >= 128) {
+      r = Math.round(r * 0.35 + 255 * 0.65);
+      g = Math.round(g * 0.35 + 180 * 0.65);
+      b = Math.round(b * 0.35 + 60 * 0.65);
     }
     buf[o] = r;
     buf[o + 1] = g;
@@ -129,53 +212,96 @@ export function buildFootRingPreviewRgb(source: RgbaImage, footRing: Mask): Buff
   return buf;
 }
 
-/** Pixels in edge/foot bands where final RGB still matches source (should be 0). */
-export function countBandSourceRgbSurvivors(
-  source: RgbaImage,
-  final: RgbaImage,
-  legs: Mask,
-  edgeBandOnly: Mask,
-  footRing: Mask,
-  tolerance = 2,
-): number {
-  const { channels } = source;
-  let n = 0;
-  for (let j = 0; j < source.data.length / channels; j++) {
-    if (legs.data[j] >= 128) continue;
-    if (edgeBandOnly.data[j] < 128 && footRing.data[j] < 128) continue;
+export function buildContourRingPreviewRgb(source: RgbaImage, contourRing: Mask): Buffer {
+  const { width, height, channels } = source;
+  const buf = Buffer.alloc(width * height * 3);
+  for (let j = 0; j < width * height; j++) {
     const p = j * channels;
-    if (
-      Math.abs(source.data[p] - final.data[p]) <= tolerance &&
-      Math.abs(source.data[p + 1] - final.data[p + 1]) <= tolerance &&
-      Math.abs(source.data[p + 2] - final.data[p + 2]) <= tolerance
-    ) {
-      n++;
+    const o = j * 3;
+    let r = source.data[p];
+    let g = source.data[p + 1];
+    let b = source.data[p + 2];
+    if (contourRing.data[j] >= 128) {
+      r = Math.round(r * 0.35 + 255 * 0.65);
+      g = Math.round(g * 0.35 + 120 * 0.65);
+      b = Math.round(b * 0.35 + 40 * 0.65);
     }
+    buf[o] = r;
+    buf[o + 1] = g;
+    buf[o + 2] = b;
   }
-  return n;
+  return buf;
 }
 
-/**
- * After compositePhase2: force recolored RGB on edge/foot bands (non-leg, alpha on).
- * Legs stay source; alpha channel untouched.
- */
-export function applyCoverageBandsToFinal(
+export interface Stage4bEdgeFixAudit {
+  bandSourceRgbSurvivors: number;
+  cornerSourceRgbSurvivors: number;
+  contourSourceRgbSurvivors: number;
+  backgroundPixelsTouchedByCleanup: number;
+  footCornerPixelsTouchedOutsideAlpha: number;
+  contourPixelsTouchedOutsideAlpha: number;
+}
+
+export function auditStage4bEdgeFix(
   source: RgbaImage,
-  recolored: RgbaImage,
   final: RgbaImage,
   alpha: Mask,
   legs: Mask,
-  edgeBandOnly: Mask,
-  footRing: Mask,
-): void {
-  const { channels } = source;
-  for (let j = 0; j < alpha.data.length; j++) {
-    if (legs.data[j] >= 128) continue;
-    if (edgeBandOnly.data[j] < 128 && footRing.data[j] < 128) continue;
-    if (alpha.data[j] < 128) continue;
-    const p = j * channels;
-    final.data[p] = recolored.data[p];
-    final.data[p + 1] = recolored.data[p + 1];
-    final.data[p + 2] = recolored.data[p + 2];
+  masks: Stage4bCoverageMasks,
+  forceResult: ForceRemapResult,
+): Stage4bEdgeFixAudit {
+  return {
+    bandSourceRgbSurvivors: countSourceRgbSurvivorsInMask(
+      source,
+      final,
+      alpha,
+      legs,
+      masks.cleanupUnion,
+      0,
+    ),
+    cornerSourceRgbSurvivors: countSourceRgbSurvivorsInMask(
+      source,
+      final,
+      alpha,
+      legs,
+      masks.footCornerRing,
+      0,
+    ),
+    contourSourceRgbSurvivors: countSourceRgbSurvivorsInMask(
+      source,
+      final,
+      alpha,
+      legs,
+      masks.contourRing,
+      0,
+    ),
+    backgroundPixelsTouchedByCleanup: forceResult.backgroundPixelsTouchedByCleanup,
+    footCornerPixelsTouchedOutsideAlpha: countMaskPixelsOutsideAlpha(masks.footCornerRing, alpha),
+    contourPixelsTouchedOutsideAlpha: countMaskPixelsOutsideAlpha(masks.contourRing, alpha),
+  };
+}
+
+export function assertStage4bEdgeFixComplete(audit: Stage4bEdgeFixAudit): void {
+  const failures: string[] = [];
+  if (audit.bandSourceRgbSurvivors !== 0) {
+    failures.push(`bandSourceRgbSurvivors=${audit.bandSourceRgbSurvivors}`);
+  }
+  if (audit.cornerSourceRgbSurvivors !== 0) {
+    failures.push(`cornerSourceRgbSurvivors=${audit.cornerSourceRgbSurvivors}`);
+  }
+  if (audit.contourSourceRgbSurvivors !== 0) {
+    failures.push(`contourSourceRgbSurvivors=${audit.contourSourceRgbSurvivors}`);
+  }
+  if (audit.backgroundPixelsTouchedByCleanup !== 0) {
+    failures.push(`backgroundPixelsTouchedByCleanup=${audit.backgroundPixelsTouchedByCleanup}`);
+  }
+  if (audit.footCornerPixelsTouchedOutsideAlpha !== 0) {
+    failures.push(`footCornerPixelsTouchedOutsideAlpha=${audit.footCornerPixelsTouchedOutsideAlpha}`);
+  }
+  if (audit.contourPixelsTouchedOutsideAlpha !== 0) {
+    failures.push(`contourPixelsTouchedOutsideAlpha=${audit.contourPixelsTouchedOutsideAlpha}`);
+  }
+  if (failures.length) {
+    throw new Error(`Stage 4B edge fix v3 incomplete: ${failures.join(', ')} (all must be 0)`);
   }
 }
