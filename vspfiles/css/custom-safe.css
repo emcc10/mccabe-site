@@ -5639,7 +5639,7 @@ body.mc-product-page #content_area .productoptionname,
 body.mc-product-page .productoptionname,
 body.mc-product-page #content_area label,
 body.mc-product-page #content_area .mc-option-accordion__label {
-  font-size: 14px !important;
+  font-size: 13px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
   letter-spacing: .06em !important;
@@ -13055,6 +13055,25 @@ body.mc-product-page #content_area p,
 body.mc-product-page #content_area li {
 
   font-size: 13px !important;
+}
+
+/* Option / accordion labels: must follow global `body * { font-size: 18px }` (~13041). */
+body.mc-product-page #content_area .productoptionname,
+body.mc-product-page #content_area .vCSS_input_label,
+body.mc-product-page #content_area td.productoptionname,
+body.mc-product-page #content_area label,
+body.mc-product-page #content_area #options_table label,
+body.mc-product-page #content_area #options_table .productoptionname,
+body.mc-product-page #content_area table[id*="options_table"] label,
+body.mc-product-page #content_area table[id*="options_table"] .productoptionname,
+body.mc-product-page #content_area #mcLeatherHeader,
+body.mc-product-page #content_area .mc-option-accordion__label,
+body.mc-product-page #content_area .mc-option-accordion__header,
+body.mc-product-page #content_area .mc-option-accordion__header .mc-option-accordion__label {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.06em !important;
 }
 
 .productdetails span[itemprop="name"] {
