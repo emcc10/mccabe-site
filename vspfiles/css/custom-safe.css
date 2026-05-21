@@ -10348,11 +10348,25 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row > * {
   position: static !important;
   width: 100% !important;
 }
-body.productdetails #v65-product-parent .mc-pdp-member-pricing .mc-pdp-sale-preview,
-body.mc-product-page #v65-product-parent .mc-pdp-member-pricing .mc-pdp-sale-preview {
-  display: block !important;
+body.productdetails #v65-product-parent .mc-pdp-member-pricing .mc-pdp-member-line--sale,
+body.mc-product-page #v65-product-parent .mc-pdp-member-pricing .mc-pdp-member-line--sale {
+  display: flex !important;
+  flex-direction: column !important;
   margin-top: 4px !important;
-  clear: both !important;
+  gap: 2px !important;
+}
+body.productdetails #mcConfigurationBlock .mc-configuration-rh__addl,
+body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__addl,
+body.productdetails #mcConfigurationBlock .mc-configuration-rh__total-line,
+body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__total-line,
+body.productdetails #mcConfigurationBlock #mcConfigurationPrice,
+body.mc-product-page #mcConfigurationBlock #mcConfigurationPrice {
+  display: block !important;
+  font-size: 13px !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.35 !important;
+  color: #444 !important;
+  margin-top: 4px !important;
 }
 
 body.productdetails #v65-product-parent .mc-pdp-member-pricing + #priceWithOptions,

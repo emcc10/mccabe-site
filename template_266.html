@@ -50,7 +50,7 @@ body.productdetails #options_table select:not(.mc-native-leather),body.mc-produc
 body.productdetails .mc-pdp-retail-label,body.mc-product-page .mc-pdp-retail-label,body.productdetails .mc-pdp-member-line__label,body.mc-product-page .mc-pdp-member-line__label{font-size:13px!important;letter-spacing:.16em!important;text-transform:uppercase!important;color:#777!important}
 body.productdetails .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-member-line__amount,body.productdetails .mc-pdp-retail-row .product_list_price,body.mc-product-page .mc-pdp-retail-row .product_list_price{font-size:13px!important;letter-spacing:.02em!important;text-transform:none!important;color:#444!important;white-space:normal!important}
 body.productdetails .mc-pdp-retail-row .product_sale_price,body.mc-product-page .mc-pdp-retail-row .product_sale_price,body.productdetails .mc-pdp-retail-row .product_saleprice,body.mc-product-page .mc-pdp-retail-row .product_saleprice,body.productdetails .mtl-product-price-block>.product_sale_price,body.mc-product-page .mtl-product-price-block>.product_saleprice{display:none!important;visibility:hidden!important}
-body.productdetails .mc-pdp-member-pricing .mc-pdp-sale-preview,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-sale-preview{display:block!important;margin-top:4px!important}
+body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line--sale,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line--sale{display:flex!important;flex-direction:column!important;margin-top:4px!important}
 </style>
 <link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260521type" id="mc-live-patch-css">
 <script>
@@ -461,7 +461,7 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-sale-preview,body.mc-product-
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
-  <link href="/v/vspfiles/css/custom-safe.css?v=20260521f" rel="stylesheet" id="mc-custom-safe-css-static">
+  <link href="/v/vspfiles/css/custom-safe.css?v=20260521g" rel="stylesheet" id="mc-custom-safe-css-static">
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
   html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
@@ -16619,9 +16619,21 @@ body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
   display: block !important;
   font-size: 13px !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.16em !important;
+  letter-spacing: 0.02em !important;
   color: #444 !important;
   font-weight: 400 !important;
+  white-space: normal !important;
+  position: static !important;
+  width: 100% !important;
+}
+.mc-pdp-member-pricing .mc-pdp-member-line--sale {
+  margin-top: 4px !important;
+}
+.mc-pdp-member-pricing > .product_sale_price,
+.mc-pdp-member-pricing > .product_saleprice,
+.mc-pdp-member-pricing > font.product_sale_price {
+  display: none !important;
+  visibility: hidden !important;
 }
 
 .mc-pdp-member-pricing .mc-pdp-member-line {
