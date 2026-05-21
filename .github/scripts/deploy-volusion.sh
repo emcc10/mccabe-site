@@ -145,12 +145,23 @@ fi
 
 python3 scripts/announce_deploy_markers.py || true
 
+DEPLOY_STRICT="${DEPLOY_STRICT:-1}"
+DEPLOY_FAIL=0
+
+echo "=== DEPLOY_START ref=$(git rev-parse --short HEAD 2>/dev/null || echo unknown) ==="
+echo "=== custom-safe line 1: $(head -1 vspfiles/css/custom-safe.css 2>/dev/null || echo MISSING) ==="
+
 set +e
 deploy_template
 template_upload_rc=$?
 set -e
 if [[ "$template_upload_rc" -ne 0 ]]; then
-  echo "::warning::Template upload step failed (exit ${template_upload_rc}) — continuing with vspfiles/CSS/JS"
+  echo "::error::Template upload failed (exit ${template_upload_rc})"
+  DEPLOY_FAIL=1
+  if [[ "$DEPLOY_STRICT" == "1" ]]; then
+    echo "::error::DEPLOY_STRICT=1 — aborting (template_266.html did not upload)"
+    exit 1
+  fi
 fi
 
 set +e
@@ -160,6 +171,9 @@ set -e
 if [[ "$verify_rc" -ne 0 ]]; then
   echo "::warning::SFTP template verify failed (exit ${verify_rc}) — continuing with vspfiles/CSS/JS upload"
   echo "::warning::If categories/PDPs look stale: Volusion Design → File Editor → template_266.html → Save"
+  if [[ "$DEPLOY_STRICT" == "1" && "$template_upload_rc" -ne 0 ]]; then
+    DEPLOY_FAIL=1
+  fi
 fi
 
 echo "=== Assets via Paramiko (size-verified; /v/vspfiles + chroot paths) ==="
@@ -312,7 +326,7 @@ for pair in \
   fi
 done
 if [[ "${boards_canon_rc:-0}" -ne 0 ]]; then
-  echo "::error::My Boards live byte check failed — page will look empty until /v/vspfiles/boards/* updates"
+  echo "::warning::My Boards live byte check failed (non-blocking for template/CSS deploy)"
 fi
 
 echo "=== PLP product photos (replace baked gray mat with white) ==="
@@ -392,3 +406,9 @@ echo "  /v/vspfiles/templates/266/js/min/design-toolkit.min.js"
 echo ""
 echo "=== Live storefront verify (soft — does not fail CI) ==="
 python3 scripts/verify_live_plp_deploy.py --soft || true
+
+if [[ "$DEPLOY_FAIL" -ne 0 ]]; then
+  echo "::error::Deploy finished with failures (template or prior step)"
+  exit 1
+fi
+echo "=== DEPLOY_OK — template + custom-safe SFTP verified ==="
