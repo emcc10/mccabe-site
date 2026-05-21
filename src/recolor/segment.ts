@@ -212,8 +212,13 @@ export async function buildSegmentationForProduct(
       legs,
       trim: overrides.trim ?? emptyMask,
     };
-    if (overrides.legs) seg.legs = dilateMask(overrides.legs, config.legProtectionExpandPx);
-    seg.upholstery = subtractMask(intersectMask(seg.upholstery, alpha), seg.legs);
+    const legGuard = dilateMask(legs, config.legProtectionExpandPx);
+    seg.legs = legGuard;
+    seg.upholstery = subtractMask(intersectMask(seg.upholstery, alpha), legGuard);
+    if (config.upholsteryContractPx > 0) {
+      seg.upholstery = erodeMask(seg.upholstery, config.upholsteryContractPx);
+    }
+    seg.upholstery = subtractMask(seg.upholstery, legGuard);
   } else {
     seg = await autoSegmentSingleProduct(image, config);
   }

@@ -9,7 +9,6 @@ const SWATCHES: SwatchProfile[] = [
     grainStrength: 0.2,
     highlightSoftness: 0.18,
     textureMapUrl: '/swatch-assets/bali-silk-texture.png',
-    recolor: { preserveLuminance: 0.08, textureBlend: 0.95 },
   },
   {
     code: 'REIN-GREY',

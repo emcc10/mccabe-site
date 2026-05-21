@@ -29,6 +29,11 @@ import {
 } from './cache.js';
 import { getSwatchProfile } from './swatchRegistry.js';
 import { loadMask, maskBoundingBox } from './masks.js';
+import {
+  assertMasksValidForRecolor,
+  formatMaskValidationReport,
+  validateProductMasks,
+} from './maskValidation.js';
 
 export async function ensureProductAssets(
   productCode: string,
@@ -73,6 +78,15 @@ export async function ensureProductAssets(
 
 export async function renderProductSwatch(request: RenderRequest): Promise<RenderResult> {
   const { productCode, swatchCode, forceRebuild } = request;
+
+  const upholstery = await loadMask(join(productDir(productCode), 'upholstery-mask.png'));
+  const legs = await loadMask(join(productDir(productCode), 'leg-mask.png'));
+  const alpha = await loadMask(join(productDir(productCode), 'alpha.png'));
+  const trim = await loadMask(join(productDir(productCode), 'trim-mask.png'));
+  const validation = validateProductMasks(alpha, upholstery, legs, trim);
+  console.log(formatMaskValidationReport(validation));
+  assertMasksValidForRecolor(alpha, upholstery, legs, trim);
+
   const assets = await ensureProductAssets(productCode, false);
   const version = assetVersionFromRecord(assets);
   const cacheKey = buildCacheKey(productCode, swatchCode, version);
@@ -98,14 +112,21 @@ export async function renderProductSwatch(request: RenderRequest): Promise<Rende
     }
   }
 
-  const config = getSingleProductConfig(productCode);
   const swatch = getSwatchProfile(swatchCode);
   const baseImage = await loadImageRGBA(basePath);
-  const upholstery = await loadMask(join(productDir(productCode), 'upholstery-mask.png'));
-  const legs = await loadMask(join(productDir(productCode), 'leg-mask.png'));
-  const alpha = await loadMask(join(productDir(productCode), 'alpha.png'));
+  const config = getSingleProductConfig(productCode);
+  if (config.recolorMode !== 'debug-flat-safe') {
+    console.warn('[render] recolorMode is not debug-flat-safe — use only after mask validation');
+  }
 
-  const recolored = await recolorUpholstery(baseImage, assets, upholstery, swatch, config);
+  const recolored = await recolorUpholstery(
+    baseImage,
+    assets,
+    upholstery,
+    swatch,
+    config,
+    config.recolorMode,
+  );
   let finalImage = await compositeFinalRender(baseImage, recolored, assets);
 
   enforceLegExclusion(finalImage, baseImage, legs);

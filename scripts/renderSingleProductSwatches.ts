@@ -1,8 +1,10 @@
 #!/usr/bin/env npx tsx
 /**
+ * BLOCKED until mask validation passes — run debug:assets first.
+ *
  * Usage:
+ *   npm run debug:assets -- TEST-SOFA
  *   npm run render:swatches -- TEST-SOFA BALI-SILK
- *   npm run render:swatches -- TEST-SOFA --all
  */
 import { resolve } from 'path';
 import { listSwatches } from '../src/recolor/swatchRegistry.js';
@@ -30,5 +32,4 @@ for (const swatchCode of swatches) {
   console.log(`  public URL:   ${result.imageUrl}`);
 }
 
-console.log('\nView renders: npm run preview:sofa');
-console.log('Then open: http://localhost:3456/preview-test-sofa.html');
+console.log('\nRun mask debug first: npm run debug:assets -- TEST-SOFA');

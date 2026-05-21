@@ -1,10 +1,6 @@
 import convert from 'color-convert';
-import type { ImageRGBA, MaskData, SingleProductConfig, SwatchProfile } from './types.js';
+import type { ImageRGBA, MaskData, RecolorMode, SingleProductConfig, SwatchProfile } from './types.js';
 import type { ProductRenderAssets } from './types.js';
-import { join } from 'path';
-import { productDir } from './paths.js';
-import { loadDerivedMaps } from './maps.js';
-import { loadImageRGBA } from './imageIO.js';
 
 function clamp(v: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, v));
@@ -28,14 +24,54 @@ function labToRgb(L: number, a: number, b: number) {
   };
 }
 
+/** Preserve source L; minimal a/b shift toward swatch — no map-driven flattening */
+function recolorDebugFlatSafe(
+  baseImage: ImageRGBA,
+  upholsteryMask: MaskData,
+  swatch: SwatchProfile,
+  preserve: number,
+): ImageRGBA {
+  const out = Buffer.from(baseImage.data);
+  const { width, height, channels } = baseImage;
+  const chromaBlend = 0.32;
+
+  for (let j = 0; j < width * height; j++) {
+    if (upholsteryMask.data[j] < 128) continue;
+    const p = j * channels;
+    const src = rgbToLab(baseImage.data[p], baseImage.data[p + 1], baseImage.data[p + 2]);
+
+    const L = src.L * preserve + swatch.lab.l * (1 - preserve);
+    const a = src.a * (1 - chromaBlend) + swatch.lab.a * chromaBlend;
+    const b = src.b * (1 - chromaBlend) + swatch.lab.b * chromaBlend;
+
+    const rgb = labToRgb(L, a, b);
+    out[p] = rgb.r;
+    out[p + 1] = rgb.g;
+    out[p + 2] = rgb.b;
+    if (channels === 4) out[p + 3] = baseImage.data[p + 3];
+  }
+
+  return { data: out, width, height, channels };
+}
+
 export async function recolorUpholstery(
   baseImage: ImageRGBA,
-  assets: ProductRenderAssets,
+  _assets: ProductRenderAssets,
   upholsteryMask: MaskData,
   swatch: SwatchProfile,
   config: SingleProductConfig,
+  mode: RecolorMode = config.recolorMode,
 ): Promise<ImageRGBA> {
-  const dir = productDir(assets.productCode);
+  const preserve = swatch.recolor?.preserveLuminance ?? config.preserveLuminance;
+
+  if (mode === 'debug-flat-safe') {
+    return recolorDebugFlatSafe(baseImage, upholsteryMask, swatch, preserve);
+  }
+
+  const { join } = await import('path');
+  const { productDir } = await import('./paths.js');
+  const { loadDerivedMaps } = await import('./maps.js');
+  const dir = productDir(_assets.productCode);
   const maps = await loadDerivedMaps(
     {
       shadowPath: join(dir, 'shadow-map.png'),
@@ -47,7 +83,6 @@ export async function recolorUpholstery(
 
   const out = Buffer.from(baseImage.data);
   const { width, height, channels } = baseImage;
-  const preserve = swatch.recolor?.preserveLuminance ?? config.preserveLuminance;
   const shadowStr = config.shadowStrength;
   const detailStr = config.detailStrength;
   const chromaStr = config.chromaVariationStrength * swatch.chromaVariation;

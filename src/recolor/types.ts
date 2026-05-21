@@ -30,8 +30,11 @@ export interface SwatchProfile {
   recolor?: SwatchRecolorTuning;
 }
 
+export type RecolorMode = 'debug-flat-safe' | 'production';
+
 export interface SingleProductConfig {
   productCode: string;
+  recolorMode: RecolorMode;
   preserveLuminance: number;
   shadowStrength: number;
   detailStrength: number;
