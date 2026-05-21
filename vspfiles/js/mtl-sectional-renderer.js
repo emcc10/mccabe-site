@@ -4219,7 +4219,28 @@
     return rep;
   };
 
+  function mtlLoadPdpPriceStackJs() {
+    if (typeof window.mcEnsurePdpPriceStack === "function") {
+      try {
+        window.mcEnsurePdpPriceStack();
+      } catch (e0) {}
+      return;
+    }
+    if (document.getElementById("mc-pdp-price-stack-loader")) return;
+    var s = document.createElement("script");
+    s.id = "mc-pdp-price-stack-loader";
+    s.async = true;
+    s.src = "/v/vspfiles/js/mc-pdp-price-stack.js?v=20260522&mcrd=" + Date.now();
+    s.onload = function () {
+      try {
+        if (typeof window.mcEnsurePdpPriceStack === "function") window.mcEnsurePdpPriceStack();
+      } catch (e1) {}
+    };
+    (document.head || document.documentElement).appendChild(s);
+  }
+
   function boot() {
+    mtlLoadPdpPriceStackJs();
     mtlRemoveLeatherPickerHint();
     stripSectionalHtmlClassIfTheater();
     removeMtlDebugPanelIfPresent();
