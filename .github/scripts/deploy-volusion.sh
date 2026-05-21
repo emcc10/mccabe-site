@@ -181,6 +181,18 @@ put_primary "vspfiles/css/custom-safe.css" "custom-safe" \
   "/vspfiles/css/custom-safe.css" \
   "vspfiles/css/custom-safe.css"
 
+CSS_VERIFY_NEEDLE=$(grep -oE 'C_CSS_DEPLOY_VERIFY_[0-9a-z]+' vspfiles/css/custom-safe.css 2>/dev/null | head -1 || echo "C_CSS_DEPLOY_VERIFY_20260521e")
+export CSS_NEEDLE="$CSS_VERIFY_NEEDLE"
+set +e
+verify_custom_safe_sftp_rc=0
+python3 scripts/verify_custom_safe_sftp.py
+verify_custom_safe_sftp_rc=$?
+set -e
+if [[ "$verify_custom_safe_sftp_rc" -ne 0 ]]; then
+  echo "::error::custom-safe.css SFTP verify failed (needle=${CSS_VERIFY_NEEDLE}) — CI failing so you are not misled by a green HTTP check"
+  exit 1
+fi
+
 put_primary "vspfiles/js/mc-plp-enforcer.js" "mc-plp-enforcer" \
   "/vspfiles/js/mc-plp-enforcer.js" \
   "vspfiles/js/mc-plp-enforcer.js"
@@ -342,7 +354,7 @@ verify_url() {
   fi
 }
 
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "C_CSS_DEPLOY_VERIFY_20260521d"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "$CSS_VERIFY_NEEDLE"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260624" "MC_PLP_ENFORCER_20260624"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260624" "MC_PLP_ENFORCER_20260624"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260624" "MC_PDP_AUTH_CTA_20260624"

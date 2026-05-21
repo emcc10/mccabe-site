@@ -48,7 +48,7 @@ body.productdetails span[itemprop="name"],body.mc-product-page span[itemprop="na
 body.productdetails #options_table select:not(.mc-native-leather),body.mc-product-page #options_table select:not(.mc-native-leather),body.productdetails #options_table td[align="right"],body.productdetails #options_table .productoptionname,body.mc-product-page #options_table td[align="right"],body.mc-product-page #options_table .productoptionname{font-size:13px!important;font-weight:400!important;line-height:1.2!important;letter-spacing:.16em!important;text-transform:uppercase!important;color:#777!important}
 body.productdetails #options_table select:not(.mc-native-leather),body.mc-product-page #options_table select:not(.mc-native-leather){text-transform:none!important;color:#444!important}
 body.productdetails .mc-pdp-retail-label,body.mc-product-page .mc-pdp-retail-label,body.productdetails .mc-pdp-member-line__label,body.mc-product-page .mc-pdp-member-line__label{font-size:13px!important;letter-spacing:.16em!important;text-transform:uppercase!important;color:#777!important}
-body.productdetails .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-member-line__amount,body.productdetails .mc-pdp-retail-row .product_list_price,body.mc-product-page .mc-pdp-retail-row .product_list_price{font-size:13px!important;letter-spacing:.16em!important;text-transform:none!important;color:#444!important}
+body.productdetails .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-member-line__amount,body.productdetails .mc-pdp-retail-row .product_list_price,body.mc-product-page .mc-pdp-retail-row .product_list_price{font-size:13px!important;letter-spacing:.02em!important;text-transform:none!important;color:#444!important;white-space:normal!important}
 </style>
 <link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260521type" id="mc-live-patch-css">
 <script>
@@ -459,7 +459,7 @@ body.productdetails .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-mem
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
-  <link href="/v/vspfiles/css/custom-safe.css?v=20260521d" rel="stylesheet" id="mc-custom-safe-css-static">
+  <link href="/v/vspfiles/css/custom-safe.css?v=20260521e" rel="stylesheet" id="mc-custom-safe-css-static">
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
   html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
@@ -16365,9 +16365,14 @@ body .mc-member-grid-price__amount,
 body .mc-member-price-caption__price-value,
 body .mc-pdp-sale-preview,
 body .mc-pdp-member-line__amount,
-body .mc-pdp-member-line__amount a {
+body .mc-pdp-member-line__amount a,
+body .mc-pdp-retail-row .product_list_price,
+body .mc-pdp-retail-row .product_productprice,
+body .mc-pdp-retail-row .v65-product-price {
   text-transform:none !important;
   color:#444 !important;
+  letter-spacing:0.02em !important;
+  white-space:normal !important;
 }
 body .mc-pdp-sale-preview,
 body .mc-pdp-member-line__amount,
@@ -16375,7 +16380,6 @@ body .mc-pdp-member-line__amount a {
   display:block !important;
   font-size:13px !important;
   font-weight:400 !important;
-  letter-spacing:0.16em !important;
   line-height:1.2 !important;
   margin-top:4px !important;
 }

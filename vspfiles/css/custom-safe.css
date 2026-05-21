@@ -1,4 +1,4 @@
-/* 0521d C_CSS_DEPLOY_VERIFY_20260521d — MC_PDP_TYPE_13PX_STACK + ATC #e2dfd8 */
+/* 0521e C_CSS_DEPLOY_VERIFY_20260521e — retail amount letter-spacing fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -14380,18 +14380,53 @@ html body.productdetails #content_area .mc-configuration-rh__total,
 html body.mc-product-page #content_area .mc-configuration-rh__total,
 html body.productdetails #content_area .mc-configuration-rh__caption,
 html body.mc-product-page #content_area .mc-configuration-rh__caption,
-html body.productdetails #mcConfigurationBlock #mcConfigurationPrice.mc-configuration-rh__total,
-html body.mc-product-page #mcConfigurationBlock #mcConfigurationPrice.mc-configuration-rh__total,
 html body.productdetails #content_area .mc-pdp-sale-preview,
 html body.mc-product-page #content_area .mc-pdp-sale-preview {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 13px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.16em !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: #444 !important;
+  white-space: normal !important;
+}
+html body.productdetails #mcConfigurationBlock #mcConfigurationPrice.mc-configuration-rh__total,
+html body.mc-product-page #mcConfigurationBlock #mcConfigurationPrice.mc-configuration-rh__total,
+html body.productdetails #content_area .mc-configuration-rh__total,
+html body.mc-product-page #content_area .mc-configuration-rh__total {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.02em !important;
   text-transform: none !important;
   color: #444 !important;
   white-space: pre-line !important;
+}
+/* Retail/member dollar amounts — normal tracking (0.16em on prices looked jumbled) */
+html body.productdetails #content_area .mc-pdp-retail-row .product_list_price,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_list_price,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_list_price,
+html body.productdetails #content_area .mc-pdp-retail-row .product_productprice,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_productprice,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_productprice,
+html body.productdetails #content_area .mc-pdp-retail-row .v65-product-price,
+html body.mc-product-page #content_area .mc-pdp-retail-row .v65-product-price,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+html body.productdetails #content_area .mc-pdp-retail-row font.product_list_price,
+html body.mc-product-page #content_area .mc-pdp-retail-row font.product_list_price,
+html body.productdetails #content_area .mc-pdp-member-line__amount,
+html body.mc-product-page #content_area .mc-pdp-member-line__amount,
+html body.productdetails #v65-product-parent .mc-pdp-member-line__amount,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line__amount,
+html body.productdetails #content_area .mc-pdp-member-line__amount a,
+html body.mc-product-page #content_area .mc-pdp-member-line__amount a {
+  letter-spacing: 0.02em !important;
+  white-space: normal !important;
 }
 html body.productdetails #content_area .mc-pdp-retail-label,
 html body.mc-product-page #content_area .mc-pdp-retail-label,
