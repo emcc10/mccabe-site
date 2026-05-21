@@ -1248,7 +1248,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     lBlend: isBali
       ? realismStress
         ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
-        : `lowfreq(r~${LOWFREQ_RADIUS_BASE})+detail×${DETAIL_GAIN} src/ref ${SOURCE_DETAIL_MIX}/${REF_DETAIL_MIX} tex×${TEXTURE_STRENGTH}; L>${HIGHLIGHT_START} matte; NO luma lock`
+        : 'lowfreq+ref texture bands + seam protect + contour unsharp; NO per-pixel luma lock'
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali
@@ -1258,32 +1258,43 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
       : null,
   });
 
+  const composeDebugHolder = {};
   const detailVizHolder = { buf: null };
   const outData = recolorSofa(sourceImage, mask, palette, {
     realismStress,
     skipFinalize: isBali && realismStress,
     referenceImage,
     detailVizHolder,
+    composeDebugHolder,
   });
 
   if (isBali && !realismStress) {
     const ts = renderTimestamp();
-    const stripPath = join(PIPELINE_DEBUG_DIR, `${ts}-debug-strip.png`);
+    const stripPath = join(PIPELINE_DEBUG_DIR, `${ts}-debug-strip-6panel.png`);
     let prevPanel = Buffer.from(sourceImage.data);
     if (previousBaliPath && existsSync(previousBaliPath)) {
       prevPanel = (await loadImage(previousBaliPath)).data;
     }
-    const detailPanel = detailVizHolder.buf ?? outData;
-    await writeBaliDebugStrip(
-      [sourceImage.data, prevPanel, outData, detailPanel],
+    await writeBaliDebugStrip6(
+      [
+        sourceImage.data,
+        prevPanel,
+        outData,
+        composeDebugHolder.contourViz ?? outData,
+        composeDebugHolder.detailViz ?? outData,
+        composeDebugHolder.seamViz ?? outData,
+      ],
       sourceImage.width,
       sourceImage.height,
       sourceImage.channels,
       stripPath,
     );
-    console.log(`  debug strip (source | previous | new | detail): ${resolve(stripPath)}`);
+    const p = composeDebugHolder.params ?? getBaliComposeParams(sourceImage.width, sourceImage.height);
+    console.log(`  debug strip 6-panel: ${resolve(stripPath)}`);
+    console.log('  panels: source | previous | new | contour alpha | detail map | seam map');
+    console.log('  compose params:', p);
     console.log(
-      '  REMOVED from production path: baliChromaOnlyPreserveSourceLuma, applySourceYResidualToRgb (per-pixel Rec.709 lock)',
+      '  disabled for upholstery: per-pixel luma lock (baliChromaOnlyPreserveSourceLuma), interior detail feather',
     );
   }
 
