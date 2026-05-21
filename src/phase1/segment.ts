@@ -81,10 +81,13 @@ export function detectLegs(image: RgbaImage, alpha: Mask): Mask {
 export function buildPhase1Masks(
   image: RgbaImage,
   handUpholstery: Mask,
+  handLegs?: Mask,
 ): { alpha: Mask; upholstery: Mask; legs: Mask } {
   const alpha = alphaFromImage(image);
-  let legs = detectLegs(image, alpha);
-  legs = dilate(legs, LEG_EXPAND_PX);
+  let legs = handLegs ?? detectLegs(image, alpha);
+  if (!handLegs) {
+    legs = dilate(legs, LEG_EXPAND_PX);
+  }
 
   let upholstery = intersect(handUpholstery, alpha);
   upholstery = subtract(upholstery, legs);

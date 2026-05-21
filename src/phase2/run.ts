@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync } from 'fs';
 import sharp from 'sharp';
-import { DEBUG_DIR, LEGACY_UPHOLSTERY_MASK, SOURCE_OUT } from '../phase1/paths.js';
-import { buildPhase1Masks, loadMaskPng, loadRgba } from '../phase1/segment.js';
+import { DEBUG_DIR, SOURCE_OUT } from '../phase1/paths.js';
+import { loadPhase1Masks } from '../phase1/loadMasks.js';
+import { loadRgba } from '../phase1/segment.js';
 import { writeCombinedOverlay } from '../phase1/previews.js';
 import {
   BALI_SILK_LAB,
@@ -64,8 +65,7 @@ export async function runPhase2(): Promise<Phase2Outputs> {
   }
 
   const source = await loadRgba(SOURCE_OUT);
-  const handUpholstery = await loadMaskPng(LEGACY_UPHOLSTERY_MASK, source.width, source.height);
-  const { alpha, upholstery, legs } = buildPhase1Masks(source, handUpholstery);
+  const { alpha, upholstery, legs } = await loadPhase1Masks(source);
 
   const recolored = recolorUpholsteryMinimal(
     source,

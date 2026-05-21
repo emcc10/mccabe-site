@@ -10,6 +10,8 @@ export const DEBUG_DIR = join(PRODUCT_DIR, 'debug');
 
 export const LEGACY_SOURCE = join(REPO_ROOT, 'sofa-recolor-tool', 'input', 'sofa.png');
 export const LEGACY_UPHOLSTERY_MASK = join(REPO_ROOT, 'sofa-recolor-tool', 'input', 'mask.png');
+/** Hand-edited leg mask (white = legs). Your approved leg-mask-preview. */
+export const LEG_MASK_OVERRIDE = join(PRODUCT_DIR, 'leg-mask.override.png');
 
 export const SOURCE_OUT = join(PRODUCT_DIR, 'source.png');
 export const ALPHA_PREVIEW = join(DEBUG_DIR, 'alpha-preview.png');

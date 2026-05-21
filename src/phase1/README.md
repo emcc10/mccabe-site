@@ -18,7 +18,9 @@ npm run phase1:test-sofa
 | leg mask | `public/product-assets/TEST-SOFA/debug/leg-mask-preview.png` |
 | combined overlay | `public/product-assets/TEST-SOFA/debug/combined-overlay-preview.png` |
 
-Upholstery mask comes from `sofa-recolor-tool/input/mask.png`. Legs are auto-detected and subtracted with 4px protection.
+Upholstery mask comes from `sofa-recolor-tool/input/mask.png`.
+
+Legs use **`leg-mask.override.png`** when present (your hand-edited leg mask). Otherwise auto-detected.
 
 ## Phase 2 (after masks look correct)
 
