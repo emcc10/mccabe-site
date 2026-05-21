@@ -17,10 +17,6 @@ on:
         description: Upload all PLP photos via SFTP (slow; ~160 files)
         type: boolean
         default: true
-      skip_template:
-        description: Skip template_266.html upload & verify (boards/CSS/JS only)
-        type: boolean
-        default: false
 
 # One deploy at a time — parallel runs corrupt the same SFTP files (550 locks, truncated PNGs).
 concurrency:
@@ -59,7 +55,7 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          SKIP_TEMPLATE_DEPLOY: ${{ github.event_name == 'workflow_dispatch' && inputs.skip_template == true && '1' || '0' }}
+          SKIP_TEMPLATE_DEPLOY: "0"
           # Push = fast path (template/CSS/JS). Manual run can include all PLP photos.
           SKIP_PLP_PHOTOS: ${{ github.event_name == 'push' && '1' || (inputs.upload_plp_photos == false && '1' || '0') }}
         run: bash .github/scripts/deploy-volusion.sh
@@ -76,4 +72,3 @@ jobs:
           echo "SFTP template verify inside deploy script is authoritative for CI pass/fail."
           echo "After green: Volusion Design → File Editor → template_266.html → Save (rebake categories/PDPs)."
           echo "Manual full photo upload: Actions → Run workflow → check 'Upload all PLP photos'."
-          echo "Boards-only (stuck template): Run workflow → check 'Skip template_266.html upload & verify'."
