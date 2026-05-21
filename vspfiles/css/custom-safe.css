@@ -11603,11 +11603,16 @@ html.mc-paragon-pdp body [class*="cartqty__wrap"] label {
   order: -1 !important;
 }
 
-/* Sectional PDP: hide Room Planner block; keep leather row visible. */
+/* Sectional PDP: hide Room Planner row; show configuration box (native selects + prices). */
 
-html.is-sectional-product #mcPlannerRow,
-html.is-sectional-product #mcConfigurationBlock {
+html.is-sectional-product #mcPlannerRow {
   display: none !important;
+}
+
+html.is-sectional-product #mcConfigurationBlock {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 html.is-sectional-product #mc-inline-config {
