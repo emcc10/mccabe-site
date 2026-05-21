@@ -28,7 +28,12 @@ export function buildStage4bCoverageMasks(
   const expandInsideAlpha = subtract(intersect(dilate(upholstery, EDGE_EXPAND_PX), alpha), upholstery);
   const upholsteryEdgeBand = intersect(union(alphaContour, expandInsideAlpha), nonLeg);
   const edgeBandOnly = subtract(upholsteryEdgeBand, upholstery);
-  const footRing = subtract(intersect(dilate(legs, FOOT_GUARD_PX), alpha), legs);
+  const legGuard = subtract(intersect(dilate(legs, FOOT_GUARD_PX), alpha), legs);
+  const footJunction = subtract(
+    intersect(dilate(upholstery, FOOT_GUARD_PX), dilate(legs, FOOT_GUARD_PX)),
+    legs,
+  );
+  const footRing = intersect(union(legGuard, footJunction), nonLeg);
   const upholsteryRecolor = union(upholstery, upholsteryEdgeBand, footRing);
 
   return { upholsteryEdgeBand, edgeBandOnly, footRing, upholsteryRecolor };
@@ -124,18 +129,53 @@ export function buildFootRingPreviewRgb(source: RgbaImage, footRing: Mask): Buff
   return buf;
 }
 
-/** Count alpha-on, non-leg pixels that would keep source RGB in compositePhase2. */
-export function countSourceRgbLeakage(
-  alpha: Mask,
-  upholsteryForComposite: Mask,
+/** Pixels in edge/foot bands where final RGB still matches source (should be 0). */
+export function countBandSourceRgbSurvivors(
+  source: RgbaImage,
+  final: RgbaImage,
   legs: Mask,
+  edgeBandOnly: Mask,
+  footRing: Mask,
+  tolerance = 2,
 ): number {
+  const { channels } = source;
   let n = 0;
-  for (let j = 0; j < alpha.data.length; j++) {
+  for (let j = 0; j < source.data.length / channels; j++) {
     if (legs.data[j] >= 128) continue;
-    if (alpha.data[j] < 128) continue;
-    if (upholsteryForComposite.data[j] >= 128) continue;
-    n++;
+    if (edgeBandOnly.data[j] < 128 && footRing.data[j] < 128) continue;
+    const p = j * channels;
+    if (
+      Math.abs(source.data[p] - final.data[p]) <= tolerance &&
+      Math.abs(source.data[p + 1] - final.data[p + 1]) <= tolerance &&
+      Math.abs(source.data[p + 2] - final.data[p + 2]) <= tolerance
+    ) {
+      n++;
+    }
   }
   return n;
+}
+
+/**
+ * After compositePhase2: force recolored RGB on edge/foot bands (non-leg, alpha on).
+ * Legs stay source; alpha channel untouched.
+ */
+export function applyCoverageBandsToFinal(
+  source: RgbaImage,
+  recolored: RgbaImage,
+  final: RgbaImage,
+  alpha: Mask,
+  legs: Mask,
+  edgeBandOnly: Mask,
+  footRing: Mask,
+): void {
+  const { channels } = source;
+  for (let j = 0; j < alpha.data.length; j++) {
+    if (legs.data[j] >= 128) continue;
+    if (edgeBandOnly.data[j] < 128 && footRing.data[j] < 128) continue;
+    if (alpha.data[j] < 128) continue;
+    const p = j * channels;
+    final.data[p] = recolored.data[p];
+    final.data[p + 1] = recolored.data[p + 1];
+    final.data[p + 2] = recolored.data[p + 2];
+  }
 }

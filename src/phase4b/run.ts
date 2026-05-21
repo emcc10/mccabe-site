@@ -9,9 +9,10 @@ import { measureRecolorMetrics } from '../phase2/metrics.js';
 import { computeUpholsteryLabStats } from '../phase4/recolor.js';
 import type { RgbaImage } from '../phase1/segment.js';
 import {
+  applyCoverageBandsToFinal,
   buildEdgeBandPreviewRgb,
   buildFootRingPreviewRgb,
-  countSourceRgbLeakage,
+  countBandSourceRgbSurvivors,
   recolorWithStage4bCoverage,
 } from './coverage.js';
 import { LOCKED_4B } from './spec.js';
@@ -122,9 +123,23 @@ export async function runStage4b() {
     stats,
   );
   const final = compositePhase2(source, recolored, alpha, masks.upholsteryRecolor, legs);
+  applyCoverageBandsToFinal(
+    source,
+    recolored,
+    final,
+    alpha,
+    legs,
+    masks.edgeBandOnly,
+    masks.footRing,
+  );
 
-  const leakageBefore = countSourceRgbLeakage(alpha, upholstery, legs);
-  const leakageAfter = countSourceRgbLeakage(alpha, masks.upholsteryRecolor, legs);
+  const bandSurvivors = countBandSourceRgbSurvivors(
+    source,
+    final,
+    legs,
+    masks.edgeBandOnly,
+    masks.footRing,
+  );
 
   await writeRgbaPng(STAGE4B_SINGLE_EDGEFIXED, final);
   await writeTwoPanelComparison(
@@ -177,9 +192,8 @@ export async function runStage4b() {
       upholsteryRecolorPixelCount: countMask(masks.upholsteryRecolor),
     },
     compositeAudit: {
-      leakageAlphaOnNonLegOutsideUpholsteryBefore: leakageBefore,
-      leakageAlphaOnNonLegOutsideUpholsteryAfter: leakageAfter,
-      note: 'compositePhase2 leaves source RGB when alpha on but upholstery mask off; expanded upholsteryRecolor mask fixes fringe',
+      bandSourceRgbSurvivors: bandSurvivors,
+      note: 'Trim/frame inside alpha intentionally keeps source; band survivors must be 0',
     },
     postRgbPasses: [],
     outputs: {
@@ -207,8 +221,7 @@ export async function runStage4b() {
     metrics,
     stats,
     masks,
-    leakageBefore,
-    leakageAfter,
+    bandSurvivors,
   };
 }
 

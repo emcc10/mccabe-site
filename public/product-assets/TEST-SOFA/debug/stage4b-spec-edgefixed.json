@@ -30,9 +30,8 @@
     "upholsteryRecolorPixelCount": 157141
   },
   "compositeAudit": {
-    "leakageAlphaOnNonLegOutsideUpholsteryBefore": 326209,
-    "leakageAlphaOnNonLegOutsideUpholsteryAfter": 321299,
-    "note": "compositePhase2 leaves source RGB when alpha on but upholstery mask off; expanded upholsteryRecolor mask fixes fringe"
+    "bandSourceRgbSurvivors": 4,
+    "note": "Trim/frame inside alpha intentionally keeps source; band survivors must be 0"
   },
   "postRgbPasses": [],
   "outputs": {

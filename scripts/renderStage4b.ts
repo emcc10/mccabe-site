@@ -18,8 +18,7 @@ console.log(`  chromaSourceA=${p.chromaSourceA} chromaSourceB=${p.chromaSourceB}
 console.log(`  chromaTargetA=${p.chromaTargetA} chromaTargetB=${p.chromaTargetB}\n`);
 
 console.log('=== Coverage audit ===');
-console.log(`  leakage (alpha on, non-leg, outside upholstery) before: ${out.leakageBefore}`);
-console.log(`  leakage after edge/foot bands:                      ${out.leakageAfter}\n`);
+console.log(`  band pixels still matching source RGB (want 0): ${out.bandSurvivors}\n`);
 
 console.log('=== Outputs ===');
 console.log(`  stage4b-single-edgefixed.png`);
