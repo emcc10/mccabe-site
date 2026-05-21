@@ -1,4 +1,4 @@
-/* 0518e C_CSS_DEPLOY_VERIFY_20260518e — tail wins; Store-dot may omit #v65-product-parent */
+/* 0518f C_CSS_DEPLOY_VERIFY_20260518f — tail wins; MC_OPTION_LABEL_13PX_TAIL at EOF */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -13031,14 +13031,17 @@ table.colors_pricebox:nth-child(3) > tbody:nth-child(1) > tr:nth-child(1) > td:n
      the layout. Use the DOM move from template_266.html accordion script + this CSS.).
    ========================================================= */
 
-/* Inline <style> baseline copied from the Firefox session into the persisted CSS. */
+/* Inline <style> baseline copied from the Firefox session into the persisted CSS.
+   Do NOT set font-size on body * — it overrides PDP option/accordion labels (use body + scoped blocks). */
 body,
 body * {
 
   font-weight: 400;
   color: #444 !important;
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 18px !important;
+}
+body {
+  font-size: 18px;
 }
 
 body {
@@ -14245,4 +14248,40 @@ html.category #content_area .v-product-grid .v65-productPhoto a {
   background: #ffffff !important;
   box-shadow: none !important;
   border: 0 !important;
+}
+
+/* MC_OPTION_LABEL_13PX_TAIL — must be last; beats body * legacy + template inline 14px */
+html body.productdetails #content_area #options_table label,
+html body.mc-product-page #content_area #options_table label,
+html body.productdetails #content_area #options_table .productoptionname,
+html body.mc-product-page #content_area #options_table .productoptionname,
+html body.productdetails #content_area #options_table td:first-child,
+html body.mc-product-page #content_area #options_table td:first-child,
+html body.productdetails #content_area table[id*="options_table"] label,
+html body.mc-product-page #content_area table[id*="options_table"] label,
+html body.productdetails #content_area table[id*="options_table"] .productoptionname,
+html body.mc-product-page #content_area table[id*="options_table"] .productoptionname,
+html body.productdetails #content_area table[id*="options_table"] td:first-child,
+html body.mc-product-page #content_area table[id*="options_table"] td:first-child,
+html body.productdetails #content_area #mcLeatherHeader,
+html body.mc-product-page #content_area #mcLeatherHeader,
+html body.productdetails #content_area .mc-option-accordion__label,
+html body.mc-product-page #content_area .mc-option-accordion__label,
+html body.productdetails #content_area .mc-option-accordion__header,
+html body.mc-product-page #content_area .mc-option-accordion__header,
+html body.productdetails #content_area .mc-option-accordion__header .mc-option-accordion__label,
+html body.mc-product-page #content_area .mc-option-accordion__header .mc-option-accordion__label,
+html.mc-paragon-pdp body #content_area .mc-option-accordion__label,
+html.mc-paragon-pdp body #content_area .mc-option-accordion__header,
+html.mc-theater-seating-pdp body #content_area .mc-option-accordion__label,
+html.mc-theater-seating-pdp body #content_area .mc-option-accordion__header {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.06em !important;
+}
+/* Chevron only — not label text */
+html body.mc-product-page #content_area .mc-option-accordion__toggle,
+html body.productdetails #content_area .mc-option-accordion__toggle {
+  font-size: 18px !important;
 }

@@ -108,8 +108,8 @@ export async function upscaleCropToPanel(crop, cropW, cropH, channels, panelW, p
   return panel;
 }
 
-/** Zoom crop of right-leg patch region. */
-export async function writeRightLegZoomCrop(buf, patchMask, width, height, channels, outPath, zoom = 3) {
+/** Zoom crop of right-leg patch region (default 400%). */
+export async function writeRightLegZoomCrop(buf, patchMask, width, height, channels, outPath, zoom = 4) {
   const bb = patchBoundingBox(patchMask, width, height);
   if (!bb) return null;
   const crop = Buffer.alloc(bb.width * bb.height * channels);
@@ -133,6 +133,54 @@ export async function writeRightLegZoomCrop(buf, patchMask, width, height, chann
     .png()
     .toFile(outPath);
   return outPath;
+}
+
+/**
+ * Contour + material debug strip (10 panels) + right-leg zoom.
+ */
+export async function writeBaliDebugContourPack(
+  panels,
+  width,
+  height,
+  channels,
+  basePath,
+  patchMask,
+  finalComposite,
+  zoom = 4,
+) {
+  const stripPath = basePath.replace(/\.png$/i, '-contour-strip-10panel.png');
+  const stripPanels = panels.slice(0, 9);
+  const overrideCrop = extractRightLegCrop(panels[5] ?? finalComposite, patchMask, width, height, channels);
+  if (overrideCrop) {
+    stripPanels[5] = await upscaleCropToPanel(
+      overrideCrop.crop,
+      overrideCrop.bb.width,
+      overrideCrop.bb.height,
+      channels,
+      width,
+      height,
+    );
+  }
+  const finalCrop = extractRightLegCrop(finalComposite, patchMask, width, height, channels);
+  if (finalCrop) {
+    stripPanels.push(
+      await upscaleCropToPanel(finalCrop.crop, finalCrop.bb.width, finalCrop.bb.height, channels, width, height),
+    );
+  } else {
+    stripPanels.push(panels[9] ?? panels[2] ?? panels[0]);
+  }
+  await writeBaliDebugStripN(stripPanels, width, height, channels, stripPath);
+  const zoomBase = basePath.replace(/\.png$/i, '');
+  const zoomFinal = await writeRightLegZoomCrop(
+    finalComposite,
+    patchMask,
+    width,
+    height,
+    channels,
+    `${zoomBase}-right-leg-final-${zoom}x.png`,
+    zoom,
+  );
+  return { stripPath, zoomFinal };
 }
 
 /**

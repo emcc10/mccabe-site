@@ -857,6 +857,23 @@ html.mc-paragon-pdp body #mcConfigurationBlock .mc-configuration-rh__caption {
   max-width: none !important;
 }
 
+/* Option accordion labels (span) — same 13px as options column labels */
+html body.productdetails #content_area .mc-option-accordion__label,
+html body.mc-product-page #content_area .mc-option-accordion__label,
+html body.mc-theater-seating-pdp #content_area .mc-option-accordion__label,
+html.mc-paragon-pdp body #content_area .mc-option-accordion__label,
+html body.productdetails #content_area .mc-option-accordion__header,
+html body.mc-product-page #content_area .mc-option-accordion__header,
+html.mc-paragon-pdp body #content_area .mc-option-accordion__header,
+html.mc-theater-seating-pdp body #content_area .mc-option-accordion__header {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  color: #444 !important;
+  line-height: 1.2 !important;
+}
+
 /* Volusion option labels in options column */
 body.productdetails #content_area .mc-pdp-options-td label,
 body.mc-product-page #content_area .mc-pdp-options-td label,

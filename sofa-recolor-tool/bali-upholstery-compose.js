@@ -1,36 +1,30 @@
 /**
  * Bali upholstery compose: source lowfreq + ref texture + chroma variation + seam protect.
- * Matte/contour: bali-matte.js (unchanged settings).
+ * Matte/contour: bali-matte.js (source mask silhouette only).
  */
 import convert from 'color-convert';
 
 const MASK_APPLY_THRESH = 128;
 
 export const LOWFREQ_RADIUS_BASE = 16;
-export const REF_MEDIUM_BLUR = 12;
-export const REF_FINE_BLUR = 4;
-export const REF_MEDIUM_TEXTURE_WEIGHT = 0.64;
-export const REF_FINE_TEXTURE_WEIGHT = 0.36;
-export const REF_TEXTURE_AMPLITUDE = 0.92;
-export const SOURCE_DETAIL_MIX = 0.52;
-export const REF_TEXTURE_MIX = 0.48;
-export const DETAIL_GAIN = 1.11;
+export const REF_MEDIUM_BLUR = 11;
+export const REF_FINE_BLUR = 3.4;
+export const REF_MEDIUM_TEXTURE_WEIGHT = 0.66;
+export const REF_FINE_TEXTURE_WEIGHT = 0.34;
+export const REF_TEXTURE_AMPLITUDE = 0.9;
+export const SOURCE_DETAIL_MIX = 0.54;
+export const REF_TEXTURE_MIX = 0.46;
+export const DETAIL_GAIN = 1.1;
 export const REF_DETAIL_STD_TARGET = 2.5;
 export const CHROMA_SOURCE_KEEP = 0.06;
 export const REFLECTANCE_L_AMP = 0.95;
-export const CHROMA_A_AMP = 0.38;
-export const CHROMA_B_AMP = 0.46;
-export const LOWFREQ_CHROMA_A_AMP = 0.18;
-export const LOWFREQ_CHROMA_B_AMP = 0.24;
-export const LOWFREQ_CHROMA_BLUR_BASE = 34;
+export const MID_CHROMA_A_AMP = 0.32;
+export const MID_CHROMA_B_AMP = 0.4;
+export const LOWFREQ_CHROMA_A_AMP = 0.2;
+export const LOWFREQ_CHROMA_B_AMP = 0.28;
+export const LOWFREQ_CHROMA_BLUR_BASE = 38;
 export const LOCAL_CONTRAST_RADIUS = 4;
 export const LOCAL_CONTRAST_AMOUNT = 0.07;
-export const TEXTURE_FULL_L = 66;
-export const TEXTURE_MIN_L = 82;
-export const TEXTURE_MIN_STRENGTH = 0.62;
-export const CHROMA_TEXTURE_FULL_L = 72;
-export const CHROMA_TEXTURE_MIN_L = 82;
-export const CHROMA_TEXTURE_MIN_STRENGTH = 0.6;
 export const HIGHLIGHT_TIER1_START = 74;
 export const HIGHLIGHT_TIER1_RATIO = 0.48;
 export const HIGHLIGHT_TIER2_START = 82;
@@ -39,29 +33,23 @@ export const SEAM_INFLUENCE_MAX = 0.54;
 export const PERCENTILE_LO = 0.12;
 export const PERCENTILE_HI = 0.88;
 
-/** Highlight-based texture suppression (detail transfer). */
-export function highlightDetailStrength(L) {
-  if (L <= TEXTURE_FULL_L) return 1;
-  if (L >= TEXTURE_MIN_L) return TEXTURE_MIN_STRENGTH;
-  const t = (L - TEXTURE_FULL_L) / (TEXTURE_MIN_L - TEXTURE_FULL_L);
-  return 1 - t * (1 - TEXTURE_MIN_STRENGTH);
+/** Texture detail weight: 100% at L 50–70, taper highlights/shadows. */
+export function textureLumaWeight(L) {
+  if (L >= 50 && L <= 70) return 1;
+  if (L > 70 && L <= 82) return 1 - ((L - 70) / 12) * 0.35;
+  if (L > 82) return 0.65;
+  if (L < 50 && L >= 40) return 0.7 + ((L - 40) / 10) * 0.3;
+  if (L < 40) return 0.7;
+  return 1;
 }
 
-/** Highlight-based chroma variation suppression. */
-export function highlightChromaStrength(L) {
-  if (L <= CHROMA_TEXTURE_FULL_L) return 1;
-  if (L >= CHROMA_TEXTURE_MIN_L) return CHROMA_TEXTURE_MIN_STRENGTH;
-  const t = (L - CHROMA_TEXTURE_FULL_L) / (CHROMA_TEXTURE_MIN_L - CHROMA_TEXTURE_FULL_L);
-  return 1 - t * (1 - CHROMA_TEXTURE_MIN_STRENGTH);
-}
-
-/** Chroma variation weight: strongest L 58–70, taper highlights/shadows. */
+/** Chroma variation weight: 100% at L 56–72, taper to 60% @ L82, 70% @ L42. */
 export function materialChromaWeight(L) {
-  if (L >= 58 && L <= 70) return 1;
-  if (L > 70 && L <= 82) return 1 - ((L - 70) / 12) * 0.45;
-  if (L > 82) return 0.55;
-  if (L < 58 && L >= 42) return 0.65 + ((L - 42) / 16) * 0.35;
-  if (L < 42) return 0.65;
+  if (L >= 56 && L <= 72) return 1;
+  if (L > 72 && L <= 82) return 1 - ((L - 72) / 10) * 0.4;
+  if (L > 82) return 0.6;
+  if (L < 56 && L >= 42) return 0.7 + ((L - 42) / 14) * 0.3;
+  if (L < 42) return 0.7;
   return 1;
 }
 
@@ -87,11 +75,10 @@ export function getBaliComposeParams(width, height) {
     refFineWeight: REF_FINE_TEXTURE_WEIGHT,
     detailGain: DETAIL_GAIN,
     reflectanceL: REFLECTANCE_L_AMP,
-    chromaA: CHROMA_A_AMP,
-    chromaB: CHROMA_B_AMP,
+    midChroma: `a±${MID_CHROMA_A_AMP} b±${MID_CHROMA_B_AMP}`,
     lowfreqChroma: `a±${LOWFREQ_CHROMA_A_AMP} b±${LOWFREQ_CHROMA_B_AMP}`,
-    textureHighlight: `full≤L${TEXTURE_FULL_L}, ${TEXTURE_MIN_STRENGTH * 100}%@L${TEXTURE_MIN_L}`,
-    chromaHighlight: `full≤L${CHROMA_TEXTURE_FULL_L}, ${CHROMA_TEXTURE_MIN_STRENGTH * 100}%@L${CHROMA_TEXTURE_MIN_L}`,
+    textureLumaWeight: '100% L50–70, 65%@L82, 70%@L40',
+    chromaLumaWeight: '100% L56–72, 60%@L82, 70%@L42',
     highlightTier1: `${HIGHLIGHT_TIER1_START}×${HIGHLIGHT_TIER1_RATIO}`,
     highlightTier2: `${HIGHLIGHT_TIER2_START}×${HIGHLIGHT_TIER2_RATIO}`,
     localContrast: `r${LOCAL_CONTRAST_RADIUS}×${LOCAL_CONTRAST_AMOUNT}`,
@@ -280,12 +267,12 @@ export function prepareBaliComposeFields(sourceImage, referenceImage, mask) {
   let refMediumNorm = new Float32Array(n);
   let refFineNorm = new Float32Array(n);
   let refReflectanceL = new Float32Array(n);
-  let refChromaA = new Float32Array(n);
-  let refChromaB = new Float32Array(n);
+  let midChromaA = new Float32Array(n);
+  let midChromaB = new Float32Array(n);
   let lowfreqDriftA = new Float32Array(n);
   let lowfreqDriftB = new Float32Array(n);
-  let highlightTexWeight = new Float32Array(n);
-  let highlightChromaWeight = new Float32Array(n);
+  let textureLumaWeightMap = new Float32Array(n);
+  let chromaLumaWeightMap = new Float32Array(n);
 
   if (referenceImage && referenceImage.width === width && referenceImage.height === height) {
     const ref = buildLabL(referenceImage);
@@ -302,14 +289,13 @@ export function prepareBaliComposeFields(sourceImage, referenceImage, mask) {
     refMediumNorm = normalizeMaskedPercentile(refMedium, mask);
     refFineNorm = normalizeMaskedPercentile(refFine, mask);
 
-    const textureBasis = new Float32Array(n);
     for (let j = 0; j < n; j++) {
-      textureBasis[j] =
+      const textureBasis =
         refMediumNorm[j] * REF_MEDIUM_TEXTURE_WEIGHT + refFineNorm[j] * REF_FINE_TEXTURE_WEIGHT;
-      refReflectanceL[j] = textureBasis[j];
-      refChromaA[j] = textureBasis[j] * CHROMA_A_AMP;
-      refChromaB[j] =
-        (refMediumNorm[j] * 0.4 + refFineNorm[j] * 0.6) * CHROMA_B_AMP;
+      refReflectanceL[j] = textureBasis;
+      midChromaA[j] = textureBasis * MID_CHROMA_A_AMP;
+      midChromaB[j] =
+        (refMediumNorm[j] * 0.45 + refFineNorm[j] * 0.55) * MID_CHROMA_B_AMP;
     }
 
     const chromaLowR = scaleRadius(LOWFREQ_CHROMA_BLUR_BASE, width, height);
@@ -332,20 +318,23 @@ export function prepareBaliComposeFields(sourceImage, referenceImage, mask) {
 
   for (let j = 0; j < n; j++) {
     const baseL = srcLow[j];
-    highlightTexWeight[j] = highlightDetailStrength(baseL);
-    highlightChromaWeight[j] = highlightChromaStrength(baseL);
+    textureLumaWeightMap[j] = textureLumaWeight(baseL);
+    chromaLumaWeightMap[j] = materialChromaWeight(baseL);
 
     refTexture[j] =
       (refMediumNorm[j] * REF_MEDIUM_TEXTURE_WEIGHT + refFineNorm[j] * REF_FINE_TEXTURE_WEIGHT) *
       REF_TEXTURE_AMPLITUDE *
-      highlightTexWeight[j];
+      textureLumaWeightMap[j];
 
     transferredDetailRaw[j] = srcDetail[j] * SOURCE_DETAIL_MIX + refTexture[j] * REF_TEXTURE_MIX;
     const sw = seamWeight[j];
     finalDetail[j] = transferredDetailRaw[j] * (1 - sw) + srcDetail[j] * sw;
 
     chromaVariationMap[j] =
-      Math.abs(refChromaA[j]) + Math.abs(refChromaB[j]) + Math.abs(lowfreqDriftA[j]) + Math.abs(lowfreqDriftB[j]);
+      Math.abs(midChromaA[j]) +
+      Math.abs(midChromaB[j]) +
+      Math.abs(lowfreqDriftA[j]) +
+      Math.abs(lowfreqDriftB[j]);
   }
 
   return {
@@ -363,13 +352,13 @@ export function prepareBaliComposeFields(sourceImage, referenceImage, mask) {
     refTexture,
     seamWeight,
     refReflectanceL,
-    refChromaA,
-    refChromaB,
+    midChromaA,
+    midChromaB,
     lowfreqDriftA,
     lowfreqDriftB,
     chromaVariationMap,
-    highlightTexWeight,
-    highlightChromaWeight,
+    textureLumaWeightMap,
+    chromaLumaWeightMap,
   };
 }
 
@@ -470,7 +459,7 @@ export function recolorBaliUpholstery(sourceImage, mask, palette, referenceImage
       channels,
       128 + (fields.lowfreqDriftA[j] + fields.lowfreqDriftB[j]) * 40,
     );
-    fillVizGray(highlightWeightViz, j, channels, fields.highlightTexWeight[j] * 255);
+    fillVizGray(highlightWeightViz, j, channels, fields.textureLumaWeightMap[j] * 255);
   }
 
   const Lcontrasted = applyLocalContrastOnL(finalLBuf, mask, width, height);
@@ -486,17 +475,15 @@ export function recolorBaliUpholstery(sourceImage, mask, palette, referenceImage
     const Lwork = Lcontrasted[j];
     const finalL = compressUpholsteryHighlights(clamp(Lwork, 0, 100));
 
-    const chromaW = materialChromaWeight(Lwork) * fields.highlightChromaWeight[j];
+    const chromaW = materialChromaWeight(Lwork);
     const finalA =
       chroma.a * (1 - CHROMA_SOURCE_KEEP) +
       srcLab.a * CHROMA_SOURCE_KEEP +
-      fields.refChromaA[j] * chromaW +
-      fields.lowfreqDriftA[j] * chromaW;
+      (fields.midChromaA[j] + fields.lowfreqDriftA[j]) * chromaW;
     const finalB =
       chroma.b * (1 - CHROMA_SOURCE_KEEP) +
       srcLab.b * CHROMA_SOURCE_KEEP +
-      fields.refChromaB[j] * chromaW +
-      fields.lowfreqDriftB[j] * chromaW;
+      (fields.midChromaB[j] + fields.lowfreqDriftB[j]) * chromaW;
 
     const rgb = labToRgb(finalL, finalA, finalB);
     out[p] = rgb.r;

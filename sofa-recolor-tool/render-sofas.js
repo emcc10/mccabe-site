@@ -19,12 +19,8 @@ import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { finalizeBaliExport } from './finalize-bali-export.js';
 import { getBaliComposeParams, recolorBaliUpholstery } from './bali-upholstery-compose.js';
-import {
-  applyBaliMattePipeline,
-  applyRightLegNormalSharpen,
-  getBaliMatteParams,
-} from './bali-matte.js';
-import { writeBaliDebugMaterialPack } from './debug-strip.js';
+import { applyBaliMattePipeline, getBaliMatteParams } from './bali-matte.js';
+import { writeBaliDebugContourPack } from './debug-strip.js';
 import {
   applySourceYResidualToRgb,
   prepareSourceLGrain,
@@ -905,30 +901,18 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
     );
     if (options.composeDebugHolder) {
       Object.assign(options.composeDebugHolder, {
-        srcDetailViz: composed.srcDetailViz,
-        refMesoViz: composed.refMesoViz,
-        refMicroViz: composed.refMicroViz,
         detailViz: composed.detailViz,
         chromaViz: composed.chromaViz,
-        lowfreqDriftViz: composed.lowfreqDriftViz,
-        highlightWeightViz: composed.highlightWeightViz,
-        rightLegPatchMask: matte.rightLegPatchMask,
+        sourceMatteViz: matte.sourceMatteViz,
+        finalMatteViz: matte.finalMatteViz,
+        decontamViz: matte.decontamViz,
+        overrideViz: matte.overrideViz,
         params: composed.params,
         matteParams: getBaliMatteParams(),
       });
     }
     if (options.detailVizHolder) options.detailVizHolder.buf = composed.detailViz;
     if (!options.skipFinalize) finalizeBaliExport(composed.out, sourceImage, mask);
-    applyRightLegNormalSharpen(
-      composed.out,
-      mask,
-      matte.contourAlpha,
-      matte.rightLegPatchMask,
-      matte.distIn,
-      sourceImage.width,
-      sourceImage.height,
-      sourceImage.channels,
-    );
     if (options.matteDebugHolder) Object.assign(options.matteDebugHolder, matte);
     return composed.out;
   }
@@ -1277,7 +1261,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     lBlend: isBali
       ? realismStress
         ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
-        : 'material variation restore (L+chroma); right-leg matte unchanged; NO luma lock'
+        : 'source-mask silhouette + material chroma/detail; NO luma lock'
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali
@@ -1306,18 +1290,21 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     if (previousBaliPath && existsSync(previousBaliPath)) {
       prevPanel = (await loadImage(previousBaliPath)).data;
     }
-    const patchMask = matteDebugHolder.rightLegPatchMask ?? new Uint8Array(sourceImage.width * sourceImage.height);
-    const materialPack = await writeBaliDebugMaterialPack(
+    const patchMask =
+      matteDebugHolder.rightLegOverrideMask ??
+      matteDebugHolder.rightLegPatchMask ??
+      new Uint8Array(sourceImage.width * sourceImage.height);
+    const contourPack = await writeBaliDebugContourPack(
       [
+        sourceImage.data,
         prevPanel,
         outData,
-        composeDebugHolder.srcDetailViz ?? outData,
-        composeDebugHolder.refMesoViz ?? outData,
-        composeDebugHolder.refMicroViz ?? outData,
+        composeDebugHolder.sourceMatteViz ?? outData,
+        composeDebugHolder.finalMatteViz ?? outData,
+        composeDebugHolder.overrideViz ?? outData,
+        composeDebugHolder.decontamViz ?? outData,
         composeDebugHolder.detailViz ?? outData,
         composeDebugHolder.chromaViz ?? outData,
-        composeDebugHolder.lowfreqDriftViz ?? outData,
-        composeDebugHolder.highlightWeightViz ?? outData,
       ],
       sourceImage.width,
       sourceImage.height,
@@ -1325,21 +1312,20 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
       `${debugBase}.png`,
       patchMask,
       outData,
+      4,
     );
     const p = composeDebugHolder.params ?? getBaliComposeParams(sourceImage.width, sourceImage.height);
     const mp = composeDebugHolder.matteParams ?? getBaliMatteParams();
-    console.log(`  debug material strip 10-panel: ${resolve(materialPack.stripPath)}`);
+    console.log(`  debug contour strip 10-panel: ${resolve(contourPack.stripPath)}`);
     console.log(
-      '  panels: prev | new | source-detail | ref-meso | ref-micro | final-detail | chroma-var | lowfreq-drift | highlight-weight | leg-3x',
+      '  panels: source | prev | new | source-matte | final-matte | leg-override | decontam-band | detail | chroma | leg-400%',
     );
-    if (materialPack.zoomFinal) {
-      console.log(`  right-leg final composite 3x: ${resolve(materialPack.zoomFinal)}`);
+    if (contourPack.zoomFinal) {
+      console.log(`  right-leg final 400%: ${resolve(contourPack.zoomFinal)}`);
     }
     console.log('  compose params:', p);
-    console.log('  matte params (unchanged):', mp);
-    console.log(
-      '  chroma: ref-texture a/b + lowfreq drift; matte decontam contour-band only (right leg)',
-    );
+    console.log('  matte params:', mp);
+    console.log('  silhouette: input/mask.png only — supersample AA on boundary ring, no blur feather');
   }
 
   if (isBali && realismStress) {
