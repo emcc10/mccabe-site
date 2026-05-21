@@ -1,18 +1,19 @@
 /**
- * Mandatory 4-panel Bali debug strip: source | previous | new | detail viz.
+ * Mandatory 6-panel Bali debug strip.
  */
-import { mkdirSync, renameSync, unlinkSync, existsSync } from 'fs';
+import { mkdirSync } from 'fs';
 import { dirname } from 'path';
 import sharp from 'sharp';
 
 /**
- * @param {Buffer[]} panels — [source, previousOutput, newOutput, detailViz]
+ * @param {Buffer[]} panels — [source, previous, new, contourAlpha, detail, seam]
  */
-export async function writeBaliDebugStrip(panels, width, height, channels, outPath) {
-  const stripW = width * 4;
+export async function writeBaliDebugStrip6(panels, width, height, channels, outPath) {
+  const count = panels.length;
+  const stripW = width * count;
   const strip = Buffer.alloc(stripW * height * channels);
   for (let y = 0; y < height; y++) {
-    for (let col = 0; col < 4; col++) {
+    for (let col = 0; col < count; col++) {
       const panel = panels[col];
       for (let x = 0; x < width; x++) {
         const sj = y * width + x;
@@ -29,4 +30,9 @@ export async function writeBaliDebugStrip(panels, width, height, channels, outPa
   mkdirSync(dirname(outPath), { recursive: true });
   await sharp(strip, { raw: { width: stripW, height, channels } }).png().toFile(outPath);
   return outPath;
+}
+
+/** @deprecated use writeBaliDebugStrip6 */
+export async function writeBaliDebugStrip(panels, width, height, channels, outPath) {
+  return writeBaliDebugStrip6(panels, width, height, channels, outPath);
 }

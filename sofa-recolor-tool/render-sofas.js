@@ -18,16 +18,8 @@ import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { finalizeBaliExport } from './finalize-bali-export.js';
-import {
-  DETAIL_GAIN,
-  HIGHLIGHT_START,
-  LOWFREQ_RADIUS_BASE,
-  recolorBaliUpholstery,
-  REF_DETAIL_MIX,
-  SOURCE_DETAIL_MIX,
-  TEXTURE_STRENGTH,
-} from './bali-upholstery-compose.js';
-import { writeBaliDebugStrip } from './debug-strip.js';
+import { getBaliComposeParams, recolorBaliUpholstery } from './bali-upholstery-compose.js';
+import { writeBaliDebugStrip6 } from './debug-strip.js';
 import {
   applySourceYResidualToRgb,
   prepareSourceLGrain,
@@ -892,18 +884,24 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
       const u = clamp((srcLum - lumRange.lo) / lumRange.span, 0, 1);
       return swatchChromaForPixel(palette, u);
     };
-    const { out, detailViz } = recolorBaliUpholstery(
+    const composed = recolorBaliUpholstery(
       sourceImage,
       mask,
       palette,
       options.referenceImage ?? null,
       chromaFn,
     );
-    if (!options.skipFinalize) {
-      finalizeBaliExport(out, sourceImage, mask);
+    if (options.composeDebugHolder) {
+      Object.assign(options.composeDebugHolder, {
+        detailViz: composed.detailViz,
+        contourViz: composed.contourViz,
+        seamViz: composed.seamViz,
+        params: composed.params,
+      });
     }
-    if (options.detailVizHolder) options.detailVizHolder.buf = detailViz;
-    return out;
+    if (options.detailVizHolder) options.detailVizHolder.buf = composed.detailViz;
+    if (!options.skipFinalize) finalizeBaliExport(composed.out, sourceImage, mask);
+    return composed.out;
   }
 
   const { data, width, height, channels } = sourceImage;
