@@ -26,6 +26,7 @@
   var stylesEl = document.getElementById('mc-boards-styles');
   var lifestyleEl = document.getElementById('mc-boards-lifestyle');
   var styleGuideEl = document.getElementById('mc-boards-style-guide');
+  var trendsEl = document.getElementById('mc-boards-trends');
   var typesEl = document.getElementById('mc-boards-types');
   var signInLink = document.getElementById('mc-boards-signin');
   var yearEl = document.getElementById('mc-boards-year');
@@ -412,6 +413,38 @@
     renderLifestyleLooks();
     renderQuiz();
     renderColorWheel();
+    renderTrends();
+    renderStyleGuide();
+    renderFurnitureTypes();
+  }
+
+  function renderFurnitureTypes() {
+    if (!typesEl) return;
+    typesEl.innerHTML = '';
+    var list = config.furnitureTypes || [];
+    for (var i = 0; i < list.length; i++) {
+      (function (ft) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mc-boards__type-chip';
+        btn.setAttribute('role', 'listitem');
+        var title = document.createElement('span');
+        title.className = 'mc-boards__type-chip-label';
+        title.textContent = ft.label;
+        btn.appendChild(title);
+        if (ft.desc) {
+          var desc = document.createElement('span');
+          desc.className = 'mc-boards__type-chip-desc';
+          desc.textContent = ft.desc;
+          btn.appendChild(desc);
+        }
+        btn.addEventListener('click', function () {
+          var cat = document.getElementById('mc-boards-catalog');
+          if (cat) cat.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        typesEl.appendChild(btn);
+      })(list[i]);
+    }
   }
 
   function renderTrends() {
@@ -628,7 +661,11 @@
         btn.setAttribute('data-style-id', look.styleId);
 
         var scene = document.createElement('div');
-        scene.className = 'mc-boards__lifestyle-scene';
+        scene.className =
+          'mc-boards__lifestyle-scene' + (look.sceneClass ? ' ' + look.sceneClass : '');
+        if (look.accents && look.accents.length) {
+          scene.style.backgroundColor = look.accents[0];
+        }
 
         var prod = document.createElement('img');
         prod.className = 'mc-boards__lifestyle-product';
@@ -1256,7 +1293,7 @@
       done();
       return;
     }
-    var src = API_BASE + 'board-styles.js?v=20260529';
+    var src = API_BASE + 'board-styles.js?v=20260530';
     var tag = document.querySelector('script[src*="board-styles.js"]');
     if (tag) {
       tag.addEventListener('load', function () {

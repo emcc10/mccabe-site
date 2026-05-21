@@ -2,6 +2,7 @@
  * Style library + curated McCabe product looks for inspiration boards.
  * Product PNGs: /v/vspfiles/boards/showcase/
  */
+window.MC_BOARD_STYLES_BUILD = '20260530';
 window.MC_BOARD_STYLES = {
   assetBases: ['/v/vspfiles/boards/', '/vspfiles/boards/'],
 
