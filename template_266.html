@@ -5763,7 +5763,8 @@ function getMemberCreateAccountUrl(){
 }
 function refreshPlannerPriceForMemberState(){
   if (!window.__mcPlannerConfigApplied || !window.__mcPlannerCounts) {
-    if (typeof mcSyncTheaterConfigurationFromDom === "function") mcSyncTheaterConfigurationFromDom();
+    if (typeof mcSyncConfigurationFromDom === "function") mcSyncConfigurationFromDom();
+    else if (typeof mcSyncTheaterConfigurationFromDom === "function") mcSyncTheaterConfigurationFromDom();
     return;
   }
   if (!mcPlannerUserIsLoggedIn()) {
@@ -6587,7 +6588,7 @@ function mcCleanConfigurationLabel(text) {
   return t.replace(/\s*\[\s*Additional[^\]]*\]\s*/gi, "").replace(/\s+/g, " ").trim();
 }
 
-function mcFindTheaterOptionSelects(root) {
+function mcFindConfigurationOptionSelects(root) {
   root = root || document;
   var tables = root.querySelectorAll("#options_table, table[id*='options_table']");
   var seatsSel = null;
@@ -6598,6 +6599,7 @@ function mcFindTheaterOptionSelects(root) {
     var si;
     for (si = 0; si < selects.length; si++) {
       var sel = selects[si];
+      if (sel.id === "mc-sectional-cover-proxy") continue;
       var meta = (
         (sel.getAttribute("title") || "") +
         " " +
@@ -6608,32 +6610,51 @@ function mcFindTheaterOptionSelects(root) {
       var row = sel.closest("tr");
       var rowTxt = row ? (row.textContent || "").replace(/\s+/g, " ").toLowerCase() : "";
       var blob = meta + " " + rowTxt;
-      if (!seatsSel && /number of seats|# of seats|seat count/.test(blob)) seatsSel = sel;
-      if (!configSel && /choose configuration|configuration/.test(blob) && !/configuration details/.test(blob)) {
+      if (!seatsSel && /number of seats|# of seats|seat count|number of pieces|# of pieces/.test(blob)) {
+        seatsSel = sel;
+      }
+      if (
+        !configSel &&
+        /choose configuration|select configuration|choose sectional|sectional configuration/.test(blob)
+      ) {
+        configSel = sel;
+      } else if (
+        !configSel &&
+        /\bconfiguration\b/.test(blob) &&
+        !/configuration details|product configuration summary/.test(blob) &&
+        !/(leather|cover|upholstery|fabric|grade|color)/.test(blob)
+      ) {
         configSel = sel;
       }
     }
   }
   return { seatsSel: seatsSel, configSel: configSel };
 }
+function mcFindTheaterOptionSelects(root) {
+  return mcFindConfigurationOptionSelects(root);
+}
 
-function mcSyncTheaterConfigurationFromDom() {
+function mcSyncConfigurationFromDom() {
   if (window.__mcPlannerConfigApplied) return;
-  if (typeof mcIsTheaterPlannerPdp === "function" && !mcIsTheaterPlannerPdp()) return;
 
   var capEl = document.getElementById("mcConfigurationCaption");
   var pieEl = document.getElementById("mcConfigurationPieces");
   var priceEl = document.getElementById("mcConfigurationPrice");
   if (!pieEl) return;
 
-  var picks = mcFindTheaterOptionSelects(document);
+  var picks = mcFindConfigurationOptionSelects(document);
   var seatsSel = picks.seatsSel;
   var configSel = picks.configSel;
+  var isTheaterPlanner =
+    typeof mcIsTheaterPlannerPdp === "function" && mcIsTheaterPlannerPdp();
   if (!configSel && !seatsSel) {
     if (capEl) {
       capEl.style.display = "block";
-      if (!capEl.classList.contains("mc-configuration-rh__planner-only")) {
+      capEl.classList.remove("mc-configuration-rh__planner-only");
+      if (isTheaterPlanner) {
         capEl.textContent = "Please use the room planner to choose configuration.";
+      } else {
+        capEl.textContent = "Select configuration options above.";
       }
     }
     pieEl.style.display = "none";
@@ -6734,7 +6755,12 @@ function mcSyncTheaterConfigurationFromDom() {
     }
   }
 }
+function mcSyncTheaterConfigurationFromDom() {
+  return mcSyncConfigurationFromDom();
+}
 if (typeof window !== "undefined") {
+  window.mcFindConfigurationOptionSelects = mcFindConfigurationOptionSelects;
+  window.mcSyncConfigurationFromDom = mcSyncConfigurationFromDom;
   window.mcSyncTheaterConfigurationFromDom = mcSyncTheaterConfigurationFromDom;
 }
 
@@ -6752,6 +6778,8 @@ function ensureTheaterPlannerOptionPriceResync() {
         deb = null;
         if (window.__mcPlannerConfigApplied) {
           mcSyncPlannerConfigurationPriceDisplay();
+        } else if (typeof mcSyncConfigurationFromDom === "function") {
+          mcSyncConfigurationFromDom();
         } else if (typeof mcSyncTheaterConfigurationFromDom === "function") {
           mcSyncTheaterConfigurationFromDom();
         }
@@ -13108,10 +13136,12 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       hideTheaterSeatPdpNativePricing(scope);
       ensurePriceWithOptionsLabel(scope);
       leftAlignPricingBlock(scope);
-      if (typeof mcIsTheaterPlannerPdp === "function" && mcIsTheaterPlannerPdp()) {
+      if (document.getElementById("mcConfigurationBlock")) {
         ensureTheaterPlannerOptionPriceResync();
       }
-      if (typeof window.mcSyncTheaterConfigurationFromDom === "function") {
+      if (typeof window.mcSyncConfigurationFromDom === "function") {
+        window.mcSyncConfigurationFromDom();
+      } else if (typeof window.mcSyncTheaterConfigurationFromDom === "function") {
         window.mcSyncTheaterConfigurationFromDom();
       }
     } catch (e3) {}

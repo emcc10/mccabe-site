@@ -296,7 +296,7 @@ fi
 
 echo "=== My Boards byte-size check (/v/vspfiles is what browsers load) ==="
 for pair in \
-  "vspfiles/boards/my-boards-app.js|/v/vspfiles/boards/my-boards-app.js" \
+  "vspfiles/boards/my-boards-page.js|/v/vspfiles/boards/my-boards-page.js" \
   "vspfiles/boards/board-styles.js|/v/vspfiles/boards/board-styles.js" \
   "vspfiles/boards/board-styles.js|/v/vspfiles/boards/board-styles.js" \
   "vspfiles/boards/my-boards-bundle.css|/v/vspfiles/boards/my-boards-bundle.css"; do
@@ -361,10 +361,10 @@ verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-ct
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260621"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260520plp" "MC_DTK_PLP_20260621"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-sofa-bounds.json?v=$(date +%s)" "77494-91-1.jpg"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" "mc-boards-triptych"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-bundle.css?v=20260533" "mc-boards__feature"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/board-styles.js?v=20260533" "MC_BOARD_STYLES_BUILD"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-app.js?v=20260533" "__MC_BOARDS_APP_V2"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" "renderInline"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-bundle.css?v=20260534" "mc-boards__feature"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/board-styles.js?v=20260534" "MC_BOARD_STYLES_BUILD"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-page.js?v=20260534" "__MC_BOARDS_APP_V2"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" "mc-boards__triptych"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png?v=$(date +%s)" "PNG"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/template.min.js" "MC_PLP_ENFORCER_LOADING__"

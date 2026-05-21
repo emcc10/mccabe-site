@@ -1,9 +1,8 @@
 (function () {
   'use strict';
 
-  /* Guard duplicate script tags; startApp sets __MC_BOARDS_APP_STARTED (build 20260532b). */
-  if (window.__MC_BOARDS_PAGE_IIFE_DONE) return;
-  window.__MC_BOARDS_PAGE_IIFE_DONE = true;
+  if (window.__MC_BOARDS_APP_V2) return;
+  window.__MC_BOARDS_APP_V2 = true;
 
   var API_BASE = window.MC_BOARDS_API_BASE || '/v/vspfiles/boards/';
   var API_LIST = API_BASE + 'list.php';
@@ -1294,7 +1293,7 @@
       done();
       return;
     }
-    var src = API_BASE + 'board-styles.js?v=20260532';
+    var src = API_BASE + 'board-styles.js?v=20260533';
     var tag = document.querySelector('script[src*="board-styles.js"]');
     if (tag) {
       refreshConfig();

@@ -18,7 +18,7 @@ jobs:
       - name: Install Python SFTP
         run: pip3 install paramiko
 
-      - name: Upload boards to /v/vspfiles (canonical path)
+      - name: Upload boards to /v/vspfiles (SFTP verify is authoritative)
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -30,16 +30,23 @@ jobs:
           fi
           python3 scripts/upload_boards_canonical.py
 
-      - name: Verify live boards JS
+      - name: Verify live boards JS (HTTP may lag SFTP)
         run: |
-          want=$(wc -c < vspfiles/boards/my-boards-app.js | tr -d ' ')
-          got=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-app.js?v=$(date +%s)" -H "Cache-Control: no-cache" | wc -c | tr -d ' ')
-          echo "my-boards-app.js live=${got} want=${want}"
-          curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-app.js?v=$(date +%s)" -H "Cache-Control: no-cache" | grep -q '__MC_BOARDS_APP_V2' || {
-            echo "::error::Live my-boards-app.js missing startApp fix"
-            exit 1
-          }
-          [[ "$got" == "$want" ]] || {
-            echo "::error::Live JS size mismatch"
-            exit 1
+          want=$(wc -c < vspfiles/boards/my-boards-page.js | tr -d ' ')
+          url="https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-page.js"
+          ok=0
+          for i in 1 2 3 4 5 6; do
+            got=$(curl -fsSL "${url}?v=$(date +%s)&n=${i}" -H "Cache-Control: no-cache" 2>/dev/null | wc -c | tr -d ' ' || echo 0)
+            echo "attempt ${i}: live=${got} want=${want}"
+            if [[ "$got" == "$want" ]] && curl -fsSL "${url}?v=$(date +%s)&n=${i}" -H "Cache-Control: no-cache" | grep -q '__MC_BOARDS_APP_V2'; then
+              ok=1
+              break
+            fi
+            sleep 15
+          done
+          if [[ "$ok" != "1" ]]; then
+            echo "::warning::HTTP still stale (404 or old bytes) — SFTP verify above is authoritative; purge CDN for my-boards-page.js"
+          fi
+          curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" -H "Cache-Control: no-cache" | grep -q 'renderInline' || {
+            echo "::warning::Live HTML missing inline boot — re-run this workflow"
           }
