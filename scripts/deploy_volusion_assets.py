@@ -186,6 +186,11 @@ def _upload_one(sftp, local: str, remotes: list[str] | None = None) -> bool:
     paths = remotes if remotes is not None else _remotes(local)
     use_chunked_first = want > 31000 or local.lower().endswith(".png")
     sync_all = _boards_need_all_remotes(local)
+    local_n = local.replace("\\", "/")
+    # Browsers fetch https://…/v/vspfiles/… — uploads that only land on /vspfiles/ can pass lftp yet 404 HTTP.
+    require_canon = "vspfiles/" in local_n and local_n not in {
+        p.replace("\\", "/") for p in SKIP_OVER_CAP
+    }
     canon_ok = False
     any_ok = False
     last_exc: Exception | None = None
@@ -196,21 +201,20 @@ def _upload_one(sftp, local: str, remotes: list[str] | None = None) -> bool:
                 any_ok = True
                 if remote.startswith("/v/vspfiles/"):
                     canon_ok = True
-                if not sync_all:
-                    return True
             else:
                 last_exc = None
         except Exception as exc:  # noqa: BLE001
             last_exc = exc
             print(f"::warning::PUT_SKIP {remote!r}: {exc}", flush=True)
 
+    if require_canon and not canon_ok:
+        print(
+            f"::error::FAIL {local!r}: /v/vspfiles/ path not updated (HTTP serves this URL)",
+            file=sys.stderr,
+        )
+        return False
+
     if sync_all:
-        if not canon_ok:
-            print(
-                f"::error::FAIL {local!r}: /v/vspfiles/ path not updated (HTTP serves this URL)",
-                file=sys.stderr,
-            )
-            return False
         return any_ok
 
     if last_exc:

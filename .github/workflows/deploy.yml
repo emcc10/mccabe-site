@@ -82,6 +82,8 @@ jobs:
             exit 1
           fi
           echo ""
-          echo "Uploaded from Git: template_266.html + vspfiles/* (see deploy log)."
-          echo "Confirm CSS: fetch('/v/vspfiles/css/custom-safe.css?'+Date.now()) then check line 1 marker."
-          echo "Rebake: Volusion Design → File Editor → template_266.html → Save"
+          echo "Green only if log contains: SFTP custom-safe OK, MC_PDP_JS_SFTP_CANONICAL_OK, MC_PDP_JS_HTTP_OK"
+          echo "Quick browser checks:"
+          echo "  fetch('/v/vspfiles/js/mc-pdp-auth-cta-fix.js?'+Date.now()).then(r=>r.text()).then(t=>console.log(t.includes('mcEnsurePdpPriceStack')))"
+          echo "  fetch('/v/vspfiles/js/mc-pdp-price-stack.js?'+Date.now()).then(r=>console.log(r.status))"
+          echo "Rebake: Volusion Design → File Editor → template_266.html → Save (for template/baked .htm changes)"
