@@ -1,0 +1,53 @@
+{
+  "stage": "6C-B",
+  "lockedFrom": "Phase 6C variant B (+fine detail / -seam)",
+  "notFinalBaliSilk": true,
+  "params": {
+    "detailStrength": 0.36,
+    "highlightStrength": 0.06,
+    "aVarAmp": 0.12,
+    "bVarAmp": 0.19,
+    "fineBlurPx": 4,
+    "coarseBlurPx": 12,
+    "seamBoost": 0.18,
+    "fineDetailScale": 1.12,
+    "luminanceIrregularityAmp": 0
+  },
+  "pipeline": [
+    "Stage 4B-v3",
+    "Phase 6A bottom seam fix",
+    "Phase 6B-B base + Phase 6C-B naturalization"
+  ],
+  "method": "Phase 6A + applyRealismPassV2 (locked 6C-B params); upholstery mask only",
+  "realismParams": {
+    "detailStrength": 0.36,
+    "highlightStrength": 0.06,
+    "aVarAmp": 0.12,
+    "bVarAmp": 0.19,
+    "fineBlurPx": 4,
+    "coarseBlurPx": 12,
+    "seamBoost": 0.18,
+    "fineDetailScale": 1.12,
+    "luminanceIrregularityAmp": 0
+  },
+  "upholsteryMeanLab": {
+    "base6a": {
+      "meanL": 71.86234735369274,
+      "meanA": 3.1375015601290146,
+      "meanB": 6.165209451425794,
+      "count": 152231
+    },
+    "output": {
+      "meanL": 71.67149266575139,
+      "meanA": 3.1340988366364275,
+      "meanB": 6.163935072357141,
+      "count": 152231
+    }
+  },
+  "deltaMeanLFrom6a": -0.19085468794135352,
+  "postRgbPasses": [],
+  "outputs": {
+    "single": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6c-single-B.png",
+    "comparison": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6c-comparison-B.png"
+  }
+}

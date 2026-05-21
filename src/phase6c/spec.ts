@@ -32,3 +32,24 @@ export function realismParamsFor6cVariant(variant: Phase6cVariant): RealismV2Par
     ...variant.naturalization,
   };
 }
+
+/** Locked Phase 6C-B realism params (not final Bali Silk). */
+export const LOCKED_6C_B_PARAMS: RealismV2Params = {
+  detailStrength: 0.36,
+  highlightStrength: 0.06,
+  aVarAmp: 0.12,
+  bVarAmp: 0.19,
+  fineBlurPx: 4,
+  coarseBlurPx: 12,
+  seamBoost: 0.18,
+  fineDetailScale: 1.12,
+  luminanceIrregularityAmp: 0,
+};
+
+export const LOCKED_6C_B = {
+  stage: '6C-B',
+  lockedFrom: 'Phase 6C variant B (+fine detail / -seam)',
+  notFinalBaliSilk: true,
+  params: LOCKED_6C_B_PARAMS,
+  pipeline: ['Stage 4B-v3', 'Phase 6A bottom seam fix', 'Phase 6B-B base + Phase 6C-B naturalization'],
+} as const;
