@@ -1,0 +1,105 @@
+{
+  "phase": "6C",
+  "purpose": "Realism naturalization on locked 6B-B (less digital smoothness)",
+  "input": "Phase 6A (4B-v3 color/edges + bottom seam fix)",
+  "lockedBase": "6B-B",
+  "locked6bB": {
+    "detailStrength": 0.36,
+    "highlightStrength": 0.06,
+    "aVarAmp": 0.12,
+    "bVarAmp": 0.19,
+    "fineBlurPx": 4,
+    "coarseBlurPx": 12,
+    "seamBoost": 0.28,
+    "fineDetailScale": 1,
+    "luminanceIrregularityAmp": 0
+  },
+  "functionsChanged": [
+    "src/phase6b/realismV2.ts — fineDetailScale, luminanceIrregularityAmp, lIrregularity map",
+    "src/phase6c/spec.ts — PHASE6C_VARIANTS",
+    "src/phase6c/run.ts — runPhase6c"
+  ],
+  "upholsteryMeanLab": {
+    "base6a": {
+      "meanL": 71.86234735369274,
+      "meanA": 3.1375015601290146,
+      "meanB": 6.165209451425794,
+      "count": 152231
+    },
+    "locked6bB": {
+      "meanL": 71.68599693886264,
+      "meanA": 3.134322181421655,
+      "meanB": 6.164000761999856,
+      "count": 152231
+    }
+  },
+  "variants": [
+    {
+      "id": "A",
+      "label": "6C A +FINE DETAIL",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6c-variant-A.png",
+      "params": {
+        "detailStrength": 0.36,
+        "highlightStrength": 0.06,
+        "aVarAmp": 0.12,
+        "bVarAmp": 0.19,
+        "fineBlurPx": 4,
+        "coarseBlurPx": 12,
+        "seamBoost": 0.28,
+        "fineDetailScale": 1.12,
+        "luminanceIrregularityAmp": 0
+      },
+      "meanL": 71.66098889188142,
+      "deltaLFrom6bB": -0.025008046981227494
+    },
+    {
+      "id": "B",
+      "label": "6C B +FINE / -SEAM",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6c-variant-B.png",
+      "params": {
+        "detailStrength": 0.36,
+        "highlightStrength": 0.06,
+        "aVarAmp": 0.12,
+        "bVarAmp": 0.19,
+        "fineBlurPx": 4,
+        "coarseBlurPx": 12,
+        "seamBoost": 0.18,
+        "fineDetailScale": 1.12,
+        "luminanceIrregularityAmp": 0
+      },
+      "meanL": 71.67149266575139,
+      "deltaLFrom6bB": -0.014504273111256794
+    },
+    {
+      "id": "C",
+      "label": "6C C +L IRREGULARITY",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6c-variant-C.png",
+      "params": {
+        "detailStrength": 0.36,
+        "highlightStrength": 0.06,
+        "aVarAmp": 0.12,
+        "bVarAmp": 0.19,
+        "fineBlurPx": 4,
+        "coarseBlurPx": 12,
+        "seamBoost": 0.18,
+        "fineDetailScale": 1.12,
+        "luminanceIrregularityAmp": 0.45
+      },
+      "meanL": 71.67092116585978,
+      "deltaLFrom6bB": -0.015075773002863002
+    }
+  ],
+  "outputs": {
+    "grid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6c-grid.png",
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6c-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6c-variant-B.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6c-variant-C.png"
+    ],
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6c-spec.json"
+  },
+  "notes": [
+    "Single realism pass from 6A per variant (not stacked on 6B-B image).",
+    "No noise, global sharpen, color remap, edge/bottom/alpha/mask changes."
+  ]
+}

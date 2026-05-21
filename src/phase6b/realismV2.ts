@@ -10,6 +10,10 @@ export interface RealismV2Params {
   seamBoost: number;
   fineBlurPx: number;
   coarseBlurPx: number;
+  /** Multiplier on fine detail only (default 1) */
+  fineDetailScale?: number;
+  /** Low-amplitude source-derived L irregularity (default 0) */
+  luminanceIrregularityAmp?: number;
 }
 
 export interface SourceTextureMapsV2 {
@@ -19,6 +23,8 @@ export interface SourceTextureMapsV2 {
   highlight: Float32Array;
   aResidual: Float32Array;
   bResidual: Float32Array;
+  /** Zero-mean low-frequency source L variation */
+  lIrregularity: Float32Array;
 }
 
 export function buildSourceTextureMapsV2(
@@ -85,7 +91,27 @@ export function buildSourceTextureMapsV2(
     bResidual[j] = (lab.b - bMean) / bMax;
   }
 
-  return { lDetailFine, lDetailCoarse, seamWeight, highlight, aResidual, bResidual };
+  const blurMid = boxBlur(L, width, height, 16);
+  const blurLow = boxBlur(L, width, height, 36);
+  const lIrregularity = new Float32Array(n);
+  let irrSum = 0;
+  let irrCount = 0;
+  let irrMax = 1e-6;
+  for (let j = 0; j < n; j++) {
+    if (upholstery.data[j] < 128) continue;
+    const v = blurMid[j] - blurLow[j];
+    lIrregularity[j] = v;
+    irrSum += v;
+    irrCount++;
+    irrMax = Math.max(irrMax, Math.abs(v));
+  }
+  const irrMean = irrCount ? irrSum / irrCount : 0;
+  for (let j = 0; j < n; j++) {
+    if (upholstery.data[j] < 128) continue;
+    lIrregularity[j] = (lIrregularity[j] - irrMean) / irrMax;
+  }
+
+  return { lDetailFine, lDetailCoarse, seamWeight, highlight, aResidual, bResidual, lIrregularity };
 }
 
 /** Material realism v2 — stronger HF detail, seam-weighted, softer highlight lift. */
@@ -103,11 +129,14 @@ export function applyRealismPassV2(
     const p = j * channels;
     const lab = rgbToLab(base.data[p], base.data[p + 1], base.data[p + 2]);
 
+    const fineScale = params.fineDetailScale ?? 1;
+    const irrAmp = params.luminanceIrregularityAmp ?? 0;
     const seamMul = 1 + params.seamBoost * maps.seamWeight[j];
     let L =
       lab.L +
       params.detailStrength * maps.lDetailCoarse[j] +
-      params.detailStrength * 0.85 * maps.lDetailFine[j] * seamMul;
+      params.detailStrength * 0.85 * fineScale * maps.lDetailFine[j] * seamMul +
+      irrAmp * maps.lIrregularity[j];
 
     const hi = maps.highlight[j];
     L += params.highlightStrength * 7.5 * hi * (1 - 0.35 * hi);

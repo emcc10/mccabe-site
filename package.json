@@ -19,7 +19,8 @@
     "render:stage5c": "tsx scripts/renderStage5c.ts",
     "render:final": "tsx scripts/renderFinalCandidate.ts",
     "render:phase6a": "tsx scripts/renderPhase6a.ts",
-    "render:phase6b": "tsx scripts/renderPhase6b.ts"
+    "render:phase6b": "tsx scripts/renderPhase6b.ts",
+    "render:phase6c": "tsx scripts/renderPhase6c.ts"
   },
   "dependencies": {
     "color-convert": "^2.0.1",

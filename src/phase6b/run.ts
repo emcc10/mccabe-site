@@ -7,7 +7,7 @@ import { writeVariantGrid } from '../phase3b/grid.js';
 import type { RgbaImage } from '../phase1/segment.js';
 import { meanUpholsteryLab } from '../phase5/labUtil.js';
 import { applyRealismPassV2, buildSourceTextureMapsV2 } from './realismV2.js';
-import { PHASE6B_VARIANTS, REALISM_V2_SHARED } from './spec.js';
+import { LOCKED_6B_B, PHASE6B_VARIANTS, REALISM_V2_SHARED } from './spec.js';
 
 export const PHASE6B_GRID = join(DEBUG_DIR, 'phase6b-grid.png');
 export const PHASE6B_SPEC = join(DEBUG_DIR, 'phase6b-spec.json');
@@ -23,6 +23,19 @@ async function writeRgbaPng(path: string, image: RgbaImage) {
   })
     .png()
     .toFile(path);
+}
+
+/** Phase 6A + locked 6B-B realism (material base for Phase 6C). */
+export async function buildLocked6bBBase() {
+  const { source, image: base6a, upholstery } = await buildPhase6aBase();
+  const maps = buildSourceTextureMapsV2(
+    source,
+    upholstery,
+    LOCKED_6B_B.fineBlurPx,
+    LOCKED_6B_B.coarseBlurPx,
+  );
+  const image = applyRealismPassV2(base6a, upholstery, maps, LOCKED_6B_B);
+  return { source, image, base6a, upholstery, maps };
 }
 
 export async function runPhase6b() {

@@ -47,3 +47,16 @@ export const PHASE6B_VARIANTS: Phase6bVariant[] = [
     },
   },
 ];
+
+/** Locked Phase 6B-B — approved material realism base for Phase 6C */
+export const LOCKED_6B_B: RealismV2Params = {
+  detailStrength: 0.36,
+  highlightStrength: 0.06,
+  aVarAmp: 0.12,
+  bVarAmp: 0.19,
+  fineBlurPx: 4,
+  coarseBlurPx: 12,
+  seamBoost: 0.28,
+  fineDetailScale: 1,
+  luminanceIrregularityAmp: 0,
+};
