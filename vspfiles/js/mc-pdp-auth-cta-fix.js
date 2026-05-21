@@ -6,7 +6,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260522restore";
+  var VERSION = "20260523boot";
 
   function authDelay(ms) {
     return new Promise(function (resolve) {
@@ -520,8 +520,12 @@
 
   global.mcHandleLoginCtaClick = handleAuthCtaClick;
 
-  if (global.__MC_PDP_AUTH_CTA_FIX_VER__ === VERSION) return;
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
+  global.mcPdpAuthCtaRefresh = function () {
+    try {
+      runPatch();
+    } catch (eRef) {}
+  };
 
   function isProductPdp() {
     try {
@@ -805,7 +809,110 @@
       });
   }
 
+  function extractAdditionalFromOptionText(text) {
+    var t = String(text || "");
+    var m =
+      t.match(/\[\s*Additional\s*\$?\s*([\d,]+(?:\.\d{2})?)\s*\]/i) ||
+      t.match(/additional\s*\$?\s*([\d,]+(?:\.\d{2})?)/i) ||
+      t.match(/\(\s*\+\s*\$?\s*([\d,]+(?:\.\d{2})?)\s*\)/i);
+    return m ? parseMoney(m[1]) : 0;
+  }
+
+  function findConfigurationSelects() {
+    if (typeof global.mcFindConfigurationOptionSelects === "function") {
+      try {
+        return global.mcFindConfigurationOptionSelects(global.document);
+      } catch (eF) {}
+    }
+    var configSel = null;
+    var seatsSel = null;
+    global.document.querySelectorAll("#options_table select, #v65-product-parent select").forEach(function (sel) {
+      if (sel.classList && sel.classList.contains("mc-native-leather")) return;
+      var txt = sel.options && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex].text : "";
+      if (!configSel && /additional|sectional configuration|\d+\/\d+/i.test(String(txt))) configSel = sel;
+      if (!seatsSel && /seat|straight|curved/i.test(String(txt))) seatsSel = sel;
+    });
+    return { configSel: configSel, seatsSel: seatsSel };
+  }
+
+  function inlineSyncConfigurationPrice() {
+    var capEl = global.document.getElementById("mcConfigurationCaption");
+    var pieEl = global.document.getElementById("mcConfigurationPieces");
+    var priceEl = global.document.getElementById("mcConfigurationPrice");
+    if (!pieEl || !priceEl) return;
+    var picks = findConfigurationSelects();
+    var configSel = picks.configSel;
+    if (!configSel) {
+      if (priceEl) {
+        priceEl.style.display = "none";
+        priceEl.textContent = "";
+      }
+      return;
+    }
+    var additional = 0;
+    if (configSel.selectedIndex >= 0) {
+      additional = extractAdditionalFromOptionText(
+        configSel.options[configSel.selectedIndex].text || configSel.options[configSel.selectedIndex].innerText
+      );
+    }
+    var loggedIn = false;
+    try {
+      loggedIn =
+        !!(global.document.body && global.document.body.classList.contains("mc-member-logged-in")) ||
+        !!global.sessionStorage.getItem("mc_recent_member_auth");
+    } catch (eLi) {}
+    var priceHtml = [];
+    if (additional > 0) {
+      priceHtml.push(
+        '<div class="mc-configuration-rh__addl">Additional configuration cost: ' +
+          fmtMoney(additional) +
+          "</div>"
+      );
+    }
+    if (loggedIn) {
+      var totalAmt = 0;
+      var pwo =
+        global.document.getElementById("priceWithOptions") ||
+        global.document.getElementById("priceWithOptionsNoTax");
+      if (pwo) {
+        totalAmt =
+          parseMoney(
+            (pwo.getAttribute && (pwo.getAttribute("value") || pwo.getAttribute("content"))) ||
+              pwo.textContent ||
+              ""
+          ) || 0;
+      }
+      if (!(totalAmt > 0) && typeof global.getVolusionAddToCartSeatPrice === "function") {
+        totalAmt = Number(global.getVolusionAddToCartSeatPrice(global.document)) || 0;
+      }
+      if (!(totalAmt > 0) && additional > 0) {
+        var retailEl = global.document.querySelector(".mc-pdp-retail-row .product_list_price");
+        var baseAmt = retailEl ? parseMoney(retailEl.textContent || "") : 0;
+        if (!(baseAmt > 0)) baseAmt = resolvePdpSaleAmount() || readRetailAmountForSale();
+        if (baseAmt > 0) totalAmt = baseAmt + additional;
+      }
+      if (totalAmt > 0) {
+        priceHtml.push('<div class="mc-configuration-rh__total-line">Total: ' + fmtMoney(totalAmt) + "</div>");
+      }
+    }
+    if (priceHtml.length) {
+      priceEl.innerHTML = priceHtml.join("");
+      priceEl.style.display = "block";
+    } else {
+      priceEl.style.display = "none";
+      priceEl.textContent = "";
+    }
+    if (capEl && additional > 0 && !loggedIn) {
+      capEl.style.display = "block";
+      if (!capEl.querySelector("[data-mc-open-login]")) {
+        capEl.innerHTML =
+          '<button type="button" class="mc-configuration-rh__signin-cta" data-mc-open-login style="border:none;background:none;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer;">Sign in</button> for configured total.';
+      }
+    }
+  }
+
   function syncConfigurationBlockPricing() {
+    inlineSyncConfigurationPrice();
     if (typeof global.mcSyncConfigurationFromDom === "function") {
       try {
         global.mcSyncConfigurationFromDom();
@@ -816,6 +923,53 @@
         global.scheduleConfigurationFromDomRetries();
       } catch (eSch) {}
     }
+  }
+
+  function buildMinimalRetailMemberStack() {
+    if (!isProductPdp()) return;
+    var host =
+      global.document.querySelector("#v65-product-parent .colors_pricebox td") ||
+      global.document.querySelector("#v65-product-parent .colors_pricebox");
+    if (!host) return;
+    var box = global.document.querySelector("#v65-product-parent .colors_pricebox");
+    var retailAmt = 0;
+    if (box) {
+      var pp = box.querySelector(".product_productprice");
+      if (pp) retailAmt = parseMoney(pp.textContent || "");
+      if (!(retailAmt > 0)) {
+        var re = /\$[\d,]+(?:\.\d{2})?/g;
+        var m;
+        var text = box.textContent || "";
+        while ((m = re.exec(text)) !== null) {
+          var v = parseMoney(m[0]);
+          if (v > 0) retailAmt = Math.max(retailAmt, v);
+        }
+      }
+    }
+    if (!(retailAmt > 0)) return;
+    if (!global.document.querySelector(".mc-pdp-retail-row")) {
+      var row = global.document.createElement("div");
+      row.className = "mc-pdp-retail-row";
+      row.innerHTML =
+        '<div class="mc-pdp-retail-label">Retail Price</div>' +
+        '<div class="mc-pdp-retail-line"><span class="product_list_price">' +
+        fmtMoney(retailAmt) +
+        "</span></div>";
+      host.insertBefore(row, host.firstChild);
+    }
+    var wrap = ensureMemberPricingWrap();
+    if (wrap && !wrap.querySelector(".mc-pdp-member-line")) {
+      var locked = global.document.createElement("div");
+      locked.className = "mc-pdp-member-line mc-pdp-member-line--locked";
+      locked.innerHTML =
+        '<span class="mc-pdp-member-line__label">Member Price</span>' +
+        '<span class="mc-pdp-member-line__amount"><a href="#" data-mc-open-login>Log in</a> to see member pricing</span>';
+      wrap.appendChild(locked);
+    }
+    if (wrap) layoutMemberLines(wrap);
+    try {
+      global.document.body.classList.add("mc-pdp-price-stack");
+    } catch (eCls) {}
   }
 
   function hideNativeSaleNodes() {
@@ -1052,6 +1206,7 @@
   function runPatch() {
     if (!isProductPdp()) return;
     ensurePdpStackCriticalCss();
+    buildMinimalRetailMemberStack();
     ensureMcCabeRetailStack();
     wirePlannerLoginGate();
     guardConfigurationBlockClick();
@@ -1060,6 +1215,19 @@
       mcEnsurePdpPriceStack();
     } catch (eStackRun) {}
     syncConfigurationBlockPricing();
+    try {
+      global.document
+        .querySelectorAll("#options_table select, #v65-product-parent select")
+        .forEach(function (sel) {
+          if (sel.dataset.mcConfigPriceBound === "1") return;
+          sel.dataset.mcConfigPriceBound = "1";
+          sel.addEventListener("change", function () {
+            try {
+              inlineSyncConfigurationPrice();
+            } catch (eCh) {}
+          });
+        });
+    } catch (eBind) {}
   }
 
   if (!global.__MC_PDP_AUTH_CTA_CAPTURE__) {
@@ -1131,7 +1299,7 @@
   var s = d.createElement("script");
   s.id = "mc-pdp-price-stack-loader";
   s.async = true;
-  s.src = "/v/vspfiles/js/mc-pdp-price-stack.js?v=20260522stack&mcrd=" + Date.now();
+  s.src = "/v/vspfiles/js/mc-pdp-price-stack.js?v=20260523boot&mcrd=" + Date.now();
   s.onload = function () {
     try {
       if (typeof g.mcEnsurePdpPriceStack === "function") g.mcEnsurePdpPriceStack();
