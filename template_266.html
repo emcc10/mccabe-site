@@ -49,7 +49,8 @@ body.productdetails #options_table select:not(.mc-native-leather),body.mc-produc
 body.productdetails #options_table select:not(.mc-native-leather),body.mc-product-page #options_table select:not(.mc-native-leather){text-transform:none!important;color:#444!important}
 body.productdetails .mc-pdp-retail-label,body.mc-product-page .mc-pdp-retail-label,body.productdetails .mc-pdp-member-line__label,body.mc-product-page .mc-pdp-member-line__label{font-size:13px!important;letter-spacing:.16em!important;text-transform:uppercase!important;color:#777!important}
 body.productdetails .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-member-line__amount,body.productdetails .mc-pdp-retail-row .product_list_price,body.mc-product-page .mc-pdp-retail-row .product_list_price{font-size:13px!important;letter-spacing:.02em!important;text-transform:none!important;color:#444!important;white-space:normal!important}
-body.productdetails .mc-pdp-retail-row .product_sale_price,body.mc-product-page .mc-pdp-retail-row .product_sale_price,body.productdetails .mc-pdp-retail-row .product_saleprice,body.mc-product-page .mc-pdp-retail-row .product_saleprice,body.productdetails .colors_pricebox>.product_sale_price,body.mc-product-page .colors_pricebox>.product_sale_price,body.productdetails .colors_pricebox>font.product_sale_price,body.mc-product-page .colors_pricebox>font.product_sale_price,body.productdetails .mtl-product-price-block>.product_sale_price,body.mc-product-page .mtl-product-price-block>.product_saleprice{display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important}
+body.mc-pdp-price-stack #v65-product-parent .product_sale_price,body.mc-pdp-price-stack #v65-product-parent .product_saleprice,body.mc-pdp-price-stack #v65-product-parent font.product_sale_price,body.mc-pdp-price-stack #content_area .product_sale_price,body.mc-pdp-price-stack #content_area .product_saleprice,body.mc-pdp-price-stack #content_area font.product_sale_price,body.productdetails .mc-pdp-retail-row .product_sale_price,body.mc-product-page .mc-pdp-retail-row .product_sale_price,body.productdetails .mc-pdp-retail-row .product_saleprice,body.mc-product-page .mc-pdp-retail-row .product_saleprice,body.productdetails .colors_pricebox .product_sale_price,body.mc-product-page .colors_pricebox .product_sale_price,body.productdetails .colors_pricebox .product_saleprice,body.mc-product-page .colors_pricebox .product_saleprice,body.productdetails .mtl-product-price-block .product_sale_price,body.mc-product-page .mtl-product-price-block .product_saleprice{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
+body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:2px!important;width:100%!important;position:static!important}
 body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line--sale,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line--sale{display:flex!important;flex-direction:column!important;gap:2px!important;margin-top:4px!important}
 body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line__amount{letter-spacing:.02em!important;white-space:normal!important}
 </style>
@@ -462,7 +463,7 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-p
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
-  <link href="/v/vspfiles/css/custom-safe.css?v=20260521h" rel="stylesheet" id="mc-custom-safe-css-static">
+  <link href="/v/vspfiles/css/custom-safe.css?v=20260521i" rel="stylesheet" id="mc-custom-safe-css-static">
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
   html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
@@ -13047,7 +13048,12 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       scope ||
       document;
     if (!root || !root.querySelectorAll) return;
-    var hasMcPricing = !!document.querySelector('.mc-pdp-member-pricing, .mc-pdp-retail-row');
+    var isPdp =
+      !!(document.body && (document.body.classList.contains('productdetails') || document.body.classList.contains('mc-product-page'))) ||
+      /\/product-p\//i.test(location.pathname || '');
+    var hasMcPricing =
+      !!(document.body && document.body.classList.contains('mc-pdp-price-stack')) ||
+      !!document.querySelector('.mc-pdp-member-pricing, .mc-pdp-retail-row');
     var saleNodes = root.querySelectorAll(
       'font.product_sale_price, .product_sale_price, .product_saleprice, [class*="product_sale_price"], [class*="product_saleprice"]'
     );
@@ -13056,15 +13062,20 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       var node = saleNodes[i];
       if (node.closest && node.closest('.mc-member-price-caption')) continue;
       if (node.closest && node.closest('.mc-pdp-sale-preview')) continue;
+      if (node.closest && node.closest('.mc-pdp-member-line--sale')) continue;
       try {
-        if (hasMcPricing) {
+        if (isPdp || hasMcPricing) {
           node.style.setProperty('display', 'none', 'important');
           node.style.setProperty('visibility', 'hidden', 'important');
+          node.style.setProperty('height', '0', 'important');
+          node.style.setProperty('overflow', 'hidden', 'important');
+          node.style.setProperty('opacity', '0', 'important');
         } else {
           node.style.removeProperty('display');
           node.style.removeProperty('visibility');
-          node.style.setProperty('display', 'block', 'important');
-          node.style.setProperty('visibility', 'visible', 'important');
+          node.style.removeProperty('height');
+          node.style.removeProperty('overflow');
+          node.style.removeProperty('opacity');
         }
       } catch (eSaleHide) {}
     }
@@ -13160,6 +13171,8 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }
     try {
       hideNativePdpSalePricing(scope);
+      if (typeof mcTidyMtlPriceBlock === 'function') mcTidyMtlPriceBlock();
+      if (typeof mcTidyPdpMemberPricing === 'function') mcTidyPdpMemberPricing();
       hideTheaterSeatPdpNativePricing(scope);
       ensurePriceWithOptionsLabel(scope);
       leftAlignPricingBlock(scope);
@@ -19146,7 +19159,7 @@ async function mcSubmitAuthForm(form, mode) {
 
   function mcTidyMtlPriceBlock() {
     var blocks = document.querySelectorAll(
-      "#v65-product-parent .mtl-product-price-block, #content_area .mtl-product-price-block, #v65-product-parent .colors_pricebox, #content_area .colors_pricebox"
+      "#v65-product-parent .mtl-product-price-block, #content_area .mtl-product-price-block, #v65-product-parent .colors_pricebox, #content_area .colors_pricebox, #v65-product-parent, #content_area"
     );
     var bi;
     for (bi = 0; bi < blocks.length; bi++) {
@@ -19155,15 +19168,35 @@ async function mcSubmitAuthForm(form, mode) {
       pb.querySelectorAll(
         ".product_sale_price, .product_saleprice, font.product_sale_price, [class*='product_sale_price'], [class*='product_saleprice']"
       ).forEach(function (node) {
-        if (node.closest && (node.closest(".mc-pdp-retail-row") || node.closest(".mc-pdp-member-pricing"))) {
-          return;
-        }
+        if (node.closest && node.closest(".mc-pdp-member-line--sale")) return;
         node.style.setProperty("display", "none", "important");
         node.style.setProperty("visibility", "hidden", "important");
         node.style.setProperty("height", "0", "important");
+        node.style.setProperty("max-height", "0", "important");
+        node.style.setProperty("margin", "0", "important");
+        node.style.setProperty("padding", "0", "important");
         node.style.setProperty("overflow", "hidden", "important");
+        node.style.setProperty("opacity", "0", "important");
+        node.style.setProperty("pointer-events", "none", "important");
       });
     }
+  }
+
+  function mcObservePdpPriceStackTidy() {
+    if (window.__mcPdpPriceTidyObs) return;
+    var target =
+      document.querySelector(".mtl-product-price-block") ||
+      document.querySelector("#v65-product-parent .colors_pricebox") ||
+      document.getElementById("v65-product-parent");
+    if (!target || typeof MutationObserver !== "function") return;
+    window.__mcPdpPriceTidyObs = new MutationObserver(function () {
+      try {
+        hideNativePdpSalePricing(document);
+        mcTidyMtlPriceBlock();
+        mcTidyPdpMemberPricing();
+      } catch (eObs) {}
+    });
+    window.__mcPdpPriceTidyObs.observe(target, { childList: true, subtree: true });
   }
 
   function mcTidyPdpMemberPricing() {
@@ -19219,6 +19252,9 @@ async function mcSubmitAuthForm(form, mode) {
   }
 
   function mcRenderPdpRetailAndMember(retailText, memberText, loginUrl, isLoggedIn) {
+    try {
+      if (document.body) document.body.classList.add("mc-pdp-price-stack");
+    } catch (eStackCls) {}
     var theaterTitle = (
       (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
       document.title ||
@@ -19378,8 +19414,10 @@ async function mcSubmitAuthForm(form, mode) {
 
     mcSetStableHtml(wrap, html);
     try {
+      hideNativePdpSalePricing(document);
       mcTidyMtlPriceBlock();
       mcTidyPdpMemberPricing();
+      mcObservePdpPriceStackTidy();
     } catch (eTidyWrap) {}
     try {
       wrap.querySelectorAll('.mc-pdp-member-line__label').forEach(function (el) {

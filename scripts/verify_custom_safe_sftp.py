@@ -24,7 +24,7 @@ def css_needle() -> str:
         m = re.search(r"C_CSS_DEPLOY_VERIFY_[0-9a-z]+", head)
         if m:
             return m.group(0)
-    return "C_CSS_DEPLOY_VERIFY_20260521h"  # keep in sync with custom-safe.css line 1
+    return "C_CSS_DEPLOY_VERIFY_20260521i"  # keep in sync with custom-safe.css line 1
 
 
 def css_remote_paths() -> list[str]:

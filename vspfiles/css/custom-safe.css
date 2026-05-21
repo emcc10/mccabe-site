@@ -1,4 +1,4 @@
-/* 0521h C_CSS_DEPLOY_VERIFY_20260521h — hide native 32px sale overlap on McCabe PDP stack */
+/* 0521i C_CSS_DEPLOY_VERIFY_20260521i — body.mc-pdp-price-stack kills all native sale overlap */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -14558,4 +14558,35 @@ html body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line {
   width: 100% !important;
   position: static !important;
   margin: 0 0 2px 0 !important;
+}
+/* No :has() — template sets body.mc-pdp-price-stack when retail/member block mounts */
+html body.mc-pdp-price-stack #v65-product-parent .product_sale_price,
+html body.mc-pdp-price-stack #v65-product-parent .product_saleprice,
+html body.mc-pdp-price-stack #v65-product-parent font.product_sale_price,
+html body.mc-pdp-price-stack #content_area .product_sale_price,
+html body.mc-pdp-price-stack #content_area .product_saleprice,
+html body.mc-pdp-price-stack #content_area font.product_sale_price,
+html body.mc-pdp-price-stack .colors_pricebox .product_sale_price,
+html body.mc-pdp-price-stack .colors_pricebox .product_saleprice,
+html body.mc-pdp-price-stack .colors_pricebox font.product_sale_price,
+html body.mc-pdp-price-stack .mtl-product-price-block .product_sale_price,
+html body.mc-pdp-price-stack .mtl-product-price-block .product_saleprice {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+html body.mc-pdp-price-stack .mc-pdp-member-pricing .mc-pdp-member-line--sale {
+  display: flex !important;
+  flex-direction: column !important;
+  visibility: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
