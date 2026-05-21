@@ -1,0 +1,31 @@
+{
+  "phase": "6A",
+  "purpose": "Bottom-front compositing seam cleanup (not material realism)",
+  "input": "Stage 4B-v3 locked (color + edge cleanup)",
+  "functionsChanged": [
+    "src/phase6a/bottomSeam.ts — buildLower12Region, buildBottomCleanupBandFromImage, applyBottomSeamCleanup",
+    "src/phase6a/run.ts — buildPhase6aBase, runPhase6a"
+  ],
+  "seamSources": {
+    "overlapEdgeBandPx": 0,
+    "overlapContourRingPx": 946,
+    "overlapOutsideCoreUpholsteryPx": 2826,
+    "note": "High overlap with edge/contour rings suggests compositing boundary artifact"
+  },
+  "diagnostics": {
+    "lower12PixelCount": 57598,
+    "cleanupBandPixelCount": 2826,
+    "overlapEdgeBandPx": 0,
+    "overlapContourRingPx": 946,
+    "overlapOutsideCoreUpholsteryPx": 2826,
+    "meanLInBandBefore": 97.99150743099787,
+    "meanLInBandAfter": 72.64642276570801,
+    "backgroundPixelsTouched": 0,
+    "pixelsRepaired": 2826
+  },
+  "outputs": {
+    "single": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6a-single.png",
+    "comparison": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6a-comparison.png",
+    "bottomlineDebug": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6a-bottomline-debug.png"
+  }
+}

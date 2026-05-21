@@ -1,0 +1,85 @@
+{
+  "phase": "6B",
+  "purpose": "Material realism v2 (replaces powdery Stage 5 stack)",
+  "input": "Phase 6A output (Stage 4B-v3 color/edges + bottom seam fix)",
+  "functionsChanged": [
+    "src/phase6b/realismV2.ts — buildSourceTextureMapsV2, applyRealismPassV2",
+    "src/phase6b/run.ts — runPhase6b"
+  ],
+  "architecture": {
+    "fineHighPassBlurPx": 4,
+    "coarseHighPassBlurPx": 12,
+    "seamWeightedDetail": true,
+    "reducedHighlightLift": true,
+    "upholsteryMaskOnly": true
+  },
+  "base6aUpholsteryMeanLab": {
+    "meanL": 71.86234735369274,
+    "meanA": 3.1375015601290146,
+    "meanB": 6.165209451425794,
+    "count": 152231
+  },
+  "variants": [
+    {
+      "id": "A",
+      "label": "6B A STRONG DETAIL",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6b-variant-A.png",
+      "params": {
+        "fineBlurPx": 4,
+        "coarseBlurPx": 12,
+        "seamBoost": 0.28,
+        "detailStrength": 0.36,
+        "highlightStrength": 0.1,
+        "aVarAmp": 0.12,
+        "bVarAmp": 0.19
+      },
+      "meanL": 71.68599693886264,
+      "deltaLFrom6a": -0.17635041483009672
+    },
+    {
+      "id": "B",
+      "label": "6B B STRONG DETAIL / SOFT HI",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6b-variant-B.png",
+      "params": {
+        "fineBlurPx": 4,
+        "coarseBlurPx": 12,
+        "seamBoost": 0.28,
+        "detailStrength": 0.36,
+        "highlightStrength": 0.06,
+        "aVarAmp": 0.12,
+        "bVarAmp": 0.19
+      },
+      "meanL": 71.68599693886264,
+      "deltaLFrom6a": -0.17635041483009672
+    },
+    {
+      "id": "C",
+      "label": "6B C SOFT HI + MICRO CHROMA",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6b-variant-C.png",
+      "params": {
+        "fineBlurPx": 4,
+        "coarseBlurPx": 12,
+        "seamBoost": 0.28,
+        "detailStrength": 0.36,
+        "highlightStrength": 0.06,
+        "aVarAmp": 0.14,
+        "bVarAmp": 0.21
+      },
+      "meanL": 71.6860757664339,
+      "deltaLFrom6a": -0.17627158725883874
+    }
+  ],
+  "outputs": {
+    "grid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6b-grid.png",
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6b-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6b-variant-B.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6b-variant-C.png"
+    ],
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6b-spec.json"
+  },
+  "notes": [
+    "Does not re-run Stage 5B/5C — new realism on clean 6A compositing base.",
+    "No noise, global sharpen, shadow darken, mask/alpha/edge changes."
+  ]
+}
