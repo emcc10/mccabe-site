@@ -4,26 +4,18 @@ on:
   push:
     branches:
       - main
-    # Only deploy when Volusion-facing files change (not sofa-recolor / render-cache only).
-    paths:
-      - "template_266.html"
-      - "vspfiles/**"
-      - ".github/workflows/deploy.yml"
-      - ".github/scripts/deploy-volusion.sh"
-      - "scripts/deploy_volusion_assets.py"
-      - "scripts/volusion_sftp_force_template.py"
-      - "scripts/verify_template_sftp.py"
-      - "scripts/verify_custom_safe_sftp.py"
-      - "scripts/upload_boards_canonical.py"
-      - "scripts/announce_deploy_markers.py"
   workflow_dispatch:
     inputs:
+      git_ref:
+        description: Branch or tag to deploy (e.g. main, phase1-test-sofa)
+        type: string
+        default: main
       upload_plp_photos:
         description: Upload all PLP photos via SFTP (slow; ~160 files)
         type: boolean
         default: false
 
-# Queue deploys — do NOT cancel in-progress (rapid pushes were killing uploads mid-flight).
+# Queue deploys — never cancel mid-upload (parallel/cancelled runs corrupt SFTP files).
 concurrency:
   group: deploy-volusion-main
   cancel-in-progress: false
@@ -36,6 +28,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.git_ref || github.ref }}
+
+      - name: Deploy context
+        run: |
+          echo "=== Deploy context ==="
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.event_name == 'workflow_dispatch' && inputs.git_ref || github.ref_name }}"
+          echo "SHA: $(git rev-parse --short HEAD)"
+          echo "CSS marker: $(head -1 vspfiles/css/custom-safe.css 2>/dev/null || echo missing)"
+          echo "Template: $(wc -c < template_266.html 2>/dev/null || echo 0) bytes"
 
       - name: Remove problematic Microsoft/Azure apt sources
         run: |
@@ -54,17 +57,18 @@ jobs:
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
 
-      - name: Deploy to Volusion (template + assets; SFTP verify is the gate)
+      - name: Deploy to Volusion (SFTP + verify — job fails if upload fails)
         id: deploy
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SKIP_TEMPLATE_DEPLOY: "0"
+          DEPLOY_STRICT: "1"
           SKIP_PLP_PHOTOS: ${{ github.event_name == 'push' && '1' || (inputs.upload_plp_photos == false && '1' || '0') }}
         run: bash .github/scripts/deploy-volusion.sh
 
-      - name: Verify live storefront (informational — CDN/baked HTML often lags SFTP)
+      - name: Verify live storefront (informational)
         if: steps.deploy.outcome == 'success'
         continue-on-error: true
         run: python3 scripts/verify_live_plp_deploy.py --soft
@@ -72,15 +76,12 @@ jobs:
       - name: Deploy summary
         if: always()
         run: |
-          echo "Deploy step: ${{ steps.deploy.outcome }}"
+          echo "Deploy: ${{ steps.deploy.outcome }}"
+          if [ "${{ steps.deploy.outcome }}" != "success" ]; then
+            echo "::error::Deploy failed — live site was NOT fully updated. Open the log above for ::error lines."
+            exit 1
+          fi
           echo ""
-          echo "WHEN DEPLOY RUNS:"
-          echo "  - Push to main that touches template_266.html, vspfiles/**, or deploy scripts"
-          echo "  - OR: Actions → Deploy to Volusion → Run workflow (always uploads)"
-          echo ""
-          echo "WHEN DEPLOY IS SKIPPED:"
-          echo "  - Push only changes public/, src/, sofa-recolor-tool/, docs — use workflow_dispatch"
-          echo ""
-          echo "AFTER GREEN SFTP:"
-          echo "  Volusion Design → File Editor → template_266.html → Save (rebake PDP/category HTML)"
-          echo "  Hard-refresh PDP (Ctrl+Shift+R) or purge Cloudflare for /v/vspfiles/css/custom-safe.css"
+          echo "Uploaded from Git: template_266.html + vspfiles/* (see deploy log)."
+          echo "Confirm CSS: fetch('/v/vspfiles/css/custom-safe.css?'+Date.now()) then check line 1 marker."
+          echo "Rebake: Volusion Design → File Editor → template_266.html → Save"
