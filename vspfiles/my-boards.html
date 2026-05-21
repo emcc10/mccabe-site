@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inspiration Boards — McCabe&apos;s Theater &amp; Living</title>
-  <!-- deploy-marker: 20260533-inline-boot -->
-  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-bundle.css?v=20260533" charset="utf-8" />
+  <!-- deploy-marker: 20260534-inline-boot -->
+  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-bundle.css?v=20260534" charset="utf-8" />
 </head>
 <body class="mc-my-boards-page">
   <div class="mc-boards-shell">
@@ -146,7 +146,7 @@
       return '/v/vspfiles/boards/';
     })();
   </script>
-  <script src="/v/vspfiles/boards/board-styles.js?v=20260533"></script>
+  <script src="/v/vspfiles/boards/board-styles.js?v=20260534"></script>
   <script>
     /* Inline boot: fills grids if my-boards-app.js is missing or stale on SFTP */
     (function () {
@@ -212,7 +212,7 @@
       function loadApp() {
         if (window.__MC_BOARDS_APP_V2) return;
         var s = document.createElement('script');
-        s.src = '/v/vspfiles/boards/my-boards-app.js?v=20260533';
+        s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260534';
         s.defer = true;
         document.body.appendChild(s);
       }
@@ -238,6 +238,6 @@
       }
     })();
   </script>
-  <script src="/v/vspfiles/boards/my-boards-app.js?v=20260533" defer></script>
+  <script src="/v/vspfiles/boards/my-boards-page.js?v=20260534" defer></script>
 </body>
 </html>
