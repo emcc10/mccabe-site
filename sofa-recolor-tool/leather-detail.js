@@ -1,20 +1,25 @@
 /**
- * Measured luminance residuals from original sofa.png (preservation, not synthesis).
+ * Measured Rec.709 luminance residuals from original sofa.png (preservation, not synthesis).
  */
-import { rgbToLab } from './render-sofas.js';
+import { MASK_APPLY_THRESH } from './render-sofas.js';
 
 const HF_BLUR_RADIUS = 1;
 const MF_BLUR_LO = 1;
 const MF_BLUR_HI = 5;
 
-/** Re-inject photographed leather detail from source catalog image. */
-export const PHOTO_HF_GAIN = 0.4;
-export const PHOTO_MF_GAIN = 0.15;
-/** Soft cap on combined HF+MF injection (LAB L units) — avoids halos / etched seams. */
-export const PHOTO_RESIDUAL_CLAMP = 3.5;
+/** TEMPORARY realism push — source photo only. */
+export const PHOTO_HF_GAIN = 0.9;
+export const PHOTO_MF_GAIN = 0.45;
+export const INTERIOR_MIN_EDGE_DIST = 6;
+/** Soft cap on combined injection (luma units). */
+export const PHOTO_RESIDUAL_CLAMP = 8;
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
+}
+
+function rec709Lum(r, g, b) {
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
 function boxBlurPass(src, dst, width, height, horizontal, radius) {
@@ -39,60 +44,133 @@ function boxBlurPass(src, dst, width, height, horizontal, radius) {
   }
 }
 
-function gaussianBlur(L, width, height, radius) {
-  const tmp = new Float32Array(L.length);
-  const out = new Float32Array(L.length);
-  boxBlurPass(L, tmp, width, height, true, radius);
+function gaussianBlur(src, width, height, radius) {
+  const tmp = new Float32Array(src.length);
+  const out = new Float32Array(src.length);
+  boxBlurPass(src, tmp, width, height, true, radius);
   boxBlurPass(tmp, out, width, height, false, radius);
   return out;
 }
 
-function highPass(L, width, height, radius) {
-  const blur = gaussianBlur(L, width, height, radius);
-  const hf = new Float32Array(L.length);
-  for (let j = 0; j < L.length; j++) hf[j] = L[j] - blur[j];
-  return hf;
+function highPass(src, width, height, radius) {
+  const blur = gaussianBlur(src, width, height, radius);
+  const out = new Float32Array(src.length);
+  for (let j = 0; j < src.length; j++) out[j] = src[j] - blur[j];
+  return out;
+}
+
+/** Inward distance from mask edge (upholstery pixels only). */
+export function buildMaskInteriorWeight(mask, width, height, minDist = INTERIOR_MIN_EDGE_DIST) {
+  const n = width * height;
+  const dist = new Float32Array(n);
+  for (let j = 0; j < n; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) {
+      dist[j] = 0;
+      continue;
+    }
+    const x = j % width;
+    const y = (j / width) | 0;
+    let onEdge = false;
+    if (x === 0 || y === 0 || x === width - 1 || y === height - 1) onEdge = true;
+    else {
+      const nb = [
+        j - 1,
+        j + 1,
+        j - width,
+        j + width,
+      ];
+      for (const k of nb) {
+        if (mask[k] < MASK_APPLY_THRESH) onEdge = true;
+      }
+    }
+    dist[j] = onEdge ? 0 : 1e6;
+  }
+
+  for (let pass = 0; pass < width + height; pass++) {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const j = y * width + x;
+        if (mask[j] < MASK_APPLY_THRESH || dist[j] === 0) continue;
+        let best = dist[j];
+        if (x > 0 && mask[j - 1] >= MASK_APPLY_THRESH) best = Math.min(best, dist[j - 1] + 1);
+        if (x < width - 1 && mask[j + 1] >= MASK_APPLY_THRESH) best = Math.min(best, dist[j + 1] + 1);
+        if (y > 0 && mask[j - width] >= MASK_APPLY_THRESH) best = Math.min(best, dist[j - width] + 1);
+        if (y < height - 1 && mask[j + width] >= MASK_APPLY_THRESH) {
+          best = Math.min(best, dist[j + width] + 1);
+        }
+        dist[j] = best;
+      }
+    }
+  }
+
+  const weight = new Float32Array(n);
+  for (let j = 0; j < n; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) weight[j] = 0;
+    else weight[j] = dist[j] > minDist ? 1 : 0;
+  }
+  return weight;
 }
 
 /**
- * HF: sourceL − blur(sourceL, 1px)
- * MF: blur(sourceL, 1px) − blur(sourceL, 5px)
+ * HF/MF from source Rec.709 luma; interior weight from mask (>6px from edge).
  */
-export function prepareSourceLGrain(sourceImage) {
+export function prepareSourceLGrain(sourceImage, mask) {
   const { data, width, height, channels } = sourceImage;
   const n = width * height;
-  const L = new Float32Array(n);
+  const Y = new Float32Array(n);
   for (let j = 0; j < n; j++) {
     const p = j * channels;
-    L[j] = rgbToLab(data[p], data[p + 1], data[p + 2]).L;
+    Y[j] = rec709Lum(data[p], data[p + 1], data[p + 2]);
   }
-  const blur1 = gaussianBlur(L, width, height, MF_BLUR_LO);
-  const blur5 = gaussianBlur(L, width, height, MF_BLUR_HI);
-  const sourceHf = highPass(L, width, height, HF_BLUR_RADIUS);
+  const blur1 = gaussianBlur(Y, width, height, MF_BLUR_LO);
+  const blur5 = gaussianBlur(Y, width, height, MF_BLUR_HI);
+  const sourceHf = highPass(Y, width, height, HF_BLUR_RADIUS);
   const sourceMf = new Float32Array(n);
   for (let j = 0; j < n; j++) sourceMf[j] = blur1[j] - blur5[j];
-  return { width, height, sourceHf, sourceMf };
+  const interiorWeight = buildMaskInteriorWeight(mask, width, height, INTERIOR_MIN_EDGE_DIST);
+  return { width, height, sourceHf, sourceMf, interiorWeight };
 }
 
 function softClampResidual(delta) {
   return clamp(delta, -PHOTO_RESIDUAL_CLAMP, PHOTO_RESIDUAL_CLAMP);
 }
 
-export function applySourceLGrain(finalL, j, grain) {
+/** Apply measured Y residual AFTER chroma + luma lock (avoids ratio canceling detail). */
+export function applySourceYResidualToRgb(r, g, b, j, grain) {
+  if (!grain) return { r, g, b };
+  const y = rec709Lum(r, g, b);
+  if (y < 0.5) return { r, g, b };
+  const w = grain.interiorWeight[j];
+  if (w <= 0) return { r, g, b };
   const delta = softClampResidual(
-    grain.sourceHf[j] * PHOTO_HF_GAIN + grain.sourceMf[j] * PHOTO_MF_GAIN,
+    (grain.sourceHf[j] * PHOTO_HF_GAIN + grain.sourceMf[j] * PHOTO_MF_GAIN) * w,
+  );
+  const yNew = clamp(y + delta, 0, 255);
+  const scale = yNew / y;
+  return {
+    r: clamp(Math.round(r * scale), 0, 255),
+    g: clamp(Math.round(g * scale), 0, 255),
+    b: clamp(Math.round(b * scale), 0, 255),
+  };
+}
+
+/** @deprecated LAB-stage injection — use applySourceYResidualToRgb after luma lock. */
+export function applySourceLGrain(finalL, j, grain) {
+  const w = grain.interiorWeight?.[j] ?? 0;
+  const delta = softClampResidual(
+    (grain.sourceHf[j] * PHOTO_HF_GAIN + grain.sourceMf[j] * PHOTO_MF_GAIN) * w,
   );
   return finalL + delta;
 }
 
-/** Stress/probe: legacy LF band from source L (debug only). */
+/** Stress/probe: LF band from source Rec.709 luma (debug only). */
 export function prepareSourceLLfBand(sourceImage, lfRadius = 6) {
   const { data, width, height, channels } = sourceImage;
   const n = width * height;
-  const L = new Float32Array(n);
+  const Y = new Float32Array(n);
   for (let j = 0; j < n; j++) {
     const p = j * channels;
-    L[j] = rgbToLab(data[p], data[p + 1], data[p + 2]).L;
+    Y[j] = rec709Lum(data[p], data[p + 1], data[p + 2]);
   }
-  return highPass(L, width, height, lfRadius);
+  return highPass(Y, width, height, lfRadius);
 }

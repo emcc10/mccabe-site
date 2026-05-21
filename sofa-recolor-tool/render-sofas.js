@@ -19,12 +19,19 @@ import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { finalizeBaliExport } from './finalize-bali-export.js';
 import {
-  applySourceLGrain,
+  applySourceYResidualToRgb,
   PHOTO_HF_GAIN,
   PHOTO_MF_GAIN,
   prepareSourceLGrain,
   prepareSourceLLfBand,
 } from './leather-detail.js';
+import {
+  evaluateBaliExportGate,
+  EXPORT_MIN_UPHOLSTERY_RMS,
+  findLatestBaliProductionPng,
+  formatMaskedStats,
+  maskedRgbStats,
+} from './pipeline-trace.js';
 import {
   applyReferenceRealismTransfer,
   DEFAULT_REFERENCE,
@@ -37,7 +44,6 @@ import {
   PROBE_LF_GAIN,
   PROBE_MF_GAIN,
 } from './realism-probe.js';
-import { formatMaskedStats, maskedRgbStats } from './pipeline-trace.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
@@ -771,11 +777,13 @@ export function baliRealismStressRgb(
   const srcLum = pixelBrightness(r, g, b);
   const outLum = pixelBrightness(tr, tg, tb);
   const ratio = (srcLum + lumOffset) / Math.max(outLum, 0.25);
-  return {
-    r: clamp(Math.round(tr * ratio), 0, 255),
-    g: clamp(Math.round(tg * ratio), 0, 255),
-    b: clamp(Math.round(tb * ratio), 0, 255),
-  };
+  return applySourceYResidualToRgb(
+    clamp(Math.round(tr * ratio), 0, 255),
+    clamp(Math.round(tg * ratio), 0, 255),
+    clamp(Math.round(tb * ratio), 0, 255),
+    j,
+    grain,
+  );
 }
 
 /**
@@ -801,17 +809,17 @@ export function baliChromaOnlyPreserveSourceLuma(
   j,
 ) {
   const srcLum = pixelBrightness(r, g, b);
-  let finalL = photoL + (anchorL - meanPhotoL);
-  if (grain) finalL = applySourceLGrain(finalL, j, grain);
-  finalL = clamp(finalL, 0, 100);
+  const finalL = clamp(photoL + (anchorL - meanPhotoL), 0, 100);
   const { r: tr, g: tg, b: tb } = labToRgb(finalL, chroma.a, chroma.b);
   const outLum = pixelBrightness(tr, tg, tb);
   const ratio = (srcLum + lumOffset) / Math.max(outLum, 0.5);
-  return {
-    r: clamp(Math.round(tr * ratio), 0, 255),
-    g: clamp(Math.round(tg * ratio), 0, 255),
-    b: clamp(Math.round(tb * ratio), 0, 255),
-  };
+  return applySourceYResidualToRgb(
+    clamp(Math.round(tr * ratio), 0, 255),
+    clamp(Math.round(tg * ratio), 0, 255),
+    clamp(Math.round(tb * ratio), 0, 255),
+    j,
+    grain,
+  );
 }
 
 /** @deprecated alias */
@@ -880,7 +888,7 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
   const lumOffset = palette.isBaliSilk
     ? pixelBrightness(midRgb.r, midRgb.g, midRgb.b) - meanSrcLum
     : 0;
-  const grain = palette.isBaliSilk ? prepareSourceLGrain(sourceImage) : null;
+  const grain = palette.isBaliSilk ? prepareSourceLGrain(sourceImage, mask) : null;
   const sourceLf = realismProbe ? prepareSourceLLfBand(sourceImage) : null;
 
   for (let j = 0; j < width * height; j++) {
@@ -1165,12 +1173,12 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
   const swatchName = basename(resolved, extname(resolved));
   const isBali = isBaliSilkSwatch(swatchName);
 
-  if (isBali && !realismProbe) {
-    deleteBaliSilkOutputs();
-    console.log('  cleared previous Bali-Silk outputs');
-  }
-
   const palette = await getSwatchPalette(resolved);
+  const previousBaliPath =
+    isBali && !realismStress && !realismProbe ? findLatestBaliProductionPng(OUTPUT_DIR) : null;
+  if (previousBaliPath) {
+    console.log(`  previous production render: ${basename(previousBaliPath)}`);
+  }
 
   if (isBali && realismProbe) {
     return processBaliRealismProbe(sourceImage, mask, palette);
@@ -1193,7 +1201,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     lBlend: isBali
       ? realismStress
         ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
-        : `source ΔL + swatch a/b + source HF×${PHOTO_HF_GAIN} MF×${PHOTO_MF_GAIN} (sofa.png); per-pixel luma lock`
+        : `chroma + source Y HF×${PHOTO_HF_GAIN} MF×${PHOTO_MF_GAIN} interior>6px; Y residual after luma lock`
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali
@@ -1258,7 +1266,42 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     }
   }
 
-  const outPath = isBali
+  let outPath = null;
+  let exported = true;
+
+  if (isBali && !realismStress && !realismProbe) {
+    let previousBuf = null;
+    if (previousBaliPath && existsSync(previousBaliPath)) {
+      const prevImg = await loadImage(previousBaliPath);
+      previousBuf = prevImg.data;
+    }
+    const gate = evaluateBaliExportGate(
+      outData,
+      previousBuf,
+      mask,
+      sourceImage.width,
+      sourceImage.height,
+      sourceImage.channels,
+    );
+    if (gate.stats) {
+      console.log(
+        formatMaskedStats(
+          `upholstery Δ vs previous final (export if RMS≥${EXPORT_MIN_UPHOLSTERY_RMS})`,
+          gate.stats,
+        ),
+      );
+    }
+    console.log(`  export gate: ${gate.reason}`);
+    if (!gate.export) {
+      exported = false;
+      console.log('\n  EXPORT BLOCKED — candidate too similar to previous render; PNG not written.');
+      return { outPath: null, palette, exported: false, gate };
+    }
+    deleteBaliSilkOutputs();
+    console.log('  replacing previous Bali-Silk production PNG(s)');
+  }
+
+  outPath = isBali
     ? realismStress
       ? join(OUTPUT_DIR, `Bali-Silk-REALISM-STRESS-${renderTimestamp()}.png`)
       : join(OUTPUT_DIR, `Bali-Silk-${renderTimestamp()}.png`)
@@ -1273,7 +1316,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
   console.log(`\n  wrote ${basename(outPath)} (${Math.round(bytes / 1024)} KB)`);
   console.log(`  ${resolve(outPath)}`);
   if (!isBali) publishRenderOutputs(swatchName, outPath);
-  return { outPath, palette };
+  return { outPath, palette, exported };
 }
 
 export function zipOutputs(outputDir, zipPath) {
@@ -1397,8 +1440,9 @@ export async function main(argv = process.argv) {
       console.error(`Swatch not found: ${cli.swatchFile}`);
       process.exit(1);
     }
-    const { outPath } = await processSwatch(swPath, sourceSofa, mask);
-    console.log(`\nDone: ${outPath}`);
+    const { outPath, exported } = await processSwatch(swPath, sourceSofa, mask);
+    if (exported && outPath) console.log(`\nDone: ${outPath}`);
+    else console.log('\nDone: export blocked (see upholstery Δ metrics above).');
     return;
   }
 

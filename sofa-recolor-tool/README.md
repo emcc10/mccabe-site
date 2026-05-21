@@ -24,8 +24,8 @@ No depth restore, CLAHE, hero clustering, texture residuals, or dual pipelines.
 ## Bali-Silk (production)
 
 1. `input/sofa.png` → **swatch chroma only** (LAB a/b from Bali-Silk; source ΔL preserved).
-2. **Measured HF/MF luminance residuals** from `sofa.png` re-injected (HF×0.40, MF×0.15, soft-clamped).
-3. **Per-pixel source Rec.709 luma** restored after chroma + residual pass.
+2. **Measured HF/MF Rec.709 residuals** from `sofa.png` applied **after** chroma + luma lock (interior mask only, >6px from edge).
+3. **Export gate** — writes PNG only if upholstery RMS Δ vs previous production render ≥ 3.0.
 4. **Finalize only** — white background, contact shadow, bottom-band cleanup (upholstery untouched).
 
 No synthesis, reference transfer, sharpening, or upholstery post-processing.
