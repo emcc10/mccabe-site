@@ -1,0 +1,18 @@
+{
+  "stage": 2,
+  "branchIntent": "Complete Stage 2 proof only; Stage 3 is separate",
+  "preserveLuminance": 0.93,
+  "chromaBlend": 0.28,
+  "targetLab": {
+    "l": 74.2,
+    "a": 1.8,
+    "b": 11.4
+  },
+  "textureDetailContribution": 0,
+  "highlightCompression": 0,
+  "shadowMapContribution": 0,
+  "chromaDrift": 0,
+  "postRgbPasses": [],
+  "recolorFormula": "For each pixel where upholsteryMask >= 128:\n  (L_src, a_src, b_src) = RGB_to_Lab(source.R, source.G, source.B)\n  L_out = L_src * PRESERVE_LUMINANCE + BALI_SILK_LAB.l * (1 - PRESERVE_LUMINANCE)\n  a_out = a_src * (1 - CHROMA_BLEND) + BALI_SILK_LAB.a * CHROMA_BLEND\n  b_out = b_src * (1 - CHROMA_BLEND) + BALI_SILK_LAB.b * CHROMA_BLEND\n  (R,G,B) = Lab_to_RGB(L_out, a_out, b_out)\nNo other terms. No maps. No post on upholstery buffer.",
+  "compositeRules": "If legMask >= 128: copy source RGB (+ source A if present) — restored, not excluded.\nElse if upholsteryMask >= 128 AND alphaMask >= 128: copy recolor RGB, A=255.\nElse if alphaMask < 128: RGB = (255,255,255), A=255.\nAlpha mask derived from source image only (channel A>=128 or L<248).\nNo supersample feather, no blur, no second luminance pass after composite."
+}

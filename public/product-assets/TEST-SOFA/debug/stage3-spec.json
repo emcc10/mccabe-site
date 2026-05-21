@@ -1,0 +1,16 @@
+{
+  "stage": 3,
+  "derivedFrom": "stage2 pipeline (recolorUpholsteryMinimal + compositePhase2)",
+  "preserveLuminance": 0.88,
+  "chromaBlend": 0.72,
+  "targetLab": {
+    "l": 74.2,
+    "a": 1.8,
+    "b": 11.4
+  },
+  "textureDetailContribution": 0,
+  "highlightCompression": 0,
+  "shadowMapContribution": 0,
+  "chromaDrift": 0,
+  "postRgbPasses": []
+}

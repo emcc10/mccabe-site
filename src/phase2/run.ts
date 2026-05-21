@@ -1,22 +1,31 @@
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import sharp from 'sharp';
 import { DEBUG_DIR, SOURCE_OUT } from '../phase1/paths.js';
 import { loadPhase1Masks } from '../phase1/loadMasks.js';
 import { loadRgba } from '../phase1/segment.js';
 import { writeCombinedOverlay } from '../phase1/previews.js';
+import { writeLabeledComparison } from './comparison.js';
+import { measureStage2Structure } from './metrics.js';
 import {
   BALI_SILK_LAB,
   CHROMA_BLEND,
   PHASE2_COMPARISON_OUT,
+  PHASE2_METRICS_OUT,
   PHASE2_RECOLOR_OUT,
+  PHASE2_SPEC_OUT,
   PRESERVE_LUMINANCE,
+  stage2SpecRecord,
 } from './paths.js';
 import { compositePhase2 } from './composite.js';
 import { recolorUpholsteryMinimal } from './recolor.js';
+import type { RgbaImage } from '../phase1/segment.js';
 
-export interface Phase2Outputs {
+export interface Phase2RunResult {
   recolor: string;
   comparison: string;
+  spec: string;
+  metrics: string;
+  structural: Awaited<ReturnType<typeof measureStage2Structure>>;
 }
 
 async function writeRgbaPng(path: string, image: RgbaImage) {
@@ -28,41 +37,12 @@ async function writeRgbaPng(path: string, image: RgbaImage) {
     .toFile(path);
 }
 
-async function writeComparison(
-  outPath: string,
-  sourcePath: string,
-  overlayPath: string,
-  renderPath: string,
-) {
-  const panels = [sourcePath, overlayPath, renderPath];
-  const metas = await Promise.all(panels.map((p) => sharp(p).metadata()));
-  const maxH = Math.max(...metas.map((m) => m.height ?? 0), 1);
-  const resized = await Promise.all(
-    panels.map((p, i) => {
-      const w = metas[i].width ?? 1;
-      const h = metas[i].height ?? 1;
-      return sharp(p).resize(Math.round((w * maxH) / h), maxH).toBuffer();
-    }),
-  );
-  const widths = await Promise.all(resized.map((b) => sharp(b).metadata().then((m) => m.width ?? 0)));
-  const totalW = widths.reduce((a, b) => a + b, 0);
-  const composites = resized.map((input, i) => ({
-    input,
-    left: widths.slice(0, i).reduce((a, b) => a + b, 0),
-    top: 0,
-  }));
-  await sharp({
-    create: { width: totalW, height: maxH, channels: 3, background: { r: 255, g: 255, b: 255 } },
-  })
-    .composite(composites)
-    .png()
-    .toFile(outPath);
-}
-
-export async function runPhase2(): Promise<Phase2Outputs> {
+export async function runPhase2(): Promise<Phase2RunResult> {
   if (!existsSync(SOURCE_OUT)) {
     throw new Error(`Run Phase 1 first — missing ${SOURCE_OUT}`);
   }
+
+  writeFileSync(PHASE2_SPEC_OUT, JSON.stringify(stage2SpecRecord(), null, 2));
 
   const source = await loadRgba(SOURCE_OUT);
   const { alpha, upholstery, legs } = await loadPhase1Masks(source);
@@ -80,7 +60,21 @@ export async function runPhase2(): Promise<Phase2Outputs> {
 
   const overlayTmp = `${DEBUG_DIR}/_phase2-overlay-tmp.png`;
   await writeCombinedOverlay(overlayTmp, source, upholstery, legs);
-  await writeComparison(PHASE2_COMPARISON_OUT, SOURCE_OUT, overlayTmp, PHASE2_RECOLOR_OUT);
+  await writeLabeledComparison(
+    PHASE2_COMPARISON_OUT,
+    SOURCE_OUT,
+    overlayTmp,
+    PHASE2_RECOLOR_OUT,
+  );
 
-  return { recolor: PHASE2_RECOLOR_OUT, comparison: PHASE2_COMPARISON_OUT };
+  const structural = measureStage2Structure(source, recolored, final, upholstery, legs);
+  writeFileSync(PHASE2_METRICS_OUT, JSON.stringify(structural, null, 2));
+
+  return {
+    recolor: PHASE2_RECOLOR_OUT,
+    comparison: PHASE2_COMPARISON_OUT,
+    spec: PHASE2_SPEC_OUT,
+    metrics: PHASE2_METRICS_OUT,
+    structural,
+  };
 }
