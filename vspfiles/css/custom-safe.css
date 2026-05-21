@@ -1,4 +1,4 @@
-/* 0518f C_CSS_DEPLOY_VERIFY_20260518f — tail wins; MC_OPTION_LABEL_13PX_TAIL at EOF */
+/* 0520a C_CSS_DEPLOY_VERIFY_20260520a — tail wins; MC_OPTION_LABEL_13PX_TAIL at EOF */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -14250,35 +14250,70 @@ html.category #content_area .v-product-grid .v65-productPhoto a {
   border: 0 !important;
 }
 
-/* MC_OPTION_LABEL_13PX_TAIL — must be last; beats body * legacy + template inline 14px */
+/* MC_OPTION_LABEL_13PX_TAIL — must be last; beats body 18px + template inline 14px */
 html body.productdetails #content_area #options_table label,
 html body.mc-product-page #content_area #options_table label,
 html body.productdetails #content_area #options_table .productoptionname,
 html body.mc-product-page #content_area #options_table .productoptionname,
+html body.productdetails #content_area #options_table td[align="right"],
+html body.mc-product-page #content_area #options_table td[align="right"],
 html body.productdetails #content_area #options_table td:first-child,
 html body.mc-product-page #content_area #options_table td:first-child,
 html body.productdetails #content_area table[id*="options_table"] label,
 html body.mc-product-page #content_area table[id*="options_table"] label,
 html body.productdetails #content_area table[id*="options_table"] .productoptionname,
 html body.mc-product-page #content_area table[id*="options_table"] .productoptionname,
+html body.productdetails #content_area table[id*="options_table"] td[align="right"],
+html body.mc-product-page #content_area table[id*="options_table"] td[align="right"],
 html body.productdetails #content_area table[id*="options_table"] td:first-child,
 html body.mc-product-page #content_area table[id*="options_table"] td:first-child,
+html body.productdetails #v65-product-parent #options_table td[align="right"],
+html body.mc-product-page #v65-product-parent #options_table td[align="right"],
+html body.productdetails #v65-product-parent #options_table .productoptionname,
+html body.mc-product-page #v65-product-parent #options_table .productoptionname,
+html body.productdetails #content_area #options_table td[align="right"] font,
+html body.mc-product-page #content_area #options_table td[align="right"] font,
+html body.productdetails #content_area #options_table .productoptionname font,
+html body.mc-product-page #content_area #options_table .productoptionname font,
 html body.productdetails #content_area #mcLeatherHeader,
 html body.mc-product-page #content_area #mcLeatherHeader,
+html body.productdetails #content_area #mcLeatherSummary,
+html body.mc-product-page #content_area #mcLeatherSummary,
 html body.productdetails #content_area .mc-option-accordion__label,
 html body.mc-product-page #content_area .mc-option-accordion__label,
 html body.productdetails #content_area .mc-option-accordion__header,
 html body.mc-product-page #content_area .mc-option-accordion__header,
 html body.productdetails #content_area .mc-option-accordion__header .mc-option-accordion__label,
 html body.mc-product-page #content_area .mc-option-accordion__header .mc-option-accordion__label,
+html body.productdetails #content_area .mc-option-accordion__selected,
+html body.mc-product-page #content_area .mc-option-accordion__selected,
 html.mc-paragon-pdp body #content_area .mc-option-accordion__label,
 html.mc-paragon-pdp body #content_area .mc-option-accordion__header,
 html.mc-theater-seating-pdp body #content_area .mc-option-accordion__label,
-html.mc-theater-seating-pdp body #content_area .mc-option-accordion__header {
+html.mc-theater-seating-pdp body #content_area .mc-option-accordion__header,
+html body.productdetails #content_area .mc-configuration-rh__pieces,
+html body.mc-product-page #content_area .mc-configuration-rh__pieces,
+html body.mc-theater-seating-pdp #content_area .mc-configuration-rh__pieces,
+html body.productdetails #mcConfigurationBlock .mc-configuration-rh__pieces,
+html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__pieces,
+html.mc-paragon-pdp body #mcConfigurationBlock .mc-configuration-rh__pieces,
+html.mc-theater-seating-pdp body #mcConfigurationBlock .mc-configuration-rh__pieces {
   font-size: 13px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
   letter-spacing: 0.06em !important;
+}
+/* Dropdowns sit in the other column — inherit body 18px without this */
+html body.productdetails #content_area #options_table select:not(.mc-native-leather),
+html body.mc-product-page #content_area #options_table select:not(.mc-native-leather),
+html body.productdetails #v65-product-parent #options_table select:not(.mc-native-leather),
+html body.mc-product-page #v65-product-parent #options_table select:not(.mc-native-leather),
+html body.productdetails #content_area table[id*="options_table"] select:not(.mc-native-leather),
+html body.mc-product-page #content_area table[id*="options_table"] select:not(.mc-native-leather) {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.02em !important;
 }
 /* Chevron only — not label text */
 html body.mc-product-page #content_area .mc-option-accordion__toggle,
