@@ -226,12 +226,10 @@ def main() -> int:
     user = os.environ["FTP_USERNAME"]
     password = os.environ["FTP_PASSWORD"]
 
-    import paramiko  # noqa: PLC0415
+    from verify_template_sftp import connect_paramiko_transport
 
-    transport = paramiko.Transport((host, port))
-    transport.banner_timeout = 120
     try:
-        transport.connect(username=user, password=password)
+        transport = connect_paramiko_transport(host, port, user, password)
     except Exception as exc:  # noqa: BLE001
         print(f"::error::CONNECT_FAIL {exc}", file=sys.stderr)
         return 2

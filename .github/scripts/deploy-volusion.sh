@@ -98,9 +98,24 @@ deploy_template() {
   export SFTP_USER="${FTP_USERNAME}"
   export SFTP_PASS="${FTP_PASSWORD}"
   export SFTP_PORT="2222"
+  # Brief pause after nc probe — Volusion sometimes drops the SSH banner on immediate reconnect.
+  sleep 5
+  set +e
   python3 scripts/volusion_sftp_force_template.py
-  # Template is uploaded only via Paramiko above (MD5 read-back). lftp duplicate put
-  # can hit 550 locks and leave a same-size stale file without the enforcer tag.
+  local py_rc=$?
+  set -e
+  if [[ "$py_rc" -eq 0 ]]; then
+    return 0
+  fi
+  echo "::warning::Paramiko template upload failed (exit ${py_rc}) — trying lftp (same SSH as asset puts)"
+  if put_primary "template_266.html" "template-lftp" \
+    "/v/template_266.html" \
+    "/template_266.html"; then
+    echo "::notice::Template uploaded via lftp fallback"
+    return 0
+  fi
+  echo "::error::Template upload failed after Paramiko retries and lftp fallback"
+  return 1
 }
 
 verify_live_template_http() {
@@ -130,7 +145,14 @@ fi
 
 python3 scripts/announce_deploy_markers.py || true
 
+set +e
 deploy_template
+template_upload_rc=$?
+set -e
+if [[ "$template_upload_rc" -ne 0 ]]; then
+  echo "::warning::Template upload step failed (exit ${template_upload_rc}) — continuing with vspfiles/CSS/JS"
+fi
+
 set +e
 verify_template_on_sftp "$TEMPLATE_ENFORCER_TAG"
 verify_rc=$?

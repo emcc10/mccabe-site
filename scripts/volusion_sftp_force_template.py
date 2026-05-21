@@ -12,6 +12,7 @@ import sys
 
 from verify_template_sftp import (
     check_remote,
+    connect_paramiko_transport,
     md5_hex,
     read_local_template,
     template_remote_paths,
@@ -57,11 +58,8 @@ def main() -> int:
         print("::error::Missing SFTP env for force template step.", file=sys.stderr)
         return 1
 
-    import paramiko  # noqa: PLC0415
-
-    transport = paramiko.Transport((host, port))
     try:
-        transport.connect(username=user, password=password)
+        transport = connect_paramiko_transport(host, port, user, password)
     except Exception as exc:  # noqa: BLE001
         print(f"::error::force template connect failed: {exc}", file=sys.stderr)
         return 1

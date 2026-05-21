@@ -10,6 +10,45 @@ import hashlib
 import os
 import re
 import sys
+import time
+
+# Volusion SFTP often drops the SSH banner on first connect (GitHub Actions / Paramiko).
+SFTP_BANNER_TIMEOUT = 120
+SFTP_AUTH_TIMEOUT = 60
+SFTP_CONNECT_ATTEMPTS = 5
+
+
+def connect_paramiko_transport(host: str, port: int, user: str, password: str):
+    """Connect with retries and long banner timeout (shared by template deploy/verify)."""
+    import paramiko  # noqa: PLC0415
+
+    last_exc: Exception | None = None
+    for attempt in range(1, SFTP_CONNECT_ATTEMPTS + 1):
+        transport = paramiko.Transport((host, int(port)))
+        transport.banner_timeout = SFTP_BANNER_TIMEOUT
+        transport.auth_timeout = SFTP_AUTH_TIMEOUT
+        try:
+            transport.connect(username=user, password=password)
+            if attempt > 1:
+                print(
+                    f"::notice::SFTP connected on attempt {attempt}/{SFTP_CONNECT_ATTEMPTS}",
+                    flush=True,
+                )
+            return transport
+        except Exception as exc:  # noqa: BLE001
+            last_exc = exc
+            print(
+                f"::warning::SFTP connect attempt {attempt}/{SFTP_CONNECT_ATTEMPTS} failed: {exc}",
+                flush=True,
+            )
+            try:
+                transport.close()
+            except Exception:
+                pass
+            if attempt < SFTP_CONNECT_ATTEMPTS:
+                time.sleep(min(12 * attempt, 45))
+    assert last_exc is not None
+    raise last_exc
 
 
 def template_remote_paths() -> list[str]:
@@ -147,11 +186,8 @@ def main() -> int:
         print("::error::Missing SFTP credentials for template verify", file=sys.stderr)
         return 1
 
-    import paramiko  # noqa: PLC0415
-
-    transport = paramiko.Transport((host, port))
     try:
-        transport.connect(username=user, password=password)
+        transport = connect_paramiko_transport(host, port, user, password)
     except Exception as exc:  # noqa: BLE001
         print(f"::error::SFTP connect failed: {exc}", file=sys.stderr)
         return 1
@@ -204,9 +240,10 @@ def main() -> int:
         "::warning::SFTP template mismatch on first pass — repair write to all paths",
         flush=True,
     )
-    transport2 = paramiko.Transport((host, port))
     try:
-        transport2.connect(username=user, password=password)
+        transport2 = connect_paramiko_transport(host, port, user, password)
+        import paramiko  # noqa: PLC0415
+
         sftp2 = paramiko.SFTPClient.from_transport(transport2)
         try:
             for remote in template_remote_paths():
@@ -234,8 +271,13 @@ def main() -> int:
                 sftp2.close()
             except Exception:
                 pass
-    finally:
-        transport2.close()
+    except Exception as exc:  # noqa: BLE001
+        print(f"::warning::SFTP template repair connect failed: {exc}", flush=True)
+    else:
+        try:
+            transport2.close()
+        except Exception:
+            pass
 
     if matched:
         print(
