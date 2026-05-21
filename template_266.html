@@ -5752,7 +5752,6 @@ try {
     try {
       if (typeof mcSyncPlannerConfigurationPriceDisplay === "function") mcSyncPlannerConfigurationPriceDisplay();
       if (typeof mcSyncConfigurationFromDom === "function") mcSyncConfigurationFromDom();
-      else       if (typeof mcSyncConfigurationFromDom === "function") mcSyncConfigurationFromDom();
       else if (typeof mcSyncTheaterConfigurationFromDom === "function") mcSyncTheaterConfigurationFromDom();
       if (typeof recalcRoomPlannerPrice === "function") recalcRoomPlannerPrice();
       else if (typeof window.recalcRoomPlannerPrice === "function") window.recalcRoomPlannerPrice();
@@ -6748,7 +6747,16 @@ function mcSyncConfigurationFromDom() {
         priceLines.push("Total: " + fmt(totalAmt));
       }
       if (priceLines.length) {
-        priceEl.textContent = priceLines.join("\n");
+        var priceHtml = [];
+        if (additional > 0) {
+          priceHtml.push(
+            '<div class="mc-configuration-rh__addl">Additional configuration cost: ' + fmt(additional) + "</div>"
+          );
+        }
+        if (totalAmt > 0) {
+          priceHtml.push('<div class="mc-configuration-rh__total-line">Total: ' + fmt(totalAmt) + "</div>");
+        }
+        priceEl.innerHTML = priceHtml.join("");
         priceEl.style.display = "block";
       } else {
         priceEl.textContent = "Calculating price…";
@@ -6760,10 +6768,20 @@ function mcSyncConfigurationFromDom() {
 function mcSyncTheaterConfigurationFromDom() {
   return mcSyncConfigurationFromDom();
 }
+function scheduleConfigurationFromDomRetries() {
+  if (window.__mcPlannerConfigApplied) return;
+  [0, 250, 700, 1600, 3500, 6000].forEach(function (ms) {
+    setTimeout(function () {
+      if (window.__mcPlannerConfigApplied) return;
+      if (typeof mcSyncConfigurationFromDom === "function") mcSyncConfigurationFromDom();
+    }, ms);
+  });
+}
 if (typeof window !== "undefined") {
   window.mcFindConfigurationOptionSelects = mcFindConfigurationOptionSelects;
   window.mcSyncConfigurationFromDom = mcSyncConfigurationFromDom;
   window.mcSyncTheaterConfigurationFromDom = mcSyncTheaterConfigurationFromDom;
+  window.scheduleConfigurationFromDomRetries = scheduleConfigurationFromDomRetries;
 }
 
 function ensureTheaterPlannerOptionPriceResync() {
@@ -7192,7 +7210,8 @@ window.applyPlannerToPage = function (payload) {
     schedulePlannerConfigurationPriceRetries();
   } else {
     ensureTheaterPlannerOptionPriceResync();
-    if (typeof mcSyncTheaterConfigurationFromDom === "function") mcSyncTheaterConfigurationFromDom();
+    if (typeof mcSyncConfigurationFromDom === "function") mcSyncConfigurationFromDom();
+    else if (typeof mcSyncTheaterConfigurationFromDom === "function") mcSyncTheaterConfigurationFromDom();
   }
   if (window.__mcMemberPricing) {
     try { window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing })); } catch (e) {}
@@ -13140,11 +13159,11 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       leftAlignPricingBlock(scope);
       if (document.getElementById("mcConfigurationBlock")) {
         ensureTheaterPlannerOptionPriceResync();
-      }
-      if (typeof window.mcSyncConfigurationFromDom === "function") {
-        window.mcSyncConfigurationFromDom();
-      } else if (typeof window.mcSyncTheaterConfigurationFromDom === "function") {
-        window.mcSyncTheaterConfigurationFromDom();
+        if (typeof window.scheduleConfigurationFromDomRetries === "function") {
+          window.scheduleConfigurationFromDomRetries();
+        } else if (typeof window.mcSyncConfigurationFromDom === "function") {
+          window.mcSyncConfigurationFromDom();
+        }
       }
     } catch (e3) {}
   }
@@ -19107,6 +19126,40 @@ async function mcSubmitAuthForm(form, mode) {
   }
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
 
+  function mcTidyPdpMemberPricing() {
+    var wrap = document.querySelector(".mc-pdp-member-pricing");
+    if (!wrap) return;
+    try {
+      wrap.querySelectorAll(
+        ".product_sale_price, .product_saleprice, font.product_sale_price, .mc-member-price-caption, .option_pricing"
+      ).forEach(function (node) {
+        if (node.closest && node.closest(".mc-pdp-member-line")) return;
+        node.style.setProperty("display", "none", "important");
+        node.style.setProperty("visibility", "hidden", "important");
+      });
+      wrap.querySelectorAll(".mc-pdp-member-line").forEach(function (line) {
+        line.style.setProperty("display", "flex", "important");
+        line.style.setProperty("flex-direction", "column", "important");
+        line.style.setProperty("align-items", "flex-start", "important");
+        line.style.setProperty("gap", "2px", "important");
+        line.style.setProperty("width", "100%", "important");
+        line.style.setProperty("position", "static", "important");
+      });
+      wrap.querySelectorAll(".mc-pdp-member-line__label").forEach(function (el) {
+        el.style.setProperty("display", "block", "important");
+        el.style.setProperty("letter-spacing", "0.16em", "important");
+        el.style.setProperty("white-space", "normal", "important");
+      });
+      wrap.querySelectorAll(".mc-pdp-member-line__amount, .mc-pdp-sale-preview").forEach(function (el) {
+        el.style.setProperty("display", "block", "important");
+        el.style.setProperty("letter-spacing", "0.02em", "important");
+        el.style.setProperty("white-space", "normal", "important");
+        el.style.setProperty("position", "static", "important");
+        el.style.setProperty("width", "100%", "important");
+      });
+    } catch (eTidyM) {}
+  }
+
   function mcHideDuplicatePdpMemberFragments() {
     var root = document.querySelector('#v65-product-parent');
     if (!root) return;
@@ -19267,7 +19320,11 @@ async function mcSubmitAuthForm(form, mode) {
           var saleAmt = parseMcCurrency(saleNode.textContent || '');
           if (saleAmt > 0 && typeof mcFmtMoney === 'function') {
             salePreview =
-              '<div class="mc-pdp-sale-preview">Sale Price: ' + mcFmtMoney(saleAmt) + '</div>';
+              '<div class="mc-pdp-member-line mc-pdp-member-line--sale">' +
+              '<span class="mc-pdp-member-line__label">Sale Price</span>' +
+              '<span class="mc-pdp-member-line__amount">' +
+              mcFmtMoney(saleAmt) +
+              '</span></div>';
           }
         }
       } catch (eSalePrev) {}
@@ -19280,6 +19337,9 @@ async function mcSubmitAuthForm(form, mode) {
     }
 
     mcSetStableHtml(wrap, html);
+    try {
+      mcTidyPdpMemberPricing();
+    } catch (eTidyWrap) {}
     try {
       wrap.querySelectorAll('.mc-pdp-member-line__label').forEach(function (el) {
         el.classList.add('mtl-member-label');
