@@ -22,12 +22,18 @@ Upholstery mask comes from `sofa-recolor-tool/input/mask.png`.
 
 Legs use **`leg-mask.override.png`** when present (your hand-edited leg mask). Otherwise auto-detected.
 
-## Phase 2 (after masks look correct)
+## Stage 2 proof
 
 ```bash
-npm run phase2:test-sofa
+npm run prove:stage2
+```
+
+## Stage 3 swatch match (explicit only)
+
+```bash
+npm run render:stage3
 ```
 
 Outputs in `debug/`:
-- `phase2-bali-silk.png` — minimal recolor (preserve L, upholstery a/b only)
-- `phase2-comparison.png` — source | overlay | recolor side by side
+- `phase2-bali-silk.png`, `phase2-comparison.png`, `stage2-spec.json`, `stage2-structural-metrics.json`
+- `phase3-bali-silk.png`, `phase3-comparison.png`, `stage3-spec.json`, `stage3-metrics.json`

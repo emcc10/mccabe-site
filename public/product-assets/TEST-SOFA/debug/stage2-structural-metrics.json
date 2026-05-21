@@ -3,6 +3,7 @@
   "legExactMatchRatio": 1,
   "upholsteryPixels": 152231,
   "upholsteryMeanAbsDeltaRgb": 8.966984385571926,
+  "upholsteryMeanLabDeltaFromSource": 8.085781052535037,
   "upholsteryLabLStdSource": 12.475894128530177,
   "upholsteryLabLStdRecolorBuffer": 11.611300645669068,
   "upholsteryLabLStdFinal": 11.611300645669068,

@@ -1,0 +1,13 @@
+{
+  "legPixels": 1560,
+  "legExactMatchRatio": 1,
+  "upholsteryPixels": 152231,
+  "upholsteryMeanAbsDeltaRgb": 20.330197747721115,
+  "upholsteryMeanLabDeltaFromSource": 19.81377119262982,
+  "upholsteryLabLStdSource": 12.475894128530177,
+  "upholsteryLabLStdRecolorBuffer": 10.989307943740375,
+  "upholsteryLabLStdFinal": 10.989307943740375,
+  "lStdPreservationRatio": 0.8808433151584509,
+  "structurallyCorrect": true,
+  "failReasons": []
+}

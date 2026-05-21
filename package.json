@@ -6,7 +6,7 @@
     "phase1:test-sofa": "tsx scripts/phase1TestSofa.ts",
     "phase2:test-sofa": "tsx scripts/phase2TestSofa.ts",
     "prove:stage2": "tsx scripts/proveStage2.ts",
-    "phase3:test-sofa": "tsx scripts/phase3TestSofa.ts"
+    "render:stage3": "tsx scripts/renderStage3.ts"
   },
   "dependencies": {
     "color-convert": "^2.0.1",

@@ -13184,9 +13184,11 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       if (typeof console !== 'undefined' && console.warn) console.warn('[McCabe] renderMemberPricingCaption', e2);
     }
     try {
+      if (typeof mcCachePdpSaleAmountFromDom === 'function') mcCachePdpSaleAmountFromDom();
       hideNativePdpSalePricing(scope);
       if (typeof mcTidyMtlPriceBlock === 'function') mcTidyMtlPriceBlock();
       if (typeof mcTidyPdpMemberPricing === 'function') mcTidyPdpMemberPricing();
+      if (typeof mcEnsurePdpPriceStack === 'function') mcEnsurePdpPriceStack();
       hideTheaterSeatPdpNativePricing(scope);
       ensurePriceWithOptionsLabel(scope);
       leftAlignPricingBlock(scope);
@@ -18509,6 +18511,114 @@ async function mcSubmitAuthForm(form, mode) {
     return 0;
   }
 
+  function mcCachePdpSaleAmountFromDom() {
+    try {
+      if (window.__mcPdpSaleAmtCached > 0) return window.__mcPdpSaleAmtCached;
+      var amt = 0;
+      var pc = window.parseMcCurrency;
+      if (typeof pc === 'function') {
+        var nodes = document.querySelectorAll(
+          '#v65-product-parent input, #v65-product-parent textarea, #content_area input, #content_area textarea'
+        );
+        var ni;
+        for (ni = 0; ni < nodes.length; ni++) {
+          var inp = nodes[ni];
+          var nm = ((inp.name || '') + ' ' + (inp.id || '')).toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (nm.indexOf('saleprice') === -1) continue;
+          amt = Number(pc(inp.value || inp.getAttribute('value') || '')) || 0;
+          if (amt > 0) break;
+        }
+      }
+      if (!(amt > 0)) amt = Number(mcExtractSalePriceFromPdpHtml(document.documentElement.innerHTML || '')) || 0;
+      if (amt > 0) window.__mcPdpSaleAmtCached = amt;
+      return amt;
+    } catch (eCacheSale) {
+      return 0;
+    }
+  }
+
+  function mcResolvePdpSaleAmount() {
+    var amt = Number(window.__mcPdpSaleAmtCached) || 0;
+    if (amt > 0) return amt;
+    amt = Number(mcCachePdpSaleAmountFromDom()) || 0;
+    if (amt > 0) return amt;
+    var pc = window.parseMcCurrency;
+    if (typeof pc !== 'function') return 0;
+    try {
+      var saleNode =
+        document.querySelector('#v65-product-parent .product_saleprice, #content_area .product_saleprice') ||
+        document.querySelector('#v65-product-parent .product_sale_price, #content_area .product_sale_price');
+      if (saleNode) amt = Number(pc(saleNode.textContent || '')) || 0;
+    } catch (eSaleDom) {}
+    if (amt > 0) {
+      window.__mcPdpSaleAmtCached = amt;
+      return amt;
+    }
+    try {
+      amt = Number(mcExtractSalePriceFromPdpHtml(document.documentElement.innerHTML || '')) || 0;
+    } catch (eSaleHtml) {}
+    if (amt > 0) window.__mcPdpSaleAmtCached = amt;
+    return amt;
+  }
+
+  function mcBuildPdpSaleLineHtml(saleAmt) {
+    if (!(saleAmt > 0)) return '';
+    return (
+      '<div class="mc-pdp-member-line mc-pdp-member-line--sale">' +
+      '<span class="mc-pdp-member-line__label">Sale Price</span>' +
+      '<span class="mc-pdp-member-line__amount">' +
+      mcFmtMoney(saleAmt) +
+      '</span></div>'
+    );
+  }
+
+  function mcEnsurePdpPriceStack() {
+    var wrap = document.querySelector('.mc-pdp-member-pricing');
+    var retailRow = document.querySelector('.mc-pdp-retail-row');
+    if (!wrap && !retailRow) return false;
+    try {
+      if (document.body) document.body.classList.add('mc-pdp-price-stack');
+    } catch (eCls) {}
+    var loggedIn =
+      !!(document.body && document.body.classList.contains('mc-member-logged-in')) ||
+      (function () {
+        try {
+          return !!sessionStorage.getItem('mc_recent_member_auth');
+        } catch (eS) {
+          return false;
+        }
+      })();
+    if (!loggedIn && wrap) {
+      var hasSaleLine = wrap.querySelector('.mc-pdp-member-line--sale');
+      if (!hasSaleLine) {
+        var saleAmt = mcResolvePdpSaleAmount();
+        var saleHtml = mcBuildPdpSaleLineHtml(saleAmt);
+        if (saleHtml) {
+          var locked = wrap.querySelector('.mc-pdp-member-line--locked');
+          if (locked && locked.nextSibling) {
+            var tmp = document.createElement('div');
+            tmp.innerHTML = saleHtml;
+            wrap.insertBefore(tmp.firstChild, locked.nextSibling);
+          } else {
+            wrap.insertAdjacentHTML('beforeend', saleHtml);
+          }
+        }
+      }
+    }
+    if (!retailRow && typeof mcRenderRetailMemberOnPdp === 'function') {
+      try {
+        mcRenderRetailMemberOnPdp();
+      } catch (eRender) {}
+    }
+    try {
+      hideNativePdpSalePricing(document);
+      mcTidyMtlPriceBlock();
+      mcTidyPdpMemberPricing();
+      mcObservePdpPriceStackTidy();
+    } catch (eTidy) {}
+    return true;
+  }
+
   /** Member grid PDP fetch: SalePrice first, else retail; then legacy HowToGet / MAP scrapers. */
   function mcExtractHowToGetFromPdpHtml(html) {
     if (!html) return 0;
@@ -19401,23 +19511,7 @@ async function mcSubmitAuthForm(form, mode) {
     } else if (isLoggedIn) {
       /* No member amount yet; omit a loading caption so async paint does not flash placeholder text. */
     } else {
-      var salePreview = '';
-      try {
-        var saleNode =
-          document.querySelector('#v65-product-parent .product_saleprice, #content_area .product_saleprice') ||
-          document.querySelector('#v65-product-parent .product_sale_price, #content_area .product_sale_price');
-        if (saleNode) {
-          var saleAmt = parseMcCurrency(saleNode.textContent || '');
-          if (saleAmt > 0 && typeof mcFmtMoney === 'function') {
-            salePreview =
-              '<div class="mc-pdp-member-line mc-pdp-member-line--sale">' +
-              '<span class="mc-pdp-member-line__label">Sale Price</span>' +
-              '<span class="mc-pdp-member-line__amount">' +
-              mcFmtMoney(saleAmt) +
-              '</span></div>';
-          }
-        }
-      } catch (eSalePrev) {}
+      var salePreview = mcBuildPdpSaleLineHtml(mcResolvePdpSaleAmount());
       html +=
         '<div class="mc-pdp-member-line mc-pdp-member-line--locked">' +
         '<span class="mc-pdp-member-line__label">Member Price</span>' +
@@ -19473,6 +19567,9 @@ async function mcSubmitAuthForm(form, mode) {
       }
     } catch (eHidePdpSale) {}
     mcHideDuplicatePdpMemberFragments();
+    try {
+      mcEnsurePdpPriceStack();
+    } catch (eEnsureStack) {}
     return true;
   }
 
