@@ -185,6 +185,9 @@ set -e
 if [[ "$py_rc" -ne 0 ]]; then
   echo "::warning::Paramiko deploy exited $py_rc — continuing with lftp for remaining assets"
   echo "::notice::Showcase PNG / mood SVG failures do not block template_266 or PDP login deploys"
+  if [[ "$DEPLOY_STRICT" == "1" ]]; then
+    DEPLOY_FAIL=1
+  fi
 fi
 
 echo "=== Assets via lftp (fallback + large JS) ==="
@@ -192,6 +195,7 @@ put_primary "vspfiles/templates/266/js/min/design-toolkit.min.js" "design-toolki
   "/vspfiles/templates/266/js/min/design-toolkit.min.js" \
   "vspfiles/templates/266/js/min/design-toolkit.min.js"
 put_primary "vspfiles/css/custom-safe.css" "custom-safe" \
+  "/v/vspfiles/css/custom-safe.css" \
   "/vspfiles/css/custom-safe.css" \
   "vspfiles/css/custom-safe.css"
 
