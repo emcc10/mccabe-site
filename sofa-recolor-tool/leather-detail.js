@@ -5,6 +5,7 @@ import { rgbToLab } from './render-sofas.js';
 
 const HF_RADIUS = 1;
 const MF_RADIUS = 2;
+const LF_RADIUS = 6;
 /** Low-amplitude source L only — catalog softness, not enhancement. */
 export const PHOTO_HF_GAIN = 0.4;
 export const PHOTO_MF_GAIN = 0.1;
@@ -58,6 +59,7 @@ export function prepareSourceLGrain(sourceImage) {
     height,
     sourceHf: highPass(L, width, height, HF_RADIUS),
     sourceMf: highPass(L, width, height, MF_RADIUS),
+    sourceLf: highPass(L, width, height, LF_RADIUS),
   };
 }
 
