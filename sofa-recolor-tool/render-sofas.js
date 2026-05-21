@@ -19,13 +19,17 @@ import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { finalizeBaliExport } from './finalize-bali-export.js';
 import {
+  DETAIL_GAIN,
+  recolorBaliUpholstery,
+  REF_DETAIL_MIX,
+  SOURCE_DETAIL_MIX,
+  TEXTURE_STRENGTH,
+} from './bali-upholstery-compose.js';
+import { writeBaliDebugStrip } from './debug-strip.js';
+import {
   applySourceYResidualToRgb,
-  PHOTO_HF_GAIN,
-  PHOTO_MF_GAIN,
   prepareSourceLGrain,
   prepareSourceLLfBand,
-  prepareSpecularSheenMap,
-  SPECULAR_SHEEN_ATTEN,
 } from './leather-detail.js';
 import {
   evaluateBaliExportGate,
@@ -868,11 +872,38 @@ export function swatchChromaForPixel(palette, u) {
 
 /**
  * Photographic recolor: original buffer + mask pixels get swatch chroma and preserved photo L.
- * No post-recolor compositing, enhancement, or cleanup.
+ * Bali production uses bali-upholstery-compose (no per-pixel Rec.709 luma lock).
  */
 export function recolorSofa(sourceImage, mask, palette, options = {}) {
   const realismStress = Boolean(options.realismStress && palette.isBaliSilk);
   const realismProbe = Boolean(options.realismProbe && palette.isBaliSilk);
+  const baliProduction =
+    palette.isBaliSilk && !realismStress && !realismProbe;
+
+  if (baliProduction) {
+    const lumRange = computeSourceRec709LumRange(sourceImage, mask);
+    const lMap = computeBaliFullLRange(sourceImage, mask);
+    const lo = lMap.lo;
+    const span = lMap.span;
+    const chromaFn = (r, g, b) => {
+      const srcLum = pixelBrightness(r, g, b);
+      const u = clamp((srcLum - lumRange.lo) / lumRange.span, 0, 1);
+      return swatchChromaForPixel(palette, u);
+    };
+    const { out, detailViz } = recolorBaliUpholstery(
+      sourceImage,
+      mask,
+      palette,
+      options.referenceImage ?? null,
+      chromaFn,
+    );
+    if (!options.skipFinalize) {
+      finalizeBaliExport(out, sourceImage, mask);
+    }
+    if (options.detailVizHolder) options.detailVizHolder.buf = detailViz;
+    return out;
+  }
+
   const { data, width, height, channels } = sourceImage;
   const out = Buffer.from(data);
   const lMap = palette.isBaliSilk
@@ -890,10 +921,10 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
   const lumOffset = palette.isBaliSilk
     ? pixelBrightness(midRgb.r, midRgb.g, midRgb.b) - meanSrcLum
     : 0;
-  const grain = palette.isBaliSilk ? prepareSourceLGrain(sourceImage, mask) : null;
-  if (grain && lumRange) {
-    Object.assign(grain, prepareSpecularSheenMap(sourceImage, mask, lumRange));
-  }
+  const grain =
+    palette.isBaliSilk && (realismStress || realismProbe)
+      ? prepareSourceLGrain(sourceImage, mask)
+      : null;
   const sourceLf = realismProbe ? prepareSourceLLfBand(sourceImage) : null;
 
   for (let j = 0; j < width * height; j++) {
@@ -1206,7 +1237,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     lBlend: isBali
       ? realismStress
         ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
-        : `chroma + source Y HF×${PHOTO_HF_GAIN} MF×${PHOTO_MF_GAIN} interior>6px; LF sheen−${Math.round(SPECULAR_SHEEN_ATTEN * 100)}% (smooth highlights)`
+        : `lowfreq L + detail×${DETAIL_GAIN} (src ${SOURCE_DETAIL_MIX}/ref ${REF_DETAIL_MIX}) + texture×${TEXTURE_STRENGTH}; highlight matte; NO luma lock`
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali
