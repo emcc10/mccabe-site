@@ -1,5 +1,6 @@
 /**
- * Bali upholstery compose: source lowfreq + ref texture + seam protect (matte in bali-matte.js).
+ * Bali upholstery compose: source lowfreq + ref texture + chroma variation + seam protect.
+ * Matte/contour: bali-matte.js (unchanged settings).
  */
 import convert from 'color-convert';
 
@@ -8,32 +9,70 @@ const MASK_APPLY_THRESH = 128;
 export const LOWFREQ_RADIUS_BASE = 16;
 export const REF_MEDIUM_BLUR = 12;
 export const REF_FINE_BLUR = 4;
-export const REF_MEDIUM_TEXTURE_WEIGHT = 0.72;
-export const REF_FINE_TEXTURE_WEIGHT = 0.28;
-export const REF_TEXTURE_AMPLITUDE = 0.78;
-export const SOURCE_DETAIL_MIX = 0.58;
-export const REF_TEXTURE_MIX = 0.42;
-export const DETAIL_GAIN = 1.05;
-export const REF_DETAIL_STD_TARGET = 2.0;
+export const REF_MEDIUM_TEXTURE_WEIGHT = 0.64;
+export const REF_FINE_TEXTURE_WEIGHT = 0.36;
+export const REF_TEXTURE_AMPLITUDE = 0.92;
+export const SOURCE_DETAIL_MIX = 0.52;
+export const REF_TEXTURE_MIX = 0.48;
+export const DETAIL_GAIN = 1.11;
+export const REF_DETAIL_STD_TARGET = 2.5;
 export const CHROMA_SOURCE_KEEP = 0.06;
-export const SPATIAL_L_AMP = 0.8;
-export const SPATIAL_AB_AMP = 0;
+export const REFLECTANCE_L_AMP = 0.95;
+export const CHROMA_A_AMP = 0.38;
+export const CHROMA_B_AMP = 0.46;
+export const LOWFREQ_CHROMA_A_AMP = 0.18;
+export const LOWFREQ_CHROMA_B_AMP = 0.24;
+export const LOWFREQ_CHROMA_BLUR_BASE = 34;
 export const LOCAL_CONTRAST_RADIUS = 4;
-export const LOCAL_CONTRAST_AMOUNT = 0.05;
-export const TEXTURE_FULL_L = 64;
-export const TEXTURE_MIN_L = 80;
-export const TEXTURE_MIN_STRENGTH = 0.4;
+export const LOCAL_CONTRAST_AMOUNT = 0.07;
+export const TEXTURE_FULL_L = 66;
+export const TEXTURE_MIN_L = 82;
+export const TEXTURE_MIN_STRENGTH = 0.62;
+export const CHROMA_TEXTURE_FULL_L = 72;
+export const CHROMA_TEXTURE_MIN_L = 82;
+export const CHROMA_TEXTURE_MIN_STRENGTH = 0.6;
 export const HIGHLIGHT_TIER1_START = 74;
 export const HIGHLIGHT_TIER1_RATIO = 0.48;
 export const HIGHLIGHT_TIER2_START = 82;
 export const HIGHLIGHT_TIER2_RATIO = 0.32;
-export const SEAM_INFLUENCE_MAX = 0.65;
+export const SEAM_INFLUENCE_MAX = 0.54;
+export const PERCENTILE_LO = 0.12;
+export const PERCENTILE_HI = 0.88;
 
+/** Highlight-based texture suppression (detail transfer). */
 export function highlightDetailStrength(L) {
   if (L <= TEXTURE_FULL_L) return 1;
   if (L >= TEXTURE_MIN_L) return TEXTURE_MIN_STRENGTH;
   const t = (L - TEXTURE_FULL_L) / (TEXTURE_MIN_L - TEXTURE_FULL_L);
   return 1 - t * (1 - TEXTURE_MIN_STRENGTH);
+}
+
+/** Highlight-based chroma variation suppression. */
+export function highlightChromaStrength(L) {
+  if (L <= CHROMA_TEXTURE_FULL_L) return 1;
+  if (L >= CHROMA_TEXTURE_MIN_L) return CHROMA_TEXTURE_MIN_STRENGTH;
+  const t = (L - CHROMA_TEXTURE_FULL_L) / (CHROMA_TEXTURE_MIN_L - CHROMA_TEXTURE_FULL_L);
+  return 1 - t * (1 - CHROMA_TEXTURE_MIN_STRENGTH);
+}
+
+/** Chroma variation weight: strongest L 58–70, taper highlights/shadows. */
+export function materialChromaWeight(L) {
+  if (L >= 58 && L <= 70) return 1;
+  if (L > 70 && L <= 82) return 1 - ((L - 70) / 12) * 0.45;
+  if (L > 82) return 0.55;
+  if (L < 58 && L >= 42) return 0.65 + ((L - 42) / 16) * 0.35;
+  if (L < 42) return 0.65;
+  return 1;
+}
+
+/** Reflectance L modulation weight: strongest L 52–72. */
+export function reflectanceLumaWeight(L) {
+  if (L >= 52 && L <= 72) return 1;
+  if (L > 72 && L <= 78) return 1 - ((L - 72) / 6) * 0.4;
+  if (L > 78) return 0.6;
+  if (L < 52 && L >= 40) return 0.6 + ((L - 40) / 12) * 0.4;
+  if (L < 40) return 0.6;
+  return 1;
 }
 
 export function getBaliComposeParams(width, height) {
@@ -47,13 +86,17 @@ export function getBaliComposeParams(width, height) {
     refMediumWeight: REF_MEDIUM_TEXTURE_WEIGHT,
     refFineWeight: REF_FINE_TEXTURE_WEIGHT,
     detailGain: DETAIL_GAIN,
-    textureHighlight: `full≤L${TEXTURE_FULL_L}, 40%@L${TEXTURE_MIN_L}`,
+    reflectanceL: REFLECTANCE_L_AMP,
+    chromaA: CHROMA_A_AMP,
+    chromaB: CHROMA_B_AMP,
+    lowfreqChroma: `a±${LOWFREQ_CHROMA_A_AMP} b±${LOWFREQ_CHROMA_B_AMP}`,
+    textureHighlight: `full≤L${TEXTURE_FULL_L}, ${TEXTURE_MIN_STRENGTH * 100}%@L${TEXTURE_MIN_L}`,
+    chromaHighlight: `full≤L${CHROMA_TEXTURE_FULL_L}, ${CHROMA_TEXTURE_MIN_STRENGTH * 100}%@L${CHROMA_TEXTURE_MIN_L}`,
     highlightTier1: `${HIGHLIGHT_TIER1_START}×${HIGHLIGHT_TIER1_RATIO}`,
     highlightTier2: `${HIGHLIGHT_TIER2_START}×${HIGHLIGHT_TIER2_RATIO}`,
     localContrast: `r${LOCAL_CONTRAST_RADIUS}×${LOCAL_CONTRAST_AMOUNT}`,
     seamInfluenceMax: SEAM_INFLUENCE_MAX,
-    spatialL: SPATIAL_L_AMP,
-    spatialAB: SPATIAL_AB_AMP,
+    textureNorm: `${PERCENTILE_LO * 100}–${PERCENTILE_HI * 100} percentile soft clamp`,
   };
 }
 
@@ -77,6 +120,10 @@ function labToRgb(L, a, b) {
 
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
+}
+
+function softClampNorm(v) {
+  return v / (1 + Math.abs(v) * 0.4);
 }
 
 function boxBlurPass(src, dst, width, height, horizontal, radius) {
@@ -130,25 +177,36 @@ function buildLabL(image) {
   return { L, a, b, width, height };
 }
 
-function normalizeMaskedDetail(detail, mask, stdTarget = REF_DETAIL_STD_TARGET) {
-  let sum = 0;
-  let sumSq = 0;
-  let n = 0;
+/** 12th–88th percentile scale with soft clamp (not hard clip). */
+function normalizeMaskedPercentile(detail, mask, stdTarget = REF_DETAIL_STD_TARGET) {
+  const vals = [];
   for (let j = 0; j < detail.length; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
-    sum += detail[j];
-    sumSq += detail[j] * detail[j];
-    n++;
+    vals.push(detail[j]);
   }
-  if (!n) return new Float32Array(detail.length);
-  const mean = sum / n;
-  const variance = sumSq / n - mean * mean;
-  const std = Math.max(Math.sqrt(Math.max(variance, 0)), 0.35);
-  const scale = stdTarget / std;
+  if (!vals.length) return new Float32Array(detail.length);
+  vals.sort((a, b) => a - b);
+  const lo = vals[Math.floor(vals.length * PERCENTILE_LO)] ?? vals[0];
+  const hi = vals[Math.floor(vals.length * PERCENTILE_HI)] ?? vals[vals.length - 1];
+  const mid = (lo + hi) * 0.5;
+  const span = Math.max(hi - lo, 0.5);
   const out = new Float32Array(detail.length);
   for (let j = 0; j < detail.length; j++) {
-    if (mask[j] < MASK_APPLY_THRESH) out[j] = 0;
-    else out[j] = (detail[j] - mean) * scale;
+    if (mask[j] < MASK_APPLY_THRESH) {
+      out[j] = 0;
+      continue;
+    }
+    const n = softClampNorm((detail[j] - mid) / span);
+    out[j] = n * stdTarget;
+  }
+  return out;
+}
+
+function normalizeMaskedToAmplitude(detail, mask, amplitude) {
+  const norm = normalizeMaskedPercentile(detail, mask, 1);
+  const out = new Float32Array(detail.length);
+  for (let j = 0; j < detail.length; j++) {
+    out[j] = norm[j] * amplitude;
   }
   return out;
 }
@@ -221,7 +279,13 @@ export function prepareBaliComposeFields(sourceImage, referenceImage, mask) {
 
   let refMediumNorm = new Float32Array(n);
   let refFineNorm = new Float32Array(n);
-  let refSpatialL = new Float32Array(n);
+  let refReflectanceL = new Float32Array(n);
+  let refChromaA = new Float32Array(n);
+  let refChromaB = new Float32Array(n);
+  let lowfreqDriftA = new Float32Array(n);
+  let lowfreqDriftB = new Float32Array(n);
+  let highlightTexWeight = new Float32Array(n);
+  let highlightChromaWeight = new Float32Array(n);
 
   if (referenceImage && referenceImage.width === width && referenceImage.height === height) {
     const ref = buildLabL(referenceImage);
@@ -235,23 +299,53 @@ export function prepareBaliComposeFields(sourceImage, referenceImage, mask) {
       refMedium[j] = ref.L[j] - refMedBlur[j];
       refFine[j] = ref.L[j] - refFineBlur[j];
     }
-    refMediumNorm = normalizeMaskedDetail(refMedium, mask);
-    refFineNorm = normalizeMaskedDetail(refFine, mask);
-    refSpatialL = normalizeMaskedDetail(ref.L, mask, SPATIAL_L_AMP);
+    refMediumNorm = normalizeMaskedPercentile(refMedium, mask);
+    refFineNorm = normalizeMaskedPercentile(refFine, mask);
+
+    const textureBasis = new Float32Array(n);
+    for (let j = 0; j < n; j++) {
+      textureBasis[j] =
+        refMediumNorm[j] * REF_MEDIUM_TEXTURE_WEIGHT + refFineNorm[j] * REF_FINE_TEXTURE_WEIGHT;
+      refReflectanceL[j] = textureBasis[j];
+      refChromaA[j] = textureBasis[j] * CHROMA_A_AMP;
+      refChromaB[j] =
+        (refMediumNorm[j] * 0.4 + refFineNorm[j] * 0.6) * CHROMA_B_AMP;
+    }
+
+    const chromaLowR = scaleRadius(LOWFREQ_CHROMA_BLUR_BASE, width, height);
+    const refABlur = gaussianBlur(ref.a, width, height, chromaLowR);
+    const refBBlur = gaussianBlur(ref.b, width, height, chromaLowR);
+    const driftA = new Float32Array(n);
+    const driftB = new Float32Array(n);
+    for (let j = 0; j < n; j++) {
+      driftA[j] = ref.a[j] - refABlur[j];
+      driftB[j] = ref.b[j] - refBBlur[j];
+    }
+    lowfreqDriftA = normalizeMaskedToAmplitude(driftA, mask, LOWFREQ_CHROMA_A_AMP);
+    lowfreqDriftB = normalizeMaskedToAmplitude(driftB, mask, LOWFREQ_CHROMA_B_AMP);
   }
 
   const refTexture = new Float32Array(n);
   const transferredDetailRaw = new Float32Array(n);
   const finalDetail = new Float32Array(n);
+  const chromaVariationMap = new Float32Array(n);
+
   for (let j = 0; j < n; j++) {
-    const hScale = highlightDetailStrength(srcLow[j]);
+    const baseL = srcLow[j];
+    highlightTexWeight[j] = highlightDetailStrength(baseL);
+    highlightChromaWeight[j] = highlightChromaStrength(baseL);
+
     refTexture[j] =
       (refMediumNorm[j] * REF_MEDIUM_TEXTURE_WEIGHT + refFineNorm[j] * REF_FINE_TEXTURE_WEIGHT) *
       REF_TEXTURE_AMPLITUDE *
-      hScale;
+      highlightTexWeight[j];
+
     transferredDetailRaw[j] = srcDetail[j] * SOURCE_DETAIL_MIX + refTexture[j] * REF_TEXTURE_MIX;
     const sw = seamWeight[j];
     finalDetail[j] = transferredDetailRaw[j] * (1 - sw) + srcDetail[j] * sw;
+
+    chromaVariationMap[j] =
+      Math.abs(refChromaA[j]) + Math.abs(refChromaB[j]) + Math.abs(lowfreqDriftA[j]) + Math.abs(lowfreqDriftB[j]);
   }
 
   return {
@@ -262,11 +356,20 @@ export function prepareBaliComposeFields(sourceImage, referenceImage, mask) {
     srcA: src.a,
     srcB: src.b,
     srcDetail,
+    refMediumNorm,
+    refFineNorm,
     finalDetail,
     transferredDetailRaw,
     refTexture,
     seamWeight,
-    refSpatialL,
+    refReflectanceL,
+    refChromaA,
+    refChromaB,
+    lowfreqDriftA,
+    lowfreqDriftB,
+    chromaVariationMap,
+    highlightTexWeight,
+    highlightChromaWeight,
   };
 }
 
@@ -318,16 +421,20 @@ function fillVizGray(buf, j, channels, value) {
 }
 
 /**
- * @returns {{ out, detailViz, textureViz, seamViz, fields, params }}
+ * @returns compose result + material debug viz buffers
  */
 export function recolorBaliUpholstery(sourceImage, mask, palette, referenceImage, chromaFn) {
   const { data, width, height, channels } = sourceImage;
   const out = Buffer.from(data);
   const fields = prepareBaliComposeFields(sourceImage, referenceImage, mask);
   const params = getBaliComposeParams(width, height);
+  const srcDetailViz = Buffer.alloc(width * height * channels);
+  const refMesoViz = Buffer.alloc(width * height * channels);
+  const refMicroViz = Buffer.alloc(width * height * channels);
   const detailViz = Buffer.alloc(width * height * channels);
-  const textureViz = Buffer.alloc(width * height * channels);
-  const seamViz = Buffer.alloc(width * height * channels);
+  const chromaViz = Buffer.alloc(width * height * channels);
+  const lowfreqDriftViz = Buffer.alloc(width * height * channels);
+  const highlightWeightViz = Buffer.alloc(width * height * channels);
   const meanSrcLow = meanMaskedL(fields.srcLow, mask);
   const lShift = palette.midtone.L - meanSrcLow;
 
@@ -335,16 +442,35 @@ export function recolorBaliUpholstery(sourceImage, mask, palette, referenceImage
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) {
-      fillVizGray(detailViz, j, channels, 0);
-      fillVizGray(textureViz, j, channels, 0);
-      fillVizGray(seamViz, j, channels, 0);
+      for (const buf of [
+        srcDetailViz,
+        refMesoViz,
+        refMicroViz,
+        detailViz,
+        chromaViz,
+        lowfreqDriftViz,
+        highlightWeightViz,
+      ]) {
+        fillVizGray(buf, j, channels, 0);
+      }
       continue;
     }
-    finalLBuf[j] = fields.srcLow[j] + lShift + fields.finalDetail[j] * DETAIL_GAIN;
-    finalLBuf[j] += fields.refSpatialL[j];
+    const preL = fields.srcLow[j] + lShift + fields.finalDetail[j] * DETAIL_GAIN;
+    const reflW = reflectanceLumaWeight(preL);
+    finalLBuf[j] = preL + fields.refReflectanceL[j] * REFLECTANCE_L_AMP * reflW;
+
+    fillVizGray(srcDetailViz, j, channels, 128 + fields.srcDetail[j] * 5);
+    fillVizGray(refMesoViz, j, channels, 128 + fields.refMediumNorm[j] * 10);
+    fillVizGray(refMicroViz, j, channels, 128 + fields.refFineNorm[j] * 12);
     fillVizGray(detailViz, j, channels, 128 + fields.finalDetail[j] * 5);
-    fillVizGray(textureViz, j, channels, 128 + fields.refTexture[j] * 8);
-    fillVizGray(seamViz, j, channels, 128 + fields.seamWeight[j] * 120);
+    fillVizGray(chromaViz, j, channels, 128 + fields.chromaVariationMap[j] * 25);
+    fillVizGray(
+      lowfreqDriftViz,
+      j,
+      channels,
+      128 + (fields.lowfreqDriftA[j] + fields.lowfreqDriftB[j]) * 40,
+    );
+    fillVizGray(highlightWeightViz, j, channels, fields.highlightTexWeight[j] * 255);
   }
 
   const Lcontrasted = applyLocalContrastOnL(finalLBuf, mask, width, height);
@@ -357,9 +483,21 @@ export function recolorBaliUpholstery(sourceImage, mask, palette, referenceImage
     const bIn = data[p + 2];
     const chroma = chromaFn(r, g, bIn, j);
     const srcLab = rgbToLab(r, g, bIn);
-    const finalL = compressUpholsteryHighlights(clamp(Lcontrasted[j], 0, 100));
-    const finalA = chroma.a * (1 - CHROMA_SOURCE_KEEP) + srcLab.a * CHROMA_SOURCE_KEEP;
-    const finalB = chroma.b * (1 - CHROMA_SOURCE_KEEP) + srcLab.b * CHROMA_SOURCE_KEEP;
+    const Lwork = Lcontrasted[j];
+    const finalL = compressUpholsteryHighlights(clamp(Lwork, 0, 100));
+
+    const chromaW = materialChromaWeight(Lwork) * fields.highlightChromaWeight[j];
+    const finalA =
+      chroma.a * (1 - CHROMA_SOURCE_KEEP) +
+      srcLab.a * CHROMA_SOURCE_KEEP +
+      fields.refChromaA[j] * chromaW +
+      fields.lowfreqDriftA[j] * chromaW;
+    const finalB =
+      chroma.b * (1 - CHROMA_SOURCE_KEEP) +
+      srcLab.b * CHROMA_SOURCE_KEEP +
+      fields.refChromaB[j] * chromaW +
+      fields.lowfreqDriftB[j] * chromaW;
+
     const rgb = labToRgb(finalL, finalA, finalB);
     out[p] = rgb.r;
     out[p + 1] = rgb.g;
@@ -369,5 +507,16 @@ export function recolorBaliUpholstery(sourceImage, mask, palette, referenceImage
 
   applyMaskedMeanLumaOffset(out, mask, width, height, channels, palette);
 
-  return { out, detailViz, textureViz, seamViz, fields, params };
+  return {
+    out,
+    srcDetailViz,
+    refMesoViz,
+    refMicroViz,
+    detailViz,
+    chromaViz,
+    lowfreqDriftViz,
+    highlightWeightViz,
+    fields,
+    params,
+  };
 }

@@ -214,9 +214,11 @@ export function decontaminateEdgeForeground(
   height,
   channels,
 ) {
+  const contourBand = RIGHT_LEG_HARD_MATTE_AA + RIGHT_LEG_SOFT_FEATHER + 0.5;
   const minInteriorDist = 2.5;
   for (let j = 0; j < width * height; j++) {
     if (rightLegPatchMask[j] === 0 || mask[j] < MASK_APPLY_THRESH) continue;
+    if (distIn[j] > contourBand) continue;
     const a = contourAlpha[j];
     if (a <= 0.05 || a >= 0.95) continue;
     let cur = j;

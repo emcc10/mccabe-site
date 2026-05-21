@@ -136,6 +136,41 @@ export async function writeRightLegZoomCrop(buf, patchMask, width, height, chann
 }
 
 /**
+ * Material-variation debug strip (10 panels) + right-leg 3x zoom.
+ */
+export async function writeBaliDebugMaterialPack(
+  panels,
+  width,
+  height,
+  channels,
+  basePath,
+  patchMask,
+  finalComposite,
+) {
+  const stripPath = basePath.replace(/\.png$/i, '-material-strip-10panel.png');
+  const stripPanels = panels.slice(0, 9);
+  const finalCrop = extractRightLegCrop(finalComposite, patchMask, width, height, channels);
+  if (finalCrop) {
+    stripPanels.push(
+      await upscaleCropToPanel(finalCrop.crop, finalCrop.bb.width, finalCrop.bb.height, channels, width, height),
+    );
+  } else {
+    stripPanels.push(panels[9] ?? panels[1]);
+  }
+  await writeBaliDebugStripN(stripPanels, width, height, channels, stripPath);
+  const zoomBase = basePath.replace(/\.png$/i, '');
+  const zoomFinal = await writeRightLegZoomCrop(
+    finalComposite,
+    patchMask,
+    width,
+    height,
+    channels,
+    `${zoomBase}-right-leg-final-3x.png`,
+  );
+  return { stripPath, zoomFinal };
+}
+
+/**
  * Mandatory matte debug pack (10 exports).
  */
 export async function writeBaliDebugMattePack(
