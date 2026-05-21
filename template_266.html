@@ -5760,7 +5760,10 @@ function getMemberCreateAccountUrl(){
   return "/AccountSettings.asp?AddNewCustomer=Y&ReturnTo=" + returnTo;
 }
 function refreshPlannerPriceForMemberState(){
-  if (!window.__mcPlannerConfigApplied || !window.__mcPlannerCounts) return;
+  if (!window.__mcPlannerConfigApplied || !window.__mcPlannerCounts) {
+    if (typeof mcSyncTheaterConfigurationFromDom === "function") mcSyncTheaterConfigurationFromDom();
+    return;
+  }
   if (!mcPlannerUserIsLoggedIn()) {
     var cpeR0 = document.getElementById("mcConfigurationPrice");
     if (cpeR0) {
@@ -5783,9 +5786,6 @@ function refreshPlannerPriceForMemberState(){
   }
   mcSyncPlannerConfigurationPriceDisplay();
   try { window.dispatchEvent(new CustomEvent("mcMemberPricingReady", { detail: window.__mcMemberPricing })); } catch (e) {}
-  return;
-}
-  if (typeof mcSyncTheaterConfigurationFromDom === "function") mcSyncTheaterConfigurationFromDom();
 }
 if (typeof window !== "undefined") {
   window.refreshPlannerPriceForMemberState = refreshPlannerPriceForMemberState;
