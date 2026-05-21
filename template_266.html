@@ -4078,7 +4078,7 @@ try {
 </script>
  <script>
 (function(){
-  if (typeof window.mcHandleLoginCtaClick !== "function") {
+  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260523boot") {
     var boot = document.getElementById("mc-pdp-auth-cta-boot");
     if (!boot) {
       var s = document.createElement("script");
