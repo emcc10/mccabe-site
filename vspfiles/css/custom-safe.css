@@ -1,4 +1,4 @@
-/* 0520b C_CSS_DEPLOY_VERIFY_20260520b — no font-size on body *; MC_OPTION_LABEL_13PX_TAIL at EOF */
+/* 0521c C_CSS_DEPLOY_VERIFY_20260521c — MC_PDP_TYPE_13PX_STACK at EOF (title, options, retail/member) */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -5609,10 +5609,12 @@ body.productdetails #content_area .v-product-grid .v-product .mc-member-grid-pri
 body.mc-product-page #content_area h1.productnamecolorLARGE,
 body.mc-product-page #content_area h1.productnamecolor,
 body.mc-product-page #content_area h1 {
-  font-size: 30px !important;
+  font-size: 13px !important;
   line-height: 1.2 !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.03em !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
   margin: 0 0 14px 0 !important;
 }
 
@@ -5634,7 +5636,7 @@ body.mc-product-page #content_area .product_sale_price span {
   letter-spacing: 0.05em !important;
 }
 
-/* Option headers: match Select a leather (line above + same typography) */
+/* Option headers: match product title (MC_PDP_TYPE_13PX_STACK at EOF) */
 body.mc-product-page #content_area .productoptionname,
 body.mc-product-page .productoptionname,
 body.mc-product-page #content_area label,
@@ -5642,9 +5644,9 @@ body.mc-product-page #content_area .mc-option-accordion__label {
   font-size: 13px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
-  letter-spacing: .06em !important;
+  letter-spacing: 0.16em !important;
   text-transform: uppercase !important;
-  color: #686868 !important;
+  color: #777 !important;
   margin: 0 0 6px 0 !important;
   padding-top: 18px !important;
   border-top: 1px solid #e5e5e5 !important;
@@ -10267,12 +10269,12 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label
   width: auto !important;
   margin: 0 !important;
   flex: 0 0 auto !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.14em !important;
+  letter-spacing: 0.16em !important;
   text-transform: uppercase !important;
-  color: #6a6a6a !important;
+  color: #777 !important;
 }
 
 body.productdetails #v65-product-parent .mc-pdp-member-pricing,
@@ -10307,20 +10309,21 @@ body.mc-product-page #v65-product-parent .mc-pdp-member-pricing .mc-pdp-member-l
 body.productdetails #v65-product-parent .mc-pdp-member-line__label,
 body.mc-product-page #v65-product-parent .mc-pdp-member-line__label {
   display: block !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.14em !important;
+  letter-spacing: 0.16em !important;
   text-transform: uppercase !important;
-  color: #6a6a6a !important;
+  color: #777 !important;
 }
 
 body.productdetails #v65-product-parent .mc-pdp-member-line__amount,
 body.mc-product-page #v65-product-parent .mc-pdp-member-line__amount {
   display: block !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   line-height: 1.2 !important;
-  color: #1a1a1a !important;
+  letter-spacing: 0.16em !important;
+  color: #444 !important;
   font-weight: 400 !important;
 }
 
@@ -10361,7 +10364,7 @@ body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pd
 body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line--locked *,
 body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line--locked *,
 body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-member-pricing .mc-pdp-member-line--locked * {
-  font-size: 14px !important;
+  font-size: 13px !important;
 }
 
 body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row .product_list_price,
@@ -10396,7 +10399,9 @@ body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td 
 body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row #priceWithOptions,
 body.productdetails #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row #priceWithOptionsNoTax,
 body.mc-product-page #v65-product-parent tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row #priceWithOptionsNoTax {
-  font-size: 14px !important;
+  font-size: 13px !important;
+  letter-spacing: 0.16em !important;
+  color: #444 !important;
 }
 
 /* Theater / WM panel: configuration summary — RH typography (Inter, caps label, clean body). */
@@ -12980,15 +12985,15 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label
   width: 100% !important;
 }
 
-.productdetails span[itemprop="name"] {
-
+body.productdetails span[itemprop="name"],
+body.mc-product-page span[itemprop="name"],
+body.productdetails .productnamecolorLARGE.colors_productname,
+body.mc-product-page .productnamecolorLARGE.colors_productname {
   font-size: 13px !important;
-  letter-spacing: .16em !important;
-}
-
-.productdetails span[itemprop="name"],
-.productdetails .productnamecolorLARGE.colors_productname {
-
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
   color: #777 !important;
 }
 
@@ -13077,7 +13082,9 @@ body.mc-product-page #content_area .mc-option-accordion__header .mc-option-accor
   font-size: 13px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
 }
 
 .productdetails span[itemprop="name"] {
@@ -13124,7 +13131,7 @@ body.productdetails #content_area .mc-atc-button-wrap {
 }
 
 
-/* Retail-row pricing: 16px (keep in sync with ~12042 retail + member block). */
+/* Retail-row pricing: 13px (sync with MC_PDP_TYPE_13PX_STACK at EOF). */
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-line,
 html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-line,
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
@@ -13137,11 +13144,11 @@ html body.productdetails #v65-product-parent .mc-pdp-member-line__amount,
 html body.mc-product-page #v65-product-parent .mc-pdp-member-line__amount,
 html body.productdetails #content_area .mc-pdp-retail-row .product_productprice,
 html body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice {
-  font-size: 14px !important;
+  font-size: 13px !important;
   line-height: 1.2 !important;
 }
 
-/* Retail / member labels + locked-member link — 16px, Inter, #444. */
+/* Retail / member labels + locked-member link — 13px, match product title. */
 html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
 html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
 html body.productdetails #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
@@ -13156,9 +13163,12 @@ html body.productdetails #v65-product-parent .mc-pdp-member-line--locked,
 html body.mc-product-page #v65-product-parent .mc-pdp-member-line--locked,
 html body.productdetails #v65-product-parent .mc-pdp-member-line--locked a,
 html body.mc-product-page #v65-product-parent .mc-pdp-member-line--locked a {
-  font-size: 14px !important;
+  font-size: 13px !important;
   font-family: Inter, Arial, sans-serif !important;
-  color: #444 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
 }
 
 /* Retail-row price colors / letter-spacing (consolidated from the inline DevTools rule). */
@@ -14251,23 +14261,29 @@ html.category #content_area .v-product-grid .v65-productPhoto a {
   border: 0 !important;
 }
 
-/* MC_OPTION_LABEL_13PX_TAIL — must be last; beats body 18px + template inline 14px */
+/* MC_PDP_TYPE_13PX_STACK — last; title, options, retail/member unified at 13px */
+html body.productdetails #content_area span[itemprop="name"],
+html body.mc-product-page #content_area span[itemprop="name"],
+html body.productdetails #v65-product-parent span[itemprop="name"],
+html body.mc-product-page #v65-product-parent span[itemprop="name"],
+html body.productdetails #content_area .productnamecolorLARGE.colors_productname,
+html body.mc-product-page #content_area .productnamecolorLARGE.colors_productname,
+html body.productdetails #content_area h1.productnamecolorLARGE,
+html body.mc-product-page #content_area h1.productnamecolorLARGE,
+html body.productdetails #content_area h1.productnamecolor,
+html body.mc-product-page #content_area h1.productnamecolor,
 html body.productdetails #content_area #options_table label,
 html body.mc-product-page #content_area #options_table label,
 html body.productdetails #content_area #options_table .productoptionname,
 html body.mc-product-page #content_area #options_table .productoptionname,
 html body.productdetails #content_area #options_table td[align="right"],
 html body.mc-product-page #content_area #options_table td[align="right"],
-html body.productdetails #content_area #options_table td:first-child,
-html body.mc-product-page #content_area #options_table td:first-child,
 html body.productdetails #content_area table[id*="options_table"] label,
 html body.mc-product-page #content_area table[id*="options_table"] label,
 html body.productdetails #content_area table[id*="options_table"] .productoptionname,
 html body.mc-product-page #content_area table[id*="options_table"] .productoptionname,
 html body.productdetails #content_area table[id*="options_table"] td[align="right"],
 html body.mc-product-page #content_area table[id*="options_table"] td[align="right"],
-html body.productdetails #content_area table[id*="options_table"] td:first-child,
-html body.mc-product-page #content_area table[id*="options_table"] td:first-child,
 html body.productdetails #v65-product-parent #options_table td[align="right"],
 html body.mc-product-page #v65-product-parent #options_table td[align="right"],
 html body.productdetails #v65-product-parent #options_table .productoptionname,
@@ -14278,8 +14294,6 @@ html body.productdetails #content_area #options_table .productoptionname font,
 html body.mc-product-page #content_area #options_table .productoptionname font,
 html body.productdetails #content_area #mcLeatherHeader,
 html body.mc-product-page #content_area #mcLeatherHeader,
-html body.productdetails #content_area #mcLeatherSummary,
-html body.mc-product-page #content_area #mcLeatherSummary,
 html body.productdetails #content_area .mc-option-accordion__label,
 html body.mc-product-page #content_area .mc-option-accordion__label,
 html body.productdetails #content_area .mc-option-accordion__header,
@@ -14292,32 +14306,71 @@ html.mc-paragon-pdp body #content_area .mc-option-accordion__label,
 html.mc-paragon-pdp body #content_area .mc-option-accordion__header,
 html.mc-theater-seating-pdp body #content_area .mc-option-accordion__label,
 html.mc-theater-seating-pdp body #content_area .mc-option-accordion__header,
+html body.productdetails #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.mc-product-page #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.productdetails #content_area .mc-pdp-member-line__label,
+html body.mc-product-page #content_area .mc-pdp-member-line__label,
+html body.productdetails #v65-product-parent .mc-pdp-member-line__label,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line__label,
+html body.productdetails #content_area .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.mc-product-page #content_area .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.productdetails #v65-product-parent .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-pricing .mc-pdp-member-line__label,
 html body.productdetails #content_area .mc-configuration-rh__pieces,
 html body.mc-product-page #content_area .mc-configuration-rh__pieces,
 html body.mc-theater-seating-pdp #content_area .mc-configuration-rh__pieces,
 html body.productdetails #mcConfigurationBlock .mc-configuration-rh__pieces,
-html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__pieces,
-html.mc-paragon-pdp body #mcConfigurationBlock .mc-configuration-rh__pieces,
-html.mc-theater-seating-pdp body #mcConfigurationBlock .mc-configuration-rh__pieces {
+html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__pieces {
+  font-family: Inter, Arial, sans-serif !important;
   font-size: 13px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
 }
-/* Dropdowns sit in the other column — inherit body 18px without this */
+/* Retail / member amounts + option dropdown values — 13px, no caps */
+html body.productdetails #content_area .mc-pdp-retail-row .product_list_price,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_list_price,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_list_price,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_list_price,
+html body.productdetails #content_area .mc-pdp-retail-row .product_productprice,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .product_productprice,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_productprice,
+html body.productdetails #content_area .mc-pdp-retail-row .v65-product-price,
+html body.mc-product-page #content_area .mc-pdp-retail-row .v65-product-price,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row .v65-product-price,
+html body.productdetails #content_area .mc-pdp-retail-row font.product_list_price,
+html body.mc-product-page #content_area .mc-pdp-retail-row font.product_list_price,
+html body.productdetails #content_area .mc-pdp-member-line__amount,
+html body.mc-product-page #content_area .mc-pdp-member-line__amount,
+html body.productdetails #v65-product-parent .mc-pdp-member-line__amount,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line__amount,
 html body.productdetails #content_area #options_table select:not(.mc-native-leather),
 html body.mc-product-page #content_area #options_table select:not(.mc-native-leather),
 html body.productdetails #v65-product-parent #options_table select:not(.mc-native-leather),
 html body.mc-product-page #v65-product-parent #options_table select:not(.mc-native-leather),
 html body.productdetails #content_area table[id*="options_table"] select:not(.mc-native-leather),
-html body.mc-product-page #content_area table[id*="options_table"] select:not(.mc-native-leather) {
+html body.mc-product-page #content_area table[id*="options_table"] select:not(.mc-native-leather),
+html body.productdetails #options_table select:not(.mc-native-leather),
+html body.mc-product-page #options_table select:not(.mc-native-leather),
+html body.productdetails #content_area #mcLeatherSummary,
+html body.mc-product-page #content_area #mcLeatherSummary {
+  font-family: Inter, Arial, sans-serif !important;
   font-size: 13px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.02em !important;
+  letter-spacing: 0.16em !important;
+  text-transform: none !important;
+  color: #444 !important;
 }
-/* Chevron only — not label text */
 html body.mc-product-page #content_area .mc-option-accordion__toggle,
 html body.productdetails #content_area .mc-option-accordion__toggle {
-  font-size: 13px !important;
+  font-size: 18px !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
 }

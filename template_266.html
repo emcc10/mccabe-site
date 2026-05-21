@@ -44,9 +44,13 @@ header.header .header__section>.col-xs-6.col-sm-8.col-md-9.col-lg-3:first-child{
 html[data-mc-category-plp="1"] #if_homepage,html[data-mc-category-plp="1"] #slideshow-container,html[data-mc-category-plp="1"] #slideshow-container .mc-hero-video,html.category #if_homepage,html.category #slideshow-container,html.category #slideshow-container .mc-hero-video,body.category #if_homepage,body.category #slideshow-container{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;background:transparent!important}
 html[data-mc-category-plp="1"] .v-product-grid a.v-product__img.mc-plp-image-box,html.category .v-product-grid a.v-product__img.mc-plp-image-box{display:flex!important;align-items:flex-end!important;justify-content:center!important;width:100%!important;height:260px!important;overflow:visible!important;background:transparent!important;box-sizing:border-box!important;padding:0!important}
 html[data-mc-category-plp="1"] .v-product-grid a.v-product__img.mc-plp-image-box>img,html.category .v-product-grid a.v-product__img.mc-plp-image-box>img{width:auto!important;height:auto!important;max-width:none!important;max-height:none!important;object-fit:contain!important;object-position:center bottom!important;transform:none!important;display:block!important}
-body.productdetails #options_table select:not(.mc-native-leather),body.mc-product-page #options_table select:not(.mc-native-leather),body.productdetails table[id*="options_table"] select:not(.mc-native-leather),body.mc-product-page table[id*="options_table"] select:not(.mc-native-leather),body.productdetails #options_table td[align="right"],body.productdetails #options_table .productoptionname,body.productdetails #options_table td[align="right"] font,body.mc-product-page #options_table td[align="right"],body.mc-product-page #options_table .productoptionname{font-size:13px!important;font-weight:400!important;line-height:1.2!important;letter-spacing:.06em!important}
+body.productdetails span[itemprop="name"],body.mc-product-page span[itemprop="name"]{font-size:13px!important;font-weight:400!important;line-height:1.2!important;letter-spacing:.16em!important;text-transform:uppercase!important;color:#777!important}
+body.productdetails #options_table select:not(.mc-native-leather),body.mc-product-page #options_table select:not(.mc-native-leather),body.productdetails #options_table td[align="right"],body.productdetails #options_table .productoptionname,body.mc-product-page #options_table td[align="right"],body.mc-product-page #options_table .productoptionname{font-size:13px!important;font-weight:400!important;line-height:1.2!important;letter-spacing:.16em!important;text-transform:uppercase!important;color:#777!important}
+body.productdetails #options_table select:not(.mc-native-leather),body.mc-product-page #options_table select:not(.mc-native-leather){text-transform:none!important;color:#444!important}
+body.productdetails .mc-pdp-retail-label,body.mc-product-page .mc-pdp-retail-label,body.productdetails .mc-pdp-member-line__label,body.mc-product-page .mc-pdp-member-line__label{font-size:13px!important;letter-spacing:.16em!important;text-transform:uppercase!important;color:#777!important}
+body.productdetails .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-member-line__amount,body.productdetails .mc-pdp-retail-row .product_list_price,body.mc-product-page .mc-pdp-retail-row .product_list_price{font-size:13px!important;letter-spacing:.16em!important;text-transform:none!important;color:#444!important}
 </style>
-<link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260521opts" id="mc-live-patch-css">
+<link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260521type" id="mc-live-patch-css">
 <script>
 (function () {
   function apply() {
@@ -455,7 +459,7 @@ body.productdetails #options_table select:not(.mc-native-leather),body.mc-produc
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
-  <link href="/v/vspfiles/css/custom-safe.css?v=20260520b" rel="stylesheet" id="mc-custom-safe-css-static">
+  <link href="/v/vspfiles/css/custom-safe.css?v=20260521c" rel="stylesheet" id="mc-custom-safe-css-static">
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
   html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
@@ -8894,9 +8898,9 @@ body.mc-product-page #content_area .mc-option-accordion__header {
   font-style: normal !important;
   font-weight: 400 !important;
   font-size: 13px !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.16em !important;
   text-transform: uppercase !important;
-  color: #686868 !important;
+  color: #777 !important;
   text-align: left !important;
   margin-left: 0 !important;
   padding: 10px 14px 10px 0 !important;
@@ -9877,16 +9881,17 @@ table.colors_pricebox:nth-child(5) > tbody:nth-child(1) > tr:nth-child(1) > td:n
 
 }
 
-.productdetails span[itemprop="name"] {
-  font-size: 25px;
-  text-transform: uppercase;
-margin-left: 72px !important;
-}
-
-.productdetails span[itemprop="name"],
-.productdetails .productnamecolorLARGE.colors_productname {
-  color: #575757;
-  font-weight: 300;
+body.productdetails span[itemprop="name"],
+body.mc-product-page span[itemprop="name"],
+body.productdetails .productnamecolorLARGE.colors_productname,
+body.mc-product-page .productnamecolorLARGE.colors_productname {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
+  margin-left: 72px !important;
 }
 
 .mc-price-caption-moved {
@@ -16277,12 +16282,12 @@ body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
   width: auto !important;
   margin: 0 !important;
   flex: 0 0 auto !important;
-  font-size: 16px !important;
-  font-weight: 500 !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.14em !important;
+  letter-spacing: 0.16em !important;
   text-transform: uppercase !important;
-  color: #6a6a6a !important;
+  color: #777 !important;
 }
 
 .mc-pdp-member-pricing {
@@ -16315,20 +16320,21 @@ body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
 .mc-pdp-member-pricing .mc-pdp-member-line__label,
 .mc-pdp-member-line__label {
   display: block !important;
-  font-size: 16px !important;
-  font-weight: 500 !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.14em !important;
+  letter-spacing: 0.16em !important;
   text-transform: uppercase !important;
-  color: #6a6a6a !important;
+  color: #777 !important;
 }
 
 .mc-pdp-member-pricing .mc-pdp-member-line__amount,
 .mc-pdp-member-line__amount {
   display: block !important;
-  font-size: 16px !important;
+  font-size: 13px !important;
   line-height: 1.2 !important;
-  color: #1a1a1a !important;
+  letter-spacing: 0.16em !important;
+  color: #444 !important;
   font-weight: 400 !important;
 }
 
@@ -16341,12 +16347,12 @@ body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
   display: block !important;
   width: auto !important;
   margin: 0 !important;
-  font-size: 16px !important;
-  font-weight: 500 !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.14em !important;
+  letter-spacing: 0.16em !important;
   text-transform: uppercase !important;
-  color: #6a6a6a !important;
+  color: #777 !important;
 }
 
 body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
@@ -16434,11 +16440,11 @@ body.mc-product-page #content_area .mc-pdp-retail-row #priceWithOptionsNoTax {
   display: block !important;
   width: auto !important;
   margin: 0 !important;
-  font-size: 16px !important;
+  font-size: 13px !important;
   line-height: 1.2 !important;
   font-weight: 400 !important;
-  letter-spacing: normal !important;
-  color: #1a1a1a !important;
+  letter-spacing: 0.16em !important;
+  color: #444 !important;
   vertical-align: baseline !important;
 }
 
@@ -20208,7 +20214,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
 <link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260520plp-mat" id="mc-mccabe-overrides-body-last" />
 <link rel="stylesheet" href="/v/vspfiles/css/mc-plp-body-last.css?v=20260621" id="mc-plp-body-last-css" />
-<link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260521opts" id="mc-live-patch-last" />
+<link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260521type" id="mc-live-patch-last" />
 <script id="mccabe-product-room-planner-price-fix" type="text/plain" data-disabled="true">
 (function () {
 

@@ -1,4 +1,4 @@
-/* MC_LIVE_PATCH_DEPLOY_20260521opts — beats cached custom-safe?v=20260518plp4 + body 18px */
+/* MC_LIVE_PATCH_DEPLOY_20260521type — PDP title/options/retail/member 13px stack */
 
 /* 1) Hide Volusion text logo in header (all pages) */
 header.header #display_homepage_title,
@@ -161,53 +161,11 @@ html.is-category-or-listing-page .v-product-grid .v-product .v-product__img img 
   border: 0 !important;
 }
 
-/* PDP options 13px — loads after custom-safe (incl. mc-live-patch-last). Beats body, body * 18px on live. */
-html body.productdetails #content_area #options_table label,
-html body.mc-product-page #content_area #options_table label,
-html body.productdetails #content_area #options_table .productoptionname,
-html body.mc-product-page #content_area #options_table .productoptionname,
-html body.productdetails #content_area #options_table td[align="right"],
-html body.mc-product-page #content_area #options_table td[align="right"],
-html body.productdetails #content_area #options_table td:first-child,
-html body.mc-product-page #content_area #options_table td:first-child,
-html body.productdetails #content_area #options_table td[align="right"] font,
-html body.mc-product-page #content_area #options_table td[align="right"] font,
-html body.productdetails #content_area #options_table .productoptionname font,
-html body.mc-product-page #content_area #options_table .productoptionname font,
-html body.productdetails #content_area table[id*="options_table"] label,
-html body.mc-product-page #content_area table[id*="options_table"] label,
-html body.productdetails #content_area table[id*="options_table"] .productoptionname,
-html body.mc-product-page #content_area table[id*="options_table"] .productoptionname,
-html body.productdetails #content_area table[id*="options_table"] td[align="right"],
-html body.mc-product-page #content_area table[id*="options_table"] td[align="right"],
-html body.productdetails #v65-product-parent #options_table td[align="right"],
-html body.mc-product-page #v65-product-parent #options_table td[align="right"],
-html body.productdetails #v65-product-parent #options_table .productoptionname,
-html body.mc-product-page #v65-product-parent #options_table .productoptionname,
-html body.productdetails #content_area #options_table select:not(.mc-native-leather),
-html body.mc-product-page #content_area #options_table select:not(.mc-native-leather),
-html body.productdetails #v65-product-parent #options_table select:not(.mc-native-leather),
-html body.mc-product-page #v65-product-parent #options_table select:not(.mc-native-leather),
-html body.productdetails #content_area #mcLeatherHeader,
-html body.mc-product-page #content_area #mcLeatherHeader,
-html body.productdetails #content_area #mcLeatherSummary,
-html body.mc-product-page #content_area #mcLeatherSummary,
-html body.productdetails #content_area .mc-configuration-rh__pieces,
-html body.mc-product-page #content_area .mc-configuration-rh__pieces,
-html body.mc-theater-seating-pdp #content_area .mc-configuration-rh__pieces,
-html body.productdetails #mcConfigurationBlock .mc-configuration-rh__pieces,
-html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__pieces {
-  font-size: 13px !important;
-  font-weight: 400 !important;
-  line-height: 1.2 !important;
-  letter-spacing: 0.06em !important;
-}
-
-/* No #content_area ancestor required — beats cached custom-safe?v=20260518plp4 + body 18px */
-html body.productdetails #options_table select:not(.mc-native-leather),
-html body.mc-product-page #options_table select:not(.mc-native-leather),
-html body.productdetails table[id*="options_table"] select:not(.mc-native-leather),
-html body.mc-product-page table[id*="options_table"] select:not(.mc-native-leather),
+/* PDP type stack — match product title (13px, caps, 0.16em, #777) */
+html body.productdetails span[itemprop="name"],
+html body.mc-product-page span[itemprop="name"],
+html body.productdetails #content_area .productnamecolorLARGE.colors_productname,
+html body.mc-product-page #content_area .productnamecolorLARGE.colors_productname,
 html body.productdetails #options_table td[align="right"],
 html body.mc-product-page #options_table td[align="right"],
 html body.productdetails #options_table .productoptionname,
@@ -215,9 +173,34 @@ html body.mc-product-page #options_table .productoptionname,
 html body.productdetails #options_table td[align="right"] font,
 html body.mc-product-page #options_table td[align="right"] font,
 html body.productdetails #options_table label,
-html body.mc-product-page #options_table label {
+html body.mc-product-page #options_table label,
+html body.productdetails #content_area #mcLeatherHeader,
+html body.mc-product-page #content_area #mcLeatherHeader,
+html body.productdetails #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.mc-product-page #content_area .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.productdetails #content_area .mc-pdp-member-line__label,
+html body.mc-product-page #content_area .mc-pdp-member-line__label {
+  font-family: Inter, Arial, sans-serif !important;
   font-size: 13px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
+}
+html body.productdetails #options_table select:not(.mc-native-leather),
+html body.mc-product-page #options_table select:not(.mc-native-leather),
+html body.productdetails #content_area .mc-pdp-retail-row .product_list_price,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_list_price,
+html body.productdetails #content_area .mc-pdp-retail-row .product_productprice,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_productprice,
+html body.productdetails #content_area .mc-pdp-member-line__amount,
+html body.mc-product-page #content_area .mc-pdp-member-line__amount {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: none !important;
+  color: #444 !important;
 }
