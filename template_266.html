@@ -5751,7 +5751,9 @@ try {
     mcRunParagonPriceSourceDebug();
     try {
       if (typeof mcSyncPlannerConfigurationPriceDisplay === "function") mcSyncPlannerConfigurationPriceDisplay();
-      if (typeof mcSyncTheaterConfigurationFromDom === "function") mcSyncTheaterConfigurationFromDom();
+      if (typeof mcSyncConfigurationFromDom === "function") mcSyncConfigurationFromDom();
+      else       if (typeof mcSyncConfigurationFromDom === "function") mcSyncConfigurationFromDom();
+      else if (typeof mcSyncTheaterConfigurationFromDom === "function") mcSyncTheaterConfigurationFromDom();
       if (typeof recalcRoomPlannerPrice === "function") recalcRoomPlannerPrice();
       else if (typeof window.recalcRoomPlannerPrice === "function") window.recalcRoomPlannerPrice();
     } catch (eRecalcMr) {}
