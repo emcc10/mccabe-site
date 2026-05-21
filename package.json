@@ -1,0 +1,18 @@
+{
+  "name": "mccabe-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:assets": "tsx scripts/buildSingleProductAssets.ts",
+    "approve:product": "tsx scripts/approveSingleProduct.ts",
+    "render:swatches": "tsx scripts/renderSingleProductSwatches.ts"
+  },
+  "dependencies": {
+    "color-convert": "^2.0.1",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
