@@ -324,3 +324,17 @@ echo "  /v/vspfiles/templates/266/js/min/design-toolkit.min.js"
 echo ""
 echo "=== Live storefront verify (soft — does not fail CI) ==="
 python3 scripts/verify_live_plp_deploy.py --soft || true
+
+if [[ "${SKIP_TEMPLATE_DEPLOY:-0}" == "1" ]]; then
+  echo "=== SKIP_TEMPLATE_DEPLOY=1 — template SFTP verify skipped ==="
+else
+  echo ""
+  echo "=== Final SFTP template verify (after assets — stale template must not block boards deploy) ==="
+  if ! verify_template_on_sftp "$TEMPLATE_ENFORCER_TAG"; then
+    echo "::error::SFTP template still does not match repo after asset deploy."
+    echo "My Boards / vspfiles assets above may still have uploaded — check PUT_OK / boards URLs in this log."
+    echo "Fix template: Volusion Design → File Editor → template_266.html → paste repo copy → Save,"
+    echo "or re-run workflow with 'Skip template upload' unchecked after Volusion unlocks the file."
+    exit 1
+  fi
+fi

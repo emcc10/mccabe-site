@@ -201,12 +201,55 @@ def main() -> int:
         return 0
 
     print(
+        "::warning::SFTP template mismatch on first pass — repair write to all paths",
+        flush=True,
+    )
+    transport2 = paramiko.Transport((host, port))
+    try:
+        transport2.connect(username=user, password=password)
+        sftp2 = paramiko.SFTPClient.from_transport(transport2)
+        try:
+            for remote in template_remote_paths():
+                try:
+                    write_remote_template(sftp2, remote, local_data)
+                except Exception as exc:  # noqa: BLE001
+                    print(f"::warning::REPAIR_SKIP {remote!r}: {exc}", flush=True)
+            for remote in template_remote_paths():
+                try:
+                    ok, size, md5_ok, needle_ok = check_remote(
+                        sftp2, remote, local_data, local_md5, needle
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    print(f"::warning::REPAIR_CHECK_SKIP {remote!r}: {exc}", flush=True)
+                    continue
+                print(
+                    f"::notice::REPAIR_CHECK {remote!r} size={size} want={want_size} "
+                    f"md5={'yes' if md5_ok else 'no'} needle={'yes' if needle_ok else 'no'}",
+                    flush=True,
+                )
+                if ok:
+                    matched.append(remote)
+        finally:
+            try:
+                sftp2.close()
+            except Exception:
+                pass
+    finally:
+        transport2.close()
+
+    if matched:
+        print(
+            f"::notice::SFTP template OK after repair — md5/needle on: {', '.join(matched)}",
+            flush=True,
+        )
+        return 0
+
+    print(
         f"::error::SFTP template does not match repo (md5={local_md5}, "
         f"local_size={want_size}, needle={needle!r}). "
         f"Tried: {', '.join(template_remote_paths())}. "
-        "Volusion often keeps a stale file at the same byte size — the deploy step now "
-        "deletes before write; re-run deploy. If it persists, upload template_266.html "
-        "via Volusion Design → File Editor and Save.",
+        "Volusion often keeps a stale file at the same byte size — vspfiles assets may "
+        "still have deployed. Upload template_266.html via Volusion Design → File Editor → Save.",
         file=sys.stderr,
     )
     return 1
