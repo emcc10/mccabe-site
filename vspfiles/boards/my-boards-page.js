@@ -1293,7 +1293,7 @@
       done();
       return;
     }
-    var src = API_BASE + 'board-styles.js?v=20260533';
+    var src = API_BASE + 'board-styles.js?v=20260534';
     var tag = document.querySelector('script[src*="board-styles.js"]');
     if (tag) {
       refreshConfig();
