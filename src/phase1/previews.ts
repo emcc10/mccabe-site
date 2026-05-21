@@ -5,7 +5,7 @@ import type { Mask } from './masks.js';
 import type { RgbaImage } from './segment.js';
 
 async function writeRgb(path: string, width: number, height: number, buf: Buffer) {
-  mkdirSync(path.replace(/[^/\\]+$/, ''), { recursive: true });
+  mkdirSync(dirname(path), { recursive: true });
   await sharp(buf, { raw: { width, height, channels: 3 } }).png().toFile(path);
 }
 

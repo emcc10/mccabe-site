@@ -4624,11 +4624,16 @@ try {
       try {
         var prSec = document.getElementById("mcPlannerRow");
         if (prSec) prSec.style.setProperty("display", "none", "important");
+        /* Keep #mcConfigurationBlock visible on sectionals — native configuration selects update it. */
         var cbSec = document.getElementById("mcConfigurationBlock");
-        if (cbSec) cbSec.style.setProperty("display", "none", "important");
+        if (cbSec) {
+          cbSec.style.removeProperty("display");
+          cbSec.style.setProperty("display", "block", "important");
+        }
         /* Accordion owns “Select a Leather”; hide duplicate inline chrome (IDs stay live for scripting). */
         var lrHideSec = document.getElementById("mcLeatherRow");
         if (lrHideSec) lrHideSec.style.setProperty("display", "none", "important");
+        if (typeof scheduleConfigurationFromDomRetries === "function") scheduleConfigurationFromDomRetries();
       } catch (eSecStrip) {}
     }
 
