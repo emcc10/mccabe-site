@@ -8,7 +8,8 @@
     "prove:stage2": "tsx scripts/proveStage2.ts",
     "render:stage3": "tsx scripts/renderStage3.ts",
     "render:stage3b": "tsx scripts/renderStage3b.ts",
-    "render:stage3c": "tsx scripts/renderStage3c.ts"
+    "render:stage3c": "tsx scripts/renderStage3c.ts",
+    "render:stage3d": "tsx scripts/renderStage3d.ts"
   },
   "dependencies": {
     "color-convert": "^2.0.1",

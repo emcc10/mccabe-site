@@ -1,0 +1,23 @@
+{
+  "stage": "3D",
+  "lockedFrom": "3C variant J",
+  "notFinalBaliSilk": true,
+  "targetLab": {
+    "l": 86.5,
+    "a": 0.8,
+    "b": 6.5
+  },
+  "preserveLuminance": 0.74,
+  "chromaBlend": 0.85,
+  "pipeline": "recolorUpholsteryMinimal + compositePhase2",
+  "postRgbPasses": [],
+  "outputs": {
+    "single": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage3d-single-J.png",
+    "comparison": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage3d-comparison-J.png"
+  },
+  "metrics": {
+    "upholsteryMeanLabDeltaFromSource": 29.45762282461054,
+    "lStdPreservationRatio": 0.7427841864813683,
+    "legExactMatchRatio": 1
+  }
+}
