@@ -214,6 +214,7 @@ export async function writeBaliDebugMaterialPack(
     height,
     channels,
     `${zoomBase}-right-leg-final-3x.png`,
+    3,
   );
   return { stripPath, zoomFinal };
 }

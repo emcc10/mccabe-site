@@ -20,7 +20,7 @@ import sharp from 'sharp';
 import { finalizeBaliExport } from './finalize-bali-export.js';
 import { getBaliComposeParams, recolorBaliUpholstery } from './bali-upholstery-compose.js';
 import { applyBaliMattePipeline, getBaliMatteParams } from './bali-matte.js';
-import { writeBaliDebugContourPack } from './debug-strip.js';
+import { writeBaliDebugMaterialPack } from './debug-strip.js';
 import {
   applySourceYResidualToRgb,
   prepareSourceLGrain,
@@ -901,12 +901,13 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
     );
     if (options.composeDebugHolder) {
       Object.assign(options.composeDebugHolder, {
+        srcDetailViz: composed.srcDetailViz,
+        refMesoViz: composed.refMesoViz,
+        refMicroViz: composed.refMicroViz,
         detailViz: composed.detailViz,
         chromaViz: composed.chromaViz,
-        sourceMatteViz: matte.sourceMatteViz,
-        finalMatteViz: matte.finalMatteViz,
-        decontamViz: matte.decontamViz,
-        overrideViz: matte.overrideViz,
+        lowfreqDriftViz: composed.lowfreqDriftViz,
+        highlightWeightViz: composed.highlightWeightViz,
         params: composed.params,
         matteParams: getBaliMatteParams(),
       });
@@ -1261,7 +1262,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     lBlend: isBali
       ? realismStress
         ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
-        : 'source-mask silhouette + material chroma/detail; NO luma lock'
+        : 'source-mask silhouette + material re-expand (0.52/0.48, chroma a/b); NO luma lock'
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali
@@ -1294,17 +1295,17 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
       matteDebugHolder.rightLegOverrideMask ??
       matteDebugHolder.rightLegPatchMask ??
       new Uint8Array(sourceImage.width * sourceImage.height);
-    const contourPack = await writeBaliDebugContourPack(
+    const materialPack = await writeBaliDebugMaterialPack(
       [
-        sourceImage.data,
         prevPanel,
         outData,
-        composeDebugHolder.sourceMatteViz ?? outData,
-        composeDebugHolder.finalMatteViz ?? outData,
-        composeDebugHolder.overrideViz ?? outData,
-        composeDebugHolder.decontamViz ?? outData,
+        composeDebugHolder.srcDetailViz ?? outData,
+        composeDebugHolder.refMesoViz ?? outData,
+        composeDebugHolder.refMicroViz ?? outData,
         composeDebugHolder.detailViz ?? outData,
         composeDebugHolder.chromaViz ?? outData,
+        composeDebugHolder.lowfreqDriftViz ?? outData,
+        composeDebugHolder.highlightWeightViz ?? outData,
       ],
       sourceImage.width,
       sourceImage.height,
@@ -1312,20 +1313,18 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
       `${debugBase}.png`,
       patchMask,
       outData,
-      4,
     );
     const p = composeDebugHolder.params ?? getBaliComposeParams(sourceImage.width, sourceImage.height);
     const mp = composeDebugHolder.matteParams ?? getBaliMatteParams();
-    console.log(`  debug contour strip 10-panel: ${resolve(contourPack.stripPath)}`);
+    console.log(`  debug material strip 10-panel: ${resolve(materialPack.stripPath)}`);
     console.log(
-      '  panels: source | prev | new | source-matte | final-matte | leg-override | decontam-band | detail | chroma | leg-400%',
+      '  panels: prev | new | source-detail | ref-meso | ref-micro | final-detail | chroma-var | lowfreq-drift | highlight-weight | leg-3x',
     );
-    if (contourPack.zoomFinal) {
-      console.log(`  right-leg final 400%: ${resolve(contourPack.zoomFinal)}`);
+    if (materialPack.zoomFinal) {
+      console.log(`  right-leg final 3x: ${resolve(materialPack.zoomFinal)}`);
     }
     console.log('  compose params:', p);
-    console.log('  matte params:', mp);
-    console.log('  silhouette: input/mask.png only — supersample AA on boundary ring, no blur feather');
+    console.log('  matte params (unchanged):', mp);
   }
 
   if (isBali && realismStress) {
