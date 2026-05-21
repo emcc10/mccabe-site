@@ -31,6 +31,8 @@ If these exist under `public/product-assets/TEST-SOFA/`, they replace auto segme
 5. `compositeFinalRender` (original alpha + leg/trim restore)
 6. `enforceLegExclusion` + stray band cleanup
 7. `runRenderQA`
-8. Cache PNG under `public/render-cache/TEST-SOFA/` **and** a friendly copy at `public/product-assets/TEST-SOFA/BALI-SILK.png`
+8. Cache PNG **only** under `public/render-cache/TEST-SOFA/{SWATCH}-{cacheKey}.png`
+
+**Never** store swatch renders in `product-assets/` — only `source.png` + masks/maps live there.
 
 Contour truth: `alpha.png` from source — never from recolored pixels.

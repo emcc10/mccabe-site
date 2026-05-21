@@ -1,5 +1,5 @@
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { copyFileSync, existsSync, mkdirSync } from 'fs';
+import { join, resolve } from 'path';
 import sharp from 'sharp';
 import type { ProductRenderAssets, RenderRequest, RenderResult } from './types.js';
 import { productDir, toPublicUrl } from './paths.js';
@@ -8,19 +8,20 @@ import { getSingleProductConfig } from './singleProductConfig.js';
 import { getSwatchProfile } from './swatchRegistry.js';
 import { buildSegmentationForProduct } from './segment.js';
 import { saveDerivedMaps } from './maps.js';
-import { loadImageRGBA, saveImageRGBA } from './imageIO.js';
+import { loadImageRGBA } from './imageIO.js';
 import { recolorUpholstery } from './recolor.js';
 import { compositeFinalRender } from './composite.js';
 import { enforceLegExclusion, removeStrayBaseArtifacts } from './cleanup.js';
 import { runRenderQA } from './qa.js';
 import {
+  assertBaseImageUrlInAssets,
+  assertValidSourceImagePath,
+} from './sourceGuard.js';
+import {
   assetVersionFromRecord,
   buildCacheKey,
   getCachedRender,
   getCachedRenderPath,
-  getLatestRenderCachePath,
-  getProductAssetRenderPath,
-  publicProductRenderUrl,
   publicRenderUrl,
   saveCachedRender,
   sourceImagePath,
@@ -33,7 +34,8 @@ export async function ensureProductAssets(
 ): Promise<ProductRenderAssets> {
   const config = getSingleProductConfig(productCode);
   let assets = loadSingleProductAssets(productCode);
-  const srcPath = sourceImagePath(productCode);
+  const srcPath = resolve(sourceImagePath(productCode));
+  assertValidSourceImagePath(srcPath, 'ensureProductAssets');
 
   if (!existsSync(srcPath)) {
     throw new Error(`Missing source image: ${srcPath}. Run buildSingleProductAssets first.`);
@@ -50,7 +52,7 @@ export async function ensureProductAssets(
     const seg = await buildSegmentationForProduct(productCode, srcPath, config);
     const mapPaths = await saveDerivedMaps(productCode, image, seg.upholstery);
     assets = assets ?? createEmptyAssetsRecord(productCode);
-    assets.baseImageUrl = toPublicUrl(srcPath);
+    assets.baseImageUrl = `/product-assets/${productCode}/source.png`;
     assets.alphaMaskUrl = toPublicUrl(join(productDir(productCode), 'alpha.png'));
     assets.upholsteryMaskUrl = toPublicUrl(join(productDir(productCode), 'upholstery-mask.png'));
     assets.legMaskUrl = toPublicUrl(join(productDir(productCode), 'leg-mask.png'));
@@ -58,29 +60,34 @@ export async function ensureProductAssets(
     assets.shadowMapUrl = toPublicUrl(mapPaths.shadowPath);
     assets.detailMapUrl = toPublicUrl(mapPaths.detailPath);
     assets.highlightMapUrl = toPublicUrl(mapPaths.highlightPath);
+    assertBaseImageUrlInAssets(assets.baseImageUrl, productCode);
     saveSingleProductAssets(assets);
   }
 
-  return loadSingleProductAssets(productCode)!;
+  assets = loadSingleProductAssets(productCode)!;
+  assertBaseImageUrlInAssets(assets.baseImageUrl, productCode);
+  return assets;
 }
 
 export async function renderProductSwatch(request: RenderRequest): Promise<RenderResult> {
   const { productCode, swatchCode, forceRebuild } = request;
-  const assets = await ensureProductAssets(productCode, forceRebuild);
+  const assets = await ensureProductAssets(productCode, false);
   const version = assetVersionFromRecord(assets);
   const cacheKey = buildCacheKey(productCode, swatchCode, version);
-  const cachePath = getCachedRenderPath(productCode, swatchCode, cacheKey);
-  const productRenderPath = getProductAssetRenderPath(productCode, swatchCode);
-  const latestCachePath = getLatestRenderCachePath(productCode, swatchCode);
+  const cachePath = resolve(getCachedRenderPath(productCode, swatchCode, cacheKey));
+  const basePath = resolve(sourceImagePath(productCode));
+
+  assertValidSourceImagePath(basePath, 'renderProductSwatch');
+  console.log(`[render] source (cognac base only): ${basePath}`);
 
   if (!forceRebuild) {
     const cached = getCachedRender(cachePath);
     if (cached) {
-      writeFileSync(productRenderPath, cached);
-      writeFileSync(latestCachePath, cached);
+      console.log(`[render] output (cached): ${cachePath}`);
       return {
         imageUrl: publicRenderUrl(productCode, swatchCode, cacheKey),
-        productAssetPath: productRenderPath,
+        outputPath: cachePath,
+        sourcePath: basePath,
         cacheKey,
         productCode,
         swatchCode,
@@ -91,7 +98,6 @@ export async function renderProductSwatch(request: RenderRequest): Promise<Rende
 
   const config = getSingleProductConfig(productCode);
   const swatch = getSwatchProfile(swatchCode);
-  const basePath = sourceImagePath(productCode);
   const baseImage = await loadImageRGBA(basePath);
   const upholstery = await loadMask(join(productDir(productCode), 'upholstery-mask.png'));
   const legs = await loadMask(join(productDir(productCode), 'leg-mask.png'));
@@ -114,12 +120,12 @@ export async function renderProductSwatch(request: RenderRequest): Promise<Rende
     .toBuffer();
 
   saveCachedRender(cachePath, pngBuf);
-  saveCachedRender(latestCachePath, pngBuf);
-  saveCachedRender(productRenderPath, pngBuf);
+  console.log(`[render] output: ${cachePath}`);
 
   return {
     imageUrl: publicRenderUrl(productCode, swatchCode, cacheKey),
-    productAssetPath: productRenderPath,
+    outputPath: cachePath,
+    sourcePath: basePath,
     cacheKey,
     productCode,
     swatchCode,
@@ -131,12 +137,20 @@ export function bootstrapFromLegacySofaTool(
   productCode: string,
   legacySourcePath: string,
   legacyMaskPath?: string,
-): void {
+): { sourcePath: string; maskOverridePath?: string } {
+  assertValidSourceImagePath(resolve(legacySourcePath), 'bootstrap input');
+
   const dir = productDir(productCode);
   mkdirSync(dir, { recursive: true });
-  copyFileSync(legacySourcePath, join(dir, 'source.png'));
+  const destSource = join(dir, 'source.png');
+  copyFileSync(legacySourcePath, destSource);
+  assertValidSourceImagePath(resolve(destSource), 'bootstrap output source.png');
+
+  let maskOverridePath: string | undefined;
   if (legacyMaskPath && existsSync(legacyMaskPath)) {
-    copyFileSync(legacyMaskPath, join(dir, 'upholstery-mask.override.png'));
-    console.log(`Using override upholstery mask from ${legacyMaskPath}`);
+    maskOverridePath = join(dir, 'upholstery-mask.override.png');
+    copyFileSync(legacyMaskPath, maskOverridePath);
+    console.log(`  override mask: ${maskOverridePath}`);
   }
+  return { sourcePath: resolve(destSource), maskOverridePath };
 }

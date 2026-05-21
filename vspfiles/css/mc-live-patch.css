@@ -1,4 +1,4 @@
-/* MC_LIVE_PATCH_DEPLOY_20260520opts — beats stale custom-safe body, body * { font-size: 18px !important } */
+/* MC_LIVE_PATCH_DEPLOY_20260521opts — beats cached custom-safe?v=20260518plp4 + body 18px */
 
 /* 1) Hide Volusion text logo in header (all pages) */
 header.header #display_homepage_title,
@@ -197,6 +197,25 @@ html body.mc-product-page #content_area .mc-configuration-rh__pieces,
 html body.mc-theater-seating-pdp #content_area .mc-configuration-rh__pieces,
 html body.productdetails #mcConfigurationBlock .mc-configuration-rh__pieces,
 html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__pieces {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.06em !important;
+}
+
+/* No #content_area ancestor required — beats cached custom-safe?v=20260518plp4 + body 18px */
+html body.productdetails #options_table select:not(.mc-native-leather),
+html body.mc-product-page #options_table select:not(.mc-native-leather),
+html body.productdetails table[id*="options_table"] select:not(.mc-native-leather),
+html body.mc-product-page table[id*="options_table"] select:not(.mc-native-leather),
+html body.productdetails #options_table td[align="right"],
+html body.mc-product-page #options_table td[align="right"],
+html body.productdetails #options_table .productoptionname,
+html body.mc-product-page #options_table .productoptionname,
+html body.productdetails #options_table td[align="right"] font,
+html body.mc-product-page #options_table td[align="right"] font,
+html body.productdetails #options_table label,
+html body.mc-product-page #options_table label {
   font-size: 13px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;

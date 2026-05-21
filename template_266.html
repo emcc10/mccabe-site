@@ -44,8 +44,9 @@ header.header .header__section>.col-xs-6.col-sm-8.col-md-9.col-lg-3:first-child{
 html[data-mc-category-plp="1"] #if_homepage,html[data-mc-category-plp="1"] #slideshow-container,html[data-mc-category-plp="1"] #slideshow-container .mc-hero-video,html.category #if_homepage,html.category #slideshow-container,html.category #slideshow-container .mc-hero-video,body.category #if_homepage,body.category #slideshow-container{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;background:transparent!important}
 html[data-mc-category-plp="1"] .v-product-grid a.v-product__img.mc-plp-image-box,html.category .v-product-grid a.v-product__img.mc-plp-image-box{display:flex!important;align-items:flex-end!important;justify-content:center!important;width:100%!important;height:260px!important;overflow:visible!important;background:transparent!important;box-sizing:border-box!important;padding:0!important}
 html[data-mc-category-plp="1"] .v-product-grid a.v-product__img.mc-plp-image-box>img,html.category .v-product-grid a.v-product__img.mc-plp-image-box>img{width:auto!important;height:auto!important;max-width:none!important;max-height:none!important;object-fit:contain!important;object-position:center bottom!important;transform:none!important;display:block!important}
+body.productdetails #options_table select:not(.mc-native-leather),body.mc-product-page #options_table select:not(.mc-native-leather),body.productdetails table[id*="options_table"] select:not(.mc-native-leather),body.mc-product-page table[id*="options_table"] select:not(.mc-native-leather),body.productdetails #options_table td[align="right"],body.productdetails #options_table .productoptionname,body.productdetails #options_table td[align="right"] font,body.mc-product-page #options_table td[align="right"],body.mc-product-page #options_table .productoptionname{font-size:13px!important;font-weight:400!important;line-height:1.2!important;letter-spacing:.06em!important}
 </style>
-<link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260520opts" id="mc-live-patch-css">
+<link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260521opts" id="mc-live-patch-css">
 <script>
 (function () {
   function apply() {
@@ -454,7 +455,7 @@ html[data-mc-category-plp="1"] .v-product-grid a.v-product__img.mc-plp-image-box
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
-  <link href="/v/vspfiles/css/custom-safe.css?v=20260518plp4" rel="stylesheet" id="mc-custom-safe-css-static">
+  <link href="/v/vspfiles/css/custom-safe.css?v=20260520b" rel="stylesheet" id="mc-custom-safe-css-static">
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
   html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
@@ -1007,13 +1008,19 @@ html[data-mc-category-plp="1"] .v-product-grid a.v-product__img.mc-plp-image-box
   function mcCssBust() {
     return 'v=' + Date.now() + '&m=' + Math.random().toString(36).slice(2, 12);
   }
-  if (document.getElementById('mc-custom-safe-css-static') || document.getElementById('mc-custom-safe-css')) {
+  var bust = mcCssBust();
+  var staticEl = document.getElementById('mc-custom-safe-css-static');
+  if (staticEl) {
+    staticEl.href = '/v/vspfiles/css/custom-safe.css?' + bust;
+    return;
+  }
+  if (document.getElementById('mc-custom-safe-css')) {
     return;
   }
   var el = document.createElement('link');
   el.rel = 'stylesheet';
   el.id = 'mc-custom-safe-css';
-  el.href = '/v/vspfiles/css/custom-safe.css?' + mcCssBust();
+  el.href = '/v/vspfiles/css/custom-safe.css?' + bust;
   el.onerror = function () {
     this.onerror = function () {
       this.onerror = null;
@@ -8852,19 +8859,37 @@ body.mc-product-page #content_area .resp-tabs-list li {
 }
 
 /* option labels – EXACT same font for every option header (NUMBER OF SEATS, CONFIGURATION, SELECT A LEATHER) + padding */
+body.productdetails #content_area #options_table label,
 body.mc-product-page #content_area #options_table label,
+body.productdetails #v65-product-parent #options_table label,
+body.mc-product-page #v65-product-parent #options_table label,
+body.productdetails #content_area #options_table .productoptionname,
 body.mc-product-page #content_area #options_table .productoptionname,
+body.productdetails #content_area #options_table td.productoptionname,
 body.mc-product-page #content_area #options_table td.productoptionname,
+body.productdetails #content_area #options_table td[align="right"],
 body.mc-product-page #content_area #options_table td[align="right"],
+body.productdetails #content_area #options_table td:first-child,
 body.mc-product-page #content_area #options_table td:first-child,
+body.productdetails #content_area #options_table select:not(.mc-native-leather),
 body.mc-product-page #content_area #options_table select:not(.mc-native-leather),
+body.productdetails #v65-product-parent #options_table select:not(.mc-native-leather),
+body.mc-product-page #v65-product-parent #options_table select:not(.mc-native-leather),
+body.productdetails #content_area table[id*="options_table"] label,
 body.mc-product-page #content_area table[id*="options_table"] label,
+body.productdetails #content_area table[id*="options_table"] .productoptionname,
 body.mc-product-page #content_area table[id*="options_table"] .productoptionname,
+body.productdetails #content_area table[id*="options_table"] td[align="right"],
 body.mc-product-page #content_area table[id*="options_table"] td[align="right"],
+body.productdetails #content_area table[id*="options_table"] td:first-child,
 body.mc-product-page #content_area table[id*="options_table"] td:first-child,
+body.productdetails #content_area table[id*="options_table"] select:not(.mc-native-leather),
 body.mc-product-page #content_area table[id*="options_table"] select:not(.mc-native-leather),
+body.productdetails #content_area #mcLeatherHeader,
 body.mc-product-page #content_area #mcLeatherHeader,
+body.productdetails #content_area .mc-option-accordion__label,
 body.mc-product-page #content_area .mc-option-accordion__label,
+body.productdetails #content_area .mc-option-accordion__header,
 body.mc-product-page #content_area .mc-option-accordion__header {
   font-style: normal !important;
   font-weight: 400 !important;
@@ -20183,7 +20208,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 <!-- Last stylesheet in document: must load after Volusion /a/c/vnav.css (injected mid-body) or layout fixes never win. -->
 <link rel="stylesheet" href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260520plp-mat" id="mc-mccabe-overrides-body-last" />
 <link rel="stylesheet" href="/v/vspfiles/css/mc-plp-body-last.css?v=20260621" id="mc-plp-body-last-css" />
-<link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260520opts" id="mc-live-patch-last" />
+<link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260521opts" id="mc-live-patch-last" />
 <script id="mccabe-product-room-planner-price-fix" type="text/plain" data-disabled="true">
 (function () {
 

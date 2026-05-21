@@ -23,18 +23,6 @@ export function getCachedRenderPath(
   return join(dir, `${swatchCode}-${cacheKey}.png`);
 }
 
-/** Easy-to-find latest render inside product-assets/TEST-SOFA/ */
-export function getProductAssetRenderPath(productCode: string, swatchCode: string): string {
-  return join(productDir(productCode), `${swatchCode}.png`);
-}
-
-/** Stable alias in render-cache (no hash in filename) */
-export function getLatestRenderCachePath(productCode: string, swatchCode: string): string {
-  const dir = join(RENDER_CACHE_DIR, productCode);
-  mkdirSync(dir, { recursive: true });
-  return join(dir, `${swatchCode}.png`);
-}
-
 export function getCachedRender(cacheKeyPath: string): Buffer | null {
   if (!existsSync(cacheKeyPath)) return null;
   return readFileSync(cacheKeyPath);
@@ -51,10 +39,6 @@ export function assetVersionFromRecord(assets: ProductRenderAssets): string {
 
 export function publicRenderUrl(productCode: string, swatchCode: string, cacheKey: string): string {
   return `/render-cache/${productCode}/${swatchCode}-${cacheKey}.png`;
-}
-
-export function publicProductRenderUrl(productCode: string, swatchCode: string): string {
-  return `/product-assets/${productCode}/${swatchCode}.png`;
 }
 
 export function sourceImagePath(productCode: string): string {
