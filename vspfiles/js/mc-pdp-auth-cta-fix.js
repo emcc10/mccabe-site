@@ -6,7 +6,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260522stack";
+  var VERSION = "20260522retail";
 
   function authDelay(ms) {
     return new Promise(function (resolve) {
@@ -754,6 +754,30 @@
         } catch (eWrap) {}
       }
     });
+    box.querySelectorAll("font.text.colors_text, font.colors_text").forEach(function (fontEl) {
+      if (!fontEl || (fontEl.closest && fontEl.closest(".mc-pdp-retail-row, .mc-pdp-member-line"))) return;
+      if (fontEl.querySelector(".product_productprice")) {
+        try {
+          fontEl.style.setProperty("display", "none", "important");
+          fontEl.style.setProperty("visibility", "hidden", "important");
+          fontEl.style.setProperty("height", "0", "important");
+          fontEl.style.setProperty("overflow", "hidden", "important");
+          fontEl.style.setProperty("opacity", "0", "important");
+          fontEl.style.setProperty("pointer-events", "none", "important");
+        } catch (eFont) {}
+      }
+    });
+    if (global.document.querySelector(".mc-pdp-retail-row, .mc-pdp-retail-label, .mc-pdp-member-pricing, .mc-pdp-member-line")) {
+      box.querySelectorAll(".product_productprice, .product_list_price, .product_price").forEach(function (node) {
+        if (!node || (node.closest && node.closest(".mc-pdp-retail-row"))) return;
+        try {
+          node.style.setProperty("display", "none", "important");
+          node.style.setProperty("visibility", "hidden", "important");
+          node.style.setProperty("height", "0", "important");
+          node.style.setProperty("opacity", "0", "important");
+        } catch (eRet) {}
+      });
+    }
   }
 
   function hideNativeSaleNodes() {
