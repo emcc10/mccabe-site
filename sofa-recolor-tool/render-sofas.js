@@ -22,13 +22,23 @@ import { prepareSourceLGrain } from './leather-detail.js';
 import {
   applyReferenceRealismTransfer,
   DEFAULT_REFERENCE,
+  PROBE_DETAIL_MULTIPLIER,
 } from './reference-realism.js';
+import {
+  baliRealismProbeRgb,
+  PROBE_HF_GAIN,
+  PROBE_L_STRUCTURE,
+  PROBE_LF_GAIN,
+  PROBE_MF_GAIN,
+} from './realism-probe.js';
+import { formatMaskedStats, maskedRgbStats } from './pipeline-trace.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
 const INPUT_DIR = join(ROOT, 'input');
 const SWATCH_DIR = join(INPUT_DIR, 'swatches');
 const OUTPUT_DIR = join(ROOT, 'output');
+const PIPELINE_DEBUG_DIR = join(OUTPUT_DIR, 'pipeline-debug');
 const SOFA_PATH = join(INPUT_DIR, 'sofa.png');
 const MASK_PATH = join(INPUT_DIR, 'mask.png');
 const BALI_REALISM_REFERENCE_PATH = join(INPUT_DIR, DEFAULT_REFERENCE);
@@ -267,7 +277,11 @@ export function validateBaliSilkOutput(rgb) {
 export function deleteBaliSilkOutputs(outputDir = OUTPUT_DIR) {
   if (!existsSync(outputDir)) return;
   for (const f of readdirSync(outputDir)) {
-    if (f.toLowerCase().includes('bali-silk') && !f.includes('REALISM-STRESS')) {
+    if (
+      f.toLowerCase().includes('bali-silk') &&
+      !f.includes('REALISM-STRESS') &&
+      !f.includes('REALISM-PROBE')
+    ) {
       try {
         unlinkSync(join(outputDir, f));
       } catch {
@@ -778,11 +792,13 @@ export function swatchChromaForPixel(palette, u) {
  */
 export function recolorSofa(sourceImage, mask, palette, options = {}) {
   const realismStress = Boolean(options.realismStress && palette.isBaliSilk);
+  const realismProbe = Boolean(options.realismProbe && palette.isBaliSilk);
   const { data, width, height, channels } = sourceImage;
   const out = Buffer.from(data);
-  const lMap = realismStress
-    ? computeBaliFullLRange(sourceImage, mask)
-    : computeSofaLuminanceMapRange(sourceImage, mask);
+  const lMap =
+    realismStress || realismProbe
+      ? computeBaliFullLRange(sourceImage, mask)
+      : computeSofaLuminanceMapRange(sourceImage, mask);
   const lo = lMap.lo;
   const span = lMap.span;
   const meanPhotoL = palette.isBaliSilk ? meanMaskedLab(sourceImage, mask).L : 0;
@@ -794,7 +810,7 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
   const lumOffset = palette.isBaliSilk
     ? pixelBrightness(midRgb.r, midRgb.g, midRgb.b) - meanSrcLum
     : 0;
-  const grain = realismStress ? prepareSourceLGrain(sourceImage) : null;
+  const grain = realismStress || realismProbe ? prepareSourceLGrain(sourceImage) : null;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;

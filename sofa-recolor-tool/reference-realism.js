@@ -17,6 +17,9 @@ const LOCAL_CONTRAST_GAIN = 0.22;
 const LOCAL_CONTRAST_RADIUS = 5;
 const LUMA_LOCK = true;
 
+/** Debug: multiply reference detail injection (probe / trace only). */
+const PROBE_DETAIL_MULTIPLIER = 3.5;
+
 function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
 }
@@ -130,7 +133,11 @@ function applyLocalContrastEnvelope(L, refL, mask, weight, width, height) {
  * @param {{ data: Buffer, width: number, height: number, channels: number }} referenceImage
  * @param {Uint8Array} mask
  */
-export function applyReferenceRealismTransfer(outBuffer, currentImage, referenceImage, mask) {
+export function applyReferenceRealismTransfer(outBuffer, currentImage, referenceImage, mask, options = {}) {
+  const skipLumaLock = Boolean(options.skipLumaLock);
+  const skipMeanNormalize = Boolean(options.skipMeanNormalize);
+  const detailMultiplier = options.detailMultiplier ?? 1;
+  const skipLocalContrast = Boolean(options.skipLocalContrast);
   const { width, height, channels } = currentImage;
   if (
     referenceImage.width !== width ||
@@ -153,19 +160,24 @@ export function applyReferenceRealismTransfer(outBuffer, currentImage, reference
     const curDetail = highPassDetail(curL, width, height, radius);
     for (let j = 0; j < curL.length; j++) {
       if (mask[j] < MASK_APPLY_THRESH) continue;
-      const w = weight[j] * gain;
+      const w = weight[j] * gain * detailMultiplier;
       targetL[j] += (refDetail[j] - curDetail[j]) * w;
     }
   }
 
-  targetL = applyLocalContrastEnvelope(targetL, refL, mask, weight, width, height);
+  if (!skipLocalContrast) {
+    targetL = applyLocalContrastEnvelope(targetL, refL, mask, weight, width, height);
+  }
 
-  const meanBefore = meanMaskedL(curL, mask);
-  const meanAfter = meanMaskedL(targetL, mask);
-  const meanShift = meanBefore - meanAfter;
-  for (let j = 0; j < targetL.length; j++) {
-    if (mask[j] < MASK_APPLY_THRESH) continue;
-    targetL[j] = clamp(targetL[j] + meanShift, 0, 100);
+  let meanShift = 0;
+  if (!skipMeanNormalize) {
+    const meanBefore = meanMaskedL(curL, mask);
+    const meanAfter = meanMaskedL(targetL, mask);
+    meanShift = meanBefore - meanAfter;
+    for (let j = 0; j < targetL.length; j++) {
+      if (mask[j] < MASK_APPLY_THRESH) continue;
+      targetL[j] = clamp(targetL[j] + meanShift, 0, 100);
+    }
   }
 
   for (let j = 0; j < width * height; j++) {
@@ -182,7 +194,7 @@ export function applyReferenceRealismTransfer(outBuffer, currentImage, reference
     let outR = r;
     let outG = g;
     let outB = b;
-    if (LUMA_LOCK) {
+    if (!skipLumaLock && LUMA_LOCK) {
       const outLum = rec709Lum(outR, outG, outB);
       const ratio = srcLum / Math.max(outLum, 0.5);
       outR = clamp(Math.round(outR * ratio), 0, 255);
@@ -197,9 +209,13 @@ export function applyReferenceRealismTransfer(outBuffer, currentImage, reference
 
   return {
     bands: DETAIL_BANDS.map((b) => `L r${b.radius}×${b.gain}`).join(', '),
-    localContrast: LOCAL_CONTRAST_GAIN,
+    localContrast: skipLocalContrast ? 0 : LOCAL_CONTRAST_GAIN,
     meanLShift: Math.round(meanShift * 100) / 100,
+    lumaLock: !skipLumaLock && LUMA_LOCK,
+    detailMultiplier,
   };
 }
+
+export { PROBE_DETAIL_MULTIPLIER };
 
 export { DEFAULT_REFERENCE };
