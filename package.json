@@ -3,9 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "phase1:test-sofa": "tsx scripts/phase1TestSofa.ts"
+    "phase1:test-sofa": "tsx scripts/phase1TestSofa.ts",
+    "phase2:test-sofa": "tsx scripts/phase2TestSofa.ts"
   },
   "dependencies": {
+    "color-convert": "^2.0.1",
     "sharp": "^0.33.5"
   },
   "devDependencies": {

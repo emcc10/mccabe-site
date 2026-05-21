@@ -20,4 +20,12 @@ npm run phase1:test-sofa
 
 Upholstery mask comes from `sofa-recolor-tool/input/mask.png`. Legs are auto-detected and subtracted with 4px protection.
 
-Phase 2 (minimal recolor) is not implemented on this branch.
+## Phase 2 (after masks look correct)
+
+```bash
+npm run phase2:test-sofa
+```
+
+Outputs in `debug/`:
+- `phase2-bali-silk.png` — minimal recolor (preserve L, upholstery a/b only)
+- `phase2-comparison.png` — source | overlay | recolor side by side
