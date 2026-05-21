@@ -1,0 +1,69 @@
+{
+  "stage": "3C",
+  "locked3bCandidate": "F (not final Bali Silk)",
+  "pipeline": "recolorUpholsteryMinimal + compositePhase2",
+  "textureHighlightShadowDrift": 0,
+  "postRgbPasses": [],
+  "variants": [
+    {
+      "id": "G",
+      "label": "G: F base, preserveL=0.80",
+      "outputFile": "stage3c-variant-G.png",
+      "targetLab": {
+        "l": 85,
+        "a": 1,
+        "b": 7.5
+      },
+      "preserveLuminance": 0.8,
+      "chromaBlend": 0.8,
+      "upholsteryMeanLabDeltaFromSource": 25.89197201620284,
+      "lStdPreservationRatio": 0.8008112947280014,
+      "legExactMatchRatio": 1
+    },
+    {
+      "id": "H",
+      "label": "H: lighter, preserveL=0.78",
+      "outputFile": "stage3c-variant-H.png",
+      "targetLab": {
+        "l": 85.5,
+        "a": 0.9,
+        "b": 7
+      },
+      "preserveLuminance": 0.78,
+      "chromaBlend": 0.82,
+      "upholsteryMeanLabDeltaFromSource": 27.245923929338154,
+      "lStdPreservationRatio": 0.7794426665538577,
+      "legExactMatchRatio": 1
+    },
+    {
+      "id": "I",
+      "label": "I: lighter, preserveL=0.76",
+      "outputFile": "stage3c-variant-I.png",
+      "targetLab": {
+        "l": 86,
+        "a": 0.8,
+        "b": 6.8
+      },
+      "preserveLuminance": 0.76,
+      "chromaBlend": 0.84,
+      "upholsteryMeanLabDeltaFromSource": 28.451487482336244,
+      "lStdPreservationRatio": 0.7602208488945231,
+      "legExactMatchRatio": 1
+    },
+    {
+      "id": "J",
+      "label": "J: lightest pull, preserveL=0.74",
+      "outputFile": "stage3c-variant-J.png",
+      "targetLab": {
+        "l": 86.5,
+        "a": 0.8,
+        "b": 6.5
+      },
+      "preserveLuminance": 0.74,
+      "chromaBlend": 0.85,
+      "upholsteryMeanLabDeltaFromSource": 29.45762282461054,
+      "lStdPreservationRatio": 0.7427841864813683,
+      "legExactMatchRatio": 1
+    }
+  ]
+}
