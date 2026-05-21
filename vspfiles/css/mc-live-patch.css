@@ -1,4 +1,4 @@
-/* MC_LIVE_PATCH_DEPLOY_20260518live — new filename to bypass Cloudflare cache on custom-safe.css */
+/* MC_LIVE_PATCH_DEPLOY_20260520opts — beats stale custom-safe body, body * { font-size: 18px !important } */
 
 /* 1) Hide Volusion text logo in header (all pages) */
 header.header #display_homepage_title,
@@ -159,4 +159,46 @@ html.is-category-or-listing-page .v-product-grid .v-product .v-product__img img 
   max-height: 220px !important;
   width: 100% !important;
   border: 0 !important;
+}
+
+/* PDP options 13px — loads after custom-safe (incl. mc-live-patch-last). Beats body, body * 18px on live. */
+html body.productdetails #content_area #options_table label,
+html body.mc-product-page #content_area #options_table label,
+html body.productdetails #content_area #options_table .productoptionname,
+html body.mc-product-page #content_area #options_table .productoptionname,
+html body.productdetails #content_area #options_table td[align="right"],
+html body.mc-product-page #content_area #options_table td[align="right"],
+html body.productdetails #content_area #options_table td:first-child,
+html body.mc-product-page #content_area #options_table td:first-child,
+html body.productdetails #content_area #options_table td[align="right"] font,
+html body.mc-product-page #content_area #options_table td[align="right"] font,
+html body.productdetails #content_area #options_table .productoptionname font,
+html body.mc-product-page #content_area #options_table .productoptionname font,
+html body.productdetails #content_area table[id*="options_table"] label,
+html body.mc-product-page #content_area table[id*="options_table"] label,
+html body.productdetails #content_area table[id*="options_table"] .productoptionname,
+html body.mc-product-page #content_area table[id*="options_table"] .productoptionname,
+html body.productdetails #content_area table[id*="options_table"] td[align="right"],
+html body.mc-product-page #content_area table[id*="options_table"] td[align="right"],
+html body.productdetails #v65-product-parent #options_table td[align="right"],
+html body.mc-product-page #v65-product-parent #options_table td[align="right"],
+html body.productdetails #v65-product-parent #options_table .productoptionname,
+html body.mc-product-page #v65-product-parent #options_table .productoptionname,
+html body.productdetails #content_area #options_table select:not(.mc-native-leather),
+html body.mc-product-page #content_area #options_table select:not(.mc-native-leather),
+html body.productdetails #v65-product-parent #options_table select:not(.mc-native-leather),
+html body.mc-product-page #v65-product-parent #options_table select:not(.mc-native-leather),
+html body.productdetails #content_area #mcLeatherHeader,
+html body.mc-product-page #content_area #mcLeatherHeader,
+html body.productdetails #content_area #mcLeatherSummary,
+html body.mc-product-page #content_area #mcLeatherSummary,
+html body.productdetails #content_area .mc-configuration-rh__pieces,
+html body.mc-product-page #content_area .mc-configuration-rh__pieces,
+html body.mc-theater-seating-pdp #content_area .mc-configuration-rh__pieces,
+html body.productdetails #mcConfigurationBlock .mc-configuration-rh__pieces,
+html body.mc-product-page #mcConfigurationBlock .mc-configuration-rh__pieces {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.06em !important;
 }

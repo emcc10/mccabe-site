@@ -1,4 +1,4 @@
-/* 0520a C_CSS_DEPLOY_VERIFY_20260520a — tail wins; MC_OPTION_LABEL_13PX_TAIL at EOF */
+/* 0520b C_CSS_DEPLOY_VERIFY_20260520b — no font-size on body *; MC_OPTION_LABEL_13PX_TAIL at EOF */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -13032,16 +13032,17 @@ table.colors_pricebox:nth-child(3) > tbody:nth-child(1) > tr:nth-child(1) > td:n
    ========================================================= */
 
 /* Inline <style> baseline copied from the Firefox session into the persisted CSS.
-   Do NOT set font-size on body * — it overrides PDP option/accordion labels (use body + scoped blocks). */
-body,
-body * {
-
+   NEVER put font-size on `body *` — it beats every PDP option rule (see DevTools cascade). */
+body {
   font-weight: 400;
   color: #444 !important;
   font-family: Inter, Arial, sans-serif !important;
+  font-size: 18px;
 }
-body {
-  font-size: 13px;
+body * {
+  font-weight: 400;
+  color: #444 !important;
+  font-family: Inter, Arial, sans-serif !important;
 }
 
 body {
