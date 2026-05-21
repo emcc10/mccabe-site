@@ -440,4 +440,4 @@ if [[ "$DEPLOY_FAIL" -ne 0 ]]; then
   echo "::error::Deploy finished with failures (template or prior step)"
   exit 1
 fi
-echo "=== DEPLOY_OK — template + custom-safe + mc-pdp JS (SFTP + HTTP) verified on origin ==="
+echo "=== DEPLOY_OK — template + custom-safe + mc-pdp JS (SFTP canonical; HTTP when runner not blocked) ==="
