@@ -823,7 +823,22 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
     const u = clamp((photoL - lo) / span, 0, 1);
     const chroma = swatchChromaForPixel(palette, u);
 
-    if (palette.isBaliSilk && realismStress) {
+    if (palette.isBaliSilk && realismProbe) {
+      const rgb = baliRealismProbeRgb(
+        r,
+        g,
+        bIn,
+        chroma,
+        grain,
+        j,
+        photoL,
+        meanPhotoL,
+        anchorL,
+      );
+      out[p] = rgb.r;
+      out[p + 1] = rgb.g;
+      out[p + 2] = rgb.b;
+    } else if (palette.isBaliSilk && realismStress) {
       const rgb = baliRealismStressRgb(
         r,
         g,
@@ -881,6 +896,109 @@ export function resolveBaliRealismReferencePath(outputDir = OUTPUT_DIR) {
     .sort()
     .reverse();
   return stress.length ? join(outputDir, stress[0]) : null;
+}
+
+/**
+ * TEMPORARY: exaggerated probe + pipeline trace (proves export path + finds flattening).
+ */
+export async function processBaliRealismProbe(sourceImage, mask, palette) {
+  const { width, height, channels } = sourceImage;
+  const ts = renderTimestamp();
+  const traceDir = join(PIPELINE_DEBUG_DIR, ts);
+  mkdirSync(traceDir, { recursive: true });
+
+  console.log('\n  === REALISM PROBE (exaggerated source detail, no flattening) ===');
+  console.log(
+    `  probe gains: L×${PROBE_L_STRUCTURE} HF×${PROBE_HF_GAIN} MF×${PROBE_MF_GAIN} LF×${PROBE_LF_GAIN} | no luma lock | no ref transfer on export`,
+  );
+
+  const flatData = recolorSofa(sourceImage, mask, palette, { skipFinalize: true });
+  const probeData = recolorSofa(sourceImage, mask, palette, {
+    realismProbe: true,
+    skipFinalize: true,
+  });
+
+  const flatImg = { data: flatData, width, height, channels };
+  const probeImg = { data: probeData, width, height, channels };
+
+  await saveImage(flatData, join(traceDir, 'A-production-recolor-no-ref.png'), width, height, channels);
+  await saveImage(probeData, join(traceDir, 'B-probe-recolor-pre-finalize.png'), width, height, channels);
+
+  const sFlatProbe = maskedRgbStats(flatData, probeData, mask, width, height, channels);
+  console.log(formatMaskedStats('masked Δ: production recolor vs PROBE recolor (MUST be large)', sFlatProbe));
+
+  const refPath = resolveBaliRealismReferencePath();
+  if (refPath) {
+    const refImg = await loadImage(refPath);
+    const afterRefLocked = Buffer.from(flatData);
+    applyReferenceRealismTransfer(
+      afterRefLocked,
+      flatImg,
+      refImg,
+      mask,
+    );
+    const sRefLocked = maskedRgbStats(flatData, afterRefLocked, mask, width, height, channels);
+    console.log(
+      formatMaskedStats(
+        'masked Δ: production recolor vs ref-transfer WITH luma lock (often ~0 = cancelled)',
+        sRefLocked,
+      ),
+    );
+
+    const afterRefOpen = Buffer.from(flatData);
+    applyReferenceRealismTransfer(afterRefOpen, flatImg, refImg, mask, {
+      skipLumaLock: true,
+      skipMeanNormalize: true,
+      detailMultiplier: PROBE_DETAIL_MULTIPLIER,
+      skipLocalContrast: true,
+    });
+    const sRefOpen = maskedRgbStats(flatData, afterRefOpen, mask, width, height, channels);
+    console.log(
+      formatMaskedStats(
+        'masked Δ: production recolor vs ref-transfer NO luma lock (detail visible)',
+        sRefOpen,
+      ),
+    );
+    await saveImage(
+      afterRefOpen,
+      join(traceDir, 'C-ref-transfer-no-luma-lock.png'),
+      width,
+      height,
+      channels,
+    );
+  }
+
+  const finalData = Buffer.from(probeData);
+  finalizeBaliExport(finalData, sourceImage, mask);
+  const sProbeFinal = maskedRgbStats(probeData, finalData, mask, width, height, channels);
+  console.log(
+    formatMaskedStats(
+      'masked Δ: PROBE recolor vs final export (upholstery should be ~0; bg may differ)',
+      sProbeFinal,
+    ),
+  );
+
+  await saveImage(
+    finalData,
+    join(traceDir, 'D-probe-final-export.png'),
+    width,
+    height,
+    channels,
+  );
+
+  const outPath = join(OUTPUT_DIR, `Bali-Silk-REALISM-PROBE-${ts}.png`);
+  const bytes = await saveImage(finalData, outPath, width, height, channels);
+  console.log(`\n  OPEN PROBE EXPORT (must look visibly grittier than production):`);
+  console.log(`    ${resolve(outPath)} (${Math.round(bytes / 1024)} KB)`);
+  console.log(`  pipeline trace folder:`);
+  console.log(`    ${resolve(traceDir)}`);
+
+  if (sFlatProbe.rms < 2.5) {
+    console.warn(
+      '  WARN: probe recolor ≈ production recolor on mask — probe branch may not be active.',
+    );
+  }
+  return { outPath, traceDir };
 }
 
 /**
@@ -963,18 +1081,24 @@ export function publishRenderOutputs(swatchName, primaryPngPath) {
 
 export async function processSwatch(swatchPath, sourceImage, mask, options = {}) {
   const realismStress = Boolean(options.realismStress);
+  const realismProbe = Boolean(options.realismProbe);
   const resolved = resolveOriginalSwatchPath(swatchPath);
   if (!resolved) throw new Error(`Not an original swatch: ${swatchPath}`);
 
   const swatchName = basename(resolved, extname(resolved));
   const isBali = isBaliSilkSwatch(swatchName);
 
-  if (isBali) {
+  if (isBali && !realismProbe) {
     deleteBaliSilkOutputs();
     console.log('  cleared previous Bali-Silk outputs');
   }
 
   const palette = await getSwatchPalette(resolved);
+
+  if (isBali && realismProbe) {
+    return processBaliRealismProbe(sourceImage, mask, palette);
+  }
+
   const refPath = isBali && !realismStress ? resolveBaliRealismReferencePath() : null;
 
   const fmtTone = (t) => ({
@@ -1021,11 +1145,20 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
       height: sourceImage.height,
       channels: sourceImage.channels,
     };
+    const beforeRef = Buffer.from(outData);
     const transfer = applyReferenceRealismTransfer(
       outData,
       currentImage,
       referenceImage,
       mask,
+    );
+    const refDelta = maskedRgbStats(
+      beforeRef,
+      outData,
+      mask,
+      sourceImage.width,
+      sourceImage.height,
+      sourceImage.channels,
     );
     console.log({
       realismReference: refPath.includes(INPUT_DIR)
@@ -1034,7 +1167,15 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
       realismTransfer: transfer.bands,
       localContrast: transfer.localContrast,
       meanLCorrection: transfer.meanLShift,
+      lumaLock: transfer.lumaLock,
+      maskedDeltaAfterRef: refDelta,
     });
+    console.log(
+      formatMaskedStats(
+        'masked Δ: recolor vs after reference transfer (if RMS≈0, luma lock cancelled detail)',
+        refDelta,
+      ),
+    );
   } else if (isBali && !realismStress) {
     console.log(
       `  warn: no realism reference — add input/${DEFAULT_REFERENCE} (or run npm run bali-stress first)`,
@@ -1116,16 +1257,19 @@ function parseCli(argv) {
   let all = false;
   let bruteChroma = false;
   let realismStress = false;
+  let realismProbe = false;
   let swatchFile = null;
   for (const a of args) {
     if (a === '--all') all = true;
     else if (a === '--brute-chroma') bruteChroma = true;
     else if (a === '--realism-stress') realismStress = true;
+    else if (a === '--realism-probe') realismProbe = true;
     else if (a === '--currant' || a === '--current') swatchFile = DEFAULT_PREVIEW_SWATCH;
     else if (a.startsWith('--swatch=')) swatchFile = a.slice('--swatch='.length);
     else if (!a.startsWith('-')) swatchFile = a;
   }
   if (bruteChroma) return { mode: 'brute-chroma', swatchFile: swatchFile || 'Bali-Silk' };
+  if (realismProbe) return { mode: 'realism-probe', swatchFile: swatchFile || 'Bali-Silk' };
   if (realismStress) return { mode: 'realism-stress', swatchFile: swatchFile || 'Bali-Silk' };
   if (all) return { mode: 'all' };
   return { mode: 'one', swatchFile: swatchFile || DEFAULT_PREVIEW_SWATCH };
@@ -1163,6 +1307,18 @@ export async function main(argv = process.argv) {
     const label = basename(cli.swatchFile, extname(cli.swatchFile));
     console.log('  method: BRUTE-FORCE fixed chroma diagnostic (not production pipeline)');
     const { outPath } = await processBruteChromaDiagnostic(sourceSofa, mask, label);
+    console.log(`\nDone: ${outPath}`);
+    return;
+  }
+
+  if (cli.mode === 'realism-probe') {
+    const swPath = resolveSwatchArg(cli.swatchFile);
+    if (!swPath) {
+      console.error(`Swatch not found: ${cli.swatchFile}`);
+      process.exit(1);
+    }
+    console.log('  method: REALISM PROBE — exaggerated source detail + pipeline trace');
+    const { outPath } = await processSwatch(swPath, sourceSofa, mask, { realismProbe: true });
     console.log(`\nDone: ${outPath}`);
     return;
   }

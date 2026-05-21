@@ -35,7 +35,10 @@ No depth restore, CLAHE, hero clustering, texture residuals, or dual pipelines.
 npm run bali-stress      # generate donor candidate
 npm run bali-ref-setup   # copy latest stress → input reference
 npm run bali             # production Bali-Silk-*.png
+npm run bali-probe       # TEMP: exaggerated realism + pipeline trace (debug)
 ```
+
+`bali-probe` writes `output/Bali-Silk-REALISM-PROBE-*.png` and `output/pipeline-debug/{timestamp}/` with stage PNGs + masked pixel-delta stats.
 
 ## Commands
 

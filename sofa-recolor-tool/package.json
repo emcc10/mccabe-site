@@ -9,6 +9,7 @@
     "bali": "node render-sofas.js Bali-Silk",
     "bali-ref-setup": "node -e \"import{copyFileSync,existsSync,readdirSync}from'fs';import{join}from'path';const o='output',i='input/Bali-Silk-realism-reference.png';const f=readdirSync(o).filter(x=>x.includes('REALISM-STRESS')&&x.endsWith('.png')).sort().reverse()[0];if(!f)throw new Error('Run npm run bali-stress first');copyFileSync(join(o,f),i);console.log('Wrote',i,'from',f);\"",
     "bali-stress": "node render-sofas.js Bali-Silk --realism-stress",
+    "bali-probe": "node render-sofas.js Bali-Silk --realism-probe",
     "bali-brute": "node render-sofas.js Bali-Silk --brute-chroma",
     "debug-pipeline": "node debug-pipeline.js",
     "diagnostic": "node diagnostic-preview.js Bali-Silk --render",
