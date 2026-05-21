@@ -1,0 +1,51 @@
+{
+  "stage": "5C-C",
+  "lockedFrom": "Stage 5C variant C",
+  "detailStrength": 0.27,
+  "highlightStrength": 0.1,
+  "aVariationAmplitude": 0.12,
+  "bVariationAmplitude": 0.19,
+  "base": "Stage 5B on Stage 4B-v3",
+  "pipeline": [
+    "Stage 4B-v3 (color + edge cleanup)",
+    "Stage 5B realism (locked baseline)",
+    "Stage 5C-C micro-refinement delta"
+  ],
+  "locked5b": {
+    "detailStrength": 0.24,
+    "highlightStrength": 0.08,
+    "aVarAmp": 0.12,
+    "bVarAmp": 0.18
+  },
+  "locked5cC": {
+    "detailStrength": 0.27,
+    "highlightStrength": 0.1,
+    "aVarAmp": 0.12,
+    "bVarAmp": 0.19
+  },
+  "deltaFrom5b": {
+    "detailStrength": 0.030000000000000027,
+    "highlightStrength": 0.020000000000000004,
+    "aVarAmp": 0,
+    "bVarAmp": 0.010000000000000009
+  },
+  "upholsteryMeanLab": {
+    "stage5b": {
+      "meanL": 71.77008625050088,
+      "meanA": 3.136627887880918,
+      "meanB": 6.163954779249956,
+      "count": 152231
+    },
+    "final": {
+      "meanL": 71.74051277335103,
+      "meanA": 3.1365950430595606,
+      "meanB": 6.163954779249956,
+      "count": 152231
+    }
+  },
+  "postRgbPasses": [],
+  "outputs": {
+    "candidate": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\final-bali-silk-candidate.png",
+    "comparison": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\final-bali-silk-comparison.png"
+  }
+}

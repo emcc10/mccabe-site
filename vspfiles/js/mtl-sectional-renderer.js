@@ -2851,8 +2851,11 @@
           ? state.cfgByCode[normalizeCode(code)]
           : null;
     var configLabel = cfg
-      ? cfg.configurationTitle || cfg.label || cfg.code || code
+      ? cfg.label || formatDiagramConfigCode(cfg.code) || cfg.code || ""
       : code || "—";
+    if (/^popular\s+configuration$/i.test(String(configLabel || "").trim())) {
+      configLabel = formatDiagramConfigCode(cfg && cfg.code) || (cfg && cfg.code) || code || "—";
+    }
 
     var price = readDisplayedPrice();
 

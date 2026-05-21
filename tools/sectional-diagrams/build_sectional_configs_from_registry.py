@@ -235,7 +235,7 @@ def build_js(registry: dict, plp: dict[str, list[str]]) -> str:
             lines_out.append("      {")
             lines_out.append(f'        code: "{js_escape(dash)}",')
             lines_out.append(f'        label: "{js_escape(dash)}",')
-            lines_out.append(f'        configurationTitle: "Popular configuration",')
+            lines_out.append(f'        configurationTitle: "",')
             lines_out.append('        description: "",')
             lines_out.append("        priceDiff: 0,")
             lines_out.append(f'        image: img("{js_escape(key)}-SC-{js_escape(dash)}.png"),')

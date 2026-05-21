@@ -1,4 +1,4 @@
-/* 0522m C_CSS_DEPLOY_VERIFY_20260522m — hide native retail/sale in pricebox when McCabe stack present */
+/* 0522n C_CSS_DEPLOY_VERIFY_20260522n — restore McCabe stack; hide native dupes only with retail row */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -14594,12 +14594,12 @@ html body.mc-pdp-price-stack .mc-pdp-member-pricing .mc-pdp-member-line--sale {
 html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,
 html body.mc-product-page:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,
 html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_sale_price,
-html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_productprice,
 html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox b:has(.product_saleprice),
 html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox font.pricecolor:has(.product_saleprice),
-html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox font.colors_text:has(.product_productprice),
-html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox font.text.colors_text:has(.product_productprice),
-html body.mc-product-page:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox font.colors_text:has(.product_productprice) {
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox .product_productprice,
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox font.colors_text:has(.product_productprice),
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox font.text.colors_text:has(.product_productprice),
+html body.mc-product-page:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox font.colors_text:has(.product_productprice) {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;

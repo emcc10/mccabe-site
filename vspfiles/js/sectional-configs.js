@@ -22,7 +22,7 @@
       {
         code: "07-15",
         label: "07-15",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Alula-SC-07-15.png"),
@@ -30,7 +30,7 @@
       {
         code: "12-40",
         label: "12-40",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Alula-SC-12-40.png"),
@@ -38,7 +38,7 @@
       {
         code: "07-09-08",
         label: "07-09-08",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Alula-SC-07-09-08.png"),
@@ -46,7 +46,7 @@
       {
         code: "07-09-19",
         label: "07-09-19",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Alula-SC-07-09-19.png"),
@@ -56,7 +56,7 @@
       {
         code: "67-10-09-10-66",
         label: "67-10-09-10-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Acacia-SC-67-10-09-10-66.png"),
@@ -64,7 +64,7 @@
       {
         code: "67-10-09-60-66",
         label: "67-10-09-60-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Acacia-SC-67-10-09-60-66.png"),
@@ -72,7 +72,7 @@
       {
         code: "67-W2-10-09-10-66",
         label: "67-W2-10-09-10-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Acacia-SC-67-W2-10-09-10-66.png"),
@@ -80,7 +80,7 @@
       {
         code: "67-W2-10-09-60-66",
         label: "67-W2-10-09-60-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Acacia-SC-67-W2-10-09-60-66.png"),
@@ -90,7 +90,7 @@
       {
         code: "07-15",
         label: "07-15",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Atticus-SC-07-15.png"),
@@ -98,7 +98,7 @@
       {
         code: "07-40",
         label: "07-40",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Atticus-SC-07-40.png"),
@@ -106,7 +106,7 @@
       {
         code: "07-11-08",
         label: "07-11-08",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Atticus-SC-07-11-08.png"),
@@ -116,7 +116,7 @@
       {
         code: "07-15",
         label: "07-15",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Colebrook-SC-07-15.png"),
@@ -124,7 +124,7 @@
       {
         code: "07-35",
         label: "07-35",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Colebrook-SC-07-35.png"),
@@ -132,7 +132,7 @@
       {
         code: "07-40",
         label: "07-40",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Colebrook-SC-07-40.png"),
@@ -140,7 +140,7 @@
       {
         code: "12-40",
         label: "12-40",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Colebrook-SC-12-40.png"),
@@ -150,7 +150,7 @@
       {
         code: "07-40",
         label: "07-40",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Creighton-SC-07-40.png"),
@@ -158,7 +158,7 @@
       {
         code: "12-35",
         label: "12-35",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Creighton-SC-12-35.png"),
@@ -166,7 +166,7 @@
       {
         code: "12-40",
         label: "12-40",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Creighton-SC-12-40.png"),
@@ -174,7 +174,7 @@
       {
         code: "07-09-08",
         label: "07-09-08",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Creighton-SC-07-09-08.png"),
@@ -184,7 +184,7 @@
       {
         code: "92-15",
         label: "92-15",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Lexi-SC-92-15.png"),
@@ -192,7 +192,7 @@
       {
         code: "92-40",
         label: "92-40",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Lexi-SC-92-40.png"),
@@ -200,7 +200,7 @@
       {
         code: "39-10-19",
         label: "39-10-19",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Lexi-SC-39-10-19.png"),
@@ -210,7 +210,7 @@
       {
         code: "07-15",
         label: "07-15",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Barrett-SC-07-15.png"),
@@ -218,7 +218,7 @@
       {
         code: "12-35",
         label: "12-35",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Barrett-SC-12-35.png"),
@@ -226,7 +226,7 @@
       {
         code: "39-14-15",
         label: "39-14-15",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Barrett-SC-39-14-15.png"),
@@ -236,7 +236,7 @@
       {
         code: "07-15",
         label: "07-15",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Corissa-SC-07-15.png"),
@@ -244,7 +244,7 @@
       {
         code: "12-40",
         label: "12-40",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Corissa-SC-12-40.png"),
@@ -252,7 +252,7 @@
       {
         code: "07-09-08",
         label: "07-09-08",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Corissa-SC-07-09-08.png"),
@@ -260,7 +260,7 @@
       {
         code: "07-09-19",
         label: "07-09-19",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Corissa-SC-07-09-19.png"),
@@ -270,7 +270,7 @@
       {
         code: "07-15",
         label: "07-15",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Juno-SC-07-15.png"),
@@ -278,7 +278,7 @@
       {
         code: "12-40",
         label: "12-40",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Juno-SC-12-40.png"),
@@ -286,7 +286,7 @@
       {
         code: "07-09-08",
         label: "07-09-08",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Juno-SC-07-09-08.png"),
@@ -294,7 +294,7 @@
       {
         code: "07-09-19",
         label: "07-09-19",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Juno-SC-07-09-19.png"),
@@ -304,7 +304,7 @@
       {
         code: "12-35",
         label: "12-35",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Jura-SC-12-35.png"),
@@ -314,7 +314,7 @@
       {
         code: "92-15",
         label: "92-15",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Brookes-SC-92-15.png"),
@@ -322,7 +322,7 @@
       {
         code: "92-40",
         label: "92-40",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Brookes-SC-92-40.png"),
@@ -330,7 +330,7 @@
       {
         code: "39-10-19",
         label: "39-10-19",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Brookes-SC-39-10-19.png"),
@@ -338,7 +338,7 @@
       {
         code: "92-11-93",
         label: "92-11-93",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Brookes-SC-92-11-93.png"),
@@ -348,7 +348,7 @@
       {
         code: "07-40",
         label: "07-40",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Leeds-SC-07-40.png"),
@@ -356,7 +356,7 @@
       {
         code: "12-35",
         label: "12-35",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Leeds-SC-12-35.png"),
@@ -364,7 +364,7 @@
       {
         code: "12-40",
         label: "12-40",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Leeds-SC-12-40.png"),
@@ -372,7 +372,7 @@
       {
         code: "07-09-08",
         label: "07-09-08",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Leeds-SC-07-09-08.png"),
@@ -382,7 +382,7 @@
       {
         code: "92-9W-93",
         label: "92-9W-93",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Charli-SC-92-9W-93.png"),
@@ -390,7 +390,7 @@
       {
         code: "e3-90-e4",
         label: "e3-90-e4",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Charli-SC-e3-90-e4.png"),
@@ -398,7 +398,7 @@
       {
         code: "E4-90-E3",
         label: "E4-90-E3",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Charli-SC-E4-90-E3.png"),
@@ -406,7 +406,7 @@
       {
         code: "E4-90-11-90-E3",
         label: "E4-90-11-90-E3",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Charli-SC-E4-90-11-90-E3.png"),
@@ -414,7 +414,7 @@
       {
         code: "E4-E2-9W-10-19",
         label: "E4-E2-9W-10-19",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Charli-SC-E4-E2-9W-10-19.png"),
@@ -424,7 +424,7 @@
       {
         code: "92-9W-93",
         label: "92-9W-93",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Laguna-SC-92-9W-93.png"),
@@ -432,7 +432,7 @@
       {
         code: "e3-90-e4",
         label: "e3-90-e4",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Laguna-SC-e3-90-e4.png"),
@@ -440,7 +440,7 @@
       {
         code: "E4-90-E3",
         label: "E4-90-E3",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Laguna-SC-E4-90-E3.png"),
@@ -448,7 +448,7 @@
       {
         code: "19-10-9WE2-E4",
         label: "19-10-9WE2-E4",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Laguna-SC-19-10-9WE2-E4.png"),
@@ -456,7 +456,7 @@
       {
         code: "E4-90-11-90-E3",
         label: "E4-90-11-90-E3",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Laguna-SC-E4-90-11-90-E3.png"),
@@ -466,7 +466,7 @@
       {
         code: "47-10-09-10-46",
         label: "47-10-09-10-46",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Henry-SC-47-10-09-10-46.png"),
@@ -474,7 +474,7 @@
       {
         code: "67-10-09-10-66",
         label: "67-10-09-10-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Henry-SC-67-10-09-10-66.png"),
@@ -482,7 +482,7 @@
       {
         code: "67-10-09-6H-66",
         label: "67-10-09-6H-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Henry-SC-67-10-09-6H-66.png"),
@@ -490,7 +490,7 @@
       {
         code: "67-W2-10-09-10-66",
         label: "67-W2-10-09-10-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Henry-SC-67-W2-10-09-10-66.png"),
@@ -498,7 +498,7 @@
       {
         code: "67-W2-10-09-6H-66",
         label: "67-W2-10-09-6H-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Henry-SC-67-W2-10-09-6H-66.png"),
@@ -508,7 +508,7 @@
       {
         code: "07-9w-08",
         label: "07-9w-08",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Essex-SC-07-9w-08.png"),
@@ -516,7 +516,7 @@
       {
         code: "LB-9W-LA",
         label: "LB-9W-LA",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Essex-SC-LB-9W-LA.png"),
@@ -524,7 +524,7 @@
       {
         code: "LD-9W-LA",
         label: "LD-9W-LA",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Essex-SC-LD-9W-LA.png"),
@@ -532,7 +532,7 @@
       {
         code: "LH-9W-10-LA",
         label: "LH-9W-10-LA",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Essex-SC-LH-9W-10-LA.png"),
@@ -542,7 +542,7 @@
       {
         code: "07-9w-08",
         label: "07-9w-08",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Luna-SC-07-9w-08.png"),
@@ -550,7 +550,7 @@
       {
         code: "LB-9W-LA",
         label: "LB-9W-LA",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Luna-SC-LB-9W-LA.png"),
@@ -558,7 +558,7 @@
       {
         code: "LD-9W-LA",
         label: "LD-9W-LA",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Luna-SC-LD-9W-LA.png"),
@@ -566,7 +566,7 @@
       {
         code: "LD-9W-10-LA",
         label: "LD-9W-10-LA",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Luna-SC-LD-9W-10-LA.png"),
@@ -576,7 +576,7 @@
       {
         code: "47-10-09-10-46",
         label: "47-10-09-10-46",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Harlo-SC-47-10-09-10-46.png"),
@@ -584,7 +584,7 @@
       {
         code: "67-10-09-60-66",
         label: "67-10-09-60-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Harlo-SC-67-10-09-60-66.png"),
@@ -592,7 +592,7 @@
       {
         code: "88-81-11-81-04",
         label: "88-81-11-81-04",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Harlo-SC-88-81-11-81-04.png"),
@@ -600,7 +600,7 @@
       {
         code: "67-A2-10-09-10-66",
         label: "67-A2-10-09-10-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Harlo-SC-67-A2-10-09-10-66.png"),
@@ -608,7 +608,7 @@
       {
         code: "67-A2-10-09-60-66",
         label: "67-A2-10-09-60-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Harlo-SC-67-A2-10-09-60-66.png"),
@@ -618,7 +618,7 @@
       {
         code: "67-10-9x-10-66",
         label: "67-10-9x-10-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Asher-SC-67-10-9x-10-66.png"),
@@ -626,7 +626,7 @@
       {
         code: "L2-L3-9X-10-L1",
         label: "L2-L3-9X-10-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Asher-SC-L2-L3-9X-10-L1.png"),
@@ -634,7 +634,7 @@
       {
         code: "L2-K2-10-9X-10-L1",
         label: "L2-K2-10-9X-10-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Asher-SC-L2-K2-10-9X-10-L1.png"),
@@ -642,7 +642,7 @@
       {
         code: "L2-K2-L3-9X-6H-L1",
         label: "L2-K2-L3-9X-6H-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Asher-SC-L2-K2-L3-9X-6H-L1.png"),
@@ -652,7 +652,7 @@
       {
         code: "67-10-9x-10-66",
         label: "67-10-9x-10-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Hastings-SC-67-10-9x-10-66.png"),
@@ -660,7 +660,7 @@
       {
         code: "L2-L3-9X-10-L1",
         label: "L2-L3-9X-10-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Hastings-SC-L2-L3-9X-10-L1.png"),
@@ -668,7 +668,7 @@
       {
         code: "L2-K2-10-9X-10-L1",
         label: "L2-K2-10-9X-10-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Hastings-SC-L2-K2-10-9X-10-L1.png"),
@@ -676,7 +676,7 @@
       {
         code: "L2-K2-L3-9X-6H-L1",
         label: "L2-K2-L3-9X-6H-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Hastings-SC-L2-K2-L3-9X-6H-L1.png"),
@@ -686,7 +686,7 @@
       {
         code: "67-10-9x-10-66",
         label: "67-10-9x-10-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Keiran-SC-67-10-9x-10-66.png"),
@@ -694,7 +694,7 @@
       {
         code: "L2-L3-9X-10-L1",
         label: "L2-L3-9X-10-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Keiran-SC-L2-L3-9X-10-L1.png"),
@@ -702,7 +702,7 @@
       {
         code: "L2-K2-10-9X-10-L1",
         label: "L2-K2-10-9X-10-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Keiran-SC-L2-K2-10-9X-10-L1.png"),
@@ -710,7 +710,7 @@
       {
         code: "L2-K2-L3-9X-6H-L1",
         label: "L2-K2-L3-9X-6H-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Keiran-SC-L2-K2-L3-9X-6H-L1.png"),
@@ -720,7 +720,7 @@
       {
         code: "67-10-9x-10-66",
         label: "67-10-9x-10-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Kenaston-SC-67-10-9x-10-66.png"),
@@ -728,7 +728,7 @@
       {
         code: "L2-L3-9X-10-L1",
         label: "L2-L3-9X-10-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Kenaston-SC-L2-L3-9X-10-L1.png"),
@@ -736,7 +736,7 @@
       {
         code: "L2-K2-10-9X-10-L1",
         label: "L2-K2-10-9X-10-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Kenaston-SC-L2-K2-10-9X-10-L1.png"),
@@ -744,7 +744,7 @@
       {
         code: "L2-K2-L3-9X-6H-L1",
         label: "L2-K2-L3-9X-6H-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Kenaston-SC-L2-K2-L3-9X-6H-L1.png"),
@@ -754,7 +754,7 @@
       {
         code: "67-10-9x-10-66",
         label: "67-10-9x-10-66",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Leighton-SC-67-10-9x-10-66.png"),
@@ -762,7 +762,7 @@
       {
         code: "L2-L3-9X-10-L1",
         label: "L2-L3-9X-10-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Leighton-SC-L2-L3-9X-10-L1.png"),
@@ -770,7 +770,7 @@
       {
         code: "L2-K2-10-9X-10-L1",
         label: "L2-K2-10-9X-10-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Leighton-SC-L2-K2-10-9X-10-L1.png"),
@@ -778,7 +778,7 @@
       {
         code: "L2-K2-L3-9X-6H-L1",
         label: "L2-K2-L3-9X-6H-L1",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Leighton-SC-L2-K2-L3-9X-6H-L1.png"),
@@ -788,7 +788,7 @@
       {
         code: "7p-6h-9a-70-6p",
         label: "7p-6h-9a-70-6p",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Keoni-SC-7p-6h-9a-70-6p.png"),
@@ -796,7 +796,7 @@
       {
         code: "C4-70-9A-6H-17",
         label: "C4-70-9A-6H-17",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Keoni-SC-C4-70-9A-6H-17.png"),
@@ -804,7 +804,7 @@
       {
         code: "7P-K3-70-9A-70-6P",
         label: "7P-K3-70-9A-70-6P",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Keoni-SC-7P-K3-70-9A-70-6P.png"),
@@ -812,7 +812,7 @@
       {
         code: "7P-K3-70-9A-70-C3",
         label: "7P-K3-70-9A-70-C3",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Keoni-SC-7P-K3-70-9A-70-C3.png"),
@@ -822,7 +822,7 @@
       {
         code: "7p-6h-9a-70-6p",
         label: "7p-6h-9a-70-6p",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Armina-SC-7p-6h-9a-70-6p.png"),
@@ -830,7 +830,7 @@
       {
         code: "C4-70-9A-6H-17",
         label: "C4-70-9A-6H-17",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Armina-SC-C4-70-9A-6H-17.png"),
@@ -838,7 +838,7 @@
       {
         code: "7P-K3-70-9A-70-6P",
         label: "7P-K3-70-9A-70-6P",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Armina-SC-7P-K3-70-9A-70-6P.png"),
@@ -846,7 +846,7 @@
       {
         code: "7P-K3-70-9A-70-C3",
         label: "7P-K3-70-9A-70-C3",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Armina-SC-7P-K3-70-9A-70-C3.png"),
@@ -856,7 +856,7 @@
       {
         code: "7p-6h-9a-70-6p",
         label: "7p-6h-9a-70-6p",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Colton-SC-7p-6h-9a-70-6p.png"),
@@ -864,7 +864,7 @@
       {
         code: "C4-70-9A-6H-17",
         label: "C4-70-9A-6H-17",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Colton-SC-C4-70-9A-6H-17.png"),
@@ -872,7 +872,7 @@
       {
         code: "7P-K3-70-9A-70-6P",
         label: "7P-K3-70-9A-70-6P",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Colton-SC-7P-K3-70-9A-70-6P.png"),
@@ -880,7 +880,7 @@
       {
         code: "7P-K3-70-9A-70-C3",
         label: "7P-K3-70-9A-70-C3",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Colton-SC-7P-K3-70-9A-70-C3.png"),
@@ -890,7 +890,7 @@
       {
         code: "5w-1w-1l-s2-4w",
         label: "5w-1w-1l-s2-4w",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Apex-SC-5w-1w-1l-s2-4w.png"),
@@ -898,7 +898,7 @@
       {
         code: "5W-S2-1L-S2-C3",
         label: "5W-S2-1L-S2-C3",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Apex-SC-5W-S2-1L-S2-C3.png"),
@@ -906,7 +906,7 @@
       {
         code: "5H-F2-1H-19-S1-4H",
         label: "5H-F2-1H-19-S1-4H",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Apex-SC-5H-F2-1H-19-S1-4H.png"),
@@ -914,7 +914,7 @@
       {
         code: "5W-F2-S2-19-S2-4W",
         label: "5W-F2-S2-19-S2-4W",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Apex-SC-5W-F2-S2-19-S2-4W.png"),
@@ -924,7 +924,7 @@
       {
         code: "5w-1w-1l-s2-4w",
         label: "5w-1w-1l-s2-4w",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Lotus-SC-5w-1w-1l-s2-4w.png"),
@@ -932,7 +932,7 @@
       {
         code: "7P-6H-9A-70-6P",
         label: "7P-6H-9A-70-6P",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Lotus-SC-7P-6H-9A-70-6P.png"),
@@ -940,7 +940,7 @@
       {
         code: "C4-70-9A-6H-17",
         label: "C4-70-9A-6H-17",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Lotus-SC-C4-70-9A-6H-17.png"),
@@ -948,7 +948,7 @@
       {
         code: "7P-K3-70-9A-70-6P",
         label: "7P-K3-70-9A-70-6P",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Lotus-SC-7P-K3-70-9A-70-6P.png"),
@@ -956,7 +956,7 @@
       {
         code: "7P-K3-70-9A-70-C3",
         label: "7P-K3-70-9A-70-C3",
-        configurationTitle: "Popular configuration",
+        configurationTitle: "",
         description: "",
         priceDiff: 0,
         image: img("Lotus-SC-7P-K3-70-9A-70-C3.png"),

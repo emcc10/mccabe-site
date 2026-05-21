@@ -55,6 +55,39 @@ export function applyRealismPass(
   return { data: out, width, height, channels };
 }
 
+/** Incremental realism on top of an existing pass (e.g. Stage 5B → 5C micro-refinement). */
+export function applyRealismDeltaPass(
+  base: RgbaImage,
+  upholstery: Mask,
+  maps: SourceTextureMaps,
+  delta: RealismPassParams,
+): RgbaImage {
+  const out = Buffer.from(base.data);
+  const { width, height, channels } = base;
+
+  for (let j = 0; j < width * height; j++) {
+    if (upholstery.data[j] < 128) continue;
+
+    const p = j * channels;
+    const lab = rgbToLab(base.data[p], base.data[p + 1], base.data[p + 2]);
+
+    let L = lab.L + delta.detailStrength * maps.lDetail[j];
+    const hi = maps.highlight[j];
+    L += delta.highlightStrength * 11 * hi * (1 - 0.4 * hi);
+
+    const a = lab.a + delta.aVarAmp * maps.aResidual[j];
+    const b = lab.b + delta.bVarAmp * maps.bResidual[j];
+
+    const rgb = labToRgb(L, a, b);
+    out[p] = rgb.r;
+    out[p + 1] = rgb.g;
+    out[p + 2] = rgb.b;
+    if (channels === 4) out[p + 3] = base.data[p + 3];
+  }
+
+  return { data: out, width, height, channels };
+}
+
 export function realismParamsForVariant(variant: Stage5Variant): RealismPassParams {
   return {
     detailStrength: variant.detailStrength,
