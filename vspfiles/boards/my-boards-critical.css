@@ -1,9 +1,9 @@
 /* Minimal fallback - site colors */
-html.mc-my-boards-page,html.mc-my-boards-page body{margin:0;min-height:100%;background:#fff;color:#484848;font-family:Inter,system-ui,sans-serif;font-size:15px}
+html.mc-my-boards-page,html.mc-my-boards-page body{margin:0;min-height:100%;background:#fff;color:#484848;font-family:Inter,system-ui,sans-serif;font-size:15px;letter-spacing:.02em}
 .mc-boards-shell{min-height:100vh;display:flex;flex-direction:column}
 .mc-boards-site-header{border-bottom:1px solid #e8e8e8;background:#fff}
-.mc-boards__feature{background:#f5f5f5}
-.mc-boards__feature-img{display:block;width:100%;max-height:min(72vh,640px);object-fit:contain;background:#fff}
+.mc-boards__feature{display:none!important}
+.mc-boards__title{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;letter-spacing:.02em}
 .mc-boards__triptych{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .mc-boards__style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .mc-boards__split{display:grid;grid-template-columns:1fr 1.15fr;gap:32px}

@@ -47,6 +47,6 @@ jobs:
           if [[ "$ok" != "1" ]]; then
             echo "::warning::HTTP still stale (404 or old bytes) — SFTP verify above is authoritative; purge CDN for my-boards-page.js"
           fi
-          curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" -H "Cache-Control: no-cache" | grep -q '20260536' || {
-            echo "::warning::Live HTML missing build 20260536 — re-run this workflow"
+          curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" -H "Cache-Control: no-cache" | grep -q '20260537' || {
+            echo "::warning::Live HTML missing build 20260537 — re-run this workflow"
           }

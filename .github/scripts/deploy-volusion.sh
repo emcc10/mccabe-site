@@ -199,7 +199,7 @@ put_primary "vspfiles/css/custom-safe.css" "custom-safe" \
   "/vspfiles/css/custom-safe.css" \
   "vspfiles/css/custom-safe.css"
 
-CSS_VERIFY_NEEDLE=$(grep -oE 'C_CSS_DEPLOY_VERIFY_[0-9a-z]+' vspfiles/css/custom-safe.css 2>/dev/null | head -1 || echo "C_CSS_DEPLOY_VERIFY_20260522m")
+CSS_VERIFY_NEEDLE=$(grep -oE 'C_CSS_DEPLOY_VERIFY_[0-9a-z]+' vspfiles/css/custom-safe.css 2>/dev/null | head -1 || echo "C_CSS_DEPLOY_VERIFY_20260522n")
 export CSS_NEEDLE="$CSS_VERIFY_NEEDLE"
 set +e
 verify_custom_safe_sftp_rc=0
@@ -404,10 +404,10 @@ fi
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260621"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260520plp" "MC_DTK_PLP_20260621"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-sofa-bounds.json?v=$(date +%s)" "77494-91-1.jpg"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" "20260536"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-bundle.css?v=20260536" "mc-boards__feature"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/board-styles.js?v=20260536" "renderBoardsPreview"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-page.js?v=20260536" "__MC_BOARDS_PAGE_SCRIPT_LOADED"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" "20260537"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-bundle.css?v=20260537" "Cormorant Garamond"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/board-styles.js?v=20260537" "renderBoardsPreview"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-page.js?v=20260537" "__MC_BOARDS_PAGE_SCRIPT_LOADED"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" "mc-boards__triptych"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png?v=$(date +%s)" "PNG"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/template.min.js" "MC_PLP_ENFORCER_LOADING__"

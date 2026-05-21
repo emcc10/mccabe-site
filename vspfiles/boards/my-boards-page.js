@@ -1294,7 +1294,7 @@
       done();
       return;
     }
-    var src = API_BASE + 'board-styles.js?v=20260536';
+    var src = API_BASE + 'board-styles.js?v=20260537';
     var tag = document.querySelector('script[src*="board-styles.js"]');
     if (tag) {
       refreshConfig();

@@ -1,10 +1,10 @@
 /* McCabe My Boards bundle - ASCII only */
 /* Minimal fallback - site colors */
-html.mc-my-boards-page,html.mc-my-boards-page body{margin:0;min-height:100%;background:#fff;color:#484848;font-family:Inter,system-ui,sans-serif;font-size:15px}
+html.mc-my-boards-page,html.mc-my-boards-page body{margin:0;min-height:100%;background:#fff;color:#484848;font-family:Inter,system-ui,sans-serif;font-size:15px;letter-spacing:.02em}
 .mc-boards-shell{min-height:100vh;display:flex;flex-direction:column}
 .mc-boards-site-header{border-bottom:1px solid #e8e8e8;background:#fff}
-.mc-boards__feature{background:#f5f5f5}
-.mc-boards__feature-img{display:block;width:100%;max-height:min(72vh,640px);object-fit:contain;background:#fff}
+.mc-boards__feature{display:none!important}
+.mc-boards__title{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;letter-spacing:.02em}
 .mc-boards__triptych{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .mc-boards__style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .mc-boards__split{display:grid;grid-template-columns:1fr 1.15fr;gap:32px}
@@ -35,6 +35,7 @@ html.mc-my-boards-page body {
   font-size: 15px;
   font-weight: 400;
   line-height: 1.5;
+  letter-spacing: 0.02em;
   color: var(--mc-text-muted);
   background: var(--mc-bg);
 }
@@ -103,41 +104,30 @@ html.mc-my-boards-page a:hover {
   width: 100%;
   max-width: var(--mc-max);
   margin: 0 auto;
-  padding: 0 22px 56px;
+  padding: 32px 22px 56px;
 }
 
-/* Large feature image */
+/* Legacy full-bleed hero (removed from HTML; hide if old embeds still ship it) */
 .mc-boards__feature {
-  width: 100vw;
-  max-width: 100%;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-  margin-bottom: 28px;
-  background: #f5f5f5;
-}
-
-.mc-boards__feature-img {
-  display: block;
-  width: 100%;
-  max-height: min(72vh, 640px);
-  object-fit: contain;
-  object-position: center bottom;
-  background: #ffffff;
+  display: none !important;
 }
 
 .mc-boards__masthead {
-  margin-bottom: 32px;
+  margin-bottom: 36px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--mc-border);
 }
 
 .mc-boards__title {
-  margin: 0 0 10px;
-  font-family: Inter, system-ui, sans-serif;
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 600;
+  margin: 0 0 12px;
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 4.5vw, 2.75rem);
+  font-weight: 500;
   font-style: normal;
   letter-spacing: 0.02em;
+  line-height: 1.15;
   color: var(--mc-text);
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .mc-boards__lede {
@@ -163,10 +153,10 @@ html.mc-my-boards-page a:hover {
 .mc-boards__section-title {
   margin: 0 0 20px;
   font-family: Inter, system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   font-style: normal;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--mc-text);
 }
@@ -306,11 +296,13 @@ html.mc-my-boards-page a:hover {
 
 .mc-boards__split-title {
   margin: 0 0 12px;
-  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-  font-weight: 600;
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  font-size: clamp(1.5rem, 2.8vw, 2rem);
+  font-weight: 500;
   font-style: normal;
+  letter-spacing: 0.02em;
   color: var(--mc-text);
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .mc-boards__split-text {
@@ -763,9 +755,7 @@ html.mc-my-boards-page a:hover {
 }
 
 #content_area .mc-boards__feature {
-  margin-left: 0;
-  margin-right: 0;
-  width: 100%;
+  display: none !important;
 }
 
 /* Decor trends */

@@ -2,7 +2,7 @@
  * Style library + curated McCabe product looks for inspiration boards.
  * Product PNGs: /v/vspfiles/boards/showcase/
  */
-window.MC_BOARD_STYLES_BUILD = '20260536';
+window.MC_BOARD_STYLES_BUILD = '20260537';
 window.MC_BOARD_STYLES = {
   assetBases: ['/v/vspfiles/boards/', '/vspfiles/boards/'],
 
@@ -600,7 +600,7 @@ window.renderBoardsPreview = function renderBoardsPreview() {
     if (window.__MC_BOARDS_APP_STARTED) return;
     if (document.querySelector('script[src*="my-boards-page.js"]')) return;
     var s = document.createElement('script');
-    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260536';
+    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260537';
     s.defer = true;
     document.body.appendChild(s);
   }
