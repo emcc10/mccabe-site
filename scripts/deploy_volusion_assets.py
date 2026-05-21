@@ -234,6 +234,8 @@ def main() -> int:
 
     from verify_template_sftp import connect_paramiko_transport
 
+    import paramiko  # noqa: PLC0415
+
     try:
         transport = connect_paramiko_transport(host, port, user, password)
     except Exception as exc:  # noqa: BLE001

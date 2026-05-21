@@ -575,9 +575,34 @@
     return 0;
   }
 
+  function readSaleFromPriceBox() {
+    var box =
+      global.document.querySelector("#v65-product-parent .colors_pricebox") ||
+      global.document.querySelector("#content_area .colors_pricebox");
+    if (!box) return 0;
+    var text = box.textContent || "";
+    var amounts = [];
+    var re = /\$[\d,]+(?:\.\d{2})?/g;
+    var m;
+    while ((m = re.exec(text)) !== null) {
+      var v = parseMoney(m[0]);
+      if (v > 0) amounts.push(v);
+    }
+    if (amounts.length < 2) return 0;
+    amounts.sort(function (a, b) {
+      return b - a;
+    });
+    var retail = amounts[0];
+    var sale = amounts[amounts.length - 1];
+    if (sale > 0 && sale < retail) return sale;
+    if (amounts.length >= 2 && amounts[1] < retail) return amounts[1];
+    return 0;
+  }
+
   function resolvePdpSaleAmount() {
     if (global.__mcPdpSaleAmtCached > 0) return global.__mcPdpSaleAmtCached;
     var amt = readSaleFromVisibleNodes();
+    if (!(amt > 0)) amt = readSaleFromPriceBox();
     if (!(amt > 0)) {
       var inputs = global.document.querySelectorAll(
         "#v65-product-parent input, #v65-product-parent textarea, #content_area input, #content_area textarea"

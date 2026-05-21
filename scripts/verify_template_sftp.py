@@ -192,6 +192,8 @@ def main() -> int:
         print(f"::error::SFTP connect failed: {exc}", file=sys.stderr)
         return 1
 
+    import paramiko  # noqa: PLC0415
+
     matched: list[str] = []
     try:
         sftp = paramiko.SFTPClient.from_transport(transport)

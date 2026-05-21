@@ -1,6 +1,6 @@
 /**
  * PDP retail/member/sale stack repair — works without template_266 rebake.
- * MC_PDP_PRICE_STACK_JS_20260522b
+ * MC_PDP_PRICE_STACK_JS_20260522c
  */
 (function (g) {
   "use strict";
@@ -38,6 +38,30 @@
       g.document.querySelector("#v65-product-parent .product_list_price") ||
       g.document.querySelector("#content_area .product_list_price");
     return el ? parseMoney(el.textContent || "") : 0;
+  }
+
+  function readSaleFromPriceBox() {
+    var box =
+      g.document.querySelector("#v65-product-parent .colors_pricebox") ||
+      g.document.querySelector("#content_area .colors_pricebox");
+    if (!box) return 0;
+    var amounts = [];
+    var re = /\$[\d,]+(?:\.\d{2})?/g;
+    var m;
+    var text = box.textContent || "";
+    while ((m = re.exec(text)) !== null) {
+      var v = parseMoney(m[0]);
+      if (v > 0) amounts.push(v);
+    }
+    if (amounts.length < 2) return 0;
+    amounts.sort(function (a, b) {
+      return b - a;
+    });
+    var retail = amounts[0];
+    var sale = amounts[amounts.length - 1];
+    if (sale > 0 && sale < retail) return sale;
+    if (amounts.length >= 2 && amounts[1] < retail) return amounts[1];
+    return 0;
   }
 
   function readSaleFromVisibleNodes() {
@@ -80,6 +104,7 @@
   function resolvePdpSaleAmount() {
     if (g.__mcPdpSaleAmtCached > 0) return g.__mcPdpSaleAmtCached;
     var amt = readSaleFromVisibleNodes();
+    if (!(amt > 0)) amt = readSaleFromPriceBox();
     if (!(amt > 0)) {
       g.document.querySelectorAll("#v65-product-parent input, #content_area input").forEach(function (inp) {
         if (amt > 0) return;
