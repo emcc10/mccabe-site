@@ -4,6 +4,17 @@ on:
   push:
     branches:
       - main
+    # Avoid a 5+ min Volusion SFTP deploy on every render/package-only commit.
+    paths:
+      - "vspfiles/**"
+      - "template_266.html"
+      - ".github/scripts/**"
+      - ".github/workflows/deploy.yml"
+      - "scripts/deploy_volusion_assets.py"
+      - "scripts/verify_*.py"
+      - "scripts/upload_*.py"
+      - "scripts/replace_plp_photo_mats.py"
+      - "scripts/volusion_sftp_*.py"
   workflow_dispatch:
     inputs:
       git_ref:
@@ -82,7 +93,7 @@ jobs:
             exit 1
           fi
           echo ""
-          echo "Green only if log contains: SFTP custom-safe OK, MC_PDP_JS_SFTP_CANONICAL_OK, MC_PDP_JS_HTTP_OK"
+          echo "Green if log contains: SFTP custom-safe OK, MC_PDP_JS_SFTP_CANONICAL_OK (HTTP is warning-only when runner gets 403)"
           echo "Quick browser checks:"
           echo "  fetch('/v/vspfiles/js/mc-pdp-auth-cta-fix.js?'+Date.now()).then(r=>r.text()).then(t=>console.log(t.includes('mcEnsurePdpPriceStack')))"
           echo "  fetch('/v/vspfiles/js/mc-pdp-price-stack.js?'+Date.now()).then(r=>console.log(r.status))"

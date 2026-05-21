@@ -1,0 +1,34 @@
+{
+  "stage": "4B",
+  "lockedFrom": "Stage 4 variant B",
+  "notFinalBaliSilk": true,
+  "method": "recolorUpholsteryRelativeLRemap + compositePhase2",
+  "params": {
+    "lLow": 72,
+    "lHigh": 92,
+    "mappedLBlend": 0.82,
+    "targetA": 0.3,
+    "targetB": 4.2,
+    "chromaSourceA": 0.12,
+    "chromaSourceB": 0.1,
+    "chromaTargetA": 0.88,
+    "chromaTargetB": 0.9
+  },
+  "sourceUpholsteryLabStats": {
+    "minL": 0,
+    "maxL": 75,
+    "meanL": 32.40331469937135,
+    "p5": 15,
+    "p95": 56
+  },
+  "postRgbPasses": [],
+  "outputs": {
+    "single": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage4b-single.png",
+    "comparison": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\stage4b-comparison.png"
+  },
+  "metrics": {
+    "upholsteryMeanLabDeltaFromSource": 48.981557874028866,
+    "lStdPreservationRatio": 0.5559679617092524,
+    "legExactMatchRatio": 1
+  }
+}
