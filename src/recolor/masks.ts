@@ -41,6 +41,12 @@ export function dilateMask(mask: MaskData, px: number): MaskData {
   return { ...mask, data: out };
 }
 
+/** Soft mask blur via dilate+erode (morphological smooth). */
+export function blurMask(mask: MaskData, px: number): MaskData {
+  if (px <= 0) return { ...mask, data: new Uint8Array(mask.data) };
+  return erodeMask(dilateMask(mask, px), px);
+}
+
 export function erodeMask(mask: MaskData, px: number): MaskData {
   if (px <= 0) return { ...mask, data: new Uint8Array(mask.data) };
   const out = new Uint8Array(mask.data.length);

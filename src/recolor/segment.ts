@@ -198,23 +198,19 @@ export async function buildSegmentationForProduct(
   let seg: SegmentationResult;
   if (overrides?.upholstery) {
     const alpha = extractAlphaFromImage(image);
+    const emptyMask: MaskData = {
+      data: new Uint8Array(image.width * image.height),
+      width: image.width,
+      height: image.height,
+    };
+    let legs = overrides.legs ?? emptyMask;
+    const legPath = join(productDir(productCode), 'leg-mask.png');
+    if (!overrides.legs && existsSync(legPath)) legs = await loadMask(legPath);
     seg = {
       alpha,
       upholstery: overrides.upholstery,
-      legs:
-        overrides.legs ??
-        (await loadMask(join(productDir(productCode), 'leg-mask.png')).catch(() => ({
-          data: new Uint8Array(image.width * image.height),
-          width: image.width,
-          height: image.height,
-        }))),
-      trim:
-        overrides.trim ??
-        ({
-          data: new Uint8Array(image.width * image.height),
-          width: image.width,
-          height: image.height,
-        } as MaskData),
+      legs,
+      trim: overrides.trim ?? emptyMask,
     };
     if (overrides.legs) seg.legs = dilateMask(overrides.legs, config.legProtectionExpandPx);
     seg.upholstery = subtractMask(intersectMask(seg.upholstery, alpha), seg.legs);
