@@ -5749,6 +5749,7 @@ try {
     mcRunParagonPriceSourceDebug();
     try {
       if (typeof mcSyncPlannerConfigurationPriceDisplay === "function") mcSyncPlannerConfigurationPriceDisplay();
+      if (typeof mcSyncTheaterConfigurationFromDom === "function") mcSyncTheaterConfigurationFromDom();
       if (typeof recalcRoomPlannerPrice === "function") recalcRoomPlannerPrice();
       else if (typeof window.recalcRoomPlannerPrice === "function") window.recalcRoomPlannerPrice();
     } catch (eRecalcMr) {}
@@ -6565,6 +6566,173 @@ if (typeof window !== "undefined") {
   window.mcSyncPlannerConfigurationPriceDisplay = mcSyncPlannerConfigurationPriceDisplay;
 }
 
+/** Theater/Paragon native selects (not room planner): show config + additional cost + total when signed in. */
+function mcExtractAdditionalFromOptionText(text) {
+  var t = String(text || "");
+  var m =
+    t.match(/\[\s*Additional\s*\$?\s*([\d,]+(?:\.\d{2})?)\s*\]/i) ||
+    t.match(/additional\s*\$?\s*([\d,]+(?:\.\d{2})?)/i) ||
+    t.match(/\(\s*\+\s*\$?\s*([\d,]+(?:\.\d{2})?)\s*\)/i);
+  return m ? parseMcCurrency(m[1]) : 0;
+}
+
+function mcCleanConfigurationLabel(text) {
+  var t = String(text || "").replace(/\s+/g, " ").trim();
+  if (typeof stripPriceTail === "function") t = stripPriceTail(t);
+  return t.replace(/\s*\[\s*Additional[^\]]*\]\s*/gi, "").replace(/\s+/g, " ").trim();
+}
+
+function mcFindTheaterOptionSelects(root) {
+  root = root || document;
+  var tables = root.querySelectorAll("#options_table, table[id*='options_table']");
+  var seatsSel = null;
+  var configSel = null;
+  var ti;
+  for (ti = 0; ti < tables.length; ti++) {
+    var selects = tables[ti].querySelectorAll("select:not(.mc-native-leather)");
+    var si;
+    for (si = 0; si < selects.length; si++) {
+      var sel = selects[si];
+      var meta = (
+        (sel.getAttribute("title") || "") +
+        " " +
+        (sel.name || "") +
+        " " +
+        (sel.id || "")
+      ).toLowerCase();
+      var row = sel.closest("tr");
+      var rowTxt = row ? (row.textContent || "").replace(/\s+/g, " ").toLowerCase() : "";
+      var blob = meta + " " + rowTxt;
+      if (!seatsSel && /number of seats|# of seats|seat count/.test(blob)) seatsSel = sel;
+      if (!configSel && /choose configuration|configuration/.test(blob) && !/configuration details/.test(blob)) {
+        configSel = sel;
+      }
+    }
+  }
+  return { seatsSel: seatsSel, configSel: configSel };
+}
+
+function mcSyncTheaterConfigurationFromDom() {
+  if (window.__mcPlannerConfigApplied) return;
+  if (typeof mcIsTheaterPlannerPdp === "function" && !mcIsTheaterPlannerPdp()) return;
+
+  var capEl = document.getElementById("mcConfigurationCaption");
+  var pieEl = document.getElementById("mcConfigurationPieces");
+  var priceEl = document.getElementById("mcConfigurationPrice");
+  if (!pieEl) return;
+
+  var picks = mcFindTheaterOptionSelects(document);
+  var seatsSel = picks.seatsSel;
+  var configSel = picks.configSel;
+  if (!configSel && !seatsSel) {
+    if (capEl) {
+      capEl.style.display = "block";
+      if (!capEl.classList.contains("mc-configuration-rh__planner-only")) {
+        capEl.textContent = "Please use the room planner to choose configuration.";
+      }
+    }
+    pieEl.style.display = "none";
+    pieEl.innerHTML = "";
+    if (priceEl) {
+      priceEl.style.display = "none";
+      priceEl.textContent = "";
+    }
+    return;
+  }
+
+  var fmt =
+    typeof window.formatMcCurrency === "function"
+      ? window.formatMcCurrency
+      : typeof formatMcCurrency === "function"
+        ? formatMcCurrency
+        : function (v) {
+            return "$" + Number(v || 0).toFixed(2);
+          };
+
+  var lines = [];
+  if (seatsSel && seatsSel.options && seatsSel.selectedIndex >= 0) {
+    var seatLabel = mcCleanConfigurationLabel(
+      seatsSel.options[seatsSel.selectedIndex].text || seatsSel.options[seatsSel.selectedIndex].innerText
+    );
+    if (seatLabel) lines.push("<div><strong>" + seatLabel + "</strong></div>");
+  }
+  if (configSel && configSel.options && configSel.selectedIndex >= 0) {
+    var cfgLabel = mcCleanConfigurationLabel(
+      configSel.options[configSel.selectedIndex].text || configSel.options[configSel.selectedIndex].innerText
+    );
+    if (cfgLabel) lines.push("<div><strong>" + cfgLabel + "</strong></div>");
+  }
+
+  var additional = 0;
+  if (configSel && configSel.selectedIndex >= 0) {
+    additional = mcExtractAdditionalFromOptionText(
+      configSel.options[configSel.selectedIndex].text || configSel.options[configSel.selectedIndex].innerText
+    );
+  }
+
+  var loggedIn = typeof mcPlannerUserIsLoggedIn === "function" && mcPlannerUserIsLoggedIn();
+
+  if (lines.length) {
+    pieEl.innerHTML = lines.join("");
+    pieEl.style.display = "block";
+    if (capEl) {
+      if (!loggedIn) {
+        capEl.style.display = "block";
+        capEl.classList.add("mc-configuration-rh__planner-only");
+        capEl.innerHTML =
+          '<button type="button" class="mc-configuration-rh__signin-cta" data-mc-open-login style="border:none;background:none;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer;">Sign in</button> for configured price.';
+      } else {
+        capEl.style.display = "none";
+        capEl.classList.remove("mc-configuration-rh__planner-only");
+      }
+    }
+  } else {
+    pieEl.style.display = "none";
+    pieEl.innerHTML = "";
+  }
+
+  if (priceEl) {
+    if (!loggedIn) {
+      priceEl.style.display = "none";
+      priceEl.textContent = "";
+    } else {
+      var totalAmt = 0;
+      var pwo =
+        document.getElementById("priceWithOptions") ||
+        document.getElementById("priceWithOptionsNoTax") ||
+        document.querySelector("#v65-product-parent #priceWithOptions");
+      if (pwo) {
+        totalAmt =
+          parseMcCurrency(
+            (pwo.getAttribute && (pwo.getAttribute("content") || pwo.getAttribute("value"))) ||
+              pwo.textContent ||
+              ""
+          ) || 0;
+      }
+      if (!(totalAmt > 0) && typeof getVolusionAddToCartSeatPrice === "function") {
+        totalAmt = Number(getVolusionAddToCartSeatPrice(document)) || 0;
+      }
+      var priceLines = [];
+      if (additional > 0) {
+        priceLines.push("Additional configuration cost: " + fmt(additional));
+      }
+      if (totalAmt > 0) {
+        priceLines.push("Total: " + fmt(totalAmt));
+      }
+      if (priceLines.length) {
+        priceEl.textContent = priceLines.join("\n");
+        priceEl.style.display = "block";
+      } else {
+        priceEl.textContent = "Calculating price…";
+        priceEl.style.display = "block";
+      }
+    }
+  }
+}
+if (typeof window !== "undefined") {
+  window.mcSyncTheaterConfigurationFromDom = mcSyncTheaterConfigurationFromDom;
+}
+
 function ensureTheaterPlannerOptionPriceResync() {
   if (document.documentElement.dataset.mcTheaterPlannerPriceSync === "1") return;
   document.documentElement.dataset.mcTheaterPlannerPriceSync = "1";
@@ -6574,11 +6742,14 @@ function ensureTheaterPlannerOptionPriceResync() {
   root.addEventListener(
     "change",
     function () {
-      if (!window.__mcPlannerConfigApplied) return;
       if (deb) clearTimeout(deb);
       deb = setTimeout(function () {
         deb = null;
-        mcSyncPlannerConfigurationPriceDisplay();
+        if (window.__mcPlannerConfigApplied) {
+          mcSyncPlannerConfigurationPriceDisplay();
+        } else if (typeof mcSyncTheaterConfigurationFromDom === "function") {
+          mcSyncTheaterConfigurationFromDom();
+        }
       }, 150);
     },
     true
@@ -18964,10 +19135,24 @@ async function mcSubmitAuthForm(form, mode) {
     } else if (isLoggedIn) {
       /* No member amount yet; omit a loading caption so async paint does not flash placeholder text. */
     } else {
+      var salePreview = '';
+      try {
+        var saleNode =
+          document.querySelector('#v65-product-parent .product_saleprice, #content_area .product_saleprice') ||
+          document.querySelector('#v65-product-parent .product_sale_price, #content_area .product_sale_price');
+        if (saleNode) {
+          var saleAmt = parseMcCurrency(saleNode.textContent || '');
+          if (saleAmt > 0 && typeof mcFmtMoney === 'function') {
+            salePreview =
+              '<div class="mc-pdp-sale-preview">Sale Price: ' + mcFmtMoney(saleAmt) + '</div>';
+          }
+        }
+      } catch (eSalePrev) {}
       html +=
         '<div class="mc-pdp-member-line mc-pdp-member-line--locked">' +
         '<span class="mc-pdp-member-line__label">Member Price</span>' +
         '<span class="mc-pdp-member-line__amount"><a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see member pricing</span>' +
+        salePreview +
         '</div>';
     }
 

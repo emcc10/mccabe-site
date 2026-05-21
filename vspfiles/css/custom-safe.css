@@ -1,4 +1,4 @@
-/* 0521c C_CSS_DEPLOY_VERIFY_20260521c — MC_PDP_TYPE_13PX_STACK at EOF (title, options, retail/member) */
+/* 0521d C_CSS_DEPLOY_VERIFY_20260521d — MC_PDP_TYPE_13PX_STACK + ATC #e2dfd8 */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -13694,7 +13694,7 @@ html body.productdetails #v65-product-parent input[name="btnaddtocart"],
 html body.productdetails #v65-product-parent button[name="btnaddtocart"],
 html body.mc-product-page .mc-atc-button-wrap,
 html body.productdetails .mc-atc-button-wrap {
-  border-color: ##e2dfd8 !important;
+  border-color: #e2dfd8 !important;
 }
 
 /* Accordion shell + rows + panels */
@@ -14359,7 +14359,27 @@ html body.mc-product-page #content_area table[id*="options_table"] select:not(.m
 html body.productdetails #options_table select:not(.mc-native-leather),
 html body.mc-product-page #options_table select:not(.mc-native-leather),
 html body.productdetails #content_area #mcLeatherSummary,
-html body.mc-product-page #content_area #mcLeatherSummary {
+html body.mc-product-page #content_area #mcLeatherSummary,
+html body.productdetails #content_area .mc-member-price-caption,
+html body.mc-product-page #content_area .mc-member-price-caption,
+html body.productdetails #content_area .mc-member-price-caption *,
+html body.mc-product-page #content_area .mc-member-price-caption *,
+html body.productdetails #content_area .mc-pdp-member-line__amount,
+html body.mc-product-page #content_area .mc-pdp-member-line__amount,
+html body.productdetails #content_area .mc-pdp-member-line__amount a,
+html body.mc-product-page #content_area .mc-pdp-member-line__amount a,
+html body.productdetails #v65-product-parent .product_saleprice,
+html body.mc-product-page #v65-product-parent .product_saleprice,
+html body.productdetails #content_area .product_saleprice,
+html body.mc-product-page #content_area .product_saleprice,
+html body.productdetails #content_area .product_sale_price,
+html body.mc-product-page #content_area .product_sale_price,
+html body.productdetails #content_area font.product_sale_price,
+html body.mc-product-page #content_area font.product_sale_price,
+html body.productdetails #content_area .mc-configuration-rh__total,
+html body.mc-product-page #content_area .mc-configuration-rh__total,
+html body.productdetails #content_area .mc-configuration-rh__caption,
+html body.mc-product-page #content_area .mc-configuration-rh__caption {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 13px !important;
   font-weight: 400 !important;
@@ -14368,9 +14388,31 @@ html body.mc-product-page #content_area #mcLeatherSummary {
   text-transform: none !important;
   color: #444 !important;
 }
+html body.productdetails #content_area .mc-pdp-retail-label,
+html body.mc-product-page #content_area .mc-pdp-retail-label,
+html body.productdetails #content_area .mc-pdp-member-line__label,
+html body.mc-product-page #content_area .mc-pdp-member-line__label,
+html body.productdetails #content_area .mc-member-price-caption__option-label,
+html body.mc-product-page #content_area .mc-member-price-caption__headline,
+html body.productdetails #content_area .mc-configuration-rh__heading,
+html body.mc-product-page #content_area .mc-configuration-rh__heading {
+  text-transform: uppercase !important;
+  color: #777 !important;
+}
 html body.mc-product-page #content_area .mc-option-accordion__toggle,
 html body.productdetails #content_area .mc-option-accordion__toggle {
   font-size: 18px !important;
   letter-spacing: 0 !important;
   text-transform: none !important;
+}
+/* ATC + accordion + config buttons — brand line #e2dfd8 */
+html body.mc-product-page .mc-atc-button-wrap,
+html body.productdetails .mc-atc-button-wrap,
+html body.mc-product-page #mcPlannerBtn,
+html body.productdetails #mcPlannerBtn,
+html body.mc-product-page #mcProductSummaryBtn,
+html body.productdetails #mcProductSummaryBtn,
+html body.mc-product-page .mc-config-btn,
+html body.productdetails .mc-config-btn {
+  border-color: #e2dfd8 !important;
 }
