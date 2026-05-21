@@ -220,8 +220,8 @@ for f in \
   base=$(basename "$f")
   rel="${f#vspfiles/}"
   if put_primary "$f" "boards-${base}" \
-    "/vspfiles/${rel}" \
-    "/v/vspfiles/${rel}"; then
+    "/v/vspfiles/${rel}" \
+    "/vspfiles/${rel}"; then
     :
   else
     boards_fail=$((boards_fail + 1))
@@ -295,9 +295,10 @@ verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-ct
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260621"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260520plp" "MC_DTK_PLP_20260621"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-sofa-bounds.json?v=$(date +%s)" "77494-91-1.jpg"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-bundle.css?v=20260527" "mc-boards__feature"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/board-styles.js?v=20260527" "MC_BOARD_STYLES"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" "Interior design studio"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-bundle.css?v=20260529" "mc-boards__feature"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/board-styles.js?v=20260529" "MC_BOARD_STYLES"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-page.js?v=20260529" "mc-boards__catalog"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" "mc-boards__triptych"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png?v=$(date +%s)" "PNG"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/template.min.js" "MC_PLP_ENFORCER_LOADING__"
 

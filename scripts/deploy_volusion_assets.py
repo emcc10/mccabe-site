@@ -46,8 +46,12 @@ SKIP_OVER_CAP = (
 
 def _remotes(rel: str) -> list[str]:
     rel = rel.replace("\\", "/")
-    paths = [f"/vspfiles/{rel.split('vspfiles/', 1)[-1]}" if "vspfiles/" in rel else rel]
-    paths.extend([f"/v/{rel}", rel, f"/{rel}"])
+    # Live URLs use /v/vspfiles/ — upload that path first (writing only /vspfiles/ leaves HTTP stale).
+    if "vspfiles/" in rel:
+        sub = rel.split("vspfiles/", 1)[-1]
+        paths = [f"/v/vspfiles/{sub}", f"/vspfiles/{sub}", f"/v/{rel}", rel, f"/{rel}"]
+    else:
+        paths = [rel, f"/{rel}", f"/v/{rel}"]
     if rel.startswith("vspfiles/templates/266/js/min/"):
         name = rel.rsplit("/", 1)[-1]
         paths.append(f"/vspfiles/templates/266/js/min/{name}")
@@ -60,12 +64,17 @@ def _remotes(rel: str) -> list[str]:
     return out
 
 
+def _boards_need_all_remotes(local: str) -> bool:
+    n = local.replace("\\", "/")
+    return n.startswith("vspfiles/boards/") or n == "vspfiles/my-boards.html"
+
+
 def _photo_remotes(name: str) -> list[str]:
     seen: set[str] = set()
     out: list[str] = []
     for p in (
-        f"/vspfiles/photos/{name}",
         f"/v/vspfiles/photos/{name}",
+        f"/vspfiles/photos/{name}",
         f"/mccabestheaterandliving.com/v/vspfiles/photos/{name}",
         f"vspfiles/photos/{name}",
     ):
@@ -140,6 +149,27 @@ def _upload_chunked(sftp, local: str, remote: str, chunk_size: int = 16384) -> b
     return False
 
 
+def _try_put(sftp, local: str, remote: str, want: int, use_chunked_first: bool) -> bool:
+    try:
+        _ensure_remote_dir(sftp, remote)
+        if use_chunked_first and _upload_chunked(sftp, local, remote):
+            return True
+        sftp.put(local, remote, confirm=False)
+        got = sftp.stat(remote).st_size
+        if got == want:
+            print(f"::notice::PUT_OK {local!r} -> {remote!r} size={want}", flush=True)
+            return True
+        print(
+            f"::warning::SIZE_MISMATCH {remote!r} want={want} got={got}",
+            flush=True,
+        )
+        if got < want and _upload_chunked(sftp, local, remote):
+            return True
+    except Exception as exc:  # noqa: BLE001
+        print(f"::warning::PUT_SKIP {remote!r}: {exc}", flush=True)
+    return False
+
+
 def _upload_one(sftp, local: str, remotes: list[str] | None = None) -> bool:
     want = os.path.getsize(local)
     if local.replace("\\", "/") in {p.replace("\\", "/") for p in SKIP_OVER_CAP}:
@@ -153,32 +183,39 @@ def _upload_one(sftp, local: str, remotes: list[str] | None = None) -> bool:
 
     paths = remotes if remotes is not None else _remotes(local)
     use_chunked_first = want > 31000 or local.lower().endswith(".png")
+    sync_all = _boards_need_all_remotes(local)
+    canon_ok = False
+    any_ok = False
     last_exc: Exception | None = None
+
     for remote in paths:
         try:
-            _ensure_remote_dir(sftp, remote)
-            if use_chunked_first and _upload_chunked(sftp, local, remote):
-                return True
-            sftp.put(local, remote, confirm=False)
-            got = sftp.stat(remote).st_size
-            if got == want:
-                print(f"::notice::PUT_OK {local!r} -> {remote!r} size={want}", flush=True)
-                return True
-            print(
-                f"::warning::SIZE_MISMATCH {remote!r} want={want} got={got}",
-                flush=True,
-            )
-            if got < want and _upload_chunked(sftp, local, remote):
-                return True
-            last_exc = None
+            if _try_put(sftp, local, remote, want, use_chunked_first):
+                any_ok = True
+                if remote.startswith("/v/vspfiles/"):
+                    canon_ok = True
+                if not sync_all:
+                    return True
+            else:
+                last_exc = None
         except Exception as exc:  # noqa: BLE001
             last_exc = exc
             print(f"::warning::PUT_SKIP {remote!r}: {exc}", flush=True)
+
+    if sync_all:
+        if not canon_ok:
+            print(
+                f"::error::FAIL {local!r}: /v/vspfiles/ path not updated (HTTP serves this URL)",
+                file=sys.stderr,
+            )
+            return False
+        return any_ok
+
     if last_exc:
         print(f"::error::FAIL {local!r}: {last_exc}", file=sys.stderr)
-    else:
+    elif not any_ok:
         print(f"::error::FAIL {local!r}: no remote path with matching size", file=sys.stderr)
-    return False
+    return any_ok
 
 
 def main() -> int:

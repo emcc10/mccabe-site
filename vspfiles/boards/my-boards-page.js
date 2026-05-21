@@ -1256,7 +1256,7 @@
       done();
       return;
     }
-    var src = API_BASE + 'board-styles.js?v=20260528';
+    var src = API_BASE + 'board-styles.js?v=20260529';
     var tag = document.querySelector('script[src*="board-styles.js"]');
     if (tag) {
       tag.addEventListener('load', function () {

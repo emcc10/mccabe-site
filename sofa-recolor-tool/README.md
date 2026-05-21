@@ -23,11 +23,12 @@ No depth restore, CLAHE, hero clustering, texture residuals, or dual pipelines.
 
 ## Bali-Silk (production)
 
-1. `input/sofa.png` → **swatch chroma only** (LAB a/b from Bali-Silk; **100% source L** per pixel).
-2. **Per-pixel source Rec.709 luma** restored after chroma swap (catalog microcontrast preserved).
-3. **Finalize only** — white background, contact shadow, bottom-band cleanup (upholstery untouched).
+1. `input/sofa.png` → **swatch chroma only** (LAB a/b from Bali-Silk; source ΔL preserved).
+2. **Measured HF/MF luminance residuals** from `sofa.png` re-injected (HF×0.40, MF×0.15, soft-clamped).
+3. **Per-pixel source Rec.709 luma** restored after chroma + residual pass.
+4. **Finalize only** — white background, contact shadow, bottom-band cleanup (upholstery untouched).
 
-No reference transfer, sharpening, smoothing, or upholstery post-processing.
+No synthesis, reference transfer, sharpening, or upholstery post-processing.
 
 ```bash
 npm run bali             # production Bali-Silk-*.png

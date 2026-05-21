@@ -18,7 +18,13 @@ import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { finalizeBaliExport } from './finalize-bali-export.js';
-import { prepareSourceLGrain } from './leather-detail.js';
+import {
+  applySourceLGrain,
+  PHOTO_HF_GAIN,
+  PHOTO_MF_GAIN,
+  prepareSourceLGrain,
+  prepareSourceLLfBand,
+} from './leather-detail.js';
 import {
   applyReferenceRealismTransfer,
   DEFAULT_REFERENCE,
@@ -781,7 +787,7 @@ export function baliChromaOnlyLabRgb(r, g, b, chroma, photoL, meanPhotoL, anchor
   return labToRgb(clamp(finalL, 0, 100), chroma.a, chroma.b);
 }
 
-/** Production: LAB chroma swap + exact per-pixel source Rec.709 luma (catalog structure). */
+/** Production: chroma swap + source HF/MF L residuals + per-pixel Rec.709 luma lock. */
 export function baliChromaOnlyPreserveSourceLuma(
   r,
   g,
@@ -791,9 +797,14 @@ export function baliChromaOnlyPreserveSourceLuma(
   meanPhotoL,
   anchorL,
   lumOffset,
+  grain,
+  j,
 ) {
   const srcLum = pixelBrightness(r, g, b);
-  const { r: tr, g: tg, b: tb } = baliChromaOnlyLabRgb(r, g, b, chroma, photoL, meanPhotoL, anchorL);
+  let finalL = photoL + (anchorL - meanPhotoL);
+  if (grain) finalL = applySourceLGrain(finalL, j, grain);
+  finalL = clamp(finalL, 0, 100);
+  const { r: tr, g: tg, b: tb } = labToRgb(finalL, chroma.a, chroma.b);
   const outLum = pixelBrightness(tr, tg, tb);
   const ratio = (srcLum + lumOffset) / Math.max(outLum, 0.5);
   return {
@@ -804,8 +815,30 @@ export function baliChromaOnlyPreserveSourceLuma(
 }
 
 /** @deprecated alias */
-export function baliRgbPreserveSourceLuma(r, g, b, chroma, photoL, meanPhotoL, anchorL, lumOffset) {
-  return baliChromaOnlyPreserveSourceLuma(r, g, b, chroma, photoL, meanPhotoL, anchorL, lumOffset);
+export function baliRgbPreserveSourceLuma(
+  r,
+  g,
+  b,
+  chroma,
+  photoL,
+  meanPhotoL,
+  anchorL,
+  lumOffset,
+  grain,
+  j,
+) {
+  return baliChromaOnlyPreserveSourceLuma(
+    r,
+    g,
+    b,
+    chroma,
+    photoL,
+    meanPhotoL,
+    anchorL,
+    lumOffset,
+    grain,
+    j,
+  );
 }
 
 export function computeFinalLabL(originalL, swatchL) {
@@ -847,7 +880,8 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
   const lumOffset = palette.isBaliSilk
     ? pixelBrightness(midRgb.r, midRgb.g, midRgb.b) - meanSrcLum
     : 0;
-  const grain = realismStress || realismProbe ? prepareSourceLGrain(sourceImage) : null;
+  const grain = palette.isBaliSilk ? prepareSourceLGrain(sourceImage) : null;
+  const sourceLf = realismProbe ? prepareSourceLLfBand(sourceImage) : null;
 
   for (let j = 0; j < width * height; j++) {
     if (mask[j] < MASK_APPLY_THRESH) continue;
@@ -874,6 +908,7 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
         photoL,
         meanPhotoL,
         anchorL,
+        sourceLf,
       );
       out[p] = rgb.r;
       out[p + 1] = rgb.g;
@@ -904,6 +939,8 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
         meanPhotoL,
         anchorL,
         lumOffset,
+        grain,
+        j,
       );
       out[p] = rgb.r;
       out[p + 1] = rgb.g;
@@ -1156,7 +1193,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     lBlend: isBali
       ? realismStress
         ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
-        : 'source ΔL + swatch a/b keyed to source luma; per-pixel source Rec.709 luma (no upholstery post)'
+        : `source ΔL + swatch a/b + source HF×${PHOTO_HF_GAIN} MF×${PHOTO_MF_GAIN} (sofa.png); per-pixel luma lock`
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali
