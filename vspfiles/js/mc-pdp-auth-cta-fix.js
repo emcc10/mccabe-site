@@ -1,12 +1,12 @@
 /**
  * PDP Sign In / Create Account — modal only, no /login.asp redirect, no room planner on gate clicks.
  * Post-login: close modal first, refresh member/planner pricing in background (works without template rebake).
- * MC_PDP_AUTH_CTA_20260624
+ * MC_PDP_AUTH_CTA_20260624 — price stack repair MC_PDP_PRICE_STACK_20260522 (no template rebake)
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260624";
+  var VERSION = "20260522price";
 
   function authDelay(ms) {
     return new Promise(function (resolve) {
@@ -368,6 +368,11 @@
             return global.mcRenderRetailMemberOnPdp();
           }
         } catch (ePdp) {}
+      })
+      .then(function () {
+        try {
+          mcEnsurePdpPriceStack();
+        } catch (eStack) {}
       });
   }
 
@@ -523,9 +528,156 @@
       var b = global.document.body;
       if (b && b.classList.contains("productdetails")) return true;
       if (global.document.getElementById("v65-product-parent")) return true;
+      var p = String(global.location.pathname || "").toLowerCase();
+      if (/\.htm(?:\?|$)/i.test(p) && global.document.querySelector(".colors_pricebox")) return true;
     } catch (e) {}
     return false;
   }
+
+  function parseMoney(text) {
+    if (typeof global.parseMcCurrency === "function") {
+      return Number(global.parseMcCurrency(text == null ? "" : String(text))) || 0;
+    }
+    var m = String(text == null ? "" : text).match(/\$[\d,]+(?:\.\d+)?/);
+    if (!m) return 0;
+    return parseFloat(m[0].replace(/[$,]/g, "")) || 0;
+  }
+
+  function fmtMoney(n) {
+    n = Number(n || 0);
+    if (!(n > 0)) return "";
+    if (typeof global.mcFmtMoney === "function") return global.mcFmtMoney(n);
+    return (
+      "$" +
+      n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    );
+  }
+
+  function cacheSaleAmount() {
+    if (global.__mcPdpSaleAmtCached > 0) return global.__mcPdpSaleAmtCached;
+    var amt = 0;
+    var inputs = global.document.querySelectorAll(
+      "#v65-product-parent input, #v65-product-parent textarea, #content_area input, #content_area textarea"
+    );
+    var i;
+    for (i = 0; i < inputs.length; i++) {
+      var nm = ((inputs[i].name || "") + " " + (inputs[i].id || ""))
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+      if (nm.indexOf("saleprice") === -1) continue;
+      amt = parseMoney(inputs[i].value || inputs[i].getAttribute("value") || "");
+      if (amt > 0) break;
+    }
+    if (!(amt > 0)) {
+      var html = "";
+      try {
+        html = global.document.documentElement.innerHTML || "";
+      } catch (eH) {}
+      var patterns = [
+        /\bSalePrice\s*[=:]\s*['"]?\$?([\d,]+(?:\.\d+)?)/gi,
+        /\bwindow\.SalePrice\s*=\s*['"]?([\d,]+(?:\.\d+)?)/gi,
+      ];
+      var pi;
+      for (pi = 0; pi < patterns.length; pi++) {
+        var r = patterns[pi];
+        var m;
+        r.lastIndex = 0;
+        while ((m = r.exec(html)) !== null) {
+          var p = parseMoney(m[1]);
+          if (p > 0 && p < 50000000) {
+            amt = p;
+            break;
+          }
+        }
+        if (amt > 0) break;
+      }
+    }
+    if (!(amt > 0)) {
+      try {
+        if (global.__mcMemberPricing && global.__mcMemberPricing.memberSeatPrice > 0) {
+          amt = Number(global.__mcMemberPricing.memberSeatPrice) || 0;
+        }
+      } catch (eMp) {}
+    }
+    if (amt > 0) global.__mcPdpSaleAmtCached = amt;
+    return amt;
+  }
+
+  function hideNativeSaleNodes() {
+    var nodes = global.document.querySelectorAll(
+      "#v65-product-parent .product_sale_price, #v65-product-parent .product_saleprice, #v65-product-parent font.product_sale_price, #content_area .product_sale_price, #content_area .product_saleprice"
+    );
+    nodes.forEach(function (node) {
+      if (!node || (node.closest && node.closest(".mc-pdp-member-line--sale"))) return;
+      try {
+        node.style.setProperty("display", "none", "important");
+        node.style.setProperty("visibility", "hidden", "important");
+        node.style.setProperty("height", "0", "important");
+        node.style.setProperty("overflow", "hidden", "important");
+        node.style.setProperty("opacity", "0", "important");
+      } catch (eH) {}
+    });
+  }
+
+  function layoutMemberLines(wrap) {
+    if (!wrap || !wrap.querySelectorAll) return;
+    wrap.querySelectorAll(".mc-pdp-member-line").forEach(function (line) {
+      try {
+        line.style.setProperty("display", "flex", "important");
+        line.style.setProperty("flex-direction", "column", "important");
+        line.style.setProperty("align-items", "flex-start", "important");
+        line.style.setProperty("gap", "2px", "important");
+        line.style.setProperty("width", "100%", "important");
+        line.style.setProperty("position", "static", "important");
+      } catch (eL) {}
+    });
+  }
+
+  function mcEnsurePdpPriceStack() {
+    if (!isProductPdp()) return false;
+    var wrap = global.document.querySelector(".mc-pdp-member-pricing");
+    var retailRow = global.document.querySelector(".mc-pdp-retail-row");
+    if (!wrap && !retailRow) return false;
+    try {
+      global.document.body.classList.add("mc-pdp-price-stack");
+    } catch (eCls) {}
+    cacheSaleAmount();
+    hideNativeSaleNodes();
+    var loggedIn = false;
+    try {
+      loggedIn =
+        !!(global.document.body && global.document.body.classList.contains("mc-member-logged-in")) ||
+        !!global.sessionStorage.getItem("mc_recent_member_auth");
+    } catch (eLi) {}
+    if (!loggedIn && wrap && !wrap.querySelector(".mc-pdp-member-line--sale")) {
+      var saleAmt = Number(global.__mcPdpSaleAmtCached) || cacheSaleAmount();
+      if (saleAmt > 0) {
+        var saleLine = global.document.createElement("div");
+        saleLine.className = "mc-pdp-member-line mc-pdp-member-line--sale";
+        saleLine.innerHTML =
+          '<span class="mc-pdp-member-line__label">Sale Price</span>' +
+          '<span class="mc-pdp-member-line__amount">' +
+          fmtMoney(saleAmt) +
+          "</span>";
+        var locked = wrap.querySelector(".mc-pdp-member-line--locked");
+        if (locked && locked.parentNode) {
+          if (locked.nextSibling) locked.parentNode.insertBefore(saleLine, locked.nextSibling);
+          else locked.parentNode.appendChild(saleLine);
+        } else {
+          wrap.appendChild(saleLine);
+        }
+      }
+    }
+    if (wrap) layoutMemberLines(wrap);
+    if (!retailRow && typeof global.mcRenderRetailMemberOnPdp === "function") {
+      try {
+        global.mcRenderRetailMemberOnPdp();
+      } catch (eR) {}
+    }
+    return true;
+  }
+
+  global.mcEnsurePdpPriceStack = mcEnsurePdpPriceStack;
 
   function openLoginModal() {
     if (typeof global.mcOpenLoginModal === "function") {
@@ -655,6 +807,9 @@
     wirePlannerLoginGate();
     guardConfigurationBlockClick();
     patchCaptionSignInCta();
+    try {
+      mcEnsurePdpPriceStack();
+    } catch (eStackRun) {}
   }
 
   if (!global.__MC_PDP_AUTH_CTA_CAPTURE__) {

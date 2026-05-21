@@ -1,0 +1,98 @@
+{
+  "stage": "3B",
+  "pipeline": "recolorUpholsteryMinimal + compositePhase2 (same as Stage 3)",
+  "textureHighlightShadowDrift": 0,
+  "postRgbPasses": [],
+  "variants": [
+    {
+      "id": "A",
+      "label": "A: Stage3 baseline",
+      "outputFile": "stage3b-variant-A.png",
+      "targetLab": {
+        "l": 74.2,
+        "a": 1.8,
+        "b": 11.4
+      },
+      "preserveLuminance": 0.88,
+      "chromaBlend": 0.72,
+      "upholsteryMeanLabDeltaFromSource": 19.81377119262982,
+      "lStdPreservationRatio": 0.8808433151584509,
+      "legExactMatchRatio": 1
+    },
+    {
+      "id": "B",
+      "label": "B: higher L, same a/b",
+      "outputFile": "stage3b-variant-B.png",
+      "targetLab": {
+        "l": 79,
+        "a": 1.5,
+        "b": 10
+      },
+      "preserveLuminance": 0.88,
+      "chromaBlend": 0.72,
+      "upholsteryMeanLabDeltaFromSource": 20.71681490785938,
+      "lStdPreservationRatio": 0.8806096055993949,
+      "legExactMatchRatio": 1
+    },
+    {
+      "id": "C",
+      "label": "C: higher L, lower b",
+      "outputFile": "stage3b-variant-C.png",
+      "targetLab": {
+        "l": 81,
+        "a": 1.2,
+        "b": 8.4
+      },
+      "preserveLuminance": 0.87,
+      "chromaBlend": 0.74,
+      "upholsteryMeanLabDeltaFromSource": 22.132310968911007,
+      "lStdPreservationRatio": 0.8713092318159845,
+      "legExactMatchRatio": 1
+    },
+    {
+      "id": "D",
+      "label": "D: higher L, lower a/b",
+      "outputFile": "stage3b-variant-D.png",
+      "targetLab": {
+        "l": 82.5,
+        "a": 0.8,
+        "b": 7
+      },
+      "preserveLuminance": 0.87,
+      "chromaBlend": 0.76,
+      "upholsteryMeanLabDeltaFromSource": 23.5803197141252,
+      "lStdPreservationRatio": 0.8720469499078128,
+      "legExactMatchRatio": 1
+    },
+    {
+      "id": "E",
+      "label": "E: light neutral warm ivory",
+      "outputFile": "stage3b-variant-E.png",
+      "targetLab": {
+        "l": 84,
+        "a": 0.6,
+        "b": 6.2
+      },
+      "preserveLuminance": 0.86,
+      "chromaBlend": 0.78,
+      "upholsteryMeanLabDeltaFromSource": 24.936544851706845,
+      "lStdPreservationRatio": 0.8600227662165121,
+      "legExactMatchRatio": 1
+    },
+    {
+      "id": "F",
+      "label": "F: swatch-biased test",
+      "outputFile": "stage3b-variant-F.png",
+      "targetLab": {
+        "l": 85,
+        "a": 1,
+        "b": 7.5
+      },
+      "preserveLuminance": 0.85,
+      "chromaBlend": 0.8,
+      "upholsteryMeanLabDeltaFromSource": 24.876487410726586,
+      "lStdPreservationRatio": 0.849649846262469,
+      "legExactMatchRatio": 1
+    }
+  ]
+}

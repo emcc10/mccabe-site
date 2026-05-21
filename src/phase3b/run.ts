@@ -1,4 +1,5 @@
-import { existsSync, join, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { join } from 'path';
 import sharp from 'sharp';
 import { DEBUG_DIR, SOURCE_OUT } from '../phase1/paths.js';
 import { loadPhase1Masks } from '../phase1/loadMasks.js';
