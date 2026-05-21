@@ -1,4 +1,4 @@
-/* 0521g C_CSS_DEPLOY_VERIFY_20260521g — member price stack + sectional config box */
+/* 0521h C_CSS_DEPLOY_VERIFY_20260521h — hide native 32px sale overlap on McCabe PDP stack */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -5626,10 +5626,10 @@ body.mc-product-page #content_area .product_productprice,
 body.mc-product-page #v65-product-parent .product_productprice {
   display: none !important;
 }
-/* Price under "Price with selected options" – larger font */
-body.mc-product-page #content_area .product_sale_price,
-body.mc-product-page #content_area .product_sale_price b,
-body.mc-product-page #content_area .product_sale_price span {
+/* Price under "Price with selected options" – larger font (not when McCabe retail/member stack is active) */
+body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .product_sale_price,
+body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .product_sale_price b,
+body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .product_sale_price span {
   font-size: 32px !important;
   font-weight: 400 !important;
   margin: 0 0 18px 0 !important;
@@ -14502,4 +14502,60 @@ html body.productdetails #mcProductSummaryBtn,
 html body.mc-product-page .mc-config-btn,
 html body.productdetails .mc-config-btn {
   border-color: #e2dfd8 !important;
+}
+/* MC_PDP_PRICE_STACK — kill native Volusion sale row overlapping McCabe member lines */
+html body.productdetails:has(.mc-pdp-member-pricing) #content_area .product_sale_price,
+html body.mc-product-page:has(.mc-pdp-member-pricing) #content_area .product_sale_price,
+html body.productdetails:has(.mc-pdp-member-pricing) #content_area .product_saleprice,
+html body.mc-product-page:has(.mc-pdp-member-pricing) #content_area .product_saleprice,
+html body.productdetails:has(.mc-pdp-member-pricing) #v65-product-parent .product_sale_price,
+html body.mc-product-page:has(.mc-pdp-member-pricing) #v65-product-parent .product_sale_price,
+html body.productdetails:has(.mc-pdp-member-pricing) #v65-product-parent .product_saleprice,
+html body.mc-product-page:has(.mc-pdp-member-pricing) #v65-product-parent .product_saleprice,
+html body.productdetails:has(.mc-pdp-member-pricing) .colors_pricebox > .product_sale_price,
+html body.mc-product-page:has(.mc-pdp-member-pricing) .colors_pricebox > .product_sale_price,
+html body.productdetails:has(.mc-pdp-member-pricing) .colors_pricebox > font.product_sale_price,
+html body.mc-product-page:has(.mc-pdp-member-pricing) .colors_pricebox > font.product_sale_price,
+html body.productdetails:has(.mc-pdp-member-pricing) .mtl-product-price-block > .product_sale_price,
+html body.mc-product-page:has(.mc-pdp-member-pricing) .mtl-product-price-block > .product_sale_price,
+html body.productdetails:has(.mc-pdp-member-pricing) .mtl-product-price-block > .product_saleprice,
+html body.mc-product-page:has(.mc-pdp-member-pricing) .mtl-product-price-block > .product_saleprice {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+html body.productdetails .mc-pdp-retail-row .product_list_price,
+html body.mc-product-page .mc-pdp-retail-row .product_list_price,
+html body.productdetails .mc-pdp-retail-row font.product_list_price,
+html body.mc-product-page .mc-pdp-retail-row font.product_list_price {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+html body.productdetails #v65-product-parent .mc-pdp-member-pricing,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-pricing,
+html body.productdetails #content_area .mc-pdp-member-pricing,
+html body.mc-product-page #content_area .mc-pdp-member-pricing {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+  position: static !important;
+  width: 100% !important;
+}
+html body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line,
+html body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+  width: 100% !important;
+  position: static !important;
+  margin: 0 0 2px 0 !important;
 }

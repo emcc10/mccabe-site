@@ -49,7 +49,7 @@ body.productdetails #options_table select:not(.mc-native-leather),body.mc-produc
 body.productdetails #options_table select:not(.mc-native-leather),body.mc-product-page #options_table select:not(.mc-native-leather){text-transform:none!important;color:#444!important}
 body.productdetails .mc-pdp-retail-label,body.mc-product-page .mc-pdp-retail-label,body.productdetails .mc-pdp-member-line__label,body.mc-product-page .mc-pdp-member-line__label{font-size:13px!important;letter-spacing:.16em!important;text-transform:uppercase!important;color:#777!important}
 body.productdetails .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-member-line__amount,body.productdetails .mc-pdp-retail-row .product_list_price,body.mc-product-page .mc-pdp-retail-row .product_list_price{font-size:13px!important;letter-spacing:.02em!important;text-transform:none!important;color:#444!important;white-space:normal!important}
-body.productdetails .mc-pdp-retail-row .product_sale_price,body.mc-product-page .mc-pdp-retail-row .product_sale_price,body.productdetails .mc-pdp-retail-row .product_saleprice,body.mc-product-page .mc-pdp-retail-row .product_saleprice,body.productdetails .mtl-product-price-block>.product_sale_price,body.mc-product-page .mtl-product-price-block>.product_saleprice{display:none!important;visibility:hidden!important}
+body.productdetails .mc-pdp-retail-row .product_sale_price,body.mc-product-page .mc-pdp-retail-row .product_sale_price,body.productdetails .mc-pdp-retail-row .product_saleprice,body.mc-product-page .mc-pdp-retail-row .product_saleprice,body.productdetails .colors_pricebox>.product_sale_price,body.mc-product-page .colors_pricebox>.product_sale_price,body.productdetails .colors_pricebox>font.product_sale_price,body.mc-product-page .colors_pricebox>font.product_sale_price,body.productdetails .mtl-product-price-block>.product_sale_price,body.mc-product-page .mtl-product-price-block>.product_saleprice{display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important}
 body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line--sale,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line--sale{display:flex!important;flex-direction:column!important;gap:2px!important;margin-top:4px!important}
 body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line__amount{letter-spacing:.02em!important;white-space:normal!important}
 </style>
@@ -462,7 +462,7 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-p
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
-  <link href="/v/vspfiles/css/custom-safe.css?v=20260521g" rel="stylesheet" id="mc-custom-safe-css-static">
+  <link href="/v/vspfiles/css/custom-safe.css?v=20260521h" rel="stylesheet" id="mc-custom-safe-css-static">
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
   html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
@@ -19144,6 +19144,28 @@ async function mcSubmitAuthForm(form, mode) {
   }
   window.mcPaintCategoryGridMemberPricing = mcPaintCategoryGridMemberPricing;
 
+  function mcTidyMtlPriceBlock() {
+    var blocks = document.querySelectorAll(
+      "#v65-product-parent .mtl-product-price-block, #content_area .mtl-product-price-block, #v65-product-parent .colors_pricebox, #content_area .colors_pricebox"
+    );
+    var bi;
+    for (bi = 0; bi < blocks.length; bi++) {
+      var pb = blocks[bi];
+      if (!pb || !pb.querySelectorAll) continue;
+      pb.querySelectorAll(
+        ".product_sale_price, .product_saleprice, font.product_sale_price, [class*='product_sale_price'], [class*='product_saleprice']"
+      ).forEach(function (node) {
+        if (node.closest && (node.closest(".mc-pdp-retail-row") || node.closest(".mc-pdp-member-pricing"))) {
+          return;
+        }
+        node.style.setProperty("display", "none", "important");
+        node.style.setProperty("visibility", "hidden", "important");
+        node.style.setProperty("height", "0", "important");
+        node.style.setProperty("overflow", "hidden", "important");
+      });
+    }
+  }
+
   function mcTidyPdpMemberPricing() {
     var wrap = document.querySelector(".mc-pdp-member-pricing");
     if (!wrap) return;
@@ -19356,6 +19378,7 @@ async function mcSubmitAuthForm(form, mode) {
 
     mcSetStableHtml(wrap, html);
     try {
+      mcTidyMtlPriceBlock();
       mcTidyPdpMemberPricing();
     } catch (eTidyWrap) {}
     try {
