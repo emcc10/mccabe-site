@@ -249,6 +249,22 @@ if [[ "$boards_fail" -gt 0 ]]; then
   echo "::warning::${boards_fail} My Boards showcase PNG(s) failed lftp upload (non-blocking; Paramiko chunked upload is primary)"
 fi
 
+echo "=== My Boards byte-size check (/v/vspfiles is what browsers load) ==="
+for pair in \
+  "vspfiles/boards/my-boards-page.js|/v/vspfiles/boards/my-boards-page.js" \
+  "vspfiles/boards/board-styles.js|/v/vspfiles/boards/board-styles.js" \
+  "vspfiles/boards/my-boards-bundle.css|/v/vspfiles/boards/my-boards-bundle.css"; do
+  local_file="${pair%%|*}"
+  live_path="${pair##*|}"
+  want=$(wc -c < "$local_file" | tr -d ' ')
+  got=$(curl -fsSL "https://www.mccabestheaterandliving.com${live_path}?v=$(date +%s)" -H "Cache-Control: no-cache" 2>/dev/null | wc -c | tr -d ' ' || echo 0)
+  if [[ "$got" == "$want" ]]; then
+    echo "  OK ${live_path} bytes=${got}"
+  else
+    echo "::warning::SIZE ${live_path} live=${got} want=${want} (purge CDN or re-run deploy)"
+  fi
+done
+
 echo "=== PLP product photos (replace baked gray mat with white) ==="
 photo_fail=0
 photo_ok=0

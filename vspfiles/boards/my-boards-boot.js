@@ -8,7 +8,7 @@
   if (window.__MC_BOARDS_BOOT_DONE) return;
   window.__MC_BOARDS_BOOT_DONE = true;
 
-  var VER = '20260524';
+  var VER = '20260529';
 
   var path = String(location.pathname || '');
   var base =
@@ -73,8 +73,7 @@
   }
 
   addGoogleFonts();
-  addStylesheet(base + 'my-boards-critical.css?v=' + VER);
-  addStylesheet(base + 'my-boards-page.css?v=' + VER);
+  addStylesheet(base + 'my-boards-bundle.css?v=' + VER);
 
   var stylesPrimary = base + 'board-styles.js?v=' + VER;
   var stylesFallback = stylesPrimary.replace('/v/vspfiles/', '/vspfiles/');
