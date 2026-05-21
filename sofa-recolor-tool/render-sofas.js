@@ -24,6 +24,7 @@ import {
   PHOTO_MF_GAIN,
   prepareSourceLGrain,
   prepareSourceLLfBand,
+  prepareSpecularSheenMap,
 } from './leather-detail.js';
 import {
   evaluateBaliExportGate,
@@ -889,6 +890,9 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
     ? pixelBrightness(midRgb.r, midRgb.g, midRgb.b) - meanSrcLum
     : 0;
   const grain = palette.isBaliSilk ? prepareSourceLGrain(sourceImage, mask) : null;
+  if (grain && lumRange) {
+    Object.assign(grain, prepareSpecularSheenMap(sourceImage, mask, lumRange));
+  }
   const sourceLf = realismProbe ? prepareSourceLLfBand(sourceImage) : null;
 
   for (let j = 0; j < width * height; j++) {
