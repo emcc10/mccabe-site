@@ -4,8 +4,8 @@
 import { MASK_APPLY_THRESH } from './render-sofas.js';
 
 const BG = 255;
-const BAND_START = 1;
-const BAND_END = 24;
+const BAND_START = 0;
+const BAND_END = 36;
 const DARK_LUM_MAX = 108;
 const SHADOW_MAX_DROP = 10;
 const ELLIPSE_Y_OFFSET = 4;
@@ -120,6 +120,20 @@ export function finalizeBaliExport(outBuffer, sourceImage, mask) {
       if (isFoot(src, p)) continue;
       if (isShadowPixel(x, y, box)) continue;
       setWhite(out, p, channels);
+    }
+  }
+
+  /** Strip off-white contamination: band pixels that are not feet or contact shadow → #fff. */
+  for (let y = y0; y <= y1; y++) {
+    for (let x = 0; x < width; x++) {
+      const j = y * width + x;
+      if (mask[j] >= MASK_APPLY_THRESH) continue;
+      const p = j * channels;
+      if (isFoot(src, p)) continue;
+      if (isShadowPixel(x, y, box)) continue;
+      const L = lum(out[p], out[p + 1], out[p + 2]);
+      if (L >= 252) setWhite(out, p, channels);
+      else if (L > 235) setWhite(out, p, channels);
     }
   }
 

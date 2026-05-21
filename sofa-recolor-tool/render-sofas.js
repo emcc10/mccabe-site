@@ -19,6 +19,10 @@ import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { finalizeBaliExport } from './finalize-bali-export.js';
 import { prepareSourceLGrain } from './leather-detail.js';
+import {
+  applyReferenceRealismTransfer,
+  DEFAULT_REFERENCE,
+} from './reference-realism.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;
@@ -27,6 +31,7 @@ const SWATCH_DIR = join(INPUT_DIR, 'swatches');
 const OUTPUT_DIR = join(ROOT, 'output');
 const SOFA_PATH = join(INPUT_DIR, 'sofa.png');
 const MASK_PATH = join(INPUT_DIR, 'mask.png');
+const BALI_REALISM_REFERENCE_PATH = join(INPUT_DIR, DEFAULT_REFERENCE);
 const NEUTRAL_MASTER_PATH = join(INPUT_DIR, 'neutral-master.png');
 /** @deprecated alias — same file as neutral-master.png */
 const MASTER_SOFA_PATH = NEUTRAL_MASTER_PATH;
@@ -844,11 +849,22 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
     if (channels === 4) out[p + 3] = data[p + 3];
   }
 
-  if (palette.isBaliSilk) {
+  if (palette.isBaliSilk && !options.skipFinalize) {
     finalizeBaliExport(out, sourceImage, mask);
   }
 
   return out;
+}
+
+/** Photorealistic Bali donor (stress render or hand-picked reference). */
+export function resolveBaliRealismReferencePath(outputDir = OUTPUT_DIR) {
+  if (existsSync(BALI_REALISM_REFERENCE_PATH)) return BALI_REALISM_REFERENCE_PATH;
+  if (!existsSync(outputDir)) return null;
+  const stress = readdirSync(outputDir)
+    .filter((f) => f.includes('REALISM-STRESS') && f.toLowerCase().endsWith('.png'))
+    .sort()
+    .reverse();
+  return stress.length ? join(outputDir, stress[0]) : null;
 }
 
 /**
@@ -961,17 +977,58 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     lBlend: isBali
       ? realismStress
         ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
-        : 'swatch chroma + per-pixel source Rec.709 luma preserved'
+        : refPath
+          ? 'swatch chroma + reference photographic L-detail (masked)'
+          : 'swatch chroma + per-pixel source Rec.709 luma preserved'
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali
       ? realismStress
         ? 'same finalize as production (bg/shadow unchanged)'
-        : 'finalize bottom band + white bg only (no upholstery touch)'
+        : refPath
+          ? 'reference L-detail transfer + finalize bg/bottom'
+          : 'finalize bottom band + white bg only (no upholstery touch)'
       : null,
   });
 
-  const outData = recolorSofa(sourceImage, mask, palette, { realismStress });
+  const refPath = isBali && !realismStress ? resolveBaliRealismReferencePath() : null;
+  const outData = recolorSofa(sourceImage, mask, palette, {
+    realismStress,
+    skipFinalize: isBali,
+  });
+
+  if (isBali && refPath) {
+    const referenceImage = await loadImage(refPath);
+    const currentImage = {
+      data: outData,
+      width: sourceImage.width,
+      height: sourceImage.height,
+      channels: sourceImage.channels,
+    };
+    const transfer = applyReferenceRealismTransfer(
+      outData,
+      currentImage,
+      referenceImage,
+      mask,
+    );
+    console.log({
+      realismReference: refPath.includes(INPUT_DIR)
+        ? `input/${DEFAULT_REFERENCE}`
+        : basename(refPath),
+      realismTransfer: transfer.bands,
+      localContrast: transfer.localContrast,
+      meanLCorrection: transfer.meanLShift,
+    });
+  } else if (isBali && !realismStress) {
+    console.log(
+      `  warn: no realism reference — add input/${DEFAULT_REFERENCE} (or run npm run bali-stress first)`,
+    );
+  }
+
+  if (isBali) {
+    finalizeBaliExport(outData, sourceImage, mask);
+  }
+
   const outImage = {
     data: outData,
     width: sourceImage.width,
@@ -1107,7 +1164,9 @@ export async function main(argv = process.argv) {
     return;
   }
 
-  console.log('  method: Bali chroma only + preserved source L; finalize bg/bottom only');
+  console.log(
+    '  method: Bali chroma + reference realism transfer (when input reference present); finalize bg/bottom',
+  );
 
   if (cli.mode === 'one') {
     const swPath = resolveSwatchArg(cli.swatchFile);
