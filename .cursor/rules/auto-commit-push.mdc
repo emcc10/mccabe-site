@@ -1,0 +1,15 @@
+---
+description: Commit and push completed work to main without asking
+alwaysApply: true
+---
+
+# Auto commit and push
+
+After finishing an implementation task (fixes, deploy scripts, Volusion assets, PDP/PLP changes, etc.):
+
+1. **Commit and push** to the active branch (usually `main`) without asking the user to do it manually.
+2. Use the repo's commit message style (concise, why-focused). Stage only relevant files; never commit secrets (`.env`, credentials).
+3. Follow git safety: no force push to `main`, no `--no-verify` unless asked, no amend unless the commit rules allow it.
+4. **Do not commit** when there are no file changes, or when the session was question-only / review-only with no edits requested.
+
+If push fails (auth, protected branch), report the error and give the exact commands to retry.
