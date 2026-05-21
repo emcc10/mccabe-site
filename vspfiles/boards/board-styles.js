@@ -2,7 +2,7 @@
  * Style library + curated McCabe product looks for inspiration boards.
  * Product PNGs: /v/vspfiles/boards/showcase/
  */
-window.MC_BOARD_STYLES_BUILD = '20260534';
+window.MC_BOARD_STYLES_BUILD = '20260535';
 window.MC_BOARD_STYLES = {
   assetBases: ['/v/vspfiles/boards/', '/vspfiles/boards/'],
 
@@ -372,3 +372,65 @@ window.MC_BOARD_STYLES = {
     carob: 'traditional'
   }
 };
+
+/** Ensure triptych/catalog exist on Volusion article embeds (old HTML omits these ids). */
+(function () {
+  function ensureShellIds() {
+    if (document.getElementById('mc-boards-triptych')) return;
+
+    var anchor =
+      document.getElementById('mc-boards-styles') ||
+      document.getElementById('mc-boards-main') ||
+      document.querySelector('.mc-boards');
+
+    if (!anchor) return;
+
+    var parent = anchor.parentNode;
+    if (!parent) return;
+
+    function addSection(title, id, className) {
+      if (document.getElementById(id)) return;
+      var sec = document.createElement('section');
+      sec.className = 'mc-boards__section';
+      var h = document.createElement('h2');
+      h.className = 'mc-boards__section-title';
+      h.textContent = title;
+      sec.appendChild(h);
+      var el = document.createElement('div');
+      el.id = id;
+      el.className = className;
+      sec.appendChild(el);
+      parent.insertBefore(sec, anchor);
+    }
+
+    addSection('Featured pieces', 'mc-boards-triptych', 'mc-boards__triptych');
+    addSection('Pieces on your boards', 'mc-boards-catalog', 'mc-boards__catalog');
+
+    if (!document.getElementById('mc-boards-split')) {
+      var split = document.createElement('section');
+      split.className = 'mc-boards__split';
+      split.id = 'mc-boards-split';
+      parent.insertBefore(split, anchor);
+    }
+  }
+
+  function loadPageJs() {
+    if (window.__MC_BOARDS_APP_V2) return;
+    if (document.querySelector('script[src*="my-boards-page.js"]')) return;
+    var s = document.createElement('script');
+    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260534';
+    s.defer = true;
+    document.body.appendChild(s);
+  }
+
+  function kick() {
+    ensureShellIds();
+    loadPageJs();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', kick);
+  } else {
+    kick();
+  }
+})();

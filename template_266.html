@@ -23093,7 +23093,13 @@ s0.parentNode.insertBefore(s1,s0);
   </script>
   <script id="mc-my-boards-template-boot">
 (function () {
-  if (!/\/my-boards\.html/i.test(String(location.pathname || ''))) return;
+  var path = String(location.pathname || '');
+  var onBoards =
+    /\/my-boards\.html/i.test(path) ||
+    document.getElementById('mc-boards-main') ||
+    document.getElementById('mc-boards-styles') ||
+    document.querySelector('.mc-boards');
+  if (!onBoards) return;
   document.documentElement.classList.add('mc-my-boards-page');
   if (document.body) document.body.classList.add('mc-my-boards-page');
   if (!window.MC_BOARDS_API_BASE) {
