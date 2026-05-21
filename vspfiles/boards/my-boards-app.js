@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  if (window.__MC_BOARDS_APP_V2) return;
-  window.__MC_BOARDS_APP_V2 = true;
+  if (window.__MC_BOARDS_PAGE_SCRIPT_LOADED) return;
+  window.__MC_BOARDS_PAGE_SCRIPT_LOADED = true;
 
   var API_BASE = window.MC_BOARDS_API_BASE || '/v/vspfiles/boards/';
   var API_LIST = API_BASE + 'list.php';
@@ -1280,6 +1280,7 @@
       return;
     }
     window.__MC_BOARDS_APP_STARTED = true;
+    window.__MC_BOARDS_APP_V2 = true;
     refreshConfig();
     setSignedInUi(domSignedInHint());
     setAccountBanner(domSignedInHint());
@@ -1293,7 +1294,7 @@
       done();
       return;
     }
-    var src = API_BASE + 'board-styles.js?v=20260534';
+    var src = API_BASE + 'board-styles.js?v=20260536';
     var tag = document.querySelector('script[src*="board-styles.js"]');
     if (tag) {
       refreshConfig();

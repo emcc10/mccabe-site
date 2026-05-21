@@ -2,7 +2,7 @@
  * Style library + curated McCabe product looks for inspiration boards.
  * Product PNGs: /v/vspfiles/boards/showcase/
  */
-window.MC_BOARD_STYLES_BUILD = '20260535';
+window.MC_BOARD_STYLES_BUILD = '20260536';
 window.MC_BOARD_STYLES = {
   assetBases: ['/v/vspfiles/boards/', '/vspfiles/boards/'],
 
@@ -373,6 +373,188 @@ window.MC_BOARD_STYLES = {
   }
 };
 
+/** Paint grids from MC_BOARD_STYLES (runs before my-boards-page.js; survives stale cached page JS). */
+window.renderBoardsPreview = function renderBoardsPreview() {
+  var C = window.MC_BOARD_STYLES;
+  if (!C || !C.styles || !C.styles.length) return false;
+
+  function productById(id) {
+    var list = C.products || [];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === id) return list[i];
+    }
+    return null;
+  }
+
+  function styleById(id) {
+    var list = C.styles || [];
+    for (var j = 0; j < list.length; j++) {
+      if (list[j].id === id) return list[j];
+    }
+    return null;
+  }
+
+  function imgSrc(p) {
+    return (p && (p.catalogPhoto || p.image)) || '';
+  }
+
+  function styleImg(style) {
+    if (!style) return '';
+    if (style.moodImage) return style.moodImage;
+    if (style.catalogSku && C.catalogPhotos && C.catalogPhotos[style.catalogSku]) {
+      return C.catalogPhotos[style.catalogSku];
+    }
+    var list = C.products || [];
+    for (var k = 0; k < list.length; k++) {
+      if (list[k].primaryStyle === style.id) return imgSrc(list[k]);
+    }
+    return '';
+  }
+
+  var tri = document.getElementById('mc-boards-triptych');
+  if (tri && !tri.children.length && C.featuredTriptych) {
+    for (var t = 0; t < C.featuredTriptych.length && t < 3; t++) {
+      var tp = productById(C.featuredTriptych[t]);
+      if (!tp) continue;
+      var tbtn = document.createElement('button');
+      tbtn.type = 'button';
+      tbtn.className = 'mc-boards__triptych-card';
+      var tw = document.createElement('div');
+      tw.className = 'mc-boards__triptych-img-wrap';
+      var tim = document.createElement('img');
+      tim.src = imgSrc(tp);
+      tim.alt = tp.name;
+      tim.loading = 'lazy';
+      tw.appendChild(tim);
+      tbtn.appendChild(tw);
+      var tlab = document.createElement('p');
+      tlab.className = 'mc-boards__triptych-label';
+      tlab.textContent = tp.name;
+      tbtn.appendChild(tlab);
+      var tst = styleById(tp.primaryStyle);
+      if (tst) {
+        var tsub = document.createElement('p');
+        tsub.className = 'mc-boards__triptych-style';
+        tsub.textContent = tst.label;
+        tbtn.appendChild(tsub);
+      }
+      tri.appendChild(tbtn);
+    }
+  }
+
+  var cat = document.getElementById('mc-boards-catalog');
+  if (cat && !cat.children.length && C.products) {
+    for (var c = 0; c < C.products.length; c++) {
+      var prod = C.products[c];
+      var card = document.createElement('article');
+      card.className = 'mc-boards__catalog-card';
+      var cw = document.createElement('div');
+      cw.className = 'mc-boards__catalog-img';
+      var ci = document.createElement('img');
+      ci.src = imgSrc(prod);
+      ci.alt = prod.name;
+      ci.loading = 'lazy';
+      cw.appendChild(ci);
+      card.appendChild(cw);
+      var nm = document.createElement('p');
+      nm.className = 'mc-boards__catalog-name';
+      nm.textContent = prod.name;
+      card.appendChild(nm);
+      cat.appendChild(card);
+    }
+  }
+
+  var grid = document.getElementById('mc-boards-styles');
+  if (grid && !grid.children.length) {
+    for (var s = 0; s < C.styles.length; s++) {
+      var style = C.styles[s];
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'mc-boards__style-card';
+      btn.setAttribute('role', 'listitem');
+      var visual = document.createElement('div');
+      visual.className = 'mc-boards__style-visual';
+      var sim = document.createElement('img');
+      sim.src = styleImg(style);
+      sim.alt = style.label;
+      sim.loading = 'lazy';
+      visual.appendChild(sim);
+      var body = document.createElement('div');
+      body.className = 'mc-boards__style-body';
+      var label = document.createElement('p');
+      label.className = 'mc-boards__style-label';
+      label.textContent = style.label;
+      body.appendChild(label);
+      var tag = document.createElement('p');
+      tag.className = 'mc-boards__style-tagline';
+      tag.textContent = style.tagline || '';
+      body.appendChild(tag);
+      btn.appendChild(visual);
+      btn.appendChild(body);
+      grid.appendChild(btn);
+    }
+  }
+
+  var life = document.getElementById('mc-boards-lifestyle');
+  if (life && !life.children.length && C.lifestyleLooks) {
+    for (var l = 0; l < C.lifestyleLooks.length; l++) {
+      var look = C.lifestyleLooks[l];
+      var prodL = productById(look.productId);
+      var art = document.createElement('article');
+      art.className = 'mc-boards__lifestyle-card';
+      art.setAttribute('role', 'listitem');
+      if (prodL) {
+        var lw = document.createElement('div');
+        lw.className = 'mc-boards__lifestyle-img';
+        var lim = document.createElement('img');
+        lim.src = imgSrc(prodL);
+        lim.alt = look.title || prodL.name;
+        lim.loading = 'lazy';
+        lw.appendChild(lim);
+        art.appendChild(lw);
+      }
+      var lt = document.createElement('p');
+      lt.className = 'mc-boards__lifestyle-title';
+      lt.textContent = look.title || '';
+      art.appendChild(lt);
+      life.appendChild(art);
+    }
+  }
+
+  var trends = document.getElementById('mc-boards-trends');
+  if (trends && !trends.children.length && C.decorTrends) {
+    for (var d = 0; d < C.decorTrends.length; d++) {
+      var tr = C.decorTrends[d];
+      var tcard = document.createElement('article');
+      tcard.className = 'mc-boards__trend-card';
+      var th = document.createElement('h3');
+      th.className = 'mc-boards__trend-title';
+      th.textContent = tr.title;
+      tcard.appendChild(th);
+      var tb = document.createElement('p');
+      tb.className = 'mc-boards__trend-blurb';
+      tb.textContent = tr.blurb || '';
+      tcard.appendChild(tb);
+      trends.appendChild(tcard);
+    }
+  }
+
+  var types = document.getElementById('mc-boards-types');
+  if (types && !types.children.length && C.furnitureTypes) {
+    for (var f = 0; f < C.furnitureTypes.length; f++) {
+      var ft = C.furnitureTypes[f];
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'mc-boards__type-chip';
+      chip.setAttribute('role', 'listitem');
+      chip.textContent = ft.label;
+      types.appendChild(chip);
+    }
+  }
+
+  return !!(tri && tri.children.length);
+};
+
 /** Ensure triptych/catalog exist on Volusion article embeds (old HTML omits these ids). */
 (function () {
   function ensureShellIds() {
@@ -415,16 +597,19 @@ window.MC_BOARD_STYLES = {
   }
 
   function loadPageJs() {
-    if (window.__MC_BOARDS_APP_V2) return;
+    if (window.__MC_BOARDS_APP_STARTED) return;
     if (document.querySelector('script[src*="my-boards-page.js"]')) return;
     var s = document.createElement('script');
-    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260534';
+    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260536';
     s.defer = true;
     document.body.appendChild(s);
   }
 
   function kick() {
     ensureShellIds();
+    if (typeof window.renderBoardsPreview === 'function') {
+      window.renderBoardsPreview();
+    }
     loadPageJs();
   }
 

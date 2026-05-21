@@ -32,9 +32,9 @@ ALIASES = (
 )
 
 MUST_MATCH = (
-    ("vspfiles/my-boards.html", None, b"renderInline"),
-    ("vspfiles/boards/my-boards-page.js", "/v/vspfiles/boards/my-boards-page.js", b"__MC_BOARDS_APP_V2"),
-    ("vspfiles/boards/board-styles.js", None, b"ensureShellIds"),
+    ("vspfiles/my-boards.html", None, b"20260536"),
+    ("vspfiles/boards/my-boards-page.js", "/v/vspfiles/boards/my-boards-page.js", b"__MC_BOARDS_PAGE_SCRIPT_LOADED"),
+    ("vspfiles/boards/board-styles.js", None, b"renderBoardsPreview"),
     ("vspfiles/boards/my-boards-bundle.css", None, b"mc-boards__feature"),
 )
 

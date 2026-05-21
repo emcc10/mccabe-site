@@ -38,7 +38,7 @@ jobs:
           for i in 1 2 3 4 5 6; do
             got=$(curl -fsSL "${url}?v=$(date +%s)&n=${i}" -H "Cache-Control: no-cache" 2>/dev/null | wc -c | tr -d ' ' || echo 0)
             echo "attempt ${i}: live=${got} want=${want}"
-            if [[ "$got" == "$want" ]] && curl -fsSL "${url}?v=$(date +%s)&n=${i}" -H "Cache-Control: no-cache" | grep -q '__MC_BOARDS_APP_V2'; then
+            if [[ "$got" == "$want" ]] && curl -fsSL "${url}?v=$(date +%s)&n=${i}" -H "Cache-Control: no-cache" | grep -q '__MC_BOARDS_PAGE_SCRIPT_LOADED'; then
               ok=1
               break
             fi
@@ -47,6 +47,6 @@ jobs:
           if [[ "$ok" != "1" ]]; then
             echo "::warning::HTTP still stale (404 or old bytes) — SFTP verify above is authoritative; purge CDN for my-boards-page.js"
           fi
-          curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" -H "Cache-Control: no-cache" | grep -q 'renderInline' || {
-            echo "::warning::Live HTML missing inline boot — re-run this workflow"
+          curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" -H "Cache-Control: no-cache" | grep -q '20260536' || {
+            echo "::warning::Live HTML missing build 20260536 — re-run this workflow"
           }
