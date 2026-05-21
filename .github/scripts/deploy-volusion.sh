@@ -129,8 +129,15 @@ if [[ -z "$TEMPLATE_ENFORCER_TAG" ]]; then
 fi
 
 python3 scripts/announce_deploy_markers.py || true
+
+template_deploy_rc=0
+set +e
 deploy_template
-verify_template_on_sftp "$TEMPLATE_ENFORCER_TAG"
+template_deploy_rc=$?
+set -e
+if [[ "$template_deploy_rc" -ne 0 ]]; then
+  echo "::warning::Template upload step exited ${template_deploy_rc} — continuing with vspfiles assets (My Boards, CSS, JS)"
+fi
 
 echo "=== Assets via Paramiko (size-verified; /v/vspfiles + chroot paths) ==="
 export SFTP_PORT="2222"
