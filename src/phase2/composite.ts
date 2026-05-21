@@ -6,6 +6,11 @@ const BG = { r: 255, g: 255, b: 255 };
 /**
  * Final image: legs + trim areas from source; upholstery from recolor;
  * background white; contour from source alpha.
+ *
+ * Pixels with alpha on that are not legs and not in `upholstery` keep source RGB
+ * (initial buffer copy). Edge leakage happens when the upholstery mask is narrower
+ * than the visible silhouette — pass an expanded upholstery mask (edge band + foot
+ * ring) so every non-leg interior pixel uses `recolored`.
  */
 export function compositePhase2(
   source: RgbaImage,

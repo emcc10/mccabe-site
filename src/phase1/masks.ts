@@ -70,6 +70,23 @@ export function intersect(a: Mask, b: Mask): Mask {
   return { ...a, data: out };
 }
 
+export function union(...masks: Mask[]): Mask {
+  if (!masks.length) throw new Error('union() requires at least one mask');
+  const base = masks[0];
+  const out = new Uint8Array(base.data.length);
+  for (let i = 0; i < out.length; i++) {
+    let on = false;
+    for (const m of masks) {
+      if (m.data[i] >= 128) {
+        on = true;
+        break;
+      }
+    }
+    out[i] = on ? ON : OFF;
+  }
+  return { width: base.width, height: base.height, data: out };
+}
+
 export function bbox(mask: Mask) {
   let minX = mask.width;
   let minY = mask.height;
