@@ -12,13 +12,15 @@ export const REF_MEDIUM_TEXTURE_WEIGHT = 0.65;
 export const REF_FINE_TEXTURE_WEIGHT = 0.35;
 export const SOURCE_DETAIL_MIX = 0.52;
 export const REF_TEXTURE_MIX = 0.48;
-export const DETAIL_GAIN = 1.12;
+/** Measured source L fine band (sofa.png only) — photographic pore breakup. */
+export const SOURCE_FINE_DETAIL_GAIN = 0.32;
+export const DETAIL_GAIN = 1.15;
 export const REF_DETAIL_STD_TARGET = 2.5;
 export const CHROMA_SOURCE_KEEP = 0.06;
-export const SPATIAL_L_AMP = 1.6;
+export const SPATIAL_L_AMP = 1.8;
 export const SPATIAL_AB_AMP = 0.5;
 export const LOCAL_CONTRAST_RADIUS = 6;
-export const LOCAL_CONTRAST_AMOUNT = 0.1;
+export const LOCAL_CONTRAST_AMOUNT = 0.12;
 export const HIGHLIGHT_TIER1_START = 74;
 export const HIGHLIGHT_TIER1_RATIO = 0.48;
 export const HIGHLIGHT_TIER2_START = 82;
@@ -26,7 +28,8 @@ export const HIGHLIGHT_TIER2_RATIO = 0.32;
 export const SEAM_INFLUENCE_MAX = 0.65;
 export const CONTOUR_FEATHER_PX = 1.0;
 export const EDGE_UNSHARP_RADIUS = 0.8;
-export const EDGE_UNSHARP_AMOUNT = 0.45;
+export const EDGE_UNSHARP_AMOUNT = 0.52;
+export const EXPORT_BG = { r: 255, g: 255, b: 255 };
 
 export function getBaliComposeParams(width, height) {
   return {
@@ -38,6 +41,7 @@ export function getBaliComposeParams(width, height) {
     refMediumWeight: REF_MEDIUM_TEXTURE_WEIGHT,
     refFineWeight: REF_FINE_TEXTURE_WEIGHT,
     detailGain: DETAIL_GAIN,
+    sourceFineDetailGain: SOURCE_FINE_DETAIL_GAIN,
     highlightTier1: `${HIGHLIGHT_TIER1_START}×${HIGHLIGHT_TIER1_RATIO}`,
     highlightTier2: `${HIGHLIGHT_TIER2_START}×${HIGHLIGHT_TIER2_RATIO}`,
     localContrast: `r${LOCAL_CONTRAST_RADIUS}×${LOCAL_CONTRAST_AMOUNT}`,
@@ -165,7 +169,7 @@ export function buildBaliMasks(mask, width, height, contourFeatherPx = CONTOUR_F
     }
     interiorMask[j] = 255;
     if (distIn[j] >= contourFeatherPx) contourAlpha[j] = 1;
-    else contourAlpha[j] = smoothstep(0, contourFeatherPx, distIn[j]);
+    else contourAlpha[j] = clamp(distIn[j] / contourFeatherPx, 0, 1);
   }
   return { interiorMask, contourAlpha, distIn };
 }
@@ -272,6 +276,9 @@ export function prepareBaliComposeFields(sourceImage, referenceImage, mask) {
   const lowR = scaleRadius(LOWFREQ_RADIUS_BASE, width, height);
   const srcLow = gaussianBlur(src.L, width, height, lowR);
   const srcDetail = new Float32Array(n);
+  const srcFineBlur = gaussianBlur(src.L, width, height, scaleRadius(1, width, height));
+  const srcFineDetail = new Float32Array(n);
+  for (let j = 0; j < n; j++) srcFineDetail[j] = src.L[j] - srcFineBlur[j];
   for (let j = 0; j < n; j++) srcDetail[j] = src.L[j] - srcLow[j];
 
   const seamWeight = buildSeamMap(src.L, mask, width, height);
@@ -309,7 +316,9 @@ export function prepareBaliComposeFields(sourceImage, referenceImage, mask) {
     refTexture[j] =
       refMediumNorm[j] * REF_MEDIUM_TEXTURE_WEIGHT + refFineNorm[j] * REF_FINE_TEXTURE_WEIGHT;
     transferredDetailRaw[j] =
-      srcDetail[j] * SOURCE_DETAIL_MIX + refTexture[j] * REF_TEXTURE_MIX;
+      srcDetail[j] * SOURCE_DETAIL_MIX +
+      refTexture[j] * REF_TEXTURE_MIX +
+      srcFineDetail[j] * SOURCE_FINE_DETAIL_GAIN;
     const sw = seamWeight[j];
     finalDetail[j] =
       transferredDetailRaw[j] * (1 - sw) + srcDetail[j] * sw;
@@ -323,10 +332,12 @@ export function prepareBaliComposeFields(sourceImage, referenceImage, mask) {
     srcA: src.a,
     srcB: src.b,
     srcDetail,
+    srcFineDetail,
     finalDetail,
     transferredDetailRaw,
     seamWeight,
     contourAlpha: masks.contourAlpha,
+    distIn: masks.distIn,
     refSpatialL,
     refSpatialA,
     refSpatialB,
@@ -348,52 +359,61 @@ function rec709Lum(r, g, b) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-/** Mild unsharp on silhouette transition band only. */
-export function applyContourEdgeUnsharp(
+function touchesBackground(mask, j, width, height) {
+  const x = j % width;
+  const y = (j / width) | 0;
+  if (x === 0 || y === 0 || x === width - 1 || y === height - 1) return true;
+  if (mask[j - 1] < MASK_APPLY_THRESH) return true;
+  if (mask[j + 1] < MASK_APPLY_THRESH) return true;
+  if (mask[j - width] < MASK_APPLY_THRESH) return true;
+  if (mask[j + width] < MASK_APPLY_THRESH) return true;
+  return false;
+}
+
+/**
+ * After finalize: crisp silhouette vs white bg (fixes leg/arm cutout fringe).
+ * Unsharp only in transition band — not whole image.
+ */
+export function applySilhouetteEdgeCrisp(
   out,
-  sourceImage,
   mask,
   contourAlpha,
+  distIn,
   width,
   height,
   channels,
+  bg = EXPORT_BG,
 ) {
   const r = Math.max(1, Math.round(EDGE_UNSHARP_RADIUS));
   const amount = EDGE_UNSHARP_AMOUNT;
-  const Y = new Float32Array(width * height);
-  for (let j = 0; j < width * height; j++) {
+  const feather = CONTOUR_FEATHER_PX;
+  const n = width * height;
+  const Y = new Float32Array(n);
+  const edgeBand = new Float32Array(n);
+
+  for (let j = 0; j < n; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) continue;
     const p = j * channels;
     Y[j] = rec709Lum(out[p], out[p + 1], out[p + 2]);
+    const onContour = distIn[j] < feather || touchesBackground(mask, j, width, height);
+    if (onContour) edgeBand[j] = 1;
   }
+
   const blurY = gaussianBlur(Y, width, height, r);
-  const edgeBand = new Float32Array(width * height);
-  for (let j = 0; j < width * height; j++) {
-    if (mask[j] < MASK_APPLY_THRESH) continue;
-    const a = contourAlpha[j];
-    if (a >= 0.995) {
-      edgeBand[j] = 0;
-      continue;
-    }
-    edgeBand[j] = 1 - a;
-    if (edgeBand[j] < 0.08) edgeBand[j] = 0;
-  }
-  for (let j = 0; j < width * height; j++) {
+
+  for (let j = 0; j < n; j++) {
     if (edgeBand[j] <= 0) continue;
     const p = j * channels;
     const y = Y[j];
-    const high = y + (y - blurY[j]) * amount;
-    const scale = y > 0.5 ? high / y : 1;
-    const srcP = j * channels;
-    const bgR = sourceImage.data[srcP];
-    const bgG = sourceImage.data[srcP + 1];
-    const bgB = sourceImage.data[srcP + 2];
+    const sharpY = y + (y - blurY[j]) * amount;
+    const scale = y > 0.5 ? sharpY / y : 1;
     let nr = clamp(Math.round(out[p] * scale), 0, 255);
     let ng = clamp(Math.round(out[p + 1] * scale), 0, 255);
     let nb = clamp(Math.round(out[p + 2] * scale), 0, 255);
-    const w = edgeBand[j];
-    out[p] = clamp(Math.round(nr * w + bgR * (1 - w)), 0, 255);
-    out[p + 1] = clamp(Math.round(ng * w + bgG * (1 - w)), 0, 255);
-    out[p + 2] = clamp(Math.round(nb * w + bgB * (1 - w)), 0, 255);
+    const alpha = clamp(contourAlpha[j], 0, 1);
+    out[p] = clamp(Math.round(nr * alpha + bg.r * (1 - alpha)), 0, 255);
+    out[p + 1] = clamp(Math.round(ng * alpha + bg.g * (1 - alpha)), 0, 255);
+    out[p + 2] = clamp(Math.round(nb * alpha + bg.b * (1 - alpha)), 0, 255);
   }
 }
 
@@ -486,7 +506,6 @@ export function recolorBaliUpholstery(sourceImage, mask, palette, referenceImage
   }
 
   applyMaskedMeanLumaOffset(out, mask, width, height, channels, palette);
-  applyContourEdgeUnsharp(out, sourceImage, mask, fields.contourAlpha, width, height, channels);
 
   return { out, detailViz, contourViz, seamViz, fields, params };
 }

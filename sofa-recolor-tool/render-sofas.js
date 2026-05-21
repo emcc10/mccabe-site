@@ -18,7 +18,11 @@ import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { finalizeBaliExport } from './finalize-bali-export.js';
-import { getBaliComposeParams, recolorBaliUpholstery } from './bali-upholstery-compose.js';
+import {
+  applySilhouetteEdgeCrisp,
+  getBaliComposeParams,
+  recolorBaliUpholstery,
+} from './bali-upholstery-compose.js';
 import { writeBaliDebugStrip6 } from './debug-strip.js';
 import {
   applySourceYResidualToRgb,
@@ -901,6 +905,15 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
     }
     if (options.detailVizHolder) options.detailVizHolder.buf = composed.detailViz;
     if (!options.skipFinalize) finalizeBaliExport(composed.out, sourceImage, mask);
+    applySilhouetteEdgeCrisp(
+      composed.out,
+      mask,
+      composed.fields.contourAlpha,
+      composed.fields.distIn,
+      sourceImage.width,
+      sourceImage.height,
+      sourceImage.channels,
+    );
     return composed.out;
   }
 
@@ -1248,7 +1261,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     lBlend: isBali
       ? realismStress
         ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
-        : 'lowfreq+ref texture bands + seam protect + contour unsharp; NO per-pixel luma lock'
+        : 'lowfreq+ref texture+source fine detail; post-finalize silhouette crisp vs white; NO luma lock'
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali
@@ -1294,7 +1307,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     console.log('  panels: source | previous | new | contour alpha | detail map | seam map');
     console.log('  compose params:', p);
     console.log(
-      '  disabled for upholstery: per-pixel luma lock (baliChromaOnlyPreserveSourceLuma), interior detail feather',
+      '  edge crisp: post-finalize, white bg, unsharp band only (fixes leg cutout fringe)',
     );
   }
 
