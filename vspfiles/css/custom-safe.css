@@ -1,4 +1,4 @@
-/* 0521j C_CSS_DEPLOY_VERIFY_20260521j — repair partial PDP stack + sale line from cached SalePrice */
+/* 0522k C_CSS_DEPLOY_VERIFY_20260522k — hide Volusion product_saleprice when McCabe member lines present */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -14589,4 +14589,29 @@ html body.mc-pdp-price-stack .mc-pdp-member-pricing .mc-pdp-member-line--sale {
   max-height: none !important;
   opacity: 1 !important;
   pointer-events: auto !important;
+}
+/* Baked PDPs: member lines without .mc-pdp-member-pricing wrapper — hide native sale in main price box */
+html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,
+html body.mc-product-page:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,
+html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_sale_price,
+html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_productprice,
+html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox b:has(.product_saleprice),
+html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox font.pricecolor:has(.product_saleprice) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .mc-pdp-member-pricing,
+html body.mc-product-page:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .mc-pdp-member-pricing {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+  width: 100% !important;
 }
