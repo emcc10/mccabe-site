@@ -272,6 +272,15 @@ if [[ "$boards_fail" -gt 0 ]]; then
   echo "::warning::${boards_fail} My Boards showcase PNG(s) failed lftp upload (non-blocking; Paramiko chunked upload is primary)"
 fi
 
+echo "=== My Boards canonical /v/vspfiles force upload (fixes stale HTTP path) ==="
+set +e
+python3 scripts/upload_boards_canonical.py
+boards_canon_rc=$?
+set -e
+if [[ "$boards_canon_rc" -ne 0 ]]; then
+  echo "::error::upload_boards_canonical.py failed — my-boards-page.js may still be stale on live site"
+fi
+
 echo "=== My Boards byte-size check (/v/vspfiles is what browsers load) ==="
 for pair in \
   "vspfiles/boards/my-boards-page.js|/v/vspfiles/boards/my-boards-page.js" \
@@ -284,9 +293,13 @@ for pair in \
   if [[ "$got" == "$want" ]]; then
     echo "  OK ${live_path} bytes=${got}"
   else
-    echo "::warning::SIZE ${live_path} live=${got} want=${want} (purge CDN or re-run deploy)"
+    echo "::error::SIZE ${live_path} live=${got} want=${want} — boards JS/CSS not updated on origin"
+    boards_canon_rc=1
   fi
 done
+if [[ "${boards_canon_rc:-0}" -ne 0 ]]; then
+  echo "::error::My Boards live byte check failed — page will look empty until /v/vspfiles/boards/* updates"
+fi
 
 echo "=== PLP product photos (replace baked gray mat with white) ==="
 photo_fail=0

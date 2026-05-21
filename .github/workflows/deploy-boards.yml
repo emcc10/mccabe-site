@@ -1,0 +1,45 @@
+name: Deploy My Boards only
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-volusion-main
+  cancel-in-progress: true
+
+jobs:
+  deploy-boards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python SFTP
+        run: pip3 install paramiko
+
+      - name: Upload boards to /v/vspfiles (canonical path)
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: |
+          if command -v node >/dev/null 2>&1 && [[ -f scripts/sanitize-boards-css.mjs ]]; then
+            node scripts/sanitize-boards-css.mjs || true
+          fi
+          python3 scripts/upload_boards_canonical.py
+
+      - name: Verify live boards JS
+        run: |
+          want=$(wc -c < vspfiles/boards/my-boards-page.js | tr -d ' ')
+          got=$(curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-page.js?v=$(date +%s)" -H "Cache-Control: no-cache" | wc -c | tr -d ' ')
+          echo "my-boards-page.js live=${got} want=${want}"
+          curl -fsSL "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-page.js?v=$(date +%s)" -H "Cache-Control: no-cache" | grep -q '__MC_BOARDS_PAGE_IIFE_DONE' || {
+            echo "::error::Live JS missing startApp fix"
+            exit 1
+          }
+          [[ "$got" == "$want" ]] || {
+            echo "::error::Live JS size mismatch"
+            exit 1
+          }
