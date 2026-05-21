@@ -205,3 +205,17 @@ html body.mc-product-page #content_area .mc-pdp-member-line__amount {
   color: #444 !important;
   white-space: normal !important;
 }
+html body.productdetails #content_area .mc-pdp-retail-row .product_sale_price,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_sale_price,
+html body.productdetails #content_area .mc-pdp-retail-row .product_saleprice,
+html body.mc-product-page #content_area .mc-pdp-retail-row .product_saleprice,
+html body.productdetails #v65-product-parent .mtl-product-price-block > .product_sale_price,
+html body.mc-product-page #v65-product-parent .mtl-product-price-block > .product_saleprice {
+  display: none !important;
+  visibility: hidden !important;
+}
+html body.productdetails #content_area .mc-pdp-member-pricing .mc-pdp-sale-preview,
+html body.mc-product-page #content_area .mc-pdp-member-pricing .mc-pdp-sale-preview {
+  display: block !important;
+  margin-top: 4px !important;
+}
