@@ -1,11 +1,477 @@
 /**
  * PDP Sign In / Create Account — modal only, no /login.asp redirect, no room planner on gate clicks.
- * MC_PDP_AUTH_CTA_20260623
+ * Post-login: close modal first, refresh member/planner pricing in background (works without template rebake).
+ * MC_PDP_AUTH_CTA_20260624
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260623";
+  var VERSION = "20260624";
+
+  function authDelay(ms) {
+    return new Promise(function (resolve) {
+      global.setTimeout(resolve, Math.max(0, Number(ms) || 0));
+    });
+  }
+
+  function loginReturnTo() {
+    return encodeURIComponent(
+      (global.location.pathname || "/") + (global.location.search || "")
+    );
+  }
+
+  function normalizeLoginFields(form) {
+    if (!form) return;
+    var emailEl = global.document.getElementById("mc-login-email");
+    if (emailEl) emailEl.setAttribute("name", "email");
+    var passwordEl = global.document.getElementById("mc-login-password");
+    if (passwordEl) passwordEl.setAttribute("name", "password");
+  }
+
+  function getAuthFrame() {
+    var frame = global.document.getElementById("mc-member-auth-frame");
+    if (frame) return frame;
+    frame = global.document.createElement("iframe");
+    frame.id = "mc-member-auth-frame";
+    frame.name = "mc-member-auth-frame";
+    frame.setAttribute("aria-hidden", "true");
+    frame.setAttribute("tabindex", "-1");
+    frame.style.cssText =
+      "position:absolute;left:-9999px;width:1px;height:1px;border:0";
+    try {
+      global.document.body.appendChild(frame);
+    } catch (e) {}
+    return frame;
+  }
+
+  function readAuthFrameSnapshot() {
+    var frame = global.document.getElementById("mc-member-auth-frame");
+    if (!frame) return { html: "", url: "" };
+    try {
+      var win = frame.contentWindow;
+      var doc = frame.contentDocument || (win && win.document);
+      var url = win && win.location ? String(win.location.href || "") : "";
+      var html = doc && doc.documentElement ? doc.documentElement.innerHTML : "";
+      return { html: html, url: url };
+    } catch (eFrame) {
+      return { html: "", url: "" };
+    }
+  }
+
+  function domIndicatesLoggedIn() {
+    try {
+      if (
+        global.document.body &&
+        global.document.body.classList.contains("mc-member-logged-in")
+      ) {
+        return true;
+      }
+      if (
+        global.document.querySelector(
+          'a[href*="logout.asp"], a[href*="logoff.asp"]'
+        )
+      ) {
+        return true;
+      }
+    } catch (eDom) {}
+    return false;
+  }
+
+  function volusionAuthSuccess(html, url) {
+    var check =
+      global.volusionMyAccountHtmlIndicatesLoggedIn ||
+      (typeof volusionMyAccountHtmlIndicatesLoggedIn === "function"
+        ? volusionMyAccountHtmlIndicatesLoggedIn
+        : null);
+    if (typeof check === "function" && check(html)) return true;
+    var u = String(url || "").toLowerCase();
+    if (/productdetails\.asp/i.test(u)) return true;
+    if (
+      /\/\w+-p\//.test(u) &&
+      u.indexOf("login.asp") === -1 &&
+      u.indexOf("customer_login") === -1
+    ) {
+      return true;
+    }
+    return domIndicatesLoggedIn();
+  }
+
+  function loginResponseFailed(html, respUrl) {
+    var raw = String(html || "");
+    var stripped = raw
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
+      .replace(/<!--[\s\S]*?-->/g, " ");
+    var lc = stripped.toLowerCase();
+    var url = String(respUrl || "").toLowerCase();
+    if (
+      /the email address or password[^<]*invalid|invalid (?:email|login|password)|login failed|not recognized|could not log you in/i.test(
+        lc
+      )
+    ) {
+      return true;
+    }
+    if (
+      typeof global.volusionMyAccountHtmlIndicatesLoggedIn === "function" &&
+      global.volusionMyAccountHtmlIndicatesLoggedIn(raw)
+    ) {
+      return false;
+    }
+    if (/href\s*=\s*["'][^"']*logout\.asp[^"']*["']/i.test(stripped)) {
+      return false;
+    }
+    if (url.indexOf("/customer_login.asp") !== -1) return true;
+    if (
+      url.indexOf("/login.asp") !== -1 &&
+      /<input[^>]+name\s*=\s*["']password["']/i.test(stripped)
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  function postHiddenVolusionForm(actionUrl, fields) {
+    return new Promise(function (resolve, reject) {
+      var frame = getAuthFrame();
+      var settled = false;
+      var timer = global.setTimeout(function () {
+        if (settled) return;
+        settled = true;
+        try {
+          frame.onload = null;
+        } catch (eT) {}
+        reject(new Error("timeout"));
+      }, 22000);
+      frame.onload = function () {
+        if (settled) return;
+        settled = true;
+        global.clearTimeout(timer);
+        try {
+          frame.onload = null;
+        } catch (eL) {}
+        global.setTimeout(function () {
+          resolve(readAuthFrameSnapshot());
+        }, 280);
+      };
+      var f = global.document.createElement("form");
+      f.method = "POST";
+      f.action = actionUrl;
+      f.target = frame.name;
+      f.style.cssText = "position:absolute;left:-9999px;visibility:hidden";
+      Object.keys(fields || {}).forEach(function (key) {
+        var inp = global.document.createElement("input");
+        inp.type = "hidden";
+        inp.name = key;
+        inp.value = fields[key] == null ? "" : String(fields[key]);
+        f.appendChild(inp);
+      });
+      global.document.body.appendChild(f);
+      try {
+        f.submit();
+      } catch (eSub) {
+        settled = true;
+        global.clearTimeout(timer);
+        reject(eSub);
+        return;
+      }
+      global.setTimeout(function () {
+        try {
+          f.remove();
+        } catch (eRm) {}
+      }, 600);
+    });
+  }
+
+  function fetchVolusionAuth(url, body) {
+    return global.fetch(url, {
+      method: "POST",
+      credentials: "same-origin",
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "text/html,application/xhtml+xml",
+      },
+      body: body,
+      redirect: "follow",
+    });
+  }
+
+  async function authSucceeded() {
+    if (domIndicatesLoggedIn()) return true;
+    try {
+      var ctrl =
+        typeof AbortController !== "undefined" ? new AbortController() : null;
+      var timer = null;
+      if (ctrl) {
+        timer = global.setTimeout(function () {
+          try {
+            ctrl.abort();
+          } catch (eA) {}
+        }, 4500);
+      }
+      var resp = await global.fetch(
+        "/myaccount.asp?mcAuthCheck=" + Date.now(),
+        {
+          credentials: "same-origin",
+          cache: "no-store",
+          signal: ctrl ? ctrl.signal : undefined,
+        }
+      );
+      var html = await resp.text();
+      if (timer) global.clearTimeout(timer);
+      var check = global.volusionMyAccountHtmlIndicatesLoggedIn;
+      if (typeof check === "function") return !!check(html);
+    } catch (e2) {}
+    return false;
+  }
+
+  async function waitForAuthSuccess(maxMs, intervalMs) {
+    var timeoutMs = Math.max(1000, Number(maxMs) || 0);
+    var stepMs = Math.max(200, Number(intervalMs) || 0);
+    var started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      try {
+        if (await authSucceeded()) return true;
+      } catch (ePoll) {}
+      await authDelay(stepMs);
+    }
+    return false;
+  }
+
+  async function postVolusionLoginTwoStep(form) {
+    normalizeLoginFields(form);
+    var emailEl = global.document.getElementById("mc-login-email");
+    var passwordEl = global.document.getElementById("mc-login-password");
+    var email = emailEl ? String(emailEl.value || "").trim() : "";
+    var password = passwordEl ? String(passwordEl.value || "") : "";
+    if (!email || !password) return false;
+
+    var returnTo = loginReturnTo();
+    var step1 = "/login.asp?ReturnTo=" + returnTo;
+    var step2 = "/login.asp?ReturnTo=" + returnTo;
+
+    try {
+      await postHiddenVolusionForm(step1, {
+        CustomerNewOld: "old",
+        email: email,
+        "imageField2.x": "1",
+        "imageField2.y": "1",
+      });
+      await authDelay(400);
+      var afterStep2 = await postHiddenVolusionForm(step2, {
+        CustomerNewOld: "old",
+        email: email,
+        password: password,
+        "imageField2.x": "1",
+        "imageField2.y": "1",
+      });
+      if (
+        volusionAuthSuccess(
+          afterStep2 && afterStep2.html,
+          afterStep2 && afterStep2.url
+        )
+      ) {
+        return true;
+      }
+      if (
+        loginResponseFailed(
+          afterStep2 && afterStep2.html,
+          afterStep2 && afterStep2.url
+        )
+      ) {
+        return false;
+      }
+    } catch (eLoginSteps) {
+      try {
+        var body1 =
+          "CustomerNewOld=old&email=" +
+          encodeURIComponent(email) +
+          "&imageField2.x=1&imageField2.y=1";
+        await fetchVolusionAuth(step1, body1);
+        await authDelay(300);
+        var body2 =
+          "CustomerNewOld=old&email=" +
+          encodeURIComponent(email) +
+          "&password=" +
+          encodeURIComponent(password) +
+          "&imageField2.x=1&imageField2.y=1";
+        var r2 = await fetchVolusionAuth(step2, body2);
+        var html2 = await r2.text();
+        if (volusionAuthSuccess(html2, r2.url)) return true;
+        if (loginResponseFailed(html2, r2.url)) return false;
+      } catch (eFetch) {
+        return false;
+      }
+    }
+    if (await authSucceeded()) return true;
+    return waitForAuthSuccess(10000, 400);
+  }
+
+  function closeLoginModalOnly() {
+    if (typeof global.mcCloseLoginModalOnly === "function") {
+      global.mcCloseLoginModalOnly();
+      return;
+    }
+    var m = global.document.getElementById("mc-login-modal");
+    if (!m) return;
+    m.classList.remove("mc-login-modal--open");
+    m.setAttribute("aria-hidden", "true");
+    try {
+      m.style.removeProperty("display");
+      m.style.removeProperty("visibility");
+      m.style.removeProperty("opacity");
+      m.style.removeProperty("pointer-events");
+      m.style.removeProperty("z-index");
+      global.document.body.style.overflow = "";
+    } catch (e2) {}
+  }
+
+  function refreshMemberPricingAfterAuth() {
+    if (typeof global.mcRefreshMemberPricingAfterAuth === "function") {
+      return global.mcRefreshMemberPricingAfterAuth();
+    }
+    return Promise.resolve()
+      .then(function () {
+        try {
+          if (typeof global.mcRememberRecentMemberAuth === "function") {
+            global.mcRememberRecentMemberAuth();
+          }
+        } catch (eRem) {}
+        try {
+          global.__mcMemberPricing.promise = null;
+        } catch (ePr) {}
+        try {
+          global.document.body.classList.add("mc-member-logged-in");
+        } catch (eCls) {}
+        if (typeof global.detectMemberPricingState === "function") {
+          return global.detectMemberPricingState();
+        }
+      })
+      .then(function () {
+        try {
+          if (typeof global.refreshPlannerPriceForMemberState === "function") {
+            global.refreshPlannerPriceForMemberState();
+          }
+        } catch (eRpf) {}
+        try {
+          if (typeof global.renderMemberPricingCaption === "function") {
+            global.renderMemberPricingCaption(global.document);
+          }
+        } catch (eCap) {}
+        try {
+          if (typeof global.forceProductFixes === "function") {
+            global.forceProductFixes();
+          }
+        } catch (eFx) {}
+        try {
+          if (typeof global.mcRenderRetailMemberOnPdp === "function") {
+            return global.mcRenderRetailMemberOnPdp();
+          }
+        } catch (ePdp) {}
+      });
+  }
+
+  function mcFinishLoginModalAndRefreshPdp() {
+    closeLoginModalOnly();
+    try {
+      global.document.body.style.overflow = "";
+    } catch (eOv) {}
+    global.setTimeout(function () {
+      var p = refreshMemberPricingAfterAuth();
+      if (p && typeof p.catch === "function") {
+        p.catch(function () {
+          try {
+            if (typeof global.detectMemberPricingState === "function") {
+              global.__mcMemberPricing.promise = null;
+              global.detectMemberPricingState();
+            }
+          } catch (eRetry) {}
+        });
+      }
+    }, 0);
+  }
+
+  global.mcFinishLoginModalAndRefreshPdp = mcFinishLoginModalAndRefreshPdp;
+
+  function templateSubmitHasFinish() {
+    var fn = global.mcSubmitAuthForm;
+    if (!fn) return false;
+    try {
+      return String(fn).indexOf("mcFinishLoginModalAndRefreshPdp") !== -1;
+    } catch (e) {}
+    return false;
+  }
+
+  function installAuthSubmitOverride() {
+    if (templateSubmitHasFinish()) return;
+    if (
+      global.mcSubmitAuthForm &&
+      global.mcSubmitAuthForm.__mcAuthCtaOverrideVer === VERSION
+    ) {
+      return;
+    }
+    var prev = global.mcSubmitAuthForm;
+
+    global.mcSubmitAuthForm = async function (form, mode) {
+      if (mode !== "login") {
+        if (prev) return prev.call(this, form, mode);
+        return false;
+      }
+      try {
+        if (typeof global.mcSetAuthStatus === "function") {
+          global.mcSetAuthStatus(mode, "", "");
+        }
+        if (typeof global.mcToggleAuthPending === "function") {
+          global.mcToggleAuthPending(form, true);
+        }
+        if (typeof global.mcSetAuthStatus === "function") {
+          global.mcSetAuthStatus(mode, "Signing in.", "success");
+        }
+      } catch (eUi) {}
+
+      var ok = await postVolusionLoginTwoStep(form);
+
+      try {
+        if (typeof global.mcToggleAuthPending === "function") {
+          global.mcToggleAuthPending(form, false);
+        }
+      } catch (eUi2) {}
+
+      if (ok) {
+        try {
+          if (typeof global.mcLoginModalRememberRecentAuth === "function") {
+            global.mcLoginModalRememberRecentAuth();
+          }
+        } catch (eRem) {}
+        try {
+          if (typeof global.mcSetAuthStatus === "function") {
+            global.mcSetAuthStatus(mode, "Signed in.", "success");
+          }
+        } catch (eStat) {}
+        mcFinishLoginModalAndRefreshPdp();
+        return true;
+      }
+
+      try {
+        if (typeof global.mcLoginModalClearRecentAuth === "function") {
+          global.mcLoginModalClearRecentAuth();
+        }
+        if (typeof global.mcSetAuthStatus === "function") {
+          global.mcSetAuthStatus(
+            mode,
+            'Sign-in failed. Check your email and password, or use "Open in a new tab" below.',
+            "error"
+          );
+        }
+      } catch (eFail) {}
+      return false;
+    };
+    global.mcSubmitAuthForm.__mcAuthCtaOverrideVer = VERSION;
+  }
+
+  [0, 50, 200, 600, 1500, 4000, 9000].forEach(function (ms) {
+    global.setTimeout(installAuthSubmitOverride, ms);
+  });
 
   function handleAuthCtaClick(e) {
     if (!e || !e.target || !e.target.closest) return false;
@@ -79,8 +545,12 @@
 
   function convertLegacyGateLinks(g) {
     if (!g || g.querySelector("button[data-mc-open-login]")) return;
-    var legacyLogin = g.querySelector('a[href*="login.asp"], a[href*="Login.asp"]');
-    var legacySignup = g.querySelector('a[href*="register.asp"], a[href*="AccountSettings.asp"]');
+    var legacyLogin = g.querySelector(
+      'a[href*="login.asp"], a[href*="Login.asp"]'
+    );
+    var legacySignup = g.querySelector(
+      'a[href*="register.asp"], a[href*="AccountSettings.asp"]'
+    );
     if (!legacyLogin && !legacySignup) return;
     var row =
       g.querySelector(".mc-planner-login-gate__actions") ||
@@ -202,11 +672,17 @@
   }
 
   global.addEventListener("load", function () {
-    if (global.__MC_PDP_PENDING_LOGIN_MODAL__ && typeof global.mcOpenLoginModal === "function") {
+    if (
+      global.__MC_PDP_PENDING_LOGIN_MODAL__ &&
+      typeof global.mcOpenLoginModal === "function"
+    ) {
       global.__MC_PDP_PENDING_LOGIN_MODAL__ = false;
       global.mcOpenLoginModal();
     }
-    if (global.__MC_PDP_PENDING_SIGNUP_MODAL__ && typeof global.mcOpenSignupModal === "function") {
+    if (
+      global.__MC_PDP_PENDING_SIGNUP_MODAL__ &&
+      typeof global.mcOpenSignupModal === "function"
+    ) {
       global.__MC_PDP_PENDING_SIGNUP_MODAL__ = false;
       global.mcOpenSignupModal();
     }
@@ -229,7 +705,9 @@
         runPatch();
       });
     });
-    var root = global.document.getElementById("mcConfigurationBlock") || global.document.body;
+    var root =
+      global.document.getElementById("mcConfigurationBlock") ||
+      global.document.body;
     if (root) mo.observe(root, { childList: true, subtree: true });
   }
 })(window);

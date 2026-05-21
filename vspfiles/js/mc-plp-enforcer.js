@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260623
+ * MC_PLP_ENFORCER_20260624
  *
  * Thumbnails: .mc-plp-image-box + visible-sofa width normalization (no crop, no scale transform).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260623";
+  var VERSION = "20260624";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -524,7 +524,7 @@
       if (global.__MC_PDP_AUTH_CTA_FIX_VER__) return;
       if (global.document.querySelector('script[src*="mc-pdp-auth-cta-fix"]')) return;
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260623&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260624&mcrd=" + Date.now();
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eLoad) {}
