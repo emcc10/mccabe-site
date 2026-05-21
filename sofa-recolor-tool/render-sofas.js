@@ -18,12 +18,13 @@ import { basename, dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { finalizeBaliExport } from './finalize-bali-export.js';
+import { getBaliComposeParams, recolorBaliUpholstery } from './bali-upholstery-compose.js';
 import {
-  applySilhouetteEdgeCrisp,
-  getBaliComposeParams,
-  recolorBaliUpholstery,
-} from './bali-upholstery-compose.js';
-import { writeBaliDebugStrip6 } from './debug-strip.js';
+  applyBaliMattePipeline,
+  applyRightLegNormalSharpen,
+  getBaliMatteParams,
+} from './bali-matte.js';
+import { writeBaliDebugMattePack, writeBaliDebugStrip6 } from './debug-strip.js';
 import {
   applySourceYResidualToRgb,
   prepareSourceLGrain,
@@ -895,25 +896,42 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
       options.referenceImage ?? null,
       chromaFn,
     );
-    if (options.composeDebugHolder) {
-      Object.assign(options.composeDebugHolder, {
-        detailViz: composed.detailViz,
-        contourViz: composed.contourViz,
-        seamViz: composed.seamViz,
-        params: composed.params,
-      });
-    }
-    if (options.detailVizHolder) options.detailVizHolder.buf = composed.detailViz;
-    if (!options.skipFinalize) finalizeBaliExport(composed.out, sourceImage, mask);
-    applySilhouetteEdgeCrisp(
+    const matte = applyBaliMattePipeline(
       composed.out,
       mask,
-      composed.fields.contourAlpha,
-      composed.fields.distIn,
       sourceImage.width,
       sourceImage.height,
       sourceImage.channels,
     );
+    if (options.composeDebugHolder) {
+      Object.assign(options.composeDebugHolder, {
+        detailViz: composed.detailViz,
+        textureViz: composed.textureViz,
+        seamViz: composed.seamViz,
+        contourViz: matte.alphaAfterViz,
+        hardMatteViz: matte.hardMatteViz,
+        softMatteViz: matte.softMatteViz,
+        patchViz: matte.patchViz,
+        alphaBeforeViz: matte.alphaBeforeViz,
+        alphaAfterViz: matte.alphaAfterViz,
+        rightLegPatchMask: matte.rightLegPatchMask,
+        params: composed.params,
+        matteParams: getBaliMatteParams(),
+      });
+    }
+    if (options.detailVizHolder) options.detailVizHolder.buf = composed.textureViz;
+    if (!options.skipFinalize) finalizeBaliExport(composed.out, sourceImage, mask);
+    applyRightLegNormalSharpen(
+      composed.out,
+      mask,
+      matte.contourAlpha,
+      matte.rightLegPatchMask,
+      matte.distIn,
+      sourceImage.width,
+      sourceImage.height,
+      sourceImage.channels,
+    );
+    if (options.matteDebugHolder) Object.assign(options.matteDebugHolder, matte);
     return composed.out;
   }
 
@@ -1261,7 +1279,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     lBlend: isBali
       ? realismStress
         ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
-        : 'lowfreq+ref texture+source fine detail; post-finalize silhouette crisp vs white; NO luma lock'
+        : 'texture rollback + bali-matte right-leg patch decontam; NO luma lock'
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali
@@ -1272,6 +1290,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
   });
 
   const composeDebugHolder = {};
+  const matteDebugHolder = {};
   const detailVizHolder = { buf: null };
   const outData = recolorSofa(sourceImage, mask, palette, {
     realismStress,
@@ -1279,35 +1298,54 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     referenceImage,
     detailVizHolder,
     composeDebugHolder,
+    matteDebugHolder,
   });
 
   if (isBali && !realismStress) {
     const ts = renderTimestamp();
-    const stripPath = join(PIPELINE_DEBUG_DIR, `${ts}-debug-strip-6panel.png`);
+    const debugBase = join(PIPELINE_DEBUG_DIR, `${ts}-debug`);
     let prevPanel = Buffer.from(sourceImage.data);
     if (previousBaliPath && existsSync(previousBaliPath)) {
       prevPanel = (await loadImage(previousBaliPath)).data;
     }
-    await writeBaliDebugStrip6(
+    const patchMask = matteDebugHolder.rightLegPatchMask ?? new Uint8Array(sourceImage.width * sourceImage.height);
+    const mattePack = await writeBaliDebugMattePack(
       [
-        sourceImage.data,
         prevPanel,
         outData,
-        composeDebugHolder.contourViz ?? outData,
-        composeDebugHolder.detailViz ?? outData,
-        composeDebugHolder.seamViz ?? outData,
+        composeDebugHolder.textureViz ?? outData,
+        composeDebugHolder.hardMatteViz ?? outData,
+        composeDebugHolder.softMatteViz ?? outData,
+        composeDebugHolder.patchViz ?? outData,
+        composeDebugHolder.alphaBeforeViz ?? outData,
+        composeDebugHolder.alphaAfterViz ?? outData,
       ],
       sourceImage.width,
       sourceImage.height,
       sourceImage.channels,
-      stripPath,
+      `${debugBase}.png`,
+      patchMask,
+      {
+        alphaBefore: composeDebugHolder.alphaBeforeViz ?? outData,
+        finalComposite: outData,
+      },
     );
     const p = composeDebugHolder.params ?? getBaliComposeParams(sourceImage.width, sourceImage.height);
-    console.log(`  debug strip 6-panel: ${resolve(stripPath)}`);
-    console.log('  panels: source | previous | new | contour alpha | detail map | seam map');
-    console.log('  compose params:', p);
+    const mp = composeDebugHolder.matteParams ?? getBaliMatteParams();
+    console.log(`  debug matte strip 10-panel: ${resolve(mattePack.stripPath)}`);
     console.log(
-      '  edge crisp: post-finalize, white bg, unsharp band only (fixes leg cutout fringe)',
+      '  panels: prev | new | texture | hard matte | soft matte | right_leg_patch | alpha before | alpha after | leg crop | leg final',
+    );
+    if (mattePack.zoomAlphaBefore) {
+      console.log(`  right-leg alpha before snap 3x: ${resolve(mattePack.zoomAlphaBefore)}`);
+    }
+    if (mattePack.zoomFinal) {
+      console.log(`  right-leg final composite 3x: ${resolve(mattePack.zoomFinal)}`);
+    }
+    console.log('  compose params:', p);
+    console.log('  matte params:', mp);
+    console.log(
+      '  matte: decontaminateEdgeForeground → snap alpha (right leg) → compositeMatteOverBackground → directional sharpen (patch only)',
     );
   }
 
