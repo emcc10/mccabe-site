@@ -730,6 +730,21 @@ function computeBaliFullLRange(sourceImage, mask) {
   return { lo, hi, span: Math.max(hi - lo, 4) };
 }
 
+/** Min/max source Rec.709 luma on upholstery — chroma keyed to camera luma texture. */
+function computeSourceRec709LumRange(sourceImage, mask) {
+  const { data, width, height, channels } = sourceImage;
+  let lo = 255;
+  let hi = 0;
+  for (let j = 0; j < width * height; j++) {
+    if (mask[j] < MASK_APPLY_THRESH) continue;
+    const p = j * channels;
+    const y = pixelBrightness(data[p], data[p + 1], data[p + 2]);
+    if (y < lo) lo = y;
+    if (y > hi) hi = y;
+  }
+  return { lo, hi, span: Math.max(hi - lo, 1) };
+}
+
 /** TEMPORARY: extreme source L/HF/MF preservation for pipeline debug. */
 export function baliRealismStressRgb(
   r,
@@ -758,9 +773,15 @@ export function baliRealismStressRgb(
 }
 
 /**
- * Production Bali: swatch a/b only; source LAB L + uniform tone offset (ΔL preserved).
- * Per-pixel Rec.709 luma restored — catalog microcontrast, no post-enhancement.
+ * Production Bali: swatch a/b only; source LAB L + uniform ΔL offset (structure preserved).
+ * No per-pixel luma ratio — global mean luma corrected after loop to lock Bali tone.
  */
+export function baliChromaOnlyLabRgb(r, g, b, chroma, photoL, meanPhotoL, anchorL) {
+  const finalL = photoL + (anchorL - meanPhotoL);
+  return labToRgb(clamp(finalL, 0, 100), chroma.a, chroma.b);
+}
+
+/** Production: LAB chroma swap + exact per-pixel source Rec.709 luma (catalog structure). */
 export function baliChromaOnlyPreserveSourceLuma(
   r,
   g,
@@ -772,11 +793,9 @@ export function baliChromaOnlyPreserveSourceLuma(
   lumOffset,
 ) {
   const srcLum = pixelBrightness(r, g, b);
-  const finalL = photoL + (anchorL - meanPhotoL);
-  const { r: tr, g: tg, b: tb } = labToRgb(clamp(finalL, 0, 100), chroma.a, chroma.b);
+  const { r: tr, g: tg, b: tb } = baliChromaOnlyLabRgb(r, g, b, chroma, photoL, meanPhotoL, anchorL);
   const outLum = pixelBrightness(tr, tg, tb);
-  const targetLum = srcLum + lumOffset;
-  const ratio = targetLum / Math.max(outLum, 0.5);
+  const ratio = (srcLum + lumOffset) / Math.max(outLum, 0.5);
   return {
     r: clamp(Math.round(tr * ratio), 0, 255),
     g: clamp(Math.round(tg * ratio), 0, 255),
@@ -816,6 +835,7 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
   const lMap = palette.isBaliSilk
     ? computeBaliFullLRange(sourceImage, mask)
     : computeSofaLuminanceMapRange(sourceImage, mask);
+  const lumRange = palette.isBaliSilk ? computeSourceRec709LumRange(sourceImage, mask) : null;
   const lo = lMap.lo;
   const span = lMap.span;
   const meanPhotoL = palette.isBaliSilk ? meanMaskedLab(sourceImage, mask).L : 0;
@@ -837,7 +857,10 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
     const g = data[p + 1];
     const bIn = data[p + 2];
     const photoL = photoLuminanceOnly(r, g, bIn);
-    const u = clamp((photoL - lo) / span, 0, 1);
+    const srcLum = pixelBrightness(r, g, bIn);
+    const u = palette.isBaliSilk
+      ? clamp((srcLum - lumRange.lo) / lumRange.span, 0, 1)
+      : clamp((photoL - lo) / span, 0, 1);
     const chroma = swatchChromaForPixel(palette, u);
 
     if (palette.isBaliSilk && realismProbe) {
@@ -1133,7 +1156,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     lBlend: isBali
       ? realismStress
         ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
-        : 'source ΔL + swatch a/b; per-pixel source Rec.709 luma (chroma only, no post)'
+        : 'source ΔL + swatch a/b keyed to source luma; per-pixel source Rec.709 luma (no upholstery post)'
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali
@@ -1149,7 +1172,32 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
   });
 
   if (isBali) {
+    const beforeFinalize = Buffer.from(outData);
     finalizeBaliExport(outData, sourceImage, mask);
+    if (!realismStress) {
+      const srcVsRecolor = maskedRgbStats(
+        sourceImage.data,
+        beforeFinalize,
+        mask,
+        sourceImage.width,
+        sourceImage.height,
+        sourceImage.channels,
+      );
+      const recolorVsFinal = maskedRgbStats(
+        beforeFinalize,
+        outData,
+        mask,
+        sourceImage.width,
+        sourceImage.height,
+        sourceImage.channels,
+      );
+      console.log(
+        formatMaskedStats('masked Δ: source photo → recolor (color + preserved luma)', srcVsRecolor),
+      );
+      console.log(
+        formatMaskedStats('masked Δ: recolor → after finalize (upholstery should be ~0)', recolorVsFinal),
+      );
+    }
   }
 
   const outImage = {
