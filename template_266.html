@@ -57,6 +57,20 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-p
 <link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260521type" id="mc-live-patch-css">
 <script>
 (function () {
+  function mcEarlyPdpPriceStackClass() {
+    try {
+      if (!document.body) return;
+      if (document.querySelector(".mc-pdp-member-pricing, .mc-pdp-retail-row")) {
+        document.body.classList.add("mc-pdp-price-stack");
+      }
+    } catch (eEarly) {}
+  }
+  if (document.body) mcEarlyPdpPriceStackClass();
+  else document.addEventListener("DOMContentLoaded", mcEarlyPdpPriceStackClass);
+})();
+</script>
+<script>
+(function () {
   function apply() {
     try {
       var h = document.documentElement;

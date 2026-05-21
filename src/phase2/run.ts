@@ -5,7 +5,7 @@ import { loadPhase1Masks } from '../phase1/loadMasks.js';
 import { loadRgba } from '../phase1/segment.js';
 import { writeCombinedOverlay } from '../phase1/previews.js';
 import { writeLabeledComparison } from './comparison.js';
-import { measureStage2Structure } from './metrics.js';
+import { measureRecolorMetrics } from './metrics.js';
 import {
   BALI_SILK_LAB,
   CHROMA_BLEND,
@@ -25,7 +25,7 @@ export interface Phase2RunResult {
   comparison: string;
   spec: string;
   metrics: string;
-  structural: Awaited<ReturnType<typeof measureStage2Structure>>;
+  structural: Awaited<ReturnType<typeof measureRecolorMetrics>>;
 }
 
 async function writeRgbaPng(path: string, image: RgbaImage) {
@@ -67,7 +67,7 @@ export async function runPhase2(): Promise<Phase2RunResult> {
     PHASE2_RECOLOR_OUT,
   );
 
-  const structural = measureStage2Structure(source, recolored, final, upholstery, legs);
+  const structural = measureRecolorMetrics(source, recolored, final, upholstery, legs);
   writeFileSync(PHASE2_METRICS_OUT, JSON.stringify(structural, null, 2));
 
   return {
