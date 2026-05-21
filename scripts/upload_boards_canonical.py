@@ -13,6 +13,7 @@ import sys
 BOARDS_FILES = (
     "vspfiles/my-boards.html",
     "vspfiles/boards/my-boards-page.js",
+    "vspfiles/boards/my-boards-app.js",
     "vspfiles/boards/board-styles.js",
     "vspfiles/boards/my-boards-page.css",
     "vspfiles/boards/my-boards-critical.css",
@@ -28,6 +29,7 @@ BOARDS_FILES = (
 
 MUST_MATCH = (
     "vspfiles/boards/my-boards-page.js",
+    "vspfiles/boards/my-boards-app.js",
     "vspfiles/boards/board-styles.js",
     "vspfiles/boards/my-boards-bundle.css",
 )

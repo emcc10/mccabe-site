@@ -9,6 +9,8 @@ import sys
 VOLUSION_JS_CAP = 131072
 
 CRITICAL = (
+    "vspfiles/css/custom-safe.css",
+    "vspfiles/css/mc-live-patch.css",
     "vspfiles/templates/266/js/min/design-toolkit.min.js",
     "vspfiles/js/mc-plp-enforcer.js",
     "vspfiles/templates/266/js/mc-plp-enforcer.js",
@@ -16,6 +18,7 @@ CRITICAL = (
     "vspfiles/my-boards.html",
     "vspfiles/boards/my-boards-boot.js",
     "vspfiles/boards/my-boards-page.js",
+    "vspfiles/boards/my-boards-app.js",
     "vspfiles/boards/board-styles.js",
     "vspfiles/boards/my-boards-page.css",
     "vspfiles/boards/my-boards-critical.css",
@@ -29,8 +32,6 @@ CRITICAL = (
 )
 
 OPTIONAL = (
-    "vspfiles/css/custom-safe.css",
-    "vspfiles/css/mc-live-patch.css",
     "vspfiles/css/mc-plp-body-last.css",
     "vspfiles/js/mc-plp-sofa-bounds.json",
     "vspfiles/js/mc-site-fix.js",

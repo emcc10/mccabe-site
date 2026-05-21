@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inspiration Boards — McCabe's Theater &amp; Living</title>
-  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-bundle.css?v=20260532" charset="utf-8" />
+  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-bundle.css?v=20260533" charset="utf-8" />
 </head>
 <body class="mc-my-boards-page">
   <div class="mc-boards-shell">
@@ -145,7 +145,98 @@
       return '/v/vspfiles/boards/';
     })();
   </script>
-  <script src="/v/vspfiles/boards/board-styles.js?v=20260532"></script>
-  <script src="/v/vspfiles/boards/my-boards-page.js?v=20260532" defer></script>
+  <script src="/v/vspfiles/boards/board-styles.js?v=20260533"></script>
+  <script>
+    /* Inline boot: fills grids if my-boards-app.js is missing or stale on SFTP */
+    (function () {
+      function productById(C, id) {
+        var list = C.products || [];
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].id === id) return list[i];
+        }
+        return null;
+      }
+      function imgSrc(p) {
+        return p.catalogPhoto || p.image || '';
+      }
+      function renderInline() {
+        var C = window.MC_BOARD_STYLES;
+        if (!C || !C.styles || !C.styles.length) return false;
+        var tri = document.getElementById('mc-boards-triptych');
+        if (tri && !tri.children.length && C.featuredTriptych) {
+          for (var t = 0; t < C.featuredTriptych.length && t < 3; t++) {
+            var p = productById(C, C.featuredTriptych[t]);
+            if (!p) continue;
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'mc-boards__triptych-card';
+            var wrap = document.createElement('div');
+            wrap.className = 'mc-boards__triptych-img-wrap';
+            var im = document.createElement('img');
+            im.src = imgSrc(p);
+            im.alt = p.name;
+            im.loading = 'lazy';
+            wrap.appendChild(im);
+            btn.appendChild(wrap);
+            var lab = document.createElement('p');
+            lab.className = 'mc-boards__triptych-label';
+            lab.textContent = p.name;
+            btn.appendChild(lab);
+            tri.appendChild(btn);
+          }
+        }
+        var cat = document.getElementById('mc-boards-catalog');
+        if (cat && !cat.children.length && C.products) {
+          for (var c = 0; c < C.products.length; c++) {
+            var prod = C.products[c];
+            var card = document.createElement('article');
+            card.className = 'mc-boards__catalog-card';
+            var cw = document.createElement('div');
+            cw.className = 'mc-boards__catalog-img';
+            var ci = document.createElement('img');
+            ci.src = imgSrc(prod);
+            ci.alt = prod.name;
+            ci.loading = 'lazy';
+            cw.appendChild(ci);
+            card.appendChild(cw);
+            var nm = document.createElement('p');
+            nm.className = 'mc-boards__catalog-name';
+            nm.textContent = prod.name;
+            card.appendChild(nm);
+            cat.appendChild(card);
+          }
+        }
+        return tri && tri.children.length > 0;
+      }
+      function loadApp() {
+        if (window.__MC_BOARDS_APP_V2) return;
+        var s = document.createElement('script');
+        s.src = '/v/vspfiles/boards/my-boards-app.js?v=20260533';
+        s.defer = true;
+        document.body.appendChild(s);
+      }
+      function kick() {
+        var ok = renderInline();
+        if (!ok) {
+          var n = 0;
+          var poll = setInterval(function () {
+            n++;
+            if (renderInline() || n > 40) clearInterval(poll);
+          }, 100);
+        }
+        setTimeout(function () {
+          var tri = document.getElementById('mc-boards-triptych');
+          if (!tri || !tri.children.length) loadApp();
+          else if (!window.__MC_BOARDS_APP_V2) loadApp();
+        }, 600);
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', kick);
+      } else {
+        kick();
+      }
+    })();
+  </script>
+  <script src="/v/vspfiles/boards/my-boards-app.js?v=20260533" defer></script>
 </body>
 </html>

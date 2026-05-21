@@ -4,24 +4,29 @@ on:
   push:
     branches:
       - main
-    # Sofa recolor / docs-only commits should not queue a 20-minute Volusion SFTP deploy.
-    paths-ignore:
-      - "sofa-recolor-tool/**"
-      - "tools/**"
-      - "**/*.md"
-      - ".cursor/**"
-      - "agent-transcripts/**"
+    # Only deploy when Volusion-facing files change (not sofa-recolor / render-cache only).
+    paths:
+      - "template_266.html"
+      - "vspfiles/**"
+      - ".github/workflows/deploy.yml"
+      - ".github/scripts/deploy-volusion.sh"
+      - "scripts/deploy_volusion_assets.py"
+      - "scripts/volusion_sftp_force_template.py"
+      - "scripts/verify_template_sftp.py"
+      - "scripts/verify_custom_safe_sftp.py"
+      - "scripts/upload_boards_canonical.py"
+      - "scripts/announce_deploy_markers.py"
   workflow_dispatch:
     inputs:
       upload_plp_photos:
         description: Upload all PLP photos via SFTP (slow; ~160 files)
         type: boolean
-        default: true
+        default: false
 
-# One deploy at a time — parallel runs corrupt the same SFTP files (550 locks, truncated PNGs).
+# Queue deploys — do NOT cancel in-progress (rapid pushes were killing uploads mid-flight).
 concurrency:
   group: deploy-volusion-main
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -56,7 +61,6 @@ jobs:
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SKIP_TEMPLATE_DEPLOY: "0"
-          # Push = fast path (template/CSS/JS). Manual run can include all PLP photos.
           SKIP_PLP_PHOTOS: ${{ github.event_name == 'push' && '1' || (inputs.upload_plp_photos == false && '1' || '0') }}
         run: bash .github/scripts/deploy-volusion.sh
 
@@ -69,6 +73,14 @@ jobs:
         if: always()
         run: |
           echo "Deploy step: ${{ steps.deploy.outcome }}"
-          echo "SFTP template verify inside deploy script is authoritative for CI pass/fail."
-          echo "After green: Volusion Design → File Editor → template_266.html → Save (rebake categories/PDPs)."
-          echo "Manual full photo upload: Actions → Run workflow → check 'Upload all PLP photos'."
+          echo ""
+          echo "WHEN DEPLOY RUNS:"
+          echo "  - Push to main that touches template_266.html, vspfiles/**, or deploy scripts"
+          echo "  - OR: Actions → Deploy to Volusion → Run workflow (always uploads)"
+          echo ""
+          echo "WHEN DEPLOY IS SKIPPED:"
+          echo "  - Push only changes public/, src/, sofa-recolor-tool/, docs — use workflow_dispatch"
+          echo ""
+          echo "AFTER GREEN SFTP:"
+          echo "  Volusion Design → File Editor → template_266.html → Save (rebake PDP/category HTML)"
+          echo "  Hard-refresh PDP (Ctrl+Shift+R) or purge Cloudflare for /v/vspfiles/css/custom-safe.css"
