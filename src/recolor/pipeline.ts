@@ -5,7 +5,6 @@ import type { ProductRenderAssets, RenderRequest, RenderResult } from './types.j
 import { productDir, toPublicUrl } from './paths.js';
 import { loadSingleProductAssets, saveSingleProductAssets, createEmptyAssetsRecord } from './productAssets.js';
 import { getSingleProductConfig } from './singleProductConfig.js';
-import { getSwatchProfile } from './swatchRegistry.js';
 import { buildSegmentationForProduct } from './segment.js';
 import { saveDerivedMaps } from './maps.js';
 import { loadImageRGBA } from './imageIO.js';
@@ -26,7 +25,9 @@ import {
   publicRenderUrl,
   saveCachedRender,
   sourceImagePath,
+  updateRenderManifest,
 } from './cache.js';
+import { getSwatchProfile } from './swatchRegistry.js';
 import { loadMask, maskBoundingBox } from './masks.js';
 
 export async function ensureProductAssets(
@@ -121,7 +122,21 @@ export async function renderProductSwatch(request: RenderRequest): Promise<Rende
     .toBuffer();
 
   saveCachedRender(cachePath, pngBuf);
+  const manifestPath = updateRenderManifest(
+    productCode,
+    {
+      swatchCode,
+      label: swatch.label,
+      imageUrl: publicRenderUrl(productCode, swatchCode, cacheKey),
+      outputPath: cachePath,
+      cacheKey,
+      updatedAt: new Date().toISOString(),
+    },
+    assets.baseImageUrl,
+  );
   console.log(`[render] output: ${cachePath}`);
+  console.log(`[render] manifest: ${manifestPath}`);
+  console.log(`[render] preview:  /preview-test-sofa.html`);
 
   return {
     imageUrl: publicRenderUrl(productCode, swatchCode, cacheKey),

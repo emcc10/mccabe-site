@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>TEST-SOFA swatch preview</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 1.5rem; background: #f4f4f4; }
+    h1 { font-size: 1.25rem; }
+    .row { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; }
+    figure { margin: 0; background: #fff; padding: 0.75rem; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+    img { display: block; max-width: 100%; height: auto; }
+    figcaption { margin-top: 0.5rem; font-size: 0.85rem; color: #333; }
+    code { font-size: 0.75rem; word-break: break-all; }
+    .err { color: #a40; }
+  </style>
+</head>
+<body>
+  <h1>TEST-SOFA renders</h1>
+  <p>Run from repo root: <code>npm run render:swatches -- TEST-SOFA BALI-SILK</code> then refresh.</p>
+  <div class="row" id="panels"></div>
+  <p id="err" class="err" hidden></p>
+  <script>
+    const panels = document.getElementById('panels');
+    const err = document.getElementById('err');
+
+    async function load() {
+      const res = await fetch('/render-cache/TEST-SOFA/manifest.json?t=' + Date.now());
+      if (!res.ok) throw new Error('No manifest — run npm run render:swatches -- TEST-SOFA BALI-SILK');
+      const manifest = await res.json();
+
+      const base = document.createElement('figure');
+      base.innerHTML = '<img src="' + manifest.baseImageUrl + '" alt="Cognac source" /><figcaption>Original cognac (source.png)</figcaption>';
+      panels.appendChild(base);
+
+      for (const entry of Object.values(manifest.renders)) {
+        const fig = document.createElement('figure');
+        fig.innerHTML =
+          '<img src="' + entry.imageUrl + '?t=' + Date.now() + '" alt="" />' +
+          '<figcaption><strong>' + entry.label + '</strong><br><code>' + entry.imageUrl + '</code></figcaption>';
+        panels.appendChild(fig);
+      }
+    }
+
+    load().catch((e) => {
+      err.hidden = false;
+      err.textContent = e.message;
+    });
+  </script>
+</body>
+</html>

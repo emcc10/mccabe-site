@@ -29,3 +29,6 @@ for (const swatchCode of swatches) {
   console.log(`  output file:  ${result.outputPath}`);
   console.log(`  public URL:   ${result.imageUrl}`);
 }
+
+console.log('\nView renders: npm run preview:sofa');
+console.log('Then open: http://localhost:3456/preview-test-sofa.html');

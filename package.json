@@ -5,7 +5,8 @@
   "scripts": {
     "build:assets": "tsx scripts/buildSingleProductAssets.ts",
     "approve:product": "tsx scripts/approveSingleProduct.ts",
-    "render:swatches": "tsx scripts/renderSingleProductSwatches.ts"
+    "render:swatches": "tsx scripts/renderSingleProductSwatches.ts",
+    "preview:sofa": "npx --yes serve public -l 3456"
   },
   "dependencies": {
     "color-convert": "^2.0.1",

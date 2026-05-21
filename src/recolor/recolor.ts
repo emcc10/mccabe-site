@@ -47,12 +47,12 @@ export async function recolorUpholstery(
 
   const out = Buffer.from(baseImage.data);
   const { width, height, channels } = baseImage;
-  const preserve = config.preserveLuminance;
+  const preserve = swatch.recolor?.preserveLuminance ?? config.preserveLuminance;
   const shadowStr = config.shadowStrength;
   const detailStr = config.detailStrength;
   const chromaStr = config.chromaVariationStrength * swatch.chromaVariation;
   const hiComp = config.highlightCompression * swatch.highlightSoftness;
-  const texBlend = config.textureBlend * swatch.grainStrength;
+  const texBlend = swatch.recolor?.textureBlend ?? config.textureBlend * swatch.grainStrength;
 
   for (let j = 0; j < width * height; j++) {
     if (upholsteryMask.data[j] < 128) continue;

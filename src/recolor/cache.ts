@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import type { ProductRenderAssets } from './types.js';
 import { RENDER_CACHE_DIR, productDir } from './paths.js';
 
@@ -43,4 +43,44 @@ export function publicRenderUrl(productCode: string, swatchCode: string, cacheKe
 
 export function sourceImagePath(productCode: string): string {
   return join(productDir(productCode), 'source.png');
+}
+
+export interface RenderCacheManifestEntry {
+  swatchCode: string;
+  label: string;
+  imageUrl: string;
+  outputPath: string;
+  cacheKey: string;
+  updatedAt: string;
+}
+
+export interface RenderCacheManifest {
+  productCode: string;
+  baseImageUrl: string;
+  renders: Record<string, RenderCacheManifestEntry>;
+}
+
+export function renderManifestPath(productCode: string): string {
+  return join(RENDER_CACHE_DIR, productCode, 'manifest.json');
+}
+
+/** Stable index so previews can find hashed PNGs without guessing filenames */
+export function updateRenderManifest(
+  productCode: string,
+  entry: RenderCacheManifestEntry,
+  baseImageUrl: string,
+): string {
+  const path = renderManifestPath(productCode);
+  mkdirSync(join(path, '..'), { recursive: true });
+  let manifest: RenderCacheManifest = {
+    productCode,
+    baseImageUrl,
+    renders: {},
+  };
+  if (existsSync(path)) {
+    manifest = JSON.parse(readFileSync(path, 'utf8')) as RenderCacheManifest;
+  }
+  manifest.renders[entry.swatchCode] = entry;
+  writeFileSync(path, JSON.stringify(manifest, null, 2));
+  return resolve(path);
 }

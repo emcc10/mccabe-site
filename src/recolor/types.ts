@@ -12,6 +12,13 @@ export interface ProductRenderAssets {
   updatedAt: string;
 }
 
+export interface SwatchRecolorTuning {
+  /** 0–1: how much original photo L to keep (lower = more swatch lightness) */
+  preserveLuminance?: number;
+  /** 0–1: how much swatch a/b chroma to apply */
+  textureBlend?: number;
+}
+
 export interface SwatchProfile {
   code: string;
   label: string;
@@ -20,6 +27,7 @@ export interface SwatchProfile {
   grainStrength: number;
   highlightSoftness: number;
   textureMapUrl?: string;
+  recolor?: SwatchRecolorTuning;
 }
 
 export interface SingleProductConfig {

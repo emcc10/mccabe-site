@@ -1,0 +1,14 @@
+{
+  "productCode": "TEST-SOFA",
+  "baseImageUrl": "/product-assets/TEST-SOFA/source.png",
+  "renders": {
+    "BALI-SILK": {
+      "swatchCode": "BALI-SILK",
+      "label": "Bali Silk",
+      "imageUrl": "/render-cache/TEST-SOFA/BALI-SILK-1e61dab782864d6f.png",
+      "outputPath": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\render-cache\\TEST-SOFA\\BALI-SILK-1e61dab782864d6f.png",
+      "cacheKey": "1e61dab782864d6f",
+      "updatedAt": "2026-05-21T18:01:28.921Z"
+    }
+  }
+}
