@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync } from 'fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import sharp from 'sharp';
 import type { ProductRenderAssets, RenderRequest, RenderResult } from './types.js';
@@ -18,6 +18,9 @@ import {
   buildCacheKey,
   getCachedRender,
   getCachedRenderPath,
+  getLatestRenderCachePath,
+  getProductAssetRenderPath,
+  publicProductRenderUrl,
   publicRenderUrl,
   saveCachedRender,
   sourceImagePath,
@@ -67,12 +70,17 @@ export async function renderProductSwatch(request: RenderRequest): Promise<Rende
   const version = assetVersionFromRecord(assets);
   const cacheKey = buildCacheKey(productCode, swatchCode, version);
   const cachePath = getCachedRenderPath(productCode, swatchCode, cacheKey);
+  const productRenderPath = getProductAssetRenderPath(productCode, swatchCode);
+  const latestCachePath = getLatestRenderCachePath(productCode, swatchCode);
 
   if (!forceRebuild) {
     const cached = getCachedRender(cachePath);
     if (cached) {
+      writeFileSync(productRenderPath, cached);
+      writeFileSync(latestCachePath, cached);
       return {
         imageUrl: publicRenderUrl(productCode, swatchCode, cacheKey),
+        productAssetPath: productRenderPath,
         cacheKey,
         productCode,
         swatchCode,
@@ -99,16 +107,19 @@ export async function renderProductSwatch(request: RenderRequest): Promise<Rende
   const qa = await runRenderQA(baseImage, finalImage, assets);
   console.log('[QA]', JSON.stringify(qa, null, 2));
 
-  await saveImageRGBA(cachePath, finalImage);
   const pngBuf = await sharp(finalImage.data, {
     raw: { width: finalImage.width, height: finalImage.height, channels: finalImage.channels },
   })
     .png()
     .toBuffer();
+
   saveCachedRender(cachePath, pngBuf);
+  saveCachedRender(latestCachePath, pngBuf);
+  saveCachedRender(productRenderPath, pngBuf);
 
   return {
     imageUrl: publicRenderUrl(productCode, swatchCode, cacheKey),
+    productAssetPath: productRenderPath,
     cacheKey,
     productCode,
     swatchCode,

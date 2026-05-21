@@ -31,6 +31,6 @@ If these exist under `public/product-assets/TEST-SOFA/`, they replace auto segme
 5. `compositeFinalRender` (original alpha + leg/trim restore)
 6. `enforceLegExclusion` + stray band cleanup
 7. `runRenderQA`
-8. Cache PNG under `public/render-cache/TEST-SOFA/`
+8. Cache PNG under `public/render-cache/TEST-SOFA/` **and** a friendly copy at `public/product-assets/TEST-SOFA/BALI-SILK.png`
 
 Contour truth: `alpha.png` from source — never from recolored pixels.

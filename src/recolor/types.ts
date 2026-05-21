@@ -45,6 +45,8 @@ export interface RenderRequest {
 
 export interface RenderResult {
   imageUrl: string;
+  /** Human-readable file in product-assets folder, e.g. BALI-SILK.png */
+  productAssetPath: string;
   cacheKey: string;
   productCode: string;
   swatchCode: string;
