@@ -25,6 +25,7 @@ import {
   prepareSourceLGrain,
   prepareSourceLLfBand,
   prepareSpecularSheenMap,
+  SPECULAR_SHEEN_ATTEN,
 } from './leather-detail.js';
 import {
   evaluateBaliExportGate,
@@ -1205,7 +1206,7 @@ export async function processSwatch(swatchPath, sourceImage, mask, options = {})
     lBlend: isBali
       ? realismStress
         ? `STRESS: L×${REALISM_STRESS_L_STRUCTURE} HF×${REALISM_STRESS_HF_GAIN} MF×${REALISM_STRESS_MF_GAIN} full L-range u`
-        : `chroma + source Y HF×${PHOTO_HF_GAIN} MF×${PHOTO_MF_GAIN} interior>6px; Y residual after luma lock`
+        : `chroma + source Y HF×${PHOTO_HF_GAIN} MF×${PHOTO_MF_GAIN} interior>6px; LF sheen−${Math.round(SPECULAR_SHEEN_ATTEN * 100)}% (smooth highlights)`
       : `original L ${COLOR_SHIFT_L_ORIGINAL * 100}% / swatch ${COLOR_SHIFT_L_SWATCH * 100}%`,
     chroma: 'swatch a/b 100% (0% cognac)',
     postProcess: isBali
