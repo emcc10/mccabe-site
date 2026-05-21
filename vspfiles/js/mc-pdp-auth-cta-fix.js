@@ -553,20 +553,71 @@
     );
   }
 
-  function cacheSaleAmount() {
-    if (global.__mcPdpSaleAmtCached > 0) return global.__mcPdpSaleAmtCached;
-    var amt = 0;
-    var inputs = global.document.querySelectorAll(
-      "#v65-product-parent input, #v65-product-parent textarea, #content_area input, #content_area textarea"
+  function readRetailAmountForSale() {
+    var el =
+      global.document.querySelector(".mc-pdp-retail-row .product_list_price") ||
+      global.document.querySelector(".mc-pdp-retail-row font.product_list_price") ||
+      global.document.querySelector("#v65-product-parent .product_list_price") ||
+      global.document.querySelector("#content_area .product_list_price");
+    return el ? parseMoney(el.textContent || "") : 0;
+  }
+
+  function readSaleFromVisibleNodes() {
+    var nodes = global.document.querySelectorAll(
+      "#v65-product-parent .product_sale_price, #v65-product-parent .product_saleprice, " +
+        "#v65-product-parent font.product_sale_price, #content_area .product_sale_price, #content_area .product_saleprice"
     );
     var i;
-    for (i = 0; i < inputs.length; i++) {
-      var nm = ((inputs[i].name || "") + " " + (inputs[i].id || ""))
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, "");
-      if (nm.indexOf("saleprice") === -1) continue;
-      amt = parseMoney(inputs[i].value || inputs[i].getAttribute("value") || "");
-      if (amt > 0) break;
+    for (i = 0; i < nodes.length; i++) {
+      var amt = parseMoney(nodes[i].textContent || "");
+      if (amt > 0) return amt;
+    }
+    return 0;
+  }
+
+  function resolvePdpSaleAmount() {
+    if (global.__mcPdpSaleAmtCached > 0) return global.__mcPdpSaleAmtCached;
+    var amt = readSaleFromVisibleNodes();
+    if (!(amt > 0)) {
+      var inputs = global.document.querySelectorAll(
+        "#v65-product-parent input, #v65-product-parent textarea, #content_area input, #content_area textarea"
+      );
+      var i;
+      for (i = 0; i < inputs.length; i++) {
+        var nm = ((inputs[i].name || "") + " " + (inputs[i].id || ""))
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "");
+        if (nm.indexOf("saleprice") === -1) continue;
+        amt = parseMoney(inputs[i].value || inputs[i].getAttribute("value") || "");
+        if (amt > 0) break;
+      }
+    }
+    if (!(amt > 0) && typeof global.getVolusionAddToCartSeatPrice === "function") {
+      amt = Number(global.getVolusionAddToCartSeatPrice(global.document)) || 0;
+    }
+    if (!(amt > 0) && typeof global.tryReadHowToGetSalePrice === "function") {
+      amt = Number(global.tryReadHowToGetSalePrice(readRetailAmountForSale(), true)) || 0;
+    }
+    if (!(amt > 0)) {
+      try {
+        if (typeof global.HowToGetSalePrice === "function") {
+          amt = Number(global.HowToGetSalePrice(readRetailAmountForSale())) || 0;
+        } else if (Number(global.SalePrice) > 0) {
+          amt = Number(global.SalePrice);
+        }
+      } catch (eW) {}
+    }
+    if (!(amt > 0)) {
+      try {
+        if (global.__mcMemberPricing && global.__mcMemberPricing.memberSeatPrice > 0) {
+          amt = Number(global.__mcMemberPricing.memberSeatPrice) || 0;
+        } else if (Number(global.__MC_MEMBER_SEAT_PRICE) > 0) {
+          amt = Number(global.__MC_MEMBER_SEAT_PRICE);
+        }
+      } catch (eMp) {}
+    }
+    if (!(amt > 0) && typeof global.mcReadCurrentVisibleMemberUnitPrice === "function") {
+      amt = Number(global.mcReadCurrentVisibleMemberUnitPrice()) || 0;
     }
     if (!(amt > 0)) {
       var html = "";
@@ -574,8 +625,9 @@
         html = global.document.documentElement.innerHTML || "";
       } catch (eH) {}
       var patterns = [
-        /\bSalePrice\s*[=:]\s*['"]?\$?([\d,]+(?:\.\d+)?)/gi,
-        /\bwindow\.SalePrice\s*=\s*['"]?([\d,]+(?:\.\d+)?)/gi,
+        /\bSalePrice\s*[=:]\s*['"]?(\d[\d,]*(?:\.\d+)?)/gi,
+        /\bwindow\.SalePrice\s*=\s*['"]?(\d[\d,]*(?:\.\d+)?)/gi,
+        /["']SalePrice["']\s*:\s*['"]?(\d[\d,]*(?:\.\d+)?)/gi,
       ];
       var pi;
       for (pi = 0; pi < patterns.length; pi++) {
@@ -591,13 +643,6 @@
         }
         if (amt > 0) break;
       }
-    }
-    if (!(amt > 0)) {
-      try {
-        if (global.__mcMemberPricing && global.__mcMemberPricing.memberSeatPrice > 0) {
-          amt = Number(global.__mcMemberPricing.memberSeatPrice) || 0;
-        }
-      } catch (eMp) {}
     }
     if (amt > 0) global.__mcPdpSaleAmtCached = amt;
     return amt;
@@ -641,7 +686,7 @@
     try {
       global.document.body.classList.add("mc-pdp-price-stack");
     } catch (eCls) {}
-    cacheSaleAmount();
+    var saleAmt = resolvePdpSaleAmount();
     hideNativeSaleNodes();
     var loggedIn = false;
     try {
@@ -650,7 +695,7 @@
         !!global.sessionStorage.getItem("mc_recent_member_auth");
     } catch (eLi) {}
     if (!loggedIn && wrap && !wrap.querySelector(".mc-pdp-member-line--sale")) {
-      var saleAmt = Number(global.__mcPdpSaleAmtCached) || cacheSaleAmount();
+      if (!(saleAmt > 0)) saleAmt = resolvePdpSaleAmount();
       if (saleAmt > 0) {
         var saleLine = global.document.createElement("div");
         saleLine.className = "mc-pdp-member-line mc-pdp-member-line--sale";
@@ -659,10 +704,11 @@
           '<span class="mc-pdp-member-line__amount">' +
           fmtMoney(saleAmt) +
           "</span>";
-        var locked = wrap.querySelector(".mc-pdp-member-line--locked");
-        if (locked && locked.parentNode) {
-          if (locked.nextSibling) locked.parentNode.insertBefore(saleLine, locked.nextSibling);
-          else locked.parentNode.appendChild(saleLine);
+        var anchor =
+          wrap.querySelector(".mc-pdp-member-line--locked") || wrap.querySelector(".mc-pdp-member-line");
+        if (anchor && anchor.parentNode) {
+          if (anchor.nextSibling) anchor.parentNode.insertBefore(saleLine, anchor.nextSibling);
+          else anchor.parentNode.appendChild(saleLine);
         } else {
           wrap.appendChild(saleLine);
         }

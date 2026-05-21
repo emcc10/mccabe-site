@@ -1,6 +1,6 @@
 /**
  * PDP retail/member/sale stack repair — works without template_266 rebake.
- * MC_PDP_PRICE_STACK_JS_20260522
+ * MC_PDP_PRICE_STACK_JS_20260522b
  */
 (function (g) {
   "use strict";
@@ -17,8 +17,11 @@
     if (typeof g.parseMcCurrency === "function") {
       return Number(g.parseMcCurrency(text == null ? "" : String(text))) || 0;
     }
-    var m = String(text == null ? "" : text).match(/\$[\d,]+(?:\.\d+)?/);
-    return m ? parseFloat(m[0].replace(/[$,]/g, "")) || 0 : 0;
+    var src = String(text == null ? "" : text);
+    var m = src.match(/\$[\d,]+(?:\.\d+)?/);
+    if (m) return parseFloat(m[0].replace(/[$,]/g, "")) || 0;
+    m = src.replace(/,/g, "").match(/(\d+(?:\.\d+)?)/);
+    return m ? parseFloat(m[1]) || 0 : 0;
   }
 
   function fmtMoney(n) {
@@ -28,29 +31,105 @@
     return "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  function cacheSale() {
-    if (g.__mcPdpSaleAmtCached > 0) return g.__mcPdpSaleAmtCached;
-    var amt = 0;
-    g.document.querySelectorAll("#v65-product-parent input, #content_area input").forEach(function (inp) {
-      if (amt > 0) return;
-      var nm = ((inp.name || "") + " " + (inp.id || "")).toLowerCase().replace(/[^a-z0-9]/g, "");
-      if (nm.indexOf("saleprice") === -1) return;
-      amt = parseMoney(inp.value || inp.getAttribute("value") || "");
-    });
-    if (!(amt > 0)) {
-      var html = g.document.documentElement.innerHTML || "";
-      var re = /\bSalePrice\s*[=:]\s*['"]?\$?([\d,]+(?:\.\d+)?)/gi;
+  function readRetailAmount() {
+    var el =
+      g.document.querySelector(".mc-pdp-retail-row .product_list_price") ||
+      g.document.querySelector(".mc-pdp-retail-row font.product_list_price") ||
+      g.document.querySelector("#v65-product-parent .product_list_price") ||
+      g.document.querySelector("#content_area .product_list_price");
+    return el ? parseMoney(el.textContent || "") : 0;
+  }
+
+  function readSaleFromVisibleNodes() {
+    var sels =
+      "#v65-product-parent .product_sale_price, #v65-product-parent .product_saleprice, " +
+      "#v65-product-parent font.product_sale_price, #content_area .product_sale_price, #content_area .product_saleprice";
+    var nodes = g.document.querySelectorAll(sels);
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      var amt = parseMoney(nodes[i].textContent || "");
+      if (amt > 0) return amt;
+    }
+    return 0;
+  }
+
+  function readSaleFromPageHtml() {
+    var html = "";
+    try {
+      html = g.document.documentElement.innerHTML || "";
+    } catch (eH) {}
+    var patterns = [
+      /\bSalePrice\s*[=:]\s*['"]?(\d[\d,]*(?:\.\d+)?)/gi,
+      /\bwindow\.SalePrice\s*=\s*['"]?(\d[\d,]*(?:\.\d+)?)/gi,
+      /["']SalePrice["']\s*:\s*['"]?(\d[\d,]*(?:\.\d+)?)/gi,
+      /\bHowToGetSalePrice\b[^0-9]{0,40}(\d[\d,]*(?:\.\d+)?)/gi,
+    ];
+    var pi;
+    for (pi = 0; pi < patterns.length; pi++) {
+      var re = patterns[pi];
       var m;
+      re.lastIndex = 0;
       while ((m = re.exec(html)) !== null) {
         var p = parseMoney(m[1]);
-        if (p > 0) {
-          amt = p;
-          break;
-        }
+        if (p > 0 && p < 50000000) return p;
       }
     }
-    if (!(amt > 0) && g.__mcMemberPricing && g.__mcMemberPricing.memberSeatPrice > 0) {
-      amt = Number(g.__mcMemberPricing.memberSeatPrice) || 0;
+    return 0;
+  }
+
+  function resolvePdpSaleAmount() {
+    if (g.__mcPdpSaleAmtCached > 0) return g.__mcPdpSaleAmtCached;
+    var amt = readSaleFromVisibleNodes();
+    if (!(amt > 0)) {
+      g.document.querySelectorAll("#v65-product-parent input, #content_area input").forEach(function (inp) {
+        if (amt > 0) return;
+        var nm = ((inp.name || "") + " " + (inp.id || "")).toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (nm.indexOf("saleprice") === -1) return;
+        amt = parseMoney(inp.value || inp.getAttribute("value") || "");
+      });
+    }
+    if (!(amt > 0) && typeof g.getVolusionAddToCartSeatPrice === "function") {
+      amt = Number(g.getVolusionAddToCartSeatPrice(g.document)) || 0;
+    }
+    if (!(amt > 0) && typeof g.tryReadHowToGetSalePrice === "function") {
+      var retail = readRetailAmount();
+      amt = Number(g.tryReadHowToGetSalePrice(retail, true)) || 0;
+    }
+    if (!(amt > 0)) {
+      try {
+        if (typeof g.HowToGetSalePrice === "function") {
+          amt = Number(g.HowToGetSalePrice(readRetailAmount())) || 0;
+        } else if (Number(g.SalePrice) > 0) {
+          amt = Number(g.SalePrice);
+        }
+      } catch (eW) {}
+    }
+    if (!(amt > 0)) {
+      try {
+        if (g.__mcMemberPricing && g.__mcMemberPricing.memberSeatPrice > 0) {
+          amt = Number(g.__mcMemberPricing.memberSeatPrice) || 0;
+        } else if (Number(g.__MC_MEMBER_SEAT_PRICE) > 0) {
+          amt = Number(g.__MC_MEMBER_SEAT_PRICE);
+        }
+      } catch (eMp) {}
+    }
+    if (!(amt > 0) && typeof g.mcReadCurrentVisibleMemberUnitPrice === "function") {
+      amt = Number(g.mcReadCurrentVisibleMemberUnitPrice()) || 0;
+    }
+    if (!(amt > 0)) amt = readSaleFromPageHtml();
+    if (!(amt > 0)) {
+      var retailAmt = readRetailAmount();
+      var opt =
+        g.document.querySelector("#priceWithOptions") ||
+        g.document.querySelector("#priceWithOptionsNoTax");
+      if (retailAmt > 0 && opt) {
+        var optAmt = parseMoney(
+          (opt.getAttribute && (opt.getAttribute("value") || opt.getAttribute("content"))) ||
+            opt.textContent ||
+            ""
+        );
+        if (optAmt > 0 && optAmt < retailAmt) amt = optAmt;
+      }
     }
     if (amt > 0) g.__mcPdpSaleAmtCached = amt;
     return amt;
@@ -77,7 +156,7 @@
     try {
       g.document.body.classList.add("mc-pdp-price-stack");
     } catch (e0) {}
-    cacheSale();
+    var saleAmt = resolvePdpSaleAmount();
     hideNativeSale();
     var loggedIn = false;
     try {
@@ -86,7 +165,7 @@
         !!g.sessionStorage.getItem("mc_recent_member_auth");
     } catch (e1) {}
     if (!loggedIn && wrap && !wrap.querySelector(".mc-pdp-member-line--sale")) {
-      var saleAmt = Number(g.__mcPdpSaleAmtCached) || cacheSale();
+      if (!(saleAmt > 0)) saleAmt = resolvePdpSaleAmount();
       if (saleAmt > 0) {
         var line = g.document.createElement("div");
         line.className = "mc-pdp-member-line mc-pdp-member-line--sale";
@@ -95,11 +174,14 @@
           '<span class="mc-pdp-member-line__amount">' +
           fmtMoney(saleAmt) +
           "</span>";
-        var locked = wrap.querySelector(".mc-pdp-member-line--locked");
-        if (locked && locked.parentNode) {
-          if (locked.nextSibling) locked.parentNode.insertBefore(line, locked.nextSibling);
-          else locked.parentNode.appendChild(line);
-        } else wrap.appendChild(line);
+        var anchor =
+          wrap.querySelector(".mc-pdp-member-line--locked") || wrap.querySelector(".mc-pdp-member-line");
+        if (anchor && anchor.parentNode) {
+          if (anchor.nextSibling) anchor.parentNode.insertBefore(line, anchor.nextSibling);
+          else anchor.parentNode.appendChild(line);
+        } else {
+          wrap.appendChild(line);
+        }
       }
     }
     if (wrap) {
