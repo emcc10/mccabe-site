@@ -28,7 +28,7 @@ BOARDS_FILES = (
 )
 
 MUST_MATCH = (
-    "vspfiles/boards/my-boards-page.js",
+    "vspfiles/my-boards.html",
     "vspfiles/boards/my-boards-app.js",
     "vspfiles/boards/board-styles.js",
     "vspfiles/boards/my-boards-bundle.css",
