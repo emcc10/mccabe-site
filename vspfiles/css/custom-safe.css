@@ -1,4 +1,4 @@
-/* 0521i C_CSS_DEPLOY_VERIFY_20260521i — body.mc-pdp-price-stack kills all native sale overlap */
+/* 0521j C_CSS_DEPLOY_VERIFY_20260521j — repair partial PDP stack + sale line from cached SalePrice */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */

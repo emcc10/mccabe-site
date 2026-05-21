@@ -477,7 +477,7 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-p
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
-  <link href="/v/vspfiles/css/custom-safe.css?v=20260521i" rel="stylesheet" id="mc-custom-safe-css-static">
+  <link href="/v/vspfiles/css/custom-safe.css?v=20260521j" rel="stylesheet" id="mc-custom-safe-css-static">
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
   html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
@@ -19775,16 +19775,27 @@ if (!isLoggedIn) {
     mcRenderPdpRetailAndMember(retailText, memberText, window.getMemberLoginUrl(), isLoggedIn);
   }
 
-  function mcBootPdpRetailMemberOnly() {
-    if (typeof window.mcPageType === 'function' && window.mcPageType() !== 'pdp') return;
+  function mcIsPdpLikePage() {
+    if (document.getElementById('v65-product-parent')) return true;
     var p = (location.pathname || '').toLowerCase();
-    if (!/\/product-p\//.test(p) && !document.getElementById('v65-product-parent')) return;
+    if (/\/product-p\//.test(p)) return true;
+    if (document.body && (document.body.classList.contains('productdetails') || document.body.classList.contains('mc-product-page'))) {
+      return true;
+    }
+    return /\.htm(?:\?|$)/i.test(p) && !!document.querySelector('.colors_pricebox, #v65-product-parent');
+  }
+
+  function mcBootPdpRetailMemberOnly() {
+    if (typeof window.mcPageType === 'function' && window.mcPageType() !== 'pdp' && !mcIsPdpLikePage()) return;
+    if (!mcIsPdpLikePage()) return;
     if (window.__mcPdpRetailMemberBooted) return;
     window.__mcPdpRetailMemberBooted = true;
 
     function run() {
       try {
+        mcCachePdpSaleAmountFromDom();
         mcRenderRetailMemberOnPdp();
+        mcEnsurePdpPriceStack();
       } catch (e) {}
     }
 
@@ -19794,14 +19805,24 @@ if (!isLoggedIn) {
       run();
     }
 
-    window.addEventListener('load', run, { once: true });
+    window.addEventListener('load', run);
     window.addEventListener('mcMemberPricingReady', run);
+    var tries = 0;
+    var repairTimer = setInterval(function () {
+      tries++;
+      try {
+        mcEnsurePdpPriceStack();
+      } catch (eRep) {}
+      if (tries >= 30) clearInterval(repairTimer);
+    }, 500);
   }
   window.mcBootPdpRetailMemberOnly = mcBootPdpRetailMemberOnly;
   window.mcRenderRetailMemberOnPdp = mcRenderRetailMemberOnPdp;
   window.mcHideOldPdpMemberFragmentsOnly = mcHideOldPdpMemberFragmentsOnly;
   window.mcHideDuplicatePdpMemberFragments = mcHideDuplicatePdpMemberFragments;
   window.mcRenderPdpRetailAndMember = mcRenderPdpRetailAndMember;
+  window.mcEnsurePdpPriceStack = mcEnsurePdpPriceStack;
+  window.mcResolvePdpSaleAmount = mcResolvePdpSaleAmount;
   window.mcFmtMoney = mcFmtMoney;
 
   function mcMarkMemberPlpPricesPendingEarly() {
