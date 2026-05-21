@@ -866,3 +866,25 @@
     if (root) mo.observe(root, { childList: true, subtree: true });
   }
 })(window);
+
+/* MC_PDP_PRICE_STACK_20260522 — load standalone repair if this cached bundle is stale */
+(function (g) {
+  try {
+    if (typeof g.mcEnsurePdpPriceStack === "function") {
+      g.mcEnsurePdpPriceStack();
+      return;
+    }
+  } catch (e0) {}
+  var d = g.document;
+  if (!d || d.getElementById("mc-pdp-price-stack-loader")) return;
+  var s = d.createElement("script");
+  s.id = "mc-pdp-price-stack-loader";
+  s.async = true;
+  s.src = "/v/vspfiles/js/mc-pdp-price-stack.js?v=20260522&mcrd=" + Date.now();
+  s.onload = function () {
+    try {
+      if (typeof g.mcEnsurePdpPriceStack === "function") g.mcEnsurePdpPriceStack();
+    } catch (e1) {}
+  };
+  (d.head || d.documentElement).appendChild(s);
+})(window);

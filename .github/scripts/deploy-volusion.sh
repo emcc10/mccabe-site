@@ -212,8 +212,23 @@ put_primary "vspfiles/js/mc-plp-enforcer.js" "mc-plp-enforcer" \
   "vspfiles/js/mc-plp-enforcer.js"
 
 put_primary "vspfiles/js/mc-pdp-auth-cta-fix.js" "mc-pdp-auth-cta-fix" \
+  "/v/vspfiles/js/mc-pdp-auth-cta-fix.js" \
   "/vspfiles/js/mc-pdp-auth-cta-fix.js" \
   "vspfiles/js/mc-pdp-auth-cta-fix.js"
+
+put_primary "vspfiles/js/mc-pdp-price-stack.js" "mc-pdp-price-stack" \
+  "/v/vspfiles/js/mc-pdp-price-stack.js" \
+  "/vspfiles/js/mc-pdp-price-stack.js" \
+  "vspfiles/js/mc-pdp-price-stack.js"
+
+set +e
+python3 scripts/verify_mc_pdp_js_sftp.py
+verify_mc_pdp_js_rc=$?
+set -e
+if [[ "$verify_mc_pdp_js_rc" -ne 0 ]]; then
+  echo "::error::mc-pdp JS SFTP verify failed (mcEnsurePdpPriceStack must be on origin)"
+  exit 1
+fi
 
 put_primary "vspfiles/templates/266/js/mc-plp-enforcer.js" "mc-plp-enforcer-template" \
   "/vspfiles/templates/266/js/mc-plp-enforcer.js" \
@@ -371,7 +386,8 @@ verify_url() {
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "$CSS_VERIFY_NEEDLE"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260624" "MC_PLP_ENFORCER_20260624"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260624" "MC_PLP_ENFORCER_20260624"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260624" "MC_PDP_AUTH_CTA_20260624"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=$(date +%s)" "mcEnsurePdpPriceStack"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-price-stack.js?v=$(date +%s)" "mcEnsurePdpPriceStack"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260621"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260520plp" "MC_DTK_PLP_20260621"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-sofa-bounds.json?v=$(date +%s)" "77494-91-1.jpg"
