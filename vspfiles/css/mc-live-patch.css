@@ -200,7 +200,8 @@ html body.mc-product-page #content_area .mc-pdp-member-line__amount {
   font-size: 13px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.16em !important;
+  letter-spacing: 0.02em !important;
   text-transform: none !important;
   color: #444 !important;
+  white-space: normal !important;
 }
