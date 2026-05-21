@@ -757,10 +757,13 @@ export function baliRealismStressRgb(
   };
 }
 
-export function baliRgbPreserveSourceLuma(r, g, b, chroma, photoL, meanPhotoL, anchorL, lumOffset) {
+/**
+ * Production Bali: swatch a/b only; 100% per-pixel source LAB L + exact source Rec.709 luma.
+ * No L remap, no reference transfer, no enhancement — catalog photo structure preserved.
+ */
+export function baliChromaOnlyPreserveSourceLuma(r, g, b, chroma, photoL, lumOffset) {
   const srcLum = pixelBrightness(r, g, b);
-  const finalL = baliPreservedPhotoL(photoL, meanPhotoL, anchorL);
-  const { r: tr, g: tg, b: tb } = labToRgb(finalL, chroma.a, chroma.b);
+  const { r: tr, g: tg, b: tb } = labToRgb(photoL, chroma.a, chroma.b);
   const outLum = pixelBrightness(tr, tg, tb);
   const targetLum = srcLum + lumOffset;
   const ratio = targetLum / Math.max(outLum, 0.5);
@@ -769,6 +772,11 @@ export function baliRgbPreserveSourceLuma(r, g, b, chroma, photoL, meanPhotoL, a
     g: clamp(Math.round(tg * ratio), 0, 255),
     b: clamp(Math.round(tb * ratio), 0, 255),
   };
+}
+
+/** @deprecated use baliChromaOnlyPreserveSourceLuma */
+export function baliRgbPreserveSourceLuma(r, g, b, chroma, photoL, _meanPhotoL, _anchorL, lumOffset) {
+  return baliChromaOnlyPreserveSourceLuma(r, g, b, chroma, photoL, lumOffset);
 }
 
 export function computeFinalLabL(originalL, swatchL) {
@@ -795,10 +803,9 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
   const realismProbe = Boolean(options.realismProbe && palette.isBaliSilk);
   const { data, width, height, channels } = sourceImage;
   const out = Buffer.from(data);
-  const lMap =
-    realismStress || realismProbe
-      ? computeBaliFullLRange(sourceImage, mask)
-      : computeSofaLuminanceMapRange(sourceImage, mask);
+  const lMap = palette.isBaliSilk
+    ? computeBaliFullLRange(sourceImage, mask)
+    : computeSofaLuminanceMapRange(sourceImage, mask);
   const lo = lMap.lo;
   const span = lMap.span;
   const meanPhotoL = palette.isBaliSilk ? meanMaskedLab(sourceImage, mask).L : 0;
@@ -855,16 +862,7 @@ export function recolorSofa(sourceImage, mask, palette, options = {}) {
       out[p + 1] = rgb.g;
       out[p + 2] = rgb.b;
     } else if (palette.isBaliSilk) {
-      const rgb = baliRgbPreserveSourceLuma(
-        r,
-        g,
-        bIn,
-        chroma,
-        photoL,
-        meanPhotoL,
-        anchorL,
-        lumOffset,
-      );
+      const rgb = baliChromaOnlyPreserveSourceLuma(r, g, bIn, chroma, photoL, lumOffset);
       out[p] = rgb.r;
       out[p + 1] = rgb.g;
       out[p + 2] = rgb.b;
