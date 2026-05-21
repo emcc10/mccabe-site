@@ -198,14 +198,18 @@ export async function buildSegmentationForProduct(
   let seg: SegmentationResult;
   if (overrides?.upholstery) {
     const alpha = extractAlphaFromImage(image);
+    const autoRegions = classifyRegions(image, alpha, config);
     const emptyMask: MaskData = {
       data: new Uint8Array(image.width * image.height),
       width: image.width,
       height: image.height,
     };
-    let legs = overrides.legs ?? emptyMask;
+    let legs = overrides.legs ?? autoRegions.legs;
     const legPath = join(productDir(productCode), 'leg-mask.png');
-    if (!overrides.legs && existsSync(legPath)) legs = await loadMask(legPath);
+    if (!overrides.legs && existsSync(legPath)) {
+      const saved = await loadMask(legPath);
+      if (saved.data.some((v) => v >= 128)) legs = saved;
+    }
     seg = {
       alpha,
       upholstery: overrides.upholstery,

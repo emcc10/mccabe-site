@@ -79,6 +79,13 @@ export async function ensureProductAssets(
 export async function renderProductSwatch(request: RenderRequest): Promise<RenderResult> {
   const { productCode, swatchCode, forceRebuild } = request;
 
+  if (process.env.ALLOW_PRODUCTION_SWATCH_RENDER !== '1') {
+    throw new Error(
+      'Production swatch render is disabled during mask-validation phase. ' +
+        `Run: npm run debug:assets -- ${productCode} --sanity-render`,
+    );
+  }
+
   const upholstery = await loadMask(join(productDir(productCode), 'upholstery-mask.png'));
   const legs = await loadMask(join(productDir(productCode), 'leg-mask.png'));
   const alpha = await loadMask(join(productDir(productCode), 'alpha.png'));
