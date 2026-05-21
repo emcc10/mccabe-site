@@ -1729,7 +1729,7 @@ body:not(.is-home) #display_menu_1 .vnav--level1 > li:focus-within > a {
   .push-menu__menu-wrapper button.mc-sub-toggle {
     border: 0 !important;
     background: transparent !important;
-    font-size: 18px !important;
+    font-size: 13px !important;
     line-height: 1 !important;
     padding: 8px 8px !important;
     cursor: pointer !important;
@@ -5289,7 +5289,7 @@ body.mc-product-page #mcLeatherBtn {
   min-width: 18px !important;
   height: 18px !important;
   line-height: 18px !important;
-  font-size: 18px !important;
+  font-size: 13px !important;
   padding: 0 !important;
   border: 0 !important;
   background: transparent !important;
@@ -5706,7 +5706,7 @@ body.mc-product-page #content_area .mc-option-accordion__toggle {
   border: 0 !important;
   background: transparent !important;
   color: #555 !important;
-  font-size: 18px !important;
+  font-size: 13px !important;
   line-height: 1 !important;
   cursor: pointer !important;
   font-weight: 400 !important;
@@ -10716,7 +10716,7 @@ body.vertex-flipbook-ready .vertex-flipbook-btn{
   height: 56px;
   border-radius: 0;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 13px;
   line-height: 1;
   transition: opacity .18s ease;
   pointer-events: auto;
@@ -13041,7 +13041,7 @@ body * {
   font-family: Inter, Arial, sans-serif !important;
 }
 body {
-  font-size: 18px;
+  font-size: 13px;
 }
 
 body {
@@ -13060,7 +13060,7 @@ body.mc-product-page #content_area li {
   font-size: 13px !important;
 }
 
-/* Option / accordion labels: must follow global `body * { font-size: 18px }` (~13041). */
+/* Option / accordion labels: must follow global `body * { font-size: 13px }` (~13041). */
 body.mc-product-page #content_area .productoptionname,
 body.mc-product-page #content_area .vCSS_input_label,
 body.mc-product-page #content_area td.productoptionname,
@@ -13612,7 +13612,7 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2 {
 .shoppingcart a.productnamecolorLARGE,
 .productdetails .colors_lines_light font.productnamecolorSMALL.colors_productname b,
 .productdetails #v65-product-history-header td:first-child::before {
-  /* font-size: 18px; */
+  /* font-size: 13px; */
   /* line-height: 40px; */
   font-size: 15px;
   line-height: 35px;
@@ -14318,5 +14318,5 @@ html body.mc-product-page #content_area table[id*="options_table"] select:not(.m
 /* Chevron only — not label text */
 html body.mc-product-page #content_area .mc-option-accordion__toggle,
 html body.productdetails #content_area .mc-option-accordion__toggle {
-  font-size: 18px !important;
+  font-size: 13px !important;
 }
