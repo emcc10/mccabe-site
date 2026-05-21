@@ -181,7 +181,7 @@ put_primary "vspfiles/css/custom-safe.css" "custom-safe" \
   "/vspfiles/css/custom-safe.css" \
   "vspfiles/css/custom-safe.css"
 
-CSS_VERIFY_NEEDLE=$(grep -oE 'C_CSS_DEPLOY_VERIFY_[0-9a-z]+' vspfiles/css/custom-safe.css 2>/dev/null | head -1 || echo "C_CSS_DEPLOY_VERIFY_20260521e")
+CSS_VERIFY_NEEDLE=$(grep -oE 'C_CSS_DEPLOY_VERIFY_[0-9a-z]+' vspfiles/css/custom-safe.css 2>/dev/null | head -1 || echo "C_CSS_DEPLOY_VERIFY_20260521f")
 export CSS_NEEDLE="$CSS_VERIFY_NEEDLE"
 set +e
 verify_custom_safe_sftp_rc=0

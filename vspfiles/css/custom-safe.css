@@ -1,4 +1,4 @@
-/* 0521e C_CSS_DEPLOY_VERIFY_20260521e — retail amount letter-spacing fix */
+/* 0521f C_CSS_DEPLOY_VERIFY_20260521f — hide native sale overlap in retail row */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -10322,9 +10322,37 @@ body.mc-product-page #v65-product-parent .mc-pdp-member-line__amount {
   display: block !important;
   font-size: 13px !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.16em !important;
+  letter-spacing: 0.02em !important;
   color: #444 !important;
   font-weight: 400 !important;
+}
+/* PDP: one retail amount only; native sale hidden (shown under member via .mc-pdp-sale-preview). */
+body.productdetails #v65-product-parent .mc-pdp-retail-row .product_sale_price,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_sale_price,
+body.productdetails #v65-product-parent .mc-pdp-retail-row .product_saleprice,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row .product_saleprice,
+body.productdetails #content_area .mc-pdp-retail-row .product_sale_price,
+body.mc-product-page #content_area .mc-pdp-retail-row .product_saleprice,
+body.productdetails #v65-product-parent .mtl-product-price-block > .product_sale_price,
+body.mc-product-page #v65-product-parent .mtl-product-price-block > .product_sale_price,
+body.productdetails #v65-product-parent .mtl-product-price-block > .product_saleprice,
+body.mc-product-page #v65-product-parent .mtl-product-price-block > .product_saleprice {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+body.productdetails #v65-product-parent .mc-pdp-retail-row > *,
+body.mc-product-page #v65-product-parent .mc-pdp-retail-row > * {
+  display: block !important;
+  position: static !important;
+  width: 100% !important;
+}
+body.productdetails #v65-product-parent .mc-pdp-member-pricing .mc-pdp-sale-preview,
+body.mc-product-page #v65-product-parent .mc-pdp-member-pricing .mc-pdp-sale-preview {
+  display: block !important;
+  margin-top: 4px !important;
+  clear: both !important;
 }
 
 body.productdetails #v65-product-parent .mc-pdp-member-pricing + #priceWithOptions,
