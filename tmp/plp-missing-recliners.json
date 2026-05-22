@@ -1,0 +1,306 @@
+{
+  "page_totals": {
+    "Recliners": 3,
+    "Recliners & Accent Chairs": 1,
+    "Accent Chairs": 3
+  },
+  "total_recliner_products": 66,
+  "missing_count": 21,
+  "has_photo_count": 45,
+  "missing": [
+    {
+      "title": "Denali Swivel Glider Power",
+      "code": "43003-38",
+      "href": "https://www.mccabestheaterandliving.com/product-p/43003-38.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p2"
+      ]
+    },
+    {
+      "title": "Denali Swivel Rocker Recliner",
+      "code": "43003-33",
+      "href": "https://www.mccabestheaterandliving.com/product-p/43003-33.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p1"
+      ]
+    },
+    {
+      "title": "Kinsley Swivel Glider",
+      "code": "77111-G3",
+      "href": "https://www.mccabestheaterandliving.com/product-p/77111-g3.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p1"
+      ]
+    },
+    {
+      "title": "Pinecrest Power Wall Hugger",
+      "code": "42306-31",
+      "href": "https://www.mccabestheaterandliving.com/product-p/42306-31.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p1"
+      ]
+    },
+    {
+      "title": "Pinecrest Rocker Recliner",
+      "code": "42306-32",
+      "href": "https://www.mccabestheaterandliving.com/product-p/42306-32.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p1"
+      ]
+    },
+    {
+      "title": "Pinecrest Swivel Glider Recliner",
+      "code": "42306-34",
+      "href": "https://www.mccabestheaterandliving.com/product-p/42306-34.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p1"
+      ]
+    },
+    {
+      "title": "Pinecrest Swivel Rocker Recliner",
+      "code": "42306-33",
+      "href": "https://www.mccabestheaterandliving.com/product-p/42306-33.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p1"
+      ]
+    },
+    {
+      "title": "Pinecrest Wallhugger Recliner",
+      "code": "42306-35",
+      "href": "https://www.mccabestheaterandliving.com/product-p/42306-35.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p1"
+      ]
+    },
+    {
+      "title": "Regent Power Rocker Recliner",
+      "code": "41094-39",
+      "href": "https://www.mccabestheaterandliving.com/product-p/41094-39.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p2"
+      ]
+    },
+    {
+      "title": "Regent Rocker Recliner",
+      "code": "41094-32",
+      "href": "https://www.mccabestheaterandliving.com/product-p/41094-32.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p2"
+      ]
+    },
+    {
+      "title": "Regent Wallhugger Recliner",
+      "code": "41094-35",
+      "href": "https://www.mccabestheaterandliving.com/product-p/41094-35.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p2"
+      ]
+    },
+    {
+      "title": "Thea Power Recliner",
+      "code": "77119-J2",
+      "href": "https://www.mccabestheaterandliving.com/product-p/77119-j2.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p2"
+      ]
+    },
+    {
+      "title": "Thea Swivel Pushback Recliner",
+      "code": "77119-M2",
+      "href": "https://www.mccabestheaterandliving.com/product-p/77119-m2.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p2"
+      ]
+    },
+    {
+      "title": "Theo Power Rocker Recliner",
+      "code": "42002-39",
+      "href": "https://www.mccabestheaterandliving.com/product-p/42002-39.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p1"
+      ]
+    },
+    {
+      "title": "Theo Rocker Recliner",
+      "code": "42002-32",
+      "href": "https://www.mccabestheaterandliving.com/product-p/42002-32.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p1"
+      ]
+    },
+    {
+      "title": "Theo Swivel Glider Recliner",
+      "code": "42002-34",
+      "href": "https://www.mccabestheaterandliving.com/product-p/42002-34.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p1"
+      ]
+    },
+    {
+      "title": "Theo Swivel Rocker Recliner",
+      "code": "42002-33",
+      "href": "https://www.mccabestheaterandliving.com/product-p/42002-33.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p1"
+      ]
+    },
+    {
+      "title": "Theo Wallhugger Recliner",
+      "code": "42002-35",
+      "href": "https://www.mccabestheaterandliving.com/product-p/42002-35.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p1"
+      ]
+    },
+    {
+      "title": "Tundra Power Rocker Recliner",
+      "code": "41043-39",
+      "href": "https://www.mccabestheaterandliving.com/product-p/41043-39.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p2"
+      ]
+    },
+    {
+      "title": "Tundra Wallhugger Recliner",
+      "code": "41043-35",
+      "href": "https://www.mccabestheaterandliving.com/product-p/41043-35.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p1"
+      ]
+    },
+    {
+      "title": "Zg5 Zero Gravity Recliner",
+      "code": "41089-42",
+      "href": "https://www.mccabestheaterandliving.com/product-p/41089-42.htm",
+      "photo_file": "",
+      "reasons": [
+        "PLP uses NoPhoto.gif"
+      ],
+      "category": "Recliners",
+      "cat_path": "/category-s/186.htm",
+      "sources": [
+        "searchresults p2"
+      ]
+    }
+  ]
+}

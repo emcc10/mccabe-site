@@ -2,36 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>TEST-SOFA swatch preview</title>
+  <title>TEST-SOFA preview</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 1.5rem; background: #f4f4f4; }
     h1 { font-size: 1.25rem; }
+    h2 { font-size: 1rem; margin: 2rem 0 0.75rem; }
     .row { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; }
-    figure { margin: 0; background: #fff; padding: 0.75rem; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
-    img { display: block; max-width: 100%; height: auto; }
+    figure { margin: 0; background: #fff; padding: 0.75rem; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.12); max-width: 100%; }
+    img { display: block; max-width: min(100%, 900px); height: auto; }
     figcaption { margin-top: 0.5rem; font-size: 0.85rem; color: #333; }
     code { font-size: 0.75rem; word-break: break-all; }
     .err { color: #a40; }
   </style>
 </head>
 <body>
-  <h1>TEST-SOFA renders</h1>
-  <p>Run mask debug first: <code>npm run debug:assets -- TEST-SOFA</code> — inspect <code>/product-assets/TEST-SOFA/debug/</code>.</p>
-  <div class="row" id="panels"></div>
+  <h1>TEST-SOFA — locked 7C-B review (not final)</h1>
+  <p>Open this page via your dev server, e.g. <code>http://localhost:PORT/preview-test-sofa.html</code></p>
+
+  <h2>Single + comparison</h2>
+  <div class="row">
+    <figure>
+      <img src="/product-assets/TEST-SOFA/debug/phase7c-single-B.png" alt="Phase 7C-B single" />
+      <figcaption><strong>PHASE 7C SINGLE B</strong><br><code>/product-assets/TEST-SOFA/debug/phase7c-single-B.png</code></figcaption>
+    </figure>
+    <figure>
+      <img src="/product-assets/TEST-SOFA/debug/phase7c-comparison-B.png" alt="Source vs 7C-B" />
+      <figcaption><strong>SOURCE | PHASE 7C SINGLE B</strong><br><code>/product-assets/TEST-SOFA/debug/phase7c-comparison-B.png</code></figcaption>
+    </figure>
+  </div>
+
+  <h2>Source reference</h2>
+  <div class="row">
+    <figure>
+      <img src="/product-assets/TEST-SOFA/source.png" alt="Cognac source" />
+      <figcaption>Original cognac (<code>source.png</code>)</figcaption>
+    </figure>
+  </div>
+
+  <h2>Swatch cache (if manifest exists)</h2>
+  <div class="row" id="swatch-panels"></div>
   <p id="err" class="err" hidden></p>
   <script>
-    const panels = document.getElementById('panels');
+    const panels = document.getElementById('swatch-panels');
     const err = document.getElementById('err');
 
-    async function load() {
+    async function loadSwatches() {
       const res = await fetch('/render-cache/TEST-SOFA/manifest.json?t=' + Date.now());
-      if (!res.ok) throw new Error('No manifest — run npm run render:swatches -- TEST-SOFA BALI-SILK');
+      if (!res.ok) {
+        err.hidden = false;
+        err.textContent = 'No swatch manifest — optional: npm run render:swatches -- TEST-SOFA BALI-SILK';
+        return;
+      }
       const manifest = await res.json();
-
-      const base = document.createElement('figure');
-      base.innerHTML = '<img src="' + manifest.baseImageUrl + '" alt="Cognac source" /><figcaption>Original cognac (source.png)</figcaption>';
-      panels.appendChild(base);
-
       for (const entry of Object.values(manifest.renders)) {
         const fig = document.createElement('figure');
         fig.innerHTML =
@@ -41,10 +63,7 @@
       }
     }
 
-    load().catch((e) => {
-      err.hidden = false;
-      err.textContent = e.message;
-    });
+    loadSwatches();
   </script>
 </body>
 </html>

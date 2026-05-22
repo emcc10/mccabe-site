@@ -13,6 +13,7 @@ import sys
 BOARDS_FILES = (
     "vspfiles/my-boards.html",
     "vspfiles/boards/my-boards-page.js",
+    "vspfiles/boards/my-boards-hub.js",
     "vspfiles/boards/board-styles.js",
     "vspfiles/boards/my-boards-page.css",
     "vspfiles/boards/my-boards-critical.css",
@@ -32,9 +33,10 @@ ALIASES = (
 )
 
 MUST_MATCH = (
-    ("vspfiles/my-boards.html", None, b"20260538"),
-    ("vspfiles/boards/my-boards-page.js", "/v/vspfiles/boards/my-boards-page.js", b"__MC_BOARDS_PAGE_SCRIPT_LOADED"),
-    ("vspfiles/boards/board-styles.js", None, b"renderBoardsPreview"),
+    ("vspfiles/my-boards.html", None, b"20260539"),
+    ("vspfiles/boards/my-boards-hub.js", None, b"MC_BOARDS_HUB"),
+    ("vspfiles/boards/my-boards-page.js", "/v/vspfiles/boards/my-boards-page.js", b"MC_BOARDS_HUB"),
+    ("vspfiles/boards/board-styles.js", None, b"styleProfiles"),
     ("vspfiles/boards/my-boards-bundle.css", None, b"mc-boards__feature"),
 )
 

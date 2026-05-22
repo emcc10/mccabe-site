@@ -24,16 +24,17 @@
   var root = document.getElementById('mc-boards-root');
   var tabs = document.getElementById('mc-boards-tabs');
   var stylesEl = document.getElementById('mc-boards-styles');
-  var lifestyleEl = document.getElementById('mc-boards-lifestyle');
+  var lifestyleEl =
+    document.getElementById('mc-boards-lifestyle-grid') ||
+    document.getElementById('mc-boards-lifestyle');
   var styleGuideEl = document.getElementById('mc-boards-style-guide');
   var trendsEl = document.getElementById('mc-boards-trends');
   var typesEl = document.getElementById('mc-boards-types');
   var signInLink = document.getElementById('mc-boards-signin');
   var yearEl = document.getElementById('mc-boards-year');
   var accountBanner = document.getElementById('mc-boards-account-banner');
-  var quizEl = document.getElementById('mc-boards-quiz');
-  var wheelEl = document.getElementById('mc-boards-color-wheel');
-  var wheelResult = document.getElementById('mc-boards-wheel-result');
+  var quizEl = document.getElementById('mc-boards-quiz-app');
+  var wheelEl = document.getElementById('mc-boards-palette-app');
   var triptychEl = document.getElementById('mc-boards-triptych');
   var splitEl = document.getElementById('mc-boards-split');
   var catalogEl = document.getElementById('mc-boards-catalog');
@@ -469,11 +470,34 @@
     }
 
     renderLifestyleLooks();
-    renderQuiz();
-    renderColorWheel();
-    renderTrends();
+    if (!window.MC_BOARDS_HUB) {
+      renderQuiz();
+      renderColorWheel();
+      renderTrends();
+    }
     renderStyleGuide();
     renderFurnitureTypes();
+  }
+
+  function applyRoomFilters(filter) {
+    if (!lifestyleEl) return;
+    var cards = lifestyleEl.querySelectorAll('.mc-boards__lifestyle-card');
+    var looks = config.lifestyleLooks || [];
+    for (var i = 0; i < cards.length; i++) {
+      var lookId = cards[i].getAttribute('data-look-id');
+      var look = null;
+      for (var j = 0; j < looks.length; j++) {
+        if (looks[j].id === lookId) {
+          look = looks[j];
+          break;
+        }
+      }
+      var show = true;
+      if (filter.style && look && look.styleId !== filter.style) show = false;
+      if (filter.room && look && look.room !== filter.room) show = false;
+      if (filter.mood && look && look.mood !== filter.mood) show = false;
+      cards[i].style.display = show ? '' : 'none';
+    }
   }
 
   function renderFurnitureTypes() {
@@ -714,45 +738,43 @@
     if (!lifestyleEl) return;
     lifestyleEl.innerHTML = '';
     var looks = config.lifestyleLooks || [];
+    var hub = window.MC_BOARDS_HUB;
+    var roomFilter = hub ? hub.getRoomFilter() : {};
 
     for (var i = 0; i < looks.length; i++) {
       (function (look) {
         var style = getStyleById(look.styleId);
         var product = getProductById(look.productId);
 
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className =
+        var card = document.createElement('article');
+        card.className =
           'mc-boards__lifestyle-card' +
           (activeStyleFilter === look.styleId ? ' is-active' : '');
-        btn.setAttribute('role', 'listitem');
-        btn.setAttribute('data-style-id', look.styleId);
+        card.setAttribute('role', 'listitem');
+        card.setAttribute('data-look-id', look.id);
+        card.setAttribute('data-style-id', look.styleId);
 
-        var scene = document.createElement('div');
-        scene.className =
-          'mc-boards__lifestyle-scene' + (look.sceneClass ? ' ' + look.sceneClass : '');
-        if (look.accents && look.accents.length) {
-          scene.style.backgroundColor = look.accents[0];
-        }
+        var show = true;
+        if (roomFilter.style && look.styleId !== roomFilter.style) show = false;
+        if (roomFilter.room && look.room !== roomFilter.room) show = false;
+        if (roomFilter.mood && look.mood !== roomFilter.mood) show = false;
+        if (!show) card.style.display = 'none';
 
+        var imgWrap = document.createElement('div');
+        imgWrap.className = 'mc-boards__lifestyle-img';
         var prod = document.createElement('img');
-        prod.className = 'mc-boards__lifestyle-product';
         prod.src = look.image
-          ? assetUrl(look.image)
+          ? look.image.indexOf('/v/') === 0
+            ? look.image
+            : assetUrl(look.image)
           : product
             ? resolveProductImage(product)
             : '';
         prod.alt = product ? product.name : look.title;
         prod.loading = 'lazy';
-        bindImgFallback(
-          prod,
-          look.styleId,
-          product ? product.id : null,
-          look.image
-        );
-        scene.appendChild(prod);
-
-        btn.appendChild(scene);
+        bindImgFallback(prod, look.styleId, product ? product.id : null, look.image);
+        imgWrap.appendChild(prod);
+        card.appendChild(imgWrap);
 
         var cap = document.createElement('div');
         cap.className = 'mc-boards__lifestyle-cap';
@@ -764,25 +786,59 @@
         title.className = 'mc-boards__lifestyle-title';
         title.textContent = look.title;
         cap.appendChild(title);
-        var room = document.createElement('p');
-        room.className = 'mc-boards__lifestyle-room';
-        room.textContent = look.room + (product ? ' · ' + product.name : '');
-        cap.appendChild(room);
-        btn.appendChild(cap);
-
-        btn.addEventListener('click', function () {
-          if (activeStyleFilter === look.styleId) {
-            activeStyleFilter = null;
-            renderStyleLibrary();
-            renderLifestyleLooks();
-            renderBoardTabsFromDom();
-            applyBoardFilter();
-          } else {
-            activateStyleFilter(look.styleId, true);
+        if (look.accents && look.accents.length) {
+          var chips = document.createElement('div');
+          chips.className = 'mc-boards__palette-chips';
+          for (var a = 0; a < Math.min(look.accents.length, 4); a++) {
+            var sw = document.createElement('span');
+            sw.className = 'mc-boards__palette-chip';
+            sw.style.backgroundColor = look.accents[a];
+            chips.appendChild(sw);
           }
+          cap.appendChild(chips);
+        }
+        card.appendChild(cap);
+
+        var actions = document.createElement('div');
+        actions.className = 'mc-boards__btn-row';
+        var viewBtn = document.createElement('button');
+        viewBtn.type = 'button';
+        viewBtn.className = 'mc-boards__btn mc-boards__btn--ghost';
+        viewBtn.textContent = 'View style';
+        viewBtn.addEventListener('click', function () {
+          activateStyleFilter(look.styleId, true);
+          if (hub) hub.pushRecent(look.id);
+        });
+        actions.appendChild(viewBtn);
+        if (product) {
+          var shop = document.createElement('a');
+          shop.className = 'mc-boards__btn mc-boards__btn--ghost';
+          shop.href = productShopHref(product);
+          shop.target = '_blank';
+          shop.rel = 'noopener noreferrer';
+          shop.textContent = 'Shop piece';
+          actions.appendChild(shop);
+        }
+        if (hub) {
+          var saveBtn = document.createElement('button');
+          saveBtn.type = 'button';
+          saveBtn.className = 'mc-boards__btn mc-boards__btn--ghost';
+          saveBtn.textContent = hub.isLookSaved(look.id) ? 'Saved' : 'Save look';
+          saveBtn.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            hub.toggleSavedLook(look.id);
+          });
+          actions.appendChild(saveBtn);
+        }
+        card.appendChild(actions);
+
+        card.addEventListener('click', function (ev) {
+          if (ev.target.tagName === 'A' || ev.target.tagName === 'BUTTON') return;
+          activateStyleFilter(look.styleId, false);
+          if (hub) hub.pushRecent(look.id);
         });
 
-        lifestyleEl.appendChild(btn);
+        lifestyleEl.appendChild(card);
       })(looks[i]);
     }
   }
@@ -1356,6 +1412,19 @@
     refreshConfig();
     setSignedInUi(domSignedInHint());
     setAccountBanner(domSignedInHint());
+    if (window.MC_BOARDS_HUB) {
+      window.MC_BOARDS_HUB.init({
+        config: config,
+        getStyleById: getStyleById,
+        getProductById: getProductById,
+        activateStyleFilter: activateStyleFilter,
+        resolveStyleImage: resolveStyleImage,
+        resolveProductImage: resolveProductImage,
+        productShopHref: productShopHref,
+        applyRoomFilters: applyRoomFilters,
+        renderLifestyleLooks: renderLifestyleLooks
+      });
+    }
     renderStyleLibrary();
     var shuffleBtn = document.getElementById('mc-boards-shuffle');
     if (shuffleBtn && !shuffleBtn.__mcBound) {
@@ -1371,7 +1440,7 @@
       done();
       return;
     }
-    var src = API_BASE + 'board-styles.js?v=20260538';
+    var src = API_BASE + 'board-styles.js?v=20260539';
     var tag = document.querySelector('script[src*="board-styles.js"]');
     if (tag) {
       refreshConfig();
