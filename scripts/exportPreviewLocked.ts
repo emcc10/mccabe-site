@@ -10,33 +10,31 @@ import {
 import { PHASE7C_SINGLE_B } from '../src/phase7c/runSingleB.js';
 import { buildPreviewLockedParams } from '../src/phase7c/previewLocked.js';
 
-const STATUS_MD = `# TEST-SOFA Bali Silk — preview pipeline status
+const STATUS_MD = `# TEST-SOFA sofa render — frozen preview status
 
-**Locked preview version:** 7C-B (Phase 7C variant B on locked 7B)
+**Sofa render project only** (not inspiration boards).
 
-## Verdict
+- **Best locked preview version:** 7C-B
+- **preview-quality:** yes
+- **final-photo-quality:** no
+- **Reason:** still too soft / airbrushed for native catalog use
+- **Future work:** use a different approach, not more micro-tweaks on the current realism pipeline
 
-- **Best locked preview version** for this cognac source → Bali Silk mockup.
-- **Preview / mockup quality:** yes — acceptable for internal preview and rough merchandising comps.
-- **Final catalog photo quality:** no — still too soft / airbrushed; does not pass as a native product photo.
+## Frozen
 
-## Pipeline capability
+- Do not continue Stage 5/6/7 realism tuning on TEST-SOFA unless explicitly requested.
+- Do not generate more sofa render variants unless explicitly requested.
+- Canonical asset: \`bali-silk-preview.png\` (same pixels as locked 7C-B; render not re-run on freeze).
 
-This realism stack (4B-v3 → 6A → 7B → 7C-B upper boost) is **not capable of final-photo realism** on this source. Further micro-tweaks on the same pipeline are **not justified** — incremental gains do not reach catalog standard.
-
-## Future work
-
-Use a **different approach** (e.g. new source capture, generative/physical reshoot, or a separate texture-transfer method). Do **not** continue iterating Stage 5–7 micro parameters on TEST-SOFA unless explicitly requested.
-
-## Frozen bundle
+## Bundle
 
 | File | Role |
 |------|------|
-| \`bali-silk-preview.png\` | Canonical locked preview image |
-| \`params.json\` | Full locked parameters for regeneration |
+| \`bali-silk-preview.png\` | Locked preview image |
+| \`params.json\` | Locked pipeline parameters |
 | \`STATUS.md\` | This note |
 
-Regenerate bundle: \`npm run export:preview-locked\`
+Re-copy bundle from existing 7C-B export: \`npm run export:preview-locked\`
 `;
 
 mkdirSync(PREVIEW_LOCKED_DIR, { recursive: true });

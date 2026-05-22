@@ -2,64 +2,76 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>TEST-SOFA preview</title>
+  <title>TEST-SOFA — frozen preview</title>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 1.5rem; background: #f4f4f4; }
+    body { font-family: system-ui, sans-serif; margin: 1.5rem; background: #f4f4f4; max-width: 960px; }
     h1 { font-size: 1.25rem; }
-    h2 { font-size: 1rem; margin: 2rem 0 0.75rem; }
-    .row { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; }
-    figure { margin: 0; background: #fff; padding: 0.75rem; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.12); max-width: 100%; }
-    img { display: block; max-width: min(100%, 900px); height: auto; }
-    figcaption { margin-top: 0.5rem; font-size: 0.85rem; color: #333; }
-    code { font-size: 0.75rem; word-break: break-all; }
-    .err { color: #a40; }
+    h2 { font-size: 1rem; margin: 1.5rem 0 0.75rem; }
+    .primary { background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+    .primary img { display: block; max-width: 100%; height: auto; }
+    .meta { margin-top: 0.75rem; font-size: 0.85rem; color: #333; }
+    .badge { display: inline-block; margin-right: 0.5rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    .yes { background: #d4edda; color: #155724; }
+    .no { background: #f8d7da; color: #721c24; }
+    details { margin-top: 2rem; background: #fff; padding: 0.75rem 1rem; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    summary { cursor: pointer; font-weight: 600; color: #444; }
+    .row { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; margin-top: 1rem; }
+    figure { margin: 0; background: #fafafa; padding: 0.75rem; border-radius: 6px; border: 1px solid #e8e8e8; max-width: 100%; }
+    figure img { display: block; max-width: min(100%, 700px); height: auto; }
+    figcaption { margin-top: 0.5rem; font-size: 0.8rem; color: #555; }
+    code { font-size: 0.72rem; word-break: break-all; }
+    .err { color: #a40; font-size: 0.85rem; }
   </style>
 </head>
 <body>
-  <h1>TEST-SOFA — frozen preview (7C-B, not final photo)</h1>
-  <p>Preview-quality yes · Final-photo-quality no · Pipeline iteration frozen.</p>
-  <p>Open via dev server: <code>http://localhost:PORT/preview-test-sofa.html</code></p>
+  <h1>TEST-SOFA — frozen sofa preview (7C-B)</h1>
+  <p class="meta">
+    <span class="badge yes">preview-quality: yes</span>
+    <span class="badge no">final-photo-quality: no</span>
+    Sofa pipeline frozen · not inspiration boards
+  </p>
 
-  <h2>Frozen preview bundle</h2>
-  <div class="row">
-    <figure>
-      <img src="/product-assets/TEST-SOFA/preview-locked/bali-silk-preview.png" alt="Frozen Bali Silk preview" />
-      <figcaption><strong>LOCKED PREVIEW (7C-B)</strong><br><code>/product-assets/TEST-SOFA/preview-locked/bali-silk-preview.png</code></figcaption>
-    </figure>
-  </div>
+  <section class="primary" aria-label="Locked preview render">
+    <h2 style="margin-top:0">Locked preview render</h2>
+    <img
+      src="/product-assets/TEST-SOFA/preview-locked/bali-silk-preview.png"
+      alt="TEST-SOFA Bali Silk locked preview (7C-B)"
+    />
+    <p class="meta">
+      <strong>7C-B</strong> — best locked preview; not final catalog quality.<br>
+      <code>/product-assets/TEST-SOFA/preview-locked/bali-silk-preview.png</code>
+    </p>
+  </section>
 
-  <h2>Debug review exports</h2>
-  <div class="row">
-    <figure>
-      <img src="/product-assets/TEST-SOFA/debug/phase7c-single-B.png" alt="Phase 7C-B single" />
-      <figcaption><strong>PHASE 7C SINGLE B</strong> (same render as frozen bundle)<br><code>/product-assets/TEST-SOFA/debug/phase7c-single-B.png</code></figcaption>
-    </figure>
-    <figure>
-      <img src="/product-assets/TEST-SOFA/debug/phase7c-comparison-B.png" alt="Source vs 7C-B" />
-      <figcaption><strong>SOURCE | PHASE 7C SINGLE B</strong><br><code>/product-assets/TEST-SOFA/debug/phase7c-comparison-B.png</code></figcaption>
-    </figure>
-  </div>
+  <details>
+    <summary>Debug &amp; archive (not primary)</summary>
+    <div class="row">
+      <figure>
+        <img src="/product-assets/TEST-SOFA/debug/phase7c-single-B.png" alt="Debug 7C-B single" />
+        <figcaption>Debug single (same as frozen bundle)<br><code>debug/phase7c-single-B.png</code></figcaption>
+      </figure>
+      <figure>
+        <img src="/product-assets/TEST-SOFA/debug/phase7c-comparison-B.png" alt="Source vs 7C-B" />
+        <figcaption>Debug comparison<br><code>debug/phase7c-comparison-B.png</code></figcaption>
+      </figure>
+      <figure>
+        <img src="/product-assets/TEST-SOFA/source.png" alt="Cognac source" />
+        <figcaption>Source cognac<br><code>source.png</code></figcaption>
+      </figure>
+    </div>
+    <h2>Swatch cache (legacy)</h2>
+    <div class="row" id="swatch-panels"></div>
+    <p id="err" class="err" hidden></p>
+  </details>
 
-  <h2>Source reference</h2>
-  <div class="row">
-    <figure>
-      <img src="/product-assets/TEST-SOFA/source.png" alt="Cognac source" />
-      <figcaption>Original cognac (<code>source.png</code>)</figcaption>
-    </figure>
-  </div>
-
-  <h2>Swatch cache (if manifest exists)</h2>
-  <div class="row" id="swatch-panels"></div>
-  <p id="err" class="err" hidden></p>
   <script>
     const panels = document.getElementById('swatch-panels');
     const err = document.getElementById('err');
-
     async function loadSwatches() {
       const res = await fetch('/render-cache/TEST-SOFA/manifest.json?t=' + Date.now());
       if (!res.ok) {
         err.hidden = false;
-        err.textContent = 'No swatch manifest — optional: npm run render:swatches -- TEST-SOFA BALI-SILK';
+        err.textContent = 'No swatch manifest.';
         return;
       }
       const manifest = await res.json();
@@ -71,7 +83,6 @@
         panels.appendChild(fig);
       }
     }
-
     loadSwatches();
   </script>
 </body>
