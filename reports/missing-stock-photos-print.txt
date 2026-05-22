@@ -1,0 +1,53 @@
+McCabe Theater & Living — MISSING STOCK PHOTOS
+Generated May 21, 2026
+Issue: No image on website listing (NoPhoto.gif)
+Upload in Volusion → Product Images → set as primary thumbnail
+================================================================================
+
+SOFAS & SECTIONALS (19) — Stationary Sofas category, pages 2-3
+--------------------------------------------------------------------------------
+ [ ]  1. Windsor Grande 2 Seat Sofa          SKU: 77176-A4    FILE: 77176-A4-1.jpg
+ [ ]  2. Windsor Grande Angled Sofa         SKU: 77176-AE    FILE: 77176-AE-1.jpg
+ [ ]  3. Windsor Angled Sofa                SKU: 77176-AS    FILE: 77176-AS-1.jpg
+ [ ]  4. Madison Track Arm Stationary Sofa  SKU: 77651-01    FILE: 77651-01-1.jpg
+ [ ]  5. Madison Track Arm Grande Sofa      SKU: 77651-A1    FILE: 77651-A1-1.jpg
+ [ ]  6. Madison Track Arm 2 Seat Sofa      SKU: 77651-D1    FILE: 77651-D1-1.jpg
+ [ ]  7. Madison Roll Arm Stationary Sofa   SKU: 77656-01    FILE: 77656-01-1.jpg
+ [ ]  8. Madison Roll Arm Grande Sofa       SKU: 77656-A1    FILE: 77656-A1-1.jpg
+ [ ]  9. Madison Roll Arm 2 Seat Sofa       SKU: 77656-D1    FILE: 77656-D1-1.jpg
+ [ ] 10. Madison Modern English Arm Stat.   SKU: 77658-01    FILE: 77658-01-1.jpg
+ [ ] 11. Madison Modern English Arm Grande  SKU: 77658-A1    FILE: 77658-A1-1.jpg
+ [ ] 12. Madison Modern English Arm 2 Seat  SKU: 77658-D1    FILE: 77658-D1-1.jpg
+ [ ] 13. Charli Stationary Sofa             SKU: 77743-01    FILE: 77743-01-1.jpg
+ [ ] 14. Charli Grande Sofa                 SKU: 77743-A1    FILE: 77743-A1-1.jpg
+ [ ] 15. Charli 2 Seat Sofa                 SKU: 77743-D1    FILE: 77743-D1-1.jpg
+ [ ] 16. Laguna Stationary Sofa             SKU: 77752-01    FILE: 77752-01-1.jpg
+ [ ] 17. Laguna Grande Sofa                 SKU: 77752-A1    FILE: 77752-A1-1.jpg
+ [ ] 18. Laguna 2 Seat Sofa                 SKU: 77752-D1    FILE: 77752-D1-1.jpg
+ [ ] 19. Pyper Apartment Sofa               SKU: 77768-91    FILE: 77768-91-1.jpg
+
+RECLINERS (21) — Recliners category, pages 1-2
+--------------------------------------------------------------------------------
+ [ ]  1. Denali Swivel Glider Power         SKU: 43003-38    FILE: 43003-38-1.jpg
+ [ ]  2. Denali Swivel Rocker Recliner      SKU: 43003-33    FILE: 43003-33-1.jpg
+ [ ]  3. Kinsley Swivel Glider              SKU: 77111-G3    FILE: 77111-G3-1.jpg
+ [ ]  4. Pinecrest Power Wall Hugger        SKU: 42306-31    FILE: 42306-31-1.jpg
+ [ ]  5. Pinecrest Rocker Recliner          SKU: 42306-32    FILE: 42306-32-1.jpg
+ [ ]  6. Pinecrest Swivel Glider Recliner   SKU: 42306-34    FILE: 42306-34-1.jpg
+ [ ]  7. Pinecrest Swivel Rocker Recliner   SKU: 42306-33    FILE: 42306-33-1.jpg
+ [ ]  8. Pinecrest Wallhugger Recliner      SKU: 42306-35    FILE: 42306-35-1.jpg
+ [ ]  9. Regent Power Rocker Recliner       SKU: 41094-39    FILE: 41094-39-1.jpg
+ [ ] 10. Regent Rocker Recliner             SKU: 41094-32    FILE: 41094-32-1.jpg
+ [ ] 11. Regent Wallhugger Recliner         SKU: 41094-35    FILE: 41094-35-1.jpg
+ [ ] 12. Thea Power Recliner                SKU: 77119-J2    FILE: 77119-J2-1.jpg
+ [ ] 13. Thea Swivel Pushback Recliner      SKU: 77119-M2    FILE: 77119-M2-1.jpg
+ [ ] 14. Theo Power Rocker Recliner         SKU: 42002-39    FILE: 42002-39-1.jpg
+ [ ] 15. Theo Rocker Recliner               SKU: 42002-32    FILE: 42002-32-1.jpg
+ [ ] 16. Theo Swivel Glider Recliner        SKU: 42002-34    FILE: 42002-34-1.jpg
+ [ ] 17. Theo Swivel Rocker Recliner        SKU: 42002-33    FILE: 42002-33-1.jpg
+ [ ] 18. Theo Wallhugger Recliner           SKU: 42002-35    FILE: 42002-35-1.jpg
+ [ ] 19. Tundra Power Rocker Recliner       SKU: 41043-39    FILE: 41043-39-1.jpg
+ [ ] 20. Tundra Wallhugger Recliner         SKU: 41043-35    FILE: 41043-35-1.jpg
+ [ ] 21. Zg5 Zero Gravity Recliner          SKU: 41089-42    FILE: 41089-42-1.jpg
+
+TOTAL: 40 products need stock photos

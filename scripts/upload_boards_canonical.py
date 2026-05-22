@@ -33,9 +33,9 @@ ALIASES = (
 )
 
 MUST_MATCH = (
-    ("vspfiles/my-boards.html", None, b"20260539"),
-    ("vspfiles/boards/my-boards-hub.js", None, b"MC_BOARDS_HUB"),
-    ("vspfiles/boards/my-boards-page.js", "/v/vspfiles/boards/my-boards-page.js", b"MC_BOARDS_HUB"),
+    ("vspfiles/my-boards.html", None, b"20260540"),
+    ("vspfiles/boards/my-boards-page.js", "/v/vspfiles/boards/my-boards-page.js", b"MERGED_BOARDS_HUB"),
+    ("vspfiles/boards/my-boards-page.js", "/v/vspfiles/boards/my-boards-page.js", b"renderEditorialFeed"),
     ("vspfiles/boards/board-styles.js", None, b"styleProfiles"),
     ("vspfiles/boards/my-boards-bundle.css", None, b"mc-boards__feature"),
 )

@@ -635,7 +635,7 @@
     }
     accountBanner.className = 'mc-boards__account-banner mc-boards__account-banner--warn';
     accountBanner.innerHTML =
-      '<p><strong>Sign in</strong> on mccabes.com to sync saved pieces to this page. ' +
+      '<p><strong>Sign in</strong> on mccabestheaterandliving.com to sync saved pieces to this page. ' +
       (note || 'You can still explore styles and room looks above.') +
       '</p><p class="mc-boards__account-actions">' +
       '<a class="mc-boards__btn" href="/login.asp">Sign in</a> ' +
@@ -1196,7 +1196,7 @@
         setSignedInUi(false);
         setAccountBanner(
           false,
-          'If you are already signed in, try opening this page from the same browser tab where you logged in at mccabes.com.'
+          'If you are already signed in, try opening this page from the same browser tab where you logged in at mccabestheaterandliving.com.'
         );
         setMsg('');
         root.innerHTML =

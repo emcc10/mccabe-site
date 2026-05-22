@@ -1871,7 +1871,7 @@
     var wheelColors = ['#f4efe6', '#c8bfb2', '#8fa9b5', '#1e3a5f', '#a67c5b', '#4a4540', '#8a9a8c', '#6b4423'];
     var stops = [];
     for (var wd = 0; wd < wheelColors.length; wd++) {
-      stops.push(wheelColors[wd] + ' ' + (((wd + 0.5) / wheelColors.length) * 100) + '%'));
+      stops.push(wheelColors[wd] + ' ' + (((wd + 0.5) / wheelColors.length) * 100) + '%');
     }
     disc.style.background = 'conic-gradient(from 0deg, ' + stops.join(', ') + ')';
     var picks = document.createElement('div');

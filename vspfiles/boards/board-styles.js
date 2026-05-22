@@ -832,7 +832,7 @@ window.renderBoardsPreview = function renderBoardsPreview() {
     if (window.__MC_BOARDS_APP_STARTED) return;
     if (document.querySelector('script[src*="my-boards-page.js"]')) return;
     var s = document.createElement('script');
-    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260539';
+    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260540';
     s.defer = true;
     document.body.appendChild(s);
   }

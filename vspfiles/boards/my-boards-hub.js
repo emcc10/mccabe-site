@@ -337,7 +337,7 @@
       products.innerHTML = '';
       var h = document.createElement('h3');
       h.className = 'mc-boards__tool-heading';
-      h.textContent = 'Matching McCabe pieces';
+      h.textContent = 'Furniture that fits this palette';
       products.appendChild(h);
       var cat = document.createElement('div');
       cat.className = 'mc-boards__catalog';
@@ -613,7 +613,7 @@
         card.appendChild(ex);
         var take = document.createElement('p');
         take.className = 'mc-boards__mccabe-take';
-        take.textContent = item.mccabeTake ? 'McCabe take: ' + item.mccabeTake : '';
+        take.textContent = item.mccabeTake ? 'How we\'d style it: ' + item.mccabeTake : '';
         card.appendChild(take);
         if (item.sourceUrl) {
           var src = document.createElement('a');
@@ -627,7 +627,7 @@
         var actions = document.createElement('div');
         actions.className = 'mc-boards__btn-row';
         actions.appendChild(
-          btn('See McCabe pieces', 'mc-boards__btn mc-boards__btn--ghost', function () {
+          btn('Shop this look', 'mc-boards__btn mc-boards__btn--ghost', function () {
             if (item.styleId) deps.activateStyleFilter(item.styleId, false);
           })
         );
