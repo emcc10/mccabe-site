@@ -1,0 +1,84 @@
+{
+  "phase": "9.5",
+  "purpose": "Prove or fail — measure visual delta before any more “best candidate” claims",
+  "priorRender": {
+    "id": "7C-B",
+    "label": "Pre-swatch locked preview",
+    "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\preview-locked\\bali-silk-preview.png"
+  },
+  "currentRender": {
+    "id": "9RESET-B",
+    "label": "Clean swatch stochastic apply",
+    "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9reset-single-B.png"
+  },
+  "upholsteryDeltaVs7cB": {
+    "upholsteryPixels": 152231,
+    "meanAbsDeltaRgb": 6.001464879032403,
+    "meanAbsDeltaL": 2.152334281453843,
+    "meanAbsDeltaA": 0.0006700343556831394,
+    "meanAbsDeltaB": 0.0005058102488980562,
+    "maxAbsDeltaL": 11,
+    "maxAbsDeltaRgb": 28.666666666666668,
+    "rmsDeltaL": 2.8405985990116274,
+    "pixelsAboveLThreshold2": 83047,
+    "pixelsAboveLThreshold4": 29679,
+    "fractionAboveLThreshold2": 0.5455327758472321,
+    "ssimOnL": 0.9381073768613536,
+    "ssimOnRgb": 0.933380385645396
+  },
+  "perceptualSummaryVs7cB": {
+    "ssimOnL": 0.9381073768613536,
+    "ssimOnRgb": 0.933380385645396,
+    "verdict": "MEANINGFUL — delta large enough to plausibly read in side-by-side review",
+    "visuallyMeaningful": true,
+    "note": "Pipeline-to-pipeline delta; includes non-swatch realism differences"
+  },
+  "swatchOnlyDeltaVs6a": {
+    "baseline": "Stage 4B-v3 + Phase 6A (no swatch material)",
+    "stats": {
+      "upholsteryPixels": 152231,
+      "meanAbsDeltaRgb": 0.8717125070889202,
+      "meanAbsDeltaL": 0.15069860935026375,
+      "meanAbsDeltaA": 0.00013794824969946988,
+      "meanAbsDeltaB": 0.0005058102488980562,
+      "maxAbsDeltaL": 2,
+      "maxAbsDeltaRgb": 6.666666666666667,
+      "rmsDeltaL": 0.3904432786544763,
+      "pixelsAboveLThreshold2": 133,
+      "pixelsAboveLThreshold4": 0,
+      "fractionAboveLThreshold2": 0.0008736722480966427,
+      "ssimOnL": 0.9985930984412005,
+      "ssimOnRgb": 0.998073586569896
+    },
+    "verdict": "TRIVIAL — swatch transfer delta is negligible at upholstery scale",
+    "visuallyMeaningful": false,
+    "note": "Isolates swatch transfer contribution only"
+  },
+  "upholsteryDelta": {
+    "upholsteryPixels": 152231,
+    "meanAbsDeltaRgb": 6.001464879032403,
+    "meanAbsDeltaL": 2.152334281453843,
+    "meanAbsDeltaA": 0.0006700343556831394,
+    "meanAbsDeltaB": 0.0005058102488980562,
+    "maxAbsDeltaL": 11,
+    "maxAbsDeltaRgb": 28.666666666666668,
+    "rmsDeltaL": 2.8405985990116274,
+    "pixelsAboveLThreshold2": 83047,
+    "pixelsAboveLThreshold4": 29679,
+    "fractionAboveLThreshold2": 0.5455327758472321,
+    "ssimOnL": 0.9381073768613536,
+    "ssimOnRgb": 0.933380385645396
+  },
+  "perceptualSummary": {
+    "ssimOnL": 0.9381073768613536,
+    "ssimOnRgb": 0.933380385645396,
+    "ssimNote": "1.0 = identical; values above ~0.995 often look the same in casual review"
+  },
+  "verdict": "SWATCH TRIVIAL vs 6A (TRIVIAL — swatch transfer delta is negligible at upholstery scale); pipeline delta vs 7C-B is separate",
+  "visuallyMeaningful": false,
+  "outputs": {
+    "diff": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase95-diff.png",
+    "heatmap": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase95-diff-heatmap.png",
+    "metrics": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase95-metrics.json"
+  }
+}

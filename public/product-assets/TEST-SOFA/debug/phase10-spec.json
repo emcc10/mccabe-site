@@ -1,0 +1,126 @@
+{
+  "phase": 10,
+  "purpose": "One real stronger swatch-material attempt — must be visibly different from 9RESET-B",
+  "notFinalBaliSilk": true,
+  "reference9resetB": {
+    "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9reset-single-B.png",
+    "params": {
+      "grainStrength": 0.58,
+      "mottleStrength": 0.38,
+      "colorBiasStrength": 0.15,
+      "formStrength": 0.03,
+      "sampleScale": 0.4
+    }
+  },
+  "apply": "open-field weight only (back/seat/arm/rail); strong seam/highlight suppress",
+  "lockedUnchanged": [
+    "Stage 4B-v3",
+    "Phase 6A",
+    "masks, alpha, legs, edges",
+    "Phase 9 reset swatch sanitization + stochastic sampling"
+  ],
+  "variants": [
+    {
+      "id": "A",
+      "label": "10A STRONG CLEAN",
+      "intent": "Materially stronger than 9RESET-B; cleaner / safer",
+      "params": {
+        "grainStrength": 1.05,
+        "mottleStrength": 0.72,
+        "colorBiasStrength": 0.24,
+        "formStrength": 0.03,
+        "sampleScale": 0.4
+      }
+    },
+    {
+      "id": "B",
+      "label": "10B STRONG MAX",
+      "intent": "Clearly stronger than 10A; still gated open-fields only",
+      "params": {
+        "grainStrength": 1.48,
+        "mottleStrength": 1.02,
+        "colorBiasStrength": 0.32,
+        "formStrength": 0.025,
+        "sampleScale": 0.42
+      }
+    }
+  ],
+  "results": [
+    {
+      "id": "A",
+      "label": "10A STRONG CLEAN",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase10-variant-A.png",
+      "params": {
+        "grainStrength": 1.05,
+        "mottleStrength": 0.72,
+        "colorBiasStrength": 0.24,
+        "formStrength": 0.03,
+        "sampleScale": 0.4
+      },
+      "meanL": 71.8930703995901,
+      "deltaLFrom6a": 0.030723045897360635,
+      "deltaVs9resetB": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 0.39398458045126605,
+        "meanAbsDeltaL": 0.1462908343241521,
+        "meanAbsDeltaA": 0.0004663964632696363,
+        "meanAbsDeltaB": 0.0019772582456924017,
+        "maxAbsDeltaL": 2,
+        "maxAbsDeltaRgb": 6,
+        "rmsDeltaL": 0.3832862076381878,
+        "pixelsAboveLThreshold2": 47,
+        "pixelsAboveLThreshold4": 0,
+        "fractionAboveLThreshold2": 0.0003087413207559564,
+        "ssimOnL": 0.9986634789823506,
+        "ssimOnRgb": 0.9994480117153107,
+        "visuallyMeaningful": false,
+        "verdict": "TRIVIAL — swatch transfer delta is negligible at upholstery scale"
+      }
+    },
+    {
+      "id": "B",
+      "label": "10B STRONG MAX",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase10-variant-B.png",
+      "params": {
+        "grainStrength": 1.48,
+        "mottleStrength": 1.02,
+        "colorBiasStrength": 0.32,
+        "formStrength": 0.025,
+        "sampleScale": 0.42
+      },
+      "meanL": 71.88570659064186,
+      "deltaLFrom6a": 0.023359236949119122,
+      "deltaVs9resetB": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 1.133415664352215,
+        "meanAbsDeltaL": 0.39541880431712334,
+        "meanAbsDeltaA": 0.00048610335608384626,
+        "meanAbsDeltaB": 0.004236981955055147,
+        "maxAbsDeltaL": 5,
+        "maxAbsDeltaRgb": 14.333333333333334,
+        "rmsDeltaL": 0.7180195142978688,
+        "pixelsAboveLThreshold2": 7314,
+        "pixelsAboveLThreshold4": 74,
+        "fractionAboveLThreshold2": 0.048045404681043936,
+        "ssimOnL": 0.995300908330095,
+        "ssimOnRgb": 0.9959117100742672,
+        "visuallyMeaningful": false,
+        "verdict": "TRIVIAL — swatch transfer delta is negligible at upholstery scale"
+      }
+    }
+  ],
+  "base6aUpholsteryMeanLab": {
+    "meanL": 71.86234735369274,
+    "meanA": 3.1375015601290146,
+    "meanB": 6.165209451425794,
+    "count": 152231
+  },
+  "outputs": {
+    "grid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase10-grid.png",
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase10-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase10-variant-B.png"
+    ],
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase10-spec.json"
+  }
+}

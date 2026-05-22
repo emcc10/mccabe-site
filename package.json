@@ -30,7 +30,9 @@
     "render:phase8": "tsx scripts/renderPhase8.ts",
     "render:phase9": "tsx scripts/renderPhase9.ts",
     "render:phase9reset": "tsx scripts/renderPhase9Reset.ts",
-    "render:phase9reset-b": "tsx scripts/renderPhase9resetSingleB.ts"
+    "render:phase9reset-b": "tsx scripts/renderPhase9resetSingleB.ts",
+    "render:phase95": "tsx scripts/renderPhase95.ts",
+    "render:phase10": "tsx scripts/renderPhase10.ts"
   },
   "dependencies": {
     "color-convert": "^2.0.1",
