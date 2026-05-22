@@ -2863,13 +2863,21 @@
     var elP = document.getElementById("mtl-sum-price");
     if (elC) elC.textContent = configLabel;
     if (elP) {
-      elP.classList.remove("mtl-summary-price--guest");
-      if (sectionalIsLoggedIn()) {
-        elP.textContent = price || "—";
-      } else {
-        elP.classList.add("mtl-summary-price--guest");
-        elP.innerHTML =
-          '<a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see price';
+      var priceRow = elP.closest && elP.closest(".mtl-summary-row");
+      if (document.querySelector(".mc-pdp-retail-row, .mc-pdp-member-pricing")) {
+        if (priceRow && priceRow.style) priceRow.style.setProperty("display", "none", "important");
+      } else if (priceRow && priceRow.style) {
+        priceRow.style.removeProperty("display");
+      }
+      if (!document.querySelector(".mc-pdp-retail-row, .mc-pdp-member-pricing")) {
+        elP.classList.remove("mtl-summary-price--guest");
+        if (sectionalIsLoggedIn()) {
+          elP.textContent = price || "—";
+        } else {
+          elP.classList.add("mtl-summary-price--guest");
+          elP.innerHTML =
+            '<a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see price';
+        }
       }
     }
     refreshQuoteAndPalliserSummary();

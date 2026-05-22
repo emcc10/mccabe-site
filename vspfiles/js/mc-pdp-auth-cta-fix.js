@@ -945,6 +945,47 @@
     return box.querySelector("td") || box;
   }
 
+  function hideDuplicatePdpPriceUi() {
+    try {
+      global.document.querySelectorAll(".mc-member-price-caption").forEach(function (cap) {
+        if (!cap || !cap.style) return;
+        cap.style.setProperty("display", "none", "important");
+        cap.style.setProperty("visibility", "hidden", "important");
+        cap.style.setProperty("height", "0", "important");
+        cap.style.setProperty("overflow", "hidden", "important");
+        cap.style.setProperty("opacity", "0", "important");
+      });
+      var sumPrice = global.document.getElementById("mtl-sum-price");
+      if (sumPrice && global.document.querySelector(".mc-pdp-retail-row")) {
+        var priceRow = sumPrice.closest && sumPrice.closest(".mtl-summary-row");
+        if (priceRow && priceRow.style) {
+          priceRow.style.setProperty("display", "none", "important");
+        }
+      }
+      var wrap = global.document.querySelector(".mc-pdp-member-pricing");
+      if (wrap) {
+        var sales = wrap.querySelectorAll(".mc-pdp-member-line--sale");
+        var si;
+        for (si = 1; si < sales.length; si++) {
+          try {
+            sales[si].remove();
+          } catch (eRmSale) {}
+        }
+      }
+      global.document
+        .querySelectorAll(
+          "#v65-product-parent .colors_pricebox > .mc-pdp-member-line, #v65-product-parent .colors_pricebox > font.product_sale_price"
+        )
+        .forEach(function (node) {
+          if (node.closest && node.closest(".mc-pdp-member-pricing, .mc-pdp-retail-row")) return;
+          try {
+            node.style.setProperty("display", "none", "important");
+            node.style.setProperty("visibility", "hidden", "important");
+          } catch (eLoose) {}
+        });
+    } catch (eHideDup) {}
+  }
+
   function relocateRetailStackToOptionsColumn() {
     var retailRow = global.document.querySelector(".mc-pdp-retail-row");
     if (!retailRow) return;
@@ -1079,6 +1120,7 @@
     var wrap = ensureMemberPricingWrap() || global.document.querySelector(".mc-pdp-member-pricing");
     var retailRow = global.document.querySelector(".mc-pdp-retail-row");
     var saleAmt = resolvePdpSaleAmount();
+    hideDuplicatePdpPriceUi();
     hideNativeSaleNodes();
     tidyLooseMemberLines();
     var loggedIn = false;
@@ -1247,6 +1289,7 @@
       ensurePdpStackCriticalCss();
       buildMinimalRetailMemberStack();
       relocateRetailStackToOptionsColumn();
+      hideDuplicatePdpPriceUi();
       ensureMcCabeRetailStack();
       wirePlannerLoginGate();
       guardConfigurationBlockClick();

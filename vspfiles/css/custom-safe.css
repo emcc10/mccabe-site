@@ -1,4 +1,4 @@
-/* 0528b C_CSS_DEPLOY_VERIFY_20260528b — PDP stack visible; hide legacy prices only without retail row */
+/* 0528c C_CSS_DEPLOY_VERIFY_20260528c — PDP: one price stack; hide MTL summary duplicate prices */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -14671,4 +14671,53 @@ html body.mc-product-page #v65-product-parent .mc-pdp-member-line {
 html body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line--sale,
 html body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line--sale {
   display: flex !important;
+}
+/* Sectional PDP: McCabe stack owns retail/member/sale — hide duplicate MTL summary + caption prices */
+html body.productdetails:has(.mc-pdp-retail-row) #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),
+html body.mc-product-page:has(.mc-pdp-retail-row) #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),
+html body.mc-pdp-price-stack #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+html body.productdetails:has(.mc-pdp-retail-row) .mc-member-price-caption,
+html body.mc-product-page:has(.mc-pdp-retail-row) .mc-member-price-caption,
+html body.mc-pdp-price-stack .mc-member-price-caption,
+html body.productdetails:has(.mc-pdp-member-pricing) #v65-product-parent .colors_pricebox > .mc-member-price-caption,
+html body.mc-product-page:has(.mc-pdp-member-pricing) #v65-product-parent .colors_pricebox > .mc-member-price-caption {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+html body.mc-pdp-price-stack #v65-product-parent .colors_pricebox,
+html body.productdetails:has(.mc-pdp-retail-row) #v65-product-parent .colors_pricebox {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+  position: relative !important;
+}
+html body.mc-pdp-price-stack #v65-product-parent .colors_pricebox .mc-pdp-retail-row,
+html body.mc-pdp-price-stack #v65-product-parent .colors_pricebox .mc-pdp-member-pricing,
+html body.productdetails:has(.mc-pdp-retail-row) #v65-product-parent .colors_pricebox .mc-pdp-retail-row,
+html body.productdetails:has(.mc-pdp-retail-row) #v65-product-parent .colors_pricebox .mc-pdp-member-pricing {
+  position: static !important;
+  float: none !important;
+  margin: 0 0 4px 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+/* Loose duplicate member lines outside the pricing wrap */
+html body.productdetails:has(.mc-pdp-member-pricing) #v65-product-parent .colors_pricebox > .mc-pdp-member-line,
+html body.mc-product-page:has(.mc-pdp-member-pricing) #v65-product-parent .colors_pricebox > .mc-pdp-member-line {
+  display: none !important;
 }
