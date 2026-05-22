@@ -21,102 +21,219 @@ window.MC_BOARD_STYLES = {
     'Essex': '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg'
   },
 
-  decorTrends: [
-    {
-      title: 'Warm minimalism',
-      styleId: 'transitional',
-      blurb: 'Layered neutrals, soft leather, and quiet contrast—rooms feel calm but not cold.',
-      sources: [
-        { label: 'Houzz — Transitional Ideas', url: 'https://www.houzz.com/photos/transitional' },
-        { label: 'AD — Neutral Interiors', url: 'https://www.architecturaldigest.com/topic/neutral' }
-      ]
+  /** Display profiles surfaced by the visual quiz */
+  styleProfiles: {
+    'warm-transitional': {
+      title: 'Warm Transitional',
+      blurb: 'Soft neutrals, tailored upholstery, and layered texture — relaxed but refined.',
+      styleIds: ['transitional', 'traditional'],
+      palette: ['#f4efe6', '#c8bfb2', '#9a6b42', '#5c534c'],
+      productIds: ['40113-oxford-sofa', '41500-keiran-recliner', '77176-windsor-loveseat'],
+      vibe: 'cozy'
     },
-    {
-      title: 'Walnut & cognac comeback',
-      styleId: 'mid-century',
-      blurb: 'Low profiles, wood frames, and caramel leather anchor the space.',
-      sources: [
-        { label: 'Elle Decor — Mid-Century', url: 'https://www.elledecor.com/design-decor/interior-designers/glimpse-inside-midcentury-modern-home' }
-      ]
+    'modern-organic': {
+      title: 'Modern Organic',
+      blurb: 'Clean lines with natural materials — greige, stone, and quiet contrast.',
+      styleIds: ['modern', 'transitional'],
+      palette: ['#ececea', '#a8a8a4', '#8a9a8c', '#5a5a56'],
+      productIds: ['77180-martina-sofa', '40112-essex-sofa'],
+      vibe: 'modern'
     },
-    {
-      title: 'Media rooms in deep blue',
-      styleId: 'contemporary',
-      blurb: 'Navy upholstery and dimmable layers for theater-style lounging.',
-      sources: [
-        { label: 'House Beautiful — Home Theater', url: 'https://www.housebeautiful.com/room-decorating/theater-rooms/' }
-      ]
+    'soft-coastal': {
+      title: 'Soft Coastal',
+      blurb: 'Sun-washed neutrals and easy sectionals — light, airy, and family-friendly.',
+      styleIds: ['coastal', 'transitional'],
+      palette: ['#f5f3ee', '#d8d2c8', '#8fa9b5', '#c9b896'],
+      productIds: ['40112-essex-sofa', '40113-oxford-sofa'],
+      vibe: 'relaxed'
     },
-    {
-      title: 'Performance leather & power comfort',
-      styleId: 'transitional',
-      blurb: 'Reclining sectionals with tailored stitching—comfort without bulk.',
-      sources: [
-        { label: 'Better Homes — Living Trends', url: 'https://www.bhg.com/decorating/' }
-      ]
+    'collected-traditional': {
+      title: 'Collected Traditional',
+      blurb: 'Rich leather, generous scale, and timeless silhouettes built to last.',
+      styleIds: ['traditional'],
+      palette: ['#f4efe6', '#8b5e3c', '#3d2a22', '#c4a574'],
+      productIds: ['41067-washington-recliner', '77696-brookes-chair'],
+      vibe: 'tailored'
     },
-    {
-      title: 'Jewel-tone accents (edited)',
-      styleId: 'contemporary',
-      blurb: 'One rich accent per room—emerald, navy, or terracotta on a neutral field.',
-      sources: [
-        { label: 'Veranda — Color Trends', url: 'https://www.veranda.com/decorating-ideas/' }
-      ]
+    'moody-luxe': {
+      title: 'Moody Luxe',
+      blurb: 'Deeper tones, power comfort, and dramatic media-room energy.',
+      styleIds: ['contemporary', 'modern'],
+      palette: ['#e8eaed', '#1e3a5f', '#4a4540', '#5c6b7a'],
+      productIds: ['40109-reece-sofa', '77180-martina-sofa'],
+      vibe: 'dramatic'
     }
-  ],
+  },
 
-  styleQuiz: {
-    title: 'What style are you?',
+  visualQuiz: {
+    title: 'Discover your McCabe style',
     questions: [
       {
-        q: 'Which mood feels most like home?',
+        q: 'Which room feels most like you?',
         choices: [
-          { t: 'Tailored & timeless', s: { traditional: 2, transitional: 1 } },
-          { t: 'Clean & edited', s: { modern: 2, contemporary: 1 } },
-          { t: 'Sun-washed & easy', s: { coastal: 3 } },
-          { t: 'Warm & vintage', s: { 'mid-century': 3 } }
+          { label: 'Tailored family den', img: '/v/vspfiles/photos/Washington%2041067-1.jpg', scores: { traditional: 3, transitional: 1 }, vibe: 'cozy' },
+          { label: 'Open modern great room', img: '/v/vspfiles/photos/77180-01-1.jpg', scores: { modern: 3, contemporary: 1 }, vibe: 'modern' },
+          { label: 'Sunroom sectional', img: '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg', scores: { coastal: 3, transitional: 1 }, vibe: 'relaxed' },
+          { label: 'Media lounge', img: '/v/vspfiles/photos/40109-01-1.jpg', scores: { contemporary: 3 }, vibe: 'dramatic' }
         ]
       },
       {
-        q: 'Pick a sofa silhouette:',
+        q: 'Which wood tone do you gravitate toward?',
         choices: [
-          { t: 'Plush recliner', s: { traditional: 2, transitional: 2 } },
-          { t: 'Track-arm low profile', s: { modern: 3 } },
-          { t: 'Brookes accent chair', s: { 'mid-century': 3 } },
-          { t: 'Reece power sofa', s: { contemporary: 3 } }
+          { label: 'Walnut & cognac', img: '/v/vspfiles/photos/77696-1.jpg', scores: { 'mid-century': 2, traditional: 2 }, vibe: 'cozy' },
+          { label: 'Light oak', img: '/v/vspfiles/photos/40113-01-1.jpg', scores: { transitional: 2, coastal: 2 }, vibe: 'relaxed' },
+          { label: 'Charcoal casegoods', img: '/v/vspfiles/photos/77180-01-1.jpg', scores: { modern: 3 }, vibe: 'modern' },
+          { label: 'Painted millwork', img: '/v/vspfiles/photos/Keiran-SC-67-10-9X-10-66-1.jpg', scores: { transitional: 2, contemporary: 1 }, vibe: 'tailored' }
         ]
       },
       {
-        q: 'Your ideal palette:',
+        q: 'Which color palette do you love most?',
         choices: [
-          { t: 'Cream & cognac', s: { traditional: 1, 'mid-century': 2, transitional: 1 } },
-          { t: 'Greige & charcoal', s: { modern: 2, transitional: 2 } },
-          { t: 'Sand & soft blue', s: { coastal: 3, transitional: 1 } },
-          { t: 'Navy & brass', s: { contemporary: 3, modern: 1 } }
+          { label: 'Warm ivory & camel', img: '/v/vspfiles/photos/40113-01-1.jpg', scores: { transitional: 3, traditional: 1 }, vibe: 'cozy' },
+          { label: 'Greige & stone', img: '/v/vspfiles/photos/77176-A1-1.jpg', scores: { modern: 2, transitional: 2 }, vibe: 'modern' },
+          { label: 'Sand & sea glass', img: '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg', scores: { coastal: 3 }, vibe: 'relaxed' },
+          { label: 'Navy & brass', img: '/v/vspfiles/photos/40109-01-1.jpg', scores: { contemporary: 3, modern: 1 }, vibe: 'dramatic' }
         ]
       },
       {
-        q: 'Primary room to design:',
+        q: 'Which furniture silhouette do you prefer?',
         choices: [
-          { t: 'Family den', s: { traditional: 2, transitional: 2 } },
-          { t: 'Open great room', s: { modern: 2, transitional: 1 } },
-          { t: 'Home theater', s: { contemporary: 3 } },
-          { t: 'Reading nook', s: { 'mid-century': 2, coastal: 1, modern: 1 } }
+          { label: 'Power reclining sofa', img: '/v/vspfiles/photos/Washington%2041067-1.jpg', scores: { traditional: 2, transitional: 2 }, vibe: 'cozy' },
+          { label: 'Track-arm sofa', img: '/v/vspfiles/photos/77180-01-1.jpg', scores: { modern: 3 }, vibe: 'modern' },
+          { label: 'Accent chair', img: '/v/vspfiles/photos/77696-1.jpg', scores: { 'mid-century': 3 }, vibe: 'tailored' },
+          { label: 'Sectional', img: '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg', scores: { coastal: 2, transitional: 2 }, vibe: 'relaxed' }
+        ]
+      },
+      {
+        q: 'Which vibe do you want most?',
+        choices: [
+          { label: 'Cozy', img: '/v/vspfiles/photos/Keiran-SC-67-10-9X-10-66-1.jpg', scores: { transitional: 2, traditional: 2 }, vibe: 'cozy' },
+          { label: 'Tailored', img: '/v/vspfiles/photos/40113-01-1.jpg', scores: { transitional: 2, traditional: 1 }, vibe: 'tailored' },
+          { label: 'Relaxed', img: '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg', scores: { coastal: 3 }, vibe: 'relaxed' },
+          { label: 'Dramatic', img: '/v/vspfiles/photos/40109-01-1.jpg', scores: { contemporary: 3 }, vibe: 'dramatic' }
         ]
       }
     ]
   },
 
-  colorWheel: [
-    { id: 'cream', label: 'Ivory linen', hex: '#f4efe6', styles: ['transitional', 'coastal', 'traditional'] },
-    { id: 'greige', label: 'Greige', hex: '#c8bfb2', styles: ['transitional', 'modern'] },
-    { id: 'cognac', label: 'Cognac', hex: '#a67c5b', styles: ['mid-century', 'traditional', 'transitional'] },
-    { id: 'charcoal', label: 'Charcoal', hex: '#4a4540', styles: ['modern', 'contemporary'] },
-    { id: 'navy', label: 'Midnight navy', hex: '#1e3a5f', styles: ['contemporary'] },
-    { id: 'sage', label: 'Sage', hex: '#8a9a8c', styles: ['coastal', 'transitional'] },
-    { id: 'terracotta', label: 'Terracotta', hex: '#c67b4e', styles: ['mid-century', 'contemporary'] },
-    { id: 'walnut', label: 'Walnut', hex: '#6b4423', styles: ['mid-century', 'traditional'] }
+  paletteLab: {
+    presets: [
+      {
+        id: 'warm-neutral',
+        label: 'Warm neutral',
+        wall: '#f4efe6',
+        sofa: 'Camel performance leather',
+        rug: 'Oatmeal wool',
+        wood: 'Honey oak',
+        accent: '#9a6b42',
+        paintPair: '#e8dfd0',
+        styleIds: ['transitional', 'traditional'],
+        productIds: ['40113-oxford-sofa', '41500-keiran-recliner']
+      },
+      {
+        id: 'soft-coastal',
+        label: 'Soft coastal',
+        wall: '#f5f3ee',
+        sofa: 'Sand linen-look fabric',
+        rug: 'Bleached jute',
+        wood: 'Whitewashed oak',
+        accent: '#8fa9b5',
+        paintPair: '#d8d2c8',
+        styleIds: ['coastal'],
+        productIds: ['40112-essex-sofa', '40113-oxford-sofa']
+      },
+      {
+        id: 'earthy-organic',
+        label: 'Earthy organic',
+        wall: '#e8e4dc',
+        sofa: 'Mushroom greige leather',
+        rug: 'Charcoal flatweave',
+        wood: 'Walnut',
+        accent: '#6b4423',
+        paintPair: '#c8bfb2',
+        styleIds: ['modern', 'transitional'],
+        productIds: ['77180-martina-sofa', '77696-brookes-chair']
+      },
+      {
+        id: 'moody-dramatic',
+        label: 'Moody dramatic',
+        wall: '#3d4450',
+        sofa: 'Deep navy leather',
+        rug: 'Graphite wool',
+        wood: 'Espresso',
+        accent: '#b8956b',
+        paintPair: '#1e3a5f',
+        styleIds: ['contemporary', 'modern'],
+        productIds: ['40109-reece-sofa', '77180-martina-sofa']
+      },
+      {
+        id: 'classic-transitional',
+        label: 'Classic transitional',
+        wall: '#f0ebe4',
+        sofa: 'Greige tailored upholstery',
+        rug: 'Taupe sisal',
+        wood: 'Medium walnut',
+        accent: '#5c534c',
+        paintPair: '#c8bfb2',
+        styleIds: ['transitional'],
+        productIds: ['77176-windsor-loveseat', '40113-oxford-sofa']
+      }
+    ]
+  },
+
+  editorialFeed: [
+    {
+      title: 'Warm minimalism is staying',
+      excerpt: 'Layered neutrals and quiet contrast keep rooms calm without feeling cold.',
+      source: 'Architectural Digest',
+      sourceUrl: 'https://www.architecturaldigest.com/topic/neutral',
+      mccabeTake: 'Pair Oxford or Keiran seating with ivory walls and walnut accents.',
+      styleId: 'transitional',
+      productIds: ['40113-oxford-sofa', '41500-keiran-recliner']
+    },
+    {
+      title: 'Walnut & cognac are back',
+      excerpt: 'Mid-century silhouettes and caramel leather anchor the room.',
+      source: 'Elle Decor',
+      sourceUrl: 'https://www.elledecor.com/design-decor/interior-designers/glimpse-inside-midcentury-modern-home',
+      mccabeTake: 'Brookes accent chairs add MCM warmth without a full redesign.',
+      styleId: 'mid-century',
+      productIds: ['77696-brookes-chair']
+    },
+    {
+      title: 'Media rooms go deep blue',
+      excerpt: 'Navy upholstery and dimmable layers define theater lounges.',
+      source: 'House Beautiful',
+      sourceUrl: 'https://www.housebeautiful.com/room-decorating/theater-rooms/',
+      mccabeTake: 'Reece power seating delivers performance fabric and recline for long screenings.',
+      styleId: 'contemporary',
+      productIds: ['40109-reece-sofa']
+    },
+    {
+      title: 'Performance leather + power comfort',
+      excerpt: 'Reclining sectionals with tailored stitching — comfort without bulk.',
+      source: 'Better Homes & Gardens',
+      sourceUrl: 'https://www.bhg.com/decorating/',
+      mccabeTake: 'Washington and Keiran frames balance family durability with a tailored look.',
+      styleId: 'traditional',
+      productIds: ['41067-washington-recliner', '41500-keiran-recliner']
+    },
+    {
+      title: 'Jewel-tone accents, edited',
+      excerpt: 'One rich accent per room on a neutral field.',
+      source: 'Veranda',
+      sourceUrl: 'https://www.veranda.com/decorating-ideas/',
+      mccabeTake: 'Use Martina or Reece in navy, then pull brass and terracotta in decor.',
+      styleId: 'contemporary',
+      productIds: ['77180-martina-sofa', '40109-reece-sofa']
+    }
   ],
+
+  decorTrends: [],
+
+  styleQuiz: null,
+
+  colorWheel: [],
 
   featuredTriptych: [
     '77696-brookes-chair',
@@ -302,8 +419,9 @@ window.MC_BOARD_STYLES = {
     {
       id: 'mcm-brookes-lounge',
       styleId: 'mid-century',
-      title: 'Brookes accent lounge',
+      title: 'Brookes Accent Chair — Living Room',
       room: 'Living room',
+      mood: 'tailored',
       sceneClass: 'mc-scene--mcm',
       productId: '77696-brookes-chair',
       image: '/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png',
@@ -312,8 +430,9 @@ window.MC_BOARD_STYLES = {
     {
       id: 'modern-martina-loft',
       styleId: 'modern',
-      title: 'Martina track-arm loft',
+      title: 'Martina Track Arm Sofa — Great Room',
       room: 'Great room',
+      mood: 'modern',
       sceneClass: 'mc-scene--modern',
       productId: '77180-martina-sofa',
       image: '/v/vspfiles/boards/showcase/modern-pacific-charcoal-sofa-angle.png',
@@ -322,8 +441,9 @@ window.MC_BOARD_STYLES = {
     {
       id: 'contemporary-reece-media',
       styleId: 'contemporary',
-      title: 'Reece media lounge',
+      title: 'Reece Sofa — Home Theater',
       room: 'Home theater',
+      mood: 'dramatic',
       sceneClass: 'mc-scene--contemporary',
       productId: '40109-reece-sofa',
       image: '/v/vspfiles/boards/showcase/contemporary-atlantic-navy-recliner-angle.png',
@@ -332,8 +452,9 @@ window.MC_BOARD_STYLES = {
     {
       id: 'traditional-washington-den',
       styleId: 'traditional',
-      title: 'Washington leather den',
+      title: 'Washington Power Reclining Sofa — Family Room',
       room: 'Family room',
+      mood: 'cozy',
       sceneClass: 'mc-scene--traditional',
       productId: '41067-washington-recliner',
       image: '/v/vspfiles/boards/showcase/traditional-carob-recliner-recline.png',
@@ -342,8 +463,9 @@ window.MC_BOARD_STYLES = {
     {
       id: 'transitional-keiran-family',
       styleId: 'transitional',
-      title: 'Keiran family room',
+      title: 'Keiran Power Reclining Sofa — Living Room',
       room: 'Living room',
+      mood: 'cozy',
       sceneClass: 'mc-scene--transitional',
       productId: '41500-keiran-recliner',
       image: '/v/vspfiles/boards/showcase/transitional-cognac-recliner-angle.png',
@@ -352,8 +474,9 @@ window.MC_BOARD_STYLES = {
     {
       id: 'coastal-essex-sunroom',
       styleId: 'coastal',
-      title: 'Essex coastal sectional',
+      title: 'Essex Sofa — Sunroom',
       room: 'Sunroom',
+      mood: 'relaxed',
       sceneClass: 'mc-scene--coastal',
       productId: '40112-essex-sofa',
       image: '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg',
@@ -362,8 +485,9 @@ window.MC_BOARD_STYLES = {
     {
       id: 'transitional-oxford-study',
       styleId: 'transitional',
-      title: 'Oxford tailored sofa',
+      title: 'Oxford Sofa — Study',
       room: 'Study',
+      mood: 'tailored',
       sceneClass: 'mc-scene--transitional-warm',
       productId: '40113-oxford-sofa',
       image: '/v/vspfiles/photos/40113-01-1.jpg',
@@ -372,8 +496,9 @@ window.MC_BOARD_STYLES = {
     {
       id: 'transitional-windsor-nook',
       styleId: 'transitional',
-      title: 'Windsor reading nook',
-      room: 'Accent seating',
+      title: 'Windsor Loveseat — Reading Nook',
+      room: 'Reading nook',
+      mood: 'relaxed',
       sceneClass: 'mc-scene--modern-soft',
       productId: '77176-windsor-loveseat',
       image: '/v/vspfiles/photos/77176-A1-1.jpg',
@@ -537,7 +662,7 @@ window.renderBoardsPreview = function renderBoardsPreview() {
     }
   }
 
-  var life = document.getElementById('mc-boards-lifestyle');
+  var life = document.getElementById('mc-boards-lifestyle-grid') || document.getElementById('mc-boards-lifestyle');
   if (life && !life.children.length && C.lifestyleLooks) {
     for (var l = 0; l < C.lifestyleLooks.length; l++) {
       var look = C.lifestyleLooks[l];
@@ -654,7 +779,7 @@ window.renderBoardsPreview = function renderBoardsPreview() {
     if (window.__MC_BOARDS_APP_STARTED) return;
     if (document.querySelector('script[src*="my-boards-page.js"]')) return;
     var s = document.createElement('script');
-    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260538';
+    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260539';
     s.defer = true;
     document.body.appendChild(s);
   }
