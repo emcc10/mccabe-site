@@ -32,7 +32,7 @@ ALIASES = (
 )
 
 MUST_MATCH = (
-    ("vspfiles/my-boards.html", None, b"20260537"),
+    ("vspfiles/my-boards.html", None, b"20260538"),
     ("vspfiles/boards/my-boards-page.js", "/v/vspfiles/boards/my-boards-page.js", b"__MC_BOARDS_PAGE_SCRIPT_LOADED"),
     ("vspfiles/boards/board-styles.js", None, b"renderBoardsPreview"),
     ("vspfiles/boards/my-boards-bundle.css", None, b"mc-boards__feature"),

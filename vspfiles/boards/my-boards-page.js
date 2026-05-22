@@ -84,6 +84,16 @@
     return '';
   }
 
+  function productShopHref(product) {
+    if (!product) return (config.shopBase || '/') + '/';
+    var base = config.shopBase || 'https://www.mccabestheaterandliving.com';
+    if (product.shopUrl) return base + product.shopUrl;
+    if (product.sku) {
+      return base + '/SearchResults.asp?Search=' + encodeURIComponent(product.sku);
+    }
+    return base + '/';
+  }
+
   function resolveStyleImage(style) {
     if (!style) return '';
     if (style.catalogPhoto) return style.catalogPhoto;
@@ -236,6 +246,24 @@
     return wrap;
   }
 
+  function shuffleFeatured() {
+    var pool = (config.products || []).slice();
+    if (pool.length < 3) return;
+    for (var i = pool.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = pool[i];
+      pool[i] = pool[j];
+      pool[j] = tmp;
+    }
+    config.featuredTriptych = pool.slice(0, 3).map(function (p) {
+      return p.id;
+    });
+    renderTriptych();
+    if (triptychEl) {
+      triptychEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
   function renderTriptych() {
     if (!triptychEl) return;
     triptychEl.innerHTML = '';
@@ -261,6 +289,12 @@
         lab.className = 'mc-boards__triptych-label';
         lab.textContent = product.name;
         btn.appendChild(lab);
+        if (product.type) {
+          var meta = document.createElement('p');
+          meta.className = 'mc-boards__triptych-meta';
+          meta.textContent = product.type;
+          btn.appendChild(meta);
+        }
         if (style) {
           var sub = document.createElement('p');
           sub.className = 'mc-boards__triptych-style';
@@ -270,6 +304,14 @@
         btn.addEventListener('click', function () {
           if (style) activateStyleFilter(style.id, false);
         });
+        var shop = productShopHref(product);
+        if (shop) {
+          btn.setAttribute('data-shop-url', shop);
+          btn.addEventListener('dblclick', function (ev) {
+            ev.preventDefault();
+            window.open(shop, '_blank', 'noopener');
+          });
+        }
         triptychEl.appendChild(btn);
       })(ids[i]);
     }
@@ -305,6 +347,15 @@
       });
       copy.appendChild(cta);
     }
+    if (product) {
+      var shop = document.createElement('a');
+      shop.className = 'mc-boards__btn mc-boards__btn--outline';
+      shop.href = productShopHref(product);
+      shop.target = '_blank';
+      shop.rel = 'noopener noreferrer';
+      shop.textContent = 'Shop ' + product.name;
+      copy.appendChild(shop);
+    }
     var media = document.createElement('div');
     media.className = 'mc-boards__split-media';
     if (product) {
@@ -326,6 +377,12 @@
     for (var i = 0; i < products.length; i++) {
       (function (product) {
         var style = getStyleById(product.primaryStyle);
+        var link = document.createElement('a');
+        link.className = 'mc-boards__catalog-link';
+        link.href = productShopHref(product);
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+
         var card = document.createElement('article');
         card.className = 'mc-boards__catalog-card';
         var wrap = document.createElement('div');
@@ -346,7 +403,8 @@
         type.textContent =
           (style ? style.label + ' · ' : '') + (product.type || '');
         card.appendChild(type);
-        catalogEl.appendChild(card);
+        link.appendChild(card);
+        catalogEl.appendChild(link);
       })(products[i]);
     }
   }
@@ -456,6 +514,16 @@
         var card = document.createElement('article');
         card.className = 'mc-boards__trend-card';
         var style = getStyleById(tr.styleId);
+        if (style) {
+          var visual = document.createElement('div');
+          visual.className = 'mc-boards__trend-visual';
+          var tim = document.createElement('img');
+          tim.src = resolveStyleImage(style);
+          tim.alt = style.label;
+          tim.loading = 'lazy';
+          visual.appendChild(tim);
+          card.appendChild(visual);
+        }
         var tag = document.createElement('p');
         tag.className = 'mc-boards__trend-style';
         tag.textContent = style ? style.label : tr.styleId;
@@ -669,7 +737,11 @@
 
         var prod = document.createElement('img');
         prod.className = 'mc-boards__lifestyle-product';
-        prod.src = product ? resolveProductImage(product) : assetUrl(look.image);
+        prod.src = look.image
+          ? assetUrl(look.image)
+          : product
+            ? resolveProductImage(product)
+            : '';
         prod.alt = product ? product.name : look.title;
         prod.loading = 'lazy';
         bindImgFallback(
@@ -1285,6 +1357,11 @@
     setSignedInUi(domSignedInHint());
     setAccountBanner(domSignedInHint());
     renderStyleLibrary();
+    var shuffleBtn = document.getElementById('mc-boards-shuffle');
+    if (shuffleBtn && !shuffleBtn.__mcBound) {
+      shuffleBtn.__mcBound = true;
+      shuffleBtn.addEventListener('click', shuffleFeatured);
+    }
     load();
   }
 
@@ -1294,7 +1371,7 @@
       done();
       return;
     }
-    var src = API_BASE + 'board-styles.js?v=20260537';
+    var src = API_BASE + 'board-styles.js?v=20260538';
     var tag = document.querySelector('script[src*="board-styles.js"]');
     if (tag) {
       refreshConfig();

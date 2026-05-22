@@ -2,19 +2,23 @@
  * Style library + curated McCabe product looks for inspiration boards.
  * Product PNGs: /v/vspfiles/boards/showcase/
  */
-window.MC_BOARD_STYLES_BUILD = '20260537';
+window.MC_BOARD_STYLES_BUILD = '20260538';
 window.MC_BOARD_STYLES = {
   assetBases: ['/v/vspfiles/boards/', '/vspfiles/boards/'],
+  shopBase: 'https://www.mccabestheaterandliving.com',
 
-  /** Live Volusion product photos (use these first - showcase PNGs may not be deployed). */
+  /** Live Volusion photos — one unique image per SKU (no shared placeholders). */
   catalogPhotos: {
     '77696': '/v/vspfiles/photos/77696-1.jpg',
     '77180': '/v/vspfiles/photos/77180-01-1.jpg',
-    '40109': '/v/vspfiles/photos/40109-01-1.jpg',
-    '40113': '/v/vspfiles/photos/40113-01-1.jpg',
     '77176': '/v/vspfiles/photos/77176-A1-1.jpg',
-    '41067': '/v/vspfiles/photos/40109-01-1.jpg',
-    '41500': '/v/vspfiles/photos/40113-01-1.jpg'
+    '40109': '/v/vspfiles/photos/40109-01-1.jpg',
+    '40112': '/v/vspfiles/photos/40112-01-1.jpg',
+    '40113': '/v/vspfiles/photos/40113-01-1.jpg',
+    '41067': '/v/vspfiles/photos/Washington%2041067-1.jpg',
+    '41500': '/v/vspfiles/photos/Keiran-SC-67-10-9X-10-66-1.jpg',
+    'Brookes': '/v/vspfiles/photos/Brookes-SC-92-15-1.jpg',
+    'Essex': '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg'
   },
 
   decorTrends: [
@@ -78,8 +82,8 @@ window.MC_BOARD_STYLES = {
         choices: [
           { t: 'Plush recliner', s: { traditional: 2, transitional: 2 } },
           { t: 'Track-arm low profile', s: { modern: 3 } },
-          { t: 'Walnut accent chair', s: { 'mid-century': 3 } },
-          { t: 'Bold navy media sofa', s: { contemporary: 3 } }
+          { t: 'Brookes accent chair', s: { 'mid-century': 3 } },
+          { t: 'Reece power sofa', s: { contemporary: 3 } }
         ]
       },
       {
@@ -115,65 +119,77 @@ window.MC_BOARD_STYLES = {
   ],
 
   featuredTriptych: [
-    '77696-lux-cognac-chair',
-    '77180-pacific-sofa',
-    '40113-london-fog'
+    '77696-brookes-chair',
+    '77180-martina-sofa',
+    '40112-essex-sofa'
   ],
 
   splitFeature: {
-    productId: '40109-atlantic-navy',
+    productId: '40109-reece-sofa',
     styleId: 'contemporary',
-    title: 'Atlantic Navy power seating',
+    title: 'Reece power seating',
     text:
-      'Deep navy performance fabric, power recline, and scale made for media rooms. Pair with low lighting and tailored side tables for a finished theater look.'
+      'Performance upholstery and power comfort scaled for media rooms. Layer low lighting, a slim console, and tailored accents for a finished theater lounge.'
   },
 
   styles: [
     {
       id: 'traditional',
       label: 'Traditional',
-      tagline: 'Rich leather, generous comfort',
+      tagline: 'Tailored leather, generous scale',
       catalogSku: '41067',
+      catalogPhoto: '/v/vspfiles/photos/Washington%2041067-1.jpg',
+      heroProductId: '41067-washington-recliner',
       moodImage: '/v/vspfiles/boards/showcase/traditional-carob-recliner-front.png',
       palette: ['#f4f4f4', '#c4a574', '#6b3f2a', '#3d2a22', '#8b5e3c']
     },
     {
       id: 'transitional',
       label: 'Transitional',
-      tagline: 'Neutral leathers, balanced lines',
+      tagline: 'Soft neutrals, balanced profiles',
       catalogSku: '40113',
+      catalogPhoto: '/v/vspfiles/photos/40113-01-1.jpg',
+      heroProductId: '40113-oxford-sofa',
       moodImage: '/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png',
       palette: ['#f0f0f0', '#c8bfb2', '#9a8f82', '#5c534c', '#888888']
     },
     {
       id: 'modern',
       label: 'Modern',
-      tagline: 'Track arms, edited silhouettes',
+      tagline: 'Track arms, edited lines',
       catalogSku: '77180',
+      catalogPhoto: '/v/vspfiles/photos/77180-01-1.jpg',
+      heroProductId: '77180-martina-sofa',
       moodImage: '/v/vspfiles/boards/showcase/modern-pacific-charcoal-sofa-angle.png',
       palette: ['#ececea', '#a8a8a4', '#5a5a56', '#2a2a28', '#7a8790']
     },
     {
       id: 'coastal',
       label: 'Coastal',
-      tagline: 'Sun-washed neutrals',
-      catalogSku: '40113',
+      tagline: 'Light sectionals, easy rhythm',
+      catalogSku: '40112',
+      catalogPhoto: '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg',
+      heroProductId: '40112-essex-sofa',
       moodImage: '/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png',
       palette: ['#f5f5f5', '#d8d2c8', '#8fa9b5', '#5c7a86', '#c9b896']
     },
     {
       id: 'mid-century',
       label: 'Mid-Century',
-      tagline: 'Walnut frame, cognac leather',
+      tagline: 'Walnut frames, warm leather',
       catalogSku: '77696',
+      catalogPhoto: '/v/vspfiles/photos/77696-1.jpg',
+      heroProductId: '77696-brookes-chair',
       moodImage: '/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png',
       palette: ['#f0f0f0', '#c67b4e', '#6b4423', '#2f4f4f', '#d4a574']
     },
     {
       id: 'contemporary',
       label: 'Contemporary',
-      tagline: 'Bold color, power comfort',
+      tagline: 'Power comfort, bold upholstery',
       catalogSku: '40109',
+      catalogPhoto: '/v/vspfiles/photos/40109-01-1.jpg',
+      heroProductId: '40109-reece-sofa',
       moodImage: '/v/vspfiles/boards/showcase/contemporary-atlantic-navy-recliner-front.png',
       palette: ['#e8eaed', '#5c6b7a', '#1e3a5f', '#152238', '#888888']
     }
@@ -187,79 +203,95 @@ window.MC_BOARD_STYLES = {
     { id: 'accent', label: 'Accents', desc: 'Chairs, ottomans, decor' }
   ],
 
-  /** McCabe catalog pieces with style tags (primary first). */
+  /** McCabe catalog pieces — names/SKUs/photos verified against live search. */
   products: [
     {
-      id: '77696-lux-cognac-chair',
-      name: 'Lux Cognac Chair',
+      id: '77696-brookes-chair',
+      sku: '77696',
+      name: 'Brookes Stationary Chair',
       type: 'Accent chair',
       image: '/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png',
       catalogPhoto: '/v/vspfiles/photos/77696-1.jpg',
-      styles: ['mid-century', 'transitional', 'modern'],
+      shopUrl: '/product-p/brookes-sc-92-15.htm',
+      styles: ['mid-century', 'transitional'],
       primaryStyle: 'mid-century'
     },
     {
-      id: '77180-pacific-sofa',
-      name: 'Pacific Charcoal Sofa',
+      id: '77180-martina-sofa',
+      sku: '77180',
+      name: 'Martina Track Arm Sofa',
       type: 'Sofa',
       image: '/v/vspfiles/boards/showcase/modern-pacific-charcoal-sofa-angle.png',
       catalogPhoto: '/v/vspfiles/photos/77180-01-1.jpg',
-      styles: ['modern', 'contemporary', 'transitional'],
+      shopUrl: '/SearchResults.asp?Search=77180',
+      styles: ['modern', 'contemporary'],
       primaryStyle: 'modern'
     },
     {
-      id: '77180-pacific-loveseat',
-      name: 'Pacific Charcoal Loveseat',
+      id: '77176-windsor-loveseat',
+      sku: '77176',
+      name: 'Windsor Loveseat',
       type: 'Loveseat',
-      image: '/v/vspfiles/boards/showcase/modern-pacific-charcoal-loveseat-angle.png',
-      catalogPhoto: '/v/vspfiles/photos/77180-01-1.jpg',
-      styles: ['modern', 'contemporary', 'transitional'],
-      primaryStyle: 'modern'
-    },
-    {
-      id: '40109-atlantic-navy',
-      name: 'Atlantic Navy Power Sofa',
-      type: 'Power reclining sofa',
-      image: '/v/vspfiles/boards/showcase/contemporary-atlantic-navy-recliner-front.png',
-      catalogPhoto: '/v/vspfiles/photos/40109-01-1.jpg',
-      styles: ['contemporary', 'modern'],
-      primaryStyle: 'contemporary'
-    },
-    {
-      id: '41067-carob-recliner',
-      name: 'Carob Power Reclining Sofa',
-      type: 'Power reclining sofa',
-      image: '/v/vspfiles/boards/showcase/traditional-carob-recliner-front.png',
-      catalogPhoto: '/v/vspfiles/photos/40109-01-1.jpg',
-      styles: ['traditional', 'transitional'],
-      primaryStyle: 'traditional'
-    },
-    {
-      id: '41500-cognac-recliner',
-      name: 'Cognac Power Reclining Sofa',
-      type: 'Power reclining sofa',
-      image: '/v/vspfiles/boards/showcase/transitional-cognac-recliner-front.png',
-      catalogPhoto: '/v/vspfiles/photos/40113-01-1.jpg',
+      image: '/v/vspfiles/boards/showcase/transitional-coachella-madeira-sofa-front.png',
+      catalogPhoto: '/v/vspfiles/photos/77176-A1-1.jpg',
+      shopUrl: '/SearchResults.asp?Search=77176',
       styles: ['transitional', 'traditional'],
       primaryStyle: 'transitional'
     },
     {
-      id: '77176-coachella-madeira',
-      name: 'Coachella Madeira Sofa',
+      id: '40109-reece-sofa',
+      sku: '40109',
+      name: 'Reece Sofa',
+      type: 'Power reclining sofa',
+      image: '/v/vspfiles/boards/showcase/contemporary-atlantic-navy-recliner-front.png',
+      catalogPhoto: '/v/vspfiles/photos/40109-01-1.jpg',
+      shopUrl: '/SearchResults.asp?Search=40109',
+      styles: ['contemporary', 'modern'],
+      primaryStyle: 'contemporary'
+    },
+    {
+      id: '40112-essex-sofa',
+      sku: '40112',
+      name: 'Essex Sofa',
+      type: 'Sectional sofa',
+      image: '/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png',
+      catalogPhoto: '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg',
+      shopUrl: '/product-p/essex-sc-07-9w-08.htm',
+      styles: ['coastal', 'transitional'],
+      primaryStyle: 'coastal'
+    },
+    {
+      id: '40113-oxford-sofa',
+      sku: '40113',
+      name: 'Oxford Sofa',
       type: 'Sofa',
-      image: '/v/vspfiles/boards/showcase/transitional-coachella-madeira-sofa-front.png',
-      catalogPhoto: '/v/vspfiles/photos/77176-A1-1.jpg',
-      styles: ['transitional', 'modern', 'traditional'],
+      image: '/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png',
+      catalogPhoto: '/v/vspfiles/photos/40113-01-1.jpg',
+      shopUrl: '/product-p/40113-01.htm',
+      styles: ['transitional', 'coastal'],
       primaryStyle: 'transitional'
     },
     {
-      id: '40113-london-fog',
-      name: 'London Fog Power Sofa',
+      id: '41067-washington-recliner',
+      sku: '41067',
+      name: 'Palliser Washington Power Reclining Sofa',
       type: 'Power reclining sofa',
-      image: '/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png',
-      catalogPhoto: '/v/vspfiles/photos/40113-01-1.jpg',
-      styles: ['transitional', 'coastal', 'contemporary'],
-      primaryStyle: 'coastal'
+      image: '/v/vspfiles/boards/showcase/traditional-carob-recliner-front.png',
+      catalogPhoto: '/v/vspfiles/photos/Washington%2041067-1.jpg',
+      shopUrl: '/SearchResults.asp?Search=41067',
+      styles: ['traditional'],
+      primaryStyle: 'traditional'
+    },
+    {
+      id: '41500-keiran-recliner',
+      sku: '41500',
+      name: 'Palliser Keiran Power Reclining Sofa',
+      type: 'Power reclining sofa',
+      image: '/v/vspfiles/boards/showcase/transitional-cognac-recliner-front.png',
+      catalogPhoto: '/v/vspfiles/photos/Keiran-SC-67-10-9X-10-66-1.jpg',
+      shopUrl: '/product-p/keiran-sc-67-10-9x-10-66.htm',
+      styles: ['transitional', 'traditional'],
+      primaryStyle: 'transitional'
     }
   ],
 
@@ -268,83 +300,83 @@ window.MC_BOARD_STYLES = {
    */
   lifestyleLooks: [
     {
-      id: 'mcm-cognac-lounge',
+      id: 'mcm-brookes-lounge',
       styleId: 'mid-century',
-      title: 'Cognac & walnut lounge',
+      title: 'Brookes accent lounge',
       room: 'Living room',
       sceneClass: 'mc-scene--mcm',
-      productId: '77696-lux-cognac-chair',
+      productId: '77696-brookes-chair',
       image: '/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png',
       accents: ['#f0e6d8', '#c67b4e', '#2f4f4f', '#6b4423']
     },
     {
-      id: 'modern-pacific-loft',
+      id: 'modern-martina-loft',
       styleId: 'modern',
-      title: 'Pacific charcoal loft',
+      title: 'Martina track-arm loft',
       room: 'Great room',
       sceneClass: 'mc-scene--modern',
-      productId: '77180-pacific-sofa',
+      productId: '77180-martina-sofa',
       image: '/v/vspfiles/boards/showcase/modern-pacific-charcoal-sofa-angle.png',
       accents: ['#ececea', '#7a8790', '#2a2a28', '#a8a8a4']
     },
     {
-      id: 'contemporary-navy-media',
+      id: 'contemporary-reece-media',
       styleId: 'contemporary',
-      title: 'Atlantic navy media room',
+      title: 'Reece media lounge',
       room: 'Home theater',
       sceneClass: 'mc-scene--contemporary',
-      productId: '40109-atlantic-navy',
+      productId: '40109-reece-sofa',
       image: '/v/vspfiles/boards/showcase/contemporary-atlantic-navy-recliner-angle.png',
       accents: ['#e8eaed', '#1e3a5f', '#5c6b7a', '#b8956b']
     },
     {
-      id: 'traditional-carob-den',
+      id: 'traditional-washington-den',
       styleId: 'traditional',
-      title: 'Carob leather den',
+      title: 'Washington leather den',
       room: 'Family room',
       sceneClass: 'mc-scene--traditional',
-      productId: '41067-carob-recliner',
+      productId: '41067-washington-recliner',
       image: '/v/vspfiles/boards/showcase/traditional-carob-recliner-recline.png',
       accents: ['#f4efe6', '#8b5e3c', '#3d2a22', '#c4a574']
     },
     {
-      id: 'transitional-cognac-family',
+      id: 'transitional-keiran-family',
       styleId: 'transitional',
-      title: 'Warm cognac family room',
+      title: 'Keiran family room',
       room: 'Living room',
       sceneClass: 'mc-scene--transitional',
-      productId: '41500-cognac-recliner',
+      productId: '41500-keiran-recliner',
       image: '/v/vspfiles/boards/showcase/transitional-cognac-recliner-angle.png',
       accents: ['#f0ebe4', '#b8956b', '#5c534c', '#9a6b42']
     },
     {
-      id: 'coastal-london-fog',
+      id: 'coastal-essex-sunroom',
       styleId: 'coastal',
-      title: 'London fog coastal calm',
+      title: 'Essex coastal sectional',
       room: 'Sunroom',
       sceneClass: 'mc-scene--coastal',
-      productId: '40113-london-fog',
-      image: '/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png',
+      productId: '40112-essex-sofa',
+      image: '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg',
       accents: ['#f5f3ee', '#8fa9b5', '#d8d2c8', '#c9b896']
     },
     {
-      id: 'transitional-madeira-study',
+      id: 'transitional-oxford-study',
       styleId: 'transitional',
-      title: 'Madeira tailored sofa',
+      title: 'Oxford tailored sofa',
       room: 'Study',
       sceneClass: 'mc-scene--transitional-warm',
-      productId: '77176-coachella-madeira',
-      image: '/v/vspfiles/boards/showcase/transitional-coachella-madeira-sofa-angle.png',
+      productId: '40113-oxford-sofa',
+      image: '/v/vspfiles/photos/40113-01-1.jpg',
       accents: ['#efe9e0', '#6b3f2a', '#4a4540', '#c4a574']
     },
     {
-      id: 'modern-loveseat-nook',
-      styleId: 'modern',
-      title: 'Charcoal reading nook',
+      id: 'transitional-windsor-nook',
+      styleId: 'transitional',
+      title: 'Windsor reading nook',
       room: 'Accent seating',
       sceneClass: 'mc-scene--modern-soft',
-      productId: '77180-pacific-loveseat',
-      image: '/v/vspfiles/boards/showcase/modern-pacific-charcoal-loveseat-angle.png',
+      productId: '77176-windsor-loveseat',
+      image: '/v/vspfiles/photos/77176-A1-1.jpg',
       accents: ['#ececea', '#5a5a56', '#8a9a8c', '#2a2a28']
     }
   ],
@@ -365,11 +397,14 @@ window.MC_BOARD_STYLES = {
     den: 'traditional',
     dining: 'traditional',
     bedroom: 'coastal',
-    navy: 'contemporary',
-    cognac: 'mid-century',
-    charcoal: 'modern',
-    fog: 'coastal',
-    carob: 'traditional'
+    brookes: 'mid-century',
+    martina: 'modern',
+    essex: 'coastal',
+    oxford: 'transitional',
+    reece: 'contemporary',
+    keiran: 'transitional',
+    washington: 'traditional',
+    windsor: 'transitional'
   }
 };
 
@@ -400,6 +435,7 @@ window.renderBoardsPreview = function renderBoardsPreview() {
 
   function styleImg(style) {
     if (!style) return '';
+    if (style.catalogPhoto) return style.catalogPhoto;
     if (style.moodImage) return style.moodImage;
     if (style.catalogSku && C.catalogPhotos && C.catalogPhotos[style.catalogSku]) {
       return C.catalogPhotos[style.catalogSku];
@@ -431,6 +467,12 @@ window.renderBoardsPreview = function renderBoardsPreview() {
       tlab.className = 'mc-boards__triptych-label';
       tlab.textContent = tp.name;
       tbtn.appendChild(tlab);
+      if (tp.type) {
+        var ttype = document.createElement('p');
+        ttype.className = 'mc-boards__triptych-meta';
+        ttype.textContent = tp.type;
+        tbtn.appendChild(ttype);
+      }
       var tst = styleById(tp.primaryStyle);
       if (tst) {
         var tsub = document.createElement('p');
@@ -503,12 +545,13 @@ window.renderBoardsPreview = function renderBoardsPreview() {
       var art = document.createElement('article');
       art.className = 'mc-boards__lifestyle-card';
       art.setAttribute('role', 'listitem');
-      if (prodL) {
+      var limSrc = look.image || (prodL ? imgSrc(prodL) : '');
+      if (limSrc) {
         var lw = document.createElement('div');
         lw.className = 'mc-boards__lifestyle-img';
         var lim = document.createElement('img');
-        lim.src = imgSrc(prodL);
-        lim.alt = look.title || prodL.name;
+        lim.src = limSrc;
+        lim.alt = look.title || (prodL ? prodL.name : '');
         lim.loading = 'lazy';
         lw.appendChild(lim);
         art.appendChild(lw);
@@ -525,8 +568,19 @@ window.renderBoardsPreview = function renderBoardsPreview() {
   if (trends && !trends.children.length && C.decorTrends) {
     for (var d = 0; d < C.decorTrends.length; d++) {
       var tr = C.decorTrends[d];
+      var tstyle = styleById(tr.styleId);
       var tcard = document.createElement('article');
       tcard.className = 'mc-boards__trend-card';
+      if (tstyle && styleImg(tstyle)) {
+        var tv = document.createElement('div');
+        tv.className = 'mc-boards__trend-visual';
+        var ti = document.createElement('img');
+        ti.src = styleImg(tstyle);
+        ti.alt = '';
+        ti.loading = 'lazy';
+        tv.appendChild(ti);
+        tcard.appendChild(tv);
+      }
       var th = document.createElement('h3');
       th.className = 'mc-boards__trend-title';
       th.textContent = tr.title;
@@ -600,7 +654,7 @@ window.renderBoardsPreview = function renderBoardsPreview() {
     if (window.__MC_BOARDS_APP_STARTED) return;
     if (document.querySelector('script[src*="my-boards-page.js"]')) return;
     var s = document.createElement('script');
-    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260537';
+    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260538';
     s.defer = true;
     document.body.appendChild(s);
   }

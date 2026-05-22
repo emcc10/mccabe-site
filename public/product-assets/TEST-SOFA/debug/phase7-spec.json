@@ -1,0 +1,64 @@
+{
+  "phase": 7,
+  "purpose": "Material model reset — replaces Stage 5/6 realism stack (not stacked on 6C-B)",
+  "input": "Stage 4B-v3 color + Phase 6A bottom seam fix",
+  "method": "structure map + selective seam/crease + micro material + soft highlight",
+  "functionsChanged": [
+    "src/phase7/materialModel.ts — buildMaterialMaps, applyMaterialModel",
+    "src/phase7/run.ts — runPhase7"
+  ],
+  "mapBuild": {
+    "structure": "blur(22px) − blur(48px) on source L, zero-mean",
+    "seam": "crease/gradient confidence inside eroded upholstery, thresholded",
+    "micro": "residual after structure/seam separation, zero-mean"
+  },
+  "base6aUpholsteryMeanLab": {
+    "meanL": 71.86234735369274,
+    "meanA": 3.1375015601290146,
+    "meanB": 6.165209451425794,
+    "count": 152231
+  },
+  "variants": [
+    {
+      "id": "A",
+      "label": "7A MORE SEAM",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7-variant-A.png",
+      "params": {
+        "structureStrength": 0.24,
+        "seamStrength": 0.34,
+        "microStrength": 0.07,
+        "highlightStrength": 0.035
+      },
+      "meanL": 71.85819576827322,
+      "deltaLFrom6a": -0.004151585419521098
+    },
+    {
+      "id": "B",
+      "label": "7B MORE MICRO",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7-variant-B.png",
+      "params": {
+        "structureStrength": 0.24,
+        "seamStrength": 0.22,
+        "microStrength": 0.13,
+        "highlightStrength": 0.035
+      },
+      "meanL": 71.88815024535081,
+      "deltaLFrom6a": 0.025802891658074145
+    }
+  ],
+  "outputs": {
+    "grid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7-grid.png",
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7-variant-B.png"
+    ],
+    "structureMap": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7-structure-map.png",
+    "seamMap": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7-seam-map.png",
+    "microMaterialMap": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7-micro-material-map.png",
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7-spec.json"
+  },
+  "notes": [
+    "No random noise, global sharpen, color remap, mask/alpha/edge/bottom changes.",
+    "Does not use Phase 5/6/6C realism passes."
+  ]
+}
