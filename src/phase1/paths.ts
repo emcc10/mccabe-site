@@ -8,6 +8,12 @@ export const PRODUCT_CODE = 'TEST-SOFA';
 export const PRODUCT_DIR = join(REPO_ROOT, 'public', 'product-assets', PRODUCT_CODE);
 export const DEBUG_DIR = join(PRODUCT_DIR, 'debug');
 
+/** Frozen preview render + params (7C-B). Not final catalog photo quality. */
+export const PREVIEW_LOCKED_DIR = join(PRODUCT_DIR, 'preview-locked');
+export const PREVIEW_LOCKED_IMAGE = join(PREVIEW_LOCKED_DIR, 'bali-silk-preview.png');
+export const PREVIEW_LOCKED_PARAMS = join(PREVIEW_LOCKED_DIR, 'params.json');
+export const PREVIEW_LOCKED_STATUS = join(PREVIEW_LOCKED_DIR, 'STATUS.md');
+
 export const LEGACY_SOURCE = join(REPO_ROOT, 'sofa-recolor-tool', 'input', 'sofa.png');
 export const LEGACY_UPHOLSTERY_MASK = join(REPO_ROOT, 'sofa-recolor-tool', 'input', 'mask.png');
 /** Hand-edited leg mask (white = legs). Your approved leg-mask-preview. */

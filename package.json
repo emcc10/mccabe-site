@@ -25,7 +25,8 @@
     "render:phase7": "tsx scripts/renderPhase7.ts",
     "render:phase7-b": "tsx scripts/renderPhase7SingleB.ts",
     "render:phase7c": "tsx scripts/renderPhase7c.ts",
-    "render:phase7c-b": "tsx scripts/renderPhase7cSingleB.ts"
+    "render:phase7c-b": "tsx scripts/renderPhase7cSingleB.ts",
+    "export:preview-locked": "tsx scripts/exportPreviewLocked.ts"
   },
   "dependencies": {
     "color-convert": "^2.0.1",

@@ -20,11 +20,17 @@ export const PHASE7C_VARIANTS: Phase7cVariant[] = [
   },
 ];
 
-/** Locked Phase 7C-B — current best candidate (not final Bali Silk). */
+/** Frozen Phase 7C-B — best TEST-SOFA preview render; realism iteration stopped. */
 export const LOCKED_7C_B = {
   stage: '7C-B',
   lockedFrom: 'Phase 7C variant B (upper micro + structure on locked 7B)',
+  frozenAsPreview: true,
   notFinalBaliSilk: true,
+  pipelineStatus: {
+    previewQuality: true,
+    finalPhotoQuality: false,
+  },
+  iterationFrozen: true,
   base7bUnchanged: true,
   regionalBoost: { extraMicro: 0.06, extraStructure: 0.07 },
   upperRegionOnly: true,
@@ -35,6 +41,7 @@ export const LOCKED_7C_B = {
     'Phase 7B material model',
     'Phase 7C-B upper-region boost',
   ],
+  previewLockedBundle: 'public/product-assets/TEST-SOFA/preview-locked/',
 } as const;
 
 export const LOCKED_7C_B_BOOST = LOCKED_7C_B.regionalBoost;
