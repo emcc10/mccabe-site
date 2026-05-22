@@ -1,0 +1,94 @@
+{
+  "phase": 8,
+  "purpose": "Frequency-separated material recovery — replaces Phase 7 realism method",
+  "notFinalBaliSilk": true,
+  "input": "Stage 4B-v3 color + Phase 6A bottom seam fix (no Phase 7/7C stack)",
+  "method": {
+    "source": "original cognac source LAB L only",
+    "low": "boxBlur(22px) zero-mean — broad form",
+    "mid": "boxBlur(5px) − boxBlur(22px) zero-mean — leather body",
+    "high": "sourceL − boxBlur(5px) zero-mean — fine residual",
+    "highGate": "crease/gradient confidence; not applied on flat cushion fields",
+    "bottomGuard": "dilated lower-12% band reduces mid/high strength (preserve 6A seam)"
+  },
+  "lockedUnchanged": [
+    "Stage 4B-v3 color mapping",
+    "Phase 6A bottom seam fix",
+    "masks, alpha, leg restore, edge cleanup"
+  ],
+  "replaced": "Phase 7 / 7C material model (hit realism ceiling)",
+  "variants": [
+    {
+      "id": "A",
+      "label": "8A STRONGER MID",
+      "intent": "Stronger mid-frequency leather body; restrained gated high-frequency seams",
+      "params": {
+        "lowStrength": 0.07,
+        "midStrength": 0.24,
+        "highStrength": 0.1,
+        "highConfidencePercentile": 0.68
+      }
+    },
+    {
+      "id": "B",
+      "label": "8B SELECTIVE HIGH",
+      "intent": "Slightly less mid body; more selective high-frequency seam/crease recovery",
+      "params": {
+        "lowStrength": 0.07,
+        "midStrength": 0.17,
+        "highStrength": 0.15,
+        "highConfidencePercentile": 0.58
+      }
+    }
+  ],
+  "results": [
+    {
+      "id": "A",
+      "label": "8A STRONGER MID",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase8-variant-A.png",
+      "params": {
+        "lowStrength": 0.07,
+        "midStrength": 0.24,
+        "highStrength": 0.1,
+        "highConfidencePercentile": 0.68
+      },
+      "meanL": 71.85349238985489,
+      "deltaLFrom6a": -0.008854963837848118
+    },
+    {
+      "id": "B",
+      "label": "8B SELECTIVE HIGH",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase8-variant-B.png",
+      "params": {
+        "lowStrength": 0.07,
+        "midStrength": 0.17,
+        "highStrength": 0.15,
+        "highConfidencePercentile": 0.58
+      },
+      "meanL": 71.88901734863464,
+      "deltaLFrom6a": 0.026669994941897812
+    }
+  ],
+  "base6aUpholsteryMeanLab": {
+    "meanL": 71.86234735369274,
+    "meanA": 3.1375015601290146,
+    "meanB": 6.165209451425794,
+    "count": 152231
+  },
+  "outputs": {
+    "grid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase8-grid.png",
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase8-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase8-variant-B.png"
+    ],
+    "lowLayer": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase8-low-layer.png",
+    "midLayer": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase8-mid-layer.png",
+    "highLayer": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase8-high-layer.png",
+    "highConfidenceMask": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase8-high-confidence-mask.png",
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase8-spec.json"
+  },
+  "restrictions": [
+    "No color remap, mask/alpha/edge changes, random noise, global sharpen",
+    "No whole-sofa darken; high layer gated to seams/creases/edges"
+  ]
+}
