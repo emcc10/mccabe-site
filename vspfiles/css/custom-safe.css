@@ -1,4 +1,4 @@
-/* 0527a C_CSS_DEPLOY_VERIFY_20260527a — hide native sale dupes only when McCabe retail row exists */
+/* 0528b C_CSS_DEPLOY_VERIFY_20260528b — PDP stack visible; hide legacy prices only without retail row */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -5619,11 +5619,15 @@ body.mc-product-page #content_area h1 {
 }
 
 
-/* Hide price above "Price with selected options" – only show the price under it */
-body.mc-product-page #content_area .colors_price,
-body.mc-product-page #content_area .product_list_price,
-body.mc-product-page #content_area .product_productprice,
-body.mc-product-page #v65-product-parent .product_productprice {
+/* Hide legacy native prices only until McCabe retail row exists (do not hide .mc-pdp-retail-row amounts) */
+body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .colors_price,
+body.productdetails:not(:has(.mc-pdp-retail-row)) #content_area .colors_price,
+body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .product_list_price,
+body.productdetails:not(:has(.mc-pdp-retail-row)) #content_area .product_list_price,
+body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .product_productprice,
+body.productdetails:not(:has(.mc-pdp-retail-row)) #content_area .product_productprice,
+body.mc-product-page:not(:has(.mc-pdp-retail-row)) #v65-product-parent .product_productprice,
+body.productdetails:not(:has(.mc-pdp-retail-row)) #v65-product-parent .product_productprice {
   display: none !important;
 }
 /* Price under "Price with selected options" – larger font (not when McCabe retail/member stack is active) */
@@ -6120,15 +6124,15 @@ body.productdetails #v65-product-parent #options_table {
   }
 }
 
-/* Reinforce: hide duplicate price above "Price with selected options" (all viewports) */
-body.mc-product-page #content_area .product_productprice,
-body.mc-product-page #v65-product-parent .product_productprice,
-body.productdetails #content_area .product_productprice,
-body.productdetails #v65-product-parent .product_productprice,
-body.mc-product-page #content_area .product_list_price,
-body.mc-product-page #v65-product-parent .product_list_price,
-body.productdetails #content_area .product_list_price,
-body.productdetails #v65-product-parent .product_list_price {
+/* Reinforce: hide legacy native prices only until McCabe retail row exists */
+body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .product_productprice,
+body.productdetails:not(:has(.mc-pdp-retail-row)) #content_area .product_productprice,
+body.mc-product-page:not(:has(.mc-pdp-retail-row)) #v65-product-parent .product_productprice,
+body.productdetails:not(:has(.mc-pdp-retail-row)) #v65-product-parent .product_productprice,
+body.mc-product-page:not(:has(.mc-pdp-retail-row)) #content_area .product_list_price,
+body.productdetails:not(:has(.mc-pdp-retail-row)) #content_area .product_list_price,
+body.mc-product-page:not(:has(.mc-pdp-retail-row)) #v65-product-parent .product_list_price,
+body.productdetails:not(:has(.mc-pdp-retail-row)) #v65-product-parent .product_list_price {
   display: none !important;
 }
 
@@ -10254,7 +10258,7 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row {
   align-items: flex-start !important;
   gap: 2px !important;
   width: 100% !important;
-  margin: 60px 0 8px 0 !important;
+  margin: 0 0 8px 0 !important;
   text-align: left !important;
   font-family: Inter, system-ui, -apple-system, sans-serif !important;
   font-size: inherit !important;
@@ -14617,4 +14621,54 @@ html body.mc-product-page:has(#v65-product-parent .mc-pdp-member-line) #v65-prod
   align-items: flex-start !important;
   gap: 6px !important;
   width: 100% !important;
+}
+/* MC_PDP_STACK_VISIBLE_20260528b — regression fix: McCabe stack must stay visible on PDP */
+html body.productdetails .mc-pdp-retail-row,
+html body.mc-product-page .mc-pdp-retail-row,
+html body.productdetails #v65-product-parent .mc-pdp-retail-row,
+html body.mc-product-page #v65-product-parent .mc-pdp-retail-row,
+html body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row,
+html body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td .mc-pdp-retail-row,
+html body.productdetails .mc-pdp-member-pricing,
+html body.mc-product-page .mc-pdp-member-pricing,
+html body.productdetails #v65-product-parent .mc-pdp-member-pricing,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-pricing {
+  display: flex !important;
+  flex-direction: column !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+}
+html body.productdetails .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.mc-product-page .mc-pdp-retail-row .mc-pdp-retail-label,
+html body.productdetails .mc-pdp-retail-row .mc-pdp-retail-line,
+html body.mc-product-page .mc-pdp-retail-row .mc-pdp-retail-line,
+html body.productdetails .mc-pdp-retail-row .product_list_price,
+html body.mc-product-page .mc-pdp-retail-row .product_list_price,
+html body.productdetails .mc-pdp-retail-row font.product_list_price,
+html body.mc-product-page .mc-pdp-retail-row font.product_list_price,
+html body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line,
+html body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line,
+html body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line__label,
+html body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,
+html body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line__amount,
+html body.productdetails #v65-product-parent .mc-pdp-member-line,
+html body.mc-product-page #v65-product-parent .mc-pdp-member-line {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  color: #444 !important;
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+}
+html body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line--sale,
+html body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line--sale {
+  display: flex !important;
 }
