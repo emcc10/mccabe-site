@@ -966,15 +966,38 @@
 
   window.SECTIONAL_CONFIGS = window.MTL_SECTIONAL_CONFIGS;
 
-  console.log("sectional-configs", "registry-merge-v2", window.MTL_SECTIONAL_CONFIGS);
+  console.log("sectional-configs", "registry-merge-v3-pdp-auth-inline", window.MTL_SECTIONAL_CONFIGS);
 
-  /* MC_SECTIONAL_PDP_AUTH_BOOT_20260527 — baked sectionals: bypass stale auth script cache */
+  /* MC_SECTIONAL_PDP_AUTH_INLINE_20260528 — no external boot.js (404-safe); load auth fix with cache bust */
   (function (g, d) {
-    if (d.getElementById("mc-pdp-auth-cta-boot-loader")) return;
-    var s = d.createElement("script");
-    s.id = "mc-pdp-auth-cta-boot-loader";
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-boot.js?v=20260527&mcrd=" + Date.now();
-    s.async = false;
-    (d.head || d.documentElement).appendChild(s);
+    var WANT = "20260523boot";
+    function ensure() {
+      try {
+        var onPdp =
+          (d.body && d.body.classList.contains("productdetails")) ||
+          !!d.getElementById("v65-product-parent");
+        if (!onPdp) return;
+        if (String(g.__MC_PDP_AUTH_CTA_FIX_VER__ || "") === WANT) return;
+        d.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
+          try {
+            old.remove();
+          } catch (eRm) {}
+        });
+        delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
+        var s = d.createElement("script");
+        s.id = "mc-pdp-auth-cta-inline-loader";
+        s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=" + WANT + "&mcrd=" + Date.now();
+        s.async = false;
+        (d.head || d.documentElement).appendChild(s);
+      } catch (eLoad) {}
+    }
+    ensure();
+    if (d.readyState === "loading") {
+      d.addEventListener("DOMContentLoaded", ensure);
+    }
+    g.addEventListener("load", ensure);
+    [0, 200, 600, 1500, 4000].forEach(function (ms) {
+      g.setTimeout(ensure, ms);
+    });
   })(window, document);
 })();
