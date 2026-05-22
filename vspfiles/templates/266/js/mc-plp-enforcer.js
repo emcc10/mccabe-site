@@ -514,6 +514,8 @@
 
   global.mcPlpEnforcerRun = run;
 
+  var PDP_AUTH_WANT = "20260523boot";
+
   function loadPdpAuthCtaFix() {
     try {
       var b = global.document.body;
@@ -521,10 +523,21 @@
         (b && b.classList.contains("productdetails")) ||
         !!global.document.getElementById("v65-product-parent");
       if (!onPdp) return;
-      if (global.__MC_PDP_AUTH_CTA_FIX_VER__) return;
-      if (global.document.querySelector('script[src*="mc-pdp-auth-cta-fix"]')) return;
+      if (String(global.__MC_PDP_AUTH_CTA_FIX_VER__ || "") === PDP_AUTH_WANT) return;
+      global.document
+        .querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]')
+        .forEach(function (old) {
+          try {
+            old.remove();
+          } catch (eRm) {}
+        });
+      delete global.__MC_PDP_AUTH_CTA_FIX_VER__;
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260624&mcrd=" + Date.now();
+      s.src =
+        "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=" +
+        PDP_AUTH_WANT +
+        "&mcrd=" +
+        Date.now();
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eLoad) {}
@@ -535,4 +548,7 @@
     global.document.addEventListener("DOMContentLoaded", loadPdpAuthCtaFix);
   }
   global.addEventListener("load", loadPdpAuthCtaFix);
+  [0, 400, 1500].forEach(function (ms) {
+    global.setTimeout(loadPdpAuthCtaFix, ms);
+  });
 })(window);
