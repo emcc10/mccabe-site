@@ -1,0 +1,79 @@
+{
+  "productCode": "TEST-SOFA",
+  "swatch": "BALI-SILK",
+  "lockedVersion": "7C-B",
+  "frozenAt": "2026-05-22",
+  "pipelineStatus": {
+    "previewQuality": true,
+    "finalPhotoQuality": false
+  },
+  "iterationFrozen": true,
+  "notFinalCatalogPhoto": true,
+  "regenerateScript": "npm run export:preview-locked",
+  "renderScript": "npm run render:phase7c-b",
+  "pipeline": [
+    "Stage 4B-v3",
+    "Phase 6A bottom seam fix",
+    "Phase 7B material model",
+    "Phase 7C-B upper-region boost"
+  ],
+  "stage4bV3": {
+    "lLow": 72,
+    "lHigh": 92,
+    "mappedLBlend": 0.82,
+    "targetA": 0.3,
+    "targetB": 4.2,
+    "chromaSourceA": 0.12,
+    "chromaSourceB": 0.1,
+    "chromaTargetA": 0.88,
+    "chromaTargetB": 0.9,
+    "edgeFix": "v3 thin rings (edge band, foot corner ring, contour ring)"
+  },
+  "phase6a": {
+    "purpose": "Bottom-front compositing seam cleanup only",
+    "lowerBandFrac": 0.12
+  },
+  "phase7b": {
+    "structureStrength": 0.24,
+    "seamStrength": 0.22,
+    "microStrength": 0.13,
+    "highlightStrength": 0.035
+  },
+  "phase7cB": {
+    "upperRegionOnly": true,
+    "regionalBoost": {
+      "extraMicro": 0.06,
+      "extraStructure": 0.07
+    },
+    "noSeamIncrease": true,
+    "upperRegionZones": {
+      "back": {
+        "yMax": 0.46,
+        "xMin": 0.18,
+        "xMax": 0.82
+      },
+      "arms": {
+        "xOuterMax": 0.26,
+        "xInnerMin": 0.74,
+        "yMin": 0.18,
+        "yMax": 0.66
+      },
+      "seatFront": {
+        "yMin": 0.34,
+        "yMax": 0.58
+      },
+      "lower12DilatePx": 8,
+      "upholBottomExcludeFrac": 0.16,
+      "featherBlurPx": 14
+    }
+  },
+  "unchanged": [
+    "masks",
+    "alpha",
+    "leg restore",
+    "no edge changes",
+    "no color remap sweeps",
+    "no random noise",
+    "no global sharpen"
+  ]
+}
