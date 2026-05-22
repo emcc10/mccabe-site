@@ -29,3 +29,19 @@ export const PHASE7_VARIANTS: Phase7Variant[] = [
     },
   },
 ];
+
+/** Locked Phase 7-B — best material model candidate (not final Bali Silk). */
+export const LOCKED_7B_PARAMS: MaterialModelParams = {
+  structureStrength: 0.24,
+  seamStrength: 0.22,
+  microStrength: 0.13,
+  highlightStrength: 0.035,
+};
+
+export const LOCKED_7B = {
+  stage: '7B',
+  lockedFrom: 'Phase 7 variant B (more micro material)',
+  notFinalBaliSilk: true,
+  params: LOCKED_7B_PARAMS,
+  pipeline: ['Stage 4B-v3', 'Phase 6A bottom seam fix', 'Phase 7 material model'],
+} as const;

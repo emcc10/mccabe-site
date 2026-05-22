@@ -1,0 +1,43 @@
+{
+  "stage": "7B",
+  "lockedFrom": "Phase 7 variant B (more micro material)",
+  "notFinalBaliSilk": true,
+  "params": {
+    "structureStrength": 0.24,
+    "seamStrength": 0.22,
+    "microStrength": 0.13,
+    "highlightStrength": 0.035
+  },
+  "pipeline": [
+    "Stage 4B-v3",
+    "Phase 6A bottom seam fix",
+    "Phase 7 material model"
+  ],
+  "method": "Phase 6A + applyMaterialModel (locked 7B); upholstery mask only",
+  "materialParams": {
+    "structureStrength": 0.24,
+    "seamStrength": 0.22,
+    "microStrength": 0.13,
+    "highlightStrength": 0.035
+  },
+  "upholsteryMeanLab": {
+    "base6a": {
+      "meanL": 71.86234735369274,
+      "meanA": 3.1375015601290146,
+      "meanB": 6.165209451425794,
+      "count": 152231
+    },
+    "output": {
+      "meanL": 71.88815024535081,
+      "meanA": 3.1372847843080582,
+      "meanB": 6.165209451425794,
+      "count": 152231
+    }
+  },
+  "deltaMeanLFrom6a": 0.025802891658074145,
+  "postRgbPasses": [],
+  "outputs": {
+    "single": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7-single-B.png",
+    "comparison": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7-comparison-B.png"
+  }
+}

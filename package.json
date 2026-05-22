@@ -22,7 +22,8 @@
     "render:phase6b": "tsx scripts/renderPhase6b.ts",
     "render:phase6c": "tsx scripts/renderPhase6c.ts",
     "render:phase6c-b": "tsx scripts/renderPhase6cSingleB.ts",
-    "render:phase7": "tsx scripts/renderPhase7.ts"
+    "render:phase7": "tsx scripts/renderPhase7.ts",
+    "render:phase7-b": "tsx scripts/renderPhase7SingleB.ts"
   },
   "dependencies": {
     "color-convert": "^2.0.1",
