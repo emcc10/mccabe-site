@@ -2,7 +2,7 @@
  * Style library + curated McCabe product looks for inspiration boards.
  * Product PNGs: /v/vspfiles/boards/showcase/
  */
-window.MC_BOARD_STYLES_BUILD = '20260540';
+window.MC_BOARD_STYLES_BUILD = '20260541';
 window.MC_BOARD_STYLES = {
   assetBases: ['/v/vspfiles/boards/', '/vspfiles/boards/'],
   shopBase: 'https://www.mccabestheaterandliving.com',
@@ -65,52 +65,72 @@ window.MC_BOARD_STYLES = {
     }
   },
 
+  /** Sherwin-Williams & Benjamin Moore — matches showroom inspiration boards. */
+  paintLibrary: [
+    { id: 'sw-alabaster', brand: 'Sherwin-Williams', name: 'Alabaster', code: 'SW 7008', hex: '#EDE6DB', family: 'warm-neutral' },
+    { id: 'sw-agreeable-gray', brand: 'Sherwin-Williams', name: 'Agreeable Gray', code: 'SW 7029', hex: '#D1CBC1', family: 'greige' },
+    { id: 'sw-repose-gray', brand: 'Sherwin-Williams', name: 'Repose Gray', code: 'SW 7015', hex: '#C2C0BB', family: 'greige' },
+    { id: 'sw-natural-choice', brand: 'Sherwin-Williams', name: 'Natural Choice', code: 'SW 7011', hex: '#E8E2D8', family: 'warm-neutral' },
+    { id: 'sw-sea-salt', brand: 'Sherwin-Williams', name: 'Sea Salt', code: 'SW 6214', hex: '#CDD2CA', family: 'cool-neutral' },
+    { id: 'sw-rainwashed', brand: 'Sherwin-Williams', name: 'Rainwashed', code: 'SW 6210', hex: '#C3D7D3', family: 'cool-neutral' },
+    { id: 'sw-naval', brand: 'Sherwin-Williams', name: 'Naval', code: 'SW 6244', hex: '#2F3D4C', family: 'deep' },
+    { id: 'sw-urbane-bronze', brand: 'Sherwin-Williams', name: 'Urbane Bronze', code: 'SW 7048', hex: '#54504A', family: 'deep' },
+    { id: 'sw-copper-penny', brand: 'Sherwin-Williams', name: 'Copper Penny', code: 'SW 7708', hex: '#B87333', family: 'warm-accent' },
+    { id: 'sw-camelback', brand: 'Sherwin-Williams', name: 'Camelback', code: 'SW 7693', hex: '#C69B6D', family: 'warm-accent' },
+    { id: 'sw-tricorn-black', brand: 'Sherwin-Williams', name: 'Tricorn Black', code: 'SW 6258', hex: '#2F2F30', family: 'contrast' },
+    { id: 'bm-white-dove', brand: 'Benjamin Moore', name: 'White Dove', code: 'OC-17', hex: '#F3EDE4', family: 'warm-neutral' },
+    { id: 'bm-revere-pewter', brand: 'Benjamin Moore', name: 'Revere Pewter', code: 'HC-172', hex: '#B5A992', family: 'greige' },
+    { id: 'bm-edgecomb-gray', brand: 'Benjamin Moore', name: 'Edgecomb Gray', code: 'HC-173', hex: '#D1C7B8', family: 'greige' },
+    { id: 'bm-hale-navy', brand: 'Benjamin Moore', name: 'Hale Navy', code: 'HC-154', hex: '#434B54', family: 'deep' },
+    { id: 'bm-kendall-charcoal', brand: 'Benjamin Moore', name: 'Kendall Charcoal', code: 'HC-166', hex: '#696868', family: 'contrast' }
+  ],
+
   visualQuiz: {
     title: 'Discover your McCabe style',
     questions: [
       {
         q: 'Which room feels most like you?',
         choices: [
-          { label: 'Tailored family den', img: '/v/vspfiles/photos/Washington%2041067-1.jpg', scores: { traditional: 3, transitional: 1 }, vibe: 'cozy' },
-          { label: 'Open modern great room', img: '/v/vspfiles/photos/77180-01-1.jpg', scores: { modern: 3, contemporary: 1 }, vibe: 'modern' },
-          { label: 'Sunroom sectional', img: '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg', scores: { coastal: 3, transitional: 1 }, vibe: 'relaxed' },
-          { label: 'Media lounge', img: '/v/vspfiles/photos/40109-01-1.jpg', scores: { contemporary: 3 }, vibe: 'dramatic' }
+          { label: 'Tailored family den', roomMood: 'traditional', scores: { traditional: 3, transitional: 1 }, vibe: 'cozy' },
+          { label: 'Open modern great room', roomMood: 'modern', scores: { modern: 3, contemporary: 1 }, vibe: 'modern' },
+          { label: 'Sunroom sectional', roomMood: 'coastal', scores: { coastal: 3, transitional: 1 }, vibe: 'relaxed' },
+          { label: 'Media lounge', roomMood: 'contemporary', scores: { contemporary: 3 }, vibe: 'dramatic' }
         ]
       },
       {
         q: 'Which wood tone do you gravitate toward?',
         choices: [
-          { label: 'Walnut & cognac', img: '/v/vspfiles/photos/77696-1.jpg', scores: { 'mid-century': 2, traditional: 2 }, vibe: 'cozy' },
-          { label: 'Light oak', img: '/v/vspfiles/photos/40113-01-1.jpg', scores: { transitional: 2, coastal: 2 }, vibe: 'relaxed' },
-          { label: 'Charcoal casegoods', img: '/v/vspfiles/photos/77180-01-1.jpg', scores: { modern: 3 }, vibe: 'modern' },
-          { label: 'Painted millwork', img: '/v/vspfiles/photos/Keiran-SC-67-10-9X-10-66-1.jpg', scores: { transitional: 2, contemporary: 1 }, vibe: 'tailored' }
+          { label: 'Walnut & cognac', palette: ['#5c3d2e', '#8b5e3c', '#c4a574', '#f0e6d8'], scores: { 'mid-century': 2, traditional: 2 }, vibe: 'cozy' },
+          { label: 'Light oak', palette: ['#e8dfd0', '#d4c4a8', '#b8956b', '#8b7355'], scores: { transitional: 2, coastal: 2 }, vibe: 'relaxed' },
+          { label: 'Charcoal casegoods', palette: ['#3a3a38', '#5a5a56', '#8a8a86', '#c8c8c4'], scores: { modern: 3 }, vibe: 'modern' },
+          { label: 'Painted millwork', palette: ['#f4efe6', '#d8d2c8', '#9a8f82', '#6b5f55'], scores: { transitional: 2, contemporary: 1 }, vibe: 'tailored' }
         ]
       },
       {
         q: 'Which color palette do you love most?',
         choices: [
-          { label: 'Warm ivory & camel', img: '/v/vspfiles/photos/40113-01-1.jpg', scores: { transitional: 3, traditional: 1 }, vibe: 'cozy' },
-          { label: 'Greige & stone', img: '/v/vspfiles/photos/77176-A1-1.jpg', scores: { modern: 2, transitional: 2 }, vibe: 'modern' },
-          { label: 'Sand & sea glass', img: '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg', scores: { coastal: 3 }, vibe: 'relaxed' },
-          { label: 'Navy & brass', img: '/v/vspfiles/photos/40109-01-1.jpg', scores: { contemporary: 3, modern: 1 }, vibe: 'dramatic' }
+          { label: 'Warm ivory & camel', palette: ['#f4efe6', '#e8dfd0', '#c69b6d', '#9a6b42'], scores: { transitional: 3, traditional: 1 }, vibe: 'cozy' },
+          { label: 'Greige & stone', palette: ['#ececea', '#d1cbc1', '#a8a8a4', '#5a5a56'], scores: { modern: 2, transitional: 2 }, vibe: 'modern' },
+          { label: 'Sand & sea glass', palette: ['#f5f3ee', '#d8d2c8', '#8fa9b5', '#5c7a86'], scores: { coastal: 3 }, vibe: 'relaxed' },
+          { label: 'Navy & brass', palette: ['#e8eaed', '#2f3d4c', '#b8956b', '#1e3a5f'], scores: { contemporary: 3, modern: 1 }, vibe: 'dramatic' }
         ]
       },
       {
         q: 'Which furniture silhouette do you prefer?',
         choices: [
-          { label: 'Power reclining sofa', img: '/v/vspfiles/photos/Washington%2041067-1.jpg', scores: { traditional: 2, transitional: 2 }, vibe: 'cozy' },
-          { label: 'Track-arm sofa', img: '/v/vspfiles/photos/77180-01-1.jpg', scores: { modern: 3 }, vibe: 'modern' },
-          { label: 'Accent chair', img: '/v/vspfiles/photos/77696-1.jpg', scores: { 'mid-century': 3 }, vibe: 'tailored' },
-          { label: 'Sectional', img: '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg', scores: { coastal: 2, transitional: 2 }, vibe: 'relaxed' }
+          { label: 'Power reclining sofa', img: '/v/vspfiles/boards/showcase/traditional-carob-recliner-front.png', scores: { traditional: 2, transitional: 2 }, vibe: 'cozy' },
+          { label: 'Track-arm sofa', img: '/v/vspfiles/boards/showcase/modern-pacific-charcoal-sofa-angle.png', scores: { modern: 3 }, vibe: 'modern' },
+          { label: 'Accent chair', img: '/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png', scores: { 'mid-century': 3 }, vibe: 'tailored' },
+          { label: 'Sectional', img: '/v/vspfiles/boards/showcase/transitional-coachella-madeira-sofa-front.png', scores: { coastal: 2, transitional: 2 }, vibe: 'relaxed' }
         ]
       },
       {
         q: 'Which vibe do you want most?',
         choices: [
-          { label: 'Cozy', img: '/v/vspfiles/photos/Keiran-SC-67-10-9X-10-66-1.jpg', scores: { transitional: 2, traditional: 2 }, vibe: 'cozy' },
-          { label: 'Tailored', img: '/v/vspfiles/photos/40113-01-1.jpg', scores: { transitional: 2, traditional: 1 }, vibe: 'tailored' },
-          { label: 'Relaxed', img: '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg', scores: { coastal: 3 }, vibe: 'relaxed' },
-          { label: 'Dramatic', img: '/v/vspfiles/photos/40109-01-1.jpg', scores: { contemporary: 3 }, vibe: 'dramatic' }
+          { label: 'Cozy', roomMood: 'transitional', scores: { transitional: 2, traditional: 2 }, vibe: 'cozy' },
+          { label: 'Tailored', roomMood: 'traditional', scores: { transitional: 2, traditional: 1 }, vibe: 'tailored' },
+          { label: 'Relaxed', roomMood: 'coastal', scores: { coastal: 3 }, vibe: 'relaxed' },
+          { label: 'Dramatic', roomMood: 'contemporary', scores: { contemporary: 3 }, vibe: 'dramatic' }
         ]
       }
     ]
@@ -121,60 +141,85 @@ window.MC_BOARD_STYLES = {
       {
         id: 'warm-neutral',
         label: 'Warm neutral',
-        wall: '#f4efe6',
+        wallPaintId: 'sw-alabaster',
+        pairPaintId: 'sw-natural-choice',
+        accentPaintId: 'sw-camelback',
+        warmerAccentPaintId: 'sw-copper-penny',
+        coolerAccentPaintId: 'sw-repose-gray',
+        contrastAccentPaintId: 'sw-urbane-bronze',
         sofa: 'Camel performance leather',
         rug: 'Oatmeal wool',
         wood: 'Honey oak',
-        accent: '#9a6b42',
-        paintPair: '#e8dfd0',
+        woodHex: '#b8956b',
+        rugHex: '#e8dfd0',
         styleIds: ['transitional', 'traditional'],
         productIds: ['40113-oxford-sofa', '41500-keiran-recliner']
       },
       {
         id: 'soft-coastal',
         label: 'Soft coastal',
-        wall: '#f5f3ee',
+        wallPaintId: 'bm-white-dove',
+        pairPaintId: 'sw-sea-salt',
+        accentPaintId: 'sw-rainwashed',
+        warmerAccentPaintId: 'sw-camelback',
+        coolerAccentPaintId: 'sw-naval',
+        contrastAccentPaintId: 'sw-tricorn-black',
         sofa: 'Sand linen-look fabric',
         rug: 'Bleached jute',
         wood: 'Whitewashed oak',
-        accent: '#8fa9b5',
-        paintPair: '#d8d2c8',
+        woodHex: '#d8d2c8',
+        rugHex: '#f5f3ee',
         styleIds: ['coastal'],
         productIds: ['40112-essex-sofa', '40113-oxford-sofa']
       },
       {
         id: 'earthy-organic',
         label: 'Earthy organic',
-        wall: '#e8e4dc',
+        wallPaintId: 'bm-edgecomb-gray',
+        pairPaintId: 'bm-revere-pewter',
+        accentPaintId: 'sw-urbane-bronze',
+        warmerAccentPaintId: 'sw-copper-penny',
+        coolerAccentPaintId: 'sw-sea-salt',
+        contrastAccentPaintId: 'bm-kendall-charcoal',
         sofa: 'Mushroom greige leather',
         rug: 'Charcoal flatweave',
         wood: 'Walnut',
-        accent: '#6b4423',
-        paintPair: '#c8bfb2',
+        woodHex: '#6b4423',
+        rugHex: '#5a5a56',
         styleIds: ['modern', 'transitional'],
         productIds: ['77180-martina-sofa', '77696-brookes-chair']
       },
       {
         id: 'moody-dramatic',
         label: 'Moody dramatic',
-        wall: '#3d4450',
+        wallPaintId: 'bm-hale-navy',
+        pairPaintId: 'sw-naval',
+        accentPaintId: 'sw-camelback',
+        warmerAccentPaintId: 'sw-copper-penny',
+        coolerAccentPaintId: 'sw-rainwashed',
+        contrastAccentPaintId: 'sw-tricorn-black',
         sofa: 'Deep navy leather',
         rug: 'Graphite wool',
         wood: 'Espresso',
-        accent: '#b8956b',
-        paintPair: '#1e3a5f',
+        woodHex: '#3d2a22',
+        rugHex: '#4a4540',
         styleIds: ['contemporary', 'modern'],
         productIds: ['40109-reece-sofa', '77180-martina-sofa']
       },
       {
         id: 'classic-transitional',
         label: 'Classic transitional',
-        wall: '#f0ebe4',
+        wallPaintId: 'sw-agreeable-gray',
+        pairPaintId: 'sw-repose-gray',
+        accentPaintId: 'sw-urbane-bronze',
+        warmerAccentPaintId: 'sw-camelback',
+        coolerAccentPaintId: 'sw-sea-salt',
+        contrastAccentPaintId: 'bm-kendall-charcoal',
         sofa: 'Greige tailored upholstery',
         rug: 'Taupe sisal',
         wood: 'Medium walnut',
-        accent: '#5c534c',
-        paintPair: '#c8bfb2',
+        woodHex: '#8b5e3c',
+        rugHex: '#d1cbc1',
         styleIds: ['transitional'],
         productIds: ['77176-windsor-loveseat', '40113-oxford-sofa']
       }
@@ -233,7 +278,20 @@ window.MC_BOARD_STYLES = {
 
   styleQuiz: null,
 
-  colorWheel: [],
+  colorWheel: [
+    { paintId: 'sw-alabaster', styles: ['transitional', 'traditional'] },
+    { paintId: 'sw-agreeable-gray', styles: ['transitional', 'modern'] },
+    { paintId: 'bm-white-dove', styles: ['coastal', 'transitional'] },
+    { paintId: 'sw-sea-salt', styles: ['coastal', 'modern'] },
+    { paintId: 'bm-revere-pewter', styles: ['transitional', 'traditional'] },
+    { paintId: 'sw-rainwashed', styles: ['coastal', 'modern'] },
+    { paintId: 'sw-naval', styles: ['contemporary', 'modern'] },
+    { paintId: 'bm-hale-navy', styles: ['contemporary'] },
+    { paintId: 'sw-camelback', styles: ['traditional', 'transitional'] },
+    { paintId: 'sw-copper-penny', styles: ['traditional', 'mid-century'] },
+    { paintId: 'sw-urbane-bronze', styles: ['modern', 'contemporary'] },
+    { paintId: 'bm-kendall-charcoal', styles: ['contemporary', 'modern'] }
+  ],
 
   featuredTriptych: [
     '77696-brookes-chair',
@@ -740,10 +798,28 @@ window.renderBoardsPreview = function renderBoardsPreview() {
       qbtn.className = 'mc-boards__quiz-visual-card';
       var qw = document.createElement('div');
       qw.className = 'mc-boards__quiz-visual-img';
-      var qim = document.createElement('img');
-      qim.src = qc.img;
-      qim.alt = qc.label;
-      qw.appendChild(qim);
+      if (qc.roomMood) {
+        qw.className += ' mc-boards__quiz-visual-img--room';
+        var qim = document.createElement('img');
+        qim.src = '/v/vspfiles/boards/mood/' + qc.roomMood + '.svg';
+        qim.alt = qc.label;
+        qw.appendChild(qim);
+      } else if (qc.palette && qc.palette.length) {
+        qw.className += ' mc-boards__quiz-visual-img--palette';
+        var strip = document.createElement('div');
+        strip.className = 'mc-boards__quiz-palette-strip';
+        for (var ps = 0; ps < qc.palette.length; ps++) {
+          var seg = document.createElement('span');
+          seg.style.backgroundColor = qc.palette[ps];
+          strip.appendChild(seg);
+        }
+        qw.appendChild(strip);
+      } else if (qc.img) {
+        var qim = document.createElement('img');
+        qim.src = qc.img;
+        qim.alt = qc.label;
+        qw.appendChild(qim);
+      }
       qbtn.appendChild(qw);
       var ql = document.createElement('span');
       ql.className = 'mc-boards__quiz-visual-label';
@@ -832,7 +908,7 @@ window.renderBoardsPreview = function renderBoardsPreview() {
     if (window.__MC_BOARDS_APP_STARTED) return;
     if (document.querySelector('script[src*="my-boards-page.js"]')) return;
     var s = document.createElement('script');
-    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260540';
+    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260541';
     s.defer = true;
     document.body.appendChild(s);
   }

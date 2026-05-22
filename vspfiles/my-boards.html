@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inspiration Boards — McCabe&apos;s Theater &amp; Living</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <!-- deploy-marker: 20260540-hub-merged -->
+  <!-- deploy-marker: 20260541-paint-quiz -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-bundle.css?v=20260540" charset="utf-8" />
+  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-bundle.css?v=20260541" charset="utf-8" />
 </head>
 <body class="mc-my-boards-page">
   <div class="mc-boards-shell">
@@ -41,7 +41,7 @@
           <a class="mc-boards__btn" href="#mc-boards-quiz">Start style quiz</a>
           <a class="mc-boards__btn mc-boards__btn--ghost" href="#mc-boards-palette-lab">Open palette lab</a>
         </div>
-        <p id="mc-boards-deploy-ver" class="mc-boards__deploy-ver" hidden aria-hidden="true">20260540</p>
+        <p id="mc-boards-deploy-ver" class="mc-boards__deploy-ver" hidden aria-hidden="true">20260541</p>
       </header>
 
       <!-- 2. Style quiz -->
@@ -55,10 +55,20 @@
       <!-- 3. Palette lab -->
       <section class="mc-boards__section mc-boards__section--palette" id="mc-boards-palette-lab" aria-labelledby="mc-boards-palette-heading">
         <h2 id="mc-boards-palette-heading" class="mc-boards__section-title">Palette lab</h2>
-        <p class="mc-boards__section-lede">Pick a wall color or starter palette — see coordinated leather, wood, and accent directions live.</p>
+        <p class="mc-boards__section-lede">Sherwin-Williams and Benjamin Moore wall colors from our inspiration boards — coordinated with leather, wood, rug, and accent pairings.</p>
         <div id="mc-boards-palette-app" class="mc-boards__palette-app"></div>
         <div id="mc-boards-palette-matches" class="mc-boards__palette-matches" aria-live="polite"></div>
         <div id="mc-boards-palette-products" class="mc-boards__palette-products"></div>
+      </section>
+
+      <!-- Your inspiration boards (extension saves) -->
+      <section class="mc-boards__section mc-boards__section--inspiration" id="mc-boards-inspiration" aria-labelledby="mc-boards-inspiration-heading">
+        <h2 id="mc-boards-inspiration-heading" class="mc-boards__section-title">Your inspiration boards</h2>
+        <p class="mc-boards__section-lede">Pieces you pinned while shopping — grouped by board name from the McCabe browser extension. Sign in to sync across devices.</p>
+        <div id="mc-boards-account-banner" class="mc-boards__account-banner"></div>
+        <section id="mc-boards-msg" class="mc-boards__msg" aria-live="polite"></section>
+        <nav id="mc-boards-tabs" class="mc-boards__tabs" aria-label="Your boards" hidden></nav>
+        <div id="mc-boards-root" class="mc-boards__root"></div>
       </section>
 
       <!-- 4. Recommended for you -->
@@ -125,15 +135,6 @@
         </div>
       </section>
 
-      <section id="mc-boards-account" class="mc-boards__section" aria-live="polite">
-        <h2 class="mc-boards__section-title">Your saved boards</h2>
-        <div id="mc-boards-account-banner" class="mc-boards__account-banner"></div>
-      </section>
-
-      <section id="mc-boards-msg" class="mc-boards__msg" aria-live="polite"></section>
-      <nav id="mc-boards-tabs" class="mc-boards__tabs" aria-label="Your boards" hidden></nav>
-      <div id="mc-boards-root" class="mc-boards__root"></div>
-
       <footer class="mc-boards__footer">
         <a class="mc-boards__btn" href="/">Continue shopping</a>
       </footer>
@@ -152,7 +153,7 @@
       return '/v/vspfiles/boards/';
     })();
   </script>
-  <script src="/v/vspfiles/boards/board-styles.js?v=20260540"></script>
-  <script src="/v/vspfiles/boards/my-boards-page.js?v=20260540" defer></script>
+  <script src="/v/vspfiles/boards/board-styles.js?v=20260541"></script>
+  <script src="/v/vspfiles/boards/my-boards-page.js?v=20260541" defer></script>
 </body>
 </html>

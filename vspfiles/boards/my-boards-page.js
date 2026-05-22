@@ -1442,7 +1442,7 @@
       done();
       return;
     }
-    var src = API_BASE + 'board-styles.js?v=20260540';
+    var src = API_BASE + 'board-styles.js?v=20260541';
     var tag = document.querySelector('script[src*="board-styles.js"]');
     if (tag) {
       refreshConfig();
@@ -1643,11 +1643,34 @@
           card.className = 'mc-boards__quiz-visual-card';
           var imgWrap = document.createElement('div');
           imgWrap.className = 'mc-boards__quiz-visual-img';
-          var img = document.createElement('img');
-          img.src = choice.img;
-          img.alt = choice.label;
-          img.loading = 'lazy';
-          imgWrap.appendChild(img);
+          if (choice.roomMood) {
+            imgWrap.classList.add('mc-boards__quiz-visual-img--room');
+            var img = document.createElement('img');
+            img.src = '/v/vspfiles/boards/mood/' + choice.roomMood + '.svg';
+            img.alt = choice.label;
+            img.loading = 'eager';
+            img.decoding = 'sync';
+            imgWrap.appendChild(img);
+          } else if (choice.palette && choice.palette.length) {
+            imgWrap.classList.add('mc-boards__quiz-visual-img--palette');
+            var strip = document.createElement('div');
+            strip.className = 'mc-boards__quiz-palette-strip';
+            strip.setAttribute('role', 'img');
+            strip.setAttribute('aria-label', choice.label);
+            for (var pc = 0; pc < choice.palette.length; pc++) {
+              var seg = document.createElement('span');
+              seg.style.backgroundColor = choice.palette[pc];
+              strip.appendChild(seg);
+            }
+            imgWrap.appendChild(strip);
+          } else if (choice.img) {
+            var img = document.createElement('img');
+            img.src = choice.img;
+            img.alt = choice.label;
+            img.loading = 'eager';
+            img.decoding = 'async';
+            imgWrap.appendChild(img);
+          }
           card.appendChild(imgWrap);
           var lab = document.createElement('span');
           lab.className = 'mc-boards__quiz-visual-label';
@@ -1757,52 +1780,123 @@
     );
   }
 
+  function getPaintById(id) {
+    var list = config.paintLibrary || [];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === id) return list[i];
+    }
+    return null;
+  }
+
+  function paintLabel(paint) {
+    if (!paint) return '';
+    return paint.brand + ' ' + paint.name + ' (' + paint.code + ')';
+  }
+
+  function resolvePresetColors(preset, variant) {
+    var wallPaint = getPaintById(preset.wallPaintId);
+    var pairPaint = getPaintById(preset.pairPaintId);
+    var accentPaint = getPaintById(preset.accentPaintId);
+    if (variant === 'warmer' && preset.warmerAccentPaintId) {
+      accentPaint = getPaintById(preset.warmerAccentPaintId) || accentPaint;
+      if (wallPaint) wallPaint = Object.assign({}, wallPaint, { hex: shiftHex(wallPaint.hex, 8) });
+    }
+    if (variant === 'cooler' && preset.coolerAccentPaintId) {
+      accentPaint = getPaintById(preset.coolerAccentPaintId) || accentPaint;
+      if (wallPaint) wallPaint = Object.assign({}, wallPaint, { hex: shiftHex(wallPaint.hex, -8) });
+    }
+    if (variant === 'contrast' && preset.contrastAccentPaintId) {
+      accentPaint = getPaintById(preset.contrastAccentPaintId) || accentPaint;
+      if (wallPaint) wallPaint = Object.assign({}, wallPaint, { hex: shiftHex(wallPaint.hex, -18) });
+    }
+    if (!wallPaint && preset.wall) {
+      wallPaint = { brand: 'Custom', name: 'Wall', code: '', hex: preset.wall };
+    }
+    if (!accentPaint && preset.accent) {
+      accentPaint = { brand: 'Accent', name: 'Coordinate', code: '', hex: preset.accent };
+    }
+    if (!pairPaint && preset.paintPair) {
+      pairPaint = { brand: 'Pairing', name: 'Trim / adjacent', code: '', hex: preset.paintPair };
+    }
+    return {
+      wallPaint: wallPaint,
+      pairPaint: pairPaint,
+      accentPaint: accentPaint,
+      wallHex: wallPaint ? wallPaint.hex : preset.wall || '#f4efe6',
+      accentHex: accentPaint ? accentPaint.hex : preset.accent || '#9a6b42',
+      pairHex: pairPaint ? pairPaint.hex : preset.paintPair || '#e8dfd0'
+    };
+  }
+
+  function appendPaletteRow(grid, key, value, hex) {
+    var row = document.createElement('div');
+    row.className = 'mc-boards__palette-match-row';
+    var left = document.createElement('div');
+    left.className = 'mc-boards__palette-match-left';
+    if (hex) {
+      var sw = document.createElement('span');
+      sw.className = 'mc-boards__palette-match-swatch';
+      sw.style.backgroundColor = hex;
+      sw.setAttribute('aria-hidden', 'true');
+      left.appendChild(sw);
+    }
+    var k = document.createElement('span');
+    k.className = 'mc-boards__palette-match-key';
+    k.textContent = key;
+    left.appendChild(k);
+    row.appendChild(left);
+    var v = document.createElement('span');
+    v.className = 'mc-boards__palette-match-val';
+    v.textContent = value;
+    row.appendChild(v);
+    grid.appendChild(row);
+  }
+
   function applyPalette(preset, variant) {
     if (!preset) return;
     currentPalette = preset;
     writeJson(LS_PALETTE, preset.id);
-    var wall = preset.wall;
-    if (variant === 'warmer') wall = shiftHex(wall, 12);
-    if (variant === 'cooler') wall = shiftHex(wall, -12);
-    if (variant === 'contrast') wall = shiftHex(wall, -28);
+    var colors = resolvePresetColors(preset, variant || 'best');
 
     var matches = el('mc-boards-palette-matches');
     var products = el('mc-boards-palette-products');
     if (!matches) return;
 
     matches.innerHTML = '';
+    var layout = document.createElement('div');
+    layout.className = 'mc-boards__palette-match-layout';
+
+    var wallCol = document.createElement('div');
+    wallCol.className = 'mc-boards__palette-wall-col';
     var wallSwatch = document.createElement('div');
     wallSwatch.className = 'mc-boards__palette-wall';
-    wallSwatch.style.backgroundColor = wall;
+    wallSwatch.style.backgroundColor = colors.wallHex;
+    wallCol.appendChild(wallSwatch);
     var wallLab = document.createElement('p');
     wallLab.className = 'mc-boards__palette-wall-label';
-    wallLab.textContent = 'Wall color';
-    matches.appendChild(wallSwatch);
-    matches.appendChild(wallLab);
+    wallLab.textContent = colors.wallPaint ? paintLabel(colors.wallPaint) : 'Wall color';
+    wallCol.appendChild(wallLab);
+    layout.appendChild(wallCol);
 
     var grid = document.createElement('div');
     grid.className = 'mc-boards__palette-match-grid';
-    var rows = [
-      ['Sofa / leather', preset.sofa],
-      ['Rug', preset.rug],
-      ['Wood', preset.wood],
-      ['Accent', preset.accent],
-      ['Paint pairing', preset.paintPair]
-    ];
-    for (var r = 0; r < rows.length; r++) {
-      var row = document.createElement('div');
-      row.className = 'mc-boards__palette-match-row';
-      var k = document.createElement('span');
-      k.className = 'mc-boards__palette-match-key';
-      k.textContent = rows[r][0];
-      var v = document.createElement('span');
-      v.className = 'mc-boards__palette-match-val';
-      v.textContent = rows[r][1];
-      row.appendChild(k);
-      row.appendChild(v);
-      grid.appendChild(row);
-    }
-    matches.appendChild(grid);
+    appendPaletteRow(grid, 'Sofa / upholstery', preset.sofa, null);
+    appendPaletteRow(grid, 'Rug', preset.rug, preset.rugHex || colors.pairHex);
+    appendPaletteRow(grid, 'Wood', preset.wood, preset.woodHex || colors.accentHex);
+    appendPaletteRow(
+      grid,
+      'Accent',
+      colors.accentPaint ? paintLabel(colors.accentPaint) : String(preset.accent || ''),
+      colors.accentHex
+    );
+    appendPaletteRow(
+      grid,
+      'Paint pairing',
+      colors.pairPaint ? paintLabel(colors.pairPaint) : String(preset.paintPair || ''),
+      colors.pairHex
+    );
+    layout.appendChild(grid);
+    matches.appendChild(layout);
 
     if (products) {
       products.innerHTML = '';
@@ -1863,46 +1957,106 @@
     }
     root.appendChild(presetRow);
 
+    var paintList = config.paintLibrary || [];
+    var wheelEntries = (config.colorWheel || [])
+      .map(function (entry) {
+        var paint = getPaintById(entry.paintId);
+        if (!paint) return null;
+        return { paint: paint, styles: entry.styles || [] };
+      })
+      .filter(Boolean);
+    if (!wheelEntries.length) {
+      wheelEntries = paintList.map(function (paint) {
+        return { paint: paint, styles: [] };
+      });
+    }
+
     var wheelWrap = document.createElement('div');
     wheelWrap.className = 'mc-boards__wheel-wrap';
     var disc = document.createElement('div');
     disc.className = 'mc-boards__wheel-disc';
     disc.setAttribute('aria-hidden', 'true');
-    var wheelColors = ['#f4efe6', '#c8bfb2', '#8fa9b5', '#1e3a5f', '#a67c5b', '#4a4540', '#8a9a8c', '#6b4423'];
     var stops = [];
-    for (var wd = 0; wd < wheelColors.length; wd++) {
-      stops.push(wheelColors[wd] + ' ' + (((wd + 0.5) / wheelColors.length) * 100) + '%');
+    for (var wd = 0; wd < wheelEntries.length; wd++) {
+      stops.push(
+        wheelEntries[wd].paint.hex +
+          ' ' +
+          (((wd + 0.5) / wheelEntries.length) * 100) +
+          '%'
+      );
     }
-    disc.style.background = 'conic-gradient(from 0deg, ' + stops.join(', ') + ')';
+    if (stops.length) {
+      disc.style.background = 'conic-gradient(from 0deg, ' + stops.join(', ') + ')';
+    }
     var picks = document.createElement('div');
     picks.className = 'mc-boards__wheel-picks';
-    for (var wi = 0; wi < wheelColors.length; wi++) {
-      (function (hex) {
+    picks.setAttribute('role', 'list');
+    var wheelNote = document.createElement('p');
+    wheelNote.className = 'mc-boards__wheel-note';
+    wheelNote.textContent = 'Tap a paint chip (Sherwin-Williams & Benjamin Moore)';
+
+    function presetFromWallPaint(paint) {
+      var presets = config.paletteLab.presets || [];
+      for (var pi = 0; pi < presets.length; pi++) {
+        if (presets[pi].wallPaintId === paint.id) return presets[pi];
+      }
+      return {
+        id: 'custom-' + paint.id,
+        label: paint.name,
+        wallPaintId: paint.id,
+        pairPaintId: 'sw-natural-choice',
+        accentPaintId: paint.family === 'deep' ? 'sw-camelback' : 'sw-urbane-bronze',
+        warmerAccentPaintId: 'sw-copper-penny',
+        coolerAccentPaintId: 'sw-rainwashed',
+        contrastAccentPaintId: 'sw-tricorn-black',
+        sofa: 'Coordinate upholstery to ' + paint.name,
+        rug: 'Neutral textured rug',
+        wood: 'Medium walnut',
+        woodHex: '#8b5e3c',
+        rugHex: shiftHex(paint.hex, 12),
+        styleIds: ['transitional'],
+        productIds: ['40113-oxford-sofa', '77176-windsor-loveseat']
+      };
+    }
+
+    function selectWallPaint(paint) {
+      picks.querySelectorAll('.mc-boards__wheel-swatch').forEach(function (el) {
+        el.classList.remove('is-active');
+      });
+      input.value = paint.hex;
+      applyPalette(presetFromWallPaint(paint), 'best');
+    }
+
+    for (var wi = 0; wi < wheelEntries.length; wi++) {
+      (function (entry) {
+        var paint = entry.paint;
         var sw = document.createElement('button');
         sw.type = 'button';
         sw.className = 'mc-boards__wheel-swatch';
-        sw.style.backgroundColor = hex;
-        sw.title = hex;
+        sw.style.backgroundColor = paint.hex;
+        sw.title = paintLabel(paint);
+        sw.setAttribute('aria-label', paintLabel(paint));
         sw.addEventListener('click', function () {
-          input.value = hex;
-          input.dispatchEvent(new Event('input'));
+          sw.classList.add('is-active');
+          selectWallPaint(paint);
         });
         picks.appendChild(sw);
-      })(wheelColors[wi]);
+      })(wheelEntries[wi]);
     }
     wheelWrap.appendChild(disc);
     wheelWrap.appendChild(picks);
     root.appendChild(wheelWrap);
+    root.appendChild(wheelNote);
 
     var pickerRow = document.createElement('div');
     pickerRow.className = 'mc-boards__palette-picker';
     var lab = document.createElement('label');
     lab.className = 'mc-boards__palette-picker-label';
-    lab.textContent = 'Custom wall color';
+    lab.textContent = 'Fine-tune wall color';
     var input = document.createElement('input');
     input.type = 'color';
     input.className = 'mc-boards__palette-input';
-    input.value = '#f4efe6';
+    input.value = '#EDE6DB';
     input.addEventListener('input', function () {
       var custom = {
         id: 'custom',
@@ -1911,6 +2065,8 @@
         sofa: 'Coordinate leather to wall undertone',
         rug: 'Neutral textured rug',
         wood: 'Medium walnut',
+        woodHex: '#8b5e3c',
+        rugHex: shiftHex(input.value, 12),
         accent: shiftHex(input.value, -40),
         paintPair: shiftHex(input.value, 20),
         styleIds: ['transitional'],

@@ -498,6 +498,14 @@ html.mc-my-boards-page a:hover {
   flex-shrink: 0;
   position: relative;
   box-shadow: inset 0 0 0 12px #ffffff;
+  pointer-events: none;
+}
+
+.mc-boards__wheel-note {
+  margin: 0 0 16px;
+  width: 100%;
+  font-size: 12px;
+  color: var(--mc-text-muted);
 }
 
 .mc-boards__wheel-picks {
@@ -509,12 +517,14 @@ html.mc-my-boards-page a:hover {
 }
 
 .mc-boards__wheel-swatch {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid rgba(0, 0, 0, 0.12);
   cursor: pointer;
   padding: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .mc-boards__wheel-swatch.is-active {
@@ -1085,8 +1095,9 @@ html.mc-my-boards-page a:hover {
 }
 
 .mc-boards__quiz-visual-img {
-  aspect-ratio: 4 / 3;
-  background: #fff;
+  aspect-ratio: 16 / 10;
+  min-height: 200px;
+  background: #f5f3f0;
   overflow: hidden;
 }
 
@@ -1094,7 +1105,25 @@ html.mc-my-boards-page a:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
+  image-rendering: auto;
+}
+
+.mc-boards__quiz-visual-img--room img {
+  object-fit: cover;
+}
+
+.mc-boards__quiz-palette-strip {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+}
+
+.mc-boards__quiz-palette-strip span {
+  flex: 1 1 0;
+  min-height: 100%;
 }
 
 .mc-boards__quiz-visual-label {
@@ -1161,34 +1190,84 @@ html.mc-my-boards-page a:hover {
 }
 
 .mc-boards__palette-matches {
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: 24px;
-  align-items: start;
   margin: 24px 0;
   padding: 20px;
   border: 1px solid var(--mc-border);
   background: #fafafa;
 }
 
-.mc-boards__palette-wall {
-  aspect-ratio: 1;
-  border: 1px solid var(--mc-border);
+.mc-boards__palette-match-layout {
+  display: grid;
+  grid-template-columns: minmax(160px, 200px) 1fr;
+  gap: 28px;
+  align-items: start;
 }
 
-.mc-boards__palette-match-grid {
+.mc-boards__palette-wall-col {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.mc-boards__palette-match-row {
+.mc-boards__palette-wall {
+  aspect-ratio: 1;
+  min-height: 160px;
+  border: 1px solid var(--mc-border);
+}
+
+.mc-boards__palette-wall-label {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--mc-text);
+  font-weight: 600;
+}
+
+.mc-boards__palette-match-grid {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.mc-boards__palette-match-row {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 1.2fr);
   gap: 16px;
+  align-items: center;
   font-size: 13px;
   border-bottom: 1px solid var(--mc-border);
-  padding-bottom: 8px;
+  padding-bottom: 10px;
+}
+
+.mc-boards__palette-match-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mc-boards__palette-match-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.mc-boards__palette-match-key {
+  font-weight: 600;
+  color: var(--mc-text);
+}
+
+.mc-boards__palette-match-val {
+  text-align: right;
+  color: var(--mc-text-muted);
+  line-height: 1.4;
+}
+
+.mc-boards__section--inspiration .mc-boards__root {
+  margin-top: 8px;
 }
 
 .mc-boards__palette-chips {
@@ -1284,7 +1363,15 @@ html.mc-my-boards-page a:hover {
     grid-template-columns: 1fr;
   }
 
-  .mc-boards__palette-matches {
+  .mc-boards__palette-match-layout {
     grid-template-columns: 1fr;
+  }
+
+  .mc-boards__palette-match-row {
+    grid-template-columns: 1fr;
+  }
+
+  .mc-boards__palette-match-val {
+    text-align: left;
   }
 }
