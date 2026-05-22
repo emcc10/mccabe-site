@@ -29,7 +29,8 @@
     "export:preview-locked": "tsx scripts/exportPreviewLocked.ts",
     "render:phase8": "tsx scripts/renderPhase8.ts",
     "render:phase9": "tsx scripts/renderPhase9.ts",
-    "render:phase9reset": "tsx scripts/renderPhase9Reset.ts"
+    "render:phase9reset": "tsx scripts/renderPhase9Reset.ts",
+    "render:phase9reset-b": "tsx scripts/renderPhase9resetSingleB.ts"
   },
   "dependencies": {
     "color-convert": "^2.0.1",

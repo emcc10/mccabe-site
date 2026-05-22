@@ -33,3 +33,24 @@ export const PHASE9RESET_VARIANTS: Phase9ResetVariant[] = [
     },
   },
 ];
+
+/** Locked Phase 9RESET-B — current best candidate (not final Bali Silk). */
+export const LOCKED_9RESET_B_PARAMS: CleanSwatchApplyParams = {
+  grainStrength: 0.58,
+  mottleStrength: 0.38,
+  colorBiasStrength: 0.15,
+  formStrength: 0.03,
+  sampleScale: 0.4,
+};
+
+export const LOCKED_9RESET_B = {
+  stage: '9RESET-B',
+  lockedFrom: 'Phase 9 reset variant B (clean swatch stochastic apply)',
+  notFinalBaliSilk: true,
+  params: LOCKED_9RESET_B_PARAMS,
+  pipeline: [
+    'Stage 4B-v3',
+    'Phase 6A bottom seam fix',
+    'Phase 9 reset swatch sanitization + stochastic material apply',
+  ],
+} as const;
