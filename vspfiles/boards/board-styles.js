@@ -2,7 +2,7 @@
  * Style library + curated McCabe product looks for inspiration boards.
  * Product PNGs: /v/vspfiles/boards/showcase/
  */
-window.MC_BOARD_STYLES_BUILD = '20260538';
+window.MC_BOARD_STYLES_BUILD = '20260539';
 window.MC_BOARD_STYLES = {
   assetBases: ['/v/vspfiles/boards/', '/vspfiles/boards/'],
   shopBase: 'https://www.mccabestheaterandliving.com',

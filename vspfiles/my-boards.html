@@ -5,21 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inspiration Boards — McCabe&apos;s Theater &amp; Living</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <!-- deploy-marker: 20260538-catalog-accuracy -->
+  <!-- deploy-marker: 20260539-interactive-hub -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet" />
-  <style id="mc-boards-critical-inline">
-html.mc-my-boards-page,html.mc-my-boards-page body{margin:0;min-height:100%;background:#fff;color:#484848;font-family:Inter,system-ui,-apple-system,sans-serif;font-weight:400;letter-spacing:.02em}
-.mc-boards-shell{min-height:100vh;display:flex;flex-direction:column}
-.mc-boards__title{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;letter-spacing:.02em;text-transform:none}
-.mc-boards__triptych,.mc-boards__catalog,.mc-boards__style-grid,.mc-boards__lifestyle-grid,.mc-boards__trends-grid{display:grid;gap:16px}
-.mc-boards__triptych,.mc-boards__style-grid{grid-template-columns:repeat(3,1fr)}
-.mc-boards__catalog{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
-.mc-boards__triptych-img-wrap,.mc-boards__catalog-img,.mc-boards__style-visual{aspect-ratio:4/3;background:#f0f0f0;overflow:hidden}
-.mc-boards__triptych-img-wrap img,.mc-boards__catalog-img img,.mc-boards__style-visual img{width:100%;height:100%;object-fit:cover;display:block}
-  </style>
-  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-bundle.css?v=20260538" charset="utf-8" />
+  <link rel="stylesheet" href="/v/vspfiles/boards/my-boards-bundle.css?v=20260539" charset="utf-8" />
 </head>
 <body class="mc-my-boards-page">
   <div class="mc-boards-shell">
@@ -30,6 +20,9 @@ html.mc-my-boards-page,html.mc-my-boards-page body{margin:0;min-height:100%;back
         </a>
         <nav class="mc-boards-site-nav" aria-label="Site">
           <a href="/">Shop</a>
+          <a href="#mc-boards-quiz">Quiz</a>
+          <a href="#mc-boards-palette-lab">Palette</a>
+          <a href="#mc-boards-lifestyle">Room looks</a>
           <a href="/myaccount.asp">My account</a>
           <a href="/login.asp" id="mc-boards-signin">Sign in</a>
         </nav>
@@ -37,80 +30,99 @@ html.mc-my-boards-page,html.mc-my-boards-page body{margin:0;min-height:100%;back
     </header>
 
     <main class="mc-boards" id="mc-boards-main">
-      <header class="mc-boards__masthead">
-        <h1 class="mc-boards__title">Inspiration boards</h1>
+      <!-- 1. Hero -->
+      <header class="mc-boards__hero" id="mc-boards-hero">
+        <p class="mc-boards__hero-kicker">McCabe inspiration studio</p>
+        <h1 class="mc-boards__title">Build your room board</h1>
         <p class="mc-boards__lede">
-          Curated McCabe seating by style. Save pieces with
-          <strong>Save to McCabe&rsquo;s Board</strong> while you shop.
+          Take the style quiz, test wall colors in the palette lab, save room looks, and shop real McCabe pieces.
         </p>
-        <p id="mc-boards-deploy-ver" class="mc-boards__deploy-ver" hidden aria-hidden="true">20260538</p>
+        <div class="mc-boards__hero-actions">
+          <a class="mc-boards__btn" href="#mc-boards-quiz">Start style quiz</a>
+          <a class="mc-boards__btn mc-boards__btn--ghost" href="#mc-boards-palette-lab">Open palette lab</a>
+        </div>
+        <p id="mc-boards-deploy-ver" class="mc-boards__deploy-ver" hidden aria-hidden="true">20260539</p>
       </header>
 
+      <!-- 2. Style quiz -->
+      <section class="mc-boards__section mc-boards__section--quiz" id="mc-boards-quiz" aria-labelledby="mc-boards-quiz-heading">
+        <h2 id="mc-boards-quiz-heading" class="mc-boards__section-title">Your style quiz</h2>
+        <p class="mc-boards__section-lede">Five visual questions — get a profile, palette, and matching McCabe pieces.</p>
+        <div id="mc-boards-quiz-app" class="mc-boards__quiz-app"></div>
+        <div id="mc-boards-quiz-result-panel" class="mc-boards__quiz-result-panel" hidden></div>
+      </section>
+
+      <!-- 3. Palette lab -->
+      <section class="mc-boards__section mc-boards__section--palette" id="mc-boards-palette-lab" aria-labelledby="mc-boards-palette-heading">
+        <h2 id="mc-boards-palette-heading" class="mc-boards__section-title">Palette lab</h2>
+        <p class="mc-boards__section-lede">Pick a wall color or starter palette — see coordinated leather, wood, and accent directions live.</p>
+        <div id="mc-boards-palette-app" class="mc-boards__palette-app"></div>
+        <div id="mc-boards-palette-matches" class="mc-boards__palette-matches" aria-live="polite"></div>
+        <div id="mc-boards-palette-products" class="mc-boards__palette-products"></div>
+      </section>
+
+      <!-- 4. Recommended for you -->
+      <section class="mc-boards__section" id="mc-boards-recommended" aria-labelledby="mc-boards-rec-heading" hidden>
+        <h2 id="mc-boards-rec-heading" class="mc-boards__section-title">Recommended for you</h2>
+        <p class="mc-boards__section-lede" id="mc-boards-rec-lede"></p>
+        <div id="mc-boards-rec-grid" class="mc-boards__catalog"></div>
+      </section>
+
+      <!-- Featured + room looks -->
       <section class="mc-boards__section" aria-label="Featured pieces">
         <div class="mc-boards__section-head">
           <div>
-            <h2 class="mc-boards__section-title">Featured pieces</h2>
-            <p class="mc-boards__section-lede">Tap a look to filter by style. Double-click to open on the site.</p>
+            <h2 class="mc-boards__section-title">Featured McCabe pieces</h2>
+            <p class="mc-boards__section-lede">Tap to filter the page. Double-click a card to shop on mccabes.com.</p>
           </div>
-          <button type="button" class="mc-boards__btn mc-boards__btn--ghost" id="mc-boards-shuffle">Shuffle looks</button>
+          <button type="button" class="mc-boards__btn mc-boards__btn--ghost" id="mc-boards-shuffle">Shuffle featured</button>
         </div>
         <div class="mc-boards__triptych" id="mc-boards-triptych"></div>
       </section>
 
-      <section class="mc-boards__section" aria-label="McCabe catalog">
-        <h2 class="mc-boards__section-title">Pieces on your boards</h2>
-        <p class="mc-boards__section-lede">Real product photography from our catalog.</p>
-        <div class="mc-boards__catalog" id="mc-boards-catalog"></div>
+      <section class="mc-boards__section" id="mc-boards-lifestyle" aria-labelledby="mc-boards-lifestyle-heading">
+        <h2 id="mc-boards-lifestyle-heading" class="mc-boards__section-title">Room looks</h2>
+        <p class="mc-boards__section-lede">Filter by style, room, or mood. Save favorites to revisit later.</p>
+        <div id="mc-boards-room-filters" class="mc-boards__filter-bar" role="toolbar" aria-label="Filter room looks"></div>
+        <div id="mc-boards-lifestyle-grid" class="mc-boards__lifestyle-grid" role="list"></div>
       </section>
 
-      <section class="mc-boards__split" id="mc-boards-split" aria-label="Featured style"></section>
+      <section class="mc-boards__split" id="mc-boards-split" aria-label="Featured story"></section>
 
+      <!-- 5. Shop by style -->
       <section class="mc-boards__section" aria-labelledby="mc-boards-style-heading">
-        <h2 id="mc-boards-style-heading" class="mc-boards__section-title">Explore by style</h2>
-        <p class="mc-boards__section-lede">
-          Traditional, modern, mid-century, coastal, and more. Tap a style to filter your saved boards.
-        </p>
+        <h2 id="mc-boards-style-heading" class="mc-boards__section-title">Shop by style</h2>
+        <p class="mc-boards__section-lede">Each direction uses a distinct McCabe hero piece — no duplicate thumbnails.</p>
         <div id="mc-boards-styles" class="mc-boards__style-grid" role="list"></div>
       </section>
 
-      <section class="mc-boards__section mc-boards__section--tools" aria-label="Style tools">
-        <h2 class="mc-boards__section-title">Style tools</h2>
-        <p class="mc-boards__section-lede">Quick quiz and color wheel to narrow your direction.</p>
-        <div class="mc-boards__tools-row">
-          <div class="mc-boards__tool-panel" id="mc-boards-quiz-panel">
-            <h3 class="mc-boards__tool-heading">Your style</h3>
-            <div id="mc-boards-quiz"></div>
-          </div>
-          <div class="mc-boards__tool-panel" id="mc-boards-wheel-panel">
-            <h3 class="mc-boards__tool-heading">Palette explorer</h3>
-            <div id="mc-boards-color-wheel"></div>
-            <p id="mc-boards-wheel-result" class="mc-boards__wheel-result" aria-live="polite"></p>
-          </div>
-        </div>
+      <section class="mc-boards__section" aria-label="Catalog">
+        <h2 class="mc-boards__section-title">All catalog pieces</h2>
+        <div class="mc-boards__catalog" id="mc-boards-catalog"></div>
       </section>
 
-      <section class="mc-boards__section" aria-labelledby="mc-boards-lifestyle-heading">
-        <h2 id="mc-boards-lifestyle-heading" class="mc-boards__section-title">Room looks</h2>
-        <p class="mc-boards__section-lede">How the same pieces read in different rooms.</p>
-        <div id="mc-boards-lifestyle" class="mc-boards__lifestyle-grid" role="list"></div>
-      </section>
-
+      <!-- 6. Editorial trends -->
       <section class="mc-boards__section" aria-labelledby="mc-boards-trends-heading">
-        <h2 id="mc-boards-trends-heading" class="mc-boards__section-title">Home trends</h2>
-        <p class="mc-boards__section-lede">Editorial ideas from top design sites — tap a card to filter McCabe pieces in that direction.</p>
-        <div id="mc-boards-trends" class="mc-boards__trends-grid" role="list"></div>
+        <h2 id="mc-boards-trends-heading" class="mc-boards__section-title">Fresh design ideas</h2>
+        <p class="mc-boards__section-lede">Outside inspiration plus the McCabe take — tap a card to see matching pieces.</p>
+        <div id="mc-boards-trends" class="mc-boards__editorial-feed" role="list"></div>
       </section>
 
       <section class="mc-boards__section" aria-labelledby="mc-boards-guide-heading">
         <h2 id="mc-boards-guide-heading" class="mc-boards__section-title">Style guide</h2>
-        <p class="mc-boards__section-lede">Which McCabe pieces fit each design direction.</p>
         <div id="mc-boards-style-guide" class="mc-boards__style-guide"></div>
       </section>
 
-      <section class="mc-boards__section" aria-labelledby="mc-boards-types-heading">
-        <h2 id="mc-boards-types-heading" class="mc-boards__section-title">Shop by room</h2>
-        <p class="mc-boards__section-lede">Start with the category that matches your project.</p>
-        <div id="mc-boards-types" class="mc-boards__type-row" role="list"></div>
+      <!-- 7. Saved + recent -->
+      <section class="mc-boards__section" id="mc-boards-sticky" aria-labelledby="mc-boards-sticky-heading">
+        <h2 id="mc-boards-sticky-heading" class="mc-boards__section-title">Your saved looks</h2>
+        <p class="mc-boards__section-lede">Saved on this device — sign in to sync boards from shopping.</p>
+        <div id="mc-boards-saved-looks" class="mc-boards__saved-row"></div>
+        <h3 class="mc-boards__tool-heading">Recently viewed</h3>
+        <div id="mc-boards-recent" class="mc-boards__saved-row"></div>
+        <div class="mc-boards__hero-actions">
+          <button type="button" class="mc-boards__btn mc-boards__btn--ghost" id="mc-boards-share">Copy page link</button>
+        </div>
       </section>
 
       <section id="mc-boards-account" class="mc-boards__section" aria-live="polite">
@@ -140,7 +152,8 @@ html.mc-my-boards-page,html.mc-my-boards-page body{margin:0;min-height:100%;back
       return '/v/vspfiles/boards/';
     })();
   </script>
-  <script src="/v/vspfiles/boards/board-styles.js?v=20260538"></script>
-  <script src="/v/vspfiles/boards/my-boards-page.js?v=20260538" defer></script>
+  <script src="/v/vspfiles/boards/board-styles.js?v=20260539"></script>
+  <script src="/v/vspfiles/boards/my-boards-hub.js?v=20260539"></script>
+  <script src="/v/vspfiles/boards/my-boards-page.js?v=20260539" defer></script>
 </body>
 </html>

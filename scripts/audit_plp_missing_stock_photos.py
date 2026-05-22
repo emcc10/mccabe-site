@@ -331,6 +331,12 @@ def classify_plp(item: dict, beans: dict[str, str], hash_cache: dict[str, str]) 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--json", type=Path, help="Write JSON results")
+    parser.add_argument(
+        "--csv",
+        type=Path,
+        default=None,
+        help="Write sofas/sectionals CSV (default: reports/sofas-sectionals-missing-stock-photos.csv)",
+    )
     parser.add_argument("--no-discover", action="store_true")
     args = parser.parse_args()
 
@@ -419,7 +425,66 @@ def main() -> int:
         )
         print(f"\nJSON: {args.json}", file=sys.stderr)
 
+    if args.csv is not None:
+        _write_csv(
+            missing_sofa,
+            args.csv if args.csv else ROOT / "reports" / "sofas-sectionals-missing-stock-photos.csv",
+        )
+
     return 0
+
+
+CAT_DISPLAY_NAMES = {
+    "177": "Stationary Sofas",
+    "187": "Stationary Sectionals",
+    "188": "Reclining Sectionals",
+    "179": "Reclining Sofas",
+    "157": "Stationary Loveseats",
+    "147": "Reclining Loveseats",
+    "192": "Apartment Sofas",
+}
+
+
+def _write_csv(rows: list[dict], path: Path) -> None:
+    import csv
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = [
+        "#",
+        "Product Title",
+        "SKU / Product Code",
+        "Product URL",
+        "Category",
+        "Category URL",
+        "PLP Issue",
+        "Found On (PLP page)",
+        "Suggested upload filename",
+        "Notes",
+    ]
+    with path.open("w", newline="", encoding="utf-8-sig") as f:
+        w = csv.DictWriter(f, fieldnames=fieldnames)
+        w.writeheader()
+        for i, r in enumerate(rows, 1):
+            cat_path = r.get("category", "")
+            m = re.search(r"/(\d+)\.htm", cat_path)
+            cat_id = m.group(1) if m else ""
+            w.writerow(
+                {
+                    "#": i,
+                    "Product Title": r["title"],
+                    "SKU / Product Code": r.get("code", ""),
+                    "Product URL": r["href"],
+                    "Category": CAT_DISPLAY_NAMES.get(cat_id, cat_path),
+                    "Category URL": SITE + cat_path if cat_path else "",
+                    "PLP Issue": "; ".join(r.get("reasons", [])),
+                    "Found On (PLP page)": ", ".join(r.get("sources", [])),
+                    "Suggested upload filename": (
+                        f"{r.get('code', '')}-1.jpg" if r.get("code") else ""
+                    ),
+                    "Notes": "Upload in Volusion → Product Images; set as primary thumbnail",
+                }
+            )
+    print(f"CSV: {path}", file=sys.stderr)
 
 
 if __name__ == "__main__":
