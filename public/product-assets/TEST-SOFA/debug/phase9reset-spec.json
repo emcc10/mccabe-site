@@ -1,0 +1,93 @@
+{
+  "phase": "9-reset",
+  "purpose": "Clean swatch material extraction + stochastic apply (replaces failed Phase 9 tiling)",
+  "notFinalBaliSilk": true,
+  "input": "Stage 4B-v3 + Phase 6A; cognac source structure only",
+  "swatchSource": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\sofa-recolor-tool\\input\\swatches\\Bali-Silk.jpg",
+  "sanitization": {
+    "lightingFlatten": "L − boxBlur(28px) + mean",
+    "artifactRemoval": "oriented line + anisotropy + lighting residual mask, inpaint",
+    "sampling": "5-offset hash blend per pixel (no literal patch tiling)"
+  },
+  "lockedUnchanged": [
+    "Stage 4B-v3 color mapping",
+    "Phase 6A bottom seam fix",
+    "masks, alpha, leg restore, edge cleanup"
+  ],
+  "failedApproach": "Phase 9 literal tiled patch transfer (diagonal fold + block repeat)",
+  "variants": [
+    {
+      "id": "A",
+      "label": "9RESET-A CLEAN LIGHT",
+      "intent": "Conservative clean swatch grain + mottle",
+      "params": {
+        "grainStrength": 0.42,
+        "mottleStrength": 0.28,
+        "colorBiasStrength": 0.11,
+        "formStrength": 0.03,
+        "sampleScale": 0.38
+      }
+    },
+    {
+      "id": "B",
+      "label": "9RESET-B CLEAN STRONGER",
+      "intent": "Slightly stronger clean swatch transfer; still subtle",
+      "params": {
+        "grainStrength": 0.58,
+        "mottleStrength": 0.38,
+        "colorBiasStrength": 0.15,
+        "formStrength": 0.03,
+        "sampleScale": 0.4
+      }
+    }
+  ],
+  "results": [
+    {
+      "id": "A",
+      "label": "9RESET-A CLEAN LIGHT",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9reset-variant-A.png",
+      "params": {
+        "grainStrength": 0.42,
+        "mottleStrength": 0.28,
+        "colorBiasStrength": 0.11,
+        "formStrength": 0.03,
+        "sampleScale": 0.38
+      },
+      "meanL": 71.90896072416263,
+      "deltaLFrom6a": 0.046613370469884785
+    },
+    {
+      "id": "B",
+      "label": "9RESET-B CLEAN STRONGER",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9reset-variant-B.png",
+      "params": {
+        "grainStrength": 0.58,
+        "mottleStrength": 0.38,
+        "colorBiasStrength": 0.15,
+        "formStrength": 0.03,
+        "sampleScale": 0.4
+      },
+      "meanL": 71.9008349153589,
+      "deltaLFrom6a": 0.038487561666158854
+    }
+  ],
+  "base6aUpholsteryMeanLab": {
+    "meanL": 71.86234735369274,
+    "meanA": 3.1375015601290146,
+    "meanB": 6.165209451425794,
+    "count": 152231
+  },
+  "outputs": {
+    "grid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9reset-grid.png",
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9reset-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9reset-variant-B.png"
+    ],
+    "cleanSwatchBase": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-clean-swatch-base.png",
+    "cleanSwatchGrain": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-clean-swatch-grain.png",
+    "cleanSwatchMottle": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-clean-swatch-mottle.png",
+    "cleanSwatchColorBias": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-clean-swatch-color-bias.png",
+    "swatchArtifactMask": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-swatch-artifact-mask.png",
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9reset-spec.json"
+  }
+}

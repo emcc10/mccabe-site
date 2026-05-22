@@ -88,7 +88,6 @@ function buildArtifactMask(L: Float32Array, flatL: Float32Array, w: number, h: n
   }
 
   const thresh = percentile(samples, 0.82);
-  let si = 0;
   for (let y = 2; y < h - 2; y++) {
     for (let x = 2; x < w - 2; x++) {
       const j = y * w + x;
@@ -102,7 +101,6 @@ function buildArtifactMask(L: Float32Array, flatL: Float32Array, w: number, h: n
       const lightResidual = Math.abs(L[j] - flatL[j]);
       const score = maxR * 0.55 + aniso * 0.25 + lightResidual * 0.2;
       if (score >= thresh) mask[j] = 1;
-      si++;
     }
   }
 
@@ -169,10 +167,9 @@ export function buildCleanSwatchMaterial(swatch: RgbaImage): CleanSwatchMaterial
     mottle[j] = blurMottleIn[j] - blurMottleOut[j];
     const p = j * channels;
     const lab = rgbToLab(patch.data[p], patch.data[p + 1], patch.data[p + 2]);
-    const chromaFlat = boxBlur(colorBiasA, width, height, 12); // placeholder wrong
-    void chromaFlat;
-    colorBiasA[j] = (lab.a - meanA) * (1 - artifactMask[j] * 0.85);
-    colorBiasB[j] = (lab.b - meanB) * (1 - artifactMask[j] * 0.85);
+    const suppress = 1 - artifactMask[j] * 0.85;
+    colorBiasA[j] = (lab.a - meanA) * suppress;
+    colorBiasB[j] = (lab.b - meanB) * suppress;
   }
 
   const blurA = boxBlur(colorBiasA, width, height, 10);
