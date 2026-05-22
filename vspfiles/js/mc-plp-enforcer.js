@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260624 — PDP: upgrade mc-pdp-auth-cta-fix to 20260523boot on baked pages
+ * MC_PLP_ENFORCER_20260625 — PDP: upgrade mc-pdp-auth-cta-fix to 20260523boot on baked pages
  *
  * Thumbnails: .mc-plp-image-box + visible-sofa width normalization (no crop, no scale transform).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260624";
+  var VERSION = "20260625";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);

@@ -967,4 +967,14 @@
   window.SECTIONAL_CONFIGS = window.MTL_SECTIONAL_CONFIGS;
 
   console.log("sectional-configs", "registry-merge-v2", window.MTL_SECTIONAL_CONFIGS);
+
+  /* MC_SECTIONAL_PDP_AUTH_BOOT_20260527 — baked sectionals: bypass stale auth script cache */
+  (function (g, d) {
+    if (d.getElementById("mc-pdp-auth-cta-boot-loader")) return;
+    var s = d.createElement("script");
+    s.id = "mc-pdp-auth-cta-boot-loader";
+    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-boot.js?v=20260527&mcrd=" + Date.now();
+    s.async = false;
+    (d.head || d.documentElement).appendChild(s);
+  })(window, document);
 })();

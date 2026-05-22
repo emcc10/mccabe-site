@@ -220,6 +220,11 @@ put_primary "vspfiles/js/mc-pdp-auth-cta-fix.js" "mc-pdp-auth-cta-fix" \
   "/vspfiles/js/mc-pdp-auth-cta-fix.js" \
   "vspfiles/js/mc-pdp-auth-cta-fix.js"
 
+put_primary "vspfiles/js/mc-pdp-auth-cta-boot.js" "mc-pdp-auth-cta-boot" \
+  "/v/vspfiles/js/mc-pdp-auth-cta-boot.js" \
+  "/vspfiles/js/mc-pdp-auth-cta-boot.js" \
+  "vspfiles/js/mc-pdp-auth-cta-boot.js"
+
 put_primary "vspfiles/js/mc-pdp-price-stack.js" "mc-pdp-price-stack" \
   "/v/vspfiles/js/mc-pdp-price-stack.js" \
   "/vspfiles/js/mc-pdp-price-stack.js" \
@@ -379,8 +384,10 @@ verify_url() {
 }
 
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "$CSS_VERIFY_NEEDLE"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260624" "MC_PLP_ENFORCER_20260624"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260624" "MC_PLP_ENFORCER_20260624"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260625" "MC_PLP_ENFORCER_20260625"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260625" "PDP_AUTH_WANT"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-pdp-auth-cta-boot.js?v=20260527" "MC_PDP_AUTH_CTA_BOOT_20260527"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/mc-plp-enforcer.js?v=20260625" "MC_PLP_ENFORCER_20260625"
 
 echo "=== mc-pdp JS gates (SFTP MD5 on /v/vspfiles = source of truth; HTTP curl confirms browser path) ==="
 set +e

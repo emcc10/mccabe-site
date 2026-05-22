@@ -1,4 +1,4 @@
-/* 0522n C_CSS_DEPLOY_VERIFY_20260522n — restore McCabe stack; hide native dupes only with retail row */
+/* 0527a C_CSS_DEPLOY_VERIFY_20260527a — hide native sale dupes only when McCabe retail row exists */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -14590,12 +14590,12 @@ html body.mc-pdp-price-stack .mc-pdp-member-pricing .mc-pdp-member-line--sale {
   opacity: 1 !important;
   pointer-events: auto !important;
 }
-/* Baked PDPs: member lines without .mc-pdp-member-pricing wrapper — hide native sale in main price box */
-html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,
-html body.mc-product-page:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,
-html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_sale_price,
-html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox b:has(.product_saleprice),
-html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox font.pricecolor:has(.product_saleprice),
+/* Baked PDPs: hide native sale dupes only after McCabe retail row exists (avoid blank stack if JS fails) */
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row):has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,
+html body.mc-product-page:has(#v65-product-parent .mc-pdp-retail-row):has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row):has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_sale_price,
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row):has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox b:has(.product_saleprice),
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row):has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox font.pricecolor:has(.product_saleprice),
 html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox .product_productprice,
 html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox font.colors_text:has(.product_productprice),
 html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox font.text.colors_text:has(.product_productprice),
