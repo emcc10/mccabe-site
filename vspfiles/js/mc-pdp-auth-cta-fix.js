@@ -7,6 +7,8 @@
   "use strict";
 
   var VERSION = "20260523boot";
+  /* Set immediately so console/deploy checks work even if later init throws */
+  global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
 
   function authDelay(ms) {
     return new Promise(function (resolve) {
@@ -1205,16 +1207,22 @@
 
   function runPatch() {
     if (!isProductPdp()) return;
-    ensurePdpStackCriticalCss();
-    buildMinimalRetailMemberStack();
-    ensureMcCabeRetailStack();
-    wirePlannerLoginGate();
-    guardConfigurationBlockClick();
-    patchCaptionSignInCta();
     try {
-      mcEnsurePdpPriceStack();
-    } catch (eStackRun) {}
-    syncConfigurationBlockPricing();
+      ensurePdpStackCriticalCss();
+      buildMinimalRetailMemberStack();
+      ensureMcCabeRetailStack();
+      wirePlannerLoginGate();
+      guardConfigurationBlockClick();
+      patchCaptionSignInCta();
+      try {
+        mcEnsurePdpPriceStack();
+      } catch (eStackRun) {}
+      syncConfigurationBlockPricing();
+    } catch (eRunPatch) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[McCabe] mc-pdp-auth-cta runPatch", eRunPatch);
+      }
+    }
     try {
       global.document
         .querySelectorAll("#options_table select, #v65-product-parent select")
