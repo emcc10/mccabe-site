@@ -20,6 +20,15 @@ export const LEGACY_UPHOLSTERY_MASK = join(REPO_ROOT, 'sofa-recolor-tool', 'inpu
 export const LEG_MASK_OVERRIDE = join(PRODUCT_DIR, 'leg-mask.override.png');
 
 export const SOURCE_OUT = join(PRODUCT_DIR, 'source.png');
+
+/** Physical Bali Silk swatch photo (material source for Phase 9). */
+export const BALI_SILK_SWATCH = join(
+  REPO_ROOT,
+  'sofa-recolor-tool',
+  'input',
+  'swatches',
+  'Bali-Silk.jpg',
+);
 export const ALPHA_PREVIEW = join(DEBUG_DIR, 'alpha-preview.png');
 export const UPHOLSTERY_MASK_PREVIEW = join(DEBUG_DIR, 'upholstery-mask-preview.png');
 export const LEG_MASK_PREVIEW = join(DEBUG_DIR, 'leg-mask-preview.png');

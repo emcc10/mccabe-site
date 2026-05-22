@@ -1,0 +1,102 @@
+{
+  "phase": 9,
+  "purpose": "Swatch-derived material transfer — replaces source-L realism (Phases 5–8)",
+  "notFinalBaliSilk": true,
+  "input": "Stage 4B-v3 + Phase 6A; cognac source for structure only",
+  "swatchSource": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\sofa-recolor-tool\\input\\swatches\\Bali-Silk.jpg",
+  "swatchPatch": {
+    "width": 324,
+    "height": 324,
+    "cropFrac": 0.72
+  },
+  "method": {
+    "swatchGrain": "L − blur(3px), lighting removed via crop + normalization",
+    "swatchMottle": "blur(7) − blur(22) from swatch L",
+    "swatchColorBias": "local a/b residual from swatch (restrained apply)",
+    "source": "form/seam/highlight gates from cognac L only",
+    "apply": "tiled swatch samples × material weight (open fields, not seams/highlights)"
+  },
+  "lockedUnchanged": [
+    "Stage 4B-v3 color mapping",
+    "Phase 6A bottom seam fix",
+    "masks, alpha, leg restore, edge cleanup"
+  ],
+  "abandoned": "Phase 5/6/7/8 source-luminance realism (ceiling reached)",
+  "variants": [
+    {
+      "id": "A",
+      "label": "9A LIGHT SWATCH",
+      "intent": "Lighter swatch texture influence; conservative / cleaner",
+      "params": {
+        "grainStrength": 1.1,
+        "mottleStrength": 0.75,
+        "colorBiasStrength": 0.35,
+        "formStrength": 0.04,
+        "tileScale": 0.42
+      }
+    },
+    {
+      "id": "B",
+      "label": "9B STRONGER SWATCH",
+      "intent": "Slightly stronger swatch grain + mottle; still subtle",
+      "params": {
+        "grainStrength": 1.55,
+        "mottleStrength": 1.05,
+        "colorBiasStrength": 0.48,
+        "formStrength": 0.04,
+        "tileScale": 0.44
+      }
+    }
+  ],
+  "results": [
+    {
+      "id": "A",
+      "label": "9A LIGHT SWATCH",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-variant-A.png",
+      "params": {
+        "grainStrength": 1.1,
+        "mottleStrength": 0.75,
+        "colorBiasStrength": 0.35,
+        "formStrength": 0.04,
+        "tileScale": 0.42
+      },
+      "meanL": 71.92818151362074,
+      "deltaLFrom6a": 0.06583415992800212
+    },
+    {
+      "id": "B",
+      "label": "9B STRONGER SWATCH",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-variant-B.png",
+      "params": {
+        "grainStrength": 1.55,
+        "mottleStrength": 1.05,
+        "colorBiasStrength": 0.48,
+        "formStrength": 0.04,
+        "tileScale": 0.44
+      },
+      "meanL": 71.91562165393383,
+      "deltaLFrom6a": 0.05327430024108537
+    }
+  ],
+  "base6aUpholsteryMeanLab": {
+    "meanL": 71.86234735369274,
+    "meanA": 3.1375015601290146,
+    "meanB": 6.165209451425794,
+    "count": 152231
+  },
+  "outputs": {
+    "grid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-grid.png",
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-variant-B.png"
+    ],
+    "swatchGrainMap": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-swatch-grain-map.png",
+    "swatchMottleMap": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-swatch-mottle-map.png",
+    "swatchColorBiasMap": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-swatch-color-bias-map.png",
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase9-spec.json"
+  },
+  "restrictions": [
+    "No random/procedural noise, mask/alpha/edge/feet/bottom changes, global sharpen",
+    "No uniform swatch slap — gated by seam/highlight/zone weights"
+  ]
+}

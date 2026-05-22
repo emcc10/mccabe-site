@@ -2,7 +2,7 @@
  * Style library + curated McCabe product looks for inspiration boards.
  * Product PNGs: /v/vspfiles/boards/showcase/
  */
-window.MC_BOARD_STYLES_BUILD = '20260539';
+window.MC_BOARD_STYLES_BUILD = '20260540';
 window.MC_BOARD_STYLES = {
   assetBases: ['/v/vspfiles/boards/', '/vspfiles/boards/'],
   shopBase: 'https://www.mccabestheaterandliving.com',
@@ -690,9 +690,10 @@ window.renderBoardsPreview = function renderBoardsPreview() {
   }
 
   var trends = document.getElementById('mc-boards-trends');
-  if (trends && !trends.children.length && C.decorTrends) {
-    for (var d = 0; d < C.decorTrends.length; d++) {
-      var tr = C.decorTrends[d];
+  var trendList = C.editorialFeed || C.decorTrends || [];
+  if (trends && !trends.children.length && trendList.length) {
+    for (var d = 0; d < trendList.length; d++) {
+      var tr = trendList[d];
       var tstyle = styleById(tr.styleId);
       var tcard = document.createElement('article');
       tcard.className = 'mc-boards__trend-card';
@@ -712,10 +713,62 @@ window.renderBoardsPreview = function renderBoardsPreview() {
       tcard.appendChild(th);
       var tb = document.createElement('p');
       tb.className = 'mc-boards__trend-blurb';
-      tb.textContent = tr.blurb || '';
+      tb.textContent = tr.excerpt || tr.blurb || '';
       tcard.appendChild(tb);
+      if (tr.mccabeTake) {
+        var tk = document.createElement('p');
+        tk.className = 'mc-boards__mccabe-take';
+        tk.textContent = 'How we\'d style it: ' + tr.mccabeTake;
+        tcard.appendChild(tk);
+      }
       trends.appendChild(tcard);
     }
+  }
+
+  var quizRoot = document.getElementById('mc-boards-quiz-app');
+  if (quizRoot && !quizRoot.children.length && C.visualQuiz && C.visualQuiz.questions) {
+    var q0 = C.visualQuiz.questions[0];
+    var qp = document.createElement('p');
+    qp.className = 'mc-boards__quiz-q';
+    qp.textContent = q0.q;
+    quizRoot.appendChild(qp);
+    var qg = document.createElement('div');
+    qg.className = 'mc-boards__quiz-visual-grid';
+    for (var qi = 0; qi < q0.choices.length; qi++) {
+      var qc = q0.choices[qi];
+      var qbtn = document.createElement('div');
+      qbtn.className = 'mc-boards__quiz-visual-card';
+      var qw = document.createElement('div');
+      qw.className = 'mc-boards__quiz-visual-img';
+      var qim = document.createElement('img');
+      qim.src = qc.img;
+      qim.alt = qc.label;
+      qw.appendChild(qim);
+      qbtn.appendChild(qw);
+      var ql = document.createElement('span');
+      ql.className = 'mc-boards__quiz-visual-label';
+      ql.textContent = qc.label;
+      qbtn.appendChild(ql);
+      qg.appendChild(qbtn);
+    }
+    quizRoot.appendChild(qg);
+  }
+
+  var palApp = document.getElementById('mc-boards-palette-app');
+  if (palApp && !palApp.children.length && C.paletteLab && C.paletteLab.presets) {
+    var pr = document.createElement('div');
+    pr.className = 'mc-boards__palette-presets';
+    for (var pi = 0; pi < C.paletteLab.presets.length; pi++) {
+      var chip = document.createElement('span');
+      chip.className = 'mc-boards__filter-chip';
+      chip.textContent = C.paletteLab.presets[pi].label;
+      pr.appendChild(chip);
+    }
+    palApp.appendChild(pr);
+    var disc = document.createElement('div');
+    disc.className = 'mc-boards__wheel-disc';
+    disc.setAttribute('aria-hidden', 'true');
+    palApp.appendChild(disc);
   }
 
   var types = document.getElementById('mc-boards-types');
