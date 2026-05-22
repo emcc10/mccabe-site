@@ -1,5 +1,5 @@
 import type { Mask } from '../phase1/masks.js';
-import { bbox, dilate, intersect } from '../phase1/masks.js';
+import { bbox, dilate, intersect, union } from '../phase1/masks.js';
 import { boxBlur } from '../phase5/labUtil.js';
 
 /** Normalized zones within upholstery bbox (TEST-SOFA sectional layout). */
@@ -16,6 +16,8 @@ const SEAT_FRONT_Y_MIN = 0.34;
 const SEAT_FRONT_Y_MAX = 0.58;
 
 const LOWER12_DILATE_PX = 8;
+/** Bottom of upholstery bbox — keeps lower front base rail off-limits when lower12 misses uphol. */
+const UPHOL_BOTTOM_EXCLUDE_FRAC = 0.16;
 const FEATHER_BLUR_PX = 14;
 
 export interface UpperUpholsteryRegion {
@@ -32,8 +34,22 @@ export interface UpperUpholsteryRegion {
     arms: { xOuterMax: number; xInnerMin: number; yMin: number; yMax: number };
     seatFront: { yMin: number; yMax: number };
     lower12DilatePx: number;
+    upholBottomExcludeFrac: number;
     featherBlurPx: number;
   };
+}
+
+function buildUpholsteryBottomExclude(upholstery: Mask, bb: NonNullable<ReturnType<typeof bbox>>): Mask {
+  const { width, height } = upholstery;
+  const out = emptyMask(width, height);
+  const yStart = bb.minY + Math.floor((bb.maxY - bb.minY + 1) * (1 - UPHOL_BOTTOM_EXCLUDE_FRAC));
+  for (let y = yStart; y <= bb.maxY; y++) {
+    for (let x = bb.minX; x <= bb.maxX; x++) {
+      const j = y * width + x;
+      if (upholstery.data[j] >= 128) out.data[j] = 255;
+    }
+  }
+  return out;
 }
 
 function emptyMask(width: number, height: number): Mask {
@@ -74,6 +90,7 @@ export function buildUpperUpholsteryRegion(
         },
         seatFront: { yMin: SEAT_FRONT_Y_MIN, yMax: SEAT_FRONT_Y_MAX },
         lower12DilatePx: LOWER12_DILATE_PX,
+        upholBottomExcludeFrac: UPHOL_BOTTOM_EXCLUDE_FRAC,
         featherBlurPx: FEATHER_BLUR_PX,
       },
     };
@@ -82,7 +99,10 @@ export function buildUpperUpholsteryRegion(
   const spanX = Math.max(bb.maxX - bb.minX, 1);
   const spanY = Math.max(bb.maxY - bb.minY, 1);
 
-  const exclude = intersect(dilate(lower12, LOWER12_DILATE_PX), upholstery);
+  const exclude = union(
+    intersect(dilate(lower12, LOWER12_DILATE_PX), upholstery),
+    buildUpholsteryBottomExclude(upholstery, bb),
+  );
   const hard = emptyMask(width, height);
 
   for (let y = bb.minY; y <= bb.maxY; y++) {
@@ -131,6 +151,7 @@ export function buildUpperUpholsteryRegion(
       },
       seatFront: { yMin: SEAT_FRONT_Y_MIN, yMax: SEAT_FRONT_Y_MAX },
       lower12DilatePx: LOWER12_DILATE_PX,
+      upholBottomExcludeFrac: UPHOL_BOTTOM_EXCLUDE_FRAC,
       featherBlurPx: FEATHER_BLUR_PX,
     },
   };

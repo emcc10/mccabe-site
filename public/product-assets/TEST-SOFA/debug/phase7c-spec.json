@@ -52,19 +52,20 @@
       "yMax": 0.58
     },
     "lower12DilatePx": 8,
+    "upholBottomExcludeFrac": 0.16,
     "featherBlurPx": 14,
     "stats": {
       "upholsteryPixels": 152231,
       "hardUpperPixels": 86738,
       "weightedUpperPixels": 97694,
-      "excludeOnUpholsteryPixels": 0,
+      "excludeOnUpholsteryPixels": 24604,
       "hardUpperOverlapsExclude": 0,
       "hardUpperMaskCount": 86738,
-      "excludeMaskCount": 0
+      "excludeMaskCount": 24604
     },
     "debugMaskLegend": {
       "darkGray": "outside upholstery",
-      "orange": "excluded lower-12% band (dilated) — base rail preserved",
+      "orange": "excluded lower band (dilated lower-12% + bottom 16% uphol bbox) — base rail preserved",
       "dimGray": "upholstery outside upper zones",
       "green": "upper boost weight (brighter = stronger)"
     }

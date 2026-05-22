@@ -128,7 +128,7 @@ export async function runPhase7c() {
       stats: upperRegionStats(upholstery, upperRegion),
       debugMaskLegend: {
         darkGray: 'outside upholstery',
-        orange: 'excluded lower-12% band (dilated) — base rail preserved',
+        orange: 'excluded lower band (dilated lower-12% + bottom 16% uphol bbox) — base rail preserved',
         dimGray: 'upholstery outside upper zones',
         green: 'upper boost weight (brighter = stronger)',
       },
