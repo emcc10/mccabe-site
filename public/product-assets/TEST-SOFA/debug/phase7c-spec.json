@@ -1,0 +1,139 @@
+{
+  "phase": "7C",
+  "purpose": "Reduce soft/airbrushed look on upper upholstery (back cushions, arm fronts, seat top/front) — not final Bali Silk",
+  "lockedUnchanged": [
+    "Stage 4B-v3 color mapping",
+    "Phase 6A bottom seam fix",
+    "Phase 7B global material params (structure/seam/micro/highlight)",
+    "masks, alpha, leg restore, edges"
+  ],
+  "base7b": {
+    "stage": "7B",
+    "lockedFrom": "Phase 7 variant B (more micro material)",
+    "notFinalBaliSilk": true,
+    "params": {
+      "structureStrength": 0.24,
+      "seamStrength": 0.22,
+      "microStrength": 0.13,
+      "highlightStrength": 0.035
+    },
+    "pipeline": [
+      "Stage 4B-v3",
+      "Phase 6A bottom seam fix",
+      "Phase 7 material model"
+    ]
+  },
+  "method": "applyMaterialModel (7B globally) + feathered upper-region micro/structure delta from source maps; seam unchanged",
+  "functionsChanged": [
+    "src/phase7c/upperRegion.ts — buildUpperUpholsteryRegion",
+    "src/phase7c/apply.ts — applyPhase7c",
+    "src/phase7c/run.ts — runPhase7c"
+  ],
+  "upperRegion": {
+    "zones": [
+      "back-cushions",
+      "upper-arm-fronts",
+      "seat-top-front-transition"
+    ],
+    "normalizedWithin": "upholstery-bbox",
+    "back": {
+      "yMax": 0.46,
+      "xMin": 0.18,
+      "xMax": 0.82
+    },
+    "arms": {
+      "xOuterMax": 0.26,
+      "xInnerMin": 0.74,
+      "yMin": 0.18,
+      "yMax": 0.66
+    },
+    "seatFront": {
+      "yMin": 0.34,
+      "yMax": 0.58
+    },
+    "lower12DilatePx": 8,
+    "featherBlurPx": 14,
+    "stats": {
+      "upholsteryPixels": 152231,
+      "hardUpperPixels": 86738,
+      "weightedUpperPixels": 97694,
+      "excludeOnUpholsteryPixels": 0,
+      "hardUpperOverlapsExclude": 0,
+      "hardUpperMaskCount": 86738,
+      "excludeMaskCount": 0
+    },
+    "debugMaskLegend": {
+      "darkGray": "outside upholstery",
+      "orange": "excluded lower-12% band (dilated) — base rail preserved",
+      "dimGray": "upholstery outside upper zones",
+      "green": "upper boost weight (brighter = stronger)"
+    }
+  },
+  "variants": [
+    {
+      "id": "A",
+      "label": "7C-A +MICRO UPPER",
+      "boost": {
+        "extraMicro": 0.06,
+        "extraStructure": 0
+      },
+      "note": "Slightly stronger micro recovery on upper surfaces only; no seam increase"
+    },
+    {
+      "id": "B",
+      "label": "7C-B +MICRO+STRUCT UPPER",
+      "boost": {
+        "extraMicro": 0.06,
+        "extraStructure": 0.07
+      },
+      "note": "Same micro boost as A + slightly stronger structure on upper surfaces only; no seam increase"
+    }
+  ],
+  "results": [
+    {
+      "id": "A",
+      "label": "7C-A +MICRO UPPER",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7c-variant-A.png",
+      "boost": {
+        "extraMicro": 0.06,
+        "extraStructure": 0
+      },
+      "meanL": 71.88636348706899,
+      "deltaLFrom6a": 0.02401613337625008,
+      "deltaLFrom7b": -0.0017867582818240635
+    },
+    {
+      "id": "B",
+      "label": "7C-B +MICRO+STRUCT UPPER",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7c-variant-B.png",
+      "boost": {
+        "extraMicro": 0.06,
+        "extraStructure": 0.07
+      },
+      "meanL": 72.00941989476519,
+      "deltaLFrom6a": 0.14707254107244694,
+      "deltaLFrom7b": 0.1212696494143728
+    }
+  ],
+  "reference7bMeanL": 71.88815024535081,
+  "base6aUpholsteryMeanLab": {
+    "meanL": 71.86234735369274,
+    "meanA": 3.1375015601290146,
+    "meanB": 6.165209451425794,
+    "count": 152231
+  },
+  "outputs": {
+    "grid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7c-grid.png",
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7c-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7c-variant-B.png"
+    ],
+    "upperRegionMask": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7c-upper-region-mask.png",
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase7c-spec.json"
+  },
+  "notes": [
+    "No color remap, random noise, global sharpen, edge/mask/alpha changes.",
+    "Lower front base rail excluded via dilated lower-12% band.",
+    "No single/comparison re-export of unchanged 7B."
+  ]
+}

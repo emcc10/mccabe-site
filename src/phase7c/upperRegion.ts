@@ -1,5 +1,5 @@
 import type { Mask } from '../phase1/masks.js';
-import { bbox, dilate, intersect, subtract } from '../phase1/masks.js';
+import { bbox, dilate, intersect } from '../phase1/masks.js';
 import { boxBlur } from '../phase5/labUtil.js';
 
 /** Normalized zones within upholstery bbox (TEST-SOFA sectional layout). */

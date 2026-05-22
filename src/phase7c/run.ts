@@ -9,7 +9,7 @@ import { meanUpholsteryLab } from '../phase5/labUtil.js';
 import { buildMaterialMaps } from '../phase7/materialModel.js';
 import { LOCKED_7B, LOCKED_7B_PARAMS } from '../phase7/spec.js';
 import { applyPhase7c } from './apply.js';
-import { PHASE7C_VARIANTS } from './spec.js';
+import { PHASE7C_VARIANTS, type Phase7cVariant } from './spec.js';
 import {
   buildUpperUpholsteryRegion,
   upperRegionMaskToRgb,
@@ -166,9 +166,8 @@ export async function runPhase7c() {
     upperMask: PHASE7C_UPPER_MASK,
     variants: variantResults,
     upperRegion,
+    regionStats: upperRegionStats(upholstery, upperRegion),
     baseLab,
     base7bLab,
   };
 }
-
-import type { Phase7cVariant } from './spec.js';

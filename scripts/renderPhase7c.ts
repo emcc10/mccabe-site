@@ -7,7 +7,8 @@ console.log('Phase 7C: upper upholstery texture recovery (7B base + regional boo
 const out = await runPhase7c();
 
 console.log('=== Upper region mask ===');
-console.log(`  hard upper px: ${out.upperRegion.definition.zones.length ? 'see spec' : 'n/a'}`);
+console.log(`  hard upper px: ${out.regionStats.hardUpperPixels}`);
+console.log(`  weighted px:   ${out.regionStats.weightedUpperPixels}`);
 console.log(`  ${resolve(out.upperMask)}\n`);
 
 console.log('=== Variants (7B global + upper-only delta) ===');
