@@ -40,8 +40,11 @@ OPTIONAL = (
     "vspfiles/js/sectional-configs.js",
 )
 
-SKIP_OVER_CAP = (
+CHUNKED_JS_OVER_CAP = (
     "vspfiles/js/mtl-sectional-renderer.js",
+)
+
+SKIP_OVER_CAP = (
     "vspfiles/templates/266/js/min/template.min.js",
 )
 
@@ -174,7 +177,8 @@ def _try_put(sftp, local: str, remote: str, want: int, use_chunked_first: bool) 
 
 def _upload_one(sftp, local: str, remotes: list[str] | None = None) -> bool:
     want = os.path.getsize(local)
-    if local.replace("\\", "/") in {p.replace("\\", "/") for p in SKIP_OVER_CAP}:
+    local_n = local.replace("\\", "/")
+    if local_n in {p.replace("\\", "/") for p in SKIP_OVER_CAP}:
         if want > VOLUSION_JS_CAP:
             print(
                 f"::notice::SKIP_CAP {local!r} size={want} — over Volusion "
@@ -184,9 +188,28 @@ def _upload_one(sftp, local: str, remotes: list[str] | None = None) -> bool:
             return True
 
     paths = remotes if remotes is not None else _remotes(local)
+    if local_n in {p.replace("\\", "/") for p in CHUNKED_JS_OVER_CAP} and want > VOLUSION_JS_CAP:
+        print(
+            f"::notice::CHUNKED_JS_OVER_CAP {local!r} size={want} — chunked SFTP upload",
+            flush=True,
+        )
+        canon_ok = False
+        any_ok = False
+        for remote in paths:
+            if _upload_chunked(sftp, local, remote):
+                any_ok = True
+                if remote.startswith("/v/vspfiles/"):
+                    canon_ok = True
+        if not canon_ok:
+            print(
+                f"::error::FAIL {local!r}: /v/vspfiles/ path not updated (HTTP serves this URL)",
+                file=sys.stderr,
+            )
+            return False
+        return any_ok
+
     use_chunked_first = want > 31000 or local.lower().endswith(".png")
     sync_all = _boards_need_all_remotes(local)
-    local_n = local.replace("\\", "/")
     # Browsers fetch https://…/v/vspfiles/… — uploads that only land on /vspfiles/ can pass lftp yet 404 HTTP.
     require_canon = "vspfiles/" in local_n and local_n not in {
         p.replace("\\", "/") for p in SKIP_OVER_CAP

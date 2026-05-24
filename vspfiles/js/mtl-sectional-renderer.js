@@ -73,7 +73,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v23";
+  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v24";
 
   /** Template owns native leather `<select>` discovery; prefers __McCabeLeatherCollectImpl so `mcCollectNativeLeatherSelectsForPdp` can’t be swapped by other scripts */
   function mtlGetNativeLeatherCollectFn() {
@@ -391,25 +391,24 @@
     return !!(title.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING);
   }
 
-  function insertTopPricePanel(panel, mount) {
+  function insertTopPricePanel(panel) {
     var title = findProductTitleEl();
-    var parent = mount && mount.parent;
-    var ref = mount && mount.before;
-    if (parent && ref && ref.parentNode === parent) {
-      parent.insertBefore(panel, ref);
-      return;
-    }
-    if (title && title.parentNode) {
-      parent = title.parentNode;
+    if (!title || !title.parentNode) return false;
+    var parent = title.parentNode;
+    try {
       if (title.nextSibling) {
         parent.insertBefore(panel, title.nextSibling);
       } else {
         parent.appendChild(panel);
       }
-      return;
-    }
-    if (parent) {
-      parent.appendChild(panel);
+      return true;
+    } catch (eIns) {
+      try {
+        parent.appendChild(panel);
+        return true;
+      } catch (eApp) {
+        return false;
+      }
     }
   }
 
@@ -556,12 +555,9 @@
       } catch (eUnmount) {}
       delete panel.dataset.mtlTopPriceMounted;
     }
-    var mount = findTopPriceMountPoint();
-    if (!mount || !mount.parent) return;
+    if (!findProductTitleEl()) return;
     try {
-      if (!panel.parentNode) {
-        insertTopPricePanel(panel, mount);
-      }
+      if (!panel.parentNode && !insertTopPricePanel(panel)) return;
       panel.dataset.mtlTopPriceMounted = "1";
       panel.style.setProperty("display", "flex", "important");
       panel.style.setProperty("flex-direction", "column", "important");
@@ -571,7 +567,10 @@
       panel.style.setProperty("position", "static", "important");
       suppressExternalTopPricePanels();
     } catch (eMount) {
-      console.warn("[MTL] mountTopPricePanelUnderTitleOnce", eMount);
+      if (!window.__MTL_TOP_PRICE_MOUNT_WARNED__) {
+        window.__MTL_TOP_PRICE_MOUNT_WARNED__ = 1;
+        console.warn("[MTL] mountTopPricePanelUnderTitleOnce", eMount);
+      }
     }
   }
 

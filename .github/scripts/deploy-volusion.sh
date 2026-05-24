@@ -234,8 +234,13 @@ put_primary "vspfiles/templates/266/js/mc-plp-enforcer.js" "mc-plp-enforcer-temp
   "/vspfiles/templates/266/js/mc-plp-enforcer.js" \
   "vspfiles/templates/266/js/mc-plp-enforcer.js"
 
-# template.min.js + mtl-sectional-renderer.js exceed Volusion 128 KiB SFTP cap — SKIP_CAP in Paramiko (not an error).
-echo "=== skip template.min.js + mtl-sectional-renderer.js (>128 KiB; use Volusion File Manager or GitHub for renderer) ==="
+# template.min.js exceeds Volusion 128 KiB SFTP cap — SKIP_CAP in Paramiko (not an error).
+echo "=== skip template.min.js (>128 KiB); mtl-sectional-renderer.js via Paramiko chunked upload ==="
+
+put_primary "vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer" \
+  "/v/vspfiles/js/mtl-sectional-renderer.js" \
+  "/vspfiles/js/mtl-sectional-renderer.js" \
+  "vspfiles/js/mtl-sectional-renderer.js"
 
 put_primary "vspfiles/js/sectional-configs.js" "sectional-configs" \
   "/vspfiles/js/sectional-configs.js" \
@@ -408,6 +413,7 @@ elif [[ "$verify_mc_pdp_http_rc" -ne 0 ]]; then
 else
   echo "=== MC_PDP_JS_DEPLOY_VERIFIED (SFTP + HTTP) ==="
 fi
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mtl-sectional-renderer.js?v=$(date +%s)" "sectional-20260601-top-price-panel-v24"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260625"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp" "MC_DTK_PLP_20260625"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-sofa-bounds.json?v=$(date +%s)" "77494-91-1.jpg"
@@ -430,7 +436,7 @@ fi
 
 echo ""
 echo "Deploy finished (~2–4 min). Hard-refresh category 177 (Ctrl+Shift+R)."
-echo "SKIP_CAP on template.min / mtl-sectional-renderer is normal (128 KiB Volusion limit)."
+echo "SKIP_CAP on template.min.js is normal (128 KiB Volusion limit); mtl-sectional-renderer uses chunked SFTP."
 echo "PLP fix: single enforcer via design-toolkit.min.js + template body script (${TEMPLATE_ENFORCER_TAG})."
 verify_live_template_http "$TEMPLATE_ENFORCER_TAG"
 echo ""

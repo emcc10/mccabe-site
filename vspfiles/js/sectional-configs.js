@@ -1014,4 +1014,59 @@
       g.setTimeout(ensure, ms);
     });
   })(window, document);
+
+  /* MC_SECTIONAL_MTL_RENDERER_INLINE_v24 — upgrade stale baked renderer (CI now chunked-SFTPs file) */
+  (function (g, d) {
+    var WANT = "sectional-20260601-top-price-panel-v24";
+    var GH =
+      "https://raw.githubusercontent.com/emcc10/mccabe-site/main/vspfiles/js/mtl-sectional-renderer.js";
+    function onPdp() {
+      try {
+        return (
+          (d.body && d.body.classList.contains("productdetails")) ||
+          !!d.getElementById("v65-product-parent")
+        );
+      } catch (ePdp) {
+        return false;
+      }
+    }
+    function needUpgrade() {
+      var have = String(g.MTL_RENDERER_BUILD || "").trim();
+      if (have === WANT) return false;
+      if (have) return true;
+      return !!d.querySelector('script[src*="mtl-sectional-renderer.js"]');
+    }
+    function load(src, isFallback) {
+      var s = d.createElement("script");
+      s.id = isFallback ? "mc-mtl-renderer-gh-fallback" : "mc-mtl-renderer-inline-loader";
+      s.src = src;
+      s.async = false;
+      s.onerror = function () {
+        if (!isFallback) {
+          load(GH + "?mcrd=" + Date.now(), true);
+        }
+      };
+      (d.head || d.documentElement).appendChild(s);
+    }
+    function ensure() {
+      if (!onPdp() || !needUpgrade()) return;
+      if (g.__MC_MTL_RENDERER_UPGRADING__) return;
+      g.__MC_MTL_RENDERER_UPGRADING__ = 1;
+      d.querySelectorAll('script[src*="mtl-sectional-renderer"]').forEach(function (old) {
+        try {
+          old.remove();
+        } catch (eRm) {}
+      });
+      delete g.MTL_RENDERER_BUILD;
+      load("/v/vspfiles/js/mtl-sectional-renderer.js?v=" + WANT + "&mcrd=" + Date.now(), false);
+    }
+    ensure();
+    if (d.readyState === "loading") {
+      d.addEventListener("DOMContentLoaded", ensure);
+    }
+    g.addEventListener("load", ensure);
+    [0, 300, 1200].forEach(function (ms) {
+      g.setTimeout(ensure, ms);
+    });
+  })(window, document);
 })();
