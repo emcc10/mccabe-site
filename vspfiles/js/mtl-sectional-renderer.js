@@ -73,7 +73,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v24";
+  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v25";
 
   /** Template owns native leather `<select>` discovery; prefers __McCabeLeatherCollectImpl so `mcCollectNativeLeatherSelectsForPdp` can’t be swapped by other scripts */
   function mtlGetNativeLeatherCollectFn() {
@@ -546,6 +546,7 @@
 
   function mountTopPricePanelUnderTitleOnce() {
     if (!isSectionalProductPageClient()) return;
+    if (window.__MTL_TOP_PRICE_MOUNT_GAVE_UP__) return;
     var panel = ensureTopPricePanel();
     if (!panel) return;
     if (isTopPricePanelMounted(panel)) return;
@@ -557,8 +558,12 @@
     }
     if (!findProductTitleEl()) return;
     try {
-      if (!panel.parentNode && !insertTopPricePanel(panel)) return;
+      if (!panel.parentNode && !insertTopPricePanel(panel)) {
+        window.__MTL_TOP_PRICE_MOUNT_GAVE_UP__ = true;
+        return;
+      }
       panel.dataset.mtlTopPriceMounted = "1";
+      delete window.__MTL_TOP_PRICE_MOUNT_GAVE_UP__;
       panel.style.setProperty("display", "flex", "important");
       panel.style.setProperty("flex-direction", "column", "important");
       panel.style.setProperty("gap", "6px", "important");
@@ -567,6 +572,7 @@
       panel.style.setProperty("position", "static", "important");
       suppressExternalTopPricePanels();
     } catch (eMount) {
+      window.__MTL_TOP_PRICE_MOUNT_GAVE_UP__ = true;
       if (!window.__MTL_TOP_PRICE_MOUNT_WARNED__) {
         window.__MTL_TOP_PRICE_MOUNT_WARNED__ = 1;
         console.warn("[MTL] mountTopPricePanelUnderTitleOnce", eMount);
@@ -574,8 +580,12 @@
     }
   }
 
-  function updateTopPricePanel() {
+  var __mtlTopPricePanelTimer = null;
+  function updateTopPricePanelNow() {
     if (!isSectionalProductPageClient()) return;
+    if (window.__MTL_TOP_PRICE_MOUNT_GAVE_UP__ && !isTopPricePanelMounted(document.getElementById("mc-pdp-top-price-panel"))) {
+      return;
+    }
     mountTopPricePanelUnderTitleOnce();
     var panel = document.getElementById("mc-pdp-top-price-panel");
     if (!panel) return;
@@ -590,6 +600,11 @@
     }
     panel.innerHTML = buildTopPricePanelInnerHtml(retailAmt, memberAmt, loggedIn);
     suppressExternalTopPricePanels();
+  }
+
+  function updateTopPricePanel() {
+    if (__mtlTopPricePanelTimer) clearTimeout(__mtlTopPricePanelTimer);
+    __mtlTopPricePanelTimer = setTimeout(updateTopPricePanelNow, 80);
   }
 
   /** Sectional PDP: never relocate finished lower blocks (#mtl-product-summary, #mc-inline-config). */
@@ -2189,15 +2204,19 @@
     return "mailto:erin@mccabestheaterandliving.com";
   }
 
+  var __mtlMemberObsTimer = null;
   function ensureMemberClassObserver() {
     if (typeof MutationObserver === "undefined" || !document.body) return;
     if (document.body.dataset.mtlSectionalMemberObs === "1") return;
     document.body.dataset.mtlSectionalMemberObs = "1";
     var obs = new MutationObserver(function () {
-      syncCardsSelectionHighlight();
-      updateProductSummary();
-      updateTopPricePanel();
-      updateSectionalCardPriceBadges();
+      if (__mtlMemberObsTimer) clearTimeout(__mtlMemberObsTimer);
+      __mtlMemberObsTimer = setTimeout(function () {
+        syncCardsSelectionHighlight();
+        updateProductSummary();
+        updateTopPricePanel();
+        updateSectionalCardPriceBadges();
+      }, 120);
     });
     obs.observe(document.body, { attributes: true, attributeFilter: ["class"] });
   }

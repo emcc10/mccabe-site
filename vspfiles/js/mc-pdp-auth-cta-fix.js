@@ -6,7 +6,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260531a";
+  var VERSION = "20260602a";
   /* Set immediately so console/deploy checks work even if later init throws */
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
 
@@ -14,6 +14,19 @@
     return new Promise(function (resolve) {
       global.setTimeout(resolve, Math.max(0, Number(ms) || 0));
     });
+  }
+
+  function isSectionalPdpPage() {
+    try {
+      if (global.window.MTL_SECTIONAL_CONFIGS) return true;
+      if (global.document.getElementById("mtl-sectional-configurations")) return true;
+      if (global.document.body && global.document.body.classList.contains("is-sectional-product")) {
+        return true;
+      }
+      var t = (global.document.querySelector("h1") || {}).textContent || "";
+      if (/\bsectional\b/i.test(t) && global.document.getElementById("v65-product-parent")) return true;
+    } catch (eSec) {}
+    return false;
   }
 
   function loginReturnTo() {
@@ -940,7 +953,9 @@
 
   function forceRebuildCleanPriceStack() {
     if (!isProductPdp()) return;
+    if (isSectionalPdpPage()) return;
     if (global.document.getElementById("mc-pdp-top-price-panel") || global.__MTL_OWNS_TOP_PRICE__) return;
+    if (global.__MTL_TOP_PRICE_MOUNT_GAVE_UP__) return;
     ensurePdpStackCriticalCss();
     var retailAmt = readRetailAmountForStack();
     if (!(retailAmt > 0)) return;
@@ -1539,10 +1554,13 @@
 
   function runPatch() {
     if (!isProductPdp()) return;
+    var sectional = isSectionalPdpPage();
     try {
       installPdpStackApiGuards();
       ensurePdpStackCriticalCss();
-      forceRebuildCleanPriceStack();
+      if (!sectional) {
+        forceRebuildCleanPriceStack();
+      }
       wirePlannerLoginGate();
       guardConfigurationBlockClick();
       patchCaptionSignInCta();
@@ -1611,8 +1629,15 @@
 
   if (typeof MutationObserver !== "undefined") {
     var scheduled = false;
+    var moLastRun = 0;
     var mo = new MutationObserver(function () {
       if (scheduled) return;
+      var sectional = isSectionalPdpPage();
+      if (sectional) {
+        var now = Date.now();
+        if (now - moLastRun < 2500) return;
+        moLastRun = now;
+      }
       scheduled = true;
       global.requestAnimationFrame(function () {
         scheduled = false;
@@ -1624,7 +1649,13 @@
       global.document.getElementById("v65-product-parent") ||
       global.document.getElementById("mcConfigurationBlock") ||
       global.document.body;
-    if (root) mo.observe(root, { childList: true, subtree: true, characterData: true });
+    if (root) {
+      mo.observe(root, {
+        childList: true,
+        subtree: true,
+        characterData: !isSectionalPdpPage(),
+      });
+    }
   }
 })(window);
 
