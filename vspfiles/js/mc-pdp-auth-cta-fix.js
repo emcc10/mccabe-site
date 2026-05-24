@@ -960,7 +960,7 @@
     try {
       global.document.body.classList.add("mc-pdp-price-stack");
     } catch (eCls) {}
-    global.__MC_PDP_STACK_FORCE__ = "20260530a";
+    global.__MC_PDP_STACK_FORCE__ = "20260531a";
   }
 
   global.mcForceRebuildCleanPriceStack = forceRebuildCleanPriceStack;
@@ -1641,7 +1641,7 @@
   var s = d.createElement("script");
   s.id = "mc-pdp-price-stack-loader";
   s.async = true;
-  s.src = "/v/vspfiles/js/mc-pdp-price-stack.js?v=20260530a&mcrd=" + Date.now();
+  s.src = "/v/vspfiles/js/mc-pdp-price-stack.js?v=20260531a&mcrd=" + Date.now();
   s.onload = function () {
     try {
       if (typeof g.mcEnsurePdpPriceStack === "function") g.mcEnsurePdpPriceStack();
