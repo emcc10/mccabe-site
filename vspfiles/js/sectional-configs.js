@@ -4,33 +4,15 @@
  * Source: sectional_styles_registry.json + Palliser PDFs + mccabe_plp_codes.json
  */
 (function () {
-  /* Stop v22 mountTopPricePanel insertBefore loop until v24+ loads (runs before renderer script). */
+  /* Load emergency patch before renderer (fixes v22 insertBefore loop on live). */
   (function (g, d) {
-    var mountWarned = false;
-    var origWarn = console.warn;
-    console.warn = function () {
-      var a0 = arguments[0];
-      if (typeof a0 === "string" && a0.indexOf("mountTopPricePanelUnderTitleOnce") >= 0) {
-        g.__MTL_TOP_PRICE_MOUNT_GAVE_UP__ = true;
-        if (mountWarned) return;
-        mountWarned = true;
-      }
-      return origWarn.apply(console, arguments);
-    };
-    function patchMtlTopPrice() {
-      var fn = g.mtlUpdateTopPricePanel;
-      if (typeof fn === "function" && !fn.__mcLoopGuard__) {
-        g.mtlUpdateTopPricePanel = function () {
-          if (g.__MTL_TOP_PRICE_MOUNT_GAVE_UP__) return;
-          return fn.apply(this, arguments);
-        };
-        g.mtlUpdateTopPricePanel.__mcLoopGuard__ = 1;
-      }
-    }
-    patchMtlTopPrice();
-    [50, 200, 600, 1500, 3000].forEach(function (ms) {
-      g.setTimeout(patchMtlTopPrice, ms);
-    });
+    if (g.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) return;
+    try {
+      var s = d.createElement("script");
+      s.src = "/v/vspfiles/js/mc-sectional-pdp-emergency.js?v=20260602b&mcrd=" + Date.now();
+      s.async = false;
+      (d.head || d.documentElement).appendChild(s);
+    } catch (eLoad) {}
   })(window, document);
 
   var _base =
@@ -1013,7 +995,7 @@
 
   /* MC_SECTIONAL_PDP_AUTH_INLINE_20260531a — no external boot.js (404-safe); load auth fix with cache bust */
   (function (g, d) {
-    var WANT = "20260602a";
+    var WANT = "20260602b";
     function ensure() {
       try {
         var onPdp =

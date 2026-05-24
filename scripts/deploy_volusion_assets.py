@@ -9,6 +9,8 @@ import sys
 VOLUSION_JS_CAP = 131072
 
 CRITICAL = (
+    "vspfiles/js/mc-sectional-pdp-emergency.js",
+    "vspfiles/js/mtl-sectional-renderer.js",
     "vspfiles/css/custom-safe.css",
     "vspfiles/css/mc-live-patch.css",
     "vspfiles/templates/266/js/min/design-toolkit.min.js",

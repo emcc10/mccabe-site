@@ -242,6 +242,11 @@ put_primary "vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer" \
   "/vspfiles/js/mtl-sectional-renderer.js" \
   "vspfiles/js/mtl-sectional-renderer.js"
 
+put_primary "vspfiles/js/mc-sectional-pdp-emergency.js" "mc-sectional-pdp-emergency" \
+  "/v/vspfiles/js/mc-sectional-pdp-emergency.js" \
+  "/vspfiles/js/mc-sectional-pdp-emergency.js" \
+  "vspfiles/js/mc-sectional-pdp-emergency.js"
+
 put_primary "vspfiles/js/sectional-configs.js" "sectional-configs" \
   "/vspfiles/js/sectional-configs.js" \
   "vspfiles/js/sectional-configs.js"

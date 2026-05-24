@@ -6,7 +6,17 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260602a";
+  /* Same guard as mc-sectional-pdp-emergency.js — runs when auth bundle loads on baked PDPs */
+  if (!global.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) {
+    try {
+      var s = global.document.createElement("script");
+      s.src = "/v/vspfiles/js/mc-sectional-pdp-emergency.js?v=20260602b&mcrd=" + Date.now();
+      s.async = false;
+      (global.document.head || global.document.documentElement).appendChild(s);
+    } catch (eEmer) {}
+  }
+
+  var VERSION = "20260602b";
   /* Set immediately so console/deploy checks work even if later init throws */
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
 
