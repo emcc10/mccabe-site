@@ -1,4 +1,4 @@
-/* 0530a C_CSS_DEPLOY_VERIFY_20260530a — PDP price stack host; block template render dupes */
+/* 0531a C_CSS_DEPLOY_VERIFY_20260531a — sectional top price panel (#mtl-pdp-top-price) */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -14752,4 +14752,41 @@ html body.productdetails:has(.mc-pdp-retail-row) #v65-product-parent .colors_pri
 html body.productdetails:has(.mc-pdp-member-pricing) #v65-product-parent .colors_pricebox > .mc-pdp-member-line,
 html body.mc-product-page:has(.mc-pdp-member-pricing) #v65-product-parent .colors_pricebox > .mc-pdp-member-line {
   display: none !important;
+}
+/* Sectional PDP: MTL top price panel under title (retail + member only) */
+html body.is-sectional-product #mtl-pdp-top-price,
+html body.productdetails #mtl-pdp-top-price {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 12px 0 !important;
+  padding: 0 !important;
+  position: static !important;
+  clear: both !important;
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+}
+html body.is-sectional-product #mtl-pdp-top-price .mc-pdp-retail-row,
+html body.is-sectional-product #mtl-pdp-top-price .mc-pdp-member-pricing,
+html body.productdetails #mtl-pdp-top-price .mc-pdp-retail-row,
+html body.productdetails #mtl-pdp-top-price .mc-pdp-member-pricing {
+  display: flex !important;
+  flex-direction: column !important;
+  position: static !important;
+  margin: 0 0 4px 0 !important;
+  width: 100% !important;
+}
+html body.is-sectional-product #mtl-pdp-top-price .mc-pdp-member-line--sale,
+html body.productdetails #mtl-pdp-top-price .mc-pdp-member-line--sale {
+  display: none !important;
+}
+html body.is-sectional-product #mc-pdp-price-stack-host {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }

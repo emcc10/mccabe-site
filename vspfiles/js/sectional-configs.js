@@ -968,82 +968,23 @@
 
   console.log("sectional-configs", "registry-merge-v3-pdp-auth-inline", window.MTL_SECTIONAL_CONFIGS);
 
-  /* MC_SECTIONAL_PDP_STACK_EMERGENCY_20260530a — layout before auth bundle (cached CSS safe) */
+  /* MC_SECTIONAL_PDP_TOP_PRICE_CSS_20260531a — MTL renderer owns top price panel layout */
   (function (d) {
     if (d.getElementById("mc-pdp-stack-emergency-css")) return;
     var s = d.createElement("style");
     s.id = "mc-pdp-stack-emergency-css";
     s.textContent =
-      "body.productdetails #mc-pdp-price-stack-host,body.mc-pdp-price-stack #mc-pdp-price-stack-host{display:flex!important;flex-direction:column!important;gap:6px!important;width:100%!important;margin:0 0 12px!important;position:static!important}" +
-      "body.productdetails #mc-pdp-price-stack-host .mc-pdp-retail-row,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-pricing{display:flex!important;flex-direction:column!important;position:static!important;margin:0 0 4px!important;width:100%!important;visibility:visible!important;opacity:1!important}" +
-      "body.productdetails #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),body.productdetails:has(#mc-pdp-price-stack-host) #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price){display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
+      "body.productdetails #mtl-pdp-top-price,body.is-sectional-product #mtl-pdp-top-price{display:flex!important;flex-direction:column!important;gap:6px!important;width:100%!important;margin:0 0 12px!important;position:static!important}" +
+      "body.productdetails #mtl-pdp-top-price .mc-pdp-retail-row,body.productdetails #mtl-pdp-top-price .mc-pdp-member-pricing{display:flex!important;flex-direction:column!important;position:static!important;margin:0 0 4px!important;width:100%!important;font-size:13px!important;line-height:1.2!important}" +
+      "body.productdetails #mc-pdp-price-stack-host{display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
       "body.productdetails .mc-member-price-caption,body.productdetails #v65-product-parent .colors_pricebox>.mc-pdp-member-line{display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
       "body.productdetails #v65-product-parent .colors_pricebox .mc-pdp-retail-row,body.productdetails #v65-product-parent .colors_pricebox .mc-pdp-member-pricing,body.productdetails #v65-product-parent .colors_pricebox>.mc-pdp-member-line{display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}";
     (d.head || d.documentElement).appendChild(s);
   })(document);
 
-  /* MC_SECTIONAL_PDP_STACK_FORCE_20260530a — hide dupes + call force rebuild when auth loads */
+  /* MC_SECTIONAL_PDP_AUTH_INLINE_20260531a — no external boot.js (404-safe); load auth fix with cache bust */
   (function (g, d) {
-    function hideMtlPriceDupes() {
-      try {
-        if (!d.body || !d.body.classList.contains("productdetails")) return;
-        var host = d.getElementById("mc-pdp-price-stack-host");
-        var stackActive =
-          !!host ||
-          (d.body && d.body.classList.contains("mc-pdp-price-stack")) ||
-          !!d.querySelector(".mc-pdp-retail-row, .mc-pdp-member-pricing");
-        if (!stackActive) return;
-        var elP = d.getElementById("mtl-sum-price");
-        if (elP) {
-          var priceRow = elP.closest && elP.closest(".mtl-summary-row");
-          if (priceRow && priceRow.style) {
-            priceRow.style.setProperty("display", "none", "important");
-            priceRow.style.setProperty("height", "0", "important");
-            priceRow.style.setProperty("overflow", "hidden", "important");
-            priceRow.style.setProperty("opacity", "0", "important");
-          }
-        }
-        d.querySelectorAll(".mc-member-price-caption").forEach(function (node) {
-          try {
-            node.style.setProperty("display", "none", "important");
-          } catch (eCap) {}
-        });
-      } catch (eHide) {}
-    }
-    function runForce() {
-      hideMtlPriceDupes();
-      if (typeof g.mcForceRebuildCleanPriceStack === "function") {
-        try {
-          g.mcForceRebuildCleanPriceStack();
-        } catch (eForce) {}
-      }
-    }
-    runForce();
-    if (d.readyState === "loading") {
-      d.addEventListener("DOMContentLoaded", runForce);
-    }
-    g.addEventListener("load", runForce);
-    [0, 80, 200, 500, 1200, 2500, 5000, 9000].forEach(function (ms) {
-      g.setTimeout(runForce, ms);
-    });
-    if (typeof MutationObserver !== "undefined") {
-      var scheduled = false;
-      var mo = new MutationObserver(function () {
-        if (scheduled) return;
-        scheduled = true;
-        g.requestAnimationFrame(function () {
-          scheduled = false;
-          runForce();
-        });
-      });
-      var root = d.getElementById("v65-product-parent") || d.getElementById("mtl-product-summary") || d.body;
-      if (root) mo.observe(root, { childList: true, subtree: true });
-    }
-  })(window, document);
-
-  /* MC_SECTIONAL_PDP_AUTH_INLINE_20260530a — no external boot.js (404-safe); load auth fix with cache bust */
-  (function (g, d) {
-    var WANT = "20260530a";
+    var WANT = "20260531a";
     function ensure() {
       try {
         var onPdp =

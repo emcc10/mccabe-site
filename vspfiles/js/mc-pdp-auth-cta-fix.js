@@ -6,7 +6,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260530a";
+  var VERSION = "20260531a";
   /* Set immediately so console/deploy checks work even if later init throws */
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
 
@@ -940,6 +940,7 @@
 
   function forceRebuildCleanPriceStack() {
     if (!isProductPdp()) return;
+    if (global.document.getElementById("mtl-pdp-top-price") || global.__MTL_OWNS_TOP_PRICE__) return;
     ensurePdpStackCriticalCss();
     var retailAmt = readRetailAmountForStack();
     if (!(retailAmt > 0)) return;
