@@ -940,7 +940,7 @@
 
   function forceRebuildCleanPriceStack() {
     if (!isProductPdp()) return;
-    if (global.document.getElementById("mtl-pdp-top-price") || global.__MTL_OWNS_TOP_PRICE__) return;
+    if (global.document.getElementById("mc-pdp-top-price-panel") || global.__MTL_OWNS_TOP_PRICE__) return;
     ensurePdpStackCriticalCss();
     var retailAmt = readRetailAmountForStack();
     if (!(retailAmt > 0)) return;

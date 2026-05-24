@@ -14754,8 +14754,8 @@ html body.mc-product-page:has(.mc-pdp-member-pricing) #v65-product-parent .color
   display: none !important;
 }
 /* Sectional PDP: MTL top price panel under title (retail + member only) */
-html body.is-sectional-product #mtl-pdp-top-price,
-html body.productdetails #mtl-pdp-top-price {
+html body.is-sectional-product #mc-pdp-top-price-panel,
+html body.productdetails #mc-pdp-top-price-panel {
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
@@ -14769,21 +14769,33 @@ html body.productdetails #mtl-pdp-top-price {
   font-size: 13px !important;
   line-height: 1.2 !important;
 }
-html body.is-sectional-product #mtl-pdp-top-price .mc-pdp-retail-row,
-html body.is-sectional-product #mtl-pdp-top-price .mc-pdp-member-pricing,
-html body.productdetails #mtl-pdp-top-price .mc-pdp-retail-row,
-html body.productdetails #mtl-pdp-top-price .mc-pdp-member-pricing {
+html body.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-retail-row,
+html body.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-member-pricing,
+html body.productdetails #mc-pdp-top-price-panel .mc-pdp-retail-row,
+html body.productdetails #mc-pdp-top-price-panel .mc-pdp-member-pricing {
   display: flex !important;
   flex-direction: column !important;
   position: static !important;
   margin: 0 0 4px 0 !important;
   width: 100% !important;
 }
-html body.is-sectional-product #mtl-pdp-top-price .mc-pdp-member-line--sale,
-html body.productdetails #mtl-pdp-top-price .mc-pdp-member-line--sale {
+html body.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-member-line--sale,
+html body.productdetails #mc-pdp-top-price-panel .mc-pdp-member-line--sale {
   display: none !important;
 }
-html body.is-sectional-product #mc-pdp-price-stack-host {
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .product_saleprice,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .product_sale_price,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .product_saleprice,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .product_sale_price {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+html body.is-sectional-product #mc-pdp-price-stack-host,
+html body.is-sectional-product #mtl-pdp-top-price {
   display: none !important;
   height: 0 !important;
   overflow: hidden !important;

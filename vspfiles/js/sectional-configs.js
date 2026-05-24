@@ -974,9 +974,9 @@
     var s = d.createElement("style");
     s.id = "mc-pdp-stack-emergency-css";
     s.textContent =
-      "body.productdetails #mtl-pdp-top-price,body.is-sectional-product #mtl-pdp-top-price{display:flex!important;flex-direction:column!important;gap:6px!important;width:100%!important;margin:0 0 12px!important;position:static!important}" +
-      "body.productdetails #mtl-pdp-top-price .mc-pdp-retail-row,body.productdetails #mtl-pdp-top-price .mc-pdp-member-pricing{display:flex!important;flex-direction:column!important;position:static!important;margin:0 0 4px!important;width:100%!important;font-size:13px!important;line-height:1.2!important}" +
-      "body.productdetails #mc-pdp-price-stack-host{display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
+      "body.productdetails #mc-pdp-top-price-panel,body.is-sectional-product #mc-pdp-top-price-panel{display:flex!important;flex-direction:column!important;gap:6px!important;width:100%!important;margin:0 0 12px!important;position:static!important}" +
+      "body.productdetails #mc-pdp-top-price-panel .mc-pdp-retail-row,body.productdetails #mc-pdp-top-price-panel .mc-pdp-member-pricing{display:flex!important;flex-direction:column!important;position:static!important;margin:0 0 4px!important;width:100%!important;font-size:13px!important;line-height:1.2!important}" +
+      "body.productdetails #mc-pdp-price-stack-host,body.productdetails #mtl-pdp-top-price{display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
       "body.productdetails .mc-member-price-caption,body.productdetails #v65-product-parent .colors_pricebox>.mc-pdp-member-line{display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
       "body.productdetails #v65-product-parent .colors_pricebox .mc-pdp-retail-row,body.productdetails #v65-product-parent .colors_pricebox .mc-pdp-member-pricing,body.productdetails #v65-product-parent .colors_pricebox>.mc-pdp-member-line{display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}";
     (d.head || d.documentElement).appendChild(s);
