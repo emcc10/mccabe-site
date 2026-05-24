@@ -73,7 +73,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v22";
+  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v23";
 
   /** Template owns native leather `<select>` discovery; prefers __McCabeLeatherCollectImpl so `mcCollectNativeLeatherSelectsForPdp` can’t be swapped by other scripts */
   function mtlGetNativeLeatherCollectFn() {
@@ -370,6 +370,8 @@
     for (i = 0; i < nodes.length; i++) {
       var node = nodes[i];
       if (!node || node === title || (title.contains && title.contains(node))) continue;
+      /* Klarna/options often live outside title.parentNode — insertBefore requires a sibling ref. */
+      if (!parent.contains(node)) continue;
       if (!insertBefore) {
         insertBefore = node;
         continue;
@@ -379,6 +381,36 @@
       }
     }
     return { parent: parent, before: insertBefore || title.nextSibling };
+  }
+
+  function isTopPricePanelMounted(panel) {
+    if (!panel || !panel.parentNode) return false;
+    var title = findProductTitleEl();
+    if (!title || !title.parentNode) return panel.dataset.mtlTopPriceMounted === "1";
+    if (panel.parentNode !== title.parentNode) return false;
+    return !!(title.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING);
+  }
+
+  function insertTopPricePanel(panel, mount) {
+    var title = findProductTitleEl();
+    var parent = mount && mount.parent;
+    var ref = mount && mount.before;
+    if (parent && ref && ref.parentNode === parent) {
+      parent.insertBefore(panel, ref);
+      return;
+    }
+    if (title && title.parentNode) {
+      parent = title.parentNode;
+      if (title.nextSibling) {
+        parent.insertBefore(panel, title.nextSibling);
+      } else {
+        parent.appendChild(panel);
+      }
+      return;
+    }
+    if (parent) {
+      parent.appendChild(panel);
+    }
   }
 
   function readRetailAmountForTopPanel() {
@@ -517,12 +549,18 @@
     if (!isSectionalProductPageClient()) return;
     var panel = ensureTopPricePanel();
     if (!panel) return;
-    if (panel.dataset.mtlTopPriceMounted === "1" && panel.parentNode) return;
+    if (isTopPricePanelMounted(panel)) return;
+    if (panel.parentNode && !isTopPricePanelMounted(panel)) {
+      try {
+        panel.parentNode.removeChild(panel);
+      } catch (eUnmount) {}
+      delete panel.dataset.mtlTopPriceMounted;
+    }
     var mount = findTopPriceMountPoint();
     if (!mount || !mount.parent) return;
     try {
       if (!panel.parentNode) {
-        mount.parent.insertBefore(panel, mount.before || null);
+        insertTopPricePanel(panel, mount);
       }
       panel.dataset.mtlTopPriceMounted = "1";
       panel.style.setProperty("display", "flex", "important");
