@@ -2864,12 +2864,20 @@
     if (elC) elC.textContent = configLabel;
     if (elP) {
       var priceRow = elP.closest && elP.closest(".mtl-summary-row");
-      if (document.querySelector(".mc-pdp-retail-row, .mc-pdp-member-pricing")) {
+      if (
+        document.getElementById("mc-pdp-price-stack-host") ||
+        (document.body && document.body.classList.contains("mc-pdp-price-stack")) ||
+        document.querySelector(".mc-pdp-retail-row, .mc-pdp-member-pricing")
+      ) {
         if (priceRow && priceRow.style) priceRow.style.setProperty("display", "none", "important");
       } else if (priceRow && priceRow.style) {
         priceRow.style.removeProperty("display");
       }
-      if (!document.querySelector(".mc-pdp-retail-row, .mc-pdp-member-pricing")) {
+      if (
+        !document.getElementById("mc-pdp-price-stack-host") &&
+        !(document.body && document.body.classList.contains("mc-pdp-price-stack")) &&
+        !document.querySelector(".mc-pdp-retail-row, .mc-pdp-member-pricing")
+      ) {
         elP.classList.remove("mtl-summary-price--guest");
         if (sectionalIsLoggedIn()) {
           elP.textContent = price || "—";

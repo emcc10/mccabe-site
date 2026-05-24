@@ -514,7 +514,7 @@
 
   global.mcPlpEnforcerRun = run;
 
-  var PDP_AUTH_WANT = "20260523boot";
+  var PDP_AUTH_WANT = "20260529e";
 
   function loadPdpAuthCtaFix() {
     try {
