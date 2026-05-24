@@ -968,6 +968,20 @@
 
   console.log("sectional-configs", "registry-merge-v3-pdp-auth-inline", window.MTL_SECTIONAL_CONFIGS);
 
+  /* MC_SECTIONAL_PDP_STACK_EMERGENCY_20260528d — layout before auth bundle (cached CSS safe) */
+  (function (d) {
+    if (d.getElementById("mc-pdp-stack-emergency-css")) return;
+    var s = d.createElement("style");
+    s.id = "mc-pdp-stack-emergency-css";
+    s.textContent =
+      "body.productdetails #mc-pdp-price-stack-host,body.mc-pdp-price-stack #mc-pdp-price-stack-host{display:flex!important;flex-direction:column!important;gap:6px!important;width:100%!important;margin:0 0 12px!important;position:static!important}" +
+      "body.productdetails #mc-pdp-price-stack-host .mc-pdp-retail-row,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-pricing{display:flex!important;flex-direction:column!important;position:static!important;margin:0 0 4px!important;width:100%!important;visibility:visible!important;opacity:1!important}" +
+      "body.productdetails #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price){display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
+      "body.productdetails .mc-member-price-caption,body.productdetails #v65-product-parent .colors_pricebox>.mc-pdp-member-line{display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
+      "body.productdetails #v65-product-parent .colors_pricebox .mc-pdp-retail-row,body.productdetails #v65-product-parent .colors_pricebox .mc-pdp-member-pricing{display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}";
+    (d.head || d.documentElement).appendChild(s);
+  })(document);
+
   /* MC_SECTIONAL_PDP_AUTH_INLINE_20260528 — no external boot.js (404-safe); load auth fix with cache bust */
   (function (g, d) {
     var WANT = "20260523boot";

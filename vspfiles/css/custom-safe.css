@@ -1,4 +1,4 @@
-/* 0528c C_CSS_DEPLOY_VERIFY_20260528c — PDP: one price stack; hide MTL summary duplicate prices */
+/* 0528d C_CSS_DEPLOY_VERIFY_20260528d — PDP price stack host; no overlap with MTL summary */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -14668,8 +14668,40 @@ html body.mc-product-page #v65-product-parent .mc-pdp-member-line {
   font-size: 13px !important;
   line-height: 1.2 !important;
 }
-html body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line--sale,
-html body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line--sale {
+html body.productdetails #mc-pdp-price-stack-host,
+html body.mc-product-page #mc-pdp-price-stack-host,
+html body.mc-pdp-price-stack #mc-pdp-price-stack-host {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 12px 0 !important;
+  padding: 0 !important;
+  position: static !important;
+  clear: both !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+}
+html body.productdetails #mc-pdp-price-stack-host .mc-pdp-retail-row,
+html body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-pricing,
+html body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-retail-row,
+html body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-member-pricing {
+  display: flex !important;
+  flex-direction: column !important;
+  position: static !important;
+  float: none !important;
+  margin: 0 0 4px 0 !important;
+  width: 100% !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+}
+html body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-pricing .mc-pdp-member-line--sale,
+html body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-member-pricing .mc-pdp-member-line--sale {
   display: flex !important;
 }
 /* Sectional PDP: McCabe stack owns retail/member/sale — hide duplicate MTL summary + caption prices */
