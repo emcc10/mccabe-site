@@ -140,7 +140,7 @@ verify_template_on_sftp() {
 
 TEMPLATE_ENFORCER_TAG=$(grep -oE 'mc-plp-enforcer\.js\?v=[0-9]+' template_266.html 2>/dev/null | head -1 || true)
 if [[ -z "$TEMPLATE_ENFORCER_TAG" ]]; then
-  TEMPLATE_ENFORCER_TAG="mc-plp-enforcer.js?v=20260624"
+  TEMPLATE_ENFORCER_TAG="mc-plp-enforcer.js?v=20260625"
 fi
 
 python3 scripts/announce_deploy_markers.py || true
@@ -408,8 +408,8 @@ elif [[ "$verify_mc_pdp_http_rc" -ne 0 ]]; then
 else
   echo "=== MC_PDP_JS_DEPLOY_VERIFIED (SFTP + HTTP) ==="
 fi
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260621"
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260520plp" "MC_DTK_PLP_20260621"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260625"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp" "MC_DTK_PLP_20260625"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-sofa-bounds.json?v=$(date +%s)" "77494-91-1.jpg"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/my-boards.html?v=$(date +%s)" "20260541"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/boards/my-boards-bundle.css?v=20260541" "mc-boards__palette-match-layout"

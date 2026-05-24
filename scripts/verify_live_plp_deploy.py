@@ -73,6 +73,10 @@ def main() -> int:
     dtk_urls = [
         (f"{SITE}/v/vspfiles/templates/266/js/min/design-toolkit.min.js", False),
         (
+            f"{SITE}/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp",
+            True,
+        ),
+        (
             f"{SITE}/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260520plp",
             True,
         ),
@@ -90,7 +94,7 @@ def main() -> int:
         elif baked_query and got_dtk > 0 and got_dtk < want_dtk:
             print(
                 f"::warning::STALE_DTK {url} has MC_DTK_PLP_{got_dtk}, want >={want_dtk} — "
-                "Cloudflare Purge by URL (category HTML loads ?v=20260520plp until template rebake)",
+                "Cloudflare Purge by URL (category HTML loads stale ?v= until template rebake)",
                 file=sys.stderr,
             )
         elif got_dtk >= want_dtk - 1:
