@@ -968,7 +968,7 @@
 
   console.log("sectional-configs", "registry-merge-v3-pdp-auth-inline", window.MTL_SECTIONAL_CONFIGS);
 
-  /* MC_SECTIONAL_PDP_STACK_EMERGENCY_20260529e — layout before auth bundle (cached CSS safe) */
+  /* MC_SECTIONAL_PDP_STACK_EMERGENCY_20260530a — layout before auth bundle (cached CSS safe) */
   (function (d) {
     if (d.getElementById("mc-pdp-stack-emergency-css")) return;
     var s = d.createElement("style");
@@ -982,7 +982,7 @@
     (d.head || d.documentElement).appendChild(s);
   })(document);
 
-  /* MC_SECTIONAL_PDP_STACK_FORCE_20260529e — hide dupes + call force rebuild when auth loads */
+  /* MC_SECTIONAL_PDP_STACK_FORCE_20260530a — hide dupes + call force rebuild when auth loads */
   (function (g, d) {
     function hideMtlPriceDupes() {
       try {
@@ -1041,9 +1041,9 @@
     }
   })(window, document);
 
-  /* MC_SECTIONAL_PDP_AUTH_INLINE_20260529e — no external boot.js (404-safe); load auth fix with cache bust */
+  /* MC_SECTIONAL_PDP_AUTH_INLINE_20260530a — no external boot.js (404-safe); load auth fix with cache bust */
   (function (g, d) {
-    var WANT = "20260529e";
+    var WANT = "20260530a";
     function ensure() {
       try {
         var onPdp =

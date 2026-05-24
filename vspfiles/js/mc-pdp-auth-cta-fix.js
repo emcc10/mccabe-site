@@ -6,7 +6,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260529e";
+  var VERSION = "20260530a";
   /* Set immediately so console/deploy checks work even if later init throws */
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
 
@@ -698,7 +698,7 @@
       "display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:6px!important;width:100%!important;max-width:100%!important;margin:0 0 12px!important;padding:0!important;position:static!important;clear:both!important}" +
       "body.productdetails #mc-pdp-price-stack-host .mc-pdp-retail-row,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-pricing,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-retail-row,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-member-pricing{" +
       "display:flex!important;flex-direction:column!important;position:static!important;float:none!important;margin:0 0 4px!important;width:100%!important;visibility:visible!important;opacity:1!important;height:auto!important;max-height:none!important}" +
-      "body.productdetails #mc-pdp-price-stack-host .product_list_price,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-line__amount,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-line__label,body.mc-pdp-price-stack #mc-pdp-price-stack-host .product_list_price{" +
+      "body.productdetails #mc-pdp-price-stack-host .product_list_price,body.productdetails #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-line__amount,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-line__label,body.mc-pdp-price-stack #mc-pdp-price-stack-host .product_list_price,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt{" +
       "display:block!important;visibility:visible!important;opacity:1!important;font-size:13px!important;color:#444!important;line-height:1.2!important}" +
       "body.productdetails #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),body.mc-pdp-price-stack #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price){" +
       "display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important}" +
@@ -767,7 +767,7 @@
 
   function readRetailAmountForStack() {
     var fromRow = global.document.querySelector(
-      ".mc-pdp-retail-row .product_list_price, .mc-pdp-retail-row font.product_list_price"
+      ".mc-pdp-retail-row .mc-pdp-stack-retail-amt, .mc-pdp-retail-row .product_list_price, .mc-pdp-retail-row font.product_list_price"
     );
     if (fromRow) {
       var a = parseMoney(fromRow.textContent || "");
@@ -809,7 +809,7 @@
       parts.push(
         '<div class="mc-pdp-retail-row">' +
           '<div class="mc-pdp-retail-label">Retail Price</div>' +
-          '<div class="mc-pdp-retail-line"><span class="product_list_price">' +
+          '<div class="mc-pdp-retail-line"><span class="mc-pdp-stack-retail-amt">' +
           fmtMoney(retailAmt) +
           "</span></div>" +
           "</div>"
@@ -876,6 +876,68 @@
       });
   }
 
+  function prunePriceStackHost(host) {
+    if (!host) return;
+    host.querySelectorAll(
+      ".product_saleprice, .product_sale_price, .product_productprice, font.product_sale_price, .mc-member-price-caption"
+    ).forEach(function (node) {
+      try {
+        node.remove();
+      } catch (eRm) {}
+    });
+    host.querySelectorAll(".mtl-product-price-block").forEach(function (pb) {
+      try {
+        while (pb.firstChild) {
+          host.insertBefore(pb.firstChild, pb);
+        }
+        pb.remove();
+      } catch (eUnwrap) {}
+    });
+    var retailRows = host.querySelectorAll(".mc-pdp-retail-row");
+    var ri;
+    for (ri = 1; ri < retailRows.length; ri++) {
+      try {
+        retailRows[ri].remove();
+      } catch (eRr) {}
+    }
+    var row = host.querySelector(".mc-pdp-retail-row");
+    if (row) {
+      var labels = row.querySelectorAll(".mc-pdp-retail-label");
+      var li;
+      for (li = 1; li < labels.length; li++) {
+        try {
+          labels[li].remove();
+        } catch (eLbl) {}
+      }
+    }
+    var wraps = host.querySelectorAll(".mc-pdp-member-pricing");
+    for (ri = 1; ri < wraps.length; ri++) {
+      try {
+        wraps[ri].remove();
+      } catch (eWrap) {}
+    }
+    var wrap = host.querySelector(".mc-pdp-member-pricing");
+    if (wrap) {
+      var locked = wrap.querySelectorAll(".mc-pdp-member-line--locked");
+      for (li = 1; li < locked.length; li++) {
+        try {
+          locked[li].remove();
+        } catch (eLock) {}
+      }
+      var sales = wrap.querySelectorAll(".mc-pdp-member-line--sale");
+      for (li = 1; li < sales.length; li++) {
+        try {
+          sales[li].remove();
+        } catch (eSale) {}
+      }
+    }
+    host.querySelectorAll(":scope > .mc-pdp-member-line").forEach(function (node) {
+      try {
+        node.remove();
+      } catch (eLoose) {}
+    });
+  }
+
   function forceRebuildCleanPriceStack() {
     if (!isProductPdp()) return;
     ensurePdpStackCriticalCss();
@@ -887,17 +949,17 @@
     var host = findOrCreatePriceStackHost();
     if (!host) return;
     var sig = String(retailAmt) + "|" + String(saleAmt) + "|" + (guest ? "g" : "m");
-    if (host.getAttribute("data-mc-stack-sig") !== sig) {
-      host.innerHTML = buildStackHostHtml(retailAmt, saleAmt, guest);
-      host.setAttribute("data-mc-stack-sig", sig);
-    }
+    host.innerHTML = buildStackHostHtml(retailAmt, saleAmt, guest);
+    host.setAttribute("data-mc-stack-sig", sig);
+    host.setAttribute("data-mc-stack-owned", "1");
+    prunePriceStackHost(host);
     placePriceStackHost(host);
     hideAllStrayPdpPriceNodes(host);
     hideDuplicatePdpPriceUi();
     try {
       global.document.body.classList.add("mc-pdp-price-stack");
     } catch (eCls) {}
-    global.__MC_PDP_STACK_FORCE__ = "20260529e";
+    global.__MC_PDP_STACK_FORCE__ = "20260530a";
   }
 
   global.mcForceRebuildCleanPriceStack = forceRebuildCleanPriceStack;
@@ -985,6 +1047,7 @@
 
   function ensureMcCabeRetailStack() {
     if (!isProductPdp()) return;
+    if (global.document.getElementById("mc-pdp-price-stack-host")) return;
     if (
       !global.document.querySelector(".mc-pdp-retail-row") &&
       typeof global.mcRenderRetailMemberOnPdp === "function"
@@ -993,20 +1056,47 @@
         global.mcRenderRetailMemberOnPdp();
       } catch (eRender) {}
     }
-    global.document
-      .querySelectorAll(
-        ".mc-pdp-retail-row, .mc-pdp-member-pricing, .mc-pdp-member-line, .mc-pdp-retail-label"
-      )
-      .forEach(function (node) {
-        if (!node || !node.style) return;
+  }
+
+  function installPdpStackApiGuards() {
+    global.mcEnsurePdpPriceStack = mcEnsurePdpPriceStack;
+    global.mcForceRebuildCleanPriceStack = forceRebuildCleanPriceStack;
+
+    if (
+      typeof global.mcRenderRetailMemberOnPdp === "function" &&
+      global.mcRenderRetailMemberOnPdp.__mcStackGuardVer !== VERSION
+    ) {
+      var origRender = global.mcRenderRetailMemberOnPdp;
+      global.mcRenderRetailMemberOnPdp = function () {
+        if (global.document.getElementById("mc-pdp-price-stack-host")) {
+          forceRebuildCleanPriceStack();
+          return Promise.resolve(true);
+        }
+        return origRender.apply(this, arguments);
+      };
+      global.mcRenderRetailMemberOnPdp.__mcStackGuardVer = VERSION;
+      global.mcRenderRetailMemberOnPdp.__mcOrig = origRender;
+    }
+
+    if (typeof global.forceProductFixes === "function" && global.forceProductFixes.__mcStackWrapped !== VERSION) {
+      var origFixes = global.forceProductFixes;
+      global.forceProductFixes = function () {
+        var out;
         try {
-          node.style.removeProperty("display");
-          node.style.setProperty("visibility", "visible", "important");
-          node.style.setProperty("opacity", "1", "important");
-          node.style.setProperty("height", "auto", "important");
-          node.style.setProperty("max-height", "none", "important");
-        } catch (eVis) {}
-      });
+          out = origFixes.apply(this, arguments);
+        } catch (eFix) {
+          out = undefined;
+        }
+        try {
+          if (global.document.getElementById("mc-pdp-price-stack-host")) {
+            forceRebuildCleanPriceStack();
+          }
+        } catch (eRebuild) {}
+        return out;
+      };
+      global.forceProductFixes.__mcStackWrapped = VERSION;
+      global.forceProductFixes.__mcOrig = origFixes;
+    }
   }
 
   function extractAdditionalFromOptionText(text) {
@@ -1449,9 +1539,9 @@
   function runPatch() {
     if (!isProductPdp()) return;
     try {
+      installPdpStackApiGuards();
       ensurePdpStackCriticalCss();
       forceRebuildCleanPriceStack();
-      ensureMcCabeRetailStack();
       wirePlannerLoginGate();
       guardConfigurationBlockClick();
       patchCaptionSignInCta();
@@ -1512,7 +1602,10 @@
   global.document.addEventListener("DOMContentLoaded", runPatch);
   global.addEventListener("load", runPatch);
   [0, 50, 200, 600, 1500, 4000, 9000].forEach(function (ms) {
-    global.setTimeout(runPatch, ms);
+    global.setTimeout(function () {
+      installPdpStackApiGuards();
+      runPatch();
+    }, ms);
   });
 
   if (typeof MutationObserver !== "undefined") {
@@ -1522,6 +1615,7 @@
       scheduled = true;
       global.requestAnimationFrame(function () {
         scheduled = false;
+        installPdpStackApiGuards();
         runPatch();
       });
     });
@@ -1546,7 +1640,7 @@
   var s = d.createElement("script");
   s.id = "mc-pdp-price-stack-loader";
   s.async = true;
-  s.src = "/v/vspfiles/js/mc-pdp-price-stack.js?v=20260529e&mcrd=" + Date.now();
+  s.src = "/v/vspfiles/js/mc-pdp-price-stack.js?v=20260530a&mcrd=" + Date.now();
   s.onload = function () {
     try {
       if (typeof g.mcEnsurePdpPriceStack === "function") g.mcEnsurePdpPriceStack();
