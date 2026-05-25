@@ -1,0 +1,197 @@
+{
+  "phase": "RealLeather Reference Match 2",
+  "purpose": "Tone down REF-B washout while preserving seam depth and catalog-leather behavior",
+  "base": "REALLEATHER-REF-B",
+  "preserves": [
+    "smooth leather surface",
+    "satin highlight behavior",
+    "improved cushion depth",
+    "clean catalog look",
+    "no visible grain pattern",
+    "no blotchy or stamped texture"
+  ],
+  "adjustments": [
+    "slight global brightness pull-down",
+    "stronger high-end clamp on upper cushion highlights",
+    "seam and shadow preservation during blend-back",
+    "blend toward REF-A and REALLEATHER2-B only in controlled open fields"
+  ],
+  "outputs": {
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherReferenceMatch2-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherReferenceMatch2-variant-B.png"
+    ],
+    "compareGrid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherReferenceMatch2-compare-grid.png",
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherReferenceMatch2-spec.json"
+  },
+  "variants": [
+    {
+      "id": "A",
+      "label": "REALLEATHER-REF2-A",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherReferenceMatch2-variant-A.png",
+      "params": {
+        "mixRefA": 0.15,
+        "mixRl2Base": 0,
+        "mixRl2Highlight": 0,
+        "mixRl2Upper": 0,
+        "globalPull": 0.18,
+        "upperPull": 0.52,
+        "highlightClamp": 0.68,
+        "seamRestore": 0.82,
+        "contrastKeep": 0.08,
+        "topKnee": 81.8,
+        "topCompress": 0.76
+      },
+      "vs6a": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 4.887094831758578,
+        "meanAbsDeltaL": 1.7824096274740362,
+        "meanAbsDeltaA": 0.2552371067653763,
+        "meanAbsDeltaB": 0.7861867819300931,
+        "maxAbsDeltaL": 8,
+        "maxAbsDeltaRgb": 22.333333333333332,
+        "rmsDeltaL": 2.2765838404429495,
+        "pixelsAboveLThreshold2": 73562,
+        "pixelsAboveLThreshold4": 21248,
+        "fractionAboveLThreshold2": 0.4832261497329716,
+        "ssimOnL": 0.9733301981932776,
+        "ssimOnRgb": 0.9682779597077784
+      },
+      "vsRealLeather2B": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 3.9633802138381165,
+        "meanAbsDeltaL": 1.4851902700501212,
+        "meanAbsDeltaA": 0.11474666789287333,
+        "meanAbsDeltaB": 0.37715051467835065,
+        "maxAbsDeltaL": 4,
+        "maxAbsDeltaRgb": 13,
+        "rmsDeltaL": 1.8907777667812724,
+        "pixelsAboveLThreshold2": 60282,
+        "pixelsAboveLThreshold4": 9684,
+        "fractionAboveLThreshold2": 0.39599030420873543,
+        "ssimOnL": 0.984070317037732,
+        "ssimOnRgb": 0.9828434668261427
+      },
+      "vsRefA": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 1.4948532164929884,
+        "meanAbsDeltaL": 0.4420847265011726,
+        "meanAbsDeltaA": 0.062083281329032854,
+        "meanAbsDeltaB": 0.17495779440455622,
+        "maxAbsDeltaL": 3,
+        "maxAbsDeltaRgb": 8.333333333333334,
+        "rmsDeltaL": 0.872801855899625,
+        "pixelsAboveLThreshold2": 20704,
+        "pixelsAboveLThreshold4": 0,
+        "fractionAboveLThreshold2": 0.1360038362751345,
+        "ssimOnL": 0.9965401123315806,
+        "ssimOnRgb": 0.9965358083120933
+      },
+      "vsRefB": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 1.498017267617085,
+        "meanAbsDeltaL": 0.44283358842811255,
+        "meanAbsDeltaA": 0.0026538615656469446,
+        "meanAbsDeltaB": 0.0008802412123680459,
+        "maxAbsDeltaL": 3,
+        "maxAbsDeltaRgb": 8.333333333333334,
+        "rmsDeltaL": 0.8748165776385938,
+        "pixelsAboveLThreshold2": 20705,
+        "pixelsAboveLThreshold4": 0,
+        "fractionAboveLThreshold2": 0.1360104052394059,
+        "ssimOnL": 0.9965512894683379,
+        "ssimOnRgb": 0.9964464173193555
+      },
+      "meanLab": {
+        "meanL": 73.17892544882449,
+        "meanA": 2.8823695567919807,
+        "meanB": 6.9513962333558865,
+        "count": 152231
+      }
+    },
+    {
+      "id": "B",
+      "label": "REALLEATHER-REF2-B",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherReferenceMatch2-variant-B.png",
+      "params": {
+        "mixRefA": 0,
+        "mixRl2Base": 0.12,
+        "mixRl2Highlight": 0.1,
+        "mixRl2Upper": 0.07,
+        "globalPull": 0.12,
+        "upperPull": 0.64,
+        "highlightClamp": 0.9,
+        "seamRestore": 0.9,
+        "contrastKeep": 0.16,
+        "topKnee": 81.2,
+        "topCompress": 0.68
+      },
+      "vs6a": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 4.148103868463317,
+        "meanAbsDeltaL": 1.5374398118648633,
+        "meanAbsDeltaA": 0.25300365891309917,
+        "meanAbsDeltaB": 0.7843080581484717,
+        "maxAbsDeltaL": 7,
+        "maxAbsDeltaRgb": 20.333333333333332,
+        "rmsDeltaL": 1.9416439290128715,
+        "pixelsAboveLThreshold2": 66971,
+        "pixelsAboveLThreshold4": 10534,
+        "fractionAboveLThreshold2": 0.4399301062201523,
+        "ssimOnL": 0.9788485702351448,
+        "ssimOnRgb": 0.9756379341193474
+      },
+      "vsRealLeather2B": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 3.2868995145557336,
+        "meanAbsDeltaL": 1.2612148642523533,
+        "meanAbsDeltaA": 0.1125132200405962,
+        "meanAbsDeltaB": 0.3752717908967293,
+        "maxAbsDeltaL": 4,
+        "maxAbsDeltaRgb": 12,
+        "rmsDeltaL": 1.5730217613727426,
+        "pixelsAboveLThreshold2": 52261,
+        "pixelsAboveLThreshold4": 795,
+        "fractionAboveLThreshold2": 0.34330064178780934,
+        "ssimOnL": 0.9878564035138224,
+        "ssimOnRgb": 0.9876769943602589
+      },
+      "vsRefA": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 2.202716047761142,
+        "meanAbsDeltaL": 0.6864896111830048,
+        "meanAbsDeltaA": 0.06510500489387838,
+        "meanAbsDeltaB": 0.17458993240535764,
+        "maxAbsDeltaL": 4,
+        "maxAbsDeltaRgb": 11.333333333333334,
+        "rmsDeltaL": 1.2968142164883285,
+        "pixelsAboveLThreshold2": 30582,
+        "pixelsAboveLThreshold4": 1901,
+        "fractionAboveLThreshold2": 0.20089206534805656,
+        "ssimOnL": 0.9923684828003821,
+        "ssimOnRgb": 0.9917933889960855
+      },
+      "vsRefB": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 2.2110082703261686,
+        "meanAbsDeltaL": 0.6883551970360833,
+        "meanAbsDeltaA": 0.0018130341389073184,
+        "meanAbsDeltaB": 0.0024567926375048447,
+        "maxAbsDeltaL": 4,
+        "maxAbsDeltaRgb": 11,
+        "rmsDeltaL": 1.3038765034270237,
+        "pixelsAboveLThreshold2": 31508,
+        "pixelsAboveLThreshold4": 2013,
+        "fractionAboveLThreshold2": 0.20697492626337605,
+        "ssimOnL": 0.992312705346809,
+        "ssimOnRgb": 0.9915647018673167
+      },
+      "meanLab": {
+        "meanL": 72.93340384021651,
+        "meanA": 2.884852625286571,
+        "meanB": 6.949517509574266,
+        "count": 152231
+      }
+    }
+  ]
+}
