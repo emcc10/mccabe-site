@@ -27,6 +27,7 @@
     "render:phase7c": "tsx scripts/renderPhase7c.ts",
     "render:phase7c-b": "tsx scripts/renderPhase7cSingleB.ts",
     "export:preview-locked": "tsx scripts/exportPreviewLocked.ts",
+    "export:realleather-locked": "tsx scripts/exportRealLeatherLocked.ts",
     "render:phase8": "tsx scripts/renderPhase8.ts",
     "render:phase9": "tsx scripts/renderPhase9.ts",
     "render:phase9reset": "tsx scripts/renderPhase9Reset.ts",

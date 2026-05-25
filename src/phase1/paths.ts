@@ -14,6 +14,12 @@ export const PREVIEW_LOCKED_IMAGE = join(PREVIEW_LOCKED_DIR, 'bali-silk-preview.
 export const PREVIEW_LOCKED_PARAMS = join(PREVIEW_LOCKED_DIR, 'params.json');
 export const PREVIEW_LOCKED_STATUS = join(PREVIEW_LOCKED_DIR, 'STATUS.md');
 
+/** Locked RealLeather production baseline (FINAL-A). */
+export const REALLEATHER_LOCKED_DIR = join(PRODUCT_DIR, 'realleather-locked');
+export const REALLEATHER_LOCKED_IMAGE = join(REALLEATHER_LOCKED_DIR, 'bali-silk-realleather-baseline.png');
+export const REALLEATHER_LOCKED_PARAMS = join(REALLEATHER_LOCKED_DIR, 'params.json');
+export const REALLEATHER_LOCKED_STATUS = join(REALLEATHER_LOCKED_DIR, 'STATUS.md');
+
 export const LEGACY_SOURCE = join(REPO_ROOT, 'sofa-recolor-tool', 'input', 'sofa.png');
 export const LEGACY_UPHOLSTERY_MASK = join(REPO_ROOT, 'sofa-recolor-tool', 'input', 'mask.png');
 /** Hand-edited leg mask (white = legs). Your approved leg-mask-preview. */
