@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260625
+ * MC_PLP_ENFORCER_20260626p — PLP: swap NoPhoto when {SKU}-1.jpg exists on /v/vspfiles/photos/
  *
  * Thumbnails: .mc-plp-image-box + visible-sofa width normalization (no crop, no scale transform).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260625";
+  var VERSION = "20260626p";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -224,6 +224,74 @@
   function isProductPhoto(img) {
     var src = String(img.currentSrc || img.src || "").toLowerCase();
     return /vspfiles\/photos\//.test(src) || /vspfiles\/product\//.test(src);
+  }
+
+  function isNoPhotoPlaceholder(src) {
+    return /nophoto\.gif/i.test(String(src || ""));
+  }
+
+  function skuFromProductTitle(title) {
+    var m = String(title || "").match(/,\s*([^,"]+)\s*$/);
+    return m ? String(m[1]).trim() : "";
+  }
+
+  /** Volusion PLP often bakes NoPhoto.gif even when {SKU}-1.jpg exists on SFTP — probe and swap. */
+  function fixNoPhotoThumbnails() {
+    var root = document.getElementById("content_area");
+    if (!root) return;
+
+    root.querySelectorAll(".v-product").forEach(function (block) {
+      var titleEl = block.querySelector("a.v-product__title");
+      var sku = skuFromProductTitle(
+        titleEl && (titleEl.getAttribute("title") || titleEl.textContent)
+      );
+      if (!sku || !/^[0-9A-Za-z][0-9A-Za-z-]*$/.test(sku)) return;
+
+      var img =
+        block.querySelector("a.v-product__img img") ||
+        block.querySelector(".v-product__img img") ||
+        block.querySelector("img");
+      if (!img || !isNoPhotoPlaceholder(img.currentSrc || img.src)) return;
+
+      var file = sku + "-1.jpg";
+      var probe = new Image();
+      probe.onload = function () {
+        if (probe.naturalWidth < 80) return;
+        img.src = sameOriginPhotoUrl(file) + "?v=" + VERSION;
+        img.removeAttribute("data-mc-scale-done");
+        img.classList.remove("mc-plp-img-fit", "mc-plp-img-sized");
+        var parent = thumbBox(img);
+        if (parent) {
+          parent.classList.add("mc-plp-image-box");
+          clearClippingStyles(img, parent);
+        }
+        if (img.complete && img.naturalWidth) {
+          if (isPreNormalizedPhoto(img)) {
+            applyPreNormalizedPhoto(img, parent);
+          } else {
+            getVisibleBounds(img, function (bounds) {
+              applyNormalizedImage(img, parent, bounds);
+            });
+          }
+        } else {
+          img.addEventListener(
+            "load",
+            function () {
+              if (isPreNormalizedPhoto(img)) {
+                applyPreNormalizedPhoto(img, parent);
+              } else {
+                getVisibleBounds(img, function (bounds) {
+                  applyNormalizedImage(img, parent, bounds);
+                });
+              }
+            },
+            { once: true }
+          );
+        }
+      };
+      probe.onerror = function () {};
+      probe.src = sameOriginPhotoUrl(file) + "?mc-nophoto-probe=" + Date.now();
+    });
   }
 
   function thumbBox(img) {
@@ -465,12 +533,16 @@
     markCategory();
     injectCriticalThumbCss();
     removeLegacyCategoryBars();
+    fixNoPhotoThumbnails();
     normalizePLPImages();
     hideHero();
     if (!global.__MC_PLP_NORM_RETRIES__) {
       global.__MC_PLP_NORM_RETRIES__ = 1;
       [200, 800, 2500].forEach(function (ms) {
-        global.setTimeout(normalizePLPImages, ms);
+        global.setTimeout(function () {
+          fixNoPhotoThumbnails();
+          normalizePLPImages();
+        }, ms);
       });
     }
   }

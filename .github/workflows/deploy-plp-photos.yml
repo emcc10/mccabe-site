@@ -1,0 +1,47 @@
+name: Deploy PLP photos to Volusion
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "vspfiles/photos/**"
+      - "scripts/upload_missing_stock_photos.py"
+      - ".github/workflows/deploy-plp-photos.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-volusion-photos
+  cancel-in-progress: false
+
+jobs:
+  upload-photos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Paramiko
+        run: pip3 install paramiko
+
+      - name: Upload missing stock photos (SFTP)
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SFTP_PORT: "2222"
+        run: python3 scripts/upload_missing_stock_photos.py
+
+      - name: Verify sample photos on live CDN
+        run: |
+          set -e
+          for f in 77743-01-1.jpg 77651-01-1.jpg 42306-31-1.jpg; do
+            url="https://www.mccabestheaterandliving.com/v/vspfiles/photos/${f}"
+            code=$(curl -sS -o /dev/null -w "%{http_code}" "$url" || echo "000")
+            echo "$f -> HTTP $code"
+            if [ "$code" != "200" ]; then
+              echo "::error::Photo not reachable: $url"
+              exit 1
+            fi
+          done

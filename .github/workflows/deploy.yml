@@ -68,6 +68,20 @@ jobs:
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
 
+      - name: Detect PLP photo changes (push only)
+        if: github.event_name == 'push'
+        id: photos_changed
+        run: |
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            BEFORE=$(git rev-parse HEAD~1 2>/dev/null || true)
+          fi
+          if [ -n "$BEFORE" ] && git diff --name-only "$BEFORE" "${{ github.sha }}" -- 'vspfiles/photos/' | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Deploy to Volusion (SFTP + verify — job fails if upload fails)
         id: deploy
         env:
@@ -76,7 +90,7 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SKIP_TEMPLATE_DEPLOY: "0"
           DEPLOY_STRICT: "1"
-          SKIP_PLP_PHOTOS: ${{ github.event_name == 'push' && '1' || (inputs.upload_plp_photos == false && '1' || '0') }}
+          SKIP_PLP_PHOTOS: ${{ github.event_name == 'push' && steps.photos_changed.outputs.changed != 'true' && '1' || (github.event_name == 'workflow_dispatch' && inputs.upload_plp_photos == false && '1' || '0') }}
         run: bash .github/scripts/deploy-volusion.sh
 
       - name: Verify live storefront (informational)
