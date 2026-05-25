@@ -102,13 +102,8 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-p
       if (!looksPdp && /\/product\//i.test(p)) looksPdp = true;
       if (!looksPdp && document.body) {
         try {
-          if (document.getElementById("v65-product-parent")) looksPdp = true;
-          else if (
-            document.querySelector("[class*=\"cartqty__wrap\"]") &&
-            document.querySelector('input[name="ProductCode"]')
-          ) {
-            looksPdp = true;
-          }
+          if (document.body.classList.contains("productdetails")) looksPdp = true;
+          else if (document.getElementById("v65-product-parent")) looksPdp = true;
         } catch (eDomPdp) {}
       }
       if (!looksPdp) {
@@ -339,10 +334,8 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-p
 
   function mcDomLooksLikeProductPage() {
     try {
-      if (document.getElementById("v65-product-parent")) return true;
       if (document.body && document.body.classList.contains("productdetails")) return true;
-      var pc = document.querySelector('input[name="ProductCode"]');
-      if (pc && String(pc.value || "").trim()) return true;
+      if (document.getElementById("v65-product-parent")) return true;
     } catch (eD) {}
     return false;
   }
@@ -11878,14 +11871,9 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
 
   function markProductPage() {
     /* Volusion injects #content_area asynchronously; don’t rely only on ProductCode timing. */
-    var pcInp =
-      document.querySelector('input[name="ProductCode"]') ||
-      document.querySelector('input[name="productcode"]');
-    var hasMarker =
-      pcInp ||
-      document.querySelector('#v65-product-parent') ||
-      document.querySelector('.colors_pricebox');
-    if (!hasMarker) return false;
+    if (!document.body || !document.body.classList.contains('productdetails')) return false;
+    var vp = document.getElementById('v65-product-parent');
+    if (!vp && !document.querySelector('.colors_pricebox')) return false;
     document.body.classList.add('mc-product-page');
     try { document.body.classList.remove('mc-hide-native-options-until-mc'); } catch (eMcH) {}
     try {
@@ -13194,6 +13182,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function boot() {
     forceProductFixes();
+    try {
+      if (typeof window.mcSyncHomeBodyClass === 'function') window.mcSyncHomeBodyClass();
+    } catch (eHomeBoot) {}
     if (mcShouldKeepOptionsOffscreen()) {
       setTimeout(forceProductFixes, 800);
       return;
@@ -13218,6 +13209,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   window.addEventListener('load', function(){
     setTimeout(forceProductFixes, 0);
     setTimeout(forceProductFixes, 800);
+    try {
+      if (typeof window.mcSyncHomeBodyClass === 'function') window.mcSyncHomeBodyClass();
+    } catch (eHomeLoad) {}
   });
 
   (function observeContentAreaForPdp(){
@@ -13249,6 +13243,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
           }
         } catch (eObs) {}
         if (markProductPage() && !window.__MC_PDP_LAYOUT_LOCKED__) forceProductFixes();
+        try {
+          if (typeof window.mcSyncHomeBodyClass === 'function') window.mcSyncHomeBodyClass();
+        } catch (eHomeMo) {}
       }, 50);
     });
     try {
@@ -13316,7 +13313,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   function qsa(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
 
   function isPDP(){
-    return !!qs('input[name="ProductCode"]') && !!(qs('#content_area') || qs('#v65-product-parent'));
+    return !!(document.body && document.body.classList.contains('productdetails'));
   }
 
   function unwrapBadWrapper(){
