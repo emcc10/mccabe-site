@@ -8,21 +8,6 @@
 <script>
 (function () {
   try {
-    var qs = String(location.search || "");
-    if (/[?&]mcnopdplayout=1(?:&|$)/i.test(qs) || sessionStorage.getItem("mcPdpKillLayout") === "1") {
-      window.__MC_PDP_LAYOUT_KILL__ = true;
-      window.__MC_PDP_LAYOUT_DONE__ = true;
-      window.__MC_PDP_LAYOUT_LOCKED__ = true;
-      window.__MTL_OWNS_TOP_PRICE__ = true;
-      window.__MTL_TOP_PRICE_MOUNT_GAVE_UP__ = true;
-      window.mtlUpdateTopPricePanel = function () {};
-    }
-    window.__mcPdpDiagBump = function (key) {
-      try {
-        var k = "mcPdpDiag_" + key;
-        sessionStorage.setItem(k, String((parseInt(sessionStorage.getItem(k) || "0", 10) || 0) + 1));
-      } catch (eDiag) {}
-    };
     var p = String(location.pathname || "").toLowerCase();
     var h = document.documentElement;
     if (/-s\//.test(p) && /\.html?/i.test(p)) {
@@ -64,7 +49,7 @@ body.productdetails #options_table select:not(.mc-native-leather),body.mc-produc
 body.productdetails #options_table select:not(.mc-native-leather),body.mc-product-page #options_table select:not(.mc-native-leather){text-transform:none!important;color:#444!important}
 body.productdetails .mc-pdp-retail-label,body.mc-product-page .mc-pdp-retail-label,body.productdetails .mc-pdp-member-line__label,body.mc-product-page .mc-pdp-member-line__label{font-size:13px!important;letter-spacing:.16em!important;text-transform:uppercase!important;color:#777!important}
 body.productdetails .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-member-line__amount,body.productdetails .mc-pdp-retail-row .product_list_price,body.mc-product-page .mc-pdp-retail-row .product_list_price{font-size:13px!important;letter-spacing:.02em!important;text-transform:none!important;color:#444!important;white-space:normal!important}
-body.productdetails.mc-pdp-price-stack #v65-product-parent .product_sale_price,body.productdetails.mc-pdp-price-stack #v65-product-parent .product_saleprice,body.productdetails.mc-pdp-price-stack #v65-product-parent font.product_sale_price,body.productdetails.mc-pdp-price-stack #content_area .product_sale_price,body.productdetails.mc-pdp-price-stack #content_area .product_saleprice,body.productdetails.mc-pdp-price-stack #content_area font.product_sale_price,body.productdetails .mc-pdp-retail-row .product_sale_price,body.mc-product-page .mc-pdp-retail-row .product_sale_price,body.productdetails .mc-pdp-retail-row .product_saleprice,body.mc-product-page .mc-pdp-retail-row .product_saleprice,body.productdetails .colors_pricebox .product_sale_price,body.mc-product-page .colors_pricebox .product_sale_price,body.productdetails .colors_pricebox .product_saleprice,body.mc-product-page .colors_pricebox .product_saleprice,body.productdetails .mtl-product-price-block .product_sale_price,body.mc-product-page .mtl-product-price-block .product_saleprice,body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .product_saleprice,body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox .product_saleprice,body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .product_productprice,body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox .product_productprice{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
+body.mc-pdp-price-stack #v65-product-parent .product_sale_price,body.mc-pdp-price-stack #v65-product-parent .product_saleprice,body.mc-pdp-price-stack #v65-product-parent font.product_sale_price,body.mc-pdp-price-stack #content_area .product_sale_price,body.mc-pdp-price-stack #content_area .product_saleprice,body.mc-pdp-price-stack #content_area font.product_sale_price,body.productdetails .mc-pdp-retail-row .product_sale_price,body.mc-product-page .mc-pdp-retail-row .product_sale_price,body.productdetails .mc-pdp-retail-row .product_saleprice,body.mc-product-page .mc-pdp-retail-row .product_saleprice,body.productdetails .colors_pricebox .product_sale_price,body.mc-product-page .colors_pricebox .product_sale_price,body.productdetails .colors_pricebox .product_saleprice,body.mc-product-page .colors_pricebox .product_saleprice,body.productdetails .mtl-product-price-block .product_sale_price,body.mc-product-page .mtl-product-price-block .product_saleprice,body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,body.mc-product-page:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,body.productdetails:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox .product_productprice,body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox b:has(.product_saleprice){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
 body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:2px!important;width:100%!important;position:static!important}
 body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line--sale,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line--sale{display:flex!important;flex-direction:column!important;gap:2px!important;margin-top:4px!important}
 body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line__amount{letter-spacing:.02em!important;white-space:normal!important}
@@ -74,7 +59,7 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-p
 (function () {
   function mcEarlyPdpPriceStackClass() {
     try {
-      if (!document.body || !document.body.classList.contains("productdetails")) return;
+      if (!document.body) return;
       if (document.querySelector(".mc-pdp-member-pricing, .mc-pdp-retail-row, #v65-product-parent .mc-pdp-member-line")) {
         document.body.classList.add("mc-pdp-price-stack");
       }
@@ -102,8 +87,13 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-p
       if (!looksPdp && /\/product\//i.test(p)) looksPdp = true;
       if (!looksPdp && document.body) {
         try {
-          if (document.body.classList.contains("productdetails")) looksPdp = true;
-          else if (document.getElementById("v65-product-parent")) looksPdp = true;
+          if (document.getElementById("v65-product-parent")) looksPdp = true;
+          else if (
+            document.querySelector("[class*=\"cartqty__wrap\"]") &&
+            document.querySelector('input[name="ProductCode"]')
+          ) {
+            looksPdp = true;
+          }
         } catch (eDomPdp) {}
       }
       if (!looksPdp) {
@@ -334,8 +324,10 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-p
 
   function mcDomLooksLikeProductPage() {
     try {
-      if (document.body && document.body.classList.contains("productdetails")) return true;
       if (document.getElementById("v65-product-parent")) return true;
+      if (document.body && document.body.classList.contains("productdetails")) return true;
+      var pc = document.querySelector('input[name="ProductCode"]');
+      if (pc && String(pc.value || "").trim()) return true;
     } catch (eD) {}
     return false;
   }
@@ -11871,9 +11863,14 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
 
   function markProductPage() {
     /* Volusion injects #content_area asynchronously; don’t rely only on ProductCode timing. */
-    if (!document.body || !document.body.classList.contains('productdetails')) return false;
-    var vp = document.getElementById('v65-product-parent');
-    if (!vp && !document.querySelector('.colors_pricebox')) return false;
+    var pcInp =
+      document.querySelector('input[name="ProductCode"]') ||
+      document.querySelector('input[name="productcode"]');
+    var hasMarker =
+      pcInp ||
+      document.querySelector('#v65-product-parent') ||
+      document.querySelector('.colors_pricebox');
+    if (!hasMarker) return false;
     document.body.classList.add('mc-product-page');
     try { document.body.classList.remove('mc-hide-native-options-until-mc'); } catch (eMcH) {}
     try {
@@ -13125,10 +13122,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function forceProductFixes() {
     if (!markProductPage()) return;
-    var pdpLayoutLocked =
-      window.__MC_PDP_LAYOUT_LOCKED__ ||
-      !!document.getElementById('mc-pdp-top-price-panel') ||
-      (document.body && document.body.classList.contains('mc-has-pdp-top-price-panel'));
     var scope = document.querySelector('#content_area') || document.body;
     var vp = document.getElementById('v65-product-parent');
     var mediaScope = vp && scope && !scope.contains(vp) ? vp : scope;
@@ -13157,18 +13150,14 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       if (typeof console !== 'undefined' && console.warn) console.warn('[McCabe] renderMemberPricingCaption', e2);
     }
     try {
-      if (!pdpLayoutLocked) {
-        if (typeof mcCachePdpSaleAmountFromDom === 'function') mcCachePdpSaleAmountFromDom();
-        hideNativePdpSalePricing(scope);
-        if (typeof mcTidyMtlPriceBlock === 'function') mcTidyMtlPriceBlock();
-        if (typeof mcTidyPdpMemberPricing === 'function') mcTidyPdpMemberPricing();
-        if (typeof mcEnsurePdpPriceStack === 'function') mcEnsurePdpPriceStack();
-      }
+      if (typeof mcCachePdpSaleAmountFromDom === 'function') mcCachePdpSaleAmountFromDom();
+      hideNativePdpSalePricing(scope);
+      if (typeof mcTidyMtlPriceBlock === 'function') mcTidyMtlPriceBlock();
+      if (typeof mcTidyPdpMemberPricing === 'function') mcTidyPdpMemberPricing();
+      if (typeof mcEnsurePdpPriceStack === 'function') mcEnsurePdpPriceStack();
       hideTheaterSeatPdpNativePricing(scope);
-      if (!pdpLayoutLocked) {
-        ensurePriceWithOptionsLabel(scope);
-        leftAlignPricingBlock(scope);
-      }
+      ensurePriceWithOptionsLabel(scope);
+      leftAlignPricingBlock(scope);
       if (document.getElementById("mcConfigurationBlock")) {
         ensureTheaterPlannerOptionPriceResync();
         if (typeof window.scheduleConfigurationFromDomRetries === "function") {
@@ -13182,9 +13171,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function boot() {
     forceProductFixes();
-    try {
-      if (typeof window.mcSyncHomeBodyClass === 'function') window.mcSyncHomeBodyClass();
-    } catch (eHomeBoot) {}
     if (mcShouldKeepOptionsOffscreen()) {
       setTimeout(forceProductFixes, 800);
       return;
@@ -13192,10 +13178,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     var tries = 0;
     var t = setInterval(function () {
       tries++;
-      if (window.__MC_PDP_LAYOUT_LOCKED__) {
-        clearInterval(t);
-        return;
-      }
       forceProductFixes();
       if (tries >= 25) clearInterval(t);
     }, 400);
@@ -13209,9 +13191,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   window.addEventListener('load', function(){
     setTimeout(forceProductFixes, 0);
     setTimeout(forceProductFixes, 800);
-    try {
-      if (typeof window.mcSyncHomeBodyClass === 'function') window.mcSyncHomeBodyClass();
-    } catch (eHomeLoad) {}
   });
 
   (function observeContentAreaForPdp(){
@@ -13222,7 +13201,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     var mo = new MutationObserver(function(){
       clearTimeout(deb);
       deb = setTimeout(function(){
-        if (window.__MC_PDP_LAYOUT_LOCKED__) return;
         try {
           var ca = document.getElementById('content_area');
           var isSec = typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage();
@@ -13242,10 +13220,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
             document.body.classList.add('mc-hide-native-options-until-mc');
           }
         } catch (eObs) {}
-        if (markProductPage() && !window.__MC_PDP_LAYOUT_LOCKED__) forceProductFixes();
-        try {
-          if (typeof window.mcSyncHomeBodyClass === 'function') window.mcSyncHomeBodyClass();
-        } catch (eHomeMo) {}
+        if (markProductPage()) forceProductFixes();
       }, 50);
     });
     try {
@@ -13313,7 +13288,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   function qsa(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
 
   function isPDP(){
-    return !!(document.body && document.body.classList.contains('productdetails'));
+    return !!qs('input[name="ProductCode"]') && !!(qs('#content_area') || qs('#v65-product-parent'));
   }
 
   function unwrapBadWrapper(){
@@ -13439,12 +13414,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   function q(sel, root)  { return (root || document).querySelector(sel); }
   function qa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
 
-  function mcIsProductDetailsPage() {
-    return !!(document.body && document.body.classList.contains('productdetails'));
-  }
-
   function isPdpPage() {
-    return mcIsProductDetailsPage();
+    return !!document.querySelector('input[name="ProductCode"]') &&
+           !!(document.getElementById('v65-product-parent') || document.getElementById('content_area'));
   }
 
   function isSectionalPg() {
@@ -13602,28 +13574,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 
   function mcFindCleanProductTitleEl() {
-    var wrap = document.getElementById('mc-pdp-title-right');
-    if (wrap) {
-      var inWrap =
-        wrap.querySelector("[itemprop='name']") ||
-        wrap.querySelector('h1') ||
-        wrap.querySelector('.productnamecolorLARGE') ||
-        wrap.querySelector('.productnamecolor');
-      if (inWrap) {
-        var inWrapText = (inWrap.textContent || '').replace(/\s+/g, ' ').trim();
-        if (inWrapText && !mcTitleRejectText(inWrapText)) {
-          window.__MC_PDP_TITLE_EL__ = inWrap;
-          return inWrap;
-        }
-      }
-    }
-
-    var cached = window.__MC_PDP_TITLE_EL__;
-    if (cached && cached.isConnected && document.body && document.body.contains(cached)) {
-      var cs = (cached.textContent || '').replace(/\s+/g, ' ').trim();
-      if (cs && !mcTitleRejectText(cs)) return cached;
-    }
-
     var root = document.getElementById('v65-product-parent') || document.getElementById('content_area');
     if (!root) return null;
 
@@ -13688,11 +13638,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }
 
     if (!candidates.length) {
-      var narrow = root.querySelectorAll(
-        '.vCSS_breadcrumb_td h1, .vCSS_breadcrumb_td [itemprop="name"], .vCSS_breadcrumb_td .productnamecolor, h1, .productnamecolor, [itemprop="name"], .v-product__title'
-      );
-      for (ni = 0; ni < narrow.length; ni++) {
-        var bel = narrow[ni];
+      var broad = root.querySelectorAll('h1, .productnamecolor, [itemprop="name"], .v-product__title, td, div');
+      for (ni = 0; ni < broad.length; ni++) {
+        var bel = broad[ni];
         var bs = (bel.textContent || '').replace(/\s+/g, ' ').trim();
         if (!bs || mcTitleRejectText(bs)) continue;
         if (
@@ -13706,17 +13654,12 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       }
     }
 
-    if (!candidates.length) {
-      var fallback = findH1();
-      if (fallback) window.__MC_PDP_TITLE_EL__ = fallback;
-      return fallback;
-    }
+    if (!candidates.length) return findH1();
 
     candidates.sort(function (a, b) {
       if (a.score !== b.score) return a.score - b.score;
       return a.len - b.len;
     });
-    window.__MC_PDP_TITLE_EL__ = candidates[0].el;
     return candidates[0].el;
   }
 
@@ -13737,7 +13680,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   function mcLayoutReadRetailAmount() {
     var root = document.getElementById('v65-product-parent') || document.getElementById('content_area');
     if (root) {
-      var topAmt = root.querySelector('#mc-pdp-top-price-panel .mc-pdp-top-retail-row .mc-pdp-top-price-value');
+      var topAmt = root.querySelector(
+        '#mc-pdp-top-price-panel .mc-pdp-top-retail-row .mc-pdp-top-price-value, #mc-pdp-top-price-panel .mc-pdp-stack-retail-amt, #mc-pdp-top-price-panel .mtl-top-price__amount, #mc-pdp-top-price-panel .mc-pdp-retail-line'
+      );
       if (topAmt) {
         var aTop = mcLayoutParseMoney(topAmt.textContent || '');
         if (aTop > 0) return aTop;
@@ -13747,22 +13692,14 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
         var pp = box.querySelector('.product_productprice, .product_list_price, font.product_list_price');
         if (pp) {
           var aBox = mcLayoutParseMoney(pp.textContent || '');
-          if (aBox > 0) {
-            window.__MC_PDP_LAYOUT_RETAIL_CACHED__ = aBox;
-            return aBox;
-          }
+          if (aBox > 0) return aBox;
         }
       }
     }
-    if (window.__MC_PDP_LAYOUT_RETAIL_CACHED__ > 0) return window.__MC_PDP_LAYOUT_RETAIL_CACHED__;
-    if (typeof window.mcExtractRetailPriceFromPdpHtml === 'function' && !window.__MC_PDP_LAYOUT_RETAIL_HTML_TRIED__) {
-      window.__MC_PDP_LAYOUT_RETAIL_HTML_TRIED__ = true;
+    if (typeof window.mcExtractRetailPriceFromPdpHtml === 'function') {
       try {
         var aHtml = Number(window.mcExtractRetailPriceFromPdpHtml(document.documentElement.innerHTML || '')) || 0;
-        if (aHtml > 0) {
-          window.__MC_PDP_LAYOUT_RETAIL_CACHED__ = aHtml;
-          return aHtml;
-        }
+        if (aHtml > 0) return aHtml;
       } catch (eHtml) {}
     }
     return 0;
@@ -13867,294 +13804,43 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function mcInsertConfigPanel(configPanel) {
     if (!configPanel) return;
-    if (mcIsConfigPanelPlaced(configPanel)) return;
     var anchor = mcFindPdpAtcInsertAnchor();
     if (anchor && anchor.parent && anchor.before && anchor.before.parentNode === anchor.parent) {
       try {
-        anchor.parent.insertBefore(configPanel, anchor.before);
+        if (configPanel.parentNode !== anchor.parent || configPanel.nextSibling !== anchor.before) {
+          anchor.parent.insertBefore(configPanel, anchor.before);
+        }
         return;
       } catch (eAtc) {}
     }
     var acc = document.getElementById('mc-pdp-accordion');
     if (acc && acc.parentNode) {
       try {
-        acc.parentNode.insertBefore(configPanel, acc.nextSibling);
+        var ref = acc.nextSibling;
+        if (configPanel.parentNode !== acc.parentNode || configPanel.previousSibling !== acc) {
+          acc.parentNode.insertBefore(configPanel, ref);
+        }
       } catch (eAcc) {}
     }
   }
 
-  function mcConfigLayoutSig(configPanel) {
-    var sum = document.getElementById('mtl-product-summary');
-    var cfg = document.getElementById('mcConfigurationBlock');
-    var anchor = mcFindPdpAtcInsertAnchor();
-    var anchorId = anchor && anchor.before && anchor.before.id ? anchor.before.id : '';
-    var placed = mcIsConfigPanelPlaced(configPanel) ? '1' : '0';
-    return ['rp', sum ? 's' : '-', cfg ? 'c' : '-', anchorId, placed].join('|');
-  }
-
-  function mcIsConfigPanelPlaced(configPanel) {
-    if (!configPanel || !configPanel.parentNode) return false;
-    var anchor = mcFindPdpAtcInsertAnchor();
-    if (anchor && anchor.parent && anchor.before && anchor.before.parentNode === anchor.parent) {
-      return configPanel.parentNode === anchor.parent && configPanel.nextElementSibling === anchor.before;
-    }
-    var acc = document.getElementById('mc-pdp-accordion');
-    return !!(acc && acc.parentNode && configPanel.parentNode === acc.parentNode && configPanel.previousElementSibling === acc);
-  }
-
-  function mcGetTopPanelInsertAnchor() {
-    var titleWrap = document.getElementById('mc-pdp-title-right');
-    if (titleWrap) {
-      var titleEl =
-        titleWrap.querySelector("[itemprop='name']") ||
-        titleWrap.querySelector('h1') ||
-        titleWrap.querySelector('.productnamecolorLARGE, .productnamecolor');
-      if (titleEl) return { parent: titleWrap, titleEl: titleEl };
-      if (titleWrap.parentNode) return { parent: titleWrap.parentNode, titleEl: titleWrap };
-    }
-    var title = mcFindCleanProductTitleEl();
-    if (title && title.parentNode) return { parent: title.parentNode, titleEl: title };
-    return null;
-  }
-
-  function mcIsTopPanelCorrectlyPlaced(topPanel, anchor) {
-    anchor = anchor || mcGetTopPanelInsertAnchor();
-    if (!topPanel || !anchor || !topPanel.parentNode) return false;
-    return topPanel.parentNode === anchor.parent && topPanel.previousElementSibling === anchor.titleEl;
-  }
-
-  function mcInsertTopPanelAfterTitle(topPanel) {
-    if (!topPanel) return false;
-    var anchor = mcGetTopPanelInsertAnchor();
-    if (!anchor) return false;
-    if (!mcIsTopPanelCorrectlyPlaced(topPanel, anchor)) {
-      try {
-        anchor.parent.insertBefore(topPanel, anchor.titleEl.nextSibling);
-      } catch (eIns) {
-        return false;
-      }
-    }
-    try {
-      topPanel.dataset.mtlTopPriceMounted = '1';
-    } catch (eDs) {}
-    return true;
-  }
-
-  function mcRefreshTopPricePanelContent() {
-    if (!mcIsProductDetailsPage()) return;
-    if (window.__MC_PDP_LAYOUT_KILL__) return;
-    var topPanel = document.getElementById('mc-pdp-top-price-panel');
-    if (!topPanel) return;
-    var retailAmt = mcLayoutReadRetailAmount();
-    if (!(retailAmt > 0)) return;
-    var loggedIn = mcLayoutLoggedInGuess();
-    var memberAmt = loggedIn ? mcLayoutReadMemberAmount() : 0;
-    var topSig = String(retailAmt) + '|' + String(memberAmt) + '|' + (loggedIn ? 'm' : 'g');
-    if (topPanel.dataset.mcTopSig === topSig) return;
-    topPanel.innerHTML = mcBuildTopPricePanelHtml(retailAmt, memberAmt, loggedIn);
-    topPanel.dataset.mcTopSig = topSig;
-    mcSanitizeTopPricePanel(topPanel);
-  }
-
-  function mcComputeLayoutSettleSig(title, topPanel, topSig, roomPlanner, configPanel) {
-    var anchor = mcGetTopPanelInsertAnchor();
-    var titleKey = anchor && anchor.titleEl
-      ? String(anchor.titleEl.id || anchor.titleEl.getAttribute('itemprop') || anchor.titleEl.tagName || 'el') +
-        ':' +
-        String(anchor.titleEl.textContent || '')
-          .replace(/\s+/g, ' ')
-          .trim()
-          .slice(0, 100)
-      : title
-        ? String(title.id || title.getAttribute('itemprop') || title.tagName || 'el') +
-          ':' +
-          String(title.textContent || '')
-            .replace(/\s+/g, ' ')
-            .trim()
-            .slice(0, 100)
-        : '';
-    var topPos = mcIsTopPanelCorrectlyPlaced(topPanel, anchor) ? '1' : '0';
-    var cfgPart = roomPlanner ? mcConfigLayoutSig(configPanel) : 'off';
-    return titleKey + '||' + topPos + '||' + topSig + '||' + cfgPart;
-  }
-
-  function mcLockPdpLayout() {
-    window.__MC_PDP_LAYOUT_LOCKED__ = true;
-    window.__MC_PDP_LAYOUT_DONE__ = true;
-    window.__MTL_OWNS_TOP_PRICE__ = true;
-    window.__MTL_TOP_PRICE_MOUNT_GAVE_UP__ = true;
-    window.mtlUpdateTopPricePanel = function () {};
-    window.mtlUpdateTopPricePanel.__mcLayoutWrap = true;
-    if (window.__mcPdpPriceTidyObs && window.__mcPdpPriceTidyObs.disconnect) {
-      try {
-        window.__mcPdpPriceTidyObs.disconnect();
-      } catch (eDisc) {}
-      window.__mcPdpPriceTidyObs = null;
-    }
-    if (typeof window.mcPdpAuthCtaRefresh === 'function' && !window.mcPdpAuthCtaRefresh.__mcLayoutWrap) {
-      var origAuthRefresh = window.mcPdpAuthCtaRefresh;
-      window.mcPdpAuthCtaRefresh = function () {
-        if (window.__MC_PDP_LAYOUT_LOCKED__ || document.getElementById('mc-pdp-top-price-panel')) return;
-        try {
-          origAuthRefresh();
-        } catch (eAuth) {}
-      };
-      window.mcPdpAuthCtaRefresh.__mcLayoutWrap = true;
-    }
-  }
-
-  function mcTopPanelOwnsPricing() {
-    return !!(
-      document.getElementById('mc-pdp-top-price-panel') ||
-      window.__MTL_OWNS_TOP_PRICE__ ||
-      (document.body && document.body.classList.contains('mc-has-pdp-top-price-panel'))
-    );
-  }
-
-  function layoutMcPdpPricePanels() {
-    if (!mcIsProductDetailsPage()) return;
-    if (window.__MC_PDP_LAYOUT_KILL__) return;
-    if (window.__MC_PDP_LAYOUT_DONE__) return;
-    if (window.__MC_PDP_LAYOUT_RUNNING__) return;
-    window.__MC_PDP_LAYOUT_RUNNING__ = true;
-    if (typeof window.__mcPdpDiagBump === 'function') window.__mcPdpDiagBump('layoutRun');
-    try {
-      if (!mcIsProductDetailsPage()) return;
-      window.__MTL_OWNS_TOP_PRICE__ = true;
-
-      if (!window.__MC_PDP_LAYOUT_ATTEMPTS__) window.__MC_PDP_LAYOUT_ATTEMPTS__ = 0;
-      window.__MC_PDP_LAYOUT_ATTEMPTS__++;
-
-      placeTitle();
-      var title = mcFindCleanProductTitleEl();
-      if (!title || !title.parentNode) return;
-
-      var topPanel = document.getElementById('mc-pdp-top-price-panel');
-      var retailAmt = mcLayoutReadRetailAmount();
-      var loggedIn = mcLayoutLoggedInGuess();
-      var memberAmt = loggedIn ? mcLayoutReadMemberAmount() : 0;
-      var topSig = retailAmt > 0 ? String(retailAmt) + '|' + String(memberAmt) + '|' + (loggedIn ? 'm' : 'g') : '';
-      var roomPlanner = mcIsRoomPlannerPdp();
-      var configPanel = roomPlanner ? document.getElementById('mc-pdp-config-panel') : null;
-      var settleSig = mcComputeLayoutSettleSig(title, topPanel, topSig, roomPlanner, configPanel);
-      if (window.__MC_PDP_LAYOUT_SETTLED_SIG__ === settleSig && topPanel && topPanel.dataset.mcTopSig === topSig) {
-        if (mcIsTopPanelCorrectlyPlaced(topPanel)) {
-          window.__MC_PDP_LAYOUT_DONE__ = true;
-          window.__MTL_TOP_PRICE_MOUNT_GAVE_UP__ = true;
-          mcLockPdpLayout();
-        }
-        return;
-      }
-
-      var titleWrap = document.getElementById('mc-pdp-title-right');
-      if (titleWrap && !titleWrap.contains(title)) {
-        try {
-          titleWrap.appendChild(title);
-        } catch (eTitleMove) {}
-      }
-
-      if (!topPanel) {
-        topPanel = document.createElement('div');
-        topPanel.id = 'mc-pdp-top-price-panel';
-        topPanel.className = 'mc-pdp-top-price-panel';
-        topPanel.setAttribute('data-mc-pdp-top-price', '1');
-      }
-
-      mcInsertTopPanelAfterTitle(topPanel);
-
-      try {
-        if (document.body && document.body.classList.contains('productdetails')) {
-          document.body.classList.add('mc-pdp-price-stack', 'mc-has-pdp-top-price-panel');
-        }
-      } catch (eCls) {}
-
-      if (retailAmt > 0 && topPanel.dataset.mcTopSig !== topSig) {
-        topPanel.innerHTML = mcBuildTopPricePanelHtml(retailAmt, memberAmt, loggedIn);
-        topPanel.dataset.mcTopSig = topSig;
-        mcSanitizeTopPricePanel(topPanel);
-      }
-
-      if (roomPlanner) {
-        if (!configPanel) {
-          configPanel = document.createElement('div');
-          configPanel.id = 'mc-pdp-config-panel';
-          configPanel.className = 'mc-pdp-config-panel';
-          configPanel.setAttribute('data-mc-pdp-config', '1');
-        }
-        var cfgSig = mcConfigLayoutSig(configPanel);
-        if (configPanel.dataset.mcConfigSig !== cfgSig || !mcIsConfigPanelPlaced(configPanel)) {
-          mcPopulateConfigPanel(configPanel);
-          mcInsertConfigPanel(configPanel);
-          configPanel.dataset.mcConfigSig = cfgSig;
-        }
-      } else {
-        var staleCfg = document.getElementById('mc-pdp-config-panel');
-        if (staleCfg) {
-          try {
-            staleCfg.remove();
-          } catch (eRmCfg) {}
-        }
-      }
-
-      window.__MC_PDP_LAYOUT_SETTLED_SIG__ = mcComputeLayoutSettleSig(
-        title,
-        topPanel,
-        topSig,
-        roomPlanner,
-        roomPlanner ? document.getElementById('mc-pdp-config-panel') : null
-      );
-      window.__MC_PDP_LAYOUT_LAST_RUN__ = Date.now();
-
-      var placed = mcIsTopPanelCorrectlyPlaced(topPanel);
-      var priced = retailAmt > 0 && topPanel.dataset.mcTopSig === topSig;
-      if (placed && (priced || window.__MC_PDP_LAYOUT_ATTEMPTS__ >= 5)) {
-        window.__MC_PDP_LAYOUT_DONE__ = true;
-        window.__MTL_TOP_PRICE_MOUNT_GAVE_UP__ = true;
-        mcLockPdpLayout();
-      }
-    } finally {
-      window.__MC_PDP_LAYOUT_RUNNING__ = false;
-    }
-  }
-  window.layoutMcPdpPricePanels = layoutMcPdpPricePanels;
-  window.mcLockPdpLayout = mcLockPdpLayout;
-  window.mcRefreshTopPricePanelContent = mcRefreshTopPricePanelContent;
-  window.mcSchedulePdpPriceLayout = function () {
-    if (!document.body || !document.body.classList.contains('productdetails')) return;
-    if (window.__MC_PDP_LAYOUT_KILL__ || window.__MC_PDP_LAYOUT_DONE__) return;
-    if (window.__MC_PDP_LAYOUT_ATTEMPTS__ >= 6) return;
-    if (window.__MC_PDP_LAYOUT_SCHEDULED__) return;
-    window.__MC_PDP_LAYOUT_SCHEDULED__ = true;
-    requestAnimationFrame(function () {
-      window.__MC_PDP_LAYOUT_SCHEDULED__ = false;
-      layoutMcPdpPricePanels();
-    });
-  };
-  if (!window.mtlUpdateTopPricePanel || !window.mtlUpdateTopPricePanel.__mcLayoutWrap) {
-    window.mtlUpdateTopPricePanel = function () {};
-    window.mtlUpdateTopPricePanel.__mcLayoutWrap = true;
-  }
-  if (!window.__MC_PDP_LAYOUT_MEMBER_REFRESH_BOUND__) {
-    window.__MC_PDP_LAYOUT_MEMBER_REFRESH_BOUND__ = true;
-    window.addEventListener('mcMemberPricingReady', function () {
-      if (typeof window.mcRefreshTopPricePanelContent === 'function') {
-        try {
-          window.mcRefreshTopPricePanelContent();
-        } catch (eMem) {}
-      }
-    });
-  }
 
   /* Place the H1 title immediately BEFORE the first pricebox (retail pricing). */
   function placeTitle() {
     var firstPricebox = findFirstPricebox();
     if (!firstPricebox || !firstPricebox.parentNode) {
+      try {
+        layoutMcPdpPricePanels();
+      } catch (eLayoutEarly) {}
       return;
     }
     var titleWrap = document.getElementById('mc-pdp-title-right');
     var titleEl = mcFindCleanProductTitleEl();
     if (!titleWrap) {
       if (!titleEl) {
+        try {
+          layoutMcPdpPricePanels();
+        } catch (eLayoutNoH1) {}
         return;
       }
       titleWrap = document.createElement('div');
@@ -14168,6 +13854,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       firstPricebox.parentNode.insertBefore(titleWrap, firstPricebox);
     }
     hideBreadcrumbRowIfEmpty();
+    try {
+      layoutMcPdpPricePanels();
+    } catch (eLayout) {}
   }
 
   /* SVG icon helpers — reused on the in-panel buttons so they match the original
@@ -14530,11 +14219,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     placeTitle();
     placePalliserLogoUnderTitle();
     placeAccordion();
-    if (!window.__MC_PDP_LAYOUT_DONE__ && !window.__MC_PDP_LAYOUT_KILL__) {
-      try {
-        mcSchedulePdpPriceLayout();
-      } catch (eLayoutRun) {}
-    }
+    try {
+      layoutMcPdpPricePanels();
+    } catch (eLayoutRun) {}
     hostLeatherStripInsideAccordion();
     if (typeof window.mcTryInitWmLeather === "function") {
       window.mcTryInitWmLeather();
@@ -19142,13 +18829,6 @@ async function mcSubmitAuthForm(form, mode) {
   }
 
   function mcEnsurePdpPriceStack() {
-    if (
-      document.getElementById('mc-pdp-top-price-panel') ||
-      window.__MTL_OWNS_TOP_PRICE__ ||
-      (document.body && document.body.classList.contains('mc-has-pdp-top-price-panel'))
-    ) {
-      return true;
-    }
     if (typeof window.mcForceRebuildCleanPriceStack === 'function') {
       try {
         window.mcForceRebuildCleanPriceStack();
@@ -19159,9 +18839,7 @@ async function mcSubmitAuthForm(form, mode) {
     var retailRow = document.querySelector('.mc-pdp-retail-row');
     if (!wrap && !retailRow) return false;
     try {
-      if (document.body && document.body.classList.contains('productdetails')) {
-        document.body.classList.add('mc-pdp-price-stack');
-      }
+      if (document.body) document.body.classList.add('mc-pdp-price-stack');
     } catch (eCls) {}
     var loggedIn =
       !!(document.body && document.body.classList.contains('mc-member-logged-in')) ||
@@ -19892,31 +19570,17 @@ async function mcSubmitAuthForm(form, mode) {
 
   function mcObservePdpPriceStackTidy() {
     if (window.__mcPdpPriceTidyObs) return;
-    if (
-      document.getElementById('mc-pdp-top-price-panel') ||
-      (document.body && document.body.classList.contains('mc-has-pdp-top-price-panel'))
-    ) {
-      return;
-    }
     var target =
       document.querySelector(".mtl-product-price-block") ||
       document.querySelector("#v65-product-parent .colors_pricebox") ||
       document.getElementById("v65-product-parent");
     if (!target || typeof MutationObserver !== "function") return;
-    var tidyPending = false;
     window.__mcPdpPriceTidyObs = new MutationObserver(function () {
-      if (tidyPending) return;
-      if (document.getElementById('mc-pdp-top-price-panel')) return;
-      tidyPending = true;
-      requestAnimationFrame(function () {
-        tidyPending = false;
-        if (document.getElementById('mc-pdp-top-price-panel')) return;
-        try {
-          hideNativePdpSalePricing(document);
-          mcTidyMtlPriceBlock();
-          mcTidyPdpMemberPricing();
-        } catch (eObs) {}
-      });
+      try {
+        hideNativePdpSalePricing(document);
+        mcTidyMtlPriceBlock();
+        mcTidyPdpMemberPricing();
+      } catch (eObs) {}
     });
     window.__mcPdpPriceTidyObs.observe(target, { childList: true, subtree: true });
   }
@@ -19983,9 +19647,7 @@ async function mcSubmitAuthForm(form, mode) {
       return true;
     }
     try {
-      if (document.body && document.body.classList.contains("productdetails")) {
-        document.body.classList.add("mc-pdp-price-stack");
-      }
+      if (document.body) document.body.classList.add("mc-pdp-price-stack");
     } catch (eStackCls) {}
     var theaterTitle = (
       (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
@@ -20186,9 +19848,6 @@ async function mcSubmitAuthForm(form, mode) {
   }
 
   async function mcRenderRetailMemberOnPdp() {
-    if (window.__MC_PDP_LAYOUT_SETTLED_SIG__ && document.getElementById('mc-pdp-top-price-panel')) {
-      return;
-    }
     var root = document.querySelector('#v65-product-parent');
     if (!root) return;
 
@@ -20384,13 +20043,9 @@ if (!isLoggedIn) {
     if (!retailText) return;
 
     mcRenderPdpRetailAndMember(retailText, memberText, window.getMemberLoginUrl(), isLoggedIn);
-    if (document.getElementById('mc-pdp-top-price-panel') && typeof window.mcRefreshTopPricePanelContent === 'function') {
+    if (typeof window.layoutMcPdpPricePanels === 'function') {
       try {
-        window.mcRefreshTopPricePanelContent();
-      } catch (eRefresh) {}
-    } else if (typeof window.mcSchedulePdpPriceLayout === 'function') {
-      try {
-        window.mcSchedulePdpPriceLayout();
+        window.layoutMcPdpPricePanels();
       } catch (eLayoutPdp) {}
     }
   }
@@ -20413,9 +20068,6 @@ if (!isLoggedIn) {
 
     function run() {
       try {
-        if (window.__MC_PDP_LAYOUT_DONE__ || document.getElementById('mc-pdp-top-price-panel')) {
-          return;
-        }
         mcCachePdpSaleAmountFromDom();
         mcRenderRetailMemberOnPdp();
         mcEnsurePdpPriceStack();
@@ -20433,14 +20085,10 @@ if (!isLoggedIn) {
     var tries = 0;
     var repairTimer = setInterval(function () {
       tries++;
-      if (window.__MC_PDP_LAYOUT_DONE__ || document.getElementById('mc-pdp-top-price-panel')) {
-        clearInterval(repairTimer);
-        return;
-      }
       try {
         mcEnsurePdpPriceStack();
       } catch (eRep) {}
-      if (tries >= 12) clearInterval(repairTimer);
+      if (tries >= 30) clearInterval(repairTimer);
     }, 500);
   }
   window.mcBootPdpRetailMemberOnly = mcBootPdpRetailMemberOnly;
@@ -23866,27 +23514,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 <script src="/v/vspfiles/js/sectional-configs.js?v=20260603e"></script>
 <script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260601-top-price-panel-v30"></script>
 <script>
-  (function (g) {
-    if (!g.document.body || !g.document.body.classList.contains("productdetails")) return;
-    g.__MTL_OWNS_TOP_PRICE__ = true;
-    g.__MTL_TOP_PRICE_MOUNT_GAVE_UP__ = true;
-    g.mtlUpdateTopPricePanel = function () {};
-    g.mtlUpdateTopPricePanel.__mcLayoutWrap = true;
-    var panel = g.document.getElementById("mc-pdp-top-price-panel");
-    if (panel) {
-      try {
-        panel.dataset.mtlTopPriceMounted = "1";
-      } catch (eDs) {}
-      g.__MC_PDP_LAYOUT_DONE__ = true;
-      if (typeof g.mcLockPdpLayout === "function") {
-        try {
-          g.mcLockPdpLayout();
-        } catch (eLock) {}
-      }
-    }
-  })(window);
-</script>
-<script>
   window.MTL_CLEANUP_VERSION = "cleanup-20260506-final";
   document.documentElement.classList.add("mtl-cleanup-20260506-final");
   console.log("MTL CLEANUP VERSION LOADED:", window.MTL_CLEANUP_VERSION);
@@ -23934,14 +23561,7 @@ s0.parentNode.insertBefore(s1,s0);
   ensure();
   g.addEventListener("load", ensure);
   [0, 400, 1500].forEach(function (ms) {
-    g.setTimeout(function () {
-      ensure();
-      if (g.__MC_PDP_LAYOUT_LOCKED__ && typeof g.mcLockPdpLayout === "function") {
-        try {
-          g.mcLockPdpLayout();
-        } catch (eReLock) {}
-      }
-    }, ms);
+    g.setTimeout(ensure, ms);
   });
 })(window, document);
   </script>
