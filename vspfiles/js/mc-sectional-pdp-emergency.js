@@ -1,10 +1,10 @@
 /**
  * Sectional PDP emergency: panel inside #mc-pdp-title-right after h1 (accordion placeTitle safe).
- * MC_SECTIONAL_PDP_EMERGENCY_20260603d
+ * MC_SECTIONAL_PDP_EMERGENCY_20260603e
  */
 (function (g, d) {
   "use strict";
-  var VER = "20260603d";
+  var VER = "20260603e";
   function patchRev(v) {
     var m = String(v || "").match(/(\d+)\s*$/);
     return m ? parseInt(m[1], 10) : 0;
@@ -18,7 +18,9 @@
 
   function titleH1(wrap) {
     wrap = wrap || titleWrap();
-    return wrap ? wrap.querySelector("h1, .productname, .vCSS_productname") : null;
+    return wrap
+      ? wrap.querySelector("[itemprop='name'], h1, .productnamecolorLARGE, .productname, .vCSS_productname")
+      : null;
   }
 
   function firstPricebox() {
@@ -29,16 +31,20 @@
   function hideNativeSaleNodes() {
     var root = d.getElementById("v65-product-parent") || d.getElementById("content_area");
     if (!root) return;
-    root.querySelectorAll(".product_saleprice, .product_sale_price, font.product_sale_price").forEach(function (node) {
-      if (!node || (node.closest && node.closest("#mtl-sectional-configurations, #mc-pdp-accordion"))) return;
-      try {
-        node.style.setProperty("display", "none", "important");
-        node.style.setProperty("visibility", "hidden", "important");
-        node.style.setProperty("height", "0", "important");
-        node.style.setProperty("overflow", "hidden", "important");
-        node.style.setProperty("opacity", "0", "important");
-      } catch (eHide) {}
-    });
+    root
+      .querySelectorAll(
+        ".product_saleprice, .product_sale_price, font.product_sale_price, #priceWithOptions, #priceWithOptionsNoTax, .option_pricing, .colors_pricebox [itemprop='price']"
+      )
+      .forEach(function (node) {
+        if (!node || (node.closest && node.closest("#mtl-sectional-configurations, #mc-pdp-accordion"))) return;
+        try {
+          node.style.setProperty("display", "none", "important");
+          node.style.setProperty("visibility", "hidden", "important");
+          node.style.setProperty("height", "0", "important");
+          node.style.setProperty("overflow", "hidden", "important");
+          node.style.setProperty("opacity", "0", "important");
+        } catch (eHide) {}
+      });
   }
 
   function hideLegacyPricingInPricebox() {
@@ -146,7 +152,7 @@
     return m ? parseInt(m[1], 10) : 0;
   }
   function maybeUpgradeRendererFromGh() {
-    var WANT = "sectional-20260601-top-price-panel-v29";
+    var WANT = "sectional-20260601-top-price-panel-v30";
     var have = String(g.MTL_RENDERER_BUILD || "").trim();
     if (have === WANT || rendererRev(have) >= rendererRev(WANT)) return;
     if (g.__MC_MTL_RENDERER_UPGRADING__) return;

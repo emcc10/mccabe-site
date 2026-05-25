@@ -7,7 +7,7 @@ import sys
 import urllib.request
 
 SITE = "https://www.mccabestheaterandliving.com"
-WANT = "sectional-20260601-top-price-panel-v29"
+WANT = "sectional-20260601-top-price-panel-v30"
 UA = {"User-Agent": "Mozilla/5.0 (McCabe MTL verify)"}
 
 

@@ -73,7 +73,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v29";
+  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v30";
 
   /** Template owns native leather `<select>` discovery; prefers __McCabeLeatherCollectImpl so `mcCollectNativeLeatherSelectsForPdp` can’t be swapped by other scripts */
   function mtlGetNativeLeatherCollectFn() {
@@ -349,6 +349,12 @@
 
   function findProductTitleEl() {
     return (
+      document.querySelector("#mc-pdp-title-right [itemprop='name']") ||
+      document.querySelector("#mc-pdp-title-right .productnamecolorLARGE.colors_productname") ||
+      document.querySelector("#mc-pdp-title-right .productnamecolorLARGE") ||
+      document.querySelector("#mc-pdp-title-right .productnamecolor") ||
+      document.querySelector("#v65-product-parent [itemprop='name']") ||
+      document.querySelector("#content_area [itemprop='name']") ||
       document.querySelector("#v65-product-parent h1[itemprop='name']") ||
       document.querySelector("#v65-product-parent h1") ||
       document.querySelector("#content_area h1.vp-product-title") ||
@@ -635,7 +641,8 @@
     if (!root) return;
     root
       .querySelectorAll(
-        ".product_saleprice, .product_sale_price, font.product_sale_price, span.product_sale_price, b .product_saleprice"
+        ".product_saleprice, .product_sale_price, font.product_sale_price, span.product_sale_price, b .product_saleprice, " +
+          "#priceWithOptions, #priceWithOptionsNoTax, .option_pricing, .colors_pricebox [itemprop='price']"
       )
       .forEach(function (node) {
         if (!node) return;

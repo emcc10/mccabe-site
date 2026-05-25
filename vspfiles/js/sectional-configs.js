@@ -9,7 +9,7 @@
     if (g.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) return;
     try {
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-sectional-pdp-emergency.js?v=20260603d&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-sectional-pdp-emergency.js?v=20260603e&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eLoad) {}
@@ -998,7 +998,7 @@
 
   /* MC_SECTIONAL_PDP_AUTH_INLINE_20260531a — no external boot.js (404-safe); load auth fix with cache bust */
   (function (g, d) {
-    var WANT = "20260603d";
+    var WANT = "20260603e";
     function ensure() {
       try {
         var onPdp =
@@ -1031,7 +1031,7 @@
 
   /* MC_SECTIONAL_MTL_RENDERER_INLINE — GitHub raw first (Volusion file body lags ?v= cache bust) */
   (function (g, d) {
-    var WANT = "sectional-20260601-top-price-panel-v29";
+    var WANT = "sectional-20260601-top-price-panel-v30";
     var GH =
       "https://raw.githubusercontent.com/emcc10/mccabe-site/main/vspfiles/js/mtl-sectional-renderer.js";
     function onPdp() {

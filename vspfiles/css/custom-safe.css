@@ -1,4 +1,4 @@
-/* 0603b C_CSS_DEPLOY_VERIFY_20260603b — sectional top price inside title wrap */
+/* 0603c C_CSS_DEPLOY_VERIFY_20260603c — sectional top price inside baked title block */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -14791,11 +14791,23 @@ html body.productdetails #mc-pdp-top-price-panel .mc-pdp-member-line--sale {
 html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .product_saleprice,
 html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .product_sale_price,
 html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent font.product_sale_price,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent #priceWithOptions,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent #priceWithOptionsNoTax,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .option_pricing,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox [itemprop="price"],
 html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .product_saleprice,
 html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .product_sale_price,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent #priceWithOptions,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent #priceWithOptionsNoTax,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .option_pricing,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox [itemprop="price"],
 html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .product_saleprice,
 html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .product_sale_price,
-html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent font.product_sale_price {
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent font.product_sale_price,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent #priceWithOptions,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent #priceWithOptionsNoTax,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .option_pricing,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox [itemprop="price"] {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -14852,6 +14864,21 @@ html body.productdetails #mc-pdp-title-right > h1 {
   width: 100% !important;
   float: none !important;
   margin: 0 0 8px !important;
+}
+html.is-sectional-product #mc-pdp-title-right > [itemprop="name"],
+html.is-sectional-product #mc-pdp-title-right > .productnamecolorLARGE,
+html body.is-sectional-product #mc-pdp-title-right > [itemprop="name"],
+html body.is-sectional-product #mc-pdp-title-right > .productnamecolorLARGE,
+html body.productdetails #mc-pdp-title-right > [itemprop="name"],
+html body.productdetails #mc-pdp-title-right > .productnamecolorLARGE {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  float: none !important;
+  clear: both !important;
+  margin: 0 0 8px 0 !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
 }
 html.is-sectional-product #mc-pdp-title-right #mc-pdp-top-price-panel,
 html body.is-sectional-product #mc-pdp-title-right #mc-pdp-top-price-panel,
