@@ -1,11 +1,11 @@
 /**
  * Sectional PDP emergency: mount top price before first .colors_pricebox (accordion layout).
- * MC_SECTIONAL_PDP_EMERGENCY_20260603a
+ * MC_SECTIONAL_PDP_EMERGENCY_20260603b
  */
 (function (g, d) {
   "use strict";
   if (g.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) return;
-  g.__MC_SECTIONAL_INSERT_BEFORE_PATCH__ = "20260603a";
+  g.__MC_SECTIONAL_INSERT_BEFORE_PATCH__ = "20260603b";
 
   function firstPricebox() {
     var scope = d.getElementById("v65-product-parent") || d.getElementById("content_area");
@@ -93,4 +93,34 @@
     g.MutationObserver.prototype = Orig.prototype;
   }
   patchMutationObserver();
+
+  function rendererRev(build) {
+    var m = String(build || "").match(/v(\d+)\s*$/);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+  function maybeUpgradeRendererFromGh() {
+    var WANT = "sectional-20260601-top-price-panel-v27";
+    var have = String(g.MTL_RENDERER_BUILD || "").trim();
+    if (have === WANT || rendererRev(have) >= rendererRev(WANT)) return;
+    if (g.__MC_MTL_RENDERER_UPGRADING__) return;
+    g.__MC_MTL_RENDERER_UPGRADING__ = 1;
+    var GH =
+      "https://raw.githubusercontent.com/emcc10/mccabe-site/main/vspfiles/js/mtl-sectional-renderer.js";
+    d.querySelectorAll('script[src*="mtl-sectional-renderer"]').forEach(function (old) {
+      try {
+        old.remove();
+      } catch (eRm) {}
+    });
+    delete g.MTL_RENDERER_BUILD;
+    var s = d.createElement("script");
+    s.src = GH + "?mcrd=" + Date.now();
+    s.async = false;
+    s.onload = function () {
+      g.__MC_MTL_RENDERER_UPGRADING__ = 0;
+      if (typeof g.mtlUpdateTopPricePanel === "function") g.mtlUpdateTopPricePanel();
+    };
+    (d.head || d.documentElement).appendChild(s);
+  }
+  g.setTimeout(maybeUpgradeRendererFromGh, 800);
+  g.setTimeout(maybeUpgradeRendererFromGh, 2500);
 })(window, document);

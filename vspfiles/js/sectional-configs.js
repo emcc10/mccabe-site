@@ -9,7 +9,7 @@
     if (g.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) return;
     try {
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-sectional-pdp-emergency.js?v=20260603a&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-sectional-pdp-emergency.js?v=20260603b&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eLoad) {}
@@ -1029,7 +1029,7 @@
     });
   })(window, document);
 
-  /* MC_SECTIONAL_MTL_RENDERER_INLINE_v24 — upgrade stale baked renderer (CI now chunked-SFTPs file) */
+  /* MC_SECTIONAL_MTL_RENDERER_INLINE — GitHub raw first (Volusion file body lags ?v= cache bust) */
   (function (g, d) {
     var WANT = "sectional-20260601-top-price-panel-v27";
     var GH =
@@ -1044,25 +1044,40 @@
         return false;
       }
     }
+    function rendererRev(build) {
+      var m = String(build || "").match(/v(\d+)\s*$/);
+      return m ? parseInt(m[1], 10) : 0;
+    }
     function needUpgrade() {
       var have = String(g.MTL_RENDERER_BUILD || "").trim();
       if (have === WANT) return false;
+      if (rendererRev(have) >= rendererRev(WANT)) return false;
       if (have) return true;
       return !!d.querySelector('script[src*="mtl-sectional-renderer.js"]');
     }
-    function load(src, isFallback) {
+    function afterLoad() {
+      try {
+        delete g.__MTL_TOP_PRICE_MOUNT_GAVE_UP__;
+        if (typeof g.mtlUpdateTopPricePanel === "function") {
+          g.mtlUpdateTopPricePanel();
+        }
+      } catch (eOk) {}
+    }
+    function load(src, isVolusionFallback) {
       var s = d.createElement("script");
-      s.id = isFallback ? "mc-mtl-renderer-gh-fallback" : "mc-mtl-renderer-inline-loader";
+      s.id = isVolusionFallback ? "mc-mtl-renderer-vol-fallback" : "mc-mtl-renderer-gh-loader";
       s.src = src;
       s.async = false;
       s.onload = function () {
-        try {
-          delete g.__MTL_TOP_PRICE_MOUNT_GAVE_UP__;
-        } catch (eOk) {}
+        if (String(g.MTL_RENDERER_BUILD || "").trim() !== WANT && isVolusionFallback) return;
+        afterLoad();
       };
       s.onerror = function () {
-        if (!isFallback) {
-          load(GH + "?mcrd=" + Date.now(), true);
+        if (!isVolusionFallback) {
+          load(
+            "/v/vspfiles/js/mtl-sectional-renderer.js?v=" + WANT + "&mcrd=" + Date.now(),
+            true
+          );
         }
       };
       (d.head || d.documentElement).appendChild(s);
@@ -1077,15 +1092,18 @@
         } catch (eRm) {}
       });
       delete g.MTL_RENDERER_BUILD;
-      load("/v/vspfiles/js/mtl-sectional-renderer.js?v=" + WANT + "&mcrd=" + Date.now(), false);
+      load(GH + "?mcrd=" + Date.now(), false);
     }
     ensure();
     if (d.readyState === "loading") {
       d.addEventListener("DOMContentLoaded", ensure);
     }
     g.addEventListener("load", ensure);
-    [0, 300, 1200].forEach(function (ms) {
-      g.setTimeout(ensure, ms);
+    [0, 400, 1500, 4000].forEach(function (ms) {
+      g.setTimeout(function () {
+        g.__MC_MTL_RENDERER_UPGRADING__ = 0;
+        ensure();
+      }, ms);
     });
   })(window, document);
 })();

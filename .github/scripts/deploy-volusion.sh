@@ -419,6 +419,7 @@ else
   echo "=== MC_PDP_JS_DEPLOY_VERIFIED (SFTP + HTTP) ==="
 fi
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mtl-sectional-renderer.js?v=$(date +%s)" "sectional-20260601-top-price-panel-v27"
+python3 scripts/verify_mtl_renderer_live.py || true
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260625"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp" "MC_DTK_PLP_20260625"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-sofa-bounds.json?v=$(date +%s)" "77494-91-1.jpg"

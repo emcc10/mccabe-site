@@ -10,7 +10,7 @@
   if (!global.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) {
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-sectional-pdp-emergency.js?v=20260603a&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-sectional-pdp-emergency.js?v=20260603b&mcrd=" + Date.now();
       s.async = false;
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eEmer) {}
