@@ -12,7 +12,6 @@ import { compareUpholsteryImages } from '../phase95/imageCompare.js';
 import { loadImageRGBA } from '../recolor/imageIO.js';
 
 const REALISM_REFERENCE_PATH = join(REPO_ROOT, 'sofa-recolor-tool', 'input', 'Bali-Silk-realism-reference.png');
-const PHASE6A_SINGLE_PATH = join(DEBUG_DIR, 'phase6a-single.png');
 
 export const PHASE_REALLEATHER_RELIGHT1_COMPARE_GRID = join(DEBUG_DIR, 'phaseRealLeatherRelight1-compare-grid.png');
 export const PHASE_REALLEATHER_RELIGHT1_SPEC = join(DEBUG_DIR, 'phaseRealLeatherRelight1-spec.json');
@@ -208,7 +207,7 @@ function mapLThroughCurve(L: number, baseP: number[], refP: number[]): number {
   return L;
 }
 
-function buildHandMasks(base: RgbaImage, source: RgbaImage, reference: RgbaImage, upholstery: Mask): HandMasks {
+function buildHandMasks(source: RgbaImage, reference: RgbaImage, upholstery: Mask): HandMasks {
   const { width, height } = base;
   const n = width * height;
   const backCenter = new Float32Array(n);
@@ -643,7 +642,7 @@ export async function runPhaseRealLeatherRelight1() {
   const lockedBaseline = await loadImageRGBA(REALLEATHER_LOCKED_IMAGE);
   const reference = await loadResizedImageRGBA(REALISM_REFERENCE_PATH, base6a.width, base6a.height);
   const tone = analyzeTone(lockedBaseline, reference, upholstery);
-  const masks = buildHandMasks(lockedBaseline, source, reference, upholstery);
+  const masks = buildHandMasks(source, reference, upholstery);
   const backgroundRing = buildBackgroundRing(upholstery);
 
   const relightA = applyRelightVariant(lockedBaseline, upholstery, tone, masks, VARIANTS[0]);

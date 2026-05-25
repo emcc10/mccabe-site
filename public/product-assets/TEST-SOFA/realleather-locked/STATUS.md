@@ -1,11 +1,11 @@
-# TEST-SOFA Bali Silk RealLeather baseline
+# TEST-SOFA Bali Silk RealLeather checkpoint
 
-**Locked current best output** for the Bali Silk / RealLeather method.
+**Checkpoint / revert point only** for the Bali Silk / RealLeather method.
 
 - **Canonical baseline:** REALLEATHER-FINAL-A
 - **Source image:** `phaseRealLeatherFinal-variant-A.png`
-- **Method status:** locked for integration/generalization
-- **Current instruction:** do not continue tuning this swatch unless a new swatch exposes a specific failure
+- **Method status:** not production-ready; keep only as a checkpoint
+- **Current instruction:** use this as a revert point while building a stronger reference-guided relight pass
 
 ## Preserve
 
@@ -26,5 +26,5 @@
 
 ## Next Step
 
-Apply this RealLeather Reference Match method to the next leather swatch.
-Keep the same method unless the next swatch clearly fails.
+Do not treat this image as production-ready.
+Use it only as a checkpoint while testing stronger reference-guided relighting.

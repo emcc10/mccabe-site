@@ -3,8 +3,9 @@
   "swatch": "BALI-SILK",
   "lockedVersion": "REALLEATHER-FINAL-A",
   "frozenAt": "2026-05-25",
-  "productionBaseline": true,
-  "baselineImageRole": "Locked current best RealLeather output",
+  "productionBaseline": false,
+  "checkpointOnly": true,
+  "baselineImageRole": "Checkpoint / revert point only; not production-ready",
   "regenerateScript": "npm run export:realleather-locked",
   "sourceRenderScript": "npm run render:phaseRealLeatherFinal",
   "lockedFrom": "phaseRealLeatherFinal-variant-A.png",
@@ -36,5 +37,5 @@
     "micro smoothing",
     "brightness/shadow tweaks"
   ],
-  "nextStep": "Apply the same RealLeather Reference Match method to the next leather swatch. Only create a new phase if the next swatch exposes a specific failure."
+  "nextStep": "Keep this as a checkpoint only. The next step is stronger reference-guided relighting, not another minor polish pass."
 }

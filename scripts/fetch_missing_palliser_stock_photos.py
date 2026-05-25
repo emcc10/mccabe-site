@@ -73,33 +73,35 @@ STOCK_SOURCES: dict[str, str] = {
         "https://images.furnituredealer.net/b/p/a1e18853-5f6b-4575-b42b-6c376b416583/"
         "assets/f5c591a3e91242808969e874dbc9d5a2.jpg"
     ),
-    # Kinsley 77111-G3
-    "77111-G3-1.jpg": f"{SOS}/243752.original.jpg",
-    # Pinecrest 42306
+    # Kinsley 77111-G3 — front-angle swivel glider with visible base (not stationary barrel)
+    "77111-G3-1.jpg": (
+        "https://cdn.knorrweb.com/palliser/3a42b61803c86aa08fe2752276a994c9.webp"
+    ),
+    # Pinecrest 42306 — one front 3/4 hero for all mechanism variants
     "42306-31-1.jpg": f"{SOS}/88658.original.jpg",
     "42306-32-1.jpg": f"{SOS}/88658.original.jpg",
-    "42306-33-1.jpg": f"{SOS}/88659.original.jpg",
-    "42306-34-1.jpg": f"{SOS}/88660.original.jpg",
-    "42306-35-1.jpg": f"{SOS}/88661.original.jpg",
-    # Regent 41094
+    "42306-33-1.jpg": f"{SOS}/88658.original.jpg",
+    "42306-34-1.jpg": f"{SOS}/88658.original.jpg",
+    "42306-35-1.jpg": f"{SOS}/88658.original.jpg",
+    # Regent 41094 — front-facing hero for all variants
     "41094-32-1.jpg": f"{SOS}/88429.original.jpg",
-    "41094-33-1.jpg": f"{SOS}/88433.original.jpg",
-    "41094-35-1.jpg": f"{SOS}/88432.original.jpg",
-    "41094-39-1.jpg": f"{SOS}/264579.original.png",
+    "41094-33-1.jpg": f"{SOS}/88429.original.jpg",
+    "41094-35-1.jpg": f"{SOS}/88429.original.jpg",
+    "41094-39-1.jpg": f"{SOS}/88429.original.jpg",
     # Thea 77119
     "77119-J2-1.jpg": f"{SITE}/v/vspfiles/photos/77119-N2-2T.jpg",
     "77119-M2-1.jpg": (
         "https://images.furnituredealer.net/b/p/a1e18853-5f6b-4575-b42b-6c376b416583/"
         "assets/fa3bca52c55245cbacdcb6ebe7b1f431.jpg"
     ),
-    # Theo 42002
+    # Theo 42002 — one front 3/4 hero for all mechanism variants
     "42002-32-1.jpg": f"{SOS}/245773.original.jpg",
-    "42002-33-1.jpg": f"{SOS}/245774.original.jpg",
-    "42002-34-1.jpg": f"{SOS}/245775.original.jpg",
-    "42002-35-1.jpg": f"{SOS}/245776.original.jpg",
-    "42002-39-1.jpg": f"{SOS}/245777.original.jpg",
-    # Tundra 41043
-    "41043-35-1.jpg": f"{SOS}/264465.original.png",
+    "42002-33-1.jpg": f"{SOS}/245773.original.jpg",
+    "42002-34-1.jpg": f"{SOS}/245773.original.jpg",
+    "42002-35-1.jpg": f"{SOS}/245773.original.jpg",
+    "42002-39-1.jpg": f"{SOS}/245773.original.jpg",
+    # Tundra 41043 — front 3/4 hero for all variants
+    "41043-35-1.jpg": f"{SOS}/264471.original.png",
     "41043-39-1.jpg": f"{SOS}/264471.original.png",
     # ZG5 41089-42
     "41089-42-1.jpg": (
