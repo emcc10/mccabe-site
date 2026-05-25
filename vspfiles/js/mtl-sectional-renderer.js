@@ -73,7 +73,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v28";
+  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v29";
 
   /** Template owns native leather `<select>` discovery; prefers __McCabeLeatherCollectImpl so `mcCollectNativeLeatherSelectsForPdp` can’t be swapped by other scripts */
   function mtlGetNativeLeatherCollectFn() {
@@ -407,6 +407,10 @@
   function isTopPricePanelMounted(panel) {
     if (!panel || !panel.parentNode) return false;
     var wrap = findTitleRightWrap();
+    var h1 = findProductTitleEl();
+    if (wrap && h1 && wrap.contains(h1) && wrap.contains(panel)) {
+      return h1.nextElementSibling === panel;
+    }
     if (wrap && wrap.parentNode && panel.parentNode === wrap.parentNode) {
       return wrap.nextElementSibling === panel;
     }
@@ -417,17 +421,26 @@
     panel = panel || document.getElementById("mc-pdp-top-price-panel");
     if (!panel) return false;
     var wrap = findTitleRightWrap();
-    if (!wrap || !wrap.parentNode) return false;
-    var parent = wrap.parentNode;
-    try {
-      if (wrap.nextElementSibling !== panel) {
-        parent.insertBefore(panel, wrap.nextSibling);
-      }
-      panel.dataset.mtlTopPriceMounted = "1";
-      return true;
-    } catch (eOrd) {
-      return false;
+    var h1 = findProductTitleEl();
+    if (wrap && h1 && wrap.contains(h1)) {
+      try {
+        if (h1.nextElementSibling !== panel) {
+          wrap.insertBefore(panel, h1.nextSibling);
+        }
+        panel.dataset.mtlTopPriceMounted = "1";
+        return true;
+      } catch (eIn) {}
     }
+    if (wrap && wrap.parentNode) {
+      try {
+        if (wrap.nextElementSibling !== panel) {
+          wrap.parentNode.insertBefore(panel, wrap.nextSibling);
+        }
+        panel.dataset.mtlTopPriceMounted = "1";
+        return true;
+      } catch (eOut) {}
+    }
+    return false;
   }
 
   function hidePricingBeforeTitleWrap() {
@@ -461,6 +474,13 @@
 
   function insertTopPricePanel(panel) {
     var wrap = findTitleRightWrap();
+    var h1 = findProductTitleEl();
+    if (wrap && h1 && wrap.contains(h1)) {
+      try {
+        wrap.insertBefore(panel, h1.nextSibling);
+        return true;
+      } catch (eIn) {}
+    }
     if (wrap && wrap.parentNode) {
       try {
         wrap.parentNode.insertBefore(panel, wrap.nextSibling);
@@ -610,6 +630,20 @@
     return parts.join("").replace(/<\/?motion\b[^>]*>/g, "");
   }
 
+  function purgeNativeSalePriceNodes() {
+    var root = document.getElementById("v65-product-parent") || document.getElementById("content_area");
+    if (!root) return;
+    root
+      .querySelectorAll(
+        ".product_saleprice, .product_sale_price, font.product_sale_price, span.product_sale_price, b .product_saleprice"
+      )
+      .forEach(function (node) {
+        if (!node) return;
+        if (node.closest && node.closest("#mtl-sectional-configurations, #mc-pdp-accordion")) return;
+        hidePricingNode(node);
+      });
+  }
+
   function hideNativeVolusionSaleUnderTitle() {
     var top = document.getElementById("mc-pdp-top-price-panel");
     if (!top) return;
@@ -649,6 +683,7 @@
       } catch (eLeg) {}
     }
     hideNativeVolusionSaleUnderTitle();
+    purgeNativeSalePriceNodes();
     hideStrayPriceRowsOutsideTopPanel(top);
     try {
       document.body.classList.add("mc-pdp-price-stack");
@@ -666,8 +701,10 @@
       assertTopPricePanelOrder();
       hidePricingBeforeTitleWrap();
       hideLegacyPricingInFirstPricebox();
+      purgeNativeSalePriceNodes();
     });
     __mtlTopPriceOrderObs.observe(parent, { childList: true });
+    if (wrap !== parent) __mtlTopPriceOrderObs.observe(wrap, { childList: true });
   }
 
   function ensureTopPricePanel() {
@@ -736,6 +773,7 @@
     }
     mountTopPricePanelUnderTitleOnce();
     assertTopPricePanelOrder();
+    purgeNativeSalePriceNodes();
     hidePricingBeforeTitleWrap();
     var panel = document.getElementById("mc-pdp-top-price-panel");
     if (!panel) return;
