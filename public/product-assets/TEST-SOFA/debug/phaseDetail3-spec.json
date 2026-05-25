@@ -1,0 +1,122 @@
+{
+  "phase": "detail3",
+  "purpose": "Fine-grain dominant — remove cloudy mottle from DETAIL2-A base",
+  "notFinalBaliSilk": true,
+  "basedOn": "DETAIL2-A (not DETAIL2-B or DETAIL-B)",
+  "changes": {
+    "grainExtract": "L - blur(2px) high-pass",
+    "mottleMix": "0.04–0.05 (was 0.10); extraction damped 82%",
+    "backTextureScale": "58% on upper back panels",
+    "seamSuppress": "expanded feather blur on seam map",
+    "cushionBreakSuppress": "horizontal band y 40–60% feathered",
+    "detailGain": "tanh×1.15 cap 0.68",
+    "maxDeltaL": "2.3–2.45",
+    "targetMeanDeltaL": "0.60–0.68 vs 6A"
+  },
+  "variants": [
+    {
+      "id": "A",
+      "label": "DETAIL3-A",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail3-variant-A.png",
+      "calibratedStrength": 1.0143798828125,
+      "params": {
+        "targetMeanDeltaL": 0.6,
+        "softLightMix": 0.62,
+        "directLScale": 1.1,
+        "softLightScale": 0.46,
+        "grainMix": 0.78,
+        "mottleMix": 0.04,
+        "maxDeltaL": 2.3,
+        "chromaStrength": 0.07,
+        "sampleScale": 0.56
+      },
+      "vs6a": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 1.9343848055479478,
+        "meanAbsDeltaL": 0.6002259723709362,
+        "meanAbsDeltaA": 0.00018393099959929319,
+        "meanAbsDeltaB": 0,
+        "maxAbsDeltaL": 2,
+        "maxAbsDeltaRgb": 7.666666666666667,
+        "rmsDeltaL": 1.0036587886960817,
+        "pixelsAboveLThreshold2": 30987,
+        "pixelsAboveLThreshold4": 0,
+        "fractionAboveLThreshold2": 0.20355249587797491,
+        "ssimOnL": 0.9905201312064815,
+        "ssimOnRgb": 0.9879411025009059
+      },
+      "vsDetail2A": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 2.6164097106810136,
+        "meanAbsDeltaL": 0.944511958799456,
+        "meanAbsDeltaA": 0.00043355164191261964,
+        "meanAbsDeltaB": 0,
+        "maxAbsDeltaL": 5,
+        "maxAbsDeltaRgb": 14,
+        "rmsDeltaL": 1.6007196324254054,
+        "pixelsAboveLThreshold2": 38430,
+        "pixelsAboveLThreshold4": 9509,
+        "fractionAboveLThreshold2": 0.2524452969500299,
+        "ssimOnL": 0.9762382376269809,
+        "ssimOnRgb": 0.9751012590473852
+      }
+    },
+    {
+      "id": "B",
+      "label": "DETAIL3-B",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail3-variant-B.png",
+      "calibratedStrength": 1.1352294921875,
+      "params": {
+        "targetMeanDeltaL": 0.68,
+        "softLightMix": 0.6,
+        "directLScale": 1.18,
+        "softLightScale": 0.47,
+        "grainMix": 0.82,
+        "mottleMix": 0.05,
+        "maxDeltaL": 2.45,
+        "chromaStrength": 0.08,
+        "sampleScale": 0.57
+      },
+      "vs6a": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 2.140913042240727,
+        "meanAbsDeltaL": 0.6817074051934231,
+        "meanAbsDeltaA": 0.00017079307105648652,
+        "meanAbsDeltaB": 0,
+        "maxAbsDeltaL": 3,
+        "maxAbsDeltaRgb": 8,
+        "rmsDeltaL": 1.1300268455266482,
+        "pixelsAboveLThreshold2": 35444,
+        "pixelsAboveLThreshold4": 0,
+        "fractionAboveLThreshold2": 0.23283036963561954,
+        "ssimOnL": 0.9880335725989882,
+        "ssimOnRgb": 0.9856075387493612
+      },
+      "vsDetail2A": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 2.701889453089852,
+        "meanAbsDeltaL": 0.9815346414330852,
+        "meanAbsDeltaA": 0.00039413785628419966,
+        "meanAbsDeltaB": 0,
+        "maxAbsDeltaL": 6,
+        "maxAbsDeltaRgb": 14,
+        "rmsDeltaL": 1.6617091410391085,
+        "pixelsAboveLThreshold2": 39961,
+        "pixelsAboveLThreshold4": 10392,
+        "fractionAboveLThreshold2": 0.2625023812495484,
+        "ssimOnL": 0.9744913159879948,
+        "ssimOnRgb": 0.9736054746734473
+      }
+    }
+  ],
+  "validationNote": "Not declared better unless less cloudy/embossed AND less flat than 6A — review compare grid",
+  "outputs": {
+    "compareGrid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail3-compare-grid.png",
+    "heatmapVs6a": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail3-heatmap.png",
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail3-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail3-variant-B.png"
+    ],
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail3-spec.json"
+  }
+}

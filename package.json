@@ -32,7 +32,13 @@
     "render:phase9reset": "tsx scripts/renderPhase9Reset.ts",
     "render:phase9reset-b": "tsx scripts/renderPhase9resetSingleB.ts",
     "render:phase95": "tsx scripts/renderPhase95.ts",
-    "render:phase10": "tsx scripts/renderPhase10.ts"
+    "render:phase10": "tsx scripts/renderPhase10.ts",
+    "render:phaseDetail": "tsx scripts/renderPhaseDetail.ts",
+    "render:phaseDetail2": "tsx scripts/renderPhaseDetail2.ts",
+    "render:phaseDetail3": "tsx scripts/renderPhaseDetail3.ts",
+    "render:phaseRealLeather1": "tsx scripts/renderPhaseRealLeather1.ts",
+    "render:phaseRealLeather2": "tsx scripts/renderPhaseRealLeather2.ts",
+    "render:phaseRealLeather3": "tsx scripts/renderPhaseRealLeather3.ts"
   },
   "dependencies": {
     "color-convert": "^2.0.1",

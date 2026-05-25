@@ -1,0 +1,145 @@
+{
+  "phase": "detail2",
+  "purpose": "Reduce embossing/dirty look; keep subtle grain in midtone open fields",
+  "notFinalBaliSilk": true,
+  "basedOn": "DETAIL-A (not DETAIL-B)",
+  "changesFromDetailA": {
+    "targetMeanDeltaL": "1.0 → 0.75–0.80",
+    "directLScale": "2.8 → ~1.15–1.28 (~55% reduction)",
+    "mottleMix": "0.38 → 0.10–0.12 (~70% reduction)",
+    "grainMix": "0.62 → 0.77–0.85",
+    "maxDeltaLCap": "2.6–2.8 per pixel",
+    "midtoneOnlyWeight": true,
+    "panelUVWarp": true,
+    "detailGainCurve": "tanh soft-clip"
+  },
+  "variants": [
+    {
+      "id": "A",
+      "label": "DETAIL2-A",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail2-variant-A.png",
+      "calibratedStrength": 0.7300491333007811,
+      "params": {
+        "targetMeanDeltaL": 0.75,
+        "softLightMix": 0.62,
+        "directLScale": 1.15,
+        "softLightScale": 0.48,
+        "grainMix": 0.77,
+        "mottleMix": 0.1,
+        "maxDeltaL": 2.6,
+        "chromaStrength": 0.09,
+        "sampleScale": 0.54
+      },
+      "vs6a": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 2.1565844013374504,
+        "meanAbsDeltaL": 0.7501165991158174,
+        "meanAbsDeltaA": 0.0002496206423133265,
+        "meanAbsDeltaB": 0,
+        "maxAbsDeltaL": 3,
+        "maxAbsDeltaRgb": 8.666666666666666,
+        "rmsDeltaL": 1.2570328200427838,
+        "pixelsAboveLThreshold2": 33677,
+        "pixelsAboveLThreshold4": 0,
+        "fractionAboveLThreshold2": 0.22122300976804987,
+        "ssimOnL": 0.9852094795459595,
+        "ssimOnRgb": 0.9853685224575441,
+        "lessFlatThan6a": true
+      },
+      "vsDetailA": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 3.3500622956778425,
+        "meanAbsDeltaL": 1.2431107987203658,
+        "meanAbsDeltaA": 0.0006043447129691062,
+        "meanAbsDeltaB": 0,
+        "maxAbsDeltaL": 17,
+        "maxAbsDeltaRgb": 48,
+        "rmsDeltaL": 2.049101332935561,
+        "pixelsAboveLThreshold2": 46948,
+        "pixelsAboveLThreshold4": 14534,
+        "fractionAboveLThreshold2": 0.30839973461384346,
+        "ssimOnL": 0.962085379521656,
+        "ssimOnRgb": 0.9619788866441003
+      }
+    },
+    {
+      "id": "B",
+      "label": "DETAIL2-B",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail2-variant-B.png",
+      "calibratedStrength": 0.6926864624023438,
+      "params": {
+        "targetMeanDeltaL": 0.8,
+        "softLightMix": 0.58,
+        "directLScale": 1.28,
+        "softLightScale": 0.5,
+        "grainMix": 0.85,
+        "mottleMix": 0.12,
+        "maxDeltaL": 2.8,
+        "chromaStrength": 0.1,
+        "sampleScale": 0.56
+      },
+      "vs6a": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 2.285482807925731,
+        "meanAbsDeltaL": 0.7998633655431548,
+        "meanAbsDeltaA": 0.0002496206423133265,
+        "meanAbsDeltaB": 0,
+        "maxAbsDeltaL": 3,
+        "maxAbsDeltaRgb": 9,
+        "rmsDeltaL": 1.3240315310102724,
+        "pixelsAboveLThreshold2": 35561,
+        "pixelsAboveLThreshold4": 0,
+        "fractionAboveLThreshold2": 0.23359893845537374,
+        "ssimOnL": 0.9835940590130403,
+        "ssimOnRgb": 0.9835018063804555,
+        "lessFlatThan6a": true
+      },
+      "vsDetailA": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 3.47063125556997,
+        "meanAbsDeltaL": 1.2878126005872654,
+        "meanAbsDeltaA": 0.0006043447129691062,
+        "meanAbsDeltaB": 0,
+        "maxAbsDeltaL": 17,
+        "maxAbsDeltaRgb": 45.333333333333336,
+        "rmsDeltaL": 2.1139180726827442,
+        "pixelsAboveLThreshold2": 48620,
+        "pixelsAboveLThreshold4": 15851,
+        "fractionAboveLThreshold2": 0.3193830428756298,
+        "ssimOnL": 0.9596442316710913,
+        "ssimOnRgb": 0.9594173940334304
+      }
+    }
+  ],
+  "validationNote": "Not declared better unless visually less dirty/embossed AND less flat than 6A — review compare grid",
+  "references": {
+    "base6a": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phase6a-single.png",
+    "detailA": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail-variant-A.png",
+    "detailB": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail-variant-B.png"
+  },
+  "outputs": {
+    "grid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail2-grid.png",
+    "compareGrid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail2-compare-grid.png",
+    "heatmapVs6a": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail2-heatmap.png",
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail2-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail2-variant-B.png"
+    ],
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseDetail2-spec.json"
+  },
+  "detail2A_vs_detailA": {
+    "upholsteryPixels": 152231,
+    "meanAbsDeltaRgb": 3.3500622956778425,
+    "meanAbsDeltaL": 1.2431107987203658,
+    "meanAbsDeltaA": 0.0006043447129691062,
+    "meanAbsDeltaB": 0,
+    "maxAbsDeltaL": 17,
+    "maxAbsDeltaRgb": 48,
+    "rmsDeltaL": 2.049101332935561,
+    "pixelsAboveLThreshold2": 46948,
+    "pixelsAboveLThreshold4": 14534,
+    "fractionAboveLThreshold2": 0.30839973461384346,
+    "ssimOnL": 0.962085379521656,
+    "ssimOnRgb": 0.9619788866441003
+  }
+}

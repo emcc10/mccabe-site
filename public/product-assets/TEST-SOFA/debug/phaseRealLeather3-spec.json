@@ -1,0 +1,174 @@
+{
+  "phase": "RealLeather3",
+  "purpose": "Stronger smooth catalog leather from RealLeather2-B via light response, not texture",
+  "notFinalBaliSilk": true,
+  "base": "RealLeather2-B",
+  "referenceImage": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\sofa-recolor-tool\\input\\Bali-Silk-realism-reference.png",
+  "forbidden": [
+    "detail/detail2/detail3 transfer path",
+    "swatch texture transfer",
+    "mottle",
+    "visible grain pattern",
+    "cloudy patches",
+    "dirty bands",
+    "plastic shine"
+  ],
+  "method": {
+    "swatch": "Average Bali Silk a/b only",
+    "specular": "Broad smooth highlight shaping from source highlight geography + cushion bands",
+    "shadowPockets": "Existing seam/gap/arm/rail pockets only",
+    "cushionGradient": "Smooth center lift on back cushions with seam-edge depth retained",
+    "grain": "Barely visible procedural micrograin only to avoid dead flatness",
+    "finishCurve": "Lift highlights gently, hold mids, slightly deepen shadows, clamp extremes"
+  },
+  "swatchMeanLab": {
+    "meanA": 1,
+    "meanB": 9.133497180307879
+  },
+  "base6aMeanLab": {
+    "meanL": 71.86234735369274,
+    "meanA": 3.1375015601290146,
+    "meanB": 6.165209451425794,
+    "count": 152231
+  },
+  "outputs": {
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeather3-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeather3-variant-B.png"
+    ],
+    "compareGrid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeather3-compare-grid.png",
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeather3-spec.json"
+  },
+  "variants": [
+    {
+      "id": "A",
+      "label": "REALLEATHER3-A",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeather3-variant-A.png",
+      "params": {
+        "micrograinStrength": 0.35,
+        "sheenStrength": 7,
+        "formContrastStrength": 2,
+        "shadowPocketStrength": 0.45,
+        "cushionGradientStrength": 0.35,
+        "warmHighlightTint": 0.42,
+        "chromaBlend": 0.13
+      },
+      "vs6a": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 1.8713687312917737,
+        "meanAbsDeltaL": 0.38006713481485377,
+        "meanAbsDeltaA": 0.24816233224507492,
+        "meanAbsDeltaB": 0.615465969480592,
+        "maxAbsDeltaL": 5,
+        "maxAbsDeltaRgb": 14,
+        "rmsDeltaL": 0.8291529790795722,
+        "pixelsAboveLThreshold2": 9748,
+        "pixelsAboveLThreshold4": 1506,
+        "fractionAboveLThreshold2": 0.06403426371763964,
+        "ssimOnL": 0.9939490907367323,
+        "ssimOnRgb": 0.9913578257138618
+      },
+      "vsDetail3A": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 2.844788512194734,
+        "meanAbsDeltaL": 0.841543443845209,
+        "meanAbsDeltaA": 0.2483068494590458,
+        "meanAbsDeltaB": 0.615465969480592,
+        "maxAbsDeltaL": 5,
+        "maxAbsDeltaRgb": 13,
+        "rmsDeltaL": 1.3018647789615099,
+        "pixelsAboveLThreshold2": 38530,
+        "pixelsAboveLThreshold4": 1928,
+        "fractionAboveLThreshold2": 0.2531021933771702,
+        "ssimOnL": 0.9850176207875718,
+        "ssimOnRgb": 0.981672890115841
+      },
+      "vsRealLeather2B": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 0.6154747280993966,
+        "meanAbsDeltaL": 0.006621515985574555,
+        "meanAbsDeltaA": 0.10767189337257195,
+        "meanAbsDeltaB": 0.20642970222884957,
+        "maxAbsDeltaL": 1,
+        "maxAbsDeltaRgb": 3,
+        "rmsDeltaL": 0.08137269803548704,
+        "pixelsAboveLThreshold2": 0,
+        "pixelsAboveLThreshold4": 0,
+        "fractionAboveLThreshold2": 0,
+        "ssimOnL": 0.999943505901635,
+        "ssimOnRgb": 0.9992307241092543
+      },
+      "meanLab": {
+        "meanL": 71.98855029527495,
+        "meanA": 2.8893392278839394,
+        "meanB": 6.780675420906386,
+        "count": 152231
+      }
+    },
+    {
+      "id": "B",
+      "label": "REALLEATHER3-B",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeather3-variant-B.png",
+      "params": {
+        "micrograinStrength": 0.42,
+        "sheenStrength": 8.5,
+        "formContrastStrength": 2.35,
+        "shadowPocketStrength": 0.58,
+        "cushionGradientStrength": 0.48,
+        "warmHighlightTint": 0.48,
+        "chromaBlend": 0.14
+      },
+      "vs6a": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 1.9144151541621621,
+        "meanAbsDeltaL": 0.4011206653047014,
+        "meanAbsDeltaA": 0.2631264328553317,
+        "meanAbsDeltaB": 0.6712299071805349,
+        "maxAbsDeltaL": 5,
+        "maxAbsDeltaRgb": 14,
+        "rmsDeltaL": 0.8593388484750052,
+        "pixelsAboveLThreshold2": 10461,
+        "pixelsAboveLThreshold4": 1770,
+        "fractionAboveLThreshold2": 0.06871793524315022,
+        "ssimOnL": 0.9935371830184008,
+        "ssimOnRgb": 0.9910809504897936
+      },
+      "vsDetail3A": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 2.87070307624536,
+        "meanAbsDeltaL": 0.8517844591443268,
+        "meanAbsDeltaA": 0.263244674212217,
+        "meanAbsDeltaB": 0.6712299071805349,
+        "maxAbsDeltaL": 5,
+        "maxAbsDeltaRgb": 13.333333333333334,
+        "rmsDeltaL": 1.3198375215985023,
+        "pixelsAboveLThreshold2": 38715,
+        "pixelsAboveLThreshold4": 2264,
+        "fractionAboveLThreshold2": 0.25431745176737985,
+        "ssimOnL": 0.9846660912575589,
+        "ssimOnRgb": 0.9814838124816333
+      },
+      "vsRealLeather2B": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 0.6593050473730069,
+        "meanAbsDeltaL": 0.030144977041469873,
+        "meanAbsDeltaA": 0.12263599398282873,
+        "meanAbsDeltaB": 0.2621936399287924,
+        "maxAbsDeltaL": 1,
+        "maxAbsDeltaRgb": 3,
+        "rmsDeltaL": 0.17362308902179419,
+        "pixelsAboveLThreshold2": 0,
+        "pixelsAboveLThreshold4": 0,
+        "fractionAboveLThreshold2": 0,
+        "ssimOnL": 0.9997451923416869,
+        "ssimOnRgb": 0.9991130740426579
+      },
+      "meanLab": {
+        "meanL": 72.00168165485348,
+        "meanA": 2.874375127273683,
+        "meanB": 6.836439358606328,
+        "count": 152231
+      }
+    }
+  ]
+}

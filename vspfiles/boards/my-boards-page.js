@@ -97,11 +97,11 @@
 
   function resolveStyleImage(style) {
     if (!style) return '';
+    if (style.moodImage) return assetUrl(style.moodImage);
     if (style.catalogPhoto) return style.catalogPhoto;
     if (style.catalogSku && config.catalogPhotos && config.catalogPhotos[style.catalogSku]) {
       return config.catalogPhotos[style.catalogSku];
     }
-    if (style.moodImage) return assetUrl(style.moodImage);
     return '';
   }
 
@@ -766,7 +766,7 @@
           : product
             ? resolveProductImage(product)
             : '';
-        prod.alt = product ? product.name : look.title;
+        prod.alt = look.title || (product ? product.name : '');
         prod.loading = 'lazy';
         bindImgFallback(prod, look.styleId, product ? product.id : null, look.image);
         imgWrap.appendChild(prod);
@@ -782,6 +782,18 @@
         title.className = 'mc-boards__lifestyle-title';
         title.textContent = look.title;
         cap.appendChild(title);
+        if (look.room) {
+          var roomLine = document.createElement('p');
+          roomLine.className = 'mc-boards__lifestyle-room';
+          roomLine.textContent = look.room;
+          cap.appendChild(roomLine);
+        }
+        if (product) {
+          var featuredLine = document.createElement('p');
+          featuredLine.className = 'mc-boards__lifestyle-product-name';
+          featuredLine.textContent = 'Featuring ' + product.name;
+          cap.appendChild(featuredLine);
+        }
         if (look.accents && look.accents.length) {
           var chips = document.createElement('div');
           chips.className = 'mc-boards__palette-chips';
@@ -1442,7 +1454,7 @@
       done();
       return;
     }
-    var src = API_BASE + 'board-styles.js?v=20260541';
+    var src = API_BASE + 'board-styles.js?v=20260542';
     var tag = document.querySelector('script[src*="board-styles.js"]');
     if (tag) {
       refreshConfig();
@@ -2273,17 +2285,23 @@
         take.className = 'mc-boards__mccabe-take';
         take.textContent = item.mccabeTake ? 'How we\'d style it: ' + item.mccabeTake : '';
         card.appendChild(take);
-        if (item.sourceUrl) {
-          var src = document.createElement('a');
-          src.className = 'mc-boards__editorial-source';
-          src.href = item.sourceUrl;
-          src.target = '_blank';
-          src.rel = 'noopener noreferrer';
-          src.textContent = item.source || 'Source';
-          card.appendChild(src);
+        if (item.source) {
+          var meta = document.createElement('p');
+          meta.className = 'mc-boards__editorial-meta';
+          meta.textContent = item.source;
+          card.appendChild(meta);
         }
         var actions = document.createElement('div');
         actions.className = 'mc-boards__btn-row';
+        if (item.sourceUrl) {
+          var src = document.createElement('a');
+          src.className = 'mc-boards__btn mc-boards__btn--ghost';
+          src.href = item.sourceUrl;
+          src.target = '_blank';
+          src.rel = 'noopener noreferrer';
+          src.textContent = 'Read article';
+          actions.appendChild(src);
+        }
         actions.appendChild(
           btn('Shop this look', 'mc-boards__btn mc-boards__btn--ghost', function () {
             if (item.styleId) deps.activateStyleFilter(item.styleId, false);

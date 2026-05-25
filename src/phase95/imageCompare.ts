@@ -57,11 +57,91 @@ function computeSsim1d(a: number[], b: number[]): number {
   );
 }
 
+/** Stats only — no diff buffers (for calibration loops). */
+export function computeUpholsteryDeltaStats(
+  prior: RgbaImage,
+  current: RgbaImage,
+  upholstery: Mask,
+  sampleStep = 1,
+): UpholsteryDeltaStats {
+  if (prior.width !== current.width || prior.height !== current.height) {
+    throw new Error('Compare images must match dimensions');
+  }
+
+  const n = prior.width * prior.height;
+  const labPriorL: number[] = [];
+  const labCurrL: number[] = [];
+  const rgbPrior: number[] = [];
+  const rgbCurr: number[] = [];
+
+  let upholPx = 0;
+  let sumAbsRgb = 0;
+  let sumAbsL = 0;
+  let sumAbsA = 0;
+  let sumAbsB = 0;
+  let sumSqL = 0;
+  let maxAbsL = 0;
+  let maxAbsRgb = 0;
+  let above2 = 0;
+  let above4 = 0;
+
+  for (let j = 0; j < n; j++) {
+    if (sampleStep > 1 && j % sampleStep !== 0) continue;
+    if (upholstery.data[j] < 128) continue;
+
+    const pp = j * prior.channels;
+    const cp = j * current.channels;
+    const dr = Math.abs(prior.data[pp] - current.data[cp]);
+    const dg = Math.abs(prior.data[pp + 1] - current.data[cp + 1]);
+    const db = Math.abs(prior.data[pp + 2] - current.data[cp + 2]);
+    const absRgb = (dr + dg + db) / 3;
+
+    const labP = rgbToLab(prior.data[pp], prior.data[pp + 1], prior.data[pp + 2]);
+    const labC = rgbToLab(current.data[cp], current.data[cp + 1], current.data[cp + 2]);
+    const dL = Math.abs(labP.L - labC.L);
+    const dA = Math.abs(labP.a - labC.a);
+    const dB = Math.abs(labP.b - labC.b);
+
+    upholPx++;
+    sumAbsRgb += absRgb;
+    sumAbsL += dL;
+    sumAbsA += dA;
+    sumAbsB += dB;
+    sumSqL += dL * dL;
+    maxAbsL = Math.max(maxAbsL, dL);
+    maxAbsRgb = Math.max(maxAbsRgb, absRgb);
+    if (dL >= 2) above2++;
+    if (dL >= 4) above4++;
+
+    labPriorL.push(labP.L);
+    labCurrL.push(labC.L);
+    rgbPrior.push(0.2126 * prior.data[pp] + 0.7152 * prior.data[pp + 1] + 0.0722 * prior.data[pp + 2]);
+    rgbCurr.push(0.2126 * current.data[cp] + 0.7152 * current.data[cp + 1] + 0.0722 * current.data[cp + 2]);
+  }
+
+  return {
+    upholsteryPixels: upholPx,
+    meanAbsDeltaRgb: upholPx ? sumAbsRgb / upholPx : 0,
+    meanAbsDeltaL: upholPx ? sumAbsL / upholPx : 0,
+    meanAbsDeltaA: upholPx ? sumAbsA / upholPx : 0,
+    meanAbsDeltaB: upholPx ? sumAbsB / upholPx : 0,
+    maxAbsDeltaL: maxAbsL,
+    maxAbsDeltaRgb: maxAbsRgb,
+    rmsDeltaL: upholPx ? Math.sqrt(sumSqL / upholPx) : 0,
+    pixelsAboveLThreshold2: above2,
+    pixelsAboveLThreshold4: above4,
+    fractionAboveLThreshold2: upholPx ? above2 / upholPx : 0,
+    ssimOnL: computeSsim1d(labPriorL, labCurrL),
+    ssimOnRgb: computeSsim1d(rgbPrior, rgbCurr),
+  };
+}
+
 /** Compare two same-size RGBA images inside upholstery mask. */
 export function compareUpholsteryImages(
   prior: RgbaImage,
   current: RgbaImage,
   upholstery: Mask,
+  sampleStep = 1,
 ): CompareResult {
   if (prior.width !== current.width || prior.height !== current.height) {
     throw new Error('Compare images must match dimensions');
@@ -89,6 +169,7 @@ export function compareUpholsteryImages(
   let above4 = 0;
 
   for (let j = 0; j < n; j++) {
+    if (sampleStep > 1 && j % sampleStep !== 0) continue;
     const o = j * 3;
     if (upholstery.data[j] < 128) {
       diffRgb[o] = 32;

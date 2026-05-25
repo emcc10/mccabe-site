@@ -2,7 +2,7 @@
  * Style library + curated McCabe product looks for inspiration boards.
  * Product PNGs: /v/vspfiles/boards/showcase/
  */
-window.MC_BOARD_STYLES_BUILD = '20260541';
+window.MC_BOARD_STYLES_BUILD = '20260542';
 window.MC_BOARD_STYLES = {
   assetBases: ['/v/vspfiles/boards/', '/vspfiles/boards/'],
   shopBase: 'https://www.mccabestheaterandliving.com',
@@ -68,21 +68,30 @@ window.MC_BOARD_STYLES = {
   /** Sherwin-Williams & Benjamin Moore — matches showroom inspiration boards. */
   paintLibrary: [
     { id: 'sw-alabaster', brand: 'Sherwin-Williams', name: 'Alabaster', code: 'SW 7008', hex: '#EDE6DB', family: 'warm-neutral' },
+    { id: 'sw-pure-white', brand: 'Sherwin-Williams', name: 'Pure White', code: 'SW 7005', hex: '#F2EFE7', family: 'warm-neutral' },
     { id: 'sw-agreeable-gray', brand: 'Sherwin-Williams', name: 'Agreeable Gray', code: 'SW 7029', hex: '#D1CBC1', family: 'greige' },
     { id: 'sw-repose-gray', brand: 'Sherwin-Williams', name: 'Repose Gray', code: 'SW 7015', hex: '#C2C0BB', family: 'greige' },
+    { id: 'sw-accessible-beige', brand: 'Sherwin-Williams', name: 'Accessible Beige', code: 'SW 7036', hex: '#D2C7B8', family: 'greige' },
+    { id: 'sw-drift-of-mist', brand: 'Sherwin-Williams', name: 'Drift of Mist', code: 'SW 9166', hex: '#DCD6CC', family: 'greige' },
     { id: 'sw-natural-choice', brand: 'Sherwin-Williams', name: 'Natural Choice', code: 'SW 7011', hex: '#E8E2D8', family: 'warm-neutral' },
     { id: 'sw-sea-salt', brand: 'Sherwin-Williams', name: 'Sea Salt', code: 'SW 6214', hex: '#CDD2CA', family: 'cool-neutral' },
     { id: 'sw-rainwashed', brand: 'Sherwin-Williams', name: 'Rainwashed', code: 'SW 6210', hex: '#C3D7D3', family: 'cool-neutral' },
+    { id: 'sw-evergreen-fog', brand: 'Sherwin-Williams', name: 'Evergreen Fog', code: 'SW 9130', hex: '#95998A', family: 'cool-neutral' },
     { id: 'sw-naval', brand: 'Sherwin-Williams', name: 'Naval', code: 'SW 6244', hex: '#2F3D4C', family: 'deep' },
     { id: 'sw-urbane-bronze', brand: 'Sherwin-Williams', name: 'Urbane Bronze', code: 'SW 7048', hex: '#54504A', family: 'deep' },
+    { id: 'sw-iron-ore', brand: 'Sherwin-Williams', name: 'Iron Ore', code: 'SW 7069', hex: '#43413C', family: 'contrast' },
     { id: 'sw-copper-penny', brand: 'Sherwin-Williams', name: 'Copper Penny', code: 'SW 7708', hex: '#B87333', family: 'warm-accent' },
     { id: 'sw-camelback', brand: 'Sherwin-Williams', name: 'Camelback', code: 'SW 7693', hex: '#C69B6D', family: 'warm-accent' },
     { id: 'sw-tricorn-black', brand: 'Sherwin-Williams', name: 'Tricorn Black', code: 'SW 6258', hex: '#2F2F30', family: 'contrast' },
     { id: 'bm-white-dove', brand: 'Benjamin Moore', name: 'White Dove', code: 'OC-17', hex: '#F3EDE4', family: 'warm-neutral' },
+    { id: 'bm-classic-gray', brand: 'Benjamin Moore', name: 'Classic Gray', code: 'OC-23', hex: '#E7E1D8', family: 'warm-neutral' },
+    { id: 'bm-pale-oak', brand: 'Benjamin Moore', name: 'Pale Oak', code: 'OC-20', hex: '#DED8CF', family: 'greige' },
     { id: 'bm-revere-pewter', brand: 'Benjamin Moore', name: 'Revere Pewter', code: 'HC-172', hex: '#B5A992', family: 'greige' },
     { id: 'bm-edgecomb-gray', brand: 'Benjamin Moore', name: 'Edgecomb Gray', code: 'HC-173', hex: '#D1C7B8', family: 'greige' },
+    { id: 'bm-october-mist', brand: 'Benjamin Moore', name: 'October Mist', code: '1495', hex: '#B8B6A5', family: 'cool-neutral' },
     { id: 'bm-hale-navy', brand: 'Benjamin Moore', name: 'Hale Navy', code: 'HC-154', hex: '#434B54', family: 'deep' },
-    { id: 'bm-kendall-charcoal', brand: 'Benjamin Moore', name: 'Kendall Charcoal', code: 'HC-166', hex: '#696868', family: 'contrast' }
+    { id: 'bm-kendall-charcoal', brand: 'Benjamin Moore', name: 'Kendall Charcoal', code: 'HC-166', hex: '#696868', family: 'contrast' },
+    { id: 'bm-chelsea-gray', brand: 'Benjamin Moore', name: 'Chelsea Gray', code: 'HC-168', hex: '#8A7F73', family: 'deep' }
   ],
 
   visualQuiz: {
@@ -228,49 +237,67 @@ window.MC_BOARD_STYLES = {
 
   editorialFeed: [
     {
-      title: 'Warm minimalism is staying',
-      excerpt: 'Layered neutrals and quiet contrast keep rooms calm without feeling cold.',
+      title: 'The 2025 Interior Design Trends That Are Here to Stay',
+      excerpt: 'Architectural Digest calls out darker woods, livable color, and layered warmth as the shift away from sterile white rooms.',
       source: 'Architectural Digest',
-      sourceUrl: 'https://www.architecturaldigest.com/topic/neutral',
-      mccabeTake: 'Pair Oxford or Keiran seating with ivory walls and walnut accents.',
+      sourceUrl: 'https://www.architecturaldigest.com/story/interior-design-trends',
+      mccabeTake: 'Use Oxford or Windsor with warm greige walls, walnut tables, and one deeper anchor tone.',
       styleId: 'transitional',
       productIds: ['40113-oxford-sofa', '41500-keiran-recliner']
     },
     {
-      title: 'Walnut & cognac are back',
-      excerpt: 'Mid-century silhouettes and caramel leather anchor the room.',
-      source: 'Elle Decor',
-      sourceUrl: 'https://www.elledecor.com/design-decor/interior-designers/glimpse-inside-midcentury-modern-home',
-      mccabeTake: 'Brookes accent chairs add MCM warmth without a full redesign.',
+      title: 'Dark Wood Paneling Is Making Rooms Feel Grounded Again',
+      excerpt: 'Architectural Digest highlights the return of rich paneling, depth, and architectural warmth over flat bright-white interiors.',
+      source: 'Architectural Digest',
+      sourceUrl: 'https://www.architecturaldigest.com/story/were-obsessed-with-the-dark-wood-paneling-in-athena-calderones-apartment',
+      mccabeTake: 'Brookes and camel leather seating work well with walnut millwork and quiet tonal layering.',
       styleId: 'mid-century',
       productIds: ['77696-brookes-chair']
     },
     {
-      title: 'Media rooms go deep blue',
-      excerpt: 'Navy upholstery and dimmable layers define theater lounges.',
+      title: '17 Cozy Home Theater Ideas for Your Next Netflix Marathon',
+      excerpt: 'Architectural Digest is leaning into cocooning media rooms with warm neutrals, deep charcoal, walnut reeding, and layered lighting.',
       source: 'House Beautiful',
-      sourceUrl: 'https://www.housebeautiful.com/room-decorating/theater-rooms/',
-      mccabeTake: 'Reece power seating delivers performance fabric and recline for long screenings.',
+      sourceUrl: 'https://www.architecturaldigest.com/story/home-theater-ideas',
+      mccabeTake: 'Reece and Washington seating fit this look when paired with darker walls, dimmable lamps, and walnut media storage.',
       styleId: 'contemporary',
-      productIds: ['40109-reece-sofa']
+      productIds: ['40109-reece-sofa', '41067-washington-recliner']
     },
     {
-      title: 'Performance leather + power comfort',
-      excerpt: 'Reclining sectionals with tailored stitching — comfort without bulk.',
-      source: 'Better Homes & Gardens',
-      sourceUrl: 'https://www.bhg.com/decorating/',
-      mccabeTake: 'Washington and Keiran frames balance family durability with a tailored look.',
-      styleId: 'traditional',
-      productIds: ['41067-washington-recliner', '41500-keiran-recliner']
+      title: '3 Interior Design Trends to Know for 2026',
+      excerpt: 'ELLE Decor points to curved silhouettes, richer layering, and architectural trim details replacing flat minimal rooms.',
+      source: 'ELLE Decor',
+      sourceUrl: 'https://www.elledecor.com/design-decorate/trends/a69545023/interior-design-trends-2026/',
+      mccabeTake: 'Martina and Oxford work well when you want a softer silhouette with layered textures instead of a cold all-white room.',
+      styleId: 'modern',
+      productIds: ['77180-martina-sofa', '40113-oxford-sofa']
     },
     {
-      title: 'Jewel-tone accents, edited',
-      excerpt: 'One rich accent per room on a neutral field.',
-      source: 'Veranda',
-      sourceUrl: 'https://www.veranda.com/decorating-ideas/',
-      mccabeTake: 'Use Martina or Reece in navy, then pull brass and terracotta in decor.',
+      title: '3 Furniture Trends That Will Dominate 2026',
+      excerpt: 'ELLE Decor says curved forms, artisan-crafted furniture, and darker walnut finishes are leading the next wave.',
+      source: 'ELLE Decor',
+      sourceUrl: 'https://www.elledecor.com/design-decorate/trends/a69811787/furniture-trends-2026/',
+      mccabeTake: 'Brookes, Martina, and richer walnut accents fit this shift toward sculptural seating and deeper woods.',
+      styleId: 'mid-century',
+      productIds: ['77696-brookes-chair', '77180-martina-sofa']
+    },
+    {
+      title: '6 Living Room Trends That Will Take Over 2026',
+      excerpt: 'ELLE Decor is seeing expressive but edited living rooms, more vintage character, and layered pattern instead of safe neutrals.',
+      source: 'ELLE Decor',
+      sourceUrl: 'https://www.elledecor.com/design-decorate/trends/a69937526/living-room-trends-2026/',
+      mccabeTake: 'Essex and Oxford give you the quieter base; layer pattern through pillows, rugs, and one bold accent instead of repeating the same image everywhere.',
+      styleId: 'coastal',
+      productIds: ['40112-essex-sofa', '40113-oxford-sofa']
+    },
+    {
+      title: 'Why Curved Furniture Is Everywhere Right Now',
+      excerpt: 'ELLE Decor frames the 2026 curve trend around softer, more relaxed rooms with rounded backs, sculptural arms, and less rigid layouts.',
+      source: 'ELLE Decor',
+      sourceUrl: 'https://www.elledecor.com/design-decorate/trends/a70757894/curved-furniture-trend-2026/',
+      mccabeTake: 'Use Martina or Essex as the seating anchor, then balance it with round occasional tables and softer lighting.',
       styleId: 'contemporary',
-      productIds: ['77180-martina-sofa', '40109-reece-sofa']
+      productIds: ['77180-martina-sofa', '40112-essex-sofa']
     }
   ],
 
@@ -280,16 +307,26 @@ window.MC_BOARD_STYLES = {
 
   colorWheel: [
     { paintId: 'sw-alabaster', styles: ['transitional', 'traditional'] },
+    { paintId: 'sw-pure-white', styles: ['transitional', 'coastal'] },
     { paintId: 'sw-agreeable-gray', styles: ['transitional', 'modern'] },
+    { paintId: 'sw-accessible-beige', styles: ['transitional', 'traditional'] },
+    { paintId: 'sw-drift-of-mist', styles: ['transitional', 'modern'] },
     { paintId: 'bm-white-dove', styles: ['coastal', 'transitional'] },
+    { paintId: 'bm-classic-gray', styles: ['transitional', 'coastal'] },
     { paintId: 'sw-sea-salt', styles: ['coastal', 'modern'] },
+    { paintId: 'bm-pale-oak', styles: ['transitional', 'modern'] },
     { paintId: 'bm-revere-pewter', styles: ['transitional', 'traditional'] },
     { paintId: 'sw-rainwashed', styles: ['coastal', 'modern'] },
+    { paintId: 'bm-edgecomb-gray', styles: ['transitional', 'modern'] },
+    { paintId: 'bm-october-mist', styles: ['coastal', 'modern'] },
+    { paintId: 'sw-evergreen-fog', styles: ['modern', 'mid-century'] },
     { paintId: 'sw-naval', styles: ['contemporary', 'modern'] },
     { paintId: 'bm-hale-navy', styles: ['contemporary'] },
     { paintId: 'sw-camelback', styles: ['traditional', 'transitional'] },
     { paintId: 'sw-copper-penny', styles: ['traditional', 'mid-century'] },
     { paintId: 'sw-urbane-bronze', styles: ['modern', 'contemporary'] },
+    { paintId: 'bm-chelsea-gray', styles: ['traditional', 'contemporary'] },
+    { paintId: 'sw-iron-ore', styles: ['contemporary', 'modern'] },
     { paintId: 'bm-kendall-charcoal', styles: ['contemporary', 'modern'] }
   ],
 
@@ -315,7 +352,7 @@ window.MC_BOARD_STYLES = {
       catalogSku: '41067',
       catalogPhoto: '/v/vspfiles/photos/Washington%2041067-1.jpg',
       heroProductId: '41067-washington-recliner',
-      moodImage: '/v/vspfiles/boards/showcase/traditional-carob-recliner-front.png',
+      moodImage: '/v/vspfiles/boards/mood/traditional.svg',
       palette: ['#f4f4f4', '#c4a574', '#6b3f2a', '#3d2a22', '#8b5e3c']
     },
     {
@@ -325,7 +362,7 @@ window.MC_BOARD_STYLES = {
       catalogSku: '40113',
       catalogPhoto: '/v/vspfiles/photos/40113-01-1.jpg',
       heroProductId: '40113-oxford-sofa',
-      moodImage: '/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png',
+      moodImage: '/v/vspfiles/boards/mood/transitional.svg',
       palette: ['#f0f0f0', '#c8bfb2', '#9a8f82', '#5c534c', '#888888']
     },
     {
@@ -335,7 +372,7 @@ window.MC_BOARD_STYLES = {
       catalogSku: '77180',
       catalogPhoto: '/v/vspfiles/photos/77180-01-1.jpg',
       heroProductId: '77180-martina-sofa',
-      moodImage: '/v/vspfiles/boards/showcase/modern-pacific-charcoal-sofa-angle.png',
+      moodImage: '/v/vspfiles/boards/mood/modern.svg',
       palette: ['#ececea', '#a8a8a4', '#5a5a56', '#2a2a28', '#7a8790']
     },
     {
@@ -345,7 +382,7 @@ window.MC_BOARD_STYLES = {
       catalogSku: '40112',
       catalogPhoto: '/v/vspfiles/photos/Essex-SC-07-9W-08-1.jpg',
       heroProductId: '40112-essex-sofa',
-      moodImage: '/v/vspfiles/boards/showcase/transitional-london-fog-sofa-angle.png',
+      moodImage: '/v/vspfiles/boards/mood/coastal.svg',
       palette: ['#f5f5f5', '#d8d2c8', '#8fa9b5', '#5c7a86', '#c9b896']
     },
     {
@@ -355,7 +392,7 @@ window.MC_BOARD_STYLES = {
       catalogSku: '77696',
       catalogPhoto: '/v/vspfiles/photos/77696-1.jpg',
       heroProductId: '77696-brookes-chair',
-      moodImage: '/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png',
+      moodImage: '/v/vspfiles/boards/mood/mid-century.svg',
       palette: ['#f0f0f0', '#c67b4e', '#6b4423', '#2f4f4f', '#d4a574']
     },
     {
@@ -365,7 +402,7 @@ window.MC_BOARD_STYLES = {
       catalogSku: '40109',
       catalogPhoto: '/v/vspfiles/photos/40109-01-1.jpg',
       heroProductId: '40109-reece-sofa',
-      moodImage: '/v/vspfiles/boards/showcase/contemporary-atlantic-navy-recliner-front.png',
+      moodImage: '/v/vspfiles/boards/mood/contemporary.svg',
       palette: ['#e8eaed', '#5c6b7a', '#1e3a5f', '#152238', '#888888']
     }
   ],
@@ -482,7 +519,7 @@ window.MC_BOARD_STYLES = {
       mood: 'tailored',
       sceneClass: 'mc-scene--mcm',
       productId: '77696-brookes-chair',
-      image: '/v/vspfiles/boards/showcase/mid-century-lux-cognac-chair-angle.png',
+      image: '/v/vspfiles/photos/77696-1.jpg',
       accents: ['#f0e6d8', '#c67b4e', '#2f4f4f', '#6b4423']
     },
     {
@@ -493,40 +530,40 @@ window.MC_BOARD_STYLES = {
       mood: 'modern',
       sceneClass: 'mc-scene--modern',
       productId: '77180-martina-sofa',
-      image: '/v/vspfiles/boards/showcase/modern-pacific-charcoal-sofa-angle.png',
+      image: '/v/vspfiles/photos/77180-01-1.jpg',
       accents: ['#ececea', '#7a8790', '#2a2a28', '#a8a8a4']
     },
     {
       id: 'contemporary-reece-media',
       styleId: 'contemporary',
-      title: 'Reece Sofa — Home Theater',
+      title: 'Reece Power Seating — Home Theater',
       room: 'Home theater',
       mood: 'dramatic',
       sceneClass: 'mc-scene--contemporary',
       productId: '40109-reece-sofa',
-      image: '/v/vspfiles/boards/showcase/contemporary-atlantic-navy-recliner-angle.png',
+      image: '/v/vspfiles/photos/40109-01-1.jpg',
       accents: ['#e8eaed', '#1e3a5f', '#5c6b7a', '#b8956b']
     },
     {
       id: 'traditional-washington-den',
       styleId: 'traditional',
-      title: 'Washington Power Reclining Sofa — Family Room',
+      title: 'Washington Power Seating — Family Room',
       room: 'Family room',
       mood: 'cozy',
       sceneClass: 'mc-scene--traditional',
       productId: '41067-washington-recliner',
-      image: '/v/vspfiles/boards/showcase/traditional-carob-recliner-recline.png',
+      image: '/v/vspfiles/photos/Washington%2041067-1.jpg',
       accents: ['#f4efe6', '#8b5e3c', '#3d2a22', '#c4a574']
     },
     {
       id: 'transitional-keiran-family',
       styleId: 'transitional',
-      title: 'Keiran Power Reclining Sofa — Living Room',
+      title: 'Keiran Power Seating — Living Room',
       room: 'Living room',
       mood: 'cozy',
       sceneClass: 'mc-scene--transitional',
       productId: '41500-keiran-recliner',
-      image: '/v/vspfiles/boards/showcase/transitional-cognac-recliner-angle.png',
+      image: '/v/vspfiles/photos/Keiran-SC-67-10-9X-10-66-1.jpg',
       accents: ['#f0ebe4', '#b8956b', '#5c534c', '#9a6b42']
     },
     {
@@ -618,8 +655,8 @@ window.renderBoardsPreview = function renderBoardsPreview() {
 
   function styleImg(style) {
     if (!style) return '';
-    if (style.catalogPhoto) return style.catalogPhoto;
     if (style.moodImage) return style.moodImage;
+    if (style.catalogPhoto) return style.catalogPhoto;
     if (style.catalogSku && C.catalogPhotos && C.catalogPhotos[style.catalogSku]) {
       return C.catalogPhotos[style.catalogSku];
     }
@@ -908,7 +945,7 @@ window.renderBoardsPreview = function renderBoardsPreview() {
     if (window.__MC_BOARDS_APP_STARTED) return;
     if (document.querySelector('script[src*="my-boards-page.js"]')) return;
     var s = document.createElement('script');
-    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260541';
+    s.src = '/v/vspfiles/boards/my-boards-page.js?v=20260542';
     s.defer = true;
     document.body.appendChild(s);
   }
