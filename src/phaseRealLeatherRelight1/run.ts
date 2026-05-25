@@ -78,7 +78,7 @@ const VARIANTS: VariantParams[] = [
   },
 ];
 
-interface HandMasks {
+export interface HandMasks {
   backCenter: Float32Array;
   backEdgeSeam: Float32Array;
   seatTop: Float32Array;
@@ -95,14 +95,14 @@ interface HandMasks {
   shadowGuide: Float32Array;
 }
 
-interface ToneAnalysis {
+export interface ToneAnalysis {
   basePercentiles: number[];
   refPercentiles: number[];
   highlightThreshold: number;
   shadowThreshold: number;
 }
 
-interface DiagnosticStats {
+export interface DiagnosticStats {
   label: string;
   contrastRange: number;
   shadowDepth: number;
@@ -148,7 +148,7 @@ async function loadResizedImageRGBA(path: string, width: number, height: number)
   };
 }
 
-function buildLField(image: RgbaImage): Float32Array {
+export function buildLField(image: RgbaImage): Float32Array {
   const n = image.width * image.height;
   const field = new Float32Array(n);
   for (let j = 0; j < n; j++) {
@@ -182,7 +182,7 @@ function weightedMean(field: Float32Array, weights: Float32Array, minWeight = 0.
   return total > 0 ? sum / total : 0;
 }
 
-function analyzeTone(base: RgbaImage, reference: RgbaImage, upholstery: Mask): ToneAnalysis {
+export function analyzeTone(base: RgbaImage, reference: RgbaImage, upholstery: Mask): ToneAnalysis {
   const baseL = buildLField(base);
   const refL = buildLField(reference);
   const basePercentiles = [0.05, 0.25, 0.5, 0.75, 0.95].map((p) => percentileMasked(baseL, upholstery, p));
@@ -195,7 +195,7 @@ function analyzeTone(base: RgbaImage, reference: RgbaImage, upholstery: Mask): T
   };
 }
 
-function mapLThroughCurve(L: number, baseP: number[], refP: number[]): number {
+export function mapLThroughCurve(L: number, baseP: number[], refP: number[]): number {
   if (L <= baseP[0]) return refP[0];
   if (L >= baseP[4]) return refP[4];
   for (let i = 0; i < baseP.length - 1; i++) {
@@ -207,8 +207,8 @@ function mapLThroughCurve(L: number, baseP: number[], refP: number[]): number {
   return L;
 }
 
-function buildHandMasks(source: RgbaImage, reference: RgbaImage, upholstery: Mask): HandMasks {
-  const { width, height } = base;
+export function buildHandMasks(source: RgbaImage, reference: RgbaImage, upholstery: Mask): HandMasks {
+  const { width, height } = source;
   const n = width * height;
   const backCenter = new Float32Array(n);
   const backEdgeSeam = new Float32Array(n);
@@ -429,7 +429,7 @@ function buildHandMasks(source: RgbaImage, reference: RgbaImage, upholstery: Mas
   };
 }
 
-function buildBackgroundRing(upholstery: Mask): Mask {
+export function buildBackgroundRing(upholstery: Mask): Mask {
   const dilated = dilate(upholstery, 8);
   return subtract(dilated, upholstery);
 }
@@ -469,7 +469,7 @@ function buildDiagnosticNotes(
   return notes;
 }
 
-function analyzeImage(
+export function analyzeImage(
   label: string,
   image: RgbaImage,
   upholstery: Mask,
@@ -587,7 +587,7 @@ function applyRelightVariant(
   return { data: out, width, height, channels };
 }
 
-async function writeRgbaPng(path: string, image: RgbaImage) {
+export async function writeRgbaPng(path: string, image: RgbaImage) {
   mkdirSync(dirname(path), { recursive: true });
   await sharp(image.data, {
     raw: { width: image.width, height: image.height, channels: image.channels },
@@ -620,7 +620,7 @@ async function panelWithLabel(imagePath: string, label: string): Promise<Buffer>
     .toBuffer();
 }
 
-async function writeCompareGrid(outPath: string, panels: { path: string; label: string }[]) {
+export async function writeCompareGrid(outPath: string, panels: { path: string; label: string }[]) {
   const labeled = await Promise.all(panels.map((panel) => panelWithLabel(panel.path, panel.label)));
   const metas = await Promise.all(labeled.map((buf) => sharp(buf).metadata()));
   const cellW = Math.max(...metas.map((meta) => meta.width ?? 0));
