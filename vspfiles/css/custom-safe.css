@@ -14850,12 +14850,26 @@ html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .color
 html.is-sectional-product #mc-pdp-title-right,
 html body.is-sectional-product #mc-pdp-title-right,
 html body.productdetails #mc-pdp-title-right {
-  display: block !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
   width: 100% !important;
   max-width: 100% !important;
   float: none !important;
   clear: both !important;
   position: static !important;
+}
+html.is-sectional-product #mc-pdp-title-right > :not(#mc-pdp-top-price-panel),
+html body.is-sectional-product #mc-pdp-title-right > :not(#mc-pdp-top-price-panel),
+html body.productdetails #mc-pdp-title-right > :not(#mc-pdp-top-price-panel) {
+  order: 1 !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  float: none !important;
+  clear: both !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
 }
 html.is-sectional-product #mc-pdp-title-right > h1,
 html body.is-sectional-product #mc-pdp-title-right > h1,
@@ -14880,9 +14894,31 @@ html body.productdetails #mc-pdp-title-right > .productnamecolorLARGE {
   margin-left: 0 !important;
   padding-left: 0 !important;
 }
+html.is-sectional-product #mc-pdp-title-right [itemprop="name"],
+html.is-sectional-product #mc-pdp-title-right .productnamecolorLARGE,
+html.is-sectional-product #mc-pdp-title-right .productnamecolor,
+html.is-sectional-product #mc-pdp-title-right .colors_productname,
+html body.is-sectional-product #mc-pdp-title-right [itemprop="name"],
+html body.is-sectional-product #mc-pdp-title-right .productnamecolorLARGE,
+html body.is-sectional-product #mc-pdp-title-right .productnamecolor,
+html body.is-sectional-product #mc-pdp-title-right .colors_productname,
+html body.productdetails #mc-pdp-title-right [itemprop="name"],
+html body.productdetails #mc-pdp-title-right .productnamecolorLARGE,
+html body.productdetails #mc-pdp-title-right .productnamecolor,
+html body.productdetails #mc-pdp-title-right .colors_productname {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  float: none !important;
+  clear: both !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  text-indent: 0 !important;
+}
 html.is-sectional-product #mc-pdp-title-right #mc-pdp-top-price-panel,
 html body.is-sectional-product #mc-pdp-title-right #mc-pdp-top-price-panel,
 html body.productdetails #mc-pdp-title-right #mc-pdp-top-price-panel {
+  order: 2 !important;
   display: flex !important;
   flex-direction: column !important;
   margin: 0 0 10px !important;
