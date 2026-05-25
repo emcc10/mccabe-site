@@ -1,0 +1,81 @@
+{
+  "phase": "RealLeather Final Polish",
+  "purpose": "Export REF2-B unchanged plus one selectively smoothed upper-back-cushion variant",
+  "base": "REALLEATHER-REF2-B",
+  "preservesExactly": [
+    "arms",
+    "seams",
+    "cushion breaks",
+    "lower rail",
+    "global tone intent"
+  ],
+  "outputs": {
+    "finalA": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherFinal-variant-A.png",
+    "finalB": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherFinal-variant-B.png",
+    "compareGrid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherFinal-compare-grid.png",
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherFinal-spec.json"
+  },
+  "finalA": {
+    "exactCopyOf": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherReferenceMatch2-variant-B.png",
+    "vsRef2B": {
+      "upholsteryPixels": 152231,
+      "meanAbsDeltaRgb": 0,
+      "meanAbsDeltaL": 0,
+      "meanAbsDeltaA": 0,
+      "meanAbsDeltaB": 0,
+      "maxAbsDeltaL": 0,
+      "maxAbsDeltaRgb": 0,
+      "rmsDeltaL": 0,
+      "pixelsAboveLThreshold2": 0,
+      "pixelsAboveLThreshold4": 0,
+      "fractionAboveLThreshold2": 0,
+      "ssimOnL": 1,
+      "ssimOnRgb": 1
+    },
+    "meanLab": {
+      "meanL": 72.93340384021651,
+      "meanA": 2.884852625286571,
+      "meanB": 6.949517509574266,
+      "count": 152231
+    }
+  },
+  "finalB": {
+    "smoothingMethod": "Reduce fine L residual by 22% inside upper back cushion open fields only",
+    "vsRef2B": {
+      "upholsteryPixels": 152231,
+      "meanAbsDeltaRgb": 0.22979331848746823,
+      "meanAbsDeltaL": 0.00018393099959929319,
+      "meanAbsDeltaA": 0,
+      "meanAbsDeltaB": 0,
+      "maxAbsDeltaL": 1,
+      "maxAbsDeltaRgb": 2.6666666666666665,
+      "rmsDeltaL": 0.013562116339247839,
+      "pixelsAboveLThreshold2": 0,
+      "pixelsAboveLThreshold4": 0,
+      "fractionAboveLThreshold2": 0,
+      "ssimOnL": 0.9999987230801225,
+      "ssimOnRgb": 0.9997922103692798
+    },
+    "vsRealLeather2B": {
+      "upholsteryPixels": 152231,
+      "meanAbsDeltaRgb": 3.2847032908344134,
+      "meanAbsDeltaL": 1.261044071181297,
+      "meanAbsDeltaA": 0.1125132200405962,
+      "meanAbsDeltaB": 0.3752717908967293,
+      "maxAbsDeltaL": 4,
+      "maxAbsDeltaRgb": 12,
+      "rmsDeltaL": 1.572896475899136,
+      "pixelsAboveLThreshold2": 52256,
+      "pixelsAboveLThreshold4": 795,
+      "fractionAboveLThreshold2": 0.3432677969664523,
+      "ssimOnL": 0.987859696031011,
+      "ssimOnRgb": 0.9878312235137665
+    },
+    "meanLab": {
+      "meanL": 72.93344325400214,
+      "meanA": 2.884852625286571,
+      "meanB": 6.949517509574266,
+      "count": 152231
+    }
+  }
+}
