@@ -14821,13 +14821,15 @@ html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .color
 }
 html body.is-sectional-product #mc-pdp-title-right + #mc-pdp-top-price-panel,
 html body.productdetails #mc-pdp-title-right + #mc-pdp-top-price-panel {
-  margin-top: 0 !important;
-  margin-bottom: 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin: 0 0 10px !important;
+  clear: both !important;
 }
-html body.is-sectional-product #mc-pdp-top-price-panel + .colors_pricebox,
-html body.is-sectional-product #mc-pdp-top-price-panel + table.colors_pricebox,
-html body.productdetails #mc-pdp-top-price-panel + .colors_pricebox,
-html body.productdetails #mc-pdp-top-price-panel + table.colors_pricebox {
+html body.is-sectional-product #mc-pdp-title-right ~ .colors_pricebox,
+html body.is-sectional-product #mc-pdp-top-price-panel ~ .colors_pricebox,
+html body.productdetails #mc-pdp-title-right ~ .colors_pricebox,
+html body.productdetails #mc-pdp-top-price-panel ~ .colors_pricebox {
   margin-top: 14px !important;
   clear: both !important;
 }

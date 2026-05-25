@@ -1,11 +1,15 @@
 /**
- * Sectional PDP emergency: mount top price before first .colors_pricebox (accordion layout).
- * MC_SECTIONAL_PDP_EMERGENCY_20260603b
+ * Sectional PDP emergency: panel after #mc-pdp-title-right (accordion placeTitle safe).
+ * MC_SECTIONAL_PDP_EMERGENCY_20260603c
  */
 (function (g, d) {
   "use strict";
   if (g.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) return;
-  g.__MC_SECTIONAL_INSERT_BEFORE_PATCH__ = "20260603b";
+  g.__MC_SECTIONAL_INSERT_BEFORE_PATCH__ = "20260603c";
+
+  function titleWrap() {
+    return d.getElementById("mc-pdp-title-right");
+  }
 
   function firstPricebox() {
     var scope = d.getElementById("v65-product-parent") || d.getElementById("content_area");
@@ -31,22 +35,44 @@
     });
   }
 
+  function hideBeforeTitle() {
+    var wrap = titleWrap();
+    if (!wrap || !wrap.parentNode) return;
+    var child = wrap.parentNode.firstChild;
+    while (child && child !== wrap) {
+      if (child.nodeType === 1) {
+        hideLegacyPricingInPricebox();
+        child.querySelectorAll(".mc-pdp-retail-row, .mc-pdp-member-pricing, .mc-pdp-retail-label").forEach(
+          function (node) {
+            try {
+              node.style.setProperty("display", "none", "important");
+            } catch (eH) {}
+          }
+        );
+      }
+      child = child.nextSibling;
+    }
+  }
+
+  function assertPanelOrder() {
+    var wrap = titleWrap();
+    var panel = d.getElementById("mc-pdp-top-price-panel");
+    if (!wrap || !panel || !wrap.parentNode) return;
+    if (wrap.nextElementSibling !== panel) {
+      try {
+        wrap.parentNode.insertBefore(panel, wrap.nextSibling);
+      } catch (eOrd) {}
+    }
+  }
+
   var origInsert = Node.prototype.insertBefore;
   Node.prototype.insertBefore = function (newNode, ref) {
     if (ref != null && ref.parentNode !== this) {
       try {
         if (newNode && newNode.nodeType === 1) {
           var nid = String(newNode.id || "");
-          if (
-            nid === "mc-pdp-top-price-panel" ||
-            nid === "mtl-pdp-top-price" ||
-            nid === "mc-pdp-price-stack-host"
-          ) {
-            var pb = firstPricebox();
-            if (pb && pb.parentNode) {
-              return origInsert.call(pb.parentNode, newNode, pb);
-            }
-            var wrap = d.getElementById("mc-pdp-title-right");
+          if (nid === "mc-pdp-top-price-panel" || nid === "mtl-pdp-top-price" || nid === "mc-pdp-price-stack-host") {
+            var wrap = titleWrap();
             if (wrap && wrap.parentNode) {
               return origInsert.call(wrap.parentNode, newNode, wrap.nextSibling);
             }
@@ -59,47 +85,26 @@
   };
 
   g.__MTL_TOP_PRICE_MOUNT_GAVE_UP__ = false;
+  assertPanelOrder();
+  hideBeforeTitle();
   hideLegacyPricingInPricebox();
-  g.setTimeout(hideLegacyPricingInPricebox, 250);
-  g.setTimeout(hideLegacyPricingInPricebox, 1500);
-
-  var moPatched = false;
-  function patchMutationObserver() {
-    if (moPatched || typeof MutationObserver === "undefined") return;
-    moPatched = true;
-    var Orig = g.MutationObserver;
-    g.MutationObserver = function (callback) {
-      var timer;
-      return new Orig(function (records, observer) {
-        if (g.__MTL_TOP_PRICE_MOUNT_GAVE_UP__) {
-          var stack = "";
-          try {
-            stack = new Error().stack || "";
-          } catch (eSt) {}
-          if (
-            stack.indexOf("updateTopPricePanel") >= 0 ||
-            stack.indexOf("mountTopPricePanelUnderTitleOnce") >= 0
-          ) {
-            return;
-          }
-        }
-        if (timer) clearTimeout(timer);
-        timer = g.setTimeout(function () {
-          timer = null;
-          callback(records, observer);
-        }, 150);
-      });
-    };
-    g.MutationObserver.prototype = Orig.prototype;
-  }
-  patchMutationObserver();
+  g.setTimeout(function () {
+    assertPanelOrder();
+    hideBeforeTitle();
+    hideLegacyPricingInPricebox();
+  }, 300);
+  g.setTimeout(function () {
+    assertPanelOrder();
+    hideBeforeTitle();
+    hideLegacyPricingInPricebox();
+  }, 1500);
 
   function rendererRev(build) {
     var m = String(build || "").match(/v(\d+)\s*$/);
     return m ? parseInt(m[1], 10) : 0;
   }
   function maybeUpgradeRendererFromGh() {
-    var WANT = "sectional-20260601-top-price-panel-v27";
+    var WANT = "sectional-20260601-top-price-panel-v28";
     var have = String(g.MTL_RENDERER_BUILD || "").trim();
     if (have === WANT || rendererRev(have) >= rendererRev(WANT)) return;
     if (g.__MC_MTL_RENDERER_UPGRADING__) return;
@@ -117,10 +122,27 @@
     s.async = false;
     s.onload = function () {
       g.__MC_MTL_RENDERER_UPGRADING__ = 0;
+      assertPanelOrder();
+      hideBeforeTitle();
+      hideLegacyPricingInPricebox();
       if (typeof g.mtlUpdateTopPricePanel === "function") g.mtlUpdateTopPricePanel();
     };
     (d.head || d.documentElement).appendChild(s);
   }
   g.setTimeout(maybeUpgradeRendererFromGh, 800);
   g.setTimeout(maybeUpgradeRendererFromGh, 2500);
+
+  if (typeof MutationObserver !== "undefined") {
+    var moTimer;
+    var mo = new MutationObserver(function () {
+      if (moTimer) clearTimeout(moTimer);
+      moTimer = g.setTimeout(function () {
+        assertPanelOrder();
+        hideBeforeTitle();
+        hideLegacyPricingInPricebox();
+      }, 80);
+    });
+    var wrap = titleWrap();
+    if (wrap && wrap.parentNode) mo.observe(wrap.parentNode, { childList: true });
+  }
 })(window, document);
