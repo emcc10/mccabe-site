@@ -998,7 +998,7 @@
 
   /* MC_SECTIONAL_PDP_AUTH_INLINE_20260531a — no external boot.js (404-safe); load auth fix with cache bust */
   (function (g, d) {
-    var WANT = "20260602c";
+    var WANT = "20260603a";
     function ensure() {
       try {
         var onPdp =
