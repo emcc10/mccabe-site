@@ -1,0 +1,195 @@
+{
+  "phase": "RealLeather Reference Match",
+  "purpose": "Reference-match smooth leather: tonal/material behavior from generated reference, not texture",
+  "notFinalBaliSilk": true,
+  "base": "RealLeather2-B",
+  "referenceImage": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\sofa-recolor-tool\\input\\Bali-Silk-realism-reference.png",
+  "forbidden": [
+    "detail/detail2/detail3 transfer path",
+    "swatch texture transfer",
+    "mottle",
+    "visible grain pattern",
+    "cloudy patches",
+    "dirty bands",
+    "plastic shine"
+  ],
+  "referenceAnalysis": {
+    "basePercentiles": [
+      58.337646484375,
+      64.3867416381836,
+      66.79474639892578,
+      74.2457275390625,
+      83.7959213256836
+    ],
+    "refPercentiles": [
+      55.7031364440918,
+      63.5462760925293,
+      67.10399627685547,
+      78.92376708984375,
+      94.33161163330078
+    ],
+    "midtoneContrastRatio": 1.5597436847884714,
+    "shadowDepthRatio": 1.3480814875023568,
+    "seamContrastRatio": 1.6900301239109046,
+    "highlightWarmA": -0.5880397984505608,
+    "highlightWarmB": -0.47822073711071234
+  },
+  "method": {
+    "swatch": "Average Bali Silk a/b only",
+    "toneCurve": "Percentile-based upholstery L curve matched toward reference",
+    "specular": "Broad hand-authored region shaping modulated by source/reference highlight geography",
+    "shadowPockets": "Existing seam/gap/arm/rail pockets only",
+    "cushionGradient": "Smooth back-cushion center lift with seam-edge depth retained",
+    "grain": "Barely visible procedural micrograin only to avoid dead flatness"
+  },
+  "swatchMeanLab": {
+    "meanA": 1,
+    "meanB": 9.133497180307879
+  },
+  "base6aMeanLab": {
+    "meanL": 71.86234735369274,
+    "meanA": 3.1375015601290146,
+    "meanB": 6.165209451425794,
+    "count": 152231
+  },
+  "outputs": {
+    "variants": [
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherReferenceMatch-variant-A.png",
+      "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherReferenceMatch-variant-B.png"
+    ],
+    "compareGrid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherReferenceMatch-compare-grid.png",
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherReferenceMatch-spec.json"
+  },
+  "variants": [
+    {
+      "id": "A",
+      "label": "REALLEATHER-REF-A",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherReferenceMatch-variant-A.png",
+      "params": {
+        "micrograinStrength": 0.35,
+        "sheenStrength": 7,
+        "formContrastStrength": 2,
+        "shadowPocketStrength": 0.45,
+        "cushionGradientStrength": 0.35,
+        "warmHighlightTint": 0.42,
+        "chromaBlend": 0.13
+      },
+      "vs6a": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 5.881918487913358,
+        "meanAbsDeltaL": 2.1983630141035664,
+        "meanAbsDeltaA": 0.23611485177132122,
+        "meanAbsDeltaB": 0.7328993437604693,
+        "maxAbsDeltaL": 9,
+        "maxAbsDeltaRgb": 25.333333333333332,
+        "rmsDeltaL": 2.921878526260486,
+        "pixelsAboveLThreshold2": 75429,
+        "pixelsAboveLThreshold4": 43145,
+        "fractionAboveLThreshold2": 0.49549040602768163,
+        "ssimOnL": 0.9608940794215195,
+        "ssimOnRgb": 0.9561081596858338
+      },
+      "vsDetail3A": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 6.391875942920924,
+        "meanAbsDeltaL": 2.378267238604489,
+        "meanAbsDeltaA": 0.2362856448423777,
+        "meanAbsDeltaB": 0.7328993437604693,
+        "maxAbsDeltaL": 9,
+        "maxAbsDeltaRgb": 24.666666666666668,
+        "rmsDeltaL": 3.085550722858088,
+        "pixelsAboveLThreshold2": 84226,
+        "pixelsAboveLThreshold4": 46424,
+        "fractionAboveLThreshold2": 0.5532775847232166,
+        "ssimOnL": 0.9542638457295076,
+        "ssimOnRgb": 0.949827069773369
+      },
+      "vsRealLeather2B": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 4.9585410768255205,
+        "meanAbsDeltaL": 1.8976621056158076,
+        "meanAbsDeltaA": 0.09562441289881825,
+        "meanAbsDeltaB": 0.32386307650872687,
+        "maxAbsDeltaL": 5,
+        "maxAbsDeltaRgb": 14.666666666666666,
+        "rmsDeltaL": 2.5067611603684163,
+        "pixelsAboveLThreshold2": 65377,
+        "pixelsAboveLThreshold4": 35880,
+        "fractionAboveLThreshold2": 0.42945917717153537,
+        "ssimOnL": 0.9750469382551564,
+        "ssimOnRgb": 0.9746408714748744
+      },
+      "meanLab": {
+        "meanL": 73.61742352083347,
+        "meanA": 2.9013867083576934,
+        "meanB": 6.898108795186263,
+        "count": 152231
+      }
+    },
+    {
+      "id": "B",
+      "label": "REALLEATHER-REF-B",
+      "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherReferenceMatch-variant-B.png",
+      "params": {
+        "micrograinStrength": 0.42,
+        "sheenStrength": 8.5,
+        "formContrastStrength": 2.35,
+        "shadowPocketStrength": 0.58,
+        "cushionGradientStrength": 0.48,
+        "warmHighlightTint": 0.48,
+        "chromaBlend": 0.14
+      },
+      "vs6a": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 5.924237945404863,
+        "meanAbsDeltaL": 2.218634837845117,
+        "meanAbsDeltaA": 0.25381821048275316,
+        "meanAbsDeltaB": 0.7867648507859766,
+        "maxAbsDeltaL": 9,
+        "maxAbsDeltaRgb": 25.333333333333332,
+        "rmsDeltaL": 2.948102988526387,
+        "pixelsAboveLThreshold2": 75592,
+        "pixelsAboveLThreshold4": 44012,
+        "fractionAboveLThreshold2": 0.49656114720392036,
+        "ssimOnL": 0.960038429371404,
+        "ssimOnRgb": 0.9553060436404551
+      },
+      "vsDetail3A": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 6.433985193555707,
+        "meanAbsDeltaL": 2.3994061656298653,
+        "meanAbsDeltaA": 0.25398900355380966,
+        "meanAbsDeltaB": 0.7867648507859766,
+        "maxAbsDeltaL": 9,
+        "maxAbsDeltaRgb": 24.666666666666668,
+        "rmsDeltaL": 3.109996351054378,
+        "pixelsAboveLThreshold2": 84596,
+        "pixelsAboveLThreshold4": 47025,
+        "fractionAboveLThreshold2": 0.5557081015036359,
+        "ssimOnL": 0.9534538597521889,
+        "ssimOnRgb": 0.9491004334195797
+      },
+      "vsRealLeather2B": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 4.993779190832388,
+        "meanAbsDeltaL": 1.916790929574134,
+        "meanAbsDeltaA": 0.1133277716102502,
+        "meanAbsDeltaB": 0.37772858353423416,
+        "maxAbsDeltaL": 5,
+        "maxAbsDeltaRgb": 14.666666666666666,
+        "rmsDeltaL": 2.532651630897985,
+        "pixelsAboveLThreshold2": 65971,
+        "pixelsAboveLThreshold4": 36865,
+        "fractionAboveLThreshold2": 0.4333611419487489,
+        "ssimOnL": 0.9743320690534052,
+        "ssimOnRgb": 0.9739664541711811
+      },
+      "meanLab": {
+        "meanL": 73.6217590372526,
+        "meanA": 2.8836833496462613,
+        "meanB": 6.95197430221177,
+        "count": 152231
+      }
+    }
+  ]
+}

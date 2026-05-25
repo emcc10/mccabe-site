@@ -2,7 +2,7 @@
 import { resolve } from 'path';
 import { runPhaseRealLeatherReferenceMatch } from '../src/phaseRealLeather3/run.js';
 
-console.log('Phase RealLeather Reference Match (legacy alias): reference-driven tonal/material behavior\n');
+console.log('Phase RealLeather Reference Match: reference-driven tonal/material behavior\n');
 
 const out = await runPhaseRealLeatherReferenceMatch();
 
