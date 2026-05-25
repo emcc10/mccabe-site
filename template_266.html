@@ -64,7 +64,7 @@ body.productdetails #options_table select:not(.mc-native-leather),body.mc-produc
 body.productdetails #options_table select:not(.mc-native-leather),body.mc-product-page #options_table select:not(.mc-native-leather){text-transform:none!important;color:#444!important}
 body.productdetails .mc-pdp-retail-label,body.mc-product-page .mc-pdp-retail-label,body.productdetails .mc-pdp-member-line__label,body.mc-product-page .mc-pdp-member-line__label{font-size:13px!important;letter-spacing:.16em!important;text-transform:uppercase!important;color:#777!important}
 body.productdetails .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-member-line__amount,body.productdetails .mc-pdp-retail-row .product_list_price,body.mc-product-page .mc-pdp-retail-row .product_list_price{font-size:13px!important;letter-spacing:.02em!important;text-transform:none!important;color:#444!important;white-space:normal!important}
-body.mc-pdp-price-stack #v65-product-parent .product_sale_price,body.mc-pdp-price-stack #v65-product-parent .product_saleprice,body.mc-pdp-price-stack #v65-product-parent font.product_sale_price,body.mc-pdp-price-stack #content_area .product_sale_price,body.mc-pdp-price-stack #content_area .product_saleprice,body.mc-pdp-price-stack #content_area font.product_sale_price,body.productdetails .mc-pdp-retail-row .product_sale_price,body.mc-product-page .mc-pdp-retail-row .product_sale_price,body.productdetails .mc-pdp-retail-row .product_saleprice,body.mc-product-page .mc-pdp-retail-row .product_saleprice,body.productdetails .colors_pricebox .product_sale_price,body.mc-product-page .colors_pricebox .product_sale_price,body.productdetails .colors_pricebox .product_saleprice,body.mc-product-page .colors_pricebox .product_saleprice,body.productdetails .mtl-product-price-block .product_sale_price,body.mc-product-page .mtl-product-price-block .product_saleprice,body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,body.mc-product-page:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,body.productdetails:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox .product_productprice,body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox b:has(.product_saleprice){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
+body.productdetails.mc-pdp-price-stack #v65-product-parent .product_sale_price,body.productdetails.mc-pdp-price-stack #v65-product-parent .product_saleprice,body.productdetails.mc-pdp-price-stack #v65-product-parent font.product_sale_price,body.productdetails.mc-pdp-price-stack #content_area .product_sale_price,body.productdetails.mc-pdp-price-stack #content_area .product_saleprice,body.productdetails.mc-pdp-price-stack #content_area font.product_sale_price,body.productdetails .mc-pdp-retail-row .product_sale_price,body.mc-product-page .mc-pdp-retail-row .product_sale_price,body.productdetails .mc-pdp-retail-row .product_saleprice,body.mc-product-page .mc-pdp-retail-row .product_saleprice,body.productdetails .colors_pricebox .product_sale_price,body.mc-product-page .colors_pricebox .product_sale_price,body.productdetails .colors_pricebox .product_saleprice,body.mc-product-page .colors_pricebox .product_saleprice,body.productdetails .mtl-product-price-block .product_sale_price,body.mc-product-page .mtl-product-price-block .product_saleprice,body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .product_saleprice,body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox .product_saleprice,body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .product_productprice,body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox .product_productprice{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
 body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:2px!important;width:100%!important;position:static!important}
 body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line--sale,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line--sale{display:flex!important;flex-direction:column!important;gap:2px!important;margin-top:4px!important}
 body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line__amount{letter-spacing:.02em!important;white-space:normal!important}
@@ -74,7 +74,7 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-p
 (function () {
   function mcEarlyPdpPriceStackClass() {
     try {
-      if (!document.body) return;
+      if (!document.body || !document.body.classList.contains("productdetails")) return;
       if (document.querySelector(".mc-pdp-member-pricing, .mc-pdp-retail-row, #v65-product-parent .mc-pdp-member-line")) {
         document.body.classList.add("mc-pdp-price-stack");
       }
@@ -14066,7 +14066,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       mcInsertTopPanelAfterTitle(topPanel);
 
       try {
-        if (document.body) {
+        if (document.body && document.body.classList.contains('productdetails')) {
           document.body.classList.add('mc-pdp-price-stack', 'mc-has-pdp-top-price-panel');
         }
       } catch (eCls) {}
@@ -19162,7 +19162,9 @@ async function mcSubmitAuthForm(form, mode) {
     var retailRow = document.querySelector('.mc-pdp-retail-row');
     if (!wrap && !retailRow) return false;
     try {
-      if (document.body) document.body.classList.add('mc-pdp-price-stack');
+      if (document.body && document.body.classList.contains('productdetails')) {
+        document.body.classList.add('mc-pdp-price-stack');
+      }
     } catch (eCls) {}
     var loggedIn =
       !!(document.body && document.body.classList.contains('mc-member-logged-in')) ||
@@ -19984,7 +19986,9 @@ async function mcSubmitAuthForm(form, mode) {
       return true;
     }
     try {
-      if (document.body) document.body.classList.add("mc-pdp-price-stack");
+      if (document.body && document.body.classList.contains("productdetails")) {
+        document.body.classList.add("mc-pdp-price-stack");
+      }
     } catch (eStackCls) {}
     var theaterTitle = (
       (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
@@ -23866,6 +23870,7 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
 <script src="/v/vspfiles/js/mtl-sectional-renderer.js?v=sectional-20260601-top-price-panel-v30"></script>
 <script>
   (function (g) {
+    if (!g.document.body || !g.document.body.classList.contains("productdetails")) return;
     g.__MTL_OWNS_TOP_PRICE__ = true;
     g.__MTL_TOP_PRICE_MOUNT_GAVE_UP__ = true;
     g.mtlUpdateTopPricePanel = function () {};

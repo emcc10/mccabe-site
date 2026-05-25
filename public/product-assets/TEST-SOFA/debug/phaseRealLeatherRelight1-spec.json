@@ -1,0 +1,274 @@
+{
+  "phase": "RealLeather Relight 1",
+  "purpose": "Stronger reference-guided relighting with explicit region masks, not a minor finish pass",
+  "checkpointOnlyBaseline": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\realleather-locked\\bali-silk-realleather-baseline.png",
+  "baseChoice": {
+    "chosenBase": "Locked RealLeather checkpoint",
+    "reason": "Preserves current Bali Silk color while allowing stronger relight deltas than 6A"
+  },
+  "method": {
+    "target": "Generated realistic reference",
+    "doNotUse": [
+      "texture transfer",
+      "Detail phases",
+      "mottle",
+      "visible grain",
+      "stamped texture",
+      "minor tone-only tweaks"
+    ],
+    "handAuthoredMasks": [
+      "back cushion centers",
+      "back cushion edges and seams",
+      "seat cushion tops",
+      "horizontal seam under backs",
+      "front rail",
+      "arms",
+      "lower shadows"
+    ],
+    "relightActions": [
+      "lift cushion centers more clearly",
+      "deepen seams and cushion separations",
+      "deepen lower rail and under-seat shadows",
+      "add broad satin highlights on cushion tops and arms",
+      "compress high-end highlights to stay smooth"
+    ]
+  },
+  "diagnostics": {
+    "source": {
+      "label": "Source sofa",
+      "contrastRange": 41,
+      "shadowDepth": 14,
+      "highlightPlacement": {
+        "upperBackShare": 0.16136899263748028,
+        "seatTopShare": 0.10059255921925671,
+        "armShare": 0.05446675661665262
+      },
+      "cushionCenterToEdgeGradient": 4.928326264231011,
+      "seamDarkness": 1.1564644662209602,
+      "armCurvatureShading": 0.13716105533032774,
+      "frontRailDepth": 4.267330179669145,
+      "backgroundEdgeIntegration": 48.42980480433651,
+      "perceivedMaterialRealism": 69.1,
+      "notes": [
+        "closest to the reference across the measured relight cues"
+      ]
+    },
+    "base6a": {
+      "label": "6A base",
+      "contrastRange": 24,
+      "shadowDepth": 8,
+      "highlightPlacement": {
+        "upperBackShare": 0.16350038048844362,
+        "seatTopShare": 0.10104188971216949,
+        "armShare": 0.05485145044811734
+      },
+      "cushionCenterToEdgeGradient": 2.7146198998421625,
+      "seamDarkness": 0.5560976764506478,
+      "armCurvatureShading": 0.042895055435252516,
+      "frontRailDepth": 2.1092485211018186,
+      "backgroundEdgeIntegration": 12.612060443646357,
+      "perceivedMaterialRealism": 82,
+      "notes": [
+        "overall contrast range is flatter than the reference",
+        "shadow pockets are shallower than the reference",
+        "cushion center-to-edge gradients are too weak",
+        "seam darkness and cushion separation are too light",
+        "front rail depth is too shallow"
+      ]
+    },
+    "lockedBaseline": {
+      "label": "Locked baseline",
+      "contrastRange": 27,
+      "shadowDepth": 11,
+      "highlightPlacement": {
+        "upperBackShare": 0.16639370354918592,
+        "seatTopShare": 0.1130443863350301,
+        "armShare": 0.05984081885437923
+      },
+      "cushionCenterToEdgeGradient": 3.274623990560997,
+      "seamDarkness": 0.5314805515247372,
+      "armCurvatureShading": 0.18043853044726177,
+      "frontRailDepth": 2.785003275179321,
+      "backgroundEdgeIntegration": 11.96148309326935,
+      "perceivedMaterialRealism": 75.9,
+      "notes": [
+        "overall contrast range is flatter than the reference",
+        "cushion center-to-edge gradients are too weak",
+        "seam darkness and cushion separation are too light"
+      ]
+    },
+    "reference": {
+      "label": "Generated reference",
+      "contrastRange": 36,
+      "shadowDepth": 11,
+      "highlightPlacement": {
+        "upperBackShare": 0.1575842308973587,
+        "seatTopShare": 0.10097867126899004,
+        "armShare": 0.05450355829779766
+      },
+      "cushionCenterToEdgeGradient": 4.075346355420152,
+      "seamDarkness": 0.7172647765499249,
+      "armCurvatureShading": 0.045210670038073886,
+      "frontRailDepth": 3.377954579720395,
+      "backgroundEdgeIntegration": 22.212921291035002,
+      "perceivedMaterialRealism": 100,
+      "notes": [
+        "reference target"
+      ]
+    },
+    "relightA": {
+      "label": "RELIGHT-A",
+      "contrastRange": 31,
+      "shadowDepth": 11,
+      "highlightPlacement": {
+        "upperBackShare": 0.1960901245349682,
+        "seatTopShare": 0.1018834773357802,
+        "armShare": 0.06134205849965282
+      },
+      "cushionCenterToEdgeGradient": 4.471776281185001,
+      "seamDarkness": 0.751889879579366,
+      "armCurvatureShading": 1.0151191545266016,
+      "frontRailDepth": 3.81145793787384,
+      "backgroundEdgeIntegration": 11.59246984295467,
+      "perceivedMaterialRealism": 80.8,
+      "notes": [
+        "overall contrast range is flatter than the reference"
+      ]
+    },
+    "relightB": {
+      "label": "RELIGHT-B",
+      "contrastRange": 30,
+      "shadowDepth": 11,
+      "highlightPlacement": {
+        "upperBackShare": 0.2103075611734689,
+        "seatTopShare": 0.10059566466996403,
+        "armShare": 0.06294034155128991
+      },
+      "cushionCenterToEdgeGradient": 4.7468728306998855,
+      "seamDarkness": 0.8284010214526631,
+      "armCurvatureShading": 1.3044043367333984,
+      "frontRailDepth": 4.044399491149122,
+      "backgroundEdgeIntegration": 11.860299961062253,
+      "perceivedMaterialRealism": 77.6,
+      "notes": [
+        "overall contrast range is flatter than the reference"
+      ]
+    }
+  },
+  "outputs": {
+    "compareGrid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherRelight1-compare-grid.png",
+    "variantA": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherRelight1-variant-A.png",
+    "variantB": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherRelight1-variant-B.png",
+    "spec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\debug\\phaseRealLeatherRelight1-spec.json"
+  },
+  "variants": [
+    {
+      "id": "A",
+      "label": "RELIGHT-A",
+      "curveStrength": 0.78,
+      "refGuideStrength": 0.8,
+      "backCenterLift": 2.2,
+      "seatTopLift": 1.15,
+      "armHighlightLift": 1.25,
+      "satinLift": 0.85,
+      "seamDepth": 1.55,
+      "underBackDepth": 1.25,
+      "armPocketDepth": 0.95,
+      "railDepth": 1.35,
+      "lowerShadowDepth": 0.9,
+      "topKnee": 82.2,
+      "topCompress": 0.72,
+      "deltaClamp": 5.8,
+      "meanLab": {
+        "meanL": 73.16968291609462,
+        "meanA": 2.8844716253588296,
+        "meanB": 6.949517509574266,
+        "count": 152231
+      },
+      "vs6a": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 6.740935376719568,
+        "meanAbsDeltaL": 2.38693170247847,
+        "meanAbsDeltaA": 0.25338465884084055,
+        "meanAbsDeltaB": 0.7843080581484717,
+        "maxAbsDeltaL": 10,
+        "maxAbsDeltaRgb": 26.333333333333332,
+        "rmsDeltaL": 3.224716305654286,
+        "pixelsAboveLThreshold2": 79643,
+        "pixelsAboveLThreshold4": 48666,
+        "fractionAboveLThreshold2": 0.5231720214673753,
+        "ssimOnL": 0.9419693326357331,
+        "ssimOnRgb": 0.935394482047441
+      },
+      "vsLockedBaseline": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 3.8603832333735735,
+        "meanAbsDeltaL": 1.4143439903830364,
+        "meanAbsDeltaA": 0.000380999927741393,
+        "meanAbsDeltaB": 0,
+        "maxAbsDeltaL": 4,
+        "maxAbsDeltaRgb": 11.666666666666666,
+        "rmsDeltaL": 1.7257512319207617,
+        "pixelsAboveLThreshold2": 54744,
+        "pixelsAboveLThreshold4": 1371,
+        "fractionAboveLThreshold2": 0.3596113800737038,
+        "ssimOnL": 0.9827587294570882,
+        "ssimOnRgb": 0.9816765756373417
+      }
+    },
+    {
+      "id": "B",
+      "label": "RELIGHT-B",
+      "curveStrength": 0.92,
+      "refGuideStrength": 1,
+      "backCenterLift": 2.9,
+      "seatTopLift": 1.45,
+      "armHighlightLift": 1.65,
+      "satinLift": 1.18,
+      "seamDepth": 2,
+      "underBackDepth": 1.55,
+      "armPocketDepth": 1.2,
+      "railDepth": 1.75,
+      "lowerShadowDepth": 1.18,
+      "topKnee": 81.4,
+      "topCompress": 0.64,
+      "deltaClamp": 6.8,
+      "meanLab": {
+        "meanL": 73.01057603247696,
+        "meanA": 2.884392797787573,
+        "meanB": 6.949543785431351,
+        "count": 152231
+      },
+      "vs6a": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 6.89760955390293,
+        "meanAbsDeltaL": 2.446702708383969,
+        "meanAbsDeltaA": 0.2534634864120974,
+        "meanAbsDeltaB": 0.7843343340055573,
+        "maxAbsDeltaL": 9,
+        "maxAbsDeltaRgb": 25.333333333333332,
+        "rmsDeltaL": 3.2071199800632058,
+        "pixelsAboveLThreshold2": 83016,
+        "pixelsAboveLThreshold4": 45380,
+        "fractionAboveLThreshold2": 0.5453291379548186,
+        "ssimOnL": 0.9398862897501338,
+        "ssimOnRgb": 0.9331448846892075
+      },
+      "vsLockedBaseline": {
+        "upholsteryPixels": 152231,
+        "meanAbsDeltaRgb": 4.14123273183303,
+        "meanAbsDeltaL": 1.5055409213629287,
+        "meanAbsDeltaA": 0.0004729654275410396,
+        "meanAbsDeltaB": 0.000026275857085613312,
+        "maxAbsDeltaL": 5,
+        "maxAbsDeltaRgb": 12,
+        "rmsDeltaL": 1.7707226243092418,
+        "pixelsAboveLThreshold2": 67869,
+        "pixelsAboveLThreshold4": 2071,
+        "fractionAboveLThreshold2": 0.44582903613587244,
+        "ssimOnL": 0.9814680301566595,
+        "ssimOnRgb": 0.9801396028430331
+      }
+    }
+  ]
+}

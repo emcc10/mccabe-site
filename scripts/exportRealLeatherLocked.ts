@@ -12,14 +12,14 @@ import { buildRealLeatherLockedParams } from '../src/phaseRealLeatherFinal/locke
 
 const FINAL_A_PATH = phaseRealLeatherFinalVariantPath('A');
 
-const STATUS_MD = `# TEST-SOFA Bali Silk RealLeather baseline
+const STATUS_MD = `# TEST-SOFA Bali Silk RealLeather checkpoint
 
-**Locked current best output** for the Bali Silk / RealLeather method.
+**Checkpoint / revert point only** for the Bali Silk / RealLeather method.
 
 - **Canonical baseline:** REALLEATHER-FINAL-A
 - **Source image:** \`phaseRealLeatherFinal-variant-A.png\`
-- **Method status:** locked for integration/generalization
-- **Current instruction:** do not continue tuning this swatch unless a new swatch exposes a specific failure
+- **Method status:** not production-ready; keep only as a checkpoint
+- **Current instruction:** use this as a revert point while building a stronger reference-guided relight pass
 
 ## Preserve
 
@@ -40,8 +40,8 @@ const STATUS_MD = `# TEST-SOFA Bali Silk RealLeather baseline
 
 ## Next Step
 
-Apply this RealLeather Reference Match method to the next leather swatch.
-Keep the same method unless the next swatch clearly fails.
+Do not treat this image as production-ready.
+Use it only as a checkpoint while testing stronger reference-guided relighting.
 `;
 
 mkdirSync(REALLEATHER_LOCKED_DIR, { recursive: true });
@@ -49,7 +49,7 @@ copyFileSync(FINAL_A_PATH, REALLEATHER_LOCKED_IMAGE);
 writeFileSync(REALLEATHER_LOCKED_PARAMS, JSON.stringify(buildRealLeatherLockedParams(), null, 2));
 writeFileSync(REALLEATHER_LOCKED_STATUS, STATUS_MD);
 
-console.log('Locked TEST-SOFA RealLeather baseline\n');
+console.log('Locked TEST-SOFA RealLeather checkpoint\n');
 console.log(`  image:  ${resolve(REALLEATHER_LOCKED_IMAGE)}`);
 console.log(`  params: ${resolve(REALLEATHER_LOCKED_PARAMS)}`);
 console.log(`  status: ${resolve(REALLEATHER_LOCKED_STATUS)}`);
