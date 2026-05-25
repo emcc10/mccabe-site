@@ -1,4 +1,4 @@
-/* 0531a C_CSS_DEPLOY_VERIFY_20260531a — sectional top price panel (#mtl-pdp-top-price) */
+/* 0602c C_CSS_DEPLOY_VERIFY_20260602c — sectional top price before Klarna */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -14801,4 +14801,47 @@ html body.is-sectional-product #mtl-pdp-top-price {
   overflow: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
+}
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .mc-pdp-retail-row,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .mc-pdp-retail-row,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .mc-pdp-member-pricing,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .mc-pdp-member-pricing {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #mc-pdp-top-price-panel .mc-pdp-retail-row,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #mc-pdp-top-price-panel .mc-pdp-member-pricing,
+html body.productdetails:has(#mc-pdp-top-price-panel) #mc-pdp-top-price-panel .mc-pdp-retail-row,
+html body.productdetails:has(#mc-pdp-top-price-panel) #mc-pdp-top-price-panel .mc-pdp-member-pricing {
+  display: flex !important;
+  visibility: visible !important;
+  height: auto !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+html body.is-sectional-product #mc-pdp-top-price-panel,
+html body.productdetails #mc-pdp-top-price-panel {
+  margin: 0 0 18px 0 !important;
+  padding-bottom: 6px !important;
+}
+html body.is-sectional-product #v65-product-parent [class*="klarna" i],
+html body.is-sectional-product #v65-product-parent [id*="klarna" i],
+html body.is-sectional-product #v65-product-parent klarna-placement,
+html body.is-sectional-product #v65-product-parent [class*="affirm" i],
+html body.is-sectional-product #v65-product-parent [id*="affirm" i],
+html body.productdetails #v65-product-parent [class*="klarna" i],
+html body.productdetails #v65-product-parent [id*="klarna" i],
+html body.productdetails #v65-product-parent klarna-placement,
+html body.productdetails #v65-product-parent [class*="affirm" i],
+html body.productdetails #v65-product-parent [id*="affirm" i] {
+  clear: both !important;
+  display: block !important;
+  margin-top: 12px !important;
+  position: relative !important;
+  z-index: 0 !important;
 }

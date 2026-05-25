@@ -73,7 +73,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v25";
+  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v26";
 
   /** Template owns native leather `<select>` discovery; prefers __McCabeLeatherCollectImpl so `mcCollectNativeLeatherSelectsForPdp` can’t be swapped by other scripts */
   function mtlGetNativeLeatherCollectFn() {
@@ -383,33 +383,89 @@
     return { parent: parent, before: insertBefore || title.nextSibling };
   }
 
+  function findFinancingBlockAfterTitle(title) {
+    if (!title) return null;
+    var root = document.getElementById("v65-product-parent") || document.getElementById("content_area");
+    if (!root) return null;
+    var nodes = root.querySelectorAll(
+      '[id*="klarna" i], [class*="klarna" i], [data-klarna], klarna-placement, ' +
+        '[id*="affirm" i], [class*="affirm" i], [data-affirm], affirm-as-low-as, .affirm-as-low-as'
+    );
+    var best = null;
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      var node = nodes[i];
+      if (!node || node === title || (title.contains && title.contains(node))) continue;
+      if (!(title.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)) continue;
+      if (!best || node.compareDocumentPosition(best) & Node.DOCUMENT_POSITION_FOLLOWING) {
+        best = node;
+      }
+    }
+    return best;
+  }
+
   function isTopPricePanelMounted(panel) {
     if (!panel || !panel.parentNode) return false;
     var title = findProductTitleEl();
-    if (!title || !title.parentNode) return panel.dataset.mtlTopPriceMounted === "1";
-    if (panel.parentNode !== title.parentNode) return false;
-    return !!(title.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING);
+    if (!title) return panel.dataset.mtlTopPriceMounted === "1";
+    if (!(title.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING)) return false;
+    var fin = findFinancingBlockAfterTitle(title);
+    if (fin && fin.parentNode) {
+      if (panel.parentNode === fin.parentNode) {
+        return !!(panel.compareDocumentPosition(fin) & Node.DOCUMENT_POSITION_PRECEDING);
+      }
+      return panel.dataset.mtlTopPriceMounted === "1";
+    }
+    return panel.parentNode === title.parentNode;
   }
 
   function insertTopPricePanel(panel) {
     var title = findProductTitleEl();
-    if (!title || !title.parentNode) return false;
-    var parent = title.parentNode;
-    try {
-      if (title.nextSibling) {
-        parent.insertBefore(panel, title.nextSibling);
-      } else {
-        parent.appendChild(panel);
-      }
-      return true;
-    } catch (eIns) {
+    if (!title) return false;
+    var fin = findFinancingBlockAfterTitle(title);
+    if (fin && fin.parentNode) {
       try {
-        parent.appendChild(panel);
+        fin.parentNode.insertBefore(panel, fin);
         return true;
-      } catch (eApp) {
-        return false;
+      } catch (eFin) {}
+    }
+    if (title.parentNode) {
+      var parent = title.parentNode;
+      try {
+        if (title.nextSibling) {
+          parent.insertBefore(panel, title.nextSibling);
+        } else {
+          parent.appendChild(panel);
+        }
+        return true;
+      } catch (eIns) {
+        try {
+          parent.appendChild(panel);
+          return true;
+        } catch (eApp) {
+          return false;
+        }
       }
     }
+    return false;
+  }
+
+  function hideStrayPriceRowsOutsideTopPanel(top) {
+    top = top || document.getElementById("mc-pdp-top-price-panel");
+    var root = document.getElementById("v65-product-parent") || document.getElementById("content_area");
+    if (!root) return;
+    root.querySelectorAll(".mc-pdp-retail-row, .mc-pdp-member-pricing").forEach(function (node) {
+      if (!node || (top && top.contains && top.contains(node))) return;
+      try {
+        node.style.setProperty("display", "none", "important");
+        node.style.setProperty("visibility", "hidden", "important");
+        node.style.setProperty("height", "0", "important");
+        node.style.setProperty("overflow", "hidden", "important");
+        node.style.setProperty("opacity", "0", "important");
+        node.style.setProperty("margin", "0", "important");
+        node.style.setProperty("padding", "0", "important");
+      } catch (eHide) {}
+    });
   }
 
   function readRetailAmountForTopPanel() {
@@ -501,6 +557,7 @@
   }
 
   function suppressExternalTopPricePanels() {
+    var top = document.getElementById("mc-pdp-top-price-panel");
     var authHost = document.getElementById("mc-pdp-price-stack-host");
     if (authHost) {
       try {
@@ -517,6 +574,7 @@
       } catch (eLeg) {}
     }
     hideNativeVolusionSaleUnderTitle();
+    hideStrayPriceRowsOutsideTopPanel(top);
     try {
       document.body.classList.add("mc-pdp-price-stack");
     } catch (eCls) {}
