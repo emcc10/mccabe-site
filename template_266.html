@@ -13442,9 +13442,12 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   function q(sel, root)  { return (root || document).querySelector(sel); }
   function qa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
 
+  function mcIsProductDetailsPage() {
+    return !!(document.body && document.body.classList.contains('productdetails'));
+  }
+
   function isPdpPage() {
-    return !!document.querySelector('input[name="ProductCode"]') &&
-           !!(document.getElementById('v65-product-parent') || document.getElementById('content_area'));
+    return mcIsProductDetailsPage();
   }
 
   function isSectionalPg() {
@@ -13941,6 +13944,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 
   function mcRefreshTopPricePanelContent() {
+    if (!mcIsProductDetailsPage()) return;
     if (window.__MC_PDP_LAYOUT_KILL__) return;
     var topPanel = document.getElementById('mc-pdp-top-price-panel');
     if (!topPanel) return;
@@ -14011,13 +14015,14 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 
   function layoutMcPdpPricePanels() {
+    if (!mcIsProductDetailsPage()) return;
     if (window.__MC_PDP_LAYOUT_KILL__) return;
     if (window.__MC_PDP_LAYOUT_DONE__) return;
     if (window.__MC_PDP_LAYOUT_RUNNING__) return;
     window.__MC_PDP_LAYOUT_RUNNING__ = true;
     if (typeof window.__mcPdpDiagBump === 'function') window.__mcPdpDiagBump('layoutRun');
     try {
-      if (!isPdpPage()) return;
+      if (!mcIsProductDetailsPage()) return;
       window.__MTL_OWNS_TOP_PRICE__ = true;
 
       if (!window.__MC_PDP_LAYOUT_ATTEMPTS__) window.__MC_PDP_LAYOUT_ATTEMPTS__ = 0;
@@ -14118,6 +14123,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   window.mcLockPdpLayout = mcLockPdpLayout;
   window.mcRefreshTopPricePanelContent = mcRefreshTopPricePanelContent;
   window.mcSchedulePdpPriceLayout = function () {
+    if (!document.body || !document.body.classList.contains('productdetails')) return;
     if (window.__MC_PDP_LAYOUT_KILL__ || window.__MC_PDP_LAYOUT_DONE__) return;
     if (window.__MC_PDP_LAYOUT_ATTEMPTS__ >= 6) return;
     if (window.__MC_PDP_LAYOUT_SCHEDULED__) return;
