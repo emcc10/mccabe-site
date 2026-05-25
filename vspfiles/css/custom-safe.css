@@ -1,4 +1,4 @@
-/* 0602c C_CSS_DEPLOY_VERIFY_20260602c — sectional top price before Klarna */
+/* 0603a C_CSS_DEPLOY_VERIFY_20260603a — sectional top price before first pricebox */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -14802,10 +14802,16 @@ html body.is-sectional-product #mtl-pdp-top-price {
   opacity: 0 !important;
   pointer-events: none !important;
 }
-html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .mc-pdp-retail-row,
-html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .mc-pdp-retail-row,
-html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .mc-pdp-member-pricing,
-html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .mc-pdp-member-pricing {
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-retail-row,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-retail-row,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-member-pricing,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-member-pricing,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-retail-label,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-retail-label,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .product_productprice,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .product_list_price,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox font.product_list_price,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox font.product_list_price {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -14813,16 +14819,17 @@ html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .mc-pd
   opacity: 0 !important;
   pointer-events: none !important;
 }
-html body.is-sectional-product:has(#mc-pdp-top-price-panel) #mc-pdp-top-price-panel .mc-pdp-retail-row,
-html body.is-sectional-product:has(#mc-pdp-top-price-panel) #mc-pdp-top-price-panel .mc-pdp-member-pricing,
-html body.productdetails:has(#mc-pdp-top-price-panel) #mc-pdp-top-price-panel .mc-pdp-retail-row,
-html body.productdetails:has(#mc-pdp-top-price-panel) #mc-pdp-top-price-panel .mc-pdp-member-pricing {
-  display: flex !important;
-  visibility: visible !important;
-  height: auto !important;
-  overflow: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
+html body.is-sectional-product #mc-pdp-title-right + #mc-pdp-top-price-panel,
+html body.productdetails #mc-pdp-title-right + #mc-pdp-top-price-panel {
+  margin-top: 0 !important;
+  margin-bottom: 10px !important;
+}
+html body.is-sectional-product #mc-pdp-top-price-panel + .colors_pricebox,
+html body.is-sectional-product #mc-pdp-top-price-panel + table.colors_pricebox,
+html body.productdetails #mc-pdp-top-price-panel + .colors_pricebox,
+html body.productdetails #mc-pdp-top-price-panel + table.colors_pricebox {
+  margin-top: 14px !important;
+  clear: both !important;
 }
 html body.is-sectional-product #mc-pdp-top-price-panel,
 html body.productdetails #mc-pdp-top-price-panel {

@@ -9,7 +9,7 @@
     if (g.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) return;
     try {
       var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-sectional-pdp-emergency.js?v=20260602c&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-sectional-pdp-emergency.js?v=20260603a&mcrd=" + Date.now();
       s.async = false;
       (d.head || d.documentElement).appendChild(s);
     } catch (eLoad) {}
@@ -987,8 +987,8 @@
     s.textContent =
       "body.productdetails #mc-pdp-top-price-panel,body.is-sectional-product #mc-pdp-top-price-panel{display:flex!important;flex-direction:column!important;gap:6px!important;width:100%!important;margin:0 0 12px!important;position:static!important}" +
       "body.productdetails #mc-pdp-top-price-panel .mc-pdp-retail-row,body.productdetails #mc-pdp-top-price-panel .mc-pdp-member-pricing{display:flex!important;flex-direction:column!important;position:static!important;margin:0 0 4px!important;width:100%!important;font-size:13px!important;line-height:1.2!important}" +
-      "body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .mc-pdp-retail-row,body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .mc-pdp-member-pricing{display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
-      "body.productdetails:has(#mc-pdp-top-price-panel) #mc-pdp-top-price-panel .mc-pdp-retail-row,body.productdetails:has(#mc-pdp-top-price-panel) #mc-pdp-top-price-panel .mc-pdp-member-pricing{display:flex!important;height:auto!important;overflow:visible!important;opacity:1!important}" +
+      "body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-retail-row,body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-member-pricing,body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-retail-label,body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .product_list_price{display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
+      "body.productdetails #mc-pdp-title-right+#mc-pdp-top-price-panel{margin:0 0 10px!important}body.productdetails #mc-pdp-top-price-panel+.colors_pricebox,body.productdetails #mc-pdp-top-price-panel+table.colors_pricebox{margin-top:14px!important;clear:both!important}" +
       "body.productdetails #v65-product-parent [class*='klarna' i],body.productdetails #v65-product-parent [class*='affirm' i]{clear:both!important;margin-top:12px!important}";
       "body.productdetails #mc-pdp-price-stack-host,body.productdetails #mtl-pdp-top-price{display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
       "body.productdetails .mc-member-price-caption,body.productdetails #v65-product-parent .colors_pricebox>.mc-pdp-member-line{display:none!important;height:0!important;overflow:hidden!important;opacity:0!important}" +
@@ -1031,7 +1031,7 @@
 
   /* MC_SECTIONAL_MTL_RENDERER_INLINE_v24 — upgrade stale baked renderer (CI now chunked-SFTPs file) */
   (function (g, d) {
-    var WANT = "sectional-20260601-top-price-panel-v26";
+    var WANT = "sectional-20260601-top-price-panel-v27";
     var GH =
       "https://raw.githubusercontent.com/emcc10/mccabe-site/main/vspfiles/js/mtl-sectional-renderer.js";
     function onPdp() {

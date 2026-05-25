@@ -73,7 +73,7 @@
   var __mtlSectionalLbPopstateBound = false;
 
   window.MTL_RENDERER_VERSION = "sectional-leather-20260520-v2";
-  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v26";
+  window.MTL_RENDERER_BUILD = "sectional-20260601-top-price-panel-v27";
 
   /** Template owns native leather `<select>` discovery; prefers __McCabeLeatherCollectImpl so `mcCollectNativeLeatherSelectsForPdp` can’t be swapped by other scripts */
   function mtlGetNativeLeatherCollectFn() {
@@ -406,66 +406,109 @@
 
   function isTopPricePanelMounted(panel) {
     if (!panel || !panel.parentNode) return false;
+    var pb = findFirstColorsPricebox();
+    if (pb && pb.parentNode && panel.parentNode === pb.parentNode) {
+      return !!(panel.compareDocumentPosition(pb) & Node.DOCUMENT_POSITION_PRECEDING);
+    }
     var title = findProductTitleEl();
     if (!title) return panel.dataset.mtlTopPriceMounted === "1";
-    if (!(title.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING)) return false;
-    var fin = findFinancingBlockAfterTitle(title);
-    if (fin && fin.parentNode) {
-      if (panel.parentNode === fin.parentNode) {
-        return !!(panel.compareDocumentPosition(fin) & Node.DOCUMENT_POSITION_PRECEDING);
-      }
-      return panel.dataset.mtlTopPriceMounted === "1";
-    }
-    return panel.parentNode === title.parentNode;
+    return !!(title.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING);
   }
 
   function insertTopPricePanel(panel) {
-    var title = findProductTitleEl();
-    if (!title) return false;
-    var fin = findFinancingBlockAfterTitle(title);
-    if (fin && fin.parentNode) {
+    var pb = findFirstColorsPricebox();
+    if (pb && pb.parentNode) {
       try {
-        fin.parentNode.insertBefore(panel, fin);
+        pb.parentNode.insertBefore(panel, pb);
         return true;
-      } catch (eFin) {}
+      } catch (ePb) {}
     }
-    if (title.parentNode) {
-      var parent = title.parentNode;
+    var wrap = findTitleRightWrap();
+    if (wrap && wrap.parentNode) {
       try {
-        if (title.nextSibling) {
-          parent.insertBefore(panel, title.nextSibling);
+        if (wrap.nextSibling) {
+          wrap.parentNode.insertBefore(panel, wrap.nextSibling);
         } else {
-          parent.appendChild(panel);
+          wrap.parentNode.appendChild(panel);
         }
         return true;
-      } catch (eIns) {
-        try {
-          parent.appendChild(panel);
-          return true;
-        } catch (eApp) {
-          return false;
-        }
+      } catch (eWrap) {}
+    }
+    var title = findProductTitleEl();
+    if (!title || !title.parentNode) return false;
+    try {
+      if (title.nextSibling) {
+        title.parentNode.insertBefore(panel, title.nextSibling);
+      } else {
+        title.parentNode.appendChild(panel);
+      }
+      return true;
+    } catch (eIns) {
+      try {
+        title.parentNode.appendChild(panel);
+        return true;
+      } catch (eApp) {
+        return false;
       }
     }
-    return false;
+  }
+
+  function findFirstColorsPricebox() {
+    var scope = document.getElementById("v65-product-parent") || document.getElementById("content_area");
+    return scope ? scope.querySelector(".colors_pricebox") : null;
+  }
+
+  function findTitleRightWrap() {
+    return document.getElementById("mc-pdp-title-right");
+  }
+
+  function nodeIsFinancingEl(node) {
+    if (!node || node.nodeType !== 1) return false;
+    if (node.closest && node.closest('[class*="klarna" i], [id*="klarna" i], klarna-placement, [class*="affirm" i], [id*="affirm" i], [data-klarna], [data-affirm]')) {
+      return true;
+    }
+    var blob = (String(node.id || "") + " " + String(node.className || "")).toLowerCase();
+    return /klarna|affirm/.test(blob);
+  }
+
+  function hidePricingNode(node) {
+    if (!node) return;
+    try {
+      node.style.setProperty("display", "none", "important");
+      node.style.setProperty("visibility", "hidden", "important");
+      node.style.setProperty("height", "0", "important");
+      node.style.setProperty("overflow", "hidden", "important");
+      node.style.setProperty("opacity", "0", "important");
+      node.style.setProperty("margin", "0", "important");
+      node.style.setProperty("padding", "0", "important");
+      node.style.setProperty("pointer-events", "none", "important");
+    } catch (eHide) {}
+  }
+
+  function hideLegacyPricingInFirstPricebox() {
+    var pb = findFirstColorsPricebox();
+    if (!pb) return;
+    pb.querySelectorAll(
+      ".mc-pdp-retail-row, .mc-pdp-member-pricing, .mc-pdp-retail-label, .mc-pdp-retail-line, " +
+        ".product_productprice, .product_list_price, font.product_list_price, " +
+        ".product_saleprice, .product_sale_price, font.product_sale_price, " +
+        ".v65-product-price, .mc-member-price-caption, .mc-pdp-member-line"
+    ).forEach(function (node) {
+      if (!node || nodeIsFinancingEl(node)) return;
+      hidePricingNode(node);
+    });
   }
 
   function hideStrayPriceRowsOutsideTopPanel(top) {
     top = top || document.getElementById("mc-pdp-top-price-panel");
     var root = document.getElementById("v65-product-parent") || document.getElementById("content_area");
     if (!root) return;
-    root.querySelectorAll(".mc-pdp-retail-row, .mc-pdp-member-pricing").forEach(function (node) {
+    root.querySelectorAll(".mc-pdp-retail-row, .mc-pdp-member-pricing, .mc-pdp-retail-label").forEach(function (node) {
       if (!node || (top && top.contains && top.contains(node))) return;
-      try {
-        node.style.setProperty("display", "none", "important");
-        node.style.setProperty("visibility", "hidden", "important");
-        node.style.setProperty("height", "0", "important");
-        node.style.setProperty("overflow", "hidden", "important");
-        node.style.setProperty("opacity", "0", "important");
-        node.style.setProperty("margin", "0", "important");
-        node.style.setProperty("padding", "0", "important");
-      } catch (eHide) {}
+      if (nodeIsFinancingEl(node)) return;
+      hidePricingNode(node);
     });
+    hideLegacyPricingInFirstPricebox();
   }
 
   function readRetailAmountForTopPanel() {
