@@ -1,4 +1,4 @@
-/* 0603g C_CSS_DEPLOY_VERIFY_20260603g — PDP pricing scoped to body.productdetails only */
+/* 0603e C_CSS_DEPLOY_VERIFY_20260603e — clean title anchor + fresh top price markup */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -14563,21 +14563,18 @@ html body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line {
   position: static !important;
   margin: 0 0 2px 0 !important;
 }
-/* No :has() — template sets body.mc-pdp-price-stack on productdetails only */
-body.productdetails.mc-pdp-price-stack #v65-product-parent .product_sale_price,
-body.productdetails.mc-pdp-price-stack #v65-product-parent .product_saleprice,
-body.productdetails.mc-pdp-price-stack #v65-product-parent font.product_sale_price,
-body.productdetails.mc-pdp-price-stack #content_area .product_sale_price,
-body.productdetails.mc-pdp-price-stack #content_area .product_saleprice,
-body.productdetails.mc-pdp-price-stack #content_area font.product_sale_price,
-body.productdetails.mc-pdp-price-stack .colors_pricebox .product_sale_price,
-body.productdetails.mc-pdp-price-stack .colors_pricebox .product_saleprice,
-body.productdetails.mc-pdp-price-stack .colors_pricebox font.product_sale_price,
-body.productdetails.mc-pdp-price-stack .mtl-product-price-block .product_sale_price,
-body.productdetails.mc-pdp-price-stack .mtl-product-price-block .product_saleprice,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .product_sale_price,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .product_saleprice,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent font.product_sale_price {
+/* No :has() — template sets body.mc-pdp-price-stack when retail/member block mounts */
+html body.mc-pdp-price-stack #v65-product-parent .product_sale_price,
+html body.mc-pdp-price-stack #v65-product-parent .product_saleprice,
+html body.mc-pdp-price-stack #v65-product-parent font.product_sale_price,
+html body.mc-pdp-price-stack #content_area .product_sale_price,
+html body.mc-pdp-price-stack #content_area .product_saleprice,
+html body.mc-pdp-price-stack #content_area font.product_sale_price,
+html body.mc-pdp-price-stack .colors_pricebox .product_sale_price,
+html body.mc-pdp-price-stack .colors_pricebox .product_saleprice,
+html body.mc-pdp-price-stack .colors_pricebox font.product_sale_price,
+html body.mc-pdp-price-stack .mtl-product-price-block .product_sale_price,
+html body.mc-pdp-price-stack .mtl-product-price-block .product_saleprice {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -14588,8 +14585,7 @@ body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent font.product_
   opacity: 0 !important;
   pointer-events: none !important;
 }
-body.productdetails.mc-pdp-price-stack .mc-pdp-member-pricing .mc-pdp-member-line--sale,
-body.productdetails.mc-has-pdp-top-price-panel .mc-pdp-member-pricing .mc-pdp-member-line--sale {
+html body.mc-pdp-price-stack .mc-pdp-member-pricing .mc-pdp-member-line--sale {
   display: flex !important;
   flex-direction: column !important;
   visibility: visible !important;
@@ -14598,15 +14594,16 @@ body.productdetails.mc-has-pdp-top-price-panel .mc-pdp-member-pricing .mc-pdp-me
   opacity: 1 !important;
   pointer-events: auto !important;
 }
-/* Baked PDPs: hide native sale dupes when McCabe top/stack panel is active */
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .product_saleprice,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .product_sale_price,
-body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox .product_saleprice,
-body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox .product_sale_price,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .product_productprice,
-body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox .product_productprice,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox font.product_list_price,
-body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox font.product_list_price {
+/* Baked PDPs: hide native sale dupes only after McCabe retail row exists (avoid blank stack if JS fails) */
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row):has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,
+html body.mc-product-page:has(#v65-product-parent .mc-pdp-retail-row):has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row):has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_sale_price,
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row):has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox b:has(.product_saleprice),
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row):has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox font.pricecolor:has(.product_saleprice),
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox .product_productprice,
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox font.colors_text:has(.product_productprice),
+html body.productdetails:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox font.text.colors_text:has(.product_productprice),
+html body.mc-product-page:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox font.colors_text:has(.product_productprice) {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -14617,8 +14614,8 @@ body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox font
   opacity: 0 !important;
   pointer-events: none !important;
 }
-body.productdetails.mc-pdp-price-stack #v65-product-parent .mc-pdp-member-pricing,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .mc-pdp-member-pricing {
+html body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .mc-pdp-member-pricing,
+html body.mc-product-page:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .mc-pdp-member-pricing {
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
@@ -14673,8 +14670,7 @@ html body.mc-product-page #v65-product-parent .mc-pdp-member-line {
 }
 html body.productdetails #mc-pdp-price-stack-host,
 html body.mc-product-page #mc-pdp-price-stack-host,
-body.productdetails.mc-pdp-price-stack #mc-pdp-price-stack-host,
-body.productdetails.mc-has-pdp-top-price-panel #mc-pdp-price-stack-host {
+html body.mc-pdp-price-stack #mc-pdp-price-stack-host {
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
@@ -14691,8 +14687,8 @@ body.productdetails.mc-has-pdp-top-price-panel #mc-pdp-price-stack-host {
 }
 html body.productdetails #mc-pdp-price-stack-host .mc-pdp-retail-row,
 html body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-pricing,
-body.productdetails.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-retail-row,
-body.productdetails.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-member-pricing {
+html body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-retail-row,
+html body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-member-pricing {
   display: flex !important;
   flex-direction: column !important;
   position: static !important;
@@ -14705,12 +14701,13 @@ body.productdetails.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-member-p
   max-height: none !important;
 }
 html body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-pricing .mc-pdp-member-line--sale,
-body.productdetails.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-member-pricing .mc-pdp-member-line--sale {
+html body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-member-pricing .mc-pdp-member-line--sale {
   display: flex !important;
 }
 /* Sectional PDP: McCabe stack owns retail/member/sale — hide duplicate MTL summary + caption prices */
-body.productdetails.mc-has-pdp-top-price-panel #mtl-product-summary .mtl-summary-row #mtl-sum-price,
-body.productdetails.mc-pdp-price-stack #mtl-product-summary .mtl-summary-row #mtl-sum-price {
+html body.productdetails:has(.mc-pdp-retail-row) #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),
+html body.mc-product-page:has(.mc-pdp-retail-row) #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),
+html body.mc-pdp-price-stack #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price) {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -14721,10 +14718,11 @@ body.productdetails.mc-pdp-price-stack #mtl-product-summary .mtl-summary-row #mt
   opacity: 0 !important;
   pointer-events: none !important;
 }
-body.productdetails.mc-has-pdp-top-price-panel .mc-member-price-caption,
-body.productdetails.mc-pdp-price-stack .mc-member-price-caption,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox > .mc-member-price-caption,
-body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox > .mc-member-price-caption {
+html body.productdetails:has(.mc-pdp-retail-row) .mc-member-price-caption,
+html body.mc-product-page:has(.mc-pdp-retail-row) .mc-member-price-caption,
+html body.mc-pdp-price-stack .mc-member-price-caption,
+html body.productdetails:has(.mc-pdp-member-pricing) #v65-product-parent .colors_pricebox > .mc-member-price-caption,
+html body.mc-product-page:has(.mc-pdp-member-pricing) #v65-product-parent .colors_pricebox > .mc-member-price-caption {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -14732,18 +14730,18 @@ body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox > .m
   opacity: 0 !important;
   pointer-events: none !important;
 }
-body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox {
+html body.mc-pdp-price-stack #v65-product-parent .colors_pricebox,
+html body.productdetails:has(.mc-pdp-retail-row) #v65-product-parent .colors_pricebox {
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
   gap: 6px !important;
   position: relative !important;
 }
-body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox .mc-pdp-retail-row,
-body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox .mc-pdp-member-pricing,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .mc-pdp-retail-row,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .mc-pdp-member-pricing {
+html body.mc-pdp-price-stack #v65-product-parent .colors_pricebox .mc-pdp-retail-row,
+html body.mc-pdp-price-stack #v65-product-parent .colors_pricebox .mc-pdp-member-pricing,
+html body.productdetails:has(.mc-pdp-retail-row) #v65-product-parent .colors_pricebox .mc-pdp-retail-row,
+html body.productdetails:has(.mc-pdp-retail-row) #v65-product-parent .colors_pricebox .mc-pdp-member-pricing {
   position: static !important;
   float: none !important;
   margin: 0 0 4px 0 !important;
@@ -14751,12 +14749,15 @@ body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_price
   max-width: 100% !important;
 }
 /* Loose duplicate member lines outside the pricing wrap */
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox > .mc-pdp-member-line,
-body.productdetails.mc-pdp-price-stack #v65-product-parent .colors_pricebox > .mc-pdp-member-line {
+html body.productdetails:has(.mc-pdp-member-pricing) #v65-product-parent .colors_pricebox > .mc-pdp-member-line,
+html body.mc-product-page:has(.mc-pdp-member-pricing) #v65-product-parent .colors_pricebox > .mc-pdp-member-line {
   display: none !important;
 }
-/* Global PDP top price panel (productdetails only) */
-body.productdetails #mc-pdp-top-price-panel {
+/* Sectional PDP: MTL top price panel — html.is-sectional-product (class is on documentElement) */
+html.is-sectional-product #mc-pdp-top-price-panel,
+html.is-sectional-product body #mc-pdp-top-price-panel,
+html body.is-sectional-product #mc-pdp-top-price-panel,
+html body.productdetails #mc-pdp-top-price-panel {
   display: block !important;
   clear: both !important;
   width: 100% !important;
@@ -14820,45 +14821,43 @@ html body.productdetails #mc-pdp-top-price-panel font.product_sale_price {
   opacity: 0 !important;
   pointer-events: none !important;
 }
-body.productdetails #mc-pdp-top-price-panel .mc-pdp-retail-row,
-body.productdetails #mc-pdp-top-price-panel .mc-pdp-member-pricing {
+html body.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-retail-row,
+html body.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-member-pricing,
+html.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-retail-row,
+html.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-member-pricing,
+html body.productdetails #mc-pdp-top-price-panel .mc-pdp-retail-row,
+html body.productdetails #mc-pdp-top-price-panel .mc-pdp-member-pricing {
   display: flex !important;
   flex-direction: column !important;
   position: static !important;
   margin: 0 0 4px 0 !important;
   width: 100% !important;
 }
-body.productdetails #mc-pdp-top-price-panel .mc-pdp-member-line--sale {
+html body.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-member-line--sale,
+html.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-member-line--sale,
+html body.productdetails #mc-pdp-top-price-panel .mc-pdp-member-line--sale {
   display: none !important;
 }
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .product_saleprice,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .product_sale_price,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent font.product_sale_price,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent #priceWithOptions,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent #priceWithOptionsNoTax,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .option_pricing,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox [itemprop="price"] {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-body.productdetails.mc-has-pdp-top-price-panel #mc-pdp-price-stack-host,
-body.productdetails.mc-has-pdp-top-price-panel #mtl-pdp-top-price {
-  display: none !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .mc-pdp-retail-row,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .mc-pdp-member-pricing,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .mc-pdp-retail-label,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .product_productprice,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox .product_list_price,
-body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_pricebox font.product_list_price {
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .product_saleprice,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .product_sale_price,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent font.product_sale_price,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent #priceWithOptions,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent #priceWithOptionsNoTax,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .option_pricing,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox [itemprop="price"],
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .product_saleprice,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .product_sale_price,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent #priceWithOptions,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent #priceWithOptionsNoTax,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .option_pricing,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox [itemprop="price"],
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .product_saleprice,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .product_sale_price,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent font.product_sale_price,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent #priceWithOptions,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent #priceWithOptionsNoTax,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .option_pricing,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox [itemprop="price"] {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -14866,7 +14865,41 @@ body.productdetails.mc-has-pdp-top-price-panel #v65-product-parent .colors_price
   opacity: 0 !important;
   pointer-events: none !important;
 }
-body.productdetails #mc-pdp-title-right {
+html body.is-sectional-product #mc-pdp-price-stack-host,
+html.is-sectional-product #mc-pdp-price-stack-host,
+html body.is-sectional-product #mtl-pdp-top-price,
+html.is-sectional-product #mtl-pdp-top-price {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-retail-row,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-retail-row,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-retail-row,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-member-pricing,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-member-pricing,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-member-pricing,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-retail-label,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-retail-label,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .mc-pdp-retail-label,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .product_productprice,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .product_productprice,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox .product_list_price,
+html.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox font.product_list_price,
+html body.is-sectional-product:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox font.product_list_price,
+html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .colors_pricebox font.product_list_price {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+html.is-sectional-product #mc-pdp-title-right,
+html body.is-sectional-product #mc-pdp-title-right,
+html body.productdetails #mc-pdp-title-right {
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
@@ -14876,17 +14909,29 @@ body.productdetails #mc-pdp-title-right {
   clear: both !important;
   position: static !important;
 }
-body.productdetails #v65-product-parent .vCSS_breadcrumb_td {
+html.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td,
+html.is-sectional-product #content_area .vCSS_breadcrumb_td,
+html body.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td,
+html body.productdetails #v65-product-parent .vCSS_breadcrumb_td {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
   justify-content: flex-start !important;
   gap: 0 !important;
 }
-body.productdetails #v65-product-parent .vCSS_breadcrumb_td > #mc-pdp-title-right,
-body.productdetails #v65-product-parent .vCSS_breadcrumb_td > [itemprop="name"],
-body.productdetails #v65-product-parent .vCSS_breadcrumb_td > .productnamecolorLARGE,
-body.productdetails #v65-product-parent .vCSS_breadcrumb_td > .productnamecolor {
+html.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td > #mc-pdp-title-right,
+html.is-sectional-product #content_area .vCSS_breadcrumb_td > #mc-pdp-title-right,
+html body.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td > #mc-pdp-title-right,
+html body.productdetails #v65-product-parent .vCSS_breadcrumb_td > #mc-pdp-title-right,
+html.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td > [itemprop="name"],
+html.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td > .productnamecolorLARGE,
+html.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td > .productnamecolor,
+html body.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td > [itemprop="name"],
+html body.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td > .productnamecolorLARGE,
+html body.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td > .productnamecolor,
+html body.productdetails #v65-product-parent .vCSS_breadcrumb_td > [itemprop="name"],
+html body.productdetails #v65-product-parent .vCSS_breadcrumb_td > .productnamecolorLARGE,
+html body.productdetails #v65-product-parent .vCSS_breadcrumb_td > .productnamecolor {
   order: 1 !important;
   display: block !important;
   width: 100% !important;
@@ -14897,7 +14942,9 @@ body.productdetails #v65-product-parent .vCSS_breadcrumb_td > .productnamecolor 
   margin-left: 0 !important;
   padding-left: 0 !important;
 }
-body.productdetails #mc-pdp-title-right > :not(#mc-pdp-top-price-panel) {
+html.is-sectional-product #mc-pdp-title-right > :not(#mc-pdp-top-price-panel),
+html body.is-sectional-product #mc-pdp-title-right > :not(#mc-pdp-top-price-panel),
+html body.productdetails #mc-pdp-title-right > :not(#mc-pdp-top-price-panel) {
   order: 1 !important;
   display: block !important;
   width: 100% !important;
@@ -14907,14 +14954,20 @@ body.productdetails #mc-pdp-title-right > :not(#mc-pdp-top-price-panel) {
   margin-left: 0 !important;
   padding-left: 0 !important;
 }
-body.productdetails #mc-pdp-title-right > h1 {
+html.is-sectional-product #mc-pdp-title-right > h1,
+html body.is-sectional-product #mc-pdp-title-right > h1,
+html body.productdetails #mc-pdp-title-right > h1 {
   display: block !important;
   width: 100% !important;
   float: none !important;
   margin: 0 0 8px !important;
 }
-body.productdetails #mc-pdp-title-right > [itemprop="name"],
-body.productdetails #mc-pdp-title-right > .productnamecolorLARGE {
+html.is-sectional-product #mc-pdp-title-right > [itemprop="name"],
+html.is-sectional-product #mc-pdp-title-right > .productnamecolorLARGE,
+html body.is-sectional-product #mc-pdp-title-right > [itemprop="name"],
+html body.is-sectional-product #mc-pdp-title-right > .productnamecolorLARGE,
+html body.productdetails #mc-pdp-title-right > [itemprop="name"],
+html body.productdetails #mc-pdp-title-right > .productnamecolorLARGE {
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -14924,10 +14977,18 @@ body.productdetails #mc-pdp-title-right > .productnamecolorLARGE {
   margin-left: 0 !important;
   padding-left: 0 !important;
 }
-body.productdetails #mc-pdp-title-right [itemprop="name"],
-body.productdetails #mc-pdp-title-right .productnamecolorLARGE,
-body.productdetails #mc-pdp-title-right .productnamecolor,
-body.productdetails #mc-pdp-title-right .colors_productname {
+html.is-sectional-product #mc-pdp-title-right [itemprop="name"],
+html.is-sectional-product #mc-pdp-title-right .productnamecolorLARGE,
+html.is-sectional-product #mc-pdp-title-right .productnamecolor,
+html.is-sectional-product #mc-pdp-title-right .colors_productname,
+html body.is-sectional-product #mc-pdp-title-right [itemprop="name"],
+html body.is-sectional-product #mc-pdp-title-right .productnamecolorLARGE,
+html body.is-sectional-product #mc-pdp-title-right .productnamecolor,
+html body.is-sectional-product #mc-pdp-title-right .colors_productname,
+html body.productdetails #mc-pdp-title-right [itemprop="name"],
+html body.productdetails #mc-pdp-title-right .productnamecolorLARGE,
+html body.productdetails #mc-pdp-title-right .productnamecolor,
+html body.productdetails #mc-pdp-title-right .colors_productname {
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -14937,14 +14998,19 @@ body.productdetails #mc-pdp-title-right .colors_productname {
   padding-left: 0 !important;
   text-indent: 0 !important;
 }
-body.productdetails #mc-pdp-title-right #mc-pdp-top-price-panel {
+html.is-sectional-product #mc-pdp-title-right #mc-pdp-top-price-panel,
+html body.is-sectional-product #mc-pdp-title-right #mc-pdp-top-price-panel,
+html body.productdetails #mc-pdp-title-right #mc-pdp-top-price-panel {
   order: 2 !important;
   display: flex !important;
   flex-direction: column !important;
   margin: 0 0 10px !important;
   clear: both !important;
 }
-body.productdetails #v65-product-parent .vCSS_breadcrumb_td > #mc-pdp-top-price-panel {
+html.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td > #mc-pdp-top-price-panel,
+html.is-sectional-product #content_area .vCSS_breadcrumb_td > #mc-pdp-top-price-panel,
+html body.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td > #mc-pdp-top-price-panel,
+html body.productdetails #v65-product-parent .vCSS_breadcrumb_td > #mc-pdp-top-price-panel {
   order: 2 !important;
   display: flex !important;
   flex-direction: column !important;
@@ -14953,46 +15019,67 @@ body.productdetails #v65-product-parent .vCSS_breadcrumb_td > #mc-pdp-top-price-
   margin: 0 0 10px 0 !important;
   clear: both !important;
 }
-body.productdetails #v65-product-parent .vCSS_breadcrumb_td > .colors_pricebox {
+html.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td > .colors_pricebox,
+html.is-sectional-product #content_area .vCSS_breadcrumb_td > .colors_pricebox,
+html body.is-sectional-product #v65-product-parent .vCSS_breadcrumb_td > .colors_pricebox,
+html body.productdetails #v65-product-parent .vCSS_breadcrumb_td > .colors_pricebox {
   order: 3 !important;
 }
-body.productdetails #mc-pdp-top-price-panel *,
-body.productdetails #mc-pdp-top-price-panel font {
+html.is-sectional-product #mc-pdp-top-price-panel *,
+html.is-sectional-product #mc-pdp-top-price-panel font,
+html body.is-sectional-product #mc-pdp-top-price-panel *,
+html body.productdetails #mc-pdp-top-price-panel *,
+html body.productdetails #mc-pdp-top-price-panel font {
   font-size: 13px !important;
   line-height: 1.2 !important;
   font-weight: 400 !important;
 }
-body.productdetails tr.mc-pdp-main-row td.mc-pdp-options-td {
+html.is-sectional-product tr.mc-pdp-main-row td.mc-pdp-options-td,
+html body.is-sectional-product tr.mc-pdp-main-row td.mc-pdp-options-td {
   display: block !important;
   width: 100% !important;
   float: none !important;
 }
-body.productdetails tr.mc-pdp-main-row td.mc-pdp-options-td > table,
-body.productdetails tr.mc-pdp-main-row td.mc-pdp-options-td > div {
+html.is-sectional-product tr.mc-pdp-main-row td.mc-pdp-options-td > table,
+html.is-sectional-product tr.mc-pdp-main-row td.mc-pdp-options-td > div,
+html body.is-sectional-product tr.mc-pdp-main-row td.mc-pdp-options-td > table,
+html body.is-sectional-product tr.mc-pdp-main-row td.mc-pdp-options-td > div {
   display: block !important;
   width: 100% !important;
   float: none !important;
 }
-body.productdetails #mc-pdp-title-right + #mc-pdp-top-price-panel {
+html body.is-sectional-product #mc-pdp-title-right + #mc-pdp-top-price-panel,
+html body.productdetails #mc-pdp-title-right + #mc-pdp-top-price-panel {
   display: flex !important;
   flex-direction: column !important;
   margin: 0 0 10px !important;
   clear: both !important;
 }
-body.productdetails #mc-pdp-title-right ~ .colors_pricebox,
-body.productdetails #mc-pdp-top-price-panel ~ .colors_pricebox {
+html.is-sectional-product #mc-pdp-title-right ~ .colors_pricebox,
+html.is-sectional-product #mc-pdp-top-price-panel ~ .colors_pricebox,
+html body.is-sectional-product #mc-pdp-title-right ~ .colors_pricebox,
+html body.is-sectional-product #mc-pdp-top-price-panel ~ .colors_pricebox,
+html body.productdetails #mc-pdp-title-right ~ .colors_pricebox,
+html body.productdetails #mc-pdp-top-price-panel ~ .colors_pricebox {
   margin-top: 14px !important;
   clear: both !important;
 }
-body.productdetails #mc-pdp-top-price-panel {
+html.is-sectional-product #mc-pdp-top-price-panel,
+html body.is-sectional-product #mc-pdp-top-price-panel,
+html body.productdetails #mc-pdp-top-price-panel {
   margin: 0 0 18px 0 !important;
   padding-bottom: 6px !important;
 }
-body.productdetails #v65-product-parent [class*="klarna" i],
-body.productdetails #v65-product-parent [id*="klarna" i],
-body.productdetails #v65-product-parent klarna-placement,
-body.productdetails #v65-product-parent [class*="affirm" i],
-body.productdetails #v65-product-parent [id*="affirm" i] {
+html body.is-sectional-product #v65-product-parent [class*="klarna" i],
+html body.is-sectional-product #v65-product-parent [id*="klarna" i],
+html body.is-sectional-product #v65-product-parent klarna-placement,
+html body.is-sectional-product #v65-product-parent [class*="affirm" i],
+html body.is-sectional-product #v65-product-parent [id*="affirm" i],
+html body.productdetails #v65-product-parent [class*="klarna" i],
+html body.productdetails #v65-product-parent [id*="klarna" i],
+html body.productdetails #v65-product-parent klarna-placement,
+html body.productdetails #v65-product-parent [class*="affirm" i],
+html body.productdetails #v65-product-parent [id*="affirm" i] {
   clear: both !important;
   display: block !important;
   margin-top: 12px !important;
@@ -15047,10 +15134,10 @@ html body.productdetails #mc-pdp-config-panel + .mc-atc-button-wrap {
 }
 
 /* Hide legacy duplicate top-price hosts when universal panel is active */
-body.productdetails.mc-has-pdp-top-price-panel #mc-pdp-price-stack-host,
-body.productdetails.mc-has-pdp-top-price-panel #mtl-pdp-top-price,
-html body.productdetails.mc-has-pdp-top-price-panel #mc-pdp-price-stack-host,
-html body.productdetails.mc-has-pdp-top-price-panel #mtl-pdp-top-price {
+body.productdetails:has(#mc-pdp-top-price-panel) #mc-pdp-price-stack-host,
+body.productdetails:has(#mc-pdp-top-price-panel) #mtl-pdp-top-price,
+html body.productdetails:has(#mc-pdp-top-price-panel) #mc-pdp-price-stack-host,
+html body.productdetails:has(#mc-pdp-top-price-panel) #mtl-pdp-top-price {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
