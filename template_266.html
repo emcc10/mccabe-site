@@ -13824,86 +13824,115 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }
   }
 
+  function mcConfigLayoutSig(configPanel) {
+    var sum = document.getElementById('mtl-product-summary');
+    var cfg = document.getElementById('mcConfigurationBlock');
+    var anchor = mcFindPdpAtcInsertAnchor();
+    var anchorId = anchor && anchor.before && anchor.before.id ? anchor.before.id : '';
+    var parentId =
+      configPanel && configPanel.parentNode && configPanel.parentNode.id ? configPanel.parentNode.id : '';
+    return ['rp', sum ? 's' : '-', cfg ? 'c' : '-', anchorId, parentId].join('|');
+  }
+
   function layoutMcPdpPricePanels() {
-    if (!isPdpPage()) return;
-    window.__MTL_OWNS_TOP_PRICE__ = true;
-
-    var title = mcFindCleanProductTitleEl();
-    console.log('[MC PDP price layout] title el', title, title && title.outerHTML);
-    console.log(
-      '[MC PDP price layout] title parent',
-      title && title.parentNode,
-      title && title.parentNode && title.parentNode.outerHTML
-    );
-    if (!title || !title.parentNode) return;
-
-    var titleWrap = document.getElementById('mc-pdp-title-right');
-    if (titleWrap && !titleWrap.contains(title)) {
-      try {
-        titleWrap.appendChild(title);
-        title = mcFindCleanProductTitleEl() || title;
-      } catch (eTitleMove) {}
-    }
-
-    var topPanel = document.getElementById('mc-pdp-top-price-panel');
-    if (!topPanel) {
-      topPanel = document.createElement('div');
-      topPanel.id = 'mc-pdp-top-price-panel';
-      topPanel.className = 'mc-pdp-top-price-panel';
-      topPanel.setAttribute('data-mc-pdp-top-price', '1');
-    }
-
-    console.log('[MC PDP price layout] top panel parent before', topPanel && topPanel.parentNode);
-
-    if (topPanel.parentNode !== title.parentNode || topPanel.previousSibling !== title) {
-      try {
-        title.parentNode.insertBefore(topPanel, title.nextSibling);
-      } catch (eTopIns) {}
-    }
-
-    console.log('[MC PDP price layout] top panel parent after', topPanel && topPanel.parentNode);
-
-    mcSanitizeTopPricePanel(topPanel);
-
-    var retailAmt = mcLayoutReadRetailAmount();
-    var loggedIn = mcLayoutLoggedInGuess();
-    var memberAmt = loggedIn ? mcLayoutReadMemberAmount() : 0;
-    if (retailAmt > 0) {
-      var sig = String(retailAmt) + '|' + String(memberAmt) + '|' + (loggedIn ? 'm' : 'g');
-      topPanel.innerHTML = mcBuildTopPricePanelHtml(retailAmt, memberAmt, loggedIn);
-      topPanel.setAttribute('data-mc-top-sig', sig);
-      mcSanitizeTopPricePanel(topPanel);
-    }
-
-    if (mcIsRoomPlannerPdp()) {
-      var configPanel = document.getElementById('mc-pdp-config-panel');
-      if (!configPanel) {
-        configPanel = document.createElement('div');
-        configPanel.id = 'mc-pdp-config-panel';
-        configPanel.className = 'mc-pdp-config-panel';
-        configPanel.setAttribute('data-mc-pdp-config', '1');
-      }
-      mcPopulateConfigPanel(configPanel);
-      mcInsertConfigPanel(configPanel);
-    } else {
-      var staleCfg = document.getElementById('mc-pdp-config-panel');
-      if (staleCfg) {
-        try {
-          staleCfg.remove();
-        } catch (eRmCfg) {}
-      }
-    }
-
+    if (window.__MC_PDP_LAYOUT_RUNNING__) return;
+    window.__MC_PDP_LAYOUT_RUNNING__ = true;
+    var t0 = typeof performance !== 'undefined' && performance.now ? performance.now() : 0;
     try {
-      if (document.body) document.body.classList.add('mc-pdp-price-stack');
-    } catch (eCls) {}
+      if (!isPdpPage()) return;
+      window.__MTL_OWNS_TOP_PRICE__ = true;
+
+      var title = mcFindCleanProductTitleEl();
+      if (!title || !title.parentNode) return;
+
+      var titleWrap = document.getElementById('mc-pdp-title-right');
+      if (titleWrap && !titleWrap.contains(title)) {
+        try {
+          titleWrap.appendChild(title);
+          title = mcFindCleanProductTitleEl() || title;
+        } catch (eTitleMove) {}
+      }
+
+      var topPanel = document.getElementById('mc-pdp-top-price-panel');
+      if (!topPanel) {
+        topPanel = document.createElement('div');
+        topPanel.id = 'mc-pdp-top-price-panel';
+        topPanel.className = 'mc-pdp-top-price-panel';
+        topPanel.setAttribute('data-mc-pdp-top-price', '1');
+      }
+
+      if (topPanel.parentNode !== title.parentNode || topPanel.previousElementSibling !== title) {
+        try {
+          title.parentNode.insertBefore(topPanel, title.nextSibling);
+        } catch (eTopIns) {}
+      }
+
+      try {
+        if (document.body) {
+          document.body.classList.add('mc-pdp-price-stack', 'mc-has-pdp-top-price-panel');
+        }
+      } catch (eCls) {}
+
+      var retailAmt = mcLayoutReadRetailAmount();
+      var loggedIn = mcLayoutLoggedInGuess();
+      var memberAmt = loggedIn ? mcLayoutReadMemberAmount() : 0;
+      if (retailAmt > 0) {
+        var topSig = String(retailAmt) + '|' + String(memberAmt) + '|' + (loggedIn ? 'm' : 'g');
+        if (topPanel.dataset.mcTopSig !== topSig) {
+          topPanel.innerHTML = mcBuildTopPricePanelHtml(retailAmt, memberAmt, loggedIn);
+          topPanel.dataset.mcTopSig = topSig;
+          mcSanitizeTopPricePanel(topPanel);
+        }
+      }
+
+      if (mcIsRoomPlannerPdp()) {
+        var configPanel = document.getElementById('mc-pdp-config-panel');
+        var cfgSig = mcConfigLayoutSig(configPanel);
+        if (!configPanel) {
+          configPanel = document.createElement('div');
+          configPanel.id = 'mc-pdp-config-panel';
+          configPanel.className = 'mc-pdp-config-panel';
+          configPanel.setAttribute('data-mc-pdp-config', '1');
+        }
+        if (configPanel.dataset.mcConfigSig !== cfgSig || !configPanel.parentNode) {
+          mcPopulateConfigPanel(configPanel);
+          mcInsertConfigPanel(configPanel);
+          configPanel.dataset.mcConfigSig = cfgSig;
+        }
+      } else {
+        var staleCfg = document.getElementById('mc-pdp-config-panel');
+        if (staleCfg) {
+          try {
+            staleCfg.remove();
+          } catch (eRmCfg) {}
+        }
+      }
+    } finally {
+      window.__MC_PDP_LAYOUT_RUNNING__ = false;
+      if (t0 && typeof performance !== 'undefined') {
+        var elapsed = Math.round(performance.now() - t0);
+        if (!window.__MC_PDP_LAYOUT_LOG_COUNT__) window.__MC_PDP_LAYOUT_LOG_COUNT__ = 0;
+        if (window.__MC_PDP_LAYOUT_LOG_COUNT__ < 8) {
+          window.__MC_PDP_LAYOUT_LOG_COUNT__++;
+          console.log('[MC PDP layout ms]', elapsed);
+        }
+      }
+    }
   }
   window.layoutMcPdpPricePanels = layoutMcPdpPricePanels;
+  window.mcSchedulePdpPriceLayout = function () {
+    if (window.__MC_PDP_LAYOUT_SCHEDULED__) return;
+    window.__MC_PDP_LAYOUT_SCHEDULED__ = true;
+    requestAnimationFrame(function () {
+      window.__MC_PDP_LAYOUT_SCHEDULED__ = false;
+      layoutMcPdpPricePanels();
+    });
+  };
   if (!window.mtlUpdateTopPricePanel || !window.mtlUpdateTopPricePanel.__mcLayoutWrap) {
     window.mtlUpdateTopPricePanel = function () {
-      try {
-        layoutMcPdpPricePanels();
-      } catch (eMtlWrap) {}
+      if (typeof window.mcSchedulePdpPriceLayout === 'function') {
+        window.mcSchedulePdpPriceLayout();
+      }
     };
     window.mtlUpdateTopPricePanel.__mcLayoutWrap = true;
   }
@@ -13913,7 +13942,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     var firstPricebox = findFirstPricebox();
     if (!firstPricebox || !firstPricebox.parentNode) {
       try {
-        layoutMcPdpPricePanels();
+        mcSchedulePdpPriceLayout();
       } catch (eLayoutEarly) {}
       return;
     }
@@ -13922,7 +13951,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (!titleWrap) {
       if (!titleEl) {
         try {
-          layoutMcPdpPricePanels();
+          mcSchedulePdpPriceLayout();
         } catch (eLayoutNoH1) {}
         return;
       }
@@ -13938,7 +13967,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     }
     hideBreadcrumbRowIfEmpty();
     try {
-      layoutMcPdpPricePanels();
+      mcSchedulePdpPriceLayout();
     } catch (eLayout) {}
   }
 
@@ -14303,7 +14332,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     placePalliserLogoUnderTitle();
     placeAccordion();
     try {
-      layoutMcPdpPricePanels();
+      mcSchedulePdpPriceLayout();
     } catch (eLayoutRun) {}
     hostLeatherStripInsideAccordion();
     if (typeof window.mcTryInitWmLeather === "function") {
@@ -20126,9 +20155,9 @@ if (!isLoggedIn) {
     if (!retailText) return;
 
     mcRenderPdpRetailAndMember(retailText, memberText, window.getMemberLoginUrl(), isLoggedIn);
-    if (typeof window.layoutMcPdpPricePanels === 'function') {
+    if (typeof window.mcSchedulePdpPriceLayout === 'function') {
       try {
-        window.layoutMcPdpPricePanels();
+        window.mcSchedulePdpPriceLayout();
       } catch (eLayoutPdp) {}
     }
   }
