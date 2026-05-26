@@ -26,7 +26,7 @@ def expected_version() -> str:
         m = re.search(r'VERSION = "([0-9]+)"', enforcer.read_text(encoding="utf-8"))
         if m:
             return m.group(1)
-    return "20260617"
+    return "20260626p"
 
 
 def dtk_plp_version(body: str) -> int:
