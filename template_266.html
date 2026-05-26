@@ -12744,7 +12744,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 
   function hideOptionsTable(scope){
-    if (isBeanBagProductPage()) return;
+    if (typeof window.isBeanBagProductPage === "function" && window.isBeanBagProductPage()) return;
     if (document.documentElement.classList.contains("has-sectional-config-cards")) return;
     var root = scope || document;
     var keepOffscreen = mcShouldKeepOptionsOffscreen();
@@ -13443,7 +13443,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     document.body.classList.remove('mc-product-page');
   }
 
-  if (isBeanBagProductPage()) {
+  if (typeof window.isBeanBagProductPage === "function" && window.isBeanBagProductPage()) {
     document.body.classList.add('mc-bean-bag-pdp');
   } else {
     document.body.classList.remove('mc-bean-bag-pdp');
