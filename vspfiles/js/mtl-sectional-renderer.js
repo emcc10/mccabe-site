@@ -428,10 +428,10 @@
     if (!panel) return false;
     var wrap = findTitleRightWrap();
     var h1 = findProductTitleEl();
-    if (wrap && h1 && wrap.contains(h1)) {
+    if (wrap && wrap.parentNode) {
       try {
-        if (h1.nextElementSibling !== panel) {
-          wrap.insertBefore(panel, h1.nextSibling);
+        if (wrap.nextElementSibling !== panel) {
+          wrap.parentNode.insertBefore(panel, wrap.nextSibling);
         }
         panel.dataset.mtlTopPriceMounted = "1";
         return true;
@@ -453,6 +453,22 @@
     var wrap = findTitleRightWrap();
     if (!wrap || !wrap.parentNode) return;
     var parent = wrap.parentNode;
+    var panel = document.getElementById("mc-pdp-top-price-panel");
+    var wrapIndex = 0;
+    var n = parent.firstChild;
+    while (n && n !== wrap) {
+      wrapIndex++;
+      n = n.nextSibling;
+    }
+    var sig = [
+      wrapIndex,
+      parent.childNodes ? parent.childNodes.length : 0,
+      panel && panel.parentNode === parent ? "panel-after-wrap:" + (wrap.nextElementSibling === panel ? "1" : "0") : "panel-other",
+      panel && panel.dataset ? panel.dataset.mtlTopPriceMounted || "" : ""
+    ].join("|");
+    if (isTopPricePanelMounted(panel) && wrap.dataset.mtlHidePricingBeforeTitleSig === sig) return;
+    wrap.dataset.mtlHidePricingBeforeTitleSig = sig;
+
     var child = parent.firstChild;
     while (child && child !== wrap) {
       if (child.nodeType === 1) {
@@ -481,9 +497,9 @@
   function insertTopPricePanel(panel) {
     var wrap = findTitleRightWrap();
     var h1 = findProductTitleEl();
-    if (wrap && h1 && wrap.contains(h1)) {
+    if (wrap && wrap.parentNode) {
       try {
-        wrap.insertBefore(panel, h1.nextSibling);
+        wrap.parentNode.insertBefore(panel, wrap.nextSibling);
         return true;
       } catch (eIn) {}
     }
