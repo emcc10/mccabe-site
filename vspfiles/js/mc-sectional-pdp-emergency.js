@@ -1,5 +1,5 @@
 /**
- * Sectional PDP emergency: panel inside #mc-pdp-title-right after h1 (accordion placeTitle safe).
+ * Sectional PDP emergency: panel directly after #mc-pdp-title-right (accordion placeTitle safe).
  * MC_SECTIONAL_PDP_EMERGENCY_20260603e
  */
 (function (g, d) {
@@ -89,15 +89,6 @@
     var wrap = titleWrap();
     var panel = d.getElementById("mc-pdp-top-price-panel");
     if (!wrap || !panel) return;
-    var h1 = titleH1(wrap);
-    if (h1 && wrap.contains(h1)) {
-      if (h1.nextElementSibling !== panel) {
-        try {
-          wrap.insertBefore(panel, h1.nextSibling);
-        } catch (eIn) {}
-      }
-      return;
-    }
     if (wrap.parentNode && wrap.nextElementSibling !== panel) {
       try {
         wrap.parentNode.insertBefore(panel, wrap.nextSibling);
@@ -114,10 +105,6 @@
           var nid = String(newNode.id || "");
           if (nid === "mc-pdp-top-price-panel" || nid === "mtl-pdp-top-price" || nid === "mc-pdp-price-stack-host") {
             var wrap = titleWrap();
-            var h1 = titleH1(wrap);
-            if (wrap && h1 && wrap.contains(h1)) {
-              return origInsert.call(wrap, newNode, h1.nextSibling);
-            }
             if (wrap && wrap.parentNode) {
               return origInsert.call(wrap.parentNode, newNode, wrap.nextSibling);
             }
@@ -152,7 +139,7 @@
     return m ? parseInt(m[1], 10) : 0;
   }
   function maybeUpgradeRendererFromGh() {
-    var WANT = "sectional-20260601-top-price-panel-v30";
+    var WANT = "sectional-20260626-top-price-panel-v31";
     var have = String(g.MTL_RENDERER_BUILD || "").trim();
     if (d.querySelector('script[src*="mtl-sectional-renderer.js"][src*="' + WANT + '"]')) return;
     if (have === WANT || rendererRev(have) >= rendererRev(WANT)) return;

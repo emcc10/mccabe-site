@@ -1037,7 +1037,7 @@
 
   /* MC_SECTIONAL_MTL_RENDERER_INLINE — GitHub raw first (Volusion file body lags ?v= cache bust) */
   (function (g, d) {
-    var WANT = "sectional-20260601-top-price-panel-v30";
+    var WANT = "sectional-20260626-top-price-panel-v31";
     var GH =
       "https://raw.githubusercontent.com/emcc10/mccabe-site/main/vspfiles/js/mtl-sectional-renderer.js";
     function onPdp() {
