@@ -154,6 +154,7 @@
   function maybeUpgradeRendererFromGh() {
     var WANT = "sectional-20260601-top-price-panel-v30";
     var have = String(g.MTL_RENDERER_BUILD || "").trim();
+    if (d.querySelector('script[src*="mtl-sectional-renderer.js"][src*="' + WANT + '"]')) return;
     if (have === WANT || rendererRev(have) >= rendererRev(WANT)) return;
     if (g.__MC_MTL_RENDERER_UPGRADING__) return;
     g.__MC_MTL_RENDERER_UPGRADING__ = 1;

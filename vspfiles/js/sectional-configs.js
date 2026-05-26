@@ -1058,8 +1058,9 @@
       var have = String(g.MTL_RENDERER_BUILD || "").trim();
       if (have === WANT) return false;
       if (rendererRev(have) >= rendererRev(WANT)) return false;
+      if (d.querySelector('script[src*="mtl-sectional-renderer.js"][src*="' + WANT + '"]')) return false;
       if (have) return true;
-      return !!d.querySelector('script[src*="mtl-sectional-renderer.js"]');
+      return false;
     }
     function afterLoad() {
       try {
