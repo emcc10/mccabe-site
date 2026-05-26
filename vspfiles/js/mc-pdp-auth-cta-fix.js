@@ -7,14 +7,21 @@
   "use strict";
 
   /* Same guard as mc-sectional-pdp-emergency.js — runs when auth bundle loads on baked PDPs */
-  if (!global.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) {
+  (function () {
+    if (global.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) return;
+    if (global.__MC_SECTIONAL_EMERGENCY_LOADING__ || global.__MC_SECTIONAL_EMERGENCY_LOADED__) return;
+    if (global.document && global.document.querySelector('script[src*="mc-sectional-pdp-emergency.js"]')) return;
+    global.__MC_SECTIONAL_EMERGENCY_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
       s.src = "/v/vspfiles/js/mc-sectional-pdp-emergency.js?v=20260603e&mcrd=" + Date.now();
       s.async = false;
+      s.onload = function () {
+        global.__MC_SECTIONAL_EMERGENCY_LOADED__ = true;
+      };
       (global.document.head || global.document.documentElement).appendChild(s);
     } catch (eEmer) {}
-  }
+  })();
 
   var VERSION = "20260603e";
   /* Set immediately so console/deploy checks work even if later init throws */

@@ -5,12 +5,18 @@
  */
 (function () {
   /* Load emergency patch before renderer (fixes v22 insertBefore loop on live). */
-  (function (g, d) {
-    if (g.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) return;
+  (function (global, d) {
+    if (global.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) return;
+    if (global.__MC_SECTIONAL_EMERGENCY_LOADING__ || global.__MC_SECTIONAL_EMERGENCY_LOADED__) return;
+    if (global.document && global.document.querySelector('script[src*="mc-sectional-pdp-emergency.js"]')) return;
+    global.__MC_SECTIONAL_EMERGENCY_LOADING__ = true;
     try {
       var s = d.createElement("script");
       s.src = "/v/vspfiles/js/mc-sectional-pdp-emergency.js?v=20260603e&mcrd=" + Date.now();
       s.async = false;
+      s.onload = function () {
+        global.__MC_SECTIONAL_EMERGENCY_LOADED__ = true;
+      };
       (d.head || d.documentElement).appendChild(s);
     } catch (eLoad) {}
   })(window, document);
