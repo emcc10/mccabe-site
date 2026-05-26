@@ -652,6 +652,28 @@
     return parts.join("").replace(/<\/?motion\b[^>]*>/g, "");
   }
 
+  function normalizeTopPricePanelFlow(panel) {
+    if (!panel || !panel.querySelectorAll) return;
+    try {
+      panel.style.setProperty("display", "flex", "important");
+      panel.style.setProperty("flex-direction", "column", "important");
+      panel.style.setProperty("gap", "6px", "important");
+      panel.style.setProperty("width", "100%", "important");
+      panel.style.setProperty("margin", "0 0 12px", "important");
+      panel.style.setProperty("position", "static", "important");
+      panel.style.setProperty("clear", "both", "important");
+      panel.querySelectorAll(
+        ".mc-pdp-retail-label, .mc-pdp-member-line__label, .mc-pdp-member-line__amount, .mc-pdp-retail-line"
+      ).forEach(function (node) {
+        node.style.setProperty("margin-top", "0", "important");
+        node.style.setProperty("margin-bottom", "0", "important");
+        node.style.setProperty("position", "static", "important");
+        node.style.setProperty("float", "none", "important");
+        node.style.setProperty("clear", "both", "important");
+      });
+    } catch (eFlow) {}
+  }
+
   function purgeNativeSalePriceNodes() {
     var root = document.getElementById("v65-product-parent") || document.getElementById("content_area");
     if (!root) return;
@@ -778,6 +800,7 @@
       panel.style.setProperty("width", "100%", "important");
       panel.style.setProperty("margin", "0 0 12px", "important");
       panel.style.setProperty("position", "static", "important");
+      normalizeTopPricePanelFlow(panel);
       suppressExternalTopPricePanels();
     } catch (eMount) {
       window.__MTL_TOP_PRICE_MOUNT_GAVE_UP__ = true;
@@ -810,6 +833,7 @@
       } catch (eSess) {}
     }
     panel.innerHTML = buildTopPricePanelInnerHtml(retailAmt, memberAmt, loggedIn);
+    normalizeTopPricePanelFlow(panel);
     suppressExternalTopPricePanels();
   }
 
