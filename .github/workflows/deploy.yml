@@ -82,6 +82,31 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Detect deploy file changes (push only)
+        if: github.event_name == 'push'
+        run: |
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            BEFORE=$(git rev-parse HEAD~1 2>/dev/null || true)
+          fi
+          {
+            echo "DEPLOY_CHANGED_ONLY=1"
+            echo "DEPLOY_CHANGED_FILES<<EOF"
+            if [ -n "$BEFORE" ]; then
+              git diff --name-only "$BEFORE" "${{ github.sha }}" -- \
+                'template_266.html' \
+                'vspfiles/**' \
+                '.github/scripts/**' \
+                '.github/workflows/deploy.yml' \
+                'scripts/deploy_volusion_assets.py' \
+                'scripts/verify_*.py' \
+                'scripts/upload_*.py' \
+                'scripts/replace_plp_photo_mats.py' \
+                'scripts/volusion_sftp_*.py'
+            fi
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
       - name: Deploy to Volusion (SFTP + verify — job fails if upload fails)
         id: deploy
         env:

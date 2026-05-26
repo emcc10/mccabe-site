@@ -148,8 +148,43 @@ python3 scripts/announce_deploy_markers.py || true
 DEPLOY_STRICT="${DEPLOY_STRICT:-1}"
 DEPLOY_FAIL=0
 
+deploy_changed_only() {
+  [[ "${DEPLOY_CHANGED_ONLY:-0}" == "1" || "${DEPLOY_CHANGED_ONLY:-}" == "true" ]]
+}
+
+deploy_file_changed() {
+  local local_path="$1"
+  if ! deploy_changed_only; then
+    return 0
+  fi
+  [[ -n "${DEPLOY_CHANGED_FILES:-}" ]] && grep -Fxq "$local_path" <<<"${DEPLOY_CHANGED_FILES}"
+}
+
+deploy_prefix_changed() {
+  local prefix="$1"
+  if ! deploy_changed_only; then
+    return 0
+  fi
+  [[ -n "${DEPLOY_CHANGED_FILES:-}" ]] && grep -Eq "^${prefix}" <<<"${DEPLOY_CHANGED_FILES}"
+}
+
+maybe_put_primary() {
+  local local_path="$1"
+  local label="$2"
+  shift 2
+  if ! deploy_file_changed "$local_path"; then
+    echo "=== skip ${label}: ${local_path} unchanged ==="
+    return 0
+  fi
+  put_primary "$local_path" "$label" "$@"
+}
+
 echo "=== DEPLOY_START ref=$(git rev-parse --short HEAD 2>/dev/null || echo unknown) ==="
 echo "=== custom-safe line 1: $(head -1 vspfiles/css/custom-safe.css 2>/dev/null || echo MISSING) ==="
+
+if deploy_changed_only && ! deploy_file_changed "template_266.html"; then
+  export SKIP_TEMPLATE_DEPLOY="1"
+fi
 
 set +e
 deploy_template
@@ -164,6 +199,9 @@ if [[ "$template_upload_rc" -ne 0 ]]; then
   fi
 fi
 
+if [[ "${SKIP_TEMPLATE_DEPLOY:-0}" == "1" ]]; then
+  echo "=== template unchanged; SFTP template verify skipped ==="
+else
 set +e
 verify_template_on_sftp "$TEMPLATE_ENFORCER_TAG"
 verify_rc=$?
@@ -174,6 +212,7 @@ if [[ "$verify_rc" -ne 0 ]]; then
   if [[ "$DEPLOY_STRICT" == "1" && "$template_upload_rc" -ne 0 ]]; then
     DEPLOY_FAIL=1
   fi
+fi
 fi
 
 echo "=== Assets via Paramiko (size-verified; /v/vspfiles + chroot paths) ==="
@@ -191,10 +230,10 @@ if [[ "$py_rc" -ne 0 ]]; then
 fi
 
 echo "=== Assets via lftp (fallback + large JS) ==="
-put_primary "vspfiles/templates/266/js/min/design-toolkit.min.js" "design-toolkit" \
+maybe_put_primary "vspfiles/templates/266/js/min/design-toolkit.min.js" "design-toolkit" \
   "/vspfiles/templates/266/js/min/design-toolkit.min.js" \
   "vspfiles/templates/266/js/min/design-toolkit.min.js"
-put_primary "vspfiles/css/custom-safe.css" "custom-safe" \
+maybe_put_primary "vspfiles/css/custom-safe.css" "custom-safe" \
   "/v/vspfiles/css/custom-safe.css" \
   "/vspfiles/css/custom-safe.css" \
   "vspfiles/css/custom-safe.css"
@@ -211,63 +250,63 @@ if [[ "$verify_custom_safe_sftp_rc" -ne 0 ]]; then
   exit 1
 fi
 
-put_primary "vspfiles/js/mc-plp-enforcer.js" "mc-plp-enforcer" \
+maybe_put_primary "vspfiles/js/mc-plp-enforcer.js" "mc-plp-enforcer" \
   "/vspfiles/js/mc-plp-enforcer.js" \
   "vspfiles/js/mc-plp-enforcer.js"
 
-put_primary "vspfiles/js/mc-pdp-auth-cta-fix.js" "mc-pdp-auth-cta-fix" \
+maybe_put_primary "vspfiles/js/mc-pdp-auth-cta-fix.js" "mc-pdp-auth-cta-fix" \
   "/v/vspfiles/js/mc-pdp-auth-cta-fix.js" \
   "/vspfiles/js/mc-pdp-auth-cta-fix.js" \
   "vspfiles/js/mc-pdp-auth-cta-fix.js"
 
-put_primary "vspfiles/js/mc-pdp-auth-cta-boot.js" "mc-pdp-auth-cta-boot" \
+maybe_put_primary "vspfiles/js/mc-pdp-auth-cta-boot.js" "mc-pdp-auth-cta-boot" \
   "/v/vspfiles/js/mc-pdp-auth-cta-boot.js" \
   "/vspfiles/js/mc-pdp-auth-cta-boot.js" \
   "vspfiles/js/mc-pdp-auth-cta-boot.js"
 
-put_primary "vspfiles/js/mc-pdp-price-stack.js" "mc-pdp-price-stack" \
+maybe_put_primary "vspfiles/js/mc-pdp-price-stack.js" "mc-pdp-price-stack" \
   "/v/vspfiles/js/mc-pdp-price-stack.js" \
   "/vspfiles/js/mc-pdp-price-stack.js" \
   "vspfiles/js/mc-pdp-price-stack.js"
 
-put_primary "vspfiles/templates/266/js/mc-plp-enforcer.js" "mc-plp-enforcer-template" \
+maybe_put_primary "vspfiles/templates/266/js/mc-plp-enforcer.js" "mc-plp-enforcer-template" \
   "/vspfiles/templates/266/js/mc-plp-enforcer.js" \
   "vspfiles/templates/266/js/mc-plp-enforcer.js"
 
 # template.min.js exceeds Volusion 128 KiB SFTP cap — SKIP_CAP in Paramiko (not an error).
 echo "=== skip template.min.js (>128 KiB); mtl-sectional-renderer.js via Paramiko chunked upload ==="
 
-put_primary "vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer" \
+maybe_put_primary "vspfiles/js/mtl-sectional-renderer.js" "mtl-sectional-renderer" \
   "/v/vspfiles/js/mtl-sectional-renderer.js" \
   "/vspfiles/js/mtl-sectional-renderer.js" \
   "vspfiles/js/mtl-sectional-renderer.js"
 
-put_primary "vspfiles/js/mc-sectional-pdp-emergency.js" "mc-sectional-pdp-emergency" \
+maybe_put_primary "vspfiles/js/mc-sectional-pdp-emergency.js" "mc-sectional-pdp-emergency" \
   "/v/vspfiles/js/mc-sectional-pdp-emergency.js" \
   "/vspfiles/js/mc-sectional-pdp-emergency.js" \
   "vspfiles/js/mc-sectional-pdp-emergency.js"
 
-put_primary "vspfiles/js/sectional-configs.js" "sectional-configs" \
+maybe_put_primary "vspfiles/js/sectional-configs.js" "sectional-configs" \
   "/vspfiles/js/sectional-configs.js" \
   "vspfiles/js/sectional-configs.js"
 
-put_primary "vspfiles/js/mc-site-fix.js" "mc-site-fix" \
+maybe_put_primary "vspfiles/js/mc-site-fix.js" "mc-site-fix" \
   "/vspfiles/js/mc-site-fix.js" \
   "vspfiles/js/mc-site-fix.js"
 
-put_primary "vspfiles/css/mc-live-patch.css" "mc-live-patch" \
+maybe_put_primary "vspfiles/css/mc-live-patch.css" "mc-live-patch" \
   "/vspfiles/css/mc-live-patch.css" \
   "vspfiles/css/mc-live-patch.css"
 
-put_primary "vspfiles/templates/266/css/mccabe-overrides.css" "mccabe-overrides" \
+maybe_put_primary "vspfiles/templates/266/css/mccabe-overrides.css" "mccabe-overrides" \
   "/vspfiles/templates/266/css/mccabe-overrides.css" \
   "vspfiles/templates/266/css/mccabe-overrides.css"
 
-put_primary "vspfiles/js/mc-plp-sofa-bounds.json" "mc-plp-sofa-bounds" \
+maybe_put_primary "vspfiles/js/mc-plp-sofa-bounds.json" "mc-plp-sofa-bounds" \
   "/vspfiles/js/mc-plp-sofa-bounds.json" \
   "vspfiles/js/mc-plp-sofa-bounds.json"
 
-put_primary "vspfiles/css/mc-plp-body-last.css" "mc-plp-body-last" \
+maybe_put_primary "vspfiles/css/mc-plp-body-last.css" "mc-plp-body-last" \
   "/vspfiles/css/mc-plp-body-last.css" \
   "vspfiles/css/mc-plp-body-last.css"
 
@@ -292,6 +331,10 @@ for f in \
   vspfiles/boards/save.php \
   vspfiles/boards/delete.php \
   vspfiles/boards/_auth.php; do
+  if ! deploy_file_changed "$f"; then
+    echo "=== skip boards: ${f} unchanged ==="
+    continue
+  fi
   base=$(basename "$f")
   rel="${f#vspfiles/}"
   if put_primary "$f" "boards-${base}" \
@@ -304,6 +347,10 @@ for f in \
 done
 shopt -s nullglob
 for f in vspfiles/boards/showcase/*.png; do
+  if ! deploy_file_changed "$f"; then
+    echo "=== skip boards-showcase: ${f} unchanged ==="
+    continue
+  fi
   base=$(basename "$f")
   if put_primary "$f" "boards-showcase-${base}" \
     "/v/vspfiles/boards/showcase/${base}" \
@@ -315,6 +362,10 @@ for f in vspfiles/boards/showcase/*.png; do
 done
 shopt -u nullglob
 for f in vspfiles/boards/mood/*.svg; do
+  if ! deploy_file_changed "$f"; then
+    echo "=== skip boards-mood: ${f} unchanged ==="
+    continue
+  fi
   base=$(basename "$f")
   put_primary "$f" "boards-mood-${base}" \
     "/v/vspfiles/boards/mood/${base}" \
@@ -325,6 +376,7 @@ if [[ "$boards_fail" -gt 0 ]]; then
 fi
 
 echo "=== My Boards canonical /v/vspfiles force upload (fixes stale HTTP path) ==="
+if deploy_prefix_changed "vspfiles/boards/" || deploy_file_changed "vspfiles/my-boards.html"; then
 set +e
 python3 scripts/upload_boards_canonical.py
 boards_canon_rc=$?
@@ -333,7 +385,13 @@ if [[ "$boards_canon_rc" -ne 0 ]]; then
   echo "::error::upload_boards_canonical.py failed — my-boards-page.js may still be stale on live site"
 fi
 
+else
+  echo "=== My Boards unchanged; canonical force upload skipped ==="
+  boards_canon_rc=0
+fi
+
 echo "=== My Boards byte-size check (/v/vspfiles is what browsers load) ==="
+if deploy_prefix_changed "vspfiles/boards/" || deploy_file_changed "vspfiles/my-boards.html"; then
 for pair in \
   "vspfiles/boards/my-boards-page.js|/v/vspfiles/boards/my-boards-page.js" \
   "vspfiles/boards/board-styles.js|/v/vspfiles/boards/board-styles.js" \
@@ -350,6 +408,9 @@ for pair in \
     boards_canon_rc=1
   fi
 done
+else
+  echo "=== My Boards unchanged; byte-size check skipped ==="
+fi
 if [[ "${boards_canon_rc:-0}" -ne 0 ]]; then
   echo "::warning::My Boards live byte check failed (non-blocking for template/CSS deploy)"
 fi
@@ -362,6 +423,10 @@ if [[ "${SKIP_PLP_PHOTOS:-0}" == "1" ]]; then
 else
 shopt -s nullglob
 for f in vspfiles/photos/*.jpg vspfiles/photos/*.jpeg vspfiles/photos/*.png; do
+  if ! deploy_file_changed "$f"; then
+    echo "=== skip plp-photo: ${f} unchanged ==="
+    continue
+  fi
   base=$(basename "$f")
   if put_primary "$f" "plp-photo-${base}" \
     "/vspfiles/photos/${base}" \

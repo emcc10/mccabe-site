@@ -51,6 +51,41 @@ SKIP_OVER_CAP = (
 )
 
 
+def _norm(path: str) -> str:
+    return path.replace("\\", "/").lstrip("./")
+
+
+def _changed_only() -> bool:
+    return os.environ.get("DEPLOY_CHANGED_ONLY", "").strip().lower() in {"1", "true", "yes"}
+
+
+def _changed_files() -> set[str]:
+    raw = os.environ.get("DEPLOY_CHANGED_FILES", "")
+    return {_norm(p.strip()) for p in raw.replace("\r", "\n").split("\n") if p.strip()}
+
+
+def _filter_changed(paths: tuple[str, ...], changed: set[str]) -> tuple[str, ...]:
+    if not _changed_only():
+        return paths
+    return tuple(p for p in paths if _norm(p) in changed)
+
+
+def _changed_extra_assets(changed: set[str], known: set[str]) -> tuple[str, ...]:
+    if not _changed_only():
+        return ()
+    out: list[str] = []
+    for path in sorted(changed):
+        if not path.startswith("vspfiles/"):
+            continue
+        if path in known:
+            continue
+        if path.startswith("vspfiles/photos/") or path.startswith("vspfiles/boards/showcase/"):
+            continue
+        if os.path.isfile(path):
+            out.append(path)
+    return tuple(out)
+
+
 def _remotes(rel: str) -> list[str]:
     rel = rel.replace("\\", "/")
     # Live URLs use /v/vspfiles/ — upload that path first (writing only /vspfiles/ leaves HTTP stale).
@@ -251,6 +286,22 @@ def _upload_one(sftp, local: str, remotes: list[str] | None = None) -> bool:
 
 def main() -> int:
     os.chdir(os.environ.get("GITHUB_WORKSPACE", "."))
+    changed = _changed_files()
+    changed_only = _changed_only()
+    known_assets = {_norm(p) for p in CRITICAL + OPTIONAL + SKIP_OVER_CAP}
+    critical = _filter_changed(CRITICAL, changed)
+    optional = _filter_changed(OPTIONAL, changed)
+    skip_over_cap = _filter_changed(SKIP_OVER_CAP, changed)
+    extra_assets = _changed_extra_assets(changed, known_assets)
+
+    if changed_only:
+        print(
+            "::notice::DEPLOY_CHANGED_ONLY assets="
+            f"{len(critical) + len(optional) + len(skip_over_cap) + len(extra_assets)}",
+            flush=True,
+        )
+        for path in critical + optional + skip_over_cap + extra_assets:
+            print(f"::notice::DEPLOY_ASSET {path}", flush=True)
 
     host = os.environ["FTP_SERVER"]
     port = int(os.environ.get("SFTP_PORT", "2222"))
@@ -278,15 +329,15 @@ def main() -> int:
             except Exception as exc:  # noqa: BLE001
                 print(f"::notice::getcwd: {exc}", flush=True)
 
-            for local in CRITICAL + OPTIONAL + SKIP_OVER_CAP:
+            for local in critical + optional + skip_over_cap + extra_assets:
                 if not os.path.isfile(local):
                     print(f"::warning::SKIP missing {local!r}", flush=True)
                     continue
                 ok = _upload_one(sftp, local)
                 if not ok:
-                    if local in CRITICAL:
+                    if local in critical:
                         critical_fail += 1
-                    elif local not in SKIP_OVER_CAP:
+                    elif local not in skip_over_cap:
                         optional_fail += 1
 
             skip_photos = os.environ.get("SKIP_PLP_PHOTOS", "").strip() in ("1", "true", "yes")
@@ -295,6 +346,8 @@ def main() -> int:
                 + glob.glob("vspfiles/photos/*.jpeg")
                 + glob.glob("vspfiles/photos/*.png")
             )
+            if changed_only:
+                plp_photos = [p for p in plp_photos if _norm(p) in changed]
             if skip_photos:
                 print(
                     f"::notice::SKIP_PLP_PHOTOS=1 — skipping {len(plp_photos)} PLP photo(s)",
@@ -310,6 +363,8 @@ def main() -> int:
                         photo_fail += 1
 
             showcase = sorted(glob.glob("vspfiles/boards/showcase/*.png"))
+            if changed_only:
+                showcase = [p for p in showcase if _norm(p) in changed]
             if showcase:
                 print(
                     f"::notice::BOARDS_SHOWCASE uploading {len(showcase)} file(s)",
