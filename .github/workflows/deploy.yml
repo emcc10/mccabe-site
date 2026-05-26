@@ -41,6 +41,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.git_ref || github.ref }}
+          fetch-depth: 2
 
       - name: Deploy context
         run: |
@@ -89,10 +90,10 @@ jobs:
           if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
             BEFORE=$(git rev-parse HEAD~1 2>/dev/null || true)
           fi
-          {
-            echo "DEPLOY_CHANGED_ONLY=1"
-            echo "DEPLOY_CHANGED_FILES<<EOF"
-            if [ -n "$BEFORE" ]; then
+          if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            {
+              echo "DEPLOY_CHANGED_ONLY=1"
+              echo "DEPLOY_CHANGED_FILES<<EOF"
               git diff --name-only "$BEFORE" "${{ github.sha }}" -- \
                 'template_266.html' \
                 'vspfiles/**' \
@@ -103,9 +104,12 @@ jobs:
                 'scripts/upload_*.py' \
                 'scripts/replace_plp_photo_mats.py' \
                 'scripts/volusion_sftp_*.py'
-            fi
-            echo "EOF"
-          } >> "$GITHUB_ENV"
+              echo "EOF"
+            } >> "$GITHUB_ENV"
+          else
+            echo "::warning::Could not resolve previous commit for changed-file deploy; deploying full tracked asset set."
+            echo "DEPLOY_CHANGED_ONLY=0" >> "$GITHUB_ENV"
+          fi
 
       - name: Deploy to Volusion (SFTP + verify — job fails if upload fails)
         id: deploy
