@@ -1372,7 +1372,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
  
   <!-- DESIGN TOOLKIT -->
-  <script src="/v/vspfiles/js/mc-sectional-pdp-emergency.js?v=20260603e"></script>
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260522stack"></script>
@@ -12698,6 +12697,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       return false;
     }
   }
+  window.isBeanBagProductPage = isBeanBagProductPage;
   function mcIsParagonOrTheaterPdpEarly() {
     try {
       if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
