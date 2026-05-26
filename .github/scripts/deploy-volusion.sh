@@ -251,6 +251,10 @@ if [[ "$verify_custom_safe_sftp_rc" -ne 0 ]]; then
   exit 1
 fi
 
+else
+  echo "=== custom-safe.css unchanged; SFTP verify skipped ==="
+fi
+
 maybe_put_primary "vspfiles/js/mc-plp-enforcer.js" "mc-plp-enforcer" \
   "/vspfiles/js/mc-plp-enforcer.js" \
   "vspfiles/js/mc-plp-enforcer.js"
@@ -459,7 +463,11 @@ verify_url() {
   fi
 }
 
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "$CSS_VERIFY_NEEDLE"
+if deploy_file_changed "vspfiles/css/custom-safe.css"; then
+  verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "$CSS_VERIFY_NEEDLE"
+else
+  echo "=== custom-safe.css unchanged; post-deploy HTTP check skipped ==="
+fi
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260625" "MC_PLP_ENFORCER_20260625"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260625" "PDP_AUTH_WANT"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/sectional-configs.js?v=$(date +%s)" "MC_SECTIONAL_PDP_AUTH_INLINE_20260528"
@@ -484,7 +492,7 @@ elif [[ "$verify_mc_pdp_http_rc" -ne 0 ]]; then
 else
   echo "=== MC_PDP_JS_DEPLOY_VERIFIED (SFTP + HTTP) ==="
 fi
-verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mtl-sectional-renderer.js?v=$(date +%s)" "sectional-20260601-top-price-panel-v30"
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mtl-sectional-renderer.js?v=$(date +%s)" "sectional-20260626-top-price-panel-v31"
 python3 scripts/verify_mtl_renderer_live.py || true
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js" "MC_DTK_PLP_20260625"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp" "MC_DTK_PLP_20260625"
