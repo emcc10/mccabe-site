@@ -22,6 +22,11 @@ runHeroPipeline(swatchCode)
     }
   })
   .catch((err) => {
-    console.error(err);
+    if (err instanceof Error && err.name === 'OpenAIApiError') {
+      console.error('\n[hero] OpenAI authentication failed.\n');
+      console.error(err.message);
+    } else {
+      console.error(err);
+    }
     process.exitCode = 1;
   });

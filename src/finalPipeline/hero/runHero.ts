@@ -6,6 +6,7 @@ import { HERO_DIR } from '../shared/paths.js';
 import { buildSharedRenderContext } from '../shared/context.js';
 import { buildHeroInputBundle } from './buildHeroInputs.js';
 import { resolveHeroGenerativeProvider } from './generativeProvider.js';
+import { verifyOpenAiApiKey } from './providers/openaiImageEdit.js';
 import { blendGenerativeUpholstery } from './blendUpholstery.js';
 import {
   compositeHeroFromGenerative,
@@ -191,6 +192,11 @@ export async function runHeroPipeline(
   let message = 'Input bundle written only.';
 
   if (runGenerative && providerConfigured) {
+    if (provider.id === 'openai') {
+      console.log('[hero] Verifying OpenAI API key...');
+      await verifyOpenAiApiKey();
+    }
+
     skippedGenerative = false;
     message = `Running generative edits via ${provider.id}.`;
 

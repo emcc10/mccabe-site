@@ -16,6 +16,66 @@ function apiKey(): string | undefined {
   return process.env.OPENAI_API_KEY?.trim() || process.env.HERO_GENERATIVE_API_KEY?.trim();
 }
 
+export class OpenAIApiError extends Error {
+  readonly status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = 'OpenAIApiError';
+    this.status = status;
+  }
+}
+
+/** Fail fast before image edits if the key is missing or rejected. */
+export async function verifyOpenAiApiKey(): Promise<void> {
+  const key = apiKey();
+  if (!key) {
+    throw new HeroProviderNotConfiguredError(
+      'openai',
+      'Set OPENAI_API_KEY or HERO_GENERATIVE_API_KEY in this shell session.',
+    );
+  }
+
+  const res = await fetch('https://api.openai.com/v1/models?limit=1', {
+    headers: { Authorization: `Bearer ${key}` },
+  });
+
+  if (res.ok) return;
+
+  const text = await res.text();
+  let message = text.slice(0, 300);
+  try {
+    const json = JSON.parse(text) as { error?: { message?: string } };
+    message = json.error?.message ?? message;
+  } catch {
+    /* keep raw slice */
+  }
+
+  if (res.status === 401) {
+    throw new OpenAIApiError(
+      401,
+      [
+        'OpenAI rejected the API key (401 Unauthorized).',
+        'Use a valid key from https://platform.openai.com/api-keys',
+        'Set it in the same terminal before running:',
+        '  $env:OPENAI_API_KEY = "sk-..."',
+        'Do not use a placeholder like sk-....',
+        `Server message: ${message}`,
+      ].join('\n'),
+    );
+  }
+
+  throw new OpenAIApiError(res.status, `OpenAI API check failed (${res.status}): ${message}`);
+}
+
+function isNonRetryableError(err: unknown): boolean {
+  if (err instanceof OpenAIApiError) {
+    return err.status === 401 || err.status === 403 || err.status === 429;
+  }
+  const msg = err instanceof Error ? err.message : String(err);
+  return /\b(401|403)\b/.test(msg) || /incorrect api key/i.test(msg);
+}
+
 async function postOpenAiEdit(form: FormData): Promise<Buffer> {
   const key = apiKey();
   if (!key) {
@@ -36,13 +96,12 @@ async function postOpenAiEdit(form: FormData): Promise<Buffer> {
   try {
     json = JSON.parse(text);
   } catch {
-    throw new Error(`OpenAI image edit: invalid JSON (${res.status}): ${text.slice(0, 400)}`);
+    throw new OpenAIApiError(res.status, `OpenAI image edit: invalid JSON: ${text.slice(0, 400)}`);
   }
 
   if (!res.ok) {
-    throw new Error(
-      `OpenAI image edit failed (${res.status}): ${json.error?.message ?? text.slice(0, 400)}`,
-    );
+    const message = json.error?.message ?? text.slice(0, 400);
+    throw new OpenAIApiError(res.status, `OpenAI image edit failed (${res.status}): ${message}`);
   }
 
   const b64 = json.data?.[0]?.b64_json;
@@ -101,8 +160,11 @@ export class OpenAIImageEditProvider implements HeroGenerativeProvider {
     try {
       canvasResult = await attempt(request.variant.model, true);
     } catch (firstErr) {
+      if (isNonRetryableError(firstErr)) throw firstErr;
       if (request.variant.model !== 'dall-e-2') {
-        console.warn(`[hero/openai] ${request.variant.model} failed, retrying dall-e-2:`, firstErr);
+        console.warn(
+          `[hero/openai] ${request.variant.model} failed (${firstErr instanceof Error ? firstErr.message : firstErr}), retrying dall-e-2...`,
+        );
         canvasResult = await attempt('dall-e-2', false);
         modelUsed = 'dall-e-2';
       } else {

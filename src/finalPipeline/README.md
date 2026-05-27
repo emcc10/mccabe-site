@@ -72,13 +72,15 @@ Outputs under `final-pipeline/hero/`:
 
 Configure:
 
-```bash
-set HERO_GENERATIVE_PROVIDER=openai
-set OPENAI_API_KEY=sk-...
+PowerShell (same session as `npm run`):
+
+```powershell
+$env:HERO_GENERATIVE_PROVIDER = "openai"
+$env:OPENAI_API_KEY = "sk-proj-..."   # real key from platform.openai.com/api-keys
 npm run render:hero-pipeline
 ```
 
-(`HERO_GENERATIVE_API_KEY` also accepted. Without a key, only the input bundle is written.)
+`HERO_GENERATIVE_API_KEY` also works. A **401 Incorrect API key** means the value is invalid, expired, or still a placeholder — not a pipeline bug. The script verifies the key before any image edits.
 
 ---
 
