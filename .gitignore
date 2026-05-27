@@ -4,6 +4,8 @@ Thumbs.db
 .vscode/*.code-workspace
 
 # Secrets / local config
+.env
+.env.local
 .vscode/sftp.json
 
 # Logs and temp artifacts
