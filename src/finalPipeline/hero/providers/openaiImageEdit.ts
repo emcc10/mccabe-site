@@ -32,7 +32,17 @@ export function sanitizeApiKey(raw: string | undefined): string | undefined {
   ) {
     k = k.slice(1, -1).trim();
   }
-  if (!k || k === 'sk-...' || k === 'sk-proj-...' || /^sk-[a-z]*\.\.\.$/i.test(k)) {
+  const lower = k.toLowerCase();
+  if (
+    !k ||
+    k === 'sk-...' ||
+    k === 'sk-proj-...' ||
+    /^sk-[a-z]*\.\.\.$/i.test(k) ||
+    lower.includes('paste-full') ||
+    lower.includes('your-key') ||
+    lower.includes('paste-the-entire') ||
+    lower.includes('no-quotes')
+  ) {
     return undefined;
   }
   return k;
@@ -53,7 +63,7 @@ function assertKeyLooksValid(key: string): void {
       [
         `OPENAI_API_KEY looks truncated (${key.length} characters; real keys are usually 150+).`,
         'Copy the full key from https://platform.openai.com/api-keys',
-        'Tip: put it in .env.local as OPENAI_API_KEY=sk-proj-... (no quotes) and re-run npm run render:hero-pipeline',
+        'Replace the placeholder in .env.local with your full secret from platform.openai.com/api-keys (one line, no quotes).',
       ].join('\n'),
     );
   }
