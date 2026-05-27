@@ -28,10 +28,13 @@ export function sanitizeApiKey(raw: string | undefined): string | undefined {
   let k = raw.trim().replace(/^\uFEFF/, '');
   if (
     (k.startsWith('"') && k.endsWith('"')) ||
-    (k.startsWith("'") && k.endsWith("'"))
+    (k.startsWith("'") && k.endsWith("'")) ||
+    (k.startsWith('<') && k.endsWith('>'))
   ) {
     k = k.slice(1, -1).trim();
   }
+  if (k.startsWith('<')) k = k.slice(1).trim();
+  if (k.endsWith('>')) k = k.slice(0, -1).trim();
   const lower = k.toLowerCase();
   if (
     !k ||
