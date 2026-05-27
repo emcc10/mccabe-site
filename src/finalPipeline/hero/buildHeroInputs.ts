@@ -9,7 +9,7 @@ import {
   heroProtectedMaskPath,
   heroReferenceBasePath,
   heroReferenceSwatchPath,
-  heroSpecPath,
+  heroInputSpecPath,
   heroUpholsteryMaskPath,
 } from '../shared/paths.js';
 import { buildHeroPrompt, formatHeroPromptFile } from './prompt.js';
@@ -65,7 +65,7 @@ export async function buildHeroInputBundle(ctx: SharedRenderContext): Promise<He
     referenceBaseRecolor: heroReferenceBasePath(code),
     referenceCleanSwatch: heroReferenceSwatchPath(code),
     prompt: heroPromptPath(code),
-    spec: heroSpecPath(code),
+    spec: heroInputSpecPath(code),
   };
 
   await writeMaskPng(paths.upholsteryEditMask, upholsteryEditMask);

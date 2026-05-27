@@ -1,12 +1,6 @@
 import type { SharedRenderContext } from '../shared/context.js';
 import { baseRecolorPath } from '../paths.js';
-import {
-  heroComparisonPath,
-  heroInputBundleDir,
-  heroMasterPath,
-  heroStatusPath,
-  previewExportPath,
-} from '../shared/paths.js';
+import { heroVariantPath, previewExportPath } from '../shared/paths.js';
 import type { HeroExportManifest, HeroPipelineResult } from './spec.js';
 
 export function buildHeroExportManifest(
@@ -15,8 +9,8 @@ export function buildHeroExportManifest(
 ): HeroExportManifest {
   return {
     swatchCode: ctx.profile.code,
-    heroMaster: result.outputs.heroMaster,
-    heroComparison: result.outputs.heroComparison,
+    heroMaster: result.outputs.bestMaster,
+    heroComparison: result.outputs.grid,
     inputBundleDir: result.inputBundle.paths.bundleDir,
     status: result.outputs.status,
     previewBaseRecolor: ctx.base.path || baseRecolorPath(ctx.profile.code),
@@ -24,7 +18,7 @@ export function buildHeroExportManifest(
 }
 
 export function heroExportDestPath(code: string): string {
-  return heroMasterPath(code);
+  return heroVariantPath('B', code);
 }
 
 /** Suggested preview path for side-by-side hero comparison grids */
@@ -34,6 +28,6 @@ export function heroVsPreviewComparisonHint(code: string): {
 } {
   return {
     preview: previewExportPath(code),
-    hero: heroMasterPath(code),
+    hero: heroVariantPath('B', code),
   };
 }

@@ -55,20 +55,30 @@ The limiting factor is not mask quality or base recolor — it is that **LAB gra
 - When preview looks like a **good recolor** but not a **photographed sofa**
 - Top products where generative cost is justified
 
-Hero pipeline today:
+Hero pipeline:
 
 1. Reuses shared stages (prep → base recolor → clean swatch).
-2. Writes a **generative input bundle** under `final-pipeline/hero/inputs-{SWATCH}/` (edit mask, protected mask, references, prompt, spec).
-3. Calls a pluggable provider (`HERO_GENERATIVE_PROVIDER`, default `bundle-only` = no API).
-4. When a provider is implemented, composites **legs + background from source** after generative upholstery.
+2. Writes input bundle under `final-pipeline/hero/inputs-{SWATCH}/`.
+3. Calls **OpenAI image edit** (`gpt-image-1`, fallback `dall-e-2`) for variants A and B.
+4. Feather-blends generative output into **upholstery only**, then locks **legs + background** from source.
 
-Configure (future):
+Outputs under `final-pipeline/hero/`:
+
+- `hero-variant-A-{SWATCH}.png` — safer / softer
+- `hero-variant-B-{SWATCH}.png` — stronger leather character
+- `hero-grid-{SWATCH}.png` — source | base | A | B
+- `hero-spec-{SWATCH}.json` — provider metadata + QA
+- `hero-status-{SWATCH}.md`
+
+Configure:
 
 ```bash
-HERO_GENERATIVE_PROVIDER=openai   # or fal, replicate — implement in hero/generativeProvider.ts
-HERO_GENERATIVE_API_KEY=...
-npm run render:hero-pipeline -- BALI-SILK
+set HERO_GENERATIVE_PROVIDER=openai
+set OPENAI_API_KEY=sk-...
+npm run render:hero-pipeline
 ```
+
+(`HERO_GENERATIVE_API_KEY` also accepted. Without a key, only the input bundle is written.)
 
 ---
 
@@ -89,8 +99,10 @@ src/finalPipeline/
   hero/runHero.ts        # Optional generative path
   hero/buildHeroInputs.ts
   hero/generativeProvider.ts
+  hero/providers/openaiImageEdit.ts
+  hero/qa.ts
+  hero/variants.ts
   hero/compositeHero.ts
-  hero/exportHero.ts
   prep.ts, baseRecolor.ts, swatchClean.ts, …  # Shared stage implementations
 ```
 

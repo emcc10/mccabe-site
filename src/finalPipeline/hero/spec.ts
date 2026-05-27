@@ -1,5 +1,8 @@
+import type { Mask } from '../../phase1/masks.js';
 import type { SwatchProfile } from '../spec.js';
 import type { HeroPromptParts } from './prompt.js';
+import type { HeroQaReport } from './qa.js';
+import type { HeroVariantSpec } from './variants.js';
 
 export interface HeroInputBundlePaths {
   bundleDir: string;
@@ -20,13 +23,24 @@ export interface HeroInputBundle {
 export interface HeroGenerativeRequest {
   profile: SwatchProfile;
   bundle: HeroInputBundle;
-  /** Full-size RGBA source (geometry truth) */
   sourcePath: string;
+  upholstery: Mask;
+  variant: HeroVariantSpec;
 }
 
 export interface HeroGenerativeResult {
-  /** Raw generative output before leg/background composite */
   generativeRgbPath: string;
+  providerId: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface HeroVariantRunResult {
+  id: 'A' | 'B';
+  label: string;
+  variant: HeroVariantSpec;
+  generativeRawPath: string;
+  outputPath: string;
+  qa: HeroQaReport;
   providerId: string;
   metadata?: Record<string, unknown>;
 }
@@ -35,12 +49,15 @@ export interface HeroPipelineResult {
   swatchCode: string;
   profile: SwatchProfile;
   inputBundle: HeroInputBundle;
-  generative: HeroGenerativeResult | null;
+  providerId: string;
+  variants: HeroVariantRunResult[];
+  bestVariantId: 'A' | 'B' | null;
   outputs: {
-    heroMaster: string;
-    heroComparison: string;
+    grid: string;
+    spec: string;
     status: string;
-    exportCopy?: string;
+    variantPaths: Record<'A' | 'B', string>;
+    bestMaster: string;
   };
   skippedGenerative: boolean;
   message: string;
@@ -49,7 +66,6 @@ export interface HeroPipelineResult {
 export interface HeroExportManifest {
   swatchCode: string;
   heroMaster: string;
-  heroComparison: string;
   inputBundleDir: string;
   status: string;
   previewBaseRecolor: string;

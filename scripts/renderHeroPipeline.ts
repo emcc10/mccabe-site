@@ -7,12 +7,18 @@ runHeroPipeline(swatchCode)
   .then((r) => {
     console.log('\n[hero] Done.');
     console.log('  bundle:', r.inputBundle.paths.bundleDir);
+    console.log('  spec:', r.outputs.spec);
     console.log('  status:', r.outputs.status);
-    if (r.outputs.heroMaster) {
-      console.log('  hero master:', r.outputs.heroMaster);
+    if (r.outputs.grid) console.log('  grid:', r.outputs.grid);
+    for (const v of r.variants) {
+      console.log(`  variant ${v.id}: ${v.outputPath} — ${v.qa.verdict}`);
     }
+    if (r.outputs.bestMaster) console.log('  best:', r.outputs.bestMaster);
     if (r.skippedGenerative) {
-      console.log('\n[hero] Generative step skipped — input bundle is ready for manual or future API integration.');
+      console.warn('\n[hero] Generative skipped — set HERO_GENERATIVE_PROVIDER=openai and OPENAI_API_KEY.');
+      process.exitCode = 2;
+    } else if (r.variants.some((v) => !v.qa.passed)) {
+      console.warn('\n[hero] One or more variants failed QA — see hero-status file.');
     }
   })
   .catch((err) => {

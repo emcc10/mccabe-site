@@ -1,4 +1,5 @@
 import type { SwatchProfile } from '../spec.js';
+import type { HeroVariantSpec } from './variants.js';
 
 export interface HeroPromptParts {
   system: string;
@@ -43,6 +44,17 @@ export function buildHeroPrompt(profile: SwatchProfile): HeroPromptParts {
   ].join(', ');
 
   return { system, user, negative };
+}
+
+/** Single prompt string for OpenAI edits — describes full final scene. */
+export function buildFullEditPrompt(parts: HeroPromptParts, variant: HeroVariantSpec): string {
+  return [
+    parts.system,
+    parts.user,
+    variant.promptAddon,
+    'The wooden legs, metal feet, white studio background, and sofa outline must remain exactly as in the input image.',
+    `Avoid: ${parts.negative}.`,
+  ].join(' ');
 }
 
 export function formatHeroPromptFile(parts: HeroPromptParts): string {

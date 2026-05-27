@@ -36,7 +36,7 @@ export function heroPromptPath(code: string): string {
   return join(heroInputBundleDir(code), 'prompt.txt');
 }
 
-export function heroSpecPath(code: string): string {
+export function heroInputSpecPath(code: string): string {
   return join(heroInputBundleDir(code), 'hero-spec.json');
 }
 
@@ -49,5 +49,17 @@ export function heroComparisonPath(code: string): string {
 }
 
 export function heroStatusPath(code: string): string {
-  return heroPath(`HERO_STATUS-${swatchCodeToSlug(code)}.md`);
+  return heroPath(`hero-status-${swatchCodeToSlug(code)}.md`);
+}
+
+export function heroVariantPath(id: 'A' | 'B', code: string): string {
+  return heroPath(`hero-variant-${id}-${swatchCodeToSlug(code)}.png`);
+}
+
+export function heroGridPath(code: string): string {
+  return heroPath(`hero-grid-${swatchCodeToSlug(code)}.png`);
+}
+
+export function heroSpecPath(code: string): string {
+  return heroPath(`hero-spec-${swatchCodeToSlug(code)}.json`);
 }
