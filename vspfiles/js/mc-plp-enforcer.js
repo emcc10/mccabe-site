@@ -7,7 +7,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260626p";
+  var VERSION = "20260626q";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -38,6 +38,7 @@
 
   (function injectPlpBodyLastCss() {
     function attach() {
+      if (isCloseoutSalePlp()) return;
       injectCriticalThumbCss();
       if (document.getElementById("mc-plp-body-last-css")) return;
       var l = document.createElement("link");
@@ -60,6 +61,16 @@
   var boundsMap = null;
   var boundsMapLoading = false;
   var boundsMapWaiters = [];
+
+  function isCloseoutSalePlp() {
+    try {
+      var p = String(global.location.pathname || "").toLowerCase();
+      var s = String(global.location.search || "").toLowerCase();
+      if (/\/category-s\/181\.htm/i.test(p)) return true;
+      if (/searchresults\.asp/i.test(p) && /(?:^|[?&])cat=181(?:&|$)/.test(s)) return true;
+    } catch (eCo) {}
+    return false;
+  }
 
   function isCategoryPlp() {
     try {
@@ -237,6 +248,7 @@
 
   /** Volusion PLP often bakes NoPhoto.gif even when {SKU}-1.jpg exists on SFTP — probe and swap. */
   function fixNoPhotoThumbnails() {
+    if (isCloseoutSalePlp()) return;
     var root = document.getElementById("content_area");
     if (!root) return;
 
@@ -480,7 +492,7 @@
   }
 
   function normalizePLPImages() {
-    if (!isCategoryPlp()) return;
+    if (!isCategoryPlp() || isCloseoutSalePlp()) return;
 
     var root = document.getElementById("content_area");
     if (!root) return;

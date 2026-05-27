@@ -6,11 +6,21 @@
 (function (global) {
   "use strict";
 
-  /* Same guard as mc-sectional-pdp-emergency.js — runs when auth bundle loads on baked PDPs */
+  /* Same guard as mc-sectional-pdp-emergency.js — only load on sectional configurator PDPs */
   (function () {
     if (global.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) return;
     if (global.__MC_SECTIONAL_EMERGENCY_LOADING__ || global.__MC_SECTIONAL_EMERGENCY_LOADED__) return;
     if (global.document && global.document.querySelector('script[src*="mc-sectional-pdp-emergency.js"]')) return;
+    try {
+      if (typeof global.window.isSectionalProductPage === "function") {
+        if (!global.window.isSectionalProductPage()) return;
+      } else {
+        var pLoad = String(global.location.pathname || "").toLowerCase();
+        if (pLoad.indexOf("room-planner") !== -1 || pLoad.indexOf("-sc-") === -1) return;
+      }
+    } catch (eSecLoad) {
+      return;
+    }
     global.__MC_SECTIONAL_EMERGENCY_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
@@ -35,13 +45,9 @@
 
   function isSectionalPdpPage() {
     try {
-      if (global.window.MTL_SECTIONAL_CONFIGS) return true;
-      if (global.document.getElementById("mtl-sectional-configurations")) return true;
-      if (global.document.body && global.document.body.classList.contains("is-sectional-product")) {
+      if (typeof global.window.isSectionalProductPage === "function" && global.window.isSectionalProductPage()) {
         return true;
       }
-      var t = (global.document.querySelector("h1") || {}).textContent || "";
-      if (/\bsectional\b/i.test(t) && global.document.getElementById("v65-product-parent")) return true;
     } catch (eSec) {}
     return false;
   }
@@ -1572,6 +1578,7 @@
   }
 
   function guardConfigurationBlockClick() {
+    if (!isSectionalPdpPage()) return;
     var block = global.document.getElementById("mcConfigurationBlock");
     if (!block) return;
 

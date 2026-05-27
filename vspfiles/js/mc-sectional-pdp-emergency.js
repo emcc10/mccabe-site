@@ -10,6 +10,22 @@
     return m ? parseInt(m[1], 10) : 0;
   }
   if (patchRev(g.__MC_SECTIONAL_INSERT_BEFORE_PATCH__) >= patchRev(VER)) return;
+
+  function isSectionalConfiguratorPdp() {
+    try {
+      if (typeof g.isSectionalProductPage === "function" && g.isSectionalProductPage()) return true;
+    } catch (eSec) {}
+    try {
+      var path = String(g.location.pathname || "").toLowerCase();
+      if (path.indexOf("room-planner") === -1 && path.indexOf("-sc-") !== -1) return true;
+      var pcEl = d.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      var pcVal = pcEl ? String(pcEl.value || "").trim() : "";
+      if (/-sc-/i.test(pcVal)) return true;
+    } catch (ePath) {}
+    return false;
+  }
+  if (!isSectionalConfiguratorPdp()) return;
+
   g.__MC_SECTIONAL_INSERT_BEFORE_PATCH__ = VER;
 
   function titleWrap() {

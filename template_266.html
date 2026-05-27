@@ -1455,37 +1455,44 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
         var pcVal = pcEl ? String(pcEl.value || "").trim() : "";
         if (/-sc-/i.test(pcVal)) return true;
       } catch (ePc) {}
-      var text = "";
+      var titleHaySec = " " + String(document.title || "").toLowerCase();
       try {
-        var prodR = document.getElementById("v65-product-parent");
-        text = prodR ? String(prodR.innerText || "").toLowerCase() : "";
-      } catch (eTxt) {}
-      if (!text && document.body) text = String(document.body.innerText || "").toLowerCase();
+        var prodRootSec = document.getElementById("v65-product-parent");
+        var h1Sec = prodRootSec ? prodRootSec.querySelector("h1") : document.querySelector("h1");
+        var nmSec = prodRootSec ? prodRootSec.querySelector('[itemprop="name"]') : document.querySelector('#v65-product-parent [itemprop="name"]');
+        if (h1Sec) titleHaySec += " " + String(h1Sec.textContent || "").toLowerCase();
+        if (nmSec) titleHaySec += " " + String(nmSec.textContent || "").toLowerCase();
+      } catch (eTitleSec) {}
+      if (/sectional\s+configuration/i.test(titleHaySec)) return true;
 
       try {
         var pcKeys = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
-        var pcKeysVal = pcKeys ? String(pcKeys.value || "").trim().toLowerCase() : "";
+        var pcKeysVal = pcKeys ? String(pcKeys.value || "").trim() : "";
         var cfgMtl = window.MTL_SECTIONAL_CONFIGS;
         if (cfgMtl && typeof cfgMtl === "object") {
-          var mtlKeys = Object.keys(cfgMtl);
-          var blobMtl = (
-            String(path || "").toLowerCase() +
-            " " +
-            String(document.title || "").toLowerCase() +
-            " " +
-            pcKeysVal
-          ).trim();
-          for (var mi = 0; mi < mtlKeys.length; mi++) {
-            var mk = String(mtlKeys[mi] || "").toLowerCase();
-            if (mk && blobMtl.indexOf(mk) !== -1) return true;
+          var mSc = pcKeysVal.match(/^([A-Za-z][A-Za-z0-9]*)[-_]SC(?:[-_]|$)/i);
+          if (mSc && mSc[1]) {
+            var styleFromPc = String(mSc[1]).toLowerCase();
+            var mtlKeysPc = Object.keys(cfgMtl);
+            for (var mpi = 0; mpi < mtlKeysPc.length; mpi++) {
+              if (String(mtlKeysPc[mpi] || "").toLowerCase() === styleFromPc && cfgMtl[mtlKeysPc[mpi]]) return true;
+            }
+          }
+          var identityHay = (
+            path + " " + titleHaySec + " " + String(pcKeysVal || "").toLowerCase()
+          ).replace(/\s+/g, " ");
+          var sortedKeys = Object.keys(cfgMtl).slice().sort(function (a, b) {
+            return b.length - a.length;
+          });
+          for (var mi = 0; mi < sortedKeys.length; mi++) {
+            var mk = sortedKeys[mi];
+            if (!mk || !cfgMtl[mk]) continue;
+            var esc = String(mk).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            if (new RegExp("\\b" + esc + "\\b", "i").test(identityHay)) return true;
           }
         }
       } catch (eMtl) {}
 
-      if (text.indexOf("choose configuration") !== -1) return true;
-      if (/\b(select|choose)\s+configuration\b/i.test(text)) return true;
-      if (/\bconfiguration\s*\(/i.test(text) && /\b(select|choose)\s+(a\s+)?leather\b/i.test(text)) return true;
-      if (/\bconfiguration\b/i.test(text) && /\bselect\s+a\s+leather\b/i.test(text)) return true;
       return false;
     };
 
@@ -4508,6 +4515,11 @@ try {
   function mount(opts){
     opts = opts || {};
     var isSecPdp = typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage();
+    var isTheaterPdp = false;
+    try {
+      isTheaterPdp = mcIsTheaterSeatingPdpEarly();
+    } catch (eThMount) {}
+    if (!isSecPdp && !isTheaterPdp) return;
     if (isSecPdp) {
       try {
         document.documentElement.classList.add("is-sectional-product");
@@ -13734,10 +13746,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function mcIsRoomPlannerPdp() {
     try {
-      if (typeof window.isSectionalProductPage === 'function' && window.isSectionalProductPage()) return true;
-      if (document.getElementById('mtl-sectional-configurations')) return true;
-      if (window.MTL_SECTIONAL_CONFIGS) return true;
-      if (document.documentElement.classList.contains('is-sectional-product')) return true;
+      return typeof window.isSectionalProductPage === 'function' && window.isSectionalProductPage();
     } catch (eRp) {}
     return false;
   }
@@ -13932,32 +13941,33 @@ function placeTitle() {
     acc.id = 'mc-pdp-accordion';
     acc.className = 'mc-pdp-accordion';
 
-    /* Row 1: Select a Leather — expands to show the existing #mcLeatherPicker mini-swatch
-       strip plus a "View all leathers" button that opens the existing modal. Open by default. */
-    var leatherRow = buildRow('leather', 'Select a Leather', null, function () {
-      var c = document.createElement('div');
-      c.className = 'mc-acc-content mc-acc-content--leather';
-      var stripHost = document.createElement('div');
-      stripHost.className = 'mc-acc-leather-host';
-      c.appendChild(stripHost);
-      var viewAll = document.createElement('button');
-      viewAll.type = 'button';
-      viewAll.className = 'mc-config-btn mc-acc-config-btn mc-acc-config-btn--full';
-      viewAll.innerHTML = '<span>View All Leathers</span>';
-      viewAll.addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (typeof window.mcOpenWmLeatherModal === 'function') {
-          window.mcOpenWmLeatherModal(e);
-          return;
-        }
-        var existing = q('#mcLeatherBtn') || q('#mcLeatherHeader');
-        if (existing) existing.click();
+    /* Row 1: Select a Leather — sectional configurator PDPs only. */
+    if (isSectionalPg()) {
+      var leatherRow = buildRow('leather', 'Select a Leather', null, function () {
+        var c = document.createElement('div');
+        c.className = 'mc-acc-content mc-acc-content--leather';
+        var stripHost = document.createElement('div');
+        stripHost.className = 'mc-acc-leather-host';
+        c.appendChild(stripHost);
+        var viewAll = document.createElement('button');
+        viewAll.type = 'button';
+        viewAll.className = 'mc-config-btn mc-acc-config-btn mc-acc-config-btn--full';
+        viewAll.innerHTML = '<span>View All Leathers</span>';
+        viewAll.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (typeof window.mcOpenWmLeatherModal === 'function') {
+            window.mcOpenWmLeatherModal(e);
+            return;
+          }
+          var existing = q('#mcLeatherBtn') || q('#mcLeatherHeader');
+          if (existing) existing.click();
+        });
+        c.appendChild(viewAll);
+        return c;
       });
-      c.appendChild(viewAll);
-      return c;
-    });
-    acc.appendChild(leatherRow);
+      acc.appendChild(leatherRow);
+    }
 
     /* Row 2: Room Planner — theater pages only. Panel hosts a real .mc-config-btn that
        delegates to the original #mcPlannerBtn click handler. */
@@ -14280,14 +14290,16 @@ function placeTitle() {
     placeTitle();
     placePalliserLogoUnderTitle();
     placeAccordion();
-    hostLeatherStripInsideAccordion();
-    if (typeof window.mcTryInitWmLeather === "function") {
-      window.mcTryInitWmLeather();
-    }
-    if (typeof window.mcRenderLeatherPreviewStrip === "function") {
-      var strip = document.getElementById("mcLeatherSwatchStrip");
-      if (!strip || !strip.querySelector(".mc-mini-swatch")) {
-        window.mcRenderLeatherPreviewStrip();
+    if (isSectionalPg()) {
+      hostLeatherStripInsideAccordion();
+      if (typeof window.mcTryInitWmLeather === "function") {
+        window.mcTryInitWmLeather();
+      }
+      if (typeof window.mcRenderLeatherPreviewStrip === "function") {
+        var strip = document.getElementById("mcLeatherSwatchStrip");
+        if (!strip || !strip.querySelector(".mc-mini-swatch")) {
+          window.mcRenderLeatherPreviewStrip();
+        }
       }
     }
     if (isSectionalPg()) {
@@ -14305,9 +14317,11 @@ function placeTitle() {
     if (!window.__mcAccLeatherReadyListen) {
       window.__mcAccLeatherReadyListen = true;
       document.addEventListener("wmLeatherOptionsReady", function () {
-        hostLeatherStripInsideAccordion();
-        if (typeof window.mcRenderLeatherPreviewStrip === "function") {
-          window.mcRenderLeatherPreviewStrip();
+        if (isSectionalPg()) {
+          hostLeatherStripInsideAccordion();
+          if (typeof window.mcRenderLeatherPreviewStrip === "function") {
+            window.mcRenderLeatherPreviewStrip();
+          }
         }
         if (isSectionalPg()) {
           if (typeof window.MTL_retryMountPopularConfigurations === "function") {

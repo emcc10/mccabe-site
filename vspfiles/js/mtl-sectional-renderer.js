@@ -215,7 +215,6 @@
   function isSectionalProductPageClient() {
     if (isTheaterSeatingProductPageForGuard()) return false;
     if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) return true;
-    if (document.documentElement.classList.contains("is-sectional-product")) return true;
     try {
       var path = String(window.location.pathname || "").toLowerCase();
       if (path.indexOf("room-planner") === -1 && path.includes("-sc-")) return true;
@@ -2542,32 +2541,8 @@
 
     var path = String(location.pathname || "").toLowerCase();
     var sectionalOrLikely =
-      document.documentElement.classList.contains("is-sectional-product") ||
       (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) ||
       path.indexOf("-sc-") !== -1;
-    if (!sectionalOrLikely) {
-      try {
-        var cfgEarly = window.MTL_SECTIONAL_CONFIGS;
-        if (cfgEarly && typeof cfgEarly === "object") {
-          var keysE = Object.keys(cfgEarly);
-          var blobE = (
-            path +
-            " " +
-            String(document.title || "").toLowerCase()
-          ).toLowerCase();
-          var pcE = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
-          var pcEv = pcE ? String(pcE.value || "").toLowerCase() : "";
-          for (var ie = 0; ie < keysE.length; ie++) {
-            var ke = String(keysE[ie] || "").toLowerCase();
-            if (!ke) continue;
-            if (blobE.indexOf(ke) !== -1 || (pcEv && pcEv.indexOf(ke) !== -1)) {
-              sectionalOrLikely = true;
-              break;
-            }
-          }
-        }
-      } catch (eLik) {}
-    }
     if (!sectionalOrLikely) return null;
 
     var scored = [];
