@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from 'fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname } from 'path';
 import sharp from 'sharp';
 import type { Mask } from '../../phase1/masks.js';
@@ -71,7 +71,16 @@ export async function buildHeroInputBundle(ctx: SharedRenderContext): Promise<He
   await writeMaskPng(paths.upholsteryEditMask, upholsteryEditMask);
   await writeMaskPng(paths.protectedMask, protectedMask);
   await sharp(ctx.base.path).png().toFile(paths.referenceBaseRecolor);
-  await sharp(ctx.swatch.paths.cleanBase).png().toFile(paths.referenceCleanSwatch);
+  await sharp(ctx.swatch.paths.cleanBase)
+    .png()
+    .toFile(paths.referenceCleanSwatch);
+
+  const v = JSON.parse(readFileSync(ctx.swatch.paths.validationJson, 'utf8')) as { ok?: boolean };
+  if (!v.ok) {
+    throw new Error(
+      `Clean swatch failed validation (${ctx.swatch.paths.validationJson}) — fix sanitization before hero run.`,
+    );
+  }
 
   const promptParts = buildHeroPrompt(ctx.profile);
   writeFileSync(paths.prompt, formatHeroPromptFile(promptParts));

@@ -17,11 +17,13 @@ import { runHeroQa } from './qa.js';
 import { HERO_VARIANTS } from './variants.js';
 import type { HeroPipelineResult, HeroVariantRunResult } from './spec.js';
 import {
+  heroExportManifestPath,
   heroGridPath,
   heroSpecPath,
   heroStatusPath,
   heroVariantPath,
 } from '../shared/paths.js';
+import { buildHeroExportManifest } from './exportHero.js';
 
 const LABEL_H = 40;
 
@@ -327,6 +329,17 @@ export async function runHeroPipeline(
   };
 
   result.outputs.status = writeHeroStatusMd(result, providerConfigured);
+
+  const manifest = buildHeroExportManifest(ctx, result);
+  const manifestPath = heroExportManifestPath(ctx.profile.code);
+  writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  console.log(`[hero] Export manifest: ${manifestPath}`);
+
+  if (skippedGenerative || !variantResults.length) {
+    throw new Error(
+      `${message} Hero variants were not generated — set a valid OPENAI_API_KEY and re-run.`,
+    );
+  }
 
   return result;
 }

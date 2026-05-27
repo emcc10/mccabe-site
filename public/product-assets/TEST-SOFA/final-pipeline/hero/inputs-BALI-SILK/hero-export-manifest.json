@@ -2,7 +2,12 @@
   "swatchCode": "BALI-SILK",
   "heroMaster": "",
   "heroComparison": "",
+  "heroVariantA": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\hero\\hero-variant-A-BALI-SILK.png",
+  "heroVariantB": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\hero\\hero-variant-B-BALI-SILK.png",
+  "heroGrid": "",
+  "heroSpec": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\hero\\hero-spec-BALI-SILK.json",
   "inputBundleDir": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\hero\\inputs-BALI-SILK",
-  "status": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\hero\\HERO_STATUS-BALI-SILK.md",
-  "previewBaseRecolor": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\base-recolor-BALI-SILK.png"
+  "status": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\hero\\hero-status-BALI-SILK.md",
+  "previewBaseRecolor": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\base-recolor-BALI-SILK.png",
+  "bestVariantId": null
 }

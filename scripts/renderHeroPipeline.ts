@@ -1,5 +1,8 @@
+import { loadEnvLocal } from './loadEnvLocal.js';
 import { runHeroPipeline } from '../src/finalPipeline/hero/runHero.js';
 import { DEFAULT_SWATCH_CODE } from '../src/finalPipeline/paths.js';
+
+loadEnvLocal();
 
 const swatchCode = process.argv[2]?.trim() || DEFAULT_SWATCH_CODE;
 

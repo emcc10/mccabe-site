@@ -40,11 +40,7 @@ export function resolveHeroGenerativeProvider(): HeroGenerativeProvider {
   if (raw === 'openai' || !raw) {
     const openai = new OpenAIImageEditProvider();
     if (openai.isConfigured()) return openai;
-    if (!raw) return new BundleOnlyProvider();
-    throw new HeroProviderNotConfiguredError(
-      'openai',
-      'Set OPENAI_API_KEY or HERO_GENERATIVE_API_KEY.',
-    );
+    return new BundleOnlyProvider();
   }
 
   throw new Error(`Unknown HERO_GENERATIVE_PROVIDER="${raw}". Expected: ${PROVIDER_IDS.join(', ')}`);

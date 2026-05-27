@@ -11,9 +11,14 @@ export function buildHeroExportManifest(
     swatchCode: ctx.profile.code,
     heroMaster: result.outputs.bestMaster,
     heroComparison: result.outputs.grid,
+    heroVariantA: result.outputs.variantPaths.A,
+    heroVariantB: result.outputs.variantPaths.B,
+    heroGrid: result.outputs.grid,
+    heroSpec: result.outputs.spec,
     inputBundleDir: result.inputBundle.paths.bundleDir,
     status: result.outputs.status,
     previewBaseRecolor: ctx.base.path || baseRecolorPath(ctx.profile.code),
+    bestVariantId: result.bestVariantId,
   };
 }
 

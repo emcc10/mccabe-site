@@ -1,4 +1,4 @@
-import { boxBlur, buildLinearL, clamp, rgbToLab } from '../phase5/labUtil.js';
+import { boxBlur, buildLinearL, clamp, labToRgb, rgbToLab } from '../phase5/labUtil.js';
 import type { RgbaImage } from '../phase1/segment.js';
 import { cropSwatchCenter } from '../phase9/swatchMaps.js';
 
@@ -7,6 +7,25 @@ const BLUR_MOTTLE_IN = 8;
 const BLUR_MOTTLE_OUT = 24;
 const BLUR_GRAIN_PX = 3;
 const INPAINT_BLUR_PX = 18;
+const INPAINT_BLUR_HEAVY_PX = 36;
+
+export interface SwatchCleanValidation {
+  ok: boolean;
+  diagonalBandScore: number;
+  maxDiagonalResidual: number;
+  artifactCoverage: number;
+  failures: string[];
+}
+
+export class SwatchCleanRejectedError extends Error {
+  constructor(
+    message: string,
+    readonly validation: SwatchCleanValidation,
+  ) {
+    super(message);
+    this.name = 'SwatchCleanRejectedError';
+  }
+}
 
 export interface CleanSwatchMaterial {
   grain: Float32Array;
@@ -14,9 +33,11 @@ export interface CleanSwatchMaterial {
   colorBiasA: Float32Array;
   colorBiasB: Float32Array;
   artifactMask: Float32Array;
+  cleanL: Float32Array;
   cleanBaseRgb: Buffer;
   width: number;
   height: number;
+  validation: SwatchCleanValidation;
 }
 
 function hashUint(x: number, y: number, s: number): number {
@@ -66,8 +87,14 @@ function percentile(values: number[], p: number): number {
   return s[lo] + (s[hi] - s[lo]) * (idx - lo);
 }
 
-/** Detect fold lines, edges, and large directional lighting residuals. */
-function buildArtifactMask(L: Float32Array, flatL: Float32Array, w: number, h: number): Float32Array {
+/** Detect fold lines, diagonal bands, and large directional lighting residuals. */
+function buildArtifactMask(
+  L: Float32Array,
+  flatL: Float32Array,
+  w: number,
+  h: number,
+  percentileCut: number,
+): Float32Array {
   const mask = new Float32Array(w * h);
   const samples: number[] = [];
 
@@ -78,16 +105,22 @@ function buildArtifactMask(L: Float32Array, flatL: Float32Array, w: number, h: n
       const r45 = orientedResponse(L, w, h, x, y, 1, 1);
       const r90 = orientedResponse(L, w, h, x, y, 0, 1);
       const r135 = orientedResponse(L, w, h, x, y, 1, -1);
-      const maxR = Math.max(r0, r45, r90, r135);
-      const minR = Math.min(r0, r45, r90, r135);
-      const aniso = maxR / (minR + 0.5);
+      const axis = (r0 + r90) * 0.5;
+      const diag = (r45 + r135) * 0.5;
+      const diagDominance = diag / (axis + 0.35);
+      const aniso = Math.max(r0, r45, r90, r135) / (Math.min(r0, r45, r90, r135) + 0.5);
       const lightResidual = Math.abs(L[j] - flatL[j]);
-      const score = maxR * 0.55 + aniso * 0.25 + lightResidual * 0.2;
+      const score =
+        diag * 0.42 +
+        diagDominance * 2.8 +
+        aniso * 0.22 +
+        lightResidual * 0.28 +
+        Math.max(r0, r90) * 0.08;
       samples.push(score);
     }
   }
 
-  const thresh = percentile(samples, 0.82);
+  const thresh = percentile(samples, percentileCut);
   for (let y = 2; y < h - 2; y++) {
     for (let x = 2; x < w - 2; x++) {
       const j = y * w + x;
@@ -95,19 +128,104 @@ function buildArtifactMask(L: Float32Array, flatL: Float32Array, w: number, h: n
       const r45 = orientedResponse(L, w, h, x, y, 1, 1);
       const r90 = orientedResponse(L, w, h, x, y, 0, 1);
       const r135 = orientedResponse(L, w, h, x, y, 1, -1);
-      const maxR = Math.max(r0, r45, r90, r135);
-      const minR = Math.min(r0, r45, r90, r135);
-      const aniso = maxR / (minR + 0.5);
+      const axis = (r0 + r90) * 0.5;
+      const diag = (r45 + r135) * 0.5;
+      const diagDominance = diag / (axis + 0.35);
+      const aniso = Math.max(r0, r45, r90, r135) / (Math.min(r0, r45, r90, r135) + 0.5);
       const lightResidual = Math.abs(L[j] - flatL[j]);
-      const score = maxR * 0.55 + aniso * 0.25 + lightResidual * 0.2;
+      const score =
+        diag * 0.42 +
+        diagDominance * 2.8 +
+        aniso * 0.22 +
+        lightResidual * 0.28 +
+        Math.max(r0, r90) * 0.08;
       if (score >= thresh) mask[j] = 1;
     }
   }
 
-  const dilated = boxBlur(mask, w, h, 3);
-  for (let j = 0; j < mask.length; j++) mask[j] = clamp(dilated[j] * 1.35, 0, 1);
+  const dilated = boxBlur(mask, w, h, 5);
+  for (let j = 0; j < mask.length; j++) mask[j] = clamp(dilated[j] * 1.45, 0, 1);
 
   return mask;
+}
+
+/** Residual diagonal/fold energy on cleaned luminance — must be low for hero reference. */
+export function validateCleanSwatchQuality(
+  cleanL: Float32Array,
+  artifactMask: Float32Array,
+  w: number,
+  h: number,
+): SwatchCleanValidation {
+  const failures: string[] = [];
+  let diagSum = 0;
+  let axisSum = 0;
+  let maxDiagonalResidual = 0;
+  let n = 0;
+  let artifactPx = 0;
+
+  for (let j = 0; j < artifactMask.length; j++) {
+    if (artifactMask[j] > 0.25) artifactPx++;
+  }
+  const artifactCoverage = artifactPx / artifactMask.length;
+
+  for (let y = 3; y < h - 3; y++) {
+    for (let x = 3; x < w - 3; x++) {
+      const j = y * w + x;
+      const r0 = orientedResponse(cleanL, w, h, x, y, 1, 0);
+      const r45 = orientedResponse(cleanL, w, h, x, y, 1, 1);
+      const r90 = orientedResponse(cleanL, w, h, x, y, 0, 1);
+      const r135 = orientedResponse(cleanL, w, h, x, y, 1, -1);
+      const axis = (r0 + r90) * 0.5;
+      const diag = (r45 + r135) * 0.5;
+      diagSum += diag;
+      axisSum += axis;
+      maxDiagonalResidual = Math.max(maxDiagonalResidual, diag);
+      n++;
+    }
+  }
+
+  const diagonalBandScore = n ? diagSum / n / (axisSum / n + 0.15) : 0;
+
+  if (diagonalBandScore > 1.02) {
+    failures.push(
+      `Diagonal band residual too high (score ${diagonalBandScore.toFixed(2)} > 1.02)`,
+    );
+  }
+  if (maxDiagonalResidual > 2.35) {
+    failures.push(
+      `Visible diagonal fold line (max residual ${maxDiagonalResidual.toFixed(2)} > 2.35)`,
+    );
+  }
+
+  const blur = boxBlur(cleanL, w, h, 14);
+  let bandContrast = 0;
+  let bandN = 0;
+  for (let j = 0; j < cleanL.length; j++) {
+    bandContrast += Math.abs(cleanL[j] - blur[j]);
+    bandN++;
+  }
+  const meanBandContrast = bandN ? bandContrast / bandN : 0;
+  if (meanBandContrast > 3.2 && diagonalBandScore > 0.95) {
+    failures.push(
+      `Broad lighting band remains (contrast ${meanBandContrast.toFixed(2)})`,
+    );
+  }
+
+  return {
+    ok: failures.length === 0,
+    diagonalBandScore,
+    maxDiagonalResidual,
+    artifactCoverage,
+    failures,
+  };
+}
+
+export function assertCleanSwatchPasses(validation: SwatchCleanValidation): void {
+  if (validation.ok) return;
+  throw new SwatchCleanRejectedError(
+    `Clean swatch rejected — ${validation.failures.join('; ')}. Cannot use for hero reference.`,
+    validation,
+  );
 }
 
 /**
@@ -127,14 +245,36 @@ export function buildCleanSwatchMaterial(swatch: RgbaImage): CleanSwatchMaterial
   const flatL = new Float32Array(n);
   for (let j = 0; j < n; j++) flatL[j] = L[j] - blurLight[j] + meanL;
 
-  const artifactMask = buildArtifactMask(L, flatL, width, height);
-  const inpaint = boxBlur(flatL, width, height, INPAINT_BLUR_PX);
+  let artifactMask = new Float32Array(n);
+  let cleanL = new Float32Array(n);
+  let validation: SwatchCleanValidation = {
+    ok: false,
+    diagonalBandScore: 99,
+    maxDiagonalResidual: 99,
+    artifactCoverage: 0,
+    failures: ['not validated'],
+  };
 
-  const cleanL = new Float32Array(n);
-  for (let j = 0; j < n; j++) {
-    const m = artifactMask[j];
-    cleanL[j] = flatL[j] * (1 - m) + inpaint[j] * m;
+  const passes = [
+    { percentile: 0.76, inpaintPx: INPAINT_BLUR_PX },
+    { percentile: 0.7, inpaintPx: INPAINT_BLUR_HEAVY_PX },
+    { percentile: 0.64, inpaintPx: INPAINT_BLUR_HEAVY_PX },
+  ];
+
+  for (const pass of passes) {
+    artifactMask = buildArtifactMask(L, flatL, width, height, pass.percentile);
+    const inpaint = boxBlur(flatL, width, height, pass.inpaintPx);
+    const heavy = boxBlur(inpaint, width, height, pass.inpaintPx);
+    for (let j = 0; j < n; j++) {
+      const m = artifactMask[j];
+      const blended = inpaint[j] * 0.55 + heavy[j] * 0.45;
+      cleanL[j] = flatL[j] * (1 - m) + blended * m;
+    }
+    validation = validateCleanSwatchQuality(cleanL, artifactMask, width, height);
+    if (validation.ok) break;
   }
+
+  assertCleanSwatchPasses(validation);
 
   const blurMottleIn = boxBlur(cleanL, width, height, BLUR_MOTTLE_IN);
   const blurMottleOut = boxBlur(cleanL, width, height, BLUR_MOTTLE_OUT);
@@ -145,22 +285,29 @@ export function buildCleanSwatchMaterial(swatch: RgbaImage): CleanSwatchMaterial
   const colorBiasA = new Float32Array(n);
   const colorBiasB = new Float32Array(n);
 
-  const flatRgb = Buffer.alloc(n * 3);
   let meanA = 0;
   let meanB = 0;
+  let chromaN = 0;
   for (let j = 0; j < n; j++) {
+    if (artifactMask[j] > 0.35) continue;
     const p = j * channels;
     const lab = rgbToLab(patch.data[p], patch.data[p + 1], patch.data[p + 2]);
     meanA += lab.a;
     meanB += lab.b;
-    const t = cleanL[j] / Math.max(L[j], 1e-3);
-    const o = j * 3;
-    flatRgb[o] = clamp(patch.data[p] * t, 0, 255);
-    flatRgb[o + 1] = clamp(patch.data[p + 1] * t, 0, 255);
-    flatRgb[o + 2] = clamp(patch.data[p + 2] * t, 0, 255);
+    chromaN++;
   }
-  meanA /= n;
-  meanB /= n;
+  if (!chromaN) chromaN = n;
+  meanA /= chromaN;
+  meanB /= chromaN;
+
+  const flatRgb = Buffer.alloc(n * 3);
+  for (let j = 0; j < n; j++) {
+    const rgb = labToRgb(cleanL[j], meanA, meanB);
+    const o = j * 3;
+    flatRgb[o] = rgb.r;
+    flatRgb[o + 1] = rgb.g;
+    flatRgb[o + 2] = rgb.b;
+  }
 
   for (let j = 0; j < n; j++) {
     grain[j] = cleanL[j] - blurFine[j];
@@ -190,9 +337,11 @@ export function buildCleanSwatchMaterial(swatch: RgbaImage): CleanSwatchMaterial
     colorBiasA,
     colorBiasB,
     artifactMask,
+    cleanL,
     cleanBaseRgb: flatRgb,
     width,
     height,
+    validation,
   };
 }
 

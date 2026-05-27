@@ -47,7 +47,8 @@
     "render:phaseRealLeatherRelight2": "tsx scripts/renderPhaseRealLeatherRelight2.ts",
     "render:final-pipeline": "tsx scripts/renderFinalPipeline.ts",
     "render:preview-pipeline": "tsx scripts/renderPreviewPipeline.ts",
-    "render:hero-pipeline": "tsx scripts/renderHeroPipeline.ts"
+    "render:hero-pipeline": "tsx scripts/renderHeroPipeline.ts",
+    "reexport:swatch-clean": "tsx scripts/reexportSwatchClean.ts"
   },
   "dependencies": {
     "color-convert": "^2.0.1",

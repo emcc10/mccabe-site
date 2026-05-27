@@ -63,3 +63,7 @@ export function heroGridPath(code: string): string {
 export function heroSpecPath(code: string): string {
   return heroPath(`hero-spec-${swatchCodeToSlug(code)}.json`);
 }
+
+export function heroExportManifestPath(code: string): string {
+  return join(heroInputBundleDir(code), 'hero-export-manifest.json');
+}

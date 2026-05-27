@@ -66,7 +66,13 @@ export interface HeroPipelineResult {
 export interface HeroExportManifest {
   swatchCode: string;
   heroMaster: string;
+  heroComparison: string;
+  heroVariantA: string;
+  heroVariantB: string;
+  heroGrid: string;
+  heroSpec: string;
   inputBundleDir: string;
   status: string;
   previewBaseRecolor: string;
+  bestVariantId: 'A' | 'B' | null;
 }

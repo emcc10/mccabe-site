@@ -1,0 +1,12 @@
+{
+  "swatchCode": "BALI-SILK",
+  "ok": true,
+  "validation": {
+    "ok": true,
+    "diagonalBandScore": 0.680759095802471,
+    "maxDiagonalResidual": 2.1779956817626953,
+    "artifactCoverage": 0.41464715744551134,
+    "failures": []
+  },
+  "note": "buildCleanSwatchMaterial already asserted ok before export"
+}
