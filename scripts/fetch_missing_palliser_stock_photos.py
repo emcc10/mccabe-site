@@ -18,11 +18,24 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PHOTOS = ROOT / "vspfiles" / "photos"
+SCRIPTS = Path(__file__).resolve().parent
 SITE = "https://www.mccabestheaterandliving.com"
 UA = {"User-Agent": "Mozilla/5.0 (McCabe Palliser stock photos)"}
 SOS = "https://images.sofasandsectionals.com/images/photos"
 MIN_BYTES = 20_000
 MIN_W, MIN_H = 450, 350
+
+FD = (
+    "https://images.furnituredealer.net/b/p/a1e18853-5f6b-4575-b42b-6c376b416583/assets"
+)
+# Front-facing / front 3/4 studio heroes — one per Palliser collection (not side profile)
+DENALI_HERO = f"{FD}/f5c591a3e91242808969e874dbc9d5a2.jpg"
+PINECREST_HERO = f"{SOS}/88658.original.jpg"
+THEO_HERO = f"{SOS}/245773.original.jpg"
+REGENT_HERO = f"{SOS}/88429.original.jpg"
+TUNDRA_HERO = f"{SOS}/88919.original.jpg"
+HENRY_HERO = f"{SOS}/244228.original.jpg"
+KINSLEY_HERO = "https://cdn.knorrweb.com/palliser/3a42b61803c86aa08fe2752276a994c9.webp"
 
 # Volusion filename -> official Palliser studio/catalog photo URL
 STOCK_SOURCES: dict[str, str] = {
@@ -64,45 +77,47 @@ STOCK_SOURCES: dict[str, str] = {
         "https://www.alinefurniture.ca/wp-content/uploads/2025/11/"
         "PALLISER-PYPERTON-SOFA-RESERVE-LONDON-FOG.jpg"
     ),
-    # Denali 43003
-    "43003-38-1.jpg": (
-        "https://images.furnituredealer.net/b/p/a1e18853-5f6b-4575-b42b-6c376b416583/"
-        "assets/f5c591a3e91242808969e874dbc9d5a2.jpg"
-    ),
-    "43003-33-1.jpg": (
-        "https://images.furnituredealer.net/b/p/a1e18853-5f6b-4575-b42b-6c376b416583/"
-        "assets/f5c591a3e91242808969e874dbc9d5a2.jpg"
-    ),
-    # Kinsley 77111-G3 — front-angle swivel glider with visible base (not stationary barrel)
-    "77111-G3-1.jpg": (
-        "https://cdn.knorrweb.com/palliser/3a42b61803c86aa08fe2752276a994c9.webp"
-    ),
-    # Pinecrest 42306 — one front 3/4 hero for all mechanism variants
-    "42306-31-1.jpg": f"{SOS}/88658.original.jpg",
-    "42306-32-1.jpg": f"{SOS}/88658.original.jpg",
-    "42306-33-1.jpg": f"{SOS}/88658.original.jpg",
-    "42306-34-1.jpg": f"{SOS}/88658.original.jpg",
-    "42306-35-1.jpg": f"{SOS}/88658.original.jpg",
+    # Denali 43003 — front 3/4 hero for all mechanism variants
+    "43003-31-1.jpg": DENALI_HERO,
+    "43003-32-1.jpg": DENALI_HERO,
+    "43003-33-1.jpg": DENALI_HERO,
+    "43003-34-1.jpg": DENALI_HERO,
+    "43003-35-1.jpg": DENALI_HERO,
+    "43003-38-1.jpg": DENALI_HERO,
+    "43003-39-1.jpg": DENALI_HERO,
+    # Kinsley 77111-G3 — front swivel glider with visible base
+    "77111-G3-1.jpg": KINSLEY_HERO,
+    # Pinecrest 42306 — front 3/4 hero for all mechanism variants
+    "42306-31-1.jpg": PINECREST_HERO,
+    "42306-32-1.jpg": PINECREST_HERO,
+    "42306-33-1.jpg": PINECREST_HERO,
+    "42306-34-1.jpg": PINECREST_HERO,
+    "42306-35-1.jpg": PINECREST_HERO,
+    "42306-38-1.jpg": PINECREST_HERO,
+    # Henry 41051
+    "41051-35-1.jpg": HENRY_HERO,
     # Regent 41094 — front-facing hero for all variants
-    "41094-32-1.jpg": f"{SOS}/88429.original.jpg",
-    "41094-33-1.jpg": f"{SOS}/88429.original.jpg",
-    "41094-35-1.jpg": f"{SOS}/88429.original.jpg",
-    "41094-39-1.jpg": f"{SOS}/88429.original.jpg",
+    "41094-32-1.jpg": REGENT_HERO,
+    "41094-33-1.jpg": REGENT_HERO,
+    "41094-35-1.jpg": REGENT_HERO,
+    "41094-39-1.jpg": REGENT_HERO,
     # Thea 77119
     "77119-J2-1.jpg": f"{SITE}/v/vspfiles/photos/77119-N2-2T.jpg",
     "77119-M2-1.jpg": (
         "https://images.furnituredealer.net/b/p/a1e18853-5f6b-4575-b42b-6c376b416583/"
         "assets/fa3bca52c55245cbacdcb6ebe7b1f431.jpg"
     ),
-    # Theo 42002 — one front 3/4 hero for all mechanism variants
-    "42002-32-1.jpg": f"{SOS}/245773.original.jpg",
-    "42002-33-1.jpg": f"{SOS}/245773.original.jpg",
-    "42002-34-1.jpg": f"{SOS}/245773.original.jpg",
-    "42002-35-1.jpg": f"{SOS}/245773.original.jpg",
-    "42002-39-1.jpg": f"{SOS}/245773.original.jpg",
-    # Tundra 41043 — front 3/4 hero for all variants
-    "41043-35-1.jpg": f"{SOS}/264471.original.png",
-    "41043-39-1.jpg": f"{SOS}/264471.original.png",
+    # Theo 42002 — front 3/4 hero for all mechanism variants
+    "42002-32-1.jpg": THEO_HERO,
+    "42002-33-1.jpg": THEO_HERO,
+    "42002-34-1.jpg": THEO_HERO,
+    "42002-35-1.jpg": THEO_HERO,
+    "42002-39-1.jpg": THEO_HERO,
+    # Tundra 41043 — front-facing white-bg hero for all variants
+    "41043-32-1.jpg": TUNDRA_HERO,
+    "41043-33-1.jpg": TUNDRA_HERO,
+    "41043-35-1.jpg": TUNDRA_HERO,
+    "41043-39-1.jpg": TUNDRA_HERO,
     # ZG5 41089-42
     "41089-42-1.jpg": (
         "https://dowfurniture.com/cdn/shop/products/"
@@ -153,12 +168,31 @@ def download_live(name: str) -> bytes:
     return data
 
 
+def strip_grey_mat(data: bytes) -> tuple[bytes, int]:
+    """Replace Palliser/catalog grey studio mats with white."""
+    import sys
+
+    sys.path.insert(0, str(SCRIPTS))
+    from replace_plp_photo_mats import replace_mat_background  # noqa: PLC0415
+    from PIL import Image
+
+    img = Image.open(io.BytesIO(data))
+    fixed, changed = replace_mat_background(img.convert("RGBA"), global_pass=True)
+    if changed == 0:
+        return data, 0
+    out = io.BytesIO()
+    fixed.convert("RGB").save(out, format="JPEG", quality=92, optimize=True)
+    return out.getvalue(), changed
+
+
 def save_stock(url: str, dest: Path) -> None:
     raw = fetch_bytes(url)
     jpeg = to_jpeg(raw)
+    jpeg, mat_px = strip_grey_mat(jpeg)
     w, h = validate_jpeg(jpeg)
     dest.write_bytes(jpeg)
-    print(f"  -> {dest.name} ({w}x{h}, {len(jpeg)} bytes)")
+    mat_note = f", mat->{mat_px}px white" if mat_px else ""
+    print(f"  -> {dest.name} ({w}x{h}, {len(jpeg)} bytes{mat_note})")
 
 
 def main() -> int:

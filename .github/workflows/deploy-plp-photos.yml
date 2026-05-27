@@ -7,6 +7,8 @@ on:
     paths:
       - "vspfiles/photos/**"
       - "scripts/upload_missing_stock_photos.py"
+      - "scripts/upload_recliner_plp_photos.py"
+      - "scripts/fetch_recliner_plp_photos.py"
       - ".github/workflows/deploy-plp-photos.yml"
   workflow_dispatch:
 
@@ -31,7 +33,9 @@ jobs:
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SFTP_PORT: "2222"
-        run: python3 scripts/upload_missing_stock_photos.py
+        run: |
+          python3 scripts/upload_recliner_plp_photos.py
+          python3 scripts/upload_missing_stock_photos.py
 
       - name: Verify sample photos on live CDN
         run: |
