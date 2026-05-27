@@ -47,6 +47,7 @@
     "render:phaseRealLeatherRelight2": "tsx scripts/renderPhaseRealLeatherRelight2.ts",
     "render:final-pipeline": "tsx scripts/renderFinalPipeline.ts",
     "render:preview-pipeline": "tsx scripts/renderPreviewPipeline.ts",
+    "render:preview-cleanup-v2": "tsx scripts/renderPreviewCleanupV2.ts",
     "render:hero-pipeline": "tsx scripts/renderHeroPipeline.ts",
     "hero:check-key": "tsx scripts/checkOpenAiKey.ts",
     "reexport:swatch-clean": "tsx scripts/reexportSwatchClean.ts"

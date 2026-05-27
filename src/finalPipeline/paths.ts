@@ -39,6 +39,26 @@ export function statusPath(code: string): string {
   return finalPath(`BEST_PREVIEW_STATUS-${swatchCodeToSlug(code)}.md`);
 }
 
+export function cleanupV2MasterPath(code: string): string {
+  return finalPath(`best-preview-master-${swatchCodeToSlug(code)}-v2.png`);
+}
+
+export function cleanupV2ComparisonPath(code: string): string {
+  return finalPath(`best-preview-comparison-${swatchCodeToSlug(code)}-v2.png`);
+}
+
+export function cleanupDebugBottomLinesPath(code: string): string {
+  return finalPath(`cleanup-debug-bottom-lines.png`);
+}
+
+export function cleanupDebugLegZonesPath(code: string): string {
+  return finalPath(`cleanup-debug-leg-zones.png`);
+}
+
+export function cleanupSpecV2Path(code: string): string {
+  return finalPath(`cleanup-spec-v2.json`);
+}
+
 export function resolveSwatchImagePath(swatchFile: string): string {
   if (swatchFile.includes('/') || swatchFile.includes('\\')) {
     return join(REPO_ROOT, swatchFile);
