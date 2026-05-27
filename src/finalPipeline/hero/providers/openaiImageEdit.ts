@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from 'fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import type { HeroGenerativeRequest, HeroGenerativeResult } from '../spec.js';
 import { buildFullEditPrompt } from '../prompt.js';
@@ -12,8 +12,57 @@ import type { HeroGenerativeProvider } from '../generativeProvider.js';
 import { HeroProviderNotConfiguredError } from '../generativeProvider.js';
 import { loadRgba } from '../../../phase1/segment.js';
 
+function readKeyFile(): string | undefined {
+  const path = process.env.OPENAI_API_KEY_FILE?.trim() || process.env.HERO_OPENAI_KEY_FILE?.trim();
+  if (!path) return undefined;
+  try {
+    return sanitizeApiKey(readFileSync(path, 'utf8'));
+  } catch {
+    return undefined;
+  }
+}
+
+/** Trim BOM/quotes; reject obvious placeholders and truncated keys. */
+export function sanitizeApiKey(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  let k = raw.trim().replace(/^\uFEFF/, '');
+  if (
+    (k.startsWith('"') && k.endsWith('"')) ||
+    (k.startsWith("'") && k.endsWith("'"))
+  ) {
+    k = k.slice(1, -1).trim();
+  }
+  if (!k || k === 'sk-...' || k === 'sk-proj-...' || /^sk-[a-z]*\.\.\.$/i.test(k)) {
+    return undefined;
+  }
+  return k;
+}
+
 function apiKey(): string | undefined {
-  return process.env.OPENAI_API_KEY?.trim() || process.env.HERO_GENERATIVE_API_KEY?.trim();
+  return (
+    sanitizeApiKey(process.env.OPENAI_API_KEY) ||
+    sanitizeApiKey(process.env.HERO_GENERATIVE_API_KEY) ||
+    readKeyFile()
+  );
+}
+
+function assertKeyLooksValid(key: string): void {
+  if (key.length < 80) {
+    throw new OpenAIApiError(
+      401,
+      [
+        `OPENAI_API_KEY looks truncated (${key.length} characters; real keys are usually 150+).`,
+        'Copy the full key from https://platform.openai.com/api-keys',
+        'Tip: put it in .env.local as OPENAI_API_KEY=sk-proj-... (no quotes) and re-run npm run render:hero-pipeline',
+      ].join('\n'),
+    );
+  }
+  if (!key.startsWith('sk-')) {
+    throw new OpenAIApiError(
+      401,
+      'OPENAI_API_KEY should start with sk-. Check you copied a secret key, not a project ID or org name.',
+    );
+  }
 }
 
 export class OpenAIApiError extends Error {
@@ -32,9 +81,10 @@ export async function verifyOpenAiApiKey(): Promise<void> {
   if (!key) {
     throw new HeroProviderNotConfiguredError(
       'openai',
-      'Set OPENAI_API_KEY or HERO_GENERATIVE_API_KEY in this shell session.',
+      'Set OPENAI_API_KEY, HERO_GENERATIVE_API_KEY, or OPENAI_API_KEY_FILE (path to a one-line key file).',
     );
   }
+  assertKeyLooksValid(key);
 
   const res = await fetch('https://api.openai.com/v1/models?limit=1', {
     headers: { Authorization: `Bearer ${key}` },
