@@ -43,7 +43,9 @@
     "render:phaseRealLeatherReferenceMatch": "tsx scripts/renderPhaseRealLeatherReferenceMatch.ts",
     "render:phaseRealLeatherReferenceMatch2": "tsx scripts/renderPhaseRealLeatherReferenceMatch2.ts",
     "render:phaseRealLeatherFinal": "tsx scripts/renderPhaseRealLeatherFinal.ts",
-    "render:phaseRealLeatherRelight1": "tsx scripts/renderPhaseRealLeatherRelight1.ts"
+    "render:phaseRealLeatherRelight1": "tsx scripts/renderPhaseRealLeatherRelight1.ts",
+    "render:phaseRealLeatherRelight2": "tsx scripts/renderPhaseRealLeatherRelight2.ts",
+    "render:final-pipeline": "tsx scripts/renderFinalPipeline.ts"
   },
   "dependencies": {
     "color-convert": "^2.0.1",

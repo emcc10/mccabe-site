@@ -1,0 +1,22 @@
+[
+  {
+    "code": "BALI-SILK",
+    "swatchFile": "sofa-recolor-tool/input/swatches/Bali-Silk.jpg",
+    "targetLab": { "l": 86.5, "a": 0.8, "b": 6.5 },
+    "grainStrength": 0.58,
+    "mottleStrength": 0.38,
+    "colorBiasStrength": 0.15,
+    "highlightSoftness": 0.35,
+    "lightnessClass": "light",
+    "textureClass": "refined",
+    "baseRecolor": {
+      "lLow": 72,
+      "lHigh": 92,
+      "mappedLBlend": 0.82,
+      "chromaSourceA": 0.12,
+      "chromaSourceB": 0.1,
+      "chromaTargetA": 0.88,
+      "chromaTargetB": 0.9
+    }
+  }
+]
