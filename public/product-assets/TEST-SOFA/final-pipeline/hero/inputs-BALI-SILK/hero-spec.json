@@ -1,0 +1,54 @@
+{
+  "pipeline": "hero-pipeline-v1",
+  "swatchCode": "BALI-SILK",
+  "profile": {
+    "code": "BALI-SILK",
+    "swatchFile": "sofa-recolor-tool/input/swatches/Bali-Silk.jpg",
+    "targetLab": {
+      "l": 86.5,
+      "a": 0.8,
+      "b": 6.5
+    },
+    "grainStrength": 0.58,
+    "mottleStrength": 0.38,
+    "colorBiasStrength": 0.15,
+    "highlightSoftness": 0.35,
+    "lightnessClass": "light",
+    "textureClass": "refined",
+    "baseRecolor": {
+      "lLow": 72,
+      "lHigh": 92,
+      "mappedLBlend": 0.82,
+      "chromaSourceA": 0.12,
+      "chromaSourceB": 0.1,
+      "chromaTargetA": 0.88,
+      "chromaTargetB": 0.9
+    }
+  },
+  "editRegion": "upholstery-only",
+  "protectedRegions": [
+    "legs",
+    "feet",
+    "trim",
+    "background",
+    "alpha-outside"
+  ],
+  "references": {
+    "geometryAndLighting": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\hero\\inputs-BALI-SILK\\reference-base-recolor.png",
+    "materialCharacter": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\hero\\inputs-BALI-SILK\\reference-clean-swatch.png"
+  },
+  "masks": {
+    "editWhite": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\hero\\inputs-BALI-SILK\\upholstery-edit-mask.png",
+    "protectWhite": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\hero\\inputs-BALI-SILK\\protected-mask.png"
+  },
+  "prompt": {
+    "system": "You are retouching a product photo of a sofa for e-commerce. Edit ONLY the leather upholstery pixels indicated by the edit mask. Do not change sofa shape, seams placement, cushion structure, legs, feet, trim, or white background. Preserve photographic lighting geography from the base image (highlights and shadows in the same places). Output must look like a real product photograph, not airbrushed or CGI.",
+    "user": "Recolor and re-material the upholstery to BALI-SILK leather. Material: refined leather, light value range. Target color direction approximately LAB L=86.5 a=0.8 b=6.5. Use the base recolor image for geometry, seams, and lighting. Use the clean swatch reference for subtle grain and organic mottle only — no folds, no patch tiling, no diagonal artifacts. Keep seams crisp but not outlined; no bottom-front dark line artifact; no chalky powdery finish.",
+    "negative": "changed legs, changed feet, changed silhouette, gray background, dirty background, swatch fold lines, patch tiling, repeated texture blocks, airbrushed skin-like leather, plastic CGI, over-sharpened seams, muddy brown color drift"
+  },
+  "providerEnv": "HERO_GENERATIVE_PROVIDER",
+  "notes": [
+    "Generative step is optional; preview pipeline covers batch color previews.",
+    "Composite hero output must re-lock legs/background from source after provider returns RGB."
+  ]
+}

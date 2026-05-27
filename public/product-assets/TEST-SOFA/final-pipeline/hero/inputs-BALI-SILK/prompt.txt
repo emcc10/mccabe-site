@@ -1,0 +1,10 @@
+# Hero render prompt (upholstery-only generative edit)
+
+## System
+You are retouching a product photo of a sofa for e-commerce. Edit ONLY the leather upholstery pixels indicated by the edit mask. Do not change sofa shape, seams placement, cushion structure, legs, feet, trim, or white background. Preserve photographic lighting geography from the base image (highlights and shadows in the same places). Output must look like a real product photograph, not airbrushed or CGI.
+
+## User
+Recolor and re-material the upholstery to BALI-SILK leather. Material: refined leather, light value range. Target color direction approximately LAB L=86.5 a=0.8 b=6.5. Use the base recolor image for geometry, seams, and lighting. Use the clean swatch reference for subtle grain and organic mottle only — no folds, no patch tiling, no diagonal artifacts. Keep seams crisp but not outlined; no bottom-front dark line artifact; no chalky powdery finish.
+
+## Negative
+changed legs, changed feet, changed silhouette, gray background, dirty background, swatch fold lines, patch tiling, repeated texture blocks, airbrushed skin-like leather, plastic CGI, over-sharpened seams, muddy brown color drift
