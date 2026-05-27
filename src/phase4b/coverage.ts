@@ -3,18 +3,25 @@ import { dilate, erode, intersect, subtract, union } from '../phase1/masks.js';
 import type { RgbaImage } from '../phase1/segment.js';
 import type { RelativeLRemapParams, UpholsteryLabStats } from '../phase4/recolor.js';
 import { recolorUpholsteryRelativeLRemap, relativeLRemapRgb } from '../phase4/recolor.js';
+import { labToRgb, rgbToLab } from '../phase5/labUtil.js';
 
 /** Thin boundary rings only (v3) — no blobs or rectangular fills */
 const EDGE_EXPAND_PX = 1;
 const LEG_RING_PX = 1;
 const CONTOUR_RING_PX = 1;
 const UPHOLSTERY_NEAR_PX = 2;
+/** Upholstery ring above/beside feet — full Bali Silk ownership (no cognac source) */
+const FOOT_ADJ_OUTER_PX = 11;
+const FOOT_ADJ_INNER_PX = 1;
+const FOOT_ADJ_UPHOL_DILATE = 5;
 
 export interface Stage4bCoverageMasks {
   /** 1px upholstery expand inside alpha (recovers mask erode) */
   edgeBandOnly: Mask;
   /** dilate(leg,1) ∩ alpha ∩ non-leg ∩ upholstery-neighborhood */
   footCornerRing: Mask;
+  /** Wider upholstery-only ring at feet for full chroma recolor */
+  footAdjacentUpholstery: Mask;
   /** Outer alpha silhouette 1px ring */
   contourRing: Mask;
   /** All thin cleanup rings combined */
@@ -42,10 +49,22 @@ export function buildStage4bCoverageMasks(
     intersect(upholsteryNear, nonLeg),
   );
 
-  const cleanupUnion = union(edgeBandOnly, footCornerRing, contourRing);
+  const footAdjacentUpholstery = intersect(
+    subtract(dilate(legs, FOOT_ADJ_OUTER_PX), dilate(legs, FOOT_ADJ_INNER_PX)),
+    intersect(dilate(upholstery, FOOT_ADJ_UPHOL_DILATE), alpha),
+  );
+
+  const cleanupUnion = union(edgeBandOnly, footCornerRing, footAdjacentUpholstery, contourRing);
   const upholsteryRecolor = union(upholstery, cleanupUnion);
 
-  return { edgeBandOnly, footCornerRing, contourRing, cleanupUnion, upholsteryRecolor };
+  return {
+    edgeBandOnly,
+    footCornerRing,
+    footAdjacentUpholstery,
+    contourRing,
+    cleanupUnion,
+    upholsteryRecolor,
+  };
 }
 
 export function countMaskPixelsOutsideAlpha(mask: Mask, alpha: Mask): number {
@@ -148,6 +167,58 @@ export function forceRemapRgbInMask(
   return { backgroundPixelsTouchedByCleanup };
 }
 
+/**
+ * Foot-adjacent upholstery: kill cognac chroma without lifting shadow L (avoids pale blobs).
+ */
+export function forceFootAdjacentChromaRemap(
+  source: RgbaImage,
+  recolored: RgbaImage,
+  final: RgbaImage,
+  alpha: Mask,
+  legs: Mask,
+  region: Mask,
+  params: RelativeLRemapParams,
+  stats: UpholsteryLabStats,
+): ForceRemapResult {
+  const { channels } = source;
+  let backgroundPixelsTouchedByCleanup = 0;
+
+  for (let j = 0; j < alpha.data.length; j++) {
+    if (region.data[j] < 128) continue;
+    if (legs.data[j] >= 128) continue;
+    if (alpha.data[j] < 128) {
+      backgroundPixelsTouchedByCleanup++;
+      continue;
+    }
+    const p = j * channels;
+    const sr = source.data[p];
+    const sg = source.data[p + 1];
+    const sb = source.data[p + 2];
+    const curLab = rgbToLab(final.data[p], final.data[p + 1], final.data[p + 2]);
+    const srcLab = rgbToLab(sr, sg, sb);
+    const warm = srcLab.b > params.targetB + 2 || sr > sg + 2;
+    const chromaBlend = warm ? 0.52 : 0.18;
+    const a = curLab.a * (1 - chromaBlend) + params.targetA * chromaBlend;
+    const b = curLab.b * (1 - chromaBlend) + params.targetB * chromaBlend;
+    let L = curLab.L;
+    if (warm) {
+      const mapped = relativeLRemapRgb(sr, sg, sb, params, stats);
+      const mapLab = rgbToLab(mapped.r, mapped.g, mapped.b);
+      L = curLab.L * 0.82 + mapLab.L * 0.18;
+      if (L > curLab.L + 2) L = curLab.L + 2;
+    }
+    const rgb = labToRgb(L, a, b);
+    recolored.data[p] = rgb.r;
+    recolored.data[p + 1] = rgb.g;
+    recolored.data[p + 2] = rgb.b;
+    final.data[p] = rgb.r;
+    final.data[p + 1] = rgb.g;
+    final.data[p + 2] = rgb.b;
+  }
+
+  return { backgroundPixelsTouchedByCleanup };
+}
+
 export function applyStage4bEdgeFixV3(
   source: RgbaImage,
   recolored: RgbaImage,
@@ -233,12 +304,69 @@ export function buildContourRingPreviewRgb(source: RgbaImage, contourRing: Mask)
   return buf;
 }
 
+export function buildFootAdjacentPreviewRgb(source: RgbaImage, footAdjacentUpholstery: Mask): Buffer {
+  const { width, height, channels } = source;
+  const buf = Buffer.alloc(width * height * 3);
+  for (let j = 0; j < width * height; j++) {
+    const p = j * channels;
+    const o = j * 3;
+    let r = source.data[p];
+    let g = source.data[p + 1];
+    let b = source.data[p + 2];
+    if (footAdjacentUpholstery.data[j] >= 128) {
+      r = Math.round(r * 0.45 + 60 * 0.55);
+      g = Math.round(g * 0.45 + 200 * 0.55);
+      b = Math.round(b * 0.45 + 255 * 0.55);
+    }
+    buf[o] = r;
+    buf[o + 1] = g;
+    buf[o + 2] = b;
+  }
+  return buf;
+}
+
+export function buildOwnershipDebugRgb(
+  source: RgbaImage,
+  legs: Mask,
+  footAdjacentUpholstery: Mask,
+  frontRailSeamBand: Mask,
+): Buffer {
+  const { width, height, channels } = source;
+  const buf = Buffer.alloc(width * height * 3);
+  for (let j = 0; j < width * height; j++) {
+    const p = j * channels;
+    const o = j * 3;
+    let r = source.data[p];
+    let g = source.data[p + 1];
+    let b = source.data[p + 2];
+    if (legs.data[j] >= 128) {
+      r = 220;
+      g = 40;
+      b = 40;
+    } else if (footAdjacentUpholstery.data[j] >= 128) {
+      r = 50;
+      g = 200;
+      b = 255;
+    } else if (frontRailSeamBand.data[j] >= 128) {
+      r = 255;
+      g = 90;
+      b = 220;
+    }
+    buf[o] = r;
+    buf[o + 1] = g;
+    buf[o + 2] = b;
+  }
+  return buf;
+}
+
 export interface Stage4bEdgeFixAudit {
   bandSourceRgbSurvivors: number;
   cornerSourceRgbSurvivors: number;
+  footAdjacentSourceRgbSurvivors: number;
   contourSourceRgbSurvivors: number;
   backgroundPixelsTouchedByCleanup: number;
   footCornerPixelsTouchedOutsideAlpha: number;
+  footAdjacentPixelsOutsideAlpha: number;
   contourPixelsTouchedOutsideAlpha: number;
 }
 
@@ -267,6 +395,14 @@ export function auditStage4bEdgeFix(
       masks.footCornerRing,
       0,
     ),
+    footAdjacentSourceRgbSurvivors: countSourceRgbSurvivorsInMask(
+      source,
+      final,
+      alpha,
+      legs,
+      masks.footAdjacentUpholstery,
+      0,
+    ),
     contourSourceRgbSurvivors: countSourceRgbSurvivorsInMask(
       source,
       final,
@@ -277,6 +413,7 @@ export function auditStage4bEdgeFix(
     ),
     backgroundPixelsTouchedByCleanup: forceResult.backgroundPixelsTouchedByCleanup,
     footCornerPixelsTouchedOutsideAlpha: countMaskPixelsOutsideAlpha(masks.footCornerRing, alpha),
+    footAdjacentPixelsOutsideAlpha: countMaskPixelsOutsideAlpha(masks.footAdjacentUpholstery, alpha),
     contourPixelsTouchedOutsideAlpha: countMaskPixelsOutsideAlpha(masks.contourRing, alpha),
   };
 }
@@ -289,6 +426,9 @@ export function assertStage4bEdgeFixComplete(audit: Stage4bEdgeFixAudit): void {
   if (audit.cornerSourceRgbSurvivors !== 0) {
     failures.push(`cornerSourceRgbSurvivors=${audit.cornerSourceRgbSurvivors}`);
   }
+  if (audit.footAdjacentSourceRgbSurvivors !== 0) {
+    failures.push(`footAdjacentSourceRgbSurvivors=${audit.footAdjacentSourceRgbSurvivors}`);
+  }
   if (audit.contourSourceRgbSurvivors !== 0) {
     failures.push(`contourSourceRgbSurvivors=${audit.contourSourceRgbSurvivors}`);
   }
@@ -297,6 +437,9 @@ export function assertStage4bEdgeFixComplete(audit: Stage4bEdgeFixAudit): void {
   }
   if (audit.footCornerPixelsTouchedOutsideAlpha !== 0) {
     failures.push(`footCornerPixelsTouchedOutsideAlpha=${audit.footCornerPixelsTouchedOutsideAlpha}`);
+  }
+  if (audit.footAdjacentPixelsOutsideAlpha !== 0) {
+    failures.push(`footAdjacentPixelsOutsideAlpha=${audit.footAdjacentPixelsOutsideAlpha}`);
   }
   if (audit.contourPixelsTouchedOutsideAlpha !== 0) {
     failures.push(`contourPixelsTouchedOutsideAlpha=${audit.contourPixelsTouchedOutsideAlpha}`);

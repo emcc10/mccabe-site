@@ -48,6 +48,7 @@
     "render:final-pipeline": "tsx scripts/renderFinalPipeline.ts",
     "render:preview-pipeline": "tsx scripts/renderPreviewPipeline.ts",
     "render:preview-cleanup-v2": "tsx scripts/renderPreviewCleanupV2.ts",
+    "render:preview-v3": "tsx scripts/renderPreviewV3.ts",
     "render:hero-pipeline": "tsx scripts/renderHeroPipeline.ts",
     "hero:check-key": "tsx scripts/checkOpenAiKey.ts",
     "reexport:swatch-clean": "tsx scripts/reexportSwatchClean.ts"

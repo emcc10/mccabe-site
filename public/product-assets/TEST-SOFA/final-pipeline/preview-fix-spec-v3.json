@@ -1,0 +1,23 @@
+{
+  "pass": "preview-pipeline-v3-base-stage",
+  "frontRail": {
+    "regionPixels": 39742,
+    "seamBandPixels": 2208,
+    "attenuationPixels": 736,
+    "bottomSeamBandPixels": 2826
+  },
+  "footAdjacent": {
+    "ringPixels": 1597,
+    "sourceRgbSurvivors": 0
+  },
+  "edgeFixAudit": {
+    "bandSourceRgbSurvivors": 0,
+    "cornerSourceRgbSurvivors": 0,
+    "footAdjacentSourceRgbSurvivors": 0,
+    "contourSourceRgbSurvivors": 0,
+    "backgroundPixelsTouchedByCleanup": 0,
+    "footCornerPixelsTouchedOutsideAlpha": 0,
+    "footAdjacentPixelsOutsideAlpha": 0,
+    "contourPixelsTouchedOutsideAlpha": 0
+  }
+}

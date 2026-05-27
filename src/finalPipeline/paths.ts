@@ -59,6 +59,30 @@ export function cleanupSpecV2Path(code: string): string {
   return finalPath(`cleanup-spec-v2.json`);
 }
 
+export function previewV3MasterPath(code: string): string {
+  return finalPath(`best-preview-master-${swatchCodeToSlug(code)}-v3.png`);
+}
+
+export function previewV3ComparisonPath(code: string): string {
+  return finalPath(`best-preview-comparison-${swatchCodeToSlug(code)}-v3.png`);
+}
+
+export function previewBottomRailRegionDebugPath(): string {
+  return finalPath('preview-bottom-rail-region-debug.png');
+}
+
+export function previewFootAdjacentZoneDebugPath(): string {
+  return finalPath('preview-foot-adjacent-zone-debug.png');
+}
+
+export function previewOwnershipDebugPath(): string {
+  return finalPath('preview-ownership-debug.png');
+}
+
+export function previewFixSpecV3Path(): string {
+  return finalPath('preview-fix-spec-v3.json');
+}
+
 export function resolveSwatchImagePath(swatchFile: string): string {
   if (swatchFile.includes('/') || swatchFile.includes('\\')) {
     return join(REPO_ROOT, swatchFile);

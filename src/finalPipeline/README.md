@@ -9,13 +9,13 @@ Two layers share the same product geometry, masks, and swatch profiles. They do 
 
 `npm run render:final-pipeline` is an alias for the preview command.
 
-**Targeted cleanup (v2)** — surgical fix on an existing best preview (bottom front seam lines + leg-adjacent warmth only):
+**Preview v3 (base-stage fixes)** — foot-adjacent chroma + front-rail seam fixes in `buildBaseRecolor` (not a post-pass):
 
 ```bash
-npm run render:preview-cleanup-v2
+npm run render:preview-v3
 ```
 
-Outputs: `best-preview-master-{SWATCH}-v2.png`, comparison, debug overlays, `cleanup-spec-v2.json`.
+Outputs: `best-preview-master-{SWATCH}-v3.png`, comparison vs prior preview, ownership debug PNGs, `preview-fix-spec-v3.json`.
 
 ---
 

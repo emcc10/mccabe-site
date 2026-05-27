@@ -7,13 +7,15 @@ import { compositePhase2 } from '../phase2/composite.js';
 import { computeUpholsteryLabStats, type RelativeLRemapParams } from '../phase4/recolor.js';
 import {
   applyStage4bEdgeFixV3,
+  auditStage4bEdgeFix,
+  forceFootAdjacentChromaRemap,
   recolorWithStage4bCoverage,
 } from '../phase4b/coverage.js';
-import { applyBottomSeamCleanup } from '../phase6a/bottomSeam.js';
 import { SOURCE_OUT } from '../phase1/paths.js';
 import type { RgbaImage } from '../phase1/segment.js';
 import type { SwatchProfile } from './spec.js';
 import { baseRecolorPath } from './paths.js';
+import { applyPreviewFixV3AtBaseStage, type PreviewFixV3Result } from './preview/previewFixV3.js';
 
 const LIGHTNESS_BANDS = {
   light: { lLow: 72, lHigh: 92, mappedLBlend: 0.82 },
@@ -37,12 +39,13 @@ export function profileToRelativeLParams(profile: SwatchProfile): RelativeLRemap
   };
 }
 
-/** Reusable swatch-driven base recolor + fixed product edge/bottom seam steps. */
+/** Reusable swatch-driven base recolor + v3 foot/rail fixes at source stage. */
 export async function buildBaseRecolor(profile: SwatchProfile): Promise<{
   image: RgbaImage;
   path: string;
   params: RelativeLRemapParams;
   labStats: ReturnType<typeof computeUpholsteryLabStats>;
+  previewFixV3: PreviewFixV3Result;
 }> {
   const source = await loadRgba(SOURCE_OUT);
   const { alpha, upholstery, legs } = await loadPhase1Masks(source);
@@ -58,18 +61,40 @@ export async function buildBaseRecolor(profile: SwatchProfile): Promise<{
     labStats,
   );
   const composited = compositePhase2(source, recolored, alpha, masks.upholsteryRecolor, legs);
-  applyStage4bEdgeFixV3(source, recolored, composited, alpha, legs, masks, params, labStats);
 
-  const { image, diagnostics } = applyBottomSeamCleanup(
+  const edgeFix = applyStage4bEdgeFixV3(source, recolored, composited, alpha, legs, masks, params, labStats);
+  const footFix = forceFootAdjacentChromaRemap(
+    source,
+    recolored,
     composited,
+    alpha,
+    legs,
+    masks.footAdjacentUpholstery,
+    params,
+    labStats,
+  );
+  const bgTouched = edgeFix.backgroundPixelsTouchedByCleanup + footFix.backgroundPixelsTouchedByCleanup;
+  if (bgTouched !== 0) {
+    throw new Error(`Coverage remap touched ${bgTouched} background pixels`);
+  }
+
+  const edgeAudit = auditStage4bEdgeFix(source, composited, alpha, legs, masks, {
+    backgroundPixelsTouchedByCleanup: 0,
+  });
+  const { image, fix } = await applyPreviewFixV3AtBaseStage(
+    source,
+    composited,
+    recolored,
     alpha,
     upholstery,
     legs,
     masks,
+    profile.targetLab,
+    edgeAudit,
   );
 
-  if (diagnostics.backgroundPixelsTouched !== 0) {
-    throw new Error(`Base recolor touched ${diagnostics.backgroundPixelsTouched} background pixels`);
+  if (fix.audit.backgroundPixelsTouchedByCleanup !== 0) {
+    throw new Error(`Base recolor touched ${fix.audit.backgroundPixelsTouchedByCleanup} background pixels`);
   }
 
   const path = baseRecolorPath(profile.code);
@@ -80,5 +105,5 @@ export async function buildBaseRecolor(profile: SwatchProfile): Promise<{
     .png()
     .toFile(path);
 
-  return { image, path, params, labStats };
+  return { image, path, params, labStats, previewFixV3: fix };
 }
