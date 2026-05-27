@@ -18,7 +18,7 @@ async function main() {
     `  bottom lines: detect mask=${result.spec.bottomLine.detectionMaskPixels}px weights=${result.spec.bottomLine.detectionWeightPixels}px, touched=${result.spec.bottomLine.pixelsTouched}, ΔL ${result.spec.bottomLine.meanLBefore.toFixed(2)} → ${result.spec.bottomLine.meanLAfter.toFixed(2)}`,
   );
   console.log(
-    `  leg zone: ${result.spec.legZone.pixelsContaminated} contaminated, ${result.spec.legZone.pixelsTouched}px repaired`,
+    `  leg zone: ${result.spec.legZone.zonePixels}px zone, ${result.spec.legZone.pixelsContaminated} warm, ${result.spec.legZone.pixelsTouched}px repaired`,
   );
   console.log(
     `  integrity: feetΔ=${result.spec.integrity.feetPixelsChanged} bgΔ=${result.spec.integrity.backgroundPixelsChanged} outside=${result.spec.integrity.pixelsChangedOutsideZones}`,

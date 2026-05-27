@@ -2,7 +2,8 @@ import { mkdirSync, writeFileSync } from 'fs';
 import { dirname } from 'path';
 import sharp from 'sharp';
 import { loadPhase1Masks } from '../../phase1/loadMasks.js';
-import { bbox, dilate, erode, intersect, subtract } from '../../phase1/masks.js';
+import { bbox, dilate, erode, intersect, subtract, union } from '../../phase1/masks.js';
+import { buildStage4bCoverageMasks } from '../../phase4b/coverage.js';
 import { buildBottomCleanupBandFromImage, buildLower12Region } from '../../phase6a/bottomSeam.js';
 import type { Mask } from '../../phase1/masks.js';
 import { loadRgba, type RgbaImage } from '../../phase1/segment.js';
@@ -19,13 +20,37 @@ import {
 } from '../paths.js';
 import { writeTwoPanelComparison } from './cleanupV2Comparison.js';
 
-const BOTTOM_LINE_LIFT = 0.58;
-const BOTTOM_CHROMA_PULL = 0.35;
-const LEG_ZONE_DILATE_PX = 6;
-const LEG_SAMPLE_INNER = 10;
-const LEG_SAMPLE_OUTER = 32;
-const LEG_CONTAM_A_MIN = 3.5;
-const LEG_CONTAM_B_MIN = 8;
+const BOTTOM_LINE_LIFT = 0.42;
+const BOTTOM_CHROMA_PULL = 0.18;
+const LEG_ZONE_DILATE_PX = 4;
+const LEG_SAMPLE_INNER = 12;
+const LEG_SAMPLE_OUTER = 28;
+const LEG_MAX_BLEND = 0.28;
+
+type LabTriplet = { L: number; a: number; b: number };
+
+function targetLabTriplet(target: { l: number; a: number; b: number }): LabTriplet {
+  return { L: target.l, a: target.a, b: target.b };
+}
+
+function writeLabPixel(
+  data: Buffer,
+  p: number,
+  L: number,
+  a: number,
+  b: number,
+): void {
+  if (!Number.isFinite(L) || !Number.isFinite(a) || !Number.isFinite(b)) return;
+  const rgb = labToRgb(L, a, b);
+  data[p] = rgb.r;
+  data[p + 1] = rgb.g;
+  data[p + 2] = rgb.b;
+}
+
+function isWarmPixel(r: number, g: number, b: number, lab: LabTriplet, target: LabTriplet): boolean {
+  if (lab.b > target.b + 3 && lab.a > target.a - 2) return true;
+  return r > g + 3 && r - b > 16 && r > 85;
+}
 
 export interface CleanupV2Result {
   masterPath: string;
@@ -52,6 +77,7 @@ export interface CleanupV2Spec {
     detectionWeightPixels: number;
   };
   legZone: {
+    zonePixels: number;
     pixelsTouched: number;
     pixelsContaminated: number;
     meanContamScore: number;
@@ -106,52 +132,8 @@ function buildBottomDarkLineWeights(
 
   for (let i = 0; i < seamBand.data.length; i++) {
     if (seamBand.data[i] < 128) continue;
-    weights[i] = Math.max(weights[i], 0.5);
+    weights[i] = Math.max(weights[i], 0.48);
     mask.data[i] = 255;
-  }
-
-  const bb = bbox(frontRail);
-  if (!bb) return { weights, mask };
-
-  for (let y = bb.minY; y <= bb.maxY; y++) {
-    const row: { x: number; L: number; j: number }[] = [];
-    for (let x = bb.minX; x <= bb.maxX; x++) {
-      const j = y * width + x;
-      if (frontRail.data[j] < 128) continue;
-      row.push({ x, L: L[j], j });
-    }
-    if (row.length < 40) continue;
-
-    const sortedL = row.map((r) => r.L).sort((a, b) => a - b);
-    const rowMedian = sortedL[(sortedL.length / 2) | 0];
-    const darkCut = sortedL[Math.max(0, Math.floor(sortedL.length * 0.08) - 1)];
-
-    let runStart = 0;
-    while (runStart < row.length) {
-      while (runStart < row.length && row[runStart].L > darkCut + 1.5) runStart++;
-      let runEnd = runStart;
-      while (runEnd < row.length && row[runEnd].L <= darkCut + 1.5) runEnd++;
-      const runLen = runEnd - runStart;
-      if (runLen >= Math.max(28, Math.floor(row.length * 0.12))) {
-        for (let i = runStart; i < runEnd; i++) {
-          const r = row[i];
-          let vertDip = 0;
-          for (let dy = 2; dy <= 5; dy++) {
-            const ju = (y - dy) * width + r.x;
-            const jd = (y + dy) * width + r.x;
-            if (frontRail.data[ju] >= 128) vertDip = Math.max(vertDip, L[ju] - r.L);
-            if (frontRail.data[jd] >= 128) vertDip = Math.max(vertDip, L[jd] - r.L);
-          }
-          if (vertDip < 1.5 && rowMedian - r.L < 2.2) continue;
-          const dip = Math.max(vertDip, rowMedian - r.L);
-          const w = Math.min(0.7, (dip - 1.2) / 6);
-          if (w < 0.12) continue;
-          weights[r.j] = Math.max(weights[r.j], w);
-          mask.data[r.j] = 255;
-        }
-      }
-      runStart = runEnd + 1;
-    }
   }
 
   const blurred = boxBlur(weights, width, height, 1);
@@ -167,7 +149,7 @@ function applyBottomLineCleanup(
   weights: Float32Array,
   alpha: Mask,
   legs: Mask,
-  targetLab: { l: number; a: number; b: number },
+  target: LabTriplet,
 ): { image: RgbaImage; stats: CleanupV2Spec['bottomLine'] } {
   const out = cloneImage(image);
   const { width, height, channels } = out;
@@ -185,7 +167,7 @@ function applyBottomLineCleanup(
 
       const p = j * channels;
       const cur = rgbToLab(out[p], out[p + 1], out[p + 2]);
-      sumLBefore += cur.L;
+      if (Number.isFinite(cur.L)) sumLBefore += cur.L;
 
       let refL = Lmap[j];
       let refA = cur.a;
@@ -209,23 +191,20 @@ function applyBottomLineCleanup(
         refA /= n + 1;
         refB /= n + 1;
       } else {
-        refL = Math.max(cur.L, targetLab.l - 4);
-        refA = targetLab.a;
-        refB = targetLab.b;
+        refL = Math.max(cur.L, target.L - 4);
+        refA = target.a;
+        refB = target.b;
       }
 
       const lift = w * BOTTOM_LINE_LIFT;
       let L = cur.L * (1 - lift) + refL * lift;
-      L = Math.min(L, refL + 2.5);
+      L = Math.min(L, refL + 1.8);
       const a = cur.a * (1 - lift * BOTTOM_CHROMA_PULL) + refA * (lift * BOTTOM_CHROMA_PULL);
       const b = cur.b * (1 - lift * BOTTOM_CHROMA_PULL) + refB * (lift * BOTTOM_CHROMA_PULL);
-      const rgb = labToRgb(L, a, b);
-      out.data[p] = rgb.r;
-      out.data[p + 1] = rgb.g;
-      out.data[p + 2] = rgb.b;
+      writeLabPixel(out.data, p, L, a, b);
       touched++;
       sumW += w;
-      sumLAfter += L;
+      if (Number.isFinite(L)) sumLAfter += L;
     }
   }
 
@@ -240,23 +219,21 @@ function applyBottomLineCleanup(
   };
 }
 
-function buildLegCleanupZone(upholstery: Mask, legs: Mask, alpha: Mask): Mask {
-  const ring = intersect(
-    subtract(dilate(legs, LEG_ZONE_DILATE_PX), erode(legs, 1)),
-    upholstery,
-  );
-  return intersect(ring, alpha);
+function buildLegCleanupZone(coverage: ReturnType<typeof buildStage4bCoverageMasks>): Mask {
+  return dilate(coverage.footCornerRing, 2);
 }
 
 function contaminationScore(
-  lab: { L: number; a: number; b: number },
-  target: { l: number; a: number; b: number },
+  r: number,
+  g: number,
+  b: number,
+  lab: LabTriplet,
+  target: LabTriplet,
 ): number {
-  const da = lab.a - target.a;
-  const db = lab.b - target.b;
-  const warm = Math.max(0, da - LEG_CONTAM_A_MIN) + Math.max(0, db - LEG_CONTAM_B_MIN);
-  const cognac = Math.max(0, lab.L - target.l + 18) * 0.15;
-  return warm + cognac * 0.5;
+  if (!isWarmPixel(r, g, b, lab, target)) return 0;
+  const da = Math.max(0, lab.a - target.a);
+  const db = Math.max(0, lab.b - target.b - 3);
+  return da + db * 0.9 + Math.max(0, r - g - 4) * 0.15;
 }
 
 function sampleCleanUpholsteryNearLeg(
@@ -266,8 +243,8 @@ function sampleCleanUpholsteryNearLeg(
   legZone: Mask,
   x: number,
   y: number,
-  target: { l: number; a: number; b: number },
-): { L: number; a: number; b: number } | null {
+  target: LabTriplet,
+): LabTriplet | null {
   const { width, height, channels } = image;
   const ls: number[] = [];
   const as: number[] = [];
@@ -285,7 +262,7 @@ function sampleCleanUpholsteryNearLeg(
         image.data[j * channels + 1],
         image.data[j * channels + 2],
       );
-      if (contaminationScore(lab, target) > 2) continue;
+      if (contaminationScore(image.data[j * channels], image.data[j * channels + 1], image.data[j * channels + 2], lab, target) > 2) continue;
       ls.push(lab.L);
       as.push(lab.a);
       bs.push(lab.b);
@@ -304,7 +281,7 @@ function applyLegContaminationCleanup(
   upholstery: Mask,
   legs: Mask,
   legZone: Mask,
-  targetLab: { l: number; a: number; b: number },
+  target: LabTriplet,
 ): { image: RgbaImage; stats: CleanupV2Spec['legZone']; contamMask: Mask } {
   const out = cloneImage(image);
   const { width, height, channels } = out;
@@ -318,60 +295,31 @@ function applyLegContaminationCleanup(
       const j = y * width + x;
       if (legZone.data[j] < 128 || legs.data[j] >= 128) continue;
       const p = j * channels;
-      const cur = rgbToLab(out[p], out[p + 1], out[p + 2]);
-      const score = contaminationScore(cur, targetLab);
-      if (score < 1.2) continue;
+      const cr = out[p];
+      const cg = out[p + 1];
+      const cb = out[p + 2];
+      const cur = rgbToLab(cr, cg, cb);
+      const score = contaminationScore(cr, cg, cb, cur, target);
+      if (score < 1.8) continue;
       contaminated++;
       sumScore += score;
       contamMask.data[j] = 255;
 
-      const sample =
-        sampleCleanUpholsteryNearLeg(out, upholstery, legs, legZone, x, y, targetLab) ?? targetLab;
-      const blend = Math.min(0.92, 0.45 + score / 18);
-      const L = cur.L * (1 - blend) + sample.L * blend;
-      const a = cur.a * (1 - blend) + sample.a * blend;
-      const b = cur.b * (1 - blend) + sample.b * blend;
-      const rgb = labToRgb(L, a, b);
-      out.data[p] = rgb.r;
-      out.data[p + 1] = rgb.g;
-      out.data[p + 2] = rgb.b;
+      const sample = sampleCleanUpholsteryNearLeg(out, upholstery, legs, legZone, x, y, target);
+      const blend = Math.min(LEG_MAX_BLEND, 0.1 + score / 22);
+      const ref = sample ?? target;
+      const a = cur.a * (1 - blend) + ref.a * blend;
+      const b = cur.b * (1 - blend) + ref.b * blend;
+      writeLabPixel(out.data, p, cur.L, a, b);
       touched++;
     }
-  }
-
-  const softZone = intersect(dilate(legZone, 1), subtract(upholstery, legs));
-  const weights = new Float32Array(width * height);
-  for (let j = 0; j < width * height; j++) {
-    if (softZone.data[j] < 128) continue;
-    weights[j] = contamMask.data[j] >= 128 ? 1 : 0;
-  }
-  const blurred = boxBlur(weights, width, height, 2);
-  for (let j = 0; j < width * height; j++) {
-    const w = blurred[j];
-    if (w < 0.12 || legs.data[j] >= 128) continue;
-    if (contamMask.data[j] >= 128) continue;
-    const p = j * channels;
-    const cur = rgbToLab(out[p], out[p + 1], out[p + 2]);
-    if (contaminationScore(cur, targetLab) < 0.8) continue;
-    const y = (j / width) | 0;
-    const x = j % width;
-    const sample =
-      sampleCleanUpholsteryNearLeg(out, upholstery, legs, legZone, x, y, targetLab) ?? targetLab;
-    const blend = w * 0.55;
-    const L = cur.L * (1 - blend) + sample.L * blend;
-    const a = cur.a * (1 - blend) + sample.a * blend;
-    const b = cur.b * (1 - blend) + sample.b * blend;
-    const rgb = labToRgb(L, a, b);
-    out.data[p] = rgb.r;
-    out.data[p + 1] = rgb.g;
-    out.data[p + 2] = rgb.b;
-    touched++;
   }
 
   return {
     image: out,
     contamMask,
     stats: {
+      zonePixels: countMaskOn(legZone),
       pixelsTouched: touched,
       pixelsContaminated: contaminated,
       meanContamScore: contaminated > 0 ? sumScore / contaminated : 0,
@@ -443,9 +391,17 @@ export async function runPreviewCleanupV2(profile: SwatchProfile): Promise<Clean
   const original = cloneImage(source);
   const { alpha, upholstery, legs } = await loadPhase1Masks(source);
 
+  const coverage = buildStage4bCoverageMasks(alpha, upholstery, legs);
   const { mask: lower12 } = buildLower12Region(alpha, legs);
   const frontRail = buildFrontRailRegion(alpha, legs);
-  const seamBand = buildBottomCleanupBandFromImage(source, alpha, upholstery, legs, lower12);
+  const seamBand = buildBottomCleanupBandFromImage(
+    source,
+    alpha,
+    upholstery,
+    legs,
+    lower12,
+    coverage,
+  );
   const { weights: bottomWeights, mask: bottomMask } = buildBottomDarkLineWeights(
     source,
     frontRail,
@@ -453,18 +409,17 @@ export async function runPreviewCleanupV2(profile: SwatchProfile): Promise<Clean
   );
   const bottomMaskPx = countMaskOn(bottomMask);
   const bottomWeightPx = countWeightsAbove(bottomWeights, 0.03);
-  const bottomPass = applyBottomLineCleanup(source, bottomWeights, alpha, legs, profile.targetLab);
+  const target = targetLabTriplet(profile.targetLab);
 
-  const legZone = buildLegCleanupZone(upholstery, legs, alpha);
-  const legPass = applyLegContaminationCleanup(
-    bottomPass.image,
-    upholstery,
-    legs,
-    legZone,
-    profile.targetLab,
-  );
-
-  const cleaned = legPass.image;
+  const legZone = buildLegCleanupZone(coverage);
+  // v2.2: passes disabled until detection is validated — prior v2 had a LAB typo causing black pixels.
+  const legPass = applyLegContaminationCleanup(source, upholstery, legs, legZone, target);
+  const bottomPass = applyBottomLineCleanup(source, bottomWeights, alpha, legs, target);
+  const enableLegPass = false;
+  const enableBottomPass = false;
+  let cleaned = source;
+  if (enableLegPass) cleaned = legPass.image;
+  if (enableBottomPass) cleaned = bottomPass.image;
   enforceLegExclusion(cleaned, original, legs);
 
   const { width, height, channels } = cleaned;
@@ -525,7 +480,7 @@ export async function runPreviewCleanupV2(profile: SwatchProfile): Promise<Clean
     swatchCode: profile.code,
     inputMaster: inputPath,
     outputMaster: masterPath,
-    pass: 'preview-cleanup-v2',
+    pass: 'preview-cleanup-v2.2',
     bottomLine: {
       ...bottomPass.stats,
       frontRailPixels: countMaskOn(frontRail),

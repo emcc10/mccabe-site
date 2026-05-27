@@ -2,21 +2,22 @@
   "swatchCode": "BALI-SILK",
   "inputMaster": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\best-preview-master-BALI-SILK.png",
   "outputMaster": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\best-preview-master-BALI-SILK-v2.png",
-  "pass": "preview-cleanup-v2",
+  "pass": "preview-cleanup-v2.2",
   "bottomLine": {
     "pixelsTouched": 2208,
-    "meanWeight": 0.559492746098102,
-    "meanLBefore": null,
-    "meanLAfter": null,
+    "meanWeight": 0.3839999934037526,
+    "meanLBefore": 0,
+    "meanLAfter": 0,
     "frontRailPixels": 44158,
-    "seamBandPixels": 0,
-    "detectionMaskPixels": 2208,
+    "seamBandPixels": 2826,
+    "detectionMaskPixels": 2826,
     "detectionWeightPixels": 2944
   },
   "legZone": {
-    "pixelsTouched": 976,
-    "pixelsContaminated": 583,
-    "meanContamScore": null
+    "zonePixels": 580,
+    "pixelsTouched": 0,
+    "pixelsContaminated": 0,
+    "meanContamScore": 0
   },
   "integrity": {
     "feetPixelsChanged": 0,
