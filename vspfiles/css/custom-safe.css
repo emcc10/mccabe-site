@@ -11080,10 +11080,16 @@ body.mc-product-page #v65-product-parent .klarna-product-page,
 body.mc-product-page #v65-product-parent .payment-plan,
 body.mc-product-page #v65-product-parent [class*="affirm"],
 body.mc-product-page #v65-product-parent [class*="klarna"]{
-  display:block !important;
-  width:100% !important;
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+  text-align: left !important;
+  width: auto !important;
+  max-width: 100% !important;
   min-height:44px !important;
-  text-align:left !important;
   margin:0 0 12px 0 !important;
 }
 
@@ -11097,6 +11103,9 @@ body.mc-product-page #v65-product-parent .klarna-product-page *,
 body.mc-product-page #v65-product-parent .payment-plan *,
 body.mc-product-page #v65-product-parent [class*="affirm"] *,
 body.mc-product-page #v65-product-parent [class*="klarna"] *{
+  display: inline !important;
+  white-space: nowrap !important;
+  vertical-align: middle !important;
   text-align:left !important;
 }
 
