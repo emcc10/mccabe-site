@@ -11942,7 +11942,7 @@ body.mtl-sectional-diagram-lightbox-open {
 
 #mtl-product-summary {
   clear: both;
-  display: block !important;
+  display: none !important;
   margin: 24px 0;
   padding: 18px;
   border: 1px solid #ddd;
@@ -13013,11 +13013,11 @@ body.productdetails #product_options_heading > td:nth-child(2) > img:nth-child(1
 
 body.productdetails #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label,
 body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label {
-
   font-weight: 400 !important;
   letter-spacing: 0.14em !important;
   color: #444 !important;
-  margin-top: -39px !important;
+  margin-top: 0 !important;
+  margin-bottom: 2px !important;
   text-transform: capitalize !important;
 }
 
@@ -13068,6 +13068,7 @@ div.product_productprice:nth-child(2) {
    Selector kept verbatim from the live override; brittle but matches the live tree exactly. */
 table.colors_pricebox:nth-child(3) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > b:nth-child(2) > font:nth-child(1) > div:nth-child(1) > span:nth-child(1) {
   margin-top: 5px !important;
+width: 400px !important;
 }
 
 /* =========================================================
@@ -15343,4 +15344,47 @@ body.category.is-home #slideshow-container .hero-nav {
   overflow: visible !important;
   pointer-events: auto !important;
   z-index: 50 !important;
+}
+/* MC FINAL FIX — keep PDP top price panel visible and separated */
+body.productdetails #v65-product-parent #mc-pdp-top-price-panel,
+body.mc-product-page #v65-product-parent #mc-pdp-top-price-panel,
+html.is-sectional-product #v65-product-parent #mc-pdp-top-price-panel {
+  display: flex !important;
+  visibility: visible !important;
+  flex-direction: column !important;
+  height: auto !important;
+  max-height: none !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  clear: both !important;
+  margin: 16px 0 18px 0 !important;
+  padding: 0 !important;
+  z-index: 5 !important;
+}
+
+body.productdetails #v65-product-parent #mc-pdp-top-price-panel *,
+body.mc-product-page #v65-product-parent #mc-pdp-top-price-panel *,
+html.is-sectional-product #v65-product-parent #mc-pdp-top-price-panel * {
+  position: static !important;
+  transform: none !important;
+}
+/* MC FIX — hide duplicate selected-configuration summary card on sectional PDPs */
+body.productdetails #v65-product-parent .mtl-selected-configuration-card,
+body.mc-product-page #v65-product-parent .mtl-selected-configuration-card,
+body.productdetails #v65-product-parent .mtl-selected-config-card,
+body.mc-product-page #v65-product-parent .mtl-selected-config-card,
+body.productdetails #v65-product-parent #mtl-selected-configuration,
+body.mc-product-page #v65-product-parent #mtl-selected-configuration,
+body.productdetails #v65-product-parent #mc-selected-configuration-summary,
+body.mc-product-page #v65-product-parent #mc-selected-configuration-summary {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
 }
