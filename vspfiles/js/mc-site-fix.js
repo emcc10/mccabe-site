@@ -8,7 +8,7 @@
   if (global.__MC_SITE_FIX_LOADED__) return;
   global.__MC_SITE_FIX_LOADED__ = true;
 
-  var MAT = "#f2f2f2";
+  var MAT = "#ffffff";
   var TILE_H = 280;
   var STAGE_H = 220;
   var TILE_H_M = 220;

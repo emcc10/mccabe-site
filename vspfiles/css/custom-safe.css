@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260607memberpricing — locked Palliser retail/member block; sale-only hide */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260607revertplpmat — reverted gray PLP mats; member pricing lock retained */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -13979,7 +13979,7 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,
   margin: 0 !important;
   padding: var(--mc-plp-mat-pad, 14px) !important;
   box-sizing: border-box !important;
-  background: var(--mc-plp-mat-bg, #f2f2f2) !important;
+  background: var(--mc-plp-mat-bg, #ffffff) !important;
   line-height: 0 !important;
   text-decoration: none !important;
 }
@@ -14095,7 +14095,7 @@ html.is-category-or-listing-page .v-product-grid a.v-product__img {
   padding: var(--mc-plp-mat-pad, 14px) !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
-  background: var(--mc-plp-mat-bg, #f2f2f2) !important;
+  background: var(--mc-plp-mat-bg, #ffffff) !important;
   line-height: 0 !important;
 }
 
@@ -14263,22 +14263,38 @@ html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box > 
   clip-path: none !important;
 }
 
-/* MC PLP THUMB — gray mat on every category thumbnail link */
-html.category #content_area .v-product-grid a.v-product__img,
-html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img,
-body:not(.productdetails) #content_area .v-product-grid a.v-product__img,
-html.category #content_area .v-product-grid a.mc-plp-thumb-mat,
-html[data-mc-category-plp="1"] #content_area .v-product-grid a.mc-plp-thumb-mat {
-  background: #f2f2f2 !important;
-  background-color: #f2f2f2 !important;
+/* MC PLP THUMB — all white, no gray mat */
+html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos/"],
+html.category #content_area .v-product-grid img[src*="/v/vspfiles/product/"],
+html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos"],
+html.category #content_area .v-product-grid img[src*="vspfiles/photos"] {
+  background: #ffffff !important;
   box-shadow: none !important;
   border: 0 !important;
 }
 
-html.category #content_area .v-product-grid a.v-product__img > img,
-html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img > img,
-body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img {
-  background: transparent !important;
+html.category #content_area .v-product-grid a:has(img[src*="/v/vspfiles/photos/"]),
+html.category #content_area .v-product-grid a:has(img[src*="vspfiles/photos"]),
+html.category #content_area .v-product-grid div:has(> img[src*="/v/vspfiles/photos/"]),
+html.category #content_area .v-product-grid div:has(> img[src*="vspfiles/photos"]),
+html.category #content_area .v-product-grid td:has(img[src*="/v/vspfiles/photos/"]),
+html.category #content_area .v-product-grid td:has(img[src*="vspfiles/photos"]) {
+  background: #ffffff !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+html.category #content_area .v-product-grid .v-product,
+html.category #content_area .v-product-grid .v-product__img,
+html.category #content_area .v-product-grid .product_image,
+html.category #content_area .v-product-grid .product_productphoto,
+html.category #content_area .v-product-grid .product-photo,
+html.category #content_area .v-product-grid .product-image,
+html.category #content_area .v-product-grid .product-image-wrapper,
+html.category #content_area .v-product-grid .productimg,
+html.category #content_area .v-product-grid .v65-productPhoto,
+html.category #content_area .v-product-grid .v65-productPhoto a {
+  background: #ffffff !important;
   box-shadow: none !important;
   border: 0 !important;
 }
