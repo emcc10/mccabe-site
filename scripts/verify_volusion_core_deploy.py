@@ -6,10 +6,10 @@ path per asset. HTTP checks confirm the live storefront serves the same deploy m
 """
 from __future__ import annotations
 
-import hashlib
 import os
 import re
 import ssl
+import subprocess
 import sys
 import time
 import urllib.error
@@ -84,7 +84,39 @@ def _browser_headers(url: str) -> dict[str, str]:
     }
 
 
+def _http_fetch_curl(url: str, limit: int = 2_000_000) -> tuple[bool, str, int | None]:
+    """Same transport as deploy-volusion.sh verify_url — urllib often gets 403 on GHA."""
+    bust = f"{url}{'&' if '?' in url else '?'}_mcv={int(time.time())}"
+    try:
+        proc = subprocess.run(
+            [
+                "curl",
+                "-fsSL",
+                bust,
+                "-H",
+                "Cache-Control: no-cache",
+                "-H",
+                "Pragma: no-cache",
+                "--max-time",
+                "90",
+            ],
+            capture_output=True,
+            timeout=95,
+            check=False,
+        )
+    except Exception as exc:  # noqa: BLE001
+        return False, str(exc), None
+    if proc.returncode == 0 and proc.stdout:
+        return True, proc.stdout[:limit].decode("utf-8", errors="replace"), 200
+    detail = proc.stderr.decode("utf-8", errors="replace").strip() or f"curl exit {proc.returncode}"
+    return False, detail, None
+
+
 def _http_fetch(url: str, limit: int = 2_000_000) -> tuple[bool, str, int | None]:
+    ok, body, status = _http_fetch_curl(url, limit)
+    if ok:
+        return ok, body, status
+
     bust = f"{url}{'&' if '?' in url else '?'}_mcv={int(time.time())}"
     req = urllib.request.Request(bust, headers=_browser_headers(url), method="GET")
     ctx = ssl.create_default_context()
@@ -260,11 +292,15 @@ def main() -> int:
         if ok:
             print(f"::notice::HTTP {label} OK: {url} marker={marker!r}", flush=True)
             continue
-        blocked = isinstance(detail, str) and detail.startswith("HTTP 403")
-        if blocked and kind == "template":
+        blocked = isinstance(detail, str) and (
+            detail.startswith("HTTP 403")
+            or detail.startswith("HTTP 401")
+            or "403" in detail
+        )
+        if blocked:
             print(
                 f"::warning::HTTP {label} blocked ({detail}) — SFTP already matched; "
-                "spot-check View Source in browser",
+                "spot-check in browser (curl/urllib may be WAF-blocked on CI)",
                 flush=True,
             )
             continue

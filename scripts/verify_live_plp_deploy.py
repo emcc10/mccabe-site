@@ -23,10 +23,15 @@ def fetch(url: str, *, binary: bool = False) -> bytes:
 def expected_version() -> str:
     enforcer = ROOT / "vspfiles" / "js" / "mc-plp-enforcer.js"
     if enforcer.is_file():
-        m = re.search(r'VERSION = "([0-9]+)"', enforcer.read_text(encoding="utf-8"))
+        m = re.search(r'VERSION = "([0-9a-z]+)"', enforcer.read_text(encoding="utf-8"))
         if m:
             return m.group(1)
     return "20260626p"
+
+
+def version_numeric(ver: str) -> int:
+    m = re.search(r"([0-9]+)", ver)
+    return int(m.group(1)) if m else 0
 
 
 def dtk_plp_version(body: str) -> int:
@@ -69,7 +74,7 @@ def main() -> int:
         else:
             print(f"::notice::OK {needle} @ {url}")
 
-    want_dtk = int(ver)
+    want_dtk = version_numeric(ver)
     dtk_urls = [
         (f"{SITE}/v/vspfiles/templates/266/js/min/design-toolkit.min.js", False),
         (
@@ -121,7 +126,7 @@ def main() -> int:
             continue
         tags = re.findall(r"mc-plp-enforcer\.js\?v=([0-9]+)", html)
         tag_max = max((int(t) for t in tags), default=0)
-        want_tag = int(ver)
+        want_tag = version_numeric(ver)
         if "mc-plp-image-box" not in html:
             msg = f"{cat} missing mc-plp-image-box in baked HTML"
             if soft:
