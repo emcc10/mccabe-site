@@ -461,7 +461,7 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-p
 </script>
 <!-- MC_DEPLOY_VERIFY_20260607plpmat: github->volusion deploy verification marker — search live View Source for this string -->
 <!-- MC_CSS_DEPLOY_VERIFY_20260607plpmat: same token as /v/vspfiles/css/custom-safe.css line 1 -->
-<meta name="mc-deploy-verify" content="20260607plpmat">
+<meta name="mc-deploy-verify" content="20260607mobilepdp">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script>
@@ -1138,14 +1138,16 @@ document.addEventListener("DOMContentLoaded", function () {
       display: block !important;
     }
   }
-  /* Tighter inset; still clear of safe areas and hero menu */
-  body a.mc-home-float, body .mc-home-float { margin-right: 0 !important; }
-  body a.mc-cart-float, body .mc-cart-float {
-    margin-left: 0 !important;
-    left: calc(100vw - 52px - max(10px, env(safe-area-inset-right))) !important;
-    right: auto !important;
-    width: 52px !important;
-    max-width: 52px !important;
+  /* Desktop-only cart inset (mobile uses custom-safe.css end block) */
+  @media (min-width: 992px) {
+    body a.mc-home-float, body .mc-home-float { margin-right: 0 !important; }
+    body a.mc-cart-float, body .mc-cart-float {
+      margin-left: 0 !important;
+      left: calc(100vw - 52px - max(10px, env(safe-area-inset-right))) !important;
+      right: auto !important;
+      width: 52px !important;
+      max-width: 52px !important;
+    }
   }
   </style>
   <!-- Hero headline: IDs + head CSS + sync script — Volusion often strips p/class/style; this must win -->
@@ -1612,28 +1614,20 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     } catch (eClose) {}
   }
   function bindMobileFloatNav() {
-    if (!isMobile()) return;
     FLOAT_NAV.forEach(function (item) {
       var el = document.querySelector(item.sel);
       if (!el) return;
       var href = el.getAttribute("href") || item.href;
       if (!href || href === "#") el.setAttribute("href", item.href);
+      el.setAttribute("role", "link");
+      el.style.pointerEvents = "auto";
       if (el.dataset.mcFloatNavBound === "1") return;
       el.dataset.mcFloatNavBound = "1";
-      el.addEventListener(
-        "click",
-        function (e) {
-          if (!isMobile()) return;
-          var dest = el.getAttribute("href") || item.href;
-          if (!dest || dest === "#") return;
-          closePushMenu();
-          e.preventDefault();
-          e.stopPropagation();
-          if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-          window.location.assign(dest);
-        },
-        true
-      );
+      /* Native <a href> navigation — do not preventDefault (was blocking taps on live mobile). */
+      el.addEventListener("click", function () {
+        if (!isMobile()) return;
+        closePushMenu();
+      });
     });
   }
   if (document.readyState === "loading") {
