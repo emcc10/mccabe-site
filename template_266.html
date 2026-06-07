@@ -36,13 +36,45 @@ body.mc-pdp-price-stack #v65-product-parent .product_sale_price,body.mc-pdp-pric
 body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:2px!important;width:100%!important;position:static!important}
 body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line--sale,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line--sale{display:flex!important;flex-direction:column!important;gap:2px!important;margin-top:4px!important}
 body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-member-pricing .mc-pdp-member-line__amount{letter-spacing:.02em!important;white-space:normal!important}
+body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent font.product_sale_price,body.mc-palliser-pdp:not(.mc-logged-in) #content_area font.product_sale_price,body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent .product_sale_price,body.mc-palliser-pdp:not(.mc-logged-in) #content_area .product_sale_price,body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent .product_saleprice,body.mc-palliser-pdp:not(.mc-logged-in) #content_area .product_saleprice,body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent #priceWithOptions,body.mc-palliser-pdp:not(.mc-logged-in) #content_area #priceWithOptions,body.mc-palliser-pdp:not(.mc-logged-in) .mc-pdp-member-line--sale{display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
+body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.productdetails:not(.mc-palliser-pdp) #mc-inline-config,body.mc-product-page:not(.mc-palliser-pdp) #mc-inline-config{display:none!important;visibility:hidden!important;pointer-events:none!important}
 </style>
 <link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260521type" id="mc-live-patch-css">
 <script>
 (function () {
+  function mcIsPalliserProduct() {
+    var text = [
+      document.title,
+      document.body ? document.body.innerText : "",
+      location.pathname
+    ].join(" ").toLowerCase();
+    return text.indexOf("palliser") !== -1;
+  }
+  function mcSyncPalliserPdpBodyClasses(isLoggedInOpt) {
+    if (!document.body) return;
+    if (mcIsPalliserProduct()) document.body.classList.add("mc-palliser-pdp");
+    else document.body.classList.remove("mc-palliser-pdp");
+    var loggedIn =
+      typeof isLoggedInOpt === "boolean"
+        ? isLoggedInOpt
+        : !!(
+            document.body.classList.contains("mc-member-logged-in") ||
+            document.body.classList.contains("mc-logged-in")
+          );
+    try {
+      if (!loggedIn && sessionStorage.getItem("mc_recent_member_auth")) loggedIn = true;
+    } catch (eSess) {}
+    if (loggedIn) document.body.classList.add("mc-logged-in");
+    else document.body.classList.remove("mc-logged-in");
+  }
+  window.mcIsPalliserProduct = mcIsPalliserProduct;
+  window.mcSyncPalliserPdpBodyClasses = mcSyncPalliserPdpBodyClasses;
+
   function mcEarlyPdpPriceStackClass() {
     try {
       if (!document.body) return;
+      mcSyncPalliserPdpBodyClasses();
+      if (!mcIsPalliserProduct()) return;
       if (document.querySelector(".mc-pdp-member-pricing, .mc-pdp-retail-row, #v65-product-parent .mc-pdp-member-line")) {
         document.body.classList.add("mc-pdp-price-stack");
       }
@@ -461,7 +493,7 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-p
 </script>
 <!-- MC_DEPLOY_VERIFY_20260607plpmat: github->volusion deploy verification marker — search live View Source for this string -->
 <!-- MC_CSS_DEPLOY_VERIFY_20260607plpmat: same token as /v/vspfiles/css/custom-safe.css line 1 -->
-<meta name="mc-deploy-verify" content="20260607mobilepdp">
+<meta name="mc-deploy-verify" content="20260607palliserpdp">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script>
@@ -4560,6 +4592,8 @@ try {
 
   function mount(opts){
     opts = opts || {};
+    if (typeof window.mcIsPalliserProduct === "function" && !window.mcIsPalliserProduct()) return;
+    if (typeof window.mcSyncPalliserPdpBodyClasses === "function") window.mcSyncPalliserPdpBodyClasses();
     var isSecPdp = typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage();
     var isTheaterPdp = false;
     try {
@@ -4627,10 +4661,11 @@ try {
     if (!panel) {
     panel = document.createElement("div");
     panel.id = "mc-inline-config";
+    panel.className = "mc-pdp-config-box";
     panel.style.margin = "0 0 12px";
 
     panel.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;max-width:520px;width:100%">
+      <div class="mc-pdp-config-box" style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;max-width:100%;width:100%">
         <div id="mcLeatherRow" style="display:flex;flex-direction:column;gap:6px;align-items:stretch;width:100%">
           <div id="mcLeatherHeaderRow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;flex-wrap:nowrap">
             <div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 auto">
@@ -4648,7 +4683,7 @@ try {
           </div>
         </div>
 
-        <div id="mcPlannerRow" style="display:flex;flex-direction:row;flex-wrap:nowrap;gap:10px;align-items:stretch;justify-content:flex-start;width:100%;min-width:0;margin-top:4px">
+        <div id="mcPlannerRow" class="mc-pdp-room-planner-box" style="display:flex;flex-direction:row;flex-wrap:nowrap;gap:10px;align-items:stretch;justify-content:flex-start;width:100%;min-width:0;margin-top:4px">
           <button type="button" id="mcPlannerBtn" class="mc-config-btn"
             style="padding:10px 14px;min-width:0;max-width:100%;width:auto;flex:0 1 240px;text-align:center;border:1px solid #333;border-radius:0;background:#fff;cursor:pointer">
             <span>Room Planner</span>
@@ -4661,7 +4696,7 @@ try {
           </a>
         </div>
 
-        <div id="mcConfigurationBlock" class="mc-configuration-rh" style="width:100%">
+        <div id="mcConfigurationBlock" class="mc-configuration-rh mc-pdp-config-box" style="width:100%">
           <div class="mc-configuration-rh__heading">CONFIGURATION</div>
           <div id="mcConfigurationCaption" class="mc-configuration-rh__caption">Please use the room planner to choose configuration.</div>
           <div id="mcConfigurationPieces" class="mc-configuration-rh__pieces" style="display:none"></div>
@@ -6413,6 +6448,9 @@ function detectMemberPricingState(){
     try {
       if (state && state.unlocked) document.body.classList.add('mc-member-logged-in');
       else document.body.classList.remove('mc-member-logged-in');
+      if (typeof window.mcSyncPalliserPdpBodyClasses === 'function') {
+        window.mcSyncPalliserPdpBodyClasses(!!(state && state.unlocked));
+      }
     } catch (eCls) {}
     try {
       if (state && state.unlocked) mcClearRecentMemberAuth();
@@ -17401,6 +17439,9 @@ body.mc-product-page #content_area font.product_sale_price {
     } catch (ePr) {}
     try {
       document.body.classList.add("mc-member-logged-in");
+      if (typeof window.mcSyncPalliserPdpBodyClasses === "function") {
+        window.mcSyncPalliserPdpBodyClasses(true);
+      }
     } catch (eCls) {}
     var state = null;
     try {
@@ -18948,6 +18989,7 @@ async function mcSubmitAuthForm(form, mode) {
   }
 
   function mcEnsurePdpPriceStack() {
+    if (typeof window.mcIsPalliserProduct === 'function' && !window.mcIsPalliserProduct()) return false;
     if (typeof window.mcForceRebuildCleanPriceStack === 'function') {
       try {
         window.mcForceRebuildCleanPriceStack();
@@ -18962,6 +19004,7 @@ async function mcSubmitAuthForm(form, mode) {
     } catch (eCls) {}
     var loggedIn =
       !!(document.body && document.body.classList.contains('mc-member-logged-in')) ||
+      !!(document.body && document.body.classList.contains('mc-logged-in')) ||
       (function () {
         try {
           return !!sessionStorage.getItem('mc_recent_member_auth');
@@ -18969,7 +19012,15 @@ async function mcSubmitAuthForm(form, mode) {
           return false;
         }
       })();
+    /* Logged-out Palliser PDPs must not surface live sale/member amounts in the custom stack. */
     if (!loggedIn && wrap) {
+      wrap.querySelectorAll('.mc-pdp-member-line--sale').forEach(function (node) {
+        try {
+          node.parentNode && node.parentNode.removeChild(node);
+        } catch (eRm) {}
+      });
+    }
+    if (!loggedIn && wrap && !(typeof window.mcIsPalliserProduct === 'function' && window.mcIsPalliserProduct())) {
       var hasSaleLine = wrap.querySelector('.mc-pdp-member-line--sale');
       if (!hasSaleLine) {
         var saleAmt = mcResolvePdpSaleAmount();
@@ -19504,6 +19555,9 @@ async function mcSubmitAuthForm(form, mode) {
       try {
         if (unlocked) document.body.classList.add('mc-member-logged-in');
         else document.body.classList.remove('mc-member-logged-in');
+        if (typeof window.mcSyncPalliserPdpBodyClasses === 'function') {
+          window.mcSyncPalliserPdpBodyClasses(unlocked);
+        }
       } catch (eCls2) {}
       try {
         if (on157MemberGatedPlp && !unlocked) {
@@ -19757,6 +19811,8 @@ async function mcSubmitAuthForm(form, mode) {
   }
 
   function mcRenderPdpRetailAndMember(retailText, memberText, loginUrl, isLoggedIn) {
+    if (typeof window.mcIsPalliserProduct === 'function' && !window.mcIsPalliserProduct()) return false;
+    if (typeof window.mcSyncPalliserPdpBodyClasses === 'function') window.mcSyncPalliserPdpBodyClasses(isLoggedIn);
     if (
       document.getElementById('mc-pdp-top-price-panel') ||
       window.MTL_SECTIONAL_CONFIGS ||
@@ -19899,13 +19955,12 @@ async function mcSubmitAuthForm(form, mode) {
     } else if (isLoggedIn) {
       /* No member amount yet; omit a loading caption so async paint does not flash placeholder text. */
     } else {
-      var salePreview = mcBuildPdpSaleLineHtml(mcResolvePdpSaleAmount());
       html +=
+        '<div class="mc-pdp-palliser-advertise-note">Our prices are too low to advertise…</div>' +
         '<div class="mc-pdp-member-line mc-pdp-member-line--locked">' +
         '<span class="mc-pdp-member-line__label">Member Price</span>' +
         '<span class="mc-pdp-member-line__amount"><a href="#" class="mc-member-grid-price__login" data-mc-open-login>Log in</a> to see member pricing</span>' +
-        '</div>' +
-        salePreview;
+        '</div>';
     }
 
     mcSetStableHtml(wrap, html);
@@ -19966,6 +20021,7 @@ async function mcSubmitAuthForm(form, mode) {
   }
 
   async function mcRenderRetailMemberOnPdp() {
+    if (typeof window.mcIsPalliserProduct === 'function' && !window.mcIsPalliserProduct()) return;
     var root = document.querySelector('#v65-product-parent');
     if (!root) return;
 
@@ -20096,6 +20152,9 @@ if (document.body) {
   if (isLoggedIn) document.body.classList.add('mc-member-logged-in');
   else document.body.classList.remove('mc-member-logged-in');
 }
+if (typeof window.mcSyncPalliserPdpBodyClasses === 'function') {
+  window.mcSyncPalliserPdpBodyClasses(isLoggedIn);
+}
 
 if (!isLoggedIn) {
   mcLoginModalClearRecentAuth();
@@ -20174,6 +20233,7 @@ if (!isLoggedIn) {
   }
 
   function mcBootPdpRetailMemberOnly() {
+    if (typeof window.mcIsPalliserProduct === 'function' && !window.mcIsPalliserProduct()) return;
     if (typeof window.mcPageType === 'function' && window.mcPageType() !== 'pdp' && !mcIsPdpLikePage()) return;
     if (!mcIsPdpLikePage()) return;
     if (window.__mcPdpRetailMemberBooted) return;

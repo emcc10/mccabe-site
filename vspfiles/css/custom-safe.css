@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260607mobilepdp — mobile PDP layout + float nav tap fixes */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260607palliserpdp — Palliser-only PDP pricing/config + mobile containment */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -15516,10 +15516,10 @@ body.mc-product-page #v65-product-parent #mc-selected-configuration-summary {
     flex-direction: column !important;
   }
 
-  html:not(.is-sectional-product) body.productdetails:not(.mc-theater-seating-pdp) #mc-inline-config,
-  html:not(.is-sectional-product) body.mc-product-page:not(.mc-theater-seating-pdp) #mc-inline-config,
-  html:not(.is-sectional-product) body.productdetails:not(.mc-theater-seating-pdp) #mcConfigurationBlock,
-  html:not(.is-sectional-product) body.mc-product-page:not(.mc-theater-seating-pdp) #mcConfigurationBlock {
+  body.productdetails:not(.mc-palliser-pdp) #mc-inline-config,
+  body.mc-product-page:not(.mc-palliser-pdp) #mc-inline-config,
+  body.productdetails:not(.mc-palliser-pdp) #mcConfigurationBlock,
+  body.mc-product-page:not(.mc-palliser-pdp) #mcConfigurationBlock {
     display: none !important;
     visibility: hidden !important;
     pointer-events: none !important;
@@ -15591,5 +15591,138 @@ body.mc-product-page #v65-product-parent #mc-selected-configuration-summary {
     max-width: 100% !important;
     overflow-x: hidden !important;
     clear: both !important;
+  }
+}
+
+/* =========================================================
+   PALLISER PDP ONLY — pricing/config visibility + logged-out sale hide
+   ========================================================= */
+body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,
+body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-member-pricing,
+body.productdetails:not(.mc-palliser-pdp) .mc-pdp-retail-row,
+body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-retail-row,
+body.productdetails:not(.mc-palliser-pdp) .mc-pdp-retail-label,
+body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-retail-label,
+body.productdetails:not(.mc-palliser-pdp) .mc-pdp-palliser-advertise-note,
+body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-palliser-advertise-note,
+body.productdetails:not(.mc-palliser-pdp) #mc-inline-config,
+body.mc-product-page:not(.mc-palliser-pdp) #mc-inline-config,
+body.productdetails:not(.mc-palliser-pdp) #mcConfigurationBlock,
+body.mc-product-page:not(.mc-palliser-pdp) #mcConfigurationBlock,
+body.productdetails:not(.mc-palliser-pdp) .mc-pdp-config-box,
+body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-config-box,
+body.productdetails:not(.mc-palliser-pdp) .mc-pdp-room-planner-box,
+body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-room-planner-box {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.mc-palliser-pdp .mc-pdp-palliser-advertise-note {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 8px 0 !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  color: #555 !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+}
+
+/* Logged-out Palliser: hide Volusion live sale/member selling price (e.g. font.product_sale_price $3,970) */
+body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent font.product_sale_price,
+body.mc-palliser-pdp:not(.mc-logged-in) #content_area font.product_sale_price,
+body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent .product_sale_price,
+body.mc-palliser-pdp:not(.mc-logged-in) #content_area .product_sale_price,
+body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent .product_saleprice,
+body.mc-palliser-pdp:not(.mc-logged-in) #content_area .product_saleprice,
+body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent #priceWithOptions,
+body.mc-palliser-pdp:not(.mc-logged-in) #content_area #priceWithOptions,
+body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent #priceWithOptionsNoTax,
+body.mc-palliser-pdp:not(.mc-logged-in) #content_area #priceWithOptionsNoTax,
+body.mc-palliser-pdp:not(.mc-logged-in) .mc-pdp-member-line--sale,
+body.mc-palliser-pdp:not(.mc-logged-in) .colors_pricebox > font.product_sale_price,
+body.mc-palliser-pdp:not(.mc-logged-in) .colors_pricebox > .product_sale_price,
+body.mc-palliser-pdp:not(.mc-logged-in) .colors_pricebox > .product_saleprice {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Palliser price/config blocks: stay inside PDP column (all viewports) */
+body.mc-palliser-pdp .mc-pdp-member-pricing,
+body.mc-palliser-pdp .mc-pdp-retail-row,
+body.mc-palliser-pdp .mc-pdp-config-box,
+body.mc-palliser-pdp .mc-pdp-room-planner-box,
+body.mc-palliser-pdp .mc-pdp-price-stack,
+body.mc-palliser-pdp #mc-inline-config,
+body.mc-palliser-pdp #mcConfigurationBlock,
+body.mc-palliser-pdp #mc-pdp-price-stack-host {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  float: none !important;
+}
+
+@media (max-width: 768px) {
+  body.mc-palliser-pdp .mc-pdp-member-pricing,
+  body.mc-palliser-pdp .mc-pdp-config-box,
+  body.mc-palliser-pdp .mc-pdp-room-planner-box,
+  body.mc-palliser-pdp .mc-pdp-price-stack,
+  body.mc-palliser-pdp .mc-pdp-retail-row,
+  body.mc-palliser-pdp #mc-inline-config,
+  body.mc-palliser-pdp #mc-pdp-price-stack-host {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+    text-align: center !important;
+  }
+
+  body.mc-palliser-pdp .mc-pdp-member-pricing *,
+  body.mc-palliser-pdp .mc-pdp-config-box *,
+  body.mc-palliser-pdp .mc-pdp-room-planner-box *,
+  body.mc-palliser-pdp .mc-pdp-price-stack *,
+  body.mc-palliser-pdp .mc-pdp-retail-row * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body.mc-palliser-pdp #mcPlannerRow,
+  body.mc-palliser-pdp #mcPlannerRow .mc-config-btn,
+  body.mc-palliser-pdp #mcConfigurationBlock,
+  body.mc-palliser-pdp .mc-configuration-rh__caption,
+  body.mc-palliser-pdp .mc-configuration-rh__heading {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    left: auto !important;
+    right: auto !important;
+    flex: 1 1 100% !important;
   }
 }

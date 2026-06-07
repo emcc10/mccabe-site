@@ -1,6 +1,6 @@
 /*0429 McCabe fixes — load after template.css (linked from template_266.html).
    Ensures hero copy + listing member block even if custom-safe.css fails to load.
-   MC_OVERRIDES_VERIFY_20260607deploy — linked again at end of <body> after Volusion vnav.css so rules win.
+   MC_OVERRIDES_VERIFY_20260607palliserpdp — Palliser-only PDP pricing/config containment backup.
    Sectional PDP wmOpen visibility: 20260519sectional (do not style sectional #wmOpen.wm-btn as visible control). */
 
 /* Category: bottom pager + compact subcats (duplicated if custom-safe absent) */
@@ -1324,4 +1324,60 @@ html.mc-allow-home-hero body.is-home #slideshow-container {
   width: 0 !important;
   overflow: hidden !important;
   opacity: 0 !important;
+}
+
+/* Palliser PDP backup — mirrors custom-safe.css palliser pricing/config rules */
+body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,
+body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-member-pricing,
+body.productdetails:not(.mc-palliser-pdp) #mc-inline-config,
+body.mc-product-page:not(.mc-palliser-pdp) #mc-inline-config,
+body.productdetails:not(.mc-palliser-pdp) #mcConfigurationBlock,
+body.mc-product-page:not(.mc-palliser-pdp) #mcConfigurationBlock {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent font.product_sale_price,
+body.mc-palliser-pdp:not(.mc-logged-in) #content_area font.product_sale_price,
+body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent .product_sale_price,
+body.mc-palliser-pdp:not(.mc-logged-in) #content_area .product_sale_price,
+body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent .product_saleprice,
+body.mc-palliser-pdp:not(.mc-logged-in) #content_area .product_saleprice,
+body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent #priceWithOptions,
+body.mc-palliser-pdp:not(.mc-logged-in) #content_area #priceWithOptions,
+body.mc-palliser-pdp:not(.mc-logged-in) .mc-pdp-member-line--sale {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 768px) {
+  body.mc-palliser-pdp .mc-pdp-member-pricing,
+  body.mc-palliser-pdp .mc-pdp-config-box,
+  body.mc-palliser-pdp .mc-pdp-room-planner-box,
+  body.mc-palliser-pdp .mc-pdp-price-stack,
+  body.mc-palliser-pdp .mc-pdp-retail-row,
+  body.mc-palliser-pdp #mc-inline-config {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+  }
+
+  body.mc-palliser-pdp .mc-pdp-member-pricing *,
+  body.mc-palliser-pdp .mc-pdp-config-box *,
+  body.mc-palliser-pdp .mc-pdp-room-planner-box *,
+  body.mc-palliser-pdp .mc-pdp-price-stack * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
 }
