@@ -1,20 +1,26 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260626p — PLP: swap NoPhoto when {SKU}-1.jpg exists on /v/vspfiles/photos/
+ * MC_PLP_ENFORCER_20260627mat — gray mat thumbs + uniform stage height on category PLP
  *
- * Thumbnails: .mc-plp-image-box + visible-sofa width normalization (no crop, no scale transform).
+ * Thumbnails: .mc-plp-thumb-mat fixed tile/stage (contain, bottom-aligned sofas).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260626q";
+  var VERSION = "20260627mat";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
     return isNaN(n) ? 0 : n;
   }
 
-  var PLP_MAT = "#ffffff";
+  var PLP_MAT = "#f2f2f2";
+  var TILE_H = 280;
+  var STAGE_H = 220;
+  var TILE_H_M = 220;
+  var STAGE_H_M = 172;
+  var MAT_PAD = 14;
+  var MAT_PAD_M = 12;
   if (plpVerNum(global.__MC_PLP_ENFORCER_VER__) >= plpVerNum(VERSION)) return;
   global.__MC_PLP_ENFORCER_VER__ = VERSION;
   global.__MC_PLP_ENFORCER__ = true;
@@ -24,15 +30,48 @@
     var s = document.createElement("style");
     s.id = "mc-plp-critical-css";
     s.textContent =
-      "html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box," +
-      "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img.mc-plp-image-box{" +
+      "html.category #content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat," +
+      "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat," +
+      "body:not(.productdetails) #content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat{" +
       "display:flex!important;align-items:flex-end!important;justify-content:center!important;" +
-      "width:100%!important;height:260px!important;overflow:visible!important;background:#fff!important;padding:0!important}" +
-      "html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box>img," +
-      "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img.mc-plp-image-box>img{" +
-      "width:100%!important;height:auto!important;max-width:420px!important;max-height:260px!important;" +
-      "object-fit:contain!important;object-position:center bottom!important;transform:none!important;" +
-      "border:none!important;box-shadow:none!important;background:transparent!important}";
+      "width:100%!important;height:" +
+      TILE_H +
+      "px!important;min-height:" +
+      TILE_H +
+      "px!important;max-height:" +
+      TILE_H +
+      "px!important;overflow:hidden!important;background:" +
+      PLP_MAT +
+      "!important;padding:" +
+      MAT_PAD +
+      "px!important;box-sizing:border-box!important}" +
+      "html.category #content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat>img," +
+      "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat>img," +
+      "body:not(.productdetails) #content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat>img{" +
+      "width:100%!important;height:" +
+      STAGE_H +
+      "px!important;max-width:100%!important;max-height:" +
+      STAGE_H +
+      "px!important;object-fit:contain!important;object-position:center bottom!important;" +
+      "transform:none!important;border:0!important;box-shadow:none!important;background:transparent!important}" +
+      "@media(max-width:991px){html.category #content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat," +
+      "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat," +
+      "body:not(.productdetails) #content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat{height:" +
+      TILE_H_M +
+      "px!important;min-height:" +
+      TILE_H_M +
+      "px!important;max-height:" +
+      TILE_H_M +
+      "px!important;padding:" +
+      MAT_PAD_M +
+      "px!important}" +
+      "html.category #content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat>img," +
+      "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat>img," +
+      "body:not(.productdetails) #content_area .v-product-grid a.v-product__img.mc-plp-thumb-mat>img{height:" +
+      STAGE_H_M +
+      "px!important;max-height:" +
+      STAGE_H_M +
+      "px!important}}";
     (document.head || document.documentElement).appendChild(s);
   }
 
@@ -420,75 +459,50 @@
     });
   }
 
-  function clearClippingStyles(img, parent) {
-    parent.classList.remove("mc-plp-thumb-mat");
-    parent.style.removeProperty("max-height");
-    parent.style.removeProperty("min-height");
-    parent.style.removeProperty("clip-path");
-    parent.style.setProperty("overflow", "visible", "important");
-    parent.style.setProperty("background", "transparent", "important");
-    parent.style.setProperty("background-color", "transparent", "important");
-
-    img.style.removeProperty("transform");
-    img.removeAttribute("data-scale");
-    img.removeAttribute("data-mc-scale-done");
-    img.style.removeProperty("clip-path");
-    img.style.removeProperty("max-height");
-    img.style.removeProperty("min-height");
-    img.style.setProperty("transform", "none", "important");
-    img.style.setProperty("border", "none", "important");
-    img.style.setProperty("outline", "none", "important");
-    img.style.setProperty("box-shadow", "none", "important");
-    img.style.setProperty("background", "transparent", "important");
-    img.removeAttribute("border");
+  function thumbDims() {
+    var mobile = global.innerWidth <= 991;
+    return {
+      tile: mobile ? TILE_H_M : TILE_H,
+      stage: mobile ? STAGE_H_M : STAGE_H,
+      pad: mobile ? MAT_PAD_M : MAT_PAD,
+    };
   }
 
-  function applyImageBoxLayout(parent) {
-    parent.classList.add("mc-plp-image-box");
-    parent.style.setProperty("height", BOX_HEIGHT + "px", "important");
-    parent.style.setProperty("overflow", "visible", "important");
+  function applyThumbMatLayout(img, parent) {
+    var d = thumbDims();
+    parent.classList.remove("mc-plp-image-box");
+    parent.classList.add("mc-plp-thumb-mat");
     parent.style.setProperty("display", "flex", "important");
     parent.style.setProperty("align-items", "flex-end", "important");
     parent.style.setProperty("justify-content", "center", "important");
     parent.style.setProperty("width", "100%", "important");
-    parent.style.setProperty("background", "#ffffff", "important");
-    parent.style.setProperty("background-color", "#ffffff", "important");
-  }
+    parent.style.setProperty("height", d.tile + "px", "important");
+    parent.style.setProperty("min-height", d.tile + "px", "important");
+    parent.style.setProperty("max-height", d.tile + "px", "important");
+    parent.style.setProperty("margin", "0", "important");
+    parent.style.setProperty("padding", d.pad + "px", "important");
+    parent.style.setProperty("overflow", "hidden", "important");
+    parent.style.setProperty("box-sizing", "border-box", "important");
+    parent.style.setProperty("background", PLP_MAT, "important");
+    parent.style.setProperty("background-color", PLP_MAT, "important");
+    parent.style.setProperty("line-height", "0", "important");
 
-  function applyPreNormalizedPhoto(img, parent) {
-    applyImageBoxLayout(parent);
-    clearClippingStyles(img, parent);
-    img.classList.add("mc-plp-img-fit");
+    img.classList.remove("mc-plp-img-fit", "mc-plp-img-sized");
+    img.style.removeProperty("transform");
+    img.style.removeProperty("clip-path");
+    img.style.setProperty("border", "0", "important");
+    img.style.setProperty("outline", "0", "important");
+    img.style.setProperty("box-shadow", "none", "important");
     img.style.setProperty("width", "100%", "important");
-    img.style.setProperty("height", "auto", "important");
-    img.style.setProperty("max-width", NORMALIZED_W + "px", "important");
-    img.style.setProperty("max-height", BOX_HEIGHT + "px", "important");
-    img.style.setProperty("object-fit", "contain", "important");
-    img.style.setProperty("object-position", "center bottom", "important");
-    img.style.setProperty("transform", "none", "important");
-    img.style.setProperty("display", "block", "important");
-  }
-
-  function applyNormalizedImage(img, parent, bounds) {
-    if (!bounds || !bounds.width) return;
-
-    var targetW = targetVisibleWidth(parent);
-    var scale = targetW / bounds.width;
-    var finalWidth = Math.round(img.naturalWidth * scale * 1000) / 1000;
-    var finalHeight = Math.round(img.naturalHeight * scale * 1000) / 1000;
-
-    applyImageBoxLayout(parent);
-    clearClippingStyles(img, parent);
-    img.classList.add("mc-plp-img-sized");
-
-    img.style.setProperty("width", finalWidth + "px", "important");
-    img.style.setProperty("height", finalHeight + "px", "important");
+    img.style.setProperty("height", d.stage + "px", "important");
     img.style.setProperty("max-width", "100%", "important");
-    img.style.setProperty("max-height", BOX_HEIGHT + "px", "important");
+    img.style.setProperty("max-height", d.stage + "px", "important");
+    img.style.setProperty("min-height", "0", "important");
     img.style.setProperty("object-fit", "contain", "important");
     img.style.setProperty("object-position", "center bottom", "important");
-    img.style.setProperty("transform", "none", "important");
     img.style.setProperty("display", "block", "important");
+    img.style.setProperty("margin", "0 auto", "important");
+    img.style.setProperty("background", "transparent", "important");
   }
 
   function normalizePLPImages() {
@@ -497,30 +511,28 @@
     var root = document.getElementById("content_area");
     if (!root) return;
 
-    root.querySelectorAll("img").forEach(function (img) {
-      if (!isProductPhoto(img)) return;
-      if (img.closest("#v65-product-related")) return;
+    root
+      .querySelectorAll(
+        ".v-product-grid a.v-product__img, ul.v-product-grid > li.v-product > a.v-product__img"
+      )
+      .forEach(function (parent) {
+        if (!parent || parent.closest("#v65-product-related")) return;
+        var img = parent.querySelector("img");
+        if (!img || !isProductPhoto(img)) return;
+        applyThumbMatLayout(img, parent);
+      });
+  }
 
-      var parent = thumbBox(img);
-      if (!parent) return;
-
-      parent.classList.add("mc-plp-image-box");
-      clearClippingStyles(img, parent);
-
-      function apply() {
-        if (!img.naturalWidth) return;
-        if (isPreNormalizedPhoto(img)) {
-          applyPreNormalizedPhoto(img, parent);
-          return;
-        }
-        getVisibleBounds(img, function (bounds) {
-          applyNormalizedImage(img, parent, bounds);
-        });
-      }
-
-      if (img.complete && img.naturalWidth) apply();
-      else img.addEventListener("load", apply, { once: true });
-    });
+  function hideInjectedLogo() {
+    var logo = document.getElementById("display_homepage_title");
+    if (!logo) return;
+    logo.style.setProperty("display", "none", "important");
+    logo.style.setProperty("visibility", "hidden", "important");
+    logo.style.setProperty("height", "0", "important");
+    logo.style.setProperty("width", "0", "important");
+    logo.style.setProperty("overflow", "hidden", "important");
+    logo.style.setProperty("opacity", "0", "important");
+    logo.style.setProperty("pointer-events", "none", "important");
   }
 
   function hideHero() {
@@ -544,6 +556,7 @@
     if (!isCategoryPlp()) return;
     markCategory();
     injectCriticalThumbCss();
+    hideInjectedLogo();
     removeLegacyCategoryBars();
     fixNoPhotoThumbnails();
     normalizePLPImages();

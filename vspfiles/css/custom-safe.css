@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260607mobilefloat — mobile float nav home/cart/account ≤991px */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260607plpmat — gray PLP thumb mats + hide category spacer bars */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -13982,7 +13982,7 @@ html[data-mc-category-plp="1"] .v-product-grid .v-product a.v-product__img,
   margin: 0 !important;
   padding: var(--mc-plp-mat-pad, 14px) !important;
   box-sizing: border-box !important;
-  background: var(--mc-plp-mat-bg, #ffffff) !important;
+  background: var(--mc-plp-mat-bg, #f2f2f2) !important;
   line-height: 0 !important;
   text-decoration: none !important;
 }
@@ -14098,7 +14098,7 @@ html.is-category-or-listing-page .v-product-grid a.v-product__img {
   padding: var(--mc-plp-mat-pad, 14px) !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
-  background: var(--mc-plp-mat-bg, #ffffff) !important;
+  background: var(--mc-plp-mat-bg, #f2f2f2) !important;
   line-height: 0 !important;
 }
 
@@ -14266,38 +14266,22 @@ html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box > 
   clip-path: none !important;
 }
 
-/* MC PLP THUMB — all white, no gray mat */
-html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos/"],
-html.category #content_area .v-product-grid img[src*="/v/vspfiles/product/"],
-html.category #content_area .v-product-grid img[src*="/v/vspfiles/photos"],
-html.category #content_area .v-product-grid img[src*="vspfiles/photos"] {
-  background: #ffffff !important;
+/* MC PLP THUMB — gray mat on every category thumbnail link */
+html.category #content_area .v-product-grid a.v-product__img,
+html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img,
+body:not(.productdetails) #content_area .v-product-grid a.v-product__img,
+html.category #content_area .v-product-grid a.mc-plp-thumb-mat,
+html[data-mc-category-plp="1"] #content_area .v-product-grid a.mc-plp-thumb-mat {
+  background: #f2f2f2 !important;
+  background-color: #f2f2f2 !important;
   box-shadow: none !important;
   border: 0 !important;
 }
 
-html.category #content_area .v-product-grid a:has(img[src*="/v/vspfiles/photos/"]),
-html.category #content_area .v-product-grid a:has(img[src*="vspfiles/photos"]),
-html.category #content_area .v-product-grid div:has(> img[src*="/v/vspfiles/photos/"]),
-html.category #content_area .v-product-grid div:has(> img[src*="vspfiles/photos"]),
-html.category #content_area .v-product-grid td:has(img[src*="/v/vspfiles/photos/"]),
-html.category #content_area .v-product-grid td:has(img[src*="vspfiles/photos"]) {
-  background: #ffffff !important;
-  box-shadow: none !important;
-  border: 0 !important;
-}
-
-html.category #content_area .v-product-grid .v-product,
-html.category #content_area .v-product-grid .v-product__img,
-html.category #content_area .v-product-grid .product_image,
-html.category #content_area .v-product-grid .product_productphoto,
-html.category #content_area .v-product-grid .product-photo,
-html.category #content_area .v-product-grid .product-image,
-html.category #content_area .v-product-grid .product-image-wrapper,
-html.category #content_area .v-product-grid .productimg,
-html.category #content_area .v-product-grid .v65-productPhoto,
-html.category #content_area .v-product-grid .v65-productPhoto a {
-  background: #ffffff !important;
+html.category #content_area .v-product-grid a.v-product__img > img,
+html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img > img,
+body:not(.productdetails) #content_area .v-product-grid a.v-product__img > img {
+  background: transparent !important;
   box-shadow: none !important;
   border: 0 !important;
 }
@@ -15170,11 +15154,8 @@ body.category.is-home #if_homepage {
   pointer-events: auto !important;
 }
 
-/* Full video hero container */
-html.mc-allow-home-hero body.is-home #slideshow-container,
-html.category body.is-home #slideshow-container,
-body.category.is-home #slideshow-container,
-html.mc-allow-home-hero.home.category body.is-home.category #slideshow-container {
+/* Full video hero container — real homepage only (never category+is-home Volusion quirk) */
+html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container {
   display: block !important;
   visibility: visible !important;
   position: relative !important;
@@ -15195,9 +15176,7 @@ html.mc-allow-home-hero.home.category body.is-home.category #slideshow-container
 }
 
 /* Show video wrapper */
-html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video,
-html.category body.is-home #slideshow-container .mc-hero-video,
-body.category.is-home #slideshow-container .mc-hero-video {
+html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .mc-hero-video {
   display: block !important;
   visibility: visible !important;
   position: absolute !important;
@@ -15214,12 +15193,8 @@ body.category.is-home #slideshow-container .mc-hero-video {
 }
 
 /* Show actual video */
-html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video-el,
-html.category body.is-home #slideshow-container .mc-hero-video-el,
-body.category.is-home #slideshow-container .mc-hero-video-el,
-html.mc-allow-home-hero body.is-home #slideshow-container video,
-html.category body.is-home #slideshow-container video,
-body.category.is-home #slideshow-container video {
+html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .mc-hero-video-el,
+html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container video {
   display: block !important;
   visibility: visible !important;
   position: absolute !important;
@@ -15237,9 +15212,7 @@ body.category.is-home #slideshow-container video {
 }
 
 /* Overlay/logo/copy above video */
-html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-overlay,
-html.category body.is-home #slideshow-container .mc-hero-overlay,
-body.category.is-home #slideshow-container .mc-hero-overlay {
+html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .mc-hero-overlay {
   display: flex !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -15266,12 +15239,8 @@ body.category.is-home #slideshow-container .hero-logo-img {
 }
 
 /* Keep homepage hero menu/nav visible */
-html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu,
-html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav,
-html.category body.is-home #slideshow-container .hero-menu,
-html.category body.is-home #slideshow-container .hero-nav,
-body.category.is-home #slideshow-container .hero-menu,
-body.category.is-home #slideshow-container .hero-nav {
+html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .hero-menu,
+html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .hero-nav {
   display: flex !important;
   visibility: visible !important;
   height: auto !important;
@@ -15286,9 +15255,7 @@ html.mc-allow-home-hero body.is-home #slideshow-container video {
   background: #000 !important;
 }
 /* MC HOME VIDEO HERO FINAL OVERRIDE */
-html.mc-allow-home-hero body.is-home #slideshow-container,
-html.category body.is-home #slideshow-container,
-body.category.is-home #slideshow-container {
+html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container {
   display: block !important;
   visibility: visible !important;
   position: relative !important;
@@ -15306,9 +15273,7 @@ body.category.is-home #slideshow-container {
   z-index: 2 !important;
 }
 
-html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video,
-html.category body.is-home #slideshow-container .mc-hero-video,
-body.category.is-home #slideshow-container .mc-hero-video {
+html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .mc-hero-video {
   display: block !important;
   visibility: visible !important;
   position: absolute !important;
@@ -15323,9 +15288,7 @@ body.category.is-home #slideshow-container .mc-hero-video {
   z-index: 1 !important;
 }
 
-html.mc-allow-home-hero body.is-home #slideshow-container video.mc-hero-video-el,
-html.category body.is-home #slideshow-container video.mc-hero-video-el,
-body.category.is-home #slideshow-container video.mc-hero-video-el {
+html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container video.mc-hero-video-el {
   display: block !important;
   visibility: visible !important;
   position: absolute !important;
@@ -15340,12 +15303,8 @@ body.category.is-home #slideshow-container video.mc-hero-video-el {
   z-index: 1 !important;
 }
 
-html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu,
-html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav,
-html.category body.is-home #slideshow-container .hero-menu,
-html.category body.is-home #slideshow-container .hero-nav,
-body.category.is-home #slideshow-container .hero-menu,
-body.category.is-home #slideshow-container .hero-nav {
+html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .hero-menu,
+html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .hero-nav {
   display: flex !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -15354,6 +15313,33 @@ body.category.is-home #slideshow-container .hero-nav {
   pointer-events: auto !important;
   z-index: 50 !important;
 }
+
+/* MC PLP FINAL — never black hero shell on category/listing pages */
+html[data-mc-category-plp="1"] #if_homepage,
+html[data-mc-category-plp="1"] #slideshow-container,
+html[data-mc-category-plp="1"] #slideshow-container .mc-hero-video,
+html.category #if_homepage,
+html.category #slideshow-container,
+html.category #slideshow-container .mc-hero-video,
+body.category #if_homepage,
+body.category #slideshow-container,
+body.category #slideshow-container .mc-hero-video,
+html.is-category-or-listing-page #if_homepage,
+html.is-category-or-listing-page #slideshow-container {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
 /* MC FINAL FIX — keep PDP top price panel visible and separated */
 body.productdetails #v65-product-parent #mc-pdp-top-price-panel,
 body.mc-product-page #v65-product-parent #mc-pdp-top-price-panel,
