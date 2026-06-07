@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260607revertplpmat — reverted gray PLP mats; member pricing lock retained */
+/* 0603e C_CSS_DEPLOY_VERIFY_20260603e — clean title anchor + fresh top price markup */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -4508,23 +4508,26 @@ body:not(.is-home) #display_menu_1 > ul {
 }
 
 /* ============================================================
-   CART + MY ACCOUNT FLOATS: desktop positioning (mobile: end-of-file block)
+   CART + MY ACCOUNT FLOATS: base (mobile keeps original cart inset)
    ============================================================ */
-@media (min-width: 992px) {
-  html body a.mc-cart-float,
-  html body .mc-cart-float,
-  body a.mc-cart-float,
-  body .mc-cart-float {
-    left: calc(100vw - 52px - max(28px, env(safe-area-inset-right))) !important;
-    right: auto !important;
-    width: 52px !important;
-    max-width: 52px !important;
-    min-width: 40px !important;
-    max-height: 52px !important;
-    margin-left: 16px !important;
-    margin-right: max(20px, env(safe-area-inset-right)) !important;
-    box-sizing: border-box !important;
-  }
+html body a.mc-cart-float,
+html body .mc-cart-float,
+body a.mc-cart-float,
+body .mc-cart-float {
+  left: calc(100vw - 52px - max(28px, env(safe-area-inset-right))) !important;
+  right: auto !important;
+  width: 52px !important;
+  max-width: 52px !important;
+  min-width: 40px !important;
+  max-height: 48px !important;
+  margin-left: 16px !important;
+  margin-right: max(20px, env(safe-area-inset-right)) !important;
+  box-sizing: border-box !important;
+}
+
+.mc-account-float,
+a.mc-account-float {
+  display: none !important;
 }
 
 /* Home page: position cart from right so it stays visible when width is adjusted */
@@ -15086,7 +15089,7 @@ html body.productdetails #v65-product-parent klarna-placement,
 html body.productdetails #v65-product-parent [class*="affirm" i],
 html body.productdetails #v65-product-parent [id*="affirm" i] {
   clear: both !important;
-  display: inline-flex !important;
+  display: block !important;
   margin-top: 12px !important;
   position: relative !important;
   z-index: 0 !important;
@@ -15167,8 +15170,11 @@ body.category.is-home #if_homepage {
   pointer-events: auto !important;
 }
 
-/* Full video hero container — real homepage only (never category+is-home Volusion quirk) */
-html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container {
+/* Full video hero container */
+html.mc-allow-home-hero body.is-home #slideshow-container,
+html.category body.is-home #slideshow-container,
+body.category.is-home #slideshow-container,
+html.mc-allow-home-hero.home.category body.is-home.category #slideshow-container {
   display: block !important;
   visibility: visible !important;
   position: relative !important;
@@ -15189,7 +15195,9 @@ html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container {
 }
 
 /* Show video wrapper */
-html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .mc-hero-video {
+html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video,
+html.category body.is-home #slideshow-container .mc-hero-video,
+body.category.is-home #slideshow-container .mc-hero-video {
   display: block !important;
   visibility: visible !important;
   position: absolute !important;
@@ -15206,8 +15214,12 @@ html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .mc-her
 }
 
 /* Show actual video */
-html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .mc-hero-video-el,
-html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container video {
+html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video-el,
+html.category body.is-home #slideshow-container .mc-hero-video-el,
+body.category.is-home #slideshow-container .mc-hero-video-el,
+html.mc-allow-home-hero body.is-home #slideshow-container video,
+html.category body.is-home #slideshow-container video,
+body.category.is-home #slideshow-container video {
   display: block !important;
   visibility: visible !important;
   position: absolute !important;
@@ -15225,7 +15237,9 @@ html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container video {
 }
 
 /* Overlay/logo/copy above video */
-html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .mc-hero-overlay {
+html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-overlay,
+html.category body.is-home #slideshow-container .mc-hero-overlay,
+body.category.is-home #slideshow-container .mc-hero-overlay {
   display: flex !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -15252,8 +15266,12 @@ body.category.is-home #slideshow-container .hero-logo-img {
 }
 
 /* Keep homepage hero menu/nav visible */
-html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .hero-menu,
-html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .hero-nav {
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu,
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav,
+html.category body.is-home #slideshow-container .hero-menu,
+html.category body.is-home #slideshow-container .hero-nav,
+body.category.is-home #slideshow-container .hero-menu,
+body.category.is-home #slideshow-container .hero-nav {
   display: flex !important;
   visibility: visible !important;
   height: auto !important;
@@ -15268,7 +15286,9 @@ html.mc-allow-home-hero body.is-home #slideshow-container video {
   background: #000 !important;
 }
 /* MC HOME VIDEO HERO FINAL OVERRIDE */
-html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container {
+html.mc-allow-home-hero body.is-home #slideshow-container,
+html.category body.is-home #slideshow-container,
+body.category.is-home #slideshow-container {
   display: block !important;
   visibility: visible !important;
   position: relative !important;
@@ -15286,7 +15306,9 @@ html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container {
   z-index: 2 !important;
 }
 
-html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .mc-hero-video {
+html.mc-allow-home-hero body.is-home #slideshow-container .mc-hero-video,
+html.category body.is-home #slideshow-container .mc-hero-video,
+body.category.is-home #slideshow-container .mc-hero-video {
   display: block !important;
   visibility: visible !important;
   position: absolute !important;
@@ -15301,7 +15323,9 @@ html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .mc-her
   z-index: 1 !important;
 }
 
-html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container video.mc-hero-video-el {
+html.mc-allow-home-hero body.is-home #slideshow-container video.mc-hero-video-el,
+html.category body.is-home #slideshow-container video.mc-hero-video-el,
+body.category.is-home #slideshow-container video.mc-hero-video-el {
   display: block !important;
   visibility: visible !important;
   position: absolute !important;
@@ -15316,8 +15340,12 @@ html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container video.m
   z-index: 1 !important;
 }
 
-html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .hero-menu,
-html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .hero-nav {
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-menu,
+html.mc-allow-home-hero body.is-home #slideshow-container .hero-nav,
+html.category body.is-home #slideshow-container .hero-menu,
+html.category body.is-home #slideshow-container .hero-nav,
+body.category.is-home #slideshow-container .hero-menu,
+body.category.is-home #slideshow-container .hero-nav {
   display: flex !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -15326,33 +15354,6 @@ html.mc-allow-home-hero body.is-home:not(.category) #slideshow-container .hero-n
   pointer-events: auto !important;
   z-index: 50 !important;
 }
-
-/* MC PLP FINAL — never black hero shell on category/listing pages */
-html[data-mc-category-plp="1"] #if_homepage,
-html[data-mc-category-plp="1"] #slideshow-container,
-html[data-mc-category-plp="1"] #slideshow-container .mc-hero-video,
-html.category #if_homepage,
-html.category #slideshow-container,
-html.category #slideshow-container .mc-hero-video,
-body.category #if_homepage,
-body.category #slideshow-container,
-body.category #slideshow-container .mc-hero-video,
-html.is-category-or-listing-page #if_homepage,
-html.is-category-or-listing-page #slideshow-container {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  max-height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  background: transparent !important;
-  border: 0 !important;
-}
-
 /* MC FINAL FIX — keep PDP top price panel visible and separated */
 body.productdetails #v65-product-parent #mc-pdp-top-price-panel,
 body.mc-product-page #v65-product-parent #mc-pdp-top-price-panel,
@@ -15395,234 +15396,4 @@ body.mc-product-page #v65-product-parent #mc-selected-configuration-summary {
   padding: 0 !important;
   overflow: hidden !important;
   opacity: 0 !important;
-}
-
-/* =========================================================
-   MOBILE floating nav: home / account / cart (≤991px only)
-   Fixes: account hidden, cart/home size mismatch, dead taps on SVG
-   ========================================================= */
-@media (max-width: 991px) {
-  html body a.mc-home-float,
-  html body a.mc-cart-float,
-  html body a.mc-account-float {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    pointer-events: auto !important;
-    touch-action: manipulation !important;
-    cursor: pointer !important;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.12) !important;
-    width: 52px !important;
-    height: 52px !important;
-    min-width: 52px !important;
-    min-height: 52px !important;
-    max-width: 52px !important;
-    max-height: 52px !important;
-    border-radius: 999px !important;
-    z-index: 2147483647 !important;
-    text-decoration: none !important;
-    box-sizing: border-box !important;
-  }
-
-  html body a.mc-home-float {
-    left: max(12px, env(safe-area-inset-left)) !important;
-    right: auto !important;
-    margin-right: 0 !important;
-  }
-
-  html body a.mc-cart-float {
-    left: auto !important;
-    right: max(12px, env(safe-area-inset-right)) !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  html body a.mc-account-float {
-    left: auto !important;
-    right: calc(52px + 12px + max(12px, env(safe-area-inset-right))) !important;
-    margin: 0 !important;
-  }
-
-  .mc-home-float__icon,
-  .mc-cart-float__icon,
-  .mc-account-float__icon,
-  .mc-home-float__icon path,
-  .mc-cart-float__icon path,
-  .mc-account-float__icon path {
-    pointer-events: none !important;
-    width: 20px !important;
-    height: 20px !important;
-    min-width: 20px !important;
-    min-height: 20px !important;
-    max-width: 20px !important;
-    max-height: 20px !important;
-  }
-
-  /* Volusion legacy floating cart must not block our fixed nav taps */
-  body.productdetails a.floating-mobile-cart,
-  body.mc-product-page a.floating-mobile-cart {
-    display: none !important;
-    pointer-events: none !important;
-  }
-}
-
-/* =========================================================
-   PALLISER PDP ONLY — pricing/config visibility + logged-out sale hide
-   (no desktop column/layout changes — containment is 768px only below)
-   ========================================================= */
-body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,
-body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-member-pricing,
-body.productdetails:not(.mc-palliser-pdp) .mc-pdp-retail-row,
-body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-retail-row,
-body.productdetails:not(.mc-palliser-pdp) .mc-pdp-retail-label,
-body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-retail-label,
-body.productdetails:not(.mc-palliser-pdp) .mc-pdp-palliser-advertise-note,
-body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-palliser-advertise-note,
-body.productdetails:not(.mc-palliser-pdp) #mc-inline-config,
-body.mc-product-page:not(.mc-palliser-pdp) #mc-inline-config,
-body.productdetails:not(.mc-palliser-pdp) #mcConfigurationBlock,
-body.mc-product-page:not(.mc-palliser-pdp) #mcConfigurationBlock,
-body.productdetails:not(.mc-palliser-pdp) .mc-pdp-config-box,
-body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-config-box,
-body.productdetails:not(.mc-palliser-pdp) .mc-pdp-room-planner-box,
-body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-room-planner-box {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-body.mc-palliser-pdp .mc-pdp-palliser-advertise-note {
-  display: block !important;
-  margin: 0 0 8px 0 !important;
-  padding: 0 !important;
-  font-size: 13px !important;
-  line-height: 1.45 !important;
-  color: #555 !important;
-  text-align: left !important;
-}
-
-/* Logged-out Palliser: hide ONLY the Volusion sale price node (e.g. font.product_sale_price $3,970) */
-body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent .colors_pricebox > font.product_sale_price,
-body.mc-palliser-pdp:not(.mc-logged-in) #content_area .colors_pricebox > font.product_sale_price {
-  display: none !important;
-}
-
-/* Canonical block owns retail — hide duplicate Volusion list price sibling only */
-body.mc-palliser-pdp:has(.mc-pdp-member-pricing--canonical) #v65-product-parent .colors_pricebox > font.product_list_price,
-body.mc-palliser-pdp:has(.mc-pdp-member-pricing--canonical) #content_area .colors_pricebox > font.product_list_price {
-  display: none !important;
-}
-
-/* =========================================================
-   LOCKED: canonical Palliser retail/member pricing block
-   Do not override in future pricing fixes — structure is fixed.
-   ========================================================= */
-html body .mc-pdp-member-pricing.mc-pdp-member-pricing--canonical,
-html body.mc-palliser-pdp .mc-pdp-member-pricing {
-  display: block !important;
-  width: 100% !important;
-  max-width: 260px !important;
-  margin: 28px 0 22px 0 !important;
-  padding: 0 !important;
-  box-sizing: border-box !important;
-  flex: none !important;
-  flex-direction: unset !important;
-  align-items: unset !important;
-  gap: unset !important;
-  position: static !important;
-  left: auto !important;
-  right: auto !important;
-  transform: none !important;
-  float: none !important;
-}
-
-html body .mc-pdp-member-pricing .mc-pdp-member-row {
-  display: block !important;
-  margin: 0 0 24px 0 !important;
-  padding: 0 !important;
-  flex: none !important;
-  flex-direction: unset !important;
-  position: static !important;
-  left: auto !important;
-  right: auto !important;
-  transform: none !important;
-  float: none !important;
-}
-
-html body .mc-pdp-member-pricing .mc-pdp-member-label {
-  display: block !important;
-  font-size: 14px !important;
-  line-height: 1.25 !important;
-  letter-spacing: 0.22em !important;
-  text-transform: uppercase !important;
-  color: #777 !important;
-  margin: 0 0 8px 0 !important;
-  padding: 0 !important;
-  white-space: normal !important;
-  flex: none !important;
-  position: static !important;
-  left: auto !important;
-  right: auto !important;
-  transform: none !important;
-  float: none !important;
-}
-
-html body .mc-pdp-member-pricing .mc-pdp-member-value {
-  display: block !important;
-  font-size: 14px !important;
-  line-height: 1.35 !important;
-  letter-spacing: 0.08em !important;
-  color: #333 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  flex: none !important;
-  position: static !important;
-  left: auto !important;
-  right: auto !important;
-  transform: none !important;
-  float: none !important;
-}
-
-html body .mc-pdp-member-pricing .mc-pdp-member-login a {
-  color: #333 !important;
-  text-decoration: underline !important;
-}
-
-@media (max-width: 768px) {
-  html body .mc-pdp-member-pricing.mc-pdp-member-pricing--canonical,
-  html body.mc-palliser-pdp .mc-pdp-member-pricing {
-    max-width: 100% !important;
-    width: 100% !important;
-    margin: 24px 0 22px 0 !important;
-  }
-
-  html body .mc-pdp-member-pricing .mc-pdp-member-label,
-  html body .mc-pdp-member-pricing .mc-pdp-member-value {
-    text-align: left !important;
-  }
-
-  body.mc-palliser-pdp .mc-pdp-config-box,
-  body.mc-palliser-pdp .mc-pdp-room-planner-box,
-  body.mc-palliser-pdp .mc-pdp-price-stack {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    position: relative !important;
-    left: auto !important;
-    right: auto !important;
-    transform: none !important;
-  }
-
-  body.mc-palliser-pdp .mc-pdp-config-box *,
-  body.mc-palliser-pdp .mc-pdp-room-planner-box *,
-  body.mc-palliser-pdp .mc-pdp-price-stack * {
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
 }

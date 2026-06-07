@@ -1,6 +1,6 @@
 /*0429 McCabe fixes — load after template.css (linked from template_266.html).
    Ensures hero copy + listing member block even if custom-safe.css fails to load.
-   MC_OVERRIDES_VERIFY_20260607memberpricing — locked Palliser retail/member block backup.
+   MC_OVERRIDES_VERIFY_20260430dom — linked again at end of <body> after Volusion vnav.css so rules win.
    Sectional PDP wmOpen visibility: 20260519sectional (do not style sectional #wmOpen.wm-btn as visible control). */
 
 /* Category: bottom pager + compact subcats (duplicated if custom-safe absent) */
@@ -1324,81 +1324,4 @@ html.mc-allow-home-hero body.is-home #slideshow-container {
   width: 0 !important;
   overflow: hidden !important;
   opacity: 0 !important;
-}
-
-/* Palliser PDP backup — mirrors custom-safe.css palliser pricing/config rules */
-body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,
-body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-member-pricing,
-body.productdetails:not(.mc-palliser-pdp) #mc-inline-config,
-body.mc-product-page:not(.mc-palliser-pdp) #mc-inline-config,
-body.productdetails:not(.mc-palliser-pdp) #mcConfigurationBlock,
-body.mc-product-page:not(.mc-palliser-pdp) #mcConfigurationBlock {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent .colors_pricebox > font.product_sale_price,
-body.mc-palliser-pdp:not(.mc-logged-in) #content_area .colors_pricebox > font.product_sale_price {
-  display: none !important;
-}
-
-html body .mc-pdp-member-pricing.mc-pdp-member-pricing--canonical,
-html body.mc-palliser-pdp .mc-pdp-member-pricing {
-  display: block !important;
-  width: 100% !important;
-  max-width: 260px !important;
-  margin: 28px 0 22px 0 !important;
-  padding: 0 !important;
-  box-sizing: border-box !important;
-  flex: none !important;
-  position: static !important;
-  float: none !important;
-}
-
-html body .mc-pdp-member-pricing .mc-pdp-member-row {
-  display: block !important;
-  margin: 0 0 24px 0 !important;
-  padding: 0 !important;
-}
-
-html body .mc-pdp-member-pricing .mc-pdp-member-label {
-  display: block !important;
-  font-size: 14px !important;
-  line-height: 1.25 !important;
-  letter-spacing: 0.22em !important;
-  text-transform: uppercase !important;
-  color: #777 !important;
-  margin: 0 0 8px 0 !important;
-  padding: 0 !important;
-  white-space: normal !important;
-}
-
-html body .mc-pdp-member-pricing .mc-pdp-member-value {
-  display: block !important;
-  font-size: 14px !important;
-  line-height: 1.35 !important;
-  letter-spacing: 0.08em !important;
-  color: #333 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-html body .mc-pdp-member-pricing .mc-pdp-member-login a {
-  color: #333 !important;
-  text-decoration: underline !important;
-}
-
-@media (max-width: 768px) {
-  html body .mc-pdp-member-pricing.mc-pdp-member-pricing--canonical,
-  html body.mc-palliser-pdp .mc-pdp-member-pricing {
-    max-width: 100% !important;
-    width: 100% !important;
-    margin: 24px 0 22px 0 !important;
-  }
-
-  html body .mc-pdp-member-pricing .mc-pdp-member-label,
-  html body .mc-pdp-member-pricing .mc-pdp-member-value {
-    text-align: left !important;
-  }
 }
