@@ -1,6 +1,6 @@
 # Best preview status — BALI-SILK
 
-Generated: 2026-05-27T16:04:39.215Z
+Generated: 2026-05-27T19:55:04.358Z
 
 ## Selected best variant
 - **C** (FINAL-C) — score 17.3
@@ -37,7 +37,7 @@ Generated: 2026-05-27T16:04:39.215Z
 
 ## Variants
 - **A:** mean |ΔL|=0.09, meaningful=false, failures=TRIVIAL — swatch transfer delta is negligible at upholstery scale
-- **B:** mean |ΔL|=0.27, meaningful=false, failures=TRIVIAL — swatch transfer delta is negligible at upholstery scale
+- **B:** mean |ΔL|=0.26, meaningful=false, failures=TRIVIAL — swatch transfer delta is negligible at upholstery scale
 - **C:** mean |ΔL|=0.50, meaningful=false, failures=SUBTLE — visible only in diff/heatmap, unlikely to read in normal review
 
 ## Prep validation

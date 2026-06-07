@@ -840,42 +840,44 @@
   }
 
   function buildStackHostHtml(retailAmt, saleAmt, guest) {
-    var parts = [];
-    if (retailAmt > 0) {
-      parts.push(
-        '<div class="mc-pdp-retail-row">' +
-          '<div class="mc-pdp-retail-label">Retail Price</div>' +
-          '<div class="mc-pdp-retail-line"><span class="mc-pdp-stack-retail-amt">' +
-          fmtMoney(retailAmt) +
-          "</span></div>" +
-          "</div>"
+    if (typeof global.mcBuildCanonicalMemberPricingHtml === "function") {
+      return (
+        '<div class="mc-pdp-member-pricing mc-pdp-member-pricing--canonical">' +
+        global.mcBuildCanonicalMemberPricingHtml(
+          retailAmt > 0 ? fmtMoney(retailAmt) : "",
+          !guest && saleAmt > 0 ? fmtMoney(saleAmt) : "",
+          "/login.asp",
+          !guest
+        ) +
+        "</div>"
       );
     }
-    parts.push('<div class="mc-pdp-member-pricing">');
+    var parts = [];
+    parts.push('<div class="mc-pdp-member-pricing mc-pdp-member-pricing--canonical">');
+    if (retailAmt > 0) {
+      parts.push(
+        '<div class="mc-pdp-member-row mc-pdp-member-row--retail">' +
+          '<div class="mc-pdp-member-label">RETAIL PRICE</div>' +
+          '<div class="mc-pdp-member-value">' +
+          fmtMoney(retailAmt) +
+          "</div></div>"
+      );
+    }
     if (!guest && saleAmt > 0) {
       parts.push(
-        '<div class="mc-pdp-member-line">' +
-          '<span class="mc-pdp-member-line__label">Member Price</span>' +
-          '<span class="mc-pdp-member-line__amount">' +
+        '<div class="mc-pdp-member-row mc-pdp-member-row--member">' +
+          '<div class="mc-pdp-member-label">MEMBER PRICE</div>' +
+          '<div class="mc-pdp-member-value">' +
           fmtMoney(saleAmt) +
-          "</span></div>"
+          "</div></div>"
       );
     } else {
       parts.push(
-        '<div class="mc-pdp-member-line mc-pdp-member-line--locked">' +
-          '<span class="mc-pdp-member-line__label">Member Price</span>' +
-          '<span class="mc-pdp-member-line__amount"><a href="#" data-mc-open-login>Log in</a> to see member pricing</span>' +
-          "</div>"
+        '<div class="mc-pdp-member-row mc-pdp-member-row--member">' +
+          '<div class="mc-pdp-member-label">MEMBER PRICE</div>' +
+          '<div class="mc-pdp-member-value mc-pdp-member-login">' +
+          '<a href="/login.asp" data-mc-open-login>Log in</a><br>to see member pricing</div></div>'
       );
-      if (saleAmt > 0) {
-        parts.push(
-          '<div class="mc-pdp-member-line mc-pdp-member-line--sale">' +
-            '<span class="mc-pdp-member-line__label">Sale Price</span>' +
-            '<span class="mc-pdp-member-line__amount">' +
-            fmtMoney(saleAmt) +
-            "</span></div>"
-        );
-      }
     }
     parts.push("</div>");
     return parts.join("");

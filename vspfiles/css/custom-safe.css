@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260607palliserdesktop — revert desktop PDP layout; Palliser gating + 768px containment only */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260607memberpricing — locked Palliser retail/member block; sale-only hide */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -15489,34 +15489,106 @@ body.mc-palliser-pdp .mc-pdp-palliser-advertise-note {
   text-align: left !important;
 }
 
-/* Logged-out Palliser: hide Volusion live sale/member selling price (e.g. font.product_sale_price $3,970) */
-body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent font.product_sale_price,
-body.mc-palliser-pdp:not(.mc-logged-in) #content_area font.product_sale_price,
-body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent .product_sale_price,
-body.mc-palliser-pdp:not(.mc-logged-in) #content_area .product_sale_price,
-body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent .product_saleprice,
-body.mc-palliser-pdp:not(.mc-logged-in) #content_area .product_saleprice,
-body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent #priceWithOptions,
-body.mc-palliser-pdp:not(.mc-logged-in) #content_area #priceWithOptions,
-body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent #priceWithOptionsNoTax,
-body.mc-palliser-pdp:not(.mc-logged-in) #content_area #priceWithOptionsNoTax,
-body.mc-palliser-pdp:not(.mc-logged-in) .mc-pdp-member-line--sale,
-body.mc-palliser-pdp:not(.mc-logged-in) .colors_pricebox > font.product_sale_price,
-body.mc-palliser-pdp:not(.mc-logged-in) .colors_pricebox > .product_sale_price,
-body.mc-palliser-pdp:not(.mc-logged-in) .colors_pricebox > .product_saleprice {
+/* Logged-out Palliser: hide ONLY the Volusion sale price node (e.g. font.product_sale_price $3,970) */
+body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent .colors_pricebox > font.product_sale_price,
+body.mc-palliser-pdp:not(.mc-logged-in) #content_area .colors_pricebox > font.product_sale_price {
   display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  max-height: 0 !important;
+}
+
+/* Canonical block owns retail — hide duplicate Volusion list price sibling only */
+body.mc-palliser-pdp:has(.mc-pdp-member-pricing--canonical) #v65-product-parent .colors_pricebox > font.product_list_price,
+body.mc-palliser-pdp:has(.mc-pdp-member-pricing--canonical) #content_area .colors_pricebox > font.product_list_price {
+  display: none !important;
+}
+
+/* =========================================================
+   LOCKED: canonical Palliser retail/member pricing block
+   Do not override in future pricing fixes — structure is fixed.
+   ========================================================= */
+html body .mc-pdp-member-pricing.mc-pdp-member-pricing--canonical,
+html body.mc-palliser-pdp .mc-pdp-member-pricing {
+  display: block !important;
+  width: 100% !important;
+  max-width: 260px !important;
+  margin: 28px 0 22px 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  flex: none !important;
+  flex-direction: unset !important;
+  align-items: unset !important;
+  gap: unset !important;
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  float: none !important;
+}
+
+html body .mc-pdp-member-pricing .mc-pdp-member-row {
+  display: block !important;
+  margin: 0 0 24px 0 !important;
+  padding: 0 !important;
+  flex: none !important;
+  flex-direction: unset !important;
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  float: none !important;
+}
+
+html body .mc-pdp-member-pricing .mc-pdp-member-label {
+  display: block !important;
+  font-size: 14px !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0.22em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
+  margin: 0 0 8px 0 !important;
+  padding: 0 !important;
+  white-space: normal !important;
+  flex: none !important;
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  float: none !important;
+}
+
+html body .mc-pdp-member-pricing .mc-pdp-member-value {
+  display: block !important;
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.08em !important;
+  color: #333 !important;
   margin: 0 !important;
   padding: 0 !important;
-  overflow: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
+  flex: none !important;
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  float: none !important;
+}
+
+html body .mc-pdp-member-pricing .mc-pdp-member-login a {
+  color: #333 !important;
+  text-decoration: underline !important;
 }
 
 @media (max-width: 768px) {
-  body.mc-palliser-pdp .mc-pdp-member-pricing,
+  html body .mc-pdp-member-pricing.mc-pdp-member-pricing--canonical,
+  html body.mc-palliser-pdp .mc-pdp-member-pricing {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 24px 0 22px 0 !important;
+  }
+
+  html body .mc-pdp-member-pricing .mc-pdp-member-label,
+  html body .mc-pdp-member-pricing .mc-pdp-member-value {
+    text-align: left !important;
+  }
+
   body.mc-palliser-pdp .mc-pdp-config-box,
   body.mc-palliser-pdp .mc-pdp-room-planner-box,
   body.mc-palliser-pdp .mc-pdp-price-stack {
@@ -15531,7 +15603,6 @@ body.mc-palliser-pdp:not(.mc-logged-in) .colors_pricebox > .product_saleprice {
     transform: none !important;
   }
 
-  body.mc-palliser-pdp .mc-pdp-member-pricing *,
   body.mc-palliser-pdp .mc-pdp-config-box *,
   body.mc-palliser-pdp .mc-pdp-room-planner-box *,
   body.mc-palliser-pdp .mc-pdp-price-stack * {

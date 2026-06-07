@@ -2,13 +2,13 @@
   "swatchCode": "BALI-SILK",
   "bestVariantId": "C",
   "variantsTooClose": false,
-  "variantSpreadMeanAbsDeltaL": 0.41002089328655345,
+  "variantSpreadMeanAbsDeltaL": 0.40751107081378696,
   "variants": [
     {
       "id": "A",
       "label": "FINAL-A",
       "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\final-variant-A-BALI-SILK.png",
-      "score": 2.4241787571209974,
+      "score": 2.3984668515221492,
       "applyParams": {
         "grainStrength": 0.5195519999999999,
         "mottleStrength": 0.283712,
@@ -25,7 +25,7 @@
         "backgroundContaminated": false,
         "backgroundContaminatedPixels": 0,
         "bottomSeamRegression": false,
-        "meanAbsDeltaL": 0.0912734392452136,
+        "meanAbsDeltaL": 0.0897491491570413,
         "visuallyMeaningful": false,
         "verdict": "FAIL — TRIVIAL — swatch transfer delta is negligible at upholstery scale",
         "failures": [
@@ -33,9 +33,9 @@
         ]
       },
       "compare": {
-        "meanAbsDeltaL": 0.0912734392452136,
-        "meanAbsDeltaRgb": 0.7056718483769725,
-        "ssimOnL": 0.9991485791735791,
+        "meanAbsDeltaL": 0.0897491491570413,
+        "meanAbsDeltaRgb": 0.7058426739902961,
+        "ssimOnL": 0.9991598206023408,
         "visuallyMeaningful": false,
         "verdict": "TRIVIAL — swatch transfer delta is negligible at upholstery scale"
       }
@@ -44,7 +44,7 @@
       "id": "B",
       "label": "FINAL-B",
       "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\final-variant-B-BALI-SILK.png",
-      "score": 5.356490182042353,
+      "score": 5.329382191428594,
       "applyParams": {
         "grainStrength": 1.05,
         "mottleStrength": 0.6624,
@@ -61,7 +61,7 @@
         "backgroundContaminated": false,
         "backgroundContaminatedPixels": 0,
         "bottomSeamRegression": false,
-        "meanAbsDeltaL": 0.2658440756363254,
+        "meanAbsDeltaL": 0.26333425316355896,
         "visuallyMeaningful": false,
         "verdict": "FAIL — TRIVIAL — swatch transfer delta is negligible at upholstery scale",
         "failures": [
@@ -69,9 +69,9 @@
         ]
       },
       "compare": {
-        "meanAbsDeltaL": 0.2658440756363254,
-        "meanAbsDeltaRgb": 1.0203939501451873,
-        "ssimOnL": 0.9972976148171722,
+        "meanAbsDeltaL": 0.26333425316355896,
+        "meanAbsDeltaRgb": 1.0171176024844077,
+        "ssimOnL": 0.9973024803027819,
         "visuallyMeaningful": false,
         "verdict": "TRIVIAL — swatch transfer delta is negligible at upholstery scale"
       }
@@ -80,7 +80,7 @@
       "id": "C",
       "label": "FINAL-C",
       "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\final-variant-C-BALI-SILK.png",
-      "score": 17.30210793200032,
+      "score": 17.253371892081812,
       "applyParams": {
         "grainStrength": 1.900272,
         "mottleStrength": 1.2158720000000003,
@@ -97,7 +97,7 @@
         "backgroundContaminated": false,
         "backgroundContaminatedPixels": 0,
         "bottomSeamRegression": false,
-        "meanAbsDeltaL": 0.501294332531767,
+        "meanAbsDeltaL": 0.49726021997082825,
         "visuallyMeaningful": false,
         "verdict": "FAIL — SUBTLE — visible only in diff/heatmap, unlikely to read in normal review",
         "failures": [
@@ -105,9 +105,9 @@
         ]
       },
       "compare": {
-        "meanAbsDeltaL": 0.501294332531767,
-        "meanAbsDeltaRgb": 1.5640136134873406,
-        "ssimOnL": 0.9931989658929524,
+        "meanAbsDeltaL": 0.49726021997082825,
+        "meanAbsDeltaRgb": 1.5541101080581499,
+        "ssimOnL": 0.9932253950039083,
         "visuallyMeaningful": false,
         "verdict": "SUBTLE — visible only in diff/heatmap, unlikely to read in normal review"
       }
@@ -118,7 +118,7 @@
     "realismMeaningful": false,
     "trivialOnly": true
   },
-  "pipeline": "final-pipeline-v1",
+  "pipeline": "preview-pipeline-v1",
   "profile": {
     "code": "BALI-SILK",
     "swatchFile": "sofa-recolor-tool/input/swatches/Bali-Silk.jpg",
@@ -163,5 +163,46 @@
     "chromaSourceB": 0.1,
     "chromaTargetA": 0.88,
     "chromaTargetB": 0.9
+  },
+  "previewExport": {
+    "swatchCode": "BALI-SILK",
+    "previewMaster": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\best-preview-master-BALI-SILK.png",
+    "previewComparison": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\best-preview-comparison-BALI-SILK.png",
+    "baseRecolor": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\base-recolor-BALI-SILK.png",
+    "prep": {
+      "sourceClean": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\source-clean.png",
+      "upholsteryMask": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\upholstery-mask.png",
+      "legMask": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\leg-mask.png",
+      "alphaMask": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\alpha-mask.png",
+      "prepDebugOverlay": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\prep-debug-overlay.png"
+    },
+    "swatchMaps": {
+      "cleanBase": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\clean-swatch-base-BALI-SILK.png",
+      "cleanGrain": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\clean-swatch-grain-BALI-SILK.png",
+      "cleanMottle": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\clean-swatch-mottle-BALI-SILK.png",
+      "cleanColorBias": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\clean-swatch-color-bias-BALI-SILK.png",
+      "cleanArtifactMask": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\clean-swatch-artifact-mask-BALI-SILK.png",
+      "validationJson": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\clean-swatch-validation-BALI-SILK.json"
+    },
+    "status": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\BEST_PREVIEW_STATUS-BALI-SILK.md",
+    "qaMetrics": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\qa-metrics-BALI-SILK.json",
+    "optional": {
+      "grid": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\final-grid-BALI-SILK.png",
+      "regionDebug": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\upholstery-region-debug.png",
+      "variants": [
+        {
+          "id": "A",
+          "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\final-variant-A-BALI-SILK.png"
+        },
+        {
+          "id": "B",
+          "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\final-variant-B-BALI-SILK.png"
+        },
+        {
+          "id": "C",
+          "path": "C:\\Users\\erink\\OneDrive\\Documents\\GitHub\\mccabe-site\\public\\product-assets\\TEST-SOFA\\final-pipeline\\final-variant-C-BALI-SILK.png"
+        }
+      ]
+    }
   }
 }

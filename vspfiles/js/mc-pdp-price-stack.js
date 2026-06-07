@@ -193,6 +193,12 @@
 
   function mcEnsurePdpPriceStack() {
     if (!isPdp()) return false;
+    if (g.document.querySelector(".mc-pdp-member-pricing--canonical, .mc-pdp-member-row")) {
+      try {
+        g.document.body.classList.add("mc-pdp-price-stack");
+      } catch (eCanon) {}
+      return true;
+    }
     if (!hasStackMarkers()) {
       hideNativeSale();
       return false;
@@ -209,6 +215,9 @@
         g.document.body.classList.contains("mc-member-logged-in") ||
         !!g.sessionStorage.getItem("mc_recent_member_auth");
     } catch (e1) {}
+    if (wrap && (wrap.querySelector(".mc-pdp-member-row") || wrap.classList.contains("mc-pdp-member-pricing--canonical"))) {
+      return true;
+    }
     if (!loggedIn && wrap && !wrap.querySelector(".mc-pdp-member-line--sale")) {
       if (!(saleAmt > 0)) saleAmt = resolvePdpSaleAmount();
       if (saleAmt > 0) {
