@@ -83,6 +83,13 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Deploy mode (push = changed files only; dispatch = full core deploy)
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "DEPLOY_CHANGED_ONLY=0" >> "$GITHUB_ENV"
+            echo "::notice::workflow_dispatch — full deploy (template + custom-safe + mccabe-overrides always upload)"
+          fi
+
       - name: Detect deploy file changes (push only)
         if: github.event_name == 'push'
         run: |
@@ -136,7 +143,7 @@ jobs:
             exit 1
           fi
           echo ""
-          echo "Green if log contains: SFTP custom-safe OK, MC_PDP_JS_SFTP_CANONICAL_OK (HTTP is warning-only when runner gets 403)"
+          echo "Green if log contains: CORE_DEPLOY_VERIFIED, SFTP custom-safe OK, SFTP mccabe-overrides OK"
           echo "Quick browser checks:"
           echo "  fetch('/v/vspfiles/js/mc-pdp-auth-cta-fix.js?'+Date.now()).then(r=>r.text()).then(t=>console.log(t.includes('mcEnsurePdpPriceStack')))"
           echo "  fetch('/v/vspfiles/js/mc-pdp-price-stack.js?'+Date.now()).then(r=>console.log(r.status))"

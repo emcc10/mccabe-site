@@ -152,11 +152,24 @@ deploy_changed_only() {
   [[ "${DEPLOY_CHANGED_ONLY:-0}" == "1" || "${DEPLOY_CHANGED_ONLY:-}" == "true" ]]
 }
 
+# template_266 + primary CSS always deploy (Volusion serves /v/ paths; partial deploys mislead CI).
+CRITICAL_ALWAYS=(
+  "template_266.html"
+  "vspfiles/css/custom-safe.css"
+  "vspfiles/templates/266/css/mccabe-overrides.css"
+)
+
 deploy_file_changed() {
   local local_path="$1"
   if ! deploy_changed_only; then
     return 0
   fi
+  local critical
+  for critical in "${CRITICAL_ALWAYS[@]}"; do
+    if [[ "$local_path" == "$critical" ]]; then
+      return 0
+    fi
+  done
   [[ -n "${DEPLOY_CHANGED_FILES:-}" ]] && grep -Fxq "$local_path" <<<"${DEPLOY_CHANGED_FILES}"
 }
 
@@ -182,9 +195,7 @@ maybe_put_primary() {
 echo "=== DEPLOY_START ref=$(git rev-parse --short HEAD 2>/dev/null || echo unknown) ==="
 echo "=== custom-safe line 1: $(head -1 vspfiles/css/custom-safe.css 2>/dev/null || echo MISSING) ==="
 
-if deploy_changed_only && ! deploy_file_changed "template_266.html"; then
-  export SKIP_TEMPLATE_DEPLOY="1"
-fi
+echo "=== Critical always-deploy: ${CRITICAL_ALWAYS[*]} ==="
 
 set +e
 deploy_template
@@ -233,12 +244,11 @@ echo "=== Assets via lftp (fallback + large JS) ==="
 maybe_put_primary "vspfiles/templates/266/js/min/design-toolkit.min.js" "design-toolkit" \
   "/vspfiles/templates/266/js/min/design-toolkit.min.js" \
   "vspfiles/templates/266/js/min/design-toolkit.min.js"
-maybe_put_primary "vspfiles/css/custom-safe.css" "custom-safe" \
+put_primary "vspfiles/css/custom-safe.css" "custom-safe" \
   "/v/vspfiles/css/custom-safe.css" \
   "/vspfiles/css/custom-safe.css" \
   "vspfiles/css/custom-safe.css"
 
-if deploy_file_changed "vspfiles/css/custom-safe.css"; then
 CSS_VERIFY_NEEDLE=$(grep -oE 'C_CSS_DEPLOY_VERIFY_[0-9a-z]+' vspfiles/css/custom-safe.css 2>/dev/null | head -1 || echo "C_CSS_DEPLOY_VERIFY_20260522n")
 export CSS_NEEDLE="$CSS_VERIFY_NEEDLE"
 set +e
@@ -249,10 +259,6 @@ set -e
 if [[ "$verify_custom_safe_sftp_rc" -ne 0 ]]; then
   echo "::error::custom-safe.css SFTP verify failed (needle=${CSS_VERIFY_NEEDLE}) — CI failing so you are not misled by a green HTTP check"
   exit 1
-fi
-
-else
-  echo "=== custom-safe.css unchanged; SFTP verify skipped ==="
 fi
 
 maybe_put_primary "vspfiles/js/mc-plp-enforcer.js" "mc-plp-enforcer" \
@@ -303,7 +309,8 @@ maybe_put_primary "vspfiles/css/mc-live-patch.css" "mc-live-patch" \
   "/vspfiles/css/mc-live-patch.css" \
   "vspfiles/css/mc-live-patch.css"
 
-maybe_put_primary "vspfiles/templates/266/css/mccabe-overrides.css" "mccabe-overrides" \
+put_primary "vspfiles/templates/266/css/mccabe-overrides.css" "mccabe-overrides" \
+  "/v/vspfiles/templates/266/css/mccabe-overrides.css" \
   "/vspfiles/templates/266/css/mccabe-overrides.css" \
   "vspfiles/templates/266/css/mccabe-overrides.css"
 
@@ -463,11 +470,9 @@ verify_url() {
   fi
 }
 
-if deploy_file_changed "vspfiles/css/custom-safe.css"; then
-  verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "$CSS_VERIFY_NEEDLE"
-else
-  echo "=== custom-safe.css unchanged; post-deploy HTTP check skipped ==="
-fi
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?v=$(date +%s)" "$CSS_VERIFY_NEEDLE"
+OVERRIDES_VERIFY_NEEDLE=$(grep -oE 'MC_OVERRIDES_VERIFY_[0-9A-Za-z]+' vspfiles/templates/266/css/mccabe-overrides.css 2>/dev/null | head -1 || echo "MC_OVERRIDES_VERIFY_20260430dom")
+verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/templates/266/css/mccabe-overrides.css?v=$(date +%s)" "$OVERRIDES_VERIFY_NEEDLE"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260625" "MC_PLP_ENFORCER_20260625"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/mc-plp-enforcer.js?v=20260625" "PDP_AUTH_WANT"
 verify_url "https://www.mccabestheaterandliving.com/v/vspfiles/js/sectional-configs.js?v=$(date +%s)" "MC_SECTIONAL_PDP_AUTH_INLINE_20260528"
@@ -529,8 +534,18 @@ echo ""
 echo "=== Live storefront verify (soft — does not fail CI) ==="
 python3 scripts/verify_live_plp_deploy.py --soft || true
 
+echo "=== Core deploy gate (template + custom-safe + mccabe-overrides — SFTP MD5 + HTTP markers) ==="
+set +e
+python3 scripts/verify_volusion_core_deploy.py
+core_verify_rc=$?
+set -e
+if [[ "$core_verify_rc" -ne 0 ]]; then
+  echo "::error::Core Volusion deploy verify failed — live site may not serve updated template/CSS"
+  exit 1
+fi
+
 if [[ "$DEPLOY_FAIL" -ne 0 ]]; then
   echo "::error::Deploy finished with failures (template or prior step)"
   exit 1
 fi
-echo "=== DEPLOY_OK — template + custom-safe + mc-pdp JS (SFTP canonical; HTTP when runner not blocked) ==="
+echo "=== DEPLOY_OK — template + custom-safe + mccabe-overrides verified; mc-pdp JS SFTP canonical ==="

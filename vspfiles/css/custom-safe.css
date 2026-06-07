@@ -1,4 +1,4 @@
-/* 0603e C_CSS_DEPLOY_VERIFY_20260603e — clean title anchor + fresh top price markup */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260607deploy — deploy-path verify only; no layout change */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -15089,7 +15089,7 @@ html body.productdetails #v65-product-parent klarna-placement,
 html body.productdetails #v65-product-parent [class*="affirm" i],
 html body.productdetails #v65-product-parent [id*="affirm" i] {
   clear: both !important;
-  display: block !important;
+  display: inline-flex !important;
   margin-top: 12px !important;
   position: relative !important;
   z-index: 0 !important;

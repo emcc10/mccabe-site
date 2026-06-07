@@ -64,6 +64,8 @@ def main() -> int:
         print(f"::error::force template connect failed: {exc}", file=sys.stderr)
         return 1
 
+    import paramiko  # noqa: PLC0415
+
     verified: list[str] = []
     try:
         sftp = paramiko.SFTPClient.from_transport(transport)

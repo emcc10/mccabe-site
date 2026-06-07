@@ -12,6 +12,7 @@ CRITICAL = (
     "vspfiles/js/mc-sectional-pdp-emergency.js",
     "vspfiles/js/mtl-sectional-renderer.js",
     "vspfiles/css/custom-safe.css",
+    "vspfiles/templates/266/css/mccabe-overrides.css",
     "vspfiles/css/mc-live-patch.css",
     "vspfiles/templates/266/js/min/design-toolkit.min.js",
     "vspfiles/js/mc-plp-enforcer.js",
@@ -38,7 +39,6 @@ OPTIONAL = (
     "vspfiles/css/mc-plp-body-last.css",
     "vspfiles/js/mc-plp-sofa-bounds.json",
     "vspfiles/js/mc-site-fix.js",
-    "vspfiles/templates/266/css/mccabe-overrides.css",
     "vspfiles/js/sectional-configs.js",
 )
 
@@ -64,10 +64,19 @@ def _changed_files() -> set[str]:
     return {_norm(p.strip()) for p in raw.replace("\r", "\n").split("\n") if p.strip()}
 
 
+# Browsers load these from /v/vspfiles/ — always upload even on DEPLOY_CHANGED_ONLY pushes.
+_ALWAYS_DEPLOY = frozenset(
+    {
+        "vspfiles/css/custom-safe.css",
+        "vspfiles/templates/266/css/mccabe-overrides.css",
+    }
+)
+
+
 def _filter_changed(paths: tuple[str, ...], changed: set[str]) -> tuple[str, ...]:
     if not _changed_only():
         return paths
-    return tuple(p for p in paths if _norm(p) in changed)
+    return tuple(p for p in paths if _norm(p) in changed or _norm(p) in _ALWAYS_DEPLOY)
 
 
 def _changed_extra_assets(changed: set[str], known: set[str]) -> tuple[str, ...]:
