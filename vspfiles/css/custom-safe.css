@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260607deploy — deploy-path verify only; no layout change */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260607mobilefloat — mobile float nav home/cart/account ≤991px */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -15396,4 +15396,66 @@ body.mc-product-page #v65-product-parent #mc-selected-configuration-summary {
   padding: 0 !important;
   overflow: hidden !important;
   opacity: 0 !important;
+}
+
+/* =========================================================
+   MOBILE floating nav: home / account / cart (≤991px only)
+   Fixes: account hidden, cart/home size mismatch, dead taps on SVG
+   ========================================================= */
+@media (max-width: 991px) {
+  html body a.mc-home-float,
+  html body a.mc-cart-float,
+  html body a.mc-account-float {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.12) !important;
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+    max-width: 52px !important;
+    max-height: 52px !important;
+    border-radius: 999px !important;
+    z-index: 2147483647 !important;
+    text-decoration: none !important;
+    box-sizing: border-box !important;
+  }
+
+  html body a.mc-home-float {
+    left: max(12px, env(safe-area-inset-left)) !important;
+    right: auto !important;
+    margin-right: 0 !important;
+  }
+
+  html body a.mc-cart-float {
+    left: auto !important;
+    right: max(12px, env(safe-area-inset-right)) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  html body a.mc-account-float {
+    left: auto !important;
+    right: calc(52px + 12px + max(12px, env(safe-area-inset-right))) !important;
+    margin: 0 !important;
+  }
+
+  .mc-home-float__icon,
+  .mc-cart-float__icon,
+  .mc-account-float__icon,
+  .mc-home-float__icon path,
+  .mc-cart-float__icon path,
+  .mc-account-float__icon path {
+    pointer-events: none !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    max-width: 20px !important;
+    max-height: 20px !important;
+  }
 }

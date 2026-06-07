@@ -456,9 +456,9 @@ body.productdetails .mc-pdp-member-pricing .mc-pdp-member-line__amount,body.mc-p
   window.addEventListener('load', mcCategoryVisibilitySafetyReset);
 })();
 </script>
-<!-- MC_DEPLOY_VERIFY_20260607deploy: github->volusion deploy verification marker — search live View Source for this string -->
-<!-- MC_CSS_DEPLOY_VERIFY_20260607deploy: same token as /v/vspfiles/css/custom-safe.css line 1 -->
-<meta name="mc-deploy-verify" content="20260607deploy">
+<!-- MC_DEPLOY_VERIFY_20260607mobilefloat: github->volusion deploy verification marker — search live View Source for this string -->
+<!-- MC_CSS_DEPLOY_VERIFY_20260607mobilefloat: same token as /v/vspfiles/css/custom-safe.css line 1 -->
+<meta name="mc-deploy-verify" content="20260607mobilefloat">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script>
@@ -1592,6 +1592,55 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
     <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="2"></line>
   </svg>
 </button>
+<script>
+(function () {
+  function isMobile() {
+    return window.matchMedia("(max-width: 991px)").matches;
+  }
+  var FLOAT_NAV = [
+    { sel: "a.mc-home-float", href: "/default.asp" },
+    { sel: "a.mc-cart-float", href: "/shoppingcart.asp" },
+    { sel: "a.mc-account-float", href: "/myaccount.asp" }
+  ];
+  function closePushMenu() {
+    try {
+      document.documentElement.classList.remove("push-menu-open");
+      document.body.classList.remove("push-menu-open");
+    } catch (eClose) {}
+  }
+  function bindMobileFloatNav() {
+    if (!isMobile()) return;
+    FLOAT_NAV.forEach(function (item) {
+      var el = document.querySelector(item.sel);
+      if (!el) return;
+      var href = el.getAttribute("href") || item.href;
+      if (!href || href === "#") el.setAttribute("href", item.href);
+      if (el.dataset.mcFloatNavBound === "1") return;
+      el.dataset.mcFloatNavBound = "1";
+      el.addEventListener(
+        "click",
+        function (e) {
+          if (!isMobile()) return;
+          var dest = el.getAttribute("href") || item.href;
+          if (!dest || dest === "#") return;
+          closePushMenu();
+          e.preventDefault();
+          e.stopPropagation();
+          if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+          window.location.assign(dest);
+        },
+        true
+      );
+    });
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindMobileFloatNav);
+  } else {
+    bindMobileFloatNav();
+  }
+  window.addEventListener("resize", bindMobileFloatNav);
+})();
+</script>
 <div id="if_homepage">
 <script>
 (function () {
