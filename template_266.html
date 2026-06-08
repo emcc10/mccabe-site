@@ -33,7 +33,7 @@ body.productdetails .mc-pdp-member-line__amount,body.mc-product-page .mc-pdp-mem
 body.mc-pdp-price-stack #v65-product-parent .product_sale_price,body.mc-pdp-price-stack #v65-product-parent .product_saleprice,body.mc-pdp-price-stack #v65-product-parent font.product_sale_price,body.mc-pdp-price-stack #content_area .product_sale_price,body.mc-pdp-price-stack #content_area .product_saleprice,body.mc-pdp-price-stack #content_area font.product_sale_price,body.productdetails .mc-pdp-retail-row .product_sale_price,body.mc-product-page .mc-pdp-retail-row .product_sale_price,body.productdetails .mc-pdp-retail-row .product_saleprice,body.mc-product-page .mc-pdp-retail-row .product_saleprice,body.productdetails .colors_pricebox .product_sale_price,body.mc-product-page .colors_pricebox .product_sale_price,body.productdetails .colors_pricebox .product_saleprice,body.mc-product-page .colors_pricebox .product_saleprice,body.productdetails .mtl-product-price-block .product_sale_price,body.mc-product-page .mtl-product-price-block .product_saleprice,body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,body.mc-product-page:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox .product_saleprice,body.productdetails:has(#v65-product-parent .mc-pdp-retail-row) #v65-product-parent .colors_pricebox .product_productprice,body.productdetails:has(#v65-product-parent .mc-pdp-member-line) #v65-product-parent .colors_pricebox b:has(.product_saleprice){display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
 
 body.mc-palliser-pdp:not(.mc-logged-in) #v65-product-parent .colors_pricebox>font.product_sale_price,body.mc-palliser-pdp:not(.mc-logged-in) #content_area .colors_pricebox>font.product_sale_price{display:none!important}
-body.mc-palliser-pdp #v65-product-parent .option_pricing,body.mc-palliser-pdp #content_area .option_pricing,body.mc-palliser-pdp #v65-product-parent #priceWithOptions,body.mc-palliser-pdp #content_area #priceWithOptions,body.mc-palliser-pdp #v65-product-parent #priceWithOptionsNoTax,body.mc-palliser-pdp #content_area #priceWithOptionsNoTax{display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
+body.mc-palliser-pdp #mc-pdp-price-stack-host,body.mc-palliser-pdp #v65-product-parent .option_pricing,body.mc-palliser-pdp #content_area .option_pricing,body.mc-palliser-pdp #v65-product-parent #priceWithOptions,body.mc-palliser-pdp #content_area #priceWithOptions,body.mc-palliser-pdp #v65-product-parent #priceWithOptionsNoTax,body.mc-palliser-pdp #content_area #priceWithOptionsNoTax,body.mc-palliser-pdp:has(.mc-pdp-member-pricing--canonical) #v65-product-parent .colors_pricebox .product_list_price,body.mc-palliser-pdp:has(.mc-pdp-member-pricing--canonical) #content_area .colors_pricebox .product_list_price,body.mc-palliser-pdp:has(.mc-pdp-member-pricing--canonical) #v65-product-parent .colors_pricebox .product_productprice,body.mc-palliser-pdp:has(.mc-pdp-member-pricing--canonical) #content_area .colors_pricebox .product_productprice,body.mc-palliser-pdp:has(.mc-pdp-member-pricing--canonical) #v65-product-parent .colors_pricebox .product_sale_price,body.mc-palliser-pdp:has(.mc-pdp-member-pricing--canonical) #content_area .colors_pricebox .product_sale_price,body.mc-palliser-pdp:has(.mc-pdp-member-pricing--canonical) #v65-product-parent .colors_pricebox font.product_sale_price,body.mc-palliser-pdp:has(.mc-pdp-member-pricing--canonical) #content_area .colors_pricebox font.product_sale_price{display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
 body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product-page:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.productdetails:not(.mc-palliser-pdp) #mc-inline-config,body.mc-product-page:not(.mc-palliser-pdp) #mc-inline-config{display:none!important;visibility:hidden!important;pointer-events:none!important}
 </style>
 <link rel="stylesheet" href="/v/vspfiles/css/mc-live-patch.css?v=20260521type" id="mc-live-patch-css">
@@ -13196,6 +13196,12 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
   function ensurePriceWithOptionsLabel(scope){
     var root = scope || document;
+    if (
+      (typeof window.mcIsPalliserProduct === 'function' && window.mcIsPalliserProduct()) ||
+      (document.body && document.body.classList.contains('mc-palliser-pdp'))
+    ) {
+      return;
+    }
     if (mcIsTheaterSeatingPdp(root)) {
       hideTheaterSeatPdpNativePricing(root);
       return;
@@ -18984,6 +18990,9 @@ async function mcSubmitAuthForm(form, mode) {
 
   function mcEnsurePdpPriceStack() {
     if (document.querySelector('.mc-pdp-member-pricing--canonical, .mc-pdp-member-row')) return true;
+    if (typeof window.mcIsPalliserProduct === 'function' && window.mcIsPalliserProduct()) {
+      return !!document.querySelector('.mc-pdp-member-pricing--canonical');
+    }
     if (typeof window.mcIsPalliserProduct === 'function' && !window.mcIsPalliserProduct()) return false;
     if (typeof window.mcForceRebuildCleanPriceStack === 'function') {
       try {
@@ -19900,6 +19909,34 @@ try {
   });
 } catch (eShowCanon) {}
 
+    try {
+      var hostRm = document.getElementById('mc-pdp-price-stack-host');
+      if (hostRm && hostRm.parentNode) hostRm.parentNode.removeChild(hostRm);
+      document.querySelectorAll('.mc-pdp-member-pricing').forEach(function (el) {
+        if (el !== wrap) {
+          try {
+            el.parentNode && el.parentNode.removeChild(el);
+          } catch (eRmW) {}
+        }
+      });
+      var pallRoot = document.getElementById('v65-product-parent') || document.getElementById('content_area');
+      if (pallRoot) {
+        pallRoot.querySelectorAll('.mc-pdp-retail-row, .mc-pdp-member-line').forEach(function (el) {
+          if (wrap.contains(el)) return;
+          try {
+            el.parentNode && el.parentNode.removeChild(el);
+          } catch (eRmR) {}
+        });
+        pallRoot.querySelectorAll('.option_pricing, #priceWithOptions, #priceWithOptionsNoTax').forEach(function (el) {
+          if (wrap.contains(el)) return;
+          el.style.setProperty('display', 'none', 'important');
+          el.style.setProperty('visibility', 'hidden', 'important');
+          el.style.setProperty('height', '0', 'important');
+          el.style.setProperty('opacity', '0', 'important');
+        });
+      }
+    } catch (ePalClean) {}
+
 mcHideDuplicatePdpMemberFragments();
 return true;
 }
@@ -19939,9 +19976,7 @@ return true;
           document.querySelector('#v65-product-parent .v65-product-price') ||
           document.querySelector('#content_area .v65-product-price') ||
           document.querySelector('#v65-product-parent .product_price') ||
-          document.querySelector('#v65-product-parent .price') ||
-          document.querySelector('#priceWithOptionsNoTax') ||
-          document.querySelector('#priceWithOptions');
+          document.querySelector('#v65-product-parent .price');
         if (nb) {
           amt =
             Number(
@@ -19968,10 +20003,10 @@ return true;
       if (typeof window.parseMcCurrency !== 'function') return 0;
       try {
         var saleNode =
-          document.querySelector('#priceWithOptions') ||
+          document.querySelector('#v65-product-parent .product_saleprice, #v65-product-parent .product_sale_price, #v65-product-parent font.product_sale_price') ||
+          document.querySelector('#content_area .product_saleprice, #content_area .product_sale_price, #content_area font.product_sale_price') ||
           document.querySelector('#priceWithOptionsNoTax') ||
-          document.querySelector('#content_area .product_saleprice, #content_area .product_sale_price') ||
-          document.querySelector('#v65-product-parent .product_saleprice, #v65-product-parent .product_sale_price');
+          document.querySelector('#priceWithOptions');
         if (saleNode) {
           amt =
             Number(
