@@ -202,13 +202,10 @@
   function mcEnsurePdpPriceStack() {
     if (!isPdp()) return false;
     if (isPalliserPdp()) {
-      var canon = g.document.querySelector(".mc-pdp-member-pricing--canonical");
-      if (canon) {
-        canon.querySelectorAll(".mc-pdp-member-line--sale").forEach(function (node) {
-          try {
-            node.remove();
-          } catch (eRm) {}
-        });
+      if (typeof g.mcDedupePalliserMemberPricingBlocks === "function") {
+        try {
+          g.mcDedupePalliserMemberPricingBlocks();
+        } catch (eDed) {}
       }
       if (typeof g.mcRepositionPalliserMemberPricing === "function") {
         try {
@@ -220,7 +217,7 @@
           g.mcHidePalliserNativePriceUi();
         } catch (eHide) {}
       }
-      return !!canon;
+      return !!g.document.querySelector(".mc-pdp-member-pricing--canonical");
     }
     if (!hasStackMarkers()) {
       hideNativeSale();
