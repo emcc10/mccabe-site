@@ -46,10 +46,44 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
     ].join(" ").toLowerCase();
     return text.indexOf("palliser") !== -1;
   }
+  /** Narrow theater-chair PDP: named models or theater-chair URL only — not sectionals/sofas (e.g. Titan). */
+  function mcIsTrueTheaterChairPdp() {
+    try {
+      if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
+        return false;
+      }
+    } catch (eSec) {}
+    var path = String(location.pathname || "").toLowerCase();
+    if (path.indexOf("theater-chair") !== -1 || path.indexOf("theatre-chair") !== -1) return true;
+    if (/\bparagon\b/i.test(path) || /-s\/106(\b|\.|-|\/)/.test(path)) return true;
+    try {
+      if (document.documentElement.classList.contains("mc-paragon-pdp")) return true;
+    } catch (ePg) {}
+    var pcInput = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+    var pcVal = pcInput && String(pcInput.value || "").trim();
+    if (pcVal === "41417") return true;
+    var titleEl = document.querySelector("h1 [itemprop='name'], h1, .vp-product-title");
+    var title = titleEl ? String(titleEl.textContent || "").toLowerCase().trim() : "";
+    if (!title) return false;
+    return /\b(paragon|flicks|vivid|\bace\b|vertex|catalina|beckett|audio)\b/i.test(title);
+  }
+  window.mcIsTrueTheaterChairPdp = mcIsTrueTheaterChairPdp;
   function mcSyncPalliserPdpBodyClasses(isLoggedInOpt) {
     if (!document.body) return;
-    if (mcIsPalliserProduct()) document.body.classList.add("mc-palliser-pdp");
+    var isPalliser = mcIsPalliserProduct();
+    if (isPalliser) document.body.classList.add("mc-palliser-pdp");
     else document.body.classList.remove("mc-palliser-pdp");
+    var isTheaterChair = isPalliser && mcIsTrueTheaterChairPdp();
+    if (isTheaterChair) {
+      document.body.classList.add("mc-theater-seating-pdp");
+      document.body.classList.remove("mc-non-theater-palliser-pdp");
+    } else if (isPalliser) {
+      document.body.classList.remove("mc-theater-seating-pdp");
+      document.body.classList.add("mc-non-theater-palliser-pdp");
+    } else {
+      document.body.classList.remove("mc-theater-seating-pdp");
+      document.body.classList.remove("mc-non-theater-palliser-pdp");
+    }
     var loggedIn =
       typeof isLoggedInOpt === "boolean"
         ? isLoggedInOpt
@@ -4239,47 +4273,17 @@ try {
 
   window.__MC_INLINE_FINAL__ = true;
 
-  /** True on Palliser / custom theater PDPs before mount finishes (body class may not exist yet). */
+  /** True on Palliser theater-chair PDPs before mount finishes (body class may not exist yet). */
   function mcIsTheaterSeatingPdpEarly() {
     try {
       if (!document.getElementById("v65-product-parent")) return false;
-      var path = String(location.pathname || "").toLowerCase();
-      var search = String(location.search || "").toLowerCase();
-      var pcInput = document.querySelector('input[name="ProductCode"]');
-      var pcVal = pcInput && String(pcInput.value || "").trim();
-      if (pcVal === "41417") return true;
-      if (/productcode=41417\b/i.test(search)) return true;
-      if (/\bparagon\b/i.test(path)) return true;
-      if (/-s\/106(\b|\.|-|\/)/.test(path) || /\bcategoryid=106\b/.test(search)) return true;
-      if (
-        /customtheaterseating|palliser-theater-seating|theater-seating|theatre-seating|vertex-theater/i.test(
-          path
-        )
-      )
-        return true;
-      if (
-        document.querySelector(
-          'a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"], a[href*="theater-seating"], a[href*="theatre-seating"]'
-        )
-      )
-        return true;
-      if (
-        document.querySelector(
-          'select[title*="Number of Seats" i], select[title*="Choose Configuration" i]'
-        )
-      )
-        return true;
-      var titleText = (
-        (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
-        document.title ||
-        ""
-      ).toLowerCase();
-      return /theater seating|theatre seating|theater chair|theatre chair|home theater|home theatre|palliser vertex|\bparagon\b/i.test(
-        titleText
-      );
+      if (typeof window.mcIsTrueTheaterChairPdp === "function") {
+        return window.mcIsTrueTheaterChairPdp();
+      }
     } catch (eTh) {
       return false;
     }
+    return false;
   }
 
   /** Mirrors leather modal's select detection: if true, wait for #wmOpen instead of mounting without it. */
@@ -5174,29 +5178,10 @@ try {
       });
     }
     function isTheaterSeatingPdp(){
-      if (!document.getElementById("v65-product-parent")) return false;
-      var pcInput = document.querySelector('input[name="ProductCode"]');
-      var pcEarly = pcInput && String(pcInput.value || "").trim();
-      if (pcEarly === "41417") return true;
-      if (
-        !(document.body && (document.body.classList.contains("mc-product-page") || document.body.classList.contains("productdetails"))) &&
-        !(document.documentElement && document.documentElement.classList.contains("mc-paragon-pdp"))
-      ) {
-        return false;
+      if (typeof window.mcIsTrueTheaterChairPdp === "function") {
+        return window.mcIsTrueTheaterChairPdp();
       }
-      if (
-        document.querySelector(
-          'a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"]'
-        )
-      ) {
-        return true;
-      }
-      var titleText = (
-        (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
-        document.title ||
-        ""
-      ).toLowerCase();
-      return /theater seating|theatre seating|theater chair|theatre chair|\bparagon\b|home theater|home theatre/i.test(titleText);
+      return false;
     }
     function hideTheaterSeatDropdownRows(){
       if (!isTheaterSeatingPdp()) return;
@@ -13230,18 +13215,10 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
       return false;
     }
-    var scope = root || document;
-    var theaterTitle = (
-      (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
-      document.title ||
-      ""
-    ).toLowerCase();
-    return (
-      !!(document.body && document.body.classList.contains('mc-theater-seating-pdp')) ||
-      !!document.querySelector('a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"]') ||
-      /theater seating|theatre seating|theater chair|theatre chair|\bparagon\b/i.test(theaterTitle) ||
-      !!scope.querySelector('select[title*="Number of Seats"], select[title*="Choose Configuration"], select[title*="Choose Cover"]')
-    );
+    if (typeof window.mcIsTrueTheaterChairPdp === "function") {
+      return window.mcIsTrueTheaterChairPdp();
+    }
+    return !!(document.body && document.body.classList.contains("mc-theater-seating-pdp"));
   }
   function hideTheaterSeatPdpNativePricing(scope){
     var root = scope || document;
@@ -23941,36 +23918,10 @@ s0.parentNode.insertBefore(s1,s0);
 <script id="mc-hide-config-non-theater-pdps">
 (function () {
   function mcIsTrueTheaterSeatingPdp() {
-    var path = "";
-    var title = "";
-    var pc = "";
-
-    try {
-      path = String(location.pathname || "").toLowerCase();
-      title = String(document.title || "").toLowerCase();
-
-      var pcInput = document.querySelector('input[name="ProductCode"]');
-      pc = pcInput ? String(pcInput.value || "").toLowerCase() : "";
-    } catch (e) {}
-
-    /*
-      IMPORTANT:
-      Do NOT use "palliser" alone here.
-      Titan, Barrett, sectional, sofa, recliner pages are also Palliser.
-    */
-    return (
-      document.documentElement.classList.contains("mc-paragon-pdp") ||
-      path.indexOf("theater-chair") !== -1 ||
-      path.indexOf("theatre-chair") !== -1 ||
-      title.indexOf("theater chair") !== -1 ||
-      title.indexOf("theatre chair") !== -1 ||
-      title.indexOf("home theater chair") !== -1 ||
-      title.indexOf("home theatre chair") !== -1 ||
-      title.indexOf("theater seating") !== -1 ||
-      title.indexOf("theatre seating") !== -1 ||
-      pc.indexOf("theater") !== -1 ||
-      pc.indexOf("theatre") !== -1
-    );
+    if (typeof window.mcIsTrueTheaterChairPdp === "function") {
+      return window.mcIsTrueTheaterChairPdp();
+    }
+    return false;
   }
 
   function mcHideConfigBoxUnlessTheater() {
