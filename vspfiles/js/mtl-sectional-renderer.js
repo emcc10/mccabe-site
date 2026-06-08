@@ -543,8 +543,23 @@
     return /klarna|affirm/.test(blob);
   }
 
+  function isCanonicalPricingEl(node) {
+    if (!node) return false;
+    if (node.classList && node.classList.contains("mc-pdp-member-pricing--canonical")) return true;
+    if (node.closest && node.closest(".mc-pdp-member-pricing--canonical")) return true;
+    return false;
+  }
+
+  function isPalliserPdpForMtlPricing() {
+    try {
+      if (typeof window.mcIsPalliserProduct === "function" && window.mcIsPalliserProduct()) return true;
+    } catch (ePal) {}
+    return false;
+  }
+
   function hidePricingNode(node) {
     if (!node) return;
+    if (isCanonicalPricingEl(node)) return;
     try {
       node.style.setProperty("display", "none", "important");
       node.style.setProperty("visibility", "hidden", "important");
@@ -558,6 +573,7 @@
   }
 
   function hideLegacyPricingInFirstPricebox() {
+    if (isPalliserPdpForMtlPricing()) return;
     var pb = findFirstColorsPricebox();
     if (!pb) return;
     pb.querySelectorAll(
@@ -572,12 +588,14 @@
   }
 
   function hideStrayPriceRowsOutsideTopPanel(top) {
+    if (isPalliserPdpForMtlPricing()) return;
     top = top || document.getElementById("mc-pdp-top-price-panel");
     var root = document.getElementById("v65-product-parent") || document.getElementById("content_area");
     if (!root) return;
     root.querySelectorAll(".mc-pdp-retail-row, .mc-pdp-member-pricing, .mc-pdp-retail-label").forEach(function (node) {
       if (!node || (top && top.contains && top.contains(node))) return;
       if (nodeIsFinancingEl(node)) return;
+      if (isCanonicalPricingEl(node)) return;
       hidePricingNode(node);
     });
     hideLegacyPricingInFirstPricebox();
@@ -774,6 +792,7 @@
 
   function mountTopPricePanelUnderTitleOnce() {
     if (!isSectionalProductPageClient()) return;
+    if (isPalliserPdpForMtlPricing()) return;
     if (window.__MTL_TOP_PRICE_MOUNT_GAVE_UP__) return;
     var panel = ensureTopPricePanel();
     if (!panel) return;
@@ -813,6 +832,7 @@
   var __mtlTopPricePanelTimer = null;
   function updateTopPricePanelNow() {
     if (!isSectionalProductPageClient()) return;
+    if (isPalliserPdpForMtlPricing()) return;
     if (window.__MTL_TOP_PRICE_MOUNT_GAVE_UP__ && !isTopPricePanelMounted(document.getElementById("mc-pdp-top-price-panel"))) {
       return;
     }
