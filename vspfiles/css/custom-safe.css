@@ -1,4 +1,4 @@
-/* 0603e C_CSS_DEPLOY_VERIFY_20260603e — clean title anchor + fresh top price markup */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260607deploy — deploy-path verify only; no layout change */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
 /* Loads after template.css; cache-bust via mcCssBust() in template — not the static ?v= on mccabe-overrides */
@@ -3006,7 +3006,7 @@ body.mc-product-page select.mc-native-leather {
     #mcProductSummaryBtn {
       width: 260px !important;
       min-width: 260px !important;
-      max-width: 260px !important;
+      max-width: 420px !important;
       box-sizing: border-box !important;
     }
 
@@ -5030,9 +5030,9 @@ body.mc-product-page #mcLeatherSwatchStrip {
   min-width: 0 !important;
   overflow: hidden !important;
   max-width: 260px !important;
-  height: 26px !important;
+  height: 38px !important;
   border: 1px solid #d7d7d7 !important;
-  background: #fff !important;
+
 }
 
 body.mc-product-page .mc-mini-swatch {
@@ -13030,9 +13030,6 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label
   text-transform: capitalize !important;
 }
 
-.mc-pdp-member-line__amount {
-  margin-bottom: -100px !important;
-}
 
 .productnamecolorLARGE > span:nth-child(1) {
 
@@ -14690,9 +14687,21 @@ html body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-member-pricing {
   height: auto !important;
   max-height: none !important;
 }
-html body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-pricing .mc-pdp-member-line--sale,
-html body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-member-pricing .mc-pdp-member-line--sale {
+html body.productdetails:not(.mc-theater-seating-pdp) #mc-pdp-price-stack-host .mc-pdp-member-pricing .mc-pdp-member-line--sale,
+html body.mc-pdp-price-stack:not(.mc-theater-seating-pdp) #mc-pdp-price-stack-host .mc-pdp-member-pricing .mc-pdp-member-line--sale {
   display: flex !important;
+}
+
+html.mc-paragon-pdp body #mc-pdp-price-stack-host .mc-pdp-member-pricing .mc-pdp-member-line--sale,
+html body.mc-theater-seating-pdp #mc-pdp-price-stack-host .mc-pdp-member-pricing .mc-pdp-member-line--sale {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
 }
 /* Sectional PDP: McCabe stack owns retail/member/sale — hide duplicate MTL summary + caption prices */
 html body.productdetails:has(.mc-pdp-retail-row) #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),
@@ -15089,7 +15098,7 @@ html body.productdetails #v65-product-parent klarna-placement,
 html body.productdetails #v65-product-parent [class*="affirm" i],
 html body.productdetails #v65-product-parent [id*="affirm" i] {
   clear: both !important;
-  display: block !important;
+  display: inline-flex !important;
   margin-top: 12px !important;
   position: relative !important;
   z-index: 0 !important;
@@ -15396,4 +15405,87 @@ body.mc-product-page #v65-product-parent #mc-selected-configuration-summary {
   padding: 0 !important;
   overflow: hidden !important;
   opacity: 0 !important;
+}
+/* FINAL WINNER: mini leather swatch strip should scroll, not clip */
+html body.productdetails #mcLeatherSwatchStrip,
+html body.mc-product-page #mcLeatherSwatchStrip,
+html body.productdetails #content_area #mcLeatherSwatchStrip,
+html body.mc-product-page #content_area #mcLeatherSwatchStrip {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  gap: 4px !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  max-width: 420px !important;
+  min-width: 0 !important;
+  height: 45px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: auto !important;
+
+  white-space: nowrap !important;
+}
+
+html body.productdetails #mcLeatherSwatchStrip::-webkit-scrollbar,
+html body.mc-product-page #mcLeatherSwatchStrip::-webkit-scrollbar {
+  display: initial !important;
+  height: 6px !important;
+}
+
+html body.productdetails #mcLeatherSwatchStrip .mc-mini-swatch,
+html body.mc-product-page #mcLeatherSwatchStrip .mc-mini-swatch {
+  width: 32px !important;
+  min-width: 32px !important;
+  flex: 0 0 32px !important;
+  height: 24px !important;
+  border: 0 !important;
+  border-right: 1px solid #e6e6e6 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+/* FINAL: force Palliser PDP Retail/Member labels visible */
+body.mc-palliser-pdp .mc-pdp-member-pricing {
+  display: flex !important;
+  flex-direction: column !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+body.mc-palliser-pdp .mc-pdp-retail-row,
+body.mc-palliser-pdp .mc-pdp-member-line {
+  display: flex !important;
+  flex-direction: column !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+body.mc-palliser-pdp .mc-pdp-retail-label,
+body.mc-palliser-pdp .mc-pdp-member-line__label {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
+}
+
+body.mc-palliser-pdp .mc-pdp-stack-retail-amt,
+body.mc-palliser-pdp .mc-pdp-member-line__amount {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  font-size: 13px !important;
+  color: #444 !important;
 }
