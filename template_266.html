@@ -6562,18 +6562,10 @@ function getPlannerBaseSeatPriceForCalc() {
   return 0;
 }
 function mcIsTheaterPlannerPdp() {
-  if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
-  if (document.documentElement && document.documentElement.classList.contains("mc-paragon-pdp")) {
-    return true;
+  if (typeof window.mcIsTrueTheaterChairPdp === "function") {
+    return window.mcIsTrueTheaterChairPdp();
   }
-  var title = (
-    (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
-    document.title ||
-    ""
-  ).toLowerCase();
-  return /theater seating|theatre seating|theater chair|theatre chair|\bparagon\b|home theater|home theatre/i.test(
-    title
-  );
+  return !!(document.body && document.body.classList.contains("mc-theater-seating-pdp"));
 }
 if (typeof window !== "undefined") {
   window.mcIsTheaterPlannerPdp = mcIsTheaterPlannerPdp;
@@ -6926,11 +6918,7 @@ function ensurePriceWithOptionsLabel(scope){
     document.title ||
     ""
   ).toLowerCase();
-  var isTheaterSeatPdp =
-    !!(document.body && document.body.classList.contains('mc-theater-seating-pdp')) ||
-    !!document.querySelector('a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"]') ||
-    /theater seating|theatre seating|theater chair|theatre chair/.test(theaterTitle);
-  if (isTheaterSeatPdp) return;
+  if (typeof window.mcIsTrueTheaterChairPdp === "function" && window.mcIsTrueTheaterChairPdp()) return;
   var priceNode = root.querySelector('#priceWithOptions');
   if (!priceNode) return;
 
@@ -12761,25 +12749,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
   window.isBeanBagProductPage = isBeanBagProductPage;
   function mcIsParagonOrTheaterPdpEarly() {
-    try {
-      if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
-      if (document.documentElement.classList.contains("mc-paragon-pdp")) return true;
-      var path = String(location.pathname || "").toLowerCase();
-      if (/\bparagon\b/i.test(path)) return true;
-      if (/-s\/106(\b|\.|-|\/)/.test(path)) return true;
-      var pcInput = document.querySelector('input[name="ProductCode"]');
-      var pcVal = pcInput && String(pcInput.value || "").trim();
-      if (pcVal === "41417") return true;
-      if (/\bparagon\b|theater seating|theatre seating|theater chair|theatre chair/.test(
-        (
-          (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
-          document.title ||
-          ""
-        ).toLowerCase()
-      )) {
-        return true;
-      }
-    } catch (eEarly) {}
+    if (typeof window.mcIsTrueTheaterChairPdp === "function") {
+      return window.mcIsTrueTheaterChairPdp();
+    }
     return false;
   }
 
@@ -12791,15 +12763,11 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function mcPdpKeepsNativeOptionsOffscreen() {
     if (!document.getElementById("mc-inline-config")) return false;
-    if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
-    if (document.documentElement.classList.contains("mc-paragon-pdp")) return true;
+    if (typeof window.mcIsTrueTheaterChairPdp === "function" && window.mcIsTrueTheaterChairPdp()) {
+      return true;
+    }
     if (document.querySelector(".mc-native-options-offscreen, [data-mc-hide-native-options='1']")) return true;
-    var title = (
-      (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
-      document.title ||
-      ""
-    ).toLowerCase();
-    return /\bparagon\b|theater seating|theatre seating|theater chair|theatre chair/.test(title);
+    return false;
   }
 
   function hideOptionsTable(scope){

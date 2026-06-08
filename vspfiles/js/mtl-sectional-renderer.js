@@ -155,8 +155,16 @@
     }
   }
 
-  /** Palliser theater PDPs: never run sectional leather/cards/summary relocation. */
+  /** Palliser theater-chair PDPs: never run sectional leather/cards/summary relocation. */
   function isTheaterSeatingProductPageForGuard() {
+    try {
+      if (typeof window.mcIsTrueTheaterChairPdp === "function" && window.mcIsTrueTheaterChairPdp()) {
+        return true;
+      }
+      if (typeof window.mcIsTrueTheaterChairPdp === "function") {
+        return false;
+      }
+    } catch (eTc) {}
     /* Sectional PDPs often include “Theater seating” nav / cross-sell copy in v65-product-parent — must not trigger theater guard. */
     try {
       if (document.documentElement.classList.contains("is-sectional-product")) return false;
@@ -547,6 +555,19 @@
     if (!node) return false;
     if (node.classList && node.classList.contains("mc-pdp-member-pricing--canonical")) return true;
     if (node.closest && node.closest(".mc-pdp-member-pricing--canonical")) return true;
+    var box =
+      node.closest &&
+      node.closest("#v65-product-parent .colors_pricebox, #content_area .colors_pricebox");
+    if (box && box.querySelector(".mc-pdp-member-pricing--canonical")) {
+      if (
+        node.classList &&
+        (node.classList.contains("mc-pdp-retail-row") ||
+          node.classList.contains("mc-pdp-member-line") ||
+          node.classList.contains("mc-pdp-member-pricing"))
+      ) {
+        return true;
+      }
+    }
     return false;
   }
 
