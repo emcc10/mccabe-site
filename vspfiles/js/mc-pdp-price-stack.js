@@ -13,6 +13,14 @@
     return /\.htm(?:\?|$)/i.test(p) && !!g.document.querySelector(".colors_pricebox");
   }
 
+  function isPalliserPdp() {
+    try {
+      if (typeof g.mcIsPalliserProduct === "function" && g.mcIsPalliserProduct()) return true;
+      if (g.document.body && g.document.body.classList.contains("mc-palliser-pdp")) return true;
+    } catch (ePal) {}
+    return false;
+  }
+
   function parseMoney(text) {
     if (typeof g.parseMcCurrency === "function") {
       return Number(g.parseMcCurrency(text == null ? "" : String(text))) || 0;
@@ -193,6 +201,27 @@
 
   function mcEnsurePdpPriceStack() {
     if (!isPdp()) return false;
+    if (isPalliserPdp()) {
+      var canon = g.document.querySelector(".mc-pdp-member-pricing--canonical");
+      if (canon) {
+        canon.querySelectorAll(".mc-pdp-member-line--sale").forEach(function (node) {
+          try {
+            node.remove();
+          } catch (eRm) {}
+        });
+      }
+      if (typeof g.mcRepositionPalliserMemberPricing === "function") {
+        try {
+          g.mcRepositionPalliserMemberPricing();
+        } catch (ePos) {}
+      }
+      if (typeof g.mcHidePalliserNativePriceUi === "function") {
+        try {
+          g.mcHidePalliserNativePriceUi();
+        } catch (eHide) {}
+      }
+      return !!canon;
+    }
     if (!hasStackMarkers()) {
       hideNativeSale();
       return false;

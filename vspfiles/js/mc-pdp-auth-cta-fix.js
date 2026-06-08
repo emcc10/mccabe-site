@@ -1007,6 +1007,7 @@
 
   function forceRebuildCleanPriceStack() {
     if (!isProductPdp()) return;
+    if (isPalliserPdpPage()) return;
     if (isSectionalPdpPage()) return;
     if (global.document.getElementById("mc-pdp-top-price-panel") || global.__MTL_OWNS_TOP_PRICE__) return;
     if (global.__MTL_TOP_PRICE_MOUNT_GAVE_UP__) return;
@@ -1525,6 +1526,27 @@
 
   function mcEnsurePdpPriceStack() {
     if (!isProductPdp()) return false;
+    if (isPalliserPdpPage()) {
+      if (typeof global.mcRepositionPalliserMemberPricing === "function") {
+        try {
+          global.mcRepositionPalliserMemberPricing();
+        } catch (ePos) {}
+      }
+      if (typeof global.mcHidePalliserNativePriceUi === "function") {
+        try {
+          global.mcHidePalliserNativePriceUi();
+        } catch (eHide) {}
+      }
+      var canon = global.document.querySelector(".mc-pdp-member-pricing--canonical");
+      if (canon) {
+        canon.querySelectorAll(".mc-pdp-member-line--sale").forEach(function (node) {
+          try {
+            node.remove();
+          } catch (eRm) {}
+        });
+      }
+      return !!canon;
+    }
     try {
       forceRebuildCleanPriceStack();
       syncConfigurationBlockPricing();

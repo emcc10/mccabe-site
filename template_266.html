@@ -1442,8 +1442,8 @@ document.addEventListener("DOMContentLoaded", function () {
   <!-- DESIGN TOOLKIT -->
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
-  <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260607titan"></script>
+  <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607palliser"></script>
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260607palliser"></script>
   <script id="mc-plp-enforcer-bridge">
 (function(g,d){var W="20260626p",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
@@ -14248,10 +14248,19 @@ if (mcShouldUseLeatherAccordion()) {
     if (secondPricebox && secondPricebox.parentNode) {
       if (secondPricebox.previousSibling === existingAcc) {
         existingAcc.dataset.mcAccAnchor = 'second-pricebox';
+        if (typeof window.mcRepositionPalliserMemberPricing === 'function') {
+          window.mcRepositionPalliserMemberPricing();
+        }
+        if (typeof window.mcHidePalliserNativePriceUi === 'function') {
+          window.mcHidePalliserNativePriceUi();
+        }
         return;
       }
       secondPricebox.parentNode.insertBefore(existingAcc, secondPricebox);
       existingAcc.dataset.mcAccAnchor = 'second-pricebox';
+      if (typeof window.mcRepositionPalliserMemberPricing === 'function') {
+        window.mcRepositionPalliserMemberPricing();
+      }
       return;
     }
     /* Wait for the options pricebox — avoid fallback placement that jumps when the second box appears. */
@@ -18989,7 +18998,21 @@ async function mcSubmitAuthForm(form, mode) {
 }
 
   function mcEnsurePdpPriceStack() {
-    if (document.querySelector('.mc-pdp-member-pricing--canonical, .mc-pdp-member-row')) return true;
+    if (document.querySelector('.mc-pdp-member-pricing--canonical, .mc-pdp-member-row')) {
+      if (typeof window.mcIsPalliserProduct === 'function' && window.mcIsPalliserProduct()) {
+        var canonEarly = document.querySelector('.mc-pdp-member-pricing--canonical');
+        if (canonEarly) {
+          canonEarly.querySelectorAll('.mc-pdp-member-line--sale').forEach(function (node) {
+            try {
+              node.remove();
+            } catch (eRmCanonSale) {}
+          });
+        }
+        if (typeof mcRepositionPalliserMemberPricing === 'function') mcRepositionPalliserMemberPricing();
+        if (typeof mcHidePalliserNativePriceUi === 'function') mcHidePalliserNativePriceUi();
+      }
+      return true;
+    }
     if (typeof window.mcIsPalliserProduct === 'function' && window.mcIsPalliserProduct()) {
       return !!document.querySelector('.mc-pdp-member-pricing--canonical');
     }
@@ -19817,6 +19840,68 @@ async function mcSubmitAuthForm(form, mode) {
     }
   }
 
+  function mcFindPalliserPricingAnchor() {
+    var scope = document.getElementById('v65-product-parent') || document.getElementById('content_area');
+    if (!scope) return { parent: null, before: null };
+    var boxes = scope.querySelectorAll('.colors_pricebox');
+    var secondBox = boxes.length > 1 ? boxes[1] : null;
+    var acc = document.getElementById('mc-pdp-accordion');
+    if (secondBox && secondBox.parentNode) {
+      return {
+        parent: secondBox.parentNode,
+        before: acc && acc.parentNode === secondBox.parentNode ? acc : secondBox
+      };
+    }
+    if (acc && acc.parentNode) {
+      return { parent: acc.parentNode, before: acc };
+    }
+    var optTd =
+      document.querySelector('#v65-product-parent td.mc-pdp-options-td') ||
+      document.querySelector('#content_area td.mc-pdp-options-td');
+    if (optTd) {
+      return { parent: optTd, before: optTd.firstChild };
+    }
+    return { parent: null, before: null };
+  }
+
+  function mcRepositionPalliserMemberPricing() {
+    if (typeof window.mcIsPalliserProduct === 'function' && !window.mcIsPalliserProduct()) return false;
+    var wrap = document.querySelector('.mc-pdp-member-pricing--canonical');
+    if (!wrap) return false;
+    var anchor = mcFindPalliserPricingAnchor();
+    if (!anchor.parent) return false;
+    if (wrap.parentNode !== anchor.parent || wrap.nextSibling !== anchor.before) {
+      try {
+        anchor.parent.insertBefore(wrap, anchor.before);
+      } catch (eRep) {
+        try {
+          anchor.parent.appendChild(wrap);
+        } catch (eRep2) {}
+      }
+    }
+    return true;
+  }
+
+  function mcHidePalliserNativePriceUi() {
+    if (typeof window.mcIsPalliserProduct === 'function' && !window.mcIsPalliserProduct()) return;
+    var scope = document.getElementById('v65-product-parent') || document.getElementById('content_area');
+    if (!scope) return;
+    scope.querySelectorAll('.option_pricing, #priceWithOptions, #priceWithOptionsNoTax').forEach(function (el) {
+      if (el.closest && el.closest('.mc-pdp-member-pricing--canonical')) return;
+      try {
+        el.style.setProperty('display', 'none', 'important');
+        el.style.setProperty('visibility', 'hidden', 'important');
+        el.style.setProperty('height', '0', 'important');
+        el.style.setProperty('max-height', '0', 'important');
+        el.style.setProperty('margin', '0', 'important');
+        el.style.setProperty('padding', '0', 'important');
+        el.style.setProperty('overflow', 'hidden', 'important');
+        el.style.setProperty('opacity', '0', 'important');
+        el.style.setProperty('pointer-events', 'none', 'important');
+      } catch (eH) {}
+    });
+  }
+
   function mcRenderPdpRetailAndMember(retailText, memberText, loginUrl, isLoggedIn) {
     if (typeof window.mcIsPalliserProduct === 'function' && !window.mcIsPalliserProduct()) return false;
     if (typeof window.mcSyncPalliserPdpBodyClasses === 'function') window.mcSyncPalliserPdpBodyClasses(isLoggedIn);
@@ -19838,42 +19923,14 @@ async function mcSubmitAuthForm(form, mode) {
       wrap.classList.add('mc-pdp-member-pricing--canonical');
     }
 
-    /* Palliser: options column, above accordion/options — below product image table */
-    var anchorParent = null;
-    var anchorBefore = null;
-    var acc = document.getElementById('mc-pdp-accordion');
-    var optTd =
-      document.querySelector('#v65-product-parent td.mc-pdp-options-td') ||
-      document.querySelector('#content_area td.mc-pdp-options-td');
-    if (acc && acc.parentNode) {
-      anchorParent = acc.parentNode;
-      anchorBefore = acc;
-    } else if (optTd) {
-      var optsTable = optTd.querySelector('#options_table, table[id*="options_table"]');
-      if (optsTable && optsTable.parentNode) {
-        anchorParent = optsTable.parentNode;
-        anchorBefore = optsTable;
-      } else {
-        anchorParent = optTd;
-        anchorBefore = optTd.firstChild;
-      }
-    } else {
-      var boxes = document.querySelectorAll('#v65-product-parent .colors_pricebox, #content_area .colors_pricebox');
-      if (boxes.length > 1 && boxes[1].parentNode) {
-        anchorParent = boxes[1].parentNode;
-        anchorBefore = boxes[1];
-      } else if (boxes.length && boxes[0].parentNode) {
-        anchorParent = boxes[0].parentNode;
-        anchorBefore = boxes[0];
-      }
-    }
-    if (!anchorParent) return false;
-
-    if (wrap.parentNode !== anchorParent || wrap.nextSibling !== anchorBefore) {
+    /* Palliser: same slot as accordion — sibling before second .colors_pricebox */
+    var anchor = mcFindPalliserPricingAnchor();
+    if (!anchor.parent) return false;
+    if (wrap.parentNode !== anchor.parent || wrap.nextSibling !== anchor.before) {
       try {
-        anchorParent.insertBefore(wrap, anchorBefore);
+        anchor.parent.insertBefore(wrap, anchor.before);
       } catch (eIns) {
-        anchorParent.appendChild(wrap);
+        anchor.parent.appendChild(wrap);
       }
     }
 
@@ -19881,6 +19938,13 @@ async function mcSubmitAuthForm(form, mode) {
   wrap,
   mcBuildCanonicalMemberPricingHtml(retailDisplay, memberText, loginUrl, isLoggedIn)
 );
+
+    wrap.querySelectorAll('.mc-pdp-member-line--sale').forEach(function (node) {
+      try {
+        node.remove();
+      } catch (eRmSale) {}
+    });
+    mcHidePalliserNativePriceUi();
 
 /* Force canonical Retail/Member labels visible after prior cleanup scripts may have hidden them */
 try {
@@ -20193,6 +20257,8 @@ if (!isLoggedIn) {
   window.mcHideDuplicatePdpMemberFragments = mcHideDuplicatePdpMemberFragments;
   window.mcRenderPdpRetailAndMember = mcRenderPdpRetailAndMember;
   window.mcBuildCanonicalMemberPricingHtml = mcBuildCanonicalMemberPricingHtml;
+  window.mcRepositionPalliserMemberPricing = mcRepositionPalliserMemberPricing;
+  window.mcHidePalliserNativePriceUi = mcHidePalliserNativePriceUi;
   window.mcEnsurePdpPriceStack = mcEnsurePdpPriceStack;
   window.mcResolvePdpSaleAmount = mcResolvePdpSaleAmount;
   window.mcFmtMoney = mcFmtMoney;
