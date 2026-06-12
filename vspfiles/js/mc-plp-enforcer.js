@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260626p — PLP: swap NoPhoto when {SKU}-1.jpg exists on /v/vspfiles/photos/
+ * MC_PLP_ENFORCER_20260627a — PLP: thumbnail image fills the .mc-plp-image-box wrapper (100% x 100%, contain)
  *
- * Thumbnails: .mc-plp-image-box + visible-sofa width normalization (no crop, no scale transform).
+ * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260626q";
+  var VERSION = "20260627a";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -26,12 +26,12 @@
     s.textContent =
       "html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box," +
       "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img.mc-plp-image-box{" +
-      "display:flex!important;align-items:flex-end!important;justify-content:center!important;" +
+      "display:flex!important;align-items:center!important;justify-content:center!important;" +
       "width:100%!important;height:260px!important;overflow:visible!important;background:#fff!important;padding:0!important}" +
       "html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box>img," +
       "html[data-mc-category-plp='1'] #content_area .v-product-grid a.v-product__img.mc-plp-image-box>img{" +
-      "width:100%!important;height:auto!important;max-width:420px!important;max-height:260px!important;" +
-      "object-fit:contain!important;object-position:center bottom!important;transform:none!important;" +
+      "width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;" +
+      "object-fit:contain!important;object-position:center center!important;transform:none!important;" +
       "border:none!important;box-shadow:none!important;background:transparent!important}";
     (document.head || document.documentElement).appendChild(s);
   }
@@ -281,9 +281,7 @@
           if (isPreNormalizedPhoto(img)) {
             applyPreNormalizedPhoto(img, parent);
           } else {
-            getVisibleBounds(img, function (bounds) {
-              applyNormalizedImage(img, parent, bounds);
-            });
+            applyNormalizedImage(img, parent, null);
           }
         } else {
           img.addEventListener(
@@ -292,9 +290,7 @@
               if (isPreNormalizedPhoto(img)) {
                 applyPreNormalizedPhoto(img, parent);
               } else {
-                getVisibleBounds(img, function (bounds) {
-                  applyNormalizedImage(img, parent, bounds);
-                });
+                applyNormalizedImage(img, parent, null);
               }
             },
             { once: true }
@@ -448,47 +444,34 @@
     parent.style.setProperty("height", BOX_HEIGHT + "px", "important");
     parent.style.setProperty("overflow", "visible", "important");
     parent.style.setProperty("display", "flex", "important");
-    parent.style.setProperty("align-items", "flex-end", "important");
+    parent.style.setProperty("align-items", "center", "important");
     parent.style.setProperty("justify-content", "center", "important");
     parent.style.setProperty("width", "100%", "important");
     parent.style.setProperty("background", "#ffffff", "important");
     parent.style.setProperty("background-color", "#ffffff", "important");
   }
 
-  function applyPreNormalizedPhoto(img, parent) {
+  /* Image element always matches the wrapper box exactly; object-fit: contain scales the photo inside. */
+  function applyWrapperFill(img, parent, extraClass) {
     applyImageBoxLayout(parent);
     clearClippingStyles(img, parent);
-    img.classList.add("mc-plp-img-fit");
+    img.classList.add(extraClass);
     img.style.setProperty("width", "100%", "important");
-    img.style.setProperty("height", "auto", "important");
-    img.style.setProperty("max-width", NORMALIZED_W + "px", "important");
-    img.style.setProperty("max-height", BOX_HEIGHT + "px", "important");
+    img.style.setProperty("height", "100%", "important");
+    img.style.setProperty("max-width", "none", "important");
+    img.style.setProperty("max-height", "none", "important");
     img.style.setProperty("object-fit", "contain", "important");
-    img.style.setProperty("object-position", "center bottom", "important");
+    img.style.setProperty("object-position", "center center", "important");
     img.style.setProperty("transform", "none", "important");
     img.style.setProperty("display", "block", "important");
   }
 
+  function applyPreNormalizedPhoto(img, parent) {
+    applyWrapperFill(img, parent, "mc-plp-img-fit");
+  }
+
   function applyNormalizedImage(img, parent, bounds) {
-    if (!bounds || !bounds.width) return;
-
-    var targetW = targetVisibleWidth(parent);
-    var scale = targetW / bounds.width;
-    var finalWidth = Math.round(img.naturalWidth * scale * 1000) / 1000;
-    var finalHeight = Math.round(img.naturalHeight * scale * 1000) / 1000;
-
-    applyImageBoxLayout(parent);
-    clearClippingStyles(img, parent);
-    img.classList.add("mc-plp-img-sized");
-
-    img.style.setProperty("width", finalWidth + "px", "important");
-    img.style.setProperty("height", finalHeight + "px", "important");
-    img.style.setProperty("max-width", "100%", "important");
-    img.style.setProperty("max-height", BOX_HEIGHT + "px", "important");
-    img.style.setProperty("object-fit", "contain", "important");
-    img.style.setProperty("object-position", "center bottom", "important");
-    img.style.setProperty("transform", "none", "important");
-    img.style.setProperty("display", "block", "important");
+    applyWrapperFill(img, parent, "mc-plp-img-sized");
   }
 
   function normalizePLPImages() {
@@ -513,9 +496,7 @@
           applyPreNormalizedPhoto(img, parent);
           return;
         }
-        getVisibleBounds(img, function (bounds) {
-          applyNormalizedImage(img, parent, bounds);
-        });
+        applyNormalizedImage(img, parent, null);
       }
 
       if (img.complete && img.naturalWidth) apply();
@@ -598,7 +579,7 @@
 
   global.mcPlpEnforcerRun = run;
 
-  var PDP_AUTH_WANT = "20260531a";
+  var PDP_AUTH_WANT = "20260612price";
 
   function loadPdpAuthCtaFix() {
     try {

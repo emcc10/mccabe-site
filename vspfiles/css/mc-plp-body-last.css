@@ -1,10 +1,10 @@
-/* MC PLP THUMBNAIL — load last; no crop, no cover, no overflow clip */
+/* MC PLP THUMBNAIL — load last; image fills the wrapper box (object-fit: contain, no crop) */
 
 .mc-plp-image-box {
   width: 100% !important;
   height: 260px !important;
   display: flex !important;
-  align-items: flex-end !important;
+  align-items: center !important;
   justify-content: center !important;
   overflow: visible !important;
   background: #ffffff !important;
@@ -17,27 +17,15 @@
   line-height: 0 !important;
 }
 
-.mc-plp-image-box img.mc-plp-img-fit {
-  display: block !important;
-  object-fit: contain !important;
-  object-position: center bottom !important;
-  width: 100% !important;
-  height: auto !important;
-  max-width: 420px !important;
-  max-height: 260px !important;
-  transform: none !important;
-  clip-path: none !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
+.mc-plp-image-box img.mc-plp-img-fit,
 .mc-plp-image-box img.mc-plp-img-sized {
   display: block !important;
   object-fit: contain !important;
-  object-position: center bottom !important;
-  max-width: 100% !important;
-  max-height: 260px !important;
+  object-position: center center !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
   transform: none !important;
   clip-path: none !important;
   background: transparent !important;
@@ -54,29 +42,22 @@ html.category body:not(.productdetails) #content_area .v-product-grid a.v-produc
   min-height: 0 !important;
   max-height: none !important;
   display: flex !important;
-  align-items: flex-end !important;
+  align-items: center !important;
   justify-content: center !important;
   overflow: visible !important;
   background: transparent !important;
   padding: 0 !important;
 }
 
-html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img.mc-plp-img-fit,
-html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img.mc-plp-img-fit,
-html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img.mc-plp-img-fit {
+html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img,
+html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img,
+html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img {
   width: 100% !important;
-  height: auto !important;
-  max-width: 420px !important;
-  max-height: 260px !important;
-  transform: none !important;
-  clip-path: none !important;
-}
-
-html[data-mc-category-plp="1"] #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img.mc-plp-img-sized,
-html.category #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img.mc-plp-img-sized,
-html.category body:not(.productdetails) #content_area .v-product-grid a.v-product__img.mc-plp-image-box > img.mc-plp-img-sized {
-  max-width: 100% !important;
-  max-height: 260px !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center center !important;
   transform: none !important;
   clip-path: none !important;
 }

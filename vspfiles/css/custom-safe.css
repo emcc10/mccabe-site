@@ -15527,10 +15527,10 @@ html[data-mc-category-plp="1"] #content_area ul.v-product-grid > li.v-product a.
 /* Volusion wrong body.is-home fallback */
 body.is-home:not(.productdetails) #content_area .v-product-grid .v-product a.v-product__img img,
 body.is-home:not(.productdetails) #content_area ul.v-product-grid > li.v-product a.v-product__img img {
-  width: auto !important;
-  height: auto !important;
-  max-width: 100% !important;
-  max-height: 260px !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
   min-width: 0 !important;
   min-height: 0 !important;
   object-fit: contain !important;
@@ -15541,4 +15541,35 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li.v-product
   border: 0 !important;
   background: transparent !important;
   box-sizing: border-box !important;
+}
+
+/* =====================================================
+   PDP PRICE: 18px amounts (sits above the Klarna/Affirm
+   section — placement handled by mc-pdp-auth-cta-fix.js)
+===================================================== */
+html body.productdetails #content_area #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
+html body.productdetails #v65-product-parent #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
+html body.mc-product-page #content_area #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
+html body.mc-product-page #v65-product-parent #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
+html body.productdetails #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
+html body.mc-product-page #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
+html body.productdetails #content_area #mc-pdp-price-stack-host .product_list_price,
+html body.productdetails #v65-product-parent #mc-pdp-price-stack-host .product_list_price,
+html body.mc-product-page #content_area #mc-pdp-price-stack-host .product_list_price,
+html body.mc-product-page #v65-product-parent #mc-pdp-price-stack-host .product_list_price,
+html body.productdetails #content_area #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,
+html body.productdetails #v65-product-parent #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,
+html body.mc-product-page #content_area #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,
+html body.mc-product-page #v65-product-parent #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,
+html body.productdetails #mc-pdp-top-price-panel .mc-pdp-top-price-value,
+html body.mc-product-page #mc-pdp-top-price-panel .mc-pdp-top-price-value,
+html body.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-top-price-value,
+html body.productdetails #mc-pdp-top-price-panel .mtl-top-price__amount,
+html body.mc-product-page #mc-pdp-top-price-panel .mtl-top-price__amount,
+html body.is-sectional-product #mc-pdp-top-price-panel .mtl-top-price__amount,
+html body.productdetails #mc-pdp-top-price-panel .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,
+html body.mc-product-page #mc-pdp-top-price-panel .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,
+html body.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount {
+  font-size: 18px !important;
+  line-height: 1.25 !important;
 }

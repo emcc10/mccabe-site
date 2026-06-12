@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260607titan";
+  var VERSION = "20260612price";
   /* Set immediately so console/deploy checks work even if later init throws */
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
 
@@ -765,6 +765,11 @@
       "display:flex!important;flex-direction:column!important;position:static!important;float:none!important;margin:0 0 4px!important;width:100%!important;visibility:visible!important;opacity:1!important;height:auto!important;max-height:none!important}" +
       "body.productdetails #mc-pdp-price-stack-host .product_list_price,body.productdetails #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-line__amount,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-line__label,body.mc-pdp-price-stack #mc-pdp-price-stack-host .product_list_price,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt{" +
       "display:block!important;visibility:visible!important;opacity:1!important;font-size:13px!important;color:#444!important;line-height:1.2!important}" +
+      /* Price amounts at 18px (locked "Log in to see member pricing" line stays small) */
+      "body.productdetails #mc-pdp-price-stack-host .product_list_price,body.mc-product-page #mc-pdp-price-stack-host .product_list_price,body.mc-pdp-price-stack #mc-pdp-price-stack-host .product_list_price," +
+      "body.productdetails #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.mc-product-page #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt," +
+      "body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,body.mc-product-page #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount{" +
+      "font-size:18px!important;line-height:1.25!important}" +
       "body.productdetails #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),body.mc-pdp-price-stack #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price){" +
       "display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important}" +
       "body.productdetails .mc-member-price-caption,body.mc-pdp-price-stack .mc-member-price-caption{" +
@@ -777,6 +782,18 @@
 
   function placePriceStackHost(host) {
     if (!host) return;
+    /* Price goes ABOVE the Klarna/Affirm (Stripe BNPL) messaging section */
+    var bnpl = global.document.getElementById("messaging-element");
+    var bnplBox = bnpl && bnpl.closest ? bnpl.closest(".colors_pricebox") : null;
+    var bnplAnchor = bnplBox || bnpl;
+    if (bnplAnchor && bnplAnchor.parentNode) {
+      if (host.nextElementSibling !== bnplAnchor || host.parentNode !== bnplAnchor.parentNode) {
+        try {
+          bnplAnchor.parentNode.insertBefore(host, bnplAnchor);
+        } catch (eBnpl) {}
+      }
+      return;
+    }
     var sum = global.document.getElementById("mtl-product-summary");
     var atc = global.document.querySelector(
       '#v65-product-parent input[name="btnaddtocart"], #v65-product-parent button[name="btnaddtocart"]'
