@@ -6492,7 +6492,7 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
   max-height: var(--mc-plp-tile-h);
   overflow: hidden;
   display: flex !important;
-  align-items: flex-end !important;
+  align-items: center !important;
   justify-content: center !important;
   position: relative;
   margin: 0 !important;
@@ -6539,14 +6539,14 @@ body.is-home:not(.productdetails) #content_area .v-product-grid .mc-member-grid-
 }
 
 :is(html.category, body.category) .v-product-grid .v-product a.v-product__img > img {
-  width: auto !important;
-  height: var(--mc-plp-stage-h) !important;
+  width: 100% !important;
+  height: 100% !important;
   max-width: 100% !important;
-  max-height: var(--mc-plp-stage-h) !important;
+  max-height: 100% !important;
   min-width: 0 !important;
   min-height: 0 !important;
   object-fit: contain !important;
-  object-position: center bottom !important;
+  object-position: center center !important;
   display: block !important;
   margin: 0 auto !important;
   flex: 0 0 auto !important;
@@ -6769,11 +6769,9 @@ body:not(.mc-member-logged-in) #v65-product-parent font.product_sale_price {
   :is(html.category, body.category) ul.v-product-grid > li.v-product .v-product__img img,
   :is(html.category, body.category) ul.v-product-grid > li.v-product .product_image img,
   :is(html.category, body.category) .v-product-grid .v-product a.v-product__img > img {
-    width: 100% !important;
-    height: var(--mc-plp-stage-h) !important;
-    max-width: 100% !important;
-    max-height: var(--mc-plp-stage-h) !important;
-    object-fit: contain !important;
+width: 100%;
+height: 100%;
+object-fit: contain;
     object-position: center bottom !important;
   }
 
@@ -8329,9 +8327,9 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   justify-content: center !important;
   width: 100% !important;
   max-width: none !important;
-  height: 280px !important;
+  height: 380px !important;
   min-height: 280px !important;
-  max-height: 280px !important;
+  max-height: none !important;
   margin: 0 auto 10px !important;
   overflow: hidden !important;
   text-align: center !important;
@@ -15488,4 +15486,59 @@ body.mc-palliser-pdp .mc-pdp-member-line__amount {
   opacity: 1 !important;
   font-size: 13px !important;
   color: #444 !important;
+}
+/* =====================================================
+   FINAL LOCK: CATEGORY PRODUCT IMAGE UNIFORMITY
+   0609 — Steve Silver / PLP image fix
+   Purpose: same visual box, no crop, no weird image heights
+===================================================== */
+
+html.category #content_area .v-product-grid .v-product a.v-product__img,
+html.category #content_area ul.v-product-grid > li.v-product a.v-product__img,
+body.category #content_area .v-product-grid .v-product a.v-product__img,
+body.category #content_area ul.v-product-grid > li.v-product a.v-product__img,
+html[data-mc-category-plp="1"] #content_area .v-product-grid .v-product a.v-product__img,
+html[data-mc-category-plp="1"] #content_area ul.v-product-grid > li.v-product a.v-product__img,
+
+/* Volusion sometimes incorrectly leaves body.is-home on listing/category pages */
+body.is-home:not(.productdetails) #content_area .v-product-grid .v-product a.v-product__img,
+body.is-home:not(.productdetails) #content_area ul.v-product-grid > li.v-product a.v-product__img {
+  width: 100% !important;
+  height: 260px !important;
+  min-height: 260px !important;
+  max-height: 260px !important;
+  padding: 0 !important;
+  margin: 0 auto 14px auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  box-sizing: border-box !important;
+}
+
+html.category #content_area .v-product-grid .v-product a.v-product__img img,
+html.category #content_area ul.v-product-grid > li.v-product a.v-product__img img,
+body.category #content_area .v-product-grid .v-product a.v-product__img img,
+body.category #content_area ul.v-product-grid > li.v-product a.v-product__img img,
+html[data-mc-category-plp="1"] #content_area .v-product-grid .v-product a.v-product__img img,
+html[data-mc-category-plp="1"] #content_area ul.v-product-grid > li.v-product a.v-product__img img,
+
+/* Volusion wrong body.is-home fallback */
+body.is-home:not(.productdetails) #content_area .v-product-grid .v-product a.v-product__img img,
+body.is-home:not(.productdetails) #content_area ul.v-product-grid > li.v-product a.v-product__img img {
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: 260px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  display: block !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-sizing: border-box !important;
 }
