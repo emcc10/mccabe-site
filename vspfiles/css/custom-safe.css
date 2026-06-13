@@ -7655,7 +7655,7 @@ html.vol-list.category:not(.productdetails) #content_area td:has(> select):not(#
     height: auto !important;
     margin-left: 0 !important;
     margin-right: auto !important;
-    margin-top: clamp(16px, 3vw, 40px) !important;
+    margin-top: 0 !important;
     object-fit: contain !important;
     box-sizing: border-box !important;
   }
@@ -12776,8 +12776,6 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
 
 /* ----- 440px cap on the right-column stack (desktop only) ----- */
 @media (min-width: 992px) {
-  body.mc-product-page #mc-pdp-title-right,
-  body.productdetails #mc-pdp-title-right,
   body.mc-product-page #mc-pdp-accordion,
   body.productdetails #mc-pdp-accordion,
   body.mc-product-page #v65-product-parent .colors_pricebox,
@@ -12790,6 +12788,18 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     margin-left: 0 !important;
     margin-right: 0 !important;
     margin-top: -13px !important;
+  }
+
+  body.mc-product-page #mc-pdp-title-right,
+  body.productdetails #mc-pdp-title-right,
+  body.mc-product-page #mc-pdp-price-stack-host,
+  body.productdetails #mc-pdp-price-stack-host {
+    max-width: 440px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 0 !important;
   }
 
   body.mc-product-page #mcConfigurationBlock,
@@ -15684,4 +15694,50 @@ html body.mc-product-page #mc-pdp-features .mc-pdp-features__list {
 html body.productdetails #mc-pdp-features .mc-pdp-features__list li,
 html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li {
   margin: 0 0 4px 0 !important;
+}
+
+/* =====================================================
+   PDP DESKTOP: align product title top with main image top
+===================================================== */
+@media (min-width: 992px) {
+  html body.productdetails td.mc-pdp-media-td,
+  html body.mc-product-page td.mc-pdp-media-td,
+  html body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td,
+  html body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td {
+    padding-top: 0 !important;
+    vertical-align: top !important;
+  }
+
+  html body.productdetails td.mc-pdp-media-td > br,
+  html body.mc-product-page td.mc-pdp-media-td > br,
+  html body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > br,
+  html body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > br {
+    display: none !important;
+    height: 0 !important;
+    line-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  html body.productdetails a#product_photo_zoom_url,
+  html body.mc-product-page a#product_photo_zoom_url,
+  html body.productdetails a#product_photo_zoom_url2,
+  html body.mc-product-page a#product_photo_zoom_url2 {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    line-height: 0 !important;
+  }
+
+  html body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
+  html body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
+    margin-top: 0 !important;
+  }
+
+  html body.productdetails #mc-pdp-title-right,
+  html body.mc-product-page #mc-pdp-title-right,
+  html body.productdetails #v65-product-parent #mc-pdp-title-right,
+  html body.mc-product-page #v65-product-parent #mc-pdp-title-right {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
 }
