@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260614fix";
+  var VERSION = "20260614pdp3";
   /* Set immediately so console/deploy checks work even if later init throws */
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
 
@@ -934,6 +934,83 @@
     syncPdpHeroTopAlign();
   }
 
+  function disableQuantityHiders() {
+    try {
+      var st = global.document.getElementById("mc-hide-all-quantity-final");
+      if (st && st.parentNode) st.parentNode.removeChild(st);
+    } catch (eRm) {}
+  }
+
+  function ensureQuantityAboveAtc() {
+    if (!isProductPdp()) return;
+    if (isSectionalPdpPage()) return;
+    try {
+      if (
+        global.document.body &&
+        (global.document.body.classList.contains("mc-theater-seating-pdp") ||
+          global.document.documentElement.classList.contains("mc-paragon-pdp"))
+      ) {
+        return;
+      }
+    } catch (eSkip) {}
+    var root = global.document.getElementById("v65-product-parent") || global.document;
+    var qty = root.querySelector(
+      'input.v65-productdetail-cartqty, input[name^="QTY."], input[name="QTY"], input[name="quantity"]'
+    );
+    var atcWrap = root.querySelector(".mc-atc-button-wrap");
+    if (!qty || !atcWrap) return;
+    var atcBlock = atcWrap.closest(".v65-product-addtocart") || atcWrap.parentElement;
+    if (!atcBlock || !atcBlock.parentNode) return;
+    var insertParent = atcBlock.parentNode;
+    var row = global.document.getElementById("mc-pdp-qty-row");
+    if (!row) {
+      row = global.document.createElement("div");
+      row.id = "mc-pdp-qty-row";
+      row.className = "mc-pdp-qty-row";
+      var lab = global.document.createElement("span");
+      lab.className = "mc-pdp-qty-row__label";
+      lab.textContent = "Quantity";
+      row.appendChild(lab);
+    }
+    if (!row.contains(qty)) row.appendChild(qty);
+    if (row.parentNode !== insertParent || row.nextElementSibling !== atcBlock) {
+      insertParent.insertBefore(row, atcBlock);
+    }
+    row.style.setProperty("display", "flex", "important");
+    row.style.setProperty("flex-direction", "column", "important");
+    row.style.setProperty("align-items", "flex-start", "important");
+    row.style.setProperty("gap", "6px", "important");
+    row.style.setProperty("width", "100%", "important");
+    row.style.setProperty("max-width", "440px", "important");
+    row.style.setProperty("margin", "0 0 10px 0", "important");
+    row.style.setProperty("padding", "0", "important");
+    row.style.setProperty("visibility", "visible", "important");
+    row.style.setProperty("opacity", "1", "important");
+    row.style.setProperty("height", "auto", "important");
+    qty.style.setProperty("display", "inline-block", "important");
+    qty.style.setProperty("visibility", "visible", "important");
+    qty.style.setProperty("opacity", "1", "important");
+    qty.style.setProperty("width", "58px", "important");
+    qty.style.setProperty("height", "38px", "important");
+    qty.style.setProperty("margin", "0", "important");
+    qty.style.setProperty("padding", "0", "important");
+    qty.style.setProperty("text-align", "center", "important");
+    qty.style.setProperty("border", "1px solid #777", "important");
+    qty.style.setProperty("border-radius", "6px", "important");
+    qty.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
+    qty.style.setProperty("font-size", "14px", "important");
+    qty.style.setProperty("color", "#444", "important");
+    var labEl = row.querySelector(".mc-pdp-qty-row__label");
+    if (labEl) {
+      labEl.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
+      labEl.style.setProperty("font-size", "15px", "important");
+      labEl.style.setProperty("font-weight", "400", "important");
+      labEl.style.setProperty("letter-spacing", "0.16em", "important");
+      labEl.style.setProperty("text-transform", "uppercase", "important");
+      labEl.style.setProperty("color", "#777", "important");
+    }
+  }
+
   function fixAddToCartChrome() {
     global.document.querySelectorAll(".mc-atc-button-wrap").forEach(function (wrap) {
       try {
@@ -955,9 +1032,13 @@
     }
     el.textContent =
       "body.productdetails #mc-pdp-brand-logo,body.mc-product-page #mc-pdp-brand-logo{" +
-      "display:block!important;width:100%!important;max-width:440px!important;margin:0 0 14px!important;padding:0!important;text-align:left!important}" +
+      "display:block!important;width:100%!important;max-width:440px!important;margin:0 0 14px!important;padding:0!important;text-align:center!important}" +
       "body.productdetails #mc-pdp-brand-logo img,body.mc-product-page #mc-pdp-brand-logo img{" +
-      "display:block!important;width:auto!important;max-width:180px!important;max-height:48px!important;height:auto!important;object-fit:contain!important;object-position:left center!important;margin:0!important}" +
+      "display:inline-block!important;width:auto!important;max-width:180px!important;max-height:48px!important;height:auto!important;" +
+      "object-fit:contain!important;object-position:center center!important;margin:0 auto!important}" +
+      "body.productdetails #mc-pdp-title-right,body.mc-product-page #mc-pdp-title-right," +
+      "body.productdetails #mc-pdp-price-stack-host,body.mc-product-page #mc-pdp-price-stack-host{" +
+      "padding-left:1.1em!important;box-sizing:border-box!important}" +
       "body.productdetails #mc-pdp-title-right h1,body.mc-product-page #mc-pdp-title-right h1," +
       "body.productdetails #mc-pdp-title-right [itemprop='name'],body.mc-product-page #mc-pdp-title-right [itemprop='name']," +
       "body.productdetails #mc-pdp-title-right .productnamecolorLARGE,body.mc-product-page #mc-pdp-title-right .productnamecolorLARGE{" +
@@ -966,7 +1047,23 @@
       "body.productdetails #mc-pdp-features .mc-pdp-features__heading,body.mc-product-page #mc-pdp-features .mc-pdp-features__heading{" +
       "font-size:15px!important;color:#777!important;letter-spacing:0.16em!important;text-transform:uppercase!important}" +
       "body.productdetails .mc-atc-button-wrap,body.mc-product-page .mc-atc-button-wrap{" +
-      "border:1px solid #777!important;border-radius:10px!important;background:#fff!important;color:#444!important}";
+      "border:1px solid #777!important;border-radius:10px!important;background:#fff!important;color:#444!important;" +
+      "box-shadow:none!important;outline:none!important}" +
+      "body.productdetails #mc-pdp-qty-row,body.mc-product-page #mc-pdp-qty-row{" +
+      "display:flex!important;visibility:visible!important;opacity:1!important;height:auto!important;width:100%!important;max-width:440px!important}" +
+      "body.productdetails #mc-pdp-qty-row input,body.mc-product-page #mc-pdp-qty-row input," +
+      "body.productdetails input.v65-productdetail-cartqty,body.mc-product-page input.v65-productdetail-cartqty," +
+      "body.productdetails input[name^='QTY.'],body.mc-product-page input[name^='QTY.']{" +
+      "display:inline-block!important;visibility:visible!important;opacity:1!important;width:58px!important;height:38px!important;" +
+      "border:1px solid #777!important;border-radius:6px!important;font-size:14px!important;color:#444!important}" +
+      "body.productdetails #ProductDetail_ProductDetails_div2,body.mc-product-page #ProductDetail_ProductDetails_div2," +
+      "body.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox,body.mc-product-page #ProductDetail_ProductDetails_div2 .colors_descriptionbox{" +
+      "font-family:Inter,Arial,sans-serif!important;font-size:14px!important;line-height:1.55!important;letter-spacing:0.02em!important;color:#444!important}" +
+      "@media(min-width:992px){body.productdetails img#product_photo,body.mc-product-page img#product_photo{" +
+      "max-width:800px!important;width:100%!important;height:auto!important}body.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox," +
+      "body.mc-product-page #ProductDetail_ProductDetails_div2 .colors_descriptionbox,body.productdetails form .colors_descriptionbox," +
+      "body.mc-product-page form .colors_descriptionbox{margin-top:16px!important;margin-left:109px!important;margin-right:0!important;" +
+      "width:1132px!important;max-width:1132px!important;box-sizing:border-box!important}}";
   }
 
   global.mcPlaceBrandLogoAboveTitle = placeBrandLogoAboveTitle;
@@ -1965,11 +2062,13 @@
       installPdpStackApiGuards();
       ensurePdpStackCriticalCss();
       ensurePdpHeroCriticalCss();
+      disableQuantityHiders();
       if (!sectional) {
         forceRebuildCleanPriceStack();
       }
       ensureHeroColumnOrder();
       mountPdpFeaturesBlock();
+      ensureQuantityAboveAtc();
       fixAddToCartChrome();
       wirePlannerLoginGate();
       guardConfigurationBlockClick();
@@ -2035,7 +2134,7 @@
   runPatch();
   global.document.addEventListener("DOMContentLoaded", runPatch);
   global.addEventListener("load", runPatch);
-  [0, 50, 200, 600, 1500, 4000, 9000, 15000, 25000].forEach(function (ms) {
+  [0, 50, 200, 600, 1500, 4000, 9000, 15000, 25000, 35000].forEach(function (ms) {
     global.setTimeout(function () {
       installPdpStackApiGuards();
       runPatch();

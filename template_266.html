@@ -1444,7 +1444,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260614fix"></script>
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260614pdp3"></script>
   <script id="mc-plp-enforcer-bridge">
 (function(g,d){var W="20260627a",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
@@ -4250,11 +4250,11 @@ try {
 </script>
  <script>
 (function(){
-  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260614fix") {
+  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260614pdp3") {
     var boot = document.getElementById("mc-pdp-auth-cta-boot");
     if (!boot) {
       var s = document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260614fix&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260614pdp3&mcrd=" + Date.now();
       s.async = false;
       (document.head || document.documentElement).appendChild(s);
     }
@@ -22057,25 +22057,6 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   });
 })();
 </script>
-<style id="mc-hide-all-quantity-final">
-  body.productdetails input.v65-productdetail-cartqty,
-  body.productdetails input[name^="QTY."],
-  body.productdetails input[name="QTY"],
-  body.productdetails input[name="Qty"],
-  body.productdetails input[name="qty"],
-  body.productdetails #mc-surgical-qty-row,
-  body.productdetails #mc-final-qty-row,
-  body.productdetails #mc-simple-final-qty-row {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    height: 0 !important;
-    width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-  }
-</style>
 
 <script id="mc-remove-all-quantity-final">
 (function () {
@@ -22110,6 +22091,15 @@ body.vertex-flipbook-ready img.vertex-original-desc-image-wrap{
   }
 
   function cleanQuantity() {
+    if (
+      document.body &&
+      (document.body.classList.contains("mc-theater-seating-pdp") ||
+        document.documentElement.classList.contains("mc-paragon-pdp"))
+    ) {
+      /* Theater / Paragon: keep planner-driven qty hidden. */
+    } else {
+      return;
+    }
     var root =
       document.querySelector("#v65-product-parent") ||
       document.querySelector("#content_area") ||

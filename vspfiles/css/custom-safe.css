@@ -13648,12 +13648,19 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2 {
   opacity: 1 !important;
 }
 
-/* Description box: shift right + down so the Palliser logo can sit under the title. */
-.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox > tbody > tr:nth-child(3) > td[width="100%"],
-.productdetails form .colors_descriptionbox {
-  /* margin-left: 173px !important; */
-  margin-left: 120px !important;
-  margin-top: 80px !important;
+/* Description box: align right edge with options column / Add to Cart (440px @ ~801px). */
+@media (min-width: 992px) {
+  html body.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox,
+  html body.mc-product-page #ProductDetail_ProductDetails_div2 .colors_descriptionbox,
+  html body.productdetails form .colors_descriptionbox,
+  html body.mc-product-page form .colors_descriptionbox {
+    margin-left: 109px !important;
+    margin-top: 16px !important;
+    margin-right: 0 !important;
+    width: min(1132px, calc(100% - 109px - 48px)) !important;
+    max-width: 1132px !important;
+    box-sizing: border-box !important;
+  }
 }
 
 /* Alt-view thumbnails: slightly larger. */
@@ -13726,19 +13733,19 @@ a.productnamecolor {
   max-width: 440px !important;
   margin: 0 0 14px 0 !important;
   padding: 0 !important;
-  text-align: left !important;
+  text-align: center !important;
   box-sizing: border-box !important;
 }
 
 #mc-pdp-brand-logo img {
-  display: block !important;
+  display: inline-block !important;
   width: auto !important;
   max-width: 180px !important;
   max-height: 48px !important;
   height: auto !important;
   object-fit: contain !important;
-  object-position: left center !important;
-  margin: 0 !important;
+  object-position: center center !important;
+  margin: 0 auto !important;
   float: none !important;
 }
 
@@ -15810,5 +15817,104 @@ html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li {
   html body.productdetails #v65-product-parent .mc-atc-button-wrap {
     border: 1px solid #777 !important;
     border-radius: 10px !important;
+  }
+}
+
+/* =====================================================
+   MC PDP FINAL LAYOUT — logo, hero indent, qty, description, image cap
+   SFTP-deployed; wins over template inline styles where possible.
+===================================================== */
+html body.productdetails #mc-pdp-title-right,
+html body.mc-product-page #mc-pdp-title-right,
+html body.productdetails #mc-pdp-price-stack-host,
+html body.mc-product-page #mc-pdp-price-stack-host {
+  padding-left: 1.1em !important;
+  box-sizing: border-box !important;
+}
+
+html body.productdetails #ProductDetail_ProductDetails_div2,
+html body.mc-product-page #ProductDetail_ProductDetails_div2,
+html body.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 .colors_descriptionbox,
+html body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop="description"],
+html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="description"],
+html body.productdetails .colors_descriptionbox,
+html body.mc-product-page .colors_descriptionbox {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  color: #444 !important;
+}
+
+html body.productdetails #mc-pdp-qty-row,
+html body.mc-product-page #mc-pdp-qty-row,
+html body.productdetails #mc-pdp-qty-row input,
+html body.mc-product-page #mc-pdp-qty-row input,
+html body.productdetails input.v65-productdetail-cartqty,
+html body.mc-product-page input.v65-productdetail-cartqty,
+html body.productdetails input[name^="QTY."],
+html body.mc-product-page input[name^="QTY."],
+html body.productdetails input[name="QTY"],
+html body.mc-product-page input[name="QTY"] {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  width: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+html body.productdetails #mc-pdp-qty-row,
+html body.mc-product-page #mc-pdp-qty-row {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+  width: 100% !important;
+  max-width: 440px !important;
+  margin: 0 0 10px 0 !important;
+}
+
+html body.productdetails #mc-pdp-qty-row .mc-pdp-qty-row__label,
+html body.mc-product-page #mc-pdp-qty-row .mc-pdp-qty-row__label {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
+}
+
+html body.productdetails #mc-pdp-qty-row input,
+html body.mc-product-page #mc-pdp-qty-row input,
+html body.productdetails input.v65-productdetail-cartqty,
+html body.mc-product-page input.v65-productdetail-cartqty {
+  width: 58px !important;
+  height: 38px !important;
+  border: 1px solid #777 !important;
+  border-radius: 6px !important;
+  text-align: center !important;
+  font-size: 14px !important;
+  color: #444 !important;
+}
+
+html body.productdetails .mc-atc-button-wrap,
+html body.mc-product-page .mc-atc-button-wrap,
+html body.productdetails #v65-product-parent .mc-atc-button-wrap,
+html body.mc-product-page #v65-product-parent .mc-atc-button-wrap {
+  border: 1px solid #777 !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+@media (min-width: 992px) {
+  html body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
+  html body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
+    max-width: 800px !important;
+    width: 100% !important;
+    height: auto !important;
   }
 }
