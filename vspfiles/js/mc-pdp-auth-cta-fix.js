@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260613hero";
+  var VERSION = "20260613layout";
   /* Set immediately so console/deploy checks work even if later init throws */
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
 
@@ -824,8 +824,14 @@
     ensureHeroColumnOrder();
   }
 
-  /** Title → price → Klarna/Affirm pricebox in the right column. */
+  /** Logo → title → price → Klarna/Affirm pricebox in the right column. */
   function ensureHeroColumnOrder() {
+    try {
+      if (typeof global.mcPlaceBrandLogoAboveTitle === "function") {
+        global.mcPlaceBrandLogoAboveTitle();
+      }
+    } catch (eLogo) {}
+    var logo = global.document.getElementById("mc-pdp-brand-logo");
     var title = global.document.getElementById("mc-pdp-title-right");
     var price = global.document.getElementById("mc-pdp-price-stack-host");
     var bnpl = global.document.getElementById("messaging-element");
@@ -834,6 +840,13 @@
       global.document.querySelector("#v65-product-parent .colors_pricebox");
     if (!box || !box.parentNode) return;
     var parent = box.parentNode;
+    var anchor = title || price || box;
+    if (logo && logo.querySelector && logo.querySelector("img") && anchor) {
+      try {
+        if (logo.parentNode !== parent) parent.insertBefore(logo, anchor);
+        else if (logo.nextElementSibling !== anchor) parent.insertBefore(logo, anchor);
+      } catch (eLogoPos) {}
+    }
     if (title && title.parentNode !== parent) {
       try {
         parent.insertBefore(title, box);

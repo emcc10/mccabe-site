@@ -12330,7 +12330,7 @@ body.productdetails #v65-product-parent .v65-product-addtocart input.vCSS_input_
 body.mc-product-page #v65-product-parent .v65-product-addtocart input.vCSS_input_addtocart,
 body.productdetails #v65-product-parent td.vCSS_input_addtocart,
 body.mc-product-page #v65-product-parent td.vCSS_input_addtocart {
-  margin-left: 12px !important;
+  margin-left: 0 !important;
   margin-right: auto !important;
 }
 
@@ -12859,8 +12859,8 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     justify-content: center !important;
     gap: 12px !important;
     padding: 12px 22px !important;
-    border: 1px solid #e2dfd8 !important;
-    border-radius: 0 !important;
+    border: 1px solid #777 !important;
+    border-radius: 6px !important;
     background: #fff !important;
     background-color: #fff !important;
     color: #444 !important;
@@ -13715,29 +13715,29 @@ a.productnamecolor {
   font-size: 14px;
 }
 
-/* ---------- Palliser brand logo under product title ---------- */
-/* The JS placePalliserLogoUnderTitle() in template_266.html finds the live Palliser
-   <img> and moves it into a #mc-pdp-brand-logo wrapper inserted right after the H1. */
+/* ---------- Manufacturer brand logo above product title ---------- */
+/* placePalliserLogoUnderTitle() in template_266.html moves /photos/manufacturers/*
+   into #mc-pdp-brand-logo at the top of the options column (before the H1). */
 
 #mc-pdp-brand-logo {
   display: block !important;
   width: 100% !important;
   max-width: 440px !important;
-  margin: 8px 0 16px 0 !important;
+  margin: 0 0 14px 0 !important;
   padding: 0 !important;
-  text-align: center !important;
+  text-align: left !important;
   box-sizing: border-box !important;
 }
 
 #mc-pdp-brand-logo img {
-  display: inline-block !important;
-  /* User asked for ~70% of natural size; cap to a sensible max so it never overshoots
-     the right-column 440px stack. */
+  display: block !important;
   width: auto !important;
-  max-width: 70% !important;
+  max-width: 180px !important;
+  max-height: 48px !important;
   height: auto !important;
-  transform: scale(1) !important;
-  margin: 0 auto !important;
+  object-fit: contain !important;
+  object-position: left center !important;
+  margin: 0 !important;
   float: none !important;
 }
 
@@ -15564,9 +15564,11 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li.v-product
 }
 
 /* =====================================================
-   MC PDP HERO COLUMN — title, price, Klarna/Affirm, Features
-   Order: title → price → BNPL → Features (TechSpecs)
+   MC PDP HERO COLUMN — logo, title, price, Klarna/Affirm, Features
+   Order: logo → title → price → BNPL → Features (TechSpecs)
 ===================================================== */
+html body.productdetails #mc-pdp-brand-logo,
+html body.mc-product-page #mc-pdp-brand-logo,
 html body.productdetails #mc-pdp-title-right,
 html body.mc-product-page #mc-pdp-title-right,
 html body.productdetails #v65-product-parent #mc-pdp-title-right,
@@ -15575,12 +15577,30 @@ html body.productdetails #mc-pdp-price-stack-host,
 html body.mc-product-page #mc-pdp-price-stack-host,
 html body.productdetails #mc-pdp-features,
 html body.mc-product-page #mc-pdp-features,
+html body.productdetails #v65-product-parent td:has(#mc-pdp-brand-logo),
 html body.productdetails #v65-product-parent td:has(#mc-pdp-title-right),
 html body.productdetails #v65-product-parent td:has(#mc-pdp-price-stack-host),
 html body.productdetails #v65-product-parent td:has(#messaging-element),
 html body.productdetails #v65-product-parent .colors_pricebox:first-of-type,
 html body.mc-product-page #v65-product-parent .colors_pricebox:first-of-type {
   text-align: left !important;
+}
+
+html body.productdetails #mc-pdp-brand-logo,
+html body.mc-product-page #mc-pdp-brand-logo,
+html body.productdetails #mc-pdp-title-right,
+html body.mc-product-page #mc-pdp-title-right,
+html body.productdetails #mc-pdp-price-stack-host,
+html body.mc-product-page #mc-pdp-price-stack-host,
+html body.productdetails #mc-pdp-features,
+html body.mc-product-page #mc-pdp-features {
+  width: 100% !important;
+  max-width: 440px !important;
+  box-sizing: border-box !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 html body.productdetails #mc-pdp-title-right h1,
@@ -15607,6 +15627,11 @@ html body.mc-product-page #v65-product-parent #mc-pdp-title-right .productnameco
   letter-spacing: 0.16em !important;
   text-transform: uppercase !important;
   color: #777 !important;
+}
+
+html body.productdetails #mc-pdp-brand-logo + #mc-pdp-title-right,
+html body.mc-product-page #mc-pdp-brand-logo + #mc-pdp-title-right {
+  margin-top: 0 !important;
 }
 
 html body.productdetails #mc-pdp-price-stack-host,
@@ -15661,7 +15686,7 @@ html body.mc-product-page #mc-pdp-features {
 html body.productdetails #mc-pdp-features .mc-pdp-features__heading,
 html body.mc-product-page #mc-pdp-features .mc-pdp-features__heading {
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 13px !important;
+  font-size: 15px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
   letter-spacing: 0.16em !important;
@@ -15733,11 +15758,56 @@ html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li {
     margin-top: 0 !important;
   }
 
+  html body.productdetails #mc-pdp-brand-logo,
+  html body.mc-product-page #mc-pdp-brand-logo,
   html body.productdetails #mc-pdp-title-right,
   html body.mc-product-page #mc-pdp-title-right,
   html body.productdetails #v65-product-parent #mc-pdp-title-right,
   html body.mc-product-page #v65-product-parent #mc-pdp-title-right {
     margin-top: 0 !important;
     padding-top: 0 !important;
+  }
+
+  html body.productdetails #mc-pdp-title-right,
+  html body.mc-product-page #mc-pdp-title-right,
+  html body.productdetails #v65-product-parent #mc-pdp-title-right,
+  html body.mc-product-page #v65-product-parent #mc-pdp-title-right {
+    margin-top: 0 !important;
+  }
+
+  html body.productdetails #v65-product-parent td:has(> #mc-pdp-brand-logo),
+  html body.mc-product-page #v65-product-parent td:has(> #mc-pdp-brand-logo),
+  html body.productdetails #v65-product-parent td:has(> #mc-pdp-title-right),
+  html body.mc-product-page #v65-product-parent td:has(> #mc-pdp-title-right),
+  html body.productdetails #content_area td:has(> #mc-pdp-brand-logo),
+  html body.mc-product-page #content_area td:has(> #mc-pdp-brand-logo),
+  html body.productdetails #content_area td:has(> #mc-pdp-title-right),
+  html body.mc-product-page #content_area td:has(> #mc-pdp-title-right) {
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  html body.productdetails #v65-product-parent .colors_pricebox:first-of-type > tbody > tr > td,
+  html body.mc-product-page #v65-product-parent .colors_pricebox:first-of-type > tbody > tr > td,
+  html body.productdetails #v65-product-parent .colors_pricebox:first-of-type td > div,
+  html body.mc-product-page #v65-product-parent .colors_pricebox:first-of-type td > div {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  html body.productdetails #messaging-element,
+  html body.mc-product-page #messaging-element,
+  html body.productdetails #mc-pdp-features,
+  html body.mc-product-page #mc-pdp-features {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  html body.mc-product-page #content_area .mc-atc-button-wrap,
+  html body.productdetails #content_area .mc-atc-button-wrap,
+  html body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
+  html body.productdetails #v65-product-parent .mc-atc-button-wrap {
+    border-color: #777 !important;
+    border-radius: 6px !important;
   }
 }

@@ -1444,7 +1444,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260613hero"></script>
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260613layout"></script>
   <script id="mc-plp-enforcer-bridge">
 (function(g,d){var W="20260627a",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
@@ -4250,11 +4250,11 @@ try {
 </script>
  <script>
 (function(){
-  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260613hero") {
+  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260613layout") {
     var boot = document.getElementById("mc-pdp-auth-cta-boot");
     if (!boot) {
       var s = document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260613hero&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260613layout&mcrd=" + Date.now();
       s.async = false;
       (document.head || document.documentElement).appendChild(s);
     }
@@ -14218,22 +14218,19 @@ if (mcShouldUseLeatherAccordion()) {
     main.parentNode.insertBefore(alt, main.nextSibling);
   }
 
-  /* Find the Palliser brand logo image and relocate it into a centered wrapper
-     directly under the relocated H1 title. Scaled to 70% via CSS.
-     STRICT: src/alt must contain BOTH "palliser" AND a logo/brand/vendor token,
-     and the img must NOT live inside any related-product / history / cross-sell
-     container. If nothing matches, do nothing (we'd rather move zero than move
-     the wrong image — last time the heuristic grabbed a "More items in this
-     collection" rail image and dropped it under the title, which the user
-     specifically called out). */
+  /* Find the manufacturer brand logo and relocate it into a left-aligned wrapper
+     at the top of the options column (before the H1), aligned with the main image.
+     Prefer Volusion /photos/manufacturers/* assets; fall back to strict Palliser
+     logo heuristics. Never grab related-product / history / cross-sell images. */
   function placePalliserLogoUnderTitle() {
     var title = document.getElementById('mc-pdp-title-right');
     if (!title || !title.parentNode) return;
+    var parent = title.parentNode;
     var wrap = document.getElementById('mc-pdp-brand-logo');
-    /* Already moved a logo — just re-assert its position. */
+    /* Already moved a logo — re-assert position above the title. */
     if (wrap && wrap.querySelector('img')) {
-      if (title.nextSibling !== wrap) {
-        title.parentNode.insertBefore(wrap, title.nextSibling);
+      if (wrap.parentNode !== parent || wrap.nextElementSibling !== title) {
+        parent.insertBefore(wrap, title);
       }
       return;
     }
@@ -14255,24 +14252,37 @@ if (mcShouldUseLeatherAccordion()) {
     ].join(', ');
     var imgs = document.querySelectorAll('#v65-product-parent img, #content_area img');
     var logo = null;
-    for (var i = 0; i < imgs.length; i++) {
+    var i;
+    for (i = 0; i < imgs.length; i++) {
       var img = imgs[i];
       if (!img || !img.getAttribute) continue;
       if (img.id === 'product_photo' || img.id === 'main-image') continue;
       if (img.closest && img.closest(SKIP_PARENTS_SEL)) continue;
       var src = (img.getAttribute('src') || '');
-      var alt = (img.getAttribute('alt') || '');
-      var lc = (src + ' ' + alt).toLowerCase();
-      /* Strict: require BOTH palliser and a logo/brand/vendor/manufacturer token. */
-      if (!/palliser/.test(lc)) continue;
-      if (!/(logo|brand|vendor|manufacturer)/.test(lc)) continue;
-      /* Reject clearly non-logo asset names. */
-      if (/swatch|leather|cover|configurator|sectional|paragon|recliner|sofa|loveseat|chaise|seating|chair/.test(lc)) continue;
-      /* Logos are usually small. Reject very large images. */
-      var w = img.naturalWidth || img.width || 0;
-      if (w && w > 400) continue;
-      logo = img;
-      break;
+      if (/manufacturers\//i.test(src)) {
+        var mw = img.naturalWidth || img.width || 0;
+        if (mw && mw > 400) continue;
+        logo = img;
+        break;
+      }
+    }
+    if (!logo) {
+      for (i = 0; i < imgs.length; i++) {
+        img = imgs[i];
+        if (!img || !img.getAttribute) continue;
+        if (img.id === 'product_photo' || img.id === 'main-image') continue;
+        if (img.closest && img.closest(SKIP_PARENTS_SEL)) continue;
+        src = (img.getAttribute('src') || '');
+        var alt = (img.getAttribute('alt') || '');
+        var lc = (src + ' ' + alt).toLowerCase();
+        if (!/palliser/.test(lc)) continue;
+        if (!/(logo|brand|vendor|manufacturer)/.test(lc)) continue;
+        if (/swatch|leather|cover|configurator|sectional|paragon|recliner|sofa|loveseat|chaise|seating|chair/.test(lc)) continue;
+        mw = img.naturalWidth || img.width || 0;
+        if (mw && mw > 400) continue;
+        logo = img;
+        break;
+      }
     }
     if (!logo) {
       if (typeof console !== 'undefined' && console.log) {
@@ -14286,10 +14296,9 @@ if (mcShouldUseLeatherAccordion()) {
       wrap.className = 'mc-pdp-brand-logo';
     }
     wrap.appendChild(logo);
-    if (title.nextSibling !== wrap) {
-      title.parentNode.insertBefore(wrap, title.nextSibling);
-    }
+    parent.insertBefore(wrap, title);
   }
+  window.mcPlaceBrandLogoAboveTitle = placePalliserLogoUnderTitle;
 
   /* Hide the Volusion "Choose Options" / "Available Options" / "Chooser Options" label
      that floats above the options_table. Only hides nodes NOT inside our accordion. */
