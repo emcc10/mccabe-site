@@ -12860,7 +12860,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     gap: 12px !important;
     padding: 12px 22px !important;
     border: 1px solid #777 !important;
-    border-radius: 6px !important;
+    border-radius: 10px !important;
     background: #fff !important;
     background-color: #fff !important;
     color: #444 !important;
@@ -13190,13 +13190,14 @@ body.productdetails #content_area .mc-atc-button-wrap {
 }
 
 .mc-atc-button-wrap {
-  /* Outline pill shared with accordion / planner — matches #mcPlannerBtn / config boxes (#e2dfd8). */
+  /* Outline pill — light grey border matches Features heading (#777). */
   background: #fff !important;
   background-color: #fff !important;
-  border: 1px solid #e2dfd8 !important;
+  border: 1px solid #777 !important;
+  border-radius: 10px !important;
   color: #444 !important;
   min-width: 440px !important;
-  margin-left: 12px !important;
+  margin-left: 0 !important;
   margin-right: 0px !important;
   margin-top: 5px !important;
   box-sizing: border-box !important;
@@ -15621,7 +15622,7 @@ html body.mc-product-page #v65-product-parent #mc-pdp-title-right .productnameco
   margin-left: 0 !important;
   margin-right: 0 !important;
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 13px !important;
+  font-size: 15px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
   letter-spacing: 0.16em !important;
@@ -15658,7 +15659,7 @@ html body.productdetails #mc-pdp-top-price-panel .mtl-top-price__amount,
 html body.mc-product-page #mc-pdp-top-price-panel .mtl-top-price__amount,
 html body.is-sectional-product #mc-pdp-top-price-panel .mtl-top-price__amount {
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 13px !important;
+  font-size: 15px !important;
   font-weight: 400 !important;
   line-height: 1.2 !important;
   letter-spacing: 0.16em !important;
@@ -15807,7 +15808,7 @@ html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li {
   html body.productdetails #content_area .mc-atc-button-wrap,
   html body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
   html body.productdetails #v65-product-parent .mc-atc-button-wrap {
-    border-color: #777 !important;
-    border-radius: 6px !important;
+    border: 1px solid #777 !important;
+    border-radius: 10px !important;
   }
 }

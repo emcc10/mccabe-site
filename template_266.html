@@ -1444,7 +1444,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260613layout"></script>
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260614layout"></script>
   <script id="mc-plp-enforcer-bridge">
 (function(g,d){var W="20260627a",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
@@ -4250,11 +4250,11 @@ try {
 </script>
  <script>
 (function(){
-  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260613layout") {
+  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260614layout") {
     var boot = document.getElementById("mc-pdp-auth-cta-boot");
     if (!boot) {
       var s = document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260613layout&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260614layout&mcrd=" + Date.now();
       s.async = false;
       (document.head || document.documentElement).appendChild(s);
     }
@@ -9525,8 +9525,8 @@ body.mc-product-page #content_area .mc-atc-button-wrap {
   min-width: 150px !important;
   max-width: 100% !important;
   padding: 10px 14px !important;
-  border: 1px solid #e2dfd8 !important;
-  border-radius: 0px !important;
+  border: 1px solid #777 !important;
+  border-radius: 10px !important;
   background: #fff !important;
   background-color: #fff !important;
   color: #545454 !important;
@@ -12627,8 +12627,9 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
     if (atcWrap) {
       atcWrap.style.setProperty('background', '#fff', 'important');
       atcWrap.style.setProperty('background-color', '#fff', 'important');
-      atcWrap.style.setProperty('color', '#111', 'important');
-      atcWrap.style.setProperty('border', '1px solid #333', 'important');
+      atcWrap.style.setProperty('color', '#444', 'important');
+      atcWrap.style.setProperty('border', '1px solid #777', 'important');
+      atcWrap.style.setProperty('border-radius', '10px', 'important');
     }
     btn.style.setProperty('background', 'transparent', 'important');
     btn.style.setProperty('background-color', 'transparent', 'important');
@@ -14222,6 +14223,95 @@ if (mcShouldUseLeatherAccordion()) {
      at the top of the options column (before the H1), aligned with the main image.
      Prefer Volusion /photos/manufacturers/* assets; fall back to strict Palliser
      logo heuristics. Never grab related-product / history / cross-sell images. */
+  var MC_PDP_LOGO_SKIP_PARENTS_SEL = [
+    '#mc-pdp-brand-logo',
+    '#altviews', '.altviews',
+    '#mcLeatherPicker', '#mcLeatherSwatchStrip',
+    '.mtl-leather-modal', '.wm-modal',
+    '.v-products-list', '.v-product',
+    '.v65-productDisplay',
+    '#v65-product-history-details', '#v65-product-history-header',
+    'table[id*="v65-product-history" i]',
+    '.relatedproducts', '.related-products', '.related_products',
+    '.cross-sell', '.cross_sell',
+    '.upsell', '.up-sell',
+    '.v65-productCategoryMore',
+    '.mc-more-items', '.mc-related-rail', '.mc-collection-rail'
+  ].join(', ');
+
+  function isManufacturerLogoCandidate(img) {
+    if (!img || !img.getAttribute) return false;
+    if (img.id === 'product_photo' || img.id === 'main-image') return false;
+    if (/^alternate_product_photo/i.test(img.id || '')) return false;
+    var src = (img.getAttribute('src') || '').toLowerCase();
+    if (!src || /clear1x1|spacer|pixel\.gif|1x1\.gif/.test(src)) return false;
+    if (/swatch|leather|cover|configurator|sectional|thumbnail|altview/.test(src)) return false;
+    if (img.closest && img.closest(MC_PDP_LOGO_SKIP_PARENTS_SEL)) return false;
+    var w = img.naturalWidth || img.width || 0;
+    var h = img.naturalHeight || img.height || 0;
+    if (w <= 1 && h <= 1) return false;
+    if (w > 520 || (h > 180 && w > 320)) return false;
+    return true;
+  }
+
+  function findManufacturerLogoImg() {
+    var mediaTd = document.querySelector('td.mc-pdp-media-td, #product_photo_td');
+    if (mediaTd) {
+      var mediaImgs = mediaTd.querySelectorAll('img');
+      var j;
+      for (j = 0; j < mediaImgs.length; j++) {
+        if (isManufacturerLogoCandidate(mediaImgs[j])) return mediaImgs[j];
+      }
+    }
+    var imgs = document.querySelectorAll('#v65-product-parent img, #content_area img');
+    var i;
+    for (i = 0; i < imgs.length; i++) {
+      var img = imgs[i];
+      if (!isManufacturerLogoCandidate(img)) continue;
+      var src = (img.getAttribute('src') || '');
+      if (/manufacturers\//i.test(src)) return img;
+    }
+    for (i = 0; i < imgs.length; i++) {
+      img = imgs[i];
+      if (!isManufacturerLogoCandidate(img)) continue;
+      src = (img.getAttribute('src') || '');
+      var alt = (img.getAttribute('alt') || '');
+      var lc = (src + ' ' + alt).toLowerCase();
+      if (!/palliser/.test(lc)) continue;
+      if (!/(logo|brand|vendor|manufacturer)/.test(lc)) continue;
+      if (/swatch|leather|cover|configurator|sectional|paragon|recliner|sofa|loveseat|chaise|seating|chair/.test(lc)) continue;
+      return img;
+    }
+    return null;
+  }
+
+  function syncPdpHeroTopAlign() {
+    if (window.matchMedia && window.matchMedia('(max-width: 991px)').matches) return;
+    function apply() {
+      var photo = document.getElementById('product_photo') ||
+        document.querySelector('img#main-image, #v65-product-parent img#product_photo');
+      if (!photo) return;
+      var logo = document.getElementById('mc-pdp-brand-logo');
+      var title = document.getElementById('mc-pdp-title-right');
+      var target = (logo && logo.querySelector('img')) ? logo : title;
+      if (!target) return;
+      var photoTop = photo.getBoundingClientRect().top;
+      var targetTop = target.getBoundingClientRect().top;
+      var delta = Math.round(photoTop - targetTop);
+      if (Math.abs(delta) <= 1) {
+        try { target.style.removeProperty('margin-top'); } catch (eRm) {}
+        return;
+      }
+      try {
+        target.style.setProperty('margin-top', Math.max(0, delta) + 'px', 'important');
+      } catch (eMt) {}
+    }
+    apply();
+    if (typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(apply);
+    }
+  }
+
   function placePalliserLogoUnderTitle() {
     var title = document.getElementById('mc-pdp-title-right');
     if (!title || !title.parentNode) return;
@@ -14232,61 +14322,14 @@ if (mcShouldUseLeatherAccordion()) {
       if (wrap.parentNode !== parent || wrap.nextElementSibling !== title) {
         parent.insertBefore(wrap, title);
       }
+      syncPdpHeroTopAlign();
       return;
     }
-    var SKIP_PARENTS_SEL = [
-      '#mc-pdp-brand-logo',
-      '#altviews', '.altviews',
-      '#mcLeatherPicker', '#mcLeatherSwatchStrip',
-      '.mtl-leather-modal', '.wm-modal',
-      /* "More items in this collection", "Related products", "Recently viewed", etc. */
-      '.v-products-list', '.v-product',
-      '.v65-productDisplay',
-      '#v65-product-history-details', '#v65-product-history-header',
-      'table[id*="v65-product-history" i]',
-      '.relatedproducts', '.related-products', '.related_products',
-      '.cross-sell', '.cross_sell',
-      '.upsell', '.up-sell',
-      '.v65-productCategoryMore',
-      '.mc-more-items', '.mc-related-rail', '.mc-collection-rail'
-    ].join(', ');
-    var imgs = document.querySelectorAll('#v65-product-parent img, #content_area img');
-    var logo = null;
-    var i;
-    for (i = 0; i < imgs.length; i++) {
-      var img = imgs[i];
-      if (!img || !img.getAttribute) continue;
-      if (img.id === 'product_photo' || img.id === 'main-image') continue;
-      if (img.closest && img.closest(SKIP_PARENTS_SEL)) continue;
-      var src = (img.getAttribute('src') || '');
-      if (/manufacturers\//i.test(src)) {
-        var mw = img.naturalWidth || img.width || 0;
-        if (mw && mw > 400) continue;
-        logo = img;
-        break;
-      }
-    }
+    var logo = findManufacturerLogoImg();
     if (!logo) {
-      for (i = 0; i < imgs.length; i++) {
-        img = imgs[i];
-        if (!img || !img.getAttribute) continue;
-        if (img.id === 'product_photo' || img.id === 'main-image') continue;
-        if (img.closest && img.closest(SKIP_PARENTS_SEL)) continue;
-        src = (img.getAttribute('src') || '');
-        var alt = (img.getAttribute('alt') || '');
-        var lc = (src + ' ' + alt).toLowerCase();
-        if (!/palliser/.test(lc)) continue;
-        if (!/(logo|brand|vendor|manufacturer)/.test(lc)) continue;
-        if (/swatch|leather|cover|configurator|sectional|paragon|recliner|sofa|loveseat|chaise|seating|chair/.test(lc)) continue;
-        mw = img.naturalWidth || img.width || 0;
-        if (mw && mw > 400) continue;
-        logo = img;
-        break;
-      }
-    }
-    if (!logo) {
+      syncPdpHeroTopAlign();
       if (typeof console !== 'undefined' && console.log) {
-        console.log('[MC PDP] placePalliserLogoUnderTitle: no strict palliser+logo image found; not moving anything.');
+        console.log('[MC PDP] placePalliserLogoUnderTitle: no manufacturer logo image found.');
       }
       return;
     }
@@ -14297,8 +14340,15 @@ if (mcShouldUseLeatherAccordion()) {
     }
     wrap.appendChild(logo);
     parent.insertBefore(wrap, title);
+    syncPdpHeroTopAlign();
   }
   window.mcPlaceBrandLogoAboveTitle = placePalliserLogoUnderTitle;
+  window.mcSyncPdpHeroTopAlign = syncPdpHeroTopAlign;
+  if (!window.__mcPdpHeroAlignListen) {
+    window.__mcPdpHeroAlignListen = true;
+    window.addEventListener('resize', syncPdpHeroTopAlign);
+    window.addEventListener('load', syncPdpHeroTopAlign);
+  }
 
   /* Hide the Volusion "Choose Options" / "Available Options" / "Chooser Options" label
      that floats above the options_table. Only hides nodes NOT inside our accordion. */
@@ -14427,6 +14477,7 @@ if (mcShouldUseLeatherAccordion()) {
     __mcAccRunPending = false;
     placeTitle();
     placePalliserLogoUnderTitle();
+    syncPdpHeroTopAlign();
     /* placeAccordion(); disabled 20260612 */
 
 if (mcShouldUseLeatherAccordion()) {

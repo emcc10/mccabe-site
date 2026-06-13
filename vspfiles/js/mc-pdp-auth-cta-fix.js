@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260613layout";
+  var VERSION = "20260614layout";
   /* Set immediately so console/deploy checks work even if later init throws */
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
 
@@ -764,11 +764,11 @@
       "body.productdetails #mc-pdp-price-stack-host .mc-pdp-retail-row,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-pricing,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-retail-row,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-member-pricing{" +
       "display:flex!important;flex-direction:column!important;position:static!important;float:none!important;margin:0 0 4px!important;width:100%!important;visibility:visible!important;opacity:1!important;height:auto!important;max-height:none!important}" +
       "body.productdetails #mc-pdp-price-stack-host .product_list_price,body.productdetails #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-line__amount,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-line__label,body.mc-pdp-price-stack #mc-pdp-price-stack-host .product_list_price,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt{" +
-      "display:block!important;visibility:visible!important;opacity:1!important;font-size:13px!important;color:#444!important;line-height:1.2!important}" +
-      /* Hero price amount — same typography as product title (13px / #777 / caps) */
+      "display:block!important;visibility:visible!important;opacity:1!important;font-size:15px!important;color:#444!important;line-height:1.2!important}" +
+      /* Hero price amount — same typography as product title (15px / #777 / caps) */
       "body.productdetails #mc-pdp-price-stack-host .product_list_price,body.mc-product-page #mc-pdp-price-stack-host .product_list_price,body.mc-pdp-price-stack #mc-pdp-price-stack-host .product_list_price," +
       "body.productdetails #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.mc-product-page #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt{" +
-      "font-size:13px!important;font-weight:400!important;line-height:1.2!important;letter-spacing:0.16em!important;text-transform:uppercase!important;color:#777!important}" +
+      "font-size:15px!important;font-weight:400!important;line-height:1.2!important;letter-spacing:0.16em!important;text-transform:uppercase!important;color:#777!important}" +
       "body.productdetails #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),body.mc-pdp-price-stack #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price){" +
       "display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important}" +
       "body.productdetails .mc-member-price-caption,body.mc-pdp-price-stack .mc-member-price-caption{" +
@@ -871,6 +871,11 @@
         parent.insertBefore(price, box);
       } catch (ePriceOnly) {}
     }
+    try {
+      if (typeof global.mcSyncPdpHeroTopAlign === "function") {
+        global.mcSyncPdpHeroTopAlign();
+      }
+    } catch (eAlign) {}
   }
 
   function escapeHtmlText(s) {
