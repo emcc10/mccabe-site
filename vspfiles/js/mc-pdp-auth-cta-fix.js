@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260612price";
+  var VERSION = "20260613hero";
   /* Set immediately so console/deploy checks work even if later init throws */
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
 
@@ -765,11 +765,10 @@
       "display:flex!important;flex-direction:column!important;position:static!important;float:none!important;margin:0 0 4px!important;width:100%!important;visibility:visible!important;opacity:1!important;height:auto!important;max-height:none!important}" +
       "body.productdetails #mc-pdp-price-stack-host .product_list_price,body.productdetails #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-line__amount,body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-line__label,body.mc-pdp-price-stack #mc-pdp-price-stack-host .product_list_price,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt{" +
       "display:block!important;visibility:visible!important;opacity:1!important;font-size:13px!important;color:#444!important;line-height:1.2!important}" +
-      /* Price amounts at 18px (locked "Log in to see member pricing" line stays small) */
+      /* Hero price amount — same typography as product title (13px / #777 / caps) */
       "body.productdetails #mc-pdp-price-stack-host .product_list_price,body.mc-product-page #mc-pdp-price-stack-host .product_list_price,body.mc-pdp-price-stack #mc-pdp-price-stack-host .product_list_price," +
-      "body.productdetails #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.mc-product-page #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt," +
-      "body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,body.mc-product-page #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount{" +
-      "font-size:18px!important;line-height:1.25!important}" +
+      "body.productdetails #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.mc-product-page #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.mc-pdp-price-stack #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt{" +
+      "font-size:13px!important;font-weight:400!important;line-height:1.2!important;letter-spacing:0.16em!important;text-transform:uppercase!important;color:#777!important}" +
       "body.productdetails #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price),body.mc-pdp-price-stack #mtl-product-summary .mtl-summary-row:has(#mtl-sum-price){" +
       "display:none!important;visibility:hidden!important;height:0!important;max-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;opacity:0!important}" +
       "body.productdetails .mc-member-price-caption,body.mc-pdp-price-stack .mc-member-price-caption{" +
@@ -792,6 +791,7 @@
           bnplAnchor.parentNode.insertBefore(host, bnplAnchor);
         } catch (eBnpl) {}
       }
+      ensureHeroColumnOrder();
       return;
     }
     var sum = global.document.getElementById("mtl-product-summary");
@@ -821,7 +821,135 @@
         parent.appendChild(host);
       } catch (eFallback) {}
     }
+    ensureHeroColumnOrder();
   }
+
+  /** Title → price → Klarna/Affirm pricebox in the right column. */
+  function ensureHeroColumnOrder() {
+    var title = global.document.getElementById("mc-pdp-title-right");
+    var price = global.document.getElementById("mc-pdp-price-stack-host");
+    var bnpl = global.document.getElementById("messaging-element");
+    var box =
+      (bnpl && bnpl.closest && bnpl.closest(".colors_pricebox")) ||
+      global.document.querySelector("#v65-product-parent .colors_pricebox");
+    if (!box || !box.parentNode) return;
+    var parent = box.parentNode;
+    if (title && title.parentNode !== parent) {
+      try {
+        parent.insertBefore(title, box);
+      } catch (eTitle) {}
+    }
+    if (price && price.parentNode !== parent) {
+      try {
+        parent.insertBefore(price, box);
+      } catch (ePrice) {}
+    }
+    if (title && title.parentNode === parent) {
+      try {
+        if (price && price.parentNode === parent) {
+          if (title.nextElementSibling !== price) parent.insertBefore(title, price);
+          if (price.nextElementSibling !== box) parent.insertBefore(price, box);
+        } else if (title.nextElementSibling !== box) {
+          parent.insertBefore(title, box);
+        }
+      } catch (eOrder) {}
+    } else if (price && price.parentNode === parent && price.nextElementSibling !== box) {
+      try {
+        parent.insertBefore(price, box);
+      } catch (ePriceOnly) {}
+    }
+  }
+
+  function escapeHtmlText(s) {
+    return String(s || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function extractTechSpecsBodyHtml() {
+    var src = global.document.getElementById("ProductDetail_TechSpecs_div");
+    if (!src) return "";
+    var lis = src.querySelectorAll("li");
+    if (lis.length) {
+      var items = [];
+      var i;
+      for (i = 0; i < lis.length; i++) {
+        var t = (lis[i].textContent || "").replace(/\s+/g, " ").trim();
+        if (t) items.push("<li>" + escapeHtmlText(t) + "</li>");
+      }
+      if (items.length) {
+        return '<ul class="mc-pdp-features__list">' + items.join("") + "</ul>";
+      }
+    }
+    var clone = src.cloneNode(true);
+    clone.removeAttribute("id");
+    clone.removeAttribute("style");
+    clone.querySelectorAll("script, style").forEach(function (n) {
+      try {
+        n.remove();
+      } catch (eRm) {}
+    });
+    var inner = (clone.innerHTML || "").replace(/\s+/g, " ").trim();
+    if (!inner || /^<ul>\s*<\/ul>$/i.test(inner)) return "";
+    var plain = (clone.textContent || "").replace(/\s+/g, " ").trim();
+    if (!plain) return "";
+    return inner;
+  }
+
+  function mountPdpFeaturesBlock() {
+    if (!isProductPdp()) return;
+    var bodyHtml = extractTechSpecsBodyHtml();
+    var block = global.document.getElementById("mc-pdp-features");
+    if (!bodyHtml) {
+      if (block) {
+        try {
+          block.style.setProperty("display", "none", "important");
+        } catch (eHide) {}
+      }
+      return;
+    }
+    if (!block) {
+      block = global.document.createElement("div");
+      block.id = "mc-pdp-features";
+      block.className = "mc-pdp-features";
+    }
+    block.innerHTML =
+      '<div class="mc-pdp-features__heading">Features:</div>' +
+      '<div class="mc-pdp-features__body">' +
+      bodyHtml +
+      "</div>";
+    try {
+      block.style.removeProperty("display");
+    } catch (eShow) {}
+    var anchor = global.document.getElementById("messaging-element");
+    var insertParent = null;
+    var insertAfter = null;
+    if (anchor && anchor.parentNode) {
+      insertParent = anchor.parentNode;
+      insertAfter = anchor;
+    } else {
+      var box = global.document.querySelector("#v65-product-parent .colors_pricebox");
+      if (box && box.parentNode) {
+        insertParent = box.parentNode;
+        insertAfter = box;
+      }
+    }
+    if (!insertParent || !insertAfter) return;
+    if (block.parentNode !== insertParent || block.previousSibling !== insertAfter) {
+      try {
+        if (insertAfter.nextSibling) {
+          insertParent.insertBefore(block, insertAfter.nextSibling);
+        } else {
+          insertParent.appendChild(block);
+        }
+      } catch (eFeat) {}
+    }
+  }
+
+  global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
+  global.mcEnsureHeroColumnOrder = ensureHeroColumnOrder;
 
   function findOrCreatePriceStackHost() {
     var host = global.document.getElementById("mc-pdp-price-stack-host");
@@ -886,45 +1014,15 @@
   }
 
   function buildStackHostHtml(retailAmt, saleAmt, guest) {
-    var parts = [];
-    if (retailAmt > 0) {
-      parts.push(
-        '<div class="mc-pdp-retail-row">' +
-          '<div class="mc-pdp-retail-label">Retail Price</div>' +
-          '<div class="mc-pdp-retail-line"><span class="mc-pdp-stack-retail-amt">' +
-          fmtMoney(retailAmt) +
-          "</span></div>" +
-          "</div>"
-      );
-    }
-    parts.push('<div class="mc-pdp-member-pricing">');
-    if (!guest && saleAmt > 0) {
-      parts.push(
-        '<div class="mc-pdp-member-line">' +
-          '<span class="mc-pdp-member-line__label">Member Price</span>' +
-          '<span class="mc-pdp-member-line__amount">' +
-          fmtMoney(saleAmt) +
-          "</span></div>"
-      );
-    } else {
-      parts.push(
-        '<div class="mc-pdp-member-line mc-pdp-member-line--locked">' +
-          '<span class="mc-pdp-member-line__label">Member Price</span>' +
-          '<span class="mc-pdp-member-line__amount"><a href="#" data-mc-open-login>Log in</a> to see member pricing</span>' +
-          "</div>"
-      );
-      if (saleAmt > 0) {
-        parts.push(
-          '<div class="mc-pdp-member-line mc-pdp-member-line--sale">' +
-            '<span class="mc-pdp-member-line__label">Sale Price</span>' +
-            '<span class="mc-pdp-member-line__amount">' +
-            fmtMoney(saleAmt) +
-            "</span></div>"
-        );
-      }
-    }
-    parts.push("</div>");
-    return parts.join("");
+    var showAmt = retailAmt > 0 ? retailAmt : saleAmt;
+    if (!(showAmt > 0)) return "";
+    /* Hero column: single price line beneath title (member/retail labels live elsewhere). */
+    return (
+      '<div class="mc-pdp-retail-row mc-pdp-hero-price-row">' +
+      '<div class="mc-pdp-retail-line"><span class="mc-pdp-stack-retail-amt">' +
+      fmtMoney(showAmt) +
+      "</span></div></div>"
+    );
   }
 
   function hideAllStrayPdpPriceNodes(host) {
@@ -1044,6 +1142,8 @@
     placePriceStackHost(host);
     hideAllStrayPdpPriceNodes(host);
     hideDuplicatePdpPriceUi();
+    ensureHeroColumnOrder();
+    mountPdpFeaturesBlock();
     try {
       global.document.body.classList.add("mc-pdp-price-stack");
     } catch (eCls) {}
@@ -1705,6 +1805,8 @@
       if (!sectional) {
         forceRebuildCleanPriceStack();
       }
+      ensureHeroColumnOrder();
+      mountPdpFeaturesBlock();
       wirePlannerLoginGate();
       guardConfigurationBlockClick();
       patchCaptionSignInCta();

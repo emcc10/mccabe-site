@@ -579,7 +579,7 @@
 
   global.mcPlpEnforcerRun = run;
 
-  var PDP_AUTH_WANT = "20260612price";
+  var PDP_AUTH_WANT = "20260613hero";
 
   function loadPdpAuthCtaFix() {
     try {

@@ -13036,6 +13036,16 @@ body.mc-product-page #v65-product-parent .mc-pdp-retail-row .mc-pdp-retail-label
   width: 100% !important;
 }
 
+html body.productdetails #mc-pdp-title-right .productnamecolorLARGE > span,
+html body.mc-product-page #mc-pdp-title-right .productnamecolorLARGE > span,
+html body.productdetails #mc-pdp-title-right [itemprop="name"],
+html body.mc-product-page #mc-pdp-title-right [itemprop="name"] {
+  margin-top: 0 !important;
+  margin-left: 0 !important;
+  width: auto !important;
+  text-align: left !important;
+}
+
 body.productdetails span[itemprop="name"],
 body.mc-product-page span[itemprop="name"],
 body.productdetails .productnamecolorLARGE.colors_productname,
@@ -15544,32 +15554,134 @@ body.is-home:not(.productdetails) #content_area ul.v-product-grid > li.v-product
 }
 
 /* =====================================================
-   PDP PRICE: 18px amounts (sits above the Klarna/Affirm
-   section — placement handled by mc-pdp-auth-cta-fix.js)
+   MC PDP HERO COLUMN — title, price, Klarna/Affirm, Features
+   Order: title → price → BNPL → Features (TechSpecs)
 ===================================================== */
-html body.productdetails #content_area #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
-html body.productdetails #v65-product-parent #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
-html body.mc-product-page #content_area #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
-html body.mc-product-page #v65-product-parent #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
+html body.productdetails #mc-pdp-title-right,
+html body.mc-product-page #mc-pdp-title-right,
+html body.productdetails #v65-product-parent #mc-pdp-title-right,
+html body.mc-product-page #v65-product-parent #mc-pdp-title-right,
+html body.productdetails #mc-pdp-price-stack-host,
+html body.mc-product-page #mc-pdp-price-stack-host,
+html body.productdetails #mc-pdp-features,
+html body.mc-product-page #mc-pdp-features,
+html body.productdetails #v65-product-parent td:has(#mc-pdp-title-right),
+html body.productdetails #v65-product-parent td:has(#mc-pdp-price-stack-host),
+html body.productdetails #v65-product-parent td:has(#messaging-element),
+html body.productdetails #v65-product-parent .colors_pricebox:first-of-type,
+html body.mc-product-page #v65-product-parent .colors_pricebox:first-of-type {
+  text-align: left !important;
+}
+
+html body.productdetails #mc-pdp-title-right h1,
+html body.mc-product-page #mc-pdp-title-right h1,
+html body.productdetails #v65-product-parent #mc-pdp-title-right h1,
+html body.mc-product-page #v65-product-parent #mc-pdp-title-right h1,
+html body.productdetails #content_area #mc-pdp-title-right h1,
+html body.mc-product-page #content_area #mc-pdp-title-right h1,
+html body.productdetails #mc-pdp-title-right [itemprop="name"],
+html body.mc-product-page #mc-pdp-title-right [itemprop="name"],
+html body.productdetails #v65-product-parent #mc-pdp-title-right [itemprop="name"],
+html body.mc-product-page #v65-product-parent #mc-pdp-title-right [itemprop="name"],
+html body.productdetails #mc-pdp-title-right .productnamecolorLARGE,
+html body.mc-product-page #mc-pdp-title-right .productnamecolorLARGE,
+html body.productdetails #v65-product-parent #mc-pdp-title-right .productnamecolorLARGE,
+html body.mc-product-page #v65-product-parent #mc-pdp-title-right .productnamecolorLARGE {
+  text-align: left !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
+}
+
+html body.productdetails #mc-pdp-price-stack-host,
+html body.mc-product-page #mc-pdp-price-stack-host {
+  margin: 0 0 10px 0 !important;
+  gap: 0 !important;
+}
+
+html body.productdetails #mc-pdp-price-stack-host .mc-pdp-retail-label,
+html body.mc-product-page #mc-pdp-price-stack-host .mc-pdp-retail-label,
+html body.productdetails #mc-pdp-price-stack-host .mc-pdp-member-pricing,
+html body.mc-product-page #mc-pdp-price-stack-host .mc-pdp-member-pricing {
+  display: none !important;
+}
+
 html body.productdetails #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
 html body.mc-product-page #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
-html body.productdetails #content_area #mc-pdp-price-stack-host .product_list_price,
-html body.productdetails #v65-product-parent #mc-pdp-price-stack-host .product_list_price,
-html body.mc-product-page #content_area #mc-pdp-price-stack-host .product_list_price,
-html body.mc-product-page #v65-product-parent #mc-pdp-price-stack-host .product_list_price,
-html body.productdetails #content_area #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,
-html body.productdetails #v65-product-parent #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,
-html body.mc-product-page #content_area #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,
-html body.mc-product-page #v65-product-parent #mc-pdp-price-stack-host .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,
+html body.productdetails #mc-pdp-price-stack-host .product_list_price,
+html body.mc-product-page #mc-pdp-price-stack-host .product_list_price,
 html body.productdetails #mc-pdp-top-price-panel .mc-pdp-top-price-value,
 html body.mc-product-page #mc-pdp-top-price-panel .mc-pdp-top-price-value,
 html body.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-top-price-value,
 html body.productdetails #mc-pdp-top-price-panel .mtl-top-price__amount,
 html body.mc-product-page #mc-pdp-top-price-panel .mtl-top-price__amount,
-html body.is-sectional-product #mc-pdp-top-price-panel .mtl-top-price__amount,
-html body.productdetails #mc-pdp-top-price-panel .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,
-html body.mc-product-page #mc-pdp-top-price-panel .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount,
-html body.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-member-line:not(.mc-pdp-member-line--locked) .mc-pdp-member-line__amount {
-  font-size: 18px !important;
-  line-height: 1.25 !important;
+html body.is-sectional-product #mc-pdp-top-price-panel .mtl-top-price__amount {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
+}
+
+html body.productdetails #messaging-element,
+html body.mc-product-page #messaging-element {
+  margin: 0 0 14px 0 !important;
+  text-align: left !important;
+}
+
+html body.productdetails #mc-pdp-features,
+html body.mc-product-page #mc-pdp-features {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 16px 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  clear: both !important;
+}
+
+html body.productdetails #mc-pdp-features .mc-pdp-features__heading,
+html body.mc-product-page #mc-pdp-features .mc-pdp-features__heading {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
+  margin: 0 0 8px 0 !important;
+}
+
+html body.productdetails #mc-pdp-features .mc-pdp-features__body,
+html body.mc-product-page #mc-pdp-features .mc-pdp-features__body,
+html body.productdetails #mc-pdp-features .mc-pdp-features__list,
+html body.mc-product-page #mc-pdp-features .mc-pdp-features__list {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: #444 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html body.productdetails #mc-pdp-features .mc-pdp-features__list,
+html body.mc-product-page #mc-pdp-features .mc-pdp-features__list {
+  list-style: disc !important;
+  padding-left: 1.1em !important;
+}
+
+html body.productdetails #mc-pdp-features .mc-pdp-features__list li,
+html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li {
+  margin: 0 0 4px 0 !important;
 }
