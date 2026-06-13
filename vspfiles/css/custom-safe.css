@@ -13650,15 +13650,21 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2 {
 
 /* Description box: align right edge with options column / Add to Cart (440px @ ~801px). */
 @media (min-width: 992px) {
+  html body.productdetails #ProductDetail_ProductDetails_div2,
+  html body.mc-product-page #ProductDetail_ProductDetails_div2 {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+
   html body.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox,
   html body.mc-product-page #ProductDetail_ProductDetails_div2 .colors_descriptionbox,
   html body.productdetails form .colors_descriptionbox,
   html body.mc-product-page form .colors_descriptionbox {
     margin-left: 109px !important;
     margin-top: 16px !important;
-    margin-right: 0 !important;
-    width: min(1132px, calc(100% - 109px - 48px)) !important;
-    max-width: 1132px !important;
+    margin-right: auto !important;
+    width: 1132px !important;
+    max-width: calc(1241px - 109px) !important;
     box-sizing: border-box !important;
   }
 }
@@ -15605,10 +15611,16 @@ html body.mc-product-page #mc-pdp-features {
   width: 100% !important;
   max-width: 440px !important;
   box-sizing: border-box !important;
-  padding-left: 0 !important;
   padding-right: 0 !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
+}
+
+html body.productdetails #mc-pdp-title-right,
+html body.mc-product-page #mc-pdp-title-right,
+html body.productdetails #mc-pdp-price-stack-host,
+html body.mc-product-page #mc-pdp-price-stack-host {
+  padding-left: 1.1em !important;
 }
 
 html body.productdetails #mc-pdp-title-right h1,
