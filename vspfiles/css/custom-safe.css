@@ -13734,17 +13734,19 @@ a.productnamecolor {
    into #mc-pdp-brand-logo at the top of the options column (before the H1). */
 
 #mc-pdp-brand-logo {
-  display: block !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
   width: 100% !important;
   max-width: 440px !important;
-  margin: 0 0 14px 0 !important;
+  margin: 0 auto 14px auto !important;
   padding: 0 !important;
   text-align: center !important;
   box-sizing: border-box !important;
 }
 
 #mc-pdp-brand-logo img {
-  display: inline-block !important;
+  display: block !important;
   width: auto !important;
   max-width: 180px !important;
   max-height: 48px !important;
@@ -15638,15 +15640,15 @@ html body.mc-product-page #mc-pdp-title-right .productnamecolorLARGE,
 html body.productdetails #v65-product-parent #mc-pdp-title-right .productnamecolorLARGE,
 html body.mc-product-page #v65-product-parent #mc-pdp-title-right .productnamecolorLARGE {
   text-align: left !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 15px !important;
+  font-size: 14px !important;
   font-weight: 400 !important;
-  line-height: 1.2 !important;
-  letter-spacing: 0.16em !important;
-  text-transform: uppercase !important;
-  color: #777 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: #444 !important;
 }
 
 html body.productdetails #mc-pdp-brand-logo + #mc-pdp-title-right,
@@ -15656,7 +15658,7 @@ html body.mc-product-page #mc-pdp-brand-logo + #mc-pdp-title-right {
 
 html body.productdetails #mc-pdp-price-stack-host,
 html body.mc-product-page #mc-pdp-price-stack-host {
-  margin: 0 0 10px 0 !important;
+  margin: 4px 0 10px 0 !important;
   gap: 0 !important;
 }
 
@@ -15678,12 +15680,14 @@ html body.productdetails #mc-pdp-top-price-panel .mtl-top-price__amount,
 html body.mc-product-page #mc-pdp-top-price-panel .mtl-top-price__amount,
 html body.is-sectional-product #mc-pdp-top-price-panel .mtl-top-price__amount {
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 15px !important;
+  font-size: 16px !important;
   font-weight: 400 !important;
-  line-height: 1.2 !important;
-  letter-spacing: 0.16em !important;
-  text-transform: uppercase !important;
-  color: #777 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: #444 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 html body.productdetails #messaging-element,
@@ -15837,6 +15841,11 @@ html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li {
    SFTP-deployed; wins over template inline styles where possible.
 ===================================================== */
 html body.productdetails #mc-pdp-title-right,
+html body.mc-product-page #mc-pdp-title-right {
+  display: block !important;
+}
+
+html body.productdetails #mc-pdp-title-right,
 html body.mc-product-page #mc-pdp-title-right,
 html body.productdetails #mc-pdp-price-stack-host,
 html body.mc-product-page #mc-pdp-price-stack-host {
@@ -15879,25 +15888,41 @@ html body.mc-product-page input[name="QTY"] {
   overflow: visible !important;
 }
 
+html body.productdetails #mc-surgical-qty-row,
+html body.mc-product-page #mc-surgical-qty-row,
+html body.productdetails #mc-final-qty-row,
+html body.mc-product-page #mc-final-qty-row,
+html body.productdetails #mc-simple-final-qty-row,
+html body.mc-product-page #mc-simple-final-qty-row {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
 html body.productdetails #mc-pdp-qty-row,
 html body.mc-product-page #mc-pdp-qty-row {
   display: flex !important;
   flex-direction: column !important;
-  align-items: flex-start !important;
+  align-items: center !important;
+  text-align: center !important;
   gap: 6px !important;
   width: 100% !important;
   max-width: 440px !important;
-  margin: 0 0 10px 0 !important;
+  margin: 0 auto 10px auto !important;
 }
 
 html body.productdetails #mc-pdp-qty-row .mc-pdp-qty-row__label,
 html body.mc-product-page #mc-pdp-qty-row .mc-pdp-qty-row__label {
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 15px !important;
+  font-size: 14px !important;
   font-weight: 400 !important;
-  letter-spacing: 0.16em !important;
-  text-transform: uppercase !important;
-  color: #777 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: #444 !important;
 }
 
 html body.productdetails #mc-pdp-qty-row input,
@@ -15918,14 +15943,15 @@ html body.mc-product-page .mc-atc-button-wrap,
 html body.productdetails #v65-product-parent .mc-atc-button-wrap,
 html body.mc-product-page #v65-product-parent .mc-atc-button-wrap {
   border: 1px solid #777 !important;
+  border-color: #777 !important;
+  box-shadow: inset 0 0 0 1px #777 !important;
   border-radius: 10px !important;
-  box-shadow: none !important;
 }
 
 @media (min-width: 992px) {
   html body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
   html body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo {
-    max-width: 800px !important;
+    max-width: 650px !important;
     width: 100% !important;
     height: auto !important;
   }
