@@ -33,12 +33,13 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260614pdp11";
+  var VERSION = "20260614pdp12";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_HERO_ANTIFLICKER_SEL =
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo," +
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-title-right,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-title-right," +
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host," +
+    "body.productdetails:not(.mc-pdp-hero-ready) #beanbag-swatch-wrapper,body.mc-product-page:not(.mc-pdp-hero-ready) #beanbag-swatch-wrapper," +
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-features,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-features," +
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-purchase-stack,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-purchase-stack";
   /* Set immediately so console/deploy checks work even if later init throws */
@@ -1685,6 +1686,70 @@
     return inner;
   }
 
+  function isBeanBagPdpPage() {
+    try {
+      if (typeof global.isBeanBagProductPage === "function") return !!global.isBeanBagProductPage();
+      if (global.document.body && global.document.body.classList.contains("mc-bean-bag-pdp")) return true;
+      var p = String(global.location.pathname || "").toLowerCase();
+      if (/product-p\/bb-/i.test(p) || /\/bean-bag-seating-s\//.test(p)) return true;
+    } catch (eBb) {}
+    return !!global.document.getElementById("beanbag-swatch-wrapper");
+  }
+
+  function findPdpHeroColumnTd() {
+    var td = global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
+    if (td) return td;
+    var seeds = [
+      global.document.getElementById("mc-pdp-title-right"),
+      global.document.getElementById("mc-pdp-price-stack-host"),
+      global.document.getElementById("messaging-element"),
+      global.document.querySelector("#v65-product-parent .colors_pricebox"),
+    ];
+    var si;
+    for (si = 0; si < seeds.length; si++) {
+      var walk = seeds[si];
+      while (walk && walk !== global.document.body) {
+        if (walk.tagName === "TD") return walk;
+        walk = walk.parentNode;
+      }
+    }
+    return null;
+  }
+
+  function findPdpHeroInsertParent() {
+    var td = findPdpHeroColumnTd();
+    if (td) return td;
+    var anchor = global.document.getElementById("messaging-element");
+    if (anchor && anchor.parentNode) return anchor.parentNode;
+    var box = global.document.querySelector("#v65-product-parent .colors_pricebox");
+    if (box && box.parentNode) return box.parentNode;
+    return null;
+  }
+
+  function findPdpHeroInsertAfter(parent) {
+    if (!parent) return null;
+    var bnpl = global.document.getElementById("messaging-element");
+    if (bnpl && parent.contains(bnpl)) return bnpl;
+    var price = global.document.getElementById("mc-pdp-price-stack-host");
+    if (price && parent.contains(price)) return price;
+    var box = parent.querySelector ? parent.querySelector(".colors_pricebox") : null;
+    if (!box && parent.classList && parent.classList.contains("colors_pricebox")) box = parent;
+    if (box && parent.contains(box)) return box;
+    return null;
+  }
+
+  function insertPdpHeroNodeAfter(parent, after, node) {
+    if (!parent || !node) return;
+    try {
+      if (after && after.parentNode === parent) {
+        if (after.nextSibling) parent.insertBefore(node, after.nextSibling);
+        else parent.appendChild(node);
+      } else {
+        parent.appendChild(node);
+      }
+    } catch (eIns) {}
+  }
+
   function extractDescriptionFeaturesHtml() {
     var src = global.document.querySelector(
       "#ProductDetail_ProductDetails_div2 span[itemprop='description'], #ProductDetail_ProductDetails_div2 .colors_descriptionbox, #content_area span[itemprop='description']"
@@ -1727,32 +1792,273 @@
     try {
       block.style.removeProperty("display");
     } catch (eShow) {}
-    var anchor = global.document.getElementById("messaging-element");
-    var insertParent = null;
-    var insertAfter = null;
-    if (anchor && anchor.parentNode) {
-      insertParent = anchor.parentNode;
-      insertAfter = anchor;
-    } else {
-      var box = global.document.querySelector("#v65-product-parent .colors_pricebox");
-      if (box && box.parentNode) {
-        insertParent = box.parentNode;
-        insertAfter = box;
-      }
-    }
-    if (!insertParent || !insertAfter) return;
-    if (block.parentNode !== insertParent || block.previousSibling !== insertAfter) {
-      try {
-        if (insertAfter.nextSibling) {
-          insertParent.insertBefore(block, insertAfter.nextSibling);
-        } else {
-          insertParent.appendChild(block);
-        }
-      } catch (eFeat) {}
+    var insertParent = findPdpHeroInsertParent();
+    var insertAfter = findPdpHeroInsertAfter(insertParent);
+    if (!insertParent) return;
+    if (block.parentNode !== insertParent || (insertAfter && block.previousElementSibling !== insertAfter)) {
+      insertPdpHeroNodeAfter(insertParent, insertAfter, block);
     }
   }
 
+  function normalizeBeanBagOptionLabel(str) {
+    return String(str || "")
+      .toLowerCase()
+      .replace(/\u00a0/g, " ")
+      .replace(/\s+/g, " ")
+      .replace(/[^a-z0-9\/ ]/g, "")
+      .trim();
+  }
+
+  function parseBeanBagImageMapFromPage() {
+    var map = {};
+    try {
+      global.document.querySelectorAll("script").forEach(function (sc) {
+        var txt = sc.textContent || "";
+        if (txt.indexOf("imageMap") === -1 || txt.indexOf("beanbag-swatch") === -1) return;
+        var m = txt.match(/var\s+imageMap\s*=\s*(\{[\s\S]*?\});/);
+        if (!m) return;
+        var pairRe = /['"]([^'"]+)['"]\s*:\s*['"]([^'"]+)['"]/g;
+        var pm;
+        while ((pm = pairRe.exec(m[1]))) {
+          map[pm[1]] = pm[2];
+        }
+      });
+    } catch (eMap) {}
+    return map;
+  }
+
+  function collectBeanBagAltPhotoIndices() {
+    var indices = [];
+    global.document.querySelectorAll('[id^="alternate_product_photo_"]').forEach(function (img) {
+      var m = String(img.id || "").match(/alternate_product_photo_(\d+)/i);
+      if (m) indices.push(parseInt(m[1], 10));
+    });
+    if (!indices.length) {
+      global.document.querySelectorAll("img.vCSS_img_alternate_product_photo").forEach(function (img) {
+        var onclick =
+          (img.getAttribute("onmouseover") || "") +
+          (img.parentElement && img.parentElement.getAttribute
+            ? img.parentElement.getAttribute("onmouseover") || ""
+            : "");
+        var m = onclick.match(/change_product_photo\s*\(\s*(\d+)\s*\)/i);
+        if (m) indices.push(parseInt(m[1], 10));
+      });
+    }
+    indices = indices.filter(function (n, i, a) {
+      return a.indexOf(n) === i;
+    });
+    indices.sort(function (a, b) {
+      return a - b;
+    });
+    return indices;
+  }
+
+  function resolveBeanBagPhotoIndexForSwatch(swatch, swatchIndex, altIndices) {
+    var attr = swatch.getAttribute("data-photo-index");
+    if (attr && /^\d+$/.test(attr)) return parseInt(attr, 10);
+    if (altIndices.length) {
+      return altIndices[Math.min(Math.max(swatchIndex, 0), altIndices.length - 1)];
+    }
+    return Math.min(Math.max(swatchIndex, 0) + 2, 7);
+  }
+
+  function findBeanBagCoverSelect() {
+    var sel =
+      global.document.querySelector('#options_table select[name*="___4"]') ||
+      global.document.querySelector('#v65-product-parent select[name*="___4"]') ||
+      global.document.querySelector('select[name*="___4"]');
+    if (sel) return sel;
+    var selects = global.document.querySelectorAll(
+      "#v65-product-parent select, form[action*='ProductDetails'] select"
+    );
+    var i;
+    for (i = 0; i < selects.length; i++) {
+      var s = selects[i];
+      if (!s.options || s.options.length < 2) continue;
+      var j;
+      for (j = 0; j < s.options.length; j++) {
+        var t = normalizeBeanBagOptionLabel(s.options[j].text);
+        if (t.indexOf(" / ") >= 0 || /faux fur|corduroy|chenille|nest|chinchilla|cordaroy/.test(t)) {
+          return s;
+        }
+      }
+    }
+    return null;
+  }
+
+  function applyBeanBagMainPhoto(photoIndex, imageMap, label) {
+    var mainImg = global.document.getElementById("product_photo");
+    if (typeof global.change_product_photo === "function" && photoIndex > 0) {
+      try {
+        global.change_product_photo(photoIndex);
+      } catch (ePhoto) {}
+    }
+    if (mainImg && imageMap[label]) {
+      var file = imageMap[label];
+      var src = mainImg.src || "";
+      var candidates = [];
+      if (src) {
+        candidates.push(src.replace(/[^/]+$/, file));
+        candidates.push(src.replace(/\/photos\/[^/]+$/, "/photos/" + file.replace(/\.jpg/i, "T.jpg")));
+      }
+      candidates.push("/v/vspfiles/photos/" + file.replace(/\.jpg/i, "T.jpg"));
+      candidates.push("/v/vspfiles/photos/" + file);
+      candidates.push("/v/vspfiles/images/" + file);
+      var ci;
+      for (ci = 0; ci < candidates.length; ci++) {
+        if (candidates[ci] && mainImg.getAttribute("src") !== candidates[ci]) {
+          try {
+            mainImg.src = candidates[ci];
+            break;
+          } catch (eSrc) {}
+        }
+      }
+    }
+    if (mainImg) {
+      var zoom = global.document.getElementById("product_photo_zoom_url");
+      if (zoom) {
+        try {
+          var full = (mainImg.src || "").replace(/T\.jpg/i, ".jpg").replace(/S\.jpg/i, ".jpg");
+          zoom.href = full;
+          if (label) zoom.title = label;
+        } catch (eZoom) {}
+      }
+      try {
+        mainImg.style.setProperty("opacity", "1", "important");
+      } catch (eOp) {}
+    }
+  }
+
+  function syncBeanBagCoverOption(label) {
+    var coverSelect = findBeanBagCoverSelect();
+    if (!coverSelect) return false;
+    var target = normalizeBeanBagOptionLabel(label);
+    var foundIndex = -1;
+    var i;
+    for (i = 0; i < coverSelect.options.length; i++) {
+      if (normalizeBeanBagOptionLabel(coverSelect.options[i].text) === target) {
+        foundIndex = i;
+        break;
+      }
+    }
+    if (foundIndex === -1) return false;
+    coverSelect.selectedIndex = foundIndex;
+    if (typeof global.change_option === "function") {
+      try {
+        global.change_option(coverSelect.name, coverSelect.options[foundIndex].value);
+      } catch (eOpt) {}
+    }
+    if (typeof global.AutoUpdatePriceWithSelectedOptions === "function") {
+      try {
+        global.AutoUpdatePriceWithSelectedOptions(coverSelect.options[foundIndex].value, 4);
+      } catch (ePrice) {}
+    }
+    try {
+      coverSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    } catch (eEv) {}
+    return true;
+  }
+
+  function handleBeanBagSwatchClick(swatch) {
+    if (!swatch) return;
+    var label = swatch.getAttribute("data-option") || swatch.getAttribute("alt") || "";
+    if (!label) return;
+    var swatches = global.document.querySelectorAll(".beanbag-swatch");
+    var swatchIndex = -1;
+    var i;
+    for (i = 0; i < swatches.length; i++) {
+      if (swatches[i] === swatch) {
+        swatchIndex = i;
+        break;
+      }
+    }
+    if (!global.__MC_BEANBAG_IMAGE_MAP__) {
+      global.__MC_BEANBAG_IMAGE_MAP__ = parseBeanBagImageMapFromPage();
+    }
+    if (!global.__MC_BEANBAG_ALT_INDICES__) {
+      global.__MC_BEANBAG_ALT_INDICES__ = collectBeanBagAltPhotoIndices();
+    }
+    var photoIndex = resolveBeanBagPhotoIndexForSwatch(
+      swatch,
+      swatchIndex,
+      global.__MC_BEANBAG_ALT_INDICES__
+    );
+    applyBeanBagMainPhoto(photoIndex, global.__MC_BEANBAG_IMAGE_MAP__, label);
+    syncBeanBagCoverOption(label);
+    var labelSpan = global.document.getElementById("beanbag-selected-cover-name");
+    if (labelSpan) labelSpan.textContent = label;
+    swatches.forEach(function (s) {
+      s.classList.remove("active");
+    });
+    swatch.classList.add("active");
+    global.__MC_BEANBAG_SELECTED_COVER__ = label;
+  }
+
+  function mountBeanBagSwatchesAboveFeatures() {
+    if (!isProductPdp()) return;
+    var wrap = global.document.getElementById("beanbag-swatch-wrapper");
+    if (!wrap) return;
+    wrap.setAttribute("data-mc-beanbag-swatches", "1");
+    wrap.dataset.moved = "1";
+    mountPdpFeaturesBlock();
+    var features = global.document.getElementById("mc-pdp-features");
+    var insertParent = findPdpHeroInsertParent();
+    if (!insertParent) return;
+    if (features && features.parentNode !== insertParent) {
+      insertPdpHeroNodeAfter(insertParent, findPdpHeroInsertAfter(insertParent), features);
+    }
+    try {
+      if (features) insertParent.insertBefore(wrap, features);
+      else insertPdpHeroNodeAfter(insertParent, findPdpHeroInsertAfter(insertParent), wrap);
+    } catch (eMount) {}
+    var labelWrap = global.document.getElementById("beanbag-selected-cover");
+    if (labelWrap) {
+      try {
+        labelWrap.style.setProperty("display", "block", "important");
+      } catch (eLab) {}
+    }
+    try {
+      wrap.style.setProperty("width", "100%", "important");
+      wrap.style.setProperty("max-width", "440px", "important");
+      wrap.style.setProperty("margin", "12px auto 8px auto", "important");
+      wrap.style.setProperty("display", "block", "important");
+      wrap.style.setProperty("clear", "both", "important");
+    } catch (eWrap) {}
+  }
+
+  function initBeanBagSwatchBehavior() {
+    if (!global.document.getElementById("beanbag-swatch-wrapper")) return;
+    if (global.__MC_BEANBAG_SWATCH_CAPTURE__) return;
+    global.__MC_BEANBAG_SWATCH_CAPTURE__ = true;
+    global.document.addEventListener(
+      "click",
+      function (e) {
+        var swatch = e.target && e.target.closest ? e.target.closest(".beanbag-swatch") : null;
+        if (!swatch) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        handleBeanBagSwatchClick(swatch);
+      },
+      true
+    );
+    var saved = global.__MC_BEANBAG_SELECTED_COVER__;
+    if (saved) {
+      global.document.querySelectorAll(".beanbag-swatch").forEach(function (s) {
+        if (s.getAttribute("data-option") === saved) handleBeanBagSwatchClick(s);
+      });
+    }
+  }
+
+  function patchBeanBagPdp() {
+    if (!isProductPdp()) return;
+    if (!global.document.getElementById("beanbag-swatch-wrapper") && !isBeanBagPdpPage()) return;
+    mountBeanBagSwatchesAboveFeatures();
+    initBeanBagSwatchBehavior();
+  }
+
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
+  global.mcMountBeanBagSwatchesAboveFeatures = mountBeanBagSwatchesAboveFeatures;
   global.mcEnsureHeroColumnOrder = ensureHeroColumnOrder;
 
   function findOrCreatePriceStackHost() {
@@ -2619,6 +2925,7 @@
       applyPdpPriceTypography();
       applyPdpDescriptionStyle();
       mountPdpFeaturesBlock();
+      patchBeanBagPdp();
       ensureQuantityAboveAtc();
       ensurePurchaseStackCentered();
       fixAddToCartChrome();

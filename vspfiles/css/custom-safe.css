@@ -16291,3 +16291,47 @@ html body.mc-product-page #mc-pdp-purchase-stack > .mc-atc-button-wrap {
   margin-left: auto !important;
   margin-right: auto !important;
 }
+
+/* MC PDP LOCK pdp12 — bean bag cover swatches above Features in hero column */
+html body.productdetails #beanbag-swatch-wrapper,
+html body.mc-product-page #beanbag-swatch-wrapper,
+html body.mc-bean-bag-pdp #beanbag-swatch-wrapper {
+  display: block !important;
+  width: 100% !important;
+  max-width: 440px !important;
+  margin: 12px auto 8px auto !important;
+  clear: both !important;
+  z-index: 5 !important;
+}
+
+html body.productdetails #beanbag-swatch-wrapper .beanbag-swatches,
+html body.mc-product-page #beanbag-swatch-wrapper .beanbag-swatches {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+html body.productdetails #beanbag-selected-cover,
+html body.mc-product-page #beanbag-selected-cover {
+  display: block !important;
+  margin: 0 0 8px !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  color: #444 !important;
+}
+
+html body.productdetails #beanbag-selected-cover-name,
+html body.mc-product-page #beanbag-selected-cover-name {
+  font-weight: 700 !important;
+}
+
+html body.productdetails #beanbag-swatch-wrapper + #mc-pdp-features,
+html body.mc-product-page #beanbag-swatch-wrapper + #mc-pdp-features {
+  margin-top: 0 !important;
+}
+
+html body.productdetails #ProductDetail_ProductDetails_div2 #beanbag-swatch-wrapper:not([data-mc-beanbag-swatches]),
+html body.mc-product-page #ProductDetail_ProductDetails_div2 #beanbag-swatch-wrapper:not([data-mc-beanbag-swatches]) {
+  display: none !important;
+}
