@@ -12845,22 +12845,23 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     display: block !important;
   }
 
-  /* Wrapper must span full button width — `width: max-content` on the input collapses unless the flex row is 440px. */
+  /* Wrapper: fit-content width — thin light grey square border. */
   body.mc-product-page #content_area .mc-atc-button-wrap,
   body.productdetails #content_area .mc-atc-button-wrap,
   body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
   body.productdetails #v65-product-parent .mc-atc-button-wrap {
     box-sizing: border-box !important;
-    min-width: 440px !important;
-    width: 440px !important;
-    max-width: 440px !important;
+    min-width: 0 !important;
+    width: fit-content !important;
+    max-width: none !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 12px !important;
-    padding: 12px 22px !important;
-    border: 1px solid #777 !important;
-    border-radius: 10px !important;
+    gap: 10px !important;
+    padding: 10px 18px !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
     background: #fff !important;
     background-color: #fff !important;
     color: #444 !important;
@@ -12882,7 +12883,6 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     text-decoration: none !important;
     -webkit-appearance: none !important;
     appearance: none !important;
-    /* Use width/min-width only — flex-basis: 440px becomes HEIGHT when a column flex ancestor is present. */
     flex-grow: 0 !important;
     flex-shrink: 0 !important;
     flex-basis: auto !important;
@@ -12906,7 +12906,7 @@ body.mc-product-page #mc-pdp-title-right,
 body.productdetails #mc-pdp-title-right {
   margin-top: 0 !important;
   padding-top: 0 !important;
-  padding-left: 0 !important;
+  padding-left: 1.1em !important;
   padding-right: 0 !important;
   text-align: left !important;
 }
@@ -13190,13 +13190,17 @@ body.productdetails #content_area .mc-atc-button-wrap {
 }
 
 .mc-atc-button-wrap {
-  /* Outline pill — light grey border matches Features heading (#777). */
+  /* Outline — thin light grey border, square, fit-content width. */
   background: #fff !important;
   background-color: #fff !important;
-  border: 1px solid #777 !important;
-  border-radius: 10px !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   color: #444 !important;
-  min-width: 440px !important;
+  width: fit-content !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  padding: 10px 18px !important;
   margin-left: 0 !important;
   margin-right: 0px !important;
   margin-top: 5px !important;
@@ -13846,18 +13850,18 @@ html body.productdetails #v65-product-parent hr {
   html body.mc-product-page #v65-product-parent button[name="btnaddtocart"],
   html body.productdetails #v65-product-parent input[name="btnaddtocart"],
   html body.productdetails #v65-product-parent button[name="btnaddtocart"] {
-    width: 440px !important;
-    max-width: 440px !important;
-    min-width: 440px !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
   }
 
   html body.mc-product-page #content_area .mc-atc-button-wrap,
   html body.productdetails #content_area .mc-atc-button-wrap,
   html body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
   html body.productdetails #v65-product-parent .mc-atc-button-wrap {
-    min-width: 440px !important;
-    width: 440px !important;
-    max-width: 440px !important;
+    min-width: 0 !important;
+    width: fit-content !important;
+    max-width: none !important;
     flex-grow: 0 !important;
     flex-shrink: 0 !important;
     flex-basis: auto !important;
@@ -15680,7 +15684,7 @@ html body.productdetails #mc-pdp-top-price-panel .mtl-top-price__amount,
 html body.mc-product-page #mc-pdp-top-price-panel .mtl-top-price__amount,
 html body.is-sectional-product #mc-pdp-top-price-panel .mtl-top-price__amount {
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 16px !important;
+  font-size: 18px !important;
   font-weight: 400 !important;
   line-height: 1.55 !important;
   letter-spacing: 0.02em !important;
@@ -15831,8 +15835,9 @@ html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li {
   html body.productdetails #content_area .mc-atc-button-wrap,
   html body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
   html body.productdetails #v65-product-parent .mc-atc-button-wrap {
-    border: 1px solid #777 !important;
-    border-radius: 10px !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
 }
 
@@ -15931,8 +15936,8 @@ html body.productdetails input.v65-productdetail-cartqty,
 html body.mc-product-page input.v65-productdetail-cartqty {
   width: 58px !important;
   height: 38px !important;
-  border: 1px solid #777 !important;
-  border-radius: 6px !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 0 !important;
   text-align: center !important;
   font-size: 14px !important;
   color: #444 !important;
@@ -15942,10 +15947,61 @@ html body.productdetails .mc-atc-button-wrap,
 html body.mc-product-page .mc-atc-button-wrap,
 html body.productdetails #v65-product-parent .mc-atc-button-wrap,
 html body.mc-product-page #v65-product-parent .mc-atc-button-wrap {
-  border: 1px solid #777 !important;
-  border-color: #777 !important;
-  box-shadow: inset 0 0 0 1px #777 !important;
-  border-radius: 10px !important;
+  border: 1px solid #e0e0e0 !important;
+  border-color: #e0e0e0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  width: fit-content !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  padding: 10px 18px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+}
+
+html body.productdetails .mc-atc-button-wrap input[name="btnaddtocart"],
+html body.mc-product-page .mc-atc-button-wrap input[name="btnaddtocart"],
+html body.productdetails .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.mc-product-page .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.productdetails #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
+html body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
+html body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"] {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+/* Hide duplicate Volusion qty labels — single label lives in #mc-pdp-qty-row */
+html body.productdetails .vol-cartqty__wrap:not(#mc-pdp-qty-row .vol-cartqty__wrap) label,
+html body.mc-product-page .vol-cartqty__wrap:not(#mc-pdp-qty-row .vol-cartqty__wrap) label,
+html body.productdetails [itemprop="offers"] .vol-cartqty__wrap label,
+html body.mc-product-page [itemprop="offers"] .vol-cartqty__wrap label {
+  display: none !important;
+}
+
+/* Anti-flicker: manufacturer logo must not sit in media column before JS moves it */
+html body.productdetails td.mc-pdp-media-td img[src*="/manufacturers/"],
+html body.mc-product-page td.mc-pdp-media-td img[src*="/manufacturers/"],
+html body.productdetails #product_photo_td img[src*="/manufacturers/"],
+html body.mc-product-page #product_photo_td img[src*="/manufacturers/"] {
+  display: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+html body.productdetails.mc-pdp-hero-pending #mc-pdp-brand-logo,
+html body.mc-product-page.mc-pdp-hero-pending #mc-pdp-brand-logo,
+html body.productdetails.mc-pdp-hero-pending #mc-pdp-title-right,
+html body.mc-product-page.mc-pdp-hero-pending #mc-pdp-title-right,
+html body.productdetails.mc-pdp-hero-pending #mc-pdp-price-stack-host,
+html body.mc-product-page.mc-pdp-hero-pending #mc-pdp-price-stack-host {
+  visibility: hidden !important;
 }
 
 @media (min-width: 992px) {
@@ -15954,5 +16010,31 @@ html body.mc-product-page #v65-product-parent .mc-atc-button-wrap {
     max-width: 650px !important;
     width: 100% !important;
     height: auto !important;
+  }
+
+  html body.productdetails #content_area .mc-atc-button-wrap,
+  html body.mc-product-page #content_area .mc-atc-button-wrap,
+  html body.productdetails #v65-product-parent .mc-atc-button-wrap,
+  html body.mc-product-page #v65-product-parent .mc-atc-button-wrap {
+    width: fit-content !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  html body.productdetails #content_area input[name="btnaddtocart"],
+  html body.mc-product-page #content_area input[name="btnaddtocart"],
+  html body.productdetails #content_area button[name="btnaddtocart"],
+  html body.mc-product-page #content_area button[name="btnaddtocart"],
+  html body.productdetails #v65-product-parent input[name="btnaddtocart"],
+  html body.mc-product-page #v65-product-parent input[name="btnaddtocart"],
+  html body.productdetails #v65-product-parent button[name="btnaddtocart"],
+  html body.mc-product-page #v65-product-parent button[name="btnaddtocart"],
+  html body.productdetails #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
+  html body.mc-product-page #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
+  html body.productdetails #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
+  html body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"] {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
   }
 }

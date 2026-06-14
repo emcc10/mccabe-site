@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260627a — PLP: thumbnail image fills the .mc-plp-image-box wrapper (100% x 100%, contain)
+ * MC_PLP_ENFORCER_20260627b — site-wide strip .00 from prices; PLP thumbnails
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260627a";
+  var VERSION = "20260627b";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -579,7 +579,67 @@
 
   global.mcPlpEnforcerRun = run;
 
-  var PDP_AUTH_WANT = "20260613hero";
+  var PRICE_ZERO_CENT_SELECTOR =
+    ".product_list_price,.product_sale_price,.product_saleprice,.product_productprice,.product_price," +
+    ".v-product__price,.mc-member-grid-price,.mc-pdp-stack-retail-amt,.mc-pdp-top-price-value,.mtl-top-price__amount," +
+    "#priceWithOptions,#priceWithOptionsNoTax,.colors_productprice,.pricecolor,.mc-member-price-caption," +
+    ".mc-pdp-member-line__amount,.v65-product-price,.mc-member-grid-price__amount";
+
+  function stripPriceZeroCentsLocal(root) {
+    if (typeof global.mcStripPriceZeroCents === "function") {
+      global.mcStripPriceZeroCents(root);
+      return;
+    }
+    root = root || global.document.body;
+    if (!root || !root.querySelectorAll) return;
+    try {
+      root.querySelectorAll(PRICE_ZERO_CENT_SELECTOR).forEach(function (el) {
+        var walker = global.document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        var n;
+        while ((n = walker.nextNode())) {
+          if (!n || n.nodeType !== 3) continue;
+          var v = n.nodeValue;
+          if (!v || v.indexOf(".00") === -1) continue;
+          var nv = v.replace(/(\$\d[\d,]*)\.00(?!\d)/g, "$1");
+          if (nv !== v) n.nodeValue = nv;
+        }
+      });
+    } catch (eStrip) {}
+  }
+
+  function runGlobalPriceDisplayFix() {
+    stripPriceZeroCentsLocal();
+  }
+
+  global.document.addEventListener("DOMContentLoaded", runGlobalPriceDisplayFix);
+  global.addEventListener("load", runGlobalPriceDisplayFix);
+  [200, 800, 2500].forEach(function (ms) {
+    global.setTimeout(runGlobalPriceDisplayFix, ms);
+  });
+
+  if (typeof MutationObserver !== "undefined") {
+    var priceMoScheduled = false;
+    var priceMo = new MutationObserver(function (mutations) {
+      var i;
+      for (i = 0; i < mutations.length; i++) {
+        if (mutations[i].type === "characterData" || mutations[i].type === "childList") {
+          if (priceMoScheduled) return;
+          priceMoScheduled = true;
+          global.requestAnimationFrame(function () {
+            priceMoScheduled = false;
+            runGlobalPriceDisplayFix();
+          });
+          return;
+        }
+      }
+    });
+    var priceRoot = global.document.getElementById("content_area") || global.document.body;
+    if (priceRoot) {
+      priceMo.observe(priceRoot, { childList: true, subtree: true, characterData: true });
+    }
+  }
+
+  var PDP_AUTH_WANT = "20260614pdp7";
 
   function loadPdpAuthCtaFix() {
     try {
