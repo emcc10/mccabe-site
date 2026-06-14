@@ -1,0 +1,294 @@
+beanbag-swatch-wrapper">
+  <div id="beanbag-selected-cover">
+    Selected cover:
+    <span id="beanbag-selected-cover-name"></span>
+  </div>
+
+  <div class="beanbag-swatches">
+
+    <!-- EXAMPLE swatches – repeat per product -->
+		<img src="/v/vspfiles/swatches/corduroy/fauxfur-pink.jpg" class="beanbag-swatch" data-option="Faux Fur / Pink" alt="Faux Fur Pink"/>
+		
+<img src="/v/vspfiles/swatches/corduroy/fauxfur-gray.jpg" class="beanbag-swatch" data-option="Faux Fur / Gray" alt="Faux Fur Gray"/>
+		
+<img src="/v/vspfiles/swatches/corduroy/fauxfur-tan.jpg" class="beanbag-swatch" data-option="Faux Fur / Tan" alt="Faux Fur Tan"/>
+		
+<img src="/v/vspfiles/swatches/corduroy/fauxfur-navy.jpg" class="beanbag-swatch" data-option="Faux Fur / Navy" alt="Faux Fur Navy"/>
+		
+<img src="/v/vspfiles/swatches/corduroy/fauxfur-black.jpg" class="beanbag-swatch" data-option="Faux Fur / Black" alt="Faux Fur Black"/>
+		
+<img src="/v/vspfiles/swatches/corduroy/fauxfur-white.jpg" class="beanbag-swatch" data-option="Faux Fur / White" alt="Faux Fur White"/>
+
+<img src="/v/vspfiles/swatches/corduroy/fauxfur-cowprint.jpg" class="beanbag-swatch" data-option="Faux Fur / Cow" alt="Faux Fur Cow"/>
+	</div>
+</div>
+<style>
+
+.beanbag-swatch {
+  width: 38px;
+  height: 38px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.beanbag-swatch.active {
+  border-color: #000;
+}
+
+
+/* Anchor swatches to the product detail column */
+#beanbag-swatch-wrapper {
+  width: 100%;
+  margin: 12px 0 18px;
+  z-index: 5;
+}
+
+/* Ensure parent allows absolute positioning */
+.vol-product__top--right {
+  position: relative;
+}
+
+/* Swatch layout */
+.beanbag-swatches {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+
+}
+#.v65-productdetail-image {
+  min-height: 420px;
+}
+
+#.v65-productdetail-image img {
+  opacity: 0;
+}
+/* Hide Choose Cover dropdown but keep it functional */
+#options_table select[name*="___4"] {
+  display: none !important;
+}
+
+/* Hide the "Choose Cover" heading text */
+#options_table .vol-option-heading + tr + tr {
+  display: none !important;
+}
+#beanbag-selected-cover {
+  display: block !important;
+  margin: 8px 0 4px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #000;
+}
+
+#beanbag-selected-cover-name {
+  font-weight: 700;
+}
+
+</style>
+
+
+<script>
+(function () {
+
+  function normalize(str) {
+    return str
+      .toLowerCase()
+      .replace(/\u00a0/g, ' ')
+      .replace(/\s+/g, ' ')
+      .replace(/[^a-z0-9\/ ]/g, '')
+      .trim();
+  }
+
+  // IMAGE MAP — filenames UNCHANGED
+  var imageMap = {
+    'Faux Fur / Pink': 'bb-fauxfur-pink.jpg',
+    'Faux Fur / Gray': 'bb-fauxfur-gray.jpg',
+    'Faux Fur / Tan': 'bb-fauxfur-tan.jpg',
+    'Faux Fur / Navy': 'bb-fauxfur-navy.jpg',
+    'Faux Fur / Black': 'bb-fauxfur-black.jpg',
+    'Faux Fur / White': 'bb-fauxfur-white.jpg',
+    'Faux Fur / Cow': 'bb-fauxfur-cow.jpg'
+  };
+
+  document.addEventListener('click', function (e) {
+
+    var swatch = e.target.closest('.beanbag-swatch');
+    if (!swatch) return;
+
+    var coverSelect = document.querySelector('#options_table select[name*="___4"]');
+    if (!coverSelect) return;
+
+    var label = swatch.getAttribute('data-option');
+    var target = normalize(label);
+    var foundIndex = -1;
+
+    for (var i = 0; i < coverSelect.options.length; i++) {
+      if (normalize(coverSelect.options[i].text) === target) {
+        foundIndex = i;
+        break;
+      }
+    }
+
+    if (foundIndex === -1) return;
+
+    // Sync Volusion option
+    coverSelect.selectedIndex = foundIndex;
+
+    if (typeof change_option === 'function') {
+      change_option(
+        coverSelect.name,
+        coverSelect.options[foundIndex].value
+      );
+    }
+
+    if (typeof AutoUpdatePriceWithSelectedOptions === 'function') {
+      AutoUpdatePriceWithSelectedOptions(
+        coverSelect.options[foundIndex].value,
+        4
+      );
+    }
+
+    // Update selected cover text
+    var labelSpan = document.getElementById('beanbag-selected-cover-name');
+    if (labelSpan) {
+      labelSpan.textContent = label;
+    }
+
+    // 🔥 IMAGE SWAP (Volusion-safe background hack)
+var mainImg = document.getElementById('product_photo');
+
+if (mainImg && imageMap[label]) {
+  mainImg.src = '/v/vspfiles/images/' + imageMap[label];
+}
+
+
+
+    // Active swatch styling
+    document.querySelectorAll('.beanbag-swatch').forEach(function (s) {
+      s.classList.remove('active');
+    });
+    swatch.classList.add('active');
+
+  });
+
+})();
+</script>
+
+<script>
+(function () {
+  function moveSwatches() {
+    var swatchWrap = document.getElementById('beanbag-swatch-wrapper');
+    var optionsTable = document.getElementById('options_table');
+
+    if (!swatchWrap || !optionsTable) return;
+
+    if (!swatchWrap.dataset.moved) {
+      optionsTable.parentNode.insertBefore(
+        swatchWrap,
+        optionsTable.nextSibling
+      );
+      swatchWrap.dataset.moved = '1';
+    }
+  }
+
+  var tries = 0;
+  var timer = setInterval(function () {
+    tries++;
+    moveSwatches();
+    if (tries > 20) clearInterval(timer);
+  }, 100);
+})();
+</script>
+
+<script>
+(function () {
+
+  // Covers not available when Size = King (ALREADY NORMALIZED)
+  var kingExcludedCovers = [
+    'faux fur / pink',
+    'faux fur / navy'
+  ];
+
+  function normalize(str) {
+    return str
+      .toLowerCase()
+      .replace(/\u00a0/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function getSizeSelect() {
+    return Array.from(
+      document.querySelectorAll('#options_table select')
+    ).find(sel =>
+      Array.from(sel.options).some(opt =>
+        normalize(opt.text).includes('king')
+      )
+    );
+  }
+
+  function updateSwatchesForSize() {
+    var sizeSelect = getSizeSelect();
+    if (!sizeSelect) return;
+
+    var selectedSize = normalize(
+      sizeSelect.options[sizeSelect.selectedIndex].text
+    );
+
+    document.querySelectorAll('.beanbag-swatch').forEach(function (swatch) {
+      var cover = normalize(swatch.dataset.option);
+
+      if (selectedSize.includes('king') && kingExcludedCovers.includes(cover)) {
+        swatch.style.display = 'none';
+
+        if (swatch.classList.contains('active')) {
+          swatch.classList.remove('active');
+          var label = document.getElementById('beanbag-selected-cover-name');
+          if (label) label.textContent = '';
+        }
+      } else {
+        swatch.style.display = '';
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', updateSwatchesForSize);
+
+  document.addEventListener('change', function (e) {
+    if (e.target.closest('#options_table')) {
+      updateSwatchesForSize();
+    }
+  });
+
+})();
+</script>
+
+
+
+
+
+<li><strong>CHAIR BY DAY, BED BY NIGHT:</strong> Effortlessly converts 
+from a stylish, comfortable bean bag chair into a standard Full-sized 
+bed, providing a perfect sleeping solution for guests.
+</li>
+<li><strong>MACHINE WASHABLE & DRYABLE:</strong>
+Simply unzip the outer cover and toss it in your home washing machine 
+for easy cleaning, ensuring your bean bag always looks its best.
+</li>
+<li><strong>LIFETIME GUARANTEE SINCE 1998:</strong> Rest easy knowing your investment is protected by a lifetime guarantee, a testament to our commitment to quality craftsmanship.</li></span>
+
+                                <div style="height: 15px;"></div>
+                            
+                            <div style="clear: both;"></div>
+              </div>   
+              <div id="ProductDetail_TechSpecs_div" style="display:none;">
+              <ul></ul>
+              </div>                      
+              <div id="ProductDetail_ExtInfo_div" style="display:none;">
+              
+              </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+                <td width="1" background="/v/vspfiles/temp
