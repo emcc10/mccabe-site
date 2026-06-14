@@ -8890,13 +8890,21 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     visibility: visible !important;
     opacity: 1 !important;
     width: 100% !important;
-    max-width: 100% !important;
+    max-width: min(650px, 100%) !important;
     min-width: 0 !important;
     height: auto !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     float: none !important;
     clear: none !important;
     object-fit: contain !important;
+    box-sizing: border-box !important;
+  }
+
+  body.productdetails :is(#content_area, #v65-product-parent) a#product_photo_zoom_url,
+  body.mc-product-page :is(#content_area, #v65-product-parent) a#product_photo_zoom_url {
+    max-width: min(650px, 100%) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* Tables inside media cell cannot spill into the options column */
@@ -13678,6 +13686,15 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2 {
     max-width: calc(1241px - 109px) !important;
     box-sizing: border-box !important;
   }
+
+  html body.mc-bean-bag-pdp #ProductDetail_ProductDetails_div2 .colors_descriptionbox,
+  html body.mc-bean-bag-pdp form .colors_descriptionbox,
+  html body.mc-bean-bag-pdp #mc-pdp-description-under-media .colors_descriptionbox {
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    width: 100% !important;
+    max-width: min(650px, 100%) !important;
+  }
 }
 
 /* Alt-view thumbnails: slightly larger. */
@@ -16147,6 +16164,18 @@ html body.mc-product-page .colors_pricebox td[aria-hidden="true"] {
 }
 
 /* MC PDP LOCK pdp9 — main image cap + description border off */
+html body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
+html body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo,
+html body.productdetails #content_area img#product_photo,
+html body.mc-product-page #content_area img#product_photo,
+html body.productdetails #v65-product-parent img#product_photo,
+html body.mc-product-page #v65-product-parent img#product_photo {
+  max-width: min(650px, 100%) !important;
+  width: 100% !important;
+  height: auto !important;
+  box-sizing: border-box !important;
+}
+
 @media (min-width: 992px) {
   html body.productdetails :is(#content_area, #v65-product-parent) img#product_photo,
   html body.mc-product-page :is(#content_area, #v65-product-parent) img#product_photo,
@@ -16154,9 +16183,6 @@ html body.mc-product-page .colors_pricebox td[aria-hidden="true"] {
   html body.mc-product-page #content_area img#product_photo,
   html body.productdetails #v65-product-parent img#product_photo,
   html body.mc-product-page #v65-product-parent img#product_photo {
-    max-width: 650px !important;
-    width: 100% !important;
-    height: auto !important;
     margin-left: auto !important;
     margin-right: auto !important;
   }
@@ -16299,9 +16325,11 @@ html body.mc-bean-bag-pdp #beanbag-swatch-wrapper {
   display: block !important;
   width: 100% !important;
   max-width: 440px !important;
-  margin: 12px auto 8px auto !important;
+  margin: 12px 0 8px 0 !important;
+  padding: 0 0 0 1.1em !important;
   clear: both !important;
   z-index: 5 !important;
+  text-align: left !important;
 }
 
 html body.productdetails #beanbag-swatch-wrapper .beanbag-swatches,
@@ -16334,4 +16362,46 @@ html body.mc-product-page #beanbag-swatch-wrapper + #mc-pdp-features {
 html body.productdetails #ProductDetail_ProductDetails_div2 #beanbag-swatch-wrapper:not([data-mc-beanbag-swatches]),
 html body.mc-product-page #ProductDetail_ProductDetails_div2 #beanbag-swatch-wrapper:not([data-mc-beanbag-swatches]) {
   display: none !important;
+}
+
+/* MC PDP LOCK pdp13 — description under media + responsive image cap */
+html body.mc-bean-bag-pdp #mc-pdp-description-under-media,
+html body.mc-bean-bag-pdp .mc-pdp-description-under-media {
+  display: block !important;
+  width: 100% !important;
+  max-width: min(650px, 100%) !important;
+  margin: 10px 0 0 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-bean-bag-pdp #ProductDetail_ProductDetails_div2,
+html body.mc-bean-bag-pdp #ProductDetail_ProductDetails_div2 .colors_descriptionbox,
+html body.mc-bean-bag-pdp #mc-pdp-description-under-media .colors_descriptionbox {
+  margin: 0 !important;
+  margin-left: 0 !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-bean-bag-pdp #beanbag-swatch-wrapper .beanbag-swatches {
+  justify-content: flex-start !important;
+}
+
+html body.productdetails #mc-pdp-features .mc-pdp-features__heading,
+html body.mc-product-page #mc-pdp-features .mc-pdp-features__heading {
+  padding-left: 1.1em !important;
+}
+
+html body.productdetails a#product_photo_zoom_url,
+html body.mc-product-page a#product_photo_zoom_url,
+html body.productdetails a#product_photo_zoom_url2,
+html body.mc-product-page a#product_photo_zoom_url2 {
+  max-width: min(650px, 100%) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }

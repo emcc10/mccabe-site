@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260614pdp12";
+  var VERSION = "20260614pdp13";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_HERO_ANTIFLICKER_SEL =
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo," +
@@ -181,6 +181,107 @@
       return false;
     }
     return true;
+  }
+
+  function pruneDescriptionDuplicateFeatures() {
+    var feat = global.document.getElementById("mc-pdp-features");
+    if (!feat || !feat.querySelector(".mc-pdp-features__list li")) return;
+    global.document
+      .querySelectorAll(
+        "#ProductDetail_ProductDetails_div2 li, #ProductDetail_ProductDetails_div2 span[itemprop='description'] > li"
+      )
+      .forEach(function (li) {
+        if (li.closest("#beanbag-swatch-wrapper, #mc-pdp-features, script, style")) return;
+        try {
+          li.style.setProperty("display", "none", "important");
+        } catch (eHide) {}
+      });
+    global.document
+      .querySelectorAll("#ProductDetail_ProductDetails_div2 ul, #ProductDetail_ProductDetails_div2 span[itemprop='description'] ul")
+      .forEach(function (ul) {
+        if (ul.closest("#beanbag-swatch-wrapper, #mc-pdp-features")) return;
+        var vis = ul.querySelector("li:not([style*='display: none'])");
+        if (!vis) {
+          try {
+            ul.style.setProperty("display", "none", "important");
+          } catch (eUl) {}
+        }
+      });
+  }
+
+  function findPdpMediaTd() {
+    return (
+      global.document.querySelector("#v65-product-parent td.mc-pdp-media-td") ||
+      global.document.getElementById("product_photo_td") ||
+      global.document.querySelector("#v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child")
+    );
+  }
+
+  function mountPdpDescriptionUnderMedia() {
+    if (!isProductPdp()) return;
+    if (!isBeanBagPdpPage()) return;
+    var descDiv = global.document.getElementById("ProductDetail_ProductDetails_div2");
+    if (!descDiv) return;
+    var mediaTd = findPdpMediaTd();
+    if (!mediaTd || mediaTd.contains(descDiv)) return;
+    var host = global.document.getElementById("mc-pdp-description-under-media");
+    if (!host) {
+      host = global.document.createElement("div");
+      host.id = "mc-pdp-description-under-media";
+      host.className = "mc-pdp-description-under-media";
+    }
+    var altviews =
+      mediaTd.querySelector("#altviews") ||
+      mediaTd.querySelector("span#altviews") ||
+      global.document.getElementById("altviews");
+    if (altviews && altviews.parentNode === mediaTd) {
+      try {
+        if (altviews.nextSibling) mediaTd.insertBefore(host, altviews.nextSibling);
+        else mediaTd.appendChild(host);
+      } catch (eIns) {
+        mediaTd.appendChild(host);
+      }
+    } else {
+      try {
+        mediaTd.appendChild(host);
+      } catch (eTd) {}
+    }
+    if (descDiv.parentNode !== host) {
+      try {
+        host.appendChild(descDiv);
+      } catch (eMove) {}
+    }
+    try {
+      host.style.setProperty("width", "100%", "important");
+      host.style.setProperty("max-width", "650px", "important");
+      host.style.setProperty("margin", "10px 0 0 0", "important");
+      host.style.setProperty("padding", "0", "important");
+      host.style.setProperty("text-align", "left", "important");
+      descDiv.style.setProperty("margin", "0", "important");
+      descDiv.style.setProperty("padding", "0", "important");
+    } catch (eHost) {}
+    pruneDescriptionDuplicateFeatures();
+  }
+
+  function applyPdpMainImageCap() {
+    if (!isProductPdp()) return;
+    var img = global.document.getElementById("product_photo");
+    if (img) {
+      try {
+        img.style.setProperty("max-width", "650px", "important");
+        img.style.setProperty("width", "100%", "important");
+        img.style.setProperty("height", "auto", "important");
+        img.style.setProperty("box-sizing", "border-box", "important");
+      } catch (eImg) {}
+    }
+    global.document.querySelectorAll("#product_photo_zoom_url, a#product_photo_zoom_url2").forEach(function (link) {
+      try {
+        link.style.setProperty("max-width", "650px", "important");
+        link.style.setProperty("width", "100%", "important");
+        link.style.setProperty("display", "block", "important");
+        link.style.setProperty("box-sizing", "border-box", "important");
+      } catch (eLink) {}
+    });
   }
 
   function applyPdpDescriptionTypography(el) {
@@ -1591,7 +1692,9 @@
       "body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop='description'],body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop='description']{" +
       "font-family:Inter,Arial,sans-serif!important;font-size:14px!important;line-height:1.55!important;letter-spacing:0.02em!important;color:#444!important}" +
       "body.productdetails img#product_photo,body.mc-product-page img#product_photo{" +
-      "max-width:650px!important;width:100%!important;height:auto!important}";
+      "max-width:min(650px,100%)!important;width:100%!important;height:auto!important}" +
+      "body.productdetails a#product_photo_zoom_url,body.mc-product-page a#product_photo_zoom_url{" +
+      "max-width:min(650px,100%)!important;width:100%!important;display:block!important}";
   }
 
   global.mcPlaceBrandLogoAboveTitle = placeBrandLogoAboveTitle;
@@ -1798,6 +1901,7 @@
     if (block.parentNode !== insertParent || (insertAfter && block.previousElementSibling !== insertAfter)) {
       insertPdpHeroNodeAfter(insertParent, insertAfter, block);
     }
+    pruneDescriptionDuplicateFeatures();
   }
 
   function normalizeBeanBagOptionLabel(str) {
@@ -2020,9 +2124,11 @@
     try {
       wrap.style.setProperty("width", "100%", "important");
       wrap.style.setProperty("max-width", "440px", "important");
-      wrap.style.setProperty("margin", "12px auto 8px auto", "important");
+      wrap.style.setProperty("margin", "12px 0 8px 0", "important");
+      wrap.style.setProperty("padding", "0 0 0 1.1em", "important");
       wrap.style.setProperty("display", "block", "important");
       wrap.style.setProperty("clear", "both", "important");
+      wrap.style.setProperty("text-align", "left", "important");
     } catch (eWrap) {}
   }
 
@@ -2054,6 +2160,7 @@
     if (!isProductPdp()) return;
     if (!global.document.getElementById("beanbag-swatch-wrapper") && !isBeanBagPdpPage()) return;
     mountBeanBagSwatchesAboveFeatures();
+    mountPdpDescriptionUnderMedia();
     initBeanBagSwatchBehavior();
   }
 
@@ -2924,6 +3031,7 @@
       applyPdpTitleTypography();
       applyPdpPriceTypography();
       applyPdpDescriptionStyle();
+      applyPdpMainImageCap();
       mountPdpFeaturesBlock();
       patchBeanBagPdp();
       ensureQuantityAboveAtc();
