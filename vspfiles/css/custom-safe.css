@@ -16161,3 +16161,109 @@ html body.mc-product-page .colors_pricebox td[aria-hidden="true"] {
     margin-right: auto !important;
   }
 }
+
+/* MC PDP LOCK pdp10 — centered purchase stack, description typography, anti-flicker */
+html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-features,
+html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-features,
+html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-purchase-stack,
+html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-purchase-stack {
+  visibility: hidden !important;
+}
+
+html body.productdetails #ProductDetail_ProductDetails_div2 li,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 li,
+html body.productdetails #ProductDetail_ProductDetails_div2 p,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 p,
+html body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop="description"] li,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="description"] li,
+html body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop="description"] p,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="description"] p,
+html body.productdetails #ProductDetail_ProductDetails_div2 strong,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 strong,
+html body.productdetails #ProductDetail_ProductDetails_div2 font,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 font,
+html body.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox li,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 .colors_descriptionbox li {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: #444 !important;
+}
+
+html body.productdetails #ProductDetail_ProductDetails_div2 ul,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 ul,
+html body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop="description"] ul,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="description"] ul {
+  list-style: disc !important;
+  padding-left: 1.1em !important;
+  margin: 0 !important;
+}
+
+html body.productdetails #ProductDetail_ProductDetails_div2 li,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 li,
+html body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop="description"] li,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="description"] li {
+  margin: 0 0 4px 0 !important;
+}
+
+html body.productdetails #mc-pdp-purchase-stack,
+html body.mc-product-page #mc-pdp-purchase-stack,
+html body.productdetails #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack,
+html body.mc-product-page #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack,
+html body.productdetails #mc-pdp-features + #mc-pdp-purchase-stack,
+html body.mc-product-page #mc-pdp-features + #mc-pdp-purchase-stack {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 8px auto 16px auto !important;
+  padding: 0 !important;
+  gap: 10px !important;
+  clear: both !important;
+}
+
+html body.productdetails #mc-pdp-purchase-stack *,
+html body.mc-product-page #mc-pdp-purchase-stack *,
+html body.productdetails #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack *,
+html body.mc-product-page #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack * {
+  text-align: center !important;
+}
+
+html body.productdetails #mc-pdp-purchase-stack .v65-product-addtocart,
+html body.mc-product-page #mc-pdp-purchase-stack .v65-product-addtocart,
+html body.productdetails #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack .v65-product-addtocart,
+html body.mc-product-page #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack .v65-product-addtocart {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+}
+
+html body.productdetails #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-product-page #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.productdetails #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-product-page #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack .mc-atc-button-wrap {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+html body.productdetails #v65-product-parent [itemprop="offers"] #mc-pdp-qty-row,
+html body.mc-product-page #v65-product-parent [itemprop="offers"] #mc-pdp-qty-row,
+html body.productdetails #mc-pdp-purchase-stack #mc-pdp-qty-row,
+html body.mc-product-page #mc-pdp-purchase-stack #mc-pdp-qty-row {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  max-width: 440px !important;
+  margin: 0 auto 10px auto !important;
+}
