@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260614pdp5";
+  var VERSION = "20260614pdp6";
   /* Set immediately so console/deploy checks work even if later init throws */
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
 
@@ -1184,6 +1184,7 @@
       var items = [];
       var i;
       for (i = 0; i < lis.length; i++) {
+        if (lis[i].querySelector("ul, ol")) continue;
         var t = (lis[i].textContent || "").replace(/\s+/g, " ").trim();
         if (t) items.push("<li>" + escapeHtmlText(t) + "</li>");
       }
