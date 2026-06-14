@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260614pdp7";
+  var VERSION = "20260614pdp8";
   var PDP_CHROME_BORDER = "#e0e0e0";
   /* Set immediately so console/deploy checks work even if later init throws */
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
@@ -43,19 +43,23 @@
       if (!global.document || global.document.getElementById("mc-pdp-hero-antiflicker-css")) return;
       var path = String(global.location.pathname || "").toLowerCase();
       if (!/(?:-p\/|product-p\/)/.test(path)) return;
-      var body = global.document.body;
-      if (body) body.classList.add("mc-pdp-hero-pending");
       var st = global.document.createElement("style");
       st.id = "mc-pdp-hero-antiflicker-css";
       st.textContent =
-        "body.productdetails.mc-pdp-hero-pending #mc-pdp-brand-logo,body.mc-product-page.mc-pdp-hero-pending #mc-pdp-brand-logo," +
-        "body.productdetails.mc-pdp-hero-pending #mc-pdp-title-right,body.mc-product-page.mc-pdp-hero-pending #mc-pdp-title-right," +
-        "body.productdetails.mc-pdp-hero-pending #mc-pdp-price-stack-host,body.mc-product-page.mc-pdp-hero-pending #mc-pdp-price-stack-host{" +
+        "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo," +
+        "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-title-right,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-title-right," +
+        "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host{" +
         "visibility:hidden!important}" +
         "body.productdetails td.mc-pdp-media-td img[src*='/manufacturers/'],body.mc-product-page td.mc-pdp-media-td img[src*='/manufacturers/']," +
         "body.productdetails #product_photo_td img[src*='/manufacturers/'],body.mc-product-page #product_photo_td img[src*='/manufacturers/']{" +
         "display:none!important;height:0!important;width:0!important;margin:0!important;padding:0!important;overflow:hidden!important}";
       (global.document.head || global.document.documentElement).appendChild(st);
+      if (!global.__MC_PDP_HERO_READY_FALLBACK__) {
+        global.__MC_PDP_HERO_READY_FALLBACK__ = true;
+        global.setTimeout(function () {
+          markPdpHeroReady();
+        }, 1800);
+      }
     } catch (eAf) {}
   })();
 
@@ -66,6 +70,83 @@
       body.classList.remove("mc-pdp-hero-pending");
       body.classList.add("mc-pdp-hero-ready");
     } catch (eReady) {}
+  }
+
+  function applyPdpTitleTypography() {
+    var wrap = global.document.getElementById("mc-pdp-title-right");
+    if (!wrap) return;
+    try {
+      wrap.style.setProperty("padding-left", "1.1em", "important");
+      wrap.style.setProperty("padding-right", "0", "important");
+      wrap.style.setProperty("margin-left", "0", "important");
+    } catch (eWrap) {}
+    global.document
+      .querySelectorAll(
+        "#mc-pdp-title-right h1, #mc-pdp-title-right [itemprop='name'], #mc-pdp-title-right .productnamecolorLARGE, #mc-pdp-title-right .productnamecolor"
+      )
+      .forEach(function (el) {
+        try {
+          el.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
+          el.style.setProperty("font-size", "15px", "important");
+          el.style.setProperty("font-weight", "400", "important");
+          el.style.setProperty("line-height", "1.2", "important");
+          el.style.setProperty("letter-spacing", "0.16em", "important");
+          el.style.setProperty("text-transform", "uppercase", "important");
+          el.style.setProperty("color", "#777", "important");
+          el.style.setProperty("margin-left", "0", "important");
+          el.style.setProperty("padding-left", "0", "important");
+          el.style.setProperty("text-align", "left", "important");
+        } catch (eTy) {}
+      });
+  }
+
+  function applyPdpPriceTypography() {
+    global.document
+      .querySelectorAll(
+        "#mc-pdp-price-stack-host .product_list_price, #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt, #mc-pdp-price-stack-host [itemprop='price']"
+      )
+      .forEach(function (el) {
+        try {
+          el.style.setProperty("font-size", "18px", "important");
+          el.style.setProperty("line-height", "1.55", "important");
+          el.style.setProperty("letter-spacing", "0.02em", "important");
+          el.style.setProperty("color", "#444", "important");
+        } catch (ePr) {}
+      });
+  }
+
+  function hideVolusionQuantityRows() {
+    var root = global.document.getElementById("v65-product-parent") || global.document;
+    root
+      .querySelectorAll(
+        '[itemprop="offers"] tr, [itemprop="offers"] td, .colors_pricebox tr, .colors_pricebox td, .v65-productdetail-cartqty'
+      )
+      .forEach(function (el) {
+        if (el.closest("#mc-pdp-qty-row") || el.closest("#mc-pdp-purchase-stack")) return;
+        if (
+          el.querySelector(
+            "#mc-pdp-qty-row, #mc-pdp-purchase-stack, input[name='btnaddtocart'], .mc-atc-button-wrap, input[name^='QTY.']"
+          )
+        ) {
+          return;
+        }
+        var txt = String(el.textContent || "")
+          .replace(/\u00a0/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .toLowerCase();
+        if (txt === "quantity:" || txt === "quantity" || txt === "qty:" || txt === "qty") {
+          try {
+            el.style.setProperty("display", "none", "important");
+            el.style.setProperty("visibility", "hidden", "important");
+            el.style.setProperty("height", "0", "important");
+            el.style.setProperty("margin", "0", "important");
+            el.style.setProperty("padding", "0", "important");
+            el.style.setProperty("overflow", "hidden", "important");
+            el.setAttribute("aria-hidden", "true");
+          } catch (eH) {}
+        }
+      });
   }
 
   var PRICE_ZERO_CENT_SELECTOR =
@@ -1050,6 +1131,7 @@
         } catch (eQtyLab) {}
       }
     });
+    hideVolusionQuantityRows();
   }
 
   function ensureQuantityAboveAtc() {
@@ -1123,7 +1205,60 @@
       labEl.style.setProperty("text-transform", "none", "important");
       labEl.style.setProperty("color", "#444", "important");
     }
-    removeDuplicateQtyUi();
+    ensurePurchaseStackCentered();
+    hideVolusionQuantityRows();
+  }
+
+  function ensurePurchaseStackCentered() {
+    if (!isProductPdp()) return;
+    if (isSectionalPdpPage()) return;
+    try {
+      if (
+        global.document.body &&
+        (global.document.body.classList.contains("mc-theater-seating-pdp") ||
+          global.document.documentElement.classList.contains("mc-paragon-pdp"))
+      ) {
+        return;
+      }
+    } catch (eSkip) {}
+    var root = global.document.getElementById("v65-product-parent") || global.document;
+    var row = global.document.getElementById("mc-pdp-qty-row");
+    var atcBlock = root.querySelector(".v65-product-addtocart");
+    if (!atcBlock || !atcBlock.parentNode) return;
+    var insertParent = atcBlock.parentNode;
+    var stack = global.document.getElementById("mc-pdp-purchase-stack");
+    if (!stack) {
+      stack = global.document.createElement("div");
+      stack.id = "mc-pdp-purchase-stack";
+      stack.className = "mc-pdp-purchase-stack";
+    }
+    if (row && !stack.contains(row)) stack.appendChild(row);
+    if (!stack.contains(atcBlock)) stack.appendChild(atcBlock);
+    if (stack.parentNode !== insertParent) {
+      insertParent.appendChild(stack);
+    } else if (row && stack.firstElementChild !== row) {
+      try {
+        stack.insertBefore(row, atcBlock);
+      } catch (eOrd) {}
+    }
+    try {
+      stack.style.setProperty("display", "flex", "important");
+      stack.style.setProperty("flex-direction", "column", "important");
+      stack.style.setProperty("align-items", "center", "important");
+      stack.style.setProperty("justify-content", "center", "important");
+      stack.style.setProperty("text-align", "center", "important");
+      stack.style.setProperty("width", "100%", "important");
+      stack.style.setProperty("max-width", "440px", "important");
+      stack.style.setProperty("margin", "12px auto 0 auto", "important");
+      stack.style.setProperty("padding", "0", "important");
+      stack.style.setProperty("gap", "10px", "important");
+    } catch (eStack) {}
+    try {
+      atcBlock.style.setProperty("width", "100%", "important");
+      atcBlock.style.setProperty("display", "flex", "important");
+      atcBlock.style.setProperty("justify-content", "center", "important");
+      atcBlock.style.setProperty("margin", "0 auto", "important");
+    } catch (eAtcBlock) {}
   }
 
   function featuresAccentColor() {
@@ -1185,9 +1320,9 @@
       "body.productdetails #mc-pdp-title-right h1,body.mc-product-page #mc-pdp-title-right h1," +
       "body.productdetails #mc-pdp-title-right [itemprop='name'],body.mc-product-page #mc-pdp-title-right [itemprop='name']," +
       "body.productdetails #mc-pdp-title-right .productnamecolorLARGE,body.mc-product-page #mc-pdp-title-right .productnamecolorLARGE{" +
-      "font-family:Inter,Arial,sans-serif!important;font-size:14px!important;font-weight:400!important;line-height:1.55!important;" +
-      "letter-spacing:0.02em!important;text-transform:none!important;color:#444!important;text-align:left!important;" +
-      "margin:0!important;padding:0!important}" +
+      "font-family:Inter,Arial,sans-serif!important;font-size:15px!important;font-weight:400!important;line-height:1.2!important;" +
+      "letter-spacing:0.16em!important;text-transform:uppercase!important;color:#777!important;text-align:left!important;" +
+      "margin:0!important;padding:0!important;margin-left:0!important}" +
       "body.productdetails #mc-pdp-price-stack-host .product_list_price,body.mc-product-page #mc-pdp-price-stack-host .product_list_price," +
       "body.productdetails #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,body.mc-product-page #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt{" +
       "font-family:Inter,Arial,sans-serif!important;font-size:18px!important;font-weight:400!important;line-height:1.55!important;" +
@@ -1209,6 +1344,15 @@
       "body.productdetails #mc-pdp-qty-row input,body.mc-product-page #mc-pdp-qty-row input{" +
       "display:inline-block!important;visibility:visible!important;opacity:1!important;width:58px!important;height:38px!important;" +
       "border:1px solid #e0e0e0!important;border-radius:0!important;font-size:14px!important;color:#444!important}" +
+      "body.productdetails #mc-pdp-purchase-stack,body.mc-product-page #mc-pdp-purchase-stack{" +
+      "display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;" +
+      "text-align:center!important;width:100%!important;max-width:440px!important;margin:12px auto 0 auto!important;gap:10px!important}" +
+      "body.productdetails #mc-pdp-purchase-stack .v65-product-addtocart,body.mc-product-page #mc-pdp-purchase-stack .v65-product-addtocart{" +
+      "display:flex!important;justify-content:center!important;width:100%!important;margin:0 auto!important}" +
+      "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo," +
+      "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-title-right,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-title-right," +
+      "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host{" +
+      "visibility:hidden!important}" +
       "body.productdetails #ProductDetail_ProductDetails_div2,body.mc-product-page #ProductDetail_ProductDetails_div2," +
       "body.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox,body.mc-product-page #ProductDetail_ProductDetails_div2 .colors_descriptionbox{" +
       "font-family:Inter,Arial,sans-serif!important;font-size:14px!important;line-height:1.55!important;letter-spacing:0.02em!important;color:#444!important}" +
@@ -2218,10 +2362,15 @@
         forceRebuildCleanPriceStack();
       }
       ensureHeroColumnOrder();
+      applyPdpTitleTypography();
+      applyPdpPriceTypography();
       mountPdpFeaturesBlock();
       ensureQuantityAboveAtc();
       fixAddToCartChrome();
       stripPriceZeroCents();
+      try {
+        syncPdpHeroTopAlign();
+      } catch (eAlignFinal) {}
       markPdpHeroReady();
       wirePlannerLoginGate();
       guardConfigurationBlockClick();

@@ -12623,21 +12623,28 @@ body.productdetails #v65-product-parent #mc-pdp-title-right,
 body.mc-product-page #content_area #mc-pdp-title-right,
 body.productdetails #content_area #mc-pdp-title-right {
   margin: 0 0 14px 0 !important;
-  padding: 0 !important;
+  padding: 0 0 0 1.1em !important;
   text-align: left !important;
 }
 
 body.mc-product-page #v65-product-parent #mc-pdp-title-right h1,
 body.productdetails #v65-product-parent #mc-pdp-title-right h1,
 body.mc-product-page #content_area #mc-pdp-title-right h1,
-body.productdetails #content_area #mc-pdp-title-right h1 {
+body.productdetails #content_area #mc-pdp-title-right h1,
+body.mc-product-page #v65-product-parent #mc-pdp-title-right [itemprop="name"],
+body.productdetails #v65-product-parent #mc-pdp-title-right [itemprop="name"],
+body.mc-product-page #content_area #mc-pdp-title-right [itemprop="name"],
+body.productdetails #content_area #mc-pdp-title-right [itemprop="name"] {
   margin: 0 0 6px 0 !important;
   padding: 0 !important;
   text-align: left !important;
-  font-size: 30px !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 15px !important;
   line-height: 1.2 !important;
   font-weight: 400 !important;
-  letter-spacing: 0.03em !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
 }
 
 body.mc-product-page #v65-product-parent #mc-pdp-title-right h1 font,
@@ -15646,13 +15653,14 @@ html body.mc-product-page #v65-product-parent #mc-pdp-title-right .productnameco
   text-align: left !important;
   margin: 0 !important;
   padding: 0 !important;
+  margin-left: 0 !important;
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 14px !important;
+  font-size: 15px !important;
   font-weight: 400 !important;
-  line-height: 1.55 !important;
-  letter-spacing: 0.02em !important;
-  text-transform: none !important;
-  color: #444 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
 }
 
 html body.productdetails #mc-pdp-brand-logo + #mc-pdp-title-right,
@@ -15995,12 +16003,12 @@ html body.mc-product-page #product_photo_td img[src*="/manufacturers/"] {
   overflow: hidden !important;
 }
 
-html body.productdetails.mc-pdp-hero-pending #mc-pdp-brand-logo,
-html body.mc-product-page.mc-pdp-hero-pending #mc-pdp-brand-logo,
-html body.productdetails.mc-pdp-hero-pending #mc-pdp-title-right,
-html body.mc-product-page.mc-pdp-hero-pending #mc-pdp-title-right,
-html body.productdetails.mc-pdp-hero-pending #mc-pdp-price-stack-host,
-html body.mc-product-page.mc-pdp-hero-pending #mc-pdp-price-stack-host {
+html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,
+html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,
+html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-title-right,
+html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-title-right,
+html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host,
+html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host {
   visibility: hidden !important;
 }
 
@@ -16037,4 +16045,94 @@ html body.mc-product-page.mc-pdp-hero-pending #mc-pdp-price-stack-host {
     min-width: 0 !important;
     max-width: none !important;
   }
+}
+
+/* =====================================================
+   MC PDP LOCK 20260614pdp8 — title, price, qty/atc stack, anti-flicker
+===================================================== */
+html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,
+html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,
+html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-title-right,
+html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-title-right,
+html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host,
+html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host {
+  visibility: hidden !important;
+}
+
+html body.productdetails #mc-pdp-title-right,
+html body.mc-product-page #mc-pdp-title-right,
+html body.productdetails #v65-product-parent #mc-pdp-title-right,
+html body.mc-product-page #v65-product-parent #mc-pdp-title-right {
+  padding-left: 1.1em !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+html body.productdetails #mc-pdp-title-right h1,
+html body.mc-product-page #mc-pdp-title-right h1,
+html body.productdetails #mc-pdp-title-right [itemprop="name"],
+html body.mc-product-page #mc-pdp-title-right [itemprop="name"],
+html body.productdetails #mc-pdp-title-right .productnamecolorLARGE,
+html body.mc-product-page #mc-pdp-title-right .productnamecolorLARGE {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #777 !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+html body.productdetails #mc-pdp-price-stack-host .product_list_price,
+html body.mc-product-page #mc-pdp-price-stack-host .product_list_price,
+html body.productdetails #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
+html body.mc-product-page #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
+html body.productdetails #mc-pdp-price-stack-host [itemprop="price"],
+html body.mc-product-page #mc-pdp-price-stack-host [itemprop="price"] {
+  font-size: 18px !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  color: #444 !important;
+}
+
+html body.productdetails #mc-pdp-purchase-stack,
+html body.mc-product-page #mc-pdp-purchase-stack {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  max-width: 440px !important;
+  margin: 12px auto 0 auto !important;
+  padding: 0 !important;
+  gap: 10px !important;
+}
+
+html body.productdetails #mc-pdp-purchase-stack .v65-product-addtocart,
+html body.mc-product-page #mc-pdp-purchase-stack .v65-product-addtocart {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+html body.productdetails #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-product-page #mc-pdp-purchase-stack .mc-atc-button-wrap {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+html body.productdetails [itemprop="offers"] td[aria-hidden="true"],
+html body.mc-product-page [itemprop="offers"] td[aria-hidden="true"],
+html body.productdetails .colors_pricebox td[aria-hidden="true"],
+html body.mc-product-page .colors_pricebox td[aria-hidden="true"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
 }
