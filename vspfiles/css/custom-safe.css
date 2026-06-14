@@ -16267,3 +16267,27 @@ html body.mc-product-page #mc-pdp-purchase-stack #mc-pdp-qty-row {
   max-width: 440px !important;
   margin: 0 auto 10px auto !important;
 }
+
+/* MC PDP LOCK pdp11 — loose description li + ATC wrap in purchase stack */
+html body.productdetails #content_area span[itemprop="description"] > li,
+html body.mc-product-page #content_area span[itemprop="description"] > li,
+html body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop="description"] > li,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="description"] > li {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: #444 !important;
+  list-style: disc !important;
+  margin: 0 0 4px 1.1em !important;
+  display: list-item !important;
+}
+
+html body.productdetails #mc-pdp-purchase-stack > .mc-atc-button-wrap,
+html body.mc-product-page #mc-pdp-purchase-stack > .mc-atc-button-wrap {
+  display: inline-flex !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
