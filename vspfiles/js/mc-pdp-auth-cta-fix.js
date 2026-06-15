@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp25";
+  var VERSION = "20260616pdp26";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -2005,9 +2005,9 @@
     var insertAfter = findPdpHeroInsertAfter(insertParent);
     if (!insertParent) return;
     if (isBeanBagPdpPage()) {
-      // Ordering for bean bag / soft-goods PDPs is owned by buildBeanBagStack();
-      // only make sure the block lives in the options column, never reposition it
-      // here (that would fight the stack and cause flicker).
+      // Bean bag PDPs: keep the Features block in the options column. This is an
+      // idempotent move (only when not already there), so it settles once and
+      // never bounces. No separate stack reorders it anymore.
       var bbCol = findPdpHeroColumnTd() || insertParent;
       if (block.parentNode !== bbCol) {
         try {
@@ -2664,12 +2664,33 @@
     var wrap = global.document.getElementById("beanbag-swatch-wrapper");
     if (!wrap) return;
     wrap.setAttribute("data-mc-beanbag-swatches", "1");
+    // Setting dataset.moved also disables the legacy embedded setInterval mover
+    // (it bails when dataset.moved is set), so only this idempotent placement
+    // controls the swatch position.
     wrap.dataset.moved = "1";
     var col = findPdpHeroColumnTd();
-    if (col && !col.contains(wrap)) {
+    if (!col) return;
+    // Place the cover swatches inside the option block (which the general layout
+    // already positions directly above the Features block). Parking them inside
+    // the option block keeps them above Features without competing with any
+    // other function for the "immediately before #mc-pdp-features" slot, so the
+    // layout settles once and never bounces. Idempotent: only move when needed.
+    var optionBlock = global.document.getElementById("mc-pdp-option-block");
+    var features = global.document.getElementById("mc-pdp-features");
+    if (optionBlock && wrap.parentNode !== optionBlock) {
+      try {
+        optionBlock.appendChild(wrap);
+      } catch (eSwOpt) {}
+    } else if (!optionBlock && features && features.parentNode === col) {
+      if (wrap.nextElementSibling !== features) {
+        try {
+          col.insertBefore(wrap, features);
+        } catch (eSw) {}
+      }
+    } else if (!optionBlock && !col.contains(wrap)) {
       try {
         col.appendChild(wrap);
-      } catch (eSw) {}
+      } catch (eSw2) {}
     }
     var labelWrap = global.document.getElementById("beanbag-selected-cover");
     if (labelWrap) {
@@ -2784,72 +2805,22 @@
       });
   }
 
-  // Authoritative ordering: collect the hero nodes into one dedicated stack and
-  // append them in the desired order. appendChild both moves AND orders, so this
-  // is robust against the deeply nested Volusion table. Idempotent: only
-  // re-append when the current order is wrong (prevents MutationObserver loops).
-  function buildBeanBagStack() {
-    var col = findPdpHeroColumnTd();
-    if (!col) return;
-    var stack = global.document.getElementById("mc-pdp-hero-stack");
-    if (!stack) {
-      stack = global.document.createElement("div");
-      stack.id = "mc-pdp-hero-stack";
-      stack.className = "mc-pdp-hero-stack";
-    }
-    if (stack.parentNode !== col) {
-      try {
-        col.insertBefore(stack, col.firstChild);
-      } catch (eStk) {}
-    }
-    var seq = [
-      global.document.getElementById("mc-pdp-brand-logo"),
-      global.document.getElementById("mc-pdp-title-right"),
-      global.document.getElementById("mc-pdp-price-stack-host"),
-      global.document.getElementById("messaging-element"),
-      global.document.getElementById("mc-pdp-option-block"),
-      global.document.getElementById("beanbag-swatch-wrapper"),
-      global.document.getElementById("mc-pdp-features"),
-      global.document.getElementById("mc-pdp-description-below-features"),
-      global.document.getElementById("mc-pdp-purchase-stack"),
-    ].filter(function (n) {
-      return !!n;
-    });
-    // Minimal-move ordering: only relocate nodes that are not already at their
-    // target index. Re-appending the whole sequence on every mutation caused a
-    // visible reflow flash whenever a third-party widget (Klarna/Affirm) or the
-    // MutationObserver fired. Processing left-to-right keeps earlier indices
-    // settled before we touch later ones.
-    seq.forEach(function (n, i) {
-      if (stack.children[i] === n) return;
-      try {
-        var ref = stack.children[i] || null;
-        stack.insertBefore(n, ref);
-      } catch (eApp) {}
-    });
-  }
-
   function patchBeanBagPdp() {
     if (!isProductPdp()) return;
     if (!isBeanBagPdpPage() && !global.document.getElementById("beanbag-swatch-wrapper")) return;
+    // Bean bags use the SAME general two-column layout as every other product
+    // (built once per runPatch via mountPdpFeaturesBlock / mountDescriptionBelow-
+    // Features / ensureQuantityAboveAtc / ensurePurchaseStackCentered). The only
+    // bean-bag-specific work left here is hiding the duplicate legacy price and
+    // placing the cover swatches above the Features block. We must NOT build a
+    // second "hero stack" ordering: buildBeanBagStack() pulled #mc-pdp-features
+    // into #mc-pdp-hero-stack while mountPdpFeaturesBlock() pulled it back into
+    // the options column on every pass, which made the page bounce indefinitely.
+    // Swatch CLICKS are owned solely by the single delegated handler embedded in
+    // the product description — no handler is registered here.
     withMoPaused(function () {
-      tagHeroMediaCol();
-      try {
-        placeBrandLogoAboveTitle();
-      } catch (eLogo) {}
-      mountPdpFeaturesBlock();
-      extractSwatchesIntoCol();
-      mountPrimaryOptionBlock();
-      mountDescriptionBelowFeatures();
       hideLegacyBeanBagPrice();
-      ensureQuantityAboveAtc();
-      ensurePurchaseStackCentered();
-      buildBeanBagStack();
-      // Bean bag cover swatch clicks are owned solely by the single delegated
-      // handler embedded in the product description. We must NOT register a
-      // second capture-phase handler here: it called stopImmediatePropagation()
-      // and swapped the photo by gallery position, which both suppressed the
-      // real handler and showed the wrong image.
+      extractSwatchesIntoCol();
     });
   }
 
