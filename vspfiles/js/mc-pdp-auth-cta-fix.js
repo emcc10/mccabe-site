@@ -1476,6 +1476,10 @@
   }
 
   function findPurchaseStackAnchor() {
+    var desc = global.document.getElementById("mc-pdp-description-below-features");
+    if (desc && desc.parentNode) {
+      return { parent: desc.parentNode, after: desc };
+    }
     var features = global.document.getElementById("mc-pdp-features");
     if (features && features.parentNode) {
       return { parent: features.parentNode, after: features };
@@ -1498,10 +1502,6 @@
   function ensureQuantityAboveAtc() {
     if (!isProductPdp()) return;
     if (isSectionalPdpPage()) return;
-    if (isBeanBagPdpPage()) {
-      hideUniformQty();
-      return;
-    }
     try {
       if (
         global.document.body &&
@@ -1536,14 +1536,15 @@
     if (row.parentNode !== insertParent || row.nextElementSibling !== stackNode) {
       insertParent.insertBefore(row, stackNode);
     }
-    row.style.setProperty("display", "flex", "important");
-    row.style.setProperty("flex-direction", "column", "important");
+    row.style.setProperty("display", "inline-flex", "important");
+    row.style.setProperty("flex-direction", "row", "important");
     row.style.setProperty("align-items", "center", "important");
+    row.style.setProperty("justify-content", "center", "important");
     row.style.setProperty("text-align", "center", "important");
-    row.style.setProperty("gap", "6px", "important");
-    row.style.setProperty("width", "100%", "important");
-    row.style.setProperty("max-width", "440px", "important");
-    row.style.setProperty("margin", "0 auto 10px auto", "important");
+    row.style.setProperty("gap", "0", "important");
+    row.style.setProperty("width", "auto", "important");
+    row.style.setProperty("max-width", "none", "important");
+    row.style.setProperty("margin", "0", "important");
     row.style.setProperty("padding", "0", "important");
     row.style.setProperty("visibility", "visible", "important");
     row.style.setProperty("opacity", "1", "important");
@@ -1563,13 +1564,7 @@
     qty.style.setProperty("color", "#444", "important");
     var labEl = row.querySelector(".mc-pdp-qty-row__label");
     if (labEl) {
-      labEl.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
-      labEl.style.setProperty("font-size", "14px", "important");
-      labEl.style.setProperty("font-weight", "400", "important");
-      labEl.style.setProperty("line-height", "1.55", "important");
-      labEl.style.setProperty("letter-spacing", "0.02em", "important");
-      labEl.style.setProperty("text-transform", "none", "important");
-      labEl.style.setProperty("color", "#444", "important");
+      labEl.style.setProperty("display", "none", "important");
     }
     ensurePurchaseStackCentered();
     hideVolusionQuantityRows();
@@ -1578,7 +1573,6 @@
   function ensurePurchaseStackCentered() {
     if (!isProductPdp()) return;
     if (isSectionalPdpPage()) return;
-    if (isBeanBagPdpPage()) return;
     try {
       if (
         global.document.body &&
@@ -1627,22 +1621,30 @@
     }
     try {
       stack.style.setProperty("display", "flex", "important");
-      stack.style.setProperty("flex-direction", "column", "important");
+      stack.style.setProperty("flex-direction", "row", "important");
       stack.style.setProperty("align-items", "center", "important");
       stack.style.setProperty("justify-content", "center", "important");
       stack.style.setProperty("text-align", "center", "important");
-      stack.style.setProperty("width", "100%", "important");
+      stack.style.setProperty("width", "auto", "important");
       stack.style.setProperty("max-width", "100%", "important");
       stack.style.setProperty("margin", "8px auto 16px auto", "important");
       stack.style.setProperty("padding", "0", "important");
       stack.style.setProperty("gap", "10px", "important");
+      stack.style.setProperty("flex-wrap", "wrap", "important");
       stack.style.setProperty("clear", "both", "important");
     } catch (eStack) {}
+    if (row) {
+      try {
+        row.style.setProperty("flex", "0 0 auto", "important");
+      } catch (eRow) {}
+    }
     try {
-      stackNode.style.setProperty("width", "100%", "important");
+      stackNode.style.setProperty("width", "auto", "important");
+      stackNode.style.setProperty("max-width", "none", "important");
       stackNode.style.setProperty("display", "flex", "important");
       stackNode.style.setProperty("justify-content", "center", "important");
       stackNode.style.setProperty("margin", "0 auto", "important");
+      stackNode.style.setProperty("flex", "0 0 auto", "important");
     } catch (eAtcBlock) {}
   }
 
@@ -2081,6 +2083,42 @@
     return best;
   }
 
+  function getConfiguredColorSwatchContextFromSelect(select) {
+    if (!select) return null;
+    var productCode = parseProductCodeFromSelectName(select.name);
+    var entries = PDP_CONFIGURED_COLOR_SWATCHS[productCode];
+    if (!entries || !entries.length) return null;
+    return {
+      productCode: productCode,
+      select: select,
+      entries: entries,
+      score: entries.length,
+    };
+  }
+
+  function findConfiguredColorEntryByLabel(ctx, label) {
+    if (!ctx || !ctx.entries || !label) return null;
+    var target = normalizeConfiguredColorLabel(label);
+    var i;
+    for (i = 0; i < ctx.entries.length; i++) {
+      if (normalizeConfiguredColorLabel(ctx.entries[i].label) === target) return ctx.entries[i];
+    }
+    return null;
+  }
+
+  function applyConfiguredColorMappedPhotoForSelect(select, label) {
+    var ctx = getConfiguredColorSwatchContextFromSelect(select);
+    if (!ctx) return false;
+    var entry = findConfiguredColorSelectedEntry(ctx) || findConfiguredColorEntryByLabel(ctx, label);
+    if (!entry) return false;
+    [0, 120, 350].forEach(function (ms) {
+      global.setTimeout(function () {
+        applyConfiguredColorMainPhoto(entry.mainImage, entry.label);
+      }, ms);
+    });
+    return true;
+  }
+
   function buildConfiguredColorImageCandidates(fileName) {
     var candidates = [];
     var mainImg = global.document.getElementById("product_photo");
@@ -2309,12 +2347,71 @@
     syncConfiguredColorSwatchUi(ctx, true);
   }
 
+  function looksLikePrimaryColorOptionsTable(table) {
+    if (!table || !table.querySelector) return false;
+    if (!table.querySelector("select")) return false;
+    var txt = String(table.textContent || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+    return /(choose color|selected color|color\*|color:|cover|choose cover)/.test(txt);
+  }
+
+  function findPrimaryOptionMountNode() {
+    if (!isProductPdp()) return null;
+    if (isSectionalPdpPage()) return null;
+    var beanbag = global.document.getElementById("beanbag-swatch-wrapper");
+    if (beanbag) return beanbag;
+    var table =
+      global.document.getElementById("options_table") ||
+      global.document.querySelector("#v65-product-parent table[id*='options_table']") ||
+      global.document.querySelector("table[id*='options_table']");
+    if (looksLikePrimaryColorOptionsTable(table)) return table;
+    var configured = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    return configured || null;
+  }
+
+  function shouldUseDescriptionBelowFeaturesLayout() {
+    return !!findPrimaryOptionMountNode() || !!findConfiguredColorSwatchContext();
+  }
+
+  function mountPrimaryOptionBlock() {
+    if (!isProductPdp()) return;
+    if (isSectionalPdpPage()) return;
+    var node = findPrimaryOptionMountNode();
+    if (!node) return;
+    var col = findPdpHeroColumnTd();
+    if (!col) return;
+    var host = global.document.getElementById("mc-pdp-option-block");
+    if (!host) {
+      host = global.document.createElement("div");
+      host.id = "mc-pdp-option-block";
+      host.className = "mc-pdp-option-block";
+    }
+    if (host.parentNode !== col) {
+      try {
+        col.appendChild(host);
+      } catch (eHost) {}
+    }
+    if (node.parentNode !== host) {
+      try {
+        host.appendChild(node);
+      } catch (eNode) {}
+    }
+    var features = global.document.getElementById("mc-pdp-features");
+    if (features && host.parentNode === features.parentNode && host.nextElementSibling !== features) {
+      try {
+        host.parentNode.insertBefore(host, features);
+      } catch (ePos) {}
+    }
+  }
+
   function parseBeanBagImageMapFromPage() {
     var map = {};
     try {
       global.document.querySelectorAll("script").forEach(function (sc) {
         var txt = sc.textContent || "";
-        if (txt.indexOf("imageMap") === -1 || txt.indexOf("beanbag-swatch") === -1) return;
+        if (txt.indexOf("imageMap") === -1) return;
         var m = txt.match(/var\s+imageMap\s*=\s*(\{[\s\S]*?\});/);
         if (!m) return;
         var pairRe = /['"]([^'"]+)['"]\s*:\s*['"]([^'"]+)['"]/g;
@@ -2362,6 +2459,18 @@
     return Math.min(Math.max(swatchIndex, 0) + 2, 7);
   }
 
+  function findBeanBagImageFileForLabel(imageMap, label) {
+    if (!imageMap || !label) return "";
+    if (imageMap[label]) return imageMap[label];
+    var target = normalizeBeanBagOptionLabel(label);
+    var key;
+    for (key in imageMap) {
+      if (!Object.prototype.hasOwnProperty.call(imageMap, key)) continue;
+      if (normalizeBeanBagOptionLabel(key) === target) return imageMap[key];
+    }
+    return "";
+  }
+
   function findBeanBagCoverSelect() {
     var sel =
       global.document.querySelector('#options_table select[name*="___4"]') ||
@@ -2393,8 +2502,8 @@
         global.change_product_photo(photoIndex);
       } catch (ePhoto) {}
     }
-    if (mainImg && imageMap[label]) {
-      var file = imageMap[label];
+    var file = findBeanBagImageFileForLabel(imageMap, label);
+    if (mainImg && file) {
       var src = mainImg.src || "";
       var candidates = [];
       if (src) {
@@ -2472,19 +2581,23 @@
         break;
       }
     }
-    if (!global.__MC_BEANBAG_IMAGE_MAP__) {
-      global.__MC_BEANBAG_IMAGE_MAP__ = parseBeanBagImageMapFromPage();
-    }
-    if (!global.__MC_BEANBAG_ALT_INDICES__) {
-      global.__MC_BEANBAG_ALT_INDICES__ = collectBeanBagAltPhotoIndices();
-    }
-    var photoIndex = resolveBeanBagPhotoIndexForSwatch(
-      swatch,
-      swatchIndex,
-      global.__MC_BEANBAG_ALT_INDICES__
-    );
-    applyBeanBagMainPhoto(photoIndex, global.__MC_BEANBAG_IMAGE_MAP__, label);
     syncBeanBagCoverOption(label);
+    var coverSelect = findBeanBagCoverSelect();
+    var appliedMappedPhoto = applyConfiguredColorMappedPhotoForSelect(coverSelect, label);
+    if (!appliedMappedPhoto) {
+      if (!global.__MC_BEANBAG_IMAGE_MAP__) {
+        global.__MC_BEANBAG_IMAGE_MAP__ = parseBeanBagImageMapFromPage();
+      }
+      if (!global.__MC_BEANBAG_ALT_INDICES__) {
+        global.__MC_BEANBAG_ALT_INDICES__ = collectBeanBagAltPhotoIndices();
+      }
+      var photoIndex = resolveBeanBagPhotoIndexForSwatch(
+        swatch,
+        swatchIndex,
+        global.__MC_BEANBAG_ALT_INDICES__
+      );
+      applyBeanBagMainPhoto(photoIndex, global.__MC_BEANBAG_IMAGE_MAP__, label);
+    }
     var labelSpan = global.document.getElementById("beanbag-selected-cover-name");
     if (labelSpan) labelSpan.textContent = label;
     swatches.forEach(function (s) {
@@ -2643,7 +2756,9 @@
   }
 
   function mountDescriptionBelowFeatures() {
-    if (!isBeanBagPdpPage()) return;
+    if (!isProductPdp()) return;
+    if (isSectionalPdpPage()) return;
+    if (!shouldUseDescriptionBelowFeaturesLayout()) return;
     var col = findPdpHeroColumnTd();
     if (!col) return;
     var descDiv =
@@ -2683,6 +2798,13 @@
         var hdr = global.document.getElementById("Header_ProductDetail_ProductDetails");
         if (hdr) hdr.setAttribute("data-mc-empty-desc", "1");
       } catch (eMove) {}
+    }
+    var purchase = global.document.getElementById("mc-pdp-purchase-stack");
+    if (purchase && purchase.parentNode === col && purchase.previousElementSibling !== host) {
+      try {
+        if (host.nextSibling) col.insertBefore(purchase, host.nextSibling);
+        else col.appendChild(purchase);
+      } catch (ePurch) {}
     }
     try {
       pruneDescriptionDuplicateFeatures();
@@ -2797,11 +2919,12 @@
     var seq = [
       global.document.getElementById("mc-pdp-brand-logo"),
       global.document.getElementById("mc-pdp-title-right"),
-      global.document.getElementById("mc-pdp-price-atc-row"),
+      global.document.getElementById("mc-pdp-price-stack-host"),
       global.document.getElementById("messaging-element"),
-      global.document.getElementById("beanbag-swatch-wrapper"),
+      global.document.getElementById("mc-pdp-option-block"),
       global.document.getElementById("mc-pdp-features"),
       global.document.getElementById("mc-pdp-description-below-features"),
+      global.document.getElementById("mc-pdp-purchase-stack"),
     ].filter(function (n) {
       return !!n;
     });
@@ -2829,12 +2952,12 @@
       } catch (eLogo) {}
       mountPdpFeaturesBlock();
       extractSwatchesIntoCol();
-      ensureBeanBagPriceAtcRow();
+      mountPrimaryOptionBlock();
       mountDescriptionBelowFeatures();
       hideLegacyBeanBagPrice();
+      ensureQuantityAboveAtc();
+      ensurePurchaseStackCentered();
       buildBeanBagStack();
-      styleBeanBagPriceAtc();
-      hideUniformQty();
       initBeanBagSwatchBehavior();
     });
   }
@@ -3708,8 +3831,10 @@
       applyPdpDescriptionStyle();
       applyPdpMainImageCap();
       mountPdpFeaturesBlock();
-      patchBeanBagPdp();
       ensureConfiguredColorSwatches();
+      mountPrimaryOptionBlock();
+      mountDescriptionBelowFeatures();
+      patchBeanBagPdp();
       ensureQuantityAboveAtc();
       ensurePurchaseStackCentered();
       fixAddToCartChrome();
