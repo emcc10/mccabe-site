@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp27";
+  var VERSION = "20260616pdp28";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -1565,8 +1565,9 @@
     if (!stack) {
       stack = global.document.createElement("div");
       stack.id = "mc-pdp-purchase-stack";
-      stack.className = "mc-pdp-purchase-stack";
     }
+    // Always carry the stable class used by CSS (includes anti-flicker rule)
+    stack.className = "mc-pdp-purchase-controls";
     if (row && !stack.contains(row)) stack.appendChild(row);
     if (!stack.contains(stackNode)) stack.appendChild(stackNode);
     var anchor = findPurchaseStackAnchor();
@@ -1602,9 +1603,9 @@
       stack.style.setProperty("text-align", "center", "important");
       stack.style.setProperty("width", "100%", "important");
       stack.style.setProperty("max-width", "100%", "important");
-      stack.style.setProperty("margin", "12px auto 16px auto", "important");
+      stack.style.setProperty("margin", "28px auto 0", "important");
       stack.style.setProperty("padding", "0", "important");
-      stack.style.setProperty("gap", "10px", "important");
+      stack.style.setProperty("gap", "28px", "important");
       stack.style.setProperty("flex-wrap", "wrap", "important");
       stack.style.setProperty("clear", "both", "important");
     } catch (eStack) {}
@@ -2611,7 +2612,15 @@
     }
     if (!col.contains(host)) {
       try {
-        col.appendChild(host);
+        // Place description BEFORE the features block (if features are already
+        // in the column) so the right-column order is:
+        //   options → description → features → purchase controls
+        var featuresBlockForDesc = global.document.getElementById("mc-pdp-features");
+        if (featuresBlockForDesc && featuresBlockForDesc.parentNode === col) {
+          col.insertBefore(host, featuresBlockForDesc);
+        } else {
+          col.appendChild(host);
+        }
       } catch (eH) {}
     }
     try {
@@ -3029,6 +3038,24 @@
     placePriceStackHost(host);
     hideAllStrayPdpPriceNodes(host);
     hideDuplicatePdpPriceUi();
+    // Rescue the Klarna/BNPL messaging element into the price host so it
+    // is never accidentally hidden when we suppress duplicate pricebox nodes.
+    // We move it once (idempotent) — Stripe mounts by ID so the move is safe.
+    var bnplRescue = global.document.getElementById("messaging-element");
+    if (bnplRescue && bnplRescue.parentNode !== host) {
+      try {
+        host.appendChild(bnplRescue);
+        bnplRescue.style.removeProperty("display");
+        bnplRescue.style.removeProperty("visibility");
+        bnplRescue.style.removeProperty("opacity");
+        bnplRescue.style.removeProperty("height");
+      } catch (eBnplRescue) {}
+    } else if (bnplRescue) {
+      try {
+        bnplRescue.style.removeProperty("display");
+        bnplRescue.style.removeProperty("visibility");
+      } catch (eBnplVis) {}
+    }
     ensureHeroColumnOrder();
     mountPdpFeaturesBlock();
     try {
@@ -3150,6 +3177,48 @@
         node.style.setProperty("opacity", "0", "important");
       } catch (eHide) {}
     });
+  }
+
+  // OptionID → image filename for Faux Fur Bean Bag covers.
+  // Source: Volusion product data. Do not infer by position or text guessing.
+  var BB_COVER_IMAGE_BY_OPTION_ID = {
+    "799": "bb-fauxfur-navy.jpg",
+    "801": "bb-fauxfur-pink.jpg",
+    "803": "bb-fauxfur-cow.jpg",
+    "805": "bb-fauxfur-tan.jpg",
+    "807": "bb-fauxfur-white.jpg",
+    "809": "bb-fauxfur-gray.jpg",
+    "811": "bb-fauxfur-black.jpg"
+  };
+
+  function initBeanBagImageSync() {
+    if (!isBeanBagPdpPage()) return;
+    if (global.document.documentElement.dataset.mcBbImgBound === "1") return;
+    global.document.documentElement.dataset.mcBbImgBound = "1";
+    global.document.addEventListener("click", function (eBb) {
+      var swatch = eBb.target && eBb.target.closest ? eBb.target.closest(".beanbag-swatch") : null;
+      if (!swatch) return;
+      // A single 200ms callback re-asserts the selected image after Volusion's
+      // own change_option handler finishes. No interval; no repeated timeouts.
+      global.setTimeout(function () {
+        var coverSel = global.document.querySelector("#options_table select");
+        if (!coverSel) return;
+        var optId = String(coverSel.value || "");
+        var imgFile = BB_COVER_IMAGE_BY_OPTION_ID[optId];
+        if (!imgFile) return;
+        var mainImg = global.document.getElementById("product_photo");
+        if (!mainImg) return;
+        var targetSrc = "/v/vspfiles/images/" + imgFile;
+        try {
+          if (mainImg.getAttribute("src") !== targetSrc) mainImg.src = targetSrc;
+          mainImg.style.setProperty("opacity", "1", "important");
+        } catch (eSet) {}
+        var zoomLink = global.document.getElementById("product_photo_zoom_url");
+        if (zoomLink) {
+          try { zoomLink.href = targetSrc; } catch (eZm) {}
+        }
+      }, 200);
+    }, false);
   }
 
   function installPdpStackApiGuards() {
@@ -3709,6 +3778,7 @@
     global.setTimeout(mcReleaseMo, 250);
     try {
       installPdpStackApiGuards();
+      initBeanBagImageSync();
       ensurePdpStackCriticalCss();
       ensurePdpHeroCriticalCss();
       disableQuantityHiders();
@@ -3725,10 +3795,25 @@
       mountPdpFeaturesBlock();
       ensureConfiguredColorSwatches();
       mountPrimaryOptionBlock();
-      mountDescriptionBelowFeatures();
-      patchBeanBagPdp();
-      ensureQuantityAboveAtc();
-      ensurePurchaseStackCentered();
+      // One-time layout normalization: move nodes once then mark page as done.
+      // Re-runs after this guard only re-assert styles; they never re-move nodes.
+      if (global.document.documentElement.dataset.mcPdpNormalized !== "1") {
+        var _atcReady = global.document.querySelector(
+          '#v65-product-parent input[name="btnaddtocart"], #v65-product-parent button[name="btnaddtocart"], ' +
+          'input[name="btnaddtocart"], button[name="btnaddtocart"]'
+        );
+        if (_atcReady) {
+          global.document.documentElement.dataset.mcPdpNormalized = "1";
+          mountDescriptionBelowFeatures();
+          patchBeanBagPdp();
+          ensureQuantityAboveAtc();
+          ensurePurchaseStackCentered();
+        }
+      } else {
+        // Guard already set — only re-style the purchase stack, never re-move.
+        ensureQuantityAboveAtc();
+        ensurePurchaseStackCentered();
+      }
       fixAddToCartChrome();
       stripPriceZeroCents();
       if (!heroLocked) {

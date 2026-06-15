@@ -16120,35 +16120,33 @@ html body.mc-product-page #mc-pdp-price-stack-host [itemprop="price"] {
   color: #444 !important;
 }
 
-html body.productdetails #mc-pdp-purchase-stack,
-html body.mc-product-page #mc-pdp-purchase-stack,
-html body.productdetails #mc-pdp-features + #mc-pdp-purchase-stack,
-html body.mc-product-page #mc-pdp-features + #mc-pdp-purchase-stack {
+html body.productdetails .mc-pdp-purchase-controls,
+html body.mc-product-page .mc-pdp-purchase-controls {
   display: flex !important;
-  flex-direction: column !important;
+  flex-direction: row !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
   width: 100% !important;
   max-width: 100% !important;
-  margin: 8px auto 16px auto !important;
+  margin: 28px auto 0 !important;
   padding: 0 !important;
-  gap: 10px !important;
+  gap: 28px !important;
   clear: both !important;
 }
 
-html body.productdetails #mc-pdp-purchase-stack .v65-product-addtocart,
-html body.mc-product-page #mc-pdp-purchase-stack .v65-product-addtocart {
+html body.productdetails .mc-pdp-purchase-controls .v65-product-addtocart,
+html body.mc-product-page .mc-pdp-purchase-controls .v65-product-addtocart {
   display: flex !important;
   justify-content: center !important;
-  width: 100% !important;
-  margin: 0 auto !important;
+  align-items: center !important;
+  width: auto !important;
+  margin: 0 !important;
 }
 
-html body.productdetails #mc-pdp-purchase-stack .mc-atc-button-wrap,
-html body.mc-product-page #mc-pdp-purchase-stack .mc-atc-button-wrap {
-  margin-left: auto !important;
-  margin-right: auto !important;
+html body.productdetails .mc-pdp-purchase-controls .mc-atc-button-wrap,
+html body.mc-product-page .mc-pdp-purchase-controls .mc-atc-button-wrap {
+  margin: 0 !important;
 }
 
 html body.productdetails [itemprop="offers"] td[aria-hidden="true"],
@@ -16192,7 +16190,11 @@ html body.mc-product-page #v65-product-parent img#product_photo {
 html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-features,
 html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-features,
 html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-purchase-stack,
-html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-purchase-stack {
+html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-purchase-stack,
+html body.productdetails:not(.mc-pdp-hero-ready) .mc-pdp-purchase-controls,
+html body.mc-product-page:not(.mc-pdp-hero-ready) .mc-pdp-purchase-controls,
+html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-description-below-features,
+html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-description-below-features {
   visibility: hidden !important;
 }
 
@@ -16235,56 +16237,51 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="desc
   margin: 0 0 4px 0 !important;
 }
 
-html body.productdetails #mc-pdp-purchase-stack,
-html body.mc-product-page #mc-pdp-purchase-stack,
-html body.productdetails #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack,
-html body.mc-product-page #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack,
-html body.productdetails #mc-pdp-features + #mc-pdp-purchase-stack,
-html body.mc-product-page #mc-pdp-features + #mc-pdp-purchase-stack {
+html body.productdetails .mc-pdp-purchase-controls,
+html body.mc-product-page .mc-pdp-purchase-controls,
+html body.productdetails #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls,
+html body.mc-product-page #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls {
   display: flex !important;
-  flex-direction: column !important;
+  flex-direction: row !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
   width: 100% !important;
   max-width: 100% !important;
-  margin: 8px auto 16px auto !important;
+  margin: 28px auto 0 !important;
   padding: 0 !important;
-  gap: 10px !important;
+  gap: 28px !important;
   clear: both !important;
 }
 
-html body.productdetails #mc-pdp-purchase-stack *,
-html body.mc-product-page #mc-pdp-purchase-stack *,
-html body.productdetails #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack *,
-html body.mc-product-page #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack * {
+html body.productdetails .mc-pdp-purchase-controls *,
+html body.mc-product-page .mc-pdp-purchase-controls * {
   text-align: center !important;
 }
 
-html body.productdetails #mc-pdp-purchase-stack .v65-product-addtocart,
-html body.mc-product-page #mc-pdp-purchase-stack .v65-product-addtocart,
-html body.productdetails #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack .v65-product-addtocart,
-html body.mc-product-page #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack .v65-product-addtocart {
+html body.productdetails .mc-pdp-purchase-controls .v65-product-addtocart,
+html body.mc-product-page .mc-pdp-purchase-controls .v65-product-addtocart,
+html body.productdetails #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls .v65-product-addtocart,
+html body.mc-product-page #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls .v65-product-addtocart {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 auto !important;
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 !important;
 }
 
-html body.productdetails #mc-pdp-purchase-stack .mc-atc-button-wrap,
-html body.mc-product-page #mc-pdp-purchase-stack .mc-atc-button-wrap,
-html body.productdetails #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack .mc-atc-button-wrap,
-html body.mc-product-page #v65-product-parent [itemprop="offers"] #mc-pdp-purchase-stack .mc-atc-button-wrap {
-  margin-left: auto !important;
-  margin-right: auto !important;
+html body.productdetails .mc-pdp-purchase-controls .mc-atc-button-wrap,
+html body.mc-product-page .mc-pdp-purchase-controls .mc-atc-button-wrap,
+html body.productdetails #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls .mc-atc-button-wrap,
+html body.mc-product-page #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls .mc-atc-button-wrap {
+  margin: 0 !important;
 }
 
 html body.productdetails #v65-product-parent [itemprop="offers"] #mc-pdp-qty-row,
 html body.mc-product-page #v65-product-parent [itemprop="offers"] #mc-pdp-qty-row,
-html body.productdetails #mc-pdp-purchase-stack #mc-pdp-qty-row,
-html body.mc-product-page #mc-pdp-purchase-stack #mc-pdp-qty-row {
+html body.productdetails .mc-pdp-purchase-controls #mc-pdp-qty-row,
+html body.mc-product-page .mc-pdp-purchase-controls #mc-pdp-qty-row {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -16311,11 +16308,10 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="desc
   display: list-item !important;
 }
 
-html body.productdetails #mc-pdp-purchase-stack > .mc-atc-button-wrap,
-html body.mc-product-page #mc-pdp-purchase-stack > .mc-atc-button-wrap {
+html body.productdetails .mc-pdp-purchase-controls > .mc-atc-button-wrap,
+html body.mc-product-page .mc-pdp-purchase-controls > .mc-atc-button-wrap {
   display: inline-flex !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
+  margin: 0 !important;
 }
 
 /* MC PDP LOCK pdp12 — bean bag cover swatches above Features in hero column */
@@ -16541,24 +16537,24 @@ html body.mc-bean-bag-pdp #mc-pdp-qty-row {
   display: none !important;
 }
 
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack {
+html body.mc-bean-bag-pdp .mc-pdp-purchase-controls {
   display: flex !important;
-  flex-direction: column !important;
+  flex-direction: row !important;
   align-items: center !important;
   justify-content: center !important;
   width: 100% !important;
   max-width: 450px !important;
-  margin: 18px auto 0 auto !important;
+  margin: 28px auto 0 !important;
   padding: 0 !important;
-  gap: 0 !important;
+  gap: 28px !important;
   clear: both !important;
 }
 
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap {
+html body.mc-bean-bag-pdp .mc-pdp-purchase-controls .v65-product-addtocart,
+html body.mc-bean-bag-pdp .mc-pdp-purchase-controls .mc-atc-button-wrap {
   display: flex !important;
   justify-content: center !important;
-  margin: 0 auto !important;
+  margin: 0 !important;
   width: auto !important;
 }
 
