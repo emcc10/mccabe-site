@@ -93,6 +93,14 @@
       },
     ],
   };
+  // When a configured-color swatch is chosen we "lock" that selection so that
+  // MutationObserver-driven re-renders (and Volusion's async option-image logic)
+  // cannot wipe the active swatch or blank the hero image.
+  var configuredColorActiveEntry = null;
+  var configuredColorActiveSrc = "";
+  var configuredColorDefaultSrc = "";
+  var configuredColorEnforceUntil = 0;
+  var configuredColorEnforceTimer = null;
   var PDP_HERO_ANTIFLICKER_SEL =
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo," +
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-title-right,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-title-right," +
@@ -2153,11 +2161,8 @@
     if (!ctx) return false;
     var entry = findConfiguredColorSelectedEntry(ctx) || findConfiguredColorEntryByLabel(ctx, label);
     if (!entry) return false;
-    [0, 120, 350].forEach(function (ms) {
-      global.setTimeout(function () {
-        applyConfiguredColorMainPhoto(entry.mainImage, entry.label);
-      }, ms);
-    });
+    configuredColorActiveEntry = entry;
+    applyConfiguredColorMainPhoto(entry.mainImage, entry.label);
     return true;
   }
 
@@ -2191,38 +2196,63 @@
     tryNext();
   }
 
+  function setConfiguredColorPhotoSrc(resolvedSrc, label) {
+    var mainImg = global.document.getElementById("product_photo");
+    if (!mainImg || !resolvedSrc) return;
+    try {
+      if ((mainImg.getAttribute("src") || "") !== resolvedSrc) mainImg.src = resolvedSrc;
+    } catch (eSrc) {}
+    try {
+      mainImg.style.setProperty("opacity", "1", "important");
+    } catch (eOp) {}
+    var zoom = global.document.getElementById("product_photo_zoom_url");
+    if (zoom) {
+      try {
+        var full = resolvedSrc.replace(/-T\.jpg/i, ".jpg").replace(/-S\.jpg/i, ".jpg");
+        if ((zoom.getAttribute("href") || "") !== full) zoom.href = full;
+        if (label) zoom.title = label;
+      } catch (eZoom) {}
+    }
+  }
+
+  // Volusion's native option-change logic can asynchronously rewrite (often blank)
+  // #product_photo a few hundred ms after the change event. Re-assert our chosen
+  // image for a short window so the hero never blanks or reverts.
+  function enforceConfiguredColorPhoto() {
+    if (configuredColorEnforceTimer) return;
+    configuredColorEnforceTimer = global.setInterval(function () {
+      if (Date.now() > configuredColorEnforceUntil || !configuredColorActiveSrc) {
+        global.clearInterval(configuredColorEnforceTimer);
+        configuredColorEnforceTimer = null;
+        return;
+      }
+      var mainImg = global.document.getElementById("product_photo");
+      if (!mainImg) return;
+      var cur = mainImg.getAttribute("src") || "";
+      if (cur !== configuredColorActiveSrc) {
+        setConfiguredColorPhotoSrc(
+          configuredColorActiveSrc,
+          configuredColorActiveEntry ? configuredColorActiveEntry.label : ""
+        );
+      }
+    }, 120);
+  }
+
   function applyConfiguredColorMainPhoto(fileName, label) {
     var mainImg = global.document.getElementById("product_photo");
     if (!mainImg || !fileName) return;
     var previousSrc = mainImg.getAttribute("src") || "";
-    var zoom = global.document.getElementById("product_photo_zoom_url");
-    var previousZoomHref = zoom ? zoom.getAttribute("href") || "" : "";
+    if (previousSrc && previousSrc.indexOf("/manufacturers/") === -1) configuredColorDefaultSrc = previousSrc;
     var token = String(Date.now()) + ":" + Math.random();
     global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ = token;
     loadConfiguredColorImage(buildConfiguredColorImageCandidates(fileName), function (resolvedSrc) {
       if (global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ !== token) return;
-      if (resolvedSrc) {
-        try {
-          mainImg.src = resolvedSrc;
-        } catch (eSrc) {}
-      } else if (previousSrc) {
-        try {
-          mainImg.src = previousSrc;
-        } catch (ePrev) {}
-      }
-      if (zoom) {
-        try {
-          var activeSrc = resolvedSrc || mainImg.src || previousSrc || "";
-          var full = activeSrc
-            ? activeSrc.replace(/-T\.jpg/i, ".jpg").replace(/S\.jpg/i, ".jpg")
-            : previousZoomHref;
-          zoom.href = full;
-          if (label) zoom.title = label;
-        } catch (eZoom) {}
-      }
-      try {
-        mainImg.style.setProperty("opacity", "1", "important");
-      } catch (eOp) {}
+      var finalSrc = resolvedSrc || previousSrc || configuredColorDefaultSrc;
+      if (!finalSrc) return;
+      configuredColorActiveSrc = finalSrc;
+      configuredColorEnforceUntil = Date.now() + 2500;
+      setConfiguredColorPhotoSrc(finalSrc, label);
+      enforceConfiguredColorPhoto();
     });
   }
 
@@ -2313,26 +2343,33 @@
       wrap.className = "mc-configured-color-swatch-wrapper";
     }
     wrap.setAttribute("data-product-code", ctx.productCode);
-    wrap.innerHTML =
-      '<div class="mc-configured-color-swatch-label">Selected color: <span id="mc-configured-color-selected-name"></span></div>' +
-      '<div class="mc-configured-color-swatches"></div>';
-    var rail = wrap.querySelector(".mc-configured-color-swatches");
-    ctx.entries.forEach(function (entry) {
-      var opt = findConfiguredColorOption(ctx.select, entry);
-      if (!opt) return;
-      var btn = global.document.createElement("button");
-      btn.type = "button";
-      btn.className = "mc-configured-color-swatch";
-      btn.setAttribute("aria-label", entry.label);
-      btn.setAttribute("title", entry.label);
-      btn.setAttribute("data-option-id", entry.optionId);
-      btn.setAttribute("data-main-image", entry.mainImage);
-      btn.setAttribute("data-label", entry.label);
-      btn.innerHTML = '<img alt="' + escapeHtmlText(entry.label) + '" />';
-      var img = btn.querySelector("img");
-      img.src = buildConfiguredColorImageCandidates(entry.swatchImage)[0];
-      rail.appendChild(btn);
-    });
+    // Build the swatch markup exactly once per product (idempotent). Rebuilding
+    // innerHTML on every MutationObserver tick would wipe the active ring/label
+    // the user just selected and cause the block to "bounce".
+    var signature = ctx.productCode + "|" + ctx.entries.map(function (e) { return e.optionId; }).join(",");
+    if (wrap.getAttribute("data-mc-signature") !== signature || !wrap.querySelector(".mc-configured-color-swatch")) {
+      wrap.setAttribute("data-mc-signature", signature);
+      wrap.innerHTML =
+        '<div class="mc-configured-color-swatch-label">Selected color: <span id="mc-configured-color-selected-name"></span></div>' +
+        '<div class="mc-configured-color-swatches"></div>';
+      var rail = wrap.querySelector(".mc-configured-color-swatches");
+      ctx.entries.forEach(function (entry) {
+        var opt = findConfiguredColorOption(ctx.select, entry);
+        if (!opt) return;
+        var btn = global.document.createElement("button");
+        btn.type = "button";
+        btn.className = "mc-configured-color-swatch";
+        btn.setAttribute("aria-label", entry.label);
+        btn.setAttribute("title", entry.label);
+        btn.setAttribute("data-option-id", entry.optionId);
+        btn.setAttribute("data-main-image", entry.mainImage);
+        btn.setAttribute("data-label", entry.label);
+        btn.innerHTML = '<img alt="' + escapeHtmlText(entry.label) + '" />';
+        var img = btn.querySelector("img");
+        img.src = buildConfiguredColorImageCandidates(entry.swatchImage)[0];
+        rail.appendChild(btn);
+      });
+    }
     var host = global.document.getElementById("mc-pdp-option-block");
     if (host && wrap.parentNode !== host) {
       try {
@@ -2366,7 +2403,9 @@
   function syncConfiguredColorSwatchUi(ctx, applyPhoto) {
     var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
     if (!ctx || !wrap) return;
-    var selected = findConfiguredColorSelectedEntry(ctx);
+    // Prefer the user's locked selection so a Volusion-driven select reset can't
+    // wipe the active swatch. Fall back to whatever the native select reports.
+    var selected = configuredColorActiveEntry || findConfiguredColorSelectedEntry(ctx);
     var labelEl = global.document.getElementById("mc-configured-color-selected-name");
     if (labelEl) labelEl.textContent = selected ? selected.label : "";
     wrap.querySelectorAll(".mc-configured-color-swatch").forEach(function (btn) {
@@ -2375,11 +2414,7 @@
       btn.setAttribute("aria-pressed", active ? "true" : "false");
     });
     if (applyPhoto && selected) {
-      [0, 120, 350].forEach(function (ms) {
-        global.setTimeout(function () {
-          applyConfiguredColorMainPhoto(selected.mainImage, selected.label);
-        }, ms);
-      });
+      applyConfiguredColorMainPhoto(selected.mainImage, selected.label);
     }
   }
 
@@ -2400,8 +2435,11 @@
     var i;
     for (i = 0; i < ctx.entries.length; i++) {
       if (ctx.entries[i].optionId !== btn.getAttribute("data-option-id")) continue;
-      var opt = findConfiguredColorOption(ctx.select, ctx.entries[i]);
+      var entry = ctx.entries[i];
+      var opt = findConfiguredColorOption(ctx.select, entry);
       if (!opt) return;
+      // Lock this selection first so subsequent re-renders / Volusion resets keep it.
+      configuredColorActiveEntry = entry;
       syncConfiguredColorSelect(ctx.select, opt);
       syncConfiguredColorSwatchUi(ctx, true);
       return;
@@ -2421,7 +2459,14 @@
     }
     renderConfiguredColorSwatches(ctx);
     bindConfiguredColorSwatchSelect(ctx.select);
-    syncConfiguredColorSwatchUi(ctx, true);
+    if (!configuredColorActiveEntry) {
+      var hero = global.document.getElementById("product_photo");
+      var heroSrc = hero ? hero.getAttribute("src") || "" : "";
+      if (heroSrc && heroSrc.indexOf("/manufacturers/") === -1) configuredColorDefaultSrc = heroSrc;
+    }
+    // Only re-assert the hero image once the shopper has locked a color; on the
+    // initial render we leave Volusion's default product photo untouched.
+    syncConfiguredColorSwatchUi(ctx, !!configuredColorActiveEntry);
   }
 
   function looksLikePrimaryColorOptionsTable(table) {
