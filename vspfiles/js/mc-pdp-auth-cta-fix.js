@@ -58,40 +58,6 @@
         mainImage: "SAR-DBL-RCH-FX-FUR-1014-T.jpg",
       },
     ],
-    "SAR-BMB-HATS": [
-      {
-        optionId: "1048",
-        label: "Charcoal",
-        swatchImage: "SAR-BMB-HATS-1048-S.jpg",
-        mainImage: "SAR-BMB-HATS-1048-T.jpg",
-      },
-      {
-        optionId: "1012",
-        label: "Moonbeam",
-        swatchImage: "SAR-BMB-HATS-1012-S.jpg",
-        mainImage: "SAR-BMB-HATS-1012-T.jpg",
-      },
-    ],
-    "SAR-BMB-SNUGGLER": [
-      {
-        optionId: "1048",
-        label: "Charcoal",
-        swatchImage: "SAR-BMB-SNUGGLER-1048-S.jpg",
-        mainImage: "SAR-BMB-SNUGGLER-1048-T.jpg",
-      },
-      {
-        optionId: "1094",
-        label: "Ivory",
-        swatchImage: "SAR-BMB-SNUGGLER-1094-S.jpg",
-        mainImage: "SAR-BMB-SNUGGLER-1094-T.jpg",
-      },
-      {
-        optionId: "1210",
-        label: "Light Pink",
-        swatchImage: "SAR-BMB-SNUGGLER-1210-S.jpg",
-        mainImage: "SAR-BMB-SNUGGLER-1210-T.jpg",
-      },
-    ],
   };
   // When a configured-color swatch is chosen we "lock" that selection so that
   // MutationObserver-driven re-renders (and Volusion's async option-image logic)
@@ -2107,6 +2073,9 @@
   }
 
   function findConfiguredColorSwatchContext() {
+    // Bean bag PDPs have their own native swatch system (#beanbag-swatch-wrapper);
+    // never let the configured-color swatches take over those pages.
+    if (isBeanBagPdpPage()) return null;
     var selects = global.document.querySelectorAll("#options_table select, #v65-product-parent select");
     var best = null;
     var i;
@@ -2131,39 +2100,6 @@
       }
     }
     return best;
-  }
-
-  function getConfiguredColorSwatchContextFromSelect(select) {
-    if (!select) return null;
-    var productCode = parseProductCodeFromSelectName(select.name);
-    var entries = PDP_CONFIGURED_COLOR_SWATCHS[productCode];
-    if (!entries || !entries.length) return null;
-    return {
-      productCode: productCode,
-      select: select,
-      entries: entries,
-      score: entries.length,
-    };
-  }
-
-  function findConfiguredColorEntryByLabel(ctx, label) {
-    if (!ctx || !ctx.entries || !label) return null;
-    var target = normalizeConfiguredColorLabel(label);
-    var i;
-    for (i = 0; i < ctx.entries.length; i++) {
-      if (normalizeConfiguredColorLabel(ctx.entries[i].label) === target) return ctx.entries[i];
-    }
-    return null;
-  }
-
-  function applyConfiguredColorMappedPhotoForSelect(select, label) {
-    var ctx = getConfiguredColorSwatchContextFromSelect(select);
-    if (!ctx) return false;
-    var entry = findConfiguredColorSelectedEntry(ctx) || findConfiguredColorEntryByLabel(ctx, label);
-    if (!entry) return false;
-    configuredColorActiveEntry = entry;
-    applyConfiguredColorMainPhoto(entry.mainImage, entry.label);
-    return true;
   }
 
   function buildConfiguredColorImageCandidates(fileName) {
@@ -2706,22 +2642,18 @@
       }
     }
     syncBeanBagCoverOption(label);
-    var coverSelect = findBeanBagCoverSelect();
-    var appliedMappedPhoto = applyConfiguredColorMappedPhotoForSelect(coverSelect, label);
-    if (!appliedMappedPhoto) {
-      if (!global.__MC_BEANBAG_IMAGE_MAP__) {
-        global.__MC_BEANBAG_IMAGE_MAP__ = parseBeanBagImageMapFromPage();
-      }
-      if (!global.__MC_BEANBAG_ALT_INDICES__) {
-        global.__MC_BEANBAG_ALT_INDICES__ = collectBeanBagAltPhotoIndices();
-      }
-      var photoIndex = resolveBeanBagPhotoIndexForSwatch(
-        swatch,
-        swatchIndex,
-        global.__MC_BEANBAG_ALT_INDICES__
-      );
-      applyBeanBagMainPhoto(photoIndex, global.__MC_BEANBAG_IMAGE_MAP__, label);
+    if (!global.__MC_BEANBAG_IMAGE_MAP__) {
+      global.__MC_BEANBAG_IMAGE_MAP__ = parseBeanBagImageMapFromPage();
     }
+    if (!global.__MC_BEANBAG_ALT_INDICES__) {
+      global.__MC_BEANBAG_ALT_INDICES__ = collectBeanBagAltPhotoIndices();
+    }
+    var photoIndex = resolveBeanBagPhotoIndexForSwatch(
+      swatch,
+      swatchIndex,
+      global.__MC_BEANBAG_ALT_INDICES__
+    );
+    applyBeanBagMainPhoto(photoIndex, global.__MC_BEANBAG_IMAGE_MAP__, label);
     var labelSpan = global.document.getElementById("beanbag-selected-cover-name");
     if (labelSpan) labelSpan.textContent = label;
     swatches.forEach(function (s) {
