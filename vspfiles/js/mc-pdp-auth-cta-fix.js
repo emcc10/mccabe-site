@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp31";
+  var VERSION = "20260616pdp32";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -2424,10 +2424,9 @@
   function shouldUseDescriptionBelowFeaturesLayout() {
     // Unified layout for every standard product PDP: title/price, then options
     // (if any), then features, then description, with the qty+ATC purchase stack
-    // centered below. Sectional and bean bag PDPs own their own layout.
+    // centered below. Sectional PDPs own their own layout.
     if (!isProductPdp()) return false;
     if (isSectionalPdpPage()) return false;
-    if (isBeanBagPdpPage()) return false;
     return true;
   }
 
@@ -2606,12 +2605,15 @@
     }
     if (!col.contains(host)) {
       try {
-        // Place description BEFORE the features block (if features are already
-        // in the column) so the right-column order is:
-        //   options → description → features → purchase controls
+        // Place description AFTER the features block so the right-column order is:
+        //   options → features → description → purchase controls
         var featuresBlockForDesc = global.document.getElementById("mc-pdp-features");
         if (featuresBlockForDesc && featuresBlockForDesc.parentNode === col) {
-          col.insertBefore(host, featuresBlockForDesc);
+          if (featuresBlockForDesc.nextSibling) {
+            col.insertBefore(host, featuresBlockForDesc.nextSibling);
+          } else {
+            col.appendChild(host);
+          }
         } else {
           col.appendChild(host);
         }
@@ -3044,7 +3046,9 @@
         bnplVis.style.removeProperty("height");
       } catch (eBnplVis) {}
     }
-    ensureHeroColumnOrder();
+    if (global.document.documentElement.dataset.mcPdpNormalized !== "1") {
+      ensureHeroColumnOrder();
+    }
     mountPdpFeaturesBlock();
     try {
       global.document.body.classList.add("mc-pdp-price-stack");
@@ -3184,6 +3188,14 @@
     if (global.document.documentElement.dataset.mcBbImgBound === "1") return;
     global.document.documentElement.dataset.mcBbImgBound = "1";
 
+    function normalizeBbLabel(str) {
+      return String(str || "")
+        .toLowerCase()
+        .replace(/\u00a0/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
     function applyBbImage(imgFile) {
       var mainImg = global.document.getElementById("product_photo");
       if (!mainImg) return;
@@ -3198,47 +3210,84 @@
       }
     }
 
-    global.document.addEventListener("click", function (eBb) {
-      var swatch = eBb.target && eBb.target.closest ? eBb.target.closest(".beanbag-swatch") : null;
-      if (!swatch) return;
-      // Use the select that has name containing "___4" (cover option) or fall back to first select.
-      var coverSel =
-        global.document.querySelector("#options_table select[name*='___4']") ||
-        global.document.querySelector("#options_table select");
-      if (!coverSel) return;
-      var optId = String(coverSel.value || "");
-      var imgFile = BB_COVER_IMAGE_BY_OPTION_ID[optId];
-      if (!imgFile) {
-        // Value may not be updated yet — re-check after Volusion's handler runs
-        global.setTimeout(function () {
-          var optIdLate = String(coverSel.value || "");
-          var imgFileLate = BB_COVER_IMAGE_BY_OPTION_ID[optIdLate];
-          if (imgFileLate) applyBbImage(imgFileLate);
-        }, 50);
-        return;
-      }
-      // Apply immediately, then re-assert after Volusion's change_option AJAX resets the image.
-      applyBbImage(imgFile);
-      // Single MutationObserver that re-applies our colour image if Volusion resets it,
-      // then disconnects — never runs more than once per swatch click.
+    function reassertBbImageOnce(imgFile) {
       var mainImg = global.document.getElementById("product_photo");
+      if (!mainImg) return;
       if (mainImg && typeof global.MutationObserver === "function") {
         var bbObs = new global.MutationObserver(function (mutations, obs) {
           var src = mainImg.getAttribute("src") || "";
-          // If Volusion reset the src away from our custom image, re-apply once.
           if (src.indexOf("bb-fauxfur") === -1) {
             applyBbImage(imgFile);
           }
           obs.disconnect();
         });
         bbObs.observe(mainImg, { attributes: true, attributeFilter: ["src"] });
-        // Disconnect after 2 s regardless — this is never continuous.
         global.setTimeout(function () { try { bbObs.disconnect(); } catch (e) {} }, 2000);
       } else {
-        // Fallback: single 600 ms re-assert for browsers without MO.
         global.setTimeout(function () { applyBbImage(imgFile); }, 600);
       }
-    }, false);
+    }
+
+    // Capture phase so this runs before legacy inline swatch scripts baked into product HTML.
+    global.document.addEventListener("click", function (eBb) {
+      var swatch = eBb.target && eBb.target.closest ? eBb.target.closest(".beanbag-swatch") : null;
+      if (!swatch) return;
+      var coverSel =
+        global.document.querySelector("#options_table select[name*='___4']") ||
+        global.document.querySelector("#options_table select");
+      if (!coverSel || !coverSel.options || !coverSel.options.length) return;
+
+      var label = swatch.getAttribute("data-option") || "";
+      var target = normalizeBbLabel(label);
+      var foundIndex = -1;
+      var i;
+      for (i = 0; i < coverSel.options.length; i++) {
+        if (normalizeBbLabel(coverSel.options[i].text) === target) {
+          foundIndex = i;
+          break;
+        }
+      }
+      if (foundIndex < 0) return;
+
+      coverSel.selectedIndex = foundIndex;
+      var optVal = String(coverSel.options[foundIndex].value || "");
+      var imgFile = BB_COVER_IMAGE_BY_OPTION_ID[optVal];
+      if (!imgFile) return;
+
+      if (typeof global.change_option === "function") {
+        try {
+          global.change_option(coverSel.name, optVal);
+        } catch (eCo) {}
+      }
+      if (typeof global.AutoUpdatePriceWithSelectedOptions === "function") {
+        try {
+          global.AutoUpdatePriceWithSelectedOptions(optVal, 4);
+        } catch (eAu) {}
+      }
+
+      var labelSpan = global.document.getElementById("beanbag-selected-cover-name");
+      if (labelSpan) {
+        try {
+          labelSpan.textContent = label;
+        } catch (eLbl) {}
+      }
+
+      global.document.querySelectorAll(".beanbag-swatch").forEach(function (node) {
+        try {
+          node.classList.remove("active");
+        } catch (eRm) {}
+      });
+      try {
+        swatch.classList.add("active");
+      } catch (eAct) {}
+
+      eBb.preventDefault();
+      eBb.stopPropagation();
+      eBb.stopImmediatePropagation();
+
+      applyBbImage(imgFile);
+      reassertBbImageOnce(imgFile);
+    }, true);
   }
 
   function installPdpStackApiGuards() {
