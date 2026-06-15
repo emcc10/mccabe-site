@@ -16450,7 +16450,7 @@ html body.mc-bean-bag-pdp #mc-pdp-brand-logo {
   justify-content: center !important;
   align-items: center !important;
   width: 100% !important;
-  max-width: 440px !important;
+  max-width: 450px !important;
   margin: 0 0 14px 0 !important;
   padding: 0 0 0 1.1em !important;
   box-sizing: border-box !important;
@@ -16468,7 +16468,7 @@ html body.mc-bean-bag-pdp #mc-pdp-price-atc-row {
   flex-wrap: wrap !important;
   gap: 16px !important;
   width: 100% !important;
-  max-width: 440px !important;
+  max-width: 450px !important;
   margin: 6px 0 12px 0 !important;
   padding: 0 0 0 1.1em !important;
   box-sizing: border-box !important;
@@ -16546,7 +16546,7 @@ html body.mc-bean-bag-pdp #mc-pdp-purchase-stack {
 html body.mc-bean-bag-pdp #mc-pdp-description-below-features {
   display: block !important;
   width: 100% !important;
-  max-width: 440px !important;
+  max-width: 450px !important;
   margin: 14px 0 0 0 !important;
   padding: 0 0 0 1.1em !important;
   text-align: left !important;
@@ -16582,4 +16582,37 @@ html body.mc-bean-bag-pdp #mc-pdp-description-below-features span {
 html body.mc-bean-bag-pdp table.colors_descriptionbox[data-mc-empty-desc],
 html body.mc-bean-bag-pdp [data-mc-empty-desc] {
   display: none !important;
+}
+
+html body.productdetails #mc-pdp-option-block,
+html body.mc-product-page #mc-pdp-option-block,
+html body.mc-bean-bag-pdp #mc-pdp-option-block {
+  display: block !important;
+  width: 100% !important;
+  max-width: 450px !important;
+  margin: 0 0 12px 0 !important;
+  padding: 0 0 0 1.1em !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+}
+
+html body.productdetails #mc-pdp-option-block #options_table,
+html body.mc-product-page #mc-pdp-option-block #options_table,
+html body.mc-bean-bag-pdp #mc-pdp-option-block #options_table {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+}
+
+html body.productdetails #mc-pdp-option-block select,
+html body.mc-product-page #mc-pdp-option-block select,
+html body.mc-bean-bag-pdp #mc-pdp-option-block select {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+html body.productdetails #mc-pdp-features,
+html body.mc-product-page #mc-pdp-features,
+html body.mc-bean-bag-pdp #mc-pdp-features {
+  max-width: 450px !important;
 }

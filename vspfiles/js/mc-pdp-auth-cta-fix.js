@@ -33,8 +33,66 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp19";
+  var VERSION = "20260616pdp20";
   var PDP_CHROME_BORDER = "#e0e0e0";
+  var PDP_CONFIGURED_COLOR_SWATCHS = {
+    "SAR-CHNK-KNT-LG": [
+      {
+        optionId: "1012",
+        label: "Moonbeam",
+        swatchImage: "SAR-CHNK-KNT-LG-1012-S.jpg",
+        mainImage: "SAR-CHNK-KNT-LG-1012-T.jpg",
+      },
+    ],
+    "SAR-DBL-RCH-FX-FUR": [
+      {
+        optionId: "1013",
+        label: "Snow",
+        swatchImage: "SAR-DBL-RCH-FX-FUR-1013-S.jpg",
+        mainImage: "SAR-DBL-RCH-FX-FUR-1013-T.jpg",
+      },
+      {
+        optionId: "1014",
+        label: "Flax",
+        swatchImage: "SAR-DBL-RCH-FX-FUR-1014-S.jpg",
+        mainImage: "SAR-DBL-RCH-FX-FUR-1014-T.jpg",
+      },
+    ],
+    "SAR-BMB-HATS": [
+      {
+        optionId: "1048",
+        label: "Charcoal",
+        swatchImage: "SAR-BMB-HATS-1048-S.jpg",
+        mainImage: "SAR-BMB-HATS-1048-T.jpg",
+      },
+      {
+        optionId: "1012",
+        label: "Moonbeam",
+        swatchImage: "SAR-BMB-HATS-1012-S.jpg",
+        mainImage: "SAR-BMB-HATS-1012-T.jpg",
+      },
+    ],
+    "SAR-BMB-SNUGGLER": [
+      {
+        optionId: "1048",
+        label: "Charcoal",
+        swatchImage: "SAR-BMB-SNUGGLER-1048-S.jpg",
+        mainImage: "SAR-BMB-SNUGGLER-1048-T.jpg",
+      },
+      {
+        optionId: "1094",
+        label: "Ivory",
+        swatchImage: "SAR-BMB-SNUGGLER-1094-S.jpg",
+        mainImage: "SAR-BMB-SNUGGLER-1094-T.jpg",
+      },
+      {
+        optionId: "1210",
+        label: "Light Pink",
+        swatchImage: "SAR-BMB-SNUGGLER-1210-S.jpg",
+        mainImage: "SAR-BMB-SNUGGLER-1210-T.jpg",
+      },
+    ],
+  };
   var PDP_HERO_ANTIFLICKER_SEL =
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo," +
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-title-right,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-title-right," +
@@ -1956,6 +2014,301 @@
       .trim();
   }
 
+  function normalizeConfiguredColorLabel(str) {
+    return String(str || "")
+      .toLowerCase()
+      .replace(/\u00a0/g, " ")
+      .replace(/\s+/g, " ")
+      .replace(/[^a-z0-9 ]/g, "")
+      .trim();
+  }
+
+  function escapeRegexLiteral(str) {
+    return String(str || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function parseProductCodeFromSelectName(name) {
+    var m = String(name || "").match(/^select___(.+?)___\d+$/i);
+    return m ? String(m[1] || "").toUpperCase() : "";
+  }
+
+  function optionMatchesConfiguredColorEntry(opt, entry) {
+    if (!opt || !entry) return false;
+    var val = String(opt.value || "");
+    if (val === entry.optionId) return true;
+    if (
+      val &&
+      new RegExp("(^|\\D)" + escapeRegexLiteral(entry.optionId) + "(\\D|$)").test(val)
+    ) {
+      return true;
+    }
+    return normalizeConfiguredColorLabel(opt.text) === normalizeConfiguredColorLabel(entry.label);
+  }
+
+  function findConfiguredColorOption(select, entry) {
+    if (!select || !select.options || !entry) return null;
+    var i;
+    for (i = 0; i < select.options.length; i++) {
+      if (optionMatchesConfiguredColorEntry(select.options[i], entry)) return select.options[i];
+    }
+    return null;
+  }
+
+  function findConfiguredColorSwatchContext() {
+    var selects = global.document.querySelectorAll("#options_table select, #v65-product-parent select");
+    var best = null;
+    var i;
+    for (i = 0; i < selects.length; i++) {
+      var select = selects[i];
+      var productCode = parseProductCodeFromSelectName(select.name);
+      var entries = PDP_CONFIGURED_COLOR_SWATCHS[productCode];
+      if (!entries || !entries.length) continue;
+      var score = 0;
+      var ei;
+      for (ei = 0; ei < entries.length; ei++) {
+        if (findConfiguredColorOption(select, entries[ei])) score++;
+      }
+      if (!score) continue;
+      if (!best || score > best.score) {
+        best = {
+          productCode: productCode,
+          select: select,
+          entries: entries,
+          score: score,
+        };
+      }
+    }
+    return best;
+  }
+
+  function buildConfiguredColorImageCandidates(fileName) {
+    var candidates = [];
+    var mainImg = global.document.getElementById("product_photo");
+    var src = mainImg && mainImg.getAttribute ? mainImg.getAttribute("src") || "" : "";
+    if (src) candidates.push(src.replace(/[^/]+$/, fileName));
+    candidates.push("/v/vspfiles/photos/" + fileName);
+    candidates.push("/v/vspfiles/images/" + fileName);
+    return candidates.filter(function (item, idx, arr) {
+      return item && arr.indexOf(item) === idx;
+    });
+  }
+
+  function loadConfiguredColorImage(candidates, done) {
+    var idx = 0;
+    function tryNext() {
+      if (idx >= candidates.length) {
+        done("");
+        return;
+      }
+      var probe = new global.Image();
+      var candidate = candidates[idx++];
+      probe.onload = function () {
+        done(candidate);
+      };
+      probe.onerror = tryNext;
+      probe.src = candidate;
+    }
+    tryNext();
+  }
+
+  function applyConfiguredColorMainPhoto(fileName, label) {
+    var mainImg = global.document.getElementById("product_photo");
+    if (!mainImg || !fileName) return;
+    var token = String(Date.now()) + ":" + Math.random();
+    global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ = token;
+    loadConfiguredColorImage(buildConfiguredColorImageCandidates(fileName), function (resolvedSrc) {
+      if (global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ !== token) return;
+      if (resolvedSrc) {
+        try {
+          mainImg.src = resolvedSrc;
+        } catch (eSrc) {}
+      }
+      var zoom = global.document.getElementById("product_photo_zoom_url");
+      if (zoom) {
+        try {
+          var activeSrc = resolvedSrc || mainImg.src || "";
+          var full = activeSrc.replace(/-T\.jpg/i, ".jpg").replace(/S\.jpg/i, ".jpg");
+          zoom.href = full;
+          if (label) zoom.title = label;
+        } catch (eZoom) {}
+      }
+      try {
+        mainImg.style.setProperty("opacity", "1", "important");
+      } catch (eOp) {}
+    });
+  }
+
+  function syncConfiguredColorSelect(select, opt) {
+    if (!select || !opt) return false;
+    select.value = opt.value;
+    if (typeof global.change_option === "function") {
+      try {
+        global.change_option(select.name, opt.value);
+      } catch (eOpt) {}
+    }
+    if (typeof global.AutoUpdatePriceWithSelectedOptions === "function") {
+      try {
+        global.AutoUpdatePriceWithSelectedOptions(opt.value, 4);
+      } catch (ePrice) {}
+    }
+    try {
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    } catch (eEv) {}
+    return true;
+  }
+
+  function hideConfiguredColorNativeSelect(select) {
+    if (!select || select.dataset.mcConfiguredColorHidden === "1") return;
+    select.dataset.mcConfiguredColorHidden = "1";
+    try {
+      select.style.setProperty("position", "absolute", "important");
+      select.style.setProperty("width", "1px", "important");
+      select.style.setProperty("height", "1px", "important");
+      select.style.setProperty("padding", "0", "important");
+      select.style.setProperty("margin", "0", "important");
+      select.style.setProperty("border", "0", "important");
+      select.style.setProperty("overflow", "hidden", "important");
+      select.style.setProperty("clip", "rect(0 0 0 0)", "important");
+      select.style.setProperty("clip-path", "inset(50%)", "important");
+      select.style.setProperty("white-space", "nowrap", "important");
+      select.style.setProperty("opacity", "0", "important");
+      select.style.setProperty("pointer-events", "none", "important");
+    } catch (eHide) {}
+  }
+
+  function ensureConfiguredColorSwatchCss() {
+    if (global.document.getElementById("mc-configured-color-swatch-css")) return;
+    var st = global.document.createElement("style");
+    st.id = "mc-configured-color-swatch-css";
+    st.textContent =
+      ".mc-configured-color-swatch-wrapper{display:block!important;margin:12px 0 0!important}" +
+      ".mc-configured-color-swatch-label{display:block!important;margin-bottom:8px!important;font:700 12px/1.4 Inter,Arial,sans-serif!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:#444!important}" +
+      ".mc-configured-color-swatch-label span{font-weight:600!important;letter-spacing:.03em!important;text-transform:none!important}" +
+      ".mc-configured-color-swatches{display:flex!important;flex-wrap:wrap!important;gap:10px!important}" +
+      ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:42px!important;height:42px!important;padding:0!important;border:2px solid #ddd!important;border-radius:999px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important}" +
+      ".mc-configured-color-swatch img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}" +
+      ".mc-configured-color-swatch.active{border-color:#111!important;box-shadow:0 0 0 1px #111 inset!important}" +
+      ".mc-configured-color-swatch:focus-visible{outline:2px solid #111!important;outline-offset:2px!important}";
+    (global.document.head || global.document.documentElement).appendChild(st);
+  }
+
+  function renderConfiguredColorSwatches(ctx) {
+    if (!ctx || !ctx.select || !ctx.entries || !ctx.entries.length) return null;
+    ensureConfiguredColorSwatchCss();
+    hideConfiguredColorNativeSelect(ctx.select);
+    var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    if (!wrap) {
+      wrap = global.document.createElement("div");
+      wrap.id = "mc-configured-color-swatch-wrapper";
+      wrap.className = "mc-configured-color-swatch-wrapper";
+    }
+    wrap.setAttribute("data-product-code", ctx.productCode);
+    wrap.innerHTML =
+      '<div class="mc-configured-color-swatch-label">Selected color: <span id="mc-configured-color-selected-name"></span></div>' +
+      '<div class="mc-configured-color-swatches"></div>';
+    var rail = wrap.querySelector(".mc-configured-color-swatches");
+    ctx.entries.forEach(function (entry) {
+      var opt = findConfiguredColorOption(ctx.select, entry);
+      if (!opt) return;
+      var btn = global.document.createElement("button");
+      btn.type = "button";
+      btn.className = "mc-configured-color-swatch";
+      btn.setAttribute("aria-label", entry.label);
+      btn.setAttribute("title", entry.label);
+      btn.setAttribute("data-option-id", entry.optionId);
+      btn.setAttribute("data-main-image", entry.mainImage);
+      btn.setAttribute("data-label", entry.label);
+      btn.innerHTML = '<img alt="' + escapeHtmlText(entry.label) + '" />';
+      var img = btn.querySelector("img");
+      img.src = buildConfiguredColorImageCandidates(entry.swatchImage)[0];
+      rail.appendChild(btn);
+    });
+    if (ctx.select.parentNode && wrap.parentNode !== ctx.select.parentNode) {
+      try {
+        ctx.select.insertAdjacentElement("afterend", wrap);
+      } catch (eIns) {
+        ctx.select.parentNode.appendChild(wrap);
+      }
+    } else if (ctx.select.nextSibling !== wrap) {
+      try {
+        ctx.select.insertAdjacentElement("afterend", wrap);
+      } catch (eMv) {}
+    }
+    return wrap;
+  }
+
+  function findConfiguredColorSelectedEntry(ctx) {
+    if (!ctx || !ctx.select || !ctx.entries) return null;
+    var opt = ctx.select.options && ctx.select.selectedIndex >= 0 ? ctx.select.options[ctx.select.selectedIndex] : null;
+    if (!opt) return null;
+    var i;
+    for (i = 0; i < ctx.entries.length; i++) {
+      if (optionMatchesConfiguredColorEntry(opt, ctx.entries[i])) return ctx.entries[i];
+    }
+    return null;
+  }
+
+  function syncConfiguredColorSwatchUi(ctx, applyPhoto) {
+    var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    if (!ctx || !wrap) return;
+    var selected = findConfiguredColorSelectedEntry(ctx);
+    var labelEl = global.document.getElementById("mc-configured-color-selected-name");
+    if (labelEl) labelEl.textContent = selected ? selected.label : "";
+    wrap.querySelectorAll(".mc-configured-color-swatch").forEach(function (btn) {
+      var active = !!selected && btn.getAttribute("data-option-id") === selected.optionId;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    if (applyPhoto && selected) {
+      [0, 120, 350].forEach(function (ms) {
+        global.setTimeout(function () {
+          applyConfiguredColorMainPhoto(selected.mainImage, selected.label);
+        }, ms);
+      });
+    }
+  }
+
+  function bindConfiguredColorSwatchSelect(select) {
+    if (!select || select.dataset.mcConfiguredColorBound === "1") return;
+    select.dataset.mcConfiguredColorBound = "1";
+    select.addEventListener("change", function () {
+      var ctx = findConfiguredColorSwatchContext();
+      if (!ctx || ctx.select !== select) return;
+      syncConfiguredColorSwatchUi(ctx, true);
+    });
+  }
+
+  function handleConfiguredColorSwatchClick(btn) {
+    if (!btn) return;
+    var ctx = findConfiguredColorSwatchContext();
+    if (!ctx) return;
+    var i;
+    for (i = 0; i < ctx.entries.length; i++) {
+      if (ctx.entries[i].optionId !== btn.getAttribute("data-option-id")) continue;
+      var opt = findConfiguredColorOption(ctx.select, ctx.entries[i]);
+      if (!opt) return;
+      syncConfiguredColorSelect(ctx.select, opt);
+      syncConfiguredColorSwatchUi(ctx, true);
+      return;
+    }
+  }
+
+  function ensureConfiguredColorSwatches() {
+    var ctx = findConfiguredColorSwatchContext();
+    var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    if (!ctx) {
+      if (wrap && wrap.parentNode) {
+        try {
+          wrap.parentNode.removeChild(wrap);
+        } catch (eRm) {}
+      }
+      return;
+    }
+    renderConfiguredColorSwatches(ctx);
+    bindConfiguredColorSwatchSelect(ctx.select);
+    syncConfiguredColorSwatchUi(ctx, true);
+  }
+
   function parseBeanBagImageMapFromPage() {
     var map = {};
     try {
@@ -3356,6 +3709,7 @@
       applyPdpMainImageCap();
       mountPdpFeaturesBlock();
       patchBeanBagPdp();
+      ensureConfiguredColorSwatches();
       ensureQuantityAboveAtc();
       ensurePurchaseStackCentered();
       fixAddToCartChrome();
@@ -3397,6 +3751,15 @@
       "click",
       function (e) {
         if (handleAuthCtaClick(e)) return;
+        var configuredColorSwatch =
+          e.target && e.target.closest ? e.target.closest(".mc-configured-color-swatch") : null;
+        if (configuredColorSwatch) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          handleConfiguredColorSwatchClick(configuredColorSwatch);
+          return;
+        }
         if (typeof global.mcHandleLoginCtaClick === "function") {
           global.mcHandleLoginCtaClick(e);
         }
