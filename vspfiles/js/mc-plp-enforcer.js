@@ -1,6 +1,6 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260627b — site-wide strip .00 from prices; PLP thumbnails
+ * MC_PLP_ENFORCER_20260628a — site-wide strip .00 from prices (full content sweep); PLP thumbnails
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
@@ -585,6 +585,30 @@
     "#priceWithOptions,#priceWithOptionsNoTax,.colors_productprice,.pricecolor,.mc-member-price-caption," +
     ".mc-pdp-member-line__amount,.v65-product-price,.mc-member-grid-price__amount";
 
+  function stripZeroCentTextNodes(scope) {
+    if (!scope || typeof global.document.createTreeWalker !== "function") return;
+    var walker = global.document.createTreeWalker(scope, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        if (!n.nodeValue || n.nodeValue.indexOf(".00") === -1) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        var p = n.parentNode;
+        if (!p) return NodeFilter.FILTER_REJECT;
+        var tag = p.nodeName;
+        if (tag === "SCRIPT" || tag === "STYLE" || tag === "TEXTAREA" || tag === "OPTION") {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      },
+    });
+    var n;
+    while ((n = walker.nextNode())) {
+      var v = n.nodeValue;
+      var nv = v.replace(/(\$\d[\d,]*)\.00(?!\d)/g, "$1");
+      if (nv !== v) n.nodeValue = nv;
+    }
+  }
+
   function stripPriceZeroCentsLocal(root) {
     if (typeof global.mcStripPriceZeroCents === "function") {
       global.mcStripPriceZeroCents(root);
@@ -594,17 +618,15 @@
     if (!root || !root.querySelectorAll) return;
     try {
       root.querySelectorAll(PRICE_ZERO_CENT_SELECTOR).forEach(function (el) {
-        var walker = global.document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-        var n;
-        while ((n = walker.nextNode())) {
-          if (!n || n.nodeType !== 3) continue;
-          var v = n.nodeValue;
-          if (!v || v.indexOf(".00") === -1) continue;
-          var nv = v.replace(/(\$\d[\d,]*)\.00(?!\d)/g, "$1");
-          if (nv !== v) n.nodeValue = nv;
-        }
+        stripZeroCentTextNodes(el);
       });
     } catch (eStrip) {}
+    // Category/search pages can render prices in containers not covered by the
+    // selector list above. Sweep the content area so no $X.00 slips through.
+    try {
+      var area = global.document.getElementById("content_area") || root;
+      stripZeroCentTextNodes(area);
+    } catch (eSweep) {}
   }
 
   function runGlobalPriceDisplayFix() {
