@@ -16405,3 +16405,169 @@ html body.mc-product-page a#product_photo_zoom_url2 {
   width: 100% !important;
   box-sizing: border-box !important;
 }
+
+/* =====================================================================
+   MC PDP LOCK pdp17 — uniform soft-goods PDP layout
+   (bean bags + throws / anything tagged mc-bean-bag-pdp)
+   - tighter gap between image and info column
+   - centered manufacturer logo
+   - price + ADD TO CART on one row (qty removed, borderless compact ATC)
+   - description moved below the Features block
+   ===================================================================== */
+
+/* ---- column widths / 20px gap (image hugs its column) ---- */
+@media (min-width: 992px) {
+  html body.mc-bean-bag-pdp .mc-pdp-hero-media-col {
+    flex: 0 1 auto !important;
+    width: min(640px, 50%) !important;
+    max-width: 640px !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+  }
+  html body.mc-bean-bag-pdp td.mc-pdp-options-td {
+    flex: 1 1 auto !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+  }
+}
+html body.mc-bean-bag-pdp .mc-pdp-hero-media-col,
+html body.mc-bean-bag-pdp .mc-pdp-hero-media-col td.mc-pdp-media-td,
+html body.mc-bean-bag-pdp .mc-pdp-hero-media-col #product_photo_td,
+html body.mc-bean-bag-pdp .mc-pdp-hero-media-col table {
+  max-width: 100% !important;
+}
+html body.mc-bean-bag-pdp .mc-pdp-hero-media-col #product_photo {
+  width: 100% !important;
+  max-width: 640px !important;
+  height: auto !important;
+}
+
+/* ---- centered manufacturer logo (over the info text block) ---- */
+html body.mc-bean-bag-pdp #mc-pdp-brand-logo {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 440px !important;
+  margin: 0 0 14px 0 !important;
+  padding: 0 0 0 1.1em !important;
+  box-sizing: border-box !important;
+}
+html body.mc-bean-bag-pdp #mc-pdp-brand-logo img {
+  margin: 0 !important;
+}
+
+/* ---- price + ADD TO CART on a single row ---- */
+html body.mc-bean-bag-pdp #mc-pdp-price-atc-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: wrap !important;
+  gap: 16px !important;
+  width: 100% !important;
+  max-width: 440px !important;
+  margin: 6px 0 12px 0 !important;
+  padding: 0 0 0 1.1em !important;
+  box-sizing: border-box !important;
+}
+html body.mc-bean-bag-pdp #mc-pdp-price-atc-row #mc-pdp-price-stack-host {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+}
+/* price color matches the Features heading */
+html body.mc-bean-bag-pdp #mc-pdp-price-atc-row #mc-pdp-price-stack-host,
+html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-pdp-stack-retail,
+html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-pdp-stack-retail-amt,
+html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .product_productprice,
+html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .product_list_price {
+  color: #777 !important;
+}
+
+/* compact, borderless ATC sitting to the right of price */
+html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap {
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap .mc-cart-icon-wrapper {
+  display: none !important;
+}
+html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap input,
+html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap button {
+  border: none !important;
+  background: #111 !important;
+  color: #fff !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
+  padding: 10px 18px !important;
+  margin: 0 !important;
+  width: auto !important;
+  min-width: 0 !important;
+  border-radius: 0 !important;
+  cursor: pointer !important;
+}
+
+/* ---- remove quantity + legacy purchase stack on these pages ---- */
+html body.mc-bean-bag-pdp #mc-pdp-qty-row,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack {
+  display: none !important;
+}
+
+/* ---- description below the Features block ---- */
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features {
+  display: block !important;
+  width: 100% !important;
+  max-width: 440px !important;
+  margin: 14px 0 0 0 !important;
+  padding: 0 0 0 1.1em !important;
+  text-align: left !important;
+  clear: both !important;
+  box-sizing: border-box !important;
+}
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features #ProductDetail_ProductDetails_div,
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features #ProductDetail_ProductDetails_div2,
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features #product_description,
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features .colors_descriptionbox {
+  display: block !important;
+  visibility: visible !important;
+  height: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  box-sizing: border-box !important;
+}
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features #product_description,
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features p,
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features span {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  color: #444 !important;
+  text-transform: none !important;
+}
+
+/* hide the now-empty legacy description box + its tab header */
+html body.mc-bean-bag-pdp table.colors_descriptionbox[data-mc-empty-desc],
+html body.mc-bean-bag-pdp [data-mc-empty-desc] {
+  display: none !important;
+}
