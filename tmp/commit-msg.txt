@@ -1,0 +1,6 @@
+pdp29: revert Klarna DOM move — keep #messaging-element in place
+
+Moving #messaging-element into the price host caused Stripe to remount
+and issue requests to r.stripe.com, hanging the page. Revert to only
+clearing inline visibility overrides on the existing element, never
+relocating it.
