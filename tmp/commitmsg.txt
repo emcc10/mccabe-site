@@ -1,6 +1,21 @@
-PDP pdp19: put price + ADD TO CART on one line with compact borderless button
+Stop PDP buy-box bounce: remove competing bean-bag hero-stack layout
 
-- styleBeanBagPriceAtc(): override the inline width:100% on the price host
-  so it shrinks to content, and strip the leftover inline chrome from the
-  ATC wrap (applied before it was moved into the row) so the button is a
-  compact borderless dark button sitting to the right of the price.
+Headless measurement (Playwright + layout-shift API) proved the bean-bag PDP
+was bouncing because two functions fought over #mc-pdp-features 283x in 9s:
+mountPdpFeaturesBlock() kept it in the options column while buildBeanBagStack()
+kept pulling it into #mc-pdp-hero-stack. Every move re-triggered the
+MutationObserver, so it never settled (CLS-style oscillation, features/qty
+moving ~12x each).
+
+Fix: bean bags now use the SAME general two-column layout as every other
+product (built once per runPatch). Removed buildBeanBagStack() entirely and the
+stale "ordering owned by buildBeanBagStack" branch note. patchBeanBagPdp() is
+reduced to the only bean-bag-specific, non-conflicting work: hide the duplicate
+legacy price and park the cover swatches inside the option block (idempotent,
+above Features, no competition for the slot before #mc-pdp-features).
+
+Re-measured with the local build served over the live page: features/qty/swatch
+now move once and settle (was 12x). Remaining CLS is page-level Volusion reflow
+(manufacturer-logo area, related-content table) unrelated to the buy box.
+
+Bumped cache version to pdp26.
