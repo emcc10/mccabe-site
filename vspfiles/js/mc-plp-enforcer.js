@@ -7,7 +7,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260627b";
+  var VERSION = "20260628a";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
