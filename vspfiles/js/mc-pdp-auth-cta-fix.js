@@ -2152,6 +2152,9 @@
   function applyConfiguredColorMainPhoto(fileName, label) {
     var mainImg = global.document.getElementById("product_photo");
     if (!mainImg || !fileName) return;
+    var previousSrc = mainImg.getAttribute("src") || "";
+    var zoom = global.document.getElementById("product_photo_zoom_url");
+    var previousZoomHref = zoom ? zoom.getAttribute("href") || "" : "";
     var token = String(Date.now()) + ":" + Math.random();
     global.__MC_CONFIGURED_COLOR_IMAGE_TOKEN__ = token;
     loadConfiguredColorImage(buildConfiguredColorImageCandidates(fileName), function (resolvedSrc) {
@@ -2160,12 +2163,17 @@
         try {
           mainImg.src = resolvedSrc;
         } catch (eSrc) {}
+      } else if (previousSrc) {
+        try {
+          mainImg.src = previousSrc;
+        } catch (ePrev) {}
       }
-      var zoom = global.document.getElementById("product_photo_zoom_url");
       if (zoom) {
         try {
-          var activeSrc = resolvedSrc || mainImg.src || "";
-          var full = activeSrc.replace(/-T\.jpg/i, ".jpg").replace(/S\.jpg/i, ".jpg");
+          var activeSrc = resolvedSrc || mainImg.src || previousSrc || "";
+          var full = activeSrc
+            ? activeSrc.replace(/-T\.jpg/i, ".jpg").replace(/S\.jpg/i, ".jpg")
+            : previousZoomHref;
           zoom.href = full;
           if (label) zoom.title = label;
         } catch (eZoom) {}
@@ -2283,7 +2291,12 @@
       img.src = buildConfiguredColorImageCandidates(entry.swatchImage)[0];
       rail.appendChild(btn);
     });
-    if (ctx.select.parentNode && wrap.parentNode !== ctx.select.parentNode) {
+    var host = global.document.getElementById("mc-pdp-option-block");
+    if (host && wrap.parentNode !== host) {
+      try {
+        host.appendChild(wrap);
+      } catch (eHost) {}
+    } else if (ctx.select.parentNode && wrap.parentNode !== ctx.select.parentNode) {
       try {
         ctx.select.insertAdjacentElement("afterend", wrap);
       } catch (eIns) {
@@ -3033,9 +3046,9 @@
       mountPrimaryOptionBlock();
       mountDescriptionBelowFeatures();
       hideLegacyBeanBagPrice();
-      ensureBeanBagPurchaseStack();
+      ensureQuantityAboveAtc();
+      ensurePurchaseStackCentered();
       buildBeanBagStack();
-      styleBeanBagPriceAtc();
       initBeanBagSwatchBehavior();
     });
   }
