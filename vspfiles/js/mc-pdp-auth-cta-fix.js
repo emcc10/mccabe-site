@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260615pdp15";
+  var VERSION = "20260616pdp16";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_HERO_ANTIFLICKER_SEL =
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo," +
@@ -235,42 +235,13 @@
 
   function collapseBeanBagLegacyDescriptionTab() {
     if (!isBeanBagPdpPage()) return;
-    var host = global.document.getElementById("mc-pdp-description-below-features");
-    if (!host) return;
-    var optTd = findPdpHeroColumnTd();
-    global.document
-      .querySelectorAll(
-        "#ProductDetail_ProductDetails_div, #ProductDetail_ProductDetails_div2, #product_description"
-      )
-      .forEach(function (node) {
-        if (!node || host.contains(node) || (optTd && optTd.contains(node))) return;
-        try {
-          node.style.setProperty("display", "none", "important");
-          node.style.setProperty("visibility", "hidden", "important");
-          node.style.setProperty("height", "0", "important");
-          node.style.setProperty("margin", "0", "important");
-          node.style.setProperty("padding", "0", "important");
-          node.style.setProperty("overflow", "hidden", "important");
-        } catch (eHide) {}
-        var shell =
-          (node.closest && node.closest("table.colors_descriptionbox")) ||
-          (node.closest && node.closest("table"));
-        if (shell && (!optTd || !optTd.contains(shell))) {
-          try {
-            shell.style.setProperty("display", "none", "important");
-            shell.style.setProperty("visibility", "hidden", "important");
-            shell.style.setProperty("height", "0", "important");
-            shell.style.setProperty("margin", "0", "important");
-            shell.style.setProperty("padding", "0", "important");
-            shell.style.setProperty("overflow", "hidden", "important");
-          } catch (eShell) {}
-        }
-      });
+    if (!global.document.getElementById("mc-pdp-description-below-features")) return;
     global.document
       .querySelectorAll(
         "#Header_ProductDetail_ProductDetails, td#Header_ProductDetail_ProductDetails, span#Header_ProductDetail_ProductDetails_span"
       )
       .forEach(function (tab) {
+        if (tab.closest("#v65-product-related, #related_products_content")) return;
         try {
           tab.style.setProperty("display", "none", "important");
         } catch (eTab) {}
@@ -278,6 +249,158 @@
     try {
       if (global.document.body) global.document.body.classList.add("mc-bean-bag-desc-moved");
     } catch (eCls) {}
+  }
+
+  function protectRelatedProducts() {
+    global.document
+      .querySelectorAll("#v65-product-related, #related_products_content")
+      .forEach(function (el) {
+        if (!el || (el.closest && el.closest(".mc-related-carousel__viewport"))) return;
+        try {
+          el.style.removeProperty("display");
+          el.style.removeProperty("visibility");
+          el.style.removeProperty("height");
+          el.style.removeProperty("max-height");
+          el.style.removeProperty("overflow");
+          el.style.removeProperty("opacity");
+          el.style.removeProperty("pointer-events");
+        } catch (eRel) {}
+      });
+  }
+
+  function parseProductPhotoSeries(src) {
+    var s = String(src || "");
+    if (!s) return null;
+    var m = s.match(/\/([^/?#]+)-(\d+)T\.(?:jpg|jpeg|png|webp)(?:\?|$)/i);
+    if (!m) m = s.match(/\/([^/?#]+)-(\d+)\.(?:jpg|jpeg|png|webp)(?:\?|$)/i);
+    if (!m) return null;
+    var slug = m[1];
+    var mainIdx = parseInt(m[2], 10);
+    if (!(mainIdx > 0)) return null;
+    var basePath = s.replace(/\/[^/?#]+$/, "/");
+    var indices = [];
+    var i;
+    for (i = 2; i <= 9; i++) {
+      if (i !== mainIdx) indices.push(i);
+    }
+    return { slug: slug, mainIdx: mainIdx, basePath: basePath, indices: indices };
+  }
+
+  function mountAltviewsUnderHero(mediaTd, altviews, photo) {
+    if (!mediaTd || !altviews || !photo) return;
+    var photoTable = photo.closest("table");
+    var insertAfter = photoTable || photo.closest("a") || photo;
+    if (insertAfter && insertAfter.parentNode === mediaTd) {
+      try {
+        if (altviews.previousElementSibling !== insertAfter) {
+          if (insertAfter.nextSibling) mediaTd.insertBefore(altviews, insertAfter.nextSibling);
+          else mediaTd.appendChild(altviews);
+        }
+      } catch (eAlt) {}
+    }
+    try {
+      if (global.document.body) global.document.body.classList.add("mc-pdp-alt-under-hero");
+    } catch (eCls) {}
+  }
+
+  function ensurePdpAltThumbnailsUnderHero() {
+    if (!isProductPdp()) return;
+    if (isSectionalPdpPage()) return;
+    var mediaTd = findPdpMediaTd();
+    if (!mediaTd) return;
+    var photo = global.document.getElementById("product_photo");
+    if (!photo) return;
+    var altviews =
+      mediaTd.querySelector("#altviews") || mediaTd.querySelector("span#altviews");
+    var existingCount = altviews
+      ? altviews.querySelectorAll(
+          'img[id^="alternate_product_photo_"], img.vCSS_img_alternate_product_photo'
+        ).length
+      : 0;
+    if (altviews && existingCount > 0) {
+      mountAltviewsUnderHero(mediaTd, altviews, photo);
+      return;
+    }
+    var series = parseProductPhotoSeries(photo.getAttribute("src") || photo.src || "");
+    if (!series) return;
+    if (!altviews) {
+      altviews = global.document.createElement("span");
+      altviews.id = "altviews";
+      try {
+        mediaTd.appendChild(altviews);
+      } catch (eMk) {
+        return;
+      }
+    }
+    if (altviews.getAttribute("data-mc-alt-built") === "1") {
+      mountAltviewsUnderHero(mediaTd, altviews, photo);
+      return;
+    }
+    altviews.setAttribute("data-mc-alt-built", "1");
+    altviews.innerHTML = "";
+    var title = photo.getAttribute("alt") || photo.getAttribute("title") || "";
+    var pending = 0;
+    var added = 0;
+    series.indices.forEach(function (idx) {
+      pending++;
+      var full = series.basePath + series.slug + "-" + idx + ".jpg";
+      var thumb = series.basePath + series.slug + "-" + idx + "S.jpg";
+      var a = global.document.createElement("a");
+      a.href = full;
+      a.setAttribute("rel", "shadowbox[ProductImages]");
+      if (title) a.title = title;
+      var img = global.document.createElement("img");
+      img.className = "vCSS_img_alternate_product_photo";
+      img.id = "alternate_product_photo_" + idx;
+      img.src = thumb;
+      img.setAttribute("border", "1");
+      img.style.borderColor = "#666666";
+      img.onmouseover = function () {
+        if (typeof global.change_product_photo === "function") {
+          try {
+            global.change_product_photo(idx);
+          } catch (ePh) {}
+        }
+      };
+      img.onload = function () {
+        added++;
+      };
+      img.onerror = function () {
+        try {
+          a.remove();
+        } catch (eRm) {}
+      };
+      a.appendChild(img);
+      altviews.appendChild(a);
+    });
+    global.setTimeout(function () {
+      if (!altviews.querySelector("img")) {
+        try {
+          altviews.remove();
+        } catch (eEmpty) {}
+        return;
+      }
+      mountAltviewsUnderHero(mediaTd, altviews, photo);
+    }, 120);
+  }
+
+  function beanBagHeroNodesOrdered(parent, ordered) {
+    var present = [];
+    var i;
+    for (i = 0; i < ordered.length; i++) {
+      if (ordered[i] && ordered[i].parentNode === parent) present.push(ordered[i]);
+    }
+    if (present.length < 2) return true;
+    for (i = 1; i < present.length; i++) {
+      if (
+        (present[i - 1].compareDocumentPosition(present[i]) &
+          global.Node.DOCUMENT_POSITION_FOLLOWING) ===
+        0
+      ) {
+        return false;
+      }
+    }
+    return true;
   }
 
   function mountPdpDescriptionBelowFeatures() {
@@ -306,6 +429,11 @@
     }
     if (descDiv.parentNode !== host) {
       try {
+        descDiv.querySelectorAll("script").forEach(function (sc) {
+          try {
+            sc.remove();
+          } catch (eSc) {}
+        });
         host.appendChild(descDiv);
       } catch (eMove) {}
     }
@@ -317,12 +445,14 @@
     });
     try {
       host.style.setProperty("width", "100%", "important");
-      host.style.setProperty("max-width", "440px", "important");
+      host.style.setProperty("max-width", "100%", "important");
       host.style.setProperty("margin", "8px 0 0 0", "important");
       host.style.setProperty("padding", "0 0 0 1.1em", "important");
       host.style.setProperty("text-align", "left", "important");
       descDiv.style.setProperty("margin", "0", "important");
       descDiv.style.setProperty("padding", "0", "important");
+      descDiv.style.setProperty("width", "100%", "important");
+      descDiv.style.setProperty("max-width", "100%", "important");
     } catch (eHost) {}
     pruneDescriptionDuplicateFeatures();
     collapseBeanBagLegacyDescriptionTab();
@@ -1877,21 +2007,6 @@
     var swatches = global.document.getElementById("beanbag-swatch-wrapper");
     var features = global.document.getElementById("mc-pdp-features");
     var descHost = global.document.getElementById("mc-pdp-description-below-features");
-    if (title && !parent.contains(title)) {
-      try {
-        parent.insertBefore(title, parent.firstChild);
-      } catch (eTitleMove) {}
-    }
-    if (logo && logo.querySelector && logo.querySelector("img") && !parent.contains(logo)) {
-      try {
-        parent.insertBefore(logo, parent.firstChild);
-      } catch (eLogoMove) {}
-    }
-    if (box && !parent.contains(box)) {
-      try {
-        parent.appendChild(box);
-      } catch (eBoxMove) {}
-    }
     var ordered = [];
     if (logo && logo.querySelector && logo.querySelector("img")) ordered.push(logo);
     if (title) ordered.push(title);
@@ -1900,14 +2015,30 @@
     if (swatches) ordered.push(swatches);
     if (features) ordered.push(features);
     if (descHost) ordered.push(descHost);
-    var anchor = parent.firstChild;
+    if (beanBagHeroNodesOrdered(parent, ordered)) {
+      applyBeanBagPriceTypography();
+      fixAddToCartChrome();
+      hideBeanBagQuantityUi();
+      return;
+    }
     var oi;
-    for (oi = 0; oi < ordered.length; oi++) {
+    for (oi = ordered.length - 1; oi >= 0; oi--) {
       var node = ordered[oi];
-      if (!node) continue;
+      if (!node || node.parentNode !== parent) continue;
+      var before = null;
+      var bi;
+      for (bi = oi + 1; bi < ordered.length; bi++) {
+        if (ordered[bi] && ordered[bi].parentNode === parent) {
+          before = ordered[bi];
+          break;
+        }
+      }
       try {
-        parent.insertBefore(node, anchor);
-        anchor = node.nextSibling;
+        if (before) {
+          if (node.nextElementSibling !== before) parent.insertBefore(node, before);
+        } else if (node !== parent.lastElementChild) {
+          parent.appendChild(node);
+        }
       } catch (eOrd) {}
     }
     applyBeanBagPriceTypography();
@@ -2147,26 +2278,7 @@
   }
 
   function mountBeanBagAltViewsUnderHero() {
-    if (!isBeanBagPdpPage()) return;
-    var mediaTd = findPdpMediaTd();
-    if (!mediaTd) return;
-    var altviews =
-      mediaTd.querySelector("#altviews") || mediaTd.querySelector("span#altviews");
-    var photo = global.document.getElementById("product_photo");
-    if (!altviews || !photo) return;
-    var photoTable = photo.closest("table");
-    var insertAfter = photoTable || photo.closest("a") || photo;
-    if (insertAfter && insertAfter.parentNode === mediaTd) {
-      try {
-        if (altviews.previousElementSibling !== insertAfter) {
-          if (insertAfter.nextSibling) mediaTd.insertBefore(altviews, insertAfter.nextSibling);
-          else mediaTd.appendChild(altviews);
-        }
-      } catch (eAlt) {}
-    }
-    try {
-      if (global.document.body) global.document.body.classList.add("mc-bean-bag-alt-under-hero");
-    } catch (eCls) {}
+    ensurePdpAltThumbnailsUnderHero();
   }
 
   function findPdpHeroColumnTd() {
@@ -3403,6 +3515,8 @@
 
   function runPatch() {
     if (!isProductPdp()) return;
+    if (global.__MC_PDP_PATCH_BUSY__) return;
+    global.__MC_PDP_PATCH_BUSY__ = true;
     var sectional = isSectionalPdpPage();
     var heroLocked = !!global.__MC_PDP_HERO_READY_LOCKED__;
     try {
@@ -3420,16 +3534,13 @@
       applyPdpPriceTypography();
       applyPdpDescriptionStyle();
       applyPdpMainImageCap();
+      ensurePdpAltThumbnailsUnderHero();
       mountPdpFeaturesBlock();
       patchBeanBagPdp();
       ensureQuantityAboveAtc();
       ensurePurchaseStackCentered();
       fixAddToCartChrome();
-      if (isBeanBagPdpPage()) {
-        try {
-          ensureBeanBagHeroColumnOrder();
-        } catch (eBbFinal) {}
-      }
+      protectRelatedProducts();
       stripPriceZeroCents();
       if (!heroLocked) {
         try {
@@ -3446,6 +3557,8 @@
       if (typeof console !== "undefined" && console.warn) {
         console.warn("[McCabe] mc-pdp-auth-cta runPatch", eRunPatch);
       }
+    } finally {
+      global.__MC_PDP_PATCH_BUSY__ = false;
     }
     try {
       global.document
@@ -3513,12 +3626,10 @@
     var moLastRun = 0;
     var mo = new MutationObserver(function () {
       if (scheduled) return;
-      var sectional = isSectionalPdpPage();
-      if (sectional) {
-        var now = Date.now();
-        if (now - moLastRun < 2500) return;
-        moLastRun = now;
-      }
+      var now = Date.now();
+      var minGap = isBeanBagPdpPage() ? 1500 : isSectionalPdpPage() ? 2500 : 450;
+      if (now - moLastRun < minGap) return;
+      moLastRun = now;
       scheduled = true;
       global.requestAnimationFrame(function () {
         scheduled = false;

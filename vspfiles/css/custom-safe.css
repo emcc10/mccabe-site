@@ -16519,10 +16519,19 @@ html body.mc-bean-bag-pdp #mc-pdp-description-below-features,
 html body.mc-bean-bag-pdp .mc-pdp-description-below-features {
   display: block !important;
   width: 100% !important;
-  max-width: 440px !important;
+  max-width: 100% !important;
   margin: 8px 0 0 0 !important;
   padding: 0 0 0 1.1em !important;
   text-align: left !important;
+}
+
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features #product_description,
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features #ProductDetail_ProductDetails_div,
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features #ProductDetail_ProductDetails_div2,
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features .colors_descriptionbox {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 html body.mc-bean-bag-pdp #mc-pdp-description-below-features .colors_descriptionbox,
