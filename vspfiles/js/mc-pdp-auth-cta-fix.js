@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260614pdp13";
+  var VERSION = "20260616pdp17";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_HERO_ANTIFLICKER_SEL =
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo," +
@@ -119,6 +119,12 @@
     ) {
       return true;
     }
+    if (isBeanBagPdpPage()) {
+      return !!(
+        global.document.getElementById("mc-pdp-price-atc-row") ||
+        global.document.getElementById("mc-pdp-purchase-stack")
+      );
+    }
     return !!global.document.getElementById("mc-pdp-purchase-stack");
   }
 
@@ -186,10 +192,18 @@
   function pruneDescriptionDuplicateFeatures() {
     var feat = global.document.getElementById("mc-pdp-features");
     if (!feat || !feat.querySelector(".mc-pdp-features__list li")) return;
+    var liSel =
+      "#ProductDetail_ProductDetails_div2 li, #ProductDetail_ProductDetails_div2 span[itemprop='description'] > li";
+    var ulSel =
+      "#ProductDetail_ProductDetails_div2 ul, #ProductDetail_ProductDetails_div2 span[itemprop='description'] ul";
+    if (isBeanBagPdpPage()) {
+      liSel +=
+        ", #mc-pdp-description-below-features li, #ProductDetail_ProductDetails_div li";
+      ulSel +=
+        ", #mc-pdp-description-below-features ul, #ProductDetail_ProductDetails_div ul";
+    }
     global.document
-      .querySelectorAll(
-        "#ProductDetail_ProductDetails_div2 li, #ProductDetail_ProductDetails_div2 span[itemprop='description'] > li"
-      )
+      .querySelectorAll(liSel)
       .forEach(function (li) {
         if (li.closest("#beanbag-swatch-wrapper, #mc-pdp-features, script, style")) return;
         try {
@@ -197,7 +211,7 @@
         } catch (eHide) {}
       });
     global.document
-      .querySelectorAll("#ProductDetail_ProductDetails_div2 ul, #ProductDetail_ProductDetails_div2 span[itemprop='description'] ul")
+      .querySelectorAll(ulSel)
       .forEach(function (ul) {
         if (ul.closest("#beanbag-swatch-wrapper, #mc-pdp-features")) return;
         var vis = ul.querySelector("li:not([style*='display: none'])");
@@ -1426,6 +1440,10 @@
   function ensureQuantityAboveAtc() {
     if (!isProductPdp()) return;
     if (isSectionalPdpPage()) return;
+    if (isBeanBagPdpPage()) {
+      hideUniformQty();
+      return;
+    }
     try {
       if (
         global.document.body &&
@@ -1502,6 +1520,7 @@
   function ensurePurchaseStackCentered() {
     if (!isProductPdp()) return;
     if (isSectionalPdpPage()) return;
+    if (isBeanBagPdpPage()) return;
     try {
       if (
         global.document.body &&
@@ -1705,6 +1724,12 @@
     try {
       placeBrandLogoAboveTitle();
     } catch (eLogo) {}
+    if (isBeanBagPdpPage()) {
+      // Bean bag / soft-goods PDPs use the uniform layout handled in
+      // patchBeanBagPdp(); do not reorder the price/box here or it fights
+      // the price+ATC row and causes flicker.
+      return;
+    }
     var logo = global.document.getElementById("mc-pdp-brand-logo");
     var title = global.document.getElementById("mc-pdp-title-right");
     var price = global.document.getElementById("mc-pdp-price-stack-host");
@@ -1854,9 +1879,13 @@
   }
 
   function extractDescriptionFeaturesHtml() {
-    var src = global.document.querySelector(
-      "#ProductDetail_ProductDetails_div2 span[itemprop='description'], #ProductDetail_ProductDetails_div2 .colors_descriptionbox, #content_area span[itemprop='description']"
-    );
+    var sel =
+      "#ProductDetail_ProductDetails_div2 span[itemprop='description'], #ProductDetail_ProductDetails_div2 .colors_descriptionbox, #content_area span[itemprop='description']";
+    if (isBeanBagPdpPage()) {
+      sel +=
+        ", #mc-pdp-description-below-features #product_description, #ProductDetail_ProductDetails_div span[itemprop='description'], #product_description";
+    }
+    var src = global.document.querySelector(sel);
     if (!src) return "";
     var items = [];
     src.querySelectorAll("li").forEach(function (li) {
@@ -2156,12 +2185,209 @@
     }
   }
 
+  function withMoPaused(fn) {
+    global.__MC_PDP_MO_PAUSE__ = (global.__MC_PDP_MO_PAUSE__ || 0) + 1;
+    try {
+      fn();
+    } catch (eFn) {}
+    var release = function () {
+      global.__MC_PDP_MO_PAUSE__ = Math.max(0, (global.__MC_PDP_MO_PAUSE__ || 1) - 1);
+    };
+    if (typeof global.requestAnimationFrame === "function") {
+      global.requestAnimationFrame(release);
+    } else {
+      release();
+    }
+  }
+
+  function tagHeroMediaCol() {
+    var opt = global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
+    if (!opt) return;
+    var media = opt.previousElementSibling;
+    if (media && media.tagName === "TD" && !media.classList.contains("mc-pdp-hero-media-col")) {
+      media.classList.add("mc-pdp-hero-media-col");
+    }
+  }
+
+  function hideUniformQty() {
+    var root = global.document.getElementById("v65-product-parent") || global.document;
+    root
+      .querySelectorAll(
+        'input.v65-productdetail-cartqty, input[name^="QTY."], input[name="QTY"], input[name="quantity"]'
+      )
+      .forEach(function (q) {
+        if (q.closest("#mc-pdp-price-atc-row")) return;
+        try {
+          q.style.setProperty("position", "absolute", "important");
+          q.style.setProperty("width", "1px", "important");
+          q.style.setProperty("height", "1px", "important");
+          q.style.setProperty("overflow", "hidden", "important");
+          q.style.setProperty("clip", "rect(0 0 0 0)", "important");
+          q.style.setProperty("opacity", "0", "important");
+          q.style.setProperty("pointer-events", "none", "important");
+        } catch (eQ) {}
+      });
+    var qr = global.document.getElementById("mc-pdp-qty-row");
+    if (qr && qr.parentNode) {
+      try {
+        qr.parentNode.removeChild(qr);
+      } catch (eRm) {}
+    }
+    try {
+      hideVolusionQuantityRows();
+    } catch (eVol) {}
+  }
+
+  function ensureBeanBagPriceAtcRow() {
+    if (!isBeanBagPdpPage()) return null;
+    var col = findPdpHeroColumnTd();
+    if (!col) return null;
+    var price = global.document.getElementById("mc-pdp-price-stack-host");
+    if (!price) return null;
+    var target = resolveAtcPurchaseTarget();
+    var atc = target ? target.wrap : null;
+    var row = global.document.getElementById("mc-pdp-price-atc-row");
+    if (!row) {
+      row = global.document.createElement("div");
+      row.id = "mc-pdp-price-atc-row";
+      row.className = "mc-pdp-price-atc-row";
+    }
+    var title = global.document.getElementById("mc-pdp-title-right");
+    if (title && title.parentNode === col) {
+      if (title.nextElementSibling !== row) {
+        try {
+          if (title.nextSibling) col.insertBefore(row, title.nextSibling);
+          else col.appendChild(row);
+        } catch (eT) {}
+      }
+    } else if (row.parentNode !== col) {
+      try {
+        col.insertBefore(row, col.firstChild);
+      } catch (eC) {}
+    }
+    if (price.parentNode !== row) {
+      try {
+        row.insertBefore(price, row.firstChild);
+      } catch (eP) {}
+    }
+    if (atc && atc.parentNode !== row) {
+      try {
+        row.appendChild(atc);
+      } catch (eA) {}
+    }
+    if (atc && price.nextElementSibling !== atc && price.parentNode === row && atc.parentNode === row) {
+      try {
+        row.insertBefore(price, atc);
+      } catch (eO) {}
+    }
+    return row;
+  }
+
+  function mountDescriptionBelowFeatures() {
+    if (!isBeanBagPdpPage()) return;
+    var col = findPdpHeroColumnTd();
+    if (!col) return;
+    var descDiv =
+      global.document.getElementById("ProductDetail_ProductDetails_div") ||
+      global.document.getElementById("ProductDetail_ProductDetails_div2");
+    if (!descDiv) return;
+    var host = global.document.getElementById("mc-pdp-description-below-features");
+    if (!host) {
+      host = global.document.createElement("div");
+      host.id = "mc-pdp-description-below-features";
+      host.className = "mc-pdp-description-below-features";
+    }
+    if (host.parentNode !== col) {
+      try {
+        col.appendChild(host);
+      } catch (eH) {}
+    }
+    if (descDiv.parentNode !== host) {
+      try {
+        var box = descDiv.closest("table.colors_descriptionbox");
+        descDiv.querySelectorAll("script").forEach(function (s) {
+          try {
+            s.remove();
+          } catch (eS) {}
+        });
+        host.appendChild(descDiv);
+        if (box && !box.contains(descDiv)) {
+          box.setAttribute("data-mc-empty-desc", "1");
+        }
+        var altBox = global.document.getElementById("ProductDetail_ProductDetails_div2");
+        if (altBox && altBox !== descDiv && !altBox.contains(descDiv)) {
+          var altWrap = altBox.closest("table.colors_descriptionbox");
+          if (altWrap && !altWrap.contains(descDiv)) {
+            altWrap.setAttribute("data-mc-empty-desc", "1");
+          }
+        }
+        var hdr = global.document.getElementById("Header_ProductDetail_ProductDetails");
+        if (hdr) hdr.setAttribute("data-mc-empty-desc", "1");
+      } catch (eMove) {}
+    }
+    try {
+      pruneDescriptionDuplicateFeatures();
+    } catch (ePrune) {}
+  }
+
+  function orderBeanBagColumn() {
+    var col = findPdpHeroColumnTd();
+    if (!col) return;
+    var box =
+      global.document.querySelector("#v65-product-parent .colors_pricebox") || null;
+    var order = [
+      global.document.getElementById("mc-pdp-brand-logo"),
+      global.document.getElementById("mc-pdp-title-right"),
+      global.document.getElementById("mc-pdp-price-atc-row"),
+      box,
+      global.document.getElementById("beanbag-swatch-wrapper"),
+      global.document.getElementById("mc-pdp-features"),
+      global.document.getElementById("mc-pdp-description-below-features"),
+    ];
+    var prev = null;
+    var FOLLOWING = 4; // Node.DOCUMENT_POSITION_FOLLOWING
+    order.forEach(function (node) {
+      if (!node) return;
+      if (node.parentNode !== col) {
+        try {
+          if (prev && prev.parentNode === col && prev.nextSibling) {
+            col.insertBefore(node, prev.nextSibling);
+          } else if (prev && prev.parentNode === col) {
+            col.appendChild(node);
+          } else {
+            col.appendChild(node);
+          }
+        } catch (eBring) {}
+      } else if (prev && prev.parentNode === col) {
+        try {
+          if (node.compareDocumentPosition(prev) & FOLLOWING) {
+            if (prev.nextSibling) col.insertBefore(node, prev.nextSibling);
+            else col.appendChild(node);
+          }
+        } catch (eOrd) {}
+      }
+      prev = node;
+    });
+  }
+
   function patchBeanBagPdp() {
     if (!isProductPdp()) return;
-    if (!global.document.getElementById("beanbag-swatch-wrapper") && !isBeanBagPdpPage()) return;
-    mountBeanBagSwatchesAboveFeatures();
-    mountPdpDescriptionUnderMedia();
-    initBeanBagSwatchBehavior();
+    if (!isBeanBagPdpPage() && !global.document.getElementById("beanbag-swatch-wrapper")) return;
+    withMoPaused(function () {
+      tagHeroMediaCol();
+      try {
+        placeBrandLogoAboveTitle();
+      } catch (eLogo) {}
+      mountBeanBagSwatchesAboveFeatures();
+      ensureBeanBagPriceAtcRow();
+      mountDescriptionBelowFeatures();
+      orderBeanBagColumn();
+      hideUniformQty();
+      try {
+        fixAddToCartChrome();
+      } catch (eChrome) {}
+      initBeanBagSwatchBehavior();
+    });
   }
 
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
@@ -3120,6 +3346,7 @@
     var moLastRun = 0;
     var mo = new MutationObserver(function () {
       if (scheduled) return;
+      if (global.__MC_PDP_MO_PAUSE__) return;
       var sectional = isSectionalPdpPage();
       if (sectional) {
         var now = Date.now();
