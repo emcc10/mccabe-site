@@ -3238,7 +3238,6 @@
         // Fallback: single 600 ms re-assert for browsers without MO.
         global.setTimeout(function () { applyBbImage(imgFile); }, 600);
       }
-      }, 200);
     }, false);
   }
 
