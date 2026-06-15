@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp29";
+  var VERSION = "20260616pdp30";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -1790,13 +1790,7 @@
       "body.productdetails img#product_photo,body.mc-product-page img#product_photo{" +
       "max-width:min(650px,100%)!important;width:100%!important;height:auto!important}" +
       "body.productdetails a#product_photo_zoom_url,body.mc-product-page a#product_photo_zoom_url{" +
-      "max-width:min(650px,100%)!important;width:100%!important;display:block!important}" +
-      // Desktop two-column hero: nudge the main image down so its top lines up
-      // with the product name (the info column has the brand logo above it).
-      // Target only img#product_photo so the offset is applied once.
-      "@media (min-width:992px){" +
-      "body.productdetails #content_area img#product_photo,body.mc-product-page #content_area img#product_photo{" +
-      "margin-top:60px!important}}";
+      "max-width:min(650px,100%)!important;width:100%!important;display:block!important}";
   }
 
   global.mcPlaceBrandLogoAboveTitle = placeBrandLogoAboveTitle;
@@ -3189,28 +3183,61 @@
     if (!isBeanBagPdpPage()) return;
     if (global.document.documentElement.dataset.mcBbImgBound === "1") return;
     global.document.documentElement.dataset.mcBbImgBound = "1";
+
+    function applyBbImage(imgFile) {
+      var mainImg = global.document.getElementById("product_photo");
+      if (!mainImg) return;
+      var targetSrc = "/v/vspfiles/images/" + imgFile;
+      try {
+        if (mainImg.getAttribute("src") !== targetSrc) mainImg.src = targetSrc;
+        mainImg.style.setProperty("opacity", "1", "important");
+      } catch (eSet) {}
+      var zoomLink = global.document.getElementById("product_photo_zoom_url");
+      if (zoomLink) {
+        try { zoomLink.href = targetSrc; } catch (eZm) {}
+      }
+    }
+
     global.document.addEventListener("click", function (eBb) {
       var swatch = eBb.target && eBb.target.closest ? eBb.target.closest(".beanbag-swatch") : null;
       if (!swatch) return;
-      // A single 200ms callback re-asserts the selected image after Volusion's
-      // own change_option handler finishes. No interval; no repeated timeouts.
-      global.setTimeout(function () {
-        var coverSel = global.document.querySelector("#options_table select");
-        if (!coverSel) return;
-        var optId = String(coverSel.value || "");
-        var imgFile = BB_COVER_IMAGE_BY_OPTION_ID[optId];
-        if (!imgFile) return;
-        var mainImg = global.document.getElementById("product_photo");
-        if (!mainImg) return;
-        var targetSrc = "/v/vspfiles/images/" + imgFile;
-        try {
-          if (mainImg.getAttribute("src") !== targetSrc) mainImg.src = targetSrc;
-          mainImg.style.setProperty("opacity", "1", "important");
-        } catch (eSet) {}
-        var zoomLink = global.document.getElementById("product_photo_zoom_url");
-        if (zoomLink) {
-          try { zoomLink.href = targetSrc; } catch (eZm) {}
-        }
+      // Use the select that has name containing "___4" (cover option) or fall back to first select.
+      var coverSel =
+        global.document.querySelector("#options_table select[name*='___4']") ||
+        global.document.querySelector("#options_table select");
+      if (!coverSel) return;
+      var optId = String(coverSel.value || "");
+      var imgFile = BB_COVER_IMAGE_BY_OPTION_ID[optId];
+      if (!imgFile) {
+        // Value may not be updated yet — re-check after Volusion's handler runs
+        global.setTimeout(function () {
+          var optIdLate = String(coverSel.value || "");
+          var imgFileLate = BB_COVER_IMAGE_BY_OPTION_ID[optIdLate];
+          if (imgFileLate) applyBbImage(imgFileLate);
+        }, 50);
+        return;
+      }
+      // Apply immediately, then re-assert after Volusion's change_option AJAX resets the image.
+      applyBbImage(imgFile);
+      // Single MutationObserver that re-applies our colour image if Volusion resets it,
+      // then disconnects — never runs more than once per swatch click.
+      var mainImg = global.document.getElementById("product_photo");
+      if (mainImg && typeof global.MutationObserver === "function") {
+        var bbObs = new global.MutationObserver(function (mutations, obs) {
+          var src = mainImg.getAttribute("src") || "";
+          // If Volusion reset the src away from our custom image, re-apply once.
+          if (src.indexOf("bb-fauxfur") === -1) {
+            applyBbImage(imgFile);
+          }
+          obs.disconnect();
+        });
+        bbObs.observe(mainImg, { attributes: true, attributeFilter: ["src"] });
+        // Disconnect after 2 s regardless — this is never continuous.
+        global.setTimeout(function () { try { bbObs.disconnect(); } catch (e) {} }, 2000);
+      } else {
+        // Fallback: single 600 ms re-assert for browsers without MO.
+        global.setTimeout(function () { applyBbImage(imgFile); }, 600);
+      }
       }, 200);
     }, false);
   }
