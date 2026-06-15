@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp26";
+  var VERSION = "20260616pdp27";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -1689,7 +1689,12 @@
   function fixAddToCartChrome() {
     global.document.querySelectorAll(".mc-atc-button-wrap").forEach(function (wrap) {
       if (wrap.closest("#mc-pdp-price-atc-row")) return;
+      // Only write inline styles once per wrapper element. Subsequent runPatch calls
+      // are covered by the CSS rule in ensurePdpHeroCriticalCss, so re-running
+      // styleCompactAtcButton every MO tick is unnecessary and causes visual flash.
+      if (wrap.getAttribute("data-mc-atc-styled") === "1") return;
       styleCompactAtcButton(wrap);
+      wrap.setAttribute("data-mc-atc-styled", "1");
     });
   }
 
@@ -3012,8 +3017,13 @@
     var host = findOrCreatePriceStackHost();
     if (!host) return;
     var sig = String(retailAmt) + "|" + String(saleAmt) + "|" + (guest ? "g" : "m");
-    host.innerHTML = buildStackHostHtml(retailAmt, saleAmt, guest);
-    host.setAttribute("data-mc-stack-sig", sig);
+    if (host.getAttribute("data-mc-stack-sig") === sig) {
+      // Price unchanged — skip innerHTML rebuild so the price display never flashes.
+      // Still run placement and hiding passes below in case the DOM shifted.
+    } else {
+      host.innerHTML = buildStackHostHtml(retailAmt, saleAmt, guest);
+      host.setAttribute("data-mc-stack-sig", sig);
+    }
     host.setAttribute("data-mc-stack-owned", "1");
     prunePriceStackHost(host);
     placePriceStackHost(host);
