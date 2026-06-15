@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp28";
+  var VERSION = "20260616pdp29";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -3038,22 +3038,16 @@
     placePriceStackHost(host);
     hideAllStrayPdpPriceNodes(host);
     hideDuplicatePdpPriceUi();
-    // Rescue the Klarna/BNPL messaging element into the price host so it
-    // is never accidentally hidden when we suppress duplicate pricebox nodes.
-    // We move it once (idempotent) — Stripe mounts by ID so the move is safe.
-    var bnplRescue = global.document.getElementById("messaging-element");
-    if (bnplRescue && bnplRescue.parentNode !== host) {
+    // Never move #messaging-element — Stripe has mounted into it and any DOM
+    // repositioning triggers network calls to r.stripe.com.  Just ensure its
+    // inline visibility is clear so nothing accidentally hides it.
+    var bnplVis = global.document.getElementById("messaging-element");
+    if (bnplVis) {
       try {
-        host.appendChild(bnplRescue);
-        bnplRescue.style.removeProperty("display");
-        bnplRescue.style.removeProperty("visibility");
-        bnplRescue.style.removeProperty("opacity");
-        bnplRescue.style.removeProperty("height");
-      } catch (eBnplRescue) {}
-    } else if (bnplRescue) {
-      try {
-        bnplRescue.style.removeProperty("display");
-        bnplRescue.style.removeProperty("visibility");
+        bnplVis.style.removeProperty("display");
+        bnplVis.style.removeProperty("visibility");
+        bnplVis.style.removeProperty("opacity");
+        bnplVis.style.removeProperty("height");
       } catch (eBnplVis) {}
     }
     ensureHeroColumnOrder();
