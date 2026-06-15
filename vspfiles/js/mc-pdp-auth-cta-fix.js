@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp17";
+  var VERSION = "20260616pdp18";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_HERO_ANTIFLICKER_SEL =
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo," +
@@ -1606,6 +1606,7 @@
 
   function fixAddToCartChrome() {
     global.document.querySelectorAll(".mc-atc-button-wrap").forEach(function (wrap) {
+      if (wrap.closest("#mc-pdp-price-atc-row")) return;
       try {
         wrap.style.setProperty("border", "1px solid " + PDP_CHROME_BORDER, "important");
         wrap.style.setProperty("border-color", PDP_CHROME_BORDER, "important");
@@ -1927,6 +1928,19 @@
     var insertParent = findPdpHeroInsertParent();
     var insertAfter = findPdpHeroInsertAfter(insertParent);
     if (!insertParent) return;
+    if (isBeanBagPdpPage()) {
+      // Ordering for bean bag / soft-goods PDPs is owned by buildBeanBagStack();
+      // only make sure the block lives in the options column, never reposition it
+      // here (that would fight the stack and cause flicker).
+      var bbCol = findPdpHeroColumnTd() || insertParent;
+      if (block.parentNode !== bbCol) {
+        try {
+          bbCol.appendChild(block);
+        } catch (eBbFeat) {}
+      }
+      pruneDescriptionDuplicateFeatures();
+      return;
+    }
     if (block.parentNode !== insertParent || (insertAfter && block.previousElementSibling !== insertAfter)) {
       insertPdpHeroNodeAfter(insertParent, insertAfter, block);
     }
@@ -2252,17 +2266,9 @@
       row.id = "mc-pdp-price-atc-row";
       row.className = "mc-pdp-price-atc-row";
     }
-    var title = global.document.getElementById("mc-pdp-title-right");
-    if (title && title.parentNode === col) {
-      if (title.nextElementSibling !== row) {
-        try {
-          if (title.nextSibling) col.insertBefore(row, title.nextSibling);
-          else col.appendChild(row);
-        } catch (eT) {}
-      }
-    } else if (row.parentNode !== col) {
+    if (!col.contains(row)) {
       try {
-        col.insertBefore(row, col.firstChild);
+        col.appendChild(row);
       } catch (eC) {}
     }
     if (price.parentNode !== row) {
@@ -2297,7 +2303,7 @@
       host.id = "mc-pdp-description-below-features";
       host.className = "mc-pdp-description-below-features";
     }
-    if (host.parentNode !== col) {
+    if (!col.contains(host)) {
       try {
         col.appendChild(host);
       } catch (eH) {}
@@ -2330,44 +2336,79 @@
     } catch (ePrune) {}
   }
 
-  function orderBeanBagColumn() {
+  function extractSwatchesIntoCol() {
+    var wrap = global.document.getElementById("beanbag-swatch-wrapper");
+    if (!wrap) return;
+    wrap.setAttribute("data-mc-beanbag-swatches", "1");
+    wrap.dataset.moved = "1";
+    var col = findPdpHeroColumnTd();
+    if (col && !col.contains(wrap)) {
+      try {
+        col.appendChild(wrap);
+      } catch (eSw) {}
+    }
+    var labelWrap = global.document.getElementById("beanbag-selected-cover");
+    if (labelWrap) {
+      try {
+        labelWrap.style.setProperty("display", "block", "important");
+      } catch (eLab) {}
+    }
+  }
+
+  function hideLegacyBeanBagPrice() {
+    // The clean price now lives in #mc-pdp-price-atc-row; hide the duplicate
+    // legacy Volusion price so it does not show at the top of the column.
+    global.document
+      .querySelectorAll("#v65-product-parent .colors_pricebox .product_productprice")
+      .forEach(function (el) {
+        if (el.closest("#mc-pdp-price-atc-row")) return;
+        try {
+          el.style.setProperty("display", "none", "important");
+        } catch (ePr) {}
+      });
+  }
+
+  // Authoritative ordering: collect the hero nodes into one dedicated stack and
+  // append them in the desired order. appendChild both moves AND orders, so this
+  // is robust against the deeply nested Volusion table. Idempotent: only
+  // re-append when the current order is wrong (prevents MutationObserver loops).
+  function buildBeanBagStack() {
     var col = findPdpHeroColumnTd();
     if (!col) return;
-    var box =
-      global.document.querySelector("#v65-product-parent .colors_pricebox") || null;
-    var order = [
+    var stack = global.document.getElementById("mc-pdp-hero-stack");
+    if (!stack) {
+      stack = global.document.createElement("div");
+      stack.id = "mc-pdp-hero-stack";
+      stack.className = "mc-pdp-hero-stack";
+    }
+    if (stack.parentNode !== col) {
+      try {
+        col.insertBefore(stack, col.firstChild);
+      } catch (eStk) {}
+    }
+    var seq = [
       global.document.getElementById("mc-pdp-brand-logo"),
       global.document.getElementById("mc-pdp-title-right"),
       global.document.getElementById("mc-pdp-price-atc-row"),
-      box,
+      global.document.getElementById("messaging-element"),
       global.document.getElementById("beanbag-swatch-wrapper"),
       global.document.getElementById("mc-pdp-features"),
       global.document.getElementById("mc-pdp-description-below-features"),
-    ];
-    var prev = null;
-    var FOLLOWING = 4; // Node.DOCUMENT_POSITION_FOLLOWING
-    order.forEach(function (node) {
-      if (!node) return;
-      if (node.parentNode !== col) {
-        try {
-          if (prev && prev.parentNode === col && prev.nextSibling) {
-            col.insertBefore(node, prev.nextSibling);
-          } else if (prev && prev.parentNode === col) {
-            col.appendChild(node);
-          } else {
-            col.appendChild(node);
-          }
-        } catch (eBring) {}
-      } else if (prev && prev.parentNode === col) {
-        try {
-          if (node.compareDocumentPosition(prev) & FOLLOWING) {
-            if (prev.nextSibling) col.insertBefore(node, prev.nextSibling);
-            else col.appendChild(node);
-          }
-        } catch (eOrd) {}
-      }
-      prev = node;
+    ].filter(function (n) {
+      return !!n;
     });
+    var correct =
+      stack.children.length === seq.length &&
+      seq.every(function (n, i) {
+        return stack.children[i] === n;
+      });
+    if (!correct) {
+      seq.forEach(function (n) {
+        try {
+          stack.appendChild(n);
+        } catch (eApp) {}
+      });
+    }
   }
 
   function patchBeanBagPdp() {
@@ -2378,14 +2419,13 @@
       try {
         placeBrandLogoAboveTitle();
       } catch (eLogo) {}
-      mountBeanBagSwatchesAboveFeatures();
+      mountPdpFeaturesBlock();
+      extractSwatchesIntoCol();
       ensureBeanBagPriceAtcRow();
       mountDescriptionBelowFeatures();
-      orderBeanBagColumn();
+      hideLegacyBeanBagPrice();
+      buildBeanBagStack();
       hideUniformQty();
-      try {
-        fixAddToCartChrome();
-      } catch (eChrome) {}
       initBeanBagSwatchBehavior();
     });
   }
