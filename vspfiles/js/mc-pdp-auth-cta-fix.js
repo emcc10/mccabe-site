@@ -3937,16 +3937,20 @@
     // what makes the PDP visibly bounce/reflow. Released on rAF after the browser
     // has applied our changes. Uses a counter so nested/overlapping runs are safe.
     global.__MC_PDP_MO_PAUSE__ = (global.__MC_PDP_MO_PAUSE__ || 0) + 1;
+    var mcMoReleased = false;
     var mcReleaseMo = function () {
+      if (mcMoReleased) return;
+      mcMoReleased = true;
       global.__MC_PDP_MO_PAUSE__ = Math.max(0, (global.__MC_PDP_MO_PAUSE__ || 1) - 1);
     };
     if (typeof global.requestAnimationFrame === "function") {
       global.requestAnimationFrame(function () {
         global.requestAnimationFrame(mcReleaseMo);
       });
-    } else {
-      global.setTimeout(mcReleaseMo, 64);
     }
+    // Safety net: rAF does not fire in background tabs, so guarantee the pause is
+    // always released even if the frame callbacks never run.
+    global.setTimeout(mcReleaseMo, 250);
     try {
       installPdpStackApiGuards();
       ensurePdpStackCriticalCss();
