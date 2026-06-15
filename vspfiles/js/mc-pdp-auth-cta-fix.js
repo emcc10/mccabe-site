@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp18";
+  var VERSION = "20260616pdp19";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_HERO_ANTIFLICKER_SEL =
     "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo," +
@@ -2355,6 +2355,61 @@
     }
   }
 
+  function styleBeanBagPriceAtc() {
+    var row = global.document.getElementById("mc-pdp-price-atc-row");
+    if (!row) return;
+    var price = global.document.getElementById("mc-pdp-price-stack-host");
+    if (price) {
+      // override the inline width:100% that placePriceStackHost sets so the
+      // price shrinks to its content and the ATC can sit beside it
+      price.style.setProperty("display", "inline-flex", "important");
+      price.style.setProperty("align-items", "center", "important");
+      price.style.setProperty("width", "auto", "important");
+      price.style.setProperty("max-width", "none", "important");
+      price.style.setProperty("flex", "0 0 auto", "important");
+      price.style.setProperty("margin", "0", "important");
+      price.style.setProperty("padding", "0", "important");
+    }
+    var wrap = row.querySelector(".mc-atc-button-wrap");
+    if (!wrap) return;
+    // clear any chrome that fixAddToCartChrome applied before the wrap was
+    // moved into the row (inline styles can't be undone by the stylesheet)
+    wrap.style.setProperty("border", "none", "important");
+    wrap.style.setProperty("box-shadow", "none", "important");
+    wrap.style.setProperty("background", "transparent", "important");
+    wrap.style.setProperty("background-color", "transparent", "important");
+    wrap.style.setProperty("padding", "0", "important");
+    wrap.style.setProperty("margin", "0", "important");
+    wrap.style.setProperty("width", "auto", "important");
+    wrap.style.setProperty("min-width", "0", "important");
+    wrap.style.setProperty("max-width", "none", "important");
+    wrap.style.setProperty("display", "inline-flex", "important");
+    wrap.style.setProperty("align-items", "center", "important");
+    wrap.style.setProperty("gap", "0", "important");
+    wrap.style.setProperty("flex", "0 0 auto", "important");
+    var icon = wrap.querySelector(".mc-cart-icon-wrapper");
+    if (icon) icon.style.setProperty("display", "none", "important");
+    var btn = wrap.querySelector("input, button");
+    if (btn) {
+      btn.style.setProperty("border", "none", "important");
+      btn.style.setProperty("background", "#111", "important");
+      btn.style.setProperty("background-color", "#111", "important");
+      btn.style.setProperty("color", "#fff", "important");
+      btn.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
+      btn.style.setProperty("font-size", "11px", "important");
+      btn.style.setProperty("font-weight", "500", "important");
+      btn.style.setProperty("letter-spacing", "0.14em", "important");
+      btn.style.setProperty("text-transform", "uppercase", "important");
+      btn.style.setProperty("line-height", "1", "important");
+      btn.style.setProperty("padding", "10px 18px", "important");
+      btn.style.setProperty("margin", "0", "important");
+      btn.style.setProperty("width", "auto", "important");
+      btn.style.setProperty("min-width", "0", "important");
+      btn.style.setProperty("border-radius", "0", "important");
+      btn.style.setProperty("cursor", "pointer", "important");
+    }
+  }
+
   function hideLegacyBeanBagPrice() {
     // The clean price now lives in #mc-pdp-price-atc-row; hide the duplicate
     // legacy Volusion price so it does not show at the top of the column.
@@ -2425,6 +2480,7 @@
       mountDescriptionBelowFeatures();
       hideLegacyBeanBagPrice();
       buildBeanBagStack();
+      styleBeanBagPriceAtc();
       hideUniformQty();
       initBeanBagSwatchBehavior();
     });

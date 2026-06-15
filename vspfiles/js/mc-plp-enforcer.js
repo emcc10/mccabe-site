@@ -639,7 +639,7 @@
     }
   }
 
-  var PDP_AUTH_WANT = "20260616pdp18";
+  var PDP_AUTH_WANT = "20260616pdp19";
 
   function loadPdpAuthCtaFix() {
     try {
