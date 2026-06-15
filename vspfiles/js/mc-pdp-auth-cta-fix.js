@@ -2431,7 +2431,13 @@
   }
 
   function shouldUseDescriptionBelowFeaturesLayout() {
-    return !!findPrimaryOptionMountNode() || !!findConfiguredColorSwatchContext();
+    // Unified layout for every standard product PDP: title/price, then options
+    // (if any), then features, then description, with the qty+ATC purchase stack
+    // centered below. Sectional and bean bag PDPs own their own layout.
+    if (!isProductPdp()) return false;
+    if (isSectionalPdpPage()) return false;
+    if (isBeanBagPdpPage()) return false;
+    return true;
   }
 
   function mountPrimaryOptionBlock() {
