@@ -3931,6 +3931,22 @@
     if (!isProductPdp()) return;
     var sectional = isSectionalPdpPage();
     var heroLocked = !!global.__MC_PDP_HERO_READY_LOCKED__;
+    // Pause the MutationObserver for the duration of this patch (plus a couple of
+    // animation frames) so the DOM moves/styles we apply here don't get observed
+    // as "new" mutations and schedule yet another runPatch — that feedback loop is
+    // what makes the PDP visibly bounce/reflow. Released on rAF after the browser
+    // has applied our changes. Uses a counter so nested/overlapping runs are safe.
+    global.__MC_PDP_MO_PAUSE__ = (global.__MC_PDP_MO_PAUSE__ || 0) + 1;
+    var mcReleaseMo = function () {
+      global.__MC_PDP_MO_PAUSE__ = Math.max(0, (global.__MC_PDP_MO_PAUSE__ || 1) - 1);
+    };
+    if (typeof global.requestAnimationFrame === "function") {
+      global.requestAnimationFrame(function () {
+        global.requestAnimationFrame(mcReleaseMo);
+      });
+    } else {
+      global.setTimeout(mcReleaseMo, 64);
+    }
     try {
       installPdpStackApiGuards();
       ensurePdpStackCriticalCss();
