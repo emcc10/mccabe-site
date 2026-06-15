@@ -1664,26 +1664,57 @@
     return "rgb(119, 119, 119)";
   }
 
+  // Single source of truth for the Add-to-Cart look: a transparent, borderless
+  // wrapper with a solid dark button inside. No outer box = no "second box".
+  function styleCompactAtcButton(wrap) {
+    if (!wrap) return;
+    try {
+      wrap.style.setProperty("border", "none", "important");
+      wrap.style.setProperty("border-color", "transparent", "important");
+      wrap.style.setProperty("box-shadow", "none", "important");
+      wrap.style.setProperty("border-radius", "0", "important");
+      wrap.style.setProperty("background", "transparent", "important");
+      wrap.style.setProperty("background-color", "transparent", "important");
+      wrap.style.setProperty("padding", "0", "important");
+      wrap.style.setProperty("width", "auto", "important");
+      wrap.style.setProperty("min-width", "0", "important");
+      wrap.style.setProperty("max-width", "none", "important");
+      wrap.style.setProperty("display", "inline-flex", "important");
+      wrap.style.setProperty("align-items", "center", "important");
+      wrap.style.setProperty("justify-content", "center", "important");
+      wrap.style.setProperty("gap", "0", "important");
+      var icon = wrap.querySelector(".mc-cart-icon-wrapper");
+      if (icon) icon.style.setProperty("display", "none", "important");
+      var btn = wrap.querySelector(
+        "input[name='btnaddtocart'], button[name='btnaddtocart'], input[type='submit'], input, button"
+      );
+      if (btn) {
+        btn.style.setProperty("border", "none", "important");
+        btn.style.setProperty("box-shadow", "none", "important");
+        btn.style.setProperty("background", "#111", "important");
+        btn.style.setProperty("background-color", "#111", "important");
+        btn.style.setProperty("color", "#fff", "important");
+        btn.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
+        btn.style.setProperty("font-size", "11px", "important");
+        btn.style.setProperty("font-weight", "500", "important");
+        btn.style.setProperty("letter-spacing", "0.14em", "important");
+        btn.style.setProperty("text-transform", "uppercase", "important");
+        btn.style.setProperty("line-height", "1", "important");
+        btn.style.setProperty("padding", "12px 22px", "important");
+        btn.style.setProperty("margin", "0", "important");
+        btn.style.setProperty("width", "auto", "important");
+        btn.style.setProperty("min-width", "0", "important");
+        btn.style.setProperty("max-width", "none", "important");
+        btn.style.setProperty("border-radius", "0", "important");
+        btn.style.setProperty("cursor", "pointer", "important");
+      }
+    } catch (eAtc) {}
+  }
+
   function fixAddToCartChrome() {
     global.document.querySelectorAll(".mc-atc-button-wrap").forEach(function (wrap) {
       if (wrap.closest("#mc-pdp-price-atc-row")) return;
-      try {
-        wrap.style.setProperty("border", "1px solid " + PDP_CHROME_BORDER, "important");
-        wrap.style.setProperty("border-color", PDP_CHROME_BORDER, "important");
-        wrap.style.setProperty("box-shadow", "none", "important");
-        wrap.style.setProperty("border-radius", "0", "important");
-        wrap.style.setProperty("background", "#fff", "important");
-        wrap.style.setProperty("background-color", "#fff", "important");
-        wrap.style.setProperty("color", "#444", "important");
-        wrap.style.setProperty("width", "fit-content", "important");
-        wrap.style.setProperty("min-width", "0", "important");
-        wrap.style.setProperty("max-width", "none", "important");
-        wrap.style.setProperty("padding", "10px 18px", "important");
-        wrap.style.setProperty("display", "inline-flex", "important");
-        wrap.style.setProperty("align-items", "center", "important");
-        wrap.style.setProperty("justify-content", "center", "important");
-        wrap.style.setProperty("gap", "10px", "important");
-      } catch (eAtc) {}
+      styleCompactAtcButton(wrap);
     });
   }
 
@@ -1720,13 +1751,17 @@
       "letter-spacing:0.02em!important;text-transform:none!important;color:#444!important;margin:0!important;padding:0!important}" +
       "body.productdetails #mc-pdp-price-stack-host,body.mc-product-page #mc-pdp-price-stack-host{margin:4px 0 10px 0!important;gap:0!important}" +
       "body.productdetails .mc-atc-button-wrap,body.mc-product-page .mc-atc-button-wrap{" +
-      "border:1px solid #e0e0e0!important;border-color:#e0e0e0!important;box-shadow:none!important;" +
-      "border-radius:0!important;background:#fff!important;color:#444!important;outline:none!important;" +
-      "width:fit-content!important;min-width:0!important;max-width:none!important;padding:10px 18px!important;" +
-      "display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:10px!important}" +
+      "border:none!important;border-color:transparent!important;box-shadow:none!important;" +
+      "border-radius:0!important;background:transparent!important;background-color:transparent!important;color:#444!important;outline:none!important;" +
+      "width:auto!important;min-width:0!important;max-width:none!important;padding:0!important;" +
+      "display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:0!important}" +
       "body.productdetails .mc-atc-button-wrap input[name='btnaddtocart'],body.mc-product-page .mc-atc-button-wrap input[name='btnaddtocart']," +
-      "body.productdetails .mc-atc-button-wrap button[name='btnaddtocart'],body.mc-product-page .mc-atc-button-wrap button[name='btnaddtocart']{" +
-      "width:auto!important;min-width:0!important;max-width:none!important}" +
+      "body.productdetails .mc-atc-button-wrap button[name='btnaddtocart'],body.mc-product-page .mc-atc-button-wrap button[name='btnaddtocart']," +
+      "body.productdetails .mc-atc-button-wrap input[type='submit'],body.mc-product-page .mc-atc-button-wrap input[type='submit']{" +
+      "border:none!important;box-shadow:none!important;background:#111!important;background-color:#111!important;color:#fff!important;" +
+      "font-family:Inter,Arial,sans-serif!important;font-size:11px!important;font-weight:500!important;letter-spacing:0.14em!important;" +
+      "text-transform:uppercase!important;line-height:1!important;padding:12px 22px!important;margin:0!important;" +
+      "width:auto!important;min-width:0!important;max-width:none!important;border-radius:0!important;cursor:pointer!important}" +
       "body.productdetails #mc-pdp-qty-row,body.mc-product-page #mc-pdp-qty-row{" +
       "display:inline-flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;text-align:center!important;" +
       "visibility:visible!important;opacity:1!important;height:auto!important;width:auto!important;max-width:none!important;margin:0!important;gap:0!important}" +
@@ -3019,18 +3054,18 @@
     ].filter(function (n) {
       return !!n;
     });
-    var correct =
-      stack.children.length === seq.length &&
-      seq.every(function (n, i) {
-        return stack.children[i] === n;
-      });
-    if (!correct) {
-      seq.forEach(function (n) {
-        try {
-          stack.appendChild(n);
-        } catch (eApp) {}
-      });
-    }
+    // Minimal-move ordering: only relocate nodes that are not already at their
+    // target index. Re-appending the whole sequence on every mutation caused a
+    // visible reflow flash whenever a third-party widget (Klarna/Affirm) or the
+    // MutationObserver fired. Processing left-to-right keeps earlier indices
+    // settled before we touch later ones.
+    seq.forEach(function (n, i) {
+      if (stack.children[i] === n) return;
+      try {
+        var ref = stack.children[i] || null;
+        stack.insertBefore(n, ref);
+      } catch (eApp) {}
+    });
   }
 
   function patchBeanBagPdp() {
