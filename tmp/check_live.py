@@ -10,5 +10,6 @@ m = re.search(r'var VERSION = "([^"]+)"', js)
 print("live JS VERSION:", m.group(1) if m else "NOT FOUND")
 
 css = fetch("https://www.mccabestheaterandliving.com/v/vspfiles/css/custom-safe.css?cb=" + cb)
-print("css has pdp17 block:", "MC PDP LOCK pdp17" in css)
-print("css has price-atc-row:", "#mc-pdp-price-atc-row" in css)
+print("css has hero-stack:", "#mc-pdp-hero-stack" in css)
+print("css has :has rebalance:", "td:has(#product_photo)" in css)
+print("js has buildBeanBagStack:", "buildBeanBagStack" in js)

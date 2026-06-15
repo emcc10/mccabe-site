@@ -47,7 +47,7 @@ with sync_playwright() as p:
     for tag, url in URLS:
         pg = b.new_page(viewport={"width": 1440, "height": 1500})
         pg.goto(url, wait_until="domcontentloaded", timeout=60000)
-        pg.wait_for_timeout(12000)
+        pg.wait_for_timeout(16000)
         print("\n====", tag, url)
         print(json.dumps(pg.evaluate(MEASURE), indent=2))
         pg.screenshot(path=f"tmp/live_{tag}.png", clip={"x": 0, "y": 80, "width": 1440, "height": 1000})

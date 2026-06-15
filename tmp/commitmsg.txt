@@ -1,0 +1,6 @@
+PDP pdp19: put price + ADD TO CART on one line with compact borderless button
+
+- styleBeanBagPriceAtc(): override the inline width:100% on the price host
+  so it shrinks to content, and strip the leftover inline chrome from the
+  ATC wrap (applied before it was moved into the row) so the button is a
+  compact borderless dark button sitting to the right of the price.
