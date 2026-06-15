@@ -2361,7 +2361,7 @@
     if (!isProductPdp()) return null;
     if (isSectionalPdpPage()) return null;
     var beanbag = global.document.getElementById("beanbag-swatch-wrapper");
-    if (beanbag) return beanbag;
+    if (beanbag) return null;
     var table =
       global.document.getElementById("options_table") ||
       global.document.querySelector("#v65-product-parent table[id*='options_table']") ||
@@ -2388,9 +2388,12 @@
       host.id = "mc-pdp-option-block";
       host.className = "mc-pdp-option-block";
     }
-    if (host.parentNode !== col) {
+    var features = global.document.getElementById("mc-pdp-features");
+    var heroStack = global.document.getElementById("mc-pdp-hero-stack");
+    var targetParent = (features && features.parentNode) || heroStack || col;
+    if (host.parentNode !== targetParent) {
       try {
-        col.appendChild(host);
+        targetParent.appendChild(host);
       } catch (eHost) {}
     }
     if (node.parentNode !== host) {
@@ -2398,7 +2401,6 @@
         host.appendChild(node);
       } catch (eNode) {}
     }
-    var features = global.document.getElementById("mc-pdp-features");
     if (features && host.parentNode === features.parentNode && host.nextElementSibling !== features) {
       try {
         host.parentNode.insertBefore(host, features);
@@ -2497,11 +2499,6 @@
 
   function applyBeanBagMainPhoto(photoIndex, imageMap, label) {
     var mainImg = global.document.getElementById("product_photo");
-    if (typeof global.change_product_photo === "function" && photoIndex > 0) {
-      try {
-        global.change_product_photo(photoIndex);
-      } catch (ePhoto) {}
-    }
     var file = findBeanBagImageFileForLabel(imageMap, label);
     if (mainImg && file) {
       var src = mainImg.src || "";
@@ -2522,6 +2519,10 @@
           } catch (eSrc) {}
         }
       }
+    } else if (typeof global.change_product_photo === "function" && photoIndex > 0) {
+      try {
+        global.change_product_photo(photoIndex);
+      } catch (ePhoto) {}
     }
     if (mainImg) {
       var zoom = global.document.getElementById("product_photo_zoom_url");
@@ -2830,59 +2831,96 @@
     }
   }
 
+  function ensureBeanBagPurchaseStack() {
+    if (!isProductPdp()) return null;
+    if (!isBeanBagPdpPage()) return null;
+    var col = findPdpHeroColumnTd();
+    if (!col) return null;
+    var purchaseTarget = resolveAtcPurchaseTarget();
+    if (!purchaseTarget || !purchaseTarget.stackNode) return null;
+    var stackNode = purchaseTarget.stackNode;
+    var stack = global.document.getElementById("mc-pdp-purchase-stack");
+    if (!stack) {
+      stack = global.document.createElement("div");
+      stack.id = "mc-pdp-purchase-stack";
+      stack.className = "mc-pdp-purchase-stack";
+    }
+    if (!stack.contains(stackNode)) stack.appendChild(stackNode);
+    if (stack.parentNode !== col) {
+      try {
+        col.appendChild(stack);
+      } catch (eStack) {}
+    }
+    try {
+      stack.style.setProperty("display", "flex", "important");
+      stack.style.setProperty("flex-direction", "column", "important");
+      stack.style.setProperty("align-items", "center", "important");
+      stack.style.setProperty("justify-content", "center", "important");
+      stack.style.setProperty("text-align", "center", "important");
+      stack.style.setProperty("width", "100%", "important");
+      stack.style.setProperty("max-width", "450px", "important");
+      stack.style.setProperty("margin", "18px auto 0 auto", "important");
+      stack.style.setProperty("padding", "0", "important");
+      stack.style.setProperty("gap", "0", "important");
+      stack.style.setProperty("clear", "both", "important");
+    } catch (eStyle) {}
+    try {
+      stackNode.style.setProperty("width", "100%", "important");
+      stackNode.style.setProperty("display", "flex", "important");
+      stackNode.style.setProperty("justify-content", "center", "important");
+      stackNode.style.setProperty("margin", "0 auto", "important");
+    } catch (eNode) {}
+    return stack;
+  }
+
   function styleBeanBagPriceAtc() {
-    var row = global.document.getElementById("mc-pdp-price-atc-row");
-    if (!row) return;
     var price = global.document.getElementById("mc-pdp-price-stack-host");
     if (price) {
-      // override the inline width:100% that placePriceStackHost sets so the
-      // price shrinks to its content and the ATC can sit beside it
-      price.style.setProperty("display", "inline-flex", "important");
-      price.style.setProperty("align-items", "center", "important");
-      price.style.setProperty("width", "auto", "important");
-      price.style.setProperty("max-width", "none", "important");
-      price.style.setProperty("flex", "0 0 auto", "important");
-      price.style.setProperty("margin", "0", "important");
-      price.style.setProperty("padding", "0", "important");
+      price.style.setProperty("display", "block", "important");
+      price.style.setProperty("width", "100%", "important");
+      price.style.setProperty("max-width", "450px", "important");
+      price.style.setProperty("margin", "4px 0 10px 0", "important");
+      price.style.setProperty("padding", "0 0 0 1.1em", "important");
+      price.style.setProperty("box-sizing", "border-box", "important");
     }
-    var wrap = row.querySelector(".mc-atc-button-wrap");
-    if (!wrap) return;
-    // clear any chrome that fixAddToCartChrome applied before the wrap was
-    // moved into the row (inline styles can't be undone by the stylesheet)
-    wrap.style.setProperty("border", "none", "important");
-    wrap.style.setProperty("box-shadow", "none", "important");
-    wrap.style.setProperty("background", "transparent", "important");
-    wrap.style.setProperty("background-color", "transparent", "important");
-    wrap.style.setProperty("padding", "0", "important");
-    wrap.style.setProperty("margin", "0", "important");
-    wrap.style.setProperty("width", "auto", "important");
-    wrap.style.setProperty("min-width", "0", "important");
-    wrap.style.setProperty("max-width", "none", "important");
-    wrap.style.setProperty("display", "inline-flex", "important");
-    wrap.style.setProperty("align-items", "center", "important");
-    wrap.style.setProperty("gap", "0", "important");
-    wrap.style.setProperty("flex", "0 0 auto", "important");
-    var icon = wrap.querySelector(".mc-cart-icon-wrapper");
-    if (icon) icon.style.setProperty("display", "none", "important");
-    var btn = wrap.querySelector("input, button");
-    if (btn) {
-      btn.style.setProperty("border", "none", "important");
-      btn.style.setProperty("background", "#111", "important");
-      btn.style.setProperty("background-color", "#111", "important");
-      btn.style.setProperty("color", "#fff", "important");
-      btn.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
-      btn.style.setProperty("font-size", "11px", "important");
-      btn.style.setProperty("font-weight", "500", "important");
-      btn.style.setProperty("letter-spacing", "0.14em", "important");
-      btn.style.setProperty("text-transform", "uppercase", "important");
-      btn.style.setProperty("line-height", "1", "important");
-      btn.style.setProperty("padding", "10px 18px", "important");
-      btn.style.setProperty("margin", "0", "important");
-      btn.style.setProperty("width", "auto", "important");
-      btn.style.setProperty("min-width", "0", "important");
-      btn.style.setProperty("border-radius", "0", "important");
-      btn.style.setProperty("cursor", "pointer", "important");
+    var wrap = global.document.querySelector("#mc-pdp-purchase-stack .mc-atc-button-wrap");
+    if (wrap) {
+      wrap.style.setProperty("border", "none", "important");
+      wrap.style.setProperty("box-shadow", "none", "important");
+      wrap.style.setProperty("background", "transparent", "important");
+      wrap.style.setProperty("background-color", "transparent", "important");
+      wrap.style.setProperty("padding", "0", "important");
+      wrap.style.setProperty("margin", "0 auto", "important");
+      wrap.style.setProperty("width", "auto", "important");
+      wrap.style.setProperty("min-width", "0", "important");
+      wrap.style.setProperty("max-width", "none", "important");
+      wrap.style.setProperty("display", "inline-flex", "important");
+      wrap.style.setProperty("align-items", "center", "important");
+      wrap.style.setProperty("gap", "0", "important");
+      var icon = wrap.querySelector(".mc-cart-icon-wrapper");
+      if (icon) icon.style.setProperty("display", "none", "important");
+      var btn = wrap.querySelector("input, button");
+      if (btn) {
+        btn.style.setProperty("border", "none", "important");
+        btn.style.setProperty("background", "#111", "important");
+        btn.style.setProperty("background-color", "#111", "important");
+        btn.style.setProperty("color", "#fff", "important");
+        btn.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
+        btn.style.setProperty("font-size", "11px", "important");
+        btn.style.setProperty("font-weight", "500", "important");
+        btn.style.setProperty("letter-spacing", "0.14em", "important");
+        btn.style.setProperty("text-transform", "uppercase", "important");
+        btn.style.setProperty("line-height", "1", "important");
+        btn.style.setProperty("padding", "10px 18px", "important");
+        btn.style.setProperty("margin", "0", "important");
+        btn.style.setProperty("width", "auto", "important");
+        btn.style.setProperty("min-width", "0", "important");
+        btn.style.setProperty("border-radius", "0", "important");
+        btn.style.setProperty("cursor", "pointer", "important");
+      }
     }
+    var row = global.document.getElementById("mc-pdp-price-atc-row");
+    if (row) row.style.setProperty("display", "none", "important");
   }
 
   function hideLegacyBeanBagPrice() {
@@ -2922,6 +2960,7 @@
       global.document.getElementById("mc-pdp-price-stack-host"),
       global.document.getElementById("messaging-element"),
       global.document.getElementById("mc-pdp-option-block"),
+      global.document.getElementById("beanbag-swatch-wrapper"),
       global.document.getElementById("mc-pdp-features"),
       global.document.getElementById("mc-pdp-description-below-features"),
       global.document.getElementById("mc-pdp-purchase-stack"),
@@ -2955,9 +2994,9 @@
       mountPrimaryOptionBlock();
       mountDescriptionBelowFeatures();
       hideLegacyBeanBagPrice();
-      ensureQuantityAboveAtc();
-      ensurePurchaseStackCentered();
+      ensureBeanBagPurchaseStack();
       buildBeanBagStack();
+      styleBeanBagPriceAtc();
       initBeanBagSwatchBehavior();
     });
   }

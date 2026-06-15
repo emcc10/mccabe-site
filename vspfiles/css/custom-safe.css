@@ -16537,9 +16537,29 @@ html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap button {
 }
 
 /* ---- remove quantity + legacy purchase stack on these pages ---- */
-html body.mc-bean-bag-pdp #mc-pdp-qty-row,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack {
+html body.mc-bean-bag-pdp #mc-pdp-qty-row {
   display: none !important;
+}
+
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  max-width: 450px !important;
+  margin: 18px auto 0 auto !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  clear: both !important;
+}
+
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap {
+  display: flex !important;
+  justify-content: center !important;
+  margin: 0 auto !important;
+  width: auto !important;
 }
 
 /* ---- description below the Features block ---- */
