@@ -1624,10 +1624,11 @@
       stack.style.setProperty("flex-direction", "row", "important");
       stack.style.setProperty("align-items", "center", "important");
       stack.style.setProperty("justify-content", "center", "important");
+      stack.style.setProperty("align-self", "stretch", "important");
       stack.style.setProperty("text-align", "center", "important");
-      stack.style.setProperty("width", "auto", "important");
+      stack.style.setProperty("width", "100%", "important");
       stack.style.setProperty("max-width", "100%", "important");
-      stack.style.setProperty("margin", "8px auto 16px auto", "important");
+      stack.style.setProperty("margin", "12px auto 16px auto", "important");
       stack.style.setProperty("padding", "0", "important");
       stack.style.setProperty("gap", "10px", "important");
       stack.style.setProperty("flex-wrap", "wrap", "important");
@@ -1772,7 +1773,7 @@
       "border:1px solid #e0e0e0!important;border-radius:0!important;font-size:14px!important;color:#444!important}" +
       "body.productdetails #mc-pdp-purchase-stack,body.mc-product-page #mc-pdp-purchase-stack{" +
       "display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;" +
-      "text-align:center!important;width:auto!important;max-width:100%!important;margin:8px auto 16px auto!important;gap:10px!important;clear:both!important}" +
+      "text-align:center!important;align-self:stretch!important;width:100%!important;max-width:100%!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
       "body.productdetails #mc-pdp-purchase-stack .v65-product-addtocart,body.mc-product-page #mc-pdp-purchase-stack .v65-product-addtocart{" +
       "display:flex!important;justify-content:center!important;width:auto!important;margin:0!important}" +
       "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo," +
@@ -1793,12 +1794,12 @@
       "body.productdetails #mc-pdp-purchase-stack,body.mc-product-page #mc-pdp-purchase-stack," +
       "body.productdetails #v65-product-parent [itemprop='offers'] #mc-pdp-purchase-stack,body.mc-product-page #v65-product-parent [itemprop='offers'] #mc-pdp-purchase-stack{" +
       "display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;" +
-      "text-align:center!important;width:auto!important;max-width:100%!important;margin:8px auto 16px auto!important;gap:10px!important;clear:both!important}" +
+      "text-align:center!important;align-self:stretch!important;width:100%!important;max-width:100%!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
       "body.productdetails #mc-pdp-purchase-stack *,body.mc-product-page #mc-pdp-purchase-stack *{" +
       "text-align:center!important}" +
       "body.productdetails #mc-pdp-features+#mc-pdp-purchase-stack,body.mc-product-page #mc-pdp-features+#mc-pdp-purchase-stack{" +
       "display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;" +
-      "text-align:center!important;width:auto!important;max-width:100%!important;margin:8px auto 16px auto!important;gap:10px!important;clear:both!important}" +
+      "text-align:center!important;align-self:stretch!important;width:100%!important;max-width:100%!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
       "body.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox,body.mc-product-page #ProductDetail_ProductDetails_div2 .colors_descriptionbox," +
       "body.productdetails form .colors_descriptionbox,body.mc-product-page form .colors_descriptionbox{" +
       "border:none!important;border-width:0!important;background:transparent!important}" +
@@ -1809,7 +1810,13 @@
       "body.productdetails img#product_photo,body.mc-product-page img#product_photo{" +
       "max-width:min(650px,100%)!important;width:100%!important;height:auto!important}" +
       "body.productdetails a#product_photo_zoom_url,body.mc-product-page a#product_photo_zoom_url{" +
-      "max-width:min(650px,100%)!important;width:100%!important;display:block!important}";
+      "max-width:min(650px,100%)!important;width:100%!important;display:block!important}" +
+      // Desktop two-column hero: nudge the main image down so its top lines up
+      // with the product name (the info column has the brand logo above it).
+      // Target only img#product_photo so the offset is applied once.
+      "@media (min-width:992px){" +
+      "body.productdetails #content_area img#product_photo,body.mc-product-page #content_area img#product_photo{" +
+      "margin-top:60px!important}}";
   }
 
   global.mcPlaceBrandLogoAboveTitle = placeBrandLogoAboveTitle;
@@ -4057,12 +4064,17 @@
     var mo = new MutationObserver(function () {
       if (scheduled) return;
       if (global.__MC_PDP_MO_PAUSE__) return;
-      var sectional = isSectionalPdpPage();
-      if (sectional) {
-        var now = Date.now();
-        if (now - moLastRun < 2500) return;
-        moLastRun = now;
-      }
+      // Throttle on every page (not just sectional). Once the hero is built,
+      // third-party widgets (Klarna/Affirm) keep mutating the DOM; reacting to
+      // each one re-runs the full patch and causes a visible reflow flash.
+      var minGap = isSectionalPdpPage()
+        ? 2500
+        : global.__MC_PDP_HERO_READY_LOCKED__
+        ? 1500
+        : 400;
+      var now = Date.now();
+      if (now - moLastRun < minGap) return;
+      moLastRun = now;
       scheduled = true;
       global.requestAnimationFrame(function () {
         scheduled = false;
@@ -4078,7 +4090,7 @@
       mo.observe(root, {
         childList: true,
         subtree: true,
-        characterData: !isSectionalPdpPage(),
+        characterData: false,
       });
     }
   }
