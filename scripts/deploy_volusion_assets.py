@@ -44,6 +44,7 @@ OPTIONAL = (
 
 CHUNKED_JS_OVER_CAP = (
     "vspfiles/js/mtl-sectional-renderer.js",
+    "vspfiles/js/mc-pdp-auth-cta-fix.js",
 )
 
 SKIP_OVER_CAP = (
