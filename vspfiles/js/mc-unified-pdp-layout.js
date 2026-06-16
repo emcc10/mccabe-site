@@ -95,9 +95,10 @@
 
   function appendInOrder(parent, nodes) {
     var present = nodes.filter(function (el) {
-      return el && el.parentNode === parent;
+      return el && el !== parent && !el.contains(parent);
     });
-    if (!present.length || childrenInOrder(parent, present)) return false;
+    if (!present.length) return false;
+    if (present.every(function (el) { return el.parentNode === parent; }) && childrenInOrder(parent, present)) return false;
     present.forEach(function (el) {
       parent.appendChild(el);
     });
