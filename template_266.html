@@ -441,6 +441,13 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
       }
       if (typeof window.mcPathIsHomepage === "function" && window.mcPathIsHomepage()) {
         document.body.classList.add("is-home");
+        document.body.classList.remove("mc-theater-seating-pdp");
+        document.body.classList.remove("mc-product-page");
+        document.body.classList.remove("mc-bean-bag-pdp");
+        try {
+          var inlineCfg = document.getElementById("mc-inline-config");
+          if (inlineCfg && inlineCfg.parentNode) inlineCfg.parentNode.removeChild(inlineCfg);
+        } catch (eRmCfg) {}
         try {
           if (root) root.classList.add("mc-allow-home-hero");
         } catch (eAhh2) {}
@@ -526,7 +533,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
 <!-- MC_DEPLOY_VERIFY_20260607revertplpmat: reverted gray PLP thumb mats from 7516154 -->
 <!-- MC_CSS_DEPLOY_VERIFY_20260607memberpricing: same token as /v/vspfiles/css/custom-safe.css line 1 -->
 <meta name="mc-deploy-verify" content="20260607memberpricing">
-<meta name="mc-live-deploy-check" content="20260615-room-planner-removed">
+<meta name="mc-live-deploy-check" content="20260615-room-planner-removed-v2">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script>
@@ -548,7 +555,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
-  <link href="/v/vspfiles/css/custom-safe.css?v=20260616pdp33" rel="stylesheet" id="mc-custom-safe-css-static">
+  <link href="/v/vspfiles/css/custom-safe.css?v=20260616pdp34" rel="stylesheet" id="mc-custom-safe-css-static">
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
   html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
@@ -1445,7 +1452,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp33"></script>
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp34"></script>
   <script id="mc-plp-enforcer-bridge">
 (function(g,d){var W="20260628a",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
@@ -1593,10 +1600,11 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
       document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
     var catEarlyV = catEarly && String(catEarly.value || "").trim();
     var isBean =
-      /^BB/i.test(pc) ||
-      /\/bean-bag-seating-s\//.test(p) ||
-      /product-p\/bb-/i.test(p) ||
-      catEarlyV === "103";
+      (!!document.getElementById("v65-product-parent") || /product-p\//i.test(p) || /-p\//i.test(p)) &&
+      (/^BB/i.test(pc) ||
+        /\/bean-bag-seating-s\//.test(p) ||
+        /product-p\/bb-/i.test(p) ||
+        catEarlyV === "103");
     if (isBean) {
       b.classList.add("mc-bean-bag-pdp");
       return;
@@ -4092,11 +4100,11 @@ try {
 </script>
  <script>
 (function(){
-  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260616pdp33") {
+  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260616pdp34") {
     var boot = document.getElementById("mc-pdp-auth-cta-boot");
     if (!boot) {
       var s = document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp33&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp34&mcrd=" + Date.now();
       s.async = false;
       (document.head || document.documentElement).appendChild(s);
     }
@@ -4137,22 +4145,13 @@ try {
         return true;
       if (
         document.querySelector(
-          'a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"], a[href*="theater-seating"], a[href*="theatre-seating"]'
-        )
-      )
-        return true;
-      if (
-        document.querySelector(
           'select[title*="Number of Seats" i], select[title*="Choose Configuration" i]'
         )
       )
         return true;
-      var titleText = (
-        (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
-        document.title ||
-        ""
-      ).toLowerCase();
-      return /theater seating|theatre seating|theater chair|theatre chair|home theater|home theatre|palliser vertex|\bparagon\b/i.test(
+      var h1El = document.querySelector("h1 [itemprop='name'], h1, .vp-product-title");
+      var titleText = String((h1El && h1El.textContent) || "").toLowerCase();
+      return /theater chair|theatre chair|home theater chair|home theatre chair|\bparagon\b/i.test(
         titleText
       );
     } catch (eTh) {
@@ -4569,7 +4568,7 @@ try {
 
         <div id="mcConfigurationBlock" class="mc-configuration-rh mc-pdp-config-box" style="width:100%">
           <div class="mc-configuration-rh__heading">CONFIGURATION</div>
-          <div id="mcConfigurationCaption" class="mc-configuration-rh__caption">Please use the room planner to choose configuration.</div>
+          <div id="mcConfigurationCaption" class="mc-configuration-rh__caption">Choose your configuration below.</div>
           <div id="mcConfigurationPieces" class="mc-configuration-rh__pieces" style="display:none"></div>
           <div id="mcConfigurationPrice" class="mc-configuration-rh__total" style="display:none"></div>
           <div id="mcPlannerMemberPriceAboveAtc" class="mc-planner-member-price-above-atc" style="display:none" aria-live="polite">
@@ -6621,7 +6620,7 @@ function mcSyncConfigurationFromDom() {
       capEl.style.display = "block";
       capEl.classList.remove("mc-configuration-rh__planner-only");
       if (isTheaterPlanner) {
-        capEl.textContent = "Please use the room planner to choose configuration.";
+        capEl.textContent = "Choose your configuration below.";
       } else {
         capEl.textContent = "Select configuration options above.";
       }
@@ -10530,14 +10529,11 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
 
   function markProductPage() {
     /* Volusion injects #content_area asynchronously; don’t rely only on ProductCode timing. */
+    if (!document.getElementById("v65-product-parent")) return false;
     var pcInp =
       document.querySelector('input[name="ProductCode"]') ||
       document.querySelector('input[name="productcode"]');
-    var hasMarker =
-      pcInp ||
-      document.querySelector('#v65-product-parent') ||
-      document.querySelector('.colors_pricebox');
-    if (!hasMarker) return false;
+    if (!pcInp && !document.querySelector(".colors_pricebox")) return false;
     document.body.classList.add('mc-product-page');
     try { document.body.classList.remove('mc-hide-native-options-until-mc'); } catch (eMcH) {}
     try {
@@ -11262,40 +11258,20 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   function isBeanBagProductPage() {
     try {
       var p = (location.pathname || '').toLowerCase();
+      var pcInp = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      var pc = String((pcInp && pcInp.value) || '').trim();
+      var onPdp =
+        !!document.getElementById('v65-product-parent') ||
+        /product-p\//.test(p) ||
+        /-p\//.test(p);
+      if (!onPdp) return false;
+      if (/^BB/i.test(pc)) return true;
       var catInp = document.querySelector(
         'input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]'
       );
       var catVal = catInp && String(catInp.value || '').trim();
       if (catVal === '103') return true;
-      /* Fuzzy copy checks must NOT use document.body — global nav includes e.g. "Nest Bean Bags" (/nest/), which false-flagged every PDP as a bean bag and killed member pricing. */
-      var contentRoot =
-        document.getElementById('content_area') ||
-        document.getElementById('v65-product-parent') ||
-        document.body;
-      var bodyText = (contentRoot ? contentRoot.textContent : '').toLowerCase();
-      var titleText = (document.title || '').toLowerCase();
-
-      if (
-        /\/bean-bag-seating-s\//.test(p) ||
-        /product-p\/bb-/.test(p) ||
-        /cordaroys/.test(bodyText) ||
-        /cordaroys/.test(titleText) ||
-        /bean bag/.test(bodyText) ||
-        /bean bag/.test(titleText) ||
-        /chinchilla/.test(bodyText) ||
-        /chinchilla/.test(titleText) ||
-        /nest/.test(bodyText) ||
-        /nest/.test(titleText) ||
-        /faux fur/.test(bodyText) ||
-        /faux fur/.test(titleText) ||
-        /chenille/.test(bodyText) ||
-        /chenille/.test(titleText) ||
-        /corduroy/.test(bodyText) ||
-        /corduroy/.test(titleText)
-      ) {
-        return true;
-      }
-
+      if (/\/bean-bag-seating-s\//.test(p) || /product-p\/bb-/.test(p)) return true;
       return false;
     } catch (e) {
       return false;
@@ -11304,6 +11280,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   window.isBeanBagProductPage = isBeanBagProductPage;
   function mcIsParagonOrTheaterPdpEarly() {
     try {
+      if (!document.getElementById("v65-product-parent")) return false;
       if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
       if (document.documentElement.classList.contains("mc-paragon-pdp")) return true;
       var path = String(location.pathname || "").toLowerCase();
@@ -11312,13 +11289,13 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       var pcInput = document.querySelector('input[name="ProductCode"]');
       var pcVal = pcInput && String(pcInput.value || "").trim();
       if (pcVal === "41417") return true;
-      if (/\bparagon\b|theater seating|theatre seating|theater chair|theatre chair/.test(
-        (
-          (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
-          document.title ||
-          ""
-        ).toLowerCase()
-      )) {
+      var h1El = document.querySelector("h1 [itemprop='name'], h1, .vp-product-title");
+      var titleText = String((h1El && h1El.textContent) || "").toLowerCase();
+      if (
+        /\bparagon\b|theater chair|theatre chair|home theater chair|home theatre chair/.test(
+          titleText
+        )
+      ) {
         return true;
       }
     } catch (eEarly) {}
@@ -11332,16 +11309,14 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 
   function mcPdpKeepsNativeOptionsOffscreen() {
+    if (!document.getElementById("v65-product-parent")) return false;
     if (!document.getElementById("mc-inline-config")) return false;
     if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
     if (document.documentElement.classList.contains("mc-paragon-pdp")) return true;
     if (document.querySelector(".mc-native-options-offscreen, [data-mc-hide-native-options='1']")) return true;
-    var title = (
-      (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
-      document.title ||
-      ""
-    ).toLowerCase();
-    return /\bparagon\b|theater seating|theatre seating|theater chair|theatre chair/.test(title);
+    var h1El = document.querySelector("h1 [itemprop='name'], h1, .vp-product-title");
+    var title = String((h1El && h1El.textContent) || "").toLowerCase();
+    return /\bparagon\b|theater chair|theatre chair|home theater chair|home theatre chair/.test(title);
   }
 
   function hideOptionsTable(scope){
@@ -11742,16 +11717,13 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
       return false;
     }
+    if (!document.getElementById("v65-product-parent")) return false;
     var scope = root || document;
-    var theaterTitle = (
-      (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
-      document.title ||
-      ""
-    ).toLowerCase();
+    var h1El = document.querySelector("h1 [itemprop='name'], h1, .vp-product-title");
+    var theaterTitle = String((h1El && h1El.textContent) || "").toLowerCase();
     return (
-      !!(document.body && document.body.classList.contains('mc-theater-seating-pdp')) ||
-      !!document.querySelector('a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"]') ||
-      /theater seating|theatre seating|theater chair|theatre chair|\bparagon\b/i.test(theaterTitle) ||
+      !!(document.body && document.body.classList.contains("mc-theater-seating-pdp")) ||
+      /theater chair|theatre chair|home theater chair|home theatre chair|\bparagon\b/i.test(theaterTitle) ||
       !!scope.querySelector('select[title*="Number of Seats"], select[title*="Choose Configuration"], select[title*="Choose Cover"]')
     );
   }
@@ -22522,13 +22494,15 @@ s0.parentNode.insertBefore(s1,s0);
 <script id="mc-hide-config-non-theater-pdps">
 (function () {
   function mcIsTrueTheaterSeatingPdp() {
+    if (!document.getElementById("v65-product-parent")) return false;
     var path = "";
     var title = "";
     var pc = "";
 
     try {
       path = String(location.pathname || "").toLowerCase();
-      title = String(document.title || "").toLowerCase();
+      var h1El = document.querySelector("h1 [itemprop='name'], h1, .vp-product-title");
+      title = String((h1El && h1El.textContent) || "").toLowerCase();
 
       var pcInput = document.querySelector('input[name="ProductCode"]');
       pc = pcInput ? String(pcInput.value || "").toLowerCase() : "";
@@ -22538,6 +22512,7 @@ s0.parentNode.insertBefore(s1,s0);
       IMPORTANT:
       Do NOT use "palliser" alone here.
       Titan, Barrett, sectional, sofa, recliner pages are also Palliser.
+      Do NOT match document.title — the store homepage title contains "Theater Seating".
     */
     return (
       document.documentElement.classList.contains("mc-paragon-pdp") ||
@@ -22547,8 +22522,6 @@ s0.parentNode.insertBefore(s1,s0);
       title.indexOf("theatre chair") !== -1 ||
       title.indexOf("home theater chair") !== -1 ||
       title.indexOf("home theatre chair") !== -1 ||
-      title.indexOf("theater seating") !== -1 ||
-      title.indexOf("theatre seating") !== -1 ||
       pc.indexOf("theater") !== -1 ||
       pc.indexOf("theatre") !== -1
     );
