@@ -17355,6 +17355,63 @@ html body.mc-saranoni-pdp .mc-atc-button-wrap {
   margin-top: 5px !important;
 }
 
+html body.mc-bean-bag-pdp td.mc-pdp-media-td .mc-return-category,
+html body.mc-saranoni-pdp td.mc-pdp-media-td .mc-return-category,
+html body.mc-ruched-blanket-pdp td.mc-pdp-media-td .mc-return-category {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  max-width: min(650px, 100%) !important;
+  margin: 0 0 14px 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"],
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"],
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"],
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack input.vCSS_input_addtocart,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack input.vCSS_input_addtocart,
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack input.vCSS_input_addtocart {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  background: #111 !important;
+  background-color: #111 !important;
+  background-image: none !important;
+  color: #fff !important;
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  min-height: 48px !important;
+  padding: 0 28px !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+@media (max-width: 991px) {
+  html body.mc-bean-bag-pdp td.mc-pdp-media-td .mc-return-category,
+  html body.mc-saranoni-pdp td.mc-pdp-media-td .mc-return-category,
+  html body.mc-ruched-blanket-pdp td.mc-pdp-media-td .mc-return-category {
+    max-width: 100% !important;
+  }
+}
+
 html.mc-url-looks-like-pdp body #related_products_content img,
 html.mc-url-looks-like-pdp body #v65-product-related img,
 body.productdetails #related_products_content img,
