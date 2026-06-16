@@ -23030,6 +23030,440 @@ body.mc-product-page #v65-product-related img {
   }
 }
 </style>
-</body>
+<style>
+/* RETURN TO CATEGORY LINK ABOVE PRODUCT IMAGE */
+.mc-return-category{
+  display:block;
+  width:100%;
+  margin:0 0 14px;
+  padding:0;
+  text-align:left;
+  clear:both;
+  box-sizing:border-box;
+}
+
+.mc-return-category__link{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-family:Inter,Arial,sans-serif;
+  font-size:11px;
+  line-height:1.4;
+  font-weight:600;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#2d251e;
+  text-decoration:none;
+  transition:color .2s ease, transform .2s ease;
+}
+
+.mc-return-category__link::before{
+  content:"\2190";
+  display:inline-block;
+  font-size:16px;
+  line-height:1;
+  font-weight:400;
+  letter-spacing:0;
+}
+
+.mc-return-category__link:hover,
+.mc-return-category__link:focus{
+  color:#756555;
+  text-decoration:none;
+  transform:translateX(-2px);
+}
+
+@media (max-width:767px){
+  .mc-return-category{
+    margin-bottom:12px;
+  }
+
+  .mc-return-category__link{
+    font-size:10px;
+    letter-spacing:.12em;
+  }
+}
+</style>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "mcLastProductCategory";
+
+  function cleanText(value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .replace(/^\s+|\s+$/g, "");
+  }
+
+  function isCategoryUrl(url) {
+    return (
+      /\/category-s\/\d+\.htm/i.test(url) ||
+      /\/[^/?#]+-s\/\d+\.htm/i.test(url) ||
+      /SearchResults\.asp[^#]*[?&]Cat=/i.test(url)
+    );
+  }
+
+  function isProductPage() {
+    var currentUrl = window.location.pathname + window.location.search;
+
+    return (
+      /-p\//i.test(currentUrl) ||
+      /ProductDetails\.asp/i.test(currentUrl)
+    );
+  }
+
+  function isCategoryPage() {
+    return isCategoryUrl(
+      window.location.pathname + window.location.search
+    );
+  }
+
+  function categoryNameFromUrl(url) {
+    var path = String(url || "")
+      .split("?")[0]
+      .replace(/\/+$/, "");
+
+    var match = path.match(/\/([^/]+)-s\/\d+\.htm/i);
+
+    if (match && match[1]) {
+      return match[1]
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, function (letter) {
+          return letter.toUpperCase();
+        });
+    }
+
+    return "Category";
+  }
+
+  function readStoredCategory() {
+    try {
+      var saved = window.sessionStorage.getItem(STORAGE_KEY);
+
+      if (!saved) {
+        return null;
+      }
+
+      var category = JSON.parse(saved);
+
+      if (
+        !category ||
+        !category.url ||
+        !isCategoryUrl(category.url)
+      ) {
+        return null;
+      }
+
+      /*
+       * Ignore stale category history after two hours.
+       */
+      if (
+        category.savedAt &&
+        Date.now() - category.savedAt > 7200000
+      ) {
+        window.sessionStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+
+      return category;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function saveCurrentCategory() {
+    if (!isCategoryPage()) {
+      return;
+    }
+
+    var heading =
+      document.querySelector(
+        ".mc-cat-landing h1, .mc-living-landing h1, main h1, #content_area h1, h1"
+      );
+
+    var name = cleanText(
+      heading ? heading.textContent : document.title
+    );
+
+    if (!name) {
+      name = categoryNameFromUrl(window.location.href);
+    }
+
+    try {
+      window.sessionStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          url: window.location.href,
+          name: name,
+          savedAt: Date.now()
+        })
+      );
+    } catch (error) {
+      /*
+       * The breadcrumb fallback will still work if storage is unavailable.
+       */
+    }
+  }
+
+  function categoryFromReferrer() {
+    if (!document.referrer) {
+      return null;
+    }
+
+    var referrerLink = document.createElement("a");
+    referrerLink.href = document.referrer;
+
+    if (
+      referrerLink.hostname !== window.location.hostname ||
+      !isCategoryUrl(referrerLink.href)
+    ) {
+      return null;
+    }
+
+    var stored = readStoredCategory();
+    var referrerUrl =
+      referrerLink.pathname +
+      referrerLink.search;
+
+    if (stored) {
+      var storedLink = document.createElement("a");
+      storedLink.href = stored.url;
+
+      var storedUrl =
+        storedLink.pathname +
+        storedLink.search;
+
+      if (storedUrl === referrerUrl) {
+        return {
+          url: referrerLink.href,
+          name: stored.name
+        };
+      }
+    }
+
+    return {
+      url: referrerLink.href,
+      name: categoryNameFromUrl(referrerLink.href)
+    };
+  }
+
+  function categoryFromBreadcrumb() {
+    var selectors = [
+      "#v65-breadcrumbs a[href]",
+      ".v65-breadcrumbs a[href]",
+      "#breadcrumbs a[href]",
+      ".breadcrumbs a[href]",
+      ".breadcrumb a[href]"
+    ];
+
+    var links = [];
+    var index;
+
+    for (index = 0; index < selectors.length; index += 1) {
+      var matchedLinks =
+        document.querySelectorAll(selectors[index]);
+
+      if (matchedLinks.length) {
+        links = Array.prototype.slice.call(matchedLinks);
+        break;
+      }
+    }
+
+    /*
+     * Fallback for templates whose breadcrumb has no class or ID.
+     * The final category link before the product heading is selected.
+     */
+    if (!links.length) {
+      var productHeading =
+        document.querySelector(
+          "#v65-product-parent h1, .productnamecolorLARGE, main h1, h1"
+        );
+
+      var allLinks =
+        Array.prototype.slice.call(
+          document.querySelectorAll("a[href]")
+        );
+
+      links = allLinks.filter(function (link) {
+        if (!isCategoryUrl(link.href)) {
+          return false;
+        }
+
+        if (!productHeading) {
+          return true;
+        }
+
+        return Boolean(
+          link.compareDocumentPosition(productHeading) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+        );
+      });
+    }
+
+    var categoryLinks = links.filter(function (link) {
+      return isCategoryUrl(link.href);
+    });
+
+    if (!categoryLinks.length) {
+      return null;
+    }
+
+    var categoryLink =
+      categoryLinks[categoryLinks.length - 1];
+
+    return {
+      url: categoryLink.href,
+      name:
+        cleanText(categoryLink.textContent) ||
+        categoryNameFromUrl(categoryLink.href)
+    };
+  }
+
+  function categoryFromStorage() {
+    var stored = readStoredCategory();
+
+    if (!stored) {
+      return null;
+    }
+
+    return {
+      url: stored.url,
+      name: stored.name
+    };
+  }
+
+  function findMainProductImage() {
+    var selectors = [
+      "#product_photo",
+      "#product_photo_zoom_url img",
+      "img#product_photo",
+      "#v65-product-parent img[itemprop='image']",
+      "#v65-product-parent img[src*='/photos/']",
+      ".v65-productPhoto img",
+      ".v65-product-photo img",
+      ".product-photo img",
+      ".product_photo img"
+    ];
+
+    var index;
+
+    for (index = 0; index < selectors.length; index += 1) {
+      var image = document.querySelector(selectors[index]);
+
+      if (image) {
+        if (
+          image.tagName &&
+          image.tagName.toLowerCase() !== "img"
+        ) {
+          image = image.querySelector("img") || image;
+        }
+
+        return image;
+      }
+    }
+
+    return null;
+  }
+
+  function findImageContainer(image) {
+    if (!image) {
+      return null;
+    }
+
+    if (image.closest) {
+      return (
+        image.closest("#product_photo_area") ||
+        image.closest(".v65-productPhoto") ||
+        image.closest(".v65-product-photo") ||
+        image.closest(".product-photo") ||
+        image.closest(".product_photo") ||
+        image.closest("td") ||
+        image.parentNode
+      );
+    }
+
+    return image.parentNode;
+  }
+
+  function addReturnLink(attempt) {
+    if (!isProductPage()) {
+      return;
+    }
+
+    if (document.querySelector(".mc-return-category")) {
+      return;
+    }
+
+    var image = findMainProductImage();
+    var imageContainer = findImageContainer(image);
+
+    if (!image || !imageContainer) {
+      if (attempt < 30) {
+        window.setTimeout(function () {
+          addReturnLink(attempt + 1);
+        }, 250);
+      }
+
+      return;
+    }
+
+    var category =
+      categoryFromReferrer() ||
+      categoryFromBreadcrumb() ||
+      categoryFromStorage();
+
+    if (!category || !category.url) {
+      return;
+    }
+
+    var categoryName =
+      cleanText(category.name) || "Category";
+
+    var wrapper = document.createElement("div");
+    wrapper.className = "mc-return-category";
+
+    var link = document.createElement("a");
+    link.className = "mc-return-category__link";
+    link.href = category.url;
+    link.textContent = "Return to " + categoryName;
+    link.setAttribute(
+      "aria-label",
+      "Return to " + categoryName
+    );
+
+    wrapper.appendChild(link);
+
+    imageContainer.insertBefore(
+      wrapper,
+      imageContainer.firstChild
+    );
+  }
+
+  function initializeReturnLink() {
+    saveCurrentCategory();
+    addReturnLink(0);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initializeReturnLink
+    );
+  } else {
+    initializeReturnLink();
+  }
+
+  /*
+   * One delayed check protects against Volusion product scripts
+   * rebuilding the image area after the initial page load.
+   */
+  window.setTimeout(function () {
+    addReturnLink(0);
+  }, 1200);
+})();
+</script>
+
 </body>
 </html>
