@@ -16682,7 +16682,7 @@ html body.mc-bean-bag-pdp #mc-pdp-features {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: flex-start !important;
-    gap: 32px !important;
+    gap: 24px !important;
   }
 
   html body.mc-bean-bag-pdp #content_area td.mc-pdp-options-td,
