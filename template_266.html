@@ -526,6 +526,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
 <!-- MC_DEPLOY_VERIFY_20260607revertplpmat: reverted gray PLP thumb mats from 7516154 -->
 <!-- MC_CSS_DEPLOY_VERIFY_20260607memberpricing: same token as /v/vspfiles/css/custom-safe.css line 1 -->
 <meta name="mc-deploy-verify" content="20260607memberpricing">
+<meta name="mc-live-deploy-check" content="20260615-room-planner-removed">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script>
@@ -4637,45 +4638,9 @@ try {
       } catch (eLr) {}
     }
 
-    var plannerOverlay = document.getElementById("mcPlannerOverlay");
-    if (!plannerOverlay) {
-      plannerOverlay = document.createElement("div");
-      plannerOverlay.id = "mcPlannerOverlay";
-      plannerOverlay.className = "mc-planner-overlay";
-      plannerOverlay.innerHTML = '<div class="mc-planner-modal"><button type="button" class="mc-planner-close" aria-label="Close">&#215;</button><div id="mcPlannerModalBody"></div></div>';
-      document.body.appendChild(plannerOverlay);
-      var modalEl = plannerOverlay.querySelector(".mc-planner-modal");
-      plannerOverlay.querySelector(".mc-planner-close").onclick = function () {
-        plannerOverlay.classList.remove("mc-planner-open");
-      };
-      plannerOverlay.addEventListener("click", function (e) {
-        if (e.target === plannerOverlay) plannerOverlay.classList.remove("mc-planner-open");
-      });
-    }
-
-    function openPlannerOverlay() {
-      var t = document.getElementById("roomPlannerEmbed");
-      var body = document.getElementById("mcPlannerModalBody");
-      if (!t || !body || !t.content) return;
-      var curCode = (document.querySelector('input[name="ProductCode"]') || {}).value || "";
-      if (!body.dataset.plannerProduct || body.dataset.plannerProduct !== curCode) {
-        body.innerHTML = "";
-        body.appendChild(t.content.cloneNode(true));
-        if (typeof window.initRoomPlanner === "function") {
-          window.initRoomPlanner({
-            onApply: function (payload) {
-              if (typeof window.applyPlannerToPage === "function") window.applyPlannerToPage(payload);
-              plannerOverlay.classList.remove("mc-planner-open");
-            }
-          });
-        }
-        body.dataset.plannerProduct = curCode;
-      }
-      plannerOverlay.classList.add("mc-planner-open");
-    }
-    function closePlannerOverlay() {
-      plannerOverlay.classList.remove("mc-planner-open");
-    }
+    // Room planner removed — keep no-op stubs so legacy inline handlers do not throw.
+    function openPlannerOverlay() {}
+    function closePlannerOverlay() {}
 
     const mcLeatherBtn = document.getElementById("mcLeatherBtn");
     const mcLeatherStrip = document.getElementById("mcLeatherSwatchStrip");
