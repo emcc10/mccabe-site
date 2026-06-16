@@ -85,7 +85,8 @@ def main() -> int:
         print(f"Downloading {code} ({product['title']})...")
         download(url, raw)
         save_main(raw, main_dest)
-        make_thumb(main_dest, thumb_dest)
+        # Volusion PDP uses -2T.jpg as #product_photo; must be full size, not a tiny thumb.
+        shutil.copy2(main_dest, thumb_dest)
         written.append(code)
 
     print(f"\nWrote {len(written)} accessory products ({len(written) * 2} files)")
