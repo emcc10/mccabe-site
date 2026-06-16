@@ -16560,21 +16560,24 @@ html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap button {
   cursor: pointer !important;
 }
 
-/* ---- remove quantity + legacy purchase stack on these pages ---- */
+/* ---- bean bag qty + purchase stack (column layout, matches Saranoni) ---- */
 html body.mc-bean-bag-pdp #mc-pdp-qty-row {
-  display: none !important;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
 }
 
 html body.mc-bean-bag-pdp .mc-pdp-purchase-controls {
   display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: center !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
   width: 100% !important;
-  max-width: 450px !important;
+  max-width: 400px !important;
   margin: 28px auto 0 !important;
   padding: 0 !important;
-  gap: 28px !important;
+  gap: 10px !important;
   clear: both !important;
 }
 
@@ -16583,7 +16586,15 @@ html body.mc-bean-bag-pdp .mc-pdp-purchase-controls .mc-atc-button-wrap {
   display: flex !important;
   justify-content: center !important;
   margin: 0 !important;
-  width: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+html body.mc-bean-bag-pdp #messaging-element {
+  margin: 0 0 14px 0 !important;
+  padding: 0 0 0 1.1em !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
 }
 
 /* ---- description below the Features block ---- */
@@ -16794,7 +16805,6 @@ html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features li {
   color: #444 !important;
 }
 
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,
 html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row {
   display: flex !important;
   flex-direction: row !important;
@@ -17163,9 +17173,8 @@ html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ru
   font-family: Inter, Arial, sans-serif !important;
 }
 
-/* =========================================================
-   MC_SARANONI_PDP_RESTORE — column qty+ATC, hide duplicate color UI.
-   ========================================================= */
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-bean-bag-purchase-stack,
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-saranoni-purchase-stack {
   display: flex !important;
@@ -17180,17 +17189,23 @@ html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-saranoni-purchase-stack {
   box-sizing: border-box !important;
 }
 
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row {
   order: 1 !important;
   width: 100% !important;
   justify-content: center !important;
 }
 
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap {
   order: 2 !important;
 }
 
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap,
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap {
@@ -17200,6 +17215,10 @@ html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap {
   margin: 0 !important;
 }
 
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"],
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
@@ -17210,6 +17229,9 @@ html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[n
   display: block !important;
 }
 
+/* =========================================================
+   MC_SARANONI_PDP_RESTORE — hide duplicate color UI.
+   ========================================================= */
 html body.mc-saranoni-pdp #mc-pdp-brand-logo {
   display: flex !important;
   justify-content: center !important;

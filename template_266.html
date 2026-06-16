@@ -1452,7 +1452,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp38d"></script>
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp38e"></script>
   <script id="mc-plp-enforcer-bridge">
 (function(g,d){var W="20260628a",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
@@ -4104,7 +4104,7 @@ try {
     var boot = document.getElementById("mc-pdp-auth-cta-boot");
     if (!boot) {
       var s = document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp38d&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp38e&mcrd=" + Date.now();
       s.async = false;
       (document.head || document.documentElement).appendChild(s);
     }
@@ -23138,6 +23138,32 @@ body.mc-product-page #v65-product-related img {
     return "Category";
   }
 
+  function isBeanBagProductPage() {
+    try {
+      if (document.body && document.body.classList.contains("mc-bean-bag-pdp")) {
+        return true;
+      }
+      var path = String(window.location.pathname || "").toLowerCase();
+      if (/product-p\/bb-/.test(path)) {
+        return true;
+      }
+      if (document.getElementById("beanbag-swatch-wrapper")) {
+        return true;
+      }
+    } catch (error) {}
+    return false;
+  }
+
+  function categoryFromProductType() {
+    if (isBeanBagProductPage()) {
+      return {
+        url: "/bean-bag-seating-s/103.htm",
+        name: "Bean Bags"
+      };
+    }
+    return null;
+  }
+
   function readStoredCategory() {
     try {
       var saved = window.sessionStorage.getItem(STORAGE_KEY);
@@ -23392,7 +23418,30 @@ body.mc-product-page #v65-product-related img {
       return;
     }
 
-    if (document.querySelector(".mc-return-category")) {
+    var category =
+      categoryFromProductType() ||
+      categoryFromReferrer() ||
+      categoryFromBreadcrumb() ||
+      categoryFromStorage();
+
+    if (!category || !category.url) {
+      return;
+    }
+
+    var categoryName =
+      cleanText(category.name) || "Category";
+
+    var existing = document.querySelector(".mc-return-category");
+    if (existing) {
+      var existingLink = existing.querySelector(".mc-return-category__link");
+      if (existingLink) {
+        existingLink.href = category.url;
+        existingLink.textContent = "Return to " + categoryName;
+        existingLink.setAttribute(
+          "aria-label",
+          "Return to " + categoryName
+        );
+      }
       return;
     }
 
@@ -23408,18 +23457,6 @@ body.mc-product-page #v65-product-related img {
 
       return;
     }
-
-    var category =
-      categoryFromReferrer() ||
-      categoryFromBreadcrumb() ||
-      categoryFromStorage();
-
-    if (!category || !category.url) {
-      return;
-    }
-
-    var categoryName =
-      cleanText(category.name) || "Category";
 
     var wrapper = document.createElement("div");
     wrapper.className = "mc-return-category";
