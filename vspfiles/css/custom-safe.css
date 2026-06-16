@@ -17285,3 +17285,28 @@ html body.mc-saranoni-pdp:has(#mc-pdp-purchase-stack) table[id*="options_table"]
 .soft_add_wrapper .continue_shopping:active {
   color: #fff !important;
 }
+
+/* Saranoni PDP layout tuning (sar-jl-jl-msln-lush and related). */
+html body.mc-saranoni-pdp #product_photo {
+  margin-left: 80px !important;
+}
+
+@media (min-width: 992px) {
+  html body.mc-saranoni-pdp.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
+  html body.mc-saranoni-pdp.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
+  html body.mc-saranoni-pdp.productdetails #v65-product-parent > tr:nth-of-type(2) > td:last-child,
+  html body.mc-saranoni-pdp.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:last-child {
+    margin-left: -22px !important;
+  }
+}
+
+html body.mc-saranoni-pdp #v65-product-parent > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) {
+  padding: 15px !important;
+}
+
+html body.mc-saranoni-pdp .vCSS_input_addtocart {
+  font-weight: 500 !important;
+  letter-spacing: 0.2em !important;
+  min-height: 38px !important;
+  padding-bottom: 5px !important;
+}
