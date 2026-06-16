@@ -1566,8 +1566,9 @@
       stack = global.document.createElement("div");
       stack.id = "mc-pdp-purchase-stack";
     }
-    // Always carry the stable class used by CSS (includes anti-flicker rule)
-    stack.className = "mc-pdp-purchase-controls";
+    // Always carry the stable class used by CSS (includes anti-flicker rule).
+    // mc-pdp-cart-row is the shared qty+ATC container contract used by custom-safe.css.
+    stack.className = "mc-pdp-purchase-controls mc-pdp-cart-row";
     if (row && !stack.contains(row)) stack.appendChild(row);
     if (!stack.contains(stackNode)) stack.appendChild(stackNode);
     var anchor = findPurchaseStackAnchor();
@@ -3404,6 +3405,68 @@
     }, true);
   }
 
+  // Bean-bag size option (category 58): keep the native select visible + functional,
+  // give it a "CHOOSE SIZE" label, and make sure size changes drive Volusion pricing.
+  function ensureBeanBagSizeRow() {
+    if (!isBeanBagPdpPage()) return;
+    var sizeSel = global.document.querySelector("#options_table select[name*='___58']");
+    if (!sizeSel) {
+      var sels = global.document.querySelectorAll("#options_table select");
+      for (var s = 0; s < sels.length; s++) {
+        var hasSize = false;
+        for (var o = 0; o < sels[s].options.length; o++) {
+          if (/\b(king|queen|full)\b/i.test(sels[s].options[o].text || "")) {
+            hasSize = true;
+            break;
+          }
+        }
+        if (hasSize) {
+          sizeSel = sels[s];
+          break;
+        }
+      }
+    }
+    if (!sizeSel) return;
+
+    try {
+      sizeSel.style.removeProperty("display");
+      sizeSel.style.setProperty("display", "inline-block", "important");
+    } catch (eShow) {}
+    var sizeRow = sizeSel.closest ? sizeSel.closest("tr") : null;
+    if (sizeRow) {
+      try {
+        sizeRow.style.setProperty("display", "table-row", "important");
+      } catch (eRow) {}
+    }
+
+    if (!global.document.getElementById("mc-bb-size-label")) {
+      var lbl = global.document.createElement("div");
+      lbl.id = "mc-bb-size-label";
+      lbl.className = "mc-bb-size-label";
+      lbl.textContent = "CHOOSE SIZE";
+      try {
+        sizeSel.insertAdjacentElement("beforebegin", lbl);
+      } catch (eLbl) {}
+    }
+
+    if (sizeSel.dataset.mcBbSizeBound !== "1") {
+      sizeSel.dataset.mcBbSizeBound = "1";
+      sizeSel.addEventListener("change", function () {
+        var v = sizeSel.value;
+        if (typeof global.change_option === "function") {
+          try {
+            global.change_option(sizeSel.name, v);
+          } catch (eCo) {}
+        }
+        if (typeof global.AutoUpdatePriceWithSelectedOptions === "function") {
+          try {
+            global.AutoUpdatePriceWithSelectedOptions(v, 58);
+          } catch (eAu) {}
+        }
+      });
+    }
+  }
+
   function installPdpStackApiGuards() {
     global.mcEnsurePdpPriceStack = mcEnsurePdpPriceStack;
     global.mcForceRebuildCleanPriceStack = forceRebuildCleanPriceStack;
@@ -3962,6 +4025,7 @@
     try {
       installPdpStackApiGuards();
       initBeanBagImageSync();
+      ensureBeanBagSizeRow();
       ensurePdpStackCriticalCss();
       ensurePdpHeroCriticalCss();
       disableQuantityHiders();
