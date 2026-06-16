@@ -17358,32 +17358,83 @@ html body.mc-saranoni-pdp .mc-atc-button-wrap {
 html body.mc-bean-bag-pdp td.mc-pdp-media-td .mc-return-category,
 html body.mc-saranoni-pdp td.mc-pdp-media-td .mc-return-category,
 html body.mc-ruched-blanket-pdp td.mc-pdp-media-td .mc-return-category {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  width: 100% !important;
-  max-width: min(650px, 100%) !important;
-  margin: 0 0 14px 0 !important;
-  padding: 0 !important;
-  text-align: left !important;
-  box-sizing: border-box !important;
+  display: none !important;
 }
 
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"],
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"],
-html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
-html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"],
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack input.vCSS_input_addtocart,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack input.vCSS_input_addtocart,
-html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack input.vCSS_input_addtocart {
+html body .mc-product-shell {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+html body .mc-product-topbar {
+  width: 100%;
+  min-height: 24px;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  box-sizing: border-box;
+}
+
+html body a.mc-return-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  color: #333;
+}
+
+html body a.mc-return-category::before {
+  content: "\2190";
+}
+
+@media (max-width: 767px) {
+  html body .mc-product-topbar {
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+}
+
+/* === Universal PDP Add to Cart (all product types) === */
+body.productdetails #v65-product-parent input[name="btnaddtocart"],
+body.productdetails #v65-product-parent button[name="btnaddtocart"],
+body.mc-product-page #v65-product-parent input[name="btnaddtocart"],
+body.mc-product-page #v65-product-parent button[name="btnaddtocart"],
+body.productdetails #content_area input[name="btnaddtocart"],
+body.mc-product-page #content_area input[name="btnaddtocart"],
+body.productdetails #mc-pdp-purchase-stack input[name="btnaddtocart"],
+body.mc-product-page #mc-pdp-purchase-stack input[name="btnaddtocart"],
+body.productdetails #mc-pdp-purchase-stack button[name="btnaddtocart"],
+body.mc-product-page #mc-pdp-purchase-stack button[name="btnaddtocart"],
+body.productdetails #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
+body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
+body.productdetails #v65-product-parent .v65-product-addtocart input[name="btnaddtocart"],
+body.mc-product-page #v65-product-parent .v65-product-addtocart input[name="btnaddtocart"],
+body.productdetails #v65-product-parent input.vCSS_input_addtocart,
+body.mc-product-page #v65-product-parent input.vCSS_input_addtocart,
+html.is-sectional-product #mc-pdp-purchase-stack input[name="btnaddtocart"],
+html.is-sectional-product #mc-pdp-purchase-stack button[name="btnaddtocart"],
+html.is-sectional-product #mc-pdp-purchase-stack .mc-atc-button-wrap input[name="btnaddtocart"],
+html.is-sectional-product #mc-pdp-purchase-stack .mc-atc-button-wrap button[name="btnaddtocart"] {
   display: flex !important;
-  justify-content: center !important;
   align-items: center !important;
+  justify-content: center !important;
   text-align: center !important;
   width: 100% !important;
   max-width: 100% !important;
+  min-height: 46px !important;
   box-sizing: border-box !important;
   background: #111 !important;
   background-color: #111 !important;
@@ -17392,24 +17443,72 @@ html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack input.vCSS_input_addtocar
   border: 1px solid #111 !important;
   border-radius: 0 !important;
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 13px !important;
+  font-size: 12px !important;
   font-weight: 600 !important;
   letter-spacing: 0.12em !important;
   text-transform: uppercase !important;
-  min-height: 48px !important;
   padding: 0 28px !important;
+  margin: 0 !important;
   opacity: 1 !important;
   box-shadow: none !important;
+  outline: none !important;
   -webkit-appearance: none !important;
   appearance: none !important;
+  cursor: pointer !important;
 }
 
-@media (max-width: 991px) {
-  html body.mc-bean-bag-pdp td.mc-pdp-media-td .mc-return-category,
-  html body.mc-saranoni-pdp td.mc-pdp-media-td .mc-return-category,
-  html body.mc-ruched-blanket-pdp td.mc-pdp-media-td .mc-return-category {
-    max-width: 100% !important;
-  }
+body.productdetails #v65-product-parent input[name="btnaddtocart"]:hover,
+body.productdetails #v65-product-parent input[name="btnaddtocart"]:focus,
+body.productdetails #v65-product-parent input[name="btnaddtocart"]:active,
+body.mc-product-page #v65-product-parent input[name="btnaddtocart"]:hover,
+body.mc-product-page #v65-product-parent input[name="btnaddtocart"]:focus,
+body.mc-product-page #v65-product-parent input[name="btnaddtocart"]:active,
+body.productdetails #mc-pdp-purchase-stack input[name="btnaddtocart"]:hover,
+body.productdetails #mc-pdp-purchase-stack input[name="btnaddtocart"]:focus,
+body.productdetails #mc-pdp-purchase-stack input[name="btnaddtocart"]:active,
+body.mc-product-page #mc-pdp-purchase-stack input[name="btnaddtocart"]:hover,
+body.mc-product-page #mc-pdp-purchase-stack input[name="btnaddtocart"]:focus,
+body.mc-product-page #mc-pdp-purchase-stack input[name="btnaddtocart"]:active,
+html.is-sectional-product #mc-pdp-purchase-stack input[name="btnaddtocart"]:hover,
+html.is-sectional-product #mc-pdp-purchase-stack input[name="btnaddtocart"]:focus,
+html.is-sectional-product #mc-pdp-purchase-stack input[name="btnaddtocart"]:active {
+  background: #111 !important;
+  background-color: #111 !important;
+  color: #fff !important;
+  border: 1px solid #111 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+body.productdetails #v65-product-parent input[name="btnaddtocart"]:disabled,
+body.mc-product-page #v65-product-parent input[name="btnaddtocart"]:disabled,
+body.productdetails #mc-pdp-purchase-stack input[name="btnaddtocart"]:disabled,
+body.mc-product-page #mc-pdp-purchase-stack input[name="btnaddtocart"]:disabled {
+  background: #111 !important;
+  background-color: #111 !important;
+  color: #fff !important;
+  border: 1px solid #111 !important;
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+}
+
+body.productdetails #mc-pdp-purchase-stack .v65-product-addtocart,
+body.mc-product-page #mc-pdp-purchase-stack .v65-product-addtocart,
+body.productdetails #mc-pdp-purchase-stack .mc-atc-button-wrap,
+body.mc-product-page #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html.is-sectional-product #mc-pdp-purchase-stack .v65-product-addtocart,
+html.is-sectional-product #mc-pdp-purchase-stack .mc-atc-button-wrap {
+  display: flex !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: 1 1 100% !important;
+  justify-content: stretch !important;
+  align-items: stretch !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 html.mc-url-looks-like-pdp body #related_products_content img,
@@ -17418,6 +17517,6 @@ body.productdetails #related_products_content img,
 body.productdetails #v65-product-related img,
 body.mc-product-page #related_products_content img,
 body.mc-product-page #v65-product-related img {
-  max-width: 200px !important;
-  max-height: 250px !important;
+  min-width: 180px !important;
+  min-height: 180px !important;
 }

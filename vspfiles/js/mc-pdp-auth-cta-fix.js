@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp38g";
+  var VERSION = "20260616pdp38h";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -4965,46 +4965,117 @@
     } catch (eTag) {}
   }
 
+  function ensurePdpProductShell() {
+    var parent = global.document.getElementById("v65-product-parent");
+    if (!parent) return null;
+    var shell = parent.closest ? parent.closest(".mc-product-shell") : null;
+    if (shell) return shell;
+    shell = global.document.createElement("div");
+    shell.className = "mc-product-shell";
+    if (parent.parentNode) {
+      parent.parentNode.insertBefore(shell, parent);
+      shell.appendChild(parent);
+    }
+    return shell;
+  }
+
   function ensurePdpReturnCategoryLink() {
     if (!isProductPdp()) return;
     var category = resolvePdpReturnCategory();
     if (!category || !category.url) return;
-    var categoryName = String(category.name || "Category").replace(/^\s+|\s+$/g, "");
-    var label = "Return to " + categoryName;
-    var linkWrap = global.document.querySelector(".mc-return-category");
-    var link = linkWrap ? linkWrap.querySelector(".mc-return-category__link") : null;
-    if (!linkWrap || !link) {
-      var mediaTd = findPdpMediaTd();
-      if (!mediaTd) return;
-      if (!linkWrap) {
-        linkWrap = global.document.createElement("div");
-        linkWrap.className = "mc-return-category";
+    var shell = ensurePdpProductShell();
+    if (!shell) return;
+    var topbar = shell.querySelector(".mc-product-topbar");
+    if (!topbar) {
+      topbar = global.document.createElement("div");
+      topbar.className = "mc-product-topbar";
+      shell.insertBefore(topbar, shell.firstChild);
+    }
+    var link = topbar.querySelector("a.mc-return-category");
+    if (!link) {
+      var legacyLink = global.document.querySelector(".mc-return-category__link");
+      if (legacyLink) {
+        link = legacyLink;
+        link.className = "mc-return-category";
+      } else {
         link = global.document.createElement("a");
-        link.className = "mc-return-category__link";
-        linkWrap.appendChild(link);
+        link.className = "mc-return-category";
       }
-      try {
-        mediaTd.insertBefore(linkWrap, mediaTd.firstChild);
-      } catch (eCreate) {}
+      topbar.appendChild(link);
     }
-    if (isSoftGoodsPdpPage()) {
-      var mediaCol = findPdpMediaTd();
-      if (mediaCol && linkWrap && linkWrap.parentNode !== mediaCol) {
+    global.document.querySelectorAll(".mc-return-category").forEach(function (node) {
+      if (node === link || node === topbar) return;
+      if (node.tagName === "A" && node !== link) {
         try {
-          mediaCol.insertBefore(linkWrap, mediaCol.firstChild);
-        } catch (eMove) {}
+          node.parentNode.removeChild(node);
+        } catch (eLegacyA) {}
+        return;
       }
-    }
-    link = global.document.querySelector(".mc-return-category__link");
-    if (!link) return;
+      if (node.tagName !== "A" && !topbar.contains(node)) {
+        try {
+          node.parentNode.removeChild(node);
+        } catch (eLegacyWrap) {}
+      }
+    });
+    var label = "Return to " + cleanReturnCategoryText(category.name || "Category");
     try {
-      if (link.getAttribute("href") !== category.url) link.href = category.url;
-      if (link.textContent !== label) link.textContent = label;
+      link.href = category.url;
+      link.textContent = label;
       link.setAttribute("aria-label", label);
+      if (link.parentNode !== topbar) topbar.appendChild(link);
     } catch (eRet) {}
   }
 
   var MC_BLOCKED_RETURN_CATEGORY_IDS = { 136: true };
+
+  var MC_RETURN_CATEGORY_FALLBACK = {
+    103: { url: "/bean-bag-seating-s/103.htm", name: "Bean Bags" },
+    106: { url: "/palliser-theater-seating-s/106.htm", name: "Theater Seating" },
+    139: { url: "/sectionals-s/139.htm", name: "Sofas & Sectionals" },
+    147: { url: "/category-s/147.htm", name: "Reclining Loveseats" },
+    157: { url: "/category-s/157.htm", name: "Stationary Loveseats" },
+    175: { url: "/category-s/175.htm", name: "Accent Chairs" },
+    177: { url: "/category-s/177.htm", name: "Stationary Sofas" },
+    179: { url: "/category-s/179.htm", name: "Reclining Sofas" },
+    186: { url: "/category-s/186.htm", name: "Recliners" },
+    187: { url: "/category-s/187.htm", name: "Stationary Sectionals" },
+    188: { url: "/category-s/188.htm", name: "Reclining Sectionals" },
+    192: { url: "/category-s/192.htm", name: "Apartment Sofas" },
+    196: { url: "/category-s/196.htm", name: "Luxe Comforts" },
+    205: { url: "/category-s/205.htm", name: "Adult Blankets" },
+    206: { url: "/category-s/206.htm", name: "Kids Blankets" },
+    207: { url: "/category-s/207.htm", name: "Baby Blankets" },
+    208: { url: "/category-s/208.htm", name: "Snugglewear" },
+    209: { url: "/category-s/209.htm", name: "Bedding" },
+  };
+
+  var MC_RETURN_CATEGORY_DEPTH = {
+    103: 1,
+    106: 1,
+    139: 1,
+    132: 2,
+    135: 2,
+    187: 3,
+    188: 3,
+    198: 2,
+    197: 2,
+    177: 3,
+    179: 3,
+    192: 3,
+    199: 2,
+    157: 3,
+    147: 3,
+    149: 2,
+    186: 3,
+    175: 3,
+    178: 2,
+    196: 1,
+    205: 2,
+    206: 2,
+    207: 2,
+    208: 2,
+    209: 2,
+  };
 
   function cleanReturnCategoryText(value) {
     return String(value || "")
@@ -5060,10 +5131,87 @@
     var link = global.document.querySelector(
       'a[href*="category-s/' + id + '.htm"], a[href*="-s/' + id + '.htm"]'
     );
-    if (!link || !link.href) return null;
-    var name = cleanReturnCategoryText(link.textContent) || categoryNameFromPdpUrl(link.href);
-    if (!isValidReturnCategory(link.href, name)) return null;
-    return { url: link.href, name: name };
+    if (link && link.href) {
+      var name = cleanReturnCategoryText(link.textContent) || categoryNameFromPdpUrl(link.href);
+      if (isValidReturnCategory(link.href, name)) {
+        return { url: link.href, name: name };
+      }
+    }
+    if (MC_RETURN_CATEGORY_FALLBACK[id]) {
+      return MC_RETURN_CATEGORY_FALLBACK[id];
+    }
+    return null;
+  }
+
+  function parseVolusionBreadCrumbIds() {
+    var raw = "";
+    try {
+      if (typeof global.breadCrumb === "string") raw = global.breadCrumb;
+    } catch (eBc) {}
+    if (!raw) {
+      var scripts = global.document.querySelectorAll("script");
+      var si;
+      for (si = 0; si < scripts.length; si++) {
+        var text = scripts[si].textContent || "";
+        var match = text.match(/var\s+breadCrumb\s*=\s*"([^"]*)"/);
+        if (match && match[1]) {
+          raw = match[1];
+          break;
+        }
+      }
+    }
+    if (!raw) return [];
+    return raw.split("|").filter(function (part) {
+      return /^\d+$/.test(String(part || "").trim());
+    });
+  }
+
+  function pickMostSpecificCategoryId(ids) {
+    if (!ids || !ids.length) return null;
+    var best = ids[0];
+    var bestDepth = MC_RETURN_CATEGORY_DEPTH[best] || 0;
+    var i;
+    for (i = 1; i < ids.length; i++) {
+      var depth = MC_RETURN_CATEGORY_DEPTH[ids[i]] || 0;
+      if (depth > bestDepth) {
+        best = ids[i];
+        bestDepth = depth;
+      }
+    }
+    return best;
+  }
+
+  function resolveLuxeComfortsChildCategoryId() {
+    var titleEl = global.document.querySelector(
+      "#v65-product-parent h1, #v65-product-parent .productnamecolorLARGE, #v65-product-parent [itemprop='name']"
+    );
+    var pcEl = global.document.querySelector(
+      'input[name="ProductCode"], input[name="productcode"]'
+    );
+    var blob = (
+      cleanReturnCategoryText(titleEl && titleEl.textContent) +
+      " " +
+      String((pcEl && pcEl.value) || "")
+    ).toLowerCase();
+    if (/wearable|robe|snuggler|snuggle/.test(blob)) return "208";
+    if (/\bbaby\b/.test(blob)) return "207";
+    if (/\bkid/.test(blob)) return "206";
+    if (/waffle|sheet|bedding|duvet|pillowcase|pillow case/.test(blob)) return "209";
+    return "205";
+  }
+
+  function categoryFromPdpBreadcrumbTd() {
+    var td = global.document.querySelector("#v65-product-parent .vCSS_breadcrumb_td");
+    if (!td) return null;
+    var links = [];
+    td.querySelectorAll("a[href]").forEach(function (link) {
+      if (!isPdpCategoryUrl(link.href)) return;
+      var name = cleanReturnCategoryText(link.textContent) || categoryNameFromPdpUrl(link.href);
+      if (!isValidReturnCategory(link.href, name)) return;
+      links.push({ url: link.href, name: name });
+    });
+    if (!links.length) return null;
+    return links[links.length - 1];
   }
 
   function categoryFromVolusionProductCategoryField() {
@@ -5074,169 +5222,18 @@
     return categoryFromNavCategoryId(String(inp.value || "").trim());
   }
 
-  function categoryFromPdpProductType() {
-    if (isBeanBagPdpPage()) {
-      return { url: "/bean-bag-seating-s/103.htm", name: "Bean Bags" };
-    }
-    var body = global.document.body;
-    var html = global.document.documentElement;
-    var pcEl =
-      global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
-    var pc = String((pcEl && pcEl.value) || "").trim().toUpperCase();
-    if (!pc) {
-      var path = String(global.location.pathname || "").toLowerCase();
-      var mPc = path.match(/\/product-p\/([^/.]+)/i);
-      if (mPc) pc = decodeURIComponent(mPc[1]).replace(/-/g, " ").toUpperCase();
-    }
-    if (body && body.classList.contains("mc-ruched-blanket-pdp")) {
-      return (
-        categoryFromNavCategoryId("196") || {
-          url: "/category-s/196.htm",
-          name: "Luxe Comforts",
-        }
-      );
-    }
-    if (isSaranoniPdpPage() || /^SAR/.test(pc)) {
-      return (
-        categoryFromNavCategoryId("196") || {
-          url: "/category-s/196.htm",
-          name: "Luxe Comforts",
-        }
-      );
-    }
-    if (/^BB/.test(pc)) {
-      return { url: "/bean-bag-seating-s/103.htm", name: "Bean Bags" };
-    }
-    if (
-      body &&
-      (body.classList.contains("mc-theater-seating-pdp") ||
-        body.classList.contains("mc-palliser-pdp"))
-    ) {
-      return (
-        categoryFromNavCategoryId("106") || {
-          url: "/palliser-theater-seating-s/106.htm",
-          name: "Theater Seating",
-        }
-      );
-    }
-    if (html && html.classList.contains("is-sectional-product")) {
-      return (
-        categoryFromNavCategoryId("139") || {
-          url: "/sectionals-s/139.htm",
-          name: "Sofas & Sectionals",
-        }
-      );
-    }
-    return null;
-  }
-
-  function categoryFromPdpBreadcrumb() {
-    var roots = [];
-    var parent = global.document.getElementById("v65-product-parent");
-    var content = global.document.getElementById("content_area");
-    if (parent) roots.push(parent);
-    if (content && roots.indexOf(content) === -1) roots.push(content);
-    if (!roots.length) return null;
-
-    var selectors = [
-      "#v65-breadcrumbs a[href]",
-      ".v65-breadcrumbs a[href]",
-      "#breadcrumbs a[href]",
-      ".breadcrumbs a[href]",
-      ".breadcrumb a[href]",
-    ];
-    var links = [];
-    var ri;
-    for (ri = 0; ri < roots.length; ri++) {
-      var si;
-      for (si = 0; si < selectors.length; si++) {
-        var matched = roots[ri].querySelectorAll(selectors[si]);
-        if (matched.length) {
-          links = Array.prototype.slice.call(matched);
-          break;
-        }
-      }
-      if (links.length) break;
-    }
-
-    if (!links.length) {
-      var productHeading = global.document.querySelector(
-        "#v65-product-parent h1, .productnamecolorLARGE, #content_area h1"
-      );
-      links = [];
-      for (ri = 0; ri < roots.length; ri++) {
-        Array.prototype.slice.call(roots[ri].querySelectorAll("a[href]")).forEach(function (link) {
-          if (!isPdpCategoryUrl(link.href)) return;
-          if (productHeading) {
-            if (
-              !(
-                link.compareDocumentPosition(productHeading) &
-                Node.DOCUMENT_POSITION_FOLLOWING
-              )
-            ) {
-              return;
-            }
-          }
-          links.push(link);
-        });
-      }
-    }
-
-    var categoryLinks = links.filter(function (link) {
-      var name = cleanReturnCategoryText(link.textContent) || categoryNameFromPdpUrl(link.href);
-      return isValidReturnCategory(link.href, name);
-    });
-    if (!categoryLinks.length) return null;
-    var categoryLink = categoryLinks[categoryLinks.length - 1];
-    return {
-      url: categoryLink.href,
-      name:
-        cleanReturnCategoryText(categoryLink.textContent) ||
-        categoryNameFromPdpUrl(categoryLink.href),
-    };
-  }
-
-  function categoryFromPdpReferrer() {
-    if (!global.document.referrer) return null;
-    try {
-      var ref = new URL(global.document.referrer, global.location.origin);
-      if (ref.hostname !== global.location.hostname) return null;
-      if (!isPdpCategoryUrl(ref.href)) return null;
-      var name = categoryNameFromPdpUrl(ref.href);
-      if (!isValidReturnCategory(ref.href, name)) return null;
-      return { url: ref.href, name: name };
-    } catch (eRef) {
-      return null;
-    }
-  }
-
-  function categoryFromPdpStorage() {
-    try {
-      var saved = global.sessionStorage.getItem("mcLastProductCategory");
-      if (!saved) return null;
-      var category = JSON.parse(saved);
-      if (!category || !category.url) return null;
-      if (!isPdpCategoryUrl(category.url)) return null;
-      if (category.savedAt && Date.now() - category.savedAt > 7200000) {
-        global.sessionStorage.removeItem("mcLastProductCategory");
-        return null;
-      }
-      var name = cleanReturnCategoryText(category.name) || categoryNameFromPdpUrl(category.url);
-      if (!isValidReturnCategory(category.url, name)) return null;
-      return { url: category.url, name: name };
-    } catch (eStore) {
-      return null;
-    }
-  }
-
   function resolvePdpReturnCategory() {
-    return (
-      categoryFromPdpProductType() ||
-      categoryFromVolusionProductCategoryField() ||
-      categoryFromPdpReferrer() ||
-      categoryFromPdpBreadcrumb() ||
-      categoryFromPdpStorage()
-    );
+    var ids = parseVolusionBreadCrumbIds();
+    if (ids.length) {
+      var pick = pickMostSpecificCategoryId(ids);
+      if (pick === "196" && ids.length === 1) {
+        pick = resolveLuxeComfortsChildCategoryId();
+      }
+      return categoryFromNavCategoryId(pick);
+    }
+    var tdCategory = categoryFromPdpBreadcrumbTd();
+    if (tdCategory) return tdCategory;
+    return categoryFromVolusionProductCategoryField();
   }
 
   function ensureBeanBagReturnLink() {
