@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260616unified4";
-  var AUTH_LAYOUT_VER = "20260616pdp43";
+  var LAYOUT_VER = "20260616unified6";
+  var AUTH_LAYOUT_VER = "20260616pdp45";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -170,13 +170,36 @@
   function fallbackReturnCategory() {
     var pc = "";
     var title = "";
+    var hay = "";
     try {
       pc = String((qs('input[name="ProductCode"], input[name="productcode"]') || {}).value || "").toUpperCase();
       title = String((global.document.querySelector('[itemprop="name"], h1, .productnamecolor, .colors_productname') || {}).textContent || global.document.title || "").toUpperCase();
+      hay = [pc, title, global.location && global.location.pathname || ""].join(" ").toUpperCase();
     } catch (e) {}
 
-    if (/^BB|BEAN\s*BAG/.test(pc) || /BEAN\s*BAG/.test(title)) {
-      return { name: "Luxe Comforts", href: "/luxe-comforts-s/196.htm" };
+    if (/^SAR/.test(pc) && /(ROBE|SNUGGLE|WEAR|BAMBONI)/.test(hay)) {
+      return { name: "Snugglewear", href: "/category-s/208.htm" };
+    }
+    if (/^SAR/.test(pc) && /(BABY)/.test(hay)) {
+      return { name: "Baby Blankets", href: "/category-s/207.htm" };
+    }
+    if (/^SAR/.test(pc) && /(KID|CHILD|MINI)/.test(hay)) {
+      return { name: "Kids Blankets", href: "/category-s/206.htm" };
+    }
+    if (/^SAR/.test(pc)) {
+      return { name: "Adult Blankets", href: "/category-s/205.htm" };
+    }
+    if (/^BB|BEAN\s*BAG|NEST/.test(pc) || /BEAN\s*BAG|NEST/.test(title)) {
+      return { name: "Bean Bags", href: "/bean-bag-seating-s/103.htm" };
+    }
+    if (/MAHJONG/.test(hay) && /(MAT|RACK)/.test(hay)) {
+      return { name: "Mats and Racks", href: "/category-s/203.htm" };
+    }
+    if (/MAHJONG/.test(hay) && /(TILE|SET)/.test(hay)) {
+      return { name: "Mahjong Tiles", href: "/category-s/202.htm" };
+    }
+    if (/MAHJONG/.test(hay) && /(BAG|TOTE|BOX|ACCESSOR)/.test(hay)) {
+      return { name: "Mahjong Accessories", href: "/category-s/204.htm" };
     }
     if (/SECTIONAL|SECT/.test(pc) || /SECTIONAL/.test(title)) {
       return { name: "Sectionals", href: "/sectionals-s/198.htm" };
@@ -191,7 +214,19 @@
   }
 
   function resolveReturnCategory() {
-    var BLOCK = { 136: true };
+    var fallback = fallbackReturnCategory();
+    var productAwareNames = {
+      "BEAN BAGS": true,
+      "MATS AND RACKS": true,
+      "MAHJONG TILES": true,
+      "MAHJONG ACCESSORIES": true,
+      "SNUGGLEWEAR": true,
+      "BABY BLANKETS": true,
+      "KIDS BLANKETS": true,
+      "ADULT BLANKETS": true,
+    };
+    var BLOCK = { 136: true, 196: true };
+    if (productAwareNames[String(fallback.name || "").toUpperCase()]) return fallback;
     var bcTd = qs("#v65-product-parent .vCSS_breadcrumb_td, #content_area .vCSS_breadcrumb_td");
     var links = bcTd ? qsa('a[href*="-s/"], a[href*="category-s/"]', bcTd) : [];
     var ids = parseBreadCrumbIds();
@@ -218,9 +253,10 @@
       var t = (links[i].textContent || "").replace(/\s+/g, " ").trim();
       var h = links[i].getAttribute("href") || "";
       if (!t || !h || /about us/i.test(t)) continue;
+      if (/luxe comforts/i.test(t) && productAwareNames[String(fallback.name || "").toUpperCase()]) continue;
       return { name: t, href: h };
     }
-    return fallbackReturnCategory();
+    return fallback;
   }
 
   function ensureReturnRow(mainRow, table) {
@@ -295,10 +331,14 @@
     }
     if (btn.tagName === "INPUT" && !btn.value) btn.value = "ADD TO CART";
     btn.classList.add("mc-unified-atc-btn");
+    btn.classList.remove("btn-default", "btn-secondary");
+    btn.classList.add("btn-primary");
     btn.style.setProperty("background", "#000", "important");
     btn.style.setProperty("background-color", "#000", "important");
+    btn.style.setProperty("background-image", "none", "important");
     btn.style.setProperty("color", "#fff", "important");
     btn.style.setProperty("border", "1px solid #000", "important");
+    btn.style.setProperty("box-shadow", "none", "important");
     btn.style.setProperty("transition", "none", "important");
     btn.style.setProperty("animation", "none", "important");
     btn.setAttribute("data-mc-atc-styled", AUTH_LAYOUT_VER);
@@ -357,10 +397,20 @@
     return controls;
   }
 
+  function collectFinanceBlock(infoTd) {
+    return (
+      qs("#messaging-element", infoTd) ||
+      qs('[id*="klarna" i], [class*="klarna" i], klarna-placement', infoTd) ||
+      qs('[id*="affirm" i], [class*="affirm" i], affirm-as-low-as', infoTd)
+    );
+  }
+
   function collectOptionBlocks(infoTd) {
     var sel =
       "#mc-pdp-option-block, #beanbag-swatch-wrapper, #mc-configured-color-swatch-wrapper, " +
-      "#mc-bb-size-section, .mc-saranoni-swatch-wrapper, .mc-configured-color-swatch-wrapper";
+      "#mc-bb-size-section, .mc-saranoni-swatch-wrapper, .mc-saranoni-swatches, " +
+      ".mc-configured-color-swatch-wrapper, .mc-configured-color-swatches, " +
+      "[data-mc-color-swatches], [data-mc-saranoni-swatches]";
     var seen = [];
     qsa(sel, infoTd).forEach(function (el) {
       if (seen.indexOf(el) === -1) seen.push(el);
@@ -376,13 +426,13 @@
     var logo = qs("#mc-pdp-brand-logo", infoTd);
     var price = qs("#mc-pdp-price-stack-host", infoTd);
     if (!price) price = qs("#mc-pdp-price-atc-row", infoTd);
-    var klarna = qs("#messaging-element", infoTd);
+    var klarna = collectFinanceBlock(infoTd);
     var options = collectOptionBlocks(infoTd);
     var features = qs("#mc-pdp-features", infoTd);
     var purchase = qs(".mc-unified-purchase-controls", infoTd);
 
     var ordered = [];
-    [title, logo, price, klarna].forEach(function (el) {
+    [logo, title, price, klarna].forEach(function (el) {
       if (el && ordered.indexOf(el) === -1) ordered.push(el);
     });
     options.forEach(function (el) {

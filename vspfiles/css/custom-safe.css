@@ -16812,3 +16812,78 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap button[name="
   text-transform: uppercase !important;
   box-shadow: none !important;
 }
+
+/* MC PDP unified e-product lock 20260616pdp44: consistent layout, black ATC, description/features typography parity. */
+html body.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
+html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row,
+html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
+html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row {
+  display: table-row !important;
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+
+@media (min-width: 992px) {
+  html body.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-media {
+    display: table-cell !important;
+    width: 58% !important;
+    max-width: 58% !important;
+    padding: 0 22px 0 0 !important;
+    vertical-align: top !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-info {
+    display: table-cell !important;
+    width: 42% !important;
+    max-width: 42% !important;
+    padding: 0 0 0 22px !important;
+    vertical-align: top !important;
+    box-sizing: border-box !important;
+  }
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input.mc-unified-atc-btn,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"],
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input.btn_addtocart,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input.btn-primary,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls button.mc-unified-atc-btn,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input.mc-unified-atc-btn,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input.btn_addtocart,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input.btn-primary,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls button.mc-unified-atc-btn,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"] {
+  background: #000 !important;
+  background-color: #000 !important;
+  background-image: none !important;
+  border: 1px solid #000 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-pdp-description,
+html body.mc-pdp-unified-ready .mc-unified-pdp-description *,
+html body.mc-pdp-unified-ready #mc-pdp-features,
+html body.mc-pdp-unified-ready #mc-pdp-features *,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description *,
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-features,
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-features * {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  color: #444 !important;
+  text-transform: none !important;
+}
