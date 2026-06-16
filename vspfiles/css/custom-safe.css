@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260607deploy — deploy-path verify only; no layout change */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260525atc — ATC black lock only */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -12539,27 +12539,38 @@ body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart
 body.productdetails #v65-product-parent .mc-atc-button-wrap input[type="submit"],
 body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[type="submit"],
 body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
-body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"] {
-  display: inline-block !important;
-  flex: 0 0 auto !important;
-  width: auto !important;
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
+body.productdetails #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
+body.mc-product-page #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
+body.productdetails #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"] {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
   min-width: 0 !important;
-  padding: 0 !important;
-  border: none !important;
+  max-width: 100% !important;
+  min-height: 46px !important;
+  padding: 0 28px !important;
+  margin: 0 !important;
+  border: 1px solid #111 !important;
   border-radius: 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
+  background: #111 !important;
+  background-color: #111 !important;
   background-image: none !important;
   -webkit-appearance: none !important;
   appearance: none !important;
   box-shadow: none !important;
-  color: inherit !important;
-  font-size: inherit !important;
-  font-weight: inherit !important;
-  letter-spacing: inherit !important;
-  text-transform: inherit !important;
+  color: #fff !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
   cursor: pointer !important;
-  font-family: inherit !important;
 }
 
 body.productdetails #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
@@ -17083,27 +17094,35 @@ html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ru
 html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
 html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
 html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap button[name="btnaddtocart"] {
-  display: inline-block !important;
-  flex: 0 0 auto !important;
-  width: auto !important;
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap input[name="btnaddtocart"] {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
   min-width: 0 !important;
-  max-width: none !important;
-  padding: 0 !important;
+  max-width: 100% !important;
+  min-height: 46px !important;
+  padding: 0 28px !important;
   margin: 0 !important;
-  border: none !important;
+  border: 1px solid #111 !important;
   border-radius: 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
+  background: #111 !important;
+  background-color: #111 !important;
   background-image: none !important;
   box-shadow: none !important;
-  color: inherit !important;
-  font: inherit !important;
-  font-size: inherit !important;
-  font-weight: inherit !important;
-  letter-spacing: inherit !important;
-  text-transform: inherit !important;
-  line-height: inherit !important;
+  color: #fff !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
   cursor: pointer !important;
   -webkit-appearance: none !important;
   appearance: none !important;
@@ -17327,11 +17346,27 @@ html body.mc-saranoni-pdp #v65-product-parent > tbody:nth-child(1) > tr:nth-chil
 }
 
 html body.mc-saranoni-pdp .vCSS_input_addtocart {
-  font-weight: 500 !important;
-  letter-spacing: 0.2em !important;
-  min-height: 38px !important;
-  padding: 0 18px 5px !important;
+  background: #111 !important;
+  background-color: #111 !important;
+  background-image: none !important;
+  color: #fff !important;
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  min-height: 46px !important;
+  padding: 0 28px !important;
   margin-top: 5px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
 
 html body.mc-saranoni-pdp .mc-pdp-media-td {
@@ -17363,4 +17398,47 @@ body.mc-product-page #related_products_content img,
 body.mc-product-page #v65-product-related img {
   max-width: 200px !important;
   max-height: 250px !important;
+}
+
+/* MC PDP ATC black lock — all product types, no layout changes */
+body.productdetails #v65-product-parent input[name="btnaddtocart"],
+body.mc-product-page #v65-product-parent input[name="btnaddtocart"],
+body.productdetails #v65-product-parent button[name="btnaddtocart"],
+body.mc-product-page #v65-product-parent button[name="btnaddtocart"],
+body.productdetails #v65-product-parent input.vCSS_input_addtocart,
+body.mc-product-page #v65-product-parent input.vCSS_input_addtocart,
+body.productdetails #mc-pdp-purchase-stack input[name="btnaddtocart"],
+body.mc-product-page #mc-pdp-purchase-stack input[name="btnaddtocart"],
+body.productdetails #content_area input[name="btnaddtocart"],
+body.mc-product-page #content_area input[name="btnaddtocart"],
+body.productdetails input[type="image"][name="btnaddtocart"],
+body.mc-product-page input[type="image"][name="btnaddtocart"] {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 48px !important;
+  padding: 0 28px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  background: #111 !important;
+  background-color: #111 !important;
+  background-image: none !important;
+  color: #fff !important;
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
 }

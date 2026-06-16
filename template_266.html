@@ -1452,7 +1452,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp38e"></script>
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp39b"></script>
   <script id="mc-plp-enforcer-bridge">
 (function(g,d){var W="20260628a",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
@@ -4104,7 +4104,7 @@ try {
     var boot = document.getElementById("mc-pdp-auth-cta-boot");
     if (!boot) {
       var s = document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp38e&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp39b&mcrd=" + Date.now();
       s.async = false;
       (document.head || document.documentElement).appendChild(s);
     }
@@ -8054,7 +8054,7 @@ body.productdetails #v65-product-parent .mc-atc-button-wrap:hover {
   color: #fff !important;
   border-color: #222 !important;
 }
-/* Input inside wrapper: no box — wrapper carries black fill; text/icon inherit white. */
+/* Inner submit: solid black on the clickable control */
 body.mc-product-page #content_area .mc-atc-button-wrap input[type="submit"],
 body.productdetails #content_area .mc-atc-button-wrap input[type="submit"],
 body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[type="submit"],
@@ -8062,27 +8062,38 @@ body.productdetails #v65-product-parent .mc-atc-button-wrap input[type="submit"]
 body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
 body.productdetails #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
 body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
-body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"] {
-  display: inline-block !important;
-  flex: 0 0 auto !important;
-  width: auto !important;
+body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
+body.mc-product-page #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
+body.productdetails #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
+body.productdetails #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"] {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
   min-width: 0 !important;
-  padding: 0 !important;
-  border: none !important;
+  max-width: 100% !important;
+  min-height: 46px !important;
+  padding: 0 28px !important;
+  margin: 0 !important;
+  border: 1px solid #111 !important;
   border-radius: 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
+  background: #111 !important;
+  background-color: #111 !important;
   background-image: none !important;
   -webkit-appearance: none !important;
   appearance: none !important;
   box-shadow: none !important;
-  color: inherit !important;
-  font-size: inherit !important;
-  font-weight: inherit !important;
-  letter-spacing: inherit !important;
-  text-transform: inherit !important;
+  color: #fff !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
   cursor: pointer !important;
-  font-family: inherit !important;
 }
 body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
 body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon {
