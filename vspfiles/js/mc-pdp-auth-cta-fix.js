@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp38i";
+  var VERSION = "20260616pdp38j";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -207,7 +207,7 @@
     if (!el || el.nodeType !== 1) return false;
     if (
       !el.closest(
-        "#ProductDetail_ProductDetails_div2, #mc-pdp-description-below-features, .colors_descriptionbox, #content_area span[itemprop='description']"
+        "#ProductDetail_ProductDetails_div, #ProductDetail_ProductDetails_div2, #product_description, #mc-pdp-description-below-features, .colors_descriptionbox, #content_area span[itemprop='description']"
       )
     ) {
       return false;
@@ -345,7 +345,7 @@
 
   function applyPdpDescriptionStyle() {
     var roots = global.document.querySelectorAll(
-      "#ProductDetail_ProductDetails_div2, #mc-pdp-description-below-features, #ProductDetail_ProductDetails_div2 .colors_descriptionbox, #ProductDetail_ProductDetails_div2 span[itemprop='description'], #content_area span[itemprop='description']"
+      "#ProductDetail_ProductDetails_div, #ProductDetail_ProductDetails_div2, #product_description, #mc-pdp-description-below-features, #ProductDetail_ProductDetails_div2 .colors_descriptionbox, #ProductDetail_ProductDetails_div .colors_descriptionbox, #ProductDetail_ProductDetails_div2 span[itemprop='description'], #ProductDetail_ProductDetails_div span[itemprop='description'], #content_area span[itemprop='description']"
     );
     roots.forEach(function (root) {
       try {
@@ -359,7 +359,7 @@
         applyPdpDescriptionTypography(el);
       });
     });
-    global.document.querySelectorAll("#ProductDetail_ProductDetails_div2 ul, #ProductDetail_ProductDetails_div2 ol, #mc-pdp-description-below-features ul, #mc-pdp-description-below-features ol, #content_area span[itemprop='description'] ul").forEach(function (list) {
+    global.document.querySelectorAll("#ProductDetail_ProductDetails_div ul, #ProductDetail_ProductDetails_div ol, #ProductDetail_ProductDetails_div2 ul, #ProductDetail_ProductDetails_div2 ol, #mc-pdp-description-below-features ul, #mc-pdp-description-below-features ol, #content_area span[itemprop='description'] ul").forEach(function (list) {
       if (!isPdpDescriptionTypographyEl(list)) return;
       try {
         list.style.setProperty("list-style", "disc", "important");
@@ -367,7 +367,7 @@
         list.style.setProperty("margin", "0", "important");
       } catch (eList) {}
     });
-    global.document.querySelectorAll("#ProductDetail_ProductDetails_div2 li, #mc-pdp-description-below-features li, #content_area span[itemprop='description'] > li").forEach(function (li) {
+    global.document.querySelectorAll("#ProductDetail_ProductDetails_div li, #ProductDetail_ProductDetails_div2 li, #mc-pdp-description-below-features li, #content_area span[itemprop='description'] > li").forEach(function (li) {
       if (!isPdpDescriptionTypographyEl(li)) return;
       try {
         li.style.setProperty("margin", "0 0 4px 0", "important");
@@ -2109,6 +2109,30 @@
     }
   }
 
+  function ensurePdpDescriptionCriticalCss() {
+    var el = global.document.getElementById("mc-pdp-description-critical-css");
+    if (!el) {
+      el = global.document.createElement("style");
+      el.id = "mc-pdp-description-critical-css";
+      (global.document.head || global.document.documentElement).appendChild(el);
+    }
+    el.textContent =
+      "html body.productdetails #mc-pdp-description-below-features,html body.mc-product-page #mc-pdp-description-below-features," +
+      "html body.productdetails #mc-pdp-description-below-features *,html body.mc-product-page #mc-pdp-description-below-features *," +
+      "html body.productdetails #product_description,html body.mc-product-page #product_description," +
+      "html body.productdetails #product_description *,html body.mc-product-page #product_description *," +
+      "html body.productdetails #ProductDetail_ProductDetails_div,html body.mc-product-page #ProductDetail_ProductDetails_div," +
+      "html body.productdetails #ProductDetail_ProductDetails_div p,html body.mc-product-page #ProductDetail_ProductDetails_div p," +
+      "html body.productdetails #ProductDetail_ProductDetails_div span,html body.mc-product-page #ProductDetail_ProductDetails_div span," +
+      "html body.productdetails #ProductDetail_ProductDetails_div li,html body.mc-product-page #ProductDetail_ProductDetails_div li," +
+      "html body.productdetails #ProductDetail_ProductDetails_div font,html body.mc-product-page #ProductDetail_ProductDetails_div font," +
+      "html body.productdetails #ProductDetail_ProductDetails_div strong,html body.mc-product-page #ProductDetail_ProductDetails_div strong," +
+      "html body.productdetails span[itemprop='description'],html body.mc-product-page span[itemprop='description']," +
+      "html body.productdetails span[itemprop='description'] *,html body.mc-product-page span[itemprop='description'] *{" +
+      "font-family:Inter,Arial,sans-serif!important;font-size:14px!important;font-weight:400!important;line-height:1.55!important;" +
+      "letter-spacing:0.02em!important;text-transform:none!important;color:#444!important}";
+  }
+
   function ensurePdpHeroCriticalCss() {
     var el = global.document.getElementById("mc-pdp-hero-critical-css");
     if (!el) {
@@ -2209,7 +2233,9 @@
       "border:none!important;border-width:0!important;background:transparent!important}" +
       "body.productdetails #ProductDetail_ProductDetails_div2,body.mc-product-page #ProductDetail_ProductDetails_div2," +
       "body.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox,body.mc-product-page #ProductDetail_ProductDetails_div2 .colors_descriptionbox," +
-      "body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop='description'],body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop='description']{" +
+      "body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop='description'],body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop='description']," +
+      "body.productdetails #ProductDetail_ProductDetails_div span[itemprop='description'],body.mc-product-page #ProductDetail_ProductDetails_div span[itemprop='description']," +
+      "body.productdetails #product_description,body.mc-product-page #product_description,body.productdetails #mc-pdp-description-below-features,body.mc-product-page #mc-pdp-description-below-features{" +
       "font-family:Inter,Arial,sans-serif!important;font-size:14px!important;line-height:1.55!important;letter-spacing:0.02em!important;color:#444!important}" +
       "body.productdetails img#product_photo,body.mc-product-page img#product_photo{" +
       "max-width:min(650px,100%)!important;width:100%!important;height:auto!important}" +
@@ -3677,7 +3703,7 @@
       descDiv.style.setProperty("margin", "0", "important");
       descDiv.style.setProperty("padding", "0", "important");
       descDiv.style.setProperty("text-align", "left", "important");
-      descDiv.style.setProperty("line-height", "1.65", "important");
+      descDiv.style.setProperty("line-height", "1.55", "important");
     } catch (eDescStyle) {}
     try {
       pruneDescriptionDuplicateFeatures();
@@ -5317,6 +5343,7 @@
     }
     var host = global.document.getElementById("mc-pdp-price-stack-host");
     if (host) placePriceStackHost(host);
+    applyPdpDescriptionStyle();
     fixAddToCartChrome();
   }
 
@@ -5430,12 +5457,14 @@
       markBeanBagCoverSwatchesReady();
       ensurePdpStackCriticalCss();
       ensurePdpHeroCriticalCss();
+      ensurePdpDescriptionCriticalCss();
       disableQuantityHiders();
       if (!sectional && isSoftGoodsPdpPage()) {
         ensureConfiguredColorSwatches();
       }
       if (!sectional && isPdpLayoutMounted()) {
         forceRebuildCleanPriceStack();
+        applyPdpDescriptionStyle();
         if (isSoftGoodsPdpPage()) {
           reassertSoftGoodsHeroOrder();
         } else {

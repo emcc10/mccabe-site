@@ -13605,17 +13605,26 @@ body * {
   letter-spacing: 1.14px;
 }
 
-/* PDP description text — !important + high specificity so the broad
-   `html body…#content_area span` rule below doesn't override these. */
+/* PDP description text — match #mc-pdp-features body/list (14px / 400). */
 html body.productdetails span[itemprop="description"],
 html body.mc-product-page span[itemprop="description"],
 html body.productdetails #content_area span[itemprop="description"],
 html body.mc-product-page #content_area span[itemprop="description"],
 html body.productdetails #v65-product-parent span[itemprop="description"],
-html body.mc-product-page #v65-product-parent span[itemprop="description"] {
-  font-size: 13px !important;
-  letter-spacing: 1.14px !important;
-font-weight: 300px !important;
+html body.mc-product-page #v65-product-parent span[itemprop="description"],
+html body.productdetails #product_description,
+html body.mc-product-page #product_description,
+html body.productdetails #ProductDetail_ProductDetails_div,
+html body.mc-product-page #ProductDetail_ProductDetails_div,
+html body.productdetails #ProductDetail_ProductDetails_div2,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: #444 !important;
 }
 
 /* Retail / member labels: uppercase + semibold weight. */
@@ -16798,15 +16807,38 @@ html body.mc-bean-bag-pdp.mc-bb-cover-swatches-ready #options_table select[name*
 html body.mc-bean-bag-pdp #mc-pdp-description-below-features,
 html body.mc-saranoni-pdp #mc-pdp-description-below-features,
 html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features,
+html body.productdetails #mc-pdp-description-below-features,
+html body.mc-product-page #mc-pdp-description-below-features,
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features #product_description,
+html body.mc-saranoni-pdp #mc-pdp-description-below-features #product_description,
+html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features #product_description,
+html body.productdetails #mc-pdp-description-below-features #product_description,
+html body.mc-product-page #mc-pdp-description-below-features #product_description,
 html body.mc-bean-bag-pdp #mc-pdp-description-below-features p,
 html body.mc-saranoni-pdp #mc-pdp-description-below-features p,
 html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features p,
+html body.productdetails #mc-pdp-description-below-features p,
+html body.mc-product-page #mc-pdp-description-below-features p,
 html body.mc-bean-bag-pdp #mc-pdp-description-below-features span,
 html body.mc-saranoni-pdp #mc-pdp-description-below-features span,
 html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features span,
+html body.productdetails #mc-pdp-description-below-features span,
+html body.mc-product-page #mc-pdp-description-below-features span,
 html body.mc-bean-bag-pdp #mc-pdp-description-below-features li,
 html body.mc-saranoni-pdp #mc-pdp-description-below-features li,
-html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features li {
+html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features li,
+html body.productdetails #mc-pdp-description-below-features li,
+html body.mc-product-page #mc-pdp-description-below-features li,
+html body.productdetails #ProductDetail_ProductDetails_div p,
+html body.mc-product-page #ProductDetail_ProductDetails_div p,
+html body.productdetails #ProductDetail_ProductDetails_div span,
+html body.mc-product-page #ProductDetail_ProductDetails_div span,
+html body.productdetails #ProductDetail_ProductDetails_div li,
+html body.mc-product-page #ProductDetail_ProductDetails_div li,
+html body.productdetails #ProductDetail_ProductDetails_div font,
+html body.mc-product-page #ProductDetail_ProductDetails_div font,
+html body.productdetails #ProductDetail_ProductDetails_div strong,
+html body.mc-product-page #ProductDetail_ProductDetails_div strong {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 14px !important;
   font-weight: 400 !important;
@@ -17579,4 +17611,38 @@ body.mc-product-page #content_area input[type="image"][name="btnaddtocart"] {
   box-sizing: border-box !important;
   opacity: 1 !important;
   cursor: pointer !important;
+}
+
+/* MC PDP LOCK — description typography must match .mc-pdp-features__list */
+html body.productdetails #mc-pdp-description-below-features,
+html body.mc-product-page #mc-pdp-description-below-features,
+html body.productdetails #mc-pdp-description-below-features *,
+html body.mc-product-page #mc-pdp-description-below-features *,
+html body.productdetails #product_description,
+html body.mc-product-page #product_description,
+html body.productdetails #product_description *,
+html body.mc-product-page #product_description *,
+html body.productdetails #ProductDetail_ProductDetails_div,
+html body.mc-product-page #ProductDetail_ProductDetails_div,
+html body.productdetails #ProductDetail_ProductDetails_div p,
+html body.mc-product-page #ProductDetail_ProductDetails_div p,
+html body.productdetails #ProductDetail_ProductDetails_div span,
+html body.mc-product-page #ProductDetail_ProductDetails_div span,
+html body.productdetails #ProductDetail_ProductDetails_div li,
+html body.mc-product-page #ProductDetail_ProductDetails_div li,
+html body.productdetails #ProductDetail_ProductDetails_div font,
+html body.mc-product-page #ProductDetail_ProductDetails_div font,
+html body.productdetails #ProductDetail_ProductDetails_div strong,
+html body.mc-product-page #ProductDetail_ProductDetails_div strong,
+html body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop="description"],
+html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="description"],
+html body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop="description"] *,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="description"] * {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: #444 !important;
 }
