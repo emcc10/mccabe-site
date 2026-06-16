@@ -17308,7 +17308,29 @@ html body.mc-saranoni-pdp .vCSS_input_addtocart {
   font-weight: 500 !important;
   letter-spacing: 0.2em !important;
   min-height: 38px !important;
-  padding-bottom: 5px !important;
+  padding: 0 18px 5px !important;
+  margin-top: 5px !important;
+}
+
+html body.mc-saranoni-pdp .mc-pdp-media-td {
+  margin-left: 100px !important;
+  margin-top: -30px !important;
+}
+
+html body.mc-saranoni-pdp .mc-pdp-options-td {
+  margin-left: -20px !important;
+}
+
+html body.mc-saranoni-pdp .mc-pdp-stack-retail-amt {
+  margin-left: 15px !important;
+}
+
+html body.mc-saranoni-pdp #messaging-element {
+  margin-left: 15px !important;
+}
+
+html body.mc-saranoni-pdp .mc-atc-button-wrap {
+  margin-top: 5px !important;
 }
 
 html.mc-url-looks-like-pdp body #related_products_content img,
