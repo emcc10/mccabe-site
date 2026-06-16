@@ -17463,9 +17463,13 @@ body.mc-product-page #v65-product-related img {
   max-height: 250px !important;
 }
 
-/* Bean bag PDP layout alignment (reference: ruched blanket page). */
-html body.mc-bean-bag-pdp td.mc-pdp-media-td .mc-return-category {
+/* Bean bag + soft-goods PDP layout alignment (reference: ruched blanket page). */
+html body.mc-bean-bag-pdp td.mc-pdp-media-td .mc-return-category,
+html body.mc-saranoni-pdp td.mc-pdp-media-td .mc-return-category,
+html body.mc-ruched-blanket-pdp td.mc-pdp-media-td .mc-return-category {
   display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   width: 100% !important;
   max-width: min(650px, 100%) !important;
   margin: 0 0 14px 0 !important;
@@ -17475,27 +17479,65 @@ html body.mc-bean-bag-pdp td.mc-pdp-media-td .mc-return-category {
 }
 
 html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap {
-  justify-content: center !important;
-  align-items: center !important;
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap,
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap {
+  justify-content: flex-start !important;
+  align-items: stretch !important;
   width: 100% !important;
   max-width: 100% !important;
+  background: #111 !important;
+  background-color: #111 !important;
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
 html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
 html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"] {
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"],
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"],
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"] {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
   text-align: center !important;
   width: 100% !important;
   max-width: 100% !important;
+  background: #111 !important;
+  background-color: #111 !important;
+  background-image: none !important;
+  color: #fff !important;
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  min-height: 48px !important;
+  padding: 0 28px !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
 
 @media (max-width: 991px) {
-  html body.mc-bean-bag-pdp td.mc-pdp-media-td .mc-return-category {
+  html body.mc-bean-bag-pdp td.mc-pdp-media-td .mc-return-category,
+  html body.mc-saranoni-pdp td.mc-pdp-media-td .mc-return-category,
+  html body.mc-ruched-blanket-pdp td.mc-pdp-media-td .mc-return-category {
     max-width: 100% !important;
   }
 
@@ -17513,10 +17555,10 @@ html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[n
 }
 
 /* =========================================================
-   PDP row-2 flex collapse fix (20260616pdp38j)
+   PDP row-2 flex collapse fix (20260616pdp38k)
    display:flex on <tr> zeroes row height inside <table>, which blanked
-   simple PDPs (e.g. SAR-WEARABLE). Restore table-row for untagged row-2 only.
-   Soft-goods tagged mc-pdp-main-row keeps flex + block table parent (below).
+   Saranoni/simple PDPs (e.g. SAR-WEARABLE). Restore table-row layout for
+   the main product row; soft-goods column widths come from mc-pdp-media/options-td.
    ========================================================= */
 @media (min-width: 992px) {
   body.mc-product-page #v65-product-parent,
@@ -17533,20 +17575,29 @@ html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[n
     height: auto !important;
   }
 
-  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2):not(.mc-pdp-main-row),
-  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2):not(.mc-pdp-main-row),
-  body.mc-product-page #v65-product-parent > tr:nth-of-type(2):not(.mc-pdp-main-row),
-  body.productdetails #v65-product-parent > tr:nth-of-type(2):not(.mc-pdp-main-row) {
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2),
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2),
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2),
+  body.productdetails #v65-product-parent > tr:nth-of-type(2),
+  body.mc-product-page #v65-product-parent > tbody > tr.mc-pdp-main-row,
+  body.productdetails #v65-product-parent > tbody > tr.mc-pdp-main-row,
+  body.mc-product-page #v65-product-parent > tr.mc-pdp-main-row,
+  body.productdetails #v65-product-parent > tr.mc-pdp-main-row,
+  html body.mc-bean-bag-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-ruched-blanket-pdp #content_area tr.mc-pdp-main-row {
     display: table-row !important;
     height: auto !important;
     min-height: 0 !important;
     overflow: visible !important;
   }
 
-  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2):not(.mc-pdp-main-row) > td,
-  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2):not(.mc-pdp-main-row) > td,
-  body.mc-product-page #v65-product-parent > tr:nth-of-type(2):not(.mc-pdp-main-row) > td,
-  body.productdetails #v65-product-parent > tr:nth-of-type(2):not(.mc-pdp-main-row) > td {
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td,
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td,
+  body.mc-product-page tr.mc-pdp-main-row > td,
+  body.productdetails tr.mc-pdp-main-row > td {
     display: table-cell !important;
     vertical-align: top !important;
     height: auto !important;
@@ -17554,63 +17605,18 @@ html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[n
     overflow: visible !important;
   }
 
-  /* Soft goods: block table shell + flex main row (660px media / 400px options). */
-  html body.mc-bean-bag-pdp #v65-product-parent,
-  html body.mc-saranoni-pdp #v65-product-parent,
-  html body.mc-ruched-blanket-pdp #v65-product-parent {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
+  html body.mc-saranoni-pdp tr.mc-pdp-main-row > td.mc-pdp-media-td,
+  html body.mc-ruched-blanket-pdp tr.mc-pdp-main-row > td.mc-pdp-media-td {
+    width: 58% !important;
+    min-width: 480px !important;
   }
 
-  html body.mc-bean-bag-pdp #v65-product-parent > tbody,
-  html body.mc-saranoni-pdp #v65-product-parent > tbody,
-  html body.mc-ruched-blanket-pdp #v65-product-parent > tbody {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-  }
-
-  html body.mc-bean-bag-pdp #content_area tr.mc-pdp-main-row,
-  html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,
-  html body.mc-ruched-blanket-pdp #content_area tr.mc-pdp-main-row,
-  html body.mc-bean-bag-pdp #v65-product-parent > tbody > tr.mc-pdp-main-row,
-  html body.mc-saranoni-pdp #v65-product-parent > tbody > tr.mc-pdp-main-row,
-  html body.mc-ruched-blanket-pdp #v65-product-parent > tbody > tr.mc-pdp-main-row {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    align-items: flex-start !important;
-    gap: 24px !important;
-    width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    overflow: visible !important;
-  }
-
-  html body.mc-bean-bag-pdp #content_area td.mc-pdp-media-td,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,
-  html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-media-td {
-    flex: 0 0 660px !important;
-    width: 660px !important;
-    max-width: 660px !important;
-    min-width: 0 !important;
-    display: block !important;
-  }
-
-  html body.mc-bean-bag-pdp #content_area td.mc-pdp-options-td,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-options-td,
-  html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-options-td {
-    flex: 0 0 400px !important;
-    width: 400px !important;
-    max-width: 400px !important;
-    min-width: 0 !important;
-    display: block !important;
-  }
-
-  html body.mc-saranoni-pdp #content_area img#product_photo,
-  html body.mc-saranoni-pdp #content_area a#product_photo_zoom_url {
+  html body.mc-saranoni-pdp img#product_photo,
+  html body.mc-ruched-blanket-pdp img#product_photo,
+  html body.mc-saranoni-pdp a#product_photo_zoom_url,
+  html body.mc-ruched-blanket-pdp a#product_photo_zoom_url {
     width: 100% !important;
     max-width: 650px !important;
-    margin-left: 0 !important;
+    height: auto !important;
   }
 }

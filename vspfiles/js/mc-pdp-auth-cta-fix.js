@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp38j";
+  var VERSION = "20260616pdp38k";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -1934,11 +1934,15 @@
       } catch (eRow) {}
     }
     try {
-      stackNode.style.setProperty("width", "auto", "important");
-      stackNode.style.setProperty("max-width", "none", "important");
+      stackNode.style.setProperty("width", isSoftGoodsPdpPage() ? "100%" : "auto", "important");
+      stackNode.style.setProperty("max-width", isSoftGoodsPdpPage() ? "100%" : "none", "important");
       stackNode.style.setProperty("display", "flex", "important");
-      stackNode.style.setProperty("justify-content", "center", "important");
-      stackNode.style.setProperty("margin", "0 auto", "important");
+      stackNode.style.setProperty(
+        "justify-content",
+        isBeanBagPdpPage() ? "flex-start" : "center",
+        "important"
+      );
+      stackNode.style.setProperty("margin", isSoftGoodsPdpPage() ? "0" : "0 auto", "important");
       stackNode.style.setProperty("flex", "0 0 auto", "important");
     } catch (eAtcBlock) {}
   }
@@ -1973,9 +1977,14 @@
     }
     var wrap = stack.querySelector(".mc-atc-button-wrap");
     if (wrap) {
+      applySoftGoodsAtcChrome(wrap);
       try {
         wrap.style.setProperty("display", "flex", "important");
-        wrap.style.setProperty("justify-content", "center", "important");
+        wrap.style.setProperty(
+          "justify-content",
+          beanBag ? "flex-start" : "center",
+          "important"
+        );
         wrap.style.setProperty("align-items", "center", "important");
         wrap.style.setProperty("width", "100%", "important");
         wrap.style.setProperty("max-width", "100%", "important");
@@ -2230,9 +2239,11 @@
       "body.productdetails #mc-pdp-price-stack-host,body.mc-product-page #mc-pdp-price-stack-host{margin:4px 0 10px 0!important;gap:0!important}" +
       "body.productdetails .mc-atc-button-wrap,body.mc-product-page .mc-atc-button-wrap{" +
       "border:none!important;border-color:transparent!important;box-shadow:none!important;" +
-      "border-radius:0!important;background:transparent!important;background-color:transparent!important;color:#444!important;outline:none!important;" +
+      "border-radius:0!important;color:#444!important;outline:none!important;" +
       "width:auto!important;min-width:0!important;max-width:none!important;padding:0!important;" +
       "display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:0!important}" +
+      "body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) .mc-atc-button-wrap,body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) .mc-atc-button-wrap{" +
+      "background:transparent!important;background-color:transparent!important}" +
       "body.productdetails .mc-atc-button-wrap input[name='btnaddtocart'],body.mc-product-page .mc-atc-button-wrap input[name='btnaddtocart']," +
       "body.productdetails .mc-atc-button-wrap button[name='btnaddtocart'],body.mc-product-page .mc-atc-button-wrap button[name='btnaddtocart']," +
       "body.productdetails .mc-atc-button-wrap input[type='submit'],body.mc-product-page .mc-atc-button-wrap input[type='submit']," +
@@ -5139,18 +5150,33 @@
     var category = resolvePdpReturnCategory();
     if (!category || !category.url) return;
     var categoryName = String(category.name || "Category").replace(/^\s+|\s+$/g, "");
+    var label = "Return to " + categoryName;
     var linkWrap = global.document.querySelector(".mc-return-category");
-    if (isBeanBagPdpPage() && linkWrap) {
+    var link = linkWrap ? linkWrap.querySelector(".mc-return-category__link") : null;
+    if (!linkWrap || !link) {
       var mediaTd = findPdpMediaTd();
-      if (mediaTd && linkWrap.parentNode !== mediaTd) {
+      if (!mediaTd) return;
+      if (!linkWrap) {
+        linkWrap = global.document.createElement("div");
+        linkWrap.className = "mc-return-category";
+        link = global.document.createElement("a");
+        link.className = "mc-return-category__link";
+        linkWrap.appendChild(link);
+      }
+      try {
+        mediaTd.insertBefore(linkWrap, mediaTd.firstChild);
+      } catch (eCreate) {}
+    }
+    if (isSoftGoodsPdpPage()) {
+      var mediaCol = findPdpMediaTd();
+      if (mediaCol && linkWrap && linkWrap.parentNode !== mediaCol) {
         try {
-          mediaTd.insertBefore(linkWrap, mediaTd.firstChild);
+          mediaCol.insertBefore(linkWrap, mediaCol.firstChild);
         } catch (eMove) {}
       }
     }
-    var link = global.document.querySelector(".mc-return-category__link");
+    link = global.document.querySelector(".mc-return-category__link");
     if (!link) return;
-    var label = "Return to " + categoryName;
     try {
       if (link.getAttribute("href") !== category.url) link.href = category.url;
       if (link.textContent !== label) link.textContent = label;
