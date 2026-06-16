@@ -17452,3 +17452,55 @@ html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[n
     box-sizing: border-box !important;
   }
 }
+
+/* =========================================================
+   PDP row-2 flex collapse fix (20260616pdp38h)
+   display:flex on <tr> zeroes row height inside <table>, which blanked
+   Saranoni/simple PDPs (e.g. SAR-WEARABLE). Restore table-row layout for
+   the main product row; column widths still come from mc-pdp-media/options-td.
+   ========================================================= */
+@media (min-width: 992px) {
+  body.mc-product-page #v65-product-parent,
+  body.productdetails #v65-product-parent {
+    display: table !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  body.mc-product-page #v65-product-parent > tbody,
+  body.productdetails #v65-product-parent > tbody {
+    display: table-row-group !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2),
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2),
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2),
+  body.productdetails #v65-product-parent > tr:nth-of-type(2),
+  body.mc-product-page #v65-product-parent > tbody > tr.mc-pdp-main-row,
+  body.productdetails #v65-product-parent > tbody > tr.mc-pdp-main-row,
+  body.mc-product-page #v65-product-parent > tr.mc-pdp-main-row,
+  body.productdetails #v65-product-parent > tr.mc-pdp-main-row,
+  html body.mc-bean-bag-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-ruched-blanket-pdp #content_area tr.mc-pdp-main-row {
+    display: table-row !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td,
+  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td,
+  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td,
+  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td,
+  body.mc-product-page tr.mc-pdp-main-row > td,
+  body.productdetails tr.mc-pdp-main-row > td {
+    display: table-cell !important;
+    vertical-align: top !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+}

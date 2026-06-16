@@ -1452,7 +1452,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp38f"></script>
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp38h"></script>
   <script id="mc-plp-enforcer-bridge">
 (function(g,d){var W="20260628a",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
@@ -4100,11 +4100,11 @@ try {
 </script>
  <script>
 (function(){
-  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260616pdp38a") {
+  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260616pdp38h") {
     var boot = document.getElementById("mc-pdp-auth-cta-boot");
     if (!boot) {
       var s = document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp38f&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp38h&mcrd=" + Date.now();
       s.async = false;
       (document.head || document.documentElement).appendChild(s);
     }
@@ -12016,39 +12016,70 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       return acc;
     }
 
-    // Find the TD that contains the main image
-    var main =
-      qsRoot('#product_photo') ||
-      qsRoot('#product_photo_td') ||
-      qsRoot('.vcss_img_wrap') ||
-      qsRoot('.vCSS_img_wrap') ||
-      qsRoot('.main-image') ||
-      qsRoot('img#main-image');
-
-    var mediaTd = main ? main.closest('td') : null;
-
-    // Find TD that contains Add to Cart
-    var addBtn =
-      qsRoot('input[name="btnaddtocart"]') ||
-      qsRoot('input[id*="btnaddtocart" i]') ||
-      qsaRoot('input[type="submit"], button').find(function(el){
-        return /add to cart/i.test(el.value || el.textContent || '');
-      });
-
-    var optionsTd = addBtn ? addBtn.closest('td') : null;
-
-    // Fallback: TD containing first visible non-hidden select (NOT hidden leather select)
-    if (!optionsTd){
-      var sel = qsaRoot('select').find(function(s){
-        if (s.classList.contains('mc-native-leather')) return false;
-        return s.offsetParent !== null;
-      });
-      optionsTd = sel ? sel.closest('td') : null;
+    function findMainProductRow() {
+      if (!v65) return null;
+      return (
+        v65.querySelector(':scope > tbody > tr:nth-of-type(2)') ||
+        v65.querySelector(':scope > tr:nth-of-type(2)')
+      );
     }
 
-    // Apply classes
+    function outerColumnTdFrom(el) {
+      if (!el || !v65) return null;
+      var mainRow = findMainProductRow();
+      if (!mainRow) return el.closest('td');
+      var td = el.closest('td');
+      while (td && td.parentNode && td.parentNode !== mainRow) {
+        td = td.parentNode.closest ? td.parentNode.closest('td') : null;
+      }
+      if (td && td.parentNode === mainRow) return td;
+      return el.closest('td');
+    }
+
+    var mainRow = findMainProductRow();
+    var mediaTd = null;
+    var optionsTd = null;
+
+    // Prefer the two direct column cells on Volusion row 2 (image left, buy box right).
+    if (mainRow) {
+      var rowTds = mainRow.querySelectorAll(':scope > td');
+      if (rowTds.length >= 2) {
+        mediaTd = rowTds[0];
+        optionsTd = rowTds[rowTds.length - 1];
+        mainRow.classList.add('mc-pdp-main-row');
+      }
+    }
+
+    if (!mediaTd || !optionsTd) {
+      var main =
+        qsRoot('#product_photo') ||
+        qsRoot('#product_photo_td') ||
+        qsRoot('.vcss_img_wrap') ||
+        qsRoot('.vCSS_img_wrap') ||
+        qsRoot('.main-image') ||
+        qsRoot('img#main-image');
+      if (!mediaTd && main) mediaTd = outerColumnTdFrom(main);
+
+      var addBtn =
+        qsRoot('input[name="btnaddtocart"]') ||
+        qsRoot('input[id*="btnaddtocart" i]') ||
+        qsaRoot('input[type="submit"], button').find(function(el){
+          return /add to cart/i.test(el.value || el.textContent || '');
+        });
+      if (!optionsTd && addBtn) optionsTd = outerColumnTdFrom(addBtn);
+
+      if (!optionsTd) {
+        var sel = qsaRoot('select').find(function(s){
+          if (s.classList.contains('mc-native-leather')) return false;
+          return s.offsetParent !== null;
+        });
+        if (sel) optionsTd = outerColumnTdFrom(sel);
+      }
+    }
+
     if (mediaTd) mediaTd.classList.add('mc-pdp-media-td');
     if (optionsTd) optionsTd.classList.add('mc-pdp-options-td');
+    if (mainRow && mediaTd && optionsTd) mainRow.classList.add('mc-pdp-main-row');
   }
 
   function run(){
@@ -23090,6 +23121,47 @@ body.mc-product-page #v65-product-related img {
   "use strict";
 
   var STORAGE_KEY = "mcLastProductCategory";
+  var BLOCKED_RETURN_CATEGORY_IDS = { 136: true };
+
+  function isBlockedReturnCategory(url, name) {
+    var label = cleanText(name).toLowerCase();
+    if (/^about(\s+us)?$/i.test(label)) return true;
+    if (/^contact(\s+us)?$/i.test(label)) return true;
+    try {
+      var path = new URL(url, window.location.origin).pathname.toLowerCase();
+      if (/aboutus\.asp/i.test(path)) return true;
+      if (/contact[_-]?us/i.test(path)) return true;
+      var match = path.match(/(?:category-s\/|-s\/)(\d+)\.htm/i);
+      if (match && BLOCKED_RETURN_CATEGORY_IDS[match[1]]) return true;
+    } catch (error) {}
+    return false;
+  }
+
+  function isValidReturnCategory(url, name) {
+    if (!url || !isCategoryUrl(url)) return false;
+    return !isBlockedReturnCategory(url, name);
+  }
+
+  function categoryFromNavCategoryId(categoryId) {
+    var id = String(categoryId || "").trim();
+    if (!id || BLOCKED_RETURN_CATEGORY_IDS[id]) return null;
+    var link = document.querySelector(
+      'a[href*="category-s/' + id + '.htm"], a[href*="-s/' + id + '.htm"]'
+    );
+    if (!link || !link.href) return null;
+    var name =
+      cleanText(link.textContent) || categoryNameFromUrl(link.href);
+    if (!isValidReturnCategory(link.href, name)) return null;
+    return { url: link.href, name: name };
+  }
+
+  function categoryFromVolusionProductCategoryField() {
+    var inp = document.querySelector(
+      'input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]'
+    );
+    if (!inp) return null;
+    return categoryFromNavCategoryId(String(inp.value || "").trim());
+  }
 
   function cleanText(value) {
     return String(value || "")
@@ -23161,6 +23233,56 @@ body.mc-product-page #v65-product-related img {
         name: "Bean Bags"
       };
     }
+    var body = document.body;
+    var html = document.documentElement;
+    var pcEl =
+      document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+    var pc = String((pcEl && pcEl.value) || "").trim().toUpperCase();
+    if (body && body.classList.contains("mc-ruched-blanket-pdp")) {
+      return (
+        categoryFromNavCategoryId("196") || {
+          url: "/category-s/196.htm",
+          name: "Luxe Comforts"
+        }
+      );
+    }
+    if (
+      (body && body.classList.contains("mc-saranoni-pdp")) ||
+      /^SAR/.test(pc)
+    ) {
+      return (
+        categoryFromNavCategoryId("196") || {
+          url: "/category-s/196.htm",
+          name: "Luxe Comforts"
+        }
+      );
+    }
+    if (/^BB/.test(pc)) {
+      return {
+        url: "/bean-bag-seating-s/103.htm",
+        name: "Bean Bags"
+      };
+    }
+    if (
+      body &&
+      (body.classList.contains("mc-theater-seating-pdp") ||
+        body.classList.contains("mc-palliser-pdp"))
+    ) {
+      return (
+        categoryFromNavCategoryId("106") || {
+          url: "/palliser-theater-seating-s/106.htm",
+          name: "Theater Seating"
+        }
+      );
+    }
+    if (html && html.classList.contains("is-sectional-product")) {
+      return (
+        categoryFromNavCategoryId("139") || {
+          url: "/sectionals-s/139.htm",
+          name: "Sofas & Sectionals"
+        }
+      );
+    }
     return null;
   }
 
@@ -23177,7 +23299,8 @@ body.mc-product-page #v65-product-related img {
       if (
         !category ||
         !category.url ||
-        !isCategoryUrl(category.url)
+        !isCategoryUrl(category.url) ||
+        isBlockedReturnCategory(category.url, category.name)
       ) {
         return null;
       }
@@ -23217,6 +23340,10 @@ body.mc-product-page #v65-product-related img {
       name = categoryNameFromUrl(window.location.href);
     }
 
+    if (!isValidReturnCategory(window.location.href, name)) {
+      return;
+    }
+
     try {
       window.sessionStorage.setItem(
         STORAGE_KEY,
@@ -23248,6 +23375,11 @@ body.mc-product-page #v65-product-related img {
       return null;
     }
 
+    var referrerName = categoryNameFromUrl(referrerLink.href);
+    if (!isValidReturnCategory(referrerLink.href, referrerName)) {
+      return null;
+    }
+
     var stored = readStoredCategory();
     var referrerUrl =
       referrerLink.pathname +
@@ -23271,11 +23403,18 @@ body.mc-product-page #v65-product-related img {
 
     return {
       url: referrerLink.href,
-      name: categoryNameFromUrl(referrerLink.href)
+      name: referrerName
     };
   }
 
   function categoryFromBreadcrumb() {
+    var roots = [];
+    var parent = document.getElementById("v65-product-parent");
+    var content = document.getElementById("content_area");
+    if (parent) roots.push(parent);
+    if (content && roots.indexOf(content) === -1) roots.push(content);
+    if (!roots.length) return null;
+
     var selectors = [
       "#v65-breadcrumbs a[href]",
       ".v65-breadcrumbs a[href]",
@@ -23286,50 +23425,57 @@ body.mc-product-page #v65-product-related img {
 
     var links = [];
     var index;
+    var rootIndex;
 
-    for (index = 0; index < selectors.length; index += 1) {
-      var matchedLinks =
-        document.querySelectorAll(selectors[index]);
-
-      if (matchedLinks.length) {
-        links = Array.prototype.slice.call(matchedLinks);
-        break;
+    for (rootIndex = 0; rootIndex < roots.length; rootIndex += 1) {
+      for (index = 0; index < selectors.length; index += 1) {
+        var matchedLinks = roots[rootIndex].querySelectorAll(selectors[index]);
+        if (matchedLinks.length) {
+          links = Array.prototype.slice.call(matchedLinks);
+          break;
+        }
       }
+      if (links.length) break;
     }
 
     /*
      * Fallback for templates whose breadcrumb has no class or ID.
-     * The final category link before the product heading is selected.
+     * Only scan inside the product table/content — never global nav.
      */
     if (!links.length) {
       var productHeading =
         document.querySelector(
-          "#v65-product-parent h1, .productnamecolorLARGE, main h1, h1"
+          "#v65-product-parent h1, .productnamecolorLARGE, #content_area h1"
         );
 
-      var allLinks =
-        Array.prototype.slice.call(
-          document.querySelectorAll("a[href]")
-        );
+      links = [];
+      for (rootIndex = 0; rootIndex < roots.length; rootIndex += 1) {
+        Array.prototype.slice
+          .call(roots[rootIndex].querySelectorAll("a[href]"))
+          .forEach(function (link) {
+            if (!isCategoryUrl(link.href)) {
+              return;
+            }
 
-      links = allLinks.filter(function (link) {
-        if (!isCategoryUrl(link.href)) {
-          return false;
-        }
+            if (!productHeading) {
+              links.push(link);
+              return;
+            }
 
-        if (!productHeading) {
-          return true;
-        }
-
-        return Boolean(
-          link.compareDocumentPosition(productHeading) &
-          Node.DOCUMENT_POSITION_FOLLOWING
-        );
-      });
+            if (
+              link.compareDocumentPosition(productHeading) &
+              Node.DOCUMENT_POSITION_FOLLOWING
+            ) {
+              links.push(link);
+            }
+          });
+      }
     }
 
     var categoryLinks = links.filter(function (link) {
-      return isCategoryUrl(link.href);
+      var name =
+        cleanText(link.textContent) || categoryNameFromUrl(link.href);
+      return isValidReturnCategory(link.href, name);
     });
 
     if (!categoryLinks.length) {
@@ -23354,10 +23500,24 @@ body.mc-product-page #v65-product-related img {
       return null;
     }
 
+    if (!isValidReturnCategory(stored.url, stored.name)) {
+      return null;
+    }
+
     return {
       url: stored.url,
       name: stored.name
     };
+  }
+
+  function resolveReturnCategory() {
+    return (
+      categoryFromProductType() ||
+      categoryFromVolusionProductCategoryField() ||
+      categoryFromReferrer() ||
+      categoryFromBreadcrumb() ||
+      categoryFromStorage()
+    );
   }
 
   function findMainProductImage() {
@@ -23419,11 +23579,7 @@ body.mc-product-page #v65-product-related img {
       return;
     }
 
-    var category =
-      categoryFromProductType() ||
-      categoryFromReferrer() ||
-      categoryFromBreadcrumb() ||
-      categoryFromStorage();
+    var category = resolveReturnCategory();
 
     if (!category || !category.url) {
       return;
