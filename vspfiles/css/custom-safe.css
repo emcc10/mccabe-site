@@ -17014,16 +17014,17 @@ html body.mc-ruched-blanket-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-hos
    MC_PDP_ATC_BLACK_LOCK — final cascade: black rectangular Add to Cart.
    Targets live Volusion markup: input[name="btnaddtocart"] inside .mc-atc-button-wrap
    (template JS wrapper) or bare .vCSS_input_addtocart / .v65-product-addtocart.
+   Excludes bean bag / Saranoni / ruched blanket — those use MC PDP LOCK pdp14 below.
    Does not change layout order or qty/ATC placement.
    ========================================================= */
-html body.productdetails #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
-html body.mc-product-page #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
-html body.productdetails #content_area .v65-product-addtocart .mc-atc-button-wrap,
-html body.mc-product-page #content_area .v65-product-addtocart .mc-atc-button-wrap,
-html body.productdetails #v65-product-parent td.mc-pdp-options-td .mc-atc-button-wrap,
-html body.mc-product-page #v65-product-parent td.mc-pdp-options-td .mc-atc-button-wrap,
-html body.productdetails #content_area td.mc-pdp-options-td .mc-atc-button-wrap,
-html body.mc-product-page #content_area td.mc-pdp-options-td .mc-atc-button-wrap {
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart .mc-atc-button-wrap,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart .mc-atc-button-wrap,
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent td.mc-pdp-options-td .mc-atc-button-wrap,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent td.mc-pdp-options-td .mc-atc-button-wrap,
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area td.mc-pdp-options-td .mc-atc-button-wrap,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area td.mc-pdp-options-td .mc-atc-button-wrap {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -17052,28 +17053,28 @@ html body.mc-product-page #content_area td.mc-pdp-options-td .mc-atc-button-wrap
   appearance: none !important;
 }
 
-html body.productdetails #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap:hover,
-html body.mc-product-page #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap:hover,
-html body.productdetails #content_area .v65-product-addtocart .mc-atc-button-wrap:hover,
-html body.mc-product-page #content_area .v65-product-addtocart .mc-atc-button-wrap:hover {
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap:hover,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap:hover,
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart .mc-atc-button-wrap:hover,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart .mc-atc-button-wrap:hover {
   background: #222 !important;
   background-color: #222 !important;
   color: #fff !important;
   border-color: #222 !important;
 }
 
-html body.productdetails #v65-product-parent .mc-atc-button-wrap input[type="submit"],
-html body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[type="submit"],
-html body.productdetails #content_area .mc-atc-button-wrap input[type="submit"],
-html body.mc-product-page #content_area .mc-atc-button-wrap input[type="submit"],
-html body.productdetails #v65-product-parent .mc-atc-button-wrap input.vCSS_input_addtocart,
-html body.mc-product-page #v65-product-parent .mc-atc-button-wrap input.vCSS_input_addtocart,
-html body.productdetails #content_area .mc-atc-button-wrap input.vCSS_input_addtocart,
-html body.mc-product-page #content_area .mc-atc-button-wrap input.vCSS_input_addtocart,
-html body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
-html body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
-html body.productdetails #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
-html body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart"] {
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap input[type="submit"],
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap input[type="submit"],
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap input[type="submit"],
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap input[type="submit"],
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap input.vCSS_input_addtocart,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap input.vCSS_input_addtocart,
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap input.vCSS_input_addtocart,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap input.vCSS_input_addtocart,
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap button[name="btnaddtocart"] {
   display: inline-block !important;
   flex: 0 0 auto !important;
   width: auto !important;
@@ -17099,27 +17100,27 @@ html body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddt
   appearance: none !important;
 }
 
-html body.productdetails #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper,
-html body.mc-product-page #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper,
-html body.productdetails #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
-html body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
-html body.productdetails #v65-product-parent .mc-atc-button-wrap .mc-cart-icon,
-html body.mc-product-page #v65-product-parent .mc-atc-button-wrap .mc-cart-icon,
-html body.productdetails #content_area .mc-atc-button-wrap .mc-cart-icon,
-html body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon {
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper,
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap .mc-cart-icon,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap .mc-cart-icon,
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap .mc-cart-icon,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap .mc-cart-icon {
   color: #fff !important;
   flex-shrink: 0 !important;
 }
 
 /* Bare submit (not yet wrapped by JS) — same black chrome. */
-html body.productdetails #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"],
-html body.mc-product-page #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"],
-html body.productdetails #content_area .v65-product-addtocart > input[name="btnaddtocart"],
-html body.mc-product-page #content_area .v65-product-addtocart > input[name="btnaddtocart"],
-html body.productdetails #v65-product-parent .v65-product-addtocart > input.vCSS_input_addtocart,
-html body.mc-product-page #v65-product-parent .v65-product-addtocart > input.vCSS_input_addtocart,
-html body.productdetails #v65-product-parent .v65-product-addtocart > button[name="btnaddtocart"],
-html body.mc-product-page #v65-product-parent .v65-product-addtocart > button[name="btnaddtocart"] {
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"],
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"],
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart > input[name="btnaddtocart"],
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart > input[name="btnaddtocart"],
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > input.vCSS_input_addtocart,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > input.vCSS_input_addtocart,
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > button[name="btnaddtocart"],
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > button[name="btnaddtocart"] {
   background: #000 !important;
   background-color: #000 !important;
   background-image: none !important;
@@ -17144,10 +17145,10 @@ html body.mc-product-page #v65-product-parent .v65-product-addtocart > button[na
   margin: 0 !important;
 }
 
-html body.productdetails #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"]:hover,
-html body.mc-product-page #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"]:hover,
-html body.productdetails #content_area .v65-product-addtocart > input[name="btnaddtocart"]:hover,
-html body.mc-product-page #content_area .v65-product-addtocart > input[name="btnaddtocart"]:hover {
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"]:hover,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"]:hover,
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart > input[name="btnaddtocart"]:hover,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart > input[name="btnaddtocart"]:hover {
   background: #222 !important;
   background-color: #222 !important;
   color: #fff !important;
@@ -17155,10 +17156,10 @@ html body.mc-product-page #content_area .v65-product-addtocart > input[name="btn
 }
 
 /* Option selects must not restyle the Add to Cart control. */
-html body.productdetails #v65-product-parent #options_table select ~ .v65-product-addtocart input[name="btnaddtocart"],
-html body.mc-product-page #v65-product-parent #options_table select ~ .v65-product-addtocart input[name="btnaddtocart"],
-html body.productdetails #v65-product-parent #options_table .v65-product-addtocart .mc-atc-button-wrap,
-html body.mc-product-page #v65-product-parent #options_table .v65-product-addtocart .mc-atc-button-wrap {
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent #options_table select ~ .v65-product-addtocart input[name="btnaddtocart"],
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent #options_table select ~ .v65-product-addtocart input[name="btnaddtocart"],
+html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent #options_table .v65-product-addtocart .mc-atc-button-wrap,
+html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent #options_table .v65-product-addtocart .mc-atc-button-wrap {
   border-radius: 0 !important;
   font-family: Inter, Arial, sans-serif !important;
 }

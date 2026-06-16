@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp38a";
+  var VERSION = "20260616pdp38b";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -1180,13 +1180,25 @@
 
   function placePriceStackHost(host) {
     if (!host) return;
-    if (isPdpLayoutMounted()) return;
+    if (isPdpLayoutMounted() && !isSoftGoodsPdpPage()) return;
     if (isSoftGoodsPdpPage()) {
       var sgCol = findPdpHeroColumnTd();
-      if (sgCol && host.parentNode !== sgCol) {
+      if (!sgCol) return;
+      var titleEl = global.document.getElementById("mc-pdp-title-right");
+      if (titleEl && titleEl.parentNode === sgCol) {
+        if (host.parentNode !== sgCol || host.previousElementSibling !== titleEl) {
+          try {
+            if (titleEl.nextSibling) {
+              sgCol.insertBefore(host, titleEl.nextSibling);
+            } else {
+              sgCol.appendChild(host);
+            }
+          } catch (eSgPrice) {}
+        }
+      } else if (host.parentNode !== sgCol) {
         try {
           sgCol.appendChild(host);
-        } catch (eSgPrice) {}
+        } catch (eSgPrice2) {}
       }
       return;
     }
@@ -1286,7 +1298,7 @@
       if (/swatch|leather|cover|configurator|sectional|paragon|recliner|sofa|loveseat|chaise|seating|chair/.test(lc)) {
         continue;
       }
-      if (/palliser|manufacturers\//i.test(lc)) return img;
+      if (/palliser|saranoni|manufacturers\//i.test(lc)) return img;
       if (/(logo|brand|vendor|manufacturer)/.test(lc)) return img;
     }
     return null;
@@ -1602,7 +1614,7 @@
   function ensureQuantityAboveAtc() {
     if (!isProductPdp()) return;
     if (isSectionalPdpPage()) return;
-    if (isPdpLayoutMounted()) return;
+    if (isPdpLayoutMounted() && !isSoftGoodsPdpPage()) return;
     try {
       if (
         global.document.body &&
@@ -1675,7 +1687,7 @@
   function ensurePurchaseStackCentered() {
     if (!isProductPdp()) return;
     if (isSectionalPdpPage()) return;
-    if (isPdpLayoutMounted()) return;
+    if (isPdpLayoutMounted() && !isSoftGoodsPdpPage()) return;
     try {
       if (
         global.document.body &&
@@ -2070,7 +2082,6 @@
   }
 
   function appendBeanBagInfoColumnOrder() {
-    if (isPdpLayoutMounted()) return;
     if (!isBeanBagPdpPage()) return;
     var infoColumn = findPdpHeroColumnTd();
     if (!infoColumn) return;
@@ -2133,7 +2144,6 @@
   }
 
   function appendSaranoniInfoColumnOrder() {
-    if (isPdpLayoutMounted()) return;
     if (!isSaranoniPdpPage()) return;
     var infoColumn = findPdpHeroColumnTd();
     if (!infoColumn) return;
@@ -2575,6 +2585,18 @@
     if (src) candidates.push(src.replace(/[^/]+$/, fileName));
     candidates.push("/v/vspfiles/photos/" + fileName);
     candidates.push("/v/vspfiles/images/" + fileName);
+    var storeFolder = "";
+    try {
+      storeFolder = String(
+        global.global_Config_StoreFolderName || global.Config_StoreFolderName || ""
+      ).trim();
+    } catch (eStore) {}
+    if (storeFolder) {
+      var cdnPath = storeFolder.replace(/\/?$/, "/") + "v/vspfiles/photos/" + fileName;
+      if (cdnPath.indexOf("//") === 0) cdnPath = "https:" + cdnPath;
+      candidates.push(cdnPath);
+    }
+    candidates.push("https://cdn4.volusion.store/srulk-fqudj/v/vspfiles/photos/" + fileName);
     return candidates.filter(function (item, idx, arr) {
       return item && arr.indexOf(item) === idx;
     });
@@ -3003,7 +3025,7 @@
 
   function mountBeanBagSwatchesAboveFeatures() {
     if (!isProductPdp()) return;
-    if (isPdpLayoutMounted()) return;
+    if (!isBeanBagPdpPage() && !global.document.getElementById("beanbag-swatch-wrapper")) return;
     var wrap = global.document.getElementById("beanbag-swatch-wrapper");
     if (!wrap) return;
     wrap.setAttribute("data-mc-beanbag-swatches", "1");
@@ -3202,7 +3224,6 @@
   }
 
   function extractSwatchesIntoCol() {
-    if (isPdpLayoutMounted()) return;
     var wrap = global.document.getElementById("beanbag-swatch-wrapper");
     if (!wrap) return;
     wrap.setAttribute("data-mc-beanbag-swatches", "1");
@@ -3227,8 +3248,8 @@
     if (!stack) {
       stack = global.document.createElement("div");
       stack.id = "mc-pdp-purchase-stack";
-      stack.className = "mc-pdp-purchase-stack";
     }
+    stack.className = "mc-pdp-purchase-stack mc-pdp-purchase-controls mc-pdp-cart-row";
     if (!stack.contains(stackNode)) stack.appendChild(stackNode);
     if (stack.parentNode !== col) {
       try {
@@ -3237,15 +3258,16 @@
     }
     try {
       stack.style.setProperty("display", "flex", "important");
-      stack.style.setProperty("flex-direction", "column", "important");
+      stack.style.setProperty("flex-direction", "row", "important");
+      stack.style.setProperty("flex-wrap", "wrap", "important");
       stack.style.setProperty("align-items", "center", "important");
       stack.style.setProperty("justify-content", "center", "important");
       stack.style.setProperty("text-align", "center", "important");
       stack.style.setProperty("width", "100%", "important");
-      stack.style.setProperty("max-width", "450px", "important");
+      stack.style.setProperty("max-width", "400px", "important");
       stack.style.setProperty("margin", "18px auto 0 auto", "important");
       stack.style.setProperty("padding", "0", "important");
-      stack.style.setProperty("gap", "0", "important");
+      stack.style.setProperty("gap", "10px", "important");
       stack.style.setProperty("clear", "both", "important");
     } catch (eStyle) {}
     try {
@@ -3335,6 +3357,8 @@
     // the product description — no handler is registered here.
     withMoPaused(function () {
       hideLegacyBeanBagPrice();
+      mountBeanBagSwatchesAboveFeatures();
+      extractSwatchesIntoCol();
       markBeanBagCoverSwatchesReady();
     });
   }
@@ -4543,6 +4567,38 @@
       '<button type="button" class="mc-configuration-rh__signin-cta" data-mc-open-login style="border:none;background:none;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer;">Sign in</button> for configured price.';
   }
 
+  function tagSoftGoodsBodyClasses() {
+    try {
+      var body = global.document.body;
+      if (!body) return;
+      if (isBeanBagPdpPage()) body.classList.add("mc-bean-bag-pdp");
+      if (isSaranoniPdpPage()) body.classList.add("mc-saranoni-pdp");
+    } catch (eTag) {}
+  }
+
+  function reassertSoftGoodsHeroOrder() {
+    if (!isSoftGoodsPdpPage()) return;
+    try {
+      placeBrandLogoBelowTitle();
+    } catch (eLogo) {}
+    ensureQuantityAboveAtc();
+    ensurePurchaseStackCentered();
+    if (isBeanBagPdpPage()) {
+      mountBeanBagSwatchesAboveFeatures();
+      extractSwatchesIntoCol();
+      ensureBeanBagPurchaseStack();
+      appendBeanBagInfoColumnOrder();
+      markBeanBagCoverSwatchesReady();
+      styleBeanBagPriceAtc();
+    } else if (isSaranoniPdpPage()) {
+      ensureConfiguredColorSwatches();
+      appendSaranoniInfoColumnOrder();
+    }
+    var host = global.document.getElementById("mc-pdp-price-stack-host");
+    if (host) placePriceStackHost(host);
+    fixAddToCartChrome();
+  }
+
   function isPdpLayoutReady() {
     return !!global.document.querySelector(
       '#v65-product-parent input[name="btnaddtocart"], #v65-product-parent button[name="btnaddtocart"], ' +
@@ -4573,9 +4629,12 @@
       ensureQuantityAboveAtc();
       ensurePurchaseStackCentered();
       if (isBeanBagPdpPage()) {
+        mountBeanBagSwatchesAboveFeatures();
+        extractSwatchesIntoCol();
         ensureBeanBagSizeRow();
         ensureBeanBagPurchaseStack();
         appendBeanBagInfoColumnOrder();
+        styleBeanBagPriceAtc();
       } else if (isSaranoniPdpPage()) {
         appendSaranoniInfoColumnOrder();
       } else {
@@ -4640,6 +4699,7 @@
     // always released even if the frame callbacks never run.
     global.setTimeout(mcReleaseMo, 250);
     try {
+      tagSoftGoodsBodyClasses();
       installPdpStackApiGuards();
       initBeanBagImageSync();
       ensureBeanBagSizeRow();
@@ -4647,14 +4707,25 @@
       ensurePdpStackCriticalCss();
       ensurePdpHeroCriticalCss();
       disableQuantityHiders();
+      if (!sectional && isSoftGoodsPdpPage()) {
+        ensureConfiguredColorSwatches();
+      }
       if (!sectional && isPdpLayoutMounted()) {
         forceRebuildCleanPriceStack();
-        fixAddToCartChrome();
+        if (isSoftGoodsPdpPage()) {
+          reassertSoftGoodsHeroOrder();
+        } else {
+          fixAddToCartChrome();
+        }
         stripPriceZeroCents();
       } else if (!sectional) {
         if (!mountPdpLayoutOnce()) {
           forceRebuildCleanPriceStack();
-          fixAddToCartChrome();
+          if (isSoftGoodsPdpPage()) {
+            reassertSoftGoodsHeroOrder();
+          } else {
+            fixAddToCartChrome();
+          }
         } else {
           stripPriceZeroCents();
         }
