@@ -2294,7 +2294,7 @@
       ".mc-configured-color-swatch-wrapper{display:block!important;width:100%!important;max-width:460px!important;margin:12px 0 0!important}" +
       ".mc-configured-color-swatch-label{display:block!important;margin-bottom:8px!important;font:700 12px/1.4 Inter,Arial,sans-serif!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:#444!important}" +
       ".mc-configured-color-swatch-label span{font-weight:600!important;letter-spacing:.03em!important;text-transform:none!important}" +
-      ".mc-configured-color-swatches{display:flex!important;flex-wrap:wrap!important;gap:12px!important}" +
+      ".mc-configured-color-swatches,.mc-saranoni-swatches{display:flex!important;flex-wrap:wrap!important;gap:12px!important}" +
       ".mc-configured-color-swatch{appearance:none!important;-webkit-appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:56px!important;height:56px!important;padding:0!important;border:2px solid #ddd!important;border-radius:999px!important;background:#fff!important;cursor:pointer!important;overflow:hidden!important}" +
       ".mc-configured-color-swatch img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}" +
       ".mc-configured-color-swatch.active{border-color:#111!important;box-shadow:0 0 0 1px #111 inset!important}" +
@@ -3287,12 +3287,32 @@
       var targetSrc = "/v/vspfiles/images/" + imgFile;
       try {
         if (mainImg.getAttribute("src") !== targetSrc) mainImg.src = targetSrc;
+        // A stale srcset lets the browser re-pick the previous cover; remove it.
+        if (mainImg.hasAttribute("srcset")) mainImg.removeAttribute("srcset");
         mainImg.style.setProperty("opacity", "1", "important");
       } catch (eSet) {}
-      var zoomLink = global.document.getElementById("product_photo_zoom_url");
-      if (zoomLink) {
-        try { zoomLink.href = targetSrc; } catch (eZm) {}
-      }
+      // Point both Volusion zoom-link variants at the selected cover full image.
+      ["product_photo_zoom_url", "product_photo_zoom_url2"].forEach(function (id) {
+        var lnk = global.document.getElementById(id);
+        if (lnk) {
+          try { lnk.href = targetSrc; } catch (eZm) {}
+        }
+      });
+      // Re-register the new image with Volusion's zoom plugin if present, so the
+      // magnifier shows the chosen cover instead of the original photo.
+      try {
+        if (global.vZoom && typeof global.vZoom.add === "function") {
+          global.vZoom.add(mainImg, targetSrc);
+        }
+      } catch (eVz) {}
+      // Clear any "selected" styling on alternate thumbnails so none conflicts.
+      try {
+        global.document
+          .querySelectorAll("#altviews a, #altviews img, a[id^='alternate_product_photo']")
+          .forEach(function (t) {
+            if (t.classList) t.classList.remove("active", "selected");
+          });
+      } catch (eAlt) {}
     }
 
     function reassertBbImageOnce(imgFile) {
@@ -3334,7 +3354,9 @@
       }
       if (foundIndex < 0) return;
 
+      // Select the native cover option by value (value drives price + image map).
       coverSel.selectedIndex = foundIndex;
+      coverSel.value = coverSel.options[foundIndex].value;
       var optVal = String(coverSel.options[foundIndex].value || "");
       var imgFile = BB_COVER_IMAGE_BY_OPTION_ID[optVal];
       if (!imgFile) return;
@@ -3349,6 +3371,13 @@
           global.AutoUpdatePriceWithSelectedOptions(optVal, 4);
         } catch (eAu) {}
       }
+      // Fire native input + change so Volusion's own option/price/cart logic stays in sync.
+      try {
+        coverSel.dispatchEvent(new Event("input", { bubbles: true }));
+      } catch (eIn) {}
+      try {
+        coverSel.dispatchEvent(new Event("change", { bubbles: true }));
+      } catch (eCh) {}
 
       var labelSpan = global.document.getElementById("beanbag-selected-cover-name");
       if (labelSpan) {
