@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp35";
+  var VERSION = "20260616pdp35b";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -1819,15 +1819,41 @@
   }
 
   function fixAddToCartChrome() {
+    injectAtcButtonWrap();
     global.document.querySelectorAll(".mc-atc-button-wrap").forEach(function (wrap) {
       if (wrap.closest("#mc-pdp-price-atc-row")) return;
-      // Only write inline styles once per wrapper element. Subsequent runPatch calls
-      // are covered by the CSS rule in ensurePdpHeroCriticalCss, so re-running
-      // styleCompactAtcButton every MO tick is unnecessary and causes visual flash.
-      if (wrap.getAttribute("data-mc-atc-styled") === "1") return;
+      if (wrap.getAttribute("data-mc-atc-styled") === VERSION) return;
       styleCompactAtcButton(wrap);
-      wrap.setAttribute("data-mc-atc-styled", "1");
+      wrap.setAttribute("data-mc-atc-styled", VERSION);
     });
+    global.document
+      .querySelectorAll(
+        '#mc-pdp-purchase-stack input[name="btnaddtocart"], #mc-pdp-purchase-stack button[name="btnaddtocart"]'
+      )
+      .forEach(function (btn) {
+        if (btn.getAttribute("data-mc-atc-styled") === VERSION) return;
+        var wrap = btn.closest(".mc-atc-button-wrap");
+        if (wrap) return;
+        try {
+          btn.type = "submit";
+          btn.removeAttribute("src");
+          if (!btn.value) btn.value = "ADD TO CART";
+        } catch (eTyp) {}
+        btn.style.setProperty("background", "#111", "important");
+        btn.style.setProperty("background-color", "#111", "important");
+        btn.style.setProperty("background-image", "none", "important");
+        btn.style.setProperty("color", "#fff", "important");
+        btn.style.setProperty("border", "1px solid #111", "important");
+        btn.style.setProperty("border-radius", "0", "important");
+        btn.style.setProperty("font-size", "13px", "important");
+        btn.style.setProperty("font-weight", "600", "important");
+        btn.style.setProperty("letter-spacing", "0.12em", "important");
+        btn.style.setProperty("text-transform", "uppercase", "important");
+        btn.style.setProperty("min-height", "48px", "important");
+        btn.style.setProperty("padding", "0 28px", "important");
+        btn.style.setProperty("opacity", "1", "important");
+        btn.setAttribute("data-mc-atc-styled", VERSION);
+      });
   }
 
   function ensurePdpHeroCriticalCss() {
@@ -1936,30 +1962,72 @@
     try {
       placeBrandLogoBelowTitle();
     } catch (eLogo) {}
-    if (isBeanBagPdpPage()) return;
+    ensurePdpInfoColumnOrder();
+  }
+
+  function ensurePdpInfoColumnOrder() {
+    if (isPdpLayoutMounted()) return;
+    var col = findPdpHeroColumnTd();
+    if (!col) {
+      var box = global.document.querySelector("#v65-product-parent .colors_pricebox");
+      if (!box || !box.parentNode) return;
+      col = box.parentNode;
+    }
     var title = global.document.getElementById("mc-pdp-title-right");
     var logo = global.document.getElementById("mc-pdp-brand-logo");
     var price = global.document.getElementById("mc-pdp-price-stack-host");
     var bnpl = global.document.getElementById("messaging-element");
-    var box =
-      (bnpl && bnpl.closest && bnpl.closest(".colors_pricebox")) ||
-      global.document.querySelector("#v65-product-parent .colors_pricebox");
-    if (!box || !box.parentNode) return;
-    var parent = box.parentNode;
-    if (title && title.parentNode !== parent) {
-      try {
-        parent.insertBefore(title, box);
-      } catch (eTitle) {}
-    }
-    if (logo && logo.querySelector && logo.querySelector("img") && title) {
-      if (logo.parentNode !== parent || logo.previousElementSibling !== title) {
-        insertNodeAfter(parent, title, logo);
+    var priceBox = col.querySelector ? col.querySelector(".colors_pricebox") : null;
+    var chain = [];
+    if (title && col.contains(title)) chain.push(title);
+    if (logo && col.contains(logo) && logo.querySelector("img")) chain.push(logo);
+    if (price && col.contains(price)) chain.push(price);
+    if (bnpl && col.contains(bnpl)) chain.push(bnpl);
+    if (priceBox && col.contains(priceBox) && chain.indexOf(priceBox) < 0) chain.push(priceBox);
+    var ref = null;
+    var ci;
+    for (ci = 0; ci < chain.length; ci++) {
+      var node = chain[ci];
+      if (!ref) {
+        ref = node;
+        continue;
       }
+      if (ref.nextElementSibling !== node) {
+        insertNodeAfter(col, ref, node);
+      }
+      ref = node;
     }
-    if (price && price.parentNode === parent && price.nextElementSibling !== box) {
-      try {
-        parent.insertBefore(price, box);
-      } catch (ePrice) {}
+  }
+
+  function ensurePdpContentColumnOrder() {
+    if (isPdpLayoutMounted()) return;
+    var col = findPdpHeroColumnTd();
+    if (!col) return;
+    var head =
+      global.document.getElementById("messaging-element") ||
+      global.document.querySelector("#v65-product-parent .colors_pricebox");
+    if (head && !col.contains(head)) head = null;
+    var blocks = [
+      global.document.getElementById("mc-pdp-option-block"),
+      global.document.getElementById("beanbag-swatch-wrapper"),
+      global.document.getElementById("mc-configured-color-swatch-wrapper"),
+      global.document.getElementById("mc-pdp-description-below-features"),
+      global.document.getElementById("mc-pdp-features"),
+      global.document.getElementById("mc-pdp-purchase-stack"),
+    ];
+    var ref = head;
+    var bi;
+    for (bi = 0; bi < blocks.length; bi++) {
+      var block = blocks[bi];
+      if (!block || block.parentNode !== col) continue;
+      if (!ref) {
+        ref = block;
+        continue;
+      }
+      if (ref.nextElementSibling !== block) {
+        insertNodeAfter(col, ref, block);
+      }
+      ref = block;
     }
   }
 
@@ -4268,6 +4336,8 @@
       patchBeanBagPdp();
       ensureQuantityAboveAtc();
       ensurePurchaseStackCentered();
+      ensurePdpInfoColumnOrder();
+      ensurePdpContentColumnOrder();
       applyPdpTitleTypography();
       applyPdpPriceTypography();
       applyPdpDescriptionStyle();
