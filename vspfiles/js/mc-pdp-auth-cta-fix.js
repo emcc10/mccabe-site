@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp36b";
+  var VERSION = "20260616pdp36c";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -2094,6 +2094,49 @@
     }
   }
 
+  function finalizeSoftGoodsColumnOrder() {
+    if (!isSoftGoodsPdpPage()) return;
+    var col = findPdpHeroColumnTd();
+    if (!col) return;
+    var title = global.document.getElementById("mc-pdp-title-right");
+    var logo = global.document.getElementById("mc-pdp-brand-logo");
+    if (title && logo && col.contains(title) && col.contains(logo)) {
+      var ti = Array.prototype.indexOf.call(col.children, title);
+      var li = Array.prototype.indexOf.call(col.children, logo);
+      if (li >= 0 && ti >= 0 && li < ti) {
+        try {
+          col.insertBefore(title, logo);
+        } catch (eOrd) {}
+      }
+    }
+    var head =
+      global.document.getElementById("mc-pdp-price-stack-host") ||
+      global.document.getElementById("messaging-element") ||
+      global.document.querySelector("#v65-product-parent .colors_pricebox");
+    if (head && !col.contains(head)) head = null;
+    var blocks = [
+      global.document.getElementById("mc-pdp-features"),
+      global.document.getElementById("mc-pdp-option-block"),
+      global.document.getElementById("beanbag-swatch-wrapper"),
+      global.document.getElementById("mc-configured-color-swatch-wrapper"),
+      global.document.getElementById("mc-pdp-description-below-features"),
+      global.document.getElementById("mc-pdp-purchase-stack"),
+    ];
+    var ref = head;
+    var bi;
+    for (bi = 0; bi < blocks.length; bi++) {
+      var block = blocks[bi];
+      if (!block || block.parentNode !== col) continue;
+      if (!ref) {
+        ref = block;
+        continue;
+      }
+      if (ref.nextElementSibling !== block) {
+        insertNodeAfter(col, ref, block);
+      }
+      ref = block;
+    }
+  }
   function ensurePdpContentColumnOrder() {
     if (isPdpLayoutMounted()) return;
     var col = findPdpHeroColumnTd();
@@ -4426,11 +4469,20 @@
       ensurePurchaseStackCentered();
       ensurePdpInfoColumnOrder();
       ensurePdpContentColumnOrder();
+      finalizeSoftGoodsColumnOrder();
       applyPdpTitleTypography();
       applyPdpPriceTypography();
       applyPdpDescriptionStyle();
       applyPdpMainImageCap();
       fixAddToCartChrome();
+      if (!global.__MC_SOFT_GOODS_ATC_FINAL__ && isSoftGoodsPdpPage()) {
+        global.__MC_SOFT_GOODS_ATC_FINAL__ = true;
+        global.setTimeout(function () {
+          try {
+            fixAddToCartChrome();
+          } catch (eAtcFinal) {}
+        }, 1200);
+      }
       if (!heroLocked && !isSoftGoodsPdpPage()) {
         try {
           syncPdpHeroTopAlign();

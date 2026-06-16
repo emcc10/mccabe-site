@@ -16708,9 +16708,9 @@ html body.mc-bean-bag-pdp #mc-pdp-features {
   html body.mc-bean-bag-pdp #content_area td.mc-pdp-media-td,
   html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,
   html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-media-td {
-    flex: 1 1 auto !important;
+    flex: 0 1 auto !important;
     width: auto !important;
-    max-width: none !important;
+    max-width: min(650px, 58%) !important;
     min-width: 0 !important;
   }
 }
