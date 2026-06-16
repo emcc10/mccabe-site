@@ -1452,7 +1452,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp34"></script>
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp35"></script>
   <script id="mc-plp-enforcer-bridge">
 (function(g,d){var W="20260628a",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
@@ -4100,11 +4100,11 @@ try {
 </script>
  <script>
 (function(){
-  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260616pdp34") {
+  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260616pdp35") {
     var boot = document.getElementById("mc-pdp-auth-cta-boot");
     if (!boot) {
       var s = document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp34&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp35&mcrd=" + Date.now();
       s.async = false;
       (document.head || document.documentElement).appendChild(s);
     }
@@ -12772,14 +12772,16 @@ if (mcShouldUseLeatherAccordion()) {
   }
 
   function placePalliserLogoUnderTitle() {
+    if (document.body && document.body.dataset.mcPdpLayoutMounted === '1') return;
     var title = document.getElementById('mc-pdp-title-right');
     if (!title || !title.parentNode) return;
     var parent = title.parentNode;
     var wrap = document.getElementById('mc-pdp-brand-logo');
-    /* Already moved a logo — re-assert position above the title. */
+    /* Already moved a logo — keep it directly below the title. */
     if (wrap && wrap.querySelector('img')) {
-      if (wrap.parentNode !== parent || wrap.nextElementSibling !== title) {
-        parent.insertBefore(wrap, title);
+      if (wrap.parentNode !== parent || wrap.previousElementSibling !== title) {
+        if (title.nextSibling) parent.insertBefore(wrap, title.nextSibling);
+        else parent.appendChild(wrap);
       }
       syncPdpHeroTopAlign();
       return;
@@ -12798,7 +12800,8 @@ if (mcShouldUseLeatherAccordion()) {
       wrap.className = 'mc-pdp-brand-logo';
     }
     wrap.appendChild(logo);
-    parent.insertBefore(wrap, title);
+    if (title.nextSibling) parent.insertBefore(wrap, title.nextSibling);
+    else parent.appendChild(wrap);
     syncPdpHeroTopAlign();
   }
   window.mcPlaceBrandLogoAboveTitle = placePalliserLogoUnderTitle;
@@ -12934,6 +12937,9 @@ if (mcShouldUseLeatherAccordion()) {
   function run() {
     if (!isPdpPage()) return;
     __mcAccRunPending = false;
+    if (document.body && document.body.dataset.mcPdpLayoutMounted === '1') {
+      return;
+    }
     // mc-pdp-auth-cta-fix.js owns layout on standard PDPs (bean bags, Saranoni, dining, etc.).
     // Re-running placeTitle/syncPdpHeroTopAlign here was undoing that script after every deploy.
     var _accPc = String((document.querySelector('input[name="ProductCode"]') || {}).value || '');
@@ -12950,9 +12956,11 @@ if (mcShouldUseLeatherAccordion()) {
       moveAltViewsUnderMainImage();
       return;
     }
-    if (document.documentElement.dataset.mcPdpNormalized === '1' && !isSectionalPg()) {
-      moveAltViewsUnderMainImage();
-      return;
+    if (
+      (document.body && document.body.dataset.mcPdpLayoutMounted === '1') ||
+      document.documentElement.dataset.mcPdpNormalized === '1'
+    ) {
+      if (!isSectionalPg()) return;
     }
     placeTitle();
     placePalliserLogoUnderTitle();
