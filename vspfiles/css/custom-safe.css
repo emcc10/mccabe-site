@@ -17171,13 +17171,24 @@ html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-saranoni-purchase-stack {
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
-  justify-content: center !important;
+  justify-content: flex-start !important;
   gap: 10px !important;
   width: 100% !important;
   max-width: 400px !important;
   margin-left: auto !important;
   margin-right: auto !important;
   box-sizing: border-box !important;
+}
+
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row {
+  order: 1 !important;
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap {
+  order: 2 !important;
 }
 
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
@@ -17217,18 +17228,6 @@ html body.mc-saranoni-pdp #mc-pdp-brand-logo img {
   margin: 0 auto !important;
 }
 
-html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #options_table tr:has(select[name*="___23"]),
-html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #v65-product-parent tr:has(select[name*="___23"]),
-html body.mc-saranoni-pdp.mc-saranoni-swatches-ready table[id*="options_table"] tr:has(select[name*="___23"]) {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  max-height: 0 !important;
-  overflow: hidden !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
 html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #options_table .productoptionname,
 html body.mc-saranoni-pdp.mc-saranoni-swatches-ready table[id*="options_table"] .productoptionname,
 html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #options_table td.productoptionname,
@@ -17237,6 +17236,18 @@ html body.mc-saranoni-pdp.mc-saranoni-swatches-ready table[id*="options_table"] 
   visibility: hidden !important;
   height: 0 !important;
   overflow: hidden !important;
+}
+
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #options_table tr:has(select[name*="___23"]),
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #v65-product-parent tr:has(select[name*="___23"]),
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready table[id*="options_table"] tr:has(select[name*="___23"]) {
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  line-height: 0 !important;
 }
 
 html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper:not(:has(.mc-configured-color-swatch)) {
@@ -17251,4 +17262,26 @@ html body.mc-saranoni-pdp:has(#mc-pdp-purchase-stack) table[id*="options_table"]
   visibility: hidden !important;
   height: 0 !important;
   overflow: hidden !important;
+}
+
+/* Volusion soft-add popup: View Cart text matches Continue Shopping (white on gray). */
+.soft_add_wrapper .check_out,
+.soft_add_wrapper .check_out:link,
+.soft_add_wrapper .check_out:visited,
+.soft_add_wrapper .check_out:hover,
+.soft_add_wrapper .check_out:focus,
+.soft_add_wrapper .check_out:active {
+  background: #666 !important;
+  background-color: #666 !important;
+  border-color: #666 !important;
+  color: #fff !important;
+}
+
+.soft_add_wrapper .continue_shopping,
+.soft_add_wrapper .continue_shopping:link,
+.soft_add_wrapper .continue_shopping:visited,
+.soft_add_wrapper .continue_shopping:hover,
+.soft_add_wrapper .continue_shopping:focus,
+.soft_add_wrapper .continue_shopping:active {
+  color: #fff !important;
 }

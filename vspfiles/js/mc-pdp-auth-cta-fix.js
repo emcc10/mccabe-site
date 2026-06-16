@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp38c";
+  var VERSION = "20260616pdp38d";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -1767,6 +1767,13 @@
     stack.className = "mc-pdp-purchase-controls mc-pdp-cart-row";
     if (row && !stack.contains(row)) stack.appendChild(row);
     if (!stack.contains(stackNode)) stack.appendChild(stackNode);
+    if (isSaranoniPdpPage() && row && stackNode && stack.contains(row) && stack.contains(stackNode)) {
+      try {
+        if (row.nextElementSibling !== stackNode) {
+          stack.insertBefore(row, stackNode);
+        }
+      } catch (eOrd) {}
+    }
     var anchor = findPurchaseStackAnchor();
     var targetParent = anchor ? anchor.parent : stackNode.parentNode;
     if (targetParent) {
@@ -1876,6 +1883,7 @@
         stackNode.style.setProperty("width", "100%", "important");
         stackNode.style.setProperty("max-width", "100%", "important");
         stackNode.style.setProperty("display", "flex", "important");
+        stackNode.style.setProperty("flex-direction", "column", "important");
         stackNode.style.setProperty("justify-content", "stretch", "important");
       } catch (eNode) {}
     }
@@ -1901,11 +1909,16 @@
   // wrapper with a solid dark button inside. No outer box = no "second box".
   function applySoftGoodsAtcChrome(wrap) {
     if (!wrap || !isSoftGoodsPdpPage()) return;
+    var isSar = isSaranoniPdpPage();
     wrap.classList.add("mc-soft-goods-atc-wrap");
     try {
       wrap.style.setProperty("display", "inline-flex", "important");
       wrap.style.setProperty("align-items", "center", "important");
       wrap.style.setProperty("justify-content", "center", "important");
+      if (isSar) {
+        wrap.style.setProperty("width", "100%", "important");
+        wrap.style.setProperty("max-width", "100%", "important");
+      }
       wrap.style.setProperty("background", "#111", "important");
       wrap.style.setProperty("background-color", "#111", "important");
       wrap.style.setProperty("border", "1px solid #111", "important");
@@ -1954,6 +1967,11 @@
       btn.style.setProperty("padding", "0 28px", "important");
       btn.style.setProperty("min-height", "48px", "important");
       btn.style.setProperty("opacity", "1", "important");
+      if (isSar) {
+        btn.style.setProperty("width", "100%", "important");
+        btn.style.setProperty("display", "block", "important");
+        btn.style.setProperty("box-sizing", "border-box", "important");
+      }
       btn.style.setProperty("-webkit-appearance", "none", "important");
       btn.style.setProperty("appearance", "none", "important");
     } catch (eBtn) {}
@@ -2132,13 +2150,19 @@
       "letter-spacing:0.02em!important;text-transform:none!important;color:#444!important}" +
       "body.productdetails #ProductDetail_ProductDetails_div2 ul,body.mc-product-page #ProductDetail_ProductDetails_div2 ul{" +
       "list-style:disc!important;padding-left:1.1em!important;margin:0!important}" +
-      "body.productdetails #mc-pdp-purchase-stack,body.mc-product-page #mc-pdp-purchase-stack," +
-      "body.productdetails #v65-product-parent [itemprop='offers'] #mc-pdp-purchase-stack,body.mc-product-page #v65-product-parent [itemprop='offers'] #mc-pdp-purchase-stack{" +
+      "body.productdetails:not(.mc-saranoni-pdp) #mc-pdp-purchase-stack,body.mc-product-page:not(.mc-saranoni-pdp) #mc-pdp-purchase-stack," +
+      "body.productdetails:not(.mc-saranoni-pdp) #v65-product-parent [itemprop='offers'] #mc-pdp-purchase-stack,body.mc-product-page:not(.mc-saranoni-pdp) #v65-product-parent [itemprop='offers'] #mc-pdp-purchase-stack{" +
       "display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;" +
       "text-align:center!important;align-self:stretch!important;width:100%!important;max-width:100%!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-saranoni-purchase-stack{" +
+      "display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;flex-wrap:nowrap!important;" +
+      "text-align:center!important;width:100%!important;max-width:400px!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row{order:1!important;width:100%!important;justify-content:center!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap{order:2!important;width:100%!important;max-width:100%!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button{width:100%!important;box-sizing:border-box!important;display:block!important}" +
       "body.productdetails #mc-pdp-purchase-stack *,body.mc-product-page #mc-pdp-purchase-stack *{" +
       "text-align:center!important}" +
-      "body.productdetails #mc-pdp-features+#mc-pdp-purchase-stack,body.mc-product-page #mc-pdp-features+#mc-pdp-purchase-stack{" +
+      "body.productdetails:not(.mc-saranoni-pdp) #mc-pdp-features+#mc-pdp-purchase-stack,body.mc-product-page:not(.mc-saranoni-pdp) #mc-pdp-features+#mc-pdp-purchase-stack{" +
       "display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;" +
       "text-align:center!important;align-self:stretch!important;width:100%!important;max-width:100%!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
       "body.productdetails #ProductDetail_ProductDetails_div2 .colors_descriptionbox,body.mc-product-page #ProductDetail_ProductDetails_div2 .colors_descriptionbox," +
@@ -2874,8 +2898,9 @@
   function syncConfiguredColorSelect(select, opt) {
     if (!select || !opt) return false;
     select.value = opt.value;
-    // Use the select's real option-category id (Saranoni color = 23) instead of a
-    // hardcoded value, so AutoUpdatePriceWithSelectedOptions targets the right group.
+    try {
+      select.selectedIndex = opt.index;
+    } catch (eIdx) {}
     var catRaw = parseOptionCategoryFromSelectName(select.name);
     var catId = catRaw ? parseInt(catRaw, 10) : 4;
     if (typeof global.change_option === "function") {
@@ -2889,12 +2914,92 @@
       } catch (ePrice) {}
     }
     try {
+      select.disabled = false;
+      select.removeAttribute("disabled");
+    } catch (eEn) {}
+    try {
       select.dispatchEvent(new Event("input", { bubbles: true }));
     } catch (eIn) {}
     try {
       select.dispatchEvent(new Event("change", { bubbles: true }));
     } catch (eEv) {}
     return true;
+  }
+
+  function findSaranoniColorSelect() {
+    var selects = global.document.querySelectorAll("#options_table select, #v65-product-parent select");
+    var i;
+    for (i = 0; i < selects.length; i++) {
+      var sel = selects[i];
+      if (parseOptionCategoryFromSelectName(sel.name) !== SARANONI_COLOR_OPTION_CATEGORY) continue;
+      if (!/^SAR/i.test(parseProductCodeFromSelectName(sel.name))) continue;
+      return sel;
+    }
+    return null;
+  }
+
+  function ensureColorOptionCommittedBeforeAddToCart() {
+    if (!isSaranoniPdpPage()) return;
+    var ctx = findConfiguredColorSwatchContext();
+    var select = (ctx && ctx.select) || findSaranoniColorSelect();
+    if (!select) return;
+    var opt = null;
+    if (configuredColorActiveEntry && ctx) {
+      opt = findConfiguredColorOption(select, configuredColorActiveEntry);
+    }
+    if (!opt) {
+      var activeBtn = global.document.querySelector(".mc-configured-color-swatch.active");
+      if (activeBtn && ctx) {
+        var oid = activeBtn.getAttribute("data-option-id");
+        var ei;
+        for (ei = 0; ei < ctx.entries.length; ei++) {
+          if (ctx.entries[ei].optionId === oid) {
+            opt = findConfiguredColorOption(select, ctx.entries[ei]);
+            break;
+          }
+        }
+      }
+    }
+    if (!opt && select.selectedIndex >= 0) {
+      var cur = select.options[select.selectedIndex];
+      if (cur && String(cur.value || "").trim()) opt = cur;
+    }
+    if (opt) syncConfiguredColorSelect(select, opt);
+  }
+
+  function installSaranoniColorAtcGuard() {
+    if (global.__MC_SAR_COLOR_ATC_GUARD__) return;
+    global.__MC_SAR_COLOR_ATC_GUARD__ = true;
+    global.document.addEventListener(
+      "click",
+      function (eAtc) {
+        if (!isSaranoniPdpPage()) return;
+        var btn =
+          eAtc.target && eAtc.target.closest
+            ? eAtc.target.closest('input[name="btnaddtocart"], button[name="btnaddtocart"]')
+            : null;
+        if (!btn) return;
+        ensureColorOptionCommittedBeforeAddToCart();
+      },
+      true
+    );
+    global.document.addEventListener(
+      "submit",
+      function (eSub) {
+        if (!isSaranoniPdpPage()) return;
+        var form = eSub.target;
+        if (!form || !form.querySelector) return;
+        if (
+          !form.querySelector(
+            'input[name="btnaddtocart"], button[name="btnaddtocart"], input[name="ProductCode"]'
+          )
+        ) {
+          return;
+        }
+        ensureColorOptionCommittedBeforeAddToCart();
+      },
+      true
+    );
   }
 
   function restoreConfiguredColorNativeSelect(select) {
@@ -2922,8 +3027,7 @@
     if (visibleCount > 0 && wrap && wrap.querySelector(".mc-configured-color-swatch")) {
       body.classList.add("mc-saranoni-swatches-ready");
       hideConfiguredColorNativeSelect(select);
-      hideConfiguredColorLegacyRows(select);
-      hideSaranoniNativeColorRows(select);
+      hideSaranoniNativeColorUi(select);
       try {
         wrap.style.removeProperty("display");
       } catch (eShow) {}
@@ -2938,29 +3042,48 @@
     restoreConfiguredColorNativeSelect(select);
   }
 
-  function hideSaranoniNativeColorRows(select) {
+  function hideSaranoniNativeColorUi(select) {
     if (!select || !isSaranoniPdpPage()) return;
-    hideConfiguredColorLegacyRows(select);
+    hideConfiguredColorNativeSelect(select);
+    var row = select.closest ? select.closest("tr") : null;
+    if (row) {
+      try {
+        row.style.setProperty("height", "0", "important");
+        row.style.setProperty("max-height", "0", "important");
+        row.style.setProperty("overflow", "hidden", "important");
+        row.style.setProperty("margin", "0", "important");
+        row.style.setProperty("padding", "0", "important");
+        row.style.setProperty("border", "0", "important");
+        row.style.setProperty("line-height", "0", "important");
+      } catch (eRow) {}
+      var prev = row.previousElementSibling;
+      var prevText = String(prev && prev.textContent ? prev.textContent : "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+      if (prev && /(choose color|selected color|color\*|color:|cover)/.test(prevText)) {
+        try {
+          prev.style.setProperty("display", "none", "important");
+          prev.style.setProperty("visibility", "hidden", "important");
+          prev.style.setProperty("height", "0", "important");
+          prev.style.setProperty("overflow", "hidden", "important");
+        } catch (ePrev) {}
+      }
+    }
     var table = select.closest ? select.closest("#options_table, table[id*='options_table']") : null;
     if (!table) return;
-    table.querySelectorAll("tr").forEach(function (tr) {
-      if (!tr.contains(select)) return;
-      try {
-        tr.style.setProperty("display", "none", "important");
-        tr.style.setProperty("visibility", "hidden", "important");
-        tr.style.setProperty("height", "0", "important");
-        tr.style.setProperty("overflow", "hidden", "important");
-      } catch (eTr) {}
-    });
     table.querySelectorAll(".productoptionname, td.productoptionname, label").forEach(function (lab) {
       var txt = String(lab.textContent || "")
         .replace(/\s+/g, " ")
         .trim()
         .toLowerCase();
-      if (!/(choose color|selected color|color\*|color:)/.test(txt)) return;
-      if (select.closest && lab.contains && lab.contains(select)) return;
+      if (!/(choose color|selected color|color\*|color:|cover)/.test(txt)) return;
+      if (lab.contains && lab.contains(select)) return;
       try {
         lab.style.setProperty("display", "none", "important");
+        lab.style.setProperty("visibility", "hidden", "important");
+        lab.style.setProperty("height", "0", "important");
+        lab.style.setProperty("overflow", "hidden", "important");
       } catch (eLab) {}
     });
   }
@@ -3095,8 +3218,7 @@
               img.src = resolvedSrc;
               btn.style.display = "";
               hideConfiguredColorNativeSelect(ctx.select);
-              hideConfiguredColorLegacyRows(ctx.select);
-              hideSaranoniNativeColorRows(ctx.select);
+              hideSaranoniNativeColorUi(ctx.select);
             } else if (btn.parentNode) {
               btn.parentNode.removeChild(btn);
             }
@@ -4999,6 +5121,7 @@
     global.setTimeout(mcReleaseMo, 250);
     try {
       tagSoftGoodsBodyClasses();
+      installSaranoniColorAtcGuard();
       installPdpStackApiGuards();
       initBeanBagImageSync();
       ensureBeanBagSizeRow();
