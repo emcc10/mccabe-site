@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp38h";
+  var VERSION = "20260616pdp38i";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -1586,8 +1586,24 @@
   var MC_CART_ICON_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
 
+  function convertAllAtcImageButtons(root) {
+    root = root || global.document.getElementById("v65-product-parent") || global.document;
+    root.querySelectorAll(
+      'input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]'
+    ).forEach(function (btn) {
+      if (btn.tagName !== "INPUT") return;
+      if ((btn.type || "").toLowerCase() !== "image") return;
+      try {
+        btn.type = "submit";
+      } catch (eImg) {}
+      btn.removeAttribute("src");
+      if (!btn.value) btn.value = "ADD TO CART";
+    });
+  }
+
   function injectAtcButtonWrap(root) {
     root = root || global.document.getElementById("v65-product-parent") || global.document;
+    convertAllAtcImageButtons(root);
     var btn = root.querySelector(
       'input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]'
     );
@@ -2020,6 +2036,7 @@
 
   function fixAddToCartChrome() {
     injectAtcButtonWrap();
+    convertAllAtcImageButtons();
     global.document.querySelectorAll(".mc-atc-button-wrap").forEach(function (wrap) {
       if (wrap.closest("#mc-pdp-price-atc-row")) return;
       if (!isSoftGoodsPdpPage() && wrap.getAttribute("data-mc-atc-styled") === VERSION) return;
@@ -2028,7 +2045,9 @@
     });
     global.document
       .querySelectorAll(
-        '#mc-pdp-purchase-stack input[name="btnaddtocart"], #mc-pdp-purchase-stack button[name="btnaddtocart"]'
+        '#v65-product-parent input[name="btnaddtocart"], #v65-product-parent button[name="btnaddtocart"], ' +
+          '#v65-product-parent input[id*="btnaddtocart"], #content_area input[name="btnaddtocart"], ' +
+          '#content_area button[name="btnaddtocart"]'
       )
       .forEach(function (btn) {
         if (btn.getAttribute("data-mc-atc-styled") === VERSION) return;
@@ -2036,20 +2055,31 @@
         if (wrap && isSoftGoodsPdpPage()) {
           applySoftGoodsAtcChrome(wrap);
           wrap.setAttribute("data-mc-atc-styled", VERSION);
+          btn.setAttribute("data-mc-atc-styled", VERSION);
           return;
         }
-        if (wrap) return;
+        if (wrap) {
+          styleCompactAtcButton(wrap);
+          wrap.setAttribute("data-mc-atc-styled", VERSION);
+          btn.setAttribute("data-mc-atc-styled", VERSION);
+          return;
+        }
         try {
-          btn.type = "submit";
-          btn.removeAttribute("src");
-          if (!btn.value) btn.value = "ADD TO CART";
+          if (btn.tagName === "INPUT" && (btn.type || "").toLowerCase() === "image") {
+            btn.type = "submit";
+            btn.removeAttribute("src");
+          }
+          if (!btn.value && btn.tagName === "INPUT") btn.value = "ADD TO CART";
         } catch (eTyp) {}
+        var inPurchaseStack = !!btn.closest("#mc-pdp-purchase-stack");
+        var fullWidth = inPurchaseStack || isSoftGoodsPdpPage();
         btn.style.setProperty("background", "#111", "important");
         btn.style.setProperty("background-color", "#111", "important");
         btn.style.setProperty("background-image", "none", "important");
         btn.style.setProperty("color", "#fff", "important");
         btn.style.setProperty("border", "1px solid #111", "important");
         btn.style.setProperty("border-radius", "0", "important");
+        btn.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
         btn.style.setProperty("font-size", "13px", "important");
         btn.style.setProperty("font-weight", "600", "important");
         btn.style.setProperty("letter-spacing", "0.12em", "important");
@@ -2057,6 +2087,16 @@
         btn.style.setProperty("min-height", "48px", "important");
         btn.style.setProperty("padding", "0 28px", "important");
         btn.style.setProperty("opacity", "1", "important");
+        btn.style.setProperty("display", "flex", "important");
+        btn.style.setProperty("align-items", "center", "important");
+        btn.style.setProperty("justify-content", "center", "important");
+        btn.style.setProperty("text-align", "center", "important");
+        btn.style.setProperty("box-sizing", "border-box", "important");
+        btn.style.setProperty("-webkit-appearance", "none", "important");
+        btn.style.setProperty("appearance", "none", "important");
+        btn.style.setProperty("width", fullWidth ? "100%" : "auto", "important");
+        btn.style.setProperty("max-width", fullWidth ? "100%" : "none", "important");
+        btn.style.setProperty("cursor", "pointer", "important");
         btn.setAttribute("data-mc-atc-styled", VERSION);
       });
     if (isSoftGoodsPdpPage()) {
@@ -2190,7 +2230,15 @@
       "border:1px solid #111!important;border-radius:0!important;font-size:13px!important;font-weight:600!important;" +
       "letter-spacing:.12em!important;text-transform:uppercase!important;min-height:48px!important;padding:0 28px!important;opacity:1!important}" +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper,html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper{" +
-      "display:none!important}";
+      "display:none!important}" +
+      "body.productdetails #v65-product-parent input.vCSS_input_addtocart[name='btnaddtocart'],body.mc-product-page #v65-product-parent input.vCSS_input_addtocart[name='btnaddtocart']," +
+      "body.productdetails #v65-product-parent input[name='btnaddtocart'],body.mc-product-page #v65-product-parent input[name='btnaddtocart']," +
+      "body.productdetails #v65-product-parent button[name='btnaddtocart'],body.mc-product-page #v65-product-parent button[name='btnaddtocart']{" +
+      "background:#111!important;background-color:#111!important;background-image:none!important;color:#fff!important;" +
+      "border:1px solid #111!important;border-radius:0!important;box-shadow:none!important;" +
+      "font-family:Inter,Arial,sans-serif!important;font-size:13px!important;font-weight:600!important;letter-spacing:.12em!important;" +
+      "text-transform:uppercase!important;line-height:1!important;padding:0 28px!important;min-height:48px!important;" +
+      "opacity:1!important;cursor:pointer!important;-webkit-appearance:none!important;appearance:none!important}";
   }
 
   global.mcPlaceBrandLogoAboveTitle = placeBrandLogoAboveTitle;
