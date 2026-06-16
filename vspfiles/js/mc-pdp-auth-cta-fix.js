@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp46";
+  var VERSION = "20260616pdp47";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -63,20 +63,6 @@
         label: "Moonbeam",
         swatchImage: "SAR-CHNK-KNT-LG-1012-S.jpg",
         mainImage: "SAR-CHNK-KNT-LG-1012-T.jpg",
-      },
-    ],
-    "SAR-DBL-RCH-FX-FUR": [
-      {
-        optionId: "1013",
-        label: "Snow",
-        swatchImage: "SAR-DBL-RCH-FX-FUR-1013-S.jpg",
-        mainImage: "SAR-DBL-RCH-FX-FUR-1013-T.jpg",
-      },
-      {
-        optionId: "1014",
-        label: "Flax",
-        swatchImage: "SAR-DBL-RCH-FX-FUR-1014-S.jpg",
-        mainImage: "SAR-DBL-RCH-FX-FUR-1014-T.jpg",
       },
     ],
   };
