@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp38k";
+  var VERSION = "20260616pdp39a";
 
   (function injectMcAtcBlackCriticalCss() {
     var css =
@@ -2094,6 +2094,7 @@
   }
 
   function fixAddToCartChrome() {
+    normalizeProductPageLayout();
     injectAtcButtonWrap();
     convertAllAtcImageButtons();
     global.document.querySelectorAll(".mc-atc-button-wrap").forEach(function (wrap) {
@@ -2166,6 +2167,7 @@
         purchaseTarget ? purchaseTarget.stackNode : null
       );
     }
+    normalizeAtcClasses();
   }
 
   function ensurePdpDescriptionCriticalCss() {
@@ -3606,6 +3608,104 @@
     } else {
       release();
     }
+  }
+
+  function findProductMediaTd() {
+    return (
+      global.document.querySelector("#v65-product-parent td.mc-pdp-media-td") ||
+      global.document.getElementById("product_photo_td") ||
+      (global.document.getElementById("product_photo") &&
+        global.document.getElementById("product_photo").closest &&
+        global.document.getElementById("product_photo").closest("td"))
+    );
+  }
+
+  function findProductHeroRow() {
+    var row = global.document.querySelector("#v65-product-parent tr.mc-product-columns");
+    if (row) return row;
+    row = global.document.querySelector("#v65-product-parent tr.mc-pdp-main-row");
+    if (row) return row;
+    var mediaTd = findProductMediaTd();
+    if (mediaTd && mediaTd.parentNode && mediaTd.parentNode.tagName === "TR") {
+      return mediaTd.parentNode;
+    }
+    var infoTd = findPdpHeroColumnTd();
+    if (infoTd && infoTd.parentNode && infoTd.parentNode.tagName === "TR") {
+      return infoTd.parentNode;
+    }
+    return null;
+  }
+
+  function normalizeProductPageLayout() {
+    if (!isProductPdp()) return;
+    tagHeroMediaCol();
+    var infoTd = findPdpHeroColumnTd();
+    var mediaTd = findProductMediaTd();
+    if (!infoTd && mediaTd && mediaTd.nextElementSibling && mediaTd.nextElementSibling.tagName === "TD") {
+      infoTd = mediaTd.nextElementSibling;
+    }
+    if (infoTd) {
+      infoTd.classList.add("mc-pdp-options-td", "mc-product-info-column");
+    }
+    if (mediaTd) {
+      mediaTd.classList.add("mc-pdp-media-td", "mc-pdp-hero-media-col", "mc-product-media-column");
+    }
+    var row = findProductHeroRow();
+    if (row) {
+      row.classList.add("mc-pdp-main-row", "mc-product-columns");
+    }
+    var features = global.document.getElementById("mc-pdp-features");
+    if (features) features.classList.add("mc-features");
+    var desc = global.document.getElementById("mc-pdp-description-below-features");
+    if (desc) desc.classList.add("mc-product-description");
+    var purchase = global.document.getElementById("mc-pdp-purchase-stack");
+    if (purchase) purchase.classList.add("mc-purchase-area");
+    normalizeAtcClasses();
+  }
+
+  function normalizeAtcClasses() {
+    if (!isProductPdp()) return;
+    convertAllAtcImageButtons();
+    var root = global.document.getElementById("v65-product-parent") || global.document;
+    root
+      .querySelectorAll('input[name="btnaddtocart"], button[name="btnaddtocart"], input[id*="btnaddtocart"]')
+      .forEach(function (btn) {
+        btn.classList.add("mc-atc-button");
+        if (btn.tagName === "INPUT" && !(btn.value || "").trim()) {
+          btn.value = "ADD TO CART";
+        }
+        var wrap =
+          btn.closest(".mc-atc-button-wrap") ||
+          btn.closest(".v65-product-addtocart") ||
+          (btn.parentElement && btn.parentElement !== root ? btn.parentElement : null);
+        if (wrap && wrap !== btn) {
+          wrap.classList.add("mc-atc-wrapper");
+        }
+        [
+          "width",
+          "min-width",
+          "max-width",
+          "background",
+          "background-color",
+          "background-image",
+          "color",
+          "border",
+          "border-radius",
+          "padding",
+          "font-size",
+          "font-weight",
+          "letter-spacing",
+          "text-transform",
+          "display",
+          "opacity",
+        ].forEach(function (prop) {
+          try {
+            btn.style.removeProperty(prop);
+          } catch (eStrip) {}
+        });
+      });
+    var qtyRow = global.document.getElementById("mc-pdp-qty-row");
+    if (qtyRow) qtyRow.classList.add("mc-quantity-row");
   }
 
   function tagHeroMediaCol() {
@@ -5509,6 +5609,7 @@
     global.setTimeout(mcReleaseMo, 250);
     try {
       tagSoftGoodsBodyClasses();
+      normalizeProductPageLayout();
       installSaranoniColorAtcGuard();
       installPdpStackApiGuards();
       initBeanBagImageSync();
