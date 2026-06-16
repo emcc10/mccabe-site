@@ -16795,7 +16795,6 @@ html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features li {
 }
 
 html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,
 html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row {
   display: flex !important;
   flex-direction: row !important;
@@ -17162,4 +17161,94 @@ html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruc
 html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent #options_table .v65-product-addtocart .mc-atc-button-wrap {
   border-radius: 0 !important;
   font-family: Inter, Arial, sans-serif !important;
+}
+
+/* =========================================================
+   MC_SARANONI_PDP_RESTORE — column qty+ATC, hide duplicate color UI.
+   ========================================================= */
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-saranoni-purchase-stack {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  margin: 0 !important;
+}
+
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  display: block !important;
+}
+
+html body.mc-saranoni-pdp #mc-pdp-brand-logo {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  margin: 0 auto 14px auto !important;
+}
+
+html body.mc-saranoni-pdp #mc-pdp-brand-logo img {
+  display: block !important;
+  max-width: 180px !important;
+  max-height: 48px !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 auto !important;
+}
+
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #options_table tr:has(select[name*="___23"]),
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #v65-product-parent tr:has(select[name*="___23"]),
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready table[id*="options_table"] tr:has(select[name*="___23"]) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #options_table .productoptionname,
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready table[id*="options_table"] .productoptionname,
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #options_table td.productoptionname,
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready table[id*="options_table"] td.productoptionname {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper:not(:has(.mc-configured-color-swatch)) {
+  display: none !important;
+}
+
+html body.mc-saranoni-pdp:has(#mc-pdp-purchase-stack) #options_table tr:has(input[name="btnaddtocart"]),
+html body.mc-saranoni-pdp:has(#mc-pdp-purchase-stack) #options_table tr:has(.vCSS_input_addtocart),
+html body.mc-saranoni-pdp:has(#mc-pdp-purchase-stack) table[id*="options_table"] tr:has(input[name="btnaddtocart"]),
+html body.mc-saranoni-pdp:has(#mc-pdp-purchase-stack) table[id*="options_table"] tr:has(.vCSS_input_addtocart) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
 }
