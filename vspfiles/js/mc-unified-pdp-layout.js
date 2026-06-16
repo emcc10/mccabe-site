@@ -7,7 +7,7 @@
 
 
   var LAYOUT_VER = "20260616unified2";
-  var AUTH_LAYOUT_VER = "20260616pdp41";
+  var AUTH_LAYOUT_VER = "20260616pdp42";
   var moTimer = null;
   var moBound = false;
 

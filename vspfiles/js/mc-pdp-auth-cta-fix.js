@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp41";
+  var VERSION = "20260616pdp42";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -330,8 +330,26 @@
     pruneDescriptionDuplicateFeatures();
   }
 
+  function fixTmhMatPhotoUrls(root) {
+    root = root || global.document;
+    function swap2Tto1(el, attr) {
+      if (!el || !el.getAttribute) return;
+      var val = el.getAttribute(attr) || "";
+      if (!/\/TMH-MAT-[A-Z0-9-]+-2T\./i.test(val)) return;
+      el.setAttribute(attr, val.replace(/-2T\.(jpg|jpeg|png|webp)/i, "-1.$1"));
+    }
+    swap2Tto1(global.document.getElementById("product_photo"), "src");
+    global.document.querySelectorAll("#product_photo_zoom_url, #product_photo_zoom_url2").forEach(function (link) {
+      swap2Tto1(link, "href");
+    });
+    root.querySelectorAll('img[src*="/vspfiles/photos/TMH-MAT-"][src*="-2T."]').forEach(function (img) {
+      swap2Tto1(img, "src");
+    });
+  }
+
   function applyPdpMainImageCap() {
     if (!isProductPdp()) return;
+    fixTmhMatPhotoUrls(global.document);
     var img = global.document.getElementById("product_photo");
     if (img) {
       try {

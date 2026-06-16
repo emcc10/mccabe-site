@@ -7,7 +7,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260628a";
+  var VERSION = "20260628b";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -244,6 +244,35 @@
   function skuFromProductTitle(title) {
     var m = String(title || "").match(/,\s*([^,"]+)\s*$/);
     return m ? String(m[1]).trim() : "";
+  }
+
+  function fixTmhMatPlpThumbnails(root) {
+    root = root || document.getElementById("content_area") || document;
+    root.querySelectorAll('img[src*="/vspfiles/photos/TMH-MAT-"]').forEach(function (img) {
+      var src = String(img.getAttribute("src") || img.src || "");
+      if (!/-2T\.(jpg|jpeg|png|webp)/i.test(src)) return;
+      img.setAttribute("src", src.replace(/-2T\.(jpg|jpeg|png|webp)/i, "-1.$1"));
+      img.removeAttribute("data-mc-scale-done");
+      img.classList.remove("mc-plp-img-fit", "mc-plp-img-sized");
+    });
+    root.querySelectorAll(".v-product, td a.productnamecolor, td a.colors_productname").forEach(function (node) {
+      var title = String(
+        (node.getAttribute && (node.getAttribute("title") || node.textContent)) || ""
+      );
+      if (!/TMH-MAT-/i.test(title)) return;
+      var m = title.match(/,\s*(TMH-MAT-[A-Z0-9-]+)\s*$/i);
+      if (!m) return;
+      var code = m[1].toUpperCase();
+      var block = node.closest ? node.closest(".v-product, tr, td") : node;
+      if (!block) return;
+      var img =
+        (block.querySelector && block.querySelector("a.v-product__img img, .v-product__img img, img")) ||
+        null;
+      if (!img) return;
+      img.setAttribute("src", sameOriginPhotoUrl(code + "-1.jpg") + "?v=" + VERSION);
+      img.removeAttribute("data-mc-scale-done");
+      img.classList.remove("mc-plp-img-fit", "mc-plp-img-sized");
+    });
   }
 
   /** Volusion PLP often bakes NoPhoto.gif even when {SKU}-1.jpg exists on SFTP — probe and swap. */
@@ -527,6 +556,7 @@
     injectCriticalThumbCss();
     removeLegacyCategoryBars();
     fixNoPhotoThumbnails();
+    fixTmhMatPlpThumbnails();
     normalizePLPImages();
     hideHero();
     if (!global.__MC_PLP_NORM_RETRIES__) {
@@ -534,6 +564,7 @@
       [200, 800, 2500].forEach(function (ms) {
         global.setTimeout(function () {
           fixNoPhotoThumbnails();
+          fixTmhMatPlpThumbnails();
           normalizePLPImages();
         }, ms);
       });
