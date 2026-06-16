@@ -33,7 +33,66 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp38j";
+  var VERSION = "20260616pdp38k";
+
+  (function injectMcAtcBlackCriticalCss() {
+    var css =
+      "html body.productdetails #v65-product-parent input[name='btnaddtocart']," +
+      "html body.mc-product-page #v65-product-parent input[name='btnaddtocart']," +
+      "html body.productdetails #v65-product-parent input.vCSS_input_addtocart," +
+      "html body.mc-product-page #v65-product-parent input.vCSS_input_addtocart," +
+      "html body.productdetails #mc-pdp-purchase-stack input[name='btnaddtocart']," +
+      "html body.mc-product-page #mc-pdp-purchase-stack input[name='btnaddtocart']," +
+      "html body.productdetails #mc-pdp-purchase-stack .mc-atc-button-wrap input," +
+      "html body.mc-product-page #mc-pdp-purchase-stack .mc-atc-button-wrap input," +
+      "html body.productdetails .mc-atc-button-wrap input[name='btnaddtocart']," +
+      "html body.mc-product-page .mc-atc-button-wrap input[name='btnaddtocart']{" +
+      "display:flex!important;align-items:center!important;justify-content:center!important;" +
+      "text-align:center!important;width:100%!important;max-width:100%!important;min-height:46px!important;" +
+      "padding:0 28px!important;margin:0!important;border:1px solid #111!important;border-radius:0!important;" +
+      "background:#111!important;background-color:#111!important;background-image:none!important;color:#fff!important;" +
+      "font-family:Inter,Arial,sans-serif!important;font-size:12px!important;font-weight:600!important;" +
+      "letter-spacing:.12em!important;text-transform:uppercase!important;line-height:1!important;" +
+      "opacity:1!important;cursor:pointer!important;-webkit-appearance:none!important;appearance:none!important;" +
+      "box-sizing:border-box!important}" +
+      "html body.productdetails #mc-pdp-purchase-stack .mc-atc-button-wrap," +
+      "html body.mc-product-page #mc-pdp-purchase-stack .mc-atc-button-wrap," +
+      "html body.productdetails .mc-atc-button-wrap,html body.mc-product-page .mc-atc-button-wrap{" +
+      "display:flex!important;width:100%!important;max-width:100%!important;background:#111!important;" +
+      "background-color:#111!important;border:1px solid #111!important;padding:0!important;margin:0!important}";
+    function mount() {
+      if (!global.document) return;
+      var el = global.document.getElementById("mc-atc-black-critical-css");
+      if (!el) {
+        el = global.document.createElement("style");
+        el.id = "mc-atc-black-critical-css";
+        (global.document.head || global.document.documentElement).appendChild(el);
+      }
+      el.textContent = css;
+    }
+    mount();
+    if (global.document && global.document.readyState === "loading") {
+      global.document.addEventListener("DOMContentLoaded", mount);
+    }
+    function earlyConvertAtcImages() {
+      if (!global.document) return;
+      global.document
+        .querySelectorAll('input[name="btnaddtocart"], input[id*="btnaddtocart"]')
+        .forEach(function (btn) {
+          if ((btn.type || "").toLowerCase() !== "image") return;
+          try {
+            btn.type = "submit";
+          } catch (eTyp) {}
+          btn.removeAttribute("src");
+          if (!btn.value) btn.value = "ADD TO CART";
+        });
+    }
+    earlyConvertAtcImages();
+    if (global.document && global.document.readyState === "loading") {
+      global.document.addEventListener("DOMContentLoaded", earlyConvertAtcImages);
+    }
+    global.addEventListener("load", earlyConvertAtcImages);
+  })();
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [

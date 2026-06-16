@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260607deploy — deploy-path verify only; no layout change */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260525atc — deploy-path verify only; no layout change */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -15908,9 +15908,11 @@ html body.mc-product-page #mc-pdp-features .mc-pdp-features__list li {
   html body.productdetails #content_area .mc-atc-button-wrap,
   html body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
   html body.productdetails #v65-product-parent .mc-atc-button-wrap {
-    border: 1px solid #e0e0e0 !important;
+    border: 1px solid #111 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    background: #111 !important;
+    background-color: #111 !important;
   }
 }
 
