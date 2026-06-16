@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp39b";
+  var VERSION = "20260616pdp41";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -5134,6 +5134,39 @@
     }
   }
 
+  function ensureUnifiedPdpLayout() {
+    if (isSectionalPdpPage()) return;
+    function runNorm() {
+      try {
+        if (typeof global.mcNormalizePdpLayout === "function") {
+          return !!global.mcNormalizePdpLayout();
+        }
+      } catch (eNorm) {}
+      return false;
+    }
+    if (runNorm()) return;
+    if (global.__MC_UNIFIED_PDP_LOADING__) return;
+    if (global.document.querySelector('script[src*="mc-unified-pdp-layout.js"]')) {
+      global.setTimeout(runNorm, 150);
+      return;
+    }
+    global.__MC_UNIFIED_PDP_LOADING__ = true;
+    try {
+      var s = global.document.createElement("script");
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260616unified3&mcrd=" + Date.now();
+      s.onload = function () {
+        global.__MC_UNIFIED_PDP_LOADING__ = false;
+        runNorm();
+      };
+      s.onerror = function () {
+        global.__MC_UNIFIED_PDP_LOADING__ = false;
+      };
+      (global.document.head || global.document.documentElement).appendChild(s);
+    } catch (eLoad) {
+      global.__MC_UNIFIED_PDP_LOADING__ = false;
+    }
+  }
+
   function runPatch() {
     if (!isProductPdp()) return;
     var sectional = isSectionalPdpPage();
@@ -5172,23 +5205,34 @@
       }
       if (!sectional && isPdpLayoutMounted()) {
         forceRebuildCleanPriceStack();
-        if (isSoftGoodsPdpPage()) {
-          reassertSoftGoodsHeroOrder();
-        } else {
-          fixAddToCartChrome();
-        }
-        stripPriceZeroCents();
-      } else if (!sectional) {
-        if (!mountPdpLayoutOnce()) {
-          forceRebuildCleanPriceStack();
+        ensureUnifiedPdpLayout();
+        if (
+          global.document.body &&
+          !global.document.body.classList.contains("mc-pdp-unified-ready")
+        ) {
           if (isSoftGoodsPdpPage()) {
             reassertSoftGoodsHeroOrder();
           } else {
             fixAddToCartChrome();
           }
-        } else {
-          stripPriceZeroCents();
         }
+        stripPriceZeroCents();
+      } else if (!sectional) {
+        if (!mountPdpLayoutOnce()) {
+          forceRebuildCleanPriceStack();
+        }
+        ensureUnifiedPdpLayout();
+        if (
+          global.document.body &&
+          !global.document.body.classList.contains("mc-pdp-unified-ready")
+        ) {
+          if (isSoftGoodsPdpPage()) {
+            reassertSoftGoodsHeroOrder();
+          } else {
+            fixAddToCartChrome();
+          }
+        }
+        stripPriceZeroCents();
       }
       wirePlannerLoginGate();
       guardConfigurationBlockClick();

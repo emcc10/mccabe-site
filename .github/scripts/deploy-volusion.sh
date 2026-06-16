@@ -270,6 +270,11 @@ maybe_put_primary "vspfiles/js/mc-pdp-auth-cta-fix.js" "mc-pdp-auth-cta-fix" \
   "/vspfiles/js/mc-pdp-auth-cta-fix.js" \
   "vspfiles/js/mc-pdp-auth-cta-fix.js"
 
+maybe_put_primary "vspfiles/js/mc-unified-pdp-layout.js" "mc-unified-pdp-layout" \
+  "/v/vspfiles/js/mc-unified-pdp-layout.js" \
+  "/vspfiles/js/mc-unified-pdp-layout.js" \
+  "vspfiles/js/mc-unified-pdp-layout.js"
+
 maybe_put_primary "vspfiles/js/mc-pdp-auth-cta-boot.js" "mc-pdp-auth-cta-boot" \
   "/v/vspfiles/js/mc-pdp-auth-cta-boot.js" \
   "/vspfiles/js/mc-pdp-auth-cta-boot.js" \
