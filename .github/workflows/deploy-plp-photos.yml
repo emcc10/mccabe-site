@@ -10,8 +10,10 @@ on:
       - "scripts/upload_recliner_plp_photos.py"
       - "scripts/fetch_recliner_plp_photos.py"
       - ".github/workflows/deploy-plp-photos.yml"
+      - ".github/scripts/deploy-volusion.sh"
   workflow_dispatch:
 
+# Never cancel mid-photo-upload — large batches can run 40+ minutes.
 concurrency:
   group: deploy-volusion-photos
   cancel-in-progress: false
@@ -19,15 +21,48 @@ concurrency:
 jobs:
   upload-photos:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
-      - name: Install Paramiko
-        run: pip3 install paramiko
+      - name: Install lftp and Paramiko
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp openssh-client python3-pip
+          pip3 install paramiko
 
-      - name: Upload missing stock photos (SFTP)
+      - name: Detect changed photos (push only)
+        if: github.event_name == 'push'
+        run: |
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            BEFORE=$(git rev-parse HEAD~1 2>/dev/null || true)
+          fi
+          {
+            echo "DEPLOY_CHANGED_ONLY=1"
+            echo "DEPLOY_CHANGED_FILES<<EOF"
+            if [ -n "$BEFORE" ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+              git diff --name-only "$BEFORE" "${{ github.sha }}" -- 'vspfiles/photos/'
+            fi
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
+      - name: Upload changed vspfiles/photos (SFTP)
+        if: github.event_name == 'push'
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          PHOTOS_ONLY_DEPLOY: "1"
+          SKIP_TEMPLATE_DEPLOY: "1"
+          DEPLOY_STRICT: "1"
+        run: bash .github/scripts/deploy-volusion.sh
+
+      - name: Upload missing stock photos (manual / full refresh)
+        if: github.event_name == 'workflow_dispatch'
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}

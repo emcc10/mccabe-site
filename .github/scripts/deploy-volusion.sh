@@ -181,6 +181,35 @@ deploy_prefix_changed() {
   [[ -n "${DEPLOY_CHANGED_FILES:-}" ]] && grep -Eq "^${prefix}" <<<"${DEPLOY_CHANGED_FILES}"
 }
 
+upload_changed_photos() {
+  local photo_fail=0
+  local photo_ok=0
+  shopt -s nullglob
+  for f in vspfiles/photos/*.jpg vspfiles/photos/*.jpeg vspfiles/photos/*.png; do
+    if ! deploy_file_changed "$f"; then
+      echo "=== skip plp-photo: ${f} unchanged ==="
+      continue
+    fi
+    local base
+    base=$(basename "$f")
+    if put_primary "$f" "plp-photo-${base}" \
+      "/vspfiles/photos/${base}" \
+      "/v/vspfiles/photos/${base}" \
+      "vspfiles/photos/${base}"; then
+      photo_ok=$((photo_ok + 1))
+    else
+      photo_fail=$((photo_fail + 1))
+    fi
+  done
+  shopt -u nullglob
+  echo "PLP photos: ${photo_ok} uploaded, ${photo_fail} failed"
+  if [[ "$photo_fail" -gt 0 ]]; then
+    echo "::error::Photo upload failed for ${photo_fail} file(s)"
+    return 1
+  fi
+  return 0
+}
+
 maybe_put_primary() {
   local local_path="$1"
   local label="$2"
@@ -194,6 +223,19 @@ maybe_put_primary() {
 
 echo "=== DEPLOY_START ref=$(git rev-parse --short HEAD 2>/dev/null || echo unknown) ==="
 echo "=== custom-safe line 1: $(head -1 vspfiles/css/custom-safe.css 2>/dev/null || echo MISSING) ==="
+
+if [[ "${PHOTOS_ONLY_DEPLOY:-0}" == "1" ]]; then
+  echo "=== PHOTOS_ONLY_DEPLOY=1 — changed vspfiles/photos only (no template/CSS) ==="
+  set +e
+  upload_changed_photos
+  photos_rc=$?
+  set -e
+  if [[ "$photos_rc" -ne 0 ]]; then
+    exit 1
+  fi
+  echo "=== PHOTOS_DEPLOY_OK ==="
+  exit 0
+fi
 
 echo "=== Critical always-deploy: ${CRITICAL_ALWAYS[*]} ==="
 
@@ -433,32 +475,16 @@ if [[ "${boards_canon_rc:-0}" -ne 0 ]]; then
 fi
 
 echo "=== PLP product photos (replace baked gray mat with white) ==="
-photo_fail=0
-photo_ok=0
 if [[ "${SKIP_PLP_PHOTOS:-0}" == "1" ]]; then
-  echo "=== SKIP_PLP_PHOTOS=1 — skipping bulk PLP photo upload (use workflow_dispatch with photos enabled) ==="
+  echo "=== SKIP_PLP_PHOTOS=1 — skipping bulk PLP photo upload (photos workflow handles vspfiles/photos/) ==="
 else
-shopt -s nullglob
-for f in vspfiles/photos/*.jpg vspfiles/photos/*.jpeg vspfiles/photos/*.png; do
-  if ! deploy_file_changed "$f"; then
-    echo "=== skip plp-photo: ${f} unchanged ==="
-    continue
+  set +e
+  upload_changed_photos
+  photos_rc=$?
+  set -e
+  if [[ "$photos_rc" -ne 0 ]]; then
+    echo "::warning::PLP photo upload failed for some file(s) — template already deployed; gray mats may persist on those SKUs"
   fi
-  base=$(basename "$f")
-  if put_primary "$f" "plp-photo-${base}" \
-    "/vspfiles/photos/${base}" \
-    "/v/vspfiles/photos/${base}" \
-    "vspfiles/photos/${base}"; then
-    photo_ok=$((photo_ok + 1))
-  else
-    photo_fail=$((photo_fail + 1))
-  fi
-done
-shopt -u nullglob
-echo "PLP photos: ${photo_ok} uploaded, ${photo_fail} failed"
-if [[ "$photo_fail" -gt 0 ]]; then
-  echo "::warning::PLP photo upload failed for ${photo_fail} file(s) — template already deployed; gray mats may persist on those SKUs"
-fi
 fi
 
 echo "=== Post-deploy verify ==="

@@ -26,15 +26,16 @@ on:
         type: boolean
         default: false
 
-# Queue deploys — never cancel mid-upload (parallel/cancelled runs corrupt SFTP files).
+# JS/CSS/template only — cancel stale runs so code fixes ship in ~2 min, not behind 40+ min photo queues.
+# Photo uploads use deploy-plp-photos.yml (separate serial queue).
 concurrency:
   group: deploy-volusion-main
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -126,7 +127,7 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SKIP_TEMPLATE_DEPLOY: "0"
           DEPLOY_STRICT: "1"
-          SKIP_PLP_PHOTOS: ${{ github.event_name == 'push' && steps.photos_changed.outputs.changed != 'true' && '1' || (github.event_name == 'workflow_dispatch' && inputs.upload_plp_photos == false && '1' || '0') }}
+          SKIP_PLP_PHOTOS: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_plp_photos == true && '0' || '1' }}
         run: bash .github/scripts/deploy-volusion.sh
 
       - name: Verify live storefront (informational)
