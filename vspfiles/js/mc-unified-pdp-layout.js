@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260616unified6";
-  var AUTH_LAYOUT_VER = "20260616pdp45";
+  var LAYOUT_VER = "20260616unified7";
+  var AUTH_LAYOUT_VER = "20260616pdp48";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -331,6 +331,7 @@
       btn.removeAttribute("src");
     }
     if (btn.tagName === "INPUT" && !btn.value) btn.value = "ADD TO CART";
+    clearInlineLayout(btn);
     btn.classList.add("mc-unified-atc-btn");
     btn.classList.remove("btn-default", "btn-secondary");
     btn.classList.add("btn-primary");
@@ -353,7 +354,6 @@
     }
     var cartBlock = btn.closest(".v65-product-addtocart");
     if (cartBlock && cartBlock !== btn) clearInlineLayout(cartBlock);
-    clearInlineLayout(btn);
     return btn;
   }
 
@@ -388,10 +388,10 @@
     }
 
     var qtyRow = findQtyBlock(infoTd);
-    if (qtyRow && !controls.contains(qtyRow)) controls.appendChild(qtyRow);
+    if (qtyRow) controls.appendChild(qtyRow);
 
     var atcHost = findAtcHost(atcBtn);
-    if (atcHost && !controls.contains(atcHost)) controls.appendChild(atcHost);
+    if (atcHost) controls.appendChild(atcHost);
 
     prepareAtcButton(atcBtn);
     clearInlineLayout(controls);
@@ -514,25 +514,24 @@
     return null;
   }
 
-  function ensureDescriptionRow(mainRow, table, descNode) {
-    if (!mainRow || !table) return;
+  function ensureDescriptionRow(mainRow, table, descNode, mediaTd) {
+    if (!mainRow || !table || !mediaTd) return;
     var tbody = table.tBodies && table.tBodies[0] ? table.tBodies[0] : table;
     var descRow = qs("tr.mc-pdp-description-row", tbody);
-    if (!descRow) {
-      descRow = global.document.createElement("tr");
-      descRow.className = "mc-pdp-description-row";
-      var cell = global.document.createElement("td");
-      cell.className = "mc-pdp-description-cell";
-      cell.colSpan = tableColspan(table, mainRow);
-      var wrap = global.document.createElement("div");
-      wrap.className = "mc-unified-pdp-description";
-      cell.appendChild(wrap);
-      descRow.appendChild(cell);
-      if (mainRow.nextSibling) tbody.insertBefore(descRow, mainRow.nextSibling);
-      else tbody.appendChild(descRow);
+    var wrapEl = qs(".mc-unified-pdp-description", mediaTd);
+    if (!wrapEl) {
+      wrapEl = global.document.createElement("div");
+      wrapEl.className = "mc-unified-pdp-description mc-unified-pdp-description--media";
+      var altViews = qs("#altviews, .mc-unified-altviews, .vCSS_img_alternate", mediaTd);
+      if (altViews && altViews.parentNode === mediaTd && altViews.nextSibling) {
+        mediaTd.insertBefore(wrapEl, altViews.nextSibling);
+      } else {
+        mediaTd.appendChild(wrapEl);
+      }
+    } else {
+      wrapEl.classList.add("mc-unified-pdp-description--media");
     }
 
-    var wrapEl = descRow.querySelector(".mc-unified-pdp-description");
     if (!wrapEl || !descNode) return;
 
     if (descNode.id === "mc-pdp-description-below-features" || descNode.classList.contains("mc-pdp-description-below")) {
@@ -549,6 +548,11 @@
         legacy.style.setProperty("display", "none", "important");
       }
     });
+
+    if (descRow) {
+      descRow.style.setProperty("display", "none", "important");
+      descRow.setAttribute("aria-hidden", "true");
+    }
   }
 
   function tagProductBodyClasses() {
@@ -646,7 +650,7 @@
     orderInfoColumn(infoTd);
 
     var desc = findDescriptionNode();
-    ensureDescriptionRow(row, table, desc);
+    ensureDescriptionRow(row, table, desc, mediaTd);
 
     global.document.body.classList.add("mc-pdp-unified-ready", "mc-pdp-hero-ready");
     global.document.documentElement.dataset.mcPdpNormalized = "1";

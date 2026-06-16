@@ -16874,7 +16874,7 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap button[name="
   box-shadow: none !important;
 }
 
-/* MC PDP unified e-product lock 20260616pdp45: consistent layout, black ATC, description/features typography parity. */
+/* MC PDP unified e-product lock 20260616pdp48: consistent layout, black ATC, description/features typography parity. */
 html body.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
 html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row,
 html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
@@ -16929,6 +16929,80 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls but
   color: #fff !important;
   box-shadow: none !important;
   text-shadow: none !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 14px !important;
+  width: 100% !important;
+  max-width: 360px !important;
+  margin: 28px auto 0 !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart {
+  display: block !important;
+  width: 100% !important;
+  max-width: 360px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  text-align: center !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host input,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host button,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap input,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap button,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart input,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart button,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host input,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host button,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap input,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap button,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart input,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart button {
+  display: block !important;
+  width: 100% !important;
+  max-width: 360px !important;
+  min-height: 48px !important;
+  margin: 0 auto !important;
+  padding: 0 24px !important;
+  border: 1px solid #000 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  background-color: #000 !important;
+  background-image: none !important;
+  color: #fff !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  line-height: 48px !important;
+  text-align: center !important;
+  text-shadow: none !important;
+  text-transform: uppercase !important;
+  box-shadow: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description {
+  display: block !important;
+  width: 100% !important;
+  max-width: 820px !important;
+  margin: 24px auto 0 !important;
+  padding: 0 !important;
+  text-align: center !important;
 }
 
 html body.mc-pdp-unified-ready .mc-unified-pdp-description,
