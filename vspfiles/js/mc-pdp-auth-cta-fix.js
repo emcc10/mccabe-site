@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp36d";
+  var VERSION = "20260616pdp37e";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -1181,6 +1181,30 @@
   function placePriceStackHost(host) {
     if (!host) return;
     if (isPdpLayoutMounted()) return;
+    if (isSoftGoodsPdpPage()) {
+      var sgCol = findPdpHeroColumnTd();
+      if (sgCol) {
+        var sgLogo = global.document.getElementById("mc-pdp-brand-logo");
+        var sgTitle = global.document.getElementById("mc-pdp-title-right");
+        var sgAnchor = sgLogo && sgCol.contains(sgLogo) ? sgLogo : sgTitle;
+        if (sgAnchor) {
+          if (host.parentNode !== sgCol || host.previousElementSibling !== sgAnchor) {
+            try {
+              insertNodeAfter(sgCol, sgAnchor, host);
+            } catch (eSgPrice) {}
+          }
+          ensureHeroColumnOrder();
+          return;
+        }
+        if (host.parentNode !== sgCol) {
+          try {
+            sgCol.insertBefore(host, sgCol.firstChild);
+          } catch (eSgPrice2) {}
+        }
+        ensureHeroColumnOrder();
+        return;
+      }
+    }
     /* Price goes ABOVE the Klarna/Affirm (Stripe BNPL) messaging section */
     var bnpl = global.document.getElementById("messaging-element");
     var bnplBox = bnpl && bnpl.closest ? bnpl.closest(".colors_pricebox") : null;
@@ -1354,9 +1378,6 @@
     if (isPdpLayoutMounted()) return;
     var col = findPdpHeroColumnTd();
     if (!col) return;
-    var priceBox = col.querySelector(".colors_pricebox");
-    var anchor = priceBox || col;
-    var parent = anchor.parentNode || col;
     var titleWrap = global.document.getElementById("mc-pdp-title-right");
     var titleEl = findProductTitleSourceEl();
     if (!titleWrap) {
@@ -1368,10 +1389,14 @@
       titleWrap.appendChild(titleEl);
     }
     if (!titleWrap.querySelector("h1, [itemprop='name'], .productnamecolor")) return;
-    if (parent !== titleWrap.parentNode || anchor.previousElementSibling !== titleWrap) {
+    if (titleWrap.parentNode !== col) {
       try {
-        parent.insertBefore(titleWrap, anchor);
+        col.insertBefore(titleWrap, col.firstChild);
       } catch (eT) {}
+    } else if (col.firstElementChild !== titleWrap) {
+      try {
+        col.insertBefore(titleWrap, col.firstChild);
+      } catch (eT2) {}
     }
   }
 
@@ -1427,9 +1452,16 @@
     ) {
       return;
     }
+    var col = findPdpHeroColumnTd();
     var title = global.document.getElementById("mc-pdp-title-right");
-    if (!title || !title.parentNode) return;
-    var parent = title.parentNode;
+    if (!title) return;
+    if (col && title.parentNode !== col) {
+      try {
+        col.insertBefore(title, col.firstChild);
+      } catch (eTi) {}
+    }
+    var parent = col || title.parentNode;
+    if (!parent) return;
     var wrap = global.document.getElementById("mc-pdp-brand-logo");
     if (wrap && wrap.querySelector("img")) {
       if (wrap.parentNode !== parent || wrap.previousElementSibling !== title) {
@@ -2064,6 +2096,34 @@
     var price = global.document.getElementById("mc-pdp-price-stack-host");
     var bnpl = global.document.getElementById("messaging-element");
     var priceBox = col.querySelector ? col.querySelector(".colors_pricebox") : null;
+    if (title && !col.contains(title)) {
+      try {
+        col.insertBefore(title, col.firstChild);
+      } catch (eTitleCol) {}
+    }
+    if (logo && !col.contains(logo)) {
+      if (title && col.contains(title)) {
+        try {
+          insertNodeAfter(col, title, logo);
+        } catch (eLogoCol) {}
+      } else {
+        try {
+          col.insertBefore(logo, col.firstChild);
+        } catch (eLogoCol2) {}
+      }
+    }
+    if (price && !col.contains(price)) {
+      var priceAfter = logo && col.contains(logo) ? logo : title && col.contains(title) ? title : null;
+      if (priceAfter) {
+        try {
+          insertNodeAfter(col, priceAfter, price);
+        } catch (ePriceCol) {}
+      } else {
+        try {
+          col.insertBefore(price, col.firstChild);
+        } catch (ePriceCol2) {}
+      }
+    }
     if (title && logo && col.contains(title) && col.contains(logo)) {
       try {
         var ti = Array.prototype.indexOf.call(col.children, title);
@@ -2078,7 +2138,6 @@
     if (logo && col.contains(logo) && logo.querySelector("img")) chain.push(logo);
     if (price && col.contains(price)) chain.push(price);
     if (bnpl && col.contains(bnpl)) chain.push(bnpl);
-    if (priceBox && col.contains(priceBox) && chain.indexOf(priceBox) < 0) chain.push(priceBox);
     var ref = null;
     var ci;
     for (ci = 0; ci < chain.length; ci++) {
@@ -2143,7 +2202,9 @@
     if (!col) return;
     var head =
       global.document.getElementById("messaging-element") ||
-      global.document.querySelector("#v65-product-parent .colors_pricebox");
+      global.document.getElementById("mc-pdp-price-stack-host") ||
+      global.document.getElementById("mc-pdp-brand-logo") ||
+      global.document.getElementById("mc-pdp-title-right");
     if (head && !col.contains(head)) head = null;
     var blocks = [
       global.document.getElementById("mc-pdp-features"),
@@ -3632,6 +3693,16 @@
     "809": "bb-fauxfur-gray.jpg",
     "811": "bb-fauxfur-black.jpg"
   };
+  var BB_COVER_IMAGE_BY_LABEL = {
+    navy: "bb-fauxfur-navy.jpg",
+    pink: "bb-fauxfur-pink.jpg",
+    cow: "bb-fauxfur-cow.jpg",
+    tan: "bb-fauxfur-tan.jpg",
+    white: "bb-fauxfur-white.jpg",
+    gray: "bb-fauxfur-gray.jpg",
+    grey: "bb-fauxfur-gray.jpg",
+    black: "bb-fauxfur-black.jpg"
+  };
 
   function initBeanBagImageSync() {
     if (!isBeanBagPdpPage()) return;
@@ -3644,6 +3715,18 @@
         .replace(/\u00a0/g, " ")
         .replace(/\s+/g, " ")
         .trim();
+    }
+
+    function bbColorFromSwatchLabel(label) {
+      var normalized = normalizeBbLabel(label);
+      if (!normalized) return "";
+      var parts = normalized.split("/");
+      return (parts.length > 1 ? parts[parts.length - 1] : normalized).trim();
+    }
+
+    function bbImageForSwatchLabel(label) {
+      var colorKey = bbColorFromSwatchLabel(label);
+      return colorKey ? BB_COVER_IMAGE_BY_LABEL[colorKey] || null : null;
     }
 
     function applyBbImage(imgFile) {
@@ -3702,47 +3785,53 @@
     global.document.addEventListener("click", function (eBb) {
       var swatch = eBb.target && eBb.target.closest ? eBb.target.closest(".beanbag-swatch") : null;
       if (!swatch) return;
+      var label = swatch.getAttribute("data-option") || "";
+      var target = bbColorFromSwatchLabel(label) || normalizeBbLabel(label);
       var coverSel =
         global.document.querySelector("#options_table select[name*='___4']") ||
         global.document.querySelector("#options_table select");
-      if (!coverSel || !coverSel.options || !coverSel.options.length) return;
+      var imgFile = bbImageForSwatchLabel(label);
+      var optVal = "";
 
-      var label = swatch.getAttribute("data-option") || "";
-      var target = normalizeBbLabel(label);
-      var foundIndex = -1;
-      var i;
-      for (i = 0; i < coverSel.options.length; i++) {
-        if (normalizeBbLabel(coverSel.options[i].text) === target) {
-          foundIndex = i;
-          break;
+      if (coverSel && coverSel.options && coverSel.options.length) {
+        var foundIndex = -1;
+        var i;
+        for (i = 0; i < coverSel.options.length; i++) {
+          var optText = normalizeBbLabel(coverSel.options[i].text);
+          var optColor = bbColorFromSwatchLabel(coverSel.options[i].text) || optText;
+          if (optColor === target || optText === target || optText.indexOf(target) >= 0) {
+            foundIndex = i;
+            break;
+          }
+        }
+        if (foundIndex >= 0) {
+          coverSel.selectedIndex = foundIndex;
+          coverSel.value = coverSel.options[foundIndex].value;
+          optVal = String(coverSel.options[foundIndex].value || "");
+          imgFile = BB_COVER_IMAGE_BY_OPTION_ID[optVal] || imgFile;
         }
       }
-      if (foundIndex < 0) return;
 
-      // Select the native cover option by value (value drives price + image map).
-      coverSel.selectedIndex = foundIndex;
-      coverSel.value = coverSel.options[foundIndex].value;
-      var optVal = String(coverSel.options[foundIndex].value || "");
-      var imgFile = BB_COVER_IMAGE_BY_OPTION_ID[optVal];
       if (!imgFile) return;
 
-      if (typeof global.change_option === "function") {
+      if (coverSel && optVal) {
+        if (typeof global.change_option === "function") {
+          try {
+            global.change_option(coverSel.name, optVal);
+          } catch (eCo) {}
+        }
+        if (typeof global.AutoUpdatePriceWithSelectedOptions === "function") {
+          try {
+            global.AutoUpdatePriceWithSelectedOptions(optVal, 4);
+          } catch (eAu) {}
+        }
         try {
-          global.change_option(coverSel.name, optVal);
-        } catch (eCo) {}
-      }
-      if (typeof global.AutoUpdatePriceWithSelectedOptions === "function") {
+          coverSel.dispatchEvent(new Event("input", { bubbles: true }));
+        } catch (eIn) {}
         try {
-          global.AutoUpdatePriceWithSelectedOptions(optVal, 4);
-        } catch (eAu) {}
+          coverSel.dispatchEvent(new Event("change", { bubbles: true }));
+        } catch (eCh) {}
       }
-      // Fire native input + change so Volusion's own option/price/cart logic stays in sync.
-      try {
-        coverSel.dispatchEvent(new Event("input", { bubbles: true }));
-      } catch (eIn) {}
-      try {
-        coverSel.dispatchEvent(new Event("change", { bubbles: true }));
-      } catch (eCh) {}
 
       var labelSpan = global.document.getElementById("beanbag-selected-cover-name");
       if (labelSpan) {
