@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp38j";
+  var VERSION = "20260616pdp38f";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -1907,20 +1907,13 @@
       } catch (eGap) {}
       stack.style.setProperty("flex-direction", mcStackDir, "important");
       stack.style.setProperty("align-items", mcAlign, "important");
-      if (isBeanBagPdpPage()) {
-        stack.style.setProperty("justify-content", "flex-start", "important");
-        stack.style.setProperty("text-align", "left", "important");
-        stack.style.setProperty("margin", "28px 0 0 0", "important");
-        stack.style.setProperty("padding", "0 0 0 1.1em", "important");
-      } else {
-        stack.style.setProperty("justify-content", "center", "important");
-        stack.style.setProperty("text-align", "center", "important");
-        stack.style.setProperty("margin", "28px auto 0", "important");
-        stack.style.setProperty("padding", "0", "important");
-      }
+      stack.style.setProperty("justify-content", "center", "important");
       stack.style.setProperty("align-self", "stretch", "important");
+      stack.style.setProperty("text-align", "center", "important");
       stack.style.setProperty("width", "100%", "important");
       stack.style.setProperty("max-width", "100%", "important");
+      stack.style.setProperty("margin", "28px auto 0", "important");
+      stack.style.setProperty("padding", "0", "important");
       stack.style.setProperty("gap", mcCartGap, "important");
       stack.style.setProperty("flex-wrap", "wrap", "important");
       stack.style.setProperty("clear", "both", "important");
@@ -1945,30 +1938,19 @@
 
   function applySoftGoodsColumnPurchaseStackLayout(stack, qtyRow, stackNode) {
     if (!isSoftGoodsPdpPage() || !stack) return;
-    var beanBag = isBeanBagPdpPage();
     try {
       stack.classList.add("mc-pdp-cart-row", "mc-soft-goods-purchase-stack");
       if (isSaranoniPdpPage()) stack.classList.add("mc-saranoni-purchase-stack");
-      if (beanBag) stack.classList.add("mc-bean-bag-purchase-stack");
+      if (isBeanBagPdpPage()) stack.classList.add("mc-bean-bag-purchase-stack");
       stack.style.setProperty("flex-direction", "column", "important");
       stack.style.setProperty("align-items", "stretch", "important");
       stack.style.setProperty("max-width", "400px", "important");
       stack.style.setProperty("width", "100%", "important");
-      if (beanBag) {
-        stack.style.setProperty("margin-left", "0", "important");
-        stack.style.setProperty("margin-right", "0", "important");
-        stack.style.setProperty("padding-left", "1.1em", "important");
-        stack.style.setProperty("text-align", "left", "important");
-      }
     } catch (eStack) {}
     if (qtyRow) {
       try {
         qtyRow.style.setProperty("width", "100%", "important");
-        qtyRow.style.setProperty(
-          "justify-content",
-          beanBag ? "flex-start" : "center",
-          "important"
-        );
+        qtyRow.style.setProperty("justify-content", "center", "important");
       } catch (eQty) {}
     }
     var wrap = stack.querySelector(".mc-atc-button-wrap");
@@ -2154,17 +2136,11 @@
     });
     global.document
       .querySelectorAll(
-        '#mc-pdp-purchase-stack input[name="btnaddtocart"], #mc-pdp-purchase-stack button[name="btnaddtocart"], ' +
-          '#mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"], #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"]'
+        '#mc-pdp-purchase-stack input[name="btnaddtocart"], #mc-pdp-purchase-stack button[name="btnaddtocart"]'
       )
       .forEach(function (btn) {
         if (btn.getAttribute("data-mc-atc-styled") === VERSION) return;
         var wrap = btn.closest(".mc-atc-button-wrap");
-        if (wrap && isSoftGoodsPdpPage()) {
-          applySoftGoodsAtcChrome(wrap);
-          wrap.setAttribute("data-mc-atc-styled", VERSION);
-          return;
-        }
         if (wrap) return;
         try {
           btn.type = "submit";
@@ -2275,19 +2251,16 @@
       "body.productdetails:not(.mc-saranoni-pdp):not(.mc-bean-bag-pdp) #v65-product-parent [itemprop='offers'] #mc-pdp-purchase-stack,body.mc-product-page:not(.mc-saranoni-pdp):not(.mc-bean-bag-pdp) #v65-product-parent [itemprop='offers'] #mc-pdp-purchase-stack{" +
       "display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;" +
       "text-align:center!important;align-self:stretch!important;width:100%!important;max-width:100%!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
-      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-saranoni-purchase-stack{" +
-      "display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;flex-wrap:nowrap!important;" +
-      "text-align:center!important;width:100%!important;max-width:400px!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-saranoni-purchase-stack," +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-bean-bag-purchase-stack{" +
       "display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;flex-wrap:nowrap!important;" +
-      "text-align:left!important;width:100%!important;max-width:400px!important;margin:28px 0 0 0!important;padding:0 0 0 1.1em!important;gap:10px!important;clear:both!important}" +
-      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row{order:1!important;width:100%!important;justify-content:center!important}" +
-      "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row{order:1!important;width:100%!important;justify-content:flex-start!important}" +
+      "text-align:center!important;width:100%!important;max-width:400px!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row{order:1!important;width:100%!important;justify-content:center!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap{order:2!important;width:100%!important;max-width:100%!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button," +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button{width:100%!important;box-sizing:border-box!important;display:flex!important;justify-content:center!important;align-items:center!important;text-align:center!important}" +
-      "body.productdetails:not(.mc-saranoni-pdp):not(.mc-bean-bag-pdp) #mc-pdp-purchase-stack *,body.mc-product-page:not(.mc-saranoni-pdp):not(.mc-bean-bag-pdp) #mc-pdp-purchase-stack *{" +
+      "body.productdetails #mc-pdp-purchase-stack *,body.mc-product-page #mc-pdp-purchase-stack *{" +
       "text-align:center!important}" +
       "body.productdetails:not(.mc-saranoni-pdp):not(.mc-bean-bag-pdp) #mc-pdp-features+#mc-pdp-purchase-stack,body.mc-product-page:not(.mc-saranoni-pdp):not(.mc-bean-bag-pdp) #mc-pdp-features+#mc-pdp-purchase-stack{" +
       "display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;" +
@@ -3610,65 +3583,19 @@
     }
   }
 
-  function findMainProductRowEl() {
-    var parent = global.document.getElementById("v65-product-parent");
-    if (!parent) return null;
-    return (
-      parent.querySelector(":scope > tbody > tr:nth-of-type(2)") ||
-      parent.querySelector(":scope > tr:nth-of-type(2)")
-    );
-  }
-
-  function outerColumnTdFromNode(el) {
-    if (!el) return null;
-    var mainRow = findMainProductRowEl();
-    if (!mainRow) return el.closest ? el.closest("td") : null;
-    var td = el.closest ? el.closest("td") : null;
-    while (td && td.parentNode && td.parentNode !== mainRow) {
-      td = td.parentNode.closest ? td.parentNode.closest("td") : null;
-    }
-    if (td && td.parentNode === mainRow) return td;
-    return el.closest ? el.closest("td") : null;
-  }
-
   function tagHeroMediaCol() {
-    var mainRow = findMainProductRowEl();
-    var media = null;
-    var opt = null;
-    if (mainRow) {
-      var rowTds = mainRow.querySelectorAll(":scope > td");
-      if (rowTds.length >= 2) {
-        media = rowTds[0];
-        opt = rowTds[rowTds.length - 1];
-      }
-    }
-    if (!opt) {
-      opt = global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
-    }
-    if (!opt) {
-      var atc = global.document.querySelector(
-        '#v65-product-parent input[name="btnaddtocart"], #v65-product-parent button[name="btnaddtocart"]'
-      );
-      if (atc) opt = outerColumnTdFromNode(atc);
-    }
-    if (!media) {
-      var photo = global.document.getElementById("product_photo");
-      if (photo) media = outerColumnTdFromNode(photo);
-    }
-    if (!media && opt && opt.previousElementSibling && opt.previousElementSibling.tagName === "TD") {
-      media = opt.previousElementSibling;
-    }
-    if (opt && !opt.classList.contains("mc-pdp-options-td")) {
+    var opt = global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
+    if (!opt) return;
+    if (!opt.classList.contains("mc-pdp-options-td")) {
       opt.classList.add("mc-pdp-options-td");
     }
-    if (media) {
+    var media = opt.previousElementSibling;
+    if (media && media.tagName === "TD") {
       media.classList.add("mc-pdp-hero-media-col", "mc-pdp-media-td");
       var row = media.parentNode;
       if (row && row.tagName === "TR") {
         row.classList.add("mc-pdp-main-row");
       }
-    } else if (mainRow && opt) {
-      mainRow.classList.add("mc-pdp-main-row");
     }
   }
 
@@ -5134,13 +5061,10 @@
     } catch (eTag) {}
   }
 
-  function ensurePdpReturnCategoryLink() {
-    if (!isProductPdp()) return;
-    var category = resolvePdpReturnCategory();
-    if (!category || !category.url) return;
-    var categoryName = String(category.name || "Category").replace(/^\s+|\s+$/g, "");
+  function ensureBeanBagReturnLink() {
+    if (!isBeanBagPdpPage()) return;
     var linkWrap = global.document.querySelector(".mc-return-category");
-    if (isBeanBagPdpPage() && linkWrap) {
+    if (linkWrap) {
       var mediaTd = findPdpMediaTd();
       if (mediaTd && linkWrap.parentNode !== mediaTd) {
         try {
@@ -5150,251 +5074,11 @@
     }
     var link = global.document.querySelector(".mc-return-category__link");
     if (!link) return;
-    var label = "Return to " + categoryName;
     try {
-      if (link.getAttribute("href") !== category.url) link.href = category.url;
-      if (link.textContent !== label) link.textContent = label;
-      link.setAttribute("aria-label", label);
+      link.href = "/bean-bag-seating-s/103.htm";
+      link.textContent = "Return to Bean Bags";
+      link.setAttribute("aria-label", "Return to Bean Bags");
     } catch (eRet) {}
-  }
-
-  var MC_BLOCKED_RETURN_CATEGORY_IDS = { 136: true };
-
-  function cleanReturnCategoryText(value) {
-    return String(value || "")
-      .replace(/\s+/g, " ")
-      .replace(/^\s+|\s+$/g, "");
-  }
-
-  function isPdpCategoryUrl(url) {
-    return (
-      /\/category-s\/\d+\.htm/i.test(url) ||
-      /\/[^/?#]+-s\/\d+\.htm/i.test(url) ||
-      /SearchResults\.asp[^#]*[?&]Cat=/i.test(url)
-    );
-  }
-
-  function isBlockedReturnCategory(url, name) {
-    var label = cleanReturnCategoryText(name).toLowerCase();
-    if (/^about(\s+us)?$/i.test(label)) return true;
-    if (/^contact(\s+us)?$/i.test(label)) return true;
-    try {
-      var path = new URL(url, global.location.origin).pathname.toLowerCase();
-      if (/aboutus\.asp/i.test(path)) return true;
-      if (/contact[_-]?us/i.test(path)) return true;
-      var match = path.match(/(?:category-s\/|-s\/)(\d+)\.htm/i);
-      if (match && MC_BLOCKED_RETURN_CATEGORY_IDS[match[1]]) return true;
-    } catch (eBlock) {}
-    return false;
-  }
-
-  function isValidReturnCategory(url, name) {
-    if (!url || !isPdpCategoryUrl(url)) return false;
-    return !isBlockedReturnCategory(url, name);
-  }
-
-  function categoryNameFromPdpUrl(url) {
-    var path = String(url || "")
-      .split("?")[0]
-      .replace(/\/+$/, "");
-    var match = path.match(/\/([^/]+)-s\/\d+\.htm/i) || path.match(/\/category-s\/\d+\.htm/i);
-    if (match && match[1]) {
-      return match[1]
-        .replace(/-/g, " ")
-        .replace(/\b\w/g, function (letter) {
-          return letter.toUpperCase();
-        });
-    }
-    return "Category";
-  }
-
-  function categoryFromNavCategoryId(categoryId) {
-    var id = String(categoryId || "").trim();
-    if (!id || MC_BLOCKED_RETURN_CATEGORY_IDS[id]) return null;
-    var link = global.document.querySelector(
-      'a[href*="category-s/' + id + '.htm"], a[href*="-s/' + id + '.htm"]'
-    );
-    if (!link || !link.href) return null;
-    var name = cleanReturnCategoryText(link.textContent) || categoryNameFromPdpUrl(link.href);
-    if (!isValidReturnCategory(link.href, name)) return null;
-    return { url: link.href, name: name };
-  }
-
-  function categoryFromVolusionProductCategoryField() {
-    var inp = global.document.querySelector(
-      'input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]'
-    );
-    if (!inp) return null;
-    return categoryFromNavCategoryId(String(inp.value || "").trim());
-  }
-
-  function categoryFromPdpProductType() {
-    if (isBeanBagPdpPage()) {
-      return { url: "/bean-bag-seating-s/103.htm", name: "Bean Bags" };
-    }
-    var body = global.document.body;
-    var html = global.document.documentElement;
-    var pcEl =
-      global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
-    var pc = String((pcEl && pcEl.value) || "").trim().toUpperCase();
-    if (!pc) {
-      var path = String(global.location.pathname || "").toLowerCase();
-      var mPc = path.match(/\/product-p\/([^/.]+)/i);
-      if (mPc) pc = decodeURIComponent(mPc[1]).replace(/-/g, " ").toUpperCase();
-    }
-    if (body && body.classList.contains("mc-ruched-blanket-pdp")) {
-      return (
-        categoryFromNavCategoryId("196") || {
-          url: "/category-s/196.htm",
-          name: "Luxe Comforts",
-        }
-      );
-    }
-    if (isSaranoniPdpPage() || /^SAR/.test(pc)) {
-      return (
-        categoryFromNavCategoryId("196") || {
-          url: "/category-s/196.htm",
-          name: "Luxe Comforts",
-        }
-      );
-    }
-    if (/^BB/.test(pc)) {
-      return { url: "/bean-bag-seating-s/103.htm", name: "Bean Bags" };
-    }
-    if (
-      body &&
-      (body.classList.contains("mc-theater-seating-pdp") ||
-        body.classList.contains("mc-palliser-pdp"))
-    ) {
-      return (
-        categoryFromNavCategoryId("106") || {
-          url: "/palliser-theater-seating-s/106.htm",
-          name: "Theater Seating",
-        }
-      );
-    }
-    if (html && html.classList.contains("is-sectional-product")) {
-      return (
-        categoryFromNavCategoryId("139") || {
-          url: "/sectionals-s/139.htm",
-          name: "Sofas & Sectionals",
-        }
-      );
-    }
-    return null;
-  }
-
-  function categoryFromPdpBreadcrumb() {
-    var roots = [];
-    var parent = global.document.getElementById("v65-product-parent");
-    var content = global.document.getElementById("content_area");
-    if (parent) roots.push(parent);
-    if (content && roots.indexOf(content) === -1) roots.push(content);
-    if (!roots.length) return null;
-
-    var selectors = [
-      "#v65-breadcrumbs a[href]",
-      ".v65-breadcrumbs a[href]",
-      "#breadcrumbs a[href]",
-      ".breadcrumbs a[href]",
-      ".breadcrumb a[href]",
-    ];
-    var links = [];
-    var ri;
-    for (ri = 0; ri < roots.length; ri++) {
-      var si;
-      for (si = 0; si < selectors.length; si++) {
-        var matched = roots[ri].querySelectorAll(selectors[si]);
-        if (matched.length) {
-          links = Array.prototype.slice.call(matched);
-          break;
-        }
-      }
-      if (links.length) break;
-    }
-
-    if (!links.length) {
-      var productHeading = global.document.querySelector(
-        "#v65-product-parent h1, .productnamecolorLARGE, #content_area h1"
-      );
-      links = [];
-      for (ri = 0; ri < roots.length; ri++) {
-        Array.prototype.slice.call(roots[ri].querySelectorAll("a[href]")).forEach(function (link) {
-          if (!isPdpCategoryUrl(link.href)) return;
-          if (productHeading) {
-            if (
-              !(
-                link.compareDocumentPosition(productHeading) &
-                Node.DOCUMENT_POSITION_FOLLOWING
-              )
-            ) {
-              return;
-            }
-          }
-          links.push(link);
-        });
-      }
-    }
-
-    var categoryLinks = links.filter(function (link) {
-      var name = cleanReturnCategoryText(link.textContent) || categoryNameFromPdpUrl(link.href);
-      return isValidReturnCategory(link.href, name);
-    });
-    if (!categoryLinks.length) return null;
-    var categoryLink = categoryLinks[categoryLinks.length - 1];
-    return {
-      url: categoryLink.href,
-      name:
-        cleanReturnCategoryText(categoryLink.textContent) ||
-        categoryNameFromPdpUrl(categoryLink.href),
-    };
-  }
-
-  function categoryFromPdpReferrer() {
-    if (!global.document.referrer) return null;
-    try {
-      var ref = new URL(global.document.referrer, global.location.origin);
-      if (ref.hostname !== global.location.hostname) return null;
-      if (!isPdpCategoryUrl(ref.href)) return null;
-      var name = categoryNameFromPdpUrl(ref.href);
-      if (!isValidReturnCategory(ref.href, name)) return null;
-      return { url: ref.href, name: name };
-    } catch (eRef) {
-      return null;
-    }
-  }
-
-  function categoryFromPdpStorage() {
-    try {
-      var saved = global.sessionStorage.getItem("mcLastProductCategory");
-      if (!saved) return null;
-      var category = JSON.parse(saved);
-      if (!category || !category.url) return null;
-      if (!isPdpCategoryUrl(category.url)) return null;
-      if (category.savedAt && Date.now() - category.savedAt > 7200000) {
-        global.sessionStorage.removeItem("mcLastProductCategory");
-        return null;
-      }
-      var name = cleanReturnCategoryText(category.name) || categoryNameFromPdpUrl(category.url);
-      if (!isValidReturnCategory(category.url, name)) return null;
-      return { url: category.url, name: name };
-    } catch (eStore) {
-      return null;
-    }
-  }
-
-  function resolvePdpReturnCategory() {
-    return (
-      categoryFromPdpProductType() ||
-      categoryFromVolusionProductCategoryField() ||
-      categoryFromPdpReferrer() ||
-      categoryFromPdpBreadcrumb() ||
-      categoryFromPdpStorage()
-    );
-  }
-
-  function ensureBeanBagReturnLink() {
-    ensurePdpReturnCategoryLink();
   }
 
   function reassertSoftGoodsHeroOrder() {
@@ -5480,7 +5164,6 @@
       applyPdpDescriptionStyle();
       applyPdpMainImageCap();
       fixAddToCartChrome();
-      ensurePdpReturnCategoryLink();
       if (!global.__MC_SOFT_GOODS_ATC_FINAL__ && isSoftGoodsPdpPage()) {
         global.__MC_SOFT_GOODS_ATC_FINAL__ = true;
         global.setTimeout(function () {
@@ -5571,9 +5254,6 @@
       patchCaptionSignInCta();
       syncConfigurationBlockPricing();
       inlineSyncConfigurationPrice();
-      if (isProductPdp()) {
-        ensurePdpReturnCategoryLink();
-      }
     } catch (eRunPatch) {
       if (typeof console !== "undefined" && console.warn) {
         console.warn("[McCabe] mc-pdp-auth-cta runPatch", eRunPatch);
