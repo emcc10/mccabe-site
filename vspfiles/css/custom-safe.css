@@ -16367,13 +16367,9 @@ html body.productdetails #beanbag-selected-cover,
 html body.mc-product-page #beanbag-selected-cover {
   display: block !important;
   margin: 0 0 8px !important;
-  padding: 0 0 0 1.1em !important;
   font-family: Inter, Arial, sans-serif !important;
   font-size: 14px !important;
   font-weight: 400 !important;
-  line-height: 1.55 !important;
-  letter-spacing: 0.02em !important;
-  text-transform: none !important;
   color: #444 !important;
 }
 
@@ -16384,27 +16380,6 @@ html body.mc-product-page #beanbag-selected-cover-name {
 
 html body.productdetails #beanbag-swatch-wrapper + #mc-pdp-features,
 html body.mc-product-page #beanbag-swatch-wrapper + #mc-pdp-features {
-  margin-top: 0 !important;
-}
-
-html body.mc-bean-bag-pdp .mc-pdp-section-heading,
-html body.mc-bean-bag-pdp #mc-pdp-features .mc-pdp-features__heading {
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 15px !important;
-  font-weight: 400 !important;
-  line-height: 1.2 !important;
-  letter-spacing: 0.16em !important;
-  text-transform: uppercase !important;
-  color: #777 !important;
-  margin: 0 0 8px 0 !important;
-  padding: 0 0 0 1.1em !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-features .mc-pdp-features__heading {
-  margin-top: 22px !important;
-}
-
-html body.mc-bean-bag-pdp #beanbag-swatch-wrapper .mc-pdp-section-heading[data-mc-bb-color-label] {
   margin-top: 0 !important;
 }
 
@@ -16622,29 +16597,17 @@ html body.mc-bean-bag-pdp #messaging-element {
   text-align: left !important;
 }
 
-/* ---- description below the full two-column hero (bean bag only) ---- */
-html body.mc-bean-bag-pdp tr.mc-pdp-description-row {
-  display: table-row !important;
-}
-
-html body.mc-bean-bag-pdp tr.mc-pdp-description-row > td.mc-pdp-description-cell {
-  display: block !important;
-  width: 100% !important;
-  padding: 0 !important;
-  border: 0 !important;
-}
-
+/* ---- description below the Features block ---- */
 html body.mc-bean-bag-pdp #mc-pdp-description-below-features {
   display: block !important;
   width: 100% !important;
-  max-width: 760px !important;
-  margin: 38px auto 0 !important;
-  padding: 0 !important;
+  max-width: 450px !important;
+  margin: 14px 0 0 0 !important;
+  padding: 0 0 0 1.1em !important;
   text-align: left !important;
   clear: both !important;
   box-sizing: border-box !important;
 }
-
 html body.mc-bean-bag-pdp #mc-pdp-description-below-features #ProductDetail_ProductDetails_div,
 html body.mc-bean-bag-pdp #mc-pdp-description-below-features #ProductDetail_ProductDetails_div2,
 html body.mc-bean-bag-pdp #mc-pdp-description-below-features #product_description,
@@ -16659,26 +16622,15 @@ html body.mc-bean-bag-pdp #mc-pdp-description-below-features .colors_description
   border: 0 !important;
   box-sizing: border-box !important;
 }
-
 html body.mc-bean-bag-pdp #mc-pdp-description-below-features #product_description,
 html body.mc-bean-bag-pdp #mc-pdp-description-below-features p,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features span,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features li {
+html body.mc-bean-bag-pdp #mc-pdp-description-below-features span {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 14px !important;
-  font-weight: 400 !important;
-  line-height: 1.7 !important;
+  line-height: 1.55 !important;
   letter-spacing: 0.02em !important;
   color: #444 !important;
   text-transform: none !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features p {
-  margin: 0 0 16px 0 !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features p:last-child {
-  margin-bottom: 0 !important;
 }
 
 /* hide the now-empty legacy description box + its tab header */
@@ -16799,6 +16751,11 @@ html body.mc-saranoni-pdp .mc-configured-color-swatch-wrapper.mc-saranoni-swatch
 
 html body.mc-bean-bag-pdp .mc-bb-size-label {
   display: block !important;
+  margin: 0 0 6px 0 !important;
+  font: 700 12px/1.4 Inter, Arial, sans-serif !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: #444 !important;
 }
 
 /* Cover select stays visible until custom swatches are confirmed mounted */
@@ -17406,49 +17363,4 @@ body.mc-product-page #related_products_content img,
 body.mc-product-page #v65-product-related img {
   max-width: 200px !important;
   max-height: 250px !important;
-}
-
-/* Bean bag PDP layout alignment (reference: ruched blanket page). */
-html body.mc-bean-bag-pdp td.mc-pdp-media-td .mc-return-category {
-  display: block !important;
-  width: 100% !important;
-  max-width: min(650px, 100%) !important;
-  margin: 0 0 14px 0 !important;
-  padding: 0 !important;
-  text-align: left !important;
-  box-sizing: border-box !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap {
-  justify-content: center !important;
-  align-items: center !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"] {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  text-align: center !important;
-}
-
-@media (max-width: 991px) {
-  html body.mc-bean-bag-pdp td.mc-pdp-media-td .mc-return-category {
-    max-width: 100% !important;
-  }
-
-  html body.mc-bean-bag-pdp tr.mc-pdp-description-row > td.mc-pdp-description-cell {
-    display: block !important;
-    width: 100% !important;
-  }
-
-  html body.mc-bean-bag-pdp #mc-pdp-description-below-features {
-    max-width: 760px !important;
-    margin-top: 28px !important;
-    padding: 0 16px !important;
-    box-sizing: border-box !important;
-  }
 }
