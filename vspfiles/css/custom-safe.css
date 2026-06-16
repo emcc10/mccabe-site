@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260525cols — unified PDP info column + ATC */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260616unified — one global PDP layout */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -2590,8 +2590,8 @@ body.mc-product-page select.mc-native-leather {
    PDP FIX: force media TD left, options TD right (desktop only)
 ========================================= */
 @media (min-width: 992px) {
-  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-media-td,
-  body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-media-td {
+  body.mc-product-page #content_area tr.mc-pdp-main-row:not(.mc-unified-pdp-row) td.mc-pdp-media-td,
+  body.productdetails #content_area tr.mc-pdp-main-row:not(.mc-unified-pdp-row) td.mc-pdp-media-td {
     flex: 1 1 0% !important;
     flex-basis: 55% !important;
     width: auto !important;
@@ -2605,8 +2605,8 @@ body.mc-product-page select.mc-native-leather {
     isolation: isolate !important;
   }
 
-  body.mc-product-page #content_area tr.mc-pdp-main-row td.mc-pdp-options-td,
-  body.productdetails #content_area tr.mc-pdp-main-row td.mc-pdp-options-td {
+  body.mc-product-page #content_area tr.mc-pdp-main-row:not(.mc-unified-pdp-row) td.mc-pdp-options-td,
+  body.productdetails #content_area tr.mc-pdp-main-row:not(.mc-unified-pdp-row) td.mc-pdp-options-td {
     flex: 1 1 0% !important;
     flex-basis: 42% !important;
     width: auto !important;
@@ -5799,8 +5799,7 @@ body.mc-product-page #content_area select:not(.mc-option-accordion-native) {
   }
 }
 
-/* Add to Cart: visual chrome lives on `.mc-atc-button-wrap` (black fill, square corners).
-   Inner submit stays transparent; see MC_PDP_ATC_BLACK_LOCK at EOF. */
+/* Add to Cart: unified layout styles `.mc-unified-purchase-controls` (see MC_UNIFIED_PDP_LAYOUT at EOF). */
 
 /* Don’t clip the Add to Cart button in the options column */
 /* Single Add to Cart: no second container/color – wrapper matches button */
@@ -13261,7 +13260,7 @@ body.productdetails #content_area .mc-atc-button-wrap {
 }
 
 .mc-atc-button-wrap {
-  /* Black rectangular Add to Cart — locked at EOF (MC_PDP_ATC_BLACK_LOCK). */
+  /* Black rectangular Add to Cart — superseded by MC_UNIFIED_PDP_LAYOUT when .mc-pdp-unified-ready */
   background: #000 !important;
   background-color: #000 !important;
   border: 1px solid #000 !important;
@@ -16170,8 +16169,8 @@ html body.mc-product-page #mc-pdp-price-stack-host [itemprop="price"] {
   color: #444 !important;
 }
 
-html body.productdetails .mc-pdp-purchase-controls,
-html body.mc-product-page .mc-pdp-purchase-controls {
+html body.productdetails:not(.mc-pdp-unified-ready) .mc-pdp-purchase-controls,
+html body.mc-product-page:not(.mc-pdp-unified-ready) .mc-pdp-purchase-controls {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -16287,10 +16286,10 @@ html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="desc
   margin: 0 0 4px 0 !important;
 }
 
-html body.productdetails .mc-pdp-purchase-controls,
-html body.mc-product-page .mc-pdp-purchase-controls,
-html body.productdetails #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls,
-html body.mc-product-page #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls {
+html body.productdetails:not(.mc-pdp-unified-ready) .mc-pdp-purchase-controls,
+html body.mc-product-page:not(.mc-pdp-unified-ready) .mc-pdp-purchase-controls,
+html body.productdetails:not(.mc-pdp-unified-ready) #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls,
+html body.mc-product-page:not(.mc-pdp-unified-ready) #v65-product-parent [itemprop="offers"] .mc-pdp-purchase-controls {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -16452,535 +16451,6 @@ html body.mc-product-page a#product_photo_zoom_url2 {
   box-sizing: border-box !important;
 }
 
-/* =====================================================================
-   MC PDP LOCK pdp17 — uniform soft-goods PDP layout
-   (bean bags + throws / anything tagged mc-bean-bag-pdp)
-   - tighter gap between image and info column
-   - centered manufacturer logo
-   - price + ADD TO CART on one row (qty removed, borderless compact ATC)
-   - description moved below the Features block
-   ===================================================================== */
-
-/* ---- column widths: shrink media so the info column is roomy (~440px) ---- */
-@media (min-width: 992px) {
-  html body.mc-bean-bag-pdp #v65-product-parent tr:has(> td.mc-pdp-options-td) > td:has(#product_photo) {
-    flex: 0 0 auto !important;
-    width: 660px !important;
-    max-width: 660px !important;
-  }
-  html body.mc-bean-bag-pdp #v65-product-parent tr:has(> td.mc-pdp-options-td) > td.mc-pdp-options-td {
-    flex: 1 1 auto !important;
-    width: auto !important;
-    max-width: none !important;
-    margin-left: 0 !important;
-  }
-}
-html body.mc-bean-bag-pdp #product_photo {
-  width: 100% !important;
-  max-width: 650px !important;
-  height: auto !important;
-}
-
-/* ---- single ordered hero stack inside the info column ---- */
-html body.mc-bean-bag-pdp #mc-pdp-hero-stack {
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* ---- centered manufacturer logo (over the info text block) ---- */
-html body.mc-bean-bag-pdp #mc-pdp-brand-logo {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  width: 100% !important;
-  max-width: 450px !important;
-  margin: 0 0 14px 0 !important;
-  padding: 0 0 0 1.1em !important;
-  box-sizing: border-box !important;
-}
-html body.mc-bean-bag-pdp #mc-pdp-brand-logo img {
-  margin: 0 !important;
-}
-
-/* ---- price + ADD TO CART on a single row ---- */
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  flex-wrap: wrap !important;
-  gap: 16px !important;
-  width: 100% !important;
-  max-width: 450px !important;
-  margin: 6px 0 12px 0 !important;
-  padding: 0 0 0 1.1em !important;
-  box-sizing: border-box !important;
-}
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row #mc-pdp-price-stack-host {
-  margin: 0 !important;
-  padding: 0 !important;
-  width: -moz-fit-content !important;
-  width: fit-content !important;
-  max-width: none !important;
-  flex: 0 0 auto !important;
-  display: inline-flex !important;
-  align-items: center !important;
-}
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row #mc-pdp-price-stack-host > * {
-  width: auto !important;
-  white-space: nowrap !important;
-}
-
-/* hide the duplicate legacy Volusion price (clean price is in the row) */
-html body.mc-bean-bag-pdp #v65-product-parent .colors_pricebox .product_productprice {
-  display: none !important;
-}
-/* price color matches the Features heading */
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row #mc-pdp-price-stack-host,
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-pdp-stack-retail,
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-pdp-stack-retail-amt,
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .product_productprice,
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .product_list_price {
-  color: #777 !important;
-}
-
-/* compact, borderless ATC sitting to the right of price */
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap {
-  margin: 0 !important;
-  flex: 0 0 auto !important;
-  width: auto !important;
-  max-width: none !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 0 !important;
-  border: none !important;
-  background: transparent !important;
-  padding: 0 !important;
-}
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap .mc-cart-icon-wrapper {
-  display: none !important;
-}
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap input,
-html body.mc-bean-bag-pdp #mc-pdp-price-atc-row .mc-atc-button-wrap button {
-  border: none !important;
-  background: #111 !important;
-  color: #fff !important;
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.14em !important;
-  text-transform: uppercase !important;
-  line-height: 1 !important;
-  padding: 10px 18px !important;
-  margin: 0 !important;
-  width: auto !important;
-  min-width: 0 !important;
-  border-radius: 0 !important;
-  cursor: pointer !important;
-}
-
-/* ---- bean bag qty + purchase stack (column layout, matches Saranoni) ---- */
-html body.mc-bean-bag-pdp #mc-pdp-qty-row {
-  display: inline-flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  height: auto !important;
-}
-
-html body.mc-bean-bag-pdp .mc-pdp-purchase-controls {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
-  width: 100% !important;
-  max-width: 400px !important;
-  margin: 28px auto 0 !important;
-  padding: 0 !important;
-  gap: 10px !important;
-  clear: both !important;
-}
-
-html body.mc-bean-bag-pdp .mc-pdp-purchase-controls .v65-product-addtocart,
-html body.mc-bean-bag-pdp .mc-pdp-purchase-controls .mc-atc-button-wrap {
-  display: flex !important;
-  justify-content: center !important;
-  margin: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-}
-
-html body.mc-bean-bag-pdp #messaging-element {
-  margin: 0 0 14px 0 !important;
-  padding: 0 0 0 1.1em !important;
-  box-sizing: border-box !important;
-  text-align: left !important;
-}
-
-/* ---- description below the Features block ---- */
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features {
-  display: block !important;
-  width: 100% !important;
-  max-width: 450px !important;
-  margin: 14px 0 0 0 !important;
-  padding: 0 0 0 1.1em !important;
-  text-align: left !important;
-  clear: both !important;
-  box-sizing: border-box !important;
-}
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features #ProductDetail_ProductDetails_div,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features #ProductDetail_ProductDetails_div2,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features #product_description,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features .colors_descriptionbox {
-  display: block !important;
-  visibility: visible !important;
-  height: auto !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  box-sizing: border-box !important;
-}
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features #product_description,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features p,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features span {
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 14px !important;
-  line-height: 1.55 !important;
-  letter-spacing: 0.02em !important;
-  color: #444 !important;
-  text-transform: none !important;
-}
-
-/* hide the now-empty legacy description box + its tab header */
-html body.mc-bean-bag-pdp table.colors_descriptionbox[data-mc-empty-desc],
-html body.mc-bean-bag-pdp [data-mc-empty-desc] {
-  display: none !important;
-}
-
-html body.productdetails #mc-pdp-option-block,
-html body.mc-product-page #mc-pdp-option-block,
-html body.mc-bean-bag-pdp #mc-pdp-option-block {
-  display: block !important;
-  width: 100% !important;
-  max-width: 450px !important;
-  margin: 0 0 12px 0 !important;
-  padding: 0 0 0 1.1em !important;
-  text-align: left !important;
-  box-sizing: border-box !important;
-}
-
-html body.productdetails #mc-pdp-option-block #options_table,
-html body.mc-product-page #mc-pdp-option-block #options_table,
-html body.mc-bean-bag-pdp #mc-pdp-option-block #options_table {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-}
-
-html body.productdetails #mc-pdp-option-block select,
-html body.mc-product-page #mc-pdp-option-block select,
-html body.mc-bean-bag-pdp #mc-pdp-option-block select {
-  width: 100% !important;
-  max-width: 100% !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-features {
-  max-width: 450px !important;
-}
-
-/* =========================================================
-   Bean-bag + Saranoni soft-goods PDP repair (20260616)
-   Scoped to body.mc-bean-bag-pdp, body.mc-saranoni-pdp,
-   body.mc-ruched-blanket-pdp — does not affect sofas/category.
-   ========================================================= */
-
-@media (min-width: 992px) {
-  html body.mc-bean-bag-pdp #content_area tr.mc-pdp-main-row,
-  html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,
-  html body.mc-ruched-blanket-pdp #content_area tr.mc-pdp-main-row {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    align-items: flex-start !important;
-    gap: 24px !important;
-  }
-
-  html body.mc-bean-bag-pdp #content_area td.mc-pdp-options-td,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-options-td,
-  html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-options-td {
-    width: 400px !important;
-    max-width: 400px !important;
-    flex: 0 0 400px !important;
-    box-sizing: border-box !important;
-  }
-
-  html body.mc-bean-bag-pdp #content_area td.mc-pdp-options-td > *,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-options-td > *,
-  html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-options-td > * {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    white-space: normal !important;
-    overflow-wrap: break-word !important;
-    word-break: normal !important;
-  }
-
-  html body.mc-bean-bag-pdp #content_area td.mc-pdp-media-td,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,
-  html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-media-td {
-    flex: 0 0 660px !important;
-    width: 660px !important;
-    max-width: 660px !important;
-    min-width: 0 !important;
-  }
-}
-
-@media (max-width: 991px) {
-  html body.mc-bean-bag-pdp #content_area td.mc-pdp-options-td,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-options-td,
-  html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-options-td {
-    width: 100% !important;
-    max-width: 100% !important;
-    flex: 1 1 100% !important;
-  }
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-option-block,
-html body.mc-saranoni-pdp #mc-pdp-option-block,
-html body.mc-ruched-blanket-pdp #mc-pdp-option-block,
-html body.mc-bean-bag-pdp #mc-pdp-features,
-html body.mc-saranoni-pdp #mc-pdp-features,
-html body.mc-ruched-blanket-pdp #mc-pdp-features,
-html body.mc-bean-bag-pdp #beanbag-swatch-wrapper,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features,
-html body.mc-saranoni-pdp #mc-pdp-description-below-features,
-html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features,
-html body.mc-saranoni-pdp .mc-saranoni-swatch-wrapper,
-html body.mc-saranoni-pdp .mc-configured-color-swatch-wrapper {
-  max-width: 400px !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-html body.mc-saranoni-pdp .mc-saranoni-swatch-wrapper,
-html body.mc-saranoni-pdp .mc-configured-color-swatch-wrapper.mc-saranoni-swatch-wrapper {
-  margin: 14px 0 0 0 !important;
-  padding: 0 0 0 1.1em !important;
-}
-
-html body.mc-bean-bag-pdp .mc-bb-size-label {
-  display: block !important;
-  margin: 0 0 6px 0 !important;
-  font: 700 12px/1.4 Inter, Arial, sans-serif !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
-  color: #444 !important;
-}
-
-/* Cover select stays visible until custom swatches are confirmed mounted */
-html body.mc-bean-bag-pdp #options_table select[name*="___4"] {
-  display: inline-block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: static !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  pointer-events: auto !important;
-}
-
-html body.mc-bean-bag-pdp.mc-bb-cover-swatches-ready #options_table select[name*="___4"] {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border: 0 !important;
-  overflow: hidden !important;
-  clip: rect(0 0 0 0) !important;
-  clip-path: inset(50%) !important;
-  white-space: nowrap !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features,
-html body.mc-saranoni-pdp #mc-pdp-description-below-features,
-html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features,
-html body.productdetails #mc-pdp-description-below-features,
-html body.mc-product-page #mc-pdp-description-below-features,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features #product_description,
-html body.mc-saranoni-pdp #mc-pdp-description-below-features #product_description,
-html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features #product_description,
-html body.productdetails #mc-pdp-description-below-features #product_description,
-html body.mc-product-page #mc-pdp-description-below-features #product_description,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features p,
-html body.mc-saranoni-pdp #mc-pdp-description-below-features p,
-html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features p,
-html body.productdetails #mc-pdp-description-below-features p,
-html body.mc-product-page #mc-pdp-description-below-features p,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features span,
-html body.mc-saranoni-pdp #mc-pdp-description-below-features span,
-html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features span,
-html body.productdetails #mc-pdp-description-below-features span,
-html body.mc-product-page #mc-pdp-description-below-features span,
-html body.mc-bean-bag-pdp #mc-pdp-description-below-features li,
-html body.mc-saranoni-pdp #mc-pdp-description-below-features li,
-html body.mc-ruched-blanket-pdp #mc-pdp-description-below-features li,
-html body.productdetails #mc-pdp-description-below-features li,
-html body.mc-product-page #mc-pdp-description-below-features li,
-html body.productdetails #ProductDetail_ProductDetails_div p,
-html body.mc-product-page #ProductDetail_ProductDetails_div p,
-html body.productdetails #ProductDetail_ProductDetails_div span,
-html body.mc-product-page #ProductDetail_ProductDetails_div span,
-html body.productdetails #ProductDetail_ProductDetails_div li,
-html body.mc-product-page #ProductDetail_ProductDetails_div li,
-html body.productdetails #ProductDetail_ProductDetails_div font,
-html body.mc-product-page #ProductDetail_ProductDetails_div font,
-html body.productdetails #ProductDetail_ProductDetails_div strong,
-html body.mc-product-page #ProductDetail_ProductDetails_div strong {
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 14px !important;
-  font-weight: 400 !important;
-  line-height: 1.55 !important;
-  letter-spacing: 0.02em !important;
-  text-transform: none !important;
-  color: #444 !important;
-}
-
-html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  align-items: stretch !important;
-  justify-content: center !important;
-  gap: 10px !important;
-  width: 100% !important;
-  max-width: 400px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  box-sizing: border-box !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-qty-row,
-html body.mc-saranoni-pdp #mc-pdp-qty-row,
-html body.mc-ruched-blanket-pdp #mc-pdp-qty-row {
-  display: inline-flex !important;
-  align-items: stretch !important;
-  margin: 0 !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-qty-row input.v65-productdetail-cartqty,
-html body.mc-saranoni-pdp #mc-pdp-qty-row input.v65-productdetail-cartqty,
-html body.mc-ruched-blanket-pdp #mc-pdp-qty-row input.v65-productdetail-cartqty,
-html body.mc-bean-bag-pdp #mc-pdp-qty-row input[name^="QTY."],
-html body.mc-saranoni-pdp #mc-pdp-qty-row input[name^="QTY."],
-html body.mc-ruched-blanket-pdp #mc-pdp-qty-row input[name^="QTY."] {
-  width: 58px !important;
-  min-width: 58px !important;
-  height: 48px !important;
-  min-height: 48px !important;
-  text-align: center !important;
-  border-radius: 0 !important;
-  border: 1px solid #111 !important;
-  box-sizing: border-box !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-title-right,
-html body.mc-saranoni-pdp #mc-pdp-title-right,
-html body.mc-ruched-blanket-pdp #mc-pdp-title-right,
-html body.mc-bean-bag-pdp #mc-pdp-brand-logo,
-html body.mc-saranoni-pdp #mc-pdp-brand-logo,
-html body.mc-ruched-blanket-pdp #mc-pdp-brand-logo {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
-html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap,
-html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap,
-body.mc-product-page.mc-bean-bag-pdp #content_area .mc-atc-button-wrap,
-body.mc-product-page.mc-saranoni-pdp #content_area .mc-atc-button-wrap,
-body.mc-product-page.mc-ruched-blanket-pdp #content_area .mc-atc-button-wrap {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: #111 !important;
-  background-color: #111 !important;
-  border: 1px solid #111 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  margin-top: 0 !important;
-  min-width: 0 !important;
-  gap: 0 !important;
-  color: #fff !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap:hover,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap:hover,
-html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap:hover,
-body.mc-product-page.mc-bean-bag-pdp #content_area .mc-atc-button-wrap:hover,
-body.mc-product-page.mc-saranoni-pdp #content_area .mc-atc-button-wrap:hover,
-body.mc-product-page.mc-ruched-blanket-pdp #content_area .mc-atc-button-wrap:hover {
-  background: #000 !important;
-  background-color: #000 !important;
-  border-color: #000 !important;
-  color: #fff !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap:active,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap:active,
-html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap:active {
-  background: #222 !important;
-  background-color: #222 !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper,
-html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper {
-  display: none !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
-html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
-html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
-body.mc-product-page.mc-bean-bag-pdp #content_area .mc-atc-button-wrap input[type="submit"],
-body.mc-product-page.mc-saranoni-pdp #content_area .mc-atc-button-wrap input[type="submit"],
-body.mc-product-page.mc-ruched-blanket-pdp #content_area .mc-atc-button-wrap input[type="submit"] {
-  background: #111 !important;
-  background-color: #111 !important;
-  background-image: none !important;
-  color: #fff !important;
-  border: 1px solid #111 !important;
-  border-radius: 0 !important;
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.12em !important;
-  text-transform: uppercase !important;
-  min-height: 48px !important;
-  padding: 0 28px !important;
-  opacity: 1 !important;
-  box-shadow: none !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input:disabled,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input:disabled,
-html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input:disabled {
-  opacity: 0.55 !important;
-  cursor: not-allowed !important;
-}
-
 html body.mc-saranoni-pdp .mc-saranoni-swatches,
 html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches {
   flex-wrap: wrap !important;
@@ -16988,35 +16458,13 @@ html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches {
   overflow-x: visible !important;
 }
 
-/* Soft-goods hero: full-width main image, thumbnails in a row below (not beside) */
+/* Soft-goods thumbnails under main image (not column layout) */
 @media (min-width: 992px) {
-  html body.mc-bean-bag-pdp #content_area td.mc-pdp-media-td,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,
-  html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-media-td {
-    display: block !important;
-    grid-template-columns: none !important;
-  }
-
-  html body.mc-bean-bag-pdp #content_area td.mc-pdp-media-td > *,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td > *,
-  html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-media-td > *,
-  html body.mc-bean-bag-pdp #content_area td.mc-pdp-media-td table:has(img#product_photo),
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td table:has(img#product_photo),
-  html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-media-td table:has(img#product_photo) {
-    grid-column: unset !important;
-    grid-row: unset !important;
-    margin-left: 0 !important;
-    width: 100% !important;
-    max-width: 650px !important;
-    box-sizing: border-box !important;
-  }
-
-  html body.mc-bean-bag-pdp #content_area td.mc-pdp-media-td #altviews,
-  html body.mc-bean-bag-pdp #content_area td.mc-pdp-media-td span#altviews,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td #altviews,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td span#altviews,
-  html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-media-td #altviews,
-  html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-media-td span#altviews {
+  html body.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
+  html body.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews,
+  html body.mc-bean-bag-pdp td.mc-unified-pdp-media #altviews,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-media #altviews,
+  html body.mc-ruched-blanket-pdp td.mc-unified-pdp-media #altviews {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
@@ -17030,25 +16478,19 @@ html body.mc-saranoni-pdp .mc-configured-color-swatches.mc-saranoni-swatches {
     clear: both !important;
   }
 
-  html body.mc-bean-bag-pdp #content_area td.mc-pdp-media-td #altviews a,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td #altviews a,
-  html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-media-td #altviews a,
-  html body.mc-bean-bag-pdp #content_area td.mc-pdp-media-td span#altviews a,
-  html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td span#altviews a,
-  html body.mc-ruched-blanket-pdp #content_area td.mc-pdp-media-td span#altviews a {
+  html body.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews a,
+  html body.mc-bean-bag-pdp td.mc-unified-pdp-media #altviews a,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-media #altviews a,
+  html body.mc-ruched-blanket-pdp td.mc-unified-pdp-media #altviews a,
+  html body.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews a,
+  html body.mc-bean-bag-pdp td.mc-unified-pdp-media span#altviews a,
+  html body.mc-saranoni-pdp td.mc-unified-pdp-media span#altviews a,
+  html body.mc-ruched-blanket-pdp td.mc-unified-pdp-media span#altviews a {
     display: block !important;
     width: 72px !important;
     max-width: 72px !important;
     margin: 0 !important;
   }
-}
-
-html body.mc-bean-bag-pdp #content_area img#product_photo,
-html body.mc-saranoni-pdp #content_area img#product_photo,
-html body.mc-ruched-blanket-pdp #content_area img#product_photo {
-  width: 100% !important;
-  max-width: 650px !important;
-  height: auto !important;
 }
 
 html body.mc-bean-bag-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-host) > table:first-child .product_productprice,
@@ -17063,970 +16505,310 @@ html body.mc-ruched-blanket-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-hos
   overflow: hidden !important;
   opacity: 0 !important;
 }
-
 /* =========================================================
-   MC_PDP_ATC_BLACK_LOCK — final cascade: black rectangular Add to Cart.
-   Targets live Volusion markup: input[name="btnaddtocart"] inside .mc-atc-button-wrap
-   (template JS wrapper) or bare .vCSS_input_addtocart / .v65-product-addtocart.
-   Excludes bean bag / Saranoni / ruched blanket — those use MC PDP LOCK pdp14 below.
-   Does not change layout order or qty/ATC placement.
+   MC_UNIFIED_PDP_LAYOUT_20260616 — one global PDP layout system.
+   Replaces product-specific layout patches (bean bag, Saranoni,
+   Gatlin, MC_PDP_ATC_BLACK_LOCK wrapper styling, mc-pdp-purchase-controls).
    ========================================================= */
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart .mc-atc-button-wrap,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart .mc-atc-button-wrap,
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent td.mc-pdp-options-td .mc-atc-button-wrap,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent td.mc-pdp-options-td .mc-atc-button-wrap,
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area td.mc-pdp-options-td .mc-atc-button-wrap,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area td.mc-pdp-options-td .mc-atc-button-wrap {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  width: fit-content !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  padding: 12px 22px !important;
-  margin: 0 !important;
-  border: 1px solid #000 !important;
-  border-radius: 0 !important;
-  background: #000 !important;
-  background-color: #000 !important;
-  background-image: none !important;
-  color: #fff !important;
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.14em !important;
-  text-transform: uppercase !important;
-  line-height: 1 !important;
-  box-shadow: none !important;
-  cursor: pointer !important;
-  box-sizing: border-box !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
+
+html body.mc-pdp-unified-ready .mc-pdp-return-row,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-return-row {
+  display: table-row !important;
 }
 
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap:hover,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap:hover,
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart .mc-atc-button-wrap:hover,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart .mc-atc-button-wrap:hover {
-  background: #222 !important;
-  background-color: #222 !important;
-  color: #fff !important;
-  border-color: #222 !important;
-}
-
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap input[type="submit"],
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap input[type="submit"],
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap input[type="submit"],
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap input[type="submit"],
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap input.vCSS_input_addtocart,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap input.vCSS_input_addtocart,
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap input.vCSS_input_addtocart,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap input.vCSS_input_addtocart,
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap input[name="btnaddtocart"] {
-  display: flex !important;
-  flex: 1 1 auto !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  min-height: 46px !important;
-  padding: 0 28px !important;
-  margin: 0 !important;
-  border: 1px solid #111 !important;
-  border-radius: 0 !important;
-  background: #111 !important;
-  background-color: #111 !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  color: #fff !important;
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.12em !important;
-  text-transform: uppercase !important;
-  line-height: 1 !important;
-  cursor: pointer !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
-}
-
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper,
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap .mc-cart-icon,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .mc-atc-button-wrap .mc-cart-icon,
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap .mc-cart-icon,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .mc-atc-button-wrap .mc-cart-icon {
-  color: #fff !important;
-  flex-shrink: 0 !important;
-}
-
-/* Bare submit (not yet wrapped by JS) — same black chrome. */
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"],
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"],
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart > input[name="btnaddtocart"],
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart > input[name="btnaddtocart"],
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > input.vCSS_input_addtocart,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > input.vCSS_input_addtocart,
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > button[name="btnaddtocart"],
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > button[name="btnaddtocart"] {
-  background: #000 !important;
-  background-color: #000 !important;
-  background-image: none !important;
-  color: #fff !important;
-  border: 1px solid #000 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  text-transform: uppercase !important;
-  padding: 12px 22px !important;
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.14em !important;
-  line-height: 1 !important;
-  cursor: pointer !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  width: auto !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  display: inline-block !important;
-  margin: 0 !important;
-}
-
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"]:hover,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"]:hover,
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart > input[name="btnaddtocart"]:hover,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #content_area .v65-product-addtocart > input[name="btnaddtocart"]:hover {
-  background: #222 !important;
-  background-color: #222 !important;
-  color: #fff !important;
-  border-color: #222 !important;
-}
-
-/* Option selects must not restyle the Add to Cart control. */
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent #options_table select ~ .v65-product-addtocart input[name="btnaddtocart"],
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent #options_table select ~ .v65-product-addtocart input[name="btnaddtocart"],
-html body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent #options_table .v65-product-addtocart .mc-atc-button-wrap,
-html body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp):not(.mc-ruched-blanket-pdp) #v65-product-parent #options_table .v65-product-addtocart .mc-atc-button-wrap {
-  border-radius: 0 !important;
-  font-family: Inter, Arial, sans-serif !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-bean-bag-purchase-stack,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-saranoni-purchase-stack {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
-  gap: 10px !important;
-  width: 100% !important;
-  max-width: 400px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  box-sizing: border-box !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row {
-  order: 1 !important;
-  width: 100% !important;
-  justify-content: center !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap {
-  order: 2 !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap {
-  width: 100% !important;
-  max-width: 100% !important;
-  display: flex !important;
-  margin: 0 !important;
-}
-
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"],
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart input[name="btnaddtocart"],
-html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart button[name="btnaddtocart"] {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+html body.mc-pdp-unified-ready .mc-pdp-return-cell,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-return-cell {
   display: block !important;
-}
-
-/* =========================================================
-   MC_SARANONI_PDP_RESTORE — hide duplicate color UI.
-   ========================================================= */
-html body.mc-saranoni-pdp #mc-pdp-brand-logo {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
   width: 100% !important;
-  max-width: 400px !important;
-  margin: 0 auto 14px auto !important;
-}
-
-html body.mc-saranoni-pdp #mc-pdp-brand-logo img {
-  display: block !important;
-  max-width: 180px !important;
-  max-height: 48px !important;
-  width: auto !important;
-  height: auto !important;
-  margin: 0 auto !important;
-}
-
-html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #options_table .productoptionname,
-html body.mc-saranoni-pdp.mc-saranoni-swatches-ready table[id*="options_table"] .productoptionname,
-html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #options_table td.productoptionname,
-html body.mc-saranoni-pdp.mc-saranoni-swatches-ready table[id*="options_table"] td.productoptionname {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  overflow: hidden !important;
-}
-
-html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #options_table tr:has(select[name*="___23"]),
-html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #v65-product-parent tr:has(select[name*="___23"]),
-html body.mc-saranoni-pdp.mc-saranoni-swatches-ready table[id*="options_table"] tr:has(select[name*="___23"]) {
-  height: 0 !important;
-  max-height: 0 !important;
-  overflow: hidden !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  padding: 0 0 12px 0 !important;
   border: 0 !important;
-  line-height: 0 !important;
+  vertical-align: top !important;
 }
 
-html body.mc-saranoni-pdp #mc-configured-color-swatch-wrapper:not(:has(.mc-configured-color-swatch)) {
-  display: none !important;
+html body.mc-pdp-unified-ready .mc-pdp-return-link,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-return-link {
+  display: inline-block !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  color: #111 !important;
 }
 
-html body.mc-saranoni-pdp:has(#mc-pdp-purchase-stack) #options_table tr:has(input[name="btnaddtocart"]),
-html body.mc-saranoni-pdp:has(#mc-pdp-purchase-stack) #options_table tr:has(.vCSS_input_addtocart),
-html body.mc-saranoni-pdp:has(#mc-pdp-purchase-stack) table[id*="options_table"] tr:has(input[name="btnaddtocart"]),
-html body.mc-saranoni-pdp:has(#mc-pdp-purchase-stack) table[id*="options_table"] tr:has(.vCSS_input_addtocart) {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  overflow: hidden !important;
-}
-
-/* Volusion soft-add popup: View Cart text matches Continue Shopping (white on gray). */
-.soft_add_wrapper .check_out,
-.soft_add_wrapper .check_out:link,
-.soft_add_wrapper .check_out:visited,
-.soft_add_wrapper .check_out:hover,
-.soft_add_wrapper .check_out:focus,
-.soft_add_wrapper .check_out:active {
-  background: #666 !important;
-  background-color: #666 !important;
-  border-color: #666 !important;
-  color: #fff !important;
-}
-
-.soft_add_wrapper .continue_shopping,
-.soft_add_wrapper .continue_shopping:link,
-.soft_add_wrapper .continue_shopping:visited,
-.soft_add_wrapper .continue_shopping:hover,
-.soft_add_wrapper .continue_shopping:focus,
-.soft_add_wrapper .continue_shopping:active {
-  color: #fff !important;
-}
-
-/* Saranoni PDP layout tuning (sar-jl-jl-msln-lush and related). */
-html body.mc-saranoni-pdp #product_photo {
-  margin-left: 80px !important;
-  margin-top: 20px !important;
+html body.mc-pdp-unified-ready .mc-pdp-return-link:hover,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-return-link:hover {
+  color: #444 !important;
+  text-decoration: underline !important;
 }
 
 @media (min-width: 992px) {
-  html body.mc-saranoni-pdp.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
-  html body.mc-saranoni-pdp.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:last-child,
-  html body.mc-saranoni-pdp.productdetails #v65-product-parent > tr:nth-of-type(2) > td:last-child,
-  html body.mc-saranoni-pdp.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:last-child {
-    margin-left: -22px !important;
+  html body.mc-pdp-unified-ready tr.mc-unified-pdp-row,
+  html body.mc-product-page.mc-pdp-unified-ready tr.mc-unified-pdp-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr) !important;
+    column-gap: 24px !important;
+    align-items: start !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-product-page.mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
+  html body.mc-product-page.mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-info {
+    display: block !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    vertical-align: top !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
+  html body.mc-product-page.mc-pdp-unified-ready tr.mc-unified-pdp-row > td.mc-unified-pdp-info {
+    max-width: 520px !important;
   }
 }
 
-html body.mc-saranoni-pdp #v65-product-parent > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) {
-  padding: 15px !important;
-}
+@media (max-width: 991px) {
+  html body.mc-pdp-unified-ready tr.mc-unified-pdp-row,
+  html body.mc-product-page.mc-pdp-unified-ready tr.mc-unified-pdp-row {
+    display: block !important;
+    width: 100% !important;
+  }
 
-html body.mc-saranoni-pdp .vCSS_input_addtocart {
-  background: #111 !important;
-  background-color: #111 !important;
-  background-image: none !important;
-  color: #fff !important;
-  border: 1px solid #111 !important;
-  border-radius: 0 !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.12em !important;
-  text-transform: uppercase !important;
-  min-height: 46px !important;
-  padding: 0 28px !important;
-  margin-top: 5px !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
-}
-
-html body.mc-saranoni-pdp .mc-pdp-media-td {
-  margin-left: 100px !important;
-  margin-top: -30px !important;
-}
-
-html body.mc-saranoni-pdp .mc-pdp-options-td {
-  margin-left: -20px !important;
-}
-
-html body.mc-saranoni-pdp .mc-pdp-stack-retail-amt {
-  margin-left: 15px !important;
-}
-
-html body.mc-saranoni-pdp #messaging-element {
-  margin-left: 15px !important;
-}
-
-html body.mc-saranoni-pdp .mc-atc-button-wrap {
-  margin-top: 5px !important;
-}
-
-html body.mc-bean-bag-pdp td.mc-pdp-media-td .mc-return-category,
-html body.mc-saranoni-pdp td.mc-pdp-media-td .mc-return-category,
-html body.mc-ruched-blanket-pdp td.mc-pdp-media-td .mc-return-category {
-  display: none !important;
-}
-
-html body .mc-product-shell {
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-  box-sizing: border-box;
-}
-
-html body .mc-product-topbar {
-  width: 100%;
-  min-height: 24px;
-  margin: 50px 0 -40px;
-  padding: 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  box-sizing: border-box;
-  position: static !important;
-}
-
-html body a.mc-return-category {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin: 0;
-  margin-left: 69px !important;
-  padding: 0;
-  font-family: Inter, Arial, sans-serif;
-  font-size: 13px;
-  line-height: 1.4;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-decoration: none;
-  color: #333;
-}
-
-html body a.mc-return-category::before {
-  content: "\2190";
-}
-
-@media (max-width: 767px) {
-  html body .mc-product-topbar {
-    padding: 0 16px;
-    box-sizing: border-box;
+  html body.mc-pdp-unified-ready tr.mc-unified-pdp-row > td,
+  html body.mc-product-page.mc-pdp-unified-ready tr.mc-unified-pdp-row > td {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
   }
 }
 
-/* === Universal PDP Add to Cart (all product types) === */
-body.productdetails #v65-product-parent input[name="btnaddtocart"],
-body.productdetails #v65-product-parent button[name="btnaddtocart"],
-body.mc-product-page #v65-product-parent input[name="btnaddtocart"],
-body.mc-product-page #v65-product-parent button[name="btnaddtocart"],
-body.productdetails #content_area input[name="btnaddtocart"],
-body.mc-product-page #content_area input[name="btnaddtocart"],
-body.productdetails #mc-pdp-purchase-stack input[name="btnaddtocart"],
-body.mc-product-page #mc-pdp-purchase-stack input[name="btnaddtocart"],
-body.productdetails #mc-pdp-purchase-stack button[name="btnaddtocart"],
-body.mc-product-page #mc-pdp-purchase-stack button[name="btnaddtocart"],
-body.productdetails #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
-body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
-body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
-body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
-body.productdetails #v65-product-parent .v65-product-addtocart input[name="btnaddtocart"],
-body.mc-product-page #v65-product-parent .v65-product-addtocart input[name="btnaddtocart"],
-body.productdetails #v65-product-parent input.vCSS_input_addtocart,
-body.mc-product-page #v65-product-parent input.vCSS_input_addtocart,
-html.is-sectional-product #mc-pdp-purchase-stack input[name="btnaddtocart"],
-html.is-sectional-product #mc-pdp-purchase-stack button[name="btnaddtocart"],
-html.is-sectional-product #mc-pdp-purchase-stack .mc-atc-button-wrap input[name="btnaddtocart"],
-html.is-sectional-product #mc-pdp-purchase-stack .mc-atc-button-wrap button[name="btnaddtocart"] {
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls {
   display: flex !important;
+  flex-direction: column !important;
   align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
   width: 100% !important;
-  max-width: 100% !important;
-  min-height: 46px !important;
-  box-sizing: border-box !important;
-  background: #111 !important;
-  background-color: #111 !important;
-  background-image: none !important;
-  color: #fff !important;
-  border: 1px solid #111 !important;
-  border-radius: 0 !important;
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.12em !important;
-  text-transform: uppercase !important;
-  padding: 0 28px !important;
-  margin: 0 !important;
-  opacity: 1 !important;
-  box-shadow: none !important;
-  outline: none !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  cursor: pointer !important;
-}
-
-body.productdetails #v65-product-parent input[name="btnaddtocart"]:hover,
-body.productdetails #v65-product-parent input[name="btnaddtocart"]:focus,
-body.productdetails #v65-product-parent input[name="btnaddtocart"]:active,
-body.mc-product-page #v65-product-parent input[name="btnaddtocart"]:hover,
-body.mc-product-page #v65-product-parent input[name="btnaddtocart"]:focus,
-body.mc-product-page #v65-product-parent input[name="btnaddtocart"]:active,
-body.productdetails #mc-pdp-purchase-stack input[name="btnaddtocart"]:hover,
-body.productdetails #mc-pdp-purchase-stack input[name="btnaddtocart"]:focus,
-body.productdetails #mc-pdp-purchase-stack input[name="btnaddtocart"]:active,
-body.mc-product-page #mc-pdp-purchase-stack input[name="btnaddtocart"]:hover,
-body.mc-product-page #mc-pdp-purchase-stack input[name="btnaddtocart"]:focus,
-body.mc-product-page #mc-pdp-purchase-stack input[name="btnaddtocart"]:active,
-html.is-sectional-product #mc-pdp-purchase-stack input[name="btnaddtocart"]:hover,
-html.is-sectional-product #mc-pdp-purchase-stack input[name="btnaddtocart"]:focus,
-html.is-sectional-product #mc-pdp-purchase-stack input[name="btnaddtocart"]:active {
-  background: #111 !important;
-  background-color: #111 !important;
-  color: #fff !important;
-  border: 1px solid #111 !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-body.productdetails #v65-product-parent input[name="btnaddtocart"]:disabled,
-body.mc-product-page #v65-product-parent input[name="btnaddtocart"]:disabled,
-body.productdetails #mc-pdp-purchase-stack input[name="btnaddtocart"]:disabled,
-body.mc-product-page #mc-pdp-purchase-stack input[name="btnaddtocart"]:disabled {
-  background: #111 !important;
-  background-color: #111 !important;
-  color: #fff !important;
-  border: 1px solid #111 !important;
-  opacity: 0.55 !important;
-  cursor: not-allowed !important;
-}
-
-body.productdetails #mc-pdp-purchase-stack .v65-product-addtocart,
-body.mc-product-page #mc-pdp-purchase-stack .v65-product-addtocart,
-body.productdetails #mc-pdp-purchase-stack .mc-atc-button-wrap,
-body.mc-product-page #mc-pdp-purchase-stack .mc-atc-button-wrap,
-html.is-sectional-product #mc-pdp-purchase-stack .v65-product-addtocart,
-html.is-sectional-product #mc-pdp-purchase-stack .mc-atc-button-wrap {
-  display: flex !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  flex: 1 1 100% !important;
-  justify-content: stretch !important;
-  align-items: stretch !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
+  max-width: 360px !important;
+  margin: 28px auto 0 !important;
+  gap: 10px !important;
   padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-atc-host,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-atc-button-wrap,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart {
+  display: contents !important;
+  width: auto !important;
+  max-width: none !important;
   margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
-html.mc-url-looks-like-pdp body #related_products_content img,
-html.mc-url-looks-like-pdp body #v65-product-related img,
-body.productdetails #related_products_content img,
-body.productdetails #v65-product-related img,
-body.mc-product-page #related_products_content img,
-body.mc-product-page #v65-product-related img {
-  min-width: 180px !important;
-  min-height: 180px !important;
-}
-
-/* Bare Volusion image-type ATC before/alongside JS wrap */
-body.productdetails #v65-product-parent input[type="image"][name="btnaddtocart"],
-body.mc-product-page #v65-product-parent input[type="image"][name="btnaddtocart"],
-body.productdetails #content_area input[type="image"][name="btnaddtocart"],
-body.mc-product-page #content_area input[type="image"][name="btnaddtocart"] {
-  appearance: none !important;
-  -webkit-appearance: none !important;
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls #mc-pdp-qty-row,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-qty-row,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls #mc-pdp-qty-row,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-qty-row {
+  display: flex !important;
+  justify-content: center !important;
   width: 100% !important;
-  max-width: 100% !important;
-  min-height: 46px !important;
-  padding: 0 28px !important;
-  border: 1px solid #111 !important;
-  border-radius: 0 !important;
-  background: #111 !important;
-  background-color: #111 !important;
-  background-image: none !important;
-  color: #fff !important;
-  box-sizing: border-box !important;
-  opacity: 1 !important;
-  cursor: pointer !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
 }
 
-/* MC PDP LOCK — description typography must match .mc-pdp-features__list */
-html body.productdetails #mc-pdp-description-below-features,
-html body.mc-product-page #mc-pdp-description-below-features,
-html body.productdetails #mc-pdp-description-below-features *,
-html body.mc-product-page #mc-pdp-description-below-features *,
-html body.productdetails #product_description,
-html body.mc-product-page #product_description,
-html body.productdetails #product_description *,
-html body.mc-product-page #product_description *,
-html body.productdetails #ProductDetail_ProductDetails_div,
-html body.mc-product-page #ProductDetail_ProductDetails_div,
-html body.productdetails #ProductDetail_ProductDetails_div p,
-html body.mc-product-page #ProductDetail_ProductDetails_div p,
-html body.productdetails #ProductDetail_ProductDetails_div span,
-html body.mc-product-page #ProductDetail_ProductDetails_div span,
-html body.productdetails #ProductDetail_ProductDetails_div li,
-html body.mc-product-page #ProductDetail_ProductDetails_div li,
-html body.productdetails #ProductDetail_ProductDetails_div font,
-html body.mc-product-page #ProductDetail_ProductDetails_div font,
-html body.productdetails #ProductDetail_ProductDetails_div strong,
-html body.mc-product-page #ProductDetail_ProductDetails_div strong,
-html body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop="description"],
-html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="description"],
-html body.productdetails #ProductDetail_ProductDetails_div2 span[itemprop="description"] *,
-html body.mc-product-page #ProductDetail_ProductDetails_div2 span[itemprop="description"] * {
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name^="QTY."],
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input.v65-productdetail-cartqty,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name^="QTY."],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input.v65-productdetail-cartqty {
+  width: 52px !important;
+  height: 44px !important;
+  min-width: 52px !important;
+  min-height: 44px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  text-align: center !important;
+  border: 1px solid #d7d7d7 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  box-sizing: border-box !important;
   font-family: Inter, Arial, sans-serif !important;
   font-size: 14px !important;
-  font-weight: 400 !important;
-  line-height: 1.55 !important;
-  letter-spacing: 0.02em !important;
-  text-transform: none !important;
   color: #444 !important;
 }
 
-/* === MC PDP UNIFIED COLUMN + ATC (all product types) === */
-@media (min-width: 801px) {
-  html body.productdetails #v65-product-parent > tbody > tr.mc-product-columns,
-  html body.mc-product-page #v65-product-parent > tbody > tr.mc-product-columns,
-  html body.productdetails #v65-product-parent > tr.mc-product-columns,
-  html body.mc-product-page #v65-product-parent > tr.mc-product-columns,
-  html body.productdetails tr.mc-product-columns.mc-pdp-main-row,
-  html body.mc-product-page tr.mc-product-columns.mc-pdp-main-row {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(420px, 520px) !important;
-    column-gap: 64px !important;
-    row-gap: 0 !important;
-    align-items: start !important;
-    width: 100% !important;
-    max-width: 1200px !important;
-    margin: 0 auto !important;
-    box-sizing: border-box !important;
-    flex-direction: unset !important;
-    flex-wrap: unset !important;
-    gap: unset !important;
-  }
-
-  html body.productdetails tr.mc-product-columns > td,
-  html body.mc-product-page tr.mc-product-columns > td {
-    display: block !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    float: none !important;
-    flex: unset !important;
-    flex-basis: unset !important;
-    order: unset !important;
-  }
-}
-
-html body.productdetails td.mc-product-info-column,
-html body.mc-product-page td.mc-product-info-column,
-html body.productdetails .mc-product-info-column,
-html body.mc-product-page .mc-product-info-column {
-  display: block !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 520px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  float: none !important;
-  box-sizing: border-box !important;
-}
-
-html body.productdetails .mc-product-info-column > *,
-html body.mc-product-page .mc-product-info-column > *,
-html body.productdetails .mc-product-info-column .mc-features,
-html body.mc-product-page .mc-product-info-column .mc-features,
-html body.productdetails .mc-product-info-column #mc-pdp-features,
-html body.mc-product-page .mc-product-info-column #mc-pdp-features,
-html body.productdetails .mc-product-info-column .mc-product-description,
-html body.mc-product-page .mc-product-info-column .mc-product-description,
-html body.productdetails .mc-product-info-column #mc-pdp-description-below-features,
-html body.mc-product-page .mc-product-info-column #mc-pdp-description-below-features,
-html body.productdetails .mc-product-info-column .mc-purchase-area,
-html body.mc-product-page .mc-product-info-column .mc-purchase-area,
-html body.productdetails .mc-product-info-column #mc-pdp-purchase-stack,
-html body.mc-product-page .mc-product-info-column #mc-pdp-purchase-stack,
-html body.productdetails .mc-product-info-column .mc-atc-wrapper,
-html body.mc-product-page .mc-product-info-column .mc-atc-wrapper {
-  width: 100% !important;
-  max-width: none !important;
-  box-sizing: border-box !important;
-}
-
-html body.mc-bean-bag-pdp .mc-product-info-column #mc-pdp-features,
-html body.mc-saranoni-pdp .mc-product-info-column #mc-pdp-features,
-html body.mc-ruched-blanket-pdp .mc-product-info-column #mc-pdp-features,
-html body.mc-bean-bag-pdp .mc-product-info-column #mc-pdp-description-below-features,
-html body.mc-saranoni-pdp .mc-product-info-column #mc-pdp-description-below-features,
-html body.mc-ruched-blanket-pdp .mc-product-info-column #mc-pdp-description-below-features,
-html body.mc-bean-bag-pdp .mc-product-info-column #mc-pdp-purchase-stack,
-html body.mc-saranoni-pdp .mc-product-info-column #mc-pdp-purchase-stack,
-html body.mc-ruched-blanket-pdp .mc-product-info-column #mc-pdp-purchase-stack,
-html body.mc-bean-bag-pdp .mc-product-info-column #mc-pdp-option-block,
-html body.mc-saranoni-pdp .mc-product-info-column #mc-pdp-option-block,
-html body.productdetails .mc-product-info-column .mc-atc-button-wrap,
-html body.mc-product-page .mc-product-info-column .mc-atc-button-wrap {
-  width: 100% !important;
-  max-width: none !important;
-  min-width: 0 !important;
-}
-
-html body.productdetails .mc-quantity-row,
-html body.mc-product-page .mc-quantity-row,
-html body.productdetails #mc-pdp-qty-row.mc-quantity-row,
-html body.mc-product-page #mc-pdp-qty-row.mc-quantity-row {
-  display: flex !important;
-  justify-content: center !important;
-  width: 100% !important;
-  margin: 28px 0 8px !important;
-}
-
-html body.productdetails .mc-quantity-row input,
-html body.mc-product-page .mc-quantity-row input,
-html body.productdetails #mc-pdp-qty-row.mc-quantity-row input,
-html body.mc-product-page #mc-pdp-qty-row.mc-quantity-row input {
-  width: 52px !important;
-  height: 44px !important;
-  text-align: center !important;
-}
-
-.mc-atc-button,
-.mc-atc-wrapper .mc-atc-button,
-html body.productdetails .mc-product-info-column input.mc-atc-button,
-html body.mc-product-page .mc-product-info-column input.mc-atc-button,
-html body.productdetails .mc-product-info-column button.mc-atc-button,
-html body.mc-product-page .mc-product-info-column button.mc-atc-button,
-html body.productdetails .mc-product-info-column a.mc-atc-button,
-html body.mc-product-page .mc-product-info-column a.mc-atc-button,
-html body.productdetails input.mc-atc-button[name="btnaddtocart"],
-html body.mc-product-page input.mc-atc-button[name="btnaddtocart"],
-html body.productdetails button.mc-atc-button[name="btnaddtocart"],
-html body.mc-product-page button.mc-atc-button[name="btnaddtocart"] {
-  -webkit-appearance: none !important;
-  appearance: none !important;
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input.mc-unified-atc-btn,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"],
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input.mc-unified-atc-btn,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"] {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  width: 100% !important;
-  min-width: 100% !important;
-  max-width: none !important;
-  min-height: 48px !important;
-  margin: 0 !important;
-  padding: 0 24px !important;
-  box-sizing: border-box !important;
-  background: #111 !important;
-  background-color: #111 !important;
-  background-image: none !important;
-  color: #fff !important;
-  border: 1px solid #111 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 12px !important;
-  line-height: 1 !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.14em !important;
-  text-transform: uppercase !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-  cursor: pointer !important;
-  opacity: 1 !important;
-}
-
-.mc-atc-button:hover,
-.mc-atc-button:focus,
-.mc-atc-button:active,
-html body.productdetails input.mc-atc-button[name="btnaddtocart"]:hover,
-html body.mc-product-page input.mc-atc-button[name="btnaddtocart"]:hover,
-html body.productdetails input.mc-atc-button[name="btnaddtocart"]:focus,
-html body.mc-product-page input.mc-atc-button[name="btnaddtocart"]:focus,
-html body.productdetails input.mc-atc-button[name="btnaddtocart"]:active,
-html body.mc-product-page input.mc-atc-button[name="btnaddtocart"]:active {
-  background: #000 !important;
-  background-color: #000 !important;
-  background-image: none !important;
-  color: #fff !important;
-  border-color: #000 !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-.mc-atc-wrapper,
-html body.productdetails .mc-product-info-column .mc-atc-wrapper,
-html body.mc-product-page .mc-product-info-column .mc-atc-wrapper,
-html body.productdetails .mc-atc-button-wrap.mc-atc-wrapper,
-html body.mc-product-page .mc-atc-button-wrap.mc-atc-wrapper {
-  display: block !important;
-  width: 100% !important;
-  max-width: none !important;
-  margin: 12px 0 0 !important;
-  padding: 0 !important;
-  float: none !important;
-  box-sizing: border-box !important;
-  background: transparent !important;
-  border: none !important;
-}
-
-html body.productdetails .mc-product-info-column .mc-atc-wrapper input.mc-atc-button,
-html body.mc-product-page .mc-product-info-column .mc-atc-wrapper input.mc-atc-button,
-html body.productdetails .mc-atc-wrapper .mc-atc-button-wrap input[type="submit"],
-html body.mc-product-page .mc-atc-wrapper .mc-atc-button-wrap input[type="submit"] {
-  background: #111 !important;
-  background-color: #111 !important;
-  background-image: none !important;
-  color: #fff !important;
-  width: 100% !important;
-  min-width: 100% !important;
-  max-width: none !important;
-}
-
-@media (max-width: 800px) {
-  html body.productdetails tr.mc-product-columns,
-  html body.mc-product-page tr.mc-product-columns {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    row-gap: 28px !important;
-    column-gap: 0 !important;
-  }
-
-  html body.productdetails .mc-product-info-column,
-  html body.mc-product-page .mc-product-info-column {
-    width: 100% !important;
-    max-width: none !important;
-  }
-
-  html body.productdetails .mc-atc-button,
-  html body.mc-product-page .mc-atc-button {
-    width: 100% !important;
-    min-width: 100% !important;
-  }
-}
-
-/* =========================================================
-   MC_FIXED_SECTIONAL_PDP_LAYOUT_20260616
-   Fixed furniture sectionals such as SS-GATLIN-PWR-SECT are standard
-   two-column PDPs, not -SC- configurator pages. The template now tags
-   the shared OUTER product row/cells; this block only styles those cells.
-   ========================================================= */
-@media (min-width: 992px) {
-  html body.mc-fixed-sectional-pdp #v65-product-parent {
-    width: 100% !important;
-    max-width: 1240px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-
-  html body.mc-fixed-sectional-pdp #v65-product-parent tr.mc-pdp-main-row {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: flex-start !important;
-    gap: 52px !important;
-    width: 100% !important;
-  }
-
-  html body.mc-fixed-sectional-pdp #v65-product-parent tr.mc-pdp-main-row > td.mc-pdp-media-td {
-    display: block !important;
-    flex: 1 1 auto !important;
-    width: calc(100% - 532px) !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    padding: 0 !important;
-  }
-
-  html body.mc-fixed-sectional-pdp #v65-product-parent tr.mc-pdp-main-row > td.mc-pdp-options-td {
-    display: block !important;
-    flex: 0 0 480px !important;
-    width: 480px !important;
-    min-width: 480px !important;
-    max-width: 480px !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  html body.mc-fixed-sectional-pdp #v65-product-parent tr.mc-pdp-main-row > td.mc-pdp-options-td > * {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    box-sizing: border-box !important;
-  }
-}
-
-html body.mc-fixed-sectional-pdp #v65-product-parent .v65-product-addtocart,
-html body.mc-fixed-sectional-pdp #v65-product-parent .mc-atc-button-wrap {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  margin: 10px 0 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  box-sizing: border-box !important;
-}
-
-html body.mc-fixed-sectional-pdp #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper {
-  display: none !important;
-}
-
-html body.mc-fixed-sectional-pdp #v65-product-parent #btn_addtocart,
-html body.mc-fixed-sectional-pdp #v65-product-parent #btnaddtocart,
-html body.mc-fixed-sectional-pdp #v65-product-parent input[name="btnaddtocart"],
-html body.mc-fixed-sectional-pdp #v65-product-parent button[name="btnaddtocart"] {
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  display: block !important;
-  width: 100% !important;
-  min-width: 100% !important;
-  max-width: none !important;
+  width: 360px !important;
+  max-width: 100% !important;
   height: 48px !important;
   min-height: 48px !important;
   margin: 0 !important;
   padding: 0 24px !important;
-  border: 1px solid #111 !important;
+  border: 1px solid #000 !important;
   border-radius: 0 !important;
-  background: #111 !important;
-  background-color: #111 !important;
+  background: #000 !important;
   background-image: none !important;
   color: #fff !important;
-  box-shadow: none !important;
-  box-sizing: border-box !important;
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  line-height: 48px !important;
-  letter-spacing: .14em !important;
-  text-align: center !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
+  text-align: center !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
 
-html body.mc-fixed-sectional-pdp #mc-pdp-purchase-stack {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
-  width: 100% !important;
-  max-width: none !important;
-  gap: 10px !important;
-  margin: 24px 0 0 !important;
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"]:hover,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"]:focus,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"]:hover,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"]:hover,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"]:focus,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"]:hover {
+  background: #222 !important;
+  border-color: #222 !important;
+  color: #fff !important;
 }
 
-html body.mc-fixed-sectional-pdp #mc-pdp-qty-row,
-html body.mc-fixed-sectional-pdp .vol-cartqty__wrap {
-  display: flex !important;
-  justify-content: center !important;
-  width: 100% !important;
-  margin: 0 !important;
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-cart-icon-wrapper,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-cart-icon-wrapper {
+  display: none !important;
 }
 
-html body.mc-fixed-sectional-pdp .mc-fixed-sectional-description-below {
+html body.mc-pdp-unified-ready .mc-pdp-description-row,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-description-row {
+  display: table-row !important;
+}
+
+html body.mc-pdp-unified-ready .mc-pdp-description-cell,
+html body.mc-product-page.mc-pdp-unified-ready .mc-pdp-description-cell {
   display: block !important;
   width: 100% !important;
-  max-width: 760px !important;
-  margin: 38px auto 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-pdp-description,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description {
+  display: block !important;
+  width: 100% !important;
+  max-width: 1050px !important;
+  margin: 36px auto 0 !important;
   padding: 0 !important;
   text-align: left !important;
   box-sizing: border-box !important;
 }
 
-html body.mc-fixed-sectional-pdp .mc-fixed-sectional-description-below,
-html body.mc-fixed-sectional-pdp .mc-fixed-sectional-description-below p,
-html body.mc-fixed-sectional-pdp .mc-fixed-sectional-description-below div,
-html body.mc-fixed-sectional-pdp .mc-fixed-sectional-description-below span {
+html body.mc-pdp-unified-ready .mc-unified-pdp-description p,
+html body.mc-pdp-unified-ready .mc-unified-pdp-description span,
+html body.mc-pdp-unified-ready .mc-unified-pdp-description li,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description p,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description span,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description li {
   font-family: Inter, Arial, sans-serif !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
   font-weight: 400 !important;
-  font-style: normal !important;
   line-height: 1.55 !important;
-  letter-spacing: .02em !important;
+  letter-spacing: 0.02em !important;
   color: #444 !important;
   text-transform: none !important;
 }
 
-@media (max-width: 991px) {
-  html body.mc-fixed-sectional-pdp #v65-product-parent tr.mc-pdp-main-row,
-  html body.mc-fixed-sectional-pdp #v65-product-parent tr.mc-pdp-main-row > td.mc-pdp-media-td,
-  html body.mc-fixed-sectional-pdp #v65-product-parent tr.mc-pdp-main-row > td.mc-pdp-options-td {
-    display: block !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    padding: 0 !important;
-  }
+html body.mc-pdp-unified-ready #mc-pdp-description-below-features:not(:empty),
+html body.mc-pdp-unified-ready #mc-pdp-description-under-media,
+html body.mc-pdp-unified-ready .mc-pdp-description-under-media,
+html body.mc-pdp-unified-ready .mc-gatlin-description-below,
+html body.mc-pdp-unified-ready #mc-pdp-price-atc-row,
+html body.mc-pdp-unified-ready .mc-pdp-purchase-controls,
+html body.mc-pdp-unified-ready #mc-pdp-purchase-stack[aria-hidden="true"],
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-purchase-stack[aria-hidden="true"] {
+  display: none !important;
+}
 
-  html body.mc-fixed-sectional-pdp .mc-fixed-sectional-description-below {
-    max-width: none !important;
-    margin-top: 28px !important;
+@media (max-width: 991px) {
+  html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"],
+  html body.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"],
+  html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name="btnaddtocart"],
+  html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls button[name="btnaddtocart"] {
+    width: 100% !important;
+    max-width: 360px !important;
   }
 }
 
+html body.mc-pdp-unified-ready #mc-pdp-option-block,
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-option-block {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 12px 0 !important;
+  padding: 0 0 0 1.1em !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-pdp-unified-ready .mc-atc-button-wrap,
+html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap {
+  display: contents !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+html body.mc-pdp-unified-ready .mc-atc-button-wrap input[name="btnaddtocart"],
+html body.mc-pdp-unified-ready .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap input[name="btnaddtocart"],
+html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap button[name="btnaddtocart"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 360px !important;
+  max-width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  margin: 0 !important;
+  padding: 0 24px !important;
+  border: 1px solid #000 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  background-image: none !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  box-shadow: none !important;
+}
