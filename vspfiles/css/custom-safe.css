@@ -16682,6 +16682,7 @@ html body.mc-bean-bag-pdp #mc-pdp-features {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: flex-start !important;
+    gap: 32px !important;
   }
 
   html body.mc-bean-bag-pdp #content_area td.mc-pdp-options-td,
@@ -16843,24 +16844,97 @@ html body.mc-ruched-blanket-pdp #mc-pdp-qty-row input[name^="QTY."] {
   box-sizing: border-box !important;
 }
 
+html body.mc-bean-bag-pdp #mc-pdp-title-right,
+html body.mc-saranoni-pdp #mc-pdp-title-right,
+html body.mc-ruched-blanket-pdp #mc-pdp-title-right,
+html body.mc-bean-bag-pdp #mc-pdp-brand-logo,
+html body.mc-saranoni-pdp #mc-pdp-brand-logo,
+html body.mc-ruched-blanket-pdp #mc-pdp-brand-logo {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap,
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-soft-goods-atc-wrap,
+body.mc-product-page.mc-bean-bag-pdp #content_area .mc-atc-button-wrap,
+body.mc-product-page.mc-saranoni-pdp #content_area .mc-atc-button-wrap,
+body.mc-product-page.mc-ruched-blanket-pdp #content_area .mc-atc-button-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #111 !important;
+  background-color: #111 !important;
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  margin-top: 0 !important;
+  min-width: 0 !important;
+  gap: 0 !important;
+  color: #fff !important;
+}
+
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap:hover,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap:hover,
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap:hover,
+body.mc-product-page.mc-bean-bag-pdp #content_area .mc-atc-button-wrap:hover,
+body.mc-product-page.mc-saranoni-pdp #content_area .mc-atc-button-wrap:hover,
+body.mc-product-page.mc-ruched-blanket-pdp #content_area .mc-atc-button-wrap:hover {
+  background: #000 !important;
+  background-color: #000 !important;
+  border-color: #000 !important;
+  color: #fff !important;
+}
+
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap:active,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap:active,
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap:active {
+  background: #222 !important;
+  background-color: #222 !important;
+}
+
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper,
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap .mc-cart-icon-wrapper {
+  display: none !important;
+}
+
 html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
 html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
 html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
 html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,
-html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button {
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button,
+body.mc-product-page.mc-bean-bag-pdp #content_area .mc-atc-button-wrap input[type="submit"],
+body.mc-product-page.mc-saranoni-pdp #content_area .mc-atc-button-wrap input[type="submit"],
+body.mc-product-page.mc-ruched-blanket-pdp #content_area .mc-atc-button-wrap input[type="submit"] {
   background: #111 !important;
+  background-color: #111 !important;
+  background-image: none !important;
   color: #fff !important;
   border: 1px solid #111 !important;
   border-radius: 0 !important;
-  font-family: inherit !important;
+  font-family: Inter, Arial, sans-serif !important;
   font-size: 13px !important;
   font-weight: 600 !important;
   letter-spacing: 0.12em !important;
   text-transform: uppercase !important;
   min-height: 48px !important;
   padding: 0 28px !important;
+  opacity: 1 !important;
   box-shadow: none !important;
+}
+
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input:disabled,
+html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input:disabled,
+html body.mc-ruched-blanket-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
 }
 
 html body.mc-saranoni-pdp .mc-saranoni-swatches,
