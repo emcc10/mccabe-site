@@ -7999,8 +7999,11 @@ body.mc-product-page #content_area #mcPlannerSummary.mc-has-selections {
   flex: 1 1 auto !important;
 }
 
-/* Add to Cart: same look as Room Planner – one white button with cart icon inside */
-body.mc-product-page #content_area .mc-atc-row {
+/* Add to Cart: black rectangular button — `.mc-atc-button-wrap` is the visual chrome (JS wraps input[name="btnaddtocart"]). */
+body.mc-product-page #content_area .mc-atc-row,
+body.productdetails #content_area .mc-atc-row,
+body.mc-product-page #v65-product-parent .mc-atc-row,
+body.productdetails #v65-product-parent .mc-atc-row {
   display: flex !important;
   align-items: center !important;
   flex-wrap: nowrap !important;
@@ -8009,41 +8012,57 @@ body.mc-product-page #content_area .mc-atc-row {
   border: none !important;
   padding: 0 !important;
 }
-/* Wrapper = visual button (matches #mcPlannerBtn exactly) */
-body.mc-product-page #content_area .mc-atc-button-wrap {
+body.mc-product-page #content_area .mc-atc-button-wrap,
+body.productdetails #content_area .mc-atc-button-wrap,
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
+body.productdetails #v65-product-parent .mc-atc-button-wrap {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  min-width: 150px !important;
-  max-width: 100% !important;
-  padding: 10px 14px !important;
-  border: 1px solid #777 !important;
-  border-radius: 10px !important;
-  background: #fff !important;
-  background-color: #fff !important;
-  color: #545454 !important;
-  font-size: 14px !important;
-  font-weight: 300 !important;
-  letter-spacing: 0.15em !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  width: fit-content !important;
+  padding: 12px 22px !important;
+  border: 1px solid #000 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  background-color: #000 !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
   text-align: center !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
-  font-family: inherit !important;
+  font-family: Inter, Arial, sans-serif !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
-  margin-top: 30px;
+  margin-top: 0 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
-body.mc-product-page #content_area .mc-atc-button-wrap:hover {
-  background: #f5f5f5 !important;
-  background-color: #f5f5f5 !important;
-  color: #111 !important;
-  border-color: #c9c4bc !important;
+body.mc-product-page #content_area .mc-atc-button-wrap:hover,
+body.productdetails #content_area .mc-atc-button-wrap:hover,
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap:hover,
+body.productdetails #v65-product-parent .mc-atc-button-wrap:hover {
+  background: #222 !important;
+  background-color: #222 !important;
+  color: #fff !important;
+  border-color: #222 !important;
 }
-/* Input inside wrapper: no box, same font so it aligns with icon */
+/* Input inside wrapper: no box — wrapper carries black fill; text/icon inherit white. */
 body.mc-product-page #content_area .mc-atc-button-wrap input[type="submit"],
-body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart"] {
+body.productdetails #content_area .mc-atc-button-wrap input[type="submit"],
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[type="submit"],
+body.productdetails #v65-product-parent .mc-atc-button-wrap input[type="submit"],
+body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
+body.productdetails #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
+body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
+body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"] {
   display: inline-block !important;
   flex: 0 0 auto !important;
   width: auto !important;

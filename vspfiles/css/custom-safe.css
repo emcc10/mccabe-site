@@ -5799,8 +5799,8 @@ body.mc-product-page #content_area select:not(.mc-option-accordion-native) {
   }
 }
 
-/* Add to Cart: visual chrome lives on `.mc-atc-button-wrap` (#e2dfd8 border — template_266 ~7937, custom-safe ~12343).
-   Do NOT paint the raw Volusion submit (border #111 / white text) — it defeats the outline pill and reads as black. */
+/* Add to Cart: visual chrome lives on `.mc-atc-button-wrap` (black fill, square corners).
+   Inner submit stays transparent; see MC_PDP_ATC_BLACK_LOCK at EOF. */
 
 /* Don’t clip the Add to Cart button in the options column */
 /* Single Add to Cart: no second container/color – wrapper matches button */
@@ -12932,7 +12932,7 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     border-color: #222 !important;
   }
 
-  /* Wrapper: transparent shell — let the button itself carry the black fill. */
+  /* Wrapper carries black fill when JS wraps the submit. */
   body.mc-product-page #content_area .mc-atc-button-wrap,
   body.productdetails #content_area .mc-atc-button-wrap,
   body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
@@ -12940,17 +12940,24 @@ body.productdetails .mc-pdp-accordion .mc-acc-link-btn:hover {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    background: transparent !important;
-    background-color: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
+    background: #000 !important;
+    background-color: #000 !important;
+    border: 1px solid #000 !important;
     border-radius: 0 !important;
-    padding: 0 !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    padding: 12px 22px !important;
     margin: 0 !important;
     width: fit-content !important;
     min-width: 0 !important;
     max-width: none !important;
-    gap: 0 !important;
+    gap: 8px !important;
+    font-family: Inter, Arial, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    line-height: 1 !important;
   }
 }
 
@@ -13243,21 +13250,27 @@ body.productdetails #content_area .mc-atc-button-wrap {
 }
 
 .mc-atc-button-wrap {
-  /* Outline — thin light grey border, square, fit-content width. */
-  background: #fff !important;
-  background-color: #fff !important;
-  border: 1px solid #e0e0e0 !important;
+  /* Black rectangular Add to Cart — locked at EOF (MC_PDP_ATC_BLACK_LOCK). */
+  background: #000 !important;
+  background-color: #000 !important;
+  border: 1px solid #000 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  color: #444 !important;
+  color: #fff !important;
   width: fit-content !important;
   min-width: 0 !important;
   max-width: none !important;
-  padding: 10px 18px !important;
+  padding: 12px 22px !important;
   margin-left: 0 !important;
-  margin-right: 0px !important;
-  margin-top: 5px !important;
+  margin-right: 0 !important;
+  margin-top: 0 !important;
   box-sizing: border-box !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
 }
 
 
@@ -13827,29 +13840,8 @@ a.productnamecolor {
    PDP button borders + divider lines = #e2dfd8 (sitewide brand line color).
    Late, broad sweep so every visible button border / horizontal rule on a PDP
    uses the same warm-grey line color regardless of which earlier rule painted it.
+   Add to Cart excluded — MC_PDP_ATC_BLACK_LOCK at EOF.
    ========================================================= */
-
-/* Add to Cart button (input/button + wrap) */
-html body.mc-product-page #content_area input[name="btnaddtocart"],
-html body.mc-product-page #content_area input[id*="btnaddtocart"],
-html body.mc-product-page #content_area button[name="btnaddtocart"],
-html body.mc-product-page #content_area .v65-product-addtocart input[name="btnaddtocart"],
-html body.mc-product-page #content_area .v65-product-addtocart input[id*="btnaddtocart"],
-html body.mc-product-page #content_area .v65-product-addtocart button[name="btnaddtocart"],
-html body.productdetails #content_area input[name="btnaddtocart"],
-html body.productdetails #content_area input[id*="btnaddtocart"],
-html body.productdetails #content_area button[name="btnaddtocart"],
-html body.productdetails #content_area .v65-product-addtocart input[name="btnaddtocart"],
-html body.productdetails #content_area .v65-product-addtocart input[id*="btnaddtocart"],
-html body.productdetails #content_area .v65-product-addtocart button[name="btnaddtocart"],
-html body.mc-product-page #v65-product-parent input[name="btnaddtocart"],
-html body.mc-product-page #v65-product-parent button[name="btnaddtocart"],
-html body.productdetails #v65-product-parent input[name="btnaddtocart"],
-html body.productdetails #v65-product-parent button[name="btnaddtocart"],
-html body.mc-product-page .mc-atc-button-wrap,
-html body.productdetails .mc-atc-button-wrap {
-  border-color: #e2dfd8 !important;
-}
 
 /* Accordion shell + rows + panels */
 html body.mc-product-page .mc-pdp-accordion,
@@ -14583,9 +14575,7 @@ html body.productdetails #content_area .mc-option-accordion__toggle {
   letter-spacing: 0 !important;
   text-transform: none !important;
 }
-/* ATC + accordion + config buttons — brand line #e2dfd8 */
-html body.mc-product-page .mc-atc-button-wrap,
-html body.productdetails .mc-atc-button-wrap,
+/* Accordion + config buttons — brand line #e2dfd8 (ATC uses black lock at EOF) */
 html body.mc-product-page #mcPlannerBtn,
 html body.productdetails #mcPlannerBtn,
 html body.mc-product-page #mcProductSummaryBtn,
@@ -17018,4 +17008,157 @@ html body.mc-ruched-blanket-pdp td.mc-pdp-options-td:has(#mc-pdp-price-stack-hos
   height: 0 !important;
   overflow: hidden !important;
   opacity: 0 !important;
+}
+
+/* =========================================================
+   MC_PDP_ATC_BLACK_LOCK — final cascade: black rectangular Add to Cart.
+   Targets live Volusion markup: input[name="btnaddtocart"] inside .mc-atc-button-wrap
+   (template JS wrapper) or bare .vCSS_input_addtocart / .v65-product-addtocart.
+   Does not change layout order or qty/ATC placement.
+   ========================================================= */
+html body.productdetails #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
+html body.mc-product-page #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap,
+html body.productdetails #content_area .v65-product-addtocart .mc-atc-button-wrap,
+html body.mc-product-page #content_area .v65-product-addtocart .mc-atc-button-wrap,
+html body.productdetails #v65-product-parent td.mc-pdp-options-td .mc-atc-button-wrap,
+html body.mc-product-page #v65-product-parent td.mc-pdp-options-td .mc-atc-button-wrap,
+html body.productdetails #content_area td.mc-pdp-options-td .mc-atc-button-wrap,
+html body.mc-product-page #content_area td.mc-pdp-options-td .mc-atc-button-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: fit-content !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  padding: 12px 22px !important;
+  margin: 0 !important;
+  border: 1px solid #000 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  background-color: #000 !important;
+  background-image: none !important;
+  color: #fff !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+html body.productdetails #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap:hover,
+html body.mc-product-page #v65-product-parent .v65-product-addtocart .mc-atc-button-wrap:hover,
+html body.productdetails #content_area .v65-product-addtocart .mc-atc-button-wrap:hover,
+html body.mc-product-page #content_area .v65-product-addtocart .mc-atc-button-wrap:hover {
+  background: #222 !important;
+  background-color: #222 !important;
+  color: #fff !important;
+  border-color: #222 !important;
+}
+
+html body.productdetails #v65-product-parent .mc-atc-button-wrap input[type="submit"],
+html body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[type="submit"],
+html body.productdetails #content_area .mc-atc-button-wrap input[type="submit"],
+html body.mc-product-page #content_area .mc-atc-button-wrap input[type="submit"],
+html body.productdetails #v65-product-parent .mc-atc-button-wrap input.vCSS_input_addtocart,
+html body.mc-product-page #v65-product-parent .mc-atc-button-wrap input.vCSS_input_addtocart,
+html body.productdetails #content_area .mc-atc-button-wrap input.vCSS_input_addtocart,
+html body.mc-product-page #content_area .mc-atc-button-wrap input.vCSS_input_addtocart,
+html body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.productdetails #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
+html body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart"] {
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  font: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  letter-spacing: inherit !important;
+  text-transform: inherit !important;
+  line-height: inherit !important;
+  cursor: pointer !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+html body.productdetails #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper,
+html body.mc-product-page #v65-product-parent .mc-atc-button-wrap .mc-cart-icon-wrapper,
+html body.productdetails #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
+html body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
+html body.productdetails #v65-product-parent .mc-atc-button-wrap .mc-cart-icon,
+html body.mc-product-page #v65-product-parent .mc-atc-button-wrap .mc-cart-icon,
+html body.productdetails #content_area .mc-atc-button-wrap .mc-cart-icon,
+html body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon {
+  color: #fff !important;
+  flex-shrink: 0 !important;
+}
+
+/* Bare submit (not yet wrapped by JS) — same black chrome. */
+html body.productdetails #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"],
+html body.mc-product-page #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"],
+html body.productdetails #content_area .v65-product-addtocart > input[name="btnaddtocart"],
+html body.mc-product-page #content_area .v65-product-addtocart > input[name="btnaddtocart"],
+html body.productdetails #v65-product-parent .v65-product-addtocart > input.vCSS_input_addtocart,
+html body.mc-product-page #v65-product-parent .v65-product-addtocart > input.vCSS_input_addtocart,
+html body.productdetails #v65-product-parent .v65-product-addtocart > button[name="btnaddtocart"],
+html body.mc-product-page #v65-product-parent .v65-product-addtocart > button[name="btnaddtocart"] {
+  background: #000 !important;
+  background-color: #000 !important;
+  background-image: none !important;
+  color: #fff !important;
+  border: 1px solid #000 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-transform: uppercase !important;
+  padding: 12px 22px !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  display: inline-block !important;
+  margin: 0 !important;
+}
+
+html body.productdetails #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"]:hover,
+html body.mc-product-page #v65-product-parent .v65-product-addtocart > input[name="btnaddtocart"]:hover,
+html body.productdetails #content_area .v65-product-addtocart > input[name="btnaddtocart"]:hover,
+html body.mc-product-page #content_area .v65-product-addtocart > input[name="btnaddtocart"]:hover {
+  background: #222 !important;
+  background-color: #222 !important;
+  color: #fff !important;
+  border-color: #222 !important;
+}
+
+/* Option selects must not restyle the Add to Cart control. */
+html body.productdetails #v65-product-parent #options_table select ~ .v65-product-addtocart input[name="btnaddtocart"],
+html body.mc-product-page #v65-product-parent #options_table select ~ .v65-product-addtocart input[name="btnaddtocart"],
+html body.productdetails #v65-product-parent #options_table .v65-product-addtocart .mc-atc-button-wrap,
+html body.mc-product-page #v65-product-parent #options_table .v65-product-addtocart .mc-atc-button-wrap {
+  border-radius: 0 !important;
+  font-family: Inter, Arial, sans-serif !important;
 }
