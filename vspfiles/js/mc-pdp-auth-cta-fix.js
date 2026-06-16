@@ -2183,9 +2183,20 @@
     });
   }
 
+  // Parse the trailing option-category id out of a Volusion select name,
+  // e.g. SELECT___SAR-RUCHED-MINKY-THROW-BLANKET___23 -> "23".
+  function parseOptionCategoryFromSelectName(name) {
+    var m = String(name || "").match(/___(\d+)\s*$/);
+    return m ? m[1] : "";
+  }
+
   function syncConfiguredColorSelect(select, opt) {
     if (!select || !opt) return false;
     select.value = opt.value;
+    // Use the select's real option-category id (Saranoni color = 23) instead of a
+    // hardcoded value, so AutoUpdatePriceWithSelectedOptions targets the right group.
+    var catRaw = parseOptionCategoryFromSelectName(select.name);
+    var catId = catRaw ? parseInt(catRaw, 10) : 4;
     if (typeof global.change_option === "function") {
       try {
         global.change_option(select.name, opt.value);
@@ -2193,9 +2204,12 @@
     }
     if (typeof global.AutoUpdatePriceWithSelectedOptions === "function") {
       try {
-        global.AutoUpdatePriceWithSelectedOptions(opt.value, 4);
+        global.AutoUpdatePriceWithSelectedOptions(opt.value, catId);
       } catch (ePrice) {}
     }
+    try {
+      select.dispatchEvent(new Event("input", { bubbles: true }));
+    } catch (eIn) {}
     try {
       select.dispatchEvent(new Event("change", { bubbles: true }));
     } catch (eEv) {}

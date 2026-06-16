@@ -12090,6 +12090,17 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   } else {
     document.body.classList.remove('mc-bean-bag-pdp');
   }
+
+  try {
+    var __pcSar = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+    var __pcv = String((__pcSar && __pcSar.value) || "").trim().toUpperCase();
+    if (/^SAR/.test(__pcv)) {
+      document.body.classList.add('mc-saranoni-pdp');
+      if (__pcv === 'SAR-RUCHED-MINKY-THROW-BLANKET') {
+        document.body.classList.add('mc-ruched-blanket-pdp');
+      }
+    }
+  } catch (eSarRun) {}
 }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
