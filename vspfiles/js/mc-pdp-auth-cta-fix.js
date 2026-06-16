@@ -2063,6 +2063,36 @@
     return null;
   }
 
+  // Saranoni shares one color option-category (23) across products, one option id
+  // per color. Products not in PDP_CONFIGURED_COLOR_SWATCHS get swatches built from
+  // their native options + the verified filename convention below.
+  var SARANONI_COLOR_OPTION_CATEGORY = "23";
+
+  function buildDataDrivenSaranoniEntries(select, productCode) {
+    if (!select || !select.options || !productCode) return [];
+    var out = [];
+    var seen = {};
+    var i;
+    for (i = 0; i < select.options.length; i++) {
+      var opt = select.options[i];
+      var val = String(opt.value || "").trim();
+      if (!val) continue;
+      var text = String(opt.text || "").replace(/\s+/g, " ").trim();
+      if (!text || /^(--|please\b|select\b|choose\b)/i.test(text)) continue;
+      if (seen[val]) continue;
+      seen[val] = true;
+      out.push({
+        optionId: val,
+        label: text,
+        // Repository convention, verified live for SAR-DBL-RCH-FX-FUR:
+        // /v/vspfiles/photos/{ProductCode}-{optionId}-S.jpg (swatch) and -T.jpg (main).
+        swatchImage: productCode + "-" + val + "-S.jpg",
+        mainImage: productCode + "-" + val + "-T.jpg",
+      });
+    }
+    return out;
+  }
+
   function findConfiguredColorSwatchContext() {
     // Bean bag PDPs have their own native swatch system (#beanbag-swatch-wrapper);
     // never let the configured-color swatches take over those pages.
@@ -2087,10 +2117,31 @@
           select: select,
           entries: entries,
           score: score,
+          dataDriven: false,
         };
       }
     }
-    return best;
+    if (best) return best;
+    // Data-driven fallback for any Saranoni (SAR-*) product whose color select is the
+    // shared color option-category (23). Swatches are probe-mounted, so a product
+    // whose photos are not uploaded yet keeps its native dropdown visible.
+    for (i = 0; i < selects.length; i++) {
+      var sel = selects[i];
+      if (sel.classList && sel.classList.contains("mc-native-leather")) continue;
+      var pc = parseProductCodeFromSelectName(sel.name);
+      if (!/^SAR/i.test(pc)) continue;
+      if (parseOptionCategoryFromSelectName(sel.name) !== SARANONI_COLOR_OPTION_CATEGORY) continue;
+      var dynEntries = buildDataDrivenSaranoniEntries(sel, pc);
+      if (!dynEntries.length) continue;
+      return {
+        productCode: pc,
+        select: sel,
+        entries: dynEntries,
+        score: dynEntries.length,
+        dataDriven: true,
+      };
+    }
+    return null;
   }
 
   function buildConfiguredColorImageCandidates(fileName) {
@@ -2275,14 +2326,21 @@
   function renderConfiguredColorSwatches(ctx) {
     if (!ctx || !ctx.select || !ctx.entries || !ctx.entries.length) return null;
     ensureConfiguredColorSwatchCss();
-    hideConfiguredColorNativeSelect(ctx.select);
-    hideConfiguredColorLegacyRows(ctx.select);
+    var isSar = /^SAR/i.test(ctx.productCode || "");
+    // Verified (hardcoded) products hide the native select immediately. Data-driven
+    // products hide it only after a real swatch image loads, so a product without
+    // uploaded photos keeps its native dropdown as a working fallback.
+    if (!ctx.dataDriven) {
+      hideConfiguredColorNativeSelect(ctx.select);
+      hideConfiguredColorLegacyRows(ctx.select);
+    }
     var wrap = global.document.getElementById("mc-configured-color-swatch-wrapper");
     if (!wrap) {
       wrap = global.document.createElement("div");
       wrap.id = "mc-configured-color-swatch-wrapper";
       wrap.className = "mc-configured-color-swatch-wrapper";
     }
+    if (isSar) wrap.classList.add("mc-saranoni-swatch-wrapper");
     wrap.setAttribute("data-product-code", ctx.productCode);
     // Build the swatch markup exactly once per product (idempotent). Rebuilding
     // innerHTML on every MutationObserver tick would wipe the active ring/label
@@ -2292,7 +2350,7 @@
       wrap.setAttribute("data-mc-signature", signature);
       wrap.innerHTML =
         '<div class="mc-configured-color-swatch-label">Selected color: <span id="mc-configured-color-selected-name"></span></div>' +
-        '<div class="mc-configured-color-swatches"></div>';
+        '<div class="mc-configured-color-swatches' + (isSar ? " mc-saranoni-swatches" : "") + '"></div>';
       var rail = wrap.querySelector(".mc-configured-color-swatches");
       ctx.entries.forEach(function (entry) {
         var opt = findConfiguredColorOption(ctx.select, entry);
@@ -2307,6 +2365,19 @@
         btn.setAttribute("data-label", entry.label);
         btn.innerHTML = '<img alt="' + escapeHtmlText(entry.label) + '" />';
         var img = btn.querySelector("img");
+        if (ctx.dataDriven) {
+          // Probe-mount: hide until the swatch image confirms it exists; remove the
+          // swatch on error so broken images never show.
+          btn.style.display = "none";
+          img.onload = function () {
+            btn.style.display = "";
+            hideConfiguredColorNativeSelect(ctx.select);
+            hideConfiguredColorLegacyRows(ctx.select);
+          };
+          img.onerror = function () {
+            if (btn.parentNode) btn.parentNode.removeChild(btn);
+          };
+        }
         img.src = buildConfiguredColorImageCandidates(entry.swatchImage)[0];
         rail.appendChild(btn);
       });
