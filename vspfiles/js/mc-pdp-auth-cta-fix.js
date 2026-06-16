@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp32";
+  var VERSION = "20260616pdp33";
   var PDP_CHROME_BORDER = "#e0e0e0";
   var PDP_CONFIGURED_COLOR_SWATCHS = {
     "SAR-CHNK-KNT-LG": [
@@ -1527,7 +1527,8 @@
     qty.style.setProperty("visibility", "visible", "important");
     qty.style.setProperty("opacity", "1", "important");
     qty.style.setProperty("width", "58px", "important");
-    qty.style.setProperty("height", "38px", "important");
+    qty.style.setProperty("min-width", "58px", "important");
+    qty.style.setProperty("height", isSoftGoodsPdpPage() ? "48px" : "38px", "important");
     qty.style.setProperty("margin", "0", "important");
     qty.style.setProperty("padding", "0", "important");
     qty.style.setProperty("text-align", "center", "important");
@@ -1606,7 +1607,16 @@
       stack.style.setProperty("max-width", "100%", "important");
       stack.style.setProperty("margin", "28px auto 0", "important");
       stack.style.setProperty("padding", "0", "important");
-      stack.style.setProperty("gap", "28px", "important");
+      // Bean-bag / Saranoni pages keep the quantity tight beside the cart button (10px);
+      // other product types are unchanged.
+      var mcCartGap = "28px";
+      try {
+        var bcl = global.document.body && global.document.body.classList;
+        if (bcl && (bcl.contains("mc-bean-bag-pdp") || bcl.contains("mc-saranoni-pdp"))) {
+          mcCartGap = "10px";
+        }
+      } catch (eGap) {}
+      stack.style.setProperty("gap", mcCartGap, "important");
       stack.style.setProperty("flex-wrap", "wrap", "important");
       stack.style.setProperty("clear", "both", "important");
     } catch (eStack) {}
@@ -1666,18 +1676,20 @@
         "input[name='btnaddtocart'], button[name='btnaddtocart'], input[type='submit'], input, button"
       );
       if (btn) {
-        btn.style.setProperty("border", "none", "important");
+        var softGoods = isSoftGoodsPdpPage();
+        btn.style.setProperty("border", softGoods ? "1px solid #111" : "none", "important");
         btn.style.setProperty("box-shadow", "none", "important");
         btn.style.setProperty("background", "#111", "important");
         btn.style.setProperty("background-color", "#111", "important");
         btn.style.setProperty("color", "#fff", "important");
-        btn.style.setProperty("font-family", "Inter, Arial, sans-serif", "important");
-        btn.style.setProperty("font-size", "11px", "important");
-        btn.style.setProperty("font-weight", "500", "important");
-        btn.style.setProperty("letter-spacing", "0.14em", "important");
+        btn.style.setProperty("font-family", "inherit", "important");
+        btn.style.setProperty("font-size", softGoods ? "13px" : "11px", "important");
+        btn.style.setProperty("font-weight", softGoods ? "600" : "500", "important");
+        btn.style.setProperty("letter-spacing", softGoods ? "0.12em" : "0.14em", "important");
         btn.style.setProperty("text-transform", "uppercase", "important");
         btn.style.setProperty("line-height", "1", "important");
-        btn.style.setProperty("padding", "12px 22px", "important");
+        btn.style.setProperty("padding", softGoods ? "0 28px" : "12px 22px", "important");
+        btn.style.setProperty("min-height", softGoods ? "48px" : "0", "important");
         btn.style.setProperty("margin", "0", "important");
         btn.style.setProperty("width", "auto", "important");
         btn.style.setProperty("min-width", "0", "important");
@@ -1900,6 +1912,20 @@
       if (/product-p\/bb-/i.test(p) || /\/bean-bag-seating-s\//.test(p)) return true;
     } catch (eBb) {}
     return !!global.document.getElementById("beanbag-swatch-wrapper");
+  }
+
+  function isSaranoniPdpPage() {
+    try {
+      if (global.document.body && global.document.body.classList.contains("mc-saranoni-pdp")) return true;
+      var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      var pc = String((pcEl && pcEl.value) || "").trim().toUpperCase();
+      if (/^SAR/.test(pc)) return true;
+    } catch (eSar) {}
+    return false;
+  }
+
+  function isSoftGoodsPdpPage() {
+    return isBeanBagPdpPage() || isSaranoniPdpPage();
   }
 
   function findPdpHeroColumnTd() {
@@ -2350,7 +2376,9 @@
     if (wrap.getAttribute("data-mc-signature") !== signature || !wrap.querySelector(".mc-configured-color-swatch")) {
       wrap.setAttribute("data-mc-signature", signature);
       wrap.innerHTML =
-        '<div class="mc-configured-color-swatch-label">Selected color: <span id="mc-configured-color-selected-name"></span></div>' +
+        '<div class="mc-configured-color-swatch-label">' +
+        (isSar ? "Choose color: " : "Selected color: ") +
+        '<span id="mc-configured-color-selected-name"></span></div>' +
         '<div class="mc-configured-color-swatches' + (isSar ? " mc-saranoni-swatches" : "") + '"></div>';
       var rail = wrap.querySelector(".mc-configured-color-swatches");
       ctx.entries.forEach(function (entry) {
@@ -2384,7 +2412,21 @@
       });
     }
     var host = global.document.getElementById("mc-pdp-option-block");
-    if (host && wrap.parentNode !== host) {
+    if (isSar) {
+      var insertParent = findPdpHeroInsertParent();
+      var bnpl = global.document.getElementById("messaging-element");
+      if (insertParent) {
+        insertPdpHeroNodeAfter(
+          insertParent,
+          bnpl && insertParent.contains(bnpl) ? bnpl : findPdpHeroInsertAfter(insertParent),
+          wrap
+        );
+      } else if (host && wrap.parentNode !== host) {
+        try {
+          host.appendChild(wrap);
+        } catch (eHostSar) {}
+      }
+    } else if (host && wrap.parentNode !== host) {
       try {
         host.appendChild(wrap);
       } catch (eHost) {}
@@ -2917,6 +2959,7 @@
     withMoPaused(function () {
       hideLegacyBeanBagPrice();
       extractSwatchesIntoCol();
+      markBeanBagCoverSwatchesReady();
     });
   }
 
@@ -3463,8 +3506,84 @@
             global.AutoUpdatePriceWithSelectedOptions(v, 58);
           } catch (eAu) {}
         }
+        try {
+          sizeSel.dispatchEvent(new Event("input", { bubbles: true }));
+        } catch (eIn) {}
+        try {
+          sizeSel.dispatchEvent(new Event("change", { bubbles: true }));
+        } catch (eCh) {}
+        try {
+          ensureBeanBagKingCoverRestriction();
+        } catch (eKing) {}
       });
     }
+    try {
+      ensureBeanBagKingCoverRestriction();
+    } catch (eKingInit) {}
+  }
+
+  // Pink (801) and Navy (799) covers are unavailable when King size is selected.
+  function ensureBeanBagKingCoverRestriction() {
+    if (!isBeanBagPdpPage()) return;
+    var sizeSel =
+      global.document.querySelector("#options_table select[name*='___58']") ||
+      (function () {
+        var sels = global.document.querySelectorAll("#options_table select");
+        var s;
+        for (s = 0; s < sels.length; s++) {
+          var o;
+          for (o = 0; o < sels[s].options.length; o++) {
+            if (/\b(king|queen|full)\b/i.test(sels[s].options[o].text || "")) return sels[s];
+          }
+        }
+        return null;
+      })();
+    if (!sizeSel || sizeSel.selectedIndex < 0) return;
+    var sizeText = String(sizeSel.options[sizeSel.selectedIndex].text || "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
+    var isKing = /\bking\b/.test(sizeText);
+    var kingExcludedLabels = ["faux fur / pink", "faux fur / navy"];
+    var kingExcludedOptionIds = { "799": true, "801": true };
+    global.document.querySelectorAll(".beanbag-swatch").forEach(function (swatch) {
+      var label = String(swatch.getAttribute("data-option") || "")
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        .trim();
+      var hide = isKing && kingExcludedLabels.indexOf(label) !== -1;
+      try {
+        swatch.style.display = hide ? "none" : "";
+      } catch (eDisp) {}
+      if (hide && swatch.classList.contains("active")) {
+        try {
+          swatch.classList.remove("active");
+        } catch (eRm) {}
+        var nameEl = global.document.getElementById("beanbag-selected-cover-name");
+        if (nameEl) nameEl.textContent = "";
+      }
+    });
+    if (isKing) {
+      var coverSel = global.document.querySelector("#options_table select[name*='___4']");
+      if (coverSel && coverSel.selectedIndex >= 0) {
+        var cv = String(coverSel.options[coverSel.selectedIndex].value || "");
+        if (kingExcludedOptionIds[cv]) {
+          coverSel.selectedIndex = 0;
+          try {
+            coverSel.dispatchEvent(new Event("change", { bubbles: true }));
+          } catch (eCv) {}
+        }
+      }
+    }
+  }
+
+  function markBeanBagCoverSwatchesReady() {
+    if (!isBeanBagPdpPage()) return;
+    var wrap = global.document.getElementById("beanbag-swatch-wrapper");
+    if (!wrap || !wrap.querySelector(".beanbag-swatch")) return;
+    try {
+      global.document.body.classList.add("mc-bb-cover-swatches-ready");
+    } catch (eCls) {}
   }
 
   function installPdpStackApiGuards() {
@@ -4026,6 +4145,7 @@
       installPdpStackApiGuards();
       initBeanBagImageSync();
       ensureBeanBagSizeRow();
+      markBeanBagCoverSwatchesReady();
       ensurePdpStackCriticalCss();
       ensurePdpHeroCriticalCss();
       disableQuantityHiders();

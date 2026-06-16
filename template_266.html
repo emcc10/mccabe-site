@@ -547,7 +547,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
-  <link href="/v/vspfiles/css/custom-safe.css?v=20260616pdp22" rel="stylesheet" id="mc-custom-safe-css-static">
+  <link href="/v/vspfiles/css/custom-safe.css?v=20260616pdp33" rel="stylesheet" id="mc-custom-safe-css-static">
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
   html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
@@ -1444,7 +1444,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp32"></script>
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp33"></script>
   <script id="mc-plp-enforcer-bridge">
 (function(g,d){var W="20260628a",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
@@ -4091,11 +4091,11 @@ try {
 </script>
  <script>
 (function(){
-  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260616pdp32") {
+  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260616pdp33") {
     var boot = document.getElementById("mc-pdp-auth-cta-boot");
     if (!boot) {
       var s = document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp32&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp33&mcrd=" + Date.now();
       s.async = false;
       (document.head || document.documentElement).appendChild(s);
     }
@@ -4289,6 +4289,7 @@ try {
 
   function mcApplyOffscreenNativeOptionsTable(table) {
     if (!table) return;
+    if (document.body && (document.body.classList.contains("mc-bean-bag-pdp") || document.body.classList.contains("mc-saranoni-pdp"))) return;
     table.classList.add("mc-native-options-offscreen");
     table.dataset.mcHideNativeOptions = "1";
     table.style.setProperty("position", "absolute", "important");
@@ -11380,6 +11381,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
 
   function hideOptionsTable(scope){
     if (typeof window.isBeanBagProductPage === "function" && window.isBeanBagProductPage()) return;
+    if (document.body && document.body.classList.contains("mc-saranoni-pdp")) return;
     if (document.documentElement.classList.contains("has-sectional-config-cards")) return;
     var root = scope || document;
     var keepOffscreen = mcShouldKeepOptionsOffscreen();
@@ -11925,6 +11927,7 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
             ca.querySelector('#options_table, table[id*="options_table"]') &&
             !document.body.classList.contains('mc-product-page') &&
             !document.body.classList.contains('mc-bean-bag-pdp') &&
+            !document.body.classList.contains('mc-saranoni-pdp') &&
             !isSec
           ) {
             document.body.classList.add('mc-hide-native-options-until-mc');
@@ -15747,14 +15750,14 @@ body.mc-theater-seating-pdp #content_area tr.mc-theater-hide-preleather {
   color: #777 !important;
 }
 
-body.productdetails:not(.mc-bean-bag-pdp) #content_area #options_table,
-body.productdetails:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"],
-body.mc-product-page:not(.mc-bean-bag-pdp) #content_area #options_table,
-body.mc-product-page:not(.mc-bean-bag-pdp) #content_area table[id*="options_table"],
-body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent #options_table,
-body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent table[id*="options_table"] {
+body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #content_area #options_table,
+body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #content_area table[id*="options_table"],
+body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #v65-product-parent #options_table,
+body.productdetails:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #v65-product-parent table[id*="options_table"],
+body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #content_area #options_table,
+body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #content_area table[id*="options_table"],
+body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #v65-product-parent #options_table,
+body.mc-product-page:not(.mc-bean-bag-pdp):not(.mc-saranoni-pdp) #v65-product-parent table[id*="options_table"] {
   position: static !important;
   left: auto !important;
   opacity: 1 !important;
