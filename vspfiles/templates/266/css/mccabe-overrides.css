@@ -909,7 +909,7 @@ html.mc-paragon-pdp body #content_area .v65-productdetail-cartqty {
   font-family: Inter, Arial, sans-serif !important;
 }
 
-/* Add to cart — match planner / summary control */
+/* Add to cart — approved solid black, full-column control */
 body.productdetails #content_area #btn_addtocart,
 body.mc-product-page #content_area #btn_addtocart,
 body.mc-theater-seating-pdp #content_area #btn_addtocart,
@@ -922,23 +922,31 @@ body.productdetails #content_area input[name="btnaddtocart"],
 body.mc-product-page #content_area input[name="btnaddtocart"],
 body.mc-theater-seating-pdp #content_area input[name="btnaddtocart"],
 html.mc-paragon-pdp body #content_area input[name="btnaddtocart"] {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: none !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  margin: 0 !important;
+  padding: 0 24px !important;
+  box-sizing: border-box !important;
   font-family: Inter, Arial, sans-serif !important;
   font-size: 12px !important;
-  font-weight: 400 !important;
+  font-weight: 600 !important;
+  line-height: 48px !important;
   letter-spacing: 0.14em !important;
   text-transform: uppercase !important;
-  color: #111 !important;
-  height: 44px !important;
-  min-height: 44px !important;
-  box-sizing: border-box !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  border: 1px solid #1f1f1f !important;
-  border-radius: 3px !important;
-  background: #fff !important;
-  padding: 0 16px !important;
+  text-align: center !important;
+  color: #fff !important;
+  border: 1px solid #111 !important;
+  border-radius: 0 !important;
+  background: #111 !important;
+  background-color: #111 !important;
+  background-image: none !important;
+  box-shadow: none !important;
 }
 
 /* Undo column cartqty chrome when Volusion block is inside #mc-qty-under-configuration */

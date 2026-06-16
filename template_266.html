@@ -441,13 +441,6 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
       }
       if (typeof window.mcPathIsHomepage === "function" && window.mcPathIsHomepage()) {
         document.body.classList.add("is-home");
-        document.body.classList.remove("mc-theater-seating-pdp");
-        document.body.classList.remove("mc-product-page");
-        document.body.classList.remove("mc-bean-bag-pdp");
-        try {
-          var inlineCfg = document.getElementById("mc-inline-config");
-          if (inlineCfg && inlineCfg.parentNode) inlineCfg.parentNode.removeChild(inlineCfg);
-        } catch (eRmCfg) {}
         try {
           if (root) root.classList.add("mc-allow-home-hero");
         } catch (eAhh2) {}
@@ -533,7 +526,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
 <!-- MC_DEPLOY_VERIFY_20260607revertplpmat: reverted gray PLP thumb mats from 7516154 -->
 <!-- MC_CSS_DEPLOY_VERIFY_20260607memberpricing: same token as /v/vspfiles/css/custom-safe.css line 1 -->
 <meta name="mc-deploy-verify" content="20260607memberpricing">
-<meta name="mc-live-deploy-check" content="20260615-room-planner-removed-v2">
+<meta name="mc-live-deploy-check" content="20260615-room-planner-removed">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script>
@@ -555,7 +548,7 @@ body.productdetails:not(.mc-palliser-pdp) .mc-pdp-member-pricing,body.mc-product
 
   <link href="/v/vspfiles/templates/266/css/template.css?v=20260302b" rel="stylesheet">
   <link href="/v/vspfiles/templates/266/css/mccabe-overrides.css?v=20260518plp-mat" rel="stylesheet">
-  <link href="/v/vspfiles/css/custom-safe.css?v=20260616pdp34" rel="stylesheet" id="mc-custom-safe-css-static">
+  <link href="/v/vspfiles/css/custom-safe.css?v=20260616pdp33" rel="stylesheet" id="mc-custom-safe-css-static">
   <style id="mc-plp-url-critical">
   /* Category PLP: applies via data-mc-category-plp on &lt;html&gt; before body.category exists */
   html[data-mc-category-plp="1"] .v-product-grid .v-product > a.v-product__img,
@@ -1452,7 +1445,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <script src="v/vspfiles/templates/266/js/min/design-toolkit.min.js?v=20260625plp"></script>
   <script id="mc-pdp-auth-cta-boot">/* PDP login capture: mc-pdp-auth-cta-fix.js (footer boot upgrades baked pages) */</script>
   <script src="/v/vspfiles/js/mc-pdp-price-stack.js?v=20260607member"></script>
-  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp39b"></script>
+  <script src="/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp33"></script>
   <script id="mc-plp-enforcer-bridge">
 (function(g,d){var W="20260628a",vn=function(v){var n=parseInt(String(v||"").replace(/\D/g,""),10);return isNaN(n)?0:n;};
 
@@ -1600,11 +1593,10 @@ if(g.document.body&&g.document.body.classList.contains("productdetails"))return 
       document.querySelector('input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]');
     var catEarlyV = catEarly && String(catEarly.value || "").trim();
     var isBean =
-      (!!document.getElementById("v65-product-parent") || /product-p\//i.test(p) || /-p\//i.test(p)) &&
-      (/^BB/i.test(pc) ||
-        /\/bean-bag-seating-s\//.test(p) ||
-        /product-p\/bb-/i.test(p) ||
-        catEarlyV === "103");
+      /^BB/i.test(pc) ||
+      /\/bean-bag-seating-s\//.test(p) ||
+      /product-p\/bb-/i.test(p) ||
+      catEarlyV === "103";
     if (isBean) {
       b.classList.add("mc-bean-bag-pdp");
       return;
@@ -4100,11 +4092,11 @@ try {
 </script>
  <script>
 (function(){
-  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260616pdp39b") {
+  if (String(window.__MC_PDP_AUTH_CTA_FIX_VER__ || "") !== "20260616pdp33") {
     var boot = document.getElementById("mc-pdp-auth-cta-boot");
     if (!boot) {
       var s = document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp39b&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=20260616pdp33&mcrd=" + Date.now();
       s.async = false;
       (document.head || document.documentElement).appendChild(s);
     }
@@ -4145,13 +4137,22 @@ try {
         return true;
       if (
         document.querySelector(
+          'a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"], a[href*="theater-seating"], a[href*="theatre-seating"]'
+        )
+      )
+        return true;
+      if (
+        document.querySelector(
           'select[title*="Number of Seats" i], select[title*="Choose Configuration" i]'
         )
       )
         return true;
-      var h1El = document.querySelector("h1 [itemprop='name'], h1, .vp-product-title");
-      var titleText = String((h1El && h1El.textContent) || "").toLowerCase();
-      return /theater chair|theatre chair|home theater chair|home theatre chair|\bparagon\b/i.test(
+      var titleText = (
+        (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
+        document.title ||
+        ""
+      ).toLowerCase();
+      return /theater seating|theatre seating|theater chair|theatre chair|home theater|home theatre|palliser vertex|\bparagon\b/i.test(
         titleText
       );
     } catch (eTh) {
@@ -4568,7 +4569,7 @@ try {
 
         <div id="mcConfigurationBlock" class="mc-configuration-rh mc-pdp-config-box" style="width:100%">
           <div class="mc-configuration-rh__heading">CONFIGURATION</div>
-          <div id="mcConfigurationCaption" class="mc-configuration-rh__caption">Choose your configuration below.</div>
+          <div id="mcConfigurationCaption" class="mc-configuration-rh__caption">Please use the room planner to choose configuration.</div>
           <div id="mcConfigurationPieces" class="mc-configuration-rh__pieces" style="display:none"></div>
           <div id="mcConfigurationPrice" class="mc-configuration-rh__total" style="display:none"></div>
           <div id="mcPlannerMemberPriceAboveAtc" class="mc-planner-member-price-above-atc" style="display:none" aria-live="polite">
@@ -6620,7 +6621,7 @@ function mcSyncConfigurationFromDom() {
       capEl.style.display = "block";
       capEl.classList.remove("mc-configuration-rh__planner-only");
       if (isTheaterPlanner) {
-        capEl.textContent = "Choose your configuration below.";
+        capEl.textContent = "Please use the room planner to choose configuration.";
       } else {
         capEl.textContent = "Select configuration options above.";
       }
@@ -7999,11 +8000,8 @@ body.mc-product-page #content_area #mcPlannerSummary.mc-has-selections {
   flex: 1 1 auto !important;
 }
 
-/* Add to Cart: black rectangular button — `.mc-atc-button-wrap` is the visual chrome (JS wraps input[name="btnaddtocart"]). */
-body.mc-product-page #content_area .mc-atc-row,
-body.productdetails #content_area .mc-atc-row,
-body.mc-product-page #v65-product-parent .mc-atc-row,
-body.productdetails #v65-product-parent .mc-atc-row {
+/* Add to Cart: same look as Room Planner – one white button with cart icon inside */
+body.mc-product-page #content_area .mc-atc-row {
   display: flex !important;
   align-items: center !important;
   flex-wrap: nowrap !important;
@@ -8012,88 +8010,61 @@ body.productdetails #v65-product-parent .mc-atc-row {
   border: none !important;
   padding: 0 !important;
 }
-body.mc-product-page #content_area .mc-atc-button-wrap,
-body.productdetails #content_area .mc-atc-button-wrap,
-body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
-body.productdetails #v65-product-parent .mc-atc-button-wrap {
+/* Wrapper = visual button (matches #mcPlannerBtn exactly) */
+body.mc-product-page #content_area .mc-atc-button-wrap {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  width: fit-content !important;
-  padding: 12px 22px !important;
-  border: 1px solid #000 !important;
-  border-radius: 0 !important;
-  background: #000 !important;
-  background-color: #000 !important;
-  color: #fff !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.14em !important;
+  min-width: 150px !important;
+  max-width: 100% !important;
+  padding: 10px 14px !important;
+  border: 1px solid #777 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  background-color: #fff !important;
+  color: #545454 !important;
+  font-size: 14px !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.15em !important;
   text-transform: uppercase !important;
   text-align: center !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
-  font-family: Inter, Arial, sans-serif !important;
+  font-family: inherit !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
-  margin-top: 0 !important;
-  line-height: 1 !important;
-  box-shadow: none !important;
-  -webkit-appearance: none !important;
-  appearance: none !important;
+  margin-top: 30px;
 }
-body.mc-product-page #content_area .mc-atc-button-wrap:hover,
-body.productdetails #content_area .mc-atc-button-wrap:hover,
-body.mc-product-page #v65-product-parent .mc-atc-button-wrap:hover,
-body.productdetails #v65-product-parent .mc-atc-button-wrap:hover {
-  background: #222 !important;
-  background-color: #222 !important;
-  color: #fff !important;
-  border-color: #222 !important;
+body.mc-product-page #content_area .mc-atc-button-wrap:hover {
+  background: #f5f5f5 !important;
+  background-color: #f5f5f5 !important;
+  color: #111 !important;
+  border-color: #c9c4bc !important;
 }
-/* Inner submit: solid black on the clickable control */
+/* Input inside wrapper: no box, same font so it aligns with icon */
 body.mc-product-page #content_area .mc-atc-button-wrap input[type="submit"],
-body.productdetails #content_area .mc-atc-button-wrap input[type="submit"],
-body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[type="submit"],
-body.productdetails #v65-product-parent .mc-atc-button-wrap input[type="submit"],
-body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
-body.productdetails #content_area .mc-atc-button-wrap button[name="btnaddtocart"],
-body.mc-product-page #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
-body.productdetails #v65-product-parent .mc-atc-button-wrap button[name="btnaddtocart"],
-body.mc-product-page #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
-body.productdetails #content_area .mc-atc-button-wrap input[name="btnaddtocart"],
-body.mc-product-page #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"],
-body.productdetails #v65-product-parent .mc-atc-button-wrap input[name="btnaddtocart"] {
-  display: flex !important;
-  flex: 1 1 auto !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  width: 100% !important;
+body.mc-product-page #content_area .mc-atc-button-wrap button[name="btnaddtocart"] {
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
   min-width: 0 !important;
-  max-width: 100% !important;
-  min-height: 46px !important;
-  padding: 0 28px !important;
-  margin: 0 !important;
-  border: 1px solid #111 !important;
+  padding: 0 !important;
+  border: none !important;
   border-radius: 0 !important;
-  background: #111 !important;
-  background-color: #111 !important;
+  background: transparent !important;
+  background-color: transparent !important;
   background-image: none !important;
   -webkit-appearance: none !important;
   appearance: none !important;
   box-shadow: none !important;
-  color: #fff !important;
-  font-family: Inter, Arial, sans-serif !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.12em !important;
-  text-transform: uppercase !important;
-  line-height: 1 !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  letter-spacing: inherit !important;
+  text-transform: inherit !important;
   cursor: pointer !important;
+  font-family: inherit !important;
 }
 body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon-wrapper,
 body.mc-product-page #content_area .mc-atc-button-wrap .mc-cart-icon {
@@ -10559,11 +10530,14 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
 
   function markProductPage() {
     /* Volusion injects #content_area asynchronously; don’t rely only on ProductCode timing. */
-    if (!document.getElementById("v65-product-parent")) return false;
     var pcInp =
       document.querySelector('input[name="ProductCode"]') ||
       document.querySelector('input[name="productcode"]');
-    if (!pcInp && !document.querySelector(".colors_pricebox")) return false;
+    var hasMarker =
+      pcInp ||
+      document.querySelector('#v65-product-parent') ||
+      document.querySelector('.colors_pricebox');
+    if (!hasMarker) return false;
     document.body.classList.add('mc-product-page');
     try { document.body.classList.remove('mc-hide-native-options-until-mc'); } catch (eMcH) {}
     try {
@@ -11111,19 +11085,8 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
   function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
   function clearAddToCartWrapperBackground(scope) {
-    var body = document.body;
-    if (
-      body &&
-      (body.classList.contains('mc-bean-bag-pdp') ||
-        body.classList.contains('mc-saranoni-pdp') ||
-        body.classList.contains('mc-ruched-blanket-pdp') ||
-        body.dataset.mcPdpLayoutMounted === '1')
-    ) {
-      return;
-    }
     var btn = (scope || document).querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
     if (!btn) return;
-    if (btn.closest('.mc-soft-goods-atc-wrap')) return;
     var el = btn.parentElement;
     var stop = document.querySelector('#content_area') || document.querySelector('#v65-product-parent') || document.body;
     while (el && el !== stop) {
@@ -11156,15 +11119,6 @@ body.mc-product-page .productnamecolorLARGE.colors_productname {
 
   var cartIconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mc-cart-icon" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
   function injectAddToCartIcon(scope) {
-    var body = document.body;
-    if (
-      body &&
-      (body.classList.contains('mc-bean-bag-pdp') ||
-        body.classList.contains('mc-saranoni-pdp') ||
-        body.classList.contains('mc-ruched-blanket-pdp'))
-    ) {
-      return;
-    }
     var root = scope || document;
     var btn = root.querySelector('input[name="btnaddtocart"], input[id*="btnaddtocart"], button[name="btnaddtocart"]');
     if (!btn) return;
@@ -11308,20 +11262,40 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   function isBeanBagProductPage() {
     try {
       var p = (location.pathname || '').toLowerCase();
-      var pcInp = document.querySelector('input[name="ProductCode"], input[name="productcode"]');
-      var pc = String((pcInp && pcInp.value) || '').trim();
-      var onPdp =
-        !!document.getElementById('v65-product-parent') ||
-        /product-p\//.test(p) ||
-        /-p\//.test(p);
-      if (!onPdp) return false;
-      if (/^BB/i.test(pc)) return true;
       var catInp = document.querySelector(
         'input[name="CategoryID"], input[name="categoryid"], input[name="Category_Id"]'
       );
       var catVal = catInp && String(catInp.value || '').trim();
       if (catVal === '103') return true;
-      if (/\/bean-bag-seating-s\//.test(p) || /product-p\/bb-/.test(p)) return true;
+      /* Fuzzy copy checks must NOT use document.body — global nav includes e.g. "Nest Bean Bags" (/nest/), which false-flagged every PDP as a bean bag and killed member pricing. */
+      var contentRoot =
+        document.getElementById('content_area') ||
+        document.getElementById('v65-product-parent') ||
+        document.body;
+      var bodyText = (contentRoot ? contentRoot.textContent : '').toLowerCase();
+      var titleText = (document.title || '').toLowerCase();
+
+      if (
+        /\/bean-bag-seating-s\//.test(p) ||
+        /product-p\/bb-/.test(p) ||
+        /cordaroys/.test(bodyText) ||
+        /cordaroys/.test(titleText) ||
+        /bean bag/.test(bodyText) ||
+        /bean bag/.test(titleText) ||
+        /chinchilla/.test(bodyText) ||
+        /chinchilla/.test(titleText) ||
+        /nest/.test(bodyText) ||
+        /nest/.test(titleText) ||
+        /faux fur/.test(bodyText) ||
+        /faux fur/.test(titleText) ||
+        /chenille/.test(bodyText) ||
+        /chenille/.test(titleText) ||
+        /corduroy/.test(bodyText) ||
+        /corduroy/.test(titleText)
+      ) {
+        return true;
+      }
+
       return false;
     } catch (e) {
       return false;
@@ -11330,7 +11304,6 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   window.isBeanBagProductPage = isBeanBagProductPage;
   function mcIsParagonOrTheaterPdpEarly() {
     try {
-      if (!document.getElementById("v65-product-parent")) return false;
       if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
       if (document.documentElement.classList.contains("mc-paragon-pdp")) return true;
       var path = String(location.pathname || "").toLowerCase();
@@ -11339,13 +11312,13 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       var pcInput = document.querySelector('input[name="ProductCode"]');
       var pcVal = pcInput && String(pcInput.value || "").trim();
       if (pcVal === "41417") return true;
-      var h1El = document.querySelector("h1 [itemprop='name'], h1, .vp-product-title");
-      var titleText = String((h1El && h1El.textContent) || "").toLowerCase();
-      if (
-        /\bparagon\b|theater chair|theatre chair|home theater chair|home theatre chair/.test(
-          titleText
-        )
-      ) {
+      if (/\bparagon\b|theater seating|theatre seating|theater chair|theatre chair/.test(
+        (
+          (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
+          document.title ||
+          ""
+        ).toLowerCase()
+      )) {
         return true;
       }
     } catch (eEarly) {}
@@ -11359,14 +11332,16 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   }
 
   function mcPdpKeepsNativeOptionsOffscreen() {
-    if (!document.getElementById("v65-product-parent")) return false;
     if (!document.getElementById("mc-inline-config")) return false;
     if (document.body && document.body.classList.contains("mc-theater-seating-pdp")) return true;
     if (document.documentElement.classList.contains("mc-paragon-pdp")) return true;
     if (document.querySelector(".mc-native-options-offscreen, [data-mc-hide-native-options='1']")) return true;
-    var h1El = document.querySelector("h1 [itemprop='name'], h1, .vp-product-title");
-    var title = String((h1El && h1El.textContent) || "").toLowerCase();
-    return /\bparagon\b|theater chair|theatre chair|home theater chair|home theatre chair/.test(title);
+    var title = (
+      (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
+      document.title ||
+      ""
+    ).toLowerCase();
+    return /\bparagon\b|theater seating|theatre seating|theater chair|theatre chair/.test(title);
   }
 
   function hideOptionsTable(scope){
@@ -11767,13 +11742,16 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
     if (typeof window.isSectionalProductPage === "function" && window.isSectionalProductPage()) {
       return false;
     }
-    if (!document.getElementById("v65-product-parent")) return false;
     var scope = root || document;
-    var h1El = document.querySelector("h1 [itemprop='name'], h1, .vp-product-title");
-    var theaterTitle = String((h1El && h1El.textContent) || "").toLowerCase();
+    var theaterTitle = (
+      (document.querySelector("h1 [itemprop='name'], h1, .vp-product-title") || {}).textContent ||
+      document.title ||
+      ""
+    ).toLowerCase();
     return (
-      !!(document.body && document.body.classList.contains("mc-theater-seating-pdp")) ||
-      /theater chair|theatre chair|home theater chair|home theatre chair|\bparagon\b/i.test(theaterTitle) ||
+      !!(document.body && document.body.classList.contains('mc-theater-seating-pdp')) ||
+      !!document.querySelector('a[href*="customtheaterseating-s/106"], a[href*="palliser-theater-seating-s/100"]') ||
+      /theater seating|theatre seating|theater chair|theatre chair|\bparagon\b/i.test(theaterTitle) ||
       !!scope.querySelector('select[title*="Number of Seats"], select[title*="Choose Configuration"], select[title*="Choose Cover"]')
     );
   }
@@ -12026,8 +12004,198 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       }
       return acc;
     }
+    function directTdUnder(row, node){
+      var cur = node;
+      while (cur && cur.parentNode !== row) cur = cur.parentNode;
+      return cur && cur.tagName === 'TD' ? cur : null;
+    }
+    function findOuterProductRow(mediaNode, purchaseNode){
+      if (!mediaNode || !purchaseNode) return null;
+      var cur = mediaNode;
+      while (cur && cur !== document.body) {
+        if (cur.tagName === 'TR' && cur.contains(purchaseNode)) {
+          var mediaCell = directTdUnder(cur, mediaNode);
+          var infoCell = directTdUnder(cur, purchaseNode);
+          if (mediaCell && infoCell && mediaCell !== infoCell) {
+            return { row: cur, mediaCell: mediaCell, infoCell: infoCell };
+          }
+        }
+        cur = cur.parentNode;
+      }
+      return null;
+    }
+    function setImp(el, prop, value){
+      if (el && el.style) el.style.setProperty(prop, value, 'important');
+    }
+    function productCode(){
+      var input = qsRoot('input[name="ProductCode"], input[name="productcode"]');
+      return String((input && input.value) || '').trim().toUpperCase();
+    }
+    function isFixedFurnitureSectional(){
+      var pc = productCode();
+      return /-SECT(?:$|-)/i.test(pc) && !/-SC-/i.test(pc);
+    }
+    function findDescriptionNode(){
+      var candidates = qsaRoot(
+        '#ProductDetail_ProductDetails_div span[itemprop="description"], ' +
+        '#ProductDetail_ProductDetails_div2 span[itemprop="description"], ' +
+        'span[itemprop="description"]'
+      );
+      for (var i = 0; i < candidates.length; i++) {
+        var node = candidates[i];
+        if (!node || node.closest('#mc-pdp-features, .mc-related-carousel, #related_products_content')) continue;
+        var text = String(node.textContent || '').replace(/\s+/g, ' ').trim();
+        if (text.length >= 80) return node;
+      }
+      return null;
+    }
+    function moveFixedSectionalDescriptionBelow(row){
+      if (!row || !row.parentNode || !isFixedFurnitureSectional()) return;
+      var existing = row.parentNode.querySelector(':scope > tr.mc-fixed-sectional-description-row');
+      if (existing) return;
+      var desc = findDescriptionNode();
+      if (!desc) return;
 
-    // Find the TD that contains the main image
+      var descRow = document.createElement('tr');
+      descRow.className = 'mc-fixed-sectional-description-row';
+      var descCell = document.createElement('td');
+      descCell.colSpan = Math.max(2, row.children.length || 2);
+      descCell.style.setProperty('padding', '0', 'important');
+      descCell.style.setProperty('border', '0', 'important');
+      var wrap = document.createElement('div');
+      wrap.className = 'mc-fixed-sectional-description-below';
+      wrap.appendChild(desc);
+      descCell.appendChild(wrap);
+      descRow.appendChild(descCell);
+      if (row.nextSibling) row.parentNode.insertBefore(descRow, row.nextSibling);
+      else row.parentNode.appendChild(descRow);
+    }
+    function styleFixedSectional(layout, addBtn){
+      if (!layout || !isFixedFurnitureSectional()) return;
+      document.body.classList.add('mc-fixed-sectional-pdp');
+      var row = layout.row;
+      var mediaTd = layout.mediaCell;
+      var infoTd = layout.infoCell;
+      var desktop = !window.matchMedia || window.matchMedia('(min-width: 992px)').matches;
+
+      setImp(row, 'width', '100%');
+      setImp(row, 'align-items', 'flex-start');
+      setImp(row, 'box-sizing', 'border-box');
+      if (desktop) {
+        setImp(row, 'display', 'flex');
+        setImp(row, 'flex-direction', 'row');
+        setImp(row, 'flex-wrap', 'nowrap');
+        setImp(row, 'gap', '52px');
+        setImp(mediaTd, 'display', 'block');
+        setImp(mediaTd, 'flex', '1 1 auto');
+        setImp(mediaTd, 'width', 'calc(100% - 532px)');
+        setImp(mediaTd, 'min-width', '0');
+        setImp(mediaTd, 'max-width', 'none');
+        setImp(mediaTd, 'padding', '0');
+        setImp(infoTd, 'display', 'block');
+        setImp(infoTd, 'flex', '0 0 480px');
+        setImp(infoTd, 'width', '480px');
+        setImp(infoTd, 'min-width', '480px');
+        setImp(infoTd, 'max-width', '480px');
+        setImp(infoTd, 'padding', '0');
+      } else {
+        setImp(row, 'display', 'block');
+        [mediaTd, infoTd].forEach(function(td){
+          setImp(td, 'display', 'block');
+          setImp(td, 'width', '100%');
+          setImp(td, 'min-width', '0');
+          setImp(td, 'max-width', 'none');
+          setImp(td, 'padding', '0');
+        });
+      }
+
+      qsa(':scope > *', infoTd).forEach(function(child){
+        setImp(child, 'width', '100%');
+        setImp(child, 'min-width', '0');
+        setImp(child, 'max-width', 'none');
+        setImp(child, 'box-sizing', 'border-box');
+      });
+
+      var photo = qs('#product_photo', mediaTd);
+      if (photo) {
+        setImp(photo, 'display', 'block');
+        setImp(photo, 'width', '100%');
+        setImp(photo, 'max-width', '680px');
+        setImp(photo, 'height', 'auto');
+        setImp(photo, 'margin', '0 auto');
+      }
+
+      if (addBtn) {
+        var wrap = addBtn.closest('.mc-atc-button-wrap');
+        var cartBlock = addBtn.closest('.v65-product-addtocart');
+        [cartBlock, wrap].forEach(function(el){
+          if (!el) return;
+          setImp(el, 'display', 'flex');
+          setImp(el, 'align-items', 'center');
+          setImp(el, 'justify-content', 'center');
+          setImp(el, 'width', '100%');
+          setImp(el, 'min-width', '0');
+          setImp(el, 'max-width', 'none');
+          setImp(el, 'margin', '10px 0 0');
+          setImp(el, 'padding', '0');
+          setImp(el, 'border', '0');
+          setImp(el, 'border-radius', '0');
+          setImp(el, 'background', 'transparent');
+          setImp(el, 'box-shadow', 'none');
+          setImp(el, 'box-sizing', 'border-box');
+        });
+        setImp(addBtn, '-webkit-appearance', 'none');
+        setImp(addBtn, 'appearance', 'none');
+        setImp(addBtn, 'display', 'block');
+        setImp(addBtn, 'width', '100%');
+        setImp(addBtn, 'min-width', '100%');
+        setImp(addBtn, 'max-width', 'none');
+        setImp(addBtn, 'height', '48px');
+        setImp(addBtn, 'min-height', '48px');
+        setImp(addBtn, 'margin', '0');
+        setImp(addBtn, 'padding', '0 24px');
+        setImp(addBtn, 'border', '1px solid #111');
+        setImp(addBtn, 'border-radius', '0');
+        setImp(addBtn, 'background', '#111');
+        setImp(addBtn, 'background-color', '#111');
+        setImp(addBtn, 'background-image', 'none');
+        setImp(addBtn, 'color', '#fff');
+        setImp(addBtn, 'box-shadow', 'none');
+        setImp(addBtn, 'box-sizing', 'border-box');
+        setImp(addBtn, 'font-family', 'Inter, Arial, sans-serif');
+        setImp(addBtn, 'font-size', '12px');
+        setImp(addBtn, 'font-weight', '600');
+        setImp(addBtn, 'line-height', '48px');
+        setImp(addBtn, 'letter-spacing', '.14em');
+        setImp(addBtn, 'text-align', 'center');
+        setImp(addBtn, 'text-transform', 'uppercase');
+        var icon = wrap && wrap.querySelector('.mc-cart-icon-wrapper');
+        if (icon) setImp(icon, 'display', 'none');
+      }
+
+      var purchase = qs('#mc-pdp-purchase-stack', infoTd);
+      if (purchase) {
+        setImp(purchase, 'display', 'flex');
+        setImp(purchase, 'flex-direction', 'column');
+        setImp(purchase, 'align-items', 'stretch');
+        setImp(purchase, 'justify-content', 'flex-start');
+        setImp(purchase, 'width', '100%');
+        setImp(purchase, 'max-width', 'none');
+        setImp(purchase, 'gap', '10px');
+        setImp(purchase, 'margin', '24px 0 0');
+      }
+      var qty = qs('#mc-pdp-qty-row', infoTd) || qs('.vol-cartqty__wrap', infoTd);
+      if (qty) {
+        setImp(qty, 'display', 'flex');
+        setImp(qty, 'justify-content', 'center');
+        setImp(qty, 'width', '100%');
+        setImp(qty, 'margin', '0');
+      }
+
+      moveFixedSectionalDescriptionBelow(row);
+    }
+
+    // Find the main product image and the actual purchase control.
     var main =
       qsRoot('#product_photo') ||
       qsRoot('#product_photo_td') ||
@@ -12036,20 +12204,29 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       qsRoot('.main-image') ||
       qsRoot('img#main-image');
 
-    var mediaTd = main ? main.closest('td') : null;
-
-    // Find TD that contains Add to Cart
     var addBtn =
+      qsRoot('#btn_addtocart') ||
+      qsRoot('#btnaddtocart') ||
       qsRoot('input[name="btnaddtocart"]') ||
       qsRoot('input[id*="btnaddtocart" i]') ||
-      qsaRoot('input[type="submit"], button').find(function(el){
-        return /add to cart/i.test(el.value || el.textContent || '');
+      qsaRoot('input[type="submit"], input[type="button"], button, a').find(function(el){
+        return /add\s+to\s+cart/i.test(el.value || el.textContent || '');
       });
 
-    var optionsTd = addBtn ? addBtn.closest('td') : null;
+    // Remove stale classes previously assigned to nested Volusion cells.
+    qsaRoot('td.mc-pdp-media-td, td.mc-pdp-options-td').forEach(function(td){
+      td.classList.remove('mc-pdp-media-td', 'mc-pdp-options-td');
+    });
+    qsaRoot('tr.mc-pdp-main-row').forEach(function(tr){
+      tr.classList.remove('mc-pdp-main-row');
+    });
 
-    // Fallback: TD containing first visible non-hidden select (NOT hidden leather select)
-    if (!optionsTd){
+    var layout = findOuterProductRow(main, addBtn);
+    var mediaTd = layout ? layout.mediaCell : (main ? main.closest('td') : null);
+    var optionsTd = layout ? layout.infoCell : null;
+
+    if (!optionsTd && addBtn) optionsTd = addBtn.closest('td');
+    if (!optionsTd) {
       var sel = qsaRoot('select').find(function(s){
         if (s.classList.contains('mc-native-leather')) return false;
         return s.offsetParent !== null;
@@ -12057,9 +12234,11 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
       optionsTd = sel ? sel.closest('td') : null;
     }
 
-    // Apply classes
     if (mediaTd) mediaTd.classList.add('mc-pdp-media-td');
     if (optionsTd) optionsTd.classList.add('mc-pdp-options-td');
+    if (layout && layout.row) layout.row.classList.add('mc-pdp-main-row');
+
+    styleFixedSectional(layout, addBtn);
   }
 
   function run(){
@@ -12099,6 +12278,9 @@ else if (catParam && /^\d+$/.test(String(catParam).trim())) fromQuery = String(c
   window.addEventListener('load', run);
   setTimeout(run, 300);
   setTimeout(run, 900);
+  setTimeout(run, 1700);
+  setTimeout(run, 3200);
+  window.addEventListener('resize', run);
 })();
 </script>
 <script>
@@ -12822,16 +13004,14 @@ if (mcShouldUseLeatherAccordion()) {
   }
 
   function placePalliserLogoUnderTitle() {
-    if (document.body && document.body.dataset.mcPdpLayoutMounted === '1') return;
     var title = document.getElementById('mc-pdp-title-right');
     if (!title || !title.parentNode) return;
     var parent = title.parentNode;
     var wrap = document.getElementById('mc-pdp-brand-logo');
-    /* Already moved a logo — keep it directly below the title. */
+    /* Already moved a logo — re-assert position above the title. */
     if (wrap && wrap.querySelector('img')) {
-      if (wrap.parentNode !== parent || wrap.previousElementSibling !== title) {
-        if (title.nextSibling) parent.insertBefore(wrap, title.nextSibling);
-        else parent.appendChild(wrap);
+      if (wrap.parentNode !== parent || wrap.nextElementSibling !== title) {
+        parent.insertBefore(wrap, title);
       }
       syncPdpHeroTopAlign();
       return;
@@ -12850,8 +13030,7 @@ if (mcShouldUseLeatherAccordion()) {
       wrap.className = 'mc-pdp-brand-logo';
     }
     wrap.appendChild(logo);
-    if (title.nextSibling) parent.insertBefore(wrap, title.nextSibling);
-    else parent.appendChild(wrap);
+    parent.insertBefore(wrap, title);
     syncPdpHeroTopAlign();
   }
   window.mcPlaceBrandLogoAboveTitle = placePalliserLogoUnderTitle;
@@ -12987,9 +13166,6 @@ if (mcShouldUseLeatherAccordion()) {
   function run() {
     if (!isPdpPage()) return;
     __mcAccRunPending = false;
-    if (document.body && document.body.dataset.mcPdpLayoutMounted === '1') {
-      return;
-    }
     // mc-pdp-auth-cta-fix.js owns layout on standard PDPs (bean bags, Saranoni, dining, etc.).
     // Re-running placeTitle/syncPdpHeroTopAlign here was undoing that script after every deploy.
     var _accPc = String((document.querySelector('input[name="ProductCode"]') || {}).value || '');
@@ -13006,11 +13182,9 @@ if (mcShouldUseLeatherAccordion()) {
       moveAltViewsUnderMainImage();
       return;
     }
-    if (
-      (document.body && document.body.dataset.mcPdpLayoutMounted === '1') ||
-      document.documentElement.dataset.mcPdpNormalized === '1'
-    ) {
-      if (!isSectionalPg()) return;
+    if (document.documentElement.dataset.mcPdpNormalized === '1' && !isSectionalPg()) {
+      moveAltViewsUnderMainImage();
+      return;
     }
     placeTitle();
     placePalliserLogoUnderTitle();
@@ -22552,15 +22726,13 @@ s0.parentNode.insertBefore(s1,s0);
 <script id="mc-hide-config-non-theater-pdps">
 (function () {
   function mcIsTrueTheaterSeatingPdp() {
-    if (!document.getElementById("v65-product-parent")) return false;
     var path = "";
     var title = "";
     var pc = "";
 
     try {
       path = String(location.pathname || "").toLowerCase();
-      var h1El = document.querySelector("h1 [itemprop='name'], h1, .vp-product-title");
-      title = String((h1El && h1El.textContent) || "").toLowerCase();
+      title = String(document.title || "").toLowerCase();
 
       var pcInput = document.querySelector('input[name="ProductCode"]');
       pc = pcInput ? String(pcInput.value || "").toLowerCase() : "";
@@ -22570,7 +22742,6 @@ s0.parentNode.insertBefore(s1,s0);
       IMPORTANT:
       Do NOT use "palliser" alone here.
       Titan, Barrett, sectional, sofa, recliner pages are also Palliser.
-      Do NOT match document.title — the store homepage title contains "Theater Seating".
     */
     return (
       document.documentElement.classList.contains("mc-paragon-pdp") ||
@@ -22580,6 +22751,8 @@ s0.parentNode.insertBefore(s1,s0);
       title.indexOf("theatre chair") !== -1 ||
       title.indexOf("home theater chair") !== -1 ||
       title.indexOf("home theatre chair") !== -1 ||
+      title.indexOf("theater seating") !== -1 ||
+      title.indexOf("theatre seating") !== -1 ||
       pc.indexOf("theater") !== -1 ||
       pc.indexOf("theatre") !== -1
     );
@@ -23041,477 +23214,5 @@ body.mc-product-page #v65-product-related img {
   }
 }
 </style>
-<style>
-/* RETURN TO CATEGORY LINK ABOVE PRODUCT IMAGE */
-.mc-return-category{
-  display:block;
-  width:100%;
-  margin:0 0 14px;
-  padding:0;
-  text-align:left;
-  clear:both;
-  box-sizing:border-box;
-}
-
-.mc-return-category__link{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  font-family:Inter,Arial,sans-serif;
-  font-size:11px;
-  line-height:1.4;
-  font-weight:600;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  color:#2d251e;
-  text-decoration:none;
-  transition:color .2s ease, transform .2s ease;
-}
-
-.mc-return-category__link::before{
-  content:"\2190";
-  display:inline-block;
-  font-size:16px;
-  line-height:1;
-  font-weight:400;
-  letter-spacing:0;
-}
-
-.mc-return-category__link:hover,
-.mc-return-category__link:focus{
-  color:#756555;
-  text-decoration:none;
-  transform:translateX(-2px);
-}
-
-@media (max-width:767px){
-  .mc-return-category{
-    margin-bottom:12px;
-  }
-
-  .mc-return-category__link{
-    font-size:10px;
-    letter-spacing:.12em;
-  }
-}
-</style>
-
-<script>
-(function () {
-  "use strict";
-
-  var STORAGE_KEY = "mcLastProductCategory";
-
-  function cleanText(value) {
-    return String(value || "")
-      .replace(/\s+/g, " ")
-      .replace(/^\s+|\s+$/g, "");
-  }
-
-  function isCategoryUrl(url) {
-    return (
-      /\/category-s\/\d+\.htm/i.test(url) ||
-      /\/[^/?#]+-s\/\d+\.htm/i.test(url) ||
-      /SearchResults\.asp[^#]*[?&]Cat=/i.test(url)
-    );
-  }
-
-  function isProductPage() {
-    var currentUrl = window.location.pathname + window.location.search;
-
-    return (
-      /-p\//i.test(currentUrl) ||
-      /ProductDetails\.asp/i.test(currentUrl)
-    );
-  }
-
-  function isCategoryPage() {
-    return isCategoryUrl(
-      window.location.pathname + window.location.search
-    );
-  }
-
-  function categoryNameFromUrl(url) {
-    var path = String(url || "")
-      .split("?")[0]
-      .replace(/\/+$/, "");
-
-    var match = path.match(/\/([^/]+)-s\/\d+\.htm/i);
-
-    if (match && match[1]) {
-      return match[1]
-        .replace(/-/g, " ")
-        .replace(/\b\w/g, function (letter) {
-          return letter.toUpperCase();
-        });
-    }
-
-    return "Category";
-  }
-
-  function isBeanBagProductPage() {
-    try {
-      if (document.body && document.body.classList.contains("mc-bean-bag-pdp")) {
-        return true;
-      }
-      var path = String(window.location.pathname || "").toLowerCase();
-      if (/product-p\/bb-/.test(path)) {
-        return true;
-      }
-      if (document.getElementById("beanbag-swatch-wrapper")) {
-        return true;
-      }
-    } catch (error) {}
-    return false;
-  }
-
-  function categoryFromProductType() {
-    if (isBeanBagProductPage()) {
-      return {
-        url: "/bean-bag-seating-s/103.htm",
-        name: "Bean Bags"
-      };
-    }
-    return null;
-  }
-
-  function readStoredCategory() {
-    try {
-      var saved = window.sessionStorage.getItem(STORAGE_KEY);
-
-      if (!saved) {
-        return null;
-      }
-
-      var category = JSON.parse(saved);
-
-      if (
-        !category ||
-        !category.url ||
-        !isCategoryUrl(category.url)
-      ) {
-        return null;
-      }
-
-      /*
-       * Ignore stale category history after two hours.
-       */
-      if (
-        category.savedAt &&
-        Date.now() - category.savedAt > 7200000
-      ) {
-        window.sessionStorage.removeItem(STORAGE_KEY);
-        return null;
-      }
-
-      return category;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  function saveCurrentCategory() {
-    if (!isCategoryPage()) {
-      return;
-    }
-
-    var heading =
-      document.querySelector(
-        ".mc-cat-landing h1, .mc-living-landing h1, main h1, #content_area h1, h1"
-      );
-
-    var name = cleanText(
-      heading ? heading.textContent : document.title
-    );
-
-    if (!name) {
-      name = categoryNameFromUrl(window.location.href);
-    }
-
-    try {
-      window.sessionStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          url: window.location.href,
-          name: name,
-          savedAt: Date.now()
-        })
-      );
-    } catch (error) {
-      /*
-       * The breadcrumb fallback will still work if storage is unavailable.
-       */
-    }
-  }
-
-  function categoryFromReferrer() {
-    if (!document.referrer) {
-      return null;
-    }
-
-    var referrerLink = document.createElement("a");
-    referrerLink.href = document.referrer;
-
-    if (
-      referrerLink.hostname !== window.location.hostname ||
-      !isCategoryUrl(referrerLink.href)
-    ) {
-      return null;
-    }
-
-    var stored = readStoredCategory();
-    var referrerUrl =
-      referrerLink.pathname +
-      referrerLink.search;
-
-    if (stored) {
-      var storedLink = document.createElement("a");
-      storedLink.href = stored.url;
-
-      var storedUrl =
-        storedLink.pathname +
-        storedLink.search;
-
-      if (storedUrl === referrerUrl) {
-        return {
-          url: referrerLink.href,
-          name: stored.name
-        };
-      }
-    }
-
-    return {
-      url: referrerLink.href,
-      name: categoryNameFromUrl(referrerLink.href)
-    };
-  }
-
-  function categoryFromBreadcrumb() {
-    var selectors = [
-      "#v65-breadcrumbs a[href]",
-      ".v65-breadcrumbs a[href]",
-      "#breadcrumbs a[href]",
-      ".breadcrumbs a[href]",
-      ".breadcrumb a[href]"
-    ];
-
-    var links = [];
-    var index;
-
-    for (index = 0; index < selectors.length; index += 1) {
-      var matchedLinks =
-        document.querySelectorAll(selectors[index]);
-
-      if (matchedLinks.length) {
-        links = Array.prototype.slice.call(matchedLinks);
-        break;
-      }
-    }
-
-    /*
-     * Fallback for templates whose breadcrumb has no class or ID.
-     * The final category link before the product heading is selected.
-     */
-    if (!links.length) {
-      var productHeading =
-        document.querySelector(
-          "#v65-product-parent h1, .productnamecolorLARGE, main h1, h1"
-        );
-
-      var allLinks =
-        Array.prototype.slice.call(
-          document.querySelectorAll("a[href]")
-        );
-
-      links = allLinks.filter(function (link) {
-        if (!isCategoryUrl(link.href)) {
-          return false;
-        }
-
-        if (!productHeading) {
-          return true;
-        }
-
-        return Boolean(
-          link.compareDocumentPosition(productHeading) &
-          Node.DOCUMENT_POSITION_FOLLOWING
-        );
-      });
-    }
-
-    var categoryLinks = links.filter(function (link) {
-      return isCategoryUrl(link.href);
-    });
-
-    if (!categoryLinks.length) {
-      return null;
-    }
-
-    var categoryLink =
-      categoryLinks[categoryLinks.length - 1];
-
-    return {
-      url: categoryLink.href,
-      name:
-        cleanText(categoryLink.textContent) ||
-        categoryNameFromUrl(categoryLink.href)
-    };
-  }
-
-  function categoryFromStorage() {
-    var stored = readStoredCategory();
-
-    if (!stored) {
-      return null;
-    }
-
-    return {
-      url: stored.url,
-      name: stored.name
-    };
-  }
-
-  function findMainProductImage() {
-    var selectors = [
-      "#product_photo",
-      "#product_photo_zoom_url img",
-      "img#product_photo",
-      "#v65-product-parent img[itemprop='image']",
-      "#v65-product-parent img[src*='/photos/']",
-      ".v65-productPhoto img",
-      ".v65-product-photo img",
-      ".product-photo img",
-      ".product_photo img"
-    ];
-
-    var index;
-
-    for (index = 0; index < selectors.length; index += 1) {
-      var image = document.querySelector(selectors[index]);
-
-      if (image) {
-        if (
-          image.tagName &&
-          image.tagName.toLowerCase() !== "img"
-        ) {
-          image = image.querySelector("img") || image;
-        }
-
-        return image;
-      }
-    }
-
-    return null;
-  }
-
-  function findImageContainer(image) {
-    if (!image) {
-      return null;
-    }
-
-    if (image.closest) {
-      return (
-        image.closest("#product_photo_area") ||
-        image.closest(".v65-productPhoto") ||
-        image.closest(".v65-product-photo") ||
-        image.closest(".product-photo") ||
-        image.closest(".product_photo") ||
-        image.closest("td") ||
-        image.parentNode
-      );
-    }
-
-    return image.parentNode;
-  }
-
-  function addReturnLink(attempt) {
-    if (!isProductPage()) {
-      return;
-    }
-
-    var category =
-      categoryFromProductType() ||
-      categoryFromReferrer() ||
-      categoryFromBreadcrumb() ||
-      categoryFromStorage();
-
-    if (!category || !category.url) {
-      return;
-    }
-
-    var categoryName =
-      cleanText(category.name) || "Category";
-
-    var existing = document.querySelector(".mc-return-category");
-    if (existing) {
-      var existingLink = existing.querySelector(".mc-return-category__link");
-      if (existingLink) {
-        existingLink.href = category.url;
-        existingLink.textContent = "Return to " + categoryName;
-        existingLink.setAttribute(
-          "aria-label",
-          "Return to " + categoryName
-        );
-      }
-      return;
-    }
-
-    var image = findMainProductImage();
-    var imageContainer = findImageContainer(image);
-
-    if (!image || !imageContainer) {
-      if (attempt < 30) {
-        window.setTimeout(function () {
-          addReturnLink(attempt + 1);
-        }, 250);
-      }
-
-      return;
-    }
-
-    var wrapper = document.createElement("div");
-    wrapper.className = "mc-return-category";
-
-    var link = document.createElement("a");
-    link.className = "mc-return-category__link";
-    link.href = category.url;
-    link.textContent = "Return to " + categoryName;
-    link.setAttribute(
-      "aria-label",
-      "Return to " + categoryName
-    );
-
-    wrapper.appendChild(link);
-
-    imageContainer.insertBefore(
-      wrapper,
-      imageContainer.firstChild
-    );
-  }
-
-  function initializeReturnLink() {
-    saveCurrentCategory();
-    addReturnLink(0);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener(
-      "DOMContentLoaded",
-      initializeReturnLink
-    );
-  } else {
-    initializeReturnLink();
-  }
-
-  /*
-   * One delayed check protects against Volusion product scripts
-   * rebuilding the image area after the initial page load.
-   */
-  window.setTimeout(function () {
-    addReturnLink(0);
-  }, 1200);
-})();
-</script>
-
 </body>
 </html>
