@@ -7,7 +7,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "20260628b";
+  var VERSION = "20260628c";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -246,6 +246,35 @@
     return m ? String(m[1]).trim() : "";
   }
 
+  /** Travel mats use TMH-TRV-* on Volusion; repo photos may be TMH-MAT-* stems. */
+  var TMH_TRV_PHOTO_ALIASES = {
+    "TMH-TRV-AMETHYST-GEM-MAT": "TMH-MAT-AMETHYST-GEM-TRAVEL-MAT",
+    "TMH-TRV-AMETHYST-TABLE-MAT": "TMH-MAT-AMETHYST-TABLE-TRAVEL-MAT",
+    "TMH-TRV-BLUE-MAT": "TMH-MAT-BLUE-MAT",
+    "TMH-TRV-ELEC-BLU-GARDEN": "TMH-MAT-ELEC-BLU-GARDEN",
+    "TMH-TRV-ELEC-BLU-TRELLIS": "TMH-MAT-ELEC-BLU-TRELLIS",
+    "TMH-TRV-EMERALD-GEM-MAT": "TMH-MAT-EMERALD-GEM-MAT",
+    "TMH-TRV-EMERALD-TABLE-MAT": "TMH-MAT-EMERALD-TABLE-MAT",
+    "TMH-TRV-LILAC-GARDEN-MAT": "TMH-MAT-LILAC-GARDEN-MAT",
+    "TMH-TRV-LILAC-TRELLIS-MAT": "TMH-MAT-LILAC-TRELLIS-MAT",
+    "TMH-TRV-PLUM-GARDEN-MAT": "TMH-MAT-PLUM-GARDEN-MAT",
+    "TMH-TRV-PLUM-TRELLIS-MAT": "TMH-MAT-PLUM-TRELLIS-MAT",
+    "TMH-TRV-PURP-RED-GRN": "TMH-MAT-DECO-OLIVE-AND-RED-MAT",
+    "TMH-TRV-RUBY-GEM-MAT": "TMH-MAT-RUBY-GEM-MAT",
+    "TMH-TRV-RUBY-TABLE-MAT": "TMH-MAT-RUBY-TABLE-MAT",
+    "TMH-TRV-SAPPHIRE-GEM-MAT": "TMH-MAT-SAPPHIRE-GEM-MAT",
+    "TMH-TRV-SAPPHIRE-TABLE-MAT": "TMH-MAT-SAPPHIRE-TABLE-MAT",
+    "TMH-TRV-TEAL-GARDEN-MAT": "TMH-MAT-TEAL-GARDEN-MAT",
+    "TMH-TRV-TEAL-TRELLIS-MAT": "TMH-MAT-TEAL-TRELLIS-MAT",
+  };
+
+  function resolveTmhMatPhotoCode(sku) {
+    var code = String(sku || "").trim().toUpperCase();
+    if (!code) return code;
+    if (TMH_TRV_PHOTO_ALIASES[code]) return TMH_TRV_PHOTO_ALIASES[code];
+    return code;
+  }
+
   function fixTmhMatPlpThumbnails(root) {
     root = root || document.getElementById("content_area") || document;
     root.querySelectorAll('img[src*="/vspfiles/photos/TMH-MAT-"]').forEach(function (img) {
@@ -259,10 +288,10 @@
       var title = String(
         (node.getAttribute && (node.getAttribute("title") || node.textContent)) || ""
       );
-      if (!/TMH-MAT-/i.test(title)) return;
-      var m = title.match(/,\s*(TMH-MAT-[A-Z0-9-]+)\s*$/i);
+      if (!/TMH-MAT-|TMH-TRV-/i.test(title)) return;
+      var m = title.match(/,\s*(TMH-(?:MAT|TRV)-[A-Z0-9-]+)\s*$/i);
       if (!m) return;
-      var code = m[1].toUpperCase();
+      var code = resolveTmhMatPhotoCode(m[1]);
       var block = node.closest ? node.closest(".v-product, tr, td") : node;
       if (!block) return;
       var img =
@@ -288,13 +317,14 @@
       );
       if (!sku || !/^[0-9A-Za-z][0-9A-Za-z-]*$/.test(sku)) return;
 
+      var photoCode = resolveTmhMatPhotoCode(sku);
       var img =
         block.querySelector("a.v-product__img img") ||
         block.querySelector(".v-product__img img") ||
         block.querySelector("img");
       if (!img || !isNoPhotoPlaceholder(img.currentSrc || img.src)) return;
 
-      var file = sku + "-1.jpg";
+      var file = photoCode + "-1.jpg";
       var probe = new Image();
       probe.onload = function () {
         if (probe.naturalWidth < 80) return;

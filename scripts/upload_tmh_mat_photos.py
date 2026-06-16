@@ -13,12 +13,13 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 def targets() -> list[str]:
     names: set[str] = set()
-    for path in PHOTOS.glob("TMH-MAT-*-1.jpg"):
-        code = path.name[:-6]
-        names.add(f"{code}-1.jpg")
-        thumb = PHOTOS / f"{code}-2T.jpg"
-        if thumb.is_file():
-            names.add(f"{code}-2T.jpg")
+    for pattern in ("TMH-MAT-*-1.jpg", "TMH-TRV-*-1.jpg"):
+        for path in PHOTOS.glob(pattern):
+            code = path.name[:-6]
+            names.add(f"{code}-1.jpg")
+            thumb = PHOTOS / f"{code}-2T.jpg"
+            if thumb.is_file():
+                names.add(f"{code}-2T.jpg")
     return sorted(names)
 
 
@@ -64,7 +65,7 @@ def main() -> int:
     finally:
         transport.close()
 
-    print(f"Uploaded {ok}/{len(files)} TMH mat photo(s); failed {fail}")
+    print(f"Uploaded {ok}/{len(files)} TMH mat/travel photo(s); failed {fail}")
     return 1 if fail else 0
 
 
