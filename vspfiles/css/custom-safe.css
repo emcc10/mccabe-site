@@ -17310,3 +17310,13 @@ html body.mc-saranoni-pdp .vCSS_input_addtocart {
   min-height: 38px !important;
   padding-bottom: 5px !important;
 }
+
+html.mc-url-looks-like-pdp body #related_products_content img,
+html.mc-url-looks-like-pdp body #v65-product-related img,
+body.productdetails #related_products_content img,
+body.productdetails #v65-product-related img,
+body.mc-product-page #related_products_content img,
+body.mc-product-page #v65-product-related img {
+  max-width: 200px !important;
+  max-height: 250px !important;
+}
