@@ -6,10 +6,11 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260616unified2";
-  var AUTH_LAYOUT_VER = "20260616pdp42";
+  var LAYOUT_VER = "20260616unified4";
+  var AUTH_LAYOUT_VER = "20260616pdp43";
   var moTimer = null;
   var moBound = false;
+  var moInstance = null;
 
   function qs(sel, root) {
     return (root || global.document).querySelector(sel);
@@ -80,10 +81,52 @@
     return n;
   }
 
-  function appendInOrder(parent, nodes) {
-    nodes.forEach(function (el) {
-      if (el && el.parentNode === parent) parent.appendChild(el);
+  function childrenInOrder(parent, nodes) {
+    var present = nodes.filter(function (el) {
+      return el && el.parentNode === parent;
     });
+    if (!present.length) return true;
+    var i;
+    for (i = 0; i < present.length - 1; i++) {
+      if (present[i].nextElementSibling !== present[i + 1]) return false;
+    }
+    return true;
+  }
+
+  function appendInOrder(parent, nodes) {
+    var present = nodes.filter(function (el) {
+      return el && el.parentNode === parent;
+    });
+    if (!present.length || childrenInOrder(parent, present)) return false;
+    present.forEach(function (el) {
+      parent.appendChild(el);
+    });
+    return true;
+  }
+
+  function isUnifiedStable() {
+    return !!(
+      global.__MC_UNIFIED_PDP_STABLE__ &&
+      global.document.body &&
+      global.document.body.classList.contains("mc-pdp-unified-ready") &&
+      qs("tr.mc-unified-pdp-row") &&
+      qs(".mc-unified-purchase-controls")
+    );
+  }
+
+  function markUnifiedStable() {
+    global.__MC_UNIFIED_PDP_STABLE__ = true;
+    if (moInstance && typeof moInstance.disconnect === "function") {
+      try {
+        moInstance.disconnect();
+      } catch (eMo) {}
+      moInstance = null;
+      moBound = false;
+    }
+    if (moTimer) {
+      clearTimeout(moTimer);
+      moTimer = null;
+    }
   }
 
   function clearInlineLayout(el) {
@@ -243,6 +286,7 @@
 
   function prepareAtcButton(btn) {
     if (!btn) return btn;
+    if (btn.getAttribute("data-mc-atc-styled") === AUTH_LAYOUT_VER) return btn;
     if ((btn.type || "").toLowerCase() === "image") {
       try {
         btn.type = "submit";
@@ -479,6 +523,7 @@
   function mcNormalizePdpLayout() {
     if (!isPDP()) return false;
     if (isSectionalConfigurator()) return false;
+    if (isUnifiedStable()) return true;
 
     unwrapBadWrapper();
     tagProductBodyClasses();
@@ -515,19 +560,33 @@
     var table = layout.table;
 
     qsa("td.mc-unified-pdp-media, td.mc-unified-pdp-info").forEach(function (td) {
+      if (td === mediaTd || td === infoTd) return;
       td.classList.remove("mc-unified-pdp-media", "mc-unified-pdp-info", "mc-pdp-media-td", "mc-pdp-options-td");
     });
     qsa("tr.mc-unified-pdp-row").forEach(function (tr) {
       if (tr !== row) tr.classList.remove("mc-unified-pdp-row", "mc-pdp-main-row");
     });
 
-    row.classList.add("mc-unified-pdp-row", "mc-pdp-main-row");
-    mediaTd.classList.add("mc-unified-pdp-media", "mc-pdp-media-td");
-    infoTd.classList.add("mc-unified-pdp-info", "mc-pdp-options-td");
+    if (!row.classList.contains("mc-unified-pdp-row")) row.classList.add("mc-unified-pdp-row", "mc-pdp-main-row");
+    if (!mediaTd.classList.contains("mc-unified-pdp-media")) {
+      mediaTd.classList.add("mc-unified-pdp-media", "mc-pdp-media-td");
+    }
+    if (!infoTd.classList.contains("mc-unified-pdp-info")) {
+      infoTd.classList.add("mc-unified-pdp-info", "mc-pdp-options-td");
+    }
 
-    clearInlineLayout(row);
-    clearInlineLayout(mediaTd);
-    clearInlineLayout(infoTd);
+    if (!row.dataset.mcUnifiedLayoutCleared) {
+      clearInlineLayout(row);
+      row.dataset.mcUnifiedLayoutCleared = "1";
+    }
+    if (!mediaTd.dataset.mcUnifiedLayoutCleared) {
+      clearInlineLayout(mediaTd);
+      mediaTd.dataset.mcUnifiedLayoutCleared = "1";
+    }
+    if (!infoTd.dataset.mcUnifiedLayoutCleared) {
+      clearInlineLayout(infoTd);
+      infoTd.dataset.mcUnifiedLayoutCleared = "1";
+    }
     normalizeMediaColumn(mediaTd);
     global.document.body.classList.remove("mc-fixed-sectional-pdp");
 
@@ -548,34 +607,39 @@
       if (typeof global.mcSyncHomeBodyClass === "function") global.mcSyncHomeBodyClass();
     } catch (eSync) {}
 
+    global.__MC_PDP_HERO_READY_LOCKED__ = true;
+    markUnifiedStable();
     return true;
   }
 
   global.mcNormalizePdpLayout = mcNormalizePdpLayout;
 
   function scheduleNormalize() {
+    if (isUnifiedStable() || global.__MC_PDP_MO_PAUSE__) return;
     if (moTimer) clearTimeout(moTimer);
     moTimer = setTimeout(function () {
       moTimer = null;
+      if (isUnifiedStable() || global.__MC_PDP_MO_PAUSE__) return;
       mcNormalizePdpLayout();
     }, 120);
   }
 
   function bindMutationObserver() {
-    if (moBound) return;
+    if (moBound || isUnifiedStable()) return;
     var root = qs("#v65-product-parent") || qs("#content_area");
     if (!root || typeof MutationObserver === "undefined") return;
     moBound = true;
-    var mo = new MutationObserver(function () {
-      if (!isPDP() || isSectionalConfigurator()) return;
+    moInstance = new MutationObserver(function () {
+      if (!isPDP() || isSectionalConfigurator() || isUnifiedStable()) return;
+      if (global.__MC_PDP_MO_PAUSE__) return;
       scheduleNormalize();
     });
-    mo.observe(root, { childList: true, subtree: true });
-    global.__MC_UNIFIED_PDP_MO__ = mo;
+    moInstance.observe(root, { childList: true, subtree: true });
+    global.__MC_UNIFIED_PDP_MO__ = moInstance;
   }
 
   function boot() {
-    mcNormalizePdpLayout();
+    if (mcNormalizePdpLayout()) return;
     bindMutationObserver();
   }
 
@@ -584,5 +648,7 @@
   } else {
     boot();
   }
-  global.addEventListener("load", mcNormalizePdpLayout);
+  global.addEventListener("load", function () {
+    if (!isUnifiedStable()) mcNormalizePdpLayout();
+  });
 })(window);

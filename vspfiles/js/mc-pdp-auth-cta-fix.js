@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp42";
+  var VERSION = "20260616pdp43";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -89,12 +89,14 @@
   var configuredColorEnforceUntil = 0;
   var configuredColorEnforceTimer = null;
   var PDP_HERO_ANTIFLICKER_SEL =
-    "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo," +
-    "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-title-right,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-title-right," +
-    "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host," +
-    "body.productdetails:not(.mc-pdp-hero-ready) #beanbag-swatch-wrapper,body.mc-product-page:not(.mc-pdp-hero-ready) #beanbag-swatch-wrapper," +
-    "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-features,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-features," +
-    "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-purchase-stack,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-purchase-stack";
+    "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-brand-logo," +
+    "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-title-right,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-title-right," +
+    "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) h1[itemprop='name'],body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) h1[itemprop='name']," +
+    "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-price-stack-host,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-price-stack-host," +
+    "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #beanbag-swatch-wrapper,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #beanbag-swatch-wrapper," +
+    "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-features,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-features," +
+    "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-purchase-stack,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-purchase-stack," +
+    "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) .mc-unified-purchase-controls,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) .mc-unified-purchase-controls";
   /* Set immediately so console/deploy checks work even if later init throws */
   global.__MC_PDP_AUTH_CTA_FIX_VER__ = VERSION;
 
@@ -1219,6 +1221,7 @@
 
   function placePriceStackHost(host) {
     if (!host) return;
+    if (isUnifiedPdpReady()) return;
     if (isPdpLayoutMounted() && !isSoftGoodsPdpPage()) return;
     if (isSoftGoodsPdpPage()) {
       var sgCol = findPdpHeroColumnTd();
@@ -1348,6 +1351,14 @@
       global.document.body &&
       global.document.body.dataset.mcPdpLayoutMounted === "1" &&
       global.document.body.dataset.mcPdpLayoutVer === VERSION
+    );
+  }
+
+  function isUnifiedPdpReady() {
+    return !!(
+      global.document.body &&
+      (global.document.body.classList.contains("mc-pdp-unified-ready") ||
+        global.__MC_UNIFIED_PDP_STABLE__)
     );
   }
 
@@ -2199,11 +2210,12 @@
       "text-align:center!important;align-self:stretch!important;width:100%!important;max-width:100%!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
       "body.productdetails #mc-pdp-purchase-stack .v65-product-addtocart,body.mc-product-page #mc-pdp-purchase-stack .v65-product-addtocart{" +
       "display:flex!important;justify-content:center!important;width:auto!important;margin:0!important}" +
-      "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-brand-logo," +
-      "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-title-right,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-title-right," +
-      "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-price-stack-host," +
-      "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-features,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-features," +
-      "body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-purchase-stack,body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-purchase-stack{" +
+      "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-brand-logo,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-brand-logo," +
+      "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-title-right,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-title-right," +
+      "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-price-stack-host,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-price-stack-host," +
+      "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-features,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-features," +
+      "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-purchase-stack,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) #mc-pdp-purchase-stack," +
+      "body.productdetails:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) .mc-unified-purchase-controls,body.mc-product-page:not(.mc-pdp-hero-ready):not(.mc-pdp-unified-ready) .mc-unified-purchase-controls{" +
       "visibility:hidden!important}" +
       "body.productdetails #ProductDetail_ProductDetails_div2 li,body.mc-product-page #ProductDetail_ProductDetails_div2 li," +
       "body.productdetails #ProductDetail_ProductDetails_div2 p,body.mc-product-page #ProductDetail_ProductDetails_div2 p," +
@@ -3995,6 +4007,7 @@
 
   function forceRebuildCleanPriceStack() {
     if (!isProductPdp()) return;
+    if (isUnifiedPdpReady()) return;
     if (isPalliserPdpPage()) return;
     if (isSectionalPdpPage()) return;
     if (global.document.getElementById("mc-pdp-top-price-panel") || global.__MTL_OWNS_TOP_PRICE__) return;
@@ -5154,6 +5167,7 @@
 
   function ensureUnifiedPdpLayout() {
     if (isSectionalPdpPage()) return;
+    if (isUnifiedPdpReady() || global.__MC_UNIFIED_PDP_STABLE__) return;
     function runNorm() {
       try {
         if (typeof global.mcNormalizePdpLayout === "function") {
@@ -5171,7 +5185,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260616unified3&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260616unified4&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -5221,7 +5235,9 @@
       if (!sectional && isSoftGoodsPdpPage()) {
         ensureConfiguredColorSwatches();
       }
-      if (!sectional && isPdpLayoutMounted()) {
+      if (!sectional && isUnifiedPdpReady()) {
+        stripPriceZeroCents();
+      } else if (!sectional && isPdpLayoutMounted()) {
         forceRebuildCleanPriceStack();
         ensureUnifiedPdpLayout();
         if (
@@ -5332,7 +5348,7 @@
   // once by the throttled, pause-aware MutationObserver below.
   [0, 50, 200, 600, 1500].forEach(function (ms) {
     global.setTimeout(function () {
-      if (isPdpLayoutMounted()) return;
+      if (isPdpLayoutMounted() || isUnifiedPdpReady()) return;
       installPdpStackApiGuards();
       runPatch();
     }, ms);
@@ -5342,7 +5358,7 @@
     var scheduled = false;
     var moLastRun = 0;
     var mo = new MutationObserver(function () {
-      if (isPdpLayoutMounted()) return;
+      if (isPdpLayoutMounted() || isUnifiedPdpReady()) return;
       if (scheduled) return;
       if (global.__MC_PDP_MO_PAUSE__) return;
       // Throttle on every page (not just sectional). Once the hero is built,
