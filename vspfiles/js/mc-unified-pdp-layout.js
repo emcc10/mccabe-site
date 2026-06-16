@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260616unified7";
-  var AUTH_LAYOUT_VER = "20260616pdp48";
+  var LAYOUT_VER = "20260616unified8";
+  var AUTH_LAYOUT_VER = "20260616pdp49";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -106,10 +106,13 @@
   }
 
   function isUnifiedStable() {
+    var body = global.document.body;
     return !!(
       global.__MC_UNIFIED_PDP_STABLE__ &&
-      global.document.body &&
-      global.document.body.classList.contains("mc-pdp-unified-ready") &&
+      body &&
+      body.classList.contains("mc-pdp-unified-ready") &&
+      body.dataset.mcPdpLayoutVer === AUTH_LAYOUT_VER &&
+      body.dataset.mcUnifiedPdpVer === LAYOUT_VER &&
       qs("tr.mc-unified-pdp-row") &&
       qs(".mc-unified-purchase-controls")
     );
