@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260617pdp73
-  var VERSION = "20260617pdp73";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260617pdp74
+  var VERSION = "20260617pdp74";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -2619,6 +2619,38 @@
     return null;
   }
 
+  /** Keep native #options_table in DOM for Volusion/cover sync; hide duplicate SIZE/COVER UI below ATC. */
+  function hideBeanBagNativeOptionsTable() {
+    if (!isBeanBagPdpPage()) return;
+    if (!global.document.getElementById("mc-bb-size-section")) return;
+    global.document
+      .querySelectorAll(
+        "#v65-product-parent #options_table, #v65-product-parent table[id*='options_table'], " +
+          "#content_area #options_table, #content_area table[id*='options_table']"
+      )
+      .forEach(function (table) {
+        if (table.getAttribute("data-mc-bb-native-suppressed") === "1") return;
+        table.setAttribute("data-mc-bb-native-suppressed", "1");
+        table.classList.add("mc-bb-native-options-suppressed");
+        try {
+          table.style.setProperty("position", "absolute", "important");
+          table.style.setProperty("left", "-9999px", "important");
+          table.style.setProperty("top", "0", "important");
+          table.style.setProperty("width", "1px", "important");
+          table.style.setProperty("height", "1px", "important");
+          table.style.setProperty("max-height", "0", "important");
+          table.style.setProperty("overflow", "hidden", "important");
+          table.style.setProperty("opacity", "0", "important");
+          table.style.setProperty("visibility", "hidden", "important");
+          table.style.setProperty("pointer-events", "none", "important");
+          table.style.setProperty("margin", "0", "important");
+          table.style.setProperty("padding", "0", "important");
+          table.style.setProperty("border", "0", "important");
+          table.setAttribute("aria-hidden", "true");
+        } catch (eHide) {}
+      });
+  }
+
   function resolveBeanBagPurchaseElement(infoColumn) {
     infoColumn = infoColumn || findPdpHeroColumnTd();
     var unified =
@@ -2714,6 +2746,9 @@
         } catch (eAppend) {}
       }
     });
+    try {
+      hideBeanBagNativeOptionsTable();
+    } catch (eHideNative) {}
     consolidateBeanBagPurchaseBlocks(infoColumn, purchaseElement);
     infoColumn.querySelectorAll(":scope > table, :scope > div").forEach(function (node) {
       if (node.id && /^(mc-pdp-|beanbag-|messaging|mc-bb-)/.test(node.id)) return;
@@ -2970,6 +3005,12 @@
 
   function findPdpHeroInsertAfter(parent) {
     if (!parent) return null;
+    if (isBeanBagPdpPage()) {
+      var bbCover = global.document.getElementById("beanbag-swatch-wrapper");
+      if (bbCover && parent.contains(bbCover)) return bbCover;
+      var bbSize = global.document.getElementById("mc-bb-size-section");
+      if (bbSize && parent.contains(bbSize)) return bbSize;
+    }
     var bnpl = global.document.getElementById("messaging-element");
     if (bnpl && parent.contains(bnpl)) return bnpl;
     var price = global.document.getElementById("mc-pdp-price-stack-host");
@@ -3049,6 +3090,11 @@
       pruneDescriptionDuplicateFeatures();
       if (block && insertParent && !insertParent.contains(block)) {
         insertPdpHeroNodeAfter(insertParent, insertAfter, block);
+      } else if (isBeanBagPdpPage() && block && insertParent && insertParent.contains(block)) {
+        var bbFeatAnchor = findPdpHeroInsertAfter(insertParent);
+        if (bbFeatAnchor && block.previousElementSibling !== bbFeatAnchor) {
+          insertPdpHeroNodeAfter(insertParent, bbFeatAnchor, block);
+        }
       }
       if (isSaranoniPdpPage()) {
         hideSaranoniHeroAltviews();
@@ -3058,6 +3104,12 @@
     }
     if (block.parentNode !== insertParent || (insertAfter && block.previousElementSibling !== insertAfter)) {
       insertPdpHeroNodeAfter(insertParent, insertAfter, block);
+    }
+    if (isBeanBagPdpPage() && block && insertParent && insertParent.contains(block)) {
+      var bbAnchor = findPdpHeroInsertAfter(insertParent);
+      if (bbAnchor && block.previousElementSibling !== bbAnchor) {
+        insertPdpHeroNodeAfter(insertParent, bbAnchor, block);
+      }
     }
     pruneDescriptionDuplicateFeatures();
     if (isSaranoniPdpPage()) {
@@ -4551,6 +4603,7 @@
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
   global.mcMountBeanBagSwatchesAboveFeatures = mountBeanBagSwatchesAboveFeatures;
   global.mcAppendBeanBagInfoColumnOrder = appendBeanBagInfoColumnOrder;
+  global.mcHideBeanBagNativeOptionsTable = hideBeanBagNativeOptionsTable;
   global.mcEnsureBeanBagMediaStack = function (main, alt) {
     if (!main) {
       main =
@@ -5322,6 +5375,9 @@
     try {
       ensureBeanBagKingCoverRestriction();
     } catch (eKingInit) {}
+    try {
+      hideBeanBagNativeOptionsTable();
+    } catch (eHideNative) {}
   }
 
   // Pink (801) and Navy (799) covers are unavailable when King size is selected.
@@ -5428,6 +5484,7 @@
           ensureBeanBagSizeRow();
           markBeanBagCoverSwatchesReady();
           appendBeanBagInfoColumnOrder();
+          hideBeanBagNativeOptionsTable();
           sanitizeBeanBagAltviews();
           applyPdpMainImageCap();
         } catch (eBbRepair) {}

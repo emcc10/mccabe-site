@@ -7,7 +7,7 @@
 
 
   var LAYOUT_VER = "20260617unified19";
-  var AUTH_LAYOUT_VER = "20260617pdp73";
+  var AUTH_LAYOUT_VER = "20260617pdp74";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -716,6 +716,54 @@
     unwrapBadWrapper();
     tagProductBodyClasses();
     global.document.body.classList.add("mc-product-page");
+
+    if (global.document.body && global.document.body.classList.contains("mc-bean-bag-pdp")) {
+      var bbMain =
+        qs("#product_photo") ||
+        qs("#product_photo_td") ||
+        qs(".vCSS_img_wrap img") ||
+        qs("img#main-image");
+      var bbAtc = findAtcButton();
+      if (bbMain && bbAtc) {
+        var bbLayout = findOuterProductRow(bbMain, bbAtc);
+        if (bbLayout && bbLayout.table) {
+          var bbRow = bbLayout.row;
+          var bbMediaTd = bbLayout.mediaCell;
+          var bbInfoTd = bbLayout.infoCell;
+          if (!bbRow.classList.contains("mc-unified-pdp-row")) {
+            bbRow.classList.add("mc-unified-pdp-row", "mc-pdp-main-row");
+          }
+          if (!bbMediaTd.classList.contains("mc-unified-pdp-media")) {
+            bbMediaTd.classList.add("mc-unified-pdp-media", "mc-pdp-media-td");
+          }
+          if (!bbInfoTd.classList.contains("mc-unified-pdp-info")) {
+            bbInfoTd.classList.add("mc-unified-pdp-info", "mc-pdp-options-td");
+          }
+          normalizeMediaColumn(bbMediaTd);
+          try {
+            if (typeof global.mcReassertBeanBagHeroMedia === "function") {
+              global.mcReassertBeanBagHeroMedia();
+            }
+          } catch (eBbMedia) {}
+          ensureReturnRow(bbRow, bbLayout.table);
+        }
+      }
+      try {
+        if (typeof global.mcEnsureSoftGoodsPdpLayout === "function") {
+          global.mcEnsureSoftGoodsPdpLayout();
+        } else if (typeof global.mcAppendBeanBagInfoColumnOrder === "function") {
+          global.mcAppendBeanBagInfoColumnOrder();
+        }
+      } catch (eBbLayout) {}
+      global.document.body.classList.add("mc-pdp-unified-ready", "mc-pdp-hero-ready");
+      global.document.documentElement.dataset.mcPdpNormalized = "1";
+      global.document.body.dataset.mcPdpLayoutMounted = "1";
+      global.document.body.dataset.mcPdpLayoutVer = AUTH_LAYOUT_VER;
+      global.document.body.dataset.mcUnifiedPdpVer = LAYOUT_VER;
+      global.__MC_PDP_HERO_READY_LOCKED__ = true;
+      markUnifiedStable();
+      return true;
+    }
 
     var main =
       qs("#product_photo") ||
