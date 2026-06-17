@@ -1,23 +1,3 @@
-/* MC_STALE_PDP_RESCUE_20260617pdp78 */
-(function (w, d) {
-  try {
-    if (!w || !d || w.__MC_STALE_PDP_RESCUE_20260617pdp78__) return;
-    if (!d.getElementById("v65-product-parent")) return;
-    var hasProductPath = /(?:product-p|ProductDetails\.asp)/i.test(String(w.location && (w.location.pathname + w.location.search) || ""));
-    if (!hasProductPath && !(d.body && d.body.classList && d.body.classList.contains("productdetails"))) return;
-    var want = "20260617pdp78";
-    var cur = String(w.MC_PDP_AUTH_VERSION || w.__MC_PDP_AUTH_VERSION__ || "");
-    if (cur === want) return;
-    var existing = d.querySelector('script[src*="mc-pdp-auth-cta-fix.js"][src*="' + want + '"]');
-    if (existing) return;
-    w.__MC_STALE_PDP_RESCUE_20260617pdp78__ = true;
-    var s = d.createElement("script");
-    s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=" + want + "&mcrd=" + Date.now();
-    s.async = false;
-    (d.head || d.documentElement).appendChild(s);
-  } catch (e) {}
-})(window, document);
-
 /**
  * PDP retail/member/sale stack repair — works without template_266 rebake.
  * MC_PDP_PRICE_STACK_JS_20260522stack
