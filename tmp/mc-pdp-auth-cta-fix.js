@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260617pdp68";
+  var VERSION = "20260617pdp64";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -104,23 +104,7 @@
       if (!global.__MC_PDP_HERO_READY_FALLBACK__) {
         global.__MC_PDP_HERO_READY_FALLBACK__ = true;
         global.setTimeout(function () {
-          if (global.__MC_PDP_HERO_READY_LOCKED__) return;
-          try {
-            if (shouldDeferToUnifiedPdpLayout() || isFixedSectionalUnifiedPdp()) {
-              prepareDeferredUnifiedPdpHero();
-              ensureUnifiedPdpLayout();
-              if (typeof global.mcNormalizePdpLayout === "function") {
-                global.mcNormalizePdpLayout();
-              }
-            }
-          } catch (eAfFb) {}
-          if (!global.__MC_PDP_HERO_READY_LOCKED__) {
-            if (isFixedSectionalUnifiedPdp() && !isUnifiedPdpReady()) {
-              retryDeferredUnifiedNormalize();
-            } else {
-              markPdpHeroReady();
-            }
-          }
+          if (!global.__MC_PDP_HERO_READY_LOCKED__) markPdpHeroReady();
         }, 2200);
       }
     } catch (eAf) {}
@@ -181,13 +165,6 @@
         global.document.getElementById("mc-pdp-price-atc-row") ||
         global.document.getElementById("mc-pdp-purchase-stack") ||
         global.document.querySelector(".mc-unified-purchase-controls")
-      );
-    }
-    if (shouldDeferToUnifiedPdpLayout() || isFixedSectionalUnifiedPdp()) {
-      return !!(
-        global.document.querySelector(
-          ".mc-unified-purchase-controls input[name='btnaddtocart'], .mc-unified-purchase-controls button[name='btnaddtocart']"
-        ) || global.document.querySelector(".mc-unified-purchase-controls")
       );
     }
     return !!(
@@ -291,50 +268,9 @@
       });
   }
 
-  function findPdpAtcButton() {
-    return global.document.querySelector(
-      '#v65-product-parent input[name="btnaddtocart"], #v65-product-parent button[name="btnaddtocart"], ' +
-        'input[name="btnaddtocart"], button[name="btnaddtocart"]'
-    );
-  }
-
-  function directChildTdUnderRow(row, node) {
-    if (!row || !node) return null;
-    var cur = node;
-    while (cur && cur.parentNode !== row) cur = cur.parentNode;
-    return cur && cur.tagName === "TD" ? cur : null;
-  }
-
-  function findMainPdpProductRow() {
-    var main =
-      global.document.getElementById("product_photo") ||
-      global.document.querySelector("#v65-product-parent img#product_photo, #v65-product-parent .vCSS_img_product_photo");
-    var atc = findPdpAtcButton();
-    if (!main || !atc) return null;
-    var cur = main;
-    while (cur && cur !== global.document.body) {
-      if (cur.tagName === "TR" && cur.contains(atc)) return cur;
-      cur = cur.parentNode;
-    }
-    return null;
-  }
-
   function findPdpMediaTd() {
-    var tagged =
-      global.document.querySelector("#v65-product-parent td.mc-unified-pdp-media") ||
-      global.document.querySelector("#v65-product-parent td.mc-pdp-media-td");
-    if (tagged) return tagged;
-    var row = findMainPdpProductRow();
-    if (row) {
-      var main =
-        global.document.getElementById("product_photo") ||
-        global.document.querySelector("#v65-product-parent img#product_photo");
-      var mediaCell = main ? directChildTdUnderRow(row, main) : null;
-      if (mediaCell) return mediaCell;
-      var tds = row.children;
-      if (tds && tds.length >= 2 && tds[0].tagName === "TD") return tds[0];
-    }
     return (
+      global.document.querySelector("#v65-product-parent td.mc-pdp-media-td") ||
       global.document.getElementById("product_photo_td") ||
       global.document.querySelector("#v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child")
     );
@@ -548,30 +484,9 @@
     return false;
   }
 
-  /** Steve Silver / fixed sectionals (-SECT, not MTL -SC- configurators) use unified PDP layout. */
-  function isFixedSectionalUnifiedPdp() {
-    try {
-      var pc = String(
-        (global.document.querySelector('input[name="ProductCode"], input[name="productcode"]') || {}).value || ""
-      )
-        .trim()
-        .toUpperCase();
-      if (!pc) return false;
-      if (/-SC-/i.test(pc) || /ROOM-PLANNER|CONFIGURATOR/i.test(pc)) return false;
-      return /-SECT/i.test(pc);
-    } catch (eFix) {}
-    return false;
-  }
-
-  function isMtlSectionalConfiguratorPdp() {
-    return isSectionalPdpPage() && !isFixedSectionalUnifiedPdp();
-  }
-
   /** Standard furniture PDPs (e.g. Steve Silver Gatlin -SECT) use mc-unified-pdp-layout.js, not legacy mount. */
   function shouldDeferToUnifiedPdpLayout() {
-    if (!isProductPdp()) return false;
-    if (isFixedSectionalUnifiedPdp()) return true;
-    if (isSectionalPdpPage()) return false;
+    if (!isProductPdp() || isSectionalPdpPage()) return false;
     if (isSoftGoodsPdpPage()) return false;
     try {
       if (
@@ -1513,72 +1428,8 @@
     return null;
   }
 
-  function tagSoftGoodsHeroColumns() {
-    if (!isSoftGoodsPdpPage()) return;
-    var row = findMainPdpProductRow();
-    if (!row) return;
-    row.classList.add("mc-pdp-main-row", "mc-unified-pdp-row");
-    var main =
-      global.document.getElementById("product_photo") ||
-      global.document.querySelector("#v65-product-parent img#product_photo");
-    var atc = findPdpAtcButton();
-    var mediaTd = main ? directChildTdUnderRow(row, main) : null;
-    var infoTd = atc ? directChildTdUnderRow(row, atc) : null;
-    if (!mediaTd || !infoTd) {
-      var tds = row.querySelectorAll(":scope > td");
-      if (tds.length >= 2) {
-        if (!mediaTd) mediaTd = tds[0];
-        if (!infoTd) infoTd = tds[tds.length - 1];
-      }
-    }
-    if (mediaTd) {
-      mediaTd.classList.add("mc-pdp-media-td", "mc-pdp-hero-media-col", "mc-unified-pdp-media");
-    }
-    if (infoTd) {
-      infoTd.classList.add("mc-pdp-options-td", "mc-unified-pdp-info");
-    }
-  }
-
-  function hideRebakedTemplateBreadcrumbTitle() {
-    var titleWrap = global.document.getElementById("mc-pdp-title-right");
-    if (!titleWrap || !titleWrap.querySelector("h1, [itemprop='name'], .productnamecolor")) return;
-    var root = global.document.getElementById("v65-product-parent");
-    if (!root) return;
-    root.querySelectorAll("td.vCSS_breadcrumb_td h1.vp-product-title").forEach(function (h1) {
-      if (titleWrap.contains(h1)) return;
-      try {
-        h1.style.setProperty("display", "none", "important");
-        h1.style.setProperty("visibility", "hidden", "important");
-        h1.style.setProperty("height", "0", "important");
-        h1.style.setProperty("overflow", "hidden", "important");
-        h1.style.setProperty("margin", "0", "important");
-        h1.style.setProperty("padding", "0", "important");
-      } catch (eHideH1) {}
-    });
-    root.querySelectorAll("tr > td.vCSS_breadcrumb_td").forEach(function (bcTd) {
-      if (bcTd.contains(titleWrap)) return;
-      var visibleTitle = bcTd.querySelector("h1.vp-product-title, h1 [itemprop='name']");
-      if (!visibleTitle || titleWrap.contains(visibleTitle)) {
-        try {
-          bcTd.style.setProperty("padding", "0", "important");
-          bcTd.style.setProperty("padding-bottom", "0", "important");
-          bcTd.style.setProperty("padding-left", "0", "important");
-        } catch (eBcPad) {}
-        return;
-      }
-      try {
-        visibleTitle.style.setProperty("display", "none", "important");
-        bcTd.style.setProperty("padding", "0", "important");
-        bcTd.style.setProperty("padding-bottom", "0", "important");
-        bcTd.style.setProperty("padding-left", "0", "important");
-        bcTd.style.setProperty("line-height", "0", "important");
-      } catch (eBc) {}
-    });
-  }
-
   function ensurePdpTitleInOptionsColumn() {
-    if (isPdpLayoutMounted() && !isSoftGoodsPdpPage()) return;
-    if (isSoftGoodsPdpPage()) tagSoftGoodsHeroColumns();
+    if (isPdpLayoutMounted()) return;
     var col = findPdpHeroColumnTd();
     if (!col) return;
     var titleWrap = global.document.getElementById("mc-pdp-title-right");
@@ -1594,14 +1445,9 @@
     if (!titleWrap.querySelector("h1, [itemprop='name'], .productnamecolor")) return;
     if (titleWrap.parentNode !== col) {
       try {
-        col.insertBefore(titleWrap, col.firstChild || null);
-      } catch (eT) {
-        try {
-          col.appendChild(titleWrap);
-        } catch (eT2) {}
-      }
+        col.appendChild(titleWrap);
+      } catch (eT) {}
     }
-    hideRebakedTemplateBreadcrumbTitle();
   }
 
   function applySoftGoodsAltviewsLayout(alt) {
@@ -1699,19 +1545,13 @@
       for (ki = 0; ki < kids.length; ki++) {
         var ch = kids[ki];
         if (ch.id === "mc-pdp-description-under-media") continue;
-        if (ch.tagName === "TABLE") {
+        if (ch.id === "altviews" || ch.classList.contains("altviews")) {
           anchor = ch;
           break;
         }
-      }
-      if (!anchor) {
-        for (ki = 0; ki < kids.length; ki++) {
-          var chAlt = kids[ki];
-          if (chAlt.id === "mc-pdp-description-under-media") continue;
-          if (chAlt.id === "altviews" || chAlt.classList.contains("altviews")) {
-            anchor = chAlt;
-            break;
-          }
+        if (ch.tagName === "TABLE") {
+          anchor = ch;
+          break;
         }
       }
       try {
@@ -1743,23 +1583,11 @@
     var mainBlock = stack.querySelector("table");
     if (mainBlock) {
       try {
-        mainBlock.style.setProperty("order", "1", "important");
-      } catch (eTblOrd) {}
-      try {
         stack.insertBefore(alt, mainBlock.nextSibling);
       } catch (eOrd) {
         stack.appendChild(alt);
       }
     }
-    try {
-      alt.style.setProperty("order", "2", "important");
-      alt.style.setProperty("position", "static", "important");
-      alt.style.setProperty("top", "auto", "important");
-      alt.style.setProperty("left", "auto", "important");
-      alt.style.setProperty("margin-top", "10px", "important");
-      alt.style.setProperty("width", "100%", "important");
-      alt.style.setProperty("max-width", "600px", "important");
-    } catch (eAltOrd) {}
   }
 
   function moveAltViewsUnderMainImage() {
@@ -2659,10 +2487,10 @@
       "text-align:center!important;align-self:stretch!important;width:100%!important;max-width:100%!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-saranoni-purchase-stack," +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-bean-bag-purchase-stack," +
-      "html body.mc-bean-bag-pdp .mc-unified-purchase-controls,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls{" +
+      "html body.mc-bean-bag-pdp .mc-unified-purchase-controls{" +
       "display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;flex-wrap:nowrap!important;" +
       "text-align:center!important;width:100%!important;max-width:400px!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important;visibility:visible!important;opacity:1!important}" +
-      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp .mc-unified-purchase-controls #mc-pdp-qty-row,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls #mc-pdp-qty-row,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls .mc-unified-qty-row{order:1!important;width:100%!important;justify-content:center!important;visibility:visible!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp .mc-unified-purchase-controls #mc-pdp-qty-row{order:1!important;width:100%!important;justify-content:center!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
       "html body.mc-bean-bag-pdp .mc-unified-purchase-controls .v65-product-addtocart,html body.mc-bean-bag-pdp .mc-unified-purchase-controls .mc-atc-button-wrap{order:2!important;width:100%!important;max-width:100%!important}" +
@@ -3038,18 +2866,8 @@
   }
 
   function findPdpHeroColumnTd() {
-    var td =
-      global.document.querySelector("#v65-product-parent td.mc-unified-pdp-info") ||
-      global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
+    var td = global.document.querySelector("#v65-product-parent td.mc-pdp-options-td");
     if (td) return td;
-    var row = findMainPdpProductRow();
-    if (row) {
-      var atc = findPdpAtcButton();
-      var infoCell = atc ? directChildTdUnderRow(row, atc) : null;
-      if (infoCell) return infoCell;
-      var tds = row.querySelectorAll(":scope > td");
-      if (tds.length >= 2) return tds[tds.length - 1];
-    }
     var seeds = [
       global.document.getElementById("mc-pdp-title-right"),
       global.document.getElementById("mc-pdp-price-stack-host"),
@@ -3059,17 +2877,9 @@
     var si;
     for (si = 0; si < seeds.length; si++) {
       var walk = seeds[si];
-      var best = null;
       while (walk && walk !== global.document.body) {
-        if (walk.tagName === "TR" && walk.id === "v65-product-parent") break;
-        if (walk.tagName === "TD") best = walk;
+        if (walk.tagName === "TD") return walk;
         walk = walk.parentNode;
-      }
-      if (best && best.closest && best.closest("#v65-product-parent")) {
-        var parentRow = best.parentNode;
-        if (parentRow && parentRow.tagName === "TR" && parentRow.querySelector(":scope > td")) {
-          return best;
-        }
       }
     }
     return null;
@@ -4518,24 +4328,6 @@
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
   global.mcMountBeanBagSwatchesAboveFeatures = mountBeanBagSwatchesAboveFeatures;
   global.mcAppendBeanBagInfoColumnOrder = appendBeanBagInfoColumnOrder;
-  global.mcEnsureBeanBagMediaStack = function (main, alt) {
-    if (!main) {
-      main =
-        global.document.getElementById("product_photo") ||
-        global.document.querySelector("img#main-image, #v65-product-parent img#product_photo");
-    }
-    if (!alt) {
-      alt =
-        global.document.getElementById("altviews") ||
-        global.document.querySelector("#content_area .altviews, #v65-product-parent .altviews");
-    }
-    if (main && alt) ensureBeanBagMediaStack(main, alt);
-  };
-  global.mcReassertBeanBagHeroMedia = function () {
-    if (!isBeanBagPdpPage()) return;
-    moveAltViewsUnderMainImage();
-    sanitizeBeanBagAltviews();
-  };
   global.mcEnsureHeroColumnOrder = ensureHeroColumnOrder;
 
   function findOrCreatePriceStackHost() {
@@ -4711,7 +4503,7 @@
     if (!isProductPdp()) return;
     if (isUnifiedPdpReady()) return;
     if (isPalliserPdpPage()) return;
-    if (isSectionalPdpPage() && !isFixedSectionalUnifiedPdp()) return;
+    if (isSectionalPdpPage()) return;
     if (global.document.getElementById("mc-pdp-top-price-panel") || global.__MTL_OWNS_TOP_PRICE__) return;
     if (global.__MTL_TOP_PRICE_MOUNT_GAVE_UP__) return;
     ensurePdpStackCriticalCss();
@@ -5960,7 +5752,6 @@
     if (!isProductPdp()) return false;
     if (isSectionalPdpPage()) return false;
     if (shouldDeferToUnifiedPdpLayout()) {
-      prepareDeferredUnifiedPdpHero();
       ensureUnifiedPdpLayout();
       return false;
     }
@@ -6030,40 +5821,8 @@
     }
   }
 
-  function prepareDeferredUnifiedPdpHero() {
-    if (!shouldDeferToUnifiedPdpLayout() && !isFixedSectionalUnifiedPdp()) return;
-    try {
-      tagHeroMediaCol();
-      moveAltViewsUnderMainImage();
-      ensurePdpTitleInOptionsColumn();
-      placeBrandLogoBelowTitle();
-      if (!global.document.getElementById("mc-pdp-price-stack-host")) {
-        forceRebuildCleanPriceStack();
-      }
-      mountPdpFeaturesBlock();
-    } catch (ePrep) {}
-  }
-  global.mcPrepareUnifiedPdpHero = prepareDeferredUnifiedPdpHero;
-
-  function retryDeferredUnifiedNormalize() {
-    if (!shouldDeferToUnifiedPdpLayout() && !isFixedSectionalUnifiedPdp()) return;
-    function attempt() {
-      try {
-        if (typeof global.mcNormalizePdpLayout === "function") {
-          global.mcNormalizePdpLayout();
-        }
-      } catch (eNorm) {}
-    }
-    attempt();
-    [80, 200, 500, 1200, 2400].forEach(function (ms) {
-      global.setTimeout(function () {
-        if (!isUnifiedPdpReady()) attempt();
-      }, ms);
-    });
-  }
-
   function ensureUnifiedPdpLayout() {
-    if (isMtlSectionalConfiguratorPdp()) return;
+    if (isSectionalPdpPage()) return;
     if (isUnifiedPdpReady() || global.__MC_UNIFIED_PDP_STABLE__) return;
     function runNorm() {
       try {
@@ -6082,7 +5841,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260617unified16&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260617unified15&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -6136,18 +5895,6 @@
       if (!sectional && isSoftGoodsPdpPage()) {
         reassertSoftGoodsHeroOrder();
         stripPriceZeroCents();
-      } else if (shouldDeferToUnifiedPdpLayout()) {
-        prepareDeferredUnifiedPdpHero();
-        forceRebuildCleanPriceStack();
-        ensureUnifiedPdpLayout();
-        retryDeferredUnifiedNormalize();
-        if (
-          global.document.body &&
-          !global.document.body.classList.contains("mc-pdp-unified-ready")
-        ) {
-          fixAddToCartChrome();
-        }
-        stripPriceZeroCents();
       } else if (!sectional && isUnifiedPdpReady()) {
         stripPriceZeroCents();
       } else if (!sectional && isPdpLayoutMounted()) {
@@ -6191,9 +5938,7 @@
       scheduleAtcBlackLock();
       scheduleBeanBagOptionRepair();
       if (shouldDeferToUnifiedPdpLayout() && !isUnifiedPdpReady()) {
-        prepareDeferredUnifiedPdpHero();
         ensureUnifiedPdpLayout();
-        retryDeferredUnifiedNormalize();
         try {
           if (typeof global.mcNormalizePdpLayout === "function") {
             global.mcNormalizePdpLayout();
