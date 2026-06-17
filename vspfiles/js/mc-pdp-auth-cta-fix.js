@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp55";
+  var VERSION = "20260616pdp56";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -2022,6 +2022,7 @@
       btn.style.setProperty("background-color", "#000", "important");
       btn.style.setProperty("background-image", "none", "important");
       btn.style.setProperty("color", "#fff", "important");
+      btn.style.setProperty("border", "1px solid #000", "important");
       btn.style.setProperty("border-color", "#000", "important");
       btn.style.setProperty("box-shadow", "none", "important");
       btn.style.setProperty("text-shadow", "none", "important");
@@ -2036,6 +2037,7 @@
     try {
       wrap.style.setProperty("background", "#000", "important");
       wrap.style.setProperty("background-color", "#000", "important");
+      wrap.style.setProperty("border", "1px solid #000", "important");
       wrap.style.setProperty("border-color", "#000", "important");
       wrap.style.setProperty("color", "#fff", "important");
       wrap.querySelectorAll("input, button").forEach(function (btn) {
@@ -2174,13 +2176,46 @@
   function scheduleAtcBlackLock() {
     if (global.__MC_PDP_ATC_BLACK_LOCK__ === VERSION) return;
     global.__MC_PDP_ATC_BLACK_LOCK__ = VERSION;
-    [80, 250, 700, 1400, 2600].forEach(function (ms) {
+    [80, 250, 700, 1400, 2600, 5000, 9000].forEach(function (ms) {
       global.setTimeout(function () {
         try {
           fixAddToCartChrome();
         } catch (eAtcLock) {}
       }, ms);
     });
+    try {
+      if (!global.__MC_PDP_ATC_BLACK_MO__) {
+        var pending = false;
+        global.__MC_PDP_ATC_BLACK_MO__ = new MutationObserver(function (mutations) {
+          var shouldRun = false;
+          mutations.forEach(function (m) {
+            if (shouldRun) return;
+            var t = m.target;
+            if (!t || !t.matches) return;
+            if (
+              t.matches(".mc-atc-button-wrap, input[name='btnaddtocart'], button[name='btnaddtocart'], input.vCSS_input_addtocart, input.mc-unified-atc-btn") ||
+              (t.closest && t.closest(".mc-atc-button-wrap"))
+            ) {
+              shouldRun = true;
+            }
+          });
+          if (!shouldRun || pending) return;
+          pending = true;
+          global.requestAnimationFrame(function () {
+            pending = false;
+            try {
+              fixAddToCartChrome();
+            } catch (eMoAtc) {}
+          });
+        });
+        global.__MC_PDP_ATC_BLACK_MO__.observe(global.document.documentElement, {
+          subtree: true,
+          childList: true,
+          attributes: true,
+          attributeFilter: ["class", "style"]
+        });
+      }
+    } catch (eAtcMo) {}
   }
 
   function ensurePdpHeroCriticalCss() {

@@ -1,0 +1,107 @@
+[
+  {
+    "code": "SAR-MNKY-LUSH",
+    "optionId": "1087",
+    "label": "Jasmine",
+    "source": "manual-url",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/2047/7533/files/minkylush-mini-blankets-253273.jpg?v=1724161590",
+    "tFile": "SAR-MNKY-LUSH-1087-T.jpg",
+    "sFile": "SAR-MNKY-LUSH-1087-S.jpg"
+  },
+  {
+    "code": "SAR-MNKY-LUSH",
+    "optionId": "1088",
+    "label": "Lilly",
+    "source": "manual-url",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/2047/7533/files/minkylush-mini-blankets-752425.jpg?v=1724161590",
+    "tFile": "SAR-MNKY-LUSH-1088-T.jpg",
+    "sFile": "SAR-MNKY-LUSH-1088-S.jpg"
+  },
+  {
+    "code": "SAR-MNKY-LUSH-XL-LG",
+    "optionId": "1087",
+    "label": "Jasmine",
+    "source": "manual-url",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/2047/7533/files/IvyXL.png?v=1741874244",
+    "tFile": "SAR-MNKY-LUSH-XL-LG-1087-T.jpg",
+    "sFile": "SAR-MNKY-LUSH-XL-LG-1087-S.jpg"
+  },
+  {
+    "code": "SAR-WFL-KNT",
+    "optionId": "1132",
+    "label": "Nightfall Double Layer",
+    "source": "global-color-index",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/2047/7533/products/double-layer-bamboni-toddler-blankets-790074.jpg?v=1756841635&width=1946",
+    "tFile": "SAR-WFL-KNT-1132-T.jpg",
+    "sFile": "SAR-WFL-KNT-1132-S.jpg"
+  },
+  {
+    "code": "SAR-WFL-KNT",
+    "optionId": "1131",
+    "label": "Pansy Double Layer",
+    "source": "global-color-index",
+    "imageUrl": "https://cdn.shopify.com/s/files/1/2047/7533/products/double-layer-bamboni-toddler-blankets-558693.jpg?v=1745416700&width=1946",
+    "tFile": "SAR-WFL-KNT-1131-T.jpg",
+    "sFile": "SAR-WFL-KNT-1131-S.jpg"
+  },
+  {
+    "code": "SAR-WFL-KNT-KING",
+    "optionId": "1132",
+    "label": "Nightfall Double Layer",
+    "source": "optionId-reuse"
+  },
+  {
+    "code": "SAR-WFL-KNT-KING",
+    "optionId": "1131",
+    "label": "Pansy Double Layer",
+    "source": "optionId-reuse"
+  },
+  {
+    "code": "SAR-WFL-KNT-QUEEN",
+    "optionId": "1132",
+    "label": "Nightfall Double Layer",
+    "source": "optionId-reuse"
+  },
+  {
+    "code": "SAR-WFL-KNT-QUEEN",
+    "optionId": "1131",
+    "label": "Pansy Double Layer",
+    "source": "optionId-reuse"
+  },
+  {
+    "code": "SAR-WFL-KNT-ROBES",
+    "optionId": "1132",
+    "label": "Nightfall Double Layer",
+    "source": "optionId-reuse"
+  },
+  {
+    "code": "SAR-WFL-KNT-ROBES",
+    "optionId": "1131",
+    "label": "Pansy Double Layer",
+    "source": "optionId-reuse"
+  },
+  {
+    "code": "SAR-WFL-KNT-TWIN",
+    "optionId": "1132",
+    "label": "Nightfall Double Layer",
+    "source": "optionId-reuse"
+  },
+  {
+    "code": "SAR-WFL-KNT-TWIN",
+    "optionId": "1131",
+    "label": "Pansy Double Layer",
+    "source": "optionId-reuse"
+  },
+  {
+    "code": "SAR-WFL-KNT-XL-LG",
+    "optionId": "1132",
+    "label": "Nightfall Double Layer",
+    "source": "optionId-reuse"
+  },
+  {
+    "code": "SAR-WFL-KNT-XL-LG",
+    "optionId": "1131",
+    "label": "Pansy Double Layer",
+    "source": "optionId-reuse"
+  }
+]

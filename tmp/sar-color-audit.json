@@ -381,41 +381,41 @@
       {
         "optionId": "1035",
         "label": "Arctic Hare",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1038",
         "label": "Chinchilla",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1036",
         "label": "Fawn",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1039",
         "label": "Midnight Plaid",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1037",
         "label": "Timberwolf",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1040",
         "label": "Truffle Plaid",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       }
     ],
-    "missingCount": 6
+    "missingCount": 0
   },
   {
     "code": "SAR-GRAND-FX-FUR-12X20",
@@ -521,41 +521,41 @@
       {
         "optionId": "1035",
         "label": "Arctic Hare",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1038",
         "label": "Chinchilla",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1036",
         "label": "Fawn",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1039",
         "label": "Midnight Plaid",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1037",
         "label": "Timberwolf",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1040",
         "label": "Truffle Plaid",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       }
     ],
-    "missingCount": 6
+    "missingCount": 0
   },
   {
     "code": "SAR-LUSH",
@@ -565,35 +565,35 @@
       {
         "optionId": "1047",
         "label": "Buttermilk",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1048",
         "label": "Charcoal",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1049",
         "label": "Feather",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1050",
         "label": "Twilight",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1051",
         "label": "Walnut",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       }
     ],
-    "missingCount": 5
+    "missingCount": 0
   },
   {
     "code": "SAR-LUSH-MINI",
@@ -603,137 +603,137 @@
       {
         "optionId": "1074",
         "label": "Aubergine",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1056",
         "label": "Ballet Slipper",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1064",
         "label": "Bloom",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1069",
         "label": "Blossom",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1047",
         "label": "Buttermilk",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1070",
         "label": "Chambray",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1048",
         "label": "Charcoal",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1075",
         "label": "Chiffon",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1066",
         "label": "Eucalyptus",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1055",
         "label": "Fairy Wings",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1049",
         "label": "Feather",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1058",
         "label": "Fern",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1065",
         "label": "Gray",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1060",
         "label": "Hazelnut",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1062",
         "label": "Hunter",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1067",
         "label": "Mineral Blue",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1057",
         "label": "Natural",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1053",
         "label": "Navy",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1071",
         "label": "Primrose",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1068",
         "label": "Rosy",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1073",
         "label": "Seagrass",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1063",
         "label": "Storm Cloud",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       }
     ],
-    "missingCount": 22
+    "missingCount": 0
   },
   {
     "code": "SAR-LUSH-RCV",
@@ -743,137 +743,137 @@
       {
         "optionId": "1074",
         "label": "Aubergine",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1056",
         "label": "Ballet Slipper",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1064",
         "label": "Bloom",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1069",
         "label": "Blossom",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1047",
         "label": "Buttermilk",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1070",
         "label": "Chambray",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1048",
         "label": "Charcoal",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1075",
         "label": "Chiffon",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1066",
         "label": "Eucalyptus",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1055",
         "label": "Fairy Wings",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1049",
         "label": "Feather",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1058",
         "label": "Fern",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1065",
         "label": "Gray",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1060",
         "label": "Hazelnut",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1062",
         "label": "Hunter",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1067",
         "label": "Mineral Blue",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1057",
         "label": "Natural",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1053",
         "label": "Navy",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1071",
         "label": "Primrose",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1068",
         "label": "Rosy",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1073",
         "label": "Seagrass",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1063",
         "label": "Storm Cloud",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       }
     ],
-    "missingCount": 22
+    "missingCount": 0
   },
   {
     "code": "SAR-LUSH-TOD",
@@ -1029,149 +1029,149 @@
       {
         "optionId": "1074",
         "label": "Aubergine",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1056",
         "label": "Ballet Slipper",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1064",
         "label": "Bloom",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1069",
         "label": "Blossom",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1047",
         "label": "Buttermilk",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1070",
         "label": "Chambray",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1048",
         "label": "Charcoal",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1075",
         "label": "Chiffon",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1059",
         "label": "Clay",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1072",
         "label": "Dew",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1066",
         "label": "Eucalyptus",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1055",
         "label": "Fairy Wings",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1049",
         "label": "Feather",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1058",
         "label": "Fern",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1065",
         "label": "Gray",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1060",
         "label": "Hazelnut",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1062",
         "label": "Hunter",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1067",
         "label": "Mineral Blue",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1057",
         "label": "Natural",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1053",
         "label": "Navy",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1071",
         "label": "Primrose",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1068",
         "label": "Rosy",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1073",
         "label": "Seagrass",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1063",
         "label": "Storm Cloud",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       }
     ],
-    "missingCount": 24
+    "missingCount": 0
   },
   {
     "code": "SAR-MARBLE-FX-FUR-MNKY-XL-LG",
@@ -1201,8 +1201,8 @@
       {
         "optionId": "1089",
         "label": "Bows",
-        "hasS": false,
-        "hasT": false
+        "hasS": true,
+        "hasT": true
       },
       {
         "optionId": "1087",
@@ -1217,7 +1217,7 @@
         "hasT": false
       }
     ],
-    "missingCount": 3
+    "missingCount": 2
   },
   {
     "code": "SAR-MNKY-LUSH-TOD",
@@ -1290,5 +1290,629 @@
       }
     ],
     "missingCount": 3
+  },
+  {
+    "code": "SAR-MNKY-STR",
+    "name": "Minky Stretch Throw Blanket",
+    "href": "https://www.mccabestheaterandliving.com/product-p/sar-mnky-str.htm",
+    "colors": [
+      {
+        "optionId": "1085",
+        "label": "Brown Rice",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1047",
+        "label": "Buttermilk",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1048",
+        "label": "Charcoal",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1082",
+        "label": "Florals",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1078",
+        "label": "Neutral Checkered",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1079",
+        "label": "Olive Checkered",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1084",
+        "label": "Plaid",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1083",
+        "label": "Posy",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1081",
+        "label": "Stripe",
+        "hasS": true,
+        "hasT": true
+      }
+    ],
+    "missingCount": 0
+  },
+  {
+    "code": "SAR-PTRN-FX-FUR-XL-LG",
+    "name": "Patterned Faux Fur XL Throw Blanket",
+    "href": "https://www.mccabestheaterandliving.com/product-p/sar-ptrn-fx-fur-xl-lg.htm",
+    "colors": [
+      {
+        "optionId": "1103",
+        "label": "Black",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1106",
+        "label": "Cameo",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1094",
+        "label": "Cashmere",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1048",
+        "label": "Charcoal",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1105",
+        "label": "Clove",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1104",
+        "label": "Currant",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1098",
+        "label": "Dusk",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1095",
+        "label": "Dusty Mauve",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1066",
+        "label": "Eucalyptus",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1049",
+        "label": "Feather",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1108",
+        "label": "Golden",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1065",
+        "label": "Gray",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1102",
+        "label": "Indigo",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1100",
+        "label": "Khaki",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1111",
+        "label": "Oatmeal",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1110",
+        "label": "Oxford",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1101",
+        "label": "Rouge",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1107",
+        "label": "Sun-kissed",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1109",
+        "label": "Surf",
+        "hasS": false,
+        "hasT": false
+      }
+    ],
+    "missingCount": 3
+  },
+  {
+    "code": "SAR-RIBBED-BMB",
+    "name": "Ribbed Bamboni\u00c2\u00ae Throw Blanket",
+    "href": "https://www.mccabestheaterandliving.com/product-p/sar-ribbed-bmb.htm",
+    "colors": [
+      {
+        "optionId": "1112",
+        "label": "Allspice",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1048",
+        "label": "Charcoal",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1011",
+        "label": "Ginger",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1012",
+        "label": "Moonbeam",
+        "hasS": true,
+        "hasT": true
+      }
+    ],
+    "missingCount": 1
+  },
+  {
+    "code": "SAR-RIBBED-BMB-QUEEN-KING",
+    "name": "Ribbed Bamboni\u00c2\u00ae Queen/King Blanket",
+    "href": "https://www.mccabestheaterandliving.com/product-p/sar-ribbed-bmb-queen-king.htm",
+    "colors": [
+      {
+        "optionId": "1112",
+        "label": "Allspice",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1048",
+        "label": "Charcoal",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1011",
+        "label": "Ginger",
+        "hasS": false,
+        "hasT": false
+      }
+    ],
+    "missingCount": 3
+  },
+  {
+    "code": "SAR-RIBBED-BMB-XL-LG",
+    "name": "Ribbed Bamboni\u00c2\u00ae XL Blanket",
+    "href": "https://www.mccabestheaterandliving.com/product-p/sar-ribbed-bmb-xl-lg.htm",
+    "colors": [
+      {
+        "optionId": "1112",
+        "label": "Allspice",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1048",
+        "label": "Charcoal",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1121",
+        "label": "French Rose",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1011",
+        "label": "Ginger",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1012",
+        "label": "Moonbeam",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1122",
+        "label": "Nautical Blue",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1120",
+        "label": "Spruce",
+        "hasS": false,
+        "hasT": false
+      }
+    ],
+    "missingCount": 4
+  },
+  {
+    "code": "SAR-SNUGGLER",
+    "name": "Snuggler",
+    "href": "https://www.mccabestheaterandliving.com/product-p/sar-snuggler.htm",
+    "colors": [
+      {
+        "optionId": "1048",
+        "label": "Charcoal",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1062",
+        "label": "Hunter",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1053",
+        "label": "Navy",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1127",
+        "label": "Olive",
+        "hasS": false,
+        "hasT": false
+      }
+    ],
+    "missingCount": 4
+  },
+  {
+    "code": "SAR-WFL-KNT",
+    "name": "Waffle Knit Throw Blanket",
+    "href": "https://www.mccabestheaterandliving.com/product-p/sar-wfl-knt.htm",
+    "colors": [
+      {
+        "optionId": "1130",
+        "label": "Hibiscus",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1012",
+        "label": "Moonbeam",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1132",
+        "label": "Nightfall Double Layer",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1127",
+        "label": "Olive",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1131",
+        "label": "Pansy Double Layer",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1126",
+        "label": "Peach",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1129",
+        "label": "Pecan",
+        "hasS": false,
+        "hasT": false
+      }
+    ],
+    "missingCount": 6
+  },
+  {
+    "code": "SAR-WFL-KNT-KING",
+    "name": "Waffle Knit King Blanket",
+    "href": "https://www.mccabestheaterandliving.com/product-p/sar-wfl-knt-king.htm",
+    "colors": [
+      {
+        "optionId": "1130",
+        "label": "Hibiscus",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1012",
+        "label": "Moonbeam",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1132",
+        "label": "Nightfall Double Layer",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1127",
+        "label": "Olive",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1131",
+        "label": "Pansy Double Layer",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1126",
+        "label": "Peach",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1129",
+        "label": "Pecan",
+        "hasS": false,
+        "hasT": false
+      }
+    ],
+    "missingCount": 7
+  },
+  {
+    "code": "SAR-WFL-KNT-QUEEN",
+    "name": "Waffle Knit Queen Blanket",
+    "href": "https://www.mccabestheaterandliving.com/product-p/sar-wfl-knt-queen.htm",
+    "colors": [
+      {
+        "optionId": "1130",
+        "label": "Hibiscus",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1012",
+        "label": "Moonbeam",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1132",
+        "label": "Nightfall Double Layer",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1127",
+        "label": "Olive",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1131",
+        "label": "Pansy Double Layer",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1126",
+        "label": "Peach",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1129",
+        "label": "Pecan",
+        "hasS": false,
+        "hasT": false
+      }
+    ],
+    "missingCount": 7
+  },
+  {
+    "code": "SAR-WFL-KNT-ROBES",
+    "name": "Waffle Knit Robe",
+    "href": "https://www.mccabestheaterandliving.com/product-p/sar-wfl-knt-robes.htm",
+    "colors": [
+      {
+        "optionId": "1130",
+        "label": "Hibiscus",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1012",
+        "label": "Moonbeam",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1132",
+        "label": "Nightfall Double Layer",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1127",
+        "label": "Olive",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1131",
+        "label": "Pansy Double Layer",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1126",
+        "label": "Peach",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1129",
+        "label": "Pecan",
+        "hasS": false,
+        "hasT": false
+      }
+    ],
+    "missingCount": 7
+  },
+  {
+    "code": "SAR-WFL-KNT-TWIN",
+    "name": "Waffle Knit Twin Blanket",
+    "href": "https://www.mccabestheaterandliving.com/product-p/sar-wfl-knt-twin.htm",
+    "colors": [
+      {
+        "optionId": "1130",
+        "label": "Hibiscus",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1012",
+        "label": "Moonbeam",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1132",
+        "label": "Nightfall Double Layer",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1127",
+        "label": "Olive",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1131",
+        "label": "Pansy Double Layer",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1126",
+        "label": "Peach",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1129",
+        "label": "Pecan",
+        "hasS": false,
+        "hasT": false
+      }
+    ],
+    "missingCount": 7
+  },
+  {
+    "code": "SAR-WFL-KNT-XL-LG",
+    "name": "Waffle Knit XL Throw Blanket",
+    "href": "https://www.mccabestheaterandliving.com/product-p/sar-wfl-knt-xl-lg.htm",
+    "colors": [
+      {
+        "optionId": "1130",
+        "label": "Hibiscus",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1012",
+        "label": "Moonbeam",
+        "hasS": true,
+        "hasT": true
+      },
+      {
+        "optionId": "1132",
+        "label": "Nightfall Double Layer",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1127",
+        "label": "Olive",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1131",
+        "label": "Pansy Double Layer",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1126",
+        "label": "Peach",
+        "hasS": false,
+        "hasT": false
+      },
+      {
+        "optionId": "1129",
+        "label": "Pecan",
+        "hasS": false,
+        "hasT": false
+      }
+    ],
+    "missingCount": 6
   }
 ]
