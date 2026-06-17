@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp58";
+  var VERSION = "20260616pdp59";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -1698,6 +1698,16 @@
   }
 
   function findPurchaseStackAnchor() {
+    if (isBeanBagPdpPage()) {
+      var cover = global.document.getElementById("beanbag-swatch-wrapper");
+      if (cover && cover.parentNode) {
+        return { parent: cover.parentNode, after: cover };
+      }
+      var size = resolveBeanBagSizeOptionsElement();
+      if (size && size.parentNode) {
+        return { parent: size.parentNode, after: size };
+      }
+    }
     var features = global.document.getElementById("mc-pdp-features");
     if (features && features.parentNode) {
       return { parent: features.parentNode, after: features };
@@ -2410,13 +2420,37 @@
         "td.mc-pdp-options-td .mc-unified-purchase-controls, td.mc-unified-pdp-info .mc-unified-purchase-controls"
       );
     var stack = global.document.getElementById("mc-pdp-purchase-stack");
-    if (unified && unified.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]')) {
-      return unified;
-    }
     if (stack && stack.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]')) {
       return stack;
     }
-    return unified || stack || null;
+    if (unified && unified.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]')) {
+      return unified;
+    }
+    return stack || unified || null;
+  }
+
+  function consolidateBeanBagPurchaseBlocks(infoColumn, canonical) {
+    infoColumn = infoColumn || findPdpHeroColumnTd();
+    if (!infoColumn) return canonical;
+    var stack = global.document.getElementById("mc-pdp-purchase-stack");
+    var unified = infoColumn.querySelector(".mc-unified-purchase-controls");
+    [stack, unified].forEach(function (el) {
+      if (!el || el === canonical) return;
+      try {
+        el.style.setProperty("display", "none", "important");
+        el.style.setProperty("visibility", "hidden", "important");
+        el.setAttribute("aria-hidden", "true");
+      } catch (eHide) {}
+    });
+    if (canonical) {
+      try {
+        canonical.style.setProperty("display", "flex", "important");
+        canonical.style.setProperty("visibility", "visible", "important");
+        canonical.style.setProperty("opacity", "1", "important");
+        canonical.removeAttribute("aria-hidden");
+      } catch (eShow) {}
+    }
+    return canonical;
   }
 
   function isBeanBagInfoColumnChildVisible(child, allowedIds) {
@@ -2473,6 +2507,7 @@
         } catch (eAppend) {}
       }
     });
+    consolidateBeanBagPurchaseBlocks(infoColumn, purchaseElement);
     infoColumn.querySelectorAll(":scope > table, :scope > div").forEach(function (node) {
       if (node.id && /^(mc-pdp-|beanbag-|messaging|mc-bb-)/.test(node.id)) return;
       if (node.id) return;
@@ -4124,6 +4159,7 @@
 
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
   global.mcMountBeanBagSwatchesAboveFeatures = mountBeanBagSwatchesAboveFeatures;
+  global.mcAppendBeanBagInfoColumnOrder = appendBeanBagInfoColumnOrder;
   global.mcEnsureHeroColumnOrder = ensureHeroColumnOrder;
 
   function findOrCreatePriceStackHost() {
@@ -5430,14 +5466,10 @@
     try {
       placeBrandLogoBelowTitle();
     } catch (eLogo) {}
-    ensureQuantityAboveAtc();
-    ensurePurchaseStackCentered();
     if (isBeanBagPdpPage()) {
       mountBeanBagSwatchesAboveFeatures();
       extractSwatchesIntoCol();
       ensureBeanBagSizeRow();
-      ensureBeanBagPurchaseStack();
-      appendBeanBagInfoColumnOrder();
       markBeanBagCoverSwatchesReady();
       styleBeanBagPriceAtc();
       ensureBeanBagReturnLink();
@@ -5445,6 +5477,13 @@
       ensureSaranoniBrandLogo();
       ensureConfiguredColorSwatches();
       mountDescriptionBelowFeatures();
+    }
+    ensureQuantityAboveAtc();
+    ensurePurchaseStackCentered();
+    if (isBeanBagPdpPage()) {
+      ensureBeanBagPurchaseStack();
+      appendBeanBagInfoColumnOrder();
+    } else if (isSaranoniPdpPage()) {
       appendSaranoniInfoColumnOrder();
       applySoftGoodsColumnPurchaseStackLayout(
         global.document.getElementById("mc-pdp-purchase-stack"),
@@ -5554,7 +5593,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260616unified12&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260616unified13&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -5604,7 +5643,10 @@
       if (!sectional && isSoftGoodsPdpPage()) {
         ensureConfiguredColorSwatches();
       }
-      if (!sectional && isUnifiedPdpReady()) {
+      if (!sectional && isSoftGoodsPdpPage()) {
+        reassertSoftGoodsHeroOrder();
+        stripPriceZeroCents();
+      } else if (!sectional && isUnifiedPdpReady()) {
         stripPriceZeroCents();
       } else if (!sectional && isPdpLayoutMounted()) {
         forceRebuildCleanPriceStack();

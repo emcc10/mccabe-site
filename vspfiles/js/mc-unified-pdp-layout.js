@@ -6,7 +6,7 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260616unified12";
+  var LAYOUT_VER = "20260616unified13";
   var AUTH_LAYOUT_VER = "20260616pdp53";
   var moTimer = null;
   var moBound = false;
@@ -449,7 +449,9 @@
     var klarna = collectFinanceBlock(infoTd);
     var options = collectOptionBlocks(infoTd);
     var features = qs("#mc-pdp-features", infoTd);
-    var purchase = qs(".mc-unified-purchase-controls", infoTd);
+    var purchase =
+      qs("#mc-pdp-purchase-stack", infoTd) ||
+      qs(".mc-unified-purchase-controls", infoTd);
 
     var ordered = [];
     [logo, title, price, klarna].forEach(function (el) {
@@ -458,8 +460,15 @@
     options.forEach(function (el) {
       if (ordered.indexOf(el) === -1) ordered.push(el);
     });
-    if (features && ordered.indexOf(features) === -1) ordered.push(features);
-    if (purchase && ordered.indexOf(purchase) === -1) ordered.push(purchase);
+    var beanBag =
+      global.document.body && global.document.body.classList.contains("mc-bean-bag-pdp");
+    if (beanBag) {
+      if (purchase && ordered.indexOf(purchase) === -1) ordered.push(purchase);
+      if (features && ordered.indexOf(features) === -1) ordered.push(features);
+    } else {
+      if (features && ordered.indexOf(features) === -1) ordered.push(features);
+      if (purchase && ordered.indexOf(purchase) === -1) ordered.push(purchase);
+    }
 
     appendInOrder(infoTd, ordered);
 
@@ -711,6 +720,16 @@
     try {
       if (typeof global.mcSyncHomeBodyClass === "function") global.mcSyncHomeBodyClass();
     } catch (eSync) {}
+
+    try {
+      if (
+        global.document.body &&
+        global.document.body.classList.contains("mc-bean-bag-pdp") &&
+        typeof global.mcAppendBeanBagInfoColumnOrder === "function"
+      ) {
+        global.mcAppendBeanBagInfoColumnOrder();
+      }
+    } catch (eBbOrder) {}
 
     global.__MC_PDP_HERO_READY_LOCKED__ = true;
     markUnifiedStable();
