@@ -15,6 +15,7 @@ CRITICAL = (
     "vspfiles/templates/266/css/mccabe-overrides.css",
     "vspfiles/css/mc-live-patch.css",
     "vspfiles/templates/266/js/min/design-toolkit.min.js",
+    "vspfiles/templates/266/js/min/template.min.js",
     "vspfiles/js/mc-plp-enforcer.js",
     "vspfiles/templates/266/js/mc-plp-enforcer.js",
     "vspfiles/js/mc-pdp-auth-cta-fix.js",
@@ -44,13 +45,12 @@ OPTIONAL = (
 )
 
 CHUNKED_JS_OVER_CAP = (
+    "vspfiles/templates/266/js/min/template.min.js",
     "vspfiles/js/mtl-sectional-renderer.js",
     "vspfiles/js/mc-pdp-auth-cta-fix.js",
 )
 
-SKIP_OVER_CAP = (
-    "vspfiles/templates/266/js/min/template.min.js",
-)
+SKIP_OVER_CAP = ()
 
 
 def _norm(path: str) -> str:
