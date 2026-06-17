@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260617unified17 — soft-goods PDP rebake title/color layout */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260617unified18 — revert pdp68 soft-goods over-scope; Gatlin price */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -15048,10 +15048,8 @@ html body.productdetails:has(#mc-pdp-top-price-panel) #v65-product-parent .color
   opacity: 0 !important;
   pointer-events: none !important;
 }
-html body.is-sectional-product #mc-pdp-price-stack-host,
-html.is-sectional-product #mc-pdp-price-stack-host,
-html body.is-sectional-product #mtl-pdp-top-price,
-html.is-sectional-product #mtl-pdp-top-price {
+html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) #mc-pdp-price-stack-host,
+html.is-sectional-product body:not(.mc-gatlin-sectional-pdp) #mtl-pdp-top-price {
   display: none !important;
   height: 0 !important;
   overflow: hidden !important;
@@ -15829,7 +15827,10 @@ html body.mc-product-page #mc-pdp-top-price-panel .mc-pdp-top-price-value,
 html body.is-sectional-product #mc-pdp-top-price-panel .mc-pdp-top-price-value,
 html body.productdetails #mc-pdp-top-price-panel .mtl-top-price__amount,
 html body.mc-product-page #mc-pdp-top-price-panel .mtl-top-price__amount,
-html body.is-sectional-product #mc-pdp-top-price-panel .mtl-top-price__amount {
+html body.is-sectional-product #mc-pdp-top-price-panel .mtl-top-price__amount,
+html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready #mc-pdp-price-stack-host .product_list_price,
+html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready #mc-pdp-price-stack-host .mc-pdp-stack-retail-amt,
+html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready #mc-pdp-price-stack-host [itemprop="price"] {
   font-family: Inter, Arial, sans-serif !important;
   font-size: 20px !important;
   font-weight: 400 !important;
@@ -16605,11 +16606,36 @@ html body.mc-saranoni-pdp #v65-product-parent > tr:first-child > td.vCSS_breadcr
   padding: 0 !important;
 }
 
-html body.mc-bean-bag-pdp #v65-product-parent td.mc-pdp-options-td > #mc-pdp-title-right,
-html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-options-td > #mc-pdp-title-right,
-html body.mc-bean-bag-pdp #v65-product-parent td.mc-unified-pdp-info > #mc-pdp-title-right,
-html body.mc-saranoni-pdp #v65-product-parent td.mc-unified-pdp-info > #mc-pdp-title-right {
-  order: 2 !important;
+html body.mc-bean-bag-pdp .mc-pdp-return-row,
+html body.mc-saranoni-pdp .mc-pdp-return-row {
+  display: table-row !important;
+}
+
+html body.mc-bean-bag-pdp .mc-pdp-return-cell,
+html body.mc-saranoni-pdp .mc-pdp-return-cell {
+  display: block !important;
+  width: 100% !important;
+  padding: 0 0 12px 0 !important;
+  border: 0 !important;
+  vertical-align: top !important;
+}
+
+html body.mc-bean-bag-pdp .mc-pdp-return-link,
+html body.mc-saranoni-pdp .mc-pdp-return-link {
+  display: inline-block !important;
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  color: #111 !important;
+}
+
+html body.mc-bean-bag-pdp .mc-pdp-return-link:hover,
+html body.mc-saranoni-pdp .mc-pdp-return-link:hover {
+  color: #444 !important;
+  text-decoration: underline !important;
 }
 
 html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker {
@@ -17121,6 +17147,16 @@ html body.mc-pdp-unified-ready td.mc-unified-pdp-info:has(.mc-unified-purchase-c
 }
 
 /* Gatlin / fixed -SECT sectionals: unified purchase stack below logo + features */
+html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready #mc-pdp-price-stack-host {
+  display: block !important;
+  visibility: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
 html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls,
 html body.mc-gatlin-sectional-pdp.mc-pdp-unified-ready .mc-unified-purchase-controls {
   display: flex !important;

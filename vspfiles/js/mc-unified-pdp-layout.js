@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260617unified17";
-  var AUTH_LAYOUT_VER = "20260617pdp68";
+  var LAYOUT_VER = "20260617unified18";
+  var AUTH_LAYOUT_VER = "20260617pdp69";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -821,17 +821,6 @@
         global.mcAppendBeanBagInfoColumnOrder();
       }
     } catch (eBbOrder) {}
-
-    try {
-      if (
-        global.document.body &&
-        (global.document.body.classList.contains("mc-bean-bag-pdp") ||
-          global.document.body.classList.contains("mc-saranoni-pdp")) &&
-        typeof global.mcEnsureSoftGoodsPdpLayout === "function"
-      ) {
-        global.mcEnsureSoftGoodsPdpLayout();
-      }
-    } catch (eSgOrder) {}
 
     global.__MC_PDP_HERO_READY_LOCKED__ = true;
     markUnifiedStable();
