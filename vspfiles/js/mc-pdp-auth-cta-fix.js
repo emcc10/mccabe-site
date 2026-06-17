@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260617pdp66";
+  var VERSION = "20260617pdp67";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -104,6 +104,16 @@
       if (!global.__MC_PDP_HERO_READY_FALLBACK__) {
         global.__MC_PDP_HERO_READY_FALLBACK__ = true;
         global.setTimeout(function () {
+          if (global.__MC_PDP_HERO_READY_LOCKED__) return;
+          try {
+            if (shouldDeferToUnifiedPdpLayout() || isFixedSectionalUnifiedPdp()) {
+              prepareDeferredUnifiedPdpHero();
+              ensureUnifiedPdpLayout();
+              if (typeof global.mcNormalizePdpLayout === "function") {
+                global.mcNormalizePdpLayout();
+              }
+            }
+          } catch (eAfFb) {}
           if (!global.__MC_PDP_HERO_READY_LOCKED__) markPdpHeroReady();
         }, 2200);
       }
@@ -165,6 +175,13 @@
         global.document.getElementById("mc-pdp-price-atc-row") ||
         global.document.getElementById("mc-pdp-purchase-stack") ||
         global.document.querySelector(".mc-unified-purchase-controls")
+      );
+    }
+    if (shouldDeferToUnifiedPdpLayout() || isFixedSectionalUnifiedPdp()) {
+      return !!(
+        global.document.querySelector(
+          ".mc-unified-purchase-controls input[name='btnaddtocart'], .mc-unified-purchase-controls button[name='btnaddtocart']"
+        ) || global.document.querySelector(".mc-unified-purchase-controls")
       );
     }
     return !!(
@@ -484,9 +501,30 @@
     return false;
   }
 
+  /** Steve Silver / fixed sectionals (-SECT, not MTL -SC- configurators) use unified PDP layout. */
+  function isFixedSectionalUnifiedPdp() {
+    try {
+      var pc = String(
+        (global.document.querySelector('input[name="ProductCode"], input[name="productcode"]') || {}).value || ""
+      )
+        .trim()
+        .toUpperCase();
+      if (!pc) return false;
+      if (/-SC-/i.test(pc) || /ROOM-PLANNER|CONFIGURATOR/i.test(pc)) return false;
+      return /-SECT/i.test(pc);
+    } catch (eFix) {}
+    return false;
+  }
+
+  function isMtlSectionalConfiguratorPdp() {
+    return isSectionalPdpPage() && !isFixedSectionalUnifiedPdp();
+  }
+
   /** Standard furniture PDPs (e.g. Steve Silver Gatlin -SECT) use mc-unified-pdp-layout.js, not legacy mount. */
   function shouldDeferToUnifiedPdpLayout() {
-    if (!isProductPdp() || isSectionalPdpPage()) return false;
+    if (!isProductPdp()) return false;
+    if (isFixedSectionalUnifiedPdp()) return true;
+    if (isSectionalPdpPage()) return false;
     if (isSoftGoodsPdpPage()) return false;
     try {
       if (
@@ -4539,7 +4577,7 @@
     if (!isProductPdp()) return;
     if (isUnifiedPdpReady()) return;
     if (isPalliserPdpPage()) return;
-    if (isSectionalPdpPage()) return;
+    if (isSectionalPdpPage() && !isFixedSectionalUnifiedPdp()) return;
     if (global.document.getElementById("mc-pdp-top-price-panel") || global.__MTL_OWNS_TOP_PRICE__) return;
     if (global.__MTL_TOP_PRICE_MOUNT_GAVE_UP__) return;
     ensurePdpStackCriticalCss();
@@ -5788,6 +5826,7 @@
     if (!isProductPdp()) return false;
     if (isSectionalPdpPage()) return false;
     if (shouldDeferToUnifiedPdpLayout()) {
+      prepareDeferredUnifiedPdpHero();
       ensureUnifiedPdpLayout();
       return false;
     }
@@ -5857,8 +5896,40 @@
     }
   }
 
+  function prepareDeferredUnifiedPdpHero() {
+    if (!shouldDeferToUnifiedPdpLayout() && !isFixedSectionalUnifiedPdp()) return;
+    try {
+      tagHeroMediaCol();
+      moveAltViewsUnderMainImage();
+      ensurePdpTitleInOptionsColumn();
+      placeBrandLogoBelowTitle();
+      if (!global.document.getElementById("mc-pdp-price-stack-host")) {
+        forceRebuildCleanPriceStack();
+      }
+      mountPdpFeaturesBlock();
+    } catch (ePrep) {}
+  }
+  global.mcPrepareUnifiedPdpHero = prepareDeferredUnifiedPdpHero;
+
+  function retryDeferredUnifiedNormalize() {
+    if (!shouldDeferToUnifiedPdpLayout() && !isFixedSectionalUnifiedPdp()) return;
+    function attempt() {
+      try {
+        if (typeof global.mcNormalizePdpLayout === "function") {
+          global.mcNormalizePdpLayout();
+        }
+      } catch (eNorm) {}
+    }
+    attempt();
+    [80, 200, 500, 1200, 2400].forEach(function (ms) {
+      global.setTimeout(function () {
+        if (!isUnifiedPdpReady()) attempt();
+      }, ms);
+    });
+  }
+
   function ensureUnifiedPdpLayout() {
-    if (isSectionalPdpPage()) return;
+    if (isMtlSectionalConfiguratorPdp()) return;
     if (isUnifiedPdpReady() || global.__MC_UNIFIED_PDP_STABLE__) return;
     function runNorm() {
       try {
@@ -5877,7 +5948,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260617unified15&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260617unified16&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -5931,6 +6002,18 @@
       if (!sectional && isSoftGoodsPdpPage()) {
         reassertSoftGoodsHeroOrder();
         stripPriceZeroCents();
+      } else if (shouldDeferToUnifiedPdpLayout()) {
+        prepareDeferredUnifiedPdpHero();
+        forceRebuildCleanPriceStack();
+        ensureUnifiedPdpLayout();
+        retryDeferredUnifiedNormalize();
+        if (
+          global.document.body &&
+          !global.document.body.classList.contains("mc-pdp-unified-ready")
+        ) {
+          fixAddToCartChrome();
+        }
+        stripPriceZeroCents();
       } else if (!sectional && isUnifiedPdpReady()) {
         stripPriceZeroCents();
       } else if (!sectional && isPdpLayoutMounted()) {
@@ -5974,7 +6057,9 @@
       scheduleAtcBlackLock();
       scheduleBeanBagOptionRepair();
       if (shouldDeferToUnifiedPdpLayout() && !isUnifiedPdpReady()) {
+        prepareDeferredUnifiedPdpHero();
         ensureUnifiedPdpLayout();
+        retryDeferredUnifiedNormalize();
         try {
           if (typeof global.mcNormalizePdpLayout === "function") {
             global.mcNormalizePdpLayout();
