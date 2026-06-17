@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260616unified8";
-  var AUTH_LAYOUT_VER = "20260616pdp49";
+  var LAYOUT_VER = "20260616unified9";
+  var AUTH_LAYOUT_VER = "20260616pdp50";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -24,15 +24,13 @@
   }
 
   function isSectionalConfigurator() {
-    try {
-      if (typeof global.window.isSectionalProductPage === "function" && global.window.isSectionalProductPage()) {
-        return true;
-      }
-    } catch (e) {}
+    var path = String((global.location && global.location.pathname) || "").toLowerCase();
+    if (path.indexOf("room-planner") !== -1) return true;
+    if (qs("#mtl-sectional-configurations, #mccabe-room-planner-pricing-summary, .room-planner-summary")) return true;
     var pc = String((qs('input[name="ProductCode"], input[name="productcode"]') || {}).value || "")
       .trim()
       .toUpperCase();
-    return /-SC-/i.test(pc);
+    return /ROOM-PLANNER|CONFIGURATOR/i.test(pc);
   }
 
   function unwrapBadWrapper() {
@@ -107,12 +105,25 @@
 
   function isUnifiedStable() {
     var body = global.document.body;
+    var info = qs("td.mc-unified-pdp-info");
+    var orderedOk = !info || childrenInOrder(
+      info,
+      [
+        qs("#mc-pdp-brand-logo", info),
+        qs("#mc-pdp-title-right", info),
+        qs("#mc-pdp-price-stack-host", info) || qs("#mc-pdp-price-atc-row", info),
+        collectFinanceBlock(info),
+        qs("#mc-pdp-features", info),
+        qs(".mc-unified-purchase-controls", info),
+      ].filter(Boolean)
+    );
     return !!(
       global.__MC_UNIFIED_PDP_STABLE__ &&
       body &&
       body.classList.contains("mc-pdp-unified-ready") &&
       body.dataset.mcPdpLayoutVer === AUTH_LAYOUT_VER &&
       body.dataset.mcUnifiedPdpVer === LAYOUT_VER &&
+      orderedOk &&
       qs("tr.mc-unified-pdp-row") &&
       qs(".mc-unified-purchase-controls")
     );
@@ -701,6 +712,11 @@
     bindMutationObserver();
   }
 
+  function forceNormalizePass() {
+    global.__MC_UNIFIED_PDP_STABLE__ = false;
+    mcNormalizePdpLayout();
+  }
+
   if (global.document.readyState === "loading") {
     global.document.addEventListener("DOMContentLoaded", boot);
   } else {
@@ -708,5 +724,8 @@
   }
   global.addEventListener("load", function () {
     if (!isUnifiedStable()) mcNormalizePdpLayout();
+  });
+  [250, 800, 1600].forEach(function (delay) {
+    global.setTimeout(forceNormalizePass, delay);
   });
 })(window);
