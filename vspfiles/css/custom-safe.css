@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260617unified16 — one global PDP layout */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260617unified17 — soft-goods PDP rebake title/color layout */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -16583,6 +16583,35 @@ html body.mc-saranoni-pdp #product_photo_td span#altviews {
 }
 
 /* Saranoni color picker in features section */
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready #mc-configured-color-swatch-wrapper,
+html body.mc-saranoni-pdp.mc-saranoni-swatches-ready .mc-configured-color-swatch-wrapper {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html body.mc-bean-bag-pdp #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
+html body.mc-saranoni-pdp #v65-product-parent > tbody > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
+html body.mc-bean-bag-pdp #v65-product-parent > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title,
+html body.mc-saranoni-pdp #v65-product-parent > tr:first-child > td.vCSS_breadcrumb_td h1.vp-product-title {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html body.mc-bean-bag-pdp #v65-product-parent td.mc-pdp-options-td > #mc-pdp-title-right,
+html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-options-td > #mc-pdp-title-right,
+html body.mc-bean-bag-pdp #v65-product-parent td.mc-unified-pdp-info > #mc-pdp-title-right,
+html body.mc-saranoni-pdp #v65-product-parent td.mc-unified-pdp-info > #mc-pdp-title-right {
+  order: 2 !important;
+}
+
 html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker {
   display: block !important;
   width: 100% !important;

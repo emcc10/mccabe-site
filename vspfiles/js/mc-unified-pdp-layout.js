@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260617unified16";
-  var AUTH_LAYOUT_VER = "20260617pdp67";
+  var LAYOUT_VER = "20260617unified17";
+  var AUTH_LAYOUT_VER = "20260617pdp68";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -446,7 +446,56 @@
     qsa(sel, infoTd).forEach(function (el) {
       if (seen.indexOf(el) === -1) seen.push(el);
     });
+    if (
+      global.document.body &&
+      global.document.body.classList.contains("mc-saranoni-swatches-ready")
+    ) {
+      seen = seen.filter(function (el) {
+        return el && el.id !== "mc-configured-color-swatch-wrapper";
+      });
+    }
     return seen;
+  }
+
+  function moveRebakedTitleIntoInfo(infoTd) {
+    if (!infoTd) return;
+    if (typeof global.mcEnsureSoftGoodsPdpLayout === "function") {
+      try {
+        if (
+          global.document.body &&
+          (global.document.body.classList.contains("mc-bean-bag-pdp") ||
+            global.document.body.classList.contains("mc-saranoni-pdp"))
+        ) {
+          return;
+        }
+      } catch (eSg) {}
+    }
+    var titleWrap = qs("#mc-pdp-title-right");
+    if (!titleWrap) {
+      titleWrap = global.document.createElement("div");
+      titleWrap.id = "mc-pdp-title-right";
+      titleWrap.className = "mc-pdp-title-right";
+    }
+    var src =
+      qs("#v65-product-parent td.vCSS_breadcrumb_td h1.vp-product-title") ||
+      qs("#v65-product-parent h1.vp-product-title");
+    if (src && !titleWrap.contains(src)) {
+      titleWrap.appendChild(src);
+    }
+    if (!titleWrap.querySelector("h1, [itemprop='name'], .productnamecolor")) return;
+    if (titleWrap.parentNode !== infoTd) {
+      try {
+        infoTd.insertBefore(titleWrap, infoTd.firstChild || null);
+      } catch (eTitle) {
+        infoTd.appendChild(titleWrap);
+      }
+    }
+    qsa("#v65-product-parent td.vCSS_breadcrumb_td h1.vp-product-title").forEach(function (h1) {
+      if (titleWrap.contains(h1)) return;
+      try {
+        h1.style.setProperty("display", "none", "important");
+      } catch (eHide) {}
+    });
   }
 
   function scoopLooseQtyIntoPurchase(infoTd, purchase) {
@@ -746,6 +795,7 @@
 
     ensureReturnRow(row, table);
     ensurePurchaseControls(infoTd, atc);
+    moveRebakedTitleIntoInfo(infoTd);
     orderInfoColumn(infoTd);
     hideDuplicatePriceBlocks(infoTd);
 
@@ -771,6 +821,17 @@
         global.mcAppendBeanBagInfoColumnOrder();
       }
     } catch (eBbOrder) {}
+
+    try {
+      if (
+        global.document.body &&
+        (global.document.body.classList.contains("mc-bean-bag-pdp") ||
+          global.document.body.classList.contains("mc-saranoni-pdp")) &&
+        typeof global.mcEnsureSoftGoodsPdpLayout === "function"
+      ) {
+        global.mcEnsureSoftGoodsPdpLayout();
+      }
+    } catch (eSgOrder) {}
 
     global.__MC_PDP_HERO_READY_LOCKED__ = true;
     markUnifiedStable();
