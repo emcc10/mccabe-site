@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260617pdp64";
+  var VERSION = "20260617pdp66";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -1545,13 +1545,19 @@
       for (ki = 0; ki < kids.length; ki++) {
         var ch = kids[ki];
         if (ch.id === "mc-pdp-description-under-media") continue;
-        if (ch.id === "altviews" || ch.classList.contains("altviews")) {
-          anchor = ch;
-          break;
-        }
         if (ch.tagName === "TABLE") {
           anchor = ch;
           break;
+        }
+      }
+      if (!anchor) {
+        for (ki = 0; ki < kids.length; ki++) {
+          var chAlt = kids[ki];
+          if (chAlt.id === "mc-pdp-description-under-media") continue;
+          if (chAlt.id === "altviews" || chAlt.classList.contains("altviews")) {
+            anchor = chAlt;
+            break;
+          }
         }
       }
       try {
@@ -1583,11 +1589,23 @@
     var mainBlock = stack.querySelector("table");
     if (mainBlock) {
       try {
+        mainBlock.style.setProperty("order", "1", "important");
+      } catch (eTblOrd) {}
+      try {
         stack.insertBefore(alt, mainBlock.nextSibling);
       } catch (eOrd) {
         stack.appendChild(alt);
       }
     }
+    try {
+      alt.style.setProperty("order", "2", "important");
+      alt.style.setProperty("position", "static", "important");
+      alt.style.setProperty("top", "auto", "important");
+      alt.style.setProperty("left", "auto", "important");
+      alt.style.setProperty("margin-top", "10px", "important");
+      alt.style.setProperty("width", "100%", "important");
+      alt.style.setProperty("max-width", "600px", "important");
+    } catch (eAltOrd) {}
   }
 
   function moveAltViewsUnderMainImage() {
@@ -4328,6 +4346,24 @@
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
   global.mcMountBeanBagSwatchesAboveFeatures = mountBeanBagSwatchesAboveFeatures;
   global.mcAppendBeanBagInfoColumnOrder = appendBeanBagInfoColumnOrder;
+  global.mcEnsureBeanBagMediaStack = function (main, alt) {
+    if (!main) {
+      main =
+        global.document.getElementById("product_photo") ||
+        global.document.querySelector("img#main-image, #v65-product-parent img#product_photo");
+    }
+    if (!alt) {
+      alt =
+        global.document.getElementById("altviews") ||
+        global.document.querySelector("#content_area .altviews, #v65-product-parent .altviews");
+    }
+    if (main && alt) ensureBeanBagMediaStack(main, alt);
+  };
+  global.mcReassertBeanBagHeroMedia = function () {
+    if (!isBeanBagPdpPage()) return;
+    moveAltViewsUnderMainImage();
+    sanitizeBeanBagAltviews();
+  };
   global.mcEnsureHeroColumnOrder = ensureHeroColumnOrder;
 
   function findOrCreatePriceStackHost() {

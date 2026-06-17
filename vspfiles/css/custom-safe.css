@@ -8983,14 +8983,14 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
 /* #altviews is a *direct* child of #product_photo_td / media td: pull up (legacy Volusion).
    When #altviews is nested *inside* the same td/table as the hero, do NOT use margin hacks — use nested flex block below. */
 @media (min-width: 992px) {
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > #altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td > span#altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > #altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > span#altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > #altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td > span#altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > #altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > span#altviews {
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td > #altviews,
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td > span#altviews,
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > #altviews,
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > span#altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td > #altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td > span#altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > #altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td > span#altviews {
     margin-top: var(--mc-pdp-altviews-shift, min(-58vh, -620px)) !important;
   }
 }
@@ -9046,12 +9046,12 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 
   /* Same as above but #altviews + hero live inside a wrapper div inside td */
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):has(img#product_photo),
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):has(a#product_photo_zoom_url),
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):has(img#product_photo),
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):has(img#product_photo),
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):has(a#product_photo_zoom_url),
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):has(img#product_photo) {
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo),
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(a#product_photo_zoom_url),
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo),
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo),
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack):has(a#product_photo_zoom_url),
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):not(.mc-bean-bag-media-stack):has(img#product_photo) {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
@@ -9062,12 +9062,12 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     box-sizing: border-box !important;
   }
 
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) #altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) span#altviews,
-  body.productdetails :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews) #altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) #altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews) span#altviews,
-  body.mc-product-page :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews) #altviews {
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack) #altviews,
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack) span#altviews,
+  body.productdetails:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):not(.mc-bean-bag-media-stack) #altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack) #altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) #product_photo_td div:has(#altviews):not(.mc-bean-bag-media-stack) span#altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) :is(#content_area, #v65-product-parent) td.mc-pdp-media-td div:has(#altviews):not(.mc-bean-bag-media-stack) #altviews {
     order: -1 !important;
     flex: 0 0 72px !important;
     width: 72px !important;
@@ -9143,10 +9143,10 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
   }
 
   /* Lift alt thumbnails back to the top of the media area */
-  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
-  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews,
-  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
-  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews {
+  body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
+  body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews,
+  body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
@@ -9158,10 +9158,10 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     z-index: 5 !important;
   }
 
-  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews a,
-  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews a,
-  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews a,
-  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews a {
+  body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews a,
+  body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews a,
+  body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews a,
+  body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews a {
     display: block !important;
     width: 86px !important;
     max-width: 86px !important;
@@ -9169,10 +9169,10 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     padding: 0 !important;
   }
 
-  body.productdetails #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews img,
-  body.productdetails #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews img,
-  body.mc-product-page #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews img,
-  body.mc-product-page #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews img {
+  body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews img,
+  body.productdetails:not(.mc-bean-bag-pdp) #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews img,
+  body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent > tbody > tr:nth-of-type(2) > td:first-child > #altviews img,
+  body.mc-product-page:not(.mc-bean-bag-pdp) #v65-product-parent > tr:nth-of-type(2) > td:first-child > #altviews img {
     display: block !important;
     width: 86px !important;
     max-width: 86px !important;
@@ -9195,6 +9195,81 @@ body:not(.productdetails) #content_area table.v65-productDisplay ul.v-product-gr
     margin-left: 40px !important;
     position: relative !important;
     z-index: 1 !important;
+  }
+}
+
+/* Bean bag PDP last-win: main hero then horizontal thumbs (overrides grid/lift/wrapper rules above). */
+@media (min-width: 992px) {
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-pdp-media-td,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-media,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-pdp-media-td,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-media {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    column-gap: 0 !important;
+    row-gap: 10px !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-bean-bag-media-stack,
+  html body.mc-bean-bag-pdp.productdetails #content_area .mc-bean-bag-media-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-bean-bag-media-stack > table,
+  html body.mc-bean-bag-pdp.productdetails #content_area .mc-bean-bag-media-stack > table,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-pdp-media-td > table:first-of-type,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-pdp-media-td > table:first-of-type,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-media > table:first-of-type,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-media > table:first-of-type {
+    order: 1 !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 600px !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-bean-bag-media-stack #altviews,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-bean-bag-media-stack span#altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area .mc-bean-bag-media-stack #altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area .mc-bean-bag-media-stack span#altviews,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-pdp-media-td > #altviews,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-pdp-media-td > span#altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-pdp-media-td > #altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-pdp-media-td > span#altviews,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-media > #altviews,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-media > span#altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-media > #altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-media > span#altviews {
+    order: 2 !important;
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 10px 0 0 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    clear: both !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    z-index: auto !important;
   }
 }
 

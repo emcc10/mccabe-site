@@ -7,7 +7,7 @@
 
 
   var LAYOUT_VER = "20260617unified15";
-  var AUTH_LAYOUT_VER = "20260617pdp64";
+  var AUTH_LAYOUT_VER = "20260617pdp66";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -726,6 +726,16 @@
       infoTd.dataset.mcUnifiedLayoutCleared = "1";
     }
     normalizeMediaColumn(mediaTd);
+    if (
+      global.document.body &&
+      global.document.body.classList.contains("mc-bean-bag-pdp")
+    ) {
+      try {
+        if (typeof global.mcReassertBeanBagHeroMedia === "function") {
+          global.mcReassertBeanBagHeroMedia();
+        }
+      } catch (eBbMedia) {}
+    }
     global.document.body.classList.remove("mc-fixed-sectional-pdp");
 
     ensureReturnRow(row, table);
