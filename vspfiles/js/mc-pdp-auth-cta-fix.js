@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260617pdp62";
+  var VERSION = "20260617pdp63";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -3220,18 +3220,25 @@
     if (!mainImg || !resolvedSrc) return;
     try {
       if ((mainImg.getAttribute("src") || "") !== resolvedSrc) mainImg.src = resolvedSrc;
+      if (mainImg.hasAttribute("srcset")) mainImg.removeAttribute("srcset");
     } catch (eSrc) {}
     try {
       mainImg.style.setProperty("opacity", "1", "important");
     } catch (eOp) {}
-    var zoom = global.document.getElementById("product_photo_zoom_url");
-    if (zoom) {
+    var full = resolvedSrc.replace(/-T\.jpg/i, ".jpg").replace(/-S\.jpg/i, ".jpg");
+    ["product_photo_zoom_url", "product_photo_zoom_url2"].forEach(function (id) {
+      var zoom = global.document.getElementById(id);
+      if (!zoom) return;
       try {
-        var full = resolvedSrc.replace(/-T\.jpg/i, ".jpg").replace(/-S\.jpg/i, ".jpg");
         if ((zoom.getAttribute("href") || "") !== full) zoom.href = full;
         if (label) zoom.title = label;
       } catch (eZoom) {}
-    }
+    });
+    try {
+      if (global.vZoom && typeof global.vZoom.add === "function") {
+        global.vZoom.add(mainImg, resolvedSrc);
+      }
+    } catch (eVz) {}
   }
 
   // Volusion's native option-change logic can asynchronously rewrite (often blank)
@@ -3871,6 +3878,10 @@
     // Only re-assert the hero image once the shopper has locked a color; on the
     // initial render we leave Volusion's default product photo untouched.
     syncConfiguredColorSwatchUi(ctx, !!configuredColorActiveEntry);
+    if (isSaranoniPdpPage()) {
+      moveAltViewsUnderMainImage();
+      syncSaranoniColorAltviews(ctx);
+    }
   }
 
   function looksLikePrimaryColorOptionsTable(table) {
@@ -4857,6 +4868,75 @@
     }, true);
   }
 
+  function initSaranoniImageSync() {
+    if (!isSaranoniPdpPage()) return;
+    if (global.document.documentElement.dataset.mcSarImgBound === "1") return;
+    global.document.documentElement.dataset.mcSarImgBound = "1";
+
+    function saranoniAltLinkFromTarget(target) {
+      if (!target || !target.closest) return null;
+      return target.closest(
+        "#altviews a[data-option-id], span#altviews a[data-option-id], .mc-saranoni-color-altviews a[data-option-id]"
+      );
+    }
+
+    function selectSaranoniColorByOptionId(optionId) {
+      if (!optionId) return;
+      var btn = global.document.querySelector(
+        '.mc-configured-color-swatch[data-option-id="' + optionId + '"]'
+      );
+      if (btn) {
+        handleConfiguredColorSwatchClick(btn);
+        syncSaranoniAltviewActiveState();
+        return;
+      }
+      var ctx = findConfiguredColorSwatchContext();
+      if (!ctx) return;
+      var ei;
+      for (ei = 0; ei < ctx.entries.length; ei++) {
+        if (ctx.entries[ei].optionId !== optionId) continue;
+        var entry = ctx.entries[ei];
+        var opt = findConfiguredColorOption(ctx.select, entry);
+        if (!opt) return;
+        configuredColorActiveEntry = entry;
+        syncConfiguredColorSelect(ctx.select, opt);
+        syncConfiguredColorSwatchUi(ctx, true);
+        syncSaranoniAltviewActiveState();
+        return;
+      }
+    }
+
+    global.document.addEventListener(
+      "click",
+      function (eSarAlt) {
+        if (!isSaranoniPdpPage()) return;
+        var altLink = saranoniAltLinkFromTarget(eSarAlt.target);
+        if (!altLink) return;
+        eSarAlt.preventDefault();
+        eSarAlt.stopPropagation();
+        selectSaranoniColorByOptionId(altLink.getAttribute("data-option-id") || "");
+      },
+      true
+    );
+
+    global.document.addEventListener(
+      "change",
+      function (eSarSel) {
+        if (!isSaranoniPdpPage()) return;
+        var sel = eSarSel.target;
+        if (!sel || !sel.matches || !sel.matches("select")) return;
+        if (parseOptionCategoryFromSelectName(sel.name) !== SARANONI_COLOR_OPTION_CATEGORY) return;
+        if (!/^SAR/i.test(parseProductCodeFromSelectName(sel.name))) return;
+        var ctx = findConfiguredColorSwatchContext();
+        if (!ctx || ctx.select !== sel) return;
+        syncConfiguredColorSwatchUi(ctx, true);
+        syncSaranoniColorAltviews(ctx);
+        syncSaranoniAltviewActiveState();
+      },
+      true
+    );
+  }
+
   // Bean-bag size option (category 58): keep the native select visible + functional,
   // give it a "CHOOSE SIZE" label, and make sure size changes drive Volusion pricing.
   function ensureBeanBagSizeRow() {
@@ -5622,6 +5702,9 @@
     } else if (isSaranoniPdpPage()) {
       ensureSaranoniBrandLogo();
       ensureConfiguredColorSwatches();
+      moveAltViewsUnderMainImage();
+      var sarCtx = findConfiguredColorSwatchContext();
+      if (sarCtx) syncSaranoniColorAltviews(sarCtx);
       mountDescriptionBelowFeatures();
     }
     ensureQuantityAboveAtc();
@@ -5785,6 +5868,7 @@
       installSaranoniColorAtcGuard();
       installPdpStackApiGuards();
       initBeanBagImageSync();
+      initSaranoniImageSync();
       ensureBeanBagSizeRow();
       markBeanBagCoverSwatchesReady();
       ensurePdpStackCriticalCss();
