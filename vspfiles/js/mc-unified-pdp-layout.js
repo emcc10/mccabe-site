@@ -103,6 +103,15 @@
     return true;
   }
 
+  function purchaseQtyOrderOk(info) {
+    if (!info) return true;
+    var qty = qs("#mc-pdp-qty-row", info);
+    if (!qty) return true;
+    var purchase =
+      qs(".mc-unified-purchase-controls", info) || qs("#mc-pdp-purchase-stack", info);
+    return !!(purchase && purchase.contains(qty));
+  }
+
   function isUnifiedStable() {
     var body = global.document.body;
     var info = qs("td.mc-unified-pdp-info");
@@ -124,6 +133,7 @@
       body.dataset.mcPdpLayoutVer === AUTH_LAYOUT_VER &&
       body.dataset.mcUnifiedPdpVer === LAYOUT_VER &&
       orderedOk &&
+      purchaseQtyOrderOk(info) &&
       qs("tr.mc-unified-pdp-row") &&
       qs(".mc-unified-purchase-controls")
     );
@@ -430,12 +440,29 @@
       "#mc-pdp-option-block, #beanbag-swatch-wrapper, #mc-configured-color-swatch-wrapper, " +
       "#mc-bb-size-section, .mc-saranoni-swatch-wrapper, .mc-saranoni-swatches, " +
       ".mc-configured-color-swatch-wrapper, .mc-configured-color-swatches, " +
-      "[data-mc-color-swatches], [data-mc-saranoni-swatches]";
+      "[data-mc-color-swatches], [data-mc-saranoni-swatches], " +
+      "#mc-inline-config, #mcConfigurationBlock, #mc-acc-sectional-config";
     var seen = [];
     qsa(sel, infoTd).forEach(function (el) {
       if (seen.indexOf(el) === -1) seen.push(el);
     });
     return seen;
+  }
+
+  function scoopLooseQtyIntoPurchase(infoTd, purchase) {
+    if (!infoTd || !purchase) return;
+    var qty = qs("#mc-pdp-qty-row", infoTd);
+    if (!qty || purchase.contains(qty)) return;
+    var atc = findAtcButton(purchase) || findAtcButton(infoTd);
+    if (atc) {
+      var host = findAtcHost(atc);
+      if (host && !purchase.contains(host)) purchase.appendChild(host);
+      if (host && purchase.contains(host)) {
+        purchase.insertBefore(qty, host);
+        return;
+      }
+    }
+    purchase.insertBefore(qty, purchase.firstChild || null);
   }
 
   function orderInfoColumn(infoTd) {
@@ -452,6 +479,8 @@
     var purchase =
       qs("#mc-pdp-purchase-stack", infoTd) ||
       qs(".mc-unified-purchase-controls", infoTd);
+
+    scoopLooseQtyIntoPurchase(infoTd, purchase);
 
     var ordered = [];
     [logo, title, price, klarna].forEach(function (el) {

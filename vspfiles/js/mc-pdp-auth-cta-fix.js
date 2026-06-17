@@ -1878,6 +1878,7 @@
   function ensureQuantityAboveAtc() {
     if (!isProductPdp()) return;
     if (isSectionalPdpPage()) return;
+    if (shouldDeferToUnifiedPdpLayout()) return;
     if (isPdpLayoutMounted() && !isSoftGoodsPdpPage()) return;
     try {
       if (
@@ -1951,6 +1952,7 @@
   function ensurePurchaseStackCentered() {
     if (!isProductPdp()) return;
     if (isSectionalPdpPage()) return;
+    if (shouldDeferToUnifiedPdpLayout()) return;
     if (isPdpLayoutMounted() && !isSoftGoodsPdpPage()) return;
     try {
       if (

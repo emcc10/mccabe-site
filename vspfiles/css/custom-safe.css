@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260616unified — one global PDP layout */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260617unified15 — one global PDP layout */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -16244,6 +16244,14 @@ html body.productdetails:not(.mc-pdp-hero-ready) .mc-pdp-purchase-controls,
 html body.mc-product-page:not(.mc-pdp-hero-ready) .mc-pdp-purchase-controls,
 html body.productdetails:not(.mc-pdp-hero-ready) #mc-pdp-description-below-features,
 html body.mc-product-page:not(.mc-pdp-hero-ready) #mc-pdp-description-below-features {
+  visibility: hidden !important;
+}
+
+/* Orphan qty from legacy mount: hide until unified layout moves it into purchase controls */
+html body.productdetails:not(.mc-pdp-unified-ready) td.mc-pdp-options-td > #mc-pdp-qty-row,
+html body.mc-product-page:not(.mc-pdp-unified-ready) td.mc-pdp-options-td > #mc-pdp-qty-row,
+html body.productdetails:not(.mc-pdp-unified-ready) td.mc-unified-pdp-info > #mc-pdp-qty-row,
+html body.mc-product-page:not(.mc-pdp-unified-ready) td.mc-unified-pdp-info > #mc-pdp-qty-row {
   visibility: hidden !important;
 }
 
