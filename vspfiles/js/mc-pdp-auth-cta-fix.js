@@ -2576,8 +2576,12 @@
       "max-width:min(650px,100%)!important;width:100%!important;height:auto!important}" +
       "body.productdetails a#product_photo_zoom_url,body.mc-product-page a#product_photo_zoom_url{" +
       "max-width:min(650px,100%)!important;width:100%!important;display:block!important}" +
-      "html body.mc-bean-bag-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-ruched-blanket-pdp #content_area tr.mc-pdp-main-row{" +
+      "html body.mc-bean-bag-pdp #content_area tr.mc-pdp-main-row,html body.mc-ruched-blanket-pdp #content_area tr.mc-pdp-main-row{" +
       "display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:32px!important}" +
+      "html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row{" +
+      "display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;gap:4px!important;column-gap:4px!important}" +
+      "html body.mc-saranoni-pdp #content_area td.mc-pdp-media-td,html body.mc-saranoni-pdp #v65-product-parent td.mc-pdp-media-td{" +
+      "padding-right:0!important;margin-right:0!important}" +
       "html body.mc-bean-bag-pdp #mc-pdp-title-right,html body.mc-saranoni-pdp #mc-pdp-title-right,html body.mc-ruched-blanket-pdp #mc-pdp-title-right," +
       "html body.mc-bean-bag-pdp #mc-pdp-brand-logo,html body.mc-saranoni-pdp #mc-pdp-brand-logo,html body.mc-ruched-blanket-pdp #mc-pdp-brand-logo{" +
       "margin-top:0!important;padding-top:0!important}" +
@@ -2790,6 +2794,7 @@
   function appendSaranoniInfoColumnOrder() {
     if (!isSaranoniPdpPage()) return;
     ensureSoftGoodsReturnRow();
+    ensureSaranoniVisibleReturnLink();
     var infoColumn = findPdpHeroColumnTd();
     if (!infoColumn) return;
     var brandElement = global.document.getElementById("mc-pdp-brand-logo");
@@ -6116,6 +6121,28 @@
       return { name: "Adult Blankets", href: "/category-s/205.htm" };
     }
     return null;
+  }
+
+  function ensureSaranoniVisibleReturnLink() {
+    if (!isSaranoniPdpPage()) return;
+    if (global.document.getElementById("mc-saranoni-visible-return-link")) return;
+    var dest = resolveSoftGoodsReturnCategory();
+    if (!dest) return;
+    var mount =
+      global.document.getElementById("content_area") ||
+      (global.document.getElementById("v65-product-parent") || {}).parentNode ||
+      global.document.body;
+    var table = global.document.getElementById("v65-product-parent");
+    if (!mount || !table || !table.parentNode) return;
+    var wrap = global.document.createElement("div");
+    wrap.id = "mc-saranoni-visible-return-link";
+    wrap.className = "mc-saranoni-visible-return-link";
+    wrap.innerHTML = '<a href="' + dest.href + '">&larr; RETURN TO ' + dest.label + '</a>';
+    try {
+      table.parentNode.insertBefore(wrap, table);
+    } catch (eInsSarReturn) {
+      try { mount.insertBefore(wrap, mount.firstChild); } catch (eInsSarReturn2) {}
+    }
   }
 
   function ensureSoftGoodsReturnRow() {
