@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp57";
+  var VERSION = "20260616pdp58";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -1429,6 +1429,25 @@
     }
   }
 
+  function applySoftGoodsAltviewsLayout(alt) {
+    if (!alt) return;
+    try {
+      alt.classList.add("mc-unified-altviews");
+      alt.style.setProperty("display", "flex", "important");
+      alt.style.setProperty("flex-direction", "row", "important");
+      alt.style.setProperty("flex-wrap", "wrap", "important");
+      alt.style.setProperty("align-items", "flex-start", "important");
+      alt.style.setProperty("justify-content", "flex-start", "important");
+      alt.style.setProperty("gap", "8px", "important");
+      alt.style.setProperty("width", "100%", "important");
+      alt.style.setProperty("max-width", "650px", "important");
+      alt.style.setProperty("margin", "10px 0 0 0", "important");
+      alt.style.setProperty("padding", "0", "important");
+      alt.style.setProperty("float", "none", "important");
+      alt.style.setProperty("clear", "both", "important");
+    } catch (eAltLayout) {}
+  }
+
   function moveAltViewsUnderMainImage() {
     var alt =
       global.document.getElementById("altviews") ||
@@ -1438,10 +1457,14 @@
       global.document.getElementById("product_photo") ||
       global.document.querySelector("img#main-image, #v65-product-parent img#product_photo");
     if (!main || !main.parentNode) return;
-    if (main.nextElementSibling === alt) return;
-    try {
-      main.parentNode.insertBefore(alt, main.nextSibling);
-    } catch (eAlt) {}
+    if (main.nextElementSibling !== alt) {
+      try {
+        main.parentNode.insertBefore(alt, main.nextSibling);
+      } catch (eAlt) {}
+    }
+    if (isBeanBagPdpPage() || isSaranoniPdpPage()) {
+      applySoftGoodsAltviewsLayout(alt);
+    }
   }
 
   function syncPdpHeroTopAlign() {
@@ -2309,14 +2332,17 @@
       "display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important;" +
       "text-align:center!important;align-self:stretch!important;width:100%!important;max-width:100%!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-saranoni-purchase-stack," +
-      "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-bean-bag-purchase-stack{" +
+      "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-bean-bag-purchase-stack," +
+      "html body.mc-bean-bag-pdp .mc-unified-purchase-controls{" +
       "display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;flex-wrap:nowrap!important;" +
-      "text-align:center!important;width:100%!important;max-width:400px!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
-      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row{order:1!important;width:100%!important;justify-content:center!important}" +
+      "text-align:center!important;width:100%!important;max-width:400px!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important;visibility:visible!important;opacity:1!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp .mc-unified-purchase-controls #mc-pdp-qty-row{order:1!important;width:100%!important;justify-content:center!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
-      "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap{order:2!important;width:100%!important;max-width:100%!important}" +
+      "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
+      "html body.mc-bean-bag-pdp .mc-unified-purchase-controls .v65-product-addtocart,html body.mc-bean-bag-pdp .mc-unified-purchase-controls .mc-atc-button-wrap{order:2!important;width:100%!important;max-width:100%!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button," +
-      "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button{width:100%!important;box-sizing:border-box!important;display:block!important}" +
+      "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap input,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap button," +
+      "html body.mc-bean-bag-pdp .mc-unified-purchase-controls .mc-atc-button-wrap input,html body.mc-bean-bag-pdp .mc-unified-purchase-controls .mc-atc-button-wrap button{width:100%!important;box-sizing:border-box!important;display:block!important}" +
       "body.productdetails #mc-pdp-purchase-stack *,body.mc-product-page #mc-pdp-purchase-stack *{" +
       "text-align:center!important}" +
       "body.productdetails:not(.mc-saranoni-pdp):not(.mc-bean-bag-pdp) #mc-pdp-features+#mc-pdp-purchase-stack,body.mc-product-page:not(.mc-saranoni-pdp):not(.mc-bean-bag-pdp) #mc-pdp-features+#mc-pdp-purchase-stack{" +
@@ -2376,6 +2402,30 @@
     return null;
   }
 
+  function resolveBeanBagPurchaseElement(infoColumn) {
+    infoColumn = infoColumn || findPdpHeroColumnTd();
+    var unified =
+      (infoColumn && infoColumn.querySelector(".mc-unified-purchase-controls")) ||
+      global.document.querySelector(
+        "td.mc-pdp-options-td .mc-unified-purchase-controls, td.mc-unified-pdp-info .mc-unified-purchase-controls"
+      );
+    var stack = global.document.getElementById("mc-pdp-purchase-stack");
+    if (unified && unified.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]')) {
+      return unified;
+    }
+    if (stack && stack.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]')) {
+      return stack;
+    }
+    return unified || stack || null;
+  }
+
+  function isBeanBagInfoColumnChildVisible(child, allowedIds) {
+    if (!child) return false;
+    if (child.id && allowedIds[child.id]) return true;
+    if (child.classList && child.classList.contains("mc-unified-purchase-controls")) return true;
+    return false;
+  }
+
   function appendBeanBagInfoColumnOrder() {
     if (!isBeanBagPdpPage()) return;
     var infoColumn = findPdpHeroColumnTd();
@@ -2386,9 +2436,9 @@
     var klarnaElement = global.document.getElementById("messaging-element");
     var sizeOptionsElement = resolveBeanBagSizeOptionsElement();
     var coverOptionsElement = global.document.getElementById("beanbag-swatch-wrapper");
+    var purchaseElement = resolveBeanBagPurchaseElement(infoColumn);
     var featuresElement = global.document.getElementById("mc-pdp-features");
     var descriptionElement = global.document.getElementById("mc-pdp-description-below-features");
-    var cartRow = global.document.getElementById("mc-pdp-purchase-stack");
     var ordered = [
       brandElement,
       titleElement,
@@ -2396,9 +2446,9 @@
       klarnaElement,
       sizeOptionsElement,
       coverOptionsElement,
+      purchaseElement,
       featuresElement,
       descriptionElement,
-      cartRow,
     ];
     var allowedIds = {};
     var oi;
@@ -2406,7 +2456,7 @@
       if (ordered[oi] && ordered[oi].id) allowedIds[ordered[oi].id] = true;
     }
     infoColumn.querySelectorAll(":scope > *").forEach(function (child) {
-      if (child.id && allowedIds[child.id]) return;
+      if (isBeanBagInfoColumnChildVisible(child, allowedIds)) return;
       if (!child.id) {
         try {
           child.style.setProperty("display", "none", "important");
@@ -3953,6 +4003,24 @@
       stackNode.style.setProperty("max-height", "none", "important");
       stackNode.style.setProperty("overflow", "visible", "important");
     } catch (eNodeShow) {}
+    var unified = col.querySelector(".mc-unified-purchase-controls");
+    if (unified) {
+      try {
+        unified.style.setProperty("display", "flex", "important");
+        unified.style.setProperty("visibility", "visible", "important");
+        unified.style.setProperty("opacity", "1", "important");
+        unified.style.setProperty("width", "100%", "important");
+        unified.style.setProperty("max-width", "400px", "important");
+        unified.style.setProperty("height", "auto", "important");
+        unified.style.setProperty("max-height", "none", "important");
+        unified.style.setProperty("overflow", "visible", "important");
+        unified.removeAttribute("aria-hidden");
+      } catch (eUnified) {}
+      var qtyRowUnified = global.document.getElementById("mc-pdp-qty-row");
+      applySoftGoodsColumnPurchaseStackLayout(unified, qtyRowUnified, stackNode);
+      fixAddToCartChrome();
+      return unified;
+    }
     var stack = global.document.getElementById("mc-pdp-purchase-stack");
     if (!stack) {
       stack = global.document.createElement("div");

@@ -16541,11 +16541,61 @@ html body.mc-saranoni-pdp .mc-saranoni-color-altviews img {
   object-fit: cover !important;
 }
 
-/* Soft-goods thumbnails under main image (not column layout) */
+/* Bean bag color thumbnails under hero at all breakpoints */
+html body.mc-bean-bag-pdp td.mc-unified-pdp-media #altviews,
+html body.mc-bean-bag-pdp td.mc-unified-pdp-media span#altviews,
+html body.mc-bean-bag-pdp td.mc-pdp-media-td #altviews,
+html body.mc-bean-bag-pdp td.mc-pdp-media-td span#altviews,
+html body.mc-bean-bag-pdp #product_photo_td #altviews,
+html body.mc-bean-bag-pdp #product_photo_td span#altviews,
+html body.mc-bean-bag-pdp .mc-unified-altviews {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 650px !important;
+  margin: 10px 0 0 0 !important;
+  padding: 0 !important;
+  float: none !important;
+  clear: both !important;
+}
+
+html body.mc-bean-bag-pdp td.mc-unified-pdp-media #altviews a,
+html body.mc-bean-bag-pdp td.mc-unified-pdp-media span#altviews a,
+html body.mc-bean-bag-pdp td.mc-pdp-media-td #altviews a,
+html body.mc-bean-bag-pdp td.mc-pdp-media-td span#altviews a,
+html body.mc-bean-bag-pdp #product_photo_td #altviews a,
+html body.mc-bean-bag-pdp #product_photo_td span#altviews a,
+html body.mc-bean-bag-pdp .mc-unified-altviews a {
+  display: block !important;
+  width: 72px !important;
+  max-width: 72px !important;
+  margin: 0 !important;
+  border: 2px solid transparent !important;
+  border-radius: 4px !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-bean-bag-pdp td.mc-unified-pdp-media #altviews img,
+html body.mc-bean-bag-pdp td.mc-unified-pdp-media span#altviews img,
+html body.mc-bean-bag-pdp td.mc-pdp-media-td #altviews img,
+html body.mc-bean-bag-pdp td.mc-pdp-media-td span#altviews img,
+html body.mc-bean-bag-pdp #product_photo_td #altviews img,
+html body.mc-bean-bag-pdp #product_photo_td span#altviews img,
+html body.mc-bean-bag-pdp .mc-unified-altviews img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  object-fit: cover !important;
+}
+
+/* Soft-goods thumbnails under main image (not column layout) — unified + ruched fallback */
 @media (min-width: 992px) {
   html body.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews,
   html body.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews,
-  html body.mc-bean-bag-pdp td.mc-unified-pdp-media #altviews,
   html body.mc-saranoni-pdp td.mc-unified-pdp-media #altviews,
   html body.mc-ruched-blanket-pdp td.mc-unified-pdp-media #altviews {
     display: flex !important;
@@ -16562,11 +16612,9 @@ html body.mc-saranoni-pdp .mc-saranoni-color-altviews img {
   }
 
   html body.mc-pdp-unified-ready td.mc-unified-pdp-media #altviews a,
-  html body.mc-bean-bag-pdp td.mc-unified-pdp-media #altviews a,
   html body.mc-saranoni-pdp td.mc-unified-pdp-media #altviews a,
   html body.mc-ruched-blanket-pdp td.mc-unified-pdp-media #altviews a,
   html body.mc-pdp-unified-ready td.mc-unified-pdp-media span#altviews a,
-  html body.mc-bean-bag-pdp td.mc-unified-pdp-media span#altviews a,
   html body.mc-saranoni-pdp td.mc-unified-pdp-media span#altviews a,
   html body.mc-ruched-blanket-pdp td.mc-unified-pdp-media span#altviews a {
     display: block !important;
@@ -17273,7 +17321,12 @@ html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,
 html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,
 html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap,
 html body.mc-bean-bag-pdp #mc-pdp-purchase-stack input[name="btnaddtocart"],
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack button[name="btnaddtocart"] {
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack button[name="btnaddtocart"],
+html body.mc-bean-bag-pdp .mc-unified-purchase-controls,
+html body.mc-bean-bag-pdp .mc-unified-purchase-controls .v65-product-addtocart,
+html body.mc-bean-bag-pdp .mc-unified-purchase-controls .mc-atc-button-wrap,
+html body.mc-bean-bag-pdp .mc-unified-purchase-controls input[name="btnaddtocart"],
+html body.mc-bean-bag-pdp .mc-unified-purchase-controls button[name="btnaddtocart"] {
   display: flex !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -17284,7 +17337,8 @@ html body.mc-bean-bag-pdp #mc-pdp-purchase-stack button[name="btnaddtocart"] {
   overflow: visible !important;
 }
 
-html body.mc-bean-bag-pdp #mc-pdp-purchase-stack {
+html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,
+html body.mc-bean-bag-pdp .mc-unified-purchase-controls {
   flex-direction: column !important;
   max-width: 400px !important;
 }
