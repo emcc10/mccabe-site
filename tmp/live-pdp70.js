@@ -33,8 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260617pdp76
-  var VERSION = "20260617pdp76";
+  var VERSION = "20260617pdp70";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -2619,60 +2618,6 @@
     return null;
   }
 
-  /** Keep native #options_table in DOM for Volusion/cover sync; hide duplicate SIZE/COVER UI below ATC. */
-  function hideBeanBagNativeOptionsTable() {
-    if (!isBeanBagPdpPage()) return;
-    var hasCustomUi =
-      global.document.getElementById("mc-bb-size-section") ||
-      global.document.getElementById("beanbag-swatch-wrapper");
-    if (!hasCustomUi) return;
-    global.document.body.classList.add("mc-bb-native-options-hidden");
-    global.document
-      .querySelectorAll(
-        "#v65-product-parent #options_table, #v65-product-parent table[id*='options_table'], " +
-          "#content_area #options_table, #content_area table[id*='options_table']"
-      )
-      .forEach(function (table) {
-        if (table.getAttribute("data-mc-bb-native-suppressed") === "1") return;
-        table.setAttribute("data-mc-bb-native-suppressed", "1");
-        table.classList.add("mc-bb-native-options-suppressed");
-        try {
-          table.style.setProperty("position", "absolute", "important");
-          table.style.setProperty("left", "-9999px", "important");
-          table.style.setProperty("top", "0", "important");
-          table.style.setProperty("width", "1px", "important");
-          table.style.setProperty("height", "1px", "important");
-          table.style.setProperty("max-height", "0", "important");
-          table.style.setProperty("overflow", "hidden", "important");
-          table.style.setProperty("opacity", "0", "important");
-          table.style.setProperty("visibility", "hidden", "important");
-          table.style.setProperty("pointer-events", "none", "important");
-          table.style.setProperty("margin", "0", "important");
-          table.style.setProperty("padding", "0", "important");
-          table.style.setProperty("border", "0", "important");
-          table.setAttribute("aria-hidden", "true");
-        } catch (eHide) {}
-      });
-    global.document.querySelectorAll("#v65-product-parent tr, #content_area tr").forEach(function (row) {
-      if (row.closest("#mc-bb-size-section, #beanbag-swatch-wrapper, #mc-pdp-features")) return;
-      if (row.closest('[data-mc-bb-native-suppressed="1"]')) return;
-      var sizeSection = global.document.getElementById("mc-bb-size-section");
-      var sel = row.querySelector("select");
-      if (sel && sizeSection && sizeSection.contains(sel)) return;
-      var txt = String(row.textContent || "").replace(/\s+/g, " ").trim().toUpperCase();
-      var isCoverRow = /CHOOSE COVER/.test(txt) && !!sel;
-      var isEmptySizeRow = /\bSIZE\b/.test(txt) && !sel && !row.querySelector("#mc-bb-size-label");
-      if (!isCoverRow && !isEmptySizeRow) return;
-      try {
-        row.style.setProperty("display", "none", "important");
-        row.style.setProperty("visibility", "hidden", "important");
-        row.style.setProperty("height", "0", "important");
-        row.style.setProperty("overflow", "hidden", "important");
-        row.setAttribute("data-mc-bb-stray-option-row", "1");
-      } catch (eRowHide) {}
-    });
-  }
-
   function resolveBeanBagPurchaseElement(infoColumn) {
     infoColumn = infoColumn || findPdpHeroColumnTd();
     var unified =
@@ -2768,9 +2713,6 @@
         } catch (eAppend) {}
       }
     });
-    try {
-      hideBeanBagNativeOptionsTable();
-    } catch (eHideNative) {}
     consolidateBeanBagPurchaseBlocks(infoColumn, purchaseElement);
     infoColumn.querySelectorAll(":scope > table, :scope > div").forEach(function (node) {
       if (node.id && /^(mc-pdp-|beanbag-|messaging|mc-bb-)/.test(node.id)) return;
@@ -2971,19 +2913,8 @@
     return inner;
   }
 
-  function resolveSoftGoodsProductCode() {
-    try {
-      var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
-      return String((pcEl && pcEl.value) || "").trim().toUpperCase();
-    } catch (ePc) {}
-    return "";
-  }
-
   function isBeanBagPdpPage() {
     try {
-      if (isSaranoniPdpPage()) return false;
-      var pc = resolveSoftGoodsProductCode();
-      if (/^BB/i.test(pc)) return true;
       if (typeof global.isBeanBagProductPage === "function") return !!global.isBeanBagProductPage();
       if (global.document.body && global.document.body.classList.contains("mc-bean-bag-pdp")) return true;
       var p = String(global.location.pathname || "").toLowerCase();
@@ -2994,9 +2925,10 @@
 
   function isSaranoniPdpPage() {
     try {
-      var pc = resolveSoftGoodsProductCode();
-      if (/^SAR/.test(pc)) return true;
       if (global.document.body && global.document.body.classList.contains("mc-saranoni-pdp")) return true;
+      var pcEl = global.document.querySelector('input[name="ProductCode"], input[name="productcode"]');
+      var pc = String((pcEl && pcEl.value) || "").trim().toUpperCase();
+      if (/^SAR/.test(pc)) return true;
     } catch (eSar) {}
     return false;
   }
@@ -3037,12 +2969,6 @@
 
   function findPdpHeroInsertAfter(parent) {
     if (!parent) return null;
-    if (isBeanBagPdpPage()) {
-      var bbCover = global.document.getElementById("beanbag-swatch-wrapper");
-      if (bbCover && parent.contains(bbCover)) return bbCover;
-      var bbSize = global.document.getElementById("mc-bb-size-section");
-      if (bbSize && parent.contains(bbSize)) return bbSize;
-    }
     var bnpl = global.document.getElementById("messaging-element");
     if (bnpl && parent.contains(bnpl)) return bnpl;
     var price = global.document.getElementById("mc-pdp-price-stack-host");
@@ -3120,28 +3046,15 @@
     if (!insertParent) return;
     if (isPdpLayoutMounted()) {
       pruneDescriptionDuplicateFeatures();
-      if (block && insertParent && !insertParent.contains(block)) {
-        insertPdpHeroNodeAfter(insertParent, insertAfter, block);
-      } else if (isBeanBagPdpPage() && block && insertParent && insertParent.contains(block)) {
-        var bbFeatAnchor = findPdpHeroInsertAfter(insertParent);
-        if (bbFeatAnchor && block.previousElementSibling !== bbFeatAnchor) {
-          insertPdpHeroNodeAfter(insertParent, bbFeatAnchor, block);
-        }
-      }
       if (isSaranoniPdpPage()) {
         hideSaranoniHeroAltviews();
-        ensureConfiguredColorSwatches();
+        var sarCtxMounted = findConfiguredColorSwatchContext();
+        if (sarCtxMounted) syncSaranoniColorPicker(sarCtxMounted);
       }
       return;
     }
     if (block.parentNode !== insertParent || (insertAfter && block.previousElementSibling !== insertAfter)) {
       insertPdpHeroNodeAfter(insertParent, insertAfter, block);
-    }
-    if (isBeanBagPdpPage() && block && insertParent && insertParent.contains(block)) {
-      var bbAnchor = findPdpHeroInsertAfter(insertParent);
-      if (bbAnchor && block.previousElementSibling !== bbAnchor) {
-        insertPdpHeroNodeAfter(insertParent, bbAnchor, block);
-      }
     }
     pruneDescriptionDuplicateFeatures();
     if (isSaranoniPdpPage()) {
@@ -3738,28 +3651,11 @@
     }
     if (picker.getAttribute("data-mc-sar-color-signature") === signature) {
       syncSaranoniAltviewActiveState();
-      var sarNameKeep = global.document.getElementById("mc-saranoni-selected-color-name");
-      if (sarNameKeep) {
-        var activeEntry =
-          configuredColorActiveEntry ||
-          (function () {
-            var activeBtn = global.document.querySelector(".mc-configured-color-swatch.active");
-            if (!activeBtn) return null;
-            var oid = activeBtn.getAttribute("data-option-id");
-            var ei;
-            for (ei = 0; ei < ctx.entries.length; ei++) {
-              if (ctx.entries[ei].optionId === oid) return ctx.entries[ei];
-            }
-            return null;
-          })();
-        sarNameKeep.textContent = activeEntry ? activeEntry.label : "";
-      }
       return;
     }
     picker.setAttribute("data-mc-sar-color-signature", signature);
     picker.innerHTML =
-      '<div class="mc-pdp-features__heading mc-saranoni-color-picker__heading">Selected color: ' +
-      '<span id="mc-saranoni-selected-color-name"></span></div>' +
+      '<div class="mc-pdp-features__heading mc-saranoni-color-picker__heading">Select color:</div>' +
       '<div class="mc-saranoni-color-picker__thumbs"></div>';
     var thumbs = picker.querySelector(".mc-saranoni-color-picker__thumbs");
     visible.forEach(function (item) {
@@ -3920,48 +3816,6 @@
     (global.document.head || global.document.documentElement).appendChild(st);
   }
 
-  function mountSaranoniSwatchWrapper(wrap) {
-    if (!wrap || !isSaranoniPdpPage()) return;
-    wrap.setAttribute("data-mc-saranoni-swatches", "1");
-    var col = findPdpHeroColumnTd();
-    var features = global.document.getElementById("mc-pdp-features");
-    var bnpl = global.document.getElementById("messaging-element");
-    if (col) {
-      if (wrap.parentNode !== col) {
-        try {
-          if (features && features.parentNode === col) col.insertBefore(wrap, features);
-          else if (bnpl && bnpl.parentNode === col) insertPdpHeroNodeAfter(col, bnpl, wrap);
-          else col.appendChild(wrap);
-        } catch (eCol) {
-          try {
-            col.appendChild(wrap);
-          } catch (eCol2) {}
-        }
-      }
-      try {
-        wrap.style.setProperty("width", "100%", "important");
-        wrap.style.setProperty("max-width", "440px", "important");
-        wrap.style.setProperty("margin", "12px 0 8px 0", "important");
-        wrap.style.setProperty("padding", "0 0 0 1.1em", "important");
-      } catch (eWrapStyle) {}
-      return;
-    }
-    var insertParent = findPdpHeroInsertParent();
-    if (insertParent && wrap.parentNode !== insertParent) {
-      insertPdpHeroNodeAfter(
-        insertParent,
-        bnpl && insertParent.contains(bnpl) ? bnpl : findPdpHeroInsertAfter(insertParent),
-        wrap
-      );
-    }
-  }
-
-  function finishDataDrivenSaranoniSwatchProbe(wrap, select, ctx, probeState) {
-    if (probeState.pending > 0) return;
-    syncSaranoniSwatchReadyState(wrap, select, probeState.loaded);
-    if (ctx && probeState.loaded > 0) syncSaranoniColorPicker(ctx);
-  }
-
   function hideConfiguredColorLegacyRows(select) {
     if (!select || select.dataset.mcConfiguredColorRowsHidden === "1") return;
     select.dataset.mcConfiguredColorRowsHidden = "1";
@@ -4028,15 +3882,13 @@
         btn.setAttribute("data-label", entry.label);
         btn.innerHTML = '<img alt="' + escapeHtmlText(entry.label) + '" />';
         var img = btn.querySelector("img");
-        var candidates = buildConfiguredColorImageCandidates(entry.swatchImage);
+        var candidates = ctx.dataDriven
+          ? buildSaranoniSwatchCandidates(ctx.productCode, entry.optionId, entry.label)
+          : buildConfiguredColorImageCandidates(entry.swatchImage);
         if (ctx.dataDriven) {
+          btn.style.display = "none";
           probeState.pending++;
-          var primarySrc = candidates[0] || "";
-          var settled = false;
-          function settleDataDrivenSwatch(resolvedSrc) {
-            if (settled) return;
-            settled = true;
-            probeState.pending--;
+          loadConfiguredColorImage(candidates, function (resolvedSrc) {
             if (resolvedSrc) {
               probeState.loaded++;
               img.src = resolvedSrc;
@@ -4044,28 +3896,14 @@
               hideConfiguredColorNativeSelect(ctx.select);
               hideSaranoniNativeColorUi(ctx.select);
             } else if (btn.parentNode) {
-              try {
-                btn.parentNode.removeChild(btn);
-              } catch (eRmBtn) {}
+              btn.parentNode.removeChild(btn);
             }
-            finishDataDrivenSaranoniSwatchProbe(wrap, ctx.select, ctx, probeState);
-          }
-          if (primarySrc) {
-            img.src = primarySrc;
-            btn.style.display = "";
-            img.onload = function () {
-              settleDataDrivenSwatch(primarySrc);
-            };
-            img.onerror = function () {
-              loadConfiguredColorImage(candidates.slice(1), settleDataDrivenSwatch);
-            };
-            global.setTimeout(function () {
-              if (settled) return;
-              if (img.complete && img.naturalWidth > 0) settleDataDrivenSwatch(primarySrc);
-            }, 250);
-          } else {
-            loadConfiguredColorImage(candidates, settleDataDrivenSwatch);
-          }
+            probeState.pending--;
+            if (probeState.pending <= 0) {
+              syncSaranoniSwatchReadyState(wrap, ctx.select, probeState.loaded);
+              syncSaranoniColorPicker(ctx);
+            }
+          });
         } else {
           loadConfiguredColorImage(candidates, function (resolvedSrc) {
             img.src = resolvedSrc || candidates[0] || "";
@@ -4074,7 +3912,7 @@
         rail.appendChild(btn);
       });
       if (ctx.dataDriven && probeState.pending === 0) {
-        finishDataDrivenSaranoniSwatchProbe(wrap, ctx.select, ctx, probeState);
+        syncSaranoniSwatchReadyState(wrap, ctx.select, 0);
       }
     } else if (ctx.dataDriven && isSar) {
       var visibleSwatches = 0;
@@ -4084,10 +3922,24 @@
       syncSaranoniSwatchReadyState(wrap, ctx.select, visibleSwatches);
       if (visibleSwatches > 0) syncSaranoniColorPicker(ctx);
     }
+    var host = global.document.getElementById("mc-pdp-option-block");
     if (isSar) {
-      mountSaranoniSwatchWrapper(wrap);
+      if (!isPdpLayoutMounted()) {
+        var insertParent = findPdpHeroInsertParent();
+        var bnpl = global.document.getElementById("messaging-element");
+        if (insertParent) {
+          insertPdpHeroNodeAfter(
+            insertParent,
+            bnpl && insertParent.contains(bnpl) ? bnpl : findPdpHeroInsertAfter(insertParent),
+            wrap
+          );
+        } else if (host && wrap.parentNode !== host) {
+          try {
+            host.appendChild(wrap);
+          } catch (eHostSar) {}
+        }
+      }
     } else if (!isPdpLayoutMounted()) {
-      var host = global.document.getElementById("mc-pdp-option-block");
       if (host && wrap.parentNode !== host) {
         try {
           host.appendChild(wrap);
@@ -4126,8 +3978,6 @@
     var selected = configuredColorActiveEntry || findConfiguredColorSelectedEntry(ctx);
     var labelEl = global.document.getElementById("mc-configured-color-selected-name");
     if (labelEl) labelEl.textContent = selected ? selected.label : "";
-    var sarNameEl = global.document.getElementById("mc-saranoni-selected-color-name");
-    if (sarNameEl) sarNameEl.textContent = selected ? selected.label : "";
     wrap.querySelectorAll(".mc-configured-color-swatch").forEach(function (btn) {
       var active = !!selected && btn.getAttribute("data-option-id") === selected.optionId;
       btn.classList.toggle("active", active);
@@ -4635,7 +4485,6 @@
   global.mcMountPdpFeaturesBlock = mountPdpFeaturesBlock;
   global.mcMountBeanBagSwatchesAboveFeatures = mountBeanBagSwatchesAboveFeatures;
   global.mcAppendBeanBagInfoColumnOrder = appendBeanBagInfoColumnOrder;
-  global.mcHideBeanBagNativeOptionsTable = hideBeanBagNativeOptionsTable;
   global.mcEnsureBeanBagMediaStack = function (main, alt) {
     if (!main) {
       main =
@@ -5249,22 +5098,6 @@
 
     global.document.addEventListener(
       "click",
-      function (eSarThumb) {
-        if (!isSaranoniPdpPage()) return;
-        var thumbLink =
-          eSarThumb.target && eSarThumb.target.closest
-            ? eSarThumb.target.closest(".mc-saranoni-color-picker__thumbs a[data-option-id]")
-            : null;
-        if (!thumbLink) return;
-        eSarThumb.preventDefault();
-        eSarThumb.stopPropagation();
-        selectSaranoniColorByOptionId(thumbLink.getAttribute("data-option-id") || "");
-      },
-      true
-    );
-
-    global.document.addEventListener(
-      "click",
       function (eSarAlt) {
         if (!isSaranoniPdpPage()) return;
         var altLink = saranoniAltLinkFromTarget(eSarAlt.target);
@@ -5407,9 +5240,6 @@
     try {
       ensureBeanBagKingCoverRestriction();
     } catch (eKingInit) {}
-    try {
-      hideBeanBagNativeOptionsTable();
-    } catch (eHideNative) {}
   }
 
   // Pink (801) and Navy (799) covers are unavailable when King size is selected.
@@ -5467,38 +5297,6 @@
     }
   }
 
-  function markSaranoniSwatchesReady() {
-    if (!isSaranoniPdpPage()) return;
-    var pickerThumb = global.document.querySelector(
-      ".mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs a[data-option-id]"
-    );
-    if (!pickerThumb) return;
-    try {
-      global.document.body.classList.add("mc-saranoni-swatches-ready");
-    } catch (eCls) {}
-  }
-
-  function scheduleSaranoniColorRepair() {
-    if (!isSaranoniPdpPage()) return;
-    if (global.__MC_SAR_COLOR_REPAIR_VER__ === VERSION) return;
-    global.__MC_SAR_COLOR_REPAIR_VER__ = VERSION;
-    [80, 250, 700, 1400, 2600, 5000].forEach(function (ms) {
-      global.setTimeout(function () {
-        try {
-          if (isSaranoniPdpPage() && global.document.body) {
-            global.document.body.classList.remove("mc-bean-bag-pdp");
-          }
-          ensureConfiguredColorSwatches();
-          hideSaranoniHeroAltviews();
-          var ctx = findConfiguredColorSwatchContext();
-          if (ctx) syncSaranoniColorPicker(ctx);
-          appendSaranoniInfoColumnOrder();
-          markSaranoniSwatchesReady();
-        } catch (eSarRepair) {}
-      }, ms);
-    });
-  }
-
   function markBeanBagCoverSwatchesReady() {
     if (!isBeanBagPdpPage()) return;
     var wrap = global.document.getElementById("beanbag-swatch-wrapper");
@@ -5519,7 +5317,6 @@
           ensureBeanBagSizeRow();
           markBeanBagCoverSwatchesReady();
           appendBeanBagInfoColumnOrder();
-          hideBeanBagNativeOptionsTable();
           sanitizeBeanBagAltviews();
           applyPdpMainImageCap();
         } catch (eBbRepair) {}
@@ -6062,12 +5859,8 @@
     try {
       var body = global.document.body;
       if (!body) return;
-      if (isSaranoniPdpPage()) {
-        body.classList.add("mc-saranoni-pdp");
-        body.classList.remove("mc-bean-bag-pdp");
-        return;
-      }
       if (isBeanBagPdpPage()) body.classList.add("mc-bean-bag-pdp");
+      if (isSaranoniPdpPage()) body.classList.add("mc-saranoni-pdp");
     } catch (eTag) {}
   }
 
@@ -6183,7 +5976,6 @@
       ensureBeanBagReturnLink();
       moveAltViewsUnderMainImage();
       sanitizeBeanBagAltviews();
-      mountPdpFeaturesBlock();
     } else if (isSaranoniPdpPage()) {
       ensureSaranoniBrandLogo();
       mountPdpFeaturesBlock();
@@ -6191,7 +5983,6 @@
       hideSaranoniHeroAltviews();
       var sarCtx = findConfiguredColorSwatchContext();
       if (sarCtx) syncSaranoniColorPicker(sarCtx);
-      markSaranoniSwatchesReady();
       mountDescriptionBelowFeatures();
     }
     ensureQuantityAboveAtc();
@@ -6243,9 +6034,7 @@
       }
       mountPrimaryOptionBlock();
       ensureConfiguredColorSwatches();
-      if (!isBeanBagPdpPage()) {
-        mountPdpFeaturesBlock();
-      }
+      mountPdpFeaturesBlock();
       patchBeanBagPdp();
       mountDescriptionBelowFeatures();
       ensureQuantityAboveAtc();
@@ -6254,7 +6043,6 @@
         mountBeanBagSwatchesAboveFeatures();
         extractSwatchesIntoCol();
         ensureBeanBagSizeRow();
-        mountPdpFeaturesBlock();
         ensureBeanBagPurchaseStack();
         appendBeanBagInfoColumnOrder();
         styleBeanBagPriceAtc();
@@ -6465,7 +6253,6 @@
       fixAddToCartChrome();
       scheduleAtcBlackLock();
       scheduleBeanBagOptionRepair();
-      scheduleSaranoniColorRepair();
       if (shouldDeferToUnifiedPdpLayout() && !isUnifiedPdpReady()) {
         prepareDeferredUnifiedPdpHero();
         ensureUnifiedPdpLayout();
@@ -6596,32 +6383,6 @@
     global.__MC_PDP_LAYOUT_MO__ = mo;
   }
 })(window);
-
-/* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
-(function (g, d) {
-  var WANT = "20260617pdp76";
-  function go() {
-    try {
-      if (!d.getElementById("v65-product-parent")) return;
-      if (String(g.__MC_PDP_AUTH_CTA_FIX_VER__ || "") === WANT) return;
-      if (d.documentElement.getAttribute("data-mc-pdp-auth-reload")) return;
-      d.documentElement.setAttribute("data-mc-pdp-auth-reload", "1");
-      d.querySelectorAll('script[src*="mc-pdp-auth-cta-fix.js"]').forEach(function (old) {
-        try {
-          old.remove();
-        } catch (eRm) {}
-      });
-      delete g.__MC_PDP_AUTH_CTA_FIX_VER__;
-      var s = d.createElement("script");
-      s.src = "/v/vspfiles/js/mc-pdp-auth-cta-fix.js?v=" + WANT + "&mcrd=" + Date.now();
-      s.async = false;
-      (d.head || d.documentElement).appendChild(s);
-    } catch (eUp) {}
-  }
-  [0, 120, 500, 1500].forEach(function (ms) {
-    g.setTimeout(go, ms);
-  });
-})(window, document);
 
 /* MC_PDP_PRICE_STACK_20260522 — load standalone repair if this cached bundle is stale */
 (function (g) {
