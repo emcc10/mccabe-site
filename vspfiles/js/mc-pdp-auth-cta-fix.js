@@ -33,7 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260617pdp72";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260617pdp73
+  var VERSION = "20260617pdp73";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
