@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260616unified11";
-  var AUTH_LAYOUT_VER = "20260616pdp52";
+  var LAYOUT_VER = "20260616unified12";
+  var AUTH_LAYOUT_VER = "20260616pdp53";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -337,7 +337,6 @@
 
   function prepareAtcButton(btn) {
     if (!btn) return btn;
-    if (btn.getAttribute("data-mc-atc-styled") === AUTH_LAYOUT_VER) return btn;
     if ((btn.type || "").toLowerCase() === "image") {
       try {
         btn.type = "submit";
@@ -356,6 +355,8 @@
     btn.style.setProperty("border", "1px solid #000", "important");
     btn.style.setProperty("width", "100%", "important");
     btn.style.setProperty("max-width", "400px", "important");
+    btn.style.setProperty("height", "48px", "important");
+    btn.style.setProperty("min-height", "48px", "important");
     btn.style.setProperty("box-shadow", "none", "important");
     btn.style.setProperty("transition", "none", "important");
     btn.style.setProperty("animation", "none", "important");
@@ -367,6 +368,8 @@
     if (wrap) {
       clearInlineLayout(wrap);
       wrap.classList.add("mc-unified-atc-host");
+      wrap.style.setProperty("background", "#000", "important");
+      wrap.style.setProperty("background-color", "#000", "important");
     }
     var cartBlock = btn.closest(".v65-product-addtocart");
     if (cartBlock && cartBlock !== btn) clearInlineLayout(cartBlock);
@@ -564,12 +567,26 @@
       wrapEl.classList.add("mc-unified-pdp-description--media");
     }
 
-    if (!wrapEl || !descNode) return;
+    if (!wrapEl && !descNode) return;
+
+    if (!descNode && descRow) {
+      descNode = qs(".mc-unified-pdp-description, .mc-pdp-description-cell, td", descRow);
+    }
+
+    if (!wrapEl || !descNode) {
+      if (descRow) {
+        descRow.style.setProperty("display", "none", "important");
+        descRow.setAttribute("aria-hidden", "true");
+      }
+      return;
+    }
 
     if (descNode.id === "mc-pdp-description-below-features" || descNode.classList.contains("mc-pdp-description-below")) {
       while (descNode.firstChild) wrapEl.appendChild(descNode.firstChild);
       descNode.style.setProperty("display", "none", "important");
       descNode.setAttribute("aria-hidden", "true");
+    } else if (descRow && descRow.contains(descNode)) {
+      while (descNode.firstChild) wrapEl.appendChild(descNode.firstChild);
     } else if (!wrapEl.contains(descNode)) {
       wrapEl.appendChild(descNode);
     }
