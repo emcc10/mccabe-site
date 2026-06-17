@@ -1,13 +1,13 @@
 /**
  * PLP fixes — DOM-driven, scoped to inspected Volusion markup.
- * MC_PLP_ENFORCER_20260628a — site-wide strip .00 from prices (full content sweep); PLP thumbnails
+ * MC_PLP_ENFORCER_20260628d — site-wide strip .00 from prices (full content sweep); PLP thumbnails
  *
  * Thumbnails: .mc-plp-image-box; image element sized to the wrapper, object-fit: contain (no crop).
  */
 (function (global) {
   "use strict";
 
-  var VERSION = "20260628c";
+  var VERSION = "20260628d";
 
   function plpVerNum(v) {
     var n = parseInt(String(v || "").replace(/\D/g, ""), 10);
@@ -722,7 +722,7 @@
     }
   }
 
-  var PDP_AUTH_WANT = "20260616pdp32";
+  var PDP_AUTH_WANT = "20260617pdp76";
 
   function loadPdpAuthCtaFix() {
     try {
