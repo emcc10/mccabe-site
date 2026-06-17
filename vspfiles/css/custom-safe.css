@@ -16896,7 +16896,7 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap button[name="
   box-shadow: none !important;
 }
 
-/* MC PDP unified e-product lock 20260616pdp54: consistent layout, black ATC, description follows existing features typography. */
+/* MC PDP unified e-product lock 20260616pdp55: consistent layout, black ATC, description follows existing features typography. */
 html body.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
 html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row,
 html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
@@ -17190,4 +17190,75 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description * {
   letter-spacing: 0.02em !important;
   color: #444 !important;
   text-transform: none !important;
+}
+
+/* PDP final lock 20260616pdp55: typography-only description match and black ATC repaint guard. */
+html body.productdetails #mc-pdp-description-below-features,
+html body.productdetails #mc-pdp-description-below-features *,
+html body.productdetails .mc-pdp-description-below-features,
+html body.productdetails .mc-pdp-description-below-features *,
+html body.productdetails #ProductDetail_ProductDetails_div,
+html body.productdetails #ProductDetail_ProductDetails_div *,
+html body.productdetails #ProductDetail_ProductDetails_div2,
+html body.productdetails #ProductDetail_ProductDetails_div2 *,
+html body.productdetails #content_area span[itemprop="description"],
+html body.productdetails #content_area span[itemprop="description"] *,
+html body.mc-product-page #mc-pdp-description-below-features,
+html body.mc-product-page #mc-pdp-description-below-features *,
+html body.mc-product-page .mc-pdp-description-below-features,
+html body.mc-product-page .mc-pdp-description-below-features *,
+html body.mc-product-page #ProductDetail_ProductDetails_div,
+html body.mc-product-page #ProductDetail_ProductDetails_div *,
+html body.mc-product-page #ProductDetail_ProductDetails_div2,
+html body.mc-product-page #ProductDetail_ProductDetails_div2 *,
+html body.mc-product-page #content_area span[itemprop="description"],
+html body.mc-product-page #content_area span[itemprop="description"] *,
+html body.mc-pdp-unified-ready .mc-unified-pdp-description,
+html body.mc-pdp-unified-ready .mc-unified-pdp-description *,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description * {
+  font-family: Inter, Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.02em !important;
+  color: #444 !important;
+  text-transform: none !important;
+}
+
+html body.productdetails .mc-atc-button-wrap,
+html body.mc-product-page .mc-atc-button-wrap,
+html body.productdetails #v65-product-parent .mc-atc-button-wrap,
+html body.mc-product-page #v65-product-parent .mc-atc-button-wrap,
+html body.productdetails #content_area .mc-atc-button-wrap,
+html body.mc-product-page #content_area .mc-atc-button-wrap {
+  background: #000 !important;
+  background-color: #000 !important;
+  border-color: #000 !important;
+  color: #fff !important;
+}
+
+html body.productdetails input[name="btnaddtocart"],
+html body.productdetails button[name="btnaddtocart"],
+html body.productdetails input.vCSS_input_addtocart,
+html body.productdetails input.mc-unified-atc-btn,
+html body.mc-product-page input[name="btnaddtocart"],
+html body.mc-product-page button[name="btnaddtocart"],
+html body.mc-product-page input.vCSS_input_addtocart,
+html body.mc-product-page input.mc-unified-atc-btn,
+html body.productdetails .mc-atc-button-wrap input,
+html body.productdetails .mc-atc-button-wrap button,
+html body.mc-product-page .mc-atc-button-wrap input,
+html body.mc-product-page .mc-atc-button-wrap button {
+  background: #000 !important;
+  background-color: #000 !important;
+  background-image: none !important;
+  border-color: #000 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }

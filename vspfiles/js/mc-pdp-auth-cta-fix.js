@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp54";
+  var VERSION = "20260616pdp55";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -2006,6 +2006,42 @@
       btn.style.setProperty("-webkit-appearance", "none", "important");
       btn.style.setProperty("appearance", "none", "important");
     } catch (eBtn) {}
+    forceBlackAtcWrap(wrap);
+  }
+
+  function forceBlackAtcButton(btn) {
+    if (!btn) return;
+    try {
+      if (btn.tagName === "INPUT" && (btn.type || "").toLowerCase() === "image") {
+        btn.type = "submit";
+        btn.removeAttribute("src");
+      }
+      if (btn.tagName === "INPUT" && !btn.value) btn.value = "ADD TO CART";
+      btn.classList.add("mc-unified-atc-btn");
+      btn.style.setProperty("background", "#000", "important");
+      btn.style.setProperty("background-color", "#000", "important");
+      btn.style.setProperty("background-image", "none", "important");
+      btn.style.setProperty("color", "#fff", "important");
+      btn.style.setProperty("border-color", "#000", "important");
+      btn.style.setProperty("box-shadow", "none", "important");
+      btn.style.setProperty("text-shadow", "none", "important");
+      btn.style.setProperty("opacity", "1", "important");
+      btn.style.setProperty("-webkit-appearance", "none", "important");
+      btn.style.setProperty("appearance", "none", "important");
+    } catch (eForceBtn) {}
+  }
+
+  function forceBlackAtcWrap(wrap) {
+    if (!wrap) return;
+    try {
+      wrap.style.setProperty("background", "#000", "important");
+      wrap.style.setProperty("background-color", "#000", "important");
+      wrap.style.setProperty("border-color", "#000", "important");
+      wrap.style.setProperty("color", "#fff", "important");
+      wrap.querySelectorAll("input, button").forEach(function (btn) {
+        forceBlackAtcButton(btn);
+      });
+    } catch (eForceWrap) {}
   }
 
   function styleCompactAtcButton(wrap) {
@@ -2056,16 +2092,17 @@
         btn.style.setProperty("max-width", "none", "important");
         btn.style.setProperty("border-radius", "0", "important");
         btn.style.setProperty("cursor", "pointer", "important");
+        forceBlackAtcButton(btn);
       }
+      forceBlackAtcWrap(wrap);
     } catch (eAtc) {}
   }
 
   function fixAddToCartChrome() {
     injectAtcButtonWrap();
     global.document.querySelectorAll(".mc-atc-button-wrap").forEach(function (wrap) {
-      if (wrap.closest("#mc-pdp-price-atc-row")) return;
-      if (!isSoftGoodsPdpPage() && wrap.getAttribute("data-mc-atc-styled") === VERSION) return;
       styleCompactAtcButton(wrap);
+      forceBlackAtcWrap(wrap);
       wrap.setAttribute("data-mc-atc-styled", VERSION);
     });
     global.document
@@ -2075,16 +2112,17 @@
           '#content_area button[name="btnaddtocart"]'
       )
       .forEach(function (btn) {
-        if (btn.getAttribute("data-mc-atc-styled") === VERSION) return;
         var wrap = btn.closest(".mc-atc-button-wrap");
         if (wrap && isSoftGoodsPdpPage()) {
           applySoftGoodsAtcChrome(wrap);
+          forceBlackAtcWrap(wrap);
           wrap.setAttribute("data-mc-atc-styled", VERSION);
           btn.setAttribute("data-mc-atc-styled", VERSION);
           return;
         }
         if (wrap) {
           styleCompactAtcButton(wrap);
+          forceBlackAtcWrap(wrap);
           wrap.setAttribute("data-mc-atc-styled", VERSION);
           btn.setAttribute("data-mc-atc-styled", VERSION);
           return;
@@ -2120,6 +2158,7 @@
         btn.style.setProperty("width", "100%", "important");
         btn.style.setProperty("max-width", "100%", "important");
         btn.style.setProperty("cursor", "pointer", "important");
+        forceBlackAtcButton(btn);
         btn.setAttribute("data-mc-atc-styled", VERSION);
       });
     if (isSoftGoodsPdpPage()) {
@@ -2130,6 +2169,18 @@
         purchaseTarget ? purchaseTarget.stackNode : null
       );
     }
+  }
+
+  function scheduleAtcBlackLock() {
+    if (global.__MC_PDP_ATC_BLACK_LOCK__ === VERSION) return;
+    global.__MC_PDP_ATC_BLACK_LOCK__ = VERSION;
+    [80, 250, 700, 1400, 2600].forEach(function (ms) {
+      global.setTimeout(function () {
+        try {
+          fixAddToCartChrome();
+        } catch (eAtcLock) {}
+      }, ms);
+    });
   }
 
   function ensurePdpHeroCriticalCss() {
@@ -5411,6 +5462,9 @@
       patchCaptionSignInCta();
       syncConfigurationBlockPricing();
       inlineSyncConfigurationPrice();
+      applyPdpDescriptionStyle();
+      fixAddToCartChrome();
+      scheduleAtcBlackLock();
     } catch (eRunPatch) {
       if (typeof console !== "undefined" && console.warn) {
         console.warn("[McCabe] mc-pdp-auth-cta runPatch", eRunPatch);
