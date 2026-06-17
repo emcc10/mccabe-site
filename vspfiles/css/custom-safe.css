@@ -16874,7 +16874,7 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap button[name="
   box-shadow: none !important;
 }
 
-/* MC PDP unified e-product lock 20260616pdp50: consistent layout, black ATC, description follows existing features typography. */
+/* MC PDP unified e-product lock 20260616pdp51: consistent layout, black ATC, description follows existing features typography. */
 html body.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
 html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row,
 html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
@@ -16890,8 +16890,8 @@ html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent tr.mc-unified
   html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-media,
   html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-media {
     display: table-cell !important;
-    width: 58% !important;
-    max-width: 58% !important;
+    width: auto !important;
+    max-width: none !important;
     padding: 0 22px 0 0 !important;
     vertical-align: top !important;
     box-sizing: border-box !important;
@@ -16902,11 +16902,23 @@ html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent tr.mc-unified
   html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row > td.mc-unified-pdp-info,
   html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row > td.mc-unified-pdp-info {
     display: table-cell !important;
-    width: 42% !important;
-    max-width: 42% !important;
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
     padding: 0 0 0 22px !important;
     vertical-align: top !important;
     box-sizing: border-box !important;
+  }
+
+  html body.mc-pdp-unified-ready #content_area td.mc-pdp-options-td,
+  html body.mc-pdp-unified-ready #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-product-page.mc-pdp-unified-ready #content_area td.mc-pdp-options-td,
+  html body.mc-product-page.mc-pdp-unified-ready #v65-product-parent td.mc-pdp-options-td,
+  html body.mc-pdp-unified-ready #options_table > tbody > tr > td.mc-unified-pdp-info,
+  html body.mc-product-page.mc-pdp-unified-ready #options_table > tbody > tr > td.mc-unified-pdp-info {
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
   }
 }
 
@@ -16939,7 +16951,7 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls {
   justify-content: flex-start !important;
   gap: 14px !important;
   width: 100% !important;
-  max-width: 360px !important;
+  max-width: 400px !important;
   margin: 28px auto 0 !important;
 }
 
@@ -16951,9 +16963,11 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc
 html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart {
   display: block !important;
   width: 100% !important;
-  max-width: 360px !important;
+  max-width: 400px !important;
   margin: 0 auto !important;
   padding: 0 !important;
+  background: #000 !important;
+  background-color: #000 !important;
   text-align: center !important;
 }
 
@@ -16971,7 +16985,7 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .v6
 html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .v65-product-addtocart button {
   display: block !important;
   width: 100% !important;
-  max-width: 360px !important;
+  max-width: 400px !important;
   min-height: 48px !important;
   margin: 0 auto !important;
   padding: 0 24px !important;
@@ -16993,6 +17007,42 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .v6
   box-shadow: none !important;
   appearance: none !important;
   -webkit-appearance: none !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls #mc-pdp-qty-row,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-qty-row,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls #mc-pdp-qty-row,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls .mc-unified-qty-row {
+  width: 100% !important;
+  max-width: 400px !important;
+  justify-content: center !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input.v65-productdetail-cartqty,
+html body.mc-pdp-unified-ready .mc-unified-purchase-controls input[name^="QTY."],
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input.v65-productdetail-cartqty,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-purchase-controls input[name^="QTY."] {
+  width: 52px !important;
+  min-width: 18px !important;
+  max-width: 52px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+}
+
+html body.mc-pdp-unified-ready .mc-unified-pdp-info .colors_pricebox,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-info .colors_pricebox,
+html body.mc-pdp-unified-ready .mc-unified-pdp-info #mc-pdp-price-stack-host,
+html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-info #mc-pdp-price-stack-host {
+  width: 400px !important;
+  max-width: 400px !important;
+}
+
+html body.productdetails.mc-pdp-unified-ready #mc-pdp-features .mc-pdp-features__body,
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-features .mc-pdp-features__body,
+html body.productdetails.mc-pdp-unified-ready #mc-pdp-features .mc-pdp-features__list,
+html body.mc-product-page.mc-pdp-unified-ready #mc-pdp-features .mc-pdp-features__list {
+  width: 425px !important;
+  max-width: 425px !important;
 }
 
 html body.mc-pdp-unified-ready td.mc-unified-pdp-media .mc-unified-pdp-description,
