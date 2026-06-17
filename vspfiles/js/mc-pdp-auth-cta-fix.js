@@ -114,7 +114,13 @@
               }
             }
           } catch (eAfFb) {}
-          if (!global.__MC_PDP_HERO_READY_LOCKED__) markPdpHeroReady();
+          if (!global.__MC_PDP_HERO_READY_LOCKED__) {
+            if (isFixedSectionalUnifiedPdp() && !isUnifiedPdpReady()) {
+              retryDeferredUnifiedNormalize();
+            } else {
+              markPdpHeroReady();
+            }
+          }
         }, 2200);
       }
     } catch (eAf) {}
@@ -2543,10 +2549,10 @@
       "text-align:center!important;align-self:stretch!important;width:100%!important;max-width:100%!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-saranoni-pdp #mc-pdp-purchase-stack.mc-saranoni-purchase-stack," +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-pdp-cart-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack.mc-bean-bag-purchase-stack," +
-      "html body.mc-bean-bag-pdp .mc-unified-purchase-controls{" +
+      "html body.mc-bean-bag-pdp .mc-unified-purchase-controls,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls{" +
       "display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;flex-wrap:nowrap!important;" +
       "text-align:center!important;width:100%!important;max-width:400px!important;margin:12px auto 16px auto!important;gap:10px!important;clear:both!important;visibility:visible!important;opacity:1!important}" +
-      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp .mc-unified-purchase-controls #mc-pdp-qty-row{order:1!important;width:100%!important;justify-content:center!important}" +
+      "html body.mc-saranoni-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack #mc-pdp-qty-row,html body.mc-bean-bag-pdp .mc-unified-purchase-controls #mc-pdp-qty-row,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls #mc-pdp-qty-row,html body.mc-gatlin-sectional-pdp .mc-unified-purchase-controls .mc-unified-qty-row{order:1!important;width:100%!important;justify-content:center!important;visibility:visible!important}" +
       "html body.mc-saranoni-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-saranoni-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
       "html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .v65-product-addtocart,html body.mc-bean-bag-pdp #mc-pdp-purchase-stack .mc-atc-button-wrap," +
       "html body.mc-bean-bag-pdp .mc-unified-purchase-controls .v65-product-addtocart,html body.mc-bean-bag-pdp .mc-unified-purchase-controls .mc-atc-button-wrap{order:2!important;width:100%!important;max-width:100%!important}" +
