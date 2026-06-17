@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260616unified10";
-  var AUTH_LAYOUT_VER = "20260616pdp51";
+  var LAYOUT_VER = "20260616unified11";
+  var AUTH_LAYOUT_VER = "20260616pdp52";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -303,7 +303,7 @@
     var cat = resolveReturnCategory();
     if (cat) {
       link.href = cat.href;
-      link.textContent = "RETURN TO " + cat.name.toUpperCase();
+      link.textContent = "\u2190 RETURN TO " + cat.name.toUpperCase();
       link.setAttribute("aria-label", "Return to " + cat.name);
     }
   }
@@ -354,6 +354,8 @@
     btn.style.setProperty("background-image", "none", "important");
     btn.style.setProperty("color", "#fff", "important");
     btn.style.setProperty("border", "1px solid #000", "important");
+    btn.style.setProperty("width", "100%", "important");
+    btn.style.setProperty("max-width", "400px", "important");
     btn.style.setProperty("box-shadow", "none", "important");
     btn.style.setProperty("transition", "none", "important");
     btn.style.setProperty("animation", "none", "important");
@@ -472,6 +474,22 @@
     });
   }
 
+  function hideDuplicatePriceBlocks(infoTd) {
+    if (!infoTd) return;
+    var canonical = qs("#mc-pdp-price-stack-host", infoTd) || qs("#mc-pdp-price-atc-row", infoTd);
+    if (!canonical) return;
+    qsa(".colors_pricebox, [itemprop='offers']", infoTd).forEach(function (node) {
+      if (!node || node === canonical || node.contains(canonical) || canonical.contains(node)) return;
+      if (node.closest(".mc-unified-purchase-controls, #mc-pdp-features")) return;
+      var txt = String(node.textContent || "").replace(/\s+/g, " ").trim();
+      if (!/\$[0-9]/.test(txt)) return;
+      node.style.setProperty("display", "none", "important");
+      node.style.setProperty("visibility", "hidden", "important");
+      node.setAttribute("aria-hidden", "true");
+      node.classList.add("mc-pdp-duplicate-price-hidden");
+    });
+  }
+
   function normalizeMediaColumn(mediaTd) {
     if (!mediaTd) return;
     var img = qs("#product_photo, .vCSS_img_product_photo, .vcss_img_wrap img, img#main-image", mediaTd) || qs("#product_photo, .vCSS_img_product_photo, .vcss_img_wrap img, img#main-image");
@@ -482,7 +500,7 @@
       img.style.setProperty("display", "block", "important");
       img.style.setProperty("width", "100%", "important");
       img.style.setProperty("height", "auto", "important");
-      img.style.setProperty("max-width", "820px", "important");
+      img.style.setProperty("max-width", "650px", "important");
       img.style.setProperty("max-height", "none", "important");
       img.style.setProperty("object-fit", "contain", "important");
       img.style.setProperty("margin", "0 auto", "important");
@@ -662,6 +680,7 @@
     ensureReturnRow(row, table);
     ensurePurchaseControls(infoTd, atc);
     orderInfoColumn(infoTd);
+    hideDuplicatePriceBlocks(infoTd);
 
     var desc = findDescriptionNode();
     ensureDescriptionRow(row, table, desc, mediaTd);
