@@ -1002,9 +1002,9 @@
     (d.head || d.documentElement).appendChild(s);
   })(document);
 
-  /* MC_SECTIONAL_PDP_AUTH_INLINE_20260617pdp77 — no external boot.js (404-safe); load auth fix with cache bust */
+  /* MC_SECTIONAL_PDP_AUTH_INLINE_20260617pdp78 — no external boot.js (404-safe); load auth fix with cache bust */
   (function (g, d) {
-    var WANT = "20260617pdp77";
+    var WANT = "20260617pdp78";
     function ensure() {
       try {
         var onPdp =

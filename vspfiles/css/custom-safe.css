@@ -1,4 +1,4 @@
-/* 0607 C_CSS_DEPLOY_VERIFY_20260617pdp77 — PDP repair deploy marker */
+/* 0607 C_CSS_DEPLOY_VERIFY_20260617pdp78 — PDP repair deploy marker */
 /* MC_PDP_LAYOUT_20260616pdp32 — stop template accordion/price-interval fighting mc-pdp-auth-cta-fix */
 /* MC_DEPLOY_VERIFY — PDP hero/ATC column unify; related: table repair skips .mc-related-carousel; PDP retail stack 16px */
 /* McCabe: hero menu match, 992px breakpoint, unified icons, RH-style header search; PDP grid + alt thumbs; hide dup desktop search strip */
@@ -17770,4 +17770,15 @@ html body [id*="soft"][id*="cart"] a[href*="shoppingcart"],
 html body [id*="soft"][id*="cart"] a[href*="ShoppingCart"] {
   color: #fff !important;
   -webkit-text-fill-color: #fff !important;
+}
+
+/* Saranoni PDP: keep the hero image closer to the feature/color column. */
+@media (min-width: 992px) {
+  html body.mc-saranoni-pdp #content_area tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp #v65-product-parent tr.mc-pdp-main-row,
+  html body.mc-saranoni-pdp #content_area tr.mc-unified-pdp-row,
+  html body.mc-saranoni-pdp #v65-product-parent tr.mc-unified-pdp-row {
+    gap: 18px !important;
+    column-gap: 18px !important;
+  }
 }

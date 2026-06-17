@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260617pdp77
-  var VERSION = "20260617pdp77";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260617pdp78
+  var VERSION = "20260617pdp78";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -2789,6 +2789,7 @@
 
   function appendSaranoniInfoColumnOrder() {
     if (!isSaranoniPdpPage()) return;
+    ensureSoftGoodsReturnRow();
     var infoColumn = findPdpHeroColumnTd();
     if (!infoColumn) return;
     var brandElement = global.document.getElementById("mc-pdp-brand-logo");
@@ -3785,8 +3786,8 @@
       a.appendChild(altImg);
       a.addEventListener("click", function (e) {
         e.preventDefault();
-        handleConfiguredColorSwatchClick(item.btn);
-        syncSaranoniAltviewActiveState();
+        e.stopPropagation();
+        selectConfiguredColorByOptionId(item.optionId);
       });
       thumbs.appendChild(a);
     });
@@ -4151,22 +4152,30 @@
     });
   }
 
-  function handleConfiguredColorSwatchClick(btn) {
-    if (!btn) return;
+  function selectConfiguredColorByOptionId(optionId) {
+    if (!optionId) return false;
     var ctx = findConfiguredColorSwatchContext();
-    if (!ctx) return;
+    if (!ctx) return false;
     var i;
     for (i = 0; i < ctx.entries.length; i++) {
-      if (ctx.entries[i].optionId !== btn.getAttribute("data-option-id")) continue;
+      if (ctx.entries[i].optionId !== String(optionId)) continue;
       var entry = ctx.entries[i];
       var opt = findConfiguredColorOption(ctx.select, entry);
-      if (!opt) return;
+      if (!opt) return false;
       // Lock this selection first so subsequent re-renders / Volusion resets keep it.
       configuredColorActiveEntry = entry;
       syncConfiguredColorSelect(ctx.select, opt);
       syncConfiguredColorSwatchUi(ctx, true);
-      return;
+      if (isSaranoniPdpPage()) syncSaranoniColorPicker(ctx);
+      syncSaranoniAltviewActiveState();
+      return true;
     }
+    return false;
+  }
+
+  function handleConfiguredColorSwatchClick(btn) {
+    if (!btn) return;
+    selectConfiguredColorByOptionId(btn.getAttribute("data-option-id"));
   }
 
   function ensureConfiguredColorSwatches() {
@@ -4182,14 +4191,22 @@
     }
     renderConfiguredColorSwatches(ctx);
     bindConfiguredColorSwatchSelect(ctx.select);
+    if (isSaranoniPdpPage() && !configuredColorActiveEntry) {
+      var defaultSarEntry = findConfiguredColorSelectedEntry(ctx) || ctx.entries[0] || null;
+      var defaultSarOpt = defaultSarEntry ? findConfiguredColorOption(ctx.select, defaultSarEntry) : null;
+      if (defaultSarEntry && defaultSarOpt) {
+        configuredColorActiveEntry = defaultSarEntry;
+        syncConfiguredColorSelect(ctx.select, defaultSarOpt);
+      }
+    }
     if (!configuredColorActiveEntry) {
       var hero = global.document.getElementById("product_photo");
       var heroSrc = hero ? hero.getAttribute("src") || "" : "";
       if (heroSrc && heroSrc.indexOf("/manufacturers/") === -1) configuredColorDefaultSrc = heroSrc;
     }
-    // Only re-assert the hero image once the shopper has locked a color; on the
-    // initial render we leave Volusion's default product photo untouched.
-    syncConfiguredColorSwatchUi(ctx, !!configuredColorActiveEntry);
+    // Saranoni color PDPs should open on the default selected option image;
+    // other configured products keep Volusion's initial hero until selection.
+    syncConfiguredColorSwatchUi(ctx, isSaranoniPdpPage() || !!configuredColorActiveEntry);
     if (isSaranoniPdpPage()) {
       hideSaranoniHeroAltviews();
       syncSaranoniColorPicker(ctx);
@@ -5224,29 +5241,7 @@
     }
 
     function selectSaranoniColorByOptionId(optionId) {
-      if (!optionId) return;
-      var btn = global.document.querySelector(
-        '.mc-configured-color-swatch[data-option-id="' + optionId + '"]'
-      );
-      if (btn) {
-        handleConfiguredColorSwatchClick(btn);
-        syncSaranoniAltviewActiveState();
-        return;
-      }
-      var ctx = findConfiguredColorSwatchContext();
-      if (!ctx) return;
-      var ei;
-      for (ei = 0; ei < ctx.entries.length; ei++) {
-        if (ctx.entries[ei].optionId !== optionId) continue;
-        var entry = ctx.entries[ei];
-        var opt = findConfiguredColorOption(ctx.select, entry);
-        if (!opt) return;
-        configuredColorActiveEntry = entry;
-        syncConfiguredColorSelect(ctx.select, opt);
-        syncConfiguredColorSwatchUi(ctx, true);
-        syncSaranoniAltviewActiveState();
-        return;
-      }
+      selectConfiguredColorByOptionId(optionId);
     }
 
     global.document.addEventListener(
@@ -6601,7 +6596,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260617pdp77";
+  var WANT = "20260617pdp78";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
