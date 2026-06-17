@@ -7,7 +7,7 @@
 
 
   var LAYOUT_VER = "20260616unified14";
-  var AUTH_LAYOUT_VER = "20260616pdp53";
+  var AUTH_LAYOUT_VER = "20260616pdp61";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -497,6 +497,9 @@
 
   function normalizeMediaColumn(mediaTd) {
     if (!mediaTd) return;
+    var isBeanBag =
+      global.document.body && global.document.body.classList.contains("mc-bean-bag-pdp");
+    var imgMaxW = isBeanBag ? "600px" : "650px";
     var img = qs("#product_photo, .vCSS_img_product_photo, .vcss_img_wrap img, img#main-image", mediaTd) || qs("#product_photo, .vCSS_img_product_photo, .vcss_img_wrap img, img#main-image");
     if (img && img.style) {
       img.style.removeProperty("max-width");
@@ -505,7 +508,7 @@
       img.style.setProperty("display", "block", "important");
       img.style.setProperty("width", "100%", "important");
       img.style.setProperty("height", "auto", "important");
-      img.style.setProperty("max-width", "650px", "important");
+      img.style.setProperty("max-width", imgMaxW, "important");
       img.style.setProperty("max-height", "none", "important");
       img.style.setProperty("object-fit", "contain", "important");
       img.style.setProperty("margin", "0 auto", "important");

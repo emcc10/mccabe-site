@@ -16556,7 +16556,7 @@ html body.mc-bean-bag-pdp .mc-unified-altviews {
   justify-content: flex-start !important;
   gap: 8px !important;
   width: 100% !important;
-  max-width: 650px !important;
+  max-width: 600px !important;
   margin: 10px 0 0 0 !important;
   padding: 0 !important;
   float: none !important;
@@ -16590,6 +16590,129 @@ html body.mc-bean-bag-pdp .mc-unified-altviews img {
   width: 100% !important;
   height: auto !important;
   object-fit: cover !important;
+}
+
+/* Bean bag PDP: stack main image then horizontal alt row (override side-thumb grid). */
+@media (min-width: 992px) {
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-pdp-media-td,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-media,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-pdp-media-td,
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-media,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area #product_photo_td,
+  html body.mc-bean-bag-pdp.productdetails #content_area #product_photo_td {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    column-gap: 0 !important;
+    row-gap: 10px !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-bean-bag-media-stack,
+  html body.mc-bean-bag-pdp.productdetails #content_area .mc-bean-bag-media-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area .mc-bean-bag-media-stack > table,
+  html body.mc-bean-bag-pdp.productdetails #content_area .mc-bean-bag-media-stack > table {
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area img#product_photo,
+  html body.mc-bean-bag-pdp.productdetails #content_area img#product_photo,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area a#product_photo_zoom_url,
+  html body.mc-bean-bag-pdp.productdetails #content_area a#product_photo_zoom_url {
+    display: block !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 auto 0 0 !important;
+    box-sizing: border-box !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area #altviews,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area span#altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area #altviews,
+  html body.mc-bean-bag-pdp.productdetails #content_area span#altviews {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 10px 0 0 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    clear: both !important;
+    position: static !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    text-align: left !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area #altviews br,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area span#altviews br,
+  html body.mc-bean-bag-pdp.productdetails #content_area #altviews br,
+  html body.mc-bean-bag-pdp.productdetails #content_area span#altviews br {
+    display: none !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area #altviews a,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area span#altviews a,
+  html body.mc-bean-bag-pdp.productdetails #content_area #altviews a,
+  html body.mc-bean-bag-pdp.productdetails #content_area span#altviews a {
+    display: inline-block !important;
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex: 0 0 72px !important;
+    vertical-align: top !important;
+    font-size: initial !important;
+    line-height: normal !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area #altviews img,
+  html body.mc-bean-bag-pdp.mc-product-page #content_area span#altviews img,
+  html body.mc-bean-bag-pdp.productdetails #content_area #altviews img,
+  html body.mc-bean-bag-pdp.productdetails #content_area span#altviews img {
+    display: block !important;
+    width: 100% !important;
+    max-width: 72px !important;
+    height: auto !important;
+    max-height: 72px !important;
+    margin: 0 !important;
+    object-fit: contain !important;
+  }
+
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-pdp-media-td > *:not(#altviews):not(span#altviews):not(.altviews):not(#mc-pdp-description-under-media),
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-pdp-media-td > *:not(#altviews):not(span#altviews):not(.altviews):not(#mc-pdp-description-under-media),
+  html body.mc-bean-bag-pdp.mc-product-page #content_area td.mc-unified-pdp-media > *:not(#altviews):not(span#altviews):not(.altviews):not(#mc-pdp-description-under-media),
+  html body.mc-bean-bag-pdp.productdetails #content_area td.mc-unified-pdp-media > *:not(#altviews):not(span#altviews):not(.altviews):not(#mc-pdp-description-under-media) {
+    margin-left: 0 !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    max-width: 600px !important;
+  }
 }
 
 /* Soft-goods thumbnails under main image (not column layout) — unified + ruched fallback */
