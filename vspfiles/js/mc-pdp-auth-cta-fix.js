@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp61";
+  var VERSION = "20260617pdp62";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -163,10 +163,14 @@
     if (isBeanBagPdpPage()) {
       return !!(
         global.document.getElementById("mc-pdp-price-atc-row") ||
-        global.document.getElementById("mc-pdp-purchase-stack")
+        global.document.getElementById("mc-pdp-purchase-stack") ||
+        global.document.querySelector(".mc-unified-purchase-controls")
       );
     }
-    return !!global.document.getElementById("mc-pdp-purchase-stack");
+    return !!(
+      global.document.getElementById("mc-pdp-purchase-stack") ||
+      global.document.querySelector(".mc-unified-purchase-controls")
+    );
   }
 
   function applyPdpTitleTypography() {
@@ -478,6 +482,22 @@
       }
     } catch (eSec) {}
     return false;
+  }
+
+  /** Standard furniture PDPs (e.g. Steve Silver Gatlin -SECT) use mc-unified-pdp-layout.js, not legacy mount. */
+  function shouldDeferToUnifiedPdpLayout() {
+    if (!isProductPdp() || isSectionalPdpPage()) return false;
+    if (isSoftGoodsPdpPage()) return false;
+    try {
+      if (
+        global.document.body &&
+        (global.document.body.classList.contains("mc-theater-seating-pdp") ||
+          global.document.documentElement.classList.contains("mc-paragon-pdp"))
+      ) {
+        return false;
+      }
+    } catch (eDefer) {}
+    return true;
   }
 
   function isPalliserPdpPage() {
@@ -5631,6 +5651,10 @@
     if (isPdpLayoutMounted()) return false;
     if (!isProductPdp()) return false;
     if (isSectionalPdpPage()) return false;
+    if (shouldDeferToUnifiedPdpLayout()) {
+      ensureUnifiedPdpLayout();
+      return false;
+    }
     if (!isPdpLayoutReady()) return false;
     var heroLocked = !!global.__MC_PDP_HERO_READY_LOCKED__;
     try {
@@ -5717,7 +5741,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260616unified14&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260617unified15&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
@@ -5812,6 +5836,14 @@
       fixAddToCartChrome();
       scheduleAtcBlackLock();
       scheduleBeanBagOptionRepair();
+      if (shouldDeferToUnifiedPdpLayout() && !isUnifiedPdpReady()) {
+        ensureUnifiedPdpLayout();
+        try {
+          if (typeof global.mcNormalizePdpLayout === "function") {
+            global.mcNormalizePdpLayout();
+          }
+        } catch (eNormRetry) {}
+      }
     } catch (eRunPatch) {
       if (typeof console !== "undefined" && console.warn) {
         console.warn("[McCabe] mc-pdp-auth-cta runPatch", eRunPatch);
@@ -5887,7 +5919,7 @@
   // once by the throttled, pause-aware MutationObserver below.
   [0, 50, 200, 600, 1500].forEach(function (ms) {
     global.setTimeout(function () {
-      if (isPdpLayoutMounted() || isUnifiedPdpReady()) return;
+      if (isUnifiedPdpReady()) return;
       installPdpStackApiGuards();
       runPatch();
     }, ms);
@@ -5897,7 +5929,7 @@
     var scheduled = false;
     var moLastRun = 0;
     var mo = new MutationObserver(function () {
-      if (isPdpLayoutMounted() || isUnifiedPdpReady()) return;
+      if (isUnifiedPdpReady()) return;
       if (scheduled) return;
       if (global.__MC_PDP_MO_PAUSE__) return;
       // Throttle on every page (not just sectional). Once the hero is built,

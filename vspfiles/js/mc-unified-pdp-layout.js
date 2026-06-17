@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260616unified14";
-  var AUTH_LAYOUT_VER = "20260616pdp61";
+  var LAYOUT_VER = "20260617unified15";
+  var AUTH_LAYOUT_VER = "20260617pdp62";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
