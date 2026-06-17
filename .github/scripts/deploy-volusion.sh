@@ -157,6 +157,9 @@ CRITICAL_ALWAYS=(
   "template_266.html"
   "vspfiles/css/custom-safe.css"
   "vspfiles/templates/266/css/mccabe-overrides.css"
+  # Always upload when CI runs: verify_mc_pdp_js_sftp gates on /v/vspfiles/ MD5 even if only template/CSS changed.
+  "vspfiles/js/mc-pdp-auth-cta-fix.js"
+  "vspfiles/js/mc-unified-pdp-layout.js"
 )
 
 deploy_file_changed() {
