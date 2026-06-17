@@ -6,8 +6,8 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260617unified18";
-  var AUTH_LAYOUT_VER = "20260617pdp69";
+  var LAYOUT_VER = "20260617unified19";
+  var AUTH_LAYOUT_VER = "20260617pdp70";
   var moTimer = null;
   var moBound = false;
   var moInstance = null;
@@ -135,6 +135,7 @@
       orderedOk &&
       purchaseQtyOrderOk(info) &&
       qs("tr.mc-unified-pdp-row") &&
+      qs(".mc-pdp-return-link") &&
       qs(".mc-unified-purchase-controls")
     );
   }
@@ -589,7 +590,7 @@
       img.style.setProperty("max-width", imgMaxW, "important");
       img.style.setProperty("max-height", "none", "important");
       img.style.setProperty("object-fit", "contain", "important");
-      img.style.setProperty("margin", "0 auto", "important");
+      img.style.setProperty("margin", "0 0 0 auto", "important");
     }
 
     var alt = qs("#altviews, .altviews, [id*='altviews'], [class*='altviews']", document);

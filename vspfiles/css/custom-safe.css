@@ -16638,6 +16638,7 @@ html body.mc-saranoni-pdp .mc-pdp-return-link:hover {
   text-decoration: underline !important;
 }
 
+html body.mc-saranoni-pdp .mc-saranoni-color-picker,
 html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker {
   display: block !important;
   width: 100% !important;
@@ -16645,6 +16646,7 @@ html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker {
   padding: 0 !important;
 }
 
+html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs,
 html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs {
   display: flex !important;
   flex-direction: row !important;
@@ -16658,6 +16660,7 @@ html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs {
   box-sizing: border-box !important;
 }
 
+html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs a,
 html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs a {
   display: block !important;
   width: 72px !important;
@@ -16668,10 +16671,12 @@ html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs a {
   box-sizing: border-box !important;
 }
 
+html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs a.mc-sar-alt-active,
 html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs a.mc-sar-alt-active {
   border-color: #111 !important;
 }
 
+html body.mc-saranoni-pdp .mc-saranoni-color-picker__thumbs img,
 html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs img {
   display: block !important;
   width: 100% !important;
@@ -17646,4 +17651,79 @@ html body.mc-bean-bag-pdp #mc-pdp-purchase-stack,
 html body.mc-bean-bag-pdp .mc-unified-purchase-controls {
   flex-direction: column !important;
   max-width: 400px !important;
+}
+
+/* MC_PDP_REPAIR_20260617pdp70: restore return/color/ATC order and tighten media gap. */
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media #product_photo,
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media .vCSS_img_product_photo,
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+html body.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media #product_photo,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media .vCSS_img_product_photo,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url,
+html body.mc-product-page.mc-pdp-unified-ready td.mc-unified-pdp-media a#product_photo_zoom_url2 {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+html body.mc-saranoni-pdp .mc-unified-pdp-info > .mc-saranoni-color-picker,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > .mc-saranoni-color-picker {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 16px 0 !important;
+  padding: 0 !important;
+}
+
+html body.mc-saranoni-pdp .mc-unified-pdp-info > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 0 0 1.1em !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-saranoni-pdp .mc-unified-pdp-info > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs a,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs a {
+  display: block !important;
+  width: 72px !important;
+  max-width: 72px !important;
+  margin: 0 !important;
+  border: 2px solid transparent !important;
+  border-radius: 4px !important;
+  box-sizing: border-box !important;
+}
+
+html body.mc-saranoni-pdp .mc-unified-pdp-info > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs a.mc-sar-alt-active,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs a.mc-sar-alt-active {
+  border-color: #111 !important;
+}
+
+html body.mc-saranoni-pdp .mc-unified-pdp-info > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs img,
+html body.mc-saranoni-pdp td.mc-pdp-options-td > .mc-saranoni-color-picker .mc-saranoni-color-picker__thumbs img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  object-fit: cover !important;
+}
+
+html body .anchored-cart a[href*="shoppingcart"],
+html body .anchored-cart a[href*="ShoppingCart"],
+html body .soft-cart a[href*="shoppingcart"],
+html body .soft-cart a[href*="ShoppingCart"],
+html body .soft_add_wrapper a[href*="shoppingcart"],
+html body .soft_add_wrapper a[href*="ShoppingCart"],
+html body .v65-softcart a[href*="shoppingcart"],
+html body .v65-softcart a[href*="ShoppingCart"],
+html body [class*="soft"][class*="cart"] a[href*="shoppingcart"],
+html body [class*="soft"][class*="cart"] a[href*="ShoppingCart"],
+html body [id*="soft"][id*="cart"] a[href*="shoppingcart"],
+html body [id*="soft"][id*="cart"] a[href*="ShoppingCart"] {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
 }

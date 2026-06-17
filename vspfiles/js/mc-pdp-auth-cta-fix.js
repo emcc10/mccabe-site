@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260617pdp69";
+  var VERSION = "20260617pdp70";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -2742,6 +2742,7 @@
       sizeOptionsElement = null;
     }
     var coverOptionsElement = global.document.getElementById("mc-configured-color-swatch-wrapper");
+    var colorPickerElement = global.document.querySelector(".mc-saranoni-color-picker");
     if (coverOptionsElement && global.document.body.classList.contains("mc-saranoni-swatches-ready")) {
       try {
         coverOptionsElement.style.setProperty("display", "none", "important");
@@ -2760,6 +2761,7 @@
       klarnaElement,
       sizeOptionsElement,
       coverOptionsElement,
+      colorPickerElement,
       featuresElement,
       descriptionElement,
       cartRow,
@@ -3208,6 +3210,25 @@
     var selects = global.document.querySelectorAll("#options_table select, #v65-product-parent select");
     var best = null;
     var i;
+    // Saranoni products share option category 23 and use uploaded per-option
+    // photos named {ProductCode}-{optionId}-S/T.jpg. Prefer that live option
+    // list over any legacy one-off config so every available variant renders.
+    for (i = 0; i < selects.length; i++) {
+      var sarSel = selects[i];
+      if (sarSel.classList && sarSel.classList.contains("mc-native-leather")) continue;
+      var sarPc = parseProductCodeFromSelectName(sarSel.name);
+      if (!/^SAR/i.test(sarPc)) continue;
+      if (parseOptionCategoryFromSelectName(sarSel.name) !== SARANONI_COLOR_OPTION_CATEGORY) continue;
+      var sarEntries = buildDataDrivenSaranoniEntries(sarSel, sarPc);
+      if (!sarEntries.length) continue;
+      return {
+        productCode: sarPc,
+        select: sarSel,
+        entries: sarEntries,
+        score: sarEntries.length,
+        dataDriven: true,
+      };
+    }
     for (i = 0; i < selects.length; i++) {
       var select = selects[i];
       var productCode = parseProductCodeFromSelectName(select.name);
@@ -3414,7 +3435,37 @@
     return null;
   }
 
-  function ensureColorOptionCommittedBeforeAddToCart() {
+  function ensureConfiguredColorCartField(select, opt, form) {
+    if (!select || !opt || !select.name) return;
+    try {
+      select.disabled = false;
+      select.removeAttribute("disabled");
+    } catch (eEnable) {}
+    if (!form) {
+      var btn = global.document.querySelector('input[name="btnaddtocart"], button[name="btnaddtocart"]');
+      form = (btn && btn.form) || (select.closest && select.closest("form")) || null;
+    }
+    if (!form || form.contains(select)) return;
+    var hidden = null;
+    var existing = form.querySelectorAll('input[type="hidden"][data-mc-configured-color-cart="1"]');
+    var hi;
+    for (hi = 0; hi < existing.length; hi++) {
+      if (existing[hi].name === select.name) {
+        hidden = existing[hi];
+        break;
+      }
+    }
+    if (!hidden) {
+      hidden = global.document.createElement("input");
+      hidden.type = "hidden";
+      hidden.name = select.name;
+      hidden.setAttribute("data-mc-configured-color-cart", "1");
+      form.appendChild(hidden);
+    }
+    hidden.value = opt.value;
+  }
+
+  function ensureColorOptionCommittedBeforeAddToCart(trigger) {
     if (!isSaranoniPdpPage()) return;
     var ctx = findConfiguredColorSwatchContext();
     var select = (ctx && ctx.select) || findSaranoniColorSelect();
@@ -3440,7 +3491,11 @@
       var cur = select.options[select.selectedIndex];
       if (cur && String(cur.value || "").trim()) opt = cur;
     }
-    if (opt) syncConfiguredColorSelect(select, opt);
+    if (opt) {
+      syncConfiguredColorSelect(select, opt);
+      var form = trigger && trigger.tagName === "FORM" ? trigger : trigger && trigger.form ? trigger.form : null;
+      ensureConfiguredColorCartField(select, opt, form);
+    }
   }
 
   function installSaranoniColorAtcGuard() {
@@ -3455,7 +3510,7 @@
             ? eAtc.target.closest('input[name="btnaddtocart"], button[name="btnaddtocart"]')
             : null;
         if (!btn) return;
-        ensureColorOptionCommittedBeforeAddToCart();
+        ensureColorOptionCommittedBeforeAddToCart(btn);
       },
       true
     );
@@ -3472,7 +3527,7 @@
         ) {
           return;
         }
-        ensureColorOptionCommittedBeforeAddToCart();
+        ensureColorOptionCommittedBeforeAddToCart(form);
       },
       true
     );
@@ -3542,7 +3597,9 @@
     if (!isSaranoniPdpPage() || !ctx || !ctx.entries || !ctx.entries.length) return;
     hideSaranoniHeroAltviews();
     var features = global.document.getElementById("mc-pdp-features");
-    if (!features) return;
+    var infoColumn = findPdpHeroColumnTd();
+    var pickerParent = infoColumn || (features && features.parentNode) || features;
+    if (!pickerParent) return;
     var visible = [];
     global.document
       .querySelectorAll(
@@ -3559,7 +3616,9 @@
           thumbSrc: thumbSrc,
         });
       });
-    var picker = features.querySelector(".mc-saranoni-color-picker");
+    var picker =
+      pickerParent.querySelector(".mc-saranoni-color-picker") ||
+      (features && features.querySelector(".mc-saranoni-color-picker"));
     if (!visible.length) {
       if (picker && picker.parentNode) {
         try {
@@ -3579,10 +3638,15 @@
     if (!picker) {
       picker = global.document.createElement("div");
       picker.className = "mc-saranoni-color-picker";
-      features.insertBefore(picker, features.firstChild);
-    } else if (picker.parentNode !== features || picker !== features.firstElementChild) {
+      if (features && pickerParent.contains(features)) {
+        pickerParent.insertBefore(picker, features);
+      } else {
+        pickerParent.appendChild(picker);
+      }
+    } else if (picker.parentNode !== pickerParent || (features && picker.nextElementSibling !== features)) {
       try {
-        features.insertBefore(picker, features.firstChild);
+        if (features && pickerParent.contains(features)) pickerParent.insertBefore(picker, features);
+        else pickerParent.appendChild(picker);
       } catch (eMovePicker) {}
     }
     if (picker.getAttribute("data-mc-sar-color-signature") === signature) {
@@ -6077,7 +6141,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260617unified18&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260617unified19&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();
