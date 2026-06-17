@@ -738,6 +738,12 @@
     }
     global.document.body.classList.remove("mc-fixed-sectional-pdp");
 
+    try {
+      if (typeof global.mcPrepareUnifiedPdpHero === "function") {
+        global.mcPrepareUnifiedPdpHero();
+      }
+    } catch (eHeroPrep) {}
+
     ensureReturnRow(row, table);
     ensurePurchaseControls(infoTd, atc);
     orderInfoColumn(infoTd);
