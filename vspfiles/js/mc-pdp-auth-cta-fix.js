@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260617pdp70";
+  var VERSION = "20260617pdp71";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
