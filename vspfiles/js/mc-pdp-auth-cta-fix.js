@@ -33,8 +33,8 @@
     } catch (eEmer) {}
   })();
 
-  // MC_PDP_AUTH_DEPLOY_VERIFY_20260617pdp76
-  var VERSION = "20260617pdp76";
+  // MC_PDP_AUTH_DEPLOY_VERIFY_20260617pdp77
+  var VERSION = "20260617pdp77";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -3890,6 +3890,8 @@
     select.dataset.mcConfiguredColorHidden = "1";
     try {
       select.style.setProperty("position", "absolute", "important");
+      select.style.setProperty("left", "-9999px", "important");
+      select.style.setProperty("top", "auto", "important");
       select.style.setProperty("width", "1px", "important");
       select.style.setProperty("height", "1px", "important");
       select.style.setProperty("padding", "0", "important");
@@ -6599,7 +6601,7 @@
 
 /* MC_PDP_AUTH_SELF_UPGRADE — stale ?v= CDN bundles on baked PDPs */
 (function (g, d) {
-  var WANT = "20260617pdp76";
+  var WANT = "20260617pdp77";
   function go() {
     try {
       if (!d.getElementById("v65-product-parent")) return;
