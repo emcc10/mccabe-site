@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260616pdp59";
+  var VERSION = "20260616pdp60";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -339,9 +339,10 @@
     if (!isProductPdp()) return;
     fixTmhMatPhotoUrls(global.document);
     var img = global.document.getElementById("product_photo");
+    var maxW = isBeanBagPdpPage() ? "780px" : "650px";
     if (img) {
       try {
-        img.style.setProperty("max-width", "650px", "important");
+        img.style.setProperty("max-width", maxW, "important");
         img.style.setProperty("width", "100%", "important");
         img.style.setProperty("height", "auto", "important");
         img.style.setProperty("box-sizing", "border-box", "important");
@@ -349,7 +350,7 @@
     }
     global.document.querySelectorAll("#product_photo_zoom_url, a#product_photo_zoom_url2").forEach(function (link) {
       try {
-        link.style.setProperty("max-width", "650px", "important");
+        link.style.setProperty("max-width", maxW, "important");
         link.style.setProperty("width", "100%", "important");
         link.style.setProperty("display", "block", "important");
         link.style.setProperty("box-sizing", "border-box", "important");
@@ -1440,12 +1441,39 @@
       alt.style.setProperty("justify-content", "flex-start", "important");
       alt.style.setProperty("gap", "8px", "important");
       alt.style.setProperty("width", "100%", "important");
-      alt.style.setProperty("max-width", "650px", "important");
+      alt.style.setProperty("max-width", isBeanBagPdpPage() ? "780px" : "650px", "important");
       alt.style.setProperty("margin", "10px 0 0 0", "important");
       alt.style.setProperty("padding", "0", "important");
       alt.style.setProperty("float", "none", "important");
       alt.style.setProperty("clear", "both", "important");
+      alt.style.setProperty("font-size", "0", "important");
+      alt.style.setProperty("line-height", "0", "important");
     } catch (eAltLayout) {}
+    alt.querySelectorAll("br").forEach(function (br) {
+      try {
+        br.style.setProperty("display", "none", "important");
+      } catch (eBr) {}
+    });
+    alt.querySelectorAll("a").forEach(function (a) {
+      try {
+        a.style.setProperty("display", "inline-block", "important");
+        a.style.setProperty("width", "72px", "important");
+        a.style.setProperty("max-width", "72px", "important");
+        a.style.setProperty("margin", "0", "important");
+        a.style.setProperty("vertical-align", "top", "important");
+        a.style.setProperty("font-size", "initial", "important");
+        a.style.setProperty("line-height", "normal", "important");
+      } catch (eA) {}
+    });
+  }
+
+  function sanitizeBeanBagAltviews() {
+    if (!isBeanBagPdpPage()) return;
+    var alt =
+      global.document.getElementById("altviews") ||
+      global.document.querySelector("#content_area .altviews, #v65-product-parent .altviews");
+    if (!alt) return;
+    applySoftGoodsAltviewsLayout(alt);
   }
 
   function moveAltViewsUnderMainImage() {
@@ -1698,16 +1726,6 @@
   }
 
   function findPurchaseStackAnchor() {
-    if (isBeanBagPdpPage()) {
-      var cover = global.document.getElementById("beanbag-swatch-wrapper");
-      if (cover && cover.parentNode) {
-        return { parent: cover.parentNode, after: cover };
-      }
-      var size = resolveBeanBagSizeOptionsElement();
-      if (size && size.parentNode) {
-        return { parent: size.parentNode, after: size };
-      }
-    }
     var features = global.document.getElementById("mc-pdp-features");
     if (features && features.parentNode) {
       return { parent: features.parentNode, after: features };
@@ -2480,8 +2498,8 @@
       klarnaElement,
       sizeOptionsElement,
       coverOptionsElement,
-      purchaseElement,
       featuresElement,
+      purchaseElement,
       descriptionElement,
     ];
     var allowedIds = {};
@@ -4905,6 +4923,8 @@
           ensureBeanBagSizeRow();
           markBeanBagCoverSwatchesReady();
           appendBeanBagInfoColumnOrder();
+          sanitizeBeanBagAltviews();
+          applyPdpMainImageCap();
         } catch (eBbRepair) {}
       }, ms);
     });
@@ -5473,6 +5493,8 @@
       markBeanBagCoverSwatchesReady();
       styleBeanBagPriceAtc();
       ensureBeanBagReturnLink();
+      moveAltViewsUnderMainImage();
+      sanitizeBeanBagAltviews();
     } else if (isSaranoniPdpPage()) {
       ensureSaranoniBrandLogo();
       ensureConfiguredColorSwatches();
@@ -5593,7 +5615,7 @@
     global.__MC_UNIFIED_PDP_LOADING__ = true;
     try {
       var s = global.document.createElement("script");
-      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260616unified13&mcrd=" + Date.now();
+      s.src = "/v/vspfiles/js/mc-unified-pdp-layout.js?v=20260616unified14&mcrd=" + Date.now();
       s.onload = function () {
         global.__MC_UNIFIED_PDP_LOADING__ = false;
         runNorm();

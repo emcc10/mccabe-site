@@ -6,7 +6,7 @@
   "use strict";
 
 
-  var LAYOUT_VER = "20260616unified13";
+  var LAYOUT_VER = "20260616unified14";
   var AUTH_LAYOUT_VER = "20260616pdp53";
   var moTimer = null;
   var moBound = false;
@@ -460,15 +460,8 @@
     options.forEach(function (el) {
       if (ordered.indexOf(el) === -1) ordered.push(el);
     });
-    var beanBag =
-      global.document.body && global.document.body.classList.contains("mc-bean-bag-pdp");
-    if (beanBag) {
-      if (purchase && ordered.indexOf(purchase) === -1) ordered.push(purchase);
-      if (features && ordered.indexOf(features) === -1) ordered.push(features);
-    } else {
-      if (features && ordered.indexOf(features) === -1) ordered.push(features);
-      if (purchase && ordered.indexOf(purchase) === -1) ordered.push(purchase);
-    }
+    if (features && ordered.indexOf(features) === -1) ordered.push(features);
+    if (purchase && ordered.indexOf(purchase) === -1) ordered.push(purchase);
 
     appendInOrder(infoTd, ordered);
 
