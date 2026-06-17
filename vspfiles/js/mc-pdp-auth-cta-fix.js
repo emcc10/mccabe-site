@@ -33,7 +33,7 @@
     } catch (eEmer) {}
   })();
 
-  var VERSION = "20260617pdp63";
+  var VERSION = "20260617pdp64";
 
   (function mcAtcEarlyImageConvert() {
     function go() {
@@ -1607,13 +1607,15 @@
       return;
     }
 
+    if (isSaranoniPdpPage()) {
+      hideSaranoniHeroAltviews();
+      return;
+    }
+
     if (main.nextElementSibling !== alt) {
       try {
         main.parentNode.insertBefore(alt, main.nextSibling);
       } catch (eAlt) {}
-    }
-    if (isSaranoniPdpPage()) {
-      applySoftGoodsAltviewsLayout(alt);
     }
   }
 
@@ -2978,6 +2980,11 @@
       insertPdpHeroNodeAfter(insertParent, insertAfter, block);
     }
     pruneDescriptionDuplicateFeatures();
+    if (isSaranoniPdpPage()) {
+      hideSaranoniHeroAltviews();
+      var sarFeatCtx = findConfiguredColorSwatchContext();
+      if (sarFeatCtx) syncSaranoniColorPicker(sarFeatCtx);
+    }
   }
 
   function normalizeConfiguredColorLabel(str) {
@@ -3426,7 +3433,7 @@
       if (activeBtn) activeId = activeBtn.getAttribute("data-option-id") || "";
     }
     global.document
-      .querySelectorAll("#altviews a[data-option-id], span#altviews a[data-option-id]")
+      .querySelectorAll(".mc-saranoni-color-picker a[data-option-id]")
       .forEach(function (a) {
         var on = !!(activeId && a.getAttribute("data-option-id") === activeId);
         a.classList.toggle("mc-sar-alt-active", on);
@@ -3435,43 +3442,32 @@
       });
   }
 
-  function getSaranoniMediaAltviewsRoot() {
-    var photo = global.document.getElementById("product_photo");
-    if (!photo) return null;
-    var mediaTd =
-      photo.closest("td.mc-unified-pdp-media") ||
-      photo.closest("td.mc-pdp-media-td") ||
-      photo.closest("#product_photo_td") ||
-      photo.closest("td");
-    if (!mediaTd) return null;
+  function hideSaranoniHeroAltviews() {
+    if (!isSaranoniPdpPage()) return;
     var alt =
-      mediaTd.querySelector("#altviews") ||
-      mediaTd.querySelector("span#altviews") ||
-      global.document.getElementById("altviews");
-    if (!alt) {
-      alt = global.document.createElement("span");
-      alt.id = "altviews";
-      var photoAnchor = photo.closest("a") || photo;
-      if (photoAnchor.parentNode === mediaTd) {
-        if (photoAnchor.nextSibling) mediaTd.insertBefore(alt, photoAnchor.nextSibling);
-        else mediaTd.appendChild(alt);
-      } else {
-        mediaTd.appendChild(alt);
-      }
-    } else if (alt.parentNode !== mediaTd) {
-      try {
-        var anchor = photo.closest("a") || photo;
-        if (anchor.nextSibling) mediaTd.insertBefore(alt, anchor.nextSibling);
-        else mediaTd.appendChild(alt);
-      } catch (eMove) {}
+      global.document.getElementById("altviews") ||
+      global.document.querySelector("span#altviews, #content_area .altviews, #v65-product-parent .altviews");
+    if (!alt) return;
+    alt.classList.remove("mc-saranoni-color-altviews", "mc-unified-altviews");
+    if (alt.getAttribute("data-mc-sar-alt-signature")) {
+      alt.removeAttribute("data-mc-sar-alt-signature");
+      alt.innerHTML = "";
     }
-    return alt;
+    try {
+      alt.style.setProperty("display", "none", "important");
+      alt.style.setProperty("visibility", "hidden", "important");
+      alt.style.setProperty("height", "0", "important");
+      alt.style.setProperty("overflow", "hidden", "important");
+      alt.style.setProperty("margin", "0", "important");
+      alt.style.setProperty("padding", "0", "important");
+    } catch (eHideAlt) {}
   }
 
-  function syncSaranoniColorAltviews(ctx) {
+  function syncSaranoniColorPicker(ctx) {
     if (!isSaranoniPdpPage() || !ctx || !ctx.entries || !ctx.entries.length) return;
-    var alt = getSaranoniMediaAltviewsRoot();
-    if (!alt) return;
+    hideSaranoniHeroAltviews();
+    var features = global.document.getElementById("mc-pdp-features");
+    if (!features) return;
     var visible = [];
     global.document
       .querySelectorAll(
@@ -3488,7 +3484,15 @@
           thumbSrc: thumbSrc,
         });
       });
-    if (!visible.length) return;
+    var picker = features.querySelector(".mc-saranoni-color-picker");
+    if (!visible.length) {
+      if (picker && picker.parentNode) {
+        try {
+          picker.parentNode.removeChild(picker);
+        } catch (eRmPicker) {}
+      }
+      return;
+    }
     var signature =
       ctx.productCode +
       "|" +
@@ -3497,13 +3501,24 @@
           return v.optionId + ":" + v.thumbSrc;
         })
         .join(",");
-    if (alt.getAttribute("data-mc-sar-alt-signature") === signature) {
+    if (!picker) {
+      picker = global.document.createElement("div");
+      picker.className = "mc-saranoni-color-picker";
+      features.insertBefore(picker, features.firstChild);
+    } else if (picker.parentNode !== features || picker !== features.firstElementChild) {
+      try {
+        features.insertBefore(picker, features.firstChild);
+      } catch (eMovePicker) {}
+    }
+    if (picker.getAttribute("data-mc-sar-color-signature") === signature) {
       syncSaranoniAltviewActiveState();
       return;
     }
-    alt.setAttribute("data-mc-sar-alt-signature", signature);
-    alt.innerHTML = "";
-    alt.classList.add("mc-saranoni-color-altviews");
+    picker.setAttribute("data-mc-sar-color-signature", signature);
+    picker.innerHTML =
+      '<div class="mc-pdp-features__heading mc-saranoni-color-picker__heading">Select color:</div>' +
+      '<div class="mc-saranoni-color-picker__thumbs"></div>';
+    var thumbs = picker.querySelector(".mc-saranoni-color-picker__thumbs");
     visible.forEach(function (item) {
       var entry = null;
       var ei;
@@ -3530,7 +3545,7 @@
         handleConfiguredColorSwatchClick(item.btn);
         syncSaranoniAltviewActiveState();
       });
-      alt.appendChild(a);
+      thumbs.appendChild(a);
     });
     syncSaranoniAltviewActiveState();
   }
@@ -3546,7 +3561,7 @@
       try {
         wrap.style.removeProperty("display");
       } catch (eShow) {}
-      if (ctx) syncSaranoniColorAltviews(ctx);
+      if (ctx) syncSaranoniColorPicker(ctx);
       return;
     }
     body.classList.remove("mc-saranoni-swatches-ready");
@@ -3741,7 +3756,7 @@
             probeState.pending--;
             if (probeState.pending <= 0) {
               syncSaranoniSwatchReadyState(wrap, ctx.select, probeState.loaded);
-              syncSaranoniColorAltviews(ctx);
+              syncSaranoniColorPicker(ctx);
             }
           });
         } else {
@@ -3760,7 +3775,7 @@
         if (btn.style.display !== "none") visibleSwatches++;
       });
       syncSaranoniSwatchReadyState(wrap, ctx.select, visibleSwatches);
-      if (visibleSwatches > 0) syncSaranoniColorAltviews(ctx);
+      if (visibleSwatches > 0) syncSaranoniColorPicker(ctx);
     }
     var host = global.document.getElementById("mc-pdp-option-block");
     if (isSar) {
@@ -3879,8 +3894,8 @@
     // initial render we leave Volusion's default product photo untouched.
     syncConfiguredColorSwatchUi(ctx, !!configuredColorActiveEntry);
     if (isSaranoniPdpPage()) {
-      moveAltViewsUnderMainImage();
-      syncSaranoniColorAltviews(ctx);
+      hideSaranoniHeroAltviews();
+      syncSaranoniColorPicker(ctx);
     }
   }
 
@@ -4876,7 +4891,7 @@
     function saranoniAltLinkFromTarget(target) {
       if (!target || !target.closest) return null;
       return target.closest(
-        "#altviews a[data-option-id], span#altviews a[data-option-id], .mc-saranoni-color-altviews a[data-option-id]"
+        ".mc-saranoni-color-picker a[data-option-id]"
       );
     }
 
@@ -4930,7 +4945,7 @@
         var ctx = findConfiguredColorSwatchContext();
         if (!ctx || ctx.select !== sel) return;
         syncConfiguredColorSwatchUi(ctx, true);
-        syncSaranoniColorAltviews(ctx);
+        syncSaranoniColorPicker(ctx);
         syncSaranoniAltviewActiveState();
       },
       true
@@ -5702,9 +5717,9 @@
     } else if (isSaranoniPdpPage()) {
       ensureSaranoniBrandLogo();
       ensureConfiguredColorSwatches();
-      moveAltViewsUnderMainImage();
+      hideSaranoniHeroAltviews();
       var sarCtx = findConfiguredColorSwatchContext();
-      if (sarCtx) syncSaranoniColorAltviews(sarCtx);
+      if (sarCtx) syncSaranoniColorPicker(sarCtx);
       mountDescriptionBelowFeatures();
     }
     ensureQuantityAboveAtc();

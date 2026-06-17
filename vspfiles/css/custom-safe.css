@@ -16492,14 +16492,30 @@ html body.mc-saranoni-pdp .mc-configured-color-swatch-label {
   display: none !important;
 }
 
-/* Saranoni color thumbnails under hero at all breakpoints */
+/* Hide Saranoni hero altviews — color picker lives in #mc-pdp-features */
 html body.mc-saranoni-pdp td.mc-unified-pdp-media #altviews,
 html body.mc-saranoni-pdp td.mc-unified-pdp-media span#altviews,
 html body.mc-saranoni-pdp td.mc-pdp-media-td #altviews,
 html body.mc-saranoni-pdp td.mc-pdp-media-td span#altviews,
 html body.mc-saranoni-pdp #product_photo_td #altviews,
-html body.mc-saranoni-pdp #product_photo_td span#altviews,
-html body.mc-saranoni-pdp .mc-saranoni-color-altviews {
+html body.mc-saranoni-pdp #product_photo_td span#altviews {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Saranoni color picker in features section */
+html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 16px 0 !important;
+  padding: 0 !important;
+}
+
+html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs {
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: wrap !important;
@@ -16507,20 +16523,12 @@ html body.mc-saranoni-pdp .mc-saranoni-color-altviews {
   justify-content: flex-start !important;
   gap: 8px !important;
   width: 100% !important;
-  max-width: 650px !important;
-  margin: 10px 0 0 0 !important;
-  padding: 0 !important;
-  float: none !important;
-  clear: both !important;
+  margin: 0 !important;
+  padding: 0 0 0 1.1em !important;
+  box-sizing: border-box !important;
 }
 
-html body.mc-saranoni-pdp td.mc-unified-pdp-media #altviews a,
-html body.mc-saranoni-pdp td.mc-unified-pdp-media span#altviews a,
-html body.mc-saranoni-pdp td.mc-pdp-media-td #altviews a,
-html body.mc-saranoni-pdp td.mc-pdp-media-td span#altviews a,
-html body.mc-saranoni-pdp #product_photo_td #altviews a,
-html body.mc-saranoni-pdp #product_photo_td span#altviews a,
-html body.mc-saranoni-pdp .mc-saranoni-color-altviews a {
+html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs a {
   display: block !important;
   width: 72px !important;
   max-width: 72px !important;
@@ -16530,19 +16538,11 @@ html body.mc-saranoni-pdp .mc-saranoni-color-altviews a {
   box-sizing: border-box !important;
 }
 
-html body.mc-saranoni-pdp td.mc-unified-pdp-media #altviews a.mc-sar-alt-active,
-html body.mc-saranoni-pdp td.mc-unified-pdp-media span#altviews a.mc-sar-alt-active,
-html body.mc-saranoni-pdp td.mc-pdp-media-td #altviews a.mc-sar-alt-active,
-html body.mc-saranoni-pdp #product_photo_td #altviews a.mc-sar-alt-active,
-html body.mc-saranoni-pdp .mc-saranoni-color-altviews a.mc-sar-alt-active {
+html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs a.mc-sar-alt-active {
   border-color: #111 !important;
 }
 
-html body.mc-saranoni-pdp td.mc-unified-pdp-media #altviews img,
-html body.mc-saranoni-pdp td.mc-unified-pdp-media span#altviews img,
-html body.mc-saranoni-pdp td.mc-pdp-media-td #altviews img,
-html body.mc-saranoni-pdp #product_photo_td #altviews img,
-html body.mc-saranoni-pdp .mc-saranoni-color-altviews img {
+html body.mc-saranoni-pdp #mc-pdp-features .mc-saranoni-color-picker__thumbs img {
   display: block !important;
   width: 100% !important;
   height: auto !important;
