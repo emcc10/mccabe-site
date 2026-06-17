@@ -16896,7 +16896,7 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-atc-button-wrap button[name="
   box-shadow: none !important;
 }
 
-/* MC PDP unified e-product lock 20260616pdp55: consistent layout, black ATC, description follows existing features typography. */
+/* MC PDP unified e-product lock 20260616pdp56: consistent layout, black ATC, description follows existing features typography. */
 html body.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
 html body.mc-pdp-unified-ready #v65-product-parent tr.mc-unified-pdp-row,
 html body.mc-product-page.mc-pdp-unified-ready #content_area tr.mc-unified-pdp-row,
@@ -17192,7 +17192,7 @@ html body.mc-product-page.mc-pdp-unified-ready .mc-unified-pdp-description * {
   text-transform: none !important;
 }
 
-/* PDP final lock 20260616pdp55: typography-only description match and black ATC repaint guard. */
+/* PDP final lock 20260616pdp56: typography-only description match and black ATC repaint guard. */
 html body.productdetails #mc-pdp-description-below-features,
 html body.productdetails #mc-pdp-description-below-features *,
 html body.productdetails .mc-pdp-description-below-features,

@@ -4400,6 +4400,7 @@
     if (!isBeanBagPdpPage()) return;
     if (global.document.documentElement.dataset.mcBbImgBound === "1") return;
     global.document.documentElement.dataset.mcBbImgBound = "1";
+    var activeBbImageFile = "";
 
     function normalizeBbLabel(str) {
       return String(str || "")
@@ -4407,6 +4408,18 @@
         .replace(/\u00a0/g, " ")
         .replace(/\s+/g, " ")
         .trim();
+    }
+
+    function beanBagSwatchLabel(swatch) {
+      if (!swatch) return "";
+      return (
+        swatch.getAttribute("data-option") ||
+        swatch.getAttribute("aria-label") ||
+        swatch.getAttribute("title") ||
+        (swatch.querySelector("img") ? swatch.querySelector("img").getAttribute("alt") : "") ||
+        swatch.textContent ||
+        ""
+      );
     }
 
     function bbColorFromSwatchLabel(label) {
@@ -4424,6 +4437,7 @@
     function applyBbImage(imgFile) {
       var mainImg = global.document.getElementById("product_photo");
       if (!mainImg) return;
+      activeBbImageFile = imgFile;
       var targetSrc = "/v/vspfiles/images/" + imgFile;
       try {
         if (mainImg.getAttribute("src") !== targetSrc) mainImg.src = targetSrc;
@@ -4473,11 +4487,15 @@
       }
     }
 
-    // Capture phase so this runs before legacy inline swatch scripts baked into product HTML.
-    global.document.addEventListener("click", function (eBb) {
-      var swatch = eBb.target && eBb.target.closest ? eBb.target.closest(".beanbag-swatch") : null;
-      if (!swatch) return;
-      var label = swatch.getAttribute("data-option") || "";
+    function scheduleBbImageLock(imgFile) {
+      [60, 180, 450, 900, 1600, 2800, 5000].forEach(function (ms) {
+        global.setTimeout(function () {
+          if (activeBbImageFile === imgFile) applyBbImage(imgFile);
+        }, ms);
+      });
+    }
+
+    function selectCoverByLabel(label) {
       var target = bbColorFromSwatchLabel(label) || normalizeBbLabel(label);
       var coverSel =
         global.document.querySelector("#options_table select[name*='___4']") ||
@@ -4485,7 +4503,6 @@
         global.document.querySelector("#options_table select");
       var imgFile = bbImageForSwatchLabel(label);
       var optVal = "";
-
       if (coverSel && coverSel.options && coverSel.options.length) {
         var foundIndex = -1;
         var i;
@@ -4504,6 +4521,18 @@
           imgFile = BB_COVER_IMAGE_BY_OPTION_ID[optVal] || imgFile;
         }
       }
+      return { coverSel: coverSel, imgFile: imgFile, optVal: optVal };
+    }
+
+    // Capture phase so this runs before legacy inline swatch scripts baked into product HTML.
+    global.document.addEventListener("click", function (eBb) {
+      var swatch = eBb.target && eBb.target.closest ? eBb.target.closest(".beanbag-swatch") : null;
+      if (!swatch) return;
+      var label = beanBagSwatchLabel(swatch);
+      var selected = selectCoverByLabel(label);
+      var coverSel = selected.coverSel;
+      var imgFile = selected.imgFile;
+      var optVal = selected.optVal;
 
       if (!imgFile) return;
 
@@ -4544,6 +4573,19 @@
 
       applyBbImage(imgFile);
       reassertBbImageOnce(imgFile);
+      scheduleBbImageLock(imgFile);
+    }, true);
+
+    global.document.addEventListener("change", function (eBbChange) {
+      var sel = eBbChange.target;
+      if (!sel || !sel.matches || !sel.matches("select")) return;
+      if (!sel.matches("#options_table select[name*='___4'], select[name*='___4']")) return;
+      var opt = sel.options && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex] : null;
+      var imgFile = BB_COVER_IMAGE_BY_OPTION_ID[String(sel.value || "")] || bbImageForSwatchLabel(opt ? opt.text : "");
+      if (!imgFile) return;
+      applyBbImage(imgFile);
+      reassertBbImageOnce(imgFile);
+      scheduleBbImageLock(imgFile);
     }, true);
   }
 
@@ -4653,9 +4695,6 @@
           sizeSel.dispatchEvent(new Event("input", { bubbles: true }));
         } catch (eIn) {}
         try {
-          sizeSel.dispatchEvent(new Event("change", { bubbles: true }));
-        } catch (eCh) {}
-        try {
           ensureBeanBagKingCoverRestriction();
         } catch (eKing) {}
       });
@@ -4727,6 +4766,22 @@
     try {
       global.document.body.classList.add("mc-bb-cover-swatches-ready");
     } catch (eCls) {}
+  }
+
+  function scheduleBeanBagOptionRepair() {
+    if (!isBeanBagPdpPage()) return;
+    if (global.__MC_BB_OPTION_REPAIR_VER__ === VERSION) return;
+    global.__MC_BB_OPTION_REPAIR_VER__ = VERSION;
+    [80, 250, 700, 1400, 2600, 5000].forEach(function (ms) {
+      global.setTimeout(function () {
+        try {
+          initBeanBagImageSync();
+          ensureBeanBagSizeRow();
+          markBeanBagCoverSwatchesReady();
+          appendBeanBagInfoColumnOrder();
+        } catch (eBbRepair) {}
+      }, ms);
+    });
   }
 
   function installPdpStackApiGuards() {
@@ -5500,6 +5555,7 @@
       applyPdpDescriptionStyle();
       fixAddToCartChrome();
       scheduleAtcBlackLock();
+      scheduleBeanBagOptionRepair();
     } catch (eRunPatch) {
       if (typeof console !== "undefined" && console.warn) {
         console.warn("[McCabe] mc-pdp-auth-cta runPatch", eRunPatch);
