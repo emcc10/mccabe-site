@@ -45,9 +45,12 @@ def _read_local(path: str) -> bytes:
 
 def _template_marker() -> str:
     raw = _read_local("template_266.html").decode("utf-8", errors="replace")
+    m = re.search(r"MC_TEMPLATE_DEPLOY_VERIFY_([0-9a-z]+)", raw)
+    if m:
+        return m.group(0)
     m = re.search(r'name="mc-deploy-verify"\s+content="([^"]+)"', raw)
     if not m:
-        raise ValueError("template_266.html missing mc-deploy-verify meta tag")
+        raise ValueError("template_266.html missing MC_TEMPLATE_DEPLOY_VERIFY or mc-deploy-verify")
     return m.group(1)
 
 
@@ -174,6 +177,10 @@ def _http_has_marker(url: str, marker: str, *, kind: str) -> tuple[bool, str]:
     if not ok:
         return False, body
     if kind == "template":
+        if marker.startswith("MC_TEMPLATE_DEPLOY_VERIFY_"):
+            if marker in body:
+                return True, "found"
+            return False, "(MC_TEMPLATE_DEPLOY_VERIFY comment missing)"
         m = re.search(r'name="mc-deploy-verify"\s+content="([^"]+)"', body)
         got = m.group(1) if m else "(no meta tag)"
         if got == marker:
@@ -312,6 +319,30 @@ def main() -> int:
 
     if http_fail:
         return 1
+
+    # Product HTML is Volusion-BAKED from admin File Editor — SFTP template alone does not update PDPs.
+    pdp_needle = ""
+    raw_tpl = _read_local("template_266.html").decode("utf-8", errors="replace")
+    m_pdp = re.search(r"mc-pdp-auth-cta-fix\.js\?v=([0-9a-z]+)", raw_tpl)
+    if m_pdp:
+        pdp_needle = m_pdp.group(1)
+    if pdp_needle:
+        probe_url = f"{STOREFRONT}/product-p/bb-faux-fur.htm"
+        ok, body, _ = _http_fetch(probe_url, limit=500_000)
+        if ok and pdp_needle not in body:
+            old = re.search(r"mc-pdp-auth-cta-fix\.js\?v=([0-9a-z]+)", body)
+            baked = old.group(1) if old else "unknown"
+            print(
+                f"::warning::BAKED PRODUCT HTML STALE: {probe_url} has js?v={baked}, "
+                f"repo template expects {pdp_needle}. SFTP deploy does NOT rebake product pages.",
+                flush=True,
+            )
+            print(
+                "::warning::Volusion admin → Design → File Editor → template_266.html → "
+                "paste full file from GitHub main → Save once. Search file for "
+                f"{pdp_needle} before saving.",
+                flush=True,
+            )
 
     print("::notice::CORE_DEPLOY_VERIFIED (SFTP + HTTP) — template, custom-safe, mccabe-overrides", flush=True)
     return 0
